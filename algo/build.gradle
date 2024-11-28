@@ -82,4 +82,5 @@ dependencies {
     testImplementation project(':community-algorithms')
     testImplementation project(':node-embedding-algorithms')
     testImplementation project(':path-finding-algorithms')
+    testImplementation project(':similarity-algorithms')
 }

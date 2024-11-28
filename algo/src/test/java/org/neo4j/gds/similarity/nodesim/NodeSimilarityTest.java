@@ -29,10 +29,14 @@ import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmMachinery;
+import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
+import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
+import org.neo4j.gds.applications.algorithms.similarity.SimilarityAlgorithms;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
@@ -47,9 +51,7 @@ import org.neo4j.gds.wcc.WccStub;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -291,8 +293,7 @@ final class NodeSimilarityTest {
         var nodeSimilarity = constructNodeSimilarity(
             graph,
             parameters,
-            new Concurrency(concurrency),
-            ProgressTracker.NULL_TRACKER
+            new Concurrency(concurrency)
         );
 
         Set<String> result = nodeSimilarity
@@ -323,8 +324,7 @@ final class NodeSimilarityTest {
         NodeSimilarity nodeSimilarity = constructNodeSimilarity(
             graph,
             parameters,
-            new Concurrency(concurrency),
-            ProgressTracker.NULL_TRACKER
+            new Concurrency(concurrency)
         );
 
         Set<String> result = nodeSimilarity
@@ -356,8 +356,7 @@ final class NodeSimilarityTest {
         NodeSimilarity nodeSimilarity = constructNodeSimilarity(
             graph,
             parameters,
-            new Concurrency(concurrency),
-            ProgressTracker.NULL_TRACKER
+            new Concurrency(concurrency)
         );
 
         Set<String> result = nodeSimilarity
@@ -389,8 +388,7 @@ final class NodeSimilarityTest {
         NodeSimilarity nodeSimilarity = constructNodeSimilarity(
             graph,
             parameters,
-            new Concurrency(concurrency),
-            ProgressTracker.NULL_TRACKER
+            new Concurrency(concurrency)
         );
 
         Graph similarityGraph = nodeSimilarity.compute().graphResult().similarityGraph();
@@ -425,8 +423,7 @@ final class NodeSimilarityTest {
         NodeSimilarity nodeSimilarity = constructNodeSimilarity(
             graph,
             parameters,
-            new Concurrency(concurrency),
-            ProgressTracker.NULL_TRACKER
+            new Concurrency(concurrency)
         );
 
         Set<String> result = nodeSimilarity
@@ -458,8 +455,7 @@ final class NodeSimilarityTest {
         NodeSimilarity nodeSimilarity = constructNodeSimilarity(
             graph,
             parameters,
-            new Concurrency(concurrency),
-            ProgressTracker.NULL_TRACKER
+            new Concurrency(concurrency)
         );
 
         Graph similarityGraph = nodeSimilarity.compute().graphResult().similarityGraph();
@@ -500,8 +496,7 @@ final class NodeSimilarityTest {
         NodeSimilarity nodeSimilarity = constructNodeSimilarity(
             graph,
             parameters,
-            new Concurrency(concurrency),
-            ProgressTracker.NULL_TRACKER
+            new Concurrency(concurrency)
         );
 
         Set<String> result = nodeSimilarity
@@ -536,8 +531,7 @@ final class NodeSimilarityTest {
         NodeSimilarity nodeSimilarity = constructNodeSimilarity(
             graph,
             parameters,
-            new Concurrency(concurrency),
-            ProgressTracker.NULL_TRACKER
+            new Concurrency(concurrency)
         );
 
         Set<String> result = nodeSimilarity
@@ -570,8 +564,7 @@ final class NodeSimilarityTest {
         NodeSimilarity nodeSimilarity = constructNodeSimilarity(
             undirectedGraph,
             parameters,
-            new Concurrency(concurrency),
-            ProgressTracker.NULL_TRACKER
+            new Concurrency(concurrency)
         );
         Set<SimilarityResult> result = nodeSimilarity.compute()
             .streamResult().collect(Collectors.toSet());
@@ -594,8 +587,7 @@ final class NodeSimilarityTest {
         NodeSimilarity nodeSimilarity = constructNodeSimilarity(
             naturalGraph,
             parameters,
-            new Concurrency(1),
-            ProgressTracker.NULL_TRACKER
+            new Concurrency(1)
         );
         var result1 = nodeSimilarity.compute()
             .streamResult().collect(Collectors.toSet());
@@ -603,8 +595,7 @@ final class NodeSimilarityTest {
         nodeSimilarity = constructNodeSimilarity(
             naturalUnionGraph,
             parameters,
-            new Concurrency(1),
-            ProgressTracker.NULL_TRACKER
+            new Concurrency(1)
         );
         var result2 = nodeSimilarity.compute()
             .streamResult().collect(Collectors.toSet());
@@ -632,8 +623,7 @@ final class NodeSimilarityTest {
         NodeSimilarity nodeSimilarity = constructNodeSimilarity(
             graph,
             parameters,
-            new Concurrency(concurrency),
-            ProgressTracker.NULL_TRACKER
+            new Concurrency(concurrency)
         );
 
         SimilarityGraphResult similarityGraphResult = nodeSimilarity.compute().graphResult();
@@ -691,8 +681,7 @@ final class NodeSimilarityTest {
         NodeSimilarity nodeSimilarity = constructNodeSimilarity(
             graph,
             parameters,
-            new Concurrency(concurrency),
-            ProgressTracker.NULL_TRACKER
+            new Concurrency(concurrency)
         );
 
         SimilarityGraphResult similarityGraphResult = nodeSimilarity.compute().graphResult();
@@ -741,8 +730,7 @@ final class NodeSimilarityTest {
         NodeSimilarity nodeSimilarity = constructNodeSimilarity(
             graph,
             parameters,
-            new Concurrency(concurrency),
-            ProgressTracker.NULL_TRACKER
+            new Concurrency(concurrency)
         );
 
         Set<String> result = nodeSimilarity
@@ -781,8 +769,7 @@ final class NodeSimilarityTest {
         NodeSimilarity nodeSimilarity = constructNodeSimilarity(
             graph,
             parameters,
-            new Concurrency(concurrency),
-            ProgressTracker.NULL_TRACKER
+            new Concurrency(concurrency)
         );
 
         Set<String> result = nodeSimilarity
@@ -794,145 +781,113 @@ final class NodeSimilarityTest {
         assertEquals(orientation == REVERSE ? EXPECTED_INCOMING : EXPECTED_OUTGOING, result);
     }
 
+    @Test
+    void shouldLogMessages() {
+        var log = new GdsTestLog();
+        var requestScopedDependencies = RequestScopedDependencies.builder()
+            .with(EmptyTaskRegistryFactory.INSTANCE)
+            .with(TerminationFlag.RUNNING_TRUE)
+            .with(EmptyUserLogRegistryFactory.INSTANCE)
+            .build();
+        var progressTrackerCreator = new ProgressTrackerCreator(log, requestScopedDependencies);
+        var similarityAlgorithms = new SimilarityAlgorithms(progressTrackerCreator, requestScopedDependencies.getTerminationFlag());
 
-    @ParameterizedTest(name = "topK = {0}, concurrency = {1}")
-    @MethodSource("topKAndConcurrencies")
-    void shouldLogMessages(int topK, int concurrencyValue) {
-        var graph = naturalGraph;
-        var concurrency = new Concurrency(concurrencyValue);
-        var factory = new NodeSimilarityFactory<>();
-        var progressLog = new GdsTestLog();
-        var progressTracker = new TestProgressTracker(
-            factory.progressTask(graph, false),
-            progressLog,
-            concurrency,
-            EmptyTaskRegistryFactory.INSTANCE
-        );
-        var parameters = new NodeSimilarityParameters(
-            new JaccardSimilarityComputer(1E-42),
-            1,
-            Integer.MAX_VALUE,
-            topK,
-            100,
-            true,
-            false,
-            false,
-            null
-        );
-        var nodeSimilarity = constructNodeSimilarity(graph, parameters, concurrency, progressTracker);
-        nodeSimilarity.compute();
+        similarityAlgorithms.nodeSimilarity(naturalGraph, NodeSimilarityBaseConfigImpl.builder().build());
 
-        assertThat(progressLog.getMessages(INFO))
+        assertThat(log.getMessages(INFO))
             .extracting(removingThreadId())
             .contains(
-                "NodeSimilarity :: prepare :: Start",
-                "NodeSimilarity :: prepare :: Finished",
-                "NodeSimilarity :: compare node pairs :: Start",
-                "NodeSimilarity :: compare node pairs :: Finished"
+                "Node Similarity :: prepare :: Start",
+                "Node Similarity :: prepare :: Finished",
+                "Node Similarity :: compare node pairs :: Start",
+                "Node Similarity :: compare node pairs :: Finished"
             );
     }
 
-    @ParameterizedTest(name = "topK = {0}, concurrency = {1}")
-    @MethodSource("topKAndConcurrencies")
-    void shouldNotLogMessagesWhenLoggingIsDisabled(int topK, int concurrency) {
-        var graph = naturalGraph;
-        // TODO: wrong place to test org.neo4j.gds.AlgorithmFactory.createProgressTracker
-        var config = NodeSimilarityStreamConfigImpl.builder()
-            .similarityCutoff(0.0).topN(100).topK(topK).concurrency(concurrency).logProgress(false).build();
+    @Test
+    void shouldNotLogMessagesWhenLoggingIsDisabled() {
+        var log = new GdsTestLog();
+        var requestScopedDependencies = RequestScopedDependencies.builder()
+            .with(EmptyTaskRegistryFactory.INSTANCE)
+            .with(TerminationFlag.RUNNING_TRUE)
+            .with(EmptyUserLogRegistryFactory.INSTANCE)
+            .build();
+        var progressTrackerCreator = new ProgressTrackerCreator(log, requestScopedDependencies);
+        var similarityAlgorithms = new SimilarityAlgorithms(progressTrackerCreator, requestScopedDependencies.getTerminationFlag());
 
-        var progressLog = new GdsTestLog();
-        var nodeSimilarity = new NodeSimilarityFactory<>().build(
-            graph,
-            config,
-            progressLog,
-            EmptyTaskRegistryFactory.INSTANCE
-        );
+        similarityAlgorithms.nodeSimilarity(naturalGraph, NodeSimilarityBaseConfigImpl.builder().logProgress(false).build());
 
-        nodeSimilarity.compute();
-
-        assertThat(progressLog.getMessages(INFO))
+        assertThat(log.getMessages(INFO))
             .as("When progress logging is disabled we only log `start` and `finished`.")
             .extracting(removingThreadId())
             .containsExactly(
-                "NodeSimilarity :: Start",
-                "NodeSimilarity :: prepare :: Start",
-                "NodeSimilarity :: prepare :: Finished",
-                "NodeSimilarity :: compare node pairs :: Start",
-                "NodeSimilarity :: compare node pairs :: Finished",
-                "NodeSimilarity :: Finished"
+                "Node Similarity :: Start",
+                "Node Similarity :: prepare :: Start",
+                "Node Similarity :: prepare :: Finished",
+                "Node Similarity :: compare node pairs :: Start",
+                "Node Similarity :: compare node pairs :: Finished",
+                "Node Similarity :: Finished"
             );
     }
 
     @ParameterizedTest(name = "concurrency = {0}")
     @ValueSource(ints = {1, 2})
     void shouldLogProgress(int concurrencyValue) {
-        var graph = naturalGraph;
-        var progressTask = new NodeSimilarityFactory<>().progressTask(graph, false);
         var log = new GdsTestLog();
-        var concurrency = new Concurrency(concurrencyValue);
+        var requestScopedDependencies = RequestScopedDependencies.builder()
+            .with(EmptyTaskRegistryFactory.INSTANCE)
+            .with(TerminationFlag.RUNNING_TRUE)
+            .with(EmptyUserLogRegistryFactory.INSTANCE)
+            .build();
+        var similarityAlgorithms = new SimilarityAlgorithms(null, requestScopedDependencies.getTerminationFlag());
+
+        var configuration = NodeSimilarityStreamConfigImpl.builder().build();
         var progressTracker = new TestProgressTracker(
-            progressTask,
+            similarityAlgorithms.constructNodeSimilarityTask(naturalGraph, configuration),
             log,
-            concurrency,
+            new Concurrency(concurrencyValue),
             EmptyTaskRegistryFactory.INSTANCE
         );
-        var parameters = new NodeSimilarityParameters(
-            new JaccardSimilarityComputer(1E-42),
-            1,
-            Integer.MAX_VALUE,
-            10,
-            0,
-            true,
-            false,
-            false,
-            null
-        );
+        similarityAlgorithms.nodeSimilarity(naturalGraph, configuration, progressTracker).streamResult().count();
 
-        constructNodeSimilarity(graph, parameters, concurrency, progressTracker).compute().streamResult().count();
-
-        List<AtomicLong> progresses = progressTracker.getProgresses();
+        var progresses = progressTracker.getProgresses();
 
         // Should log progress for prepare and actual comparisons
         assertEquals(4, progresses.size());
-        assertEquals(graph.relationshipCount(), progresses.get(1).get());
+        assertEquals(naturalGraph.relationshipCount(), progresses.get(1).get());
 
         assertThat(log.getMessages(INFO))
             .extracting(removingThreadId())
             .contains(
-                "NodeSimilarity :: prepare :: Start",
-                "NodeSimilarity :: prepare :: Finished",
-                "NodeSimilarity :: compare node pairs :: Start",
-                "NodeSimilarity :: compare node pairs :: Finished"
+                "Node Similarity :: prepare :: Start",
+                "Node Similarity :: prepare :: Finished",
+                "Node Similarity :: compare node pairs :: Start",
+                "Node Similarity :: compare node pairs :: Finished"
             );
     }
 
     @Test
     void shouldLogProgressForWccOptimization() {
-        var graph = naturalGraph;
-        var parameters = new NodeSimilarityParameters(
-            new JaccardSimilarityComputer(1E-42),
-            1,
-            Integer.MAX_VALUE,
-            10,
-            0,
-            true,
-            false,
-            true,
-            null
-        );
-        var progressTask = new NodeSimilarityFactory<>().progressTask(graph, true);
-        var concurrency = new Concurrency(4);
         var log = new GdsTestLog();
+        var requestScopedDependencies = RequestScopedDependencies.builder()
+            .with(EmptyTaskRegistryFactory.INSTANCE)
+            .with(TerminationFlag.RUNNING_TRUE)
+            .with(EmptyUserLogRegistryFactory.INSTANCE)
+            .build();
+        var similarityAlgorithms = new SimilarityAlgorithms(null, requestScopedDependencies.getTerminationFlag());
+
+        var configuration = NodeSimilarityStreamConfigImpl.builder()
+            .useComponents(true)
+            .build();
         var progressTracker = new TestProgressTracker(
-            progressTask,
+            similarityAlgorithms.constructNodeSimilarityTask(naturalGraph, configuration),
             log,
-            concurrency,
+            new Concurrency(4),
             EmptyTaskRegistryFactory.INSTANCE
         );
+        similarityAlgorithms.nodeSimilarity(naturalGraph, configuration, progressTracker).streamResult().count();
 
-        constructNodeSimilarity(graph, parameters, concurrency, progressTracker).compute().streamResult().count();
-
-        List<AtomicLong> progresses = progressTracker.getProgresses();
+        var progresses = progressTracker.getProgresses();
 
         // Should log progress for prepare and actual comparisons
         assertThat(progresses).hasSize(6);
@@ -940,12 +895,12 @@ final class NodeSimilarityTest {
         assertThat(log.getMessages(INFO))
             .extracting(removingThreadId())
             .contains(
-                "NodeSimilarity :: prepare :: WCC :: Start",
-                "NodeSimilarity :: prepare :: WCC :: Finished",
-                "NodeSimilarity :: prepare :: Start",
-                "NodeSimilarity :: prepare :: Finished",
-                "NodeSimilarity :: compare node pairs :: Start",
-                "NodeSimilarity :: compare node pairs :: Finished"
+                "Node Similarity :: prepare :: WCC :: Start",
+                "Node Similarity :: prepare :: WCC :: Finished",
+                "Node Similarity :: prepare :: Start",
+                "Node Similarity :: prepare :: Finished",
+                "Node Similarity :: compare node pairs :: Start",
+                "Node Similarity :: compare node pairs :: Finished"
             );
     }
 
@@ -980,8 +935,7 @@ final class NodeSimilarityTest {
         NodeSimilarity nodeSimilarity = constructNodeSimilarity(
             graph,
             parameters1,
-            new Concurrency(1),
-            ProgressTracker.NULL_TRACKER
+            new Concurrency(1)
         );
 
         Set<String> result = nodeSimilarity
@@ -1003,7 +957,7 @@ final class NodeSimilarityTest {
             false,
             null
         );
-        nodeSimilarity = constructNodeSimilarity(graph, parameters2, new Concurrency(1), ProgressTracker.NULL_TRACKER);
+        nodeSimilarity = constructNodeSimilarity(graph, parameters2, new Concurrency(1));
 
         result = nodeSimilarity.compute()
             .streamResult().map(NodeSimilarityTest::resultString).collect(Collectors.toSet());
@@ -1055,8 +1009,7 @@ final class NodeSimilarityTest {
         NodeSimilarity nodeSimilarity = constructNodeSimilarity(
             naturalGraph,
             parameters,
-            new Concurrency(4),
-            ProgressTracker.NULL_TRACKER
+            new Concurrency(4)
         );
 
         Set<String> result = nodeSimilarity
@@ -1071,8 +1024,7 @@ final class NodeSimilarityTest {
     private static NodeSimilarity constructNodeSimilarity(
         Graph graph,
         NodeSimilarityParameters parameters,
-        Concurrency concurrency,
-        ProgressTracker progressTracker
+        Concurrency concurrency
     ) {
         var wccStub = new WccStub(TerminationFlag.RUNNING_TRUE, new AlgorithmMachinery());
 
@@ -1081,7 +1033,7 @@ final class NodeSimilarityTest {
             parameters,
             concurrency,
             DefaultPool.INSTANCE,
-            progressTracker,
+            ProgressTracker.NULL_TRACKER,
             NodeFilter.ALLOW_EVERYTHING,
             NodeFilter.ALLOW_EVERYTHING,
             TerminationFlag.RUNNING_TRUE,

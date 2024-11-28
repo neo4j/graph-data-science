@@ -20,12 +20,13 @@
 package org.neo4j.gds.applications.algorithms.similarity;
 
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.wcc.WccStub;
 import org.neo4j.gds.wcc.WccTask;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmMachinery;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
-import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
@@ -55,14 +56,11 @@ public class SimilarityAlgorithms {
     private final AlgorithmMachinery algorithmMachinery = new AlgorithmMachinery();
 
     private final ProgressTrackerCreator progressTrackerCreator;
-    private final RequestScopedDependencies requestScopedDependencies;
+    private final TerminationFlag terminationFlag;
 
-    public SimilarityAlgorithms(
-        ProgressTrackerCreator progressTrackerCreator,
-        RequestScopedDependencies requestScopedDependencies
-    ) {
+    public SimilarityAlgorithms(ProgressTrackerCreator progressTrackerCreator, TerminationFlag terminationFlag) {
         this.progressTrackerCreator = progressTrackerCreator;
-        this.requestScopedDependencies = requestScopedDependencies;
+        this.terminationFlag = terminationFlag;
     }
 
     FilteredKnnResult filteredKnn(Graph graph, FilteredKnnBaseConfig configuration) {
@@ -113,7 +111,7 @@ public class SimilarityAlgorithms {
 
         var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
 
-        var wccStub = new WccStub(requestScopedDependencies.getTerminationFlag(), algorithmMachinery);
+        var wccStub = new WccStub(terminationFlag, algorithmMachinery);
 
         var algorithm = new NodeSimilarity(
             graph,
@@ -123,7 +121,7 @@ public class SimilarityAlgorithms {
             progressTracker,
             sourceNodeFilter,
             targetNodeFilter,
-            requestScopedDependencies.getTerminationFlag(),
+            terminationFlag,
             wccStub
         );
 
@@ -167,7 +165,7 @@ public class SimilarityAlgorithms {
                 .progressTracker(progressTracker)
                 .executor(DefaultPool.INSTANCE)
                 .build(),
-            requestScopedDependencies.getTerminationFlag()
+            terminationFlag
         );
 
         return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
@@ -178,8 +176,16 @@ public class SimilarityAlgorithms {
         );
     }
 
-    NodeSimilarityResult nodeSimilarity(Graph graph, NodeSimilarityBaseConfig configuration) {
-        Task task = Tasks.task(
+    public NodeSimilarityResult nodeSimilarity(Graph graph, NodeSimilarityBaseConfig configuration) {
+        var task = constructNodeSimilarityTask(graph, configuration);
+
+        var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
+
+        return nodeSimilarity(graph, configuration, progressTracker);
+    }
+
+    public Task constructNodeSimilarityTask(Graph graph, NodeSimilarityBaseConfig configuration) {
+        return Tasks.task(
             AlgorithmLabel.NodeSimilarity.asString(),
             configuration.useComponents().computeComponents()
                 ? Tasks.task(
@@ -190,10 +196,14 @@ public class SimilarityAlgorithms {
                 : Tasks.leaf("prepare", graph.relationshipCount()),
             Tasks.leaf("compare node pairs")
         );
+    }
 
-        var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
-
-        var wccStub = new WccStub(requestScopedDependencies.getTerminationFlag(), algorithmMachinery);
+    public NodeSimilarityResult nodeSimilarity(
+        Graph graph,
+        NodeSimilarityBaseConfig configuration,
+        ProgressTracker progressTracker
+    ) {
+        var wccStub = new WccStub(terminationFlag, algorithmMachinery);
 
         var algorithm = new NodeSimilarity(
             graph,
@@ -203,7 +213,7 @@ public class SimilarityAlgorithms {
             progressTracker,
             NodeFilter.ALLOW_EVERYTHING,
             NodeFilter.ALLOW_EVERYTHING,
-            requestScopedDependencies.getTerminationFlag(),
+            terminationFlag,
             wccStub
         );
 
@@ -236,7 +246,7 @@ public class SimilarityAlgorithms {
                 graph,
                 configuration,
                 knnContext,
-                requestScopedDependencies.getTerminationFlag()
+                terminationFlag
             );
         }
 
@@ -244,7 +254,7 @@ public class SimilarityAlgorithms {
             graph,
             configuration,
             knnContext,
-            requestScopedDependencies.getTerminationFlag()
+            terminationFlag
         );
     }
 }
