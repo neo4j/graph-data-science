@@ -27,7 +27,7 @@ class ProgressTest {
 
     @Test
     void relativeProgress() {
-        assertThat(ImmutableProgress.of(40, Task.UNKNOWN_VOLUME).relativeProgress()).isEqualTo(1.0);
+        assertThat(ImmutableProgress.of(40, Task.UNKNOWN_VOLUME).relativeProgress()).isEqualTo(-1.0);
         assertThat(ImmutableProgress.of(40, 40).relativeProgress()).isEqualTo(1.0);
         assertThat(ImmutableProgress.of(44, 40).relativeProgress()).isEqualTo(1.0);
 

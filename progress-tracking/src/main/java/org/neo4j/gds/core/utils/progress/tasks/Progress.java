@@ -30,6 +30,10 @@ public interface Progress {
 
     @Value.Lazy
     default double relativeProgress() {
+        if (volume() == Task.UNKNOWN_VOLUME) {
+            return Task.UNKNOWN_VOLUME;
+        }
+
         // progress can be larger if the volume was estimated too low (such as for cypher projections)
         return progress() >= volume()
             ? 1.0D

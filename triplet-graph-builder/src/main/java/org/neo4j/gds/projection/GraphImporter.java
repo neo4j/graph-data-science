@@ -82,7 +82,7 @@ public final class GraphImporter {
         return Tasks.task(
             "Graph aggregation",
             Tasks.leaf("Update aggregation", taskVolume),
-            Tasks.task("Build graph store", Tasks.leaf("Nodes"), Tasks.leaf("Relationships"))
+            Tasks.task("Build graph store", Tasks.leaf("Nodes", 1), Tasks.leaf("Relationships", 1))
         );
     }
 
