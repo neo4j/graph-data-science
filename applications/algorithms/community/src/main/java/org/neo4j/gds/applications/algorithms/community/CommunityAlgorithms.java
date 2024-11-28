@@ -463,7 +463,7 @@ public class CommunityAlgorithms {
 
         var wccStub = new WccStub(terminationFlag, algorithmMachinery);
 
-        return wccStub.wcc(graph, configuration.toParameters(), progressTracker);
+        return wccStub.wcc(graph, configuration.toParameters(), progressTracker, true);
     }
 
     private Task constructKMeansProgressTask(Graph graph, KmeansBaseConfig configuration) {

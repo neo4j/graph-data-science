@@ -309,7 +309,7 @@ class WccTest {
             var wccStub = new WccStub(TerminationFlag.RUNNING_TRUE, new AlgorithmMachinery());
 
             var parameters = new WccParameters(0D, new Concurrency(4));
-            var dss = wccStub.wcc(graph, parameters, ProgressTracker.NULL_TRACKER);
+            var dss = wccStub.wcc(graph, parameters, ProgressTracker.NULL_TRACKER, true);
 
             var actualCommunities = new ArrayList<Long>();
             graph.forEachNode(node -> actualCommunities.add(dss.setIdOf(node)));

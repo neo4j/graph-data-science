@@ -40,7 +40,12 @@ public class WccStub {
         this.algorithmMachinery = algorithmMachinery;
     }
 
-    public DisjointSetStruct wcc(Graph graph, WccParameters parameters, ProgressTracker progressTracker) {
+    public DisjointSetStruct wcc(
+        Graph graph,
+        WccParameters parameters,
+        ProgressTracker progressTracker,
+        boolean shouldReleaseProgressTracker
+    ) {
         var algorithm = new Wcc(
             graph,
             DefaultPool.INSTANCE,
@@ -50,6 +55,11 @@ public class WccStub {
             terminationFlag
         );
 
-        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true, parameters.concurrency());
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
+            algorithm,
+            progressTracker,
+            shouldReleaseProgressTracker,
+            parameters.concurrency()
+        );
     }
 }
