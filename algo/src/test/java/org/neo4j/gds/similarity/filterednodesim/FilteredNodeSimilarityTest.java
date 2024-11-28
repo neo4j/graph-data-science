@@ -22,16 +22,20 @@ package org.neo4j.gds.similarity.filterednodesim;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.neo4j.gds.TestProgressTracker;
+import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
+import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
+import org.neo4j.gds.applications.algorithms.similarity.SimilarityAlgorithms;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.similarity.filtering.NodeFilterSpecFactory;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -70,29 +74,23 @@ class FilteredNodeSimilarityTest {
 
     @Test
     void should() {
+        var similarityAlgorithms = new SimilarityAlgorithms(null, TerminationFlag.RUNNING_TRUE);
+
         var sourceNodeFilter = Stream.of("a", "b", "c").map(graph::toOriginalNodeId).collect(Collectors.toList());
 
         var config = FilteredNodeSimilarityStreamConfigImpl.builder()
             .sourceNodeFilter(NodeFilterSpecFactory.create(sourceNodeFilter))
             .build();
 
-        var nodeSimilarity = new FilteredNodeSimilarityFactory<>().build(
-            graph,
-            config,
-            ProgressTracker.NULL_TRACKER
-        );
-
         // no results for nodes that are not specified in the node filter -- nice
-        var noOfResultsWithSourceNodeOutsideOfFilter = nodeSimilarity
-            .compute()
+        var noOfResultsWithSourceNodeOutsideOfFilter = similarityAlgorithms.filteredNodeSimilarity(graph, config, ProgressTracker.NULL_TRACKER)
             .streamResult()
             .filter(res -> !sourceNodeFilter.contains(graph.toOriginalNodeId(res.node1)))
             .count();
         assertThat(noOfResultsWithSourceNodeOutsideOfFilter).isEqualTo(0L);
 
         // nodes outside of the node filter are not present as target nodes either -- not nice
-        var noOfResultsWithTargetNodeOutSideOfFilter = nodeSimilarity
-            .compute()
+        var noOfResultsWithTargetNodeOutSideOfFilter = similarityAlgorithms.filteredNodeSimilarity(graph, config, ProgressTracker.NULL_TRACKER)
             .streamResult()
             .filter(res -> !sourceNodeFilter.contains(graph.toOriginalNodeId(res.node2)))
             .count();
@@ -101,6 +99,8 @@ class FilteredNodeSimilarityTest {
 
     @Test
     void shouldSurviveIoannisObjections() {
+        var similarityAlgorithms = new SimilarityAlgorithms(null, TerminationFlag.RUNNING_TRUE);
+
         var sourceNodeFilter = List.of(graph.toOriginalNodeId("d"));
 
         var config = FilteredNodeSimilarityStreamConfigImpl.builder()
@@ -108,23 +108,15 @@ class FilteredNodeSimilarityTest {
             .concurrency(1)
             .build();
 
-        var nodeSimilarity = new FilteredNodeSimilarityFactory<>().build(
-            graph,
-            config,
-            ProgressTracker.NULL_TRACKER
-        );
-
         // no results for nodes that are not specified in the node filter -- nice
-        var noOfResultsWithSourceNodeOutsideOfFilter = nodeSimilarity
-            .compute()
+        var noOfResultsWithSourceNodeOutsideOfFilter = similarityAlgorithms.filteredNodeSimilarity(graph, config, ProgressTracker.NULL_TRACKER)
             .streamResult()
             .filter(res -> !sourceNodeFilter.contains(graph.toOriginalNodeId(res.node1)))
             .count();
         assertThat(noOfResultsWithSourceNodeOutsideOfFilter).isEqualTo(0L);
 
         // nodes outside of the node filter are not present as target nodes either -- not nice
-        var noOfResultsWithTargetNodeOutSideOfFilter = nodeSimilarity
-            .compute()
+        var noOfResultsWithTargetNodeOutSideOfFilter = similarityAlgorithms.filteredNodeSimilarity(graph, config, ProgressTracker.NULL_TRACKER)
             .streamResult()
             .filter(res -> !sourceNodeFilter.contains(graph.toOriginalNodeId(res.node2)))
             .count();
@@ -134,6 +126,8 @@ class FilteredNodeSimilarityTest {
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
     void shouldSurviveIoannisFurtherObjections(boolean enableWcc) {
+        var similarityAlgorithms = new SimilarityAlgorithms(null, TerminationFlag.RUNNING_TRUE);
+
         var sourceNodeFilter = List.of(graph.toOriginalNodeId("d"));
 
         var config = FilteredNodeSimilarityStreamConfigImpl.builder()
@@ -144,23 +138,15 @@ class FilteredNodeSimilarityTest {
             .topN(10)
             .build();
 
-        var nodeSimilarity = new FilteredNodeSimilarityFactory<>().build(
-            graph,
-            config,
-            ProgressTracker.NULL_TRACKER
-        );
-
         // no results for nodes that are not specified in the node filter -- nice
-        var noOfResultsWithSourceNodeOutsideOfFilter = nodeSimilarity
-            .compute()
+        var noOfResultsWithSourceNodeOutsideOfFilter = similarityAlgorithms.filteredNodeSimilarity(graph, config, ProgressTracker.NULL_TRACKER)
             .streamResult()
             .filter(res -> !sourceNodeFilter.contains(graph.toOriginalNodeId(res.node1)))
             .count();
         assertThat(noOfResultsWithSourceNodeOutsideOfFilter).isEqualTo(0L);
 
         // nodes outside of the node filter are not present as target nodes either -- not nice
-        var noOfResultsWithTargetNodeOutSideOfFilter = nodeSimilarity
-            .compute()
+        var noOfResultsWithTargetNodeOutSideOfFilter = similarityAlgorithms.filteredNodeSimilarity(graph, config, ProgressTracker.NULL_TRACKER)
             .streamResult()
             .filter(res -> !sourceNodeFilter.contains(graph.toOriginalNodeId(res.node2)))
             .count();
@@ -170,6 +156,15 @@ class FilteredNodeSimilarityTest {
     @ParameterizedTest
     @ValueSource(ints = {1, 2})
     void shouldLogProgressAccurately(int concurrencyValue) {
+        var log = new GdsTestLog();
+        var requestScopedDependencies = RequestScopedDependencies.builder()
+            .with(EmptyTaskRegistryFactory.INSTANCE)
+            .with(TerminationFlag.RUNNING_TRUE)
+            .with(EmptyUserLogRegistryFactory.INSTANCE)
+            .build();
+        var progressTrackerCreator = new ProgressTrackerCreator(log, requestScopedDependencies);
+        var similarityAlgorithms = new SimilarityAlgorithms(progressTrackerCreator, requestScopedDependencies.getTerminationFlag());
+
         var sourceNodeFilter = List.of(graph.toOriginalNodeId("c"), graph.toOriginalNodeId("d"));
         var concurrency = new Concurrency(concurrencyValue);
         var config = FilteredNodeSimilarityStreamConfigImpl.builder()
@@ -178,44 +173,28 @@ class FilteredNodeSimilarityTest {
             .topK(1)
             .topN(10)
             .build();
-        var progressTask = new FilteredNodeSimilarityFactory<>().progressTask(graph, config);
-        var log = new GdsTestLog();
-        var progressTracker = new TestProgressTracker(
-            progressTask,
-            log,
-            concurrency,
-            EmptyTaskRegistryFactory.INSTANCE
-        );
-
-
-        new FilteredNodeSimilarityFactory<>().build(
-            graph,
-            config,
-            progressTracker
-        ).compute();
-
+        similarityAlgorithms.filteredNodeSimilarity(graph, config);
 
         assertThat(log.getMessages(INFO))
             .extracting(removingThreadId())
             .containsExactly(
-                "FilteredNodeSimilarity :: Start",
-                "FilteredNodeSimilarity :: prepare :: Start",
-                "FilteredNodeSimilarity :: prepare 33%",
-                "FilteredNodeSimilarity :: prepare 55%",
-                "FilteredNodeSimilarity :: prepare 66%",
-                "FilteredNodeSimilarity :: prepare 100%",
-                "FilteredNodeSimilarity :: prepare :: Finished",
-                "FilteredNodeSimilarity :: compare node pairs :: Start",
-                "FilteredNodeSimilarity :: compare node pairs 12%",
-                "FilteredNodeSimilarity :: compare node pairs 25%",
-                "FilteredNodeSimilarity :: compare node pairs 37%",
-                "FilteredNodeSimilarity :: compare node pairs 50%",
-                "FilteredNodeSimilarity :: compare node pairs 62%",
-                "FilteredNodeSimilarity :: compare node pairs 75%",
-                "FilteredNodeSimilarity :: compare node pairs 100%",
-                "FilteredNodeSimilarity :: compare node pairs :: Finished",
-                "FilteredNodeSimilarity :: Finished"
+                "Filtered Node Similarity :: Start",
+                "Filtered Node Similarity :: prepare :: Start",
+                "Filtered Node Similarity :: prepare 33%",
+                "Filtered Node Similarity :: prepare 55%",
+                "Filtered Node Similarity :: prepare 66%",
+                "Filtered Node Similarity :: prepare 100%",
+                "Filtered Node Similarity :: prepare :: Finished",
+                "Filtered Node Similarity :: compare node pairs :: Start",
+                "Filtered Node Similarity :: compare node pairs 12%",
+                "Filtered Node Similarity :: compare node pairs 25%",
+                "Filtered Node Similarity :: compare node pairs 37%",
+                "Filtered Node Similarity :: compare node pairs 50%",
+                "Filtered Node Similarity :: compare node pairs 62%",
+                "Filtered Node Similarity :: compare node pairs 75%",
+                "Filtered Node Similarity :: compare node pairs 100%",
+                "Filtered Node Similarity :: compare node pairs :: Finished",
+                "Filtered Node Similarity :: Finished"
             );
     }
-
 }

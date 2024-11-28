@@ -99,10 +99,7 @@ public class SimilarityAlgorithms {
         );
     }
 
-    NodeSimilarityResult filteredNodeSimilarity(Graph graph, FilteredNodeSimilarityBaseConfig configuration) {
-        var sourceNodeFilter = configuration.sourceNodeFilter().toNodeFilter(graph);
-        var targetNodeFilter = configuration.targetNodeFilter().toNodeFilter(graph);
-
+    public NodeSimilarityResult filteredNodeSimilarity(Graph graph, FilteredNodeSimilarityBaseConfig configuration) {
         var task = Tasks.task(
             FilteredNodeSimilarity.asString(),
             filteredNodeSimilarityProgressTask(graph, configuration.useComponents().computeComponents()),
@@ -110,6 +107,17 @@ public class SimilarityAlgorithms {
         );
 
         var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
+
+        return filteredNodeSimilarity(graph, configuration, progressTracker);
+    }
+
+    public NodeSimilarityResult filteredNodeSimilarity(
+        Graph graph,
+        FilteredNodeSimilarityBaseConfig configuration,
+        ProgressTracker progressTracker
+    ) {
+        var sourceNodeFilter = configuration.sourceNodeFilter().toNodeFilter(graph);
+        var targetNodeFilter = configuration.targetNodeFilter().toNodeFilter(graph);
 
         var wccStub = new WccStub(terminationFlag, algorithmMachinery);
 
