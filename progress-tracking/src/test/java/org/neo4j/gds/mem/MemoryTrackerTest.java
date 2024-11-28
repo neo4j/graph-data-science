@@ -114,11 +114,11 @@ class MemoryTrackerTest {
         memoryTracker.onGraphStoreAdded(new GraphStoreAddedEvent("alice","neo4j","graph1",11));
 
         var  aliceMemory = memoryTracker.memorySummary("alice");
-        assertThat(aliceMemory.totalGraphMemory()).isEqualTo(11L);
+        assertThat(aliceMemory.totalGraphsMemory()).isEqualTo(11L);
         assertThat(aliceMemory.totalTasksMemory()).isEqualTo(12L);
 
         var  bobMemory = memoryTracker.memorySummary("bob");
-        assertThat(bobMemory.totalGraphMemory()).isEqualTo(0L);
+        assertThat(bobMemory.totalGraphsMemory()).isEqualTo(0L);
         assertThat(bobMemory.totalTasksMemory()).isEqualTo(5L);
 
     }
@@ -133,7 +133,7 @@ class MemoryTrackerTest {
 
         var list = memoryTracker.memorySummary().toList();
 
-        assertThat(list.stream()).map(UserMemorySummary::totalGraphMemory).containsExactlyInAnyOrder(11L,0L);
+        assertThat(list.stream()).map(UserMemorySummary::totalGraphsMemory).containsExactlyInAnyOrder(11L,0L);
         assertThat(list.stream()).map(UserMemorySummary::totalTasksMemory).containsExactlyInAnyOrder(12L,5L);
 
     }

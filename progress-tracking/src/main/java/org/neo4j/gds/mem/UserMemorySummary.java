@@ -19,5 +19,5 @@
  */
 package org.neo4j.gds.mem;
 
-public record UserMemorySummary(String user, long totalGraphMemory, long totalTasksMemory) {}
+public record UserMemorySummary(String user, long totalGraphsMemory, long totalTasksMemory) {}
 

@@ -53,7 +53,7 @@ class MemoryProcTest extends  BaseProgressTest {
             "CALL gds.listMemory.summary",
             resultRow -> {
             assertThat(resultRow.getString("user")).isEqualTo("alice");
-                assertThat(resultRow.getNumber("totalGraphMemory")).asInstanceOf(LONG).isEqualTo(0);
+                assertThat(resultRow.getNumber("totalGraphsMemory")).asInstanceOf(LONG).isEqualTo(0);
                 assertThat(resultRow.getNumber("totalTasksMemory")).asInstanceOf(LONG).isEqualTo(0);
             });
         assertThat(rowCount).isEqualTo(1L);
@@ -97,7 +97,7 @@ class MemoryProcTest extends  BaseProgressTest {
             "CALL gds.listMemory.summary",
             resultRow -> {
                 assertThat(resultRow.getString("user")).isEqualTo("bob");
-                assertThat(resultRow.getNumber("totalGraphMemory")).asInstanceOf(LONG).isEqualTo(0);
+                assertThat(resultRow.getNumber("totalGraphsMemory")).asInstanceOf(LONG).isEqualTo(0);
                 assertThat(resultRow.getNumber("totalTasksMemory")).asInstanceOf(LONG).isEqualTo(0);
             });
 
@@ -131,7 +131,7 @@ class MemoryProcTest extends  BaseProgressTest {
             "CALL gds.listMemory.summary",
             resultRow -> {
                 assertThat(resultRow.getString("user")).isEqualTo("alice");
-                assertThat(resultRow.getNumber("totalGraphMemory")).asInstanceOf(LONG).isEqualTo(0);
+                assertThat(resultRow.getNumber("totalGraphsMemory")).asInstanceOf(LONG).isEqualTo(0);
                 assertThat(resultRow.getNumber("totalTasksMemory")).asInstanceOf(LONG).isGreaterThan(0);
             });
         assertThat(rowCountAlice).isEqualTo(1L);
@@ -140,7 +140,7 @@ class MemoryProcTest extends  BaseProgressTest {
             "CALL gds.listMemory.summary",
             resultRow -> {
                 assertThat(resultRow.getString("user")).isEqualTo("bob");
-                assertThat(resultRow.getNumber("totalGraphMemory")).asInstanceOf(LONG).isEqualTo(0);
+                assertThat(resultRow.getNumber("totalGraphsMemory")).asInstanceOf(LONG).isEqualTo(0);
                 assertThat(resultRow.getNumber("totalTasksMemory")).asInstanceOf(LONG).isEqualTo(0);
             });
 
