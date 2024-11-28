@@ -128,6 +128,32 @@ RETURN gds.graph.project(
   { undirectedRelationshipTypes: ['*'] }
 )
 ----
+[[algorithms-prize-tree-examples-mem]]
+=== Memory estimation
+
+:mode: stream
+include::partial$/algorithms/shared/examples-estimate-intro.adoc[]
+
+[role=query-example]
+--
+.The following will estimate the memory requirements for running the algorithm in stream mode:
+[source, cypher, role=noplay]
+----
+CALL gds.prizeSteinerTree.stream.estimate('graph', {
+  relationshipWeightProperty: 'cost',
+  prizeProperty: 'prize'
+})
+YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
+RETURN nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
+----
+.Results
+[opts="header"]
+|===
+| nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
+| 6         | 14                | 3873      | 561592      | "[3873 Bytes \... 548 KiB]"
+|===
+--
+
 
 [[algorithms-prize-tree-examples-sream]]
 === Stream

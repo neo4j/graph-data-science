@@ -39,6 +39,8 @@ import org.neo4j.gds.paths.traverse.DfsBaseConfig;
 import org.neo4j.gds.paths.traverse.DfsMemoryEstimateDefinition;
 import org.neo4j.gds.paths.yens.YensMemoryEstimateDefinition;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensBaseConfig;
+import org.neo4j.gds.pcst.PCSTBaseConfig;
+import org.neo4j.gds.pricesteiner.PrizeSteinerTreeMemoryEstimateDefinition;
 import org.neo4j.gds.spanningtree.SpanningTreeBaseConfig;
 import org.neo4j.gds.spanningtree.SpanningTreeMemoryEstimateDefinition;
 import org.neo4j.gds.steiner.SteinerTreeBaseConfig;
@@ -120,9 +122,20 @@ public class PathFindingAlgorithmsEstimationModeBusinessFacade {
         throw new MemoryEstimationNotImplementedException();
     }
 
-    public MemoryEstimation pcst() {
-        throw new MemoryEstimationNotImplementedException();
+
+    public MemoryEstimateResult pcst(
+        PCSTBaseConfig configuration,
+        Object graphNameOrConfiguration
+    ) {
+        var memoryEstimation = pcst();
+
+        return runEstimation(configuration, graphNameOrConfiguration, memoryEstimation);
     }
+
+    MemoryEstimation pcst() {
+        return new PrizeSteinerTreeMemoryEstimateDefinition().memoryEstimation();
+    }
+
     public MemoryEstimateResult randomWalk(
         RandomWalkBaseConfig configuration,
         Object graphNameOrConfiguration

@@ -129,6 +129,12 @@ public interface PathFindingProcedureFacade {
 
     Stream<SteinerTreeStreamResult> prizeCollectingSteinerTreeStream(String graphName, Map<String, Object> configuration);
 
+    Stream<MemoryEstimateResult> prizeCollectingSteinerTreeStreamEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    );
+
+
     Stream<StandardModeResult> randomWalkStats(String graphName, Map<String, Object> configuration);
 
     Stream<MemoryEstimateResult> randomWalkStatsEstimate(

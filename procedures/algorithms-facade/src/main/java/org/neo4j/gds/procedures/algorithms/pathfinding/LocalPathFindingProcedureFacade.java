@@ -591,6 +591,20 @@ public final class LocalPathFindingProcedureFacade implements PathFindingProcedu
     }
 
     @Override
+    public Stream<MemoryEstimateResult> prizeCollectingSteinerTreeStreamEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        return
+            Stream.of(
+                estimationModeBusinessFacade.pcst(
+                    configurationParser.parseConfiguration(algorithmConfiguration, PCSTStreamConfig::of),
+                    graphNameOrConfiguration
+                )
+            );
+    }
+
+    @Override
     public Stream<StandardModeResult> randomWalkStats(String graphName, Map<String, Object> rawConfiguration) {
         var configuration = configurationParser.parseConfiguration(
             rawConfiguration,
