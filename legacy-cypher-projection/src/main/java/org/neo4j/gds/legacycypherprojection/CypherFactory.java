@@ -162,8 +162,8 @@ public final class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCy
     @Override
     public CSRGraphStore build() {
         // Temporarily override the security context to enforce read-only access during load
-        return readOnlyTransaction().apply((tx, ktx) -> {
-            try {
+        try {
+            return readOnlyTransaction().apply((tx, ktx) -> {
                 progressTracker.beginSubTask("Loading");
                 BatchLoadResult nodeCount = new CountingCypherRecordLoader(
                     cypherConfig.nodeQuery(),
@@ -198,11 +198,11 @@ public final class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCy
                 logLoadingSummary(graphStore);
 
                 return graphStore;
-            } catch (RuntimeException ex) {
-                progressTracker.endSubTaskWithFailure();
-                throw ex;
-            }
-        });
+            });
+        } catch (Throwable ex) {
+            progressTracker.endSubTaskWithFailure();
+            throw ex;
+        }
     }
 
     private ProgressTracker initProgressTracker() {

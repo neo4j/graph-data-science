@@ -27,7 +27,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
-import static org.neo4j.internal.kernel.api.security.AccessMode.Static.READ;
 
 public class CypherQueryEstimator {
 
@@ -48,7 +47,7 @@ public class CypherQueryEstimator {
     }
 
     private EstimationResult runEstimationQuery(String query, Collection<String> reservedColumns) {
-        return context.withRestrictedAccess(READ).apply((tx, ktx) -> {
+        return context.apply((tx, ktx) -> {
             var explainQuery = formatWithLocale("EXPLAIN %s", query);
             try (var result = tx.execute(explainQuery)) {
                 var estimatedRows = (Number) result.getExecutionPlanDescription().getArguments().get("EstimatedRows");
