@@ -158,12 +158,12 @@ class FilteredNodeSimilarityTest {
     void shouldLogProgressAccurately(int concurrencyValue) {
         var log = new GdsTestLog();
         var requestScopedDependencies = RequestScopedDependencies.builder()
-            .with(EmptyTaskRegistryFactory.INSTANCE)
-            .with(TerminationFlag.RUNNING_TRUE)
-            .with(EmptyUserLogRegistryFactory.INSTANCE)
+            .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
+            .terminationFlag(TerminationFlag.RUNNING_TRUE)
+            .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
             .build();
         var progressTrackerCreator = new ProgressTrackerCreator(log, requestScopedDependencies);
-        var similarityAlgorithms = new SimilarityAlgorithms(progressTrackerCreator, requestScopedDependencies.getTerminationFlag());
+        var similarityAlgorithms = new SimilarityAlgorithms(progressTrackerCreator, requestScopedDependencies.terminationFlag());
 
         var sourceNodeFilter = List.of(graph.toOriginalNodeId("c"), graph.toOriginalNodeId("d"));
         var concurrency = new Concurrency(concurrencyValue);

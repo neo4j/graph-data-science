@@ -253,7 +253,7 @@ public final class ApplicationsFacade {
     ) {
         var modelCatalogApplications = DefaultModelCatalogApplications.create(
             modelCatalog,
-            requestScopedDependencies.getUser()
+            requestScopedDependencies.user()
         );
 
         if (modelCatalogApplicationsDecorator.isEmpty()) return modelCatalogApplications;

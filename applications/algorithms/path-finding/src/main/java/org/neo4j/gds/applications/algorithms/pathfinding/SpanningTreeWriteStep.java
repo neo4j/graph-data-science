@@ -67,13 +67,13 @@ class SpanningTreeWriteStep implements WriteStep<SpanningTree, RelationshipsWrit
             NodePropertyExporter.baseTask(AlgorithmLabel.SpanningTree.asString(), graph.nodeCount()),
             log,
             configuration.writeConcurrency(),
-            requestScopedDependencies.getTaskRegistryFactory()
+            requestScopedDependencies.taskRegistryFactory()
         );
 
         var relationshipExporter = writeContext.relationshipExporterBuilder()
             .withGraph(spanningGraph)
             .withIdMappingOperator(spanningGraph::toOriginalNodeId)
-            .withTerminationFlag(requestScopedDependencies.getTerminationFlag())
+            .withTerminationFlag(requestScopedDependencies.terminationFlag())
             .withProgressTracker(progressTracker)
             .withResultStore(configuration.resolveResultStore(resultStore))
             .withJobId(configuration.jobId())

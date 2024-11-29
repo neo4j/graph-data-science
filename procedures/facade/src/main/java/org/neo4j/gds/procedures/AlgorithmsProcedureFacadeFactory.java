@@ -93,7 +93,7 @@ final class AlgorithmsProcedureFacadeFactory {
             genericStub,
             applicationsFacade,
             configurationParser,
-            requestScopedDependencies.getUser()
+            requestScopedDependencies.user()
         );
 
     var pathFindingProcedureFacade = LocalPathFindingProcedureFacade.create(

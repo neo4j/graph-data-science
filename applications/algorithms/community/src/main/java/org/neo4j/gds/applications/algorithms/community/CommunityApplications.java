@@ -60,7 +60,7 @@ public final class CommunityApplications {
         var estimation = new CommunityAlgorithmsEstimationModeBusinessFacade(algorithmEstimationTemplate);
         var algorithms = new CommunityAlgorithms(
             progressTrackerCreator,
-            requestScopedDependencies.getTerminationFlag()
+            requestScopedDependencies.terminationFlag()
         );
         var mutation = new CommunityAlgorithmsMutateModeBusinessFacade(
             estimation,

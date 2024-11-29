@@ -177,12 +177,12 @@ class WccTest {
     void shouldWarnAboutThresholdOnUnweightedGraphs() {
         var log = new GdsTestLog();
         var requestScopedDependencies = RequestScopedDependencies.builder()
-            .with(EmptyTaskRegistryFactory.INSTANCE)
-            .with(TerminationFlag.RUNNING_TRUE)
-            .with(EmptyUserLogRegistryFactory.INSTANCE)
+            .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
+            .terminationFlag(TerminationFlag.RUNNING_TRUE)
+            .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
             .build();
         var progressTrackerCreator = new ProgressTrackerCreator(log, requestScopedDependencies);
-        var communityAlgorithms = new CommunityAlgorithms(progressTrackerCreator, requestScopedDependencies.getTerminationFlag());
+        var communityAlgorithms = new CommunityAlgorithms(progressTrackerCreator, requestScopedDependencies.terminationFlag());
 
         var graph = createTestGraph(Orientation.NATURAL);
         var configuration = WccStreamConfigImpl.builder().relationshipWeightProperty("weights").build();

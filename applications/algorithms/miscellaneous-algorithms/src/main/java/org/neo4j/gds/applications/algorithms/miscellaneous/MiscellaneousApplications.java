@@ -60,7 +60,7 @@ public final class MiscellaneousApplications {
     ) {
         var algorithms = new MiscellaneousAlgorithms(
             progressTrackerCreator,
-            requestScopedDependencies.getTerminationFlag()
+            requestScopedDependencies.terminationFlag()
         );
 
         var estimation = new MiscellaneousApplicationsEstimationModeBusinessFacade(algorithmEstimationTemplate);

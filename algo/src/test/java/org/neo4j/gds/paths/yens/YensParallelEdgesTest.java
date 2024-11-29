@@ -67,7 +67,7 @@ class YensParallelEdgesTest {
     @Test
     void shouldWorkWithParallelEdges() {
         var requestScopedDependencies = RequestScopedDependencies.builder()
-            .with(TerminationFlag.RUNNING_TRUE)
+            .terminationFlag(TerminationFlag.RUNNING_TRUE)
             .build();
         var pathFindingAlgorithms = new PathFindingAlgorithms(requestScopedDependencies, null);
 

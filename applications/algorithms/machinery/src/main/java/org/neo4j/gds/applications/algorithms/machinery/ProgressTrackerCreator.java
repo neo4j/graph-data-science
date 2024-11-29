@@ -45,8 +45,8 @@ public class ProgressTrackerCreator {
                 log,
                 configuration.concurrency(),
                 configuration.jobId(),
-                requestScopedDependencies.getTaskRegistryFactory(),
-                requestScopedDependencies.getUserLogRegistryFactory()
+                requestScopedDependencies.taskRegistryFactory(),
+                requestScopedDependencies.userLogRegistryFactory()
             );
         }
 
@@ -55,8 +55,8 @@ public class ProgressTrackerCreator {
             log,
             configuration.concurrency(),
             configuration.jobId(),
-            requestScopedDependencies.getTaskRegistryFactory(),
-            requestScopedDependencies.getUserLogRegistryFactory()
+            requestScopedDependencies.taskRegistryFactory(),
+            requestScopedDependencies.userLogRegistryFactory()
         );
     }
 }

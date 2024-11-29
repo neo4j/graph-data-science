@@ -551,8 +551,8 @@ class FastRPTest {
     void shouldLogProgress() {
         var log = new GdsTestLog();
         var progressTrackerCreator = new ProgressTrackerCreator(log, RequestScopedDependencies.builder()
-            .with(EmptyTaskRegistryFactory.INSTANCE)
-            .with(EmptyUserLogRegistryFactory.INSTANCE)
+            .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
+            .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
             .build());
         var nodeEmbeddingAlgorithms = new NodeEmbeddingAlgorithms(null, progressTrackerCreator, TerminationFlag.RUNNING_TRUE);
 

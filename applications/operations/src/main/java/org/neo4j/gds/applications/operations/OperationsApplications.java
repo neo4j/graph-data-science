@@ -59,8 +59,8 @@ public final class OperationsApplications {
      * List progress for the given user, or for all users if in administrator mode
      */
     public Stream<UserTask> listProgress() {
-        var taskStore = requestScopedDependencies.getTaskStore();
-        var user = requestScopedDependencies.getUser();
+        var taskStore = requestScopedDependencies.taskStore();
+        var user = requestScopedDependencies.user();
 
         if (user.isAdmin()) return taskStore.query();
 
@@ -71,8 +71,8 @@ public final class OperationsApplications {
      * List progress for the given job id, subject to user permissions.
      */
     public <RESULT> Stream<RESULT> listProgress(JobId jobId, ResultRenderer<RESULT> resultRenderer) {
-        var taskStore = requestScopedDependencies.getTaskStore();
-        var user = requestScopedDependencies.getUser();
+        var taskStore = requestScopedDependencies.taskStore();
+        var user = requestScopedDependencies.user();
 
         if (user.isAdmin()) {
             var results = taskStore.query(jobId);
@@ -89,8 +89,8 @@ public final class OperationsApplications {
      * Huh, we never did jobId filtering...
      */
     public Stream<UserLogEntry> queryUserLog(String jobId) {
-        var user = requestScopedDependencies.getUser();
-        var userLogStore = requestScopedDependencies.getUserLogStore();
+        var user = requestScopedDependencies.user();
+        var userLogStore = requestScopedDependencies.userLogStore();
 
         return userLogStore.query(user.getUsername());
     }

@@ -69,7 +69,7 @@ class KgeWriteStep implements WriteStep<KGEPredictResult, RelationshipsWritten> 
             task,
             log,
             RelationshipExporterBuilder.TYPED_DEFAULT_WRITE_CONCURRENCY,
-            requestScopedDependencies.getTaskRegistryFactory()
+            requestScopedDependencies.taskRegistryFactory()
         );
 
         var relationshipExporter = writeContext.relationshipExporterBuilder()
@@ -78,7 +78,7 @@ class KgeWriteStep implements WriteStep<KGEPredictResult, RelationshipsWritten> 
             .withJobId(jobId)
             .withResultStore(configuration.resolveResultStore(resultStore))
             .withProgressTracker(progressTracker)
-            .withTerminationFlag(requestScopedDependencies.getTerminationFlag())
+            .withTerminationFlag(requestScopedDependencies.terminationFlag())
             .build();
 
         relationshipExporter.write(configuration.writeRelationshipType(), configuration.writeProperty());

@@ -151,8 +151,8 @@ class CELFOnConnectedGraphTest {
     void shouldLogProgress() {
         var log = new GdsTestLog();
         var requestScopedDependencies = RequestScopedDependencies.builder()
-            .with(EmptyTaskRegistryFactory.INSTANCE)
-            .with(EmptyUserLogRegistryFactory.INSTANCE)
+            .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
+            .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
             .build();
         var progressTrackerCreator = new ProgressTrackerCreator(log, requestScopedDependencies);
         var centralityAlgorithms = new CentralityAlgorithms(progressTrackerCreator, TerminationFlag.RUNNING_TRUE);

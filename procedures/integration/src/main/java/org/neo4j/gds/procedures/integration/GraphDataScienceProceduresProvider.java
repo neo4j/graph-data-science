@@ -174,14 +174,14 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
         );
 
         var requestScopedDependencies = RequestScopedDependencies.builder()
-            .with(databaseId)
-            .with(graphLoaderContext)
-            .with(taskRegistryFactory)
-            .with(taskStore)
-            .with(terminationFlag)
-            .with(user)
-            .with(userLogRegistryFactory)
-            .with(userLogStore)
+            .databaseId(databaseId)
+            .graphLoaderContext(graphLoaderContext)
+            .taskRegistryFactory(taskRegistryFactory)
+            .taskStore(taskStore)
+            .terminationFlag(terminationFlag)
+            .user(user)
+            .userLogRegistryFactory(userLogRegistryFactory)
+            .userLogStore(userLogStore)
             .build();
 
         return LocalGraphDataScienceProcedures.create(

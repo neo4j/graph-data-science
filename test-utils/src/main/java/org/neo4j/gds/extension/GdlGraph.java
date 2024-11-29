@@ -62,4 +62,9 @@ public @interface GdlGraph {
      * {@code 'graph'} if no prefix is set.
      */
     boolean addToCatalog() default false;
+
+    /**
+     * If set, the graph will be created using the specified database.
+     */
+    String databaseName() default BaseGdlSupportExtension.DATABASE_NAME;
 }

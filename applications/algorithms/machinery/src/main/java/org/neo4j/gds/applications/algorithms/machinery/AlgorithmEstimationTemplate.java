@@ -78,7 +78,7 @@ public class AlgorithmEstimationTemplate {
         var estimationBuilder = MemoryEstimations.builder("Memory Estimation");
 
         if (graphNameOrConfiguration instanceof Map graphConfig) {
-            var memoryEstimationGraphConfigParser = new MemoryEstimationGraphConfigParser(requestScopedDependencies.getUser().getUsername());
+            var memoryEstimationGraphConfigParser = new MemoryEstimationGraphConfigParser(requestScopedDependencies.user().getUsername());
             var projectionConfiguration = memoryEstimationGraphConfigParser.parse(graphConfig);
 
             var graphMemoryEstimation = estimate(projectionConfiguration);
@@ -126,8 +126,8 @@ public class AlgorithmEstimationTemplate {
         var graphStore = graphStoreCatalogService.getGraphStoreCatalogEntry(
             graphName,
             configuration,
-            requestScopedDependencies.getUser(),
-            requestScopedDependencies.getDatabaseId()
+            requestScopedDependencies.user(),
+            requestScopedDependencies.databaseId()
         ).graphStore();
 
         return GraphDimensionsComputer.of(graphStore, configuration);

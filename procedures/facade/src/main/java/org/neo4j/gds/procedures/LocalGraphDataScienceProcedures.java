@@ -128,8 +128,8 @@ public class LocalGraphDataScienceProcedures implements GraphDataScienceProcedur
         var nodeLookup = new TransactionNodeLookup(kernelTransaction);
 
         var databaseGraphStoreEstimationService = new DatabaseGraphStoreEstimationService(
-            requestScopedDependencies.getGraphLoaderContext(),
-            requestScopedDependencies.getUser()
+            requestScopedDependencies.graphLoaderContext(),
+            requestScopedDependencies.user()
         );
 
         var algorithmEstimationTemplate = new AlgorithmEstimationTemplate(
@@ -172,7 +172,7 @@ public class LocalGraphDataScienceProcedures implements GraphDataScienceProcedur
         var configurationParser = new ConfigurationParser(defaultsConfiguration, limitsConfiguration);
         var userSpecificConfigurationParser = new UserSpecificConfigurationParser(
             configurationParser,
-            requestScopedDependencies.getUser()
+            requestScopedDependencies.user()
         );
 
         var algorithmsProcedureFacade = AlgorithmsProcedureFacadeFactory.create(
@@ -206,18 +206,18 @@ public class LocalGraphDataScienceProcedures implements GraphDataScienceProcedur
             modelRepository,
             pipelineRepository,
             closeableResourceRegistry,
-            requestScopedDependencies.getDatabaseId(),
+            requestScopedDependencies.databaseId(),
             dependencyResolver,
             metrics,
             nodeLookup,
             writeContext.nodePropertyExporterBuilder(),
             procedureReturnColumns,
             writeContext.relationshipExporterBuilder(),
-            requestScopedDependencies.getTaskRegistryFactory(),
+            requestScopedDependencies.taskRegistryFactory(),
             terminationMonitor,
-            requestScopedDependencies.getTerminationFlag(),
-            requestScopedDependencies.getUser(),
-            requestScopedDependencies.getUserLogRegistryFactory(),
+            requestScopedDependencies.terminationFlag(),
+            requestScopedDependencies.user(),
+            requestScopedDependencies.userLogRegistryFactory(),
             progressTrackerCreator,
             algorithmsProcedureFacade,
             algorithmEstimationTemplate,

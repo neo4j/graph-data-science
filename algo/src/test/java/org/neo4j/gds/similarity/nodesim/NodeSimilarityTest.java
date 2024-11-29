@@ -785,12 +785,12 @@ final class NodeSimilarityTest {
     void shouldLogMessages() {
         var log = new GdsTestLog();
         var requestScopedDependencies = RequestScopedDependencies.builder()
-            .with(EmptyTaskRegistryFactory.INSTANCE)
-            .with(TerminationFlag.RUNNING_TRUE)
-            .with(EmptyUserLogRegistryFactory.INSTANCE)
+            .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
+            .terminationFlag(TerminationFlag.RUNNING_TRUE)
+            .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
             .build();
         var progressTrackerCreator = new ProgressTrackerCreator(log, requestScopedDependencies);
-        var similarityAlgorithms = new SimilarityAlgorithms(progressTrackerCreator, requestScopedDependencies.getTerminationFlag());
+        var similarityAlgorithms = new SimilarityAlgorithms(progressTrackerCreator, requestScopedDependencies.terminationFlag());
 
         similarityAlgorithms.nodeSimilarity(naturalGraph, NodeSimilarityBaseConfigImpl.builder().build());
 
@@ -808,12 +808,12 @@ final class NodeSimilarityTest {
     void shouldNotLogMessagesWhenLoggingIsDisabled() {
         var log = new GdsTestLog();
         var requestScopedDependencies = RequestScopedDependencies.builder()
-            .with(EmptyTaskRegistryFactory.INSTANCE)
-            .with(TerminationFlag.RUNNING_TRUE)
-            .with(EmptyUserLogRegistryFactory.INSTANCE)
+            .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
+            .terminationFlag(TerminationFlag.RUNNING_TRUE)
+            .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
             .build();
         var progressTrackerCreator = new ProgressTrackerCreator(log, requestScopedDependencies);
-        var similarityAlgorithms = new SimilarityAlgorithms(progressTrackerCreator, requestScopedDependencies.getTerminationFlag());
+        var similarityAlgorithms = new SimilarityAlgorithms(progressTrackerCreator, requestScopedDependencies.terminationFlag());
 
         similarityAlgorithms.nodeSimilarity(naturalGraph, NodeSimilarityBaseConfigImpl.builder().logProgress(false).build());
 
@@ -835,11 +835,11 @@ final class NodeSimilarityTest {
     void shouldLogProgress(int concurrencyValue) {
         var log = new GdsTestLog();
         var requestScopedDependencies = RequestScopedDependencies.builder()
-            .with(EmptyTaskRegistryFactory.INSTANCE)
-            .with(TerminationFlag.RUNNING_TRUE)
-            .with(EmptyUserLogRegistryFactory.INSTANCE)
+            .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
+            .terminationFlag(TerminationFlag.RUNNING_TRUE)
+            .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
             .build();
-        var similarityAlgorithms = new SimilarityAlgorithms(null, requestScopedDependencies.getTerminationFlag());
+        var similarityAlgorithms = new SimilarityAlgorithms(null, requestScopedDependencies.terminationFlag());
 
         var configuration = NodeSimilarityStreamConfigImpl.builder().build();
         var progressTracker = new TestProgressTracker(
@@ -870,11 +870,11 @@ final class NodeSimilarityTest {
     void shouldLogProgressForWccOptimization() {
         var log = new GdsTestLog();
         var requestScopedDependencies = RequestScopedDependencies.builder()
-            .with(EmptyTaskRegistryFactory.INSTANCE)
-            .with(TerminationFlag.RUNNING_TRUE)
-            .with(EmptyUserLogRegistryFactory.INSTANCE)
+            .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
+            .terminationFlag(TerminationFlag.RUNNING_TRUE)
+            .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
             .build();
-        var similarityAlgorithms = new SimilarityAlgorithms(null, requestScopedDependencies.getTerminationFlag());
+        var similarityAlgorithms = new SimilarityAlgorithms(null, requestScopedDependencies.terminationFlag());
 
         var configuration = NodeSimilarityStreamConfigImpl.builder()
             .useComponents(true)

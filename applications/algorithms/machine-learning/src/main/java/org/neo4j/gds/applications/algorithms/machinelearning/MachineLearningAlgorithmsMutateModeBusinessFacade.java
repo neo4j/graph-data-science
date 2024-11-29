@@ -57,7 +57,7 @@ public class MachineLearningAlgorithmsMutateModeBusinessFacade {
         KGEPredictMutateConfig configuration,
         ResultBuilder<KGEPredictMutateConfig, KGEPredictResult, RESULT, RelationshipsWritten> resultBuilder
     ) {
-        var mutateStep = new KgeMutateStep(requestScopedDependencies.getTerminationFlag(), configuration);
+        var mutateStep = new KgeMutateStep(requestScopedDependencies.terminationFlag(), configuration);
 
         return convenience.processRegularAlgorithmInMutateMode(
             graphName,

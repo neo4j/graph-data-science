@@ -154,13 +154,13 @@ public final class ProcedureRunner {
         var procedureContext = WriteContext.builder().build();
 
         var requestScopedDependencies = RequestScopedDependencies.builder()
-            .with(new DatabaseIdAccessor().getDatabaseId(graphDatabaseService))
-            .with(GraphLoaderContext.NULL_CONTEXT)
-            .with(taskRegistryFactory)
-            .with(EmptyTaskStore.INSTANCE)
-            .with(new User(username.username(), false))
-            .with(EmptyUserLogRegistryFactory.INSTANCE)
-            .with(EmptyUserLogStore.INSTANCE)
+            .databaseId(new DatabaseIdAccessor().getDatabaseId(graphDatabaseService))
+            .graphLoaderContext(GraphLoaderContext.NULL_CONTEXT)
+            .taskRegistryFactory(taskRegistryFactory)
+            .taskStore(EmptyTaskStore.INSTANCE)
+            .user(new User(username.username(), false))
+            .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
+            .userLogStore(EmptyUserLogStore.INSTANCE)
             .build();
         var graphStoreCatalogService = new GraphStoreCatalogService();
 

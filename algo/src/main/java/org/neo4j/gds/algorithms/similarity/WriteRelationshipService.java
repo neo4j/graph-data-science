@@ -54,13 +54,13 @@ public class WriteRelationshipService {
         return Neo4jDatabaseRelationshipWriter.writeRelationship(
             writeRelationshipType,
             writeProperty,
-            requestScopedDependencies.getTaskRegistryFactory(),
+            requestScopedDependencies.taskRegistryFactory(),
             writeContext.relationshipExporterBuilder(),
             graph,
             rootIdMap,
             log,
             taskName,
-            requestScopedDependencies.getTerminationFlag(),
+            requestScopedDependencies.terminationFlag(),
             resultStore,
             relationshipWithPropertyConsumer,
             jobId

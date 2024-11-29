@@ -431,8 +431,8 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
      */
     private static AlgorithmsProcedureFacade createAlgorithmsProcedureFacade() {
         var requestScopedDependencies = RequestScopedDependencies.builder()
-            .with(TerminationFlag.RUNNING_TRUE)
-            .with(User.DEFAULT)
+            .terminationFlag(TerminationFlag.RUNNING_TRUE)
+            .user(User.DEFAULT)
             .build();
 
         var applicationsFacade = ApplicationsFacade.create(
@@ -453,7 +453,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
             null,
             null
         );
-        var configurationParser = new UserSpecificConfigurationParser(new  ConfigurationParser(null, null),requestScopedDependencies.getUser());
+        var configurationParser = new UserSpecificConfigurationParser(new  ConfigurationParser(null, null),requestScopedDependencies.user());
         var genericStub = new GenericStub(configurationParser, null);
         var centralityProcedureFacade = LocalCentralityProcedureFacade.create(
             genericStub,

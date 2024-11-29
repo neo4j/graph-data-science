@@ -20,9 +20,9 @@
 package org.neo4j.gds.algorithms.someotherpackage;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.User;
+import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -31,13 +31,13 @@ class RequestScopedDependenciesTest {
     @Test
     void shouldBuildBespokeProducts() {
         var rsd = RequestScopedDependencies.builder()
-            .with(DatabaseId.of("IMDB"))
-            .with(TerminationFlag.STOP_RUNNING)
-            .with(new User("Colin Needham", true))
+            .databaseId(DatabaseId.of("IMDB"))
+            .terminationFlag(TerminationFlag.STOP_RUNNING)
+            .user(new User("Colin Needham", true))
             .build();
 
-        assertThat(rsd.getDatabaseId()).isEqualTo(DatabaseId.of("IMDB"));
-        assertThat(rsd.getTerminationFlag()).isEqualTo(TerminationFlag.STOP_RUNNING);
-        assertThat(rsd.getUser()).isEqualTo(new User("Colin Needham", true));
+        assertThat(rsd.databaseId()).isEqualTo(DatabaseId.of("IMDB"));
+        assertThat(rsd.terminationFlag()).isEqualTo(TerminationFlag.STOP_RUNNING);
+        assertThat(rsd.user()).isEqualTo(new User("Colin Needham", true));
     }
 }

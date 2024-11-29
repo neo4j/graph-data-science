@@ -106,7 +106,7 @@ class ShortestPathWriteStep<CONFIGURATION extends WriteRelationshipConfig & Writ
                 RelationshipStreamExporter.baseTask("Write shortest Paths"),
                 log,
                 new Concurrency(1),
-                requestScopedDependencies.getTaskRegistryFactory()
+                requestScopedDependencies.taskRegistryFactory()
             );
 
             var maybeResultStore = configuration.resolveResultStore(resultStore);
@@ -124,7 +124,7 @@ class ShortestPathWriteStep<CONFIGURATION extends WriteRelationshipConfig & Writ
                 .withIdMappingOperator(graph::toOriginalNodeId)
                 .withProgressTracker(progressTracker)
                 .withRelationships(maybeCollectedStream)
-                .withTerminationFlag(requestScopedDependencies.getTerminationFlag())
+                .withTerminationFlag(requestScopedDependencies.terminationFlag())
                 .withJobId(configuration.jobId())
                 .build();
 

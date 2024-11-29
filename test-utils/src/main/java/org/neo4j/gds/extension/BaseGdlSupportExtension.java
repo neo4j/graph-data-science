@@ -52,7 +52,8 @@ import static org.neo4j.gds.extension.ExtensionUtil.injectInstance;
 
 public abstract class BaseGdlSupportExtension {
 
-    public static final DatabaseId DATABASE_ID = DatabaseId.of("GDL");
+    static final String DATABASE_NAME = "GDL";
+    public static final DatabaseId DATABASE_ID = DatabaseId.of(DATABASE_NAME);
 
     void beforeAction(ExtensionContext context) {
         Class<?> requiredTestClass = context.getRequiredTestClass();
@@ -113,6 +114,7 @@ public abstract class BaseGdlSupportExtension {
                 .indexInverse(annotation.indexInverse())
                 .idOffset(annotation.idOffset())
                 .addToCatalog(annotation.addToCatalog())
+                .databaseId(DatabaseId.of(annotation.databaseName()))
                 .build()
             );
     }
@@ -137,7 +139,7 @@ public abstract class BaseGdlSupportExtension {
             .builder()
             .nodeIdFunction(nodeIdFunction)
             .graphProjectConfig(graphProjectConfig)
-            .databaseId(DATABASE_ID)
+            .databaseId(gdlGraphSetup.databaseId())
             .build();
 
         GraphDimensions dimensions = gdlFactory.dimensions();
@@ -198,5 +200,8 @@ public abstract class BaseGdlSupportExtension {
         default boolean addToCatalog() {
             return false;
         }
+
+        @Value.Auxiliary
+        DatabaseId databaseId();
     }
 }
