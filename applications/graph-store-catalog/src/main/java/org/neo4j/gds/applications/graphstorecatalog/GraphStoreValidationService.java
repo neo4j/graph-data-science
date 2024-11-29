@@ -44,7 +44,7 @@ public class GraphStoreValidationService {
     /**
      * @throws java.lang.IllegalArgumentException if at least one key in the list of node properties is not present in the graph store
      */
-    void ensureNodePropertiesExist(GraphStore graphStore, Collection<String> nodeProperties) {
+    public void ensureNodePropertiesExist(GraphStore graphStore, Collection<String> nodeProperties) {
         var invalidProperties = nodeProperties.stream()
             .filter(nodeProperty -> !graphStore.hasNodeProperty(nodeProperty))
             .collect(Collectors.toList());
@@ -58,7 +58,7 @@ public class GraphStoreValidationService {
         }
     }
 
-    List<String> filterExistingNodeProperties(GraphStore graphStore, Collection<String> nodeProperties) {
+    public List<String> filterExistingNodeProperties(GraphStore graphStore, Collection<String> nodeProperties) {
         return nodeProperties.stream()
             .filter(graphStore::hasNodeProperty)
             .toList();
