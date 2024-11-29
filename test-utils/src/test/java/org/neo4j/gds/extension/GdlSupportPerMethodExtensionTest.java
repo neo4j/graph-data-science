@@ -20,6 +20,7 @@
 package org.neo4j.gds.extension;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.api.GraphStore;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -33,6 +34,7 @@ class GdlSupportPerMethodExtensionTest {
     @Inject
     private IdFunction idOffsetIdFunction;
 
+
     @Test
     void testIdOffset() {
         assertThat(idOffsetGraph.nodeCount()).isEqualTo(2L);
@@ -41,5 +43,25 @@ class GdlSupportPerMethodExtensionTest {
         assertThat(idOffsetIdFunction.of("b")).isEqualTo(43L);
         assertThat(idOffsetGraph.toMappedNodeId(42L)).isEqualTo(0L);
         assertThat(idOffsetGraph.toMappedNodeId(43L)).isEqualTo(1L);
+    }
+
+    @GdlGraph(graphNamePrefix = "withoutDatabase")
+    public static final String WITHOUT_DATABASE_GRAPH = "(a)-[:REL]->(b)";
+    @Inject
+    private GraphStore withoutDatabaseGraphStore;
+
+    @Test
+    void withoutDatabaseName() {
+        assertThat(withoutDatabaseGraphStore.databaseInfo().databaseId().databaseName()).isEqualTo("gdl");
+    }
+
+    @GdlGraph(graphNamePrefix = "withDatabase", databaseName = "foobar")
+    public static final String WITH_DATABASE_GRAPH = "(a)-[:REL]->(b)";
+    @Inject
+    private GraphStore withDatabaseGraphStore;
+
+    @Test
+    void withDatabaseName() {
+        assertThat(withDatabaseGraphStore.databaseInfo().databaseId().databaseName()).isEqualTo("foobar");
     }
 }
