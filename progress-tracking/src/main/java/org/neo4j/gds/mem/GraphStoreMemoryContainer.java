@@ -44,10 +44,13 @@ class GraphStoreMemoryContainer {
     }
 
     long removeGraph(GraphStoreRemovedEvent graphStoreRemovedEvent){
-        var graphMemoryToRemove = graphStoreRemovedEvent.memoryInBytes();
-        var graphsMemoryAfterRemoval = graphStoreReservedMemory.addAndGet(-graphMemoryToRemove);
-        graphStoresMemory.get(graphStoreRemovedEvent.user()).remove(graphStoreRemovedEvent.graphName());
-        return  graphsMemoryAfterRemoval;
+      //TODO: for more effective progress tracking
+        //var graphMemoryToRemove = graphStoreRemovedEvent.memoryInBytes();
+        var graphMemoryToRemove=  graphStoresMemory.get(graphStoreRemovedEvent.user()).remove(graphStoreRemovedEvent.graphName());
+        if (graphMemoryToRemove==null) {
+            return graphStoreReservedMemory.get();
+        }
+        return  graphStoreReservedMemory.addAndGet(-graphMemoryToRemove);
     }
 
     long graphStoreReservedMemory(){
