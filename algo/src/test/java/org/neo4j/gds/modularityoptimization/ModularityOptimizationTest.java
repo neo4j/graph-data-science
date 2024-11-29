@@ -180,8 +180,12 @@ class ModularityOptimizationTest {
         int minBatchSize,
         Log log
     ) {
-        var task = ModularityOptimizationFactory.progressTask(graph, maxIterations);
-        var progressTracker = new TestProgressTracker(task, log, concurrency, EmptyTaskRegistryFactory.INSTANCE);
+        var progressTask = ModularityOptimizationProgressTrackerTaskCreator.progressTask(
+            graph.nodeCount(),
+            graph.relationshipCount(),
+            maxIterations
+        );
+        var progressTracker = new TestProgressTracker(progressTask, log, concurrency, EmptyTaskRegistryFactory.INSTANCE);
         return new ModularityOptimization(
             graph,
             maxIterations,

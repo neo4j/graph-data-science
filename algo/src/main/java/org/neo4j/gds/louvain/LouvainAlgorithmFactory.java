@@ -26,7 +26,7 @@ import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
-import org.neo4j.gds.modularityoptimization.ModularityOptimizationFactory;
+import org.neo4j.gds.modularityoptimization.ModularityOptimizationProgressTrackerTaskCreator;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
@@ -62,9 +62,15 @@ public class LouvainAlgorithmFactory<CONFIG extends LouvainBaseConfig> extends G
     }
 
     public Task progressTask(Graph graph, int maxIterations, int maxLevels) {
+        var progressTask = ModularityOptimizationProgressTrackerTaskCreator.progressTask(
+            graph.nodeCount(),
+            graph.relationshipCount(),
+            maxIterations
+        );
+
         return Tasks.iterativeDynamic(
             taskName(),
-            () -> List.of(ModularityOptimizationFactory.progressTask(graph, maxIterations)),
+            () -> List.of(progressTask),
             maxLevels
         );
     }
