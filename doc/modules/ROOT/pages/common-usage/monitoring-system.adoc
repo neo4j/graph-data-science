@@ -121,7 +121,7 @@ This procedure can help a user realize which of his operations might be memory d
 
 A user can access only his own graphs or tasks, but an admin can obtain information for all users.
 
-[[syntax]]
+[[mem-reporting-syntax]]
 ==== Syntax
 .List the graphs and tasks of a user along with their memory footprint.
 [source, cypher, role=noplay]
@@ -173,7 +173,7 @@ The `gds.listMemory.summary` procedure provides an overview of the total graph m
 
 A user can access only his own graphs or tasks, but an admin can obtain information for all users.
 
-[[syntax]]
+[[mem-summary-syntax]]
 ==== Syntax
 .List the graphs and tasks of a user along with their memory footprint.
 [source, cypher, role=noplay]

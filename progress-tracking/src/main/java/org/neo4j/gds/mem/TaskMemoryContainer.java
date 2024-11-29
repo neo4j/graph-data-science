@@ -44,9 +44,13 @@ class TaskMemoryContainer {
     }
 
     long removeTask(UserTask task){
-         var mem=  memoryInUse.getOrDefault(task.username(), EMPTY_HASH_MAP).remove(task.jobId()).getRight();
-         allocatedMemory.addAndGet(-mem);
-         return  mem;
+            var memPair=  memoryInUse.getOrDefault(task.username(), EMPTY_HASH_MAP).remove(task.jobId());
+            if (memPair !=null){
+                var mem = memPair.getRight();
+                 allocatedMemory.addAndGet(-mem);
+                return mem;
+            }
+            return allocatedMemory.get();
     }
 
     long taskReservedMemory(){
