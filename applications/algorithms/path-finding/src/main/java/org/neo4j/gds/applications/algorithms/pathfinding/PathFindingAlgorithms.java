@@ -42,7 +42,7 @@ import org.neo4j.gds.dag.longestPath.DagLongestPath;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSort;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortBaseConfig;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortResult;
-import org.neo4j.gds.degree.DegreeCentralityFactory;
+import org.neo4j.gds.degree.DegreeCentralityTask;
 import org.neo4j.gds.kspanningtree.KSpanningTree;
 import org.neo4j.gds.kspanningtree.KSpanningTreeBaseConfig;
 import org.neo4j.gds.paths.astar.AStar;
@@ -249,7 +249,7 @@ public class PathFindingAlgorithms {
     Stream<long[]> randomWalk(Graph graph, RandomWalkBaseConfig configuration) {
         var tasks = new ArrayList<Task>();
         if (graph.hasRelationshipProperty()) {
-            tasks.add(DegreeCentralityFactory.degreeCentralityProgressTask(graph));
+            tasks.add(DegreeCentralityTask.create(graph));
         }
         tasks.add(Tasks.leaf("create walks", graph.nodeCount()));
         var task = Tasks.task(AlgorithmLabel.RandomWalk.asString(), tasks);
@@ -297,7 +297,7 @@ public class PathFindingAlgorithms {
     HugeAtomicLongArray randomWalkCountingNodeVisits(Graph graph, RandomWalkBaseConfig configuration) {
         var tasks = new ArrayList<Task>();
         if (graph.hasRelationshipProperty()) {
-            tasks.add(DegreeCentralityFactory.degreeCentralityProgressTask(graph));
+            tasks.add(DegreeCentralityTask.create(graph));
         }
         Task task;
         if (tasks.isEmpty()) {

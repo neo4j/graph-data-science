@@ -156,7 +156,7 @@ final class DegreeCentralityTest {
         var concurrency = new Concurrency(4);
         var orientation = Orientation.NATURAL;
 
-        var progressTask = DegreeCentralityFactory.degreeCentralityProgressTask(graph);
+        var progressTask = DegreeCentralityTask.create(graph);
         var log = new GdsTestLog();
         var progressTracker = new TestProgressTracker(progressTask, log, new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE);
         var degreeCentrality = new DegreeCentrality(

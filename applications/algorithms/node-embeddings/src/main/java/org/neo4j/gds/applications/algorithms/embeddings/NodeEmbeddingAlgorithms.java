@@ -29,7 +29,7 @@ import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
-import org.neo4j.gds.degree.DegreeCentralityFactory;
+import org.neo4j.gds.degree.DegreeCentralityTask;
 import org.neo4j.gds.embeddings.fastrp.FastRP;
 import org.neo4j.gds.embeddings.fastrp.FastRPBaseConfig;
 import org.neo4j.gds.embeddings.fastrp.FastRPConfigTransformer;
@@ -284,7 +284,7 @@ public class NodeEmbeddingAlgorithms {
     private Task createNode2VecTask(Graph graph, Node2VecBaseConfig configuration) {
         var randomWalkTasks = new ArrayList<Task>();
         if (graph.hasRelationshipProperty()) {
-            randomWalkTasks.add(DegreeCentralityFactory.degreeCentralityProgressTask(graph));
+            randomWalkTasks.add(DegreeCentralityTask.create(graph));
         }
         randomWalkTasks.add(Tasks.leaf("create walks", graph.nodeCount()));
 

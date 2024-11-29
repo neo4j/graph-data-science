@@ -19,8 +19,14 @@
  */
 package org.neo4j.gds.degree;
 
-final class Constants {
-    static final String DEGREE_CENTRALITY_DESCRIPTION = "Degree centrality measures the number of incoming and outgoing relationships from a node.";
+import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
-    private Constants() {}
+public final class DegreeCentralityTask {
+    private DegreeCentralityTask() {}
+
+    public static Task create(IdMap idMap) {
+        return Tasks.leaf("DegreeCentrality", idMap.nodeCount());
+    }
 }
