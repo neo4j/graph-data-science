@@ -57,7 +57,7 @@ public final class SimilarityApplications {
         WriteContext writeContext
     ) {
         var estimationModeFacade = new SimilarityAlgorithmsEstimationModeBusinessFacade(algorithmEstimationTemplate);
-        var similarityAlgorithms = new SimilarityAlgorithms(progressTrackerCreator, requestScopedDependencies.getTerminationFlag());
+        var similarityAlgorithms = new SimilarityAlgorithms(progressTrackerCreator, requestScopedDependencies.terminationFlag());
 
         var mutateModeFacade = new SimilarityAlgorithmsMutateModeBusinessFacade(
             log,

@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.applications.algorithms.machinery;
 
+import org.neo4j.gds.annotation.GenerateBuilder;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.User;
@@ -32,143 +33,18 @@ import org.neo4j.gds.termination.TerminationFlag;
  * This is a handy class for transporting similarly scoped dependencies through layers.
  * And especially useful when that list grows or shrinks - fewer sites to edit innit.
  */
-public final class RequestScopedDependencies {
-    private final DatabaseId databaseId;
-    private final GraphLoaderContext graphLoaderContext;
-    private final TaskRegistryFactory taskRegistryFactory;
-    private final TaskStore taskStore;
-    private final TerminationFlag terminationFlag;
-    private final User user;
-    private final UserLogRegistryFactory userLogRegistryFactory;
-    private final UserLogStore userLogStore;
-
-    /**
-     * Over-doing it with a private constructor?
-     * <p>
-     * I just really like the <code>RequestScopedDependencies.builder().build()</code> form
-     */
-    private RequestScopedDependencies(
-        DatabaseId databaseId,
-        GraphLoaderContext graphLoaderContext,
-        TaskRegistryFactory taskRegistryFactory,
-        TaskStore taskStore,
-        TerminationFlag terminationFlag,
-        User user,
-        UserLogRegistryFactory userLogRegistryFactory,
-        UserLogStore userLogStore
-    ) {
-        this.databaseId = databaseId;
-        this.graphLoaderContext = graphLoaderContext;
-        this.taskRegistryFactory = taskRegistryFactory;
-        this.taskStore = taskStore;
-        this.terminationFlag = terminationFlag;
-        this.user = user;
-        this.userLogRegistryFactory = userLogRegistryFactory;
-        this.userLogStore = userLogStore;
-    }
-
+@GenerateBuilder
+public record RequestScopedDependencies(
+    DatabaseId databaseId,
+    GraphLoaderContext graphLoaderContext,
+    TaskRegistryFactory taskRegistryFactory,
+    TaskStore taskStore,
+    TerminationFlag terminationFlag,
+    User user,
+    UserLogRegistryFactory userLogRegistryFactory,
+    UserLogStore userLogStore
+) {
     public static RequestScopedDependenciesBuilder builder() {
-        return new RequestScopedDependenciesBuilder();
-    }
-
-    public DatabaseId getDatabaseId() {
-        return databaseId;
-    }
-
-    public GraphLoaderContext getGraphLoaderContext() {
-        return graphLoaderContext;
-    }
-
-    public TaskRegistryFactory getTaskRegistryFactory() {
-        return taskRegistryFactory;
-    }
-
-    public TaskStore getTaskStore() {
-        return taskStore;
-    }
-
-    public TerminationFlag getTerminationFlag() {
-        return terminationFlag;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public UserLogRegistryFactory getUserLogRegistryFactory() {
-        return userLogRegistryFactory;
-    }
-
-    public UserLogStore getUserLogStore() {
-        return userLogStore;
-    }
-
-    /**
-     * A handy builder where you can include as many or as few components as you are interested in.
-     * We deliberately do not have defaults,
-     * because trying to reconcile convenience across all usages is an error-prone form of coupling.
-     */
-    public static class RequestScopedDependenciesBuilder {
-        private DatabaseId databaseId;
-        private GraphLoaderContext graphLoaderContext;
-        private TerminationFlag terminationFlag;
-        private TaskRegistryFactory taskRegistryFactory;
-        private TaskStore taskStore;
-        private User user;
-        private UserLogRegistryFactory userLogRegistryFactory;
-        private UserLogStore userLogStore;
-
-        public RequestScopedDependenciesBuilder with(DatabaseId databaseId) {
-            this.databaseId = databaseId;
-            return this;
-        }
-
-        public RequestScopedDependenciesBuilder with(GraphLoaderContext graphLoaderContext) {
-            this.graphLoaderContext = graphLoaderContext;
-            return this;
-        }
-
-        public RequestScopedDependenciesBuilder with(TaskRegistryFactory taskRegistryFactory) {
-            this.taskRegistryFactory = taskRegistryFactory;
-            return this;
-        }
-
-        public RequestScopedDependenciesBuilder with(TaskStore taskStore) {
-            this.taskStore = taskStore;
-            return this;
-        }
-
-        public RequestScopedDependenciesBuilder with(TerminationFlag terminationFlag) {
-            this.terminationFlag = terminationFlag;
-            return this;
-        }
-
-        public RequestScopedDependenciesBuilder with(User user) {
-            this.user = user;
-            return this;
-        }
-
-        public RequestScopedDependenciesBuilder with(UserLogRegistryFactory userLogRegistryFactory) {
-            this.userLogRegistryFactory = userLogRegistryFactory;
-            return this;
-        }
-
-        public RequestScopedDependenciesBuilder with(UserLogStore userLogStore) {
-            this.userLogStore = userLogStore;
-            return this;
-        }
-
-        public RequestScopedDependencies build() {
-            return new RequestScopedDependencies(
-                databaseId,
-                graphLoaderContext,
-                taskRegistryFactory,
-                taskStore,
-                terminationFlag,
-                user,
-                userLogRegistryFactory,
-                userLogStore
-            );
-        }
+        return RequestScopedDependenciesBuilder.builder();
     }
 }

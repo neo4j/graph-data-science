@@ -41,8 +41,8 @@ class LocalOperationsProcedureFacadeTest {
         var operationsApplications = OperationsApplications.create(
             null,
             RequestScopedDependencies.builder()
-                .with(new User("current user", false))
-                .with(userLogStore)
+                .user(new User("current user", false))
+                .userLogStore(userLogStore)
                 .build()
         );
         var applicationsFacade = mock(ApplicationsFacade.class);

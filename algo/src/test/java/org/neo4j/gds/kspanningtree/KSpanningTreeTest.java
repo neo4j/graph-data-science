@@ -272,9 +272,9 @@ class KSpanningTreeTest {
     void shouldLogProgress() {
         var log = new GdsTestLog();
         var requestScopedDependencies = RequestScopedDependencies.builder()
-            .with(EmptyTaskRegistryFactory.INSTANCE)
-            .with(TerminationFlag.RUNNING_TRUE)
-            .with(EmptyUserLogRegistryFactory.INSTANCE)
+            .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
+            .terminationFlag(TerminationFlag.RUNNING_TRUE)
+            .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
             .build();
         var progressTrackerCreator = new ProgressTrackerCreator(log, requestScopedDependencies);
         var pathFindingAlgorithms = new PathFindingAlgorithms(requestScopedDependencies, progressTrackerCreator);

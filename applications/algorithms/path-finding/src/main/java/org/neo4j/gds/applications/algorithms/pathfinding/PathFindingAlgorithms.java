@@ -151,7 +151,7 @@ public class PathFindingAlgorithms {
             graph,
             configuration,
             progressTracker,
-            requestScopedDependencies.getTerminationFlag()
+            requestScopedDependencies.terminationFlag()
         );
     }
 
@@ -188,7 +188,7 @@ public class PathFindingAlgorithms {
             graph,
             configuration,
             progressTracker,
-            requestScopedDependencies.getTerminationFlag()
+            requestScopedDependencies.terminationFlag()
         );
     }
 
@@ -214,7 +214,7 @@ public class PathFindingAlgorithms {
             graph.toMappedNodeId(parameters.sourceNode()),
             parameters.k(),
             progressTracker,
-            requestScopedDependencies.getTerminationFlag()
+            requestScopedDependencies.terminationFlag()
         );
 
         return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
@@ -235,7 +235,7 @@ public class PathFindingAlgorithms {
             graph,
             progressTracker,
             configuration.concurrency(),
-            requestScopedDependencies.getTerminationFlag()
+            requestScopedDependencies.terminationFlag()
         );
 
         return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
@@ -264,7 +264,7 @@ public class PathFindingAlgorithms {
             configuration.randomSeed(),
             progressTracker,
             DefaultPool.INSTANCE,
-            requestScopedDependencies.getTerminationFlag()
+            requestScopedDependencies.terminationFlag()
         );
 
         return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
@@ -316,7 +316,7 @@ public class PathFindingAlgorithms {
             configuration.randomSeed(),
             progressTracker,
             DefaultPool.INSTANCE,
-            requestScopedDependencies.getTerminationFlag()
+            requestScopedDependencies.terminationFlag()
         );
 
         return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
@@ -337,7 +337,7 @@ public class PathFindingAlgorithms {
             graph,
             configuration,
             progressTracker,
-            requestScopedDependencies.getTerminationFlag()
+            requestScopedDependencies.terminationFlag()
         );
 
         return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
@@ -367,7 +367,7 @@ public class PathFindingAlgorithms {
             false,
             Optional.empty(),
             progressTracker,
-            requestScopedDependencies.getTerminationFlag()
+            requestScopedDependencies.terminationFlag()
         );
 
         return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
@@ -401,7 +401,7 @@ public class PathFindingAlgorithms {
             configuration,
             configuration.concurrency(),
             progressTracker,
-            requestScopedDependencies.getTerminationFlag()
+            requestScopedDependencies.terminationFlag()
         );
 
         return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
@@ -424,7 +424,7 @@ public class PathFindingAlgorithms {
             false,
             Optional.empty(),
             progressTracker,
-            requestScopedDependencies.getTerminationFlag()
+            requestScopedDependencies.terminationFlag()
         );
 
         return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
@@ -452,7 +452,7 @@ public class PathFindingAlgorithms {
             parameters.objective(),
             graph.toMappedNodeId(parameters.sourceNode()),
             progressTracker,
-            requestScopedDependencies.getTerminationFlag()
+            requestScopedDependencies.terminationFlag()
         );
 
         return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
@@ -490,7 +490,7 @@ public class PathFindingAlgorithms {
             parameters.applyRerouting(),
             DefaultPool.INSTANCE,
             progressTracker,
-            requestScopedDependencies.getTerminationFlag()
+            requestScopedDependencies.terminationFlag()
         );
 
         return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
@@ -515,7 +515,7 @@ public class PathFindingAlgorithms {
             progressTracker,
             configuration.concurrency(),
             configuration.computeMaxDistanceFromSource(),
-            requestScopedDependencies.getTerminationFlag()
+            requestScopedDependencies.terminationFlag()
         );
 
         return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
@@ -532,14 +532,14 @@ public class PathFindingAlgorithms {
                 graph,
                 DefaultPool.INSTANCE,
                 configuration.concurrency(),
-                requestScopedDependencies.getTerminationFlag()
+                requestScopedDependencies.terminationFlag()
             );
         } else {
             return new MSBFSAllShortestPaths(
                 graph,
                 configuration.concurrency(),
                 DefaultPool.INSTANCE,
-                requestScopedDependencies.getTerminationFlag()
+                requestScopedDependencies.terminationFlag()
             );
         }
     }

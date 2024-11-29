@@ -71,8 +71,8 @@ class GraphCatalogProcedureFacadeTest {
         var businessFacade = mock(GraphCatalogApplications.class);
         var catalogFacade = new LocalGraphCatalogProcedureFacade(
             RequestScopedDependencies.builder()
-                .with(DatabaseId.of("current database"))
-                .with(new User("current user", false))
+                .databaseId(DatabaseId.of("current database"))
+                .user(new User("current user", false))
                 .build(),
             null,
             null,
@@ -98,10 +98,10 @@ class GraphCatalogProcedureFacadeTest {
         var procedureReturnColumns = mock(ProcedureReturnColumns.class);
         var businessFacade = mock(GraphCatalogApplications.class);
 
-        var procedureContext =  WriteContext.builder().build();
+        var procedureContext = WriteContext.builder().build();
         var catalogFacade = new LocalGraphCatalogProcedureFacade(
             RequestScopedDependencies.builder()
-                .with(new User("Bob", false))
+                .user(new User("Bob", false))
                 .build(),
             null,
             null,
@@ -134,11 +134,11 @@ class GraphCatalogProcedureFacadeTest {
     void shouldListGraphsWithDegreeDistribution() {
         var procedureReturnColumns = mock(ProcedureReturnColumns.class);
         var businessFacade = mock(GraphCatalogApplications.class);
-        var procedureContext =  WriteContext.builder().build();
+        var procedureContext = WriteContext.builder().build();
 
         var catalogFacade = new LocalGraphCatalogProcedureFacade(
             RequestScopedDependencies.builder()
-                .with(new User("Bob", false))
+                .user(new User("Bob", false))
                 .build(),
             null,
             null,
@@ -183,11 +183,11 @@ class GraphCatalogProcedureFacadeTest {
     void shouldListGraphsWithoutMemoryUsage() {
         var procedureReturnColumns = mock(ProcedureReturnColumns.class);
         var businessFacade = mock(GraphCatalogApplications.class);
-        var procedureContext =  WriteContext.builder().build();
+        var procedureContext = WriteContext.builder().build();
 
         var catalogFacade = new LocalGraphCatalogProcedureFacade(
             RequestScopedDependencies.builder()
-                .with(new User("Bob", false))
+                .user(new User("Bob", false))
                 .build(),
             null,
             null,
@@ -223,11 +223,11 @@ class GraphCatalogProcedureFacadeTest {
     void shouldListGraphsWithMemoryUsage(String returnColumn) {
         var procedureReturnColumns = mock(ProcedureReturnColumns.class);
         var businessFacade = mock(GraphCatalogApplications.class);
-        var procedureContext =  WriteContext.builder().build();
+        var procedureContext = WriteContext.builder().build();
 
         var catalogFacade = new LocalGraphCatalogProcedureFacade(
             RequestScopedDependencies.builder()
-                .with(new User("Bob", false))
+                .user(new User("Bob", false))
                 .build(),
             null,
             null,

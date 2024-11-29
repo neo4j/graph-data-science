@@ -127,8 +127,8 @@ public class LocalGraphCatalogProcedureFacade implements GraphCatalogProcedureFa
     @Override
     public boolean graphExists(String graphName) {
         return catalog.graphExists(
-            requestScopedDependencies.getUser(),
-            requestScopedDependencies.getDatabaseId(),
+            requestScopedDependencies.user(),
+            requestScopedDependencies.databaseId(),
             graphName
         );
     }
@@ -151,8 +151,8 @@ public class LocalGraphCatalogProcedureFacade implements GraphCatalogProcedureFa
             failIfMissing,
             databaseName,
             username,
-            requestScopedDependencies.getDatabaseId(),
-            requestScopedDependencies.getUser()
+            requestScopedDependencies.databaseId(),
+            requestScopedDependencies.user()
         );
 
         // we convert here from domain type to Neo4j display type
@@ -169,10 +169,10 @@ public class LocalGraphCatalogProcedureFacade implements GraphCatalogProcedureFa
         var displayDegreeDistribution = procedureReturnColumns.contains("degreeDistribution");
 
         var results = catalog.listGraphs(
-            requestScopedDependencies.getUser(),
+            requestScopedDependencies.user(),
             graphName,
             displayDegreeDistribution,
-            requestScopedDependencies.getTerminationFlag()
+            requestScopedDependencies.terminationFlag()
         );
 
         // we convert here from domain type to Neo4j display type
@@ -194,14 +194,14 @@ public class LocalGraphCatalogProcedureFacade implements GraphCatalogProcedureFa
         Map<String, Object> configuration
     ) {
         var result = catalog.nativeProject(
-            requestScopedDependencies.getUser(),
-            requestScopedDependencies.getDatabaseId(),
+            requestScopedDependencies.user(),
+            requestScopedDependencies.databaseId(),
             graphDatabaseService,
             graphProjectMemoryUsageService,
-            requestScopedDependencies.getTaskRegistryFactory(),
-            requestScopedDependencies.getTerminationFlag(),
+            requestScopedDependencies.taskRegistryFactory(),
+            requestScopedDependencies.terminationFlag(),
             transactionContext,
-            requestScopedDependencies.getUserLogRegistryFactory(),
+            requestScopedDependencies.userLogRegistryFactory(),
             graphName,
             nodeProjection,
             relationshipProjection,
@@ -219,12 +219,12 @@ public class LocalGraphCatalogProcedureFacade implements GraphCatalogProcedureFa
         Map<String, Object> configuration
     ) {
         var result = catalog.estimateNativeProject(
-            requestScopedDependencies.getDatabaseId(),
+            requestScopedDependencies.databaseId(),
             graphProjectMemoryUsageService,
-            requestScopedDependencies.getTaskRegistryFactory(),
-            requestScopedDependencies.getTerminationFlag(),
+            requestScopedDependencies.taskRegistryFactory(),
+            requestScopedDependencies.terminationFlag(),
             transactionContext,
-            requestScopedDependencies.getUserLogRegistryFactory(),
+            requestScopedDependencies.userLogRegistryFactory(),
             nodeProjection,
             relationshipProjection,
             configuration
@@ -241,14 +241,14 @@ public class LocalGraphCatalogProcedureFacade implements GraphCatalogProcedureFa
         Map<String, Object> configuration
     ) {
         var result = catalog.cypherProject(
-            requestScopedDependencies.getUser(),
-            requestScopedDependencies.getDatabaseId(),
+            requestScopedDependencies.user(),
+            requestScopedDependencies.databaseId(),
             graphDatabaseService,
             graphProjectMemoryUsageService,
-            requestScopedDependencies.getTaskRegistryFactory(),
-            requestScopedDependencies.getTerminationFlag(),
+            requestScopedDependencies.taskRegistryFactory(),
+            requestScopedDependencies.terminationFlag(),
             transactionContext,
-            requestScopedDependencies.getUserLogRegistryFactory(),
+            requestScopedDependencies.userLogRegistryFactory(),
             graphName,
             nodeQuery,
             relationshipQuery,
@@ -265,12 +265,12 @@ public class LocalGraphCatalogProcedureFacade implements GraphCatalogProcedureFa
         Map<String, Object> configuration
     ) {
         var result = catalog.estimateCypherProject(
-            requestScopedDependencies.getDatabaseId(),
+            requestScopedDependencies.databaseId(),
             graphProjectMemoryUsageService,
-            requestScopedDependencies.getTaskRegistryFactory(),
-            requestScopedDependencies.getTerminationFlag(),
+            requestScopedDependencies.taskRegistryFactory(),
+            requestScopedDependencies.terminationFlag(),
             transactionContext,
-            requestScopedDependencies.getUserLogRegistryFactory(),
+            requestScopedDependencies.userLogRegistryFactory(),
             nodeQuery,
             relationshipQuery,
             configuration
@@ -288,10 +288,10 @@ public class LocalGraphCatalogProcedureFacade implements GraphCatalogProcedureFa
         Map<String, Object> configuration
     ) {
         var result = catalog.subGraphProject(
-            requestScopedDependencies.getUser(),
-            requestScopedDependencies.getDatabaseId(),
-            requestScopedDependencies.getTaskRegistryFactory(),
-            requestScopedDependencies.getUserLogRegistryFactory(),
+            requestScopedDependencies.user(),
+            requestScopedDependencies.databaseId(),
+            requestScopedDependencies.taskRegistryFactory(),
+            requestScopedDependencies.userLogRegistryFactory(),
             graphName,
             originGraphName,
             nodeFilter,
@@ -305,8 +305,8 @@ public class LocalGraphCatalogProcedureFacade implements GraphCatalogProcedureFa
     @Override
     public Stream<GraphMemoryUsage> sizeOf(String graphName) {
         var result = catalog.sizeOf(
-            requestScopedDependencies.getUser(),
-            requestScopedDependencies.getDatabaseId(),
+            requestScopedDependencies.user(),
+            requestScopedDependencies.databaseId(),
             graphName
         );
 
@@ -320,10 +320,10 @@ public class LocalGraphCatalogProcedureFacade implements GraphCatalogProcedureFa
         Map<String, Object> configuration
     ) {
         var result = catalog.dropNodeProperties(
-            requestScopedDependencies.getUser(),
-            requestScopedDependencies.getDatabaseId(),
-            requestScopedDependencies.getTaskRegistryFactory(),
-            requestScopedDependencies.getUserLogRegistryFactory(),
+            requestScopedDependencies.user(),
+            requestScopedDependencies.databaseId(),
+            requestScopedDependencies.taskRegistryFactory(),
+            requestScopedDependencies.userLogRegistryFactory(),
             graphName,
             nodeProperties,
             configuration
@@ -338,10 +338,10 @@ public class LocalGraphCatalogProcedureFacade implements GraphCatalogProcedureFa
         String relationshipType
     ) {
         var result = catalog.dropRelationships(
-            requestScopedDependencies.getUser(),
-            requestScopedDependencies.getDatabaseId(),
-            requestScopedDependencies.getTaskRegistryFactory(),
-            requestScopedDependencies.getUserLogRegistryFactory(),
+            requestScopedDependencies.user(),
+            requestScopedDependencies.databaseId(),
+            requestScopedDependencies.taskRegistryFactory(),
+            requestScopedDependencies.userLogRegistryFactory(),
             graphName,
             relationshipType
         );
@@ -356,8 +356,8 @@ public class LocalGraphCatalogProcedureFacade implements GraphCatalogProcedureFa
         Map<String, Object> configuration
     ) {
         var numberOfPropertiesRemoved = catalog.dropGraphProperty(
-            requestScopedDependencies.getUser(),
-            requestScopedDependencies.getDatabaseId(),
+            requestScopedDependencies.user(),
+            requestScopedDependencies.databaseId(),
             graphName,
             graphProperty,
             configuration
@@ -379,8 +379,8 @@ public class LocalGraphCatalogProcedureFacade implements GraphCatalogProcedureFa
         Map<String, Object> configuration
     ) {
         var result = catalog.mutateNodeLabel(
-            requestScopedDependencies.getUser(),
-            requestScopedDependencies.getDatabaseId(),
+            requestScopedDependencies.user(),
+            requestScopedDependencies.databaseId(),
             graphName,
             nodeLabel,
             configuration
@@ -396,8 +396,8 @@ public class LocalGraphCatalogProcedureFacade implements GraphCatalogProcedureFa
         Map<String, Object> configuration
     ) {
         var result = catalog.streamGraphProperty(
-            requestScopedDependencies.getUser(),
-            requestScopedDependencies.getDatabaseId(),
+            requestScopedDependencies.user(),
+            requestScopedDependencies.databaseId(),
             graphName,
             graphProperty,
             configuration
@@ -486,8 +486,8 @@ public class LocalGraphCatalogProcedureFacade implements GraphCatalogProcedureFa
         Map<String, Object> configuration
     ) {
         return catalog.streamRelationships(
-            requestScopedDependencies.getUser(),
-            requestScopedDependencies.getDatabaseId(),
+            requestScopedDependencies.user(),
+            requestScopedDependencies.databaseId(),
             graphName,
             relationshipTypes,
             configuration
@@ -502,12 +502,12 @@ public class LocalGraphCatalogProcedureFacade implements GraphCatalogProcedureFa
         Map<String, Object> configuration
     ) {
         var result = catalog.writeNodeProperties(
-            requestScopedDependencies.getUser(),
-            requestScopedDependencies.getDatabaseId(),
+            requestScopedDependencies.user(),
+            requestScopedDependencies.databaseId(),
             writeContext.nodePropertyExporterBuilder(),
-            requestScopedDependencies.getTaskRegistryFactory(),
-            requestScopedDependencies.getTerminationFlag(),
-            requestScopedDependencies.getUserLogRegistryFactory(),
+            requestScopedDependencies.taskRegistryFactory(),
+            requestScopedDependencies.terminationFlag(),
+            requestScopedDependencies.userLogRegistryFactory(),
             graphName,
             nodeProperties,
             nodeLabels,
@@ -525,10 +525,10 @@ public class LocalGraphCatalogProcedureFacade implements GraphCatalogProcedureFa
         Map<String, Object> configuration
     ) {
         var result = catalog.writeRelationshipProperties(
-            requestScopedDependencies.getUser(),
-            requestScopedDependencies.getDatabaseId(),
+            requestScopedDependencies.user(),
+            requestScopedDependencies.databaseId(),
             writeContext.relationshipPropertiesExporterBuilder(),
-            requestScopedDependencies.getTerminationFlag(),
+            requestScopedDependencies.terminationFlag(),
             graphName,
             relationshipType,
             relationshipProperties,
@@ -545,10 +545,10 @@ public class LocalGraphCatalogProcedureFacade implements GraphCatalogProcedureFa
         Map<String, Object> configuration
     ) {
         var result = catalog.writeNodeLabel(
-            requestScopedDependencies.getUser(),
-            requestScopedDependencies.getDatabaseId(),
+            requestScopedDependencies.user(),
+            requestScopedDependencies.databaseId(),
             writeContext.nodeLabelExporterBuilder(),
-            requestScopedDependencies.getTerminationFlag(),
+            requestScopedDependencies.terminationFlag(),
             graphName,
             nodeLabel,
             configuration
@@ -565,12 +565,12 @@ public class LocalGraphCatalogProcedureFacade implements GraphCatalogProcedureFa
         Map<String, Object> configuration
     ) {
         var result = catalog.writeRelationships(
-            requestScopedDependencies.getUser(),
-            requestScopedDependencies.getDatabaseId(),
+            requestScopedDependencies.user(),
+            requestScopedDependencies.databaseId(),
             writeContext.relationshipExporterBuilder(),
-            requestScopedDependencies.getTaskRegistryFactory(),
-            requestScopedDependencies.getTerminationFlag(),
-            requestScopedDependencies.getUserLogRegistryFactory(),
+            requestScopedDependencies.taskRegistryFactory(),
+            requestScopedDependencies.terminationFlag(),
+            requestScopedDependencies.userLogRegistryFactory(),
             graphName,
             relationshipType,
             relationshipProperty,
@@ -587,11 +587,11 @@ public class LocalGraphCatalogProcedureFacade implements GraphCatalogProcedureFa
         Map<String, Object> configuration
     ) {
         var result = catalog.sampleRandomWalkWithRestarts(
-            requestScopedDependencies.getUser(),
-            requestScopedDependencies.getDatabaseId(),
-            requestScopedDependencies.getTaskRegistryFactory(),
-            requestScopedDependencies.getUserLogRegistryFactory(),
-            requestScopedDependencies.getTerminationFlag(),
+            requestScopedDependencies.user(),
+            requestScopedDependencies.databaseId(),
+            requestScopedDependencies.taskRegistryFactory(),
+            requestScopedDependencies.userLogRegistryFactory(),
+            requestScopedDependencies.terminationFlag(),
             graphName,
             originGraphName,
             configuration
@@ -607,11 +607,11 @@ public class LocalGraphCatalogProcedureFacade implements GraphCatalogProcedureFa
         Map<String, Object> configuration
     ) {
         var result = catalog.sampleCommonNeighbourAwareRandomWalk(
-            requestScopedDependencies.getUser(),
-            requestScopedDependencies.getDatabaseId(),
-            requestScopedDependencies.getTaskRegistryFactory(),
-            requestScopedDependencies.getUserLogRegistryFactory(),
-            requestScopedDependencies.getTerminationFlag(),
+            requestScopedDependencies.user(),
+            requestScopedDependencies.databaseId(),
+            requestScopedDependencies.taskRegistryFactory(),
+            requestScopedDependencies.userLogRegistryFactory(),
+            requestScopedDependencies.terminationFlag(),
             graphName,
             originGraphName,
             configuration
@@ -626,8 +626,8 @@ public class LocalGraphCatalogProcedureFacade implements GraphCatalogProcedureFa
         Map<String, Object> configuration
     ) {
         var result = catalog.estimateCommonNeighbourAwareRandomWalk(
-            requestScopedDependencies.getUser(),
-            requestScopedDependencies.getDatabaseId(),
+            requestScopedDependencies.user(),
+            requestScopedDependencies.databaseId(),
             graphName,
             configuration
         );
@@ -672,8 +672,8 @@ public class LocalGraphCatalogProcedureFacade implements GraphCatalogProcedureFa
         Map<String, Object> configuration
     ) {
         var result = catalog.generateGraph(
-            requestScopedDependencies.getUser(),
-            requestScopedDependencies.getDatabaseId(),
+            requestScopedDependencies.user(),
+            requestScopedDependencies.databaseId(),
             graphName,
             nodeCount,
             averageDegree,
@@ -693,10 +693,10 @@ public class LocalGraphCatalogProcedureFacade implements GraphCatalogProcedureFa
         var usesPropertyNameColumn = procedureReturnColumns.contains("relationshipProperty");
 
         var resultStream = catalog.streamRelationshipProperties(
-            requestScopedDependencies.getUser(),
-            requestScopedDependencies.getDatabaseId(),
-            requestScopedDependencies.getTaskRegistryFactory(),
-            requestScopedDependencies.getUserLogRegistryFactory(),
+            requestScopedDependencies.user(),
+            requestScopedDependencies.databaseId(),
+            requestScopedDependencies.taskRegistryFactory(),
+            requestScopedDependencies.userLogRegistryFactory(),
             graphName,
             relationshipProperties,
             relationshipTypes,
@@ -730,10 +730,10 @@ public class LocalGraphCatalogProcedureFacade implements GraphCatalogProcedureFa
         var usesPropertyNameColumn = procedureReturnColumns.contains("nodeProperty");
 
         var resultStream = catalog.streamNodeProperties(
-            requestScopedDependencies.getUser(),
-            requestScopedDependencies.getDatabaseId(),
-            requestScopedDependencies.getTaskRegistryFactory(),
-            requestScopedDependencies.getUserLogRegistryFactory(),
+            requestScopedDependencies.user(),
+            requestScopedDependencies.databaseId(),
+            requestScopedDependencies.taskRegistryFactory(),
+            requestScopedDependencies.userLogRegistryFactory(),
             graphName,
             nodeProperties,
             nodeLabels,

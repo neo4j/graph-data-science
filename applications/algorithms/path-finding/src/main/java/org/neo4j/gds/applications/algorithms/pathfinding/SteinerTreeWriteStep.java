@@ -71,7 +71,7 @@ class SteinerTreeWriteStep implements WriteStep<SteinerTreeResult, Relationships
         var relationshipExporter = writeContext.relationshipExporterBuilder()
             .withGraph(spanningGraph)
             .withIdMappingOperator(spanningGraph::toOriginalNodeId)
-            .withTerminationFlag(requestScopedDependencies.getTerminationFlag())
+            .withTerminationFlag(requestScopedDependencies.terminationFlag())
             .withProgressTracker(ProgressTracker.NULL_TRACKER)
             .withResultStore(configuration.resolveResultStore(resultStore))
             .withJobId(configuration.jobId())

@@ -94,13 +94,13 @@ class BellmanFordWriteStep implements WriteStep<BellmanFordResult, Relationships
             RelationshipStreamExporter.baseTask("Write shortest Paths"),
             log,
             new Concurrency(1),
-            requestScopedDependencies.getTaskRegistryFactory()
+            requestScopedDependencies.taskRegistryFactory()
         );
 
         var exporter = writeContext.relationshipStreamExporterBuilder()
             .withIdMappingOperator(graph::toOriginalNodeId)
             .withRelationships(relationshipStream)
-            .withTerminationFlag(requestScopedDependencies.getTerminationFlag())
+            .withTerminationFlag(requestScopedDependencies.terminationFlag())
             .withProgressTracker(progressTracker)
             .withResultStore(configuration.resolveResultStore(resultStore))
             .withJobId(configuration.jobId())

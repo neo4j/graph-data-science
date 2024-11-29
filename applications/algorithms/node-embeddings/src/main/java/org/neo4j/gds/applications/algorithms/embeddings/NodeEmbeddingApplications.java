@@ -69,7 +69,7 @@ public final class NodeEmbeddingApplications {
         var algorithms = new NodeEmbeddingAlgorithms(
             graphSageModelCatalog,
             progressTrackerCreator,
-            requestScopedDependencies.getTerminationFlag()
+            requestScopedDependencies.terminationFlag()
         );
 
         var estimationMode = new NodeEmbeddingAlgorithmsEstimationModeBusinessFacade(

@@ -60,10 +60,10 @@ public final class CentralityApplications {
         var estimation = new CentralityAlgorithmsEstimationModeBusinessFacade(estimationTemplate);
         var algorithms = new CentralityAlgorithms(
             progressTrackerCreator,
-            requestScopedDependencies.getTerminationFlag()
+            requestScopedDependencies.terminationFlag()
         );
 
-        var hitsHookGenerator =new HitsHookGenerator(progressTrackerCreator,requestScopedDependencies.getTerminationFlag());
+        var hitsHookGenerator =new HitsHookGenerator(progressTrackerCreator,requestScopedDependencies.terminationFlag());
 
         var mutation = new CentralityAlgorithmsMutateModeBusinessFacade(
             estimation,

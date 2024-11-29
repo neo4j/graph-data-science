@@ -52,7 +52,7 @@ public final class MachineLearningApplications {
     ) {
         var algorithms = new MachineLearningAlgorithms(
             progressTrackerCreator,
-            requestScopedDependencies.getTerminationFlag()
+            requestScopedDependencies.terminationFlag()
         );
 
         var estimation = new MachineLearningAlgorithmsEstimationModeBusinessFacade();

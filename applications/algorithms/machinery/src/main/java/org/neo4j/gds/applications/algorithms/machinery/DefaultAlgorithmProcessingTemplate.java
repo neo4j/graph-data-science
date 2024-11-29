@@ -260,8 +260,8 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
                 postGraphStoreLoadValidationHooks,
                 postGraphStoreLoadETLHooks,
                 relationshipProperty,
-                requestScopedDependencies.getUser(),
-                requestScopedDependencies.getDatabaseId()
+                requestScopedDependencies.user(),
+                requestScopedDependencies.databaseId()
             );
         }
     }

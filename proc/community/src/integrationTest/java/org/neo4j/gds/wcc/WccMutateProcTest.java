@@ -582,12 +582,12 @@ class WccMutateProcTest extends BaseProcTest {
 
         var graphStoreCatalogService = new GraphStoreCatalogService();
         var requestScopedDependencies = RequestScopedDependencies.builder()
-            .with(DatabaseId.of(db.databaseName()))
-            .with(GraphLoaderContext.NULL_CONTEXT)
-            .with(TaskRegistryFactory.empty())
-            .with(TerminationFlag.RUNNING_TRUE)
-            .with(new User(getUsername(), false))
-            .with(EmptyUserLogRegistryFactory.INSTANCE)
+            .databaseId(DatabaseId.of(db.databaseName()))
+            .graphLoaderContext(GraphLoaderContext.NULL_CONTEXT)
+            .taskRegistryFactory(TaskRegistryFactory.empty())
+            .terminationFlag(TerminationFlag.RUNNING_TRUE)
+            .user(new User(getUsername(), false))
+            .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
             .build();
         var algorithmProcessingTemplate = DefaultAlgorithmProcessingTemplate.create(
             logMock,
@@ -618,7 +618,7 @@ class WccMutateProcTest extends BaseProcTest {
         var configurationParser = new UserSpecificConfigurationParser(new ConfigurationParser(
             DefaultsConfiguration.Instance,
             LimitsConfiguration.Instance
-        ), requestScopedDependencies.getUser());
+        ), requestScopedDependencies.user());
 
         var genericStub = new GenericStub(configurationParser, null);
         var communityProcedureFacade = LocalCommunityProcedureFacade.create(

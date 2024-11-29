@@ -56,8 +56,8 @@ class DefaultAlgorithmProcessingTemplateTest {
             Optional.empty(),
             Optional.empty(),
             Optional.empty(),
-            requestScopedDependencies.getUser(),
-            requestScopedDependencies.getDatabaseId()
+            requestScopedDependencies.user(),
+            requestScopedDependencies.databaseId()
         )).thenReturn(graphResources);
         when(algorithmComputer.computeAlgorithm(
             configuration,
@@ -111,8 +111,8 @@ class DefaultAlgorithmProcessingTemplateTest {
             Optional.empty(),
             Optional.empty(),
             Optional.empty(),
-            requestScopedDependencies.getUser(),
-            requestScopedDependencies.getDatabaseId()
+            requestScopedDependencies.user(),
+            requestScopedDependencies.databaseId()
         )).thenReturn(graphResources);
         when(algorithmComputer.computeAlgorithm(
             configuration,

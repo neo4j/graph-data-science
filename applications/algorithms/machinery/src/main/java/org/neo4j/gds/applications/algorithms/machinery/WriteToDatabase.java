@@ -54,7 +54,7 @@ public class WriteToDatabase {
     ) {
         return Neo4jDatabaseNodePropertyWriter.writeNodeProperty(
             writeContext.nodePropertyExporterBuilder(),
-            requestScopedDependencies.getTaskRegistryFactory(),
+            requestScopedDependencies.taskRegistryFactory(),
             graph,
             graphStore,
             nodePropertyValues,
@@ -63,7 +63,7 @@ public class WriteToDatabase {
             label.asString(),
             writeConfiguration.resolveResultStore(resultStore),
             jobId,
-            requestScopedDependencies.getTerminationFlag(),
+            requestScopedDependencies.terminationFlag(),
             log
         );
     }
@@ -80,7 +80,7 @@ public class WriteToDatabase {
 
         return Neo4jDatabaseNodePropertyWriter.writeNodeProperties(
             writeContext.nodePropertyExporterBuilder(),
-            requestScopedDependencies.getTaskRegistryFactory(),
+            requestScopedDependencies.taskRegistryFactory(),
             graph,
             graphStore,
             writeConfiguration.writeConcurrency(),
@@ -88,7 +88,7 @@ public class WriteToDatabase {
             label.asString(),
             writeConfiguration.resolveResultStore(resultStore),
             jobId,
-            requestScopedDependencies.getTerminationFlag(),
+            requestScopedDependencies.terminationFlag(),
             log
         );
     }

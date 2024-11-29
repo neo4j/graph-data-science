@@ -203,15 +203,15 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
             graphDatabaseService,
             procedureTransaction,
             exportLocation,
-            requestScopedDependencies.getTaskRegistryFactory()
+            requestScopedDependencies.taskRegistryFactory()
         );
         var exportToCsvEstimateApplication = new ExportToCsvEstimateApplication();
         var exportToDatabaseApplication = new ExportToDatabaseApplication(
             log,
             graphDatabaseService,
             procedureTransaction,
-            requestScopedDependencies.getTaskRegistryFactory(),
-            requestScopedDependencies.getUserLogRegistryFactory()
+            requestScopedDependencies.taskRegistryFactory(),
+            requestScopedDependencies.userLogRegistryFactory()
         );
         var generateGraphApplication = new GenerateGraphApplication(log, graphStoreCatalogService);
         var graphMemoryUsageApplication = new GraphMemoryUsageApplication(graphStoreCatalogService);
@@ -1044,7 +1044,7 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
         var graphName = graphNameValidationService.validate(graphNameAsString);
 
         var configuration = catalogConfigurationService.parseGraphStoreToFileExporterConfiguration(
-            requestScopedDependencies.getUser(),
+            requestScopedDependencies.user(),
             rawConfiguration
         );
 
@@ -1058,7 +1058,7 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
         var graphName = graphNameValidationService.validate(graphNameAsString);
 
         var configuration = catalogConfigurationService.parseGraphStoreToCsvEstimationConfiguration(
-            requestScopedDependencies.getUser(),
+            requestScopedDependencies.user(),
             rawConfiguration
         );
 
@@ -1096,8 +1096,8 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
         var graphStoreCatalogEntry = graphStoreCatalogService.getGraphStoreCatalogEntry(
             graphName,
             configuration,
-            requestScopedDependencies.getUser(),
-            requestScopedDependencies.getDatabaseId()
+            requestScopedDependencies.user(),
+            requestScopedDependencies.databaseId()
         );
 
         return graphStoreCatalogEntry.graphStore();
