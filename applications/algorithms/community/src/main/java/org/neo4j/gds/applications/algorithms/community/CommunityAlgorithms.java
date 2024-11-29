@@ -21,6 +21,7 @@ package org.neo4j.gds.applications.algorithms.community;
 
 import org.neo4j.gds.algorithms.community.CommunityCompanion;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmMachinery;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
@@ -39,7 +40,6 @@ import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
-import org.neo4j.gds.k1coloring.K1Coloring;
 import org.neo4j.gds.k1coloring.K1ColoringBaseConfig;
 import org.neo4j.gds.k1coloring.K1ColoringProgressTrackerTaskCreator;
 import org.neo4j.gds.k1coloring.K1ColoringResult;
@@ -62,12 +62,12 @@ import org.neo4j.gds.louvain.LouvainResult;
 import org.neo4j.gds.modularity.ModularityBaseConfig;
 import org.neo4j.gds.modularity.ModularityCalculator;
 import org.neo4j.gds.modularity.ModularityResult;
+import org.neo4j.gds.modularityoptimization.K1ColoringStub;
 import org.neo4j.gds.modularityoptimization.ModularityOptimization;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationBaseConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationProgressTrackerTaskCreator;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationResult;
 import org.neo4j.gds.scc.Scc;
-import org.neo4j.gds.scc.SccCommonBaseConfig;
 import org.neo4j.gds.sllpa.SpeakerListenerLPA;
 import org.neo4j.gds.sllpa.SpeakerListenerLPAConfig;
 import org.neo4j.gds.sllpa.SpeakerListenerLPAProgressTrackerCreator;
@@ -156,28 +156,20 @@ public class CommunityAlgorithms {
         );
     }
 
-    K1ColoringResult k1Coloring(Graph graph, K1ColoringBaseConfig configuration) {
-
-
+    public K1ColoringResult k1Coloring(Graph graph, K1ColoringBaseConfig configuration) {
         var parameters = configuration.toParameters();
-        var task = K1ColoringProgressTrackerTaskCreator.progressTask(graph.nodeCount(),parameters.maxIterations());
+        var task = K1ColoringProgressTrackerTaskCreator.progressTask(graph.nodeCount(), parameters.maxIterations());
         var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
 
-        var algorithm = new K1Coloring(
-            graph,
-            parameters.maxIterations(),
-            parameters.batchSize(),
-            parameters.concurrency(),
-            DefaultPool.INSTANCE,
-            progressTracker,
-            terminationFlag
-        );
+        var k1ColoringStub = new K1ColoringStub(algorithmMachinery);
 
-        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
-            algorithm,
+        return k1ColoringStub.k1Coloring(
+            graph,
+            parameters,
             progressTracker,
-            true,
-            configuration.concurrency()
+            terminationFlag,
+            configuration.concurrency(),
+            true
         );
     }
 
@@ -402,7 +394,7 @@ public class CommunityAlgorithms {
         );
     }
 
-    HugeLongArray scc(Graph graph, SccCommonBaseConfig configuration) {
+    HugeLongArray scc(Graph graph, AlgoBaseConfig configuration) {
         var progressTracker = progressTrackerCreator.createProgressTracker(
             configuration,
             Tasks.leaf(AlgorithmLabel.SCC.asString(), graph.nodeCount())
@@ -466,27 +458,27 @@ public class CommunityAlgorithms {
         return wccStub.wcc(graph, configuration.toParameters(), progressTracker, true);
     }
 
-    private Task constructKMeansProgressTask(Graph graph, KmeansBaseConfig configuration) {
+    private Task constructKMeansProgressTask(IdMap idMap, KmeansBaseConfig configuration) {
         var label = AlgorithmLabel.KMeans.asString();
 
         var iterations = configuration.numberOfRestarts();
         if (iterations == 1) {
-            return kMeansTask(graph, label, configuration);
+            return kMeansTask(idMap, label, configuration);
         }
 
         return Tasks.iterativeFixed(
             label,
-            () -> List.of(kMeansTask(graph, "KMeans Iteration", configuration)),
+            () -> List.of(kMeansTask(idMap, "KMeans Iteration", configuration)),
             iterations
         );
     }
 
-    private Task kMeansTask(Graph graph, String description, KmeansBaseConfig configuration) {
+    private Task kMeansTask(IdMap idMap, String description, KmeansBaseConfig configuration) {
         if (configuration.computeSilhouette()) {
             return Tasks.task(description, List.of(
                 Tasks.leaf("Initialization", configuration.k()),
                 Tasks.iterativeDynamic("Main", () -> List.of(Tasks.leaf("Iteration")), configuration.maxIterations()),
-                Tasks.leaf("Silhouette", graph.nodeCount())
+                Tasks.leaf("Silhouette", idMap.nodeCount())
 
             ));
         } else {

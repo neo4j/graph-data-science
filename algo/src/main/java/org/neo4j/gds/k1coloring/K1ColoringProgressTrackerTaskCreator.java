@@ -25,12 +25,10 @@ import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
 import java.util.List;
 
-public class K1ColoringProgressTrackerTaskCreator {
-
+public final class K1ColoringProgressTrackerTaskCreator {
     private K1ColoringProgressTrackerTaskCreator() {}
 
     public static Task progressTask(long nodeCount, int maxIterations) {
-
         return Tasks.iterativeDynamic(
             AlgorithmLabel.K1Coloring.asString(),
             () -> List.of(
