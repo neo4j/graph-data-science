@@ -126,8 +126,7 @@ USE DATABASE Neo4j_GDS;
 
 -- Next, we want to consider the warehouse that the GDS application will use to execute queries.
 -- For this example a MEDIUM size warehouse, so we configure the application's warehouse accordingly
-ALTER WAREHOUSE Neo4j_GDS_app_warehouse
-  WAREHOUSE_SIZE='MEDIUM';
+ALTER WAREHOUSE Neo4j_GDS_app_warehouse SET WAREHOUSE_SIZE='MEDIUM';
 -- A highly performant warehouse will speed up graph projections but does not affect algorithm computation.
 -- It can therefore be a good idea to alter the warehouse size and make other configuration changes to increase performance when projecting larger amounts of data.
 -- The warehouse can then be brought back to a less expensive configuration after the projection is done.
