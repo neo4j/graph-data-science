@@ -34,13 +34,13 @@ public class MemoryProc {
     @Context
     public MemoryFacade facade;
 
-    @Procedure("gds.listMemory")
+    @Procedure("gds.memory.list")
     @Description(DESCRIPTION)
     public Stream<UserEntityMemory> listMemory() {
         return facade.list();
     }
 
-    @Procedure("gds.listMemory.summary")
+    @Procedure("gds.memory.summary")
     @Description(DESCRIPTION)
     public Stream<UserMemorySummary> summary() {
         return facade.memorySummary();

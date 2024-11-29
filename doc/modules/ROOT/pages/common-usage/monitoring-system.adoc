@@ -113,7 +113,7 @@ To facilitate memory management, the Neo4j GDS Library offers two memory reporti
 [detailed-memory-listing]
 === Detailed memory listing
 
-Through the `gds.listMemory` procedure, a user can obtain a combined list of their projected graphs and running tasks alongside their memory footprint.
+Through the `gds.memory.list` procedure, a user can obtain a combined list of their projected graphs and running tasks alongside their memory footprint.
 
 For graphs, the size of the in-memory graph is returned,  whereas  for algorithms the  memory estimation i.e., the maximum memory needs that this task is expected to require over the course of its execution.
 
@@ -126,7 +126,7 @@ A user can access only his own graphs or tasks, but an admin can obtain informat
 .List the graphs and tasks of a user along with their memory footprint.
 [source, cypher, role=noplay]
 ----
-CALL gds.listMemory()
+CALL gds.memory.list()
 YIELD
   user: String,
   name: String,
@@ -150,7 +150,7 @@ for a graph or the estimation of a task.
 .List running tasks and graphs for Bob.
 [source, cypher, role=noplay]
 ----
-CALL gds.listMemory()
+CALL gds.memory.list()
 YIELD
   user, name, entity, memoryInBytes
 ----
@@ -168,7 +168,7 @@ As we can see, Bob has projected a graph named 'my-graph' occupying  200 bytes m
 [memory-summary]
 ===  Memory Summary
 
-The `gds.listMemory.summary` procedure provides an overview of the total graph memory, and the total  memory requirements of running tasks for a given users.
+The `gds.memory.summary` procedure provides an overview of the total graph memory, and the total  memory requirements of running tasks for a given users.
 
 
 A user can access only his own graphs or tasks, but an admin can obtain information for all users.
@@ -178,7 +178,7 @@ A user can access only his own graphs or tasks, but an admin can obtain informat
 .List the graphs and tasks of a user along with their memory footprint.
 [source, cypher, role=noplay]
 ----
-CALL gds.listMemory.summary()
+CALL gds.memory.summary()
 YIELD
   user: String,
   totalGraphsMemory : Intger,
@@ -199,7 +199,7 @@ YIELD
 .List running tasks and graphs for Bob.
 [source, cypher, role=noplay]
 ----
-CALL gds.listMemory.summary()
+CALL gds.memory.summary()
 YIELD
   user, totalGraphsMemory, totalTasksMemory
 ----

@@ -519,8 +519,8 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         "gds.prizeSteinerTree.stream",
         "gds.prizeSteinerTree.stream.estimate",
 
-        "gds.listMemory",
-        "gds.listMemory.summary",
+        "gds.memory.list",
+        "gds.memory.summary",
 
         "gds.version"
     );

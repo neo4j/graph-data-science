@@ -43,14 +43,14 @@ class MemoryProcTest extends  BaseProgressTest {
 
     @Test
     void shouldReturnEmptyIfEmpty() {
-        var rowCount = runQueryWithRowConsumer("CALL gds.listMemory", result->{} );
+        var rowCount = runQueryWithRowConsumer("CALL gds.memory.list", result->{} );
         assertThat(rowCount).isEqualTo(0L);
     }
 
     @Test
     void shouldReturnEmptySummary() {
         var rowCount = runQueryWithRowConsumer("alice",
-            "CALL gds.listMemory.summary",
+            "CALL gds.memory.summary",
             resultRow -> {
             assertThat(resultRow.getString("user")).isEqualTo("alice");
                 assertThat(resultRow.getNumber("totalGraphsMemory")).asInstanceOf(LONG).isEqualTo(0);
@@ -63,7 +63,7 @@ class MemoryProcTest extends  BaseProgressTest {
     void shouldListGraphsAccordingly() {
        runQuery("alice", " CALL gds.graph.generate('random',10,1)");
         var rowCountAlice = runQueryWithRowConsumer("alice",
-            "CALL gds.listMemory",
+            "CALL gds.memory.list",
             resultRow -> {
                 assertThat(resultRow.getString("user")).isEqualTo("alice");
                 assertThat(resultRow.getString("name")).isEqualTo("random");
@@ -73,7 +73,7 @@ class MemoryProcTest extends  BaseProgressTest {
         assertThat(rowCountAlice).isEqualTo(1L);
 
         var rowCountBob = runQueryWithRowConsumer("bob",
-            "CALL gds.listMemory",resultRow ->{}
+            "CALL gds.memory.list",resultRow ->{}
             );
 
         assertThat(rowCountBob).isEqualTo(0L);
@@ -83,7 +83,7 @@ class MemoryProcTest extends  BaseProgressTest {
     void shouldSummarizeAccordingly() {
         runQuery("alice", " CALL gds.graph.generate('random',10,1)");
         var rowCountAlice = runQueryWithRowConsumer("alice",
-            "CALL gds.listMemory",
+            "CALL gds.memory.list",
             resultRow -> {
                 assertThat(resultRow.getString("user")).isEqualTo("alice");
                 assertThat(resultRow.getString("name")).isEqualTo("random");
@@ -94,7 +94,7 @@ class MemoryProcTest extends  BaseProgressTest {
         assertThat(rowCountAlice).isEqualTo(1L);
 
         var rowCountBob = runQueryWithRowConsumer("bob",
-            "CALL gds.listMemory.summary",
+            "CALL gds.memory.summary",
             resultRow -> {
                 assertThat(resultRow.getString("user")).isEqualTo("bob");
                 assertThat(resultRow.getNumber("totalGraphsMemory")).asInstanceOf(LONG).isEqualTo(0);
@@ -108,7 +108,7 @@ class MemoryProcTest extends  BaseProgressTest {
     void canListRunningTask() {
         runQuery("alice","CALL gds.test.pl('foo',true,false)");
         var rowCountAlice = runQueryWithRowConsumer("alice",
-            "CALL gds.listMemory",
+            "CALL gds.memory.list",
             resultRow -> {
                 assertThat(resultRow.getString("user")).isEqualTo("alice");
                 assertThat(resultRow.getString("entity")).isNotEqualTo("graph");
@@ -117,7 +117,7 @@ class MemoryProcTest extends  BaseProgressTest {
         assertThat(rowCountAlice).isEqualTo(1L);
 
         var rowCountBob = runQueryWithRowConsumer("bob",
-            "CALL gds.listMemory",resultRow ->{}
+            "CALL gds.memory.list",resultRow ->{}
         );
 
         assertThat(rowCountBob).isEqualTo(0L);
@@ -128,7 +128,7 @@ class MemoryProcTest extends  BaseProgressTest {
         runQuery("alice","CALL gds.test.pl('foo',true,false)");
 
         var rowCountAlice = runQueryWithRowConsumer("alice",
-            "CALL gds.listMemory.summary",
+            "CALL gds.memory.summary",
             resultRow -> {
                 assertThat(resultRow.getString("user")).isEqualTo("alice");
                 assertThat(resultRow.getNumber("totalGraphsMemory")).asInstanceOf(LONG).isEqualTo(0);
@@ -137,7 +137,7 @@ class MemoryProcTest extends  BaseProgressTest {
         assertThat(rowCountAlice).isEqualTo(1L);
 
         var rowCountBob = runQueryWithRowConsumer("bob",
-            "CALL gds.listMemory.summary",
+            "CALL gds.memory.summary",
             resultRow -> {
                 assertThat(resultRow.getString("user")).isEqualTo("bob");
                 assertThat(resultRow.getNumber("totalGraphsMemory")).asInstanceOf(LONG).isEqualTo(0);
