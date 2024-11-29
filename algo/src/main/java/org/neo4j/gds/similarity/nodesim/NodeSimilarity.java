@@ -38,8 +38,8 @@ import org.neo4j.gds.similarity.SimilarityGraphResult;
 import org.neo4j.gds.similarity.SimilarityResult;
 import org.neo4j.gds.similarity.filtering.NodeFilter;
 import org.neo4j.gds.termination.TerminationFlag;
-import org.neo4j.gds.wcc.WccStub;
 import org.neo4j.gds.wcc.WccParameters;
+import org.neo4j.gds.wcc.WccStub;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -173,19 +173,30 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
         progressTracker.beginSubTask();
 
         components = initComponents();
-        if (parameters.runWCC()) {
-            progressTracker.beginSubTask();
+
+        if (parameters.runWCC()){
+            prepareAsChildTask();
+        }else{
+            prepareAsLeaf();
         }
-        initNodeSpecificFields();
 
-        sourceNodesStream = initSourceNodesStream();
-
-        targetNodesStream = initTargetNodesStream();
-
-        if (parameters.runWCC()) {
-            progressTracker.endSubTask();
-        }
         progressTracker.endSubTask();
+    }
+
+    private  void prepareAsLeaf(){
+        setUpNodesAndFilters();
+    }
+
+    private  void prepareAsChildTask(){
+        progressTracker.beginSubTask();
+        setUpNodesAndFilters();
+        progressTracker.endSubTask();
+    }
+
+    private void setUpNodesAndFilters(){
+        initNodeSpecificFields();
+        sourceNodesStream = initSourceNodesStream();
+        targetNodesStream = initTargetNodesStream();
     }
 
     private Stream<SimilarityResult> computeSimilarityResultStream() {
@@ -219,10 +230,8 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
         }
 
         // run WCC to determine components
-        progressTracker.beginSubTask();
         var wccParameters = new WccParameters(0D, concurrency);
-        var disjointSets = wccStub.wcc(graph, wccParameters, ProgressTracker.NULL_TRACKER, false);
-        progressTracker.endSubTask();
+        var disjointSets = wccStub.wcc(graph, wccParameters, progressTracker, false);
         return disjointSets::setIdOf;
     }
 

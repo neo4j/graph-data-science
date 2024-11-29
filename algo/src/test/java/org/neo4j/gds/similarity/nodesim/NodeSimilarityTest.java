@@ -902,6 +902,14 @@ final class NodeSimilarityTest {
                 "Node Similarity :: compare node pairs :: Start",
                 "Node Similarity :: compare node pairs :: Finished"
             );
+
+       assertThat(log.getMessages(INFO)
+                .stream()
+                .filter( v -> v.contains("WCC"))
+                .count())
+           .isGreaterThan(3);
+
+
     }
 
     @Test
