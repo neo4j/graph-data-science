@@ -27,6 +27,7 @@ import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.properties.relationships.RelationshipIterator;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmMachinery;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
@@ -38,8 +39,6 @@ import org.neo4j.gds.core.utils.paged.ParallelDoublePageCreator;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.k1coloring.K1Coloring;
-import org.neo4j.gds.k1coloring.K1ColoringAlgorithmFactory;
 import org.neo4j.gds.k1coloring.K1ColoringParameters;
 import org.neo4j.gds.termination.TerminationFlag;
 
@@ -177,10 +176,16 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
 
     private void computeColoring() {
         var parameters = new K1ColoringParameters(concurrency, K1COLORING_MAX_ITERATIONS, minBatchSize);
-        K1Coloring coloring = new K1ColoringAlgorithmFactory<>().build(graph, parameters, progressTracker);
-        coloring.setTerminationFlag(terminationFlag);
+        var k1ColoringStub = new K1ColoringStub(new AlgorithmMachinery());
+        var k1ColoringResult = k1ColoringStub.k1Coloring(
+            graph,
+            parameters,
+            progressTracker,
+            terminationFlag,
+            concurrency,
+            false
+        );
 
-        var k1ColoringResult = coloring.compute();
         modularityColorArray = ModularityColorArray.create(
             k1ColoringResult.colors(),
             k1ColoringResult.usedColors()
@@ -393,12 +398,5 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
     private double calculateModularity() {
         modularityManager.registerCommunities(currentCommunities);
         return modularityManager.calculateModularity();
-    }
-
-    private long getCommunityId(long nodeId) {
-        if (seedProperty == null || reverseSeedCommunityMapping == null) {
-            return currentCommunities.get(nodeId);
-        }
-        return reverseSeedCommunityMapping.get(currentCommunities.get(nodeId));
     }
 }

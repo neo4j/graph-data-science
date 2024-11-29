@@ -24,11 +24,11 @@ import org.neo4j.gds.algorithms.community.CommunityCompanion;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.concurrency.DefaultPool;
+import org.neo4j.gds.k1coloring.K1ColoringProgressTrackerTaskCreator;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
-import org.neo4j.gds.k1coloring.K1ColoringAlgorithmFactory;
 import org.neo4j.gds.k1coloring.K1ColoringBaseConfig;
 import org.neo4j.gds.k1coloring.K1ColoringStreamConfigImpl;
 import org.neo4j.gds.termination.TerminationFlag;
@@ -94,11 +94,13 @@ public class ModularityOptimizationFactory<CONFIG extends ModularityOptimization
     }
 
     public static Task progressTask(Graph graph, int maxIterations) {
+        var config = createModularityConfig();
+
         return Tasks.task(
             MODULARITY_OPTIMIZATION_TASK_NAME,
             Tasks.task(
                 "initialization",
-                K1ColoringAlgorithmFactory.k1ColoringProgressTask(graph, createModularityConfig())
+                K1ColoringProgressTrackerTaskCreator.progressTask(graph.nodeCount(), config.maxIterations())
             ),
             Tasks.iterativeDynamic(
                 "compute modularity",
