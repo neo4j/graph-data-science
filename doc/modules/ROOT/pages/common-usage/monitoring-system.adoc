@@ -104,3 +104,112 @@ Here we can note that there is only one GDS procedure currently running, namely 
 We also see that it may use up to an estimated `234 kB` of memory.
 Note that it may not currently be using that much memory and so it may require more memory later in its execution, thus possible lowering our current `freeHeap`.
 Apparently it wants to use up to `16` CPU cores, leaving us with a total of `84` currently available cores in the system not requested by any GDS procedures.
+
+[[Memory-reporting-procedures]]
+== Memory reporting procedures
+
+To facilitate memory management, the Neo4j GDS Library offers two memory reporting procedures, alongside the aforementioned monitoring capabilities.
+
+[detailed-memory-listing]
+=== Detailed memory listing
+
+Through the `gds.memory.list` procedure, a user can obtain a combined list of their projected graphs and running tasks alongside their memory footprint.
+
+For graphs, the size of the in-memory graph is returned,  whereas  for algorithms the  memory estimation i.e., the maximum memory needs that this task is expected to require over the course of its execution.
+
+This procedure can help a user realize which of his operations might be memory demanding and plan accordingly (e.g., drop a graph, or termination a transaction).
+
+A user can access only his own graphs or tasks, but an admin can obtain information for all users.
+
+[[mem-reporting-syntax]]
+==== Syntax
+.List the graphs and tasks of a user along with their memory footprint.
+[source, cypher, role=noplay]
+----
+CALL gds.memory.list()
+YIELD
+  user: String,
+  name: String,
+  entity: String
+  memoryInBytes: Integer
+----
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                          | Type        | Description
+| user                      | String     | The username
+| name                     | String     | The name of the graph or running task.
+| entity                       | String     | If the reporting entity is a task, this corresponds to its job id. Otherwise, it is set to "graph".
+| memoryInBytes          | Integer     | The occupying memory
+for a graph or the estimation of a task.
+|===
+
+=== Example
+
+.List running tasks and graphs for Bob.
+[source, cypher, role=noplay]
+----
+CALL gds.memory.list()
+YIELD
+  user, name, entity, memoryInBytes
+----
+
+.Results
+[opts="header",cols='2,2,2,2']
+|===
+| user | name | entity | memoryInBytes |
+"Bob" | "my-graph" | "graph" | 20 |
+"Bob" | "Node2Vec" | 111-222-333 | 234
+|===
+
+As we can see, Bob has projected a graph named 'my-graph' occupying  200 bytes memory, and is currently running Node2Vec which has a memory footprint of 234 bytes.
+
+[memory-summary]
+===  Memory Summary
+
+The `gds.memory.summary` procedure provides an overview of the total graph memory, and the total  memory requirements of running tasks for a given users.
+
+
+A user can access only his own graphs or tasks, but an admin can obtain information for all users.
+
+[[mem-summary-syntax]]
+==== Syntax
+.List the graphs and tasks of a user along with their memory footprint.
+[source, cypher, role=noplay]
+----
+CALL gds.memory.summary()
+YIELD
+  user: String,
+  totalGraphsMemory : Intger,
+  totalTasksMemory : Integer
+----
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                          | Type        | Description
+| user                      | String     | The username.
+|totalGraphsMemory |  Integer| The total requirement for that user's graphs.
+| totalTasksMemory          | Integer |  The total requirements of that user's tasks.
+|===
+
+=== Example
+
+.List running tasks and graphs for Bob.
+[source, cypher, role=noplay]
+----
+CALL gds.memory.summary()
+YIELD
+  user, totalGraphsMemory, totalTasksMemory
+----
+
+.Results
+[opts="header",cols='2,2,2']
+|===
+| user | totalGraphsMemory | totalTasksMemory |
+"Bob" | 20 | 234
+|===
+
+
+

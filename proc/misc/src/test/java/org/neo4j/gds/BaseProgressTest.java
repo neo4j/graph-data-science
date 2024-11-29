@@ -20,6 +20,7 @@
 package org.neo4j.gds;
 
 import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.ProgressFeatureSettings;
 import org.neo4j.gds.core.utils.progress.TaskRegistryExtension;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
@@ -27,6 +28,7 @@ import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.MemoryRange;
+import org.neo4j.gds.procedures.memory.MemoryFacade;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -55,6 +57,9 @@ public abstract class BaseProgressTest extends BaseTest {
         @Context
         public TaskRegistryFactory taskRegistryFactory;
 
+        @Context
+        public MemoryFacade memoryFacade;
+
         @Procedure("gds.test.pl")
         public Stream<Bar> foo(
             @Name(value = "taskName") String taskName,
@@ -64,17 +69,20 @@ public abstract class BaseProgressTest extends BaseTest {
             var task = Tasks.task(taskName, Tasks.leaf("leaf", 3));
             if (withMemoryEstimation) {
                 task.setEstimatedMemoryRangeInBytes(MEMORY_ESTIMATION_RANGE);
+
+                memoryFacade.track(task.description(),new JobId(),task.estimatedMemoryRangeInBytes().max);
             }
+
             if (withConcurrency) {
                 task.setMaxConcurrency(new Concurrency(REQUESTED_CPU_CORES));
             }
+
             var taskProgressTracker = new TaskProgressTracker(task, Log.noOpLog(), new Concurrency(1), taskRegistryFactory);
             taskProgressTracker.beginSubTask();
             taskProgressTracker.beginSubTask();
             taskProgressTracker.logProgress(1);
             return Stream.empty();
         }
-
 
     }
 

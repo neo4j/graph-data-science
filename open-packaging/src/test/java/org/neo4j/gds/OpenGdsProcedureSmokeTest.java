@@ -519,6 +519,9 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         "gds.prizeSteinerTree.stream",
         "gds.prizeSteinerTree.stream.estimate",
 
+        "gds.memory.list",
+        "gds.memory.summary",
+
         "gds.version"
     );
 
@@ -590,7 +593,7 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         );
 
         // If you find yourself updating this count, please also update the count in SmokeTest.kt
-        int expectedCount = 432;
+        int expectedCount = 434;
         assertEquals(
             expectedCount,
             returnedRows,

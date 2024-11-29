@@ -34,11 +34,13 @@ class ComputationService {
     private final Log log;
     private final MemoryGuard memoryGuard;
     private final AlgorithmMetricsService algorithmMetricsService;
+    private final String username;
 
-    ComputationService(Log log, MemoryGuard memoryGuard, AlgorithmMetricsService algorithmMetricsService) {
+    ComputationService(String username,Log log, MemoryGuard memoryGuard, AlgorithmMetricsService algorithmMetricsService) {
         this.log = log;
         this.memoryGuard = memoryGuard;
         this.algorithmMetricsService = algorithmMetricsService;
+        this.username = username;
     }
 
     <CONFIGURATION extends AlgoBaseConfig, RESULT_FROM_ALGORITHM> RESULT_FROM_ALGORITHM computeAlgorithm(
@@ -49,7 +51,7 @@ class ComputationService {
         Computation<RESULT_FROM_ALGORITHM> computation,
         DimensionTransformer dimensionTransformer
     ) {
-        memoryGuard.assertAlgorithmCanRun(estimationSupplier, graphResources.graphStore(), configuration, label, dimensionTransformer);
+        memoryGuard.assertAlgorithmCanRun(username,estimationSupplier, graphResources.graphStore(), configuration, label, dimensionTransformer);
 
         return computeWithMetrics(graphResources, label, computation);
     }

@@ -411,3 +411,6 @@ project(':algorithm-specifications').projectDir = file('algorithm-specifications
 
 include('core-api')
 project(':core-api').projectDir = file('core-api')
+
+include('memory-facade')
+project(':memory-facade').projectDir = file('procedures/memory-facade')

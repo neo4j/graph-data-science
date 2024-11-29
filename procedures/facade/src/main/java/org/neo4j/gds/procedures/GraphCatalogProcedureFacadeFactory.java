@@ -73,7 +73,13 @@ public class GraphCatalogProcedureFacadeFactory {
         MemoryTracker memoryTracker
     ) {
         // Derived data and services
-        var graphProjectMemoryUsageService = new GraphProjectMemoryUsageService(log, graphDatabaseService, memoryTracker);
+        var graphProjectMemoryUsageService = new GraphProjectMemoryUsageService(
+            requestScopedDependencies.getUser().getUsername(),
+            log,
+            graphDatabaseService,
+            memoryTracker
+        );
+
         var streamCloser = new Consumer<AutoCloseable>() {
             @Override
             public void accept(AutoCloseable autoCloseable) {

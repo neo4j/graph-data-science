@@ -19,9 +19,6 @@
  */
 package org.neo4j.gds.mem;
 
-import com.carrotsearch.hppc.ObjectLongHashMap;
-import com.carrotsearch.hppc.ObjectLongMap;
-import com.carrotsearch.hppc.procedures.LongProcedure;
 import org.neo4j.gds.api.graph.store.catalog.GraphStoreAddedEvent;
 import org.neo4j.gds.api.graph.store.catalog.GraphStoreAddedEventListener;
 import org.neo4j.gds.api.graph.store.catalog.GraphStoreRemovedEvent;
@@ -31,18 +28,16 @@ import org.neo4j.gds.core.utils.progress.TaskStoreListener;
 import org.neo4j.gds.core.utils.progress.UserTask;
 import org.neo4j.gds.logging.Log;
 
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.LongAdder;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class MemoryTracker implements TaskStoreListener, GraphStoreAddedEventListener, GraphStoreRemovedEventListener {
     private final long initialMemory;
-
-    private final AtomicLong graphStoresMemory = new AtomicLong();
-
-    private final ObjectLongMap<JobId> memoryInUse = new ObjectLongHashMap<>();
-    private final Log log;
+    private final  GraphStoreMemoryContainer  graphStoreMemoryContainer = new GraphStoreMemoryContainer();
+    private final  TaskMemoryContainer taskMemoryContainer = new TaskMemoryContainer();
+    private final  Log log;
 
     public MemoryTracker(long initialMemory, Log log) {
         this.log = log;
@@ -54,24 +49,50 @@ public class MemoryTracker implements TaskStoreListener, GraphStoreAddedEventLis
         return initialMemory;
     }
 
-    public synchronized void track(JobId jobId, long memoryEstimate) {
+    public synchronized void track(String username, String taskName, JobId jobId, long memoryEstimate) {
         log.debug("Tracking %s:  %s bytes", jobId.asString(), memoryEstimate);
-        memoryInUse.put(jobId, memoryEstimate);
+        taskMemoryContainer.reserve(username,taskName,jobId, memoryEstimate);
         log.debug("Available memory after tracking task: %s bytes", availableMemory());
     }
 
-    public synchronized void tryToTrack(JobId jobId, long memoryEstimate) throws MemoryReservationExceededException {
+    public synchronized void tryToTrack(String username, String taskName,JobId jobId, long memoryEstimate) throws MemoryReservationExceededException {
         var availableMemory = availableMemory();
         if (memoryEstimate > availableMemory) {
             throw new MemoryReservationExceededException(memoryEstimate, availableMemory);
         }
-        track(jobId, memoryEstimate);
+        track(username,taskName,jobId, memoryEstimate);
     }
 
     public synchronized long availableMemory() {
-        var reservedMemory = new LongAdder();
-        memoryInUse.values().forEach((LongProcedure) reservedMemory::add);
-        return initialMemory - (reservedMemory.longValue() + graphStoresMemory.longValue());
+        return initialMemory - graphStoreMemoryContainer.graphStoreReservedMemory() - taskMemoryContainer.taskReservedMemory();
+    }
+
+    public Stream<UserEntityMemory> listUser(String user){
+        return  Stream.concat(taskMemoryContainer.listTasks(user), graphStoreMemoryContainer.listGraphs(user));
+    }
+
+    public Stream<UserEntityMemory> listAll(){
+        return  Stream.concat(taskMemoryContainer.listTasks(), graphStoreMemoryContainer.listGraphs());
+    }
+
+    public UserMemorySummary memorySummary(String user){
+        return  new UserMemorySummary(user,
+            graphStoreMemoryContainer.memoryOfGraphs(user),
+            taskMemoryContainer.memoryOfTasks(user)
+        );
+    }
+
+    public Stream<UserMemorySummary> memorySummary(){
+
+        var  users = graphStoreMemoryContainer.graphUsers(Optional.empty());
+        users = taskMemoryContainer.taskUsers(Optional.of(users));
+
+        return  users.stream()
+            .map(user -> new UserMemorySummary(
+                user,
+                graphStoreMemoryContainer.memoryOfGraphs(user),
+                taskMemoryContainer.memoryOfTasks(user)
+            ));
     }
 
     @Override
@@ -81,10 +102,11 @@ public class MemoryTracker implements TaskStoreListener, GraphStoreAddedEventLis
 
     @Override
     public synchronized void onTaskRemoved(UserTask userTask) {
+
         var taskDescription = userTask.task().description();
         log.debug("Removing task: %s", taskDescription);
         var jobId = userTask.jobId();
-        var removed = memoryInUse.remove(jobId);
+        var removed= taskMemoryContainer.removeTask(userTask);
         log.debug("Removed task %s (%s):  %s bytes", taskDescription, jobId.asString(), removed);
         log.debug("Available memory after removing task: %s bytes", availableMemory());
         log.debug("Done removing task: %s", taskDescription);
@@ -100,24 +122,23 @@ public class MemoryTracker implements TaskStoreListener, GraphStoreAddedEventLis
 
     @Override
     public void onGraphStoreAdded(GraphStoreAddedEvent graphStoreAddedEvent) {
-        var addedGraphMemory = graphStoreAddedEvent.memoryInBytes();
-        var graphsMemory = graphStoresMemory.addAndGet(addedGraphMemory);
+        var graphsMemory = graphStoreMemoryContainer.addGraph(graphStoreAddedEvent);
         log.debug(
             "Added graph %s, which added another %s bytes, now there are %s bytes occupied by projected graphs",
             graphStoreAddedEvent.graphName(),
-            addedGraphMemory,
+            graphStoreAddedEvent.memoryInBytes(),
             graphsMemory
         );
     }
 
     @Override
-    public void onGraphStoreRemoved(GraphStoreRemovedEvent graphStoreAddedEvent) {
-        var graphMemoryToRemove = graphStoreAddedEvent.memoryInBytes();
-        var graphsMemoryAfterRemoval = graphStoresMemory.addAndGet(-graphMemoryToRemove);
+    public void onGraphStoreRemoved(GraphStoreRemovedEvent graphStoreRemovedEvent) {
+
+       var graphsMemoryAfterRemoval= graphStoreMemoryContainer.removeGraph(graphStoreRemovedEvent);
         log.debug(
             "Removed graph %s, which freed %s bytes, there are still %s bytes occupied by projected graphs",
-            graphStoreAddedEvent.graphName(),
-            graphMemoryToRemove,
+            graphStoreRemovedEvent.graphName(),
+            graphStoreRemovedEvent.memoryInBytes(),
             graphsMemoryAfterRemoval
         );
     }
