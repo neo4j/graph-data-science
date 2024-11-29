@@ -74,7 +74,7 @@ public class GraphCatalogProcedureFacadeFactory {
     ) {
         // Derived data and services
         var graphProjectMemoryUsageService = new GraphProjectMemoryUsageService(
-            requestScopedDependencies.getUser().getUsername(),
+            requestScopedDependencies.user().getUsername(),
             log,
             graphDatabaseService,
             memoryTracker
