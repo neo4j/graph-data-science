@@ -20,14 +20,15 @@
 package org.neo4j.gds.leiden;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.applications.algorithms.community.CommunityAlgorithms;
+import org.neo4j.gds.applications.algorithms.community.LeidenTask;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.gdl.GdlFactory;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 class LeidenAlgorithmFactoryTest {
 
@@ -38,8 +39,7 @@ class LeidenAlgorithmFactoryTest {
 
         var graph = GdlFactory.of(" CREATE (a:NODE), (b:NODE) ").build().getUnion();
 
-        var task = new LeidenAlgorithmFactory<>().progressTask(graph, config);
-        
+        var task = LeidenTask.create(graph, config);
         var initialization = Tasks.leaf("Initialization", 2);
 
         var iteration = Tasks.iterativeDynamic("Iteration", () ->
@@ -59,13 +59,11 @@ class LeidenAlgorithmFactoryTest {
     @Test
     void shouldThrowIfNotUndirected() {
         var graph = GdlFactory.of("(a)-->(b)").build().getUnion();
-        var config = LeidenStatsConfigImpl.builder().maxLevels(3).build();
-        var leidenFactory = new LeidenAlgorithmFactory<>();
-        assertThatThrownBy(() -> leidenFactory.build(
-            graph,
-            config,
-            ProgressTracker.NULL_TRACKER
-        )).hasMessageContaining(
-            "undirected");
+
+        var communityAlgorithms = new CommunityAlgorithms(null, null);
+
+        assertThatIllegalArgumentException()
+            .isThrownBy(() -> communityAlgorithms.leiden(graph, null))
+            .withMessage("The Leiden algorithm works only with undirected graphs. Please orient the edges properly");
     }
 }

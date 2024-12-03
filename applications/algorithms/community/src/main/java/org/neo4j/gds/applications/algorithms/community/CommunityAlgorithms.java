@@ -270,26 +270,13 @@ public class CommunityAlgorithms {
         );
     }
 
-    LeidenResult leiden(Graph graph, LeidenBaseConfig configuration) {
+    public LeidenResult leiden(Graph graph, LeidenBaseConfig configuration) {
         if (!graph.schema().isUndirected()) {
             throw new IllegalArgumentException(
                 "The Leiden algorithm works only with undirected graphs. Please orient the edges properly");
         }
 
-        var iterations = configuration.maxLevels();
-        var iterativeTasks = Tasks.iterativeDynamic(
-            "Iteration",
-            () ->
-                List.of(
-                    Tasks.leaf("Local Move", 1),
-                    Tasks.leaf("Modularity Computation", graph.nodeCount()),
-                    Tasks.leaf("Refinement", graph.nodeCount()),
-                    Tasks.leaf("Aggregation", graph.nodeCount())
-                ),
-            iterations
-        );
-        var initializationTask = Tasks.leaf("Initialization", graph.nodeCount());
-        var task = Tasks.task(AlgorithmLabel.Leiden.asString(), initializationTask, iterativeTasks);
+        var task = LeidenTask.create(graph, configuration);
         var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
 
         var parameters = configuration.toParameters();
