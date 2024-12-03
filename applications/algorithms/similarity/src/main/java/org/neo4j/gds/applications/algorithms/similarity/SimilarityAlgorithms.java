@@ -83,6 +83,15 @@ public class SimilarityAlgorithms {
             configuration,
             task
         );
+
+        return filteredKnn(graph, configuration, progressTracker);
+    }
+
+    public FilteredKnnResult filteredKnn(
+        Graph graph,
+        FilteredKnnBaseConfig configuration,
+        ProgressTracker progressTracker
+    ) {
         var knnContext = ImmutableKnnContext
             .builder()
             .progressTracker(progressTracker)
