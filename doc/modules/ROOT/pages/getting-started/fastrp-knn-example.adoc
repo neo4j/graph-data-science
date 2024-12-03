@@ -235,8 +235,8 @@ RETURN p2.name AS recommendation
 |===
 --
 
-The query returns the node "Kale" as the one product that "Annie" is already buying but "Matt" does not.
-This is the recommended product for "Matt".
+The query looks for products that "Annie" is buying, then selects the products that "Matt" is buying which "Annie" is _not_ buying yet.
+The resulting node "Kale" is therefore the recommended product for "Annie".
 
 
 == Next steps
