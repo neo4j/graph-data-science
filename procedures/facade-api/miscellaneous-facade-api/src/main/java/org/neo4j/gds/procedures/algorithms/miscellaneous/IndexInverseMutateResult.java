@@ -21,7 +21,6 @@ package org.neo4j.gds.procedures.algorithms.miscellaneous;
 
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.procedures.algorithms.results.StandardMutateResult;
-import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.Map;
 
@@ -49,26 +48,5 @@ public final class IndexInverseMutateResult extends StandardMutateResult {
             0,
             configurationMap
         );
-    }
-
-    public static class Builder extends AbstractResultBuilder<IndexInverseMutateResult> {
-        private long inputRelationships;
-
-        public Builder withInputRelationships(long inputRelationships) {
-            this.inputRelationships = inputRelationships;
-            return this;
-        }
-
-        @Override
-        public IndexInverseMutateResult build() {
-            return new IndexInverseMutateResult(
-                preProcessingMillis,
-                computeMillis,
-                mutateMillis,
-                0,
-                inputRelationships,
-                config.toMap()
-            );
-        }
     }
 }
