@@ -32,6 +32,7 @@ import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.core.loading.GdsNeo4jValueConverter;
 import org.neo4j.gds.core.loading.NodeLabelTokenSet;
 import org.neo4j.gds.core.loading.nodeproperties.NodePropertiesFromStoreBuilder;
 import org.neo4j.internal.kernel.api.PropertyCursor;
@@ -142,7 +143,8 @@ public final class NativeNodePropertyImporter {
             Value value = propertyCursor.propertyValue();
 
             for (NodePropertiesFromStoreBuilder builder : builders) {
-                builder.set(neoNodeId, value);
+                var gdsValue = GdsNeo4jValueConverter.toValue(value);
+                builder.set(neoNodeId, gdsValue);
                 propertiesImported++;
             }
         }

@@ -30,18 +30,17 @@ import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryEstimations;
 import org.neo4j.gds.values.GdsNoValue;
 import org.neo4j.gds.values.GdsValue;
+import org.neo4j.gds.values.primitive.PrimitiveValues;
 import org.neo4j.values.storable.DoubleArray;
 import org.neo4j.values.storable.FloatArray;
 import org.neo4j.values.storable.FloatingPointValue;
 import org.neo4j.values.storable.IntegralValue;
 import org.neo4j.values.storable.LongArray;
 import org.neo4j.values.storable.Value;
-import org.neo4j.values.storable.Values;
 
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
-import static org.neo4j.values.storable.Values.NO_VALUE;
 
 public final class NodePropertiesFromStoreBuilder {
 
@@ -80,15 +79,6 @@ public final class NodePropertiesFromStoreBuilder {
         this.innerBuilder = new AtomicReference<>();
     }
 
-    public void set(long neoNodeId, Value value) {
-        if (value != null && value != NO_VALUE) {
-            if (innerBuilder.get() == null) {
-                initializeWithType(value);
-            }
-            innerBuilder.get().setValue(neoNodeId, value);
-        }
-    }
-
     public void set(long neoNodeId, GdsValue value) {
         if (value != null && value != GdsNoValue.NO_VALUE) {
             if (innerBuilder.get() == null) {
@@ -101,7 +91,8 @@ public final class NodePropertiesFromStoreBuilder {
     public NodePropertyValues build(IdMap idMap) {
         if (innerBuilder.get() == null) {
             if (defaultValue.getObject() != null) {
-                initializeWithType(Values.of(defaultValue.getObject()));
+                var gdsValue = PrimitiveValues.create(defaultValue.getObject());
+                initializeWithType(gdsValue);
             } else {
                 throw new IllegalStateException("Cannot infer type of property");
             }
@@ -114,15 +105,6 @@ public final class NodePropertiesFromStoreBuilder {
         var actualIdMap = (idMap instanceof HighLimitIdMap) ? idMap.rootIdMap() : idMap;
 
         return innerBuilder.get().build(idMap.nodeCount(), actualIdMap, idMap.highestOriginalId());
-    }
-
-    // This is synchronized as we want to prevent the creation of multiple InnerNodePropertiesBuilders of which only once survives.
-    private synchronized void initializeWithType(Value value) {
-        if (innerBuilder.get() == null) {
-            var valueType = valueType(value);
-            var newBuilder = newInnerBuilder(valueType);
-            innerBuilder.compareAndSet(null, newBuilder);
-        }
     }
 
     // This is synchronized as we want to prevent the creation of multiple InnerNodePropertiesBuilders of which only once survives.

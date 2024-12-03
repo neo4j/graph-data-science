@@ -28,9 +28,7 @@ import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.utils.GdsNeo4jValueConversion;
-import org.neo4j.gds.utils.Neo4jValueConversion;
 import org.neo4j.gds.values.GdsValue;
-import org.neo4j.values.storable.Value;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
@@ -78,12 +76,6 @@ public class DoubleNodePropertiesBuilder implements InnerNodePropertiesBuilder {
     public void set(long neoNodeId, double value) {
         builder.set(neoNodeId, value);
         updateMaxValue(value);
-    }
-
-    @Override
-    public void setValue(long neoNodeId, Value value) {
-        double doubleValue = Neo4jValueConversion.getDoubleValue(value);
-        set(neoNodeId, doubleValue);
     }
 
     @Override
