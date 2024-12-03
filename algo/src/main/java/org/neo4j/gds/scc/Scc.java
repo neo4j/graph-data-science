@@ -34,9 +34,8 @@ import org.neo4j.gds.termination.TerminationFlag;
  * specified in:  http://code.activestate.com/recipes/578507-strongly-connected-components-of-a-directed-graph/
  */
 public class Scc extends Algorithm<HugeLongArray> {
-    public static final int UNORDERED = -1;
-    public static final String SCC_DESCRIPTION = "The SCC algorithm finds sets of connected nodes in an directed graph, " +
-                                                 "where all nodes in the same set form a connected component.";
+    private static final int UNORDERED = -1;
+
     private final Graph graph;
     private final HugeLongArrayStack boundaries;
     private final HugeLongArray connectedComponents;

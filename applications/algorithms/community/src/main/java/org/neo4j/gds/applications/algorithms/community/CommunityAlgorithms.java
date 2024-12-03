@@ -38,6 +38,7 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.k1coloring.K1ColoringBaseConfig;
@@ -400,6 +401,10 @@ public class CommunityAlgorithms {
             Tasks.leaf(AlgorithmLabel.SCC.asString(), graph.nodeCount())
         );
 
+        return scc(graph, configuration, progressTracker);
+    }
+
+    public HugeLongArray scc(Graph graph, ConcurrencyConfig configuration, ProgressTracker progressTracker) {
         var algorithm = new Scc(graph, progressTracker, terminationFlag);
 
         return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
