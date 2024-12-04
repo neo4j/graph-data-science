@@ -48,6 +48,7 @@ import org.neo4j.gds.embeddings.hashgnn.HashGNN;
 import org.neo4j.gds.embeddings.hashgnn.HashGNNConfig;
 import org.neo4j.gds.embeddings.hashgnn.HashGNNConfigTransformer;
 import org.neo4j.gds.embeddings.hashgnn.HashGNNResult;
+import org.neo4j.gds.embeddings.hashgnn.HashGNNTask;
 import org.neo4j.gds.embeddings.node2vec.Node2Vec;
 import org.neo4j.gds.embeddings.node2vec.Node2VecBaseConfig;
 import org.neo4j.gds.embeddings.node2vec.Node2VecConfigTransformer;
@@ -196,10 +197,16 @@ public class NodeEmbeddingAlgorithms {
     }
 
     HashGNNResult hashGnn(Graph graph, HashGNNConfig configuration) {
-        var task = createHashGnnTask(graph, configuration);
+        var task = HashGNNTask.create(graph, configuration);
         var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
 
-        var algorithm = new HashGNN(graph, HashGNNConfigTransformer.toParameters(configuration), progressTracker, terminationFlag);
+        return hashGnn(graph, configuration, progressTracker);
+    }
+
+    public HashGNNResult hashGnn(Graph graph, HashGNNConfig configuration, ProgressTracker progressTracker) {
+        var parameters = HashGNNConfigTransformer.toParameters(configuration);
+
+        var algorithm = new HashGNN(graph, parameters, progressTracker, terminationFlag);
 
         return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
             algorithm,
@@ -244,41 +251,6 @@ public class NodeEmbeddingAlgorithms {
             iterationWeightsSize
         ));
         return Tasks.task(AlgorithmLabel.FastRP.asString(), tasks);
-    }
-
-    private static Task createHashGnnTask(Graph graph, HashGNNConfig configuration) {
-        var tasks = new ArrayList<Task>();
-
-        if (configuration.generateFeatures().isPresent()) {
-            tasks.add(Tasks.leaf("Generate base node property features", graph.nodeCount()));
-        } else if (configuration.binarizeFeatures().isPresent()) {
-            tasks.add(Tasks.leaf("Binarize node property features", graph.nodeCount()));
-        } else {
-            tasks.add(Tasks.leaf("Extract raw node property features", graph.nodeCount()));
-        }
-
-        int numRelTypes = configuration.heterogeneous() ? configuration.relationshipTypes().size() : 1;
-
-        tasks.add(Tasks.iterativeFixed(
-            "Propagate embeddings",
-            () -> List.of(
-                Tasks.leaf(
-                    "Precompute hashes",
-                    configuration.embeddingDensity() * (1L + 1 + numRelTypes)
-                ),
-                Tasks.leaf(
-                    "Perform min-hashing",
-                    (2 * graph.nodeCount() + graph.relationshipCount()) * configuration.embeddingDensity()
-                )
-            ),
-            configuration.iterations()
-        ));
-
-        if (configuration.outputDimension().isPresent()) {
-            tasks.add(Tasks.leaf("Densify output embeddings", graph.nodeCount()));
-        }
-
-        return Tasks.task(AlgorithmLabel.HashGNN.asString(), tasks);
     }
 
     private Task createNode2VecTask(Graph graph, Node2VecBaseConfig configuration) {

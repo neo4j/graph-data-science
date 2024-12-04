@@ -111,8 +111,8 @@ class HashGNNMemoryEstimateDefinitionTest {
             Optional.of(GenerateFeaturesConfigImpl.builder().dimension(inputDimension).densityLevel(1).build()),
             Optional.empty()
         );
-        var bigEstimation = new HashGNNFactory<>()
-            .memoryEstimation(bigParameters)
+        var bigEstimation = new HashGNNMemoryEstimateDefinition(bigParameters)
+            .memoryEstimation()
             .estimate(graphDims, concurrency)
             .memoryUsage();
 
@@ -128,8 +128,8 @@ class HashGNNMemoryEstimateDefinitionTest {
             Optional.of(GenerateFeaturesConfigImpl.builder().dimension((int) (inputRatio * inputDimension)).densityLevel(1).build()),
             Optional.empty()
         );
-        var smallEstimation = new HashGNNFactory<>()
-            .memoryEstimation(smallParameters)
+        var smallEstimation = new HashGNNMemoryEstimateDefinition(smallParameters)
+            .memoryEstimation()
             .estimate(graphDims, concurrency)
             .memoryUsage();
 

@@ -19,48 +19,16 @@
  */
 package org.neo4j.gds.embeddings.hashgnn;
 
-import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
-import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class HashGNNFactory<CONFIG extends HashGNNConfig> extends GraphAlgorithmFactory<HashGNN, CONFIG> {
-
-    @Override
-    public String taskName() {
-        return "HashGNN";
-    }
-
-    public HashGNN build(
-        Graph graph,
-        HashGNNParameters parameters,
-        ProgressTracker progressTracker
-    ) {
-        return new HashGNN(
-            graph,
-            parameters,
-            progressTracker,
-            TerminationFlag.RUNNING_TRUE
-        );
-    }
-
-    @Override
-    public HashGNN build(
-        Graph graph,
-        CONFIG configuration,
-        ProgressTracker progressTracker
-    ) {
-        return build(graph, HashGNNConfigTransformer.toParameters(configuration), progressTracker);
-    }
-
-    @Override
-    public Task progressTask(Graph graph, CONFIG config) {
+public class HashGNNTask {
+    public static Task create(Graph graph, HashGNNConfig config) {
         var tasks = new ArrayList<Task>();
 
         if (config.generateFeatures().isPresent()) {
@@ -93,17 +61,8 @@ public class HashGNNFactory<CONFIG extends HashGNNConfig> extends GraphAlgorithm
         }
 
         return Tasks.task(
-            taskName(),
+            AlgorithmLabel.HashGNN.asString(),
             tasks
         );
-    }
-
-    public MemoryEstimation memoryEstimation(HashGNNParameters parameters) {
-        return new HashGNNMemoryEstimateDefinition(parameters).memoryEstimation();
-    }
-
-    @Override
-    public MemoryEstimation memoryEstimation(CONFIG config) {
-        return memoryEstimation(HashGNNConfigTransformer.toParameters(config));
     }
 }

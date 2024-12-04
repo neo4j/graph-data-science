@@ -30,6 +30,9 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.ResourceUtil;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.applications.algorithms.embeddings.NodeEmbeddingAlgorithms;
+import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
+import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.hsa.HugeSparseLongArray;
 import org.neo4j.gds.compat.TestLog;
@@ -272,6 +275,13 @@ class HashGNNTest {
     @ParameterizedTest
     @CsvSource(value = {"true", "false"})
     void shouldLogProgress(boolean dense) {
+        var log = new GdsTestLog();
+        var requestScopedDependencies = RequestScopedDependencies.builder()
+            .terminationFlag(TerminationFlag.RUNNING_TRUE)
+            .build();
+        var progressTrackerCreator = new ProgressTrackerCreator(log, requestScopedDependencies);
+        var nodeEmbeddingAlgorithms = new NodeEmbeddingAlgorithms(null, progressTrackerCreator, requestScopedDependencies.terminationFlag());
+
         var g = dense ? doubleGraph : binaryGraph;
 
         int embeddingDensity = 200;
@@ -290,12 +300,10 @@ class HashGNNTest {
         }
         var config = configBuilder.build();
 
-        var factory = new HashGNNFactory<>();
-        var progressTask = factory.progressTask(g, config);
-        var log = new GdsTestLog();
+        var progressTask = HashGNNTask.create(g, config);
         var progressTracker = new TaskProgressTracker(progressTask, log, new Concurrency(4), EmptyTaskRegistryFactory.INSTANCE);
 
-        factory.build(g, config, progressTracker).compute();
+        nodeEmbeddingAlgorithms.hashGnn(g, config, progressTracker);
 
         String logResource;
         if (dense) {
