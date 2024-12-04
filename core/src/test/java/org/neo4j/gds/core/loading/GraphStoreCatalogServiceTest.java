@@ -29,14 +29,11 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.config.GraphProjectConfig;
 
-import java.util.NoSuchElementException;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -100,19 +97,13 @@ class GraphStoreCatalogServiceTest {
             )
         );
 
-        try {
-            service.removeGraph(
-                CatalogRequest.of("some user", "some database"),
-                GraphName.parse("some graph"),
-                true
-            );
-
-            fail();
-        } catch (NoSuchElementException e) {
-            assertThat(e.getMessage()).isEqualTo(
-                "Graph with name `some graph` does not exist on database `some database`. It might exist on another database."
-            );
-        }
+        assertThatThrownBy(() -> service.removeGraph(
+            CatalogRequest.of("some user", "some database"),
+            GraphName.parse("some graph"),
+            true
+        )).isInstanceOf(GraphNotFoundException.class)
+            .hasMessageContaining(
+                "Graph with name `some graph` does not exist on database `some database`. It might exist on another database.");
     }
 
 }

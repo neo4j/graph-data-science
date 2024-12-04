@@ -39,7 +39,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
@@ -107,7 +106,7 @@ public final class GraphStoreCatalog {
 
         if (usersWithMatchingGraphs.isEmpty()) {
             // suggests only own graphs names
-            throw ownCatalog.graphNotFoundException(userCatalogKey);
+            throw new GraphNotFoundException(userCatalogKey);
         }
 
         var usernames = StringJoining.joinVerbose(
@@ -151,7 +150,7 @@ public final class GraphStoreCatalog {
 
         if (usersWithMatchingGraphs.isEmpty() && failOnMissing) {
             // suggests only own graphs names
-            throw ownCatalog.graphNotFoundException(userCatalogKey);
+            throw new GraphNotFoundException(userCatalogKey);
         }
 
         if (usersWithMatchingGraphs.size() > 1) {
@@ -297,7 +296,8 @@ public final class GraphStoreCatalog {
         return userCatalogs.getOrDefault(username, UserCatalog.EMPTY);
     }
 
-    public record GraphStoreCatalogEntryWithUsername(GraphStoreCatalogEntry catalogEntry, String username) {}
+    public record GraphStoreCatalogEntryWithUsername(GraphStoreCatalogEntry catalogEntry, String username) {
+    }
 
     static class UserCatalog {
 
@@ -332,7 +332,11 @@ public final class GraphStoreCatalog {
                 throw new IllegalArgumentException("Both name and graph store must be not null");
             }
 
-            GraphStoreCatalogEntry graphStoreCatalogEntry = new GraphStoreCatalogEntry(graphStore, config, new EphemeralResultStore());
+            GraphStoreCatalogEntry graphStoreCatalogEntry = new GraphStoreCatalogEntry(
+                graphStore,
+                config,
+                new EphemeralResultStore()
+            );
 
             if (graphsByName.containsKey(userCatalogKey)) {
                 throw new IllegalStateException(
@@ -369,22 +373,11 @@ public final class GraphStoreCatalog {
             var graphStoreWithConfig = graphsByName.get(userCatalogKey);
 
             if (graphStoreWithConfig == null && failOnMissing) {
-                throw graphNotFoundException(userCatalogKey);
+                GraphNotFoundException result;
+                throw new GraphNotFoundException(userCatalogKey);
             }
 
             return graphStoreWithConfig;
-        }
-
-        private NoSuchElementException graphNotFoundException(UserCatalogKey userCatalogKey) {
-            var graphName = userCatalogKey.graphName();
-
-            return new NoSuchElementException(
-                formatWithLocale(
-                    "Graph with name `%s` does not exist on database `%s`. It might exist on another database.",
-                    graphName,
-                    userCatalogKey.databaseName()
-                )
-            );
         }
 
         private Optional<Map<String, Object>> getDegreeDistribution(UserCatalogKey userCatalogKey) {

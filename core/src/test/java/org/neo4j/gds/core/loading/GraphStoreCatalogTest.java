@@ -31,7 +31,6 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.gdl.GdlFactory;
 
-import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -429,7 +428,7 @@ class GraphStoreCatalogTest {
         var dummyDatabaseId = DatabaseId.of("mydatabase");
 
         // test the get code path
-        assertThatExceptionOfType(NoSuchElementException.class)
+        assertThatExceptionOfType(GraphNotFoundException.class)
             .isThrownBy(() -> GraphStoreCatalog.get(
                 CatalogRequest.of(USER_NAME, dummyDatabaseId),
                 "myGraph"
@@ -437,7 +436,7 @@ class GraphStoreCatalogTest {
             .withMessage("Graph with name `myGraph` does not exist on database `mydatabase`. It might exist on another database.");
 
         // test the drop code path
-        assertThatExceptionOfType(NoSuchElementException.class)
+        assertThatExceptionOfType(GraphNotFoundException.class)
             .isThrownBy(() -> GraphStoreCatalog.remove(
                 CatalogRequest.of(USER_NAME, dummyDatabaseId),
                 "myGraph",
