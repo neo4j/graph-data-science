@@ -8,7 +8,27 @@ The Neo4j Graph Data Science library is available as a link:https://neo4j.com/do
 docker run -it --rm \
   --publish=7474:7474 --publish=7687:7687 \
   --user="$(id -u):$(id -g)" \
-  -e NEO4J_AUTH=none \
+  --env NEO4J_AUTH=none \
   --env NEO4J_PLUGINS='["graph-data-science"]' \
   neo4j:latest
 ----
+
+== Enterprise edition
+
+You can use the following command to run the latest version of Neo4j Enterprise with GDS Enterprise:
+
+[source, shell]
+----
+docker run -it --rm \
+  --publish=7474:7474 --publish=7687:7687 \
+  --user="$(id -u):$(id -g)" \
+  --volume=$HOME/neo4j/licenses:/licenses \
+  --env NEO4J_AUTH=none \
+  --env NEO4J_PLUGINS='["graph-data-science"]' \
+  --env NEO4J_ACCEPT_LICENSE_AGREEMENT=yes \
+  --env NEO4J_gds_enterprise_license__file=/licenses/gds \
+  neo4j:enterprise
+----
+
+The command expects the GDS Enterprise license file at `$HOME/neo4j/licenses`.
+For more details on how to obtain a GDS Enterprise licence, please visit xref:installation/installation-enterprise-edition.adoc[].
