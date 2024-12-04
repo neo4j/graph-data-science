@@ -39,6 +39,11 @@ import org.neo4j.internal.kernel.api.PropertyCursor;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.storageengine.api.PropertySelection;
 import org.neo4j.storageengine.api.Reference;
+import org.neo4j.values.storable.DoubleArray;
+import org.neo4j.values.storable.FloatArray;
+import org.neo4j.values.storable.FloatingPointValue;
+import org.neo4j.values.storable.IntegralValue;
+import org.neo4j.values.storable.LongArray;
 import org.neo4j.values.storable.Value;
 
 import java.util.ArrayList;
@@ -50,6 +55,7 @@ import java.util.function.BiConsumer;
 import static java.util.stream.Collectors.toMap;
 import static org.neo4j.gds.core.GraphDimensions.ANY_LABEL;
 import static org.neo4j.gds.core.GraphDimensions.IGNORE;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class NativeNodePropertyImporter {
 
@@ -143,6 +149,7 @@ public final class NativeNodePropertyImporter {
             Value value = propertyCursor.propertyValue();
 
             for (NodePropertiesFromStoreBuilder builder : builders) {
+                verifyValueType(value);
                 var gdsValue = GdsNeo4jValueConverter.toValue(value);
                 builder.set(neoNodeId, gdsValue);
                 propertiesImported++;
@@ -150,6 +157,21 @@ public final class NativeNodePropertyImporter {
         }
 
         return propertiesImported;
+    }
+
+    private void verifyValueType(Value value) {
+        if (!(
+            value instanceof IntegralValue ||
+                value instanceof FloatingPointValue ||
+                value instanceof LongArray ||
+                value instanceof DoubleArray ||
+                value instanceof FloatArray
+        )) {
+            throw new UnsupportedOperationException(formatWithLocale(
+                "Loading of values of type %s is currently not supported",
+                value.getTypeName()
+            ));
+        }
     }
 
     public static final class Builder {
