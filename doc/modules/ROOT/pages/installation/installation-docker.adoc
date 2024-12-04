@@ -31,4 +31,4 @@ docker run -it --rm \
 ----
 
 The command expects the GDS Enterprise license file at `$HOME/neo4j/licenses`.
-For more details on how to obtain a GDS Enterprise licence, please visit xref:installation/installation-enterprise-edition.adoc[].
+See xref:installation/installation-enterprise-edition.adoc[] for more details on how to obtain a GDS Enterprise license.
