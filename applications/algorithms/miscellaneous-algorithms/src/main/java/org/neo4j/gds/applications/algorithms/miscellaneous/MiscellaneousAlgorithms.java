@@ -50,13 +50,13 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-class MiscellaneousAlgorithms {
+public class MiscellaneousAlgorithms {
     private final AlgorithmMachinery algorithmMachinery = new AlgorithmMachinery();
 
     private final ProgressTrackerCreator progressTrackerCreator;
     private final TerminationFlag terminationFlag;
 
-    MiscellaneousAlgorithms(ProgressTrackerCreator progressTrackerCreator, TerminationFlag terminationFlag) {
+    public MiscellaneousAlgorithms(ProgressTrackerCreator progressTrackerCreator, TerminationFlag terminationFlag) {
         this.progressTrackerCreator = progressTrackerCreator;
         this.terminationFlag = terminationFlag;
     }
@@ -150,7 +150,7 @@ class MiscellaneousAlgorithms {
         );
     }
 
-    SingleTypeRelationships toUndirected(GraphStore graphStore, ToUndirectedConfig configuration) {
+    public SingleTypeRelationships toUndirected(GraphStore graphStore, ToUndirectedConfig configuration) {
         var task = Tasks.task(
             AlgorithmLabel.ToUndirected.asString(),
             Tasks.leaf("Create Undirected Relationships", graphStore.nodeCount()),
