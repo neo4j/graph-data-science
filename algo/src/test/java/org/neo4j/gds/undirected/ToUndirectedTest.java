@@ -26,11 +26,15 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
+import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
+import org.neo4j.gds.applications.algorithms.miscellaneous.MiscellaneousAlgorithms;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.loading.SingleTypeRelationships;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
@@ -312,6 +316,16 @@ class ToUndirectedTest {
     @Test
     void shouldLogProgress() {
         var log = new GdsTestLog();
+        var requestScopedDependencies = RequestScopedDependencies.builder()
+            .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
+            .terminationFlag(TerminationFlag.RUNNING_TRUE)
+            .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
+            .build();
+        var progressTrackerCreator = new ProgressTrackerCreator(log, requestScopedDependencies);
+        var miscellaneousAlgorithms = new MiscellaneousAlgorithms(
+            progressTrackerCreator,
+            requestScopedDependencies.terminationFlag()
+        );
 
         var config = ToUndirectedConfigImpl
             .builder()
@@ -319,15 +333,7 @@ class ToUndirectedTest {
             .relationshipType("T1")
             .mutateRelationshipType("T2")
             .build();
-
-        ToUndirected toUndirected = new ToUndirectedAlgorithmFactory().build(
-            directedGraphStore,
-            config,
-            log,
-            EmptyTaskRegistryFactory.INSTANCE
-        );
-
-        toUndirected.compute();
+        miscellaneousAlgorithms.toUndirected(directedGraphStore, config);
 
         var messagesInOrder = log.getMessages(INFO);
 

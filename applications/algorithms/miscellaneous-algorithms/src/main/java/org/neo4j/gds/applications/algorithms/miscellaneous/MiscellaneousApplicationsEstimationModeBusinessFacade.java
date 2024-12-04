@@ -77,6 +77,21 @@ public class MiscellaneousApplicationsEstimationModeBusinessFacade {
     }
 
     public MemoryEstimation toUndirected(ToUndirectedConfig configuration) {
-        return new ToUndirectedMemoryEstimateDefinition(ToUndirectedConfigTransformer.toMemoryEstimateParameters(configuration)).memoryEstimation();
+        var parameters = ToUndirectedConfigTransformer.toMemoryEstimateParameters(configuration);
+
+        return new ToUndirectedMemoryEstimateDefinition(parameters).memoryEstimation();
+    }
+
+    public MemoryEstimateResult toUndirected(
+        ToUndirectedConfig configuration,
+        Object graphNameOrConfiguration
+    ) {
+        var memoryEstimation = toUndirected(configuration);
+
+        return algorithmEstimationTemplate.estimate(
+            configuration,
+            graphNameOrConfiguration,
+            memoryEstimation
+        );
     }
 }
