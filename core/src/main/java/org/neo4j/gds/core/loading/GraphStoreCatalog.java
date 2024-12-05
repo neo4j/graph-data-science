@@ -267,11 +267,21 @@ public final class GraphStoreCatalog {
     }
 
     public static void removeAllLoadedGraphs() {
-        userCatalogs.clear();
+        userCatalogs.forEach((username, userCatalog) -> {
+            userCatalog.graphsByName.forEach(((userCatalogKey, graphStoreCatalogEntry) -> {
+                userCatalog.remove(userCatalogKey, __ -> {}, false);
+            }));
+        });
     }
 
     public static void removeAllLoadedGraphs(DatabaseId databaseId) {
-        userCatalogs.forEach((user, userCatalog) -> userCatalog.remove(databaseId.databaseName()));
+        userCatalogs.forEach((user, userCatalog) -> {
+            userCatalog.graphsByName.forEach(((userCatalogKey, graphStoreCatalogEntry) -> {
+                if (databaseId.databaseName().equals(userCatalogKey.databaseName())) {
+                    userCatalog.remove(userCatalogKey, __ -> {}, false);
+                }
+            }));
+        });
     }
 
     public static Collection<GraphStoreCatalogEntry> getGraphStores(String username) {
@@ -428,10 +438,6 @@ public final class GraphStoreCatalog {
                     return Boolean.TRUE;
                 })
                 .orElse(Boolean.FALSE);
-        }
-
-        private void remove(String databaseName) {
-            graphsByName.keySet().removeIf(userCatalogKey -> userCatalogKey.databaseName().equals(databaseName));
         }
 
         private Stream<GraphStoreCatalogEntryWithUsername> streamGraphStores(String userName) {
