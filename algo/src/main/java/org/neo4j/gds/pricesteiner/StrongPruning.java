@@ -38,6 +38,9 @@ public class StrongPruning {
     private final HugeDoubleArray parentCostArray;
     private final ProgressTracker progressTracker;
     private final TerminationFlag terminationFlag;
+    private long effectiveNodeCount;
+    private double sumOfPrizes;
+    private double totalWeight;
 
     public StrongPruning(TreeStructure treeStructure,
         BitSet activeUnprunedOriginalNodes,
@@ -53,15 +56,17 @@ public class StrongPruning {
         this.progressTracker = progressTracker;
         this.terminationFlag = terminationFlag;
         parentArray.fill(PrizeSteinerTreeResult.PRUNED);
-
+        effectiveNodeCount = activeOriginalNodes.cardinality();
     }
 
     void performPruning(){
 
         progressTracker.beginSubTask("Pruning Phase");
-        if (activeOriginalNodes.cardinality() ==1){
+        if (activeOriginalNodes.cardinality() == 1){
             var singleActiveNode = activeOriginalNodes.nextSetBit(0);
             parentArray.set(singleActiveNode, PrizeSteinerTreeResult.ROOT);
+            effectiveNodeCount=1;
+            sumOfPrizes = prizes.applyAsDouble(singleActiveNode);
         }
         else {
             HugeLongArray queue = HugeLongArray.newArray(activeOriginalNodes.cardinality());
@@ -84,10 +89,12 @@ public class StrongPruning {
                 var nextLeaf = queue.get(currentPos++);
                 var parent = new MutableLong(-1);
                 var parentCost = new MutableDouble(-1);
-                dp.addTo(nextLeaf, prizes.applyAsDouble(nextLeaf));
+                double prizeOfNextLeaf = prizes.applyAsDouble(nextLeaf);
+                dp.addTo(nextLeaf, prizeOfNextLeaf);
                 degrees.set(nextLeaf, 0);
                 progressTracker.logProgress();
 
+                sumOfPrizes +=  prizeOfNextLeaf;
                 tree.forEachRelationship(nextLeaf, 1.0, (s, t, w) -> {
                     if (degrees.get(t) > 0) {
                         parent.set(t);
@@ -100,7 +107,8 @@ public class StrongPruning {
                 var actualParent = parent.get();
 
                 parentArray.set(nextLeaf, PrizeSteinerTreeResult.ROOT);
-                if (bestSolutionIndex == -1 || Double.compare(dp.get(bestSolutionIndex), dp.get(nextLeaf))< 0 ){
+
+                if (bestSolutionIndex == -1 || Double.compare(dp.get(bestSolutionIndex), dp.get(nextLeaf)) < 0 ){
                     bestSolutionIndex = nextLeaf;
                 }
 
@@ -113,6 +121,7 @@ public class StrongPruning {
                     dp.addTo(actualParent, dp.get(nextLeaf) - actualParentCost);
                     parentArray.set(nextLeaf, actualParent);
                     parentCostArray.set(nextLeaf, actualParentCost);
+                    totalWeight+= actualParentCost;
                 }
 
                 degrees.addTo(actualParent, -1);
@@ -132,13 +141,18 @@ public class StrongPruning {
 
     void pruneUnnecessarySubTrees(long bestSolutionIndex, HugeLongArray helpingArray, HugeLongArray parentArray){
         for (long u=0;u<treeStructure.tree().nodeCount();++u){
-            if (parentArray.get(u) == PrizeSteinerTreeResult.ROOT  && u!= bestSolutionIndex ){
+            if (parentArray.get(u) == PrizeSteinerTreeResult.ROOT  && u!= bestSolutionIndex){
                 pruneSubtree(u,helpingArray,parentArray);
             }
         }
     }
     PrizeSteinerTreeResult resultTree(){
-            return  new PrizeSteinerTreeResult(parentArray,parentCostArray);
+        return new PrizeSteinerTreeResult(parentArray,
+                parentCostArray,
+                effectiveNodeCount,
+                totalWeight,
+                sumOfPrizes
+        );
     }
 
     private void pruneSubtree(long node, HugeLongArray helpingArray,HugeLongArray parents){
@@ -153,10 +167,13 @@ public class StrongPruning {
             progressTracker.logProgress();
 
             parents.set(currentNode, PrizeSteinerTreeResult.PRUNED);
+            effectiveNodeCount--;
+            sumOfPrizes -= prizes.applyAsDouble(currentNode);
 
-            tree.forEachRelationship(currentNode, (s,t)->{
+            tree.forEachRelationship(currentNode, 1.0,(s,t,w)->{
                 if (parents.get(t)==s){
                     helpingArray.set(position.getAndIncrement(),t);
+                    totalWeight -= w;
                 }
                 return true;
             });

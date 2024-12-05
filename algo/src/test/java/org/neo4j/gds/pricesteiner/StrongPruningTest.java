@@ -77,10 +77,19 @@ class StrongPruningTest {
 
         @Test
         void shouldPruneCorrectly(){
+            var bitSet = new BitSet(graph.nodeCount());
+            for (int i = 0; i < graph.nodeCount(); ++i) {
+                bitSet.set(i);
+            }
+
             var strongPruning = new StrongPruning(
-                new TreeStructure(graph,  null, graph.nodeCount()),
-                null,
-               (x)->2,
+                new TreeStructure(
+                    graph,
+                    null,
+                    graph.nodeCount()
+                ),
+                bitSet,
+                (x) -> 2,
                 ProgressTracker.NULL_TRACKER,
                 TerminationFlag.RUNNING_TRUE
             );
@@ -107,9 +116,6 @@ class StrongPruningTest {
             assertThat(parents.get(a.apply(7))).isEqualTo(PrizeSteinerTreeResult.PRUNED);
             assertThat(parents.get(a.apply(8))).isEqualTo(a.apply(5));
             assertThat(parents.get(a.apply(9))).isEqualTo(PrizeSteinerTreeResult.PRUNED);
-
-
-
 
         }
 
@@ -155,6 +161,10 @@ class StrongPruningTest {
             assertThat(resultTree.parentArray().get(graph.toMappedNodeId("a9"))).isEqualTo(PrizeSteinerTreeResult.PRUNED);
             assertThat(resultTree.parentArray().get(graph.toMappedNodeId("a3"))).isEqualTo(PrizeSteinerTreeResult.PRUNED);
 
+            assertThat(resultTree.effectiveNodeCount()).isEqualTo(5);
+            assertThat(resultTree.sumOfPrizes()).isEqualTo(28.0);
+            assertThat(resultTree.totalWeight()).isEqualTo(15.0);
+
         }
     }
 
@@ -195,7 +205,6 @@ class StrongPruningTest {
                 prizes::get,
                 ProgressTracker.NULL_TRACKER,
                 TerminationFlag.RUNNING_TRUE
-
 
             );
             strongPruning.performPruning();
@@ -317,8 +326,8 @@ class StrongPruningTest {
             strongPruning.performPruning();
 
             var sp=strongPruning.resultTree();
-        var parents = sp.parentArray();
-        var costs = sp.relationshipToParentCost();
+            var parents = sp.parentArray();
+            var costs = sp.relationshipToParentCost();
             LongToDoubleFunction costSupplier =  e -> {
                 if (parents.get(e) == PrizeSteinerTreeResult.ROOT )
                     return  0;
@@ -332,9 +341,11 @@ class StrongPruningTest {
             assertThat(parents.get(a3)).isEqualTo(PrizeSteinerTreeResult.PRUNED);
 
             double sum=costSupplier.applyAsDouble(a1) +costSupplier.applyAsDouble(a4);
-
             assertThat(sum).isEqualTo(54);
 
+            assertThat(sp.effectiveNodeCount()).isEqualTo(2);
+            assertThat(sp.sumOfPrizes()).isEqualTo(170);
+            assertThat(sp.totalWeight()).isEqualTo(54.0);
 
         }
     }

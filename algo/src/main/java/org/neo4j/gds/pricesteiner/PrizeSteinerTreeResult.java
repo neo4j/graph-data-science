@@ -24,7 +24,10 @@ import org.neo4j.gds.collections.ha.HugeLongArray;
 
 public record PrizeSteinerTreeResult(
     HugeLongArray parentArray,
-    HugeDoubleArray relationshipToParentCost
+    HugeDoubleArray relationshipToParentCost,
+    long effectiveNodeCount,
+    double totalWeight,
+    double sumOfPrizes
 ) {
     public static final long  PRUNED=-2;
     public static final long  ROOT=-1;

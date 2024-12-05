@@ -33,8 +33,8 @@ class PrizeSteinerTreeMemoryEstimateDefinitionTest {
 
     static Stream<Arguments> memoryEstimationTuples() {
         return Stream.of(
-            arguments(100_000,500_000, 56_439_177L, 62_418_784L),
-            arguments(100_000,2_000_000, 146_439_177L, 152_418_784L)
+            arguments(100_000,500_000, 56_439_201L, 62_418_808L),
+            arguments(100_000,2_000_000, 146_439_201L, 152_418_808L)
         );
     }
 
