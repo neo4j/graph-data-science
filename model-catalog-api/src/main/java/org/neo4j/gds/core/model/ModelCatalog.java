@@ -22,7 +22,6 @@ package org.neo4j.gds.core.model;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.core.model.Model.CustomInfo;
 import org.neo4j.gds.model.ModelConfig;
-import org.neo4j.graphdb.GraphDatabaseService;
 
 import java.nio.file.Path;
 import java.util.Collection;
@@ -61,10 +60,6 @@ public interface ModelCatalog {
     Collection<Model<?, ?, ?>> list(String username);
 
     Model<?, ?, ?> publish(String username, String modelName);
-
-    void checkLicenseBeforeStoreModel(GraphDatabaseService db, String detail);
-
-    Path getModelDirectory(GraphDatabaseService db);
 
     Model<?, ?, ?> store(String username, String modelName, Path modelDir);
 
@@ -145,12 +140,6 @@ public interface ModelCatalog {
         public Model<?, ?, ?> publish(String username, String modelName) {
             return null;
         }
-
-        @Override
-        public void checkLicenseBeforeStoreModel(GraphDatabaseService db, String detail) { }
-
-        @Override
-        public Path getModelDirectory(GraphDatabaseService db) { return null; }
 
         @Override
         public Model<?, ?, ?> store(String username, String modelName, Path modelDir) { return null; }

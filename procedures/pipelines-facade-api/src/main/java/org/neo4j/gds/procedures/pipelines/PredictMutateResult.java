@@ -20,7 +20,6 @@
 package org.neo4j.gds.procedures.pipelines;
 
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.procedures.algorithms.results.StandardMutateResult;
 
 import java.util.Map;
@@ -53,18 +52,5 @@ public final class PredictMutateResult extends StandardMutateResult {
             0,
             configurationMap
         );
-    }
-
-    public static class Builder extends AbstractResultBuilder<PredictMutateResult> {
-        @Override
-        public PredictMutateResult build() {
-            return new PredictMutateResult(
-                preProcessingMillis,
-                computeMillis,
-                mutateMillis,
-                nodePropertiesWritten,
-                config.toMap()
-            );
-        }
     }
 }

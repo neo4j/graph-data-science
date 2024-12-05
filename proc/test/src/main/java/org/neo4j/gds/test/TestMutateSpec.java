@@ -20,7 +20,6 @@
 package org.neo4j.gds.test;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
-import org.neo4j.gds.MutatePropertyComputationResultConsumer;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
 import org.neo4j.gds.mem.MemoryEstimation;

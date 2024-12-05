@@ -19,13 +19,8 @@
  */
 package org.neo4j.gds.procedures.pipelines;
 
-import org.HdrHistogram.ConcurrentDoubleHistogram;
-import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.core.ProcedureConstants;
 import org.neo4j.gds.procedures.algorithms.results.StandardMutateResult;
-import org.neo4j.gds.result.AbstractResultBuilder;
-import org.neo4j.gds.result.HistogramUtils;
 
 import java.util.Collections;
 import java.util.Map;
@@ -67,48 +62,5 @@ public final class MutateResult extends StandardMutateResult {
             Collections.emptyMap(),
             Collections.emptyMap()
         );
-    }
-
-    public static class Builder extends AbstractResultBuilder<MutateResult> {
-        private Map<String, Object> samplingStats = null;
-        @Nullable
-        private ConcurrentDoubleHistogram histogram = null;
-
-        @Override
-        public MutateResult build() {
-            return new MutateResult(
-                preProcessingMillis,
-                computeMillis,
-                mutateMillis,
-                relationshipsWritten,
-                config.toMap(),
-                histogram == null ? Map.of() : HistogramUtils.similaritySummary(histogram),
-                samplingStats
-            );
-        }
-
-        public Builder withHistogram() {
-            if (histogram != null) {
-                return this;
-            }
-
-            this.histogram = new ConcurrentDoubleHistogram(ProcedureConstants.HISTOGRAM_PRECISION_DEFAULT);
-            return this;
-        }
-
-        public void recordHistogramValue(double value) {
-            if (histogram == null) {
-                return;
-            }
-
-            //HISTOGRAM_PRECISION_DEFAULT hence numberOfSignificantValueDigits is 1E-5, so it can't separate 0 and 1E-5
-            //Therefore we can floor at 1E-6 and smaller probabilities between 0 and 1E-6 is unnecessary.
-            if (value >= 1E-6) histogram.recordValue(value); else histogram.recordValue(1E-6);
-        }
-
-        public Builder withSamplingStats(Map<String, Object> samplingStats) {
-            this.samplingStats = samplingStats;
-            return this;
-        }
     }
 }
