@@ -29,6 +29,8 @@ import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
 import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaStatsConfig;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.paths.traverse.BfsStatsConfig;
+import org.neo4j.gds.pcst.PCSTStatsConfig;
+import org.neo4j.gds.pricesteiner.PrizeSteinerTreeResult;
 import org.neo4j.gds.spanningtree.SpanningTree;
 import org.neo4j.gds.spanningtree.SpanningTreeStatsConfig;
 import org.neo4j.gds.steiner.SteinerTreeResult;
@@ -40,6 +42,7 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.BFS;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.BellmanFord;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.DeltaStepping;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.PCST;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.RandomWalk;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.SteinerTree;
 
@@ -104,6 +107,21 @@ public class PathFindingAlgorithmsStatsModeBusinessFacade {
         );
     }
 
+    public <RESULT> RESULT pcst(
+        GraphName graphName,
+        PCSTStatsConfig configuration,
+        StatsResultBuilder<PrizeSteinerTreeResult, RESULT> resultBuilder
+    ) {
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
+            graphName,
+            configuration,
+            PCST,
+            estimationFacade::pcst,
+            (graph, __) -> pathFindingAlgorithms.pcst(graph, configuration),
+            resultBuilder
+        );
+    }
+
     public <RESULT> RESULT randomWalk(
         GraphName graphName,
         RandomWalkStatsConfig configuration,
@@ -148,4 +166,6 @@ public class PathFindingAlgorithmsStatsModeBusinessFacade {
             resultBuilder
         );
     }
+
+
 }
