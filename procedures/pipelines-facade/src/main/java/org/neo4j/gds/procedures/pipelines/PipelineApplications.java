@@ -78,7 +78,7 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.config.RelationshipWeightConfig.RELATIONSHIP_WEIGHT_PROPERTY;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-class PipelineApplications {
+public class PipelineApplications {
     private final Log log;
     private final GraphStoreCatalogService graphStoreCatalogService;
     private final GraphStoreService graphStoreService;

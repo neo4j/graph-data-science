@@ -22,7 +22,6 @@ package org.neo4j.gds.procedures.pipelines;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.ml.models.BaseModelData;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPipelineBaseTrainConfig;
 
@@ -37,18 +36,6 @@ public class NodeRegressionPredictConfigPreProcessor {
     NodeRegressionPredictConfigPreProcessor(ModelCatalog modelCatalog, User user) {
         this.modelCatalog = modelCatalog;
         this.user = user;
-    }
-
-    public static void enhanceInputWithPipelineParameters(
-        Map<String, Object> userInput,
-        ExecutionContext executionContext
-    ) {
-        var modelCatalog = executionContext.modelCatalog();
-        var user = new User(executionContext.username(), executionContext.isGdsAdmin());
-
-        var preProcessor = new NodeRegressionPredictConfigPreProcessor(modelCatalog, user);
-
-        preProcessor.enhanceInputWithPipelineParameters(userInput);
     }
 
     void enhanceInputWithPipelineParameters(Map<String, Object> userInput) {

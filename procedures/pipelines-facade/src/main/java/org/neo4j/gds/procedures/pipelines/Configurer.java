@@ -30,7 +30,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-class Configurer {
+public class Configurer {
     private final PipelineRepository pipelineRepository;
     private final User user;
 

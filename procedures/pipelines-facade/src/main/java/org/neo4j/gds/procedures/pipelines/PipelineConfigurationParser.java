@@ -42,7 +42,7 @@ import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-class PipelineConfigurationParser {
+public class PipelineConfigurationParser {
     private final User user;
 
     PipelineConfigurationParser(User user) {

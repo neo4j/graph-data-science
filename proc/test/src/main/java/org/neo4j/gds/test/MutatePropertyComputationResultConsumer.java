@@ -17,8 +17,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds;
+package org.neo4j.gds.test;
 
+import org.neo4j.gds.Algorithm;
+import org.neo4j.gds.GraphStoreUpdater;
+import org.neo4j.gds.MutateComputationResultConsumer;
+import org.neo4j.gds.MutateNodePropertyListFunction;
+import org.neo4j.gds.ResultBuilderFunction;
 import org.neo4j.gds.config.MutateNodePropertyConfig;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
@@ -28,7 +33,7 @@ public class MutatePropertyComputationResultConsumer<ALGO extends Algorithm<ALGO
     extends MutateComputationResultConsumer<ALGO, ALGO_RESULT, CONFIG, RESULT> {
     private final MutateNodePropertyListFunction<ALGO, ALGO_RESULT, CONFIG> nodePropertyListFunction;
 
-    public MutatePropertyComputationResultConsumer(
+    MutatePropertyComputationResultConsumer(
         MutateNodePropertyListFunction<ALGO, ALGO_RESULT, CONFIG> nodePropertyListFunction,
         ResultBuilderFunction<ALGO, ALGO_RESULT, CONFIG, RESULT> resultBuilderFunction
     ) {
