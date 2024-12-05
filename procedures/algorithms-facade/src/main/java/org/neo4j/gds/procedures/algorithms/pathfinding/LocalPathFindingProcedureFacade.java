@@ -53,6 +53,7 @@ import org.neo4j.gds.paths.yens.config.ShortestPathYensStreamConfig;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensWriteConfig;
 import org.neo4j.gds.pcst.PCSTStatsConfig;
 import org.neo4j.gds.pcst.PCSTStreamConfig;
+import org.neo4j.gds.pcst.PCSTWriteConfig;
 import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.BFSMutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.BellmanFordMutateStub;
@@ -629,6 +630,37 @@ public final class LocalPathFindingProcedureFacade implements PathFindingProcedu
             Stream.of(
                 estimationModeBusinessFacade.pcst(
                     configurationParser.parseConfiguration(algorithmConfiguration, PCSTStatsConfig::of),
+                    graphNameOrConfiguration
+                )
+            );
+    }
+
+    @Override
+    public Stream<PrizeCollectingSteinerTreeWriteResult> prizeCollectingSteinerTreeWrite(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var config = configurationParser.parseConfiguration(configuration, PCSTWriteConfig::of);
+        var resultBuilder  = new PrizeCollectingSteinerTreeResultBuilderForWriteMode(config);
+
+        return  Stream.of(
+                writeModeBusinessFacade.pcst(
+                GraphName.parse(graphName),
+                config,
+                resultBuilder
+            )
+        );
+    }
+
+    @Override
+    public Stream<MemoryEstimateResult> prizeCollectingSteinerTreeWriteEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        return
+            Stream.of(
+                estimationModeBusinessFacade.pcst(
+                    configurationParser.parseConfiguration(algorithmConfiguration, PCSTWriteConfig::of),
                     graphNameOrConfiguration
                 )
             );

@@ -22,66 +22,62 @@ package org.neo4j.gds.applications.algorithms.pathfinding;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
 import org.neo4j.gds.applications.algorithms.machinery.WriteStep;
+import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 import org.neo4j.gds.core.utils.progress.JobId;
-import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
-import org.neo4j.gds.core.write.NodePropertyExporter;
-import org.neo4j.gds.kspanningtree.KSpanningTreeWriteConfig;
-import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.pcst.PCSTWriteConfig;
+import org.neo4j.gds.pricesteiner.PrizeSteinerTreeResult;
+import org.neo4j.gds.spanningtree.SpanningGraph;
 import org.neo4j.gds.spanningtree.SpanningTree;
 
-class KSpanningTreeWriteStep implements WriteStep<SpanningTree, Void> {
-    private final Log log;
+class PrizeCollectingSteinerTreeWriteStep implements WriteStep<PrizeSteinerTreeResult, RelationshipsWritten> {
     private final RequestScopedDependencies requestScopedDependencies;
+    private final PCSTWriteConfig configuration;
     private final WriteContext writeContext;
-    private final KSpanningTreeWriteConfig configuration;
 
-
-    KSpanningTreeWriteStep(
-        Log log,
+    PrizeCollectingSteinerTreeWriteStep(
         RequestScopedDependencies requestScopedDependencies,
         WriteContext writeContext,
-        KSpanningTreeWriteConfig configuration
+        PCSTWriteConfig configuration
     ) {
-        this.log = log;
         this.requestScopedDependencies = requestScopedDependencies;
-        this.writeContext = writeContext;
         this.configuration = configuration;
+        this.writeContext = writeContext;
     }
 
     @Override
-    public Void execute(
+    public RelationshipsWritten execute(
         Graph graph,
         GraphStore graphStore,
         ResultStore resultStore,
-        SpanningTree spanningTree,
+        PrizeSteinerTreeResult steinerTreeResult,
         JobId jobId
     ) {
-        var properties = new KSpanningTreeBackedNodePropertyValues(spanningTree, graph.nodeCount());
 
-        var progressTracker = new TaskProgressTracker(
-            NodePropertyExporter.baseTask(AlgorithmLabel.KSpanningTree.asString(), graph.nodeCount()),
-            log,
-            configuration.writeConcurrency(),
-            requestScopedDependencies.taskRegistryFactory()
+        var spanningTree = new SpanningTree(
+            -1,
+            graph.nodeCount(),
+            steinerTreeResult.effectiveNodeCount(),
+            steinerTreeResult.parentArray(),
+            nodeId -> steinerTreeResult.relationshipToParentCost().get(nodeId),
+            steinerTreeResult.totalWeight()
         );
+        var spanningGraph = new SpanningGraph(graph, spanningTree);
 
-        var nodePropertyExporter = writeContext.nodePropertyExporterBuilder()
-            .withIdMap(graph)
+        var relationshipExporter = writeContext.relationshipExporterBuilder()
+            .withGraph(spanningGraph)
+            .withIdMappingOperator(spanningGraph::toOriginalNodeId)
             .withTerminationFlag(requestScopedDependencies.terminationFlag())
-            .withProgressTracker(progressTracker)
+            .withProgressTracker(ProgressTracker.NULL_TRACKER)
             .withResultStore(configuration.resolveResultStore(resultStore))
             .withJobId(configuration.jobId())
             .build();
 
-        // effect
-        nodePropertyExporter.write(configuration.writeProperty(), properties);
+        relationshipExporter.write(configuration.writeRelationshipType(), configuration.writeProperty());
 
-        // reporting
-        // countsBuilder.withNodePropertiesWritten(...);
-        return null;
+        return new RelationshipsWritten(steinerTreeResult.effectiveNodeCount() - 1);
     }
 }

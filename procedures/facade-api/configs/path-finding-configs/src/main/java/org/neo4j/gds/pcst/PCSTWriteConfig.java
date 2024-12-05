@@ -17,30 +17,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.applications.algorithms.pathfinding;
+package org.neo4j.gds.pcst;
 
-import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
-import org.neo4j.gds.spanningtree.SpanningTree;
+import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.config.WritePropertyConfig;
+import org.neo4j.gds.config.WriteRelationshipConfig;
+import org.neo4j.gds.core.CypherMapWrapper;
 
-public class SpanningTreeBackedNodePropertyValues implements LongNodePropertyValues {
-    private final SpanningTree spanningTree;
-    private final long nodeCount;
+@Configuration
+public interface PCSTWriteConfig extends PCSTBaseConfig, WriteRelationshipConfig, WritePropertyConfig {
 
-    public SpanningTreeBackedNodePropertyValues(
-        SpanningTree spanningTree,
-        long nodeCount
-    ) {
-        this.nodeCount = nodeCount;
-        this.spanningTree = spanningTree;
-    }
-
-    @Override
-    public long nodeCount() {
-        return nodeCount;
-    }
-
-    @Override
-    public long longValue(long nodeId) {
-        return spanningTree.head(nodeId);
+    static PCSTWriteConfig of(CypherMapWrapper userInput) {
+        return new PCSTWriteConfigImpl(userInput);
     }
 }

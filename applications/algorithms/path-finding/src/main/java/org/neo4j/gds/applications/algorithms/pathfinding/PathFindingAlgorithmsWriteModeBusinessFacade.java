@@ -21,8 +21,8 @@ package org.neo4j.gds.applications.algorithms.pathfinding;
 
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
-import org.neo4j.gds.applications.algorithms.machinery.Computation;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
+import org.neo4j.gds.applications.algorithms.machinery.Computation;
 import org.neo4j.gds.applications.algorithms.machinery.Label;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
@@ -44,6 +44,8 @@ import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.paths.dijkstra.config.AllShortestPathsDijkstraWriteConfig;
 import org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraWriteConfig;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensWriteConfig;
+import org.neo4j.gds.pcst.PCSTWriteConfig;
+import org.neo4j.gds.pricesteiner.PrizeSteinerTreeResult;
 import org.neo4j.gds.spanningtree.SpanningTree;
 import org.neo4j.gds.spanningtree.SpanningTreeWriteConfig;
 import org.neo4j.gds.steiner.SteinerTreeResult;
@@ -56,6 +58,7 @@ import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Bel
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.DeltaStepping;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Dijkstra;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.KSpanningTree;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.PCST;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.SingleSourceDijkstra;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.SteinerTree;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Yens;
@@ -145,6 +148,24 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
             KSpanningTree,
             estimationFacade::kSpanningTree,
             (graph, __) -> pathFindingAlgorithms.kSpanningTree(graph, configuration),
+            writeStep,
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT pcst(
+        GraphName graphName,
+        PCSTWriteConfig configuration,
+        ResultBuilder<PCSTWriteConfig, PrizeSteinerTreeResult, RESULT, RelationshipsWritten> resultBuilder
+    ) {
+        var writeStep = new PrizeCollectingSteinerTreeWriteStep(requestScopedDependencies, writeContext, configuration);
+
+        return runAlgorithmAndWrite(
+            graphName,
+            configuration,
+            PCST,
+            estimationFacade::pcst,
+            (graph, __) -> pathFindingAlgorithms.pcst(graph, configuration),
             writeStep,
             resultBuilder
         );
