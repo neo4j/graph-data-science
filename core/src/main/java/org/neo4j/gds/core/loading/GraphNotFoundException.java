@@ -19,9 +19,11 @@
  */
 package org.neo4j.gds.core.loading;
 
+import java.util.NoSuchElementException;
+
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public class GraphNotFoundException extends RuntimeException {
+public class GraphNotFoundException extends NoSuchElementException {
     private final GraphStoreCatalog.UserCatalog.UserCatalogKey userCatalogKey;
 
     GraphNotFoundException(GraphStoreCatalog.UserCatalog.UserCatalogKey userCatalogKey) {
