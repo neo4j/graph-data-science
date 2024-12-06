@@ -20,7 +20,10 @@
 package org.neo4j.gds.doc;
 
 import org.neo4j.gds.functions.AsNodeFunc;
+import org.neo4j.gds.paths.prizesteiner.PrizeCollectingSteinerTreeMutateProc;
+import org.neo4j.gds.paths.prizesteiner.PrizeCollectingSteinerTreeStatsProc;
 import org.neo4j.gds.paths.prizesteiner.PrizeCollectingSteinerTreeStreamProc;
+import org.neo4j.gds.paths.prizesteiner.PrizeCollectingSteinerTreeWriteProc;
 
 import java.util.List;
 
@@ -34,7 +37,10 @@ class PrizeSteinerTreeDocTest extends SingleFileDocTestBase {
     @Override
     protected List<Class<?>> procedures() {
         return List.of(
-            PrizeCollectingSteinerTreeStreamProc.class
+            PrizeCollectingSteinerTreeStreamProc.class,
+            PrizeCollectingSteinerTreeStatsProc.class,
+            PrizeCollectingSteinerTreeMutateProc.class,
+            PrizeCollectingSteinerTreeWriteProc.class
         );
     }
 
