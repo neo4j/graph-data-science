@@ -132,7 +132,7 @@ public class PathFindingAlgorithmsEstimationModeBusinessFacade {
         return runEstimation(configuration, graphNameOrConfiguration, memoryEstimation);
     }
 
-    MemoryEstimation pcst() {
+    public MemoryEstimation pcst() {
         return new PrizeSteinerTreeMemoryEstimateDefinition().memoryEstimation();
     }
 

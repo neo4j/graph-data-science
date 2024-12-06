@@ -39,6 +39,8 @@ import org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraMutateConfig;
 import org.neo4j.gds.paths.traverse.BfsMutateConfig;
 import org.neo4j.gds.paths.traverse.DfsMutateConfig;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensMutateConfig;
+import org.neo4j.gds.pcst.PCSTMutateConfig;
+import org.neo4j.gds.pricesteiner.PrizeSteinerTreeResult;
 import org.neo4j.gds.spanningtree.SpanningTree;
 import org.neo4j.gds.spanningtree.SpanningTreeMutateConfig;
 import org.neo4j.gds.steiner.SteinerTreeMutateConfig;
@@ -147,6 +149,24 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
             DFS,
             estimationFacade::depthFirstSearch,
             (graph, __) -> pathFindingAlgorithms.depthFirstSearch(graph, configuration),
+            mutateStep,
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT pcst(
+        GraphName graphName,
+        PCSTMutateConfig configuration,
+        ResultBuilder<PCSTMutateConfig, PrizeSteinerTreeResult, RESULT, RelationshipsWritten> resultBuilder
+    ) {
+        var mutateStep = new PrizeCollectingSteinerTreeMutateStep(configuration);
+
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
+            graphName,
+            configuration,
+            SteinerTree,
+            estimationFacade::pcst,
+            (graph, __) -> pathFindingAlgorithms.pcst(graph, configuration),
             mutateStep,
             resultBuilder
         );

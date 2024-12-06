@@ -25,6 +25,7 @@ import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.BFSMutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.BellmanFordMutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.DFSMutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.DeltaSteppingMutateStub;
+import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.PrizeCollectingSteinerTreeMutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.RandomWalkMutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.SinglePairShortestPathAStarMutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.SinglePairShortestPathDijkstraMutateStub;
@@ -129,6 +130,7 @@ public interface PathFindingProcedureFacade {
 
     Stream<SteinerTreeStreamResult> prizeCollectingSteinerTreeStream(String graphName, Map<String, Object> configuration);
 
+    PrizeCollectingSteinerTreeMutateStub prizeCollectingSteinerTreeMutateStub();
 
     Stream<MemoryEstimateResult> prizeCollectingSteinerTreeStreamEstimate(
         Object graphNameOrConfiguration,

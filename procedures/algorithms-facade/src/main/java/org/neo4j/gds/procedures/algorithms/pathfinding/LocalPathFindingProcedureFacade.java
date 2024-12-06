@@ -63,6 +63,7 @@ import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.LocalBFSMutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.LocalBellmanFordMutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.LocalDFSMutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.LocalDeltaSteppingMutateStub;
+import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.LocalPrizeCollectingSteinerTreeMutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.LocalRandomWalkMutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.LocalSinglePairShortestPathAStarMutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.LocalSinglePairShortestPathDijkstraMutateStub;
@@ -70,6 +71,7 @@ import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.LocalSinglePairShor
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.LocalSingleSourceShortestPathDijkstraMutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.LocalSpanningTreeMutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.LocalSteinerTreeMutateStub;
+import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.PrizeCollectingSteinerTreeMutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.RandomWalkMutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.SinglePairShortestPathAStarMutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.SinglePairShortestPathDijkstraMutateStub;
@@ -117,6 +119,7 @@ public final class LocalPathFindingProcedureFacade implements PathFindingProcedu
     private final BFSMutateStub breadthFirstSearchMutateStub;
     private final DeltaSteppingMutateStub deltaSteppingMutateStub;
     private final DFSMutateStub depthFirstSearchMutateStub;
+    private final PrizeCollectingSteinerTreeMutateStub prizeCollectingSteinerTreeMutateStub;
     private final RandomWalkMutateStub randomWalkMutateStub;
     private final SinglePairShortestPathAStarMutateStub singlePairShortestPathAStarMutateStub;
     private final SinglePairShortestPathDijkstraMutateStub singlePairShortestPathDijkstraMutateStub;
@@ -140,6 +143,7 @@ public final class LocalPathFindingProcedureFacade implements PathFindingProcedu
         BFSMutateStub breadthFirstSearchMutateStub,
         DeltaSteppingMutateStub deltaSteppingMutateStub,
         DFSMutateStub depthFirstSearchMutateStub,
+        PrizeCollectingSteinerTreeMutateStub prizeCollectingSteinerTreeMutateStub,
         RandomWalkMutateStub randomWalkMutateStub,
         SinglePairShortestPathAStarMutateStub singlePairShortestPathAStarMutateStub,
         SinglePairShortestPathDijkstraMutateStub singlePairShortestPathDijkstraMutateStub,
@@ -162,6 +166,7 @@ public final class LocalPathFindingProcedureFacade implements PathFindingProcedu
         this.breadthFirstSearchMutateStub = breadthFirstSearchMutateStub;
         this.deltaSteppingMutateStub = deltaSteppingMutateStub;
         this.depthFirstSearchMutateStub = depthFirstSearchMutateStub;
+        this.prizeCollectingSteinerTreeMutateStub = prizeCollectingSteinerTreeMutateStub;
         this.randomWalkMutateStub = randomWalkMutateStub;
         this.singlePairShortestPathAStarMutateStub = singlePairShortestPathAStarMutateStub;
         this.singlePairShortestPathDijkstraMutateStub = singlePairShortestPathDijkstraMutateStub;
@@ -216,6 +221,13 @@ public final class LocalPathFindingProcedureFacade implements PathFindingProcedu
             estimationModeBusinessFacade
         );
 
+        var prizeCollectingSteinerTreeMutateStub = new LocalPrizeCollectingSteinerTreeMutateStub(
+            genericStub,
+            mutateModeBusinessFacade,
+            estimationModeBusinessFacade
+        );
+
+
         var randomWalkMutateStub = new LocalRandomWalkMutateStub(
             genericStub,
             mutateModeBusinessFacade,
@@ -264,6 +276,7 @@ public final class LocalPathFindingProcedureFacade implements PathFindingProcedu
             breadthFirstSearchMutateStub,
             deltaSteppingMutateStub,
             depthFirstSearchMutateStub,
+            prizeCollectingSteinerTreeMutateStub,
             randomWalkMutateStub,
             aStarStub,
             singlePairDijkstraStub,
@@ -593,6 +606,11 @@ public final class LocalPathFindingProcedureFacade implements PathFindingProcedu
     }
 
     @Override
+    public PrizeCollectingSteinerTreeMutateStub prizeCollectingSteinerTreeMutateStub() {
+        return prizeCollectingSteinerTreeMutateStub;
+    }
+
+    @Override
     public Stream<MemoryEstimateResult> prizeCollectingSteinerTreeStreamEstimate(
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
@@ -641,7 +659,7 @@ public final class LocalPathFindingProcedureFacade implements PathFindingProcedu
         Map<String, Object> configuration
     ) {
         var config = configurationParser.parseConfiguration(configuration, PCSTWriteConfig::of);
-        var resultBuilder  = new PrizeCollectingSteinerTreeResultBuilderForWriteMode(config);
+        var resultBuilder  = new PrizeCollectingSteinerTreeResultBuilderForWriteMode();
 
         return  Stream.of(
                 writeModeBusinessFacade.pcst(

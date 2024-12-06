@@ -17,30 +17,31 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.algorithms.pathfinding;
+package org.neo4j.gds.procedures.algorithms.pathfinding.stubs;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
-import org.neo4j.gds.pcst.PCSTWriteConfig;
+import org.neo4j.gds.pcst.PCSTMutateConfig;
 import org.neo4j.gds.pricesteiner.PrizeSteinerTreeResult;
+import org.neo4j.gds.procedures.algorithms.pathfinding.PrizeCollectingSteinerTreeMutateResult;
 
 import java.util.Optional;
 
-class PrizeCollectingSteinerTreeResultBuilderForWriteMode implements ResultBuilder<PCSTWriteConfig,PrizeSteinerTreeResult, PrizeCollectingSteinerTreeWriteResult, RelationshipsWritten> {
+class PrizeCollectingSteinerTreeResultBuilderForMutateMode implements ResultBuilder<PCSTMutateConfig,PrizeSteinerTreeResult, PrizeCollectingSteinerTreeMutateResult, RelationshipsWritten> {
 
     @Override
-    public PrizeCollectingSteinerTreeWriteResult build(
+    public PrizeCollectingSteinerTreeMutateResult build(
         Graph graph,
-        PCSTWriteConfig configuration,
+        PCSTMutateConfig configuration,
         Optional<PrizeSteinerTreeResult> result,
         AlgorithmProcessingTimings timings,
         Optional<RelationshipsWritten> relationshipsWritten
     ) {
         return
             result.map(
-                treeResult-> new PrizeCollectingSteinerTreeWriteResult(
+                treeResult-> new PrizeCollectingSteinerTreeMutateResult(
                     timings.preProcessingMillis,
                     timings.computeMillis,
                     timings.sideEffectMillis,
@@ -49,6 +50,6 @@ class PrizeCollectingSteinerTreeResultBuilderForWriteMode implements ResultBuild
                     treeResult.sumOfPrizes(),
                     relationshipsWritten.map(RelationshipsWritten::value).orElse(0L),
                     configuration.toMap()
-                )).orElse(PrizeCollectingSteinerTreeWriteResult.emptyFrom(timings, configuration.toMap()));
+                )).orElse(PrizeCollectingSteinerTreeMutateResult.emptyFrom(timings, configuration.toMap()));
     }
 }
