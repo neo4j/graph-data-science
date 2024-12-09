@@ -68,4 +68,4 @@ asciidoc:
     gds-docs-base-uri: https://neo4j.com/docs/graph-data-science
     page-add-notes-tags: eol
     # Version(s) to add the EOL banner to
-    page-add-notes-versions: ['2.5']
+    page-add-notes-versions: ['2.5', '2.7', '2.8', '2.9', '2.10', '2.11']
