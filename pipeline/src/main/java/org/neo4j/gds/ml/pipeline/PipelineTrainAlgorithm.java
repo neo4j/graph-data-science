@@ -58,8 +58,6 @@ public abstract class PipelineTrainAlgorithm<
 
     @Override
     public MODEL_RESULT compute() {
-        pipelineTrainer.setTerminationFlag(terminationFlag);
-
         pipeline.validateTrainingParameterSpace();
         pipeline.validateBeforeExecution(graphStore, config.nodeLabelIdentifiers(graphStore));
 

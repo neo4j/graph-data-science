@@ -76,7 +76,7 @@ public final class NodeClassificationTrain implements PipelineTrainer<NodeClassi
     private final LongMultiSet classCounts;
     private final NodeFeatureProducer<NodeClassificationPipelineTrainConfig> nodeFeatureProducer;
     private final ProgressTracker progressTracker;
-    private TerminationFlag terminationFlag = TerminationFlag.RUNNING_TRUE;
+    private final TerminationFlag terminationFlag;
 
     public static MemoryEstimation estimate(
         NodeClassificationTrainingPipeline pipeline,
@@ -118,7 +118,8 @@ public final class NodeClassificationTrain implements PipelineTrainer<NodeClassi
         NodeClassificationTrainingPipeline pipeline,
         NodeClassificationPipelineTrainConfig config,
         NodeFeatureProducer<NodeClassificationPipelineTrainConfig> nodeFeatureProducer,
-        ProgressTracker progressTracker
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
     ) {
         // we dont resolve the relationships as for extracting the classes they are irrelevant
         var nodesGraph = graphStore.getGraph(config.targetNodeLabelIdentifiers(graphStore));
@@ -140,7 +141,8 @@ public final class NodeClassificationTrain implements PipelineTrainer<NodeClassi
             classificationMetrics(metrics),
             classCounts,
             nodeFeatureProducer,
-            progressTracker
+            progressTracker,
+            terminationFlag
         );
     }
 
@@ -154,7 +156,8 @@ public final class NodeClassificationTrain implements PipelineTrainer<NodeClassi
         List<ClassificationMetric> classificationMetrics,
         LongMultiSet classCounts,
         NodeFeatureProducer<NodeClassificationPipelineTrainConfig> nodeFeatureProducer,
-        ProgressTracker progressTracker
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
     ) {
         this.pipeline = pipeline;
         this.nodeIdMap = nodeIdMap;
@@ -166,10 +169,6 @@ public final class NodeClassificationTrain implements PipelineTrainer<NodeClassi
         this.metrics = metrics;
         this.classCounts = classCounts;
         this.progressTracker = progressTracker;
-    }
-
-    @Override
-    public void setTerminationFlag(TerminationFlag terminationFlag) {
         this.terminationFlag = terminationFlag;
     }
 

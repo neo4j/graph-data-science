@@ -62,6 +62,7 @@ class NodeClassificationFacadeTest {
             null,
             null,
             null,
+            null,
             null
         );
         var facade = new LocalNodeClassificationFacade(null, null, null, applications);
@@ -105,6 +106,7 @@ class NodeClassificationFacadeTest {
             null,
             null,
             nodeClassificationPredictPipelineEstimator,
+            null,
             null,
             null,
             null,

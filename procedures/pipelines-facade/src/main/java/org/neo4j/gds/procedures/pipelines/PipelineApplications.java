@@ -62,8 +62,6 @@ import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationT
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationModelResult;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationPipelineTrainConfig;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationTrain;
-import org.neo4j.gds.ml.pipeline.nodePipeline.regression.NodeRegressionPipelineTrainConfig;
-import org.neo4j.gds.ml.pipeline.nodePipeline.regression.NodeRegressionTrainResult;
 import org.neo4j.gds.ml.pipeline.nodePipeline.regression.NodeRegressionTrainingPipeline;
 import org.neo4j.gds.model.ModelConfig;
 import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
@@ -115,6 +113,8 @@ public class PipelineApplications {
     private final TrainedLPPipelineModel trainedLPPipelineModel;
     private final TrainedNCPipelineModel trainedNCPipelineModel;
 
+    private final NodeRegressionTrainComputationFactory nodeRegressionTrainComputationFactory;
+
     PipelineApplications(
         Log log,
         GraphStoreCatalogService graphStoreCatalogService,
@@ -144,7 +144,8 @@ public class PipelineApplications {
         AlgorithmEstimationTemplate algorithmEstimationTemplate,
         AlgorithmProcessingTemplate algorithmProcessingTemplate,
         TrainedLPPipelineModel trainedLPPipelineModel,
-        TrainedNCPipelineModel trainedNCPipelineModel
+        TrainedNCPipelineModel trainedNCPipelineModel,
+        NodeRegressionTrainComputationFactory nodeRegressionTrainComputationFactory
     ) {
         this.log = log;
         this.graphStoreCatalogService = graphStoreCatalogService;
@@ -175,6 +176,7 @@ public class PipelineApplications {
         this.algorithmProcessingTemplate = algorithmProcessingTemplate;
         this.trainedLPPipelineModel = trainedLPPipelineModel;
         this.trainedNCPipelineModel = trainedNCPipelineModel;
+        this.nodeRegressionTrainComputationFactory = nodeRegressionTrainComputationFactory;
     }
 
     static PipelineApplications create(
@@ -224,6 +226,26 @@ public class PipelineApplications {
         var trainedLPPipelineModel = new TrainedLPPipelineModel(modelCatalog);
         var trainedNCPipelineModel = new TrainedNCPipelineModel(modelCatalog);
 
+        var nodeRegressionTrainComputationFactory = new NodeRegressionTrainComputationFactory(
+            log,
+            modelCatalog,
+            pipelineRepository,
+            closeableResourceRegistry,
+            databaseId,
+            dependencyResolver,
+            metrics,
+            nodeLookup,
+            nodePropertyExporterBuilder,
+            procedureReturnColumns,
+            relationshipExporterBuilder,
+            taskRegistryFactory,
+            terminationFlag,
+            terminationMonitor,
+            userLogRegistryFactory,
+            progressTrackerCreator,
+            algorithmsProcedureFacade
+        );
+
         return new PipelineApplications(
             log,
             graphStoreCatalogService,
@@ -253,7 +275,8 @@ public class PipelineApplications {
             algorithmEstimationTemplate,
             algorithmProcessingTemplate,
             trainedLPPipelineModel,
-            trainedNCPipelineModel
+            trainedNCPipelineModel,
+            nodeRegressionTrainComputationFactory
         );
     }
 
@@ -650,7 +673,7 @@ public class PipelineApplications {
         ensureTrainingModelCanBeStored(configuration);
 
         var label = new StandardLabel("NodeRegressionPipelineTrain");
-        var computation = constructNodeRegressionTrainComputation(configuration);
+        var computation = nodeRegressionTrainComputationFactory.create(configuration);
         var sideEffects = new NodeRegressionTrainSideEffects(modelPersister, configuration);
         var resultRenderer = new NodeRegressionTrainResultRenderer();
 
@@ -795,30 +818,7 @@ public class PipelineApplications {
             procedureReturnColumns,
             relationshipExporterBuilder,
             taskRegistryFactory,
-            terminationMonitor,
-            userLogRegistryFactory,
-            progressTrackerCreator,
-            algorithmsProcedureFacade,
-            configuration
-        );
-    }
-
-    private Computation<NodeRegressionTrainResult.NodeRegressionTrainPipelineResult> constructNodeRegressionTrainComputation(
-        NodeRegressionPipelineTrainConfig configuration
-    ) {
-        return NodeRegressionTrainComputation.create(
-            log,
-            modelCatalog,
-            pipelineRepository,
-            closeableResourceRegistry,
-            databaseId,
-            dependencyResolver,
-            metrics,
-            nodeLookup,
-            nodePropertyExporterBuilder,
-            procedureReturnColumns,
-            relationshipExporterBuilder,
-            taskRegistryFactory,
+            terminationFlag,
             terminationMonitor,
             userLogRegistryFactory,
             progressTrackerCreator,

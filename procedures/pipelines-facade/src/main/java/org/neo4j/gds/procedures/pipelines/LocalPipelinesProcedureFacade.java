@@ -157,14 +157,14 @@ public final class LocalPipelinesProcedureFacade implements PipelinesProcedureFa
         if (failIfMissing) {
             var result = pipelineApplications.dropAcceptingFailure(pipelineName);
 
-            return Stream.of(PipelineCatalogResultTransformer.create(result, pipelineName.value));
+            return Stream.of(PipelineCatalogResultTransformer.create(result, pipelineName.value()));
         }
 
         var result = pipelineApplications.dropSilencingFailure(pipelineName);
 
         if (result == null) return Stream.empty();
 
-        var pipelineCatalogResult = PipelineCatalogResultTransformer.create(result, pipelineName.value);
+        var pipelineCatalogResult = PipelineCatalogResultTransformer.create(result, pipelineName.value());
 
         return Stream.of(pipelineCatalogResult);
     }
@@ -175,9 +175,9 @@ public final class LocalPipelinesProcedureFacade implements PipelinesProcedureFa
 
         var pipelineType = pipelineApplications.exists(pipelineName);
 
-        if (pipelineType.isEmpty()) return Stream.of(PipelineExistsResult.empty(pipelineName.value));
+        if (pipelineType.isEmpty()) return Stream.of(PipelineExistsResult.empty(pipelineName.value()));
 
-        var result = new PipelineExistsResult(pipelineName.value, pipelineType.get(), true);
+        var result = new PipelineExistsResult(pipelineName.value(), pipelineType.get(), true);
 
         return Stream.of(result);
     }
@@ -201,7 +201,7 @@ public final class LocalPipelinesProcedureFacade implements PipelinesProcedureFa
 
         if (pipeline.isEmpty()) return Stream.empty();
 
-        var result = PipelineCatalogResultTransformer.create(pipeline.get(), pipelineName.value);
+        var result = PipelineCatalogResultTransformer.create(pipeline.get(), pipelineName.value());
 
         return Stream.of(result);
     }

@@ -22,7 +22,6 @@ package org.neo4j.gds.ml.pipeline;
 import org.junit.jupiter.api.DynamicTest;
 import org.neo4j.gds.core.model.CatalogModelContainer;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyTrainingPipeline;
-import org.neo4j.gds.termination.TerminatedException;
 
 import java.util.List;
 import java.util.function.Function;
@@ -32,20 +31,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 public interface PipelineTrainAlgorithmTest {
-
-    static DynamicTest terminationFlagTest(
-        PipelineTrainAlgorithm<?, ?, ?, ?> algorithm
-    ) {
-        return DynamicTest.dynamicTest("terminationFlag", () ->
-            assertThatThrownBy(() -> {
-                algorithm.setTerminationFlag(() -> false);
-                algorithm.compute();
-            })
-                .isInstanceOf(TerminatedException.class)
-                .hasMessageContaining("The execution has been terminated.")
-        );
-    }
-
     static DynamicTest trainsAModel(
         PipelineTrainAlgorithm<?, ?, ?, ?> algorithm,
         String expectedType

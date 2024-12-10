@@ -30,7 +30,7 @@ public final class NodePipelineInfoResultTransformer {
     private NodePipelineInfoResultTransformer() {}
 
     static NodePipelineInfoResult create(PipelineName pipelineName, NodePropertyTrainingPipeline pipeline) {
-        return create(pipelineName.value, pipeline);
+        return create(pipelineName.value(), pipeline);
     }
 
     /**

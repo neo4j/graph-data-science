@@ -27,6 +27,7 @@ import org.neo4j.gds.InspectableTestProgressTracker;
 import org.neo4j.gds.ResourceUtil;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.beta.generator.PropertyProducer;
 import org.neo4j.gds.beta.generator.RandomGraphGenerator;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
@@ -50,7 +51,10 @@ import org.neo4j.gds.ml.models.randomforest.RandomForestRegressorTrainerConfigIm
 import org.neo4j.gds.ml.pipeline.AutoTuningConfigImpl;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureProducer;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureStep;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictionSplitConfig;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictionSplitConfigImpl;
+import org.neo4j.gds.termination.TerminatedException;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
 import java.util.Map;
@@ -59,6 +63,8 @@ import java.util.function.Supplier;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.neo4j.gds.assertj.Extractors.keepingFixedNumberOfDecimals;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.compat.TestLog.DEBUG;
@@ -337,7 +343,8 @@ class NodeRegressionTrainTest {
             pipeline,
             config,
             nodeFeatureProducer,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         ))
             .hasMessage(
                 "The specified `testFraction` is too low for the current graph. The test set would have 0 node(s) but it must have at least 1.");
@@ -370,7 +377,8 @@ class NodeRegressionTrainTest {
             pipeline,
             config,
             nodeFeatureProducer,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         ))
             .hasMessage(
                 "Node with id 46 has `target` target property value `NaN`");
@@ -419,10 +427,35 @@ class NodeRegressionTrainTest {
             pipeline,
             config,
             nodeFeatureProducer,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         ))
             .hasMessage(
                 "Node with id 0 has infinite `target` target property value");
+    }
+
+    @Test
+    void shouldRespectTerminationFlag() {
+        var pipeline = mock(NodeRegressionTrainingPipeline.class);
+        var configuration = mock(NodeRegressionPipelineTrainConfig.class);
+        var nodeRegressionTrain = new NodeRegressionTrain(
+            null,
+            pipeline,
+            configuration,
+            null,
+            null,
+            mock(IdMap.class),
+            null,
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.STOP_RUNNING
+        );
+
+        when(pipeline.splitConfig()).thenReturn(NodePropertyPredictionSplitConfig.DEFAULT_CONFIG);
+        when(configuration.concurrency()).thenReturn(new Concurrency(27));
+
+        assertThatThrownBy(nodeRegressionTrain::run)
+            .isInstanceOf(TerminatedException.class)
+            .hasMessage("The execution has been terminated.");
     }
 
     static NodeRegressionTrain createWithExecutionContext(
@@ -442,7 +475,8 @@ class NodeRegressionTrainTest {
             pipeline,
             config,
             nodeFeatureProducer,
-            progressTracker
+            progressTracker,
+            TerminationFlag.RUNNING_TRUE
         );
     }
 }

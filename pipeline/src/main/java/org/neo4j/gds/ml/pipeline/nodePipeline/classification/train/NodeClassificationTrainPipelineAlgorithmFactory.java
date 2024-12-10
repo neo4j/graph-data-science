@@ -29,6 +29,7 @@ import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureProducer;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import static org.neo4j.gds.ml.pipeline.PipelineCompanion.validateMainMetric;
 
@@ -59,14 +60,15 @@ public class NodeClassificationTrainPipelineAlgorithmFactory extends
             NodeClassificationTrainingPipeline.class
         );
 
-        return build(graphStore, configuration, pipeline, progressTracker);
+        return build(graphStore, configuration, pipeline, progressTracker, null);
     }
 
     public NodeClassificationTrainAlgorithm build(
         GraphStore graphStore,
         NodeClassificationPipelineTrainConfig configuration,
         NodeClassificationTrainingPipeline pipeline,
-        ProgressTracker progressTracker
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
     ) {
         validateMainMetric(pipeline, configuration.metrics().get(0).toString());
 
@@ -81,7 +83,8 @@ public class NodeClassificationTrainPipelineAlgorithmFactory extends
                 pipeline,
                 configuration,
                 nodeFeatureProducer,
-                progressTracker
+                progressTracker,
+                terminationFlag
             ),
             pipeline,
             graphStore,

@@ -34,6 +34,7 @@ import org.neo4j.gds.ml.models.mlp.MLPClassifierTrainConfig;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureProducer;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureStep;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
 import java.util.Map;
@@ -175,7 +176,8 @@ class NodeClassificationClassImbalanceTrainTest {
                 ExecutionContext.EMPTY,
                 ProgressTracker.NULL_TRACKER
             ),
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         ).run();
 
         return ImmutableClassifierAndTestMetric

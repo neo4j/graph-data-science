@@ -29,6 +29,7 @@ import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.ml.metrics.classification.ClassificationMetricSpecification;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
 import java.util.Map;
@@ -78,7 +79,7 @@ public class NodeClassificationTrainPipelineAlgorithmFactoryTest {
             Map.of("mutateProperty", "pr", "contextNodeLabels", List.of("INVALID"))
         ));
 
-        assertThatThrownBy(() -> ncAlgoFactory.build(graphStore, ncTrainConfig, ncTrainPipeline, ProgressTracker.NULL_TRACKER))
+        assertThatThrownBy(() -> ncAlgoFactory.build(graphStore, ncTrainConfig, ncTrainPipeline, ProgressTracker.NULL_TRACKER, TerminationFlag.RUNNING_TRUE))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("Could not find the specified contextNodeLabels for step `gds.testProc.mutate` of ['INVALID']. Available labels are ['M'].");
 
@@ -88,7 +89,7 @@ public class NodeClassificationTrainPipelineAlgorithmFactoryTest {
             Map.of("mutateProperty", "pr", "contextRelationshipTypes", List.of("INVALID"))
         ));
 
-        assertThatThrownBy(() -> ncAlgoFactory.build(graphStore, ncTrainConfig, ncTrainPipeline2, ProgressTracker.NULL_TRACKER))
+        assertThatThrownBy(() -> ncAlgoFactory.build(graphStore, ncTrainConfig, ncTrainPipeline2, ProgressTracker.NULL_TRACKER, TerminationFlag.RUNNING_TRUE))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("Could not find the specified contextRelationshipTypes for step `gds.testProc.mutate` of ['INVALID']. Available relationship types are ['R'].");
 

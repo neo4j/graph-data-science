@@ -37,7 +37,7 @@ public class PipelineRepository {
     LinkPredictionTrainingPipeline createLinkPredictionTrainingPipeline(User user, PipelineName pipelineName) {
         var pipeline = new LinkPredictionTrainingPipeline();
 
-        PipelineCatalog.set(user.getUsername(), pipelineName.value, pipeline);
+        PipelineCatalog.set(user.getUsername(), pipelineName.value(), pipeline);
 
         return pipeline;
     }
@@ -62,11 +62,11 @@ public class PipelineRepository {
      * Underlying catalog throws exception if pipeline does not exist
      */
     TrainingPipeline<?> drop(User user, PipelineName pipelineName) {
-        return PipelineCatalog.drop(user.getUsername(), pipelineName.value);
+        return PipelineCatalog.drop(user.getUsername(), pipelineName.value());
     }
 
     boolean exists(User user, PipelineName pipelineName) {
-        return PipelineCatalog.exists(user.getUsername(), pipelineName.value);
+        return PipelineCatalog.exists(user.getUsername(), pipelineName.value());
     }
 
     Stream<PipelineCatalog.PipelineCatalogEntry> getAll(User user) {
@@ -74,13 +74,13 @@ public class PipelineRepository {
     }
 
     LinkPredictionTrainingPipeline getLinkPredictionTrainingPipeline(User user, PipelineName pipelineName) {
-        return PipelineCatalog.getTyped(user.getUsername(), pipelineName.value, LinkPredictionTrainingPipeline.class);
+        return PipelineCatalog.getTyped(user.getUsername(), pipelineName.value(), LinkPredictionTrainingPipeline.class);
     }
 
     NodeClassificationTrainingPipeline getNodeClassificationTrainingPipeline(User user, PipelineName pipelineName) {
         return PipelineCatalog.getTyped(
             user.getUsername(),
-            pipelineName.value,
+            pipelineName.value(),
             NodeClassificationTrainingPipeline.class
         );
     }
@@ -88,7 +88,7 @@ public class PipelineRepository {
     NodeRegressionTrainingPipeline getNodeRegressionTrainingPipeline(User user, PipelineName pipelineName) {
         return PipelineCatalog.getTyped(
             user.getUsername(),
-            pipelineName.value,
+            pipelineName.value(),
             NodeRegressionTrainingPipeline.class
         );
     }
@@ -108,7 +108,7 @@ public class PipelineRepository {
     }
 
     private TrainingPipeline<?> get(User user, PipelineName pipelineName) {
-        return PipelineCatalog.get(user.getUsername(), pipelineName.value);
+        return PipelineCatalog.get(user.getUsername(), pipelineName.value());
     }
 
     private void registerPipeline(
@@ -116,6 +116,6 @@ public class PipelineRepository {
         PipelineName pipelineName,
         TrainingPipeline<?> pipeline
     ) {
-        PipelineCatalog.set(user.getUsername(), pipelineName.value, pipeline);
+        PipelineCatalog.set(user.getUsername(), pipelineName.value(), pipeline);
     }
 }

@@ -32,6 +32,7 @@ import org.neo4j.gds.ml.models.linearregression.LinearRegressionTrainConfig;
 import org.neo4j.gds.ml.pipeline.ExecutableNodePropertyStepTestUtil;
 import org.neo4j.gds.ml.pipeline.PipelineTrainAlgorithmTest;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureStep;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
 import java.util.function.Supplier;
@@ -89,20 +90,20 @@ class NodeRegressionTrainAlgorithmTest {
             graphStore,
             config,
             pipeline,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         );
 
         return Stream.of(
-            PipelineTrainAlgorithmTest.terminationFlagTest(algoSupplier.get()),
             PipelineTrainAlgorithmTest.trainsAModel(algoSupplier.get(), NodeRegressionTrainingPipeline.MODEL_TYPE),
             PipelineTrainAlgorithmTest.originalSchemaTest(algoSupplier.get(), pipeline),
             PipelineTrainAlgorithmTest.testParameterSpaceValidation(pipelineWithoutCandidate -> factory.build(
                 graphStore,
                 config,
                 pipelineWithoutCandidate,
-                ProgressTracker.NULL_TRACKER
+                ProgressTracker.NULL_TRACKER,
+                TerminationFlag.RUNNING_TRUE
             ), new NodeRegressionTrainingPipeline())
         );
     }
-
 }

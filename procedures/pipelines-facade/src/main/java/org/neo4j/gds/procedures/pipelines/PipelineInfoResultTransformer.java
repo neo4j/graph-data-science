@@ -30,7 +30,7 @@ public final class PipelineInfoResultTransformer {
     private PipelineInfoResultTransformer() {}
 
     public static PipelineInfoResult create(PipelineName pipelineName, LinkPredictionTrainingPipeline pipeline) {
-        return create(pipelineName.value, pipeline);
+        return create(pipelineName.value(), pipeline);
     }
 
     /**

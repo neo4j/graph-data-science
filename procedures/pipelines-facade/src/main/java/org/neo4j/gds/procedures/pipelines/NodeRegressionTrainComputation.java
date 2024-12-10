@@ -45,6 +45,7 @@ import org.neo4j.gds.ml.pipeline.nodePipeline.regression.NodeRegressionTrain;
 import org.neo4j.gds.ml.pipeline.nodePipeline.regression.NodeRegressionTrainAlgorithm;
 import org.neo4j.gds.ml.pipeline.nodePipeline.regression.NodeRegressionTrainResult;
 import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
+import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.termination.TerminationMonitor;
 
 final class NodeRegressionTrainComputation implements Computation<NodeRegressionTrainResult.NodeRegressionTrainPipelineResult> {
@@ -67,8 +68,9 @@ final class NodeRegressionTrainComputation implements Computation<NodeRegression
     private final ProgressTrackerCreator progressTrackerCreator;
     private final AlgorithmsProcedureFacade algorithmsProcedureFacade;
     private final NodeRegressionPipelineTrainConfig configuration;
+    private final TerminationFlag terminationFlag;
 
-    private NodeRegressionTrainComputation(
+    NodeRegressionTrainComputation(
         Log log,
         ModelCatalog modelCatalog,
         PipelineRepository pipelineRepository,
@@ -81,6 +83,7 @@ final class NodeRegressionTrainComputation implements Computation<NodeRegression
         ProcedureReturnColumns procedureReturnColumns,
         RelationshipExporterBuilder relationshipExporterBuilder,
         TaskRegistryFactory taskRegistryFactory,
+        TerminationFlag terminationFlag,
         TerminationMonitor terminationMonitor,
         UserLogRegistryFactory userLogRegistryFactory,
         ProgressTrackerCreator progressTrackerCreator,
@@ -99,6 +102,7 @@ final class NodeRegressionTrainComputation implements Computation<NodeRegression
         this.procedureReturnColumns = procedureReturnColumns;
         this.relationshipExporterBuilder = relationshipExporterBuilder;
         this.taskRegistryFactory = taskRegistryFactory;
+        this.terminationFlag = terminationFlag;
         this.terminationMonitor = terminationMonitor;
         this.userLogRegistryFactory = userLogRegistryFactory;
         this.progressTrackerCreator = progressTrackerCreator;
@@ -119,6 +123,7 @@ final class NodeRegressionTrainComputation implements Computation<NodeRegression
         ProcedureReturnColumns procedureReturnColumns,
         RelationshipExporterBuilder relationshipExporterBuilder,
         TaskRegistryFactory taskRegistryFactory,
+        TerminationFlag terminationFlag,
         TerminationMonitor terminationMonitor,
         UserLogRegistryFactory userLogRegistryFactory,
         ProgressTrackerCreator progressTrackerCreator,
@@ -138,6 +143,7 @@ final class NodeRegressionTrainComputation implements Computation<NodeRegression
             procedureReturnColumns,
             relationshipExporterBuilder,
             taskRegistryFactory,
+            terminationFlag,
             terminationMonitor,
             userLogRegistryFactory,
             progressTrackerCreator,
@@ -193,7 +199,8 @@ final class NodeRegressionTrainComputation implements Computation<NodeRegression
             pipeline,
             configuration,
             nodeFeatureProducer,
-            progressTracker
+            progressTracker,
+            terminationFlag
         );
 
         var algorithm = new NodeRegressionTrainAlgorithm(

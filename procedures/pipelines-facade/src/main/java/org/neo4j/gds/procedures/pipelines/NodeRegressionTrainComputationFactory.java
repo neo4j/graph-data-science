@@ -22,12 +22,8 @@ package org.neo4j.gds.procedures.pipelines;
 import org.neo4j.common.DependencyResolver;
 import org.neo4j.gds.api.CloseableResourceRegistry;
 import org.neo4j.gds.api.DatabaseId;
-import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.NodeLookup;
 import org.neo4j.gds.api.ProcedureReturnColumns;
-import org.neo4j.gds.api.User;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmMachinery;
 import org.neo4j.gds.applications.algorithms.machinery.Computation;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.core.model.ModelCatalog;
@@ -35,25 +31,19 @@ import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.core.write.RelationshipExporterBuilder;
-import org.neo4j.gds.executor.ImmutableExecutionContext;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.metrics.Metrics;
-import org.neo4j.gds.ml.pipeline.PipelineCompanion;
-import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureProducer;
-import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationModelResult;
-import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationPipelineTrainConfig;
-import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationTrain;
-import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationTrainAlgorithm;
+import org.neo4j.gds.ml.pipeline.nodePipeline.regression.NodeRegressionPipelineTrainConfig;
+import org.neo4j.gds.ml.pipeline.nodePipeline.regression.NodeRegressionTrainResult;
 import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.termination.TerminationMonitor;
 
-final class NodeClassificationTrainComputation implements Computation<NodeClassificationModelResult> {
-    private final AlgorithmMachinery algorithmMachinery = new AlgorithmMachinery();
-
+class NodeRegressionTrainComputationFactory {
     private final Log log;
     private final ModelCatalog modelCatalog;
     private final PipelineRepository pipelineRepository;
+
     private final CloseableResourceRegistry closeableResourceRegistry;
     private final DatabaseId databaseId;
     private final DependencyResolver dependencyResolver;
@@ -66,11 +56,12 @@ final class NodeClassificationTrainComputation implements Computation<NodeClassi
     private final TerminationFlag terminationFlag;
     private final TerminationMonitor terminationMonitor;
     private final UserLogRegistryFactory userLogRegistryFactory;
-    private final ProgressTrackerCreator progressTrackerCreator;
-    private final AlgorithmsProcedureFacade algorithmsProcedureFacade;
-    private final NodeClassificationPipelineTrainConfig configuration;
 
-    private NodeClassificationTrainComputation(
+    private final ProgressTrackerCreator progressTrackerCreator;
+
+    private final AlgorithmsProcedureFacade algorithmsProcedureFacade;
+
+    NodeRegressionTrainComputationFactory(
         Log log,
         ModelCatalog modelCatalog,
         PipelineRepository pipelineRepository,
@@ -87,8 +78,7 @@ final class NodeClassificationTrainComputation implements Computation<NodeClassi
         TerminationMonitor terminationMonitor,
         UserLogRegistryFactory userLogRegistryFactory,
         ProgressTrackerCreator progressTrackerCreator,
-        AlgorithmsProcedureFacade algorithmsProcedureFacade,
-        NodeClassificationPipelineTrainConfig configuration
+        AlgorithmsProcedureFacade algorithmsProcedureFacade
     ) {
         this.log = log;
         this.modelCatalog = modelCatalog;
@@ -106,31 +96,11 @@ final class NodeClassificationTrainComputation implements Computation<NodeClassi
         this.userLogRegistryFactory = userLogRegistryFactory;
         this.progressTrackerCreator = progressTrackerCreator;
         this.algorithmsProcedureFacade = algorithmsProcedureFacade;
-        this.configuration = configuration;
         this.terminationFlag = terminationFlag;
     }
 
-    static Computation<NodeClassificationModelResult> create(
-        Log log,
-        ModelCatalog modelCatalog,
-        PipelineRepository pipelineRepository,
-        CloseableResourceRegistry closeableResourceRegistry,
-        DatabaseId databaseId,
-        DependencyResolver dependencyResolver,
-        Metrics metrics,
-        NodeLookup nodeLookup,
-        NodePropertyExporterBuilder nodePropertyExporterBuilder,
-        ProcedureReturnColumns procedureReturnColumns,
-        RelationshipExporterBuilder relationshipExporterBuilder,
-        TaskRegistryFactory taskRegistryFactory,
-        TerminationFlag terminationFlag,
-        TerminationMonitor terminationMonitor,
-        UserLogRegistryFactory userLogRegistryFactory,
-        ProgressTrackerCreator progressTrackerCreator,
-        AlgorithmsProcedureFacade algorithmsProcedureFacade,
-        NodeClassificationPipelineTrainConfig configuration
-    ) {
-        return new NodeClassificationTrainComputation(
+    Computation<NodeRegressionTrainResult.NodeRegressionTrainPipelineResult> create(NodeRegressionPipelineTrainConfig configuration) {
+        return NodeRegressionTrainComputation.create(
             log,
             modelCatalog,
             pipelineRepository,
@@ -149,73 +119,6 @@ final class NodeClassificationTrainComputation implements Computation<NodeClassi
             progressTrackerCreator,
             algorithmsProcedureFacade,
             configuration
-        );
-    }
-
-    @Override
-    public NodeClassificationModelResult compute(Graph graph, GraphStore graphStore) {
-        var user = new User(configuration.username(), false);
-        var pipelineName = PipelineName.parse(configuration.pipeline());
-        var pipeline = pipelineRepository.getNodeClassificationTrainingPipeline(
-            user,
-            pipelineName
-        );
-
-        PipelineCompanion.validateMainMetric(pipeline, configuration.metrics().get(0).toString());
-
-        var executionContext = ImmutableExecutionContext.builder()
-            .algorithmsProcedureFacade(algorithmsProcedureFacade)
-            .closeableResourceRegistry(closeableResourceRegistry)
-            .databaseId(databaseId)
-            .dependencyResolver(dependencyResolver)
-            .isGdsAdmin(user.isAdmin())
-            .log(log)
-            .metrics(metrics)
-            .modelCatalog(modelCatalog)
-            .nodeLookup(nodeLookup)
-            .nodePropertyExporterBuilder(nodePropertyExporterBuilder)
-            .relationshipExporterBuilder(relationshipExporterBuilder)
-            .returnColumns(procedureReturnColumns)
-            .taskRegistryFactory(taskRegistryFactory)
-            .terminationMonitor(terminationMonitor)
-            .userLogRegistryFactory(userLogRegistryFactory)
-            .username(user.getUsername())
-            .build();
-
-        var task = NodeClassificationTrain.progressTask(pipeline, graphStore.nodeCount());
-        var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
-
-        var nodeFeatureProducer = NodeFeatureProducer.create(
-            graphStore,
-            configuration,
-            executionContext,
-            progressTracker
-        );
-
-        nodeFeatureProducer.validateNodePropertyStepsContextConfigs(pipeline.nodePropertySteps());
-
-        var pipelineTrainer = NodeClassificationTrain.create(
-            graphStore,
-            pipeline,
-            configuration,
-            nodeFeatureProducer,
-            progressTracker,
-            terminationFlag
-        );
-
-        var algorithm = new NodeClassificationTrainAlgorithm(
-            pipelineTrainer,
-            pipeline,
-            graphStore,
-            configuration,
-            progressTracker
-        );
-
-        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
-            algorithm,
-            progressTracker,
-            true,
-            configuration.concurrency()
         );
     }
 }

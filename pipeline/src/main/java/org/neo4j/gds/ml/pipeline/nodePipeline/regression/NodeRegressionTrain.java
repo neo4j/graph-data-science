@@ -65,7 +65,7 @@ public final class NodeRegressionTrain implements PipelineTrainer<NodeRegression
     private final NodeRegressionPipelineTrainConfig trainConfig;
     private final NodeFeatureProducer<NodeRegressionPipelineTrainConfig> nodeFeatureProducer;
     private final ProgressTracker progressTracker;
-    private TerminationFlag terminationFlag = TerminationFlag.RUNNING_TRUE;
+    private final TerminationFlag terminationFlag;
 
     public static Task progressTask(
         NodePropertyTrainingPipeline pipeline,
@@ -121,7 +121,8 @@ public final class NodeRegressionTrain implements PipelineTrainer<NodeRegression
         NodeRegressionTrainingPipeline pipeline,
         NodeRegressionPipelineTrainConfig config,
         NodeFeatureProducer<NodeRegressionPipelineTrainConfig> nodeFeatureProducer,
-        ProgressTracker progressTracker
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
     ) {
 
         var nodesGraph = graphStore.getGraph(config.targetNodeLabelIdentifiers(graphStore));
@@ -135,11 +136,12 @@ public final class NodeRegressionTrain implements PipelineTrainer<NodeRegression
             createTargets(nodesGraph, config.targetProperty()),
             nodesGraph,
             config.metrics(),
-            progressTracker
+            progressTracker,
+            terminationFlag
         );
     }
 
-    private NodeRegressionTrain(
+    NodeRegressionTrain(
         Concurrency concurrency,
         NodeRegressionTrainingPipeline pipeline,
         NodeRegressionPipelineTrainConfig trainConfig,
@@ -147,7 +149,8 @@ public final class NodeRegressionTrain implements PipelineTrainer<NodeRegression
         HugeDoubleArray targets,
         IdMap nodeIdMap,
         List<RegressionMetrics> metrics,
-        ProgressTracker progressTracker
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
     ) {
         this.concurrency = concurrency;
         this.pipeline = pipeline;
@@ -157,10 +160,6 @@ public final class NodeRegressionTrain implements PipelineTrainer<NodeRegression
         this.metrics = metrics;
         this.progressTracker = progressTracker;
         this.targets = targets;
-    }
-
-    @Override
-    public void setTerminationFlag(TerminationFlag terminationFlag) {
         this.terminationFlag = terminationFlag;
     }
 
