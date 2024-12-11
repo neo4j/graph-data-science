@@ -19,9 +19,7 @@
  */
 package org.neo4j.gds.ml.pipeline.nodePipeline.regression;
 
-import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestFactory;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.executor.ExecutionContext;
@@ -30,17 +28,17 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.ml.metrics.regression.RegressionMetrics;
 import org.neo4j.gds.ml.models.linearregression.LinearRegressionTrainConfig;
+import org.neo4j.gds.ml.pipeline.ExecutableNodePropertyStep;
 import org.neo4j.gds.ml.pipeline.ExecutableNodePropertyStepTestUtil;
-import org.neo4j.gds.ml.pipeline.PipelineTrainAlgorithmTest;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureProducer;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureStep;
 import org.neo4j.gds.termination.TerminationFlag;
 
+import java.util.Collections;
 import java.util.List;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 @GdlExtension
 class NodeRegressionTrainAlgorithmTest {
@@ -68,50 +66,44 @@ class NodeRegressionTrainAlgorithmTest {
     @Inject
     private GraphStore graphStore;
 
-    @TestFactory
-    Stream<DynamicTest> baseTests() {
-        var pipeline = new NodeRegressionTrainingPipeline();
+    @Test
+    void shouldTrainModel() {
+        var pipeline = constructPipeline(Collections.emptyList());
+        var algorithm = constructAlgorithm(pipeline);
 
-        pipeline.nodePropertySteps().add(new ExecutableNodePropertyStepTestUtil.NodeIdPropertyStep(graphStore, "nodeId"));
-        pipeline.addFeatureStep(NodeFeatureStep.of("scalar"));
-        pipeline.addFeatureStep(NodeFeatureStep.of("nodeId"));
+        var result = algorithm.compute();
 
-        pipeline.addTrainerConfig(LinearRegressionTrainConfig.DEFAULT);
-
-        RegressionMetrics evaluationMetric = RegressionMetrics.MEAN_ABSOLUTE_ERROR;
-        var config = NodeRegressionPipelineTrainConfigImpl.builder()
-            .pipeline("DUMMY_PIPE")
-            .graphName("DUMMY_GRAPH")
-            .modelUser("DUMMY_USER")
-            .modelName("model")
-            .targetProperty("t")
-            .metrics(List.of(evaluationMetric))
-            .build();
-
-
-        var factory = new NodeRegressionTrainPipelineAlgorithmFactory(ExecutionContext.EMPTY);
-        Supplier<NodeRegressionTrainAlgorithm> algoSupplier = () -> factory.build(
-            graphStore,
-            config,
-            pipeline,
-            ProgressTracker.NULL_TRACKER,
-            TerminationFlag.RUNNING_TRUE
-        );
-
-        return Stream.of(
-            PipelineTrainAlgorithmTest.originalSchemaTest(algoSupplier.get(), pipeline),
-            PipelineTrainAlgorithmTest.testParameterSpaceValidation(pipelineWithoutCandidate -> factory.build(
-                graphStore,
-                config,
-                pipelineWithoutCandidate,
-                ProgressTracker.NULL_TRACKER,
-                TerminationFlag.RUNNING_TRUE
-            ), new NodeRegressionTrainingPipeline())
-        );
+        assertThat(result.model().algoType()).isEqualTo(NodeRegressionTrainingPipeline.MODEL_TYPE);
     }
 
     @Test
-    void shouldTrainModel() {
+    void shouldProtectOriginalSchema() {
+        var pipeline = constructPipeline(Collections.emptyList());
+        var algorithm = constructAlgorithm(pipeline);
+
+        var result = algorithm.compute();
+
+        var schema = result.model().graphSchema();
+        var nodeProperties = schema.nodeSchema().allProperties();
+        var pipeNodeProperties = pipeline.nodePropertySteps()
+            .stream()
+            .map(ExecutableNodePropertyStep::mutateNodeProperty)
+            .toList();
+        assertThat(pipeNodeProperties).isNotEmpty();
+        assertThat(nodeProperties).doesNotContainAnyElementsOf(pipeNodeProperties);
+    }
+
+    @Test
+    void shouldValidateParameterSpace() {
+        var pipeline = new NodeRegressionTrainingPipeline();
+        var algorithm = constructAlgorithm(pipeline);
+
+        assertThatIllegalArgumentException()
+            .isThrownBy(algorithm::compute)
+            .withMessage("Need at least one model candidate for training.");
+    }
+
+    private NodeRegressionTrainingPipeline constructPipeline(List<String> featureProperties) {
         var pipeline = new NodeRegressionTrainingPipeline();
 
         pipeline.nodePropertySteps().add(new ExecutableNodePropertyStepTestUtil.NodeIdPropertyStep(
@@ -123,7 +115,13 @@ class NodeRegressionTrainAlgorithmTest {
 
         pipeline.addTrainerConfig(LinearRegressionTrainConfig.DEFAULT);
 
-        RegressionMetrics evaluationMetric = RegressionMetrics.MEAN_ABSOLUTE_ERROR;
+        pipeline.featureProperties().addAll(featureProperties);
+
+        return pipeline;
+    }
+
+    private NodeRegressionTrainAlgorithm constructAlgorithm(NodeRegressionTrainingPipeline pipeline) {
+        var evaluationMetric = RegressionMetrics.MEAN_ABSOLUTE_ERROR;
         var config = NodeRegressionPipelineTrainConfigImpl.builder()
             .pipeline("DUMMY_PIPE")
             .graphName("DUMMY_GRAPH")
@@ -147,16 +145,13 @@ class NodeRegressionTrainAlgorithmTest {
             ProgressTracker.NULL_TRACKER,
             TerminationFlag.RUNNING_TRUE
         );
-        var algorithm = new NodeRegressionTrainAlgorithm(
+
+        return new NodeRegressionTrainAlgorithm(
             pipelineTrainer,
             pipeline,
             graphStore,
             config,
             ProgressTracker.NULL_TRACKER
         );
-
-        var result = algorithm.compute();
-
-        assertThat(result.model().algoType()).isEqualTo(NodeRegressionTrainingPipeline.MODEL_TYPE);
     }
 }
