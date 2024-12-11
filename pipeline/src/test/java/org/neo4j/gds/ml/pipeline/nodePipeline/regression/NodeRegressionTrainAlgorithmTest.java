@@ -34,7 +34,6 @@ import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureProducer;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureStep;
 import org.neo4j.gds.termination.TerminationFlag;
 
-import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
