@@ -671,7 +671,8 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
         return streamModeBusinessFacade.bridges(
             GraphName.parse(graphName),
             parsedConfiguration,
-            resultBuilder
+            resultBuilder,
+            procedureReturnColumns.contains("remainingSizes")
         );
     }
 
@@ -680,6 +681,7 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     ) {
+
         var parsedConfiguration = configurationParser.parseConfiguration(
             algorithmConfiguration,
             BridgesStreamConfig::of
@@ -687,7 +689,8 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
 
         return Stream.of(estimationModeBusinessFacade.bridges(
             parsedConfiguration,
-            graphNameOrConfiguration
+            graphNameOrConfiguration,
+            true
         ));
 
     }

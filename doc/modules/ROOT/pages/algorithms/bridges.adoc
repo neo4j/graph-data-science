@@ -43,6 +43,7 @@ CALL gds.bridges.stream(
 YIELD
   from: Integer,
   to: Integer
+  remainingSizes: List of Long
 ----
 
 include::partial$/algorithms/common-configuration/common-parameters.adoc[]
@@ -60,6 +61,7 @@ include::partial$/algorithms/common-configuration/common-stream-stats-configurat
 | Name    | Type    | Description
 | from    | Integer | Start node ID.
 | to      | Integer | End node ID.
+| splitComponens| List of Long| A list with the resulting sizes of the components after removing the relationship.
 |===
 
 ======
@@ -134,7 +136,7 @@ YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
 [opts="header",cols="1,1,1,1,1"]
 |===
 | nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
-| 6         | 14                | 1040     | 1040     | "1040 Bytes"
+| 6         | 14                | 1152     | 1152     | "1152 Bytes"
 |===
 --
 
@@ -150,15 +152,15 @@ include::partial$/algorithms/shared/examples-stream-intro.adoc[]
 [source, cypher, role=noplay]
 ----
 CALL gds.bridges.stream('myGraph')
-YIELD from, to
-RETURN gds.util.asNode(from).name AS fromName, gds.util.asNode(to).name AS toName
+YIELD from, to, remainingSizes
+RETURN gds.util.asNode(from).name AS fromName, gds.util.asNode(to).name AS toName, remainingSizes
 ORDER BY fromName ASC, toName ASC
 ----
 
 .Results
-[opts="header",cols="1,1"]
+[opts="header",cols="1,1,1"]
 |===
-| fromName  | toName
-| "Alice"   | "Doug"
+| fromName  | toName | remainingSizes
+| "Alice"   | "Doug" | [3, 3]
 |===
 --

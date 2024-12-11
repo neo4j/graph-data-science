@@ -82,12 +82,12 @@ public class CentralityAlgorithmsEstimationModeBusinessFacade {
             memoryEstimation
         );
     }
-     MemoryEstimation bridges() {
-        return new BridgesMemoryEstimateDefinition().memoryEstimation();
+     MemoryEstimation bridges(boolean shouldComputeComponents) {
+        return new BridgesMemoryEstimateDefinition(shouldComputeComponents).memoryEstimation();
     }
 
-    public MemoryEstimateResult bridges(BridgesBaseConfig configuration, Object graphNameOrConfiguration) {
-        var memoryEstimation = bridges();
+    public MemoryEstimateResult bridges(BridgesBaseConfig configuration, Object graphNameOrConfiguration, boolean shouldComputeComponents) {
+        var memoryEstimation = bridges(shouldComputeComponents);
 
         return algorithmEstimationTemplate.estimate(
             configuration,

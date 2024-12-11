@@ -28,7 +28,9 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.BiConsumer;
 
 public class Bridges extends Algorithm<BridgeResult> {
 
@@ -39,14 +41,26 @@ public class Bridges extends Algorithm<BridgeResult> {
     private long timer;
     private long stackIndex = -1;
     private List<Bridge> result = new ArrayList<>();
+    private final Optional<TreeSizeTracker> treeSizeTracker;
 
-    public Bridges(Graph graph, ProgressTracker progressTracker){
+    public static  Bridges create(Graph graph, ProgressTracker progressTracker, boolean shouldComputeComponents){
+
+        if (shouldComputeComponents) {
+            var treeSizeTracker = new TreeSizeTracker(graph.nodeCount());
+            return new Bridges(graph, progressTracker, Optional.of(treeSizeTracker));
+        }else{
+            return new Bridges(graph,progressTracker,Optional.empty());
+        }
+    }
+
+    private Bridges(Graph graph, ProgressTracker progressTracker, Optional<TreeSizeTracker> treeSizeTracker){
         super(progressTracker);
 
         this.graph = graph;
         this.visited = new BitSet(graph.nodeCount());
         this.tin = HugeLongArray.newArray(graph.nodeCount());
         this.low = HugeLongArray.newArray(graph.nodeCount());
+        this.treeSizeTracker = treeSizeTracker;
     }
 
     @Override
@@ -59,28 +73,40 @@ public class Bridges extends Algorithm<BridgeResult> {
         //each edge may have at most one event to the stack at the same time
         var stack = HugeObjectArray.newArray(StackEvent.class, graph.relationshipCount());
 
+        BiConsumer<Long,Long> onLastChildVisit = (treeSizeTracker.isPresent()) ? treeSizeTracker.get()::recordTreeChild : (a,b)->{};
+        int listIndex=0;
         var n = graph.nodeCount();
-        for (int i = 0; i < n; ++i) {
-            if (!visited.get(i))
-                dfs(i, stack);
+        for (long i = 0; i < n; ++i) {
+            if (!visited.get(i)) {
+                dfs(i, stack,onLastChildVisit);
+
+                if (treeSizeTracker.isPresent()) {
+                    var tracker =treeSizeTracker.get();
+                    var listEndIndex = result.size();
+                    for (var j = listIndex; j < listEndIndex; ++j) {
+                        var currentBridge = result.get(j);
+                        var remainingSizes = tracker.recordBridge(currentBridge.to(),i);
+                        result.set(j,new Bridge(currentBridge.from(), currentBridge.to(),remainingSizes));
+                    }
+                    listIndex = listEndIndex;
+                }
+            }
         }
         progressTracker.endSubTask("Bridges");
         return new BridgeResult(result);
 
     }
 
-
-
-    private void dfs(long node, HugeObjectArray<StackEvent> stack) {
+    private void dfs(long node, HugeObjectArray<StackEvent> stack, BiConsumer<Long,Long> onLastChildVisit) {
         stack.set(++stackIndex, StackEvent.upcomingVisit(node,-1));
         while (stackIndex >= 0) {
             var stackEvent = stack.get(stackIndex--);
-            visitEvent(stackEvent, stack);
+            visitEvent(stackEvent, stack,onLastChildVisit);
         }
         progressTracker.logProgress();
     }
 
-    private void visitEvent(StackEvent event, HugeObjectArray<StackEvent> stack) {
+    private void visitEvent(StackEvent event, HugeObjectArray<StackEvent> stack, BiConsumer<Long,Long> onLastChildVisit) {
         if (event.lastVisit()) {
             var to = event.eventNode();
             var v = event.triggerNode();
@@ -88,8 +114,9 @@ public class Bridges extends Algorithm<BridgeResult> {
             var lowTo = low.get(to);
             low.set(v, Math.min(lowV, lowTo));
             var tinV = tin.get(v);
+            onLastChildVisit.accept(v,to);
             if (lowTo > tinV) {
-                result.add(new Bridge(v, to));
+                result.add(new Bridge(v, to, null));
             }
             progressTracker.logProgress();
             return;

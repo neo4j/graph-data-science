@@ -24,6 +24,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.bridges.BridgeResult;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -42,7 +43,12 @@ class BridgesResultBuilderForStreamMode implements StreamResultBuilder<BridgeRes
 
         return  bridges
             .stream()
-            .map( b -> new BridgesStreamResult(graph.toOriginalNodeId(b.from()), graph.toOriginalNodeId(b.to())));
-
+            .map( b ->
+                new BridgesStreamResult(
+                    graph.toOriginalNodeId(b.from()),
+                    graph.toOriginalNodeId(b.to()),
+                    List.of(b.remainingSizes()[0],b.remainingSizes()[1])
+                )
+            );
     }
 }

@@ -123,14 +123,16 @@ public class CentralityAlgorithmsStreamModeBusinessFacade {
     public <RESULT> Stream<RESULT> bridges(
         GraphName graphName,
         BridgesStreamConfig configuration,
-        StreamResultBuilder<BridgeResult, RESULT> streamResultBuilder
+        StreamResultBuilder<BridgeResult, RESULT> streamResultBuilder,
+        boolean shouldComputeComponents
     ) {
+
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
             graphName,
             configuration,
             Bridges,
-            estimationFacade::bridges,
-            (graph, __) -> centralityAlgorithms.bridges(graph, configuration),
+            ()-> estimationFacade.bridges(shouldComputeComponents),
+            (graph, __) -> centralityAlgorithms.bridges(graph, configuration,shouldComputeComponents),
             streamResultBuilder
         );
     }

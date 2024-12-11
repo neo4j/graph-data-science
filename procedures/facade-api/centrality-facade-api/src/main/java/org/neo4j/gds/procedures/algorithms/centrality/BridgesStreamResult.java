@@ -19,5 +19,7 @@
  */
 package org.neo4j.gds.procedures.algorithms.centrality;
 
-public record BridgesStreamResult(long from, long to) {
+import java.util.List;
+
+public record BridgesStreamResult(long from, long to, List<Long> remainingSizes) {
 }

@@ -30,6 +30,6 @@ class ArticulationPointsMemoryEstimateDefinitionTest {
 
         MemoryEstimationAssert.assertThat(memoryEstimation)
             .memoryRange(100, 6000, new Concurrency(1))
-            .hasSameMinAndMaxEqualTo(218752);
+            .hasSameMinAndMaxEqualTo(218760);
     }
 }

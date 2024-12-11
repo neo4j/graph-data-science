@@ -78,9 +78,12 @@ class BridgesStreamProcTest  extends BaseProcTest {
         var rowCount = runQueryWithRowConsumer(query, (resultRow) -> {
             var fromId = resultRow.getNumber("from");
             var toId = resultRow.getNumber("to");
+
             assertThat(fromId.longValue()).isNotEqualTo(toId.longValue());
             assertThat(fromId.longValue()).isIn(expectedNode1, expectedNode2);
             assertThat(toId.longValue()).isIn(expectedNode1, expectedNode2);
+
+            assertThat(resultRow.get("remainingSizes")).isNotNull();
 
         });
             assertThat(rowCount).isEqualTo(1l);

@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.articulationpoints;
 
-import org.neo4j.gds.bridges.Bridges;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.mem.Estimate;
@@ -32,7 +31,7 @@ public class ArticulationPointsMemoryEstimateDefinition implements MemoryEstimat
     @Override
     public MemoryEstimation memoryEstimation() {
 
-        var builder = MemoryEstimations.builder(Bridges.class);
+        var builder = MemoryEstimations.builder(ArticulationPoints.class);
         builder
             .perNode("tin", HugeLongArray::memoryEstimation)
             .perNode("low", HugeLongArray::memoryEstimation)
@@ -45,7 +44,6 @@ public class ArticulationPointsMemoryEstimateDefinition implements MemoryEstimat
             return MemoryRange.of(
                 HugeObjectArray.memoryEstimation(relationshipCount, Estimate.sizeOfInstance(ArticulationPoints.StackEvent.class))
             );
-
 
         }));
 

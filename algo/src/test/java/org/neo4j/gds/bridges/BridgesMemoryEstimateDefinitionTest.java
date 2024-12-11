@@ -19,18 +19,31 @@
  */
 package org.neo4j.gds.bridges;
 
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.assertions.MemoryEstimationAssert;
 import org.neo4j.gds.core.concurrency.Concurrency;
 
+import java.util.stream.Stream;
+
 class BridgesMemoryEstimateDefinitionTest {
 
-    @Test
-    void shouldEstimateMemoryAccurately() {
-        var memoryEstimation = new BridgesMemoryEstimateDefinition().memoryEstimation();
+    static Stream<Arguments> memoryEstimationTuples() {
+        return Stream.of(
+                 Arguments.of(false, 221064L),
+                 Arguments.of(true,  221920L)
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("memoryEstimationTuples")
+    void shouldEstimateMemoryAccurately(boolean should, long expectedMemory) {
+        var memoryEstimation = new BridgesMemoryEstimateDefinition(should).memoryEstimation();
 
         MemoryEstimationAssert.assertThat(memoryEstimation)
             .memoryRange(100, 6000, new Concurrency(1))
-            .hasSameMinAndMaxEqualTo(221056L);
+            .hasSameMinAndMaxEqualTo(expectedMemory);
     }
+
 }

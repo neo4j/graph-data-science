@@ -65,15 +65,32 @@ class SmallBridgesTest {
 
 
         @Test
-        void shouldFindBridges() {
-            var bridges = new Bridges(graph, ProgressTracker.NULL_TRACKER);
+        void shouldFindJustBridges() {
+            var bridges = Bridges.create(graph, ProgressTracker.NULL_TRACKER,false);
             var result = bridges.compute().bridges();
 
             assertThat(result)
                 .isNotNull()
+                .usingRecursiveFieldByFieldElementComparator()
                 .containsExactlyInAnyOrder(
-                     Bridge.create(graph.toMappedNodeId("a"), graph.toMappedNodeId("d")),
-                     Bridge.create(graph.toMappedNodeId("d"), graph.toMappedNodeId("e"))
+                    Bridge.create(graph.toMappedNodeId("a"), graph.toMappedNodeId("d"),null),
+                    Bridge.create(graph.toMappedNodeId("d"), graph.toMappedNodeId("e"),null)
+                );
+        }
+
+
+
+        @Test
+        void shouldFindBridgesAndComponentSizes() {
+            var bridges = Bridges.create(graph, ProgressTracker.NULL_TRACKER,true);
+            var result = bridges.compute().bridges();
+
+            assertThat(result)
+                .isNotNull()
+                .usingRecursiveFieldByFieldElementComparator()
+                .containsExactlyInAnyOrder(
+                     Bridge.create(graph.toMappedNodeId("a"), graph.toMappedNodeId("d"),new long[]{3,2}),
+                     Bridge.create(graph.toMappedNodeId("d"), graph.toMappedNodeId("e"),new long[]{4,1})
                 );
         }
 
@@ -84,7 +101,7 @@ class SmallBridgesTest {
             var log = new GdsTestLog();
             var progressTracker = new TaskProgressTracker(progressTask, log, new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE);
 
-            var bridges = new Bridges(graph, progressTracker);
+            var bridges = Bridges.create(graph, progressTracker,false);
             bridges.compute();
 
             Assertions.assertThat(log.getMessages(TestLog.INFO))
@@ -130,7 +147,7 @@ class SmallBridgesTest {
 
         @Test
         void shouldFindBridges() {
-            var bridges = new Bridges(graph,ProgressTracker.NULL_TRACKER);
+            var bridges = Bridges.create(graph,ProgressTracker.NULL_TRACKER,false);
             var result = bridges.compute().bridges();
 
             assertThat(result)

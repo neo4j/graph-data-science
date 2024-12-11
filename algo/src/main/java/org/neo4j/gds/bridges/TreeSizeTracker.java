@@ -19,9 +19,24 @@
  */
 package org.neo4j.gds.bridges;
 
-public record Bridge(long from, long to,long[] remainingSizes) {
+import org.neo4j.gds.collections.ha.HugeLongArray;
 
-    static Bridge create(long from, long to, long[] remainingSizes){
-        return new Bridge(Math.min(from,to), Math.max(from,to), remainingSizes);
+ class TreeSizeTracker  {
+
+    private final HugeLongArray subTreeSize;
+
+    TreeSizeTracker(long nodeCount){
+        subTreeSize = HugeLongArray.newArray(nodeCount);
+        subTreeSize.setAll( v -> 1);
     }
+    void recordTreeChild(long parent, long child) {
+        subTreeSize.addTo(parent,subTreeSize.get(child));
+    }
+
+    public long[] recordBridge( long child, long root) {
+        var childSubTree = subTreeSize.get(child);
+        var rootSubTree= subTreeSize.get(root) - childSubTree;
+        return  new long[]{rootSubTree, childSubTree};
+    }
+
 }

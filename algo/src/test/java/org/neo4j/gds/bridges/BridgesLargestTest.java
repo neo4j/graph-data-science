@@ -74,31 +74,32 @@ class BridgesLargestTest {
     @Inject
     private TestGraph graph;
 
-    private Bridge bridge(String from, String to) {
-        return new Bridge(graph.toOriginalNodeId(from), graph.toOriginalNodeId(to));
+    private Bridge bridge(String from, String to, long[] remainingSizes) {
+        return new Bridge(graph.toOriginalNodeId(from), graph.toOriginalNodeId(to), remainingSizes);
     }
 
 
     @Test
     void shouldFindAllBridges() {
-        var bridges = new Bridges(graph, ProgressTracker.NULL_TRACKER);
+        var bridges =  Bridges.create(graph, ProgressTracker.NULL_TRACKER,true);
 
         var result = bridges.compute().bridges().stream()
             .map(b -> new Bridge(
             graph.toOriginalNodeId(b.from()),
-            graph.toOriginalNodeId(b.to())
+            graph.toOriginalNodeId(b.to()),
+                b.remainingSizes()
         )).toList();
-
 
         assertThat(result)
             .isNotNull()
+            .usingRecursiveFieldByFieldElementComparator()
             .containsExactlyInAnyOrder(
-                bridge("a1", "a2"),
-                bridge("a3", "a4"),
-                bridge("a3", "a7"),
-                bridge("a7", "a8"),
-                bridge("a10", "a11"),
-                bridge("a14", "a13")
+                bridge("a1", "a2",   new long[]{1,1}),
+                bridge("a3", "a4",   new long[]{3,1}),
+                bridge("a3", "a7",   new long[]{2,2}),
+                bridge("a7", "a8",   new long[]{3,1}),
+                bridge("a10", "a11", new long[]{5,4}),
+                bridge("a14", "a13", new long[]{8,1})
             );
     }
 }

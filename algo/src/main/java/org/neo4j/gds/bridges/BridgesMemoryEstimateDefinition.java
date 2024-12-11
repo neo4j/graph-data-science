@@ -28,6 +28,13 @@ import org.neo4j.gds.mem.MemoryEstimations;
 import org.neo4j.gds.mem.MemoryRange;
 
 public class BridgesMemoryEstimateDefinition implements MemoryEstimateDefinition {
+
+    private final boolean shouldComputeComponents;
+
+    public BridgesMemoryEstimateDefinition(boolean shouldComputeComponents) {
+        this.shouldComputeComponents = shouldComputeComponents;
+    }
+
     @Override
     public MemoryEstimation memoryEstimation() {
 
@@ -38,6 +45,13 @@ public class BridgesMemoryEstimateDefinition implements MemoryEstimateDefinition
             .perNode("visited", Estimate::sizeOfBitset)
                 .perNode("bridge", (v)->  v * Estimate.sizeOfInstance(Bridge.class));
 
+        if (shouldComputeComponents){
+            builder.add(
+                "component split",
+                 MemoryEstimations.builder(TreeSizeTracker.class)
+                    .perNode("treeSize", HugeLongArray::memoryEstimation)
+                     .build());
+        }
         builder.rangePerGraphDimension("stack", ((graphDimensions, concurrency) -> {
             long relationshipCount = graphDimensions.relCountUpperBound();
             return MemoryRange.of(
