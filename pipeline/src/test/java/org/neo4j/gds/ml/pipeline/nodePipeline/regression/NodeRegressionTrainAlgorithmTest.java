@@ -20,6 +20,7 @@
 package org.neo4j.gds.ml.pipeline.nodePipeline.regression;
 
 import org.junit.jupiter.api.DynamicTest;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -31,12 +32,15 @@ import org.neo4j.gds.ml.metrics.regression.RegressionMetrics;
 import org.neo4j.gds.ml.models.linearregression.LinearRegressionTrainConfig;
 import org.neo4j.gds.ml.pipeline.ExecutableNodePropertyStepTestUtil;
 import org.neo4j.gds.ml.pipeline.PipelineTrainAlgorithmTest;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureProducer;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureStep;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @GdlExtension
 class NodeRegressionTrainAlgorithmTest {
@@ -95,7 +99,6 @@ class NodeRegressionTrainAlgorithmTest {
         );
 
         return Stream.of(
-            PipelineTrainAlgorithmTest.trainsAModel(algoSupplier.get(), NodeRegressionTrainingPipeline.MODEL_TYPE),
             PipelineTrainAlgorithmTest.originalSchemaTest(algoSupplier.get(), pipeline),
             PipelineTrainAlgorithmTest.testParameterSpaceValidation(pipelineWithoutCandidate -> factory.build(
                 graphStore,
@@ -105,5 +108,55 @@ class NodeRegressionTrainAlgorithmTest {
                 TerminationFlag.RUNNING_TRUE
             ), new NodeRegressionTrainingPipeline())
         );
+    }
+
+    @Test
+    void shouldTrainModel() {
+        var pipeline = new NodeRegressionTrainingPipeline();
+
+        pipeline.nodePropertySteps().add(new ExecutableNodePropertyStepTestUtil.NodeIdPropertyStep(
+            graphStore,
+            "nodeId"
+        ));
+        pipeline.addFeatureStep(NodeFeatureStep.of("scalar"));
+        pipeline.addFeatureStep(NodeFeatureStep.of("nodeId"));
+
+        pipeline.addTrainerConfig(LinearRegressionTrainConfig.DEFAULT);
+
+        RegressionMetrics evaluationMetric = RegressionMetrics.MEAN_ABSOLUTE_ERROR;
+        var config = NodeRegressionPipelineTrainConfigImpl.builder()
+            .pipeline("DUMMY_PIPE")
+            .graphName("DUMMY_GRAPH")
+            .modelUser("DUMMY_USER")
+            .modelName("model")
+            .targetProperty("t")
+            .metrics(List.of(evaluationMetric))
+            .build();
+
+        var nodeFeatureProducer = NodeFeatureProducer.create(
+            graphStore,
+            config,
+            ExecutionContext.EMPTY,
+            ProgressTracker.NULL_TRACKER
+        );
+        var pipelineTrainer = NodeRegressionTrain.create(
+            graphStore,
+            pipeline,
+            config,
+            nodeFeatureProducer,
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
+        );
+        var algorithm = new NodeRegressionTrainAlgorithm(
+            pipelineTrainer,
+            pipeline,
+            graphStore,
+            config,
+            ProgressTracker.NULL_TRACKER
+        );
+
+        var result = algorithm.compute();
+
+        assertThat(result.model().algoType()).isEqualTo(NodeRegressionTrainingPipeline.MODEL_TYPE);
     }
 }
