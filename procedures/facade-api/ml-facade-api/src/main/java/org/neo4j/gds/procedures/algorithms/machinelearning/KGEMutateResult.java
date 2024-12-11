@@ -20,7 +20,6 @@
 package org.neo4j.gds.procedures.algorithms.machinelearning;
 
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.procedures.algorithms.results.StandardMutateResult;
 
 import java.util.Map;
@@ -54,18 +53,5 @@ public final class KGEMutateResult extends StandardMutateResult {
             0,
             configurationMap
         );
-    }
-
-    public static class Builder extends AbstractResultBuilder<KGEMutateResult> {
-        @Override
-        public KGEMutateResult build() {
-            return new KGEMutateResult(
-                preProcessingMillis,
-                computeMillis,
-                mutateMillis,
-                relationshipsWritten,
-                config.toMap()
-            );
-        }
     }
 }

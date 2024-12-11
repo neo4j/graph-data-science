@@ -29,19 +29,20 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmMachinery;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.ml.splitting.EdgeSplitter;
 import org.neo4j.gds.ml.splitting.SplitRelationships;
 import org.neo4j.gds.ml.splitting.SplitRelationshipsBaseConfig;
 import org.neo4j.gds.termination.TerminationFlag;
 
-class MachineLearningAlgorithms {
+public class MachineLearningAlgorithms {
     private final AlgorithmMachinery algorithmMachinery = new AlgorithmMachinery();
 
     private final ProgressTrackerCreator progressTrackerCreator;
     private final TerminationFlag terminationFlag;
 
-    MachineLearningAlgorithms(ProgressTrackerCreator progressTrackerCreator, TerminationFlag terminationFlag) {
+    public MachineLearningAlgorithms(ProgressTrackerCreator progressTrackerCreator, TerminationFlag terminationFlag) {
         this.progressTrackerCreator = progressTrackerCreator;
         this.terminationFlag = terminationFlag;
     }
@@ -52,6 +53,14 @@ class MachineLearningAlgorithms {
             Tasks.leaf(AlgorithmLabel.KGE.asString())
         );
 
+        return kge(graph, configuration, progressTracker);
+    }
+
+    public KGEPredictResult kge(
+        Graph graph,
+        KGEPredictBaseConfig configuration,
+        ProgressTracker progressTracker
+    ) {
         var sourceNodes = new BitSet(graph.nodeCount());
         var targetNodes = new BitSet(graph.nodeCount());
         var parameters = KGEPredictConfigTransformer.toParameters(configuration);
