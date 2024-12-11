@@ -22,7 +22,7 @@ package org.neo4j.gds.procedures.algorithms.configuration;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.neo4j.gds.api.User;
-import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.config.BaseConfig;
 import org.neo4j.gds.configuration.Default;
 import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitFactory;
@@ -74,7 +74,7 @@ class ConfigurationParserTest {
 
         var configurationParser = new ConfigurationParser(null, limitsConfiguration);
 
-        var algorithmConfigurationMock = mock(AlgoBaseConfig.class);
+        var algorithmConfigurationMock = mock(BaseConfig.class);
         when(algorithmConfigurationMock.configKeys()).thenReturn(List.of("concurrency", "sudo"));
 
         Map<String, Object> userInputWithDefaults = Map.of("concurrency", 87L, "sudo", true);
@@ -93,7 +93,7 @@ class ConfigurationParserTest {
 
         var configurationParser = new ConfigurationParser(null, limitsConfiguration);
 
-        var algorithmConfigurationMock = mock(AlgoBaseConfig.class);
+        var algorithmConfigurationMock = mock(BaseConfig.class);
         when(algorithmConfigurationMock.configKeys()).thenReturn(List.of("concurrency"));
 
         Map<String, Object> userInputWithDefaults = Map.of("concurrency", 8L, "sudo", false);
@@ -110,7 +110,7 @@ class ConfigurationParserTest {
     void shouldComplainAboutArbitraryFields() {
         var configurationParser = new ConfigurationParser(null, null);
 
-        var algorithmConfigurationMock = mock(AlgoBaseConfig.class);
+        var algorithmConfigurationMock = mock(BaseConfig.class);
         when(algorithmConfigurationMock.configKeys()).thenReturn(List.of("concurrency"));
 
         Map<String, Object> userInput = Map.of("concurrency", 8L, "sudo", false);
