@@ -19,8 +19,7 @@
  */
 package org.neo4j.gds.ml.pipeline.nodePipeline.classification.train;
 
-import org.junit.jupiter.api.DynamicTest;
-import org.junit.jupiter.api.TestFactory;
+import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.executor.ExecutionContext;
@@ -29,17 +28,17 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.ml.metrics.classification.ClassificationMetricSpecification;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
+import org.neo4j.gds.ml.pipeline.ExecutableNodePropertyStep;
 import org.neo4j.gds.ml.pipeline.ExecutableNodePropertyStepTestUtil;
-import org.neo4j.gds.ml.pipeline.PipelineTrainAlgorithmTest;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureProducer;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureStep;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
 
-import static org.neo4j.gds.TestGdsVersion.testGdsVersion;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 @GdlExtension
 class NodeClassificationTrainAlgorithmTest {
@@ -67,16 +66,59 @@ class NodeClassificationTrainAlgorithmTest {
     @Inject
     private GraphStore graphStore;
 
-    @TestFactory
-    Stream<DynamicTest> baseTests() {
+    @Test
+    void shouldTrainModel() {
+        var pipeline = constructPipeline();
+        var algorithm = constructAlgorithm(pipeline);
+
+        var result = algorithm.compute();
+
+        assertThat(result.model().algoType()).isEqualTo(NodeClassificationTrainingPipeline.MODEL_TYPE);
+    }
+
+    @Test
+    void shouldProtectOriginalSchema() {
+        var pipeline = constructPipeline();
+        var algorithm = constructAlgorithm(pipeline);
+
+        var result = algorithm.compute();
+
+        var schema = result.model().graphSchema();
+        var nodeProperties = schema.nodeSchema().allProperties();
+        var pipeNodeProperties = pipeline.nodePropertySteps()
+            .stream()
+            .map(ExecutableNodePropertyStep::mutateNodeProperty)
+            .toList();
+        assertThat(pipeNodeProperties).isNotEmpty();
+        assertThat(nodeProperties).doesNotContainAnyElementsOf(pipeNodeProperties);
+    }
+
+    @Test
+    void shouldValidateParameterSpace() {
+        var pipeline = new NodeClassificationTrainingPipeline();
+        var algorithm = constructAlgorithm(pipeline);
+
+        assertThatIllegalArgumentException()
+            .isThrownBy(algorithm::compute)
+            .withMessage("Need at least one model candidate for training.");
+    }
+
+    private NodeClassificationTrainingPipeline constructPipeline() {
         var pipeline = new NodeClassificationTrainingPipeline();
 
-        pipeline.nodePropertySteps().add(new ExecutableNodePropertyStepTestUtil.NodeIdPropertyStep(graphStore, "nodeId"));
+        pipeline.nodePropertySteps().add(new ExecutableNodePropertyStepTestUtil.NodeIdPropertyStep(
+            graphStore,
+            "nodeId"
+        ));
         pipeline.addFeatureStep(NodeFeatureStep.of("scalar"));
         pipeline.addFeatureStep(NodeFeatureStep.of("nodeId"));
 
         pipeline.addTrainerConfig(LogisticRegressionTrainConfig.DEFAULT);
 
+        return pipeline;
+    }
+
+    private NodeClassificationTrainAlgorithm constructAlgorithm(NodeClassificationTrainingPipeline pipeline) {
         var metricSpecification = ClassificationMetricSpecification.Parser.parse("F1_WEIGHTED");
         var config = NodeClassificationPipelineTrainConfigImpl.builder()
             .pipeline("DUMMY_PIPE")
@@ -86,28 +128,23 @@ class NodeClassificationTrainAlgorithmTest {
             .targetProperty("t")
             .metrics(List.of(metricSpecification))
             .build();
-
-
-        var factory = new NodeClassificationTrainPipelineAlgorithmFactory(ExecutionContext.EMPTY, testGdsVersion);
-        Supplier<NodeClassificationTrainAlgorithm> algoSupplier = () -> factory.build(
+        var nodeFeatureProducer = NodeFeatureProducer
+            .create(graphStore, config, ExecutionContext.EMPTY, ProgressTracker.NULL_TRACKER);
+        var pipelineTrainer = NodeClassificationTrain.create(
             graphStore,
-            config,
             pipeline,
+            config,
+            nodeFeatureProducer,
             ProgressTracker.NULL_TRACKER,
             TerminationFlag.RUNNING_TRUE
         );
 
-        return Stream.of(
-            PipelineTrainAlgorithmTest.trainsAModel(algoSupplier.get(), NodeClassificationTrainingPipeline.MODEL_TYPE),
-            PipelineTrainAlgorithmTest.originalSchemaTest(algoSupplier.get(), pipeline),
-            PipelineTrainAlgorithmTest.testParameterSpaceValidation(pipelineWithoutCandidate -> factory.build(
-                graphStore,
-                config,
-                pipelineWithoutCandidate,
-                ProgressTracker.NULL_TRACKER,
-                TerminationFlag.RUNNING_TRUE
-            ), new NodeClassificationTrainingPipeline())
+        return new NodeClassificationTrainAlgorithm(
+            pipelineTrainer,
+            pipeline,
+            graphStore,
+            config,
+            ProgressTracker.NULL_TRACKER
         );
     }
-
 }

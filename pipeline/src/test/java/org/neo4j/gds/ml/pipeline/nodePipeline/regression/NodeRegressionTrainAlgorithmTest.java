@@ -68,7 +68,7 @@ class NodeRegressionTrainAlgorithmTest {
 
     @Test
     void shouldTrainModel() {
-        var pipeline = constructPipeline(Collections.emptyList());
+        var pipeline = constructPipeline();
         var algorithm = constructAlgorithm(pipeline);
 
         var result = algorithm.compute();
@@ -78,7 +78,7 @@ class NodeRegressionTrainAlgorithmTest {
 
     @Test
     void shouldProtectOriginalSchema() {
-        var pipeline = constructPipeline(Collections.emptyList());
+        var pipeline = constructPipeline();
         var algorithm = constructAlgorithm(pipeline);
 
         var result = algorithm.compute();
@@ -103,7 +103,7 @@ class NodeRegressionTrainAlgorithmTest {
             .withMessage("Need at least one model candidate for training.");
     }
 
-    private NodeRegressionTrainingPipeline constructPipeline(List<String> featureProperties) {
+    private NodeRegressionTrainingPipeline constructPipeline() {
         var pipeline = new NodeRegressionTrainingPipeline();
 
         pipeline.nodePropertySteps().add(new ExecutableNodePropertyStepTestUtil.NodeIdPropertyStep(
@@ -114,8 +114,6 @@ class NodeRegressionTrainAlgorithmTest {
         pipeline.addFeatureStep(NodeFeatureStep.of("nodeId"));
 
         pipeline.addTrainerConfig(LinearRegressionTrainConfig.DEFAULT);
-
-        pipeline.featureProperties().addAll(featureProperties);
 
         return pipeline;
     }
