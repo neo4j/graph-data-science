@@ -70,7 +70,7 @@ final class NodeClassificationTrainComputation implements Computation<NodeClassi
     private final AlgorithmsProcedureFacade algorithmsProcedureFacade;
     private final NodeClassificationPipelineTrainConfig configuration;
 
-    private NodeClassificationTrainComputation(
+    NodeClassificationTrainComputation(
         Log log,
         ModelCatalog modelCatalog,
         PipelineRepository pipelineRepository,
