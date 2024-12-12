@@ -19,8 +19,13 @@
  */
 package org.neo4j.gds.triangle;
 
-final class Constants {
-    static final String TRIANGLE_STREAM_DESCRIPTION = "Triangles streams the nodeIds of each triangle in the graph.";
+import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
-    private Constants() {}
+public final class TriangleCountTask {
+    private TriangleCountTask() {}
+
+    public static Task create(long nodeCount) {
+        return Tasks.leaf(IntersectingTriangleCount.class.getSimpleName(), nodeCount);
+    }
 }

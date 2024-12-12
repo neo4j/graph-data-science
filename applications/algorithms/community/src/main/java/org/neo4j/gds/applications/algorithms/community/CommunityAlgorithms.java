@@ -74,12 +74,12 @@ import org.neo4j.gds.sllpa.SpeakerListenerLPAConfig;
 import org.neo4j.gds.sllpa.SpeakerListenerLPAProgressTrackerCreator;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.triangle.IntersectingTriangleCount;
-import org.neo4j.gds.triangle.IntersectingTriangleCountFactory;
 import org.neo4j.gds.triangle.LocalClusteringCoefficient;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientBaseConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientResult;
 import org.neo4j.gds.triangle.TriangleCountBaseConfig;
 import org.neo4j.gds.triangle.TriangleCountResult;
+import org.neo4j.gds.triangle.TriangleCountTask;
 import org.neo4j.gds.triangle.TriangleResult;
 import org.neo4j.gds.triangle.TriangleStream;
 import org.neo4j.gds.wcc.WccBaseConfig;
@@ -253,7 +253,7 @@ public class CommunityAlgorithms {
     LocalClusteringCoefficientResult lcc(Graph graph, LocalClusteringCoefficientBaseConfig configuration) {
         var tasks = new ArrayList<Task>();
         if (configuration.seedProperty() == null) {
-            tasks.add(IntersectingTriangleCountFactory.triangleCountProgressTask(graph));
+            tasks.add(TriangleCountTask.create(graph.nodeCount()));
         }
         tasks.add(Tasks.leaf("Calculate Local Clustering Coefficient", graph.nodeCount()));
         var task = Tasks.task(AlgorithmLabel.LCC.asString(), tasks);
@@ -414,6 +414,14 @@ public class CommunityAlgorithms {
         var task = Tasks.leaf(AlgorithmLabel.TriangleCount.asString(), graph.nodeCount());
         var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
 
+        return triangleCount(graph, configuration, progressTracker);
+    }
+
+    public TriangleCountResult triangleCount(
+        Graph graph,
+        TriangleCountBaseConfig configuration,
+        ProgressTracker progressTracker
+    ) {
         var parameters = configuration.toParameters();
 
         var algorithm = IntersectingTriangleCount.create(
