@@ -40,7 +40,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 
 @GdlExtension
-class NodeEmbeddingAlgorithmsTest {
+class NodeEmbeddingAlgorithmsNode2VecTest {
     @SuppressWarnings("unused")
     @GdlGraph
     private static final String DB_CYPHER =

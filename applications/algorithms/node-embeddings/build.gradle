@@ -31,5 +31,6 @@ dependencies {
 
     testRuntimeOnly openGds.junit5.jupiter.engine
 
+    testImplementation project(':annotations')
     testImplementation project(':test-utils')
 }

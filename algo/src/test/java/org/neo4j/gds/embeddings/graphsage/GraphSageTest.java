@@ -29,6 +29,10 @@ import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.schema.Direction;
+import org.neo4j.gds.applications.algorithms.embeddings.GraphSageModelCatalog;
+import org.neo4j.gds.applications.algorithms.embeddings.NodeEmbeddingAlgorithms;
+import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
+import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.beta.generator.PropertyProducer;
 import org.neo4j.gds.beta.generator.RandomGraphGenerator;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
@@ -45,11 +49,9 @@ import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.model.ModelCatalogExtension;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
-import org.neo4j.gds.embeddings.graphsage.algo.GraphSageAlgorithmFactory;
-import org.neo4j.gds.embeddings.graphsage.algo.GraphSageResult;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageStreamConfigImpl;
-import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainAlgorithmFactory;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfigImpl;
 import org.neo4j.gds.embeddings.graphsage.algo.SingleLabelGraphSageTrain;
 import org.neo4j.gds.extension.GdlExtension;
@@ -67,6 +69,9 @@ import java.util.stream.LongStream;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.neo4j.gds.TestGdsVersion.testGdsVersion;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.compat.TestLog.INFO;
@@ -166,14 +171,21 @@ class GraphSageTest {
             .concurrency(4)
             .build();
 
-        var graphSage = new GraphSageAlgorithmFactory<>(modelCatalog).build(
+        var graphSageModelCatalog = new GraphSageModelCatalog(modelCatalog);
+        var nodeEmbeddingAlgorithms = new NodeEmbeddingAlgorithms(
+            graphSageModelCatalog,
+            null,
+            TerminationFlag.RUNNING_TRUE
+        );
+
+        var result = nodeEmbeddingAlgorithms.graphSage(
             orphanGraph,
             streamConfig,
             ProgressTracker.NULL_TRACKER
         );
-        GraphSageResult compute = graphSage.compute();
+
         for (int i = 0; i < orphanGraph.nodeCount() - 1; i++) {
-            Arrays.stream(compute.embeddings().get(i)).forEach(embeddingValue -> assertThat(embeddingValue).isNotNaN());
+            Arrays.stream(result.embeddings().get(i)).forEach(embeddingValue -> assertThat(embeddingValue).isNotNaN());
         }
     }
 
@@ -226,19 +238,32 @@ class GraphSageTest {
 
     @Test
     void testLogging() {
+        var log = new GdsTestLog();
+        var graphSageModelCatalog = new GraphSageModelCatalog(modelCatalog);
+        var requestScopedDependencies = RequestScopedDependencies.builder()
+            .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
+            .terminationFlag(TerminationFlag.RUNNING_TRUE)
+            .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
+            .build();
+        var progressTrackerCreator = new ProgressTrackerCreator(log, requestScopedDependencies);
+        var nodeEmbeddingAlgorithms = new NodeEmbeddingAlgorithms(
+            graphSageModelCatalog,
+            progressTrackerCreator,
+            requestScopedDependencies.terminationFlag()
+        );
+
         var trainConfig = configBuilder
             .modelName(MODEL_NAME)
             .featureProperties(List.of("f1"))
             .relationshipWeightProperty("weight")
             .build();
-
-        var graphSageTrain = new GraphSageTrainAlgorithmFactory().build(
+        var result = nodeEmbeddingAlgorithms.graphSageTrain(
             graph,
             trainConfig,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER // exclude the train bits from log
         );
 
-        modelCatalog.set(graphSageTrain.compute());
+        modelCatalog.set(result);
 
         var streamConfig = GraphSageStreamConfigImpl
             .builder()
@@ -247,14 +272,7 @@ class GraphSageTest {
             .batchSize(1)
             .build();
 
-        var log = new GdsTestLog();
-        var graphSage = new GraphSageAlgorithmFactory<>(modelCatalog).build(
-            graph,
-            streamConfig,
-            log,
-            EmptyTaskRegistryFactory.INSTANCE
-        );
-        graphSage.compute();
+        nodeEmbeddingAlgorithms.graphSage(graph, streamConfig);
 
         var messagesInOrder = log.getMessages(INFO);
 
@@ -289,19 +307,26 @@ class GraphSageTest {
 
     @Test
     void testTermination() {
+        var terminationFlag = mock(TerminationFlag.class);
+        var nodeEmbeddingAlgorithms = new NodeEmbeddingAlgorithms(
+            new GraphSageModelCatalog(modelCatalog),
+            null,
+            terminationFlag
+        );
+
         var trainConfig = configBuilder
             .modelName(MODEL_NAME)
             .featureProperties(List.of("f1"))
             .relationshipWeightProperty("weight")
             .build();
-
-        var graphSageTrain = new GraphSageTrainAlgorithmFactory().build(
+        doNothing().when(terminationFlag).assertRunning();
+        var result = nodeEmbeddingAlgorithms.graphSageTrain(
             graph,
             trainConfig,
             ProgressTracker.NULL_TRACKER
         );
 
-        modelCatalog.set(graphSageTrain.compute());
+        modelCatalog.set(result);
 
         var streamConfig = GraphSageStreamConfigImpl
             .builder()
@@ -310,16 +335,8 @@ class GraphSageTest {
             .batchSize(1)
             .build();
 
-        var log = new GdsTestLog();
-        var graphSage = new GraphSageAlgorithmFactory<>(modelCatalog).build(
-            graph,
-            streamConfig,
-            log,
-            EmptyTaskRegistryFactory.INSTANCE
-        );
-        graphSage.setTerminationFlag(TerminationFlag.STOP_RUNNING);
-
-        assertThatThrownBy(graphSage::compute)
+        doThrow(new TerminatedException()).when(terminationFlag).assertRunning();
+        assertThatThrownBy(() -> nodeEmbeddingAlgorithms.graphSage(graph, streamConfig, ProgressTracker.NULL_TRACKER))
             .isInstanceOf(TerminatedException.class)
             .hasMessageContaining("The execution has been terminated.");
     }

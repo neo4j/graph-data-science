@@ -28,15 +28,16 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.api.schema.GraphSchema;
+import org.neo4j.gds.applications.algorithms.embeddings.GraphSageModelCatalog;
+import org.neo4j.gds.applications.algorithms.embeddings.NodeEmbeddingAlgorithmsEstimationModeBusinessFacade;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
-import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.config.MutateConfig;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.model.InjectModelCatalog;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.model.ModelCatalogExtension;
-import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.embeddings.graphsage.AggregatorType;
 import org.neo4j.gds.embeddings.graphsage.GraphSageModelTrainer;
 import org.neo4j.gds.embeddings.graphsage.Layer;
@@ -44,15 +45,12 @@ import org.neo4j.gds.embeddings.graphsage.LayerConfig;
 import org.neo4j.gds.embeddings.graphsage.ModelData;
 import org.neo4j.gds.embeddings.graphsage.SingleLabelFeatureFunction;
 import org.neo4j.gds.embeddings.graphsage.TrainConfigTransformer;
-import org.neo4j.gds.gdl.GdlGraphs;
-import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.mem.MemoryTree;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.function.LongUnaryOperator;
@@ -259,8 +257,11 @@ class GraphSageAlgorithmFactoryTest {
             .add(MemoryRange.of(resultFeaturesMemory))
             .add(MemoryRange.of(40L)); // GraphSage.class
 
-        var actualTree = new GraphSageAlgorithmFactory<>(modelCatalog)
-            .memoryEstimation(gsConfig).estimate(GraphDimensions.of(nodeCount), concurrency);
+        var graphSageModelCatalog = new GraphSageModelCatalog(modelCatalog);
+        var estimationFacade = new NodeEmbeddingAlgorithmsEstimationModeBusinessFacade(graphSageModelCatalog, null);
+        var memoryEstimation = estimationFacade.graphSage(gsConfig, gsConfig instanceof MutateConfig);
+
+        var actualTree = memoryEstimation.estimate(GraphDimensions.of(nodeCount), concurrency);
 
         MemoryRange actual = actualTree.memoryUsage();
 
@@ -295,9 +296,10 @@ class GraphSageAlgorithmFactoryTest {
             .modelName("modelName")
             .build();
 
-        var actualEstimation = new GraphSageAlgorithmFactory<>(modelCatalog)
-            .memoryEstimation(gsConfig)
-            .estimate(GraphDimensions.of(1337), new Concurrency(42));
+        var graphSageModelCatalog = new GraphSageModelCatalog(modelCatalog);
+        var estimationFacade = new NodeEmbeddingAlgorithmsEstimationModeBusinessFacade(graphSageModelCatalog, null);
+        var memoryEstimation = estimationFacade.graphSage(gsConfig, gsConfig instanceof MutateConfig);
+        var actualEstimation = memoryEstimation.estimate(GraphDimensions.of(1337), new Concurrency(42));
 
         assertThat(flatten(actualEstimation)).containsExactly(
             pair(0, "GraphSage"),
@@ -346,9 +348,10 @@ class GraphSageAlgorithmFactoryTest {
             .mutateProperty("foo")
             .build();
 
-        var actualEstimation = new GraphSageAlgorithmFactory<>(modelCatalog)
-            .memoryEstimation(gsConfig)
-            .estimate(GraphDimensions.of(1337), new Concurrency(42));
+        var graphSageModelCatalog = new GraphSageModelCatalog(modelCatalog);
+        var estimationFacade = new NodeEmbeddingAlgorithmsEstimationModeBusinessFacade(graphSageModelCatalog, null);
+        var memoryEstimation = estimationFacade.graphSage(gsConfig, true);
+        var actualEstimation = memoryEstimation.estimate(GraphDimensions.of(1337), new Concurrency(42));
 
         assertThat(flatten(actualEstimation)).containsExactly(
             pair(0, "GraphSage"),
@@ -368,42 +371,6 @@ class GraphSageAlgorithmFactoryTest {
             pair(5, "MEAN 2"),
             pair(5, "normalizeRows")
         );
-    }
-
-    @Test
-    void shouldCreateCorrectAlgorithmInstance() {
-        var multiLabelConfig = GraphSageTrainConfig.of(
-            "",
-            CypherMapWrapper.create(Map.of(
-                "modelName", "graphSageModel",
-                "featureProperties", List.of("a"),
-                "projectedFeatureDimension", 42
-            ))
-        );
-        var multiLabelAlgo = new GraphSageTrainAlgorithmFactory()
-            .build(
-                GdlGraphs.EMPTY,
-                multiLabelConfig,
-                Log.noOpLog(),
-                EmptyTaskRegistryFactory.INSTANCE
-            );
-        assertThat(multiLabelAlgo).isExactlyInstanceOf(MultiLabelGraphSageTrain.class);
-
-        var singleLabelConfig = GraphSageTrainConfig.of(
-            "",
-            CypherMapWrapper.create(Map.of(
-                "modelName", "graphSageModel",
-                "featureProperties", List.of("a")
-            ))
-        );
-        var singleLabelAlgo = new GraphSageTrainAlgorithmFactory()
-            .build(
-                GdlGraphs.EMPTY,
-                singleLabelConfig,
-                Log.noOpLog(),
-                EmptyTaskRegistryFactory.INSTANCE
-            );
-        assertThat(singleLabelAlgo).isExactlyInstanceOf(SingleLabelGraphSageTrain.class);
     }
 
     private static List<IntObjectPair<String>> flatten(MemoryTree memoryTree) {
@@ -553,8 +520,10 @@ class GraphSageAlgorithmFactoryTest {
             .mutateProperty("foo")
             .build();
 
-        var actualTree = new GraphSageAlgorithmFactory<>(modelCatalog)
-            .memoryEstimation(config).estimate(GraphDimensions.of(10000), new Concurrency(4));
+        var graphSageModelCatalog = new GraphSageModelCatalog(modelCatalog);
+        var estimationFacade = new NodeEmbeddingAlgorithmsEstimationModeBusinessFacade(graphSageModelCatalog, null);
+        var memoryEstimation = estimationFacade.graphSage(config, true);
+        var actualTree = memoryEstimation.estimate(GraphDimensions.of(10000), new Concurrency(4));
 
         MemoryRange actual = actualTree.memoryUsage();
 

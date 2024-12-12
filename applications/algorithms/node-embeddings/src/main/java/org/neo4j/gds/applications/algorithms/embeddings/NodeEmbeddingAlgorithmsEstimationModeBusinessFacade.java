@@ -29,6 +29,7 @@ import org.neo4j.gds.embeddings.graphsage.algo.GraphSageBaseConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageMemoryEstimateDefinition;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainEstimateDefinition;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainMemoryEstimateParameters;
 import org.neo4j.gds.embeddings.hashgnn.HashGNNConfig;
 import org.neo4j.gds.embeddings.hashgnn.HashGNNConfigTransformer;
 import org.neo4j.gds.embeddings.hashgnn.HashGNNMemoryEstimateDefinition;
@@ -84,7 +85,13 @@ public class NodeEmbeddingAlgorithmsEstimationModeBusinessFacade {
     }
 
     MemoryEstimation graphSageTrain(GraphSageTrainConfig configuration) {
-        return new GraphSageTrainEstimateDefinition(TrainConfigTransformer.toMemoryEstimateParameters(configuration)).memoryEstimation();
+        var parameters = TrainConfigTransformer.toMemoryEstimateParameters(configuration);
+
+        return graphSageTrain(parameters);
+    }
+
+    MemoryEstimation graphSageTrain(GraphSageTrainMemoryEstimateParameters parameters) {
+        return new GraphSageTrainEstimateDefinition(parameters).memoryEstimation();
     }
 
     public MemoryEstimateResult graphSageTrain(GraphSageTrainConfig configuration, Object graphNameOrConfiguration) {

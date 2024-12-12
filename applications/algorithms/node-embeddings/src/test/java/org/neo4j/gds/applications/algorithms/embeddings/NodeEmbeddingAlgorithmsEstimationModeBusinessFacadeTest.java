@@ -17,32 +17,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.embeddings.graphsage.algo;
-
+package org.neo4j.gds.applications.algorithms.embeddings;
 
 import org.eclipse.collections.api.tuple.primitive.IntObjectPair;
 import org.eclipse.collections.api.tuple.primitive.LongLongPair;
 import org.eclipse.collections.impl.tuple.Tuples;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.neo4j.gds.InspectableTestProgressTracker;
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.embeddings.graphsage.AggregatorType;
+import org.neo4j.gds.embeddings.graphsage.LayerConfig;
 import org.neo4j.gds.embeddings.graphsage.TrainConfigTransformer;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfigImpl;
 import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.mem.MemoryTree;
-import org.neo4j.gds.embeddings.graphsage.GraphSageTestGraph;
-import org.neo4j.gds.embeddings.graphsage.LayerConfig;
-import org.neo4j.gds.extension.GdlExtension;
-import org.neo4j.gds.extension.GdlGraph;
-import org.neo4j.gds.extension.Inject;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -58,35 +52,20 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.eclipse.collections.impl.tuple.primitive.PrimitiveTuples.pair;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
-import static org.neo4j.gds.assertj.Extractors.keepingFixedNumberOfDecimals;
-import static org.neo4j.gds.assertj.Extractors.removingThreadId;
-import static org.neo4j.gds.compat.TestLog.INFO;
-import static org.neo4j.gds.mem.MemoryEstimations.RESIDENT_MEMORY;
-import static org.neo4j.gds.mem.MemoryEstimations.TEMPORARY_MEMORY;
-import static org.neo4j.gds.embeddings.graphsage.GraphSageTestGraph.DUMMY_PROPERTY;
 import static org.neo4j.gds.mem.Estimate.sizeOfDoubleArray;
 import static org.neo4j.gds.mem.Estimate.sizeOfIntArray;
 import static org.neo4j.gds.mem.Estimate.sizeOfLongArray;
 import static org.neo4j.gds.mem.Estimate.sizeOfObjectArray;
 import static org.neo4j.gds.mem.Estimate.sizeOfOpenHashContainer;
+import static org.neo4j.gds.mem.MemoryEstimations.RESIDENT_MEMORY;
+import static org.neo4j.gds.mem.MemoryEstimations.TEMPORARY_MEMORY;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-@GdlExtension
-class GraphSageTrainAlgorithmFactoryTest {
-
-    private static final int SOME_REASONABLE_VALUE = 100;
-
-    @GdlGraph
-    private static final String GDL = GraphSageTestGraph.GDL;
-
-    @Inject
-    private Graph graph;
-
-    @SuppressWarnings("UnnecessaryLocalVariable")
+class NodeEmbeddingAlgorithmsEstimationModeBusinessFacadeTest {
     @ParameterizedTest(name = "{0}")
     @MethodSource("parameters")
-    void memoryEstimation(
-        @SuppressWarnings("unused") String testName,
+    void shouldEstimateGraphSageTrain(
+        String testName,
         GraphSageTrainConfig config,
         GraphDimensions graphDimensions,
         LongUnaryOperator hugeObjectArraySize
@@ -306,9 +285,9 @@ class GraphSageTrainAlgorithmFactoryTest {
         }
 
         var lossFunctionMemory = Stream.concat(
-            subGraphMemories.stream(),
-            aggregatorMemories.stream()
-        ).reduce(MemoryRange.empty(), MemoryRange::add)
+                subGraphMemories.stream(),
+                aggregatorMemories.stream()
+            ).reduce(MemoryRange.empty(), MemoryRange::add)
             .add(featureFunctionMemory);
 
         var evaluateLossMemory = lossFunctionMemory.times(concurrency.value());
@@ -381,9 +360,9 @@ class GraphSageTrainAlgorithmFactoryTest {
             .add(expectedResidentMemory)
             .add(MemoryRange.of(40L)); // For GraphSage.class
 
-        var actualEstimation = new GraphSageTrainAlgorithmFactory()
-            .memoryEstimation(parameters)
-            .estimate(graphDimensions, concurrency);
+        var estimationFacade = new NodeEmbeddingAlgorithmsEstimationModeBusinessFacade(null, null);
+
+        var actualEstimation = estimationFacade.graphSageTrain(parameters).estimate(graphDimensions, concurrency);
 
         assertEquals(expectedPeakMemory, actualEstimation.memoryUsage());
         assertThat(actualEstimation.residentMemory())
@@ -395,6 +374,11 @@ class GraphSageTrainAlgorithmFactoryTest {
     @ParameterizedTest
     @ValueSource(booleans = {false, true})
     void memoryEstimationTreeStructure(boolean isMultiLabel) {
+        var estimationFacade = new NodeEmbeddingAlgorithmsEstimationModeBusinessFacade(
+            null,
+            null
+        );
+
         var builder = GraphSageTrainConfigImpl
             .builder()
             .modelUser("userName")
@@ -403,12 +387,13 @@ class GraphSageTrainAlgorithmFactoryTest {
             .sampleSizes(List.of(1, 2))
             .aggregator(AggregatorType.MEAN);
         var config = isMultiLabel
-            ? builder.projectedFeatureDimension(SOME_REASONABLE_VALUE).build()
+            ? builder.projectedFeatureDimension(100).build()
             : builder.build();
 
-        var actualEstimation = new GraphSageTrainAlgorithmFactory()
-            .memoryEstimation(config)
-            .estimate(GraphDimensions.of(1337), new Concurrency(42));
+        var actualEstimation = estimationFacade.graphSageTrain(config).estimate(
+            GraphDimensions.of(1337),
+            new Concurrency(42)
+        );
 
         var expectedTreeStructure = Stream.<IntObjectPair<String>>builder()
             .add(pair(0, "GraphSageTrain"))
@@ -452,92 +437,6 @@ class GraphSageTrainAlgorithmFactoryTest {
             .add(pair(5, "updateAdamOptimizer"));
 
         assertThat(flatten(actualEstimation)).containsExactlyElementsOf(expectedTreeStructure.build().collect(toList()));
-    }
-
-    @Test
-    void testLogging() {
-        var config = GraphSageTrainConfigImpl.builder()
-            .modelUser("DUMMY")
-            .featureProperties(List.of(DUMMY_PROPERTY))
-            .embeddingDimension(12)
-            .aggregator(AggregatorType.POOL)
-            .tolerance(1e-10)
-            .sampleSizes(List.of(5, 3))
-            .batchSize(4)
-            .randomSeed(42L)
-            .modelName("model")
-            .relationshipWeightProperty("times")
-            .epochs(2)
-            .maxIterations(2)
-            .build();
-
-        var factory = new GraphSageTrainAlgorithmFactory();
-
-        var progressTracker = new InspectableTestProgressTracker(
-            factory.progressTask(graph, config),
-            config.username(),
-            config.jobId()
-        );
-
-        var algo = factory.build(
-            graph,
-            config,
-            progressTracker
-        );
-
-        algo.compute();
-
-        assertThat(progressTracker.log().getMessages(INFO))
-            // avoid asserting on the thread id
-            .extracting(removingThreadId())
-            .extracting(keepingFixedNumberOfDecimals(2))
-            .containsExactly(
-                "GraphSageTrain :: Start",
-                "GraphSageTrain :: Prepare batches :: Start",
-                "GraphSageTrain :: Prepare batches 20%",
-                "GraphSageTrain :: Prepare batches 40%",
-                "GraphSageTrain :: Prepare batches 60%",
-                "GraphSageTrain :: Prepare batches 80%",
-                "GraphSageTrain :: Prepare batches 100%",
-                "GraphSageTrain :: Prepare batches :: Finished",
-                "GraphSageTrain :: Train model :: Start",
-                "GraphSageTrain :: Train model :: Epoch 1 of 2 :: Start",
-                "GraphSageTrain :: Train model :: Epoch 1 of 2 :: Iteration 1 of 2 :: Start",
-                "GraphSageTrain :: Train model :: Epoch 1 of 2 :: Iteration 1 of 2 25%",
-                "GraphSageTrain :: Train model :: Epoch 1 of 2 :: Iteration 1 of 2 50%",
-                "GraphSageTrain :: Train model :: Epoch 1 of 2 :: Iteration 1 of 2 75%",
-                "GraphSageTrain :: Train model :: Epoch 1 of 2 :: Iteration 1 of 2 100%",
-                "GraphSageTrain :: Train model :: Epoch 1 of 2 :: Iteration 1 of 2 :: Average loss per node: 26.52",
-                "GraphSageTrain :: Train model :: Epoch 1 of 2 :: Iteration 1 of 2 :: Finished",
-                "GraphSageTrain :: Train model :: Epoch 1 of 2 :: Iteration 2 of 2 :: Start",
-                "GraphSageTrain :: Train model :: Epoch 1 of 2 :: Iteration 2 of 2 25%",
-                "GraphSageTrain :: Train model :: Epoch 1 of 2 :: Iteration 2 of 2 50%",
-                "GraphSageTrain :: Train model :: Epoch 1 of 2 :: Iteration 2 of 2 75%",
-                "GraphSageTrain :: Train model :: Epoch 1 of 2 :: Iteration 2 of 2 100%",
-                "GraphSageTrain :: Train model :: Epoch 1 of 2 :: Iteration 2 of 2 :: Average loss per node: 22.35",
-                "GraphSageTrain :: Train model :: Epoch 1 of 2 :: Iteration 2 of 2 :: Finished",
-                "GraphSageTrain :: Train model :: Epoch 1 of 2 :: Finished",
-                "GraphSageTrain :: Train model :: Epoch 2 of 2 :: Start",
-                "GraphSageTrain :: Train model :: Epoch 2 of 2 :: Iteration 1 of 2 :: Start",
-                "GraphSageTrain :: Train model :: Epoch 2 of 2 :: Iteration 1 of 2 25%",
-                "GraphSageTrain :: Train model :: Epoch 2 of 2 :: Iteration 1 of 2 50%",
-                "GraphSageTrain :: Train model :: Epoch 2 of 2 :: Iteration 1 of 2 75%",
-                "GraphSageTrain :: Train model :: Epoch 2 of 2 :: Iteration 1 of 2 100%",
-                "GraphSageTrain :: Train model :: Epoch 2 of 2 :: Iteration 1 of 2 :: Average loss per node: 22.43",
-                "GraphSageTrain :: Train model :: Epoch 2 of 2 :: Iteration 1 of 2 :: Finished",
-                "GraphSageTrain :: Train model :: Epoch 2 of 2 :: Iteration 2 of 2 :: Start",
-                "GraphSageTrain :: Train model :: Epoch 2 of 2 :: Iteration 2 of 2 25%",
-                "GraphSageTrain :: Train model :: Epoch 2 of 2 :: Iteration 2 of 2 50%",
-                "GraphSageTrain :: Train model :: Epoch 2 of 2 :: Iteration 2 of 2 75%",
-                "GraphSageTrain :: Train model :: Epoch 2 of 2 :: Iteration 2 of 2 100%",
-                "GraphSageTrain :: Train model :: Epoch 2 of 2 :: Iteration 2 of 2 :: Average loss per node: 25.86",
-                "GraphSageTrain :: Train model :: Epoch 2 of 2 :: Iteration 2 of 2 :: Finished",
-                "GraphSageTrain :: Train model :: Epoch 2 of 2 :: Finished",
-                "GraphSageTrain :: Train model :: Finished",
-                "GraphSageTrain :: Finished"
-            );
-
-        progressTracker.assertValidProgressEvolution();
     }
 
     private static List<IntObjectPair<String>> flatten(MemoryTree memoryTree) {
@@ -646,20 +545,20 @@ class GraphSageTrainAlgorithmFactoryTest {
                                                         )
                                                         .build();
 
-                                                var dimensions = ImmutableGraphDimensions
-                                                    .builder()
-                                                    .nodeCount(nodeCount)
-                                                    .estimationNodeLabelCount(labelCount)
-                                                    .build();
+                                                    var dimensions = ImmutableGraphDimensions
+                                                        .builder()
+                                                        .nodeCount(nodeCount)
+                                                        .estimationNodeLabelCount(labelCount)
+                                                        .build();
 
-                                                return arguments(
-                                                    testName,
-                                                    config,
-                                                    dimensions,
-                                                    hugeObjectArraySize
-                                                );
-                                            })
-                                        )
+                                                    return arguments(
+                                                        testName,
+                                                        config,
+                                                        dimensions,
+                                                        hugeObjectArraySize
+                                                    );
+                                                })
+                                            )
                                     )
                                 )
                             )
