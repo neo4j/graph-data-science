@@ -70,7 +70,7 @@ class GraphStoreNodeVisitorTest {
             nodeVisitor.labels(nodeLabels.stream().map(NodeLabel::name).toArray(String[]::new));
             var propertyKeys = graphStore.nodePropertyKeys(nodeLabels);
             for (String propertyKey : propertyKeys) {
-                nodeVisitor.property(propertyKey, graph.nodeProperties(propertyKey).getObject(nodeId));
+                nodeVisitor.property(propertyKey, graph.nodeProperties(propertyKey).getObject(nodeId), false);
             }
             nodeVisitor.endOfEntity();
             return true;

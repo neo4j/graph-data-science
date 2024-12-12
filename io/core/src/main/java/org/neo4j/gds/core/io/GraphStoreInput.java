@@ -310,7 +310,7 @@ public final class GraphStoreInput {
 
         @Override
         public boolean next(InputEntityVisitor visitor) throws IOException {
-            if (propertyValues.tryAdvance(value -> visitor.property(propertyName, value))) {
+            if (propertyValues.tryAdvance(value -> visitor.property(propertyName, value, false))) {
                 visitor.endOfEntity();
                 return true;
             }
@@ -476,7 +476,7 @@ public final class GraphStoreInput {
                 nodeStore.additionalProperties.forEach((propertyKey, propertyFn) -> {
                     var value = propertyFn.apply(id);
                     if (value != null) {
-                        visitor.property(propertyKey, value);
+                        visitor.property(propertyKey, value, false);
                     }
                 });
 
@@ -507,7 +507,7 @@ public final class GraphStoreInput {
                 var property = properties.getObject(id);
                 if (property != null) {
                     propertyProducers.put(propertyKey, properties);
-                    visitor.property(propertyKey, property);
+                    visitor.property(propertyKey, property, false);
                 }
             }));
         }
@@ -609,7 +609,8 @@ public final class GraphStoreInput {
                 for (int propertyIdx = 0; propertyIdx < propertyKeys.length; propertyIdx++) {
                     visitor.property(
                         propertyKeys[propertyIdx],
-                        properties[propertyIdx]
+                        properties[propertyIdx],
+                        false
                     );
                 }
 

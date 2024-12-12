@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.core.io.file;
 
-import org.neo4j.batchimport.api.input.InputEntityVisitor.Adapter;
+import org.neo4j.batchimport.api.input.InputEntityVisitor;
 
 import java.io.Flushable;
 
-public abstract class GraphPropertyVisitor extends Adapter implements Flushable {
+public interface GraphPropertyVisitor extends InputEntityVisitor, Flushable {
 }

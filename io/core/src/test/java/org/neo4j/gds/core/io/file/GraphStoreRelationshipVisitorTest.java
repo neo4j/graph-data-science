@@ -121,8 +121,8 @@ class GraphStoreRelationshipVisitorTest {
         relationshipVisitor.type("R");
         relationshipVisitor.startId(multiplePropsIdFunction.of("a"));
         relationshipVisitor.endId(multiplePropsIdFunction.of("b"));
-        relationshipVisitor.property("p", 42.0D);
-        relationshipVisitor.property("r", 13.37D);
+        relationshipVisitor.property("p", 42.0D, false);
+        relationshipVisitor.property("r", 13.37D, false);
         relationshipVisitor.endOfEntity();
 
         var actualGraph = createGraph(multiplePropsGraph, relationshipBuildersByType, 1L);
@@ -195,7 +195,7 @@ class GraphStoreRelationshipVisitorTest {
                 relationshipVisitor.startId(graph.toOriginalNodeId(source));
                 relationshipVisitor.endId(graph.toOriginalNodeId(target));
                 relationshipPropertyKey
-                    .ifPresent(propertyKey -> relationshipVisitor.property(propertyKey, propertyValue));
+                    .ifPresent(propertyKey -> relationshipVisitor.property(propertyKey, propertyValue, false));
                 relationshipVisitor.type(relationshipType.name());
                 relationshipVisitor.endOfEntity();
                 return true;

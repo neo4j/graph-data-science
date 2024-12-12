@@ -53,11 +53,11 @@ class GraphStoreGraphPropertyVisitorTest {
 
         var graphPropertyVisitor = new GraphStoreGraphPropertyVisitor(graphPropertySchema);
 
-        graphPropertyVisitor.property("prop1", 42L);
-        graphPropertyVisitor.property("prop2", new double[]{ 13.37D, 42.0D });
-        graphPropertyVisitor.property("prop1", 43L);
-        graphPropertyVisitor.property("prop1", 44L);
-        graphPropertyVisitor.property("prop2", new double[]{ 2.0, 3.0 });
+        graphPropertyVisitor.property("prop1", 42L, false);
+        graphPropertyVisitor.property("prop2", new double[]{13.37D, 42.0D}, false);
+        graphPropertyVisitor.property("prop1", 43L, false);
+        graphPropertyVisitor.property("prop1", 44L, false);
+        graphPropertyVisitor.property("prop2", new double[]{2.0, 3.0}, false);
         graphPropertyVisitor.flush();
 
         graphPropertyVisitor.streamFractions().forEach((key, streams) -> {
@@ -117,9 +117,9 @@ class GraphStoreGraphPropertyVisitorTest {
         var graphPropertySchema = Map.of("prop1", PropertySchema.of("prop1", ValueType.LONG));
         var graphPropertyVisitor = new GraphStoreGraphPropertyVisitor(graphPropertySchema);
 
-        graphPropertyVisitor.property("prop1", 42L);
-        graphPropertyVisitor.property("prop1", 43L);
-        graphPropertyVisitor.property("prop1", 44L);
+        graphPropertyVisitor.property("prop1", 42L, false);
+        graphPropertyVisitor.property("prop1", 43L, false);
+        graphPropertyVisitor.property("prop1", 44L, false);
         graphPropertyVisitor.flush();
 
         var graphPropertyStore = GraphPropertyStoreFromVisitorHelper.fromGraphPropertyVisitor(graphPropertySchema, graphPropertyVisitor);
@@ -173,7 +173,7 @@ class GraphStoreGraphPropertyVisitorTest {
             phaser.arriveAndAwaitAdvance();
             try {
                 for (int i = 0; i < 10_000; i++) {
-                    graphStoreGraphPropertyVisitor.property("prop1", (long) i + (offset * 10_000L));
+                    graphStoreGraphPropertyVisitor.property("prop1", (long) i + (offset * 10_000L), false);
                     // call flush periodically to increase the potential contention
                     if (i > 0 && i % periodicFlush == 0) {
                         graphStoreGraphPropertyVisitor.flush();
