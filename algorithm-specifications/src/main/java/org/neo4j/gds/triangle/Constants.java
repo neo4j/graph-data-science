@@ -20,8 +20,6 @@
 package org.neo4j.gds.triangle;
 
 final class Constants {
-    static final String LOCAL_CLUSTERING_COEFFICIENT_DESCRIPTION = "The local clustering coefficient is a metric quantifying how connected the neighborhood of a node is.";
-
     static final String TRIANGLE_COUNT_DESCRIPTION =
         "Triangle counting is a community detection graph algorithm that is used to " +
             "determine the number of triangles passing through each node in the graph.";
