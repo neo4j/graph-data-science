@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.applications.algorithms.similarity;
 
+import org.neo4j.gds.algorithms.similarity.MutateRelationshipService;
 import org.neo4j.gds.algorithms.similarity.WriteRelationshipService;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
@@ -54,16 +55,17 @@ public final class SimilarityApplications {
         AlgorithmEstimationTemplate algorithmEstimationTemplate,
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
         ProgressTrackerCreator progressTrackerCreator,
+        MutateRelationshipService mutateRelationshipService,
         WriteContext writeContext
     ) {
         var estimationModeFacade = new SimilarityAlgorithmsEstimationModeBusinessFacade(algorithmEstimationTemplate);
         var similarityAlgorithms = new SimilarityAlgorithms(progressTrackerCreator, requestScopedDependencies.terminationFlag());
 
         var mutateModeFacade = new SimilarityAlgorithmsMutateModeBusinessFacade(
-            log,
             estimationModeFacade,
             similarityAlgorithms,
-            algorithmProcessingTemplateConvenience
+            algorithmProcessingTemplateConvenience,
+            mutateRelationshipService
         );
 
         var statsModeFacade = new SimilarityAlgorithmsStatsModeBusinessFacade(

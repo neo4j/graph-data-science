@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.applications;
 
+import org.neo4j.gds.algorithms.similarity.MutateRelationshipService;
 import org.neo4j.gds.applications.algorithms.centrality.CentralityApplications;
 import org.neo4j.gds.applications.algorithms.community.CommunityApplications;
 import org.neo4j.gds.applications.algorithms.embeddings.NodeEmbeddingApplications;
@@ -118,6 +119,7 @@ public final class ApplicationsFacade {
         var algorithmProcessingTemplateConvenience = new AlgorithmProcessingTemplateConvenience(algorithmProcessingTemplate);
 
         var mutateNodeProperty = new MutateNodeProperty(log);
+        var mutateRelationshipService =new MutateRelationshipService(log);
 
         var centralityApplications = CentralityApplications.create(
             log,
@@ -204,6 +206,7 @@ public final class ApplicationsFacade {
             algorithmEstimationTemplate,
             algorithmProcessingTemplateConvenience,
             progressTrackerCreator,
+            mutateRelationshipService,
             writeContext
         );
 

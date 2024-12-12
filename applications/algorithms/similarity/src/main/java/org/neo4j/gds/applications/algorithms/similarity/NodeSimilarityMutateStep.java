@@ -25,7 +25,6 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
-import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityMutateConfig;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
 
@@ -47,11 +46,10 @@ final class NodeSimilarityMutateStep implements MutateStep<NodeSimilarityResult,
     }
 
     static NodeSimilarityMutateStep create(
-        Log log,
+        MutateRelationshipService  mutateRelationshipService,
         NodeSimilarityMutateConfig configuration,
         boolean shouldComputeSimilarityDistribution
     ) {
-        var mutateRelationshipService = new MutateRelationshipService(log);
         var similarityMutation = new SimilarityMutation(mutateRelationshipService);
 
         return new NodeSimilarityMutateStep(similarityMutation, configuration, shouldComputeSimilarityDistribution);

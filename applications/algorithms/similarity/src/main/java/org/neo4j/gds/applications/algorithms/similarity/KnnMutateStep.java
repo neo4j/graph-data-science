@@ -25,7 +25,6 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
-import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.similarity.knn.KnnMutateConfig;
 import org.neo4j.gds.similarity.knn.KnnResult;
 
@@ -46,8 +45,7 @@ final class KnnMutateStep implements MutateStep<KnnResult, Pair<RelationshipsWri
         this.similarityMutation = similarityMutation;
     }
 
-    static KnnMutateStep create(Log log, KnnMutateConfig configuration, boolean shouldComputeSimilarityDistribution) {
-        var mutateRelationshipService = new MutateRelationshipService(log);
+    static KnnMutateStep create(MutateRelationshipService mutateRelationshipService, KnnMutateConfig configuration, boolean shouldComputeSimilarityDistribution) {
         var similarityMutation = new SimilarityMutation(mutateRelationshipService);
 
         return new KnnMutateStep(similarityMutation, configuration, shouldComputeSimilarityDistribution);

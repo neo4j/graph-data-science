@@ -20,11 +20,11 @@
 package org.neo4j.gds.applications.algorithms.similarity;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.neo4j.gds.algorithms.similarity.MutateRelationshipService;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
-import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnMutateConfig;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnResult;
 import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityMutateConfig;
@@ -41,20 +41,21 @@ import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.KNN
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.NodeSimilarity;
 
 public class SimilarityAlgorithmsMutateModeBusinessFacade {
-    private final Log log;
     private final SimilarityAlgorithmsEstimationModeBusinessFacade estimationFacade;
     private final SimilarityAlgorithms similarityAlgorithms;
     private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
+    private final MutateRelationshipService mutateRelationshipService;
 
     public SimilarityAlgorithmsMutateModeBusinessFacade(
-        Log log, SimilarityAlgorithmsEstimationModeBusinessFacade estimationFacade,
+        SimilarityAlgorithmsEstimationModeBusinessFacade estimationFacade,
         SimilarityAlgorithms similarityAlgorithms,
-        AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience
+        AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
+        MutateRelationshipService mutateRelationshipService
     ) {
-        this.log = log;
         this.estimationFacade = estimationFacade;
         this.similarityAlgorithms = similarityAlgorithms;
         this.algorithmProcessingTemplateConvenience = algorithmProcessingTemplateConvenience;
+        this.mutateRelationshipService = mutateRelationshipService;
     }
 
     public <RESULT> RESULT filteredKnn(
@@ -63,7 +64,11 @@ public class SimilarityAlgorithmsMutateModeBusinessFacade {
         ResultBuilder<FilteredKnnMutateConfig, FilteredKnnResult, RESULT, Pair<RelationshipsWritten, Map<String, Object>>> resultBuilder,
         boolean shouldComputeSimilarityDistribution
     ) {
-        var mutateStep = FilteredKnnMutateStep.create(log, configuration, shouldComputeSimilarityDistribution);
+        var mutateStep = FilteredKnnMutateStep.create(
+            mutateRelationshipService,
+            configuration,
+            shouldComputeSimilarityDistribution
+        );
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
             graphName,
@@ -83,7 +88,7 @@ public class SimilarityAlgorithmsMutateModeBusinessFacade {
         boolean shouldComputeSimilarityDistribution
     ) {
         var mutateStep = FilteredNodeSimilarityMutateStep.create(
-            log,
+            mutateRelationshipService,
             configuration,
             shouldComputeSimilarityDistribution
         );
@@ -105,7 +110,10 @@ public class SimilarityAlgorithmsMutateModeBusinessFacade {
         ResultBuilder<KnnMutateConfig, KnnResult, RESULT, Pair<RelationshipsWritten, Map<String, Object>>> resultBuilder,
         boolean shouldComputeSimilarityDistribution
     ) {
-        var mutateStep = KnnMutateStep.create(log, configuration, shouldComputeSimilarityDistribution);
+        var mutateStep = KnnMutateStep.create(mutateRelationshipService,
+            configuration,
+            shouldComputeSimilarityDistribution
+        );
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
             graphName,
@@ -124,7 +132,10 @@ public class SimilarityAlgorithmsMutateModeBusinessFacade {
         ResultBuilder<NodeSimilarityMutateConfig, NodeSimilarityResult, RESULT, Pair<RelationshipsWritten, Map<String, Object>>> resultBuilder,
         boolean shouldComputeSimilarityDistribution
     ) {
-        var mutateStep = NodeSimilarityMutateStep.create(log, configuration, shouldComputeSimilarityDistribution);
+        var mutateStep = NodeSimilarityMutateStep.create(mutateRelationshipService,
+            configuration,
+            shouldComputeSimilarityDistribution
+        );
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
             graphName,
