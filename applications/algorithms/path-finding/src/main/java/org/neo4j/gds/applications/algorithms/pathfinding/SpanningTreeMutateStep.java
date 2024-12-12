@@ -21,6 +21,7 @@ package org.neo4j.gds.applications.algorithms.pathfinding;
 
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.algorithms.similarity.MutateRelationshipService;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
@@ -32,8 +33,12 @@ import org.neo4j.gds.spanningtree.SpanningTreeMutateConfig;
 
 class SpanningTreeMutateStep implements MutateStep<SpanningTree, RelationshipsWritten> {
     private final SpanningTreeMutateConfig configuration;
+    private final MutateRelationshipService mutateRelationshipService;
 
-    SpanningTreeMutateStep(SpanningTreeMutateConfig configuration) {this.configuration = configuration;}
+    SpanningTreeMutateStep(MutateRelationshipService mutateRelationshipService, SpanningTreeMutateConfig configuration) {
+        this.mutateRelationshipService = mutateRelationshipService;
+        this.configuration = configuration;
+    }
 
     @Override
     public RelationshipsWritten execute(
@@ -67,10 +72,6 @@ class SpanningTreeMutateStep implements MutateStep<SpanningTree, RelationshipsWr
 
         var relationships = relationshipsBuilder.build();
 
-        // effect
-        graphStore.addRelationshipType(relationships);
-
-        // reporting
-        return new RelationshipsWritten(result.effectiveNodeCount() - 1);
+        return  mutateRelationshipService.mutate(graphStore,relationships);
     }
 }

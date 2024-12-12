@@ -21,6 +21,7 @@ package org.neo4j.gds.applications.algorithms.pathfinding;
 
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.algorithms.similarity.MutateRelationshipService;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
@@ -30,8 +31,12 @@ import org.neo4j.gds.core.loading.construction.GraphFactory;
 
 class SearchMutateStep implements MutateStep<HugeLongArray, RelationshipsWritten> {
     private final RelationshipType mutateRelationshipType;
+    private final MutateRelationshipService mutateRelationshipService;
 
-    SearchMutateStep(RelationshipType mutateRelationshipType) {this.mutateRelationshipType = mutateRelationshipType;}
+    SearchMutateStep(MutateRelationshipService mutateRelationshipService, RelationshipType mutateRelationshipType) {
+        this.mutateRelationshipType = mutateRelationshipType;
+        this.mutateRelationshipService = mutateRelationshipService;
+    }
 
     @Override
     public RelationshipsWritten execute(
@@ -56,10 +61,6 @@ class SearchMutateStep implements MutateStep<HugeLongArray, RelationshipsWritten
 
         var relationships = relationshipsBuilder.build();
 
-        // effect
-        graphStore.addRelationshipType(relationships);
-
-        //reporting
-        return new RelationshipsWritten(relationships.topology().elementCount());
+        return  mutateRelationshipService.mutate(graphStore,relationships);
     }
 }

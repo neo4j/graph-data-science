@@ -19,24 +19,21 @@
  */
 package org.neo4j.gds.applications.algorithms.pathfinding;
 
-import org.neo4j.gds.Orientation;
-import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.algorithms.similarity.MutateRelationshipService;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 import org.neo4j.gds.config.MutateRelationshipConfig;
-import org.neo4j.gds.core.loading.SingleTypeRelationships;
-import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
-
-import static org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraWriteConfig.TOTAL_COST_KEY;
 
 class ShortestPathMutateStep implements MutateStep<PathFindingResult, RelationshipsWritten> {
     private final MutateRelationshipConfig configuration;
+    private final MutateRelationshipService mutateRelationshipService;
 
-    ShortestPathMutateStep(MutateRelationshipConfig configuration) {
+    ShortestPathMutateStep(MutateRelationshipService mutateRelationshipService, MutateRelationshipConfig configuration) {
         this.configuration = configuration;
+        this.mutateRelationshipService = mutateRelationshipService;
     }
 
     @Override
@@ -45,30 +42,16 @@ class ShortestPathMutateStep implements MutateStep<PathFindingResult, Relationsh
         GraphStore graphStore,
         PathFindingResult result
     ) {
-        var mutateRelationshipType = RelationshipType.of(configuration.mutateRelationshipType());
 
-        var relationshipsBuilder = GraphFactory
-            .initRelationshipsBuilder()
-            .relationshipType(mutateRelationshipType)
-            .nodes(graph)
-            .addPropertyConfig(GraphFactory.PropertyConfig.of(TOTAL_COST_KEY))
-            .orientation(Orientation.NATURAL)
-            .build();
+        var singleTypeRelationshipsProducer = PathFindingSingleTypeRelationshipsFactory.fromPathFindingResult(
+            result,
+            graph
+        );
 
-        SingleTypeRelationships relationships;
-
-        result.forEachPath(pathResult -> relationshipsBuilder.addFromInternal(
-            pathResult.sourceNode(),
-            pathResult.targetNode(),
-            pathResult.totalCost()
-        ));
-
-        relationships = relationshipsBuilder.build();
-
-        // side effect
-        graphStore.addRelationshipType(relationships);
-
-        // result
-        return new RelationshipsWritten(relationships.topology().elementCount());
+        return mutateRelationshipService.mutate(
+            graphStore,
+            configuration.mutateRelationshipType(),
+            singleTypeRelationshipsProducer
+        );
     }
 }

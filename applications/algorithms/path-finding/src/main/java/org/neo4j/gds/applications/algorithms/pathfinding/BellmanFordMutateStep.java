@@ -19,23 +19,21 @@
  */
 package org.neo4j.gds.applications.algorithms.pathfinding;
 
-import org.neo4j.gds.Orientation;
-import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.algorithms.similarity.MutateRelationshipService;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
-import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.paths.bellmanford.AllShortestPathsBellmanFordMutateConfig;
 import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
 
-import static org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraWriteConfig.TOTAL_COST_KEY;
-
 class BellmanFordMutateStep implements MutateStep<BellmanFordResult, RelationshipsWritten> {
     private final AllShortestPathsBellmanFordMutateConfig configuration;
+    private final MutateRelationshipService mutateRelationshipService;
 
-    BellmanFordMutateStep(AllShortestPathsBellmanFordMutateConfig configuration) {
+    BellmanFordMutateStep( MutateRelationshipService mutateRelationshipService,AllShortestPathsBellmanFordMutateConfig configuration) {
         this.configuration = configuration;
+        this.mutateRelationshipService = mutateRelationshipService;
     }
 
     @Override
@@ -44,33 +42,17 @@ class BellmanFordMutateStep implements MutateStep<BellmanFordResult, Relationshi
         GraphStore graphStore,
         BellmanFordResult result
     ) {
-        var mutateRelationshipType = RelationshipType.of(configuration.mutateRelationshipType());
 
-        var relationshipsBuilder = GraphFactory
-            .initRelationshipsBuilder()
-            .relationshipType(mutateRelationshipType)
-            .nodes(graph)
-            .addPropertyConfig(GraphFactory.PropertyConfig.of(TOTAL_COST_KEY))
-            .orientation(Orientation.NATURAL)
-            .build();
+        var singleTypeRelationshipsProducer = PathFindingSingleTypeRelationshipsFactory.fromBellmanFordResult(
+            result,
+            graph,
+            configuration.mutateNegativeCycles()
+        );
 
-        var pathFindingResult = result.shortestPaths();
-        if (result.containsNegativeCycle() && configuration.mutateNegativeCycles()) {
-            pathFindingResult = result.negativeCycles();
-        }
-
-        pathFindingResult.forEachPath(pathResult -> relationshipsBuilder.addFromInternal(
-            pathResult.sourceNode(),
-            pathResult.targetNode(),
-            pathResult.totalCost()
-        ));
-
-        var relationships = relationshipsBuilder.build();
-
-        // effect
-        graphStore.addRelationshipType(relationships);
-
-        // reporting
-        return new RelationshipsWritten(relationships.topology().elementCount());
+        return mutateRelationshipService.mutate(
+            graphStore,
+            configuration.mutateRelationshipType(),
+            singleTypeRelationshipsProducer
+        );
     }
 }

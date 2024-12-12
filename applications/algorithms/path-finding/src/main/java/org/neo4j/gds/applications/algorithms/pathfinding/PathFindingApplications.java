@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.applications.algorithms.pathfinding;
 
+import org.neo4j.gds.algorithms.similarity.MutateRelationshipService;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
@@ -61,7 +62,8 @@ public final class PathFindingApplications {
         AlgorithmEstimationTemplate algorithmEstimationTemplate,
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
         ProgressTrackerCreator progressTrackerCreator,
-        MutateNodeProperty mutateNodeProperty
+        MutateNodeProperty mutateNodeProperty,
+        MutateRelationshipService mutateRelationshipService
     ) {
         var pathFindingAlgorithms = new PathFindingAlgorithms(requestScopedDependencies, progressTrackerCreator);
 
@@ -71,7 +73,8 @@ public final class PathFindingApplications {
             estimationModeFacade,
             pathFindingAlgorithms,
             algorithmProcessingTemplateConvenience,
-            mutateNodeProperty
+            mutateNodeProperty,
+            mutateRelationshipService
         );
 
         var statsModeFacade = new PathFindingAlgorithmsStatsModeBusinessFacade(

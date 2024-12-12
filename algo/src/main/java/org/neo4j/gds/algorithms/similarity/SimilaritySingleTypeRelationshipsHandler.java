@@ -50,7 +50,6 @@ public class SimilaritySingleTypeRelationshipsHandler implements SingleTypeRelat
     private final Graph graph;
     private final Supplier<SimilarityGraphResult> similarityGraphResultSupplier;
     private Map<String,Object> similaritySummary;
-    private long relationshipCount;
 
     public SimilaritySingleTypeRelationshipsHandler(
         Graph graph,
@@ -68,8 +67,13 @@ public class SimilaritySingleTypeRelationshipsHandler implements SingleTypeRelat
     }
 
     @Override
-    public SingleTypeRelationships createRelationships(String mutateRelationshipType, String mutateProperty) {
+    public SingleTypeRelationships createRelationships(String mutateRelationshipType, Optional<String> mutateProperty) {
 
+        if (mutateProperty.isEmpty()){
+            throw new IllegalArgumentException("Mutate Property not specified");
+        }
+
+        var actualMutateProperty= mutateProperty.get();
         RelationshipType relationshipType = RelationshipType.of(mutateRelationshipType);
         var similarityGraphResult = similarityGraphResultSupplier.get();
         SingleTypeRelationships relationships;
@@ -81,7 +85,7 @@ public class SimilaritySingleTypeRelationshipsHandler implements SingleTypeRelat
                 .nodes(topKGraph)
                 .relationshipType(relationshipType)
                 .orientation(Orientation.NATURAL)
-                .addPropertyConfig(GraphFactory.PropertyConfig.of(mutateProperty))
+                .addPropertyConfig(GraphFactory.PropertyConfig.of(actualMutateProperty))
                 .concurrency(new Concurrency(1))
                 .executorService(DefaultPool.INSTANCE)
                 .build();
@@ -111,7 +115,7 @@ public class SimilaritySingleTypeRelationshipsHandler implements SingleTypeRelat
                 similarityGraph.relationshipTopology(),
                 similarityGraph.schema().direction(),
                 similarityGraph.relationshipProperties(),
-                Optional.of(RelationshipPropertySchema.of(mutateProperty, ValueType.DOUBLE))
+                Optional.of(RelationshipPropertySchema.of(actualMutateProperty, ValueType.DOUBLE))
             );
 
             if (shouldComputeStatistics) {
@@ -121,12 +125,7 @@ public class SimilaritySingleTypeRelationshipsHandler implements SingleTypeRelat
                 similaritySummary = Map.of();
             }
         }
-        this.relationshipCount = similarityGraphResult.similarityGraph().relationshipCount();
         return relationships;
     }
 
-    @Override
-    public long relationshipsCount() {
-        return relationshipCount;
-    }
 }

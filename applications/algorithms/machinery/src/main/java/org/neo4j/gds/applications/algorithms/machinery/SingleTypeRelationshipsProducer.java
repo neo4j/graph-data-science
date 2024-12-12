@@ -21,12 +21,13 @@ package org.neo4j.gds.applications.algorithms.machinery;
 
 import org.neo4j.gds.core.loading.SingleTypeRelationships;
 
+import java.util.Optional;
+
 /**
  * Extracting some common code so that it is reusable; eventually this can probably move to where it is used
  */
 public interface SingleTypeRelationshipsProducer {
 
-    SingleTypeRelationships createRelationships(String mutateRelationshipType, String mutateProperty);
+    SingleTypeRelationships createRelationships(String mutateRelationshipType, Optional<String> mutateProperty);
 
-    long relationshipsCount();
 }

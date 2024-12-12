@@ -21,6 +21,7 @@ package org.neo4j.gds.applications.algorithms.pathfinding;
 
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.algorithms.similarity.MutateRelationshipService;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
@@ -33,9 +34,11 @@ import java.util.stream.LongStream;
 
 class PrizeCollectingSteinerTreeMutateStep implements MutateStep<PrizeSteinerTreeResult, RelationshipsWritten> {
     private final PCSTMutateConfig configuration;
+    private final MutateRelationshipService mutateRelationshipService;
 
-    PrizeCollectingSteinerTreeMutateStep(PCSTMutateConfig configuration) {
+    PrizeCollectingSteinerTreeMutateStep(MutateRelationshipService mutateRelationshipService, PCSTMutateConfig configuration) {
         this.configuration = configuration;
+        this.mutateRelationshipService = mutateRelationshipService;
     }
 
     @Override
@@ -66,10 +69,7 @@ class PrizeCollectingSteinerTreeMutateStep implements MutateStep<PrizeSteinerTre
 
         var relationships = relationshipsBuilder.build();
 
-        // the effect
-        graphStore.addRelationshipType(relationships);
+        return  mutateRelationshipService.mutate(graphStore, relationships);
 
-        // the reporting
-        return new RelationshipsWritten(treeResult.effectiveNodeCount() - 1);
     }
 }

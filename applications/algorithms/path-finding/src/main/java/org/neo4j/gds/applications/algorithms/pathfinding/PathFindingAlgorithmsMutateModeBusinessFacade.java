@@ -20,6 +20,7 @@
 package org.neo4j.gds.applications.algorithms.pathfinding;
 
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.algorithms.similarity.MutateRelationshipService;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
@@ -67,17 +68,20 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
     private final PathFindingAlgorithms pathFindingAlgorithms;
     private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
     private final MutateNodeProperty mutateNodeProperty;
+    private final MutateRelationshipService mutateRelationshipService;
 
     public PathFindingAlgorithmsMutateModeBusinessFacade(
         PathFindingAlgorithmsEstimationModeBusinessFacade estimationFacade,
         PathFindingAlgorithms pathFindingAlgorithms,
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
-        MutateNodeProperty mutateNodeProperty
+        MutateNodeProperty mutateNodeProperty,
+        MutateRelationshipService mutateRelationshipService
     ) {
         this.pathFindingAlgorithms = pathFindingAlgorithms;
         this.estimationFacade = estimationFacade;
         this.algorithmProcessingTemplateConvenience = algorithmProcessingTemplateConvenience;
         this.mutateNodeProperty = mutateNodeProperty;
+        this.mutateRelationshipService = mutateRelationshipService;
     }
 
     public <RESULT> RESULT bellmanFord(
@@ -85,7 +89,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
         AllShortestPathsBellmanFordMutateConfig configuration,
         ResultBuilder<AllShortestPathsBellmanFordMutateConfig, BellmanFordResult, RESULT, RelationshipsWritten> resultBuilder
     ) {
-        var mutateStep = new BellmanFordMutateStep(configuration);
+        var mutateStep = new BellmanFordMutateStep(mutateRelationshipService,configuration);
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
             graphName,
@@ -103,8 +107,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
         BfsMutateConfig configuration,
         ResultBuilder<BfsMutateConfig, HugeLongArray, RESULT, RelationshipsWritten> resultBuilder
     ) {
-        var mutateRelationshipType = RelationshipType.of(configuration.mutateRelationshipType());
-        var mutateStep = new SearchMutateStep(mutateRelationshipType);
+        var mutateStep = new SearchMutateStep(mutateRelationshipService, RelationshipType.of(configuration.mutateRelationshipType()));
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
             graphName,
@@ -122,7 +125,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
         AllShortestPathsDeltaMutateConfig configuration,
         ResultBuilder<AllShortestPathsDeltaMutateConfig, PathFindingResult, RESULT, RelationshipsWritten> resultBuilder
     ) {
-        var mutateStep = new ShortestPathMutateStep(configuration);
+        var mutateStep = new ShortestPathMutateStep(mutateRelationshipService,configuration);
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
             graphName,
@@ -140,8 +143,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
         DfsMutateConfig configuration,
         ResultBuilder<DfsMutateConfig, HugeLongArray, RESULT, RelationshipsWritten> resultBuilder
     ) {
-        var mutateRelationshipType = RelationshipType.of(configuration.mutateRelationshipType());
-        var mutateStep = new SearchMutateStep(mutateRelationshipType);
+        var mutateStep = new SearchMutateStep(mutateRelationshipService,RelationshipType.of(configuration.mutateRelationshipType()));
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
             graphName,
@@ -159,7 +161,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
         PCSTMutateConfig configuration,
         ResultBuilder<PCSTMutateConfig, PrizeSteinerTreeResult, RESULT, RelationshipsWritten> resultBuilder
     ) {
-        var mutateStep = new PrizeCollectingSteinerTreeMutateStep(configuration);
+        var mutateStep = new PrizeCollectingSteinerTreeMutateStep(mutateRelationshipService,configuration);
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
             graphName,
@@ -196,7 +198,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
         ShortestPathAStarMutateConfig configuration,
         ResultBuilder<ShortestPathAStarMutateConfig, PathFindingResult, RESULT, RelationshipsWritten> resultBuilder
     ) {
-        var mutateStep = new ShortestPathMutateStep(configuration);
+        var mutateStep = new ShortestPathMutateStep(mutateRelationshipService,configuration);
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
             graphName,
@@ -214,7 +216,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
         ShortestPathDijkstraMutateConfig configuration,
         ResultBuilder<ShortestPathDijkstraMutateConfig, PathFindingResult, RESULT, RelationshipsWritten> resultBuilder
     ) {
-        var mutateStep = new ShortestPathMutateStep(configuration);
+        var mutateStep = new ShortestPathMutateStep(mutateRelationshipService,configuration);
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
             graphName,
@@ -232,7 +234,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
         ShortestPathYensMutateConfig configuration,
         ResultBuilder<ShortestPathYensMutateConfig, PathFindingResult, RESULT, RelationshipsWritten> resultBuilder
     ) {
-        var mutateStep = new ShortestPathMutateStep(configuration);
+        var mutateStep = new ShortestPathMutateStep(mutateRelationshipService,configuration);
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
             graphName,
@@ -250,7 +252,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
         AllShortestPathsDijkstraMutateConfig configuration,
         ResultBuilder<AllShortestPathsDijkstraMutateConfig, PathFindingResult, RESULT, RelationshipsWritten> resultBuilder
     ) {
-        var mutateStep = new ShortestPathMutateStep(configuration);
+        var mutateStep = new ShortestPathMutateStep(mutateRelationshipService,configuration);
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
             graphName,
@@ -268,7 +270,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
         SpanningTreeMutateConfig configuration,
         ResultBuilder<SpanningTreeMutateConfig, SpanningTree, RESULT, RelationshipsWritten> resultBuilder
     ) {
-        var mutateStep = new SpanningTreeMutateStep(configuration);
+        var mutateStep = new SpanningTreeMutateStep(mutateRelationshipService,configuration);
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
             graphName,
@@ -286,7 +288,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
         SteinerTreeMutateConfig configuration,
         ResultBuilder<SteinerTreeMutateConfig, SteinerTreeResult, RESULT, RelationshipsWritten> resultBuilder
     ) {
-        var mutateStep = new SteinerTreeMutateStep(configuration);
+        var mutateStep = new SteinerTreeMutateStep(mutateRelationshipService,configuration);
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
             graphName,

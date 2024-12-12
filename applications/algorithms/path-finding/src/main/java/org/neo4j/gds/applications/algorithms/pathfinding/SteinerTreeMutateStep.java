@@ -21,6 +21,7 @@ package org.neo4j.gds.applications.algorithms.pathfinding;
 
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.algorithms.similarity.MutateRelationshipService;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
@@ -34,9 +35,12 @@ import java.util.stream.LongStream;
 
 class SteinerTreeMutateStep implements MutateStep<SteinerTreeResult, RelationshipsWritten> {
     private final SteinerTreeMutateConfig configuration;
+    private final MutateRelationshipService mutateRelationshipService;
 
-    SteinerTreeMutateStep(SteinerTreeMutateConfig configuration) {
+
+    SteinerTreeMutateStep(MutateRelationshipService mutateRelationshipService, SteinerTreeMutateConfig configuration) {
         this.configuration = configuration;
+        this.mutateRelationshipService = mutateRelationshipService;
     }
 
     @Override
@@ -70,10 +74,7 @@ class SteinerTreeMutateStep implements MutateStep<SteinerTreeResult, Relationshi
 
         var relationships = relationshipsBuilder.build();
 
-        // the effect
-        graphStore.addRelationshipType(relationships);
+        return  mutateRelationshipService.mutate(graphStore,relationships);
 
-        // the reporting
-        return new RelationshipsWritten(steinerTreeResult.effectiveNodeCount() - 1);
     }
 }
