@@ -21,6 +21,7 @@ package org.neo4j.gds.applications.algorithms.machinelearning;
 
 import org.neo4j.gds.algorithms.machinelearning.KGEPredictMutateConfig;
 import org.neo4j.gds.algorithms.machinelearning.KGEPredictResult;
+import org.neo4j.gds.algorithms.similarity.MutateRelationshipService;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
@@ -40,16 +41,20 @@ public class MachineLearningAlgorithmsMutateModeBusinessFacade {
 
     private final AlgorithmProcessingTemplateConvenience convenience;
 
+    private final MutateRelationshipService mutateRelationshipService;
+
     MachineLearningAlgorithmsMutateModeBusinessFacade(
         RequestScopedDependencies requestScopedDependencies,
         MachineLearningAlgorithmsEstimationModeBusinessFacade estimation,
         MachineLearningAlgorithms algorithms,
-        AlgorithmProcessingTemplateConvenience convenience
+        AlgorithmProcessingTemplateConvenience convenience,
+        MutateRelationshipService mutateRelationshipService
     ) {
         this.requestScopedDependencies = requestScopedDependencies;
         this.estimation = estimation;
         this.algorithms = algorithms;
         this.convenience = convenience;
+        this.mutateRelationshipService = mutateRelationshipService;
     }
 
     public <RESULT> RESULT kge(
@@ -57,7 +62,7 @@ public class MachineLearningAlgorithmsMutateModeBusinessFacade {
         KGEPredictMutateConfig configuration,
         ResultBuilder<KGEPredictMutateConfig, KGEPredictResult, RESULT, RelationshipsWritten> resultBuilder
     ) {
-        var mutateStep = new KgeMutateStep(requestScopedDependencies.terminationFlag(), configuration);
+        var mutateStep = new KgeMutateStep(mutateRelationshipService,requestScopedDependencies.terminationFlag(), configuration);
 
         return convenience.processRegularAlgorithmInMutateMode(
             graphName,
@@ -75,7 +80,7 @@ public class MachineLearningAlgorithmsMutateModeBusinessFacade {
         SplitRelationshipsMutateConfig configuration,
         ResultBuilder<SplitRelationshipsMutateConfig, EdgeSplitter.SplitResult, RESULT, RelationshipsWritten> resultBuilder
     ) {
-        var mutateStep = new SplitRelationshipsMutateStep();
+        var mutateStep = new SplitRelationshipsMutateStep(mutateRelationshipService);
 
         return convenience.processRegularAlgorithmInMutateMode(
             graphName,

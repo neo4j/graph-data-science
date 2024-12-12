@@ -157,7 +157,8 @@ public final class ApplicationsFacade {
             requestScopedDependencies,
             writeContext,
             progressTrackerCreator,
-            algorithmProcessingTemplateConvenience
+            algorithmProcessingTemplateConvenience,
+            mutateRelationshipService
         );
 
         var miscellaneousApplications = MiscellaneousApplications.create(

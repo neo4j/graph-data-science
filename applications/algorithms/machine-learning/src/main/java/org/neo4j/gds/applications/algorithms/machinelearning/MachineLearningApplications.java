@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.applications.algorithms.machinelearning;
 
+import org.neo4j.gds.algorithms.similarity.MutateRelationshipService;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
@@ -48,7 +49,8 @@ public final class MachineLearningApplications {
         RequestScopedDependencies requestScopedDependencies,
         WriteContext writeContext,
         ProgressTrackerCreator progressTrackerCreator,
-        AlgorithmProcessingTemplateConvenience convenience
+        AlgorithmProcessingTemplateConvenience convenience,
+        MutateRelationshipService mutateRelationshipService
     ) {
         var algorithms = new MachineLearningAlgorithms(
             progressTrackerCreator,
@@ -60,7 +62,8 @@ public final class MachineLearningApplications {
             requestScopedDependencies,
             estimation,
             algorithms,
-            convenience
+            convenience,
+            mutateRelationshipService
         );
         var streaming = new MachineLearningAlgorithmsStreamModeBusinessFacade(
             convenience,

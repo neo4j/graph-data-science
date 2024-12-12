@@ -23,6 +23,7 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.algorithms.machinelearning.KGEPredictMutateConfig;
 import org.neo4j.gds.algorithms.machinelearning.KGEPredictResult;
+import org.neo4j.gds.algorithms.similarity.MutateRelationshipService;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
@@ -36,10 +37,15 @@ import org.neo4j.gds.termination.TerminationFlag;
 class KgeMutateStep implements MutateStep<KGEPredictResult, RelationshipsWritten> {
     private final TerminationFlag terminationFlag;
     private final KGEPredictMutateConfig configuration;
+    private final MutateRelationshipService mutateRelationshipService;
 
-    KgeMutateStep(TerminationFlag terminationFlag, KGEPredictMutateConfig configuration) {
+    KgeMutateStep( MutateRelationshipService mutateRelationshipService,
+        TerminationFlag terminationFlag,
+        KGEPredictMutateConfig configuration
+    ) {
         this.terminationFlag = terminationFlag;
         this.configuration = configuration;
+        this.mutateRelationshipService = mutateRelationshipService;
     }
 
     @Override
@@ -81,8 +87,6 @@ class KgeMutateStep implements MutateStep<KGEPredictResult, RelationshipsWritten
 
         var relationships = relationshipsBuilder.build();
 
-        graphStore.addRelationshipType(relationships);
-
-        return new RelationshipsWritten(relationships.topology().elementCount());
+        return mutateRelationshipService.mutate(graphStore,relationships);
     }
 }

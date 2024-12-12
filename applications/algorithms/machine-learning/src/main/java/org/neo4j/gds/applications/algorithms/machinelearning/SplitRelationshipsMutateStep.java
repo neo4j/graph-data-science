@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.applications.algorithms.machinelearning;
 
+import org.neo4j.gds.algorithms.similarity.MutateRelationshipService;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
@@ -26,6 +27,13 @@ import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 import org.neo4j.gds.ml.splitting.EdgeSplitter;
 
 class SplitRelationshipsMutateStep implements MutateStep<EdgeSplitter.SplitResult, RelationshipsWritten> {
+
+
+    private final MutateRelationshipService mutateRelationshipService;
+
+    SplitRelationshipsMutateStep(MutateRelationshipService mutateRelationshipService) {this.mutateRelationshipService = mutateRelationshipService;}
+
+
     @Override
     public RelationshipsWritten execute(
         Graph graph,
@@ -35,8 +43,8 @@ class SplitRelationshipsMutateStep implements MutateStep<EdgeSplitter.SplitResul
         var selectedRelationships = result.selectedRels().build();
         var remainingRelationships = result.remainingRels().build();
 
-        graphStore.addRelationshipType(remainingRelationships);
-        graphStore.addRelationshipType(selectedRelationships);
+        mutateRelationshipService.mutate(graphStore,remainingRelationships);
+        mutateRelationshipService.mutate(graphStore,selectedRelationships);
 
         var holdoutWritten = selectedRelationships.topology().elementCount();
         var remainingWritten = remainingRelationships.topology().elementCount();
