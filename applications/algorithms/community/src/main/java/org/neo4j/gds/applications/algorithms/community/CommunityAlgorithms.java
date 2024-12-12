@@ -112,6 +112,14 @@ public class CommunityAlgorithms {
         );
         var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
 
+        return approximateMaximumKCut(graph, configuration, progressTracker);
+    }
+
+    public ApproxMaxKCutResult approximateMaximumKCut(
+        Graph graph,
+        ApproxMaxKCutBaseConfig configuration,
+        ProgressTracker progressTracker
+    ) {
         var algorithm = ApproxMaxKCut.create(
             graph,
             configuration.toParameters(),

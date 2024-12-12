@@ -45,8 +45,6 @@ import java.util.concurrent.atomic.AtomicLongArray;
  * [2]: Dunning et al. What Works Best When? A Systematic Evaluation of Heuristics for Max-Cut and QUBO, 2018.
  */
 public final class ApproxMaxKCut extends Algorithm<ApproxMaxKCutResult> {
-    public static final String APPROX_MAX_K_CUT_DESCRIPTION = "Approximate Maximum k-cut maps each node into one of k disjoint communities trying to maximize the sum of weights of relationships between these communities.";
-
     private static final Comparator MINIMIZING = (lhs, rhs) -> lhs < rhs;
     private static final Comparator MAXIMIZING = (lhs, rhs) -> lhs > rhs;
 
