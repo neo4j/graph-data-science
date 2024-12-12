@@ -27,6 +27,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.TestSupport;
+import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
+import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithms;
 import org.neo4j.gds.beta.generator.PropertyProducer;
 import org.neo4j.gds.beta.generator.RandomGraphGeneratorBuilder;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
@@ -512,21 +514,25 @@ class RandomWalkTest {
                 .randomSeed(87L)
                 .build();
 
-            var fact = new RandomWalkAlgorithmFactory<RandomWalkStreamConfig>();
             var log = new GdsTestLog();
             var taskStore = new PerDatabaseTaskStore();
 
+            var requestScopedDependencies = RequestScopedDependencies.builder()
+                .taskRegistryFactory(TaskRegistryFactory.local("rw", taskStore))
+                .terminationFlag(TerminationFlag.RUNNING_TRUE)
+                .build();
+
             var pt = new TestProgressTracker(
-                fact.progressTask(graph, config),
+                RandomWalkProgressTask.create(graph),
                 log,
                 config.concurrency(),
-                TaskRegistryFactory.local("rw", taskStore)
+                requestScopedDependencies.taskRegistryFactory()
             );
 
-            RandomWalk randomWalk = fact.build(graph, config, pt);
+            var pathFindingAlgorithms = new PathFindingAlgorithms(requestScopedDependencies, null);
 
             assertThatNoException().isThrownBy(() -> {
-                var randomWalksStream = randomWalk.compute();
+                var randomWalksStream = pathFindingAlgorithms.randomWalk(graph, config, pt);
                 // Make sure to consume the stream...
                 assertThat(randomWalksStream).hasSize(5000);
             });
@@ -563,21 +569,24 @@ class RandomWalkTest {
                 .randomSeed(87L)
                 .build();
 
-            var fact = new RandomWalkAlgorithmFactory<RandomWalkStreamConfig>();
             var log = new GdsTestLog();
             var taskStore = new PerDatabaseTaskStore();
 
+            var requestScopedDependencies = RequestScopedDependencies.builder()
+                .taskRegistryFactory(TaskRegistryFactory.local("rw", taskStore))
+                .terminationFlag(TerminationFlag.RUNNING_TRUE)
+                .build();
+            var pathFindingAlgorithms = new PathFindingAlgorithms(requestScopedDependencies, null);
+
             var pt = new TestProgressTracker(
-                fact.progressTask(weightedGraph, config),
+                RandomWalkProgressTask.create(weightedGraph),
                 log,
                 config.concurrency(),
-                TaskRegistryFactory.local("rw", taskStore)
+                requestScopedDependencies.taskRegistryFactory()
             );
 
-            RandomWalk randomWalk = fact.build(weightedGraph, config, pt);
-
             assertThatNoException().isThrownBy(() -> {
-                var randomWalksStream = randomWalk.compute();
+                var randomWalksStream = pathFindingAlgorithms.randomWalk(weightedGraph, config, pt);
                 // Make sure to consume the stream...
                 assertThat(randomWalksStream).hasSize(5000);
             });
@@ -607,20 +616,26 @@ class RandomWalkTest {
         @Test
         void shouldLeaveNoTasksBehind() {
             var config = RandomWalkStreamConfigImpl.builder().build();
-            var factory = new RandomWalkAlgorithmFactory<RandomWalkStreamConfig>();
             var taskStore = new PerDatabaseTaskStore();
+
+            var requestScopedDependencies = RequestScopedDependencies.builder()
+                .taskRegistryFactory(TaskRegistryFactory.local("rw", taskStore))
+                .terminationFlag(TerminationFlag.RUNNING_TRUE)
+                .build();
+            var pathFindingAlgorithms = new PathFindingAlgorithms(requestScopedDependencies, null);
+
             var progressTracker = new TaskProgressTracker(
-                factory.progressTask(
-                    graph,
-                    config
-                ),
+                RandomWalkProgressTask.create(graph),
                 Log.noOpLog(),
                 new Concurrency(4),
-                TaskRegistryFactory.local("rw", taskStore)
+                requestScopedDependencies.taskRegistryFactory()
             );
 
             // run the algorithm and consume the result stream
-            factory.build(graph, config, progressTracker).compute().count();
+            var result = pathFindingAlgorithms.randomWalk(graph, config, progressTracker);
+
+            //noinspection ResultOfMethodCallIgnored
+            result.count();
 
             awaitEmptyTaskStore(taskStore);
 

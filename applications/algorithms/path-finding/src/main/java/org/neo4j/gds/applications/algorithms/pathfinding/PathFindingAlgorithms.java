@@ -73,6 +73,7 @@ import org.neo4j.gds.steiner.SteinerTreeResult;
 import org.neo4j.gds.traversal.RandomWalk;
 import org.neo4j.gds.traversal.RandomWalkBaseConfig;
 import org.neo4j.gds.traversal.RandomWalkCountingNodeVisits;
+import org.neo4j.gds.traversal.RandomWalkProgressTask;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -247,14 +248,13 @@ public class PathFindingAlgorithms {
     }
 
     Stream<long[]> randomWalk(Graph graph, RandomWalkBaseConfig configuration) {
-        var tasks = new ArrayList<Task>();
-        if (graph.hasRelationshipProperty()) {
-            tasks.add(DegreeCentralityTask.create(graph));
-        }
-        tasks.add(Tasks.leaf("create walks", graph.nodeCount()));
-        var task = Tasks.task(AlgorithmLabel.RandomWalk.asString(), tasks);
+        var task = RandomWalkProgressTask.create(graph);
         var progressTracker = createProgressTracker(configuration, task);
 
+        return randomWalk(graph, configuration, progressTracker);
+    }
+
+    public Stream<long[]> randomWalk(Graph graph, RandomWalkBaseConfig configuration, ProgressTracker progressTracker) {
         var algorithm = RandomWalk.create(
             graph,
             configuration.concurrency(),
