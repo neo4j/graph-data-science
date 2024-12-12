@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.applications.algorithms.miscellaneous;
 
+import org.neo4j.gds.algorithms.similarity.MutateRelationshipService;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
@@ -56,7 +57,8 @@ public final class MiscellaneousApplications {
         AlgorithmEstimationTemplate algorithmEstimationTemplate,
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
         ProgressTrackerCreator progressTrackerCreator,
-        MutateNodeProperty mutateNodeProperty
+        MutateNodeProperty mutateNodeProperty,
+        MutateRelationshipService mutateRelationshipService
     ) {
         var algorithms = new MiscellaneousAlgorithms(
             progressTrackerCreator,
@@ -68,7 +70,8 @@ public final class MiscellaneousApplications {
             estimation,
             algorithms,
             algorithmProcessingTemplateConvenience,
-            mutateNodeProperty
+            mutateNodeProperty,
+            mutateRelationshipService
         );
         var stats = new MiscellaneousApplicationsStatsModeBusinessFacade(
             estimation,

@@ -19,19 +19,27 @@
  */
 package org.neo4j.gds.applications.algorithms.miscellaneous;
 
+import org.neo4j.gds.algorithms.similarity.MutateRelationshipService;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.core.loading.SingleTypeRelationships;
 
 class CollapsePathMutateStep implements MutateStep<SingleTypeRelationships, Void> {
+
+    private final MutateRelationshipService mutateRelationshipService;
+
+    CollapsePathMutateStep(MutateRelationshipService mutateRelationshipService) {
+        this.mutateRelationshipService = mutateRelationshipService;
+    }
+
     @Override
     public Void execute(
         Graph graph,
         GraphStore graphStore,
         SingleTypeRelationships result
     ) {
-        graphStore.addRelationshipType(result);
+        mutateRelationshipService.mutate(graphStore,result);
 
         return null;
     }

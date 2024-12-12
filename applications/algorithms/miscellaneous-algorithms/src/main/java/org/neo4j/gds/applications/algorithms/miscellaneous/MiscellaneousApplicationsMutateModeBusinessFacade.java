@@ -20,6 +20,7 @@
 package org.neo4j.gds.applications.algorithms.miscellaneous;
 
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.algorithms.similarity.MutateRelationshipService;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
@@ -45,17 +46,20 @@ public class MiscellaneousApplicationsMutateModeBusinessFacade {
     private final MiscellaneousAlgorithms algorithms;
     private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
     private final MutateNodeProperty mutateNodeProperty;
+    private final MutateRelationshipService mutateRelationshipService;
 
     MiscellaneousApplicationsMutateModeBusinessFacade(
         MiscellaneousApplicationsEstimationModeBusinessFacade estimation,
         MiscellaneousAlgorithms algorithms,
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
-        MutateNodeProperty mutateNodeProperty
+        MutateNodeProperty mutateNodeProperty,
+        MutateRelationshipService mutateRelationshipService
     ) {
         this.estimation = estimation;
         this.algorithms = algorithms;
         this.algorithmProcessingTemplateConvenience = algorithmProcessingTemplateConvenience;
         this.mutateNodeProperty = mutateNodeProperty;
+        this.mutateRelationshipService = mutateRelationshipService;
     }
 
     public <RESULT> RESULT collapsePath(
@@ -63,7 +67,7 @@ public class MiscellaneousApplicationsMutateModeBusinessFacade {
         CollapsePathConfig configuration,
         ResultBuilder<CollapsePathConfig, SingleTypeRelationships, RESULT, Void> resultBuilder
     ) {
-        var mutateStep = new CollapsePathMutateStep();
+        var mutateStep = new CollapsePathMutateStep(mutateRelationshipService);
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
             graphName,
@@ -117,7 +121,7 @@ public class MiscellaneousApplicationsMutateModeBusinessFacade {
         ToUndirectedConfig configuration,
         ResultBuilder<ToUndirectedConfig, SingleTypeRelationships, RESULT, RelationshipsWritten> resultBuilder
     ) {
-        var mutateStep = new ToUndirectedMutateStep();
+        var mutateStep = new ToUndirectedMutateStep(mutateRelationshipService);
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
             graphName,

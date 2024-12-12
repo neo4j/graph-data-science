@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.applications.algorithms.miscellaneous;
 
+import org.neo4j.gds.algorithms.similarity.MutateRelationshipService;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
@@ -26,14 +27,18 @@ import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 import org.neo4j.gds.core.loading.SingleTypeRelationships;
 
 class ToUndirectedMutateStep implements MutateStep<SingleTypeRelationships, RelationshipsWritten> {
+
+    private final MutateRelationshipService mutateRelationshipService;
+
+    public ToUndirectedMutateStep(MutateRelationshipService mutateRelationshipService){
+        this.mutateRelationshipService = mutateRelationshipService;
+    }
     @Override
     public RelationshipsWritten execute(
         Graph graph,
         GraphStore graphStore,
         SingleTypeRelationships result
     ) {
-        graphStore.addRelationshipType(result);
-
-        return new RelationshipsWritten(result.topology().elementCount());
+        return mutateRelationshipService.mutate(graphStore,result);
     }
 }
