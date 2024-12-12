@@ -42,7 +42,6 @@ import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.catalog.GraphDropProc;
 import org.neo4j.gds.catalog.GraphListProc;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
-import org.neo4j.gds.compat.QueryLanguageCompat;
 import org.neo4j.gds.core.RandomGraphTestCase;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
@@ -54,6 +53,7 @@ import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Result;
+import org.neo4j.kernel.api.QueryLanguage;
 import org.neo4j.kernel.api.procedure.CallableUserAggregationFunction;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
@@ -114,7 +114,7 @@ class CypherAggregationTest extends BaseProcTest {
     )
         throws KernelException {
         var globalProcedures = GraphDatabaseApiProxy.resolveDependency(db, GlobalProcedures.class);
-        var alreadyExists = QueryLanguageCompat.create().getAllAggregatingFunctions(globalProcedures.getCurrentView())
+        var alreadyExists = globalProcedures.getCurrentView().getAllAggregatingFunctions(QueryLanguage.CYPHER_25)
             .anyMatch(e -> e.equals(function.signature()));
 
         if (!alreadyExists) {
