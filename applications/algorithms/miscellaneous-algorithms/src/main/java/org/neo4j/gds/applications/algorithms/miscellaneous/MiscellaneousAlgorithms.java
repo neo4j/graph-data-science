@@ -29,6 +29,7 @@ import org.neo4j.gds.applications.algorithms.machinery.AlgorithmMachinery;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.loading.SingleTypeRelationships;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.indexInverse.InverseRelationships;
 import org.neo4j.gds.indexInverse.InverseRelationshipsConfig;
@@ -37,6 +38,7 @@ import org.neo4j.gds.indexInverse.InverseRelationshipsProgressTaskCreator;
 import org.neo4j.gds.scaleproperties.ScaleProperties;
 import org.neo4j.gds.scaleproperties.ScalePropertiesBaseConfig;
 import org.neo4j.gds.scaleproperties.ScalePropertiesResult;
+import org.neo4j.gds.scaleproperties.ScalePropertiesTask;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.undirected.ToUndirected;
 import org.neo4j.gds.undirected.ToUndirectedConfig;
@@ -122,19 +124,17 @@ public class MiscellaneousAlgorithms {
     }
 
     ScalePropertiesResult scaleProperties(Graph graph, ScalePropertiesBaseConfig configuration) {
-        int totalPropertyDimension = configuration
-            .nodeProperties()
-            .stream()
-            .map(graph::nodeProperties)
-            .mapToInt(p -> p.dimension().orElseThrow(/* already validated in config */))
-            .sum();
-        var task = Tasks.task(
-            AlgorithmLabel.ScaleProperties.asString(),
-            Tasks.leaf("Prepare scalers", graph.nodeCount() * totalPropertyDimension),
-            Tasks.leaf("Scale properties", graph.nodeCount() * totalPropertyDimension)
-        );
+        var task = ScalePropertiesTask.create(graph, configuration);
         var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
 
+        return scaleProperties(graph, configuration, progressTracker);
+    }
+
+    public ScalePropertiesResult scaleProperties(
+        Graph graph,
+        ScalePropertiesBaseConfig configuration,
+        ProgressTracker progressTracker
+    ) {
         var algorithm = new ScaleProperties(
             graph,
             configuration,

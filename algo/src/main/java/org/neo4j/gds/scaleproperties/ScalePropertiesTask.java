@@ -19,57 +19,25 @@
  */
 package org.neo4j.gds.scaleproperties;
 
-import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
-public final class ScalePropertiesFactory<CONFIG extends ScalePropertiesBaseConfig> extends GraphAlgorithmFactory<ScaleProperties, CONFIG> {
+public final class ScalePropertiesTask {
+    private ScalePropertiesTask() {}
 
-
-    public ScalePropertiesFactory() {
-        super();
-    }
-
-    @Override
-    public String taskName() {
-        return "ScaleProperties";
-    }
-
-    @Override
-    public Task progressTask(Graph graph, CONFIG config) {
-        int totalPropertyDimension = config
+    public static Task create(Graph graph, ScalePropertiesBaseConfig configuration) {
+        int totalPropertyDimension = configuration
             .nodeProperties()
             .stream()
             .map(graph::nodeProperties)
             .mapToInt(p -> p.dimension().orElseThrow(/* already validated in config */))
             .sum();
         return Tasks.task(
-            taskName(),
+            AlgorithmLabel.ScaleProperties.asString(),
             Tasks.leaf("Prepare scalers", graph.nodeCount() * totalPropertyDimension),
             Tasks.leaf("Scale properties", graph.nodeCount() * totalPropertyDimension)
         );
-    }
-
-    @Override
-    public ScaleProperties build(
-        Graph graph,
-        CONFIG configuration,
-        ProgressTracker progressTracker
-    ) {
-        return new ScaleProperties(
-            graph,
-            configuration,
-            progressTracker,
-            DefaultPool.INSTANCE
-        );
-    }
-
-    @Override
-    public MemoryEstimation memoryEstimation(CONFIG configuration) {
-        return new ScalePropertiesMemoryEstimateDefinition(configuration.nodeProperties()).memoryEstimation();
     }
 }

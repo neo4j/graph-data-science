@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.TestProgressTracker;
+import org.neo4j.gds.applications.algorithms.miscellaneous.MiscellaneousAlgorithms;
 import org.neo4j.gds.beta.generator.PropertyProducer;
 import org.neo4j.gds.beta.generator.RandomGraphGenerator;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
@@ -40,6 +41,7 @@ import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.scaling.MinMax;
 import org.neo4j.gds.scaling.ScalerFactory;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
 import java.util.stream.IntStream;
@@ -271,16 +273,19 @@ class ScalePropertiesTest {
             .scaler(MinMax.buildFrom(CypherMapWrapper.empty()))
             .build();
 
-        var factory = new ScalePropertiesFactory<>();
+        var miscellaneousAlgorithms = new MiscellaneousAlgorithms(
+            null,
+            TerminationFlag.RUNNING_TRUE
+        );
         var testLog = new GdsTestLog();
         var progressTracker = new TestProgressTracker(
-            factory.progressTask(graph, config),
+            ScalePropertiesTask.create(graph, config),
             testLog,
             new Concurrency(1),
             EmptyTaskRegistryFactory.INSTANCE
         );
 
-        factory.build(graph, config, progressTracker).compute();
+        miscellaneousAlgorithms.scaleProperties(graph, config, progressTracker);
 
         assertEquals(3, progressTracker.getProgresses().size());
         Assertions.assertThat(testLog.getMessages(INFO))
