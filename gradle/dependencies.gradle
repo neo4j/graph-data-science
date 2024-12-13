@@ -1,14 +1,7 @@
 ext {
-    neos = [
-        'stable': '5.26.0',
-        'next': '2024.12.0-SNAPSHOT',
-    ]
-
-    neo4jDefault = project.hasProperty('isOpenGds') ? neos.'stable' : neos.'next'
-
     ver = [
         'log4j'                : '2.20.0',
-        'neo4j'                : neo4jDefault,
+        'neo4j'                : '2024.12.0-SNAPSHOT',
         'scala'                : '2.13.11',
         'shiro'                : '2.0.1',
     ]
