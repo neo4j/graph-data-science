@@ -20,6 +20,7 @@
 package org.neo4j.gds.articulationpoints;
 
 import com.carrotsearch.hppc.BitSet;
+import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.ha.HugeLongArray;
@@ -32,7 +33,6 @@ public class ArticulationPoints extends Algorithm<BitSet> {
     private final BitSet visited;
     private final HugeLongArray tin;
     private final HugeLongArray low;
-    private final HugeLongArray children;
     private long timer;
     private long stackIndex = -1;
 
@@ -46,7 +46,6 @@ public class ArticulationPoints extends Algorithm<BitSet> {
         this.visited = new BitSet(graph.nodeCount());
         this.tin = HugeLongArray.newArray(graph.nodeCount());
         this.low = HugeLongArray.newArray(graph.nodeCount());
-        this.children = HugeLongArray.newArray(graph.nodeCount());
 
         this.articulationPoints = new BitSet(graph.nodeCount());
     }
@@ -73,11 +72,12 @@ public class ArticulationPoints extends Algorithm<BitSet> {
 
     private void dfs(long node, HugeObjectArray<StackEvent> stack) {
         stack.set(++stackIndex, StackEvent.upcomingVisit(node,-1));
+        MutableLong rootChildren =new MutableLong();
         while (stackIndex >= 0) {
             var stackEvent = stack.get(stackIndex--);
-            visitEvent(stackEvent, stack);
+            visitEvent(stackEvent, stack,rootChildren,node);
         }
-        if (children.get(node) > 1) {
+        if (rootChildren.intValue() > 1) {
             articulationPoints.set(node);
         } else {
             articulationPoints.clear(node);
@@ -85,7 +85,7 @@ public class ArticulationPoints extends Algorithm<BitSet> {
         progressTracker.logProgress();
     }
 
-    private void visitEvent(StackEvent event, HugeObjectArray<StackEvent> stack) {
+    private void visitEvent(StackEvent event, HugeObjectArray<StackEvent> stack, MutableLong childrenOfRoot, long root) {
         if (event.lastVisit()) {
             var to = event.eventNode();
             var v = event.triggerNode();
@@ -96,7 +96,9 @@ public class ArticulationPoints extends Algorithm<BitSet> {
             if (lowTo >= tinV) {
                 articulationPoints.set(v);
             }
-            children.addTo(v, 1);
+            if (v == root) {
+                childrenOfRoot.increment();
+            }
             progressTracker.logProgress();
             return;
         }
@@ -104,7 +106,6 @@ public class ArticulationPoints extends Algorithm<BitSet> {
         if (!visited.get(event.eventNode())) {
             var v = event.eventNode();
             visited.set(v);
-            children.set(v, 0);
             var p = event.triggerNode();
             tin.set(v, timer);
             low.set(v, timer++);

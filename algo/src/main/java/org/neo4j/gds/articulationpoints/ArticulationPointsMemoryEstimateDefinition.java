@@ -35,7 +35,6 @@ public class ArticulationPointsMemoryEstimateDefinition implements MemoryEstimat
         builder
             .perNode("tin", HugeLongArray::memoryEstimation)
             .perNode("low", HugeLongArray::memoryEstimation)
-            .perNode("children", HugeLongArray::memoryEstimation)
             .perNode("visited", Estimate::sizeOfBitset)
             .perNode("articulationPoints", Estimate::sizeOfBitset);
 
