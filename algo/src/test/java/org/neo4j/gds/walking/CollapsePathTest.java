@@ -25,10 +25,10 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.applications.algorithms.miscellaneous.MiscellaneousAlgorithms;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.loading.SingleTypeRelationships;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
@@ -199,9 +199,8 @@ class CollapsePathTest {
                 .allowSelfLoops(false)
                 .build();
 
-            var relationships = new CollapsePathAlgorithmFactory()
-                .build(graphStore, config, ProgressTracker.NULL_TRACKER)
-                .compute();
+            var miscellaneousAlgorithms = new MiscellaneousAlgorithms(null, null);
+            var relationships = miscellaneousAlgorithms.collapsePath(graphStore, config);
             graphStore.addRelationshipType(relationships);
             var resultGraph = graphStore.getGraph(mutateRelType);
 
@@ -224,9 +223,8 @@ class CollapsePathTest {
                 .allowSelfLoops(false)
                 .build();
 
-            var relationships = new CollapsePathAlgorithmFactory()
-                .build(graphStore, config, ProgressTracker.NULL_TRACKER)
-                .compute();
+            var miscellaneousAlgorithms = new MiscellaneousAlgorithms(null, null);
+            var relationships = miscellaneousAlgorithms.collapsePath(graphStore, config);
             graphStore.addRelationshipType(relationships);
             var resultGraph = graphStore.getGraph(mutateRelType);
 
@@ -235,5 +233,4 @@ class CollapsePathTest {
             assertThat(resultGraph.exists(mappedId.of("p1"), mappedId.of("p3"))).isTrue();
         }
     }
-
 }

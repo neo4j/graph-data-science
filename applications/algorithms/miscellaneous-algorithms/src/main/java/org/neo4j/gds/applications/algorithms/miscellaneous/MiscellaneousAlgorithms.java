@@ -61,7 +61,7 @@ public class MiscellaneousAlgorithms {
         this.terminationFlag = terminationFlag;
     }
 
-    SingleTypeRelationships collapsePath(GraphStore graphStore, CollapsePathConfig configuration) {
+    public SingleTypeRelationships collapsePath(GraphStore graphStore, CollapsePathConfig configuration) {
         Collection<NodeLabel> nodeLabels = configuration.nodeLabelIdentifiers(graphStore);
 
         /*
