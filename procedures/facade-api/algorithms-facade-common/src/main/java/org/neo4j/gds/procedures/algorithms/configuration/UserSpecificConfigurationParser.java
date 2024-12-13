@@ -20,7 +20,6 @@
 package org.neo4j.gds.procedures.algorithms.configuration;
 
 import org.neo4j.gds.api.User;
-import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.BaseConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
