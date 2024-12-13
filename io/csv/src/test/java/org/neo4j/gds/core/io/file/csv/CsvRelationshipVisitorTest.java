@@ -99,16 +99,16 @@ class CsvRelationshipVisitorTest extends CsvVisitorTest {
         relationshipVisitor.startId(0L);
         relationshipVisitor.endId(1L);
         relationshipVisitor.type("A");
-        relationshipVisitor.property("foo", 42L);
-        relationshipVisitor.property("bar", 21L);
+        relationshipVisitor.property("foo", 42L, false);
+        relationshipVisitor.property("bar", 21L, false);
         relationshipVisitor.endOfEntity();
 
         // :B
         relationshipVisitor.startId(1L);
         relationshipVisitor.endId(2L);
         relationshipVisitor.type("B");
-        relationshipVisitor.property("bar", 21L);
-        relationshipVisitor.property("baz", 21.0);
+        relationshipVisitor.property("bar", 21L, false);
+        relationshipVisitor.property("baz", 21.0, false);
         relationshipVisitor.endOfEntity();
 
         // :A

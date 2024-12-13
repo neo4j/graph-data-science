@@ -23,7 +23,7 @@ import com.carrotsearch.hppc.ObjectIntMap;
 import com.carrotsearch.hppc.ObjectIntScatterMap;
 import com.carrotsearch.hppc.ObjectObjectMap;
 import com.carrotsearch.hppc.ObjectObjectScatterMap;
-import org.neo4j.batchimport.api.input.InputEntityVisitor.Adapter;
+import org.neo4j.batchimport.api.input.InputEntityVisitor;
 import org.neo4j.gds.api.schema.PropertySchema;
 
 import java.io.Flushable;
@@ -32,7 +32,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
-abstract class ElementVisitor<PROPERTY_SCHEMA extends PropertySchema> extends Adapter implements Flushable {
+abstract class ElementVisitor<PROPERTY_SCHEMA extends PropertySchema> implements InputEntityVisitor, Flushable {
 
     private final Object[] currentProperties;
     private final ObjectObjectMap<String, List<PROPERTY_SCHEMA>> propertySchemas;
@@ -59,7 +59,7 @@ abstract class ElementVisitor<PROPERTY_SCHEMA extends PropertySchema> extends Ad
     public abstract void reset();
 
     @Override
-    public boolean property(String key, Object value) {
+    public boolean property(String key, Object value, boolean identifier) {
         var propertyPosition = propertyKeyPositions.get(key);
         currentProperties[propertyPosition] = value;
         return true;

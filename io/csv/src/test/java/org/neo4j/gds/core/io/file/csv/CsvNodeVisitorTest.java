@@ -104,16 +104,16 @@ class CsvNodeVisitorTest extends CsvVisitorTest {
         var nodeVisitor = new CsvNodeVisitor(tempDir, nodeSchema, mapper());
 
         nodeVisitor.id(0L);
-        nodeVisitor.property("foo", 42.0);
-        nodeVisitor.property("bar", 21.0);
+        nodeVisitor.property("foo", 42.0, false);
+        nodeVisitor.property("bar", 21.0, false);
         nodeVisitor.endOfEntity();
 
         nodeVisitor.id(1L);
-        nodeVisitor.property("foo", 42.0);
+        nodeVisitor.property("foo", 42.0, false);
         nodeVisitor.endOfEntity();
 
         nodeVisitor.id(2L);
-        nodeVisitor.property("bar", 21.0);
+        nodeVisitor.property("bar", 21.0, false);
         nodeVisitor.endOfEntity();
 
         nodeVisitor.close();
@@ -154,37 +154,37 @@ class CsvNodeVisitorTest extends CsvVisitorTest {
         // :A:B
         nodeVisitor.id(0L);
         nodeVisitor.labels(new String[]{"A", "B"});
-        nodeVisitor.property("foo", 42L);
-        nodeVisitor.property("bar", 21L);
-        nodeVisitor.property("baz", 21.0);
+        nodeVisitor.property("foo", 42L, false);
+        nodeVisitor.property("bar", 21L, false);
+        nodeVisitor.property("baz", 21.0, false);
         nodeVisitor.endOfEntity();
 
         // :A
         nodeVisitor.id(1L);
         nodeVisitor.labels(new String[]{"A"});
-        nodeVisitor.property("foo", 42L);
-        nodeVisitor.property("bar", 21L);
+        nodeVisitor.property("foo", 42L, false);
+        nodeVisitor.property("bar", 21L, false);
         nodeVisitor.endOfEntity();
 
         // :B
         nodeVisitor.id(2L);
         nodeVisitor.labels(new String[]{"B"});
-        nodeVisitor.property("bar", 21L);
-        nodeVisitor.property("baz", 21.0);
+        nodeVisitor.property("bar", 21L, false);
+        nodeVisitor.property("baz", 21.0, false);
         nodeVisitor.endOfEntity();
 
         // :C
         nodeVisitor.id(3L);
         nodeVisitor.labels(new String[]{"C"});
-        nodeVisitor.property("isolated", 1337.0);
-        nodeVisitor.property("isolated_array", new long[]{1L, 42L, 19L});
+        nodeVisitor.property("isolated", 1337.0, false);
+        nodeVisitor.property("isolated_array", new long[]{1L, 42L, 19L}, false);
         nodeVisitor.endOfEntity();
 
         // :A:B
         nodeVisitor.id(4L);
         nodeVisitor.labels(new String[]{"A", "B"});
-        nodeVisitor.property("bar", 21L);
-        nodeVisitor.property("baz", 21.0);
+        nodeVisitor.property("bar", 21L, false);
+        nodeVisitor.property("baz", 21.0, false);
         nodeVisitor.endOfEntity();
 
         nodeVisitor.close();

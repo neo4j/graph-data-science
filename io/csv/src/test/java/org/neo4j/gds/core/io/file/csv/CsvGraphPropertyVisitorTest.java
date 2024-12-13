@@ -39,7 +39,7 @@ class CsvGraphPropertyVisitorTest extends CsvVisitorTest {
             0
         )) {
             for (int i = 0; i < 4; i++) {
-                graphPropertyVisitor.property("longProp", (long) i);
+                graphPropertyVisitor.property("longProp", (long) i, false);
             }
         }
 
@@ -69,8 +69,8 @@ class CsvGraphPropertyVisitorTest extends CsvVisitorTest {
             0
         )) {
             for (int i = 0; i < 4; i++) {
-                graphPropertyVisitor.property("doubleProp", (double) i);
-                graphPropertyVisitor.property("floatArrayProp", new float[] { (float) i, (float) i + 0.1f });
+                graphPropertyVisitor.property("doubleProp", (double) i, false);
+                graphPropertyVisitor.property("floatArrayProp", new float[]{(float) i, (float) i + 0.1f}, false);
             }
         }
 

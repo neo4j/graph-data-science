@@ -373,7 +373,7 @@ final class CsvFileInput implements FileInput {
             var propertyKey = headerProperty.propertyKey();
             var defaultValue = propertySchemas.get(propertyKey).defaultValue();
             var value = CsvImportParsingUtil.parseProperty(stringProperty, headerProperty.valueType(), defaultValue, ARRAY_READER);
-            visitor.property(propertyKey, value);
+            visitor.property(propertyKey, value, false);
         }
     }
 }

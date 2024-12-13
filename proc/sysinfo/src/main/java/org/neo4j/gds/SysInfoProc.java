@@ -219,9 +219,9 @@ public class SysInfoProc {
     }
 
     private static void systemResources(Stream.Builder<DebugValue> builder) {
-        var freePhysicalMemory = OsBeanUtil.getFreePhysicalMemory();
+        var freePhysicalMemory = OsBeanUtil.getFreeMemory();
         var committedVirtualMemory = OsBeanUtil.getCommittedVirtualMemory();
-        var totalPhysicalMemory = OsBeanUtil.getTotalPhysicalMemory();
+        var totalPhysicalMemory = OsBeanUtil.getTotalMemory();
         var freeSwapSpace = OsBeanUtil.getFreeSwapSpace();
         var totalSwapSpace = OsBeanUtil.getTotalSwapSpace();
 
