@@ -20,7 +20,7 @@
 package org.neo4j.gds.procedures.algorithms.configuration;
 
 import org.neo4j.gds.api.User;
-import org.neo4j.gds.config.BaseConfig;
+import org.neo4j.gds.config.ToMapConvertible;
 import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitViolation;
 import org.neo4j.gds.configuration.LimitsConfiguration;
@@ -45,7 +45,7 @@ public class ConfigurationParser {
     }
 
 
-    public <CONFIG extends BaseConfig> CONFIG parseConfiguration(
+    public <CONFIG extends ToMapConvertible> CONFIG parseConfiguration(
         Map<String, Object> configuration,
        Function<CypherMapWrapper, CONFIG> lexer,
         User user
@@ -57,7 +57,7 @@ public class ConfigurationParser {
     /**
      * Convenient configuration parsing using globally configured defaults and limits
      */
-    <CONFIG extends BaseConfig> CONFIG parseConfiguration(
+    <CONFIG extends ToMapConvertible> CONFIG parseConfiguration(
         Map<String, Object> configuration,
         BiFunction<String, CypherMapWrapper, CONFIG> lexer,
         User user
@@ -65,7 +65,7 @@ public class ConfigurationParser {
         return parseConfiguration(defaults, limits, user.getUsername(), configuration, lexer);
     }
 
-   public  <CONFIG extends BaseConfig> CONFIG parseConfigurationWithoutDefaultsAndLimits(
+   public  <CONFIG extends ToMapConvertible> CONFIG parseConfigurationWithoutDefaultsAndLimits(
         Map<String, Object> configuration,
         BiFunction<String, CypherMapWrapper, CONFIG> lexer,
         String username
@@ -76,7 +76,7 @@ public class ConfigurationParser {
     /**
      * Configuration parsing using directly configured defaults and limits
      */
-    private  <CONFIG extends BaseConfig> CONFIG parseConfiguration(
+    private  <CONFIG extends ToMapConvertible> CONFIG parseConfiguration(
         DefaultsConfiguration defaultsConfiguration,
         LimitsConfiguration limitsConfiguration,
         String username,
@@ -110,7 +110,7 @@ public class ConfigurationParser {
         CypherMapWrapper.create(configuration).requireOnlyKeysFrom(allowedConfigKeys);
     }
 
-    <CONFIGURATION extends BaseConfig> void validateLimits(
+    <CONFIGURATION extends ToMapConvertible> void validateLimits(
         CONFIGURATION algorithmConfiguration,
         String username,
         Map<String, Object> userInputWithDefaults,

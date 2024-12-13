@@ -19,6 +19,10 @@
  */
 package org.neo4j.gds.config;
 
+import org.neo4j.gds.annotation.Configuration;
+
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -27,6 +31,11 @@ import java.util.stream.Collectors;
 public interface ToMapConvertible {
 
     Map<String, Object> toMap();
+
+    @Configuration.CollectKeys
+    default Collection<String> configKeys() {
+        return Collections.emptyList();
+    }
 
     static <T extends ToMapConvertible> List<Map<String, Object>> toMap(List<T> data) {
         return data.stream().map(ToMapConvertible::toMap).collect(Collectors.toList());
