@@ -21,6 +21,7 @@ package org.neo4j.gds.procedures.algorithms.configuration;
 
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.config.BaseConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.util.Map;
@@ -36,7 +37,7 @@ public class UserSpecificConfigurationParser {
         this.user = user;
     }
 
-    public <CONFIG extends AlgoBaseConfig> CONFIG parseConfiguration(
+    public <CONFIG extends BaseConfig> CONFIG parseConfiguration(
         Map<String, Object> configuration,
         Function<CypherMapWrapper, CONFIG> lexer
     ) {
@@ -47,7 +48,7 @@ public class UserSpecificConfigurationParser {
         );
     }
 
-    public <CONFIG extends AlgoBaseConfig> CONFIG parseConfigurationWithoutDefaultsAndLimits(
+    public <CONFIG extends BaseConfig> CONFIG parseConfigurationWithoutDefaultsAndLimits(
         Map<String, Object> configuration,
         Function<CypherMapWrapper, CONFIG> lexer
     ) {
