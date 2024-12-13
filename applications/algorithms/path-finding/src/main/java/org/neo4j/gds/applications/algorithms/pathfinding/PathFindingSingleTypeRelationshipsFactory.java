@@ -29,9 +29,11 @@ import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 
 import static org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraWriteConfig.TOTAL_COST_KEY;
 
- class PathFindingSingleTypeRelationshipsFactory {
+ final class PathFindingSingleTypeRelationshipsFactory {
 
-    static SingleTypeRelationshipsProducer fromPathFindingResult(PathFindingResult result, Graph graph){
+     private PathFindingSingleTypeRelationshipsFactory() {}
+
+     static SingleTypeRelationshipsProducer fromPathFindingResult(PathFindingResult result, Graph graph){
 
         return (mutateRelationshipType, mutateProperty) -> {
             var relationshipsBuilder = GraphFactory
