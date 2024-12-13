@@ -19,31 +19,45 @@
  */
 package org.neo4j.gds.procedures.algorithms.centrality;
 
-import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
+import org.neo4j.gds.articulationpoints.ArticulationPointsResult;
+import org.neo4j.gds.articulationpoints.SubtreeTracker;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-class ArticulationPointsResultBuilderForStreamMode implements StreamResultBuilder<BitSet, ArticulationPoint> {
+class ArticulationPointsResultBuilderForStreamMode implements StreamResultBuilder<ArticulationPointsResult, ArticulationPointStreamResult> {
 
     @Override
-    public Stream<ArticulationPoint> build(
+    public Stream<ArticulationPointStreamResult> build(
         Graph graph,
         GraphStore graphStore,
-        Optional<BitSet> result
+        Optional<ArticulationPointsResult> result
     ) {
         if (result.isEmpty()) return Stream.empty();
 
-        var bridges = result.get();
+        var articulationPoints = result.get().articulationPoints();
+        var subtreeTracker = result.get().subtreeTracker();
 
         var nodeCount = graph.nodeCount();
         return LongStream.range(0, nodeCount)
-            .filter(bridges::get)
-            .map(graph::toOriginalNodeId)
-            .mapToObj(ArticulationPoint::new);
+            .filter(articulationPoints::get)
+            .mapToObj( v -> createResult(v, graph.toOriginalNodeId(v),subtreeTracker));
+    }
+
+    private  ArticulationPointStreamResult createResult(long node, long originalId, Optional<SubtreeTracker> subtreeTracker){
+           return  subtreeTracker.map(
+               tracker -> {
+                   var resultMap =Map.of("max",tracker.maxComponentSize(node),
+                             "min", tracker.minComponentSize(node),
+                            "count", tracker.remainingComponents(node)
+                   );
+                   return new ArticulationPointStreamResult(originalId,resultMap);
+               }
+           ).orElse(new ArticulationPointStreamResult(originalId,null));
     }
 }

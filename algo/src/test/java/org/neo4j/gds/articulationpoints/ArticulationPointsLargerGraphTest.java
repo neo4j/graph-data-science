@@ -27,6 +27,8 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 @GdlExtension
@@ -76,16 +78,55 @@ class ArticulationPointsLargerGraphTest {
 
     @Test
     void articulationPoints() {
-        var articulationPoints = new ArticulationPoints(graph, ProgressTracker.NULL_TRACKER);
+        var articulationPoints =  ArticulationPoints.create(graph, ProgressTracker.NULL_TRACKER,true);
         var result = articulationPoints.compute();
 
-        assertThat(result.cardinality())
+        var bitset= result.articulationPoints();
+        var tracker = result.subtreeTracker().orElseThrow();
+
+        assertThat(bitset.cardinality())
             .isEqualTo(5L);
 
-        assertThat(result.get(graph.toMappedNodeId("a3"))).isTrue();
-        assertThat(result.get(graph.toMappedNodeId("a7"))).isTrue();
-        assertThat(result.get(graph.toMappedNodeId("a10"))).isTrue();
-        assertThat(result.get(graph.toMappedNodeId("a11"))).isTrue();
-        assertThat(result.get(graph.toMappedNodeId("a14"))).isTrue();
+        var a3=graph.toMappedNodeId("a3");
+        var a7=graph.toMappedNodeId("a7");
+        var a10=graph.toMappedNodeId("a10");
+        var a11=graph.toMappedNodeId("a11");
+        var a14=graph.toMappedNodeId("a14");
+
+        assertThat(bitset.get(a3)).isTrue();
+        assertThat(bitset.get(a7)).isTrue();
+        assertThat(bitset.get(a10)).isTrue();
+        assertThat(bitset.get(a11)).isTrue();
+        assertThat(bitset.get(a14)).isTrue();
+
+        assertThat(List.of(
+                 tracker.minComponentSize(a3),
+                 tracker.maxComponentSize(a3),
+                 tracker.remainingComponents(a3))).
+                 containsExactly(1L, 2L, 2L);
+
+        assertThat(List.of(
+            tracker.minComponentSize(a7),
+            tracker.maxComponentSize(a7),
+            tracker.remainingComponents(a7))).
+            containsExactly(1L, 2L, 2L);
+
+        assertThat(List.of(
+            tracker.minComponentSize(a10),
+            tracker.maxComponentSize(a10),
+            tracker.remainingComponents(a10))).
+            containsExactly(4L, 4L, 2L);
+
+        assertThat(List.of(
+            tracker.minComponentSize(a11),
+            tracker.maxComponentSize(a11),
+            tracker.remainingComponents(a11))).
+            containsExactly(3L, 5L, 2L);
+
+        assertThat(List.of(
+            tracker.minComponentSize(a14),
+            tracker.maxComponentSize(a14),
+            tracker.remainingComponents(a14))).
+            containsExactly(1L, 7L, 2L);
     }
 }

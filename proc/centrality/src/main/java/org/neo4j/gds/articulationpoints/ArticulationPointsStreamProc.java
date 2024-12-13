@@ -21,7 +21,7 @@ package org.neo4j.gds.articulationpoints;
 
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
-import org.neo4j.gds.procedures.algorithms.centrality.ArticulationPoint;
+import org.neo4j.gds.procedures.algorithms.centrality.ArticulationPointStreamResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -41,7 +41,7 @@ public class ArticulationPointsStreamProc {
 
     @Procedure(value = "gds.articulationPoints.stream", mode = READ)
     @Description(PROC_DESCRIPTION)
-    public Stream<ArticulationPoint> stream(
+    public Stream<ArticulationPointStreamResult> stream(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {

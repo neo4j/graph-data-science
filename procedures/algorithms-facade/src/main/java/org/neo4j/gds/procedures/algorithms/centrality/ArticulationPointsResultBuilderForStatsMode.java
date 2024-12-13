@@ -19,16 +19,16 @@
  */
 package org.neo4j.gds.procedures.algorithms.centrality;
 
-import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.applications.algorithms.machinery.StatsResultBuilder;
+import org.neo4j.gds.articulationpoints.ArticulationPointsResult;
 import org.neo4j.gds.articulationpoints.ArticulationPointsStatsConfig;
 
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class ArticulationPointsResultBuilderForStatsMode implements StatsResultBuilder<BitSet, Stream<ArticulationPointsStatsResult>> {
+class ArticulationPointsResultBuilderForStatsMode implements StatsResultBuilder<ArticulationPointsResult, Stream<ArticulationPointsStatsResult>> {
     private final ArticulationPointsStatsConfig configuration;
 
     ArticulationPointsResultBuilderForStatsMode(ArticulationPointsStatsConfig configuration) {
@@ -38,14 +38,14 @@ class ArticulationPointsResultBuilderForStatsMode implements StatsResultBuilder<
     @Override
     public Stream<ArticulationPointsStatsResult> build(
         Graph graph,
-        Optional<BitSet> result,
+        Optional<ArticulationPointsResult> result,
         AlgorithmProcessingTimings timings
     ) {
         if (result.isEmpty()) {
             return Stream.of(ArticulationPointsStatsResult.EMPTY);
         }
 
-        var bitSet = result.get();
+        var bitSet = result.get().articulationPoints();
         return Stream.of(
             new ArticulationPointsStatsResult(
                 bitSet.cardinality(),

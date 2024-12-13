@@ -19,17 +19,30 @@
  */
 package org.neo4j.gds.articulationpoints;
 
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.assertions.MemoryEstimationAssert;
 import org.neo4j.gds.core.concurrency.Concurrency;
 
+import java.util.stream.Stream;
+
 class ArticulationPointsMemoryEstimateDefinitionTest {
-    @Test
-    void shouldEstimateMemoryAccurately() {
-        var memoryEstimation = new ArticulationPointsMemoryEstimateDefinition().memoryEstimation();
+
+    static Stream<Arguments> memoryEstimationTuples() {
+        return Stream.of(
+            Arguments.of(false, 217920L),
+            Arguments.of(true,  222600L)
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("memoryEstimationTuples")
+    void shouldEstimateMemoryAccurately(boolean should, long expectedMemory) {
+        var memoryEstimation = new ArticulationPointsMemoryEstimateDefinition(should).memoryEstimation();
 
         MemoryEstimationAssert.assertThat(memoryEstimation)
             .memoryRange(100, 6000, new Concurrency(1))
-            .hasSameMinAndMaxEqualTo(217912);
+            .hasSameMinAndMaxEqualTo(expectedMemory);
     }
 }

@@ -17,7 +17,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.algorithms.centrality;
+package org.neo4j.gds.articulationpoints;
 
-public record ArticulationPoint(long nodeId) {
-}
+import com.carrotsearch.hppc.BitSet;
+
+import java.util.Optional;
+
+public record ArticulationPointsResult(BitSet articulationPoints, Optional<SubtreeTracker> subtreeTracker) {}

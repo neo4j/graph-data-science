@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.articulationpoints;
 
+import org.neo4j.gds.collections.ha.HugeIntArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.mem.Estimate;
@@ -28,6 +29,13 @@ import org.neo4j.gds.mem.MemoryEstimations;
 import org.neo4j.gds.mem.MemoryRange;
 
 public class ArticulationPointsMemoryEstimateDefinition implements MemoryEstimateDefinition {
+
+    private final boolean shouldComputeComponents;
+
+    public ArticulationPointsMemoryEstimateDefinition(boolean shouldComputeComponents) {
+        this.shouldComputeComponents = shouldComputeComponents;
+    }
+
     @Override
     public MemoryEstimation memoryEstimation() {
 
@@ -37,6 +45,19 @@ public class ArticulationPointsMemoryEstimateDefinition implements MemoryEstimat
             .perNode("low", HugeLongArray::memoryEstimation)
             .perNode("visited", Estimate::sizeOfBitset)
             .perNode("articulationPoints", Estimate::sizeOfBitset);
+
+        if (shouldComputeComponents){
+            builder.add(
+                "components",
+                MemoryEstimations.builder(SubtreeTracker.class)
+                    .perNode("totalSize", HugeLongArray::memoryEstimation)
+                    .perNode("min", HugeLongArray::memoryEstimation)
+                    .perNode("max", HugeLongArray::memoryEstimation)
+                    .perNode("root", HugeLongArray::memoryEstimation)
+                    .perNode("children", HugeIntArray::memoryEstimation)
+                    .perNode("backwardsSize", HugeLongArray::memoryEstimation)
+                    .build());
+        }
 
         builder.rangePerGraphDimension("stack", ((graphDimensions, concurrency) -> {
             long relationshipCount = graphDimensions.relCountUpperBound();

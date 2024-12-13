@@ -36,7 +36,8 @@ CALL gds.articulationPoints.stream(
   configuration: Map
 )
 YIELD
-  nodeId: Integer
+  nodeId: Integer,
+ resultingComponents: Map
 ----
 
 include::partial$/algorithms/common-configuration/common-parameters.adoc[]
@@ -53,6 +54,7 @@ include::partial$/algorithms/common-configuration/common-stream-stats-configurat
 |===
 | Name    | Type    | Description
 | nodeId  | Integer | The ID of the node representing an articulation point.
+| resultingComponents  | Map | A map containing three values:  The number of components that are created after removing `nodeId`,and the minimum/maximum of their sizes, stored with the keys `count,min, max` respectively.
 |===
 ======
 [.include-with-stats]
@@ -242,7 +244,7 @@ YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
 [opts="header",cols="1,1,1,1,1"]
 |===
 | nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
-| 6         | 14                | 896      | 896      | "896 Bytes"
+| 6         | 14                | 1448      | 1448      | "1448 Bytes"
 |===
 --
 
@@ -258,17 +260,17 @@ include::partial$/algorithms/shared/examples-stream-intro.adoc[]
 [source, cypher, role=noplay]
 ----
 CALL gds.articulationPoints.stream('myGraph')
-YIELD nodeId
-RETURN gds.util.asNode(nodeId).name AS name
+YIELD nodeId, resultingComponents
+RETURN gds.util.asNode(nodeId).name AS name,resultingComponents
 ORDER BY name ASC
 ----
 
 .Results
 [opts="header"]
 |===
-| name
-| "Alice"
-| "Doug"
+| name | resultingComponents
+| "Alice" | {count=2, max=3, min=2}
+| "Doug"  | {count=2, max=3, min=2}
 |===
 --
 

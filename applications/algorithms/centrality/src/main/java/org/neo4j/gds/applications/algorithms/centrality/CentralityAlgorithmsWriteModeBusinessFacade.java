@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.applications.algorithms.centrality;
 
-import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmResult;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
@@ -28,6 +27,7 @@ import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
 import org.neo4j.gds.applications.algorithms.machinery.WriteToDatabase;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
+import org.neo4j.gds.articulationpoints.ArticulationPointsResult;
 import org.neo4j.gds.articulationpoints.ArticulationPointsWriteConfig;
 import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.betweenness.BetweennessCentralityWriteConfig;
@@ -139,14 +139,14 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
     public <RESULT> RESULT articulationPoints(
         GraphName graphName,
         ArticulationPointsWriteConfig configuration,
-        ResultBuilder<ArticulationPointsWriteConfig, BitSet, RESULT, NodePropertiesWritten> resultBuilder
+        ResultBuilder<ArticulationPointsWriteConfig, ArticulationPointsResult, RESULT, NodePropertiesWritten> resultBuilder
     ) {
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInWriteMode(
             graphName,
             configuration,
             ArticulationPoints,
-            estimationFacade::articulationPoints,
-            (graph, __) -> centralityAlgorithms.articulationPoints(graph, configuration),
+            ()-> estimationFacade.articulationPoints(false),
+            (graph, __) -> centralityAlgorithms.articulationPoints(graph, configuration,false),
             new ArticulationPointsWriteStep(configuration, writeToDatabase),
             resultBuilder
         );
