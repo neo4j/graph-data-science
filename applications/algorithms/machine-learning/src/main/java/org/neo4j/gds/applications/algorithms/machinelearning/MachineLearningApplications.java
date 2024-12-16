@@ -20,6 +20,7 @@
 package org.neo4j.gds.applications.algorithms.machinelearning;
 
 import org.neo4j.gds.algorithms.similarity.MutateRelationshipService;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
@@ -49,6 +50,7 @@ public final class MachineLearningApplications {
         RequestScopedDependencies requestScopedDependencies,
         WriteContext writeContext,
         ProgressTrackerCreator progressTrackerCreator,
+        AlgorithmEstimationTemplate algorithmEstimationTemplate,
         AlgorithmProcessingTemplateConvenience convenience,
         MutateRelationshipService mutateRelationshipService
     ) {
@@ -57,7 +59,7 @@ public final class MachineLearningApplications {
             requestScopedDependencies.terminationFlag()
         );
 
-        var estimation = new MachineLearningAlgorithmsEstimationModeBusinessFacade();
+        var estimation = new MachineLearningAlgorithmsEstimationModeBusinessFacade(algorithmEstimationTemplate);
         var mutation = new MachineLearningAlgorithmsMutateModeBusinessFacade(
             requestScopedDependencies,
             estimation,

@@ -19,18 +19,41 @@
  */
 package org.neo4j.gds.applications.algorithms.machinelearning;
 
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTemplate;
+import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.ml.splitting.SplitRelationshipConfigTransformer;
+import org.neo4j.gds.ml.splitting.SplitRelationshipsBaseConfig;
 import org.neo4j.gds.ml.splitting.SplitRelationshipsEstimateDefinition;
-import org.neo4j.gds.ml.splitting.SplitRelationshipsMutateConfig;
 
 public class MachineLearningAlgorithmsEstimationModeBusinessFacade {
+    private final AlgorithmEstimationTemplate algorithmEstimationTemplate;
+
+    MachineLearningAlgorithmsEstimationModeBusinessFacade(AlgorithmEstimationTemplate algorithmEstimationTemplate) {
+        this.algorithmEstimationTemplate = algorithmEstimationTemplate;
+    }
+
     public MemoryEstimation kge() {
         throw new MemoryEstimationNotImplementedException();
     }
 
-    public MemoryEstimation splitRelationships(SplitRelationshipsMutateConfig configuration) {
-        return new SplitRelationshipsEstimateDefinition(SplitRelationshipConfigTransformer.toMemoryEstimateParameters(configuration)).memoryEstimation();
+    public MemoryEstimation splitRelationships(SplitRelationshipsBaseConfig configuration) {
+        var parameters = SplitRelationshipConfigTransformer.toMemoryEstimateParameters(configuration);
+
+        return new SplitRelationshipsEstimateDefinition(parameters).memoryEstimation();
+    }
+
+    public MemoryEstimateResult splitRelationships(
+        SplitRelationshipsBaseConfig configuration,
+        Object graphNameOrConfiguration
+    ) {
+        var memoryEstimation = splitRelationships(configuration);
+
+        return algorithmEstimationTemplate.estimate(
+            configuration,
+            graphNameOrConfiguration,
+            memoryEstimation
+        );
     }
 }

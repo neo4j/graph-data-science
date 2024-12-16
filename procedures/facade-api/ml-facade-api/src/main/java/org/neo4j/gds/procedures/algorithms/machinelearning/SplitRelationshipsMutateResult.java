@@ -20,7 +20,6 @@
 package org.neo4j.gds.procedures.algorithms.machinelearning;
 
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.Map;
 
@@ -56,18 +55,5 @@ public class SplitRelationshipsMutateResult {
             0,
             configurationMap
         );
-    }
-
-    public static class Builder extends AbstractResultBuilder<SplitRelationshipsMutateResult> {
-        @Override
-        public SplitRelationshipsMutateResult build() {
-            return new SplitRelationshipsMutateResult(
-                preProcessingMillis,
-                computeMillis,
-                mutateMillis,
-                relationshipsWritten,
-                config.toMap()
-            );
-        }
     }
 }
