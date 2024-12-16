@@ -21,8 +21,6 @@ package org.neo4j.gds.config;
 
 import org.neo4j.gds.annotation.Configuration;
 
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -44,11 +42,6 @@ public interface BaseConfig extends ToMapConvertible {
     @Configuration.Key(LOG_PROGRESS_KEY)
     default boolean logProgress() {
         return true;
-    }
-
-    @Configuration.CollectKeys
-    default Collection<String> configKeys() {
-        return Collections.emptyList();
     }
 
     @Configuration.ToMap
