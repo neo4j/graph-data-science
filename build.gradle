@@ -17,7 +17,6 @@ ext {
     distributionDir = "${layout.buildDirectory.get()}/distributions"
     cliDistributionDir = "${layout.buildDirectory.get()}/distributions/estimation-cli"
     publicDir = "${project.rootDir}"
-    isOpenGds = true
 
     checkstyleReportsDir = "${layout.buildDirectory.get()}/reports/checkstyle/"
 }
