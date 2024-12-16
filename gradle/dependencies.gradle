@@ -1,7 +1,9 @@
 ext {
+    neo4jDefault = '2024.12.0-SNAPSHOT'
+
     ver = [
         'log4j'                : '2.20.0',
-        'neo4j'                : '2024.12.0-SNAPSHOT',
+        'neo4j'                : properties.getOrDefault('neo4jVersion', neo4jDefault),
         'scala'                : '2.13.11',
         'shiro'                : '2.0.1',
     ]
