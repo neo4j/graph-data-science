@@ -207,7 +207,7 @@ public class Task {
         return sb.toString();
     }
 
-    static void render(StringBuilder sb, Task task, int depth) {
+    private static void render(StringBuilder sb, Task task, int depth) {
         sb.append("\t".repeat(Math.max(0, depth - 1)));
 
         if (depth > 0) {
