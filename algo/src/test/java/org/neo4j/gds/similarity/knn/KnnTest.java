@@ -503,7 +503,7 @@ class KnnTest {
     void shouldLogProgress() {
         var maxIterations = 100;
 
-        var progressTask = KnnFactory.knnTaskTree(graph.nodeCount(), maxIterations);
+        var progressTask = KnnTask.create(graph.nodeCount(), maxIterations);
         var log = new GdsTestLog();
         var progressTracker = new TaskProgressTracker(progressTask, log, new Concurrency(4), EmptyTaskRegistryFactory.INSTANCE);
 

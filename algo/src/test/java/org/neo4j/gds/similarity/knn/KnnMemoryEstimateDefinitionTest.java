@@ -109,7 +109,7 @@ class KnnMemoryEstimateDefinitionTest {
             Estimate.sizeOfInstance(LongArrayList.class) + sizeOfLongArray(k.sampledValue)
         );
 
-        var randomList = KnnFactory.initialSamplerMemoryEstimation(initialSampler, k.value);
+        var randomList = KnnSamplerMemoryEstimation.create(initialSampler, k.value);
         long sampledList = sizeOfIntArray(sizeOfOpenHashContainer(k.sampledValue));
 
         long expectedMin = knnAlgo + topKNeighborsList + 4 * tempNeighborsListMin + randomList.min + sampledList;

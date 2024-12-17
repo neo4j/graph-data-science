@@ -74,9 +74,7 @@ public class KnnMemoryEstimateDefinition implements MemoryEstimateDefinition {
                     .rangePerNode("new-reverse-neighbors", tempListEstimation)
                     .fixed(
                         "initial-random-neighbors (per thread)",
-                        KnnFactory
-                            .initialSamplerMemoryEstimation(parameters.samplerType(), k.value)
-                            .times(concurrency.value())
+                        KnnSamplerMemoryEstimation.create(parameters.samplerType(), k.value).times(concurrency.value())
                     )
                     .fixed(
                         "sampled-random-neighbors (per thread)",

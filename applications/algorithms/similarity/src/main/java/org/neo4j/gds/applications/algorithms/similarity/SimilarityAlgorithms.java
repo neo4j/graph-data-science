@@ -21,6 +21,7 @@ package org.neo4j.gds.applications.algorithms.similarity;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.similarity.knn.KnnTask;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.wcc.WccStub;
 import org.neo4j.gds.wcc.WccTask;
@@ -50,7 +51,6 @@ import java.util.List;
 
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.FilteredKNN;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.FilteredNodeSimilarity;
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.KNN;
 
 public class SimilarityAlgorithms {
     private final AlgorithmMachinery algorithmMachinery = new AlgorithmMachinery();
@@ -64,9 +64,9 @@ public class SimilarityAlgorithms {
     }
 
     FilteredKnnResult filteredKnn(Graph graph, FilteredKnnBaseConfig configuration) {
-        long nodeCount = graph.nodeCount();
+        var nodeCount = graph.nodeCount();
 
-        Task task = Tasks.task(
+        var task = Tasks.task(
             FilteredKNN.asString(),
             Tasks.leaf("Initialize random neighbors", nodeCount),
             Tasks.iterativeDynamic(
@@ -153,23 +153,7 @@ public class SimilarityAlgorithms {
     KnnResult knn(Graph graph, KnnBaseConfig configuration) {
         var parameters = configuration.toParameters().finalize(graph.nodeCount());
 
-        long nodeCount = graph.nodeCount();
-
-        Task task = Tasks.task(
-            KNN.asString(),
-            Tasks.leaf("Initialize random neighbors", nodeCount),
-            Tasks.iterativeDynamic(
-                "Iteration",
-                () -> List.of(
-                    Tasks.leaf("Split old and new neighbors", nodeCount),
-                    Tasks.leaf("Reverse old and new neighbors", nodeCount),
-                    Tasks.leaf("Join neighbors", nodeCount)
-                ),
-                configuration.maxIterations()
-            )
-        );
-
-
+        var task = KnnTask.create(graph.nodeCount(), configuration.maxIterations());
         var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
 
         var algorithm = Knn.create(

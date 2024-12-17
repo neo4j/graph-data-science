@@ -41,7 +41,7 @@ import org.neo4j.gds.ml.pipeline.PredictPipelineExecutor;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureExtractor;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPredictPipeline;
 import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
-import org.neo4j.gds.similarity.knn.KnnFactory;
+import org.neo4j.gds.similarity.knn.KnnTask;
 import org.neo4j.gds.utils.StringJoining;
 
 import java.util.List;
@@ -111,7 +111,7 @@ public class LinkPredictionPredictPipelineExecutor extends PredictPipelineExecut
             config.isApproximateStrategy()
                 ? Tasks.task(
                 "Approximate link prediction",
-                KnnFactory.knnTaskTree(nodeCount, config.approximateParameters().finalize(nodeCount).maxIterations())
+                KnnTask.create(nodeCount, config.approximateParameters().finalize(nodeCount).maxIterations())
             )
                 : Tasks.leaf("Exhaustive link prediction", nodeCount * nodeCount / 2)
         );
