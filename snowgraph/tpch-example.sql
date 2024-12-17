@@ -152,6 +152,7 @@ GRANT CREATE TABLE ON SCHEMA        tpch_example.gds TO APPLICATION Neo4j_GDS;
 -- * HIGHMEM_X64_S
 -- * HIGHMEM_X64_M
 -- * HIGHMEM_X64_L
+-- * GPU_NV_S
 --
 -- For our example, we use a large compute pool as the node similarity algorithm is computationally intensive, but without extra memory because the graph is quite small.
 -- We select: CPU_X64_L
