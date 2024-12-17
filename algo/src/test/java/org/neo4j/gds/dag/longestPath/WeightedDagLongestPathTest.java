@@ -22,6 +22,8 @@ package org.neo4j.gds.dag.longestPath;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.TestProgressTracker;
+import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
+import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithms;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -32,6 +34,7 @@ import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -71,13 +74,12 @@ class WeightedDagLongestPathTest {
                 idFunction.of("n3"),
             };
 
-            var longestPath = new DagLongestPathFactory().build(
-                graph,
-                CONFIG,
-                ProgressTracker.NULL_TRACKER
-            );
+            var requestScopedDependencies = RequestScopedDependencies.builder()
+                .terminationFlag(TerminationFlag.RUNNING_TRUE)
+                .build();
+            var pathFindingAlgorithms = new PathFindingAlgorithms(requestScopedDependencies, null);
 
-            PathFindingResult result = longestPath.compute();
+            PathFindingResult result = pathFindingAlgorithms.longestPath(graph, CONFIG.concurrency(), ProgressTracker.NULL_TRACKER);
 
             long[][] EXPECTED_PATHS = new long[4][];
             EXPECTED_PATHS[(int) a[0]] = new long[]{a[3], a[0]};
@@ -102,8 +104,12 @@ class WeightedDagLongestPathTest {
 
         @Test
         void shouldLogProgress() {
-            var lpFactory = new DagLongestPathFactory<>();
-            var progressTask = lpFactory.progressTask(graph, CONFIG);
+            var requestScopedDependencies = RequestScopedDependencies.builder()
+                .terminationFlag(TerminationFlag.RUNNING_TRUE)
+                .build();
+            var pathFindingAlgorithms = new PathFindingAlgorithms(requestScopedDependencies, null);
+
+            var progressTask = LongestPathTask.create(graph);
             var log = new GdsTestLog();
             var testTracker = new TestProgressTracker(
                 progressTask,
@@ -112,13 +118,16 @@ class WeightedDagLongestPathTest {
                 EmptyTaskRegistryFactory.INSTANCE
             );
 
-            var lp = lpFactory.build(graph, CONFIG, testTracker);
-            lp.compute().pathSet();
+            var result = pathFindingAlgorithms.longestPath(
+                graph,
+                CONFIG.concurrency(),
+                testTracker
+            );
 
-            String taskName = lpFactory.taskName();
+            result.pathSet();
 
-            assertTrue(log.containsMessage(TestLog.INFO, taskName + " :: Start"));
-            assertTrue(log.containsMessage(TestLog.INFO, taskName + " :: Finished"));
+            assertTrue(log.containsMessage(TestLog.INFO, "LongestPath :: Start"));
+            assertTrue(log.containsMessage(TestLog.INFO, "LongestPath :: Finished"));
         }
     }
 
@@ -164,13 +173,12 @@ class WeightedDagLongestPathTest {
 
             };
 
-            var longestPath = new DagLongestPathFactory().build(
-                graph,
-                CONFIG,
-                ProgressTracker.NULL_TRACKER
-            );
+            var requestScopedDependencies = RequestScopedDependencies.builder()
+                .terminationFlag(TerminationFlag.RUNNING_TRUE)
+                .build();
+            var pathFindingAlgorithms = new PathFindingAlgorithms(requestScopedDependencies, null);
 
-            PathFindingResult result = longestPath.compute();
+            PathFindingResult result = pathFindingAlgorithms.longestPath(graph, CONFIG.concurrency(), ProgressTracker.NULL_TRACKER);
 
             long[][] EXPECTED_PATHS = new long[7][];
             EXPECTED_PATHS[(int) a[0]] = new long[]{a[0]};
@@ -231,13 +239,13 @@ class WeightedDagLongestPathTest {
                 idFunction.of("n3"),
             };
 
-            var longestPath = new DagLongestPathFactory().build(
-                graph,
-                CONFIG,
-                ProgressTracker.NULL_TRACKER
-            );
 
-            PathFindingResult result = longestPath.compute();
+            var requestScopedDependencies = RequestScopedDependencies.builder()
+                .terminationFlag(TerminationFlag.RUNNING_TRUE)
+                .build();
+            var pathFindingAlgorithms = new PathFindingAlgorithms(requestScopedDependencies, null);
+
+            PathFindingResult result = pathFindingAlgorithms.longestPath(graph, CONFIG.concurrency(), ProgressTracker.NULL_TRACKER);
 
             long[][] EXPECTED_PATHS = new long[4][];
             EXPECTED_PATHS[(int) a[0]] = new long[]{a[0]};
@@ -262,8 +270,12 @@ class WeightedDagLongestPathTest {
 
         @Test
         void shouldLogProgress() {
-            var lpFactory = new DagLongestPathFactory<>();
-            var progressTask = lpFactory.progressTask(graph, CONFIG);
+            var requestScopedDependencies = RequestScopedDependencies.builder()
+                .terminationFlag(TerminationFlag.RUNNING_TRUE)
+                .build();
+            var pathFindingAlgorithms = new PathFindingAlgorithms(requestScopedDependencies, null);
+
+            var progressTask = LongestPathTask.create(graph);
             var log = new GdsTestLog();
             var testTracker = new TestProgressTracker(
                 progressTask,
@@ -272,13 +284,16 @@ class WeightedDagLongestPathTest {
                 EmptyTaskRegistryFactory.INSTANCE
             );
 
-            var lp = lpFactory.build(graph, CONFIG, testTracker);
-            lp.compute().pathSet();
+            var result = pathFindingAlgorithms.longestPath(
+                graph,
+                CONFIG.concurrency(),
+                testTracker
+            );
 
-            String taskName = lpFactory.taskName();
+            result.pathSet();
 
-            assertTrue(log.containsMessage(TestLog.INFO, taskName + " :: Start"));
-            assertTrue(log.containsMessage(TestLog.INFO, taskName + " :: Finished"));
+            assertTrue(log.containsMessage(TestLog.INFO, "LongestPath :: Start"));
+            assertTrue(log.containsMessage(TestLog.INFO, "LongestPath :: Finished"));
         }
     }
 }

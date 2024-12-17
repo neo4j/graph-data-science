@@ -34,11 +34,13 @@ import org.neo4j.gds.applications.algorithms.pathfinding.traverse.DepthFirstSear
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
 import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.dag.longestPath.DagLongestPath;
+import org.neo4j.gds.dag.longestPath.LongestPathTask;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSort;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortBaseConfig;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortResult;
@@ -227,15 +229,17 @@ public class PathFindingAlgorithms {
     }
 
     PathFindingResult longestPath(Graph graph, AlgoBaseConfig configuration) {
-        var initializationTask = Tasks.leaf("Initialization", graph.nodeCount());
-        var traversalTask = Tasks.leaf("Traversal", graph.nodeCount());
-        var task = Tasks.task(AlgorithmLabel.LongestPath.asString(), List.of(initializationTask, traversalTask));
+        var task = LongestPathTask.create(graph);
         var progressTracker = createProgressTracker(configuration, task);
 
+        return longestPath(graph, configuration.concurrency(), progressTracker);
+    }
+
+    public PathFindingResult longestPath(Graph graph, Concurrency concurrency, ProgressTracker progressTracker) {
         var algorithm = new DagLongestPath(
             graph,
             progressTracker,
-            configuration.concurrency(),
+            concurrency,
             requestScopedDependencies.terminationFlag()
         );
 
@@ -243,7 +247,7 @@ public class PathFindingAlgorithms {
             algorithm,
             progressTracker,
             false,
-            configuration.concurrency()
+            concurrency
         );
     }
 

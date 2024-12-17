@@ -17,11 +17,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.longestpath;
+package org.neo4j.gds.dag.longestPath;
 
-final class Constants {
-    static final String LONGEST_PATH_DESCRIPTION =
-        "Returns the longest paths ending in given target nodes";
+import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
+import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
-    private Constants() {}
+import java.util.List;
+
+public final class LongestPathTask {
+    private LongestPathTask() {}
+
+    public static Task create(IdMap idMap) {
+        var initializationTask = Tasks.leaf("Initialization", idMap.nodeCount());
+        var traversalTask = Tasks.leaf("Traversal", idMap.nodeCount());
+
+        return Tasks.task(AlgorithmLabel.LongestPath.asString(), List.of(initializationTask, traversalTask));
+    }
 }
