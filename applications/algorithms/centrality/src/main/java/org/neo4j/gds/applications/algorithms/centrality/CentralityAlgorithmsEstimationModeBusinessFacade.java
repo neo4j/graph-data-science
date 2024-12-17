@@ -86,8 +86,8 @@ public class CentralityAlgorithmsEstimationModeBusinessFacade {
         return new BridgesMemoryEstimateDefinition(shouldComputeComponents).memoryEstimation();
     }
 
-    public MemoryEstimateResult bridges(BridgesBaseConfig configuration, Object graphNameOrConfiguration, boolean shouldComputeComponents) {
-        var memoryEstimation = bridges(shouldComputeComponents);
+    public MemoryEstimateResult bridges(BridgesBaseConfig configuration, Object graphNameOrConfiguration) {
+        var memoryEstimation = bridges(true);
 
         return algorithmEstimationTemplate.estimate(
             configuration,
@@ -95,8 +95,6 @@ public class CentralityAlgorithmsEstimationModeBusinessFacade {
             memoryEstimation
         );
     }
-
-
 
     public MemoryEstimation celf(InfluenceMaximizationBaseConfig configuration) {
         return new CELFMemoryEstimateDefinition(configuration.toParameters()).memoryEstimation();

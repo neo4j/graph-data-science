@@ -681,7 +681,6 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     ) {
-
         var parsedConfiguration = configurationParser.parseConfiguration(
             algorithmConfiguration,
             BridgesStreamConfig::of
@@ -689,10 +688,8 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
 
         return Stream.of(estimationModeBusinessFacade.bridges(
             parsedConfiguration,
-            graphNameOrConfiguration,
-            true
+            graphNameOrConfiguration
         ));
-
     }
 
     @Override
