@@ -21,6 +21,8 @@ package org.neo4j.gds.dag.topologicalsort;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.TestProgressTracker;
+import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
+import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithms;
 import org.neo4j.gds.beta.generator.RandomGraphGenerator;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
 import org.neo4j.gds.collections.ha.HugeLongArray;
@@ -405,8 +407,12 @@ class TopologicalSortTest {
 
     @Test
     void shouldLogProgress() {
-        var tsFactory = new TopologicalSortFactory<>();
-        var progressTask = tsFactory.progressTask(lastGraph, null);
+        var requestScopedDependencies = RequestScopedDependencies.builder()
+            .terminationFlag(TerminationFlag.RUNNING_TRUE)
+            .build();
+        var pathFindingAlgorithms = new PathFindingAlgorithms(requestScopedDependencies, null);
+
+        var progressTask = TopSortTask.create(lastGraph);
         var log = new GdsTestLog();
         var testTracker = new TestProgressTracker(
             progressTask,
@@ -415,18 +421,13 @@ class TopologicalSortTest {
             EmptyTaskRegistryFactory.INSTANCE
         );
 
-        TopologicalSort ts =  new TopologicalSort(
-            lastGraph,
-            testTracker,
-            new Concurrency(4),
-            false,
-            TerminationFlag.RUNNING_TRUE
-        );
-        ts.compute();
+        var configuration = TopologicalSortBaseConfigImpl.builder()
+            .computeMaxDistanceFromSource(false)
+            .concurrency(4)
+            .build();
+        pathFindingAlgorithms.topologicalSort(lastGraph, configuration, testTracker);
 
-        String taskName = tsFactory.taskName();
-
-        assertTrue(log.containsMessage(TestLog.INFO, taskName + " :: Start"));
-        assertTrue(log.containsMessage(TestLog.INFO, taskName + " :: Finished"));
+        assertTrue(log.containsMessage(TestLog.INFO, "TopologicalSort :: Start"));
+        assertTrue(log.containsMessage(TestLog.INFO, "TopologicalSort :: Finished"));
     }
 }

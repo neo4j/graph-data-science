@@ -17,9 +17,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.topologicalsort;
+package org.neo4j.gds.dag.topologicalsort;
 
-class Constants {
-    static final String TOPOLOGICAL_SORT_DESCRIPTION =
-        "Returns all the nodes in the graph that are not part of a cycle or depend on a cycle, sorted in a topological order";
+import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
+import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+
+import java.util.List;
+
+public final class TopSortTask {
+    private TopSortTask() {}
+
+    public static Task create(IdMap idMap) {
+        var initializationTask = Tasks.leaf("Initialization", idMap.nodeCount());
+        var traversalTask = Tasks.leaf("Traversal", idMap.nodeCount());
+
+        return Tasks.task(
+            AlgorithmLabel.TopologicalSort.asString(),
+            List.of(initializationTask, traversalTask)
+        );
+    }
 }

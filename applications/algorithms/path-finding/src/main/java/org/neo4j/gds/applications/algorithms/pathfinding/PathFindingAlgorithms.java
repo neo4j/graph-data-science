@@ -41,6 +41,7 @@ import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.dag.longestPath.DagLongestPath;
 import org.neo4j.gds.dag.longestPath.LongestPathTask;
+import org.neo4j.gds.dag.topologicalsort.TopSortTask;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSort;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortBaseConfig;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortResult;
@@ -506,14 +507,17 @@ public class PathFindingAlgorithms {
     }
 
     public TopologicalSortResult topologicalSort(Graph graph, TopologicalSortBaseConfig configuration) {
-        var initializationTask = Tasks.leaf("Initialization", graph.nodeCount());
-        var traversalTask = Tasks.leaf("Traversal", graph.nodeCount());
-        var task = Tasks.task(
-            AlgorithmLabel.TopologicalSort.asString(),
-            List.of(initializationTask, traversalTask)
-        );
+        var task = TopSortTask.create(graph);
         var progressTracker = createProgressTracker(configuration, task);
 
+        return topologicalSort(graph, configuration, progressTracker);
+    }
+
+    public TopologicalSortResult topologicalSort(
+        Graph graph,
+        TopologicalSortBaseConfig configuration,
+        ProgressTracker progressTracker
+    ) {
         var algorithm = new TopologicalSort(
             graph,
             progressTracker,
