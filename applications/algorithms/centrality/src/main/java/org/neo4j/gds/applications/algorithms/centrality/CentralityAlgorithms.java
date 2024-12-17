@@ -42,6 +42,7 @@ import org.neo4j.gds.bridges.Bridges;
 import org.neo4j.gds.closeness.ClosenessCentrality;
 import org.neo4j.gds.closeness.ClosenessCentralityBaseConfig;
 import org.neo4j.gds.closeness.ClosenessCentralityResult;
+import org.neo4j.gds.closeness.ClosenessCentralityTask;
 import org.neo4j.gds.closeness.DefaultCentralityComputer;
 import org.neo4j.gds.closeness.WassermanFaustCentralityComputer;
 import org.neo4j.gds.config.AlgoBaseConfig;
@@ -187,7 +188,7 @@ public class CentralityAlgorithms {
         var task = BridgeProgressTaskCreator.progressTask(graph.nodeCount());
         var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
 
-        var algorithm = Bridges.create(graph, progressTracker,shouldComputeComponents);
+        var algorithm = Bridges.create(graph, progressTracker, shouldComputeComponents);
 
         return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
             algorithm,
@@ -216,19 +217,22 @@ public class CentralityAlgorithms {
     }
 
     ClosenessCentralityResult closenessCentrality(Graph graph, ClosenessCentralityBaseConfig configuration) {
+        var task = ClosenessCentralityTask.create(graph.nodeCount());
+        var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
+
+        return closenessCentrality(graph, configuration, progressTracker);
+    }
+
+    public ClosenessCentralityResult closenessCentrality(
+        Graph graph,
+        ClosenessCentralityBaseConfig configuration,
+        ProgressTracker progressTracker
+    ) {
         var parameters = configuration.toParameters();
 
         var centralityComputer = parameters.useWassermanFaust()
             ? new WassermanFaustCentralityComputer(graph.nodeCount())
             : new DefaultCentralityComputer();
-
-        var progressTracker = progressTrackerCreator.createProgressTracker(
-            configuration, Tasks.task(
-                AlgorithmLabel.ClosenessCentrality.asString(),
-                Tasks.leaf("Farness computation", graph.nodeCount() * graph.nodeCount()),
-                Tasks.leaf("Closeness computation", graph.nodeCount())
-            )
-        );
 
         var algorithm = new ClosenessCentrality(
             graph,
@@ -395,7 +399,10 @@ public class CentralityAlgorithms {
         return pageRank.compute();
     }
 
-    private ArticleRankComputation<ArticleRankConfig> articleRankComputation(Graph graph, ArticleRankConfig configuration) {
+    private ArticleRankComputation<ArticleRankConfig> articleRankComputation(
+        Graph graph,
+        ArticleRankConfig configuration
+    ) {
         var degreeFunction = DegreeFunctions.pageRankDegreeFunction(
             graph,
             configuration.hasRelationshipWeightProperty(),
@@ -412,7 +419,10 @@ public class CentralityAlgorithms {
         return new ArticleRankComputation<>(configuration, mappedSourceNodes, degreeFunction, avgDegree);
     }
 
-    private EigenvectorComputation<EigenvectorConfig> eigenvectorComputation(Graph graph, EigenvectorConfig configuration) {
+    private EigenvectorComputation<EigenvectorConfig> eigenvectorComputation(
+        Graph graph,
+        EigenvectorConfig configuration
+    ) {
         var mappedSourceNodes = new LongScatterSet(configuration.sourceNodes().size());
         configuration.sourceNodes().stream()
             .mapToLong(graph::toMappedNodeId)

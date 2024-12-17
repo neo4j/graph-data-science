@@ -112,7 +112,7 @@ class ClosenessCentralityTest {
 
     @Test
     void shouldLogProgress() {
-        var progressTask = new ClosenessCentralityAlgorithmFactory<>().progressTask(graph.nodeCount());
+        var progressTask = ClosenessCentralityTask.create(graph.nodeCount());
         var testLog = new GdsTestLog();
         var progressTracker = new TestProgressTracker(progressTask, testLog, new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE);
 
@@ -136,30 +136,30 @@ class ClosenessCentralityTest {
             // avoid asserting on the thread id
             .extracting(removingThreadId())
             .containsExactly(
-                "ClosenessCentrality :: Start",
-                "ClosenessCentrality :: Farness computation :: Start",
-                "ClosenessCentrality :: Farness computation 4%",
-                "ClosenessCentrality :: Farness computation 12%",
-                "ClosenessCentrality :: Farness computation 20%",
-                "ClosenessCentrality :: Farness computation 28%",
-                "ClosenessCentrality :: Farness computation 32%",
-                "ClosenessCentrality :: Farness computation 36%",
-                "ClosenessCentrality :: Farness computation 40%",
-                "ClosenessCentrality :: Farness computation 48%",
-                "ClosenessCentrality :: Farness computation 52%",
-                "ClosenessCentrality :: Farness computation 56%",
-                "ClosenessCentrality :: Farness computation 60%",
-                "ClosenessCentrality :: Farness computation 64%",
-                "ClosenessCentrality :: Farness computation 68%",
-                "ClosenessCentrality :: Farness computation 72%",
-                "ClosenessCentrality :: Farness computation 76%",
-                "ClosenessCentrality :: Farness computation 80%",
-                "ClosenessCentrality :: Farness computation 100%",
-                "ClosenessCentrality :: Farness computation :: Finished",
-                "ClosenessCentrality :: Closeness computation :: Start",
-                "ClosenessCentrality :: Closeness computation 100%",
-                "ClosenessCentrality :: Closeness computation :: Finished",
-                "ClosenessCentrality :: Finished"
+                "Closeness Centrality :: Start",
+                "Closeness Centrality :: Farness computation :: Start",
+                "Closeness Centrality :: Farness computation 4%",
+                "Closeness Centrality :: Farness computation 12%",
+                "Closeness Centrality :: Farness computation 20%",
+                "Closeness Centrality :: Farness computation 28%",
+                "Closeness Centrality :: Farness computation 32%",
+                "Closeness Centrality :: Farness computation 36%",
+                "Closeness Centrality :: Farness computation 40%",
+                "Closeness Centrality :: Farness computation 48%",
+                "Closeness Centrality :: Farness computation 52%",
+                "Closeness Centrality :: Farness computation 56%",
+                "Closeness Centrality :: Farness computation 60%",
+                "Closeness Centrality :: Farness computation 64%",
+                "Closeness Centrality :: Farness computation 68%",
+                "Closeness Centrality :: Farness computation 72%",
+                "Closeness Centrality :: Farness computation 76%",
+                "Closeness Centrality :: Farness computation 80%",
+                "Closeness Centrality :: Farness computation 100%",
+                "Closeness Centrality :: Farness computation :: Finished",
+                "Closeness Centrality :: Closeness computation :: Start",
+                "Closeness Centrality :: Closeness computation 100%",
+                "Closeness Centrality :: Closeness computation :: Finished",
+                "Closeness Centrality :: Finished"
             );
     }
 }

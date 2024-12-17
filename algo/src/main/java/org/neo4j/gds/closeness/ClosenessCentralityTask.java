@@ -17,22 +17,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds;
+package org.neo4j.gds.closeness;
 
-import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.executor.ComputationResult;
-import org.neo4j.gds.executor.ComputationResultConsumer;
-import org.neo4j.gds.executor.ExecutionContext;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
+import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
-import java.util.stream.Stream;
+public final class ClosenessCentralityTask {
+    private ClosenessCentralityTask() {}
 
-public class NullComputationResultConsumer<ALGO extends Algorithm<ALGO_RESULT>, ALGO_RESULT, CONFIG extends AlgoBaseConfig, RESULT>
-    implements ComputationResultConsumer<ALGO, ALGO_RESULT, CONFIG, Stream<RESULT>> {
-    @Override
-    public Stream<RESULT> consume(
-        ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult,
-        ExecutionContext executionContext
-    ) {
-        return Stream.empty();
+    public static Task create(long nodeCount) {
+        return Tasks.task(
+            AlgorithmLabel.ClosenessCentrality.asString(),
+            Tasks.leaf("Farness computation", nodeCount * nodeCount),
+            Tasks.leaf("Closeness computation", nodeCount)
+        );
     }
 }
