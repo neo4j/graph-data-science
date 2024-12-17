@@ -45,6 +45,7 @@ import org.neo4j.gds.closeness.ClosenessCentralityResult;
 import org.neo4j.gds.closeness.DefaultCentralityComputer;
 import org.neo4j.gds.closeness.WassermanFaustCentralityComputer;
 import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -301,6 +302,14 @@ public class CentralityAlgorithms {
         var task = Tasks.leaf(AlgorithmLabel.HarmonicCentrality.asString());
         var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
 
+        return harmonicCentrality(graph, configuration, progressTracker);
+    }
+
+    public HarmonicResult harmonicCentrality(
+        Graph graph,
+        ConcurrencyConfig configuration,
+        ProgressTracker progressTracker
+    ) {
         var algorithm = new HarmonicCentrality(
             graph,
             configuration.concurrency(),
