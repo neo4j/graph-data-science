@@ -70,8 +70,6 @@ public class ProcedureExecutor<
         String graphName,
         Map<String, Object> configuration
     ) {
-        Preconditions.check();
-
         ImmutableComputationResult.Builder<ALGO, ALGO_RESULT, CONFIG> builder = ImmutableComputationResult.builder();
 
         // This is needed in the case of `pipelines` where they either pick stuff from the user input,

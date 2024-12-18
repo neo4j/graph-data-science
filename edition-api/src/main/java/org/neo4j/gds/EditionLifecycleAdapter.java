@@ -58,7 +58,6 @@ class EditionLifecycleAdapter extends LifecycleAdapter {
     @Override
     public void init() {
         var licenseState = registerLicenseState();
-        setupProcedurePreconditions(licenseState);
         setupIdMapBehavior(licenseState);
         setupConcurrencyValidator(licenseState);
         setupPoolSizes(licenseState);
@@ -83,16 +82,6 @@ class EditionLifecycleAdapter extends LifecycleAdapter {
             LicensingServiceBuilder::priority
         );
         return licensingServiceBuilder.build(config).get();
-    }
-
-    private void setupProcedurePreconditions(LicenseState licenseState) {
-        var procedurePreconditionsFactory = loadService(
-            PreconditionsFactory.class,
-            PreconditionsFactory::priority
-        );
-
-        var procedurePreconditions = procedurePreconditionsFactory.create(licenseState);
-        PreconditionsProvider.preconditions(procedurePreconditions);
     }
 
     private void setupIdMapBehavior(LicenseState licenseState) {
