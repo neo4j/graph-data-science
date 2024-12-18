@@ -239,6 +239,9 @@ public final class OpenGraphDataScienceExtensionBuilder {
     }
 
     /**
+     * We register metrics as a component as a way of dependency injecting into spec framework.
+     * As long as we keep that around, this hack needs to persist.
+     *
      * @deprecated Legacy stuff, will go away one day
      */
     @Deprecated
