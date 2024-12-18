@@ -26,6 +26,7 @@ import org.neo4j.gds.applications.graphstorecatalog.GraphCatalogApplications;
 import org.neo4j.gds.applications.modelcatalog.ModelCatalogApplications;
 import org.neo4j.gds.applications.modelcatalog.ModelRepository;
 import org.neo4j.gds.applications.operations.FeatureTogglesRepository;
+import org.neo4j.gds.concurrency.ConcurrencyValidator;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.GcListenerExtension;
@@ -60,6 +61,8 @@ import java.util.function.Function;
  * We encapsulate it here, with allowances for customisations.
  */
 public final class OpenGraphDataScienceExtensionBuilder {
+    private static final SingletonConfigurer singletonConfigurer = new SingletonConfigurer();
+
     // fundamentals
     private final Log log;
     private final ComponentRegistration componentRegistration;
@@ -110,6 +113,7 @@ public final class OpenGraphDataScienceExtensionBuilder {
         Log log,
         GlobalProcedures globalProcedures,
         Configuration neo4jConfiguration,
+        ConcurrencyValidator concurrencyValidator,
         ExporterBuildersProviderService exporterBuildersProviderService,
         ExportLocation exportLocation,
         FeatureTogglesRepository featureTogglesRepository,
@@ -120,6 +124,8 @@ public final class OpenGraphDataScienceExtensionBuilder {
         Optional<Function<GraphCatalogApplications, GraphCatalogApplications>> graphCatalogApplicationsDecorator,
         Optional<Function<ModelCatalogApplications, ModelCatalogApplications>> modelCatalogApplicationsDecorator
     ) {
+        singletonConfigurer.configureSingletons(concurrencyValidator);
+
         // Read some configuration used to select behaviour
         var progressTrackingEnabled = neo4jConfiguration.get(ProgressFeatureSettings.progress_tracking_enabled);
         log.info("Progress tracking: " + (progressTrackingEnabled ? "enabled" : "disabled"));

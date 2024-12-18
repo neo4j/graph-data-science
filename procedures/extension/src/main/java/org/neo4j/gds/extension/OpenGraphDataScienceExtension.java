@@ -22,6 +22,7 @@ package org.neo4j.gds.extension;
 import org.neo4j.annotations.service.ServiceProvider;
 import org.neo4j.configuration.Config;
 import org.neo4j.gds.applications.operations.FeatureTogglesRepository;
+import org.neo4j.gds.concurrency.OpenGdsConcurrencyValidator;
 import org.neo4j.gds.core.model.OpenModelCatalogProvider;
 import org.neo4j.gds.core.write.NativeExportBuildersProvider;
 import org.neo4j.gds.metrics.Metrics;
@@ -56,6 +57,7 @@ public class OpenGraphDataScienceExtension extends ExtensionFactory<OpenGraphDat
         var neo4jConfiguration = dependencies.config();
 
         // OpenGDS edition customisations go here
+        var concurrencyValidator = new OpenGdsConcurrencyValidator();
         ExporterBuildersProviderService exporterBuildersProviderService = (__, ___) -> new NativeExportBuildersProvider(); // we always just offer native writes in OpenGDS
         var exportLocation = new DefaultExportLocation(log, neo4jConfiguration);
         var featureTogglesRepository = new FeatureTogglesRepository();
@@ -65,6 +67,7 @@ public class OpenGraphDataScienceExtension extends ExtensionFactory<OpenGraphDat
             log,
             globalProcedures,
             neo4jConfiguration,
+            concurrencyValidator,
             exporterBuildersProviderService,
             exportLocation,
             featureTogglesRepository,

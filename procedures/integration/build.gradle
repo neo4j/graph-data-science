@@ -18,6 +18,7 @@ dependencies {
     implementation project(':algorithms-machinery')
     implementation project(':algorithms-procedure-facade')
     implementation project(':applications-facade')
+    implementation project(':concurrency-validation-api')
     implementation project(':config-api')
     implementation project(':core')
     implementation project(':core-write')
@@ -28,7 +29,6 @@ dependencies {
     implementation project(':logging')
     implementation project(':memory-estimation')
     implementation project(':memory-facade')
-
     implementation project(':memory-usage')
     implementation project(':metrics-api')
     implementation project(':model-catalog-api')

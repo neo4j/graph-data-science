@@ -20,8 +20,6 @@
 package org.neo4j.gds;
 
 import org.neo4j.configuration.Config;
-import org.neo4j.gds.concurrency.ConcurrencyValidatorBuilder;
-import org.neo4j.gds.concurrency.ConcurrencyValidatorService;
 import org.neo4j.gds.concurrency.PoolSizesProvider;
 import org.neo4j.gds.concurrency.PoolSizesService;
 import org.neo4j.gds.core.IdMapBehaviorFactory;
@@ -59,7 +57,6 @@ class EditionLifecycleAdapter extends LifecycleAdapter {
     public void init() {
         var licenseState = registerLicenseState();
         setupIdMapBehavior(licenseState);
-        setupConcurrencyValidator(licenseState);
         setupPoolSizes(licenseState);
         setupModelCatalog(licenseState);
     }
@@ -91,15 +88,6 @@ class EditionLifecycleAdapter extends LifecycleAdapter {
         );
 
         IdMapBehaviorServiceProvider.idMapBehavior(idMapBehaviorFactory.create(licenseState));
-    }
-
-    private void setupConcurrencyValidator(LicenseState licenseState) {
-        var concurrencyValidatorBuilder = loadService(
-            ConcurrencyValidatorBuilder.class,
-            ConcurrencyValidatorBuilder::priority
-        );
-
-        ConcurrencyValidatorService.validator(concurrencyValidatorBuilder.build(licenseState));
     }
 
     private void setupPoolSizes(LicenseState licenseState) {

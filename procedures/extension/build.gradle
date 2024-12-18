@@ -16,6 +16,7 @@ dependencies {
 
     // the necessary GDS things for the extension to construct the application
     implementation project(':algorithms-machinery')
+    implementation project(':concurrency-validation-api')
     implementation project(':config-api')
     implementation project(':core')
     implementation project(':core-utils')

@@ -17,21 +17,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.concurrency;
+package org.neo4j.gds.procedures.integration;
 
-import org.neo4j.annotations.service.ServiceProvider;
-import org.neo4j.gds.LicenseState;
+import org.neo4j.gds.concurrency.ConcurrencyValidator;
+import org.neo4j.gds.concurrency.ConcurrencyValidatorService;
 
-@ServiceProvider
-public class OpenGdsConcurrencyValidatorBuilder implements ConcurrencyValidatorBuilder {
-
-    @Override
-    public ConcurrencyValidator build(LicenseState licenseState) {
-        return new OpenGdsConcurrencyValidator();
+/**
+ * We have some services that sit as singletons. This is one centralised place where we configure them.
+ * You cannot have GDS without specifying these.
+ */
+class SingletonConfigurer {
+    void configureSingletons(ConcurrencyValidator concurrencyValidator) {
+        configureConcurrencyValidator(concurrencyValidator);
     }
 
-    @Override
-    public int priority() {
-        return Integer.MIN_VALUE;
+    private void configureConcurrencyValidator(ConcurrencyValidator concurrencyValidator) {
+        ConcurrencyValidatorService.validator(concurrencyValidator);
     }
 }
