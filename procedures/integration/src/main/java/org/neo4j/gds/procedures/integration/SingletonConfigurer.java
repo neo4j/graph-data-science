@@ -21,17 +21,24 @@ package org.neo4j.gds.procedures.integration;
 
 import org.neo4j.gds.concurrency.ConcurrencyValidator;
 import org.neo4j.gds.concurrency.ConcurrencyValidatorService;
+import org.neo4j.gds.concurrency.PoolSizes;
+import org.neo4j.gds.concurrency.PoolSizesService;
 
 /**
- * We have some services that sit as singletons. This is one centralised place where we configure them.
- * You cannot have GDS without specifying these.
+ * We have some services that sit as singletons. While that is unfortunate,
+ * this is one centralised place where we configure them. You cannot have GDS without specifying these.
  */
 class SingletonConfigurer {
-    void configureSingletons(ConcurrencyValidator concurrencyValidator) {
+    void configureSingletons(ConcurrencyValidator concurrencyValidator, PoolSizes poolSizes) {
         configureConcurrencyValidator(concurrencyValidator);
+        configurePoolSizes(poolSizes);
     }
 
     private void configureConcurrencyValidator(ConcurrencyValidator concurrencyValidator) {
         ConcurrencyValidatorService.validator(concurrencyValidator);
+    }
+
+    private void configurePoolSizes(PoolSizes poolSizes) {
+        PoolSizesService.poolSizes(poolSizes);
     }
 }

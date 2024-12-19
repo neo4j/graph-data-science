@@ -20,8 +20,6 @@
 package org.neo4j.gds;
 
 import org.neo4j.configuration.Config;
-import org.neo4j.gds.concurrency.PoolSizesProvider;
-import org.neo4j.gds.concurrency.PoolSizesService;
 import org.neo4j.gds.core.IdMapBehaviorFactory;
 import org.neo4j.gds.core.IdMapBehaviorServiceProvider;
 import org.neo4j.gds.core.model.ModelCatalog;
@@ -35,7 +33,6 @@ import java.util.Optional;
 import static org.neo4j.gds.utils.PriorityServiceLoader.loadService;
 
 class EditionLifecycleAdapter extends LifecycleAdapter {
-
     private final ExtensionContext context;
     private final Config config;
     private final GlobalProcedures globalProceduresRegistry;
@@ -56,8 +53,8 @@ class EditionLifecycleAdapter extends LifecycleAdapter {
     @Override
     public void init() {
         var licenseState = registerLicenseState();
+
         setupIdMapBehavior(licenseState);
-        setupPoolSizes(licenseState);
         setupModelCatalog(licenseState);
     }
 
@@ -88,15 +85,6 @@ class EditionLifecycleAdapter extends LifecycleAdapter {
         );
 
         IdMapBehaviorServiceProvider.idMapBehavior(idMapBehaviorFactory.create(licenseState));
-    }
-
-    private void setupPoolSizes(LicenseState licenseState) {
-        var poolSizesProvider = loadService(
-            PoolSizesProvider.class,
-            PoolSizesProvider::priority
-        );
-
-        PoolSizesService.poolSizes(poolSizesProvider.get(licenseState));
     }
 
     private void setupModelCatalog(LicenseState licenseState) {
