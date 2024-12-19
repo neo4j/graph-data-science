@@ -30,6 +30,7 @@ import org.neo4j.gds.concurrency.ConcurrencyValidator;
 import org.neo4j.gds.concurrency.PoolSizes;
 import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
+import org.neo4j.gds.core.IdMapBehavior;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.GcListenerExtension;
@@ -121,6 +122,7 @@ public final class OpenGraphDataScienceExtensionBuilder {
         ExporterBuildersProviderService exporterBuildersProviderService,
         ExportLocation exportLocation,
         FeatureTogglesRepository featureTogglesRepository,
+        IdMapBehavior idMapBehavior,
         LimitsConfiguration limitsConfiguration,
         Metrics metrics,
         ModelCatalog modelCatalog,
@@ -130,7 +132,7 @@ public final class OpenGraphDataScienceExtensionBuilder {
         Optional<Function<GraphCatalogApplications, GraphCatalogApplications>> graphCatalogApplicationsDecorator,
         Optional<Function<ModelCatalogApplications, ModelCatalogApplications>> modelCatalogApplicationsDecorator
     ) {
-        singletonConfigurer.configureSingletons(concurrencyValidator, poolSizes);
+        singletonConfigurer.configureSingletons(concurrencyValidator, idMapBehavior, poolSizes);
 
         // Read some configuration used to select behaviour
         var progressTrackingEnabled = neo4jConfiguration.get(ProgressFeatureSettings.progress_tracking_enabled);

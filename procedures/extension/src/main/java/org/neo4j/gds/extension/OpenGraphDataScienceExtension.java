@@ -26,6 +26,7 @@ import org.neo4j.gds.concurrency.OpenGdsConcurrencyValidator;
 import org.neo4j.gds.concurrency.OpenGdsPoolSizes;
 import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
+import org.neo4j.gds.core.OpenGdsIdMapBehavior;
 import org.neo4j.gds.core.model.OpenModelCatalogProvider;
 import org.neo4j.gds.core.write.NativeExportBuildersProvider;
 import org.neo4j.gds.metrics.Metrics;
@@ -68,6 +69,7 @@ public class OpenGraphDataScienceExtension extends ExtensionFactory<OpenGraphDat
         ExporterBuildersProviderService exporterBuildersProviderService = (__, ___) -> new NativeExportBuildersProvider(); // we always just offer native writes in OpenGDS
         var exportLocation = new DefaultExportLocation(log, neo4jConfiguration);
         var featureTogglesRepository = new FeatureTogglesRepository();
+        var idMapBehavior = new OpenGdsIdMapBehavior();
         var metrics = Metrics.DISABLED; // no metrics in OpenGDS
         var modelCatalog = new OpenModelCatalogProvider().get().orElseThrow();
         var modelRepository = new OpenModelRepository(); // no model storing in OpenGDS
@@ -82,6 +84,7 @@ public class OpenGraphDataScienceExtension extends ExtensionFactory<OpenGraphDat
             exporterBuildersProviderService,
             exportLocation,
             featureTogglesRepository,
+            idMapBehavior,
             limitsConfiguration,
             metrics,
             modelCatalog,

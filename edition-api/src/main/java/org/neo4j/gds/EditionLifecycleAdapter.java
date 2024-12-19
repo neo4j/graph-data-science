@@ -20,8 +20,6 @@
 package org.neo4j.gds;
 
 import org.neo4j.configuration.Config;
-import org.neo4j.gds.core.IdMapBehaviorFactory;
-import org.neo4j.gds.core.IdMapBehaviorServiceProvider;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.model.ModelCatalogProvider;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
@@ -54,7 +52,6 @@ class EditionLifecycleAdapter extends LifecycleAdapter {
     public void init() {
         var licenseState = registerLicenseState();
 
-        setupIdMapBehavior(licenseState);
         setupModelCatalog(licenseState);
     }
 
@@ -76,15 +73,6 @@ class EditionLifecycleAdapter extends LifecycleAdapter {
             LicensingServiceBuilder::priority
         );
         return licensingServiceBuilder.build(config).get();
-    }
-
-    private void setupIdMapBehavior(LicenseState licenseState) {
-        var idMapBehaviorFactory = loadService(
-            IdMapBehaviorFactory.class,
-            IdMapBehaviorFactory::priority
-        );
-
-        IdMapBehaviorServiceProvider.idMapBehavior(idMapBehaviorFactory.create(licenseState));
     }
 
     private void setupModelCatalog(LicenseState licenseState) {

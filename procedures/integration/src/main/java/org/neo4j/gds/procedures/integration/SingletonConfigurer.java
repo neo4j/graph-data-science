@@ -23,19 +23,30 @@ import org.neo4j.gds.concurrency.ConcurrencyValidator;
 import org.neo4j.gds.concurrency.ConcurrencyValidatorService;
 import org.neo4j.gds.concurrency.PoolSizes;
 import org.neo4j.gds.concurrency.PoolSizesService;
+import org.neo4j.gds.core.IdMapBehavior;
+import org.neo4j.gds.core.IdMapBehaviorServiceProvider;
 
 /**
  * We have some services that sit as singletons. While that is unfortunate,
  * this is one centralised place where we configure them. You cannot have GDS without specifying these.
  */
 class SingletonConfigurer {
-    void configureSingletons(ConcurrencyValidator concurrencyValidator, PoolSizes poolSizes) {
+    void configureSingletons(
+        ConcurrencyValidator concurrencyValidator,
+        IdMapBehavior idMapBehavior,
+        PoolSizes poolSizes
+    ) {
         configureConcurrencyValidator(concurrencyValidator);
+        configureIdMapBehaviour(idMapBehavior);
         configurePoolSizes(poolSizes);
     }
 
     private void configureConcurrencyValidator(ConcurrencyValidator concurrencyValidator) {
         ConcurrencyValidatorService.validator(concurrencyValidator);
+    }
+
+    private void configureIdMapBehaviour(IdMapBehavior idMapBehavior) {
+        IdMapBehaviorServiceProvider.idMapBehavior(idMapBehavior);
     }
 
     private void configurePoolSizes(PoolSizes poolSizes) {
