@@ -50,13 +50,6 @@ import java.util.function.Function;
  * PS: _Best_ class name ever, bar none.
  */
 final class GraphDataScienceProceduresProviderFactory {
-    /**
-     * These are currently global singletons; when they seize to be, this is the place to initialise them.
-     * They are similar in lifecycle to {@link org.neo4j.gds.core.loading.GraphStoreCatalogService}
-     */
-    private final DefaultsConfiguration defaultsConfiguration = DefaultsConfiguration.Instance;
-    private final LimitsConfiguration limitsConfiguration = LimitsConfiguration.Instance;
-
     // Graph catalog and pipeline repository state initialised here, currently just fronts for big shared singletons
     private final GraphStoreCatalogService graphStoreCatalogService = new GraphStoreCatalogService();
     private final PipelineRepository pipelineRepository = new PipelineRepository();
@@ -64,9 +57,11 @@ final class GraphDataScienceProceduresProviderFactory {
     private final Log log;
 
     private final Configuration neo4jConfiguration;
+    private final DefaultsConfiguration defaultsConfiguration;
     private final ExporterBuildersProviderService exporterBuildersProviderService;
     private final ExportLocation exportLocation;
     private final FeatureTogglesRepository featureTogglesRepository;
+    private final LimitsConfiguration limitsConfiguration;
     private final Metrics metrics;
     private final ModelCatalog modelCatalog;
     private final ModelRepository modelRepository;
@@ -78,9 +73,11 @@ final class GraphDataScienceProceduresProviderFactory {
     GraphDataScienceProceduresProviderFactory(
         Log log,
         Configuration neo4jConfiguration,
+        DefaultsConfiguration defaultsConfiguration,
         ExporterBuildersProviderService exporterBuildersProviderService,
         ExportLocation exportLocation,
         FeatureTogglesRepository featureTogglesRepository,
+        LimitsConfiguration limitsConfiguration,
         Metrics metrics,
         ModelCatalog modelCatalog,
         ModelRepository modelRepository,
@@ -91,9 +88,11 @@ final class GraphDataScienceProceduresProviderFactory {
     ) {
         this.log = log;
         this.neo4jConfiguration = neo4jConfiguration;
+        this.defaultsConfiguration = defaultsConfiguration;
         this.exporterBuildersProviderService = exporterBuildersProviderService;
         this.exportLocation = exportLocation;
         this.featureTogglesRepository = featureTogglesRepository;
+        this.limitsConfiguration = limitsConfiguration;
         this.metrics = metrics;
         this.modelCatalog = modelCatalog;
         this.modelRepository = modelRepository;

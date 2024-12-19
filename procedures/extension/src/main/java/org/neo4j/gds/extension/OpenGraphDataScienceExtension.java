@@ -23,6 +23,8 @@ import org.neo4j.annotations.service.ServiceProvider;
 import org.neo4j.configuration.Config;
 import org.neo4j.gds.applications.operations.FeatureTogglesRepository;
 import org.neo4j.gds.concurrency.OpenGdsConcurrencyValidator;
+import org.neo4j.gds.configuration.DefaultsConfiguration;
+import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.core.model.OpenModelCatalogProvider;
 import org.neo4j.gds.core.write.NativeExportBuildersProvider;
 import org.neo4j.gds.metrics.Metrics;
@@ -56,6 +58,10 @@ public class OpenGraphDataScienceExtension extends ExtensionFactory<OpenGraphDat
         var globalProcedures = dependencies.globalProcedures();
         var neo4jConfiguration = dependencies.config();
 
+        // super annoying that some parts of our code defy dependency injection, so we need these as singletons
+        var defaultsConfiguration = DefaultsConfiguration.Instance;
+        var limitsConfiguration = LimitsConfiguration.Instance;
+
         // OpenGDS edition customisations go here
         var concurrencyValidator = new OpenGdsConcurrencyValidator();
         ExporterBuildersProviderService exporterBuildersProviderService = (__, ___) -> new NativeExportBuildersProvider(); // we always just offer native writes in OpenGDS
@@ -68,9 +74,11 @@ public class OpenGraphDataScienceExtension extends ExtensionFactory<OpenGraphDat
             globalProcedures,
             neo4jConfiguration,
             concurrencyValidator,
+            defaultsConfiguration,
             exporterBuildersProviderService,
             exportLocation,
             featureTogglesRepository,
+            limitsConfiguration,
             Metrics.DISABLED, // no metrics in OpenGDS
             modelCatalog,
             new OpenModelRepository(), // no model storing in OpenGDS
