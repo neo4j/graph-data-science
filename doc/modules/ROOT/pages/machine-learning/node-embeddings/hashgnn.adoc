@@ -342,9 +342,48 @@ include::partial$/machine-learning/node-embeddings/hashgnn/specific-configuratio
 | configuration         | Map     | Configuration used for running the algorithm.
 |===
 ======
+[.include-with-write]
+======
+
+.Run HashGNN in write mode on a named graph.
+[source, cypher, role=noplay]
+----
+CALL gds.hashgnn.write(
+  graphName: String,
+  configuration: Map
+) YIELD
+  nodeCount: Integer,
+  nodePropertiesWritten: Integer,
+  preProcessingMillis: Integer,
+  computeMillis: Integer,
+  writeMillis: Integer,
+  configuration: Map
+----
+
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name          | Type   | Default | Optional | Description
+include::partial$/algorithms/common-configuration/common-write-configuration-entries.adoc[]
+include::partial$/machine-learning/node-embeddings/hashgnn/specific-configuration.adoc[]
+|===
+
+.Results
+[opts="header"]
+|===
+| Name                  | Type    | Description
+| nodeCount             | Integer | Number of nodes processed.
+| nodePropertiesWritten | Integer | Number of node properties written.
+| preProcessingMillis   | Integer | Milliseconds for preprocessing the graph.
+| computeMillis         | Integer | Milliseconds for running the algorithm.
+| writeMillis          | Integer | Milliseconds for writing back results.
+| configuration         | Map     | Configuration used for running the algorithm.
+|===
+======
 
 ====
-
 
 [[algorithms-embeddings-hashgnn-examples]]
 == Examples
@@ -702,6 +741,38 @@ YIELD nodePropertiesWritten
 The graph 'persons' now has a node property `hashgnn-embedding` which stores the node embedding for each node.
 To find out how to inspect the new schema of the in-memory graph, see xref:management-ops/graph-list.adoc[Listing graphs].
 
+[[algorithms-embeddings-hashgnn-examples-write]]
+=== Write
+
+include::partial$/algorithms/shared/examples-write-intro.adoc[]
+
+[role=query-example]
+--
+.The following will run the algorithm in `write` mode:
+[source, cypher, role=noplay]
+----
+CALL gds.hashgnn.write(
+  'persons',
+  {
+    writeProperty: 'hashgnn-embedding',
+    heterogeneous: true,
+    iterations: 2,
+    embeddingDensity: 4,
+    binarizeFeatures: {dimension: 6, threshold: 0.2},
+    featureProperties: ['experience_scaled', 'sourness', 'sweetness', 'tropical'],
+    randomSeed: 42
+  }
+)
+YIELD nodePropertiesWritten
+----
+
+[opts=header]
+.Results
+|===
+| nodePropertiesWritten
+| 11
+|===
+--
 
 [[algorithms-embeddings-hashgnn-virtual-example]]
 === Virtual example

@@ -21,6 +21,7 @@ package org.neo4j.gds.doc;
 
 import org.neo4j.gds.embeddings.hashgnn.HashGNNMutateProc;
 import org.neo4j.gds.embeddings.hashgnn.HashGNNStreamProc;
+import org.neo4j.gds.embeddings.hashgnn.HashGNNWriteProc;
 import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.scaling.ScalePropertiesMutateProc;
 
@@ -33,6 +34,7 @@ class HashGNNDocTest extends SingleFileDocTestBase {
         return List.of(
             HashGNNStreamProc.class,
             HashGNNMutateProc.class,
+            HashGNNWriteProc.class,
             ScalePropertiesMutateProc.class
         );
     }

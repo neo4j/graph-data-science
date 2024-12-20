@@ -105,6 +105,16 @@ public interface NodeEmbeddingsProcedureFacade {
         Map<String, Object> algorithmConfiguration
     );
 
+    Stream<DefaultNodeEmbeddingsWriteResult> hashGnnWrite(
+        String graphName,
+        Map<String, Object> configuration
+    );
+
+    Stream<MemoryEstimateResult> hashGnnWriteEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    );
+
     Node2VecMutateStub node2VecMutateStub();
 
     Stream<Node2VecStreamResult> node2VecStream(

@@ -36,6 +36,7 @@ import org.neo4j.gds.embeddings.graphsage.algo.GraphSageStreamConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageWriteConfig;
 import org.neo4j.gds.embeddings.hashgnn.HashGNNStreamConfig;
+import org.neo4j.gds.embeddings.hashgnn.HashGNNWriteConfig;
 import org.neo4j.gds.embeddings.node2vec.Node2VecStreamConfig;
 import org.neo4j.gds.embeddings.node2vec.Node2VecWriteConfig;
 import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
@@ -362,6 +363,27 @@ public final class LocalNodeEmbeddingsProcedureFacade implements NodeEmbeddingsP
     ) {
         var result = estimationModeBusinessFacade.hashGnn(
             configurationParser.parseConfiguration(algorithmConfiguration, HashGNNStreamConfig::of),
+            graphNameOrConfiguration
+        );
+        return Stream.of(result);
+    }
+
+    @Override
+    public Stream<DefaultNodeEmbeddingsWriteResult> hashGnnWrite(String graphName, Map<String, Object> configuration) {
+        var resultBuilder = new HashGNNResultBuilderForWriteMode();
+        return writeModeBusinessFacade.hashGnn(
+            GraphName.parse(graphName),
+            configurationParser.parseConfiguration(configuration, HashGNNWriteConfig::of),
+            resultBuilder);
+    }
+
+    @Override
+    public Stream<MemoryEstimateResult> hashGnnWriteEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var result = estimationModeBusinessFacade.hashGnn(
+            configurationParser.parseConfiguration(algorithmConfiguration, HashGNNWriteConfig::of),
             graphNameOrConfiguration
         );
         return Stream.of(result);
