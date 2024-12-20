@@ -243,6 +243,7 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
 
         "gds.triangles",
         "gds.alpha.ml.splitRelationships.mutate",
+        "gds.alpha.ml.splitRelationships.mutate.estimate",
 
         "gds.influenceMaximization.celf.mutate",
         "gds.influenceMaximization.celf.mutate.estimate",
@@ -599,7 +600,7 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         );
 
         // If you find yourself updating this count, please also update the count in SmokeTest.kt
-        int expectedCount = 440;
+        int expectedCount = 441;
         assertEquals(
             expectedCount,
             returnedRows,
