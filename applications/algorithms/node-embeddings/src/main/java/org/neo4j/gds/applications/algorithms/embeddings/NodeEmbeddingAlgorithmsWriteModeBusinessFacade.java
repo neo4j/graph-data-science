@@ -30,6 +30,8 @@ import org.neo4j.gds.embeddings.fastrp.FastRPResult;
 import org.neo4j.gds.embeddings.fastrp.FastRPWriteConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageResult;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageWriteConfig;
+import org.neo4j.gds.embeddings.hashgnn.HashGNNResult;
+import org.neo4j.gds.embeddings.hashgnn.HashGNNWriteConfig;
 import org.neo4j.gds.embeddings.node2vec.Node2VecResult;
 import org.neo4j.gds.embeddings.node2vec.Node2VecWriteConfig;
 import org.neo4j.gds.logging.Log;
@@ -39,6 +41,7 @@ import java.util.Optional;
 
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.FastRP;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.GraphSage;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.HashGNN;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Node2Vec;
 
 public final class NodeEmbeddingAlgorithmsWriteModeBusinessFacade {
@@ -116,6 +119,23 @@ public final class NodeEmbeddingAlgorithmsWriteModeBusinessFacade {
             GraphSage,
             () -> estimationFacade.graphSage(configuration, false),
             (graph, __) -> algorithms.graphSage(graph, configuration),
+            writeStep,
+            resultBuilder
+        );
+    }
+    public <RESULT> RESULT hashGnn(
+        GraphName graphName,
+        HashGNNWriteConfig configuration,
+        ResultBuilder<HashGNNWriteConfig, HashGNNResult, RESULT, NodePropertiesWritten> resultBuilder
+    ) {
+        var writeStep = new HashGnnWriteStep(writeToDatabase, configuration);
+
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInWriteMode(
+            graphName,
+            configuration,
+            HashGNN,
+            () -> estimationFacade.hashGnn(configuration),
+            (graph, __) -> algorithms.hashGnn(graph, configuration),
             writeStep,
             resultBuilder
         );
