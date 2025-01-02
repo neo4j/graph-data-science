@@ -23,6 +23,10 @@ import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.neo4j.kernel.extension.ExtensionFactory;
+import org.neo4j.kernel.extension.context.ExtensionContext;
+import org.neo4j.kernel.lifecycle.Lifecycle;
+import org.neo4j.kernel.lifecycle.LifecycleAdapter;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 import org.neo4j.test.extension.ExtensionCallback;
 
@@ -217,9 +221,17 @@ class SysInfoProcLicensesTest {
         @ExtensionCallback
         protected void configuration(TestDatabaseManagementServiceBuilder builder) {
             super.configuration(builder);
-            builder
-                .removeExtensions(e -> e instanceof EditionFactory)
-                .addExtension(new EditionFactory(testLicenseState));
+            builder.addExtension(new ExtensionFactory<Dependencies>("justsomethingforthistest") {
+                @Override
+                public Lifecycle newInstance(ExtensionContext context, Dependencies dependencies) {
+                    dependencies.globalProcedures().registerComponent(
+                        LicenseState.class,
+                        ctx -> testLicenseState,
+                        false
+                    );
+                    return new LifecycleAdapter();
+                }
+            });
         }
 
         @BeforeEach
