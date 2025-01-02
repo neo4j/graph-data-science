@@ -57,6 +57,8 @@ public class OpenGraphDataScienceExtension extends ExtensionFactory<OpenGraphDat
     @Override
     public Lifecycle newInstance(ExtensionContext extensionContext, Dependencies dependencies) {
         var log = new LogAccessor().getLog(dependencies.logService(), getClass());
+
+        var dependencySatisfier = extensionContext.dependencySatisfier();
         var globalProcedures = dependencies.globalProcedures();
         var neo4jConfiguration = dependencies.config();
 
@@ -77,6 +79,7 @@ public class OpenGraphDataScienceExtension extends ExtensionFactory<OpenGraphDat
 
         var graphDataScienceExtensionBuilderAndAssociatedProducts = OpenGraphDataScienceExtensionBuilder.create(
             log,
+            dependencySatisfier,
             globalProcedures,
             neo4jConfiguration,
             concurrencyValidator,

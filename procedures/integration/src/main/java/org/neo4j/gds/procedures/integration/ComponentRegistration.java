@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.procedures.integration;
 
+import org.neo4j.common.DependencySatisfier;
 import org.neo4j.function.ThrowingFunction;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
@@ -27,10 +28,12 @@ import org.neo4j.kernel.api.procedure.GlobalProcedures;
 
 public class ComponentRegistration {
     private final Log log;
+    private final DependencySatisfier dependencySatisfier;
     private final GlobalProcedures globalProcedures;
 
-    public ComponentRegistration(Log log, GlobalProcedures globalProcedures) {
+    public ComponentRegistration(Log log, DependencySatisfier dependencySatisfier, GlobalProcedures globalProcedures) {
         this.log = log;
+        this.dependencySatisfier = dependencySatisfier;
         this.globalProcedures = globalProcedures;
     }
 
@@ -46,5 +49,9 @@ public class ComponentRegistration {
             true
         );
         log.info(name + " registered.");
+    }
+
+    void setUpDependency(Object component) {
+        dependencySatisfier.satisfyDependency(component);
     }
 }

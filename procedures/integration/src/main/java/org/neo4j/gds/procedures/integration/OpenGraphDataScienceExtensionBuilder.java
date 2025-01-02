@@ -20,6 +20,7 @@
 package org.neo4j.gds.procedures.integration;
 
 import org.apache.commons.lang3.tuple.Triple;
+import org.neo4j.common.DependencySatisfier;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.graphstorecatalog.ExportLocation;
 import org.neo4j.gds.applications.graphstorecatalog.GraphCatalogApplications;
@@ -115,6 +116,7 @@ public final class OpenGraphDataScienceExtensionBuilder {
      */
     public static Triple<OpenGraphDataScienceExtensionBuilder, TaskRegistryFactoryService, TaskStoreService> create(
         Log log,
+        DependencySatisfier dependencySatisfier,
         GlobalProcedures globalProcedures,
         Configuration neo4jConfiguration,
         ConcurrencyValidator concurrencyValidator,
@@ -169,7 +171,7 @@ public final class OpenGraphDataScienceExtensionBuilder {
             freeMemoryAfterLastGc
         );
 
-        var componentRegistration = new ComponentRegistration(log, globalProcedures);
+        var componentRegistration = new ComponentRegistration(log, dependencySatisfier, globalProcedures);
 
         componentRegistration.registerComponent("GDS Memory Facade", MemoryFacade.class, context -> {
              var userAccessor = new UserAccessor();
@@ -265,6 +267,8 @@ public final class OpenGraphDataScienceExtensionBuilder {
     @Deprecated
     private void registerModelCatalogComponent(ModelCatalog modelCatalog) {
         componentRegistration.registerComponent("Model Catalog", ModelCatalog.class, __ -> modelCatalog);
+
+        componentRegistration.setUpDependency(modelCatalog);
     }
 
     /**
