@@ -35,6 +35,7 @@ dependencies {
     implementation project(':neo4j-kernel-adapter-api')
     implementation project(':node-embedding-algorithms')
     implementation project(':opengds-procedure-facade')
+    implementation project(':open-licensing')
     implementation project(':open-model-catalog')
     implementation project(':operations-applications')
     implementation project(':path-finding-algorithms')

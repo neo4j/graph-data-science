@@ -21,6 +21,7 @@ package org.neo4j.gds.extension;
 
 import org.neo4j.annotations.service.ServiceProvider;
 import org.neo4j.configuration.Config;
+import org.neo4j.gds.OpenGdsLicenseState;
 import org.neo4j.gds.applications.operations.FeatureTogglesRepository;
 import org.neo4j.gds.concurrency.OpenGdsConcurrencyValidator;
 import org.neo4j.gds.concurrency.OpenGdsPoolSizes;
@@ -88,6 +89,7 @@ public class OpenGraphDataScienceExtension extends ExtensionFactory<OpenGraphDat
             exportLocation,
             featureTogglesRepository,
             idMapBehavior,
+            OpenGdsLicenseState.INSTANCE,
             limitsConfiguration,
             metrics,
             modelCatalog,

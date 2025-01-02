@@ -26,6 +26,7 @@ dependencies {
     implementation project(':executor')
     implementation project(':graph-store-catalog-applications')
     implementation project(':legacy-cypher-projection')
+    implementation project(':licensing')
     implementation project(':logging')
     implementation project(':memory-estimation')
     implementation project(':memory-facade')

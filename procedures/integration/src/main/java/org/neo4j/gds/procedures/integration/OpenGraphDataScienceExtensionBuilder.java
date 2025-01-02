@@ -21,6 +21,7 @@ package org.neo4j.gds.procedures.integration;
 
 import org.apache.commons.lang3.tuple.Triple;
 import org.neo4j.common.DependencySatisfier;
+import org.neo4j.gds.LicenseState;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.graphstorecatalog.ExportLocation;
 import org.neo4j.gds.applications.graphstorecatalog.GraphCatalogApplications;
@@ -76,6 +77,7 @@ public final class OpenGraphDataScienceExtensionBuilder {
     private final GraphDataScienceProceduresProviderFactory graphDataScienceProceduresProviderFactory;
 
     // edition specifics
+    private final LicenseState licenseState;
     private final Metrics metrics;
     private final ModelCatalog modelCatalog;
 
@@ -90,6 +92,7 @@ public final class OpenGraphDataScienceExtensionBuilder {
         Log log,
         ComponentRegistration componentRegistration,
         GraphDataScienceProceduresProviderFactory graphDataScienceProceduresProviderFactory,
+        LicenseState licenseState,
         Metrics metrics,
         ModelCatalog modelCatalog,
         TaskStoreService taskStoreService,
@@ -101,6 +104,7 @@ public final class OpenGraphDataScienceExtensionBuilder {
         this.log = log;
         this.componentRegistration = componentRegistration;
         this.graphDataScienceProceduresProviderFactory = graphDataScienceProceduresProviderFactory;
+        this.licenseState = licenseState;
         this.metrics = metrics;
         this.modelCatalog = modelCatalog;
         this.taskStoreService = taskStoreService;
@@ -125,6 +129,7 @@ public final class OpenGraphDataScienceExtensionBuilder {
         ExportLocation exportLocation,
         FeatureTogglesRepository featureTogglesRepository,
         IdMapBehavior idMapBehavior,
+        LicenseState licenseState,
         LimitsConfiguration limitsConfiguration,
         Metrics metrics,
         ModelCatalog modelCatalog,
@@ -200,6 +205,7 @@ public final class OpenGraphDataScienceExtensionBuilder {
             log,
             componentRegistration,
             graphDataScienceProviderFactory,
+            licenseState,
             metrics,
             modelCatalog,
             taskStoreService,
@@ -222,6 +228,7 @@ public final class OpenGraphDataScienceExtensionBuilder {
         registerGraphDataScienceComponent();
 
         // register legacy bits
+        registerLicenseStateComponent(licenseState);
         registerMetricsComponent(metrics);
         registerModelCatalogComponent(modelCatalog);
         registerTaskRegistryFactoryComponent(taskRegistryFactoryService);
@@ -248,6 +255,16 @@ public final class OpenGraphDataScienceExtensionBuilder {
             GraphDataScienceProcedures.class,
             graphDataScienceProvider
         );
+    }
+
+    /**
+     * @deprecated Legacy stuff, will go away one day
+     */
+    @Deprecated
+    private void registerLicenseStateComponent(LicenseState licenseState) {
+        componentRegistration.registerComponent("License State", LicenseState.class, __ -> licenseState);
+
+        componentRegistration.setUpDependency(licenseState);
     }
 
     /**
