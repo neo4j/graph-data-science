@@ -75,6 +75,11 @@ public class RandomWalkWithRestarts extends RandomWalkBasedNodesSampler {
             config.samplingRatio()
         );
 
+        if (seenNodes.totalExpectedNodes() == 0) {
+            progressTracker.endSubTask("Sample nodes");
+            return seenNodes.sampledNodes();
+        }
+
         progressTracker.beginSubTask("Do random walks");
         progressTracker.setSteps(seenNodes.totalExpectedNodes());
 
@@ -116,16 +121,17 @@ public class RandomWalkWithRestarts extends RandomWalkBasedNodesSampler {
 
     @Override
     public Task progressTask(GraphStore graphStore) {
+        long sampledNodes = 10 * Math.round(graphStore.nodeCount() * config.samplingRatio());
         if (config.nodeLabelStratification()) {
             return Tasks.task(
                 "Sample nodes",
                 Tasks.leaf("Count node labels", graphStore.nodeCount()),
-                Tasks.leaf("Do random walks", 10 * Math.round(graphStore.nodeCount() * config.samplingRatio()))
+                Tasks.leaf("Do random walks", sampledNodes)
             );
         } else {
             return Tasks.task(
                 "Sample nodes",
-                Tasks.leaf("Do random walks", 10 * Math.round(graphStore.nodeCount() * config.samplingRatio()))
+                Tasks.leaf("Do random walks", sampledNodes)
             );
         }
     }

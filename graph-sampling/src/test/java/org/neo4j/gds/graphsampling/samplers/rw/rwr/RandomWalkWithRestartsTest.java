@@ -21,16 +21,24 @@ package org.neo4j.gds.graphsampling.samplers.rw.rwr;
 
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.TestProgressTracker;
+import org.neo4j.gds.TestTaskStore;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.core.utils.progress.LocalTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.graphsampling.config.RandomWalkWithRestartsConfig;
 import org.neo4j.gds.graphsampling.config.RandomWalkWithRestartsConfigImpl;
+import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.termination.TerminatedException;
 import org.neo4j.gds.termination.TerminationFlag;
 
@@ -78,6 +86,15 @@ class RandomWalkWithRestartsTest {
 
     @Inject
     private GraphStore graphStore;
+
+    @GdlGraph(graphNamePrefix = "tiny")
+    private static String TINY_GRAPH = "()-->()";
+
+    @Inject
+    private Graph tinyGraph;
+
+    @Inject
+    private GraphStore tinyGraphStore;
 
     Graph getGraph(RandomWalkWithRestartsConfig config) {
         return graphStore.getGraph(
@@ -400,4 +417,24 @@ class RandomWalkWithRestartsTest {
             .isInstanceOf(TerminatedException.class)
             .hasMessageContaining("The execution has been terminated.");
     }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void progressTrackingTinyGraph(boolean nodeLabelStratification) {
+        var config = RandomWalkWithRestartsConfigImpl.builder()
+            .nodeLabelStratification(nodeLabelStratification)
+            .build();
+
+        var rwr = new RandomWalkWithRestarts(config);
+        Task task = rwr.progressTask(tinyGraphStore);
+
+        TestTaskStore taskStore = new TestTaskStore();
+        var taskRegistryFactory = new LocalTaskRegistryFactory("user", taskStore);
+        var tracker = new TestProgressTracker(task, new GdsTestLog(), new Concurrency(4), taskRegistryFactory);
+
+        rwr.compute(tinyGraph, tracker);
+
+        assertThat(taskStore.tasks()).isEmpty();
+    }
+
 }

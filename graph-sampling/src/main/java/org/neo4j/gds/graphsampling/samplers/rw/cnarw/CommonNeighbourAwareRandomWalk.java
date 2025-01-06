@@ -77,6 +77,12 @@ public class CommonNeighbourAwareRandomWalk extends RandomWalkBasedNodesSampler 
             config.samplingRatio()
         );
 
+        if (seenNodes.totalExpectedNodes() == 0) {
+            progressTracker.endSubTask("Sample nodes");
+            return seenNodes.sampledNodes();
+        }
+
+
         progressTracker.beginSubTask("Do common neighbour aware random walks");
         progressTracker.setSteps(seenNodes.totalExpectedNodes());
 

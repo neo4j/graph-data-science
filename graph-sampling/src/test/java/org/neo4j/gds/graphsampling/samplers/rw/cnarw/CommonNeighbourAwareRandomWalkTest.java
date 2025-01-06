@@ -22,13 +22,19 @@ package org.neo4j.gds.graphsampling.samplers.rw.cnarw;
 import org.assertj.core.data.Offset;
 import org.assertj.core.data.Percentage;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.TestProgressTracker;
+import org.neo4j.gds.TestTaskStore;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
+import org.neo4j.gds.core.utils.progress.LocalTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
@@ -36,6 +42,7 @@ import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.graphsampling.config.CommonNeighbourAwareRandomWalkConfig;
 import org.neo4j.gds.graphsampling.config.CommonNeighbourAwareRandomWalkConfigImpl;
+import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.termination.TerminatedException;
 import org.neo4j.gds.termination.TerminationFlag;
@@ -171,6 +178,15 @@ class CommonNeighbourAwareRandomWalkTest {
 
     @Inject
     private TestGraph naturalUnionGraph;
+
+    @GdlGraph(graphNamePrefix = "tiny")
+    private static String TINY_GRAPH = "()-->()";
+
+    @Inject
+    private Graph tinyGraph;
+
+    @Inject
+    private GraphStore tinyGraphStore;
 
 
     private Graph getGraph(CommonNeighbourAwareRandomWalkConfig config) {
@@ -669,5 +685,24 @@ class CommonNeighbourAwareRandomWalkTest {
         assertThatThrownBy(() -> cnarw.compute(naturalGraph, ProgressTracker.NULL_TRACKER))
             .isInstanceOf(TerminatedException.class)
             .hasMessageContaining("The execution has been terminated.");
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void progressTrackingTinyGraph(boolean nodeLabelStratification) {
+        var config = CommonNeighbourAwareRandomWalkConfigImpl.builder()
+            .nodeLabelStratification(nodeLabelStratification)
+            .build();
+
+        var cnar = new CommonNeighbourAwareRandomWalk(config);
+        Task task = cnar.progressTask(tinyGraphStore);
+
+        TestTaskStore taskStore = new TestTaskStore();
+        var taskRegistryFactory = new LocalTaskRegistryFactory("user", taskStore);
+        var tracker = new TestProgressTracker(task, new GdsTestLog(), new Concurrency(4), taskRegistryFactory);
+
+        cnar.compute(tinyGraph, tracker);
+
+        assertThat(taskStore.tasks()).isEmpty();
     }
 }

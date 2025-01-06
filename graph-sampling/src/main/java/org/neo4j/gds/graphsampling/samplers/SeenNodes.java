@@ -58,7 +58,7 @@ public interface SeenNodes {
 
         return new SeenNodes.GlobalSeenNodes(
             HugeAtomicBitSet.create(inputGraph.nodeCount()),
-            Math.round(inputGraph.nodeCount() * samplingRatio)
+            Math.max(1, Math.round(inputGraph.nodeCount() * samplingRatio))
         );
     }
 
