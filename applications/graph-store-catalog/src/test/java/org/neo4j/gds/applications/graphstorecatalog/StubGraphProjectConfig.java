@@ -67,4 +67,19 @@ class StubGraphProjectConfig implements GraphProjectConfig {
     public String toString() {
         return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
     }
+
+    @Override
+    public Optional<String> clientId() {
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<String> clientSecret() {
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<String> tenant() {
+        return Optional.empty();
+    }
 }

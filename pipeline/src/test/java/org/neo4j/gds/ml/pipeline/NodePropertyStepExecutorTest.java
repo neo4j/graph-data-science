@@ -31,9 +31,6 @@ import org.neo4j.gds.config.GraphNameConfig;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.model.OpenModelCatalog;
-import org.neo4j.gds.mem.MemoryEstimation;
-import org.neo4j.gds.mem.MemoryEstimations;
-import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.executor.ExecutionContext;
@@ -41,6 +38,9 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.gdl.GdlFactory;
+import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimations;
+import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.ml.pipeline.ExecutableNodePropertyStepTestUtil.NodeIdPropertyStep;
 import org.neo4j.gds.ml.pipeline.ExecutableNodePropertyStepTestUtil.SumNodePropertyStep;
 import org.neo4j.gds.test.SumNodePropertyStepConfigImpl;
@@ -277,6 +277,21 @@ class NodePropertyStepExecutorTest {
 
         @Override
         public Optional<String> usernameOverride() {
+            return Optional.empty();
+        }
+
+        @Override
+        public Optional<String> clientId() {
+            return Optional.empty();
+        }
+
+        @Override
+        public Optional<String> clientSecret() {
+            return Optional.empty();
+        }
+
+        @Override
+        public Optional<String> tenant() {
             return Optional.empty();
         }
     }

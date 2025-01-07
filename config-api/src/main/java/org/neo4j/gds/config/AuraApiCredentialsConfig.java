@@ -19,37 +19,13 @@
  */
 package org.neo4j.gds.config;
 
-import org.neo4j.gds.annotation.Configuration;
-
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 
-public interface BaseConfig extends ToMapConvertible, AuraApiCredentialsConfig {
+public interface AuraApiCredentialsConfig {
 
-    String SUDO_KEY = "sudo";
-    String LOG_PROGRESS_KEY = "logProgress";
+    Optional<String> clientId();
 
-    @Configuration.Key("username")
-    @Configuration.ConvertWith(method = "trim")
-    Optional<String> usernameOverride();
+    Optional<String> clientSecret();
 
-    @Configuration.Key(SUDO_KEY)
-    default boolean sudo() {
-        return false;
-    }
-
-    @Configuration.Key(LOG_PROGRESS_KEY)
-    default boolean logProgress() {
-        return true;
-    }
-
-    @Configuration.ToMap
-    default Map<String, Object> toMap() {
-        return new HashMap<>();
-    }
-
-    static String trim(String input) {
-        return input.trim();
-    }
+    Optional<String> tenant();
 }

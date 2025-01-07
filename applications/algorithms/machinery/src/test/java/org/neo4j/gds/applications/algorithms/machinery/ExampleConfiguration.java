@@ -58,4 +58,19 @@ class ExampleConfiguration implements AlgoBaseConfig, RelationshipWeightConfig {
     public Optional<String> usernameOverride() {
         throw new UnsupportedOperationException("TODO");
     }
+
+    @Override
+    public Optional<String> clientId() {
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<String> clientSecret() {
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<String> tenant() {
+        return Optional.empty();
+    }
 }
