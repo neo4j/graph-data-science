@@ -19,12 +19,24 @@
  */
 package org.neo4j.gds.spanningtree;
 
+import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphAdapter;
+import org.neo4j.gds.api.PropertyState;
+import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.relationships.RelationshipConsumer;
 import org.neo4j.gds.api.properties.relationships.RelationshipWithPropertyConsumer;
+import org.neo4j.gds.api.schema.Direction;
+import org.neo4j.gds.api.schema.GraphSchema;
+import org.neo4j.gds.api.schema.ImmutableMutableGraphSchema;
+import org.neo4j.gds.api.schema.ImmutableRelationshipPropertySchema;
+import org.neo4j.gds.api.schema.MutableRelationshipSchema;
+import org.neo4j.gds.api.schema.MutableRelationshipSchemaEntry;
+import org.neo4j.gds.core.Aggregation;
 
 import java.util.Arrays;
+import java.util.Map;
 
 public class SpanningGraph extends GraphAdapter {
 
@@ -42,6 +54,50 @@ public class SpanningGraph extends GraphAdapter {
         } else {
             return 1;
         }
+    }
+
+    @Override
+    public long relationshipCount() {
+        // parent -> node for each node (root -> root included)
+        return spanningTree.effectiveNodeCount();
+    }
+
+    @Override
+    public boolean hasRelationshipProperty() {
+        return true;
+    }
+
+    @Override
+    public GraphSchema schema() {
+        var relationshipSchema = new MutableRelationshipSchema(
+            Map.of(
+                RelationshipType.ALL_RELATIONSHIPS,
+                new MutableRelationshipSchemaEntry(
+                    RelationshipType.ALL_RELATIONSHIPS,
+                    Direction.DIRECTED,
+                    Map.of(
+                        "cost",
+                        ImmutableRelationshipPropertySchema.of(
+                            "cost",
+                            ValueType.DOUBLE,
+                            DefaultValue.DEFAULT,
+                            PropertyState.TRANSIENT,
+                            Aggregation.NONE
+                        )
+                    )
+                )
+            )
+        );
+
+        return ImmutableMutableGraphSchema.builder()
+            .from(graph.schema())
+            .relationshipSchema(relationshipSchema)
+            .build();
+    }
+
+    @Override
+    public boolean isMultiGraph() {
+        return false;
     }
 
     @Override
