@@ -58,8 +58,8 @@ public class SpanningGraph extends GraphAdapter {
 
     @Override
     public long relationshipCount() {
-        // parent -> node for each node (root -> root included)
-        return spanningTree.effectiveNodeCount();
+        // not counting root -> root as a rel
+        return spanningTree.effectiveNodeCount() - 1;
     }
 
     @Override
