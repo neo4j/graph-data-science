@@ -462,15 +462,15 @@ final class NodeSimilarityTest {
 
         assertGraphEquals(
             orientation == REVERSE
-                ? fromGdl("  (i1:Item)-[:LIKES {w: 0.50000D}]->(i3:Item)" +
-                ", (i2:Item)-[:LIKES {w: 0.50000D}]->(i3)" +
-                ", (i3)-[:LIKES {w: 0.500000D}]->(i1)" +
+                ? fromGdl("  (i1:Item)-[:SIMILAR {w: 0.50000D}]->(i3:Item)" +
+                ", (i2:Item)-[:SIMILAR {w: 0.50000D}]->(i3)" +
+                ", (i3)-[:SIMILAR {w: 0.500000D}]->(i1)" +
                 ", (i4:Item)" +
                 ", (:Person), (:Person), (:Person), (:Person)")
-                : fromGdl("  (a:Person)-[:LIKES {w: 0.333333D}]->(c:Person)" +
-                    ", (b:Person)-[:LIKES {w: 0.00000D}]->(c)" +
-                    ", (c)-[:LIKES {w: 0.000000D}]->(b)" +
-                    ", (d:Person)-[:LIKES {w: 0.333333D}]->(c)" +
+                : fromGdl("  (a:Person)-[:SIMILAR {w: 0.333333D}]->(c:Person)" +
+                    ", (b:Person)-[:SIMILAR {w: 0.00000D}]->(c)" +
+                    ", (c)-[:SIMILAR {w: 0.000000D}]->(b)" +
+                    ", (d:Person)-[:SIMILAR {w: 0.333333D}]->(c)" +
                     ", (:Item), (:Item), (:Item), (:Item)"),
             similarityGraph
         );
@@ -636,26 +636,26 @@ final class NodeSimilarityTest {
             orientation == REVERSE
                 ? fromGdl("  (:Person), (:Person), (:Person), (:Person)" +
                 ", (:Item)" +
-                ", (i1:Item)-[:LIKES {property: 1.000000D}]->(i2:Item)" +
-                ", (i1)-[:LIKES {property: 0.500000D}]->(i3:Item)" +
-                ", (i2)-[:LIKES {property: 0.500000D}]->(i3)" +
+                ", (i1:Item)-[:SIMILAR {property: 1.000000D}]->(i2:Item)" +
+                ", (i1)-[:SIMILAR {property: 0.500000D}]->(i3:Item)" +
+                ", (i2)-[:SIMILAR {property: 0.500000D}]->(i3)" +
                 // Add results in reverse direction because topK
-                ", (i2)-[:LIKES {property: 1.000000D}]->(i1)" +
-                ", (i3)-[:LIKES {property: 0.500000D}]->(i1)" +
-                ", (i3)-[:LIKES {property: 0.500000D}]->(i2)")
-                : fromGdl("  (p1:Person)-[:LIKES {property: 0.666667D}]->(p2:Person)" +
-                    ", (p1)-[:LIKES {property: 0.333333D}]->(p3:Person)" +
-                    ", (p1)-[:LIKES {property: 1.000000D}]->(p4:Person)" +
-                    ", (p2)-[:LIKES {property: 0.000000D}]->(p3)" +
-                    ", (p2)-[:LIKES {property: 0.666667D}]->(p4)" +
-                    ", (p3)-[:LIKES {property: 0.333333D}]->(p4)" +
+                ", (i2)-[:SIMILAR {property: 1.000000D}]->(i1)" +
+                ", (i3)-[:SIMILAR {property: 0.500000D}]->(i1)" +
+                ", (i3)-[:SIMILAR {property: 0.500000D}]->(i2)")
+                : fromGdl("  (p1:Person)-[:SIMILAR {property: 0.666667D}]->(p2:Person)" +
+                    ", (p1)-[:SIMILAR {property: 0.333333D}]->(p3:Person)" +
+                    ", (p1)-[:SIMILAR {property: 1.000000D}]->(p4:Person)" +
+                    ", (p2)-[:SIMILAR {property: 0.000000D}]->(p3)" +
+                    ", (p2)-[:SIMILAR {property: 0.666667D}]->(p4)" +
+                    ", (p3)-[:SIMILAR {property: 0.333333D}]->(p4)" +
                     // Add results in reverse direction because topK
-                    "  (p2)-[:LIKES {property: 0.666667D}]->(p1)" +
-                    ", (p3)-[:LIKES {property: 0.333333D}]->(p1)" +
-                    ", (p4)-[:LIKES {property: 1.000000D}]->(p1)" +
-                    ", (p3)-[:LIKES {property: 0.000000D}]->(p2)" +
-                    ", (p4)-[:LIKES {property: 0.666667D}]->(p2)" +
-                    ", (p4)-[:LIKES {property: 0.333333D}]->(p3)" +
+                    "  (p2)-[:SIMILAR {property: 0.666667D}]->(p1)" +
+                    ", (p3)-[:SIMILAR {property: 0.333333D}]->(p1)" +
+                    ", (p4)-[:SIMILAR {property: 1.000000D}]->(p1)" +
+                    ", (p3)-[:SIMILAR {property: 0.000000D}]->(p2)" +
+                    ", (p4)-[:SIMILAR {property: 0.666667D}]->(p2)" +
+                    ", (p4)-[:SIMILAR {property: 0.333333D}]->(p3)" +
                     ", (:Item), (:Item), (:Item), (:Item)"),
             resultGraph
         );

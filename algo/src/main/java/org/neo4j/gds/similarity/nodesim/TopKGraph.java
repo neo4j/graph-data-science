@@ -59,11 +59,12 @@ public class TopKGraph extends GraphAdapter {
 
     @Override
     public GraphSchema schema() {
+        var type = RelationshipType.of("SIMILAR");
         var relationshipSchema = new MutableRelationshipSchema(
             Map.of(
-                RelationshipType.ALL_RELATIONSHIPS,
+                type,
                 new MutableRelationshipSchemaEntry(
-                    RelationshipType.ALL_RELATIONSHIPS,
+                    type,
                     Direction.DIRECTED,
                     Map.of(
                         "similarity",
