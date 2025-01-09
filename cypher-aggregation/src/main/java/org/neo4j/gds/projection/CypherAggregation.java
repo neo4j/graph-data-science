@@ -46,7 +46,7 @@ import static org.neo4j.internal.kernel.api.procs.FieldSignature.inputField;
 public class CypherAggregation implements CallableUserAggregationFunction {
 
     // NOTE: keep in sync with `procedureSyntax`
-    static final QualifiedName FUNCTION_NAME = new QualifiedName(
+    public static final QualifiedName FUNCTION_NAME = new QualifiedName(
         new String[]{"gds", "graph"},
         "project"
     );

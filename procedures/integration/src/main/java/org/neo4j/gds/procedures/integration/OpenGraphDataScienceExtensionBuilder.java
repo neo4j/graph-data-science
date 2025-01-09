@@ -50,8 +50,11 @@ import org.neo4j.gds.procedures.TaskRegistryFactoryService;
 import org.neo4j.gds.procedures.UserAccessor;
 import org.neo4j.gds.procedures.UserLogServices;
 import org.neo4j.gds.procedures.memory.MemoryFacade;
+import org.neo4j.gds.projection.AlphaCypherAggregation;
+import org.neo4j.gds.projection.CypherAggregation;
 import org.neo4j.gds.settings.GdsSettings;
 import org.neo4j.graphdb.config.Configuration;
+import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
 import org.neo4j.kernel.lifecycle.LifeSupport;
 import org.neo4j.kernel.lifecycle.Lifecycle;
@@ -60,6 +63,8 @@ import java.lang.management.ManagementFactory;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
+
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 /**
  * The GraphDataScience component has a certain contract,
@@ -135,6 +140,8 @@ public final class OpenGraphDataScienceExtensionBuilder {
         ModelCatalog modelCatalog,
         ModelRepository modelRepository,
         PoolSizes poolSizes,
+        CypherAggregation cypherAggregation,
+        AlphaCypherAggregation alphaCypherAggregation,
         Optional<Function<AlgorithmProcessingTemplate, AlgorithmProcessingTemplate>> algorithmProcessingTemplateDecorator,
         Optional<Function<GraphCatalogApplications, GraphCatalogApplications>> graphCatalogApplicationsDecorator,
         Optional<Function<ModelCatalogApplications, ModelCatalogApplications>> modelCatalogApplicationsDecorator
@@ -184,6 +191,8 @@ public final class OpenGraphDataScienceExtensionBuilder {
            return new MemoryFacade(user,memoryTracker);
         });
 
+        registerCypherAggregation(globalProcedures, cypherAggregation, alphaCypherAggregation, log);
+
         var graphDataScienceProviderFactory = new GraphDataScienceProceduresProviderFactory(
             log,
             neo4jConfiguration,
@@ -216,6 +225,15 @@ public final class OpenGraphDataScienceExtensionBuilder {
         );
 
         return Triple.of(graphDataScienceExtensionBuilder, taskRegistryFactoryService, taskStoreService);
+    }
+
+    private static void registerCypherAggregation(GlobalProcedures globalProcedures, CypherAggregation cypherAggregation, AlphaCypherAggregation alphaCypherAggregation, Log log) {
+        try {
+            globalProcedures.register(cypherAggregation);
+            globalProcedures.register(alphaCypherAggregation);
+        } catch (ProcedureException e) {
+            log.warn(formatWithLocale("`%s` is not available", CypherAggregation.FUNCTION_NAME), e);
+        }
     }
 
     /**
