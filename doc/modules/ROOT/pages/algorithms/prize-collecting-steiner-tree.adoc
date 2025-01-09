@@ -17,7 +17,7 @@ A graph can have many possible spanning tree subsets depending on the set of nod
 
 Given a weighted graph where each node has a prize, the Prize-Collecting Steiner Tree problem asks for the  spanning tree that  satisfies the following conditions:
 
-- the sum of prizes for the nodes in the graph is mximized.
+- the sum of prizes for the nodes in the graph is maximized.
 - the sum of weights of relationships and prizes for nodes not in the tree is minimized.
 
 The two constraints can combined to form a single maximization problem by simpling  subtracting the second constraint for the former.
