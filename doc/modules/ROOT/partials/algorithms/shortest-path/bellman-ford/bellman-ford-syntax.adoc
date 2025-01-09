@@ -179,7 +179,7 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 [opts="header",cols="3,2,3m,2,8"]
 |===
 | Name          | Type   | Default | Optional | Description
-include::partial$/algorithms/common-configuration/common-stream-stats-configuration-entries.adoc
+include::partial$/algorithms/common-configuration/common-stream-stats-configuration-entries.adoc[]
 | sourceNode        | Integer | n/a     | no       | The Neo4j source node or node id.
 |===
 
