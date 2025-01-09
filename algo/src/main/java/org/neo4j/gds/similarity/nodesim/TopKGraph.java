@@ -19,10 +19,23 @@
  */
 package org.neo4j.gds.similarity.nodesim;
 
+import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphAdapter;
+import org.neo4j.gds.api.PropertyState;
+import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.relationships.RelationshipConsumer;
 import org.neo4j.gds.api.properties.relationships.RelationshipWithPropertyConsumer;
+import org.neo4j.gds.api.schema.Direction;
+import org.neo4j.gds.api.schema.GraphSchema;
+import org.neo4j.gds.api.schema.ImmutableMutableGraphSchema;
+import org.neo4j.gds.api.schema.ImmutableRelationshipPropertySchema;
+import org.neo4j.gds.api.schema.MutableRelationshipSchema;
+import org.neo4j.gds.api.schema.MutableRelationshipSchemaEntry;
+import org.neo4j.gds.core.Aggregation;
+
+import java.util.Map;
 
 public class TopKGraph extends GraphAdapter {
 
@@ -37,6 +50,45 @@ public class TopKGraph extends GraphAdapter {
     public int degree(long nodeId) {
         TopKMap.TopKList topKList = topKMap.get(nodeId);
         return topKList != null ? topKList.size() : 0;
+    }
+
+    @Override
+    public boolean hasRelationshipProperty() {
+        return true;
+    }
+
+    @Override
+    public GraphSchema schema() {
+        var type = RelationshipType.of("SIMILAR");
+        var relationshipSchema = new MutableRelationshipSchema(
+            Map.of(
+                type,
+                new MutableRelationshipSchemaEntry(
+                    type,
+                    Direction.DIRECTED,
+                    Map.of(
+                        "similarity",
+                        ImmutableRelationshipPropertySchema.of(
+                            "similarity",
+                            ValueType.DOUBLE,
+                            DefaultValue.DEFAULT,
+                            PropertyState.TRANSIENT,
+                            Aggregation.NONE
+                        )
+                    )
+                )
+            )
+        );
+
+        return ImmutableMutableGraphSchema.builder()
+            .from(graph.schema())
+            .relationshipSchema(relationshipSchema)
+            .build();
+    }
+
+    @Override
+    public boolean isMultiGraph() {
+        return super.isMultiGraph();
     }
 
     @Override
