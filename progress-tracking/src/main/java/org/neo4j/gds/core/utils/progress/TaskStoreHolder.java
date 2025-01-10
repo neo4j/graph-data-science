@@ -66,7 +66,7 @@ public final class TaskStoreHolder {
         return TASK_STORES.computeIfAbsent(normalizedDatabaseName, __ -> new PerDatabaseTaskStore());
     }
 
-    static void purge(String databaseName) {
+    public static void purge(String databaseName) {
         TASK_STORES.remove(databaseName);
     }
 }
