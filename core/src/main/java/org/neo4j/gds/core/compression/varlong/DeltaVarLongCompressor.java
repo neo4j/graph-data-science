@@ -121,6 +121,11 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
                 aggregations
             );
         }
+
+        @Override
+        public boolean validateNode(long nodeId) {
+            return false;
+        }
     }
 
     private final AdjacencyListBuilder.Allocator<byte[]> adjacencyAllocator;

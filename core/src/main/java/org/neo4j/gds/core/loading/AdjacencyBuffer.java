@@ -248,7 +248,7 @@ public final class AdjacencyBuffer {
                 adjacencyCompressorFactory,
                 chunkedAdjacencyLists[page],
                 relationshipCounter,
-                mapper.orElse(ZigZagLongDecoding.Identity.INSTANCE),
+                mapper.orElse(new ValidatingValueMapper()),
                 drainCountConsumer.orElse(n -> {})
             ));
         }
@@ -311,6 +311,9 @@ public final class AdjacencyBuffer {
                 chunkedAdjacencyLists.consume((localId, targets, properties, compressedByteSize, numberOfCompressedTargets) -> {
                     var sourceNodeId = this.paging.sourceNodeId(localId, this.page);
                     var nodeId = valueMapper.map(sourceNodeId);
+                    if (nodeId == AdjacencyCompressor.ValueMapper.INVALID_ID) {
+                        return;
+                    }
 
                     AdjacencyCompression.zigZagUncompressFrom(
                         buffer,
@@ -383,6 +386,16 @@ public final class AdjacencyBuffer {
         @Override
         public long sourceNodeId(long localId, int pageId) {
             return (localId << this.pageShift) + pageId;
+        }
+    }
+
+    private class ValidatingValueMapper implements AdjacencyCompressor.ValueMapper {
+        @Override
+        public long map(long value) {
+            if (adjacencyCompressorFactory.validateNode(value)) {
+                return value;
+            }
+            return AdjacencyCompressor.ValueMapper.INVALID_ID;
         }
     }
 }

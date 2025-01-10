@@ -194,6 +194,11 @@ public final class MixedCompressor implements AdjacencyCompressor {
                 .build();
         }
 
+        @Override
+        public boolean validateNode(long nodeId) {
+            return nodeId < nodeCountSupplier.getAsLong();
+        }
+
         private static MemoryInfo mergeMemoryInfo(
             MemoryInfo packed,
             MemoryInfo vlong

@@ -21,6 +21,8 @@ package org.neo4j.gds.core.compression.common;
 
 import org.neo4j.gds.api.compress.AdjacencyCompressor;
 
+import static org.neo4j.gds.api.compress.AdjacencyCompressor.ValueMapper.INVALID_ID;
+
 public final class ZigZagLongDecoding {
 
     public enum Identity implements AdjacencyCompressor.ValueMapper {
@@ -49,7 +51,11 @@ public final class ZigZagLongDecoding {
             value += (input & 127L) << shift;
             if ((input & 128L) == 128L) {
                 startValue += ((value >>> 1L) ^ -(value & 1L));
-                uncompressedData[into++] = mapper.map(startValue);
+                var mappedId = mapper.map(startValue);
+                if (mappedId != INVALID_ID) {
+                    uncompressedData[into++] = mappedId;
+                }
+
                 value = 0L;
                 shift = 0;
             } else {

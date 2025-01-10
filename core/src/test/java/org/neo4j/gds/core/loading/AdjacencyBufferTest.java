@@ -21,13 +21,51 @@ package org.neo4j.gds.core.loading;
 
 import org.assertj.core.data.Percentage;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.Orientation;
+import org.neo4j.gds.PropertyMappings;
+import org.neo4j.gds.RelationshipProjection;
+import org.neo4j.gds.api.AdjacencyList;
+import org.neo4j.gds.api.AdjacencyProperties;
+import org.neo4j.gds.api.compress.AdjacencyCompressorFactory;
+import org.neo4j.gds.api.compress.AdjacencyListBuilder;
+import org.neo4j.gds.api.compress.AdjacencyListBuilderFactory;
+import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
+import org.neo4j.gds.core.compression.common.MemoryTracker;
+import org.neo4j.gds.core.compression.varlong.CompressedAdjacencyListBuilder;
+import org.neo4j.gds.core.compression.varlong.CompressedAdjacencyListBuilderFactory;
+import org.neo4j.gds.core.compression.varlong.DeltaVarLongCompressor;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.mem.MemoryTree;
+
+import java.util.Collection;
+import java.util.Map;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class AdjacencyBufferTest {
+
+    @Test
+    void test() {
+        var nodeCount = 99L;
+        var adjacencyBuffer = AdjacencyBuffer.of(SingleTypeRelationshipImporter.ImportMetaData.of(RelationshipProjection.of(
+            "T",
+            Orientation.UNDIRECTED
+        ), 1, Map.of(), false),
+            DeltaVarLongCompressor.factory(
+                () -> nodeCount,
+                CompressedAdjacencyListBuilderFactory.of(),
+                PropertyMappings.builder().build(),
+                new Aggregation[0],
+                true,
+                MemoryTracker.EMPTY
+            ), ImportSizing.of(new Concurrency(4), nodeCount));
+
+        var tasks = adjacencyBuffer.adjacencyListBuilderTasks(Optional.empty(), Optional.empty());
+
+        tasks.forEach(Runnable::run);
+    }
 
     @Test
     void memoryEstimationShouldGrowLinearlyWithNodeCount() {

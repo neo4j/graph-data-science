@@ -125,6 +125,11 @@ public final class PackedCompressor implements AdjacencyCompressor {
                 this.memoryTracker
             );
         }
+
+        @Override
+        public boolean validateNode(long nodeId) {
+            return false;
+        }
     }
 
     private final AdjacencyListBuilder.Allocator<Address> adjacencyAllocator;

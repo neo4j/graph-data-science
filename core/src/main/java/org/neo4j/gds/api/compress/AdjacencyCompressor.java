@@ -59,6 +59,8 @@ public interface AdjacencyCompressor extends AutoCloseable {
     void close();
 
     interface ValueMapper {
+        int INVALID_ID = -1;
+
         /**
          * A mapper to transform values before compressing them.
          * Implementations must be thread-safe

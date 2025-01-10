@@ -121,6 +121,11 @@ public final class RawCompressor implements AdjacencyCompressor {
                 aggregations
             );
         }
+
+        @Override
+        public boolean validateNode(long nodeId) {
+            return false;
+        }
     }
 
     private final AdjacencyListBuilder.Allocator<long[]> adjacencyAllocator;

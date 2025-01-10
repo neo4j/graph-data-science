@@ -44,4 +44,6 @@ public interface AdjacencyCompressorFactory {
      * @return the final adjacency list, together with any number of properties, if any.
      */
     AdjacencyListsWithProperties build(boolean allowReordering);
+
+    boolean validateNode(long nodeId);
 }
