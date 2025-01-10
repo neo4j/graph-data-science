@@ -197,7 +197,7 @@ public abstract class AdjacencyListBuilderBaseTest {
         );
 
         for (long nodeId = 0; nodeId < nodeCount; nodeId++) {
-            long targetId = nodeCount - nodeId;
+            long targetId = (nodeCount - nodeId) % nodeCount;
 
             int aggregatedRelationshipId = sourceNodeToTargetNode.size();
             sourceNodeToTargetNode.put(nodeId, targetId);
@@ -213,7 +213,7 @@ public abstract class AdjacencyListBuilderBaseTest {
             for (long nodeId = 0; nodeId < nodeCount; nodeId++) {
 
                 // get the relationship id of the target node
-                long targetId = nodeCount - nodeId;
+                long targetId = (nodeCount - nodeId) % nodeCount;
                 int aggregatedRelationshipId = sourceNodeToRelationshipId.get(nodeId);
 
                 double relationshipProperty = rng.nextDouble();
