@@ -328,7 +328,7 @@ public final class AdjacencyBuffer {
                         nodeId,
                         buffer.buffer,
                         properties,
-                        numberOfCompressedTargets
+                        buffer.length
                     ));
                 });
                 relationshipCounter.add(importedRelationships.longValue());
