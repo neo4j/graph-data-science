@@ -174,7 +174,7 @@ RETURN
 ----
 
 .Results
-[opts="header", cols="0,1,1m"]
+[opts="header", cols="1,1,1m"]
 |===
 | graph     | nodes | rels
 | "persons" | 3     | 2
