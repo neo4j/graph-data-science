@@ -44,6 +44,10 @@ public final class ShardedByteArrayLongMap {
         return new Builder(concurrency);
     }
 
+    public static Builder builder(Concurrency concurrency, long capacity) {
+        return new Builder(concurrency, capacity);
+    }
+
     private ShardedByteArrayLongMap(
         HugeObjectArray<byte[]> internalNodeMapping,
         ObjectLongMap<byte[]>[] originalNodeMappingShards,
@@ -108,14 +112,16 @@ public final class ShardedByteArrayLongMap {
         var mapShards = new ObjectLongMap[shards.length];
 
         // ignoring concurrency limitation 🤷
-        Arrays.parallelSetAll(mapShards, idx -> {
-            var shard = shards[idx];
-            var mapping = shard.intoMapping();
-            mapping.forEachKeyValue((originalId, mappedId) -> {
-                internalNodeMapping.set(mappedId, originalId);
-            });
-            return mapping;
-        });
+        Arrays.parallelSetAll(
+            mapShards, idx -> {
+                var shard = shards[idx];
+                var mapping = shard.intoMapping();
+                mapping.forEachKeyValue((originalId, mappedId) -> {
+                    internalNodeMapping.set(mappedId, originalId);
+                });
+                return mapping;
+            }
+        );
 
         return new ShardedByteArrayLongMap(
             internalNodeMapping,
@@ -144,6 +150,15 @@ public final class ShardedByteArrayLongMap {
 
         MapShard() {
             this.mapping = new ObjectLongHashMapWithHashingStrategy<>(new ArrayHashingStrategy());
+            this.lock = new ReentrantLock();
+            this.lockWrapper = new AbstractMultiReaderMutableCollection.LockWrapper(lock);
+        }
+
+        MapShard(long capacity) {
+            this.mapping = new ObjectLongHashMapWithHashingStrategy<>(
+                new ArrayHashingStrategy(),
+                Math.toIntExact(capacity)
+            );
             this.lock = new ReentrantLock();
             this.lockWrapper = new AbstractMultiReaderMutableCollection.LockWrapper(lock);
         }
@@ -179,6 +194,16 @@ public final class ShardedByteArrayLongMap {
                 .toArray(Shard[]::new);
         }
 
+        Builder(Concurrency concurrency, long capacity) {
+            this.nodeCount = new AtomicLong();
+            int numberOfShards = numberOfShards(concurrency);
+            this.shardShift = Long.SIZE - Integer.numberOfTrailingZeros(numberOfShards);
+            this.shardMask = numberOfShards - 1;
+            this.shards = IntStream.range(0, numberOfShards)
+                .mapToObj(__ -> new Shard(this.nodeCount, BitUtil.ceilDiv(capacity, numberOfShards)))
+                .toArray(Shard[]::new);
+        }
+
         /**
          * Add a node to the mapping.
          *
@@ -205,6 +230,11 @@ public final class ShardedByteArrayLongMap {
 
             private Shard(AtomicLong nextId) {
                 super();
+                this.nextId = nextId;
+            }
+
+            private Shard(AtomicLong nextId, long capacity) {
+                super(capacity);
                 this.nextId = nextId;
             }
 
