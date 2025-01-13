@@ -19,11 +19,11 @@
  */
 package org.neo4j.gds.core.utils.paged;
 
-import org.eclipse.collections.api.block.HashingStrategy;
-import org.eclipse.collections.api.map.primitive.MutableObjectLongMap;
-import org.eclipse.collections.api.map.primitive.ObjectLongMap;
+import com.carrotsearch.hppc.BitMixer;
+import com.carrotsearch.hppc.ObjectLongHashMap;
+import com.carrotsearch.hppc.ObjectLongMap;
+import com.carrotsearch.hppc.procedures.ObjectLongProcedure;
 import org.eclipse.collections.impl.collection.mutable.AbstractMultiReaderMutableCollection;
-import org.eclipse.collections.impl.map.mutable.primitive.ObjectLongHashMapWithHashingStrategy;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.concurrency.Concurrency;
@@ -60,7 +60,7 @@ public final class ShardedByteArrayLongMap {
 
     public long toMappedNodeId(byte[] nodeId) {
         var shard = findShard(nodeId, this.originalNodeMappingShards, this.shardShift);
-        return shard.getIfAbsent(nodeId, IdMap.NOT_FOUND);
+        return shard.getOrDefault(nodeId, IdMap.NOT_FOUND);
     }
 
     public boolean contains(byte[] originalId) {
@@ -116,7 +116,7 @@ public final class ShardedByteArrayLongMap {
             mapShards, idx -> {
                 var shard = shards[idx];
                 var mapping = shard.intoMapping();
-                mapping.forEachKeyValue((originalId, mappedId) -> {
+                mapping.forEach((ObjectLongProcedure<? super byte[]>) (originalId, mappedId) -> {
                     internalNodeMapping.set(mappedId, originalId);
                 });
                 return mapping;
@@ -132,33 +132,39 @@ public final class ShardedByteArrayLongMap {
 
     abstract static class MapShard {
 
-        private static class ArrayHashingStrategy implements HashingStrategy<byte[]> {
-            @Override
-            public int computeHashCode(byte[] object) {
-                return Arrays.hashCode(object);
+        private static final class Map extends ObjectLongHashMap<byte[]> {
+
+            Map() {
+                super();
+            }
+
+            Map(int initialCapacity) {
+                super(initialCapacity);
             }
 
             @Override
-            public boolean equals(byte[] object1, byte[] object2) {
-                return Arrays.equals(object1, object2);
+            protected int hashKey(byte[] key) {
+                return BitMixer.mix(Arrays.hashCode(key), this.keyMixer);
+            }
+
+            @Override
+            protected boolean equals(Object v1, Object v2) {
+                return Arrays.equals((byte[]) v1, (byte[]) v2);
             }
         }
 
         private final ReentrantLock lock;
         private final AbstractMultiReaderMutableCollection.LockWrapper lockWrapper;
-        final MutableObjectLongMap<byte[]> mapping;
+        final ObjectLongMap<byte[]> mapping;
 
         MapShard() {
-            this.mapping = new ObjectLongHashMapWithHashingStrategy<>(new ArrayHashingStrategy());
+            this.mapping = new Map();
             this.lock = new ReentrantLock();
             this.lockWrapper = new AbstractMultiReaderMutableCollection.LockWrapper(lock);
         }
 
         MapShard(long capacity) {
-            this.mapping = new ObjectLongHashMapWithHashingStrategy<>(
-                new ArrayHashingStrategy(),
-                Math.toIntExact(capacity)
-            );
+            this.mapping = new Map(Math.toIntExact(capacity));
             this.lock = new ReentrantLock();
             this.lockWrapper = new AbstractMultiReaderMutableCollection.LockWrapper(lock);
         }
@@ -172,7 +178,7 @@ public final class ShardedByteArrayLongMap {
             assert this.lock.isHeldByCurrentThread() : "addNode must only be called while holding the lock";
         }
 
-        MutableObjectLongMap<byte[]> intoMapping() {
+        ObjectLongMap<byte[]> intoMapping() {
             return mapping;
         }
     }
@@ -240,12 +246,12 @@ public final class ShardedByteArrayLongMap {
 
             long addNode(byte[] nodeId) {
                 this.assertIsUnderLock();
-                long mappedId = mapping.getIfAbsent(nodeId, IdMap.NOT_FOUND);
-                if (mappedId != IdMap.NOT_FOUND) {
-                    return -mappedId - 1;
+                int index = mapping.indexOf(nodeId);
+                if (mapping.indexExists(index)) {
+                    return -mapping.indexGet(index) - 1;
                 }
-                mappedId = nextId.getAndIncrement();
-                mapping.put(nodeId, mappedId);
+                long mappedId = nextId.getAndIncrement();
+                mapping.indexInsert(index, nodeId, mappedId);
                 return mappedId;
             }
         }
