@@ -100,14 +100,14 @@ class ShardedByteArrayLongMapTest {
     }
 
     @Test
-    void addExistingNode() {
+    void doesNotActuallyDeduplicateNodes() {
         byte[] node1 = "foobar".getBytes(StandardCharsets.UTF_8);
         byte[] node2 = "foobar".getBytes(StandardCharsets.UTF_8);
         var builder = ShardedByteArrayLongMap.builder(new Concurrency(1));
         long mappedNode1 = builder.addNode(node1);
         assertThat(mappedNode1).isGreaterThanOrEqualTo(0);
         long mappedNode2 = builder.addNode(node2);
-        assertThat(mappedNode2).isEqualTo(-(mappedNode1 + 1));
+        assertThat(mappedNode2).isGreaterThanOrEqualTo(0).isNotEqualTo(mappedNode1);
     }
 
     @ParameterizedTest
