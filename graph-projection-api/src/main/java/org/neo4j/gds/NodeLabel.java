@@ -42,6 +42,10 @@ public class NodeLabel extends ElementIdentifier {
         return new NodeLabel(name);
     }
 
+    public static String toString(NodeLabel nodeLabel) {
+        return nodeLabel.name();
+    }
+
     public static Collection<NodeLabel> listOf(@NotNull String... nodeLabels) {
         return Arrays.stream(nodeLabels).map(NodeLabel::of).collect(Collectors.toList());
     }
