@@ -1,9 +1,9 @@
-ext {
-    neo4jDefault = '2025.01.0-RC-SNAPSHOT'
+apply from: "$reposityRootDirectory/gradle/neo4j-version.gradle"
 
+ext {
     ver = [
         'log4j'                : '2.20.0',
-        'neo4j'                : properties.getOrDefault('neo4jOverride', neo4jDefault),
+        'neo4j'                : properties.getOrDefault('neo4jOverride', neo4jRCVersion),
         'scala'                : '2.13.11',
         'shiro'                : '2.0.1',
     ]
