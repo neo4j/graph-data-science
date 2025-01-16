@@ -16,7 +16,8 @@ include::partial$/algorithms/shared/algorithm-traits.adoc[]
 == Introduction
 
 The Degree Centrality algorithm can be used to find popular nodes within a graph.
-The degree centrality measures the number of incoming or outgoing (or both) relationships from a node, which can be defined by the orientation of a relationship projection. If a projection contains directed relationships, only outgoing relationships of a node are considered (the out-degree).
+The degree centrality measures the number of incoming or outgoing (or both) relationships from a node, which can be defined by the orientation of a relationship projection.
+If a projection contains directed relationships, only outgoing relationships of a node are counted (the out-degree).
 For more information on how relationship orientations influence the algorithm result, see the xref:algorithms-degree-centrality-orientation-example[setting an orientation] section.
 For more general information on relationship orientations, see the xref:management-ops/graph-creation/graph-project.adoc#relationship-projection-syntax[relationship projection syntax] section.
 
