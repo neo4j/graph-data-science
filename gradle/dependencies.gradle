@@ -1,7 +1,7 @@
 ext {
     neos = [
         '5.25': '5.25.1',
-        '5.26': '5.26.0',
+        '5.26': '5.26.1',
     ]
 
     neo4jDefault = project.hasProperty('isOpenGds') ? neos.'5.25' : neos.'5.26'
