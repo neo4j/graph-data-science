@@ -1,23 +1,33 @@
 [[neo4j-server]]
 = Neo4j Server
 
-On a standalone Neo4j Server you need to install and configure GDS manually.
+On a self-managed Neo4j Server you need to install and configure GDS manually.
+If you have the Neo4j Enterprise Edition, you will find the GDS plugin bundled within the Neo4j Server distribution.
+The GDS plugin is located in the `products` directory.
+The GDS plugin is always compatible with the version of the Neo4j Server distribution with which it is bundled.
+This installation option is the _bundled_ option.
 
-. Open the link:https://neo4j.com/deployment-center/#gds-tab[Neo4j Deployment Center] and head to the Graph Data Science Self-Managed section.
+If you are using the Neo4j Community Edition, you must download GDS manually from the link:https://neo4j.com/deployment-center/#gds-tab[Neo4j Deployment Center].
+This installation option is the _custom_ option.
 
-. Check that the version of the Neo4j Graph Data Science Library is xref:installation/supported-neo4j-versions.adoc[compatible] with your Neo4j Server and download the compressed file.
 
-. Decompress the file and move the `neo4j-graph-data-science-[version].jar` file into the `$NEO4J_HOME/plugins` directory.
+== Bundled installation
 
-. Add the following to your `$NEO4J_HOME/conf/neo4j.conf` file:
+To install the GDS plugin in a Neo4j Enterprise Edition installation, follow these steps:
+
+[NOTE]
+All paths in the following instructions are relative to the Neo4j installation directory.
+
+. Copy or move the file `neo4j-graph-data-science-[version].jar` from the `products` directory to the `plugins` directory.
+
+. Add the following to your `conf/neo4j.conf` file:
 +
 ----
 dbms.security.procedures.unrestricted=gds.*
 ----
 This configuration entry is necessary because the GDS library accesses low-level components of Neo4j to maximise performance.
 +
-
-. Check if the procedure allowlist is enabled in the `$NEO4J_HOME/conf/neo4j.conf` file, namely if the `dbms.security.procedures.allowlist` option is _not_ commented out with a leading `#` sign. In this case, add the GDS library to the allowlist:
+. Check if the procedure allowlist is enabled in the `conf/neo4j.conf` file, namely if the `dbms.security.procedures.allowlist` option is _not_ commented out with a leading `#` sign. In this case, add the GDS library to the allowlist:
 +
 ----
 dbms.security.procedures.allowlist=gds.*
@@ -25,4 +35,36 @@ dbms.security.procedures.allowlist=gds.*
 You can find more information on allow listing in the link:https://neo4j.com/docs/operations-manual/current/security/securing-extensions/#allow-listing[Operations Manual].
 +
 
-. Restart the Neo4j Server.
+. Restart the Neo4j Server, using for example `bin/neo4j restart`.
+
+
+== Custom installation
+
+To install the GDS plugin in a Neo4j Community Edition installation, follow these steps:
+
+[NOTE]
+All paths in the following instructions are relative to the Neo4j installation directory.
+
+. Open the link:https://neo4j.com/deployment-center/#gds-tab[Neo4j Deployment Center] and head to the Graph Data Science Self-Managed section.
+
+. Check that the version of the Neo4j Graph Data Science Library is xref:installation/supported-neo4j-versions.adoc[compatible] with your Neo4j Server and download the compressed file.
+
+. Decompress the file and move the `neo4j-graph-data-science-[version].jar` file into the `plugins` directory.
+
+. Add the following to your `conf/neo4j.conf` file:
++
+----
+dbms.security.procedures.unrestricted=gds.*
+----
+This configuration entry is necessary because the GDS library accesses low-level components of Neo4j to maximise performance.
++
+
+. Check if the procedure allowlist is enabled in the `conf/neo4j.conf` file, namely if the `dbms.security.procedures.allowlist` option is _not_ commented out with a leading `#` sign. In this case, add the GDS library to the allowlist:
++
+----
+dbms.security.procedures.allowlist=gds.*
+----
+You can find more information on allow listing in the link:https://neo4j.com/docs/operations-manual/current/security/securing-extensions/#allow-listing[Operations Manual].
++
+
+. Restart the Neo4j Server, using for example `bin/neo4j restart`.
