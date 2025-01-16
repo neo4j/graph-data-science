@@ -16,8 +16,9 @@ include::partial$/algorithms/shared/algorithm-traits.adoc[]
 == Introduction
 
 The Degree Centrality algorithm can be used to find popular nodes within a graph.
-Degree centrality measures the number of incoming or outgoing (or both) relationships from a node, depending on the orientation of a relationship projection.
-For more information on relationship orientations, see the xref:management-ops/graph-creation/graph-project.adoc#relationship-projection-syntax[relationship projection syntax section].
+The degree centrality measures the number of incoming or outgoing (or both) relationships from a node, which can be defined by the orientation of a relationship projection. If a projection contains directed relationships, only outgoing relationships of a node are considered (the out-degree).
+For more information on how relationship orientations influence the algorithm result, see the xref:algorithms-degree-centrality-orientation-example[setting an orientation] section.
+For more general information on relationship orientations, see the xref:management-ops/graph-creation/graph-project.adoc#relationship-projection-syntax[relationship projection syntax] section.
 
 It can be applied to either weighted or unweighted graphs.
 In the weighted case the algorithm computes the sum of all positive weights of adjacent relationships of a node, for each node in the graph.
@@ -259,7 +260,8 @@ RETURN gds.graph.project(
 )
 ----
 
-The graph is projected in a `REVERSE` orientation in order to retrieve people with the most followers in the following examples.
+For directed relationships, the Degree Centrality algorithm computes the out-degree of each node.
+In order to retrieve people with the most followers, the graph is projected in a `REVERSE` orientation in the following examples.
 This will be demonstrated using the Degree Centrality algorithm on this graph.
 
 
