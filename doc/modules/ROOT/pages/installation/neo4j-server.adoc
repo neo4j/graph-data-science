@@ -2,17 +2,19 @@
 = Neo4j Server
 
 On a self-managed Neo4j Server you need to install and configure GDS manually.
-If you have the Neo4j Enterprise Edition, you will find the GDS plugin bundled within the Neo4j Server distribution.
-The GDS plugin is located in the `products` directory.
-The GDS plugin is always compatible with the version of the Neo4j Server distribution with which it is bundled.
-This installation option is the _bundled_ option.
 
-If you are using the Neo4j Community Edition, you must download GDS manually from the link:https://neo4j.com/deployment-center/#gds-tab[Neo4j Deployment Center].
-This installation option is the _custom_ option.
+* If you have the Neo4j Enterprise Edition, you will find the GDS plugin bundled within the Neo4j Server distribution.
+  The GDS plugin is located in the `products` directory.
+  This is the <<installation-neo4j-server-bundled>> option.
+
+* If you are using the Neo4j Community Edition, you must download GDS manually from the link:https://neo4j.com/deployment-center/#gds-tab[Neo4j Deployment Center].
+This is the <<installation-neo4j-server-custom>> option.
 
 
+[[installation-neo4j-server-bundled]]
 == Bundled installation
 
+The GDS plugin is always compatible with the version of the Neo4j Server distribution with which it is bundled.
 To install the GDS plugin in a Neo4j Enterprise Edition installation, follow these steps:
 
 [NOTE]
@@ -38,6 +40,7 @@ You can find more information on allow listing in the link:https://neo4j.com/doc
 . Restart the Neo4j Server, using for example `bin/neo4j restart`.
 
 
+[[installation-neo4j-server-custom]]
 == Custom installation
 
 To install the GDS plugin in a Neo4j Community Edition installation, follow these steps:
