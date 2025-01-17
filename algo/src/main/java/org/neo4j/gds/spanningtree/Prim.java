@@ -83,7 +83,7 @@ public class Prim extends Algorithm<SpanningTree> {
             }
             effectiveNodeCount++;
             visited.set(node);
-            graph.forEachRelationship(node, 0.0D, (s, t, w) -> {
+            graph.forEachRelationship(node, 1.0D, (s, t, w) -> {
                 if (visited.get(t)) {
                     return true;
                 }

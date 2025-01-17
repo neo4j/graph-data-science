@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.gds.GdlBuilder;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
@@ -209,5 +210,25 @@ class PrimTest {
         } else {
             return idFunction.of(expectedParent);
         }
+    }
+
+    @Test
+    void shouldWorkWithUnweightedGraphs(){
+        var unweightedGraph = new GdlBuilder()
+            .gdl("(a)-[:R]->(b)")
+            .orientation(Orientation.UNDIRECTED)
+            .build();
+
+        var prim =new Prim(
+            unweightedGraph,
+            PrimOperators.MIN_OPERATOR,
+            0,
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
+        );
+        var tree= prim.compute();
+
+        assertThat(tree.totalWeight()).isEqualTo(1L);
+        assertThat(tree.costToParent(1)).isEqualTo(1L);
     }
 }
