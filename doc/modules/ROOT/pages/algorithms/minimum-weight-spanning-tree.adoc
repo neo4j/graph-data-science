@@ -276,7 +276,7 @@ RETURN nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
 | 7         | 14               | 520   | 520      | "520 Bytes"
 |===
 --
-[[algorithms-spanning-tree-examples-sream]]
+[[algorithms-spanning-tree-examples-stream]]
 === Stream
 :!stream-details:
 include::partial$/algorithms/shared/examples-stream-intro.adoc[]
