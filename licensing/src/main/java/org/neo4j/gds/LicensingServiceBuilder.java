@@ -20,12 +20,12 @@
 package org.neo4j.gds;
 
 import org.neo4j.annotations.service.Service;
-import org.neo4j.configuration.Config;
+import org.neo4j.graphdb.config.Configuration;
 
 @Service
 public interface LicensingServiceBuilder {
 
-    LicensingService build(Config config);
+    LicensingService build(Configuration config);
 
     /**
      * The LicensingService with the highest priority will be used

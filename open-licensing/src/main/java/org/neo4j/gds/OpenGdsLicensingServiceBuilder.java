@@ -20,13 +20,13 @@
 package org.neo4j.gds;
 
 import org.neo4j.annotations.service.ServiceProvider;
-import org.neo4j.configuration.Config;
+import org.neo4j.graphdb.config.Configuration;
 
 @ServiceProvider
 public class OpenGdsLicensingServiceBuilder implements LicensingServiceBuilder {
 
     @Override
-    public LicensingService build(Config config) {
+    public LicensingService build(Configuration config) {
         return new OpenGdsLicensingService();
     }
 
