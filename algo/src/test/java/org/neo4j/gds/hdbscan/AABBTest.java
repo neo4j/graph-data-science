@@ -21,6 +21,8 @@ package org.neo4j.gds.hdbscan;
 
 import org.assertj.core.api.SoftAssertions;
 import org.assertj.core.api.junit.jupiter.SoftAssertionsExtension;
+import org.assertj.core.data.Offset;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -109,4 +111,59 @@ class AABBTest {
 
     }
 
+    @Nested
+    class AABBLowerBoundTest {
+
+        @Test
+        void lowerBoundOfLookupIsInsideTheBox() {
+            var aabb = new AABB(
+                new double[]{2.0, 1.0},
+                new double[]{9.0, 7.0},
+                2
+            );
+
+            var lookupPoint = new double[]{3.9, 1.2};
+            double lowerBound = aabb.lowerBoundFor(lookupPoint);
+            assertThat(lowerBound).isZero();
+        }
+
+        @Test
+        void lowerBoundOfLookupIsOutsideTheBoxTopRight() {
+            var aabb = new AABB(
+                new double[]{2.0, 1.0},
+                new double[]{9.0, 7.0},
+                2
+            );
+
+            var lookupPoint = new double[]{11.0, 0.2};
+            double lowerBound = aabb.lowerBoundFor(lookupPoint);
+            assertThat(lowerBound).isCloseTo(2.1540659229, Offset.offset(1e-5));
+        }
+
+        @Test
+        void lowerBoundOfLookupIsOutsideTheBoxBottom() {
+            var aabb = new AABB(
+                new double[]{2.0, 1.0},
+                new double[]{9.0, 7.0},
+                2
+            );
+
+            var lookupPoint = new double[]{8.0, 8.0};
+            double lowerBound = aabb.lowerBoundFor(lookupPoint);
+            assertThat(lowerBound).isEqualTo(1d);
+        }
+
+        @Test
+        void lowerBoundOfLookupIsAtTheEdgeOfTheBox() {
+            var aabb = new AABB(
+                new double[]{2.0, 1.0},
+                new double[]{9.0, 7.0},
+                2
+            );
+
+            var lookupPoint = new double[]{9.0, 1.0};
+            double lowerBound = aabb.lowerBoundFor(lookupPoint);
+            assertThat(lowerBound).isZero();
+        }
+    }
 }
