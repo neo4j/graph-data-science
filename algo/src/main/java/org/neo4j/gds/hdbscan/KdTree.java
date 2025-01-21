@@ -22,6 +22,7 @@ package org.neo4j.gds.hdbscan;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 
+import java.util.OptionalLong;
 import java.util.stream.LongStream;
 
 public class KdTree {
@@ -62,4 +63,65 @@ public class KdTree {
         return LongStream.range(start, end).map(ids::get);
     }
 
+
+    // TODO: maybe overloads for the different array types 🤔
+    Neighbour[] neighbours(double[] queryPoint, int numberOfNeighbours) {
+        var queue =new JavaUtilSearchPriorityQueue(numberOfNeighbours);
+        search(root, queryPoint, numberOfNeighbours, queue, OptionalLong.empty());
+        return queue.closest();
+    }
+
+    Neighbour[] neighbours(long pointId, int numberOfNeighbours) {
+        var queue =new JavaUtilSearchPriorityQueue(numberOfNeighbours);
+        var queryPoint = nodePropertyValues.doubleArrayValue(pointId);
+
+        search(root, queryPoint, numberOfNeighbours, queue, OptionalLong.of(pointId));
+        return queue.closest();
+    }
+
+    private void search(KdNode kdNode, double[] queryPoint, int numberOfNeighbours, ClosestSearchPriorityQueue queue, OptionalLong pointId) {
+        if (kdNode.isLeaf()) {
+            nodesContained(kdNode).forEach(nodeId -> {
+                    if ((pointId.orElse(-1L)==nodeId)){
+                        return;
+                    }
+                    var point = nodePropertyValues.doubleArrayValue(nodeId);
+                    double distance = euclideanDistance(point, queryPoint);
+                    var neighbour = new Neighbour(nodeId, distance);
+                    queue.offer(neighbour);
+                }
+            );
+        } else {
+            var splitInformation = kdNode.splitInformation();
+            var d = splitInformation.dimension();
+
+            var childOnPath = leftChild(kdNode);
+            var sibling =rightChild(kdNode);
+            if (queryPoint[d] >= splitInformation.median()) {
+                childOnPath = rightChild(kdNode);
+                sibling = leftChild(kdNode);
+            }
+            search(childOnPath, queryPoint, numberOfNeighbours, queue,pointId);
+            boolean shouldExamineOtherSide = false;
+                if(queue.size() < numberOfNeighbours) {
+                    shouldExamineOtherSide = true;
+                } else {
+                    var distance = sibling.aabb().lowerBoundFor(queryPoint);
+                     shouldExamineOtherSide = queue.largerThanLowerBound(distance);
+                }
+                if (shouldExamineOtherSide){
+                    search(sibling, queryPoint, numberOfNeighbours, queue,pointId);
+                }
+        }
+    }
+
+    private double euclideanDistance(double[] point, double[] queryPoint) {
+        var dim = point.length;
+        var sum = 0.0;
+        for (int i = 0; i < dim; i++) {
+            var diff = point[i] - queryPoint[i];
+            sum += diff * diff;
+        }
+        return Math.sqrt(sum);
+    }
 }

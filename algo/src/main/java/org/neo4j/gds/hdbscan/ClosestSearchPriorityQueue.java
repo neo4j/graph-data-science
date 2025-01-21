@@ -19,5 +19,13 @@
  */
 package org.neo4j.gds.hdbscan;
 
-public record Neighbour(long id, double distance) {
+public interface ClosestSearchPriorityQueue {
+
+    Neighbour[] closest();
+
+    void offer(Neighbour candidate);
+
+    long size();
+
+    boolean largerThanLowerBound(double low);
 }
