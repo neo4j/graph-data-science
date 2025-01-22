@@ -36,6 +36,7 @@ import org.neo4j.gds.core.loading.LazyIdMapBuilderBuilder;
 import org.neo4j.gds.core.loading.construction.NodeLabelTokens;
 import org.neo4j.gds.core.loading.construction.PropertyValues;
 import org.neo4j.gds.core.utils.ProgressTimer;
+import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.LocalTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -395,7 +396,7 @@ class GraphImporterTest {
         var taskStore = new TestTaskStore();
         var progressTracker = new TaskProgressTracker(
             GraphImporter.graphImporterTask(2),
-            new LogAdapter(log),
+            new LoggerForProgressTrackingAdapter(new LogAdapter(log)),
             new Concurrency(1),
             jobId,
             new LocalTaskRegistryFactory("", taskStore),

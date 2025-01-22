@@ -40,6 +40,7 @@ import org.neo4j.gds.core.loading.RelationshipImportResult;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.NodesBuilder;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
+import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
@@ -158,7 +159,7 @@ public abstract class FileToGraphStoreImporter {
             importTasks
         );
 
-        return new TaskProgressTracker(task, log, concurrency, taskRegistryFactory);
+        return new TaskProgressTracker(task, new LoggerForProgressTrackingAdapter(log), concurrency, taskRegistryFactory);
     }
 
     private Nodes importNodes(FileInput fileInput) {

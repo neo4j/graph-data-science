@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.graphsampling;
 
+import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -305,7 +306,7 @@ class GraphSampleConstructorTest {
         var log = new GdsTestLog();
         var progressTracker = new TaskProgressTracker(
             GraphSampleConstructor.progressTask(naturalGraphStore, rwr),
-            log,
+            new LoggerForProgressTrackingAdapter(log),
             new Concurrency(1),
             EmptyTaskRegistryFactory.INSTANCE
         );

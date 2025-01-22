@@ -32,7 +32,9 @@ import org.neo4j.gds.ResourceUtil;
 import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
+import org.neo4j.gds.core.utils.progress.PerDatabaseTaskStore;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.extension.GdlExtension;
@@ -551,7 +553,8 @@ class NodeClassificationTrainTest {
         var config = createConfig("bananasModel", GRAPH_NAME, metrics, 42L);
 
         var progressTask = NodeClassificationTrain.progressTask(pipeline, nodeGraphStore.nodeCount());
-        var progressTracker = new InspectableTestProgressTracker(progressTask, config.username(), config.jobId());
+        var log = new GdsTestLog();
+        var progressTracker = new InspectableTestProgressTracker(progressTask, config.username(), config.jobId(), new PerDatabaseTaskStore(), new LoggerForProgressTrackingAdapter(log));
 
         createWithExecutionContext(
                 nodeGraphStore,
@@ -561,7 +564,7 @@ class NodeClassificationTrainTest {
             )
             .run();
 
-        assertThat(progressTracker.log().getMessages(INFO))
+        assertThat(log.getMessages(INFO))
             .extracting(removingThreadId())
             .extracting(keepingFixedNumberOfDecimals(4))
             .containsExactlyElementsOf(ResourceUtil.lines("expectedLogs/node-classification-log"));
@@ -589,7 +592,7 @@ class NodeClassificationTrainTest {
 
         var progressTask = NodeClassificationTrain.progressTask(pipeline, nodeGraphStore.nodeCount());
         var testLog = new GdsTestLog();
-        var progressTracker = new TestProgressTracker(progressTask, testLog, new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE);
+        var progressTracker = new TestProgressTracker(progressTask, new LoggerForProgressTrackingAdapter(testLog), new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE);
 
         createWithExecutionContext(
                 nodeGraphStore,

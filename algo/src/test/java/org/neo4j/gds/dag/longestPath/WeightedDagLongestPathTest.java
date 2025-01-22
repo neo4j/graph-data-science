@@ -25,6 +25,7 @@ import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithms;
 import org.neo4j.gds.compat.TestLog;
+import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
@@ -113,7 +114,7 @@ class WeightedDagLongestPathTest {
             var log = new GdsTestLog();
             var testTracker = new TestProgressTracker(
                 progressTask,
-                log,
+                new LoggerForProgressTrackingAdapter(log),
                 CONFIG.concurrency(),
                 EmptyTaskRegistryFactory.INSTANCE
             );
@@ -279,7 +280,7 @@ class WeightedDagLongestPathTest {
             var log = new GdsTestLog();
             var testTracker = new TestProgressTracker(
                 progressTask,
-                log,
+                new LoggerForProgressTrackingAdapter(log),
                 CONFIG.concurrency(),
                 EmptyTaskRegistryFactory.INSTANCE
             );

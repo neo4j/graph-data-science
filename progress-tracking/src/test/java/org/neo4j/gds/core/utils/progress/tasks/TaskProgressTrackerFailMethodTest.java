@@ -22,6 +22,7 @@ package org.neo4j.gds.core.utils.progress.tasks;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.logging.GdsTestLog;
 
@@ -34,7 +35,7 @@ class TaskProgressTrackerFailMethodTest {
     void failingTask() {
         var failingTask = Tasks.leaf("failingTask");
         var log = new GdsTestLog();
-        var tracker = new TaskProgressTracker(failingTask, log, new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE);
+        var tracker = new TaskProgressTracker(failingTask, new LoggerForProgressTrackingAdapter(log), new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE);
 
         tracker.beginSubTask();
         tracker.endSubTaskWithFailure();
@@ -55,7 +56,7 @@ class TaskProgressTrackerFailMethodTest {
 
         var rootTask = Tasks.task("rootTask", failingSubTask);
         var log = new GdsTestLog();
-        var tracker = new TaskProgressTracker(rootTask, log, new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE);
+        var tracker = new TaskProgressTracker(rootTask, new LoggerForProgressTrackingAdapter(log), new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE);
 
         tracker.beginSubTask("rootTask");
         tracker.beginSubTask("failingSubTask");

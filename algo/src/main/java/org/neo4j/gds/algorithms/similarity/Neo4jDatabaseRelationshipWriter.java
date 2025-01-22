@@ -24,6 +24,7 @@ import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.properties.relationships.RelationshipWithPropertyConsumer;
 import org.neo4j.gds.core.utils.ProgressTimer;
+import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
@@ -54,7 +55,7 @@ final class Neo4jDatabaseRelationshipWriter {
         try (ProgressTimer ignored = ProgressTimer.start(writeMillis::set)) {
             var progressTracker = new TaskProgressTracker(
                 RelationshipExporter.baseTask(taskName, graph.relationshipCount()),
-                log,
+                new LoggerForProgressTrackingAdapter(log),
                 RelationshipExporterBuilder.TYPED_DEFAULT_WRITE_CONCURRENCY,
                 taskRegistryFactory
             );

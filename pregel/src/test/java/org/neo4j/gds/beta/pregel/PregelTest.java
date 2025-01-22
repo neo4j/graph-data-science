@@ -45,6 +45,7 @@ import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
+import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -159,7 +160,7 @@ class PregelTest {
 
         var task = Pregel.progressTask(graph, config, computation.getClass().getSimpleName());
         var log = new GdsTestLog();
-        var progressTracker = new TestProgressTracker(task, log, config.concurrency(), EmptyTaskRegistryFactory.INSTANCE);
+        var progressTracker = new TestProgressTracker(task, new LoggerForProgressTrackingAdapter(log), config.concurrency(), EmptyTaskRegistryFactory.INSTANCE);
 
         Pregel.create(
             graph,
@@ -218,7 +219,7 @@ class PregelTest {
         var task = Pregel.progressTask(graph, config, computation.getClass().getSimpleName());
         var progressTracker = new TaskProgressTracker(
             task,
-            Log.noOpLog(),
+            new LoggerForProgressTrackingAdapter(Log.noOpLog()),
             config.concurrency(),
             jobId -> new TaskRegistry("", taskStore, jobId)
         );

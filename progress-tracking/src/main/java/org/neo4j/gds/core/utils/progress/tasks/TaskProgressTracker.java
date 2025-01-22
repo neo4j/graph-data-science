@@ -28,7 +28,6 @@ import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistry;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
-import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.utils.GdsFeatureToggles;
 
@@ -57,13 +56,13 @@ public class TaskProgressTracker implements ProgressTracker {
 
     private final Consumer<RuntimeException> onError;
 
-    public TaskProgressTracker(Task baseTask, Log log, Concurrency concurrency, TaskRegistryFactory taskRegistryFactory) {
+    public TaskProgressTracker(Task baseTask, LoggerForProgressTracking log, Concurrency concurrency, TaskRegistryFactory taskRegistryFactory) {
         this(baseTask, log, concurrency, new JobId(), taskRegistryFactory, EmptyUserLogRegistryFactory.INSTANCE);
     }
 
     public TaskProgressTracker(
         Task baseTask,
-        Log log,
+        LoggerForProgressTracking log,
         Concurrency concurrency,
         JobId jobId,
         TaskRegistryFactory taskRegistryFactory,

@@ -32,6 +32,9 @@ import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.model.OpenModelCatalog;
+import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
+import org.neo4j.gds.core.utils.progress.PerDatabaseTaskStore;
+import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryEstimations;
 import org.neo4j.gds.mem.MemoryRange;
@@ -149,7 +152,9 @@ class LinkPredictionPredictPipelineExecutorTest {
                 config
             ),
             "",
-            config.jobId()
+            config.jobId(),
+            new PerDatabaseTaskStore(),
+            new LoggerForProgressTrackingAdapter(new GdsTestLog())
         );
 
         var pipelineExecutor = new LinkPredictionPredictPipelineExecutor(
@@ -376,6 +381,7 @@ class LinkPredictionPredictPipelineExecutorTest {
                 pipeline
             ));
 
+        var log = new GdsTestLog();
         var progressTracker = new InspectableTestProgressTracker(
             LinkPredictionPredictPipelineExecutor.progressTask(
                 "Link Prediction Predict Pipeline",
@@ -384,7 +390,9 @@ class LinkPredictionPredictPipelineExecutorTest {
                 config
             ),
             username,
-            config.jobId()
+            config.jobId(),
+            new PerDatabaseTaskStore(),
+            new LoggerForProgressTrackingAdapter(log)
         );
 
         var pipelineExecutor = new LinkPredictionPredictPipelineExecutor(
@@ -417,7 +425,7 @@ class LinkPredictionPredictPipelineExecutorTest {
             "Link Prediction Predict Pipeline :: Finished"
         );
 
-        assertThat(progressTracker.log().getMessages(INFO))
+        assertThat(log.getMessages(INFO))
             .extracting(removingThreadId())
             .extracting(replaceTimings())
             .containsAll(expectedMessages);

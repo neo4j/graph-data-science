@@ -30,6 +30,7 @@ import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.loading.Capabilities;
+import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -183,7 +184,7 @@ final class Neo4jDatabaseNodePropertyWriter {
     ) {
         return new TaskProgressTracker(
             NodePropertyExporter.baseTask(name, taskVolume),
-            log,
+            new LoggerForProgressTrackingAdapter(log),
             writeConcurrency,
             taskRegistryFactory
         );

@@ -24,6 +24,7 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -78,7 +79,7 @@ public class StreamRelationshipPropertiesApplication {
 
         var taskProgressTracker = new TaskProgressTracker(
             task,
-            log,
+            new LoggerForProgressTrackingAdapter(log),
             configuration.concurrency(),
             new JobId(),
             taskRegistryFactory,

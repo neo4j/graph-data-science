@@ -35,6 +35,7 @@ import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.loading.CSRGraphStore;
 import org.neo4j.gds.core.loading.Capabilities;
 import org.neo4j.gds.core.loading.ImmutableStaticCapabilities;
+import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskTreeProgressTracker;
@@ -215,7 +216,7 @@ public final class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCy
         if (graphProjectConfig.logProgress()) {
             return new TaskProgressTracker(
                 task,
-                loadingContext.log(),
+                new LoggerForProgressTrackingAdapter(loadingContext.log()),
                 graphProjectConfig.readConcurrency(),
                 graphProjectConfig.jobId(),
                 loadingContext.taskRegistryFactory(),
@@ -225,7 +226,7 @@ public final class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCy
 
         return new TaskTreeProgressTracker(
             task,
-            loadingContext.log(),
+            new LoggerForProgressTrackingAdapter(loadingContext.log()),
             graphProjectConfig.readConcurrency(),
             graphProjectConfig.jobId(),
             loadingContext.taskRegistryFactory(),

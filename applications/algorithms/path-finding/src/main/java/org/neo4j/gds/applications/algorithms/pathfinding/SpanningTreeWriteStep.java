@@ -27,6 +27,7 @@ import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies
 import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
 import org.neo4j.gds.applications.algorithms.machinery.WriteStep;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
+import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.write.NodePropertyExporter;
@@ -65,7 +66,7 @@ class SpanningTreeWriteStep implements WriteStep<SpanningTree, RelationshipsWrit
 
         var progressTracker = new TaskProgressTracker(
             NodePropertyExporter.baseTask(AlgorithmLabel.SpanningTree.asString(), graph.nodeCount()),
-            log,
+            new LoggerForProgressTrackingAdapter(log),
             configuration.writeConcurrency(),
             requestScopedDependencies.taskRegistryFactory()
         );

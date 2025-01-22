@@ -23,7 +23,6 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.BatchingProgressLogger;
 import org.neo4j.gds.core.utils.progress.ProgressLogger;
-import org.neo4j.gds.logging.Log;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -32,13 +31,13 @@ public class TaskProgressLogger extends BatchingProgressLogger {
     private final Task baseTask;
     private final TaskVisitor loggingLeafTaskVisitor;
 
-    TaskProgressLogger(Log log, Task baseTask, Concurrency concurrency) {
+    TaskProgressLogger(LoggerForProgressTracking log, Task baseTask, Concurrency concurrency) {
         super(log, baseTask, concurrency);
         this.baseTask = baseTask;
         this.loggingLeafTaskVisitor = new LoggingLeafTaskVisitor(this);
 
     }
-    TaskProgressLogger(Log log, Task baseTask, Concurrency concurrency, TaskVisitor leafTaskVisitor) {
+    TaskProgressLogger(LoggerForProgressTracking log, Task baseTask, Concurrency concurrency, TaskVisitor leafTaskVisitor) {
         super(log, baseTask, concurrency);
         this.baseTask = baseTask;
         this.loggingLeafTaskVisitor = leafTaskVisitor;

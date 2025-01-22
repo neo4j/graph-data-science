@@ -24,9 +24,12 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.InspectableTestProgressTracker;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.utils.progress.JobId;
+import org.neo4j.gds.core.utils.progress.PerDatabaseTaskStore;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.logging.GdsTestLog;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -83,7 +86,8 @@ class NodeSplitterTest {
 
     @Test
     void shouldLogWarnings() {
-        var progressTracker = new InspectableTestProgressTracker(Tasks.leaf("DUMMY"), "", new JobId());
+        var log = new GdsTestLog();
+        var progressTracker = new InspectableTestProgressTracker(Tasks.leaf("DUMMY"), "", new JobId(), new PerDatabaseTaskStore(), new LoggerForProgressTrackingAdapter(log));
         int numberOfExamples = 12;
         var splitter = new NodeSplitter(
             new Concurrency(4),
@@ -97,7 +101,7 @@ class NodeSplitterTest {
         int validationFolds = 3;
         splitter.split(testFraction, validationFolds, Optional.of(42L));
 
-        assertThat(progressTracker.log().getMessages(TestLog.WARN))
+        assertThat(log.getMessages(TestLog.WARN))
             .extracting(removingThreadId())
             .containsExactly(
                 "DUMMY :: The specified `testFraction` leads to a very small test set with only 3 node(s). " +
@@ -106,7 +110,7 @@ class NodeSplitterTest {
                 "Proceeding with such small sets might lead to unreliable results."
             );
 
-        assertThat(progressTracker.log().getMessages(TestLog.INFO))
+        assertThat(log.getMessages(TestLog.INFO))
             .extracting(removingThreadId())
             .contains(
                 "DUMMY :: Train set size is 9",

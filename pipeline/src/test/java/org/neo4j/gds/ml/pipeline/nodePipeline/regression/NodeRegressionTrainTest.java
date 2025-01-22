@@ -33,11 +33,14 @@ import org.neo4j.gds.beta.generator.RandomGraphGenerator;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.loading.CSRGraphStoreUtil;
+import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
+import org.neo4j.gds.core.utils.progress.PerDatabaseTaskStore;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.ml.api.TrainingMethod;
 import org.neo4j.gds.ml.metrics.regression.RegressionMetrics;
 import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
@@ -262,16 +265,17 @@ class NodeRegressionTrainTest {
 
         var progressTask = NodeRegressionTrain.progressTask(pipeline, graphStore.nodeCount());
 
-        var progressTracker = new InspectableTestProgressTracker(progressTask, config.username(), config.jobId());
+        var log = new GdsTestLog();
+        var progressTracker = new InspectableTestProgressTracker(progressTask, config.username(), config.jobId(), new PerDatabaseTaskStore(), new LoggerForProgressTrackingAdapter(log));
 
         createWithExecutionContext(graphStore, pipeline, config, progressTracker).run();
 
-        assertThat(progressTracker.log().getMessages(INFO))
+        assertThat(log.getMessages(INFO))
             .extracting(removingThreadId())
             .extracting(keepingFixedNumberOfDecimals(4))
             .containsExactlyElementsOf(ResourceUtil.lines("expectedLogs/node-regression-with-range-log-info"));
 
-        assertThat(progressTracker.log().getMessages(DEBUG))
+        assertThat(log.getMessages(DEBUG))
             .extracting(removingThreadId())
             .extracting(keepingFixedNumberOfDecimals(4))
             .containsExactlyElementsOf(ResourceUtil.lines("expectedLogs/node-regression-with-range-log-debug"));

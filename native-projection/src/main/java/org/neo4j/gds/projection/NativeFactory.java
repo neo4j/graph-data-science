@@ -31,6 +31,7 @@ import org.neo4j.gds.core.loading.Capabilities.WriteMode;
 import org.neo4j.gds.core.loading.ImmutableStaticCapabilities;
 import org.neo4j.gds.core.loading.Nodes;
 import org.neo4j.gds.core.loading.RelationshipImportResult;
+import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskTreeProgressTracker;
@@ -112,7 +113,7 @@ final class NativeFactory extends CSRGraphStoreFactory<GraphProjectFromStoreConf
         if (graphProjectConfig.logProgress()) {
             return new TaskProgressTracker(
                 task,
-                loadingContext.log(),
+                new LoggerForProgressTrackingAdapter(loadingContext.log()),
                 graphProjectConfig.readConcurrency(),
                 graphProjectConfig.jobId(),
                 loadingContext.taskRegistryFactory(),
@@ -122,7 +123,7 @@ final class NativeFactory extends CSRGraphStoreFactory<GraphProjectFromStoreConf
 
         return new TaskTreeProgressTracker(
             task,
-            loadingContext.log(),
+            new LoggerForProgressTrackingAdapter(loadingContext.log()),
             graphProjectConfig.readConcurrency(),
             graphProjectConfig.jobId(),
             loadingContext.taskRegistryFactory(),

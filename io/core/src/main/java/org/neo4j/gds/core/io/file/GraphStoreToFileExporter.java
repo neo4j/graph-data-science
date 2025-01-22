@@ -35,6 +35,7 @@ import org.neo4j.gds.core.io.schema.NodeSchemaVisitor;
 import org.neo4j.gds.core.io.schema.RelationshipSchemaVisitor;
 import org.neo4j.gds.core.io.schema.SimpleVisitor;
 import org.neo4j.gds.core.loading.Capabilities;
+import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
@@ -166,7 +167,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter {
         }
 
         var task = Tasks.task(rootTaskName + " export", importTasks);
-        return new TaskProgressTracker(task, log, concurrency, taskRegistryFactory);
+        return new TaskProgressTracker(task, new LoggerForProgressTrackingAdapter(log), concurrency, taskRegistryFactory);
     }
 
     private void exportNodes(

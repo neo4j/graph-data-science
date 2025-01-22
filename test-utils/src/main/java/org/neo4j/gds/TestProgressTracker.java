@@ -21,9 +21,9 @@ package org.neo4j.gds;
 
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
+import org.neo4j.gds.core.utils.progress.tasks.LoggerForProgressTracking;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
-import org.neo4j.gds.logging.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,7 +35,7 @@ public class TestProgressTracker extends TaskProgressTracker {
 
     public TestProgressTracker(
         Task baseTask,
-        Log log,
+        LoggerForProgressTracking log,
         Concurrency concurrency,
         TaskRegistryFactory taskRegistryFactory
     ) {

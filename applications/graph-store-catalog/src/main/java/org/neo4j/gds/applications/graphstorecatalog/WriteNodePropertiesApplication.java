@@ -25,6 +25,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.ProgressTimer;
+import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -75,7 +76,7 @@ public class WriteNodePropertiesApplication {
         );
         var progressTracker = new TaskProgressTracker(
             task,
-            log,
+            new LoggerForProgressTrackingAdapter(log),
             configuration.writeConcurrency(),
             new JobId(),
             taskRegistryFactory,

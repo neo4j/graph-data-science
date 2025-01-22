@@ -31,13 +31,16 @@ import org.neo4j.gds.config.GraphNameConfig;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.model.OpenModelCatalog;
+import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.utils.progress.JobId;
+import org.neo4j.gds.core.utils.progress.PerDatabaseTaskStore;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.gdl.GdlFactory;
+import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryEstimations;
 import org.neo4j.gds.mem.MemoryRange;
@@ -220,7 +223,8 @@ class NodePropertyStepExecutorTest {
             new NodeIdPropertyStep(graphStore, "another proc", "prop2")
         );
 
-        var progressTracker = new InspectableTestProgressTracker(NodePropertyStepExecutor.tasks(steps, graphStore.nodeCount()), "user", JobId.parse("42"));
+        var log = new GdsTestLog();
+        var progressTracker = new InspectableTestProgressTracker(NodePropertyStepExecutor.tasks(steps, graphStore.nodeCount()), "user", JobId.parse("42"), new PerDatabaseTaskStore(), new LoggerForProgressTrackingAdapter(log));
 
         new NodePropertyStepExecutor<>(
             ExecutionContext.EMPTY,
@@ -232,7 +236,7 @@ class NodePropertyStepExecutorTest {
             progressTracker
         ).executeNodePropertySteps(steps);
 
-        assertThat(progressTracker.log().getMessages(TestLog.INFO))
+        assertThat(log.getMessages(TestLog.INFO))
             .extracting(Extractors.removingThreadId())
             .containsExactly(
                 "Execute node property steps :: Start",

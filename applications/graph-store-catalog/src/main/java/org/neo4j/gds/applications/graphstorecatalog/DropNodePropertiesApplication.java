@@ -21,6 +21,7 @@ package org.neo4j.gds.applications.graphstorecatalog;
 
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
@@ -43,7 +44,7 @@ public class DropNodePropertiesApplication {
         GraphStore graphStore
     ) {
         var progressTrackerFactory = new ProgressTrackerFactory(
-            log,
+            new LoggerForProgressTrackingAdapter(log),
             taskRegistryFactory,
             userLogRegistryFactory
         );

@@ -31,6 +31,9 @@ import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
+import org.neo4j.gds.core.utils.progress.PerDatabaseTaskStore;
+import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.JobId;
@@ -204,7 +207,8 @@ class LinkPredictionRelationshipSamplerTest {
         var trainConfig = createTrainConfig("REL", "*", "N", 42L);
 
 
-        var progressTracker = new InspectableTestProgressTracker(progressTask(splitConfig.expectedSetSizes(graphStore.relationshipCount())), "user", new JobId());
+        var log = new GdsTestLog();
+        var progressTracker = new InspectableTestProgressTracker(progressTask(splitConfig.expectedSetSizes(graphStore.relationshipCount())), "user", new JobId(), new PerDatabaseTaskStore(), new LoggerForProgressTrackingAdapter(log));
 
         var relationshipSplitter = new LinkPredictionRelationshipSampler(
             graphStore,
@@ -216,7 +220,7 @@ class LinkPredictionRelationshipSamplerTest {
 
         relationshipSplitter.splitAndSampleRelationships(Optional.of("weight"));
 
-        assertThat(progressTracker.log().getMessages(TestLog.WARN))
+        assertThat(log.getMessages(TestLog.WARN))
             .extracting(Extractors.removingThreadId())
             .contains("Split relationships :: Using * for the `sourceNodeLabel` or `targetNodeLabel` results in not ideal negative link sampling.");
     }

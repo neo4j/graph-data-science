@@ -42,6 +42,9 @@ import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
+import org.neo4j.gds.core.utils.progress.PerDatabaseTaskStore;
+import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryEstimations;
 import org.neo4j.gds.mem.MemoryRange;
@@ -384,6 +387,7 @@ final class LinkPredictionTrainPipelineExecutorTest {
                 .stream()
                 .mapToLong(graphStore::relationshipCount)
                 .sum();
+            var log = new GdsTestLog();
             var progressTracker = new InspectableTestProgressTracker(
                 LinkPredictionTrainPipelineExecutor.progressTask(
                     "Link Prediction Train Pipeline",
@@ -391,7 +395,9 @@ final class LinkPredictionTrainPipelineExecutorTest {
                     relationshipCount
                 ),
                 getUsername(),
-                config.jobId()
+                config.jobId(),
+                new PerDatabaseTaskStore(),
+                new LoggerForProgressTrackingAdapter(log)
             );
 
             TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
@@ -403,7 +409,7 @@ final class LinkPredictionTrainPipelineExecutorTest {
                     progressTracker
                 ).compute();
 
-                assertThat(progressTracker.log().getMessages(TestLog.WARN))
+                assertThat(log.getMessages(TestLog.WARN))
                     .extracting(removingThreadId())
                     .containsExactly(
                         "Link Prediction Train Pipeline :: The specified `testFraction` leads to a very small test set with only 3 relationship(s). " +
@@ -412,7 +418,7 @@ final class LinkPredictionTrainPipelineExecutorTest {
                         "Proceeding with such small sets might lead to unreliable results."
                     );
 
-                assertThat(progressTracker.log().getMessages(TestLog.INFO))
+                assertThat(log.getMessages(TestLog.INFO))
                     .extracting(removingThreadId())
                     .extracting(keepingFixedNumberOfDecimals(4))
                     .contains(

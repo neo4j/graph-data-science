@@ -35,8 +35,10 @@ import org.neo4j.gds.beta.generator.RelationshipDistribution;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
+import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.utils.progress.PerDatabaseTaskStore;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
+import org.neo4j.gds.core.utils.progress.tasks.LoggerForProgressTracking;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
@@ -44,7 +46,6 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.logging.GdsTestLog;
-import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.time.Instant;
@@ -524,7 +525,7 @@ class RandomWalkTest {
 
             var pt = new TestProgressTracker(
                 RandomWalkProgressTask.create(graph),
-                log,
+                new LoggerForProgressTrackingAdapter(log),
                 config.concurrency(),
                 requestScopedDependencies.taskRegistryFactory()
             );
@@ -580,7 +581,7 @@ class RandomWalkTest {
 
             var pt = new TestProgressTracker(
                 RandomWalkProgressTask.create(weightedGraph),
-                log,
+                new LoggerForProgressTrackingAdapter(log),
                 config.concurrency(),
                 requestScopedDependencies.taskRegistryFactory()
             );
@@ -626,7 +627,7 @@ class RandomWalkTest {
 
             var progressTracker = new TaskProgressTracker(
                 RandomWalkProgressTask.create(graph),
-                Log.noOpLog(),
+                LoggerForProgressTracking.noOpLog(),
                 new Concurrency(4),
                 requestScopedDependencies.taskRegistryFactory()
             );

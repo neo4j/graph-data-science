@@ -43,6 +43,7 @@ import org.neo4j.gds.beta.generator.RelationshipDistribution;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.conductance.ConductanceStreamConfigImpl;
 import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.extension.GdlExtension;
@@ -1103,7 +1104,7 @@ final class CommunityAlgorithmsTest {
             {
                 var taskProgressTracker = new TestProgressTracker(
                     i.getArgument(1),
-                    log,
+                    new LoggerForProgressTrackingAdapter(log),
                     new Concurrency(concurrency),
                     EmptyTaskRegistryFactory.INSTANCE
                 );

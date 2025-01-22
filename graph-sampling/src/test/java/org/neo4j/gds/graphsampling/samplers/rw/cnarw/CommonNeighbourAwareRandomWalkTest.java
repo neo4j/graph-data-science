@@ -31,6 +31,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.progress.LocalTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -699,7 +700,7 @@ class CommonNeighbourAwareRandomWalkTest {
 
         TestTaskStore taskStore = new TestTaskStore();
         var taskRegistryFactory = new LocalTaskRegistryFactory("user", taskStore);
-        var tracker = new TestProgressTracker(task, new GdsTestLog(), new Concurrency(4), taskRegistryFactory);
+        var tracker = new TestProgressTracker(task, new LoggerForProgressTrackingAdapter(new GdsTestLog()), new Concurrency(4), taskRegistryFactory);
 
         cnar.compute(tinyGraph, tracker);
 

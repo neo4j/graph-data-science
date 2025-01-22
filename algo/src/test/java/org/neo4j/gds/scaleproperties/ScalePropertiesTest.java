@@ -32,6 +32,7 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
+import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
@@ -280,7 +281,7 @@ class ScalePropertiesTest {
         var testLog = new GdsTestLog();
         var progressTracker = new TestProgressTracker(
             ScalePropertiesTask.create(graph, config),
-            testLog,
+            new LoggerForProgressTrackingAdapter(testLog),
             new Concurrency(1),
             EmptyTaskRegistryFactory.INSTANCE
         );

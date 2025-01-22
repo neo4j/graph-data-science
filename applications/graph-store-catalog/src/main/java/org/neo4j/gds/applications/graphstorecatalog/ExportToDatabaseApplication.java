@@ -30,6 +30,7 @@ import org.neo4j.gds.core.io.db.GraphStoreToDatabaseExporter;
 import org.neo4j.gds.core.io.db.GraphStoreToDatabaseExporterConfig;
 import org.neo4j.gds.core.io.db.GraphStoreToDatabaseExporterParameters;
 import org.neo4j.gds.core.io.db.ProgressTrackerExecutionMonitor;
+import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
@@ -71,7 +72,7 @@ class ExportToDatabaseApplication {
     ) {
         var progressTracker = new TaskProgressTracker(
             ProgressTrackerExecutionMonitor.progressTask(graphStore),
-            log,
+            new LoggerForProgressTrackingAdapter(log),
             configuration.typedWriteConcurrency(),
             configuration.jobId(),
             taskRegistryFactory,

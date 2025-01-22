@@ -27,10 +27,11 @@ import org.neo4j.gds.assertj.Extractors;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
+import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.utils.progress.BatchingProgressLogger;
+import org.neo4j.gds.core.utils.progress.tasks.LoggerForProgressTracking;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.logging.GdsTestLog;
-import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.BitUtil;
 import org.neo4j.gds.utils.CloseableThreadLocal;
 
@@ -59,7 +60,7 @@ class BatchingProgressLoggerTest {
         var batchSize = 8;
         var concurrency = new Concurrency(1);
         var logger = new BatchingProgressLogger(
-            log,
+            new LoggerForProgressTrackingAdapter(log),
             Tasks.leaf("foo", taskVolume),
             batchSize,
             concurrency
@@ -92,7 +93,7 @@ class BatchingProgressLoggerTest {
         var batchSize = 16;
         var concurrency = new Concurrency(1);
         var logger = new BatchingProgressLogger(
-            log,
+            new LoggerForProgressTrackingAdapter(log),
             Tasks.leaf("foo", taskVolume),
             batchSize,
             concurrency
@@ -150,7 +151,7 @@ class BatchingProgressLoggerTest {
         var taskVolume = 1337;
 
         var log = new GdsTestLog();
-        var logger = new BatchingProgressLogger(log, Tasks.leaf("Test", taskVolume), concurrency); // batchSize is 13
+        var logger = new BatchingProgressLogger(new LoggerForProgressTrackingAdapter(log), Tasks.leaf("Test", taskVolume), concurrency); // batchSize is 13
         logger.reset(taskVolume);
         logger.logProgress(20); // callCount is 20, call count after logging == 20 - 13 = 7
         assertThat(log.getMessages(TestLog.INFO))
@@ -167,7 +168,7 @@ class BatchingProgressLoggerTest {
     void log100Percent() {
         var log = new GdsTestLog();
         var concurrency = new Concurrency(1);
-        var testProgressLogger = new BatchingProgressLogger(log, Tasks.leaf("Test"), concurrency);
+        var testProgressLogger = new BatchingProgressLogger(new LoggerForProgressTrackingAdapter(log), Tasks.leaf("Test"), concurrency);
         testProgressLogger.reset(1337);
         testProgressLogger.logFinishPercentage();
         assertThat(log.getMessages(TestLog.INFO))
@@ -179,7 +180,7 @@ class BatchingProgressLoggerTest {
     void shouldLog100OnlyOnce() {
         var log = new GdsTestLog();
         var concurrency = new Concurrency(1);
-        var testProgressLogger = new BatchingProgressLogger(log, Tasks.leaf("Test"), concurrency);
+        var testProgressLogger = new BatchingProgressLogger(new LoggerForProgressTrackingAdapter(log), Tasks.leaf("Test"), concurrency);
         testProgressLogger.reset(1);
         testProgressLogger.logProgress(1);
         testProgressLogger.logFinishPercentage();
@@ -192,7 +193,7 @@ class BatchingProgressLoggerTest {
     void shouldNotExceed100Percent() {
         var log = new GdsTestLog();
         var concurrency = new Concurrency(1);
-        var testProgressLogger = new BatchingProgressLogger(log, Tasks.leaf("Test"), concurrency);
+        var testProgressLogger = new BatchingProgressLogger(new LoggerForProgressTrackingAdapter(log), Tasks.leaf("Test"), concurrency);
         testProgressLogger.reset(1);
         testProgressLogger.logProgress(1); // reaches 100 %
         testProgressLogger.logProgress(1); // exceeds 100 %
@@ -204,7 +205,7 @@ class BatchingProgressLoggerTest {
     @Test
     void closesThreadLocal() {
         var logger = new BatchingProgressLogger(
-            Log.noOpLog(),
+            LoggerForProgressTracking.noOpLog(),
             Tasks.leaf("foo", 42),
             new Concurrency(1)
         );
@@ -226,7 +227,7 @@ class BatchingProgressLoggerTest {
 
     private static List<Integer> performLogging(long taskVolume, Concurrency concurrency) {
         var log = new GdsTestLog();
-        var logger = new BatchingProgressLogger(log, Tasks.leaf("Test", taskVolume), concurrency);
+        var logger = new BatchingProgressLogger(new LoggerForProgressTrackingAdapter(log), Tasks.leaf("Test", taskVolume), concurrency);
         logger.reset(taskVolume);
 
         var batchSize = (int) BitUtil.ceilDiv(taskVolume, concurrency.value());

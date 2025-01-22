@@ -21,14 +21,13 @@ package org.neo4j.gds;
 
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.JobId;
-import org.neo4j.gds.core.utils.progress.PerDatabaseTaskStore;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.TaskStore;
+import org.neo4j.gds.core.utils.progress.tasks.LoggerForProgressTracking;
 import org.neo4j.gds.core.utils.progress.tasks.Progress;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
-import org.neo4j.gds.logging.GdsTestLog;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,16 +39,17 @@ import static org.neo4j.gds.core.utils.progress.tasks.Task.UNKNOWN_VOLUME;
 public class InspectableTestProgressTracker extends TaskProgressTracker {
 
     private final TaskStore taskStore;
-    private final GdsTestLog log;
     private final JobId jobId;
     private final String userName;
     private final List<Optional<Progress>> progressHistory = new ArrayList<>();
 
-    public InspectableTestProgressTracker(Task baseTask, String userName, JobId jobId) {
-        this(baseTask, userName, jobId, new PerDatabaseTaskStore(), new GdsTestLog());
-    }
-
-    private InspectableTestProgressTracker(Task baseTask, String userName, JobId jobId, TaskStore taskStore, GdsTestLog log) {
+    public InspectableTestProgressTracker(
+        Task baseTask,
+        String userName,
+        JobId jobId,
+        TaskStore taskStore,
+        LoggerForProgressTracking log
+    ) {
         super(
             baseTask,
             log,
@@ -62,11 +62,6 @@ public class InspectableTestProgressTracker extends TaskProgressTracker {
         this.userName = userName;
         this.jobId = jobId;
         this.taskStore = taskStore;
-        this.log = log;
-    }
-
-    public GdsTestLog log() {
-        return log;
     }
 
     @Override

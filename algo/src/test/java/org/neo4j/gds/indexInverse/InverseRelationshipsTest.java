@@ -30,6 +30,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
+import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
@@ -136,7 +137,7 @@ class InverseRelationshipsTest {
 
         var factory = new InverseRelationshipsAlgorithmFactory();
         var task = factory.progressTask(graphStore.nodeCount(), parameters.internalRelationshipTypes(graphStore));
-        var progressTracker = new TestProgressTracker(task, log, parameters.concurrency(), EmptyTaskRegistryFactory.INSTANCE);
+        var progressTracker = new TestProgressTracker(task, new LoggerForProgressTrackingAdapter(log), parameters.concurrency(), EmptyTaskRegistryFactory.INSTANCE);
         factory.build(graphStore, parameters, progressTracker).compute();
 
         assertThat(log.getMessages(INFO))

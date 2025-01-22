@@ -21,8 +21,8 @@ package org.neo4j.gds.core.utils.progress;
 
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.core.utils.progress.tasks.LoggerForProgressTracking;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
-import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.BitUtil;
 import org.neo4j.gds.utils.CloseableThreadLocal;
 
@@ -35,7 +35,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 public class BatchingProgressLogger implements ProgressLogger {
     public static final long MAXIMUM_LOG_INTERVAL = (long) Math.pow(2, 13);
 
-    private final Log log;
+    private final LoggerForProgressTracking log;
     private final Concurrency concurrency;
     private long taskVolume;
     private long batchSize;
@@ -58,11 +58,11 @@ public class BatchingProgressLogger implements ProgressLogger {
         return Math.max(1, BitUtil.nextHighestPowerOfTwo(batchSize));
     }
 
-    public BatchingProgressLogger(Log log, Task task, Concurrency concurrency) {
+    public BatchingProgressLogger(LoggerForProgressTracking log, Task task, Concurrency concurrency) {
         this(log, task, calculateBatchSize(task, concurrency), concurrency);
     }
 
-    public BatchingProgressLogger(Log log, Task task, long batchSize, Concurrency concurrency) {
+    public BatchingProgressLogger(LoggerForProgressTracking log, Task task, long batchSize, Concurrency concurrency) {
         this.log = log;
         this.taskVolume = task.getProgress().volume();
         this.batchSize = batchSize;

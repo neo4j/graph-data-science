@@ -22,6 +22,7 @@ package org.neo4j.gds;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
@@ -79,7 +80,7 @@ public interface AlgorithmFactory<G, ALGO extends Algorithm<?>, CONFIG extends A
         if (configuration.logProgress()) {
             progressTracker = new TaskProgressTracker(
                 progressTask,
-                log,
+                new LoggerForProgressTrackingAdapter(log),
                 configuration.concurrency(),
                 configuration.jobId(),
                 taskRegistryFactory,
@@ -88,7 +89,7 @@ public interface AlgorithmFactory<G, ALGO extends Algorithm<?>, CONFIG extends A
         } else {
             progressTracker = new TaskTreeProgressTracker(
                 progressTask,
-                log,
+                new LoggerForProgressTrackingAdapter(log),
                 configuration.concurrency(),
                 configuration.jobId(),
                 taskRegistryFactory,

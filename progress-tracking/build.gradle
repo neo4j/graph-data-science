@@ -44,5 +44,6 @@ dependencies {
     testAnnotationProcessor project(':config-generator')
     testAnnotationProcessor openGds.immutables.value
 
+    testImplementation project(':core')
     testImplementation project(':test-utils')
 }

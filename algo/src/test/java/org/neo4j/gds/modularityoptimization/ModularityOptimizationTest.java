@@ -31,6 +31,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
+import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -185,7 +186,7 @@ class ModularityOptimizationTest {
             graph.relationshipCount(),
             maxIterations
         );
-        var progressTracker = new TestProgressTracker(progressTask, log, concurrency, EmptyTaskRegistryFactory.INSTANCE);
+        var progressTracker = new TestProgressTracker(progressTask, new LoggerForProgressTrackingAdapter(log), concurrency, EmptyTaskRegistryFactory.INSTANCE);
         return new ModularityOptimization(
             graph,
             maxIterations,

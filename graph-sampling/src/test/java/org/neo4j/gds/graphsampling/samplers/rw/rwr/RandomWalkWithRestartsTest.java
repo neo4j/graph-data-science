@@ -29,6 +29,7 @@ import org.neo4j.gds.TestTaskStore;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.utils.progress.LocalTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
@@ -430,7 +431,7 @@ class RandomWalkWithRestartsTest {
 
         TestTaskStore taskStore = new TestTaskStore();
         var taskRegistryFactory = new LocalTaskRegistryFactory("user", taskStore);
-        var tracker = new TestProgressTracker(task, new GdsTestLog(), new Concurrency(4), taskRegistryFactory);
+        var tracker = new TestProgressTracker(task, new LoggerForProgressTrackingAdapter(new GdsTestLog()), new Concurrency(4), taskRegistryFactory);
 
         rwr.compute(tinyGraph, tracker);
 

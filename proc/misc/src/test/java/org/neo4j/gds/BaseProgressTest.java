@@ -24,9 +24,9 @@ import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.ProgressFeatureSettings;
 import org.neo4j.gds.core.utils.progress.TaskRegistryExtension;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
+import org.neo4j.gds.core.utils.progress.tasks.LoggerForProgressTracking;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
-import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.procedures.memory.MemoryFacade;
 import org.neo4j.procedure.Context;
@@ -77,7 +77,7 @@ public abstract class BaseProgressTest extends BaseTest {
                 task.setMaxConcurrency(new Concurrency(REQUESTED_CPU_CORES));
             }
 
-            var taskProgressTracker = new TaskProgressTracker(task, Log.noOpLog(), new Concurrency(1), taskRegistryFactory);
+            var taskProgressTracker = new TaskProgressTracker(task, LoggerForProgressTracking.noOpLog(), new Concurrency(1), taskRegistryFactory);
             taskProgressTracker.beginSubTask();
             taskProgressTracker.beginSubTask();
             taskProgressTracker.logProgress(1);

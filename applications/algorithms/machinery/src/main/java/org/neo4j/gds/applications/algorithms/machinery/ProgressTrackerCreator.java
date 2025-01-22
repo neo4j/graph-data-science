@@ -20,6 +20,7 @@
 package org.neo4j.gds.applications.algorithms.machinery;
 
 import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
@@ -42,7 +43,7 @@ public class ProgressTrackerCreator {
         if (configuration.logProgress()) {
             return new TaskProgressTracker(
                 task,
-                log,
+                new LoggerForProgressTrackingAdapter(log),
                 configuration.concurrency(),
                 configuration.jobId(),
                 requestScopedDependencies.taskRegistryFactory(),
@@ -52,7 +53,7 @@ public class ProgressTrackerCreator {
 
         return new TaskTreeProgressTracker(
             task,
-            log,
+            new LoggerForProgressTrackingAdapter(log),
             configuration.concurrency(),
             configuration.jobId(),
             requestScopedDependencies.taskRegistryFactory(),

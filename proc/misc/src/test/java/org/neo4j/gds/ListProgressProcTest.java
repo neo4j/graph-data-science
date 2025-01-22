@@ -26,11 +26,11 @@ import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.RenamesCurrentThread;
 import org.neo4j.gds.core.utils.progress.JobId;
+import org.neo4j.gds.core.utils.progress.tasks.LoggerForProgressTracking;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.extension.FakeClockExtension;
 import org.neo4j.gds.extension.Inject;
-import org.neo4j.gds.logging.Log;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 import org.neo4j.time.FakeClock;
@@ -157,7 +157,7 @@ class ListProgressProcTest extends BaseProgressTest {
             var taskRegistry = taskRegistryFactory.newInstance(new JobId());
             this.taskRegistryFactory = jobId -> new NonReleasingTaskRegistry(taskRegistry);
 
-            var taskProgressTracker = new TaskProgressTracker(task, Log.noOpLog(), new Concurrency(1), taskRegistryFactory);
+            var taskProgressTracker = new TaskProgressTracker(task, LoggerForProgressTracking.noOpLog(), new Concurrency(1), taskRegistryFactory);
             taskProgressTracker.beginSubTask();
 
             taskProgressTracker.beginSubTask();

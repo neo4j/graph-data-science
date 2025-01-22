@@ -22,6 +22,8 @@ package org.neo4j.gds.applications.algorithms.embeddings;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.InspectableTestProgressTracker;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
+import org.neo4j.gds.core.utils.progress.PerDatabaseTaskStore;
 import org.neo4j.gds.embeddings.graphsage.AggregatorType;
 import org.neo4j.gds.embeddings.graphsage.GraphSageTestGraph;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfigImpl;
@@ -29,6 +31,7 @@ import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainTask;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
@@ -68,15 +71,18 @@ class NodeEmbeddingAlgorithmsGraphSageTest {
 
         var nodeEmbeddingAlgorithms = new NodeEmbeddingAlgorithms(null, null, TerminationFlag.RUNNING_TRUE);
 
+        var log = new GdsTestLog();
         var progressTracker = new InspectableTestProgressTracker(
             GraphSageTrainTask.create(graph, config),
             config.username(),
-            config.jobId()
+            config.jobId(),
+            new PerDatabaseTaskStore(),
+            new LoggerForProgressTrackingAdapter(log)
         );
 
         nodeEmbeddingAlgorithms.graphSageTrain(graph, config, progressTracker);
 
-        assertThat(progressTracker.log().getMessages(INFO))
+        assertThat(log.getMessages(INFO))
             // avoid asserting on the thread id
             .extracting(removingThreadId())
             .extracting(keepingFixedNumberOfDecimals(2))

@@ -34,6 +34,7 @@ import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies
 import org.neo4j.gds.applications.algorithms.similarity.SimilarityAlgorithms;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
+import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
@@ -844,7 +845,7 @@ final class NodeSimilarityTest {
         var configuration = NodeSimilarityStreamConfigImpl.builder().build();
         var progressTracker = new TestProgressTracker(
             similarityAlgorithms.constructNodeSimilarityTask(naturalGraph, configuration),
-            log,
+            new LoggerForProgressTrackingAdapter(log),
             new Concurrency(concurrencyValue),
             EmptyTaskRegistryFactory.INSTANCE
         );
@@ -881,7 +882,7 @@ final class NodeSimilarityTest {
             .build();
         var progressTracker = new TestProgressTracker(
             similarityAlgorithms.constructNodeSimilarityTask(naturalGraph, configuration),
-            log,
+            new LoggerForProgressTrackingAdapter(log),
             new Concurrency(4),
             EmptyTaskRegistryFactory.INSTANCE
         );
