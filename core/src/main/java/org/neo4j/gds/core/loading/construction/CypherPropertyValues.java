@@ -19,29 +19,43 @@
  */
 package org.neo4j.gds.core.loading.construction;
 
+import org.neo4j.gds.core.loading.GdsNeo4jValueConverter;
 import org.neo4j.gds.values.GdsValue;
 import org.neo4j.values.virtual.MapValue;
 
-import java.util.Map;
 import java.util.function.BiConsumer;
 
-public abstract class PropertyValues {
+final class CypherPropertyValues extends PropertyValues {
+    private final MapValue properties;
 
-    public abstract void forEach(BiConsumer<String, GdsValue> consumer);
-
-    public abstract boolean isEmpty();
-
-    public abstract int size();
-
-    public abstract Iterable<String> propertyKeys();
-
-    public abstract GdsValue get(String key);
-
-    public static PropertyValues of(MapValue mapValue) {
-        return new CypherPropertyValues(mapValue);
+    CypherPropertyValues(MapValue properties) {
+        this.properties = properties;
     }
 
-    public static PropertyValues of(Map<String, GdsValue> map) {
-        return new NativePropertyValues(map);
+    @Override
+    public void forEach(BiConsumer<String, GdsValue> consumer) {
+        this.properties.foreach((k, v) -> {
+            consumer.accept(k, GdsNeo4jValueConverter.toValue(v));
+        });
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return this.properties.isEmpty();
+    }
+
+    @Override
+    public int size() {
+        return this.properties.size();
+    }
+
+    @Override
+    public Iterable<String> propertyKeys() {
+        return this.properties.keySet();
+    }
+
+    @Override
+    public GdsValue get(String key) {
+        return GdsNeo4jValueConverter.toValue(properties.get(key));
     }
 }

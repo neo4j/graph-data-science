@@ -20,28 +20,40 @@
 package org.neo4j.gds.core.loading.construction;
 
 import org.neo4j.gds.values.GdsValue;
-import org.neo4j.values.virtual.MapValue;
 
 import java.util.Map;
+import java.util.Set;
 import java.util.function.BiConsumer;
 
-public abstract class PropertyValues {
+public final class NativePropertyValues extends PropertyValues {
+    private final Map<String, GdsValue> properties;
 
-    public abstract void forEach(BiConsumer<String, GdsValue> consumer);
-
-    public abstract boolean isEmpty();
-
-    public abstract int size();
-
-    public abstract Iterable<String> propertyKeys();
-
-    public abstract GdsValue get(String key);
-
-    public static PropertyValues of(MapValue mapValue) {
-        return new CypherPropertyValues(mapValue);
+    public NativePropertyValues(Map<String, GdsValue> properties) {
+        this.properties = properties;
     }
 
-    public static PropertyValues of(Map<String, GdsValue> map) {
-        return new NativePropertyValues(map);
+    @Override
+    public void forEach(BiConsumer<String, GdsValue> consumer) {
+        this.properties.forEach(consumer);
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return this.properties.isEmpty();
+    }
+
+    @Override
+    public int size() {
+        return this.properties.size();
+    }
+
+    @Override
+    public Set<String> propertyKeys() {
+        return this.properties.keySet();
+    }
+
+    @Override
+    public GdsValue get(String key) {
+        return properties.get(key);
     }
 }
