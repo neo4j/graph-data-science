@@ -19,9 +19,14 @@
  */
 package org.neo4j.gds.similarity.filterednodesim;
 
+import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.similarity.filtering.NodeFilterSpec;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityBaseConfig;
+
+import java.util.Collection;
 
 public interface FilteredNodeSimilarityBaseConfig extends NodeSimilarityBaseConfig {
 
@@ -35,5 +40,23 @@ public interface FilteredNodeSimilarityBaseConfig extends NodeSimilarityBaseConf
     @Configuration.ToMapValue("org.neo4j.gds.similarity.filtering.NodeFilterSpecFactory#render")
     default NodeFilterSpec targetNodeFilter() {
         return NodeFilterSpec.noOp;
+    }
+
+    @Configuration.GraphStoreValidationCheck
+    default void validateSourceNodeFilter(
+        GraphStore graphStore,
+        Collection<NodeLabel> selectedLabels,
+        Collection<RelationshipType> selectedRelationshipTypes
+    ) {
+        sourceNodeFilter().validate(graphStore, selectedLabels, "sourceNodeFilter");
+    }
+
+    @Configuration.GraphStoreValidationCheck
+    default void validateTargetNodeFilter(
+        GraphStore graphStore,
+        Collection<NodeLabel> selectedLabels,
+        Collection<RelationshipType> selectedRelationshipTypes
+    ) {
+        targetNodeFilter().validate(graphStore, selectedLabels, "targetNodeFilter");
     }
 }
