@@ -29,15 +29,14 @@ import org.neo4j.gds.config.WriteConfig;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.loading.Capabilities;
-import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
+import org.neo4j.gds.core.utils.progress.tasks.LoggerForProgressTracking;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.write.NodeProperty;
 import org.neo4j.gds.core.write.NodePropertyExporter;
 import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
-import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Collection;
@@ -51,14 +50,14 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
  * Common bits of node property writes, squirrelled away in one place
  */
 public class NodePropertyWriter {
-    private final Log log;
+    private final LoggerForProgressTracking log;
 
     private final NodePropertyExporterBuilder nodePropertyExporterBuilder;
     private final TaskRegistryFactory taskRegistryFactory;
     private final TerminationFlag terminationFlag;
 
     public NodePropertyWriter(
-        Log log,
+        LoggerForProgressTracking log,
         NodePropertyExporterBuilder nodePropertyExporterBuilder,
         TaskRegistryFactory taskRegistryFactory,
         TerminationFlag terminationFlag
@@ -111,7 +110,7 @@ public class NodePropertyWriter {
 
         return new TaskProgressTracker(
             task,
-            new LoggerForProgressTrackingAdapter(log),
+            log,
             writeConcurrency,
             taskRegistryFactory
         );

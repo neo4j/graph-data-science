@@ -30,8 +30,8 @@ import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.core.utils.logging.GdsLoggers;
 import org.neo4j.gds.core.utils.progress.TaskStoreService;
-import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.MemoryTracker;
 import org.neo4j.gds.metrics.Metrics;
 import org.neo4j.gds.procedures.ExporterBuildersProviderService;
@@ -54,7 +54,7 @@ final class GraphDataScienceProceduresProviderFactory {
     private final GraphStoreCatalogService graphStoreCatalogService = new GraphStoreCatalogService();
     private final PipelineRepository pipelineRepository = new PipelineRepository();
 
-    private final Log log;
+    private final GdsLoggers loggers;
 
     private final Configuration neo4jConfiguration;
     private final DefaultsConfiguration defaultsConfiguration;
@@ -71,7 +71,7 @@ final class GraphDataScienceProceduresProviderFactory {
     private final MemoryTracker memoryTracker;
 
     GraphDataScienceProceduresProviderFactory(
-        Log log,
+        GdsLoggers loggers,
         Configuration neo4jConfiguration,
         DefaultsConfiguration defaultsConfiguration,
         ExporterBuildersProviderService exporterBuildersProviderService,
@@ -86,7 +86,7 @@ final class GraphDataScienceProceduresProviderFactory {
         Optional<Function<ModelCatalogApplications, ModelCatalogApplications>> modelCatalogApplicationsDecorator,
         MemoryTracker memoryTracker
     ) {
-        this.log = log;
+        this.loggers = loggers;
         this.neo4jConfiguration = neo4jConfiguration;
         this.defaultsConfiguration = defaultsConfiguration;
         this.exporterBuildersProviderService = exporterBuildersProviderService;
@@ -108,12 +108,12 @@ final class GraphDataScienceProceduresProviderFactory {
         boolean useMaxMemoryEstimation,
         UserLogServices userLogServices
     ) {
-        var catalogProcedureFacadeFactory = new GraphCatalogProcedureFacadeFactory(log);
+        var catalogProcedureFacadeFactory = new GraphCatalogProcedureFacadeFactory(loggers.log());
 
-        var memoryGuard = DefaultMemoryGuard.create(log, useMaxMemoryEstimation, memoryTracker);
+        var memoryGuard = DefaultMemoryGuard.create(loggers.log(), useMaxMemoryEstimation, memoryTracker);
 
         return new GraphDataScienceProceduresProvider(
-            log,
+            loggers,
             neo4jConfiguration,
             defaultsConfiguration,
             exporterBuildersProviderService,

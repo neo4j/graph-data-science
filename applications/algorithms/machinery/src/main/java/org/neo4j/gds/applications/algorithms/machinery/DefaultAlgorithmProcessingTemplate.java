@@ -57,7 +57,12 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
         MemoryGuard memoryGuard,
         RequestScopedDependencies requestScopedDependencies
     ) {
-        var algorithmComputer = new ComputationService(requestScopedDependencies.user().getUsername(),log, memoryGuard, algorithmMetricsService);
+        var algorithmComputer = new ComputationService(
+            requestScopedDependencies.user().getUsername(),
+            log,
+            memoryGuard,
+            algorithmMetricsService
+        );
 
         return new DefaultAlgorithmProcessingTemplate(
             graphStoreCatalogService,

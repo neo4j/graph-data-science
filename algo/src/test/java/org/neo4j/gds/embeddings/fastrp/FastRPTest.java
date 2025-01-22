@@ -41,6 +41,7 @@ import org.neo4j.gds.core.loading.LabelInformationBuilders;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.core.utils.Intersections;
+import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.shuffle.ShuffleUtil;
@@ -550,7 +551,7 @@ class FastRPTest {
     @Test
     void shouldLogProgress() {
         var log = new GdsTestLog();
-        var progressTrackerCreator = new ProgressTrackerCreator(log, RequestScopedDependencies.builder()
+        var progressTrackerCreator = new ProgressTrackerCreator(new LoggerForProgressTrackingAdapter(log), RequestScopedDependencies.builder()
             .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
             .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
             .build());

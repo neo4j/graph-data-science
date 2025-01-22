@@ -59,7 +59,8 @@ class LinkPredictionPipelineStreamResultBuilder implements StreamResultBuilder<L
         );
 
         var lpGraphStoreFilter = LPGraphStoreFilterFactory.generate(
-            log, model.trainConfig(),
+            log,
+            model.trainConfig(),
             configuration,
             graphStore
         );

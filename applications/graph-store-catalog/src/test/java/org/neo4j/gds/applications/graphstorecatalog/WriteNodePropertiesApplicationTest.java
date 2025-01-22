@@ -36,7 +36,9 @@ import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.core.utils.logging.GdsLoggers;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
+import org.neo4j.gds.core.utils.progress.tasks.LoggerForProgressTracking;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.core.write.NodeProperty;
 import org.neo4j.gds.core.write.NodePropertyExporter;
@@ -111,7 +113,7 @@ class WriteNodePropertiesApplicationTest {
     @ParameterizedTest(name = "{1}")
     @MethodSource("nodeLabels")
     void writeNodeProperties(Object nodeLabels, String displayName) {
-        var nodePropertiesWriter = new WriteNodePropertiesApplication(Log.noOpLog());
+        var nodePropertiesWriter = new WriteNodePropertiesApplication(new GdsLoggers(Log.noOpLog(), LoggerForProgressTracking.noOpLog()));
 
         var exporterBuilderMock = mock(NodePropertyExporterBuilder.class, Answers.RETURNS_SELF);
         var nodePropertyExporterMock = mock(NodePropertyExporter.class);
@@ -157,7 +159,7 @@ class WriteNodePropertiesApplicationTest {
 
     @Test
     void writeNodePropertiesForLabel() {
-        var nodePropertiesWriter = new WriteNodePropertiesApplication(Log.noOpLog());
+        var nodePropertiesWriter = new WriteNodePropertiesApplication(new GdsLoggers(Log.noOpLog(), LoggerForProgressTracking.noOpLog()));
 
         var exporterBuilderMock = mock(NodePropertyExporterBuilder.class, Answers.RETURNS_SELF);
         var nodePropertyExporterMock = mock(NodePropertyExporter.class);
@@ -197,7 +199,7 @@ class WriteNodePropertiesApplicationTest {
 
     @Test
     void writeNodePropertiesForLabelSubset() {
-        var nodePropertiesWriter = new WriteNodePropertiesApplication(Log.noOpLog());
+        var nodePropertiesWriter = new WriteNodePropertiesApplication(new GdsLoggers(Log.noOpLog(), LoggerForProgressTracking.noOpLog()));
 
         var exporterBuilderMock = mock(NodePropertyExporterBuilder.class, Answers.RETURNS_SELF);
         var nodePropertyExporterMock = mock(NodePropertyExporter.class);
@@ -235,7 +237,7 @@ class WriteNodePropertiesApplicationTest {
 
     @Test
     void shouldRenameSingleProperly() {
-        var nodePropertiesWriter = new WriteNodePropertiesApplication(Log.noOpLog());
+        var nodePropertiesWriter = new WriteNodePropertiesApplication(new GdsLoggers(Log.noOpLog(), LoggerForProgressTracking.noOpLog()));
 
         var exporterBuilderMock = mock(NodePropertyExporterBuilder.class, Answers.RETURNS_SELF);
         var nodePropertyExporterMock = mock(NodePropertyExporter.class);
@@ -270,7 +272,7 @@ class WriteNodePropertiesApplicationTest {
 
     @Test
     void shouldRenameMultipleProperties() {
-        var nodePropertiesWriter = new WriteNodePropertiesApplication(Log.noOpLog());
+        var nodePropertiesWriter = new WriteNodePropertiesApplication(new GdsLoggers(Log.noOpLog(), LoggerForProgressTracking.noOpLog()));
 
         var exporterBuilderMock = mock(NodePropertyExporterBuilder.class, Answers.RETURNS_SELF);
         var nodePropertyExporterMock = mock(NodePropertyExporter.class);

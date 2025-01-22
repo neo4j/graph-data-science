@@ -26,6 +26,7 @@ import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.similarity.SimilarityAlgorithms;
 import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
@@ -162,7 +163,7 @@ class FilteredNodeSimilarityTest {
             .terminationFlag(TerminationFlag.RUNNING_TRUE)
             .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
             .build();
-        var progressTrackerCreator = new ProgressTrackerCreator(log, requestScopedDependencies);
+        var progressTrackerCreator = new ProgressTrackerCreator(new LoggerForProgressTrackingAdapter(log), requestScopedDependencies);
         var similarityAlgorithms = new SimilarityAlgorithms(progressTrackerCreator, requestScopedDependencies.terminationFlag());
 
         var sourceNodeFilter = List.of(graph.toOriginalNodeId("c"), graph.toOriginalNodeId("d"));

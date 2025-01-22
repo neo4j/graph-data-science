@@ -193,7 +193,8 @@ final class LinkPredictionComputation implements Computation<LinkPredictionResul
             .build();
 
         var lpGraphStoreFilter = LPGraphStoreFilterFactory.generate(
-            log, model.trainConfig(),
+            log,
+            model.trainConfig(),
             configuration,
             graphStore
         );

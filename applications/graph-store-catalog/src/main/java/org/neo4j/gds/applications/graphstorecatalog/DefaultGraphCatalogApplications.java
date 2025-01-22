@@ -26,6 +26,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
+import org.neo4j.gds.core.utils.logging.GdsLoggers;
 import org.neo4j.gds.beta.filter.GraphFilterResult;
 import org.neo4j.gds.config.BaseConfig;
 import org.neo4j.gds.core.io.GraphStoreExporterBaseConfig;
@@ -177,7 +178,7 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
     }
 
     public static GraphCatalogApplications create(
-        Log log,
+        GdsLoggers loggers,
         ExportLocation exportLocation,
         GraphStoreCatalogService graphStoreCatalogService,
         ProjectionMetricsService projectionMetricsService,
@@ -189,17 +190,17 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
 
         var cypherProjectApplication = new CypherProjectApplication(
             new GenericProjectApplication<>(
-                log,
+                loggers.log(),
                 graphStoreCatalogService,
                 GraphProjectCypherResult.Builder::new
             )
         );
         var dropGraphApplication = new DropGraphApplication(graphStoreCatalogService);
-        var dropNodePropertiesApplication = new DropNodePropertiesApplication(log);
-        var dropRelationshipsApplication = new DropRelationshipsApplication(log);
+        var dropNodePropertiesApplication = new DropNodePropertiesApplication(loggers.loggerForProgressTracking());
+        var dropRelationshipsApplication = new DropRelationshipsApplication(loggers.loggerForProgressTracking());
         var estimateCommonNeighbourAwareRandomWalkApplication = new EstimateCommonNeighbourAwareRandomWalkApplication();
         var exportToCsvApplication = new ExportToCsvApplication(
-            log,
+            loggers,
             graphDatabaseService,
             procedureTransaction,
             exportLocation,
@@ -207,38 +208,38 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
         );
         var exportToCsvEstimateApplication = new ExportToCsvEstimateApplication();
         var exportToDatabaseApplication = new ExportToDatabaseApplication(
-            log,
+            loggers,
             graphDatabaseService,
             procedureTransaction,
             requestScopedDependencies.taskRegistryFactory(),
             requestScopedDependencies.userLogRegistryFactory()
         );
-        var generateGraphApplication = new GenerateGraphApplication(log, graphStoreCatalogService);
+        var generateGraphApplication = new GenerateGraphApplication(loggers.log(), graphStoreCatalogService);
         var graphMemoryUsageApplication = new GraphMemoryUsageApplication(graphStoreCatalogService);
-        var graphSamplingApplication = new GraphSamplingApplication(log, graphStoreCatalogService);
+        var graphSamplingApplication = new GraphSamplingApplication(loggers.loggerForProgressTracking(), graphStoreCatalogService);
         var listGraphApplication = ListGraphApplication.create(graphStoreCatalogService);
         var nativeProjectApplication = new NativeProjectApplication(
             new GenericProjectApplication<>(
-                log,
+                loggers.log(),
                 graphStoreCatalogService,
                 GraphProjectNativeResult.Builder::new
             )
         );
         var nodeLabelMutatorApplication = new NodeLabelMutatorApplication();
-        var streamNodePropertiesApplication = new StreamNodePropertiesApplication(log);
-        var streamRelationshipPropertiesApplication = new StreamRelationshipPropertiesApplication(log);
+        var streamNodePropertiesApplication = new StreamNodePropertiesApplication(loggers.loggerForProgressTracking());
+        var streamRelationshipPropertiesApplication = new StreamRelationshipPropertiesApplication(loggers.loggerForProgressTracking());
         var streamRelationshipsApplication = new StreamRelationshipsApplication();
         var subGraphProjectApplication = new SubGraphProjectApplication(
-            log,
+            loggers,
             graphStoreCatalogService
         );
-        var writeNodeLabelApplication = new WriteNodeLabelApplication(log);
-        var writeNodePropertiesApplication = new WriteNodePropertiesApplication(log);
-        var writeRelationshipPropertiesApplication = new WriteRelationshipPropertiesApplication(log);
-        var writeRelationshipsApplication = new WriteRelationshipsApplication(log);
+        var writeNodeLabelApplication = new WriteNodeLabelApplication(loggers.log());
+        var writeNodePropertiesApplication = new WriteNodePropertiesApplication(loggers);
+        var writeRelationshipPropertiesApplication = new WriteRelationshipPropertiesApplication(loggers.log());
+        var writeRelationshipsApplication = new WriteRelationshipsApplication(loggers);
 
         return new DefaultGraphCatalogApplicationsBuilder(
-            log,
+            loggers.log(),
             graphStoreCatalogService,
             projectionMetricsService,
             requestScopedDependencies,

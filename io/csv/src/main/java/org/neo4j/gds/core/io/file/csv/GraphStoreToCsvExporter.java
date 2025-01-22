@@ -29,7 +29,7 @@ import org.neo4j.gds.core.io.NeoNodeProperties;
 import org.neo4j.gds.core.io.file.GraphStoreToFileExporter;
 import org.neo4j.gds.core.io.file.GraphStoreToFileExporterParameters;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
-import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.core.utils.progress.tasks.LoggerForProgressTracking;
 
 import java.nio.file.Path;
 import java.util.Optional;
@@ -45,7 +45,7 @@ public final class GraphStoreToCsvExporter {
         Path exportPath,
         Optional<NeoNodeProperties> neoNodeProperties,
         TaskRegistryFactory taskRegistryFactory,
-        Log log,
+        LoggerForProgressTracking log,
         ExecutorService executorService
     ) {
         Set<String> headerFiles = ConcurrentHashMap.newKeySet();

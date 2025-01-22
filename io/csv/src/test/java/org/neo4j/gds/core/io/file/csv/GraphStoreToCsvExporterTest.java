@@ -35,12 +35,12 @@ import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.io.file.GraphStoreToFileExporterParameters;
 import org.neo4j.gds.core.loading.Capabilities.WriteMode;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
+import org.neo4j.gds.core.utils.progress.tasks.LoggerForProgressTracking;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.gdl.GdlFactory;
-import org.neo4j.gds.logging.Log;
 
 import java.io.File;
 import java.io.IOException;
@@ -147,7 +147,7 @@ class GraphStoreToCsvExporterTest extends CsvTest {
             10_000
         );
         // export db
-        var exporter = GraphStoreToCsvExporter.create(graphStore, parameters, tempDir, Optional.empty(), TaskRegistryFactory.empty(), Log.noOpLog(), DefaultPool.INSTANCE);
+        var exporter = GraphStoreToCsvExporter.create(graphStore, parameters, tempDir, Optional.empty(), TaskRegistryFactory.empty(), LoggerForProgressTracking.noOpLog(), DefaultPool.INSTANCE);
         exporter.run();
 
         var aLabel = NodeLabel.of("A");
@@ -273,7 +273,7 @@ class GraphStoreToCsvExporterTest extends CsvTest {
             tempDir,
             Optional.empty(),
             TaskRegistryFactory.empty(),
-            Log.noOpLog(),
+            LoggerForProgressTracking.noOpLog(),
             DefaultPool.INSTANCE
         );
         exporter.run();
@@ -314,7 +314,7 @@ class GraphStoreToCsvExporterTest extends CsvTest {
             tempDir,
             Optional.empty(),
             TaskRegistryFactory.empty(),
-            Log.noOpLog(),
+            LoggerForProgressTracking.noOpLog(),
             DefaultPool.INSTANCE
         );
         exporter.run();
@@ -405,7 +405,7 @@ class GraphStoreToCsvExporterTest extends CsvTest {
             tempDir,
             Optional.empty(),
             TaskRegistryFactory.empty(),
-            Log.noOpLog(),
+            LoggerForProgressTracking.noOpLog(),
             DefaultPool.INSTANCE
         );
         exporter.run();
@@ -476,7 +476,7 @@ class GraphStoreToCsvExporterTest extends CsvTest {
             tempDir,
             Optional.empty(),
             TaskRegistryFactory.empty(),
-            Log.noOpLog(),
+            LoggerForProgressTracking.noOpLog(),
             DefaultPool.INSTANCE
         );
         exporter.run();
@@ -661,7 +661,7 @@ class GraphStoreToCsvExporterTest extends CsvTest {
             tempDir,
             Optional.empty(),
             TaskRegistryFactory.empty(),
-            Log.noOpLog(),
+            LoggerForProgressTracking.noOpLog(),
             DefaultPool.INSTANCE
         );
         exporter.run();
@@ -689,7 +689,7 @@ class GraphStoreToCsvExporterTest extends CsvTest {
             tempDir,
             Optional.empty(),
             TaskRegistryFactory.empty(),
-            Log.noOpLog(),
+            LoggerForProgressTracking.noOpLog(),
             DefaultPool.INSTANCE
         );
         exporter.run();
@@ -742,7 +742,7 @@ class GraphStoreToCsvExporterTest extends CsvTest {
             tempDir,
             Optional.empty(),
             TaskRegistryFactory.empty(),
-            Log.noOpLog(),
+            LoggerForProgressTracking.noOpLog(),
             DefaultPool.INSTANCE
         );
         exporter.run();
@@ -788,7 +788,7 @@ class GraphStoreToCsvExporterTest extends CsvTest {
             tempDir,
             Optional.empty(),
             TaskRegistryFactory.empty(),
-            Log.noOpLog(),
+            LoggerForProgressTracking.noOpLog(),
             DefaultPool.INSTANCE
         );
         exporter.run();

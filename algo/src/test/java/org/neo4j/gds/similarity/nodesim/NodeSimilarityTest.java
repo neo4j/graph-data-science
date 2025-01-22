@@ -790,7 +790,7 @@ final class NodeSimilarityTest {
             .terminationFlag(TerminationFlag.RUNNING_TRUE)
             .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
             .build();
-        var progressTrackerCreator = new ProgressTrackerCreator(log, requestScopedDependencies);
+        var progressTrackerCreator = new ProgressTrackerCreator(new LoggerForProgressTrackingAdapter(log), requestScopedDependencies);
         var similarityAlgorithms = new SimilarityAlgorithms(progressTrackerCreator, requestScopedDependencies.terminationFlag());
 
         similarityAlgorithms.nodeSimilarity(naturalGraph, NodeSimilarityBaseConfigImpl.builder().build());
@@ -813,7 +813,7 @@ final class NodeSimilarityTest {
             .terminationFlag(TerminationFlag.RUNNING_TRUE)
             .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
             .build();
-        var progressTrackerCreator = new ProgressTrackerCreator(log, requestScopedDependencies);
+        var progressTrackerCreator = new ProgressTrackerCreator(new LoggerForProgressTrackingAdapter(log), requestScopedDependencies);
         var similarityAlgorithms = new SimilarityAlgorithms(progressTrackerCreator, requestScopedDependencies.terminationFlag());
 
         similarityAlgorithms.nodeSimilarity(naturalGraph, NodeSimilarityBaseConfigImpl.builder().logProgress(false).build());

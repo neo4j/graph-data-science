@@ -47,6 +47,7 @@ import org.neo4j.gds.core.loading.construction.NodeLabelTokens;
 import org.neo4j.gds.core.model.InjectModelCatalog;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.model.ModelCatalogExtension;
+import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
@@ -245,7 +246,7 @@ class GraphSageTest {
             .terminationFlag(TerminationFlag.RUNNING_TRUE)
             .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
             .build();
-        var progressTrackerCreator = new ProgressTrackerCreator(log, requestScopedDependencies);
+        var progressTrackerCreator = new ProgressTrackerCreator(new LoggerForProgressTrackingAdapter(log), requestScopedDependencies);
         var nodeEmbeddingAlgorithms = new NodeEmbeddingAlgorithms(
             graphSageModelCatalog,
             progressTrackerCreator,

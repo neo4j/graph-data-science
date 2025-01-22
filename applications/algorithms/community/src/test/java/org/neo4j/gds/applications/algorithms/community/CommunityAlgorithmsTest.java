@@ -45,6 +45,7 @@ import org.neo4j.gds.conductance.ConductanceStreamConfigImpl;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
+import org.neo4j.gds.core.utils.progress.tasks.LoggerForProgressTracking;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -1087,7 +1088,7 @@ final class CommunityAlgorithmsTest {
 
     abstract static class TestProgressTrackerCreator extends ProgressTrackerCreator {
 
-        public TestProgressTrackerCreator(Log log, RequestScopedDependencies requestScopedDependencies) {
+        public TestProgressTrackerCreator(LoggerForProgressTracking log, RequestScopedDependencies requestScopedDependencies) {
             super(log, requestScopedDependencies);
         }
 

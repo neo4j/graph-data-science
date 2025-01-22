@@ -28,8 +28,8 @@ import org.neo4j.gds.core.io.NeoNodeProperties;
 import org.neo4j.gds.core.io.file.GraphStoreExporterUtil;
 import org.neo4j.gds.core.io.file.GraphStoreToFileExporterConfig;
 import org.neo4j.gds.core.io.file.GraphStoreToFileExporterParameters;
+import org.neo4j.gds.core.utils.logging.GdsLoggers;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
-import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.transaction.DatabaseTransactionContext;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
@@ -41,7 +41,7 @@ import static org.neo4j.gds.core.io.file.GraphStoreExporterUtil.EXPORT_DIR;
 import static org.neo4j.gds.core.io.file.GraphStoreExporterUtil.exportPath;
 
 class ExportToCsvApplication {
-    private final Log log;
+    private final GdsLoggers loggers;
 
     private final GraphDatabaseService graphDatabaseService;
     private final Transaction procedureTransaction;
@@ -50,13 +50,13 @@ class ExportToCsvApplication {
     private final TaskRegistryFactory taskRegistryFactory;
 
     ExportToCsvApplication(
-        Log log,
+        GdsLoggers loggers,
         GraphDatabaseService graphDatabaseService,
         Transaction procedureTransaction,
         ExportLocation exportLocation,
         TaskRegistryFactory taskRegistryFactory
     ) {
-        this.log = log;
+        this.loggers = loggers;
         this.graphDatabaseService = graphDatabaseService;
         this.procedureTransaction = procedureTransaction;
         this.exportLocation = exportLocation;
@@ -81,7 +81,7 @@ class ExportToCsvApplication {
             exportParameters,
             neoNodeProperties(configuration.additionalNodeProperties(), graphStore),
             taskRegistryFactory,
-            log,
+            loggers,
             DefaultPool.INSTANCE
         );
 
@@ -105,7 +105,7 @@ class ExportToCsvApplication {
             graphStore,
             DatabaseTransactionContext.of(graphDatabaseService, procedureTransaction),
             additionalNodeProperties,
-            log
+            loggers.log()
         );
     }
 

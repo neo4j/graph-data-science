@@ -25,9 +25,9 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.io.GraphStoreExporter;
 import org.neo4j.gds.core.io.NeoNodeProperties;
 import org.neo4j.gds.core.io.file.csv.GraphStoreToCsvExporter;
+import org.neo4j.gds.core.utils.logging.GdsLoggers;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.settings.GdsSettings;
-import org.neo4j.gds.logging.Log;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -49,7 +49,7 @@ public final class GraphStoreExporterUtil {
         GraphStoreToFileExporterParameters parameters,
         Optional<NeoNodeProperties> neoNodeProperties,
         TaskRegistryFactory taskRegistryFactory,
-        Log log,
+        GdsLoggers loggers,
         ExecutorService executorService
     ) {
         try {
@@ -59,7 +59,7 @@ public final class GraphStoreExporterUtil {
                 path,
                 neoNodeProperties,
                 taskRegistryFactory,
-                log,
+                loggers.loggerForProgressTracking(),
                 executorService
             );
 
@@ -68,13 +68,13 @@ public final class GraphStoreExporterUtil {
             var end = System.nanoTime();
 
             var tookMillis = TimeUnit.NANOSECONDS.toMillis(end - start);
-            log.info("[gds] Export completed for '%s' in %s ms", parameters.exportName(), tookMillis);
+            loggers.log().info("[gds] Export completed for '%s' in %s ms", parameters.exportName(), tookMillis);
             return ImmutableExportToCsvResult.of(
                 exportedProperties,
                 tookMillis
             );
         } catch (RuntimeException e) {
-            log.warn("CSV export failed", e);
+            loggers.log().warn("CSV export failed", e);
             throw e;
         }
     }

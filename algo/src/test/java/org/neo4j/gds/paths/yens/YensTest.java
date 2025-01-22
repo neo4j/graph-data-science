@@ -31,6 +31,7 @@ import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithms;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
@@ -154,7 +155,7 @@ class YensTest {
             .terminationFlag(TerminationFlag.RUNNING_TRUE)
             .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
             .build();
-        var progressTrackerCreator = new ProgressTrackerCreator(log, requestScopedDependencies);
+        var progressTrackerCreator = new ProgressTrackerCreator(new LoggerForProgressTrackingAdapter(log), requestScopedDependencies);
         var pathFindingAlgorithms = new PathFindingAlgorithms(requestScopedDependencies, progressTrackerCreator);
 
         var config = defaultSourceTargetConfigBuilder(1)
@@ -192,7 +193,7 @@ class YensTest {
             .terminationFlag(TerminationFlag.RUNNING_TRUE)
             .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
             .build();
-        var progressTrackerCreator = new ProgressTrackerCreator(log, requestScopedDependencies);
+        var progressTrackerCreator = new ProgressTrackerCreator(new LoggerForProgressTrackingAdapter(log), requestScopedDependencies);
         var pathFindingAlgorithms = new PathFindingAlgorithms(requestScopedDependencies, progressTrackerCreator);
 
         var config = defaultSourceTargetConfigBuilder(1)

@@ -47,7 +47,7 @@ public class GenerateGraphApplication {
     private final Log log;
     private final GraphStoreCatalogService graphStoreCatalogService;
 
-    public GenerateGraphApplication(Log log, GraphStoreCatalogService graphStoreCatalogService) {
+    GenerateGraphApplication(Log log, GraphStoreCatalogService graphStoreCatalogService) {
         this.log = log;
         this.graphStoreCatalogService = graphStoreCatalogService;
     }

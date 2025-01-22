@@ -22,17 +22,16 @@ package org.neo4j.gds.applications.graphstorecatalog;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.loading.DeletionResult;
-import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
+import org.neo4j.gds.core.utils.progress.tasks.LoggerForProgressTracking;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
-import org.neo4j.gds.logging.Log;
 
 public class DropRelationshipsApplication {
-    private final Log log;
+    private final LoggerForProgressTracking log;
 
-    public DropRelationshipsApplication(Log log) {
+    DropRelationshipsApplication(LoggerForProgressTracking log) {
         this.log = log;
     }
 
@@ -43,7 +42,7 @@ public class DropRelationshipsApplication {
         String relationshipType
     ) {
         var progressTrackerFactory = new ProgressTrackerFactory(
-            new LoggerForProgressTrackingAdapter(log),
+            log,
             taskRegistryFactory,
             userLogRegistryFactory
         );

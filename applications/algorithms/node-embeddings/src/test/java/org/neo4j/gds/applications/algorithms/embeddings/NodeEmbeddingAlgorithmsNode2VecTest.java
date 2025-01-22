@@ -26,6 +26,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.compat.TestLog;
+import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.embeddings.node2vec.Node2VecStreamConfigImpl;
@@ -72,7 +73,7 @@ class NodeEmbeddingAlgorithmsNode2VecTest {
             .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
             .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
             .build();
-        var progressTrackerCreator = new ProgressTrackerCreator(log, requestScopedDependencies);
+        var progressTrackerCreator = new ProgressTrackerCreator(new LoggerForProgressTrackingAdapter(log), requestScopedDependencies);
         var nodeEmbeddingAlgorithms = new NodeEmbeddingAlgorithms(null, progressTrackerCreator, null);
 
         var configuration = Node2VecStreamConfigImpl.builder().embeddingDimension(128).build();
@@ -105,7 +106,7 @@ class NodeEmbeddingAlgorithmsNode2VecTest {
             .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
             .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
             .build();
-        var progressTrackerCreator = new ProgressTrackerCreator(log, requestScopedDependencies);
+        var progressTrackerCreator = new ProgressTrackerCreator(new LoggerForProgressTrackingAdapter(log), requestScopedDependencies);
         var nodeEmbeddingAlgorithms = new NodeEmbeddingAlgorithms(null, progressTrackerCreator, null);
 
         var configuration = Node2VecStreamConfigImpl.builder().embeddingDimension(128).build();

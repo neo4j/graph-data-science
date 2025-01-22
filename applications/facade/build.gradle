@@ -13,6 +13,7 @@ dependencies {
 
     implementation project(":algo")
     implementation project(":algorithms-machinery")
+    implementation project(':application-services')
     implementation project(":centrality-algorithms")
     implementation project(":community-algorithms")
     implementation project(":core")

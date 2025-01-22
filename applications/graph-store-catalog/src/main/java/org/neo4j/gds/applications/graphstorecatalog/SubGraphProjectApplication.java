@@ -28,26 +28,25 @@ import org.neo4j.gds.config.GraphProjectFromGraphConfig;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.utils.ProgressTimer;
-import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
+import org.neo4j.gds.core.utils.logging.GdsLoggers;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
-import org.neo4j.gds.logging.Log;
 
 import java.util.concurrent.atomic.AtomicLong;
 
 public class SubGraphProjectApplication {
     private final GraphStoreFilterService graphStoreFilterService = new GraphStoreFilterService();
 
-    private final Log log;
+    private final GdsLoggers loggers;
     private final GraphStoreCatalogService graphStoreCatalogService;
 
     public SubGraphProjectApplication(
-        Log log,
+        GdsLoggers loggers,
         GraphStoreCatalogService graphStoreCatalogService
     ) {
-        this.log = log;
+        this.loggers = loggers;
         this.graphStoreCatalogService = graphStoreCatalogService;
     }
 
@@ -84,7 +83,7 @@ public class SubGraphProjectApplication {
                 countsAndTiming.getRight()
             );
         } catch (RuntimeException e) {
-            log.warn("Graph creation failed", e);
+            loggers.log().warn("Graph creation failed", e);
             throw e;
         }
     }
@@ -127,7 +126,7 @@ public class SubGraphProjectApplication {
 
         var progressTracker = new TaskProgressTracker(
             task,
-            new LoggerForProgressTrackingAdapter(log),
+            loggers.loggerForProgressTracking(),
             configuration.typedConcurrency(),
             configuration.jobId(),
             taskRegistryFactory,

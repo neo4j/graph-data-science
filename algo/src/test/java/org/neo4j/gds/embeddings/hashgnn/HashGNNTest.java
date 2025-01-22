@@ -280,7 +280,7 @@ class HashGNNTest {
         var requestScopedDependencies = RequestScopedDependencies.builder()
             .terminationFlag(TerminationFlag.RUNNING_TRUE)
             .build();
-        var progressTrackerCreator = new ProgressTrackerCreator(log, requestScopedDependencies);
+        var progressTrackerCreator = new ProgressTrackerCreator(new LoggerForProgressTrackingAdapter(log), requestScopedDependencies);
         var nodeEmbeddingAlgorithms = new NodeEmbeddingAlgorithms(null, progressTrackerCreator, requestScopedDependencies.terminationFlag());
 
         var g = dense ? doubleGraph : binaryGraph;

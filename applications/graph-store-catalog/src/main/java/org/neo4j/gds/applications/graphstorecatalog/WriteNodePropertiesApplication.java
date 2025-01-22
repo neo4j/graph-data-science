@@ -25,7 +25,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.ProgressTimer;
-import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
+import org.neo4j.gds.core.utils.logging.GdsLoggers;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -35,7 +35,6 @@ import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.core.write.NodeProperty;
 import org.neo4j.gds.core.write.NodePropertyExporter;
 import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
-import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
@@ -43,10 +42,10 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class WriteNodePropertiesApplication {
-    private final Log log;
+    private final GdsLoggers loggers;
 
-    public WriteNodePropertiesApplication(Log log) {
-        this.log = log;
+    public WriteNodePropertiesApplication(GdsLoggers loggers) {
+        this.loggers = loggers;
     }
 
     NodePropertiesWriteResult write(
@@ -76,7 +75,7 @@ public class WriteNodePropertiesApplication {
         );
         var progressTracker = new TaskProgressTracker(
             task,
-            new LoggerForProgressTrackingAdapter(log),
+            loggers.loggerForProgressTracking(),
             configuration.writeConcurrency(),
             new JobId(),
             taskRegistryFactory,
@@ -109,7 +108,7 @@ public class WriteNodePropertiesApplication {
                     .withPropertiesWritten(propertiesWritten)
                     .withConfig(configuration.toMap());
             } catch (RuntimeException e) {
-                log.warn("Node property writing failed", e);
+                loggers.log().warn("Node property writing failed", e);
                 throw e;
             }
         }

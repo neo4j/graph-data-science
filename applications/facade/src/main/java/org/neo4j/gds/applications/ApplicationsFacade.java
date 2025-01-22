@@ -42,9 +42,9 @@ import org.neo4j.gds.applications.modelcatalog.ModelCatalogApplications;
 import org.neo4j.gds.applications.modelcatalog.ModelRepository;
 import org.neo4j.gds.applications.operations.FeatureTogglesRepository;
 import org.neo4j.gds.applications.operations.OperationsApplications;
+import org.neo4j.gds.core.utils.logging.GdsLoggers;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.metrics.projections.ProjectionMetricsService;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
@@ -99,7 +99,7 @@ public final class ApplicationsFacade {
      * We can stuff all the boring structure stuff in here so nobody needs to worry about it.
      */
     public static ApplicationsFacade create(
-        Log log,
+        GdsLoggers loggers,
         ExportLocation exportLocation,
         Optional<Function<GraphCatalogApplications, GraphCatalogApplications>> graphCatalogApplicationsDecorator,
         Optional<Function<ModelCatalogApplications, ModelCatalogApplications>> modelCatalogApplicationsDecorator,
@@ -118,11 +118,11 @@ public final class ApplicationsFacade {
     ) {
         var algorithmProcessingTemplateConvenience = new AlgorithmProcessingTemplateConvenience(algorithmProcessingTemplate);
 
-        var mutateNodeProperty = new MutateNodeProperty(log);
-        var mutateRelationshipService =new MutateRelationshipService(log);
+        var mutateNodeProperty = new MutateNodeProperty(loggers.log());
+        var mutateRelationshipService =new MutateRelationshipService(loggers.log());
 
         var centralityApplications = CentralityApplications.create(
-            log,
+            loggers.log(),
             requestScopedDependencies,
             writeContext,
             algorithmEstimationTemplate,
@@ -132,7 +132,7 @@ public final class ApplicationsFacade {
         );
 
         var communityApplications = CommunityApplications.create(
-            log,
+            loggers.log(),
             requestScopedDependencies,
             writeContext,
             algorithmEstimationTemplate,
@@ -142,7 +142,7 @@ public final class ApplicationsFacade {
         );
 
         var graphCatalogApplications = createGraphCatalogApplications(
-            log,
+            loggers,
             exportLocation,
             graphStoreCatalogService,
             projectionMetricsService,
@@ -153,7 +153,7 @@ public final class ApplicationsFacade {
         );
 
         var machineLearningApplications = MachineLearningApplications.create(
-            log,
+            loggers.log(),
             requestScopedDependencies,
             writeContext,
             progressTrackerCreator,
@@ -163,7 +163,7 @@ public final class ApplicationsFacade {
         );
 
         var miscellaneousApplications = MiscellaneousApplications.create(
-            log,
+            loggers.log(),
             requestScopedDependencies,
             writeContext,
             algorithmEstimationTemplate,
@@ -180,7 +180,7 @@ public final class ApplicationsFacade {
         );
 
         var nodeEmbeddingApplications = NodeEmbeddingApplications.create(
-            log,
+            loggers.log(),
             requestScopedDependencies,
             writeContext,
             algorithmEstimationTemplate,
@@ -194,7 +194,7 @@ public final class ApplicationsFacade {
         var operationsApplications = OperationsApplications.create(featureTogglesRepository, requestScopedDependencies);
 
         var pathFindingApplications = PathFindingApplications.create(
-            log,
+            loggers.log(),
             requestScopedDependencies,
             writeContext,
             algorithmEstimationTemplate,
@@ -205,7 +205,7 @@ public final class ApplicationsFacade {
         );
 
         var similarityApplications = SimilarityApplications.create(
-            log,
+            loggers.log(),
             requestScopedDependencies,
             algorithmEstimationTemplate,
             algorithmProcessingTemplateConvenience,
@@ -229,7 +229,7 @@ public final class ApplicationsFacade {
     }
 
     private static GraphCatalogApplications createGraphCatalogApplications(
-        Log log,
+        GdsLoggers loggers,
         ExportLocation exportLocation,
         GraphStoreCatalogService graphStoreCatalogService,
         ProjectionMetricsService projectionMetricsService,
@@ -239,7 +239,7 @@ public final class ApplicationsFacade {
         Optional<Function<GraphCatalogApplications, GraphCatalogApplications>> graphCatalogApplicationsDecorator
     ) {
         var graphCatalogApplications = DefaultGraphCatalogApplications.create(
-            log,
+            loggers,
             exportLocation,
             graphStoreCatalogService,
             projectionMetricsService,

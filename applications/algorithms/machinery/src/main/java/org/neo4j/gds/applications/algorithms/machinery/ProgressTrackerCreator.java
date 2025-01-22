@@ -20,21 +20,20 @@
 package org.neo4j.gds.applications.algorithms.machinery;
 
 import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
+import org.neo4j.gds.core.utils.progress.tasks.LoggerForProgressTracking;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskTreeProgressTracker;
-import org.neo4j.gds.logging.Log;
 
 /**
  * Just some convenience, address this one day when we attack ProgressTracker
  */
 public class ProgressTrackerCreator {
-    private final Log log;
+    private final LoggerForProgressTracking log;
     private final RequestScopedDependencies requestScopedDependencies;
 
-    public ProgressTrackerCreator(Log log, RequestScopedDependencies requestScopedDependencies) {
+    public ProgressTrackerCreator(LoggerForProgressTracking log, RequestScopedDependencies requestScopedDependencies) {
         this.log = log;
         this.requestScopedDependencies = requestScopedDependencies;
     }
@@ -43,7 +42,7 @@ public class ProgressTrackerCreator {
         if (configuration.logProgress()) {
             return new TaskProgressTracker(
                 task,
-                new LoggerForProgressTrackingAdapter(log),
+                log,
                 configuration.concurrency(),
                 configuration.jobId(),
                 requestScopedDependencies.taskRegistryFactory(),
@@ -53,7 +52,7 @@ public class ProgressTrackerCreator {
 
         return new TaskTreeProgressTracker(
             task,
-            new LoggerForProgressTrackingAdapter(log),
+            log,
             configuration.concurrency(),
             configuration.jobId(),
             requestScopedDependencies.taskRegistryFactory(),

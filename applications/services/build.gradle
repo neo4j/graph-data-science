@@ -8,5 +8,6 @@ dependencies {
     implementation project(":graph-dimensions")
     implementation project(":config-api")
     implementation project(":core")
+    implementation project(":logging")
     implementation project(":progress-tracking")
 }

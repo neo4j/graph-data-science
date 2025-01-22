@@ -38,6 +38,7 @@ import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.core.utils.logging.GdsLoggers;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.MemoryTracker;
 import org.neo4j.gds.memest.DatabaseGraphStoreEstimationService;
@@ -98,7 +99,7 @@ public class LocalGraphDataScienceProcedures implements GraphDataScienceProcedur
     }
 
     public static GraphDataScienceProcedures create(
-        Log log,
+        GdsLoggers loggers,
         DefaultsConfiguration defaultsConfiguration,
         DependencyResolver dependencyResolver,
         ExportLocation exportLocation,
@@ -139,7 +140,7 @@ public class LocalGraphDataScienceProcedures implements GraphDataScienceProcedur
         );
 
         var algorithmProcessingTemplate = createAlgorithmProcessingTemplate(
-            log,
+            loggers.log(),
             algorithmProcessingTemplateDecorator,
             graphStoreCatalogService,
             memoryGuard,
@@ -147,10 +148,10 @@ public class LocalGraphDataScienceProcedures implements GraphDataScienceProcedur
             requestScopedDependencies
         );
 
-        var progressTrackerCreator = new ProgressTrackerCreator(log, requestScopedDependencies);
+        var progressTrackerCreator = new ProgressTrackerCreator(loggers.loggerForProgressTracking(), requestScopedDependencies);
 
         var applicationsFacade = ApplicationsFacade.create(
-            log,
+            loggers,
             exportLocation,
             graphCatalogApplicationsDecorator,
             modelCatalogApplicationsDecorator,
@@ -200,7 +201,7 @@ public class LocalGraphDataScienceProcedures implements GraphDataScienceProcedur
         var operationsProcedureFacade = new LocalOperationsProcedureFacade(applicationsFacade);
 
         var pipelinesProcedureFacade = LocalPipelinesProcedureFacade.create(
-            log,
+            loggers,
             graphStoreCatalogService,
             modelCatalog,
             modelRepository,
@@ -224,7 +225,7 @@ public class LocalGraphDataScienceProcedures implements GraphDataScienceProcedur
             algorithmProcessingTemplate
         );
 
-        return new GraphDataScienceProceduresBuilder(log)
+        return new GraphDataScienceProceduresBuilder(loggers.log())
             .with(algorithmsProcedureFacade)
             .with(graphCatalogProcedureFacade)
             .with(modelCatalogProcedureFacade)

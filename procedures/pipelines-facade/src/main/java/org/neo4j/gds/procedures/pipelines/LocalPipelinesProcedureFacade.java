@@ -31,11 +31,11 @@ import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.applications.modelcatalog.ModelRepository;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.core.utils.logging.GdsLoggers;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.core.write.RelationshipExporterBuilder;
-import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.metrics.Metrics;
 import org.neo4j.gds.ml.pipeline.TrainingPipeline;
 import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
@@ -65,7 +65,7 @@ public final class LocalPipelinesProcedureFacade implements PipelinesProcedureFa
     }
 
     public static PipelinesProcedureFacade create(
-        Log log,
+        GdsLoggers loggers,
         GraphStoreCatalogService graphStoreCatalogService,
         ModelCatalog modelCatalog,
         ModelRepository modelRepository,
@@ -91,7 +91,7 @@ public final class LocalPipelinesProcedureFacade implements PipelinesProcedureFa
         var pipelineConfigurationParser = new PipelineConfigurationParser(user);
 
         var pipelineApplications = PipelineApplications.create(
-            log,
+            loggers,
             graphStoreCatalogService,
             modelCatalog,
             modelRepository,

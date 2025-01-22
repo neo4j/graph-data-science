@@ -30,6 +30,8 @@ import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.model.OpenModelCatalog;
+import org.neo4j.gds.core.utils.logging.GdsLoggers;
+import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.utils.progress.EmptyTaskStore;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
@@ -168,8 +170,10 @@ public final class ProcedureRunner {
 
         var modelCatalog = new OpenModelCatalog();
 
+        var loggers = new GdsLoggers(gdsLog, new LoggerForProgressTrackingAdapter(gdsLog));
+
         return LocalGraphDataScienceProcedures.create(
-            gdsLog,
+            loggers,
             DefaultsConfiguration.Instance,
             null,
             null,

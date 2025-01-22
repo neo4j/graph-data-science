@@ -41,6 +41,7 @@ import org.neo4j.gds.core.loading.HighLimitIdMapBuilder;
 import org.neo4j.gds.core.loading.ImmutableStaticCapabilities;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
+import org.neo4j.gds.core.utils.progress.tasks.LoggerForProgressTracking;
 import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.gds.logging.Log;
 
@@ -98,7 +99,7 @@ class CsvToGraphStoreImporterIntegrationTest {
             graphLocation,
             Optional.empty(),
             TaskRegistryFactory.empty(),
-            Log.noOpLog(),
+            LoggerForProgressTracking.noOpLog(),
             DefaultPool.INSTANCE
         ).run();
 
@@ -125,7 +126,7 @@ class CsvToGraphStoreImporterIntegrationTest {
             graphLocation,
             Optional.empty(),
             TaskRegistryFactory.empty(),
-            Log.noOpLog(),
+            LoggerForProgressTracking.noOpLog(),
             DefaultPool.INSTANCE
         ).run();
         var importer = new CsvToGraphStoreImporter(new Concurrency(concurrency), graphLocation, Log.noOpLog(), EmptyTaskRegistryFactory.INSTANCE);
@@ -161,7 +162,7 @@ class CsvToGraphStoreImporterIntegrationTest {
             graphLocation,
             Optional.empty(),
             TaskRegistryFactory.empty(),
-            Log.noOpLog(),
+            LoggerForProgressTracking.noOpLog(),
             DefaultPool.INSTANCE
         ).run();
 
@@ -183,7 +184,7 @@ class CsvToGraphStoreImporterIntegrationTest {
             graphLocation,
             Optional.empty(),
             TaskRegistryFactory.empty(),
-            Log.noOpLog(),
+            LoggerForProgressTracking.noOpLog(),
             DefaultPool.INSTANCE
         ).run();
 
@@ -210,7 +211,7 @@ class CsvToGraphStoreImporterIntegrationTest {
             graphLocation,
             Optional.empty(),
             TaskRegistryFactory.empty(),
-            Log.noOpLog(),
+            LoggerForProgressTracking.noOpLog(),
             DefaultPool.INSTANCE
         ).run();
 
@@ -239,7 +240,7 @@ class CsvToGraphStoreImporterIntegrationTest {
             graphLocation,
             Optional.empty(),
             TaskRegistryFactory.empty(),
-            Log.noOpLog(),
+            LoggerForProgressTracking.noOpLog(),
             DefaultPool.INSTANCE
         ).run();
 
@@ -262,7 +263,7 @@ class CsvToGraphStoreImporterIntegrationTest {
             graphLocation,
             Optional.empty(),
             TaskRegistryFactory.empty(),
-            Log.noOpLog(),
+            LoggerForProgressTracking.noOpLog(),
             DefaultPool.INSTANCE
         ).run();
 

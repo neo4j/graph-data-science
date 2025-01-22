@@ -47,7 +47,7 @@ public class GenericProjectApplication<RESULT extends GraphProjectResult, CONFIG
     private final GraphStoreCatalogService graphStoreCatalogService;
     private final Function<CONFIGURATION, RESULT_BUILDER> resultBuilderFactory;
 
-    public GenericProjectApplication(
+    GenericProjectApplication(
         Log log,
         GraphStoreCatalogService graphStoreCatalogService,
         Function<CONFIGURATION, RESULT_BUILDER> resultBuilderFactory

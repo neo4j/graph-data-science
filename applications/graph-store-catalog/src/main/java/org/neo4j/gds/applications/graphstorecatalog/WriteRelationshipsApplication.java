@@ -25,7 +25,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.core.utils.ProgressTimer;
-import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
+import org.neo4j.gds.core.utils.logging.GdsLoggers;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -33,17 +33,16 @@ import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.core.write.RelationshipExporter;
 import org.neo4j.gds.core.write.RelationshipExporterBuilder;
-import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.values.storable.Values;
 
 import java.util.Optional;
 
-public class WriteRelationshipsApplication {
-    private final Log log;
+class WriteRelationshipsApplication {
+    private final GdsLoggers loggers;
 
-    public WriteRelationshipsApplication(Log log) {
-        this.log = log;
+    WriteRelationshipsApplication(GdsLoggers loggers) {
+        this.loggers = loggers;
     }
 
     WriteRelationshipResult compute(
@@ -61,7 +60,7 @@ public class WriteRelationshipsApplication {
 
         var progressTracker = new TaskProgressTracker(
             RelationshipExporter.baseTask("Graph", relationshipCount),
-            new LoggerForProgressTrackingAdapter(log),
+            loggers.loggerForProgressTracking(),
             RelationshipExporterBuilder.TYPED_DEFAULT_WRITE_CONCURRENCY,
             configuration.jobId(),
             taskRegistryFactory,
@@ -95,7 +94,7 @@ public class WriteRelationshipsApplication {
                 // result
                 return builder.build();
             } catch (RuntimeException e) {
-                log.warn("Writing relationships failed", e);
+                loggers.log().warn("Writing relationships failed", e);
                 throw e;
             }
         }

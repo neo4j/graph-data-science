@@ -24,6 +24,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.api.User;
+import org.neo4j.gds.core.utils.logging.GdsLoggers;
+import org.neo4j.gds.core.utils.progress.tasks.LoggerForProgressTracking;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline;
@@ -45,7 +47,7 @@ class NodeClassificationPipelineAddStepProcsTest extends BaseProcTest {
     @BeforeEach
     void setUp() {
         LocalPipelinesProcedureFacade.create(
-            null,
+            new GdsLoggers(Log.noOpLog(), LoggerForProgressTracking.noOpLog()),
             null,
             null,
             null,
@@ -321,7 +323,7 @@ class NodeClassificationPipelineAddStepProcsTest extends BaseProcTest {
     private GraphDataScienceProcedures buildFacade() {
         return new GraphDataScienceProceduresBuilder(Log.noOpLog())
             .with(LocalPipelinesProcedureFacade.create(
-                null,
+                new GdsLoggers(Log.noOpLog(), LoggerForProgressTracking.noOpLog()),
                 null,
                 null,
                 null,

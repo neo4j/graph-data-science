@@ -30,12 +30,11 @@ import org.neo4j.gds.core.io.db.GraphStoreToDatabaseExporter;
 import org.neo4j.gds.core.io.db.GraphStoreToDatabaseExporterConfig;
 import org.neo4j.gds.core.io.db.GraphStoreToDatabaseExporterParameters;
 import org.neo4j.gds.core.io.db.ProgressTrackerExecutionMonitor;
-import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
+import org.neo4j.gds.core.utils.logging.GdsLoggers;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
-import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.transaction.DatabaseTransactionContext;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
@@ -43,7 +42,7 @@ import org.neo4j.graphdb.Transaction;
 import java.util.Optional;
 
 class ExportToDatabaseApplication {
-    private final Log log;
+    private final GdsLoggers loggers;
 
     private final GraphDatabaseService graphDatabaseService;
     private final Transaction procedureTransaction;
@@ -52,13 +51,13 @@ class ExportToDatabaseApplication {
     private final UserLogRegistryFactory userLogRegistryFactory;
 
     ExportToDatabaseApplication(
-        Log log,
+        GdsLoggers loggers,
         GraphDatabaseService graphDatabaseService,
         Transaction procedureTransaction,
         TaskRegistryFactory taskRegistryFactory,
         UserLogRegistryFactory userLogRegistryFactory
     ) {
-        this.log = log;
+        this.loggers = loggers;
         this.graphDatabaseService = graphDatabaseService;
         this.procedureTransaction = procedureTransaction;
         this.taskRegistryFactory = taskRegistryFactory;
@@ -72,7 +71,7 @@ class ExportToDatabaseApplication {
     ) {
         var progressTracker = new TaskProgressTracker(
             ProgressTrackerExecutionMonitor.progressTask(graphStore),
-            new LoggerForProgressTrackingAdapter(log),
+            loggers.loggerForProgressTracking(),
             configuration.typedWriteConcurrency(),
             configuration.jobId(),
             taskRegistryFactory,
@@ -93,7 +92,7 @@ class ExportToDatabaseApplication {
             graphDatabaseService,
             parameters,
             neoNodeProperties(configuration.additionalNodeProperties(), graphStore),
-            log,
+            loggers.log(),
             progressTracker
         );
 
@@ -121,7 +120,7 @@ class ExportToDatabaseApplication {
             graphStore,
             DatabaseTransactionContext.of(graphDatabaseService, procedureTransaction),
             additionalNodeProperties,
-            log
+            loggers.log()
         );
     }
 

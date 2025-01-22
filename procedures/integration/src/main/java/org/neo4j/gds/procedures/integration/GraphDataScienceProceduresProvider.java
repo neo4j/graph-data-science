@@ -33,9 +33,9 @@ import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.core.utils.logging.GdsLoggers;
 import org.neo4j.gds.core.utils.progress.TaskStoreService;
 import org.neo4j.gds.core.write.ExporterContext;
-import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.MemoryTracker;
 import org.neo4j.gds.metrics.Metrics;
 import org.neo4j.gds.procedures.DatabaseIdAccessor;
@@ -69,7 +69,7 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
     private final ProcedureTransactionAccessor procedureTransactionAccessor = new ProcedureTransactionAccessor();
     private final UserAccessor userAccessor = new UserAccessor();
 
-    private final Log log;
+    private final GdsLoggers loggers;
     private final Configuration neo4jConfiguration;
 
     private final DefaultsConfiguration defaultsConfiguration;
@@ -94,7 +94,7 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
     private final MemoryTracker memoryTracker;
 
     GraphDataScienceProceduresProvider(
-        Log log,
+        GdsLoggers loggers,
         Configuration neo4jConfiguration,
         DefaultsConfiguration defaultsConfiguration,
         ExporterBuildersProviderService exporterBuildersProviderService,
@@ -116,7 +116,7 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
         Optional<Function<ModelCatalogApplications, ModelCatalogApplications>> modelCatalogApplicationsDecorator,
         MemoryTracker memoryTracker
     ) {
-        this.log = log;
+        this.loggers = loggers;
         this.neo4jConfiguration = neo4jConfiguration;
 
         this.defaultsConfiguration = defaultsConfiguration;
@@ -170,7 +170,7 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
             taskRegistryFactory,
             terminationFlag,
             userLogRegistryFactory,
-            log
+            loggers.log()
         );
 
         var requestScopedDependencies = RequestScopedDependencies.builder()
@@ -185,7 +185,7 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
             .build();
 
         return LocalGraphDataScienceProcedures.create(
-            log,
+            loggers,
             defaultsConfiguration,
             dependencyResolver,
             exportLocation,

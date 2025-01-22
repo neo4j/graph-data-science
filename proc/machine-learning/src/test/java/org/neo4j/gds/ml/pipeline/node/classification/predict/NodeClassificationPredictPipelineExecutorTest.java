@@ -43,11 +43,14 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.OpenModelCatalog;
+import org.neo4j.gds.core.utils.logging.GdsLoggers;
 import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.utils.progress.PerDatabaseTaskStore;
+import org.neo4j.gds.core.utils.progress.tasks.LoggerForProgressTracking;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.logging.GdsTestLog;
+import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.decisiontree.DecisionTreePredictor;
@@ -442,7 +445,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
             .build();
 
         var applicationsFacade = ApplicationsFacade.create(
-            null,
+            new GdsLoggers(Log.noOpLog(), LoggerForProgressTracking.noOpLog()),
             null,
             Optional.empty(),
             Optional.empty(),

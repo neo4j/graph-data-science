@@ -33,10 +33,10 @@ import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Map;
 
-public class WriteNodeLabelApplication {
+class WriteNodeLabelApplication {
     private final Log log;
 
-    public WriteNodeLabelApplication(Log log) {
+    WriteNodeLabelApplication(Log log) {
         this.log = log;
     }
 

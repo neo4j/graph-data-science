@@ -24,14 +24,13 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
+import org.neo4j.gds.core.utils.progress.tasks.LoggerForProgressTracking;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
-import org.neo4j.gds.logging.Log;
 
 import java.util.Collection;
 import java.util.List;
@@ -43,9 +42,9 @@ import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 public class StreamRelationshipPropertiesApplication {
-    private final Log log;
+    private final LoggerForProgressTracking log;
 
-    public StreamRelationshipPropertiesApplication(Log log) {
+    protected StreamRelationshipPropertiesApplication(LoggerForProgressTracking log) {
         this.log = log;
     }
 
@@ -79,7 +78,7 @@ public class StreamRelationshipPropertiesApplication {
 
         var taskProgressTracker = new TaskProgressTracker(
             task,
-            new LoggerForProgressTrackingAdapter(log),
+            log,
             configuration.concurrency(),
             new JobId(),
             taskRegistryFactory,

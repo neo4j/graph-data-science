@@ -24,6 +24,7 @@ import org.neo4j.gds.applications.algorithms.machinery.StandardLabel;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.WritePropertyConfig;
 import org.neo4j.gds.core.utils.ProgressTimer;
+import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
@@ -80,7 +81,7 @@ public class WriteNodePropertiesComputationResultConsumer<ALGO extends Algorithm
             var taskRegistryFactory = executionContext.taskRegistryFactory();
             var terminationFlag = computationResult.algorithm().terminationFlag;
             var nodePropertyWriter = new NodePropertyWriter(
-                log,
+                new LoggerForProgressTrackingAdapter(log),
                 nodePropertyExporterBuilder,
                 taskRegistryFactory,
                 terminationFlag

@@ -32,10 +32,10 @@ import org.neo4j.values.storable.Values;
 
 import java.util.List;
 
-public class WriteRelationshipPropertiesApplication {
+class WriteRelationshipPropertiesApplication {
     private final Log log;
 
-    public WriteRelationshipPropertiesApplication(Log log) {
+    WriteRelationshipPropertiesApplication(Log log) {
         this.log = log;
     }
 

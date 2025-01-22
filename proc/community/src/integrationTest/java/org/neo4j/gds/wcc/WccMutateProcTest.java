@@ -65,6 +65,8 @@ import org.neo4j.gds.core.GraphStoreFactorySupplier;
 import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
+import org.neo4j.gds.core.utils.logging.GdsLoggers;
+import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
@@ -597,7 +599,7 @@ class WccMutateProcTest extends BaseProcTest {
             requestScopedDependencies
         );
         var applicationsFacade = ApplicationsFacade.create(
-            logMock,
+            new GdsLoggers(logMock, new LoggerForProgressTrackingAdapter(logMock)),
             null,
             Optional.empty(),
             Optional.empty(),
@@ -610,7 +612,7 @@ class WccMutateProcTest extends BaseProcTest {
             null,
             null,
             null,
-            new ProgressTrackerCreator(logMock, requestScopedDependencies),
+            new ProgressTrackerCreator(new LoggerForProgressTrackingAdapter(logMock), requestScopedDependencies),
             null,
             algorithmProcessingTemplate
         );

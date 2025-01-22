@@ -35,13 +35,12 @@ import org.neo4j.gds.core.io.schema.NodeSchemaVisitor;
 import org.neo4j.gds.core.io.schema.RelationshipSchemaVisitor;
 import org.neo4j.gds.core.io.schema.SimpleVisitor;
 import org.neo4j.gds.core.loading.Capabilities;
-import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
+import org.neo4j.gds.core.utils.progress.tasks.LoggerForProgressTracking;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
-import org.neo4j.gds.logging.Log;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -69,7 +68,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter {
     private final Supplier<SimpleWriter<Capabilities>> graphCapabilitiesWriterSupplier;
 
     private final TaskRegistryFactory taskRegistryFactory;
-    private final Log log;
+    private final LoggerForProgressTracking log;
     private final String rootTaskName;
     private final ExecutorService executorService;
 
@@ -91,7 +90,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter {
         VisitorProducer<RelationshipVisitor> relationshipVisitorSupplier,
         VisitorProducer<GraphPropertyVisitor> graphPropertyVisitorSupplier,
         TaskRegistryFactory taskRegistryFactory,
-        Log log,
+        LoggerForProgressTracking log,
         String rootTaskName,
         ExecutorService executorService
     ) {
@@ -167,7 +166,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter {
         }
 
         var task = Tasks.task(rootTaskName + " export", importTasks);
-        return new TaskProgressTracker(task, new LoggerForProgressTrackingAdapter(log), concurrency, taskRegistryFactory);
+        return new TaskProgressTracker(task, log, concurrency, taskRegistryFactory);
     }
 
     private void exportNodes(
