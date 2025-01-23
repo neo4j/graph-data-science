@@ -179,6 +179,8 @@ class KdTreeBuilderTest {
         assertThat(rightleftright.aabb().max()).containsExactly(8.0, 1.0);
         assertThat(rightleftright.start()).isEqualTo(4);
         assertThat(rightleftright.end()).isEqualTo(5);
+
+        assertThat(kdTree.treeNodeCount()).isEqualTo(11);
     }
 
 }

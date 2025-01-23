@@ -33,16 +33,22 @@ class  KdNode{
     private  KdNode parent;
     private  KdNode sibling;
     private Optional<SplitInformation> splitInformation;
+    private final long id;
 
-    static  KdNode createLeaf(long start, long end, AABB aabb){
-        return new KdNode(start,end,aabb,true, Optional.empty());
+    static  KdNode createLeaf(long id, long start, long end, AABB aabb){
+        return new KdNode(id,start,end,aabb,true, Optional.empty());
     }
 
-    static KdNode createSplitNode(long start, long end, AABB aabb, SplitInformation splitInformation){
-        return  new KdNode(start,end,aabb,false, Optional.of(splitInformation));
+    static KdNode createSplitNode(long id, long start, long end, AABB aabb, SplitInformation splitInformation){
+        return  new KdNode(id, start,end,aabb,false, Optional.of(splitInformation));
     }
 
-    private KdNode(long start, long end, AABB aabb, boolean isLeaf, Optional<SplitInformation> splitInformation) {
+    long id(){
+        return id;
+    }
+
+    private KdNode(long id, long start, long end, AABB aabb, boolean isLeaf, Optional<SplitInformation> splitInformation) {
+        this.id = id;
         this.start = start;
         this.end = end;
         this.aabb = aabb;
