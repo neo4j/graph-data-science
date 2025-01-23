@@ -87,7 +87,9 @@ public class DagLongestPath extends Algorithm<PathFindingResult> {
         initializeInDegrees();
         traverse();
 
-        return new PathFindingResult(pathResults(parentsAndDistances, concurrency), progressTracker::endSubTask);
+        this.progressTracker.endSubTask("LongestPath");
+
+        return new PathFindingResult(pathResults(parentsAndDistances, concurrency));
     }
 
     private void initializeInDegrees() {

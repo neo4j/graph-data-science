@@ -558,7 +558,7 @@ class RandomWalkTest {
         }
 
         @Test
-        void shouldLogProgressOnWeightedGraph() throws InterruptedException {
+        void shouldLogProgressOnWeightedGraph() {
 
             var config = RandomWalkStreamConfigImpl.builder()
                 .walkLength(10)

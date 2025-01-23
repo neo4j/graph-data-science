@@ -118,9 +118,9 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
         progressTracker.beginSubTask("RandomWalk");
         var taskSupplier = createRandomWalkTaskSupplier();
 
-        startWalkers(
-            taskSupplier,
-            () -> progressTracker.endSubTask("RandomWalk")
+        startWalkers(taskSupplier,
+            progressTracker::endSubTask,
+            progressTracker::endSubTaskWithFailure
         );
         return streamWalks(walks);
     }
@@ -145,16 +145,25 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
         );
     }
 
-    private void startWalkers(RandomWalkTaskSupplier taskSupplier, Runnable whenCompleteAction) {
+    private void startWalkers(RandomWalkTaskSupplier taskSupplier, Runnable onComplete, Runnable onException) {
         var tasks = IntStream
             .range(0, this.concurrency.value())
             .mapToObj(i -> taskSupplier.get())
             .collect(Collectors.toList());
 
         CompletableFuture.runAsync(
-            () -> runTasks(tasks),
-            ExecutorServiceUtil.DEFAULT_SINGLE_THREAD_POOL
-        ).whenComplete((__, ___) -> whenCompleteAction.run());
+                () -> runTasks(tasks),
+                ExecutorServiceUtil.DEFAULT_SINGLE_THREAD_POOL
+            )
+            .whenComplete((__, throwable) -> {
+                    if (throwable != null) {
+                        progressTracker.logInfo("Failed to create walks: " + throwable.getMessage());
+                        onException.run();
+                    } else {
+                        onComplete.run();
+                    }
+                }
+            );
     }
 
     private void runTasks(Iterable<? extends Runnable> tasks) {

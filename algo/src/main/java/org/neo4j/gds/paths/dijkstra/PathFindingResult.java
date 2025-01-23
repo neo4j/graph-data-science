@@ -40,6 +40,7 @@ public class PathFindingResult {
         this(paths, () -> {});
     }
 
+    // TODO how to fail the tasks on exceptions?
     public PathFindingResult(Stream<PathResult> paths, Runnable closeStreamAction) {
         this.paths = paths;
         this.closeStreamAction = closeStreamAction;

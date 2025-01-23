@@ -109,7 +109,7 @@ public class PathFindingAlgorithms {
 
     Stream<AllShortestPathsStreamResult> allShortestPaths(Graph graph, AllShortestPathsConfig configuration) {
         var algorithm = selectAlgorithm(graph, configuration);
-
+        // no progresstracker to close
         return algorithm.compute();
     }
 
@@ -247,7 +247,7 @@ public class PathFindingAlgorithms {
         return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
             algorithm,
             progressTracker,
-            false,
+            true,
             concurrency
         );
     }
@@ -275,7 +275,7 @@ public class PathFindingAlgorithms {
         return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
             algorithm,
             progressTracker,
-            false,
+            false, // progress tracker released internally
             configuration.concurrency()
         );
     }
