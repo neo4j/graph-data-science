@@ -21,6 +21,7 @@ package org.neo4j.gds.hdbscan;
 
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.core.utils.Intersections;
 
 import java.util.OptionalLong;
 import java.util.stream.LongStream;
@@ -59,6 +60,10 @@ public class KdTree {
         return kdNode.sibling();
     }
 
+    long  nodeAt(long index){
+        return  ids.get(index);
+    }
+
     LongStream nodesContained(KdNode node) {
         var start = node.start();
         var end = node.end();
@@ -92,7 +97,7 @@ public class KdTree {
                         return;
                     }
                     var point = nodePropertyValues.doubleArrayValue(nodeId);
-                    double distance = euclideanDistance(point, queryPoint);
+                    double distance = Intersections.sumSquareDelta(point, queryPoint);
                     var neighbour = new Neighbour(nodeId, distance);
                     queue.offer(neighbour);
                 }
@@ -121,13 +126,5 @@ public class KdTree {
         }
     }
 
-    private double euclideanDistance(double[] point, double[] queryPoint) {
-        var dim = point.length;
-        var sum = 0.0;
-        for (int i = 0; i < dim; i++) {
-            var diff = point[i] - queryPoint[i];
-            sum += diff * diff;
-        }
-        return Math.sqrt(sum);
-    }
+
 }

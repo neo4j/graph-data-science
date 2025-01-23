@@ -104,6 +104,10 @@ public final class Intersections {
         return intersection;
     }
 
+    public static double sumSquareDelta(double[] vector1, double[] vector2) {
+        assert  vector1.length == vector2.length;
+        return  sumSquareDelta(vector1,vector2,vector1.length);
+    }
     public static double sumSquareDelta(double[] vector1, double[] vector2, int len) {
         double result = 0;
         for (int i = 0; i < len; i++) {
