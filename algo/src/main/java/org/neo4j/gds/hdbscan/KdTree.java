@@ -30,11 +30,13 @@ public class KdTree {
     private final HugeLongArray ids;
     private final NodePropertyValues nodePropertyValues;
     private final KdNode root;
+    private final long treeNodeCount;
 
-    KdTree(HugeLongArray ids, NodePropertyValues nodePropertyValues, KdNode root) {
+    KdTree(HugeLongArray ids, NodePropertyValues nodePropertyValues, KdNode root, long treeNodeCount) {
         this.ids = ids;
         this.nodePropertyValues = nodePropertyValues;
         this.root = root;
+        this.treeNodeCount = treeNodeCount;
     }
 
     KdNode root() {
@@ -44,7 +46,7 @@ public class KdTree {
     KdNode parent(KdNode kdNode) {
         return kdNode.parent();
     }
-
+    
     KdNode leftChild(KdNode kdNode) {
         return kdNode.leftChild();
     }
@@ -63,6 +65,10 @@ public class KdTree {
         return LongStream.range(start, end).map(ids::get);
     }
 
+
+    long  treeNodeCount(){
+        return treeNodeCount;
+    }
 
     // TODO: maybe overloads for the different array types 🤔
     Neighbour[] neighbours(double[] queryPoint, int numberOfNeighbours) {

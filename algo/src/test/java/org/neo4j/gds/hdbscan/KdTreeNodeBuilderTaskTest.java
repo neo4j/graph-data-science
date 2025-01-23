@@ -24,6 +24,7 @@ import org.neo4j.gds.api.properties.nodes.DoubleArrayNodePropertyValues;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -48,7 +49,7 @@ class KdTreeNodeBuilderTaskTest {
                 return ids.size();
             }
         };
-        var nodeBuilder =new KdTreeNodeBuilderTask(ids,nodePropertyValues,0,10,1,false,null);
+        var nodeBuilder =new KdTreeNodeBuilderTask(ids,nodePropertyValues,0,10,1,false,null, new AtomicInteger(0));
         var median = nodeBuilder.findMedianAndSplit(0);
         assertThat(median).isEqualTo(5L);
         assertThat(ids.toArray()).containsExactlyInAnyOrder(0,1,2,3,4,5,6,7,8,9);
@@ -72,7 +73,7 @@ class KdTreeNodeBuilderTaskTest {
                 return ids.size();
             }
         };
-        var nodeBuilder =new KdTreeNodeBuilderTask(ids,nodePropertyValues,4,8,1,false,null);
+        var nodeBuilder =new KdTreeNodeBuilderTask(ids,nodePropertyValues,4,8,1,false,null, new AtomicInteger() );
         var median = nodeBuilder.findMedianAndSplit(0);
         assertThat(median).isEqualTo(6L);
         for (int i=4;i<6;++i){
@@ -93,7 +94,7 @@ class KdTreeNodeBuilderTaskTest {
                 return ids.size();
             }
         };
-        var nodeBuilder =new KdTreeNodeBuilderTask(ids,nodePropertyValues,0,3,3,false,null);
+        var nodeBuilder =new KdTreeNodeBuilderTask(ids,nodePropertyValues,0,3,3,false,null, new AtomicInteger());
         nodeBuilder.run();
 
         var node = nodeBuilder.kdNode();
@@ -102,6 +103,7 @@ class KdTreeNodeBuilderTaskTest {
         assertThat(node.end()).isEqualTo(3);
         assertThat(node.leftChild()).isNull();
         assertThat(node.rightChild()).isNull();
+        assertThat(node.id()).isEqualTo(0L);
 
     }
 
@@ -118,7 +120,7 @@ class KdTreeNodeBuilderTaskTest {
                 return ids.size();
             }
         };
-        var nodeBuilder =new KdTreeNodeBuilderTask(ids,nodePropertyValues,0,3,2,false,null);
+        var nodeBuilder =new KdTreeNodeBuilderTask(ids,nodePropertyValues,0,3,2,false,null, new AtomicInteger(0));
         nodeBuilder.run();
 
         var node = nodeBuilder.kdNode();
@@ -149,6 +151,11 @@ class KdTreeNodeBuilderTaskTest {
 
         var split = node.splitInformation();
         assertThat(split).isEqualTo(new SplitInformation(11.0,0));
+
+        assertThat(node.id()).isEqualTo(0L);
+        assertThat(leftChild.id()).isIn(1L,2L);
+        assertThat(rightChild.id()).isNotEqualTo(leftChild.id()).isIn(1L,2L);
+
     }
 
 

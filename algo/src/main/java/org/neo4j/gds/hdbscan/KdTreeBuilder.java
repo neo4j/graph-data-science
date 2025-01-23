@@ -23,6 +23,8 @@ import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 public class KdTreeBuilder {
 
     private final  IdMap nodes;
@@ -41,11 +43,14 @@ public class KdTreeBuilder {
 
         var ids = HugeLongArray.newArray(nodes.nodeCount());
         ids.setAll(  v-> v);
-        var builderTask = new KdTreeNodeBuilderTask(ids,nodePropertyValues,0,nodePropertyValues.nodeCount(),leafSize,false,null);
+        AtomicInteger nodeIndex = new AtomicInteger(0);
+        var builderTask = new KdTreeNodeBuilderTask(ids,nodePropertyValues,0,nodePropertyValues.nodeCount(),leafSize,false,null,
+            nodeIndex
+        );
         builderTask.run();
         var root = builderTask.kdNode();
 
-        return  new KdTree(ids, nodePropertyValues, root);
+        return  new KdTree(ids, nodePropertyValues, root, nodeIndex.get());
     }
 
 }

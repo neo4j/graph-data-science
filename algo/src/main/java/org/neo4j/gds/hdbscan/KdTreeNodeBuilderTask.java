@@ -22,6 +22,7 @@ package org.neo4j.gds.hdbscan;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.LongToDoubleFunction;
 
 class KdTreeNodeBuilderTask implements Runnable {
@@ -35,13 +36,15 @@ class KdTreeNodeBuilderTask implements Runnable {
     private KdNode kdNode;
     private final boolean amLeftChild;
     private final KdNode parent;
+    private final AtomicInteger  nodeIndex;
+
 
     KdTreeNodeBuilderTask(
         HugeLongArray ids,
         NodePropertyValues nodePropertyValues,
         long start,
         long end,
-        long maxLeafSize, boolean amLeftChild, KdNode parent
+        long maxLeafSize, boolean amLeftChild, KdNode parent, AtomicInteger nodeIndex
     ) {
         this.ids = ids;
         this.nodePropertyValues = nodePropertyValues;
@@ -51,15 +54,16 @@ class KdTreeNodeBuilderTask implements Runnable {
         this.pointSize = nodePropertyValues.dimension().orElse(-1);
         this.amLeftChild = amLeftChild;
         this.parent = parent;
+        this.nodeIndex = nodeIndex;
     }
 
     @Override
     public void run() {
         var nodeSize = end - start;
         var aabb  = AABB.create(nodePropertyValues, ids, start, end, pointSize);
-
+        var treeNodeId = nodeIndex.getAndIncrement();
         if (nodeSize <= maxLeafSize) {
-            kdNode = KdNode.createLeaf(start, end, aabb);
+            kdNode = KdNode.createLeaf(treeNodeId, start, end, aabb);
 
         } else {
 
@@ -67,12 +71,12 @@ class KdTreeNodeBuilderTask implements Runnable {
             long median = findMedianAndSplit(indexToSplit);  //step.2  modify array so that everything < is before median and everything >= after
             var medianValue = nodePropertyValues.doubleArrayValue(ids.get(median-1))[indexToSplit];
 
-            kdNode = KdNode.createSplitNode(start,end,aabb,new SplitInformation(medianValue,indexToSplit));
+            kdNode = KdNode.createSplitNode(treeNodeId, start,end,aabb,new SplitInformation(medianValue,indexToSplit));
             //TODO: step.4 add these builder tasks into a fork-join
-            var leftChildBuilder = new KdTreeNodeBuilderTask(ids, nodePropertyValues, start, median, maxLeafSize,true,kdNode);
+            var leftChildBuilder = new KdTreeNodeBuilderTask(ids, nodePropertyValues, start, median, maxLeafSize,true,kdNode, nodeIndex);
             leftChildBuilder.run();
 
-            var rightChildBuilder = new KdTreeNodeBuilderTask(ids, nodePropertyValues, median, end, maxLeafSize,false,kdNode);
+            var rightChildBuilder = new KdTreeNodeBuilderTask(ids, nodePropertyValues, median, end, maxLeafSize,false,kdNode, nodeIndex);
             rightChildBuilder.run();
 
             var leftChild = leftChildBuilder.kdNode();
