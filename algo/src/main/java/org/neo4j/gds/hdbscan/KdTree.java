@@ -97,7 +97,7 @@ public class KdTree {
                         return;
                     }
                     var point = nodePropertyValues.doubleArrayValue(nodeId);
-                    double distance = Intersections.sumSquareDelta(point, queryPoint);
+                    double distance = Math.sqrt(Intersections.sumSquareDelta(point, queryPoint));
                     var neighbour = new Neighbour(nodeId, distance);
                     queue.offer(neighbour);
                 }
