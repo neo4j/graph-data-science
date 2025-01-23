@@ -59,8 +59,8 @@ class ArticulationPointsTest {
     @Test
     void articulationPoints() {
 
-        var articulationPoints = new ArticulationPoints(graph, ProgressTracker.NULL_TRACKER);
-        var result = articulationPoints.compute();
+        var articulationPoints =  ArticulationPoints.create(graph, ProgressTracker.NULL_TRACKER,false);
+        var result = articulationPoints.compute().articulationPoints();
 
         assertThat(result)
             .isNotNull()

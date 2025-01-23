@@ -19,13 +19,13 @@
  */
 package org.neo4j.gds.applications.algorithms.centrality;
 
-import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.articulationpoints.ArticulationPointsMutateConfig;
+import org.neo4j.gds.articulationpoints.ArticulationPointsResult;
 import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.betweenness.BetweennessCentralityMutateConfig;
 import org.neo4j.gds.betweenness.BetwennessCentralityResult;
@@ -103,7 +103,7 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
     public <RESULT> RESULT articulationPoints(
         GraphName graphName,
         ArticulationPointsMutateConfig configuration,
-        ResultBuilder<ArticulationPointsMutateConfig, BitSet, RESULT, NodePropertiesWritten> resultBuilder
+        ResultBuilder<ArticulationPointsMutateConfig, ArticulationPointsResult, RESULT, NodePropertiesWritten> resultBuilder
     ) {
         var mutateStep = new ArticulationPointsMutateStep(mutateNodeProperty, configuration);
 
@@ -111,8 +111,8 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
             graphName,
             configuration,
             ArticulationPoints,
-            estimation::articulationPoints,
-            (graph, __) -> algorithms.articulationPoints(graph, configuration),
+            ()-> estimation.articulationPoints(false),
+            (graph, __) -> algorithms.articulationPoints(graph, configuration,false),
             mutateStep,
             resultBuilder
         );

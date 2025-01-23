@@ -111,7 +111,7 @@ public interface CentralityProcedureFacade {
         Map<String, Object> algorithmConfiguration
     );
 
-    Stream<ArticulationPoint> articulationPointsStream(
+    Stream<ArticulationPointStreamResult> articulationPointsStream(
         String graphName,
         Map<String, Object> configuration
     );

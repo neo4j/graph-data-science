@@ -48,15 +48,16 @@ public class CentralityAlgorithmsEstimationModeBusinessFacade {
         this.algorithmEstimationTemplate = algorithmEstimationTemplate;
     }
 
-    public MemoryEstimation articulationPoints() {
-        return new ArticulationPointsMemoryEstimateDefinition().memoryEstimation();
+    public MemoryEstimation articulationPoints(boolean shouldComputeComponents) {
+        return new ArticulationPointsMemoryEstimateDefinition(shouldComputeComponents).memoryEstimation();
     }
 
     public MemoryEstimateResult articulationPoints(
         ArticulationPointsBaseConfig configuration,
-        Object graphNameOrConfiguration
+        Object graphNameOrConfiguration,
+        boolean shouldComputeComponents
     ) {
-        var memoryEstimation = articulationPoints();
+        var memoryEstimation = articulationPoints(shouldComputeComponents);
 
         return algorithmEstimationTemplate.estimate(
             configuration,

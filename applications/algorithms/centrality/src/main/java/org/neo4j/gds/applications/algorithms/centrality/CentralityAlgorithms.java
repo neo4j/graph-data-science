@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.applications.algorithms.centrality;
 
-import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.LongScatterSet;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
@@ -27,6 +26,7 @@ import org.neo4j.gds.applications.algorithms.machinery.AlgorithmMachinery;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.articulationpoints.ArticulationPoints;
 import org.neo4j.gds.articulationpoints.ArticulationPointsProgressTaskCreator;
+import org.neo4j.gds.articulationpoints.ArticulationPointsResult;
 import org.neo4j.gds.beta.pregel.Pregel;
 import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.betweenness.BetweennessCentrality;
@@ -120,12 +120,12 @@ public class CentralityAlgorithms {
         return articleRank.compute();
     }
 
-    BitSet articulationPoints(Graph graph, AlgoBaseConfig configuration) {
+    ArticulationPointsResult articulationPoints(Graph graph, AlgoBaseConfig configuration,boolean shouldComputeComponents) {
 
         var task = ArticulationPointsProgressTaskCreator.progressTask(graph.nodeCount());
         var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
 
-        var algorithm = new ArticulationPoints(graph, progressTracker);
+        var algorithm =  ArticulationPoints.create(graph, progressTracker,shouldComputeComponents);
 
         return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
             algorithm,

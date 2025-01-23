@@ -19,11 +19,11 @@
  */
 package org.neo4j.gds.applications.algorithms.centrality;
 
-import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmResult;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.StatsResultBuilder;
+import org.neo4j.gds.articulationpoints.ArticulationPointsResult;
 import org.neo4j.gds.articulationpoints.ArticulationPointsStatsConfig;
 import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.betweenness.BetweennessCentralityStatsConfig;
@@ -89,14 +89,14 @@ public class CentralityAlgorithmsStatsModeBusinessFacade {
     public <RESULT> RESULT articulationPoints(
         GraphName graphName,
         ArticulationPointsStatsConfig configuration,
-        StatsResultBuilder<BitSet, RESULT> resultBuilder
+        StatsResultBuilder<ArticulationPointsResult, RESULT> resultBuilder
     ) {
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
             graphName,
             configuration,
             ArticulationPoints,
-            estimationFacade::articulationPoints,
-            (graph, __) -> centralityAlgorithms.articulationPoints(graph, configuration),
+            ()-> estimationFacade.articulationPoints(false),
+            (graph, __) -> centralityAlgorithms.articulationPoints(graph, configuration,false),
             resultBuilder
         );
     }

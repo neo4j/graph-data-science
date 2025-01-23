@@ -28,9 +28,11 @@ import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
+import static org.assertj.core.api.InstanceOfAssertFactories.MAP;
 import static org.neo4j.gds.compat.GraphDatabaseApiProxy.registerProcedures;
 
 class ArticulationPointsStreamProcTest extends BaseTest {
@@ -88,12 +90,14 @@ class ArticulationPointsStreamProcTest extends BaseTest {
 
     @Test
     void shouldStreamBackResults() {
-        var expectedArticulationPoints = List.of(
-            idFunction.of("a3"),
-            idFunction.of("a7"),
-            idFunction.of("a10"),
-            idFunction.of("a11"),
-            idFunction.of("a14")
+
+        var expectedAnswer = Map.of(
+            idFunction.of("a3"), List.of(1L, 2L, 2L),
+            idFunction.of("a7"), List.of(1L, 2L, 2L),
+            idFunction.of("a10"), List.of(4L, 4L, 2L),
+            idFunction.of("a11"), List.of(3L, 5L, 2L),
+            idFunction.of("a14"), List.of(1L, 7L, 2L)
+
         );
 
         var resultRowCount = runQueryWithRowConsumer(
@@ -102,7 +106,20 @@ class ArticulationPointsStreamProcTest extends BaseTest {
                 var nodeId = row.getNumber("nodeId");
                 assertThat(nodeId)
                     .asInstanceOf(LONG)
-                    .isIn(expectedArticulationPoints);
+                    .isIn(expectedAnswer.keySet());
+
+                var map = row.get("resultingComponents");
+               var  expectedList = expectedAnswer.get(nodeId);
+
+                assertThat(map)
+                    .asInstanceOf(MAP)
+                    .satisfies(
+                        objectMap ->{
+                            assertThat(objectMap.get("min")).asInstanceOf(LONG).isEqualTo(expectedList.get(0));
+                            assertThat(objectMap.get("max")).asInstanceOf(LONG).isEqualTo(expectedList.get(1));
+                            assertThat(objectMap.get("count")).asInstanceOf(LONG).isEqualTo(expectedList.get(2));
+                        }
+                    );
             }
         );
 

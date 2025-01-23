@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.applications.algorithms.centrality;
 
-import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
@@ -27,8 +26,9 @@ import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.articulationpoints.ArticulationPointsMutateConfig;
+import org.neo4j.gds.articulationpoints.ArticulationPointsResult;
 
-class ArticulationPointsMutateStep implements MutateStep<BitSet, NodePropertiesWritten> {
+class ArticulationPointsMutateStep implements MutateStep<ArticulationPointsResult, NodePropertiesWritten> {
     private final MutateNodeProperty mutateNodeProperty;
     private final ArticulationPointsMutateConfig configuration;
 
@@ -41,12 +41,13 @@ class ArticulationPointsMutateStep implements MutateStep<BitSet, NodePropertiesW
     public NodePropertiesWritten execute(
         Graph graph,
         GraphStore graphStore,
-        BitSet result
+        ArticulationPointsResult result
     ) {
+        var bitset = result.articulationPoints();
         var nodeProperties =  new LongNodePropertyValues() {
             @Override
             public long longValue(long nodeId) {
-                return result.get(nodeId) ? 1 : 0;
+                return bitset.get(nodeId) ? 1 : 0;
             }
 
             @Override

@@ -19,5 +19,7 @@
  */
 package org.neo4j.gds.procedures.algorithms.centrality;
 
-public record ArticulationPoint(long nodeId) {
+import java.util.Map;
+
+public record ArticulationPointStreamResult(long nodeId, Map<String,Long> resultingComponents) {
 }

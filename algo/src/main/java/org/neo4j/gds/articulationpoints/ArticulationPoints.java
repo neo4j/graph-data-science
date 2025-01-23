@@ -27,7 +27,9 @@ import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
-public class ArticulationPoints extends Algorithm<BitSet> {
+import java.util.Optional;
+
+public final class ArticulationPoints extends Algorithm<ArticulationPointsResult> {
     private final Graph graph;
 
     private final BitSet visited;
@@ -37,8 +39,9 @@ public class ArticulationPoints extends Algorithm<BitSet> {
     private long stackIndex = -1;
 
     private final BitSet articulationPoints;
+    private final Optional<SubtreeTracker> subtreeTracker;
 
-    public ArticulationPoints(Graph graph, ProgressTracker progressTracker) {
+    private ArticulationPoints(Graph graph, ProgressTracker progressTracker,Optional<SubtreeTracker> subtreeTracker) {
         super(progressTracker);
 
         this.graph = graph;
@@ -46,12 +49,20 @@ public class ArticulationPoints extends Algorithm<BitSet> {
         this.visited = new BitSet(graph.nodeCount());
         this.tin = HugeLongArray.newArray(graph.nodeCount());
         this.low = HugeLongArray.newArray(graph.nodeCount());
-
+        this.subtreeTracker =  subtreeTracker;
         this.articulationPoints = new BitSet(graph.nodeCount());
     }
 
+    public static  ArticulationPoints create(Graph graph, ProgressTracker progressTracker, boolean shouldComputeComponents){
+              if (shouldComputeComponents){
+                    var tracker = new SubtreeTracker(graph.nodeCount());
+                    return new ArticulationPoints(graph,progressTracker,Optional.of(tracker));
+              }
+        return  new ArticulationPoints(graph,progressTracker,Optional.empty());
+    }
+
     @Override
-    public BitSet compute() {
+    public ArticulationPointsResult compute() {
         timer = 0;
         visited.clear();
         tin.setAll(__ -> -1);
@@ -67,12 +78,13 @@ public class ArticulationPoints extends Algorithm<BitSet> {
             }
         }
         progressTracker.endSubTask("ArticulationPoints");
-        return this.articulationPoints;
+        return new ArticulationPointsResult(this.articulationPoints, this.subtreeTracker);
     }
 
     private void dfs(long node, HugeObjectArray<StackEvent> stack) {
         stack.set(++stackIndex, StackEvent.upcomingVisit(node,-1));
         MutableLong rootChildren =new MutableLong();
+        subtreeTracker.ifPresent((tracker) -> tracker.recordRoot(node,node));
         while (stackIndex >= 0) {
             var stackEvent = stack.get(stackIndex--);
             visitEvent(stackEvent, stack,rootChildren,node);
@@ -85,7 +97,12 @@ public class ArticulationPoints extends Algorithm<BitSet> {
         progressTracker.logProgress();
     }
 
-    private void visitEvent(StackEvent event, HugeObjectArray<StackEvent> stack, MutableLong childrenOfRoot, long root) {
+    private void visitEvent(StackEvent event,
+        HugeObjectArray<StackEvent> stack,
+        MutableLong childrenOfRoot,
+        long root
+    )
+    {
         if (event.lastVisit()) {
             var to = event.eventNode();
             var v = event.triggerNode();
@@ -95,10 +112,24 @@ public class ArticulationPoints extends Algorithm<BitSet> {
             var tinV = tin.get(v);
             if (lowTo >= tinV) {
                 articulationPoints.set(v);
+                subtreeTracker.ifPresent(
+                    tracker -> {
+                        tracker.recordRoot(root,to);
+                        tracker.recordSplitChild(v,to);
+                });
+            }else{
+                subtreeTracker.ifPresent(
+                    tracker -> {
+                        tracker.recordRoot(root,to);
+                        tracker.recordJoinedChild(v,to);
+                    }
+                );
             }
-            if (v == root) {
+
+            if (root == v){
                 childrenOfRoot.increment();
             }
+
             progressTracker.logProgress();
             return;
         }
@@ -106,6 +137,7 @@ public class ArticulationPoints extends Algorithm<BitSet> {
         if (!visited.get(event.eventNode())) {
             var v = event.eventNode();
             visited.set(v);
+
             var p = event.triggerNode();
             tin.set(v, timer);
             low.set(v, timer++);

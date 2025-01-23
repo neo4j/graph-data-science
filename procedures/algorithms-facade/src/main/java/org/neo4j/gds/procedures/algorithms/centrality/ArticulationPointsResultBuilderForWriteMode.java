@@ -19,23 +19,23 @@
  */
 package org.neo4j.gds.procedures.algorithms.centrality;
 
-import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
+import org.neo4j.gds.articulationpoints.ArticulationPointsResult;
 import org.neo4j.gds.articulationpoints.ArticulationPointsWriteConfig;
 
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class ArticulationPointsResultBuilderForWriteMode implements ResultBuilder<ArticulationPointsWriteConfig, BitSet, Stream<ArticulationPointsWriteResult>, NodePropertiesWritten> {
+class ArticulationPointsResultBuilderForWriteMode implements ResultBuilder<ArticulationPointsWriteConfig, ArticulationPointsResult, Stream<ArticulationPointsWriteResult>, NodePropertiesWritten> {
 
     @Override
     public Stream<ArticulationPointsWriteResult> build(
         Graph graph,
         ArticulationPointsWriteConfig configuration,
-        Optional<BitSet> result,
+        Optional<ArticulationPointsResult> result,
         AlgorithmProcessingTimings timings,
         Optional<NodePropertiesWritten> metadata
     ) {
@@ -43,7 +43,7 @@ class ArticulationPointsResultBuilderForWriteMode implements ResultBuilder<Artic
             return Stream.of(ArticulationPointsWriteResult.EMPTY);
         }
 
-        var bitSet = result.get();
+        var bitSet = result.get().articulationPoints();
         return Stream.of(
             new ArticulationPointsWriteResult(
                 bitSet.cardinality(),

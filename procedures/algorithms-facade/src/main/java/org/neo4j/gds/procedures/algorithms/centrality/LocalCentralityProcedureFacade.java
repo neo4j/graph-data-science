@@ -537,7 +537,7 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
 
 
     @Override
-    public Stream<ArticulationPoint> articulationPointsStream(
+    public Stream<ArticulationPointStreamResult> articulationPointsStream(
         String graphName,
         Map<String, Object> configuration
     ) {
@@ -551,7 +551,8 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
         return streamModeBusinessFacade.articulationPoints(
             GraphName.parse(graphName),
             parsedConfiguration,
-            resultBuilder
+            resultBuilder,
+            procedureReturnColumns.contains("resultingComponents")
         );
     }
 
@@ -567,7 +568,8 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
 
         return Stream.of(estimationModeBusinessFacade.articulationPoints(
             parsedConfiguration,
-            graphNameOrConfiguration
+            graphNameOrConfiguration,
+            true
         ));
     }
 
@@ -586,7 +588,8 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
 
         return Stream.of(estimationModeBusinessFacade.articulationPoints(
             parsedConfiguration,
-            graphNameOrConfiguration
+            graphNameOrConfiguration,
+            false
         ));
     }
 
@@ -619,7 +622,8 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
 
         return Stream.of(estimationModeBusinessFacade.articulationPoints(
             parsedConfiguration,
-            graphNameOrConfiguration
+            graphNameOrConfiguration,
+            false
         ));
     }
 
@@ -652,7 +656,8 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
 
         return Stream.of(estimationModeBusinessFacade.articulationPoints(
             parsedConfiguration,
-            graphNameOrConfiguration
+            graphNameOrConfiguration,
+            false
         ));
     }
 

@@ -55,7 +55,7 @@ public class LocalArticulationPointsMutateStub implements ArticulationPointsMuta
         return genericStub.getMemoryEstimation(
             configuration,
             ArticulationPointsMutateConfig::of,
-            (config) -> estimationModeBusinessFacade.articulationPoints()
+            (config) -> estimationModeBusinessFacade.articulationPoints(false)
         );
     }
 
@@ -65,7 +65,7 @@ public class LocalArticulationPointsMutateStub implements ArticulationPointsMuta
             graphName,
             configuration,
             ArticulationPointsMutateConfig::of,
-            (config) -> estimationModeBusinessFacade.articulationPoints()
+            (config) -> estimationModeBusinessFacade.articulationPoints(false)
         );
     }
 

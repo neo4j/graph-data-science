@@ -19,30 +19,30 @@
  */
 package org.neo4j.gds.procedures.algorithms.centrality.stubs;
 
-import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.articulationpoints.ArticulationPointsMutateConfig;
+import org.neo4j.gds.articulationpoints.ArticulationPointsResult;
 import org.neo4j.gds.procedures.algorithms.centrality.ArticulationPointsMutateResult;
 
 import java.util.Optional;
 
-public class ArticulationPointsResultBuilderForMutateMode implements ResultBuilder<ArticulationPointsMutateConfig, BitSet, ArticulationPointsMutateResult, NodePropertiesWritten> {
+public class ArticulationPointsResultBuilderForMutateMode implements ResultBuilder<ArticulationPointsMutateConfig, ArticulationPointsResult, ArticulationPointsMutateResult, NodePropertiesWritten> {
 
     @Override
     public ArticulationPointsMutateResult build(
         Graph graph,
         ArticulationPointsMutateConfig configuration,
-        Optional<BitSet> result,
+        Optional<ArticulationPointsResult> result,
         AlgorithmProcessingTimings timings,
         Optional<NodePropertiesWritten> metadata
     ) {
         if (result.isEmpty()) return ArticulationPointsMutateResult.EMPTY;
 
 
-        var bitSet = result.get();
+        var bitSet = result.get().articulationPoints();
         return new ArticulationPointsMutateResult(
                 bitSet.cardinality(),
                 metadata.map(NodePropertiesWritten::value).orElseThrow(),
