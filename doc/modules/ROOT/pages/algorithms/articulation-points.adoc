@@ -66,7 +66,9 @@ CALL gds.articulationPoints.stats(
   configuration: Map
 )
 YIELD
-  nodeId: Integer
+  computeMillis: Integer,
+  articulationPointCount: Integer,
+  configuration: Map
 ----
 
 include::partial$/algorithms/common-configuration/common-parameters.adoc[]
@@ -82,7 +84,6 @@ include::partial$/algorithms/common-configuration/common-stream-stats-configurat
 [opts="header"]
 |===
 | Name    | Type    | Description
-| Name                    | Type      | Description
 | computeMillis           | Integer   | Milliseconds for running the algorithm.
 | articulationPointCount  | Integer   | Count of the articulation points in the graph.
 | configuration           | Map       | The configuration used for running the algorithm.
