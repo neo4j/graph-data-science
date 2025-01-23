@@ -165,5 +165,87 @@ class AABBTest {
             double lowerBound = aabb.lowerBoundFor(lookupPoint);
             assertThat(lowerBound).isZero();
         }
+
+        @Test
+        void lowerBoundWithBoxCompletelyOverlap() {
+            var aabb0 = new AABB(
+                new double[]{2.0, 1.0},
+                new double[]{9.0, 7.0},
+                2
+            );
+
+            var aabb1 = new AABB(
+                new double[]{3.0, 4.0},
+                new double[]{5.0, 6.0},
+                2
+            );
+
+            double lowerBound01 = aabb0.lowerBoundFor(aabb1);
+            assertThat(lowerBound01).isZero();
+            double lowerBound10 = aabb1.lowerBoundFor(aabb0);
+            assertThat(lowerBound10).isZero();
+        }
+
+        @Test
+        void lowerBoundWithBoxPartiallyInside() {
+            var aabb0 = new AABB(
+                new double[]{2.0, 1.0},
+                new double[]{9.0, 7.0},
+                2
+            );
+
+            var aabb1 = new AABB(
+                new double[]{3.0, 4.0},
+                new double[]{15.0, 6.0},
+                2
+            );
+
+            double lowerBound01 = aabb0.lowerBoundFor(aabb1);
+            assertThat(lowerBound01).isZero();
+            double lowerBound10 = aabb1.lowerBoundFor(aabb0);
+            assertThat(lowerBound10).isZero();
+        }
+
+        @Test
+        void lowerBoundWithBoxClosestIsOnCorners() {
+            var aabb0 = new AABB(
+                new double[]{2.0, 1.0},
+                new double[]{9.0, 7.0},
+                2
+            );
+
+            var aabb1 = new AABB(
+                new double[]{11.0, 8.0},
+                new double[]{15.0, 10.0},
+                2
+            );
+
+            double lowerBound01 = aabb0.lowerBoundFor(aabb1);
+            assertThat(lowerBound01).isCloseTo(Math.sqrt(5),Offset.offset(1e-5));
+            double lowerBound10 = aabb1.lowerBoundFor(aabb0);
+            assertThat(lowerBound10).isCloseTo(Math.sqrt(5),Offset.offset(1e-5));
+        }
+
+        @Test
+        void lowerBoundWithBoxClosestIsInArbitraryPerimeter() {
+            var aabb0 = new AABB(
+                new double[]{2.0, 1.0},
+                new double[]{9.0, 7.0},
+                2
+            );
+
+            var aabb1 = new AABB(
+                new double[]{1.0,  -5.0},
+                new double[]{11.0, -2.0},
+                2
+            );
+
+            double lowerBound01 = aabb0.lowerBoundFor(aabb1);
+            assertThat(lowerBound01).isEqualTo(3.0);
+            double lowerBound10 = aabb1.lowerBoundFor(aabb0);
+            assertThat(lowerBound10).isEqualTo(3.0);
+        }
+
+
     }
 }

@@ -114,12 +114,28 @@ public record AABB(double[] min, double[] max, int dimension) {
         assert dimension == lookupPoint.length : "Lookup point has different dimension: " + lookupPoint.length + ". The box has dimension: " + dimension;
         double distance = 0d;
         for (int i = 0; i < dimension; i++) {
-            var diff = Math.max(min[i], lookupPoint[i]) - Math.min(max[i], lookupPoint[i]);
-            if (diff > 0) {
-                distance += diff * diff;
-            }
+            distance += lowerBoundForDimension(i,lookupPoint[i],lookupPoint[i]);
         }
-
         return Math.sqrt(distance);
+    }
+
+    double lowerBoundFor(AABB lookupBox){
+        assert dimension == lookupBox.dimension() : "lookupBox point has different dimension: " + lookupBox.dimension() + ". The box has dimension: " + dimension;
+        double distance = 0d;
+        var  lookupMin = lookupBox.min();
+        var  lookupMax = lookupBox.max();
+
+        for (int i = 0; i < dimension; i++) {
+            distance += lowerBoundForDimension(i,lookupMin[i],lookupMax[i]);
+        }
+        return Math.sqrt(distance);
+    }
+
+    private double  lowerBoundForDimension(int dimension, double otherMin, double otherMax){
+        var diff = Math.max(min[dimension], otherMin) - Math.min(max[dimension], otherMax);
+        if (diff > 0) {
+            return diff * diff;
+        }
+        return 0;
     }
 }
