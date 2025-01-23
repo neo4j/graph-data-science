@@ -108,6 +108,7 @@ public abstract class PipelineExecutor<
             return result;
         } finally {
             nodePropertyStepExecutor.cleanupIntermediateProperties(pipeline.nodePropertySteps());
+            // TODO fail subtask in exception?
             additionalGraphStoreCleanup(dataSplitGraphFilters);
         }
     }

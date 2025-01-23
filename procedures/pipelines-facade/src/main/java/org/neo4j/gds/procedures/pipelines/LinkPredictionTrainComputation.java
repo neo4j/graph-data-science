@@ -211,6 +211,13 @@ final class LinkPredictionTrainComputation implements Computation<LinkPrediction
             progressTracker
         );
 
-        return pipelineExecutor.compute();
+        try {
+            return pipelineExecutor.compute();
+        } catch (Exception e) {
+            progressTracker.endSubTaskWithFailure();
+            throw new RuntimeException(e);
+        } finally {
+            progressTracker.release();
+        }
     }
 }

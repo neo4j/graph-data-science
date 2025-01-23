@@ -31,6 +31,8 @@ import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.core.ExceptionMessageMatcher;
 import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.core.utils.progress.TaskStore;
+import org.neo4j.gds.core.utils.progress.UserTask;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.ResourceIterator;
 import org.neo4j.graphdb.Result;
@@ -53,6 +55,17 @@ public class BaseProcTest extends BaseTest {
     @AfterEach
     void cleanupGraphStoreCatalog() {
         GraphStoreCatalog.removeAllLoadedGraphs();
+    }
+
+    @AfterEach
+    void verifyTaskStoreIsEmpty() {
+        TaskStore taskStore = GraphDatabaseApiProxy.resolveDependency(this.db, TaskStore.class);
+        List<UserTask> hangingTasks = taskStore.query().toList();
+
+        // dont spill tasks to next test
+        hangingTasks.forEach(task -> taskStore.remove(task.username(), task.jobId()));
+
+        assertThat(hangingTasks).map(i -> i.task().render()).isEmpty();
     }
 
     protected void registerFunctions(Class<?>... functionClasses) throws Exception {
