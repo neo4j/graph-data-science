@@ -89,7 +89,8 @@ public final class Yens extends Algorithm<PathFindingResult> {
 
         // no shortest path has been found
         if (shortestPath.isEmpty()) {
-            return new PathFindingResult(Stream.empty(), progressTracker::endSubTask);
+            progressTracker.endSubTask("Yens");
+            return new PathFindingResult(Stream.empty());
         }
 
         kShortestPaths.add(MutablePathResult.of(shortestPath.get()));
@@ -120,12 +121,11 @@ public final class Yens extends Algorithm<PathFindingResult> {
             }
             addPathToSolution(i, kShortestPaths, candidatePathsQueue, currentSpurIndexId);
         }
-        progressTracker.endSubTask();
+        progressTracker.endSubTask("Path growing");
 
-        return new PathFindingResult(
-            kShortestPaths.stream().map(MutablePathResult::toPathResult),
-            progressTracker::endSubTask
-        );
+        progressTracker.endSubTask("Yens");
+
+        return new PathFindingResult(kShortestPaths.stream().map(MutablePathResult::toPathResult));
     }
 
     private void addPathToSolution(

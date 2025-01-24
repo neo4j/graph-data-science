@@ -159,8 +159,9 @@ public final class DeltaStepping extends Algorithm<PathFindingResult> {
             frontierSize.set(frontierIndex.longValue());
             frontierIndex.set(0);
         }
+        progressTracker.endSubTask();
 
-        return new PathFindingResult(pathResults(distances, startNode, concurrency), progressTracker::endSubTask);
+        return new PathFindingResult(pathResults(distances, startNode, concurrency));
     }
 
     public enum Phase {

@@ -173,7 +173,7 @@ public class PathFindingAlgorithms {
         return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
             algorithm,
             progressTracker,
-            false,
+            true,
             configuration.concurrency()
         );
     }
@@ -412,7 +412,7 @@ public class PathFindingAlgorithms {
         return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
             algorithm,
             progressTracker,
-            false,
+            true,
             configuration.concurrency()
         );
     }
