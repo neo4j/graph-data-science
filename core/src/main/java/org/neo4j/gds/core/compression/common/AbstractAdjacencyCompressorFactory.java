@@ -89,9 +89,7 @@ public abstract class AbstractAdjacencyCompressorFactory<TARGET_PAGE, PROPERTY_P
     @Override
     public boolean validateNode(long nodeId) {
         assert this.nodeCount != -1 : "Called validateNode before init";
-//        assert nodeId < this.nodeCount : "NodeId out of bounds, nodeid=" + nodeId + ", nodeCount=" + this.nodeCount;
-//        return nodeId < this.nodeCount;
-        return true;
+        return nodeId < this.nodeCount;
     }
 
     @Override

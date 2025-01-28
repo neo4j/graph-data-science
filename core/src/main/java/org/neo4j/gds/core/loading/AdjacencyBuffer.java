@@ -324,6 +324,12 @@ public final class AdjacencyBuffer {
                         mapper
                     );
 
+                    if (buffer.length == 0) {
+                        // special case: we skipped a relationship because it pointed to or from a node that we didn't load
+                        // this can result in some nodes that should not get an adjacencylist at all
+                        return;
+                    }
+
                     importedRelationships.add(compressor.compress(
                         nodeId,
                         buffer.buffer,
