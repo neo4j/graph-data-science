@@ -34,6 +34,7 @@ dependencies {
     compileOnly "org.neo4j.gds:core-write:$gdsVersion"
     compileOnly "org.neo4j.gds:core:$gdsVersion"
     compileOnly "org.neo4j.gds:executor:$gdsVersion"
+    compileOnly "org.neo4j.gds:gds-values:$gdsVersion"
     compileOnly "org.neo4j.gds:memory-usage:$gdsVersion"
     compileOnly "org.neo4j.gds:proc-pregel:$gdsVersion"
     compileOnly "org.neo4j.gds:proc:$gdsVersion"

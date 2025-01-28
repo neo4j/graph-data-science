@@ -19,6 +19,7 @@ dependencies {
     implementation project(':core')
     implementation project(':core-write')
     implementation project(':executor')
+    implementation project(':gds-values')
     implementation project(':memory-usage')
     implementation project(':pregel')
     implementation project(':proc-common')

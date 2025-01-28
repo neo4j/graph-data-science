@@ -27,6 +27,7 @@ import org.neo4j.gds.beta.pregel.Pregel;
 import org.neo4j.gds.beta.pregel.PregelComputation;
 import org.neo4j.gds.beta.pregel.PregelProcedureConfig;
 import org.neo4j.gds.beta.pregel.PregelSchema;
+import org.neo4j.gds.beta.pregel.PregelSchema.Visibility;
 import org.neo4j.gds.beta.pregel.annotation.GDSMode;
 import org.neo4j.gds.beta.pregel.annotation.PregelProcedure;
 import org.neo4j.gds.beta.pregel.context.ComputeContext;
@@ -44,7 +45,7 @@ public class ExamplePregelComputation implements PregelComputation<ExamplePregel
     @Override
     public PregelSchema schema(ExampleConfig config) {
         // Declare a node schema with a single node value of type Long
-        return new PregelSchema.Builder().add(KEY, ValueType.LONG).build();
+        return new PregelSchema.Builder().add(KEY, ValueType.LONG, Visibility.PUBLIC).build();
     }
 
     @Override
