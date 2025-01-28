@@ -26,10 +26,11 @@ import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
+import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.procedures.catalog.GraphCatalogProcedureFacade.NO_VALUE_PLACEHOLDER;
 import static org.neo4j.gds.catalog.GraphCatalogProcedureConstants.LIST_DESCRIPTION;
+import static org.neo4j.gds.procedures.catalog.GraphCatalogProcedureFacade.NO_VALUE_PLACEHOLDER;
 import static org.neo4j.procedure.Mode.READ;
 
 public class GraphListProc {
@@ -47,8 +48,9 @@ public class GraphListProc {
     @Procedure(name = "gds.graph.list", mode = READ)
     @Description(LIST_DESCRIPTION)
     public Stream<GraphInfoWithHistogram> listGraphs(
-        @Name(value = "graphName", defaultValue = NO_VALUE_PLACEHOLDER) String graphName
+        @Name(value = "graphName", defaultValue = NO_VALUE_PLACEHOLDER) String graphName,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.graphCatalog().listGraphs(graphName);
+        return facade.graphCatalog().listGraphs(graphName, configuration);
     }
 }

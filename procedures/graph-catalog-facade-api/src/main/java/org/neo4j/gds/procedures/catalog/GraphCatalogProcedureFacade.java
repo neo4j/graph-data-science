@@ -66,7 +66,7 @@ public interface GraphCatalogProcedureFacade {
         String username
     ) throws IllegalArgumentException;
 
-    Stream<GraphInfoWithHistogram> listGraphs(String graphName);
+    Stream<GraphInfoWithHistogram> listGraphs(String graphName, Map<String, Object> configuration);
 
     Stream<GraphProjectNativeResult> nativeProject(
         String graphName,
