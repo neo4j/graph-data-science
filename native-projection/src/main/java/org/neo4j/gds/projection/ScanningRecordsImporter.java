@@ -72,7 +72,7 @@ abstract class ScanningRecordsImporter<Record, T> {
         )) {
             progressTracker.beginSubTask("Store Scan");
 
-            progressTracker.logDebug(formatWithLocale("Start using %s", storeScanner.getClass().getSimpleName()));
+            progressTracker.logInfo(formatWithLocale("Start using %s", storeScanner.getClass().getSimpleName()));
 
             var taskFactory = recordScannerTaskFactory(nodeCount, sizing, storeScanner);
             var taskRunner = new RecordScannerTaskRunner(threadCount, taskFactory);
@@ -91,7 +91,7 @@ abstract class ScanningRecordsImporter<Record, T> {
                 .divide(bigNanos)
                 .longValueExact();
 
-            progressTracker.logDebug(
+            progressTracker.logInfo(
                 formatWithLocale(
                     "Imported %,d records and %,d properties from %s (%,d bytes);" +
                     " took %.3f s, %,.2f %1$ss/s, %s/s (%,d bytes/s) (per thread: %,.2f %1$ss/s, %s/s (%,d bytes/s))",
