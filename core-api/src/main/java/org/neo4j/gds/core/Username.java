@@ -19,15 +19,12 @@
  */
 package org.neo4j.gds.core;
 
-import org.jetbrains.annotations.TestOnly;
-
 public class Username {
 
     public static final Username EMPTY_USERNAME = new Username("");
 
     private final String username;
 
-    @TestOnly
     public static Username of(String username) {
         return new Username(username);
     }

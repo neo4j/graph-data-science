@@ -19,8 +19,11 @@
  */
 package org.neo4j.gds.config;
 
+import org.neo4j.gds.annotation.Configuration;
+
 import java.util.Optional;
 
+@Configuration
 public interface AuraApiCredentialsConfig {
 
     Optional<String> clientId();

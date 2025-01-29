@@ -32,6 +32,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 class GraphListProcTest {
+
     @Test
     void shouldDelegateToFacade() {
         var facade = mock(GraphDataScienceProcedures.class);
@@ -41,7 +42,7 @@ class GraphListProcTest {
         var catalogFacade = mock(GraphCatalogProcedureFacade.class);
         when(facade.graphCatalog()).thenReturn(catalogFacade);
         when(catalogFacade.listGraphs("some graph", Map.of())).thenReturn(expectedResultStream);
-        var actualResultStream = procedure.listGraphs("some graph");
+        var actualResultStream = procedure.listGraphs("some graph", Map.of());
 
         assertSame(expectedResultStream, actualResultStream);
     }
