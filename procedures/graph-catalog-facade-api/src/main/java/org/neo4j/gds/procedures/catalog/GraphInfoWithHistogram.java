@@ -19,9 +19,11 @@
  */
 package org.neo4j.gds.procedures.catalog;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.GraphProjectConfig;
 
+import java.time.ZonedDateTime;
 import java.util.Map;
 
 @SuppressWarnings("unused")
@@ -29,11 +31,46 @@ public class GraphInfoWithHistogram extends GraphInfo {
 
     public final Map<String, Object> degreeDistribution;
 
+    /**
+     * Canonical constructor which is used for deserialization
+     */
+    public GraphInfoWithHistogram(
+        @JsonProperty("graphName") String graphName,
+        @JsonProperty("database") String database,
+        @JsonProperty("databaseLocation") String databaseLocation,
+        @JsonProperty("configuration") Map<String, Object> configuration,
+        @JsonProperty("memoryUsage") String memoryUsage,
+        @JsonProperty("sizeInBytes") long sizeInBytes,
+        @JsonProperty("nodeCount") long nodeCount,
+        @JsonProperty("relationshipCount") long relationshipCount,
+        @JsonProperty("creationTime") ZonedDateTime creationTime,
+        @JsonProperty("modificationTime") ZonedDateTime modificationTime,
+        @JsonProperty("schema") Map<String, Object> schema,
+        @JsonProperty("schemaWithOrientation") Map<String, Object> schemaWithOrientation,
+        @JsonProperty("degreeDistribution") Map<String, Object> degreeDistribution
+    ) {
+        super(
+            graphName,
+            database,
+            databaseLocation,
+            configuration,
+            memoryUsage,
+            sizeInBytes,
+            nodeCount,
+            relationshipCount,
+            creationTime,
+            modificationTime,
+            schema,
+            schemaWithOrientation
+        );
+        this.degreeDistribution = degreeDistribution;
+    }
+
     public GraphInfoWithHistogram(
         GraphInfo graphInfo,
         Map<String, Object> degreeDistribution
     ) {
-        super(
+        this(
             graphInfo.graphName,
             graphInfo.database,
             graphInfo.databaseLocation,
@@ -45,9 +82,9 @@ public class GraphInfoWithHistogram extends GraphInfo {
             graphInfo.creationTime,
             graphInfo.modificationTime,
             graphInfo.schema,
-            graphInfo.schemaWithOrientation
+            graphInfo.schemaWithOrientation,
+            degreeDistribution
         );
-        this.degreeDistribution = degreeDistribution;
     }
 
     /**
