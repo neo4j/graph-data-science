@@ -48,9 +48,8 @@ public class GraphListProc {
     @Procedure(name = "gds.graph.list", mode = READ)
     @Description(LIST_DESCRIPTION)
     public Stream<GraphInfoWithHistogram> listGraphs(
-        @Name(value = "graphName", defaultValue = NO_VALUE_PLACEHOLDER) String graphName,
-        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+        @Name(value = "graphName", defaultValue = NO_VALUE_PLACEHOLDER) String graphName
     ) {
-        return facade.graphCatalog().listGraphs(graphName, configuration);
+        return facade.graphCatalog().listGraphs(graphName, Map.of());
     }
 }

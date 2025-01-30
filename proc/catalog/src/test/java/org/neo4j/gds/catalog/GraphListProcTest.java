@@ -42,7 +42,7 @@ class GraphListProcTest {
         var catalogFacade = mock(GraphCatalogProcedureFacade.class);
         when(facade.graphCatalog()).thenReturn(catalogFacade);
         when(catalogFacade.listGraphs("some graph", Map.of())).thenReturn(expectedResultStream);
-        var actualResultStream = procedure.listGraphs("some graph", Map.of());
+        var actualResultStream = procedure.listGraphs("some graph");
 
         assertSame(expectedResultStream, actualResultStream);
     }
