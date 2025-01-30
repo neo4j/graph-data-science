@@ -28,64 +28,68 @@ final class ClosestDistanceInformationTracker {
     private final HugeLongArray componentInsideBestNode;
     private final HugeLongArray componentOutsideBestNode;
 
-     private ClosestDistanceInformationTracker(
-         HugeDoubleArray componentClosestDistance,
-         HugeLongArray componentInsideBestNode,
-         HugeLongArray componentOutsideBestNode
-     ) {
+    private ClosestDistanceInformationTracker(
+        HugeDoubleArray componentClosestDistance,
+        HugeLongArray componentInsideBestNode,
+        HugeLongArray componentOutsideBestNode
+    ) {
         this.componentClosestDistance = componentClosestDistance;
         this.componentInsideBestNode = componentInsideBestNode;
         this.componentOutsideBestNode = componentOutsideBestNode;
         reset(componentClosestDistance.size());
     }
 
-    static ClosestDistanceInformationTracker create(long size){
+    static ClosestDistanceInformationTracker create(long size) {
 
-        var  componentClosestDistance = HugeDoubleArray.newArray(size);
-        var  componentInsideBestNode = HugeLongArray.newArray(size);
-        var  componentOutsideBestNode = HugeLongArray.newArray(size);
+        var componentClosestDistance = HugeDoubleArray.newArray(size);
+        var componentInsideBestNode = HugeLongArray.newArray(size);
+        var componentOutsideBestNode = HugeLongArray.newArray(size);
 
-        return new ClosestDistanceInformationTracker(componentClosestDistance,componentInsideBestNode,componentOutsideBestNode);
+        return new ClosestDistanceInformationTracker(
+            componentClosestDistance,
+            componentInsideBestNode,
+            componentOutsideBestNode
+        );
     }
 
-    void reset(long upTo){
-         for (long u=0;u<upTo;++u){
-             resetComponent(u);
-         }
+    void reset(long upTo) {
+        for (long u = 0; u < upTo; ++u) {
+            resetComponent(u);
+        }
     }
 
     void resetComponent(long u) {
-        componentClosestDistance.set(u,Double.MAX_VALUE);
+        componentClosestDistance.set(u, Double.MAX_VALUE);
         componentInsideBestNode.set(u, -1);
-        componentOutsideBestNode.set(u,-1);
+        componentOutsideBestNode.set(u, -1);
     }
 
-    void  consider(long comp1, long comp2,  long p1, long p2 , double distance){
-            tryToAssign(comp1, p1, p2, distance);
-            tryToAssign(comp2, p2, p1, distance);
+    void consider(long comp1, long comp2, long p1, long p2, double distance) {
+        tryToAssign(comp1, p1, p2, distance);
+        tryToAssign(comp2, p2, p1, distance);
     }
 
-     boolean tryToAssign(long comp, long pInside,long pOutside, double distance){
+    boolean tryToAssign(long comp, long pInside, long pOutside, double distance) {
         var best = componentClosestDistance.get(comp);
-        if (best > distance){
-            componentClosestDistance.set(comp,distance);
-            componentInsideBestNode.set(comp,pInside);
-            componentOutsideBestNode.set(comp,pOutside);
+        if (best > distance) {
+            componentClosestDistance.set(comp, distance);
+            componentInsideBestNode.set(comp, pInside);
+            componentOutsideBestNode.set(comp, pOutside);
             return true;
         }
         return false;
 
     }
 
-    double componentClosestDistance(long componentId){
-         return  componentClosestDistance.get(componentId);
+    double componentClosestDistance(long componentId) {
+        return componentClosestDistance.get(componentId);
     }
 
-    long componentInsideBestNode(long componentId){
-         return componentInsideBestNode.get(componentId);
+    long componentInsideBestNode(long componentId) {
+        return componentInsideBestNode.get(componentId);
     }
 
-    long componentOutsideBestNode(long componentId){
+    long componentOutsideBestNode(long componentId) {
         return componentOutsideBestNode.get(componentId);
     }
 
