@@ -132,28 +132,33 @@ final class GenerateConfiguration {
             builder.addMethod(constructor);
         }
 
-        ClassName builderClassName = ClassName.get(packageName, generatedClassName + ".Builder");
-        TypeSpec configBuilderClass = new GenerateConfigurationBuilder(configParameterName)
-            .defineConfigBuilder(
-                TypeName.get(config.rootType()),
-                implMembers,
-                builderClassName,
-                generatedClassName,
-                constructor.parameters,
-                factory
-            );
+        builder.addMethods(defineMemberMethods(config, fieldDefinitions.names()));
 
-        MethodSpec builderFactoryMethod = MethodSpec.methodBuilder("builder")
-            .addModifiers(Modifier.STATIC, Modifier.PUBLIC)
-            .addStatement("return new $T()", builderClassName)
-            .returns(builderClassName)
-            .build();
+        if (config.generateBuilder()) {
 
-        return builder
-            .addMethods(defineMemberMethods(config, fieldDefinitions.names()))
-            .addMethod(builderFactoryMethod)
-            .addType(configBuilderClass)
-            .build();
+            ClassName builderClassName = ClassName.get(packageName, generatedClassName + ".Builder");
+            TypeSpec configBuilderClass = new GenerateConfigurationBuilder(configParameterName)
+                .defineConfigBuilder(
+                    TypeName.get(config.rootType()),
+                    implMembers,
+                    builderClassName,
+                    generatedClassName,
+                    constructor.parameters,
+                    factory
+                );
+
+            MethodSpec builderFactoryMethod = MethodSpec.methodBuilder("builder")
+                .addModifiers(Modifier.STATIC, Modifier.PUBLIC)
+                .addStatement("return new $T()", builderClassName)
+                .returns(builderClassName)
+                .build();
+
+            builder
+                .addMethod(builderFactoryMethod)
+                .addType(configBuilderClass);
+        }
+
+        return builder.build();
     }
 
     private TypeSpec.Builder classBuilder(Spec config, String packageName, String generatedClassName) {

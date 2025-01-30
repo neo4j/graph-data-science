@@ -59,9 +59,12 @@ final class ConfigParser {
         this.typeUtils = typeUtils;
     }
 
-    Spec process(TypeMirror configType) {
+    Spec process(TypeMirror configType, Configuration configAnnotation) {
         TypeElement configElement = asTypeElement(configType);
-        SpecBuilder config = SpecBuilder.builder().root(configElement).rootType(configType);
+        SpecBuilder config = SpecBuilder.builder()
+            .root(configElement)
+            .rootType(configType)
+            .generateBuilder(configAnnotation.generateBuilder());
         process(config, new HashSet<>(), configElement, configElement);
         return config.build();
     }

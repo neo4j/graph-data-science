@@ -44,7 +44,7 @@ import static com.google.auto.common.MoreElements.asType;
 import static com.google.auto.common.MoreElements.isAnnotationPresent;
 
 @GenerateBuilder
-record Spec(TypeElement root, TypeMirror rootType, List<Member> members) {
+record Spec(TypeElement root, TypeMirror rootType, List<Member> members, boolean generateBuilder) {
 
     @GenerateBuilder
     record Member(

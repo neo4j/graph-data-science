@@ -47,6 +47,8 @@ public @interface Configuration {
      */
     String value() default "";
 
+    boolean generateBuilder() default true;
+
     /**
      * By default, a configuration field is resolved in the {@link org.neo4j.gds.core.CypherMapWrapper} parameter with the method name as the expected key.
      * This annotation changes the key to look up to use {@link org.neo4j.gds.annotation.Configuration.Key#value()} instead.

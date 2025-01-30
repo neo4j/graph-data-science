@@ -83,7 +83,8 @@ public final class ConfigurationProcessingStep implements BasicAnnotationProcess
             );
             return ProcessResult.INVALID;
         }
-        Spec configSpec = configParser.process(element.asType());
+        var configAnnotation = element.getAnnotation(Configuration.class);
+        Spec configSpec = configParser.process(element.asType(), configAnnotation);
         if (!validClassName(element, configSpec)) {
             messager.printMessage(
                 Diagnostic.Kind.ERROR,
