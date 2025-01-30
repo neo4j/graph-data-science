@@ -52,7 +52,7 @@ import static org.neo4j.gds.extension.ExtensionUtil.injectInstance;
 
 public abstract class BaseGdlSupportExtension {
 
-    static final String DATABASE_NAME = "GDL";
+    public static final String DATABASE_NAME = "GDL";
     public static final DatabaseId DATABASE_ID = DatabaseId.of(DATABASE_NAME);
 
     void beforeAction(ExtensionContext context) {
