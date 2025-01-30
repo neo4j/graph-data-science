@@ -22,8 +22,8 @@ package org.neo4j.gds.procedures.catalog;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.loading.DegreeDistribution;
-import org.neo4j.gds.mem.MemoryUsage;
 import org.neo4j.gds.mem.Estimate;
+import org.neo4j.gds.mem.MemoryUsage;
 
 import java.time.ZonedDateTime;
 import java.util.Locale;
@@ -47,7 +47,7 @@ public class GraphInfo {
     public final Map<String, Object> schema;
     public final Map<String, Object> schemaWithOrientation;
 
-    GraphInfo(
+    public GraphInfo(
         String graphName,
         String database,
         String databaseLocation,
