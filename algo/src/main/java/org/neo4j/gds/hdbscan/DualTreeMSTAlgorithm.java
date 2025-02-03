@@ -45,7 +45,7 @@ public class DualTreeMSTAlgorithm extends Algorithm<HugeObjectArray<Edge>> {
     private final HugeObjectArray<Edge> edges;
     private long edgeCount = 0;
 
-    DualTreeMSTAlgorithm(
+    public DualTreeMSTAlgorithm(
         NodePropertyValues nodePropertyValues,
         KdTree kdTree,
         HugeDoubleArray coreValues,
