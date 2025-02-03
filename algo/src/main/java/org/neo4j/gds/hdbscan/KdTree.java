@@ -82,12 +82,8 @@ public class KdTree {
         return queue.closest();
     }
 
-    Neighbour[] neighbours(long pointId, int numberOfNeighbours) {
-        var queue =new JavaUtilSearchPriorityQueue(numberOfNeighbours);
-        var queryPoint = nodePropertyValues.doubleArrayValue(pointId);
-
-        search(root, queryPoint, numberOfNeighbours, queue, OptionalLong.of(pointId));
-        return queue.closest();
+    public Neighbour[] neighbours(long pointId, int numberOfNeighbours) {
+        return neighbours(nodePropertyValues.doubleArrayValue(pointId), numberOfNeighbours);
     }
 
     private void search(KdNode kdNode, double[] queryPoint, int numberOfNeighbours, ClosestSearchPriorityQueue queue, OptionalLong pointId) {
