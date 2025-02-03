@@ -159,7 +159,7 @@ public class DualTreeMSTAlgorithm extends Algorithm<HugeObjectArray<Edge>> {
     }
 
     boolean score(KdNode kdNodeQ, KdNode kdNodeR) {
-        var qId = kdNodeR.id();
+        var qId = kdNodeQ.id();
 
         var singleQ = singleComponentOr(kdNodeQ, -1L);
         var singleR = singleComponentOr(kdNodeR, -2L);
