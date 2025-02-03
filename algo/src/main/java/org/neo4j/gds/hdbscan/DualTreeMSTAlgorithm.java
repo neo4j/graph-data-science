@@ -166,6 +166,8 @@ public class DualTreeMSTAlgorithm extends Algorithm<HugeObjectArray<Edge>> {
 
         if (singleQ == singleR) return false;
 
+        if (kdNodeBound.get(qId) == Double.MAX_VALUE) return true;
+
         var lowerBoundQR = kdNodeQ.aabb().lowerBoundFor(kdNodeR.aabb());
         return lowerBoundQR < Math.sqrt(kdNodeBound.get(qId));
 
