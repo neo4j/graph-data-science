@@ -98,6 +98,16 @@ public class DualTreeMSTAlgorithm extends Algorithm<HugeObjectArray<Edge>> {
 
     }
 
+    double updateBound(long kdNodeId, double value){
+        if (kdNodeBound.get(kdNodeId)==Double.MAX_VALUE){
+            kdNodeBound.set(kdNodeId, value);
+        }
+        else if (value > kdNodeBound.get(kdNodeId)) {
+            kdNodeBound.set(kdNodeId, value);
+        }
+        return kdNodeBound.get(kdNodeId);
+    }
+
     void performIteration() {
         traversalStep(kdTree.root(), kdTree.root());
         mergeComponents();
@@ -200,9 +210,8 @@ public class DualTreeMSTAlgorithm extends Algorithm<HugeObjectArray<Edge>> {
                     }
                 }
                 if (newBound.doubleValue() != Double.MIN_VALUE) {
-                    if (newBound.doubleValue() > kdNodeBound.get(qId)) {
-                        kdNodeBound.set(qId, newBound.doubleValue());
-                    }
+                   updateBound(qId,newBound.doubleValue());
+
                 }
 
             } else if (kdNodeQ.isLeaf() && !kdNodeR.isLeaf()) {

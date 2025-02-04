@@ -22,11 +22,13 @@ package org.neo4j.gds.hdbscan;
 import org.apache.commons.lang3.mutable.MutableDouble;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.properties.nodes.DoubleArrayNodePropertyValues;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class DualTreeMSTAlgorithmFunctionsTest {
 
@@ -163,6 +165,19 @@ class DualTreeMSTAlgorithmFunctionsTest {
         dualTreeMST.baseCase(0,1,maxBound);
 
         assertThat(maxBound.doubleValue()).isEqualTo(-100.0);
+
+    }
+
+    @Test
+    void shouldUpdateBoundsCorrectly(){
+        var props = mock(NodePropertyValues.class);
+        var kdTree = mock(KdTree.class);
+        when(kdTree.treeNodeCount()).thenReturn(10L);
+        var dualTreeMST = new DualTreeMSTAlgorithm(props,kdTree,null,8);
+
+        assertThat(dualTreeMST.updateBound(0,10)).isEqualTo(10);
+        assertThat(dualTreeMST.updateBound(0,5)).isEqualTo(10);
+        assertThat(dualTreeMST.updateBound(0,100)).isEqualTo(100);
 
     }
 
