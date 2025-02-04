@@ -197,7 +197,7 @@ public class DualTreeMSTAlgorithm extends Algorithm<HugeObjectArray<Edge>> {
                         }
                     );
                 if (newBound.doubleValue() != Double.MIN_VALUE) {
-                    if (newBound.doubleValue() < kdNodeBound.get(qId)) {
+                    if (newBound.doubleValue() > kdNodeBound.get(qId)) {
                         kdNodeBound.set(qId, newBound.doubleValue());
                     }
                 }
