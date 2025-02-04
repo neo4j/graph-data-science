@@ -31,8 +31,6 @@ import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.core.utils.paged.dss.HugeAtomicDisjointSetStruct;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
-import java.util.stream.LongStream;
-
 public class DualTreeMSTAlgorithm extends Algorithm<HugeObjectArray<Edge>> {
 
     private final NodePropertyValues nodePropertyValues;
@@ -173,11 +171,9 @@ public class DualTreeMSTAlgorithm extends Algorithm<HugeObjectArray<Edge>> {
 
     }
 
-    private LongStream filterNodesOnCoreValue(KdNode kdNode) {
-        return kdTree.nodesContained(kdNode).filter(qPoint -> {
-            var component = unionFind.setIdOf(qPoint);
-            return coreValues.get(qPoint) < closestDistanceTracker.componentClosestDistance(component);
-        });
+    private boolean  filterNodesOnCoreValue(long node){
+        var component = unionFind.setIdOf(node);
+        return coreValues.get(node) < closestDistanceTracker.componentClosestDistance(component);
     }
 
     void traversalStep(KdNode kdNodeQ, KdNode kdNodeR) {
@@ -187,15 +183,22 @@ public class DualTreeMSTAlgorithm extends Algorithm<HugeObjectArray<Edge>> {
             var qId = kdNodeQ.id();
             if (kdNodeQ.isLeaf() && kdNodeR.isLeaf()) {
                 MutableDouble newBound = new MutableDouble(Double.MIN_VALUE);
-                filterNodesOnCoreValue(kdNodeQ)
-                    .forEach(
-                        qPoint -> {
-                            filterNodesOnCoreValue(kdNodeR)
-                                .forEach(rPoint -> {
-                                    baseCase(qPoint, rPoint, newBound);
-                                });
+                var qStart = kdNodeQ.start();
+                var qEnd = kdNodeQ.end();
+                for (long  qIndex=qStart;qIndex<qEnd;++qIndex) {
+                    var qPoint = kdTree.nodeAt(qIndex);
+                    if (!filterNodesOnCoreValue(qPoint)) {
+                        continue;
+                    }
+                    var rStart = kdNodeR.start();
+                    var rEnd = kdNodeR.end();
+                    for (long rIndex = rStart; rIndex < rEnd; ++rIndex) {
+                        var rPoint = kdTree.nodeAt(rIndex);
+                        if (filterNodesOnCoreValue(rPoint)) {
+                            baseCase(qPoint, rPoint, newBound);
                         }
-                    );
+                    }
+                }
                 if (newBound.doubleValue() != Double.MIN_VALUE) {
                     if (newBound.doubleValue() > kdNodeBound.get(qId)) {
                         kdNodeBound.set(qId, newBound.doubleValue());
