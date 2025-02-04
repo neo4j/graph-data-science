@@ -77,14 +77,14 @@ public class KdTree {
 
     // TODO: maybe overloads for the different array types 🤔
     Neighbour[] neighbours(double[] queryPoint, int numberOfNeighbours) {
-        var queue =new JavaUtilSearchPriorityQueue(numberOfNeighbours);
+        var queue = new JavaUtilSearchPriorityQueue(numberOfNeighbours);
         search(root, queryPoint, numberOfNeighbours, queue, OptionalLong.empty());
         return queue.closest();
     }
 
     public Neighbour[] neighbours(long pointId, int numberOfNeighbours) {
         var queryPoint = nodePropertyValues.doubleArrayValue(pointId);
-        var queue =new JavaUtilSearchPriorityQueue(numberOfNeighbours);
+        var queue = new JavaUtilSearchPriorityQueue(numberOfNeighbours);
         search(root, queryPoint, numberOfNeighbours, queue, OptionalLong.of(pointId));
         return queue.closest();
     }
