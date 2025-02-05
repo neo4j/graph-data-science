@@ -79,7 +79,7 @@ public class HDBScan extends Algorithm<Void> {
                 kdTree,coreValues,
                 nodes.nodeCount()
             );
-            return dualTreeMst.compute();
+            return dualTreeMst.compute().edges();
     }
     KdTree buildKDTree(){
         var builder =new KdTreeBuilder(nodes,nodePropertyValues,concurrency.value(),leafSize);

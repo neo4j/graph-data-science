@@ -31,7 +31,7 @@ import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.core.utils.paged.dss.HugeAtomicDisjointSetStruct;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
-public class DualTreeMSTAlgorithm extends Algorithm<HugeObjectArray<Edge>> {
+public class DualTreeMSTAlgorithm extends Algorithm<DualTreeMSTResult> {
 
     private final NodePropertyValues nodePropertyValues;
     private final KdTree kdTree;
@@ -44,6 +44,7 @@ public class DualTreeMSTAlgorithm extends Algorithm<HugeObjectArray<Edge>> {
 
     private final HugeObjectArray<Edge> edges;
     private long edgeCount = 0;
+    private double totalEdgeSum = 0d;
 
     public DualTreeMSTAlgorithm(
         NodePropertyValues nodePropertyValues,
@@ -69,7 +70,7 @@ public class DualTreeMSTAlgorithm extends Algorithm<HugeObjectArray<Edge>> {
 
 
     @Override
-    public HugeObjectArray<Edge> compute() {
+    public DualTreeMSTResult compute() {
 
         var kdRoot = kdTree.root();
         var rootId = kdRoot.id();
@@ -77,7 +78,7 @@ public class DualTreeMSTAlgorithm extends Algorithm<HugeObjectArray<Edge>> {
             kdNodeBound.fill(Double.MAX_VALUE);
             performIteration();
         }
-        return edges;
+        return new DualTreeMSTResult(edges, totalEdgeSum);
     }
 
     void baseCase(long p0, long p1, MutableDouble maxBound) {
@@ -252,11 +253,13 @@ public class DualTreeMSTAlgorithm extends Algorithm<HugeObjectArray<Edge>> {
                 continue;
             }
 
+            var distance = Math.sqrt(closestDistanceTracker.componentClosestDistance(componentId));
             this.edges.set(
                 edgeCount,
-                new Edge(u, v, Math.sqrt(closestDistanceTracker.componentClosestDistance(componentId)))
+                new Edge(u, v, distance)
             );
             this.edgeCount++;
+            this.totalEdgeSum += distance;
 
             unionFind.union(uComponent, vComponent);
         }

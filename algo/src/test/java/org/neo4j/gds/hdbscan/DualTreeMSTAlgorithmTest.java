@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.hdbscan;
 
+import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
@@ -62,7 +63,7 @@ class DualTreeMSTAlgorithmTest {
             var cores = HugeDoubleArray.newArray(graph.nodeCount());
 
             var dualTree = new DualTreeMSTAlgorithm(nodePropertyValues, kdTree, cores, graph.nodeCount());
-            var edges = dualTree.compute();
+            var result = dualTree.compute();
 
             var expected = List.of(
                 new Edge(graph.toMappedNodeId("g"), graph.toMappedNodeId("h"), 2.23606797749979),
@@ -75,9 +76,15 @@ class DualTreeMSTAlgorithmTest {
                 new Edge(graph.toMappedNodeId("b"), graph.toMappedNodeId("d"), 3.1622776601683795)
             );
 
-            assertThat(edges.toArray())
+            assertThat(result.edges().toArray())
                 .usingElementComparator(new UndirectedEdgeComparator())
                 .containsExactlyInAnyOrderElementsOf(expected);
+
+            assertThat(result.totalDistance())
+                .isEqualTo(expected.stream()
+                    .mapToDouble(Edge::distance)
+                    .sum()
+                );
         }
 
     }
@@ -107,7 +114,7 @@ class DualTreeMSTAlgorithmTest {
             var cores = HugeDoubleArray.newArray(graph.nodeCount());
 
             var dualTree = new DualTreeMSTAlgorithm(nodePropertyValues, kdTree, cores, graph.nodeCount());
-            var edges = dualTree.compute();
+            var result = dualTree.compute();
 
             var expected = List.of(
                 new Edge(graph.toMappedNodeId("a"), graph.toMappedNodeId("b"), 3.1622776601683795),
@@ -117,9 +124,17 @@ class DualTreeMSTAlgorithmTest {
                 new Edge(graph.toMappedNodeId("e"), graph.toMappedNodeId("f"), 1.4142135623730951)
             );
 
-            assertThat(edges.toArray())
+            assertThat(result.edges().toArray())
                 .usingElementComparator(new UndirectedEdgeComparator())
                 .containsExactlyInAnyOrderElementsOf(expected);
+
+            assertThat(result.totalDistance())
+                .isCloseTo(
+                    expected.stream()
+                        .mapToDouble(Edge::distance)
+                        .sum(),
+                    Offset.offset(1e-12)
+                );
         }
 
     }
@@ -150,7 +165,7 @@ class DualTreeMSTAlgorithmTest {
             var cores = HugeDoubleArray.newArray(graph.nodeCount());
 
             var dualTree = new DualTreeMSTAlgorithm(nodePropertyValues, kdTree, cores, graph.nodeCount());
-            var edges = dualTree.compute();
+            var result = dualTree.compute();
 
             var expected = List.of(
                 new Edge(graph.toMappedNodeId("a"), graph.toMappedNodeId("d"), 0.5),
@@ -160,9 +175,17 @@ class DualTreeMSTAlgorithmTest {
                 new Edge(graph.toMappedNodeId("c"), graph.toMappedNodeId("e"), 997.0045135304052)
             );
 
-            assertThat(edges.toArray())
+            assertThat(result.edges().toArray())
                 .usingElementComparator(new UndirectedEdgeComparator())
                 .containsExactlyInAnyOrderElementsOf(expected);
+
+            assertThat(result.totalDistance())
+                .isCloseTo(
+                    expected.stream()
+                        .mapToDouble(Edge::distance)
+                        .sum(),
+                    Offset.offset(1e-12)
+                );
         }
 
     }
