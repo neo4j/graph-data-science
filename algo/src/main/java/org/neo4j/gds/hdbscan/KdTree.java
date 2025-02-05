@@ -70,6 +70,15 @@ public class KdTree {
         return LongStream.range(start, end).map(ids::get);
     }
 
+   boolean descentOfOther(KdNode nodeA,KdNode nodeB){
+        long startA = nodeA.start();
+        long endA = nodeA.end();
+
+        long startB = nodeB.start();
+        long endB = nodeB.end();
+
+        return startA <= startB && endB <= endA || startB <= startA && endA <= endB;
+    }
 
     long  treeNodeCount(){
         return treeNodeCount;

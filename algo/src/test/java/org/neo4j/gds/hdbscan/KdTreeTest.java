@@ -89,4 +89,25 @@ class KdTreeTest {
             );
     }
 
+    @Test
+    void shouldCorrectlyFigureOutDescendants() {
+        var root = KdNode.createLeaf(0, 10, 100, null);
+        var l1 = KdNode.createLeaf(1, 10, 50, null);
+        var l2 = KdNode.createLeaf(1, 20, 50, null);
+        var l3 = KdNode.createLeaf(1, 100, 150, null);
+
+        var kdtree = new KdTree(null, null, root, 3);
+
+        assertThat(kdtree.descentOfOther(root, l1)).isTrue();
+        assertThat(kdtree.descentOfOther(l1, root)).isTrue();
+
+        assertThat(kdtree.descentOfOther(root, l2)).isTrue();
+        assertThat(kdtree.descentOfOther(l2, root)).isTrue();
+
+        assertThat(kdtree.descentOfOther(root, l3)).isFalse();
+        assertThat(kdtree.descentOfOther(l3, root)).isFalse();
+
+
+    }
+
 }
