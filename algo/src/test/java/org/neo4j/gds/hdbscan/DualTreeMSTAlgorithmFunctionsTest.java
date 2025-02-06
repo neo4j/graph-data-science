@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.hdbscan;
 
-import org.apache.commons.lang3.mutable.MutableDouble;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.properties.nodes.DoubleArrayNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
@@ -131,13 +130,8 @@ class DualTreeMSTAlgorithmFunctionsTest {
         var dualTreeMST = new DualTreeMSTAlgorithm(nodeProps,kdTree, HugeDoubleArray.of(0,0,10,10),8);
 
 
-        var maxBound01 =new MutableDouble(-100.0);
-        dualTreeMST.baseCase(0,1,maxBound01);
-        assertThat(maxBound01.doubleValue()).isEqualTo(1); //distance
-
-        var maxBound23 =new MutableDouble(-100.0);
-        dualTreeMST.baseCase(2,3,maxBound23);
-        assertThat(maxBound23.doubleValue()).isEqualTo(10); //corevalue
+        assertThat(dualTreeMST.baseCase(0,1,0)).isEqualTo(1); //distance
+        assertThat(dualTreeMST.baseCase(2,3,2)).isEqualTo(10); //corevalue
 
 
     }
@@ -161,10 +155,7 @@ class DualTreeMSTAlgorithmFunctionsTest {
         var dualTreeMST = new DualTreeMSTAlgorithm(nodeProps,kdTree,null,8);
         dualTreeMST.mergeComponents(0,1);
 
-        var maxBound =new MutableDouble(-100.0);
-        dualTreeMST.baseCase(0,1,maxBound);
-
-        assertThat(maxBound.doubleValue()).isEqualTo(-100.0);
+        assertThat(dualTreeMST.baseCase(0,1, 0)).isEqualTo(-1.0);
 
     }
 
@@ -181,5 +172,39 @@ class DualTreeMSTAlgorithmFunctionsTest {
 
     }
 
-  
+    @Test
+    void traversalBetweenLeaves(){
+        KdNode node1 = KdNode.createLeaf(0,0,2,new AABB(new double[]{0}, new double[]{4},1));
+        KdNode node2 = KdNode.createLeaf(1,3,4,new AABB(new double[]{5}, new double[]{7},1));
+
+        DoubleArrayNodePropertyValues nodeProps=new DoubleArrayNodePropertyValues() {
+            private double[] provs=new double[]{0,4,7,5};
+            @Override
+            public double[] doubleArrayValue(long nodeId) {
+                return new double[]{provs[(int)nodeId]};
+            }
+
+            @Override
+            public long nodeCount() {
+                return 0;
+            }
+        };
+        //0,4 and  5,7
+
+        // closet(0) = 5  , 5-0
+        // closet(4) = 5  ,5-1
+
+        //max {1,5} = 5
+        var kdTree=new KdTree(HugeLongArray.of(0,1,2,3),nodeProps,null,2);
+
+        var dualTree = new DualTreeMSTAlgorithm(nodeProps,kdTree,HugeDoubleArray.newArray(4),4);
+
+        dualTree.resetNodeBounds();
+        dualTree.traversalLeafLeafStep(node1,node2);
+
+        assertThat(dualTree.kdNodeBound(0)).isEqualTo(25); //doesnt do the root
+
+    }
+
+
 }

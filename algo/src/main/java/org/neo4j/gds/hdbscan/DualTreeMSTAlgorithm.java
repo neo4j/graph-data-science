@@ -20,7 +20,6 @@
 package org.neo4j.gds.hdbscan;
 
 import com.carrotsearch.hppc.BitSet;
-import org.apache.commons.lang3.mutable.MutableDouble;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
@@ -75,14 +74,17 @@ public class DualTreeMSTAlgorithm extends Algorithm<DualTreeMSTResult> {
         var kdRoot = kdTree.root();
         var rootId = kdRoot.id();
         while (!kdNodeSingleComponent.get(rootId)) {
-            kdNodeBound.fill(Double.MAX_VALUE);
+            resetNodeBounds();
             performIteration();
         }
         return new DualTreeMSTResult(edges, totalEdgeSum);
     }
 
-    void baseCase(long p0, long p1, MutableDouble maxBound) {
-        var comp0 = unionFind.setIdOf(p0);
+    void resetNodeBounds(){
+        kdNodeBound.fill(Double.MAX_VALUE);
+
+    }
+    double baseCase(long p0, long p1, long comp0) {
         var comp1 = unionFind.setIdOf(p1);
         if (comp0 != comp1) {
             var arr0 = nodePropertyValues.doubleArrayValue(p0);
@@ -91,11 +93,10 @@ public class DualTreeMSTAlgorithm extends Algorithm<DualTreeMSTResult> {
             var p01Distance = Intersections.sumSquareDelta(arr0, arr1);
             var adaptedDistance = Math.max(Math.max(coreValues.get(p0), coreValues.get(p1)), p01Distance);
             if (closestDistanceTracker.tryToAssign(comp0, p0, p1, adaptedDistance)) {
-                if (maxBound.doubleValue() < adaptedDistance) {
-                    maxBound.setValue(adaptedDistance);
-                }
+                return  adaptedDistance;
             }
         }
+        return  -1;
 
     }
 
@@ -187,49 +188,48 @@ public class DualTreeMSTAlgorithm extends Algorithm<DualTreeMSTResult> {
         return coreValues.get(node) < closestDistanceTracker.componentClosestDistance(component);
     }
 
+    void traversalLeafLeafStep(KdNode kdNodeQ, KdNode kdNodeR){
+        var qId = kdNodeQ.id();
+        var qStart = kdNodeQ.start();
+        var qEnd = kdNodeQ.end();
+        for (long  qIndex=qStart;qIndex<qEnd;++qIndex) {
+            var qPoint = kdTree.nodeAt(qIndex);
+            if (!filterNodesOnCoreValue(qPoint)) {
+                continue;
+            }
+            var qComp = unionFind.setIdOf(qPoint);
+            var rStart = kdNodeR.start();
+            var rEnd = kdNodeR.end();
+            for (long rIndex = rStart; rIndex < rEnd; ++rIndex) {
+                var rPoint = kdTree.nodeAt(rIndex);
+                if (filterNodesOnCoreValue(rPoint)) {
+                    baseCase(qPoint, rPoint,qComp);
+                }
+            }
+
+            updateBound(qId, closestDistanceTracker.componentClosestDistance(qComp));
+        }
+    }
     void traversalStep(KdNode kdNodeQ, KdNode kdNodeR) {
 
         boolean score = score(kdNodeQ, kdNodeR);
         if (score) {
             var qId = kdNodeQ.id();
             if (kdNodeQ.isLeaf() && kdNodeR.isLeaf()) {
-                MutableDouble newBound = new MutableDouble(Double.MIN_VALUE);
-                var qStart = kdNodeQ.start();
-                var qEnd = kdNodeQ.end();
-                for (long  qIndex=qStart;qIndex<qEnd;++qIndex) {
-                    var qPoint = kdTree.nodeAt(qIndex);
-                    if (!filterNodesOnCoreValue(qPoint)) {
-                        continue;
-                    }
-                    var rStart = kdNodeR.start();
-                    var rEnd = kdNodeR.end();
-                    for (long rIndex = rStart; rIndex < rEnd; ++rIndex) {
-                        var rPoint = kdTree.nodeAt(rIndex);
-                        if (filterNodesOnCoreValue(rPoint)) {
-                            baseCase(qPoint, rPoint, newBound);
-                        }
-                    }
-                }
-                if (newBound.doubleValue() != Double.MIN_VALUE) {
-                   updateBound(qId,newBound.doubleValue());
-
-                }
-
+                traversalLeafLeafStep(kdNodeQ,kdNodeR);
             } else if (kdNodeQ.isLeaf() && !kdNodeR.isLeaf()) {
                 traversalStep(kdNodeQ, kdTree.leftChild(kdNodeR));
                 traversalStep(kdNodeQ, kdTree.rightChild(kdNodeR));
             } else {
-
                 traversalStep(kdTree.leftChild(kdNodeQ), kdNodeR);
                 traversalStep(kdTree.rightChild(kdNodeQ), kdNodeR);
 
-                var qBound = kdNodeBound.get(qId);
                 var leftChildBound = kdNodeBound.get(kdTree.leftChild(kdNodeQ).id());
                 var rightChildBound = kdNodeBound.get(kdTree.rightChild(kdNodeQ).id());
                 var qCandidateBound = Math.max(leftChildBound, rightChildBound);
-                if (qCandidateBound < qBound) {
-                    kdNodeBound.set(qId, qCandidateBound);
-                }
+
+                kdNodeBound.set(qId, qCandidateBound);
+
 
             }
 
@@ -264,6 +264,10 @@ public class DualTreeMSTAlgorithm extends Algorithm<DualTreeMSTResult> {
             unionFind.union(uComponent, vComponent);
         }
 
+    }
+
+    double kdNodeBound(long kdNodeId){
+        return  kdNodeBound.get(kdNodeId);
     }
 
 }
