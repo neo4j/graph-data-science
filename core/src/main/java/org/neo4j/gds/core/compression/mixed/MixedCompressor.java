@@ -120,7 +120,6 @@ public final class MixedCompressor implements AdjacencyCompressor {
         private final AdjacencyCompressorFactory packedCompressorFactory;
         private final AdjacencyCompressorFactory vlongCompressorFactory;
 
-
         Factory(
             LongSupplier nodeCountSupplier,
             LongAdder relationshipCounter,
@@ -192,6 +191,11 @@ public final class MixedCompressor implements AdjacencyCompressor {
                 .addAllProperties(mixedAdjacencyProperties)
                 .relationshipCount(relationshipCounter.longValue())
                 .build();
+        }
+
+        @Override
+        public boolean validateNode(long nodeId) {
+            return this.vlongCompressorFactory.validateNode(nodeId) && this.packedCompressorFactory.validateNode(nodeId);
         }
 
         private static MemoryInfo mergeMemoryInfo(

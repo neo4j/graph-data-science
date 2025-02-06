@@ -59,10 +59,50 @@ public interface AdjacencyCompressor extends AutoCloseable {
     void close();
 
     interface ValueMapper {
+        int INVALID_ID = -1;
+
         /**
          * A mapper to transform values before compressing them.
+         * May return {@link #INVALID_ID} to indicate that the value should be skipped.
          * Implementations must be thread-safe
          */
         long map(long value);
+
+        default ValueMapper andThen(ValueMapper other) {
+            return new AndThen(this, other);
+        }
+
+        enum Identity implements AdjacencyCompressor.ValueMapper {
+            INSTANCE {
+                @Override
+                public long map(long value) {
+                    return value;
+                }
+
+                @Override
+                public ValueMapper andThen(ValueMapper other) {
+                    return other;
+                }
+            }
+        }
+
+        final class AndThen implements ValueMapper {
+            private final ValueMapper first;
+            private final ValueMapper second;
+
+            AndThen(ValueMapper first, ValueMapper second) {
+                this.first = first;
+                this.second = second;
+            }
+
+            @Override
+            public long map(long value) {
+                var firstMapped = this.first.map(value);
+                if (firstMapped == INVALID_ID) {
+                    return INVALID_ID;
+                }
+                return this.second.map(firstMapped);
+            }
+        }
     }
 }

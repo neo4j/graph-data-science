@@ -26,11 +26,11 @@ import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.compress.AdjacencyCompressor;
+import org.neo4j.gds.api.compress.AdjacencyCompressor.ValueMapper.Identity;
 import org.neo4j.gds.api.compress.AdjacencyCompressorFactory;
 import org.neo4j.gds.api.compress.LongArrayBuffer;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.compression.common.AdjacencyCompression;
-import org.neo4j.gds.core.compression.common.ZigZagLongDecoding;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryEstimations;
@@ -248,7 +248,7 @@ public final class AdjacencyBuffer {
                 adjacencyCompressorFactory,
                 chunkedAdjacencyLists[page],
                 relationshipCounter,
-                mapper.orElse(ZigZagLongDecoding.Identity.INSTANCE),
+                mapper.orElse(Identity.INSTANCE),
                 drainCountConsumer.orElse(n -> {})
             ));
         }
@@ -305,31 +305,47 @@ public final class AdjacencyBuffer {
 
         @Override
         public void run() {
+            var mapper = this.valueMapper.andThen(this::validateNode);
             try (var compressor = adjacencyCompressorFactory.createCompressor()) {
                 var buffer = new LongArrayBuffer();
                 var importedRelationships = new MutableLong(0L);
                 chunkedAdjacencyLists.consume((localId, targets, properties, compressedByteSize, numberOfCompressedTargets) -> {
                     var sourceNodeId = this.paging.sourceNodeId(localId, this.page);
-                    var nodeId = valueMapper.map(sourceNodeId);
+                    var nodeId = mapper.map(sourceNodeId);
+                    if (nodeId == AdjacencyCompressor.ValueMapper.INVALID_ID) {
+                        return;
+                    }
 
                     AdjacencyCompression.zigZagUncompressFrom(
                         buffer,
                         targets,
                         numberOfCompressedTargets,
                         compressedByteSize,
-                        valueMapper
+                        mapper
                     );
+
+                    if (buffer.length == 0) {
+                        // special case: we skipped a relationship because it pointed to or from a node that we didn't load
+                        // this can result in some nodes that should not get an adjacencylist at all
+                        return;
+                    }
 
                     importedRelationships.add(compressor.compress(
                         nodeId,
                         buffer.buffer,
                         properties,
-                        numberOfCompressedTargets
+                        buffer.length
                     ));
                 });
                 relationshipCounter.add(importedRelationships.longValue());
                 drainCountConsumer.accept(importedRelationships.longValue());
             }
+        }
+
+        long validateNode(long nodeId) {
+            return (this.adjacencyCompressorFactory.validateNode(nodeId))
+                ? nodeId
+                : AdjacencyCompressor.ValueMapper.INVALID_ID;
         }
     }
 

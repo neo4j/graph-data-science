@@ -21,13 +21,86 @@ package org.neo4j.gds.core.loading;
 
 import org.assertj.core.data.Percentage;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.Orientation;
+import org.neo4j.gds.PropertyMappings;
+import org.neo4j.gds.RelationshipProjection;
+import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
+import org.neo4j.gds.core.compression.common.MemoryTracker;
+import org.neo4j.gds.core.compression.varlong.CompressedAdjacencyListBuilderFactory;
+import org.neo4j.gds.core.compression.varlong.DeltaVarLongCompressor;
 import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.core.utils.RawValues;
 import org.neo4j.gds.mem.MemoryTree;
+
+import java.util.Map;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class AdjacencyBufferTest {
+
+    @Test
+    void skipsNodeIdsThatShouldntBeThereWhenBuildingAdjacencyLists() {
+        var nodeCount = 7L;
+        var metadata = SingleTypeRelationshipImporter.ImportMetaData.of(
+            RelationshipProjection.of(
+                "T",
+                Orientation.NATURAL
+            ), 1, Map.of(), false
+        );
+        var factory = DeltaVarLongCompressor.factory(
+            () -> nodeCount,
+            CompressedAdjacencyListBuilderFactory.of(),
+            PropertyMappings.builder().build(),
+            new Aggregation[]{Aggregation.NONE},
+            true,
+            MemoryTracker.EMPTY
+        );
+        var adjacencyBuffer = AdjacencyBuffer.of(
+            metadata,
+            factory,
+            ImportSizing.of(new Concurrency(4), nodeCount)
+        );
+
+        var relationshipsBatchBuffer = new RelationshipsBatchBufferBuilder<Integer>()
+            .capacity(6)
+            .propertyReferenceClass(Integer.class)
+            .build();
+
+        // more unique original node ids than nodeCount
+        relationshipsBatchBuffer.add(0, 1);
+        relationshipsBatchBuffer.add(2, 3);
+        relationshipsBatchBuffer.add(4, 5);
+        relationshipsBatchBuffer.add(4, 7); // should exclude the id 7
+        relationshipsBatchBuffer.add(6, 8); // should exclude the id 8
+        relationshipsBatchBuffer.add(9, 0); // should exclude the id 9
+
+        var importer = ThreadLocalSingleTypeRelationshipImporter.of(
+            adjacencyBuffer,
+            relationshipsBatchBuffer,
+            metadata,
+            null // no properties
+        );
+
+        var numberOfElementsImported = importer.importRelationships();
+        var numberOfRelationshipsImported = RawValues.getHead(numberOfElementsImported);
+        assertThat(numberOfRelationshipsImported).isEqualTo(6); // we get all in the initial run
+
+        var tasks = adjacencyBuffer.adjacencyListBuilderTasks(Optional.empty(), Optional.empty());
+
+        // but when we build the compressed adjacency lists we will skip one node and its two rels
+        tasks.forEach(Runnable::run);
+
+        var adjacencyList = factory.build(false).adjacency();
+        assertThat(adjacencyList.degree(0)).isEqualTo(1);
+        assertThat(adjacencyList.degree(1)).isEqualTo(0);
+        assertThat(adjacencyList.degree(2)).isEqualTo(1);
+        assertThat(adjacencyList.degree(3)).isEqualTo(0);
+        assertThat(adjacencyList.degree(4)).isEqualTo(1);
+        assertThat(adjacencyList.degree(5)).isEqualTo(0);
+        assertThat(adjacencyList.degree(6)).isEqualTo(0);
+    }
 
     @Test
     void memoryEstimationShouldGrowLinearlyWithNodeCount() {

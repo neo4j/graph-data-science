@@ -127,8 +127,8 @@ class GraphLoaderTest extends BaseTest {
             .build()
             .graph();
 
-        log.assertContainsMessage(TestLog.DEBUG, "Loading :: Nodes :: Store Scan :: Imported 3 records and 1 properties");
-        log.assertContainsMessage(TestLog.DEBUG, "Loading :: Relationships :: Store Scan :: Imported 4 records and 0 properties");
+        log.assertContainsMessage(TestLog.INFO, "Loading :: Nodes :: Store Scan :: Imported 3 records and 1 properties");
+        log.assertContainsMessage(TestLog.INFO, "Loading :: Relationships :: Store Scan :: Imported 4 records and 0 properties");
     }
 
     @Test
@@ -163,13 +163,13 @@ class GraphLoaderTest extends BaseTest {
             )
             .doesNotContain("Loading :: Nodes :: Property Index Scan :: Start");
 
-        assertThat(log.getMessages(TestLog.DEBUG))
+        assertThat(log.getMessages(TestLog.INFO))
             .extracting(removingThreadId())
             .contains("Loading :: Nodes :: Store Scan :: Start using NodeCursorBasedScanner")
             .contains("Loading :: Relationships :: Store Scan :: Start using RelationshipScanCursorBasedScanner");
 
-        log.assertContainsMessage(TestLog.DEBUG, "Loading :: Nodes :: Store Scan :: Imported 3 records and 1 properties");
-        log.assertContainsMessage(TestLog.DEBUG, "Loading :: Relationships :: Store Scan :: Imported 4 records and 0 properties");
+        log.assertContainsMessage(TestLog.INFO, "Loading :: Nodes :: Store Scan :: Imported 3 records and 1 properties");
+        log.assertContainsMessage(TestLog.INFO, "Loading :: Relationships :: Store Scan :: Imported 4 records and 0 properties");
     }
 
     @Test

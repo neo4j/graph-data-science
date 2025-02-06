@@ -50,11 +50,10 @@ public final class AdjacencyCompression {
         AdjacencyCompressor.ValueMapper mapper
     ) {
         into.ensureCapacity(compressedValues);
-        zigZagUncompressFrom(into.buffer, targets, compressedValues, limit, mapper);
-        into.length = compressedValues;
+        into.length = zigZagUncompressFrom(into.buffer, targets, compressedValues, limit, mapper);
     }
 
-    public static void zigZagUncompressFrom(
+    public static int zigZagUncompressFrom(
         long[] into,
         byte[] targets,
         int compressedValues,
@@ -62,7 +61,7 @@ public final class AdjacencyCompression {
         AdjacencyCompressor.ValueMapper mapper
     ) {
         assert into.length >= compressedValues;
-        zigZagUncompress(targets, limit, into, mapper);
+        return zigZagUncompress(targets, limit, into, mapper);
     }
 
     public static int applyDeltaEncoding(LongArrayBuffer data, Aggregation aggregation) {
