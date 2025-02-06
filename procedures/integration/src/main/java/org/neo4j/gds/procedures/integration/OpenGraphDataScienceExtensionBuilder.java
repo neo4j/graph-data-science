@@ -250,13 +250,11 @@ public final class OpenGraphDataScienceExtensionBuilder {
         log.info("Building Graph Data Science extension...");
         registerGraphDataScienceComponent();
 
-        // register legacy bits
+        registerComponentsNeededByBaseProc(metrics, taskRegistryFactoryService, taskStoreService, userLogServices);
+
+        // register legacy bits, as I remember it these are used internally. I lose track tho. Awful design.
         registerLicenseStateComponent(licenseState);
-        registerMetricsComponent(metrics);
         registerModelCatalogComponent(modelCatalog);
-        registerTaskRegistryFactoryComponent(taskRegistryFactoryService);
-        registerTaskStoreComponent(taskStoreService);
-        registerUserLogRegistryFactoryComponent(userLogServices);
         log.info("Graph Data Science extension built.");
 
         var lifeSupport = new LifeSupport();
@@ -281,51 +279,32 @@ public final class OpenGraphDataScienceExtensionBuilder {
     }
 
     /**
-     * @deprecated Legacy stuff, will go away one day
+     * We need BaseProc to power Pregel (current design, could change one day).
+     * Therefore, we need to pass these ideally internal things to Neo4j's component registry,
+     * so that BaseProc can look them up later.
      */
-    @Deprecated
-    private void registerLicenseStateComponent(LicenseState licenseState) {
-        componentRegistration.registerComponent("License State", LicenseState.class, __ -> licenseState);
-
-        componentRegistration.setUpDependency(licenseState);
+    private void registerComponentsNeededByBaseProc(
+        Metrics metrics,
+        TaskRegistryFactoryService taskRegistryFactoryService,
+        TaskStoreService taskStoreService,
+        UserLogServices userLogServices
+    ) {
+        registerMetricsComponent(metrics);
+        registerTaskRegistryFactoryComponent(taskRegistryFactoryService);
+        registerTaskStoreComponent(taskStoreService);
+        registerUserLogRegistryFactoryComponent(userLogServices);
     }
 
-    /**
-     * We register metrics as a component as a way of dependency injecting into spec framework.
-     * As long as we keep that around, this hack needs to persist.
-     *
-     * @deprecated Legacy stuff, will go away one day
-     */
-    @Deprecated
     private void registerMetricsComponent(Metrics metrics) {
         componentRegistration.registerComponent("Metrics", Metrics.class, __ -> metrics);
     }
 
-    /**
-     * @deprecated Legacy stuff, will go away one day
-     */
-    @Deprecated
-    private void registerModelCatalogComponent(ModelCatalog modelCatalog) {
-        componentRegistration.registerComponent("Model Catalog", ModelCatalog.class, __ -> modelCatalog);
-
-        componentRegistration.setUpDependency(modelCatalog);
-    }
-
-    /**
-     * @param taskStoreService
-     * @deprecated Legacy stuff, will go away one day
-     */
-    @Deprecated
     private void registerTaskStoreComponent(TaskStoreService taskStoreService) {
         var taskStoreProvider = new TaskStoreProvider(taskStoreService);
 
         componentRegistration.registerComponent("Task Store", TaskStore.class, taskStoreProvider);
     }
 
-    /**
-     * @deprecated Legacy stuff, will go away one day
-     */
-    @Deprecated
     private void registerTaskRegistryFactoryComponent(TaskRegistryFactoryService taskRegistryFactoryService) {
         var taskRegistryFactoryProvider = new TaskRegistryFactoryProvider(taskRegistryFactoryService);
 
@@ -336,10 +315,6 @@ public final class OpenGraphDataScienceExtensionBuilder {
         );
     }
 
-    /** appedfklvjhlfv
-     * @deprecated Legacy stuff, will go away one day
-     */
-    @Deprecated
     private void registerUserLogRegistryFactoryComponent(UserLogServices userLogServices) {
         var userLogRegistryFactoryProvider = new UserLogRegistryFactoryProvider(userLogServices);
 
@@ -348,5 +323,25 @@ public final class OpenGraphDataScienceExtensionBuilder {
             UserLogRegistryFactory.class,
             userLogRegistryFactoryProvider
         );
+    }
+
+    /**
+     * @deprecated Legacy stuff, will go away one day
+     */
+    @Deprecated
+    private void registerLicenseStateComponent(LicenseState licenseState) {
+        componentRegistration.registerComponent("License State", LicenseState.class, __ -> licenseState);
+
+        componentRegistration.setUpDependency(licenseState);
+    }
+
+    /**
+     * @deprecated Legacy stuff, will go away one day
+     */
+    @Deprecated
+    private void registerModelCatalogComponent(ModelCatalog modelCatalog) {
+        componentRegistration.registerComponent("Model Catalog", ModelCatalog.class, __ -> modelCatalog);
+
+        componentRegistration.setUpDependency(modelCatalog);
     }
 }
