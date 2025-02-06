@@ -25,7 +25,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public interface BaseConfig extends ToMapConvertible, AuraApiCredentialsConfig {
+public interface BaseConfig extends ToMapConvertible {
 
     String SUDO_KEY = "sudo";
     String LOG_PROGRESS_KEY = "logProgress";

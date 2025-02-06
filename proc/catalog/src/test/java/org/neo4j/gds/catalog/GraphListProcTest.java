@@ -24,7 +24,6 @@ import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.catalog.GraphCatalogProcedureFacade;
 import org.neo4j.gds.procedures.catalog.GraphInfoWithHistogram;
 
-import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -41,7 +40,7 @@ class GraphListProcTest {
         var expectedResultStream = Stream.of(mock(GraphInfoWithHistogram.class));
         var catalogFacade = mock(GraphCatalogProcedureFacade.class);
         when(facade.graphCatalog()).thenReturn(catalogFacade);
-        when(catalogFacade.listGraphs("some graph", Map.of())).thenReturn(expectedResultStream);
+        when(catalogFacade.listGraphs("some graph")).thenReturn(expectedResultStream);
         var actualResultStream = procedure.listGraphs("some graph");
 
         assertSame(expectedResultStream, actualResultStream);

@@ -26,7 +26,6 @@ import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
-import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.catalog.GraphCatalogProcedureConstants.LIST_DESCRIPTION;
@@ -50,6 +49,6 @@ public class GraphListProc {
     public Stream<GraphInfoWithHistogram> listGraphs(
         @Name(value = "graphName", defaultValue = NO_VALUE_PLACEHOLDER) String graphName
     ) {
-        return facade.graphCatalog().listGraphs(graphName, Map.of());
+        return facade.graphCatalog().listGraphs(graphName);
     }
 }

@@ -124,7 +124,7 @@ class GraphCatalogProcedureFacadeTest {
                     ), null)
                 )
             );
-        var graphs = catalogFacade.listGraphs("foo", Map.of());
+        var graphs = catalogFacade.listGraphs("foo");
 
         // when we specify that we do not want a degree distribution, we mean we get null instead of a map
         assertThat(graphs.findFirst().orElseThrow().degreeDistribution).isNull();
@@ -164,7 +164,7 @@ class GraphCatalogProcedureFacadeTest {
                     )
                 )
             );
-        var graphs = catalogFacade.listGraphs("foo", Map.of());
+        var graphs = catalogFacade.listGraphs("foo");
 
         // when we specify that we do want a degree distribution, we get a map of stuff
         assertThat(graphs.findFirst().orElseThrow().degreeDistribution).containsExactlyInAnyOrderEntriesOf(
@@ -210,7 +210,7 @@ class GraphCatalogProcedureFacadeTest {
                     ), null)
                 )
             );
-        var graphs = catalogFacade.listGraphs("foo", Map.of());
+        var graphs = catalogFacade.listGraphs("foo");
 
         // when we specify that we do not want memory usage, we mean we get null instead of a map
         var result = graphs.findFirst().orElseThrow();
@@ -250,7 +250,7 @@ class GraphCatalogProcedureFacadeTest {
                     ), null)
                 )
             );
-        var graphs = catalogFacade.listGraphs("foo", Map.of());
+        var graphs = catalogFacade.listGraphs("foo");
 
         // when we specify that we do not want memory usage, we mean we get null instead of a map
         var result = graphs.findFirst().orElseThrow();

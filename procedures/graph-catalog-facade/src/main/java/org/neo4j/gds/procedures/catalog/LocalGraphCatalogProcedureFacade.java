@@ -163,7 +163,7 @@ public class LocalGraphCatalogProcedureFacade implements GraphCatalogProcedureFa
     }
 
     @Override
-    public Stream<GraphInfoWithHistogram> listGraphs(String graphName, Map<String, Object> configuration) {
+    public Stream<GraphInfoWithHistogram> listGraphs(String graphName) {
         graphName = validateValue(graphName);
 
         var displayDegreeDistribution = procedureReturnColumns.contains("degreeDistribution");
