@@ -22,7 +22,6 @@ package org.neo4j.gds.ml.pipeline.linkPipeline;
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.neo4j.common.DependencyResolver;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.CloseableResourceRegistry;
@@ -185,17 +184,7 @@ class LinkPredictionTrainingPipelineTest {
     void deriveRelationshipWeightProperty() {
         var executionContext = ImmutableExecutionContext.builder()
             .databaseId(DatabaseId.of(""))
-            .dependencyResolver(new DependencyResolver() {
-                @Override
-                public <T> T resolveDependency(Class<T> type, SelectionStrategy selector) {
-                    return null;
-                }
-
-                @Override
-                public boolean containsDependency(Class<?> type) {
-                    return false;
-                }
-            })
+            .dependencyResolver(ExecutionContext.EMPTY_DEPENDENCY_RESOLVER)
             .username("")
             .terminationMonitor(TerminationMonitor.EMPTY)
             .closeableResourceRegistry(CloseableResourceRegistry.EMPTY)
@@ -239,17 +228,7 @@ class LinkPredictionTrainingPipelineTest {
 
         var executionContext = ImmutableExecutionContext.builder()
             .databaseId(DatabaseId.of(""))
-            .dependencyResolver(new DependencyResolver() {
-                @Override
-                public <T> T resolveDependency(Class<T> type, SelectionStrategy selector) {
-                    return null;
-                }
-
-                @Override
-                public boolean containsDependency(Class<?> type) {
-                    return false;
-                }
-            })
+            .dependencyResolver(ExecutionContext.EMPTY_DEPENDENCY_RESOLVER)
             .username("")
             .modelCatalog(modelCatalog)
             .terminationMonitor(TerminationMonitor.EMPTY)
@@ -293,17 +272,7 @@ class LinkPredictionTrainingPipelineTest {
 
         var executionContext = ImmutableExecutionContext.builder()
             .databaseId(DatabaseId.of(""))
-            .dependencyResolver(new DependencyResolver() {
-                @Override
-                public <T> T resolveDependency(Class<T> type, SelectionStrategy selector) {
-                    return null;
-                }
-
-                @Override
-                public boolean containsDependency(Class<?> type) {
-                    return false;
-                }
-            })
+            .dependencyResolver(ExecutionContext.EMPTY_DEPENDENCY_RESOLVER)
             .username("")
             .modelCatalog(modelCatalog)
             .terminationMonitor(TerminationMonitor.EMPTY)

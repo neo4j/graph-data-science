@@ -38,6 +38,8 @@ import org.neo4j.gds.metrics.Metrics;
 import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
 import org.neo4j.gds.termination.TerminationMonitor;
 
+import java.util.Optional;
+
 @ValueClass
 public interface ExecutionContext {
 
@@ -93,6 +95,23 @@ public interface ExecutionContext {
             .build();
     }
 
+    DependencyResolver EMPTY_DEPENDENCY_RESOLVER = new DependencyResolver() {
+        @Override
+        public <T> Optional<T> resolveOptionalDependency(Class<T> aClass) {
+            return Optional.empty();
+        }
+
+        @Override
+        public <T> T resolveDependency(Class<T> type, SelectionStrategy selector) {
+            return null;
+        }
+
+        @Override
+        public boolean containsDependency(Class<?> type) {
+            return false;
+        }
+    };
+
     ExecutionContext EMPTY = new ExecutionContext() {
 
         @Override
@@ -102,17 +121,7 @@ public interface ExecutionContext {
 
         @Override
         public DependencyResolver dependencyResolver() {
-            return new DependencyResolver() {
-                @Override
-                public <T> T resolveDependency(Class<T> type, SelectionStrategy selector) {
-                    return null;
-                }
-
-                @Override
-                public boolean containsDependency(Class<?> type) {
-                    return false;
-                }
-            };
+            return EMPTY_DEPENDENCY_RESOLVER;
         }
 
         @Override

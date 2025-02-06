@@ -20,7 +20,6 @@
 package org.neo4j.gds;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.common.DependencyResolver;
 import org.neo4j.gds.api.CloseableResourceRegistry;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.Graph;
@@ -84,17 +83,7 @@ class WriteNodePropertiesComputationResultConsumerTest extends BaseTest {
     private final ExecutionContext executionContext = ImmutableExecutionContext
         .builder()
         .databaseId(DatabaseId.of(""))
-        .dependencyResolver(new DependencyResolver() {
-            @Override
-            public <T> T resolveDependency(Class<T> type, SelectionStrategy selector) {
-                return null;
-            }
-
-            @Override
-            public boolean containsDependency(Class<?> type) {
-                return false;
-            }
-        })
+        .dependencyResolver(ExecutionContext.EMPTY_DEPENDENCY_RESOLVER)
         .returnColumns(ProcedureReturnColumns.EMPTY)
         .log(Log.noOpLog())
         .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)

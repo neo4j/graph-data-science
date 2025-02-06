@@ -48,6 +48,7 @@ import org.neo4j.gds.utils.StringJoining;
 
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -155,6 +156,11 @@ class ProcedureExecutorTest {
                         return (T) Config.defaults();
                     }
                     throw new IllegalStateException("What are you doing here, young one?");
+                }
+
+                @Override
+                public <T> Optional<T> resolveOptionalDependency(Class<T> aClass) {
+                    return Optional.empty();
                 }
 
                 @Override
