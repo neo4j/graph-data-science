@@ -219,10 +219,9 @@ final class RelationshipsScannerTask extends StatementAction implements RecordSc
                         .allocatePropertyCursor(kernelTransaction.cursorContext(), kernelTransaction.memoryTracker())
                 ) {
                     double[] relProps = new double[propertyKeyIds.length];
-                    producer.forEach((index, source, target, relationshipReference, propertyReference) -> {
+                    producer.forEach((index, relationshipReference, propertyReference) -> {
                         read.relationshipProperties(
                             relationshipReference,
-                            source,
                             propertyReference,
                             PropertySelection.ALL_PROPERTIES,
                             pc
@@ -240,7 +239,7 @@ final class RelationshipsScannerTask extends StatementAction implements RecordSc
                     });
                 }
             } else {
-                producer.forEach((index, source, target, relationshipReference, propertyReference) -> {
+                producer.forEach((index, relationshipReference, propertyReference) -> {
                     for (int j = 0; j < defaultPropertyValues.length; j++) {
                         double value = aggregations[j].normalizePropertyValue(defaultPropertyValues[j]);
                         properties[j][index] = Double.doubleToLongBits(value);

@@ -26,8 +26,6 @@ public interface PropertyReader<PROPERTY_REF> {
     interface Consumer<PROPERTY_REF> {
         void accept(
             int index,
-            long source,
-            long target,
             long relationshipReference,
             PROPERTY_REF propertyReference
         );
@@ -61,7 +59,7 @@ public interface PropertyReader<PROPERTY_REF> {
     static PropertyReader<Integer> preLoaded() {
         return (producer, propertyKeyIds, defaultValues, aggregations, atLeastOnePropertyToLoad) -> {
             long[] properties = new long[producer.numberOfElements()];
-            producer.forEach((index, source, target, relationshipReference, propertyReference) -> {
+            producer.forEach((index,  relationshipReference, propertyReference) -> {
                 properties[index] = relationshipReference;
             });
             return new long[][]{properties};
@@ -99,7 +97,7 @@ public interface PropertyReader<PROPERTY_REF> {
             for (int propertyIndex = 0; propertyIndex < propertyCount; propertyIndex++) {
                 long[] buffered = this.buffer[propertyIndex];
                 long[] propertyValues = new long[producer.numberOfElements()];
-                producer.forEach((index, source, target, relationshipReference, propertyReference) -> {
+                producer.forEach((index, relationshipReference, propertyReference) -> {
                     int relationshipId = (int) relationshipReference;
                     // We need to fill this consecutively indexed
                     // in the same order as the relationships are

@@ -163,8 +163,6 @@ public final class RelationshipsBatchBuffer<PROPERTY_REF> extends RecordsBatchBu
             for (int i = 0; i < length; i++) {
                 consumer.accept(
                     i,
-                    this.nodePairs[i << 1],
-                    this.nodePairs[(i << 1) + 1],
                     this.relationshipReferences[i],
                     this.propertyReferences[i]
                 );
