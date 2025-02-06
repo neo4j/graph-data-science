@@ -80,31 +80,30 @@ public class DualTreeMSTAlgorithm extends Algorithm<DualTreeMSTResult> {
         return new DualTreeMSTResult(edges, totalEdgeSum);
     }
 
-    void resetNodeBounds(){
+    void resetNodeBounds() {
         kdNodeBound.fill(Double.MAX_VALUE);
 
     }
-    double baseCase(long p0, long p1, long comp0) {
+
+    double baseCase(long p0, long p1, long comp0, double[] arr0) {
         var comp1 = unionFind.setIdOf(p1);
         if (comp0 != comp1) {
-            var arr0 = nodePropertyValues.doubleArrayValue(p0);
             var arr1 = nodePropertyValues.doubleArrayValue(p1);
 
             var p01Distance = Intersections.sumSquareDelta(arr0, arr1);
             var adaptedDistance = Math.max(Math.max(coreValues.get(p0), coreValues.get(p1)), p01Distance);
             if (closestDistanceTracker.tryToAssign(comp0, p0, p1, adaptedDistance)) {
-                return  adaptedDistance;
+                return adaptedDistance;
             }
         }
-        return  -1;
+        return -1;
 
     }
 
-    double updateBound(long kdNodeId, double value){
-        if (kdNodeBound.get(kdNodeId)==Double.MAX_VALUE){
+    double updateBound(long kdNodeId, double value) {
+        if (kdNodeBound.get(kdNodeId) == Double.MAX_VALUE) {
             kdNodeBound.set(kdNodeId, value);
-        }
-        else if (value > kdNodeBound.get(kdNodeId)) {
+        } else if (value > kdNodeBound.get(kdNodeId)) {
             kdNodeBound.set(kdNodeId, value);
         }
         return kdNodeBound.get(kdNodeId);
@@ -177,60 +176,66 @@ public class DualTreeMSTAlgorithm extends Algorithm<DualTreeMSTResult> {
         if (singleQ == singleR) return false;
 
         if (kdNodeBound.get(qId) == Double.MAX_VALUE) return true;
-        if ( kdTree.descentOfOther(kdNodeQ,kdNodeR)) return true;
+        if (kdTree.descentOfOther(kdNodeQ, kdNodeR)) return true;
         var lowerBoundQR = kdNodeQ.aabb().lowerBoundFor(kdNodeR.aabb());
         return lowerBoundQR < Math.sqrt(kdNodeBound.get(qId));
 
     }
 
-    private boolean  filterNodesOnCoreValue(long node){
+    private boolean filterNodesOnCoreValue(long node) {
         var component = unionFind.setIdOf(node);
         return coreValues.get(node) < closestDistanceTracker.componentClosestDistance(component);
     }
 
-    void traversalLeafLeafStep(KdNode kdNodeQ, KdNode kdNodeR){
+    void traversalLeafLeafStep(KdNode kdNodeQ, KdNode kdNodeR) {
         var qId = kdNodeQ.id();
         var qStart = kdNodeQ.start();
         var qEnd = kdNodeQ.end();
-        for (long  qIndex=qStart;qIndex<qEnd;++qIndex) {
+        for (long qIndex = qStart; qIndex < qEnd; ++qIndex) {
             var qPoint = kdTree.nodeAt(qIndex);
             if (!filterNodesOnCoreValue(qPoint)) {
                 continue;
             }
-            var qComp = unionFind.setIdOf(qPoint);
+
             var rStart = kdNodeR.start();
             var rEnd = kdNodeR.end();
+            var qComp = unionFind.setIdOf(qPoint);
+            var qArr = nodePropertyValues.doubleArrayValue(qPoint);
             for (long rIndex = rStart; rIndex < rEnd; ++rIndex) {
                 var rPoint = kdTree.nodeAt(rIndex);
                 if (filterNodesOnCoreValue(rPoint)) {
-                    baseCase(qPoint, rPoint,qComp);
+                    baseCase(qPoint, rPoint, qComp, qArr);
                 }
             }
 
             updateBound(qId, closestDistanceTracker.componentClosestDistance(qComp));
         }
     }
+
     void traversalStep(KdNode kdNodeQ, KdNode kdNodeR) {
 
         boolean score = score(kdNodeQ, kdNodeR);
         if (score) {
-            var qId = kdNodeQ.id();
             if (kdNodeQ.isLeaf() && kdNodeR.isLeaf()) {
-                traversalLeafLeafStep(kdNodeQ,kdNodeR);
-            } else if (kdNodeQ.isLeaf() && !kdNodeR.isLeaf()) {
-                traversalStep(kdNodeQ, kdTree.leftChild(kdNodeR));
-                traversalStep(kdNodeQ, kdTree.rightChild(kdNodeR));
+                traversalLeafLeafStep(kdNodeQ, kdNodeR);
+            } else if (kdNodeQ.isLeaf()) {
+                traversalStep(kdNodeQ, kdNodeR.leftChild());
+                traversalStep(kdNodeQ, kdNodeR.rightChild());
             } else {
-                traversalStep(kdTree.leftChild(kdNodeQ), kdNodeR);
-                traversalStep(kdTree.rightChild(kdNodeQ), kdNodeR);
+                if (kdNodeR.isLeaf()) {
+                    traversalStep(kdNodeQ.leftChild(), kdNodeR);
+                    traversalStep(kdNodeQ.rightChild(), kdNodeR);
+                } else {
+                    traversalStep(kdNodeQ.leftChild(), kdNodeR.leftChild());
+                    traversalStep(kdNodeQ.leftChild(), kdNodeR.rightChild());
+                    traversalStep(kdNodeQ.rightChild(), kdNodeR.rightChild());
+                    traversalStep(kdNodeQ.rightChild(), kdNodeR.leftChild());
+                }
 
-                var leftChildBound = kdNodeBound.get(kdTree.leftChild(kdNodeQ).id());
-                var rightChildBound = kdNodeBound.get(kdTree.rightChild(kdNodeQ).id());
+                var leftChildBound = kdNodeBound.get(kdNodeQ.leftChild().id());
+                var rightChildBound = kdNodeBound.get(kdNodeQ.rightChild().id());
                 var qCandidateBound = Math.max(leftChildBound, rightChildBound);
-
-                kdNodeBound.set(qId, qCandidateBound);
-
-
+                updateBound(kdNodeQ.id(), qCandidateBound);
             }
 
         }
@@ -266,8 +271,8 @@ public class DualTreeMSTAlgorithm extends Algorithm<DualTreeMSTResult> {
 
     }
 
-    double kdNodeBound(long kdNodeId){
-        return  kdNodeBound.get(kdNodeId);
+    double kdNodeBound(long kdNodeId) {
+        return kdNodeBound.get(kdNodeId);
     }
 
 }

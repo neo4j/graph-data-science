@@ -130,8 +130,8 @@ class DualTreeMSTAlgorithmFunctionsTest {
         var dualTreeMST = new DualTreeMSTAlgorithm(nodeProps,kdTree, HugeDoubleArray.of(0,0,10,10),8);
 
 
-        assertThat(dualTreeMST.baseCase(0,1,0)).isEqualTo(1); //distance
-        assertThat(dualTreeMST.baseCase(2,3,2)).isEqualTo(10); //corevalue
+        assertThat(dualTreeMST.baseCase(0,1,0, nodeProps.doubleArrayValue(0))).isEqualTo(1); //distance
+        assertThat(dualTreeMST.baseCase(2,3,2, nodeProps.doubleArrayValue(2))).isEqualTo(10); //corevalue
 
 
     }
@@ -155,7 +155,7 @@ class DualTreeMSTAlgorithmFunctionsTest {
         var dualTreeMST = new DualTreeMSTAlgorithm(nodeProps,kdTree,null,8);
         dualTreeMST.mergeComponents(0,1);
 
-        assertThat(dualTreeMST.baseCase(0,1, 0)).isEqualTo(-1.0);
+        assertThat(dualTreeMST.baseCase(0,1, 0, nodeProps.doubleArrayValue(0))).isEqualTo(-1.0);
 
     }
 

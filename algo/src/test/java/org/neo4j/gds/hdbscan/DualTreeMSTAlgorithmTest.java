@@ -119,7 +119,7 @@ class DualTreeMSTAlgorithmTest {
             var expected = List.of(
                 new Edge(graph.toMappedNodeId("a"), graph.toMappedNodeId("b"), 3.1622776601683795),
                 new Edge(graph.toMappedNodeId("b"), graph.toMappedNodeId("f"), 2.8284271247461903),
-                new Edge(graph.toMappedNodeId("c"), graph.toMappedNodeId("b"), 4.47213595499958),
+                new Edge(graph.toMappedNodeId("c"), graph.toMappedNodeId("f"), 4.47213595499958),
                 new Edge(graph.toMappedNodeId("d"), graph.toMappedNodeId("b"), 3.1622776601683795),
                 new Edge(graph.toMappedNodeId("e"), graph.toMappedNodeId("f"), 1.4142135623730951)
             );
