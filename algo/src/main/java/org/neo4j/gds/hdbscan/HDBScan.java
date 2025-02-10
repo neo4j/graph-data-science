@@ -29,8 +29,6 @@ import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.termination.TerminationFlag;
 
-import java.util.Arrays;
-
 public class HDBScan extends Algorithm<Void> {
 
     private final IdMap nodes;
@@ -61,16 +59,21 @@ public class HDBScan extends Algorithm<Void> {
     @Override
     public Void compute() {
         var kdTree =  buildKDTree();
-        HugeDoubleArray coreValues = HugeDoubleArray.newArray(nodes.nodeCount());
 
-        ParallelUtil.parallelForEachNode(nodes.nodeCount(),concurrency, terminationFlag,
+        var coreValues = computeCores(kdTree,nodes.nodeCount());
+       // var dualTreeMST = dualTreeMSTPhase(kdTree, coreValues);
+        return null;
+    }
+
+    CoreResult  computeCores(KdTree kdTree, long nodeCount){
+        HugeObjectArray<Neighbours>  neighbours = HugeObjectArray.newArray(Neighbours.class,nodeCount);
+
+        ParallelUtil.parallelForEachNode(nodeCount,concurrency, terminationFlag,
             (nodeId) ->{
-                    var coreValue =  Arrays.stream(kdTree.neighbours(nodeId,k)).map(Neighbour::distance).max(Double::compareTo).orElse(0D);
-                        coreValues.set(nodeId,coreValue);
+               neighbours.set(nodeId,kdTree.neighbours(nodeId,k));
             });
 
-        var duaTreeMST = dualTreeMSTPhase(kdTree,coreValues);
-        return null;
+        return new CoreResult(neighbours);
     }
 
     HugeObjectArray<Edge> dualTreeMSTPhase(KdTree kdTree, HugeDoubleArray coreValues){

@@ -72,7 +72,7 @@ class KdTreeTest {
 
         var points = graph.nodeProperties("point");
         var kdTree = new KdTreeBuilder(graph, points, 1, 1).build();
-        var neighbours = kdTree.neighbours(graph.toMappedNodeId("a"), 2);
+        var neighbours = kdTree.neighbours(graph.toMappedNodeId("a"), 2).neighbours();
         assertThat(neighbours)
             .isNotNull()
             .hasSize(2)
