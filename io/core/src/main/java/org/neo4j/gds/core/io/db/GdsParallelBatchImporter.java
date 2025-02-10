@@ -40,6 +40,8 @@ import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.io.layout.Neo4jLayout;
 import org.neo4j.io.pagecache.context.CursorContextFactory;
 import org.neo4j.io.pagecache.tracing.PageCacheTracer;
+import org.neo4j.kernel.api.index.IndexProvidersAccess;
+import org.neo4j.kernel.impl.index.schema.DefaultIndexProvidersAccess;
 import org.neo4j.kernel.impl.index.schema.IndexImporterFactoryImpl;
 import org.neo4j.kernel.impl.scheduler.JobSchedulerFactory;
 import org.neo4j.kernel.impl.transaction.log.files.TransactionLogInitializer;
@@ -235,6 +237,16 @@ public final class GdsParallelBatchImporter {
         var progressOutput = new PrintStream(PrintStream.nullOutputStream(), true, StandardCharsets.UTF_8);
         var verboseProgressOutput = false;
 
+        IndexProvidersAccess indexProvidersAccess = new DefaultIndexProvidersAccess(
+            storageEngineFactory,
+            this.fileSystem,
+            this.databaseConfig,
+            jobScheduler,
+            logService,
+            PageCacheTracer.NULL,
+            CursorContextFactory.NULL_CONTEXT_FACTORY
+        );
+
         return storageEngineFactory.batchImporter(
             databaseLayout,
             this.fileSystem,
@@ -251,7 +263,8 @@ public final class GdsParallelBatchImporter {
             TransactionLogInitializer.getLogFilesInitializer(),
             new IndexImporterFactoryImpl(),
             EmptyMemoryTracker.INSTANCE,
-            CursorContextFactory.NULL_CONTEXT_FACTORY
+            CursorContextFactory.NULL_CONTEXT_FACTORY,
+            indexProvidersAccess
         );
     }
 
