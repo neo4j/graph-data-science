@@ -26,6 +26,7 @@ import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -41,7 +42,7 @@ class DualTreeMSTAlgorithmFunctionsTest {
             1
         );
 
-        var dualTreeMST = new DualTreeMSTAlgorithm(null,kdTree,null,4);
+        var dualTreeMST =  DualTreeMSTAlgorithm.createWithZeroCores(null,kdTree,4);
 
         assertThat(dualTreeMST.updateSingleComponent(kdNode)).isFalse();
         dualTreeMST.mergeComponents(0,1);
@@ -60,7 +61,7 @@ class DualTreeMSTAlgorithmFunctionsTest {
             null,
             1
         );
-        var dualTreeMST = new DualTreeMSTAlgorithm(null,kdTree,null,4);
+        var dualTreeMST =  DualTreeMSTAlgorithm.createWithZeroCores(null,kdTree,4);
         KdNode kdNode1 = KdNode.createLeaf(1, 1, 2, null);
         KdNode kdNode2 = KdNode.createLeaf(2, 2, 4, null);
 
@@ -93,7 +94,7 @@ class DualTreeMSTAlgorithmFunctionsTest {
             1
         );
 
-        var dualTreeMST = new DualTreeMSTAlgorithm(null,kdTree,null,8);
+        var dualTreeMST =  DualTreeMSTAlgorithm.createWithZeroCores(null,kdTree,8);
 
         assertThat(dualTreeMST.updateSingleComponent(kdNode)).isFalse();
         dualTreeMST.mergeComponents(0,1);
@@ -127,15 +128,17 @@ class DualTreeMSTAlgorithmFunctionsTest {
         };
 
         var kdTree = mock(KdTree.class);
-        var dualTreeMST = new DualTreeMSTAlgorithm(nodeProps,kdTree, HugeDoubleArray.of(0,0,10,10),8);
 
+        var coreResult = mock(CoreResult.class);
+        when(coreResult.createCoreArray()).thenReturn(HugeDoubleArray.of(0,0,10,10));
+        when(coreResult.neighboursOf(anyLong())).thenReturn(new Neighbour[0]);
+
+        var dualTreeMST =  DualTreeMSTAlgorithm.create(nodeProps,kdTree, coreResult,8);
 
         assertThat(dualTreeMST.baseCase(0,1,0, nodeProps.doubleArrayValue(0))).isEqualTo(1); //distance
         assertThat(dualTreeMST.baseCase(2,3,2, nodeProps.doubleArrayValue(2))).isEqualTo(10); //corevalue
 
-
     }
-
 
     @Test
     void shouldIgnoreOnBasecaseForSameComponent(){
@@ -152,7 +155,7 @@ class DualTreeMSTAlgorithmFunctionsTest {
         };
 
         var kdTree = mock(KdTree.class);
-        var dualTreeMST = new DualTreeMSTAlgorithm(nodeProps,kdTree,null,8);
+        var dualTreeMST =  DualTreeMSTAlgorithm.createWithZeroCores(nodeProps,kdTree,8);
         dualTreeMST.mergeComponents(0,1);
 
         assertThat(dualTreeMST.baseCase(0,1, 0, nodeProps.doubleArrayValue(0))).isEqualTo(-1.0);
@@ -164,7 +167,7 @@ class DualTreeMSTAlgorithmFunctionsTest {
         var props = mock(NodePropertyValues.class);
         var kdTree = mock(KdTree.class);
         when(kdTree.treeNodeCount()).thenReturn(10L);
-        var dualTreeMST = new DualTreeMSTAlgorithm(props,kdTree,null,8);
+        var dualTreeMST =  DualTreeMSTAlgorithm.createWithZeroCores(props,kdTree,8);
 
         assertThat(dualTreeMST.updateBound(0,10)).isEqualTo(10);
         assertThat(dualTreeMST.updateBound(0,5)).isEqualTo(10);
@@ -197,7 +200,7 @@ class DualTreeMSTAlgorithmFunctionsTest {
         //max {1,5} = 5
         var kdTree=new KdTree(HugeLongArray.of(0,1,2,3),nodeProps,null,2);
 
-        var dualTree = new DualTreeMSTAlgorithm(nodeProps,kdTree,HugeDoubleArray.newArray(4),4);
+        var dualTree =  DualTreeMSTAlgorithm.createWithZeroCores(nodeProps,kdTree,4);
 
         dualTree.resetNodeBounds();
         dualTree.traversalLeafLeafStep(node1,node2);

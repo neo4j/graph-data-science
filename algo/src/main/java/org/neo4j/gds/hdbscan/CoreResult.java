@@ -25,9 +25,13 @@ import org.neo4j.gds.collections.ha.HugeObjectArray;
  record CoreResult(HugeObjectArray<Neighbours> neighbours) {
 
     HugeDoubleArray createCoreArray(){
-        var  cores = HugeDoubleArray.newArray(neighbours.size());
-        cores.setAll( v -> neighbours.get(v).maximum().distance());
-        return  cores;
+        var cores = HugeDoubleArray.newArray(neighbours.size());
+        cores.setAll( v -> neighbours.get(v).maximum().distance() * neighbours.get(v).maximum().distance());
+        return cores;
+    }
+
+    Neighbour[] neighboursOf(long node){
+        return neighbours.get(node).neighbours();
     }
 
 }

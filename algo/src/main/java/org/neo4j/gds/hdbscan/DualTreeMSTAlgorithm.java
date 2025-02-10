@@ -30,7 +30,7 @@ import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.core.utils.paged.dss.HugeAtomicDisjointSetStruct;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
-public class DualTreeMSTAlgorithm extends Algorithm<DualTreeMSTResult> {
+public final class DualTreeMSTAlgorithm extends Algorithm<DualTreeMSTResult> {
 
     private final NodePropertyValues nodePropertyValues;
     private final KdTree kdTree;
@@ -45,20 +45,20 @@ public class DualTreeMSTAlgorithm extends Algorithm<DualTreeMSTResult> {
     private long edgeCount = 0;
     private double totalEdgeSum = 0d;
 
-    public DualTreeMSTAlgorithm(
+    private DualTreeMSTAlgorithm(
         NodePropertyValues nodePropertyValues,
         KdTree kdTree,
+        ClosestDistanceInformationTracker closestDistanceTracker,
         HugeDoubleArray coreValues,
         long nodeCount
     ) {
         super(ProgressTracker.NULL_TRACKER);
         this.nodePropertyValues = nodePropertyValues;
         this.kdNodeBound = HugeDoubleArray.newArray(kdTree.treeNodeCount());
-        this.closestDistanceTracker = ClosestDistanceInformationTracker.create(nodeCount);
+        this.closestDistanceTracker = closestDistanceTracker;
         this.kdTree = kdTree;
         this.kdNodeSingleComponent = new BitSet(kdTree.treeNodeCount());
 
-        // TODO: `coreValues` init is not good yet
         this.coreValues = coreValues;
         //for now use existing tool
         this.unionFind = new HugeAtomicDisjointSetStruct(nodeCount, new Concurrency(1));
@@ -67,7 +67,33 @@ public class DualTreeMSTAlgorithm extends Algorithm<DualTreeMSTResult> {
         this.nodeCount = nodeCount;
     }
 
+    public static DualTreeMSTAlgorithm createWithZeroCores(
+        NodePropertyValues nodePropertyValues,
+        KdTree kdTree,
+        long nodeCount
+    ) {
+        var zeroCores = HugeDoubleArray.newArray(nodeCount);
 
+        return new DualTreeMSTAlgorithm(
+            nodePropertyValues,
+            kdTree,
+            ClosestDistanceInformationTracker.create(nodeCount),
+            zeroCores,
+            nodeCount
+        );
+    }
+
+    public static DualTreeMSTAlgorithm create(
+        NodePropertyValues nodePropertyValues,
+        KdTree kdTree,
+        CoreResult coreResult,
+        long nodeCount
+    ) {
+        var cores = coreResult.createCoreArray();
+        var closestTracker = ClosestDistanceInformationTracker.create(nodeCount, cores, coreResult);
+
+        return new DualTreeMSTAlgorithm(nodePropertyValues, kdTree, closestTracker, cores, nodeCount);
+    }
 
 
     @Override
@@ -76,7 +102,6 @@ public class DualTreeMSTAlgorithm extends Algorithm<DualTreeMSTResult> {
         var kdRoot = kdTree.root();
         var rootId = kdRoot.id();
         while (!kdNodeSingleComponent.get(rootId)) {
-            resetNodeBounds();
             performIteration();
         }
         return new DualTreeMSTResult(edges, totalEdgeSum);
@@ -84,7 +109,6 @@ public class DualTreeMSTAlgorithm extends Algorithm<DualTreeMSTResult> {
 
     void resetNodeBounds() {
         kdNodeBound.fill(Double.MAX_VALUE);
-
     }
 
     double baseCase(long p0, long p1, long comp0, double[] arr0) {
@@ -111,8 +135,12 @@ public class DualTreeMSTAlgorithm extends Algorithm<DualTreeMSTResult> {
         return kdNodeBound.get(kdNodeId);
     }
 
-    void performIteration() {
-        traversalStep(kdTree.root(), kdTree.root());
+    private void performIteration() {
+        if (!closestDistanceTracker.isUpdated()) {
+            resetNodeBounds();
+            traversalStep(kdTree.root(), kdTree.root());
+        }
+
         mergeComponents();
         //reset bounds
         // TODO: find the component id to reset up to?

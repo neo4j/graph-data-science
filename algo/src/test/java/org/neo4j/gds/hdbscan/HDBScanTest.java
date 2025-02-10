@@ -28,6 +28,8 @@ import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.termination.TerminationFlag;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 @GdlExtension
@@ -66,17 +68,56 @@ class HDBScanTest {
 
         var cores = hdbscan.computeCores(kdtree,graph.nodeCount()).createCoreArray();
 
-        assertThat(cores.toArray()).containsExactlyInAnyOrder(
-            4.0,        //a -  d,b  (sqrt(16)
-            Math.sqrt(10), //b -  c,d  (sqrt(1 + 9)=sqrt(10)
-            Math.sqrt(17),  //c -  b,d  (sqrt(1 + 16) = sqrt(17)
-            Math.sqrt(10), //d -  a,b
-            Math.sqrt(5),   //e - g,f (sqrt(1 + 4) = sqrt(5)
-            Math.sqrt(5), //f - g,e
-            2.0,   //g - f,e (sqrt(4)
-            2.0 *Math.sqrt(2),  //h - g,f (sqrt( 4 + 4) = sqrt(8) = 2sqrt(2)
-           Math.sqrt(346) //i - h, c (sqrt(11^2 + 15^2) = sqrt(346)
+        assertThat(cores.toArray())
+            .usingComparatorWithPrecision(1e-4)
+            .containsExactlyInAnyOrder(
+            16.0,        //a -  d,b  (sqrt(16)
+            10.0, //b -  c,d  (sqrt(1 + 9)=sqrt(10)
+            17.0,  //c -  b,d  (sqrt(1 + 16) = sqrt(17)
+            10.0, //d -  a,b
+            5.0,   //e - g,f (sqrt(1 + 4) = sqrt(5)
+            5.0, //f - g,e
+            4.0,   //g - f,e (sqrt(4)
+            8.0,  //h - g,f (sqrt( 4 + 4) = sqrt(8) = 2sqrt(2)
+           346.0 //i - h, c (sqrt(11^2 + 15^2) = sqrt(346)
         );
 
+    }
+
+    @Test
+    void shouldComputeMSTWithCoreValuesCorrectly(){
+
+        var hdbscan =new HDBScan(graph,graph.nodeProperties("point"),
+            new Concurrency(1),
+            1,
+            2,
+            TerminationFlag.RUNNING_TRUE,
+            ProgressTracker.NULL_TRACKER
+        );
+
+        var kdtree = hdbscan.buildKDTree();
+
+        var result =  hdbscan.dualTreeMSTPhase(kdtree,hdbscan.computeCores(kdtree,graph.nodeCount()));
+
+        var expected = List.of(
+            new Edge(graph.toMappedNodeId("i"), graph.toMappedNodeId("h"), Math.sqrt(346)),
+            new Edge(graph.toMappedNodeId("a"), graph.toMappedNodeId("d"), 4.0),
+            new Edge(graph.toMappedNodeId("e"), graph.toMappedNodeId("d"), 6.0),
+            new Edge(graph.toMappedNodeId("e"), graph.toMappedNodeId("g"), Math.sqrt(5.0)),
+            new Edge(graph.toMappedNodeId("b"), graph.toMappedNodeId("c"), Math.sqrt(17.0)),
+            new Edge(graph.toMappedNodeId("g"), graph.toMappedNodeId("h"), Math.sqrt(8)),
+            new Edge(graph.toMappedNodeId("f"), graph.toMappedNodeId("g"), Math.sqrt(5.0)),
+            new Edge(graph.toMappedNodeId("b"), graph.toMappedNodeId("d"), Math.sqrt(10))
+        );
+
+        assertThat(result.edges().toArray())
+            .usingElementComparator(new UndirectedEdgeComparator())
+            .containsExactlyInAnyOrderElementsOf(expected);
+
+        assertThat(result.totalDistance())
+            .isEqualTo(expected.stream()
+                .mapToDouble(Edge::distance)
+                .sum()
+            );
     }
 }

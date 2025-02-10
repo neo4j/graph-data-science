@@ -27,6 +27,7 @@ final class ClosestDistanceInformationTracker {
     private final HugeDoubleArray componentClosestDistance;
     private final HugeLongArray componentInsideBestNode;
     private final HugeLongArray componentOutsideBestNode;
+    private boolean updated = false;
 
     private ClosestDistanceInformationTracker(
         HugeDoubleArray componentClosestDistance,
@@ -52,10 +53,36 @@ final class ClosestDistanceInformationTracker {
         );
     }
 
+    static ClosestDistanceInformationTracker create(long size, HugeDoubleArray cores, CoreResult coreResult) {
+        var tracker = create(size);
+        tracker.reset(size);
+        for (long u = 0; u < size; ++u) {
+            var neighbors = coreResult.neighboursOf(u);
+            for (int k = neighbors.length - 1; k >= 0; --k) {
+                var neighbor = neighbors[k].id();
+                var adaptedDistance = Math.max(cores.get(u), cores.get(neighbor));
+                tracker.tryToAssign(u, u, neighbor, adaptedDistance);
+            }
+        }
+        tracker.setUpdated(true);
+
+        return tracker;
+
+    }
+
+    private void setUpdated(boolean updated) {
+        this.updated = updated;
+    }
+
+    boolean isUpdated() {
+        return updated;
+    }
+
     void reset(long upTo) {
         for (long u = 0; u < upTo; ++u) {
             resetComponent(u);
         }
+        setUpdated(false);
     }
 
     void resetComponent(long u) {

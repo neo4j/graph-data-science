@@ -19,5 +19,4 @@
  */
 package org.neo4j.gds.hdbscan;
 
-public record Neighbour(long id, double distance) {
-}
+public record Neighbour(long id, double distance) {}

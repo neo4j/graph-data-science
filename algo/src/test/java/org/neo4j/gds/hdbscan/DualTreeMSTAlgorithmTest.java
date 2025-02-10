@@ -22,7 +22,6 @@ package org.neo4j.gds.hdbscan;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
@@ -60,9 +59,13 @@ class DualTreeMSTAlgorithmTest {
         void shouldReturnEuclideanMSTWithZeroCoreValues() {
             var nodePropertyValues = graph.nodeProperties("point");
             var kdTree = new KdTreeBuilder(graph, nodePropertyValues, 1, 1).build();
-            var cores = HugeDoubleArray.newArray(graph.nodeCount());
 
-            var dualTree = new DualTreeMSTAlgorithm(nodePropertyValues, kdTree, cores, graph.nodeCount());
+            var dualTree =  DualTreeMSTAlgorithm.createWithZeroCores(
+                nodePropertyValues,
+                kdTree,
+                graph.nodeCount()
+            );
+
             var result = dualTree.compute();
 
             var expected = List.of(
@@ -111,9 +114,13 @@ class DualTreeMSTAlgorithmTest {
         void shouldReturnEuclideanMSTWithZeroCoreValues() {
             var nodePropertyValues = graph.nodeProperties("point");
             var kdTree = new KdTreeBuilder(graph, nodePropertyValues, 1, 1).build();
-            var cores = HugeDoubleArray.newArray(graph.nodeCount());
 
-            var dualTree = new DualTreeMSTAlgorithm(nodePropertyValues, kdTree, cores, graph.nodeCount());
+            var dualTree =  DualTreeMSTAlgorithm.createWithZeroCores(
+                nodePropertyValues,
+                kdTree,
+                graph.nodeCount()
+            );
+
             var result = dualTree.compute();
 
             var expected = List.of(
@@ -162,9 +169,13 @@ class DualTreeMSTAlgorithmTest {
         void shouldReturnEuclideanMSTWithZeroCoreValues() {
             var nodePropertyValues = graph.nodeProperties("point");
             var kdTree = new KdTreeBuilder(graph, nodePropertyValues, 1, 1).build();
-            var cores = HugeDoubleArray.newArray(graph.nodeCount());
 
-            var dualTree = new DualTreeMSTAlgorithm(nodePropertyValues, kdTree, cores, graph.nodeCount());
+            var dualTree =  DualTreeMSTAlgorithm.createWithZeroCores(
+                nodePropertyValues,
+                kdTree,
+                graph.nodeCount()
+            );
+
             var result = dualTree.compute();
 
             var expected = List.of(

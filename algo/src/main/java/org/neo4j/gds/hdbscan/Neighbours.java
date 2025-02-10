@@ -24,4 +24,5 @@ public record Neighbours(Neighbour[] neighbours) {
     Neighbour maximum(){
         return neighbours[0];
     }
+
 }
