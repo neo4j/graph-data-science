@@ -196,21 +196,6 @@ class PredictPipelineExecutorTest {
         public Optional<String> usernameOverride() {
             return Optional.empty();
         }
-
-        @Override
-        public Optional<String> clientId() {
-            return Optional.empty();
-        }
-
-        @Override
-        public Optional<String> clientSecret() {
-            return Optional.empty();
-        }
-
-        @Override
-        public Optional<String> tenant() {
-            return Optional.empty();
-        }
     }
 
     private static class SucceedingPipelineExecutor<CONFIG extends AlgoBaseConfig & GraphNameConfig>
