@@ -20,8 +20,11 @@
 package org.neo4j.gds.hdbscan;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.collections.ha.HugeDoubleArray;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class ClosestDistanceInformationTrackerTest {
 
@@ -67,6 +70,57 @@ class ClosestDistanceInformationTrackerTest {
         assertThat(tracker.componentClosestDistance(1)).isEqualTo(10.0);
         assertThat(tracker.componentInsideBestNode(1)).isEqualTo(1);
         assertThat(tracker.componentOutsideBestNode(1)).isEqualTo(0);
+
+    }
+
+    @Test
+    void shouldCreateWithCores(){
+
+        var mockCoreResult = mock(CoreResult.class);
+        when(mockCoreResult.neighboursOf(0)).thenReturn(
+            new Neighbour[]{
+                new Neighbour(1,0),
+                new Neighbour(2,0),
+                new Neighbour(3,0)
+            });
+
+        when(mockCoreResult.neighboursOf(1)).thenReturn(
+            new Neighbour[]{
+                new Neighbour(2,0),
+            });
+
+        when(mockCoreResult.neighboursOf(2)).thenReturn(
+            new Neighbour[]{
+                new Neighbour(0,0),
+                new Neighbour(1,0),
+
+            });
+
+        when(mockCoreResult.neighboursOf(3)).thenReturn(
+            new Neighbour[]{
+                new Neighbour(0,0),
+            });
+
+        var tracker = ClosestDistanceInformationTracker.create(4,
+            HugeDoubleArray.of(5,1,10,3),
+            mockCoreResult
+        );
+
+        assertThat(tracker.componentClosestDistance(0)).isEqualTo(5);
+        assertThat(tracker.componentInsideBestNode(0)).isEqualTo(0);
+        assertThat(tracker.componentOutsideBestNode(0)).isEqualTo(3);
+
+        assertThat(tracker.componentClosestDistance(1)).isEqualTo(10);
+        assertThat(tracker.componentInsideBestNode(1)).isEqualTo(1);
+        assertThat(tracker.componentOutsideBestNode(1)).isEqualTo(2);
+
+        assertThat(tracker.componentClosestDistance(2)).isEqualTo(10);
+        assertThat(tracker.componentInsideBestNode(2)).isEqualTo(2);
+        assertThat(tracker.componentOutsideBestNode(2)).isEqualTo(1);
+
+        assertThat(tracker.componentClosestDistance(3)).isEqualTo(5);
+        assertThat(tracker.componentInsideBestNode(3)).isEqualTo(3);
+        assertThat(tracker.componentOutsideBestNode(3)).isEqualTo(0);
 
     }
 
