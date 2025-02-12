@@ -43,5 +43,4 @@ public interface TaskStore {
     long taskCount();
 
     void addListener(TaskStoreListener listener);
-
 }
