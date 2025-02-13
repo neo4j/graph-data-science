@@ -87,6 +87,12 @@ public class HDBScan extends Algorithm<Void> {
         return dualTreeMst.compute();
     }
 
+    ClusterHierarchy createClusterHierarchy(DualTreeMSTResult dualTreeMSTResult){
+        var edges = dualTreeMSTResult.edges();
+        InsertionSort.sort(edges);
+        return ClusterHierarchy.create(nodes.nodeCount(),edges);
+    }
+
     KdTree buildKDTree() {
         var builder = new KdTreeBuilder(nodes, nodePropertyValues, concurrency.value(), leafSize);
         return builder.build();

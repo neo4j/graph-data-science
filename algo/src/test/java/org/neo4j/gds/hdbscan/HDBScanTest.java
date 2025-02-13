@@ -20,6 +20,8 @@
 package org.neo4j.gds.hdbscan;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
@@ -31,6 +33,8 @@ import org.neo4j.gds.termination.TerminationFlag;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @GdlExtension
 class HDBScanTest {
@@ -119,5 +123,44 @@ class HDBScanTest {
                 .mapToDouble(Edge::distance)
                 .sum()
             );
+    }
+
+    @Test
+    void shouldComputeClusterHierarchyCorrectly(){
+        HugeObjectArray<Edge> edges =HugeObjectArray.of(
+            new Edge(0, 1, 5.),
+            new Edge(1, 2, 3.)
+        );
+
+        var graphMock = mock(Graph.class);
+        when(graphMock.nodeCount()).thenReturn(3L);
+
+        var hdbscan =new HDBScan(graphMock,
+            graph.nodeProperties("point"),
+            new Concurrency(1),
+            1,
+            2,
+            TerminationFlag.RUNNING_TRUE,
+            ProgressTracker.NULL_TRACKER
+        );
+
+        var dualTreeResult = new DualTreeMSTResult(edges,-1);
+
+        var clusterHierarchy = hdbscan.createClusterHierarchy(dualTreeResult);
+
+        assertThat(clusterHierarchy.root()).isEqualTo(4L);
+
+        assertThat(clusterHierarchy.left(4)).isEqualTo(0);
+        assertThat(clusterHierarchy.right(4)).isEqualTo(3);
+        assertThat(clusterHierarchy.lambda(4)).isEqualTo(5.);
+        assertThat(clusterHierarchy.size(4)).isEqualTo(3);
+
+        assertThat(clusterHierarchy.left(3)).isEqualTo(1);
+        assertThat(clusterHierarchy.right(3)).isEqualTo(2);
+        assertThat(clusterHierarchy.lambda(3)).isEqualTo(3.);
+        assertThat(clusterHierarchy.size(3)).isEqualTo(2);
+
+        assertThat(clusterHierarchy.size(0)).isEqualTo(1);
+
     }
 }
