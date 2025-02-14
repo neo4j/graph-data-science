@@ -43,16 +43,22 @@ class CondenseStepTest {
         assertThat(condensedTree.root()).isEqualTo(7L);
         assertThat(condensedTree.maximumClusterId()).isEqualTo(11L);
 
+        assertThat(condensedTree.size(7L)).isEqualTo(7L);
 
         assertThat(condensedTree.parent(8L)).isEqualTo(7L);
         assertThat(condensedTree.lambda(8L)).isEqualTo(12d);
+        assertThat(condensedTree.size(8L)).isEqualTo(2L);
         assertThat(condensedTree.parent(9L)).isEqualTo(7L);
         assertThat(condensedTree.lambda(9L)).isEqualTo(12d);
+        assertThat(condensedTree.size(9L)).isEqualTo(5L);
 
         assertThat(condensedTree.parent(10L)).isEqualTo(9L);
+        assertThat(condensedTree.size(10L)).isEqualTo(2L);
         assertThat(condensedTree.lambda(10L)).isEqualTo(10d);
+
         assertThat(condensedTree.parent(11L)).isEqualTo(9L);
         assertThat(condensedTree.lambda(11L)).isEqualTo(10d);
+        assertThat(condensedTree.size(11L)).isEqualTo(3L);
 
         assertThat(condensedTree.fellOutOf(0L)).isEqualTo(8L);
         assertThat(condensedTree.lambda(0L)).isEqualTo(11d);
@@ -87,6 +93,8 @@ class CondenseStepTest {
 
         assertThat(condensedTree.root()).isEqualTo(7L);
         assertThat(condensedTree.maximumClusterId()).isEqualTo(7L);
+
+        assertThat(condensedTree.size(7L)).isEqualTo(7L);
 
         assertThat(condensedTree.fellOutOf(0L)).isEqualTo(7L);
         assertThat(condensedTree.lambda(0L)).isEqualTo(12d);

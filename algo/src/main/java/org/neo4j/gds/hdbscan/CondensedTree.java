@@ -27,13 +27,24 @@ class CondensedTree {
     private final long root;
     private final HugeLongArray parent;
     private final HugeDoubleArray lambda;
+    private final HugeLongArray size;
     private final long maximumClusterId;
+    private final long nodeCount;
 
-    CondensedTree(long root, HugeLongArray parent, HugeDoubleArray lambda, long maximumClusterId) {
+    CondensedTree(
+        long root,
+        HugeLongArray parent,
+        HugeDoubleArray lambda,
+        HugeLongArray size,
+        long maximumClusterId,
+        long nodeCount
+    ) {
         this.root = root;
         this.parent = parent;
         this.lambda = lambda;
+        this.size = size;
         this.maximumClusterId = maximumClusterId;
+        this.nodeCount = nodeCount;
     }
 
     long root() {
@@ -54,5 +65,9 @@ class CondensedTree {
 
     double lambda(long node) {
         return lambda.get(node);
+    }
+
+    long size(long node) {
+        return size.get(node - nodeCount);
     }
 }

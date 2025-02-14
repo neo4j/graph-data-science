@@ -50,6 +50,8 @@ class CondenseStep {
         var clusterHierarchyRoot = clusterHierarchy.root();
         var parent = HugeLongArray.newArray(clusterHierarchyRoot + 1);
         var lambda = HugeDoubleArray.newArray(clusterHierarchyRoot + 1);
+        var size = HugeLongArray.newArray(nodeCount);
+
 
         var relabel = HugeLongArray.newArray(nodeCount);
         var currentCondensedRoot = nodeCount;
@@ -58,6 +60,8 @@ class CondenseStep {
         var currentCondensedMaxClusterId = nodeCount;
         var bfsQueue = HugeLongArrayQueue.newQueue(nodeCount);
         var visited = HugeAtomicBitSet.create(clusterHierarchyRoot + 1);
+
+        size.set(currentCondensedRoot - nodeCount, nodeCount);
 
         for (var i = clusterHierarchyRoot; i >= nodeCount; i--) {
             if (visited.get(i)) {
@@ -88,15 +92,17 @@ class CondenseStep {
                 relabel.set(left - nodeCount, leftClusterId);
                 parent.set(leftClusterId, currentReLabel);
                 lambda.set(leftClusterId, fallingOutLambda);
+                size.set(leftClusterId - nodeCount, leftSize);
 
                 var rightClusterId = ++currentCondensedMaxClusterId;
                 relabel.set(right - nodeCount, rightClusterId);
                 parent.set(rightClusterId, currentReLabel);
                 lambda.set(rightClusterId, fallingOutLambda);
+                size.set(rightClusterId - nodeCount, rightSize);
             }
         }
 
-        return new CondensedTree(currentCondensedRoot, parent, lambda, currentCondensedMaxClusterId);
+        return new CondensedTree(currentCondensedRoot, parent, lambda, size, currentCondensedMaxClusterId, nodeCount);
     }
 
     private void fallOut(
