@@ -33,8 +33,9 @@ final class ClusterHierarchy {
     private final HugeLongArray size;
     private final long nodeCount;
 
-    private ClusterHierarchy(
-        long root, HugeLongArray left,
+    ClusterHierarchy(
+        long root,
+        HugeLongArray left,
         HugeLongArray right,
         HugeDoubleArray lambda,
         HugeLongArray size,
@@ -72,9 +73,9 @@ final class ClusterHierarchy {
             lambda.set(adaptedIndex, edge.distance());
 
             var leftSize = sizeFn.apply(l);
-            var rigthSize = sizeFn.apply(r);
+            var rightSize = sizeFn.apply(r);
 
-            size.set(adaptedIndex, leftSize + rigthSize);
+            size.set(adaptedIndex, leftSize + rightSize);
         }
 
         return new ClusterHierarchy(currentRoot, left, right, lambda, size, nodeCount);
