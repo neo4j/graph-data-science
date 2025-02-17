@@ -26,6 +26,7 @@ import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
+import org.neo4j.gds.core.utils.paged.HugeSerialObjectMergeSort;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.termination.TerminationFlag;
 
@@ -99,7 +100,7 @@ public class HDBScan extends Algorithm<HugeLongArray> {
 
     ClusterHierarchy createClusterHierarchy(DualTreeMSTResult dualTreeMSTResult){
         var edges = dualTreeMSTResult.edges();
-        InsertionSort.sort(edges);
+        HugeSerialObjectMergeSort.sort(Edge.class, edges, Edge::distance);
         return ClusterHierarchy.create(nodes.nodeCount(),edges);
     }
 
