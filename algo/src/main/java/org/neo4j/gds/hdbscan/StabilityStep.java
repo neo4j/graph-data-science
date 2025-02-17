@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.hdbscan;
 
+import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 
 class StabilityStep {
@@ -48,5 +49,36 @@ class StabilityStep {
         }
 
         return result;
+    }
+
+    BitSet selectedClusters(CondensedTree condensedTree, HugeDoubleArray stabilities, long nodeCount) {
+
+        var selectedClusters = new BitSet(nodeCount);
+
+        var condensedTreeRoot = condensedTree.root();
+        var condensedTreeMaxClusterId = condensedTree.maximumClusterId();
+
+        var stabilitySums = HugeDoubleArray.newArray(nodeCount);
+        for (var p = condensedTreeMaxClusterId; p >= condensedTreeRoot; p--) {
+            var adaptedPIndex = p - nodeCount;
+            var stabilityP = stabilities.get(adaptedPIndex);
+            var childrenStabilitySum = stabilitySums.get(adaptedPIndex);
+            double stabilityToAdd;
+            if (childrenStabilitySum > stabilityP) {
+                stabilityToAdd = childrenStabilitySum;
+                selectedClusters.clear(adaptedPIndex);
+            } else {
+                stabilityToAdd = stabilityP;
+                selectedClusters.set(adaptedPIndex);
+                // Selected clusters below `p` are implicitly unselected - they will be ignored during- `labeling`
+            }
+            if (p == condensedTreeRoot) {
+                continue;
+            }
+            var parent = condensedTree.parent(p);
+            stabilitySums.addTo(parent - nodeCount, stabilityToAdd);
+        }
+
+        return selectedClusters;
     }
 }

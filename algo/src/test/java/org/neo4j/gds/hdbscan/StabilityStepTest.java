@@ -84,4 +84,66 @@ class StabilityStepTest {
                 0.0
             }, Offset.offset(1e-10));
     }
+
+    @Test
+    void clusterSelectionOfChildClusters() {
+        //    3
+        //   4  5
+
+        var nodeCount = 3;
+        var root = 3;
+
+        var parent = HugeLongArray.of(-1, -1, -1, 0, 3, 3);
+        var lambda = HugeDoubleArray.of(-1, -1, -1, -1, -1, -1);
+        var size = HugeLongArray.of(-1, -1, -1);
+        var maximumClusterId = 5;
+
+        var stabilities = HugeDoubleArray.of(3., 4., 5.);
+
+        var condensedTree = new CondensedTree(root, parent, lambda, size, maximumClusterId, nodeCount);
+        var stabilityStep = new StabilityStep();
+
+        var selectedClusters = stabilityStep.selectedClusters(condensedTree, stabilities, nodeCount);
+
+        assertThat(selectedClusters.get(0))
+            .withFailMessage("Root should be unselected")
+            .isFalse();
+        assertThat(selectedClusters.get(1))
+            .withFailMessage("First child should be selected cluster")
+            .isTrue();
+        assertThat(selectedClusters.get(2))
+            .withFailMessage("Second child should be selected cluster")
+            .isTrue();
+    }
+
+    @Test
+    void clusterSelectionOfParentCluster() {
+        //    3
+        //   4  5
+
+        var nodeCount = 3;
+        var root = 3;
+
+        var parent = HugeLongArray.of(-1, -1, -1, 0, 3, 3);
+        var lambda = HugeDoubleArray.of(-1, -1, -1, -1, -1, -1);
+        var size = HugeLongArray.of(-1, -1, -1);
+        var maximumClusterId = 5;
+
+        var stabilities = HugeDoubleArray.of(10., 4., 5.);
+
+        var condensedTree = new CondensedTree(root, parent, lambda, size, maximumClusterId, nodeCount);
+        var stabilityStep = new StabilityStep();
+
+        var selectedClusters = stabilityStep.selectedClusters(condensedTree, stabilities, nodeCount);
+
+        assertThat(selectedClusters.get(0))
+            .withFailMessage("Root should be selected")
+            .isTrue();
+        assertThat(selectedClusters.get(1))
+            .withFailMessage("First child should be selected")
+            .isTrue();
+        assertThat(selectedClusters.get(2))
+            .withFailMessage("Second child should be selected")
+            .isTrue();
+    }
 }
