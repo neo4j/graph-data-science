@@ -22,13 +22,14 @@ package org.neo4j.gds.hdbscan;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.termination.TerminationFlag;
 
-public class HDBScan extends Algorithm<Void> {
+public class HDBScan extends Algorithm<HugeLongArray> {
 
     private final IdMap nodes;
     private final NodePropertyValues nodePropertyValues;
@@ -36,6 +37,7 @@ public class HDBScan extends Algorithm<Void> {
     private final long leafSize;
     private final TerminationFlag terminationFlag;
     private final int k;
+    private final long minClusterSize;
 
     protected HDBScan(
         IdMap nodes,
@@ -43,8 +45,9 @@ public class HDBScan extends Algorithm<Void> {
         Concurrency concurrency,
         long leafSize,
         int k,
-        TerminationFlag terminationFlag,
-        ProgressTracker progressTracker
+        long minClusterSize,
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
     ) {
         super(progressTracker);
         this.nodes = nodes;
@@ -52,16 +55,23 @@ public class HDBScan extends Algorithm<Void> {
         this.concurrency = concurrency;
         this.leafSize = leafSize;
         this.k = k;
+        this.minClusterSize = minClusterSize;
         this.terminationFlag = terminationFlag;
     }
 
     @Override
-    public Void compute() {
+    public HugeLongArray compute() {
         var kdTree = buildKDTree();
 
-        var coreResult = computeCores(kdTree, nodes.nodeCount());
+        var nodeCount = nodes.nodeCount();
+        var coreResult = computeCores(kdTree, nodeCount);
+//        var dualTreeMST = dualTreeMSTPhase();
         var dualTreeMST = dualTreeMSTPhase(kdTree, coreResult);
-        return null;
+        var clusterHierarchy = createClusterHierarchy(dualTreeMST);
+        var condenseStep = new CondenseStep(nodeCount);
+        var condensedTree = condenseStep.condense(clusterHierarchy, minClusterSize);
+        var labellingStep = new LabellingStep(condensedTree, nodeCount);
+        return labellingStep.label();
     }
 
     CoreResult computeCores(KdTree kdTree, long nodeCount) {
