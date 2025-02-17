@@ -21,14 +21,24 @@ package org.neo4j.gds.hdbscan;
 
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
+import org.neo4j.gds.collections.ha.HugeLongArray;
 
-class StabilityStep {
-    HugeDoubleArray computeStabilities(CondensedTree condensedTree, long nodeCount) {
+class LabellingStep {
+
+    private final CondensedTree condensedTree;
+    private final long nodeCount;
+
+    LabellingStep(CondensedTree condensedTree, long nodeCount) {
+        this.condensedTree = condensedTree;
+        this.nodeCount = nodeCount;
+    }
+
+    HugeDoubleArray computeStabilities() {
         var result = HugeDoubleArray.newArray(nodeCount - 1);
 
-        var condensedTreeRoot = condensedTree.root();
+        var condensedTreeRoot = this.condensedTree.root();
         // process the leaves of the tree
-        for (var p = 0; p < nodeCount; p++) {
+        for (var p = 0; p < this.nodeCount; p++) {
             var lambdaP = 1. / condensedTree.lambda(p);
             var birthPoint = condensedTree.fellOutOf(p);
             var lambdaBirth = birthPoint == condensedTreeRoot
@@ -51,7 +61,7 @@ class StabilityStep {
         return result;
     }
 
-    BitSet selectedClusters(CondensedTree condensedTree, HugeDoubleArray stabilities, long nodeCount) {
+    BitSet selectedClusters(HugeDoubleArray stabilities) {
 
         var selectedClusters = new BitSet(nodeCount);
 
@@ -80,5 +90,35 @@ class StabilityStep {
         }
 
         return selectedClusters;
+    }
+
+    HugeLongArray computeLabels(BitSet selectedClusters) {
+        var labels = HugeLongArray.newArray(nodeCount);
+        labels.fill(-1L);
+        var nodeCountLabels = HugeLongArray.newArray(nodeCount);
+        var root = condensedTree.root();
+        var maximumClusterId = condensedTree.maximumClusterId();
+        for (var p = root; p <= maximumClusterId; p++) {
+            var adaptedIndex = p - nodeCount;
+            var parent = condensedTree.parent(p);
+            long parentLabel = p == root ? -1L : labels.get(parent - nodeCount);
+            if (parentLabel != -1L) {
+                labels.set(adaptedIndex, parentLabel);
+            } else if (selectedClusters.get(adaptedIndex)) {
+                labels.set(adaptedIndex, adaptedIndex);
+            }
+        }
+
+        for (var n = 0; n < nodeCount; n++) {
+            nodeCountLabels.set(n, labels.get(condensedTree.fellOutOf(n) - nodeCount));
+        }
+
+        return nodeCountLabels;
+    }
+
+    HugeLongArray label() {
+        var stabilities = computeStabilities();
+        var selectedClusters = selectedClusters(stabilities);
+        return computeLabels(selectedClusters);
     }
 }

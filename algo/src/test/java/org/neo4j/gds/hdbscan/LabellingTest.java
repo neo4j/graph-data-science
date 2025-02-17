@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.hdbscan;
 
+import com.carrotsearch.hppc.BitSet;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
@@ -26,7 +27,7 @@ import org.neo4j.gds.collections.ha.HugeLongArray;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class StabilityStepTest {
+class LabellingTest {
 
     @Test
     void clusterStability() {
@@ -39,9 +40,9 @@ class StabilityStepTest {
         var maximumClusterId = 6;
 
         var condensedTree = new CondensedTree(root, parent, lambda, size, maximumClusterId, nodeCount);
-        var stabilityStep = new StabilityStep();
+        var stabilityStep = new LabellingStep(condensedTree, nodeCount);
 
-        var stabilities = stabilityStep.computeStabilities(condensedTree, nodeCount);
+        var stabilities = stabilityStep.computeStabilities();
 
 
         assertThat(stabilities.toArray()).containsExactly(
@@ -65,9 +66,9 @@ class StabilityStepTest {
 
         var condensedTree = new CondensedTree(root, parent, lambda, size, maximumClusterId, nodeCount);
 
-        var stabilityStep = new StabilityStep();
+        var stabilityStep = new LabellingStep(condensedTree, nodeCount);
 
-        var stabilities = stabilityStep.computeStabilities(condensedTree, nodeCount);
+        var stabilities = stabilityStep.computeStabilities();
 
         assertThat(stabilities.toArray()).containsExactly(
             new double[] {
@@ -101,9 +102,9 @@ class StabilityStepTest {
         var stabilities = HugeDoubleArray.of(3., 4., 5.);
 
         var condensedTree = new CondensedTree(root, parent, lambda, size, maximumClusterId, nodeCount);
-        var stabilityStep = new StabilityStep();
+        var stabilityStep = new LabellingStep(condensedTree, nodeCount);
 
-        var selectedClusters = stabilityStep.selectedClusters(condensedTree, stabilities, nodeCount);
+        var selectedClusters = stabilityStep.selectedClusters(stabilities);
 
         assertThat(selectedClusters.get(0))
             .withFailMessage("Root should be unselected")
@@ -132,9 +133,9 @@ class StabilityStepTest {
         var stabilities = HugeDoubleArray.of(10., 4., 5.);
 
         var condensedTree = new CondensedTree(root, parent, lambda, size, maximumClusterId, nodeCount);
-        var stabilityStep = new StabilityStep();
+        var stabilityStep = new LabellingStep(condensedTree, nodeCount);
 
-        var selectedClusters = stabilityStep.selectedClusters(condensedTree, stabilities, nodeCount);
+        var selectedClusters = stabilityStep.selectedClusters(stabilities);
 
         assertThat(selectedClusters.get(0))
             .withFailMessage("Root should be selected")
@@ -145,5 +146,60 @@ class StabilityStepTest {
         assertThat(selectedClusters.get(2))
             .withFailMessage("Second child should be selected")
             .isTrue();
+    }
+
+    @Test
+    void labelling() {
+        var parent = HugeLongArray.of(8, 8, 10, 10, 11, 11, 11, 0, 7, 7, 9, 9, 0);
+        var lambda = HugeDoubleArray.of(11.0, 11.0, 9.0, 9.0, 8.0, 7.0, 7.0, 0.0, 12.0, 12.0, 10.0, 10.0, 0.0);
+        var size = HugeLongArray.of(7, 2, 5, 2, 3, 0, 0);
+        var maximumClusterId = 11;
+        var nodeCount = 7;
+        var root = 7;
+
+        var condensedTree = new CondensedTree(root, parent, lambda, size, maximumClusterId, nodeCount);
+        var selectedClusters = new BitSet(5);
+        // selects cluster `8`
+        selectedClusters.set(1);
+        // selects cluster `11`
+        selectedClusters.set(4);
+
+        var stabilityStep = new LabellingStep(condensedTree, nodeCount);
+
+        var labels = stabilityStep.computeLabels(selectedClusters);
+
+        assertThat(labels.size()).isEqualTo(nodeCount);
+
+        assertThat(labels.get(0)).isEqualTo(1L);
+        assertThat(labels.get(1)).isEqualTo(1L);
+
+        assertThat(labels.get(2)).isEqualTo(-1L);
+        assertThat(labels.get(3)).isEqualTo(-1L);
+
+        assertThat(labels.get(4)).isEqualTo(4L);
+        assertThat(labels.get(5)).isEqualTo(4L);
+        assertThat(labels.get(6)).isEqualTo(4L);
+
+    }
+
+    @Test
+    void labellingWhenAllClustersAreSelected() {
+        var parent = HugeLongArray.of(8, 8, 10, 10, 11, 11, 11, 0, 7, 7, 9, 9, 0);
+        var lambda = HugeDoubleArray.of(11.0, 11.0, 9.0, 9.0, 8.0, 7.0, 7.0, 0.0, 12.0, 12.0, 10.0, 10.0, 0.0);
+        var size = HugeLongArray.of(7, 2, 5, 2, 3, 0, 0);
+        var maximumClusterId = 11;
+        var nodeCount = 7;
+        var root = 7;
+
+        var condensedTree = new CondensedTree(root, parent, lambda, size, maximumClusterId, nodeCount);
+        var selectedClusters = new BitSet(5);
+        selectedClusters.set(0, 5);
+
+        var stabilityStep = new LabellingStep(condensedTree, nodeCount);
+
+        var labels = stabilityStep.computeLabels(selectedClusters);
+
+        assertThat(labels.size()).isEqualTo(nodeCount);
+        assertThat(labels.toArray()).containsOnly(0L);
     }
 }
