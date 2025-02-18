@@ -212,8 +212,7 @@ public final class DualTreeMSTAlgorithm extends Algorithm<DualTreeMSTResult> {
 
     }
 
-    private boolean filterNodesOnCoreValue(long node) {
-        var component = unionFind.setIdOf(node);
+    private boolean filterNodesOnCoreValue(long node, long component) {
         return coreValues.get(node) < closestDistanceTracker.componentClosestDistance(component);
     }
 
@@ -223,17 +222,18 @@ public final class DualTreeMSTAlgorithm extends Algorithm<DualTreeMSTResult> {
         var qEnd = kdNodeQ.end();
         for (long qIndex = qStart; qIndex < qEnd; ++qIndex) {
             var qPoint = kdTree.nodeAt(qIndex);
-            if (!filterNodesOnCoreValue(qPoint)) {
+            var qComp = unionFind.setIdOf(qPoint);
+
+            if (!filterNodesOnCoreValue(qPoint, qComp)) {
                 continue;
             }
 
             var rStart = kdNodeR.start();
             var rEnd = kdNodeR.end();
-            var qComp = unionFind.setIdOf(qPoint);
             var qArr = nodePropertyValues.doubleArrayValue(qPoint);
             for (long rIndex = rStart; rIndex < rEnd; ++rIndex) {
                 var rPoint = kdTree.nodeAt(rIndex);
-                if (filterNodesOnCoreValue(rPoint)) {
+                if (filterNodesOnCoreValue(rPoint,qComp)) {
                     baseCase(qPoint, rPoint, qComp, qArr);
                 }
             }
