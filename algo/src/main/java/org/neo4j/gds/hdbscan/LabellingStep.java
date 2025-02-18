@@ -116,7 +116,7 @@ class LabellingStep {
         return nodeCountLabels;
     }
 
-    HugeLongArray label() {
+    HugeLongArray labels() {
         var stabilities = computeStabilities();
         var selectedClusters = selectedClusters(stabilities);
         return computeLabels(selectedClusters);

@@ -37,7 +37,7 @@ public class HDBScan extends Algorithm<HugeLongArray> {
     private final Concurrency concurrency;
     private final long leafSize;
     private final TerminationFlag terminationFlag;
-    private final int k;
+    private final int samples;
     private final long minClusterSize;
 
     protected HDBScan(
@@ -45,7 +45,7 @@ public class HDBScan extends Algorithm<HugeLongArray> {
         NodePropertyValues nodePropertyValues,
         Concurrency concurrency,
         long leafSize,
-        int k,
+        int samples,
         long minClusterSize,
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
@@ -55,7 +55,7 @@ public class HDBScan extends Algorithm<HugeLongArray> {
         this.nodePropertyValues = nodePropertyValues;
         this.concurrency = concurrency;
         this.leafSize = leafSize;
-        this.k = k;
+        this.samples = samples;
         this.minClusterSize = minClusterSize;
         this.terminationFlag = terminationFlag;
     }
@@ -66,13 +66,12 @@ public class HDBScan extends Algorithm<HugeLongArray> {
 
         var nodeCount = nodes.nodeCount();
         var coreResult = computeCores(kdTree, nodeCount);
-//        var dualTreeMST = dualTreeMSTPhase();
         var dualTreeMST = dualTreeMSTPhase(kdTree, coreResult);
         var clusterHierarchy = createClusterHierarchy(dualTreeMST);
         var condenseStep = new CondenseStep(nodeCount);
         var condensedTree = condenseStep.condense(clusterHierarchy, minClusterSize);
         var labellingStep = new LabellingStep(condensedTree, nodeCount);
-        return labellingStep.label();
+        return labellingStep.labels();
     }
 
     CoreResult computeCores(KdTree kdTree, long nodeCount) {
@@ -81,7 +80,7 @@ public class HDBScan extends Algorithm<HugeLongArray> {
         ParallelUtil.parallelForEachNode(
             nodeCount, concurrency, terminationFlag,
             (nodeId) -> {
-                neighbours.set(nodeId, kdTree.neighbours(nodeId, k));
+                neighbours.set(nodeId, kdTree.neighbours(nodeId, samples));
             }
         );
 
