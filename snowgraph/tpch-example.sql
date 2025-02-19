@@ -156,8 +156,8 @@ SELECT gds.graph_project('parts_in_orders', {
     'relationshipTables': {
         'tpch_example.gds.part_in_order': {
             'type': 'PART_IN_ORDER',
-            'source_table': 'tpch_example.gds.parts',
-            'target_table': 'tpch_example.gds.orders',
+            'sourceTable': 'tpch_example.gds.parts',
+            'targetTable': 'tpch_example.gds.orders',
             'orientation':  'NATURAL'
         }
     },
