@@ -29,6 +29,7 @@ final class ClosestDistanceInformationTracker {
     private final HugeLongArray componentOutsideBestNode;
     private boolean updated = false;
 
+
     private ClosestDistanceInformationTracker(
         HugeDoubleArray componentClosestDistance,
         HugeLongArray componentInsideBestNode,
@@ -96,7 +97,7 @@ final class ClosestDistanceInformationTracker {
         tryToAssign(comp2, p2, p1, distance);
     }
 
-    boolean tryToAssign(long comp, long pInside, long pOutside, double distance) {
+    synchronized boolean tryToAssign(long comp, long pInside, long pOutside, double distance) {
         var best = componentClosestDistance.get(comp);
         if (best > distance) {
             componentClosestDistance.set(comp, distance);

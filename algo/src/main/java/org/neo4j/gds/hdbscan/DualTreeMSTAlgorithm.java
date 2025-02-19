@@ -30,7 +30,7 @@ import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.core.utils.paged.dss.HugeAtomicDisjointSetStruct;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
-public final class DualTreeMSTAlgorithm extends Algorithm<DualTreeMSTResult> {
+public final class DualTreeMSTAlgorithm extends Algorithm<GeometricMSTResult> {
 
     private final NodePropertyValues nodePropertyValues;
     private final KdTree kdTree;
@@ -97,14 +97,14 @@ public final class DualTreeMSTAlgorithm extends Algorithm<DualTreeMSTResult> {
 
 
     @Override
-    public DualTreeMSTResult compute() {
+    public GeometricMSTResult compute() {
 
         var kdRoot = kdTree.root();
         var rootId = kdRoot.id();
         while (!kdNodeSingleComponent.get(rootId)) {
             performIteration();
         }
-        return new DualTreeMSTResult(edges, totalEdgeSum);
+        return new GeometricMSTResult(edges, totalEdgeSum);
     }
 
     void resetNodeBounds() {

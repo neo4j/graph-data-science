@@ -150,9 +150,9 @@ class HDBScanTest {
             TerminationFlag.RUNNING_TRUE
         );
 
-        var dualTreeResult = new DualTreeMSTResult(edges, -1);
+        var mstResult = new GeometricMSTResult(edges, -1);
 
-        var clusterHierarchy = hdbscan.createClusterHierarchy(dualTreeResult);
+        var clusterHierarchy = hdbscan.createClusterHierarchy(mstResult);
 
         assertThat(clusterHierarchy.root()).isEqualTo(4L);
 
@@ -169,4 +169,5 @@ class HDBScanTest {
         assertThat(clusterHierarchy.size(0)).isEqualTo(1);
 
     }
+
 }
