@@ -27,7 +27,7 @@ import java.lang.annotation.Target;
 
 @Documented
 @Target(ElementType.TYPE)
-@Retention(RetentionPolicy.CLASS)
+@Retention(RetentionPolicy.RUNTIME)
 public @interface Configuration {
 
     /**
@@ -55,7 +55,7 @@ public @interface Configuration {
      */
     @Documented
     @Target(ElementType.METHOD)
-    @Retention(RetentionPolicy.CLASS)
+    @Retention(RetentionPolicy.RUNTIME)
     @interface Key {
         String value();
     }
@@ -67,7 +67,7 @@ public @interface Configuration {
      */
     @Documented
     @Target(ElementType.METHOD)
-    @Retention(RetentionPolicy.CLASS)
+    @Retention(RetentionPolicy.RUNTIME)
     @interface ConvertWith {
         String method();
 
@@ -84,7 +84,7 @@ public @interface Configuration {
      */
     @Documented
     @Target(ElementType.METHOD)
-    @Retention(RetentionPolicy.CLASS)
+    @Retention(RetentionPolicy.RUNTIME)
     @interface ToMapValue {
         String value();
     }
@@ -94,7 +94,7 @@ public @interface Configuration {
      */
     @Documented
     @Target(ElementType.METHOD)
-    @Retention(RetentionPolicy.CLASS)
+    @Retention(RetentionPolicy.RUNTIME)
     @interface Ignore {
     }
 
@@ -103,7 +103,7 @@ public @interface Configuration {
      */
     @Documented
     @Target(ElementType.METHOD)
-    @Retention(RetentionPolicy.CLASS)
+    @Retention(RetentionPolicy.RUNTIME)
     @interface Parameter {
         boolean acceptNull() default false;
     }
@@ -114,7 +114,7 @@ public @interface Configuration {
      */
     @Documented
     @Target(ElementType.METHOD)
-    @Retention(RetentionPolicy.CLASS)
+    @Retention(RetentionPolicy.RUNTIME)
     @interface CollectKeys {
     }
 
@@ -127,7 +127,7 @@ public @interface Configuration {
      */
     @Documented
     @Target(ElementType.METHOD)
-    @Retention(RetentionPolicy.CLASS)
+    @Retention(RetentionPolicy.RUNTIME)
     @interface ToMap {
     }
 
@@ -139,7 +139,7 @@ public @interface Configuration {
      */
     @Documented
     @Target(ElementType.METHOD)
-    @Retention(RetentionPolicy.CLASS)
+    @Retention(RetentionPolicy.RUNTIME)
     @interface GraphStoreValidation {
     }
 
@@ -151,7 +151,7 @@ public @interface Configuration {
      */
     @Documented
     @Target(ElementType.METHOD)
-    @Retention(RetentionPolicy.CLASS)
+    @Retention(RetentionPolicy.RUNTIME)
     @interface GraphStoreValidationCheck {
     }
 
@@ -172,7 +172,7 @@ public @interface Configuration {
      */
     @Documented
     @Target(ElementType.METHOD)
-    @Retention(RetentionPolicy.CLASS)
+    @Retention(RetentionPolicy.RUNTIME)
     @interface Check {
     }
 
@@ -181,7 +181,7 @@ public @interface Configuration {
      */
     @Documented
     @Target(ElementType.METHOD)
-    @Retention(RetentionPolicy.CLASS)
+    @Retention(RetentionPolicy.RUNTIME)
     @interface IntegerRange {
         int min() default Integer.MIN_VALUE;
         int max() default Integer.MAX_VALUE;
@@ -194,7 +194,7 @@ public @interface Configuration {
      */
     @Documented
     @Target(ElementType.METHOD)
-    @Retention(RetentionPolicy.CLASS)
+    @Retention(RetentionPolicy.RUNTIME)
     @interface LongRange {
         long min() default Long.MIN_VALUE;
         long max() default Long.MAX_VALUE;
@@ -207,7 +207,7 @@ public @interface Configuration {
      */
     @Documented
     @Target(ElementType.METHOD)
-    @Retention(RetentionPolicy.CLASS)
+    @Retention(RetentionPolicy.RUNTIME)
     @interface DoubleRange {
         double min() default -Double.MAX_VALUE;
         double max() default Double.MAX_VALUE;
