@@ -35,11 +35,11 @@ public class HDBScanProgressTrackerCreator {
     }
 
     static Task condenseTask(String name, long nodeCount){
-            return  Tasks.leaf(name,nodeCount - 1);
+        return Tasks.leaf(name,nodeCount - 1);
     }
 
     static Task labellingTask(String name, long nodeCount){
-        return  Tasks.task(
+        return Tasks.task(
                 name,
                 List.of(
                     Tasks.leaf("Stability calculation", nodeCount-1),
