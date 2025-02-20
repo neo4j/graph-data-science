@@ -129,15 +129,16 @@ class CondenseStepTest {
     @Test
     void shouldLogProgress(){
         var nodeCount = 7L;
-
-        var progressTask = HDBScanProgressTrackerCreator.condenseTask("condense",7);
-        var log = new GdsTestLog();
-        var progressTracker = new TaskProgressTracker(progressTask, new LoggerForProgressTrackingAdapter(log), new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE);
         var root = 12L;
         var left = HugeLongArray.of(5, 4, 2, 9, 0, 11);
         var right = HugeLongArray.of(6, 7, 3, 8, 1, 10);
         var lambda = HugeDoubleArray.of(7d, 8d, 9d, 10d, 11d, 12d);
         var size = HugeLongArray.of(2, 3, 2, 5, 2, 7);
+
+        var progressTask = HDBScanProgressTrackerCreator.condenseTask("condense",nodeCount);
+        var log = new GdsTestLog();
+        var progressTracker = new TaskProgressTracker(progressTask, new LoggerForProgressTrackingAdapter(log), new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE);
+
 
         var clusterHierarchy = new ClusterHierarchy(root, left, right, lambda, size, nodeCount);
 

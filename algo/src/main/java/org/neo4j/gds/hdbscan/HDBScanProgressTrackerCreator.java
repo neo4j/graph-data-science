@@ -22,6 +22,8 @@ package org.neo4j.gds.hdbscan;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
+import java.util.List;
+
 public class HDBScanProgressTrackerCreator {
 
     static Task kdBuildingTask(String name, long nodeCount){
@@ -34,6 +36,17 @@ public class HDBScanProgressTrackerCreator {
 
     static Task condenseTask(String name, long nodeCount){
             return  Tasks.leaf(name,nodeCount - 1);
+    }
+
+    static Task labellingTask(String name, long nodeCount){
+        return  Tasks.task(
+                name,
+                List.of(
+                    Tasks.leaf("Stability calculation", nodeCount-1),
+                    Tasks.leaf("cluster selection", nodeCount-1),
+                    Tasks.leaf("labelling", nodeCount + nodeCount-1)
+                )
+        );
     }
 
 }

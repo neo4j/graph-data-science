@@ -20,12 +20,22 @@
 package org.neo4j.gds.hdbscan;
 
 import com.carrotsearch.hppc.BitSet;
+import org.assertj.core.api.Assertions;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.compat.TestLog;
+import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
+import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
+import org.neo4j.gds.logging.GdsTestLog;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.neo4j.gds.assertj.Extractors.removingThreadId;
+import static org.neo4j.gds.assertj.Extractors.replaceTimings;
 
 class LabellingTest {
 
@@ -40,7 +50,7 @@ class LabellingTest {
         var maximumClusterId = 6;
 
         var condensedTree = new CondensedTree(root, parent, lambda, size, maximumClusterId, nodeCount);
-        var stabilityStep = new LabellingStep(condensedTree, nodeCount);
+        var stabilityStep = new LabellingStep(condensedTree, nodeCount, ProgressTracker.NULL_TRACKER);
 
         var stabilities = stabilityStep.computeStabilities();
 
@@ -66,7 +76,7 @@ class LabellingTest {
 
         var condensedTree = new CondensedTree(root, parent, lambda, size, maximumClusterId, nodeCount);
 
-        var stabilityStep = new LabellingStep(condensedTree, nodeCount);
+        var stabilityStep = new LabellingStep(condensedTree, nodeCount,ProgressTracker.NULL_TRACKER);
 
         var stabilities = stabilityStep.computeStabilities();
 
@@ -102,7 +112,7 @@ class LabellingTest {
         var stabilities = HugeDoubleArray.of(3., 4., 5.);
 
         var condensedTree = new CondensedTree(root, parent, lambda, size, maximumClusterId, nodeCount);
-        var stabilityStep = new LabellingStep(condensedTree, nodeCount);
+        var stabilityStep = new LabellingStep(condensedTree, nodeCount,ProgressTracker.NULL_TRACKER);
 
         var selectedClusters = stabilityStep.selectedClusters(stabilities);
 
@@ -133,7 +143,7 @@ class LabellingTest {
         var stabilities = HugeDoubleArray.of(10., 4., 5.);
 
         var condensedTree = new CondensedTree(root, parent, lambda, size, maximumClusterId, nodeCount);
-        var stabilityStep = new LabellingStep(condensedTree, nodeCount);
+        var stabilityStep = new LabellingStep(condensedTree, nodeCount,ProgressTracker.NULL_TRACKER);
 
         var selectedClusters = stabilityStep.selectedClusters(stabilities);
 
@@ -164,7 +174,7 @@ class LabellingTest {
         // selects cluster `11`
         selectedClusters.set(4);
 
-        var stabilityStep = new LabellingStep(condensedTree, nodeCount);
+        var stabilityStep = new LabellingStep(condensedTree, nodeCount,ProgressTracker.NULL_TRACKER);
 
         var labels = stabilityStep.computeLabels(selectedClusters);
 
@@ -195,11 +205,57 @@ class LabellingTest {
         var selectedClusters = new BitSet(5);
         selectedClusters.set(0, 5);
 
-        var stabilityStep = new LabellingStep(condensedTree, nodeCount);
+        var stabilityStep = new LabellingStep(condensedTree, nodeCount,ProgressTracker.NULL_TRACKER);
 
         var labels = stabilityStep.computeLabels(selectedClusters);
 
         assertThat(labels.size()).isEqualTo(nodeCount);
         assertThat(labels.toArray()).containsOnly(0L);
+    }
+
+    @Test
+    void shouldLogProgress(){
+        var nodeCount = 4;
+        var root = 4;
+
+        var parent = HugeLongArray.of(5, 5, 6, 6, 0, 4, 4);
+        var lambda = HugeDoubleArray.of(10, 10, 11, 11, 0, 12, 12);
+        var size = HugeLongArray.of(4, 2, 2);
+        var maximumClusterId = 6;
+
+        var condensedTree = new CondensedTree(root, parent, lambda, size, maximumClusterId, nodeCount);
+
+        var progressTask = HDBScanProgressTrackerCreator.labellingTask("foo",nodeCount);
+        var log = new GdsTestLog();
+        var progressTracker = new TaskProgressTracker(progressTask, new LoggerForProgressTrackingAdapter(log), new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE);
+
+        new LabellingStep(condensedTree, nodeCount, progressTracker).labels();
+
+        Assertions.assertThat(log.getMessages(TestLog.INFO))
+            .extracting(removingThreadId())
+            .extracting(replaceTimings())
+            .containsExactly(
+                "foo :: Start",
+                "foo :: Stability calculation :: Start",
+                "foo :: Stability calculation 33%",
+                "foo :: Stability calculation 66%",
+                "foo :: Stability calculation 100%",
+                "foo :: Stability calculation :: Finished",
+                "foo :: cluster selection :: Start",
+                "foo :: cluster selection 33%",
+                "foo :: cluster selection 66%",
+                "foo :: cluster selection 100%",
+                "foo :: cluster selection :: Finished",
+                "foo :: labelling :: Start",
+                "foo :: labelling 14%",
+                "foo :: labelling 28%",
+                "foo :: labelling 42%",
+                "foo :: labelling 57%",
+                "foo :: labelling 71%",
+                "foo :: labelling 85%",
+                "foo :: labelling 100%",
+                "foo :: labelling :: Finished",
+                "foo :: Finished"
+            );
     }
 }

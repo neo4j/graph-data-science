@@ -22,20 +22,23 @@ package org.neo4j.gds.hdbscan;
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 class LabellingStep {
 
     private final CondensedTree condensedTree;
     private final long nodeCount;
+    private final ProgressTracker progressTracker;
 
-    LabellingStep(CondensedTree condensedTree, long nodeCount) {
+    LabellingStep(CondensedTree condensedTree, long nodeCount, ProgressTracker progressTracker) {
         this.condensedTree = condensedTree;
         this.nodeCount = nodeCount;
+        this.progressTracker = progressTracker;
     }
 
     HugeDoubleArray computeStabilities() {
         var result = HugeDoubleArray.newArray(nodeCount - 1);
-
+        progressTracker.beginSubTask();
         var condensedTreeRoot = this.condensedTree.root();
         // process the leaves of the tree
         for (var p = 0; p < this.nodeCount; p++) {
@@ -56,8 +59,9 @@ class LabellingStep {
                 : 1. / condensedTree.lambda(birthPoint);
             var sizeP = condensedTree.size(p);
             result.addTo(birthPoint - nodeCount, sizeP * (lambdaP - lambdaBirth));
+            progressTracker.logProgress();
         }
-
+        progressTracker.endSubTask();
         return result;
     }
 
@@ -67,7 +71,7 @@ class LabellingStep {
 
         var condensedTreeRoot = condensedTree.root();
         var condensedTreeMaxClusterId = condensedTree.maximumClusterId();
-
+        progressTracker.beginSubTask();
         var stabilitySums = HugeDoubleArray.newArray(nodeCount);
         for (var p = condensedTreeMaxClusterId; p >= condensedTreeRoot; p--) {
             var adaptedPIndex = p - nodeCount;
@@ -82,17 +86,19 @@ class LabellingStep {
                 selectedClusters.set(adaptedPIndex);
                 // Selected clusters below `p` are implicitly unselected - they will be ignored during- `labeling`
             }
+            progressTracker.logProgress();
             if (p == condensedTreeRoot) {
                 continue;
             }
             var parent = condensedTree.parent(p);
             stabilitySums.addTo(parent - nodeCount, stabilityToAdd);
         }
-
+        progressTracker.endSubTask();
         return selectedClusters;
     }
 
     HugeLongArray computeLabels(BitSet selectedClusters) {
+        progressTracker.beginSubTask();
         var labels = HugeLongArray.newArray(nodeCount);
         labels.fill(-1L);
         var nodeCountLabels = HugeLongArray.newArray(nodeCount);
@@ -107,18 +113,25 @@ class LabellingStep {
             } else if (selectedClusters.get(adaptedIndex)) {
                 labels.set(adaptedIndex, adaptedIndex);
             }
+            progressTracker.logProgress();
         }
 
         for (var n = 0; n < nodeCount; n++) {
             nodeCountLabels.set(n, labels.get(condensedTree.fellOutOf(n) - nodeCount));
+            progressTracker.logProgress();
         }
+        progressTracker.endSubTask();
+
 
         return nodeCountLabels;
     }
 
     HugeLongArray labels() {
+        progressTracker.beginSubTask();
         var stabilities = computeStabilities();
         var selectedClusters = selectedClusters(stabilities);
-        return computeLabels(selectedClusters);
+        var labels= computeLabels(selectedClusters);
+        progressTracker.endSubTask();
+        return labels;
     }
 }
