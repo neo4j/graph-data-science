@@ -68,7 +68,7 @@ public class HDBScan extends Algorithm<HugeLongArray> {
         var coreResult = computeCores(kdTree, nodeCount);
         var dualTreeMST = dualTreeMSTPhase(kdTree, coreResult);
         var clusterHierarchy = createClusterHierarchy(dualTreeMST);
-        var condenseStep = new CondenseStep(nodeCount);
+        var condenseStep = new CondenseStep(nodeCount,progressTracker);
         var condensedTree = condenseStep.condense(clusterHierarchy, minClusterSize);
         var labellingStep = new LabellingStep(condensedTree, nodeCount);
         return labellingStep.labels();

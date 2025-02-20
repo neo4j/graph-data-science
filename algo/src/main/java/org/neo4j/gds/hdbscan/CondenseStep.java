@@ -23,12 +23,15 @@ import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.paged.HugeLongArrayQueue;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 class CondenseStep {
     private final long nodeCount;
+    private final ProgressTracker progressTracker;
 
-    CondenseStep(long nodeCount) {
+    CondenseStep(long nodeCount, ProgressTracker progressTracker) {
         this.nodeCount = nodeCount;
+        this.progressTracker = progressTracker;
     }
 
     CondensedTree condense(ClusterHierarchy clusterHierarchy, long minClusterSize) {
@@ -46,7 +49,7 @@ class CondenseStep {
         // After walking through the whole hierarchy and doing this we end up
         // with a much smaller tree with a small number of nodes,
         // each of which has data about how the size of the cluster at that node decreases over varying distance.
-
+        progressTracker.beginSubTask();
         var clusterHierarchyRoot = clusterHierarchy.root();
         var parent = HugeLongArray.newArray(clusterHierarchyRoot + 1);
         var lambda = HugeDoubleArray.newArray(clusterHierarchyRoot + 1);
@@ -100,7 +103,9 @@ class CondenseStep {
                 lambda.set(rightClusterId, fallingOutLambda);
                 size.set(rightClusterId - nodeCount, rightSize);
             }
+            progressTracker.logProgress();
         }
+        progressTracker.endSubTask();
 
         return new CondensedTree(currentCondensedRoot, parent, lambda, size, currentCondensedMaxClusterId, nodeCount);
     }

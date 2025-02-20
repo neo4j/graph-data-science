@@ -29,7 +29,11 @@ public class HDBScanProgressTrackerCreator {
     }
 
     static Task hierarchyTask(String name, long nodeCount){
-        return Tasks.leaf(name,nodeCount-1);
+        return Tasks.leaf(name,nodeCount - 1);
+    }
+
+    static Task condenseTask(String name, long nodeCount){
+            return  Tasks.leaf(name,nodeCount - 1);
     }
 
 }

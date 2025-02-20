@@ -19,11 +19,21 @@
  */
 package org.neo4j.gds.hdbscan;
 
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.compat.TestLog;
+import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
+import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
+import org.neo4j.gds.logging.GdsTestLog;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.neo4j.gds.assertj.Extractors.removingThreadId;
+import static org.neo4j.gds.assertj.Extractors.replaceTimings;
 
 class CondenseStepTest {
 
@@ -38,7 +48,8 @@ class CondenseStepTest {
 
         var clusterHierarchy = new ClusterHierarchy(root, left, right, lambda, size, nodeCount);
 
-        var condensedTree = new CondenseStep(nodeCount).condense(clusterHierarchy, 2L);
+        var condensedTree = new CondenseStep(nodeCount, ProgressTracker.NULL_TRACKER)
+            .condense(clusterHierarchy, 2L);
 
         assertThat(condensedTree.root()).isEqualTo(7L);
         assertThat(condensedTree.maximumClusterId()).isEqualTo(11L);
@@ -89,7 +100,8 @@ class CondenseStepTest {
 
         var clusterHierarchy = new ClusterHierarchy(root, left, right, lambda, size, nodeCount);
 
-        var condensedTree = new CondenseStep(nodeCount).condense(clusterHierarchy, 3L);
+        var condensedTree = new CondenseStep(nodeCount,ProgressTracker.NULL_TRACKER)
+            .condense(clusterHierarchy, 3L);
 
         assertThat(condensedTree.root()).isEqualTo(7L);
         assertThat(condensedTree.maximumClusterId()).isEqualTo(7L);
@@ -112,5 +124,35 @@ class CondenseStepTest {
         assertThat(condensedTree.lambda(5L)).isEqualTo(8d);
         assertThat(condensedTree.fellOutOf(6L)).isEqualTo(7L);
         assertThat(condensedTree.lambda(6L)).isEqualTo(8d);
+    }
+
+    @Test
+    void shouldLogProgress(){
+        var nodeCount = 7L;
+
+        var progressTask = HDBScanProgressTrackerCreator.condenseTask("condense",7);
+        var log = new GdsTestLog();
+        var progressTracker = new TaskProgressTracker(progressTask, new LoggerForProgressTrackingAdapter(log), new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE);
+        var root = 12L;
+        var left = HugeLongArray.of(5, 4, 2, 9, 0, 11);
+        var right = HugeLongArray.of(6, 7, 3, 8, 1, 10);
+        var lambda = HugeDoubleArray.of(7d, 8d, 9d, 10d, 11d, 12d);
+        var size = HugeLongArray.of(2, 3, 2, 5, 2, 7);
+
+        var clusterHierarchy = new ClusterHierarchy(root, left, right, lambda, size, nodeCount);
+
+        new CondenseStep(nodeCount,progressTracker).condense(clusterHierarchy, 3L);
+
+        Assertions.assertThat(log.getMessages(TestLog.INFO))
+            .extracting(removingThreadId())
+            .extracting(replaceTimings())
+            .containsExactly(
+                "condense :: Start",
+                "condense 16%",
+                "condense 33%",
+                "condense 50%",
+                "condense 100%",
+                "condense :: Finished"
+            );
     }
 }
