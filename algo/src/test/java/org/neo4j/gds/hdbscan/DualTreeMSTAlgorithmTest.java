@@ -22,6 +22,7 @@ package org.neo4j.gds.hdbscan;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
@@ -58,7 +59,7 @@ class DualTreeMSTAlgorithmTest {
         @Test
         void shouldReturnEuclideanMSTWithZeroCoreValues() {
             var nodePropertyValues = graph.nodeProperties("point");
-            var kdTree = new KdTreeBuilder(graph, nodePropertyValues, 1, 1).build();
+            var kdTree = new KdTreeBuilder(graph, nodePropertyValues, 1, 1,ProgressTracker.NULL_TRACKER).build();
 
             var dualTree =  DualTreeMSTAlgorithm.createWithZeroCores(
                 nodePropertyValues,
@@ -113,7 +114,7 @@ class DualTreeMSTAlgorithmTest {
         @Test
         void shouldReturnEuclideanMSTWithZeroCoreValues() {
             var nodePropertyValues = graph.nodeProperties("point");
-            var kdTree = new KdTreeBuilder(graph, nodePropertyValues, 1, 1).build();
+            var kdTree = new KdTreeBuilder(graph, nodePropertyValues, 1, 1, ProgressTracker.NULL_TRACKER).build();
 
             var dualTree =  DualTreeMSTAlgorithm.createWithZeroCores(
                 nodePropertyValues,
@@ -168,7 +169,7 @@ class DualTreeMSTAlgorithmTest {
         @Test
         void shouldReturnEuclideanMSTWithZeroCoreValues() {
             var nodePropertyValues = graph.nodeProperties("point");
-            var kdTree = new KdTreeBuilder(graph, nodePropertyValues, 1, 1).build();
+            var kdTree = new KdTreeBuilder(graph, nodePropertyValues, 1, 1,ProgressTracker.NULL_TRACKER).build();
 
             var dualTree =  DualTreeMSTAlgorithm.createWithZeroCores(
                 nodePropertyValues,

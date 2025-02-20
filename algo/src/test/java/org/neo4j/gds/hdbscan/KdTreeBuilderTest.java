@@ -19,13 +19,23 @@
  */
 package org.neo4j.gds.hdbscan;
 
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.compat.TestLog;
+import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
+import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.logging.GdsTestLog;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.neo4j.gds.assertj.Extractors.removingThreadId;
+import static org.neo4j.gds.assertj.Extractors.replaceTimings;
 
 @GdlExtension
 class KdTreeBuilderTest {
@@ -52,7 +62,9 @@ class KdTreeBuilderTest {
             .isZero();
 
         var points = graph.nodeProperties("point");
-        var kdTree = new KdTreeBuilder(graph, points, 1, 1).build();
+        var kdTree = new KdTreeBuilder(graph, points, 1, 1, ProgressTracker.NULL_TRACKER)
+            .build();
+
         assertThat(kdTree).isNotNull();
 
         var root = kdTree.root();
@@ -181,6 +193,33 @@ class KdTreeBuilderTest {
         assertThat(rightleftright.end()).isEqualTo(5);
 
         assertThat(kdTree.treeNodeCount()).isEqualTo(11);
+    }
+
+    @Test
+    void shouldLogProgress(){
+
+            var progressTask = HDBScanProgressTrackerCreator.kdBuildingTask("foo",graph.nodeCount());
+            var log = new GdsTestLog();
+            var progressTracker = new TaskProgressTracker(progressTask, new LoggerForProgressTrackingAdapter(log), new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE);
+            var points = graph.nodeProperties("point");
+
+          new KdTreeBuilder(graph, points, 1, 1, progressTracker)
+            .build();
+
+            Assertions.assertThat(log.getMessages(TestLog.INFO))
+                .extracting(removingThreadId())
+                .extracting(replaceTimings())
+                .containsExactly(
+                "foo :: Start",
+                "foo 16%",
+                "foo 33%",
+                "foo 50%",
+                "foo 66%",
+                "foo 83%",
+                "foo 100%",
+                "foo :: Finished"
+                );
+
     }
 
 }

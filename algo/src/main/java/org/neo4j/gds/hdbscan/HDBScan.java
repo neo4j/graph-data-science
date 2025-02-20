@@ -104,7 +104,13 @@ public class HDBScan extends Algorithm<HugeLongArray> {
     }
 
     KdTree buildKDTree() {
-        var builder = new KdTreeBuilder(nodes, nodePropertyValues, concurrency.value(), leafSize);
+        var builder = new KdTreeBuilder(
+            nodes,
+            nodePropertyValues,
+            concurrency.value(),
+            leafSize,
+            progressTracker
+        );
         return builder.build();
     }
 }

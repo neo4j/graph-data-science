@@ -22,6 +22,7 @@ package org.neo4j.gds.hdbscan;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -31,12 +32,14 @@ public class KdTreeBuilder {
     private final NodePropertyValues nodePropertyValues;
     private final int concurrency;
     private final long leafSize;
+    private final ProgressTracker progressTracker;
 
-    public KdTreeBuilder(IdMap nodes, NodePropertyValues nodePropertyValues,int concurrency,long leafSize) {
+    public KdTreeBuilder(IdMap nodes, NodePropertyValues nodePropertyValues,int concurrency,long leafSize, ProgressTracker progressTracker) {
         this.nodes = nodes;
         this.nodePropertyValues = nodePropertyValues;
         this. concurrency = concurrency;
         this.leafSize = leafSize;
+        this.progressTracker = progressTracker;
     }
 
     public KdTree build(){
@@ -44,12 +47,22 @@ public class KdTreeBuilder {
         var ids = HugeLongArray.newArray(nodes.nodeCount());
         ids.setAll(  v-> v);
         AtomicInteger nodeIndex = new AtomicInteger(0);
-        var builderTask = new KdTreeNodeBuilderTask(ids,nodePropertyValues,0,nodePropertyValues.nodeCount(),leafSize,false,null,
-            nodeIndex
+        var builderTask = new KdTreeNodeBuilderTask(
+            ids,
+            nodePropertyValues,
+            0,
+            nodePropertyValues.nodeCount(),
+            leafSize,
+            false,
+            null,
+            nodeIndex,
+            progressTracker
         );
+
+        progressTracker.beginSubTask();
         builderTask.run();
         var root = builderTask.kdNode();
-
+        progressTracker.endSubTask();
         return  new KdTree(ids, nodePropertyValues, root, nodeIndex.get());
     }
 

@@ -21,6 +21,7 @@ package org.neo4j.gds.hdbscan;
 
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.LongToDoubleFunction;
@@ -37,6 +38,7 @@ class KdTreeNodeBuilderTask implements Runnable {
     private final boolean amLeftChild;
     private final KdNode parent;
     private final AtomicInteger  nodeIndex;
+    private final ProgressTracker progressTracker;
 
 
     KdTreeNodeBuilderTask(
@@ -44,7 +46,11 @@ class KdTreeNodeBuilderTask implements Runnable {
         NodePropertyValues nodePropertyValues,
         long start,
         long end,
-        long maxLeafSize, boolean amLeftChild, KdNode parent, AtomicInteger nodeIndex
+        long maxLeafSize,
+        boolean amLeftChild,
+        KdNode parent,
+        AtomicInteger nodeIndex,
+        ProgressTracker progressTracker
     ) {
         this.ids = ids;
         this.nodePropertyValues = nodePropertyValues;
@@ -55,6 +61,7 @@ class KdTreeNodeBuilderTask implements Runnable {
         this.amLeftChild = amLeftChild;
         this.parent = parent;
         this.nodeIndex = nodeIndex;
+        this.progressTracker = progressTracker;
     }
 
     @Override
@@ -64,7 +71,7 @@ class KdTreeNodeBuilderTask implements Runnable {
         var treeNodeId = nodeIndex.getAndIncrement();
         if (nodeSize <= maxLeafSize) {
             kdNode = KdNode.createLeaf(treeNodeId, start, end, aabb);
-
+            progressTracker.logProgress(nodeSize);
         } else {
 
             int indexToSplit = aabb.mostSpreadDimension(); //step. 1: find the index to  dimension split
@@ -73,10 +80,30 @@ class KdTreeNodeBuilderTask implements Runnable {
 
             kdNode = KdNode.createSplitNode(treeNodeId, start,end,aabb,new SplitInformation(medianValue,indexToSplit));
             //TODO: step.4 add these builder tasks into a fork-join
-            var leftChildBuilder = new KdTreeNodeBuilderTask(ids, nodePropertyValues, start, median, maxLeafSize,true,kdNode, nodeIndex);
+            var leftChildBuilder = new KdTreeNodeBuilderTask(ids,
+                nodePropertyValues,
+                start,
+                median,
+                maxLeafSize,
+                true,
+                kdNode,
+                nodeIndex,
+                progressTracker
+            );
             leftChildBuilder.run();
 
-            var rightChildBuilder = new KdTreeNodeBuilderTask(ids, nodePropertyValues, median, end, maxLeafSize,false,kdNode, nodeIndex);
+            var rightChildBuilder = new KdTreeNodeBuilderTask(
+                ids,
+                nodePropertyValues,
+                median,
+                end,
+                maxLeafSize,
+                false,
+                kdNode,
+                nodeIndex,
+                progressTracker
+            );
+
             rightChildBuilder.run();
 
             var leftChild = leftChildBuilder.kdNode();

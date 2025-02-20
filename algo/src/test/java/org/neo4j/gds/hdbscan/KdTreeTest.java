@@ -20,6 +20,7 @@
 package org.neo4j.gds.hdbscan;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
@@ -49,7 +50,9 @@ class KdTreeTest {
     void shouldFindNeighbours() {
 
         var points = graph.nodeProperties("point");
-        var kdTree = new KdTreeBuilder(graph, points, 1, 1).build();
+        var kdTree = new KdTreeBuilder(graph, points, 1, 1, ProgressTracker.NULL_TRACKER)
+            .build();
+
         var queryPoint = new double[]{9d, 2d};
         var neighbours = kdTree.neighbours(queryPoint, 2);
         assertThat(neighbours)
@@ -71,7 +74,9 @@ class KdTreeTest {
     void shouldNotFindItself() {
 
         var points = graph.nodeProperties("point");
-        var kdTree = new KdTreeBuilder(graph, points, 1, 1).build();
+        var kdTree = new KdTreeBuilder(graph, points, 1, 1,ProgressTracker.NULL_TRACKER)
+            .build();
+
         var neighbours = kdTree.neighbours(graph.toMappedNodeId("a"), 2).neighbours();
         assertThat(neighbours)
             .isNotNull()

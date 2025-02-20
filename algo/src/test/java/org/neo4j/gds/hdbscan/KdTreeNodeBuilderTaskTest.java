@@ -22,6 +22,7 @@ package org.neo4j.gds.hdbscan;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.properties.nodes.DoubleArrayNodePropertyValues;
 import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -49,7 +50,15 @@ class KdTreeNodeBuilderTaskTest {
                 return ids.size();
             }
         };
-        var nodeBuilder =new KdTreeNodeBuilderTask(ids,nodePropertyValues,0,10,1,false,null, new AtomicInteger(0));
+        var nodeBuilder =new KdTreeNodeBuilderTask(ids,
+            nodePropertyValues,
+            0,10,1,
+            false,
+            null,
+            new AtomicInteger(0),
+            ProgressTracker.NULL_TRACKER
+        );
+
         var median = nodeBuilder.findMedianAndSplit(0);
         assertThat(median).isEqualTo(5L);
         assertThat(ids.toArray()).containsExactlyInAnyOrder(0,1,2,3,4,5,6,7,8,9);
@@ -73,7 +82,19 @@ class KdTreeNodeBuilderTaskTest {
                 return ids.size();
             }
         };
-        var nodeBuilder =new KdTreeNodeBuilderTask(ids,nodePropertyValues,4,8,1,false,null, new AtomicInteger() );
+
+        var nodeBuilder =new KdTreeNodeBuilderTask(
+            ids,
+            nodePropertyValues,
+            4,
+            8,
+            1,
+            false,
+            null,
+            new AtomicInteger(),
+            ProgressTracker.NULL_TRACKER
+        );
+
         var median = nodeBuilder.findMedianAndSplit(0);
         assertThat(median).isEqualTo(6L);
         for (int i=4;i<6;++i){
@@ -94,7 +115,18 @@ class KdTreeNodeBuilderTaskTest {
                 return ids.size();
             }
         };
-        var nodeBuilder =new KdTreeNodeBuilderTask(ids,nodePropertyValues,0,3,3,false,null, new AtomicInteger());
+        var nodeBuilder =new KdTreeNodeBuilderTask(
+            ids,
+            nodePropertyValues,
+            0,
+            3,
+            3,
+            false,
+            null,
+            new AtomicInteger(),
+            ProgressTracker.NULL_TRACKER
+        );
+
         nodeBuilder.run();
 
         var node = nodeBuilder.kdNode();
@@ -120,7 +152,18 @@ class KdTreeNodeBuilderTaskTest {
                 return ids.size();
             }
         };
-        var nodeBuilder =new KdTreeNodeBuilderTask(ids,nodePropertyValues,0,3,2,false,null, new AtomicInteger(0));
+        var nodeBuilder =new KdTreeNodeBuilderTask(
+            ids,
+            nodePropertyValues,
+            0,
+            3,
+            2,
+            false,
+            null,
+            new AtomicInteger(0),
+            ProgressTracker.NULL_TRACKER
+        );
+
         nodeBuilder.run();
 
         var node = nodeBuilder.kdNode();
