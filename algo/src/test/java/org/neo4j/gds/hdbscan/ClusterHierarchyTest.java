@@ -19,12 +19,23 @@
  */
 package org.neo4j.gds.hdbscan;
 
+import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
 import org.assertj.core.api.junit.jupiter.SoftAssertionsExtension;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
+import org.neo4j.gds.compat.TestLog;
+import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
+import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
+import org.neo4j.gds.logging.GdsTestLog;
+
+import static org.neo4j.gds.assertj.Extractors.removingThreadId;
+import static org.neo4j.gds.assertj.Extractors.replaceTimings;
 
 @ExtendWith(SoftAssertionsExtension.class)
 class ClusterHierarchyTest {
@@ -36,7 +47,11 @@ class ClusterHierarchyTest {
             new Edge(0, 1, 5.)
         );
 
-        var clusterHierarchy = ClusterHierarchy.create(3, edges);
+        var clusterHierarchy = ClusterHierarchy.create(
+            3,
+            edges,
+            ProgressTracker.NULL_TRACKER
+        );
 
         // 1. `1` and `2` are joined and create new id = 3 --> first set
         // 2. `0` and `3` are joined and create new id = 4 --> second set
@@ -71,7 +86,11 @@ class ClusterHierarchyTest {
             new Edge(5, 7, 1.42823558)
         );
 
-        var clusterHierarchy = ClusterHierarchy.create(edges.size() + 1, edges);
+        var clusterHierarchy = ClusterHierarchy.create(
+            edges.size() + 1,
+            edges,
+            ProgressTracker.NULL_TRACKER
+        );
 
 
         assertions.assertThat(clusterHierarchy.left(11)).isEqualTo(2);
@@ -123,5 +142,32 @@ class ClusterHierarchyTest {
         assertions.assertThat(clusterHierarchy.right(20)).isEqualTo(19);
         assertions.assertThat(clusterHierarchy.lambda(20)).isCloseTo(1.42823558, Offset.offset(1e-9));
         assertions.assertThat(clusterHierarchy.size(20)).isEqualTo(11);
+    }
+
+    @Test
+    void shouldLogProgress(){
+        var edges = HugeObjectArray.of(
+            new Edge(1, 2, 3.),
+            new Edge(0, 1, 5.)
+        );
+
+        var progressTask = HDBScanProgressTrackerCreator.hierarchyTask("foo",3);
+        var log = new GdsTestLog();
+        var progressTracker = new TaskProgressTracker(progressTask, new LoggerForProgressTrackingAdapter(log), new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE);
+        var clusterHierarchy = ClusterHierarchy.create(
+            3,
+            edges,
+            progressTracker
+        );
+
+        Assertions.assertThat(log.getMessages(TestLog.INFO))
+            .extracting(removingThreadId())
+            .extracting(replaceTimings())
+            .containsExactly(
+                "foo :: Start",
+                "foo 50%",
+                "foo 100%",
+                "foo :: Finished"
+            );
     }
 }

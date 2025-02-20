@@ -25,7 +25,11 @@ import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 public class HDBScanProgressTrackerCreator {
 
     static Task kdBuildingTask(String name, long nodeCount){
-        return Tasks.leaf(name,nodeCount);
+        return Tasks.leaf(name, nodeCount);
+    }
+
+    static Task hierarchyTask(String name, long nodeCount){
+        return Tasks.leaf(name,nodeCount-1);
     }
 
 }

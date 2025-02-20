@@ -100,7 +100,7 @@ public class HDBScan extends Algorithm<HugeLongArray> {
     ClusterHierarchy createClusterHierarchy(DualTreeMSTResult dualTreeMSTResult){
         var edges = dualTreeMSTResult.edges();
         HugeSerialObjectMergeSort.sort(Edge.class, edges, Edge::distance);
-        return ClusterHierarchy.create(nodes.nodeCount(),edges);
+        return ClusterHierarchy.create(nodes.nodeCount(),edges,progressTracker);
     }
 
     KdTree buildKDTree() {

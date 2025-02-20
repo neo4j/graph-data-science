@@ -22,6 +22,7 @@ package org.neo4j.gds.hdbscan;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.function.Function;
 
@@ -49,7 +50,7 @@ final class ClusterHierarchy {
         this.nodeCount = nodeCount;
     }
 
-    static ClusterHierarchy create(long nodeCount, HugeObjectArray<Edge> edges) {
+    static ClusterHierarchy create(long nodeCount, HugeObjectArray<Edge> edges, ProgressTracker progressTracker) {
         var left = HugeLongArray.newArray(nodeCount);
         var right = HugeLongArray.newArray(nodeCount);
         var lambda = HugeDoubleArray.newArray(nodeCount);
@@ -61,6 +62,7 @@ final class ClusterHierarchy {
 
         var sizeFn = (Function<Long, Long>) n -> n < nodeCount ? 1L : size.get(n - nodeCount);
 
+        progressTracker.beginSubTask();
         for (var i = 0; i < edges.size(); i++) {
             var edge = edges.get(i);
             var l = unionFind.find(edge.source());
@@ -76,8 +78,10 @@ final class ClusterHierarchy {
             var rightSize = sizeFn.apply(r);
 
             size.set(adaptedIndex, leftSize + rightSize);
-        }
 
+            progressTracker.logProgress();
+        }
+        progressTracker.endSubTask();;
         return new ClusterHierarchy(currentRoot, left, right, lambda, size, nodeCount);
     }
 
