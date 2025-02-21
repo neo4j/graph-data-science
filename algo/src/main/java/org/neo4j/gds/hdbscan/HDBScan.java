@@ -62,7 +62,7 @@ public class HDBScan extends Algorithm<HugeLongArray> {
 
     @Override
     public HugeLongArray compute() {
-
+        progressTracker.beginSubTask();
         var kdTree = buildKDTree();
 
         var nodeCount = nodes.nodeCount();
@@ -78,20 +78,22 @@ public class HDBScan extends Algorithm<HugeLongArray> {
 
         var labellingStep = new LabellingStep(condensedTree, nodeCount, progressTracker);
         var labels= labellingStep.labels();
+        progressTracker.endSubTask();
 
         return labels;
     }
 
     CoreResult computeCores(KdTree kdTree, long nodeCount) {
         HugeObjectArray<Neighbours> neighbours = HugeObjectArray.newArray(Neighbours.class, nodeCount);
-
+        progressTracker.beginSubTask();
         ParallelUtil.parallelForEachNode(
             nodeCount, concurrency, terminationFlag,
             (nodeId) -> {
                 neighbours.set(nodeId, kdTree.neighbours(nodeId, samples));
+                progressTracker.logProgress();
             }
         );
-
+        progressTracker.endSubTask();
         return new CoreResult(neighbours);
     }
 

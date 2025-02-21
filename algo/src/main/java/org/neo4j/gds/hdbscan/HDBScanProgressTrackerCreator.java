@@ -53,4 +53,19 @@ public class HDBScanProgressTrackerCreator {
         return Tasks.leaf(name,nodeCount - 1);
     }
 
+    static Task hdbscanTask(String name, long nodeCount){
+        return Tasks.task(
+            name,
+            List.of(
+                kdBuildingTask("KD-Tree Construction",nodeCount),
+                Tasks.leaf("Nearest Neighbors Search", nodeCount),
+                boruvkaTask("MST Computation", nodeCount),
+                hierarchyTask("Dendrogram Creation", nodeCount),
+                condenseTask("Condensed Tree Creation ", nodeCount),
+                labellingTask("Node Labelling", nodeCount)
+            )
+        );
+
+    }
+
 }
