@@ -37,13 +37,9 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.ResourceIterator;
 import org.neo4j.graphdb.Result;
 
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.LockSupport;
 import java.util.stream.Collectors;
 
 import static java.util.Collections.emptyMap;
@@ -66,9 +62,9 @@ public class BaseProcTest extends BaseTest {
         TaskStore taskStore = GraphDatabaseApiProxy.resolveDependency(this.db, TaskStore.class);
 
         // wait for tasks to be removed in async processes
-        awaitEmptyTaskStore(taskStore);
+        TaskStoreHelper.awaitEmptyTaskStore(taskStore);
 
-        List<UserTask> hangingTasks = taskStore.query().toList();
+        List<UserTask> hangingTasks = taskStore.queryRunning().toList();
         // if we had any, dont spill tasks to next test
         hangingTasks.forEach(task -> taskStore.remove(task.username(), task.jobId()));
 
@@ -221,19 +217,4 @@ public class BaseProcTest extends BaseTest {
         result.close();
     }
 
-    private void awaitEmptyTaskStore(TaskStore taskStore) {
-        // there is a race condition between the thread consuming the result,
-        // and the thread scheduled to end the last subtask
-        long timeoutInSeconds = 5 * (TestSupport.CI ? 5 : 1);
-        var deadline = Instant.now().plus(timeoutInSeconds, ChronoUnit.SECONDS);
-
-        // On my machine (TM) with 1000 iterations this never fails and each run is 10ish or 100ish ms
-        while (Instant.now().isBefore(deadline)) {
-            if (taskStore.isEmpty()) {
-                break;
-            }
-
-            LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(100));
-        }
-    }
 }

@@ -21,6 +21,8 @@ package org.neo4j.gds.core.utils.progress;
 
 import org.neo4j.gds.api.DatabaseId;
 
+import java.time.Duration;
+
 /**
  * This class should hold all {@link org.neo4j.gds.core.utils.progress.TaskStore}s for the application.
  * Therefore, it should be a singleton. You instantiate it up once as part of assembling the application.
@@ -36,15 +38,17 @@ public class TaskStoreService {
     // private final Map<DatabaseId, TaskStore> taskStores = new ConcurrentHashMap();
 
     private final boolean progressTrackingEnabled;
+    private Duration retentionPeriod;
 
-    public TaskStoreService(boolean progressTrackingEnabled) {
+    public TaskStoreService(boolean progressTrackingEnabled, Duration retentionPeriod) {
         this.progressTrackingEnabled = progressTrackingEnabled;
+        this.retentionPeriod = retentionPeriod;
     }
 
     public TaskStore getTaskStore(DatabaseId databaseId) {
         if (!progressTrackingEnabled) return EmptyTaskStore.INSTANCE;
 
-        return TaskStoreHolder.getTaskStore(databaseId.databaseName());
+        return TaskStoreHolder.getTaskStore(databaseId.databaseName(), retentionPeriod);
         // return taskStores.computeIfAbsent(databaseId.databaseName(), __ -> new PerDatabaseTaskStore());
     }
 }

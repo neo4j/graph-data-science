@@ -143,10 +143,12 @@ final class NativeFactory extends CSRGraphStoreFactory<GraphProjectFromStoreConf
             CSRGraphStore graphStore = createGraphStore(nodes, relationships);
 
             logLoadingSummary(graphStore);
+            progressTracker.endSubTask();
 
             return graphStore;
-        } finally {
-            progressTracker.endSubTask();
+        } catch (Exception e) {
+            progressTracker.endSubTaskWithFailure();
+            throw e;
         }
     }
 
@@ -161,9 +163,13 @@ final class NativeFactory extends CSRGraphStoreFactory<GraphProjectFromStoreConf
 
         try {
             progressTracker.beginSubTask();
-            return scanningNodesImporter.call();
-        } finally {
+            var result = scanningNodesImporter.call();
             progressTracker.endSubTask();
+
+            return result;
+        } catch (Exception e) {
+            progressTracker.endSubTaskWithFailure();
+            throw e;
         }
     }
 
@@ -179,9 +185,13 @@ final class NativeFactory extends CSRGraphStoreFactory<GraphProjectFromStoreConf
 
         try {
             progressTracker.beginSubTask();
-            return scanningRelationshipsImporter.call();
-        } finally {
+            var result = scanningRelationshipsImporter.call();
             progressTracker.endSubTask();
+
+            return result;
+        } catch (Exception e) {
+            progressTracker.endSubTaskWithFailure();
+            throw e;
         }
     }
 

@@ -99,8 +99,10 @@ public class NativeRelationshipPropertiesExporter extends StatementApi implement
             for (Runnable task : tasks) {
                 task.run();
             }
-        } finally {
             progressTracker.endSubTask();
+        } catch (Exception e) {
+            progressTracker.endSubTaskWithFailure();
+            throw e;
         }
     }
 

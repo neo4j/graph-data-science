@@ -36,7 +36,7 @@ import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.core.utils.progress.TaskStore;
 import org.neo4j.gds.core.utils.progress.TaskStoreListener;
 import org.neo4j.gds.core.utils.progress.UserTask;
-import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.core.utils.progress.tasks.Status;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -44,15 +44,14 @@ import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.metrics.Metrics;
 import org.neo4j.gds.termination.TerminationMonitor;
-import org.neo4j.gds.utils.StringJoining;
 
+import java.time.Duration;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 
 @GdlExtension
@@ -81,7 +80,7 @@ class ProcedureExecutorTest {
     void shouldRegisterTaskWithCorrectJobId() {
         // Arrange
         var jobIdTracker = new JobIdTracker();
-        var taskStore = new PerDatabaseTaskStore();
+        var taskStore = new PerDatabaseTaskStore(Duration.ZERO);
         taskStore.addListener(jobIdTracker);
         var executor = new ProcedureExecutor<>(new TestMutateSpec(), executionContext(taskStore));
         var someJobId = new JobId();
@@ -102,10 +101,10 @@ class ProcedureExecutorTest {
     }
 
     @Test
-    void shouldUnregisterTaskAfterComputation() {
+    void shouldCompleteTaskAfterComputation() {
         // Arrange
         var invocationCounter = new TaskCreatedCounter();
-        var taskStore = new PerDatabaseTaskStore();
+        var taskStore = new PerDatabaseTaskStore(Duration.ofMinutes(1));
         taskStore.addListener(invocationCounter);
         var executor1 = new ProcedureExecutor<>(new TestMutateSpec(), executionContext(taskStore));
         var executor2 = new ProcedureExecutor<>(new TestMutateSpec(), executionContext(taskStore));
@@ -122,13 +121,8 @@ class ProcedureExecutorTest {
 
         // Assert
         assertThat(taskStore.query())
-            .withFailMessage(
-                () -> formatWithLocale(
-                    "Expected no tasks to be open but found %s",
-                    StringJoining.join(taskStore.query().map(UserTask::task).map(Task::description))
-                )
-            )
-            .isEmpty();
+            .map(i -> i.task().status())
+            .containsExactly(Status.FINISHED, Status.FINISHED);
 
         assertThat(invocationCounter.registerTaskInvocations)
             .as("We created two tasks => two tasks must have been registered")
@@ -180,7 +174,7 @@ class ProcedureExecutorTest {
         }
 
         @Override
-        public void onTaskRemoved(UserTask userTask) {
+        public void onTaskCompleted(UserTask userTask) {
 
         }
     }
@@ -194,7 +188,7 @@ class ProcedureExecutorTest {
         }
 
         @Override
-        public void onTaskRemoved(UserTask userTask) {
+        public void onTaskCompleted(UserTask userTask) {
 
         }
     }

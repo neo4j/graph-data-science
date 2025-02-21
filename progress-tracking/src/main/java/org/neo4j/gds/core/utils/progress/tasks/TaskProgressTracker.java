@@ -254,9 +254,9 @@ public class TaskProgressTracker implements ProgressTracker {
 
     @Override
     public void release() {
-        taskRegistry.unregisterTask();
-        taskProgressLogger.release();
         validateTaskNotRunning();
+        taskRegistry.markCompleted();
+        taskProgressLogger.release();
     }
 
     @Override

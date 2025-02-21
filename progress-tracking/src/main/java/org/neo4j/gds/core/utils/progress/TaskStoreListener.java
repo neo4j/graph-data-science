@@ -22,5 +22,5 @@ package org.neo4j.gds.core.utils.progress;
 // TODO: Split this in two listeners
 public interface TaskStoreListener {
     void onTaskAdded(UserTask userTask);
-    void onTaskRemoved(UserTask userTask);
+    void onTaskCompleted(UserTask userTask);
 }

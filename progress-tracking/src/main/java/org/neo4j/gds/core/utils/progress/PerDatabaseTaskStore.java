@@ -19,8 +19,10 @@
  */
 package org.neo4j.gds.core.utils.progress;
 
+import org.neo4j.gds.core.utils.progress.tasks.Status;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 
+import java.time.Duration;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
@@ -30,9 +32,11 @@ import java.util.stream.Stream;
 public class PerDatabaseTaskStore extends ObservableTaskStore {
     private final Map<String, Map<JobId, UserTask>> registeredTasks;
 
-    public PerDatabaseTaskStore() {
+    public PerDatabaseTaskStore(Duration finishedTaskTTL) {
         super(new HashSet<>());
         this.registeredTasks = new ConcurrentHashMap<>();
+
+        this.addListener(new TaskStoreCleaner(this, finishedTaskTTL));
     }
 
     @Override
@@ -82,16 +86,18 @@ public class PerDatabaseTaskStore extends ObservableTaskStore {
     }
 
     @Override
-    public boolean isEmpty() {
-        return registeredTasks
-            .values()
-            .stream()
-            .allMatch(Map::isEmpty);
+    public long ongoingTaskCount() {
+        return registeredTasks.values().stream()
+            .flatMap(taskPerJob -> taskPerJob.values().stream())
+            .filter(task -> task.task().status() == Status.PENDING || task.task().status() == Status.RUNNING)
+            .count();
     }
 
     @Override
     public long taskCount() {
-        return registeredTasks.values().stream().mapToLong(Map::size).sum();
+        return registeredTasks.values().stream()
+            .mapToLong(Map::size)
+            .sum();
     }
 
 }

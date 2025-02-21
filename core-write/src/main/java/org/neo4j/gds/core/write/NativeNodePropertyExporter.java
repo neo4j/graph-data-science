@@ -122,8 +122,10 @@ public class NativeNodePropertyExporter extends StatementApi implements NodeProp
             } else {
                 writeSequential(resolvedNodeProperties);
             }
-        } finally {
             progressTracker.endSubTask();
+        } catch (Exception e) {
+            progressTracker.endSubTaskWithFailure();
+            throw e;
         }
     }
 

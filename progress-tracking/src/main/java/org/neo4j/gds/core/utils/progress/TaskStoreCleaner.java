@@ -19,22 +19,32 @@
  */
 package org.neo4j.gds.core.utils.progress;
 
-import org.neo4j.function.ThrowingFunction;
-import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
-import org.neo4j.kernel.api.procedure.Context;
-
 import java.time.Duration;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 
-class TaskStoreProvider implements ThrowingFunction<Context, TaskStore, ProcedureException> {
-
+class TaskStoreCleaner implements TaskStoreListener {
     private final Duration finishedTaskTTL;
+    private final ScheduledThreadPoolExecutor cleanerPool;
+    private final TaskStore taskStore;
 
-    public TaskStoreProvider(Duration finishedTaskTTL) {
+
+    public TaskStoreCleaner(TaskStore taskStore, Duration finishedTaskTTL) {
+        this.taskStore = taskStore;
         this.finishedTaskTTL = finishedTaskTTL;
+        this.cleanerPool = new ScheduledThreadPoolExecutor(1);
     }
 
     @Override
-    public TaskStore apply(Context context) throws ProcedureException {
-        return TaskStoreHolder.getTaskStore(context.graphDatabaseAPI().databaseName(), finishedTaskTTL);
+    public void onTaskAdded(UserTask userTask) {
+
+    }
+
+    @Override
+    public void onTaskCompleted(UserTask userTask) {
+        this.cleanerPool.schedule(
+            () -> taskStore.remove(userTask.username(), userTask.jobId()),
+            finishedTaskTTL.toMillis(),
+            java.util.concurrent.TimeUnit.MILLISECONDS
+        );
     }
 }

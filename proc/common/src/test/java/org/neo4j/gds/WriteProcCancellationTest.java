@@ -49,6 +49,7 @@ import org.neo4j.gds.test.TestResult;
 import org.neo4j.gds.test.TestWriteConfig;
 import org.neo4j.gds.transaction.DatabaseTransactionContext;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 
@@ -57,7 +58,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class WriteProcCancellationTest extends BaseTest {
 
-    InvocationCountingTaskStore taskStore = new InvocationCountingTaskStore();
+    InvocationCountingTaskStore taskStore = new InvocationCountingTaskStore(Duration.ZERO);
 
     @Test
     void shouldRemoveTaskAfterWriteFailure() {
@@ -131,8 +132,8 @@ class WriteProcCancellationTest extends BaseTest {
             assertThatThrownBy(() -> resultConsumer.consume(computationResult, executionContext))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("explicit fail while writing");
-            assertThat(taskStore.removeTaskInvocations).isGreaterThanOrEqualTo(1);
-            assertThat(taskStore.query()).isEmpty();
+            assertThat(taskStore.queryRunning()).isEmpty();
+            assertThat(taskStore.query()).hasSize(1);
         }
     }
 }

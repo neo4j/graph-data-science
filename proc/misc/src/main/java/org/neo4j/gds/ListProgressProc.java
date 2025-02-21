@@ -43,12 +43,15 @@ public class ListProgressProc {
         facade.deprecatedProcedures().called("gds.beta.listProgress");
         facade.log().warn("Procedure `gds.beta.listProgress` has been deprecated, please use `gds.listProgress`.");
 
-        return listProgress(jobId);
+        return listProgress(jobId, false);
     }
 
     @Procedure("gds.listProgress")
     @Description(DESCRIPTION)
-    public Stream<ProgressResult> listProgress(@Name(value = "jobId", defaultValue = "") String jobId) {
-        return facade.operations().listProgress(jobId);
+    public Stream<ProgressResult> listProgress(
+        @Name(value = "jobId", defaultValue = "") String jobId,
+        @Name(value = "showCompleted", defaultValue = "false") boolean showCompleted
+    ) {
+        return facade.operations().listProgress(jobId, showCompleted);
     }
 }

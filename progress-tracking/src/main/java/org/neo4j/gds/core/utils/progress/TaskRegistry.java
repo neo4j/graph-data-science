@@ -49,8 +49,8 @@ public class TaskRegistry {
         taskStore.store(username, jobId, task);
     }
 
-    public void unregisterTask() {
-        taskStore.remove(username, jobId);
+    public void markCompleted() {
+        taskStore.markCompleted(username, jobId);
     }
 
     public boolean containsTask(Task task) {

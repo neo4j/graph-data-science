@@ -40,6 +40,7 @@ import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.LocalTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.Status;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.logging.LogAdapter;
@@ -453,6 +454,6 @@ class GraphImporterTest {
         log.assertContainsMessage(TestLog.INFO, "Graph aggregation :: Build graph store :: Finished");
         log.assertContainsMessage(TestLog.INFO, "Graph aggregation :: Finished");
 
-        assertThat(taskStore.tasks()).isEmpty();
+        assertThat(taskStore.query()).map(i -> i.task().status()).containsExactly(Status.FINISHED);
      }
 }

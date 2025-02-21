@@ -44,10 +44,6 @@ import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.utils.progress.PerDatabaseTaskStore;
-import org.neo4j.gds.logging.GdsTestLog;
-import org.neo4j.gds.mem.MemoryEstimation;
-import org.neo4j.gds.mem.MemoryEstimations;
-import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.ImmutableExecutionContext;
@@ -56,6 +52,10 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.gdl.ImmutableGraphProjectFromGdlConfig;
+import org.neo4j.gds.logging.GdsTestLog;
+import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimations;
+import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.ml.metrics.LinkMetric;
 import org.neo4j.gds.ml.metrics.classification.OutOfBagError;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
@@ -76,6 +76,7 @@ import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
 import org.neo4j.gds.test.TestMutateProc;
 import org.neo4j.gds.test.TestProc;
 
+import java.time.Duration;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -396,7 +397,7 @@ final class LinkPredictionTrainPipelineExecutorTest {
                 ),
                 getUsername(),
                 config.jobId(),
-                new PerDatabaseTaskStore(),
+                new PerDatabaseTaskStore(Duration.ofMinutes(1)),
                 new LoggerForProgressTrackingAdapter(log)
             );
 

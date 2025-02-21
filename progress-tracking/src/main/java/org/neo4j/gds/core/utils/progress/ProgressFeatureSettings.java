@@ -24,7 +24,11 @@ import org.neo4j.configuration.Description;
 import org.neo4j.configuration.SettingsDeclaration;
 import org.neo4j.graphdb.config.Setting;
 
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
+
 import static org.neo4j.configuration.SettingValueParsers.BOOL;
+import static org.neo4j.configuration.SettingValueParsers.DURATION;
 import static org.neo4j.gds.compat.SettingProxy.newBuilder;
 
 @ServiceProvider
@@ -35,5 +39,12 @@ public final class ProgressFeatureSettings implements SettingsDeclaration {
         "gds.progress_tracking_enabled",
         BOOL,
         true
+    ).build();
+
+    @Description("Retention period for completed progress tracking jobs. This includes failed and successful ones")
+    public static final Setting<Duration> task_retention_period = newBuilder(
+        "gds.progress_tracking_retention_period",
+        DURATION,
+        Duration.of(0, ChronoUnit.SECONDS) // default to 0 to avoid breaking behaviour for plugin
     ).build();
 }

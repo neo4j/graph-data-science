@@ -35,6 +35,7 @@ import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.progress.LocalTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.Status;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -704,6 +705,8 @@ class CommonNeighbourAwareRandomWalkTest {
 
         cnar.compute(tinyGraph, tracker);
 
-        assertThat(taskStore.tasks()).isEmpty();
+        assertThat(taskStore.query())
+            .map(i -> i.task().status())
+            .containsExactly(Status.FINISHED);
     }
 }

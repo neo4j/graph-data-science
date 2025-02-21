@@ -47,7 +47,7 @@ For users with administrator privileges, this procedure will list the running ta
 .Getting the progress of tasks:
 [source, cypher, role=noplay]
 ----
-CALL gds.listProgress(jobId: String)
+CALL gds.listProgress(jobId: String, showCompleted: Boolean)
 YIELD
   username,
   jobId,
@@ -64,6 +64,7 @@ YIELD
 |===
 | Name              | Type          | Default   | Optional  | Description
 | jobId             | String        | ""        | yes       | The jobId of a running task. This will trigger a detailed overview for that particular task.
+| showCompleted     | Boolean        | false        | yes       | If `false` only pending and running tasks will be listed. If `true` all tasks, including finished, failed and aborted tasks will be listed. If a `jobId` is provided, this only affects the root task.
 |===
 
 .Results

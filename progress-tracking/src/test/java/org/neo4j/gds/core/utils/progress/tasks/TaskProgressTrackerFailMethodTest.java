@@ -50,7 +50,7 @@ class TaskProgressTrackerFailMethodTest {
                 "failingTask :: Failed"
             );
 
-        assertThat(taskStore.query()).isEmpty();
+        assertThat(taskStore.queryRunning()).isEmpty();
         assertThat(taskStore.tasksSeen()).containsExactly("failingTask");
     }
 
@@ -78,7 +78,7 @@ class TaskProgressTrackerFailMethodTest {
                 "rootTask :: Failed"
             );
 
-        assertThat(taskStore.query()).isEmpty();
+        assertThat(taskStore.queryRunning()).isEmpty();
         assertThat(taskStore.tasksSeen()).containsExactly("rootTask");
     }
 

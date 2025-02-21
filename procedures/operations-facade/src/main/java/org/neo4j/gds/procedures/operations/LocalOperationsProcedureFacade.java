@@ -21,6 +21,7 @@ package org.neo4j.gds.procedures.operations;
 
 import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.core.utils.progress.JobId;
+import org.neo4j.gds.core.utils.progress.tasks.Status;
 import org.neo4j.gds.core.utils.warnings.UserLogEntry;
 
 import java.util.stream.Stream;
@@ -43,11 +44,15 @@ public class LocalOperationsProcedureFacade implements OperationsProcedureFacade
     }
 
     @Override
-    public Stream<ProgressResult> listProgress(String jobIdAsString) {
-        if (jobIdAsString.isBlank()) return summaryView();
-
+    public Stream<ProgressResult> listProgress(String jobIdAsString, boolean showCompleted) {
+        if (jobIdAsString.isBlank()) {
+            var result = summaryView();
+            if (!showCompleted) {
+                return result.filter(i -> Status.valueOf(i.status).isOngoing());
+            }
+            return result;
+        }
         var jobId = new JobId(jobIdAsString);
-
         return detailView(jobId);
     }
 

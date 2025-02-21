@@ -86,8 +86,10 @@ public class NativeNodeLabelExporter extends StatementApi implements NodeLabelEx
             } else {
                 writeSequential(nodeLabelToken);
             }
-        } finally {
             progressTracker.endSubTask();
+        } catch (Exception e) {
+           progressTracker.endSubTaskWithFailure();
+           throw e;
         }
     }
 

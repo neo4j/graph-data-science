@@ -146,11 +146,12 @@ public class WriteNodePropertiesApplication {
                 .collect(Collectors.toList());
 
             exporter.write(writeNodeProperties);
+            progressTracker.endSubTask();
 
             return exporter.propertiesWritten();
-
-        } finally {
-            progressTracker.endSubTask();
+        } catch (Exception e) {
+            progressTracker.endSubTaskWithFailure();
+            throw e;
         }
     }
 }

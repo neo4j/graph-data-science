@@ -28,6 +28,7 @@ import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.core.loading.Capabilities.WriteMode;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.progress.EmptyTaskStore;
+import org.neo4j.gds.core.utils.progress.tasks.Status;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.metrics.projections.ProjectionMetricsService;
 import org.neo4j.values.AnyValue;
@@ -110,7 +111,7 @@ class ProductGraphAggregatorTest {
                 NoValue.NO_VALUE
             )).withMessageContaining("`graphName` can not be null or blank");
 
-        assertThat(taskStore.tasks()).isEmpty();
+        assertThat(taskStore.tasksSeen()).isEmpty();
     }
 
     private static Stream<Arguments> emptyGraphNames() {
@@ -123,7 +124,7 @@ class ProductGraphAggregatorTest {
     }
 
     @Test
-    void shouldCleanupTaskOnFailure() {
+    void shouldFailTaskOnFailure() {
         TestTaskStore taskStore = new TestTaskStore();
         var aggregator = new ProductGraphAggregator(
             DatabaseId.random(),
@@ -148,6 +149,8 @@ class ProductGraphAggregatorTest {
             .hasCauseInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("The node has to be either a NODE or an INTEGER, but got String");
 
-        assertThat(taskStore.tasks()).isEmpty();
+        assertThat(taskStore.query())
+            .map(i -> i.task().status())
+            .containsExactly(Status.FAILED);
     }
 }

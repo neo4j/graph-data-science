@@ -32,6 +32,7 @@ import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.utils.progress.LocalTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.Status;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -435,7 +436,9 @@ class RandomWalkWithRestartsTest {
 
         rwr.compute(tinyGraph, tracker);
 
-        assertThat(taskStore.tasks()).isEmpty();
+        assertThat(taskStore.query())
+            .map(i -> i.task().status())
+            .containsExactly(Status.FINISHED);
     }
 
 }

@@ -28,7 +28,7 @@ public interface OperationsProcedureFacade {
 
     void enableArrowDatabaseImport(boolean value);
 
-    Stream<ProgressResult> listProgress(String jobIdAsString);
+    Stream<ProgressResult> listProgress(String jobIdAsString, boolean showCompleted);
 
     Stream<UserLogEntry> queryUserLog(String jobId);
 

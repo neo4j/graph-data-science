@@ -1,4 +1,4 @@
-[[configuration-settings1]]
+[[configuration-settings]]
 = Configuration Settings
 :description: This section describes the available configuration settings in the Neo4j Graph Data Science library.
 
@@ -61,6 +61,10 @@ Refer to The https://neo4j.com/docs/operations-manual/current/configuration/neo4
 
 <.^| <<gds.progress_tracking_enabled, gds.progress_tracking_enabled>>
 | Enable progress logging tracking.
+|
+
+<.^| <<gds.progress_tracking_retention_period, gds.progress_tracking_retention_period>>
+| Duration of retaining completed jobs. Retained jobs will be included in the output of `gds.listProgress(<jobId>, true)`.
 |
 
 <.^| <<gds.validate_using_max_memory_estimation, gds.validate_using_max_memory_estimation>>
@@ -218,6 +222,18 @@ Refer to The https://neo4j.com/docs/operations-manual/current/configuration/neo4
 | Description   | Enable progress logging tracking.
 | Default Value | `true`
 | Valid Values  | A boolean.
+| Dynamic       | `false`
+|===
+
+
+[[gds.progress_tracking_retention_period]]
+[.setting-details]
+.gds.progress_tracking_retention_period
+[cols="1,4", caption =]
+|===
+| Description   | The duration for which completed progress tracking jobs are retained. This includes failed and successful ones
+| Default Value | `0s`
+| Valid Values  | A duration (Valid units are: `ns`, `μs`, `ms`, `s`, `m`, `h` and `d` default unit is `s`).
 | Dynamic       | `false`
 |===
 

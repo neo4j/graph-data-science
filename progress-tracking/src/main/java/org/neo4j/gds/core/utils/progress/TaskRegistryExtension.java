@@ -53,16 +53,17 @@ public final class TaskRegistryExtension extends ExtensionFactory<TaskRegistryEx
     public Lifecycle newInstance(ExtensionContext context, TaskRegistryExtension.Dependencies dependencies) {
         var registry = dependencies.globalProceduresRegistry();
         var enabled = dependencies.config().get(ProgressFeatureSettings.progress_tracking_enabled);
+        var retentionPeriod = dependencies.config().get(ProgressFeatureSettings.task_retention_period);
         String databaseName = dependencies.graphDatabaseService().databaseName();
 
         if (enabled) {
-            var taskStoreProvider = new TaskStoreProvider();
+            var taskStoreProvider = new TaskStoreProvider(retentionPeriod);
             // Use the centrally managed task stores
             registry.registerComponent(TaskStore.class, taskStoreProvider, true);
             registry.registerComponent(TaskRegistryFactory.class, new TaskRegistryFactoryProvider(taskStoreProvider), true);
 
             // hey this is just for tests? TaskRegistryExtensionMultiDBTest breaks if it is missing
-            context.dependencySatisfier().satisfyDependency(TaskStoreHolder.getTaskStore(databaseName));
+            context.dependencySatisfier().satisfyDependency(TaskStoreHolder.getTaskStore(databaseName, retentionPeriod));
         } else {
             registry.registerComponent(TaskRegistryFactory.class, ctx -> EmptyTaskRegistryFactory.INSTANCE, true);
             registry.registerComponent(TaskStore.class, ctx -> EmptyTaskStore.INSTANCE, true);

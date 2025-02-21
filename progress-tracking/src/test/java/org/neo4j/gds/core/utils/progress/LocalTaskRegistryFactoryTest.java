@@ -23,6 +23,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
+import java.time.Duration;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -33,12 +35,12 @@ class LocalTaskRegistryFactoryTest {
 
     @BeforeEach
     void setup() {
-        this.taskStore = new PerDatabaseTaskStore();
+        this.taskStore = new PerDatabaseTaskStore(Duration.ZERO);
         this.taskRegistryFactory = new LocalTaskRegistryFactory("", taskStore);
     }
 
     @Test
-    void shouldPutAndRemoveDistinctTasks() {
+    void shouldPutAndMarkCompletedDistinctTasks() {
         var task1 = Tasks.leaf("root1");
         var taskRegistry1 = taskRegistryFactory.newInstance(new JobId());
         taskRegistry1.registerTask(task1);
@@ -51,9 +53,9 @@ class LocalTaskRegistryFactoryTest {
 
         assertThat(taskStore.query("")).size().isEqualTo(2);
 
-        taskRegistry1.unregisterTask();
+        taskRegistry1.markCompleted();
 
-        assertThat(taskStore.query("").map(UserTask::task)).contains(task2).doesNotContain(task1);
+        assertThat(taskStore.queryRunning().map(UserTask::task)).contains(task2).doesNotContain(task1);
     }
 
     @Test

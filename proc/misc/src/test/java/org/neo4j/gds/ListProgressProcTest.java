@@ -136,14 +136,11 @@ class ListProgressProcTest extends BaseProgressTest {
         try (var ignored = RenamesCurrentThread.renameThread("Test worker")) {
             runQuery("CALL gds.test.plfinished('foo')");
 
+            // task from proc above is finished -- wont show up here
             assertCypherResult(
                 "CALL gds.listProgress() YIELD taskName, progress RETURN taskName, progress",
-                List.of(
-                    Map.of("taskName", "foo", "progress", "100%")
-                )
+                List.of()
             );
-
-
         }
     }
 
@@ -153,28 +150,37 @@ class ListProgressProcTest extends BaseProgressTest {
         public Stream<Bar> foo2(
             @Name(value = "taskName") String taskName
         ) {
-            var task = Tasks.task(taskName, Tasks.leaf("bar", 3), Tasks.leaf("bar", 3));
+            var task = Tasks.task(
+                taskName,
+                Tasks.leaf("bar", 3),
+                Tasks.leaf("foo", 3)
+            );
             var taskRegistry = taskRegistryFactory.newInstance(new JobId());
             this.taskRegistryFactory = jobId -> new NonReleasingTaskRegistry(taskRegistry);
 
-            var taskProgressTracker = new TaskProgressTracker(task, LoggerForProgressTracking.noOpLog(), new Concurrency(1), taskRegistryFactory);
-            taskProgressTracker.beginSubTask();
+            var taskProgressTracker = new TaskProgressTracker(
+                task,
+                LoggerForProgressTracking.noOpLog(),
+                new Concurrency(1),
+                taskRegistryFactory
+            );
+            taskProgressTracker.beginSubTask(taskName);
 
-            taskProgressTracker.beginSubTask();
-            taskProgressTracker.logProgress(1);
-            taskProgressTracker.logProgress(1);
-            taskProgressTracker.logProgress(1);
-
-            taskProgressTracker.endSubTask();
-
-            taskProgressTracker.beginSubTask();
+            taskProgressTracker.beginSubTask("bar");
             taskProgressTracker.logProgress(1);
             taskProgressTracker.logProgress(1);
             taskProgressTracker.logProgress(1);
 
-            taskProgressTracker.endSubTask();
+            taskProgressTracker.endSubTask("bar");
 
-            taskProgressTracker.endSubTask();
+            taskProgressTracker.beginSubTask("foo");
+            taskProgressTracker.logProgress(1);
+            taskProgressTracker.logProgress(1);
+            taskProgressTracker.logProgress(1);
+
+            taskProgressTracker.endSubTask("foo");
+
+            taskProgressTracker.endSubTask(taskName);
 
 
             return Stream.empty();

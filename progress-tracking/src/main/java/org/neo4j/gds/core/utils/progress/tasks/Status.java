@@ -20,9 +20,36 @@
 package org.neo4j.gds.core.utils.progress.tasks;
 
 public enum Status {
-    PENDING,
-    RUNNING,
-    FINISHED,
-    CANCELED,
-    FAILED
+    PENDING {
+        @Override
+        public boolean isOngoing() {
+            return true;
+        }
+    },
+    RUNNING {
+        @Override
+        public boolean isOngoing() {
+            return true;
+        }
+    },
+    FINISHED {
+        @Override
+        public boolean isOngoing() {
+            return false;
+        }
+    },
+    CANCELED {
+        @Override
+        public boolean isOngoing() {
+            return false;
+        }
+    },
+    FAILED {
+        @Override
+        public boolean isOngoing() {
+            return false;
+        }
+    };
+
+    public abstract boolean isOngoing();
 }

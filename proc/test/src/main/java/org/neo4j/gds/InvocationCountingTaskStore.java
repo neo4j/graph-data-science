@@ -25,6 +25,7 @@ import org.neo4j.gds.core.utils.progress.PerDatabaseTaskStore;
 import org.neo4j.gds.core.utils.progress.UserTask;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 
+import java.time.Duration;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -34,6 +35,10 @@ public class InvocationCountingTaskStore extends PerDatabaseTaskStore {
     public int registerTaskInvocations;
     public int removeTaskInvocations;
     public Set<JobId> seenJobIds = new HashSet<>();
+
+    public InvocationCountingTaskStore(Duration finishedTaskTTL) {
+        super(finishedTaskTTL);
+    }
 
     @Override
     public UserTask storeUserTask(String username, JobId jobId, Task task) {

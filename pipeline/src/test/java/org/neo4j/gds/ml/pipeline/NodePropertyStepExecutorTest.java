@@ -48,6 +48,7 @@ import org.neo4j.gds.ml.pipeline.ExecutableNodePropertyStepTestUtil.NodeIdProper
 import org.neo4j.gds.ml.pipeline.ExecutableNodePropertyStepTestUtil.SumNodePropertyStep;
 import org.neo4j.gds.test.SumNodePropertyStepConfigImpl;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -224,7 +225,14 @@ class NodePropertyStepExecutorTest {
         );
 
         var log = new GdsTestLog();
-        var progressTracker = new InspectableTestProgressTracker(NodePropertyStepExecutor.tasks(steps, graphStore.nodeCount()), "user", JobId.parse("42"), new PerDatabaseTaskStore(), new LoggerForProgressTrackingAdapter(log));
+        var progressTracker = new InspectableTestProgressTracker(
+            NodePropertyStepExecutor.tasks(steps, graphStore.nodeCount()),
+            "user",
+            JobId.parse("42"),
+            new PerDatabaseTaskStore(
+                Duration.ofMinutes(1)),
+            new LoggerForProgressTrackingAdapter(log)
+        );
 
         new NodePropertyStepExecutor<>(
             ExecutionContext.EMPTY,

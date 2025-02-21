@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.neo4j.gds.TaskStoreHelper;
 import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
@@ -48,15 +49,12 @@ import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.termination.TerminationFlag;
 
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.TreeSet;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.LockSupport;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -516,7 +514,7 @@ class RandomWalkTest {
                 .build();
 
             var log = new GdsTestLog();
-            var taskStore = new PerDatabaseTaskStore();
+            var taskStore = new PerDatabaseTaskStore(Duration.ZERO);
 
             var requestScopedDependencies = RequestScopedDependencies.builder()
                 .taskRegistryFactory(TaskRegistryFactory.local("rw", taskStore))
@@ -538,7 +536,7 @@ class RandomWalkTest {
                 assertThat(randomWalksStream).hasSize(5000);
             });
 
-            awaitEmptyTaskStore(taskStore);
+            TaskStoreHelper.awaitEmptyTaskStore(taskStore);
 
             assertThat(log.getMessages(TestLog.INFO))
                 .extracting(removingThreadId())
@@ -571,7 +569,7 @@ class RandomWalkTest {
                 .build();
 
             var log = new GdsTestLog();
-            var taskStore = new PerDatabaseTaskStore();
+            var taskStore = new PerDatabaseTaskStore(Duration.ZERO);
 
             var requestScopedDependencies = RequestScopedDependencies.builder()
                 .taskRegistryFactory(TaskRegistryFactory.local("rw", taskStore))
@@ -592,7 +590,7 @@ class RandomWalkTest {
                 assertThat(randomWalksStream).hasSize(5000);
             });
 
-            awaitEmptyTaskStore(taskStore);
+            TaskStoreHelper.awaitEmptyTaskStore(taskStore);
 
             assertThat(log.getMessages(TestLog.INFO))
                 .extracting(removingThreadId())
@@ -615,9 +613,9 @@ class RandomWalkTest {
         }
 
         @Test
-        void shouldLeaveNoTasksBehind() {
+        void shouldLeaveNoOngoingTasksBehind() {
             var config = RandomWalkStreamConfigImpl.builder().build();
-            var taskStore = new PerDatabaseTaskStore();
+            var taskStore = new PerDatabaseTaskStore(Duration.ZERO);
 
             var requestScopedDependencies = RequestScopedDependencies.builder()
                 .taskRegistryFactory(TaskRegistryFactory.local("rw", taskStore))
@@ -638,26 +636,11 @@ class RandomWalkTest {
             //noinspection ResultOfMethodCallIgnored
             result.count();
 
-            awaitEmptyTaskStore(taskStore);
+            TaskStoreHelper.awaitEmptyTaskStore(taskStore);
 
             // the task store should now be empty
-            assertThat(taskStore.isEmpty()).isTrue();
+            assertThat(taskStore.queryRunning()).isEmpty();
         }
 
-        private void awaitEmptyTaskStore(PerDatabaseTaskStore taskStore) {
-            // there is a race condition between the thread consuming the result,
-            // and the thread scheduled to end the last subtask
-            long timeoutInSeconds = 5 * (TestSupport.CI ? 5 : 1);
-            var deadline = Instant.now().plus(timeoutInSeconds, ChronoUnit.SECONDS);
-
-            // On my machine (TM) with 1000 iterations this never fails and each run is 10ish or 100ish ms
-            while (Instant.now().isBefore(deadline)) {
-                if (taskStore.isEmpty()) {
-                    break;
-                }
-
-                LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(100));
-            }
-        }
     }
 }

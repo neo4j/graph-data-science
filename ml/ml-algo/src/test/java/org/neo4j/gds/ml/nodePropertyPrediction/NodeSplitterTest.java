@@ -31,6 +31,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.logging.GdsTestLog;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -87,7 +88,13 @@ class NodeSplitterTest {
     @Test
     void shouldLogWarnings() {
         var log = new GdsTestLog();
-        var progressTracker = new InspectableTestProgressTracker(Tasks.leaf("DUMMY"), "", new JobId(), new PerDatabaseTaskStore(), new LoggerForProgressTrackingAdapter(log));
+        var progressTracker = new InspectableTestProgressTracker(
+            Tasks.leaf("DUMMY"),
+            "",
+            new JobId(),
+            new PerDatabaseTaskStore(Duration.ofMinutes(1)),
+            new LoggerForProgressTrackingAdapter(log)
+        );
         int numberOfExamples = 12;
         var splitter = new NodeSplitter(
             new Concurrency(4),

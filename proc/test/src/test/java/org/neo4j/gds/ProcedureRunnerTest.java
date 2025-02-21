@@ -33,6 +33,7 @@ import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.procedure.Context;
 
 import java.lang.reflect.Field;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -85,7 +86,7 @@ class ProcedureRunnerTest extends BaseTest {
             var username = Username.of("foo");
             TaskRegistryFactory taskRegistryFactory = jobId -> new TaskRegistry(
                 username.username(),
-                new PerDatabaseTaskStore(),
+                new PerDatabaseTaskStore(Duration.ZERO),
                 jobId
             );
             ProcedureRunner.applyOnProcedure(

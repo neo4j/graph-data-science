@@ -24,13 +24,13 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.beta.pregel.context.MasterComputeContext;
 import org.neo4j.gds.core.concurrency.ExecutorServiceUtil;
-import org.neo4j.gds.termination.TerminationFlag;
-import org.neo4j.gds.mem.MemoryEstimation;
-import org.neo4j.gds.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimations;
+import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.utils.StringJoining;
 
 import java.util.List;
@@ -230,13 +230,16 @@ public final class Pregel<CONFIG extends PregelConfig> {
                     break;
                 }
             }
+            progressTracker.endSubTask();
             return ImmutablePregelResult.builder()
                 .nodeValues(nodeValues)
                 .didConverge(didConverge)
                 .ranIterations(iteration)
                 .build();
+        } catch (Exception e) {
+            progressTracker.endSubTaskWithFailure();
+            throw e;
         } finally {
-            progressTracker.endSubTask();
             computer.release();
         }
     }

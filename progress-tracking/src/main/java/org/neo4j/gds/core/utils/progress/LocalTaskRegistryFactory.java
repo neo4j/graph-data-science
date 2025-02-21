@@ -38,11 +38,13 @@ public class LocalTaskRegistryFactory implements TaskRegistryFactory {
     public TaskRegistry newInstance(JobId jobId) {
         taskStore
             .query(username, jobId)
-            .ifPresent(id -> {
+            .ifPresent(userTask -> {
                 throw new IllegalArgumentException(
                     formatWithLocale(
-                        "There's already a job running with jobId '%s'",
-                        jobId.asString()
+                        "There's already a job running with jobId '%s'. Existing Job: (desc: `%s`, status: `%s`)",
+                        jobId.asString(),
+                        userTask.task().description(),
+                        userTask.task().status()
                     )
                 );
             });

@@ -152,6 +152,18 @@ Refer to The https://neo4j.com/docs/operations-manual/current/configuration/neo4
 | Dynamic       | `false`
 |===
 
+
+[[gds.progress_tracking_retention_period]]
+[.setting-details]
+.gds.progress_tracking_retention_period
+[cols="1,4", caption =]
+|===
+| Description   | The duration for which completed progress tracking jobs are retained. This includes failed and successful ones.
+| Default Value | `0s`
+| Valid Values  | A duration (Valid units are: `ns`, `μs`, `ms`, `s`, `m`, `h` and `d` default unit is `s`).
+| Dynamic       | `false`
+|===
+
 [.setting-details]
 .gds.validate_using_max_memory_estimation
 [cols="1,4", caption =]

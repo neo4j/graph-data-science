@@ -101,7 +101,7 @@ public class MemoryTracker implements TaskStoreListener, GraphStoreAddedEventLis
     }
 
     @Override
-    public synchronized void onTaskRemoved(UserTask userTask) {
+    public synchronized void onTaskCompleted(UserTask userTask) {
 
         var taskDescription = userTask.task().description();
         log.debug("Removing task: %s", taskDescription);

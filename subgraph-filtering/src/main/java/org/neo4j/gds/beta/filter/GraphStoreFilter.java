@@ -164,7 +164,7 @@ public final class GraphStoreFilter {
 
             var filteredSchema = filterSchema(graphStore.schema(), filteredNodes, filteredRelationships.keySet());
 
-            return new GraphStoreBuilder()
+            var result = new GraphStoreBuilder()
                 .databaseInfo(graphStore.databaseInfo())
                 .capabilities(graphStore.capabilities())
                 .schema(filteredSchema)
@@ -175,8 +175,12 @@ public final class GraphStoreFilter {
                 .relationshipImportResult(RelationshipImportResult.of(filteredRelationships))
                 .concurrency(config.readConcurrency())
                 .build();
-        } finally {
             progressTracker.endSubTask();
+
+            return result;
+        } catch (Exception e) {
+            progressTracker.endSubTaskWithFailure();
+            throw e;
         }
     }
 

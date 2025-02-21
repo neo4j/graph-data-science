@@ -21,6 +21,7 @@ package org.neo4j.gds.core.utils.progress;
 
 import org.neo4j.gds.utils.StringFormatting;
 
+import java.time.Duration;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -60,10 +61,10 @@ public final class TaskStoreHolder {
      * Not using DatabaseId directly, because that would mead to some awful dependencies.
      * And we will eliminate this in due course.
      */
-    public static TaskStore getTaskStore(String databaseName) {
+    public static TaskStore getTaskStore(String databaseName, Duration finishedTaskTTL) {
         String normalizedDatabaseName = StringFormatting.toLowerCaseWithLocale(databaseName);
 
-        return TASK_STORES.computeIfAbsent(normalizedDatabaseName, __ -> new PerDatabaseTaskStore());
+        return TASK_STORES.computeIfAbsent(normalizedDatabaseName, __ -> new PerDatabaseTaskStore(finishedTaskTTL));
     }
 
     public static void purge(String databaseName) {

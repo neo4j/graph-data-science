@@ -34,6 +34,7 @@ import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.termination.TerminationFlag;
 
+import java.time.Duration;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -76,7 +77,7 @@ class NodeEmbeddingAlgorithmsGraphSageTest {
             GraphSageTrainTask.create(graph, config),
             config.username(),
             config.jobId(),
-            new PerDatabaseTaskStore(),
+            new PerDatabaseTaskStore(Duration.ofMinutes(1)),
             new LoggerForProgressTrackingAdapter(log)
         );
 

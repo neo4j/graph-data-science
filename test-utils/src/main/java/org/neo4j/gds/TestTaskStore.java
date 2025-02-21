@@ -24,6 +24,7 @@ import org.neo4j.gds.core.utils.progress.PerDatabaseTaskStore;
 import org.neo4j.gds.core.utils.progress.UserTask;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -34,6 +35,14 @@ public class TestTaskStore extends PerDatabaseTaskStore {
 
     private final Map<JobId, String> tasks = new HashMap<>();
     private final List<String> tasksSeen = new ArrayList<>();
+
+    public TestTaskStore() {
+        this(Duration.ofMinutes(5));
+    }
+
+    public TestTaskStore(Duration retentionPeriod) {
+        super(retentionPeriod);
+    }
 
     @Override
     protected UserTask storeUserTask(String username, JobId jobId, Task task) {
@@ -51,9 +60,5 @@ public class TestTaskStore extends PerDatabaseTaskStore {
 
     public List<String> tasksSeen() {
         return tasksSeen;
-    }
-
-    public Map<JobId, String> tasks() {
-        return tasks;
     }
 }

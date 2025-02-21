@@ -142,8 +142,10 @@ public final class NativeRelationshipExporter extends StatementApi implements Re
                 .executor(DefaultPool.INSTANCE)
                 .mayInterruptIfRunning(false)
                 .run();
-        } finally {
             progressTracker.endSubTask();
+        } catch (Exception e) {
+            progressTracker.endSubTaskWithFailure();
+            throw e;
         }
     }
 

@@ -34,16 +34,16 @@ import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.utils.progress.PerDatabaseTaskStore;
-import org.neo4j.gds.logging.GdsTestLog;
-import org.neo4j.gds.mem.MemoryEstimation;
-import org.neo4j.gds.mem.MemoryEstimations;
-import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.logging.GdsTestLog;
+import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimations;
+import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.decisiontree.DecisionTreePredictor;
@@ -63,6 +63,7 @@ import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainConfigImp
 import org.neo4j.gds.nodeproperties.LongTestPropertyValues;
 import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
 
+import java.time.Duration;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -153,7 +154,7 @@ class LinkPredictionPredictPipelineExecutorTest {
             ),
             "",
             config.jobId(),
-            new PerDatabaseTaskStore(),
+            new PerDatabaseTaskStore(Duration.ofMinutes(1)),
             new LoggerForProgressTrackingAdapter(new GdsTestLog())
         );
 
@@ -391,7 +392,7 @@ class LinkPredictionPredictPipelineExecutorTest {
             ),
             username,
             config.jobId(),
-            new PerDatabaseTaskStore(),
+            new PerDatabaseTaskStore(Duration.ofMinutes(1)),
             new LoggerForProgressTrackingAdapter(log)
         );
 

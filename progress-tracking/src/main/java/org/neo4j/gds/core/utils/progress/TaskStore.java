@@ -30,7 +30,13 @@ public interface TaskStore {
 
     void remove(String username, JobId jobId);
 
+    void markCompleted(String username, JobId jobId);
+
     Stream<UserTask> query();
+
+    default Stream<UserTask> queryRunning() {
+        return query().filter(userTask -> userTask.task().status().isOngoing());
+    }
 
     Stream<UserTask> query(JobId jobId);
 
@@ -38,7 +44,7 @@ public interface TaskStore {
 
     Optional<UserTask> query(String username, JobId jobId);
 
-    boolean isEmpty();
+    long ongoingTaskCount();
 
     long taskCount();
 

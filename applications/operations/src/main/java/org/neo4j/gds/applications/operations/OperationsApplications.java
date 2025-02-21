@@ -64,6 +64,8 @@ public final class OperationsApplications {
 
         if (user.isAdmin()) return taskStore.query();
 
+        // TODO only fetch ongoing tasks here and name listProgressOngoing
+        //      (add listProgress which fetches all tasks)
         return taskStore.query(user.getUsername());
     }
 

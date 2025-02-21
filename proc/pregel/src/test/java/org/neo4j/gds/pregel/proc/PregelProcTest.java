@@ -28,7 +28,6 @@ import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.GraphAlgorithmFactory;
-import org.neo4j.gds.mem.MemoryEstimateDefinition;
 import org.neo4j.gds.TestTaskStore;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.nodeproperties.ValueType;
@@ -44,21 +43,23 @@ import org.neo4j.gds.beta.pregel.context.ComputeContext;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.gds.mem.MemoryEstimation;
-import org.neo4j.gds.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.Status;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.metrics.Metrics;
-import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.mem.MemoryEstimateDefinition;
+import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimations;
+import org.neo4j.gds.metrics.Metrics;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
+import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.logging.NullLog;
 import org.neo4j.procedure.Context;
@@ -201,7 +202,7 @@ public class PregelProcTest extends BaseProcTest {
     }
 
     @Test
-    void cleanupTaskRegistryWhenTheAlgorithmFailsInStreamMode() {
+    void failTaskWhenTheAlgorithmFailsInStreamMode() {
         var taskStore = new TestTaskStore();
         var taskRegistryFactory = (TaskRegistryFactory) jobId -> new TaskRegistry(getUsername(), taskStore, jobId);
         try (var transactions = newKernelTransaction(db)) {
@@ -223,14 +224,16 @@ public class PregelProcTest extends BaseProcTest {
             );
 
             assertThatThrownBy(() -> proc.stream(DEFAULT_GRAPH_NAME, config)).isNotNull();
-            assertThat(taskStore.tasks()).isEmpty();
+            assertThat(taskStore.query())
+                .hasSize(1)
+                .allMatch(i -> i.task().status() == Status.FAILED);
             assertThat(taskStore.tasksSeen())
                 .containsExactlyInAnyOrder("TestPregelImpl");
         }
     }
 
     @Test
-    void cleanupTaskRegistryWhenTheAlgorithmFailsInWriteMode() {
+    void failTaskWhenTheAlgorithmFailsInWriteMode() {
         var taskStore = new TestTaskStore();
         var taskRegistryFactory = (TaskRegistryFactory) jobId -> new TaskRegistry(getUsername(), taskStore, jobId);
         try (var transactions = newKernelTransaction(db)) {
@@ -252,13 +255,15 @@ public class PregelProcTest extends BaseProcTest {
             );
 
             assertThatThrownBy(() -> proc.write(DEFAULT_GRAPH_NAME, config)).isNotNull();
-            assertThat(taskStore.tasks()).isEmpty();
+            assertThat(taskStore.query())
+                .hasSize(1)
+                .allMatch(i -> i.task().status() == Status.FAILED);
             assertThat(taskStore.tasksSeen()).containsExactlyInAnyOrder("TestPregelImpl");
         }
     }
 
     @Test
-    void cleanupTaskRegistryWhenTheAlgorithmFailsInMutateMode() {
+    void failTaskWhenTheAlgorithmFailsInMutateMode() {
         var taskStore = new TestTaskStore();
         var taskRegistryFactory = (TaskRegistryFactory) jobId -> new TaskRegistry(getUsername(), taskStore, jobId);
         try (var transactions = newKernelTransaction(db)) {
@@ -280,7 +285,10 @@ public class PregelProcTest extends BaseProcTest {
             );
 
             assertThatThrownBy(() -> proc.mutate(DEFAULT_GRAPH_NAME, config)).isNotNull();
-            assertThat(taskStore.tasks()).isEmpty();
+            assertThat(taskStore.query())
+                .hasSize(1)
+                .map(i -> i.task().status())
+                .containsExactly(Status.FAILED);
             assertThat(taskStore.tasksSeen()).containsExactlyInAnyOrder("TestPregelImpl");
         }
     }

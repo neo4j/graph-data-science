@@ -22,50 +22,50 @@ package org.neo4j.gds.core.utils.progress;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
+import java.time.Duration;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 class TaskRegistryTest {
 
     @Test
     void shouldStoreIncomingTasks() {
-        var taskStore = new PerDatabaseTaskStore();
+        var taskStore = new PerDatabaseTaskStore(Duration.ZERO);
         var taskRegistry1 = new TaskRegistry("", taskStore);
 
-        assertThat(taskStore.isEmpty()).isTrue();
+        assertThat(taskStore.query()).isEmpty();
 
         var task1 = Tasks.leaf("task1");
         taskRegistry1.registerTask(task1);
 
         assertThat(taskStore.query("").map(UserTask::task)).contains(task1);
-        assertThat(taskStore.isEmpty()).isFalse();
 
         var taskRegistry2 = new TaskRegistry("", taskStore);
         var task2 = Tasks.leaf("task2");
         taskRegistry2.registerTask(task2);
 
         assertThat(taskStore.query("").map(UserTask::task)).contains(task1, task2);
-        assertThat(taskStore.isEmpty()).isFalse();
     }
 
     @Test
     void shouldRemoveStoredTasks() {
-        var taskStore = new PerDatabaseTaskStore();
+        var taskStore = new PerDatabaseTaskStore(Duration.ZERO);
         var taskRegistry = new TaskRegistry("", taskStore);
 
         var task = Tasks.leaf("task");
         taskRegistry.registerTask(task);
 
-        assertThat(taskStore.isEmpty()).isFalse();
+        assertThat(taskStore.query()).hasSize(1);
 
         var jobId = taskStore.query("").map(UserTask::jobId).iterator().next();
         taskStore.remove("", jobId);
 
-        assertThat(taskStore.isEmpty()).isTrue();
+        assertThat(taskStore.query()).isEmpty();
     }
 
     @Test
     void shouldDetectAlreadyRegisteredTasks() {
-        var taskStore = new PerDatabaseTaskStore();
+        var taskStore = new PerDatabaseTaskStore(Duration.ZERO);
         var taskRegistry = new TaskRegistry("", taskStore);
 
         var task = Tasks.leaf("task");

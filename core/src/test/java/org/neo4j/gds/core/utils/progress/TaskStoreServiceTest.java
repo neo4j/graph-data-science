@@ -22,6 +22,8 @@ package org.neo4j.gds.core.utils.progress;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.DatabaseId;
 
+import java.time.Duration;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -33,7 +35,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 class TaskStoreServiceTest {
     @Test
     void shouldRespectToggle() {
-        var taskStoreService = new TaskStoreService(false);
+        var taskStoreService = new TaskStoreService(false, Duration.ZERO);
 
         var taskStore = taskStoreService.getTaskStore(DatabaseId.of("a database"));
 
@@ -42,7 +44,7 @@ class TaskStoreServiceTest {
 
     @Test
     void shouldGetOrCreatePerDatabase() {
-        var taskStoreService = new TaskStoreService(true);
+        var taskStoreService = new TaskStoreService(true, Duration.ZERO);
 
         var taskStore1 = taskStoreService.getTaskStore(DatabaseId.of("some database"));
         var taskStore2 = taskStoreService.getTaskStore(DatabaseId.of("some database"));

@@ -168,6 +168,9 @@ final class Neo4jDatabaseNodePropertyWriter {
         try {
             exporter.write(nodeProperties);
             propertiesWritten.setValue(exporter.propertiesWritten());
+        } catch (Exception e) {
+            progressTracker.endSubTaskWithFailure();
+            throw e;
         } finally {
             progressTracker.release();
         }

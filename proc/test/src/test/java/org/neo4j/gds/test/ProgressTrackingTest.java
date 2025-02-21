@@ -95,6 +95,6 @@ class ProgressTrackingTest {
 
         // Now make sure that the tasks have been registered
         verify(taskRegistryMock, times(1)).registerTask(any(Task.class));
-        verify(taskRegistryMock, times(1)).unregisterTask();
+        verify(taskRegistryMock, times(1)).markCompleted();
     }
 }

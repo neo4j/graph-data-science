@@ -34,6 +34,11 @@ public enum EmptyTaskStore implements TaskStore {
     public void remove(String username, JobId jobId) {}
 
     @Override
+    public void markCompleted(String username, JobId jobId) {
+
+    }
+
+    @Override
     public Stream<UserTask> query() {
         return Stream.empty();
     }
@@ -54,8 +59,8 @@ public enum EmptyTaskStore implements TaskStore {
     }
 
     @Override
-    public boolean isEmpty() {
-        return true;
+    public long ongoingTaskCount() {
+        return 0;
     }
 
     @Override

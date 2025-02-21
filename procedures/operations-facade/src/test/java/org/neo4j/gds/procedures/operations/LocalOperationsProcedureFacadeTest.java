@@ -24,6 +24,9 @@ import org.neo4j.gds.api.User;
 import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.operations.OperationsApplications;
+import org.neo4j.gds.core.utils.progress.JobId;
+import org.neo4j.gds.core.utils.progress.TaskStore;
+import org.neo4j.gds.core.utils.progress.UserTask;
 import org.neo4j.gds.core.utils.progress.tasks.LeafTask;
 import org.neo4j.gds.core.utils.warnings.UserLogEntry;
 import org.neo4j.gds.core.utils.warnings.UserLogStore;
@@ -35,6 +38,106 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 class LocalOperationsProcedureFacadeTest {
+
+    @Test
+    void shouldQueryProgressOnlyOngoing() {
+        var taskStore = mock(TaskStore.class);
+        var operationsApplications = OperationsApplications.create(
+            null,
+            RequestScopedDependencies.builder()
+                .taskStore(taskStore)
+                .user(new User("alice", false))
+                .build()
+        );
+
+        var applicationsFacade = mock(ApplicationsFacade.class);
+        when(applicationsFacade.operations()).thenReturn(operationsApplications);
+
+        var operationsProcedureFacade = new LocalOperationsProcedureFacade(applicationsFacade);
+
+        var finished = new LeafTask("t1", 1);
+        finished.start();
+        finished.finish();
+
+        var cancelled = new LeafTask("t2", 1);
+        cancelled.cancel();
+
+        var running = new LeafTask("t3", 1);
+        running.start();
+
+        var pending = new LeafTask("t4", 1);
+
+        var failed = new LeafTask("t5", 1);
+        failed.fail();
+
+
+        var mockedTasks = Stream.of(
+            new UserTask("alice", JobId.EMPTY, pending),
+            new UserTask("alice", JobId.EMPTY, running),
+            new UserTask("alice",  JobId.EMPTY, failed),
+            new UserTask("alice",  JobId.EMPTY, cancelled),
+            new UserTask("alice",  JobId.EMPTY, finished)
+        );
+        when(taskStore.query("alice")).thenReturn(mockedTasks);
+
+        var actualProgress = operationsProcedureFacade.listProgress("", false);
+        assertThat(actualProgress).map(i -> i.taskName).containsExactlyInAnyOrder(
+            pending.description(),
+            running.description()
+        );
+    }
+
+    @Test
+    void shouldQueryProgress() {
+        var taskStore = mock(TaskStore.class);
+        var operationsApplications = OperationsApplications.create(
+            null,
+            RequestScopedDependencies.builder()
+                .taskStore(taskStore)
+                .user(new User("alice", false))
+                .build()
+        );
+
+        var applicationsFacade = mock(ApplicationsFacade.class);
+        when(applicationsFacade.operations()).thenReturn(operationsApplications);
+
+        var operationsProcedureFacade = new LocalOperationsProcedureFacade(applicationsFacade);
+
+        var finished = new LeafTask("t1", 1);
+        finished.start();
+        finished.finish();
+
+        var cancelled = new LeafTask("t2", 1);
+        cancelled.cancel();
+
+        var running = new LeafTask("t3", 1);
+        running.start();
+
+        var pending = new LeafTask("t4", 1);
+
+        var failed = new LeafTask("t5", 1);
+        failed.fail();
+
+
+        var mockedTasks = Stream.of(
+            new UserTask("alice", JobId.EMPTY, pending),
+            new UserTask("alice", JobId.EMPTY, running),
+            new UserTask("alice",  JobId.EMPTY, failed),
+            new UserTask("alice",  JobId.EMPTY, cancelled),
+            new UserTask("alice",  JobId.EMPTY, finished)
+        );
+        when(taskStore.query("alice")).thenReturn(mockedTasks);
+
+        var actualProgress = operationsProcedureFacade.listProgress("", true);
+        assertThat(actualProgress).map(i -> i.taskName).containsExactlyInAnyOrder(
+            pending.description(),
+            running.description(),
+            cancelled.description(),
+            failed.description(),
+            finished.description()
+        );
+    }
+
     @Test
     void shouldQueryUserLog() {
         var userLogStore = mock(UserLogStore.class);

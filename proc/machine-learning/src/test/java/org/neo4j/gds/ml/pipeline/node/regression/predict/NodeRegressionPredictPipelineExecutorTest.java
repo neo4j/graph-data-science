@@ -31,8 +31,8 @@ import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
-import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.utils.progress.PerDatabaseTaskStore;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -45,6 +45,7 @@ import org.neo4j.gds.procedures.pipelines.NodeRegressionPredictPipelineBaseConfi
 import org.neo4j.gds.procedures.pipelines.NodeRegressionPredictPipelineExecutor;
 import org.neo4j.gds.test.TestProc;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -162,7 +163,7 @@ class NodeRegressionPredictPipelineExecutorTest extends BaseProcTest {
             NodeRegressionPredictPipelineExecutor.progressTask("Node Regression Predict Pipeline", pipeline, graphStore),
             getUsername(),
             config.jobId(),
-            new PerDatabaseTaskStore(),
+            new PerDatabaseTaskStore(Duration.ofMinutes(1)),
             new LoggerForProgressTrackingAdapter(log)
         );
 

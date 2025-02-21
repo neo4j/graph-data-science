@@ -30,8 +30,7 @@ public class NonReleasingTaskRegistry extends TaskRegistry {
     }
 
     @Override
-    public void unregisterTask() {
-        // skip un registering the task because we want to observe the messages after the algo is done
+    public void markCompleted() {
     }
 
 }

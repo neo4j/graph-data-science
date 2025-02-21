@@ -152,12 +152,13 @@ public final class OpenGraphDataScienceExtensionBuilder {
 
         // Read some configuration used to select behaviour
         var progressTrackingEnabled = neo4jConfiguration.get(ProgressFeatureSettings.progress_tracking_enabled);
-        log.info("Progress tracking: " + (progressTrackingEnabled ? "enabled" : "disabled"));
+        var retentionPeriod = neo4jConfiguration.get(ProgressFeatureSettings.task_retention_period);
+        log.info("Progress tracking: " + (progressTrackingEnabled ? "enabled" : "disabled" + ", retentionPeriod: " + retentionPeriod.toString()));
         var useMaxMemoryEstimation = neo4jConfiguration.get(GdsSettings.validateUsingMaxMemoryEstimation());
         log.info("Memory usage guard: " + (useMaxMemoryEstimation ? "maximum" : "minimum") + " estimate");
 
         // Task business is initialised from Neo4j configuration
-        var taskStoreService = new TaskStoreService(progressTrackingEnabled);
+        var taskStoreService = new TaskStoreService(progressTrackingEnabled, retentionPeriod);
         var taskRegistryFactoryService = new TaskRegistryFactoryService(progressTrackingEnabled, taskStoreService);
 
         // User log state will eventually be created here, instead of referencing a big shared singleton

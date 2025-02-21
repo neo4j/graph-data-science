@@ -33,6 +33,7 @@ import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.utils.GdsFeatureToggles;
 
+import java.time.Duration;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -226,7 +227,7 @@ class TaskProgressTrackerTest {
     void shouldRegisterBaseTaskOnBaseTaskStart() {
         var task = Tasks.leaf("root");
 
-        var taskStore = new PerDatabaseTaskStore();
+        var taskStore = new PerDatabaseTaskStore(Duration.ZERO);
         var taskRegistry = new TaskRegistry("", taskStore);
         var progressTracker = new TaskProgressTracker(task, LoggerForProgressTracking.noOpLog(), new Concurrency(1), jobId -> taskRegistry);
 

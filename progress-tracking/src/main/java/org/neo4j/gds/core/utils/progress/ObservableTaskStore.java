@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.utils.progress;
 
+import org.neo4j.gds.core.utils.progress.tasks.Status;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 
 import java.util.Optional;
@@ -37,8 +38,20 @@ public abstract class ObservableTaskStore implements TaskStore {
 
     @Override
     public final void remove(String username, JobId jobId) {
-        var userTask = removeUserTask(username, jobId);
-        userTask.ifPresent(task -> listeners.forEach(listener -> listener.onTaskRemoved(task)));
+        removeUserTask(username, jobId);
+    }
+
+    @Override
+    public final void markCompleted(String username, JobId jobId) {
+        var userTask = query(username, jobId);
+        userTask.map(UserTask::task).ifPresent(task -> {
+            if (task.status() == Status.PENDING) {
+                task.cancel();
+            } else if (task.status() == Status.RUNNING) {
+                task.finish();
+            }
+        });
+        userTask.ifPresent(task -> listeners.forEach(listener -> listener.onTaskCompleted(task)));
     }
 
     @Override

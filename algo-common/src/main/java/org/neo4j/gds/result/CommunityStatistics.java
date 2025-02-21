@@ -188,7 +188,7 @@ public final class CommunityStatistics {
                     concurrency
                 );
             }
-        } catch (Exception e){
+        } catch (Exception e) {
             if (e.getMessage().contains("is out of bounds for histogram, current covered range")) {
                 return  new CommunityStats(0,Optional.empty(), computeMilliseconds.get(), false);
             } else {

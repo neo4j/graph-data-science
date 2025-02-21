@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.catalog;
 
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -1382,7 +1383,7 @@ class GraphProjectProcTest extends BaseProcTest {
     }
 
     @Test
-    void clearTasksOnFailure() {
+    void failTasksOnFailure() {
         runQuery("CREATE ({prop: \"stringProp\"}), ()");
 
         assertThatThrownBy(() ->
@@ -1391,7 +1392,8 @@ class GraphProjectProcTest extends BaseProcTest {
             .hasMessageContaining("Loading of values of type String is currently not supported");;
 
         var taskStore = GraphDatabaseApiProxy.resolveDependency(db, TaskStore.class);
-        assertTrue(taskStore.isEmpty());
+        Assertions.assertThat(taskStore.ongoingTaskCount()).isZero();
+        Assertions.assertThat(taskStore.taskCount()).isZero();
     }
 
     private Graph relPropertyGraph(String graphName, RelationshipType relationshipType, String property) {

@@ -32,18 +32,19 @@ import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
-import org.neo4j.gds.core.utils.progress.PerDatabaseTaskStore;
-import org.neo4j.gds.logging.GdsTestLog;
-import org.neo4j.gds.termination.TerminationFlag;
-import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.JobId;
+import org.neo4j.gds.core.utils.progress.PerDatabaseTaskStore;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.logging.GdsTestLog;
+import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionSplitConfigImpl;
+import org.neo4j.gds.termination.TerminationFlag;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -208,7 +209,14 @@ class LinkPredictionRelationshipSamplerTest {
 
 
         var log = new GdsTestLog();
-        var progressTracker = new InspectableTestProgressTracker(progressTask(splitConfig.expectedSetSizes(graphStore.relationshipCount())), "user", new JobId(), new PerDatabaseTaskStore(), new LoggerForProgressTrackingAdapter(log));
+        var progressTracker = new InspectableTestProgressTracker(
+            progressTask(splitConfig.expectedSetSizes(graphStore.relationshipCount())),
+            "user",
+            new JobId(),
+            new PerDatabaseTaskStore(
+                Duration.ofMinutes(1)),
+            new LoggerForProgressTrackingAdapter(log)
+        );
 
         var relationshipSplitter = new LinkPredictionRelationshipSampler(
             graphStore,

@@ -59,6 +59,7 @@ import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictionSplitConfigI
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;
 import org.neo4j.gds.termination.TerminationFlag;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -554,7 +555,8 @@ class NodeClassificationTrainTest {
 
         var progressTask = NodeClassificationTrain.progressTask(pipeline, nodeGraphStore.nodeCount());
         var log = new GdsTestLog();
-        var progressTracker = new InspectableTestProgressTracker(progressTask, config.username(), config.jobId(), new PerDatabaseTaskStore(), new LoggerForProgressTrackingAdapter(log));
+        var progressTracker = new InspectableTestProgressTracker(progressTask, config.username(), config.jobId(), new PerDatabaseTaskStore(
+            Duration.ofMinutes(1)), new LoggerForProgressTrackingAdapter(log));
 
         createWithExecutionContext(
                 nodeGraphStore,

@@ -26,6 +26,9 @@ import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
+import org.neo4j.gds.core.utils.progress.UserTask;
+import org.neo4j.gds.core.utils.progress.tasks.Status;
+import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.test.TestProc;
 
 import java.util.Map;
@@ -49,7 +52,7 @@ class AlgorithmCleanupTest extends BaseProcTest {
     }
 
     @Test
-    void cleanupTaskRegistryUnderRegularExecution() {
+    void completeTaskUnderRegularExecution() {
         var taskStore = new TestTaskStore();
         var taskRegistryFactory = (TaskRegistryFactory) jobId -> new TaskRegistry(getUsername(), taskStore, jobId);
 
@@ -58,14 +61,14 @@ class AlgorithmCleanupTest extends BaseProcTest {
             Map<String, Object> config = Map.of("writeProperty", "test");
 
             assertThatCode(() -> proc.stats("g", config)).doesNotThrowAnyException();
-            assertThat(taskStore.tasks()).isEmpty();
+            assertThat(taskStore.queryRunning()).isEmpty();
             assertThat(taskStore.tasksSeen())
                 .containsExactlyInAnyOrder("TestAlgorithm");
         });
     }
 
     @Test
-    void cleanupTaskRegistryWhenTheAlgorithmFails() {
+    void failTaskWhenTheAlgorithmFails() {
         var taskStore = new TestTaskStore();
         var taskRegistryFactory = (TaskRegistryFactory) jobId -> new TaskRegistry(getUsername(), taskStore, jobId);
 
@@ -74,7 +77,10 @@ class AlgorithmCleanupTest extends BaseProcTest {
             Map<String, Object> config = Map.of("writeProperty", "test", "throwInCompute", true);
 
             assertThatThrownBy(() -> proc.stats("g", config)).isNotNull();
-            assertThat(taskStore.tasks()).isEmpty();
+            assertThat(taskStore.query())
+                .map(UserTask::task)
+                .map(Task::status)
+                .containsExactly(Status.FAILED);
             assertThat(taskStore.tasksSeen())
                 .containsExactlyInAnyOrder("TestAlgorithm");
         });

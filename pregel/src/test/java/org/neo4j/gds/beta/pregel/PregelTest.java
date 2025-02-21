@@ -49,6 +49,7 @@ import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.Status;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -235,7 +236,9 @@ class PregelTest {
         pregelAlgo.run();
         pregelAlgo.release();
 
-        assertThat(taskStore.tasks()).isEmpty();
+        assertThat(taskStore.query())
+            .map(i -> i.task().status())
+            .containsExactly(Status.FINISHED);
         assertThat(taskStore.tasksSeen())
             .containsExactlyInAnyOrder("TestPregelComputation");
     }

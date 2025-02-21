@@ -77,6 +77,7 @@ import org.neo4j.gds.procedures.pipelines.NodeClassificationPredictPipelineExecu
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.test.TestProc;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -340,7 +341,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
             ),
             getUsername(),
             config.jobId(),
-            new PerDatabaseTaskStore(),
+            new PerDatabaseTaskStore(Duration.ofMinutes(1)),
             new LoggerForProgressTrackingAdapter(log)
         );
 

@@ -94,6 +94,7 @@ class WriteRelationshipsApplication {
                 // result
                 return builder.build();
             } catch (RuntimeException e) {
+                progressTracker.endSubTaskWithFailure();
                 loggers.log().warn("Writing relationships failed", e);
                 throw e;
             }

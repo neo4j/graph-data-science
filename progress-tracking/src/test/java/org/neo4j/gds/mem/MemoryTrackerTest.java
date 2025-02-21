@@ -139,7 +139,7 @@ class MemoryTrackerTest {
     }
 
     @Test
-    void shouldFreeMemoryOnTaskRemoved() {
+    void shouldFreeMemoryOnTaskCompleted() {
         var memoryTracker = new MemoryTracker(19L, Log.noOpLog());
 
         memoryTracker.track("a","b", new JobId("foo"), 9);
@@ -149,7 +149,7 @@ class MemoryTrackerTest {
         when(userTaskMock.jobId()).thenReturn(new JobId("foo"));
         when(userTaskMock.username()).thenReturn("a");
 
-        memoryTracker.onTaskRemoved(userTaskMock);
+        memoryTracker.onTaskCompleted(userTaskMock);
 
         assertThat(memoryTracker.availableMemory())
             .isEqualTo(16L);

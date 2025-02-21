@@ -127,10 +127,12 @@ public final class NativeRelationshipStreamExporter extends StatementApi impleme
             } catch (ExecutionException e) {
                 throw new RuntimeException(e);
             }
+            progressTracker.endSubTask();
 
             return writer.written;
-        } finally {
-            progressTracker.endSubTask();
+        } catch (Exception e) {
+            progressTracker.endSubTaskWithFailure();
+            throw e;
         }
     }
 

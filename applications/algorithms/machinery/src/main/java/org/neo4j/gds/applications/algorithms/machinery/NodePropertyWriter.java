@@ -96,7 +96,10 @@ public class NodePropertyWriter {
 
         try {
             return writeNodeProperties(nodePropertyExporter, nodeProperties);
-        } finally {
+        } catch (Exception e) {
+            progressTracker.endSubTaskWithFailure();
+            throw e;
+        }finally {
             progressTracker.release();
         }
     }
