@@ -114,7 +114,7 @@ public class BoruvkaMST extends Algorithm<GeometricMSTResult> {
     }
 
     private void performIteration() {
-        if (!closestDistanceTracker.isUpdated()) {
+        if (closestDistanceTracker.isNotUpdated()) {
 
             ParallelUtil.parallelForEachNode(
                 nodeCount, concurrency, terminationFlag,

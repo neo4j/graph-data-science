@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
@@ -61,7 +62,7 @@ class BoruvkaMSTTest {
         @ValueSource(ints={1,4})
         void shouldReturnEuclideanMSTWithZeroCoreValues(int concurrency) {
             var nodePropertyValues = graph.nodeProperties("point");
-            var kdTree = new KdTreeBuilder(graph, nodePropertyValues, 1, 1).build();
+            var kdTree = new KdTreeBuilder(graph, nodePropertyValues, 1, 1, ProgressTracker.NULL_TRACKER).build();
 
             var dualTree =  BoruvkaMST.createWithZeroCores(
                 nodePropertyValues,
@@ -118,7 +119,7 @@ class BoruvkaMSTTest {
         @ValueSource(ints={1,4})
         void shouldReturnEuclideanMSTWithZeroCoreValues(int concurrency) {
             var nodePropertyValues = graph.nodeProperties("point");
-            var kdTree = new KdTreeBuilder(graph, nodePropertyValues, 1, 1).build();
+            var kdTree = new KdTreeBuilder(graph, nodePropertyValues, 1, 1, ProgressTracker.NULL_TRACKER).build();
 
             var dualTree =  BoruvkaMST.createWithZeroCores(
                 nodePropertyValues,
@@ -175,7 +176,7 @@ class BoruvkaMSTTest {
         @ValueSource(ints={1,4})
         void shouldReturnEuclideanMSTWithZeroCoreValues(int concurrency) {
             var nodePropertyValues = graph.nodeProperties("point");
-            var kdTree = new KdTreeBuilder(graph, nodePropertyValues, 1, 1).build();
+            var kdTree = new KdTreeBuilder(graph, nodePropertyValues, 1, 1, ProgressTracker.NULL_TRACKER).build();
 
             var dualTree =  BoruvkaMST.createWithZeroCores(
                 nodePropertyValues,

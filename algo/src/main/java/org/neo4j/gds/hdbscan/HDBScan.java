@@ -40,7 +40,7 @@ public class HDBScan extends Algorithm<HugeLongArray> {
     private final int samples;
     private final long minClusterSize;
 
-    protected HDBScan(
+    public HDBScan(
         IdMap nodes,
         NodePropertyValues nodePropertyValues,
         Concurrency concurrency,

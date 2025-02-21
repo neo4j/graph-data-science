@@ -136,7 +136,7 @@ public final class DualTreeMSTAlgorithm extends Algorithm<GeometricMSTResult> {
     }
 
     private void performIteration() {
-        if (!closestDistanceTracker.isUpdated()) {
+        if (closestDistanceTracker.isNotUpdated()) {
             resetNodeBounds();
             traversalStep(kdTree.root(), kdTree.root());
         }
