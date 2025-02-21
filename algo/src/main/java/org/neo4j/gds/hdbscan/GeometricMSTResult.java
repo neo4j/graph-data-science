@@ -21,5 +21,5 @@ package org.neo4j.gds.hdbscan;
 
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 
-public record DualTreeMSTResult(HugeObjectArray<Edge> edges, double totalDistance) {
+public record GeometricMSTResult(HugeObjectArray<Edge> edges, double totalDistance) {
 }

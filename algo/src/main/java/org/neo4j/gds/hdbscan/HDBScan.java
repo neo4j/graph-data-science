@@ -40,7 +40,7 @@ public class HDBScan extends Algorithm<HugeLongArray> {
     private final int samples;
     private final long minClusterSize;
 
-    protected HDBScan(
+    public HDBScan(
         IdMap nodes,
         NodePropertyValues nodePropertyValues,
         Concurrency concurrency,
@@ -62,16 +62,24 @@ public class HDBScan extends Algorithm<HugeLongArray> {
 
     @Override
     public HugeLongArray compute() {
+
         var kdTree = buildKDTree();
 
         var nodeCount = nodes.nodeCount();
         var coreResult = computeCores(kdTree, nodeCount);
-        var dualTreeMST = dualTreeMSTPhase(kdTree, coreResult);
-        var clusterHierarchy = createClusterHierarchy(dualTreeMST);
+
+       // var mst = dualTreeMSTPhase(kdTree, coreResult);
+        var mst = boruvka(kdTree,coreResult);
+
+        var clusterHierarchy = createClusterHierarchy(mst);
+
         var condenseStep = new CondenseStep(nodeCount, progressTracker);
         var condensedTree = condenseStep.condense(clusterHierarchy, minClusterSize);
+
         var labellingStep = new LabellingStep(condensedTree, nodeCount, progressTracker);
-        return labellingStep.labels();
+        var labels= labellingStep.labels();
+
+        return labels;
     }
 
     CoreResult computeCores(KdTree kdTree, long nodeCount) {
@@ -87,7 +95,7 @@ public class HDBScan extends Algorithm<HugeLongArray> {
         return new CoreResult(neighbours);
     }
 
-    DualTreeMSTResult dualTreeMSTPhase(KdTree kdTree, CoreResult coreResult) {
+    GeometricMSTResult dualTreeMSTPhase(KdTree kdTree, CoreResult coreResult) {
         var dualTreeMst = DualTreeMSTAlgorithm.create(
             nodePropertyValues,
             kdTree,
@@ -97,7 +105,18 @@ public class HDBScan extends Algorithm<HugeLongArray> {
         return dualTreeMst.compute();
     }
 
-    ClusterHierarchy createClusterHierarchy(DualTreeMSTResult dualTreeMSTResult){
+    GeometricMSTResult boruvka(KdTree kdTree, CoreResult coreResult) {
+        var boruvkaMST = BoruvkaMST.create(
+            nodePropertyValues,
+            kdTree,
+            coreResult,
+            nodes.nodeCount(),
+            concurrency
+        );
+        return boruvkaMST.compute();
+    }
+
+    ClusterHierarchy createClusterHierarchy(GeometricMSTResult dualTreeMSTResult){
         var edges = dualTreeMSTResult.edges();
         HugeSerialObjectMergeSort.sort(Edge.class, edges, Edge::distance);
         return ClusterHierarchy.create(nodes.nodeCount(),edges,progressTracker);
