@@ -111,7 +111,8 @@ public class HDBScan extends Algorithm<HugeLongArray> {
             kdTree,
             coreResult,
             nodes.nodeCount(),
-            concurrency
+            concurrency,
+            progressTracker
         );
         return boruvkaMST.compute();
     }

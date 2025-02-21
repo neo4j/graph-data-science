@@ -53,9 +53,11 @@ public class BoruvkaMST extends Algorithm<GeometricMSTResult> {
         KdTree kdTree,
         ClosestDistanceInformationTracker closestDistanceTracker,
         HugeDoubleArray coreValues,
-        long nodeCount, Concurrency concurrency
+        long nodeCount,
+        Concurrency concurrency,
+        ProgressTracker progressTracker
     ) {
-        super(ProgressTracker.NULL_TRACKER);
+        super(progressTracker);
         this.nodePropertyValues = nodePropertyValues;
         this.closestDistanceTracker = closestDistanceTracker;
         this.kdTree = kdTree;
@@ -75,7 +77,8 @@ public class BoruvkaMST extends Algorithm<GeometricMSTResult> {
         NodePropertyValues nodePropertyValues,
         KdTree kdTree,
         long nodeCount,
-        Concurrency concurrency
+        Concurrency concurrency,
+        ProgressTracker progressTracker
     ) {
         var zeroCores = HugeDoubleArray.newArray(nodeCount);
 
@@ -85,7 +88,8 @@ public class BoruvkaMST extends Algorithm<GeometricMSTResult> {
             ClosestDistanceInformationTracker.create(nodeCount),
             zeroCores,
             nodeCount,
-            concurrency
+            concurrency,
+            progressTracker
         );
     }
 
@@ -94,22 +98,33 @@ public class BoruvkaMST extends Algorithm<GeometricMSTResult> {
         KdTree kdTree,
         CoreResult coreResult,
         long nodeCount,
-        Concurrency concurrency
+        Concurrency concurrency,
+        ProgressTracker progressTracker
     ) {
         var cores = coreResult.createCoreArray();
         var closestTracker = ClosestDistanceInformationTracker.create(nodeCount, cores, coreResult);
 
-        return new BoruvkaMST(nodePropertyValues, kdTree, closestTracker, cores, nodeCount,concurrency);
+        return new BoruvkaMST(nodePropertyValues,
+            kdTree,
+            closestTracker,
+            cores,
+            nodeCount,
+            concurrency,
+            progressTracker
+        );
     }
 
 
     @Override
     public GeometricMSTResult compute() {
+        progressTracker.beginSubTask();
         var kdRoot = kdTree.root();
         var rootId = kdRoot.id();
         while (!kdNodeSingleComponent.get(rootId)) {
             performIteration();
         }
+        progressTracker.endSubTask();
+
         return new GeometricMSTResult(edges, totalEdgeSum);
     }
 
@@ -220,7 +235,7 @@ public class BoruvkaMST extends Algorithm<GeometricMSTResult> {
             this.edgeCount++;
             this.totalEdgeSum += distance;
 
-            unionFind.union(uComponent, vComponent);
+            mergeComponents(uComponent,vComponent);
         }
 
     }
@@ -265,6 +280,7 @@ public class BoruvkaMST extends Algorithm<GeometricMSTResult> {
 
     void mergeComponents(long comp0, long comp1) {
         unionFind.union(comp0, comp1);
+        progressTracker.logProgress();
     }
 
 }

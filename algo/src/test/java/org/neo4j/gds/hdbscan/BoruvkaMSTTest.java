@@ -19,20 +19,29 @@
  */
 package org.neo4j.gds.hdbscan;
 
+import org.assertj.core.api.Assertions;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
+import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.logging.GdsTestLog;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.neo4j.gds.assertj.Extractors.removingThreadId;
+import static org.neo4j.gds.assertj.Extractors.replaceTimings;
 
 @GdlExtension
 class BoruvkaMSTTest {
@@ -62,13 +71,19 @@ class BoruvkaMSTTest {
         @ValueSource(ints={1,4})
         void shouldReturnEuclideanMSTWithZeroCoreValues(int concurrency) {
             var nodePropertyValues = graph.nodeProperties("point");
-            var kdTree = new KdTreeBuilder(graph, nodePropertyValues, 1, 1, ProgressTracker.NULL_TRACKER).build();
+            var kdTree = new KdTreeBuilder(graph,
+                nodePropertyValues,
+                1,
+                1,
+                ProgressTracker.NULL_TRACKER
+            ).build();
 
             var dualTree =  BoruvkaMST.createWithZeroCores(
                 nodePropertyValues,
                 kdTree,
                 graph.nodeCount(),
-                new Concurrency(concurrency)
+                new Concurrency(concurrency),
+                ProgressTracker.NULL_TRACKER
             );
 
             var result = dualTree.compute();
@@ -119,13 +134,20 @@ class BoruvkaMSTTest {
         @ValueSource(ints={1,4})
         void shouldReturnEuclideanMSTWithZeroCoreValues(int concurrency) {
             var nodePropertyValues = graph.nodeProperties("point");
-            var kdTree = new KdTreeBuilder(graph, nodePropertyValues, 1, 1, ProgressTracker.NULL_TRACKER).build();
+            var kdTree = new KdTreeBuilder(
+                graph,
+                nodePropertyValues,
+                1,
+                1,
+                ProgressTracker.NULL_TRACKER
+            ).build();
 
             var dualTree =  BoruvkaMST.createWithZeroCores(
                 nodePropertyValues,
                 kdTree,
                 graph.nodeCount(),
-                new Concurrency(concurrency)
+                new Concurrency(concurrency),
+                ProgressTracker.NULL_TRACKER
             );
 
             var result = dualTree.compute();
@@ -176,13 +198,19 @@ class BoruvkaMSTTest {
         @ValueSource(ints={1,4})
         void shouldReturnEuclideanMSTWithZeroCoreValues(int concurrency) {
             var nodePropertyValues = graph.nodeProperties("point");
-            var kdTree = new KdTreeBuilder(graph, nodePropertyValues, 1, 1, ProgressTracker.NULL_TRACKER).build();
+            var kdTree = new KdTreeBuilder(graph,
+                nodePropertyValues,
+                1,
+                1,
+                ProgressTracker.NULL_TRACKER
+            ).build();
 
             var dualTree =  BoruvkaMST.createWithZeroCores(
                 nodePropertyValues,
                 kdTree,
                 graph.nodeCount(),
-                new Concurrency(concurrency)
+                new Concurrency(concurrency),
+                ProgressTracker.NULL_TRACKER
             );
 
             var result = dualTree.compute();
@@ -208,6 +236,45 @@ class BoruvkaMSTTest {
                 );
         }
 
+        @Test
+        void shouldLogProgress(){
+
+            var progressTask = HDBScanProgressTrackerCreator.boruvkaTask("boruvka",graph.nodeCount());
+            var log = new GdsTestLog();
+            var progressTracker = new TaskProgressTracker(progressTask, new LoggerForProgressTrackingAdapter(log), new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE);
+
+            var nodePropertyValues = graph.nodeProperties("point");
+            var kdTree = new KdTreeBuilder(graph,
+                nodePropertyValues,
+                1,
+                1,
+                ProgressTracker.NULL_TRACKER
+            ).build();
+
+            BoruvkaMST.createWithZeroCores(
+                nodePropertyValues,
+                kdTree,
+                graph.nodeCount(),
+                new Concurrency(1),
+                progressTracker
+            ).compute();
+
+            Assertions.assertThat(log.getMessages(TestLog.INFO))
+                .extracting(removingThreadId())
+                .extracting(replaceTimings())
+                .containsExactly(
+                "boruvka :: Start",
+                "boruvka 20%",
+                "boruvka 40%",
+                "boruvka 60%",
+                "boruvka 80%",
+                "boruvka 100%",
+                "boruvka :: Finished"
+                );
+
+        }
+
     }
+
 
 }

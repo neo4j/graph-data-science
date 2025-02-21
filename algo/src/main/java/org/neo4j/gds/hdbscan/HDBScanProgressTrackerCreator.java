@@ -49,4 +49,8 @@ public class HDBScanProgressTrackerCreator {
         );
     }
 
+    static Task boruvkaTask(String name, long nodeCount){
+        return Tasks.leaf(name,nodeCount - 1);
+    }
+
 }

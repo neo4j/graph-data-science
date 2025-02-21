@@ -24,6 +24,7 @@ import org.neo4j.gds.api.properties.nodes.DoubleArrayNodePropertyValues;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -42,7 +43,13 @@ class BoruvkaAlgorithmFunctionsTest {
             1
         );
 
-        var boruvkaMST =  BoruvkaMST.createWithZeroCores(null,kdTree,4,new Concurrency(1));
+        var boruvkaMST =  BoruvkaMST.createWithZeroCores(
+            null,
+            kdTree,
+            4,
+            new Concurrency(1),
+            ProgressTracker.NULL_TRACKER
+        );
 
         assertThat(boruvkaMST.updateSingleComponent(kdNode)).isFalse();
         boruvkaMST.mergeComponents(0,1);
@@ -61,7 +68,15 @@ class BoruvkaAlgorithmFunctionsTest {
             null,
             1
         );
-        var boruvkaMST =  BoruvkaMST.createWithZeroCores(null,kdTree,4,new Concurrency(1));
+
+        var boruvkaMST =  BoruvkaMST.createWithZeroCores(
+            null,
+            kdTree,
+            4,
+            new Concurrency(1),
+            ProgressTracker.NULL_TRACKER
+        );
+
         KdNode kdNode1 = KdNode.createLeaf(1, 1, 2, null);
         KdNode kdNode2 = KdNode.createLeaf(2, 2, 4, null);
 
@@ -94,7 +109,13 @@ class BoruvkaAlgorithmFunctionsTest {
             1
         );
 
-        var boruvkaMST =  BoruvkaMST.createWithZeroCores(null,kdTree,8, new Concurrency(1));
+        var boruvkaMST =  BoruvkaMST.createWithZeroCores(
+            null,
+            kdTree,
+            8,
+            new Concurrency(1),
+            ProgressTracker.NULL_TRACKER
+        );
 
         assertThat(boruvkaMST.updateSingleComponent(kdNode)).isFalse();
         boruvkaMST.mergeComponents(0,1);
@@ -133,7 +154,14 @@ class BoruvkaAlgorithmFunctionsTest {
         when(coreResult.createCoreArray()).thenReturn(HugeDoubleArray.of(0,0,10,10,0,0,0,0,0,0));
         when(coreResult.neighboursOf(anyLong())).thenReturn(new Neighbour[0]);
 
-        var boruvkaMST =  BoruvkaMST.create(nodeProps,kdTree, coreResult,8,new Concurrency(1));
+        var boruvkaMST =  BoruvkaMST.create(
+            nodeProps,
+            kdTree,
+            coreResult,
+            8,
+            new Concurrency(1),
+            ProgressTracker.NULL_TRACKER
+        );
 
         assertThat(boruvkaMST.baseCase(0,1,nodeProps.doubleArrayValue(0),0)).isEqualTo(1); //distance
         assertThat(boruvkaMST.baseCase(2,3,nodeProps.doubleArrayValue(2),2)).isEqualTo(10); //corevalue
@@ -151,7 +179,14 @@ class BoruvkaAlgorithmFunctionsTest {
         when(coreResult.createCoreArray()).thenReturn(HugeDoubleArray.of(0,0,10,10));
         when(coreResult.neighboursOf(anyLong())).thenReturn(new Neighbour[0]);
 
-        var boruvkaMST =  BoruvkaMST.create(nodeProps,kdTree, coreResult,8,new Concurrency(1));
+        var boruvkaMST =  BoruvkaMST.create(
+            nodeProps,
+            kdTree,
+            coreResult,
+            8,
+            new Concurrency(1),
+            ProgressTracker.NULL_TRACKER
+        );
 
         assertThat(boruvkaMST.baseCase(0,1,nodeProps.doubleArrayValue(0),1)).isEqualTo(-1); //distance
 
@@ -163,7 +198,13 @@ class BoruvkaAlgorithmFunctionsTest {
         DoubleArrayNodePropertyValues nodeProps=mock(DoubleArrayNodePropertyValues.class);
         var kdRoot = KdNode.createLeaf(0,0,2,mock(AABB.class));
         var kdTree =new KdTree(HugeLongArray.of(0,1,2),nodeProps,kdRoot,1);
-        var boruvkaMST =  BoruvkaMST.createWithZeroCores(nodeProps,kdTree, 3,new Concurrency(1));
+        var boruvkaMST =  BoruvkaMST.createWithZeroCores(
+            nodeProps,
+            kdTree,
+            3,
+            new Concurrency(1),
+            ProgressTracker.NULL_TRACKER
+        );
 
         //prune based on distance
         boruvkaMST.tryUpdate(2,2,3,5);
