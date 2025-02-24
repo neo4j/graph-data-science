@@ -22,7 +22,6 @@ package org.neo4j.gds.hdbscan;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
@@ -30,7 +29,7 @@ import org.neo4j.gds.core.utils.paged.HugeSerialObjectMergeSort;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.termination.TerminationFlag;
 
-public class HDBScan extends Algorithm<HugeLongArray> {
+public class HDBScan extends Algorithm<Labels> {
 
     private final IdMap nodes;
     private final NodePropertyValues nodePropertyValues;
@@ -61,7 +60,7 @@ public class HDBScan extends Algorithm<HugeLongArray> {
     }
 
     @Override
-    public HugeLongArray compute() {
+    public Labels compute() {
         progressTracker.beginSubTask();
         var kdTree = buildKDTree();
 

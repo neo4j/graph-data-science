@@ -73,7 +73,9 @@ class HDBScanE2ETest {
             TerminationFlag.RUNNING_TRUE
         );
 
-        var labelsWithOffset = hdbScan.compute();
+        var result =hdbScan.compute();
+
+        var labelsWithOffset = result.labels();
 
         var labels = new long[10];
         for (char letter='a'; letter<='j';++letter){
@@ -82,6 +84,9 @@ class HDBScanE2ETest {
         }
 
         var expectedLabels = new long[] {2, 2, 1, 2, 2, 2, 1, 1, 1, 1};
+
+        assertThat(result.numberOfClusters()).isEqualTo(2L);
+        assertThat(result.numberOfNoisePoints()).isEqualTo(0);
 
         assertThat(labels).containsExactly(expectedLabels);
     }

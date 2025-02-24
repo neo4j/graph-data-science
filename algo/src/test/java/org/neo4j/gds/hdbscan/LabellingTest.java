@@ -176,8 +176,9 @@ class LabellingTest {
 
         var stabilityStep = new LabellingStep(condensedTree, nodeCount,ProgressTracker.NULL_TRACKER);
 
-        var labels = stabilityStep.computeLabels(selectedClusters);
+        var labelsResult = stabilityStep.computeLabels(selectedClusters);
 
+        var labels=labelsResult.labels();
         assertThat(labels.size()).isEqualTo(nodeCount);
 
         assertThat(labels.get(0)).isEqualTo(1L);
@@ -189,6 +190,10 @@ class LabellingTest {
         assertThat(labels.get(4)).isEqualTo(4L);
         assertThat(labels.get(5)).isEqualTo(4L);
         assertThat(labels.get(6)).isEqualTo(4L);
+
+        assertThat(labelsResult.numberOfNoisePoints()).isEqualTo(2L);
+        assertThat(labelsResult.numberOfClusters()).isEqualTo(2L);
+
 
     }
 
@@ -207,10 +212,15 @@ class LabellingTest {
 
         var stabilityStep = new LabellingStep(condensedTree, nodeCount,ProgressTracker.NULL_TRACKER);
 
-        var labels = stabilityStep.computeLabels(selectedClusters);
+        var labelsResult = stabilityStep.computeLabels(selectedClusters);
 
+        var labels= labelsResult.labels();
         assertThat(labels.size()).isEqualTo(nodeCount);
         assertThat(labels.toArray()).containsOnly(0L);
+
+        assertThat(labelsResult.numberOfClusters()).isEqualTo(1L);
+        assertThat(labelsResult.numberOfNoisePoints()).isEqualTo(0L);
+
     }
 
     @Test

@@ -29,6 +29,7 @@ class LabellingStep {
     private final CondensedTree condensedTree;
     private final long nodeCount;
     private final ProgressTracker progressTracker;
+    private static final long NOISE = -1;
 
     LabellingStep(CondensedTree condensedTree, long nodeCount, ProgressTracker progressTracker) {
         this.condensedTree = condensedTree;
@@ -97,36 +98,42 @@ class LabellingStep {
         return selectedClusters;
     }
 
-    HugeLongArray computeLabels(BitSet selectedClusters) {
+    Labels computeLabels(BitSet selectedClusters) {
         progressTracker.beginSubTask();
+        var treeLabels = HugeLongArray.newArray(nodeCount);
         var labels = HugeLongArray.newArray(nodeCount);
-        labels.fill(-1L);
-        var nodeCountLabels = HugeLongArray.newArray(nodeCount);
+        treeLabels.fill(NOISE);
+        long clusters=0;
         var root = condensedTree.root();
         var maximumClusterId = condensedTree.maximumClusterId();
         for (var p = root; p <= maximumClusterId; p++) {
             var adaptedIndex = p - nodeCount;
             var parent = condensedTree.parent(p);
-            long parentLabel = p == root ? -1L : labels.get(parent - nodeCount);
-            if (parentLabel != -1L) {
-                labels.set(adaptedIndex, parentLabel);
+            long parentLabel = p == root ? NOISE : treeLabels.get(parent - nodeCount);
+            if (parentLabel != NOISE) {
+                treeLabels.set(adaptedIndex, parentLabel);
             } else if (selectedClusters.get(adaptedIndex)) {
-                labels.set(adaptedIndex, adaptedIndex);
+                clusters++;
+                treeLabels.set(adaptedIndex, adaptedIndex);
             }
             progressTracker.logProgress();
         }
 
+        long noisePoints=0;
         for (var n = 0; n < nodeCount; n++) {
-            nodeCountLabels.set(n, labels.get(condensedTree.fellOutOf(n) - nodeCount));
+            long label = treeLabels.get(condensedTree.fellOutOf(n) - nodeCount);
+            if (label == NOISE)  {
+                noisePoints++;
+            }
+            labels.set(n, label);
             progressTracker.logProgress();
         }
         progressTracker.endSubTask();
 
-
-        return nodeCountLabels;
+        return new Labels(labels,noisePoints,clusters);
     }
 
-    HugeLongArray labels() {
+    Labels labels() {
         progressTracker.beginSubTask();
         var stabilities = computeStabilities();
         var selectedClusters = selectedClusters(stabilities);
