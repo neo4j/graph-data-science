@@ -65,7 +65,7 @@ public class BoruvkaMST extends Algorithm<GeometricMSTResult> {
 
         this.coreValues = coreValues;
         //for now use existing tool
-        this.unionFind = new HugeAtomicDisjointSetStruct(nodeCount, new Concurrency(1));
+        this.unionFind = new HugeAtomicDisjointSetStruct(nodeCount, concurrency);
 
         this.edges = HugeObjectArray.newArray(Edge.class, nodeCount - 1);
         this.nodeCount = nodeCount;
@@ -104,7 +104,8 @@ public class BoruvkaMST extends Algorithm<GeometricMSTResult> {
         var cores = coreResult.createCoreArray();
         var closestTracker = ClosestDistanceInformationTracker.create(nodeCount, cores, coreResult);
 
-        return new BoruvkaMST(nodePropertyValues,
+        return new BoruvkaMST(
+            nodePropertyValues,
             kdTree,
             closestTracker,
             cores,
@@ -132,7 +133,9 @@ public class BoruvkaMST extends Algorithm<GeometricMSTResult> {
         if (closestDistanceTracker.isNotUpdated()) {
 
             ParallelUtil.parallelForEachNode(
-                nodeCount, concurrency, terminationFlag,
+                nodeCount,
+                concurrency,
+                terminationFlag,
                 (q) -> {
                     var   qArray = nodePropertyValues.doubleArrayValue(q);
                     var   qComp = unionFind.setIdOf(q);
