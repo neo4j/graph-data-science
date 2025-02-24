@@ -58,7 +58,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class WriteProcCancellationTest extends BaseTest {
 
-    InvocationCountingTaskStore taskStore = new InvocationCountingTaskStore(Duration.ZERO);
+    InvocationCountingTaskStore taskStore = new InvocationCountingTaskStore(Duration.ofMinutes(1));
 
     @Test
     void shouldRemoveTaskAfterWriteFailure() {
