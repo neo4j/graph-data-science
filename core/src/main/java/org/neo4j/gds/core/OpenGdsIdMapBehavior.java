@@ -45,7 +45,12 @@ public class OpenGdsIdMapBehavior implements IdMapBehavior {
     }
 
     @Override
-    public IdMapBuilder create(String id, Concurrency concurrency, Optional<Long> maxOriginalId, Optional<Long> nodeCount) {
+    public IdMapBuilder create(
+        String id,
+        Concurrency concurrency,
+        Optional<Long> maxOriginalId,
+        Optional<Long> nodeCount
+    ) {
         var idLowerCase = id.toLowerCase(Locale.US);
         if (idLowerCase.equals(ArrayIdMapBuilder.ID)) {
             return create(concurrency, maxOriginalId, nodeCount);
@@ -60,7 +65,8 @@ public class OpenGdsIdMapBehavior implements IdMapBehavior {
             var innerBuilder = HighLimitIdMap.innerTypeId(idLowerCase)
                 .map(innerId -> create(innerId, concurrency, maxIntermediateId, nodeCount))
                 .orElseGet(() -> create(concurrency, maxIntermediateId, nodeCount));
-            return HighLimitIdMapBuilder.of(concurrency, innerBuilder);        }
+            return HighLimitIdMapBuilder.of(concurrency, innerBuilder);
+        }
         return create(concurrency, maxOriginalId, nodeCount);
     }
 
