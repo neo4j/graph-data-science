@@ -344,20 +344,21 @@ public class FastRP extends Algorithm<FastRPResult> {
 
                 float entryValue = scaling * sqrtSparsity / sqrtEmbeddingDimension;
                 random.reseed(randomSeed ^ graph.toOriginalNodeId(nodeId));
-                var randomVector = computeRandomVector(nodeId, random, entryValue);
+                var randomVector = computeRandomVector(nodeId, random, entryValue, scaling);
                 embeddingB.set(nodeId, randomVector);
                 embeddingA.set(nodeId, new float[embeddingDimension]);
             });
             progressTracker.logProgress(partition.nodeCount());
         }
 
-        private float[] computeRandomVector(long nodeId, Random random, float entryValue) {
+        private float[] computeRandomVector(long nodeId, Random random, float entryValue, float scaling) {
             var randomVector = new float[embeddingDimension];
             for (int i = 0; i < baseEmbeddingDimension; i++) {
                 randomVector[i] = computeRandomEntry(random, entryValue);
             }
 
             propertyVectorAdder.setRandomVector(randomVector);
+            propertyVectorAdder.setScaling(scaling);
             FeatureExtraction.extract(nodeId, -1, featureExtractors, propertyVectorAdder);
 
             return randomVector;
@@ -365,16 +366,20 @@ public class FastRP extends Algorithm<FastRPResult> {
 
         private class PropertyVectorAdder implements FeatureConsumer {
             private float[] randomVector;
+            private float scaling = 1.0f;
 
             void setRandomVector(float[] randomVector) {
                 this.randomVector = randomVector;
+            }
+            void setScaling(float scaling) {
+                this.scaling = scaling;
             }
 
             @Override
             public void acceptScalar(long ignored, int offset, double value) {
                 float floatValue = (float) value;
                 for (int i = baseEmbeddingDimension; i < embeddingDimension; i++) {
-                    randomVector[i] += floatValue * propertyVectors[offset][i - baseEmbeddingDimension];
+                    randomVector[i] += scaling * floatValue * propertyVectors[offset][i - baseEmbeddingDimension];
                 }
             }
 
@@ -384,7 +389,7 @@ public class FastRP extends Algorithm<FastRPResult> {
                     var value = (float) values[j];
                     float[] propertyVector = propertyVectors[offset + j];
                     for (int i = baseEmbeddingDimension; i < embeddingDimension; i++) {
-                        randomVector[i] += value * propertyVector[i - baseEmbeddingDimension];
+                        randomVector[i] += scaling * value * propertyVector[i - baseEmbeddingDimension];
                     }
                 }
             }
