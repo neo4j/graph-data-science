@@ -278,12 +278,12 @@ public class CommunityAlgorithmsEstimationModeBusinessFacade {
         );
     }
 
-    public MemoryEstimation hdbscan() {
+    public MemoryEstimation hdbscan(HDBScanBaseConfig configuration) {
         return MemoryEstimations.empty();
     }
 
     public MemoryEstimateResult hdbscan(HDBScanBaseConfig configuration, Object graphNameOrConfiguration) {
-        var memoryEstimation = hdbscan();
+        var memoryEstimation = hdbscan(configuration);
 
         return algorithmEstimationTemplate.estimate(
             configuration,

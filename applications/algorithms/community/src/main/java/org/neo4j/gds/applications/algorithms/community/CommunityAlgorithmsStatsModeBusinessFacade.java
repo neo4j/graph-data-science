@@ -285,7 +285,7 @@ public class CommunityAlgorithmsStatsModeBusinessFacade {
             graphName,
             configuration,
             HDBScan,
-            estimationFacade::hdbscan,
+            () -> estimationFacade.hdbscan(configuration),
             (graph, __) -> communityAlgorithms.hdbscan(graph, configuration),
             resultBuilder
         );

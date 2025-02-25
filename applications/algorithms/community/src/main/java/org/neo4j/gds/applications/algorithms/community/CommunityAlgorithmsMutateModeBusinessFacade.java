@@ -31,6 +31,8 @@ import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutMutateConfig;
 import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
+import org.neo4j.gds.hdbscan.HDBScanMutateConfig;
+import org.neo4j.gds.hdbscan.Labels;
 import org.neo4j.gds.k1coloring.K1ColoringMutateConfig;
 import org.neo4j.gds.k1coloring.K1ColoringResult;
 import org.neo4j.gds.kcore.KCoreDecompositionMutateConfig;
@@ -318,4 +320,23 @@ public class CommunityAlgorithmsMutateModeBusinessFacade {
             resultBuilder
         );
     }
+
+    public <RESULT> RESULT hdbscan(
+        GraphName graphName,
+        HDBScanMutateConfig configuration,
+        ResultBuilder<HDBScanMutateConfig, Labels, RESULT, NodePropertiesWritten> resultBuilder
+    ) {
+        var mutateStep = new HDBScanMutateStep(mutateNodeProperty, configuration);
+
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
+            graphName,
+            configuration,
+            WCC,
+            () -> estimation.hdbscan(configuration),
+            (graph, __) -> algorithms.hdbscan(graph, configuration),
+            mutateStep,
+            resultBuilder
+        );
+    }
+
 }

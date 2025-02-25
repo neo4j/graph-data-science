@@ -56,6 +56,7 @@ import org.neo4j.gds.modularityoptimization.ModularityOptimizationStatsConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationStreamConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationWriteConfig;
 import org.neo4j.gds.procedures.algorithms.community.stubs.ApproximateMaximumKCutMutateStub;
+import org.neo4j.gds.procedures.algorithms.community.stubs.HDBScanMutateStub;
 import org.neo4j.gds.procedures.algorithms.community.stubs.K1ColoringMutateStub;
 import org.neo4j.gds.procedures.algorithms.community.stubs.KCoreMutateStub;
 import org.neo4j.gds.procedures.algorithms.community.stubs.KMeansMutateStub;
@@ -63,6 +64,7 @@ import org.neo4j.gds.procedures.algorithms.community.stubs.LabelPropagationMutat
 import org.neo4j.gds.procedures.algorithms.community.stubs.LccMutateStub;
 import org.neo4j.gds.procedures.algorithms.community.stubs.LeidenMutateStub;
 import org.neo4j.gds.procedures.algorithms.community.stubs.LocalApproximateMaximumKCutMutateStub;
+import org.neo4j.gds.procedures.algorithms.community.stubs.LocalHDBScanMutateStub;
 import org.neo4j.gds.procedures.algorithms.community.stubs.LocalK1ColoringMutateStub;
 import org.neo4j.gds.procedures.algorithms.community.stubs.LocalKCoreMutateStub;
 import org.neo4j.gds.procedures.algorithms.community.stubs.LocalKMeansMutateStub;
@@ -126,6 +128,7 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
     private final TriangleCountMutateStub triangleCountMutateStub;
     private final WccMutateStub wccMutateStub;
     private final SpeakerListenerLPAMutateStub speakerListenerLPAMutateStub;
+    private final HDBScanMutateStub hdbscanMutateStub;
 
 
     private final UserSpecificConfigurationParser configurationParser;
@@ -151,6 +154,7 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
         SccMutateStub sccMutateStub,
         TriangleCountMutateStub triangleCountMutateStub,
         WccMutateStub wccMutateStub,
+        LocalHDBScanMutateStub hdbscanMutateStub,
         UserSpecificConfigurationParser configurationParser
     ) {
         this.closeableResourceRegistry = closeableResourceRegistry;
@@ -172,6 +176,7 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
         this.triangleCountMutateStub = triangleCountMutateStub;
         this.wccMutateStub = wccMutateStub;
         this.speakerListenerLPAMutateStub = speakerListenerLPAMutateStub;
+        this.hdbscanMutateStub = hdbscanMutateStub;
 
         this.configurationParser = configurationParser;
     }
@@ -269,6 +274,12 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
             communityApplications.estimate()
         );
 
+        var hdbscanMutateStub = new LocalHDBScanMutateStub(
+            genericStub,
+            communityApplications.mutate(),
+            communityApplications.estimate()
+        );
+
         return new LocalCommunityProcedureFacade(
             closeableResourceRegistry,
             procedureReturnColumns,
@@ -289,6 +300,7 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
             sccMutateStub,
             triangleCountMutateStub,
             wccMutateStub,
+            hdbscanMutateStub,
             configurationParser
         );
     }
@@ -1207,7 +1219,10 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
             SpeakerListenerLPAConfig::of
         );
 
-        return Stream.of(estimationModeBusinessFacade.speakerListenerLPA(parsedConfiguration, graphNameOrConfiguration));
+        return Stream.of(estimationModeBusinessFacade.speakerListenerLPA(
+            parsedConfiguration,
+            graphNameOrConfiguration
+        ));
     }
 
     @Override
@@ -1236,7 +1251,10 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
             SpeakerListenerLPAConfig::of
         );
 
-        return Stream.of(estimationModeBusinessFacade.speakerListenerLPA(parsedConfiguration, graphNameOrConfiguration));
+        return Stream.of(estimationModeBusinessFacade.speakerListenerLPA(
+            parsedConfiguration,
+            graphNameOrConfiguration
+        ));
     }
 
     @Override
@@ -1266,7 +1284,10 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
             SpeakerListenerLPAConfig::of
         );
 
-        return Stream.of(estimationModeBusinessFacade.speakerListenerLPA(parsedConfiguration, graphNameOrConfiguration));
+        return Stream.of(estimationModeBusinessFacade.speakerListenerLPA(
+            parsedConfiguration,
+            graphNameOrConfiguration
+        ));
     }
 
     @Override
@@ -1291,6 +1312,24 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
     }
 
     @Override
+    public HDBScanMutateStub hdbscanMutateStub() {
+        return hdbscanMutateStub;
+    }
+
+    @Override
+    public Stream<HDBScanMutateResult> hdbscanMutate(String graphName, Map<String, Object> configuration) {
+        return hdbscanMutateStub().execute(graphName, configuration);
+    }
+
+    @Override
+    public Stream<MemoryEstimateResult> hdbscanMutateEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> configuration
+    ) {
+        return hdbscanMutateStub().estimate(graphNameOrConfiguration, configuration);
+    }
+
+    @Override
     public Stream<HDBScanStatsResult> hdbscanStats(String graphName, Map<String, Object> configuration) {
         var parsedConfig = configurationParser.parseConfiguration(configuration, HDBScanStatsConfig::of);
         var resultBuilder = new HDBScanResultBuilderForStatsMode(parsedConfig);
@@ -1299,7 +1338,10 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
     }
 
     @Override
-    public Stream<MemoryEstimateResult> hdbscanStatsEstimate(Object graphNameOrConfiguration, Map<String, Object> configuration) {
+    public Stream<MemoryEstimateResult> hdbscanStatsEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> configuration
+    ) {
         var parsedConfig = configurationParser.parseConfiguration(configuration, HDBScanStatsConfig::of);
 
         return Stream.of(estimationModeBusinessFacade.hdbscan(parsedConfig, graphNameOrConfiguration));
@@ -1314,7 +1356,10 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
     }
 
     @Override
-    public Stream<MemoryEstimateResult> hdbscanStreamEstimate(Object graphNameOrConfiguration, Map<String, Object> configuration) {
+    public Stream<MemoryEstimateResult> hdbscanStreamEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> configuration
+    ) {
         var parsedConfig = configurationParser.parseConfiguration(configuration, HDBScanStreamConfig::of);
 
         return Stream.of(estimationModeBusinessFacade.hdbscan(parsedConfig, graphNameOrConfiguration));
