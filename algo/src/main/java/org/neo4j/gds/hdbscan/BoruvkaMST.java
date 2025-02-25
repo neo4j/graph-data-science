@@ -139,7 +139,9 @@ public class BoruvkaMST extends Algorithm<GeometricMSTResult> {
                 (q) -> {
                     var   qArray = nodePropertyValues.doubleArrayValue(q);
                     var   qComp = unionFind.setIdOf(q);
-                    traversalStep(q,kdTree.root(),qComp,0,qArray);
+                    if (filterNodesOnCoreValue(q,qComp)) {
+                        traversalStep(q, kdTree.root(), qComp, 0, qArray);
+                    }
                 }
             );
         }
