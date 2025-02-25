@@ -19,19 +19,12 @@
  */
 package org.neo4j.gds.hdbscan;
 
-import org.neo4j.gds.collections.ha.HugeDoubleArray;
-import org.neo4j.gds.collections.ha.HugeObjectArray;
+import org.neo4j.gds.core.concurrency.Concurrency;
 
-public record CoreResult(HugeObjectArray<Neighbours> neighbours) {
-
-    HugeDoubleArray createCoreArray() {
-        var cores = HugeDoubleArray.newArray(neighbours.size());
-        cores.setAll(v -> neighbours.get(v).maximum().distance() * neighbours.get(v).maximum().distance());
-        return cores;
-    }
-
-    Neighbour[] neighboursOf(long node) {
-        return neighbours.get(node).neighbours();
-    }
-
+public record HDBScanParameters(
+    Concurrency concurrency,
+    long leafSize,
+    int samples,
+    long minClusterSize
+) {
 }

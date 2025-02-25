@@ -34,12 +34,31 @@ public class HDBScan extends Algorithm<Labels> {
     private final IdMap nodes;
     private final NodePropertyValues nodePropertyValues;
     private final Concurrency concurrency;
-    private final long leafSize;
-    private final TerminationFlag terminationFlag;
     private final int samples;
     private final long minClusterSize;
+    private final long leafSize;
+    private final TerminationFlag terminationFlag;
 
     public HDBScan(
+        IdMap nodes,
+        NodePropertyValues nodePropertyValues,
+        HDBScanParameters parameters,
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
+    ) {
+        this(
+            nodes,
+            nodePropertyValues,
+            parameters.concurrency(),
+            parameters.leafSize(),
+            parameters.samples(),
+            parameters.minClusterSize(),
+            progressTracker,
+            terminationFlag
+        );
+    }
+
+    HDBScan(
         IdMap nodes,
         NodePropertyValues nodePropertyValues,
         Concurrency concurrency,
@@ -118,10 +137,10 @@ public class HDBScan extends Algorithm<Labels> {
         return boruvkaMST.compute();
     }
 
-    ClusterHierarchy createClusterHierarchy(GeometricMSTResult dualTreeMSTResult){
+    ClusterHierarchy createClusterHierarchy(GeometricMSTResult dualTreeMSTResult) {
         var edges = dualTreeMSTResult.edges();
         HugeSerialObjectMergeSort.sort(Edge.class, edges, Edge::distance);
-        return ClusterHierarchy.create(nodes.nodeCount(),edges,progressTracker);
+        return ClusterHierarchy.create(nodes.nodeCount(), edges,progressTracker);
     }
 
     KdTree buildKDTree() {
