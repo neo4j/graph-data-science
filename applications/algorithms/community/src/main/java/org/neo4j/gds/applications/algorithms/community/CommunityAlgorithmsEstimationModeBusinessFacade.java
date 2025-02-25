@@ -25,6 +25,7 @@ import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutMemoryEstimateDefinition;
 import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutBaseConfig;
 import org.neo4j.gds.config.SeedConfig;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
+import org.neo4j.gds.hdbscan.HDBScanBaseConfig;
 import org.neo4j.gds.k1coloring.K1ColoringBaseConfig;
 import org.neo4j.gds.k1coloring.K1ColoringMemoryEstimateDefinition;
 import org.neo4j.gds.kcore.KCoreDecompositionBaseConfig;
@@ -38,6 +39,7 @@ import org.neo4j.gds.leiden.LeidenMemoryEstimateDefinition;
 import org.neo4j.gds.louvain.LouvainBaseConfig;
 import org.neo4j.gds.louvain.LouvainMemoryEstimateDefinition;
 import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimations;
 import org.neo4j.gds.modularity.ModularityBaseConfig;
 import org.neo4j.gds.modularity.ModularityCalculatorMemoryEstimateDefinition;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationBaseConfig;
@@ -268,6 +270,20 @@ public class CommunityAlgorithmsEstimationModeBusinessFacade {
 
     public MemoryEstimateResult speakerListenerLPA(SpeakerListenerLPAConfig configuration, Object graphNameOrConfiguration) {
         var memoryEstimation = speakerListenerLPA();
+
+        return algorithmEstimationTemplate.estimate(
+            configuration,
+            graphNameOrConfiguration,
+            memoryEstimation
+        );
+    }
+
+    public MemoryEstimation hdbscan() {
+        return MemoryEstimations.empty();
+    }
+
+    public MemoryEstimateResult hdbscan(HDBScanBaseConfig configuration, Object graphNameOrConfiguration) {
+        var memoryEstimation = hdbscan();
 
         return algorithmEstimationTemplate.estimate(
             configuration,

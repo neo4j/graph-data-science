@@ -48,6 +48,7 @@ public enum AlgorithmLabel implements Label {
     GraphSageTrain("GraphSageTrain"),
     HarmonicCentrality("HarmonicCentrality"),
     HashGNN("HashGNN"),
+    HDBScan("HDBScan"),
     HITS("HITS"),
     IndexInverse("IndexInverse"),
     IndirectExposure("IndirectExposure"),
@@ -119,6 +120,7 @@ public enum AlgorithmLabel implements Label {
             case HITS -> HITS;
             case HarmonicCentrality -> HarmonicCentrality;
             case HashGNN -> HashGNN;
+            case HDBScan -> HDBScan;
             case IndexInverse -> IndexInverse;
             case K1Coloring -> K1Coloring;
             case KCore -> KCore;

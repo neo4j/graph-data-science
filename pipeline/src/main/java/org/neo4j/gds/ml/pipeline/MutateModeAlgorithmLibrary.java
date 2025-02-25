@@ -84,6 +84,7 @@ final class MutateModeAlgorithmLibrary {
             case HITS -> CanonicalProcedureName.parse("gds.hits");
             case HarmonicCentrality -> CanonicalProcedureName.parse("gds.closeness.harmonic");
             case HashGNN -> CanonicalProcedureName.parse("gds.hashgnn");
+            case HDBScan -> null;
             case IndexInverse -> CanonicalProcedureName.parse("gds.graph.relationships.indexInverse");
             case K1Coloring -> CanonicalProcedureName.parse("gds.k1coloring");
             case KCore -> CanonicalProcedureName.parse("gds.kcore");

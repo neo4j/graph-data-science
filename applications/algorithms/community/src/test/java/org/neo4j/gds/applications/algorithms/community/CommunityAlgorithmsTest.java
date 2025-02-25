@@ -42,6 +42,7 @@ import org.neo4j.gds.beta.generator.RandomGraphGenerator;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.conductance.ConductanceStreamConfigImpl;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
@@ -51,6 +52,7 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.hdbscan.HDBScanStreamConfig;
 import org.neo4j.gds.k1coloring.K1ColoringStreamConfigImpl;
 import org.neo4j.gds.kcore.KCoreDecompositionStreamConfigImpl;
 import org.neo4j.gds.kmeans.KmeansStreamConfigImpl;
@@ -68,6 +70,7 @@ import org.neo4j.gds.wcc.WccStreamConfigImpl;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
@@ -1085,6 +1088,149 @@ final class CommunityAlgorithmsTest {
             }
         }
     }
+
+    @Nested
+    @GdlExtension
+    class HDBScan {
+
+        @GdlGraph
+        private static final String DATA =
+            """
+            CREATE
+                (a:Node {point: [1.17755754, 2.02742572]}),
+                (b:Node {point: [0.88489682, 1.97328227]}),
+                (c:Node {point: [1.04192267, 4.34997048]}),
+                (d:Node {point: [1.25764886, 1.94667762]}),
+                (e:Node {point: [0.95464318, 1.55300632]}),
+                (f:Node {point: [0.80617459, 1.60491802]}),
+                (g:Node {point: [1.26227786, 3.96066446]}),
+                (h:Node {point: [0.87569985, 4.51938412]}),
+                (i:Node {point: [0.8028515 , 4.088106  ]}),
+                (j:Node {point: [0.82954022, 4.63897487]})
+            """;
+
+        @Inject
+        private TestGraph graph;
+
+        @Test
+        void shouldLogProgress() {
+
+            var config = HDBScanStreamConfig.of(CypherMapWrapper.create(Map.of(
+                "leafSize", 1L,
+                "samples", 2,
+                "minClusterSize", 2L,
+                "nodeProperty", "point",
+                "concurrency", 1
+            )));
+            var log = new GdsTestLog();
+
+            var progressTrackerCreator = progressTrackerCreator(1, log);
+
+            var algorithms = new CommunityAlgorithms(progressTrackerCreator, TerminationFlag.RUNNING_TRUE);
+            var labels = algorithms.hdbscan(graph, config);
+            assertThat(labels).isNotNull();
+
+            var messagesInOrder = log.getMessages(INFO);
+
+            assertThat(messagesInOrder)
+                // avoid asserting on the thread id
+                .extracting(removingThreadId())
+                .containsExactly(
+
+                    "HDBScan :: Start",
+                    "HDBScan :: KD-Tree Construction :: Start",
+                    "HDBScan :: KD-Tree Construction 10%",
+                    "HDBScan :: KD-Tree Construction 20%",
+                    "HDBScan :: KD-Tree Construction 30%",
+                    "HDBScan :: KD-Tree Construction 40%",
+                    "HDBScan :: KD-Tree Construction 50%",
+                    "HDBScan :: KD-Tree Construction 60%",
+                    "HDBScan :: KD-Tree Construction 70%",
+                    "HDBScan :: KD-Tree Construction 80%",
+                    "HDBScan :: KD-Tree Construction 90%",
+                    "HDBScan :: KD-Tree Construction 100%",
+                    "HDBScan :: KD-Tree Construction :: Finished",
+                    "HDBScan :: Nearest Neighbors Search :: Start",
+                    "HDBScan :: Nearest Neighbors Search 10%",
+                    "HDBScan :: Nearest Neighbors Search 20%",
+                    "HDBScan :: Nearest Neighbors Search 30%",
+                    "HDBScan :: Nearest Neighbors Search 40%",
+                    "HDBScan :: Nearest Neighbors Search 50%",
+                    "HDBScan :: Nearest Neighbors Search 60%",
+                    "HDBScan :: Nearest Neighbors Search 70%",
+                    "HDBScan :: Nearest Neighbors Search 80%",
+                    "HDBScan :: Nearest Neighbors Search 90%",
+                    "HDBScan :: Nearest Neighbors Search 100%",
+                    "HDBScan :: Nearest Neighbors Search :: Finished",
+                    "HDBScan :: MST Computation :: Start",
+                    "HDBScan :: MST Computation 11%",
+                    "HDBScan :: MST Computation 22%",
+                    "HDBScan :: MST Computation 33%",
+                    "HDBScan :: MST Computation 44%",
+                    "HDBScan :: MST Computation 55%",
+                    "HDBScan :: MST Computation 66%",
+                    "HDBScan :: MST Computation 77%",
+                    "HDBScan :: MST Computation 88%",
+                    "HDBScan :: MST Computation 100%",
+                    "HDBScan :: MST Computation :: Finished",
+                    "HDBScan :: Dendrogram Creation :: Start",
+                    "HDBScan :: Dendrogram Creation 11%",
+                    "HDBScan :: Dendrogram Creation 22%",
+                    "HDBScan :: Dendrogram Creation 33%",
+                    "HDBScan :: Dendrogram Creation 44%",
+                    "HDBScan :: Dendrogram Creation 55%",
+                    "HDBScan :: Dendrogram Creation 66%",
+                    "HDBScan :: Dendrogram Creation 77%",
+                    "HDBScan :: Dendrogram Creation 88%",
+                    "HDBScan :: Dendrogram Creation 100%",
+                    "HDBScan :: Dendrogram Creation :: Finished",
+                    "HDBScan :: Condensed Tree Creation  :: Start",
+                    "HDBScan :: Condensed Tree Creation  11%",
+                    "HDBScan :: Condensed Tree Creation  22%",
+                    "HDBScan :: Condensed Tree Creation  33%",
+                    "HDBScan :: Condensed Tree Creation  44%",
+                    "HDBScan :: Condensed Tree Creation  55%",
+                    "HDBScan :: Condensed Tree Creation  66%",
+                    "HDBScan :: Condensed Tree Creation  77%",
+                    "HDBScan :: Condensed Tree Creation  88%",
+                    "HDBScan :: Condensed Tree Creation  100%",
+                    "HDBScan :: Condensed Tree Creation  :: Finished",
+                    "HDBScan :: Node Labelling :: Start",
+                    "HDBScan :: Node Labelling :: Stability calculation :: Start",
+                    "HDBScan :: Node Labelling :: Stability calculation 11%",
+                    "HDBScan :: Node Labelling :: Stability calculation 22%",
+                    "HDBScan :: Node Labelling :: Stability calculation 100%",
+                    "HDBScan :: Node Labelling :: Stability calculation :: Finished",
+                    "HDBScan :: Node Labelling :: cluster selection :: Start",
+                    "HDBScan :: Node Labelling :: cluster selection 11%",
+                    "HDBScan :: Node Labelling :: cluster selection 22%",
+                    "HDBScan :: Node Labelling :: cluster selection 33%",
+                    "HDBScan :: Node Labelling :: cluster selection 100%",
+                    "HDBScan :: Node Labelling :: cluster selection :: Finished",
+                    "HDBScan :: Node Labelling :: labelling :: Start",
+                    "HDBScan :: Node Labelling :: labelling 5%",
+                    "HDBScan :: Node Labelling :: labelling 10%",
+                    "HDBScan :: Node Labelling :: labelling 15%",
+                    "HDBScan :: Node Labelling :: labelling 21%",
+                    "HDBScan :: Node Labelling :: labelling 26%",
+                    "HDBScan :: Node Labelling :: labelling 31%",
+                    "HDBScan :: Node Labelling :: labelling 36%",
+                    "HDBScan :: Node Labelling :: labelling 42%",
+                    "HDBScan :: Node Labelling :: labelling 47%",
+                    "HDBScan :: Node Labelling :: labelling 52%",
+                    "HDBScan :: Node Labelling :: labelling 57%",
+                    "HDBScan :: Node Labelling :: labelling 63%",
+                    "HDBScan :: Node Labelling :: labelling 68%",
+                    "HDBScan :: Node Labelling :: labelling 100%",
+                    "HDBScan :: Node Labelling :: labelling :: Finished",
+                    "HDBScan :: Node Labelling :: Finished",
+                    "HDBScan :: Finished"
+
+                );
+        }
+
+    }
+
 
     abstract static class TestProgressTrackerCreator extends ProgressTrackerCreator {
 

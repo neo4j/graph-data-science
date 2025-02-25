@@ -110,6 +110,7 @@ public class ConfigurationParsersForMutateMode {
             case HITS -> HitsConfig::of;
             case HarmonicCentrality -> HarmonicCentralityMutateConfig::of;
             case HashGNN -> HashGNNMutateConfig::of;
+            case HDBScan -> null;
             case IndexInverse -> InverseRelationshipsConfig::of;
             case K1Coloring -> K1ColoringMutateConfig::of;
             case KCore -> KCoreDecompositionMutateConfig::of;

@@ -52,14 +52,14 @@ public interface HDBScanBaseConfig extends AlgoBaseConfig {
     }
 
     @Configuration.ConvertWith(method = "validatePropertyName")
-    String pointProperty();
+    String nodeProperty();
 
     static @Nullable String validatePropertyName(String input) {
-        return validateNoWhiteCharacter(emptyToNull(input), "pointProperty");
+        return validateNoWhiteCharacter(emptyToNull(input), "nodeProperty");
     }
 
     @Configuration.GraphStoreValidationCheck
-    default void pointPropertyValidation(
+    default void nodePropertyValidation(
         GraphStore graphStore,
         Collection<NodeLabel> selectedLabels,
         Collection<RelationshipType> selectedRelationshipTypes
@@ -67,18 +67,18 @@ public interface HDBScanBaseConfig extends AlgoBaseConfig {
 
         if (selectedLabels
             .stream()
-            .anyMatch(label -> graphStore.nodePropertyKeys(label).contains(pointProperty()))) {
+            .anyMatch(label -> graphStore.nodePropertyKeys(label).contains(nodeProperty()))) {
             return;
         }
 
         throw new IllegalArgumentException(formatWithLocale(
-            "pointProperty `%s` is not present for any requested node labels. Requested labels: %s. Labels with `%1$s` present: %s",
-            pointProperty(),
+            "nodeProperty `%s` is not present for any requested node labels. Requested labels: %s. Labels with `%1$s` present: %s",
+            nodeProperty(),
             StringJoining.join(selectedLabels.stream().map(NodeLabel::name)),
             StringJoining.join(graphStore
                 .nodeLabels()
                 .stream()
-                .filter(label -> graphStore.nodePropertyKeys(label).contains(pointProperty()))
+                .filter(label -> graphStore.nodePropertyKeys(label).contains(nodeProperty()))
                 .map(NodeLabel::name))
         ));
     }

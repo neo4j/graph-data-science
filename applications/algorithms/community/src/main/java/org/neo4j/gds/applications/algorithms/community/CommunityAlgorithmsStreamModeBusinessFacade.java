@@ -29,6 +29,8 @@ import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.conductance.ConductanceResult;
 import org.neo4j.gds.conductance.ConductanceStreamConfig;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
+import org.neo4j.gds.hdbscan.HDBScanStreamConfig;
+import org.neo4j.gds.hdbscan.Labels;
 import org.neo4j.gds.k1coloring.K1ColoringResult;
 import org.neo4j.gds.k1coloring.K1ColoringStreamConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionResult;
@@ -59,6 +61,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ApproximateMaximumKCut;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Conductance;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.HDBScan;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.K1Coloring;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.KCore;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.KMeans;
@@ -326,6 +329,21 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
             estimationFacade::speakerListenerLPA,
             (graph, __) -> algorithms.speakerListenerLPA(graph, configuration),
             streamResultBuilder
+        );
+    }
+
+    public <RESULT> Stream<RESULT> hdbscan(
+        GraphName graphName,
+        HDBScanStreamConfig configuration,
+        StreamResultBuilder<Labels, RESULT> resultBuilder
+    ) {
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
+            graphName,
+            configuration,
+            HDBScan,
+            estimationFacade::hdbscan,
+            (graph, __) -> algorithms.hdbscan(graph, configuration),
+            resultBuilder
         );
     }
 }

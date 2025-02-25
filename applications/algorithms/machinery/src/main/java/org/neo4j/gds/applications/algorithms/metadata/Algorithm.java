@@ -54,6 +54,7 @@ public enum Algorithm {
     HITS,
     HarmonicCentrality,
     HashGNN,
+    HDBScan,
     IndexInverse,
     K1Coloring,
     KCore,

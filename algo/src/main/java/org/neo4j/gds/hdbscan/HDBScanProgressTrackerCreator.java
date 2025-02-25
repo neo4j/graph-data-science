@@ -53,7 +53,7 @@ public class HDBScanProgressTrackerCreator {
         return Tasks.leaf(name,nodeCount - 1);
     }
 
-    static Task hdbscanTask(String name, long nodeCount){
+    public static Task hdbscanTask(String name, long nodeCount){
         return Tasks.task(
             name,
             List.of(

@@ -41,6 +41,10 @@ import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.hdbscan.HDBScan;
+import org.neo4j.gds.hdbscan.HDBScanBaseConfig;
+import org.neo4j.gds.hdbscan.HDBScanProgressTrackerCreator;
+import org.neo4j.gds.hdbscan.Labels;
 import org.neo4j.gds.k1coloring.K1ColoringBaseConfig;
 import org.neo4j.gds.k1coloring.K1ColoringProgressTrackerTaskCreator;
 import org.neo4j.gds.k1coloring.K1ColoringResult;
@@ -163,6 +167,22 @@ public class CommunityAlgorithms {
             true,
             configuration.concurrency()
         );
+    }
+
+    public Labels hdbscan(Graph graph, HDBScanBaseConfig configuration) {
+
+        var task = HDBScanProgressTrackerCreator.hdbscanTask(AlgorithmLabel.HDBScan.asString(), graph.nodeCount());
+        var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
+
+        var hdbScan = new HDBScan(
+            graph,
+            graph.nodeProperties(configuration.nodeProperty()),
+            configuration.toParameters(),
+            progressTracker,
+            terminationFlag
+        );
+
+        return hdbScan.compute();
     }
 
     public K1ColoringResult k1Coloring(Graph graph, K1ColoringBaseConfig configuration) {
@@ -318,7 +338,12 @@ public class CommunityAlgorithms {
 
         var parameters = configuration.toParameters();
 
-        var task = LouvainProgressTrackerTaskCreator.createTask(graph.nodeCount(),graph.relationshipCount(),parameters.maxLevels(),parameters.maxIterations());
+        var task = LouvainProgressTrackerTaskCreator.createTask(
+            graph.nodeCount(),
+            graph.relationshipCount(),
+            parameters.maxLevels(),
+            parameters.maxIterations()
+        );
         var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
 
         var algorithm = new Louvain(
@@ -483,17 +508,29 @@ public class CommunityAlgorithms {
 
     private Task kMeansTask(IdMap idMap, String description, KmeansBaseConfig configuration) {
         if (configuration.computeSilhouette()) {
-            return Tasks.task(description, List.of(
-                Tasks.leaf("Initialization", configuration.k()),
-                Tasks.iterativeDynamic("Main", () -> List.of(Tasks.leaf("Iteration")), configuration.maxIterations()),
-                Tasks.leaf("Silhouette", idMap.nodeCount())
+            return Tasks.task(
+                description, List.of(
+                    Tasks.leaf("Initialization", configuration.k()),
+                    Tasks.iterativeDynamic(
+                        "Main",
+                        () -> List.of(Tasks.leaf("Iteration")),
+                        configuration.maxIterations()
+                    ),
+                    Tasks.leaf("Silhouette", idMap.nodeCount())
 
-            ));
+                )
+            );
         } else {
-            return Tasks.task(description, List.of(
-                Tasks.leaf("Initialization", configuration.k()),
-                Tasks.iterativeDynamic("Main", () -> List.of(Tasks.leaf("Iteration")), configuration.maxIterations())
-            ));
+            return Tasks.task(
+                description, List.of(
+                    Tasks.leaf("Initialization", configuration.k()),
+                    Tasks.iterativeDynamic(
+                        "Main",
+                        () -> List.of(Tasks.leaf("Iteration")),
+                        configuration.maxIterations()
+                    )
+                )
+            );
         }
     }
 
@@ -522,8 +559,12 @@ public class CommunityAlgorithms {
         );
     }
 
-    PregelResult speakerListenerLPA(Graph graph, SpeakerListenerLPAConfig configuration){
-        var task  = SpeakerListenerLPAProgressTrackerCreator.progressTask(graph.nodeCount(),configuration.maxIterations(),AlgorithmLabel.SLLPA.asString());
+    PregelResult speakerListenerLPA(Graph graph, SpeakerListenerLPAConfig configuration) {
+        var task = SpeakerListenerLPAProgressTrackerCreator.progressTask(
+            graph.nodeCount(),
+            configuration.maxIterations(),
+            AlgorithmLabel.SLLPA.asString()
+        );
         var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
 
         var algorithm = new SpeakerListenerLPA(

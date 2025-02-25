@@ -103,6 +103,9 @@
 | `gds.eigenvector.stream.estimate` label:procedure[Procedure]
 | `gds.eigenvector.stats` label:procedure[Procedure]
 | `gds.eigenvector.stats.estimate` label:procedure[Procedure]
+.2+<.^| HDBSCAN
+| `gds.hdbscan.stream` label:procedure[Procedure]
+| `gds.hdbscan.stream.estimate` label:procedure[Procedure]
 .8+<.^| xref:machine-learning/node-embeddings/fastrp.adoc[Fast Random Projection]
 | `gds.fastRP.mutate` label:procedure[Procedure]
 | `gds.fastRP.mutate.estimate` label:procedure[Procedure]

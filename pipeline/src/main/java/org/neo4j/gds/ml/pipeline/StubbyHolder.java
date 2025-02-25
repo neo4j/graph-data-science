@@ -109,6 +109,7 @@ class StubbyHolder {
             case HITS -> new HitsStub();
             case HarmonicCentrality -> new HarmonicCentralityStub();
             case HashGNN -> new HashGnnStub();
+            case HDBScan -> null;
             case IndexInverse -> new IndexInverseStub();
             case K1Coloring -> new K1ColoringStub();
             case KCore -> new KCoreStub();

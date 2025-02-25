@@ -154,6 +154,9 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         "gds.hashgnn.write",
         "gds.hashgnn.write.estimate",
 
+        "gds.hdbscan.stream",
+        "gds.hdbscan.stream.estimate",
+
         "gds.beta.pipeline.linkPrediction.addFeature",
         "gds.beta.pipeline.linkPrediction.addNodeProperty",
         "gds.beta.pipeline.linkPrediction.addLogisticRegression",
@@ -602,7 +605,7 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         );
 
         // If you find yourself updating this count, please also update the count in SmokeTest.kt
-        int expectedCount = 443;
+        int expectedCount = 445;
         assertEquals(
             expectedCount,
             returnedRows,

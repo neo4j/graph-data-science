@@ -438,4 +438,8 @@ public interface CommunityProcedureFacade {
 
 
     SpeakerListenerLPAMutateStub speakerListenerLPAMutateStub();
+
+    Stream<HDBScanStreamResult> hdbscan(String graphName, Map<String, Object> configuration);
+
+    Stream<MemoryEstimateResult> hdbscanStreamEstimate(Object graphName, Map<String, Object> configuration);
 }

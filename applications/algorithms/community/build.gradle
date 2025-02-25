@@ -18,6 +18,7 @@ dependencies {
     implementation project(":progress-tracking")
     implementation project(":termination")
 
+    testImplementation project(':annotations')
     testImplementation project(':test-utils')
 
 }
