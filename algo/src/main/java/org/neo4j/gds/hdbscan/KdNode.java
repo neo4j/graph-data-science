@@ -30,8 +30,6 @@ class  KdNode{
     private final boolean isLeaf;
     private  KdNode leftChild;
     private  KdNode rightChild;
-    private  KdNode parent;
-    private  KdNode sibling;
     private Optional<SplitInformation> splitInformation;
     private final long id;
 
@@ -56,13 +54,6 @@ class  KdNode{
         this.splitInformation = splitInformation;
     }
 
-    void parent(KdNode parent){
-        this.parent = parent;
-    }
-
-    void sibling(KdNode sibling){
-        this.sibling = sibling;
-    }
 
     void leftChild(KdNode child){
         this.leftChild = child;
@@ -72,13 +63,9 @@ class  KdNode{
         this.rightChild = child;
     }
 
-    KdNode parent(){return parent;}
-
     KdNode rightChild(){return rightChild;}
 
     KdNode leftChild(){return leftChild;}
-
-    KdNode sibling(){return sibling;}
 
     long start() { return  start;}
 

@@ -21,12 +21,8 @@ package org.neo4j.gds.hdbscan;
 
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.collections.ha.HugeLongArray;
-import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.core.concurrency.RunWithConcurrency;
-import org.neo4j.gds.core.utils.partition.PartitionUtils;
 
 import java.util.Arrays;
-import java.util.Optional;
 
 public record AABB(double[] min, double[] max, int dimension) {
 
@@ -53,49 +49,6 @@ public record AABB(double[] min, double[] max, int dimension) {
         return new AABB(min, max, dimension);
 
     }
-
-    static AABB createInParallel(
-        NodePropertyValues nodePropertyValues,
-        HugeLongArray ids,
-        long leftIndex,
-        long rightIndex,
-        int dimension,
-        Concurrency concurrency
-    ) {
-        var size = rightIndex - leftIndex;
-        if (size <= 1000) return create(nodePropertyValues, ids, leftIndex, rightIndex, dimension);
-
-        double[] min = new double[dimension];
-        double[] max = new double[dimension];
-        Arrays.fill(min, Double.MAX_VALUE);
-        Arrays.fill(max, Double.MIN_VALUE);
-
-
-        //maybe we want to avoid create  the local min,max array for every step
-        var tasks = PartitionUtils.rangePartition(
-            concurrency,
-            size,
-            (partition) -> new AABBCreateTask(partition, nodePropertyValues, ids, leftIndex, dimension),
-            Optional.empty()
-        );
-
-        RunWithConcurrency.builder()
-            .tasks(tasks)
-            .concurrency(concurrency)
-            .run();
-
-        for (var task : tasks) {
-            var taskMin = task.taskMin();
-            var taskMax = task.taskMax();
-            for (int i = 0; i < dimension; ++i) {
-                min[i] = Math.min(min[i], taskMin[i]);
-                max[i] = Math.max(max[i], taskMax[i]);
-            }
-        }
-        return new AABB(min, max, dimension);
-
-    }
-
 
     int mostSpreadDimension() {
         double bestSpread = max[0] - min[0];

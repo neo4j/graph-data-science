@@ -83,7 +83,6 @@ class KdTreeBuilderTest {
         // (b:Node { point: [5.0, 4.0]}),
         var left = root.leftChild();
 
-        assertThat(left.parent()).isEqualTo(root);
 
         assertThat(left.start()).isEqualTo(0);
         assertThat(left.end()).isEqualTo(3);
@@ -141,7 +140,6 @@ class KdTreeBuilderTest {
         // (c:Node { point: [9.0, 6.0]}),
         var right = root.rightChild();
 
-        assertThat(right.parent()).isEqualTo(root);
 
         assertThat(right.start()).isEqualTo(3);
         assertThat(right.end()).isEqualTo(6);

@@ -50,11 +50,10 @@ class KdTreeNodeBuilderTaskTest {
                 return ids.size();
             }
         };
-        var nodeBuilder =new KdTreeNodeBuilderTask(ids,
+        var nodeBuilder =new KdTreeNodeBuilderTask(
+            ids,
             nodePropertyValues,
             0,10,1,
-            false,
-            null,
             new AtomicInteger(0),
             ProgressTracker.NULL_TRACKER
         );
@@ -89,8 +88,6 @@ class KdTreeNodeBuilderTaskTest {
             4,
             8,
             1,
-            false,
-            null,
             new AtomicInteger(),
             ProgressTracker.NULL_TRACKER
         );
@@ -121,8 +118,6 @@ class KdTreeNodeBuilderTaskTest {
             0,
             3,
             3,
-            false,
-            null,
             new AtomicInteger(),
             ProgressTracker.NULL_TRACKER
         );
@@ -158,8 +153,6 @@ class KdTreeNodeBuilderTaskTest {
             0,
             3,
             2,
-            false,
-            null,
             new AtomicInteger(0),
             ProgressTracker.NULL_TRACKER
         );
@@ -180,15 +173,11 @@ class KdTreeNodeBuilderTaskTest {
         assertThat(leftChild.start()).isEqualTo(0);
         assertThat(leftChild.leftChild()).isNull();
         assertThat(leftChild.rightChild()).isNull();
-        assertThat(leftChild.parent()).isEqualTo(node);
-        assertThat(leftChild.sibling()).isEqualTo(rightChild);
 
         assertThat(rightChild.isLeaf()).isTrue();
         assertThat(rightChild.end()).isEqualTo(3);
         assertThat(rightChild.leftChild()).isNull();
         assertThat(rightChild.rightChild()).isNull();
-        assertThat(rightChild.parent()).isEqualTo(node);
-        assertThat(rightChild.sibling()).isEqualTo(leftChild);
 
         assertThat(leftChild.end()).isEqualTo(rightChild.start());
 
@@ -201,12 +190,4 @@ class KdTreeNodeBuilderTaskTest {
 
     }
 
-
-    /*
-    @Test
-    void shouldFindLargestElementIndex() {
-        var array = new double[]{ .1, .2, .25, 5.1, 2.1, 3. };
-        var index = KdTreeNodeBuilderTask.findLargestElementIndex(array);
-        assertThat(index).isEqualTo(3);
-    } */
 }

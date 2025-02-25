@@ -105,7 +105,7 @@ class HDBScanTest {
 
         var kdtree = hdbscan.buildKDTree();
 
-        var result = hdbscan.dualTreeMSTPhase(kdtree, hdbscan.computeCores(kdtree, graph.nodeCount()));
+        var result = hdbscan.boruvka(kdtree, hdbscan.computeCores(kdtree, graph.nodeCount()));
 
         var expected = List.of(
             new Edge(graph.toMappedNodeId("i"), graph.toMappedNodeId("h"), Math.sqrt(346)),

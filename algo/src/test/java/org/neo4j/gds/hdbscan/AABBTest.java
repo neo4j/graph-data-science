@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.hdbscan;
 
-import org.assertj.core.api.SoftAssertions;
 import org.assertj.core.api.junit.jupiter.SoftAssertionsExtension;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Nested;
@@ -29,7 +28,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.neo4j.gds.api.properties.nodes.DoubleArrayNodePropertyValues;
 import org.neo4j.gds.collections.ha.HugeLongArray;
-import org.neo4j.gds.core.concurrency.Concurrency;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -74,40 +72,6 @@ class AABBTest {
         assertThat(min).containsExactly(0.1,1.0,-4.0);
         var max =aabb.max();
         assertThat(max).containsExactly(5.1,6.0,22.0);
-
-    }
-
-    @Test
-    void shouldConstructAABBInParallel(SoftAssertions assertions){
-        var dim0 = new double[]{ 0.1,  0.2, 0.25, 5.1,  2.1, 3.0};
-        var dim1 = new double[]{ 1.0,  2.0, 3.0,  4.0,  5.0, 6.0};
-        var dim2 = new double[]{ 14.0, 22.0, 3.0, -4.0,  5.0, 6.0};
-
-        var  nodeProperties =new DoubleArrayNodePropertyValues(){
-
-            @Override
-            public double[] doubleArrayValue(long nodeId) {
-                return new double[]{dim0[(int)nodeId],dim1[(int)nodeId],dim2[(int)nodeId]};
-            }
-
-            @Override
-            public long nodeCount() {
-                return dim0.length;
-            }
-        };
-        var ids = HugeLongArray.of(0,1,2,3,4,5);
-        var aabb = AABB.createInParallel(
-            nodeProperties,
-            ids,
-            0,
-            6,
-            3,
-            new Concurrency(2)
-        );
-        var min =aabb.min();
-        assertions.assertThat(min).containsExactly(0.1,1.0,-4.0);
-        var max =aabb.max();
-        assertions.assertThat(max).containsExactly(5.1,6.0,22.0);
 
     }
 

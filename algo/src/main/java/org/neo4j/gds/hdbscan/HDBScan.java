@@ -115,15 +115,6 @@ public class HDBScan extends Algorithm<Labels> {
         return new CoreResult(neighbours);
     }
 
-    GeometricMSTResult dualTreeMSTPhase(KdTree kdTree, CoreResult coreResult) {
-        var dualTreeMst = DualTreeMSTAlgorithm.create(
-            nodePropertyValues,
-            kdTree,
-            coreResult,
-            nodes.nodeCount()
-        );
-        return dualTreeMst.compute();
-    }
 
     GeometricMSTResult boruvka(KdTree kdTree, CoreResult coreResult) {
         var boruvkaMST = BoruvkaMST.create(
