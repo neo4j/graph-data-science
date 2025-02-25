@@ -50,10 +50,16 @@ class KdTreeNodeBuilderTaskTest {
                 return ids.size();
             }
         };
-        var nodeBuilder =new KdTreeNodeBuilderTask(
-            ids,
+
+        var aabbCreator = new DoubleKDNodeSupport(nodePropertyValues,ids,1);
+
+        var nodeBuilder = new KdTreeNodeBuilderTask(
+            aabbCreator,
             nodePropertyValues,
-            0,10,1,
+            ids,
+            0,
+            10,
+            1,
             new AtomicInteger(0),
             ProgressTracker.NULL_TRACKER
         );
@@ -82,9 +88,12 @@ class KdTreeNodeBuilderTaskTest {
             }
         };
 
+        var aabbCreator = new DoubleKDNodeSupport(nodePropertyValues,ids,1);
+
         var nodeBuilder =new KdTreeNodeBuilderTask(
-            ids,
+            aabbCreator,
             nodePropertyValues,
+            ids,
             4,
             8,
             1,
@@ -101,7 +110,7 @@ class KdTreeNodeBuilderTaskTest {
 
     @Test
     void shouldReturnALeafNode(){
-        HugeLongArray ids  =HugeLongArray.of(0,1,2);
+        HugeLongArray ids  = HugeLongArray.of(0,1,2);
         DoubleArrayNodePropertyValues nodePropertyValues=new DoubleArrayNodePropertyValues() {
             @Override
             public double[] doubleArrayValue(long nodeId) {
@@ -112,9 +121,13 @@ class KdTreeNodeBuilderTaskTest {
                 return ids.size();
             }
         };
+
+        var aabbCreator = new DoubleKDNodeSupport(nodePropertyValues,ids,1);
+
         var nodeBuilder =new KdTreeNodeBuilderTask(
-            ids,
+            aabbCreator,
             nodePropertyValues,
+            ids,
             0,
             3,
             3,
@@ -136,7 +149,7 @@ class KdTreeNodeBuilderTaskTest {
 
     @Test
     void shouldPerformSplit(){
-        HugeLongArray ids  =HugeLongArray.of(0,1,2);
+        HugeLongArray ids  = HugeLongArray.of(0,1,2);
         DoubleArrayNodePropertyValues nodePropertyValues=new DoubleArrayNodePropertyValues() {
             @Override
             public double[] doubleArrayValue(long nodeId) {
@@ -147,9 +160,13 @@ class KdTreeNodeBuilderTaskTest {
                 return ids.size();
             }
         };
+
+        var aabbCreator = new DoubleKDNodeSupport(nodePropertyValues,ids,1);
+
         var nodeBuilder =new KdTreeNodeBuilderTask(
-            ids,
+            aabbCreator,
             nodePropertyValues,
+            ids,
             0,
             3,
             2,

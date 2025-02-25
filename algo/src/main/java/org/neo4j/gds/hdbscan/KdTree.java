@@ -19,23 +19,20 @@
  */
 package org.neo4j.gds.hdbscan;
 
-import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.collections.ha.HugeLongArray;
-import org.neo4j.gds.core.utils.Intersections;
 
-import java.util.OptionalLong;
 import java.util.stream.LongStream;
 
 public class KdTree {
 
     private final HugeLongArray ids;
-    private final NodePropertyValues nodePropertyValues;
+    private final Distances distances;
     private final KdNode root;
     private final long treeNodeCount;
 
-    KdTree(HugeLongArray ids, NodePropertyValues nodePropertyValues, KdNode root, long treeNodeCount) {
+    KdTree(HugeLongArray ids, Distances distances, KdNode root, long treeNodeCount) {
         this.ids = ids;
-        this.nodePropertyValues = nodePropertyValues;
+        this.distances = distances;
         this.root = root;
         this.treeNodeCount = treeNodeCount;
     }
@@ -68,20 +65,18 @@ public class KdTree {
     }
 
     public Neighbours neighbours(long pointId, int numberOfNeighbours) {
-        var queryPoint = nodePropertyValues.doubleArrayValue(pointId);
         var queue = new JavaUtilSearchPriorityQueue(numberOfNeighbours);
-        search(root, queryPoint, numberOfNeighbours, queue, OptionalLong.of(pointId));
+        search(root, numberOfNeighbours, queue, pointId);
         return  new Neighbours(queue.closest());
     }
 
-    private void search(KdNode kdNode, double[] queryPoint, int numberOfNeighbours, ClosestSearchPriorityQueue queue, OptionalLong pointId) {
+    private void search(KdNode kdNode, int numberOfNeighbours, ClosestSearchPriorityQueue queue, long pointId) {
         if (kdNode.isLeaf()) {
             nodesContained(kdNode).forEach(nodeId -> {
-                    if ((pointId.orElse(-1L)==nodeId)){
+                if ( pointId == nodeId){
                         return;
                     }
-                    var point = nodePropertyValues.doubleArrayValue(nodeId);
-                    double distance = Math.sqrt(Intersections.sumSquareDelta(point, queryPoint));
+                    double distance = distances.computeDistance(pointId, nodeId);
                     var neighbour = new Neighbour(nodeId, distance);
                     queue.offer(neighbour);
                 }
@@ -90,24 +85,46 @@ public class KdTree {
             var splitInformation = kdNode.splitInformation();
             var d = splitInformation.dimension();
 
-            var childOnPath = leftChild(kdNode);
-            var sibling = rightChild(kdNode);
-            if (queryPoint[d] >= splitInformation.median()) {
-                childOnPath = rightChild(kdNode);
-                sibling = leftChild(kdNode);
+            var left = leftChild(kdNode);
+            var right = rightChild(kdNode);
+
+            //calculate both bounds, traverse on the best first as heuristic, possible chance to prune both!
+            var leftLB = distances.lowerBound(left.aabb(),pointId);
+            var rightLB = distances.lowerBound(right.aabb(),pointId);
+
+            var firstVisit = left;
+            var secondVisit = right;
+            var firstBound = leftLB;
+            var secondBound = rightLB;
+            if (leftLB > rightLB){
+                firstVisit = right;
+                secondVisit= left;
+                firstBound= rightLB;
+                secondBound = leftLB;
             }
-            search(childOnPath, queryPoint, numberOfNeighbours, queue,pointId);
-            boolean shouldExamineOtherSide = false;
-                if(queue.size() < numberOfNeighbours) {
-                    shouldExamineOtherSide = true;
-                } else {
-                    var distance = sibling.aabb().lowerBoundFor(queryPoint);
-                     shouldExamineOtherSide = queue.largerThanLowerBound(distance);
+
+            if (shouldExamine(queue,numberOfNeighbours,firstBound)){
+                search(firstVisit, numberOfNeighbours, queue,pointId);
+                if (shouldExamine(queue,numberOfNeighbours,secondBound)) {
+                    search(secondVisit, numberOfNeighbours, queue,pointId);
                 }
-                if (shouldExamineOtherSide){
-                    search(sibling, queryPoint, numberOfNeighbours, queue,pointId);
-                }
+
+            }
+
         }
+    }
+
+    private  boolean shouldExamine(ClosestSearchPriorityQueue queue, int numberOfNeighbours, double lowerBound){
+        boolean shouldExamine = false;
+        if(queue.size() < numberOfNeighbours) {
+            shouldExamine = true;
+        } else {
+
+            shouldExamine = queue.largerThanLowerBound(lowerBound);
+        }
+
+
+        return  shouldExamine;
     }
 
 }

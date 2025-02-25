@@ -19,8 +19,18 @@
  */
 package org.neo4j.gds.hdbscan;
 
-public interface AABB{
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.collections.ha.HugeLongArray;
 
-    int mostSpreadDimension();
+ final class KDNodeSupportFactory {
 
-}
+     private KDNodeSupportFactory() {}
+
+     static KDNodeSupport create(NodePropertyValues nodePropertyValues, HugeLongArray ids, int dimension) {
+
+         return switch (nodePropertyValues.valueType()) {
+             case DOUBLE_ARRAY -> new DoubleKDNodeSupport(nodePropertyValues, ids, dimension);
+             default -> throw new IllegalArgumentException("Wrong property type");
+         };
+     }
+ }

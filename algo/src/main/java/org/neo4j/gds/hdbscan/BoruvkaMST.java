@@ -21,19 +21,17 @@ package org.neo4j.gds.hdbscan;
 
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.Algorithm;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.core.utils.Intersections;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.core.utils.paged.dss.HugeAtomicDisjointSetStruct;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 public final class BoruvkaMST extends Algorithm<GeometricMSTResult> {
 
-    private final NodePropertyValues nodePropertyValues;
+    private final Distances distances;
     private final KdTree kdTree;
     private final BitSet kdNodeSingleComponent;
     private final ClosestDistanceInformationTracker closestDistanceTracker;
@@ -49,7 +47,7 @@ public final class BoruvkaMST extends Algorithm<GeometricMSTResult> {
 
 
     private BoruvkaMST(
-        NodePropertyValues nodePropertyValues,
+        Distances distances,
         KdTree kdTree,
         ClosestDistanceInformationTracker closestDistanceTracker,
         HugeDoubleArray coreValues,
@@ -58,7 +56,7 @@ public final class BoruvkaMST extends Algorithm<GeometricMSTResult> {
         ProgressTracker progressTracker
     ) {
         super(progressTracker);
-        this.nodePropertyValues = nodePropertyValues;
+        this.distances = distances;
         this.closestDistanceTracker = closestDistanceTracker;
         this.kdTree = kdTree;
         this.kdNodeSingleComponent = new BitSet(kdTree.treeNodeCount());
@@ -74,7 +72,7 @@ public final class BoruvkaMST extends Algorithm<GeometricMSTResult> {
 
 
     public static BoruvkaMST createWithZeroCores(
-        NodePropertyValues nodePropertyValues,
+        Distances distances,
         KdTree kdTree,
         long nodeCount,
         Concurrency concurrency,
@@ -83,7 +81,7 @@ public final class BoruvkaMST extends Algorithm<GeometricMSTResult> {
         var zeroCores = HugeDoubleArray.newArray(nodeCount);
 
         return new BoruvkaMST(
-            nodePropertyValues,
+            distances,
             kdTree,
             ClosestDistanceInformationTracker.create(nodeCount),
             zeroCores,
@@ -94,7 +92,7 @@ public final class BoruvkaMST extends Algorithm<GeometricMSTResult> {
     }
 
     public static BoruvkaMST create(
-        NodePropertyValues nodePropertyValues,
+        Distances distances,
         KdTree kdTree,
         CoreResult coreResult,
         long nodeCount,
@@ -105,7 +103,7 @@ public final class BoruvkaMST extends Algorithm<GeometricMSTResult> {
         var closestTracker = ClosestDistanceInformationTracker.create(nodeCount, cores, coreResult);
 
         return new BoruvkaMST(
-            nodePropertyValues,
+            distances,
             kdTree,
             closestTracker,
             cores,
@@ -137,10 +135,9 @@ public final class BoruvkaMST extends Algorithm<GeometricMSTResult> {
                 concurrency,
                 terminationFlag,
                 (q) -> {
-                    var   qArray = nodePropertyValues.doubleArrayValue(q);
                     var   qComp = unionFind.setIdOf(q);
                     if (filterNodesOnCoreValue(q,qComp)) {
-                        traversalStep(q, kdTree.root(), qComp, 0, qArray);
+                        traversalStep(q, kdTree.root(), qComp, 0);
                     }
                 }
             );
@@ -168,11 +165,10 @@ public final class BoruvkaMST extends Algorithm<GeometricMSTResult> {
         return closestDistanceTracker.tryToAssign(qComp,q,r,distance);
     }
 
-    double baseCase(long q,long r, double[] qArray, long qComp){
+    double baseCase(long q,long r,  long qComp){
         var rComp = unionFind.setIdOf(r);
         if (rComp != qComp && filterNodesOnCoreValue(r, qComp)) {
-            var rArray =  nodePropertyValues.doubleArrayValue(r);
-            var rqDistance = Intersections.sumSquareDelta(qArray, rArray);
+            var rqDistance = distances.computeDistanceUnsquared(q,r);
             var adaptedDistance = Math.max(Math.max(coreValues.get(r), coreValues.get(q)), rqDistance);
             if (tryUpdate(qComp,q,r,adaptedDistance)){
               return adaptedDistance;
@@ -181,28 +177,28 @@ public final class BoruvkaMST extends Algorithm<GeometricMSTResult> {
         return  -1;
     }
 
-     void traversalStep(long q, KdNode kdNode, long qComp, double  lowerBoundOnDistance,double[] qArray){
+     private void traversalStep(long q, KdNode kdNode, long qComp, double lowerBoundOnDistance){
         if (!prune(kdNode,qComp,lowerBoundOnDistance)) {
             if (kdNode.isLeaf()) {
                 var start = kdNode.start();
                 var end = kdNode.end();
                 for (long index = start; index < end; ++index) {
-                    baseCase(q,kdTree.nodeAt(index),qArray,qComp);
+                    baseCase(q,kdTree.nodeAt(index),qComp);
                 }
             }else{
                 var left = kdTree.leftChild(kdNode);
                 var right = kdTree.rightChild(kdNode);
-                var lowerBoundLeft = left.aabb().lowerBoundFor(qArray);
+                var lowerBoundLeft = distances.lowerBound(left.aabb(),q);
                 lowerBoundLeft*=lowerBoundLeft;
-                var lowerBoundRight = right.aabb().lowerBoundFor(qArray);
+                var lowerBoundRight = distances.lowerBound(right.aabb(),q);
                 lowerBoundRight*=lowerBoundRight;
 
                 if (lowerBoundRight < lowerBoundLeft){
-                    traversalStep(q,right,qComp,lowerBoundRight,qArray);
-                    traversalStep(q,left,qComp,lowerBoundLeft,qArray);
+                    traversalStep(q,right,qComp,lowerBoundRight);
+                    traversalStep(q,left,qComp,lowerBoundLeft);
                 }else{
-                    traversalStep(q,left,qComp,lowerBoundLeft,qArray);
-                    traversalStep(q,right,qComp,lowerBoundRight,qArray);
+                    traversalStep(q,left,qComp,lowerBoundLeft);
+                    traversalStep(q,right,qComp,lowerBoundRight);
                 }
             }
         }

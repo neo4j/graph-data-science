@@ -45,16 +45,16 @@ class HDBScanE2ETest {
     private static final String DATA =
         """
         CREATE
-            (a:Node {point: [1.17755754, 2.02742572]}),
-            (b:Node {point: [0.88489682, 1.97328227]}),
-            (c:Node {point: [1.04192267, 4.34997048]}),
-            (d:Node {point: [1.25764886, 1.94667762]}),
-            (e:Node {point: [0.95464318, 1.55300632]}),
-            (f:Node {point: [0.80617459, 1.60491802]}),
-            (g:Node {point: [1.26227786, 3.96066446]}),
-            (h:Node {point: [0.87569985, 4.51938412]}),
-            (i:Node {point: [0.8028515 , 4.088106  ]}),
-            (j:Node {point: [0.82954022, 4.63897487]})
+            (a:Node {point: [1.17755754d, 2.02742572d]}),
+            (b:Node {point: [0.88489682d, 1.97328227d]}),
+            (c:Node {point: [1.04192267d, 4.34997048d]}),
+            (d:Node {point: [1.25764886d, 1.94667762d]}),
+            (e:Node {point: [0.95464318d, 1.55300632d]}),
+            (f:Node {point: [0.80617459d, 1.60491802d]}),
+            (g:Node {point: [1.26227786d, 3.96066446d]}),
+            (h:Node {point: [0.87569985d, 4.51938412d]}),
+            (i:Node {point: [0.8028515d , 4.088106d  ]}),
+            (j:Node {point: [0.82954022d, 4.63897487d]})
         """;
 
     @Inject
