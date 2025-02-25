@@ -31,7 +31,7 @@ import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.core.utils.paged.dss.HugeAtomicDisjointSetStruct;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
-public class BoruvkaMST extends Algorithm<GeometricMSTResult> {
+public final class BoruvkaMST extends Algorithm<GeometricMSTResult> {
 
     private final NodePropertyValues nodePropertyValues;
     private final KdTree kdTree;
