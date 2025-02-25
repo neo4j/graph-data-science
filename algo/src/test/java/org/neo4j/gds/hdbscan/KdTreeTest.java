@@ -47,30 +47,6 @@ class KdTreeTest {
 
 
     @Test
-    void shouldFindNeighbours() {
-
-        var points = graph.nodeProperties("point");
-        var kdTree = new KdTreeBuilder(graph, points, 1, 1, ProgressTracker.NULL_TRACKER)
-            .build();
-
-        var queryPoint = new double[]{9d, 2d};
-        var neighbours = kdTree.neighbours(queryPoint, 2);
-        assertThat(neighbours)
-            .isNotNull()
-            .hasSize(2)
-            .containsExactlyInAnyOrder(
-                new Neighbour(
-                    graph.toMappedNodeId("e"),
-                    1.4142135623730951
-                ),
-                new Neighbour(
-                    graph.toMappedNodeId("f"),
-                    2.0
-                )
-            );
-    }
-
-    @Test
     void shouldNotFindItself() {
 
         var points = graph.nodeProperties("point");
