@@ -17,42 +17,44 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.algorithms.community.stubs;
+package org.neo4j.gds.procedures.algorithms.community;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
-import org.neo4j.gds.hdbscan.HDBScanMutateConfig;
+import org.neo4j.gds.hdbscan.HDBScanWriteConfig;
 import org.neo4j.gds.hdbscan.Labels;
-import org.neo4j.gds.procedures.algorithms.community.HDBScanMutateResult;
 
 import java.util.Optional;
+import java.util.stream.Stream;
 
-class HDBScanResultBuilderForMutateMode implements ResultBuilder<HDBScanMutateConfig, Labels, HDBScanMutateResult, NodePropertiesWritten> {
+class HDBScanResultBuilderForWriteMode implements ResultBuilder<HDBScanWriteConfig, Labels, Stream<HDBScanWriteResult>, NodePropertiesWritten> {
 
     @Override
-    public HDBScanMutateResult build(
+    public Stream<HDBScanWriteResult> build(
         Graph graph,
-        HDBScanMutateConfig configuration,
+        HDBScanWriteConfig configuration,
         Optional<Labels> result,
         AlgorithmProcessingTimings timings,
-        Optional<NodePropertiesWritten> metadata
+        Optional<NodePropertiesWritten> nodePropertiesWritten
     ) {
-        if (result.isEmpty()) return HDBScanMutateResult.emptyFrom(timings, configuration.toMap());
+        if (result.isEmpty()) return Stream.of(HDBScanWriteResult.emptyFrom(timings, configuration.toMap()));
 
         var labels = result.get();
 
-        return new HDBScanMutateResult(
+        var writeResult = new HDBScanWriteResult(
             graph.nodeCount(),
             labels.numberOfClusters(),
             labels.numberOfNoisePoints(),
             timings.sideEffectMillis,
-            metadata.map(NodePropertiesWritten::value).orElse(-1L),
+            nodePropertiesWritten.map(NodePropertiesWritten::value).orElseThrow(),
             timings.preProcessingMillis,
-            timings.preProcessingMillis,
+            timings.computeMillis,
             0,
             configuration.toMap()
         );
+
+        return Stream.of(writeResult);
     }
 }

@@ -31,6 +31,8 @@ import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
+import org.neo4j.gds.hdbscan.HDBScanWriteConfig;
+import org.neo4j.gds.hdbscan.Labels;
 import org.neo4j.gds.k1coloring.K1ColoringResult;
 import org.neo4j.gds.k1coloring.K1ColoringWriteConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionResult;
@@ -333,6 +335,24 @@ public final class CommunityAlgorithmsWriteModeBusinessFacade {
             SLLPA,
             estimationFacade::speakerListenerLPA,
             (graph, __) -> algorithms.speakerListenerLPA(graph, configuration),
+            writeStep,
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT hdbscan(
+        GraphName graphName,
+        HDBScanWriteConfig configuration,
+        ResultBuilder<HDBScanWriteConfig, Labels, RESULT, NodePropertiesWritten> resultBuilder
+    ) {
+        var writeStep = new HDBScanWriteStep(writeToDatabase, configuration);
+
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInWriteMode(
+            graphName,
+            configuration,
+            WCC,
+            () -> estimationFacade.hdbscan(configuration),
+            (graph, __) -> algorithms.hdbscan(graph, configuration),
             writeStep,
             resultBuilder
         );

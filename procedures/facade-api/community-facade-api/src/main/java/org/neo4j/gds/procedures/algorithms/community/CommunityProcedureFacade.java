@@ -453,4 +453,9 @@ public interface CommunityProcedureFacade {
     Stream<HDBScanStreamResult> hdbscanStream(String graphName, Map<String, Object> configuration);
 
     Stream<MemoryEstimateResult> hdbscanStreamEstimate(Object graphName, Map<String, Object> configuration);
+
+    Stream<HDBScanWriteResult> hdbscanWrite(String graphName, Map<String, Object> configuration);
+
+    Stream<MemoryEstimateResult> hdbscanWriteEstimate(Object graphName, Map<String, Object> configuration);
+
 }
