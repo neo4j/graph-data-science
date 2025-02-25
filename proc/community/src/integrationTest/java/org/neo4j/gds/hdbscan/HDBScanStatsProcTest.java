@@ -28,11 +28,10 @@ import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 
-import java.util.HashSet;
-
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
 
-class HDBScanStreamProcTest extends BaseProcTest {
+class HDBScanStatsProcTest extends BaseProcTest {
 
     @Inject
     private IdFunction idFunction;
@@ -58,7 +57,7 @@ class HDBScanStreamProcTest extends BaseProcTest {
     void setUp() throws Exception {
         registerProcedures(
             GraphProjectProc.class,
-            HDBScanStreamProc.class
+            HDBScanStatsProc.class
         );
 
         runQuery(
@@ -79,11 +78,11 @@ class HDBScanStreamProcTest extends BaseProcTest {
     }
 
     @Test
-    void stream() {
+    void stats() {
 
-        runQuery(
+        var rowCount = runQueryWithRowConsumer(
             """
-                    CALL gds.hdbscan.stream(
+                    CALL gds.hdbscan.stats(
                         'points',
                         {
                             nodeProperty: 'point',
@@ -92,23 +91,23 @@ class HDBScanStreamProcTest extends BaseProcTest {
                             minClusterSize: 2
                         }
                     )
+                    YIELD nodeCount, numberOfClusters, numberOfNoisePoints
                 """,
-            result -> {
-                assertThat(result.columns()).containsExactlyInAnyOrder("nodeId", "label");
-                long resultRowCount = 0;
-                var communities = new HashSet<Long>();
-                while (result.hasNext()) {
-                    var next = result.next();
-                    assertThat(next.get("nodeId")).isInstanceOf(Long.class);
-                    assertThat(next.get("label")).isInstanceOf(Long.class);
-                    communities.add((long) next.get("label"));
-                    resultRowCount++;
-                }
-                assertThat(resultRowCount).isEqualTo(10L);
-                assertThat(communities).hasSize(2);
-                return true;
+            row -> {
+                assertThat(row.getNumber("nodeCount"))
+                    .asInstanceOf(LONG)
+                    .isEqualTo(10);
+                assertThat(row.getNumber("numberOfClusters"))
+                    .asInstanceOf(LONG)
+                    .isEqualTo(2);
+                assertThat(row.getNumber("numberOfNoisePoints"))
+                    .asInstanceOf(LONG)
+                    .isEqualTo(0);
             }
         );
 
+        assertThat(rowCount)
+            .as("Stats mode should only have a single row.")
+            .isEqualTo(1);
     }
 }

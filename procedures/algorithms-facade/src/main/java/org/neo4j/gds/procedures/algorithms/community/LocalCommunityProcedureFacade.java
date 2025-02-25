@@ -30,6 +30,7 @@ import org.neo4j.gds.applications.algorithms.community.CommunityAlgorithmsWriteM
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutStreamConfig;
 import org.neo4j.gds.conductance.ConductanceStreamConfig;
+import org.neo4j.gds.hdbscan.HDBScanStatsConfig;
 import org.neo4j.gds.hdbscan.HDBScanStreamConfig;
 import org.neo4j.gds.k1coloring.K1ColoringStatsConfig;
 import org.neo4j.gds.k1coloring.K1ColoringStreamConfig;
@@ -1290,7 +1291,22 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
     }
 
     @Override
-    public Stream<HDBScanStreamResult> hdbscan(String graphName, Map<String, Object> configuration) {
+    public Stream<HDBScanStatsResult> hdbscanStats(String graphName, Map<String, Object> configuration) {
+        var parsedConfig = configurationParser.parseConfiguration(configuration, HDBScanStatsConfig::of);
+        var resultBuilder = new HDBScanResultBuilderForStatsMode(parsedConfig);
+
+        return statsModeBusinessFacade.hdbscan(GraphName.parse(graphName), parsedConfig, resultBuilder);
+    }
+
+    @Override
+    public Stream<MemoryEstimateResult> hdbscanStatsEstimate(Object graphNameOrConfiguration, Map<String, Object> configuration) {
+        var parsedConfig = configurationParser.parseConfiguration(configuration, HDBScanStatsConfig::of);
+
+        return Stream.of(estimationModeBusinessFacade.hdbscan(parsedConfig, graphNameOrConfiguration));
+    }
+
+    @Override
+    public Stream<HDBScanStreamResult> hdbscanStream(String graphName, Map<String, Object> configuration) {
         var parsedConfig = configurationParser.parseConfiguration(configuration, HDBScanStreamConfig::of);
         var resultBuilder = new HDBScanResultBuilderForStreamMode();
 

@@ -439,7 +439,11 @@ public interface CommunityProcedureFacade {
 
     SpeakerListenerLPAMutateStub speakerListenerLPAMutateStub();
 
-    Stream<HDBScanStreamResult> hdbscan(String graphName, Map<String, Object> configuration);
+    Stream<HDBScanStatsResult> hdbscanStats(String graphName, Map<String, Object> configuration);
+
+    Stream<MemoryEstimateResult> hdbscanStatsEstimate(Object graphName, Map<String, Object> configuration);
+
+    Stream<HDBScanStreamResult> hdbscanStream(String graphName, Map<String, Object> configuration);
 
     Stream<MemoryEstimateResult> hdbscanStreamEstimate(Object graphName, Map<String, Object> configuration);
 }

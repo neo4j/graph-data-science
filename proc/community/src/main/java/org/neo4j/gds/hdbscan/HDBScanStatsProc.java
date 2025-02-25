@@ -21,7 +21,7 @@ package org.neo4j.gds.hdbscan;
 
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
-import org.neo4j.gds.procedures.algorithms.community.HDBScanStreamResult;
+import org.neo4j.gds.procedures.algorithms.community.HDBScanStatsResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -34,27 +34,27 @@ import static org.neo4j.gds.hdbscan.Constants.HDBSCAN_DESCRIPTION;
 import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class HDBScanStreamProc {
+public class HDBScanStatsProc {
     @Context
     public GraphDataScienceProcedures facade;
 
-    @Procedure(name = "gds.hdbscan.stream", mode = READ)
+    @Procedure(name = "gds.hdbscan.stats", mode = READ)
     @Description(HDBSCAN_DESCRIPTION)
-    public Stream<HDBScanStreamResult> stream(
+    public Stream<HDBScanStatsResult> stats(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.algorithms().community().hdbscanStream(graphName, configuration);
+        return facade.algorithms().community().hdbscanStats(graphName, configuration);
     }
 
 
-    @Procedure(value = "gds.hdbscan.stream.estimate", mode = READ)
+    @Procedure(value = "gds.hdbscan.stats.estimate", mode = READ)
     @Description(MEMORY_ESTIMATION_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphName,
         @Name(value = "algoConfiguration") Map<String, Object> configuration
     ) {
-        return facade.algorithms().community().hdbscanStreamEstimate(graphName, configuration);
+        return facade.algorithms().community().hdbscanStatsEstimate(graphName, configuration);
     }
 
 }

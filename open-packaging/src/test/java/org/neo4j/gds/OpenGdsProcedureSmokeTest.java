@@ -154,6 +154,8 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         "gds.hashgnn.write",
         "gds.hashgnn.write.estimate",
 
+        "gds.hdbscan.stats",
+        "gds.hdbscan.stats.estimate",
         "gds.hdbscan.stream",
         "gds.hdbscan.stream.estimate",
 
@@ -605,7 +607,7 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         );
 
         // If you find yourself updating this count, please also update the count in SmokeTest.kt
-        int expectedCount = 445;
+        int expectedCount = 447;
         assertEquals(
             expectedCount,
             returnedRows,
