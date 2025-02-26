@@ -97,8 +97,8 @@ public class KdTree {
 
             if (leftLB > rightLB){
                 firstVisit = right;
-                secondVisit= left;
-                firstBound= rightLB;
+                secondVisit = left;
+                firstBound = rightLB;
                 secondBound = leftLB;
             }
 
