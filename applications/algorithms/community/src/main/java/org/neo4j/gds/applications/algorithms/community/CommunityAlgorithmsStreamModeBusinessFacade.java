@@ -341,7 +341,7 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
             graphName,
             configuration,
             HDBScan,
-            estimationFacade::hdbscan,
+            () -> estimationFacade.hdbscan(configuration),
             (graph, __) -> algorithms.hdbscan(graph, configuration),
             resultBuilder
         );

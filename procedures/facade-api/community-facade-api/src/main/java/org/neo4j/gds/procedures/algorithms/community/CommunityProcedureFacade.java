@@ -21,6 +21,7 @@ package org.neo4j.gds.procedures.algorithms.community;
 
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.procedures.algorithms.community.stubs.ApproximateMaximumKCutMutateStub;
+import org.neo4j.gds.procedures.algorithms.community.stubs.HDBScanMutateStub;
 import org.neo4j.gds.procedures.algorithms.community.stubs.K1ColoringMutateStub;
 import org.neo4j.gds.procedures.algorithms.community.stubs.KCoreMutateStub;
 import org.neo4j.gds.procedures.algorithms.community.stubs.KMeansMutateStub;
@@ -438,6 +439,12 @@ public interface CommunityProcedureFacade {
 
 
     SpeakerListenerLPAMutateStub speakerListenerLPAMutateStub();
+
+    HDBScanMutateStub hdbscanMutateStub();
+
+    Stream<HDBScanMutateResult> hdbscanMutate(String graphName, Map<String, Object> configuration);
+
+    Stream<MemoryEstimateResult> hdbscanMutateEstimate(Object graphName, Map<String, Object> configuration);
 
     Stream<HDBScanStatsResult> hdbscanStats(String graphName, Map<String, Object> configuration);
 
