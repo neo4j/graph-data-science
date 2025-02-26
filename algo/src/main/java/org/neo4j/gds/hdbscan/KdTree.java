@@ -82,8 +82,6 @@ public class KdTree {
                 }
             );
         } else {
-            var splitInformation = kdNode.splitInformation();
-            var d = splitInformation.dimension();
 
             var left = leftChild(kdNode);
             var right = rightChild(kdNode);
@@ -96,6 +94,7 @@ public class KdTree {
             var secondVisit = right;
             var firstBound = leftLB;
             var secondBound = rightLB;
+
             if (leftLB > rightLB){
                 firstVisit = right;
                 secondVisit= left;
