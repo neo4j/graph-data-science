@@ -20,17 +20,32 @@
 package org.neo4j.gds.hdbscan;
 
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.collections.ha.HugeLongArray;
 
-public final class DistancesFactory {
+import java.util.function.LongToDoubleFunction;
 
-    private DistancesFactory() {}
+class FloatKDNodeSupport implements KDNodeSupport {
 
-    public static Distances create(NodePropertyValues nodePropertyValues) {
+     private final NodePropertyValues nodePropertyValues;
+     private final HugeLongArray ids;
+     private final int dimension;
 
-        return switch (nodePropertyValues.valueType()) {
-            case DOUBLE_ARRAY -> new DoubleArrayDistances(nodePropertyValues);
-            case FLOAT_ARRAY -> new FloatArrayDistances(nodePropertyValues);
-            default -> throw new IllegalArgumentException("Wrong property type");
-        };
+    FloatKDNodeSupport(NodePropertyValues nodePropertyValues, HugeLongArray ids, int dimension) {
+        this.nodePropertyValues = nodePropertyValues;
+        this.ids = ids;
+        this.dimension = dimension;
     }
+
+    @Override
+     public AABB create(long start, long end) {
+         return FloatAABB.create(nodePropertyValues,ids,start,end,dimension);
+     }
+
+    @Override
+    public LongToDoubleFunction valueAt(int dimensionIndex) {
+       return v -> (double)nodePropertyValues.floatArrayValue(ids.get(v))[dimensionIndex];
+
+    }
+
+
 }

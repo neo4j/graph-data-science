@@ -24,10 +24,10 @@ import org.neo4j.gds.collections.ha.HugeLongArray;
 
 import java.util.Arrays;
 
-public record DoubleAABB(double[] min, double[] max, int dimension)  implements  AABB{
+public record FloatAABB(float[] min, float[] max, int dimension)  implements  AABB{
 
 
-    static DoubleAABB create(
+    static FloatAABB create(
         NodePropertyValues nodePropertyValues,
         HugeLongArray ids,
         long leftIndex,
@@ -35,18 +35,18 @@ public record DoubleAABB(double[] min, double[] max, int dimension)  implements 
         int dimension
     ) {
 
-        double[] min = new double[dimension];
-        Arrays.fill(min, Double.MAX_VALUE);
-        double[] max = new double[dimension];
-        Arrays.fill(max, Double.MIN_VALUE);
+        float[] min = new float[dimension];
+        Arrays.fill(min, Float.MAX_VALUE);
+        float[] max = new float[dimension];
+        Arrays.fill(max, Float.MIN_VALUE);
         for (long i = leftIndex; i < rightIndex; i++) {
-            var point = nodePropertyValues.doubleArrayValue(ids.get(i));
+            var point = nodePropertyValues.floatArrayValue(ids.get(i));
             for (int j = 0; j < dimension; j++) {
                 min[j] = Math.min(min[j], point[j]);
                 max[j] = Math.max(max[j], point[j]);
             }
         }
-        return new DoubleAABB(min, max, dimension);
+        return new FloatAABB(min, max, dimension);
 
     }
     @Override

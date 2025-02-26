@@ -24,33 +24,33 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.neo4j.gds.api.properties.nodes.DoubleArrayNodePropertyValues;
+import org.neo4j.gds.api.properties.nodes.FloatArrayNodePropertyValues;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(SoftAssertionsExtension.class)
-class DoubleAABBTest {
+class FloatAABBTest {
 
 
     @ParameterizedTest
     @CsvSource({"10, 0", "100, 1"})
     void shouldComputeIndexCorrectly(int v,int expectedDimension){
-        var aabb= new DoubleAABB(new double[]{1,2,3},new double[]{10,v,10},3);
+        var aabb= new FloatAABB(new float[]{1,2,3},new float[]{10,v,10},3);
         assertThat(aabb.mostSpreadDimension()).isEqualTo(expectedDimension);
     }
 
     @Test
     void shouldConstructAABB(){
-        var dim0 = new double[]{ 0.1,  0.2, 0.25, 5.1,  2.1, 3.0};
-        var dim1 = new double[]{ 1.0,  2.0, 3.0,  4.0,  5.0, 6.0};
-        var dim2 = new double[]{ 14.0, 22.0, 3.0, -4.0,  5.0, 6.0};
+        var dim0 = new float[]{ 0.1f,  0.2f, 0.25f, 5.1f,  2.1f, 3.0f};
+        var dim1 = new float[]{ 1.0f,  2.0f, 3.0f,  4.0f,  5.0f, 6.0f};
+        var dim2 = new float[]{ 14.0f, 22.0f, 3.0f, -4.0f,  5.0f, 6.0f};
 
-        var  nodeProperties =new DoubleArrayNodePropertyValues(){
+        var  nodeProperties =new FloatArrayNodePropertyValues(){
 
             @Override
-            public double[] doubleArrayValue(long nodeId) {
-                return new double[]{dim0[(int)nodeId],dim1[(int)nodeId],dim2[(int)nodeId]};
+            public float[] floatArrayValue(long nodeId) {
+                return new float[]{dim0[(int)nodeId],dim1[(int)nodeId],dim2[(int)nodeId]};
             }
 
             @Override
@@ -59,7 +59,7 @@ class DoubleAABBTest {
             }
         };
         var ids = HugeLongArray.of(0,1,2,3,4,5);
-        var aabb = DoubleAABB.create(
+        var aabb = FloatAABB.create(
             nodeProperties,
             ids,
             0,
@@ -67,9 +67,9 @@ class DoubleAABBTest {
             3
         );
         var min = aabb.min();
-        assertThat(min).containsExactly(0.1,1.0,-4.0);
+        assertThat(min).containsExactly(0.1f,1.0f,-4.0f);
         var max = aabb.max();
-        assertThat(max).containsExactly(5.1,6.0,22.0);
+        assertThat(max).containsExactly(5.1f,6.0f,22.0f);
 
     }
 

@@ -22,30 +22,30 @@ package org.neo4j.gds.hdbscan;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.utils.Intersections;
 
-public class DoubleArrayDistances implements Distances {
+public class FloatArrayDistances implements Distances {
 
     private final NodePropertyValues nodePropertyValues;
 
-    public DoubleArrayDistances(NodePropertyValues nodePropertyValues) {
+    public FloatArrayDistances(NodePropertyValues nodePropertyValues) {
         this.nodePropertyValues = nodePropertyValues;
     }
 
     @Override
     public double computeDistanceUnsquared(long index1, long index2) {
-        var array1 = nodePropertyValues.doubleArrayValue(index1);
-        var array2 = nodePropertyValues.doubleArrayValue(index2);
+        var array1 = nodePropertyValues.floatArrayValue(index1);
+        var array2 = nodePropertyValues.floatArrayValue(index2);
 
         return Intersections.sumSquareDelta(array1,array2);
     }
 
     @Override
     public double lowerBound(AABB aabb, long index) {
-        assert  aabb instanceof  DoubleAABB;
-        var doubleAABB = (DoubleAABB) aabb;
-        var min = doubleAABB.min();
-        var max = doubleAABB.max();
-        var dimension = doubleAABB.dimension();
-        var lookupPoint = nodePropertyValues.doubleArrayValue(index);
+        assert  aabb instanceof  FloatAABB;
+        var floatAABB = (FloatAABB) aabb;
+        var min = floatAABB.min();
+        var max = floatAABB.max();
+        var dimension = floatAABB.dimension();
+        var lookupPoint = nodePropertyValues.floatArrayValue(index);
         assert dimension == lookupPoint.length : "Lookup point has different dimension: " + lookupPoint.length + ". The box has dimension: " + dimension;
         double distance = 0d;
         for (int i = 0; i < dimension; i++) {
@@ -54,7 +54,7 @@ public class DoubleArrayDistances implements Distances {
         return Math.sqrt(distance);
     }
 
-    private double  lowerBoundForDimension(double[] min, double[] max,int dimension, double otherMin, double otherMax){
+    private double  lowerBoundForDimension(float[] min, float[] max,int dimension, float otherMin, float otherMax){
 
         var diff = Math.max(min[dimension], otherMin) - Math.min(max[dimension], otherMax);
         if (diff > 0) {

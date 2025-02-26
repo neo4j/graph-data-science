@@ -117,6 +117,10 @@ public final class Intersections {
         return result;
     }
 
+    public static float sumSquareDelta(float[] vector1, float[] vector2) {
+        assert  vector1.length == vector2.length;
+        return  sumSquareDelta(vector1,vector2,vector1.length);
+    }
     public static float sumSquareDelta(float[] vector1, float[] vector2, int len) {
         float result = 0;
         for (int i = 0; i < len; i++) {

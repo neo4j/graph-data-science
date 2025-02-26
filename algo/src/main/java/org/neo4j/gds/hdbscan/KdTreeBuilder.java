@@ -74,7 +74,7 @@ public class KdTreeBuilder {
         builderTask.run();
         var root = builderTask.kdNode();
         progressTracker.endSubTask();
-        return  new KdTree(ids, distances, root, nodeIndex.get());
+        return new KdTree(ids, distances, root, nodeIndex.get());
     }
 
 }

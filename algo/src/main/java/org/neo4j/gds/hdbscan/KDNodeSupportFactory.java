@@ -30,6 +30,7 @@ import org.neo4j.gds.collections.ha.HugeLongArray;
 
          return switch (nodePropertyValues.valueType()) {
              case DOUBLE_ARRAY -> new DoubleKDNodeSupport(nodePropertyValues, ids, dimension);
+             case FLOAT_ARRAY  -> new FloatKDNodeSupport(nodePropertyValues,ids,dimension);
              default -> throw new IllegalArgumentException("Wrong property type");
          };
      }
