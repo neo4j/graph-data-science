@@ -64,11 +64,6 @@ public enum EmptyTaskStore implements TaskStore {
     }
 
     @Override
-    public long taskCount() {
-        return 0;
-    }
-
-    @Override
     public void addListener(TaskStoreListener listener) {}
 
 }

@@ -93,11 +93,4 @@ public class PerDatabaseTaskStore extends ObservableTaskStore {
             .count();
     }
 
-    @Override
-    public long taskCount() {
-        return registeredTasks.values().stream()
-            .mapToLong(Map::size)
-            .sum();
-    }
-
 }

@@ -41,6 +41,11 @@ class TaskStoreCleaner implements TaskStoreListener {
 
     @Override
     public void onTaskCompleted(UserTask userTask) {
+        // avoid scheduler if task should be cleaned up immediately
+        if (finishedTaskTTL.toMillis() == 0) {
+            taskStore.remove(userTask.username(), userTask.jobId());
+        }
+
         this.cleanerPool.schedule(
             () -> taskStore.remove(userTask.username(), userTask.jobId()),
             finishedTaskTTL.toMillis(),

@@ -45,7 +45,10 @@ import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.TaskStore;
+import org.neo4j.gds.core.utils.progress.UserTask;
+import org.neo4j.gds.core.utils.progress.tasks.Status;
 import org.neo4j.gds.test.TestProc;
 import org.neo4j.gds.utils.StringJoining;
 
@@ -1385,15 +1388,19 @@ class GraphProjectProcTest extends BaseProcTest {
     @Test
     void failTasksOnFailure() {
         runQuery("CREATE ({prop: \"stringProp\"}), ()");
-
+        var jobId = new JobId();
         assertThatThrownBy(() ->
-            runQuery("CALL gds.graph.project('g', '*', '*', {nodeProperties: \"prop\"}) YIELD nodeProjection"))
+            runQuery(
+                "CALL gds.graph.project('g', '*', '*', {nodeProperties: \"prop\", jobId: $jobId}) YIELD nodeProjection",
+                Map.of("jobId", jobId.value())))
             .isInstanceOf(Exception.class)
             .hasMessageContaining("Loading of values of type String is currently not supported");;
 
         var taskStore = GraphDatabaseApiProxy.resolveDependency(db, TaskStore.class);
         Assertions.assertThat(taskStore.ongoingTaskCount()).isZero();
-        Assertions.assertThat(taskStore.taskCount()).isZero();
+        Assertions.assertThat(taskStore.query(jobId))
+            .map(UserTask::task)
+            .allSatisfy(task -> Assertions.assertThat(task.status()).isEqualTo(Status.FAILED));
     }
 
     private Graph relPropertyGraph(String graphName, RelationshipType relationshipType, String property) {

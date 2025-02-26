@@ -46,7 +46,5 @@ public interface TaskStore {
 
     long ongoingTaskCount();
 
-    long taskCount();
-
     void addListener(TaskStoreListener listener);
 }

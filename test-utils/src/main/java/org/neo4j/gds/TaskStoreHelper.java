@@ -26,15 +26,14 @@ import java.time.temporal.ChronoUnit;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
 
-public class TaskStoreHelper {
+public final class TaskStoreHelper {
+
+    private TaskStoreHelper() {}
 
     public static void awaitEmptyTaskStore(TaskStore taskStore) {
-        // there is a race condition between the thread consuming the result,
-        // and the thread scheduled to end the last subtask
         long timeoutInSeconds = 5 * (TestSupport.CI ? 5 : 1);
         var deadline = Instant.now().plus(timeoutInSeconds, ChronoUnit.SECONDS);
 
-        // On my machine (TM) with 1000 iterations this never fails and each run is 10ish or 100ish ms
         while (Instant.now().isBefore(deadline)) {
             if (taskStore.queryRunning().findAny().isEmpty()) {
                 break;
