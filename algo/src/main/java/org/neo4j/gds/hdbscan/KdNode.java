@@ -21,37 +21,33 @@ package org.neo4j.gds.hdbscan;
 
 // TODO: think if we actually  need   leftChild,rightChild, parent, or we can follow a implicit structure to store in array
 
-import java.util.Optional;
-
-class  KdNode{
+final class KdNode{
     private final long start;
     private final long end;
     private final AABB aabb;
     private final boolean isLeaf;
     private  KdNode leftChild;
     private  KdNode rightChild;
-    private Optional<SplitInformation> splitInformation;
     private final long id;
 
     static  KdNode createLeaf(long id, long start, long end, AABB aabb){
-        return new KdNode(id,start,end,aabb,true, Optional.empty());
+        return new KdNode(id,start,end,aabb,true);
     }
 
-    static KdNode createSplitNode(long id, long start, long end, AABB aabb, SplitInformation splitInformation){
-        return  new KdNode(id, start,end,aabb,false, Optional.of(splitInformation));
+    static KdNode createSplitNode(long id, long start, long end, AABB aabb){
+        return  new KdNode(id, start,end,aabb,false);
     }
 
     long id(){
         return id;
     }
 
-    private KdNode(long id, long start, long end, AABB aabb, boolean isLeaf, Optional<SplitInformation> splitInformation) {
+    private KdNode(long id, long start, long end, AABB aabb, boolean isLeaf) {
         this.id = id;
         this.start = start;
         this.end = end;
         this.aabb = aabb;
         this.isLeaf = isLeaf;
-        this.splitInformation = splitInformation;
     }
 
 
@@ -75,7 +71,4 @@ class  KdNode{
 
     boolean isLeaf() { return  isLeaf;}
 
-    SplitInformation splitInformation(){
-        return splitInformation.orElseThrow();
-    }
 }

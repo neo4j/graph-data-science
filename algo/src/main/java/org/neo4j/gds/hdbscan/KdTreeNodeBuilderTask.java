@@ -77,8 +77,7 @@ class KdTreeNodeBuilderTask implements Runnable {
                 treeNodeId,
                 start,
                 end,
-                aabb,
-                new SplitInformation(medianValue, indexToSplit)
+                aabb
             );
             //TODO: step.4 add these builder tasks into a fork-join
             var leftChildBuilder = new KdTreeNodeBuilderTask(

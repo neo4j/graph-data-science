@@ -198,9 +198,6 @@ class KdTreeNodeBuilderTaskTest {
 
         assertThat(leftChild.end()).isEqualTo(rightChild.start());
 
-        var split = node.splitInformation();
-        assertThat(split).isEqualTo(new SplitInformation(11.0,0));
-
         assertThat(node.id()).isEqualTo(0L);
         assertThat(leftChild.id()).isIn(1L,2L);
         assertThat(rightChild.id()).isNotEqualTo(leftChild.id()).isIn(1L,2L);
