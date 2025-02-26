@@ -33,15 +33,16 @@ class KdTreeNodeBuilderTask implements Runnable {
     private final long start;
     private final long end;
     private final long maxLeafSize;
-    private final int pointSize;
     private KdNode kdNode;
     private final AtomicInteger  nodeIndex;
     private final ProgressTracker progressTracker;
+    private  final KDNodeSupport kdNodeSupport;
 
 
     KdTreeNodeBuilderTask(
-        HugeLongArray ids,
+        KDNodeSupport kdNodeSupport,
         NodePropertyValues nodePropertyValues,
+        HugeLongArray ids,
         long start,
         long end,
         long maxLeafSize,
@@ -53,15 +54,15 @@ class KdTreeNodeBuilderTask implements Runnable {
         this.start = start;
         this.end = end;
         this.maxLeafSize = maxLeafSize;
-        this.pointSize = nodePropertyValues.dimension().orElse(-1);
         this.nodeIndex = nodeIndex;
         this.progressTracker = progressTracker;
+        this.kdNodeSupport = kdNodeSupport;
     }
 
     @Override
     public void run() {
         var nodeSize = end - start;
-        var aabb = AABB.create(nodePropertyValues, ids, start, end, pointSize);
+        var aabb = kdNodeSupport.create(start, end);
         var treeNodeId = nodeIndex.getAndIncrement();
         if (nodeSize <= maxLeafSize) {
             kdNode = KdNode.createLeaf(treeNodeId, start, end, aabb);
@@ -81,24 +82,12 @@ class KdTreeNodeBuilderTask implements Runnable {
             );
             //TODO: step.4 add these builder tasks into a fork-join
             var leftChildBuilder = new KdTreeNodeBuilderTask(
-                ids,
-                nodePropertyValues,
-                start,
-                median,
-                maxLeafSize,
-                nodeIndex,
-                progressTracker
+                kdNodeSupport, nodePropertyValues, ids, start, median, maxLeafSize, nodeIndex, progressTracker
             );
             leftChildBuilder.run();
 
             var rightChildBuilder = new KdTreeNodeBuilderTask(
-                ids,
-                nodePropertyValues,
-                median,
-                end,
-                maxLeafSize,
-                nodeIndex,
-                progressTracker
+                kdNodeSupport, nodePropertyValues, ids, median, end, maxLeafSize, nodeIndex, progressTracker
             );
 
             rightChildBuilder.run();
@@ -115,7 +104,7 @@ class KdTreeNodeBuilderTask implements Runnable {
         return  kdNode;
     }
     long findMedianAndSplit(int dimensionIndex) {
-        LongToDoubleFunction valueAt = v -> nodePropertyValues.doubleArrayValue(ids.get(v))[dimensionIndex];
+        var valueAt = kdNodeSupport.valueAt(dimensionIndex);
         long l = start;
         long r = end;
         long medianIndex = (long) Math.ceil((l + r) / 2.0);

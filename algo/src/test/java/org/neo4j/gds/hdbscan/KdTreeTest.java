@@ -34,12 +34,12 @@ class KdTreeTest {
     @GdlGraph
     private static final String DATA =
         """
-                (a:Node { point: [2.0, 3.0]}),
-                (b:Node { point: [5.0, 4.0]}),
-                (c:Node { point: [9.0, 6.0]}),
-                (d:Node { point: [4.0, 7.0]}),
-                (e:Node { point: [8.0, 1.0]}),
-                (f:Node { point: [7.0, 2.0]})
+                (a:Node { point: [2.0d, 3.0d]}),
+                (b:Node { point: [5.0d, 4.0d]}),
+                (c:Node { point: [9.0d, 6.0d]}),
+                (d:Node { point: [4.0d, 7.0d]}),
+                (e:Node { point: [8.0d, 1.0d]}),
+                (f:Node { point: [7.0d, 2.0d]})
             """;
 
     @Inject
@@ -50,8 +50,15 @@ class KdTreeTest {
     void shouldNotFindItself() {
 
         var points = graph.nodeProperties("point");
-        var kdTree = new KdTreeBuilder(graph, points, 1, 1,ProgressTracker.NULL_TRACKER)
-            .build();
+        var distances = new DoubleArrayDistances(points);
+
+        var kdTree = new KdTreeBuilder(graph,
+            points,
+            1,
+            1,
+            distances,
+            ProgressTracker.NULL_TRACKER
+        ).build();
 
         var neighbours = kdTree.neighbours(graph.toMappedNodeId("a"), 2).neighbours();
         assertThat(neighbours)

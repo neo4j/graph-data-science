@@ -19,8 +19,17 @@
  */
 package org.neo4j.gds.hdbscan;
 
-public interface AABB{
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 
-    int mostSpreadDimension();
+final class DistancesFactory {
 
+    private DistancesFactory() {}
+
+    static Distances create(NodePropertyValues nodePropertyValues) {
+
+        return switch (nodePropertyValues.valueType()) {
+            case DOUBLE_ARRAY -> new DoubleArrayDistances(nodePropertyValues);
+            default -> throw new IllegalArgumentException("Wrong property type");
+        };
+    }
 }

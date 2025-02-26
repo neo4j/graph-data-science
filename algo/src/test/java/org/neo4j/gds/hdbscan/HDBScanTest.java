@@ -43,15 +43,15 @@ class HDBScanTest {
     private static final String DATA =
         """
             CREATE
-                (a:Node {point: [1.0, 1.0]}),
-                (b:Node {point: [1.0, 5.0]}),
-                (c:Node {point: [1.0, 6.0]}),
-                (d:Node {point: [2.0, 2.0]}),
-                (e:Node {point: [8.0, 2.0]}),
-                (f:Node {point: [10.0, 1.0]})
-                (g:Node {point: [10.0, 2.0]})
-                (h:Node {point: [12.0, 3.0]})
-                (i:Node {point: [12.0, 21.0]})
+                (a:Node {point: [1.0d, 1.0d]}),
+                (b:Node {point: [1.0d, 5.0d]}),
+                (c:Node {point: [1.0d, 6.0d]}),
+                (d:Node {point: [2.0d, 2.0d]}),
+                (e:Node {point: [8.0d, 2.0d]}),
+                (f:Node {point: [10.0d, 1.0d]})
+                (g:Node {point: [10.0d, 2.0d]})
+                (h:Node {point: [12.0d, 3.0d]})
+                (i:Node {point: [12.0d, 21.0d]})
             """;
 
     @Inject
@@ -70,7 +70,7 @@ class HDBScanTest {
             TerminationFlag.RUNNING_TRUE
         );
 
-        var kdtree = hdbscan.buildKDTree();
+        var kdtree = hdbscan.buildKDTree(new DoubleArrayDistances(graph.nodeProperties("point")));
 
         var cores = hdbscan.computeCores(kdtree, graph.nodeCount()).createCoreArray();
 
@@ -103,9 +103,10 @@ class HDBScanTest {
             TerminationFlag.RUNNING_TRUE
         );
 
-        var kdtree = hdbscan.buildKDTree();
+        DoubleArrayDistances distances = new DoubleArrayDistances(graph.nodeProperties("point"));
+        var kdtree = hdbscan.buildKDTree(distances);
 
-        var result = hdbscan.boruvka(kdtree, hdbscan.computeCores(kdtree, graph.nodeCount()));
+        var result = hdbscan.boruvka(kdtree, hdbscan.computeCores(kdtree, graph.nodeCount()),distances);
 
         var expected = List.of(
             new Edge(graph.toMappedNodeId("i"), graph.toMappedNodeId("h"), Math.sqrt(346)),

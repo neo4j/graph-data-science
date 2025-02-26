@@ -81,13 +81,15 @@ public class HDBScan extends Algorithm<Labels> {
     @Override
     public Labels compute() {
         progressTracker.beginSubTask();
-        var kdTree = buildKDTree();
+
+        var distances = DistancesFactory.create(nodePropertyValues);
+        var kdTree = buildKDTree(distances);
 
         var nodeCount = nodes.nodeCount();
         var coreResult = computeCores(kdTree, nodeCount);
 
        // var mst = dualTreeMSTPhase(kdTree, coreResult);
-        var mst = boruvka(kdTree,coreResult);
+        var mst = boruvka(kdTree,coreResult,distances);
 
         var clusterHierarchy = createClusterHierarchy(mst);
 
@@ -116,9 +118,9 @@ public class HDBScan extends Algorithm<Labels> {
     }
 
 
-    GeometricMSTResult boruvka(KdTree kdTree, CoreResult coreResult) {
+    GeometricMSTResult boruvka(KdTree kdTree, CoreResult coreResult, Distances distances) {
         var boruvkaMST = BoruvkaMST.create(
-            nodePropertyValues,
+            distances,
             kdTree,
             coreResult,
             nodes.nodeCount(),
@@ -134,12 +136,13 @@ public class HDBScan extends Algorithm<Labels> {
         return ClusterHierarchy.create(nodes.nodeCount(), edges,progressTracker);
     }
 
-    KdTree buildKDTree() {
+    KdTree buildKDTree(Distances distances) {
         var builder = new KdTreeBuilder(
             nodes,
             nodePropertyValues,
             concurrency.value(),
             leafSize,
+            distances,
             progressTracker
         );
         return builder.build();

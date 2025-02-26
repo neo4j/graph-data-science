@@ -19,8 +19,14 @@
  */
 package org.neo4j.gds.hdbscan;
 
-public interface AABB{
+public interface Distances {
 
-    int mostSpreadDimension();
+    default double  computeDistance(long index1, long index2){
+        return  Math.sqrt(computeDistanceUnsquared(index1,index2));
+    }
 
+    double  computeDistanceUnsquared(long index1, long index2);
+
+    double lowerBound(AABB aabb, long index);
 }
+

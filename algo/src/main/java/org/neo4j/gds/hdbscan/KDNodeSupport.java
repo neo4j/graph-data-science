@@ -19,8 +19,11 @@
  */
 package org.neo4j.gds.hdbscan;
 
-public interface AABB{
+import java.util.function.LongToDoubleFunction;
 
-    int mostSpreadDimension();
+interface KDNodeSupport {
+
+    AABB create(long start, long end);
+    LongToDoubleFunction valueAt(int index);
 
 }

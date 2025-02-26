@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
@@ -53,15 +54,15 @@ class BoruvkaMSTTest {
         private static final String DATA =
             """
                 CREATE
-                    (a:Node {point: [1.0, 1.0]}),
-                    (b:Node {point: [1.0, 5.0]}),
-                    (c:Node {point: [1.0, 6.0]}),
-                    (d:Node {point: [2.0, 2.0]}),
-                    (e:Node {point: [8.0, 2.0]}),
-                    (f:Node {point: [10.0, 1.0]})
-                    (g:Node {point: [10.0, 2.0]})
-                    (h:Node {point: [12.0, 3.0]})
-                    (i:Node {point: [12.0, 21.0]})
+                    (a:Node {point: [1.0d, 1.0d]}),
+                    (b:Node {point: [1.0d, 5.0d]}),
+                    (c:Node {point: [1.0d, 6.0d]}),
+                    (d:Node {point: [2.0d, 2.0d]}),
+                    (e:Node {point: [8.0d, 2.0d]}),
+                    (f:Node {point: [10.0d, 1.0d]})
+                    (g:Node {point: [10.0d, 2.0d]})
+                    (h:Node {point: [12.0d, 3.0d]})
+                    (i:Node {point: [12.0d, 21.0d]})
                 """;
 
         @Inject
@@ -71,22 +72,26 @@ class BoruvkaMSTTest {
         @ValueSource(ints={1,4})
         void shouldReturnEuclideanMSTWithZeroCoreValues(int concurrency) {
             var nodePropertyValues = graph.nodeProperties("point");
-            var kdTree = new KdTreeBuilder(graph,
+            var distances = new DoubleArrayDistances(nodePropertyValues);
+
+            var kdTree = new KdTreeBuilder(
+                graph,
                 nodePropertyValues,
                 1,
                 1,
+                distances,
                 ProgressTracker.NULL_TRACKER
             ).build();
 
-            var dualTree =  BoruvkaMST.createWithZeroCores(
-                nodePropertyValues,
+            var boruvka =  BoruvkaMST.createWithZeroCores(
+                distances,
                 kdTree,
                 graph.nodeCount(),
                 new Concurrency(concurrency),
                 ProgressTracker.NULL_TRACKER
             );
 
-            var result = dualTree.compute();
+            var result = boruvka.compute();
 
             var expected = List.of(
                 new Edge(graph.toMappedNodeId("g"), graph.toMappedNodeId("h"), 2.23606797749979),
@@ -119,12 +124,12 @@ class BoruvkaMSTTest {
         private static final String DATA =
             """
                     CREATE
-                        (a:Node { point: [2.0, 3.0]}),
-                        (b:Node { point: [5.0, 4.0]}),
-                        (c:Node { point: [9.0, 6.0]}),
-                        (d:Node { point: [4.0, 7.0]}),
-                        (e:Node { point: [8.0, 1.0]}),
-                        (f:Node { point: [7.0, 2.0]})
+                        (a:Node { point: [2.0d, 3.0d]}),
+                        (b:Node { point: [5.0d, 4.0d]}),
+                        (c:Node { point: [9.0d, 6.0d]}),
+                        (d:Node { point: [4.0d, 7.0d]}),
+                        (e:Node { point: [8.0d, 1.0d]}),
+                        (f:Node { point: [7.0d, 2.0d]})
                 """;
 
         @Inject
@@ -133,17 +138,20 @@ class BoruvkaMSTTest {
         @ParameterizedTest
         @ValueSource(ints={1,4})
         void shouldReturnEuclideanMSTWithZeroCoreValues(int concurrency) {
-            var nodePropertyValues = graph.nodeProperties("point");
+            NodePropertyValues nodePropertyValues = graph.nodeProperties("point");
+            var distances = new DoubleArrayDistances(nodePropertyValues);
+
             var kdTree = new KdTreeBuilder(
                 graph,
                 nodePropertyValues,
                 1,
                 1,
+                distances,
                 ProgressTracker.NULL_TRACKER
             ).build();
 
             var dualTree =  BoruvkaMST.createWithZeroCores(
-                nodePropertyValues,
+                distances,
                 kdTree,
                 graph.nodeCount(),
                 new Concurrency(concurrency),
@@ -183,12 +191,12 @@ class BoruvkaMSTTest {
         private static final String DATA =
             """
                     CREATE
-                        (a:Node { point: [0.0, 0.0] }),
-                        (b:Node { point: [1.0, 1.0] }),
-                        (c:Node { point: [3.0, 3.0] }),
-                        (d:Node { point: [0.5, 0.0] }),
-                        (e:Node { point: [1000.0, 0.0] }),
-                        (f:Node { point: [1001.0, 0.0] })
+                        (a:Node { point: [0.0d, 0.0d] }),
+                        (b:Node { point: [1.0d, 1.0d] }),
+                        (c:Node { point: [3.0d, 3.0d] }),
+                        (d:Node { point: [0.5d, 0.0d] }),
+                        (e:Node { point: [1000.0d, 0.0d] }),
+                        (f:Node { point: [1001.0d, 0.0d] })
                 """;
 
         @Inject
@@ -198,22 +206,25 @@ class BoruvkaMSTTest {
         @ValueSource(ints={1,4})
         void shouldReturnEuclideanMSTWithZeroCoreValues(int concurrency) {
             var nodePropertyValues = graph.nodeProperties("point");
+            var distances = new DoubleArrayDistances(nodePropertyValues);
+
             var kdTree = new KdTreeBuilder(graph,
                 nodePropertyValues,
                 1,
                 1,
+                distances,
                 ProgressTracker.NULL_TRACKER
             ).build();
 
-            var dualTree =  BoruvkaMST.createWithZeroCores(
-                nodePropertyValues,
+            var boruvka =  BoruvkaMST.createWithZeroCores(
+                distances,
                 kdTree,
                 graph.nodeCount(),
                 new Concurrency(concurrency),
                 ProgressTracker.NULL_TRACKER
             );
 
-            var result = dualTree.compute();
+            var result = boruvka.compute();
 
             var expected = List.of(
                 new Edge(graph.toMappedNodeId("a"), graph.toMappedNodeId("d"), 0.5),
@@ -244,15 +255,20 @@ class BoruvkaMSTTest {
             var progressTracker = new TaskProgressTracker(progressTask, new LoggerForProgressTrackingAdapter(log), new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE);
 
             var nodePropertyValues = graph.nodeProperties("point");
+
+            var distances =new DoubleArrayDistances(nodePropertyValues);
+
+
             var kdTree = new KdTreeBuilder(graph,
                 nodePropertyValues,
                 1,
                 1,
+                distances,
                 ProgressTracker.NULL_TRACKER
             ).build();
 
             BoruvkaMST.createWithZeroCores(
-                nodePropertyValues,
+                distances,
                 kdTree,
                 graph.nodeCount(),
                 new Concurrency(1),

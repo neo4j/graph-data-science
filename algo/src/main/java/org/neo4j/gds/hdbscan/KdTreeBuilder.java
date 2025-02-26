@@ -33,23 +33,36 @@ public class KdTreeBuilder {
     private final int concurrency;
     private final long leafSize;
     private final ProgressTracker progressTracker;
+    private final Distances distances;
 
-    public KdTreeBuilder(IdMap nodes, NodePropertyValues nodePropertyValues,int concurrency,long leafSize, ProgressTracker progressTracker) {
+    public KdTreeBuilder(IdMap nodes,
+        NodePropertyValues nodePropertyValues,
+        int concurrency,
+        long leafSize,
+        Distances distances,
+        ProgressTracker progressTracker
+    ) {
         this.nodes = nodes;
         this.nodePropertyValues = nodePropertyValues;
         this. concurrency = concurrency;
         this.leafSize = leafSize;
         this.progressTracker = progressTracker;
+
+        this.distances = distances;
     }
 
     public KdTree build(){
 
         var ids = HugeLongArray.newArray(nodes.nodeCount());
         ids.setAll(  v-> v);
+
+        var kdNodeSupport = KDNodeSupportFactory.create(nodePropertyValues,ids,nodePropertyValues.dimension().orElseThrow());
         AtomicInteger nodeIndex = new AtomicInteger(0);
+
         var builderTask = new KdTreeNodeBuilderTask(
-            ids,
+            kdNodeSupport,
             nodePropertyValues,
+            ids,
             0,
             nodePropertyValues.nodeCount(),
             leafSize,
@@ -61,7 +74,7 @@ public class KdTreeBuilder {
         builderTask.run();
         var root = builderTask.kdNode();
         progressTracker.endSubTask();
-        return  new KdTree(ids, nodePropertyValues, root, nodeIndex.get());
+        return  new KdTree(ids, distances, root, nodeIndex.get());
     }
 
 }

@@ -154,8 +154,10 @@ class BoruvkaAlgorithmFunctionsTest {
         when(coreResult.createCoreArray()).thenReturn(HugeDoubleArray.of(0,0,10,10,0,0,0,0,0,0));
         when(coreResult.neighboursOf(anyLong())).thenReturn(new Neighbour[0]);
 
+        var distances =new DoubleArrayDistances(nodeProps);
+
         var boruvkaMST =  BoruvkaMST.create(
-            nodeProps,
+            distances,
             kdTree,
             coreResult,
             8,
@@ -163,9 +165,9 @@ class BoruvkaAlgorithmFunctionsTest {
             ProgressTracker.NULL_TRACKER
         );
 
-        assertThat(boruvkaMST.baseCase(0,1,nodeProps.doubleArrayValue(0),0)).isEqualTo(1); //distance
-        assertThat(boruvkaMST.baseCase(2,3,nodeProps.doubleArrayValue(2),2)).isEqualTo(10); //corevalue
-        assertThat(boruvkaMST.baseCase(2,6,nodeProps.doubleArrayValue(2),2)).isEqualTo(-1); //irrelevant
+        assertThat(boruvkaMST.baseCase(0,1,0)).isEqualTo(1); //distance
+        assertThat(boruvkaMST.baseCase(2,3,2)).isEqualTo(10); //corevalue
+        assertThat(boruvkaMST.baseCase(2,6,2)).isEqualTo(-1); //irrelevant
 
 
     }
@@ -179,8 +181,10 @@ class BoruvkaAlgorithmFunctionsTest {
         when(coreResult.createCoreArray()).thenReturn(HugeDoubleArray.of(0,0,10,10));
         when(coreResult.neighboursOf(anyLong())).thenReturn(new Neighbour[0]);
 
+        var distances =new DoubleArrayDistances(nodeProps);
+
         var boruvkaMST =  BoruvkaMST.create(
-            nodeProps,
+            distances,
             kdTree,
             coreResult,
             8,
@@ -188,7 +192,7 @@ class BoruvkaAlgorithmFunctionsTest {
             ProgressTracker.NULL_TRACKER
         );
 
-        assertThat(boruvkaMST.baseCase(0,1,nodeProps.doubleArrayValue(0),1)).isEqualTo(-1); //distance
+        assertThat(boruvkaMST.baseCase(0,1,1)).isEqualTo(-1); //distance
 
     }
 
@@ -196,10 +200,13 @@ class BoruvkaAlgorithmFunctionsTest {
     void shouldPruneProperly(){
 
         DoubleArrayNodePropertyValues nodeProps=mock(DoubleArrayNodePropertyValues.class);
+
+        var distances =new DoubleArrayDistances(nodeProps);
         var kdRoot = KdNode.createLeaf(0,0,2,mock(AABB.class));
-        var kdTree =new KdTree(HugeLongArray.of(0,1,2),nodeProps,kdRoot,1);
+        var kdTree =new KdTree(HugeLongArray.of(0,1,2),distances,kdRoot,1);
+
         var boruvkaMST =  BoruvkaMST.createWithZeroCores(
-            nodeProps,
+            distances,
             kdTree,
             3,
             new Concurrency(1),
