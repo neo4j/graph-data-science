@@ -93,7 +93,7 @@ public final class LocalMiscellaneousProcedureFacade implements MiscellaneousPro
         this.configurationParser = configurationParser;
     }
 
-    public static MiscellaneousProcedureFacade create(
+    public static LocalMiscellaneousProcedureFacade create(
         GenericStub genericStub,
         ApplicationsFacade applicationsFacade,
         ProcedureReturnColumns procedureReturnColumns,
