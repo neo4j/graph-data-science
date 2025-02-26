@@ -1,0 +1,4 @@
+| nodeProperty      | String    | n/a       | no        | A node property corresponding to an array of floats used by HDBSCAN to compute clusters.
+| minClusterSize    | Integer   | 5         | yes       | The minimum number of nodes that a cluster should contain.
+| samples           | Integer   | 10        | yes       | The number of neighbours to be considered when computing the core distances of a node.
+| leafSize          | Integer   | 1         | yes       | The number of leaf nodes of the supporting tree data structure.

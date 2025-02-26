@@ -70,6 +70,7 @@
 *** xref:algorithms/hits.adoc[]
 ** xref:algorithms/community.adoc[]
 *** xref:algorithms/conductance.adoc[]
+*** xref:algorithms/hdbscan.adoc[]
 *** xref:algorithms/k-core.adoc[]
 *** xref:algorithms/k1coloring.adoc[]
 *** xref:algorithms/kmeans.adoc[]

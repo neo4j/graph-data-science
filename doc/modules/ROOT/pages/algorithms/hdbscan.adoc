@@ -1,0 +1,414 @@
+[[algorithms-hdbscan]]
+= HDBSCAN
+:description: This section describes the HDBSCAN algorithm in the Neo4j Graph Data Science library.
+:entity: node
+:result: cluster
+:algorithm: HDBSCAN
+
+include::partial$/algorithms/shared/algorithm-traits.adoc[]
+
+
+[[algorithms-hdbscan-intro]]
+== Introduction
+
+HDBSCAN, which stands for Hierarchical Density-Based Spatial Clustering of Applications with Noise, is a clustering algorithm used to identify clusters of similar data points within a dataset.
+It builds upon the DBSCAN algorithm but adds a hierarchical structure, making it more robust to varying densities within the data.
+
+Unlike DBSCAN, HDBSCAN does not require tuning a specific density parameter;
+instead, it runs DBSCAN over a range of parameters, creating a hierarchy of clusters.
+This hierarchical approach allows HDBSCAN to find clusters of varying densities and to be more adaptable to real-world data.
+
+HDBSCAN is known for its ease of use, noise tolerance, and ability to handle data with varying densities, making it a versatile tool for clustering tasks, especially when dealing with complex, high-dimensional datasets.
+
+For more information on this algorithm, see:
+
+* https://arxiv.org/abs/1602.03730[HDBSCAN: Density based Clustering over Location Based Services]
+
+
+[[algorithms-hdbscan-considerations]]
+== Considerations
+
+In order for HDBSCAN to work properly, the property arrays for all nodes must have the same number of elements. Also, they should contain exclusively numbers and not contain any NaN values.
+
+
+[[algorithms-hdbscan-syntax]]
+== Syntax
+
+.HDBSCAN syntax per mode
+[.tabbed-example, caption = ]
+====
+
+[.include-with-stream]
+======
+.Run HDBSCAN in stream mode on a named graph.
+[source, cypher, role=noplay]
+----
+CALL gds.hdbscan.stream(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  nodeId: Integer,
+  label: Integer
+----
+
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name          | Type   | Default | Optional | Description
+include::partial$/algorithms/common-configuration/common-stream-stats-configuration-entries.adoc[]
+include::partial$/algorithms/hdbscan/specific-configuration.adoc[]
+|===
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name      | Type      | Description
+| nodeId    | Integer   | Node ID.
+| label     | Integer   | The label ID, `-1` if the node is considered `noise`.
+|===
+======
+
+
+[.include-with-stats]
+======
+.Run HDBSCAN in stats mode on a named graph.
+[source, cypher, role=noplay]
+----
+CALL gds.hdbscan.stats(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  nodeCount: Integer,
+  numberOfClusters: Integer,
+  numberOfNoisePoints: Integer,
+  preProcessingMillis: Integer,
+  computeMillis: Integer,
+  postProcessingMillis: Integer,
+  configuration: Map
+----
+
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name          | Type   | Default | Optional | Description
+include::partial$/algorithms/common-configuration/common-stream-stats-configuration-entries.adoc[]
+include::partial$/algorithms/hdbscan/specific-configuration.adoc[]
+|===
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                  | Type      | Description
+| nodeCount             | Integer   | The number of nodes the algorithm ran on.
+| numberOfClusters      | Integer   | The number of clusters found by the algorithm.
+| numberOfNoisePoints   | Integer   | The number of noise points found by the algorithm.
+| preProcessingMillis   | Integer   | Milliseconds for preprocessing the data.
+| computeMillis         | Integer   | Milliseconds for running the algorithm.
+| postProcessingMillis  | Integer   | Milliseconds for computing percentiles and community count.
+| configuration         | Map       | The configuration used for running the algorithm.
+|===
+======
+
+[.include-with-mutate]
+======
+.Run HDBSCAN in mutate mode on a named graph.
+[source, cypher, role=noplay]
+----
+CALL gds.hdbscan.mutate(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  nodeCount: Integer,
+  numberOfClusters: Integer,
+  numberOfNoisePoints: Integer,
+  preProcessingMillis: Integer,
+  computeMillis: Integer,
+  postProcessingMillis: Integer,
+  mutateMillis: Integer,
+  nodePropertiesWritten: Integer,
+  configuration: Map
+----
+
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name          | Type   | Default | Optional | Description
+include::partial$/algorithms/common-configuration/common-mutate-configuration-entries.adoc[]
+include::partial$/algorithms/hdbscan/specific-configuration.adoc[]
+|===
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                   | Type      | Description
+| nodeCount              | Integer   | The number of nodes the algorithm ran on.
+| numberOfClusters       | Integer   | The number of clusters found by the algorithm.
+| numberOfNoisePoints    | Integer   | The number of noise points found by the algorithm.
+| preProcessingMillis    | Integer   | Milliseconds for preprocessing the data.
+| computeMillis          | Integer   | Milliseconds for running the algorithm.
+| mutateMillis           | Integer   | Milliseconds for adding properties to the projected graph.
+| postProcessingMillis   | Integer   | Milliseconds for computing percentiles and community count.
+| nodePropertiesWritten  | Integer   | Number of properties added to the projected graph.
+| configuration          | Map       | The configuration used for running the algorithm.
+|===
+======
+
+
+[.include-with-write]
+======
+.Run HDBSCAN in write mode on a named graph.
+[source, cypher, role=noplay]
+----
+CALL gds.hdbscan.write(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  nodeCount: Integer,
+  numberOfClusters: Integer,
+  numberOfNoisePoints: Integer,
+  preProcessingMillis: Integer,
+  computeMillis: Integer,
+  postProcessingMillis: Integer,
+  writeMillis: Integer,
+  nodePropertiesWritten: Integer,
+  configuration: Map
+----
+
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name          | Type   | Default | Optional | Description
+include::partial$/algorithms/common-configuration/common-write-configuration-entries.adoc[]
+include::partial$/algorithms/hdbscan/specific-configuration.adoc[]
+|===
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                   | Type      | Description
+| nodeCount              | Integer   | The number of nodes the algorithm ran on.
+| numberOfClusters       | Integer   | The number of clusters found by the algorithm.
+| numberOfNoisePoints    | Integer   | The number of noise points found by the algorithm.
+| preProcessingMillis    | Integer   | Milliseconds for preprocessing the data.
+| computeMillis          | Integer   | Milliseconds for running the algorithm.
+| writeMillis            | Integer   | Milliseconds for adding properties to the Neo4j database.
+| postProcessingMillis   | Integer   | Milliseconds for computing percentiles and community count.
+| nodePropertiesWritten  | Integer   | Number of properties added to the projected graph.
+| configuration          | Map       | The configuration used for running the algorithm.
+|===
+======
+====
+
+
+[[algorithms-hdbscan-examples]]
+== Examples
+
+include::partial$/algorithms/shared/examples-named-native-note.adoc[]
+
+:algorithm-name: HDBSCAN
+:graph-description: cities
+:image-file: cities.svg
+include::partial$/algorithms/shared/examples-intro.adoc[]
+
+.The following Cypher statement will create the example graph in the Neo4j database:
+[source,cypher,role=noplay setup-query]
+----
+CREATE
+  (:City {name: 'Surbiton', coordinates: [51.39148, -0.29825]}),
+  (:City {name: 'Liverpool', coordinates: [53.41058, -2.97794]}),
+  (:City {name: 'Kingston upon Thames', coordinates: [51.41259, -0.2974]}),
+  (:City {name: 'Sliven', coordinates: [42.68583, 26.32917]}),
+  (:City {name: 'Solna', coordinates: [59.36004, 18.00086]}),
+  (:City {name: 'Örkelljunga', coordinates: [56.28338, 13.27773]}),
+  (:City {name: 'Malmö', coordinates: [55.60587, 13.00073]}),
+  (:City {name: 'Xánthi', coordinates: [41.13488, 24.888]});
+----
+
+This graph is composed of various _City_ nodes, in three global locations - United Kingdom, Sweden and the Balkan region in Europe.
+
+We can now project the graph and store it in the graph catalog.
+We load the `City` node label with `coordinates` node property.
+
+.The following statement will project the graph and store it in the graph catalog.
+[source,cypher,role=noplay graph-project-query]
+----
+MATCH (c:City)
+RETURN gds.graph.project(
+  'cities',
+  c,
+  null,
+  {
+    sourceNodeProperties: c { .coordinates },
+    targetNodeProperties: {}
+  }
+)
+----
+
+In the following examples we will demonstrate using the HDBSCAN algorithm on this graph to find communities of cities that are close to each other geographically.
+
+
+[[algorithms-hdbscan-examples-memory-estimation]]
+=== Memory Estimation
+
+:mode: write
+include::partial$/algorithms/shared/examples-estimate-intro.adoc[]
+
+[role=query-example]
+--
+.The following will estimate the memory requirements for running the algorithm:
+[source, cypher, role=noplay]
+----
+CALL gds.hdbscan.write.estimate('cities', {
+  writeProperty: 'label',
+  nodeProperty: 'coordinates'
+})
+YIELD nodeCount, bytesMin, bytesMax, requiredMemory
+----
+
+.Results
+[opts="header",cols="1,1,1,1"]
+|===
+| nodeCount | bytesMin | bytesMax | requiredMemory
+| 8         | 0        | 0        | "0 Bytes"
+|===
+--
+
+
+[[algorithms-hdbscan-examples-stream]]
+=== Stream
+
+include::partial$/algorithms/shared/examples-stream-intro.adoc[]
+
+[role=query-example]
+--
+.The following will run the algorithm and stream results:
+[source,cypher,role=noplay]
+----
+CALL gds.hdbscan.stream('cities', {
+  nodeProperty: 'coordinates',
+  minClusterSize: 2,
+  samples: 2
+})
+YIELD nodeId, label
+RETURN gds.util.asNode(nodeId).name AS name, label
+ORDER BY label, name ASC
+----
+
+.Results
+[opts="header"]
+|===
+| name                  | label
+|"Sliven"               | -1
+|"Xánthi"               | -1
+|"Kingston upon Thames" | 1
+|"Liverpool"            | 1
+|"Surbiton"             | 1
+|"Malmö"                | 2
+|"Solna"                | 2
+|"Örkelljunga"          | 2
+|===
+--
+
+In the example above we can see that the cities are geographically clustered together.
+
+
+[[algorithms-hdbscan-examples-stats]]
+=== Stats
+
+:stats-syntax: algorithms-hdbscan-syntax
+include::partial$/algorithms/shared/examples-stats-intro.adoc[]
+
+[role=query-example]
+--
+.The following will run the algorithm and returns the result in form of statistical and measurement values
+[source,cypher,role=noplay]
+----
+CALL gds.hdbscan.stats('cities', {
+  nodeProperty: 'coordinates',
+  minClusterSize: 2,
+  samples: 2
+})
+YIELD nodeCount, numberOfClusters, numberOfNoisePoints
+----
+
+.Results
+[opts="header"]
+|===
+| nodeCount | numberOfClusters | numberOfNoisePoints
+| 8         | 2                | 2
+|===
+--
+
+
+[[algorithms-hdbscan-examples-mutate]]
+=== Mutate
+
+include::partial$/algorithms/shared/examples-mutate-intro.adoc[]
+
+[role=query-example]
+--
+.The following will run the algorithm and store the results in `cities` graph:
+[source,cypher,role=noplay]
+----
+CALL gds.hdbscan.mutate('cities', {
+  nodeProperty: 'coordinates',
+  minClusterSize: 2,
+  samples: 2,
+  mutateProperty: 'label'
+})
+YIELD nodeCount, numberOfClusters, nodePropertiesWritten, numberOfNoisePoints
+----
+
+.Results
+[opts="header"]
+|===
+| nodeCount | numberOfClusters | nodePropertiesWritten | numberOfNoisePoints
+| 8         | 2                | 8                     | 2
+|===
+--
+
+In `mutate` mode, only a single row is returned by the procedure.
+The result is written to the GDS in-memory graph instead of the Neo4j database.
+
+
+[[algorithms-hdbscan-examples-write]]
+=== Write
+
+include::partial$/algorithms/shared/examples-write-intro.adoc[]
+
+[role=query-example]
+--
+.The following will run the algorithm and write the results back to Neo4j:
+[source,cypher,role=noplay]
+----
+CALL gds.hdbscan.write('cities', {
+  nodeProperty: 'coordinates',
+  minClusterSize: 2,
+  samples: 2,
+  writeProperty: 'label'
+})
+YIELD nodeCount, numberOfClusters, nodePropertiesWritten, numberOfNoisePoints
+----
+
+.Results
+[opts="header"]
+|===
+| nodeCount | numberOfClusters | nodePropertiesWritten | numberOfNoisePoints
+| 8         | 2                | 8                     | 2
+|===
+--
+
+In `write` mode, only a single row is returned by the procedure.
+The result is written to the Neo4j database instead of the GDS in-memory graph.
