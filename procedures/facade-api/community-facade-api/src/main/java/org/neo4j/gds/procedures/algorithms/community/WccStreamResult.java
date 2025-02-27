@@ -19,12 +19,5 @@
  */
 package org.neo4j.gds.procedures.algorithms.community;
 
-public class WccStreamResult {
-    public final long nodeId;
-    public final long componentId;
-
-    public WccStreamResult(long nodeId, long componentId) {
-        this.nodeId = nodeId;
-        this.componentId = componentId;
-    }
+public record WccStreamResult(long nodeId, long componentId) {
 }
