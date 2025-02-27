@@ -71,7 +71,6 @@ class KdTreeNodeBuilderTask implements Runnable {
 
             int indexToSplit = aabb.mostSpreadDimension(); //step. 1: find the index to  dimension split
             long median = findMedianAndSplit(indexToSplit);  //step.2  modify array so that everything < is before median and everything >= after
-            var medianValue = nodePropertyValues.doubleArrayValue(ids.get(median - 1))[indexToSplit];
 
             kdNode = KdNode.createSplitNode(
                 treeNodeId,
