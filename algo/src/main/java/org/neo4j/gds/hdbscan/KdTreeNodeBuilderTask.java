@@ -37,6 +37,8 @@ class KdTreeNodeBuilderTask implements Runnable {
     private final AtomicInteger  nodeIndex;
     private final ProgressTracker progressTracker;
     private  final KDNodeSupport kdNodeSupport;
+    private final KdNode parent;
+    private final boolean amLeftChild;
 
 
     KdTreeNodeBuilderTask(
@@ -47,6 +49,8 @@ class KdTreeNodeBuilderTask implements Runnable {
         long end,
         long maxLeafSize,
         AtomicInteger nodeIndex,
+        KdNode parent,
+        boolean amLeftChild,
         ProgressTracker progressTracker
     ) {
         this.ids = ids;
@@ -57,6 +61,8 @@ class KdTreeNodeBuilderTask implements Runnable {
         this.nodeIndex = nodeIndex;
         this.progressTracker = progressTracker;
         this.kdNodeSupport = kdNodeSupport;
+        this.parent = parent;
+        this.amLeftChild = amLeftChild;
     }
 
     @Override
@@ -65,36 +71,45 @@ class KdTreeNodeBuilderTask implements Runnable {
         var aabb = kdNodeSupport.create(start, end);
         var treeNodeId = nodeIndex.getAndIncrement();
         if (nodeSize <= maxLeafSize) {
-            kdNode = KdNode.createLeaf(treeNodeId, start, end, aabb);
+            createNode(true,treeNodeId,aabb);
             progressTracker.logProgress(nodeSize);
         } else {
 
             int indexToSplit = aabb.mostSpreadDimension(); //step. 1: find the index to  dimension split
             long median = findMedianAndSplit(indexToSplit);  //step.2  modify array so that everything < is before median and everything >= after
 
-            kdNode = KdNode.createSplitNode(
-                treeNodeId,
-                start,
-                end,
-                aabb
-            );
+            createNode(false,treeNodeId,aabb);
+
             //TODO: step.4 add these builder tasks into a fork-join
             var leftChildBuilder = new KdTreeNodeBuilderTask(
-                kdNodeSupport, nodePropertyValues, ids, start, median, maxLeafSize, nodeIndex, progressTracker
+                kdNodeSupport,
+                nodePropertyValues,
+                ids,
+                start,
+                median,
+                maxLeafSize,
+                nodeIndex,
+                kdNode,
+                true,
+                progressTracker
             );
             leftChildBuilder.run();
 
             var rightChildBuilder = new KdTreeNodeBuilderTask(
-                kdNodeSupport, nodePropertyValues, ids, median, end, maxLeafSize, nodeIndex, progressTracker
+                kdNodeSupport,
+                nodePropertyValues,
+                ids,
+                median,
+                end,
+                maxLeafSize,
+                nodeIndex,
+                kdNode,
+                false,
+                progressTracker
             );
 
             rightChildBuilder.run();
 
-            var leftChild = leftChildBuilder.kdNode();
-            var rightChild = rightChildBuilder.kdNode();
-
-            kdNode.leftChild(leftChild);
-            kdNode.rightChild(rightChild);
         }
     }
 
@@ -149,6 +164,30 @@ class KdTreeNodeBuilderTask implements Runnable {
         ids.set(pIndex, tmp);
 
         return pIndex;
+    }
+
+    private void createNode(boolean isLeaf, long treeNodeId, AABB aabb){
+        if (isLeaf) {
+            kdNode = KdNode.createLeaf(
+                treeNodeId,
+                start,
+                end, aabb
+            );
+        }else{
+            kdNode = KdNode.createSplitNode(
+                treeNodeId,
+                start,
+                end,
+                aabb
+            );
+        }
+        if (parent!=null){
+            if (amLeftChild){
+                parent.leftChild(kdNode);
+            }else{
+                parent.rightChild(kdNode);
+            }
+        }
     }
 
 

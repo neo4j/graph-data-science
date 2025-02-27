@@ -50,7 +50,6 @@ final class KdNode{
         this.isLeaf = isLeaf;
     }
 
-
     void leftChild(KdNode child){
         this.leftChild = child;
     }

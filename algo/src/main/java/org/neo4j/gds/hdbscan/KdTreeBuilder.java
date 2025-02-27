@@ -67,6 +67,8 @@ public class KdTreeBuilder {
             nodePropertyValues.nodeCount(),
             leafSize,
             nodeIndex,
+            null,
+            false,
             progressTracker
         );
 

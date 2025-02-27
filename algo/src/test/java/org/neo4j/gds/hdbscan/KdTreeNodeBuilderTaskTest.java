@@ -61,6 +61,8 @@ class KdTreeNodeBuilderTaskTest {
             10,
             1,
             new AtomicInteger(0),
+            null,
+            false,
             ProgressTracker.NULL_TRACKER
         );
 
@@ -98,6 +100,8 @@ class KdTreeNodeBuilderTaskTest {
             8,
             1,
             new AtomicInteger(),
+            null,
+            false,
             ProgressTracker.NULL_TRACKER
         );
 
@@ -132,6 +136,8 @@ class KdTreeNodeBuilderTaskTest {
             3,
             3,
             new AtomicInteger(),
+            null,
+            false,
             ProgressTracker.NULL_TRACKER
         );
 
@@ -163,7 +169,7 @@ class KdTreeNodeBuilderTaskTest {
 
         var aabbCreator = new DoubleKDNodeSupport(nodePropertyValues,ids,1);
 
-        var nodeBuilder =new KdTreeNodeBuilderTask(
+        var nodeBuilder = new KdTreeNodeBuilderTask(
             aabbCreator,
             nodePropertyValues,
             ids,
@@ -171,6 +177,8 @@ class KdTreeNodeBuilderTaskTest {
             3,
             2,
             new AtomicInteger(0),
+            null,
+            false,
             ProgressTracker.NULL_TRACKER
         );
 
