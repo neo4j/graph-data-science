@@ -96,9 +96,10 @@ final class ClosestDistanceInformationTracker {
         componentOutsideBestNode.set(u, -1);
     }
 
-    void consider(long comp1, long comp2, long p1, long p2, double distance) {
-        tryToAssign(comp1, p1, p2, distance);
+    boolean consider(long comp1, long comp2, long p1, long p2, double distance) {
+        var assigned = tryToAssign(comp1, p1, p2, distance);
         tryToAssign(comp2, p2, p1, distance);
+        return  assigned;
     }
 
     synchronized boolean tryToAssign(long comp, long pInside, long pOutside, double distance) {

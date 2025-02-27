@@ -45,7 +45,6 @@ public final class BoruvkaMST extends Algorithm<GeometricMSTResult> {
     private long edgeCount = 0;
     private double totalEdgeSum = 0d;
 
-
     private BoruvkaMST(
         Distances distances,
         KdTree kdTree,
@@ -135,7 +134,7 @@ public final class BoruvkaMST extends Algorithm<GeometricMSTResult> {
                 concurrency,
                 terminationFlag,
                 (q) -> {
-                    var   qComp = unionFind.setIdOf(q);
+                    var  qComp = unionFind.setIdOf(q);
                     if (filterNodesOnCoreValue(q,qComp)) {
                         traversalStep(q, kdTree.root(), qComp, 0);
                     }
@@ -161,8 +160,8 @@ public final class BoruvkaMST extends Algorithm<GeometricMSTResult> {
         return  currentComponentBest < lowerBoundOnDistance;
     }
 
-    boolean tryUpdate(long qComp, long q,long r, double distance){
-        return closestDistanceTracker.tryToAssign(qComp,q,r,distance);
+    boolean tryUpdate(long qComp, long rComp, long q,long r, double distance){
+            return closestDistanceTracker.consider(qComp,rComp,q,r,distance);
     }
 
     double baseCase(long q,long r,  long qComp){
@@ -170,7 +169,7 @@ public final class BoruvkaMST extends Algorithm<GeometricMSTResult> {
         if (rComp != qComp && filterNodesOnCoreValue(r, qComp)) {
             var rqDistance = distances.computeDistanceUnsquared(q,r);
             var adaptedDistance = Math.max(Math.max(coreValues.get(r), coreValues.get(q)), rqDistance);
-            if (tryUpdate(qComp,q,r,adaptedDistance)){
+            if (tryUpdate(qComp,rComp,q,r,adaptedDistance)){
               return adaptedDistance;
           }
         }

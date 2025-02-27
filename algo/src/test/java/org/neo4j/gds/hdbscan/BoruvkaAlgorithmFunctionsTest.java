@@ -36,14 +36,14 @@ class BoruvkaAlgorithmFunctionsTest {
     @Test
     void singleComponentShouldWorkOnLeaf(){
         KdNode kdNode = KdNode.createLeaf(0, 0, 4, null);
-        var kdTree =new KdTree(
+        var kdTree = new KdTree(
             HugeLongArray.of(0,1,2,3),
             null,
             kdNode,
             1
         );
 
-        var boruvkaMST =  BoruvkaMST.createWithZeroCores(
+        var boruvkaMST = BoruvkaMST.createWithZeroCores(
             null,
             kdTree,
             4,
@@ -62,14 +62,14 @@ class BoruvkaAlgorithmFunctionsTest {
 
     @Test
     void singleComponentOrShouldWork(){
-        var kdTree =new KdTree(
+        var kdTree = new KdTree(
             HugeLongArray.of(0,1,2,3),
             null,
             null,
             1
         );
 
-        var boruvkaMST =  BoruvkaMST.createWithZeroCores(
+        var boruvkaMST = BoruvkaMST.createWithZeroCores(
             null,
             kdTree,
             4,
@@ -102,14 +102,14 @@ class BoruvkaAlgorithmFunctionsTest {
         kdNode.leftChild(left);
         kdNode.rightChild(right);
 
-        var kdTree =new KdTree(
+        var kdTree = new KdTree(
             HugeLongArray.of(0,1,2,3,4,5,6,7),
             null,
             kdNode,
             1
         );
 
-        var boruvkaMST =  BoruvkaMST.createWithZeroCores(
+        var boruvkaMST = BoruvkaMST.createWithZeroCores(
             null,
             kdTree,
             8,
@@ -136,7 +136,7 @@ class BoruvkaAlgorithmFunctionsTest {
 
     @Test
     void baseCaseShouldWork(){
-        DoubleArrayNodePropertyValues nodeProps=new DoubleArrayNodePropertyValues() {
+        DoubleArrayNodePropertyValues nodeProps = new DoubleArrayNodePropertyValues() {
             @Override
             public double[] doubleArrayValue(long nodeId) {
                 return new double[]{nodeId};
@@ -154,9 +154,9 @@ class BoruvkaAlgorithmFunctionsTest {
         when(coreResult.createCoreArray()).thenReturn(HugeDoubleArray.of(0,0,10,10,0,0,0,0,0,0));
         when(coreResult.neighboursOf(anyLong())).thenReturn(new Neighbour[0]);
 
-        var distances =new DoubleArrayDistances(nodeProps);
+        var distances = new DoubleArrayDistances(nodeProps);
 
-        var boruvkaMST =  BoruvkaMST.create(
+        var boruvkaMST = BoruvkaMST.create(
             distances,
             kdTree,
             coreResult,
@@ -174,16 +174,16 @@ class BoruvkaAlgorithmFunctionsTest {
 
     @Test
     void baseCaseShouldIgnoreSameComponents(){
-        DoubleArrayNodePropertyValues nodeProps=mock(DoubleArrayNodePropertyValues.class);
+        DoubleArrayNodePropertyValues nodeProps = mock(DoubleArrayNodePropertyValues.class);
         var kdTree = mock(KdTree.class);
 
         var coreResult = mock(CoreResult.class);
         when(coreResult.createCoreArray()).thenReturn(HugeDoubleArray.of(0,0,10,10));
         when(coreResult.neighboursOf(anyLong())).thenReturn(new Neighbour[0]);
 
-        var distances =new DoubleArrayDistances(nodeProps);
+        var distances = new DoubleArrayDistances(nodeProps);
 
-        var boruvkaMST =  BoruvkaMST.create(
+        var boruvkaMST = BoruvkaMST.create(
             distances,
             kdTree,
             coreResult,
@@ -199,13 +199,13 @@ class BoruvkaAlgorithmFunctionsTest {
     @Test
     void shouldPruneProperly(){
 
-        DoubleArrayNodePropertyValues nodeProps=mock(DoubleArrayNodePropertyValues.class);
+        DoubleArrayNodePropertyValues nodeProps = mock(DoubleArrayNodePropertyValues.class);
 
-        var distances =new DoubleArrayDistances(nodeProps);
+        var distances = new DoubleArrayDistances(nodeProps);
         var kdRoot = KdNode.createLeaf(0,0,2,mock(AABB.class));
-        var kdTree =new KdTree(HugeLongArray.of(0,1,2),distances,kdRoot,1);
+        var kdTree = new KdTree(HugeLongArray.of(0,1,2),distances,kdRoot,1);
 
-        var boruvkaMST =  BoruvkaMST.createWithZeroCores(
+        var boruvkaMST = BoruvkaMST.createWithZeroCores(
             distances,
             kdTree,
             3,
@@ -214,7 +214,7 @@ class BoruvkaAlgorithmFunctionsTest {
         );
 
         //prune based on distance
-        boruvkaMST.tryUpdate(2,2,3,5);
+        boruvkaMST.tryUpdate(2,1,2,1,5);
         assertThat(boruvkaMST.prune(kdRoot,2,100)).isTrue();
         assertThat(boruvkaMST.prune(kdRoot,2,4)).isFalse();
 
