@@ -78,7 +78,7 @@ class KdTreeBuilderTest {
         assertThat(root.start()).isEqualTo(0);
         assertThat(root.end()).isEqualTo(graph.nodeCount());
         assertThat(kdTree.nodesContained(root)).containsExactlyInAnyOrder(0L, 1L, 2L, 3L, 4L, 5L);
-        var rootAABB = (DoubleAABB)root.aabb();
+        var rootAABB = root.aabb();
         assertThat(rootAABB.dimension()).isEqualTo(2);
         assertThat(rootAABB.min()).containsExactly(2, 1);
         assertThat(rootAABB.max()).containsExactly(9, 7);
@@ -98,13 +98,13 @@ class KdTreeBuilderTest {
             graph.toMappedNodeId("d")
         );
 
-        var leftAABB = (DoubleAABB)left.aabb();
+        var leftAABB = left.aabb();
 
         assertThat(leftAABB.min()).containsExactly(2.0, 3.0);
         assertThat(leftAABB.max()).containsExactly(5.0, 7.0);
 
         var leftright = left.rightChild();
-        var leftrightaabb =(DoubleAABB) leftright.aabb();
+        var leftrightaabb = leftright.aabb();
         assertThat(leftright.isLeaf()).isTrue();
         assertThat(kdTree.nodesContained(leftright)).containsExactly(graph.toMappedNodeId("d"));
         assertThat(leftrightaabb.min()).containsExactly(4.0, 7.0);
@@ -113,7 +113,7 @@ class KdTreeBuilderTest {
         assertThat(leftright.end()).isEqualTo(3);
 
         var leftleft = left.leftChild();
-        var leftleftaabb = (DoubleAABB)leftleft.aabb();
+        var leftleftaabb = leftleft.aabb();
         assertThat(leftleft.isLeaf()).isFalse();
         assertThat(kdTree.nodesContained(leftleft)).containsExactly(
             graph.toMappedNodeId("a"),
@@ -125,7 +125,7 @@ class KdTreeBuilderTest {
         assertThat(leftleft.end()).isEqualTo(2);
 
         var leftleftleft = leftleft.leftChild();
-        var  leftleftleftaabb= (DoubleAABB)leftleftleft.aabb();
+        var leftleftleftaabb= leftleftleft.aabb();
         assertThat(leftleftleft.isLeaf()).isTrue();
         assertThat(kdTree.nodesContained(leftleftleft)).containsExactly(graph.toMappedNodeId("a"));
         assertThat(leftleftleftaabb.min()).containsExactly(2.0, 3.0);
@@ -134,7 +134,7 @@ class KdTreeBuilderTest {
         assertThat(leftleftleft.end()).isEqualTo(1);
 
         var leftleftright = leftleft.rightChild();
-        var  leftleftrightaabb = (DoubleAABB)leftleftright.aabb();
+        var  leftleftrightaabb = leftleftright.aabb();
         assertThat(leftleftright.isLeaf()).isTrue();
         assertThat(kdTree.nodesContained(leftleftright)).containsExactly(graph.toMappedNodeId("b"));
         assertThat(leftleftrightaabb.min()).containsExactly(5.0, 4.0);
@@ -158,7 +158,7 @@ class KdTreeBuilderTest {
             graph.toMappedNodeId("c")
         );
 
-        var rightAABB = (DoubleAABB) right.aabb();
+        var rightAABB =  right.aabb();
 
         assertThat(rightAABB.min()).containsExactly(7.0, 1.0);
         assertThat(rightAABB.max()).containsExactly(9.0, 6.0);
@@ -167,7 +167,7 @@ class KdTreeBuilderTest {
 
         assertThat(rightright.isLeaf()).isTrue();
         assertThat(kdTree.nodesContained(rightright)).containsExactly(graph.toMappedNodeId("c"));
-        var rightrightaabb = (DoubleAABB)rightright.aabb();
+        var rightrightaabb = rightright.aabb();
         assertThat(rightrightaabb.min()).containsExactly(9.0, 6.0);
         assertThat(rightrightaabb.max()).containsExactly(9.0, 6.0);
         assertThat(rightright.start()).isEqualTo(5);
@@ -178,7 +178,7 @@ class KdTreeBuilderTest {
             graph.toMappedNodeId("f"),
             graph.toMappedNodeId("e")
         );
-        var rightleftaabb = (DoubleAABB) rightleft.aabb();
+        var rightleftaabb =  rightleft.aabb();
         assertThat(rightleftaabb.min()).containsExactly(7.0, 1.0);
         assertThat(rightleftaabb.max()).containsExactly(8.0, 2.0);
         assertThat(rightleft.start()).isEqualTo(3);
@@ -186,7 +186,7 @@ class KdTreeBuilderTest {
 
 
         var rightleftleft = rightleft.leftChild();
-        var  rightleftleftaabb = (DoubleAABB)rightleftleft.aabb();
+        var  rightleftleftaabb = rightleftleft.aabb();
         assertThat(rightleftleft.isLeaf()).isTrue();
         assertThat(kdTree.nodesContained(rightleftleft)).containsExactly(graph.toMappedNodeId("f"));
         assertThat(rightleftleftaabb.min()).containsExactly(7.0, 2.0);
@@ -195,7 +195,7 @@ class KdTreeBuilderTest {
         assertThat(rightleftleft.end()).isEqualTo(4);
 
         var rightleftright = rightleft.rightChild();
-        var rightleftrightaabb = (DoubleAABB)rightleftright.aabb();
+        var rightleftrightaabb = rightleftright.aabb();
         assertThat(rightleftright.isLeaf()).isTrue();
         assertThat(kdTree.nodesContained(rightleftright)).containsExactly(graph.toMappedNodeId("e"));
         assertThat(rightleftrightaabb.min()).containsExactly(8.0, 1.0);

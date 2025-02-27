@@ -37,7 +37,7 @@ class DoubleDistancesTest {
 
         @Test
         void lowerBoundOfLookupIsInsideTheBox() {
-            var aabb = new DoubleAABB(
+            var aabb = new AABB(
                 new double[]{2.0, 1.0},
                 new double[]{9.0, 7.0},
                 2
@@ -53,7 +53,7 @@ class DoubleDistancesTest {
 
         @Test
         void lowerBoundOfLookupIsOutsideTheBoxTopRight() {
-            var aabb = new DoubleAABB(
+            var aabb = new AABB(
                 new double[]{2.0, 1.0},
                 new double[]{9.0, 7.0},
                 2
@@ -70,7 +70,7 @@ class DoubleDistancesTest {
 
         @Test
         void lowerBoundOfLookupIsOutsideTheBoxBottom() {
-            var aabb = new DoubleAABB(
+            var aabb = new AABB(
                 new double[]{2.0, 1.0},
                 new double[]{9.0, 7.0},
                 2
@@ -87,7 +87,7 @@ class DoubleDistancesTest {
 
         @Test
         void lowerBoundOfLookupIsAtTheEdgeOfTheBox() {
-            var aabb = new DoubleAABB(
+            var aabb = new AABB(
                 new double[]{2.0, 1.0},
                 new double[]{9.0, 7.0},
                 2

@@ -37,9 +37,9 @@ class FloatDistancesTest {
 
         @Test
         void lowerBoundOfLookupIsInsideTheBox() {
-            var aabb = new FloatAABB(
-                new float[]{2.0f, 1.0f},
-                new float[]{9.0f, 7.0f},
+            var aabb = new AABB(
+                new double[]{2.0f, 1.0f},
+                new double[]{9.0f, 7.0f},
                 2
             );
 
@@ -53,9 +53,9 @@ class FloatDistancesTest {
 
         @Test
         void lowerBoundOfLookupIsOutsideTheBoxTopRight() {
-            var aabb = new FloatAABB(
-                new float[]{2.0f, 1.0f},
-                new float[]{9.0f, 7.0f},
+            var aabb = new AABB(
+                new double[]{2.0f, 1.0f},
+                new double[]{9.0f, 7.0f},
                 2
             );
 
@@ -70,9 +70,9 @@ class FloatDistancesTest {
 
         @Test
         void lowerBoundOfLookupIsOutsideTheBoxBottom() {
-            var aabb = new FloatAABB(
-                new float[]{2.0f, 1.0f},
-                new float[]{9.0f, 7.0f},
+            var aabb = new AABB(
+                new double[]{2.0f, 1.0f},
+                new double[]{9.0f, 7.0f},
                 2
             );
 
@@ -87,9 +87,9 @@ class FloatDistancesTest {
 
         @Test
         void lowerBoundOfLookupIsAtTheEdgeOfTheBox() {
-            var aabb = new FloatAABB(
-                new float[]{2.0f, 1.0f},
-                new float[]{9.0f, 7.0f},
+            var aabb = new AABB(
+                new double[]{2.0f, 1.0f},
+                new double[]{9.0f, 7.0f},
                 2
             );
 

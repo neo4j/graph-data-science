@@ -38,7 +38,7 @@ class DoubleKDNodeSupport implements KDNodeSupport {
 
     @Override
      public AABB create(long start, long end) {
-         return DoubleAABB.create(nodePropertyValues,ids,start,end,dimension);
+         return AABB.createFromDouble(nodePropertyValues,ids,start,end,dimension);
      }
 
     @Override

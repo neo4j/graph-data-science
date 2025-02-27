@@ -38,7 +38,7 @@ class FloatKDNodeSupport implements KDNodeSupport {
 
     @Override
      public AABB create(long start, long end) {
-         return FloatAABB.create(nodePropertyValues,ids,start,end,dimension);
+         return AABB.createFromFloat(nodePropertyValues,ids,start,end,dimension);
      }
 
     @Override

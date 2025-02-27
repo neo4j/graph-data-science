@@ -40,11 +40,9 @@ public class FloatArrayDistances implements Distances {
 
     @Override
     public double lowerBound(AABB aabb, long index) {
-        assert  aabb instanceof  FloatAABB;
-        var floatAABB = (FloatAABB) aabb;
-        var min = floatAABB.min();
-        var max = floatAABB.max();
-        var dimension = floatAABB.dimension();
+        var min = aabb.min();
+        var max = aabb.max();
+        var dimension = aabb.dimension();
         var lookupPoint = nodePropertyValues.floatArrayValue(index);
         assert dimension == lookupPoint.length : "Lookup point has different dimension: " + lookupPoint.length + ". The box has dimension: " + dimension;
         double distance = 0d;
@@ -54,9 +52,9 @@ public class FloatArrayDistances implements Distances {
         return Math.sqrt(distance);
     }
 
-    private double  lowerBoundForDimension(float[] min, float[] max,int dimension, float otherMin, float otherMax){
+    private double  lowerBoundForDimension(double[] min, double[] max,int dimension, float otherMin, float otherMax){
 
-        var diff = Math.max(min[dimension], otherMin) - Math.min(max[dimension], otherMax);
+        double diff = Math.max(min[dimension], otherMin) - Math.min(max[dimension], otherMax);
         if (diff > 0) {
             return diff * diff;
         }

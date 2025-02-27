@@ -40,11 +40,9 @@ public class DoubleArrayDistances implements Distances {
 
     @Override
     public double lowerBound(AABB aabb, long index) {
-        assert  aabb instanceof  DoubleAABB;
-        var doubleAABB = (DoubleAABB) aabb;
-        var min = doubleAABB.min();
-        var max = doubleAABB.max();
-        var dimension = doubleAABB.dimension();
+        var min = aabb.min();
+        var max = aabb.max();
+        var dimension = aabb.dimension();
         var lookupPoint = nodePropertyValues.doubleArrayValue(index);
         assert dimension == lookupPoint.length : "Lookup point has different dimension: " + lookupPoint.length + ". The box has dimension: " + dimension;
         double distance = 0d;

@@ -19,8 +19,69 @@
  */
 package org.neo4j.gds.hdbscan;
 
-public interface AABB{
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.collections.ha.HugeLongArray;
 
-    int mostSpreadDimension();
+import java.util.Arrays;
+
+public record AABB(double[] min, double[] max, int dimension){
+
+    static AABB createFromFloat(
+        NodePropertyValues nodePropertyValues,
+        HugeLongArray ids,
+        long leftIndex,
+        long rightIndex,
+        int dimension
+    ) {
+
+        double[] min = new double[dimension];
+        Arrays.fill(min, Double.MAX_VALUE);
+        double[] max = new double[dimension];
+        Arrays.fill(max, Double.MIN_VALUE);
+        for (long i = leftIndex; i < rightIndex; i++) {
+            var point = nodePropertyValues.floatArrayValue(ids.get(i));
+            for (int j = 0; j < dimension; j++) {
+                min[j] = Math.min(min[j], point[j]);
+                max[j] = Math.max(max[j], point[j]);
+            }
+        }
+        return new AABB(min, max, dimension);
+    }
+
+    static AABB createFromDouble(
+        NodePropertyValues nodePropertyValues,
+        HugeLongArray ids,
+        long leftIndex,
+        long rightIndex,
+        int dimension
+    ) {
+
+        double[] min = new double[dimension];
+        Arrays.fill(min, Double.MAX_VALUE);
+        double[] max = new double[dimension];
+        Arrays.fill(max, Double.MIN_VALUE);
+        for (long i = leftIndex; i < rightIndex; i++) {
+            var point = nodePropertyValues.doubleArrayValue(ids.get(i));
+            for (int j = 0; j < dimension; j++) {
+                min[j] = Math.min(min[j], point[j]);
+                max[j] = Math.max(max[j], point[j]);
+            }
+        }
+        return new AABB(min, max, dimension);
+
+    }
+
+    int mostSpreadDimension(){
+        double bestSpread = max[0] - min[0];
+        int index = 0;
+        for (int i = 1; i < dimension; i++) {
+            var spread = max[i] - min[i];
+            if (spread > bestSpread) {
+                index = i;
+                bestSpread = spread;
+            }
+        }
+        return index;
+    }
 
 }
