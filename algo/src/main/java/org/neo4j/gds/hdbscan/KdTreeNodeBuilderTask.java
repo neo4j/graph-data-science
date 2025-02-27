@@ -36,7 +36,7 @@ class KdTreeNodeBuilderTask implements Runnable {
     private KdNode kdNode;
     private final AtomicInteger  nodeIndex;
     private final ProgressTracker progressTracker;
-    private  final KDNodeSupport kdNodeSupport;
+    private final KDNodeSupport kdNodeSupport;
     private final KdNode parent;
     private final boolean amLeftChild;
 
