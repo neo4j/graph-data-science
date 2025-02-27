@@ -20,6 +20,7 @@
 package org.neo4j.gds.logging;
 
 import org.neo4j.gds.annotation.SuppressForbidden;
+import org.neo4j.gds.utils.StringJoining;
 
 import java.util.ArrayList;
 import java.util.Locale;
@@ -68,7 +69,11 @@ public class GdsTestLog implements Log {
 
     @SuppressForbidden(reason = "test log can print")
     public void printMessages() {
-        System.out.println("TestLog Messages: " + messages);
+        System.out.println("TestLog Messages:");
+        messages.forEach((level, messages) -> {
+            System.out.println(level + ":");
+            System.out.println(StringJoining.joinInGivenOrder(messages.stream(), "\n"));
+        });
     }
 
     @Override
