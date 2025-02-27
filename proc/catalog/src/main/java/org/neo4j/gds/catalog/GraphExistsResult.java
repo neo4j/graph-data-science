@@ -19,14 +19,16 @@
  */
 package org.neo4j.gds.catalog;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  * A Neo4j Procedure Framework output compatible POJO
  */
-public class GraphExistsResult {
-    public final String graphName;
-    public final boolean exists;
-
-    GraphExistsResult(String graphName, boolean exists) {
+public record GraphExistsResult(String graphName, boolean exists) {
+    public GraphExistsResult(
+        @JsonProperty("graphName") String graphName,
+        @JsonProperty("exists") boolean exists
+    ) {
         this.graphName = graphName;
         this.exists = exists;
     }

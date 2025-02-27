@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.procedures.catalog;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.loading.DegreeDistribution;
@@ -48,18 +49,18 @@ public class GraphInfo {
     public final Map<String, Object> schemaWithOrientation;
 
     public GraphInfo(
-        String graphName,
-        String database,
-        String databaseLocation,
-        Map<String, Object> configuration,
-        String memoryUsage,
-        long sizeInBytes,
-        long nodeCount,
-        long relationshipCount,
-        ZonedDateTime creationTime,
-        ZonedDateTime modificationTime,
-        Map<String, Object> schema,
-        Map<String, Object> schemaWithOrientation
+        @JsonProperty("graphName") String graphName,
+        @JsonProperty("database") String database,
+        @JsonProperty("databaseLocation") String databaseLocation,
+        @JsonProperty("configuration") Map<String, Object> configuration,
+        @JsonProperty("memoryUsage") String memoryUsage,
+        @JsonProperty("sizeInBytes") long sizeInBytes,
+        @JsonProperty("nodeCount") long nodeCount,
+        @JsonProperty("relationshipCount") long relationshipCount,
+        @JsonProperty("creationTime") ZonedDateTime creationTime,
+        @JsonProperty("modificationTime") ZonedDateTime modificationTime,
+        @JsonProperty("schema") Map<String, Object> schema,
+        @JsonProperty("schemaWithOrientation") Map<String, Object> schemaWithOrientation
     ) {
         this.graphName = graphName;
         this.database = database;
