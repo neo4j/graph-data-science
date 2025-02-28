@@ -21,8 +21,8 @@ package org.neo4j.gds.hdbscan;
 
 public record Neighbours(Neighbour[] neighbours) {
 
-    Neighbour maximum(){
-        return neighbours[0];
+    double maximumDistance(){
+        return neighbours[0].distance();
     }
 
 }

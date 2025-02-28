@@ -26,7 +26,7 @@ public record CoreResult(HugeObjectArray<Neighbours> neighbours) {
 
     HugeDoubleArray createCoreArray() {
         var cores = HugeDoubleArray.newArray(neighbours.size());
-        cores.setAll(v -> neighbours.get(v).maximum().distance() * neighbours.get(v).maximum().distance());
+        cores.setAll(v -> neighbours.get(v).maximumDistance() * neighbours.get(v).maximumDistance());
         return cores;
     }
 
