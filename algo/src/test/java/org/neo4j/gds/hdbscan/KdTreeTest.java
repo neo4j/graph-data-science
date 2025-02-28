@@ -52,7 +52,8 @@ class KdTreeTest {
         var points = graph.nodeProperties("point");
         var distances = new DoubleArrayDistances(points);
 
-        var kdTree = new KdTreeBuilder(graph,
+        var kdTree = new KdTreeBuilder(
+            graph.nodeCount(),
             points,
             1,
             1,
@@ -60,7 +61,11 @@ class KdTreeTest {
             ProgressTracker.NULL_TRACKER
         ).build();
 
-        var neighbours = kdTree.neighbours(graph.toMappedNodeId("a"), 2).neighbours();
+        var neighbours = kdTree.neighbours(
+            graph.toMappedNodeId("a"),
+            2
+        ).neighbours();
+
         assertThat(neighbours)
             .isNotNull()
             .hasSize(2)
@@ -73,7 +78,6 @@ class KdTreeTest {
                     graph.toMappedNodeId("b"),
                     Math.sqrt(10)
                 )
-
             );
     }
 

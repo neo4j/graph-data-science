@@ -137,7 +137,7 @@ public class HDBScan extends Algorithm<Labels> {
 
     KdTree buildKDTree(Distances distances) {
         var builder = new KdTreeBuilder(
-            nodes,
+            nodes.nodeCount(),
             nodePropertyValues,
             concurrency.value(),
             leafSize,

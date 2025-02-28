@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.hdbscan;
 
-import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -28,21 +27,22 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class KdTreeBuilder {
 
-    private final  IdMap nodes;
+    private final long nodeCount;
     private final NodePropertyValues nodePropertyValues;
     private final int concurrency;
     private final long leafSize;
     private final ProgressTracker progressTracker;
     private final Distances distances;
 
-    public KdTreeBuilder(IdMap nodes,
+    public KdTreeBuilder(
+        long nodeCount,
         NodePropertyValues nodePropertyValues,
         int concurrency,
         long leafSize,
         Distances distances,
         ProgressTracker progressTracker
     ) {
-        this.nodes = nodes;
+        this.nodeCount = nodeCount;
         this.nodePropertyValues = nodePropertyValues;
         this. concurrency = concurrency;
         this.leafSize = leafSize;
@@ -53,7 +53,7 @@ public class KdTreeBuilder {
 
     public KdTree build(){
 
-        var ids = HugeLongArray.newArray(nodes.nodeCount());
+        var ids = HugeLongArray.newArray(nodeCount);
         ids.setAll(  v-> v);
 
         var kdNodeSupport = KDNodeSupportFactory.create(nodePropertyValues,ids,nodePropertyValues.dimension().orElseThrow());
@@ -64,7 +64,7 @@ public class KdTreeBuilder {
             nodePropertyValues,
             ids,
             0,
-            nodePropertyValues.nodeCount(),
+            nodeCount,
             leafSize,
             nodeIndex,
             null,

@@ -75,7 +75,7 @@ class BoruvkaMSTTest {
             var distances = new DoubleArrayDistances(nodePropertyValues);
 
             var kdTree = new KdTreeBuilder(
-                graph,
+                graph.nodeCount(),
                 nodePropertyValues,
                 1,
                 1,
@@ -142,7 +142,7 @@ class BoruvkaMSTTest {
             var distances = new DoubleArrayDistances(nodePropertyValues);
 
             var kdTree = new KdTreeBuilder(
-                graph,
+                graph.nodeCount(),
                 nodePropertyValues,
                 1,
                 1,
@@ -208,7 +208,8 @@ class BoruvkaMSTTest {
             var nodePropertyValues = graph.nodeProperties("point");
             var distances = new DoubleArrayDistances(nodePropertyValues);
 
-            var kdTree = new KdTreeBuilder(graph,
+            var kdTree = new KdTreeBuilder(
+                graph.nodeCount(),
                 nodePropertyValues,
                 1,
                 1,
@@ -259,7 +260,8 @@ class BoruvkaMSTTest {
             var distances =new DoubleArrayDistances(nodePropertyValues);
 
 
-            var kdTree = new KdTreeBuilder(graph,
+            var kdTree = new KdTreeBuilder(
+                graph.nodeCount(),
                 nodePropertyValues,
                 1,
                 1,

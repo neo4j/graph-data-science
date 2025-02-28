@@ -63,7 +63,8 @@ class KdTreeBuilderTest {
 
         var points = graph.nodeProperties("point");
 
-        var kdTree = new KdTreeBuilder(graph,
+        var kdTree = new KdTreeBuilder(
+            graph.nodeCount(),
             points,
             1,
             1,
@@ -211,10 +212,16 @@ class KdTreeBuilderTest {
 
             var progressTask = HDBScanProgressTrackerCreator.kdBuildingTask("foo",graph.nodeCount());
             var log = new GdsTestLog();
-            var progressTracker = new TaskProgressTracker(progressTask, new LoggerForProgressTrackingAdapter(log), new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE);
+            var progressTracker = new TaskProgressTracker(
+                progressTask,
+                new LoggerForProgressTrackingAdapter(log),
+                new Concurrency(1),
+                EmptyTaskRegistryFactory.INSTANCE
+            );
+
             var points = graph.nodeProperties("point");
 
-          new KdTreeBuilder(graph, points, 1, 1, null,progressTracker)
+          new KdTreeBuilder(graph.nodeCount(), points, 1, 1, null,progressTracker)
             .build();
 
             Assertions.assertThat(log.getMessages(TestLog.INFO))
