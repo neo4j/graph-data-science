@@ -88,7 +88,6 @@ public class HDBScan extends Algorithm<Labels> {
         var nodeCount = nodes.nodeCount();
         var coreResult = computeCores(kdTree, nodeCount);
 
-       // var mst = dualTreeMSTPhase(kdTree, coreResult);
         var mst = boruvka(kdTree,coreResult,distances);
 
         var clusterHierarchy = createClusterHierarchy(mst);
