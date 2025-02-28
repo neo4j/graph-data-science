@@ -153,9 +153,11 @@ public final class BoruvkaMST extends Algorithm<GeometricMSTResult> {
         return coreValues.get(node) < closestDistanceTracker.componentClosestDistance(component);
     }
 
-    boolean prune(KdNode kdNode, long componentId, double  lowerBoundOnDistance){
-        var  nodeComponent = singleComponentOr(kdNode,-1);
-        if (nodeComponent == componentId) return true;
+    boolean sameComponentPrune(KdNode kdNode, long componentId){
+        return  singleComponentOr(kdNode,-1) == componentId;
+    }
+
+    boolean distancePrune(long componentId, double  lowerBoundOnDistance){
         var  currentComponentBest = closestDistanceTracker.componentClosestDistance(componentId);
         return  currentComponentBest < lowerBoundOnDistance;
     }
@@ -177,31 +179,44 @@ public final class BoruvkaMST extends Algorithm<GeometricMSTResult> {
     }
 
      private void traversalStep(long q, KdNode kdNode, long qComp, double lowerBoundOnDistance){
-        if (!prune(kdNode,qComp,lowerBoundOnDistance)) {
+        if (!distancePrune(qComp,lowerBoundOnDistance)) {
             if (kdNode.isLeaf()) {
                 var start = kdNode.start();
                 var end = kdNode.end();
                 for (long index = start; index < end; ++index) {
                     baseCase(q,kdTree.nodeAt(index),qComp);
                 }
-            }else{
+            }else {
                 var left = kdTree.leftChild(kdNode);
                 var right = kdTree.rightChild(kdNode);
-                var lowerBoundLeft = distances.lowerBound(left.aabb(),q);
-                lowerBoundLeft*=lowerBoundLeft;
-                var lowerBoundRight = distances.lowerBound(right.aabb(),q);
-                lowerBoundRight*=lowerBoundRight;
+                var pruneLeft = sameComponentPrune(left, qComp);
+                var pruneRight = sameComponentPrune(right, qComp);
 
-                if (lowerBoundRight < lowerBoundLeft){
-                    traversalStep(q,right,qComp,lowerBoundRight);
-                    traversalStep(q,left,qComp,lowerBoundLeft);
-                }else{
-                    traversalStep(q,left,qComp,lowerBoundLeft);
-                    traversalStep(q,right,qComp,lowerBoundRight);
+                if (!pruneRight && !pruneLeft) {
+                    var lowerBoundLeft = lowerBound(left, q);
+                    var lowerBoundRight = lowerBound(right, q);
+
+                    if (lowerBoundRight < lowerBoundLeft) {
+                        traversalStep(q, right, qComp, lowerBoundRight);
+                        traversalStep(q, left, qComp, lowerBoundLeft);
+                    } else {
+                        traversalStep(q, left, qComp, lowerBoundLeft);
+                        traversalStep(q, right, qComp, lowerBoundRight);
+                    }
+                }else if (pruneRight && !pruneLeft){ //avoid computing lb for useless right child
+                    traversalStep(q,left,qComp,lowerBound(left,q));
+                }else if (!pruneRight){ //avoid computing lb for useless left child
+                    traversalStep(q,right,qComp,lowerBound(right,q));
                 }
             }
         }
 
+    }
+
+    private double lowerBound(KdNode kdNode, long q){
+        var lowerBound = distances.lowerBound(kdNode.aabb(),q);
+        lowerBound *= lowerBound;
+        return lowerBound;
     }
 
     long singleComponentOr(KdNode node, long or) {
