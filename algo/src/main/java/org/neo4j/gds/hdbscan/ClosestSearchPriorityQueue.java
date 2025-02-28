@@ -19,13 +19,45 @@
  */
 package org.neo4j.gds.hdbscan;
 
-public interface ClosestSearchPriorityQueue {
+import java.util.Comparator;
+import java.util.PriorityQueue;
 
-    Neighbour[] closest();
+ class ClosestSearchPriorityQueue {
 
-    void offer(Neighbour candidate);
+    private final PriorityQueue<Neighbour> priorityQueue;
+    private final int numberOfClosestNeighbors;
 
-    long size();
+     ClosestSearchPriorityQueue(int numberOfClosestNeighbors){
+        this.numberOfClosestNeighbors = numberOfClosestNeighbors;
+        priorityQueue = new PriorityQueue<>(
+            numberOfClosestNeighbors,
+            Comparator.comparingDouble(Neighbour::distance).reversed()
+        );
+    }
 
-    boolean largerThanLowerBound(double low);
-}
+    public Neighbour[] closest() {
+        return priorityQueue.toArray(new Neighbour[0]);
+    }
+
+    public void offer(Neighbour candidate) {
+        if (priorityQueue.size() < numberOfClosestNeighbors) {
+            priorityQueue.offer(candidate);
+        } else {
+            var top = priorityQueue.peek();
+            assert top != null;
+            if (top.distance() > candidate.distance()) {
+                priorityQueue.poll();
+                priorityQueue.offer(candidate);
+            }
+        }
+    }
+
+    public long size() {
+        return priorityQueue.size();
+    }
+
+     public boolean largerThanLowerBound(double low) {
+         assert !priorityQueue.isEmpty();
+         return priorityQueue.peek().distance() > low;
+     }
+ }

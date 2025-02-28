@@ -65,7 +65,7 @@ public class KdTree {
     }
 
     public Neighbours neighbours(long pointId, int numberOfNeighbours) {
-        var queue = new JavaUtilSearchPriorityQueue(numberOfNeighbours);
+        var queue = new ClosestSearchPriorityQueue(numberOfNeighbours);
         search(root, numberOfNeighbours, queue, pointId);
         return  new Neighbours(queue.closest());
     }
