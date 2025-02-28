@@ -197,7 +197,7 @@ class BoruvkaAlgorithmFunctionsTest {
     }
 
     @Test
-    void shouldPruneProperly(){
+    void shouldApplyPruningsProperly(){
 
         DoubleArrayNodePropertyValues nodeProps = mock(DoubleArrayNodePropertyValues.class);
 
@@ -215,14 +215,15 @@ class BoruvkaAlgorithmFunctionsTest {
 
         //prune based on distance
         boruvkaMST.tryUpdate(2,1,2,1,5);
-        assertThat(boruvkaMST.prune(kdRoot,2,100)).isTrue();
-        assertThat(boruvkaMST.prune(kdRoot,2,4)).isFalse();
+        assertThat(boruvkaMST.distancePrune(2,100)).isTrue();
+        assertThat(boruvkaMST.distancePrune(2,4)).isFalse();
 
         //prune based on component
-        assertThat(boruvkaMST.prune(kdRoot,0,1)).isFalse();
+        assertThat(boruvkaMST.sameComponentPrune(kdRoot,0)).isFalse();
         boruvkaMST.mergeComponents(0,1);
         boruvkaMST.updateSingleComponent(kdRoot);
-        assertThat(boruvkaMST.prune(kdRoot,0,1)).isTrue();
+        assertThat(boruvkaMST.sameComponentPrune(kdRoot,0)).isTrue();
 
     }
+
 }
