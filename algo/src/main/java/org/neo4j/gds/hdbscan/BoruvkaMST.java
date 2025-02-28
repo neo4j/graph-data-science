@@ -279,7 +279,7 @@ public final class BoruvkaMST extends Algorithm<GeometricMSTResult> {
         } else {
             var left = kdTree.leftChild(node);
             var right = kdTree.rightChild(node);
-            if (updateSingleComponent(left) && updateSingleComponent(right)) {
+            if (updateSingleComponent(left) & updateSingleComponent(right)) {
                 var singleLeft = singleComponentOr(left, -1);
                 var singleRight = singleComponentOr(right, -2);
                 boolean isSingle = singleRight == singleLeft;
