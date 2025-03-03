@@ -23,16 +23,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public final class LouvainStreamResult {
-    public final long nodeId;
-    public final long communityId;
-    public final List<Long> intermediateCommunityIds;
-
-    private LouvainStreamResult(long nodeId, List<Long> intermediateCommunityIds, long communityId) {
-        this.nodeId = nodeId;
-        this.intermediateCommunityIds = intermediateCommunityIds;
-        this.communityId = communityId;
-    }
+public record LouvainStreamResult(long nodeId, List<Long> intermediateCommunityIds, long communityId) {
 
     public static LouvainStreamResult create(long nodeId, long[] intermediateCommunityIdsAsArray, long communityId) {
         var intermediateCommunityIdsAsList = intermediateCommunityIdsAsArray == null ? null : Arrays
