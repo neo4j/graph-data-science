@@ -38,7 +38,7 @@ class LabellingStep {
     }
 
     HugeDoubleArray computeStabilities() {
-        var result = HugeDoubleArray.newArray(nodeCount - 1);
+        var stabilities = HugeDoubleArray.newArray(nodeCount - 1);
         progressTracker.beginSubTask();
         var condensedTreeRoot = this.condensedTree.root();
         // process the leaves of the tree
@@ -48,7 +48,7 @@ class LabellingStep {
             var lambdaBirth = birthPoint == condensedTreeRoot
                 ? 0.
                 : 1. / condensedTree.lambda(birthPoint);
-            result.addTo(birthPoint - nodeCount, lambdaP - lambdaBirth);
+            stabilities.addTo(birthPoint - nodeCount, lambdaP - lambdaBirth);
         }
 
         var condensedTreeMaxClusterId = condensedTree.maximumClusterId();
@@ -59,11 +59,11 @@ class LabellingStep {
                 ? 0.
                 : 1. / condensedTree.lambda(birthPoint);
             var sizeP = condensedTree.size(p);
-            result.addTo(birthPoint - nodeCount, sizeP * (lambdaP - lambdaBirth));
+            stabilities.addTo(birthPoint - nodeCount, sizeP * (lambdaP - lambdaBirth));
             progressTracker.logProgress();
         }
         progressTracker.endSubTask();
-        return result;
+        return stabilities;
     }
 
     BitSet selectedClusters(HugeDoubleArray stabilities) {

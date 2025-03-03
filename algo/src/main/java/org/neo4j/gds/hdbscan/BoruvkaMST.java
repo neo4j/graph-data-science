@@ -34,7 +34,7 @@ public final class BoruvkaMST extends Algorithm<GeometricMSTResult> {
     private final Distances distances;
     private final KdTree kdTree;
     private final BitSet kdNodeSingleComponent;
-    private final ClosestDistanceInformationTracker closestDistanceTracker;
+    private final ClosestDistanceTracker closestDistanceTracker;
     private final HugeDoubleArray coreValues;
 
     private final DisjointSetStruct unionFind;
@@ -48,7 +48,7 @@ public final class BoruvkaMST extends Algorithm<GeometricMSTResult> {
     private BoruvkaMST(
         Distances distances,
         KdTree kdTree,
-        ClosestDistanceInformationTracker closestDistanceTracker,
+        ClosestDistanceTracker closestDistanceTracker,
         HugeDoubleArray coreValues,
         long nodeCount,
         Concurrency concurrency,
@@ -82,7 +82,7 @@ public final class BoruvkaMST extends Algorithm<GeometricMSTResult> {
         return new BoruvkaMST(
             distances,
             kdTree,
-            ClosestDistanceInformationTracker.create(nodeCount),
+            ClosestDistanceTracker.create(nodeCount),
             zeroCores,
             nodeCount,
             concurrency,
@@ -99,7 +99,7 @@ public final class BoruvkaMST extends Algorithm<GeometricMSTResult> {
         ProgressTracker progressTracker
     ) {
         var cores = coreResult.createCoreArray();
-        var closestTracker = ClosestDistanceInformationTracker.create(nodeCount, cores, coreResult);
+        var closestTracker = ClosestDistanceTracker.create(nodeCount, cores, coreResult);
 
         return new BoruvkaMST(
             distances,

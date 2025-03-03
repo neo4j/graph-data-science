@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.hdbscan;
 
+import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
-import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.paged.HugeLongArrayQueue;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
@@ -62,7 +62,7 @@ class CondenseStep {
 
         var currentCondensedMaxClusterId = nodeCount;
         var bfsQueue = HugeLongArrayQueue.newQueue(nodeCount);
-        var visited = HugeAtomicBitSet.create(clusterHierarchyRoot + 1);
+        var visited = new BitSet(clusterHierarchyRoot + 1);
 
         size.set(currentCondensedRoot - nodeCount, nodeCount);
 
@@ -118,7 +118,7 @@ class CondenseStep {
         HugeDoubleArray lambda,
         double fallingOutLambda,
         HugeLongArrayQueue bfsQueue,
-        HugeAtomicBitSet visited
+        BitSet visited
     ) {
         if (nodeToFallOut < nodeCount) {
             parent.set(nodeToFallOut, clusterToFallOutFrom);

@@ -26,14 +26,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-class ClosestDistanceInformationTrackerTest {
+class ClosestDistanceTrackerTest {
 
 
 
     @Test
     void shouldTrackInformationCorrectly(){
 
-        var  tracker = ClosestDistanceInformationTracker.create(10);
+        var  tracker = ClosestDistanceTracker.create(10);
         tracker.consider(0,1,0,1,10.0);
         tracker.consider(0,3,2,5,5.0);
         tracker.consider(2,1,3,6,11.0);
@@ -60,7 +60,7 @@ class ClosestDistanceInformationTrackerTest {
     @Test
     void shouldResetBounds(){
 
-        var  tracker = ClosestDistanceInformationTracker.create(10);
+        var  tracker = ClosestDistanceTracker.create(10);
         tracker.consider(0,1,0,1,10);
         tracker.reset(1);
         assertThat(tracker.componentClosestDistance(0)).isEqualTo(Double.MAX_VALUE);
@@ -101,7 +101,7 @@ class ClosestDistanceInformationTrackerTest {
                 new Neighbour(0,0),
             });
 
-        var tracker = ClosestDistanceInformationTracker.create(4,
+        var tracker = ClosestDistanceTracker.create(4,
             HugeDoubleArray.of(5,1,10,3),
             mockCoreResult
         );

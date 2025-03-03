@@ -22,7 +22,7 @@ package org.neo4j.gds.hdbscan;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 
-final class ClosestDistanceInformationTracker {
+final class ClosestDistanceTracker {
 
     private final HugeDoubleArray componentClosestDistance;
     private final HugeLongArray componentInsideBestNode;
@@ -30,7 +30,7 @@ final class ClosestDistanceInformationTracker {
     private boolean updated = false;
 
 
-    private ClosestDistanceInformationTracker(
+    private ClosestDistanceTracker(
         HugeDoubleArray componentClosestDistance,
         HugeLongArray componentInsideBestNode,
         HugeLongArray componentOutsideBestNode
@@ -41,20 +41,20 @@ final class ClosestDistanceInformationTracker {
         reset(componentClosestDistance.size());
     }
 
-    static ClosestDistanceInformationTracker create(long size) {
+    static ClosestDistanceTracker create(long size) {
 
         var componentClosestDistance = HugeDoubleArray.newArray(size);
         var componentInsideBestNode = HugeLongArray.newArray(size);
         var componentOutsideBestNode = HugeLongArray.newArray(size);
 
-        return new ClosestDistanceInformationTracker(
+        return new ClosestDistanceTracker(
             componentClosestDistance,
             componentInsideBestNode,
             componentOutsideBestNode
         );
     }
 
-    static ClosestDistanceInformationTracker create(long size, HugeDoubleArray cores, CoreResult coreResult) {
+    static ClosestDistanceTracker create(long size, HugeDoubleArray cores, CoreResult coreResult) {
         var tracker = create(size);
         tracker.reset(size);
         for (long u = 0; u < size; ++u) {
