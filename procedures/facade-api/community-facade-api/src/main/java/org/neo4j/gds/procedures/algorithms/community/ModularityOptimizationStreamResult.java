@@ -19,12 +19,5 @@
  */
 package org.neo4j.gds.procedures.algorithms.community;
 
-public class ModularityOptimizationStreamResult {
-    public final long nodeId;
-    public final long communityId;
-
-    public ModularityOptimizationStreamResult(long nodeId, long communityId) {
-        this.nodeId = nodeId;
-        this.communityId = communityId;
-    }
+public record ModularityOptimizationStreamResult(long nodeId, long communityId) {
 }
