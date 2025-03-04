@@ -19,12 +19,5 @@
  */
 package org.neo4j.gds.procedures.algorithms.centrality;
 
-public final class CentralityStreamResult {
-    public final long nodeId;
-    public final double score;
-
-    public CentralityStreamResult(long nodeId, double score) {
-        this.nodeId = nodeId;
-        this.score = score;
-    }
+public record CentralityStreamResult(long nodeId, double score) {
 }
