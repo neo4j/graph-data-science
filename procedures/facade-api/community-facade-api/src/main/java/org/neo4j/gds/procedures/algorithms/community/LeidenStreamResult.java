@@ -19,22 +19,14 @@
  */
 package org.neo4j.gds.procedures.algorithms.community;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public final class LeidenStreamResult {
-    public final long nodeId;
-    public final long communityId;
-    public final List<Long> intermediateCommunityIds;
-
-    private LeidenStreamResult(long nodeId, List<Long> intermediateCommunityIds, long communityId) {
-        this.nodeId = nodeId;
-        this.intermediateCommunityIds = intermediateCommunityIds;
-        this.communityId = communityId;
-    }
-
-    static LeidenStreamResult create(long nodeId, long[] intermediateCommunityIdsArray, long communityId) {
+public record LeidenStreamResult(long nodeId, @Nullable List<Long> intermediateCommunityIds, long communityId) {
+    static LeidenStreamResult create(long nodeId, long @Nullable [] intermediateCommunityIdsArray, long communityId) {
         List<Long> intermediateCommunityIdsList = intermediateCommunityIdsArray == null
             ? null
             : Arrays.stream(intermediateCommunityIdsArray).boxed().collect(Collectors.toList());
