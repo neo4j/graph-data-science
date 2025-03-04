@@ -150,7 +150,9 @@ class ProcedureSyntaxAutoCheckerTest {
                     .getResource("invalid-include-with-syntax-missing-yield-columns.adoc")
                     .toURI())
                 .toFile();
-            assertTrue(file.exists() && file.canRead());
+            assertThat(file)
+                .exists()
+                .canRead();
 
             asciidoctor.convertFile(file, options);
         }
@@ -160,7 +162,7 @@ class ProcedureSyntaxAutoCheckerTest {
             .allSatisfy(assertionError -> assertThat(assertionError)
                 .hasMessageContaining("Asserting YIELD result columns for `include-with-stream`")
                 .hasMessageContaining("could not find the following elements:" + newLine +
-                                      "  [\"communityId\", \"intermediateCommunityIds\"]"));
+                                      "  [\"intermediateCommunityIds\", \"communityId\"]"));
     }
 
     @Test
