@@ -19,12 +19,5 @@
  */
 package org.neo4j.gds.procedures.algorithms.community;
 
-public class TriangleCountStreamResult {
-    public final long nodeId;
-    public final long triangleCount;
-
-    TriangleCountStreamResult(long nodeId, long triangleCount) {
-        this.nodeId = nodeId;
-        this.triangleCount = triangleCount;
-    }
+public record TriangleCountStreamResult(long nodeId, long triangleCount) {
 }
