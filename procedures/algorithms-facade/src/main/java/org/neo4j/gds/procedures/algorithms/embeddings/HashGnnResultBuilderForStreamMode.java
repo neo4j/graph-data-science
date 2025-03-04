@@ -43,7 +43,7 @@ class HashGnnResultBuilderForStreamMode implements StreamResultBuilder<HashGNNRe
 
         return LongStream
             .range(IdMap.START_NODE_ID, graph.nodeCount())
-            .mapToObj(i -> new HashGNNStreamResult(
+            .mapToObj(i ->  HashGNNStreamResult.create(
                 graph.toOriginalNodeId(i),
                 hashGNNResult.embeddings().doubleArrayValue(i)
             ));

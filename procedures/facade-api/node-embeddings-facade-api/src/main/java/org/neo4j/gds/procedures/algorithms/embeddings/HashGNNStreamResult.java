@@ -23,12 +23,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public final class HashGNNStreamResult {
-    public final long nodeId;
-    public final List<Double> embedding;
+public record HashGNNStreamResult( long nodeId, List<Double> embedding){
 
-    public HashGNNStreamResult(long nodeId, double[] embeddings) {
-        this.nodeId = nodeId;
-        this.embedding = Arrays.stream(embeddings).boxed().collect(Collectors.toList());
+    static  HashGNNStreamResult create (long nodeId, double[] embeddings) {
+        return  new HashGNNStreamResult(nodeId,Arrays.stream(embeddings).boxed().collect(Collectors.toList()));
     }
 }
