@@ -19,12 +19,5 @@
  */
 package org.neo4j.gds.procedures.algorithms.community;
 
-public class K1ColoringStreamResult {
-    public final long nodeId;
-    public final long color;
-
-    public K1ColoringStreamResult(long nodeId, long color) {
-        this.nodeId = nodeId;
-        this.color = color;
-    }
+public record K1ColoringStreamResult(long nodeId, long color) {
 }
