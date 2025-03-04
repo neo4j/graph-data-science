@@ -19,12 +19,5 @@
  */
 package org.neo4j.gds.procedures.algorithms.community;
 
-public final class LabelPropagationStreamResult {
-    public final long nodeId;
-    public final long communityId;
-
-    public LabelPropagationStreamResult(long nodeId, long communityId) {
-        this.nodeId = nodeId;
-        this.communityId = communityId;
-    }
+public record LabelPropagationStreamResult(long nodeId, long communityId) {
 }
