@@ -19,12 +19,5 @@
  */
 package org.neo4j.gds.procedures.algorithms.community;
 
-public class LocalClusteringCoefficientStreamResult {
-    public final long nodeId;
-    public final double localClusteringCoefficient;
-
-    public LocalClusteringCoefficientStreamResult(long nodeId, double localClusteringCoefficient) {
-        this.nodeId = nodeId;
-        this.localClusteringCoefficient = localClusteringCoefficient;
-    }
+public record LocalClusteringCoefficientStreamResult(long nodeId, double localClusteringCoefficient) {
 }
