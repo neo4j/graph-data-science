@@ -22,14 +22,7 @@ package org.neo4j.gds.procedures.algorithms.embeddings;
 import java.util.ArrayList;
 import java.util.List;
 
-public final class FastRPStreamResult {
-    public final long nodeId;
-    public final List<Double> embedding;
-
-    private FastRPStreamResult(long nodeId, List<Double> embedding) {
-        this.nodeId = nodeId;
-        this.embedding = embedding;
-    }
+public record FastRPStreamResult(long nodeId, List<Double> embedding) {
 
     static FastRPStreamResult create(long nodeId, float[] embeddingAsArray) {
         var embedding = new ArrayList<Double>(embeddingAsArray.length);
