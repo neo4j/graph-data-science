@@ -19,12 +19,5 @@
  */
 package org.neo4j.gds.procedures.algorithms.community;
 
-public class SccStreamResult {
-    public final long nodeId;
-    public final long componentId;
-
-    public SccStreamResult(long nodeId, long componentId) {
-        this.nodeId = nodeId;
-        this.componentId = componentId;
-    }
+public record SccStreamResult(long nodeId, long componentId) {
 }
