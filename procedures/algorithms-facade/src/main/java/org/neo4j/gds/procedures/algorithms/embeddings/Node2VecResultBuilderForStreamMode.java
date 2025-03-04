@@ -47,7 +47,7 @@ class Node2VecResultBuilderForStreamMode implements StreamResultBuilder<Node2Vec
         return LongStream
             .range(IdMap.START_NODE_ID, graph.nodeCount())
             .filter(nodePropertyValues::hasValue)
-            .mapToObj(nodeId -> new Node2VecStreamResult(
+            .mapToObj(nodeId -> Node2VecStreamResult.create(
                 graph.toOriginalNodeId(nodeId),
                 nodePropertyValues.floatArrayValue(nodeId)
             ));

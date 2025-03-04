@@ -22,15 +22,13 @@ package org.neo4j.gds.procedures.algorithms.embeddings;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Node2VecStreamResult {
-    public long nodeId;
-    public List<Double> embedding;
+public record Node2VecStreamResult(long nodeId, List<Double> embedding ) {
 
-    Node2VecStreamResult(long nodeId, float[] embedding) {
-        this.nodeId = nodeId;
-        this.embedding = new ArrayList<>(embedding.length);
-        for (var f : embedding) {
-            this.embedding.add((double) f);
+    public static Node2VecStreamResult create(long nodeId, float[] floatEmbedding) {
+        var embedding = new ArrayList<Double>(floatEmbedding.length);
+        for (var f : floatEmbedding) {
+            embedding.add((double) f);
         }
+        return  new Node2VecStreamResult(nodeId,embedding);
     }
 }
