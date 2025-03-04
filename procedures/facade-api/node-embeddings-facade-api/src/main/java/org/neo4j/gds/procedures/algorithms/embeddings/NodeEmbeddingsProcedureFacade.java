@@ -41,7 +41,7 @@ public interface NodeEmbeddingsProcedureFacade {
         Map<String, Object> algorithmConfiguration
     );
 
-    Stream<FastRPStreamResult> fastRPStream(
+    Stream<DefaultNodeEmbeddingsStreamResult> fastRPStream(
         String graphName,
         Map<String, Object> configuration
     );
@@ -63,7 +63,7 @@ public interface NodeEmbeddingsProcedureFacade {
 
     GraphSageMutateStub graphSageMutateStub();
 
-    Stream<GraphSageStreamResult> graphSageStream(
+    Stream<DefaultNodeEmbeddingsStreamResult> graphSageStream(
         String graphName,
         Map<String, Object> configuration
     );
@@ -95,7 +95,7 @@ public interface NodeEmbeddingsProcedureFacade {
 
     HashGnnMutateStub hashGnnMutateStub();
 
-    Stream<HashGNNStreamResult> hashGnnStream(
+    Stream<DefaultNodeEmbeddingsStreamResult> hashGnnStream(
         String graphName,
         Map<String, Object> configuration
     );
@@ -117,7 +117,7 @@ public interface NodeEmbeddingsProcedureFacade {
 
     Node2VecMutateStub node2VecMutateStub();
 
-    Stream<Node2VecStreamResult> node2VecStream(
+    Stream<DefaultNodeEmbeddingsStreamResult> node2VecStream(
         String graphName,
         Map<String, Object> configuration
     );

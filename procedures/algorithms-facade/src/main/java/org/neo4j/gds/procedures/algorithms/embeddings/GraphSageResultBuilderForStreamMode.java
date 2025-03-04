@@ -29,10 +29,10 @@ import java.util.Optional;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-class GraphSageResultBuilderForStreamMode implements StreamResultBuilder<GraphSageResult, GraphSageStreamResult> {
+class GraphSageResultBuilderForStreamMode implements StreamResultBuilder<GraphSageResult, DefaultNodeEmbeddingsStreamResult> {
 
     @Override
-    public Stream<GraphSageStreamResult> build(
+    public Stream<DefaultNodeEmbeddingsStreamResult> build(
         Graph graph,
         GraphStore graphStore,
         Optional<GraphSageResult> result
@@ -44,7 +44,7 @@ class GraphSageResultBuilderForStreamMode implements StreamResultBuilder<GraphSa
         var embeddings = graphSageResult.embeddings();
 
         return LongStream.range(IdMap.START_NODE_ID, graph.nodeCount())
-            .mapToObj(internalNodeId -> new GraphSageStreamResult(
+            .mapToObj(internalNodeId -> DefaultNodeEmbeddingsStreamResult.create(
                 graph.toOriginalNodeId(internalNodeId),
                 embeddings.get(internalNodeId)
             ));

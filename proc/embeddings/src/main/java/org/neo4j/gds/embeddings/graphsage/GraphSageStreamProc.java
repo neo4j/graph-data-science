@@ -21,7 +21,7 @@ package org.neo4j.gds.embeddings.graphsage;
 
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
-import org.neo4j.gds.procedures.algorithms.embeddings.GraphSageStreamResult;
+import org.neo4j.gds.procedures.algorithms.embeddings.DefaultNodeEmbeddingsStreamResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
@@ -40,7 +40,7 @@ public class GraphSageStreamProc {
 
     @Description(GRAPH_SAGE_DESCRIPTION)
     @Procedure(name = "gds.beta.graphSage.stream", mode = Mode.READ)
-    public Stream<GraphSageStreamResult> stream(
+    public Stream<DefaultNodeEmbeddingsStreamResult> stream(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {

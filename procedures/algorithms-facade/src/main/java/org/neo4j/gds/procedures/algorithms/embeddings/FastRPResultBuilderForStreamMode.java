@@ -30,10 +30,10 @@ import java.util.Optional;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-class FastRPResultBuilderForStreamMode implements StreamResultBuilder<FastRPResult, FastRPStreamResult> {
+class FastRPResultBuilderForStreamMode implements StreamResultBuilder<FastRPResult, DefaultNodeEmbeddingsStreamResult> {
 
     @Override
-    public Stream<FastRPStreamResult> build(
+    public Stream<DefaultNodeEmbeddingsStreamResult> build(
         Graph graph,
         GraphStore graphStore,
         Optional<FastRPResult> result
@@ -46,7 +46,7 @@ class FastRPResultBuilderForStreamMode implements StreamResultBuilder<FastRPResu
         return LongStream
             .range(IdMap.START_NODE_ID, nodePropertyValues.nodeCount())
             .filter(nodePropertyValues::hasValue)
-            .mapToObj(nodeId -> FastRPStreamResult.create(
+            .mapToObj(nodeId -> DefaultNodeEmbeddingsStreamResult.create(
                 graph.toOriginalNodeId(nodeId),
                 nodePropertyValues.floatArrayValue(nodeId)
             ));

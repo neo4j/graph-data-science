@@ -20,15 +20,24 @@
 package org.neo4j.gds.procedures.algorithms.embeddings;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
-public record Node2VecStreamResult(long nodeId, List<Double> embedding ) {
+public record DefaultNodeEmbeddingsStreamResult(long nodeId, List<Double> embedding) {
 
-    public static Node2VecStreamResult create(long nodeId, float[] floatEmbedding) {
-        var embedding = new ArrayList<Double>(floatEmbedding.length);
-        for (var f : floatEmbedding) {
+    static DefaultNodeEmbeddingsStreamResult create(long nodeId, double[] embeddings) {
+        return new DefaultNodeEmbeddingsStreamResult(nodeId, Arrays.stream(embeddings).boxed().collect(
+            Collectors.toList()));
+    }
+
+    static DefaultNodeEmbeddingsStreamResult create(long nodeId, float[] embeddingAsArray) {
+        var embedding = new ArrayList<Double>(embeddingAsArray.length);
+        for (var f : embeddingAsArray) {
             embedding.add((double) f);
         }
-        return  new Node2VecStreamResult(nodeId,embedding);
+        return new DefaultNodeEmbeddingsStreamResult(nodeId, embedding);
     }
+
+
 }

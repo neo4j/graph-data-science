@@ -175,7 +175,7 @@ public final class LocalNodeEmbeddingsProcedureFacade implements NodeEmbeddingsP
     }
 
     @Override
-    public Stream<FastRPStreamResult> fastRPStream(
+    public Stream<DefaultNodeEmbeddingsStreamResult> fastRPStream(
         String graphName,
         Map<String, Object> configuration
     ) {
@@ -232,7 +232,7 @@ public final class LocalNodeEmbeddingsProcedureFacade implements NodeEmbeddingsP
     }
 
     @Override
-    public Stream<GraphSageStreamResult> graphSageStream(
+    public Stream<DefaultNodeEmbeddingsStreamResult> graphSageStream(
         String graphName,
         Map<String, Object> configuration
     ) {
@@ -342,7 +342,7 @@ public final class LocalNodeEmbeddingsProcedureFacade implements NodeEmbeddingsP
     }
 
     @Override
-    public Stream<HashGNNStreamResult> hashGnnStream(
+    public Stream<DefaultNodeEmbeddingsStreamResult> hashGnnStream(
         String graphName,
         Map<String, Object> configuration
     ) {
@@ -395,7 +395,7 @@ public final class LocalNodeEmbeddingsProcedureFacade implements NodeEmbeddingsP
     }
 
     @Override
-    public Stream<Node2VecStreamResult> node2VecStream(
+    public Stream<DefaultNodeEmbeddingsStreamResult> node2VecStream(
         String graphName,
         Map<String, Object> configuration
     ) {
