@@ -19,12 +19,5 @@
  */
 package org.neo4j.gds.procedures.algorithms.centrality;
 
-public class CELFStreamResult {
-    public final long nodeId;
-    public final double spread;
-
-    CELFStreamResult(long nodeId, double spread) {
-        this.nodeId = nodeId;
-        this.spread = spread;
-    }
+public record CELFStreamResult(long nodeId, double spread) {
 }
