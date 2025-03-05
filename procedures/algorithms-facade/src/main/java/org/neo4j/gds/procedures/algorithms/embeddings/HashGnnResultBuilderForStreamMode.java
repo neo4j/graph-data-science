@@ -29,10 +29,10 @@ import java.util.Optional;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-class HashGnnResultBuilderForStreamMode implements StreamResultBuilder<HashGNNResult, HashGNNStreamResult> {
+class HashGnnResultBuilderForStreamMode implements StreamResultBuilder<HashGNNResult, DefaultNodeEmbeddingsStreamResult> {
 
     @Override
-    public Stream<HashGNNStreamResult> build(
+    public Stream<DefaultNodeEmbeddingsStreamResult> build(
         Graph graph,
         GraphStore graphStore,
         Optional<HashGNNResult> result
@@ -43,7 +43,7 @@ class HashGnnResultBuilderForStreamMode implements StreamResultBuilder<HashGNNRe
 
         return LongStream
             .range(IdMap.START_NODE_ID, graph.nodeCount())
-            .mapToObj(i ->  HashGNNStreamResult.create(
+            .mapToObj(i ->  DefaultNodeEmbeddingsStreamResult.create(
                 graph.toOriginalNodeId(i),
                 hashGNNResult.embeddings().doubleArrayValue(i)
             ));

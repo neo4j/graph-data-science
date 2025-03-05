@@ -21,7 +21,7 @@ package org.neo4j.gds.embeddings.hashgnn;
 
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
-import org.neo4j.gds.procedures.algorithms.embeddings.HashGNNStreamResult;
+import org.neo4j.gds.procedures.algorithms.embeddings.DefaultNodeEmbeddingsStreamResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
@@ -41,7 +41,7 @@ public class HashGNNStreamProc {
 
     @Procedure(value = "gds.hashgnn.stream", mode = READ)
     @Description(HASH_GNN_DESCRIPTION)
-    public Stream<HashGNNStreamResult> stream(
+    public Stream<DefaultNodeEmbeddingsStreamResult> stream(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
@@ -52,7 +52,7 @@ public class HashGNNStreamProc {
     @Deprecated(forRemoval = true)
     @Procedure(value = "gds.beta.hashgnn.stream", deprecatedBy = "gds.hashgnn.stream", mode = READ)
     @Description(HASH_GNN_DESCRIPTION)
-    public Stream<HashGNNStreamResult> betaStream(
+    public Stream<DefaultNodeEmbeddingsStreamResult> betaStream(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {

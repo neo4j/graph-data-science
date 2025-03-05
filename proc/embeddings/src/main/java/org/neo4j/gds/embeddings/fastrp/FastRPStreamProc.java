@@ -21,7 +21,7 @@ package org.neo4j.gds.embeddings.fastrp;
 
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
-import org.neo4j.gds.procedures.algorithms.embeddings.FastRPStreamResult;
+import org.neo4j.gds.procedures.algorithms.embeddings.DefaultNodeEmbeddingsStreamResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -40,7 +40,7 @@ public class FastRPStreamProc {
 
     @Procedure(value = "gds.fastRP.stream", mode = READ)
     @Description(FASTRP_DESCRIPTION)
-    public Stream<FastRPStreamResult> stream(
+    public Stream<DefaultNodeEmbeddingsStreamResult> stream(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
