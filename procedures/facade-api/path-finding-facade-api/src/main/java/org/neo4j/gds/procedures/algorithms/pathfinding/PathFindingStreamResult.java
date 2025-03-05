@@ -23,40 +23,16 @@ import org.neo4j.graphdb.Path;
 
 import java.util.List;
 
-public final class PathFindingStreamResult {
+public record PathFindingStreamResult(
+    long index,
+    long sourceNode,
+    long targetNode,
+    double totalCost,
+    List<Long> nodeIds,
+    List<Double> costs,
+    Path path
+) {
 
     public static final String COST_PROPERTY_NAME = "cost";
-
-    public long index;
-
-    public long sourceNode;
-
-    public long targetNode;
-
-    public double totalCost;
-
-    public List<Long> nodeIds;
-
-    public List<Double> costs;
-
-    public Path path;
-
-    public PathFindingStreamResult(
-        long index,
-        long sourceNode,
-        long targetNode,
-        double totalCost,
-        List<Long> nodeIds,
-        List<Double> costs,
-        Path path
-    ) {
-        this.index = index;
-        this.sourceNode = sourceNode;
-        this.targetNode = targetNode;
-        this.totalCost = totalCost;
-        this.nodeIds = nodeIds;
-        this.costs = costs;
-        this.path = path;
-    }
 
 }
