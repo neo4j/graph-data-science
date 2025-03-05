@@ -31,7 +31,7 @@ public record DefaultNodeEmbeddingsStreamResult(long nodeId, List<Double> embedd
             Collectors.toList()));
     }
 
-    public static DefaultNodeEmbeddingsStreamResult create(long nodeId, float[] embeddingAsArray) {
+    static DefaultNodeEmbeddingsStreamResult create(long nodeId, float[] embeddingAsArray) {
         var embedding = new ArrayList<Double>(embeddingAsArray.length);
         for (var f : embeddingAsArray) {
             embedding.add((double) f);
