@@ -128,7 +128,7 @@ public interface PathFindingProcedureFacade {
     Stream<PathFindingStreamResult> longestPathStream(String graphName, Map<String, Object> configuration);
 
 
-    Stream<SteinerTreeStreamResult> prizeCollectingSteinerTreeStream(String graphName, Map<String, Object> configuration);
+    Stream<SpanningTreeStreamResult> prizeCollectingSteinerTreeStream(String graphName, Map<String, Object> configuration);
 
     PrizeCollectingSteinerTreeMutateStub prizeCollectingSteinerTreeMutateStub();
 
@@ -291,7 +291,7 @@ public interface PathFindingProcedureFacade {
         Map<String, Object> algorithmConfiguration
     );
 
-    Stream<SteinerTreeStreamResult> steinerTreeStream(String graphName, Map<String, Object> configuration);
+    Stream<SpanningTreeStreamResult> steinerTreeStream(String graphName, Map<String, Object> configuration);
 
     Stream<MemoryEstimateResult> steinerTreeStreamEstimate(
         Object graphNameOrConfiguration,

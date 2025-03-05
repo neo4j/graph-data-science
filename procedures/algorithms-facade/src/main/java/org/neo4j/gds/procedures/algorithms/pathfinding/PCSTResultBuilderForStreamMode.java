@@ -30,11 +30,11 @@ import java.util.Optional;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-class PCSTResultBuilderForStreamMode implements StreamResultBuilder<PrizeSteinerTreeResult, SteinerTreeStreamResult> {
+class PCSTResultBuilderForStreamMode implements StreamResultBuilder<PrizeSteinerTreeResult, SpanningTreeStreamResult> {
 
 
     @Override
-    public Stream<SteinerTreeStreamResult> build(
+    public Stream<SpanningTreeStreamResult> build(
         Graph graph,
         GraphStore graphStore,
         Optional<PrizeSteinerTreeResult> result
@@ -55,7 +55,7 @@ class PCSTResultBuilderForStreamMode implements StreamResultBuilder<PrizeSteiner
                         : graph.toOriginalNodeId(parents.get(nodeId));
                     var cost = costs.get(nodeId);
 
-                    return new SteinerTreeStreamResult(originalNodeId, parentNodeId, cost);
+                    return new SpanningTreeStreamResult(originalNodeId, parentNodeId, cost);
                 }
             );
     }

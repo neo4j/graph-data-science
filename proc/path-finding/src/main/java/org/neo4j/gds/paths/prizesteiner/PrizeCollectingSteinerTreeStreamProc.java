@@ -21,7 +21,6 @@ package org.neo4j.gds.paths.prizesteiner;
 
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
-import org.neo4j.gds.procedures.algorithms.pathfinding.SteinerTreeStreamResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -39,7 +38,7 @@ public class PrizeCollectingSteinerTreeStreamProc {
 
     @Procedure(value = "gds.prizeSteinerTree.stream", mode = READ)
     @Description(Constants.PRIZE_STEINER_DESCRIPTION)
-    public Stream<SteinerTreeStreamResult> steinerTree(
+    public Stream<SpanningTreeStreamResult> steinerTree(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {

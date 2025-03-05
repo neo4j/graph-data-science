@@ -31,7 +31,7 @@ import java.util.Optional;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-class SteinerTreeResultBuilderForStreamMode implements StreamResultBuilder<SteinerTreeResult, SteinerTreeStreamResult> {
+class SteinerTreeResultBuilderForStreamMode implements StreamResultBuilder<SteinerTreeResult, SpanningTreeStreamResult> {
 
     private final SteinerTreeStreamConfig configuration;
 
@@ -40,7 +40,7 @@ class SteinerTreeResultBuilderForStreamMode implements StreamResultBuilder<Stein
     }
 
     @Override
-    public Stream<SteinerTreeStreamResult> build(
+    public Stream<SpanningTreeStreamResult> build(
         Graph graph,
         GraphStore graphStore,
         Optional<SteinerTreeResult> result
@@ -62,7 +62,7 @@ class SteinerTreeResultBuilderForStreamMode implements StreamResultBuilder<Stein
                         : graph.toOriginalNodeId(parents.get(nodeId));
                     var cost = costs.get(nodeId);
 
-                    return new SteinerTreeStreamResult(originalNodeId, parentNodeId, cost);
+                    return new SpanningTreeStreamResult(originalNodeId, parentNodeId, cost);
                 }
             );
     }

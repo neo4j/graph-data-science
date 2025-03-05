@@ -21,7 +21,7 @@ package org.neo4j.gds.paths.steiner;
 
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
-import org.neo4j.gds.procedures.algorithms.pathfinding.SteinerTreeStreamResult;
+import org.neo4j.gds.procedures.algorithms.pathfinding.SpanningTreeStreamResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
@@ -41,7 +41,7 @@ public class SteinerTreeStreamProc {
 
     @Procedure(value = "gds.steinerTree.stream", mode = READ)
     @Description(STEINER_DESCRIPTION)
-    public Stream<SteinerTreeStreamResult> steinerTree(
+    public Stream<SpanningTreeStreamResult> steinerTree(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
@@ -61,7 +61,7 @@ public class SteinerTreeStreamProc {
     @Procedure(value = "gds.beta.steinerTree.stream", mode = READ, deprecatedBy = "gds.steinerTree.stream")
     @Description(STEINER_DESCRIPTION)
     @Internal
-    public Stream<SteinerTreeStreamResult> spanningTreeBeta(
+    public Stream<SpanningTreeStreamResult> spanningTreeBeta(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {

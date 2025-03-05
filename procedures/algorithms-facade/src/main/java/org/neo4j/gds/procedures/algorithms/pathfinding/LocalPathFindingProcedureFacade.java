@@ -592,7 +592,7 @@ public final class LocalPathFindingProcedureFacade implements PathFindingProcedu
     }
 
     @Override
-    public Stream<SteinerTreeStreamResult> prizeCollectingSteinerTreeStream(
+    public Stream<SpanningTreeStreamResult> prizeCollectingSteinerTreeStream(
         String graphName,
         Map<String, Object> configuration
     ) {
@@ -1120,7 +1120,7 @@ public final class LocalPathFindingProcedureFacade implements PathFindingProcedu
     }
 
     @Override
-    public Stream<SteinerTreeStreamResult> steinerTreeStream(String graphName, Map<String, Object> configuration) {
+    public Stream<SpanningTreeStreamResult> steinerTreeStream(String graphName, Map<String, Object> configuration) {
         var parsedConfig = configurationParser.parseConfiguration(
             configuration,
             SteinerTreeStreamConfig::of
