@@ -129,7 +129,7 @@ public interface CommunityProcedureFacade {
         Map<String, Object> algorithmConfiguration
     );
 
-    Stream<KmeansStreamResult> kmeansStream(
+    Stream<KMeansStreamResult> kmeansStream(
         String graphName,
         Map<String, Object> configuration
     );

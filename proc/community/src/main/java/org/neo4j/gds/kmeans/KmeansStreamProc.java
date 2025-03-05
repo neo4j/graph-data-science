@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.kmeans;
 
-import org.neo4j.gds.procedures.GraphDataScienceProcedures;
-import org.neo4j.gds.procedures.algorithms.community.KmeansStreamResult;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
+import org.neo4j.gds.procedures.GraphDataScienceProcedures;
+import org.neo4j.gds.procedures.algorithms.community.KMeansStreamResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
@@ -41,7 +41,7 @@ public class KmeansStreamProc {
 
     @Procedure(value = "gds.kmeans.stream", mode = READ)
     @Description(KMEANS_DESCRIPTION)
-    public Stream<KmeansStreamResult> stream(
+    public Stream<KMeansStreamResult> stream(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
@@ -52,7 +52,7 @@ public class KmeansStreamProc {
     @Internal
     @Procedure(value = "gds.beta.kmeans.stream", mode = READ, deprecatedBy = "gds.kmeans.stream")
     @Description(KMEANS_DESCRIPTION)
-    public Stream<KmeansStreamResult> betaStream(
+    public Stream<KMeansStreamResult> betaStream(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {

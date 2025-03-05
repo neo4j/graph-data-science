@@ -519,7 +519,7 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
     }
 
     @Override
-    public Stream<KmeansStreamResult> kmeansStream(
+    public Stream<KMeansStreamResult> kmeansStream(
         String graphName,
         Map<String, Object> configuration
     ) {
