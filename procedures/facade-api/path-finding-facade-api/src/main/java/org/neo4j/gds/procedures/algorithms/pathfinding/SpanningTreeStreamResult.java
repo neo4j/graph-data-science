@@ -19,14 +19,5 @@
  */
 package org.neo4j.gds.procedures.algorithms.pathfinding;
 
-public class SpanningTreeStreamResult {
-    public final long nodeId;
-    public final long parentId;
-    public final double weight;
+public record SpanningTreeStreamResult(long nodeId, long parentId, double weight) {}
 
-    public SpanningTreeStreamResult(long nodeId, long parentId, double weight) {
-        this.nodeId = nodeId;
-        this.parentId = parentId;
-        this.weight = weight;
-    }
-}
