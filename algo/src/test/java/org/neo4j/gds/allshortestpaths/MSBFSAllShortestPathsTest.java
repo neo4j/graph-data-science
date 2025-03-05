@@ -106,8 +106,8 @@ class MSBFSAllShortestPathsTest {
         hugeMSBFSAllShortestPaths
                 .compute()
                 .forEach(r -> {
-                    assertThat(r.sourceNodeId).isLessThan(r.targetNodeId);
-                    mock.accept(r.sourceNodeId, r.targetNodeId, r.distance);
+                    assertThat(r.sourceNodeId()).isLessThan(r.targetNodeId());
+                    mock.accept(r.sourceNodeId(), r.targetNodeId(), r.distance());
                 });
 
         verify(mock, times(35)).accept(anyLong(), anyLong(), anyDouble());

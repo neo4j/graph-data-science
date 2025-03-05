@@ -19,33 +19,6 @@
  */
 package org.neo4j.gds.allshortestpaths;
 
-public final class AllShortestPathsStreamResult {
+public record AllShortestPathsStreamResult(long sourceNodeId, long targetNodeId, double distance) {
     static final AllShortestPathsStreamResult DONE = new AllShortestPathsStreamResult(-1, -1, -1);
-
-    public final long sourceNodeId;
-    public final long targetNodeId;
-    public final double distance;
-
-    private AllShortestPathsStreamResult(long sourceNodeId, long targetNodeId, double distance) {
-        this.sourceNodeId = sourceNodeId;
-        this.targetNodeId = targetNodeId;
-        this.distance = distance;
-    }
-
-    static AllShortestPathsStreamResult result(
-        long sourceNodeId,
-        long targetNodeId,
-        double distance
-    ) {
-        return new AllShortestPathsStreamResult(sourceNodeId, targetNodeId, distance);
-    }
-
-    @Override
-    public String toString() {
-        return "Result{"
-            + "sourceNodeId=" + sourceNodeId
-            + ", targetNodeId=" + targetNodeId
-            + ", distance=" + distance
-            + "}";
-    }
 }

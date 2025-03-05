@@ -100,7 +100,7 @@ public class WeightedAllShortestPaths extends MSBFSASPAlgorithm {
             progressTracker.endSubTask();
         })
             .limit((long) nodeCount * nodeCount)
-            .filter(result -> result.distance != Double.POSITIVE_INFINITY);
+            .filter(result -> result.distance() != Double.POSITIVE_INFINITY);
     }
 
     /**
@@ -125,7 +125,7 @@ public class WeightedAllShortestPaths extends MSBFSASPAlgorithm {
             while (outputStreamOpen && terminationFlag.running() && (startNode = counter.getAndIncrement()) < nodeCount) {
                 compute(startNode);
                 for (int i = 0; i < nodeCount; i++) {
-                    var result = AllShortestPathsStreamResult.result(
+                    var result = new AllShortestPathsStreamResult(
                         graph.toOriginalNodeId(startNode),
                         graph.toOriginalNodeId(i),
                         distance[i]

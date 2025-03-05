@@ -104,11 +104,11 @@ class WeightedAllShortestPathsTest {
         new WeightedAllShortestPaths(graph, DefaultPool.INSTANCE, new Concurrency(4), TerminationFlag.RUNNING_TRUE)
                 .compute()
                 .forEach(r -> {
-                    assertNotEquals(Double.POSITIVE_INFINITY, r.distance);
-                    if (r.sourceNodeId == r.targetNodeId) {
-                        assertThat(r.distance).isCloseTo(0.0, Offset.offset(1e-1));
+                    assertNotEquals(Double.POSITIVE_INFINITY, r.distance());
+                    if (r.sourceNodeId() == r.targetNodeId()) {
+                        assertThat(r.distance()).isCloseTo(0.0, Offset.offset(1e-1));
                     }
-                    mock.accept(r.sourceNodeId, r.targetNodeId, r.distance);
+                    mock.accept(r.sourceNodeId(), r.targetNodeId(), r.distance());
                 });
 
         verify(mock, times(45)).accept(anyLong(), anyLong(), anyDouble());
