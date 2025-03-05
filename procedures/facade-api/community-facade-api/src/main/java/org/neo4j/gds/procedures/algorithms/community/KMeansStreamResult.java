@@ -19,16 +19,5 @@
  */
 package org.neo4j.gds.procedures.algorithms.community;
 
-public class KmeansStreamResult {
-    public final long nodeId;
-    public final long communityId;
-    public final double distanceFromCentroid;
-    public final double silhouette;
-
-    KmeansStreamResult(long nodeId, long communityId, double distanceFromCentroid, double silhouette) {
-        this.nodeId = nodeId;
-        this.communityId = communityId;
-        this.distanceFromCentroid = distanceFromCentroid;
-        this.silhouette = silhouette;
-    }
+public record KMeansStreamResult(long nodeId, long communityId, double distanceFromCentroid, double silhouette) {
 }

@@ -29,9 +29,9 @@ import java.util.Optional;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-class KMeansResultBuilderForStreamMode implements StreamResultBuilder<KmeansResult, KmeansStreamResult> {
+class KMeansResultBuilderForStreamMode implements StreamResultBuilder<KmeansResult, KMeansStreamResult> {
     @Override
-    public Stream<KmeansStreamResult> build(
+    public Stream<KMeansStreamResult> build(
         Graph graph,
         GraphStore graphStore,
         Optional<KmeansResult> result
@@ -45,7 +45,7 @@ class KMeansResultBuilderForStreamMode implements StreamResultBuilder<KmeansResu
         var silhouette = kmeansResult.silhouette();
 
         return LongStream.range(IdMap.START_NODE_ID, graph.nodeCount())
-            .mapToObj(nodeId -> new KmeansStreamResult(
+            .mapToObj(nodeId -> new KMeansStreamResult(
                 graph.toOriginalNodeId(nodeId),
                 communities.get(nodeId),
                 distances.get(nodeId),
