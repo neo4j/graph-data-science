@@ -58,7 +58,9 @@ class RandomWalkResultBuilderForStreamMode implements StreamResultBuilder<Stream
         if (result.isEmpty()) return Stream.empty();
 
 
-        var  pathFactoryFacade = PathFactoryFacade.create(returnPath,nodeLookup,graphStore);
+        var  pathFactoryFacade = PathFactoryFacade.create(returnPath,nodeLookup,
+            graphStore.capabilities().canWriteToLocalDatabase()
+        );
 
         var streamOfLongArrays = result.get();
 

@@ -36,7 +36,7 @@ class TraverseStreamComputationResultConsumerTest {
 
     @Test
     void shouldNotComputePath() {
-        var pathFactoryFacade = PathFactoryFacade.create(false,null,null);
+        var pathFactoryFacade = PathFactoryFacade.create(false,null, true);
         var result = TraverseStreamComputationResultConsumer.consume(
             0L,
             HugeLongArray.of(1L, 2L),

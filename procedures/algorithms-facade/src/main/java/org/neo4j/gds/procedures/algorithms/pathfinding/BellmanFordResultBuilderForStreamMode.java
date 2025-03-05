@@ -66,7 +66,9 @@ class BellmanFordResultBuilderForStreamMode implements StreamResultBuilder<Bellm
         var bellmanFordResult = result.get();
 
         // this is us handling the case of generated graphs and such
-        var  pathFactoryFacade = PathFactoryFacade.create(routeRequested, nodeLookup,graphStore);
+        var  pathFactoryFacade = PathFactoryFacade.create(routeRequested, nodeLookup,
+            graphStore.capabilities().canWriteToLocalDatabase()
+        );
 
         var algorithmResult = getPathFindingResult(bellmanFordResult, bellmanFordResult.containsNegativeCycle());
 
@@ -121,4 +123,3 @@ class BellmanFordResultBuilderForStreamMode implements StreamResultBuilder<Bellm
         return result.shortestPaths();
     }
 }
-

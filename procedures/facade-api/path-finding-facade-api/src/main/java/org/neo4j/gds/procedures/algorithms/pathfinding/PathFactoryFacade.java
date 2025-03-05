@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.procedures.algorithms.pathfinding;
 
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.NodeLookup;
 import org.neo4j.gds.paths.PathFactory;
 import org.neo4j.graphdb.Path;
@@ -27,7 +26,7 @@ import org.neo4j.graphdb.RelationshipType;
 
 import java.util.List;
 
-public class PathFactoryFacade {
+public final class PathFactoryFacade {
     private final boolean canCreatePaths;
     private final NodeLookup nodeLookup;
 
@@ -36,8 +35,8 @@ public class PathFactoryFacade {
         this.nodeLookup = nodeLookup;
     }
 
-    public static PathFactoryFacade create(boolean pathIsYielded, NodeLookup nodeLookup, GraphStore graphStore){
-        var canCreatePaths = pathIsYielded && graphStore.capabilities().canWriteToLocalDatabase();
+    public static PathFactoryFacade create(boolean pathIsYielded, NodeLookup nodeLookup, boolean canWriteToLocalDatabase){
+        var canCreatePaths = pathIsYielded && canWriteToLocalDatabase;
         return new PathFactoryFacade(canCreatePaths,nodeLookup);
     }
 
@@ -50,6 +49,22 @@ public class PathFactoryFacade {
             nodeLookup,
             nodeList,
             relationshipType
+        );
+    }
+
+    public Path createPath(
+        List<Long> nodeList,
+        List<Double> costs,
+        RelationshipType relationshipType,
+        String costPropertyName
+    ) {
+        if (!canCreatePaths) return  null;
+        return PathFactory.create(
+            nodeLookup,
+            nodeList,
+            costs,
+            relationshipType,
+            costPropertyName
         );
     }
 

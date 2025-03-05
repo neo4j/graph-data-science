@@ -60,7 +60,9 @@ public class PathFindingResultBuilderForStreamMode implements StreamResultBuilde
         if (result.isEmpty()) return Stream.of();
 
         var pathFindingResult = result.get();
-        var pathFactoryFacade=  PathFactoryFacade.create(pathRequested, nodeLookup,graphStore);
+        var pathFactoryFacade=  PathFactoryFacade.create(pathRequested, nodeLookup,
+            graphStore.capabilities().canWriteToLocalDatabase()
+        );
 
         var resultStream = pathFindingResult.mapPaths(pathResult -> mapPath(pathResult,graph,pathFactoryFacade));
 
