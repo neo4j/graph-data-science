@@ -23,17 +23,6 @@ import org.neo4j.graphdb.Path;
 
 import java.util.List;
 
-public final class BfsStreamResult {
-
+public record BfsStreamResult(long sourceNode, List<Long> nodes, Path path) {
     public static final String RELATIONSHIP_TYPE_NAME = "NEXT";
-
-    public final long sourceNode;
-    public final List<Long> nodeIds;
-    public final Path path;
-
-    public BfsStreamResult(long sourceNode, List<Long> nodes, Path path) {
-        this.sourceNode = sourceNode;
-        this.nodeIds = nodes;
-        this.path = path;
-    }
 }
