@@ -23,44 +23,14 @@ import org.neo4j.graphdb.Path;
 
 import java.util.List;
 
-public final class BellmanFordStreamResult {
-
-    public long index;
-
-    public long sourceNode;
-
-    public long targetNode;
-
-    public double totalCost;
-
-    public List<Long> nodeIds;
-
-    public List<Double> costs;
-
-    public Path route;
-
-    public boolean isNegativeCycle;
-
-    public BellmanFordStreamResult(
-        long index,
-        long sourceNode,
-        long targetNode,
-        double totalCost,
-        List<Long> nodeIds,
-        List<Double> costs,
-        Path route,
-        boolean isNegativeCycle
-    ) {
-        this.index = index;
-        this.sourceNode = sourceNode;
-        this.targetNode = targetNode;
-        this.totalCost = totalCost;
-        this.nodeIds = nodeIds;
-        this.costs = costs;
-        this.route = route;
-        this.isNegativeCycle = isNegativeCycle;
-    }
-
-
-
+public record BellmanFordStreamResult(
+    long index,
+    long sourceNode,
+    long targetNode,
+    double totalCost,
+    List<Long> nodeIds,
+    List<Double> costs,
+    Path route,
+    boolean isNegativeCycle
+) {
 }
