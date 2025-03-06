@@ -328,7 +328,7 @@ public final class GdsParallelBatchImporter {
 
                 @Override
                 public IndexConfig indexConfig() {
-                    return IndexConfig.DEFAULT.withLabelIndex().withRelationshipTypeIndex();
+                    return IndexConfig.create().withLabelIndex().withRelationshipTypeIndex();
                 }
             };
         }
