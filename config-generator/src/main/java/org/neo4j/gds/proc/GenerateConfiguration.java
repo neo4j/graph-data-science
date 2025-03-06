@@ -29,6 +29,8 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.NameAllocator;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
+import com.squareup.javapoet.TypeVariableName;
+import org.intellij.lang.annotations.PrintFormat;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.annotation.Configuration;
@@ -108,7 +110,7 @@ final class GenerateConfiguration {
         builder.addFields(fieldDefinitions.fields());
 
         String configParameterName = fieldDefinitions.names().newName(CONFIG_VAR, CONFIG_VAR);
-        List<MemberDefinition> implMembers =  config.members().stream()
+        List<MemberDefinition> implMembers = config.members().stream()
             .flatMap(parserMember -> memberDefinition(fieldDefinitions.names(), parserMember).stream())
             .collect(Collectors.toList());
 
@@ -351,7 +353,7 @@ final class GenerateConfiguration {
                 definition.fieldName(),
                 validatorCode
             );
-        } else if (isTypeOf(List.class, definition.fieldType())){
+        } else if (isTypeOf(List.class, definition.fieldType())) {
             validationConsumer = validatorCode -> fieldCodeBuilder.addStatement(
                 "this.$1N.forEach($1N -> $2L)",
                 definition.fieldName(),
@@ -480,7 +482,7 @@ final class GenerateConfiguration {
                 targetType,
                 asType(method.getEnclosingElement()),
                 converter,
-                true
+                false
             );
         }
 
@@ -490,8 +492,8 @@ final class GenerateConfiguration {
             return converterError(
                 method,
                 "[%s] is not a valid fully qualified method name: " +
-                "it must start with a fully qualified class name followed by a '#' " +
-                "and then the method name.",
+                    "it must start with a fully qualified class name followed by a '#' " +
+                    "and then the method name.",
                 converter
             );
         }
@@ -502,13 +504,13 @@ final class GenerateConfiguration {
             return converterError(
                 method,
                 "[%s] is not a valid fully qualified method name: " +
-                "The class [%s] cannot be found.",
+                    "The class [%s] cannot be found.",
                 converter,
                 className
             );
         }
 
-        return memberDefinition(names, member, targetType, classElement, methodName, false);
+        return memberDefinition(names, member, targetType, classElement, methodName, true);
     }
 
     private Optional<MemberDefinition> memberDefinition(
@@ -517,7 +519,7 @@ final class GenerateConfiguration {
         TypeMirror targetType,
         TypeElement classElement,
         CharSequence methodName,
-        boolean scanInheritance
+        boolean isFullyQualified
     ) {
         String converter = member.method().getAnnotation(ConvertWith.class).method();
         List<ExecutableElement> validCandidates = new ArrayList<>();
@@ -531,18 +533,19 @@ final class GenerateConfiguration {
                 return converterError(classElement, "Inherited interface was null, this could be a bug in the JDK.");
             }
 
-            validCandidates.clear();
 
             for (ExecutableElement candidate : methodsIn(currentClass.getEnclosedElements())) {
                 if (!candidate.getSimpleName().contentEquals(methodName)) {
                     continue;
                 }
 
-                int sizeBeforeValidation = invalidCandidates.size();
-
-                validateCandidateModifiers(targetType, invalidCandidates, candidate, candidate.getModifiers());
-
-                if (invalidCandidates.size() == sizeBeforeValidation) {
+                if (validateCandidateModifiers(
+                    targetType,
+                    invalidCandidates,
+                    isFullyQualified,
+                    candidate,
+                    candidate.getModifiers()
+                )) {
                     validCandidates.add(candidate);
                 }
             }
@@ -550,7 +553,11 @@ final class GenerateConfiguration {
             if (validCandidates.size() > 1) {
                 for (ExecutableElement candidate : validCandidates) {
                     error(
-                        String.format(Locale.ENGLISH,"Method is ambiguous and a possible candidate for [%s].", converter),
+                        String.format(
+                            Locale.ENGLISH,
+                            "Method is ambiguous and a possible candidate for [%s].",
+                            converter
+                        ),
                         candidate
                     );
                 }
@@ -558,9 +565,13 @@ final class GenerateConfiguration {
             }
 
             if (validCandidates.size() == 1) {
-                ExecutableElement candidate = validCandidates.get(0);
-                TypeMirror currentType = currentClass.asType();
-                TypeMirror converterInputType = candidate.getParameters().get(0).asType();
+                ExecutableElement candidate = validCandidates.getFirst();
+                var receiverType = candidate.getModifiers().contains(Modifier.STATIC)
+                    ? TypeName.get(currentClass.asType())
+                    : TypeVariableName.get("this"); // this isn't really the proper thing, but it works
+                TypeMirror converterInputType = candidate.getParameters().getFirst().asType();
+
+
                 if (isTypeOf(Optional.class, targetType)) {
                     return memberDefinition(names, member, targetType, Optional.of(converterInputType))
                         .map(definition -> ImmutableMemberDefinition.builder()
@@ -568,7 +579,7 @@ final class GenerateConfiguration {
                             .addConverter(codeBlock -> CodeBlock.of(
                                 "$L.map($T::$N)",
                                 codeBlock,
-                                currentType,
+                                receiverType,
                                 candidate.getSimpleName().toString()
                             ))
                             .build()
@@ -579,7 +590,7 @@ final class GenerateConfiguration {
                         .from(d)
                         .addConverter(c -> CodeBlock.of(
                             "$T.$N($L)",
-                            currentType,
+                            receiverType,
                             candidate.getSimpleName().toString(),
                             c
                         ))
@@ -587,7 +598,7 @@ final class GenerateConfiguration {
                     );
             }
 
-            if (scanInheritance) {
+            if (!isFullyQualified) {
                 for (TypeMirror superInterface : currentClass.getInterfaces()) {
                     classesToSearch.addLast(asTypeElement(superInterface));
                 }
@@ -595,26 +606,32 @@ final class GenerateConfiguration {
         } while (!classesToSearch.isEmpty());
 
         for (InvalidCandidate invalidCandidate : invalidCandidates) {
-            error(String.format(Locale.ENGLISH,invalidCandidate.message(), invalidCandidate.args()), invalidCandidate.element());
+            error(
+                String.format(Locale.ENGLISH, invalidCandidate.message(), invalidCandidate.args()),
+                invalidCandidate.element()
+            );
         }
 
         return converterError(
             member.method(),
-            "No suitable method found that matches [%s]. " +
-            "Make sure that the method is static, public, unary, not generic, " +
-            "does not declare any exception and returns [%s].",
+            "No suitable method found that matches [%1$s]. " +
+                "Make sure that the method is %3$spublic, unary, not generic, " +
+                "does not declare any exception and returns [%2$s].",
             converter,
-            targetType
+            targetType,
+            isFullyQualified ? "static, " : ""
         );
     }
 
-    private void validateCandidateModifiers(
+    private boolean validateCandidateModifiers(
         TypeMirror targetType,
         Collection<InvalidCandidate> invalidCandidates,
+        boolean requireStatic,
         ExecutableElement candidate,
         Set<Modifier> modifiers
     ) {
-        if (!modifiers.contains(Modifier.STATIC)) {
+        int numberOfInvalids = invalidCandidates.size();
+        if (requireStatic && !modifiers.contains(Modifier.STATIC)) {
             invalidCandidates.add(InvalidCandidate.of(candidate, "Must be static"));
         }
         if (!modifiers.contains(Modifier.PUBLIC)) {
@@ -640,6 +657,8 @@ final class GenerateConfiguration {
                 targetType
             ));
         }
+
+        return numberOfInvalids == invalidCandidates.size();
     }
 
     private Optional<MemberDefinition> memberDefinition(
@@ -755,7 +774,7 @@ final class GenerateConfiguration {
         return Optional.empty();
     }
 
-    private <T> Optional<T> converterError(Element element, String message, Object... args) {
+    private <T> Optional<T> converterError(Element element, @PrintFormat String message, Object... args) {
         messager.printMessage(
             Diagnostic.Kind.ERROR,
             String.format(Locale.ENGLISH, message, args),

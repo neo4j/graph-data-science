@@ -62,13 +62,28 @@ public @interface Configuration {
 
     /**
      * This annotation can be used together with {@link org.neo4j.gds.annotation.Configuration.Key} or {@link org.neo4j.gds.annotation.Configuration.Parameter}.
-     * The value must be a method reference of format `package.class#function` to a static and public method.
+     * The value must be a method reference of format `package.class#function` to a static and public method
+     * or a method name, referring to a public static or instance method in the surrounding interface or its supertypes.
      * The input for the specific field will be transformed using the method-reference.
      */
     @Documented
     @Target(ElementType.METHOD)
     @Retention(RetentionPolicy.RUNTIME)
     @interface ConvertWith {
+        /**
+         * The method to be used for converting the configuration value.
+         * <p>
+         * This can tale one of two forms:
+         * <ul>
+         * <li>A method reference of format `package.class#function` to a static and public method.</li>
+         * <li>An unqualified method name, referring to a public static or instance method in the surrounding interface or its supertypes.</li>
+         * </ul>
+         * <p>
+         * In the second case, the method can be an instance method, which allows for the conversion to make use of
+         * other configuration values.
+         * <b>FOOT-GUN WARNING:</b> Using other configuration values only works correctly if they are already initialized.
+         * That is, they must be written above this configuration option.
+         */
         String method();
 
         String INVERSE_IS_TO_MAP = "__USE_TO_MAP_METHOD__";

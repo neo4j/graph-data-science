@@ -30,7 +30,6 @@ import org.neo4j.gds.ResourceUtil;
 
 import javax.tools.JavaFileObject;
 import java.util.Locale;
-import java.util.Objects;
 
 import static com.google.common.truth.Truth.assertAbout;
 import static com.google.testing.compile.Compiler.javac;
@@ -42,7 +41,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ConfigurationProcessorTest {
 
     @Rule
-    final CompilationRule compilationRule = new CompilationRule();
+    public final CompilationRule compilationRule = new CompilationRule();
 
     @ParameterizedTest
     @ValueSource(strings = {
@@ -157,7 +156,11 @@ class ConfigurationProcessorTest {
             e("Method is ambiguous and a possible candidate for [multipleOverloads].", 33, 16),
             e("Method is ambiguous and a possible candidate for [multipleOverloads].", 37, 16),
             e("[negative.class.does.not.exist#foo] is not a valid fully qualified method name: The class [negative.class.does.not.exist] cannot be found.", 41, 5),
-            e("No suitable method found that matches [methodDoesNotExist]. Make sure that the method is static, public, unary, not generic, does not declare any exception and returns [int].", 44, 5),
+            e(
+                "No suitable method found that matches [methodDoesNotExist]. Make sure that the method is public, unary, not generic, does not declare any exception and returns [int].",
+                44,
+                5
+            ),
             e("No suitable method found that matches [negative.InvalidConversionsClasses#methodDoesNotExist]. Make sure that the method is static, public, unary, not generic, does not declare any exception and returns [int].", 47, 5),
             e("[negative.InvalidConversionsClasses#] is not a valid fully qualified method name: it must start with a fully qualified class name followed by a '#' and then the method name.", 50, 5),
             e("[negative.InvalidConversionsClasses.invalidIdentifier] is not a valid identifier, see the @Configuration.ConvertWith documentation.", 53, 5),
@@ -169,29 +172,67 @@ class ConfigurationProcessorTest {
     void invalidConversionsMethodTargets() {
         runNegativeTest(
             "InvalidConversionsMethods",
-            e("No suitable method found that matches [nonStatic]. Make sure that the method is static, public, unary, not generic, does not declare any exception and returns [int].", 27, 5),
-            e("Must be static", 31, 17),
-            e("No suitable method found that matches [generic]. Make sure that the method is static, public, unary, not generic, does not declare any exception and returns [int].", 36, 5),
-            e("May not be generic", 39, 18),
-            e("Must return a type that is assignable to int", 39, 18),
-            e("No suitable method found that matches [declaresThrows]. Make sure that the method is static, public, unary, not generic, does not declare any exception and returns [int].", 44, 5),
-            e("May not declare any exceptions", 47, 16),
-            e("No suitable method found that matches [noParameters]. Make sure that the method is static, public, unary, not generic, does not declare any exception and returns [int].", 52, 5),
-            e("May only accept one parameter", 55, 16),
-            e("No suitable method found that matches [multipleParameters]. Make sure that the method is static, public, unary, not generic, does not declare any exception and returns [int].", 60, 5),
-            e("May only accept one parameter", 63, 16),
-            e("No suitable method found that matches [invalidReturnType1]. Make sure that the method is static, public, unary, not generic, does not declare any exception and returns [int].", 68, 5),
-            e("Must return a type that is assignable to int", 71, 19),
-            e("No suitable method found that matches [invalidReturnType2]. Make sure that the method is static, public, unary, not generic, does not declare any exception and returns [int].", 76, 5),
-            e("Must return a type that is assignable to int", 79, 17),
-            e("No suitable method found that matches [invalidReturnType3]. Make sure that the method is static, public, unary, not generic, does not declare any exception and returns [int].", 84, 5),
-            e("Must return a type that is assignable to int", 87, 19),
-            e("No suitable method found that matches [invalidReturnType4]. Make sure that the method is static, public, unary, not generic, does not declare any exception and returns [int].", 92, 5),
-            e("Must return a type that is assignable to int", 95, 17),
-            e("No suitable method found that matches [negative.InvalidConversionsMethods.Inner#privateMethod]. Make sure that the method is static, public, unary, not generic, does not declare any exception and returns [int].", 99, 5),
-            e("Must be public", 106, 28),
-            e("No suitable method found that matches [negative.InvalidConversionsMethods.Inner#packagePrivateMethod]. Make sure that the method is static, public, unary, not generic, does not declare any exception and returns [int].", 102, 5),
-            e("Must be public", 110, 20)
+            e(
+                "No suitable method found that matches [generic]. Make sure that the method is public, unary, not generic, does not declare any exception and returns [int].",
+                33,
+                5
+            ),
+            e("May not be generic", 36, 18),
+            e("Must return a type that is assignable to int", 36, 18),
+            e(
+                "No suitable method found that matches [declaresThrows]. Make sure that the method is public, unary, not generic, does not declare any exception and returns [int].",
+                41,
+                5
+            ),
+            e("May not declare any exceptions", 44, 16),
+            e(
+                "No suitable method found that matches [noParameters]. Make sure that the method is public, unary, not generic, does not declare any exception and returns [int].",
+                49,
+                5
+            ),
+            e("May only accept one parameter", 52, 16),
+            e(
+                "No suitable method found that matches [multipleParameters]. Make sure that the method is public, unary, not generic, does not declare any exception and returns [int].",
+                57,
+                5
+            ),
+            e("May only accept one parameter", 60, 16),
+            e(
+                "No suitable method found that matches [invalidReturnType1]. Make sure that the method is public, unary, not generic, does not declare any exception and returns [int].",
+                65,
+                5
+            ),
+            e("Must return a type that is assignable to int", 68, 19),
+            e(
+                "No suitable method found that matches [invalidReturnType2]. Make sure that the method is public, unary, not generic, does not declare any exception and returns [int].",
+                73,
+                5
+            ),
+            e("Must return a type that is assignable to int", 76, 17),
+            e(
+                "No suitable method found that matches [invalidReturnType3]. Make sure that the method is public, unary, not generic, does not declare any exception and returns [int].",
+                81,
+                5
+            ),
+            e("Must return a type that is assignable to int", 84, 19),
+            e(
+                "No suitable method found that matches [invalidReturnType4]. Make sure that the method is public, unary, not generic, does not declare any exception and returns [int].",
+                89,
+                5
+            ),
+            e("Must return a type that is assignable to int", 92, 17),
+            e(
+                "No suitable method found that matches [negative.InvalidConversionsMethods.Inner#privateMethod]. Make sure that the method is static, public, unary, not generic, does not declare any exception and returns [int].",
+                96,
+                5
+            ),
+            e("Must be public", 103, 28),
+            e(
+                "No suitable method found that matches [negative.InvalidConversionsMethods.Inner#packagePrivateMethod]. Make sure that the method is static, public, unary, not generic, does not declare any exception and returns [int].",
+                99,
+                5
+            ),
+            e("Must be public", 107, 20)
         );
     }
 
@@ -271,37 +312,6 @@ class ConfigurationProcessorTest {
         return new ErrorCheck(error, line, column);
     }
 
-    private static final class ErrorCheck {
-        private final String error;
-        private final int line;
-        private final int column;
-
-        private ErrorCheck(String error, int line, int column) {
-            this.error = error;
-            this.line = line;
-            this.column = column;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            ErrorCheck that = (ErrorCheck) o;
-            return line == that.line && column == that.column && Objects.equals(error, that.error);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(error, line, column);
-        }
-
-        @Override
-        public String toString() {
-            return "ErrorCheck{" +
-                   "error='" + error + '\'' +
-                   ", line=" + line +
-                   ", column=" + column +
-                   '}';
-        }
+    private record ErrorCheck(String error, int line, int column) {
     }
 }

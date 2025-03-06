@@ -56,6 +56,9 @@ public interface Conversions {
         @Configuration.ConvertWith(method = "toFoo", inverse = "positive.Conversions.MyConversion#fromFoo")
         Optional<Foo> optional();
 
+        @Configuration.ConvertWith(method = "useDirectMethod")
+        int instanceConverter();
+
         static int toInt(String input) {
             return Integer.parseInt(input);
         }
@@ -73,6 +76,11 @@ public interface Conversions {
         }
         static Map<String, Object> fromFoo(Foo f) {
             return Map.of();
+        }
+
+        @Configuration.Ignore
+        default int useDirectMethod(int configInput) {
+            return 42 + configInput + directMethod();
         }
     }
 
