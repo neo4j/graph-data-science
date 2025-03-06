@@ -23,6 +23,7 @@ import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.ImmutableGraphLoaderContext;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
+import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResultFactory;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.loading.GraphProjectResult;
@@ -107,7 +108,7 @@ public class GenericProjectApplication<RESULT extends GraphProjectResult, CONFIG
             configuration
         );
 
-        return new MemoryEstimateResult(memoryTreeWithDimensions);
+        return MemoryEstimateResultFactory.from(memoryTreeWithDimensions);
     }
 
     private RESULT projectGraph(
@@ -166,7 +167,7 @@ public class GenericProjectApplication<RESULT extends GraphProjectResult, CONFIG
     ) {
         var estimate = graphProjectMemoryUsageService.getFictitiousEstimate(configuration);
 
-        return new MemoryEstimateResult(estimate);
+        return MemoryEstimateResultFactory.from(estimate);
     }
 
     private GraphLoaderContext graphLoaderContext(

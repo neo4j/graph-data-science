@@ -19,80 +19,17 @@
  */
 package org.neo4j.gds.applications.algorithms.machinery;
 
-import org.neo4j.gds.core.GraphDimensions;
-import org.neo4j.gds.mem.MemoryRange;
-import org.neo4j.gds.mem.MemoryTree;
-import org.neo4j.gds.mem.MemoryTreeWithDimensions;
-
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.Map;
 
-public class MemoryEstimateResult {
-    public final String requiredMemory;
-    public final String treeView;
-    public final Map<String, Object> mapView;
-    public final long bytesMin, bytesMax;
-    public final long nodeCount, relationshipCount;
-    public final double heapPercentageMin;
-    public final double heapPercentageMax;
-
-    public MemoryEstimateResult(MemoryTreeWithDimensions memory) {
-        this(memory.memoryTree, memory.graphDimensions);
-    }
-
-    private MemoryEstimateResult(MemoryTree memory, GraphDimensions dimensions) {
-        this(memory.render(), memory.renderMap(), memory.memoryUsage(), dimensions);
-    }
-
-    private MemoryEstimateResult(
-        String treeView,
-        Map<String, Object> mapView,
-        MemoryRange estimateMemoryUsage,
-        GraphDimensions dimensions
-    ) {
-        // FIXME: pass the heap size from the outside?
-        long heapSize = Runtime.getRuntime().maxMemory();
-        this.requiredMemory = estimateMemoryUsage.toString();
-        this.treeView = treeView;
-        this.mapView = mapView;
-        this.bytesMin = estimateMemoryUsage.min;
-        this.bytesMax = estimateMemoryUsage.max;
-        this.heapPercentageMin = getPercentage(bytesMin, heapSize);
-        this.heapPercentageMax = getPercentage(bytesMax, heapSize);
-        this.nodeCount = dimensions.nodeCount();
-        this.relationshipCount = dimensions.relCountUpperBound();
-    }
-
-    private static double getPercentage(long requiredBytes, long heapSizeBytes) {
-        if (heapSizeBytes == 0) {
-            return Double.NaN;
-        }
-        return BigDecimal.valueOf(requiredBytes)
-            .divide(BigDecimal.valueOf(heapSizeBytes), 1, RoundingMode.UP)
-            .doubleValue();
-    }
-
-    public MemoryEstimateResult(
-        String requiredMemory,
-        String treeView,
-        Map<String, Object> mapView,
-        long bytesMin,
-        long bytesMax,
-        long nodeCount,
-        long relationshipCount,
-        double heapPercentageMin,
-        double heapPercentageMax
-    ) {
-        this.requiredMemory = requiredMemory;
-        this.treeView = treeView;
-        this.mapView = mapView;
-        this.bytesMin = bytesMin;
-        this.bytesMax = bytesMax;
-        this.nodeCount = nodeCount;
-        this.relationshipCount = relationshipCount;
-        this.heapPercentageMin = heapPercentageMin;
-        this.heapPercentageMax = heapPercentageMax;
-    }
-
+public record MemoryEstimateResult(
+    String requiredMemory,
+    String treeView,
+    Map<String, Object> mapView,
+    long bytesMin,
+    long bytesMax,
+    long nodeCount,
+    long relationshipCount,
+    double heapPercentageMin,
+    double heapPercentageMax
+) {
 }

@@ -21,10 +21,10 @@ package org.neo4j.gds.applications.graphstorecatalog;
 
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.User;
-import org.neo4j.gds.mem.MemoryTreeWithDimensions;
+import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
+import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResultFactory;
 import org.neo4j.gds.graphsampling.config.CommonNeighbourAwareRandomWalkConfig;
 import org.neo4j.gds.graphsampling.samplers.rw.cnarw.CommonNeighbourAwareRandomWalk;
-import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 
 class EstimateCommonNeighbourAwareRandomWalkApplication {
     MemoryEstimateResult estimate(
@@ -45,8 +45,6 @@ class EstimateCommonNeighbourAwareRandomWalkApplication {
             .memoryEstimation(configuration)
             .estimate(loader.graphDimensions(), configuration.concurrency());
 
-        var memoryTreeWithDimensions = new MemoryTreeWithDimensions(memoryTree, loader.graphDimensions());
-
-        return new MemoryEstimateResult(memoryTreeWithDimensions);
+        return MemoryEstimateResultFactory.from(memoryTree, loader.graphDimensions());
     }
 }

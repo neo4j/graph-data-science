@@ -23,6 +23,8 @@ import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.ImmutableGraphLoaderContext;
+import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
+import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResultFactory;
 import org.neo4j.gds.applications.graphstorecatalog.FictitiousGraphStoreLoader;
 import org.neo4j.gds.applications.graphstorecatalog.GraphStoreFromCatalogLoader;
 import org.neo4j.gds.applications.graphstorecatalog.GraphStoreFromDatabaseLoader;
@@ -33,7 +35,6 @@ import org.neo4j.gds.mem.MemoryEstimations;
 import org.neo4j.gds.mem.MemoryTree;
 import org.neo4j.gds.mem.MemoryTreeWithDimensions;
 import org.neo4j.gds.memest.MemoryEstimationGraphConfigParser;
-import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.termination.TerminationMonitor;
 import org.neo4j.gds.transaction.EmptyTransactionContext;
@@ -121,7 +122,7 @@ public class MemoryEstimationExecutor<
             maybeGraphEstimation = Optional.empty();
         } else {
             throw new IllegalArgumentException(formatWithLocale(
-                "Expected `graphNameOrConfiguration` to be of type String or Map, but got",
+                "Expected `graphNameOrConfiguration` to be of type String or Map, but got `%s`",
                 graphNameOrConfiguration.getClass().getSimpleName()
             ));
         }
@@ -132,7 +133,7 @@ public class MemoryEstimationExecutor<
             algoConfig
         );
 
-        return Stream.of(new MemoryEstimateResult(memoryTreeWithDimensions));
+        return Stream.of(MemoryEstimateResultFactory.from(memoryTreeWithDimensions));
     }
 
     protected MemoryTreeWithDimensions procedureMemoryEstimation(

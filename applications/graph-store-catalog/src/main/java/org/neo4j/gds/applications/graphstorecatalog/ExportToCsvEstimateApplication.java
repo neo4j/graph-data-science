@@ -21,11 +21,11 @@ package org.neo4j.gds.applications.graphstorecatalog;
 
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
+import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResultFactory;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.io.file.GraphStoreToCsvEstimationConfig;
 import org.neo4j.gds.core.io.file.csv.estimation.CsvExportEstimation;
-import org.neo4j.gds.mem.MemoryTreeWithDimensions;
 
 class ExportToCsvEstimateApplication {
     MemoryEstimateResult run(
@@ -37,8 +37,6 @@ class ExportToCsvEstimateApplication {
             .estimate(graphStore, configuration.samplingFactor())
             .estimate(dimensions, new Concurrency(1));
 
-        var memoryTreeWithDimensions = new MemoryTreeWithDimensions(memoryTree, dimensions);
-
-        return new MemoryEstimateResult(memoryTreeWithDimensions);
+        return MemoryEstimateResultFactory.from(memoryTree, dimensions);
     }
 }

@@ -27,7 +27,6 @@ import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryEstimations;
-import org.neo4j.gds.mem.MemoryTreeWithDimensions;
 import org.neo4j.gds.memest.DatabaseGraphStoreEstimationService;
 import org.neo4j.gds.memest.FictitiousGraphStoreEstimationService;
 import org.neo4j.gds.memest.GraphMemoryEstimation;
@@ -145,6 +144,6 @@ public class AlgorithmEstimationTemplate {
 
         var memoryTree = rootEstimation.estimate(graphDimensions, concurrency);
 
-        return new MemoryEstimateResult(new MemoryTreeWithDimensions(memoryTree, graphDimensions));
+        return MemoryEstimateResultFactory.from(memoryTree, graphDimensions);
     }
 }

@@ -116,11 +116,11 @@ class MemoryEstimationExecutorTest extends BaseTest {
 
         GraphStoreCatalog.removeAllLoadedGraphs();
         estimationResult.forEach(row -> {
-            assertThat(row.nodeCount).isEqualTo(0);
-            assertThat(row.bytesMin).isGreaterThan(0);
-            assertThat(row.bytesMax).isGreaterThanOrEqualTo(row.bytesMin);
-            assertThat(row.mapView).isNotNull();
-            assertThat(row.treeView).isNotEmpty();
+            assertThat(row.nodeCount()).isEqualTo(0);
+            assertThat(row.bytesMin()).isGreaterThan(0);
+            assertThat(row.bytesMax()).isGreaterThanOrEqualTo(row.bytesMin());
+            assertThat(row.mapView()).isNotNull();
+            assertThat(row.treeView()).isNotEmpty();
         });
     }
 
@@ -157,19 +157,19 @@ class MemoryEstimationExecutorTest extends BaseTest {
         );
 
         estimationResult.forEach(row -> {
-            assertEquals(100_000_000L, row.nodeCount);
-            assertEquals(20_000_000_000L, row.relationshipCount);
-            var components = (List<Map<String, Object>>) row.mapView.get("components");
+            assertEquals(100_000_000L, row.nodeCount());
+            assertEquals(20_000_000_000L, row.relationshipCount());
+            var components = (List<Map<String, Object>>) row.mapView().get("components");
             assertEquals(2, components.size());
 
             var graphComponent = components.get(0);
             assertEquals("graph", graphComponent.get("name"));
             assertEquals("[21 GiB ... 58 GiB]", graphComponent.get("memoryUsage"));
 
-            assertTrue(row.bytesMin > row.nodeCount + row.relationshipCount);
-            assertTrue(row.bytesMax >= row.bytesMin);
-            assertNotNull(row.mapView);
-            assertFalse(row.treeView.isEmpty());
+            assertTrue(row.bytesMin() > row.nodeCount() + row.relationshipCount());
+            assertTrue(row.bytesMax() >= row.bytesMin());
+            assertNotNull(row.mapView());
+            assertFalse(row.treeView().isEmpty());
         });
     }
 }

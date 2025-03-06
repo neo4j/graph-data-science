@@ -20,13 +20,14 @@
 package org.neo4j.gds.applications.graphstorecatalog;
 
 import org.neo4j.gds.api.DatabaseId;
+import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
+import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResultFactory;
 import org.neo4j.gds.config.GraphProjectConfig;
-import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
 import org.neo4j.gds.projection.GraphProjectNativeResult;
-import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
+import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.graphdb.GraphDatabaseService;
 
@@ -90,7 +91,7 @@ public class NativeProjectApplication {
             configuration
         );
 
-        return new MemoryEstimateResult(memoryTreeWithDimensions);
+        return MemoryEstimateResultFactory.from(memoryTreeWithDimensions);
     }
 
     /**
@@ -102,6 +103,6 @@ public class NativeProjectApplication {
     ) {
         var estimate = graphProjectMemoryUsageService.getFictitiousEstimate(configuration);
 
-        return new MemoryEstimateResult(estimate);
+        return MemoryEstimateResultFactory.from(estimate);
     }
 }
