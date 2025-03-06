@@ -22,8 +22,8 @@ package org.neo4j.gds.procedures.algorithms.community;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 import org.neo4j.gds.procedures.algorithms.results.StandardWriteResult;
+import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 
 import java.util.Collections;
 import java.util.Map;
@@ -33,7 +33,7 @@ public class SccWriteResult extends StandardWriteResult {
     public final Map<String, Object> componentDistribution;
     public final long nodePropertiesWritten;
 
-    SccWriteResult(
+    public SccWriteResult(
         long componentCount,
         Map<String, Object> componentDistribution,
         long preProcessingMillis,

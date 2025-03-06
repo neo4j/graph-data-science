@@ -28,7 +28,7 @@ public class TriangleCountWriteResult extends TriangleCountStatsResult {
     public long writeMillis;
     public long nodePropertiesWritten;
 
-    TriangleCountWriteResult(
+    public TriangleCountWriteResult(
         long globalTriangleCount,
         long nodeCount,
         long preProcessingMillis,
