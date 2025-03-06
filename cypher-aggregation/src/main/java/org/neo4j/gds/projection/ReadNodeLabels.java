@@ -27,6 +27,7 @@ import org.neo4j.values.SequenceValue;
 import org.neo4j.values.storable.BooleanValue;
 import org.neo4j.values.storable.TextArray;
 import org.neo4j.values.storable.TextValue;
+import org.neo4j.values.storable.VectorValue;
 
 enum ReadNodeLabels implements PartialValueMapper<NodeLabelToken> {
     INSTANCE;
@@ -58,6 +59,11 @@ enum ReadNodeLabels implements PartialValueMapper<NodeLabelToken> {
             );
         }
         return NodeLabelTokens.empty();
+    }
+
+    @Override
+    public NodeLabelToken mapVector(VectorValue vectorValue) {
+        return NodeLabelTokens.missing();
     }
 
     @Override

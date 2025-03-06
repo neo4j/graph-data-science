@@ -22,6 +22,7 @@ package org.neo4j.gds.projection;
 import org.neo4j.values.AnyValue;
 import org.neo4j.values.SequenceValue;
 import org.neo4j.values.storable.IntegralValue;
+import org.neo4j.values.storable.VectorValue;
 import org.neo4j.values.virtual.VirtualNodeValue;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -48,6 +49,11 @@ final class ExtractNodeId implements PartialValueMapper<Long> {
     public Long mapIntegral(IntegralValue value) {
         this.hasSeenArbitraryIds.lazySet(true);
         return value.longValue();
+    }
+
+    @Override
+    public Long mapVector(VectorValue vectorValue) {
+        throw invalidNodeType(vectorValue.getTypeName());
     }
 
     private static IllegalArgumentException invalidNodeType(String typeName) {

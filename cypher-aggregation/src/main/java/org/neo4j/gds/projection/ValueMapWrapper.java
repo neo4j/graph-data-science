@@ -31,6 +31,7 @@ import org.neo4j.values.storable.TextArray;
 import org.neo4j.values.storable.TextValue;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
+import org.neo4j.values.storable.VectorValue;
 import org.neo4j.values.virtual.MapValue;
 
 import java.util.ArrayList;
@@ -134,6 +135,11 @@ public final class ValueMapWrapper implements CypherMapAccess {
                 return expectedType.cast(value.longValue());
             }
             return PartialValueMapper.super.mapFloatingPoint(value);
+        }
+
+        @Override
+        public T mapVector(VectorValue vectorValue) {
+            return unsupported(vectorValue);
         }
 
         @Override
