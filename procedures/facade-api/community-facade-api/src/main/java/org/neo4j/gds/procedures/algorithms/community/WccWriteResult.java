@@ -19,20 +19,12 @@
  */
 package org.neo4j.gds.procedures.algorithms.community;
 
-import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 
 import java.util.Collections;
 import java.util.Map;
 
-public final class WccWriteResult extends WccStatsResult {
-
-    public final long writeMillis;
-    public final long nodePropertiesWritten;
-
-    public WccWriteResult(
+public record WccWriteResult(
         long componentCount,
         Map<String, Object> componentDistribution,
         long preProcessingMillis,
@@ -42,17 +34,6 @@ public final class WccWriteResult extends WccStatsResult {
         long nodePropertiesWritten,
         Map<String, Object> configuration
     ) {
-        super(
-            componentCount,
-            componentDistribution,
-            preProcessingMillis,
-            computeMillis,
-            postProcessingMillis,
-            configuration
-        );
-        this.writeMillis = writeMillis;
-        this.nodePropertiesWritten = nodePropertiesWritten;
-    }
 
     static WccWriteResult emptyFrom(AlgorithmProcessingTimings timings, Map<String, Object> configurationMap) {
         return new WccWriteResult(
@@ -67,24 +48,4 @@ public final class WccWriteResult extends WccStatsResult {
         );
     }
 
-    public static class Builder extends AbstractCommunityResultBuilder<WccWriteResult> {
-
-        public Builder(ProcedureReturnColumns returnColumns, Concurrency concurrency) {
-            super(returnColumns, concurrency);
-        }
-
-        @Override
-        protected WccWriteResult buildResult() {
-            return new WccWriteResult(
-                maybeCommunityCount.orElse(0L),
-                communityHistogramOrNull(),
-                preProcessingMillis,
-                computeMillis,
-                postProcessingDuration,
-                writeMillis,
-                nodePropertiesWritten,
-                config.toMap()
-            );
-        }
-    }
 }

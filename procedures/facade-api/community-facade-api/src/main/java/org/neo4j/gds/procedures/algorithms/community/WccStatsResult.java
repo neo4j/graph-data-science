@@ -19,21 +19,12 @@
  */
 package org.neo4j.gds.procedures.algorithms.community;
 
-import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.result.AbstractCommunityResultBuilder;
-import org.neo4j.gds.procedures.algorithms.results.StandardStatsResult;
 
 import java.util.Collections;
 import java.util.Map;
 
-public class WccStatsResult extends StandardStatsResult {
-
-    public final long componentCount;
-    public final Map<String, Object> componentDistribution;
-
-    public WccStatsResult(
+public record WccStatsResult(
         long componentCount,
         Map<String, Object> componentDistribution,
         long preProcessingMillis,
@@ -41,10 +32,6 @@ public class WccStatsResult extends StandardStatsResult {
         long postProcessingMillis,
         Map<String, Object> configuration
     ) {
-        super(preProcessingMillis, computeMillis, postProcessingMillis, configuration);
-        this.componentCount = componentCount;
-        this.componentDistribution = componentDistribution;
-    }
 
     static WccStatsResult emptyFrom(AlgorithmProcessingTimings timings, Map<String, Object> configurationMap) {
         return new WccStatsResult(
@@ -57,22 +44,4 @@ public class WccStatsResult extends StandardStatsResult {
         );
     }
 
-    public static class Builder extends AbstractCommunityResultBuilder<WccStatsResult> {
-
-        public Builder(ProcedureReturnColumns returnColumns, Concurrency concurrency) {
-            super(returnColumns, concurrency);
-        }
-
-        @Override
-        protected WccStatsResult buildResult() {
-            return new WccStatsResult(
-                maybeCommunityCount.orElse(0L),
-                communityHistogramOrNull(),
-                preProcessingMillis,
-                computeMillis,
-                postProcessingDuration,
-                config.toMap()
-            );
-        }
-    }
 }

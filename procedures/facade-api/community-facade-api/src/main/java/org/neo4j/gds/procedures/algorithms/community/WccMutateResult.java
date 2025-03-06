@@ -19,20 +19,12 @@
  */
 package org.neo4j.gds.procedures.algorithms.community;
 
-import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 
 import java.util.Collections;
 import java.util.Map;
 
-public final class WccMutateResult extends WccStatsResult {
-
-    public final long mutateMillis;
-    public final long nodePropertiesWritten;
-
-    public WccMutateResult(
+public record WccMutateResult(
         long componentCount,
         Map<String, Object> componentDistribution,
         long preProcessingMillis,
@@ -42,17 +34,7 @@ public final class WccMutateResult extends WccStatsResult {
         long nodePropertiesWritten,
         Map<String, Object> configuration
     ) {
-        super(
-            componentCount,
-            componentDistribution,
-            preProcessingMillis,
-            computeMillis,
-            postProcessingMillis,
-            configuration
-        );
-        this.mutateMillis = mutateMillis;
-        this.nodePropertiesWritten = nodePropertiesWritten;
-    }
+
 
     public static WccMutateResult emptyFrom(AlgorithmProcessingTimings timings, Map<String, Object> configurationMap) {
         return new WccMutateResult(
@@ -67,24 +49,4 @@ public final class WccMutateResult extends WccStatsResult {
         );
     }
 
-    public static class Builder extends AbstractCommunityResultBuilder<WccMutateResult> {
-
-        public Builder(ProcedureReturnColumns returnColumns, Concurrency concurrency) {
-            super(returnColumns, concurrency);
-        }
-
-        @Override
-        protected WccMutateResult buildResult() {
-            return new WccMutateResult(
-                maybeCommunityCount.orElse(0L),
-                communityHistogramOrNull(),
-                preProcessingMillis,
-                computeMillis,
-                postProcessingDuration,
-                mutateMillis,
-                nodePropertiesWritten,
-                config.toMap()
-            );
-        }
-    }
 }
