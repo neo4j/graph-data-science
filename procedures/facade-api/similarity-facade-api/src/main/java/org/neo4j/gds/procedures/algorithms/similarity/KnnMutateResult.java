@@ -25,12 +25,7 @@ import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 import java.util.Collections;
 import java.util.Map;
 
-public class KnnMutateResult extends SimilarityMutateResult {
-    public final long ranIterations;
-    public final long nodePairsConsidered;
-    public final boolean didConverge;
-
-    public KnnMutateResult(
+public record KnnMutateResult(
         long preProcessingMillis,
         long computeMillis,
         long mutateMillis,
@@ -43,21 +38,6 @@ public class KnnMutateResult extends SimilarityMutateResult {
         long nodePairsConsidered,
         Map<String, Object> configuration
     ) {
-        super(
-            preProcessingMillis,
-            computeMillis,
-            mutateMillis,
-            postProcessingMillis,
-            nodesCompared,
-            relationshipsWritten,
-            similarityDistribution,
-            configuration
-        );
-
-        this.ranIterations = ranIterations;
-        this.didConverge = didConverge;
-        this.nodePairsConsidered = nodePairsConsidered;
-    }
 
     static KnnMutateResult emptyFrom(AlgorithmProcessingTimings timings, Map<String, Object> configurationMap) {
         return new KnnMutateResult(

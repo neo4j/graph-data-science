@@ -25,12 +25,7 @@ import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 import java.util.Collections;
 import java.util.Map;
 
-public class KnnWriteResult extends SimilarityWriteResult {
-    public final long ranIterations;
-    public final boolean didConverge;
-    public final long nodePairsConsidered;
-
-    public KnnWriteResult(
+public record KnnWriteResult(
         long preProcessingMillis,
         long computeMillis,
         long writeMillis,
@@ -43,21 +38,6 @@ public class KnnWriteResult extends SimilarityWriteResult {
         Map<String, Object> similarityDistribution,
         Map<String, Object> configuration
     ) {
-        super(
-            preProcessingMillis,
-            computeMillis,
-            writeMillis,
-            postProcessingMillis,
-            nodesCompared,
-            relationshipsWritten,
-            similarityDistribution,
-            configuration
-        );
-
-        this.nodePairsConsidered = nodePairsCompared;
-        this.ranIterations = ranIterations;
-        this.didConverge = didConverge;
-    }
 
     static KnnWriteResult emptyFrom(AlgorithmProcessingTimings timings, Map<String, Object> configurationMap) {
         return new KnnWriteResult(

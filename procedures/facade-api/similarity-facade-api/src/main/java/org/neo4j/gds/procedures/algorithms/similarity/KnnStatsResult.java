@@ -24,37 +24,18 @@ import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTiming
 import java.util.Collections;
 import java.util.Map;
 
-public class KnnStatsResult extends SimilarityStatsResult {
-    public final long ranIterations;
-    public final boolean didConverge;
-    public final long nodePairsConsidered;
-
-    public KnnStatsResult(
+public record KnnStatsResult(
         long preProcessingMillis,
         long computeMillis,
         long postProcessingMillis,
         long nodesCompared,
-        long nodePairs,
+        long similarityPairs,
         Map<String, Object> similarityDistribution,
         boolean didConverge,
         long ranIterations,
         long nodePairsConsidered,
         Map<String, Object> configuration
     ) {
-        super(
-            preProcessingMillis,
-            computeMillis,
-            postProcessingMillis,
-            nodesCompared,
-            nodePairs,
-            similarityDistribution,
-            configuration
-        );
-
-        this.nodePairsConsidered = nodePairsConsidered;
-        this.ranIterations = ranIterations;
-        this.didConverge = didConverge;
-    }
 
     static KnnStatsResult emptyFrom(AlgorithmProcessingTimings timings, Map<String, Object> configurationMap) {
         return new KnnStatsResult(

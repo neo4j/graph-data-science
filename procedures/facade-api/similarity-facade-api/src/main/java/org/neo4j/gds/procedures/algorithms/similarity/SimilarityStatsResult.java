@@ -24,17 +24,7 @@ import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTiming
 import java.util.Collections;
 import java.util.Map;
 
-public class SimilarityStatsResult {
-    public long preProcessingMillis;
-    public long computeMillis;
-    public long postProcessingMillis;
-
-    public long nodesCompared;
-    public long similarityPairs;
-    public Map<String, Object> similarityDistribution;
-    public Map<String, Object> configuration;
-
-    public SimilarityStatsResult(
+public record SimilarityStatsResult(
         long preProcessingMillis,
         long computeMillis,
         long postProcessingMillis,
@@ -44,15 +34,7 @@ public class SimilarityStatsResult {
         Map<String, Object> configuration
 
     ) {
-        this.preProcessingMillis = preProcessingMillis;
-        this.computeMillis = computeMillis;
-        this.postProcessingMillis = postProcessingMillis;
-        this.nodesCompared = nodesCompared;
-        this.similarityPairs = similarityPairs;
-        this.similarityDistribution = similarityDistribution;
-        this.configuration = configuration;
-    }
-
+      
     static SimilarityStatsResult emptyFrom(AlgorithmProcessingTimings timings, Map<String, Object> configurationMap) {
         return new SimilarityStatsResult(
             timings.preProcessingMillis,

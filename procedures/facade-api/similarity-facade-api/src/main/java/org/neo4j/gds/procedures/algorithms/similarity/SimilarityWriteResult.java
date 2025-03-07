@@ -25,19 +25,7 @@ import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 import java.util.Collections;
 import java.util.Map;
 
-public class SimilarityWriteResult {
-    public final long preProcessingMillis;
-    public final long computeMillis;
-    public final long writeMillis;
-    public final long postProcessingMillis;
-
-    public final long nodesCompared;
-    public final long relationshipsWritten;
-
-    public final Map<String, Object> similarityDistribution;
-    public final Map<String, Object> configuration;
-
-    public SimilarityWriteResult(
+public record SimilarityWriteResult(
         long preProcessingMillis,
         long computeMillis,
         long writeMillis,
@@ -47,15 +35,7 @@ public class SimilarityWriteResult {
         Map<String, Object> similarityDistribution,
         Map<String, Object> configuration
     ) {
-        this.preProcessingMillis = preProcessingMillis;
-        this.computeMillis = computeMillis;
-        this.writeMillis = writeMillis;
-        this.postProcessingMillis = postProcessingMillis;
-        this.nodesCompared = nodesCompared;
-        this.relationshipsWritten = relationshipsWritten;
-        this.similarityDistribution = similarityDistribution;
-        this.configuration = configuration;
-    }
+
 
     static SimilarityWriteResult emptyFrom(AlgorithmProcessingTimings timings, Map<String, Object> configurationMap) {
         return new SimilarityWriteResult(
