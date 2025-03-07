@@ -32,9 +32,8 @@ public record SimilarityStatsResult(
         long similarityPairs,
         Map<String, Object> similarityDistribution,
         Map<String, Object> configuration
-
     ) {
-      
+
     static SimilarityStatsResult emptyFrom(AlgorithmProcessingTimings timings, Map<String, Object> configurationMap) {
         return new SimilarityStatsResult(
             timings.preProcessingMillis,
