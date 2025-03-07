@@ -34,7 +34,7 @@ public record KnnWriteResult(
         long relationshipsWritten,
         boolean didConverge,
         long ranIterations,
-        long nodePairsCompared,
+        long nodePairsConsidered,
         Map<String, Object> similarityDistribution,
         Map<String, Object> configuration
     ) {
