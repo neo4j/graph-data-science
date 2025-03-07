@@ -20,19 +20,10 @@
 package org.neo4j.gds.procedures.algorithms.embeddings;
 
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.Map;
 
-public final class DefaultNodeEmbeddingsWriteResult {
-    public final long nodeCount;
-    public final long nodePropertiesWritten;
-    public final long preProcessingMillis;
-    public final long computeMillis;
-    public final long writeMillis;
-    public final Map<String, Object> configuration;
-
-    public DefaultNodeEmbeddingsWriteResult(
+public record DefaultNodeEmbeddingsWriteResult(
         long nodeCount,
         long nodePropertiesWritten,
         long preProcessingMillis,
@@ -40,13 +31,6 @@ public final class DefaultNodeEmbeddingsWriteResult {
         long writeMillis,
         Map<String, Object> configuration
     ) {
-        this.nodeCount = nodeCount;
-        this.nodePropertiesWritten = nodePropertiesWritten;
-        this.preProcessingMillis = preProcessingMillis;
-        this.computeMillis = computeMillis;
-        this.writeMillis = writeMillis;
-        this.configuration = configuration;
-    }
 
     static DefaultNodeEmbeddingsWriteResult emptyFrom(
         AlgorithmProcessingTimings timings,
@@ -62,17 +46,4 @@ public final class DefaultNodeEmbeddingsWriteResult {
         );
     }
 
-    public static class Builder extends AbstractResultBuilder<DefaultNodeEmbeddingsWriteResult> {
-        @Override
-        public DefaultNodeEmbeddingsWriteResult build() {
-            return new DefaultNodeEmbeddingsWriteResult(
-                nodeCount,
-                nodePropertiesWritten,
-                preProcessingMillis,
-                computeMillis,
-                writeMillis,
-                config.toMap()
-            );
-        }
-    }
 }

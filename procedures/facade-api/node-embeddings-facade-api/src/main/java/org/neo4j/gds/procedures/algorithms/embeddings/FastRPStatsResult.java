@@ -20,41 +20,18 @@
 package org.neo4j.gds.procedures.algorithms.embeddings;
 
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.Map;
 
-public final class FastRPStatsResult {
-    public final long nodeCount;
-    public final long preProcessingMillis;
-    public final long computeMillis;
-    public final Map<String, Object> configuration;
-
-    public FastRPStatsResult(
-        long nodeCount,
-        long preProcessingMillis,
-        long computeMillis,
-        Map<String, Object> config
-    ) {
-        this.nodeCount = nodeCount;
-        this.preProcessingMillis = preProcessingMillis;
-        this.computeMillis = computeMillis;
-        this.configuration = config;
-    }
+public record FastRPStatsResult(
+    long nodeCount,
+    long preProcessingMillis,
+    long computeMillis,
+    Map<String, Object> configuration
+){
 
     static FastRPStatsResult emptyFrom(AlgorithmProcessingTimings timings, Map<String, Object> configurationMap) {
         return new FastRPStatsResult(0, timings.preProcessingMillis, timings.computeMillis, configurationMap);
     }
 
-    public static final class Builder extends AbstractResultBuilder<FastRPStatsResult> {
-        @Override
-        public FastRPStatsResult build() {
-            return new FastRPStatsResult(
-                nodeCount,
-                preProcessingMillis,
-                computeMillis,
-                config.toMap()
-            );
-        }
-    }
 }
