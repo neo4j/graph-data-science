@@ -26,35 +26,14 @@ import org.neo4j.gds.core.concurrency.Concurrency;
 import java.util.Collections;
 import java.util.Map;
 
-public final class PageRankMutateResult extends PageRankStatsResult {
-    public final long mutateMillis;
-    public final long nodePropertiesWritten;
+public record PageRankMutateResult(long ranIterations, boolean didConverge, Map<String, Object> centralityDistribution,
+                                   long preProcessingMillis, long computeMillis, long postProcessingMillis,
+                                   long mutateMillis, long nodePropertiesWritten, Map<String, Object> configuration) {
 
-    public PageRankMutateResult(
-        long ranIterations,
-        boolean didConverge,
-        Map<String, Object> centralityDistribution,
-        long preProcessingMillis,
-        long computeMillis,
-        long postProcessingMillis,
-        long mutateMillis,
-        long nodePropertiesWritten,
-        Map<String, Object> configuration
+    public static PageRankMutateResult emptyFrom(
+        AlgorithmProcessingTimings timings,
+        Map<String, Object> configurationMap
     ) {
-        super(
-            ranIterations,
-            didConverge,
-            centralityDistribution,
-            preProcessingMillis,
-            computeMillis,
-            postProcessingMillis,
-            configuration
-        );
-        this.mutateMillis = mutateMillis;
-        this.nodePropertiesWritten = nodePropertiesWritten;
-    }
-
-    public static PageRankMutateResult emptyFrom(AlgorithmProcessingTimings timings, Map<String, Object> configurationMap) {
         return new PageRankMutateResult(
             0,
             false,
