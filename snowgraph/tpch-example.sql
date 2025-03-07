@@ -149,10 +149,7 @@ CALL gds.create_session('CPU_X64_L');
 -- We also specify the optional read concurrency to optimize building the graph projection.
 -- The concurrency can be set to the number of cores available on the compute pool node.
 SELECT gds.graph_project('parts_in_orders', {
-    'nodeTables': {
-        'tpch_example.gds.parts':  'Part',
-        'tpch_example.gds.orders': 'Order'
-    },
+    'nodeTables': ['tpch_example.gds.parts', 'tpch_example.gds.orders'],
     'relationshipTables': {
         'tpch_example.gds.part_in_order': {
             'type': 'PART_IN_ORDER',
