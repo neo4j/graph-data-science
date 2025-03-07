@@ -24,34 +24,15 @@ import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTiming
 import java.util.Map;
 import java.util.stream.Stream;
 
-public class K1ColoringStatsResult {
-    public final long preProcessingMillis;
-    public final long computeMillis;
-
-    public final long nodeCount;
-    public final long colorCount;
-    public final long ranIterations;
-    public final boolean didConverge;
-
-    public Map<String, Object> configuration;
-
-    public K1ColoringStatsResult(
-        long preProcessingMillis,
-        long computeMillis,
-        long nodeCount,
-        long colorCount,
-        long ranIterations,
-        boolean didConverge,
-        Map<String, Object> configuration
-    ) {
-        this.preProcessingMillis = preProcessingMillis;
-        this.computeMillis = computeMillis;
-        this.nodeCount = nodeCount;
-        this.colorCount = colorCount;
-        this.ranIterations = ranIterations;
-        this.didConverge = didConverge;
-        this.configuration = configuration;
-    }
+public record K1ColoringStatsResult(
+    long preProcessingMillis,
+    long computeMillis,
+    long nodeCount,
+    long colorCount,
+    long ranIterations,
+    boolean didConverge,
+    Map<String, Object> configuration
+) {
 
     static Stream<K1ColoringStatsResult> emptyFrom(
         AlgorithmProcessingTimings timings,
