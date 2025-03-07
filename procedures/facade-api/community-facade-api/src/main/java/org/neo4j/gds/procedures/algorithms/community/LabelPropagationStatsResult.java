@@ -22,16 +22,19 @@ package org.neo4j.gds.procedures.algorithms.community;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.procedures.algorithms.results.StandardStatsResult;
 
 import java.util.Collections;
 import java.util.Map;
 
-public class LabelPropagationStatsResult extends StandardStatsResult {
+public class LabelPropagationStatsResult  {
     public final long ranIterations;
     public final boolean didConverge;
     public final long communityCount;
     public final Map<String, Object> communityDistribution;
+    public final long preProcessingMillis;
+    public final long computeMillis;
+    public final long postProcessingMillis;
+    public final Map<String, Object> configuration;
 
     public LabelPropagationStatsResult(
         long ranIterations,
@@ -43,7 +46,10 @@ public class LabelPropagationStatsResult extends StandardStatsResult {
         long postProcessingMillis,
         Map<String, Object> configuration
     ) {
-        super(preProcessingMillis, computeMillis, postProcessingMillis, configuration);
+        this.postProcessingMillis = postProcessingMillis;
+        this.preProcessingMillis = preProcessingMillis;
+        this.configuration = configuration;
+        this.computeMillis = computeMillis;
         this.ranIterations = ranIterations;
         this.didConverge = didConverge;
         this.communityCount = communityCount;

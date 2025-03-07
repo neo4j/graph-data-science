@@ -19,31 +19,21 @@
  */
 package org.neo4j.gds.procedures.algorithms.centrality;
 
-import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.result.AbstractCentralityResultBuilder;
 
 import java.util.Collections;
 import java.util.Map;
 
-public final class CentralityWriteResult extends CentralityStatsResult {
-    public final long nodePropertiesWritten;
-    public final long writeMillis;
-
-    public CentralityWriteResult(
+public record CentralityWriteResult(
         long nodePropertiesWritten,
         long preProcessingMillis,
         long computeMillis,
         long postProcessingMillis,
         long writeMillis,
         Map<String, Object> centralityDistribution,
-        Map<String, Object> config
+        Map<String, Object> configuration
     ) {
-        super(centralityDistribution, preProcessingMillis, computeMillis, postProcessingMillis, config);
-        this.nodePropertiesWritten = nodePropertiesWritten;
-        this.writeMillis = writeMillis;
-    }
+
 
     static CentralityWriteResult emptyFrom(
         AlgorithmProcessingTimings timings,
@@ -60,22 +50,4 @@ public final class CentralityWriteResult extends CentralityStatsResult {
         );
     }
 
-    public static final class Builder extends AbstractCentralityResultBuilder<CentralityWriteResult> {
-        public Builder(ProcedureReturnColumns returnColumns, Concurrency concurrency) {
-            super(returnColumns, concurrency);
-        }
-
-        @Override
-        public CentralityWriteResult buildResult() {
-            return new CentralityWriteResult(
-                nodePropertiesWritten,
-                preProcessingMillis,
-                computeMillis,
-                postProcessingMillis,
-                writeMillis,
-                centralityHistogram,
-                config.toMap()
-            );
-        }
-    }
 }

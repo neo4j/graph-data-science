@@ -19,26 +19,13 @@
  */
 package org.neo4j.gds.procedures.algorithms.community;
 
-import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.result.AbstractCommunityResultBuilder;
-import org.neo4j.gds.procedures.algorithms.results.StandardStatsResult;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-public class LeidenStatsResult extends StandardStatsResult {
-    public final long ranLevels;
-    public final boolean didConverge;
-    public final long nodeCount;
-    public final long communityCount;
-    public final Map<String, Object> communityDistribution;
-    public final double modularity;
-    public final List<Double> modularities;
-
-    public LeidenStatsResult(
+public record LeidenStatsResult(
         long ranLevels,
         boolean didConverge,
         long nodeCount,
@@ -51,15 +38,6 @@ public class LeidenStatsResult extends StandardStatsResult {
         long postProcessingMillis,
         Map<String, Object> configuration
     ) {
-        super(preProcessingMillis, computeMillis, postProcessingMillis, configuration);
-        this.ranLevels = ranLevels;
-        this.didConverge = didConverge;
-        this.nodeCount = nodeCount;
-        this.communityCount = communityCount;
-        this.communityDistribution = communityDistribution;
-        this.modularities = modularities;
-        this.modularity = modularity;
-    }
 
     static LeidenStatsResult emptyFrom(AlgorithmProcessingTimings timings, Map<String, Object> configurationMap) {
         return new LeidenStatsResult(
@@ -77,51 +55,4 @@ public class LeidenStatsResult extends StandardStatsResult {
         );
     }
 
-    public static class StatsBuilder extends AbstractCommunityResultBuilder<LeidenStatsResult> {
-        long levels = -1;
-        boolean didConverge = false;
-        double modularity;
-        List<Double> modularities;
-
-        public StatsBuilder(ProcedureReturnColumns returnColumns, Concurrency concurrency) {
-            super(returnColumns, concurrency);
-        }
-
-        public StatsBuilder withLevels(long levels) {
-            this.levels = levels;
-            return this;
-        }
-
-        public StatsBuilder withModularity(double modularity) {
-            this.modularity = modularity;
-            return this;
-        }
-
-        public StatsBuilder withModularities(List<Double> modularities) {
-            this.modularities = modularities;
-            return this;
-        }
-
-        public StatsBuilder withDidConverge(boolean didConverge) {
-            this.didConverge = didConverge;
-            return this;
-        }
-
-        @Override
-        protected LeidenStatsResult buildResult() {
-            return new LeidenStatsResult(
-                levels,
-                didConverge,
-                nodeCount,
-                maybeCommunityCount.orElse(0L),
-                communityHistogramOrNull(),
-                modularity,
-                modularities,
-                preProcessingMillis,
-                computeMillis,
-                postProcessingDuration,
-                config.toMap()
-            );
-        }
-    }
 }

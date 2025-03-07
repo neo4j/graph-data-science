@@ -20,14 +20,17 @@
 package org.neo4j.gds.procedures.algorithms.community;
 
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.procedures.algorithms.results.StandardStatsResult;
 
 import java.util.Map;
 
-public final class HDBScanStatsResult extends StandardStatsResult {
+public final class HDBScanStatsResult  {
     public final long nodeCount;
     public final long numberOfClusters;
     public final long numberOfNoisePoints;
+    public final long postProcessingMillis;
+    public final long preProcessingMillis;
+    public final long computeMillis;
+    public final Map<String, Object> configuration;
 
     public HDBScanStatsResult(
         long nodeCount,
@@ -39,10 +42,13 @@ public final class HDBScanStatsResult extends StandardStatsResult {
         Map<String, Object> configuration
 
     ) {
-        super(preProcessingMillis, computeMillis, postProcessingMillis, configuration);
         this.nodeCount = nodeCount;
         this.numberOfClusters = numberOfClusters;
         this.numberOfNoisePoints = numberOfNoisePoints;
+        this.preProcessingMillis =  preProcessingMillis;
+        this.computeMillis = computeMillis;
+        this.postProcessingMillis = postProcessingMillis;
+        this.configuration = configuration;
     }
 
     static HDBScanStatsResult emptyFrom(AlgorithmProcessingTimings timings, Map<String, Object> configurationMap) {

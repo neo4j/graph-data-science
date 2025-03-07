@@ -39,7 +39,7 @@ class GenericCentralityResultBuilderForStatsMode {
     ) {
         var configurationMap = configuration.toMap();
 
-        if (result.isEmpty()) return CentralityMutateResult.emptyFrom(timings, configurationMap);
+        if (result.isEmpty()) return CentralityStatsResult.emptyFrom(timings, configurationMap);
 
         var centralityAlgorithmResult = result.get();
 

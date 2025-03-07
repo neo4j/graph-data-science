@@ -27,11 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public final class LouvainMutateResult extends LouvainStatsResult {
-    public final long mutateMillis;
-    public final long nodePropertiesWritten;
-
-    public LouvainMutateResult(
+public record LouvainMutateResult(
         double modularity,
         List<Double> modularities,
         long ranLevels,
@@ -44,20 +40,6 @@ public final class LouvainMutateResult extends LouvainStatsResult {
         long nodePropertiesWritten,
         Map<String, Object> configuration
     ) {
-        super(
-            modularity,
-            modularities,
-            ranLevels,
-            communityCount,
-            communityDistribution,
-            preProcessingMillis,
-            computeMillis,
-            postProcessingMillis,
-            configuration
-        );
-        this.mutateMillis = mutateMillis;
-        this.nodePropertiesWritten = nodePropertiesWritten;
-    }
 
     public static LouvainMutateResult emptyFrom(
         AlgorithmProcessingTimings timings,

@@ -20,30 +20,19 @@
 package org.neo4j.gds.procedures.algorithms.miscellaneous;
 
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.procedures.algorithms.results.StandardStatsResult;
-import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-public final class ScalePropertiesStatsResult extends StandardStatsResult {
-    public final Map<String, Map<String, List<Double>>> scalerStatistics;
-
-    ScalePropertiesStatsResult(
+public record ScalePropertiesStatsResult(
         Map<String, Map<String, List<Double>>> scalerStatistics,
         long preProcessingMillis,
         long computeMillis,
+        long postProcessingMillis,
         Map<String, Object> configuration
     ) {
-        super(
-            preProcessingMillis,
-            computeMillis,
-            0L,
-            configuration
-        );
-        this.scalerStatistics = scalerStatistics;
-    }
+
 
     static ScalePropertiesStatsResult emptyFrom(
         AlgorithmProcessingTimings timings,
@@ -53,26 +42,23 @@ public final class ScalePropertiesStatsResult extends StandardStatsResult {
             Collections.emptyMap(),
             timings.preProcessingMillis,
             timings.computeMillis,
+            0,
             configurationMap
         );
     }
 
-    public static class Builder extends AbstractResultBuilder<ScalePropertiesStatsResult> {
-        private Map<String, Map<String, List<Double>>> scalerStatistics;
-
-        public Builder withScalerStatistics(Map<String, Map<String, List<Double>>> stats) {
-            this.scalerStatistics = stats;
-            return this;
-        }
-
-        @Override
-        public ScalePropertiesStatsResult build() {
-            return new ScalePropertiesStatsResult(
-                scalerStatistics,
-                preProcessingMillis,
-                computeMillis,
-                config.toMap()
-            );
-        }
+    static ScalePropertiesStatsResult create(
+        Map<String, Map<String, List<Double>>> scalerStatistics,
+        AlgorithmProcessingTimings timings,
+        Map<String, Object> configurationMap
+    ) {
+        return new ScalePropertiesStatsResult(
+            scalerStatistics,
+            timings.preProcessingMillis,
+            timings.computeMillis,
+            0,
+            configurationMap
+        );
     }
+
 }

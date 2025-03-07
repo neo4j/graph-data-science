@@ -20,14 +20,17 @@
 package org.neo4j.gds.procedures.algorithms.community;
 
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.procedures.algorithms.results.StandardStatsResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.Map;
 
-public class TriangleCountStatsResult extends StandardStatsResult {
+public class TriangleCountStatsResult {
     public final long globalTriangleCount;
     public final long nodeCount;
+    public final long preProcessingMillis;
+    public final long computeMillis;
+    public final long postProcessingMillis;
+    public final Map<String, Object> configuration;
 
     public TriangleCountStatsResult(
         long globalTriangleCount,
@@ -37,7 +40,10 @@ public class TriangleCountStatsResult extends StandardStatsResult {
         Map<String, Object> configuration
     ) {
         // post-processing is instant for TC
-        super(preProcessingMillis, computeMillis, 0L, configuration);
+        this.postProcessingMillis = 0;
+        this.preProcessingMillis = preProcessingMillis;
+        this.configuration = configuration;
+        this.computeMillis = computeMillis;
         this.globalTriangleCount = globalTriangleCount;
         this.nodeCount = nodeCount;
     }

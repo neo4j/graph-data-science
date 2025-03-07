@@ -20,15 +20,14 @@
 package org.neo4j.gds.procedures.algorithms.community;
 
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.procedures.algorithms.results.StandardStatsResult;
+import org.neo4j.gds.procedures.algorithms.results.StandardMutateResult;
 
 import java.util.Map;
 
-public final class HDBScanMutateResult extends StandardStatsResult {
+public final class HDBScanMutateResult extends StandardMutateResult {
     public final long nodeCount;
     public final long numberOfClusters;
     public final long numberOfNoisePoints;
-    public final long mutateMillis;
     public final long nodePropertiesWritten;
 
     public HDBScanMutateResult(
@@ -43,11 +42,10 @@ public final class HDBScanMutateResult extends StandardStatsResult {
         Map<String, Object> configuration
 
     ) {
-        super(preProcessingMillis, computeMillis, postProcessingMillis, configuration);
+        super(preProcessingMillis, computeMillis, postProcessingMillis, mutateMillis,configuration);
         this.nodeCount = nodeCount;
         this.numberOfClusters = numberOfClusters;
         this.numberOfNoisePoints = numberOfNoisePoints;
-        this.mutateMillis = mutateMillis;
         this.nodePropertiesWritten = nodePropertiesWritten;
     }
 

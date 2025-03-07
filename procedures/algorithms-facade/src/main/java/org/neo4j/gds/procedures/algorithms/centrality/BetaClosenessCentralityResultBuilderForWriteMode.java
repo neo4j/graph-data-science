@@ -57,14 +57,14 @@ class BetaClosenessCentralityResultBuilderForWriteMode implements ResultBuilder<
 
         return Stream.of(
             new BetaClosenessCentralityWriteResult(
-                writeResult.nodePropertiesWritten,
-                writeResult.preProcessingMillis,
-                writeResult.computeMillis,
-                writeResult.postProcessingMillis,
-                writeResult.writeMillis,
+                writeResult.nodePropertiesWritten(),
+                writeResult.preProcessingMillis(),
+                writeResult.computeMillis(),
+                writeResult.postProcessingMillis(),
+                writeResult.writeMillis(),
                 configuration.writeProperty(),
-                writeResult.centralityDistribution,
-                writeResult.configuration
+                writeResult.centralityDistribution(),
+                writeResult.configuration()
             )
         );
     }

@@ -21,8 +21,13 @@ package org.neo4j.gds.procedures.algorithms.results;
 
 import java.util.Map;
 
-public class StandardWriteResult extends StandardStatsResult {
+public class StandardWriteResult  {
     public final long writeMillis;
+    public final long preProcessingMillis;
+    public final long computeMillis;
+    public final long postProcessingMillis;
+    public final Map<String, Object> configuration;
+
 
     public StandardWriteResult(
         long preProcessingMillis,
@@ -31,7 +36,10 @@ public class StandardWriteResult extends StandardStatsResult {
         long writeMillis,
         Map<String, Object> configuration
     ) {
-        super(preProcessingMillis, computeMillis, postProcessingMillis, configuration);
         this.writeMillis = writeMillis;
+        this.postProcessingMillis = postProcessingMillis;
+        this.preProcessingMillis = preProcessingMillis;
+        this.configuration = configuration;
+        this.computeMillis = computeMillis;
     }
 }

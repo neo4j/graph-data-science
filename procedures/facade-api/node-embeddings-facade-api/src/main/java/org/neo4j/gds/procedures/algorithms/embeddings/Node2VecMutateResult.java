@@ -20,8 +20,8 @@
 package org.neo4j.gds.procedures.algorithms.embeddings;
 
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.procedures.algorithms.results.StandardMutateResult;
+import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.Collections;
 import java.util.List;

@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.procedures.algorithms.pathfinding;
 
-import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.procedures.algorithms.results.StandardModeResult;
+import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.Map;
 

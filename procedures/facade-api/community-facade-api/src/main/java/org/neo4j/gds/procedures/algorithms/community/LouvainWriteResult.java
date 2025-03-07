@@ -25,11 +25,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-public final class LouvainWriteResult extends LouvainStatsResult {
-    public final long writeMillis;
-    public final long nodePropertiesWritten;
-
-    public LouvainWriteResult(
+public record LouvainWriteResult(
         double modularity,
         List<Double> modularities,
         long ranLevels,
@@ -42,20 +38,6 @@ public final class LouvainWriteResult extends LouvainStatsResult {
         long nodePropertiesWritten,
         Map<String, Object> configuration
     ) {
-        super(
-            modularity,
-            modularities,
-            ranLevels,
-            communityCount,
-            communityDistribution,
-            preProcessingMillis,
-            computeMillis,
-            postProcessingMillis,
-            configuration
-        );
-        this.writeMillis = writeMillis;
-        this.nodePropertiesWritten = nodePropertiesWritten;
-    }
 
     static LouvainWriteResult emptyFrom(AlgorithmProcessingTimings timings, Map<String, Object> configurationMap) {
         return new LouvainWriteResult(

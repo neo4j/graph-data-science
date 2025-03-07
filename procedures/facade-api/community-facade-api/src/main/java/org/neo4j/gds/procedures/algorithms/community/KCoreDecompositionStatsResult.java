@@ -21,13 +21,16 @@ package org.neo4j.gds.procedures.algorithms.community;
 
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.result.AbstractResultBuilder;
-import org.neo4j.gds.procedures.algorithms.results.StandardStatsResult;
 
 import java.util.Map;
 import java.util.stream.Stream;
 
-public class KCoreDecompositionStatsResult extends StandardStatsResult {
+public class KCoreDecompositionStatsResult  {
     public final long degeneracy;
+    public final  long preProcessingMillis;
+    public final  long computeMillis;
+    public final  long postProcessingMillis;
+    public final Map<String, Object> configuration;
 
     public KCoreDecompositionStatsResult(
         long degeneracy,
@@ -36,7 +39,10 @@ public class KCoreDecompositionStatsResult extends StandardStatsResult {
         long postProcessingMillis,
         Map<String, Object> configuration
     ) {
-        super(preProcessingMillis, computeMillis, postProcessingMillis,  configuration);
+        this.postProcessingMillis = postProcessingMillis;
+        this.preProcessingMillis = preProcessingMillis;
+        this.computeMillis = computeMillis;
+        this.configuration =configuration;
         this.degeneracy = degeneracy;
     }
 

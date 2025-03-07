@@ -19,41 +19,30 @@
  */
 package org.neo4j.gds.procedures.algorithms.centrality;
 
-import org.neo4j.gds.api.ProcedureReturnColumns;
-import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.procedures.algorithms.results.StandardStatsResult;
-import org.neo4j.gds.result.AbstractCentralityResultBuilder;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 
+import java.util.Collections;
 import java.util.Map;
 
-public class CentralityStatsResult extends StandardStatsResult {
-    public final Map<String, Object> centralityDistribution;
-
-    public CentralityStatsResult(
+public record CentralityStatsResult(
         Map<String, Object> centralityDistribution,
         long preProcessingMillis,
         long computeMillis,
         long postProcessingMillis,
         Map<String, Object> configuration
     ) {
-        super(preProcessingMillis, computeMillis, postProcessingMillis, configuration);
-        this.centralityDistribution = centralityDistribution;
+
+    static CentralityStatsResult emptyFrom(
+        AlgorithmProcessingTimings timings,
+        Map<String, Object> configurationMap
+    ) {
+        return new CentralityStatsResult(
+            Collections.emptyMap(),
+            timings.preProcessingMillis,
+            timings.computeMillis,
+            0,
+            configurationMap
+        );
     }
 
-    public static final class Builder extends AbstractCentralityResultBuilder<CentralityStatsResult> {
-        public Builder(ProcedureReturnColumns returnColumns, Concurrency concurrency) {
-            super(returnColumns, concurrency);
-        }
-
-        @Override
-        public CentralityStatsResult buildResult() {
-            return new CentralityStatsResult(
-                centralityHistogram,
-                preProcessingMillis,
-                computeMillis,
-                postProcessingMillis,
-                config.toMap()
-            );
-        }
-    }
 }

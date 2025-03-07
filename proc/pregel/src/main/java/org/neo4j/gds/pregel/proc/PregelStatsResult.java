@@ -19,15 +19,17 @@
  */
 package org.neo4j.gds.pregel.proc;
 
-import org.neo4j.gds.procedures.algorithms.results.StandardStatsResult;
-
 import java.util.Map;
 
 @SuppressWarnings("unused")
-public final class PregelStatsResult extends StandardStatsResult {
+public final class PregelStatsResult  {
 
+    public final long preProcessingMillis;
+    public final long computeMillis;
+    public final Map<String, Object> configuration;
     public final long ranIterations;
     public final boolean didConverge;
+    public final long postProcessingMillis;
 
     private PregelStatsResult(
         long preProcessingMillis,
@@ -36,16 +38,25 @@ public final class PregelStatsResult extends StandardStatsResult {
         boolean didConverge,
         Map<String, Object> configuration
     ) {
-        super(preProcessingMillis, computeMillis, 0L, configuration);
         this.ranIterations = ranIterations;
         this.didConverge = didConverge;
+        this.preProcessingMillis = preProcessingMillis;
+        this.postProcessingMillis = 0;
+        this.computeMillis = computeMillis;
+        this.configuration = configuration;
     }
 
     public static class Builder extends AbstractPregelResultBuilder<PregelStatsResult> {
 
         @Override
         public PregelStatsResult build() {
-            return new PregelStatsResult(preProcessingMillis, computeMillis, ranIterations, didConverge, config.toMap());
+            return new PregelStatsResult(
+                preProcessingMillis,
+                computeMillis,
+                ranIterations,
+                didConverge,
+                config.toMap()
+            );
         }
     }
 }

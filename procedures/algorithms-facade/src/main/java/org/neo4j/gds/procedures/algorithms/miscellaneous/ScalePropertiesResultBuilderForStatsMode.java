@@ -50,10 +50,9 @@ class ScalePropertiesResultBuilderForStatsMode implements StatsResultBuilder<Sca
 
         var scalePropertiesResult = result.get();
 
-        var scalePropertiesStatsResult = new ScalePropertiesStatsResult(
+        var scalePropertiesStatsResult =  ScalePropertiesStatsResult.create(
             shouldDisplayScalerStatistics ? scalePropertiesResult.scalerStatistics() : null,
-            timings.preProcessingMillis,
-            timings.computeMillis,
+            timings,
             configuration.toMap()
         );
 

@@ -21,13 +21,16 @@ package org.neo4j.gds.procedures.algorithms.community;
 
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.result.AbstractResultBuilder;
-import org.neo4j.gds.procedures.algorithms.results.StandardStatsResult;
 
 import java.util.Map;
 
-public class LocalClusteringCoefficientStatsResult extends StandardStatsResult {
+public class LocalClusteringCoefficientStatsResult {
     public final double averageClusteringCoefficient;
     public final long nodeCount;
+    public final long preProcessingMillis;
+    public final long computeMillis;
+    public final Map<String, Object> configuration;
+    public final long postProcessingMillis;
 
     public LocalClusteringCoefficientStatsResult(
         double averageClusteringCoefficient,
@@ -36,10 +39,12 @@ public class LocalClusteringCoefficientStatsResult extends StandardStatsResult {
         long computeMillis,
         Map<String, Object> configuration
     ) {
-        // post-processing is instant for TC
-        super(preProcessingMillis, computeMillis, 0L, configuration);
         this.averageClusteringCoefficient = averageClusteringCoefficient;
         this.nodeCount = nodeCount;
+        this.postProcessingMillis = 0;  // post-processing is instant for TC
+        this.preProcessingMillis = preProcessingMillis;
+        this.computeMillis = computeMillis;
+        this.configuration = configuration;
     }
 
     public static Builder statsBuilder() {

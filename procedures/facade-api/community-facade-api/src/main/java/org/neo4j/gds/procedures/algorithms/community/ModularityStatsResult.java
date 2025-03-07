@@ -20,17 +20,10 @@
 package org.neo4j.gds.procedures.algorithms.community;
 
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.procedures.algorithms.results.StandardStatsResult;
 
 import java.util.Map;
 
-public class ModularityStatsResult extends StandardStatsResult {
-    public final long nodeCount;
-    public final long relationshipCount;
-    public final long communityCount;
-    public final double modularity;
-
-    public ModularityStatsResult(
+public record ModularityStatsResult(
         long nodeCount,
         long relationshipCount,
         long communityCount,
@@ -40,12 +33,6 @@ public class ModularityStatsResult extends StandardStatsResult {
         long postProcessingMillis,
         Map<String, Object> configuration
     ) {
-        super(preProcessingMillis, computeMillis, postProcessingMillis, configuration);
-        this.nodeCount = nodeCount;
-        this.relationshipCount = relationshipCount;
-        this.communityCount = communityCount;
-        this.modularity = modularity;
-    }
 
     static ModularityStatsResult emptyFrom(AlgorithmProcessingTimings timings, Map<String, Object> configurationMap) {
         return new ModularityStatsResult(

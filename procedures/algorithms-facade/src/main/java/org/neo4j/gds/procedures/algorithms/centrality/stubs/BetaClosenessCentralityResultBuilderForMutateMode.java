@@ -56,14 +56,14 @@ class BetaClosenessCentralityResultBuilderForMutateMode implements ResultBuilder
         );
 
         return new BetaClosenessCentralityMutateResult(
-            centralityMutateResult.nodePropertiesWritten,
-            centralityMutateResult.preProcessingMillis,
-            centralityMutateResult.computeMillis,
-            centralityMutateResult.postProcessingMillis,
-            centralityMutateResult.mutateMillis,
+            centralityMutateResult.nodePropertiesWritten(),
+            centralityMutateResult.preProcessingMillis(),
+            centralityMutateResult.computeMillis(),
+            centralityMutateResult.postProcessingMillis(),
+            centralityMutateResult.mutateMillis(),
             configuration.mutateProperty(),
-            centralityMutateResult.centralityDistribution,
-            centralityMutateResult.configuration
+            centralityMutateResult.centralityDistribution(),
+            centralityMutateResult.configuration()
         );
     }
 }

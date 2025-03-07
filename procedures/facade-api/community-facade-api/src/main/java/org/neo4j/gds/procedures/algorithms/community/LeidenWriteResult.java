@@ -19,20 +19,13 @@
  */
 package org.neo4j.gds.procedures.algorithms.community;
 
-import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-public final class LeidenWriteResult extends LeidenStatsResult {
-    public final long writeMillis;
-    public final long nodePropertiesWritten;
-
-    public LeidenWriteResult(
+public record LeidenWriteResult(
         long ranLevels,
         boolean didConverge,
         long nodeCount,
@@ -47,22 +40,6 @@ public final class LeidenWriteResult extends LeidenStatsResult {
         double modularity,
         Map<String, Object> configuration
     ) {
-        super(
-            ranLevels,
-            didConverge,
-            nodeCount,
-            communityCount,
-            communityDistribution,
-            modularity,
-            modularities,
-            preProcessingMillis,
-            computeMillis,
-            postProcessingMillis,
-            configuration
-        );
-        this.writeMillis = writeMillis;
-        this.nodePropertiesWritten = nodePropertiesWritten;
-    }
 
     static LeidenWriteResult emptyFrom(AlgorithmProcessingTimings timings, Map<String, Object> configurationMap) {
         return new LeidenWriteResult(
@@ -82,54 +59,4 @@ public final class LeidenWriteResult extends LeidenStatsResult {
         );
     }
 
-    public static class Builder extends AbstractCommunityResultBuilder<LeidenWriteResult> {
-        long levels = -1;
-        boolean didConverge = false;
-
-        double modularity;
-        List<Double> modularities;
-
-        public Builder(ProcedureReturnColumns returnColumns, Concurrency concurrency) {
-            super(returnColumns, concurrency);
-        }
-
-        public Builder withLevels(long levels) {
-            this.levels = levels;
-            return this;
-        }
-
-        public Builder withDidConverge(boolean didConverge) {
-            this.didConverge = didConverge;
-            return this;
-        }
-
-        public Builder withModularity(double modularity) {
-            this.modularity = modularity;
-            return this;
-        }
-
-        public Builder withModularities(List<Double> modularities) {
-            this.modularities = modularities;
-            return this;
-        }
-
-        @Override
-        protected LeidenWriteResult buildResult() {
-            return new LeidenWriteResult(
-                levels,
-                didConverge,
-                nodeCount,
-                maybeCommunityCount.orElse(0L),
-                preProcessingMillis,
-                computeMillis,
-                postProcessingDuration,
-                writeMillis,
-                nodePropertiesWritten,
-                communityHistogramOrNull(),
-                modularities,
-                modularity,
-                config.toMap()
-            );
-        }
-    }
 }

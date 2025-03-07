@@ -23,17 +23,20 @@ import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
-import org.neo4j.gds.procedures.algorithms.results.StandardStatsResult;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-public class KmeansStatsResult extends StandardStatsResult {
+public class KmeansStatsResult  {
     public final Map<String, Object> communityDistribution;
     public final List<List<Double>> centroids;
     public final double averageDistanceToCentroid;
     public final double averageSilhouette;
+    public final long preProcessingMillis;
+    public final long computeMillis;
+    public final long postProcessingMillis;
+    public final Map<String, Object> configuration;
 
     public KmeansStatsResult(
         long preProcessingMillis,
@@ -45,10 +48,14 @@ public class KmeansStatsResult extends StandardStatsResult {
         double averageSilhouette,
         Map<String, Object> configuration
     ) {
-        super(preProcessingMillis, computeMillis, postProcessingMillis, configuration);
+
         this.communityDistribution = communityDistribution;
         this.centroids = centroids;
         this.averageDistanceToCentroid = averageDistanceToCentroid;
+        this.configuration =configuration;
+        this.preProcessingMillis = preProcessingMillis;
+        this.computeMillis = computeMillis;
+        this.postProcessingMillis = postProcessingMillis;
         this.averageSilhouette = averageSilhouette;
     }
 

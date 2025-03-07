@@ -21,16 +21,12 @@ package org.neo4j.gds.procedures.algorithms.results;
 
 import java.util.Map;
 
-public class StandardStatsResult extends StandardModeResult {
-    public final long postProcessingMillis;
-
-    public StandardStatsResult(
+public record StandardStatsResult(
         long preProcessingMillis,
         long computeMillis,
         long postProcessingMillis,
         Map<String, Object> configuration
     ) {
-        super(preProcessingMillis, computeMillis, configuration);
-        this.postProcessingMillis = postProcessingMillis;
-    }
+
+
 }

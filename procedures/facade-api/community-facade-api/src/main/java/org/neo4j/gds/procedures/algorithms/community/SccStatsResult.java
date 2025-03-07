@@ -23,14 +23,17 @@ import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
-import org.neo4j.gds.procedures.algorithms.results.StandardStatsResult;
 
 import java.util.Collections;
 import java.util.Map;
 
-public class SccStatsResult extends StandardStatsResult {
+public class SccStatsResult  {
     public final long componentCount;
     public final Map<String, Object> componentDistribution;
+    public final  long preProcessingMillis;
+    public final  long computeMillis;
+    public final  long postProcessingMillis;
+    public final Map<String, Object> configuration;
 
     public SccStatsResult(
         long componentCount,
@@ -40,8 +43,10 @@ public class SccStatsResult extends StandardStatsResult {
         long postProcessingMillis,
         Map<String, Object> configuration
     ) {
-        super(preProcessingMillis, computeMillis, postProcessingMillis, configuration);
-
+        this.postProcessingMillis = postProcessingMillis;
+        this.preProcessingMillis = preProcessingMillis;
+        this.computeMillis = computeMillis;
+        this.configuration = configuration;
         this.componentCount = componentCount;
         this.componentDistribution = componentDistribution;
     }
