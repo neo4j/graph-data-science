@@ -19,22 +19,13 @@
  */
 package org.neo4j.gds.procedures.algorithms.pathfinding;
 
-import org.neo4j.gds.procedures.algorithms.results.StandardStatsResult;
-
 import java.util.Map;
 
-public class BellmanFordStatsResult extends StandardStatsResult {
-
-    public final boolean containsNegativeCycle;
-
-    public BellmanFordStatsResult(
+public record BellmanFordStatsResult(
         long preProcessingMillis,
         long computeMillis,
         long postProcessingMillis,
         Map<String, Object> configuration,
         boolean containsNegativeCycle
     ) {
-        super(preProcessingMillis, computeMillis, postProcessingMillis, configuration);
-        this.containsNegativeCycle = containsNegativeCycle;
-    }
 }
