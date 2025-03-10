@@ -246,8 +246,12 @@ public final class ShardedByteArrayLongMap {
 
             long addNode(byte[] nodeId) {
                 this.assertIsUnderLock();
+                int index = mapping.indexOf(nodeId);
+                if (mapping.indexExists(index)) {
+                    return -mapping.indexGet(index) - 1;
+                }
                 long mappedId = nextId.getAndIncrement();
-                mapping.put(nodeId, mappedId);
+                mapping.indexInsert(index, nodeId, mappedId);
                 return mappedId;
             }
         }
