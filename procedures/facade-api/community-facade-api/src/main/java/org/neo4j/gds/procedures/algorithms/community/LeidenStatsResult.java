@@ -20,24 +20,25 @@
 package org.neo4j.gds.procedures.algorithms.community;
 
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
+import org.neo4j.gds.procedures.algorithms.results.StatsResult;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 public record LeidenStatsResult(
-        long ranLevels,
-        boolean didConverge,
-        long nodeCount,
-        long communityCount,
-        Map<String, Object> communityDistribution,
-        double modularity,
-        List<Double> modularities,
-        long preProcessingMillis,
-        long computeMillis,
-        long postProcessingMillis,
-        Map<String, Object> configuration
-    ) {
+    long ranLevels,
+    boolean didConverge,
+    long nodeCount,
+    long communityCount,
+    Map<String, Object> communityDistribution,
+    double modularity,
+    List<Double> modularities,
+    long preProcessingMillis,
+    long computeMillis,
+    long postProcessingMillis,
+    Map<String, Object> configuration
+) implements StatsResult {
 
     static LeidenStatsResult emptyFrom(AlgorithmProcessingTimings timings, Map<String, Object> configurationMap) {
         return new LeidenStatsResult(

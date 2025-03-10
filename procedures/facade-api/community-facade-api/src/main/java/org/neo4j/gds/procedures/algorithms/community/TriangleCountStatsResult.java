@@ -20,18 +20,18 @@
 package org.neo4j.gds.procedures.algorithms.community;
 
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.result.AbstractResultBuilder;
+import org.neo4j.gds.procedures.algorithms.results.StatsResult;
 
 import java.util.Map;
 
-public class TriangleCountStatsResult {
-    public final long globalTriangleCount;
-    public final long nodeCount;
-    public final long preProcessingMillis;
-    public final long computeMillis;
-    public final long postProcessingMillis;
-    public final Map<String, Object> configuration;
-
+public record TriangleCountStatsResult(
+    long globalTriangleCount,
+    long nodeCount,
+    long preProcessingMillis,
+    long computeMillis,
+    Map<String, Object> configuration,
+    long postProcessingMillis
+) implements StatsResult {
     public TriangleCountStatsResult(
         long globalTriangleCount,
         long nodeCount,
@@ -39,39 +39,27 @@ public class TriangleCountStatsResult {
         long computeMillis,
         Map<String, Object> configuration
     ) {
-        // post-processing is instant for TC
-        this.postProcessingMillis = 0;
-        this.preProcessingMillis = preProcessingMillis;
-        this.configuration = configuration;
-        this.computeMillis = computeMillis;
-        this.globalTriangleCount = globalTriangleCount;
-        this.nodeCount = nodeCount;
+        this(
+            globalTriangleCount,
+            nodeCount,
+            preProcessingMillis,
+            computeMillis,
+            configuration,
+            0 // post-processing is instant for TC
+        );
     }
 
     static TriangleCountStatsResult emptyFrom(
         AlgorithmProcessingTimings timings,
         Map<String, Object> configurationMap
     ) {
-        return new TriangleCountStatsResult(0, 0, timings.preProcessingMillis, timings.computeMillis, configurationMap);
-    }
-
-    public static class Builder extends AbstractResultBuilder<TriangleCountStatsResult> {
-        long globalTriangleCount = 0;
-
-        public Builder withGlobalTriangleCount(long globalTriangleCount) {
-            this.globalTriangleCount = globalTriangleCount;
-            return this;
-        }
-
-        @Override
-        public TriangleCountStatsResult build() {
-            return new TriangleCountStatsResult(
-                globalTriangleCount,
-                nodeCount,
-                preProcessingMillis,
-                computeMillis,
-                config.toMap()
-            );
-        }
+        return new TriangleCountStatsResult(
+            0,
+            0,
+            timings.preProcessingMillis,
+            timings.computeMillis,
+            configurationMap,
+            0
+        );
     }
 }

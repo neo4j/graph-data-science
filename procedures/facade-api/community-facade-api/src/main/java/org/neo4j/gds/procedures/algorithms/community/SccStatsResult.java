@@ -19,37 +19,20 @@
  */
 package org.neo4j.gds.procedures.algorithms.community;
 
-import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.result.AbstractCommunityResultBuilder;
+import org.neo4j.gds.procedures.algorithms.results.StatsResult;
 
 import java.util.Collections;
 import java.util.Map;
 
-public class SccStatsResult  {
-    public final long componentCount;
-    public final Map<String, Object> componentDistribution;
-    public final  long preProcessingMillis;
-    public final  long computeMillis;
-    public final  long postProcessingMillis;
-    public final Map<String, Object> configuration;
-
-    public SccStatsResult(
-        long componentCount,
-        Map<String, Object> componentDistribution,
-        long preProcessingMillis,
-        long computeMillis,
-        long postProcessingMillis,
-        Map<String, Object> configuration
-    ) {
-        this.postProcessingMillis = postProcessingMillis;
-        this.preProcessingMillis = preProcessingMillis;
-        this.computeMillis = computeMillis;
-        this.configuration = configuration;
-        this.componentCount = componentCount;
-        this.componentDistribution = componentDistribution;
-    }
+public record SccStatsResult(
+    long componentCount,
+    Map<String, Object> componentDistribution,
+    long preProcessingMillis,
+    long computeMillis,
+    long postProcessingMillis,
+    Map<String, Object> configuration
+) implements StatsResult {
 
     static SccStatsResult emptyFrom(AlgorithmProcessingTimings timings, Map<String, Object> configurationMap) {
         return new SccStatsResult(
@@ -60,33 +43,5 @@ public class SccStatsResult  {
             0,
             configurationMap
         );
-    }
-
-    public static class Builder extends AbstractCommunityResultBuilder<SccStatsResult> {
-        public Builder(ProcedureReturnColumns returnColumns, Concurrency concurrency) {
-            super(returnColumns, concurrency);
-        }
-
-        @Override
-        public SccStatsResult buildResult() {
-            return new SccStatsResult(
-                maybeCommunityCount.orElse(0L),
-                communityHistogramOrNull(),
-                preProcessingMillis,
-                computeMillis,
-                postProcessingDuration,
-                config.toMap()
-            );
-        }
-
-        public SccStatsResult.Builder buildHistogram(boolean buildHistogram) {
-            this.buildHistogram = buildHistogram;
-            return this;
-        }
-
-        public SccStatsResult.Builder buildCommunityCount(boolean buildCommunityCount) {
-            this.buildCommunityCount = buildCommunityCount;
-            return this;
-        }
     }
 }

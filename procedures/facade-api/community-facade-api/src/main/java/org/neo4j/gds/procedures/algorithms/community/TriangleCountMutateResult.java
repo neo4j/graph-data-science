@@ -20,13 +20,20 @@
 package org.neo4j.gds.procedures.algorithms.community;
 
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.result.AbstractResultBuilder;
+import org.neo4j.gds.procedures.algorithms.results.MutateNodePropertiesResult;
 
 import java.util.Map;
 
-public class TriangleCountMutateResult extends TriangleCountStatsResult {
-    public long mutateMillis;
-    public long nodePropertiesWritten;
+public record TriangleCountMutateResult(
+    long globalTriangleCount,
+    long nodeCount,
+    long preProcessingMillis,
+    long computeMillis,
+    long mutateMillis,
+    long nodePropertiesWritten,
+    Map<String, Object> configuration,
+    long postProcessingMillis
+) implements MutateNodePropertiesResult {
 
     public TriangleCountMutateResult(
         long globalTriangleCount,
@@ -37,15 +44,16 @@ public class TriangleCountMutateResult extends TriangleCountStatsResult {
         long nodePropertiesWritten,
         Map<String, Object> configuration
     ) {
-        super(
+        this(
             globalTriangleCount,
             nodeCount,
             preProcessingMillis,
             computeMillis,
-            configuration
+            mutateMillis,
+            nodePropertiesWritten,
+            configuration,
+            0
         );
-        this.mutateMillis = mutateMillis;
-        this.nodePropertiesWritten = nodePropertiesWritten;
     }
 
     public static TriangleCountMutateResult emptyFrom(
@@ -59,29 +67,8 @@ public class TriangleCountMutateResult extends TriangleCountStatsResult {
             timings.computeMillis,
             timings.sideEffectMillis,
             0,
-            configurationMap
+            configurationMap,
+            0
         );
-    }
-
-    public static class Builder extends AbstractResultBuilder<TriangleCountMutateResult> {
-        long globalTriangleCount = 0;
-
-        public Builder withGlobalTriangleCount(long globalTriangleCount) {
-            this.globalTriangleCount = globalTriangleCount;
-            return this;
-        }
-
-        @Override
-        public TriangleCountMutateResult build() {
-            return new TriangleCountMutateResult(
-                globalTriangleCount,
-                nodeCount,
-                preProcessingMillis,
-                computeMillis,
-                mutateMillis,
-                nodePropertiesWritten,
-                config.toMap()
-            );
-        }
     }
 }

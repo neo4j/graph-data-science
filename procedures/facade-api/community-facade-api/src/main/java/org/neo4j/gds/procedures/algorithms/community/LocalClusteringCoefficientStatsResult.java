@@ -20,35 +20,33 @@
 package org.neo4j.gds.procedures.algorithms.community;
 
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.result.AbstractResultBuilder;
+import org.neo4j.gds.procedures.algorithms.results.StatsResult;
 
 import java.util.Map;
 
-public class LocalClusteringCoefficientStatsResult {
-    public final double averageClusteringCoefficient;
-    public final long nodeCount;
-    public final long preProcessingMillis;
-    public final long computeMillis;
-    public final Map<String, Object> configuration;
-    public final long postProcessingMillis;
-
+public record LocalClusteringCoefficientStatsResult(
+    double averageClusteringCoefficient,
+    long nodeCount,
+    long preProcessingMillis,
+    long computeMillis,
+    Map<String, Object> configuration,
+    long postProcessingMillis
+) implements StatsResult {
     public LocalClusteringCoefficientStatsResult(
         double averageClusteringCoefficient,
-        long nodeCount,
+        long size,
         long preProcessingMillis,
         long computeMillis,
         Map<String, Object> configuration
     ) {
-        this.averageClusteringCoefficient = averageClusteringCoefficient;
-        this.nodeCount = nodeCount;
-        this.postProcessingMillis = 0;  // post-processing is instant for TC
-        this.preProcessingMillis = preProcessingMillis;
-        this.computeMillis = computeMillis;
-        this.configuration = configuration;
-    }
-
-    public static Builder statsBuilder() {
-        return new Builder();
+        this(
+            averageClusteringCoefficient,
+            size,
+            preProcessingMillis,
+            computeMillis,
+            configuration,
+            0
+        );
     }
 
     static LocalClusteringCoefficientStatsResult emptyFrom(
@@ -60,28 +58,8 @@ public class LocalClusteringCoefficientStatsResult {
             0,
             timings.preProcessingMillis,
             timings.computeMillis,
-            configurationMap
+            configurationMap,
+            0
         );
-    }
-
-    public static class Builder extends AbstractResultBuilder<LocalClusteringCoefficientStatsResult> {
-
-        double averageClusteringCoefficient = 0;
-
-        public Builder withAverageClusteringCoefficient(double averageClusteringCoefficient) {
-            this.averageClusteringCoefficient = averageClusteringCoefficient;
-            return this;
-        }
-
-        @Override
-        public LocalClusteringCoefficientStatsResult build() {
-            return new LocalClusteringCoefficientStatsResult(
-                averageClusteringCoefficient,
-                nodeCount,
-                preProcessingMillis,
-                computeMillis,
-                config.toMap()
-            );
-        }
     }
 }

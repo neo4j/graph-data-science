@@ -20,13 +20,20 @@
 package org.neo4j.gds.procedures.algorithms.community;
 
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.result.AbstractResultBuilder;
+import org.neo4j.gds.procedures.algorithms.results.WriteNodePropertiesResult;
 
 import java.util.Map;
 
-public class TriangleCountWriteResult extends TriangleCountStatsResult {
-    public long writeMillis;
-    public long nodePropertiesWritten;
+public record TriangleCountWriteResult(
+    long globalTriangleCount,
+    long nodeCount,
+    long preProcessingMillis,
+    long computeMillis,
+    long writeMillis,
+    long nodePropertiesWritten,
+    Map<String, Object> configuration,
+    long postProcessingMillis
+) implements WriteNodePropertiesResult {
 
     public TriangleCountWriteResult(
         long globalTriangleCount,
@@ -37,15 +44,16 @@ public class TriangleCountWriteResult extends TriangleCountStatsResult {
         long nodePropertiesWritten,
         Map<String, Object> configuration
     ) {
-        super(
+        this(
             globalTriangleCount,
             nodeCount,
             preProcessingMillis,
             computeMillis,
-            configuration
+            writeMillis,
+            nodePropertiesWritten,
+            configuration,
+            0
         );
-        this.writeMillis = writeMillis;
-        this.nodePropertiesWritten = nodePropertiesWritten;
     }
 
     static TriangleCountWriteResult emptyFrom(
@@ -59,29 +67,8 @@ public class TriangleCountWriteResult extends TriangleCountStatsResult {
             timings.computeMillis,
             timings.sideEffectMillis,
             0,
-            configurationMap
+            configurationMap,
+            0
         );
-    }
-
-    public static class Builder extends AbstractResultBuilder<TriangleCountWriteResult> {
-        long globalTriangleCount = 0;
-
-        public Builder withGlobalTriangleCount(long globalTriangleCount) {
-            this.globalTriangleCount = globalTriangleCount;
-            return this;
-        }
-
-        @Override
-        public TriangleCountWriteResult build() {
-            return new TriangleCountWriteResult(
-                globalTriangleCount,
-                nodeCount,
-                preProcessingMillis,
-                computeMillis,
-                writeMillis,
-                nodePropertiesWritten,
-                config.toMap()
-            );
-        }
     }
 }

@@ -20,6 +20,7 @@
 package org.neo4j.gds.procedures.algorithms.community;
 
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
+import org.neo4j.gds.procedures.algorithms.results.StatsResult;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -28,16 +29,16 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public record LouvainStatsResult(
-        double modularity,
-        List<Double> modularities,
-        long ranLevels,
-        long communityCount,
-        Map<String, Object> communityDistribution,
-        long preProcessingMillis,
-        long computeMillis,
-        long postProcessingMillis,
-        Map<String, Object> configuration
-    ) {
+    double modularity,
+    List<Double> modularities,
+    long ranLevels,
+    long communityCount,
+    Map<String, Object> communityDistribution,
+    long preProcessingMillis,
+    long computeMillis,
+    long postProcessingMillis,
+    Map<String, Object> configuration
+) implements StatsResult {
 
     static LouvainStatsResult emptyFrom(AlgorithmProcessingTimings timings, Map<String, Object> configurationMap) {
         return new LouvainStatsResult(
