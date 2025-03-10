@@ -20,31 +20,18 @@
 package org.neo4j.gds.procedures.algorithms.community;
 
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.result.AbstractResultBuilder;
+import org.neo4j.gds.procedures.algorithms.results.StatsResult;
 
 import java.util.Map;
 import java.util.stream.Stream;
 
-public class KCoreDecompositionStatsResult  {
-    public final long degeneracy;
-    public final  long preProcessingMillis;
-    public final  long computeMillis;
-    public final  long postProcessingMillis;
-    public final Map<String, Object> configuration;
-
-    public KCoreDecompositionStatsResult(
-        long degeneracy,
-        long preProcessingMillis,
-        long computeMillis,
-        long postProcessingMillis,
-        Map<String, Object> configuration
-    ) {
-        this.postProcessingMillis = postProcessingMillis;
-        this.preProcessingMillis = preProcessingMillis;
-        this.computeMillis = computeMillis;
-        this.configuration =configuration;
-        this.degeneracy = degeneracy;
-    }
+public record KCoreDecompositionStatsResult(
+    long degeneracy,
+    long preProcessingMillis,
+    long computeMillis,
+    long postProcessingMillis,
+    Map<String, Object> configuration
+) implements StatsResult {
 
     static Stream<KCoreDecompositionStatsResult> emptyFrom(
         AlgorithmProcessingTimings timings,
@@ -59,24 +46,5 @@ public class KCoreDecompositionStatsResult  {
                 configurationMap
             )
         );
-    }
-
-    public static final class Builder extends AbstractResultBuilder<KCoreDecompositionStatsResult> {
-        private long degeneracy;
-
-        public Builder withDegeneracy(long degeneracy) {
-            this.degeneracy = degeneracy;
-            return this;
-        }
-
-        public KCoreDecompositionStatsResult build() {
-            return new KCoreDecompositionStatsResult(
-                degeneracy,
-                preProcessingMillis,
-                computeMillis,
-                -1L,
-                config.toMap()
-            );
-        }
     }
 }
