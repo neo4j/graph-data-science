@@ -26,7 +26,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-public record KMeansStatsResult(
+public record KmeansStatsResult(
         long preProcessingMillis,
         long computeMillis,
         long postProcessingMillis,
@@ -37,8 +37,8 @@ public record KMeansStatsResult(
         Map<String, Object> configuration
     ) implements StatsResult {
 
-    static KMeansStatsResult emptyFrom(AlgorithmProcessingTimings timings, Map<String, Object> configurationMap) {
-        return new KMeansStatsResult(
+    static KmeansStatsResult emptyFrom(AlgorithmProcessingTimings timings, Map<String, Object> configurationMap) {
+        return new KmeansStatsResult(
             timings.preProcessingMillis,
             timings.computeMillis,
             0,

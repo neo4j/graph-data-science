@@ -32,7 +32,7 @@ import org.neo4j.gds.result.StatisticsComputationInstructions;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class KMeansResultBuilderForStatsMode implements StatsResultBuilder<KmeansResult, Stream<KMeansStatsResult>> {
+class KMeansResultBuilderForStatsMode implements StatsResultBuilder<KmeansResult, Stream<KmeansStatsResult>> {
     private final KmeansStatsConfig configuration;
     private final StatisticsComputationInstructions statisticsComputationInstructions;
     private final boolean shouldComputeListOfCentroids;
@@ -48,12 +48,12 @@ class KMeansResultBuilderForStatsMode implements StatsResultBuilder<KmeansResult
     }
 
     @Override
-    public Stream<KMeansStatsResult> build(
+    public Stream<KmeansStatsResult> build(
         Graph graph,
         Optional<KmeansResult> result,
         AlgorithmProcessingTimings timings
     ) {
-        if (result.isEmpty()) return Stream.of(KMeansStatsResult.emptyFrom(timings, configuration.toMap()));
+        if (result.isEmpty()) return Stream.of(KmeansStatsResult.emptyFrom(timings, configuration.toMap()));
 
         var kmeansResult = result.get();
 
@@ -74,7 +74,7 @@ class KMeansResultBuilderForStatsMode implements StatsResultBuilder<KmeansResult
 
         var centroids = new CentroidsComputer().compute(shouldComputeListOfCentroids, kmeansResult.centers());
 
-        var kmeansStatsResult = new KMeansStatsResult(
+        var kmeansStatsResult = new KmeansStatsResult(
             timings.preProcessingMillis,
             timings.computeMillis,
             communityStatistics.computeMilliseconds(),
