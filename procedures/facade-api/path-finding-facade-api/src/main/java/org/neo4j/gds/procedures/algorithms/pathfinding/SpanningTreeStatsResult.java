@@ -19,50 +19,28 @@
  */
 package org.neo4j.gds.procedures.algorithms.pathfinding;
 
-import org.neo4j.gds.procedures.algorithms.results.StandardModeResult;
-import org.neo4j.gds.result.AbstractResultBuilder;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
+import org.neo4j.gds.procedures.algorithms.results.ModeResult;
 
 import java.util.Map;
 
-public class SpanningTreeStatsResult extends StandardModeResult {
-    public final long effectiveNodeCount;
-    public final double totalWeight;
-
-    public SpanningTreeStatsResult(
+public record SpanningTreeStatsResult(
         long preProcessingMillis,
         long computeMillis,
         long effectiveNodeCount,
         double totalWeight,
         Map<String, Object> configuration
-    ) {
-        super(preProcessingMillis, computeMillis, configuration);
-        this.effectiveNodeCount = effectiveNodeCount;
-        this.totalWeight = totalWeight;
-    }
+    ) implements ModeResult {
 
-    public static final class Builder extends AbstractResultBuilder<SpanningTreeStatsResult> {
-        private long effectiveNodeCount;
-        private double totalWeight;
 
-        @Override
-        public SpanningTreeStatsResult build() {
-            return new SpanningTreeStatsResult(
-                preProcessingMillis,
-                computeMillis,
-                effectiveNodeCount,
-                totalWeight,
-                config.toMap()
-            );
-        }
-
-        public Builder withEffectiveNodeCount(long effectiveNodeCount) {
-            this.effectiveNodeCount = effectiveNodeCount;
-            return this;
-        }
-
-        public Builder withTotalWeight(double totalWeight) {
-            this.totalWeight = totalWeight;
-            return this;
-        }
+    static  SpanningTreeStatsResult emptyFrom(AlgorithmProcessingTimings timings, Map<String, Object> configuration)
+    {
+        return  new SpanningTreeStatsResult(
+            timings.preProcessingMillis,
+            timings.computeMillis,
+            0,
+            0,
+            configuration
+        );
     }
 }

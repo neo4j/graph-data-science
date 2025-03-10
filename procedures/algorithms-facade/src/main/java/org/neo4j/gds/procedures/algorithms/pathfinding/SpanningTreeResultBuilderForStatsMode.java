@@ -41,20 +41,20 @@ class SpanningTreeResultBuilderForStatsMode implements StatsResultBuilder<Spanni
         Optional<SpanningTree> result,
         AlgorithmProcessingTimings timings
     ) {
-        var builder = new SpanningTreeStatsResult.Builder();
 
         if (result.isEmpty()) {
-            return Stream.of(builder.build());
+            return Stream.of(SpanningTreeStatsResult.emptyFrom(timings, configuration.toMap()));
         }
 
         var spanningTree = result.get();
 
-        builder.withEffectiveNodeCount(spanningTree.effectiveNodeCount());
-        builder.withTotalWeight(spanningTree.totalWeight());
-
-        builder.withComputeMillis(timings.computeMillis);
-        builder.withPreProcessingMillis(timings.preProcessingMillis);
-        builder.withConfig(configuration);
-        return Stream.of(builder.build());
+        var statsResult = new SpanningTreeStatsResult(
+            timings.preProcessingMillis,
+            timings.computeMillis,
+            spanningTree.effectiveNodeCount(),
+            spanningTree.totalWeight(),
+            configuration.toMap()
+        );
+        return Stream.of(statsResult);
     }
 }

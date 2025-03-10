@@ -19,15 +19,12 @@
  */
 package org.neo4j.gds.procedures.algorithms.pathfinding;
 
-import org.neo4j.gds.result.AbstractResultBuilder;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
+import org.neo4j.gds.procedures.algorithms.results.ModeResult;
 
 import java.util.Map;
 
-public final class SpanningTreeMutateResult extends SpanningTreeStatsResult {
-    public final long mutateMillis;
-    public final long relationshipsWritten;
-
-    public SpanningTreeMutateResult(
+public record SpanningTreeMutateResult(
         long preProcessingMillis,
         long computeMillis,
         long mutateMillis,
@@ -35,35 +32,21 @@ public final class SpanningTreeMutateResult extends SpanningTreeStatsResult {
         long relationshipsWritten,
         double totalCost,
         Map<String, Object> configuration
-    ) {
-        super(preProcessingMillis, computeMillis, effectiveNodeCount, totalCost, configuration);
-        this.mutateMillis = mutateMillis;
-        this.relationshipsWritten = relationshipsWritten;
-    }
+    )  implements ModeResult {
 
-    public static class Builder extends AbstractResultBuilder<SpanningTreeMutateResult> {
-        long effectiveNodeCount;
-        double totalWeight;
-
-        public void withEffectiveNodeCount(long effectiveNodeCount) {
-            this.effectiveNodeCount = effectiveNodeCount;
-        }
-
-        public void withTotalWeight(double totalWeight) {
-            this.totalWeight = totalWeight;
-        }
-
-        @Override
-        public SpanningTreeMutateResult build() {
-            return new SpanningTreeMutateResult(
-                preProcessingMillis,
-                computeMillis,
-                mutateMillis,
-                effectiveNodeCount,
-                relationshipsWritten,
-                totalWeight,
-                config.toMap()
-            );
-        }
+    public static  SpanningTreeMutateResult emptyFrom(
+        AlgorithmProcessingTimings timings,
+        Map<String, Object> configuration
+    )
+    {
+        return new SpanningTreeMutateResult(
+            timings.preProcessingMillis,
+            timings.computeMillis,
+            0,
+            0,
+            0,
+            0,
+            configuration
+        );
     }
 }

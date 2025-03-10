@@ -37,26 +37,20 @@ class SpanningTreeResultBuilderForWriteMode implements ResultBuilder<SpanningTre
         AlgorithmProcessingTimings timings,
         Optional<RelationshipsWritten> metadata
     ) {
-        var builder = new SpanningTreeWriteResult.Builder();
-
         if (result.isEmpty()) {
-            return builder.build();
+            return SpanningTreeWriteResult.emptyFrom(timings, configuration.toMap());
         }
 
         var spanningTree = result.get();
 
-        builder
-            .withEffectiveNodeCount(spanningTree.effectiveNodeCount())
-            .withTotalWeight(spanningTree.totalWeight());
-
-        builder.withComputeMillis(timings.computeMillis);
-        builder.withPreProcessingMillis(timings.preProcessingMillis);
-        builder.withWriteMillis(timings.sideEffectMillis);
-
-        metadata.ifPresent(rw -> builder.withRelationshipsWritten(rw.value()));
-
-        builder.withConfig(configuration);
-
-        return builder.build();
+        return new SpanningTreeWriteResult(
+            timings.preProcessingMillis,
+            timings.computeMillis,
+            timings.sideEffectMillis,
+            spanningTree.effectiveNodeCount(),
+            metadata.get().value(),
+            spanningTree.totalWeight(),
+            configuration.toMap()
+        );
     }
 }

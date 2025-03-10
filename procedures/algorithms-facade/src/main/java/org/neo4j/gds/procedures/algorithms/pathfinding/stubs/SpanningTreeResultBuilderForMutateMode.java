@@ -38,25 +38,22 @@ public class SpanningTreeResultBuilderForMutateMode implements ResultBuilder<Spa
         AlgorithmProcessingTimings timings,
         Optional<RelationshipsWritten> metadata
     ) {
-        var builder = new SpanningTreeMutateResult.Builder();
 
         if (result.isEmpty()) {
-            return builder.build();
+            return SpanningTreeMutateResult.emptyFrom(timings, configuration.toMap());
         }
 
         var spanningTree = result.get();
 
-        builder.withEffectiveNodeCount(spanningTree.effectiveNodeCount());
-        builder.withTotalWeight(spanningTree.totalWeight());
+        return new SpanningTreeMutateResult(
+            timings.preProcessingMillis,
+            timings.computeMillis,
+            timings.sideEffectMillis,
+            spanningTree.effectiveNodeCount(),
+            metadata.get().value(),
+            spanningTree.totalWeight(),
+            configuration.toMap()
+        );
 
-        builder.withComputeMillis(timings.computeMillis);
-        builder.withPreProcessingMillis(timings.preProcessingMillis);
-        builder.withMutateMillis(timings.sideEffectMillis);
-
-        metadata.ifPresent(rw -> builder.withRelationshipsWritten(rw.value()));
-
-        builder.withConfig(configuration);
-
-        return builder.build();
     }
 }

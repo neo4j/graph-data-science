@@ -19,15 +19,12 @@
  */
 package org.neo4j.gds.procedures.algorithms.pathfinding;
 
-import org.neo4j.gds.result.AbstractResultBuilder;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
+import org.neo4j.gds.procedures.algorithms.results.ModeResult;
 
 import java.util.Map;
 
-public final class SpanningTreeWriteResult extends SpanningTreeStatsResult {
-    public final long writeMillis;
-    public final long relationshipsWritten;
-
-    private SpanningTreeWriteResult(
+public record SpanningTreeWriteResult(
         long preProcessingMillis,
         long computeMillis,
         long writeMillis,
@@ -35,37 +32,22 @@ public final class SpanningTreeWriteResult extends SpanningTreeStatsResult {
         long relationshipsWritten,
         double totalCost,
         Map<String, Object> configuration
-    ) {
-        super(preProcessingMillis, computeMillis, effectiveNodeCount, totalCost, configuration);
-        this.writeMillis = writeMillis;
-        this.relationshipsWritten = relationshipsWritten;
+    ) implements ModeResult {
+
+    public static  SpanningTreeWriteResult emptyFrom(
+        AlgorithmProcessingTimings timings,
+        Map<String, Object> configuration
+    )
+    {
+        return new SpanningTreeWriteResult(
+            timings.preProcessingMillis,
+            timings.computeMillis,
+            0,
+            0,
+            0,
+            0,
+            configuration
+        );
     }
 
-    public static class Builder extends AbstractResultBuilder<SpanningTreeWriteResult> {
-
-        long effectiveNodeCount;
-        double totalWeight;
-
-        public Builder withEffectiveNodeCount(long effectiveNodeCount) {
-            this.effectiveNodeCount = effectiveNodeCount;
-            return this;
-        }
-
-        public void withTotalWeight(double totalWeight) {
-            this.totalWeight = totalWeight;
-        }
-
-        @Override
-        public SpanningTreeWriteResult build() {
-            return new SpanningTreeWriteResult(
-                preProcessingMillis,
-                computeMillis,
-                writeMillis,
-                effectiveNodeCount,
-                relationshipsWritten,
-                totalWeight,
-                config.toMap()
-            );
-        }
-    }
 }
