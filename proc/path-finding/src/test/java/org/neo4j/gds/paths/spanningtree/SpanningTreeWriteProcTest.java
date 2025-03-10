@@ -134,7 +134,8 @@ class SpanningTreeWriteProcTest extends BaseProcTest {
                 "computeMillis",
                 "writeMillis",
                 "effectiveNodeCount",
-                "relationshipsWritten"
+                "relationshipsWritten",
+                "totalWeight"
             );
 
         runQueryWithRowConsumer(
@@ -145,6 +146,8 @@ class SpanningTreeWriteProcTest extends BaseProcTest {
                 assertThat(res.getNumber("writeMillis").longValue()).isGreaterThanOrEqualTo(0L);
                 assertThat(res.getNumber("effectiveNodeCount").longValue()).isEqualTo(5L);
                 assertThat(res.getNumber("relationshipsWritten").longValue()).isEqualTo(4L);
+                assertThat(res.getNumber("totalWeight").doubleValue()).isEqualTo(12.0);
+
 
             }
         );

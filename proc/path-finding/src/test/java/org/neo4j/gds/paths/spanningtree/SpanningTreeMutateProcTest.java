@@ -101,7 +101,8 @@ class SpanningTreeMutateProcTest extends BaseProcTest {
                 "computeMillis",
                 "mutateMillis",
                 "effectiveNodeCount",
-                "relationshipsWritten"
+                "relationshipsWritten",
+                "totalWeight"
             );
 
         var graph = findLoadedGraph(DEFAULT_GRAPH_NAME);
@@ -116,6 +117,7 @@ class SpanningTreeMutateProcTest extends BaseProcTest {
                 assertThat(res.getNumber("mutateMillis").longValue()).isGreaterThanOrEqualTo(0L);
                 assertThat(res.getNumber("effectiveNodeCount").longValue()).isEqualTo(5L);
                 assertThat(res.getNumber("relationshipsWritten").longValue()).isEqualTo(4L);
+                assertThat(res.getNumber("totalWeight").doubleValue()).isEqualTo(12.0);
 
             }
         );
