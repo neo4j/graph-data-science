@@ -48,6 +48,7 @@ public class Node2VecResultBuilderForMutateMode implements ResultBuilder<Node2Ve
             timings.preProcessingMillis,
             timings.computeMillis,
             timings.sideEffectMillis,
+            0,
             configuration.toMap(),
             node2VecResult.lossPerIteration()
         );

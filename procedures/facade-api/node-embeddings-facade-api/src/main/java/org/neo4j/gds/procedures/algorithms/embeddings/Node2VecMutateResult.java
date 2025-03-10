@@ -20,32 +20,21 @@
 package org.neo4j.gds.procedures.algorithms.embeddings;
 
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.procedures.algorithms.results.StandardMutateResult;
-import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-public final class Node2VecMutateResult extends StandardMutateResult {
-    public final long nodeCount;
-    public final long nodePropertiesWritten;
-    public final List<Double> lossPerIteration;
-
-    public Node2VecMutateResult(
+public record Node2VecMutateResult(
         long nodeCount,
         long nodePropertiesWritten,
         long preProcessingMillis,
         long computeMillis,
         long mutateMillis,
+        long postProcessingMillis,
         Map<String, Object> configuration,
         List<Double> lossPerIteration
     ) {
-        super(preProcessingMillis, computeMillis, 0, mutateMillis, configuration);
-        this.nodeCount = nodeCount;
-        this.nodePropertiesWritten = nodePropertiesWritten;
-        this.lossPerIteration = lossPerIteration;
-    }
 
     public static Node2VecMutateResult emptyFrom(AlgorithmProcessingTimings timings, Map<String, Object> configurationMap) {
         return new Node2VecMutateResult(
@@ -54,30 +43,10 @@ public final class Node2VecMutateResult extends StandardMutateResult {
             timings.preProcessingMillis,
             timings.computeMillis,
             timings.sideEffectMillis,
+            0,
             configurationMap,
             Collections.emptyList()
         );
     }
 
-    public static class Builder extends AbstractResultBuilder<Node2VecMutateResult> {
-        private List<Double> lossPerIteration;
-
-        @Override
-        public Node2VecMutateResult build() {
-            return new Node2VecMutateResult(
-                nodeCount,
-                nodePropertiesWritten,
-                preProcessingMillis,
-                computeMillis,
-                writeMillis,
-                config.toMap(),
-                lossPerIteration
-            );
-        }
-
-        public Builder withLossPerIteration(List<Double> lossPerIteration) {
-            this.lossPerIteration = lossPerIteration;
-            return this;
-        }
-    }
 }
