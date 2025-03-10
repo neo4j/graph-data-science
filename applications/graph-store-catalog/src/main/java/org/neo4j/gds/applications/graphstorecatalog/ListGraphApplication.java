@@ -56,7 +56,7 @@ public final class ListGraphApplication {
         TerminationFlag terminationFlag
     ) {
         Predicate<String> graphNameFilter = graphName
-            .map(GraphName::getValue)
+            .map(graphName1 -> graphName1.value())
             .map(name -> (Predicate<String>) name::equals)
             .orElseGet(() -> __ -> true);
         var graphEntries = graphListingService.listGraphs(user)

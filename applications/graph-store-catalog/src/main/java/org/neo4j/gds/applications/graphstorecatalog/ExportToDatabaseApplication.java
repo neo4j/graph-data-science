@@ -101,7 +101,7 @@ class ExportToDatabaseApplication {
         var end = System.nanoTime();
 
         return new DatabaseExportResult(
-            graphName.getValue(),
+            graphName.value(),
             configuration.databaseName(),
             graphStore.nodeCount(),
             graphStore.relationshipCount(),

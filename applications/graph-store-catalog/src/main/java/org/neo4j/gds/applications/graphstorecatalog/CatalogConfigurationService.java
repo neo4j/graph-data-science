@@ -70,7 +70,7 @@ public class CatalogConfigurationService {
 
         var configuration = GraphProjectFromStoreConfig.of(
             user.getUsername(),
-            graphName.getValue(),
+            graphName.value(),
             nodeProjection,
             relationshipProjection,
             wrappedRawConfiguration
@@ -92,7 +92,7 @@ public class CatalogConfigurationService {
 
         var configuration = GraphProjectFromCypherConfig.of(
             user.getUsername(),
-            graphName.getValue(),
+            graphName.value(),
             nodeQuery,
             relationshipQuery,
             wrappedRawConfiguration
@@ -162,8 +162,8 @@ public class CatalogConfigurationService {
 
         var configuration = GraphProjectFromGraphConfig.of(
             user.getUsername(),
-            graphName.getValue(),
-            originGraphName.getValue(),
+            graphName.value(),
+            originGraphName.value(),
             nodeFilter,
             relationshipFilter,
             originGraphConfiguration.config(),
@@ -183,7 +183,7 @@ public class CatalogConfigurationService {
         var cypherConfig = CypherMapWrapper.create(rawConfiguration);
 
         var configuration = GraphDropNodePropertiesConfig.of(
-            graphName.getValue(),
+            graphName.value(),
             nodeProperties,
             cypherConfig
         );
@@ -201,7 +201,7 @@ public class CatalogConfigurationService {
         var cypherConfig = CypherMapWrapper.create(rawConfiguration);
 
         var configuration = GraphRemoveGraphPropertiesConfig.of(
-            graphName.getValue(),
+            graphName.value(),
             graphProperty,
             cypherConfig
         );
@@ -217,7 +217,7 @@ public class CatalogConfigurationService {
         var cypherConfig = CypherMapWrapper.create(rawConfiguration);
 
         var configuration = GraphStreamGraphPropertiesConfig.of(
-            graphName.getValue(),
+            graphName.value(),
             graphProperty,
             cypherConfig
         );
@@ -234,7 +234,7 @@ public class CatalogConfigurationService {
         var cypherConfig = CypherMapWrapper.create(rawConfiguration);
 
         var configuration = GraphStreamNodePropertiesConfig.of(
-            graphName.getValue(),
+            graphName.value(),
             nodeProperties,
             nodeLabels,
             cypherConfig
@@ -254,7 +254,7 @@ public class CatalogConfigurationService {
         var cypherConfig = CypherMapWrapper.create(rawConfiguration);
 
         var configuration = GraphStreamRelationshipPropertiesConfig.of(
-            graphName.getValue(),
+            graphName.value(),
             relationshipProperties,
             relationshipTypes,
             cypherConfig
@@ -273,7 +273,7 @@ public class CatalogConfigurationService {
         var cypherConfig = CypherMapWrapper.create(rawConfiguration);
 
         var configuration = GraphStreamRelationshipsConfig.of(
-            graphName.getValue(),
+            graphName.value(),
             relationshipTypes,
             cypherConfig
         );
@@ -292,7 +292,7 @@ public class CatalogConfigurationService {
         var cypherConfig = CypherMapWrapper.create(rawConfiguration);
 
         var configuration = GraphWriteNodePropertiesConfig.of(
-            graphName.getValue(),
+            graphName.value(),
             nodeProperties,
             nodeLabels,
             cypherConfig
@@ -345,7 +345,7 @@ public class CatalogConfigurationService {
 
         var configuration = RandomGraphGeneratorConfig.of(
             user.getUsername(),
-            graphName.getValue(),
+            graphName.value(),
             nodeCount,
             averageDegree,
             cypherConfig

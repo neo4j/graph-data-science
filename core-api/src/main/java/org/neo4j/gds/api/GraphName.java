@@ -27,10 +27,6 @@ public record GraphName(String value) {
         return new GraphName(graphNameAsString.trim());
     }
 
-    public String getValue() {
-        return value;
-    }
-
     @Override
     public String toString() {
         return value;

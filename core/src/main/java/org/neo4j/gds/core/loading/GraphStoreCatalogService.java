@@ -48,7 +48,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
  */
 public class GraphStoreCatalogService {
     public boolean graphExists(User user, DatabaseId databaseId, GraphName graphName) {
-        return GraphStoreCatalog.exists(user.getUsername(), databaseId, graphName.getValue());
+        return GraphStoreCatalog.exists(user.getUsername(), databaseId, graphName.value());
     }
 
     public GraphStoreCatalogEntry removeGraph(
@@ -59,7 +59,7 @@ public class GraphStoreCatalogService {
         var result = new AtomicReference<GraphStoreCatalogEntry>();
         GraphStoreCatalog.remove(
             request,
-            graphName.getValue(),
+            graphName.value(),
             result::set,
             shouldFailIfMissing
         );
@@ -67,7 +67,7 @@ public class GraphStoreCatalogService {
     }
 
     public GraphStoreCatalogEntry get(CatalogRequest catalogRequest, GraphName graphName) {
-        return GraphStoreCatalog.get(catalogRequest, graphName.getValue());
+        return GraphStoreCatalog.get(catalogRequest, graphName.value());
     }
 
     /**
@@ -191,7 +191,7 @@ public class GraphStoreCatalogService {
         DatabaseId databaseId,
         GraphName graphName
     ) {
-        return GraphStoreCatalog.getDegreeDistribution(user.getUsername(), databaseId, graphName.getValue());
+        return GraphStoreCatalog.getDegreeDistribution(user.getUsername(), databaseId, graphName.value());
     }
 
     public void setDegreeDistribution(
@@ -203,7 +203,7 @@ public class GraphStoreCatalogService {
         GraphStoreCatalog.setDegreeDistribution(
             user.getUsername(),
             databaseId,
-            graphName.getValue(),
+            graphName.value(),
             degreeDistribution
         );
     }

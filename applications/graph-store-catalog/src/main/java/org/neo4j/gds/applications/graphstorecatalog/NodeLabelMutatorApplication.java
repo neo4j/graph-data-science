@@ -39,7 +39,7 @@ public class NodeLabelMutatorApplication {
         MutateLabelConfig configuration,
         Expression nodeFilter
     ) {
-        var resultBuilder = MutateLabelResult.builder(graphName.getValue(), nodeLabelAsString)
+        var resultBuilder = MutateLabelResult.builder(graphName.value(), nodeLabelAsString)
             .withConfig(configuration.toMap());
 
         try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withMutateMillis)) {

@@ -69,7 +69,7 @@ class WriteRelationshipsApplication {
 
         // writing
         var builder = new WriteRelationshipResult.Builder(
-            graphName.getValue(),
+            graphName.value(),
             configuration.relationshipType(),
             configuration.relationshipProperty()
         );
