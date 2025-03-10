@@ -73,7 +73,7 @@ public @interface Configuration {
         /**
          * The method to be used for converting the configuration value.
          * <p>
-         * This can tale one of two forms:
+         * This can have one of two forms:
          * <ul>
          * <li>A method reference of format `package.class#function` to a static and public method.</li>
          * <li>An unqualified method name, referring to a public static or instance method in the surrounding interface or its supertypes.</li>
@@ -82,7 +82,7 @@ public @interface Configuration {
          * In the second case, the method can be an instance method, which allows for the conversion to make use of
          * other configuration values.
          * <b>FOOT-GUN WARNING:</b> Using other configuration values only works correctly if they are already initialized.
-         * That is, they must be written above this configuration option.
+         * That is, they must be written above this configuration option, in source code order.
          */
         String method();
 
