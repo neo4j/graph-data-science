@@ -41,6 +41,8 @@ public final class ConversionsConfig implements Conversions.MyConversion {
 
     private Optional<Conversions.Foo> optional;
 
+    private int instanceConverter;
+
     public ConversionsConfig(@NotNull CypherMapAccess config) {
         ArrayList<IllegalArgumentException> errors = new ArrayList<>();
         try {
@@ -68,6 +70,11 @@ public final class ConversionsConfig implements Conversions.MyConversion {
         }
         try {
             this.optional = CypherMapAccess.failOnNull("optional", config.getOptional("optional", Map.class).map(Conversions.MyConversion::toFoo));
+        } catch (IllegalArgumentException e) {
+            errors.add(e);
+        }
+        try {
+            this.instanceConverter = this.useDirectMethod(config.requireInt("instanceConverter"));
         } catch (IllegalArgumentException e) {
             errors.add(e);
         }
@@ -114,6 +121,11 @@ public final class ConversionsConfig implements Conversions.MyConversion {
         return this.optional;
     }
 
+    @Override
+    public int instanceConverter() {
+        return this.instanceConverter;
+    }
+
     public static ConversionsConfig.Builder builder() {
         return new ConversionsConfig.Builder();
     }
@@ -132,6 +144,7 @@ public final class ConversionsConfig implements Conversions.MyConversion {
             builder.qualifiedMethod(String.valueOf(baseConfig.qualifiedMethod()));
             builder.referenceTypeAsResult(positive.Conversions.MyConversion.remove42(baseConfig.referenceTypeAsResult()));
             builder.optional(baseConfig.optional().map(v -> positive.Conversions.MyConversion.fromFoo(v)));
+            builder.instanceConverter(baseConfig.instanceConverter());
             return builder;
         }
 
@@ -162,6 +175,11 @@ public final class ConversionsConfig implements Conversions.MyConversion {
 
         public ConversionsConfig.Builder optional(Optional<Map> optional) {
             optional.ifPresent(actualoptional -> this.config.put("optional", actualoptional));
+            return this;
+        }
+
+        public ConversionsConfig.Builder instanceConverter(int instanceConverter) {
+            this.config.put("instanceConverter", instanceConverter);
             return this;
         }
 

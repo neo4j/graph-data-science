@@ -24,9 +24,6 @@ import org.neo4j.gds.annotation.Configuration;
 @Configuration("InvalidConversionsMethodsConfig")
 public interface InvalidConversionsMethods {
 
-    @Configuration.ConvertWith(method = "nonStatic")
-    int foo1();
-
     @Configuration.Ignore // so that it isn't picked up as a config value
     default int nonStatic(String input) {
         return Integer.parseInt(input);
