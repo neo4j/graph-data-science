@@ -19,48 +19,24 @@
  */
 package org.neo4j.gds.procedures.algorithms.community;
 
-import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.procedures.algorithms.results.StatsResult;
 
 import java.util.Collections;
 import java.util.Map;
 
-public class ModularityOptimizationStatsResult {
-    public final long preProcessingMillis;
-    public final long computeMillis;
-    public final long postProcessingMillis;
-    public final long nodes;
-    public boolean didConverge;
-    public long ranIterations;
-    public double modularity;
-    public final long communityCount;
-    public final Map<String, Object> communityDistribution;
-    public final Map<String, Object> configuration;
-
-    public ModularityOptimizationStatsResult(
-        long preProcessingMillis,
-        long computeMillis,
-        long postProcessingMillis,
-        long nodes,
-        boolean didConverge,
-        long ranIterations,
-        double modularity,
-        long communityCount,
-        Map<String, Object> communityDistribution,
-        Map<String, Object> configuration
-    ) {
-        this.preProcessingMillis = preProcessingMillis;
-        this.computeMillis = computeMillis;
-        this.postProcessingMillis = postProcessingMillis;
-        this.nodes = nodes;
-        this.didConverge = didConverge;
-        this.ranIterations = ranIterations;
-        this.modularity = modularity;
-        this.communityCount = communityCount;
-        this.communityDistribution = communityDistribution;
-        this.configuration = configuration;
-    }
+public record ModularityOptimizationStatsResult(
+    long preProcessingMillis,
+    long computeMillis,
+    long postProcessingMillis,
+    long nodes,
+    boolean didConverge,
+    long ranIterations,
+    double modularity,
+    long communityCount,
+    Map<String, Object> communityDistribution,
+    Map<String, Object> configuration
+) implements StatsResult {
 
     static ModularityOptimizationStatsResult emptyFrom(
         AlgorithmProcessingTimings timings,
@@ -78,27 +54,5 @@ public class ModularityOptimizationStatsResult {
             Collections.emptyMap(),
             configurationMap
         );
-    }
-
-    public static class Builder extends ModularityOptimizationResultBuilder<ModularityOptimizationStatsResult> {
-        public Builder(ProcedureReturnColumns returnColumns, Concurrency concurrency) {
-            super(returnColumns, concurrency);
-        }
-
-        @Override
-        protected ModularityOptimizationStatsResult buildResult() {
-            return new ModularityOptimizationStatsResult(
-                preProcessingMillis,
-                computeMillis,
-                postProcessingDuration,
-                nodeCount,
-                didConverge,
-                ranIterations,
-                modularity,
-                maybeCommunityCount.orElse(0),
-                communityHistogramOrNull(),
-                config.toMap()
-            );
-        }
     }
 }
