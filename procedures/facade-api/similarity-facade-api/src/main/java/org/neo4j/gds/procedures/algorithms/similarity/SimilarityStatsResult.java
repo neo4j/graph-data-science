@@ -20,6 +20,7 @@
 package org.neo4j.gds.procedures.algorithms.similarity;
 
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
+import org.neo4j.gds.procedures.algorithms.results.StatsResult;
 
 import java.util.Collections;
 import java.util.Map;
@@ -32,7 +33,7 @@ public record SimilarityStatsResult(
         long similarityPairs,
         Map<String, Object> similarityDistribution,
         Map<String, Object> configuration
-    ) {
+    ) implements StatsResult {
 
     static SimilarityStatsResult emptyFrom(AlgorithmProcessingTimings timings, Map<String, Object> configurationMap) {
         return new SimilarityStatsResult(
