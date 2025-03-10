@@ -20,13 +20,20 @@
 package org.neo4j.gds.procedures.algorithms.community;
 
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.result.AbstractResultBuilder;
+import org.neo4j.gds.procedures.algorithms.results.WriteNodePropertiesResult;
 
 import java.util.Map;
 
-public final class LocalClusteringCoefficientWriteResult extends LocalClusteringCoefficientStatsResult {
-    public long writeMillis;
-    public long nodePropertiesWritten;
+public record LocalClusteringCoefficientWriteResult(
+    double averageClusteringCoefficient,
+    long nodeCount,
+    long preProcessingMillis,
+    long computeMillis,
+    long writeMillis,
+    long nodePropertiesWritten,
+    Map<String, Object> configuration,
+    long postProcessingMillis
+) implements WriteNodePropertiesResult {
 
     public LocalClusteringCoefficientWriteResult(
         double averageClusteringCoefficient,
@@ -37,18 +44,22 @@ public final class LocalClusteringCoefficientWriteResult extends LocalClustering
         long nodePropertiesWritten,
         Map<String, Object> configuration
     ) {
-        super(
+        this(
             averageClusteringCoefficient,
             nodeCount,
             preProcessingMillis,
             computeMillis,
-            configuration
+            writeMillis,
+            nodePropertiesWritten,
+            configuration,
+            0
         );
-        this.writeMillis = writeMillis;
-        this.nodePropertiesWritten = nodePropertiesWritten;
     }
 
-    static LocalClusteringCoefficientWriteResult emptyFrom(AlgorithmProcessingTimings timings, Map<String, Object> configurationMap) {
+    static LocalClusteringCoefficientWriteResult emptyFrom(
+        AlgorithmProcessingTimings timings,
+        Map<String, Object> configurationMap
+    ) {
         return new LocalClusteringCoefficientWriteResult(
             0,
             0,
@@ -56,29 +67,8 @@ public final class LocalClusteringCoefficientWriteResult extends LocalClustering
             timings.computeMillis,
             timings.sideEffectMillis,
             0,
-            configurationMap
+            configurationMap,
+            0
         );
-    }
-
-    public static class Builder extends AbstractResultBuilder<LocalClusteringCoefficientWriteResult> {
-        double averageClusteringCoefficient = 0;
-
-        public Builder withAverageClusteringCoefficient(double averageClusteringCoefficient) {
-            this.averageClusteringCoefficient = averageClusteringCoefficient;
-            return this;
-        }
-
-        @Override
-        public LocalClusteringCoefficientWriteResult build() {
-            return new LocalClusteringCoefficientWriteResult(
-                averageClusteringCoefficient,
-                nodeCount,
-                preProcessingMillis,
-                computeMillis,
-                writeMillis,
-                nodePropertiesWritten,
-                config.toMap()
-            );
-        }
     }
 }

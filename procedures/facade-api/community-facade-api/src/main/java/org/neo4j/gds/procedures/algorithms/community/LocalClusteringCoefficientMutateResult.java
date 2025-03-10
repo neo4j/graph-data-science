@@ -20,36 +20,40 @@
 package org.neo4j.gds.procedures.algorithms.community;
 
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.result.AbstractResultBuilder;
+import org.neo4j.gds.procedures.algorithms.results.MutateNodePropertiesResult;
 
 import java.util.Map;
 
-public final class LocalClusteringCoefficientMutateResult extends LocalClusteringCoefficientStatsResult {
-    public long mutateMillis;
-    public long nodePropertiesWritten;
+public record LocalClusteringCoefficientMutateResult(
+    double averageClusteringCoefficient,
+    long nodeCount,
+    long preProcessingMillis,
+    long computeMillis,
+    long mutateMillis,
+    long nodePropertiesWritten,
+    Map<String, Object> configuration,
+    long postProcessingMillis
+) implements MutateNodePropertiesResult {
 
     public LocalClusteringCoefficientMutateResult(
         double averageClusteringCoefficient,
-        long nodeCount,
+        long size,
         long preProcessingMillis,
         long computeMillis,
         long mutateMillis,
         long nodePropertiesWritten,
         Map<String, Object> configuration
     ) {
-        super(
+        this(
             averageClusteringCoefficient,
-            nodeCount,
+            size,
             preProcessingMillis,
             computeMillis,
-            configuration
+            mutateMillis,
+            nodePropertiesWritten,
+            configuration,
+            0
         );
-        this.mutateMillis = mutateMillis;
-        this.nodePropertiesWritten = nodePropertiesWritten;
-    }
-
-    public static Builder builder() {
-        return new Builder();
     }
 
     public static LocalClusteringCoefficientMutateResult emptyFrom(
@@ -63,30 +67,8 @@ public final class LocalClusteringCoefficientMutateResult extends LocalClusterin
             timings.computeMillis,
             timings.sideEffectMillis,
             0,
-            configurationMap
+            configurationMap,
+            0
         );
-    }
-
-    public static class Builder extends AbstractResultBuilder<LocalClusteringCoefficientMutateResult> {
-
-        double averageClusteringCoefficient = 0;
-
-        public Builder withAverageClusteringCoefficient(double averageClusteringCoefficient) {
-            this.averageClusteringCoefficient = averageClusteringCoefficient;
-            return this;
-        }
-
-        @Override
-        public LocalClusteringCoefficientMutateResult build() {
-            return new LocalClusteringCoefficientMutateResult(
-                averageClusteringCoefficient,
-                nodeCount,
-                preProcessingMillis,
-                computeMillis,
-                mutateMillis,
-                nodePropertiesWritten,
-                config.toMap()
-            );
-        }
     }
 }
