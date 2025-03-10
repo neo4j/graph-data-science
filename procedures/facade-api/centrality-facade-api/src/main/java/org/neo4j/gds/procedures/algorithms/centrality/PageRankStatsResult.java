@@ -19,16 +19,21 @@
  */
 package org.neo4j.gds.procedures.algorithms.centrality;
 
-import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.procedures.algorithms.results.StatsResult;
 
 import java.util.Collections;
 import java.util.Map;
 
-public record PageRankStatsResult(long ranIterations, boolean didConverge, Map<String, Object> centralityDistribution,
-                                  long preProcessingMillis, long computeMillis, long postProcessingMillis,
-                                  Map<String, Object> configuration) {
+public record PageRankStatsResult(
+    long ranIterations,
+    boolean didConverge,
+    Map<String, Object> centralityDistribution,
+    long preProcessingMillis,
+    long computeMillis,
+    long postProcessingMillis,
+    Map<String, Object> configuration
+) implements StatsResult {
 
     static PageRankStatsResult emptyFrom(AlgorithmProcessingTimings timings, Map<String, Object> configurationMap) {
         return new PageRankStatsResult(
@@ -40,24 +45,5 @@ public record PageRankStatsResult(long ranIterations, boolean didConverge, Map<S
             0,
             configurationMap
         );
-    }
-
-    public static class Builder extends PageRankProcCompanion.PageRankResultBuilder<PageRankStatsResult> {
-        public Builder(ProcedureReturnColumns returnColumns, Concurrency concurrency) {
-            super(returnColumns, concurrency);
-        }
-
-        @Override
-        public PageRankStatsResult buildResult() {
-            return new PageRankStatsResult(
-                ranIterations,
-                didConverge,
-                centralityHistogram,
-                preProcessingMillis,
-                computeMillis,
-                postProcessingMillis,
-                config.toMap()
-            );
-        }
     }
 }
