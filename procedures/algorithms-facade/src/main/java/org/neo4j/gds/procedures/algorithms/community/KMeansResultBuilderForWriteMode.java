@@ -33,7 +33,7 @@ import org.neo4j.gds.result.StatisticsComputationInstructions;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class KMeansResultBuilderForWriteMode implements ResultBuilder<KmeansWriteConfig, KmeansResult, Stream<KmeansWriteResult>, NodePropertiesWritten> {
+class KMeansResultBuilderForWriteMode implements ResultBuilder<KmeansWriteConfig, KmeansResult, Stream<KMeansWriteResult>, NodePropertiesWritten> {
     private final StatisticsComputationInstructions statisticsComputationInstructions;
     private final boolean shouldComputeListOfCentroids;
 
@@ -46,14 +46,14 @@ class KMeansResultBuilderForWriteMode implements ResultBuilder<KmeansWriteConfig
     }
 
     @Override
-    public Stream<KmeansWriteResult> build(
+    public Stream<KMeansWriteResult> build(
         Graph graph,
         KmeansWriteConfig configuration,
         Optional<KmeansResult> result,
         AlgorithmProcessingTimings timings,
         Optional<NodePropertiesWritten> metadata
     ) {
-        if (result.isEmpty()) return Stream.of(KmeansWriteResult.emptyFrom(timings, configuration.toMap()));
+        if (result.isEmpty()) return Stream.of(KMeansWriteResult.emptyFrom(timings, configuration.toMap()));
 
         var kmeansResult = result.get();
 
@@ -71,7 +71,7 @@ class KMeansResultBuilderForWriteMode implements ResultBuilder<KmeansWriteConfig
 
         var centroids = new CentroidsComputer().compute(shouldComputeListOfCentroids, kmeansResult.centers());
 
-        var kmeansWriteResult = new KmeansWriteResult(
+        var kmeansWriteResult = new KMeansWriteResult(
             timings.preProcessingMillis,
             timings.computeMillis,
             communityStatistics.computeMilliseconds(),

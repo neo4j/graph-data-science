@@ -21,5 +21,12 @@ package org.neo4j.gds.procedures.algorithms.results;
 
 import java.util.Map;
 
-public record StandardWriteRelationshipsResult(long preProcessingMillis, long computeMillis, long postProcessingMillis, long writeMillis, long relationshipsWritten, Map<String, Object> configuration) {
+public record StandardWriteRelationshipsResult(
+    long preProcessingMillis,
+    long computeMillis,
+    long postProcessingMillis,
+    long writeMillis,
+    long relationshipsWritten,
+    Map<String, Object> configuration
+) implements WriteResult {
 }

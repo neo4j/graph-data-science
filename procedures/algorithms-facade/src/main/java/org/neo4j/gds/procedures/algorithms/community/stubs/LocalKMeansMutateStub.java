@@ -25,7 +25,7 @@ import org.neo4j.gds.applications.algorithms.community.CommunityAlgorithmsMutate
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.kmeans.KmeansMutateConfig;
 import org.neo4j.gds.mem.MemoryEstimation;
-import org.neo4j.gds.procedures.algorithms.community.KmeansMutateResult;
+import org.neo4j.gds.procedures.algorithms.community.KMeansMutateResult;
 import org.neo4j.gds.procedures.algorithms.community.ProcedureStatisticsComputationInstructions;
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 
@@ -76,7 +76,7 @@ public class LocalKMeansMutateStub implements KMeansMutateStub {
     }
 
     @Override
-    public Stream<KmeansMutateResult> execute(
+    public Stream<KMeansMutateResult> execute(
         String graphNameAsString,
         Map<String, Object> rawConfiguration
     ) {

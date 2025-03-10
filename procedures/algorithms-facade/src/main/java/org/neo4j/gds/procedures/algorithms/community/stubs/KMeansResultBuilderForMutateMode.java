@@ -28,12 +28,12 @@ import org.neo4j.gds.kmeans.KmeansMutateConfig;
 import org.neo4j.gds.kmeans.KmeansResult;
 import org.neo4j.gds.procedures.algorithms.community.CentroidsComputer;
 import org.neo4j.gds.procedures.algorithms.community.CommunityStatisticsWithTimingComputer;
-import org.neo4j.gds.procedures.algorithms.community.KmeansMutateResult;
+import org.neo4j.gds.procedures.algorithms.community.KMeansMutateResult;
 import org.neo4j.gds.result.StatisticsComputationInstructions;
 
 import java.util.Optional;
 
-public class KMeansResultBuilderForMutateMode implements ResultBuilder<KmeansMutateConfig, KmeansResult, KmeansMutateResult, NodePropertiesWritten> {
+public class KMeansResultBuilderForMutateMode implements ResultBuilder<KmeansMutateConfig, KmeansResult, KMeansMutateResult, NodePropertiesWritten> {
     private final CommunityStatisticsWithTimingComputer communityStatisticsWithTimingComputer = new CommunityStatisticsWithTimingComputer();
 
     private final StatisticsComputationInstructions statisticsComputationInstructions;
@@ -48,14 +48,14 @@ public class KMeansResultBuilderForMutateMode implements ResultBuilder<KmeansMut
     }
 
     @Override
-    public KmeansMutateResult build(
+    public KMeansMutateResult build(
         Graph graph,
         KmeansMutateConfig configuration,
         Optional<KmeansResult> result,
         AlgorithmProcessingTimings timings,
         Optional<NodePropertiesWritten> metadata
     ) {
-        if (result.isEmpty()) return KmeansMutateResult.emptyFrom(timings, configuration.toMap());
+        if (result.isEmpty()) return KMeansMutateResult.emptyFrom(timings, configuration.toMap());
 
         var kmeansResult = result.get();
 
@@ -70,7 +70,7 @@ public class KMeansResultBuilderForMutateMode implements ResultBuilder<KmeansMut
 
         var centroids = new CentroidsComputer().compute(shouldComputeListOfCentroids, kmeansResult.centers());
 
-        return new KmeansMutateResult(
+        return new KMeansMutateResult(
             timings.preProcessingMillis,
             timings.computeMillis,
             communityStatisticsWithTiming.getRight(),

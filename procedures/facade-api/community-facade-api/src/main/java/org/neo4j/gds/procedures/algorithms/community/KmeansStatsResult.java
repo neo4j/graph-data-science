@@ -19,26 +19,14 @@
  */
 package org.neo4j.gds.procedures.algorithms.community;
 
-import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.result.AbstractCommunityResultBuilder;
+import org.neo4j.gds.procedures.algorithms.results.StatsResult;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-public class KmeansStatsResult  {
-    public final Map<String, Object> communityDistribution;
-    public final List<List<Double>> centroids;
-    public final double averageDistanceToCentroid;
-    public final double averageSilhouette;
-    public final long preProcessingMillis;
-    public final long computeMillis;
-    public final long postProcessingMillis;
-    public final Map<String, Object> configuration;
-
-    public KmeansStatsResult(
+public record KmeansStatsResult(
         long preProcessingMillis,
         long computeMillis,
         long postProcessingMillis,
@@ -47,17 +35,7 @@ public class KmeansStatsResult  {
         double averageDistanceToCentroid,
         double averageSilhouette,
         Map<String, Object> configuration
-    ) {
-
-        this.communityDistribution = communityDistribution;
-        this.centroids = centroids;
-        this.averageDistanceToCentroid = averageDistanceToCentroid;
-        this.configuration =configuration;
-        this.preProcessingMillis = preProcessingMillis;
-        this.computeMillis = computeMillis;
-        this.postProcessingMillis = postProcessingMillis;
-        this.averageSilhouette = averageSilhouette;
-    }
+    ) implements StatsResult {
 
     static KmeansStatsResult emptyFrom(AlgorithmProcessingTimings timings, Map<String, Object> configurationMap) {
         return new KmeansStatsResult(
@@ -70,43 +48,5 @@ public class KmeansStatsResult  {
             0,
             configurationMap
         );
-    }
-
-    public static final class Builder extends AbstractCommunityResultBuilder<KmeansStatsResult> {
-        public Builder(ProcedureReturnColumns returnColumns, Concurrency concurrency) {
-            super(returnColumns, concurrency);
-        }
-
-        private List<List<Double>> centroids;
-        private double averageDistanceToCentroid;
-        private double averageSilhouette;
-        @Override
-        public KmeansStatsResult buildResult() {
-            return new KmeansStatsResult(
-                preProcessingMillis,
-                computeMillis,
-                postProcessingDuration,
-                communityHistogramOrNull(),
-                centroids,
-                averageDistanceToCentroid,
-                averageSilhouette,
-                config.toMap()
-            );
-        }
-
-        public Builder withCentroids(List<List<Double>> listCenters) {
-            this.centroids = listCenters;
-            return this;
-        }
-
-        public Builder withAverageDistanceToCentroid(double averageDistanceToCentroid) {
-            this.averageDistanceToCentroid = averageDistanceToCentroid;
-            return this;
-        }
-
-        public Builder withAverageSilhouette(double averageSilhouette) {
-            this.averageSilhouette = averageSilhouette;
-            return this;
-        }
     }
 }
