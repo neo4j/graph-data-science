@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.procedures.algorithms.pathfinding;
 
+import org.neo4j.gds.procedures.algorithms.results.StatsResult;
+
 import java.util.Map;
 
 public record BellmanFordStatsResult(
@@ -27,5 +29,5 @@ public record BellmanFordStatsResult(
         long postProcessingMillis,
         Map<String, Object> configuration,
         boolean containsNegativeCycle
-    ) {
+    )  implements StatsResult {
 }
