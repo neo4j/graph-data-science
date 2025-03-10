@@ -26,7 +26,4 @@ public record StandardStatsResult(
         long computeMillis,
         long postProcessingMillis,
         Map<String, Object> configuration
-    ) {
-
-
-}
+    ) implements StatsResult{}
