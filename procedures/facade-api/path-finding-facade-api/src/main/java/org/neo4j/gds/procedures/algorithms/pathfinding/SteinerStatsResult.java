@@ -19,63 +19,29 @@
  */
 package org.neo4j.gds.procedures.algorithms.pathfinding;
 
-import org.neo4j.gds.procedures.algorithms.results.StandardModeResult;
-import org.neo4j.gds.result.AbstractResultBuilder;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
+import org.neo4j.gds.procedures.algorithms.results.ModeResult;
 
 import java.util.Map;
 
-public class SteinerStatsResult extends StandardModeResult {
-
-    public final long effectiveNodeCount;
-    public final long effectiveTargetNodesCount;
-    public final double totalWeight;
-
-    public SteinerStatsResult(
+public record SteinerStatsResult(
         long preProcessingMillis,
         long computeMillis,
         long effectiveNodeCount,
         long effectiveTargetNodesCount,
         double totalWeight,
         Map<String, Object> configuration
-    ) {
-        super(preProcessingMillis, computeMillis, configuration);
-        this.effectiveNodeCount = effectiveNodeCount;
-        this.totalWeight = totalWeight;
-        this.effectiveTargetNodesCount = effectiveTargetNodesCount;
-    }
+    ) implements ModeResult {
 
-    public static final class Builder extends AbstractResultBuilder<SteinerStatsResult> {
-
-        private long effectiveNodeCount;
-        private double totalWeight;
-        private long effectiveTargetNodesCount;
-
-        @Override
-        public SteinerStatsResult build() {
-            return new SteinerStatsResult(
-                preProcessingMillis,
-                computeMillis,
-                effectiveNodeCount,
-                effectiveTargetNodesCount,
-                totalWeight,
-                config.toMap()
-            );
-        }
-
-        public Builder withEffectiveNodeCount(long effectiveNodeCount) {
-            this.effectiveNodeCount = effectiveNodeCount;
-            return this;
-        }
-
-        public Builder withTotalWeight(double totalWeight) {
-            this.totalWeight = totalWeight;
-            return this;
-        }
-
-        public Builder withEffectiveTargetNodesCount(long effectiveTargetNodesCount) {
-            this.effectiveTargetNodesCount = effectiveTargetNodesCount;
-            return this;
-        }
-
+    static SteinerStatsResult emptyFrom(AlgorithmProcessingTimings timings, Map<String, Object> configuration)
+    {
+        return  new SteinerStatsResult(
+            timings.preProcessingMillis,
+            timings.computeMillis,
+            0,
+            0,
+            0d,
+            configuration
+        );
     }
 }

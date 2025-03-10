@@ -41,18 +41,21 @@ class SteinerTreeResultBuilderForStatsMode implements StatsResultBuilder<Steiner
         Optional<SteinerTreeResult> result,
         AlgorithmProcessingTimings timings
     ) {
-        var builder = new SteinerStatsResult.Builder();
+        if (result.isEmpty()) {
+            return Stream.of(SteinerStatsResult.emptyFrom(timings, configuration.toMap()));
+        }
 
-        builder
-            .withConfig(configuration)
-            .withComputeMillis(timings.computeMillis)
-            .withPreProcessingMillis(timings.preProcessingMillis);
+        var spanningTree = result.get();
+        return Stream.of(
+            new SteinerStatsResult(
+            timings.preProcessingMillis,
+            timings.computeMillis,
+            spanningTree.effectiveNodeCount(),
+            spanningTree.effectiveTargetNodesCount(),
+            spanningTree.totalCost(),
+            configuration.toMap()
+        )
+        );
 
-        result.ifPresent(r -> builder
-            .withEffectiveNodeCount(r.effectiveNodeCount())
-            .withTotalWeight(r.totalCost())
-            .withEffectiveTargetNodesCount(r.effectiveTargetNodesCount()));
-
-        return Stream.of(builder.build());
     }
 }

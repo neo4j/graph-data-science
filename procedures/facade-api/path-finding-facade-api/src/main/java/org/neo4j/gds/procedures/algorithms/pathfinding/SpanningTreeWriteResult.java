@@ -30,14 +30,13 @@ public record SpanningTreeWriteResult(
         long writeMillis,
         long effectiveNodeCount,
         long relationshipsWritten,
-        double totalCost,
+        double totalWeight,
         Map<String, Object> configuration
     ) implements ModeResult {
 
     public static  SpanningTreeWriteResult emptyFrom(
         AlgorithmProcessingTimings timings,
-        Map<String, Object> configuration
-    )
+        Map<String, Object> configuration)
     {
         return new SpanningTreeWriteResult(
             timings.preProcessingMillis,

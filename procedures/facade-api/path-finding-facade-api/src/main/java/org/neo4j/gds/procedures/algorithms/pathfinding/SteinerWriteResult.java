@@ -19,64 +19,33 @@
  */
 package org.neo4j.gds.procedures.algorithms.pathfinding;
 
-import org.neo4j.gds.result.AbstractResultBuilder;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
+import org.neo4j.gds.procedures.algorithms.results.ModeResult;
 
 import java.util.Map;
 
-public final class SteinerWriteResult extends SteinerStatsResult {
-
-
-    public final long writeMillis;
-    public final long relationshipsWritten;
-
-    public SteinerWriteResult(
+public record SteinerWriteResult(
         long preProcessingMillis,
         long computeMillis,
         long writeMillis,
         long effectiveNodeCount,
         long effectiveTargetNodesCount,
-        double totalCost,
+        double totalWeight,
         long relationshipsWritten,
         Map<String, Object> configuration
-    ) {
-        super(preProcessingMillis, computeMillis, effectiveNodeCount, effectiveTargetNodesCount, totalCost, configuration);
-        this.writeMillis = writeMillis;
-        this.relationshipsWritten = relationshipsWritten;
-    }
+    ) implements ModeResult{
 
-    public static class Builder extends AbstractResultBuilder<SteinerWriteResult> {
-
-        long effectiveNodeCount;
-        long effectiveTargetNodesCount;
-        double totalWeight;
-
-        public Builder withEffectiveNodeCount(long effectiveNodeCount) {
-            this.effectiveNodeCount = effectiveNodeCount;
-            return this;
-        }
-
-        public Builder withEffectiveTargetNodeCount(long effectiveTargetNodesCount) {
-            this.effectiveTargetNodesCount = effectiveTargetNodesCount;
-            return this;
-        }
-
-        public Builder withTotalWeight(double totalWeight) {
-            this.totalWeight = totalWeight;
-            return this;
-        }
-
-        @Override
-        public SteinerWriteResult build() {
-            return new SteinerWriteResult(
-                preProcessingMillis,
-                computeMillis,
-                writeMillis,
-                effectiveNodeCount,
-                effectiveTargetNodesCount,
-                totalWeight,
-                relationshipsWritten,
-                config.toMap()
-            );
-        }
+    static SteinerWriteResult emptyFrom(AlgorithmProcessingTimings timings, Map<String, Object> configuration)
+    {
+        return new SteinerWriteResult(
+            timings.preProcessingMillis,
+            timings.computeMillis,
+            0,
+            0,
+            0,
+            0d,
+            0,
+            configuration
+        );
     }
 }

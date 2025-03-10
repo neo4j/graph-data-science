@@ -19,64 +19,34 @@
  */
 package org.neo4j.gds.procedures.algorithms.pathfinding;
 
-import org.neo4j.gds.result.AbstractResultBuilder;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
+import org.neo4j.gds.procedures.algorithms.results.ModeResult;
 
 import java.util.Map;
 
-public final class SteinerMutateResult extends SteinerStatsResult {
-
-
-    public final long mutateMillis;
-    public final long relationshipsWritten;
-
-    public SteinerMutateResult(
+public record SteinerMutateResult(
         long preProcessingMillis,
         long computeMillis,
         long mutateMillis,
         long effectiveNodeCount,
         long effectiveTargetNodesCount,
-        double totalCost,
+        double totalWeight,
         long relationshipsWritten,
         Map<String, Object> configuration
-    ) {
-        super(preProcessingMillis, computeMillis, effectiveNodeCount, effectiveTargetNodesCount, totalCost, configuration);
-        this.mutateMillis = mutateMillis;
-        this.relationshipsWritten = relationshipsWritten;
+    ) implements ModeResult {
+
+    public static SteinerMutateResult emptyFrom(AlgorithmProcessingTimings timings, Map<String, Object> configuration)
+    {
+        return new SteinerMutateResult(
+            timings.preProcessingMillis,
+            timings.computeMillis,
+            0,
+            0,
+            0,
+            0d,
+            0,
+            configuration
+        );
     }
 
-    public static class Builder extends AbstractResultBuilder<SteinerMutateResult> {
-
-        long effectiveNodeCount;
-        long effectiveTargetNodesCount;
-        double totalWeight;
-
-        public Builder withEffectiveNodeCount(long effectiveNodeCount) {
-            this.effectiveNodeCount = effectiveNodeCount;
-            return this;
-        }
-
-        public Builder withEffectiveTargetNodeCount(long effectiveTargetNodesCount) {
-            this.effectiveTargetNodesCount = effectiveTargetNodesCount;
-            return this;
-        }
-
-        public Builder withTotalWeight(double totalWeight) {
-            this.totalWeight = totalWeight;
-            return this;
-        }
-
-        @Override
-        public SteinerMutateResult build() {
-            return new SteinerMutateResult(
-                preProcessingMillis,
-                computeMillis,
-                mutateMillis,
-                effectiveNodeCount,
-                effectiveTargetNodesCount,
-                totalWeight,
-                relationshipsWritten,
-                config.toMap()
-            );
-        }
-    }
 }

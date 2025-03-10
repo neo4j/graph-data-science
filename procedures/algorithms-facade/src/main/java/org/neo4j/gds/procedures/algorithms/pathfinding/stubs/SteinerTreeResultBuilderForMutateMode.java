@@ -38,21 +38,21 @@ public class SteinerTreeResultBuilderForMutateMode implements ResultBuilder<Stei
         AlgorithmProcessingTimings timings,
         Optional<RelationshipsWritten> metadata
     ) {
-        var builder = new SteinerMutateResult.Builder();
-        builder.withConfig(steinerTreeMutateConfig);
+        if (steinerTreeResult.isEmpty()) {
+            return SteinerMutateResult.emptyFrom(timings, steinerTreeMutateConfig.toMap());
+        }
 
-        builder.withPreProcessingMillis(timings.preProcessingMillis);
-        builder.withComputeMillis(timings.computeMillis);
-        builder.withMutateMillis(timings.sideEffectMillis);
+        var spanningTree = steinerTreeResult.get();
 
-        metadata.ifPresent(rw -> builder.withRelationshipsWritten(rw.value()));
-
-        steinerTreeResult.ifPresent(result -> {
-            builder.withEffectiveNodeCount(result.effectiveNodeCount());
-            builder.withEffectiveTargetNodeCount(result.effectiveTargetNodesCount());
-            builder.withTotalWeight(result.totalCost());
-        });
-
-        return builder.build();
+        return new SteinerMutateResult(
+            timings.preProcessingMillis,
+            timings.computeMillis,
+            timings.sideEffectMillis,
+            spanningTree.effectiveNodeCount(),
+            spanningTree.effectiveTargetNodesCount(),
+            spanningTree.totalCost(),
+            metadata.get().value(),
+            steinerTreeMutateConfig.toMap()
+        );
     }
 }

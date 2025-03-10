@@ -30,14 +30,13 @@ public record SpanningTreeMutateResult(
         long mutateMillis,
         long effectiveNodeCount,
         long relationshipsWritten,
-        double totalCost,
+        double totalWeight,
         Map<String, Object> configuration
     )  implements ModeResult {
 
     public static  SpanningTreeMutateResult emptyFrom(
         AlgorithmProcessingTimings timings,
-        Map<String, Object> configuration
-    )
+        Map<String, Object> configuration)
     {
         return new SpanningTreeMutateResult(
             timings.preProcessingMillis,

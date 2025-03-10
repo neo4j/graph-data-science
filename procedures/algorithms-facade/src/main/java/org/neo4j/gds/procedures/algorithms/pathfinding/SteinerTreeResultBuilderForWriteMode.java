@@ -29,6 +29,7 @@ import org.neo4j.gds.steiner.SteinerTreeWriteConfig;
 import java.util.Optional;
 
 class SteinerTreeResultBuilderForWriteMode implements ResultBuilder<SteinerTreeWriteConfig, SteinerTreeResult, SteinerWriteResult, RelationshipsWritten> {
+
     @Override
     public SteinerWriteResult build(
         Graph graph,
@@ -37,21 +38,22 @@ class SteinerTreeResultBuilderForWriteMode implements ResultBuilder<SteinerTreeW
         AlgorithmProcessingTimings timings,
         Optional<RelationshipsWritten> metadata
     ) {
-        var builder = new SteinerWriteResult.Builder();
-        builder.withConfig(steinerTreeWriteConfig);
+        if (steinerTreeResult.isEmpty()) {
+            return SteinerWriteResult.emptyFrom(timings, steinerTreeWriteConfig.toMap());
+        }
 
-        builder.withPreProcessingMillis(timings.preProcessingMillis);
-        builder.withComputeMillis(timings.computeMillis);
-        builder.withWriteMillis(timings.sideEffectMillis);
+        var spanningTree = steinerTreeResult.get();
 
-        metadata.ifPresent(rw -> builder.withRelationshipsWritten(rw.value()));
-
-        steinerTreeResult.ifPresent(result -> {
-            builder.withEffectiveNodeCount(result.effectiveNodeCount());
-            builder.withEffectiveTargetNodeCount(result.effectiveTargetNodesCount());
-            builder.withTotalWeight(result.totalCost());
-        });
-
-        return builder.build();
+        return new SteinerWriteResult(
+            timings.preProcessingMillis,
+            timings.computeMillis,
+            timings.sideEffectMillis,
+            spanningTree.effectiveNodeCount(),
+            spanningTree.effectiveTargetNodesCount(),
+            spanningTree.totalCost(),
+            metadata.get().value(),
+            steinerTreeWriteConfig.toMap()
+        );
     }
+
 }
