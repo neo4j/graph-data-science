@@ -20,6 +20,7 @@
 package org.neo4j.gds.procedures.algorithms.embeddings;
 
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
+import org.neo4j.gds.procedures.algorithms.results.ModeResult;
 
 import java.util.Map;
 
@@ -28,7 +29,7 @@ public record FastRPStatsResult(
     long preProcessingMillis,
     long computeMillis,
     Map<String, Object> configuration
-){
+) implements ModeResult {
 
     static FastRPStatsResult emptyFrom(AlgorithmProcessingTimings timings, Map<String, Object> configurationMap) {
         return new FastRPStatsResult(0, timings.preProcessingMillis, timings.computeMillis, configurationMap);
