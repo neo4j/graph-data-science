@@ -20,6 +20,7 @@
 package org.neo4j.gds.procedures.algorithms.pathfinding;
 
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
+import org.neo4j.gds.procedures.algorithms.results.ModeResult;
 
 import java.util.Map;
 
@@ -28,7 +29,8 @@ public record PrizeCollectingSteinerTreeStatsResult(long preProcessingMillis,
                                                     long effectiveNodeCount,
                                                     double totalWeight,
                                                     double sumOfPrizes,
-                                                    Map<String, Object> configuration) {
+                                                    Map<String, Object> configuration
+) implements ModeResult {
 
     static PrizeCollectingSteinerTreeStatsResult emptyFrom(AlgorithmProcessingTimings timings,  Map<String, Object> configuration){
         return new PrizeCollectingSteinerTreeStatsResult(
