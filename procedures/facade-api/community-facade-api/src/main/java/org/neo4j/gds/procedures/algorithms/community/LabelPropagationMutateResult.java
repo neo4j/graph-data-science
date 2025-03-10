@@ -19,46 +19,24 @@
  */
 package org.neo4j.gds.procedures.algorithms.community;
 
-import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.procedures.algorithms.results.MutateNodePropertiesResult;
 
 import java.util.Collections;
 import java.util.Map;
 
-public final class LabelPropagationMutateResult extends LabelPropagationStatsResult {
-    public final long mutateMillis;
-    public final long nodePropertiesWritten;
-
-    public LabelPropagationMutateResult(
-        long ranIterations,
-        boolean didConverge,
-        long communityCount,
-        Map<String, Object> communityDistribution,
-        long preProcessingMillis,
-        long computeMillis,
-        long postProcessingMillis,
-        long mutateMillis,
-        long nodePropertiesWritten,
-        Map<String, Object> configuration
-    ) {
-        super(
-            ranIterations,
-            didConverge,
-            communityCount,
-            communityDistribution,
-            preProcessingMillis,
-            computeMillis,
-            postProcessingMillis,
-            configuration
-        );
-        this.mutateMillis = mutateMillis;
-        this.nodePropertiesWritten = nodePropertiesWritten;
-    }
-
-    public static Builder builder(ProcedureReturnColumns returnColumns, Concurrency concurrency) {
-        return new Builder(returnColumns, concurrency);
-    }
+public record LabelPropagationMutateResult(
+    long ranIterations,
+    boolean didConverge,
+    long communityCount,
+    Map<String, Object> communityDistribution,
+    long preProcessingMillis,
+    long computeMillis,
+    long postProcessingMillis,
+    long mutateMillis,
+    long nodePropertiesWritten,
+    Map<String, Object> configuration
+) implements MutateNodePropertiesResult {
 
     public static LabelPropagationMutateResult emptyFrom(
         AlgorithmProcessingTimings timings,
@@ -76,27 +54,5 @@ public final class LabelPropagationMutateResult extends LabelPropagationStatsRes
             0,
             configurationMap
         );
-    }
-
-    public static class Builder extends LabelPropagationResultBuilder<LabelPropagationMutateResult> {
-        Builder(ProcedureReturnColumns returnColumns, Concurrency concurrency) {
-            super(returnColumns, concurrency);
-        }
-
-        @Override
-        protected LabelPropagationMutateResult buildResult() {
-            return new LabelPropagationMutateResult(
-                ranIterations,
-                didConverge,
-                maybeCommunityCount.orElse(0L),
-                communityHistogramOrNull(),
-                preProcessingMillis,
-                computeMillis,
-                postProcessingDuration,
-                mutateMillis,
-                nodePropertiesWritten,
-                config.toMap()
-            );
-        }
     }
 }

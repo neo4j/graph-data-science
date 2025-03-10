@@ -19,46 +19,24 @@
  */
 package org.neo4j.gds.procedures.algorithms.community;
 
-import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.procedures.algorithms.results.WriteNodePropertiesResult;
 
 import java.util.Collections;
 import java.util.Map;
 
-public class LabelPropagationWriteResult extends LabelPropagationStatsResult {
-    public final long writeMillis;
-    public final long nodePropertiesWritten;
-
-    public LabelPropagationWriteResult(
-        long ranIterations,
-        boolean didConverge,
-        long communityCount,
-        Map<String, Object> communityDistribution,
-        long preProcessingMillis,
-        long computeMillis,
-        long postProcessingMillis,
-        long writeMillis,
-        long nodePropertiesWritten,
-        Map<String, Object> configuration
-    ) {
-        super(
-            ranIterations,
-            didConverge,
-            communityCount,
-            communityDistribution,
-            preProcessingMillis,
-            computeMillis,
-            postProcessingMillis,
-            configuration
-        );
-        this.writeMillis = writeMillis;
-        this.nodePropertiesWritten = nodePropertiesWritten;
-    }
-
-    public static Builder builder(ProcedureReturnColumns returnColumns, Concurrency concurrency) {
-        return new Builder(returnColumns, concurrency);
-    }
+public record LabelPropagationWriteResult(
+    long ranIterations,
+    boolean didConverge,
+    long communityCount,
+    Map<String, Object> communityDistribution,
+    long preProcessingMillis,
+    long computeMillis,
+    long postProcessingMillis,
+    long writeMillis,
+    long nodePropertiesWritten,
+    Map<String, Object> configuration
+) implements WriteNodePropertiesResult {
 
     static LabelPropagationWriteResult emptyFrom(
         AlgorithmProcessingTimings timings,
@@ -76,27 +54,5 @@ public class LabelPropagationWriteResult extends LabelPropagationStatsResult {
             0,
             configurationMap
         );
-    }
-
-    public static class Builder extends LabelPropagationResultBuilder<LabelPropagationWriteResult> {
-        Builder(ProcedureReturnColumns returnColumns, Concurrency concurrency) {
-            super(returnColumns, concurrency);
-        }
-
-        @Override
-        protected LabelPropagationWriteResult buildResult() {
-            return new LabelPropagationWriteResult(
-                ranIterations,
-                didConverge,
-                maybeCommunityCount.orElse(0L),
-                communityHistogramOrNull(),
-                preProcessingMillis,
-                computeMillis,
-                postProcessingDuration,
-                writeMillis,
-                nodePropertiesWritten,
-                config.toMap()
-            );
-        }
     }
 }

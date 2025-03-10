@@ -19,42 +19,22 @@
  */
 package org.neo4j.gds.procedures.algorithms.community;
 
-import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.procedures.algorithms.results.StatsResult;
 
 import java.util.Collections;
 import java.util.Map;
 
-public class LabelPropagationStatsResult  {
-    public final long ranIterations;
-    public final boolean didConverge;
-    public final long communityCount;
-    public final Map<String, Object> communityDistribution;
-    public final long preProcessingMillis;
-    public final long computeMillis;
-    public final long postProcessingMillis;
-    public final Map<String, Object> configuration;
-
-    public LabelPropagationStatsResult(
-        long ranIterations,
-        boolean didConverge,
-        long communityCount,
-        Map<String, Object> communityDistribution,
-        long preProcessingMillis,
-        long computeMillis,
-        long postProcessingMillis,
-        Map<String, Object> configuration
-    ) {
-        this.postProcessingMillis = postProcessingMillis;
-        this.preProcessingMillis = preProcessingMillis;
-        this.configuration = configuration;
-        this.computeMillis = computeMillis;
-        this.ranIterations = ranIterations;
-        this.didConverge = didConverge;
-        this.communityCount = communityCount;
-        this.communityDistribution = communityDistribution;
-    }
+public record LabelPropagationStatsResult(
+    long ranIterations,
+    boolean didConverge,
+    long communityCount,
+    Map<String, Object> communityDistribution,
+    long preProcessingMillis,
+    long computeMillis,
+    long postProcessingMillis,
+    Map<String, Object> configuration
+) implements StatsResult {
 
     static LabelPropagationStatsResult emptyFrom(
         AlgorithmProcessingTimings timings,
@@ -70,25 +50,5 @@ public class LabelPropagationStatsResult  {
             0,
             configurationMap
         );
-    }
-
-    public static class Builder extends LabelPropagationResultBuilder<LabelPropagationStatsResult> {
-        public Builder(ProcedureReturnColumns returnColumns, Concurrency concurrency) {
-            super(returnColumns, concurrency);
-        }
-
-        @Override
-        protected LabelPropagationStatsResult buildResult() {
-            return new LabelPropagationStatsResult(
-                ranIterations,
-                didConverge,
-                maybeCommunityCount.orElse(0L),
-                communityHistogramOrNull(),
-                preProcessingMillis,
-                computeMillis,
-                postProcessingDuration,
-                config.toMap()
-            );
-        }
     }
 }
