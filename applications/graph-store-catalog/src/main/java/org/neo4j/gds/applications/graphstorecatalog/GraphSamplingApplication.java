@@ -82,8 +82,8 @@ public final class GraphSamplingApplication {
 
             var rwrProcConfig = RandomWalkWithRestartsConfiguration.of(
                 user.getUsername(),
-                graphName.getValue(),
-                originGraphName.getValue(),
+                graphName.value(),
+                originGraphName.value(),
                 graphProjectConfig,
                 cypherMap
             );
@@ -93,8 +93,8 @@ public final class GraphSamplingApplication {
             var projectMillis = progressTimer.stop().getDuration();
 
             return new RandomWalkSamplingResult(
-                graphName.getValue(),
-                originGraphName.getValue(),
+                graphName.value(),
+                originGraphName.value(),
                 sampledGraphStore.nodeCount(),
                 sampledGraphStore.relationshipCount(),
                 samplerAlgorithm.startNodesCount(),

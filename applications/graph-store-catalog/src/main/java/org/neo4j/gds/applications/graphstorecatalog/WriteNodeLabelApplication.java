@@ -51,7 +51,7 @@ class WriteNodeLabelApplication {
         Expression nodeFilter
     ) {
         var resultBuilder = WriteLabelResult
-            .builder(graphName.getValue(), nodeLabel)
+            .builder(graphName.value(), nodeLabel)
             .withConfig(configuration.toMap());
 
         try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withWriteMillis)) {

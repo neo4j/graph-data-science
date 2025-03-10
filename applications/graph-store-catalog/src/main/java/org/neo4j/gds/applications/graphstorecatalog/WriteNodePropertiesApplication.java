@@ -90,7 +90,7 @@ public class WriteNodePropertiesApplication {
 
         // writing
         NodePropertiesWriteResult.Builder builder = new NodePropertiesWriteResult.Builder(
-            graphName.getValue(),
+            graphName.value(),
             allNodeProperties
         );
         try (ProgressTimer ignored = ProgressTimer.start(builder::withWriteMillis)) {

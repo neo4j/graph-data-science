@@ -563,7 +563,7 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
         );
 
         return new GraphDropNodePropertiesResult(
-            graphName.getValue(),
+            graphName.value(),
             droppedProperties,
             numberOfPropertiesRemoved
         );
@@ -604,7 +604,7 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
             relationshipType
         );
 
-        return new GraphDropRelationshipResult(graphName.getValue(), relationshipType, result);
+        return new GraphDropRelationshipResult(graphName.value(), relationshipType, result);
     }
 
     @Override

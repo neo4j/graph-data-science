@@ -86,7 +86,7 @@ class ExportToCsvApplication {
         );
 
         return new FileExportResult(
-            graphName.getValue(),
+            graphName.value(),
             configuration.exportName(),
             graphStore.nodeCount(),
             graphStore.relationshipCount(),

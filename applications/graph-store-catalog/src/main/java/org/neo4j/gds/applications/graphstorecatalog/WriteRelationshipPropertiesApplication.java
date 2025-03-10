@@ -62,7 +62,7 @@ class WriteRelationshipPropertiesApplication {
             .build();
 
         var resultBuilder = new WriteRelationshipPropertiesResult.Builder(
-            graphName.getValue(),
+            graphName.value(),
             relationshipType,
             relationshipProperties
         );
