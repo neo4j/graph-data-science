@@ -32,7 +32,7 @@ public final class CELFMutateResult {
     public final long nodeCount;
     public final Map<String, Object> configuration;
 
-    private CELFMutateResult(
+    public CELFMutateResult(
         long mutateMillis,
         long nodePropertiesWritten,
         long computeMillis,
