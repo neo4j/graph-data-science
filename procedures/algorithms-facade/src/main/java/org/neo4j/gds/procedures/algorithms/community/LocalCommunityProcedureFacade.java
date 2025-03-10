@@ -495,7 +495,7 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
     }
 
     @Override
-    public Stream<KmeansStatsResult> kmeansStats(String graphName, Map<String, Object> configuration) {
+    public Stream<KMeansStatsResult> kmeansStats(String graphName, Map<String, Object> configuration) {
         var statisticsComputationInstructions = ProcedureStatisticsComputationInstructions.forCommunities(
             procedureReturnColumns);
         var shouldComputeListOfCentroids = procedureReturnColumns.contains("centroids");
@@ -539,7 +539,7 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
     }
 
     @Override
-    public Stream<KmeansWriteResult> kmeansWrite(String graphName, Map<String, Object> configuration) {
+    public Stream<KMeansWriteResult> kmeansWrite(String graphName, Map<String, Object> configuration) {
         var statisticsComputationInstructions = ProcedureStatisticsComputationInstructions.forCommunities(
             procedureReturnColumns);
         var shouldComputeListOfCentroids = procedureReturnColumns.contains("centroids");

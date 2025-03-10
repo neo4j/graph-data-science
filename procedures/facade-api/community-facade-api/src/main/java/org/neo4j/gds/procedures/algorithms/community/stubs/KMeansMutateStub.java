@@ -22,13 +22,13 @@ package org.neo4j.gds.procedures.algorithms.community.stubs;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.kmeans.KmeansMutateConfig;
 import org.neo4j.gds.mem.MemoryEstimation;
-import org.neo4j.gds.procedures.algorithms.community.KmeansMutateResult;
+import org.neo4j.gds.procedures.algorithms.community.KMeansMutateResult;
 import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
 
 import java.util.Map;
 import java.util.stream.Stream;
 
-public interface KMeansMutateStub extends MutateStub<KmeansMutateConfig, KmeansMutateResult> {
+public interface KMeansMutateStub extends MutateStub<KmeansMutateConfig, KMeansMutateResult> {
     @Override
     KmeansMutateConfig parseConfiguration(Map<String, Object> configuration);
 
@@ -39,7 +39,7 @@ public interface KMeansMutateStub extends MutateStub<KmeansMutateConfig, KmeansM
     Stream<MemoryEstimateResult> estimate(Object graphName, Map<String, Object> rawConfiguration);
 
     @Override
-    Stream<KmeansMutateResult> execute(
+    Stream<KMeansMutateResult> execute(
         String graphNameAsString,
         Map<String, Object> rawConfiguration
     );

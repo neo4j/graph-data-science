@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.kmeans;
 
-import org.neo4j.gds.procedures.GraphDataScienceProcedures;
-import org.neo4j.gds.procedures.algorithms.community.KmeansMutateResult;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
+import org.neo4j.gds.procedures.GraphDataScienceProcedures;
+import org.neo4j.gds.procedures.algorithms.community.KMeansMutateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
@@ -41,7 +41,7 @@ public class KmeansMutateProc {
 
     @Procedure(value = "gds.kmeans.mutate", mode = READ)
     @Description(KMEANS_DESCRIPTION)
-    public Stream<KmeansMutateResult> mutate(
+    public Stream<KMeansMutateResult> mutate(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
@@ -52,7 +52,7 @@ public class KmeansMutateProc {
     @Internal
     @Procedure(value = "gds.beta.kmeans.mutate", mode = READ, deprecatedBy = "gds.kmeans.mutate")
     @Description(KMEANS_DESCRIPTION)
-    public Stream<KmeansMutateResult> betaMutate(
+    public Stream<KMeansMutateResult> betaMutate(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {

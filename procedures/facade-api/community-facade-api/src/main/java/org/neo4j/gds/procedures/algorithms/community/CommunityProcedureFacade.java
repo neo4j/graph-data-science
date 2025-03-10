@@ -122,7 +122,7 @@ public interface CommunityProcedureFacade {
 
     KMeansMutateStub kMeansMutateStub();
 
-    Stream<KmeansStatsResult> kmeansStats(String graphName, Map<String, Object> configuration);
+    Stream<KMeansStatsResult> kmeansStats(String graphName, Map<String, Object> configuration);
 
     Stream<MemoryEstimateResult> kmeansStatsEstimate(
         Object graphNameOrConfiguration,
@@ -139,7 +139,7 @@ public interface CommunityProcedureFacade {
         Map<String, Object> algorithmConfiguration
     );
 
-    Stream<KmeansWriteResult> kmeansWrite(String graphName, Map<String, Object> configuration);
+    Stream<KMeansWriteResult> kmeansWrite(String graphName, Map<String, Object> configuration);
 
     Stream<MemoryEstimateResult> kmeansWriteEstimate(
         Object graphNameOrConfiguration,

@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.kmeans;
 
-import org.neo4j.gds.procedures.GraphDataScienceProcedures;
-import org.neo4j.gds.procedures.algorithms.community.KmeansWriteResult;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
+import org.neo4j.gds.procedures.GraphDataScienceProcedures;
+import org.neo4j.gds.procedures.algorithms.community.KMeansWriteResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
@@ -42,7 +42,7 @@ public class KmeansWriteProc {
 
     @Procedure(value = "gds.kmeans.write", mode = WRITE)
     @Description(KMEANS_DESCRIPTION)
-    public Stream<KmeansWriteResult> write(
+    public Stream<KMeansWriteResult> write(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
@@ -53,7 +53,7 @@ public class KmeansWriteProc {
     @Internal
     @Procedure(value = "gds.beta.kmeans.write", mode = WRITE, deprecatedBy = "gds.beta.kmeans.write")
     @Description(KMEANS_DESCRIPTION)
-    public Stream<KmeansWriteResult> betaWrite(
+    public Stream<KMeansWriteResult> betaWrite(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {

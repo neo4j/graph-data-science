@@ -20,27 +20,34 @@
 package org.neo4j.gds.procedures.algorithms.community;
 
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.procedures.algorithms.results.StatsResult;
+import org.neo4j.gds.procedures.algorithms.results.MutateNodePropertiesResult;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-public record KMeansStatsResult(
-        long preProcessingMillis,
-        long computeMillis,
-        long postProcessingMillis,
-        Map<String, Object> communityDistribution,
-        List<List<Double>> centroids,
-        double averageDistanceToCentroid,
-        double averageSilhouette,
-        Map<String, Object> configuration
-    ) implements StatsResult {
+public record KMeansMutateResult(
+    long preProcessingMillis,
+    long computeMillis,
+    long postProcessingMillis,
+    long mutateMillis,
+    long nodePropertiesWritten,
+    Map<String, Object> communityDistribution,
+    List<List<Double>> centroids,
+    double averageDistanceToCentroid,
+    double averageSilhouette,
+    Map<String, Object> configuration
+) implements MutateNodePropertiesResult {
 
-    static KMeansStatsResult emptyFrom(AlgorithmProcessingTimings timings, Map<String, Object> configurationMap) {
-        return new KMeansStatsResult(
+    public static KMeansMutateResult emptyFrom(
+        AlgorithmProcessingTimings timings,
+        Map<String, Object> configurationMap
+    ) {
+        return new KMeansMutateResult(
             timings.preProcessingMillis,
             timings.computeMillis,
+            0,
+            timings.sideEffectMillis,
             0,
             Collections.emptyMap(),
             Collections.emptyList(),

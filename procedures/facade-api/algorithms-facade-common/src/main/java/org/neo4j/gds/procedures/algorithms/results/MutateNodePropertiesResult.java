@@ -17,15 +17,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.pipeline.stubs;
+package org.neo4j.gds.procedures.algorithms.results;
 
-import org.neo4j.gds.kmeans.KmeansMutateConfig;
-import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
-import org.neo4j.gds.procedures.algorithms.community.KMeansMutateResult;
-import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
-
-public class KMeansStub extends AbstractStub<KmeansMutateConfig, KMeansMutateResult> {
-    protected MutateStub<KmeansMutateConfig, KMeansMutateResult> stub(AlgorithmsProcedureFacade facade) {
-        return facade.community().kMeansMutateStub();
-    }
+public interface MutateNodePropertiesResult extends MutateResult {
+    long nodePropertiesWritten();
 }
