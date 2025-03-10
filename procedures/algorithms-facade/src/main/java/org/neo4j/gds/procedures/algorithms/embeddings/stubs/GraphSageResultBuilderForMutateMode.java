@@ -29,7 +29,7 @@ import org.neo4j.gds.procedures.algorithms.embeddings.DefaultNodeEmbeddingMutate
 
 import java.util.Optional;
 
-class GraphSageResultBuilderForMutateMode implements ResultBuilder<GraphSageMutateConfig, GraphSageResult, DefaultNodeEmbeddingMutateResult, NodePropertiesWritten> {
+public class GraphSageResultBuilderForMutateMode implements ResultBuilder<GraphSageMutateConfig, GraphSageResult, DefaultNodeEmbeddingMutateResult, NodePropertiesWritten> {
     @Override
     public DefaultNodeEmbeddingMutateResult build(
         Graph graph,

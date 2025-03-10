@@ -45,7 +45,7 @@ public class HashGNNMutateProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.algorithms().nodeEmbeddings().hashGnnMutateStub().execute(graphName, configuration);
+        return facade.algorithms().nodeEmbeddings().hashGnnMutate(graphName, configuration);
     }
 
     @Internal
@@ -70,7 +70,7 @@ public class HashGNNMutateProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.algorithms().nodeEmbeddings().hashGnnMutateStub().estimate(
+        return facade.algorithms().nodeEmbeddings().hashGnnMutateEstimate(
             graphNameOrConfiguration,
             algoConfiguration
         );

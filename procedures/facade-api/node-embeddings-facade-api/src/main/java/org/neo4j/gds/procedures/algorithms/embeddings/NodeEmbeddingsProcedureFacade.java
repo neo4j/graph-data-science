@@ -20,16 +20,14 @@
 package org.neo4j.gds.procedures.algorithms.embeddings;
 
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
-import org.neo4j.gds.procedures.algorithms.embeddings.stubs.FastRPMutateStub;
-import org.neo4j.gds.procedures.algorithms.embeddings.stubs.GraphSageMutateStub;
-import org.neo4j.gds.procedures.algorithms.embeddings.stubs.HashGnnMutateStub;
-import org.neo4j.gds.procedures.algorithms.embeddings.stubs.Node2VecMutateStub;
+import org.neo4j.gds.procedures.algorithms.embeddings.stubs.NodeEmbeddingsStubs;
 
 import java.util.Map;
 import java.util.stream.Stream;
 
 public interface NodeEmbeddingsProcedureFacade {
-    FastRPMutateStub fastRPMutateStub();
+
+    NodeEmbeddingsStubs stubs();
 
     Stream<FastRPStatsResult> fastRPStats(
         String graphName,
@@ -51,6 +49,16 @@ public interface NodeEmbeddingsProcedureFacade {
         Map<String, Object> algorithmConfiguration
     );
 
+    Stream<DefaultNodeEmbeddingMutateResult> fastRPMutate(
+        String graphName,
+        Map<String, Object> configuration
+    );
+
+    Stream<MemoryEstimateResult> fastRPMutateEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    );
+
     Stream<DefaultNodeEmbeddingsWriteResult> fastRPWrite(
         String graphName,
         Map<String, Object> configuration
@@ -61,14 +69,22 @@ public interface NodeEmbeddingsProcedureFacade {
         Map<String, Object> algorithmConfiguration
     );
 
-    GraphSageMutateStub graphSageMutateStub();
-
     Stream<DefaultNodeEmbeddingsStreamResult> graphSageStream(
         String graphName,
         Map<String, Object> configuration
     );
 
     Stream<MemoryEstimateResult> graphSageStreamEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    );
+
+    Stream<DefaultNodeEmbeddingMutateResult> graphSageMutate(
+        String graphName,
+        Map<String, Object> configuration
+    );
+
+    Stream<MemoryEstimateResult> graphSageMutateEstimate(
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     );
@@ -93,7 +109,6 @@ public interface NodeEmbeddingsProcedureFacade {
         Map<String, Object> algorithmConfiguration
     );
 
-    HashGnnMutateStub hashGnnMutateStub();
 
     Stream<DefaultNodeEmbeddingsStreamResult> hashGnnStream(
         String graphName,
@@ -101,6 +116,16 @@ public interface NodeEmbeddingsProcedureFacade {
     );
 
     Stream<MemoryEstimateResult> hashGnnStreamEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    );
+
+    Stream<DefaultNodeEmbeddingMutateResult> hashGnnMutate(
+        String graphName,
+        Map<String, Object> configuration
+    );
+
+    Stream<MemoryEstimateResult> hashGnnMutateEstimate(
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     );
@@ -115,7 +140,6 @@ public interface NodeEmbeddingsProcedureFacade {
         Map<String, Object> algorithmConfiguration
     );
 
-    Node2VecMutateStub node2VecMutateStub();
 
     Stream<DefaultNodeEmbeddingsStreamResult> node2VecStream(
         String graphName,
@@ -123,6 +147,16 @@ public interface NodeEmbeddingsProcedureFacade {
     );
 
     Stream<MemoryEstimateResult> node2VecStreamEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    );
+
+    Stream<Node2VecMutateResult> node2VecMutate(
+        String graphName,
+        Map<String, Object> configuration
+    );
+
+    Stream<MemoryEstimateResult> node2VecMutateEstimate(
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     );
