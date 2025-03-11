@@ -109,6 +109,7 @@ RETURN gds.graph.project(
 | readConcurrency                 | Integer               | 4                    | The number of concurrent threads used for creating the graph.
 | undirectedRelationshipTypes     | List of String        | []                   | Declare a number of relationship types as undirected. Relationships with the specified types will be imported as undirected. `*` can be used to declare all relationship types as undirected.
 | inverseIndexedRelationshipTypes | List of String        | []                   | Declare a number of relationship types which will also be indexed in inverse direction. `*` can be used to declare all relationship types as inverse indexed.
+| memory label:Gds-Session[]      | String                | -                   | Declare the memory used for the xref:installation/gds-sessions.adoc[GDS Session] created for the projected graph.
 |===
 
 
