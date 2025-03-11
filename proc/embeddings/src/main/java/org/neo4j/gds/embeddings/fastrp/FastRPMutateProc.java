@@ -44,7 +44,7 @@ public class FastRPMutateProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.algorithms().nodeEmbeddings().fastRPMutateStub().execute(graphName, configuration);
+        return facade.algorithms().nodeEmbeddings().fastRPMutate(graphName, configuration);
     }
 
     @Procedure(value = "gds.fastRP.mutate.estimate", mode = READ)
@@ -53,6 +53,6 @@ public class FastRPMutateProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.algorithms().nodeEmbeddings().fastRPMutateStub().estimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.algorithms().nodeEmbeddings().fastRPMutateEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 }

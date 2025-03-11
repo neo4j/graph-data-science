@@ -26,6 +26,6 @@ import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
 
 public class GraphSageStub extends AbstractStub<GraphSageMutateConfig, DefaultNodeEmbeddingMutateResult> {
     protected MutateStub<GraphSageMutateConfig, DefaultNodeEmbeddingMutateResult> stub(AlgorithmsProcedureFacade facade) {
-        return facade.nodeEmbeddings().graphSageMutateStub();
+        return facade.nodeEmbeddings().stubs().graphSage();
     }
 }

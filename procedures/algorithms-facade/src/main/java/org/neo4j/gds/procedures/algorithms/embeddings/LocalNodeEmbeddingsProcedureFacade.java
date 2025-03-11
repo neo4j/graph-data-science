@@ -40,14 +40,11 @@ import org.neo4j.gds.embeddings.hashgnn.HashGNNWriteConfig;
 import org.neo4j.gds.embeddings.node2vec.Node2VecStreamConfig;
 import org.neo4j.gds.embeddings.node2vec.Node2VecWriteConfig;
 import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
-import org.neo4j.gds.procedures.algorithms.embeddings.stubs.FastRPMutateStub;
-import org.neo4j.gds.procedures.algorithms.embeddings.stubs.GraphSageMutateStub;
-import org.neo4j.gds.procedures.algorithms.embeddings.stubs.HashGnnMutateStub;
 import org.neo4j.gds.procedures.algorithms.embeddings.stubs.LocalFastRPMutateStub;
 import org.neo4j.gds.procedures.algorithms.embeddings.stubs.LocalGraphSageMutateStub;
 import org.neo4j.gds.procedures.algorithms.embeddings.stubs.LocalHashGnnMutateStub;
 import org.neo4j.gds.procedures.algorithms.embeddings.stubs.LocalNode2VecMutateStub;
-import org.neo4j.gds.procedures.algorithms.embeddings.stubs.Node2VecMutateStub;
+import org.neo4j.gds.procedures.algorithms.embeddings.stubs.NodeEmbeddingsStubs;
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 
 import java.util.Map;
@@ -56,25 +53,17 @@ import java.util.stream.Stream;
 
 public final class LocalNodeEmbeddingsProcedureFacade implements NodeEmbeddingsProcedureFacade {
 
-    private final FastRPMutateStub fastRPMutateStub;
-    private final GraphSageMutateStub graphSageMutateStub;
-    private final HashGnnMutateStub hashGnnMutateStub;
-    private final Node2VecMutateStub node2VecMutateStub;
-
+    private final NodeEmbeddingsStubs stubs;
     private final NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade;
     private final NodeEmbeddingAlgorithmsStatsModeBusinessFacade statsModeBusinessFacade;
     private final NodeEmbeddingAlgorithmsStreamModeBusinessFacade streamModeBusinessFacade;
     private final NodeEmbeddingAlgorithmsTrainModeBusinessFacade trainModeBusinessFacade;
     private final NodeEmbeddingAlgorithmsWriteModeBusinessFacade writeModeBusinessFacade;
-
     private final UserSpecificConfigurationParser configurationParser;
     private final User user;
 
     private LocalNodeEmbeddingsProcedureFacade(
-        FastRPMutateStub fastRPMutateStub,
-        GraphSageMutateStub graphSageMutateStub,
-        HashGnnMutateStub hashGnnMutateStub,
-        Node2VecMutateStub node2VecMutateStub,
+        NodeEmbeddingsStubs stubs,
         NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade,
         NodeEmbeddingAlgorithmsStatsModeBusinessFacade statsModeBusinessFacade,
         NodeEmbeddingAlgorithmsStreamModeBusinessFacade streamModeBusinessFacade,
@@ -83,10 +72,7 @@ public final class LocalNodeEmbeddingsProcedureFacade implements NodeEmbeddingsP
         UserSpecificConfigurationParser configurationParser,
         User user
     ) {
-        this.fastRPMutateStub = fastRPMutateStub;
-        this.graphSageMutateStub = graphSageMutateStub;
-        this.hashGnnMutateStub = hashGnnMutateStub;
-        this.node2VecMutateStub = node2VecMutateStub;
+        this.stubs = stubs;
         this.estimationModeBusinessFacade = estimationModeBusinessFacade;
         this.statsModeBusinessFacade = statsModeBusinessFacade;
         this.streamModeBusinessFacade = streamModeBusinessFacade;
@@ -128,10 +114,12 @@ public final class LocalNodeEmbeddingsProcedureFacade implements NodeEmbeddingsP
         );
 
         return new LocalNodeEmbeddingsProcedureFacade(
-            fastRPMutateStub,
-            graphSageMutateStub,
-            hashGnnMutateStub,
-            node2VecMutateStub,
+            new NodeEmbeddingsStubs(
+                fastRPMutateStub,
+                graphSageMutateStub,
+                hashGnnMutateStub,
+                node2VecMutateStub
+            ),
             applicationsFacade.nodeEmbeddings().estimate(),
             applicationsFacade.nodeEmbeddings().stats(),
             applicationsFacade.nodeEmbeddings().stream(),
@@ -142,9 +130,10 @@ public final class LocalNodeEmbeddingsProcedureFacade implements NodeEmbeddingsP
         );
     }
 
+
     @Override
-    public FastRPMutateStub fastRPMutateStub() {
-        return fastRPMutateStub;
+    public NodeEmbeddingsStubs stubs() {
+        return stubs;
     }
 
     @Override
@@ -201,6 +190,20 @@ public final class LocalNodeEmbeddingsProcedureFacade implements NodeEmbeddingsP
     }
 
     @Override
+    public Stream<DefaultNodeEmbeddingMutateResult> fastRPMutate(String graphName, Map<String, Object> configuration) {
+        return stubs.fastRP().execute(graphName,configuration);
+    }
+
+    @Override
+    public Stream<MemoryEstimateResult> fastRPMutateEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        return stubs.fastRP().estimate(graphNameOrConfiguration, algorithmConfiguration);
+
+    }
+
+    @Override
     public Stream<DefaultNodeEmbeddingsWriteResult> fastRPWrite(
         String graphName,
         Map<String, Object> configuration
@@ -226,10 +229,6 @@ public final class LocalNodeEmbeddingsProcedureFacade implements NodeEmbeddingsP
         return Stream.of(result);
     }
 
-    @Override
-    public GraphSageMutateStub graphSageMutateStub() {
-        return graphSageMutateStub;
-    }
 
     @Override
     public Stream<DefaultNodeEmbeddingsStreamResult> graphSageStream(
@@ -265,6 +264,22 @@ public final class LocalNodeEmbeddingsProcedureFacade implements NodeEmbeddingsP
             graphNameOrConfiguration
         );
         return Stream.of(result);
+    }
+
+    @Override
+    public Stream<DefaultNodeEmbeddingMutateResult> graphSageMutate(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        return stubs.graphSage().execute(graphName,configuration);
+    }
+
+    @Override
+    public Stream<MemoryEstimateResult> graphSageMutateEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        return stubs.graphSage().estimate(graphNameOrConfiguration, algorithmConfiguration);
     }
 
     @Override
@@ -336,10 +351,6 @@ public final class LocalNodeEmbeddingsProcedureFacade implements NodeEmbeddingsP
         return Stream.of(result);
     }
 
-    @Override
-    public HashGnnMutateStub hashGnnMutateStub() {
-        return hashGnnMutateStub;
-    }
 
     @Override
     public Stream<DefaultNodeEmbeddingsStreamResult> hashGnnStream(
@@ -369,12 +380,26 @@ public final class LocalNodeEmbeddingsProcedureFacade implements NodeEmbeddingsP
     }
 
     @Override
+    public Stream<DefaultNodeEmbeddingMutateResult> hashGnnMutate(String graphName, Map<String, Object> configuration) {
+        return stubs.hashGnn().execute(graphName,configuration);
+    }
+
+    @Override
+    public Stream<MemoryEstimateResult> hashGnnMutateEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        return  stubs.hashGnn().estimate(graphNameOrConfiguration,algorithmConfiguration);
+    }
+
+    @Override
     public Stream<DefaultNodeEmbeddingsWriteResult> hashGnnWrite(String graphName, Map<String, Object> configuration) {
         var resultBuilder = new HashGNNResultBuilderForWriteMode();
         return writeModeBusinessFacade.hashGnn(
             GraphName.parse(graphName),
             configurationParser.parseConfiguration(configuration, HashGNNWriteConfig::of),
-            resultBuilder);
+            resultBuilder
+        );
     }
 
     @Override
@@ -387,11 +412,6 @@ public final class LocalNodeEmbeddingsProcedureFacade implements NodeEmbeddingsP
             graphNameOrConfiguration
         );
         return Stream.of(result);
-    }
-
-    @Override
-    public Node2VecMutateStub node2VecMutateStub() {
-        return node2VecMutateStub;
     }
 
     @Override
@@ -418,6 +438,19 @@ public final class LocalNodeEmbeddingsProcedureFacade implements NodeEmbeddingsP
             graphNameOrConfiguration
         );
         return Stream.of(result);
+    }
+
+    @Override
+    public Stream<Node2VecMutateResult> node2VecMutate(String graphName, Map<String, Object> configuration) {
+        return stubs.node2Vec().execute(graphName, configuration);
+    }
+
+    @Override
+    public Stream<MemoryEstimateResult> node2VecMutateEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        return stubs.node2Vec().estimate(graphNameOrConfiguration, algorithmConfiguration);
     }
 
     @Override

@@ -17,15 +17,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.pipeline.stubs;
+package org.neo4j.gds.procedures.algorithms.embeddings.stubs;
 
-import org.neo4j.gds.embeddings.node2vec.Node2VecMutateConfig;
-import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
-import org.neo4j.gds.procedures.algorithms.embeddings.Node2VecMutateResult;
-import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
-
-public class Node2VecStub extends AbstractStub<Node2VecMutateConfig, Node2VecMutateResult> {
-    protected MutateStub<Node2VecMutateConfig, Node2VecMutateResult> stub(AlgorithmsProcedureFacade facade) {
-        return facade.nodeEmbeddings().stubs().node2Vec();
-    }
+public record NodeEmbeddingsStubs(FastRPMutateStub fastRP,
+                                   GraphSageMutateStub graphSage,
+                                   HashGnnMutateStub hashGnn,
+                                   Node2VecMutateStub node2Vec
+) {
 }

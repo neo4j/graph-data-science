@@ -20,40 +20,25 @@
 package org.neo4j.gds.procedures.algorithms.embeddings;
 
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-public final class Node2VecWriteResult {
-    public final long nodeCount;
-    public final long nodePropertiesWritten;
-    public final long preProcessingMillis;
-    public final long computeMillis;
-    public final long writeMillis;
-    public final Map<String, Object> configuration;
-    public final List<Double> lossPerIteration;
+public record Node2VecWriteResult(
+    long nodeCount,
+    long nodePropertiesWritten,
+    long preProcessingMillis,
+    long computeMillis,
+    long writeMillis,
+    Map<String, Object> configuration,
+    List<Double> lossPerIteration
+) {
 
-    public Node2VecWriteResult(
-        long nodeCount,
-        long nodePropertiesWritten,
-        long preProcessingMillis,
-        long computeMillis,
-        long writeMillis,
-        Map<String, Object> configuration,
-        List<Double> lossPerIteration
+    public static Node2VecWriteResult emptyFrom(
+        AlgorithmProcessingTimings timings,
+        Map<String, Object> configurationMap
     ) {
-        this.nodeCount = nodeCount;
-        this.nodePropertiesWritten = nodePropertiesWritten;
-        this.preProcessingMillis = preProcessingMillis;
-        this.computeMillis = computeMillis;
-        this.writeMillis = writeMillis;
-        this.configuration = configuration;
-        this.lossPerIteration = lossPerIteration;
-    }
-
-    static Node2VecWriteResult emptyFrom(AlgorithmProcessingTimings timings, Map<String, Object> configurationMap) {
         return new Node2VecWriteResult(
             0,
             0,
@@ -63,27 +48,5 @@ public final class Node2VecWriteResult {
             configurationMap,
             Collections.emptyList()
         );
-    }
-
-    public static class Builder extends AbstractResultBuilder<Node2VecWriteResult> {
-        private List<Double> lossPerIteration;
-
-        @Override
-        public Node2VecWriteResult build() {
-            return new Node2VecWriteResult(
-                nodeCount,
-                nodePropertiesWritten,
-                preProcessingMillis,
-                computeMillis,
-                writeMillis,
-                config.toMap(),
-                lossPerIteration
-            );
-        }
-
-        public Builder withLossPerIteration(List<Double> lossPerIteration) {
-            this.lossPerIteration = lossPerIteration;
-            return this;
-        }
     }
 }
