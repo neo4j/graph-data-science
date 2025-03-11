@@ -31,7 +31,6 @@ public record Node2VecWriteResult(
     long preProcessingMillis,
     long computeMillis,
     long writeMillis,
-    long postProcessingMillis,
     Map<String, Object> configuration,
     List<Double> lossPerIteration
 ) {
@@ -46,7 +45,6 @@ public record Node2VecWriteResult(
             timings.preProcessingMillis,
             timings.computeMillis,
             timings.sideEffectMillis,
-            0,
             configurationMap,
             Collections.emptyList()
         );

@@ -48,7 +48,6 @@ class Node2VecResultBuilderForWriteMode implements ResultBuilder<Node2VecWriteCo
             timings.preProcessingMillis,
             timings.computeMillis,
             timings.sideEffectMillis,
-            0,
             configuration.toMap(),
             node2VecResult.lossPerIteration()
         );

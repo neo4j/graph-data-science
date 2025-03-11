@@ -20,6 +20,7 @@
 package org.neo4j.gds.procedures.algorithms.embeddings;
 
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
+import org.neo4j.gds.procedures.algorithms.results.MutateNodePropertiesResult;
 
 import java.util.Collections;
 import java.util.List;
@@ -34,7 +35,7 @@ public record Node2VecMutateResult(
         long postProcessingMillis,
         Map<String, Object> configuration,
         List<Double> lossPerIteration
-    ) {
+    ) implements MutateNodePropertiesResult {
 
     public static Node2VecMutateResult emptyFrom(AlgorithmProcessingTimings timings, Map<String, Object> configurationMap) {
         return new Node2VecMutateResult(
