@@ -20,33 +20,18 @@
 package org.neo4j.gds.procedures.algorithms.embeddings;
 
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.result.AbstractResultBuilder;
+import org.neo4j.gds.procedures.algorithms.results.ModeResult;
 
 import java.util.Map;
 
-public final class DefaultNodeEmbeddingMutateResult {
-    public final long nodePropertiesWritten;
-    public final long mutateMillis;
-    public final long nodeCount;
-    public final long preProcessingMillis;
-    public final long computeMillis;
-    public final Map<String, Object> configuration;
-
-    public DefaultNodeEmbeddingMutateResult(
+public record DefaultNodeEmbeddingMutateResult(
         long nodeCount,
         long nodePropertiesWritten,
         long preProcessingMillis,
         long computeMillis,
         long mutateMillis,
-        Map<String, Object> config
-    ) {
-        this.nodeCount = nodeCount;
-        this.nodePropertiesWritten = nodePropertiesWritten;
-        this.preProcessingMillis = preProcessingMillis;
-        this.computeMillis = computeMillis;
-        this.mutateMillis = mutateMillis;
-        this.configuration = config;
-    }
+        Map<String, Object> configuration
+    ) implements ModeResult {
 
     public static DefaultNodeEmbeddingMutateResult emptyFrom(
         AlgorithmProcessingTimings timings,
@@ -62,17 +47,4 @@ public final class DefaultNodeEmbeddingMutateResult {
         );
     }
 
-    public static final class Builder extends AbstractResultBuilder<DefaultNodeEmbeddingMutateResult> {
-        @Override
-        public DefaultNodeEmbeddingMutateResult build() {
-            return new DefaultNodeEmbeddingMutateResult(
-                nodeCount,
-                nodePropertiesWritten,
-                preProcessingMillis,
-                computeMillis,
-                mutateMillis,
-                config.toMap()
-            );
-        }
-    }
 }
