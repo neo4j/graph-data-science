@@ -23,10 +23,16 @@ import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.config.MutateNodePropertyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
+import java.util.Map;
+
 @Configuration
 public interface LouvainMutateConfig extends LouvainBaseConfig, MutateNodePropertyConfig {
 
     static LouvainMutateConfig of(CypherMapWrapper userInput) {
         return new LouvainMutateConfigImpl(userInput);
+    }
+
+    static LouvainMutateConfig of(Map<String, Object> userInput) {
+        return of(CypherMapWrapper.create(userInput));
     }
 }
