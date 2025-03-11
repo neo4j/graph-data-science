@@ -48,7 +48,7 @@ class ScalePropertiesResultBuilderForStreamMode implements StreamResultBuilder<S
 
         return LongStream
             .range(0, graph.nodeCount())
-            .mapToObj(nodeId -> new ScalePropertiesStreamResult(
+            .mapToObj(nodeId ->  ScalePropertiesStreamResult.create(
                 graph.toOriginalNodeId(nodeId),
                 nodeProperties.doubleArrayValue(nodeId)
             ));
