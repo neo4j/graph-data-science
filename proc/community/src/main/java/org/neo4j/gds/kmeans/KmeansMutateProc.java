@@ -45,7 +45,7 @@ public class KmeansMutateProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.algorithms().community().kMeansMutateStub().execute(graphName, configuration);
+        return facade.algorithms().community().kMeansMutate(graphName, configuration);
     }
 
     @Deprecated(forRemoval = true)
@@ -69,7 +69,7 @@ public class KmeansMutateProc {
         @Name(value = "graphNameOrConfiguration") Object graphName,
         @Name(value = "algoConfiguration") Map<String, Object> configuration
     ) {
-        return facade.algorithms().community().kMeansMutateStub().estimate(graphName, configuration);
+        return facade.algorithms().community().kMeansMutateEstimate(graphName, configuration);
     }
 
     @Deprecated(forRemoval = true)

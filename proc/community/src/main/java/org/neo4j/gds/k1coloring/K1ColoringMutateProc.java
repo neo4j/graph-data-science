@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.k1coloring;
 
+import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.algorithms.community.K1ColoringMutateResult;
-import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
@@ -45,7 +45,7 @@ public class K1ColoringMutateProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.algorithms().community().k1ColoringMutateStub().execute(graphName, configuration);
+        return facade.algorithms().community().k1ColoringMutate(graphName, configuration);
     }
 
     @Procedure(value = "gds.k1coloring.mutate.estimate", mode = READ)
@@ -54,7 +54,7 @@ public class K1ColoringMutateProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.algorithms().community().k1ColoringMutateStub().estimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.algorithms().community().k1ColoringMutateEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
     @Procedure(value = "gds.beta.k1coloring.mutate", mode = READ, deprecatedBy = "gds.beta.k1coloring.mutate")

@@ -45,7 +45,7 @@ public class ApproxMaxKCutMutateProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.algorithms().community().approximateMaximumKCutMutateStub().execute(graphName, configuration);
+        return facade.algorithms().community().approximateMaximumKCutMutate(graphName, configuration);
     }
 
     @Procedure(value = "gds.maxkcut.mutate.estimate", mode = READ)
@@ -54,7 +54,7 @@ public class ApproxMaxKCutMutateProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.algorithms().community().approximateMaximumKCutMutateStub().estimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.algorithms().community().approximateMaximumKCutMutateEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
     @Deprecated

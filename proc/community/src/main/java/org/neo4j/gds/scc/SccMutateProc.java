@@ -44,7 +44,7 @@ public class SccMutateProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.algorithms().community().sccMutateStub().execute(graphName, configuration);
+        return facade.algorithms().community().sccMutate(graphName, configuration);
     }
 
     @Procedure(value = "gds.scc.mutate.estimate", mode = READ)
@@ -53,6 +53,6 @@ public class SccMutateProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.algorithms().community().sccMutateStub().estimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.algorithms().community().sccMutateEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 }

@@ -44,7 +44,7 @@ public class WccMutateProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.algorithms().community().wccMutateStub().execute(graphName, configuration);
+        return facade.algorithms().community().wccMutate(graphName, configuration);
     }
 
     @Procedure(value = "gds.wcc.mutate.estimate", mode = READ)
@@ -53,6 +53,6 @@ public class WccMutateProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.algorithms().community().wccMutateStub().estimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.algorithms().community().wccMutateEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 }

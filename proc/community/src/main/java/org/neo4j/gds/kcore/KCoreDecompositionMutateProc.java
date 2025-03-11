@@ -44,7 +44,7 @@ public class KCoreDecompositionMutateProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.algorithms().community().kCoreMutateStub().execute(graphName, configuration);
+        return facade.algorithms().community().kCoreMutate(graphName, configuration);
     }
 
     @Procedure(value = "gds.kcore.mutate.estimate", mode = READ)
@@ -53,6 +53,6 @@ public class KCoreDecompositionMutateProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.algorithms().community().kCoreMutateStub().estimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.algorithms().community().kCoreMutateEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 }

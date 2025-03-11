@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.labelpropagation;
 
+import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.algorithms.community.LabelPropagationMutateResult;
-import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -44,7 +44,7 @@ public class LabelPropagationMutateProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.algorithms().community().labelPropagationMutateStub().execute(graphName, configuration);
+        return facade.algorithms().community().labelPropagationMutate(graphName, configuration);
     }
 
     @Procedure(value = "gds.labelPropagation.mutate.estimate", mode = READ)
@@ -53,6 +53,6 @@ public class LabelPropagationMutateProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.algorithms().community().labelPropagationMutateStub().estimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.algorithms().community().labelPropagationMutateEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 }

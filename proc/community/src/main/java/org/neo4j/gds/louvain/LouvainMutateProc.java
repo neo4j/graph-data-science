@@ -44,7 +44,7 @@ public class LouvainMutateProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.algorithms().community().louvainMutateStub().execute(graphName, configuration);
+        return facade.algorithms().community().louvainMutate(graphName, configuration);
     }
 
     @Procedure(value = "gds.louvain.mutate.estimate", mode = READ)
@@ -53,6 +53,6 @@ public class LouvainMutateProc {
         @Name(value = "graphNameOrConfiguration") Object graphName,
         @Name(value = "algoConfiguration") Map<String, Object> configuration
     ) {
-        return facade.algorithms().community().louvainMutateStub().estimate(graphName, configuration);
+        return facade.algorithms().community().louvainMutateEstimate(graphName, configuration);
     }
 }

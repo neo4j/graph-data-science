@@ -313,6 +313,22 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
     }
 
     @Override
+    public Stream<ApproxMaxKCutMutateResult> approximateMaximumKCutMutate(
+        String graphName,
+        Map<String, Object> rawConfiguration
+    ) {
+        return approximateMaximumKCutMutateStub().execute(graphName, rawConfiguration);
+    }
+
+    @Override
+    public Stream<MemoryEstimateResult> approximateMaximumKCutMutateEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> rawConfiguration
+    ) {
+        return approximateMaximumKCutMutateStub().estimate(graphNameOrConfiguration, rawConfiguration);
+    }
+
+    @Override
     public Stream<ApproxMaxKCutStreamResult> approxMaxKCutStream(
         String graphName,
         Map<String, Object> configuration
@@ -350,6 +366,22 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
     @Override
     public K1ColoringMutateStub k1ColoringMutateStub() {
         return k1ColoringMutateStub;
+    }
+
+    @Override
+    public Stream<K1ColoringMutateResult> k1ColoringMutate(
+        String graphName,
+        Map<String, Object> rawConfiguration
+    ) {
+        return k1ColoringMutateStub().execute(graphName, rawConfiguration);
+    }
+
+    @Override
+    public Stream<MemoryEstimateResult> k1ColoringMutateEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> rawConfiguration
+    ) {
+        return k1ColoringMutateStub().estimate(graphNameOrConfiguration, rawConfiguration);
     }
 
     @Override
@@ -418,6 +450,22 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
     @Override
     public KCoreMutateStub kCoreMutateStub() {
         return kCoreMutateStub;
+    }
+
+    @Override
+    public Stream<KCoreDecompositionMutateResult> kCoreMutate(
+        String graphName,
+        Map<String, Object> rawConfiguration
+    ) {
+        return kCoreMutateStub().execute(graphName, rawConfiguration);
+    }
+
+    @Override
+    public Stream<MemoryEstimateResult> kCoreMutateEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> rawConfiguration
+    ) {
+        return kCoreMutateStub().estimate(graphNameOrConfiguration, rawConfiguration);
     }
 
     @Override
@@ -495,6 +543,22 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
     }
 
     @Override
+    public Stream<KMeansMutateResult> kMeansMutate(
+        String graphName,
+        Map<String, Object> rawConfiguration
+    ) {
+        return kMeansMutateStub().execute(graphName, rawConfiguration);
+    }
+
+    @Override
+    public Stream<MemoryEstimateResult> kMeansMutateEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> rawConfiguration
+    ) {
+        return kMeansMutateStub().estimate(graphNameOrConfiguration, rawConfiguration);
+    }
+
+    @Override
     public Stream<KmeansStatsResult> kmeansStats(String graphName, Map<String, Object> configuration) {
         var statisticsComputationInstructions = ProcedureStatisticsComputationInstructions.forCommunities(
             procedureReturnColumns);
@@ -564,6 +628,38 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
     @Override
     public LabelPropagationMutateStub labelPropagationMutateStub() {
         return labelPropagationMutateStub;
+    }
+
+    @Override
+    public Stream<LocalClusteringCoefficientMutateResult> localClusteringCoefficientMutate(
+        String graphName,
+        Map<String, Object> rawConfiguration
+    ) {
+        return lccMutateStub().execute(graphName, rawConfiguration);
+    }
+
+    @Override
+    public Stream<MemoryEstimateResult> localClusteringCoefficientMutateEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> rawConfiguration
+    ) {
+        return lccMutateStub().estimate(graphNameOrConfiguration, rawConfiguration);
+    }
+
+    @Override
+    public Stream<LabelPropagationMutateResult> labelPropagationMutate(
+        String graphName,
+        Map<String, Object> rawConfiguration
+    ) {
+        return labelPropagationMutateStub().execute(graphName, rawConfiguration);
+    }
+
+    @Override
+    public Stream<MemoryEstimateResult> labelPropagationMutateEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> rawConfiguration
+    ) {
+        return labelPropagationMutateStub().estimate(graphNameOrConfiguration, rawConfiguration);
     }
 
     @Override
@@ -730,6 +826,22 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
     }
 
     @Override
+    public Stream<LeidenMutateResult> leidenMutate(
+        String graphName,
+        Map<String, Object> rawConfiguration
+    ) {
+        return leidenMutateStub().execute(graphName, rawConfiguration);
+    }
+
+    @Override
+    public Stream<MemoryEstimateResult> leidenMutateEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> rawConfiguration
+    ) {
+        return leidenMutateStub().estimate(graphNameOrConfiguration, rawConfiguration);
+    }
+
+    @Override
     public Stream<LeidenStatsResult> leidenStats(String graphName, Map<String, Object> configuration) {
         var statisticsComputationInstructions = ProcedureStatisticsComputationInstructions.forCommunities(
             procedureReturnColumns);
@@ -794,6 +906,22 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
     @Override
     public LouvainMutateStub louvainMutateStub() {
         return louvainMutateStub;
+    }
+
+    @Override
+    public Stream<LouvainMutateResult> louvainMutate(
+        String graphName,
+        Map<String, Object> rawConfiguration
+    ) {
+        return louvainMutateStub().execute(graphName, rawConfiguration);
+    }
+
+    @Override
+    public Stream<MemoryEstimateResult> louvainMutateEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> rawConfiguration
+    ) {
+        return louvainMutateStub().estimate(graphNameOrConfiguration, rawConfiguration);
     }
 
     @Override
@@ -904,6 +1032,22 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
     }
 
     @Override
+    public Stream<ModularityOptimizationMutateResult> modularityOptimizationMutate(
+        String graphName,
+        Map<String, Object> rawConfiguration
+    ) {
+        return modularityOptimizationMutateStub().execute(graphName, rawConfiguration);
+    }
+
+    @Override
+    public Stream<MemoryEstimateResult> modularityOptimizationMutateEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> rawConfiguration
+    ) {
+        return modularityOptimizationMutateStub().estimate(graphNameOrConfiguration, rawConfiguration);
+    }
+
+    @Override
     public Stream<ModularityOptimizationStatsResult> modularityOptimizationStats(
         String graphName,
         Map<String, Object> configuration
@@ -990,6 +1134,22 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
     }
 
     @Override
+    public Stream<SccMutateResult> sccMutate(
+        String graphName,
+        Map<String, Object> rawConfiguration
+    ) {
+        return sccMutateStub().execute(graphName, rawConfiguration);
+    }
+
+    @Override
+    public Stream<MemoryEstimateResult> sccMutateEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> rawConfiguration
+    ) {
+        return sccMutateStub().estimate(graphNameOrConfiguration, rawConfiguration);
+    }
+
+    @Override
     public Stream<SccStatsResult> sccStats(
         String graphName,
         Map<String, Object> configuration
@@ -1072,6 +1232,22 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
     }
 
     @Override
+    public Stream<TriangleCountMutateResult> triangleCountMutate(
+        String graphName,
+        Map<String, Object> rawConfiguration
+    ) {
+        return triangleCountMutateStub().execute(graphName, rawConfiguration);
+    }
+
+    @Override
+    public Stream<MemoryEstimateResult> triangleCountMutateEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> rawConfiguration
+    ) {
+        return triangleCountMutateStub().estimate(graphNameOrConfiguration, rawConfiguration);
+    }
+
+    @Override
     public Stream<TriangleCountStatsResult> triangleCountStats(String graphName, Map<String, Object> configuration) {
         var parsedConfig = configurationParser.parseConfiguration(configuration, TriangleCountStatsConfig::of);
         var resultBuilder = new TriangleCountResultBuilderForStatsMode(parsedConfig);
@@ -1148,6 +1324,22 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
     @Override
     public WccMutateStub wccMutateStub() {
         return wccMutateStub;
+    }
+
+    @Override
+    public Stream<WccMutateResult> wccMutate(
+        String graphName,
+        Map<String, Object> rawConfiguration
+    ) {
+        return wccMutateStub().execute(graphName, rawConfiguration);
+    }
+
+    @Override
+    public Stream<MemoryEstimateResult> wccMutateEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> rawConfiguration
+    ) {
+        return wccMutateStub().estimate(graphNameOrConfiguration, rawConfiguration);
     }
 
     @Override

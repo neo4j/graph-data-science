@@ -41,6 +41,16 @@ import java.util.stream.Stream;
 public interface CommunityProcedureFacade {
     ApproximateMaximumKCutMutateStub approximateMaximumKCutMutateStub();
 
+    Stream<ApproxMaxKCutMutateResult> approximateMaximumKCutMutate(
+        String graphName,
+        Map<String, Object> rawConfiguration
+    );
+
+    Stream<MemoryEstimateResult> approximateMaximumKCutMutateEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> rawConfiguration
+    );
+
     Stream<ApproxMaxKCutStreamResult> approxMaxKCutStream(
         String graphName,
         Map<String, Object> configuration
@@ -57,6 +67,16 @@ public interface CommunityProcedureFacade {
     );
 
     K1ColoringMutateStub k1ColoringMutateStub();
+
+    Stream<K1ColoringMutateResult> k1ColoringMutate(
+        String graphName,
+        Map<String, Object> rawConfiguration
+    );
+
+    Stream<MemoryEstimateResult> k1ColoringMutateEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> rawConfiguration
+    );
 
     Stream<K1ColoringStatsResult> k1ColoringStats(
         String graphName,
@@ -90,6 +110,16 @@ public interface CommunityProcedureFacade {
 
     KCoreMutateStub kCoreMutateStub();
 
+    Stream<KCoreDecompositionMutateResult> kCoreMutate(
+        String graphName,
+        Map<String, Object> rawConfiguration
+    );
+
+    Stream<MemoryEstimateResult> kCoreMutateEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> rawConfiguration
+    );
+
     Stream<KCoreDecompositionStatsResult> kCoreStats(
         String graphName,
         Map<String, Object> configuration
@@ -122,6 +152,16 @@ public interface CommunityProcedureFacade {
 
     KMeansMutateStub kMeansMutateStub();
 
+    Stream<KMeansMutateResult> kMeansMutate(
+        String graphName,
+        Map<String, Object> rawConfiguration
+    );
+
+    Stream<MemoryEstimateResult> kMeansMutateEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> rawConfiguration
+    );
+
     Stream<KmeansStatsResult> kmeansStats(String graphName, Map<String, Object> configuration);
 
     Stream<MemoryEstimateResult> kmeansStatsEstimate(
@@ -147,6 +187,16 @@ public interface CommunityProcedureFacade {
     );
 
     LabelPropagationMutateStub labelPropagationMutateStub();
+
+    Stream<LabelPropagationMutateResult> labelPropagationMutate(
+        String graphName,
+        Map<String, Object> rawConfiguration
+    );
+
+    Stream<MemoryEstimateResult> labelPropagationMutateEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> rawConfiguration
+    );
 
     Stream<LabelPropagationStatsResult> labelPropagationStats(
         String graphName,
@@ -179,6 +229,16 @@ public interface CommunityProcedureFacade {
 
     LccMutateStub lccMutateStub();
 
+    Stream<LocalClusteringCoefficientMutateResult> localClusteringCoefficientMutate(
+        String graphName,
+        Map<String, Object> rawConfiguration
+    );
+
+    Stream<MemoryEstimateResult> localClusteringCoefficientMutateEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> rawConfiguration
+    );
+
     Stream<LocalClusteringCoefficientStatsResult> localClusteringCoefficientStats(
         String graphName,
         Map<String, Object> configuration
@@ -209,6 +269,16 @@ public interface CommunityProcedureFacade {
 
     LeidenMutateStub leidenMutateStub();
 
+    Stream<LeidenMutateResult> leidenMutate(
+        String graphName,
+        Map<String, Object> rawConfiguration
+    );
+
+    Stream<MemoryEstimateResult> leidenMutateEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> rawConfiguration
+    );
+
     Stream<LeidenStatsResult> leidenStats(String graphName, Map<String, Object> configuration);
 
     Stream<MemoryEstimateResult> leidenStatsEstimate(
@@ -237,6 +307,16 @@ public interface CommunityProcedureFacade {
     );
 
     LouvainMutateStub louvainMutateStub();
+
+    Stream<LouvainMutateResult> louvainMutate(
+        String graphName,
+        Map<String, Object> rawConfiguration
+    );
+
+    Stream<MemoryEstimateResult> louvainMutateEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> rawConfiguration
+    );
 
     Stream<LouvainStatsResult> louvainStats(String graphName, Map<String, Object> configuration);
 
@@ -287,6 +367,16 @@ public interface CommunityProcedureFacade {
 
     ModularityOptimizationMutateStub modularityOptimizationMutateStub();
 
+    Stream<ModularityOptimizationMutateResult> modularityOptimizationMutate(
+        String graphName,
+        Map<String, Object> rawConfiguration
+    );
+
+    Stream<MemoryEstimateResult> modularityOptimizationMutateEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> rawConfiguration
+    );
+
     Stream<ModularityOptimizationStatsResult> modularityOptimizationStats(
         String graphName,
         Map<String, Object> configuration
@@ -317,6 +407,16 @@ public interface CommunityProcedureFacade {
     );
 
     SccMutateStub sccMutateStub();
+
+    Stream<SccMutateResult> sccMutate(
+        String graphName,
+        Map<String, Object> rawConfiguration
+    );
+
+    Stream<MemoryEstimateResult> sccMutateEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> rawConfiguration
+    );
 
     Stream<SccStatsResult> sccStats(
         String graphName,
@@ -355,6 +455,16 @@ public interface CommunityProcedureFacade {
 
     TriangleCountMutateStub triangleCountMutateStub();
 
+    Stream<TriangleCountMutateResult> triangleCountMutate(
+        String graphName,
+        Map<String, Object> rawConfiguration
+    );
+
+    Stream<MemoryEstimateResult> triangleCountMutateEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> rawConfiguration
+    );
+
     Stream<TriangleCountStatsResult> triangleCountStats(String graphName, Map<String, Object> configuration);
 
     Stream<MemoryEstimateResult> triangleCountStatsEstimate(
@@ -385,6 +495,16 @@ public interface CommunityProcedureFacade {
     Stream<TriangleStreamResult> trianglesStream(String graphName, Map<String, Object> configuration);
 
     WccMutateStub wccMutateStub();
+
+    Stream<WccMutateResult> wccMutate(
+        String graphName,
+        Map<String, Object> rawConfiguration
+    );
+
+    Stream<MemoryEstimateResult> wccMutateEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> rawConfiguration
+    );
 
     Stream<WccStatsResult> wccStats(String graphName, Map<String, Object> configuration);
 
