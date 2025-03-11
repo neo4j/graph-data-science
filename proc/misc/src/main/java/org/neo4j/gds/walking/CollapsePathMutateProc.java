@@ -43,7 +43,7 @@ public class CollapsePathMutateProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.algorithms().miscellaneous().collapsePathMutateStub().execute(graphName, configuration);
+        return facade.algorithms().miscellaneous().collapsePathMutate(graphName, configuration);
     }
 
     @Procedure(name = "gds.beta.collapsePath.mutate", mode = READ, deprecatedBy = "gds.collapsePath.mutate")

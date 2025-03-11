@@ -26,6 +26,6 @@ import org.neo4j.gds.walking.CollapsePathConfig;
 
 public class CollapsePathStub extends AbstractStub<CollapsePathConfig, CollapsePathMutateResult> {
     protected MutateStub<CollapsePathConfig, CollapsePathMutateResult> stub(AlgorithmsProcedureFacade facade) {
-        return facade.miscellaneous().collapsePathMutateStub();
+        return facade.miscellaneous().stubs().collapsePath();
     }
 }

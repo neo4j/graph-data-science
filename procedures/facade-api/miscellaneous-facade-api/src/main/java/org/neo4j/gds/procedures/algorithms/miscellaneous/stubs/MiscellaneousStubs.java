@@ -17,15 +17,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.pipeline.stubs;
+package org.neo4j.gds.procedures.algorithms.miscellaneous.stubs;
 
-import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
-import org.neo4j.gds.procedures.algorithms.miscellaneous.ScalePropertiesMutateResult;
-import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
-import org.neo4j.gds.scaleproperties.ScalePropertiesMutateConfig;
-
-public class ScalePropertiesStub extends AbstractStub<ScalePropertiesMutateConfig, ScalePropertiesMutateResult> {
-    protected MutateStub<ScalePropertiesMutateConfig, ScalePropertiesMutateResult> stub(AlgorithmsProcedureFacade facade) {
-        return facade.miscellaneous().stubs().scaleProperties();
-    }
-}
+public record MiscellaneousStubs(
+    CollapsePathMutateStub collapsePath,
+    IndexInverseMutateStub indexInverse,
+    ScalePropertiesMutateStub alphaScaleProperties,
+    ScalePropertiesMutateStub scaleProperties,
+    ToUndirectedMutateStub toUndirected
+) {}

@@ -46,7 +46,7 @@ public class IndexInverseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.algorithms().miscellaneous().indexInverseMutateStub().execute(graphName, configuration);
+        return facade.algorithms().miscellaneous().indexInverse(graphName, configuration);
     }
 
     @Internal // waiting for PM decision
@@ -56,6 +56,6 @@ public class IndexInverseProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.algorithms().miscellaneous().indexInverseMutateStub().estimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.algorithms().miscellaneous().indexInverseEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 }

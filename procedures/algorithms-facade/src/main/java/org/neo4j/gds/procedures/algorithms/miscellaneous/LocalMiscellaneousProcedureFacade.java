@@ -28,14 +28,11 @@ import org.neo4j.gds.applications.algorithms.miscellaneous.MiscellaneousApplicat
 import org.neo4j.gds.applications.algorithms.miscellaneous.MiscellaneousApplicationsStreamModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.miscellaneous.MiscellaneousApplicationsWriteModeBusinessFacade;
 import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
-import org.neo4j.gds.procedures.algorithms.miscellaneous.stubs.CollapsePathMutateStub;
-import org.neo4j.gds.procedures.algorithms.miscellaneous.stubs.IndexInverseMutateStub;
 import org.neo4j.gds.procedures.algorithms.miscellaneous.stubs.LocalCollapsePathMutateStub;
 import org.neo4j.gds.procedures.algorithms.miscellaneous.stubs.LocalIndexInverseMutateStub;
 import org.neo4j.gds.procedures.algorithms.miscellaneous.stubs.LocalScalePropertiesMutateStub;
 import org.neo4j.gds.procedures.algorithms.miscellaneous.stubs.LocalToUndirectedMutateStub;
-import org.neo4j.gds.procedures.algorithms.miscellaneous.stubs.ScalePropertiesMutateStub;
-import org.neo4j.gds.procedures.algorithms.miscellaneous.stubs.ToUndirectedMutateStub;
+import org.neo4j.gds.procedures.algorithms.miscellaneous.stubs.MiscellaneousStubs;
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 import org.neo4j.gds.scaleproperties.AlphaScalePropertiesMutateConfig;
 import org.neo4j.gds.scaleproperties.AlphaScalePropertiesStreamConfig;
@@ -51,11 +48,7 @@ public final class LocalMiscellaneousProcedureFacade implements MiscellaneousPro
     private final ProcedureReturnColumns procedureReturnColumns;
 
     //stubs
-    private final ScalePropertiesMutateStub alphaScalePropertiesMutateStub;
-    private final CollapsePathMutateStub collapsePathMutateStub;
-    private final IndexInverseMutateStub indexInverseMutateStub;
-    private final ScalePropertiesMutateStub scalePropertiesMutateStub;
-    private final ToUndirectedMutateStub toUndirectedMutateStub;
+    private final MiscellaneousStubs stubs;
 
     //
     private final MiscellaneousApplicationsEstimationModeBusinessFacade estimationModeBusinessFacade;
@@ -68,11 +61,7 @@ public final class LocalMiscellaneousProcedureFacade implements MiscellaneousPro
 
     private LocalMiscellaneousProcedureFacade(
         ProcedureReturnColumns procedureReturnColumns,
-        ScalePropertiesMutateStub alphaScalePropertiesMutateStub,
-        CollapsePathMutateStub collapsePathMutateStub,
-        IndexInverseMutateStub indexInverseMutateStub,
-        ScalePropertiesMutateStub scalePropertiesMutateStub,
-        ToUndirectedMutateStub toUndirectedMutateStub,
+        MiscellaneousStubs stubs,
         MiscellaneousApplicationsEstimationModeBusinessFacade estimationModeBusinessFacade,
         MiscellaneousApplicationsStatsModeBusinessFacade statsModeBusinessFacade,
         MiscellaneousApplicationsStreamModeBusinessFacade streamModeBusinessFacade,
@@ -80,11 +69,7 @@ public final class LocalMiscellaneousProcedureFacade implements MiscellaneousPro
         UserSpecificConfigurationParser configurationParser
     ) {
         this.procedureReturnColumns = procedureReturnColumns;
-        this.alphaScalePropertiesMutateStub = alphaScalePropertiesMutateStub;
-        this.collapsePathMutateStub = collapsePathMutateStub;
-        this.indexInverseMutateStub = indexInverseMutateStub;
-        this.scalePropertiesMutateStub = scalePropertiesMutateStub;
-        this.toUndirectedMutateStub = toUndirectedMutateStub;
+        this.stubs = stubs;
         this.estimationModeBusinessFacade = estimationModeBusinessFacade;
         this.statsModeBusinessFacade = statsModeBusinessFacade;
         this.streamModeBusinessFacade = streamModeBusinessFacade;
@@ -129,13 +114,17 @@ public final class LocalMiscellaneousProcedureFacade implements MiscellaneousPro
             applicationsFacade.miscellaneous().mutate()
         );
 
-        return new LocalMiscellaneousProcedureFacade(
-            procedureReturnColumns,
-            alphaScalePropertiesMutateStub,
+        var stubs =  new MiscellaneousStubs(
             collapsePathMutateStub,
             indexInverseMutateStub,
+            alphaScalePropertiesMutateStub,
             scalePropertiesMutateStub,
-            toUndirectedMutateStub,
+            toUndirectedMutateStub
+        );
+
+        return new LocalMiscellaneousProcedureFacade(
+            procedureReturnColumns,
+            stubs,
             applicationsFacade.miscellaneous().estimate(),
             applicationsFacade.miscellaneous().stats(),
             applicationsFacade.miscellaneous().stream(),
@@ -144,9 +133,10 @@ public final class LocalMiscellaneousProcedureFacade implements MiscellaneousPro
         );
     }
 
+
     @Override
-    public ScalePropertiesMutateStub alphaScalePropertiesMutateStub() {
-        return alphaScalePropertiesMutateStub;
+    public MiscellaneousStubs stubs() {
+        return stubs;
     }
 
     @Override
@@ -164,19 +154,18 @@ public final class LocalMiscellaneousProcedureFacade implements MiscellaneousPro
     }
 
     @Override
-    public CollapsePathMutateStub collapsePathMutateStub() {
-        return collapsePathMutateStub;
+    public Stream<ScalePropertiesMutateResult> alphaScalePropertiesMutate(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        return  stubs.alphaScaleProperties().execute(graphName,configuration);
     }
 
     @Override
-    public IndexInverseMutateStub indexInverseMutateStub() {
-        return indexInverseMutateStub;
+    public Stream<CollapsePathMutateResult> collapsePathMutate(String graphName, Map<String, Object> configuration) {
+        return stubs.collapsePath().execute(graphName,configuration);
     }
 
-    @Override
-    public ScalePropertiesMutateStub scalePropertiesMutateStub() {
-        return scalePropertiesMutateStub;
-    }
 
     @Override
     public Stream<ScalePropertiesStatsResult> scalePropertiesStats(
@@ -239,6 +228,22 @@ public final class LocalMiscellaneousProcedureFacade implements MiscellaneousPro
     }
 
     @Override
+    public Stream<ScalePropertiesMutateResult> scalePropertiesMutate(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        return stubs.scaleProperties().execute(graphName,configuration);
+    }
+
+    @Override
+    public Stream<MemoryEstimateResult> scalePropertiesMutateEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        return stubs.scaleProperties().estimate(graphNameOrConfiguration,algorithmConfiguration);
+    }
+
+    @Override
     public Stream<ScalePropertiesWriteResult> scalePropertiesWrite(
         String graphName,
         Map<String, Object> configuration
@@ -267,7 +272,29 @@ public final class LocalMiscellaneousProcedureFacade implements MiscellaneousPro
     }
 
     @Override
-    public ToUndirectedMutateStub toUndirectedMutateStub() {
-        return toUndirectedMutateStub;
+    public Stream<ToUndirectedMutateResult> toUndirected(String graphName, Map<String, Object> configuration) {
+        return stubs.toUndirected().execute(graphName,configuration);
     }
+
+    @Override
+    public Stream<MemoryEstimateResult> toUndirectedEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        return stubs.toUndirected().estimate(graphNameOrConfiguration,algorithmConfiguration);
+    }
+
+    @Override
+    public Stream<IndexInverseMutateResult> indexInverse(String graphName, Map<String, Object> configuration) {
+        return stubs.indexInverse().execute(graphName,configuration);
+    }
+
+    @Override
+    public Stream<MemoryEstimateResult> indexInverseEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        return stubs.indexInverse().estimate(graphNameOrConfiguration,algorithmConfiguration);
+    }
+
 }
