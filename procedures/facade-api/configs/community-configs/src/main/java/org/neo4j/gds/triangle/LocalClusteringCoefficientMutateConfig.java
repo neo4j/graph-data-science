@@ -23,11 +23,17 @@ import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.config.MutateNodePropertyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
+import java.util.Map;
+
 @Configuration
 public interface LocalClusteringCoefficientMutateConfig extends LocalClusteringCoefficientBaseConfig,
     MutateNodePropertyConfig {
 
     static LocalClusteringCoefficientMutateConfig of(CypherMapWrapper userInput) {
         return new LocalClusteringCoefficientMutateConfigImpl(userInput);
+    }
+
+    static LocalClusteringCoefficientMutateConfig of(Map<String, Object> userInput) {
+        return of(CypherMapWrapper.create(userInput));
     }
 }
