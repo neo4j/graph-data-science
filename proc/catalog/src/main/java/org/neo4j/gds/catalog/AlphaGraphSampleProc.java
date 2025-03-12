@@ -19,55 +19,36 @@
  */
 package org.neo4j.gds.catalog;
 
-import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.applications.graphstorecatalog.RandomWalkSamplingResult;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.catalog.GraphCatalogProcedureConstants.CNARW_DESCRIPTION;
-import static org.neo4j.gds.catalog.GraphCatalogProcedureConstants.ESTIMATE_CNARW_DESCRIPTION;
 import static org.neo4j.gds.catalog.GraphCatalogProcedureConstants.RWR_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class GraphSampleProc {
+public class AlphaGraphSampleProc {
     @Context
     public GraphDataScienceProcedures facade;
 
-    @SuppressWarnings("WeakerAccess")
-    @Procedure(name = "gds.graph.sample.rwr", mode = READ)
+    @Internal
+    @Deprecated(forRemoval = true)
+    @Procedure(name = "gds.alpha.graph.sample.rwr", mode = READ, deprecatedBy = "gds.graph.sample.rwr")
     @Description(RWR_DESCRIPTION)
-    public Stream<RandomWalkSamplingResult> sampleRandomWalkWithRestarts(
+    public Stream<RandomWalkSamplingResult> sampleRandomWalkWithRestartsAlpha(
         @Name(value = "graphName") String graphName,
         @Name(value = "fromGraphName") String fromGraphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
+        facade.deprecatedProcedures().called("gds.alpha.graph.sample.rwr");
+        facade.log()
+            .warn("Procedure `gds.alpha.graph.sample.rwr` has been deprecated, please use `gds.graph.sample.rwr`.");
         return facade.graphCatalog().sampleRandomWalkWithRestarts(graphName, fromGraphName, configuration);
-    }
-
-    @SuppressWarnings("unused")
-    @Procedure(name = "gds.graph.sample.cnarw", mode = READ)
-    @Description(CNARW_DESCRIPTION)
-    public Stream<RandomWalkSamplingResult> sampleCNARW(
-        @Name(value = "graphName") String graphName,
-        @Name(value = "fromGraphName") String fromGraphName,
-        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
-    ) {
-        return facade.graphCatalog().sampleCommonNeighbourAwareRandomWalk(graphName, fromGraphName, configuration);
-    }
-
-    @SuppressWarnings("unused")
-    @Procedure(name = "gds.graph.sample.cnarw.estimate", mode = READ)
-    @Description(ESTIMATE_CNARW_DESCRIPTION)
-    public Stream<MemoryEstimateResult> estimateCNARW(
-        @Name(value = "fromGraphName") String fromGraphName,
-        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
-    ) {
-        return facade.graphCatalog().estimateCommonNeighbourAwareRandomWalk(fromGraphName, configuration);
     }
 }

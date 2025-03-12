@@ -19,22 +19,6 @@
  */
 package org.neo4j.gds.applications.graphstorecatalog;
 
-import org.neo4j.gds.core.loading.GraphProjectResult;
-
-public class RandomWalkSamplingResult extends GraphProjectResult {
-    public final String fromGraphName;
-    public final long startNodeCount;
-
-    RandomWalkSamplingResult(
-        String graphName,
-        String fromGraphName,
-        long nodeCount,
-        long relationshipCount,
-        long startNodeCount,
-        long projectMillis
-    ) {
-        super(graphName, nodeCount, relationshipCount, projectMillis);
-        this.fromGraphName = fromGraphName;
-        this.startNodeCount = startNodeCount;
-    }
+public record RandomWalkSamplingResult(String graphName, String fromGraphName, long nodeCount, long relationshipCount,
+                                       long startNodeCount, long projectMillis) {
 }

@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.applications.graphstorecatalog;
 
+import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.schema.Direction;
@@ -71,15 +72,11 @@ public class GenerateGraphApplication {
         long averageDegree,
         RandomGraphGeneratorConfig config
     ) {
-        var stats = new GraphGenerationStats(
-            name,
-            averageDegree,
-            config.relationshipDistribution().name(),
-            config.relationshipProperty(),
-            config.relationshipSeed()
-        );
+        var generateMillis = new MutableLong();
+        var nodes = 0L;
+        var relationships = 0L;
 
-        try (ProgressTimer ignored = ProgressTimer.start(time -> stats.generateMillis = time)) {
+        try (ProgressTimer ignored = ProgressTimer.start(generateMillis::setValue)) {
             RandomGraphGenerator generator = initializeGraphGenerator(config);
 
             HugeGraph graph = generator.generate();
@@ -95,13 +92,22 @@ public class GenerateGraphApplication {
                 config.readConcurrency()
             );
 
-            stats.nodes = graphStore.nodeCount();
-            stats.relationships = graphStore.relationshipCount();
+            nodes = graphStore.nodeCount();
+            relationships = graphStore.relationshipCount();
 
             graphStoreCatalogService.set(config, graphStore);
         }
 
-        return stats;
+        return new GraphGenerationStats(
+            name,
+            nodes,
+            relationships,
+            generateMillis.longValue(),
+            averageDegree,
+            config.relationshipDistribution().name(),
+            config.relationshipProperty(),
+            config.relationshipSeed()
+        );
     }
 
     static RandomGraphGenerator initializeGraphGenerator(RandomGraphGeneratorConfig config) {

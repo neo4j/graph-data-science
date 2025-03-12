@@ -126,7 +126,7 @@ class GraphSamplingApplicationTest {
             RWR
         );
 
-        assertThat(result.nodeCount).isEqualTo(expectedNodeCount);
+        assertThat(result.nodeCount()).isEqualTo(expectedNodeCount);
 
         assertThat(
             GraphStoreCatalog.exists(
@@ -166,7 +166,7 @@ class GraphSamplingApplicationTest {
             CNARW
         );
 
-        assertThat(result.nodeCount).isEqualTo(expectedNodeCount);
+        assertThat(result.nodeCount()).isEqualTo(expectedNodeCount);
         assertThat(
             GraphStoreCatalog.exists(
                 user.getUsername(),
@@ -215,7 +215,7 @@ class GraphSamplingApplicationTest {
             RWR
         );
 
-        assertThat(result.startNodeCount).isEqualTo(expectedStartNodeCount);
+        assertThat(result.startNodeCount()).isEqualTo(expectedStartNodeCount);
 
         assertThat(
             GraphStoreCatalog.exists(
@@ -259,7 +259,7 @@ class GraphSamplingApplicationTest {
             CNARW
         );
 
-        assertThat(result.startNodeCount).isEqualTo(expectedStartNodeCount);
+        assertThat(result.startNodeCount()).isEqualTo(expectedStartNodeCount);
 
         assertThat(
             GraphStoreCatalog.exists(
