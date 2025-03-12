@@ -23,38 +23,16 @@ import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTiming
 
 import java.util.Map;
 
-public class K1ColoringWriteResult {
-    public final long preProcessingMillis;
-    public final long computeMillis;
-    public final long writeMillis;
-
-    public final long nodeCount;
-    public final long colorCount;
-    public final long ranIterations;
-    public final boolean didConverge;
-
-    public Map<String, Object> configuration;
-
-    public K1ColoringWriteResult(
-        long preProcessingMillis,
-        long computeMillis,
-        long writeMillis,
-        long nodeCount,
-        long colorCount,
-        long ranIterations,
-        boolean didConverge,
-        Map<String, Object> configuration
-    ) {
-        this.preProcessingMillis = preProcessingMillis;
-        this.computeMillis = computeMillis;
-        this.writeMillis = writeMillis;
-        this.nodeCount = nodeCount;
-        this.colorCount = colorCount;
-        this.ranIterations = ranIterations;
-        this.didConverge = didConverge;
-        this.configuration = configuration;
-    }
-
+public record K1ColoringWriteResult(
+    long preProcessingMillis,
+    long computeMillis,
+    long writeMillis,
+    long nodeCount,
+    long colorCount,
+    long ranIterations,
+    boolean didConverge,
+    Map<String, Object> configuration
+) {
     static K1ColoringWriteResult emptyFrom(AlgorithmProcessingTimings timings, Map<String, Object> configurationMap) {
         return new K1ColoringWriteResult(
             timings.preProcessingMillis,
