@@ -23,10 +23,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public record ScalePropertiesStreamResult( long nodeId, List<Double> scaledProperty){
+public record ScalePropertiesStreamResult(long nodeId, List<Double> scaledProperty){
 
-    public static ScalePropertiesStreamResult  create  (long nodeId, double[] scaledProperty) {
-
+    public static ScalePropertiesStreamResult  create(long nodeId, double[] scaledProperty) {
         var scaledPropertyList =  Arrays.stream(scaledProperty).boxed().collect(Collectors.toList());
         return  new ScalePropertiesStreamResult(nodeId,scaledPropertyList);
     }
