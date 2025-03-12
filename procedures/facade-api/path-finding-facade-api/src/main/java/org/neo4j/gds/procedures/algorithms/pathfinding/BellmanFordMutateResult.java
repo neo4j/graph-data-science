@@ -19,29 +19,13 @@
  */
 package org.neo4j.gds.procedures.algorithms.pathfinding;
 
-import org.neo4j.gds.procedures.algorithms.results.StandardMutateResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.Map;
 
-public final class BellmanFordMutateResult extends StandardMutateResult {
-    public final boolean containsNegativeCycle;
-    public final long relationshipsWritten;
-
-    private BellmanFordMutateResult(
-        long preProcessingMillis,
-        long computeMillis,
-        long postProcessingMillis,
-        long mutateMillis,
-        Map<String, Object> configuration,
-        boolean containsNegativeCycle,
-        long relationshipsWritten
-
-    ) {
-        super(preProcessingMillis, computeMillis, postProcessingMillis, mutateMillis, configuration);
-        this.containsNegativeCycle = containsNegativeCycle;
-        this.relationshipsWritten = relationshipsWritten;
-    }
+public record BellmanFordMutateResult(long preProcessingMillis, long computeMillis, long postProcessingMillis,
+                                      long mutateMillis, Map<String, Object> configuration,
+                                      boolean containsNegativeCycle, long relationshipsWritten) {
 
 
     public static class Builder extends AbstractResultBuilder<BellmanFordMutateResult> {
