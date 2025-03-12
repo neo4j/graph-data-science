@@ -1,4 +1,4 @@
-apply from: "$reposityRootDirectory/gradle/neo4j-version.gradle"
+apply from: "$publicDir/gradle/neo4j-version.gradle"
 
 ext {
     ver = [
