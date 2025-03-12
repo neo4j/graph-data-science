@@ -27,6 +27,9 @@ import org.neo4j.gds.paths.WritePathOptionsConfig;
 @Configuration
 public interface AllShortestPathsBellmanFordWriteConfig extends AllShortestPathsBellmanFordBaseConfig, WriteRelationshipConfig, WritePathOptionsConfig {
 
+    String WRITE_NEGATIVE_CYCLES_KEY = "writeNegativeCycles";
+
+    @Configuration.Key(WRITE_NEGATIVE_CYCLES_KEY)
     default boolean writeNegativeCycles() {
         return false;
     }
