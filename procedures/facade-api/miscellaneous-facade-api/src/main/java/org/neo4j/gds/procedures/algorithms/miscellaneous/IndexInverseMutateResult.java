@@ -20,24 +20,18 @@
 package org.neo4j.gds.procedures.algorithms.miscellaneous;
 
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.procedures.algorithms.results.StandardMutateResult;
+import org.neo4j.gds.procedures.algorithms.results.MutateResult;
 
 import java.util.Map;
 
-public final class IndexInverseMutateResult extends StandardMutateResult {
-    public final long inputRelationships;
-
-    public IndexInverseMutateResult(
+public record IndexInverseMutateResult(
         long preProcessingMillis,
         long computeMillis,
         long mutateMillis,
         long postProcessingMillis,
         long inputRelationships,
         Map<String, Object> configuration
-    ) {
-        super(preProcessingMillis, computeMillis, postProcessingMillis, mutateMillis, configuration);
-        this.inputRelationships = inputRelationships;
-    }
+    ) implements MutateResult {
 
     public static IndexInverseMutateResult emptyFrom(AlgorithmProcessingTimings timings, Map<String, Object> configurationMap) {
         return new IndexInverseMutateResult(
