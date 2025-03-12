@@ -103,6 +103,12 @@ public class DefaultsConfiguration {
         }
     }
 
+    // Test Only
+    public void clear() {
+        globalDefaults.clear();
+        personalDefaults.clear();
+    }
+
     private void fillInWithGlobalDefaults(Map<String, Object> configurationWithDefaults) {
         globalDefaults
             .forEach((s, d) -> configurationWithDefaults.putIfAbsent(s, d.getValue()));

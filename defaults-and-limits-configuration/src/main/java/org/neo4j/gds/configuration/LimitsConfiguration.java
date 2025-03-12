@@ -113,6 +113,12 @@ public class LimitsConfiguration {
         }
     }
 
+    // Test Only
+    public void clear() {
+        globalLimits.clear();
+        personalLimits.clear();
+    }
+
     private Map<String, Object> startWithGlobalLimits() {
         return globalLimits.entrySet().stream()
             .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().getValue()));
