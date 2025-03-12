@@ -20,31 +20,16 @@
 package org.neo4j.gds.procedures.algorithms.miscellaneous;
 
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.Map;
 
-public class CollapsePathMutateResult {
-    public final long preProcessingMillis;
-    public final long computeMillis;
-    public final long mutateMillis;
-    public final long relationshipsWritten;
-
-    public final Map<String, Object> configuration;
-
-    public CollapsePathMutateResult(
+public record CollapsePathMutateResult(
         long preProcessingMillis,
         long computeMillis,
         long mutateMillis,
         long relationshipsWritten,
         Map<String, Object> configuration
     ) {
-        this.preProcessingMillis = preProcessingMillis;
-        this.computeMillis = computeMillis;
-        this.mutateMillis = mutateMillis;
-        this.relationshipsWritten = relationshipsWritten;
-        this.configuration = configuration;
-    }
 
     public static CollapsePathMutateResult emptyFrom(
         AlgorithmProcessingTimings timings,
@@ -59,16 +44,5 @@ public class CollapsePathMutateResult {
         );
     }
 
-    public static final class Builder extends AbstractResultBuilder<CollapsePathMutateResult> {
-        @Override
-        public CollapsePathMutateResult build() {
-            return new CollapsePathMutateResult(
-                preProcessingMillis,
-                computeMillis,
-                mutateMillis,
-                relationshipsWritten,
-                config.toMap()
-            );
-        }
-    }
+
 }
