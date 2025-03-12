@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.core.utils.progress;
 
+import org.neo4j.gds.core.concurrency.ExecutorServiceUtil;
+
 import java.time.Duration;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 
@@ -31,7 +33,7 @@ class TaskStoreCleaner implements TaskStoreListener {
     public TaskStoreCleaner(TaskStore taskStore, Duration finishedTaskTTL) {
         this.taskStore = taskStore;
         this.finishedTaskTTL = finishedTaskTTL;
-        this.cleanerPool = new ScheduledThreadPoolExecutor(1);
+        this.cleanerPool = new ScheduledThreadPoolExecutor(1, ExecutorServiceUtil.DEFAULT_THREAD_FACTORY);
     }
 
     @Override
