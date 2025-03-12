@@ -19,25 +19,6 @@
  */
 package org.neo4j.gds.beta.filter;
 
-import org.neo4j.gds.core.loading.GraphProjectResult;
-
-public class GraphFilterResult extends GraphProjectResult {
-    public final String fromGraphName;
-    public final String nodeFilter;
-    public final String relationshipFilter;
-
-    public GraphFilterResult(
-        String graphName,
-        String fromGraphName,
-        String nodeFilter,
-        String relationshipFilter,
-        long nodeCount,
-        long relationshipCount,
-        long projectMillis
-    ) {
-        super(graphName, nodeCount, relationshipCount, projectMillis);
-        this.fromGraphName = fromGraphName;
-        this.nodeFilter = nodeFilter;
-        this.relationshipFilter = relationshipFilter;
-    }
+public record GraphFilterResult(String graphName, String fromGraphName, String nodeFilter, String relationshipFilter,
+                                long nodeCount, long relationshipCount, long projectMillis) {
 }
