@@ -44,7 +44,7 @@ public class MemoryFacade {
     public Stream<UserEntityMemory> list() {
         if (user.isAdmin()){
             return memoryTracker.listAll();
-        }else{
+        } else{
             return  memoryTracker.listUser(user.getUsername());
         }
     }
@@ -53,7 +53,7 @@ public class MemoryFacade {
     public Stream<UserMemorySummary> memorySummary() {
         if (user.isAdmin()){
             return memoryTracker.memorySummary();
-        }else{
+        } else{
             return  Stream.of(memoryTracker.memorySummary(user.getUsername()));
         }
     }
