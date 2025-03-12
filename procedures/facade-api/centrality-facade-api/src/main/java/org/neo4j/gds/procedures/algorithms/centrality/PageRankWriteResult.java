@@ -26,9 +26,17 @@ import org.neo4j.gds.core.concurrency.Concurrency;
 import java.util.Collections;
 import java.util.Map;
 
-public record PageRankWriteResult(long ranIterations, boolean didConverge, Map<String, Object> centralityDistribution,
-                                  long preProcessingMillis, long computeMillis, long postProcessingMillis,
-                                  long writeMillis, long nodePropertiesWritten, Map<String, Object> configuration) {
+public record PageRankWriteResult(
+    long ranIterations,
+    boolean didConverge,
+    Map<String, Object> centralityDistribution,
+    long preProcessingMillis,
+    long computeMillis,
+    long postProcessingMillis,
+    long writeMillis,
+    long nodePropertiesWritten,
+    Map<String, Object> configuration
+) {
 
     static PageRankWriteResult emptyFrom(AlgorithmProcessingTimings timings, Map<String, Object> configurationMap) {
         return new PageRankWriteResult(
