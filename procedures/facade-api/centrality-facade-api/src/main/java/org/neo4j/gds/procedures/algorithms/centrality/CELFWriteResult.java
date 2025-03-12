@@ -20,37 +20,17 @@
 package org.neo4j.gds.procedures.algorithms.centrality;
 
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.Map;
 
-public final class CELFWriteResult {
-    public final long writeMillis;
-    public final long nodePropertiesWritten;
-    public final long computeMillis;
-    public final double totalSpread;
-    public final long nodeCount;
-    public final Map<String, Object> configuration;
-
-    public CELFWriteResult(
-        long writeMillis,
-        long nodePropertiesWritten,
-        long computeMillis,
-        double totalSpread,
-        long nodeCount,
-        Map<String, Object> configuration
-    ) {
-        this.writeMillis = writeMillis;
-        this.nodePropertiesWritten = nodePropertiesWritten;
-        this.computeMillis = computeMillis;
-        this.totalSpread = totalSpread;
-        this.nodeCount = nodeCount;
-        this.configuration = configuration;
-    }
-
-    public static Builder builder() {
-        return new Builder();
-    }
+public record CELFWriteResult(
+    long writeMillis,
+    long nodePropertiesWritten,
+    long computeMillis,
+    double totalSpread,
+    long nodeCount,
+    Map<String, Object> configuration
+) {
 
     static CELFWriteResult emptyFrom(AlgorithmProcessingTimings timings, Map<String, Object> configurationMap) {
         return new CELFWriteResult(
@@ -63,23 +43,4 @@ public final class CELFWriteResult {
         );
     }
 
-    public static class Builder extends AbstractResultBuilder<CELFWriteResult> {
-        private double totalSpread;
-
-        public Builder withTotalSpread(double totalSpread) {
-            this.totalSpread = totalSpread;
-            return this;
-        }
-
-        public CELFWriteResult build() {
-            return new CELFWriteResult(
-                writeMillis,
-                nodePropertiesWritten,
-                computeMillis,
-                totalSpread,
-                nodeCount,
-                config.toMap()
-            );
-        }
-    }
 }
