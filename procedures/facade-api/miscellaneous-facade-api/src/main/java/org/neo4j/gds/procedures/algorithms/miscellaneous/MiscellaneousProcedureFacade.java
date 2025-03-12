@@ -20,27 +20,30 @@
 package org.neo4j.gds.procedures.algorithms.miscellaneous;
 
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
-import org.neo4j.gds.procedures.algorithms.miscellaneous.stubs.CollapsePathMutateStub;
-import org.neo4j.gds.procedures.algorithms.miscellaneous.stubs.IndexInverseMutateStub;
-import org.neo4j.gds.procedures.algorithms.miscellaneous.stubs.ScalePropertiesMutateStub;
-import org.neo4j.gds.procedures.algorithms.miscellaneous.stubs.ToUndirectedMutateStub;
+import org.neo4j.gds.procedures.algorithms.miscellaneous.stubs.MiscellaneousStubs;
 
 import java.util.Map;
 import java.util.stream.Stream;
 
 public interface MiscellaneousProcedureFacade {
-    ScalePropertiesMutateStub alphaScalePropertiesMutateStub();
+
+    MiscellaneousStubs stubs();
 
     Stream<ScalePropertiesStreamResult> alphaScalePropertiesStream(
         String graphName,
         Map<String, Object> configuration
     );
 
-    CollapsePathMutateStub collapsePathMutateStub();
+    Stream<ScalePropertiesMutateResult> alphaScalePropertiesMutate(
+        String graphName,
+        Map<String, Object> configuration
+    );
 
-    IndexInverseMutateStub indexInverseMutateStub();
+    Stream<CollapsePathMutateResult> collapsePathMutate(
+        String graphName,
+        Map<String, Object> configuration
+    );
 
-    ScalePropertiesMutateStub scalePropertiesMutateStub();
 
     Stream<ScalePropertiesStatsResult> scalePropertiesStats(
         String graphName,
@@ -62,6 +65,17 @@ public interface MiscellaneousProcedureFacade {
         Map<String, Object> algorithmConfiguration
     );
 
+
+    Stream<ScalePropertiesMutateResult> scalePropertiesMutate(
+        String graphName,
+        Map<String, Object> configuration
+    );
+
+    Stream<MemoryEstimateResult> scalePropertiesMutateEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    );
+
     Stream<ScalePropertiesWriteResult> scalePropertiesWrite(
         String graphName,
         Map<String, Object> configuration
@@ -72,5 +86,25 @@ public interface MiscellaneousProcedureFacade {
         Map<String, Object> algorithmConfiguration
     );
 
-    ToUndirectedMutateStub toUndirectedMutateStub();
+    Stream<ToUndirectedMutateResult> toUndirected(
+        String graphName,
+        Map<String, Object> configuration
+    );
+
+    Stream<MemoryEstimateResult> toUndirectedEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    );
+
+
+    Stream<IndexInverseMutateResult> indexInverse(
+        String graphName,
+        Map<String, Object> configuration
+    );
+
+    Stream<MemoryEstimateResult> indexInverseEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    );
+
 }

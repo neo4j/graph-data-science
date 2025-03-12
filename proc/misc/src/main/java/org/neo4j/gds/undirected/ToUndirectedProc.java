@@ -63,7 +63,7 @@ public class ToUndirectedProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.algorithms().miscellaneous().toUndirectedMutateStub().execute(graphName, configuration);
+        return facade.algorithms().miscellaneous().toUndirected(graphName, configuration);
     }
 
     @Internal
@@ -90,6 +90,6 @@ public class ToUndirectedProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.algorithms().miscellaneous().toUndirectedMutateStub().estimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.algorithms().miscellaneous().toUndirectedEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 }

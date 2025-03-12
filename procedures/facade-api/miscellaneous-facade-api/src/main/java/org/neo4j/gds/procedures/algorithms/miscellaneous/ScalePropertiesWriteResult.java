@@ -20,35 +20,20 @@
 package org.neo4j.gds.procedures.algorithms.miscellaneous;
 
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.procedures.algorithms.results.StandardWriteResult;
-import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-public final class ScalePropertiesWriteResult extends StandardWriteResult {
-    public final long nodePropertiesWritten;
-    public final Map<String, Map<String, List<Double>>> scalerStatistics;
-
-    ScalePropertiesWriteResult(
-        Map<String, Map<String, List<Double>>> scalerStatistics,
-        long preProcessingMillis,
-        long computeMillis,
-        long writeMillis,
-        long nodePropertiesWritten,
-        Map<String, Object> configuration
-    ) {
-        super(
-            preProcessingMillis,
-            computeMillis,
-            0L,
-            writeMillis,
-            configuration
-        );
-        this.nodePropertiesWritten = nodePropertiesWritten;
-        this.scalerStatistics = scalerStatistics;
-    }
+public record ScalePropertiesWriteResult(
+    Map<String, Map<String, List<Double>>> scalerStatistics,
+    long preProcessingMillis,
+    long computeMillis,
+    long writeMillis,
+    long postProcessingMillis,
+    long nodePropertiesWritten,
+    Map<String, Object> configuration
+){
 
     static ScalePropertiesWriteResult emptyFrom(
         AlgorithmProcessingTimings timings,
@@ -60,28 +45,10 @@ public final class ScalePropertiesWriteResult extends StandardWriteResult {
             timings.computeMillis,
             timings.sideEffectMillis,
             0,
+            0,
             configurationMap
         );
     }
 
-    public static class Builder extends AbstractResultBuilder<ScalePropertiesWriteResult> {
-        private Map<String, Map<String, List<Double>>> scalerStatistics;
 
-        public Builder withScalerStatistics(Map<String, Map<String, List<Double>>> stats) {
-            this.scalerStatistics = stats;
-            return this;
-        }
-
-        @Override
-        public ScalePropertiesWriteResult build() {
-            return new ScalePropertiesWriteResult(
-                scalerStatistics,
-                preProcessingMillis,
-                computeMillis,
-                writeMillis,
-                nodePropertiesWritten,
-                config.toMap()
-            );
-        }
-    }
 }

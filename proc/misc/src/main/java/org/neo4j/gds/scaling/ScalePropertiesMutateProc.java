@@ -45,7 +45,7 @@ public class ScalePropertiesMutateProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.algorithms().miscellaneous().scalePropertiesMutateStub().execute(graphName, configuration);
+        return facade.algorithms().miscellaneous().scalePropertiesMutate(graphName, configuration);
     }
 
     @Procedure(value = "gds.scaleProperties.mutate.estimate", mode = READ)
@@ -54,7 +54,7 @@ public class ScalePropertiesMutateProc {
         @Name(value = "graphNameOrConfiguration") Object graphName,
         @Name(value = "algoConfiguration") Map<String, Object> configuration
     ) {
-        return facade.algorithms().miscellaneous().scalePropertiesMutateStub().estimate(graphName, configuration);
+        return facade.algorithms().miscellaneous().scalePropertiesMutateEstimate(graphName, configuration);
     }
 
     @Internal
@@ -67,6 +67,6 @@ public class ScalePropertiesMutateProc {
     ) {
         facade.deprecatedProcedures().called("gds.alpha.scaleProperties.mutate");
 
-        return facade.algorithms().miscellaneous().alphaScalePropertiesMutateStub().execute(graphName, configuration);
+        return facade.algorithms().miscellaneous().alphaScalePropertiesMutate(graphName, configuration);
     }
 }

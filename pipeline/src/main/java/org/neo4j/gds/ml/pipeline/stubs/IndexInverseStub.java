@@ -26,6 +26,6 @@ import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
 
 public class IndexInverseStub extends AbstractStub<InverseRelationshipsConfig, IndexInverseMutateResult> {
     protected MutateStub<InverseRelationshipsConfig, IndexInverseMutateResult> stub(AlgorithmsProcedureFacade facade) {
-        return facade.miscellaneous().indexInverseMutateStub();
+        return facade.miscellaneous().stubs().indexInverse();
     }
 }
