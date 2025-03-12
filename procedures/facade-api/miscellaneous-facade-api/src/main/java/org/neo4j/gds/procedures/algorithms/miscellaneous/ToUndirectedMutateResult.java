@@ -20,15 +20,10 @@
 package org.neo4j.gds.procedures.algorithms.miscellaneous;
 
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.procedures.algorithms.results.StandardMutateResult;
 
 import java.util.Map;
 
-public final class ToUndirectedMutateResult extends StandardMutateResult {
-    public final long inputRelationships;
-    public final long relationshipsWritten;
-
-    public ToUndirectedMutateResult(
+public record ToUndirectedMutateResult(
         long preProcessingMillis,
         long computeMillis,
         long mutateMillis,
@@ -37,10 +32,6 @@ public final class ToUndirectedMutateResult extends StandardMutateResult {
         long relationshipsWritten,
         Map<String, Object> configuration
     ) {
-        super(preProcessingMillis, computeMillis, postProcessingMillis, mutateMillis, configuration);
-        this.inputRelationships = inputRelationships;
-        this.relationshipsWritten = relationshipsWritten;
-    }
 
     public static ToUndirectedMutateResult emptyFrom(
         AlgorithmProcessingTimings timings,
