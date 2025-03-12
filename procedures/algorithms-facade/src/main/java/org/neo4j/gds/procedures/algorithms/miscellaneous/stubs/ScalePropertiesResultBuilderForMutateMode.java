@@ -53,6 +53,7 @@ class ScalePropertiesResultBuilderForMutateMode implements ResultBuilder<ScalePr
             timings.preProcessingMillis,
             timings.computeMillis,
             timings.sideEffectMillis,
+            0,
             metadata.orElseThrow().value(),
             configuration.toMap()
         );

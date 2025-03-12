@@ -53,6 +53,7 @@ class ScalePropertiesResultBuilderForWriteMode implements ResultBuilder<ScalePro
             timings.preProcessingMillis,
             timings.computeMillis,
             timings.sideEffectMillis,
+            0,
             metadata.orElseThrow().value(),
             configuration.toMap()
         );

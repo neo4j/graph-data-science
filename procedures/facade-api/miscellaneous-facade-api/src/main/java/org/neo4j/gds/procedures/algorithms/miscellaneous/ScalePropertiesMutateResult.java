@@ -20,35 +20,20 @@
 package org.neo4j.gds.procedures.algorithms.miscellaneous;
 
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.procedures.algorithms.results.StandardMutateResult;
-import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-public final class ScalePropertiesMutateResult extends StandardMutateResult {
-    public final Map<String, Map<String, List<Double>>> scalerStatistics;
-    public final long nodePropertiesWritten;
-
-      public ScalePropertiesMutateResult(
+public record ScalePropertiesMutateResult(
           Map<String, Map<String, List<Double>>> scalerStatistics,
           long preProcessingMillis,
           long computeMillis,
           long mutateMillis,
+          long postProcessingMillis,
           long nodePropertiesWritten,
           Map<String, Object> configuration
       ) {
-        super(
-            preProcessingMillis,
-            computeMillis,
-            0L,
-            mutateMillis,
-            configuration
-        );
-        this.scalerStatistics = scalerStatistics;
-        this.nodePropertiesWritten = nodePropertiesWritten;
-    }
 
     public static ScalePropertiesMutateResult emptyFrom(
         AlgorithmProcessingTimings timings,
@@ -60,28 +45,9 @@ public final class ScalePropertiesMutateResult extends StandardMutateResult {
             timings.computeMillis,
             timings.sideEffectMillis,
             0,
+            0,
             configurationMap
         );
     }
 
-    public static class Builder extends AbstractResultBuilder<ScalePropertiesMutateResult> {
-        private Map<String, Map<String, List<Double>>> scalerStatistics;
-
-        public Builder withScalerStatistics(Map<String, Map<String, List<Double>>> stats) {
-            this.scalerStatistics = stats;
-            return this;
-        }
-
-        @Override
-        public ScalePropertiesMutateResult build() {
-            return new ScalePropertiesMutateResult(
-                scalerStatistics,
-                preProcessingMillis,
-                computeMillis,
-                mutateMillis,
-                nodePropertiesWritten,
-                config.toMap()
-            );
-        }
-    }
 }
