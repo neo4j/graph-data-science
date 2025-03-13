@@ -47,7 +47,7 @@ public class SpeakerListenerLPAMutateProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.algorithms().community().speakerListenerLPAMutateStub().execute(graphName,configuration);
+        return facade.algorithms().community().sllpaMutate(graphName,configuration);
     }
 
     @Procedure(value = "gds.sllpa.mutate.estimate", mode = READ)
@@ -56,7 +56,7 @@ public class SpeakerListenerLPAMutateProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.algorithms().community().speakerListenerLPAMutateStub().estimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.algorithms().community().sllpaMutateEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
     @Internal

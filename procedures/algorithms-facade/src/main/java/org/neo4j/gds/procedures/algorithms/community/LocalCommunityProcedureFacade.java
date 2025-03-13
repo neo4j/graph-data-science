@@ -1468,6 +1468,24 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
     }
 
     @Override
+    public Stream<MemoryEstimateResult> sllpaMutateEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        return speakerListenerLPAMutateStub.estimate(
+            graphNameOrConfiguration,
+            algorithmConfiguration
+        );
+    }
+
+    @Override
+    public Stream<SpeakerListenerLPAMutateResult> sllpaMutate(String graphName, Map<String, Object> configuration) {
+        return speakerListenerLPAMutateStub.execute(
+            graphName,
+            configuration);
+    }
+
+    @Override
     public Stream<MemoryEstimateResult> sllpaWriteEstimate(
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration

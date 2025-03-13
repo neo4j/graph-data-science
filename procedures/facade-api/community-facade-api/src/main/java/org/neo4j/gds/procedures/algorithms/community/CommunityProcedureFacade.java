@@ -547,6 +547,16 @@ public interface CommunityProcedureFacade {
         Map<String, Object> configuration
     );
 
+    Stream<MemoryEstimateResult> sllpaMutateEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    );
+
+    Stream<SpeakerListenerLPAMutateResult> sllpaMutate(
+        String graphName,
+        Map<String, Object> configuration
+    );
+
     Stream<MemoryEstimateResult> sllpaWriteEstimate(
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
