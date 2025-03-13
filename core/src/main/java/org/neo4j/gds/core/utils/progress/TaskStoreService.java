@@ -38,7 +38,7 @@ public class TaskStoreService {
     // private final Map<DatabaseId, TaskStore> taskStores = new ConcurrentHashMap();
 
     private final boolean progressTrackingEnabled;
-    private Duration retentionPeriod;
+    private final Duration retentionPeriod;
 
     public TaskStoreService(boolean progressTrackingEnabled, Duration retentionPeriod) {
         this.progressTrackingEnabled = progressTrackingEnabled;

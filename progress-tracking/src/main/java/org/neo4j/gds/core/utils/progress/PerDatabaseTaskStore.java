@@ -32,11 +32,11 @@ import java.util.stream.Stream;
 public class PerDatabaseTaskStore extends ObservableTaskStore {
     private final Map<String, Map<JobId, UserTask>> registeredTasks;
 
-    public PerDatabaseTaskStore(Duration finishedTaskTTL) {
+    public PerDatabaseTaskStore(Duration retentionPeriod) {
         super(new HashSet<>());
         this.registeredTasks = new ConcurrentHashMap<>();
 
-        this.addListener(new TaskStoreCleaner(this, finishedTaskTTL));
+        this.addListener(new TaskStoreCleaner(this, retentionPeriod));
     }
 
     @Override

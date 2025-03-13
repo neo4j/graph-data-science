@@ -25,14 +25,14 @@ import java.time.Duration;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 class TaskStoreCleaner implements TaskStoreListener {
-    private final Duration finishedTaskTTL;
+    private final Duration retentionPeriod;
     private final ScheduledThreadPoolExecutor cleanerPool;
     private final TaskStore taskStore;
 
 
-    public TaskStoreCleaner(TaskStore taskStore, Duration finishedTaskTTL) {
+    public TaskStoreCleaner(TaskStore taskStore, Duration retentionPeriod) {
         this.taskStore = taskStore;
-        this.finishedTaskTTL = finishedTaskTTL;
+        this.retentionPeriod = retentionPeriod;
         this.cleanerPool = new ScheduledThreadPoolExecutor(1, ExecutorServiceUtil.DEFAULT_THREAD_FACTORY);
     }
 
@@ -44,13 +44,14 @@ class TaskStoreCleaner implements TaskStoreListener {
     @Override
     public void onTaskCompleted(UserTask userTask) {
         // avoid scheduler if task should be cleaned up immediately
-        if (finishedTaskTTL.toMillis() == 0) {
+        if (retentionPeriod.toMillis() == 0) {
             taskStore.remove(userTask.username(), userTask.jobId());
+            return;
         }
 
         this.cleanerPool.schedule(
             () -> taskStore.remove(userTask.username(), userTask.jobId()),
-            finishedTaskTTL.toMillis(),
+            retentionPeriod.toMillis(),
             java.util.concurrent.TimeUnit.MILLISECONDS
         );
     }

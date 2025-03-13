@@ -36,8 +36,8 @@ public class InvocationCountingTaskStore extends PerDatabaseTaskStore {
     public int removeTaskInvocations;
     public Set<JobId> seenJobIds = new HashSet<>();
 
-    public InvocationCountingTaskStore(Duration finishedTaskTTL) {
-        super(finishedTaskTTL);
+    public InvocationCountingTaskStore(Duration retentionPeriod) {
+        super(retentionPeriod);
     }
 
     @Override
