@@ -61,6 +61,11 @@ public interface CommunityProcedureFacade {
         Map<String, Object> algorithmConfiguration
     );
 
+    Stream<ApproxMaxKCutWriteResult> approxMaxKCutWrite(
+        String graphName,
+        Map<String, Object> configuration
+    );
+
     Stream<ConductanceStreamResult> conductanceStream(
         String graphName,
         Map<String, Object> configuration

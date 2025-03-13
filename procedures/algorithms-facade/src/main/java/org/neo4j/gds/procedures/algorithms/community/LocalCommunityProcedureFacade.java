@@ -29,6 +29,7 @@ import org.neo4j.gds.applications.algorithms.community.CommunityAlgorithmsStream
 import org.neo4j.gds.applications.algorithms.community.CommunityAlgorithmsWriteModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutStreamConfig;
+import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutWriteConfig;
 import org.neo4j.gds.conductance.ConductanceStreamConfig;
 import org.neo4j.gds.hdbscan.HDBScanStatsConfig;
 import org.neo4j.gds.hdbscan.HDBScanStreamConfig;
@@ -350,6 +351,14 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
             ApproxMaxKCutStreamConfig::of
         );
         return Stream.of(estimationModeBusinessFacade.approximateMaximumKCut(configuration, graphNameOrConfiguration));
+    }
+
+    @Override
+    public Stream<ApproxMaxKCutWriteResult> approxMaxKCutWrite(String graphName, Map<String, Object> configuration) {
+        var resultBuilder = new ApproxMaxKCutResultBuilderForWriteMode();
+
+        var parsedConfig = configurationParser.parseConfiguration(configuration, ApproxMaxKCutWriteConfig::of);
+        return writeModeBusinessFacade.approxMaxKCut(GraphName.parse(graphName), parsedConfig, resultBuilder);
     }
 
     @Override
