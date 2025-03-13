@@ -39,14 +39,14 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 public interface CommunityProcedureFacade {
-    ApproximateMaximumKCutMutateStub approximateMaximumKCutMutateStub();
+    ApproximateMaximumKCutMutateStub approxMaxKCutMutateStub();
 
-    Stream<ApproxMaxKCutMutateResult> approximateMaximumKCutMutate(
+    Stream<ApproxMaxKCutMutateResult> approxMaxKCutMutate(
         String graphName,
         Map<String, Object> rawConfiguration
     );
 
-    Stream<MemoryEstimateResult> approximateMaximumKCutMutateEstimate(
+    Stream<MemoryEstimateResult> approxMaxKCutMutateEstimate(
         Object graphNameOrConfiguration,
         Map<String, Object> rawConfiguration
     );

@@ -308,24 +308,24 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
 
 
     @Override
-    public ApproximateMaximumKCutMutateStub approximateMaximumKCutMutateStub() {
+    public ApproximateMaximumKCutMutateStub approxMaxKCutMutateStub() {
         return approximateMaximumKCutMutateStub;
     }
 
     @Override
-    public Stream<ApproxMaxKCutMutateResult> approximateMaximumKCutMutate(
+    public Stream<ApproxMaxKCutMutateResult> approxMaxKCutMutate(
         String graphName,
         Map<String, Object> rawConfiguration
     ) {
-        return approximateMaximumKCutMutateStub().execute(graphName, rawConfiguration);
+        return approxMaxKCutMutateStub().execute(graphName, rawConfiguration);
     }
 
     @Override
-    public Stream<MemoryEstimateResult> approximateMaximumKCutMutateEstimate(
+    public Stream<MemoryEstimateResult> approxMaxKCutMutateEstimate(
         Object graphNameOrConfiguration,
         Map<String, Object> rawConfiguration
     ) {
-        return approximateMaximumKCutMutateStub().estimate(graphNameOrConfiguration, rawConfiguration);
+        return approxMaxKCutMutateStub().estimate(graphNameOrConfiguration, rawConfiguration);
     }
 
     @Override
