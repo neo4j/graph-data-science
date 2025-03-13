@@ -19,12 +19,5 @@
  */
 package org.neo4j.gds.procedures.algorithms.community;
 
-public class ApproxMaxKCutStreamResult {
-    public final long nodeId;
-    public final long communityId;
-
-    public ApproxMaxKCutStreamResult(long nodeId, long communityId) {
-        this.nodeId = nodeId;
-        this.communityId = communityId;
-    }
+public record ApproxMaxKCutStreamResult(long nodeId, long communityId) {
 }

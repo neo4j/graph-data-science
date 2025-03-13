@@ -20,34 +20,19 @@
 package org.neo4j.gds.procedures.algorithms.community;
 
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.procedures.algorithms.results.StandardMutateResult;
-import org.neo4j.gds.result.AbstractResultBuilder;
+import org.neo4j.gds.procedures.algorithms.results.MutateNodePropertiesResult;
 
 import java.util.Map;
 
-public final class ApproxMaxKCutMutateResult extends StandardMutateResult {
-    public final long nodePropertiesWritten;
-    public final double cutCost;
-
-    public ApproxMaxKCutMutateResult(
-        long nodePropertiesWritten,
-        double cutCost,
-        long preProcessingMillis,
-        long computeMillis,
-        long postProcessingMillis,
-        long mutateMillis,
-        Map<String, Object> config
-    ) {
-        super(
-            preProcessingMillis,
-            computeMillis,
-            postProcessingMillis,
-            mutateMillis,
-            config
-        );
-        this.nodePropertiesWritten = nodePropertiesWritten;
-        this.cutCost = cutCost;
-    }
+public record ApproxMaxKCutMutateResult(
+    double cutCost,
+    long preProcessingMillis,
+    long computeMillis,
+    long postProcessingMillis,
+    long mutateMillis,
+    long nodePropertiesWritten,
+    Map<String, Object> configuration
+) implements MutateNodePropertiesResult {
 
     public static ApproxMaxKCutMutateResult emptyFrom(
         AlgorithmProcessingTimings timings,
@@ -55,33 +40,12 @@ public final class ApproxMaxKCutMutateResult extends StandardMutateResult {
     ) {
         return new ApproxMaxKCutMutateResult(
             0,
-            0,
             timings.preProcessingMillis,
             timings.computeMillis,
             0,
             timings.sideEffectMillis,
+            0,
             configurationMap
         );
-    }
-
-    public static final class Builder extends AbstractResultBuilder<ApproxMaxKCutMutateResult> {
-        private final double cutCost;
-
-        public Builder(double cutCost) {
-            this.cutCost = cutCost;
-        }
-
-        @Override
-        public ApproxMaxKCutMutateResult build() {
-            return new ApproxMaxKCutMutateResult(
-                nodePropertiesWritten,
-                cutCost,
-                preProcessingMillis,
-                computeMillis,
-                0L,
-                mutateMillis,
-                config.toMap()
-            );
-        }
     }
 }
