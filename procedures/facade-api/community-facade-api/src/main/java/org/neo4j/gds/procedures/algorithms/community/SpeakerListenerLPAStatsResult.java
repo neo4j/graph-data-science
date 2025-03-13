@@ -23,10 +23,21 @@ import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTiming
 
 import java.util.Map;
 
-public record SpeakerListenerLPAStatsResult(long ranIterations, boolean didConverge, long preProcessingMillis, long computeMillis, Map<String,Object> configuration){
+public record SpeakerListenerLPAStatsResult(
+    long ranIterations,
+    boolean didConverge,
+    long preProcessingMillis,
+    long computeMillis,
+    Map<String,Object> configuration){
 
     static SpeakerListenerLPAStatsResult emptyFrom(AlgorithmProcessingTimings timings, Map<String, Object> configurationMap) {
-        return new SpeakerListenerLPAStatsResult(0,false,timings.preProcessingMillis,timings.computeMillis,configurationMap);
+        return new SpeakerListenerLPAStatsResult(
+            0,
+            false,
+            timings.preProcessingMillis,
+            timings.computeMillis,
+            configurationMap
+        );
     }
 }
 
