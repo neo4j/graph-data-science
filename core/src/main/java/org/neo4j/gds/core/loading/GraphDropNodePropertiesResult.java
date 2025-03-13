@@ -22,11 +22,7 @@ package org.neo4j.gds.core.loading;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class GraphDropNodePropertiesResult {
-    public final String graphName;
-    public final List<String> nodeProperties;
-    public final long propertiesRemoved;
-
+public record GraphDropNodePropertiesResult(String graphName, List<String> nodeProperties, long propertiesRemoved) {
     public GraphDropNodePropertiesResult(String graphName, List<String> nodeProperties, long propertiesRemoved) {
         this.graphName = graphName;
         this.nodeProperties = nodeProperties.stream().sorted().collect(Collectors.toList());

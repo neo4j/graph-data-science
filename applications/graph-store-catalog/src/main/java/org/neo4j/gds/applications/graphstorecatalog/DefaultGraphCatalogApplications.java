@@ -26,7 +26,6 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
-import org.neo4j.gds.core.utils.logging.GdsLoggers;
 import org.neo4j.gds.beta.filter.GraphFilterResult;
 import org.neo4j.gds.config.BaseConfig;
 import org.neo4j.gds.core.io.GraphStoreExporterBaseConfig;
@@ -35,6 +34,7 @@ import org.neo4j.gds.core.loading.GraphDropNodePropertiesResult;
 import org.neo4j.gds.core.loading.GraphDropRelationshipResult;
 import org.neo4j.gds.core.loading.GraphStoreCatalogEntry;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
+import org.neo4j.gds.core.utils.logging.GdsLoggers;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.core.write.NodeLabelExporterBuilder;
@@ -604,7 +604,9 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
             relationshipType
         );
 
-        return new GraphDropRelationshipResult(graphName.value(), relationshipType, result);
+        return new GraphDropRelationshipResult(
+            graphName.value(),
+            relationshipType, result.deletedRelationships(), result.deletedProperties());
     }
 
     @Override

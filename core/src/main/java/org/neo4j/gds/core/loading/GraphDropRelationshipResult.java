@@ -21,18 +21,7 @@ package org.neo4j.gds.core.loading;
 
 import java.util.Map;
 
-public class GraphDropRelationshipResult {
-    public final String graphName;
-    public final String relationshipType;
-    @SuppressWarnings("WeakerAccess")
-    public final long deletedRelationships;
-    @SuppressWarnings("WeakerAccess")
-    public final Map<String, Long> deletedProperties;
-
-    public GraphDropRelationshipResult(String graphName, String relationshipType, DeletionResult deletionResult) {
-        this.graphName = graphName;
-        this.relationshipType = relationshipType;
-        this.deletedRelationships = deletionResult.deletedRelationships();
-        this.deletedProperties = deletionResult.deletedProperties();
-    }
+public record GraphDropRelationshipResult(String graphName, String relationshipType,
+                                          long deletedRelationships,
+                                          Map<String, Long> deletedProperties) {
 }
