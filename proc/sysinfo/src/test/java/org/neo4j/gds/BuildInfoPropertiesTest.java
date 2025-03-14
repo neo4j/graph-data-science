@@ -49,21 +49,7 @@ class BuildInfoPropertiesTest {
 
         var buildInfo = BuildInfoProperties.get();
 
-        // strip Build identifier (for AuraDS releases)
-        // as the aurads flag is only a gradle property we cannot read the value here
-        String[] splits = buildInfo.gdsVersion().split("\\+");
-        assertThat(splits).hasSizeLessThanOrEqualTo(2);
-
-        var actualBaseVersion = splits[0];
-        var actualBuildLabel = splits.length > 1 ? splits[1] : "";
-
-        if (!actualBuildLabel.isEmpty()) {
-            var expectedQualifier = findAuraDSBuildLabel(file).orElseGet(() ->
-                fail("Could not find AuraDS qualifier in file: " + file.toAbsolutePath()));
-            assertEquals(expectedQualifier, actualBuildLabel);
-        }
-
-        assertEquals(expectedVersion, actualBaseVersion);
+        assertEquals(expectedVersion, buildInfo.gdsVersion());
     }
 
     @Test
@@ -119,17 +105,7 @@ class BuildInfoPropertiesTest {
     }
 
     private Optional<String> findVersion(Path file) throws IOException {
-        Pattern pattern = Pattern.compile(".*gdsBaseVersion = '(\\d+\\.\\d+\\.\\d+(-alpha\\d+|-beta\\d+)?)'.*");
-        try(var lines = Files.lines(file, StandardCharsets.UTF_8)) {
-            return lines
-                .flatMap(line -> pattern.matcher(line).results())
-                .map(i -> i.group(1))
-                .findFirst();
-        }
-    }
-
-    private Optional<String> findAuraDSBuildLabel(Path file) throws IOException {
-        Pattern pattern = Pattern.compile(".*gdsAuraDSVersion = '(\\d+)'");
+        Pattern pattern = Pattern.compile(".*gdsVersion = '(\\d+\\.\\d+\\.\\d+(-alpha\\d+|-beta\\d+)?)'.*");
         try(var lines = Files.lines(file, StandardCharsets.UTF_8)) {
             return lines
                 .flatMap(line -> pattern.matcher(line).results())
