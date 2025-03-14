@@ -26,6 +26,6 @@ import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
 
 public class ApproximateMaximumKCutStub extends AbstractStub<ApproxMaxKCutMutateConfig, ApproxMaxKCutMutateResult> {
     protected MutateStub<ApproxMaxKCutMutateConfig, ApproxMaxKCutMutateResult> stub(AlgorithmsProcedureFacade facade) {
-        return facade.community().approximateMaximumKCutMutateStub();
+        return facade.community().approxMaxKCutMutateStub();
     }
 }

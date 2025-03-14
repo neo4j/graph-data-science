@@ -17,7 +17,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.algorithms.community;
+package org.neo4j.gds.approxmaxkcut.config;
 
-public record ApproxMaxKCutStreamResult(long nodeId, long communityId) {
+import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.config.WritePropertyConfig;
+import org.neo4j.gds.core.CypherMapWrapper;
+
+@Configuration
+public interface ApproxMaxKCutWriteConfig extends ApproxMaxKCutBaseConfig, WritePropertyConfig {
+
+    static ApproxMaxKCutWriteConfig of(CypherMapWrapper config) {
+        return new ApproxMaxKCutWriteConfigImpl(config);
+    }
 }

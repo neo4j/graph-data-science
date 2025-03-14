@@ -17,41 +17,42 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.algorithms.community.stubs;
+package org.neo4j.gds.procedures.algorithms.community;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutResult;
-import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutMutateConfig;
-import org.neo4j.gds.procedures.algorithms.community.ApproxMaxKCutMutateResult;
+import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutWriteConfig;
 
 import java.util.Optional;
+import java.util.stream.Stream;
 
-public class ApproxMaxKCutResultBuilderForMutateMode implements ResultBuilder<ApproxMaxKCutMutateConfig, ApproxMaxKCutResult, ApproxMaxKCutMutateResult, NodePropertiesWritten> {
+class ApproxMaxKCutResultBuilderForWriteMode implements ResultBuilder<ApproxMaxKCutWriteConfig, ApproxMaxKCutResult, Stream<ApproxMaxKCutWriteResult>, NodePropertiesWritten> {
+
     @Override
-    public ApproxMaxKCutMutateResult build(
+    public Stream<ApproxMaxKCutWriteResult> build(
         Graph graph,
-        ApproxMaxKCutMutateConfig configuration,
+        ApproxMaxKCutWriteConfig configuration,
         Optional<ApproxMaxKCutResult> result,
         AlgorithmProcessingTimings timings,
-        Optional<NodePropertiesWritten> metadata
+        Optional<NodePropertiesWritten> nodePropertiesWritten
     ) {
-        var configurationMap = configuration.toMap();
-
-        if (result.isEmpty()) return ApproxMaxKCutMutateResult.emptyFrom(timings, configurationMap);
+        if (result.isEmpty()) return Stream.of(ApproxMaxKCutWriteResult.emptyFrom(timings, configuration.toMap()));
 
         var approxMaxKCutResult = result.get();
 
-        return new ApproxMaxKCutMutateResult(
+        var writeResult = new ApproxMaxKCutWriteResult(
             approxMaxKCutResult.cutCost(),
             timings.preProcessingMillis,
             timings.computeMillis,
             0,
             timings.sideEffectMillis,
-            metadata.orElseThrow().value(),
-            configurationMap
+            nodePropertiesWritten.orElseThrow().value(),
+            configuration.toMap()
         );
+
+        return Stream.of(writeResult);
     }
 }

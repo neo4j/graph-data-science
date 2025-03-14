@@ -20,25 +20,25 @@
 package org.neo4j.gds.procedures.algorithms.community;
 
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.procedures.algorithms.results.MutateNodePropertiesResult;
+import org.neo4j.gds.procedures.algorithms.results.WriteNodePropertiesResult;
 
 import java.util.Map;
 
-public record ApproxMaxKCutMutateResult(
+public record ApproxMaxKCutWriteResult(
     double cutCost,
     long preProcessingMillis,
     long computeMillis,
     long postProcessingMillis,
-    long mutateMillis,
+    long writeMillis,
     long nodePropertiesWritten,
     Map<String, Object> configuration
-) implements MutateNodePropertiesResult {
+) implements WriteNodePropertiesResult {
 
-    public static ApproxMaxKCutMutateResult emptyFrom(
+    public static ApproxMaxKCutWriteResult emptyFrom(
         AlgorithmProcessingTimings timings,
         Map<String, Object> configurationMap
     ) {
-        return new ApproxMaxKCutMutateResult(
+        return new ApproxMaxKCutWriteResult(
             0,
             timings.preProcessingMillis,
             timings.computeMillis,
