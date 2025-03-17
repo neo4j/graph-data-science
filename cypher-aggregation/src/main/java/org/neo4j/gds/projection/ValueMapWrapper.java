@@ -188,6 +188,28 @@ public final class ValueMapWrapper implements CypherMapAccess {
         }
 
         @Override
+        public T mapMap(MapValue value) {
+            if (MapValue.class.isAssignableFrom(expectedType)) {
+                return (T) value;
+            }
+
+            if (Map.class.isAssignableFrom(expectedType)) {
+                var length = value.size();
+                var javaMap = new HashMap<>(length);
+                value.foreach((k, v) -> javaMap.put(k, v.map(AsJavaObject.instance())));
+                return expectedType.cast(javaMap);
+            }
+
+            String message = String.format(
+                Locale.ENGLISH,
+                "The value of `%s` must be of type `%s` but was `Map`.",
+                key,
+                expectedType.getSimpleName()
+            );
+            throw new IllegalArgumentException(message);
+        }
+
+        @Override
         public T unsupported(AnyValue value) {
             if (expectedType == Object.class && value instanceof Value) {
                 return expectedType.cast(((Value) value).asObject());
