@@ -19,21 +19,10 @@
  */
 package org.neo4j.gds.applications.graphstorecatalog;
 
-public class GraphStreamRelationshipPropertyResult {
-    public final long sourceNodeId;
-    public final long targetNodeId;
-    public final String relationshipType;
-    public final Number propertyValue;
-
-    public GraphStreamRelationshipPropertyResult(
-        long sourceNodeId,
-        long targetNodeId,
-        String relationshipType,
-        Number propertyValue
-    ) {
-        this.sourceNodeId = sourceNodeId;
-        this.targetNodeId = targetNodeId;
-        this.relationshipType = relationshipType;
-        this.propertyValue = propertyValue;
-    }
+public record GraphStreamRelationshipPropertyResult(
+    long sourceNodeId,
+    long targetNodeId,
+    String relationshipType,
+    Number propertyValue
+) {
 }
