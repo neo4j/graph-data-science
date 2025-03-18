@@ -21,16 +21,10 @@ package org.neo4j.gds.applications.graphstorecatalog;
 
 import java.util.List;
 
-public class GraphStreamNodePropertiesResult {
-    public final long nodeId;
-    public final String nodeProperty;
-    public final Object propertyValue;
-    public final List<String> nodeLabels;
-
-    public GraphStreamNodePropertiesResult(long nodeId, String nodeProperty, Object propertyValue, List<String> nodeLabels) {
-        this.nodeId = nodeId;
-        this.nodeProperty = nodeProperty;
-        this.propertyValue = propertyValue;
-        this.nodeLabels = nodeLabels;
-    }
+public record GraphStreamNodePropertiesResult(
+    long nodeId,
+    String nodeProperty,
+    Object propertyValue,
+    List<String> nodeLabels
+) {
 }

@@ -19,37 +19,9 @@
  */
 package org.neo4j.gds.applications.graphstorecatalog;
 
-import java.util.Objects;
-
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
-
-public class TopologyResult {
-    public final long sourceNodeId;
-    public final long targetNodeId;
-    public final String relationshipType;
-
-    public TopologyResult(long sourceNodeId, long targetNodeId, String relationshipType) {
-        this.sourceNodeId = sourceNodeId;
-        this.targetNodeId = targetNodeId;
-        this.relationshipType = relationshipType;
-    }
-
-    @Override
-    public String toString() {
-        return formatWithLocale("TopologyResult(%d, %d, type: %s)", sourceNodeId, targetNodeId, relationshipType);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        TopologyResult that = (TopologyResult) o;
-        return sourceNodeId == that.sourceNodeId && targetNodeId == that.targetNodeId && relationshipType.equals(
-            that.relationshipType);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(sourceNodeId, targetNodeId, relationshipType);
-    }
+public record TopologyResult(
+    long sourceNodeId,
+    long targetNodeId,
+    String relationshipType
+) {
 }
