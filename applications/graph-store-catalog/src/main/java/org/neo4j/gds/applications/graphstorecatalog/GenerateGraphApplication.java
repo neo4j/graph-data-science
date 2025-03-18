@@ -103,10 +103,10 @@ public class GenerateGraphApplication {
             nodes,
             relationships,
             generateMillis.longValue(),
+            config.relationshipSeed(),
             averageDegree,
             config.relationshipDistribution().name(),
-            config.relationshipProperty(),
-            config.relationshipSeed()
+            config.relationshipProperty()
         );
     }
 

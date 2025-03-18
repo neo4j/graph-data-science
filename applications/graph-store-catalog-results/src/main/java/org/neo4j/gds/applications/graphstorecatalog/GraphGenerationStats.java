@@ -21,33 +21,15 @@ package org.neo4j.gds.applications.graphstorecatalog;
 
 import java.util.Map;
 
-public class GraphGenerationStats {
-    public final String name;
-    public final long nodes;
-    public final long relationships;
-    public final long generateMillis;
-    public final Long relationshipSeed;
-    public final double averageDegree;
-    public final Object relationshipDistribution;
-    public final Object relationshipProperty;
+public record GraphGenerationStats(
+    String name,
+    long nodes,
+    long relationships,
+    long generateMillis,
+    Long relationshipSeed,
+    double averageDegree,
+    String relationshipDistribution,
+    Map<String, Object> relationshipProperty
+){
 
-    public GraphGenerationStats(
-        String graphName,
-        long nodes,
-        long relationships,
-        long generateMillis,
-        double averageDegree,
-        String relationshipDistribution,
-        Map<String, Object> relationshipProperty,
-        Long relationshipSeed
-    ) {
-        this.name = graphName;
-        this.nodes = nodes;
-        this.relationships = relationships;
-        this.generateMillis = generateMillis;
-        this.averageDegree = averageDegree;
-        this.relationshipDistribution = relationshipDistribution;
-        this.relationshipProperty = relationshipProperty;
-        this.relationshipSeed = relationshipSeed;
-    }
 }
