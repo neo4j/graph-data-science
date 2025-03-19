@@ -25,6 +25,7 @@ import net.jqwik.api.constraints.IntRange;
 import net.jqwik.api.constraints.LongRange;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.Graph;
@@ -34,6 +35,8 @@ import org.neo4j.gds.beta.generator.RelationshipDistribution;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.StreamSupport;
 
@@ -108,6 +111,43 @@ class AllRelationshipsSpliteratorTest {
         }
 
         assertThat(actual).isEqualTo(expected);
+    }
+
+    @Test
+    void filteredGraph() {
+        var graphStore = TestSupport.graphStoreFromGDL("(a:A)-->(b:A)-->(c:B)-->(d:A)-->(e:A)-->(f:B)");
+        var graph = graphStore.getGraph(
+            NodeLabel.of("A"),
+            RelationshipType.ALL_RELATIONSHIPS,
+            Optional.empty()
+        );
+        assertThat(graph.nodeCount()).isEqualTo(4);
+        assertThat(graph.relationshipCount()).isEqualTo(2);
+
+        var actual = new ConcurrentHashMap<Long, List<Relationship>>();
+        var allRelationshipsIterator = new AllRelationshipsSpliterator(graph, 0.0);
+
+        var iterator = StreamSupport.stream(allRelationshipsIterator, true).iterator();
+
+        while (iterator.hasNext()) {
+            var relationshipCursor = iterator.next();
+            actual.computeIfAbsent(relationshipCursor.sourceId(), __ -> new ArrayList<>())
+                .add(new Relationship(
+                    relationshipCursor.targetId(),
+                    relationshipCursor.property()
+                ));
+        }
+
+        assertThat(actual).isEqualTo(Map.of(
+            0L, List.of(new Relationship(1L, 0.0)),
+            2L, List.of(new Relationship(3L, 0.0))
+        ));
+
+        // returned node ids are filtered node ids
+        assertThat(graph.toOriginalNodeId(0)).isEqualTo(0);
+        assertThat(graph.toOriginalNodeId(1)).isEqualTo(1);
+        assertThat(graph.toOriginalNodeId(2)).isEqualTo(3);
+        assertThat(graph.toOriginalNodeId(3)).isEqualTo(4);
     }
 
     private static @NotNull HugeGraph generateGraph(
