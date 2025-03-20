@@ -124,7 +124,7 @@ class ProductGraphAggregatorTest {
     }
 
     @Test
-    void shouldFailTaskOnFailure() {
+    void shouldFailTaskOnFailure() throws Exception {
         TestTaskStore taskStore = new TestTaskStore();
         var aggregator = new ProductGraphAggregator(
             DatabaseId.random(),
@@ -148,6 +148,9 @@ class ProductGraphAggregatorTest {
             ))
             .hasCauseInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("The node has to be either a NODE or an INTEGER, but got String");
+
+        // assuming this gets called by Neo4j
+        aggregator.close();
 
         assertThat(taskStore.query())
             .map(i -> i.task().status())

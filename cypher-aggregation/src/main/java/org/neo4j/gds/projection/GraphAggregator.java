@@ -70,7 +70,7 @@ import java.util.stream.StreamSupport;
 import static org.neo4j.gds.projection.GraphImporter.NO_TARGET_NODE;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-abstract class GraphAggregator implements UserAggregationReducer, UserAggregationUpdater {
+abstract class GraphAggregator implements UserAggregationReducer, UserAggregationUpdater, AutoCloseable {
 
     static final String SOURCE_NODE_PROPERTIES = "sourceNodeProperties";
     static final String SOURCE_NODE_LABELS = "sourceNodeLabels";
@@ -95,6 +95,7 @@ abstract class GraphAggregator implements UserAggregationReducer, UserAggregatio
     // Used for initializing the data and rel importers
     private final Lock lock;
     private final ExtractNodeId extractNodeId;
+    private final AtomicBoolean completedSuccessfully;
     private volatile @Nullable GraphImporter importer;
 
     // #result() may be called twice, we cache the result of the first call to return it again in the second invocation
@@ -123,6 +124,7 @@ abstract class GraphAggregator implements UserAggregationReducer, UserAggregatio
         this.lock = new ReentrantLock();
         this.configValidator = new ConfigValidator();
         this.extractNodeId = new ExtractNodeId();
+        this.completedSuccessfully = new AtomicBoolean(false);
     }
 
     void projectNextRelationship(
@@ -284,7 +286,6 @@ abstract class GraphAggregator implements UserAggregationReducer, UserAggregatio
             projectionMetric.start();
             result = buildGraph();
         } catch (Exception e) {
-            this.onFailure();
             projectionMetric.failed(e);
             throw new ProcedureException(
                 Status.Procedure.ProcedureCallFailed,
@@ -306,13 +307,11 @@ abstract class GraphAggregator implements UserAggregationReducer, UserAggregatio
         builder.add("projectMillis", Values.longValue(result.projectMillis()));
         builder.add("configuration", ValueUtils.asAnyValue(result.configuration()));
         builder.add("query", ValueUtils.asAnyValue(result.query()));
-        return builder.build();
-    }
+        MapValue projectResult = builder.build();
 
-    void onFailure() {
-        if (progressTracker != null) {
-            this.progressTracker.endSubTaskWithFailure();
-        }
+        this.completedSuccessfully.set(true);
+
+        return projectResult;
     }
 
     public @Nullable AggregationResult buildGraph() {
@@ -388,6 +387,13 @@ abstract class GraphAggregator implements UserAggregationReducer, UserAggregatio
                 relationshipTypeEntry.valueRepresentation().valueGroup()
             )
         );
+    }
+
+    @Override
+    public void close() throws Exception {
+        if (!completedSuccessfully.get() && progressTracker != null) {
+            this.progressTracker.endSubTaskWithFailure();
+        }
     }
 
     public static final class ConfigValidator {

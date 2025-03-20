@@ -98,7 +98,7 @@ public class CypherAggregation implements CallableUserAggregationFunction {
 
         var queryEstimator = QueryEstimator.fromTransaction(DatabaseTransactionContext.of(databaseService, transaction));
 
-        return new ProductGraphAggregator(
+        ProductGraphAggregator productGraphAggregator = new ProductGraphAggregator(
             DatabaseId.of(databaseService.databaseName()),
             username,
             writeMode,
@@ -108,5 +108,9 @@ public class CypherAggregation implements CallableUserAggregationFunction {
             taskStore,
             new LogAdapter(log)
         );
+
+        ctx.internalTransaction().registerCloseableResource(productGraphAggregator);
+
+        return productGraphAggregator;
     }
 }

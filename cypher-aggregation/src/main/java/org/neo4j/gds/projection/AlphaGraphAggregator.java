@@ -72,7 +72,6 @@ public class AlphaGraphAggregator extends GraphAggregator {
                 NoValue.NO_VALUE
             );
         } catch (Exception e) {
-            super.onFailure();
             throw new ProcedureException(
                 Status.Procedure.ProcedureCallFailed,
                 e,
