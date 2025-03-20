@@ -27,7 +27,7 @@ import java.util.stream.Stream;
 
 public interface NodeEmbeddingsProcedureFacade {
 
-    NodeEmbeddingsStubs stubs();
+    NodeEmbeddingsStubs nodeEmbeddingStubs();
 
     Stream<FastRPStatsResult> fastRPStats(
         String graphName,

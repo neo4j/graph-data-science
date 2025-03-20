@@ -135,7 +135,7 @@ public final class LocalMiscellaneousProcedureFacade implements MiscellaneousPro
 
 
     @Override
-    public MiscellaneousStubs stubs() {
+    public MiscellaneousStubs miscellaneousStubs() {
         return stubs;
     }
 

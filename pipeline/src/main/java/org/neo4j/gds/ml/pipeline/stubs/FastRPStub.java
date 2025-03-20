@@ -26,6 +26,6 @@ import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
 
 public class FastRPStub extends AbstractStub<FastRPMutateConfig, DefaultNodeEmbeddingMutateResult> {
     protected MutateStub<FastRPMutateConfig, DefaultNodeEmbeddingMutateResult> stub(AlgorithmsProcedureFacade facade) {
-        return facade.nodeEmbeddings().stubs().fastRP();
+        return facade.nodeEmbeddings().nodeEmbeddingStubs().fastRP();
     }
 }

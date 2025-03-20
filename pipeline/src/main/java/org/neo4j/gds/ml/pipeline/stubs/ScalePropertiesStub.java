@@ -26,6 +26,6 @@ import org.neo4j.gds.scaleproperties.ScalePropertiesMutateConfig;
 
 public class ScalePropertiesStub extends AbstractStub<ScalePropertiesMutateConfig, ScalePropertiesMutateResult> {
     protected MutateStub<ScalePropertiesMutateConfig, ScalePropertiesMutateResult> stub(AlgorithmsProcedureFacade facade) {
-        return facade.miscellaneous().stubs().scaleProperties();
+        return facade.miscellaneous().miscellaneousStubs().scaleProperties();
     }
 }
