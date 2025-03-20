@@ -48,7 +48,7 @@ public final class WriteRelationshipResult {
         this.propertiesWritten = relationshipProperty.isPresent() ? relationshipsWritten : 0L;
     }
 
-    static class Builder {
+    public static class Builder {
         private final String graphName;
         private final String relationshipType;
         private final Optional<String> maybeRelationshipProperty;
@@ -57,28 +57,28 @@ public final class WriteRelationshipResult {
         private long relationshipsWritten;
         private Map<String, Object> configuration;
 
-        Builder(String graphName, String relationshipType, Optional<String> maybeRelationshipProperty) {
+        public Builder(String graphName, String relationshipType, Optional<String> maybeRelationshipProperty) {
             this.graphName = graphName;
             this.relationshipType = relationshipType;
             this.maybeRelationshipProperty = maybeRelationshipProperty;
         }
 
-        Builder withWriteMillis(long writeMillis) {
+        public Builder withWriteMillis(long writeMillis) {
             this.writeMillis = writeMillis;
             return this;
         }
 
-        Builder withRelationshipsWritten(long relationshipsWritten) {
+        public Builder withRelationshipsWritten(long relationshipsWritten) {
             this.relationshipsWritten = relationshipsWritten;
             return this;
         }
 
-        Builder withConfiguration(Map<String, Object> configuration) {
+        public Builder withConfiguration(Map<String, Object> configuration) {
             this.configuration = configuration;
             return this;
         }
 
-        WriteRelationshipResult build() {
+        public WriteRelationshipResult build() {
             return new WriteRelationshipResult(
                 writeMillis,
                 graphName,
