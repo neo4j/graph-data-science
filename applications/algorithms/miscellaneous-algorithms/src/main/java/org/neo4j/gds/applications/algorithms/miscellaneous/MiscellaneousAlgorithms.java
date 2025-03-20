@@ -105,7 +105,12 @@ public class MiscellaneousAlgorithms {
         var relationshipTypes = parameters.internalRelationshipTypes(graphStore);
 
         var task = InverseRelationshipsProgressTaskCreator.progressTask(idMap.nodeCount(), relationshipTypes);
-        var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
+        var progressTracker = progressTrackerCreator.createProgressTracker(
+            task,
+            configuration.jobId(),
+            configuration.concurrency(),
+            configuration.logProgress()
+        );
 
         var algorithm = new InverseRelationships(
             graphStore,
@@ -125,7 +130,12 @@ public class MiscellaneousAlgorithms {
 
     ScalePropertiesResult scaleProperties(Graph graph, ScalePropertiesBaseConfig configuration) {
         var task = ScalePropertiesTask.create(graph, configuration);
-        var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
+        var progressTracker = progressTrackerCreator.createProgressTracker(
+            task,
+            configuration.jobId(),
+            configuration.concurrency(),
+            configuration.logProgress()
+        );
 
         return scaleProperties(graph, configuration, progressTracker);
     }
@@ -156,7 +166,12 @@ public class MiscellaneousAlgorithms {
             Tasks.leaf("Create Undirected Relationships", graphStore.nodeCount()),
             Tasks.leaf("Build undirected Adjacency list")
         );
-        var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
+        var progressTracker = progressTrackerCreator.createProgressTracker(
+            task,
+            configuration.jobId(),
+            configuration.concurrency(),
+            configuration.logProgress()
+        );
 
         var algorithm = new ToUndirected(
             graphStore,

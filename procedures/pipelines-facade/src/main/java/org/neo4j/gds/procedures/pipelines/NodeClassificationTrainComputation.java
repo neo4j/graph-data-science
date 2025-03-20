@@ -183,7 +183,12 @@ final class NodeClassificationTrainComputation implements Computation<NodeClassi
             .build();
 
         var task = NodeClassificationTrain.progressTask(pipeline, graphStore.nodeCount());
-        var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
+        var progressTracker = progressTrackerCreator.createProgressTracker(
+            task,
+            configuration.jobId(),
+            configuration.concurrency(),
+            configuration.logProgress()
+        );
 
         var nodeFeatureProducer = NodeFeatureProducer.create(
             graphStore,

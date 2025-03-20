@@ -173,7 +173,12 @@ final class NodeRegressionPredictComputation implements Computation<HugeDoubleAr
             predictPipeline,
             graphStore
         );
-        var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
+        var progressTracker = progressTrackerCreator.createProgressTracker(
+            task,
+            configuration.jobId(),
+            configuration.concurrency(),
+            configuration.logProgress()
+        );
 
         var executionContext = ImmutableExecutionContext.builder()
             .algorithmsProcedureFacade(algorithmsProcedureFacade)
