@@ -116,16 +116,18 @@ class LinkPredictionPipelineMutateProcTest extends BaseProcTest {
     @MethodSource("topNConcurrencyLabelCombinations")
     void shouldPredictWithTopN(int topN, int concurrency, String nodeLabel) {
         runQuery(
-            "CALL gds.beta.pipeline.linkPrediction.predict.mutate('g', {" +
-            " modelName: 'model'," +
-            " sourceNodeLabel: $sourceNodeLabel," +
-            " targetNodeLabel: $targetNodeLabel," +
-            " mutateRelationshipType: 'PREDICTED'," +
-            " threshold: 0," +
-            " topN: $topN," +
-            " concurrency:" +
-            " $concurrency" +
-            "})",
+            """
+                CALL gds.beta.pipeline.linkPrediction.predict.mutate('g', {
+                 modelName: 'model',
+                 sourceNodeLabel: $sourceNodeLabel,
+                 targetNodeLabel: $targetNodeLabel,
+                 mutateRelationshipType: 'PREDICTED',
+                 threshold: 0,
+                 topN: $topN,
+                 concurrency:
+                 $concurrency
+                })
+                YIELD computeMillis""",
             Map.of(
                 "sourceNodeLabel", nodeLabel,
                 "targetNodeLabel", nodeLabel,
