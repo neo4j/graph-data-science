@@ -19,9 +19,18 @@
  */
 package org.neo4j.gds.modularityoptimization;
 
+import org.neo4j.gds.AlgorithmParameters;
 import org.neo4j.gds.annotation.Parameters;
 import org.neo4j.gds.core.concurrency.Concurrency;
 
+import java.util.Optional;
+
 @Parameters
-public record ModularityOptimizationParameters(Concurrency concurrency, int maxIterations, int batchSize, double tolerance) {
+public record ModularityOptimizationParameters(
+    Concurrency concurrency,
+    int maxIterations,
+    int batchSize,
+    double tolerance,
+    Optional<String> seedProperty
+)  implements AlgorithmParameters {
 }

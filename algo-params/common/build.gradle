@@ -1,0 +1,9 @@
+apply plugin: 'java-library'
+
+description = 'Neo4j Graph Data Science :: Common Algorithms Parameters'
+
+group = 'org.neo4j.gds'
+
+dependencies {
+    implementation project(':concurrency')
+}

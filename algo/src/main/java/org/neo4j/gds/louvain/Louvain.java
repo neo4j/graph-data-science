@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.louvain;
 
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.algorithms.community.CommunityCompanion;
@@ -74,7 +75,7 @@ public final class Louvain extends Algorithm<LouvainResult> {
         double tolerance,
         int maxLevels,
         boolean trackIntermediateCommunities,
-        String seedProperty,
+        @Nullable String seedProperty,
         ProgressTracker progressTracker,
         ExecutorService executorService,
         TerminationFlag terminationFlag
@@ -98,6 +99,22 @@ public final class Louvain extends Algorithm<LouvainResult> {
         this.trackIntermediateCommunities = trackIntermediateCommunities;
 
         this.terminationFlag = terminationFlag;
+    }
+
+    public Louvain(Graph graph, LouvainParameters parameters, ProgressTracker progressTracker, ExecutorService executorService, TerminationFlag terminationFlag) {
+        this(
+            graph,
+            parameters.concurrency(),
+            parameters.maxIterations(),
+            parameters.tolerance(),
+            parameters.maxLevels(),
+            parameters.includeIntermediateCommunities(),
+            parameters.seedProperty(),
+            progressTracker,
+            DefaultPool.INSTANCE,
+            terminationFlag
+
+        );
     }
 
     @Override

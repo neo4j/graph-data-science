@@ -20,7 +20,8 @@
 package org.neo4j.gds.leiden;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.applications.algorithms.community.CommunityAlgorithms;
+import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.applications.algorithms.community.LeidenTask;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.gdl.GdlFactory;
@@ -55,15 +56,21 @@ class LeidenAlgorithmFactoryTest {
 
         assertThat(task.render()).isEqualTo(expectedTask.render());
     }
-    
+
     @Test
     void shouldThrowIfNotUndirected() {
-        var graph = GdlFactory.of("(a)-->(b)").build().getUnion();
+        var graphStore = GdlFactory.of("(a)-->(b)").build();
 
-        var communityAlgorithms = new CommunityAlgorithms(null, null);
+        var config = LeidenStreamConfigImpl.builder().build();
 
         assertThatIllegalArgumentException()
-            .isThrownBy(() -> communityAlgorithms.leiden(graph, null))
-            .withMessage("The Leiden algorithm works only with undirected graphs. Please orient the edges properly");
+            .isThrownBy(() -> config.validateUndirectedGraph(
+                    graphStore,
+                    List.of(NodeLabel.ALL_NODES),
+                    List.of(RelationshipType.ALL_RELATIONSHIPS)
+                )
+            )
+            .withMessageContaining("Leiden requires relationship projections to be UNDIRECTED.")
+            .withMessageContaining("Selected relationships `[__ALL__]` are not all undirected.");
     }
 }

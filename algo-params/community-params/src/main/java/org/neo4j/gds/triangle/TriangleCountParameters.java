@@ -19,9 +19,10 @@
  */
 package org.neo4j.gds.triangle;
 
+import org.neo4j.gds.AlgorithmParameters;
 import org.neo4j.gds.annotation.Parameters;
 import org.neo4j.gds.core.concurrency.Concurrency;
 
 @Parameters
-public record TriangleCountParameters(Concurrency concurrency, long maxDegree) {
+public record TriangleCountParameters(Concurrency concurrency, long maxDegree) implements AlgorithmParameters {
 }

@@ -19,12 +19,14 @@
  */
 package org.neo4j.gds.hdbscan;
 
+import org.neo4j.gds.AlgorithmParameters;
 import org.neo4j.gds.core.concurrency.Concurrency;
 
 public record HDBScanParameters(
     Concurrency concurrency,
     long leafSize,
     int samples,
-    long minClusterSize
-) {
+    long minClusterSize,
+    String nodeProperty
+) implements AlgorithmParameters {
 }

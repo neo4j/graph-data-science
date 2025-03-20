@@ -89,7 +89,8 @@ public interface HDBScanBaseConfig extends AlgoBaseConfig {
             concurrency(),
             leafSize(),
             samples(),
-            minClusterSize()
+            minClusterSize(),
+            nodeProperty()
         );
     }
 }

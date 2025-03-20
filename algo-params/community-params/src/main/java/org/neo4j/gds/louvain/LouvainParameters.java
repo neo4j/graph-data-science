@@ -20,6 +20,7 @@
 package org.neo4j.gds.louvain;
 
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.gds.AlgorithmParameters;
 import org.neo4j.gds.annotation.Parameters;
 import org.neo4j.gds.core.concurrency.Concurrency;
 
@@ -31,5 +32,5 @@ public record LouvainParameters(
     int maxLevels,
     boolean includeIntermediateCommunities,
     @Nullable String seedProperty
-) {
+) implements AlgorithmParameters {
 }
