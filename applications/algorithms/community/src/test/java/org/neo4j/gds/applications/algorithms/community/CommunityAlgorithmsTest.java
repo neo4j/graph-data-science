@@ -82,6 +82,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.neo4j.gds.TestSupport.fromGdl;
@@ -1176,11 +1177,16 @@ final class CommunityAlgorithmsTest {
 
         AtomicReference<TestProgressTracker> progressTrackerAtomicReference = new AtomicReference<>();
         var progressTrackerCreator = mock(TestProgressTrackerCreator.class);
-        when(progressTrackerCreator.createProgressTracker(any(), any(Task.class))).then(
+        when(progressTrackerCreator.createProgressTracker(
+            any(Task.class),
+            any(),
+            any(),
+            anyBoolean()
+        )).then(
             i ->
             {
                 var taskProgressTracker = new TestProgressTracker(
-                    i.getArgument(1),
+                    i.getArgument(0, Task.class),
                     new LoggerForProgressTrackingAdapter(log),
                     new Concurrency(concurrency),
                     EmptyTaskRegistryFactory.INSTANCE

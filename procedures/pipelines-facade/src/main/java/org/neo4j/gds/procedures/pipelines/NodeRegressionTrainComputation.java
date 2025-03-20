@@ -183,7 +183,12 @@ final class NodeRegressionTrainComputation implements Computation<NodeRegression
             .build();
 
         var task = NodeRegressionTrain.progressTask(pipeline, graphStore.nodeCount());
-        var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
+        var progressTracker = progressTrackerCreator.createProgressTracker(
+            task,
+            configuration.jobId(),
+            configuration.concurrency(),
+            configuration.logProgress()
+        );
 
         var nodeFeatureProducer = NodeFeatureProducer.create(
             graphStore,

@@ -169,7 +169,12 @@ final class LinkPredictionComputation implements Computation<LinkPredictionResul
             graphStore,
             configuration
         );
-        var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
+        var progressTracker = progressTrackerCreator.createProgressTracker(
+            task,
+            configuration.jobId(),
+            configuration.concurrency(),
+            configuration.logProgress()
+        );
 
         // this is the literal worst. packing up request things, with application deps,
         // and shipping it blindly.

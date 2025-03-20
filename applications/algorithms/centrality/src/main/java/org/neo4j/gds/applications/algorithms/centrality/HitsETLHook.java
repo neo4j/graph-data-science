@@ -72,7 +72,12 @@ class HitsETLHook implements PostLoadETLHook {
         var parameters = InverseRelationshipsConfigTransformer.toParameters(inverseConfig);
 
         var task = InverseRelationshipsProgressTaskCreator.progressTask(graphStore.nodeCount(),relationshipTypes);
-        var progressTracker =  progressTrackerCreator.createProgressTracker(inverseConfig,task);
+        var progressTracker =  progressTrackerCreator.createProgressTracker(
+            task,
+            inverseConfig.jobId(),
+            inverseConfig.concurrency(),
+            inverseConfig.logProgress()
+        );
 
         var inverseRelationships=new InverseRelationships(graphStore,parameters,progressTracker, DefaultPool.INSTANCE,terminationFlag);
 

@@ -20,15 +20,11 @@
 package org.neo4j.gds.applications.algorithms.similarity;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.similarity.knn.KnnTask;
-import org.neo4j.gds.termination.TerminationFlag;
-import org.neo4j.gds.wcc.WccStub;
-import org.neo4j.gds.wcc.WccTask;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmMachinery;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.core.concurrency.DefaultPool;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnn;
@@ -42,10 +38,14 @@ import org.neo4j.gds.similarity.knn.KnnBaseConfig;
 import org.neo4j.gds.similarity.knn.KnnContext;
 import org.neo4j.gds.similarity.knn.KnnNeighborFilterFactory;
 import org.neo4j.gds.similarity.knn.KnnResult;
+import org.neo4j.gds.similarity.knn.KnnTask;
 import org.neo4j.gds.similarity.knn.metrics.SimilarityComputer;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarity;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityBaseConfig;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
+import org.neo4j.gds.termination.TerminationFlag;
+import org.neo4j.gds.wcc.WccStub;
+import org.neo4j.gds.wcc.WccTask;
 
 import java.util.List;
 
@@ -80,8 +80,10 @@ public class SimilarityAlgorithms {
             )
         );
         var progressTracker = progressTrackerCreator.createProgressTracker(
-            configuration,
-            task
+            task,
+            configuration.jobId(),
+            configuration.concurrency(),
+            configuration.logProgress()
         );
 
         return filteredKnn(graph, configuration, progressTracker);
@@ -115,7 +117,12 @@ public class SimilarityAlgorithms {
             Tasks.leaf("compare node pairs")
         );
 
-        var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
+        var progressTracker = progressTrackerCreator.createProgressTracker(
+            task,
+            configuration.jobId(),
+            configuration.concurrency(),
+            configuration.logProgress()
+        );
 
         return filteredNodeSimilarity(graph, configuration, progressTracker);
     }
@@ -154,7 +161,12 @@ public class SimilarityAlgorithms {
         var parameters = configuration.toParameters().finalize(graph.nodeCount());
 
         var task = KnnTask.create(graph.nodeCount(), configuration.maxIterations());
-        var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
+        var progressTracker = progressTrackerCreator.createProgressTracker(
+            task,
+            configuration.jobId(),
+            configuration.concurrency(),
+            configuration.logProgress()
+        );
 
         var algorithm = Knn.create(
             graph,
@@ -180,7 +192,12 @@ public class SimilarityAlgorithms {
     public NodeSimilarityResult nodeSimilarity(Graph graph, NodeSimilarityBaseConfig configuration) {
         var task = constructNodeSimilarityTask(graph, configuration);
 
-        var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
+        var progressTracker = progressTrackerCreator.createProgressTracker(
+            task,
+            configuration.jobId(),
+            configuration.concurrency(),
+            configuration.logProgress()
+        );
 
         return nodeSimilarity(graph, configuration, progressTracker);
     }

@@ -77,7 +77,12 @@ public class NodeEmbeddingAlgorithms {
 
     public FastRPResult fastRP(Graph graph, FastRPBaseConfig configuration) {
         var task = createFastRPTask(graph, configuration.nodeSelfInfluence(), configuration.iterationWeights().size());
-        var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
+        var progressTracker = progressTrackerCreator.createProgressTracker(
+            task,
+            configuration.jobId(),
+            configuration.concurrency(),
+            configuration.logProgress()
+        );
 
         return fastRP(graph, configuration, progressTracker);
     }
@@ -108,7 +113,12 @@ public class NodeEmbeddingAlgorithms {
 
     public GraphSageResult graphSage(Graph graph, GraphSageBaseConfig configuration) {
         var task = Tasks.leaf(AlgorithmLabel.GraphSage.asString(), graph.nodeCount());
-        var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
+        var progressTracker = progressTrackerCreator.createProgressTracker(
+            task,
+            configuration.jobId(),
+            configuration.concurrency(),
+            configuration.logProgress()
+        );
 
         return graphSage(graph, configuration, progressTracker);
     }
@@ -140,7 +150,12 @@ public class NodeEmbeddingAlgorithms {
         GraphSageTrainConfig configuration
     ) {
         var task = GraphSageTrainTask.create(graph, configuration);
-        var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
+        var progressTracker = progressTrackerCreator.createProgressTracker(
+            task,
+            configuration.jobId(),
+            configuration.concurrency(),
+            configuration.logProgress()
+        );
 
         return graphSageTrain(graph, configuration, progressTracker);
     }
@@ -162,7 +177,12 @@ public class NodeEmbeddingAlgorithms {
 
     HashGNNResult hashGnn(Graph graph, HashGNNConfig configuration) {
         var task = HashGNNTask.create(graph, configuration);
-        var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
+        var progressTracker = progressTrackerCreator.createProgressTracker(
+            task,
+            configuration.jobId(),
+            configuration.concurrency(),
+            configuration.logProgress()
+        );
 
         return hashGnn(graph, configuration, progressTracker);
     }
@@ -182,7 +202,12 @@ public class NodeEmbeddingAlgorithms {
 
     Node2VecResult node2Vec(Graph graph, Node2VecBaseConfig configuration) {
         var task = createNode2VecTask(graph, configuration);
-        var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
+        var progressTracker = progressTrackerCreator.createProgressTracker(
+            task,
+            configuration.jobId(),
+            configuration.concurrency(),
+            configuration.logProgress()
+        );
 
         var algorithm = new Node2Vec(
             graph,
