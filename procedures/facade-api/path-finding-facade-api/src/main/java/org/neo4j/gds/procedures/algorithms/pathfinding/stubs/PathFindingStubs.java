@@ -17,15 +17,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.pipeline.stubs;
+package org.neo4j.gds.procedures.algorithms.pathfinding.stubs;
 
-import org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraMutateConfig;
-import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
-import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingMutateResult;
-import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
-
-public class SinglePairShortestPathDijkstraStub extends AbstractStub<ShortestPathDijkstraMutateConfig, PathFindingMutateResult> {
-    protected MutateStub<ShortestPathDijkstraMutateConfig, PathFindingMutateResult> stub(AlgorithmsProcedureFacade facade) {
-        return facade.pathFinding().stubs().singlePairDijkstra();
-    }
-}
+public record PathFindingStubs(
+    BellmanFordMutateStub bellmanFord,
+    BFSMutateStub bfs,
+    DeltaSteppingMutateStub deltaStepping,
+    DFSMutateStub dfs,
+    PrizeCollectingSteinerTreeMutateStub pcst,
+    RandomWalkMutateStub randomWalk,
+    SinglePairShortestPathAStarMutateStub aStar,
+    SinglePairShortestPathDijkstraMutateStub singlePairDijkstra,
+    SinglePairShortestPathYensMutateStub yens,
+    SingleSourceShortestPathDijkstraMutateStub singleSourceDijktra,
+    SpanningTreeMutateStub spanningTree,
+    SteinerTreeMutateStub steinerTree
+) {}

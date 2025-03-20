@@ -20,12 +20,12 @@
 package org.neo4j.gds.ml.pipeline.stubs;
 
 import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
-import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.SpanningTreeMutateResult;
+import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
 import org.neo4j.gds.spanningtree.SpanningTreeMutateConfig;
 
 public class SpanningTreeStub extends AbstractStub<SpanningTreeMutateConfig, SpanningTreeMutateResult> {
     protected MutateStub<SpanningTreeMutateConfig, SpanningTreeMutateResult> stub(AlgorithmsProcedureFacade facade) {
-        return facade.pathFinding().spanningTreeMutateStub();
+        return facade.pathFinding().stubs().spanningTree();
     }
 }

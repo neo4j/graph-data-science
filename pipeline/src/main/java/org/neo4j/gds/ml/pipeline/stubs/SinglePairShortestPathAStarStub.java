@@ -21,11 +21,11 @@ package org.neo4j.gds.ml.pipeline.stubs;
 
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarMutateConfig;
 import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
-import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingMutateResult;
+import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
 
 public class SinglePairShortestPathAStarStub extends AbstractStub<ShortestPathAStarMutateConfig, PathFindingMutateResult> {
     protected MutateStub<ShortestPathAStarMutateConfig, PathFindingMutateResult> stub(AlgorithmsProcedureFacade facade) {
-        return facade.pathFinding().singlePairShortestPathAStarMutateStub();
+        return facade.pathFinding().stubs().aStar();
     }
 }

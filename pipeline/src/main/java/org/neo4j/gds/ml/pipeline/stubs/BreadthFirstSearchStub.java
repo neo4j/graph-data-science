@@ -21,11 +21,11 @@ package org.neo4j.gds.ml.pipeline.stubs;
 
 import org.neo4j.gds.paths.traverse.BfsMutateConfig;
 import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
-import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingMutateResult;
+import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
 
 public class BreadthFirstSearchStub extends AbstractStub<BfsMutateConfig, PathFindingMutateResult> {
     protected MutateStub<BfsMutateConfig, PathFindingMutateResult> stub(AlgorithmsProcedureFacade facade) {
-        return facade.pathFinding().breadthFirstSearchMutateStub();
+        return facade.pathFinding().stubs().bfs();
     }
 }

@@ -20,12 +20,12 @@
 package org.neo4j.gds.ml.pipeline.stubs;
 
 import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
-import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.SteinerMutateResult;
+import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
 import org.neo4j.gds.steiner.SteinerTreeMutateConfig;
 
 public class SteinerTreeStub extends AbstractStub<SteinerTreeMutateConfig, SteinerMutateResult> {
     protected MutateStub<SteinerTreeMutateConfig, SteinerMutateResult> stub(AlgorithmsProcedureFacade facade) {
-        return facade.pathFinding().steinerTreeMutateStub();
+        return facade.pathFinding().stubs().steinerTree();
     }
 }

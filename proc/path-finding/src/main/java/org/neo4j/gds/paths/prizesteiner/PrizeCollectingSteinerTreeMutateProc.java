@@ -43,7 +43,7 @@ public class PrizeCollectingSteinerTreeMutateProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.algorithms().pathFinding().prizeCollectingSteinerTreeMutateStub().execute(graphName, configuration);
+        return facade.algorithms().pathFinding().prizeCollectingSteinerTreeMutate(graphName, configuration);
     }
 
     @Procedure(value = "gds.prizeSteinerTree.mutate.estimate", mode = READ)
@@ -52,7 +52,7 @@ public class PrizeCollectingSteinerTreeMutateProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.algorithms().pathFinding().prizeCollectingSteinerTreeMutateStub().estimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.algorithms().pathFinding().prizeCollectingSteinerTreeMutateEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
 }
