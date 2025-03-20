@@ -26,6 +26,6 @@ import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
 
 public class Node2VecStub extends AbstractStub<Node2VecMutateConfig, Node2VecMutateResult> {
     protected MutateStub<Node2VecMutateConfig, Node2VecMutateResult> stub(AlgorithmsProcedureFacade facade) {
-        return facade.nodeEmbeddings().stubs().node2Vec();
+        return facade.nodeEmbeddings().nodeEmbeddingStubs().node2Vec();
     }
 }

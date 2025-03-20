@@ -132,7 +132,7 @@ public final class LocalNodeEmbeddingsProcedureFacade implements NodeEmbeddingsP
 
 
     @Override
-    public NodeEmbeddingsStubs stubs() {
+    public NodeEmbeddingsStubs nodeEmbeddingStubs() {
         return stubs;
     }
 

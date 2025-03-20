@@ -26,6 +26,6 @@ import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
 
 public class HashGnnStub extends AbstractStub<HashGNNMutateConfig, DefaultNodeEmbeddingMutateResult> {
     protected MutateStub<HashGNNMutateConfig, DefaultNodeEmbeddingMutateResult> stub(AlgorithmsProcedureFacade facade) {
-        return facade.nodeEmbeddings().stubs().hashGnn();
+        return facade.nodeEmbeddings().nodeEmbeddingStubs().hashGnn();
     }
 }

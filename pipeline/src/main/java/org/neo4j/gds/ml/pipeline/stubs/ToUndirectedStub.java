@@ -26,6 +26,6 @@ import org.neo4j.gds.undirected.ToUndirectedConfig;
 
 public class ToUndirectedStub extends AbstractStub<ToUndirectedConfig, ToUndirectedMutateResult> {
     protected MutateStub<ToUndirectedConfig, ToUndirectedMutateResult> stub(AlgorithmsProcedureFacade facade) {
-        return facade.miscellaneous().stubs().toUndirected();
+        return facade.miscellaneous().miscellaneousStubs().toUndirected();
     }
 }

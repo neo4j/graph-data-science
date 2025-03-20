@@ -27,7 +27,7 @@ import java.util.stream.Stream;
 
 public interface MiscellaneousProcedureFacade {
 
-    MiscellaneousStubs stubs();
+    MiscellaneousStubs miscellaneousStubs();
 
     Stream<ScalePropertiesStreamResult> alphaScalePropertiesStream(
         String graphName,
