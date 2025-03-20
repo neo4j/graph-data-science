@@ -1,6 +1,6 @@
 name: graph-data-science
 title: Neo4j Graph Data Science
-version: '2.16'
+version: '2.17-preview'
 prerelease: true
 start_page: ROOT:index.adoc
 nav:
