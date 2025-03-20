@@ -55,10 +55,6 @@ import org.neo4j.gds.pcst.PCSTStatsConfig;
 import org.neo4j.gds.pcst.PCSTStreamConfig;
 import org.neo4j.gds.pcst.PCSTWriteConfig;
 import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
-import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.BFSMutateStub;
-import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.BellmanFordMutateStub;
-import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.DFSMutateStub;
-import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.DeltaSteppingMutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.LocalBFSMutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.LocalBellmanFordMutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.LocalDFSMutateStub;
@@ -71,14 +67,7 @@ import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.LocalSinglePairShor
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.LocalSingleSourceShortestPathDijkstraMutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.LocalSpanningTreeMutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.LocalSteinerTreeMutateStub;
-import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.PrizeCollectingSteinerTreeMutateStub;
-import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.RandomWalkMutateStub;
-import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.SinglePairShortestPathAStarMutateStub;
-import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.SinglePairShortestPathDijkstraMutateStub;
-import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.SinglePairShortestPathYensMutateStub;
-import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.SingleSourceShortestPathDijkstraMutateStub;
-import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.SpanningTreeMutateStub;
-import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.SteinerTreeMutateStub;
+import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.PathFindingStubs;
 import org.neo4j.gds.procedures.algorithms.results.StandardModeResult;
 import org.neo4j.gds.procedures.algorithms.results.StandardStatsResult;
 import org.neo4j.gds.procedures.algorithms.results.StandardWriteRelationshipsResult;
@@ -115,18 +104,7 @@ public final class LocalPathFindingProcedureFacade implements PathFindingProcedu
     private final PathFindingAlgorithmsWriteModeBusinessFacade writeModeBusinessFacade;
 
     // applications
-    private final BellmanFordMutateStub bellmanFordMutateStub;
-    private final BFSMutateStub breadthFirstSearchMutateStub;
-    private final DeltaSteppingMutateStub deltaSteppingMutateStub;
-    private final DFSMutateStub depthFirstSearchMutateStub;
-    private final PrizeCollectingSteinerTreeMutateStub prizeCollectingSteinerTreeMutateStub;
-    private final RandomWalkMutateStub randomWalkMutateStub;
-    private final SinglePairShortestPathAStarMutateStub singlePairShortestPathAStarMutateStub;
-    private final SinglePairShortestPathDijkstraMutateStub singlePairShortestPathDijkstraMutateStub;
-    private final SinglePairShortestPathYensMutateStub singlePairShortestPathYensMutateStub;
-    private final SingleSourceShortestPathDijkstraMutateStub singleSourceShortestPathDijkstraMutateStub;
-    private final SpanningTreeMutateStub spanningTreeMutateStub;
-    private final SteinerTreeMutateStub steinerTreeMutateStub;
+    private final PathFindingStubs stubs;
 
     // infrastructure
     private final UserSpecificConfigurationParser configurationParser;
@@ -139,18 +117,7 @@ public final class LocalPathFindingProcedureFacade implements PathFindingProcedu
         PathFindingAlgorithmsStatsModeBusinessFacade statsModeBusinessFacade,
         PathFindingAlgorithmsStreamModeBusinessFacade streamModeBusinessFacade,
         PathFindingAlgorithmsWriteModeBusinessFacade writeModeBusinessFacade,
-        BellmanFordMutateStub bellmanFordMutateStub,
-        BFSMutateStub breadthFirstSearchMutateStub,
-        DeltaSteppingMutateStub deltaSteppingMutateStub,
-        DFSMutateStub depthFirstSearchMutateStub,
-        PrizeCollectingSteinerTreeMutateStub prizeCollectingSteinerTreeMutateStub,
-        RandomWalkMutateStub randomWalkMutateStub,
-        SinglePairShortestPathAStarMutateStub singlePairShortestPathAStarMutateStub,
-        SinglePairShortestPathDijkstraMutateStub singlePairShortestPathDijkstraMutateStub,
-        SinglePairShortestPathYensMutateStub singlePairShortestPathYensMutateStub,
-        SingleSourceShortestPathDijkstraMutateStub singleSourceShortestPathDijkstraMutateStub,
-        SpanningTreeMutateStub spanningTreeMutateStub,
-        SteinerTreeMutateStub steinerTreeMutateStub,
+        PathFindingStubs stubs,
         UserSpecificConfigurationParser configurationParser
     ) {
         this.closeableResourceRegistry = closeableResourceRegistry;
@@ -162,18 +129,7 @@ public final class LocalPathFindingProcedureFacade implements PathFindingProcedu
         this.streamModeBusinessFacade = streamModeBusinessFacade;
         this.writeModeBusinessFacade = writeModeBusinessFacade;
 
-        this.bellmanFordMutateStub = bellmanFordMutateStub;
-        this.breadthFirstSearchMutateStub = breadthFirstSearchMutateStub;
-        this.deltaSteppingMutateStub = deltaSteppingMutateStub;
-        this.depthFirstSearchMutateStub = depthFirstSearchMutateStub;
-        this.prizeCollectingSteinerTreeMutateStub = prizeCollectingSteinerTreeMutateStub;
-        this.randomWalkMutateStub = randomWalkMutateStub;
-        this.singlePairShortestPathAStarMutateStub = singlePairShortestPathAStarMutateStub;
-        this.singlePairShortestPathDijkstraMutateStub = singlePairShortestPathDijkstraMutateStub;
-        this.singlePairShortestPathYensMutateStub = singlePairShortestPathYensMutateStub;
-        this.singleSourceShortestPathDijkstraMutateStub = singleSourceShortestPathDijkstraMutateStub;
-        this.spanningTreeMutateStub = spanningTreeMutateStub;
-        this.steinerTreeMutateStub = steinerTreeMutateStub;
+        this.stubs = stubs;
 
         this.configurationParser = configurationParser;
     }
@@ -264,14 +220,7 @@ public final class LocalPathFindingProcedureFacade implements PathFindingProcedu
             estimationModeBusinessFacade
         );
 
-        return new LocalPathFindingProcedureFacade(
-            closeableResourceRegistry,
-            nodeLookup,
-            procedureReturnColumns,
-            estimationModeBusinessFacade,
-            applicationsFacade.pathFinding().stats(),
-            applicationsFacade.pathFinding().stream(),
-            applicationsFacade.pathFinding().write(),
+        var stubs = new PathFindingStubs(
             bellmanFordMutateStub,
             breadthFirstSearchMutateStub,
             deltaSteppingMutateStub,
@@ -283,9 +232,25 @@ public final class LocalPathFindingProcedureFacade implements PathFindingProcedu
             yensStub,
             singleSourceDijkstraStub,
             spanningTreeMutateStub,
-            steinerTreeMutateStub,
+            steinerTreeMutateStub
+        );
+
+        return new LocalPathFindingProcedureFacade(
+            closeableResourceRegistry,
+            nodeLookup,
+            procedureReturnColumns,
+            estimationModeBusinessFacade,
+            applicationsFacade.pathFinding().stats(),
+            applicationsFacade.pathFinding().stream(),
+            applicationsFacade.pathFinding().write(),
+            stubs,
             configurationParser
         );
+    }
+
+    @Override
+    public PathFindingStubs stubs() {
+        return stubs;
     }
 
     @Override
@@ -298,11 +263,6 @@ public final class LocalPathFindingProcedureFacade implements PathFindingProcedu
             configurationParser.parseConfiguration(configuration, AllShortestPathsConfig::of),
             (g, gs, result) -> result.orElse(Stream.empty())
         );
-    }
-
-    @Override
-    public BellmanFordMutateStub bellmanFordMutateStub() {
-        return bellmanFordMutateStub;
     }
 
     @Override
@@ -335,6 +295,19 @@ public final class LocalPathFindingProcedureFacade implements PathFindingProcedu
                 graphNameOrConfiguration
             )
         );
+    }
+
+    @Override
+    public Stream<BellmanFordMutateResult> bellmanFordMutate(String graphName, Map<String, Object> configuration) {
+        return stubs.bellmanFord().execute(graphName,configuration);
+    }
+
+    @Override
+    public Stream<MemoryEstimateResult> bellmanFordMutateEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        return stubs.bellmanFord().estimate(graphNameOrConfiguration,algorithmConfiguration);
     }
 
     @Override
@@ -398,8 +371,19 @@ public final class LocalPathFindingProcedureFacade implements PathFindingProcedu
     }
 
     @Override
-    public BFSMutateStub breadthFirstSearchMutateStub() {
-        return breadthFirstSearchMutateStub;
+    public Stream<PathFindingMutateResult> breadthFirstSearchMutate(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        return stubs.bfs().execute(graphName,configuration);
+    }
+
+    @Override
+    public Stream<MemoryEstimateResult> breadthFirstSearchMutateEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        return stubs.bfs().estimate(graphNameOrConfiguration,algorithmConfiguration);
     }
 
     @Override
@@ -450,8 +434,16 @@ public final class LocalPathFindingProcedureFacade implements PathFindingProcedu
     }
 
     @Override
-    public DeltaSteppingMutateStub deltaSteppingMutateStub() {
-        return deltaSteppingMutateStub;
+    public Stream<PathFindingMutateResult> deltaSteppingMutate(String graphName, Map<String, Object> configuration) {
+        return stubs.deltaStepping().execute(graphName,configuration);
+    }
+
+    @Override
+    public Stream<MemoryEstimateResult> deltaSteppingMutateEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        return stubs.deltaStepping().estimate(graphNameOrConfiguration,algorithmConfiguration);
     }
 
     @Override
@@ -538,9 +530,18 @@ public final class LocalPathFindingProcedureFacade implements PathFindingProcedu
     }
 
     @Override
-    public DFSMutateStub depthFirstSearchMutateStub() {
-        return depthFirstSearchMutateStub;
+    public Stream<PathFindingMutateResult> depthFirstSearchMutate(String graphName, Map<String, Object> configuration) {
+        return stubs.dfs().execute(graphName,configuration);
     }
+
+    @Override
+    public Stream<MemoryEstimateResult> depthFirstSearchMutateEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        return stubs.dfs().estimate(graphNameOrConfiguration,algorithmConfiguration);
+    }
+
 
     @Override
     public Stream<DfsStreamResult> depthFirstSearchStream(String graphName, Map<String, Object> configuration) {
@@ -606,8 +607,19 @@ public final class LocalPathFindingProcedureFacade implements PathFindingProcedu
     }
 
     @Override
-    public PrizeCollectingSteinerTreeMutateStub prizeCollectingSteinerTreeMutateStub() {
-        return prizeCollectingSteinerTreeMutateStub;
+    public Stream<PrizeCollectingSteinerTreeMutateResult> prizeCollectingSteinerTreeMutate(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        return stubs.pcst().execute(graphName,configuration);
+    }
+
+    @Override
+    public Stream<MemoryEstimateResult> prizeCollectingSteinerTreeMutateEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        return stubs.pcst().estimate(graphNameOrConfiguration,algorithmConfiguration);
     }
 
     @Override
@@ -741,13 +753,16 @@ public final class LocalPathFindingProcedureFacade implements PathFindingProcedu
     }
 
     @Override
-    public RandomWalkMutateStub randomWalkMutateStub() {
-        return randomWalkMutateStub;
+    public Stream<RandomWalkMutateResult> randomWalkMutate(String graphName, Map<String, Object> configuration) {
+        return stubs.randomWalk().execute(graphName,configuration);
     }
 
     @Override
-    public SinglePairShortestPathAStarMutateStub singlePairShortestPathAStarMutateStub() {
-        return singlePairShortestPathAStarMutateStub;
+    public Stream<MemoryEstimateResult> randomWalkMutateEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        return stubs.randomWalk().estimate(graphNameOrConfiguration,algorithmConfiguration);
     }
 
     @Override
@@ -783,6 +798,22 @@ public final class LocalPathFindingProcedureFacade implements PathFindingProcedu
     }
 
     @Override
+    public Stream<PathFindingMutateResult> singlePairShortestPathAStarMutate(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        return stubs.aStar().execute(graphName,configuration);
+    }
+
+    @Override
+    public Stream<MemoryEstimateResult> singlePairShortestPathAStarMutateEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        return stubs.aStar().estimate(graphNameOrConfiguration,algorithmConfiguration);
+    }
+
+    @Override
     public Stream<StandardWriteRelationshipsResult> singlePairShortestPathAStarWrite(
         String graphName,
         Map<String, Object> configuration
@@ -807,11 +838,6 @@ public final class LocalPathFindingProcedureFacade implements PathFindingProcedu
                 graphNameOrConfiguration
             )
         );
-    }
-
-    @Override
-    public SinglePairShortestPathDijkstraMutateStub singlePairShortestPathDijkstraMutateStub() {
-        return singlePairShortestPathDijkstraMutateStub;
     }
 
     @Override
@@ -846,6 +872,22 @@ public final class LocalPathFindingProcedureFacade implements PathFindingProcedu
     }
 
     @Override
+    public Stream<PathFindingMutateResult> singlePairShortestPathDijkstraMutate(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        return stubs.singlePairDijkstra().execute(graphName,configuration);
+    }
+
+    @Override
+    public Stream<MemoryEstimateResult> singlePairShortestPathDijkstraMutateEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        return stubs.singlePairDijkstra().estimate(graphNameOrConfiguration,algorithmConfiguration);
+    }
+
+    @Override
     public Stream<StandardWriteRelationshipsResult> singlePairShortestPathDijkstraWrite(
         String graphName,
         Map<String, Object> configuration
@@ -871,11 +913,6 @@ public final class LocalPathFindingProcedureFacade implements PathFindingProcedu
                 graphNameOrConfiguration
             )
         );
-    }
-
-    @Override
-    public SinglePairShortestPathYensMutateStub singlePairShortestPathYensMutateStub() {
-        return singlePairShortestPathYensMutateStub;
     }
 
     @Override
@@ -911,6 +948,22 @@ public final class LocalPathFindingProcedureFacade implements PathFindingProcedu
     }
 
     @Override
+    public Stream<PathFindingMutateResult> singlePairShortestPathYensMutate(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        return stubs.yens().execute(graphName,configuration);
+    }
+
+    @Override
+    public Stream<MemoryEstimateResult> singlePairShortestPathYensMutateEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        return stubs.yens().estimate(graphNameOrConfiguration,algorithmConfiguration);
+    }
+
+    @Override
     public Stream<StandardWriteRelationshipsResult> singlePairShortestPathYensWrite(
         String graphName,
         Map<String, Object> configuration
@@ -935,11 +988,6 @@ public final class LocalPathFindingProcedureFacade implements PathFindingProcedu
                 graphNameOrConfiguration
             )
         );
-    }
-
-    @Override
-    public SingleSourceShortestPathDijkstraMutateStub singleSourceShortestPathDijkstraMutateStub() {
-        return singleSourceShortestPathDijkstraMutateStub;
     }
 
     @Override
@@ -976,6 +1024,22 @@ public final class LocalPathFindingProcedureFacade implements PathFindingProcedu
     }
 
     @Override
+    public Stream<PathFindingMutateResult> singleSourceShortestPathDijkstraMutate(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        return stubs.singleSourceDijktra().execute(graphName,configuration);
+    }
+
+    @Override
+    public Stream<MemoryEstimateResult> singleSourceShortestPathDijkstraMutateEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        return stubs.singleSourceDijktra().estimate(graphNameOrConfiguration,algorithmConfiguration);
+    }
+
+    @Override
     public Stream<StandardWriteRelationshipsResult> singleSourceShortestPathDijkstraWrite(
         String graphName,
         Map<String, Object> configuration
@@ -1002,10 +1066,6 @@ public final class LocalPathFindingProcedureFacade implements PathFindingProcedu
         );
     }
 
-    @Override
-    public SpanningTreeMutateStub spanningTreeMutateStub() {
-        return spanningTreeMutateStub;
-    }
 
     @Override
     public Stream<SpanningTreeStatsResult> spanningTreeStats(
@@ -1035,6 +1095,19 @@ public final class LocalPathFindingProcedureFacade implements PathFindingProcedu
                 graphNameOrConfiguration
             )
         );
+    }
+
+    @Override
+    public Stream<SpanningTreeMutateResult> spanningTreeMutate(String graphName, Map<String, Object> configuration) {
+        return  stubs.spanningTree().execute(graphName,configuration);
+    }
+
+    @Override
+    public Stream<MemoryEstimateResult> spanningTreeMutateEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        return stubs.spanningTree().estimate(graphNameOrConfiguration,algorithmConfiguration);
     }
 
     @Override
@@ -1088,11 +1161,6 @@ public final class LocalPathFindingProcedureFacade implements PathFindingProcedu
     }
 
     @Override
-    public SteinerTreeMutateStub steinerTreeMutateStub() {
-        return steinerTreeMutateStub;
-    }
-
-    @Override
     public Stream<SteinerStatsResult> steinerTreeStats(String graphName, Map<String, Object> rawConfiguration) {
         var configuration = configurationParser.parseConfiguration(
             rawConfiguration,
@@ -1117,6 +1185,19 @@ public final class LocalPathFindingProcedureFacade implements PathFindingProcedu
                 graphNameOrConfiguration
             )
         );
+    }
+
+    @Override
+    public Stream<SteinerMutateResult> steinerTreeMutate(String graphName, Map<String, Object> configuration) {
+        return stubs.steinerTree().execute(graphName,configuration);
+    }
+
+    @Override
+    public Stream<MemoryEstimateResult> steinerTreeMutateEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        return stubs.steinerTree().estimate(graphNameOrConfiguration,algorithmConfiguration);
     }
 
     @Override

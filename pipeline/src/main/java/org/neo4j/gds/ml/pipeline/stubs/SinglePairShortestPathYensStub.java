@@ -21,11 +21,11 @@ package org.neo4j.gds.ml.pipeline.stubs;
 
 import org.neo4j.gds.paths.yens.config.ShortestPathYensMutateConfig;
 import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
-import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingMutateResult;
+import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
 
 public class SinglePairShortestPathYensStub extends AbstractStub<ShortestPathYensMutateConfig, PathFindingMutateResult> {
     protected MutateStub<ShortestPathYensMutateConfig, PathFindingMutateResult> stub(AlgorithmsProcedureFacade facade) {
-        return facade.pathFinding().singlePairShortestPathYensMutateStub();
+        return facade.pathFinding().stubs().yens();
     }
 }

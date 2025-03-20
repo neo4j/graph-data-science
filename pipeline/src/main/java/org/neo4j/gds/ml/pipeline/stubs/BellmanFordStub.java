@@ -26,6 +26,6 @@ import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
 
 public class BellmanFordStub extends AbstractStub<AllShortestPathsBellmanFordMutateConfig, BellmanFordMutateResult> {
     protected MutateStub<AllShortestPathsBellmanFordMutateConfig, BellmanFordMutateResult> stub(AlgorithmsProcedureFacade facade) {
-        return facade.pathFinding().bellmanFordMutateStub();
+        return facade.pathFinding().stubs().bellmanFord();
     }
 }

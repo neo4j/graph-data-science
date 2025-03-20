@@ -26,6 +26,6 @@ import org.neo4j.gds.traversal.RandomWalkMutateConfig;
 
 public class RandomWalkStub extends AbstractStub<RandomWalkMutateConfig, RandomWalkMutateResult> {
     protected MutateStub<RandomWalkMutateConfig, RandomWalkMutateResult> stub(AlgorithmsProcedureFacade facade) {
-        return facade.pathFinding().randomWalkMutateStub();
+        return facade.pathFinding().stubs().randomWalk();
     }
 }

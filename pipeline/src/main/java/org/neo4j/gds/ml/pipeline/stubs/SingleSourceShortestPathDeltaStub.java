@@ -21,11 +21,11 @@ package org.neo4j.gds.ml.pipeline.stubs;
 
 import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaMutateConfig;
 import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
-import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingMutateResult;
+import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
 
 public class SingleSourceShortestPathDeltaStub extends AbstractStub<AllShortestPathsDeltaMutateConfig, PathFindingMutateResult> {
     protected MutateStub<AllShortestPathsDeltaMutateConfig, PathFindingMutateResult> stub(AlgorithmsProcedureFacade facade) {
-        return facade.pathFinding().deltaSteppingMutateStub();
+        return facade.pathFinding().stubs().deltaStepping();
     }
 }

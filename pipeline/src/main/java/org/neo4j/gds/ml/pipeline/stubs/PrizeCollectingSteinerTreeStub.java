@@ -26,6 +26,6 @@ import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
 
 public class PrizeCollectingSteinerTreeStub extends AbstractStub<PCSTMutateConfig, PrizeCollectingSteinerTreeMutateResult> {
     protected MutateStub<PCSTMutateConfig, PrizeCollectingSteinerTreeMutateResult> stub(AlgorithmsProcedureFacade facade) {
-        return facade.pathFinding().prizeCollectingSteinerTreeMutateStub();
+        return facade.pathFinding().stubs().pcst();
     }
 }

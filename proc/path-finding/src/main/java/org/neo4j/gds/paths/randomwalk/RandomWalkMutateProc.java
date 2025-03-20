@@ -44,7 +44,7 @@ public class RandomWalkMutateProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.algorithms().pathFinding().randomWalkMutateStub().execute(graphName, configuration);
+        return facade.algorithms().pathFinding().randomWalkMutate(graphName, configuration);
     }
 
     @Procedure(value = "gds.randomWalk.mutate.estimate", mode = READ)
@@ -53,6 +53,6 @@ public class RandomWalkMutateProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.algorithms().pathFinding().randomWalkMutateStub().estimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.algorithms().pathFinding().randomWalkMutateEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 }
