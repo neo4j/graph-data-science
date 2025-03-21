@@ -25,6 +25,7 @@ public record CentralityStubs(
     PageRankMutateStub<ArticleRankMutateConfig> articleRank,
     BetaClosenessCentralityMutateStub betaCloseness,
     BetweennessCentralityMutateStub betweeness,
-    ArticulationPointsMutateStub articulationPoints
+    ArticulationPointsMutateStub articulationPoints,
+    CelfMutateStub celf
     ) {
 }

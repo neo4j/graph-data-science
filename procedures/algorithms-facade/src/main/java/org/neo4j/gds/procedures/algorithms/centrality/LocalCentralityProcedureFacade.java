@@ -60,7 +60,6 @@ import org.neo4j.gds.pagerank.PageRankMutateConfig;
 import org.neo4j.gds.pagerank.PageRankStatsConfig;
 import org.neo4j.gds.pagerank.PageRankStreamConfig;
 import org.neo4j.gds.pagerank.PageRankWriteConfig;
-import org.neo4j.gds.procedures.algorithms.centrality.stubs.CelfMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.CentralityStubs;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.ClosenessCentralityMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.DegreeCentralityMutateStub;
@@ -87,7 +86,6 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
 
     private final CentralityStubs stubs;
 
-    private final CelfMutateStub celfMutateStub;
     private final HitsMutateStub hitsMutateStub;
 
     private final ClosenessCentralityMutateStub closenessCentralityMutateStub;
@@ -105,7 +103,6 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
 
     private LocalCentralityProcedureFacade(
         ProcedureReturnColumns procedureReturnColumns,
-        CelfMutateStub celfMutateStub,
         DegreeCentralityMutateStub degreeCentralityMutateStub,
         ClosenessCentralityMutateStub closenessCentralityMutateStub,
         HitsMutateStub hitsMutateStub,
@@ -121,7 +118,6 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
     ) {
         this.procedureReturnColumns = procedureReturnColumns;
         this.hitsMutateStub = hitsMutateStub;
-        this.celfMutateStub = celfMutateStub;
         this.closenessCentralityMutateStub = closenessCentralityMutateStub;
         this.degreeCentralityMutateStub = degreeCentralityMutateStub;
         this.eigenVectorMutateStub = eigenVectorMutateStub;
@@ -228,12 +224,12 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
             articleRankMutateStub,
             betaClosenessCentralityMutateStub,
             betweennessCentralityMutateStub,
-            articulationPointsMutateStub
+            articulationPointsMutateStub,
+            celfMutateStub
         );
 
         return new LocalCentralityProcedureFacade(
             procedureReturnColumns,
-            celfMutateStub,
             degreeCentralityMutateStub,
             closenessCentralityMutateStub,
             hitsMutateStub,
@@ -719,8 +715,16 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
     }
 
     @Override
-    public CelfMutateStub celfMutateStub() {
-        return celfMutateStub;
+    public Stream<CELFMutateResult> celfMutate(String graphName, Map<String, Object> configuration) {
+        return stubs.celf().execute(graphName, configuration);
+    }
+
+    @Override
+    public Stream<MemoryEstimateResult> celfMutateEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        return stubs.celf().estimate(graphNameOrConfiguration, algorithmConfiguration);
     }
 
     @Override
