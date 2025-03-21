@@ -57,16 +57,17 @@ public final class NodePropertiesWriteResult {
             this.nodeProperties = nodeProperties;
         }
 
-        void withWriteMillis(long writeMillis) {
+        public Builder withWriteMillis(long writeMillis) {
             this.writeMillis = writeMillis;
+            return this;
         }
 
-        Builder withPropertiesWritten(long propertiesWritten) {
+        public Builder withPropertiesWritten(long propertiesWritten) {
             this.propertiesWritten = propertiesWritten;
             return this;
         }
 
-        Builder withConfig(Map<String, Object> configuration) {
+        public Builder withConfig(Map<String, Object> configuration) {
             this.configuration = configuration;
             return this;
         }
