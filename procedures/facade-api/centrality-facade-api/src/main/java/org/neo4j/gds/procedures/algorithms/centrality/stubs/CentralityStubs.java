@@ -23,6 +23,7 @@ import org.neo4j.gds.pagerank.ArticleRankMutateConfig;
 
 public record CentralityStubs(
     PageRankMutateStub<ArticleRankMutateConfig> articleRank,
-    BetaClosenessCentralityMutateStub betaCloseness
+    BetaClosenessCentralityMutateStub betaCloseness,
+    BetweennessCentralityMutateStub betweeness
     ) {
 }

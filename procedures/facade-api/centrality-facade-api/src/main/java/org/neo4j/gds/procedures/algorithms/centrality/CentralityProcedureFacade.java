@@ -23,7 +23,6 @@ import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.pagerank.EigenvectorMutateConfig;
 import org.neo4j.gds.pagerank.PageRankMutateConfig;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.ArticulationPointsMutateStub;
-import org.neo4j.gds.procedures.algorithms.centrality.stubs.BetweennessCentralityMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.CelfMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.CentralityStubs;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.ClosenessCentralityMutateStub;
@@ -89,7 +88,16 @@ public interface CentralityProcedureFacade {
         Map<String, Object> configuration
     );
 
-    BetweennessCentralityMutateStub betweennessCentralityMutateStub();
+
+    Stream<CentralityMutateResult> betweennessCentralityMutate(
+        String graphName,
+        Map<String, Object> configuration
+    );
+
+    Stream<MemoryEstimateResult> betweennessCentralityMutateEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    );
 
     Stream<CentralityStatsResult> betweennessCentralityStats(
         String graphName,

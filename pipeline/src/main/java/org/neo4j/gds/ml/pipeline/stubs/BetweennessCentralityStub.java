@@ -26,6 +26,6 @@ import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
 
 public class BetweennessCentralityStub extends AbstractStub<BetweennessCentralityMutateConfig, CentralityMutateResult> {
     protected MutateStub<BetweennessCentralityMutateConfig, CentralityMutateResult> stub(AlgorithmsProcedureFacade facade) {
-        return facade.centrality().betweennessCentralityMutateStub();
+        return facade.centrality().centralityStubs().betweeness();
     }
 }

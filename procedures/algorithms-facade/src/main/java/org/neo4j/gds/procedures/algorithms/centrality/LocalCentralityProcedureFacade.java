@@ -91,7 +91,6 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
     private final CentralityStubs stubs;
 
     private final ArticulationPointsMutateStub articulationPointsMutateStub;
-    private final BetweennessCentralityMutateStub betweennessCentralityMutateStub;
     private final CelfMutateStub celfMutateStub;
     private final HitsMutateStub hitsMutateStub;
 
@@ -129,7 +128,6 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
         this.procedureReturnColumns = procedureReturnColumns;
         this.hitsMutateStub = hitsMutateStub;
         this.articulationPointsMutateStub = articulationPointsMutateStub;
-        this.betweennessCentralityMutateStub = betweennessCentralityMutateStub;
         this.celfMutateStub = celfMutateStub;
         this.closenessCentralityMutateStub = closenessCentralityMutateStub;
         this.degreeCentralityMutateStub = degreeCentralityMutateStub;
@@ -233,7 +231,11 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
             estimationModeBusinessFacade
         );
 
-        var stubs = new CentralityStubs(articleRankMutateStub,betaClosenessCentralityMutateStub);
+        var stubs = new CentralityStubs(
+            articleRankMutateStub,
+            betaClosenessCentralityMutateStub,
+            betweennessCentralityMutateStub
+        );
 
         return new LocalCentralityProcedureFacade(
             procedureReturnColumns,
@@ -435,8 +437,19 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
     }
 
     @Override
-    public BetweennessCentralityMutateStub betweennessCentralityMutateStub() {
-        return betweennessCentralityMutateStub;
+    public Stream<CentralityMutateResult> betweennessCentralityMutate(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        return stubs.betweeness().execute(graphName,configuration);
+    }
+
+    @Override
+    public Stream<MemoryEstimateResult> betweennessCentralityMutateEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        return stubs.betweeness().estimate(graphNameOrConfiguration,algorithmConfiguration);
     }
 
     @Override
