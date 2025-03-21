@@ -26,6 +26,6 @@ import org.neo4j.gds.scc.SccMutateConfig;
 
 public class SccStub extends AbstractStub<SccMutateConfig, SccMutateResult> {
     protected MutateStub<SccMutateConfig, SccMutateResult> stub(AlgorithmsProcedureFacade facade) {
-        return facade.community().sccMutateStub();
+        return facade.community().communityStubs().scc();
     }
 }

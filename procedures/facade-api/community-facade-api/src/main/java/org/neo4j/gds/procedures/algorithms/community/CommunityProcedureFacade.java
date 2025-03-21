@@ -20,26 +20,15 @@
 package org.neo4j.gds.procedures.algorithms.community;
 
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
-import org.neo4j.gds.procedures.algorithms.community.stubs.ApproximateMaximumKCutMutateStub;
-import org.neo4j.gds.procedures.algorithms.community.stubs.HDBScanMutateStub;
-import org.neo4j.gds.procedures.algorithms.community.stubs.K1ColoringMutateStub;
-import org.neo4j.gds.procedures.algorithms.community.stubs.KCoreMutateStub;
-import org.neo4j.gds.procedures.algorithms.community.stubs.KMeansMutateStub;
-import org.neo4j.gds.procedures.algorithms.community.stubs.LabelPropagationMutateStub;
-import org.neo4j.gds.procedures.algorithms.community.stubs.LccMutateStub;
-import org.neo4j.gds.procedures.algorithms.community.stubs.LeidenMutateStub;
-import org.neo4j.gds.procedures.algorithms.community.stubs.LouvainMutateStub;
-import org.neo4j.gds.procedures.algorithms.community.stubs.ModularityOptimizationMutateStub;
-import org.neo4j.gds.procedures.algorithms.community.stubs.SccMutateStub;
-import org.neo4j.gds.procedures.algorithms.community.stubs.SpeakerListenerLPAMutateStub;
-import org.neo4j.gds.procedures.algorithms.community.stubs.TriangleCountMutateStub;
-import org.neo4j.gds.procedures.algorithms.community.stubs.WccMutateStub;
+import org.neo4j.gds.procedures.algorithms.community.stubs.CommunityStubs;
 
 import java.util.Map;
 import java.util.stream.Stream;
 
 public interface CommunityProcedureFacade {
-    ApproximateMaximumKCutMutateStub approxMaxKCutMutateStub();
+
+    CommunityStubs communityStubs();
+
 
     Stream<ApproxMaxKCutMutateResult> approxMaxKCutMutate(
         String graphName,
@@ -71,7 +60,6 @@ public interface CommunityProcedureFacade {
         Map<String, Object> configuration
     );
 
-    K1ColoringMutateStub k1ColoringMutateStub();
 
     Stream<K1ColoringMutateResult> k1ColoringMutate(
         String graphName,
@@ -113,8 +101,6 @@ public interface CommunityProcedureFacade {
         Map<String, Object> algorithmConfiguration
     );
 
-    KCoreMutateStub kCoreMutateStub();
-
     Stream<KCoreDecompositionMutateResult> kCoreMutate(
         String graphName,
         Map<String, Object> rawConfiguration
@@ -155,8 +141,6 @@ public interface CommunityProcedureFacade {
         Map<String, Object> algorithmConfiguration
     );
 
-    KMeansMutateStub kMeansMutateStub();
-
     Stream<KMeansMutateResult> kMeansMutate(
         String graphName,
         Map<String, Object> rawConfiguration
@@ -190,8 +174,6 @@ public interface CommunityProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     );
-
-    LabelPropagationMutateStub labelPropagationMutateStub();
 
     Stream<LabelPropagationMutateResult> labelPropagationMutate(
         String graphName,
@@ -232,8 +214,6 @@ public interface CommunityProcedureFacade {
         Map<String, Object> algorithmConfiguration
     );
 
-    LccMutateStub lccMutateStub();
-
     Stream<LocalClusteringCoefficientMutateResult> localClusteringCoefficientMutate(
         String graphName,
         Map<String, Object> rawConfiguration
@@ -272,8 +252,6 @@ public interface CommunityProcedureFacade {
         Map<String, Object> algorithmConfiguration
     );
 
-    LeidenMutateStub leidenMutateStub();
-
     Stream<LeidenMutateResult> leidenMutate(
         String graphName,
         Map<String, Object> rawConfiguration
@@ -310,8 +288,6 @@ public interface CommunityProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     );
-
-    LouvainMutateStub louvainMutateStub();
 
     Stream<LouvainMutateResult> louvainMutate(
         String graphName,
@@ -370,8 +346,6 @@ public interface CommunityProcedureFacade {
         Map<String, Object> algorithmConfiguration
     );
 
-    ModularityOptimizationMutateStub modularityOptimizationMutateStub();
-
     Stream<ModularityOptimizationMutateResult> modularityOptimizationMutate(
         String graphName,
         Map<String, Object> rawConfiguration
@@ -410,8 +384,6 @@ public interface CommunityProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     );
-
-    SccMutateStub sccMutateStub();
 
     Stream<SccMutateResult> sccMutate(
         String graphName,
@@ -458,8 +430,6 @@ public interface CommunityProcedureFacade {
         Map<String, Object> algorithmConfiguration
     );
 
-    TriangleCountMutateStub triangleCountMutateStub();
-
     Stream<TriangleCountMutateResult> triangleCountMutate(
         String graphName,
         Map<String, Object> rawConfiguration
@@ -498,8 +468,6 @@ public interface CommunityProcedureFacade {
     );
 
     Stream<TriangleStreamResult> trianglesStream(String graphName, Map<String, Object> configuration);
-
-    WccMutateStub wccMutateStub();
 
     Stream<WccMutateResult> wccMutate(
         String graphName,
@@ -571,11 +539,6 @@ public interface CommunityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     );
-
-
-    SpeakerListenerLPAMutateStub speakerListenerLPAMutateStub();
-
-    HDBScanMutateStub hdbscanMutateStub();
 
     Stream<HDBScanMutateResult> hdbscanMutate(String graphName, Map<String, Object> configuration);
 

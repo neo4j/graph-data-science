@@ -17,17 +17,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.pipeline.stubs;
+package org.neo4j.gds.procedures.algorithms.community.stubs;
 
-import org.neo4j.gds.modularityoptimization.ModularityOptimizationMutateConfig;
-import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
-import org.neo4j.gds.procedures.algorithms.community.ModularityOptimizationMutateResult;
-import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
-
-public class ModularityOptimizationStub extends AbstractStub<ModularityOptimizationMutateConfig, ModularityOptimizationMutateResult> {
-    protected MutateStub<ModularityOptimizationMutateConfig, ModularityOptimizationMutateResult> stub(
-        AlgorithmsProcedureFacade facade
-    ) {
-        return facade.community().communityStubs().modularityOptimization();
-    }
+public record CommunityStubs(
+    ApproximateMaximumKCutMutateStub approxMaxKCut,
+    HDBScanMutateStub hdbscan,
+    K1ColoringMutateStub k1Coloring,
+    KCoreMutateStub kCore,
+    KMeansMutateStub kMeans,
+    LabelPropagationMutateStub labelPropagation,
+    LccMutateStub lcc,
+    LeidenMutateStub leiden,
+    LouvainMutateStub louvain,
+    ModularityOptimizationMutateStub modularityOptimization,
+    SccMutateStub scc,
+    SpeakerListenerLPAMutateStub sllpa,
+    TriangleCountMutateStub triangleCount,
+    WccMutateStub wcc
+) {
 }

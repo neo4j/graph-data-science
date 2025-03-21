@@ -26,6 +26,6 @@ import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
 
 public class K1ColoringStub extends AbstractStub<K1ColoringMutateConfig, K1ColoringMutateResult> {
     protected MutateStub<K1ColoringMutateConfig, K1ColoringMutateResult> stub(AlgorithmsProcedureFacade facade) {
-        return facade.community().k1ColoringMutateStub();
+        return facade.community().communityStubs().k1Coloring();
     }
 }

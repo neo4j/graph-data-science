@@ -26,6 +26,6 @@ import org.neo4j.gds.wcc.WccMutateConfig;
 
 public class WccStub extends AbstractStub<WccMutateConfig, WccMutateResult> {
     protected MutateStub<WccMutateConfig, WccMutateResult> stub(AlgorithmsProcedureFacade facade) {
-        return facade.community().wccMutateStub();
+        return facade.community().communityStubs().wcc();
     }
 }

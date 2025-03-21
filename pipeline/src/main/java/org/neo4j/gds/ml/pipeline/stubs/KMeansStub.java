@@ -26,6 +26,6 @@ import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
 
 public class KMeansStub extends AbstractStub<KmeansMutateConfig, KMeansMutateResult> {
     protected MutateStub<KmeansMutateConfig, KMeansMutateResult> stub(AlgorithmsProcedureFacade facade) {
-        return facade.community().kMeansMutateStub();
+        return facade.community().communityStubs().kMeans();
     }
 }
