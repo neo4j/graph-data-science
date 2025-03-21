@@ -26,6 +26,6 @@ import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
 
 public class DegreeCentralityStub extends AbstractStub<DegreeCentralityMutateConfig, CentralityMutateResult> {
     protected MutateStub<DegreeCentralityMutateConfig, CentralityMutateResult> stub(AlgorithmsProcedureFacade facade) {
-        return facade.centrality().degreeCentralityMutateStub();
+        return facade.centrality().centralityStubs().degree();
     }
 }

@@ -28,6 +28,7 @@ public record CentralityStubs(
     ArticulationPointsMutateStub articulationPoints,
     CelfMutateStub celf,
     HitsMutateStub hits,
-    ClosenessCentralityMutateStub closeness
+    ClosenessCentralityMutateStub closeness,
+    DegreeCentralityMutateStub degree
     ) {
 }
