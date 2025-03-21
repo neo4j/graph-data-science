@@ -26,6 +26,6 @@ import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
 
 public class EigenVectorStub extends AbstractStub<EigenvectorMutateConfig, PageRankMutateResult> {
     protected MutateStub<EigenvectorMutateConfig, PageRankMutateResult> stub(AlgorithmsProcedureFacade facade) {
-        return facade.centrality().eigenVectorMutateStub();
+        return facade.centrality().centralityStubs().eigenvector();
     }
 }

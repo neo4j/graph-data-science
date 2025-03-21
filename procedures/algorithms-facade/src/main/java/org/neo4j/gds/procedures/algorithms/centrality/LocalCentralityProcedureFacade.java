@@ -83,7 +83,6 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
 
     private final CentralityStubs stubs;
 
-    private final PageRankMutateStub<EigenvectorMutateConfig> eigenVectorMutateStub;
     private final HarmonicCentralityMutateStub harmonicCentralityMutateStub;
     private final PageRankMutateStub<PageRankMutateConfig> pageRankMutateStub;
 
@@ -96,7 +95,6 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
 
     private LocalCentralityProcedureFacade(
         ProcedureReturnColumns procedureReturnColumns,
-        PageRankMutateStub<EigenvectorMutateConfig> eigenVectorMutateStub,
         HarmonicCentralityMutateStub harmonicCentralityMutateStub,
         PageRankMutateStub<PageRankMutateConfig> pageRankMutateStub,
         CentralityAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade,
@@ -107,7 +105,6 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
         UserSpecificConfigurationParser configurationParser
     ) {
         this.procedureReturnColumns = procedureReturnColumns;
-        this.eigenVectorMutateStub = eigenVectorMutateStub;
         this.harmonicCentralityMutateStub = harmonicCentralityMutateStub;
         this.pageRankMutateStub = pageRankMutateStub;
         this.estimationModeBusinessFacade = estimationModeBusinessFacade;
@@ -215,12 +212,12 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
             celfMutateStub,
             hitsMutateStub,
             closenessCentralityMutateStub,
-            degreeCentralityMutateStub
+            degreeCentralityMutateStub,
+            eigenVectorMutateStub
         );
 
         return new LocalCentralityProcedureFacade(
             procedureReturnColumns,
-            eigenVectorMutateStub,
             harmonicCentralityMutateStub,
             pageRankMutateStub,
             estimationModeBusinessFacade,
@@ -1001,8 +998,16 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
     }
 
     @Override
-    public PageRankMutateStub<EigenvectorMutateConfig> eigenVectorMutateStub() {
-        return eigenVectorMutateStub;
+    public Stream<PageRankMutateResult> eigenvectorMutate(String graphName, Map<String, Object> configuration) {
+        return stubs.eigenvector().execute(graphName, configuration);
+    }
+
+    @Override
+    public Stream<MemoryEstimateResult> eigenvectorMutateEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        return stubs.eigenvector().estimate(graphNameOrConfiguration, algorithmConfiguration);
     }
 
     @Override
