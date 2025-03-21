@@ -1243,7 +1243,7 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
             HitsConfig::of
         );
 
-        var resultBuilder =new HitsResultBuilderForStreamMode(parsedConfiguration);
+        var resultBuilder = new HitsResultBuilderForStreamMode(parsedConfiguration);
 
         return streamModeBusinessFacade.hits(
             GraphName.parse(graphName),
@@ -1261,7 +1261,7 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
             algorithmConfiguration,
             HitsConfig::of
         );
-        return Stream.of(estimationModeBusinessFacade.hits(parsedConfiguration,graphNameOrConfiguration));
+        return Stream.of(estimationModeBusinessFacade.hits(parsedConfiguration, graphNameOrConfiguration));
     }
 
     @Override
@@ -1271,7 +1271,7 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
             HitsConfig::of
         );
 
-        var resultBuilder =new HitsResultBuilderForStatsMode(parsedConfiguration);
+        var resultBuilder = new HitsResultBuilderForStatsMode(parsedConfiguration);
 
         return statsModeBusinessFacade.hits(
             GraphName.parse(graphName),
@@ -1289,7 +1289,7 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
             algorithmConfiguration,
             HitsConfig::of
         );
-        return Stream.of(estimationModeBusinessFacade.hits(parsedConfiguration,graphNameOrConfiguration));
+        return Stream.of(estimationModeBusinessFacade.hits(parsedConfiguration, graphNameOrConfiguration));
     }
 
     @Override
@@ -1299,7 +1299,7 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
             HitsConfig::of
         );
 
-        var resultBuilder =new HitsResultBuilderForWriteMode();
+        var resultBuilder = new HitsResultBuilderForWriteMode();
 
         return writeModeBusinessFacade.hits(
             GraphName.parse(graphName),
@@ -1317,7 +1317,7 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
             algorithmConfiguration,
             HitsConfig::of
         );
-        return Stream.of(estimationModeBusinessFacade.hits(parsedConfiguration,graphNameOrConfiguration));
+        return Stream.of(estimationModeBusinessFacade.hits(parsedConfiguration, graphNameOrConfiguration));
     }
 
     @Override
