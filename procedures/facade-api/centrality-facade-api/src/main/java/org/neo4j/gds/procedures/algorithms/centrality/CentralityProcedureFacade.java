@@ -20,9 +20,7 @@
 package org.neo4j.gds.procedures.algorithms.centrality;
 
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
-import org.neo4j.gds.pagerank.PageRankMutateConfig;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.CentralityStubs;
-import org.neo4j.gds.procedures.algorithms.centrality.stubs.PageRankMutateStub;
 
 import java.util.Map;
 import java.util.stream.Stream;
@@ -295,7 +293,12 @@ public interface CentralityProcedureFacade {
 
     Stream<CentralityWriteResult> harmonicCentralityWrite(String graphName, Map<String, Object> configuration);
 
-    PageRankMutateStub<PageRankMutateConfig> pageRankMutateStub();
+    Stream<PageRankMutateResult> pageRankMutate(String graphName, Map<String, Object> configuration);
+
+    Stream<MemoryEstimateResult> pageRankMutateEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    );
 
     Stream<PageRankStatsResult> pageRankStats(String graphName, Map<String, Object> configuration);
 

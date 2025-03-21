@@ -70,7 +70,6 @@ import org.neo4j.gds.procedures.algorithms.centrality.stubs.LocalDegreeCentralit
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.LocalHarmonicCentralityMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.LocalHitsMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.LocalPageRankMutateStub;
-import org.neo4j.gds.procedures.algorithms.centrality.stubs.PageRankMutateStub;
 import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 
@@ -82,8 +81,6 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
 
     private final CentralityStubs stubs;
 
-    private final PageRankMutateStub<PageRankMutateConfig> pageRankMutateStub;
-
     private final CentralityAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade;
     private final CentralityAlgorithmsStatsModeBusinessFacade statsModeBusinessFacade;
     private final CentralityAlgorithmsStreamModeBusinessFacade streamModeBusinessFacade;
@@ -93,7 +90,6 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
 
     private LocalCentralityProcedureFacade(
         ProcedureReturnColumns procedureReturnColumns,
-        PageRankMutateStub<PageRankMutateConfig> pageRankMutateStub,
         CentralityAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade,
         CentralityAlgorithmsStatsModeBusinessFacade statsModeBusinessFacade,
         CentralityAlgorithmsStreamModeBusinessFacade streamModeBusinessFacade,
@@ -102,7 +98,6 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
         UserSpecificConfigurationParser configurationParser
     ) {
         this.procedureReturnColumns = procedureReturnColumns;
-        this.pageRankMutateStub = pageRankMutateStub;
         this.estimationModeBusinessFacade = estimationModeBusinessFacade;
         this.statsModeBusinessFacade = statsModeBusinessFacade;
         this.streamModeBusinessFacade = streamModeBusinessFacade;
@@ -210,12 +205,12 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
             closenessCentralityMutateStub,
             degreeCentralityMutateStub,
             eigenVectorMutateStub,
-            harmonicCentralityMutateStub
+            harmonicCentralityMutateStub,
+            pageRankMutateStub
         );
 
         return new LocalCentralityProcedureFacade(
             procedureReturnColumns,
-            pageRankMutateStub,
             estimationModeBusinessFacade,
             centralityApplications.stats(),
             centralityApplications.stream(),
@@ -227,7 +222,7 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
 
     @Override
     public CentralityStubs centralityStubs() {
-        return null;
+        return stubs;
     }
 
     @Override
@@ -271,7 +266,7 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
 
     @Override
     public Stream<PageRankMutateResult> articleRankMutate(String graphName, Map<String, Object> configuration) {
-        return stubs.articleRank().execute(graphName,configuration);
+        return stubs.articleRank().execute(graphName, configuration);
     }
 
     @Override
@@ -279,7 +274,7 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     ) {
-        return  stubs.articleRank().estimate(graphNameOrConfiguration,algorithmConfiguration);
+        return stubs.articleRank().estimate(graphNameOrConfiguration, algorithmConfiguration);
     }
 
     @Override
@@ -382,7 +377,7 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
         String graphName,
         Map<String, Object> configuration
     ) {
-        return stubs.betaCloseness().execute(graphName,configuration);
+        return stubs.betaCloseness().execute(graphName, configuration);
     }
 
 
@@ -578,7 +573,7 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
         String graphName,
         Map<String, Object> configuration
     ) {
-        return stubs.articulationPoints().execute(graphName,configuration);
+        return stubs.articulationPoints().execute(graphName, configuration);
 
     }
 
@@ -587,7 +582,7 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     ) {
-        return stubs.articulationPoints().estimate(graphNameOrConfiguration,algorithmConfiguration);
+        return stubs.articulationPoints().estimate(graphNameOrConfiguration, algorithmConfiguration);
     }
 
     @Override
@@ -816,7 +811,7 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
         String graphName,
         Map<String, Object> configuration
     ) {
-        return stubs.closeness().execute(graphName,configuration);
+        return stubs.closeness().execute(graphName, configuration);
     }
 
     @Override
@@ -877,7 +872,7 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
 
     @Override
     public Stream<CentralityMutateResult> degreeCentralityMutate(String graphName, Map<String, Object> configuration) {
-        return stubs.degree().execute(graphName,configuration);
+        return stubs.degree().execute(graphName, configuration);
     }
 
     @Override
@@ -885,7 +880,7 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     ) {
-        return stubs.degree().estimate(graphNameOrConfiguration,algorithmConfiguration);
+        return stubs.degree().estimate(graphNameOrConfiguration, algorithmConfiguration);
 
     }
 
@@ -1165,8 +1160,16 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
     }
 
     @Override
-    public PageRankMutateStub<PageRankMutateConfig> pageRankMutateStub() {
-        return pageRankMutateStub;
+    public Stream<PageRankMutateResult> pageRankMutate(String graphName, Map<String, Object> configuration) {
+        return stubs.pageRank().execute(graphName, configuration);
+    }
+
+    @Override
+    public Stream<MemoryEstimateResult> pageRankMutateEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        return stubs.pageRank().estimate(graphNameOrConfiguration, algorithmConfiguration);
     }
 
     @Override
@@ -1350,7 +1353,7 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
 
     @Override
     public Stream<HitsMutateResult> hitsMutate(String graphName, Map<String, Object> configuration) {
-        return stubs.hits().execute(graphName,configuration);
+        return stubs.hits().execute(graphName, configuration);
     }
 
     @Override
@@ -1358,7 +1361,7 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     ) {
-        return stubs.hits().estimate(graphNameOrConfiguration,algorithmConfiguration);
+        return stubs.hits().estimate(graphNameOrConfiguration, algorithmConfiguration);
 
     }
 
