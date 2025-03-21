@@ -75,13 +75,13 @@ import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.WCC
 
 public final class CommunityAlgorithmsWriteModeBusinessFacade {
     private final CommunityAlgorithmsEstimationModeBusinessFacade estimationFacade;
-    private final CommunityAlgorithms algorithms;
+    private final CommunityAlgorithmsBusinessFacade algorithms;
     private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
     private final WriteToDatabase writeToDatabase;
 
     private CommunityAlgorithmsWriteModeBusinessFacade(
         CommunityAlgorithmsEstimationModeBusinessFacade estimationFacade,
-        CommunityAlgorithms algorithms,
+        CommunityAlgorithmsBusinessFacade algorithms,
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
         WriteToDatabase writeToDatabase
     ) {
@@ -96,7 +96,7 @@ public final class CommunityAlgorithmsWriteModeBusinessFacade {
         RequestScopedDependencies requestScopedDependencies,
         WriteContext writeContext,
         CommunityAlgorithmsEstimationModeBusinessFacade estimation,
-        CommunityAlgorithms algorithms,
+        CommunityAlgorithmsBusinessFacade algorithms,
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience
     ) {
         var writeToDatabase = new WriteToDatabase(log, requestScopedDependencies, writeContext);

@@ -62,20 +62,24 @@ public final class CommunityApplications {
             progressTrackerCreator,
             requestScopedDependencies.terminationFlag()
         );
+        var algorithmsBusinessFacade = new CommunityAlgorithmsBusinessFacade(
+            algorithms,
+            progressTrackerCreator
+        );
         var mutation = new CommunityAlgorithmsMutateModeBusinessFacade(
             estimation,
-            algorithms,
+            algorithmsBusinessFacade,
             algorithmProcessingTemplateConvenience,
             mutateNodeProperty
         );
         var stats = new CommunityAlgorithmsStatsModeBusinessFacade(
             estimation,
-            algorithms,
+            algorithmsBusinessFacade,
             algorithmProcessingTemplateConvenience
         );
         var stream = new CommunityAlgorithmsStreamModeBusinessFacade(
             estimation,
-            algorithms,
+            algorithmsBusinessFacade,
             algorithmProcessingTemplateConvenience
         );
         var write = CommunityAlgorithmsWriteModeBusinessFacade.create(
@@ -83,7 +87,7 @@ public final class CommunityApplications {
             requestScopedDependencies,
             writeContext,
             estimation,
-            algorithms,
+            algorithmsBusinessFacade,
             algorithmProcessingTemplateConvenience
         );
 

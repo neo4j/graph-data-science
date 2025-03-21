@@ -107,6 +107,18 @@ public class K1Coloring extends Algorithm<K1ColoringResult> {
         this.terminationFlag = terminationFlag;
     }
 
+    public K1Coloring(Graph graph, K1ColoringParameters parameters, ExecutorService executorService, ProgressTracker progressTracker, TerminationFlag terminationFlag) {
+        this(
+            graph,
+            parameters.maxIterations(),
+            parameters.batchSize(),
+            parameters.concurrency(),
+            executorService,
+            progressTracker,
+            terminationFlag
+        );
+    }
+
     private BitSet currentNodesToColor() {
         return nodesToColor[bitSetId];
     }

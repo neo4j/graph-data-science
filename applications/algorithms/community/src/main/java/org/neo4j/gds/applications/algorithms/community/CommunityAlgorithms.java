@@ -93,6 +93,7 @@ import org.neo4j.gds.triangle.TriangleCountResult;
 import org.neo4j.gds.triangle.TriangleResult;
 import org.neo4j.gds.triangle.TriangleStream;
 import org.neo4j.gds.wcc.WccBaseConfig;
+import org.neo4j.gds.wcc.WccParameters;
 import org.neo4j.gds.wcc.WccStub;
 
 import java.util.Optional;
@@ -490,9 +491,16 @@ public class CommunityAlgorithms {
                 "Specifying a `relationshipWeightProperty` has no effect unless `threshold` is also set.");
         }
 
-        var wccStub = new WccStub(terminationFlag, algorithmMachinery);
+        return wcc(graph, configuration.toParameters(), progressTracker);
+    }
 
-        return wccStub.wcc(graph, configuration.toParameters(), progressTracker, true);
+    public DisjointSetStruct wcc(
+        Graph graph,
+        WccParameters parameters,
+        ProgressTracker progressTracker
+    ) {
+        var wccStub = new WccStub(terminationFlag, algorithmMachinery);
+        return wccStub.wcc(graph, parameters, progressTracker, true);
     }
 
     PregelResult speakerListenerLPA(Graph graph, SpeakerListenerLPAConfig configuration) {

@@ -68,12 +68,12 @@ import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.WCC
 
 public class CommunityAlgorithmsStatsModeBusinessFacade {
     private final CommunityAlgorithmsEstimationModeBusinessFacade estimationFacade;
-    private final CommunityAlgorithms communityAlgorithms;
+    private final CommunityAlgorithmsBusinessFacade communityAlgorithms;
     private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
 
     CommunityAlgorithmsStatsModeBusinessFacade(
         CommunityAlgorithmsEstimationModeBusinessFacade estimationFacade,
-        CommunityAlgorithms communityAlgorithms,
+        CommunityAlgorithmsBusinessFacade communityAlgorithms,
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience
     ) {
         this.estimationFacade = estimationFacade;

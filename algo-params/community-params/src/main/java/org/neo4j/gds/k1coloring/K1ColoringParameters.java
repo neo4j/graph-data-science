@@ -29,4 +29,9 @@ public record K1ColoringParameters(
     int maxIterations,
     int batchSize
 ) implements AlgorithmParameters {
+
+    public static K1ColoringParameters defaultsWithConcurrency(Concurrency concurrency) {
+        return new K1ColoringParameters(concurrency, 10, 10_000);
+    }
+
 }
