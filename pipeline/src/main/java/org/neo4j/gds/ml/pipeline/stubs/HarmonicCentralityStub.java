@@ -26,6 +26,6 @@ import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
 
 public class HarmonicCentralityStub extends AbstractStub<HarmonicCentralityMutateConfig, CentralityMutateResult> {
     protected MutateStub<HarmonicCentralityMutateConfig, CentralityMutateResult> stub(AlgorithmsProcedureFacade facade) {
-        return facade.centrality().harmonicCentralityMutateStub();
+        return facade.centrality().centralityStubs().harmonic();
     }
 }

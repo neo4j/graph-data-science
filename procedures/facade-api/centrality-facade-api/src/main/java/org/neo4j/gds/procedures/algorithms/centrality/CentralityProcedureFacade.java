@@ -22,7 +22,6 @@ package org.neo4j.gds.procedures.algorithms.centrality;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.pagerank.PageRankMutateConfig;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.CentralityStubs;
-import org.neo4j.gds.procedures.algorithms.centrality.stubs.HarmonicCentralityMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.PageRankMutateStub;
 
 import java.util.Map;
@@ -284,7 +283,8 @@ public interface CentralityProcedureFacade {
         Map<String, Object> algorithmConfiguration
     );
 
-    HarmonicCentralityMutateStub harmonicCentralityMutateStub();
+
+    Stream<CentralityMutateResult> harmonicCentralityMutate(String graphName, Map<String, Object> configuration);
 
     Stream<CentralityStatsResult> harmonicCentralityStats(String graphName, Map<String, Object> configuration);
 

@@ -31,7 +31,8 @@ public record CentralityStubs(
     HitsMutateStub hits,
     ClosenessCentralityMutateStub closeness,
     DegreeCentralityMutateStub degree,
-    PageRankMutateStub<EigenvectorMutateConfig> eigenvector
+    PageRankMutateStub<EigenvectorMutateConfig> eigenvector,
+    HarmonicCentralityMutateStub harmonic
 ) {
 
 }
