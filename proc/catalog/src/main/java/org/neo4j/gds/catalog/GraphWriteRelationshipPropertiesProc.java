@@ -43,8 +43,8 @@ public class GraphWriteRelationshipPropertiesProc {
     public Stream<WriteRelationshipPropertiesResult> writeRelationshipProperties(
         @Name(value = "graphName") String graphName,
         @Name(value = "relationshipType") String relationshipType,
-        @Name(value = "relationshipProperties") List<String> relationshipProperties,
-        @Name(value = "configuration") Map<String, Object> configuration
+        @Name(value = "relationshipProperties", defaultValue = "[]") List<String> relationshipProperties,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         return facade.graphCatalog().writeRelationshipProperties(
             graphName,
