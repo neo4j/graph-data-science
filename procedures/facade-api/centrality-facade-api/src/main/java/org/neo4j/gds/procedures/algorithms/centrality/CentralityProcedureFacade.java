@@ -22,7 +22,6 @@ package org.neo4j.gds.procedures.algorithms.centrality;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.pagerank.EigenvectorMutateConfig;
 import org.neo4j.gds.pagerank.PageRankMutateConfig;
-import org.neo4j.gds.procedures.algorithms.centrality.stubs.ArticulationPointsMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.CelfMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.CentralityStubs;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.ClosenessCentralityMutateStub;
@@ -139,7 +138,10 @@ public interface CentralityProcedureFacade {
         Map<String, Object> algorithmConfiguration
     );
 
-    ArticulationPointsMutateStub articulationPointsMutateStub();
+    Stream<ArticulationPointsMutateResult> articulationPointsMutate(
+        String graphName,
+        Map<String, Object> configuration
+    );
 
     Stream<MemoryEstimateResult> articulationPointsMutateEstimate(
         Object graphNameOrConfiguration,
