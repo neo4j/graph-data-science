@@ -28,14 +28,11 @@ import org.neo4j.gds.applications.algorithms.similarity.SimilarityAlgorithmsStat
 import org.neo4j.gds.applications.algorithms.similarity.SimilarityAlgorithmsStreamModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.similarity.SimilarityAlgorithmsWriteModeBusinessFacade;
 import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
-import org.neo4j.gds.procedures.algorithms.similarity.stubs.FilteredKnnMutateStub;
-import org.neo4j.gds.procedures.algorithms.similarity.stubs.FilteredNodeSimilarityMutateStub;
-import org.neo4j.gds.procedures.algorithms.similarity.stubs.KnnMutateStub;
 import org.neo4j.gds.procedures.algorithms.similarity.stubs.LocalFilteredKnnMutateStub;
 import org.neo4j.gds.procedures.algorithms.similarity.stubs.LocalFilteredNodeSimilarityMutateStub;
 import org.neo4j.gds.procedures.algorithms.similarity.stubs.LocalKnnMutateStub;
 import org.neo4j.gds.procedures.algorithms.similarity.stubs.LocalNodeSimilarityMutateStub;
-import org.neo4j.gds.procedures.algorithms.similarity.stubs.NodeSimilarityMutateStub;
+import org.neo4j.gds.procedures.algorithms.similarity.stubs.SimilarityStubs;
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnStatsConfig;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnStreamConfig;
@@ -62,10 +59,7 @@ public final class LocalSimilarityProcedureFacade implements SimilarityProcedure
     private final SimilarityAlgorithmsWriteModeBusinessFacade writeModeBusinessFacade;
 
     //stubs
-    private final FilteredKnnMutateStub filteredKnnMutateStub;
-    private final FilteredNodeSimilarityMutateStub filteredNodeSimilarityMutateStub;
-    private final KnnMutateStub knnMutateStub;
-    private final NodeSimilarityMutateStub nodeSimilarityMutateStub;
+    private final SimilarityStubs stubs;
 
     private final UserSpecificConfigurationParser configurationParser;
 
@@ -75,10 +69,7 @@ public final class LocalSimilarityProcedureFacade implements SimilarityProcedure
         SimilarityAlgorithmsStatsModeBusinessFacade statsModeBusinessFacade,
         SimilarityAlgorithmsStreamModeBusinessFacade streamModeBusinessFacade,
         SimilarityAlgorithmsWriteModeBusinessFacade writeModeBusinessFacade,
-        FilteredKnnMutateStub filteredKnnMutateStub,
-        FilteredNodeSimilarityMutateStub filteredNodeSimilarityMutateStub,
-        KnnMutateStub knnMutateStub,
-        NodeSimilarityMutateStub nodeSimilarityMutateStub,
+        SimilarityStubs stubs,
         UserSpecificConfigurationParser configurationParser
     ) {
         this.procedureReturnColumns = procedureReturnColumns;
@@ -86,10 +77,7 @@ public final class LocalSimilarityProcedureFacade implements SimilarityProcedure
         this.statsModeBusinessFacade = statsModeBusinessFacade;
         this.streamModeBusinessFacade = streamModeBusinessFacade;
         this.writeModeBusinessFacade = writeModeBusinessFacade;
-        this.filteredKnnMutateStub = filteredKnnMutateStub;
-        this.filteredNodeSimilarityMutateStub = filteredNodeSimilarityMutateStub;
-        this.knnMutateStub = knnMutateStub;
-        this.nodeSimilarityMutateStub = nodeSimilarityMutateStub;
+        this.stubs = stubs;
         this.configurationParser = configurationParser;
     }
 
@@ -127,23 +115,28 @@ public final class LocalSimilarityProcedureFacade implements SimilarityProcedure
             procedureReturnColumns
         );
 
+        var stubs = new SimilarityStubs(
+            filteredKnnMutateStub,
+            filteredNodeSimilarityMutateStub,
+            knnMutateStub,
+            nodeSimilarityMutateStub
+        );
+
         return new LocalSimilarityProcedureFacade(
             procedureReturnColumns,
             applicationsFacade.similarity().estimate(),
             applicationsFacade.similarity().stats(),
             applicationsFacade.similarity().stream(),
             applicationsFacade.similarity().write(),
-            filteredKnnMutateStub,
-            filteredNodeSimilarityMutateStub,
-            knnMutateStub,
-            nodeSimilarityMutateStub,
+            stubs,
             configurationParser
         );
     }
 
+
     @Override
-    public FilteredKnnMutateStub filteredKnnMutateStub() {
-        return filteredKnnMutateStub;
+    public SimilarityStubs similarityStubs() {
+        return stubs;
     }
 
     @Override
@@ -205,6 +198,19 @@ public final class LocalSimilarityProcedureFacade implements SimilarityProcedure
     }
 
     @Override
+    public Stream<KnnMutateResult> filteredKnnMutate(String graphName, Map<String, Object> configuration) {
+        return stubs.filteredKnn().execute(graphName,configuration);
+    }
+
+    @Override
+    public Stream<MemoryEstimateResult> filteredKnnMutateEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        return stubs.filteredKnn().estimate(graphNameOrConfiguration,algorithmConfiguration);
+    }
+
+    @Override
     public Stream<KnnWriteResult> filteredKnnWrite(String graphNameAsString, Map<String, Object> rawConfiguration) {
         var shouldComputeSimilarityDistribution = procedureReturnColumns.contains("similarityDistribution");
         var resultBuilder = new FilteredKnnResultBuilderForWriteMode();
@@ -228,11 +234,6 @@ public final class LocalSimilarityProcedureFacade implements SimilarityProcedure
         );
 
         return Stream.of(result);
-    }
-
-    @Override
-    public FilteredNodeSimilarityMutateStub filteredNodeSimilarityMutateStub() {
-        return filteredNodeSimilarityMutateStub;
     }
 
     @Override
@@ -299,6 +300,22 @@ public final class LocalSimilarityProcedureFacade implements SimilarityProcedure
     }
 
     @Override
+    public Stream<SimilarityMutateResult> filteredNodeSimilarityMutate(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        return  stubs.filteredNodeSimilarity().execute(graphName,configuration);
+    }
+
+    @Override
+    public Stream<MemoryEstimateResult> filteredNodeSimilarityMutateEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        return stubs.filteredNodeSimilarity().estimate(graphNameOrConfiguration,algorithmConfiguration);
+    }
+
+    @Override
     public Stream<SimilarityWriteResult> filteredNodeSimilarityWrite(
         String graphNameAsString,
         Map<String, Object> rawConfiguration
@@ -326,11 +343,6 @@ public final class LocalSimilarityProcedureFacade implements SimilarityProcedure
         );
 
         return Stream.of(result);
-    }
-
-    @Override
-    public KnnMutateStub knnMutateStub() {
-        return knnMutateStub;
     }
 
     @Override
@@ -390,6 +402,19 @@ public final class LocalSimilarityProcedureFacade implements SimilarityProcedure
     }
 
     @Override
+    public Stream<KnnMutateResult> knnMutate(String graphNameAsString, Map<String, Object> rawConfiguration) {
+        return stubs.knn().execute(graphNameAsString,rawConfiguration);
+    }
+
+    @Override
+    public Stream<MemoryEstimateResult> knnMutateEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        return stubs.knn().estimate(graphNameOrConfiguration,algorithmConfiguration);
+    }
+
+    @Override
     public Stream<KnnWriteResult> knnWrite(
         String graphNameAsString,
         Map<String, Object> rawConfiguration
@@ -420,9 +445,18 @@ public final class LocalSimilarityProcedureFacade implements SimilarityProcedure
     }
 
     @Override
-    public NodeSimilarityMutateStub nodeSimilarityMutateStub() {
-        return nodeSimilarityMutateStub;
+    public Stream<SimilarityMutateResult> nodeSimilarityMutate(String graphName, Map<String, Object> configuration) {
+        return stubs.nodeSimilarity().execute(graphName,configuration);
     }
+
+    @Override
+    public Stream<MemoryEstimateResult> nodeSimilarityMutateEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        return stubs.nodeSimilarity().estimate(graphNameOrConfiguration,algorithmConfiguration);
+    }
+
 
     @Override
     public Stream<SimilarityStatsResult> nodeSimilarityStats(String graphName, Map<String, Object> rawConfiguration) {

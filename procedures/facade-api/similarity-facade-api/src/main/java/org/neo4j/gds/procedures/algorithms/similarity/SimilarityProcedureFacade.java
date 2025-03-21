@@ -20,16 +20,14 @@
 package org.neo4j.gds.procedures.algorithms.similarity;
 
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
-import org.neo4j.gds.procedures.algorithms.similarity.stubs.FilteredKnnMutateStub;
-import org.neo4j.gds.procedures.algorithms.similarity.stubs.FilteredNodeSimilarityMutateStub;
-import org.neo4j.gds.procedures.algorithms.similarity.stubs.KnnMutateStub;
-import org.neo4j.gds.procedures.algorithms.similarity.stubs.NodeSimilarityMutateStub;
+import org.neo4j.gds.procedures.algorithms.similarity.stubs.SimilarityStubs;
 
 import java.util.Map;
 import java.util.stream.Stream;
 
 public interface SimilarityProcedureFacade {
-    FilteredKnnMutateStub filteredKnnMutateStub();
+
+    SimilarityStubs similarityStubs();
 
     Stream<KnnStatsResult> filteredKnnStats(String graphName, Map<String, Object> configuration);
 
@@ -45,6 +43,13 @@ public interface SimilarityProcedureFacade {
         Map<String, Object> algorithmConfiguration
     );
 
+    Stream<KnnMutateResult> filteredKnnMutate(String graphName, Map<String, Object> configuration);
+
+    Stream<MemoryEstimateResult> filteredKnnMutateEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    );
+
     Stream<KnnWriteResult> filteredKnnWrite(String graphNameAsString, Map<String, Object> rawConfiguration);
 
     Stream<MemoryEstimateResult> filteredKnnWriteEstimate(
@@ -52,7 +57,6 @@ public interface SimilarityProcedureFacade {
         Map<String, Object> algorithmConfiguration
     );
 
-    FilteredNodeSimilarityMutateStub filteredNodeSimilarityMutateStub();
 
     Stream<SimilarityStatsResult> filteredNodeSimilarityStats(
         String graphName,
@@ -71,6 +75,13 @@ public interface SimilarityProcedureFacade {
         Map<String, Object> algorithmConfiguration
     );
 
+    Stream<SimilarityMutateResult> filteredNodeSimilarityMutate(String graphName, Map<String, Object> configuration);
+
+    Stream<MemoryEstimateResult> filteredNodeSimilarityMutateEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    );
+
     Stream<SimilarityWriteResult> filteredNodeSimilarityWrite(
         String graphNameAsString,
         Map<String, Object> rawConfiguration
@@ -81,7 +92,6 @@ public interface SimilarityProcedureFacade {
         Map<String, Object> algorithmConfiguration
     );
 
-    KnnMutateStub knnMutateStub();
 
     Stream<KnnStatsResult> knnStats(
         String graphName,
@@ -103,6 +113,16 @@ public interface SimilarityProcedureFacade {
         Map<String, Object> algorithmConfiguration
     );
 
+    Stream<KnnMutateResult> knnMutate(
+        String graphNameAsString,
+        Map<String, Object> rawConfiguration
+    );
+
+    Stream<MemoryEstimateResult> knnMutateEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    );
+
     Stream<KnnWriteResult> knnWrite(
         String graphNameAsString,
         Map<String, Object> rawConfiguration
@@ -113,7 +133,13 @@ public interface SimilarityProcedureFacade {
         Map<String, Object> algorithmConfiguration
     );
 
-    NodeSimilarityMutateStub nodeSimilarityMutateStub();
+    Stream<SimilarityMutateResult> nodeSimilarityMutate(String graphName, Map<String, Object> configuration);
+
+    Stream<MemoryEstimateResult> nodeSimilarityMutateEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    );
+
 
     Stream<SimilarityStatsResult> nodeSimilarityStats(String graphName, Map<String, Object> configuration);
 

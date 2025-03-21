@@ -26,6 +26,6 @@ import org.neo4j.gds.similarity.filteredknn.FilteredKnnMutateConfig;
 
 public class FilteredKnnStub extends AbstractStub<FilteredKnnMutateConfig, KnnMutateResult> {
     protected MutateStub<FilteredKnnMutateConfig, KnnMutateResult> stub(AlgorithmsProcedureFacade facade) {
-        return facade.similarity().filteredKnnMutateStub();
+        return facade.similarity().similarityStubs().filteredKnn();
     }
 }

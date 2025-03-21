@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.similarity.filterednodesim;
 
+import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.algorithms.similarity.SimilarityMutateResult;
-import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
@@ -45,7 +45,7 @@ public class FilteredNodeSimilarityMutateProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.algorithms().similarity().filteredNodeSimilarityMutateStub().execute(graphName, configuration);
+        return facade.algorithms().similarity().filteredNodeSimilarityMutate(graphName, configuration);
     }
 
     @Procedure(name = "gds.nodeSimilarity.filtered.mutate.estimate", mode = READ)
@@ -54,7 +54,7 @@ public class FilteredNodeSimilarityMutateProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.algorithms().similarity().filteredNodeSimilarityMutateStub().estimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.algorithms().similarity().filteredNodeSimilarityMutateEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
     @Deprecated(forRemoval = true)

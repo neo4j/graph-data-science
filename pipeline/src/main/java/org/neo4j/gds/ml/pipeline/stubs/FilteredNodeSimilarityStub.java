@@ -26,6 +26,6 @@ import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityMutateConf
 
 public class FilteredNodeSimilarityStub extends AbstractStub<FilteredNodeSimilarityMutateConfig, SimilarityMutateResult> {
     protected MutateStub<FilteredNodeSimilarityMutateConfig, SimilarityMutateResult> stub(AlgorithmsProcedureFacade facade) {
-        return facade.similarity().filteredNodeSimilarityMutateStub();
+        return facade.similarity().similarityStubs().filteredNodeSimilarity();
     }
 }
