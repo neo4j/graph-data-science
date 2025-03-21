@@ -20,13 +20,13 @@
 package org.neo4j.gds.procedures.algorithms.centrality;
 
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
-import org.neo4j.gds.pagerank.ArticleRankMutateConfig;
 import org.neo4j.gds.pagerank.EigenvectorMutateConfig;
 import org.neo4j.gds.pagerank.PageRankMutateConfig;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.ArticulationPointsMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.BetaClosenessCentralityMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.BetweennessCentralityMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.CelfMutateStub;
+import org.neo4j.gds.procedures.algorithms.centrality.stubs.CentralityStubs;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.ClosenessCentralityMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.DegreeCentralityMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.HarmonicCentralityMutateStub;
@@ -37,6 +37,9 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 public interface CentralityProcedureFacade {
+
+    CentralityStubs centralityStubs();
+
     Stream<AlphaHarmonicStreamResult> alphaHarmonicCentralityStream(
         String graphName,
         Map<String, Object> configuration
@@ -47,7 +50,12 @@ public interface CentralityProcedureFacade {
         Map<String, Object> configuration
     );
 
-    PageRankMutateStub<ArticleRankMutateConfig> articleRankMutateStub();
+    Stream<PageRankMutateResult> articleRankMutate(String graphName, Map<String, Object> configuration);
+
+    Stream<MemoryEstimateResult> articleRankMutateEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    );
 
     Stream<PageRankStatsResult> articleRankStats(String graphName, Map<String, Object> configuration);
 

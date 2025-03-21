@@ -65,6 +65,7 @@ import org.neo4j.gds.procedures.algorithms.centrality.stubs.ArticulationPointsMu
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.BetaClosenessCentralityMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.BetweennessCentralityMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.CelfMutateStub;
+import org.neo4j.gds.procedures.algorithms.centrality.stubs.CentralityStubs;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.ClosenessCentralityMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.DegreeCentralityMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.HarmonicCentralityMutateStub;
@@ -88,8 +89,9 @@ import java.util.stream.Stream;
 public final class LocalCentralityProcedureFacade implements CentralityProcedureFacade {
     private final ProcedureReturnColumns procedureReturnColumns;
 
+    private final CentralityStubs stubs;
+
     private final ArticulationPointsMutateStub articulationPointsMutateStub;
-    private final PageRankMutateStub<ArticleRankMutateConfig> articleRankMutateStub;
     private final BetaClosenessCentralityMutateStub betaClosenessCentralityMutateStub;
     private final BetweennessCentralityMutateStub betweennessCentralityMutateStub;
     private final CelfMutateStub celfMutateStub;
@@ -110,7 +112,6 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
 
     private LocalCentralityProcedureFacade(
         ProcedureReturnColumns procedureReturnColumns,
-        PageRankMutateStub<ArticleRankMutateConfig> articleRankMutateStub,
         BetaClosenessCentralityMutateStub betaClosenessCentralityMutateStub,
         BetweennessCentralityMutateStub betweennessCentralityMutateStub,
         CelfMutateStub celfMutateStub,
@@ -125,10 +126,10 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
         CentralityAlgorithmsStatsModeBusinessFacade statsModeBusinessFacade,
         CentralityAlgorithmsStreamModeBusinessFacade streamModeBusinessFacade,
         CentralityAlgorithmsWriteModeBusinessFacade writeModeBusinessFacade,
+        CentralityStubs centralityStubs,
         UserSpecificConfigurationParser configurationParser
     ) {
         this.procedureReturnColumns = procedureReturnColumns;
-        this.articleRankMutateStub = articleRankMutateStub;
         this.hitsMutateStub = hitsMutateStub;
         this.articulationPointsMutateStub = articulationPointsMutateStub;
         this.betaClosenessCentralityMutateStub = betaClosenessCentralityMutateStub;
@@ -144,6 +145,8 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
         this.streamModeBusinessFacade = streamModeBusinessFacade;
         this.writeModeBusinessFacade = writeModeBusinessFacade;
         this.configurationParser = configurationParser;
+
+        this.stubs = centralityStubs;
     }
 
     public static CentralityProcedureFacade create(
@@ -234,9 +237,10 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
             estimationModeBusinessFacade
         );
 
+        var stubs = new CentralityStubs(articleRankMutateStub);
+
         return new LocalCentralityProcedureFacade(
             procedureReturnColumns,
-            articleRankMutateStub,
             betaClosenessCentralityMutateStub,
             betweennessCentralityMutateStub,
             celfMutateStub,
@@ -249,8 +253,14 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
             centralityApplications.stats(),
             centralityApplications.stream(),
             centralityApplications.write(),
+            stubs,
             configurationParser
         );
+    }
+
+    @Override
+    public CentralityStubs centralityStubs() {
+        return null;
     }
 
     @Override
@@ -293,8 +303,16 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
     }
 
     @Override
-    public PageRankMutateStub<ArticleRankMutateConfig> articleRankMutateStub() {
-        return articleRankMutateStub;
+    public Stream<PageRankMutateResult> articleRankMutate(String graphName, Map<String, Object> configuration) {
+        return stubs.articleRank().execute(graphName,configuration);
+    }
+
+    @Override
+    public Stream<MemoryEstimateResult> articleRankMutateEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        return  stubs.articleRank().estimate(graphNameOrConfiguration,algorithmConfiguration);
     }
 
     @Override
