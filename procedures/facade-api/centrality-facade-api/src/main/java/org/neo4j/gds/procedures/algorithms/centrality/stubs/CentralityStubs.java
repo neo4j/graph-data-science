@@ -21,5 +21,8 @@ package org.neo4j.gds.procedures.algorithms.centrality.stubs;
 
 import org.neo4j.gds.pagerank.ArticleRankMutateConfig;
 
-public record CentralityStubs(PageRankMutateStub<ArticleRankMutateConfig> articleRank) {
+public record CentralityStubs(
+    PageRankMutateStub<ArticleRankMutateConfig> articleRank,
+    BetaClosenessCentralityMutateStub betaCloseness
+    ) {
 }

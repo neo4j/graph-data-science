@@ -61,6 +61,6 @@ public class ClosenessCentralityMutateProc {
             .warn(
                 "Procedure `gds.beta.closeness.mutate` has been deprecated, please use `gds.closeness.mutate`.");
 
-        return facade.algorithms().centrality().betaClosenessCentralityMutateStub().execute(graphName, configuration);
+        return facade.algorithms().centrality().betaClosenessCentralityMutate(graphName, configuration);
     }
 }
