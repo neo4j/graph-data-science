@@ -47,7 +47,7 @@ public class HitsMutateProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.algorithms().centrality().hitsMutateStub().execute(graphName,configuration);
+        return facade.algorithms().centrality().hitsMutate(graphName,configuration);
     }
 
     @Procedure(value = "gds.hits.mutate.estimate", mode = READ)
@@ -56,7 +56,7 @@ public class HitsMutateProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.algorithms().centrality().hitsMutateStub().estimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.algorithms().centrality().hitsMutateEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
     @Internal

@@ -26,7 +26,6 @@ import org.neo4j.gds.procedures.algorithms.centrality.stubs.CentralityStubs;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.ClosenessCentralityMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.DegreeCentralityMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.HarmonicCentralityMutateStub;
-import org.neo4j.gds.procedures.algorithms.centrality.stubs.HitsMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.PageRankMutateStub;
 
 import java.util.Map;
@@ -332,9 +331,11 @@ public interface CentralityProcedureFacade {
         Map<String, Object> algorithmConfiguration
     );
 
-    HitsMutateStub hitsMutateStub();
+    Stream<HitsMutateResult> hitsMutate(String graphName, Map<String, Object> configuration);
 
-
-
+    Stream<MemoryEstimateResult> hitsMutateEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    );
 
 }
