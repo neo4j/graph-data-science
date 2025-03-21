@@ -23,7 +23,6 @@ import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.pagerank.EigenvectorMutateConfig;
 import org.neo4j.gds.pagerank.PageRankMutateConfig;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.CentralityStubs;
-import org.neo4j.gds.procedures.algorithms.centrality.stubs.ClosenessCentralityMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.DegreeCentralityMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.HarmonicCentralityMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.PageRankMutateStub;
@@ -216,7 +215,7 @@ public interface CentralityProcedureFacade {
         Map<String, Object> algorithmConfiguration
     );
 
-    ClosenessCentralityMutateStub closenessCentralityMutateStub();
+    Stream<CentralityMutateResult> closenessCentralityMutate(String graphName, Map<String, Object> configuration);
 
     Stream<CentralityStatsResult> closenessCentralityStats(String graphName, Map<String, Object> configuration);
 

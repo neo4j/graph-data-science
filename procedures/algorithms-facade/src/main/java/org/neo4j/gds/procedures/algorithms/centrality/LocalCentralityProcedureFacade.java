@@ -61,7 +61,6 @@ import org.neo4j.gds.pagerank.PageRankStatsConfig;
 import org.neo4j.gds.pagerank.PageRankStreamConfig;
 import org.neo4j.gds.pagerank.PageRankWriteConfig;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.CentralityStubs;
-import org.neo4j.gds.procedures.algorithms.centrality.stubs.ClosenessCentralityMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.DegreeCentralityMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.HarmonicCentralityMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.LocalArticulationPointsMutateStub;
@@ -85,7 +84,6 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
 
     private final CentralityStubs stubs;
 
-    private final ClosenessCentralityMutateStub closenessCentralityMutateStub;
     private final DegreeCentralityMutateStub degreeCentralityMutateStub;
     private final PageRankMutateStub<EigenvectorMutateConfig> eigenVectorMutateStub;
     private final HarmonicCentralityMutateStub harmonicCentralityMutateStub;
@@ -101,7 +99,6 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
     private LocalCentralityProcedureFacade(
         ProcedureReturnColumns procedureReturnColumns,
         DegreeCentralityMutateStub degreeCentralityMutateStub,
-        ClosenessCentralityMutateStub closenessCentralityMutateStub,
         PageRankMutateStub<EigenvectorMutateConfig> eigenVectorMutateStub,
         HarmonicCentralityMutateStub harmonicCentralityMutateStub,
         PageRankMutateStub<PageRankMutateConfig> pageRankMutateStub,
@@ -113,7 +110,6 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
         UserSpecificConfigurationParser configurationParser
     ) {
         this.procedureReturnColumns = procedureReturnColumns;
-        this.closenessCentralityMutateStub = closenessCentralityMutateStub;
         this.degreeCentralityMutateStub = degreeCentralityMutateStub;
         this.eigenVectorMutateStub = eigenVectorMutateStub;
         this.harmonicCentralityMutateStub = harmonicCentralityMutateStub;
@@ -221,13 +217,13 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
             betweennessCentralityMutateStub,
             articulationPointsMutateStub,
             celfMutateStub,
-            hitsMutateStub
+            hitsMutateStub,
+            closenessCentralityMutateStub
         );
 
         return new LocalCentralityProcedureFacade(
             procedureReturnColumns,
             degreeCentralityMutateStub,
-            closenessCentralityMutateStub,
             eigenVectorMutateStub,
             harmonicCentralityMutateStub,
             pageRankMutateStub,
@@ -827,8 +823,11 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
     }
 
     @Override
-    public ClosenessCentralityMutateStub closenessCentralityMutateStub() {
-        return closenessCentralityMutateStub;
+    public Stream<CentralityMutateResult> closenessCentralityMutate(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        return stubs.closeness().execute(graphName,configuration);
     }
 
     @Override

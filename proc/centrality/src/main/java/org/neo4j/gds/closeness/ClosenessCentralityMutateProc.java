@@ -44,7 +44,7 @@ public class ClosenessCentralityMutateProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.algorithms().centrality().closenessCentralityMutateStub().execute(graphName, configuration);
+        return facade.algorithms().centrality().closenessCentralityMutate(graphName, configuration);
     }
 
     @Deprecated(forRemoval = true)
