@@ -21,8 +21,6 @@ package org.neo4j.gds.applications.algorithms.community;
 
 import org.neo4j.gds.algorithms.community.CommunityCompanion;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmMachinery;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.approxmaxkcut.ApproxMaxKCut;
@@ -41,15 +39,12 @@ import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
-import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.hdbscan.HDBScan;
 import org.neo4j.gds.hdbscan.HDBScanBaseConfig;
 import org.neo4j.gds.hdbscan.HDBScanParameters;
-import org.neo4j.gds.hdbscan.HDBScanProgressTrackerCreator;
 import org.neo4j.gds.hdbscan.Labels;
 import org.neo4j.gds.k1coloring.K1ColoringBaseConfig;
 import org.neo4j.gds.k1coloring.K1ColoringParameters;
-import org.neo4j.gds.k1coloring.K1ColoringProgressTrackerTaskCreator;
 import org.neo4j.gds.k1coloring.K1ColoringResult;
 import org.neo4j.gds.kcore.KCoreDecomposition;
 import org.neo4j.gds.kcore.KCoreDecompositionBaseConfig;
@@ -71,7 +66,6 @@ import org.neo4j.gds.leiden.LeidenResult;
 import org.neo4j.gds.louvain.Louvain;
 import org.neo4j.gds.louvain.LouvainBaseConfig;
 import org.neo4j.gds.louvain.LouvainParameters;
-import org.neo4j.gds.louvain.LouvainProgressTrackerTaskCreator;
 import org.neo4j.gds.louvain.LouvainResult;
 import org.neo4j.gds.modularity.ModularityBaseConfig;
 import org.neo4j.gds.modularity.ModularityCalculator;
@@ -81,14 +75,12 @@ import org.neo4j.gds.modularityoptimization.K1ColoringStub;
 import org.neo4j.gds.modularityoptimization.ModularityOptimization;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationBaseConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationParameters;
-import org.neo4j.gds.modularityoptimization.ModularityOptimizationProgressTrackerTaskCreator;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationResult;
 import org.neo4j.gds.scc.Scc;
 import org.neo4j.gds.scc.SccCommonBaseConfig;
 import org.neo4j.gds.scc.SccParameters;
 import org.neo4j.gds.sllpa.SpeakerListenerLPA;
 import org.neo4j.gds.sllpa.SpeakerListenerLPAConfig;
-import org.neo4j.gds.sllpa.SpeakerListenerLPAProgressTrackerCreator;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.triangle.IntersectingTriangleCount;
 import org.neo4j.gds.triangle.LocalClusteringCoefficient;
@@ -98,14 +90,11 @@ import org.neo4j.gds.triangle.LocalClusteringCoefficientResult;
 import org.neo4j.gds.triangle.TriangleCountBaseConfig;
 import org.neo4j.gds.triangle.TriangleCountParameters;
 import org.neo4j.gds.triangle.TriangleCountResult;
-import org.neo4j.gds.triangle.TriangleCountTask;
 import org.neo4j.gds.triangle.TriangleResult;
 import org.neo4j.gds.triangle.TriangleStream;
 import org.neo4j.gds.wcc.WccBaseConfig;
 import org.neo4j.gds.wcc.WccStub;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -115,20 +104,15 @@ public class CommunityAlgorithms {
     private final ProgressTrackerCreator progressTrackerCreator;
     private final TerminationFlag terminationFlag;
 
+    private final AlgorithmTasks tasks = new AlgorithmTasks();
+
     public CommunityAlgorithms(ProgressTrackerCreator progressTrackerCreator, TerminationFlag terminationFlag) {
         this.progressTrackerCreator = progressTrackerCreator;
         this.terminationFlag = terminationFlag;
     }
 
     ApproxMaxKCutResult approximateMaximumKCut(Graph graph, ApproxMaxKCutBaseConfig configuration) {
-        var task = Tasks.iterativeFixed(
-            AlgorithmLabel.ApproximateMaximumKCut.asString(),
-            () -> List.of(
-                Tasks.leaf("place nodes randomly", graph.nodeCount()),
-                searchTask(graph.nodeCount(), configuration.vnsMaxNeighborhoodOrder())
-            ),
-            configuration.iterations()
-        );
+        var task = tasks.approximateMaximumKCut(graph, configuration);
         var progressTracker = createProgressTracker(task, configuration);
 
         return approximateMaximumKCut(graph, configuration.toParameters(), progressTracker);
@@ -156,17 +140,10 @@ public class CommunityAlgorithms {
     }
 
     ConductanceResult conductance(Graph graph, ConductanceBaseConfig configuration) {
-        var task = Tasks.task(
-            AlgorithmLabel.Conductance.asString(),
-            Tasks.leaf("count relationships", graph.nodeCount()),
-            Tasks.leaf("accumulate counts"),
-            Tasks.leaf("perform conductance computations")
-        );
+        var task = tasks.conductance(graph);
         var progressTracker = createProgressTracker(task, configuration);
 
-        var parameters = ConductanceConfigTransformer.toParameters(configuration);
-
-        return conductance(graph, parameters, progressTracker);
+        return conductance(graph, ConductanceConfigTransformer.toParameters(configuration), progressTracker);
     }
 
     ConductanceResult conductance(Graph graph, ConductanceParameters parameters, ProgressTracker progressTracker) {
@@ -190,7 +167,7 @@ public class CommunityAlgorithms {
     }
 
     public Labels hdbscan(Graph graph, HDBScanBaseConfig configuration) {
-        var task = HDBScanProgressTrackerCreator.hdbscanTask(AlgorithmLabel.HDBScan.asString(), graph.nodeCount());
+        var task = tasks.hdbscan(graph);
         var progressTracker = createProgressTracker(task, configuration);
 
         return hdbscan(graph, configuration.toParameters(), progressTracker);
@@ -209,20 +186,10 @@ public class CommunityAlgorithms {
     }
 
     public K1ColoringResult k1Coloring(Graph graph, K1ColoringBaseConfig configuration) {
-        var parameters = configuration.toParameters();
-        var task = K1ColoringProgressTrackerTaskCreator.progressTask(graph.nodeCount(), parameters.maxIterations());
+        var task = tasks.k1Coloring(graph, configuration);
         var progressTracker = createProgressTracker(task, configuration);
 
-        var k1ColoringStub = new K1ColoringStub(algorithmMachinery);
-
-        return k1ColoringStub.k1Coloring(
-            graph,
-            parameters,
-            progressTracker,
-            terminationFlag,
-            configuration.concurrency(),
-            true
-        );
+        return k1Coloring(graph, configuration.toParameters(), progressTracker);
     }
 
     public K1ColoringResult k1Coloring(Graph graph, K1ColoringParameters parameters, ProgressTracker progressTracker) {
@@ -240,7 +207,7 @@ public class CommunityAlgorithms {
     }
 
     KCoreDecompositionResult kCore(Graph graph, KCoreDecompositionBaseConfig configuration) {
-        var task = Tasks.leaf(AlgorithmLabel.KCore.asString(), graph.nodeCount());
+        var task = tasks.kCore(graph);
         var progressTracker = createProgressTracker(task, configuration);
 
         return kCore(graph, configuration.toParameters(), progressTracker);
@@ -262,8 +229,7 @@ public class CommunityAlgorithms {
     }
 
     public KmeansResult kMeans(Graph graph, KmeansBaseConfig configuration) {
-
-        var task = constructKMeansProgressTask(graph, configuration);
+        var task = tasks.kMeans(graph, configuration);
         var progressTracker = createProgressTracker(task, configuration);
 
         return kMeans(graph, configuration.toParameters(), progressTracker);
@@ -286,21 +252,17 @@ public class CommunityAlgorithms {
     }
 
     LabelPropagationResult labelPropagation(Graph graph, LabelPropagationBaseConfig configuration) {
-        var task = Tasks.task(
-            AlgorithmLabel.LabelPropagation.asString(),
-            Tasks.leaf("Initialization", graph.relationshipCount()),
-            Tasks.iterativeDynamic(
-                "Assign labels",
-                () -> List.of(Tasks.leaf("Iteration", graph.relationshipCount())),
-                configuration.maxIterations()
-            )
-        );
+        var task = tasks.labelPropagation(graph, configuration);
         var progressTracker = createProgressTracker(task, configuration);
 
         return labelPropagation(graph, configuration.toParameters(), progressTracker);
     }
 
-    LabelPropagationResult labelPropagation(Graph graph, LabelPropagationParameters parameters, ProgressTracker progressTracker) {
+    LabelPropagationResult labelPropagation(
+        Graph graph,
+        LabelPropagationParameters parameters,
+        ProgressTracker progressTracker
+    ) {
 
         var algorithm = new LabelPropagation(
             graph,
@@ -319,18 +281,17 @@ public class CommunityAlgorithms {
     }
 
     LocalClusteringCoefficientResult lcc(Graph graph, LocalClusteringCoefficientBaseConfig configuration) {
-        var tasks = new ArrayList<Task>();
-        if (configuration.seedProperty() == null) {
-            tasks.add(TriangleCountTask.create(graph.nodeCount()));
-        }
-        tasks.add(Tasks.leaf("Calculate Local Clustering Coefficient", graph.nodeCount()));
-        var task = Tasks.task(AlgorithmLabel.LCC.asString(), tasks);
+        var task = tasks.lcc(graph, configuration);
         var progressTracker = createProgressTracker(task, configuration);
 
-       return lcc(graph, configuration.toParameters(), progressTracker);
+        return lcc(graph, configuration.toParameters(), progressTracker);
     }
 
-    LocalClusteringCoefficientResult lcc(Graph graph, LocalClusteringCoefficientParameters parameters, ProgressTracker progressTracker) {
+    LocalClusteringCoefficientResult lcc(
+        Graph graph,
+        LocalClusteringCoefficientParameters parameters,
+        ProgressTracker progressTracker
+    ) {
         var algorithm = new LocalClusteringCoefficient(
             graph,
             parameters.concurrency(),
@@ -349,8 +310,7 @@ public class CommunityAlgorithms {
     }
 
     public LeidenResult leiden(Graph graph, LeidenBaseConfig configuration) {
-
-        var task = LeidenTask.create(graph, configuration);
+        var task = tasks.leiden(graph, configuration);
         var progressTracker = createProgressTracker(task, configuration);
 
         return leiden(graph, configuration.toParameters(), progressTracker);
@@ -378,13 +338,7 @@ public class CommunityAlgorithms {
     }
 
     LouvainResult louvain(Graph graph, LouvainBaseConfig configuration) {
-
-        var task = LouvainProgressTrackerTaskCreator.createTask(
-            graph.nodeCount(),
-            graph.relationshipCount(),
-            configuration.maxLevels(),
-            configuration.maxIterations()
-        );
+        var task = tasks.louvain(graph, configuration);
         var progressTracker = createProgressTracker(task, configuration);
 
         return louvain(graph, configuration.toParameters(), progressTracker);
@@ -423,21 +377,17 @@ public class CommunityAlgorithms {
     }
 
     ModularityOptimizationResult modularityOptimization(Graph graph, ModularityOptimizationBaseConfig configuration) {
-
-        var parameters = configuration.toParameters();
-
-        var task = ModularityOptimizationProgressTrackerTaskCreator.progressTask(
-            graph.nodeCount(),
-            graph.relationshipCount(),
-            parameters.maxIterations()
-        );
-
+        var task = tasks.modularityOptimization(graph, configuration);
         var progressTracker = createProgressTracker(task, configuration);
 
         return modularityOptimization(graph, configuration.toParameters(), progressTracker);
     }
 
-    ModularityOptimizationResult modularityOptimization(Graph graph, ModularityOptimizationParameters parameters, ProgressTracker progressTracker) {
+    ModularityOptimizationResult modularityOptimization(
+        Graph graph,
+        ModularityOptimizationParameters parameters,
+        ProgressTracker progressTracker
+    ) {
 
         var seedPropertyValues = parameters.seedProperty()
             .map(seedProperty ->
@@ -469,12 +419,8 @@ public class CommunityAlgorithms {
     }
 
     HugeLongArray scc(Graph graph, SccCommonBaseConfig configuration) {
-        var progressTracker = progressTrackerCreator.createProgressTracker(
-            Tasks.leaf(AlgorithmLabel.SCC.asString(), graph.nodeCount()),
-            configuration.jobId(),
-            configuration.concurrency(),
-            configuration.logProgress()
-        );
+        var task = tasks.scc(graph);
+        var progressTracker = createProgressTracker(task, configuration);
 
         return scc(graph, configuration.toParameters(), progressTracker);
     }
@@ -491,7 +437,7 @@ public class CommunityAlgorithms {
     }
 
     TriangleCountResult triangleCount(Graph graph, TriangleCountBaseConfig configuration) {
-        var task = Tasks.leaf(AlgorithmLabel.TriangleCount.asString(), graph.nodeCount());
+        var task = tasks.triangleCount(graph);
         var progressTracker = createProgressTracker(task, configuration);
 
         return triangleCount(graph, configuration.toParameters(), progressTracker);
@@ -536,7 +482,7 @@ public class CommunityAlgorithms {
     }
 
     public DisjointSetStruct wcc(Graph graph, WccBaseConfig configuration) {
-        var task = Tasks.leaf(AlgorithmLabel.WCC.asString(), graph.relationshipCount());
+        var task = tasks.wcc(graph);
         var progressTracker = createProgressTracker(task, configuration);
 
         if (configuration.hasRelationshipWeightProperty() && configuration.threshold() == 0) {
@@ -549,80 +495,8 @@ public class CommunityAlgorithms {
         return wccStub.wcc(graph, configuration.toParameters(), progressTracker, true);
     }
 
-    private Task constructKMeansProgressTask(IdMap idMap, KmeansBaseConfig configuration) {
-        var label = AlgorithmLabel.KMeans.asString();
-
-        var iterations = configuration.numberOfRestarts();
-        if (iterations == 1) {
-            return kMeansTask(idMap, label, configuration);
-        }
-
-        return Tasks.iterativeFixed(
-            label,
-            () -> List.of(kMeansTask(idMap, "KMeans Iteration", configuration)),
-            iterations
-        );
-    }
-
-    private Task kMeansTask(IdMap idMap, String description, KmeansBaseConfig configuration) {
-        if (configuration.computeSilhouette()) {
-            return Tasks.task(
-                description, List.of(
-                    Tasks.leaf("Initialization", configuration.k()),
-                    Tasks.iterativeDynamic(
-                        "Main",
-                        () -> List.of(Tasks.leaf("Iteration")),
-                        configuration.maxIterations()
-                    ),
-                    Tasks.leaf("Silhouette", idMap.nodeCount())
-
-                )
-            );
-        } else {
-            return Tasks.task(
-                description, List.of(
-                    Tasks.leaf("Initialization", configuration.k()),
-                    Tasks.iterativeDynamic(
-                        "Main",
-                        () -> List.of(Tasks.leaf("Iteration")),
-                        configuration.maxIterations()
-                    )
-                )
-            );
-        }
-    }
-
-    private static Task searchTask(long nodeCount, int vnsMaxNeighborhoodOrder) {
-        if (vnsMaxNeighborhoodOrder > 0) {
-            return Tasks.iterativeOpen(
-                "variable neighborhood search",
-                () -> List.of(localSearchTask(nodeCount))
-            );
-        }
-
-        return localSearchTask(nodeCount);
-    }
-
-    private static Task localSearchTask(long nodeCount) {
-        return Tasks.task(
-            "local search",
-            Tasks.iterativeOpen(
-                "improvement loop",
-                () -> List.of(
-                    Tasks.leaf("compute node to community weights", nodeCount),
-                    Tasks.leaf("swap for local improvements", nodeCount)
-                )
-            ),
-            Tasks.leaf("compute current solution cost", nodeCount)
-        );
-    }
-
     PregelResult speakerListenerLPA(Graph graph, SpeakerListenerLPAConfig configuration) {
-        var task = SpeakerListenerLPAProgressTrackerCreator.progressTask(
-            graph.nodeCount(),
-            configuration.maxIterations(),
-            AlgorithmLabel.SLLPA.asString()
-        );
+        var task = tasks.speakerListenerLPA(graph, configuration);
         var progressTracker = createProgressTracker(task, configuration);
 
         var algorithm = new SpeakerListenerLPA(
