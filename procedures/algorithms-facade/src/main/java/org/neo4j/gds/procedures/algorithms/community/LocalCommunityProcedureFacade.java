@@ -57,14 +57,7 @@ import org.neo4j.gds.modularity.ModularityStreamConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationStatsConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationStreamConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationWriteConfig;
-import org.neo4j.gds.procedures.algorithms.community.stubs.ApproximateMaximumKCutMutateStub;
-import org.neo4j.gds.procedures.algorithms.community.stubs.HDBScanMutateStub;
-import org.neo4j.gds.procedures.algorithms.community.stubs.K1ColoringMutateStub;
-import org.neo4j.gds.procedures.algorithms.community.stubs.KCoreMutateStub;
-import org.neo4j.gds.procedures.algorithms.community.stubs.KMeansMutateStub;
-import org.neo4j.gds.procedures.algorithms.community.stubs.LabelPropagationMutateStub;
-import org.neo4j.gds.procedures.algorithms.community.stubs.LccMutateStub;
-import org.neo4j.gds.procedures.algorithms.community.stubs.LeidenMutateStub;
+import org.neo4j.gds.procedures.algorithms.community.stubs.CommunityStubs;
 import org.neo4j.gds.procedures.algorithms.community.stubs.LocalApproximateMaximumKCutMutateStub;
 import org.neo4j.gds.procedures.algorithms.community.stubs.LocalHDBScanMutateStub;
 import org.neo4j.gds.procedures.algorithms.community.stubs.LocalK1ColoringMutateStub;
@@ -79,12 +72,6 @@ import org.neo4j.gds.procedures.algorithms.community.stubs.LocalSccMutateStub;
 import org.neo4j.gds.procedures.algorithms.community.stubs.LocalSpeakerListenerLPAMutateStub;
 import org.neo4j.gds.procedures.algorithms.community.stubs.LocalTriangleCountMutateStub;
 import org.neo4j.gds.procedures.algorithms.community.stubs.LocalWccMutateStub;
-import org.neo4j.gds.procedures.algorithms.community.stubs.LouvainMutateStub;
-import org.neo4j.gds.procedures.algorithms.community.stubs.ModularityOptimizationMutateStub;
-import org.neo4j.gds.procedures.algorithms.community.stubs.SccMutateStub;
-import org.neo4j.gds.procedures.algorithms.community.stubs.SpeakerListenerLPAMutateStub;
-import org.neo4j.gds.procedures.algorithms.community.stubs.TriangleCountMutateStub;
-import org.neo4j.gds.procedures.algorithms.community.stubs.WccMutateStub;
 import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 import org.neo4j.gds.scc.SccAlphaWriteConfig;
@@ -116,22 +103,7 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
     private final CommunityAlgorithmsStreamModeBusinessFacade streamModeBusinessFacade;
     private final CommunityAlgorithmsWriteModeBusinessFacade writeModeBusinessFacade;
 
-
-    private final ApproximateMaximumKCutMutateStub approximateMaximumKCutMutateStub;
-    private final K1ColoringMutateStub k1ColoringMutateStub;
-    private final KCoreMutateStub kCoreMutateStub;
-    private final KMeansMutateStub kMeansMutateStub;
-    private final LabelPropagationMutateStub labelPropagationMutateStub;
-    private final LccMutateStub lccMutateStub;
-    private final LeidenMutateStub leidenMutateStub;
-    private final LouvainMutateStub louvainMutateStub;
-    private final ModularityOptimizationMutateStub modularityOptimizationMutateStub;
-    private final SccMutateStub sccMutateStub;
-    private final TriangleCountMutateStub triangleCountMutateStub;
-    private final WccMutateStub wccMutateStub;
-    private final SpeakerListenerLPAMutateStub speakerListenerLPAMutateStub;
-    private final HDBScanMutateStub hdbscanMutateStub;
-
+    private final CommunityStubs stubs;
 
     private final UserSpecificConfigurationParser configurationParser;
 
@@ -143,20 +115,7 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
         CommunityAlgorithmsStatsModeBusinessFacade statsModeBusinessFacade,
         CommunityAlgorithmsStreamModeBusinessFacade streamModeBusinessFacade,
         CommunityAlgorithmsWriteModeBusinessFacade writeModeBusinessFacade,
-        ApproximateMaximumKCutMutateStub approximateMaximumKCutMutateStub,
-        K1ColoringMutateStub k1ColoringMutateStub,
-        KCoreMutateStub kCoreMutateStub,
-        KMeansMutateStub kMeansMutateStub,
-        LabelPropagationMutateStub labelPropagationMutateStub,
-        LccMutateStub lccMutateStub,
-        LeidenMutateStub leidenMutateStub,
-        LouvainMutateStub louvainMutateStub,
-        ModularityOptimizationMutateStub modularityOptimizationMutateStub,
-        SpeakerListenerLPAMutateStub speakerListenerLPAMutateStub,
-        SccMutateStub sccMutateStub,
-        TriangleCountMutateStub triangleCountMutateStub,
-        WccMutateStub wccMutateStub,
-        LocalHDBScanMutateStub hdbscanMutateStub,
+        CommunityStubs stubs,
         UserSpecificConfigurationParser configurationParser
     ) {
         this.closeableResourceRegistry = closeableResourceRegistry;
@@ -165,20 +124,7 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
         this.statsModeBusinessFacade = statsModeBusinessFacade;
         this.streamModeBusinessFacade = streamModeBusinessFacade;
         this.writeModeBusinessFacade = writeModeBusinessFacade;
-        this.approximateMaximumKCutMutateStub = approximateMaximumKCutMutateStub;
-        this.k1ColoringMutateStub = k1ColoringMutateStub;
-        this.kCoreMutateStub = kCoreMutateStub;
-        this.kMeansMutateStub = kMeansMutateStub;
-        this.labelPropagationMutateStub = labelPropagationMutateStub;
-        this.leidenMutateStub = leidenMutateStub;
-        this.louvainMutateStub = louvainMutateStub;
-        this.modularityOptimizationMutateStub = modularityOptimizationMutateStub;
-        this.sccMutateStub = sccMutateStub;
-        this.lccMutateStub = lccMutateStub;
-        this.triangleCountMutateStub = triangleCountMutateStub;
-        this.wccMutateStub = wccMutateStub;
-        this.speakerListenerLPAMutateStub = speakerListenerLPAMutateStub;
-        this.hdbscanMutateStub = hdbscanMutateStub;
+        this.stubs = stubs;
 
         this.configurationParser = configurationParser;
     }
@@ -282,14 +228,9 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
             communityApplications.estimate()
         );
 
-        return new LocalCommunityProcedureFacade(
-            closeableResourceRegistry,
-            procedureReturnColumns,
-            communityApplications.estimate(),
-            communityApplications.stats(),
-            communityApplications.stream(),
-            communityApplications.write(),
+        var communityStubs = new CommunityStubs(
             approximateMaximumKCutMutateStub,
+            hdbscanMutateStub,
             k1ColoringMutateStub,
             kCoreMutateStub,
             kMeansMutateStub,
@@ -298,19 +239,28 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
             leidenMutateStub,
             louvainMutateStub,
             modularityOptimizationMutateStub,
-            speakerListenerLPAMutateStub,
             sccMutateStub,
+            speakerListenerLPAMutateStub,
             triangleCountMutateStub,
-            wccMutateStub,
-            hdbscanMutateStub,
+            wccMutateStub
+        );
+
+        return new LocalCommunityProcedureFacade(
+            closeableResourceRegistry,
+            procedureReturnColumns,
+            communityApplications.estimate(),
+            communityApplications.stats(),
+            communityApplications.stream(),
+            communityApplications.write(),
+            communityStubs,
             configurationParser
         );
     }
 
 
     @Override
-    public ApproximateMaximumKCutMutateStub approxMaxKCutMutateStub() {
-        return approximateMaximumKCutMutateStub;
+    public CommunityStubs communityStubs() {
+        return stubs;
     }
 
     @Override
@@ -318,7 +268,7 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
         String graphName,
         Map<String, Object> rawConfiguration
     ) {
-        return approxMaxKCutMutateStub().execute(graphName, rawConfiguration);
+        return stubs.approxMaxKCut().execute(graphName, rawConfiguration);
     }
 
     @Override
@@ -326,7 +276,7 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
         Object graphNameOrConfiguration,
         Map<String, Object> rawConfiguration
     ) {
-        return approxMaxKCutMutateStub().estimate(graphNameOrConfiguration, rawConfiguration);
+        return stubs.approxMaxKCut().estimate(graphNameOrConfiguration, rawConfiguration);
     }
 
     @Override
@@ -373,16 +323,11 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
     }
 
     @Override
-    public K1ColoringMutateStub k1ColoringMutateStub() {
-        return k1ColoringMutateStub;
-    }
-
-    @Override
     public Stream<K1ColoringMutateResult> k1ColoringMutate(
         String graphName,
         Map<String, Object> rawConfiguration
     ) {
-        return k1ColoringMutateStub().execute(graphName, rawConfiguration);
+        return stubs.k1Coloring().execute(graphName, rawConfiguration);
     }
 
     @Override
@@ -390,7 +335,7 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
         Object graphNameOrConfiguration,
         Map<String, Object> rawConfiguration
     ) {
-        return k1ColoringMutateStub().estimate(graphNameOrConfiguration, rawConfiguration);
+        return stubs.k1Coloring().estimate(graphNameOrConfiguration, rawConfiguration);
     }
 
     @Override
@@ -456,17 +401,14 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
         return Stream.of(estimationModeBusinessFacade.k1Coloring(configuration, graphNameOrConfiguration));
     }
 
-    @Override
-    public KCoreMutateStub kCoreMutateStub() {
-        return kCoreMutateStub;
-    }
+
 
     @Override
     public Stream<KCoreDecompositionMutateResult> kCoreMutate(
         String graphName,
         Map<String, Object> rawConfiguration
     ) {
-        return kCoreMutateStub().execute(graphName, rawConfiguration);
+        return stubs.kCore().execute(graphName, rawConfiguration);
     }
 
     @Override
@@ -474,7 +416,7 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
         Object graphNameOrConfiguration,
         Map<String, Object> rawConfiguration
     ) {
-        return kCoreMutateStub().estimate(graphNameOrConfiguration, rawConfiguration);
+        return stubs.kCore().estimate(graphNameOrConfiguration, rawConfiguration);
     }
 
     @Override
@@ -547,16 +489,11 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
     }
 
     @Override
-    public KMeansMutateStub kMeansMutateStub() {
-        return kMeansMutateStub;
-    }
-
-    @Override
     public Stream<KMeansMutateResult> kMeansMutate(
         String graphName,
         Map<String, Object> rawConfiguration
     ) {
-        return kMeansMutateStub().execute(graphName, rawConfiguration);
+        return stubs.kMeans().execute(graphName, rawConfiguration);
     }
 
     @Override
@@ -564,7 +501,7 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
         Object graphNameOrConfiguration,
         Map<String, Object> rawConfiguration
     ) {
-        return kMeansMutateStub().estimate(graphNameOrConfiguration, rawConfiguration);
+        return stubs.kMeans().estimate(graphNameOrConfiguration, rawConfiguration);
     }
 
     @Override
@@ -634,17 +571,13 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
         return Stream.of(estimationModeBusinessFacade.kMeans(configuration, graphNameOrConfiguration));
     }
 
-    @Override
-    public LabelPropagationMutateStub labelPropagationMutateStub() {
-        return labelPropagationMutateStub;
-    }
 
     @Override
     public Stream<LocalClusteringCoefficientMutateResult> localClusteringCoefficientMutate(
         String graphName,
         Map<String, Object> rawConfiguration
     ) {
-        return lccMutateStub().execute(graphName, rawConfiguration);
+        return stubs.lcc().execute(graphName, rawConfiguration);
     }
 
     @Override
@@ -652,7 +585,7 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
         Object graphNameOrConfiguration,
         Map<String, Object> rawConfiguration
     ) {
-        return lccMutateStub().estimate(graphNameOrConfiguration, rawConfiguration);
+        return stubs.lcc().estimate(graphNameOrConfiguration, rawConfiguration);
     }
 
     @Override
@@ -660,7 +593,7 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
         String graphName,
         Map<String, Object> rawConfiguration
     ) {
-        return labelPropagationMutateStub().execute(graphName, rawConfiguration);
+        return stubs.labelPropagation().execute(graphName, rawConfiguration);
     }
 
     @Override
@@ -668,7 +601,7 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
         Object graphNameOrConfiguration,
         Map<String, Object> rawConfiguration
     ) {
-        return labelPropagationMutateStub().estimate(graphNameOrConfiguration, rawConfiguration);
+        return stubs.labelPropagation().estimate(graphNameOrConfiguration, rawConfiguration);
     }
 
     @Override
@@ -748,11 +681,6 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
     }
 
     @Override
-    public LccMutateStub lccMutateStub() {
-        return lccMutateStub;
-    }
-
-    @Override
     public Stream<LocalClusteringCoefficientStatsResult> localClusteringCoefficientStats(
         String graphName,
         Map<String, Object> configuration
@@ -829,17 +757,13 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
         return Stream.of(estimationModeBusinessFacade.lcc(configuration, graphNameOrConfiguration));
     }
 
-    @Override
-    public LeidenMutateStub leidenMutateStub() {
-        return leidenMutateStub;
-    }
 
     @Override
     public Stream<LeidenMutateResult> leidenMutate(
         String graphName,
         Map<String, Object> rawConfiguration
     ) {
-        return leidenMutateStub().execute(graphName, rawConfiguration);
+        return stubs.leiden().execute(graphName, rawConfiguration);
     }
 
     @Override
@@ -847,7 +771,7 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
         Object graphNameOrConfiguration,
         Map<String, Object> rawConfiguration
     ) {
-        return leidenMutateStub().estimate(graphNameOrConfiguration, rawConfiguration);
+        return stubs.leiden().estimate(graphNameOrConfiguration, rawConfiguration);
     }
 
     @Override
@@ -912,17 +836,14 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
         return Stream.of(estimationModeBusinessFacade.leiden(configuration, graphNameOrConfiguration));
     }
 
-    @Override
-    public LouvainMutateStub louvainMutateStub() {
-        return louvainMutateStub;
-    }
+
 
     @Override
     public Stream<LouvainMutateResult> louvainMutate(
         String graphName,
         Map<String, Object> rawConfiguration
     ) {
-        return louvainMutateStub().execute(graphName, rawConfiguration);
+        return stubs.louvain().execute(graphName, rawConfiguration);
     }
 
     @Override
@@ -930,7 +851,7 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
         Object graphNameOrConfiguration,
         Map<String, Object> rawConfiguration
     ) {
-        return louvainMutateStub().estimate(graphNameOrConfiguration, rawConfiguration);
+        return stubs.louvain().estimate(graphNameOrConfiguration, rawConfiguration);
     }
 
     @Override
@@ -1035,17 +956,13 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
         return Stream.of(estimationModeBusinessFacade.modularity(configuration, graphNameOrConfiguration));
     }
 
-    @Override
-    public ModularityOptimizationMutateStub modularityOptimizationMutateStub() {
-        return modularityOptimizationMutateStub;
-    }
 
     @Override
     public Stream<ModularityOptimizationMutateResult> modularityOptimizationMutate(
         String graphName,
         Map<String, Object> rawConfiguration
     ) {
-        return modularityOptimizationMutateStub().execute(graphName, rawConfiguration);
+        return stubs.modularityOptimization().execute(graphName, rawConfiguration);
     }
 
     @Override
@@ -1053,7 +970,7 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
         Object graphNameOrConfiguration,
         Map<String, Object> rawConfiguration
     ) {
-        return modularityOptimizationMutateStub().estimate(graphNameOrConfiguration, rawConfiguration);
+        return stubs.modularityOptimization().estimate(graphNameOrConfiguration, rawConfiguration);
     }
 
     @Override
@@ -1137,17 +1054,14 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
         return Stream.of(estimationModeBusinessFacade.modularityOptimization(configuration, graphNameOrConfiguration));
     }
 
-    @Override
-    public SccMutateStub sccMutateStub() {
-        return sccMutateStub;
-    }
+
 
     @Override
     public Stream<SccMutateResult> sccMutate(
         String graphName,
         Map<String, Object> rawConfiguration
     ) {
-        return sccMutateStub().execute(graphName, rawConfiguration);
+        return stubs.scc().execute(graphName, rawConfiguration);
     }
 
     @Override
@@ -1155,7 +1069,7 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
         Object graphNameOrConfiguration,
         Map<String, Object> rawConfiguration
     ) {
-        return sccMutateStub().estimate(graphNameOrConfiguration, rawConfiguration);
+        return stubs.scc().estimate(graphNameOrConfiguration, rawConfiguration);
     }
 
     @Override
@@ -1236,16 +1150,11 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
     }
 
     @Override
-    public TriangleCountMutateStub triangleCountMutateStub() {
-        return triangleCountMutateStub;
-    }
-
-    @Override
     public Stream<TriangleCountMutateResult> triangleCountMutate(
         String graphName,
         Map<String, Object> rawConfiguration
     ) {
-        return triangleCountMutateStub().execute(graphName, rawConfiguration);
+        return stubs.triangleCount().execute(graphName, rawConfiguration);
     }
 
     @Override
@@ -1253,7 +1162,7 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
         Object graphNameOrConfiguration,
         Map<String, Object> rawConfiguration
     ) {
-        return triangleCountMutateStub().estimate(graphNameOrConfiguration, rawConfiguration);
+        return stubs.triangleCount().estimate(graphNameOrConfiguration, rawConfiguration);
     }
 
     @Override
@@ -1330,17 +1239,13 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
         return streamModeBusinessFacade.triangles(GraphName.parse(graphName), parsedConfig, resultBuilder);
     }
 
-    @Override
-    public WccMutateStub wccMutateStub() {
-        return wccMutateStub;
-    }
 
     @Override
     public Stream<WccMutateResult> wccMutate(
         String graphName,
         Map<String, Object> rawConfiguration
     ) {
-        return wccMutateStub().execute(graphName, rawConfiguration);
+        return stubs.wcc().execute(graphName, rawConfiguration);
     }
 
     @Override
@@ -1348,7 +1253,7 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
         Object graphNameOrConfiguration,
         Map<String, Object> rawConfiguration
     ) {
-        return wccMutateStub().estimate(graphNameOrConfiguration, rawConfiguration);
+        return stubs.wcc().estimate(graphNameOrConfiguration, rawConfiguration);
     }
 
     @Override
@@ -1481,7 +1386,7 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     ) {
-        return speakerListenerLPAMutateStub.estimate(
+        return stubs.sllpa().estimate(
             graphNameOrConfiguration,
             algorithmConfiguration
         );
@@ -1489,7 +1394,7 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
 
     @Override
     public Stream<SpeakerListenerLPAMutateResult> sllpaMutate(String graphName, Map<String, Object> configuration) {
-        return speakerListenerLPAMutateStub.execute(
+        return stubs.sllpa().execute(
             graphName,
             configuration);
     }
@@ -1526,19 +1431,13 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
         );
     }
 
-    @Override
-    public SpeakerListenerLPAMutateStub speakerListenerLPAMutateStub() {
-        return speakerListenerLPAMutateStub;
-    }
 
-    @Override
-    public HDBScanMutateStub hdbscanMutateStub() {
-        return hdbscanMutateStub;
-    }
+
+
 
     @Override
     public Stream<HDBScanMutateResult> hdbscanMutate(String graphName, Map<String, Object> configuration) {
-        return hdbscanMutateStub().execute(graphName, configuration);
+        return stubs.hdbscan().execute(graphName, configuration);
     }
 
     @Override
@@ -1546,7 +1445,7 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
         Object graphNameOrConfiguration,
         Map<String, Object> configuration
     ) {
-        return hdbscanMutateStub().estimate(graphNameOrConfiguration, configuration);
+        return stubs.hdbscan().estimate(graphNameOrConfiguration, configuration);
     }
 
     @Override

@@ -45,7 +45,7 @@ public class ArticulationPointsMutateProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.algorithms().centrality().articulationPointsMutateStub().execute(graphName, configuration);
+        return facade.algorithms().centrality().articulationPointsMutate(graphName, configuration);
     }
 
     @Procedure(value = "gds.articulationPoints.mutate.estimate", mode = READ)

@@ -26,6 +26,6 @@ import org.neo4j.gds.sllpa.SpeakerListenerLPAConfig;
 
 public class SpeakerListenerLPAStub extends AbstractStub<SpeakerListenerLPAConfig, SpeakerListenerLPAMutateResult> {
     protected MutateStub<SpeakerListenerLPAConfig, SpeakerListenerLPAMutateResult> stub(AlgorithmsProcedureFacade facade) {
-        return facade.community().speakerListenerLPAMutateStub();
+        return facade.community().communityStubs().sllpa();
     }
 }

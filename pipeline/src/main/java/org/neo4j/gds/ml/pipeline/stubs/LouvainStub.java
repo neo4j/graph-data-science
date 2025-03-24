@@ -26,6 +26,6 @@ import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
 
 public class LouvainStub extends AbstractStub<LouvainMutateConfig, LouvainMutateResult> {
     protected MutateStub<LouvainMutateConfig, LouvainMutateResult> stub(AlgorithmsProcedureFacade facade) {
-        return facade.community().louvainMutateStub();
+        return facade.community().communityStubs().louvain();
     }
 }

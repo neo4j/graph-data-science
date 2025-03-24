@@ -26,6 +26,6 @@ import org.neo4j.gds.triangle.TriangleCountMutateConfig;
 
 public class TriangleCountStub extends AbstractStub<TriangleCountMutateConfig, TriangleCountMutateResult> {
     protected MutateStub<TriangleCountMutateConfig, TriangleCountMutateResult> stub(AlgorithmsProcedureFacade facade) {
-        return facade.community().triangleCountMutateStub();
+        return facade.community().communityStubs().triangleCount();
     }
 }

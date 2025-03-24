@@ -26,6 +26,6 @@ import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
 
 public class LeidenStub extends AbstractStub<LeidenMutateConfig, LeidenMutateResult> {
     protected MutateStub<LeidenMutateConfig, LeidenMutateResult> stub(AlgorithmsProcedureFacade facade) {
-        return facade.community().leidenMutateStub();
+        return facade.community().communityStubs().leiden();
     }
 }

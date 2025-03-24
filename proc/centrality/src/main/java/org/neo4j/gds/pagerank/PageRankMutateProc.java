@@ -44,7 +44,7 @@ public class PageRankMutateProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.algorithms().centrality().pageRankMutateStub().execute(graphName, configuration);
+        return facade.algorithms().centrality().pageRankMutate(graphName, configuration);
     }
 
     @Procedure(value = "gds.pageRank.mutate.estimate", mode = READ)
@@ -53,7 +53,7 @@ public class PageRankMutateProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.algorithms().centrality().pageRankMutateStub().estimate(
+        return facade.algorithms().centrality().pageRankMutateEstimate(
             graphNameOrConfiguration,
             algoConfiguration
         );

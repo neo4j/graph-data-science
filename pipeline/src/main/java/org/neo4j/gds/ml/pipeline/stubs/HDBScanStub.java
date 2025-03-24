@@ -26,6 +26,6 @@ import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
 
 public class HDBScanStub extends AbstractStub<HDBScanMutateConfig, HDBScanMutateResult> {
     protected MutateStub<HDBScanMutateConfig, HDBScanMutateResult> stub(AlgorithmsProcedureFacade facade) {
-        return facade.community().hdbscanMutateStub();
+        return facade.community().communityStubs().hdbscan();
     }
 }

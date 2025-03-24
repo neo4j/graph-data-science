@@ -26,6 +26,6 @@ import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
 
 public class ArticulationPointsStub extends AbstractStub<ArticulationPointsMutateConfig, ArticulationPointsMutateResult> {
     protected MutateStub<ArticulationPointsMutateConfig, ArticulationPointsMutateResult> stub(AlgorithmsProcedureFacade facade) {
-        return facade.centrality().articulationPointsMutateStub();
+        return facade.centrality().centralityStubs().articulationPoints();
     }
 }

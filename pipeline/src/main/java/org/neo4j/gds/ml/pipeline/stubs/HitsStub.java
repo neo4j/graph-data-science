@@ -26,6 +26,6 @@ import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
 
 public class HitsStub extends AbstractStub<HitsConfig, HitsMutateResult> {
     protected MutateStub<HitsConfig, HitsMutateResult> stub(AlgorithmsProcedureFacade facade) {
-        return facade.centrality().hitsMutateStub();
+        return facade.centrality().centralityStubs().hits();
     }
 }

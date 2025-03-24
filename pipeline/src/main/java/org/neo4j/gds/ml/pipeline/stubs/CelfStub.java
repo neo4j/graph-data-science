@@ -26,6 +26,6 @@ import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
 
 public class CelfStub extends AbstractStub<InfluenceMaximizationMutateConfig, CELFMutateResult> {
     protected MutateStub<InfluenceMaximizationMutateConfig, CELFMutateResult> stub(AlgorithmsProcedureFacade facade) {
-        return facade.centrality().celfMutateStub();
+        return facade.centrality().centralityStubs().celf();
     }
 }

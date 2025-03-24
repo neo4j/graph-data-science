@@ -26,6 +26,6 @@ import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
 
 public class KCoreStub extends AbstractStub<KCoreDecompositionMutateConfig, KCoreDecompositionMutateResult> {
     protected MutateStub<KCoreDecompositionMutateConfig, KCoreDecompositionMutateResult> stub(AlgorithmsProcedureFacade facade) {
-        return facade.community().kCoreMutateStub();
+        return facade.community().communityStubs().kCore();
     }
 }

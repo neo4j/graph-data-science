@@ -44,7 +44,7 @@ public class EigenvectorMutateProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.algorithms().centrality().eigenVectorMutateStub().execute(graphName, configuration);
+        return facade.algorithms().centrality().eigenvectorMutate(graphName, configuration);
     }
 
     @Procedure(value = "gds.eigenvector.mutate.estimate", mode = READ)
@@ -53,9 +53,6 @@ public class EigenvectorMutateProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.algorithms().centrality().eigenVectorMutateStub().estimate(
-            graphNameOrConfiguration,
-            algoConfiguration
-        );
+        return facade.algorithms().centrality().eigenvectorMutateEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 }

@@ -26,6 +26,6 @@ import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
 
 public class PageRankStub extends AbstractStub<PageRankMutateConfig, PageRankMutateResult> {
     protected MutateStub<PageRankMutateConfig, PageRankMutateResult> stub(AlgorithmsProcedureFacade facade) {
-        return facade.centrality().pageRankMutateStub();
+        return facade.centrality().centralityStubs().pageRank();
     }
 }

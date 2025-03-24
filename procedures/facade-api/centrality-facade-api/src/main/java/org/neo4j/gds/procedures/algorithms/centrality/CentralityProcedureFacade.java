@@ -20,23 +20,15 @@
 package org.neo4j.gds.procedures.algorithms.centrality;
 
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
-import org.neo4j.gds.pagerank.ArticleRankMutateConfig;
-import org.neo4j.gds.pagerank.EigenvectorMutateConfig;
-import org.neo4j.gds.pagerank.PageRankMutateConfig;
-import org.neo4j.gds.procedures.algorithms.centrality.stubs.ArticulationPointsMutateStub;
-import org.neo4j.gds.procedures.algorithms.centrality.stubs.BetaClosenessCentralityMutateStub;
-import org.neo4j.gds.procedures.algorithms.centrality.stubs.BetweennessCentralityMutateStub;
-import org.neo4j.gds.procedures.algorithms.centrality.stubs.CelfMutateStub;
-import org.neo4j.gds.procedures.algorithms.centrality.stubs.ClosenessCentralityMutateStub;
-import org.neo4j.gds.procedures.algorithms.centrality.stubs.DegreeCentralityMutateStub;
-import org.neo4j.gds.procedures.algorithms.centrality.stubs.HarmonicCentralityMutateStub;
-import org.neo4j.gds.procedures.algorithms.centrality.stubs.HitsMutateStub;
-import org.neo4j.gds.procedures.algorithms.centrality.stubs.PageRankMutateStub;
+import org.neo4j.gds.procedures.algorithms.centrality.stubs.CentralityStubs;
 
 import java.util.Map;
 import java.util.stream.Stream;
 
 public interface CentralityProcedureFacade {
+
+    CentralityStubs centralityStubs();
+
     Stream<AlphaHarmonicStreamResult> alphaHarmonicCentralityStream(
         String graphName,
         Map<String, Object> configuration
@@ -47,7 +39,12 @@ public interface CentralityProcedureFacade {
         Map<String, Object> configuration
     );
 
-    PageRankMutateStub<ArticleRankMutateConfig> articleRankMutateStub();
+    Stream<PageRankMutateResult> articleRankMutate(String graphName, Map<String, Object> configuration);
+
+    Stream<MemoryEstimateResult> articleRankMutateEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    );
 
     Stream<PageRankStatsResult> articleRankStats(String graphName, Map<String, Object> configuration);
 
@@ -72,14 +69,26 @@ public interface CentralityProcedureFacade {
         Map<String, Object> algorithmConfiguration
     );
 
-    BetaClosenessCentralityMutateStub betaClosenessCentralityMutateStub();
+    Stream<BetaClosenessCentralityMutateResult> betaClosenessCentralityMutate(
+        String graphName,
+        Map<String, Object> configuration
+    );
 
     Stream<BetaClosenessCentralityWriteResult> betaClosenessCentralityWrite(
         String graphName,
         Map<String, Object> configuration
     );
 
-    BetweennessCentralityMutateStub betweennessCentralityMutateStub();
+
+    Stream<CentralityMutateResult> betweennessCentralityMutate(
+        String graphName,
+        Map<String, Object> configuration
+    );
+
+    Stream<MemoryEstimateResult> betweennessCentralityMutateEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    );
 
     Stream<CentralityStatsResult> betweennessCentralityStats(
         String graphName,
@@ -121,7 +130,10 @@ public interface CentralityProcedureFacade {
         Map<String, Object> algorithmConfiguration
     );
 
-    ArticulationPointsMutateStub articulationPointsMutateStub();
+    Stream<ArticulationPointsMutateResult> articulationPointsMutate(
+        String graphName,
+        Map<String, Object> configuration
+    );
 
     Stream<MemoryEstimateResult> articulationPointsMutateEstimate(
         Object graphNameOrConfiguration,
@@ -158,7 +170,15 @@ public interface CentralityProcedureFacade {
         Map<String, Object> algorithmConfiguration
     );
 
-    CelfMutateStub celfMutateStub();
+    Stream<CELFMutateResult> celfMutate(
+        String graphName,
+        Map<String, Object> configuration
+    );
+
+    Stream<MemoryEstimateResult> celfMutateEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    );
 
     Stream<CELFStatsResult> celfStats(
         String graphName,
@@ -190,7 +210,7 @@ public interface CentralityProcedureFacade {
         Map<String, Object> algorithmConfiguration
     );
 
-    ClosenessCentralityMutateStub closenessCentralityMutateStub();
+    Stream<CentralityMutateResult> closenessCentralityMutate(String graphName, Map<String, Object> configuration);
 
     Stream<CentralityStatsResult> closenessCentralityStats(String graphName, Map<String, Object> configuration);
 
@@ -201,7 +221,12 @@ public interface CentralityProcedureFacade {
 
     Stream<CentralityWriteResult> closenessCentralityWrite(String graphName, Map<String, Object> configuration);
 
-    DegreeCentralityMutateStub degreeCentralityMutateStub();
+    Stream<CentralityMutateResult> degreeCentralityMutate(String graphName, Map<String, Object> configuration);
+
+    Stream<MemoryEstimateResult> degreeCentralityMutateEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    );
 
     Stream<CentralityStatsResult> degreeCentralityStats(String graphName, Map<String, Object> configuration);
 
@@ -227,7 +252,13 @@ public interface CentralityProcedureFacade {
         Map<String, Object> algorithmConfiguration
     );
 
-    PageRankMutateStub<EigenvectorMutateConfig> eigenVectorMutateStub();
+
+    Stream<PageRankMutateResult> eigenvectorMutate(String graphName, Map<String, Object> configuration);
+
+    Stream<MemoryEstimateResult> eigenvectorMutateEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    );
 
     Stream<PageRankStatsResult> eigenvectorStats(String graphName, Map<String, Object> configuration);
 
@@ -250,7 +281,8 @@ public interface CentralityProcedureFacade {
         Map<String, Object> algorithmConfiguration
     );
 
-    HarmonicCentralityMutateStub harmonicCentralityMutateStub();
+
+    Stream<CentralityMutateResult> harmonicCentralityMutate(String graphName, Map<String, Object> configuration);
 
     Stream<CentralityStatsResult> harmonicCentralityStats(String graphName, Map<String, Object> configuration);
 
@@ -261,7 +293,12 @@ public interface CentralityProcedureFacade {
 
     Stream<CentralityWriteResult> harmonicCentralityWrite(String graphName, Map<String, Object> configuration);
 
-    PageRankMutateStub<PageRankMutateConfig> pageRankMutateStub();
+    Stream<PageRankMutateResult> pageRankMutate(String graphName, Map<String, Object> configuration);
+
+    Stream<MemoryEstimateResult> pageRankMutateEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    );
 
     Stream<PageRankStatsResult> pageRankStats(String graphName, Map<String, Object> configuration);
 
@@ -305,9 +342,11 @@ public interface CentralityProcedureFacade {
         Map<String, Object> algorithmConfiguration
     );
 
-    HitsMutateStub hitsMutateStub();
+    Stream<HitsMutateResult> hitsMutate(String graphName, Map<String, Object> configuration);
 
-
-
+    Stream<MemoryEstimateResult> hitsMutateEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    );
 
 }

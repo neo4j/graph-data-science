@@ -44,7 +44,7 @@ public class ClosenessCentralityMutateProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.algorithms().centrality().closenessCentralityMutateStub().execute(graphName, configuration);
+        return facade.algorithms().centrality().closenessCentralityMutate(graphName, configuration);
     }
 
     @Deprecated(forRemoval = true)
@@ -61,6 +61,6 @@ public class ClosenessCentralityMutateProc {
             .warn(
                 "Procedure `gds.beta.closeness.mutate` has been deprecated, please use `gds.closeness.mutate`.");
 
-        return facade.algorithms().centrality().betaClosenessCentralityMutateStub().execute(graphName, configuration);
+        return facade.algorithms().centrality().betaClosenessCentralityMutate(graphName, configuration);
     }
 }

@@ -28,6 +28,6 @@ public class LccStub extends AbstractStub<LocalClusteringCoefficientMutateConfig
     protected MutateStub<LocalClusteringCoefficientMutateConfig, LocalClusteringCoefficientMutateResult> stub(
         AlgorithmsProcedureFacade facade
     ) {
-        return facade.community().lccMutateStub();
+        return facade.community().communityStubs().lcc();
     }
 }

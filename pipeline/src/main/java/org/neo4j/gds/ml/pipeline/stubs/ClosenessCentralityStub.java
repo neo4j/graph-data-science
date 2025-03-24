@@ -26,6 +26,6 @@ import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
 
 public class ClosenessCentralityStub extends AbstractStub<ClosenessCentralityMutateConfig, CentralityMutateResult> {
     protected MutateStub<ClosenessCentralityMutateConfig, CentralityMutateResult> stub(AlgorithmsProcedureFacade facade) {
-        return facade.centrality().closenessCentralityMutateStub();
+        return facade.centrality().centralityStubs().closeness();
     }
 }

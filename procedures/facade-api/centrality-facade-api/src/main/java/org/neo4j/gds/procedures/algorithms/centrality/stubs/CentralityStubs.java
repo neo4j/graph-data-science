@@ -17,15 +17,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.pipeline.stubs;
+package org.neo4j.gds.procedures.algorithms.centrality.stubs;
 
 import org.neo4j.gds.pagerank.ArticleRankMutateConfig;
-import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
-import org.neo4j.gds.procedures.algorithms.centrality.PageRankMutateResult;
-import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
+import org.neo4j.gds.pagerank.EigenvectorMutateConfig;
+import org.neo4j.gds.pagerank.PageRankMutateConfig;
 
-public class ArticleRankStub extends AbstractStub<ArticleRankMutateConfig, PageRankMutateResult> {
-    protected MutateStub<ArticleRankMutateConfig, PageRankMutateResult> stub(AlgorithmsProcedureFacade facade) {
-        return facade.centrality().centralityStubs().articleRank();
-    }
+public record CentralityStubs(
+    PageRankMutateStub<ArticleRankMutateConfig> articleRank,
+    BetaClosenessCentralityMutateStub betaCloseness,
+    BetweennessCentralityMutateStub betweeness,
+    ArticulationPointsMutateStub articulationPoints,
+    CelfMutateStub celf,
+    HitsMutateStub hits,
+    ClosenessCentralityMutateStub closeness,
+    DegreeCentralityMutateStub degree,
+    PageRankMutateStub<EigenvectorMutateConfig> eigenvector,
+    HarmonicCentralityMutateStub harmonic,
+    PageRankMutateStub<PageRankMutateConfig> pageRank
+) {
+
 }

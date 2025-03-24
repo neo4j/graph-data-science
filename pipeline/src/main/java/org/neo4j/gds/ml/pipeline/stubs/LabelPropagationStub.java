@@ -26,6 +26,6 @@ import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
 
 public class LabelPropagationStub extends AbstractStub<LabelPropagationMutateConfig, LabelPropagationMutateResult> {
     protected MutateStub<LabelPropagationMutateConfig, LabelPropagationMutateResult> stub(AlgorithmsProcedureFacade facade) {
-        return facade.community().labelPropagationMutateStub();
+        return facade.community().communityStubs().labelPropagation();
     }
 }
