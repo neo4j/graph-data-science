@@ -24,10 +24,12 @@ import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class QueueBasedSpliteratorTest {
 
@@ -39,7 +41,7 @@ class QueueBasedSpliteratorTest {
         queue.addAll(expected);
         queue.add(-1L);
 
-        var spliterator = new QueueBasedSpliterator<>(queue, -1L, TerminationFlag.RUNNING_TRUE, 100);
+        var spliterator = new QueueBasedSpliterator<>(queue, -1L, TerminationFlag.RUNNING_TRUE);
 
         var actual = StreamSupport.stream(spliterator, false).collect(Collectors.toList());
 
@@ -47,17 +49,15 @@ class QueueBasedSpliteratorTest {
     }
 
     @Test
-    void shouldTimeout() {
-        var expected = List.of(0L, 1L, 2L);
+    void shouldFailIQueuePopulatorFails() {
+        var error = new Throwable("foo");
+
+        var populatorError = new AtomicReference<>(error);
 
         var queue = new ArrayBlockingQueue<Long>(10);
-        queue.addAll(expected);
 
-        var spliterator = new QueueBasedSpliterator<>(queue, -1L, TerminationFlag.RUNNING_TRUE, 1);
+        var spliterator = new QueueBasedSpliterator<>(queue, -1L, populatorError, TerminationFlag.RUNNING_TRUE);
 
-        var actual = StreamSupport.stream(spliterator, false).collect(Collectors.toList());
-
-        assertThat(actual).containsExactlyElementsOf(expected);
+        assertThatThrownBy(() -> StreamSupport.stream(spliterator, false).toList()).rootCause().isEqualTo(error);
     }
-
 }

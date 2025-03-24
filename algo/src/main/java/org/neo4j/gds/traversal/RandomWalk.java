@@ -190,8 +190,7 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
     }
 
     private Stream<long[]> streamWalks(BlockingQueue<long[]> walks) {
-        int timeoutInSeconds = 100;
-        var queueConsumer = new QueueBasedSpliterator<>(walks, TOMBSTONE, externalTerminationFlag, timeoutInSeconds);
+        var queueConsumer = new QueueBasedSpliterator<>(walks, TOMBSTONE, externalTerminationFlag);
         return StreamSupport
             .stream(queueConsumer, false)
             .onClose(externalTerminationFlag::stop);

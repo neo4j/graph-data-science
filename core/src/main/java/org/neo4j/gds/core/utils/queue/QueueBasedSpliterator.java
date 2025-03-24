@@ -19,52 +19,82 @@
  */
 package org.neo4j.gds.core.utils.queue;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.termination.TerminationFlag;
+import org.neo4j.gds.utils.ExceptionUtil;
 
 import java.util.Spliterator;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
-import static java.util.concurrent.TimeUnit.SECONDS;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 public class QueueBasedSpliterator<T> implements Spliterator<T> {
     private final BlockingQueue<T> queue;
     private final T tombstone;
+    private final AtomicReference<Throwable> queuePopulatorError;
     private @Nullable T entry;
     private final TerminationFlag terminationGuard;
-    private final int timeoutInSeconds;
 
-    public QueueBasedSpliterator(BlockingQueue<T> queue, T tombstone, TerminationFlag terminationGuard, int timeoutInSeconds) {
+    private boolean hasEnded;
+
+    public QueueBasedSpliterator(
+        BlockingQueue<T> queue,
+        T tombstone,
+        TerminationFlag terminationGuard
+    ) {
+        this(queue, tombstone, new AtomicReference<>(), terminationGuard);
+    }
+
+    public QueueBasedSpliterator(
+        BlockingQueue<T> queue,
+        T tombstone,
+        AtomicReference<Throwable> queuePopulatorError,
+        TerminationFlag terminationGuard
+    ) {
         this.queue = queue;
         this.tombstone = tombstone;
         this.terminationGuard = terminationGuard;
-        this.timeoutInSeconds = timeoutInSeconds;
-        entry = poll();
+        this.queuePopulatorError = queuePopulatorError;
+        this.hasEnded = false;
     }
 
     @Override
     public boolean tryAdvance(Consumer<? super T> action) {
-        if (isEnd()) {
+        if (hasEnded) {
             return false;
         }
-        terminationGuard.assertRunning();
-        action.accept(entry);
+
         entry = poll();
-        return !isEnd();
+        if (isEnd()) {
+            hasEnded = true;
+            return false;
+        }
+
+        action.accept(entry);
+        return true;
     }
 
     private boolean isEnd() {
         return entry == null || entry == tombstone;
     }
 
-    private @Nullable T poll() {
-        try {
-            return queue.poll(timeoutInSeconds, SECONDS);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            return null;
-        }
+    private @NotNull T poll() {
+        T poll;
+        do {
+            checkForQueuePopulatorError();
+            try {
+                poll = queue.poll(100, MILLISECONDS);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                ExceptionUtil.throwIfUnchecked(e);
+                throw new RuntimeException(e);
+            }
+        } while (poll == null);
+
+        return poll;
     }
 
     public Spliterator<T> trySplit() {
@@ -77,5 +107,14 @@ public class QueueBasedSpliterator<T> implements Spliterator<T> {
 
     public int characteristics() {
         return NONNULL;
+    }
+
+    private void checkForQueuePopulatorError() {
+        terminationGuard.assertRunning();
+        var throwable = queuePopulatorError.get();
+        if (throwable != null) {
+            ExceptionUtil.throwIfUnchecked(throwable);
+            throw new RuntimeException(throwable);
+        }
     }
 }
