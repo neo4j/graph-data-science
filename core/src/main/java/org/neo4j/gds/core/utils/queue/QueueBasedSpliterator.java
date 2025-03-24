@@ -38,6 +38,8 @@ public class QueueBasedSpliterator<T> implements Spliterator<T> {
     private @Nullable T entry;
     private final TerminationFlag terminationGuard;
 
+    private boolean hasEnded;
+
     public QueueBasedSpliterator(
         BlockingQueue<T> queue,
         T tombstone,
@@ -56,16 +58,23 @@ public class QueueBasedSpliterator<T> implements Spliterator<T> {
         this.tombstone = tombstone;
         this.terminationGuard = terminationGuard;
         this.queuePopulatorError = queuePopulatorError;
+        this.hasEnded = false;
     }
 
     @Override
     public boolean tryAdvance(Consumer<? super T> action) {
-        entry = poll();
-        if (isEnd()) {
+        if (hasEnded) {
             return false;
         }
+
+        entry = poll();
+        if (isEnd()) {
+            hasEnded = true;
+            return false;
+        }
+
         action.accept(entry);
-        return !isEnd();
+        return true;
     }
 
     private boolean isEnd() {
