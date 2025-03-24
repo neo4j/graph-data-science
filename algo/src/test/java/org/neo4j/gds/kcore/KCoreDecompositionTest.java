@@ -19,11 +19,15 @@
  */
 package org.neo4j.gds.kcore;
 
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.neo4j.gds.CommunityAlgorithmTasks;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.TestProgressTrackerHelper;
+import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
@@ -34,6 +38,8 @@ import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.neo4j.gds.assertj.Extractors.removingThreadId;
+import static org.neo4j.gds.assertj.Extractors.replaceTimings;
 
 @GdlExtension
 class KCoreDecompositionTest {
@@ -218,4 +224,66 @@ class KCoreDecompositionTest {
 
         }
     }
+
+    @GdlExtension
+    @Nested
+    class ProgressTrackingTest {
+
+        @GdlGraph(orientation = Orientation.UNDIRECTED)
+        private static final String DB_CYPHER =
+            "CREATE " +
+                "  (z:node)," +
+                "  (a:node)," +
+                "  (b:node)," +
+                "  (c:node)," +
+                "  (d:node)," +
+                "  (e:node)," +
+                "  (f:node)," +
+                "  (g:node)," +
+                "  (h:node)," +
+
+                "(a)-[:R]->(b)," +
+                "(b)-[:R]->(c)," +
+                "(c)-[:R]->(d)," +
+                "(d)-[:R]->(e)," +
+                "(e)-[:R]->(f)," +
+                "(f)-[:R]->(g)," +
+                "(g)-[:R]->(h)," +
+                "(h)-[:R]->(c)";
+
+
+        @Inject
+        private TestGraph graph;
+
+        @Test
+        void shouldLogProgress() {
+            var concurrency = new Concurrency(4);
+
+            var progressTrackerWithLog = TestProgressTrackerHelper.create(
+                new CommunityAlgorithmTasks().kCore(graph),
+                concurrency
+            );
+
+            var kCore = new KCoreDecomposition(
+                graph,
+                concurrency,
+                progressTrackerWithLog.progressTracker(),
+                TerminationFlag.RUNNING_TRUE
+            );
+            kCore.compute();
+
+            var log = progressTrackerWithLog.log();
+            Assertions.assertThat(log.getMessages(TestLog.INFO))
+                .extracting(removingThreadId())
+                .extracting(replaceTimings())
+                .containsExactly(
+                    "KCoreDecomposition :: Start",
+                    "KCoreDecomposition 11%",
+                    "KCoreDecomposition 33%",
+                    "KCoreDecomposition 100%",
+                    "KCoreDecomposition :: Finished"
+                );
+        }
+    }
+
 }

@@ -20,13 +20,17 @@
 package org.neo4j.gds.leiden;
 
 import org.assertj.core.data.Offset;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.CommunityAlgorithmTasks;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.TestProgressTrackerHelper;
 import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.beta.generator.RandomGraphGenerator;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.config.RandomGraphGeneratorConfig;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.concurrency.Concurrency;
@@ -39,11 +43,14 @@ import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.gds.termination.TerminationFlag;
 
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static org.neo4j.gds.assertj.Extractors.removingThreadId;
+import static org.neo4j.gds.assertj.Extractors.replaceTimings;
 import static org.neo4j.gds.core.ProcedureConstants.TOLERANCE_DEFAULT;
 
 @GdlExtension
@@ -316,4 +323,127 @@ class LeidenTest {
 
 
     }
+
+    @Nested
+    @GdlExtension
+    class ProgressTrackingTest {
+
+        @GdlGraph(orientation = Orientation.UNDIRECTED)
+        private static final String DB_CYPHER =
+            "CREATE " +
+                "  (a0:Node {optimal: 5000, seed: 1, seed2:-1})," +
+                "  (a1:Node {optimal: 4000,seed: 2})," +
+                "  (a2:Node {optimal: 5000,seed: 2})," +
+                "  (a3:Node {optimal: 5000})," +
+                "  (a4:Node {optimal: 5000,seed: 5})," +
+                "  (a5:Node {optimal: 4000,seed: 6})," +
+                "  (a6:Node {optimal: 4000,seed: 7})," +
+                "  (a7:Node {optimal: 4000,seed: 8})," +
+                "  (a0)-[:R {weight: 1.0}]->(a1)," +
+                "  (a0)-[:R {weight: 1.0}]->(a2)," +
+                "  (a0)-[:R {weight: 1.0}]->(a3)," +
+                "  (a0)-[:R {weight: 1.0}]->(a4)," +
+                "  (a2)-[:R {weight: 1.0}]->(a3)," +
+                "  (a2)-[:R {weight: 1.0}]->(a4)," +
+                "  (a3)-[:R {weight: 1.0}]->(a4)," +
+                "  (a1)-[:R {weight: 1.0}]->(a5)," +
+                "  (a1)-[:R {weight: 1.0}]->(a6)," +
+                "  (a1)-[:R {weight: 1.0}]->(a7)," +
+                "  (a5)-[:R {weight: 1.0}]->(a6)," +
+                "  (a5)-[:R {weight: 1.0}]->(a7)," +
+                "  (a6)-[:R {weight: 1.0}]->(a7)";
+
+        @Inject
+        private TestGraph graph;
+
+        @Test
+        void shouldLogProgress() {
+            var parameters = new LeidenParameters(
+                new Concurrency(4),
+                0.0001,
+                null,
+                3,
+                1.0,
+                0.01,
+                false,
+                Optional.of(19L)
+            );
+            var progressTrackerWithLog = TestProgressTrackerHelper.create(
+                new CommunityAlgorithmTasks().leiden(graph, parameters),
+                new Concurrency(1)
+            );
+
+            var progressTracker = progressTrackerWithLog.progressTracker();
+            var leiden = new Leiden(
+                graph,
+                parameters,
+                null,
+                progressTracker,
+                TerminationFlag.RUNNING_TRUE
+            );
+
+            leiden.compute();
+
+            var log = progressTrackerWithLog.log();
+            assertThat(log.getMessages(TestLog.INFO))
+                .extracting(removingThreadId())
+                .extracting(replaceTimings())
+                .containsExactly(
+                    "Leiden :: Start",
+                    "Leiden :: Initialization :: Start",
+                    "Leiden :: Initialization 12%",
+                    "Leiden :: Initialization 25%",
+                    "Leiden :: Initialization 37%",
+                    "Leiden :: Initialization 50%",
+                    "Leiden :: Initialization 62%",
+                    "Leiden :: Initialization 75%",
+                    "Leiden :: Initialization 87%",
+                    "Leiden :: Initialization 100%",
+                    "Leiden :: Initialization :: Finished",
+                    "Leiden :: Iteration :: Start",
+                    "Leiden :: Iteration :: Local Move 1 of 3 :: Start",
+                    "Leiden :: Iteration :: Local Move 1 of 3 100%",
+                    "Leiden :: Iteration :: Local Move 1 of 3 :: Finished",
+                    "Leiden :: Iteration :: Modularity Computation 1 of 3 :: Start",
+                    "Leiden :: Iteration :: Modularity Computation 1 of 3 12%",
+                    "Leiden :: Iteration :: Modularity Computation 1 of 3 25%",
+                    "Leiden :: Iteration :: Modularity Computation 1 of 3 37%",
+                    "Leiden :: Iteration :: Modularity Computation 1 of 3 50%",
+                    "Leiden :: Iteration :: Modularity Computation 1 of 3 62%",
+                    "Leiden :: Iteration :: Modularity Computation 1 of 3 75%",
+                    "Leiden :: Iteration :: Modularity Computation 1 of 3 87%",
+                    "Leiden :: Iteration :: Modularity Computation 1 of 3 100%",
+                    "Leiden :: Iteration :: Modularity Computation 1 of 3 :: Finished",
+                    "Leiden :: Iteration :: Refinement 1 of 3 :: Start",
+                    "Leiden :: Iteration :: Refinement 1 of 3 12%",
+                    "Leiden :: Iteration :: Refinement 1 of 3 25%",
+                    "Leiden :: Iteration :: Refinement 1 of 3 37%",
+                    "Leiden :: Iteration :: Refinement 1 of 3 50%",
+                    "Leiden :: Iteration :: Refinement 1 of 3 62%",
+                    "Leiden :: Iteration :: Refinement 1 of 3 75%",
+                    "Leiden :: Iteration :: Refinement 1 of 3 87%",
+                    "Leiden :: Iteration :: Refinement 1 of 3 100%",
+                    "Leiden :: Iteration :: Refinement 1 of 3 :: Finished",
+                    "Leiden :: Iteration :: Aggregation 1 of 3 :: Start",
+                    "Leiden :: Iteration :: Aggregation 1 of 3 12%",
+                    "Leiden :: Iteration :: Aggregation 1 of 3 25%",
+                    "Leiden :: Iteration :: Aggregation 1 of 3 37%",
+                    "Leiden :: Iteration :: Aggregation 1 of 3 50%",
+                    "Leiden :: Iteration :: Aggregation 1 of 3 62%",
+                    "Leiden :: Iteration :: Aggregation 1 of 3 75%",
+                    "Leiden :: Iteration :: Aggregation 1 of 3 87%",
+                    "Leiden :: Iteration :: Aggregation 1 of 3 100%",
+                    "Leiden :: Iteration :: Aggregation 1 of 3 :: Finished",
+                    "Leiden :: Iteration :: Local Move 2 of 3 :: Start",
+                    "Leiden :: Iteration :: Local Move 2 of 3 100%",
+                    "Leiden :: Iteration :: Local Move 2 of 3 :: Finished",
+                    "Leiden :: Iteration :: Modularity Computation 2 of 3 :: Start",
+                    "Leiden :: Iteration :: Modularity Computation 2 of 3 100%",
+                    "Leiden :: Iteration :: Modularity Computation 2 of 3 :: Finished",
+                    "Leiden :: Iteration :: Finished",
+                    "Leiden :: Finished"
+                );
+        }
+    }
+
 }

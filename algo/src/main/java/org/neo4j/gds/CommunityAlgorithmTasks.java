@@ -17,38 +17,38 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.applications.algorithms.community;
+package org.neo4j.gds;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
-import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutBaseConfig;
+import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutParameters;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.hdbscan.HDBScanProgressTrackerCreator;
 import org.neo4j.gds.k1coloring.K1ColoringBaseConfig;
 import org.neo4j.gds.k1coloring.K1ColoringProgressTrackerTaskCreator;
-import org.neo4j.gds.kmeans.KmeansBaseConfig;
-import org.neo4j.gds.labelpropagation.LabelPropagationBaseConfig;
-import org.neo4j.gds.leiden.LeidenBaseConfig;
-import org.neo4j.gds.louvain.LouvainBaseConfig;
+import org.neo4j.gds.kmeans.KmeansParameters;
+import org.neo4j.gds.labelpropagation.LabelPropagationParameters;
+import org.neo4j.gds.leiden.LeidenParameters;
+import org.neo4j.gds.louvain.LouvainParameters;
 import org.neo4j.gds.louvain.LouvainProgressTrackerTaskCreator;
-import org.neo4j.gds.modularityoptimization.ModularityOptimizationBaseConfig;
+import org.neo4j.gds.modularityoptimization.ModularityOptimizationParameters;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationProgressTrackerTaskCreator;
 import org.neo4j.gds.sllpa.SpeakerListenerLPAConfig;
 import org.neo4j.gds.sllpa.SpeakerListenerLPAProgressTrackerCreator;
-import org.neo4j.gds.triangle.LocalClusteringCoefficientBaseConfig;
+import org.neo4j.gds.triangle.LocalClusteringCoefficientParameters;
 import org.neo4j.gds.triangle.TriangleCountTask;
 
 import java.util.ArrayList;
 import java.util.List;
 
-class AlgorithmTasks {
+public final class CommunityAlgorithmTasks {
 
-    Task approximateMaximumKCut(Graph graph, ApproxMaxKCutBaseConfig configuration) {
-        return ApproximateKCutTaskFactory.createTask(graph, configuration);
+    public Task approximateMaximumKCut(Graph graph, ApproxMaxKCutParameters parameters) {
+        return ApproximateKCutTaskFactory.createTask(graph, parameters);
     }
 
-    Task conductance(Graph graph) {
+    public Task conductance(Graph graph) {
         return Tasks.task(
             AlgorithmLabel.Conductance.asString(),
             Tasks.leaf("count relationships", graph.nodeCount()),
@@ -57,80 +57,80 @@ class AlgorithmTasks {
         );
     }
 
-    Task hdbscan(Graph graph) {
+    public Task hdbscan(Graph graph) {
         return HDBScanProgressTrackerCreator.hdbscanTask(AlgorithmLabel.HDBScan.asString(), graph.nodeCount());
     }
 
-    Task k1Coloring(Graph graph, K1ColoringBaseConfig configuration) {
+    public Task k1Coloring(Graph graph, K1ColoringBaseConfig configuration) {
         return K1ColoringProgressTrackerTaskCreator.progressTask(
             graph.nodeCount(),
             configuration.maxIterations()
         );
     }
 
-    Task kCore(Graph graph) {
+    public Task kCore(Graph graph) {
         return Tasks.leaf(AlgorithmLabel.KCore.asString(), graph.nodeCount());
     }
 
-    Task kMeans(Graph graph, KmeansBaseConfig configuration) {
-        return KMeansTaskFactory.createTask(graph, configuration);
+    public Task kMeans(Graph graph, KmeansParameters parameters) {
+        return KMeansTaskFactory.createTask(graph, parameters);
     }
 
-    Task labelPropagation(Graph graph, LabelPropagationBaseConfig configuration) {
+    public Task labelPropagation(Graph graph, LabelPropagationParameters parameters) {
         return Tasks.task(
             AlgorithmLabel.LabelPropagation.asString(),
             Tasks.leaf("Initialization", graph.relationshipCount()),
             Tasks.iterativeDynamic(
                 "Assign labels",
                 () -> List.of(Tasks.leaf("Iteration", graph.relationshipCount())),
-                configuration.maxIterations()
+                parameters.maxIterations()
             )
         );
     }
 
-    Task lcc(Graph graph, LocalClusteringCoefficientBaseConfig configuration) {
+    public Task lcc(Graph graph, LocalClusteringCoefficientParameters parameters) {
         var tasks = new ArrayList<Task>();
-        if (configuration.seedProperty() == null) {
+        if (parameters.seedProperty() == null) {
             tasks.add(TriangleCountTask.create(graph.nodeCount()));
         }
         tasks.add(Tasks.leaf("Calculate Local Clustering Coefficient", graph.nodeCount()));
         return Tasks.task(AlgorithmLabel.LCC.asString(), tasks);
     }
 
-    Task leiden(Graph graph, LeidenBaseConfig configuration) {
-        return LeidenTask.create(graph, configuration);
+    public Task leiden(Graph graph, LeidenParameters parameters) {
+        return LeidenTask.create(graph, parameters);
     }
 
-    Task louvain(Graph graph, LouvainBaseConfig configuration) {
+    public Task louvain(Graph graph, LouvainParameters parameters) {
         return LouvainProgressTrackerTaskCreator.createTask(
             graph.nodeCount(),
             graph.relationshipCount(),
-            configuration.maxLevels(),
-            configuration.maxIterations()
+            parameters.maxLevels(),
+            parameters.maxIterations()
         );
     }
 
-    Task modularityOptimization(Graph graph, ModularityOptimizationBaseConfig configuration) {
+    public Task modularityOptimization(Graph graph, ModularityOptimizationParameters parameters) {
         return ModularityOptimizationProgressTrackerTaskCreator.progressTask(
             graph.nodeCount(),
             graph.relationshipCount(),
-            configuration.maxIterations()
+            parameters.maxIterations()
         );
     }
 
-    Task scc(Graph graph) {
+    public Task scc(Graph graph) {
         return Tasks.leaf(AlgorithmLabel.SCC.asString(), graph.nodeCount());
     }
 
-    Task triangleCount(Graph graph) {
+    public Task triangleCount(Graph graph) {
         return Tasks.leaf(AlgorithmLabel.TriangleCount.asString(), graph.nodeCount());
     }
 
-    Task wcc(Graph graph) {
+    public Task wcc(Graph graph) {
         return Tasks.leaf(AlgorithmLabel.WCC.asString(), graph.relationshipCount());
     }
 
-    Task speakerListenerLPA(Graph graph, SpeakerListenerLPAConfig configuration) {
+    public Task speakerListenerLPA(Graph graph, SpeakerListenerLPAConfig configuration) {
         return SpeakerListenerLPAProgressTrackerCreator.progressTask(
             graph.nodeCount(),
             configuration.maxIterations(),

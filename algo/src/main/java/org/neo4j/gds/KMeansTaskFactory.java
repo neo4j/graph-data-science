@@ -17,14 +17,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.applications.algorithms.community;
+package org.neo4j.gds;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
-import org.neo4j.gds.kmeans.KmeansBaseConfig;
+import org.neo4j.gds.kmeans.KmeansParameters;
 
 import java.util.List;
 
@@ -32,30 +32,30 @@ final class KMeansTaskFactory {
 
     private KMeansTaskFactory() {}
 
-    static Task createTask(Graph graph, KmeansBaseConfig configuration) {
+    static Task createTask(Graph graph, KmeansParameters parameters) {
         var label = AlgorithmLabel.KMeans.asString();
 
-        var iterations = configuration.numberOfRestarts();
+        var iterations = parameters.numberOfRestarts();
         if (iterations == 1) {
-            return kMeansTask(graph, label, configuration);
+            return kMeansTask(graph, label, parameters);
         }
 
         return Tasks.iterativeFixed(
             label,
-            () -> List.of(kMeansTask(graph, "KMeans Iteration", configuration)),
+            () -> List.of(kMeansTask(graph, "KMeans Iteration", parameters)),
             iterations
         );
     }
 
-    private static Task kMeansTask(IdMap idMap, String description, KmeansBaseConfig configuration) {
-        if (configuration.computeSilhouette()) {
+    private static Task kMeansTask(IdMap idMap, String description, KmeansParameters parameters) {
+        if (parameters.computeSilhouette()) {
             return Tasks.task(
                 description, List.of(
-                    Tasks.leaf("Initialization", configuration.k()),
+                    Tasks.leaf("Initialization", parameters.k()),
                     Tasks.iterativeDynamic(
                         "Main",
                         () -> List.of(Tasks.leaf("Iteration")),
-                        configuration.maxIterations()
+                        parameters.maxIterations()
                     ),
                     Tasks.leaf("Silhouette", idMap.nodeCount())
 
@@ -64,11 +64,11 @@ final class KMeansTaskFactory {
         } else {
             return Tasks.task(
                 description, List.of(
-                    Tasks.leaf("Initialization", configuration.k()),
+                    Tasks.leaf("Initialization", parameters.k()),
                     Tasks.iterativeDynamic(
                         "Main",
                         () -> List.of(Tasks.leaf("Iteration")),
-                        configuration.maxIterations()
+                        parameters.maxIterations()
                     )
                 )
             );

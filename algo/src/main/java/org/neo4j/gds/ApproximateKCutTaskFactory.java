@@ -17,11 +17,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.applications.algorithms.community;
+package org.neo4j.gds;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
-import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutBaseConfig;
+import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutParameters;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
@@ -31,14 +31,14 @@ final class ApproximateKCutTaskFactory {
 
     private ApproximateKCutTaskFactory() {}
 
-    static Task createTask(Graph graph, ApproxMaxKCutBaseConfig configuration) {
+    static Task createTask(Graph graph, ApproxMaxKCutParameters parameters) {
         return Tasks.iterativeFixed(
             AlgorithmLabel.ApproximateMaximumKCut.asString(),
             () -> List.of(
                 Tasks.leaf("place nodes randomly", graph.nodeCount()),
-                searchTask(graph.nodeCount(), configuration.vnsMaxNeighborhoodOrder())
+                searchTask(graph.nodeCount(), parameters.vnsMaxNeighborhoodOrder())
             ),
-            configuration.iterations()
+            parameters.iterations()
         );
     }
 

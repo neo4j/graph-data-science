@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.applications.algorithms.community;
 
+import org.neo4j.gds.CommunityAlgorithmTasks;
 import org.neo4j.gds.algorithms.community.CommunityCompanion;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmMachinery;
@@ -30,8 +31,6 @@ import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutBaseConfig;
 import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.conductance.Conductance;
-import org.neo4j.gds.conductance.ConductanceBaseConfig;
-import org.neo4j.gds.conductance.ConductanceConfigTransformer;
 import org.neo4j.gds.conductance.ConductanceParameters;
 import org.neo4j.gds.conductance.ConductanceResult;
 import org.neo4j.gds.config.AlgoBaseConfig;
@@ -43,28 +42,22 @@ import org.neo4j.gds.hdbscan.HDBScan;
 import org.neo4j.gds.hdbscan.HDBScanBaseConfig;
 import org.neo4j.gds.hdbscan.HDBScanParameters;
 import org.neo4j.gds.hdbscan.Labels;
-import org.neo4j.gds.k1coloring.K1ColoringBaseConfig;
 import org.neo4j.gds.k1coloring.K1ColoringParameters;
 import org.neo4j.gds.k1coloring.K1ColoringResult;
 import org.neo4j.gds.kcore.KCoreDecomposition;
-import org.neo4j.gds.kcore.KCoreDecompositionBaseConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionParameters;
 import org.neo4j.gds.kcore.KCoreDecompositionResult;
-import org.neo4j.gds.kmeans.ImmutableKmeansContext;
 import org.neo4j.gds.kmeans.Kmeans;
-import org.neo4j.gds.kmeans.KmeansBaseConfig;
+import org.neo4j.gds.kmeans.KmeansContext;
 import org.neo4j.gds.kmeans.KmeansParameters;
 import org.neo4j.gds.kmeans.KmeansResult;
 import org.neo4j.gds.labelpropagation.LabelPropagation;
-import org.neo4j.gds.labelpropagation.LabelPropagationBaseConfig;
 import org.neo4j.gds.labelpropagation.LabelPropagationParameters;
 import org.neo4j.gds.labelpropagation.LabelPropagationResult;
 import org.neo4j.gds.leiden.Leiden;
-import org.neo4j.gds.leiden.LeidenBaseConfig;
 import org.neo4j.gds.leiden.LeidenParameters;
 import org.neo4j.gds.leiden.LeidenResult;
 import org.neo4j.gds.louvain.Louvain;
-import org.neo4j.gds.louvain.LouvainBaseConfig;
 import org.neo4j.gds.louvain.LouvainParameters;
 import org.neo4j.gds.louvain.LouvainResult;
 import org.neo4j.gds.modularity.ModularityBaseConfig;
@@ -73,7 +66,6 @@ import org.neo4j.gds.modularity.ModularityParameters;
 import org.neo4j.gds.modularity.ModularityResult;
 import org.neo4j.gds.modularityoptimization.K1ColoringStub;
 import org.neo4j.gds.modularityoptimization.ModularityOptimization;
-import org.neo4j.gds.modularityoptimization.ModularityOptimizationBaseConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationParameters;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationResult;
 import org.neo4j.gds.scc.Scc;
@@ -84,7 +76,6 @@ import org.neo4j.gds.sllpa.SpeakerListenerLPAConfig;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.triangle.IntersectingTriangleCount;
 import org.neo4j.gds.triangle.LocalClusteringCoefficient;
-import org.neo4j.gds.triangle.LocalClusteringCoefficientBaseConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientParameters;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientResult;
 import org.neo4j.gds.triangle.TriangleCountBaseConfig;
@@ -105,7 +96,7 @@ public class CommunityAlgorithms {
     private final ProgressTrackerCreator progressTrackerCreator;
     private final TerminationFlag terminationFlag;
 
-    private final AlgorithmTasks tasks = new AlgorithmTasks();
+    private final CommunityAlgorithmTasks tasks = new CommunityAlgorithmTasks();
 
     public CommunityAlgorithms(ProgressTrackerCreator progressTrackerCreator, TerminationFlag terminationFlag) {
         this.progressTrackerCreator = progressTrackerCreator;
@@ -113,7 +104,7 @@ public class CommunityAlgorithms {
     }
 
     ApproxMaxKCutResult approximateMaximumKCut(Graph graph, ApproxMaxKCutBaseConfig configuration) {
-        var task = tasks.approximateMaximumKCut(graph, configuration);
+        var task = tasks.approximateMaximumKCut(graph, configuration.toParameters());
         var progressTracker = createProgressTracker(task, configuration);
 
         return approximateMaximumKCut(graph, configuration.toParameters(), progressTracker);
@@ -140,13 +131,6 @@ public class CommunityAlgorithms {
         );
     }
 
-    ConductanceResult conductance(Graph graph, ConductanceBaseConfig configuration) {
-        var task = tasks.conductance(graph);
-        var progressTracker = createProgressTracker(task, configuration);
-
-        return conductance(graph, ConductanceConfigTransformer.toParameters(configuration), progressTracker);
-    }
-
     ConductanceResult conductance(Graph graph, ConductanceParameters parameters, ProgressTracker progressTracker) {
 
         var algorithm = new Conductance(
@@ -167,7 +151,7 @@ public class CommunityAlgorithms {
         );
     }
 
-    public Labels hdbscan(Graph graph, HDBScanBaseConfig configuration) {
+    Labels hdbscan(Graph graph, HDBScanBaseConfig configuration) {
         var task = tasks.hdbscan(graph);
         var progressTracker = createProgressTracker(task, configuration);
 
@@ -186,13 +170,6 @@ public class CommunityAlgorithms {
         return hdbScan.compute();
     }
 
-    public K1ColoringResult k1Coloring(Graph graph, K1ColoringBaseConfig configuration) {
-        var task = tasks.k1Coloring(graph, configuration);
-        var progressTracker = createProgressTracker(task, configuration);
-
-        return k1Coloring(graph, configuration.toParameters(), progressTracker);
-    }
-
     public K1ColoringResult k1Coloring(Graph graph, K1ColoringParameters parameters, ProgressTracker progressTracker) {
 
         var k1ColoringStub = new K1ColoringStub(algorithmMachinery);
@@ -205,13 +182,6 @@ public class CommunityAlgorithms {
             parameters.concurrency(),
             true
         );
-    }
-
-    KCoreDecompositionResult kCore(Graph graph, KCoreDecompositionBaseConfig configuration) {
-        var task = tasks.kCore(graph);
-        var progressTracker = createProgressTracker(task, configuration);
-
-        return kCore(graph, configuration.toParameters(), progressTracker);
     }
 
     KCoreDecompositionResult kCore(
@@ -229,20 +199,14 @@ public class CommunityAlgorithms {
         );
     }
 
-    public KmeansResult kMeans(Graph graph, KmeansBaseConfig configuration) {
-        var task = tasks.kMeans(graph, configuration);
-        var progressTracker = createProgressTracker(task, configuration);
-
-        return kMeans(graph, configuration.toParameters(), progressTracker);
-    }
-
     public KmeansResult kMeans(Graph graph, KmeansParameters parameters, ProgressTracker progressTracker) {
 
-        var kmeansContext = ImmutableKmeansContext.builder()
-            .executor(DefaultPool.INSTANCE)
-            .progressTracker(progressTracker)
-            .build();
-        var algorithm = Kmeans.createKmeans(graph, parameters, kmeansContext, terminationFlag);
+        var algorithm = Kmeans.createKmeans(
+            graph,
+            parameters,
+            new KmeansContext(DefaultPool.INSTANCE, progressTracker),
+            terminationFlag
+        );
 
         return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
             algorithm,
@@ -250,13 +214,6 @@ public class CommunityAlgorithms {
             true,
             parameters.concurrency()
         );
-    }
-
-    LabelPropagationResult labelPropagation(Graph graph, LabelPropagationBaseConfig configuration) {
-        var task = tasks.labelPropagation(graph, configuration);
-        var progressTracker = createProgressTracker(task, configuration);
-
-        return labelPropagation(graph, configuration.toParameters(), progressTracker);
     }
 
     LabelPropagationResult labelPropagation(
@@ -281,13 +238,6 @@ public class CommunityAlgorithms {
         );
     }
 
-    LocalClusteringCoefficientResult lcc(Graph graph, LocalClusteringCoefficientBaseConfig configuration) {
-        var task = tasks.lcc(graph, configuration);
-        var progressTracker = createProgressTracker(task, configuration);
-
-        return lcc(graph, configuration.toParameters(), progressTracker);
-    }
-
     LocalClusteringCoefficientResult lcc(
         Graph graph,
         LocalClusteringCoefficientParameters parameters,
@@ -310,13 +260,6 @@ public class CommunityAlgorithms {
         );
     }
 
-    public LeidenResult leiden(Graph graph, LeidenBaseConfig configuration) {
-        var task = tasks.leiden(graph, configuration);
-        var progressTracker = createProgressTracker(task, configuration);
-
-        return leiden(graph, configuration.toParameters(), progressTracker);
-    }
-
     public LeidenResult leiden(Graph graph, LeidenParameters parameters, ProgressTracker progressTracker) {
         var seedValues = Optional.ofNullable(parameters.seedProperty())
             .map(seedParameter -> CommunityCompanion.extractSeedingNodePropertyValues(graph, seedParameter))
@@ -336,13 +279,6 @@ public class CommunityAlgorithms {
             true,
             parameters.concurrency()
         );
-    }
-
-    LouvainResult louvain(Graph graph, LouvainBaseConfig configuration) {
-        var task = tasks.louvain(graph, configuration);
-        var progressTracker = createProgressTracker(task, configuration);
-
-        return louvain(graph, configuration.toParameters(), progressTracker);
     }
 
     LouvainResult louvain(Graph graph, LouvainParameters parameters, ProgressTracker progressTracker) {
@@ -375,13 +311,6 @@ public class CommunityAlgorithms {
         );
 
         return algorithm.compute();
-    }
-
-    ModularityOptimizationResult modularityOptimization(Graph graph, ModularityOptimizationBaseConfig configuration) {
-        var task = tasks.modularityOptimization(graph, configuration);
-        var progressTracker = createProgressTracker(task, configuration);
-
-        return modularityOptimization(graph, configuration.toParameters(), progressTracker);
     }
 
     ModularityOptimizationResult modularityOptimization(

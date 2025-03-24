@@ -20,9 +20,9 @@
 package org.neo4j.gds.leiden;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.LeidenTask;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.applications.algorithms.community.LeidenTask;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.gdl.GdlFactory;
 
@@ -40,7 +40,7 @@ class LeidenAlgorithmFactoryTest {
 
         var graph = GdlFactory.of(" CREATE (a:NODE), (b:NODE) ").build().getUnion();
 
-        var task = LeidenTask.create(graph, config);
+        var task = LeidenTask.create(graph, config.toParameters());
         var initialization = Tasks.leaf("Initialization", 2);
 
         var iteration = Tasks.iterativeDynamic("Iteration", () ->

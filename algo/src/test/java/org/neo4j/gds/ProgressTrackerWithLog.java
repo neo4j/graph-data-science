@@ -17,12 +17,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.triangle;
+package org.neo4j.gds;
 
-import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.annotation.Parameters;
-import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.logging.GdsTestLog;
 
-@Parameters
-public record LocalClusteringCoefficientParameters(Concurrency concurrency, long maxDegree, @Nullable String seedProperty) {
+public record ProgressTrackerWithLog(TestProgressTracker progressTracker, GdsTestLog log) {
 }

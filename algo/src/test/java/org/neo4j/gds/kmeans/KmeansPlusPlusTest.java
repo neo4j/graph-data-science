@@ -69,7 +69,7 @@ public class KmeansPlusPlusTest {
         // 9/45  : 0.2  (0.31 total not selected)
         // 16/45 : 0.35 (0.66 total) and 0.3636 <=0.66 so last center should be [5]
 
-        var kmeansContext = ImmutableKmeansContext.builder().build();
+        var kmeansContext = KmeansContext.defaults();
 
         var nodePropertyValues = graph.nodeProperties("kmeans");
 

@@ -20,10 +20,15 @@
 package org.neo4j.gds.kmeans;
 
 import org.assertj.core.data.Offset;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.neo4j.gds.CommunityAlgorithmTasks;
+import org.neo4j.gds.TestProgressTrackerHelper;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.compat.TestLog;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
@@ -32,40 +37,43 @@ import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.neo4j.gds.assertj.Extractors.removingThreadId;
+import static org.neo4j.gds.assertj.Extractors.replaceTimings;
 
 @GdlExtension
 class KmeansTest {
     @GdlGraph
     private static final String DB_CYPHER =
         "CREATE" +
-        "  (a {  kmeans: [1.0, 1.0], fail: [1.0]} )" +
-        "  (b {  kmeans: [1.0, 2.0]} )" +
-        "  (c {  kmeans: [102.0, 100.0], fail:[1.0]} )" +
-        "  (d {  kmeans: [100.0, 102.0]} )";
+            "  (a {  kmeans: [1.0, 1.0], fail: [1.0]} )" +
+            "  (b {  kmeans: [1.0, 2.0]} )" +
+            "  (c {  kmeans: [102.0, 100.0], fail:[1.0]} )" +
+            "  (d {  kmeans: [100.0, 102.0]} )";
     @Inject
     private Graph graph;
 
     @GdlGraph(graphNamePrefix = "float")
     private static final String floatQuery =
         "CREATE" +
-        "  (a {  kmeans: [1.0f, 1.0f]} )" +
-        "  (b {  kmeans: [1.0f, 2.0f]} )" +
-        "  (c {  kmeans: [102.0f, 100.0f]} )" +
-        "  (d {  kmeans: [100.0f, 102.0f]} )";
+            "  (a {  kmeans: [1.0f, 1.0f]} )" +
+            "  (b {  kmeans: [1.0f, 2.0f]} )" +
+            "  (c {  kmeans: [102.0f, 100.0f]} )" +
+            "  (d {  kmeans: [100.0f, 102.0f]} )";
     @Inject
     private Graph floatGraph;
 
     @GdlGraph(graphNamePrefix = "line")
     private static final String LineQuery =
         "CREATE" +
-        "  (a {  kmeans: [0.21, 0.0]} )" +
-        "  (b {  kmeans: [2.0, 0.0]} )" +
-        "  (c {  kmeans: [2.1, 0.0]} )" +
-        "  (d {  kmeans: [3.8, 0.0]} )" +
-        "  (e {  kmeans: [2.1, 0.0]} )";
+            "  (a {  kmeans: [0.21, 0.0]} )" +
+            "  (b {  kmeans: [2.0, 0.0]} )" +
+            "  (c {  kmeans: [2.1, 0.0]} )" +
+            "  (d {  kmeans: [3.8, 0.0]} )" +
+            "  (e {  kmeans: [2.1, 0.0]} )";
 
     @Inject
     private TestGraph lineGraph;
@@ -73,9 +81,9 @@ class KmeansTest {
     @GdlGraph(graphNamePrefix = "nan")
     private static final String nanQuery =
         "CREATE" +
-        "  (a {  kmeans: [0.21d, 0.0d]} )" +
-        "  (b {  kmeans: [2.0d, NaN]} )" +
-        "  (c {  kmeans: [2.1d, 0.0d]} )";
+            "  (a {  kmeans: [0.21d, 0.0d]} )" +
+            "  (b {  kmeans: [2.0d, NaN]} )" +
+            "  (c {  kmeans: [2.1d, 0.0d]} )";
 
     @Inject
     private TestGraph nanGraph;
@@ -84,9 +92,9 @@ class KmeansTest {
     @GdlGraph(graphNamePrefix = "miss")
     private static final String missQuery =
         "CREATE" +
-        "  (a {  kmeans: [0.21d, 0.0d]} )" +
-        "  (b {  kmeans: [2.0d]} )" +
-        "  (c {  kmeans: [2.1d, 0.0d]} )";
+            "  (a {  kmeans: [0.21d, 0.0d]} )" +
+            "  (b {  kmeans: [2.0d]} )" +
+            "  (c {  kmeans: [2.1d, 0.0d]} )";
 
     @Inject
     private TestGraph missGraph;
@@ -102,8 +110,13 @@ class KmeansTest {
             .randomSeed(19L)
             .k(2)
             .build();
-        var kmeansContext = ImmutableKmeansContext.builder().build();
-        var kmeans = Kmeans.createKmeans(nanGraph, kmeansConfig.toParameters(), kmeansContext, TerminationFlag.RUNNING_TRUE);
+        var kmeansContext = KmeansContext.defaults();
+        var kmeans = Kmeans.createKmeans(
+            nanGraph,
+            kmeansConfig.toParameters(),
+            kmeansContext,
+            TerminationFlag.RUNNING_TRUE
+        );
         assertThatThrownBy(kmeans::compute).hasMessageContaining(
             "Input for K-Means should not contain any NaN values");
 
@@ -117,8 +130,13 @@ class KmeansTest {
             .randomSeed(19L)
             .k(2)
             .build();
-        var kmeansContext = ImmutableKmeansContext.builder().build();
-        var kmeans = Kmeans.createKmeans(missGraph, kmeansConfig.toParameters(), kmeansContext, TerminationFlag.RUNNING_TRUE);
+        var kmeansContext = KmeansContext.defaults();
+        var kmeans = Kmeans.createKmeans(
+            missGraph,
+            kmeansConfig.toParameters(),
+            kmeansContext,
+            TerminationFlag.RUNNING_TRUE
+        );
         assertThatThrownBy(kmeans::compute).hasMessageContaining(
             "All property arrays for K-Means should have the same number of dimensions");
 
@@ -132,9 +150,14 @@ class KmeansTest {
             .randomSeed(19L)
             .k(2)
             .build();
-        var kmeansContext = ImmutableKmeansContext.builder().build();
+        var kmeansContext = KmeansContext.defaults();
 
-        var kmeans = Kmeans.createKmeans(graph, kmeansConfig.toParameters(), kmeansContext, TerminationFlag.RUNNING_TRUE);
+        var kmeans = Kmeans.createKmeans(
+            graph,
+            kmeansConfig.toParameters(),
+            kmeansContext,
+            TerminationFlag.RUNNING_TRUE
+        );
         var result = kmeans.compute();
         var communities = result.communities();
         var distances = result.distanceFromCenter();
@@ -168,9 +191,14 @@ class KmeansTest {
             .randomSeed(19L)
             .k(2)
             .build();
-        var kmeansContext = ImmutableKmeansContext.builder().build();
+        var kmeansContext = KmeansContext.defaults();
 
-        var kmeans = Kmeans.createKmeans(floatGraph, kmeansConfig.toParameters(), kmeansContext, TerminationFlag.RUNNING_TRUE);
+        var kmeans = Kmeans.createKmeans(
+            floatGraph,
+            kmeansConfig.toParameters(),
+            kmeansContext,
+            TerminationFlag.RUNNING_TRUE
+        );
         var result = kmeans.compute();
         var communities = result.communities();
         var centers = result.centers();
@@ -192,9 +220,14 @@ class KmeansTest {
             .k(2)
             .maxIterations(1)
             .build();
-        var kmeansContext = ImmutableKmeansContext.builder().build();
+        var kmeansContext = KmeansContext.defaults();
 
-        var kmeans = Kmeans.createKmeans(lineGraph, kmeansConfig.toParameters(), kmeansContext, TerminationFlag.RUNNING_TRUE);
+        var kmeans = Kmeans.createKmeans(
+            lineGraph,
+            kmeansConfig.toParameters(),
+            kmeansContext,
+            TerminationFlag.RUNNING_TRUE
+        );
         var result = kmeans.compute();
         var communities = result.communities();
         assertThat(communities.get(0)).isEqualTo(communities.get(1));
@@ -211,9 +244,14 @@ class KmeansTest {
             .k(2)
             .maxIterations(2)
             .build();
-        var kmeansContext = ImmutableKmeansContext.builder().build();
+        var kmeansContext = KmeansContext.defaults();
 
-        var kmeans = Kmeans.createKmeans(lineGraph, kmeansConfig.toParameters(), kmeansContext, TerminationFlag.RUNNING_TRUE);
+        var kmeans = Kmeans.createKmeans(
+            lineGraph,
+            kmeansConfig.toParameters(),
+            kmeansContext,
+            TerminationFlag.RUNNING_TRUE
+        );
         var result = kmeans.compute();
         var communities = result.communities();
 
@@ -233,9 +271,14 @@ class KmeansTest {
             .k(2)
             .computeSilhouette(true)
             .build();
-        var kmeansContext = ImmutableKmeansContext.builder().build();
+        var kmeansContext = KmeansContext.defaults();
 
-        var kmeans = Kmeans.createKmeans(graph, kmeansConfig.toParameters(), kmeansContext, TerminationFlag.RUNNING_TRUE);
+        var kmeans = Kmeans.createKmeans(
+            graph,
+            kmeansConfig.toParameters(),
+            kmeansContext,
+            TerminationFlag.RUNNING_TRUE
+        );
         var result = kmeans.compute();
 
         var silhouette = result.silhouette();
@@ -257,8 +300,10 @@ class KmeansTest {
         //s(d) = 1 - 2*sqrt(8) / (sqrt(101^2 + 99^2) + sqrt(99^2 + 100^2) )
         assertThat(silhouette.get(3)).isCloseTo(0.97995050342, Offset.offset(1e-4));
 
-        assertThat(averageSilhouette).isCloseTo((silhouette.get(0) + silhouette.get(1) + silhouette.get(2) + silhouette.get(
-            3)) / 4.0, Offset.offset(1e-4));
+        assertThat(averageSilhouette).isCloseTo(
+            (silhouette.get(0) + silhouette.get(1) + silhouette.get(2) + silhouette.get(
+                3)) / 4.0, Offset.offset(1e-4)
+        );
 
     }
 
@@ -274,7 +319,7 @@ class KmeansTest {
                 .numberOfRestarts(10)
                 .build()
         )
-        .hasMessageContaining("cannot be run");
+            .hasMessageContaining("cannot be run");
     }
 
     @Test
@@ -288,7 +333,7 @@ class KmeansTest {
                 .k(2)
                 .build()
         )
-        .hasMessageContaining("Incorrect");
+            .hasMessageContaining("Incorrect");
     }
 
     @Test
@@ -301,8 +346,13 @@ class KmeansTest {
             .k(1)
             .build();
 
-        var kmeansContext = ImmutableKmeansContext.builder().build();
-        var kmeans = Kmeans.createKmeans(missGraph, kmeansConfig.toParameters(), kmeansContext, TerminationFlag.RUNNING_TRUE);
+        var kmeansContext = KmeansContext.defaults();
+        var kmeans = Kmeans.createKmeans(
+            missGraph,
+            kmeansConfig.toParameters(),
+            kmeansContext,
+            TerminationFlag.RUNNING_TRUE
+        );
         assertThatThrownBy(kmeans::compute).hasMessageContaining("same");
     }
 
@@ -316,8 +366,13 @@ class KmeansTest {
             .k(1)
             .build();
 
-        var kmeansContext = ImmutableKmeansContext.builder().build();
-        var kmeans = Kmeans.createKmeans(missGraph, kmeansConfig.toParameters(), kmeansContext, TerminationFlag.RUNNING_TRUE);
+        var kmeansContext = KmeansContext.defaults();
+        var kmeans = Kmeans.createKmeans(
+            missGraph,
+            kmeansConfig.toParameters(),
+            kmeansContext,
+            TerminationFlag.RUNNING_TRUE
+        );
         assertThatThrownBy(kmeans::compute).hasMessageContaining("NaN");
     }
 
@@ -331,8 +386,13 @@ class KmeansTest {
             .k(2)
             .build();
 
-        var kmeansContext = ImmutableKmeansContext.builder().build();
-        var kmeans = Kmeans.createKmeans(lineGraph, kmeansConfig.toParameters(), kmeansContext, TerminationFlag.RUNNING_TRUE);
+        var kmeansContext = KmeansContext.defaults();
+        var kmeans = Kmeans.createKmeans(
+            lineGraph,
+            kmeansConfig.toParameters(),
+            kmeansContext,
+            TerminationFlag.RUNNING_TRUE
+        );
         var result = kmeans.compute();
         assertThat(result.communities().toArray()).isEqualTo(new int[]{0, 0, 0, 0, 0});
         var secondCentroid = result.centers()[1];
@@ -350,16 +410,222 @@ class KmeansTest {
             .randomSeed(19L)
             .k(2)
             .build();
-        var kmeansContext = ImmutableKmeansContext.builder().build();
+        var kmeansContext = KmeansContext.defaults();
 
         assertThatThrownBy(
-                () -> Kmeans.createKmeans(
+            () -> Kmeans.createKmeans(
+                graph,
+                kmeansConfig.toParameters(),
+                kmeansContext,
+                TerminationFlag.RUNNING_TRUE
+            ).compute()
+        ).hasMessageContaining(property);
+    }
+
+    @Nested
+    @GdlExtension
+    class ProgressTrackingTest {
+
+        @GdlGraph
+        private static final String DB_CYPHER =
+            "CREATE" +
+                "  (a {  kmeans: [1.0, 1.0], fail: [1.0]} )" +
+                "  (b {  kmeans: [1.0, 2.0]} )" +
+                "  (c {  kmeans: [102.0, 100.0], fail:[1.0]} )" +
+                "  (d {  kmeans: [100.0, 102.0]} )";
+        @Inject
+        private Graph graph;
+
+        @Test
+        void progressTracking() {
+
+            var concurrency = new Concurrency(1);
+
+            var parameters = new KmeansParameters(
+                2,
+                5,
+                0.05,
+                1,
+                false,
+                new Concurrency(1),
+                "kmeans",
+                SamplerType.UNIFORM,
+                List.of(),
+                Optional.of(19L)
+            );
+
+            var progressTrackerWithLog = TestProgressTrackerHelper.create(
+                new CommunityAlgorithmTasks().kMeans(
                     graph,
-                    kmeansConfig.toParameters(),
-                    kmeansContext,
-                    TerminationFlag.RUNNING_TRUE
-                ).compute()
-            ).hasMessageContaining(property);
+                    parameters
+                ), concurrency
+            );
+
+            var progressTracker = progressTrackerWithLog.progressTracker();
+            var kmeans = Kmeans.createKmeans(
+                graph,
+                parameters,
+                KmeansContext.progressTrackerWithDefaultExecutor(progressTracker),
+                TerminationFlag.RUNNING_TRUE
+            );
+
+            kmeans.compute();
+
+            var log = progressTrackerWithLog.log();
+            assertThat(log.getMessages(TestLog.INFO))
+                .extracting(removingThreadId())
+                .extracting(replaceTimings())
+                .containsExactly(
+                    "K-Means :: Start",
+                    "K-Means :: Initialization :: Start",
+                    "K-Means :: Initialization 50%",
+                    "K-Means :: Initialization 100%",
+                    "K-Means :: Initialization :: Finished",
+                    "K-Means :: Main :: Start",
+                    "K-Means :: Main :: Iteration 1 of 5 :: Start",
+                    "K-Means :: Main :: Iteration 1 of 5 100%",
+                    "K-Means :: Main :: Iteration 1 of 5 :: Finished",
+                    "K-Means :: Main :: Iteration 2 of 5 :: Start",
+                    "K-Means :: Main :: Iteration 2 of 5 100%",
+                    "K-Means :: Main :: Iteration 2 of 5 :: Finished",
+                    "K-Means :: Main :: Finished",
+                    "K-Means :: Finished"
+                );
+        }
+
+        @Test
+        void progressTrackingWithRestarts() {
+            var concurrency = new Concurrency(1);
+
+            var parameters = new KmeansParameters(
+                2,
+                5,
+                0.05,
+                2,
+                false,
+                new Concurrency(1),
+                "kmeans",
+                SamplerType.UNIFORM,
+                List.of(),
+                Optional.of(19L)
+            );
+
+            var progressTrackerWithLog = TestProgressTrackerHelper.create(
+                new CommunityAlgorithmTasks().kMeans(
+                    graph,
+                    parameters
+                ), concurrency
+            );
+
+            var progressTracker = progressTrackerWithLog.progressTracker();
+            var kmeans = Kmeans.createKmeans(
+                graph,
+                parameters,
+                KmeansContext.progressTrackerWithDefaultExecutor(progressTracker),
+                TerminationFlag.RUNNING_TRUE
+            );
+
+            kmeans.compute();
+
+            var log = progressTrackerWithLog.log();
+            assertThat(log.getMessages(TestLog.INFO))
+                .extracting(removingThreadId())
+                .extracting(replaceTimings())
+                .containsExactly(
+                    "K-Means :: Start",
+                    "K-Means :: KMeans Iteration 1 of 2 :: Start",
+                    "K-Means :: KMeans Iteration 1 of 2 :: Initialization :: Start",
+                    "K-Means :: KMeans Iteration 1 of 2 :: Initialization 50%",
+                    "K-Means :: KMeans Iteration 1 of 2 :: Initialization 100%",
+                    "K-Means :: KMeans Iteration 1 of 2 :: Initialization :: Finished",
+                    "K-Means :: KMeans Iteration 1 of 2 :: Main :: Start",
+                    "K-Means :: KMeans Iteration 1 of 2 :: Main :: Iteration 1 of 5 :: Start",
+                    "K-Means :: KMeans Iteration 1 of 2 :: Main :: Iteration 1 of 5 100%",
+                    "K-Means :: KMeans Iteration 1 of 2 :: Main :: Iteration 1 of 5 :: Finished",
+                    "K-Means :: KMeans Iteration 1 of 2 :: Main :: Iteration 2 of 5 :: Start",
+                    "K-Means :: KMeans Iteration 1 of 2 :: Main :: Iteration 2 of 5 100%",
+                    "K-Means :: KMeans Iteration 1 of 2 :: Main :: Iteration 2 of 5 :: Finished",
+                    "K-Means :: KMeans Iteration 1 of 2 :: Main :: Finished",
+                    "K-Means :: KMeans Iteration 1 of 2 :: Finished",
+                    "K-Means :: KMeans Iteration 2 of 2 :: Start",
+                    "K-Means :: KMeans Iteration 2 of 2 :: Initialization :: Start",
+                    "K-Means :: KMeans Iteration 2 of 2 :: Initialization 50%",
+                    "K-Means :: KMeans Iteration 2 of 2 :: Initialization 100%",
+                    "K-Means :: KMeans Iteration 2 of 2 :: Initialization :: Finished",
+                    "K-Means :: KMeans Iteration 2 of 2 :: Main :: Start",
+                    "K-Means :: KMeans Iteration 2 of 2 :: Main :: Iteration 1 of 5 :: Start",
+                    "K-Means :: KMeans Iteration 2 of 2 :: Main :: Iteration 1 of 5 100%",
+                    "K-Means :: KMeans Iteration 2 of 2 :: Main :: Iteration 1 of 5 :: Finished",
+                    "K-Means :: KMeans Iteration 2 of 2 :: Main :: Iteration 2 of 5 :: Start",
+                    "K-Means :: KMeans Iteration 2 of 2 :: Main :: Iteration 2 of 5 100%",
+                    "K-Means :: KMeans Iteration 2 of 2 :: Main :: Iteration 2 of 5 :: Finished",
+                    "K-Means :: KMeans Iteration 2 of 2 :: Main :: Finished",
+                    "K-Means :: KMeans Iteration 2 of 2 :: Finished",
+                    "K-Means :: Finished"
+                );
+        }
+
+        @Test
+        void progressTrackingWithSilhouette() {
+            var concurrency = new Concurrency(1);
+            var parameters = new KmeansParameters(
+                2,
+                5,
+                0.05,
+                1,
+                true,
+                new Concurrency(1),
+                "kmeans",
+                SamplerType.UNIFORM,
+                List.of(),
+                Optional.of(19L)
+            );
+
+            var progressTrackerWithLog = TestProgressTrackerHelper.create(
+                new CommunityAlgorithmTasks().kMeans(
+                    graph,
+                    parameters
+                ), concurrency
+            );
+
+            var progressTracker = progressTrackerWithLog.progressTracker();
+
+            var kmeans = Kmeans.createKmeans(
+                graph,
+                parameters,
+                KmeansContext.progressTrackerWithDefaultExecutor(progressTracker),
+                TerminationFlag.RUNNING_TRUE
+            );
+
+            kmeans.compute();
+
+            var log = progressTrackerWithLog.log();
+            assertThat(log.getMessages(TestLog.INFO))
+                .extracting(removingThreadId())
+                .extracting(replaceTimings())
+                .containsExactly(
+                    "K-Means :: Start",
+                    "K-Means :: Initialization :: Start",
+                    "K-Means :: Initialization 50%",
+                    "K-Means :: Initialization 100%",
+                    "K-Means :: Initialization :: Finished",
+                    "K-Means :: Main :: Start",
+                    "K-Means :: Main :: Iteration 1 of 5 :: Start",
+                    "K-Means :: Main :: Iteration 1 of 5 100%",
+                    "K-Means :: Main :: Iteration 1 of 5 :: Finished",
+                    "K-Means :: Main :: Iteration 2 of 5 :: Start",
+                    "K-Means :: Main :: Iteration 2 of 5 100%",
+                    "K-Means :: Main :: Iteration 2 of 5 :: Finished",
+                    "K-Means :: Main :: Finished",
+                    "K-Means :: Silhouette :: Start",
+                    "K-Means :: Silhouette 25%",
+                    "K-Means :: Silhouette 50%",
+                    "K-Means :: Silhouette 75%",
+                    "K-Means :: Silhouette 100%",
+                    "K-Means :: Silhouette :: Finished",
+                    "K-Means :: Finished"
+                );
+        }
     }
 
 }
