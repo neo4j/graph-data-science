@@ -29,15 +29,16 @@ import java.time.Instant;
 import java.time.LocalTime;
 import java.time.ZoneId;
 
-public class ProgressResult {
-    public String username;
-    public String jobId;
-    public String taskName;
-    public String progress;
-    public String progressBar;
-    public String status;
-    public LocalTime timeStarted;
-    public String elapsedTime;
+public record ProgressResult(
+    String username,
+    String jobId,
+    String taskName,
+    String progress,
+    String progressBar,
+    String status,
+    LocalTime timeStarted,
+    String elapsedTime
+) {
 
     static ProgressResult fromTaskStoreEntry(UserTask userTask) {
         return new ProgressResult(
@@ -54,19 +55,19 @@ public class ProgressResult {
     }
 
     public ProgressResult(String username, Task task, JobId jobId, String taskName) {
-        var progressContainer = task.getProgress();
-
-        this.jobId = jobId.asString();
-        this.taskName = taskName;
-        this.username = username;
-        this.progress = StructuredOutputHelper.computeProgress(progressContainer);
-        this.progressBar = StructuredOutputHelper.progressBar(progressContainer, 10);
-        this.status = task.status().name();
-        this.timeStarted = startTime(task);
-        this.elapsedTime = prettyElapsedTime(task);
+        this(
+            username,
+            jobId.asString(),
+            taskName,
+            StructuredOutputHelper.computeProgress(task.getProgress()),
+            StructuredOutputHelper.progressBar(task.getProgress(), 10),
+            task.status().name(),
+            startTime(task),
+            prettyElapsedTime(task)
+        );
     }
 
-    private LocalTime startTime(Task task) {
+    private static LocalTime startTime(Task task) {
         if (task.hasNotStarted()) {
             return null;
         }
@@ -75,7 +76,7 @@ public class ProgressResult {
         return LocalTime.ofInstant(instant, zoneId);
     }
 
-    private String prettyElapsedTime(Task task) {
+    private static String prettyElapsedTime(Task task) {
         if (task.hasNotStarted()) {
             return "Not yet started";
         }

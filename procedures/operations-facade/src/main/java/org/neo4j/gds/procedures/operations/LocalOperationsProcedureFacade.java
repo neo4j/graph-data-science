@@ -48,7 +48,7 @@ public class LocalOperationsProcedureFacade implements OperationsProcedureFacade
         if (jobIdAsString.isBlank()) {
             var result = summaryView();
             if (!showCompleted) {
-                return result.filter(i -> Status.valueOf(i.status).isOngoing());
+                return result.filter(i -> Status.valueOf(i.status()).isOngoing());
             }
             return result;
         }
