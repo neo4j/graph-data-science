@@ -19,13 +19,16 @@
  */
 package org.neo4j.gds.embeddings.hashgnn;
 
-import org.neo4j.gds.mem.MemoryEstimateDefinition;
+import hashgnn.BinarizeParameters;
+import hashgnn.GenerateParameters;
+import hashgnn.HashGNNParameters;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
+import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
+import org.neo4j.gds.mem.Estimate;
+import org.neo4j.gds.mem.MemoryEstimateDefinition;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryEstimations;
 import org.neo4j.gds.mem.MemoryRange;
-import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
-import org.neo4j.gds.mem.Estimate;
 
 import java.util.function.LongUnaryOperator;
 
@@ -45,8 +48,8 @@ public class HashGNNMemoryEstimateDefinition implements MemoryEstimateDefinition
         var generateFeatures = parameters.generateFeatures();
         var binarizeFeatures = parameters.binarizeFeatures();
         int FUDGED_BINARY_DIMENSION = 1024;
-        int binaryDimension = generateFeatures.map(GenerateFeaturesConfig::dimension)
-            .orElse(binarizeFeatures.map(BinarizeFeaturesConfig::dimension).orElse(FUDGED_BINARY_DIMENSION));
+        int binaryDimension = generateFeatures.map(GenerateParameters::dimension)
+            .orElse(binarizeFeatures.map(BinarizeParameters::dimension).orElse(FUDGED_BINARY_DIMENSION));
 
         MemoryEstimations.Builder builder = MemoryEstimations.builder(HashGNN.class.getSimpleName());
 

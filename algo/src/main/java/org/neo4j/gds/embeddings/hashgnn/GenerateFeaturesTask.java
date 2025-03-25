@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.embeddings.hashgnn;
 
+import hashgnn.GenerateParameters;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
@@ -38,7 +39,7 @@ class GenerateFeaturesTask implements Runnable {
     private final HugeObjectArray<HugeAtomicBitSet> output;
     private final Graph graph;
     private final Random rng;
-    private final GenerateFeaturesConfig generateFeaturesConfig;
+    private final GenerateParameters generateParameters;
     private final ProgressTracker progressTracker;
     private final long randomSeed;
     private long totalFeatureCount = 0;
@@ -47,7 +48,7 @@ class GenerateFeaturesTask implements Runnable {
         Partition partition,
         Graph graph,
         long randomSeed,
-        GenerateFeaturesConfig config,
+        GenerateParameters generateParameters,
         HugeObjectArray<HugeAtomicBitSet> output,
         ProgressTracker progressTracker
     ) {
@@ -55,13 +56,13 @@ class GenerateFeaturesTask implements Runnable {
         this.graph = graph;
         this.rng = new Random();
         this.randomSeed = randomSeed;
-        this.generateFeaturesConfig = config;
+        this.generateParameters = generateParameters;
         this.output = output;
         this.progressTracker = progressTracker;
     }
 
     static HugeObjectArray<HugeAtomicBitSet> compute(
-        GenerateFeaturesConfig generateFeatures,
+        GenerateParameters generateParameters,
         Graph graph,
         List<Partition> partition,
         Concurrency concurrency,
@@ -79,7 +80,7 @@ class GenerateFeaturesTask implements Runnable {
                 p,
                 graph,
                 randomSeed,
-                generateFeatures,
+                generateParameters,
                 output,
                 progressTracker
             ))
@@ -99,8 +100,8 @@ class GenerateFeaturesTask implements Runnable {
 
     @Override
     public void run() {
-        int dimension = generateFeaturesConfig.dimension();
-        int densityLevel = generateFeaturesConfig.densityLevel();
+        int dimension = generateParameters.dimension();
+        int densityLevel = generateParameters.densityLevel();
 
         partition.consume(nodeId -> {
             var generatedFeatures = HugeAtomicBitSet.create(dimension);

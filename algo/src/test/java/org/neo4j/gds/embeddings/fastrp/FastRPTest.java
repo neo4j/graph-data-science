@@ -1225,6 +1225,7 @@ class FastRPTest {
             new Concurrency(concurrency),
             Optional.of(42L)
         );
+
         var fastRPArray = new FastRP(
             graph,
             parameters,

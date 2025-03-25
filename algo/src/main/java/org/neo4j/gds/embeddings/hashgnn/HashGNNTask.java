@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.embeddings.hashgnn;
 
+import hashgnn.HashGNNParameters;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
@@ -27,36 +28,38 @@ import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import java.util.ArrayList;
 import java.util.List;
 
-public class HashGNNTask {
-    public static Task create(Graph graph, HashGNNConfig config) {
+public final class HashGNNTask {
+    private HashGNNTask() {}
+
+    public static Task create(Graph graph, HashGNNParameters parameters,List<String> relationshipTypes ) {
         var tasks = new ArrayList<Task>();
 
-        if (config.generateFeatures().isPresent()) {
+        if (parameters.generateFeatures().isPresent()) {
             tasks.add(Tasks.leaf("Generate base node property features", graph.nodeCount()));
-        } else if (config.binarizeFeatures().isPresent()) {
+        } else if (parameters.binarizeFeatures().isPresent()) {
             tasks.add(Tasks.leaf("Binarize node property features", graph.nodeCount()));
         } else {
             tasks.add(Tasks.leaf("Extract raw node property features", graph.nodeCount()));
         }
 
-        int numRelTypes = config.heterogeneous() ? config.relationshipTypes().size() : 1;
+        int numRelTypes = parameters.heterogeneous() ? relationshipTypes.size() : 1;
 
         tasks.add(Tasks.iterativeFixed(
             "Propagate embeddings",
             () -> List.of(
                 Tasks.leaf(
                     "Precompute hashes",
-                    config.embeddingDensity() * (1 + 1 + numRelTypes)
+                    parameters.embeddingDensity() * (1 + 1 + numRelTypes)
                 ),
                 Tasks.leaf(
                     "Perform min-hashing",
-                    (2 * graph.nodeCount() + graph.relationshipCount()) * config.embeddingDensity()
+                    (2 * graph.nodeCount() + graph.relationshipCount()) * parameters.embeddingDensity()
                 )
             ),
-            config.iterations()
+            parameters.iterations()
         ));
 
-        if (config.outputDimension().isPresent()) {
+        if (parameters.outputDimension().isPresent()) {
             tasks.add(Tasks.leaf("Densify output embeddings", graph.nodeCount()));
         }
 

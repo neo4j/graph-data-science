@@ -20,8 +20,8 @@
 package org.neo4j.gds.applications.algorithms.embeddings;
 
 import fastrp.FastRPParameters;
-
 import node2vec.Node2VecParameters;
+import hashgnn.HashGNNParameters;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmMachinery;
@@ -40,10 +40,7 @@ import org.neo4j.gds.embeddings.graphsage.algo.GraphSageResult;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainTask;
 import org.neo4j.gds.embeddings.hashgnn.HashGNN;
-import org.neo4j.gds.embeddings.hashgnn.HashGNNConfig;
-import org.neo4j.gds.embeddings.hashgnn.HashGNNConfigTransformer;
 import org.neo4j.gds.embeddings.hashgnn.HashGNNResult;
-import org.neo4j.gds.embeddings.hashgnn.HashGNNTask;
 import org.neo4j.gds.embeddings.node2vec.Node2Vec;
 import org.neo4j.gds.embeddings.node2vec.Node2VecResult;
 import org.neo4j.gds.ml.core.features.FeatureExtraction;
@@ -154,20 +151,7 @@ public class NodeEmbeddingAlgorithms {
         );
     }
 
-    HashGNNResult hashGnn(Graph graph, HashGNNConfig configuration) {
-        var task = HashGNNTask.create(graph, configuration);
-        var progressTracker = progressTrackerCreator.createProgressTracker(
-            task,
-            configuration.jobId(),
-            configuration.concurrency(),
-            configuration.logProgress()
-        );
-
-        return hashGnn(graph, configuration, progressTracker);
-    }
-
-    public HashGNNResult hashGnn(Graph graph, HashGNNConfig configuration, ProgressTracker progressTracker) {
-        var parameters = HashGNNConfigTransformer.toParameters(configuration);
+    public HashGNNResult hashGnn(Graph graph, HashGNNParameters  parameters, ProgressTracker progressTracker) {
 
         var algorithm = new HashGNN(graph, parameters, progressTracker, terminationFlag);
 
@@ -175,7 +159,7 @@ public class NodeEmbeddingAlgorithms {
             algorithm,
             progressTracker,
             true,
-            configuration.concurrency()
+            parameters.concurrency()
         );
     }
 

@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.embeddings.hashgnn;
 
+import hashgnn.GenerateParameters;
+import hashgnn.HashGNNParameters;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -108,7 +110,7 @@ class HashGNNMemoryEstimateDefinitionTest {
             false,
             Optional.empty(),
             Optional.empty(),
-            Optional.of(GenerateFeaturesConfigImpl.builder().dimension(inputDimension).densityLevel(1).build()),
+            Optional.of(new GenerateParameters(1,inputDimension)),
             Optional.empty()
         );
         var bigEstimation = new HashGNNMemoryEstimateDefinition(bigParameters)
@@ -125,7 +127,7 @@ class HashGNNMemoryEstimateDefinitionTest {
             false,
             Optional.empty(),
             Optional.empty(),
-            Optional.of(GenerateFeaturesConfigImpl.builder().dimension((int) (inputRatio * inputDimension)).densityLevel(1).build()),
+            Optional.of(new GenerateParameters(1,(int)(inputRatio * inputDimension))),
             Optional.empty()
         );
         var smallEstimation = new HashGNNMemoryEstimateDefinition(smallParameters)

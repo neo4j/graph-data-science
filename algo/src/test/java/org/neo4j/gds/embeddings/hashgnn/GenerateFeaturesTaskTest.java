@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.embeddings.hashgnn;
 
+import hashgnn.GenerateParameters;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.assertj.core.data.Percentage;
 import org.junit.jupiter.api.Test;
@@ -51,13 +52,13 @@ class GenerateFeaturesTaskTest {
 
         var partition = new Partition(0, graph.nodeCount());
         var totalFeatureCount = new MutableLong(0);
-        var generateFeaturesConfig = GenerateFeaturesConfigImpl.builder()
-            .densityLevel(densityLevel)
-            .dimension(embeddingDimension)
-            .build();
+        var generateParameters =  new GenerateParameters(
+            densityLevel,
+            embeddingDimension
+        );
 
         var output = GenerateFeaturesTask.compute(
-            generateFeaturesConfig,
+            generateParameters,
             graph,
             List.of(partition),
             new Concurrency(4),

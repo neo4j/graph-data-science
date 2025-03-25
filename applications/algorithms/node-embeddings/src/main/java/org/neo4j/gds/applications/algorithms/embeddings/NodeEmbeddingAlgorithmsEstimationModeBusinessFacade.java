@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.applications.algorithms.embeddings;
 
+import hashgnn.HashGNNParameters;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.embeddings.fastrp.FastRPBaseConfig;
@@ -33,7 +34,6 @@ import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainMemoryEstimateParam
 import org.neo4j.gds.embeddings.hashgnn.HashGNNConfig;
 import org.neo4j.gds.embeddings.hashgnn.HashGNNConfigTransformer;
 import org.neo4j.gds.embeddings.hashgnn.HashGNNMemoryEstimateDefinition;
-import org.neo4j.gds.embeddings.hashgnn.HashGNNParameters;
 import org.neo4j.gds.embeddings.node2vec.Node2VecBaseConfig;
 import org.neo4j.gds.embeddings.node2vec.Node2VecConfigTransformer;
 import org.neo4j.gds.embeddings.node2vec.Node2VecMemoryEstimateDefinition;
