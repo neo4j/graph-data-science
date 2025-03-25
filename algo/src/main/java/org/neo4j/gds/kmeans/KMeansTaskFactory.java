@@ -17,22 +17,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds;
+package org.neo4j.gds.kmeans;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
-import org.neo4j.gds.kmeans.KmeansParameters;
 
 import java.util.List;
 
-final class KMeansTaskFactory {
+public final class KMeansTaskFactory {
 
     private KMeansTaskFactory() {}
 
-    static Task createTask(Graph graph, KmeansParameters parameters) {
+    public static Task createTask(Graph graph, KmeansParameters parameters) {
         var label = AlgorithmLabel.KMeans.asString();
 
         var iterations = parameters.numberOfRestarts();

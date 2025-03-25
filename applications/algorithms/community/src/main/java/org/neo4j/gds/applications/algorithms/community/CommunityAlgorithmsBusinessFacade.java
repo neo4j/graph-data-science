@@ -21,7 +21,6 @@ package org.neo4j.gds.applications.algorithms.community;
 
 import org.neo4j.gds.CommunityAlgorithmTasks;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmMachinery;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutResult;
 import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutBaseConfig;
@@ -65,12 +64,8 @@ import java.util.stream.Stream;
 
 public class CommunityAlgorithmsBusinessFacade {
 
-    private final AlgorithmMachinery algorithmMachinery = new AlgorithmMachinery();
-
     private final CommunityAlgorithms algorithms;
-
     private final ProgressTrackerCreator progressTrackerCreator;
-
     private final CommunityAlgorithmTasks tasks = new CommunityAlgorithmTasks();
 
     public CommunityAlgorithmsBusinessFacade(

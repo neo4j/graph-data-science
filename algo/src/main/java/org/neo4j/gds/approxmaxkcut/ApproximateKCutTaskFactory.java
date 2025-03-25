@@ -17,21 +17,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds;
+package org.neo4j.gds.approxmaxkcut;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
-import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutParameters;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
 import java.util.List;
 
-final class ApproximateKCutTaskFactory {
+public final class ApproximateKCutTaskFactory {
 
     private ApproximateKCutTaskFactory() {}
 
-    static Task createTask(Graph graph, ApproxMaxKCutParameters parameters) {
+   public static Task createTask(Graph graph, ApproxMaxKCutParameters parameters) {
         return Tasks.iterativeFixed(
             AlgorithmLabel.ApproximateMaximumKCut.asString(),
             () -> List.of(

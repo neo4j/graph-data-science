@@ -20,7 +20,6 @@
 package org.neo4j.gds.leiden;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.LeidenTask;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
