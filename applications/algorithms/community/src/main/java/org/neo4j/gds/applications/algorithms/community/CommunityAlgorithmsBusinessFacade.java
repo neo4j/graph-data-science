@@ -31,7 +31,6 @@ import org.neo4j.gds.conductance.ConductanceBaseConfig;
 import org.neo4j.gds.conductance.ConductanceConfigTransformer;
 import org.neo4j.gds.conductance.ConductanceResult;
 import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
@@ -54,7 +53,6 @@ import org.neo4j.gds.modularity.ModularityResult;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationBaseConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationResult;
 import org.neo4j.gds.scc.SccCommonBaseConfig;
-import org.neo4j.gds.sllpa.SpeakerListenerLPA;
 import org.neo4j.gds.sllpa.SpeakerListenerLPAConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientBaseConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientResult;
@@ -63,7 +61,6 @@ import org.neo4j.gds.triangle.TriangleCountResult;
 import org.neo4j.gds.triangle.TriangleResult;
 import org.neo4j.gds.wcc.WccBaseConfig;
 
-import java.util.Optional;
 import java.util.stream.Stream;
 
 public class CommunityAlgorithmsBusinessFacade {
@@ -206,20 +203,7 @@ public class CommunityAlgorithmsBusinessFacade {
         var task = tasks.speakerListenerLPA(graph, configuration);
         var progressTracker = createProgressTracker(task, configuration);
 
-        var algorithm = new SpeakerListenerLPA(
-            graph,
-            configuration,
-            DefaultPool.INSTANCE,
-            progressTracker,
-            Optional.empty()
-        );
-
-        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
-            algorithm,
-            progressTracker,
-            true,
-            configuration.concurrency()
-        );
+        return algorithms.speakerListenerLPA(graph, configuration, progressTracker);
     }
 
     private ProgressTracker createProgressTracker(Task task, AlgoBaseConfig configuration) {

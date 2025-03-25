@@ -21,7 +21,6 @@ package org.neo4j.gds.wcc;
 
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.LongHashSet;
-import org.assertj.core.api.Assertions;
 import org.assertj.core.api.AssertionsForInterfaceTypes;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -35,23 +34,16 @@ import org.neo4j.gds.CommunityHelper;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.TestProgressTrackerHelper;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.applications.algorithms.community.CommunityAlgorithms;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmMachinery;
-import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
-import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
-import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
-import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.ArrayList;
@@ -68,7 +60,6 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.neo4j.gds.TestSupport.fromGdl;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.compat.TestLog.INFO;
-import static org.neo4j.gds.compat.TestLog.WARN;
 
 class WccTest {
 
@@ -129,16 +120,16 @@ class WccTest {
 
     static Stream<Arguments> orientationAndGraphs() {
         var monoGraph = " (a {componentId: 0})-->(b {componentId: 0})<--(c {componentId: 0})" +
-                        ",(d {componentId: 1})-->(e {componentId: 1})<--(f {componentId: 1})" +
-                        ",(g {componentId: 2})-->(h {componentId: 2})<--(i {componentId: 2})" +
-                        ",(j {componentId: 3})-->(k {componentId: 3})<--(l {componentId: 3})" +
-                        ",(m)-->(n)<--(o)";
+            ",(d {componentId: 1})-->(e {componentId: 1})<--(f {componentId: 1})" +
+            ",(g {componentId: 2})-->(h {componentId: 2})<--(i {componentId: 2})" +
+            ",(j {componentId: 3})-->(k {componentId: 3})<--(l {componentId: 3})" +
+            ",(m)-->(n)<--(o)";
 
         var unionGraph = " (a: L1 {componentId: 0})-[:A]->(b: L2 {componentId: 0})<-[:B]-(c: L1 {componentId: 0})" +
-                         ",(d: L1 {componentId: 1})-[:A]->(e: L2 {componentId: 1})<-[:B]-(f: L1 {componentId: 1})" +
-                         ",(g: L1 {componentId: 2})-[:A]->(h: L2 {componentId: 2})<-[:B]-(i: L1 {componentId: 2})" +
-                         ",(j: L1 {componentId: 3})-[:A]->(k: L2 {componentId: 3})<-[:B]-(l: L1 {componentId: 3})" +
-                         ",(m: L1)-[:A]->(n: L2)<-[:B]-(o: L1)";
+            ",(d: L1 {componentId: 1})-[:A]->(e: L2 {componentId: 1})<-[:B]-(f: L1 {componentId: 1})" +
+            ",(g: L1 {componentId: 2})-[:A]->(h: L2 {componentId: 2})<-[:B]-(i: L1 {componentId: 2})" +
+            ",(j: L1 {componentId: 3})-[:A]->(k: L2 {componentId: 3})<-[:B]-(l: L1 {componentId: 3})" +
+            ",(m: L1)-[:A]->(n: L2)<-[:B]-(o: L1)";
 
         return Stream.of(
             arguments(Orientation.NATURAL, monoGraph, "natural mono"),
@@ -177,26 +168,6 @@ class WccTest {
         }
 
         assertThat(getSetCount(result)).isEqualTo(5);
-    }
-
-    @Test
-    void shouldWarnAboutThresholdOnUnweightedGraphs() {
-        var log = new GdsTestLog();
-        var requestScopedDependencies = RequestScopedDependencies.builder()
-            .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
-            .terminationFlag(TerminationFlag.RUNNING_TRUE)
-            .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
-            .build();
-        var progressTrackerCreator = new ProgressTrackerCreator(new LoggerForProgressTrackingAdapter(log), requestScopedDependencies);
-        var communityAlgorithms = new CommunityAlgorithms(progressTrackerCreator, requestScopedDependencies.terminationFlag());
-
-        var graph = createTestGraph(Orientation.NATURAL);
-        var configuration = WccStreamConfigImpl.builder().relationshipWeightProperty("weights").build();
-        communityAlgorithms.wcc(graph, configuration);
-
-        Assertions.assertThat(log.getMessages(WARN))
-            .extracting(removingThreadId())
-            .containsExactly("WCC :: Specifying a `relationshipWeightProperty` has no effect unless `threshold` is also set.");
     }
 
     private static Graph createTestGraph(Orientation orientation) {
@@ -245,29 +216,29 @@ class WccTest {
         @GdlGraph(orientation = Orientation.NATURAL, graphNamePrefix = "natural")
         private static final String TEST_GRAPH =
             "CREATE" +
-            "  (a:Node)" +
-            ", (b:Node)" +
-            ", (c:Node)" +
-            ", (d:Node)" +
-            ", (e:Node)" +
-            ", (f:Node)" +
-            ", (g:Node)" +
-            ", (h:Node)" +
-            ", (i:Node)" +
-            // {J}
-            ", (j:Node)" +
-            // {A, B, C, D}
-            ", (a)-[:TYPE]->(b)" +
-            ", (b)-[:TYPE]->(c)" +
-            ", (c)-[:TYPE]->(d)" +
-            ", (d)-[:TYPE]->(a)" +
-            // {E, F, G}
-            ", (e)-[:TYPE]->(f)" +
-            ", (f)-[:TYPE]->(g)" +
-            ", (g)-[:TYPE]->(e)" +
-            // {H, I}
-            ", (i)-[:TYPE]->(h)" +
-            ", (h)-[:TYPE]->(i)";
+                "  (a:Node)" +
+                ", (b:Node)" +
+                ", (c:Node)" +
+                ", (d:Node)" +
+                ", (e:Node)" +
+                ", (f:Node)" +
+                ", (g:Node)" +
+                ", (h:Node)" +
+                ", (i:Node)" +
+                // {J}
+                ", (j:Node)" +
+                // {A, B, C, D}
+                ", (a)-[:TYPE]->(b)" +
+                ", (b)-[:TYPE]->(c)" +
+                ", (c)-[:TYPE]->(d)" +
+                ", (d)-[:TYPE]->(a)" +
+                // {E, F, G}
+                ", (e)-[:TYPE]->(f)" +
+                ", (f)-[:TYPE]->(g)" +
+                ", (g)-[:TYPE]->(e)" +
+                // {H, I}
+                ", (i)-[:TYPE]->(h)" +
+                ", (h)-[:TYPE]->(i)";
 
 
         @GdlGraph(orientation = Orientation.REVERSE, graphNamePrefix = "reverse")
@@ -322,10 +293,10 @@ class WccTest {
             CommunityHelper.assertCommunities(
                 actualCommunities,
                 List.of(
-                    ids( graph, "a", "b", "c", "d"),
-                    ids( graph, "e", "f", "g"),
-                    ids( graph, "h", "i"),
-                    ids( graph, "j")
+                    ids(graph, "a", "b", "c", "d"),
+                    ids(graph, "e", "f", "g"),
+                    ids(graph, "h", "i"),
+                    ids(graph, "j")
                 )
             );
         }

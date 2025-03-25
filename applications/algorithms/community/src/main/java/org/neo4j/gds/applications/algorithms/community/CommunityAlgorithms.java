@@ -19,27 +19,21 @@
  */
 package org.neo4j.gds.applications.algorithms.community;
 
-import org.neo4j.gds.CommunityAlgorithmTasks;
 import org.neo4j.gds.algorithms.community.CommunityCompanion;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmMachinery;
-import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.approxmaxkcut.ApproxMaxKCut;
 import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutParameters;
 import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutResult;
-import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutBaseConfig;
 import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.conductance.Conductance;
 import org.neo4j.gds.conductance.ConductanceParameters;
 import org.neo4j.gds.conductance.ConductanceResult;
-import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.hdbscan.HDBScan;
-import org.neo4j.gds.hdbscan.HDBScanBaseConfig;
 import org.neo4j.gds.hdbscan.HDBScanParameters;
 import org.neo4j.gds.hdbscan.Labels;
 import org.neo4j.gds.k1coloring.K1ColoringParameters;
@@ -60,7 +54,6 @@ import org.neo4j.gds.leiden.LeidenResult;
 import org.neo4j.gds.louvain.Louvain;
 import org.neo4j.gds.louvain.LouvainParameters;
 import org.neo4j.gds.louvain.LouvainResult;
-import org.neo4j.gds.modularity.ModularityBaseConfig;
 import org.neo4j.gds.modularity.ModularityCalculator;
 import org.neo4j.gds.modularity.ModularityParameters;
 import org.neo4j.gds.modularity.ModularityResult;
@@ -69,7 +62,6 @@ import org.neo4j.gds.modularityoptimization.ModularityOptimization;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationParameters;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationResult;
 import org.neo4j.gds.scc.Scc;
-import org.neo4j.gds.scc.SccCommonBaseConfig;
 import org.neo4j.gds.scc.SccParameters;
 import org.neo4j.gds.sllpa.SpeakerListenerLPA;
 import org.neo4j.gds.sllpa.SpeakerListenerLPAConfig;
@@ -78,12 +70,10 @@ import org.neo4j.gds.triangle.IntersectingTriangleCount;
 import org.neo4j.gds.triangle.LocalClusteringCoefficient;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientParameters;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientResult;
-import org.neo4j.gds.triangle.TriangleCountBaseConfig;
 import org.neo4j.gds.triangle.TriangleCountParameters;
 import org.neo4j.gds.triangle.TriangleCountResult;
 import org.neo4j.gds.triangle.TriangleResult;
 import org.neo4j.gds.triangle.TriangleStream;
-import org.neo4j.gds.wcc.WccBaseConfig;
 import org.neo4j.gds.wcc.WccParameters;
 import org.neo4j.gds.wcc.WccStub;
 
@@ -93,21 +83,10 @@ import java.util.stream.Stream;
 public class CommunityAlgorithms {
     private final AlgorithmMachinery algorithmMachinery = new AlgorithmMachinery();
 
-    private final ProgressTrackerCreator progressTrackerCreator;
     private final TerminationFlag terminationFlag;
 
-    private final CommunityAlgorithmTasks tasks = new CommunityAlgorithmTasks();
-
-    public CommunityAlgorithms(ProgressTrackerCreator progressTrackerCreator, TerminationFlag terminationFlag) {
-        this.progressTrackerCreator = progressTrackerCreator;
+    public CommunityAlgorithms(TerminationFlag terminationFlag) {
         this.terminationFlag = terminationFlag;
-    }
-
-    ApproxMaxKCutResult approximateMaximumKCut(Graph graph, ApproxMaxKCutBaseConfig configuration) {
-        var task = tasks.approximateMaximumKCut(graph, configuration.toParameters());
-        var progressTracker = createProgressTracker(task, configuration);
-
-        return approximateMaximumKCut(graph, configuration.toParameters(), progressTracker);
     }
 
     public ApproxMaxKCutResult approximateMaximumKCut(
@@ -149,13 +128,6 @@ public class CommunityAlgorithms {
             true,
             parameters.concurrency()
         );
-    }
-
-    Labels hdbscan(Graph graph, HDBScanBaseConfig configuration) {
-        var task = tasks.hdbscan(graph);
-        var progressTracker = createProgressTracker(task, configuration);
-
-        return hdbscan(graph, configuration.toParameters(), progressTracker);
     }
 
     public Labels hdbscan(Graph graph, HDBScanParameters parameters, ProgressTracker progressTracker) {
@@ -299,10 +271,6 @@ public class CommunityAlgorithms {
         );
     }
 
-    ModularityResult modularity(Graph graph, ModularityBaseConfig configuration) {
-        return modularity(graph, configuration.toParameters());
-    }
-
     ModularityResult modularity(Graph graph, ModularityParameters parameters) {
         var algorithm = ModularityCalculator.create(
             graph,
@@ -348,13 +316,6 @@ public class CommunityAlgorithms {
         );
     }
 
-    HugeLongArray scc(Graph graph, SccCommonBaseConfig configuration) {
-        var task = tasks.scc(graph);
-        var progressTracker = createProgressTracker(task, configuration);
-
-        return scc(graph, configuration.toParameters(), progressTracker);
-    }
-
     public HugeLongArray scc(Graph graph, SccParameters parameters, ProgressTracker progressTracker) {
         var algorithm = new Scc(graph, progressTracker, terminationFlag);
 
@@ -364,13 +325,6 @@ public class CommunityAlgorithms {
             true,
             parameters.concurrency()
         );
-    }
-
-    TriangleCountResult triangleCount(Graph graph, TriangleCountBaseConfig configuration) {
-        var task = tasks.triangleCount(graph);
-        var progressTracker = createProgressTracker(task, configuration);
-
-        return triangleCount(graph, configuration.toParameters(), progressTracker);
     }
 
     public TriangleCountResult triangleCount(
@@ -396,9 +350,6 @@ public class CommunityAlgorithms {
         );
     }
 
-    Stream<TriangleResult> triangles(Graph graph, TriangleCountBaseConfig configuration) {
-        return triangles(graph, configuration.toParameters());
-    }
 
     Stream<TriangleResult> triangles(Graph graph, TriangleCountParameters parameters) {
         var algorithm = TriangleStream.create(
@@ -411,18 +362,6 @@ public class CommunityAlgorithms {
         return algorithm.compute();
     }
 
-    public DisjointSetStruct wcc(Graph graph, WccBaseConfig configuration) {
-        var task = tasks.wcc(graph);
-        var progressTracker = createProgressTracker(task, configuration);
-
-        if (configuration.hasRelationshipWeightProperty() && configuration.threshold() == 0) {
-            progressTracker.logWarning(
-                "Specifying a `relationshipWeightProperty` has no effect unless `threshold` is also set.");
-        }
-
-        return wcc(graph, configuration.toParameters(), progressTracker);
-    }
-
     public DisjointSetStruct wcc(
         Graph graph,
         WccParameters parameters,
@@ -432,9 +371,11 @@ public class CommunityAlgorithms {
         return wccStub.wcc(graph, parameters, progressTracker, true);
     }
 
-    PregelResult speakerListenerLPA(Graph graph, SpeakerListenerLPAConfig configuration) {
-        var task = tasks.speakerListenerLPA(graph, configuration);
-        var progressTracker = createProgressTracker(task, configuration);
+    PregelResult speakerListenerLPA(
+        Graph graph,
+        SpeakerListenerLPAConfig configuration,
+        ProgressTracker progressTracker
+    ) {
 
         var algorithm = new SpeakerListenerLPA(
             graph,
@@ -452,12 +393,4 @@ public class CommunityAlgorithms {
         );
     }
 
-    private ProgressTracker createProgressTracker(Task task, AlgoBaseConfig configuration) {
-        return progressTrackerCreator.createProgressTracker(
-            task,
-            configuration.jobId(),
-            configuration.concurrency(),
-            configuration.logProgress()
-        );
-    }
 }
