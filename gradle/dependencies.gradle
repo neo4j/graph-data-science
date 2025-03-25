@@ -1,17 +1,6 @@
 ext {
     neos = [
-        '4.4': properties.getOrDefault('neo4jVersion44', '4.4.41'),
-        '5.11': properties.getOrDefault('neo4jVersion511', '5.11.0'),
-        '5.12': properties.getOrDefault('neo4jVersion512', '5.12.0'),
-        '5.13': properties.getOrDefault('neo4jVersion513', '5.13.0'),
-        '5.14': properties.getOrDefault('neo4jVersion514', '5.14.0'),
-        '5.15': properties.getOrDefault('neo4jVersion515', '5.15.0'),
-        '5.16': properties.getOrDefault('neo4jVersion516', '5.16.0'),
-        '5.17': properties.getOrDefault('neo4jVersion517', '5.17.0'),
-        '5.18': properties.getOrDefault('neo4jVersion518', '5.18.1'),
-        '5.19': properties.getOrDefault('neo4jVersion519', '5.19.0'),
-        '5.20': properties.getOrDefault('neo4jVersion520', '5.20.0'),
-        '5.21': properties.getOrDefault('neo4jVersion520', '5.21.0-SNAPSHOT'),
+        '4.4': properties.getOrDefault('neo4jVersion44', '4.4.42'),
     ]
 
     neo4jDefault = neos.'4.4'
@@ -19,47 +8,14 @@ ext {
 
     scalas = [
         '4.4': '2.12.13',
-        '5.11': '2.13.11',
-        '5.12': '2.13.11',
-        '5.13': '2.13.11',
-        '5.14': '2.13.11',
-        '5.15': '2.13.11',
-        '5.16': '2.13.11',
-        '5.17': '2.13.11',
-        '5.18': '2.13.11',
-        '5.19': '2.13.11',
-        '5.20': '2.13.11',
-        '5.21': '2.13.11',
     ]
 
     log4js = [
         '4.4': '2.17.0',
-        '5.11': '2.20.0',
-        '5.12': '2.20.0',
-        '5.13': '2.20.0',
-        '5.14': '2.20.0',
-        '5.15': '2.20.0',
-        '5.16': '2.20.0',
-        '5.17': '2.20.0',
-        '5.18': '2.20.0',
-        '5.19': '2.20.0',
-        '5.20': '2.20.0',
-        '5.21': '2.20.0',
     ]
 
     shiros = [
         '4.4':  '1.13.0',
-        '5.11': '1.13.0',
-        '5.12': '1.13.0',
-        '5.13': '1.13.0',
-        '5.14': '1.13.0',
-        '5.15': '1.13.0',
-        '5.16': '1.13.0',
-        '5.17': '1.13.0',
-        '5.18': '1.13.0',
-        '5.19': '2.0.0',
-        '5.20': '2.0.0',
-        '5.21': '2.0.0',
     ]
 
     ver = [
@@ -103,12 +59,6 @@ def neo_deps = [
     'neo4j',
 ]
 
-def neo_deps_50 = neo_deps - ['neo4j-storage-engine-api', 'neo4j-cypher-runtime-util']
-
 ext.neodeps = {
-    if (ver.'neo4j'.startsWith('5.')) {
-        neo_deps_50.iterator()
-    } else {
-        neo_deps.iterator()
-    }
+    neo_deps.iterator()
 }
