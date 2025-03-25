@@ -23,29 +23,9 @@ ext {
     compatibilityModules = [
             'kernel-adapter': [
                     project(':neo4j-kernel-adapter-4.4'),
-                    project(':neo4j-kernel-adapter-5.11'),
-                    project(':neo4j-kernel-adapter-5.12'),
-                    project(':neo4j-kernel-adapter-5.13'),
-                    project(':neo4j-kernel-adapter-5.14'),
-                    project(':neo4j-kernel-adapter-5.15'),
-                    project(':neo4j-kernel-adapter-5.16'),
-                    project(':neo4j-kernel-adapter-5.17'),
-                    project(':neo4j-kernel-adapter-5.18'),
-                    project(':neo4j-kernel-adapter-5.19'),
-                    project(':neo4j-kernel-adapter-5.20'),
             ],
             'storage-engine-adapter': [
                     project(':storage-engine-adapter-4.4'),
-                    project(':storage-engine-adapter-5.11'),
-                    project(':storage-engine-adapter-5.12'),
-                    project(':storage-engine-adapter-5.13'),
-                    project(':storage-engine-adapter-5.14'),
-                    project(':storage-engine-adapter-5.15'),
-                    project(':storage-engine-adapter-5.16'),
-                    project(':storage-engine-adapter-5.17'),
-                    project(':storage-engine-adapter-5.18'),
-                    project(':storage-engine-adapter-5.19'),
-                    project(':storage-engine-adapter-5.20'),
             ]
     ]
 }
