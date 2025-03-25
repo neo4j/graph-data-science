@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.applications.algorithms.embeddings;
 
+import fastrp.FastRPParameters;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmMachinery;
@@ -30,8 +31,6 @@ import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.degree.DegreeCentralityTask;
 import org.neo4j.gds.embeddings.fastrp.FastRP;
-import org.neo4j.gds.embeddings.fastrp.FastRPBaseConfig;
-import org.neo4j.gds.embeddings.fastrp.FastRPConfigTransformer;
 import org.neo4j.gds.embeddings.fastrp.FastRPResult;
 import org.neo4j.gds.embeddings.graphsage.GraphSageModelTrainer;
 import org.neo4j.gds.embeddings.graphsage.ModelData;
@@ -75,31 +74,17 @@ public class NodeEmbeddingAlgorithms {
         this.terminationFlag = terminationFlag;
     }
 
-    public FastRPResult fastRP(Graph graph, FastRPBaseConfig configuration) {
-        var task = createFastRPTask(graph, configuration.nodeSelfInfluence(), configuration.iterationWeights().size());
-        var progressTracker = progressTrackerCreator.createProgressTracker(
-            task,
-            configuration.jobId(),
-            configuration.concurrency(),
-            configuration.logProgress()
-        );
 
-        return fastRP(graph, configuration, progressTracker);
-    }
-
-    public FastRPResult fastRP(Graph graph, FastRPBaseConfig configuration, ProgressTracker progressTracker) {
-        var parameters = FastRPConfigTransformer.toParameters(configuration);
+    public FastRPResult fastRP(Graph graph, FastRPParameters parameters, ProgressTracker progressTracker) {
 
         var featureExtractors = FeatureExtraction.propertyExtractors(graph, parameters.featureProperties());
 
         var algorithm = new FastRP(
             graph,
             parameters,
-            configuration.concurrency(),
             10_000,
             featureExtractors,
             progressTracker,
-            configuration.randomSeed(),
             terminationFlag
         );
 
@@ -107,7 +92,7 @@ public class NodeEmbeddingAlgorithms {
             algorithm,
             progressTracker,
             true,
-            configuration.concurrency()
+            parameters.concurrency()
         );
     }
 
@@ -226,20 +211,6 @@ public class NodeEmbeddingAlgorithms {
             true,
             configuration.concurrency()
         );
-    }
-
-    private Task createFastRPTask(Graph graph, Number nodeSelfInfluence, int iterationWeightsSize) {
-        var tasks = new ArrayList<Task>();
-        tasks.add(Tasks.leaf("Initialize random vectors", graph.nodeCount()));
-        if (Float.compare(nodeSelfInfluence.floatValue(), 0.0f) != 0) {
-            tasks.add(Tasks.leaf("Apply node self-influence", graph.nodeCount()));
-        }
-        tasks.add(Tasks.iterativeFixed(
-            "Propagate embeddings",
-            () -> List.of(Tasks.leaf("Propagate embeddings task", graph.relationshipCount())),
-            iterationWeightsSize
-        ));
-        return Tasks.task(AlgorithmLabel.FastRP.asString(), tasks);
     }
 
     private Task createNode2VecTask(Graph graph, Node2VecBaseConfig configuration) {

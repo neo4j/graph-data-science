@@ -32,7 +32,6 @@ import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.wcc.WccStreamConfigImpl;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
@@ -52,7 +51,7 @@ class CommunityAlgorithmsBusinessFacadeTest {
         var log = new GdsTestLog();
         var progressCreator = mock(ProgressTrackerCreator.class);
 
-        when(progressCreator.createProgressTracker(any(),any(),any(),anyBoolean())).thenReturn(
+        when(progressCreator.createProgressTracker(any(),any())).thenReturn(
             new TestProgressTracker(
                 Tasks.leaf("foo",2),
                 new LoggerForProgressTrackingAdapter(log),

@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.applications.algorithms.machinery;
 
+import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.tasks.LoggerForProgressTracking;
@@ -37,6 +38,15 @@ public class ProgressTrackerCreator {
     public ProgressTrackerCreator(LoggerForProgressTracking log, RequestScopedDependencies requestScopedDependencies) {
         this.log = log;
         this.requestScopedDependencies = requestScopedDependencies;
+    }
+
+    public ProgressTracker createProgressTracker(Task task, AlgoBaseConfig configuration) {
+        return createProgressTracker(
+                task,
+                configuration.jobId(),
+                configuration.concurrency(),
+                configuration.logProgress()
+        );
     }
 
     public ProgressTracker createProgressTracker(

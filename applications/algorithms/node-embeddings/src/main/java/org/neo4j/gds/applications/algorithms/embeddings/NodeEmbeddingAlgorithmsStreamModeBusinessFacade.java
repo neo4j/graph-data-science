@@ -42,13 +42,13 @@ import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Nod
 
 public class NodeEmbeddingAlgorithmsStreamModeBusinessFacade {
     private final NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimationFacade;
-    private final NodeEmbeddingAlgorithms algorithms;
+    private final NodeEmbeddingBusinessAlgorithms algorithms;
     private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
     private final GraphSageAlgorithmProcessing graphSageAlgorithmProcessing;
 
     NodeEmbeddingAlgorithmsStreamModeBusinessFacade(
         NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimationFacade,
-        NodeEmbeddingAlgorithms algorithms,
+        NodeEmbeddingBusinessAlgorithms algorithms,
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
         GraphSageAlgorithmProcessing graphSageAlgorithmProcessing
     ) {

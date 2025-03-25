@@ -17,21 +17,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.embeddings.fastrp;
+package org.neo4j.gds;
 
-import org.neo4j.gds.annotation.Parameters;
+import fastrp.FastRPParameters;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.embeddings.fastrp.FastRPTask;
 
-import java.util.List;
-import java.util.Optional;
+public final class NodeEmbeddingsAlgorithmTasks {
 
-@Parameters
-public record FastRPParameters(
-    List<String> featureProperties,
-    List<Number> iterationWeights,
-    int embeddingDimension,
-    int propertyDimension,
-    Optional<String> relationshipWeightProperty,
-    float normalizationStrength,
-    Number nodeSelfInfluence
-) {
+    public Task fastRP(Graph graph, FastRPParameters fastRPParameters){
+        return FastRPTask.create(graph.nodeCount(),graph.relationshipCount(),fastRPParameters);
+    }
 }

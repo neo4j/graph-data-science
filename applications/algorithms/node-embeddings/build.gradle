@@ -7,6 +7,7 @@ group = 'org.neo4j.gds'
 dependencies {
     implementation project(":algo")
     implementation project(":algo-common")
+    implementation project(':algo-params-common')
     implementation project(":algorithms-machinery")
     implementation project(":config-api")
     implementation project(":core")
@@ -18,6 +19,7 @@ dependencies {
     implementation project(":model-catalog-api")
     implementation project(":model-catalog-applications")
     implementation project(":node-embeddings-configs")
+    implementation project(":node-embeddings-params")
     implementation project(':path-finding-configs')
     implementation project(":progress-tracking")
     implementation project(":string-formatting")

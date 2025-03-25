@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.embeddings.fastrp;
 
+import fastrp.FastRPParameters;
+
 public final class FastRPConfigTransformer {
 
     private FastRPConfigTransformer() {}
@@ -31,7 +33,9 @@ public final class FastRPConfigTransformer {
             config.propertyDimension(),
             config.relationshipWeightProperty(),
             config.normalizationStrength(),
-            config.nodeSelfInfluence()
+            config.nodeSelfInfluence(),
+            config.concurrency(),
+            config.randomSeed()
         );
     }
 

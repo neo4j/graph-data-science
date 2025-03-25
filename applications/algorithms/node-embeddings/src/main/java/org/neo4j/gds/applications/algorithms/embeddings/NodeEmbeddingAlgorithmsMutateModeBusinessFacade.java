@@ -43,14 +43,14 @@ import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Nod
 
 public class NodeEmbeddingAlgorithmsMutateModeBusinessFacade {
     private final NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimation;
-    private final NodeEmbeddingAlgorithms algorithms;
+    private final NodeEmbeddingBusinessAlgorithms algorithms;
     private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
     private final MutateNodeProperty mutateNodeProperty;
     private final GraphSageAlgorithmProcessing graphSageAlgorithmProcessing;
 
     public NodeEmbeddingAlgorithmsMutateModeBusinessFacade(
         NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimation,
-        NodeEmbeddingAlgorithms algorithms,
+        NodeEmbeddingBusinessAlgorithms algorithms,
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
         MutateNodeProperty mutateNodeProperty,
         GraphSageAlgorithmProcessing graphSageAlgorithmProcessing) {
