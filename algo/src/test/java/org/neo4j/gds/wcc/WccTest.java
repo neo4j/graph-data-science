@@ -22,6 +22,7 @@ package org.neo4j.gds.wcc;
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.LongHashSet;
 import org.assertj.core.api.Assertions;
+import org.assertj.core.api.AssertionsForInterfaceTypes;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -29,8 +30,10 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.gds.CommunityAlgorithmTasks;
 import org.neo4j.gds.CommunityHelper;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.TestProgressTrackerHelper;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.applications.algorithms.community.CommunityAlgorithms;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmMachinery;
@@ -38,6 +41,7 @@ import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
+import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
@@ -63,6 +67,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.neo4j.gds.TestSupport.fromGdl;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
+import static org.neo4j.gds.compat.TestLog.INFO;
 import static org.neo4j.gds.compat.TestLog.WARN;
 
 class WccTest {
@@ -329,4 +334,52 @@ class WccTest {
             return Arrays.stream(nodes).map(graph::toMappedNodeId).collect(Collectors.toList());
         }
     }
+
+    @ParameterizedTest
+    @EnumSource(Orientation.class)
+    void shouldLogProgress(Orientation orientation) {
+        var graph = createTestGraph(orientation);
+
+        var parameters = new WccParameters(0, new Concurrency(2));
+
+        var progressTrackerWithLog = TestProgressTrackerHelper.create(
+            new CommunityAlgorithmTasks().wcc(graph),
+            new Concurrency(2)
+        );
+
+        var progressTracker = progressTrackerWithLog.progressTracker();
+
+        var wcc = new Wcc(
+            graph,
+            DefaultPool.INSTANCE,
+            ParallelUtil.DEFAULT_BATCH_SIZE,
+            parameters,
+            progressTracker,
+            TerminationFlag.RUNNING_TRUE
+        );
+
+        wcc.compute();
+
+        var log = progressTrackerWithLog.log();
+
+        var messagesInOrder = log.getMessages(INFO);
+
+        AssertionsForInterfaceTypes.assertThat(messagesInOrder)
+            // avoid asserting on the thread id
+            .extracting(removingThreadId())
+            .hasSize(103)
+            .containsSequence(
+                "WCC :: Start",
+                "WCC 0%",
+                "WCC 1%",
+                "WCC 2%"
+            )
+            .containsSequence(
+                "WCC 98%",
+                "WCC 99%",
+                "WCC 100%",
+                "WCC :: Finished"
+            );
+    }
+
 }

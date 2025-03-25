@@ -20,7 +20,11 @@
 package org.neo4j.gds.scc;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.CommunityAlgorithmTasks;
+import org.neo4j.gds.TestProgressTrackerHelper;
 import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.compat.TestLog;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -33,6 +37,8 @@ import java.util.HashMap;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.neo4j.gds.assertj.Extractors.removingThreadId;
+import static org.neo4j.gds.assertj.Extractors.replaceTimings;
 
 @GdlExtension
 class SccTest {
@@ -135,6 +141,38 @@ class SccTest {
             }
             assertThat(components.get(node)).isNotEqualTo(component);
         }
+    }
+
+    @Test
+    void shouldLogProgress() {
+
+        var progressTrackerWithLog = TestProgressTrackerHelper.create(
+            new CommunityAlgorithmTasks().scc(graph),
+            new Concurrency(2)
+        );
+
+        var progressTracker = progressTrackerWithLog.progressTracker();
+        var log = progressTrackerWithLog.log();
+        var scc = new Scc(graph,progressTracker,TerminationFlag.RUNNING_TRUE);
+
+        scc.compute();
+
+        assertThat(log.getMessages(TestLog.INFO))
+            .extracting(removingThreadId())
+            .extracting(replaceTimings())
+            .containsExactly(
+                "SCC :: Start",
+                "SCC 11%",
+                "SCC 22%",
+                "SCC 33%",
+                "SCC 44%",
+                "SCC 55%",
+                "SCC 66%",
+                "SCC 77%",
+                "SCC 88%",
+                "SCC 100%",
+                "SCC :: Finished"
+            );
     }
 
 }
