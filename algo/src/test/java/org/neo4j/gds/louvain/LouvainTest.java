@@ -20,11 +20,14 @@
 package org.neo4j.gds.louvain;
 
 import org.assertj.core.data.Offset;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.CommunityAlgorithmTasks;
 import org.neo4j.gds.CommunityHelper;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.TestProgressTrackerHelper;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.beta.generator.RandomGraphGenerator;
@@ -40,6 +43,7 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.modularity.ModularityCalculator;
 import org.neo4j.gds.termination.TerminationFlag;
 
@@ -51,6 +55,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.gds.TestSupport.ids;
+import static org.neo4j.gds.compat.TestLog.INFO;
 import static org.neo4j.gds.core.ProcedureConstants.TOLERANCE_DEFAULT;
 import static org.neo4j.gds.graphbuilder.TransactionTerminationTestUtils.assertTerminates;
 
@@ -391,9 +396,97 @@ class LouvainTest {
 
         var result = louvain.compute();
         assertThat(result.ranLevels()).isGreaterThan(1);
-        LongUnaryOperator vToCommunity = v -> result.community(v);
+        LongUnaryOperator vToCommunity = result::community;
         var modularityCalculator = ModularityCalculator.create(myGraph, vToCommunity, new Concurrency(4));
         double calculatedModularity = modularityCalculator.compute().totalModularity();
         assertThat(result.modularity()).isCloseTo(calculatedModularity, Offset.offset(1e-5));
     }
+
+    @Nested
+    @GdlExtension
+    class ProgressTrackingTest {
+
+        @GdlGraph(orientation = Orientation.UNDIRECTED, idOffset = 0)
+        private static final String DB_CYPHER =
+            """
+                CREATE
+                    (a:Node {seed: 1,seed2: -1}),
+                    (b:Node {seed: 1,seed2: 10}),
+                    (c:Node {seed: 1}),
+                    (d:Node {seed: 1}),
+                    (e:Node {seed: 1}),
+                    (f:Node {seed: 1}),
+                    (g:Node {seed: 2}),
+                    (h:Node {seed: 2}),
+                    (i:Node {seed: 2}),
+                    (j:Node {seed: 42}),
+                    (k:Node {seed: 42}),
+                    (l:Node {seed: 42}),
+                    (m:Node {seed: 42}),
+                    (n:Node {seed: 42}),
+                    (x:Node {seed: 1}),
+
+                    (a)-[:TYPE_OUT {weight: 1.0}]->(b),
+                    (a)-[:TYPE_OUT {weight: 1.0}]->(d),
+                    (a)-[:TYPE_OUT {weight: 1.0}]->(f),
+                    (b)-[:TYPE_OUT {weight: 1.0}]->(d),
+                    (b)-[:TYPE_OUT {weight: 1.0}]->(x),
+                    (b)-[:TYPE_OUT {weight: 1.0}]->(g),
+                    (b)-[:TYPE_OUT {weight: 1.0}]->(e),
+                    (c)-[:TYPE_OUT {weight: 1.0}]->(x),
+                    (c)-[:TYPE_OUT {weight: 1.0}]->(f),
+                    (d)-[:TYPE_OUT {weight: 1.0}]->(k),
+                    (e)-[:TYPE_OUT {weight: 1.0}]->(x),
+                    (e)-[:TYPE_OUT {weight: 0.01}]->(f),
+                    (e)-[:TYPE_OUT {weight: 1.0}]->(h),
+                    (f)-[:TYPE_OUT {weight: 1.0}]->(g),
+                    (g)-[:TYPE_OUT {weight: 1.0}]->(h),
+                    (h)-[:TYPE_OUT {weight: 1.0}]->(i),
+                    (h)-[:TYPE_OUT {weight: 1.0}]->(j),
+                    (i)-[:TYPE_OUT {weight: 1.0}]->(k),
+                    (j)-[:TYPE_OUT {weight: 1.0}]->(k),
+                    (j)-[:TYPE_OUT {weight: 1.0}]->(m),
+                    (j)-[:TYPE_OUT {weight: 1.0}]->(n),
+                    (k)-[:TYPE_OUT {weight: 1.0}]->(m),
+                    (k)-[:TYPE_OUT {weight: 1.0}]->(l),
+                    (l)-[:TYPE_OUT {weight: 1.0}]->(n),
+                    (m)-[:TYPE_OUT {weight: 1.0}]->(n)
+            """;
+
+        @Inject
+        private TestGraph graph;
+
+        @Test
+        void testLogging() {
+            var concurrency = new Concurrency(4);
+
+            var parameters = new LouvainParameters(
+                concurrency,
+                10, 0.0001, 10, false, null
+            );
+            var progressTrackerWithLog = TestProgressTrackerHelper.create(
+                new CommunityAlgorithmTasks().louvain(
+                    graph, parameters
+                ),
+                concurrency
+            );
+
+            var louvain = new Louvain(
+                graph,
+                parameters,
+                progressTrackerWithLog.progressTracker(),
+                DefaultPool.INSTANCE,
+                TerminationFlag.RUNNING_TRUE
+            );
+            louvain.compute();
+
+            var log = progressTrackerWithLog.log();
+
+            assertThat(log.containsMessage(INFO, ":: Start")).isTrue();
+            assertThat(log.containsMessage(INFO, ":: ModularityOptimization")).isTrue();
+            assertThat(log.containsMessage(INFO, ":: K1Coloring :: Start")).isTrue();
+            assertThat(log.containsMessage(INFO, ":: Finished")).isTrue();
+        }
+    }
+
 }

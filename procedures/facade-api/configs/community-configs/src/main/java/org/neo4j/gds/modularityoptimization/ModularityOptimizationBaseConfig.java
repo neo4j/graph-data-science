@@ -28,6 +28,8 @@ import org.neo4j.gds.config.SeedConfig;
 import org.neo4j.gds.config.ToleranceConfig;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 
+import java.util.Optional;
+
 public interface ModularityOptimizationBaseConfig extends
     AlgoBaseConfig,
     IterationsConfig,
@@ -54,6 +56,12 @@ public interface ModularityOptimizationBaseConfig extends
 
     @Configuration.Ignore
     default ModularityOptimizationParameters toParameters() {
-        return new ModularityOptimizationParameters(concurrency(), maxIterations(), batchSize(), tolerance());
+        return new ModularityOptimizationParameters(
+            concurrency(),
+            maxIterations(),
+            batchSize(),
+            tolerance(),
+            Optional.ofNullable(seedProperty())
+        );
     }
 }

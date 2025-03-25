@@ -19,9 +19,10 @@
  */
 package org.neo4j.gds.triangle;
 
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.annotation.Parameters;
 import org.neo4j.gds.core.concurrency.Concurrency;
 
 @Parameters
-public record LocalClusteringCoefficientParameters(Concurrency concurrency, long maxDegree, String seedProperty) {
+public record LocalClusteringCoefficientParameters(Concurrency concurrency, long maxDegree, @Nullable String seedProperty) {
 }

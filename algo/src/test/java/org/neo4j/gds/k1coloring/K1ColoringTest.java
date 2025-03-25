@@ -20,11 +20,14 @@
 package org.neo4j.gds.k1coloring;
 
 import org.apache.commons.lang3.mutable.MutableLong;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.TestProgressTrackerHelper;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.beta.generator.RandomGraphGenerator;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
+import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.config.RandomGraphGeneratorConfig.AllowSelfLoops;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.concurrency.Concurrency;
@@ -32,7 +35,10 @@ import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.termination.TerminationFlag;
 
+import java.util.stream.LongStream;
+
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.gds.TestSupport.fromGdl;
 import static org.neo4j.gds.core.concurrency.ParallelUtil.DEFAULT_BATCH_SIZE;
 
@@ -156,6 +162,51 @@ class K1ColoringTest {
         assertThat(result.usedColors().get(ColoringStep.INITIAL_FORBIDDEN_COLORS))
             .as("The result should not contain the initial forbidden colors")
             .isFalse();
+    }
+
+    @Nested
+    class ProgressTrackingTest {
+
+        @Test
+        void shouldLogProgress() {
+            var graph = RandomGraphGenerator.builder()
+                .nodeCount(100)
+                .averageDegree(10)
+                .relationshipDistribution(RelationshipDistribution.UNIFORM)
+                .seed(42L)
+                .build()
+                .generate();
+
+            var concurrency = new Concurrency(4);
+
+            var progressTrackerWithLog = TestProgressTrackerHelper.create(
+                K1ColoringProgressTrackerTaskCreator.progressTask(
+                    graph.nodeCount(),
+                    10
+                ), concurrency
+            );
+
+            var result = new K1Coloring(
+                graph,
+                10,
+                10_000,
+                concurrency,
+                DefaultPool.INSTANCE,
+                progressTrackerWithLog.progressTracker(),
+                TerminationFlag.RUNNING_TRUE
+            ).compute();
+
+            var log = progressTrackerWithLog.log();
+            assertTrue(log.containsMessage(TestLog.INFO, ":: Start"));
+            LongStream.range(1, result.ranIterations() + 1).forEach(iteration ->
+                assertThat(log.getMessages(TestLog.INFO)).anyMatch(message -> {
+                    var expected = "%d of %d".formatted(iteration, 10);
+                    return message.contains(expected);
+                })
+            );
+            assertTrue(log.containsMessage(TestLog.INFO, ":: Finished"));
+        }
+
     }
 
 }

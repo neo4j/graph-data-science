@@ -19,27 +19,24 @@
  */
 package org.neo4j.gds.kmeans;
 
-import org.immutables.value.Value;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.concurrent.ExecutorService;
 
-@ValueClass
-public interface KmeansContext {
+public record KmeansContext(ExecutorService executor, ProgressTracker progressTracker) {
 
-    @Value.Default
-    default ExecutorService executor() {
-        return DefaultPool.INSTANCE;
+    public static KmeansContext defaults() {
+        return new KmeansContext(
+            DefaultPool.INSTANCE,
+            ProgressTracker.NULL_TRACKER
+        );
     }
 
-    @Value.Default
-    default ProgressTracker progressTracker() {
-        return ProgressTracker.NULL_TRACKER;
-    }
-
-    static KmeansContext empty() {
-        return ImmutableKmeansContext.builder().build();
+    public static KmeansContext progressTrackerWithDefaultExecutor(ProgressTracker progressTracker) {
+        return new KmeansContext(
+            DefaultPool.INSTANCE,
+            progressTracker
+        );
     }
 }

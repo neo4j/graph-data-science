@@ -90,7 +90,7 @@ class KmeansGridTest {
       //  System.out.println(splittableRandom.nextDouble()) * 204  gives appx. 23.3xx
         //thus it should select (3,3) as the second center.
 
-        var kmeansContext = ImmutableKmeansContext.builder().build();
+        var kmeansContext = KmeansContext.defaults();
 
         var nodePropertyValues = graph.nodeProperties("kmeans");
 
@@ -139,7 +139,7 @@ class KmeansGridTest {
             .maxIterations(3)
             .initialSampler(SamplerType.KMEANSPP)
             .build();
-        var kmeansContext = ImmutableKmeansContext.builder().build();
+        var kmeansContext = KmeansContext.defaults();
 
         var kmeans = Kmeans.createKmeans(graph, kmeansConfig.toParameters(), kmeansContext, TerminationFlag.RUNNING_TRUE);
         var result = kmeans.compute();

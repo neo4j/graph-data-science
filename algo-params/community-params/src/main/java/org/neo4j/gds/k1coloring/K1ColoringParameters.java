@@ -19,9 +19,19 @@
  */
 package org.neo4j.gds.k1coloring;
 
+import org.neo4j.gds.AlgorithmParameters;
 import org.neo4j.gds.annotation.Parameters;
 import org.neo4j.gds.core.concurrency.Concurrency;
 
 @Parameters
-public record K1ColoringParameters(Concurrency concurrency, int maxIterations, int batchSize) {
+public record K1ColoringParameters(
+    Concurrency concurrency,
+    int maxIterations,
+    int batchSize
+) implements AlgorithmParameters {
+
+    public static K1ColoringParameters defaultsWithConcurrency(Concurrency concurrency) {
+        return new K1ColoringParameters(concurrency, 10, 10_000);
+    }
+
 }

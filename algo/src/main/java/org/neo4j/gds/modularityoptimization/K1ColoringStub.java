@@ -46,9 +46,7 @@ public class K1ColoringStub {
     ) {
         var algorithm = new K1Coloring(
             graph,
-            parameters.maxIterations(),
-            parameters.batchSize(),
-            parameters.concurrency(),
+            parameters,
             DefaultPool.INSTANCE,
             progressTracker,
             terminationFlag

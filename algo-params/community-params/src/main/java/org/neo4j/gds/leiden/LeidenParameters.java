@@ -20,6 +20,7 @@
 package org.neo4j.gds.leiden;
 
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.gds.AlgorithmParameters;
 import org.neo4j.gds.annotation.Parameters;
 import org.neo4j.gds.core.concurrency.Concurrency;
 
@@ -35,5 +36,8 @@ public record LeidenParameters(
     double theta,
     boolean includeIntermediateCommunities,
     Optional<Long> randomSeed
-) {
+) implements AlgorithmParameters {
+    public long randomSeedOrDefault() {
+        return randomSeed.orElse(0L);
+    }
 }

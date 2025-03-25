@@ -19,8 +19,13 @@
  */
 package org.neo4j.gds.scc;
 
+import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.config.AlgoBaseConfig;
 
 public interface SccCommonBaseConfig extends AlgoBaseConfig {
 
+    @Configuration.Ignore
+    default SccParameters toParameters() {
+        return new SccParameters(concurrency());
+    }
 }

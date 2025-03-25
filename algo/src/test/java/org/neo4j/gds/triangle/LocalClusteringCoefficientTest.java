@@ -19,16 +19,23 @@
  */
 package org.neo4j.gds.triangle;
 
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.neo4j.gds.CommunityAlgorithmTasks;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.TestProgressTrackerHelper;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.extension.GdlExtension;
+import org.neo4j.gds.extension.GdlGraph;
+import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.ArrayList;
@@ -302,4 +309,132 @@ class LocalClusteringCoefficientTest {
         );
         return localClusteringCoefficient.compute();
     }
+
+    @Nested
+    @GdlExtension
+    class ProgressTrackingTest {
+
+        @GdlGraph(orientation = Orientation.UNDIRECTED)
+        private static final String GRAPH =
+            """
+                CREATE
+                 (a {triangles: 2}),
+                 (b {triangles: 2}),
+                 (c {triangles: 1}),
+                 (d {triangles: 1}),
+                 (a)-[:T]->(b)-[:T]->(c)-[:T]->(a),
+                 (a)-[:T]->(b),
+                 (d)-[:T]->(a)
+                """;
+
+        @Inject
+        private Graph graph;
+
+        @Test
+        void progressLogging() {
+
+            var concurrency = new Concurrency(4);
+            var parameters = new LocalClusteringCoefficientParameters(concurrency, Long.MAX_VALUE, null);
+            var progressTrackerWithLog = TestProgressTrackerHelper.create(
+                new CommunityAlgorithmTasks().lcc(graph, parameters),
+                concurrency
+            );
+
+            var lcc = new LocalClusteringCoefficient(
+                graph,
+                parameters,
+                progressTrackerWithLog.progressTracker(),
+                TerminationFlag.RUNNING_TRUE
+            );
+            lcc.compute();
+
+            var log = progressTrackerWithLog.log();
+            log.assertContainsMessage(TestLog.INFO, "LocalClusteringCoefficient :: Start");
+                log.assertContainsMessage(
+                    TestLog.INFO,
+                    "LocalClusteringCoefficient :: IntersectingTriangleCount :: Start"
+                );
+                log.assertContainsMessage(TestLog.INFO, "LocalClusteringCoefficient :: IntersectingTriangleCount 25%");
+                log.assertContainsMessage(TestLog.INFO, "LocalClusteringCoefficient :: IntersectingTriangleCount 50%");
+                log.assertContainsMessage(TestLog.INFO, "LocalClusteringCoefficient :: IntersectingTriangleCount 75%");
+                log.assertContainsMessage(TestLog.INFO, "LocalClusteringCoefficient :: IntersectingTriangleCount 100%");
+                log.assertContainsMessage(
+                    TestLog.INFO,
+                    "LocalClusteringCoefficient :: IntersectingTriangleCount :: Finished"
+                );
+            log.assertContainsMessage(
+                TestLog.INFO,
+                "LocalClusteringCoefficient :: Calculate Local Clustering Coefficient :: Start"
+            );
+            log.assertContainsMessage(
+                TestLog.INFO,
+                "LocalClusteringCoefficient :: Calculate Local Clustering Coefficient 25%"
+            );
+            log.assertContainsMessage(
+                TestLog.INFO,
+                "LocalClusteringCoefficient :: Calculate Local Clustering Coefficient 50%"
+            );
+            log.assertContainsMessage(
+                TestLog.INFO,
+                "LocalClusteringCoefficient :: Calculate Local Clustering Coefficient 75%"
+            );
+            log.assertContainsMessage(
+                TestLog.INFO,
+                "LocalClusteringCoefficient :: Calculate Local Clustering Coefficient 100%"
+            );
+            log.assertContainsMessage(
+                TestLog.INFO,
+                "LocalClusteringCoefficient :: Calculate Local Clustering Coefficient :: Finished"
+            );
+            log.assertContainsMessage(TestLog.INFO, "LocalClusteringCoefficient :: Finished");
+        }
+
+        @Test
+        void progressLoggingWithSeed() {
+            var concurrency = new Concurrency(4);
+            var parameters = new LocalClusteringCoefficientParameters(concurrency, Long.MAX_VALUE, "triangles");
+            var progressTrackerWithLog = TestProgressTrackerHelper.create(
+                new CommunityAlgorithmTasks().lcc(graph, parameters),
+                concurrency
+            );
+
+            var lcc = new LocalClusteringCoefficient(
+                graph,
+                parameters,
+                progressTrackerWithLog.progressTracker(),
+                TerminationFlag.RUNNING_TRUE
+            );
+            lcc.compute();
+
+            var log = progressTrackerWithLog.log();
+
+            log.assertContainsMessage(TestLog.INFO, "LocalClusteringCoefficient :: Start");
+            log.assertContainsMessage(
+                TestLog.INFO,
+                "LocalClusteringCoefficient :: Calculate Local Clustering Coefficient :: Start"
+            );
+            log.assertContainsMessage(
+                TestLog.INFO,
+                "LocalClusteringCoefficient :: Calculate Local Clustering Coefficient 25%"
+            );
+            log.assertContainsMessage(
+                TestLog.INFO,
+                "LocalClusteringCoefficient :: Calculate Local Clustering Coefficient 50%"
+            );
+            log.assertContainsMessage(
+                TestLog.INFO,
+                "LocalClusteringCoefficient :: Calculate Local Clustering Coefficient 75%"
+            );
+            log.assertContainsMessage(
+                TestLog.INFO,
+                "LocalClusteringCoefficient :: Calculate Local Clustering Coefficient 100%"
+            );
+            log.assertContainsMessage(
+                TestLog.INFO,
+                "LocalClusteringCoefficient :: Calculate Local Clustering Coefficient :: Finished"
+            );
+            log.assertContainsMessage(TestLog.INFO, "LocalClusteringCoefficient :: Finished");
+        }
+    }
+
 }

@@ -71,13 +71,13 @@ import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.WCC
 
 public class CommunityAlgorithmsMutateModeBusinessFacade {
     private final CommunityAlgorithmsEstimationModeBusinessFacade estimation;
-    private final CommunityAlgorithms algorithms;
+    private final CommunityAlgorithmsBusinessFacade algorithms;
     private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
     private final MutateNodeProperty mutateNodeProperty;
 
     public CommunityAlgorithmsMutateModeBusinessFacade(
         CommunityAlgorithmsEstimationModeBusinessFacade estimation,
-        CommunityAlgorithms algorithms,
+        CommunityAlgorithmsBusinessFacade algorithms,
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
         MutateNodeProperty mutateNodeProperty
     ) {

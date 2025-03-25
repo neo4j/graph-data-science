@@ -23,6 +23,7 @@ import com.carrotsearch.hppc.cursors.LongLongCursor;
 import org.apache.commons.lang3.mutable.MutableDouble;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.Algorithm;
+import org.neo4j.gds.algorithms.community.CommunityCompanion;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
@@ -115,6 +116,33 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         this.modularityManager = ModularityManager.create(graph, concurrency);
 
         this.terminationFlag = terminationFlag;
+    }
+
+    public ModularityOptimization(
+        final Graph graph,
+        ModularityOptimizationParameters parameters,
+        ExecutorService executor,
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
+    ) {
+        this(
+            graph,
+            parameters.maxIterations(),
+            parameters.tolerance(),
+            parameters.seedProperty()
+                .map(seedProperty ->
+                    CommunityCompanion.extractSeedingNodePropertyValues(
+                        graph,
+                        seedProperty
+                    )
+                )
+                .orElse(null),
+            parameters.concurrency(),
+            parameters.batchSize(),
+            executor,
+            progressTracker,
+            terminationFlag
+        );
     }
 
     @Override

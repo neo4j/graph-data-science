@@ -17,21 +17,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.applications.algorithms.community;
+package org.neo4j.gds;
 
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
-import org.neo4j.gds.leiden.LeidenBaseConfig;
+import org.neo4j.gds.leiden.LeidenParameters;
 
 import java.util.List;
 
 public final class LeidenTask {
     private LeidenTask() {}
 
-    public static Task create(IdMap idMap, LeidenBaseConfig configuration) {
-        var iterations = configuration.maxLevels();
+    public static Task create(IdMap idMap, LeidenParameters parameters) {
+        var iterations = parameters.maxLevels();
         var iterativeTasks = Tasks.iterativeDynamic(
             "Iteration",
             () ->

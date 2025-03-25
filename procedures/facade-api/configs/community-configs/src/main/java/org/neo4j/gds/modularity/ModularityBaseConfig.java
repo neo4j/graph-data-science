@@ -68,4 +68,9 @@ public interface ModularityBaseConfig extends AlgoBaseConfig, RelationshipWeight
                 .map(NodeLabel::name))
         ));
     }
+
+    @Configuration.Ignore
+    default ModularityParameters toParameters() {
+        return new ModularityParameters(communityProperty(), concurrency());
+    }
 }

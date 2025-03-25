@@ -69,6 +69,22 @@ public class LocalClusteringCoefficient extends Algorithm<LocalClusteringCoeffic
         this.terminationFlag = terminationFlag;
     }
 
+    public LocalClusteringCoefficient(
+        Graph graph,
+        LocalClusteringCoefficientParameters parameters,
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
+    ) {
+        this(
+            graph,
+            parameters.concurrency(),
+            parameters.maxDegree(),
+            parameters.seedProperty(),
+            progressTracker,
+            terminationFlag
+        );
+    }
+
     @Override
     public LocalClusteringCoefficientResult compute() {
         progressTracker.beginSubTask();

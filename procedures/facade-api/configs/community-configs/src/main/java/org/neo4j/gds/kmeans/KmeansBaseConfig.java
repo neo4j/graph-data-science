@@ -112,4 +112,15 @@ public interface KmeansBaseConfig extends AlgoBaseConfig, IterationsConfig, Rand
             randomSeed()
         );
     }
+
+    @Configuration.Check
+    default void validateSeedCentroids() {
+        var seedCentroids = seedCentroids();
+        if (numberOfRestarts() > 1 && !seedCentroids.isEmpty()) {
+            throw new IllegalArgumentException("K-Means cannot be run multiple time when seeded");
+        }
+        if (!seedCentroids.isEmpty() && seedCentroids.size() != k()) {
+            throw new IllegalArgumentException("Incorrect number of seeded centroids given for running K-Means");
+        }
+    }
 }

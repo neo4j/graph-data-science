@@ -19,10 +19,15 @@
  */
 package org.neo4j.gds.approxmaxkcut;
 
+import org.assertj.core.api.AssertionsForClassTypes;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.junitpioneer.jupiter.cartesian.ArgumentSets;
 import org.junitpioneer.jupiter.cartesian.CartesianTest;
+import org.neo4j.gds.CommunityAlgorithmTasks;
+import org.neo4j.gds.TestProgressTrackerHelper;
+import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutBaseConfigImpl;
+import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
@@ -229,4 +234,120 @@ final class ApproxMaxKCutTest {
         assertThat(cardinalities[1]).isIn(1L, 6L);
     }
 
+    @ParameterizedTest
+    @ValueSource(ints = {0, 2})
+    void progressLogging(int vnsMaxNeighborhoodOrder) {
+        var config = ApproxMaxKCutBaseConfigImpl.builder()
+            .vnsMaxNeighborhoodOrder(vnsMaxNeighborhoodOrder)
+            .build();
+
+        var params = config.toParameters();
+
+        var progressTrackerWithLog = TestProgressTrackerHelper.create(
+            new CommunityAlgorithmTasks().approximateMaximumKCut(maxGraph,params),
+            new Concurrency(1)
+        );
+
+        var progressTracker = progressTrackerWithLog.progressTracker();
+        var log = progressTrackerWithLog.log();
+
+        var approxMaxKCut = ApproxMaxKCut.create(
+            maxGraph,
+            params,
+            DefaultPool.INSTANCE,
+            progressTracker,
+            TerminationFlag.RUNNING_TRUE
+        );
+
+        approxMaxKCut.compute();
+
+        AssertionsForClassTypes.assertThat(log.containsMessage(TestLog.INFO, ":: Start")).isTrue();
+        AssertionsForClassTypes.assertThat(log.containsMessage(TestLog.INFO, ":: Finish")).isTrue();
+
+        for (int i = 1; i <= config.iterations(); i++) {
+            AssertionsForClassTypes.assertThat(log.containsMessage(
+                TestLog.INFO,
+                "place nodes randomly %s of %s :: Start".formatted(i, config.iterations())
+            )).isTrue();
+            AssertionsForClassTypes.assertThat(log.containsMessage(
+                TestLog.INFO,
+                "place nodes randomly %s of %s 100%%".formatted(i, config.iterations())
+            )).isTrue();
+            AssertionsForClassTypes.assertThat(log.containsMessage(
+                TestLog.INFO,
+                "place nodes randomly %s of %s :: Finished".formatted(i, config.iterations())
+            )).isTrue();
+
+            if (vnsMaxNeighborhoodOrder == 0) {
+                AssertionsForClassTypes.assertThat(log.containsMessage(
+                    TestLog.INFO,
+                    "local search %s of %s :: Start".formatted(i, config.iterations())
+                )).isTrue();
+                AssertionsForClassTypes.assertThat(log.containsMessage(
+                    TestLog.INFO,
+                    "local search %s of %s :: Finished".formatted(i, config.iterations())
+                )).isTrue();
+                AssertionsForClassTypes.assertThat(log.containsMessage(
+                    TestLog.INFO,
+                    "local search %s of %s :: improvement loop :: Start".formatted(i, config.iterations())
+                )).isTrue();
+                AssertionsForClassTypes.assertThat(log.containsMessage(
+                    TestLog.INFO,
+                    "local search %s of %s :: improvement loop :: Finished".formatted(i, config.iterations())
+                )).isTrue();
+
+                // May occur several times but we don't know.
+                AssertionsForClassTypes.assertThat(log.containsMessage(
+                    TestLog.INFO,
+                    "local search %s of %s :: improvement loop :: compute node to community weights 1 :: Start"
+                        .formatted(i, config.iterations())
+                )).isTrue();
+                AssertionsForClassTypes.assertThat(log.containsMessage(
+                    TestLog.INFO,
+                    "local search %s of %s :: improvement loop :: compute node to community weights 1 100%%"
+                        .formatted(i, config.iterations())
+                )).isTrue();
+                AssertionsForClassTypes.assertThat(log.containsMessage(
+                    TestLog.INFO,
+                    "local search %s of %s :: improvement loop :: compute node to community weights 1 :: Finished"
+                        .formatted(i, config.iterations())
+                )).isTrue();
+                AssertionsForClassTypes.assertThat(log.containsMessage(
+                    TestLog.INFO,
+                    "local search %s of %s :: improvement loop :: swap for local improvements 1 :: Start".formatted(i, config.iterations())
+                )).isTrue();
+                AssertionsForClassTypes.assertThat(log.containsMessage(
+                    TestLog.INFO,
+                    "local search %s of %s :: improvement loop :: swap for local improvements 1 100%%".formatted(i, config.iterations())
+                )).isTrue();
+                AssertionsForClassTypes.assertThat(log.containsMessage(
+                    TestLog.INFO,
+                    "local search %s of %s :: improvement loop :: swap for local improvements 1 :: Finished".formatted(i, config.iterations())
+                )).isTrue();
+
+                AssertionsForClassTypes.assertThat(log.containsMessage(
+                    TestLog.INFO,
+                    "local search %s of %s :: compute current solution cost :: Start".formatted(i, config.iterations())
+                )).isTrue();
+                AssertionsForClassTypes.assertThat(log.containsMessage(
+                    TestLog.INFO,
+                    "local search %s of %s :: compute current solution cost 100%%".formatted(i, config.iterations())
+                )).isTrue();
+                AssertionsForClassTypes.assertThat(log.containsMessage(
+                    TestLog.INFO,
+                    "local search %s of %s :: compute current solution cost :: Finished".formatted(i, config.iterations())
+                )).isTrue();
+            } else {
+                // We merely check that VNS is indeed run. The rest is very similar to the non-VNS case.
+                AssertionsForClassTypes.assertThat(log.containsMessage(
+                    TestLog.INFO,
+                    "variable neighborhood search %s of %s :: Start".formatted(i, config.iterations())
+                )).isTrue();
+                AssertionsForClassTypes.assertThat(log.containsMessage(
+                    TestLog.INFO,
+                    "variable neighborhood search %s of %s :: Finished".formatted(i, config.iterations())
+                )).isTrue();
+            }
+        }
+    }
 }

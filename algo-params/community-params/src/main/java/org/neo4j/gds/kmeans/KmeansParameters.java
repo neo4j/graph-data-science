@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.kmeans;
 
+import org.neo4j.gds.AlgorithmParameters;
 import org.neo4j.gds.annotation.Parameters;
 import org.neo4j.gds.core.concurrency.Concurrency;
 
@@ -37,7 +38,7 @@ public record KmeansParameters(
     SamplerType samplerType,
     List<List<Double>> seedCentroids,
     Optional<Long> randomSeed
-) {
+) implements AlgorithmParameters {
     public boolean isSeeded() {
         return !seedCentroids().isEmpty();
     }

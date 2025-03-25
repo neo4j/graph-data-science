@@ -7,6 +7,7 @@ group = 'org.neo4j.gds'
 dependencies {
     implementation project(":algo")
     implementation project(":algo-common")
+    implementation project(':algo-params-common')
     implementation project(":algorithms-machinery")
     implementation project(":community-configs")
     implementation project(":config-api")

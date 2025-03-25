@@ -58,6 +58,7 @@ public class Leiden extends Algorithm<LeidenResult> {
 
     private final double tolerance;
 
+
     public Leiden(
         Graph graph,
         int maxIterations,
@@ -94,6 +95,28 @@ public class Leiden extends Algorithm<LeidenResult> {
         this.tolerance = tolerance;
 
         this.terminationFlag = terminationFlag;
+    }
+
+    public Leiden(
+        Graph graph,
+        LeidenParameters parameters,
+        @Nullable NodePropertyValues seedValues,
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
+    ) {
+        this(
+            graph,
+            parameters.maxLevels(),
+            parameters.gamma(),
+            parameters.theta(),
+            parameters.includeIntermediateCommunities(),
+            parameters.randomSeedOrDefault(),
+            seedValues,
+            parameters.tolerance(),
+            parameters.concurrency(),
+            progressTracker,
+            terminationFlag
+        );
     }
 
     @Override

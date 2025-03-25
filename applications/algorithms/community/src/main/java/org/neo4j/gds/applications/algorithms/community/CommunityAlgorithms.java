@@ -21,112 +21,82 @@ package org.neo4j.gds.applications.algorithms.community;
 
 import org.neo4j.gds.algorithms.community.CommunityCompanion;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmMachinery;
-import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.approxmaxkcut.ApproxMaxKCut;
+import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutParameters;
 import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutResult;
-import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutBaseConfig;
 import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.conductance.Conductance;
-import org.neo4j.gds.conductance.ConductanceBaseConfig;
-import org.neo4j.gds.conductance.ConductanceConfigTransformer;
+import org.neo4j.gds.conductance.ConductanceParameters;
 import org.neo4j.gds.conductance.ConductanceResult;
-import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.core.utils.progress.tasks.Task;
-import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.hdbscan.HDBScan;
-import org.neo4j.gds.hdbscan.HDBScanBaseConfig;
-import org.neo4j.gds.hdbscan.HDBScanProgressTrackerCreator;
+import org.neo4j.gds.hdbscan.HDBScanParameters;
 import org.neo4j.gds.hdbscan.Labels;
-import org.neo4j.gds.k1coloring.K1ColoringBaseConfig;
-import org.neo4j.gds.k1coloring.K1ColoringProgressTrackerTaskCreator;
+import org.neo4j.gds.k1coloring.K1ColoringParameters;
 import org.neo4j.gds.k1coloring.K1ColoringResult;
 import org.neo4j.gds.kcore.KCoreDecomposition;
+import org.neo4j.gds.kcore.KCoreDecompositionParameters;
 import org.neo4j.gds.kcore.KCoreDecompositionResult;
-import org.neo4j.gds.kmeans.ImmutableKmeansContext;
 import org.neo4j.gds.kmeans.Kmeans;
-import org.neo4j.gds.kmeans.KmeansBaseConfig;
+import org.neo4j.gds.kmeans.KmeansContext;
+import org.neo4j.gds.kmeans.KmeansParameters;
 import org.neo4j.gds.kmeans.KmeansResult;
 import org.neo4j.gds.labelpropagation.LabelPropagation;
-import org.neo4j.gds.labelpropagation.LabelPropagationBaseConfig;
+import org.neo4j.gds.labelpropagation.LabelPropagationParameters;
 import org.neo4j.gds.labelpropagation.LabelPropagationResult;
 import org.neo4j.gds.leiden.Leiden;
-import org.neo4j.gds.leiden.LeidenBaseConfig;
+import org.neo4j.gds.leiden.LeidenParameters;
 import org.neo4j.gds.leiden.LeidenResult;
 import org.neo4j.gds.louvain.Louvain;
-import org.neo4j.gds.louvain.LouvainBaseConfig;
-import org.neo4j.gds.louvain.LouvainProgressTrackerTaskCreator;
+import org.neo4j.gds.louvain.LouvainParameters;
 import org.neo4j.gds.louvain.LouvainResult;
-import org.neo4j.gds.modularity.ModularityBaseConfig;
 import org.neo4j.gds.modularity.ModularityCalculator;
+import org.neo4j.gds.modularity.ModularityParameters;
 import org.neo4j.gds.modularity.ModularityResult;
 import org.neo4j.gds.modularityoptimization.K1ColoringStub;
 import org.neo4j.gds.modularityoptimization.ModularityOptimization;
-import org.neo4j.gds.modularityoptimization.ModularityOptimizationBaseConfig;
-import org.neo4j.gds.modularityoptimization.ModularityOptimizationProgressTrackerTaskCreator;
+import org.neo4j.gds.modularityoptimization.ModularityOptimizationParameters;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationResult;
 import org.neo4j.gds.scc.Scc;
+import org.neo4j.gds.scc.SccParameters;
 import org.neo4j.gds.sllpa.SpeakerListenerLPA;
 import org.neo4j.gds.sllpa.SpeakerListenerLPAConfig;
-import org.neo4j.gds.sllpa.SpeakerListenerLPAProgressTrackerCreator;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.triangle.IntersectingTriangleCount;
 import org.neo4j.gds.triangle.LocalClusteringCoefficient;
-import org.neo4j.gds.triangle.LocalClusteringCoefficientBaseConfig;
+import org.neo4j.gds.triangle.LocalClusteringCoefficientParameters;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientResult;
-import org.neo4j.gds.triangle.TriangleCountBaseConfig;
+import org.neo4j.gds.triangle.TriangleCountParameters;
 import org.neo4j.gds.triangle.TriangleCountResult;
-import org.neo4j.gds.triangle.TriangleCountTask;
 import org.neo4j.gds.triangle.TriangleResult;
 import org.neo4j.gds.triangle.TriangleStream;
-import org.neo4j.gds.wcc.WccBaseConfig;
+import org.neo4j.gds.wcc.WccParameters;
 import org.neo4j.gds.wcc.WccStub;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
 public class CommunityAlgorithms {
     private final AlgorithmMachinery algorithmMachinery = new AlgorithmMachinery();
 
-    private final ProgressTrackerCreator progressTrackerCreator;
     private final TerminationFlag terminationFlag;
 
-    public CommunityAlgorithms(ProgressTrackerCreator progressTrackerCreator, TerminationFlag terminationFlag) {
-        this.progressTrackerCreator = progressTrackerCreator;
+    public CommunityAlgorithms(TerminationFlag terminationFlag) {
         this.terminationFlag = terminationFlag;
-    }
-
-    ApproxMaxKCutResult approximateMaximumKCut(Graph graph, ApproxMaxKCutBaseConfig configuration) {
-        var task = Tasks.iterativeFixed(
-            AlgorithmLabel.ApproximateMaximumKCut.asString(),
-            () -> List.of(
-                Tasks.leaf("place nodes randomly", graph.nodeCount()),
-                searchTask(graph.nodeCount(), configuration.vnsMaxNeighborhoodOrder())
-            ),
-            configuration.iterations()
-        );
-        var progressTracker = createProgressTracker(task, configuration);
-
-        return approximateMaximumKCut(graph, configuration, progressTracker);
     }
 
     public ApproxMaxKCutResult approximateMaximumKCut(
         Graph graph,
-        ApproxMaxKCutBaseConfig configuration,
+        ApproxMaxKCutParameters parameters,
         ProgressTracker progressTracker
     ) {
         var algorithm = ApproxMaxKCut.create(
             graph,
-            configuration.toParameters(),
+            parameters,
             DefaultPool.INSTANCE,
             progressTracker,
             terminationFlag
@@ -136,20 +106,11 @@ public class CommunityAlgorithms {
             algorithm,
             progressTracker,
             true,
-            configuration.concurrency()
+            parameters.concurrency()
         );
     }
 
-    ConductanceResult conductance(Graph graph, ConductanceBaseConfig configuration) {
-        var task = Tasks.task(
-            AlgorithmLabel.Conductance.asString(),
-            Tasks.leaf("count relationships", graph.nodeCount()),
-            Tasks.leaf("accumulate counts"),
-            Tasks.leaf("perform conductance computations")
-        );
-        var progressTracker = createProgressTracker(task, configuration);
-
-        var parameters = ConductanceConfigTransformer.toParameters(configuration);
+    ConductanceResult conductance(Graph graph, ConductanceParameters parameters, ProgressTracker progressTracker) {
 
         var algorithm = new Conductance(
             graph,
@@ -165,19 +126,15 @@ public class CommunityAlgorithms {
             algorithm,
             progressTracker,
             true,
-            configuration.concurrency()
+            parameters.concurrency()
         );
     }
 
-    public Labels hdbscan(Graph graph, HDBScanBaseConfig configuration) {
-
-        var task = HDBScanProgressTrackerCreator.hdbscanTask(AlgorithmLabel.HDBScan.asString(), graph.nodeCount());
-        var progressTracker = createProgressTracker(task, configuration);
-
+    public Labels hdbscan(Graph graph, HDBScanParameters parameters, ProgressTracker progressTracker) {
         var hdbScan = new HDBScan(
             graph,
-            graph.nodeProperties(configuration.nodeProperty()),
-            configuration.toParameters(),
+            graph.nodeProperties(parameters.nodeProperty()),
+            parameters,
             progressTracker,
             terminationFlag
         );
@@ -185,10 +142,7 @@ public class CommunityAlgorithms {
         return hdbScan.compute();
     }
 
-    public K1ColoringResult k1Coloring(Graph graph, K1ColoringBaseConfig configuration) {
-        var parameters = configuration.toParameters();
-        var task = K1ColoringProgressTrackerTaskCreator.progressTask(graph.nodeCount(), parameters.maxIterations());
-        var progressTracker = createProgressTracker(task, configuration);
+    public K1ColoringResult k1Coloring(Graph graph, K1ColoringParameters parameters, ProgressTracker progressTracker) {
 
         var k1ColoringStub = new K1ColoringStub(algorithmMachinery);
 
@@ -197,66 +151,52 @@ public class CommunityAlgorithms {
             parameters,
             progressTracker,
             terminationFlag,
-            configuration.concurrency(),
+            parameters.concurrency(),
             true
         );
     }
 
-    KCoreDecompositionResult kCore(Graph graph, AlgoBaseConfig configuration) {
-        var task = Tasks.leaf(AlgorithmLabel.KCore.asString(), graph.nodeCount());
-        var progressTracker = createProgressTracker(task, configuration);
-
-        var algorithm = new KCoreDecomposition(graph, configuration.concurrency(), progressTracker, terminationFlag);
-
-        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
-            algorithm,
-            progressTracker,
-            true,
-            configuration.concurrency()
-        );
-    }
-
-    public KmeansResult kMeans(Graph graph, KmeansBaseConfig configuration) {
-        var seedCentroids = configuration.seedCentroids();
-        if (configuration.numberOfRestarts() > 1 && !seedCentroids.isEmpty()) {
-            throw new IllegalArgumentException("K-Means cannot be run multiple time when seeded");
-        }
-        if (!seedCentroids.isEmpty() && seedCentroids.size() != configuration.k()) {
-            throw new IllegalArgumentException("Incorrect number of seeded centroids given for running K-Means");
-        }
-
-        var task = constructKMeansProgressTask(graph, configuration);
-        var progressTracker = createProgressTracker(task, configuration);
-
-        var kmeansContext = ImmutableKmeansContext.builder()
-            .executor(DefaultPool.INSTANCE)
-            .progressTracker(progressTracker)
-            .build();
-        var algorithm = Kmeans.createKmeans(graph, configuration.toParameters(), kmeansContext, terminationFlag);
+    KCoreDecompositionResult kCore(
+        Graph graph,
+        KCoreDecompositionParameters parameters,
+        ProgressTracker progressTracker
+    ) {
+        var algorithm = new KCoreDecomposition(graph, parameters.concurrency(), progressTracker, terminationFlag);
 
         return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
             algorithm,
             progressTracker,
             true,
-            configuration.concurrency()
+            parameters.concurrency()
         );
     }
 
-    LabelPropagationResult labelPropagation(Graph graph, LabelPropagationBaseConfig configuration) {
-        var task = Tasks.task(
-            AlgorithmLabel.LabelPropagation.asString(),
-            Tasks.leaf("Initialization", graph.relationshipCount()),
-            Tasks.iterativeDynamic(
-                "Assign labels",
-                () -> List.of(Tasks.leaf("Iteration", graph.relationshipCount())),
-                configuration.maxIterations()
-            )
+    public KmeansResult kMeans(Graph graph, KmeansParameters parameters, ProgressTracker progressTracker) {
+
+        var algorithm = Kmeans.createKmeans(
+            graph,
+            parameters,
+            new KmeansContext(DefaultPool.INSTANCE, progressTracker),
+            terminationFlag
         );
-        var progressTracker = createProgressTracker(task, configuration);
+
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
+            algorithm,
+            progressTracker,
+            true,
+            parameters.concurrency()
+        );
+    }
+
+    LabelPropagationResult labelPropagation(
+        Graph graph,
+        LabelPropagationParameters parameters,
+        ProgressTracker progressTracker
+    ) {
 
         var algorithm = new LabelPropagation(
             graph,
-            configuration.toParameters(),
+            parameters,
             DefaultPool.INSTANCE,
             progressTracker,
             terminationFlag
@@ -266,21 +206,15 @@ public class CommunityAlgorithms {
             algorithm,
             progressTracker,
             true,
-            configuration.concurrency()
+            parameters.concurrency()
         );
     }
 
-    LocalClusteringCoefficientResult lcc(Graph graph, LocalClusteringCoefficientBaseConfig configuration) {
-        var tasks = new ArrayList<Task>();
-        if (configuration.seedProperty() == null) {
-            tasks.add(TriangleCountTask.create(graph.nodeCount()));
-        }
-        tasks.add(Tasks.leaf("Calculate Local Clustering Coefficient", graph.nodeCount()));
-        var task = Tasks.task(AlgorithmLabel.LCC.asString(), tasks);
-        var progressTracker = createProgressTracker(task, configuration);
-
-        var parameters = configuration.toParameters();
-
+    LocalClusteringCoefficientResult lcc(
+        Graph graph,
+        LocalClusteringCoefficientParameters parameters,
+        ProgressTracker progressTracker
+    ) {
         var algorithm = new LocalClusteringCoefficient(
             graph,
             parameters.concurrency(),
@@ -294,34 +228,19 @@ public class CommunityAlgorithms {
             algorithm,
             progressTracker,
             true,
-            configuration.concurrency()
+            parameters.concurrency()
         );
     }
 
-    public LeidenResult leiden(Graph graph, LeidenBaseConfig configuration) {
-        if (!graph.schema().isUndirected()) {
-            throw new IllegalArgumentException(
-                "The Leiden algorithm works only with undirected graphs. Please orient the edges properly");
-        }
-
-        var task = LeidenTask.create(graph, configuration);
-        var progressTracker = createProgressTracker(task, configuration);
-
-        var parameters = configuration.toParameters();
+    public LeidenResult leiden(Graph graph, LeidenParameters parameters, ProgressTracker progressTracker) {
         var seedValues = Optional.ofNullable(parameters.seedProperty())
             .map(seedParameter -> CommunityCompanion.extractSeedingNodePropertyValues(graph, seedParameter))
             .orElse(null);
 
         var algorithm = new Leiden(
             graph,
-            parameters.maxLevels(),
-            parameters.gamma(),
-            parameters.theta(),
-            parameters.includeIntermediateCommunities(),
-            parameters.randomSeed().orElse(0L),
+            parameters,
             seedValues,
-            parameters.tolerance(),
-            parameters.concurrency(),
             progressTracker,
             terminationFlag
         );
@@ -330,30 +249,15 @@ public class CommunityAlgorithms {
             algorithm,
             progressTracker,
             true,
-            configuration.concurrency()
+            parameters.concurrency()
         );
     }
 
-    LouvainResult louvain(Graph graph, LouvainBaseConfig configuration) {
-
-        var parameters = configuration.toParameters();
-
-        var task = LouvainProgressTrackerTaskCreator.createTask(
-            graph.nodeCount(),
-            graph.relationshipCount(),
-            parameters.maxLevels(),
-            parameters.maxIterations()
-        );
-        var progressTracker = createProgressTracker(task, configuration);
+    LouvainResult louvain(Graph graph, LouvainParameters parameters, ProgressTracker progressTracker) {
 
         var algorithm = new Louvain(
             graph,
-            parameters.concurrency(),
-            parameters.maxIterations(),
-            parameters.tolerance(),
-            parameters.maxLevels(),
-            parameters.includeIntermediateCommunities(),
-            parameters.seedProperty(),
+            parameters,
             progressTracker,
             DefaultPool.INSTANCE,
             terminationFlag
@@ -363,37 +267,34 @@ public class CommunityAlgorithms {
             algorithm,
             progressTracker,
             true,
-            configuration.concurrency()
+            parameters.concurrency()
         );
     }
 
-    ModularityResult modularity(Graph graph, ModularityBaseConfig configuration) {
+    ModularityResult modularity(Graph graph, ModularityParameters parameters) {
         var algorithm = ModularityCalculator.create(
             graph,
-            graph.nodeProperties(configuration.communityProperty())::longValue,
-            configuration.concurrency()
+            graph.nodeProperties(parameters.communityProperty())::longValue,
+            parameters.concurrency()
         );
 
         return algorithm.compute();
     }
 
-    ModularityOptimizationResult modularityOptimization(Graph graph, ModularityOptimizationBaseConfig configuration) {
+    ModularityOptimizationResult modularityOptimization(
+        Graph graph,
+        ModularityOptimizationParameters parameters,
+        ProgressTracker progressTracker
+    ) {
 
-        var parameters = configuration.toParameters();
-
-        var task = ModularityOptimizationProgressTrackerTaskCreator.progressTask(
-            graph.nodeCount(),
-            graph.relationshipCount(),
-            parameters.maxIterations()
-        );
-
-        var progressTracker = createProgressTracker(task, configuration);
-
-        var seedPropertyValues = configuration.seedProperty() != null ?
-            CommunityCompanion.extractSeedingNodePropertyValues(
-                graph,
-                configuration.seedProperty()
-            ) : null;
+        var seedPropertyValues = parameters.seedProperty()
+            .map(seedProperty ->
+                CommunityCompanion.extractSeedingNodePropertyValues(
+                    graph,
+                    seedProperty
+                )
+            )
+            .orElse(null);
 
         var algorithm = new ModularityOptimization(
             graph,
@@ -411,45 +312,26 @@ public class CommunityAlgorithms {
             algorithm,
             progressTracker,
             true,
-            configuration.concurrency()
+            parameters.concurrency()
         );
     }
 
-    HugeLongArray scc(Graph graph, AlgoBaseConfig configuration) {
-        var progressTracker = progressTrackerCreator.createProgressTracker(
-            Tasks.leaf(AlgorithmLabel.SCC.asString(), graph.nodeCount()),
-            configuration.jobId(),
-            configuration.concurrency(),
-            configuration.logProgress()
-        );
-
-        return scc(graph, configuration, progressTracker);
-    }
-
-    public HugeLongArray scc(Graph graph, ConcurrencyConfig configuration, ProgressTracker progressTracker) {
+    public HugeLongArray scc(Graph graph, SccParameters parameters, ProgressTracker progressTracker) {
         var algorithm = new Scc(graph, progressTracker, terminationFlag);
 
         return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
             algorithm,
             progressTracker,
             true,
-            configuration.concurrency()
+            parameters.concurrency()
         );
-    }
-
-    TriangleCountResult triangleCount(Graph graph, TriangleCountBaseConfig configuration) {
-        var task = Tasks.leaf(AlgorithmLabel.TriangleCount.asString(), graph.nodeCount());
-        var progressTracker = createProgressTracker(task, configuration);
-
-        return triangleCount(graph, configuration, progressTracker);
     }
 
     public TriangleCountResult triangleCount(
         Graph graph,
-        TriangleCountBaseConfig configuration,
+        TriangleCountParameters parameters,
         ProgressTracker progressTracker
     ) {
-        var parameters = configuration.toParameters();
 
         var algorithm = IntersectingTriangleCount.create(
             graph,
@@ -464,110 +346,36 @@ public class CommunityAlgorithms {
             algorithm,
             progressTracker,
             true,
-            configuration.concurrency()
+            parameters.concurrency()
         );
     }
 
-    Stream<TriangleResult> triangles(Graph graph, ConcurrencyConfig configuration) {
+
+    Stream<TriangleResult> triangles(Graph graph, TriangleCountParameters parameters) {
         var algorithm = TriangleStream.create(
             graph,
             DefaultPool.INSTANCE,
-            configuration.concurrency(),
+            parameters.concurrency(),
             terminationFlag
         );
 
         return algorithm.compute();
     }
 
-    public DisjointSetStruct wcc(Graph graph, WccBaseConfig configuration) {
-        var task = Tasks.leaf(AlgorithmLabel.WCC.asString(), graph.relationshipCount());
-        var progressTracker = createProgressTracker(task, configuration);
-
-        if (configuration.hasRelationshipWeightProperty() && configuration.threshold() == 0) {
-            progressTracker.logWarning(
-                "Specifying a `relationshipWeightProperty` has no effect unless `threshold` is also set.");
-        }
-
+    public DisjointSetStruct wcc(
+        Graph graph,
+        WccParameters parameters,
+        ProgressTracker progressTracker
+    ) {
         var wccStub = new WccStub(terminationFlag, algorithmMachinery);
-
-        return wccStub.wcc(graph, configuration.toParameters(), progressTracker, true);
+        return wccStub.wcc(graph, parameters, progressTracker, true);
     }
 
-    private Task constructKMeansProgressTask(IdMap idMap, KmeansBaseConfig configuration) {
-        var label = AlgorithmLabel.KMeans.asString();
-
-        var iterations = configuration.numberOfRestarts();
-        if (iterations == 1) {
-            return kMeansTask(idMap, label, configuration);
-        }
-
-        return Tasks.iterativeFixed(
-            label,
-            () -> List.of(kMeansTask(idMap, "KMeans Iteration", configuration)),
-            iterations
-        );
-    }
-
-    private Task kMeansTask(IdMap idMap, String description, KmeansBaseConfig configuration) {
-        if (configuration.computeSilhouette()) {
-            return Tasks.task(
-                description, List.of(
-                    Tasks.leaf("Initialization", configuration.k()),
-                    Tasks.iterativeDynamic(
-                        "Main",
-                        () -> List.of(Tasks.leaf("Iteration")),
-                        configuration.maxIterations()
-                    ),
-                    Tasks.leaf("Silhouette", idMap.nodeCount())
-
-                )
-            );
-        } else {
-            return Tasks.task(
-                description, List.of(
-                    Tasks.leaf("Initialization", configuration.k()),
-                    Tasks.iterativeDynamic(
-                        "Main",
-                        () -> List.of(Tasks.leaf("Iteration")),
-                        configuration.maxIterations()
-                    )
-                )
-            );
-        }
-    }
-
-    private static Task searchTask(long nodeCount, int vnsMaxNeighborhoodOrder) {
-        if (vnsMaxNeighborhoodOrder > 0) {
-            return Tasks.iterativeOpen(
-                "variable neighborhood search",
-                () -> List.of(localSearchTask(nodeCount))
-            );
-        }
-
-        return localSearchTask(nodeCount);
-    }
-
-    private static Task localSearchTask(long nodeCount) {
-        return Tasks.task(
-            "local search",
-            Tasks.iterativeOpen(
-                "improvement loop",
-                () -> List.of(
-                    Tasks.leaf("compute node to community weights", nodeCount),
-                    Tasks.leaf("swap for local improvements", nodeCount)
-                )
-            ),
-            Tasks.leaf("compute current solution cost", nodeCount)
-        );
-    }
-
-    PregelResult speakerListenerLPA(Graph graph, SpeakerListenerLPAConfig configuration) {
-        var task = SpeakerListenerLPAProgressTrackerCreator.progressTask(
-            graph.nodeCount(),
-            configuration.maxIterations(),
-            AlgorithmLabel.SLLPA.asString()
-        );
-        var progressTracker = createProgressTracker(task, configuration);
+    PregelResult speakerListenerLPA(
+        Graph graph,
+        SpeakerListenerLPAConfig configuration,
+        ProgressTracker progressTracker
+    ) {
 
         var algorithm = new SpeakerListenerLPA(
             graph,
@@ -585,12 +393,4 @@ public class CommunityAlgorithms {
         );
     }
 
-    private ProgressTracker createProgressTracker(Task task, AlgoBaseConfig configuration) {
-        return progressTrackerCreator.createProgressTracker(
-            task,
-            configuration.jobId(),
-            configuration.concurrency(),
-            configuration.logProgress()
-        );
-    }
 }

@@ -19,13 +19,22 @@
  */
 package org.neo4j.gds.leiden;
 
+import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.ConsecutiveIdsConfig;
 import org.neo4j.gds.config.RandomSeedConfig;
 import org.neo4j.gds.config.RelationshipWeightConfig;
 import org.neo4j.gds.config.SeedConfig;
 import org.neo4j.gds.config.ToleranceConfig;
+
+import java.util.Collection;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public interface LeidenBaseConfig extends
     AlgoBaseConfig,
@@ -64,6 +73,22 @@ public interface LeidenBaseConfig extends
                 "`includeIntermediateResults` and the `consecutiveIds` option cannot be used at the same time.");
         }
     }
+
+    @Configuration.GraphStoreValidationCheck
+    default void validateUndirectedGraph(
+        GraphStore graphStore,
+        Collection<NodeLabel> ignored,
+        Collection<RelationshipType> selectedRelationshipTypes
+    ) {
+        if (!graphStore.schema().filterRelationshipTypes(Set.copyOf(selectedRelationshipTypes)).isUndirected()) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "Leiden requires relationship projections to be UNDIRECTED. " +
+                    "Selected relationships `%s` are not all undirected.",
+                selectedRelationshipTypes.stream().map(RelationshipType::name).collect(Collectors.toSet())
+            ));
+        }
+    }
+
 
     @Configuration.Ignore
     default LeidenParameters toParameters() {

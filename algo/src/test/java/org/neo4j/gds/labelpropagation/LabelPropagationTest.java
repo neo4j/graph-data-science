@@ -26,9 +26,13 @@ import com.carrotsearch.hppc.cursors.IntObjectCursor;
 import org.assertj.core.api.SoftAssertions;
 import org.assertj.core.api.junit.jupiter.InjectSoftAssertions;
 import org.assertj.core.api.junit.jupiter.SoftAssertionsExtension;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.neo4j.gds.CommunityAlgorithmTasks;
+import org.neo4j.gds.TestProgressTrackerHelper;
 import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -38,11 +42,16 @@ import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.termination.TerminationFlag;
 
+import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
+import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @GdlExtension
 @ExtendWith(SoftAssertionsExtension.class)
@@ -204,4 +213,67 @@ class LabelPropagationTest {
 
         return cluster;
     }
+
+    @Nested
+    @GdlExtension
+    class ProgressTrackingTest {
+
+        @GdlGraph
+        private static final String GRAPH =
+            "CREATE" +
+                "  (nAlice:User   {seedId: 2})" +
+                ", (nBridget:User {seedId: 3})" +
+                ", (nCharles:User {seedId: 4})" +
+                ", (nDoug:User    {seedId: 3})" +
+                ", (nMark:User    {seedId: 4})" +
+                ", (nMichael:User {seedId: 2})" +
+                ", (nAlice)-[:FOLLOW]->(nBridget)" +
+                ", (nAlice)-[:FOLLOW]->(nCharles)" +
+                ", (nMark)-[:FOLLOW]->(nDoug)" +
+                ", (nBridget)-[:FOLLOW]->(nMichael)" +
+                ", (nDoug)-[:FOLLOW]->(nMark)" +
+                ", (nMichael)-[:FOLLOW]->(nAlice)" +
+                ", (nAlice)-[:FOLLOW]->(nMichael)" +
+                ", (nBridget)-[:FOLLOW]->(nAlice)" +
+                ", (nMichael)-[:FOLLOW]->(nBridget)" +
+                ", (nCharles)-[:FOLLOW]->(nDoug)";
+
+        @Inject
+        private TestGraph graph;
+
+        @Test
+        void shouldLogProgress() {
+
+            var parameters = new LabelPropagationParameters(new Concurrency(4), 10, null, null);
+            var progressTrackerWithLog = TestProgressTrackerHelper.create(
+                new CommunityAlgorithmTasks().labelPropagation(graph, parameters),
+                new Concurrency(1)
+            );
+
+            var progressTracker = progressTrackerWithLog.progressTracker();
+            var labelPropagation = new LabelPropagation(
+                graph,
+                parameters,
+                DefaultPool.INSTANCE,
+                progressTracker,
+                TerminationFlag.RUNNING_TRUE
+            );
+            var result = labelPropagation.compute();
+            List<AtomicLong> progresses = progressTracker.getProgresses();
+
+            // Should log progress for every iteration + init step
+            var log = progressTrackerWithLog.log();
+            assertEquals(result.ranIterations() + 3, progresses.size());
+            progresses.forEach(progress -> assertTrue(progress.get() <= graph.relationshipCount()));
+            assertTrue(log.containsMessage(TestLog.INFO, ":: Start"));
+            LongStream.range(1, result.ranIterations() + 1).forEach(iteration -> {
+                assertTrue(log.containsMessage(
+                    TestLog.INFO,
+                    "Iteration %d of %d :: Start".formatted(iteration, parameters.maxIterations())
+                ));
+            });
+            assertTrue(log.containsMessage(TestLog.INFO, ":: Finished"));
+        }
+    }
+
 }

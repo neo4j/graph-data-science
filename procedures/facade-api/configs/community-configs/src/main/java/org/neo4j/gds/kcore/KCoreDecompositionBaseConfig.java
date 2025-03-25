@@ -50,4 +50,8 @@ public interface KCoreDecompositionBaseConfig extends AlgoBaseConfig, TargetNode
         }
     }
 
+    @Configuration.Ignore
+    default KCoreDecompositionParameters toParameters() {
+        return new KCoreDecompositionParameters(concurrency());
+    }
 }

@@ -20,15 +20,19 @@
 package org.neo4j.gds.modularityoptimization;
 
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.CommunityAlgorithmTasks;
 import org.neo4j.gds.CommunityHelper;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.TestProgressTracker;
+import org.neo4j.gds.TestProgressTrackerHelper;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.assertj.Extractors;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
@@ -48,7 +52,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.gds.TestSupport.ids;
+import static org.neo4j.gds.compat.TestLog.INFO;
 import static org.neo4j.gds.core.ProcedureConstants.TOLERANCE_DEFAULT;
+import static org.neo4j.gds.modularityoptimization.ModularityOptimization.K1COLORING_MAX_ITERATIONS;
 
 @GdlExtension
 class ModularityOptimizationTest {
@@ -207,4 +213,72 @@ class ModularityOptimizationTest {
             Optional.empty()
         );
     }
+
+    @GdlExtension
+    @Nested
+    class ProgressTrackingTest {
+
+        @GdlGraph(orientation = Orientation.UNDIRECTED)
+        private static final String GRAPH =
+            """
+                CREATE
+                  (a:Node {seed1:  1,  seed2: 21}),
+                  (b:Node {seed1: 5}),
+                  (c:Node {seed1:  2,  seed2: 42}),
+                  (d:Node {seed1:  3,  seed2: 33}),
+                  (e:Node {seed1:  2,  seed2: 42}),
+                  (f:Node {seed1:  3,  seed2: 33}),
+                  (a)-[:TYPE_OUT {weight: 0.01}]->(b),
+                  (a)-[:TYPE_OUT {weight: 5.0}]->(e),
+                  (a)-[:TYPE_OUT {weight: 5.0}]->(f),
+                  (b)-[:TYPE_OUT {weight: 5.0}]->(c),
+                  (b)-[:TYPE_OUT {weight: 5.0}]->(d),
+                  (c)-[:TYPE_OUT {weight: 0.01}]->(e),
+                  (f)-[:TYPE_OUT {weight: 0.01}]->(d)
+            """;
+
+        @Inject
+        private TestGraph graph;
+
+        @Test
+        void shouldLogProgress() {
+            var concurrency = new Concurrency(3);
+            var parameters = new ModularityOptimizationParameters(
+                concurrency,
+                K1COLORING_MAX_ITERATIONS,
+                2,
+                0.0001,
+                Optional.empty()
+            );
+            var progressTrackerWithLog = TestProgressTrackerHelper.create(
+                new CommunityAlgorithmTasks().modularityOptimization(graph, parameters),
+                new Concurrency(2)
+            );
+
+            var modularityOptimization = new ModularityOptimization(
+                graph,
+                parameters,
+                DefaultPool.INSTANCE,
+                progressTrackerWithLog.progressTracker(),
+                TerminationFlag.RUNNING_TRUE
+            );
+            modularityOptimization.compute();
+
+            var log = progressTrackerWithLog.log();
+            assertThat(log.getMessages(INFO))
+                .extracting(Extractors.removingThreadId())
+                .contains(
+                    "ModularityOptimization :: Start",
+                    "ModularityOptimization :: initialization :: K1Coloring :: color nodes 1 of 5 :: Start",
+                    "ModularityOptimization :: initialization :: K1Coloring :: color nodes 1 of 5 :: Finished",
+                    "ModularityOptimization :: initialization :: K1Coloring :: validate nodes 1 of 5 :: Start",
+                    "ModularityOptimization :: initialization :: K1Coloring :: validate nodes 1 of 5 :: Finished",
+                    "ModularityOptimization :: compute modularity :: optimizeForColor 1 of 5 :: Start",
+                    "ModularityOptimization :: compute modularity :: optimizeForColor 1 of 5 :: Finished",
+                    "ModularityOptimization :: Finished"
+                );
+        }
+
+    }
+
 }

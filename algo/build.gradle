@@ -28,7 +28,8 @@ dependencies {
     implementation project(':algorithms-machinery')
     implementation project(':algo-common')
     implementation project(':annotations')
-    
+
+    implementation project(':algo-params-common')
     implementation project(':centrality-params')
     implementation project(':community-params')
     implementation project(':node-embeddings-params')

@@ -19,12 +19,18 @@
  */
 package org.neo4j.gds.conductance;
 
+import org.assertj.core.api.Assertions;
 import org.assertj.core.data.Offset;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.gds.CommunityAlgorithmTasks;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.TestProgressTrackerHelper;
 import org.neo4j.gds.TestSupport;
+import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -37,35 +43,38 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.neo4j.gds.assertj.Extractors.removingThreadId;
+import static org.neo4j.gds.assertj.Extractors.replaceTimings;
 
 @GdlExtension
-final class ConductanceTest {
+class ConductanceTest {
 
     @GdlGraph(orientation = Orientation.NATURAL, graphNamePrefix = "natural")
     private static final String TEST_GRAPH =
-        "CREATE" +
-        "  (a:Label1 { community: 0 })" +
-        ", (b:Label1 { community: 0 })" +
-        ", (c:Label1 { community: 0 })" +
-        ", (d:Label1 { community: 1 })" +
-        ", (e:Label1 { community: 1 })" +
-        ", (f:Label1 { community: 1 })" +
-        ", (g:Label1 { community: 1 })" +
-        ", (h:Label1 { community: -1 })" +
-
-        ", (a)-[:TYPE1 {weight: 81.0}]->(b)" +
-        ", (a)-[:TYPE1 {weight: 7.0}]->(d)" +
-        ", (b)-[:TYPE1 {weight: 1.0}]->(d)" +
-        ", (b)-[:TYPE1 {weight: 1.0}]->(g)" +
-        ", (b)-[:TYPE1 {weight: 3.0}]->(h)" +
-        ", (c)-[:TYPE1 {weight: 45.0}]->(b)" +
-        ", (c)-[:TYPE1 {weight: 3.0}]->(e)" +
-        ", (d)-[:TYPE1 {weight: 3.0}]->(c)" +
-        ", (e)-[:TYPE1 {weight: 1.0}]->(b)" +
-        ", (f)-[:TYPE1 {weight: 3.0}]->(a)" +
-        ", (g)-[:TYPE1 {weight: 4.0}]->(c)" +
-        ", (g)-[:TYPE1 {weight: 999.0}]->(g)" +
-        ", (h)-[:TYPE1 {weight: 2.0}]->(a)";
+        """
+            CREATE
+              (a:Label1 { community: 0 }),
+              (b:Label1 { community: 0 }),
+              (c:Label1 { community: 0 }),
+              (d:Label1 { community: 1 }),
+              (e:Label1 { community: 1 }),
+              (f:Label1 { community: 1 }),
+              (g:Label1 { community: 1 }),
+              (h:Label1 { community: -1 }),
+              (a)-[:TYPE1 {weight: 81.0}]->(b),
+              (a)-[:TYPE1 {weight: 7.0}]->(d),
+              (b)-[:TYPE1 {weight: 1.0}]->(d),
+              (b)-[:TYPE1 {weight: 1.0}]->(g),
+              (b)-[:TYPE1 {weight: 3.0}]->(h),
+              (c)-[:TYPE1 {weight: 45.0}]->(b),
+              (c)-[:TYPE1 {weight: 3.0}]->(e),
+              (d)-[:TYPE1 {weight: 3.0}]->(c),
+              (e)-[:TYPE1 {weight: 1.0}]->(b),
+              (f)-[:TYPE1 {weight: 3.0}]->(a),
+              (g)-[:TYPE1 {weight: 4.0}]->(c),
+              (g)-[:TYPE1 {weight: 999.0}]->(g),
+              (h)-[:TYPE1 {weight: 2.0}]->(a)
+          """;
 
     @GdlGraph(orientation = Orientation.UNDIRECTED, graphNamePrefix = "undirected")
     private static final String UNDIRECTED = TEST_GRAPH;
@@ -135,5 +144,52 @@ final class ConductanceTest {
         );
     }
 
+    @Nested
+    class ProgressTrackingTest {
 
+        @GdlGraph
+        private static final String GRAPH = TEST_GRAPH;
+
+        @Inject
+        private TestGraph graph;
+
+        @Test
+        void shouldLogProgress() {
+            var concurrency = new Concurrency(1);
+            var progressTrackerWithLog = TestProgressTrackerHelper.create(
+                new CommunityAlgorithmTasks().conductance(graph),
+                concurrency
+            );
+
+            var conductance = new Conductance(
+                graph,
+                new Concurrency(1),
+                1,
+                false,
+                "community",
+                DefaultPool.INSTANCE,
+                progressTrackerWithLog.progressTracker()
+            );
+
+            conductance.compute();
+
+            var log = progressTrackerWithLog.log();
+            Assertions.assertThat(log.getMessages(TestLog.INFO))
+                .extracting(removingThreadId())
+                .extracting(replaceTimings())
+                .containsExactly(
+                    "Conductance :: Start",
+                    "Conductance :: count relationships :: Start",
+                    "Conductance :: count relationships 100%",
+                    "Conductance :: count relationships :: Finished",
+                    "Conductance :: accumulate counts :: Start",
+                    "Conductance :: accumulate counts 100%",
+                    "Conductance :: accumulate counts :: Finished",
+                    "Conductance :: perform conductance computations :: Start",
+                    "Conductance :: perform conductance computations 100%",
+                    "Conductance :: perform conductance computations :: Finished",
+                    "Conductance :: Finished"
+                );
+        }
+    }
 }
