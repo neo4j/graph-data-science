@@ -21,12 +21,17 @@ package org.neo4j.gds;
 
 import fastrp.FastRPParameters;
 import org.neo4j.gds.api.Graph;
+import node2vec.Node2VecParameters;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.embeddings.fastrp.FastRPTask;
+import org.neo4j.gds.embeddings.node2vec.Node2VecTask;
 
 public final class NodeEmbeddingsAlgorithmTasks {
 
     public Task fastRP(Graph graph, FastRPParameters fastRPParameters){
         return FastRPTask.create(graph.nodeCount(),graph.relationshipCount(),fastRPParameters);
+    }
+    public Task node2Vec(Graph graph, Node2VecParameters parameters){
+        return Node2VecTask.create(graph,parameters);
     }
 }

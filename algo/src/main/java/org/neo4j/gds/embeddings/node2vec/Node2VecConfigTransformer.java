@@ -19,6 +19,10 @@
  */
 package org.neo4j.gds.embeddings.node2vec;
 
+import node2vec.Node2VecParameters;
+import node2vec.SamplingWalkParameters;
+import node2vec.TrainParameters;
+
 public final class Node2VecConfigTransformer {
     private Node2VecConfigTransformer() {}
 
@@ -26,12 +30,14 @@ public final class Node2VecConfigTransformer {
         var walkParameters = config.walkParameters();
 
         var samplingWalkParameters = new SamplingWalkParameters(
+            config.sourceNodes(),
             walkParameters.walksPerNode(),
             walkParameters.walkLength(),
             walkParameters.returnFactor(),
             walkParameters.inOutFactor(),
             config.positiveSamplingFactor(),
-            config.negativeSamplingExponent()
+            config.negativeSamplingExponent(),
+            config.walkBufferSize()
         );
         var trainParameters = new TrainParameters(
             config.initialLearningRate(),
@@ -43,7 +49,12 @@ public final class Node2VecConfigTransformer {
             config.embeddingInitializer()
         );
 
-        return new Node2VecParameters(samplingWalkParameters, trainParameters);
+        return new Node2VecParameters(
+            samplingWalkParameters,
+            trainParameters,
+            config.concurrency(),
+            config.randomSeed()
+        );
     }
 
 }

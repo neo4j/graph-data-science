@@ -19,6 +19,10 @@
  */
 package org.neo4j.gds.embeddings.node2vec;
 
+import node2vec.EmbeddingInitializer;
+import node2vec.Node2VecParameters;
+import node2vec.SamplingWalkParameters;
+import node2vec.TrainParameters;
 import org.assertj.core.api.junit.jupiter.SoftAssertionsExtension;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
@@ -28,14 +32,17 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.neo4j.gds.NodeEmbeddingsAlgorithmTasks;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.TestProgressTrackerHelper;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.collections.hsa.HugeSparseLongArray;
+import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.loading.ArrayIdMap;
@@ -60,6 +67,7 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 
 @ExtendWith(SoftAssertionsExtension.class)
 @GdlExtension
@@ -71,17 +79,17 @@ class Node2VecTest {
     @GdlGraph
     private static final String DB_CYPHER =
         "CREATE" +
-        "  (a:Node1)" +
-        ", (b:Node1)" +
-        ", (c:Node2)" +
-        ", (d:Isolated)" +
-        ", (e:Isolated)" +
-        ", (a)-[:REL {prop: 1.0}]->(b)" +
-        ", (b)-[:REL {prop: 1.0}]->(a)" +
-        ", (a)-[:REL {prop: 1.0}]->(c)" +
-        ", (c)-[:REL {prop: 1.0}]->(a)" +
-        ", (b)-[:REL {prop: 1.0}]->(c)" +
-        ", (c)-[:REL {prop: 1.0}]->(b)";
+            "  (a:Node1)" +
+            ", (b:Node1)" +
+            ", (c:Node2)" +
+            ", (d:Isolated)" +
+            ", (e:Isolated)" +
+            ", (a)-[:REL {prop: 1.0}]->(b)" +
+            ", (b)-[:REL {prop: 1.0}]->(a)" +
+            ", (a)-[:REL {prop: 1.0}]->(c)" +
+            ", (c)-[:REL {prop: 1.0}]->(a)" +
+            ", (b)-[:REL {prop: 1.0}]->(c)" +
+            ", (c)-[:REL {prop: 1.0}]->(b)";
 
     @Inject
     private Graph graph;
@@ -106,15 +114,24 @@ class Node2VecTest {
             EmbeddingInitializer.NORMALIZED
         );
 
-        HugeObjectArray<FloatVector> node2Vec = new Node2Vec(
-            currentGraph,
-            new Concurrency(4),
+        var samplingWalkParameters = new SamplingWalkParameters(
             NO_SOURCE_NODES,
-            NO_RANDOM_SEED,
-            1000,
+            10,
+            80,
+            1.0,
+            1.0,
+            0.001,
+            0.75,
+            1000
+        );
+
+        HugeObjectArray<FloatVector> node2Vec = Node2Vec.create(
+            currentGraph,
             new Node2VecParameters(
-                new SamplingWalkParameters(10, 80, 1.0, 1.0, 0.001, 0.75),
-                trainParameters
+                samplingWalkParameters,
+                trainParameters,
+                new Concurrency(4),
+                NO_RANDOM_SEED
             ),
             ProgressTracker.NULL_TRACKER,
             TerminationFlag.RUNNING_TRUE
@@ -131,16 +148,30 @@ class Node2VecTest {
     void failOnNegativeWeights() {
         var negativeGraph = GdlFactory.of("CREATE (a)-[:REL {weight: -1}]->(b)").build().getUnion();
 
-        var walkParameters = new SamplingWalkParameters(10, 80, 1.0, 1.0, 0.001, 0.75);
-        var trainParameters = new TrainParameters(0.025, 0.0001, 1, 1, 1, 128, EmbeddingInitializer.NORMALIZED);
-
-        var node2Vec = new Node2Vec(
-            negativeGraph,
-            new Concurrency(4),
+        var walkParameters = new SamplingWalkParameters(
             NO_SOURCE_NODES,
-            NO_RANDOM_SEED,
-            1000,
-            new Node2VecParameters(walkParameters, trainParameters),
+            10,
+            80,
+            1.0,
+            1.0,
+            0.001,
+            0.75,
+            1000
+        );
+
+        var trainParameters = new TrainParameters(
+            0.025,
+            0.0001,
+            1,
+            1,
+            1,
+            128,
+            EmbeddingInitializer.NORMALIZED
+        );
+
+        var node2Vec = Node2Vec.create(
+            negativeGraph,
+            new Node2VecParameters(walkParameters, trainParameters, new Concurrency(4), NO_RANDOM_SEED),
             ProgressTracker.NULL_TRACKER,
             TerminationFlag.RUNNING_TRUE
         );
@@ -149,38 +180,47 @@ class Node2VecTest {
             .isInstanceOf(RuntimeException.class)
             .hasMessage(
                 "Found an invalid relationship weight between nodes `0` and `1` with the property value of `-1.000000`." +
-                " Node2Vec only supports non-negative weights.");
+                    " Node2Vec only supports non-negative weights.");
 
     }
 
     //"The order of the randomWalks + its usage in the training is not deterministic yet. Can guarantee only for concurrency 1")
     @ParameterizedTest
-    @ValueSource(ints= {1})
+    @ValueSource(ints = {1})
     void randomSeed(int concurrency) {
 
-
         int embeddingDimension = 2;
-        var walkParameters = new SamplingWalkParameters(1, 20, 1.0, 1.0,  0.001, 0.75);
-        var trainParameters = new TrainParameters(0.025, 0.0001, 1, 1, 1, embeddingDimension, EmbeddingInitializer.NORMALIZED);
-
-        var embeddings = new Node2Vec(
-            graph,
-            new Concurrency(concurrency),
+        var walkParameters = new SamplingWalkParameters(
             NO_SOURCE_NODES,
-            Optional.of(1337L),
-            1000,
-            new Node2VecParameters(walkParameters, trainParameters),
+            1,
+            20,
+            1.0,
+            1.0,
+            0.001,
+            0.75,
+            1000
+        );
+
+        var trainParameters = new TrainParameters(
+            0.025,
+            0.0001,
+            1,
+            1,
+            1,
+            embeddingDimension,
+            EmbeddingInitializer.NORMALIZED
+        );
+
+        var embeddings = Node2Vec.create(
+            graph,
+            new Node2VecParameters(walkParameters, trainParameters, new Concurrency(concurrency), Optional.of(1337L)),
             ProgressTracker.NULL_TRACKER,
             TerminationFlag.RUNNING_TRUE
         ).compute().embeddings();
 
-        var otherEmbeddings = new Node2Vec(
+        var otherEmbeddings = Node2Vec.create(
             graph,
-            new Concurrency(concurrency),
-            NO_SOURCE_NODES,
-            Optional.of(1337L),
-            1000,
-            new Node2VecParameters(walkParameters, trainParameters),
+            new Node2VecParameters(walkParameters, trainParameters, new Concurrency(concurrency), Optional.of(1337L)),
             ProgressTracker.NULL_TRACKER,
             TerminationFlag.RUNNING_TRUE
         ).compute().embeddings();
@@ -264,27 +304,37 @@ class Node2VecTest {
         var firstGraph = GraphFactory.create(firstIdMap, firstRelationships);
         var secondGraph = GraphFactory.create(secondIdMap, secondRelationships);
 
-        var walkParameters = new SamplingWalkParameters(10, 80, 1.0, 1.0, 0.01, 0.75);
-        var trainParameters = new TrainParameters(0.025, 0.0001, 1, 10, 5, embeddingDimension, embeddingInitializer);
-
-        var firstEmbeddings = new Node2Vec(
-            firstGraph,
-            new Concurrency(4),
+        var walkParameters = new SamplingWalkParameters(
             NO_SOURCE_NODES,
-            Optional.of(1337L),
-            1000,
-            new Node2VecParameters(walkParameters, trainParameters),
+            10,
+            80,
+            1.0,
+            1.0,
+            0.01,
+            0.75,
+            1000
+        );
+
+        var trainParameters = new TrainParameters(
+            0.025,
+            0.0001,
+            1,
+            10,
+            5,
+            embeddingDimension,
+            embeddingInitializer
+        );
+
+        var firstEmbeddings = Node2Vec.create(
+            firstGraph,
+            new Node2VecParameters(walkParameters, trainParameters, new Concurrency(4), Optional.of(1337L)),
             ProgressTracker.NULL_TRACKER,
             TerminationFlag.RUNNING_TRUE
         ).compute().embeddings();
 
-        var secondEmbeddings = new Node2Vec(
+        var secondEmbeddings = Node2Vec.create(
             secondGraph,
-            new Concurrency(4),
-            NO_SOURCE_NODES,
-            Optional.of(1337L),
-            1000,
-            new Node2VecParameters(walkParameters, trainParameters),
+            new Node2VecParameters(walkParameters, trainParameters, new Concurrency(4), Optional.of(1337L)),
             ProgressTracker.NULL_TRACKER,
             TerminationFlag.RUNNING_TRUE
         ).compute().embeddings();
@@ -299,5 +349,79 @@ class Node2VecTest {
         //There's no hard cutoff on the average cosineSim.
         //We just want to assert different randomly initialized embeddings produce 'relatively similar' embeddings.
         assertThat(cosineSum / nodeCount).isCloseTo(1, Offset.offset(0.6));
+    }
+
+    @Test
+    void shouldLogProgressForNode2Vec() {
+
+        var unweighted = graphStore.getGraph(RelationshipType.of("REL"), Optional.empty());
+
+        var configuration = Node2VecStreamConfigImpl.builder().embeddingDimension(128).build();
+        var params = Node2VecConfigTransformer.node2VecParameters(configuration);
+
+        var progressTrackerWithLog = TestProgressTrackerHelper.create(
+            new NodeEmbeddingsAlgorithmTasks().node2Vec(unweighted, params),
+            new Concurrency(params.concurrency().value())
+        );
+
+        var progressTracker = progressTrackerWithLog.progressTracker();
+        var log = progressTrackerWithLog.log();
+
+        var node2Vec = Node2Vec.create(unweighted, params, progressTracker, TerminationFlag.RUNNING_TRUE);
+        node2Vec.compute();
+
+        assertThat(log.getMessages(TestLog.INFO))
+            .extracting(removingThreadId())
+            .contains(
+                "Node2Vec :: Start",
+                "Node2Vec :: RandomWalk :: Start",
+                "Node2Vec :: RandomWalk :: create walks :: Start",
+                "Node2Vec :: RandomWalk :: create walks 100%",
+                "Node2Vec :: RandomWalk :: create walks :: Finished",
+                "Node2Vec :: RandomWalk :: Finished",
+                "Node2Vec :: train :: Start",
+                "Node2Vec :: train :: iteration 1 of 1 :: Start",
+                "Node2Vec :: train :: iteration 1 of 1 100%",
+                "Node2Vec :: train :: iteration 1 of 1 :: Finished",
+                "Node2Vec :: train :: Finished",
+                "Node2Vec :: Finished"
+            );
+    }
+
+    @Test
+    void shouldLogProgressForNode2VecWithRelationshipWeights() {
+
+        var configuration = Node2VecStreamConfigImpl.builder().embeddingDimension(128).build();
+        var params = Node2VecConfigTransformer.node2VecParameters(configuration);
+
+        var progressTrackerWithLog = TestProgressTrackerHelper.create(
+            new NodeEmbeddingsAlgorithmTasks().node2Vec(graph, params),
+            new Concurrency(params.concurrency().value())
+        );
+
+        var progressTracker = progressTrackerWithLog.progressTracker();
+        var log = progressTrackerWithLog.log();
+
+        var node2Vec = Node2Vec.create(graph, params, progressTracker, TerminationFlag.RUNNING_TRUE);
+        node2Vec.compute();
+
+        assertThat(log.getMessages(TestLog.INFO))
+            .extracting(removingThreadId())
+            .contains(
+                "Node2Vec :: Start",
+                "Node2Vec :: RandomWalk :: Start",
+                "Node2Vec :: RandomWalk :: DegreeCentrality :: Start",
+                "Node2Vec :: RandomWalk :: DegreeCentrality :: Finished",
+                "Node2Vec :: RandomWalk :: create walks :: Start",
+                "Node2Vec :: RandomWalk :: create walks 100%",
+                "Node2Vec :: RandomWalk :: create walks :: Finished",
+                "Node2Vec :: RandomWalk :: Finished",
+                "Node2Vec :: train :: Start",
+                "Node2Vec :: train :: iteration 1 of 1 :: Start",
+                "Node2Vec :: train :: iteration 1 of 1 100%",
+                "Node2Vec :: train :: iteration 1 of 1 :: Finished",
+                "Node2Vec :: train :: Finished",
+                "Node2Vec :: Finished"
+            );
     }
 }

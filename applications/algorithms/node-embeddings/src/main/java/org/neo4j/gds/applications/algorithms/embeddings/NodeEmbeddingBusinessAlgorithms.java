@@ -34,6 +34,7 @@ import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.gds.embeddings.hashgnn.HashGNNConfig;
 import org.neo4j.gds.embeddings.hashgnn.HashGNNResult;
 import org.neo4j.gds.embeddings.node2vec.Node2VecBaseConfig;
+import org.neo4j.gds.embeddings.node2vec.Node2VecConfigTransformer;
 import org.neo4j.gds.embeddings.node2vec.Node2VecResult;
 
 public class NodeEmbeddingBusinessAlgorithms {
@@ -59,6 +60,15 @@ public class NodeEmbeddingBusinessAlgorithms {
 
     }
 
+    Node2VecResult node2Vec(Graph graph, Node2VecBaseConfig configuration) {
+        var params = Node2VecConfigTransformer.node2VecParameters(configuration);
+        var task = tasks.node2Vec(graph,params);
+        var progressTracker = progressTrackerCreator.createProgressTracker(task,configuration);
+
+        return algorithms.node2Vec(graph, params, progressTracker);
+    }
+
+
     public GraphSageResult graphSage(Graph graph, GraphSageBaseConfig configuration) {
        return  algorithms.graphSage(graph,configuration);
     }
@@ -71,13 +81,8 @@ public class NodeEmbeddingBusinessAlgorithms {
     }
 
     HashGNNResult hashGnn(Graph graph, HashGNNConfig configuration) {
-
         return algorithms.hashGnn(graph,configuration);
     }
 
-    Node2VecResult node2Vec(Graph graph, Node2VecBaseConfig configuration) {
-        return algorithms.node2Vec(graph,configuration);
-
-    }
 
 }
