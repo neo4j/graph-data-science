@@ -36,36 +36,46 @@ import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
 
-public class Node2Vec extends Algorithm<Node2VecResult> {
+public final class Node2Vec extends Algorithm<Node2VecResult> {
 
     private final Graph graph;
     private final Concurrency concurrency;
     private final SamplingWalkParameters samplingWalkParameters;
-    private final List<Long> sourceNodes;
     private final Optional<Long> maybeRandomSeed;
     private final TrainParameters trainParameters;
-    private final int walkBufferSize;
 
-
-    public Node2Vec(
+    public  static Node2Vec create(
         Graph graph,
-        Concurrency concurrency,
-        List<Long> sourceNodes,
-        Optional<Long> maybeRandomSeed,
-        int walkBufferSize,
         Node2VecParameters node2VecParameters,
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
+    ) {
+        return  new Node2Vec(
+            graph,
+            node2VecParameters.samplingWalkParameters(),
+            node2VecParameters.trainParameters(),
+            node2VecParameters.concurrency(),
+            node2VecParameters.randomSeed(),
+            progressTracker,
+            terminationFlag
+        );
+
+    }
+    private Node2Vec(
+        Graph graph,
+        SamplingWalkParameters samplingWalkParameters,
+        TrainParameters trainParameters,
+        Concurrency concurrency,
+        Optional<Long> maybeRandomSeed,
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
         super(progressTracker);
         this.graph = graph;
         this.concurrency = concurrency;
-        this.samplingWalkParameters = node2VecParameters.samplingWalkParameters();
-        this.walkBufferSize = walkBufferSize;
-        this.sourceNodes = sourceNodes;
+        this.samplingWalkParameters = samplingWalkParameters;
         this.maybeRandomSeed = maybeRandomSeed;
-        this.trainParameters = node2VecParameters.trainParameters();
-
+        this.trainParameters = trainParameters;
         this.terminationFlag = terminationFlag;
     }
 
@@ -99,9 +109,9 @@ public class Node2Vec extends Algorithm<Node2VecResult> {
             graph,
             maybeRandomSeed,
             concurrency,
-            sourceNodes,
+            samplingWalkParameters.sourceNodes(),
             samplingWalkParameters,
-            walkBufferSize,
+            samplingWalkParameters.walkBufferSize(),
             DefaultPool.INSTANCE,
             progressTracker,
             terminationFlag

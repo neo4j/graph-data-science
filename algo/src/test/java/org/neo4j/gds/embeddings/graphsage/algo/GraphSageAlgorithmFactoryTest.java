@@ -38,10 +38,8 @@ import org.neo4j.gds.core.model.InjectModelCatalog;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.model.ModelCatalogExtension;
-import org.neo4j.gds.embeddings.graphsage.AggregatorType;
 import org.neo4j.gds.embeddings.graphsage.GraphSageModelTrainer;
 import org.neo4j.gds.embeddings.graphsage.Layer;
-import org.neo4j.gds.embeddings.graphsage.LayerConfig;
 import org.neo4j.gds.embeddings.graphsage.ModelData;
 import org.neo4j.gds.embeddings.graphsage.SingleLabelFeatureFunction;
 import org.neo4j.gds.embeddings.graphsage.TrainConfigTransformer;
@@ -105,9 +103,9 @@ class GraphSageAlgorithmFactoryTest {
         // additional final layer size
         batchSizes.add(PrimitiveTuples.pair(minBatchNodeCount, maxBatchNodeCount));
         var subGraphMemories = new ArrayList<MemoryRange>();
-        var layerConfigs = trainParameters.layerConfigs();
-        for (LayerConfig layerConfig : layerConfigs) {
-            var sampleSize = layerConfig.sampleSize();
+        var layerConfigs = trainParameters.layerParameters();
+        for (LayerParameters layerParameters : layerConfigs) {
+            var sampleSize = layerParameters.sampleSize();
 
             // int[3bs] selfAdjacency
             var minSelfAdjacencyMemory = sizeOfIntArray(minBatchNodeCount);

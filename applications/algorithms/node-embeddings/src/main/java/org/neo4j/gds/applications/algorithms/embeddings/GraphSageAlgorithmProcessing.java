@@ -34,7 +34,7 @@ public class GraphSageAlgorithmProcessing {
 
 
    <CONFIGURATION extends GraphSageBaseConfig> GraphSageProcessParameters graphSageValidationHook( CONFIGURATION configuration){
-       var model = graphSageModelCatalog.get(configuration);
+       var model = graphSageModelCatalog.get(configuration.username(), configuration.modelName());
        var relationshipWeightPropertyFromTrainConfiguration = model.trainConfig().relationshipWeightProperty();
 
        var validationHook = new GraphSageValidationHook(configuration, model);

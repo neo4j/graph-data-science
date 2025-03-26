@@ -17,21 +17,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.embeddings.fastrp;
+package org.neo4j.gds.embeddings.graphsage.algo;
 
-import org.neo4j.gds.annotation.Parameters;
-
-import java.util.List;
-import java.util.Optional;
-
-@Parameters
-public record FastRPParameters(
-    List<String> featureProperties,
-    List<Number> iterationWeights,
-    int embeddingDimension,
-    int propertyDimension,
-    Optional<String> relationshipWeightProperty,
-    float normalizationStrength,
-    Number nodeSelfInfluence
-) {
-}
+public record ModelParameters(String username, String modelName) {}

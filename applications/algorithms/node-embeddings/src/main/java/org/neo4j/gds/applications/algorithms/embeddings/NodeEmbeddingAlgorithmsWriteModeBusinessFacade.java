@@ -46,14 +46,14 @@ import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Nod
 
 public final class NodeEmbeddingAlgorithmsWriteModeBusinessFacade {
     private final NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimationFacade;
-    private final NodeEmbeddingAlgorithms algorithms;
+    private final NodeEmbeddingBusinessAlgorithms algorithms;
     private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
     private final WriteToDatabase writeToDatabase;
     private final GraphSageAlgorithmProcessing graphSageAlgorithmProcessing;
 
     NodeEmbeddingAlgorithmsWriteModeBusinessFacade(
         NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimationFacade,
-        NodeEmbeddingAlgorithms algorithms,
+        NodeEmbeddingBusinessAlgorithms algorithms,
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
         WriteToDatabase writeToDatabase, GraphSageAlgorithmProcessing graphSageAlgorithmProcessing
     ) {
@@ -69,7 +69,7 @@ public final class NodeEmbeddingAlgorithmsWriteModeBusinessFacade {
         RequestScopedDependencies requestScopedDependencies,
         WriteContext writeContext,
         NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimationFacade,
-        NodeEmbeddingAlgorithms algorithms,
+        NodeEmbeddingBusinessAlgorithms algorithms,
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
         GraphSageAlgorithmProcessing graphSageAlgorithmProcessing
     ) {

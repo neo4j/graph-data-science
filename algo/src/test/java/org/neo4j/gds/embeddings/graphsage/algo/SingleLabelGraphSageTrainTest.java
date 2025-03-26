@@ -27,8 +27,6 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.embeddings.graphsage.ActivationFunctionType;
-import org.neo4j.gds.embeddings.graphsage.AggregatorType;
 import org.neo4j.gds.embeddings.graphsage.SingleLabelFeatureFunction;
 import org.neo4j.gds.embeddings.graphsage.TrainConfigTransformer;
 import org.neo4j.gds.extension.GdlExtension;

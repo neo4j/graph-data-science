@@ -17,26 +17,34 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.embeddings.graphsage.algo;
+package org.neo4j.gds.embeddings.node2vec;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
-import org.neo4j.gds.embeddings.graphsage.GraphSageModelTrainer;
+import org.neo4j.gds.degree.DegreeCentralityTask;
 
-public final class GraphSageTrainTask {
-    private GraphSageTrainTask() {}
+import java.util.ArrayList;
+import java.util.List;
 
-    public static Task create(Graph graph, GraphSageTrainParameters parameters) {
+public class Node2VecTask {
 
+    private Node2VecTask() {}
+
+    public static Task create(Graph graph, Node2VecParameters parameters) {
+        var randomWalkTasks = new ArrayList<Task>();
+        if (graph.hasRelationshipProperty()) {
+            randomWalkTasks.add(DegreeCentralityTask.create(graph));
+        }
+        randomWalkTasks.add(Tasks.leaf("create walks", graph.nodeCount()));
         return Tasks.task(
-            AlgorithmLabel.GraphSageTrain.asString(),
-            GraphSageModelTrainer.progressTasks(
-                parameters.numberOfBatches(graph.nodeCount()),
-                parameters.batchesPerIteration(graph.nodeCount()),
-                parameters.maxIterations(),
-                parameters.epochs()
+            AlgorithmLabel.Node2Vec.asString(),
+            Tasks.task("RandomWalk", randomWalkTasks),
+            Tasks.iterativeFixed(
+                "train",
+                () -> List.of(Tasks.leaf("iteration")),
+                parameters.trainParameters().iterations()
             )
         );
     }

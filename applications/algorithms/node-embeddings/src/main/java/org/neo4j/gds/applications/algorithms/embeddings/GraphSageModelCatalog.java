@@ -24,7 +24,6 @@ import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.embeddings.graphsage.GraphSageModelTrainer;
 import org.neo4j.gds.embeddings.graphsage.ModelData;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
-import org.neo4j.gds.model.ModelConfig;
 
 public class GraphSageModelCatalog {
     private final ModelCatalog modelCatalog;
@@ -38,10 +37,10 @@ public class GraphSageModelCatalog {
      * <p>
      * NB: We use {@link org.neo4j.gds.model.ModelConfig#username()} because then operator can override.
      */
-    Model<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics> get(ModelConfig configuration) {
+    Model<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics> get(String username,  String modelName) {
         return modelCatalog.get(
-            configuration.username(),
-            configuration.modelName(),
+            username,
+            modelName,
             ModelData.class,
             GraphSageTrainConfig.class,
             GraphSageModelTrainer.GraphSageTrainMetrics.class

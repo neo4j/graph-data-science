@@ -17,24 +17,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.embeddings.graphsage;
+package org.neo4j.gds.embeddings.hashgnn;
 
-import org.neo4j.gds.embeddings.graphsage.algo.ActivationFunctionType;
-import org.neo4j.gds.ml.core.functions.Relu;
-
-public class ReluWrapper implements ActivationFunctionWrapper {
-    @Override
-    public ActivationFunction activationFunction() {
-        return Relu::new;
-    }
-
-    @Override
-    public double weightInitBound(int rows, int cols) {
-        return Math.sqrt(2d / cols);
-    }
-
-    @Override
-    public ActivationFunctionType activationFunctionType() {
-        return ActivationFunctionType.RELU;
-    }
-}
+public record GenerateParameters(int densityLevel, int dimension) {}

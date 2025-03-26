@@ -17,27 +17,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.embeddings.graphsage.algo;
+package org.neo4j.gds.embeddings.fastrp;
 
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
-import org.neo4j.gds.embeddings.graphsage.GraphSageModelTrainer;
 
-public final class GraphSageTrainTask {
-    private GraphSageTrainTask() {}
+import java.util.ArrayList;
+import java.util.List;
 
-    public static Task create(Graph graph, GraphSageTrainParameters parameters) {
+public class FastRPTask {
 
-        return Tasks.task(
-            AlgorithmLabel.GraphSageTrain.asString(),
-            GraphSageModelTrainer.progressTasks(
-                parameters.numberOfBatches(graph.nodeCount()),
-                parameters.batchesPerIteration(graph.nodeCount()),
-                parameters.maxIterations(),
-                parameters.epochs()
-            )
-        );
+    public static Task create(long nodeCount, long relationshipCount, FastRPParameters parameters) {
+        var tasks = new ArrayList<Task>();
+        tasks.add(Tasks.leaf("Initialize random vectors", nodeCount));
+        if (Float.compare(parameters.nodeSelfInfluence().floatValue(), 0.0f) != 0) {
+            tasks.add(Tasks.leaf("Apply node self-influence", nodeCount));
+        }
+        tasks.add(Tasks.iterativeFixed(
+            "Propagate embeddings",
+            () -> List.of(Tasks.leaf("Propagate embeddings task", relationshipCount)),
+            parameters.iterationWeights().size()
+        ));
+        return Tasks.task(AlgorithmLabel.FastRP.asString(), tasks);
     }
 }

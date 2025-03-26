@@ -28,6 +28,13 @@ public interface GraphSageBaseConfig extends AlgoBaseConfig, BatchSizeConfig, Mo
 
     @Configuration.Ignore
     default GraphSageParameters toParameters() {
-        return new GraphSageParameters(concurrency(), batchSize());
+        var modelParams = new ModelParameters(username(), modelName());
+        var runningParams = new GraphSageAlgorithmParameters(concurrency(),batchSize());
+
+        return new GraphSageParameters(
+            modelParams,
+            runningParams
+        );
+
     }
 }

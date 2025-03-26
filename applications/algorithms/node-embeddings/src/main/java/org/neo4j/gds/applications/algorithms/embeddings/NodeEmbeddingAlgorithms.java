@@ -20,86 +20,54 @@
 package org.neo4j.gds.applications.algorithms.embeddings;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmMachinery;
-import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.core.utils.progress.tasks.Task;
-import org.neo4j.gds.core.utils.progress.tasks.Tasks;
-import org.neo4j.gds.degree.DegreeCentralityTask;
 import org.neo4j.gds.embeddings.fastrp.FastRP;
-import org.neo4j.gds.embeddings.fastrp.FastRPBaseConfig;
-import org.neo4j.gds.embeddings.fastrp.FastRPConfigTransformer;
+import org.neo4j.gds.embeddings.fastrp.FastRPParameters;
 import org.neo4j.gds.embeddings.fastrp.FastRPResult;
 import org.neo4j.gds.embeddings.graphsage.GraphSageModelTrainer;
 import org.neo4j.gds.embeddings.graphsage.ModelData;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
-import org.neo4j.gds.embeddings.graphsage.algo.GraphSageBaseConfig;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageParameters;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageResult;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
-import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainTask;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainParameters;
 import org.neo4j.gds.embeddings.hashgnn.HashGNN;
-import org.neo4j.gds.embeddings.hashgnn.HashGNNConfig;
-import org.neo4j.gds.embeddings.hashgnn.HashGNNConfigTransformer;
+import org.neo4j.gds.embeddings.hashgnn.HashGNNParameters;
 import org.neo4j.gds.embeddings.hashgnn.HashGNNResult;
-import org.neo4j.gds.embeddings.hashgnn.HashGNNTask;
 import org.neo4j.gds.embeddings.node2vec.Node2Vec;
-import org.neo4j.gds.embeddings.node2vec.Node2VecBaseConfig;
-import org.neo4j.gds.embeddings.node2vec.Node2VecConfigTransformer;
+import org.neo4j.gds.embeddings.node2vec.Node2VecParameters;
 import org.neo4j.gds.embeddings.node2vec.Node2VecResult;
 import org.neo4j.gds.ml.core.features.FeatureExtraction;
 import org.neo4j.gds.termination.TerminationFlag;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class NodeEmbeddingAlgorithms {
+
     private static final GraphSageTrainAlgorithmFactory graphSageTrainAlgorithmFactory = new GraphSageTrainAlgorithmFactory();
-
     private final AlgorithmMachinery algorithmMachinery = new AlgorithmMachinery();
-
     private final GraphSageModelCatalog graphSageModelCatalog;
-
-    private final ProgressTrackerCreator progressTrackerCreator;
     private final TerminationFlag terminationFlag;
 
     public NodeEmbeddingAlgorithms(
         GraphSageModelCatalog graphSageModelCatalog,
-        ProgressTrackerCreator progressTrackerCreator,
         TerminationFlag terminationFlag
     ) {
         this.graphSageModelCatalog = graphSageModelCatalog;
-        this.progressTrackerCreator = progressTrackerCreator;
         this.terminationFlag = terminationFlag;
     }
 
-    public FastRPResult fastRP(Graph graph, FastRPBaseConfig configuration) {
-        var task = createFastRPTask(graph, configuration.nodeSelfInfluence(), configuration.iterationWeights().size());
-        var progressTracker = progressTrackerCreator.createProgressTracker(
-            task,
-            configuration.jobId(),
-            configuration.concurrency(),
-            configuration.logProgress()
-        );
-
-        return fastRP(graph, configuration, progressTracker);
-    }
-
-    public FastRPResult fastRP(Graph graph, FastRPBaseConfig configuration, ProgressTracker progressTracker) {
-        var parameters = FastRPConfigTransformer.toParameters(configuration);
+    public FastRPResult fastRP(Graph graph, FastRPParameters parameters, ProgressTracker progressTracker) {
 
         var featureExtractors = FeatureExtraction.propertyExtractors(graph, parameters.featureProperties());
 
         var algorithm = new FastRP(
             graph,
             parameters,
-            configuration.concurrency(),
             10_000,
             featureExtractors,
             progressTracker,
-            configuration.randomSeed(),
             terminationFlag
         );
 
@@ -107,31 +75,23 @@ public class NodeEmbeddingAlgorithms {
             algorithm,
             progressTracker,
             true,
-            configuration.concurrency()
+            parameters.concurrency()
         );
     }
 
-    public GraphSageResult graphSage(Graph graph, GraphSageBaseConfig configuration) {
-        var task = Tasks.leaf(AlgorithmLabel.GraphSage.asString(), graph.nodeCount());
-        var progressTracker = progressTrackerCreator.createProgressTracker(
-            task,
-            configuration.jobId(),
-            configuration.concurrency(),
-            configuration.logProgress()
+
+    public GraphSageResult graphSage(Graph graph, GraphSageParameters  parameters, ProgressTracker progressTracker) {
+        var modeParameters  = parameters.modeParameters();
+        var model = graphSageModelCatalog.get(
+            modeParameters.username(),
+            modeParameters.modelName()
         );
-
-        return graphSage(graph, configuration, progressTracker);
-    }
-
-    public GraphSageResult graphSage(Graph graph, GraphSageBaseConfig configuration, ProgressTracker progressTracker) {
-        var model = graphSageModelCatalog.get(configuration);
-        var parameters = configuration.toParameters();
 
         var algorithm = new GraphSage(
             graph,
             model,
-            parameters.concurrency(),
-            parameters.batchSize(),
+            parameters.algorithmParameters().concurrency(),
+            parameters.algorithmParameters().batchSize(),
             DefaultPool.INSTANCE,
             progressTracker,
             terminationFlag
@@ -141,81 +101,21 @@ public class NodeEmbeddingAlgorithms {
             algorithm,
             progressTracker,
             true,
-            configuration.concurrency()
+            parameters.algorithmParameters().concurrency()
         );
     }
 
-    public Model<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics> graphSageTrain(
-        Graph graph,
-        GraphSageTrainConfig configuration
-    ) {
-        var task = GraphSageTrainTask.create(graph, configuration);
-        var progressTracker = progressTrackerCreator.createProgressTracker(
-            task,
-            configuration.jobId(),
-            configuration.concurrency(),
-            configuration.logProgress()
-        );
-
-        return graphSageTrain(graph, configuration, progressTracker);
-    }
 
     public Model<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics> graphSageTrain(
         Graph graph,
-        GraphSageTrainConfig configuration,
+        GraphSageTrainParameters parameters,
+        GraphSageTrainConfig config,
         ProgressTracker progressTracker
     ) {
-        var algorithm = graphSageTrainAlgorithmFactory.create(graph, configuration, progressTracker, terminationFlag);
-
-        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
-            algorithm,
-            progressTracker,
-            true,
-            configuration.concurrency()
-        );
-    }
-
-    HashGNNResult hashGnn(Graph graph, HashGNNConfig configuration) {
-        var task = HashGNNTask.create(graph, configuration);
-        var progressTracker = progressTrackerCreator.createProgressTracker(
-            task,
-            configuration.jobId(),
-            configuration.concurrency(),
-            configuration.logProgress()
-        );
-
-        return hashGnn(graph, configuration, progressTracker);
-    }
-
-    public HashGNNResult hashGnn(Graph graph, HashGNNConfig configuration, ProgressTracker progressTracker) {
-        var parameters = HashGNNConfigTransformer.toParameters(configuration);
-
-        var algorithm = new HashGNN(graph, parameters, progressTracker, terminationFlag);
-
-        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
-            algorithm,
-            progressTracker,
-            true,
-            configuration.concurrency()
-        );
-    }
-
-    Node2VecResult node2Vec(Graph graph, Node2VecBaseConfig configuration) {
-        var task = createNode2VecTask(graph, configuration);
-        var progressTracker = progressTrackerCreator.createProgressTracker(
-            task,
-            configuration.jobId(),
-            configuration.concurrency(),
-            configuration.logProgress()
-        );
-
-        var algorithm = new Node2Vec(
+        var algorithm = graphSageTrainAlgorithmFactory.create(
             graph,
-            configuration.concurrency(),
-            configuration.sourceNodes(),
-            configuration.randomSeed(),
-            configuration.walkBufferSize(),
-            Node2VecConfigTransformer.node2VecParameters(configuration),
+            config,
+            parameters,
             progressTracker,
             terminationFlag
         );
@@ -224,39 +124,37 @@ public class NodeEmbeddingAlgorithms {
             algorithm,
             progressTracker,
             true,
-            configuration.concurrency()
+            parameters.concurrency()
         );
     }
 
-    private Task createFastRPTask(Graph graph, Number nodeSelfInfluence, int iterationWeightsSize) {
-        var tasks = new ArrayList<Task>();
-        tasks.add(Tasks.leaf("Initialize random vectors", graph.nodeCount()));
-        if (Float.compare(nodeSelfInfluence.floatValue(), 0.0f) != 0) {
-            tasks.add(Tasks.leaf("Apply node self-influence", graph.nodeCount()));
-        }
-        tasks.add(Tasks.iterativeFixed(
-            "Propagate embeddings",
-            () -> List.of(Tasks.leaf("Propagate embeddings task", graph.relationshipCount())),
-            iterationWeightsSize
-        ));
-        return Tasks.task(AlgorithmLabel.FastRP.asString(), tasks);
-    }
+    public HashGNNResult hashGnn(Graph graph, HashGNNParameters  parameters, ProgressTracker progressTracker) {
 
-    private Task createNode2VecTask(Graph graph, Node2VecBaseConfig configuration) {
-        var randomWalkTasks = new ArrayList<Task>();
-        if (graph.hasRelationshipProperty()) {
-            randomWalkTasks.add(DegreeCentralityTask.create(graph));
-        }
-        randomWalkTasks.add(Tasks.leaf("create walks", graph.nodeCount()));
+        var algorithm = new HashGNN(graph, parameters, progressTracker, terminationFlag);
 
-        return Tasks.task(
-            AlgorithmLabel.Node2Vec.asString(),
-            Tasks.task("RandomWalk", randomWalkTasks),
-            Tasks.iterativeFixed(
-                "train",
-                () -> List.of(Tasks.leaf("iteration")),
-                configuration.iterations()
-            )
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
+            algorithm,
+            progressTracker,
+            true,
+            parameters.concurrency()
         );
     }
+
+    Node2VecResult node2Vec(Graph graph, Node2VecParameters parameters, ProgressTracker progressTracker) {
+
+        var algorithm =  Node2Vec.create(
+            graph,
+            parameters,
+            progressTracker,
+            terminationFlag
+        );
+
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
+            algorithm,
+            progressTracker,
+            true,
+            parameters.concurrency()
+        );
+    }
+
 }

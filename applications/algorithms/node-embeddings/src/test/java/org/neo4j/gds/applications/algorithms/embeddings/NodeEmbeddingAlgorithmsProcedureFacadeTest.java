@@ -32,7 +32,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-class NodeEmbeddingAlgorithmsBusinessFacadeTest {
+class NodeEmbeddingAlgorithmsProcedureFacadeTest {
     @Test
     void shouldValidateNode2VecDataSizeInMutateMode() {
         var processingTemplate = mock(AlgorithmProcessingTemplateConvenience.class);

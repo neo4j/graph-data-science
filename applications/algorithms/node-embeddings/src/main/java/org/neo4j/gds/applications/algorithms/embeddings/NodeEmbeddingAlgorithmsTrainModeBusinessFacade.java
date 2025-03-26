@@ -37,14 +37,14 @@ public class NodeEmbeddingAlgorithmsTrainModeBusinessFacade {
     private final GraphSageModelCatalog graphSageModelCatalog;
     private final ModelRepository modelRepository;
     private final NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimation;
-    private final NodeEmbeddingAlgorithms algorithms;
+    private final NodeEmbeddingBusinessAlgorithms algorithms;
     private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
 
     NodeEmbeddingAlgorithmsTrainModeBusinessFacade(
         GraphSageModelCatalog graphSageModelCatalog,
         ModelRepository modelRepository,
         NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimation,
-        NodeEmbeddingAlgorithms algorithms,
+        NodeEmbeddingBusinessAlgorithms algorithms,
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience
     ) {
         this.graphSageModelCatalog = graphSageModelCatalog;

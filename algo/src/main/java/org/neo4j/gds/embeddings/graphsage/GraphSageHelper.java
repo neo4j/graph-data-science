@@ -26,11 +26,14 @@ import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.api.schema.NodeSchemaEntry;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
+import org.neo4j.gds.embeddings.graphsage.algo.ActivationFunctionType;
+import org.neo4j.gds.embeddings.graphsage.algo.AggregatorType;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainMemoryEstimateParameters;
+import org.neo4j.gds.embeddings.graphsage.algo.LayerParameters;
+import org.neo4j.gds.embeddings.graphsage.algo.MultiLabelFeatureExtractors;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryEstimations;
 import org.neo4j.gds.mem.MemoryRange;
-import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainMemoryEstimateParameters;
-import org.neo4j.gds.embeddings.graphsage.algo.MultiLabelFeatureExtractors;
 import org.neo4j.gds.ml.core.NeighborhoodFunction;
 import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.features.BiasFeature;
@@ -111,7 +114,7 @@ public final class GraphSageHelper {
     ) {
         var isMultiLabel = config.isMultiLabel();
 
-        var layerConfigs = config.layerConfigs();
+        var layerConfigs = config.layerParameters();
         var numberOfLayers = layerConfigs.size();
 
         var computationGraphBuilder = MemoryEstimations.builder("computationGraph").startField("subgraphs");
@@ -276,22 +279,23 @@ public final class GraphSageHelper {
         return features;
     }
 
-    public static List<LayerConfig> layerConfigs(int featureDimension, List<Integer> sampleSizes, Optional<Long> randomSeed, AggregatorType aggregatorType, ActivationFunctionType activationFunction, int embeddingDimension) {
+    public static List<LayerParameters> layerParameters(int featureDimension, List<Integer> sampleSizes, Optional<Long> randomSeed, AggregatorType aggregatorType, ActivationFunctionType activationFunction, int embeddingDimension) {
         Random random = new Random();
         randomSeed.ifPresent(random::setSeed);
 
-        List<LayerConfig> result = new ArrayList<>(sampleSizes.size());
+        List<LayerParameters> result = new ArrayList<>(sampleSizes.size());
         for (int i = 0; i < sampleSizes.size(); i++) {
-            LayerConfig layerConfig = LayerConfig.builder()
-                .aggregatorType(aggregatorType)
-                .activationFunction(activationFunction)
-                .rows(embeddingDimension)
-                .cols(i == 0 ? featureDimension : embeddingDimension)
-                .sampleSize(sampleSizes.get(i))
-                .randomSeed(random.nextLong())
-                .build();
+            LayerParameters layerParameters =  new LayerParameters(
+                embeddingDimension,
+                i == 0 ? featureDimension : embeddingDimension,
+                sampleSizes.get(i),
+                random.nextLong(),
+                Optional.empty(),
+                aggregatorType,
+                activationFunction
+            );
 
-            result.add(layerConfig);
+            result.add(layerParameters);
         }
 
         return result;

@@ -31,7 +31,9 @@ public final class FastRPConfigTransformer {
             config.propertyDimension(),
             config.relationshipWeightProperty(),
             config.normalizationStrength(),
-            config.nodeSelfInfluence()
+            config.nodeSelfInfluence(),
+            config.concurrency(),
+            config.randomSeed()
         );
     }
 

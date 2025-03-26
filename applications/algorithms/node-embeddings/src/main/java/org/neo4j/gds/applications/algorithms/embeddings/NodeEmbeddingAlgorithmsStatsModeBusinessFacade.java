@@ -29,12 +29,12 @@ import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Fas
 
 public class NodeEmbeddingAlgorithmsStatsModeBusinessFacade {
     private final NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimationFacade;
-    private final NodeEmbeddingAlgorithms algorithms;
+    private final NodeEmbeddingBusinessAlgorithms algorithms;
     private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
 
     NodeEmbeddingAlgorithmsStatsModeBusinessFacade(
         NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimationFacade,
-        NodeEmbeddingAlgorithms algorithms,
+        NodeEmbeddingBusinessAlgorithms algorithms,
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience
     ) {
         this.estimationFacade = estimationFacade;

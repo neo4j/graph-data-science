@@ -30,11 +30,11 @@ import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.embeddings.graphsage.AggregatorType;
-import org.neo4j.gds.embeddings.graphsage.LayerConfig;
 import org.neo4j.gds.embeddings.graphsage.TrainConfigTransformer;
+import org.neo4j.gds.embeddings.graphsage.algo.AggregatorType;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfigImpl;
+import org.neo4j.gds.embeddings.graphsage.algo.LayerParameters;
 import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.mem.MemoryTree;
 
@@ -73,7 +73,7 @@ class NodeEmbeddingAlgorithmsEstimationModeBusinessFacadeTest {
         var parameters = TrainConfigTransformer.toMemoryEstimateParameters(config);
         var nodeCount = graphDimensions.nodeCount();
         var concurrency = config.concurrency();
-        var layerConfigs = parameters.layerConfigs();
+        var layerConfigs = parameters.layerParameters();
         var weightsPerLabel = MemoryRange.empty();
 
         if (parameters.isMultiLabel()) {
@@ -129,8 +129,8 @@ class NodeEmbeddingAlgorithmsEstimationModeBusinessFacadeTest {
         // additional final layer size
         batchSizes.add(pair(minBatchNodeCount, maxBatchNodeCount));
         var subGraphMemories = new ArrayList<MemoryRange>();
-        for (LayerConfig layerConfig : layerConfigs) {
-            var sampleSize = layerConfig.sampleSize();
+        for (LayerParameters layerParameters : layerConfigs) {
+            var sampleSize = layerParameters.sampleSize();
 
             // int[3bs] selfAdjacency
             var minSelfAdjacencyMemory = sizeOfIntArray(minBatchNodeCount);

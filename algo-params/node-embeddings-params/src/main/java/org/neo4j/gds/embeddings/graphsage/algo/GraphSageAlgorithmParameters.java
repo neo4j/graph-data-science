@@ -17,26 +17,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.embeddings.graphsage;
+package org.neo4j.gds.embeddings.graphsage.algo;
 
-import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.AlgorithmParameters;
+import org.neo4j.gds.annotation.Parameters;
+import org.neo4j.gds.core.concurrency.Concurrency;
 
-import java.util.Optional;
-
-@ValueClass
-public interface LayerConfig {
-    int rows();
-    int cols();
-    int sampleSize();
-    long randomSeed();
-
-    Optional<Integer> bias();
-
-    AggregatorType aggregatorType();
-
-    ActivationFunctionType activationFunction();
-
-    static ImmutableLayerConfig.Builder builder() {
-        return ImmutableLayerConfig.builder();
-    }
-}
+@Parameters
+public record GraphSageAlgorithmParameters(Concurrency concurrency, int batchSize) implements AlgorithmParameters {}

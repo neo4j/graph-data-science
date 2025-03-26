@@ -17,24 +17,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.embeddings.graphsage;
+package org.neo4j.gds.embeddings.node2vec;
 
-import org.neo4j.gds.embeddings.graphsage.algo.ActivationFunctionType;
-import org.neo4j.gds.ml.core.functions.Relu;
+import org.neo4j.gds.AlgorithmParameters;
+import org.neo4j.gds.annotation.Parameters;
+import org.neo4j.gds.core.concurrency.Concurrency;
 
-public class ReluWrapper implements ActivationFunctionWrapper {
-    @Override
-    public ActivationFunction activationFunction() {
-        return Relu::new;
-    }
+import java.util.Optional;
 
-    @Override
-    public double weightInitBound(int rows, int cols) {
-        return Math.sqrt(2d / cols);
-    }
-
-    @Override
-    public ActivationFunctionType activationFunctionType() {
-        return ActivationFunctionType.RELU;
-    }
-}
+@Parameters
+public record Node2VecParameters(
+    SamplingWalkParameters samplingWalkParameters,
+    TrainParameters trainParameters,
+    Concurrency concurrency,
+    Optional<Long> randomSeed
+)
+    implements AlgorithmParameters {}

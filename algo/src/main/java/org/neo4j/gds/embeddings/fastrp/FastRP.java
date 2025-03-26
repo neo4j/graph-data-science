@@ -79,14 +79,13 @@ public class FastRP extends Algorithm<FastRPResult> {
     private final int minBatchSize;
     private List<DegreePartition> partitions;
 
+
     public FastRP(
         Graph graph,
         FastRPParameters parameters,
-        Concurrency concurrency,
         int minBatchSize,
         List<FeatureExtractor> featureExtractors,
         ProgressTracker progressTracker,
-        Optional<Long> randomSeed,
         TerminationFlag terminationFlag
     ) {
         super(progressTracker);
@@ -95,8 +94,8 @@ public class FastRP extends Algorithm<FastRPResult> {
         this.relationshipWeightProperty = parameters.relationshipWeightProperty();
         this.relationshipWeightFallback = this.relationshipWeightProperty.map(s -> Double.NaN).orElse(1.0);
         this.inputDimension = FeatureExtraction.featureCount(featureExtractors);
-        this.randomSeed = improveSeed(randomSeed.orElseGet(System::nanoTime));
-        this.concurrency = concurrency;
+        this.randomSeed = improveSeed(parameters.randomSeed().orElseGet(System::nanoTime));
+        this.concurrency = parameters.concurrency();
         this.minBatchSize = minBatchSize;
 
         this.propertyVectors = new float[inputDimension][parameters.propertyDimension()];

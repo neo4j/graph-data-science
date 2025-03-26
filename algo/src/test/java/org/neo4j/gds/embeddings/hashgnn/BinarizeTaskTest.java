@@ -21,8 +21,8 @@ package org.neo4j.gds.embeddings.hashgnn;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
+import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
@@ -60,7 +60,7 @@ class BinarizeTaskTest {
 
         new BinarizeTask(
             partition,
-            BinarizeFeaturesConfigImpl.builder().dimension(4).build(),
+            new BinarizeParameters(4,0.0d),
             features,
             featureExtractors,
             propertyEmbeddings,
@@ -99,7 +99,7 @@ class BinarizeTaskTest {
 
         new BinarizeTask(
             partition,
-            BinarizeFeaturesConfigImpl.builder().dimension(4).threshold(0.4).build(),
+            new BinarizeParameters(4,0.4),
             features,
             featureExtractors,
             propertyEmbeddings,

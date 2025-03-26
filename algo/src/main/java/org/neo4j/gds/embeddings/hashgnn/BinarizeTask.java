@@ -55,15 +55,15 @@ class BinarizeTask implements Runnable {
 
     BinarizeTask(
         Partition partition,
-        BinarizeFeaturesConfig config,
+        BinarizeParameters binarizeParameters,
         HugeObjectArray<HugeAtomicBitSet> truncatedFeatures,
         List<FeatureExtractor> featureExtractors,
         double[][] propertyEmbeddings,
         ProgressTracker progressTracker
     ) {
         this.partition = partition;
-        this.dimension = config.dimension();
-        this.threshold = config.threshold();
+        this.dimension = binarizeParameters.dimension();
+        this.threshold = binarizeParameters.threshold();
         this.truncatedFeatures = truncatedFeatures;
         this.featureExtractors = featureExtractors;
         this.propertyEmbeddings = propertyEmbeddings;
@@ -75,7 +75,7 @@ class BinarizeTask implements Runnable {
         List<Partition> partition,
         Concurrency concurrency,
         List<String> featureProperties,
-        BinarizeFeaturesConfig binarizationConfig,
+        BinarizeParameters binarizationParameters,
         SplittableRandom rng,
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag,
@@ -86,14 +86,14 @@ class BinarizeTask implements Runnable {
         var featureExtractors = FeatureExtraction.propertyExtractors(graph, featureProperties);
 
         var inputDimension = FeatureExtraction.featureCount(featureExtractors);
-        var propertyEmbeddings = embedProperties(binarizationConfig.dimension(), rng, inputDimension);
+        var propertyEmbeddings = embedProperties(binarizationParameters.dimension(), rng, inputDimension);
 
         var truncatedFeatures = HugeObjectArray.newArray(HugeAtomicBitSet.class, graph.nodeCount());
 
         var tasks = partition.stream()
             .map(p -> new BinarizeTask(
                 p,
-                binarizationConfig,
+                binarizationParameters,
                 truncatedFeatures,
                 featureExtractors,
                 propertyEmbeddings,
@@ -110,7 +110,7 @@ class BinarizeTask implements Runnable {
 
         var squaredSum = tasks.stream().mapToDouble(BinarizeTask::scalarProductSumOfSquares).sum();
         var sum = tasks.stream().mapToDouble(BinarizeTask::scalarProductSum).sum();
-        long exampleCount = graph.nodeCount() * binarizationConfig.dimension();
+        long exampleCount = graph.nodeCount() * binarizationParameters.dimension();
         var avg = sum / exampleCount;
 
         var variance = (squaredSum - exampleCount * avg * avg) / exampleCount;

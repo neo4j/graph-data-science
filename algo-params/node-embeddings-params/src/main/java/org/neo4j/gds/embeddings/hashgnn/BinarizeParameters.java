@@ -17,17 +17,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.embeddings.node2vec;
+package org.neo4j.gds.embeddings.hashgnn;
 
-import org.neo4j.gds.annotation.Parameters;
-
-@Parameters
-public record SamplingWalkParameters(
-    int walksPerNode,
-    int walkLength,
-    double returnFactor,
-    double inOutFactor,
-    double positiveSamplingFactor,
-    double negativeSamplingExponent
-) {
-}
+public record BinarizeParameters(int dimension, double threshold) {}

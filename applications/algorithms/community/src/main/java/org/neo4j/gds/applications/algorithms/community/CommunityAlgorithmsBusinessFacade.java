@@ -29,10 +29,7 @@ import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.conductance.ConductanceBaseConfig;
 import org.neo4j.gds.conductance.ConductanceConfigTransformer;
 import org.neo4j.gds.conductance.ConductanceResult;
-import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.hdbscan.HDBScanBaseConfig;
 import org.neo4j.gds.hdbscan.Labels;
 import org.neo4j.gds.k1coloring.K1ColoringBaseConfig;
@@ -79,35 +76,35 @@ public class CommunityAlgorithmsBusinessFacade {
     ApproxMaxKCutResult approximateMaximumKCut(Graph graph, ApproxMaxKCutBaseConfig configuration) {
         var parameters = configuration.toParameters();
         var task = tasks.approximateMaximumKCut(graph, parameters);
-        var progressTracker = createProgressTracker(task, configuration);
+        var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
 
         return algorithms.approximateMaximumKCut(graph, parameters, progressTracker);
     }
 
     ConductanceResult conductance(Graph graph, ConductanceBaseConfig configuration) {
         var task = tasks.conductance(graph);
-        var progressTracker = createProgressTracker(task, configuration);
+        var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
 
         return algorithms.conductance(graph, ConductanceConfigTransformer.toParameters(configuration), progressTracker);
     }
 
     public Labels hdbscan(Graph graph, HDBScanBaseConfig configuration) {
         var task = tasks.hdbscan(graph);
-        var progressTracker = createProgressTracker(task, configuration);
+        var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
 
         return algorithms.hdbscan(graph, configuration.toParameters(), progressTracker);
     }
 
     public K1ColoringResult k1Coloring(Graph graph, K1ColoringBaseConfig configuration) {
         var task = tasks.k1Coloring(graph, configuration);
-        var progressTracker = createProgressTracker(task, configuration);
+        var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
 
         return algorithms.k1Coloring(graph, configuration.toParameters(), progressTracker);
     }
 
     KCoreDecompositionResult kCore(Graph graph, KCoreDecompositionBaseConfig configuration) {
         var task = tasks.kCore(graph);
-        var progressTracker = createProgressTracker(task, configuration);
+        var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
 
         return algorithms.kCore(graph, configuration.toParameters(), progressTracker);
     }
@@ -115,7 +112,7 @@ public class CommunityAlgorithmsBusinessFacade {
     public KmeansResult kMeans(Graph graph, KmeansBaseConfig configuration) {
         var parameters = configuration.toParameters();
         var task = tasks.kMeans(graph, parameters);
-        var progressTracker = createProgressTracker(task, configuration);
+        var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
 
         return algorithms.kMeans(graph, parameters, progressTracker);
     }
@@ -123,7 +120,7 @@ public class CommunityAlgorithmsBusinessFacade {
     LabelPropagationResult labelPropagation(Graph graph, LabelPropagationBaseConfig configuration) {
         var parameters = configuration.toParameters();
         var task = tasks.labelPropagation(graph, parameters);
-        var progressTracker = createProgressTracker(task, configuration);
+        var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
 
         return algorithms.labelPropagation(graph, parameters, progressTracker);
     }
@@ -131,7 +128,7 @@ public class CommunityAlgorithmsBusinessFacade {
     LocalClusteringCoefficientResult lcc(Graph graph, LocalClusteringCoefficientBaseConfig configuration) {
         var parameters = configuration.toParameters();
         var task = tasks.lcc(graph, parameters);
-        var progressTracker = createProgressTracker(task, configuration);
+        var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
 
         return algorithms.lcc(graph, parameters, progressTracker);
     }
@@ -139,7 +136,7 @@ public class CommunityAlgorithmsBusinessFacade {
     public LeidenResult leiden(Graph graph, LeidenBaseConfig configuration) {
         var parameters = configuration.toParameters();
         var task = tasks.leiden(graph, parameters);
-        var progressTracker = createProgressTracker(task, configuration);
+        var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
 
         return algorithms.leiden(graph, parameters, progressTracker);
     }
@@ -147,7 +144,7 @@ public class CommunityAlgorithmsBusinessFacade {
     LouvainResult louvain(Graph graph, LouvainBaseConfig configuration) {
         var parameters = configuration.toParameters();
         var task = tasks.louvain(graph, parameters);
-        var progressTracker = createProgressTracker(task, configuration);
+        var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
 
         return algorithms.louvain(graph, parameters, progressTracker);
     }
@@ -159,21 +156,21 @@ public class CommunityAlgorithmsBusinessFacade {
     ModularityOptimizationResult modularityOptimization(Graph graph, ModularityOptimizationBaseConfig configuration) {
         var parameters = configuration.toParameters();
         var task = tasks.modularityOptimization(graph, parameters);
-        var progressTracker = createProgressTracker(task, configuration);
+        var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
 
         return algorithms.modularityOptimization(graph, parameters, progressTracker);
     }
 
     HugeLongArray scc(Graph graph, SccCommonBaseConfig configuration) {
         var task = tasks.scc(graph);
-        var progressTracker = createProgressTracker(task, configuration);
+        var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
 
         return algorithms.scc(graph, configuration.toParameters(), progressTracker);
     }
 
     TriangleCountResult triangleCount(Graph graph, TriangleCountBaseConfig configuration) {
         var task = tasks.triangleCount(graph);
-        var progressTracker = createProgressTracker(task, configuration);
+        var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
 
         return algorithms.triangleCount(graph, configuration.toParameters(), progressTracker);
     }
@@ -184,7 +181,7 @@ public class CommunityAlgorithmsBusinessFacade {
 
     public DisjointSetStruct wcc(Graph graph, WccBaseConfig configuration) {
         var task = tasks.wcc(graph);
-        var progressTracker = createProgressTracker(task, configuration);
+        var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
 
         if (configuration.hasRelationshipWeightProperty() && configuration.threshold() == 0) {
             progressTracker.logWarning(
@@ -196,17 +193,10 @@ public class CommunityAlgorithmsBusinessFacade {
 
     PregelResult speakerListenerLPA(Graph graph, SpeakerListenerLPAConfig configuration) {
         var task = tasks.speakerListenerLPA(graph, configuration);
-        var progressTracker = createProgressTracker(task, configuration);
+        var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
 
         return algorithms.speakerListenerLPA(graph, configuration, progressTracker);
     }
 
-    private ProgressTracker createProgressTracker(Task task, AlgoBaseConfig configuration) {
-        return progressTrackerCreator.createProgressTracker(
-            task,
-            configuration.jobId(),
-            configuration.concurrency(),
-            configuration.logProgress()
-        );
-    }
+
 }

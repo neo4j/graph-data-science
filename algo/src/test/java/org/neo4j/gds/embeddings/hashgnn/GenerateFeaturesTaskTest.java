@@ -51,13 +51,13 @@ class GenerateFeaturesTaskTest {
 
         var partition = new Partition(0, graph.nodeCount());
         var totalFeatureCount = new MutableLong(0);
-        var generateFeaturesConfig = GenerateFeaturesConfigImpl.builder()
-            .densityLevel(densityLevel)
-            .dimension(embeddingDimension)
-            .build();
+        var generateParameters =  new GenerateParameters(
+            densityLevel,
+            embeddingDimension
+        );
 
         var output = GenerateFeaturesTask.compute(
-            generateFeaturesConfig,
+            generateParameters,
             graph,
             List.of(partition),
             new Concurrency(4),

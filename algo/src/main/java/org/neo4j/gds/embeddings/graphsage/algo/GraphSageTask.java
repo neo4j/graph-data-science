@@ -17,24 +17,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.embeddings.graphsage;
+package org.neo4j.gds.embeddings.graphsage.algo;
 
-import org.neo4j.gds.embeddings.graphsage.algo.ActivationFunctionType;
-import org.neo4j.gds.ml.core.functions.Relu;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
+import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
-public class ReluWrapper implements ActivationFunctionWrapper {
-    @Override
-    public ActivationFunction activationFunction() {
-        return Relu::new;
-    }
+public class GraphSageTask {
 
-    @Override
-    public double weightInitBound(int rows, int cols) {
-        return Math.sqrt(2d / cols);
-    }
-
-    @Override
-    public ActivationFunctionType activationFunctionType() {
-        return ActivationFunctionType.RELU;
+    public static Task create(Graph graph) {
+      return   Tasks.leaf(AlgorithmLabel.GraphSage.asString(), graph.nodeCount());
     }
 }

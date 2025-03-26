@@ -20,13 +20,12 @@
 package org.neo4j.gds.embeddings.graphsage.algo;
 
 import org.neo4j.gds.annotation.Parameters;
-import org.neo4j.gds.embeddings.graphsage.LayerConfig;
 
 import java.util.List;
 
 @Parameters
 public record GraphSageTrainMemoryEstimateParameters(
-    List<LayerConfig> layerConfigs,
+    List<LayerParameters> layerParameters,
     boolean isMultiLabel,
     int numberOfFeatureProperties,
     int estimationFeatureDimension,

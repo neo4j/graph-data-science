@@ -19,11 +19,14 @@
  */
 package org.neo4j.gds.embeddings.hashgnn;
 
+import java.util.Optional;
+
 public final class HashGNNConfigTransformer {
 
     private HashGNNConfigTransformer() {}
 
     public static HashGNNParameters toParameters(HashGNNConfig config) {
+
         return new HashGNNParameters(
             config.concurrency(),
             config.iterations(),
@@ -32,9 +35,26 @@ public final class HashGNNConfigTransformer {
             config.featureProperties(),
             config.heterogeneous(),
             config.outputDimension(),
-            config.binarizeFeatures(),
-            config.generateFeatures(),
+            toBinarizeParameters(config.binarizeFeatures()),
+            toGenerateParameters(config.generateFeatures()),
             config.randomSeed()
         );
+    }
+
+    private static Optional<BinarizeParameters> toBinarizeParameters(Optional<BinarizeFeaturesConfig> config){
+        return config
+            .map(  binarizeConfig ->  new BinarizeParameters(
+                    binarizeConfig.dimension(),
+                    binarizeConfig.threshold()
+                )
+            );
+    }
+
+    private static Optional<GenerateParameters> toGenerateParameters(Optional<GenerateFeaturesConfig> config){
+        return config
+            .map(generateConfig ->  new GenerateParameters(
+                generateConfig.densityLevel(),
+                generateConfig.dimension())
+            );
     }
 }

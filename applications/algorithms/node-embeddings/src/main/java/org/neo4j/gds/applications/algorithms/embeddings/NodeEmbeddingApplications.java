@@ -68,7 +68,6 @@ public final class NodeEmbeddingApplications {
 
         var algorithms = new NodeEmbeddingAlgorithms(
             graphSageModelCatalog,
-            progressTrackerCreator,
             requestScopedDependencies.terminationFlag()
         );
 
@@ -81,21 +80,24 @@ public final class NodeEmbeddingApplications {
             graphSageModelCatalog
         );
 
+        var businessFacade = new NodeEmbeddingBusinessAlgorithms(algorithms, progressTrackerCreator);
+
+
         var mutateMode = new NodeEmbeddingAlgorithmsMutateModeBusinessFacade(
             estimationMode,
-            algorithms,
+            businessFacade,
             algorithmProcessingTemplateConvenience,
             mutateNodeProperty,
             graphSageAlgorithmProcessing
         );
         var statsMode = new NodeEmbeddingAlgorithmsStatsModeBusinessFacade(
             estimationMode,
-            algorithms,
+            businessFacade,
             algorithmProcessingTemplateConvenience
         );
         var streamMode = new NodeEmbeddingAlgorithmsStreamModeBusinessFacade(
             estimationMode,
-            algorithms,
+            businessFacade,
             algorithmProcessingTemplateConvenience,
             graphSageAlgorithmProcessing
         );
@@ -103,15 +105,16 @@ public final class NodeEmbeddingApplications {
             graphSageModelCatalog,
             modelRepository,
             estimationMode,
-            algorithms,
+            businessFacade,
             algorithmProcessingTemplateConvenience
         );
+
         var writeMode = NodeEmbeddingAlgorithmsWriteModeBusinessFacade.create(
             log,
             requestScopedDependencies,
             writeContext,
             estimationMode,
-            algorithms,
+            businessFacade,
             algorithmProcessingTemplateConvenience,
             graphSageAlgorithmProcessing
         );

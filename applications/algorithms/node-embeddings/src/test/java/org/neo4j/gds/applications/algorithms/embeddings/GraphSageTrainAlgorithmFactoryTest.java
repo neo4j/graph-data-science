@@ -22,6 +22,7 @@ package org.neo4j.gds.applications.algorithms.embeddings;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.embeddings.graphsage.TrainConfigTransformer;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.MultiLabelGraphSageTrain;
 import org.neo4j.gds.embeddings.graphsage.algo.SingleLabelGraphSageTrain;
@@ -47,7 +48,15 @@ class GraphSageTrainAlgorithmFactoryTest {
             User.DEFAULT.getUsername(),
             rawInput
         );
-        var algorithm = factory.create(null, configuration, null, null);
+
+        var params = TrainConfigTransformer.toParameters(configuration);
+        var algorithm = factory.create(
+            null,
+            configuration,
+            params,
+            null,
+            null
+        );
 
         assertThat(algorithm).isInstanceOf(MultiLabelGraphSageTrain.class);
     }
@@ -63,7 +72,15 @@ class GraphSageTrainAlgorithmFactoryTest {
                 "featureProperties", List.of("a")
             ))
         );
-        var algorithm = factory.create(null, configuration, null, null);
+
+        var params = TrainConfigTransformer.toParameters(configuration);
+        var algorithm = factory.create(
+            null,
+            configuration,
+            params,
+            null,
+            null
+        );
 
         assertThat(algorithm).isInstanceOf(SingleLabelGraphSageTrain.class);
     }
