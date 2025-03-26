@@ -21,9 +21,6 @@ package org.neo4j.gds.embeddings.graphsage.algo;
 
 import org.neo4j.gds.annotation.Parameters;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.embeddings.graphsage.ActivationFunctionType;
-import org.neo4j.gds.embeddings.graphsage.AggregatorType;
-import org.neo4j.gds.embeddings.graphsage.LayerConfig;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -58,21 +55,22 @@ public record GraphSageTrainParameters(
         return (int) Math.ceil(samplingRatio * numberOfBatches(nodeCount));
     }
 
-    public List<LayerConfig> layerConfigs(int featureDimension) {
+    public List<LayerParameters> layerConfigs(int featureDimension) {
         Random random = new Random();
         randomSeed.ifPresent(random::setSeed);
 
-        List<LayerConfig> result = new ArrayList<>(sampleSizes.size());
+        List<LayerParameters> result = new ArrayList<>(sampleSizes.size());
         for (int i = 0; i < sampleSizes.size(); i++) {
-            LayerConfig layerConfig = LayerConfig.builder()
-                .aggregatorType(aggregatorType)
-                .activationFunction(activationFunction)
-                .rows(embeddingDimension)
-                .cols(i == 0 ? featureDimension : embeddingDimension)
-                .sampleSize(sampleSizes.get(i))
-                .randomSeed(random.nextLong())
-                .build();
-            result.add(layerConfig);
+            var layerParameters = new LayerParameters(
+                embeddingDimension,
+                i == 0 ? featureDimension : embeddingDimension,
+                sampleSizes.get(i),
+                random.nextLong(),
+                Optional.empty(),
+                aggregatorType,
+                activationFunction
+            );
+            result.add(layerParameters);
         }
         return result;
     }

@@ -19,17 +19,16 @@
  */
 package org.neo4j.gds.embeddings.graphsage.algo;
 
-import org.neo4j.gds.embeddings.graphsage.AggregatorType;
-import org.neo4j.gds.mem.MemoryEstimateDefinition;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
+import org.neo4j.gds.embeddings.graphsage.GraphSageHelper;
+import org.neo4j.gds.mem.MemoryEstimateDefinition;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryEstimations;
 import org.neo4j.gds.mem.MemoryRange;
-import org.neo4j.gds.embeddings.graphsage.GraphSageHelper;
 
+import static org.neo4j.gds.mem.Estimate.sizeOfDoubleArray;
 import static org.neo4j.gds.mem.MemoryEstimations.RESIDENT_MEMORY;
 import static org.neo4j.gds.mem.MemoryEstimations.TEMPORARY_MEMORY;
-import static org.neo4j.gds.mem.Estimate.sizeOfDoubleArray;
 
 public class GraphSageTrainEstimateDefinition implements MemoryEstimateDefinition {
 
@@ -52,7 +51,7 @@ public class GraphSageTrainEstimateDefinition implements MemoryEstimateDefinitio
     }
 
     private MemoryEstimation estimate(GraphSageTrainMemoryEstimateParameters config, long nodeCount, int labelCount) {
-        var layerConfigs = config.layerConfigs();
+        var layerConfigs = config.layerParameters();
         var numberOfLayers = layerConfigs.size();
 
         var layerBuilder = MemoryEstimations.builder("GraphSageTrain")

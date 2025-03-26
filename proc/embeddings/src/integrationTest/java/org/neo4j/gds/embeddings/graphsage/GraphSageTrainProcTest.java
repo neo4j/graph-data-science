@@ -37,6 +37,8 @@ import org.neo4j.gds.core.loading.CSRGraphStore;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.embeddings.graphsage.algo.ActivationFunctionType;
+import org.neo4j.gds.embeddings.graphsage.algo.AggregatorType;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageModelResolver;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;

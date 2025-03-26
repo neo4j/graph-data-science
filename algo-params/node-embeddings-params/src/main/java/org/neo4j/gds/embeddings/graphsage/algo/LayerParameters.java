@@ -17,26 +17,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.embeddings.graphsage;
-
-import org.neo4j.gds.annotation.ValueClass;
+package org.neo4j.gds.embeddings.graphsage.algo;
 
 import java.util.Optional;
 
-@ValueClass
-public interface LayerConfig {
-    int rows();
-    int cols();
-    int sampleSize();
-    long randomSeed();
-
-    Optional<Integer> bias();
-
-    AggregatorType aggregatorType();
-
-    ActivationFunctionType activationFunction();
-
-    static ImmutableLayerConfig.Builder builder() {
-        return ImmutableLayerConfig.builder();
-    }
-}
+public record LayerParameters(
+    int rows,
+    int cols,
+    int sampleSize,
+    long randomSeed,
+    Optional<Integer> bias,
+    AggregatorType aggregatorType,
+    ActivationFunctionType activationFunction
+){}

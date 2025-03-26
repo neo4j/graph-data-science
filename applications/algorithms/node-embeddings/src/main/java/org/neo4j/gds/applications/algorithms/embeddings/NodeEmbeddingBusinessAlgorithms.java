@@ -28,6 +28,7 @@ import org.neo4j.gds.embeddings.fastrp.FastRPConfigTransformer;
 import org.neo4j.gds.embeddings.fastrp.FastRPResult;
 import org.neo4j.gds.embeddings.graphsage.GraphSageModelTrainer;
 import org.neo4j.gds.embeddings.graphsage.ModelData;
+import org.neo4j.gds.embeddings.graphsage.TrainConfigTransformer;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageBaseConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageResult;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
@@ -55,7 +56,7 @@ public class NodeEmbeddingBusinessAlgorithms {
     public FastRPResult fastRP(Graph graph, FastRPBaseConfig configuration) {
         var params = FastRPConfigTransformer.toParameters(configuration);
         var task = tasks.fastRP(graph,params);
-        var progressTracker = progressTrackerCreator.createProgressTracker(task,configuration);
+        var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
 
         return algorithms.fastRP(graph,params,progressTracker);
 
@@ -64,7 +65,7 @@ public class NodeEmbeddingBusinessAlgorithms {
     Node2VecResult node2Vec(Graph graph, Node2VecBaseConfig configuration) {
         var params = Node2VecConfigTransformer.node2VecParameters(configuration);
         var task = tasks.node2Vec(graph,params);
-        var progressTracker = progressTrackerCreator.createProgressTracker(task,configuration);
+        var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
 
         return algorithms.node2Vec(graph, params, progressTracker);
     }
@@ -72,7 +73,7 @@ public class NodeEmbeddingBusinessAlgorithms {
     HashGNNResult hashGnn(Graph graph, HashGNNConfig configuration) {
         var params = HashGNNConfigTransformer.toParameters(configuration);
         var task = tasks.hashGNN(graph, params, configuration.relationshipTypes());
-        var progressTracker = progressTrackerCreator.createProgressTracker(task,configuration);
+        var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
         return algorithms.hashGnn(graph, params, progressTracker);
     }
 
@@ -85,7 +86,11 @@ public class NodeEmbeddingBusinessAlgorithms {
         Graph graph,
         GraphSageTrainConfig configuration
     ) {
-       return algorithms.graphSageTrain(graph,configuration);
+        var params = TrainConfigTransformer.toParameters(configuration);
+        var task = tasks.graphSageTrain(graph, params);
+        var progressTracker = progressTrackerCreator.createProgressTracker(task,configuration);
+
+        return algorithms.graphSageTrain(graph, params, configuration, progressTracker);
     }
 
 

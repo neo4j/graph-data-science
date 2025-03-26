@@ -20,8 +20,8 @@
 package org.neo4j.gds.applications.algorithms.embeddings;
 
 import fastrp.FastRPParameters;
-import node2vec.Node2VecParameters;
 import hashgnn.HashGNNParameters;
+import node2vec.Node2VecParameters;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmMachinery;
@@ -38,7 +38,7 @@ import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageBaseConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageResult;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
-import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainTask;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainParameters;
 import org.neo4j.gds.embeddings.hashgnn.HashGNN;
 import org.neo4j.gds.embeddings.hashgnn.HashGNNResult;
 import org.neo4j.gds.embeddings.node2vec.Node2Vec;
@@ -121,33 +121,26 @@ public class NodeEmbeddingAlgorithms {
         );
     }
 
-    public Model<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics> graphSageTrain(
-        Graph graph,
-        GraphSageTrainConfig configuration
-    ) {
-        var task = GraphSageTrainTask.create(graph, configuration);
-        var progressTracker = progressTrackerCreator.createProgressTracker(
-            task,
-            configuration.jobId(),
-            configuration.concurrency(),
-            configuration.logProgress()
-        );
-
-        return graphSageTrain(graph, configuration, progressTracker);
-    }
 
     public Model<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics> graphSageTrain(
         Graph graph,
-        GraphSageTrainConfig configuration,
+        GraphSageTrainParameters parameters,
+        GraphSageTrainConfig config,
         ProgressTracker progressTracker
     ) {
-        var algorithm = graphSageTrainAlgorithmFactory.create(graph, configuration, progressTracker, terminationFlag);
+        var algorithm = graphSageTrainAlgorithmFactory.create(
+            graph,
+            config,
+            parameters,
+            progressTracker,
+            terminationFlag
+        );
 
         return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
             algorithm,
             progressTracker,
             true,
-            configuration.concurrency()
+            parameters.concurrency()
         );
     }
 

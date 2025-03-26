@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.embeddings.graphsage;
+package org.neo4j.gds.embeddings.graphsage.algo;
 
 import org.neo4j.gds.utils.StringJoining;
 
@@ -28,44 +28,43 @@ import java.util.stream.Collectors;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.gds.utils.StringFormatting.toUpperCaseWithLocale;
 
-public enum ActivationFunctionType {
-    SIGMOID,
-    RELU;
+public enum AggregatorType {
+    MEAN,
+    POOL;
 
-    public static ActivationFunctionType of(String activationFunction) {
-        return valueOf(toUpperCaseWithLocale(activationFunction));
+    public static AggregatorType of(String aggregatorType) {
+        return valueOf(toUpperCaseWithLocale(aggregatorType));
     }
 
     private static final List<String> VALUES = Arrays
-        .stream(ActivationFunctionType.values())
-        .map(ActivationFunctionType::name)
+        .stream(AggregatorType.values())
+        .map(AggregatorType::name)
         .collect(Collectors.toList());
 
-
-    public static ActivationFunctionType parse(Object input) {
+    public static AggregatorType parse(Object input) {
         if (input instanceof String) {
             var inputString = toUpperCaseWithLocale((String) input);
 
             if (!VALUES.contains(inputString)) {
                 throw new IllegalArgumentException(formatWithLocale(
-                    "ActivationFunction `%s` is not supported. Must be one of: %s.",
+                    "Aggregator `%s` is not supported. Must be one of: %s.",
                     input,
                     StringJoining.join(VALUES)
                 ));
             }
 
             return of(inputString);
-        } else if (input instanceof ActivationFunctionType) {
-            return (ActivationFunctionType) input;
+        } else if (input instanceof AggregatorType) {
+            return (AggregatorType) input;
         }
 
         throw new IllegalArgumentException(formatWithLocale(
-            "Expected ActivationFunction or String. Got %s.",
+            "Expected Aggregator or String. Got %s.",
             input.getClass().getSimpleName()
         ));
     }
 
-    public static String toString(ActivationFunctionType af) {
+    public static String toString(AggregatorType af) {
         return af.toString();
     }
 }

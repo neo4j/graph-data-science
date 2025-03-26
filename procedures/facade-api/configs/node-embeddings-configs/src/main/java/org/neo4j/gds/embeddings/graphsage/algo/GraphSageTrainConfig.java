@@ -30,8 +30,6 @@ import org.neo4j.gds.config.RandomSeedConfig;
 import org.neo4j.gds.config.RelationshipWeightConfig;
 import org.neo4j.gds.config.ToleranceConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.embeddings.graphsage.ActivationFunctionType;
-import org.neo4j.gds.embeddings.graphsage.AggregatorType;
 import org.neo4j.gds.ml.training.TrainBaseConfig;
 
 import java.util.Collection;
@@ -77,14 +75,14 @@ public interface GraphSageTrainConfig extends
         }
     }
 
-    @Configuration.ConvertWith(method = "org.neo4j.gds.embeddings.graphsage.AggregatorType#parse")
-    @Configuration.ToMapValue("org.neo4j.gds.embeddings.graphsage.AggregatorType#toString")
+    @Configuration.ConvertWith(method = "org.neo4j.gds.embeddings.graphsage.algo.AggregatorType#parse")
+    @Configuration.ToMapValue("org.neo4j.gds.embeddings.graphsage.algo.AggregatorType#toString")
     default AggregatorType aggregator() {
         return AggregatorType.MEAN;
     }
 
-    @Configuration.ConvertWith(method = "org.neo4j.gds.embeddings.graphsage.ActivationFunctionType#parse")
-    @Configuration.ToMapValue("org.neo4j.gds.embeddings.graphsage.ActivationFunctionType#toString")
+    @Configuration.ConvertWith(method = "org.neo4j.gds.embeddings.graphsage.algo.ActivationFunctionType#parse")
+    @Configuration.ToMapValue("org.neo4j.gds.embeddings.graphsage.algo.ActivationFunctionType#toString")
     default ActivationFunctionType activationFunction() {
         return ActivationFunctionType.SIGMOID;
     }

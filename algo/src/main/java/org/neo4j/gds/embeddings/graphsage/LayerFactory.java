@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
+import org.neo4j.gds.embeddings.graphsage.algo.LayerParameters;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Vector;
@@ -31,16 +32,16 @@ public final class LayerFactory {
     private LayerFactory() {}
 
     public static Layer createLayer(
-        LayerConfig layerConfig
+        LayerParameters layerParameters
     ) {
-        int rows = layerConfig.rows();
-        int cols = layerConfig.cols();
+        int rows = layerParameters.rows();
+        int cols = layerParameters.cols();
 
-        var activationFunctionType = layerConfig.activationFunction();
+        var activationFunctionType = layerParameters.activationFunction();
         var activationFunctionWrapper = ActivationFunctionFactory
             .activationFunctionWrapper(activationFunctionType);
 
-        var randomSeed = layerConfig.randomSeed();
+        var randomSeed = layerParameters.randomSeed();
         Weights<Matrix> weights = generateWeights(
             rows,
             cols,
@@ -48,11 +49,11 @@ public final class LayerFactory {
             randomSeed
         );
 
-        switch (layerConfig.aggregatorType()) {
+        switch (layerParameters.aggregatorType()) {
             case MEAN:
                 return new MeanAggregatingLayer(
                     weights,
-                    layerConfig.sampleSize(),
+                    layerParameters.sampleSize(),
                     activationFunctionWrapper
                 );
             case POOL:
@@ -75,7 +76,7 @@ public final class LayerFactory {
                 Weights<Vector> bias = new Weights<>(Vector.create(0D, rows));
 
                 return new MaxPoolAggregatingLayer(
-                    layerConfig.sampleSize(),
+                    layerParameters.sampleSize(),
                     poolWeights,
                     selfWeights,
                     neighborsWeights,
@@ -85,7 +86,7 @@ public final class LayerFactory {
             default:
                 throw new IllegalArgumentException(formatWithLocale(
                     "Aggregator: %s is unknown",
-                    layerConfig.aggregatorType()
+                    layerParameters.aggregatorType()
                 ));
         }
     }

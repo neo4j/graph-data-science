@@ -30,7 +30,7 @@ public final class TrainConfigTransformer {
     public static GraphSageTrainMemoryEstimateParameters toMemoryEstimateParameters(GraphSageTrainConfig config) {
         int estimationFeatureDimension = config.projectedFeatureDimension()
             .orElse(config.featureProperties().size());
-        var layerConfigs = GraphSageHelper.layerConfigs(
+        var layerConfigs = GraphSageHelper.layerParameters(
             estimationFeatureDimension,
             config.sampleSizes(),
             config.randomSeed(),

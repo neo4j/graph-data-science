@@ -19,24 +19,22 @@
  */
 package org.neo4j.gds.embeddings.graphsage.algo;
 
-import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.embeddings.graphsage.GraphSageModelTrainer;
-import org.neo4j.gds.embeddings.graphsage.TrainConfigTransformer;
 
 public final class GraphSageTrainTask {
     private GraphSageTrainTask() {}
 
-    public static Task create(IdMap idMap, GraphSageTrainConfig configuration) {
-        var parameters = TrainConfigTransformer.toParameters(configuration);
+    public static Task create(Graph graph, GraphSageTrainParameters parameters) {
 
         return Tasks.task(
             AlgorithmLabel.GraphSageTrain.asString(),
             GraphSageModelTrainer.progressTasks(
-                parameters.numberOfBatches(idMap.nodeCount()),
-                parameters.batchesPerIteration(idMap.nodeCount()),
+                parameters.numberOfBatches(graph.nodeCount()),
+                parameters.batchesPerIteration(graph.nodeCount()),
                 parameters.maxIterations(),
                 parameters.epochs()
             )

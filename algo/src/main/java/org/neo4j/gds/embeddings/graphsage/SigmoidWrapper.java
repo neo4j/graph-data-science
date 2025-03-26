@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
+import org.neo4j.gds.embeddings.graphsage.algo.ActivationFunctionType;
 import org.neo4j.gds.ml.core.functions.Sigmoid;
 
 public class SigmoidWrapper implements ActivationFunctionWrapper {

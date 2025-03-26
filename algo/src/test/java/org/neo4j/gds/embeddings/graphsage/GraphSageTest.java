@@ -51,6 +51,8 @@ import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
+import org.neo4j.gds.embeddings.graphsage.algo.ActivationFunctionType;
+import org.neo4j.gds.embeddings.graphsage.algo.AggregatorType;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageStreamConfigImpl;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfigImpl;
@@ -258,8 +260,10 @@ class GraphSageTest {
             .featureProperties(List.of("f1"))
             .relationshipWeightProperty("weight")
             .build();
+
         var result = nodeEmbeddingAlgorithms.graphSageTrain(
             graph,
+            TrainConfigTransformer.toParameters(trainConfig),
             trainConfig,
             ProgressTracker.NULL_TRACKER // exclude the train bits from log
         );
@@ -323,6 +327,7 @@ class GraphSageTest {
         doNothing().when(terminationFlag).assertRunning();
         var result = nodeEmbeddingAlgorithms.graphSageTrain(
             graph,
+            TrainConfigTransformer.toParameters(trainConfig),
             trainConfig,
             ProgressTracker.NULL_TRACKER
         );

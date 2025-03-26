@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
+import org.neo4j.gds.embeddings.graphsage.algo.ActivationFunctionType;
+
 public final class ActivationFunctionFactory {
 
     private ActivationFunctionFactory() {}
