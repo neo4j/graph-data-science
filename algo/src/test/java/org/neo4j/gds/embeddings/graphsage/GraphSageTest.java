@@ -173,7 +173,6 @@ class GraphSageTest {
         var graphSageModelCatalog = new GraphSageModelCatalog(modelCatalog);
         var nodeEmbeddingAlgorithms = new NodeEmbeddingAlgorithms(
             graphSageModelCatalog,
-            null,
             TerminationFlag.RUNNING_TRUE
         );
 

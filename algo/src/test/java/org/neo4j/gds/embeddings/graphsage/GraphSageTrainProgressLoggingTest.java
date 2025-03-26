@@ -70,7 +70,7 @@ class GraphSageTrainProgressLoggingTest {
 
         var params = TrainConfigTransformer.toParameters(config);
 
-        var nodeEmbeddingAlgorithms = new NodeEmbeddingAlgorithms(null, null, TerminationFlag.RUNNING_TRUE);
+        var nodeEmbeddingAlgorithms = new NodeEmbeddingAlgorithms(null, TerminationFlag.RUNNING_TRUE);
 
         var progressTrackerWithLog = TestProgressTrackerHelper.create(
             new NodeEmbeddingsAlgorithmTasks().graphSageTrain(graph, params),

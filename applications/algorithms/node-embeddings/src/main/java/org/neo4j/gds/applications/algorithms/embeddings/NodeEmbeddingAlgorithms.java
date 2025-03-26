@@ -24,7 +24,6 @@ import hashgnn.HashGNNParameters;
 import node2vec.Node2VecParameters;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmMachinery;
-import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -45,22 +44,17 @@ import org.neo4j.gds.ml.core.features.FeatureExtraction;
 import org.neo4j.gds.termination.TerminationFlag;
 
 public class NodeEmbeddingAlgorithms {
+
     private static final GraphSageTrainAlgorithmFactory graphSageTrainAlgorithmFactory = new GraphSageTrainAlgorithmFactory();
-
     private final AlgorithmMachinery algorithmMachinery = new AlgorithmMachinery();
-
     private final GraphSageModelCatalog graphSageModelCatalog;
-
-    private final ProgressTrackerCreator progressTrackerCreator;
     private final TerminationFlag terminationFlag;
 
     public NodeEmbeddingAlgorithms(
         GraphSageModelCatalog graphSageModelCatalog,
-        ProgressTrackerCreator progressTrackerCreator,
         TerminationFlag terminationFlag
     ) {
         this.graphSageModelCatalog = graphSageModelCatalog;
-        this.progressTrackerCreator = progressTrackerCreator;
         this.terminationFlag = terminationFlag;
     }
 
