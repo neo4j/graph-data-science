@@ -19,22 +19,9 @@
  */
 package org.neo4j.gds.embeddings.graphsage.algo;
 
-import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.model.ModelConfig;
+import org.neo4j.gds.AlgorithmParameters;
+import org.neo4j.gds.annotation.Parameters;
+import org.neo4j.gds.core.concurrency.Concurrency;
 
-public interface GraphSageBaseConfig extends AlgoBaseConfig, BatchSizeConfig, ModelConfig {
-    long serialVersionUID = 0x42L;
-
-    @Configuration.Ignore
-    default GraphSageParameters toParameters() {
-        var modelParams = new ModelParameters(username(), modelName());
-        var runningParams = new GraphSageAlgorithmParameters(concurrency(),batchSize());
-
-        return new GraphSageParameters(
-            modelParams,
-            runningParams
-        );
-
-    }
-}
+@Parameters
+public record GraphSageAlgorithmParameters(Concurrency concurrency, int batchSize) implements AlgorithmParameters {}

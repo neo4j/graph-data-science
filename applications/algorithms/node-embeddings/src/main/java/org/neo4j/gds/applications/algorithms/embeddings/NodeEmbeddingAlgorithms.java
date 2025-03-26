@@ -23,19 +23,17 @@ import fastrp.FastRPParameters;
 import hashgnn.HashGNNParameters;
 import node2vec.Node2VecParameters;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmMachinery;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.embeddings.fastrp.FastRP;
 import org.neo4j.gds.embeddings.fastrp.FastRPResult;
 import org.neo4j.gds.embeddings.graphsage.GraphSageModelTrainer;
 import org.neo4j.gds.embeddings.graphsage.ModelData;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
-import org.neo4j.gds.embeddings.graphsage.algo.GraphSageBaseConfig;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageParameters;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageResult;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainParameters;
@@ -87,27 +85,19 @@ public class NodeEmbeddingAlgorithms {
         );
     }
 
-    public GraphSageResult graphSage(Graph graph, GraphSageBaseConfig configuration) {
-        var task = Tasks.leaf(AlgorithmLabel.GraphSage.asString(), graph.nodeCount());
-        var progressTracker = progressTrackerCreator.createProgressTracker(
-            task,
-            configuration.jobId(),
-            configuration.concurrency(),
-            configuration.logProgress()
+
+    public GraphSageResult graphSage(Graph graph, GraphSageParameters  parameters, ProgressTracker progressTracker) {
+        var modeParameters  = parameters.modeParameters();
+        var model = graphSageModelCatalog.get(
+            modeParameters.username(),
+            modeParameters.modelName()
         );
-
-        return graphSage(graph, configuration, progressTracker);
-    }
-
-    public GraphSageResult graphSage(Graph graph, GraphSageBaseConfig configuration, ProgressTracker progressTracker) {
-        var model = graphSageModelCatalog.get(configuration);
-        var parameters = configuration.toParameters();
 
         var algorithm = new GraphSage(
             graph,
             model,
-            parameters.concurrency(),
-            parameters.batchSize(),
+            parameters.algorithmParameters().concurrency(),
+            parameters.algorithmParameters().batchSize(),
             DefaultPool.INSTANCE,
             progressTracker,
             terminationFlag
@@ -117,7 +107,7 @@ public class NodeEmbeddingAlgorithms {
             algorithm,
             progressTracker,
             true,
-            configuration.concurrency()
+            parameters.algorithmParameters().concurrency()
         );
     }
 

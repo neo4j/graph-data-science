@@ -23,16 +23,16 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.neo4j.gds.NodeEmbeddingsAlgorithmTasks;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.TestProgressTrackerHelper;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.applications.algorithms.embeddings.GraphSageModelCatalog;
 import org.neo4j.gds.applications.algorithms.embeddings.NodeEmbeddingAlgorithms;
-import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
-import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.beta.generator.PropertyProducer;
 import org.neo4j.gds.beta.generator.RandomGraphGenerator;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
@@ -47,10 +47,7 @@ import org.neo4j.gds.core.loading.construction.NodeLabelTokens;
 import org.neo4j.gds.core.model.InjectModelCatalog;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.model.ModelCatalogExtension;
-import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
-import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.embeddings.graphsage.algo.ActivationFunctionType;
 import org.neo4j.gds.embeddings.graphsage.algo.AggregatorType;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
@@ -60,7 +57,6 @@ import org.neo4j.gds.embeddings.graphsage.algo.SingleLabelGraphSageTrain;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
-import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.termination.TerminatedException;
 import org.neo4j.gds.termination.TerminationFlag;
 
@@ -183,12 +179,13 @@ class GraphSageTest {
 
         var result = nodeEmbeddingAlgorithms.graphSage(
             orphanGraph,
-            streamConfig,
+            streamConfig.toParameters(),
             ProgressTracker.NULL_TRACKER
         );
 
         for (int i = 0; i < orphanGraph.nodeCount() - 1; i++) {
-            Arrays.stream(result.embeddings().get(i)).forEach(embeddingValue -> assertThat(embeddingValue).isNotNaN());
+            Arrays.stream(result.embeddings().get(i))
+                .forEach(embeddingValue -> assertThat(embeddingValue).isNotNaN());
         }
     }
 
@@ -241,19 +238,6 @@ class GraphSageTest {
 
     @Test
     void testLogging() {
-        var log = new GdsTestLog();
-        var graphSageModelCatalog = new GraphSageModelCatalog(modelCatalog);
-        var requestScopedDependencies = RequestScopedDependencies.builder()
-            .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
-            .terminationFlag(TerminationFlag.RUNNING_TRUE)
-            .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
-            .build();
-        var progressTrackerCreator = new ProgressTrackerCreator(new LoggerForProgressTrackingAdapter(log), requestScopedDependencies);
-        var nodeEmbeddingAlgorithms = new NodeEmbeddingAlgorithms(
-            graphSageModelCatalog,
-            progressTrackerCreator,
-            requestScopedDependencies.terminationFlag()
-        );
 
         var trainConfig = configBuilder
             .modelName(MODEL_NAME)
@@ -261,23 +245,39 @@ class GraphSageTest {
             .relationshipWeightProperty("weight")
             .build();
 
-        var result = nodeEmbeddingAlgorithms.graphSageTrain(
+        var graphSageTrain = new SingleLabelGraphSageTrain(
             graph,
             TrainConfigTransformer.toParameters(trainConfig),
-            trainConfig,
-            ProgressTracker.NULL_TRACKER // exclude the train bits from log
+            DefaultPool.INSTANCE,
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE,
+            testGdsVersion,
+            trainConfig
         );
 
-        modelCatalog.set(result);
+        var resultModel = graphSageTrain.compute();
 
-        var streamConfig = GraphSageStreamConfigImpl
-            .builder()
-            .modelUser("")
-            .modelName(MODEL_NAME)
-            .batchSize(1)
-            .build();
+        modelCatalog.set(resultModel);
 
-        nodeEmbeddingAlgorithms.graphSage(graph, streamConfig);
+        var progressTrackerWithLog = TestProgressTrackerHelper.create(
+            new NodeEmbeddingsAlgorithmTasks().graphSage(graph),
+            new Concurrency(4)
+        );
+
+        var progressTracker = progressTrackerWithLog.progressTracker();
+        var log = progressTrackerWithLog.log();
+
+
+        var graphSage = new GraphSage(
+            graph,
+            resultModel,
+            new Concurrency(4),
+            1,
+            DefaultPool.INSTANCE,
+            progressTracker,
+            TerminationFlag.RUNNING_TRUE
+        );
+        graphSage.compute();
 
         var messagesInOrder = log.getMessages(INFO);
 
@@ -313,36 +313,39 @@ class GraphSageTest {
     @Test
     void testTermination() {
         var terminationFlag = mock(TerminationFlag.class);
-        var nodeEmbeddingAlgorithms = new NodeEmbeddingAlgorithms(
-            new GraphSageModelCatalog(modelCatalog),
-            null,
-            terminationFlag
-        );
 
         var trainConfig = configBuilder
             .modelName(MODEL_NAME)
             .featureProperties(List.of("f1"))
             .relationshipWeightProperty("weight")
             .build();
+
         doNothing().when(terminationFlag).assertRunning();
-        var result = nodeEmbeddingAlgorithms.graphSageTrain(
+
+        var resultModel = new SingleLabelGraphSageTrain(
             graph,
             TrainConfigTransformer.toParameters(trainConfig),
-            trainConfig,
-            ProgressTracker.NULL_TRACKER
-        );
+            DefaultPool.INSTANCE,
+            ProgressTracker.NULL_TRACKER,
+            terminationFlag,
+            testGdsVersion,
+            trainConfig
+        ).compute();
 
-        modelCatalog.set(result);
-
-        var streamConfig = GraphSageStreamConfigImpl
-            .builder()
-            .modelUser("")
-            .modelName(MODEL_NAME)
-            .batchSize(1)
-            .build();
 
         doThrow(new TerminatedException()).when(terminationFlag).assertRunning();
-        assertThatThrownBy(() -> nodeEmbeddingAlgorithms.graphSage(graph, streamConfig, ProgressTracker.NULL_TRACKER))
+
+        var graphSage = new GraphSage(
+            graph,
+            resultModel,
+            new Concurrency(4),
+            1,
+            DefaultPool.INSTANCE,
+            ProgressTracker.NULL_TRACKER,
+            terminationFlag
+        );
+
+        assertThatThrownBy(graphSage::compute)
             .isInstanceOf(TerminatedException.class)
             .hasMessageContaining("The execution has been terminated.");
     }

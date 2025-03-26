@@ -19,22 +19,14 @@
  */
 package org.neo4j.gds.embeddings.graphsage.algo;
 
-import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.model.ModelConfig;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
+import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
-public interface GraphSageBaseConfig extends AlgoBaseConfig, BatchSizeConfig, ModelConfig {
-    long serialVersionUID = 0x42L;
+public class GraphSageTask {
 
-    @Configuration.Ignore
-    default GraphSageParameters toParameters() {
-        var modelParams = new ModelParameters(username(), modelName());
-        var runningParams = new GraphSageAlgorithmParameters(concurrency(),batchSize());
-
-        return new GraphSageParameters(
-            modelParams,
-            runningParams
-        );
-
+    public static Task create(Graph graph) {
+      return   Tasks.leaf(AlgorithmLabel.GraphSage.asString(), graph.nodeCount());
     }
 }

@@ -67,7 +67,7 @@ public class NodeEmbeddingAlgorithmsEstimationModeBusinessFacade {
     }
 
     public MemoryEstimation graphSage(ModelConfig configuration, boolean mutating) {
-        var model = graphSageModelCatalog.get(configuration);
+        var model = graphSageModelCatalog.get(configuration.username(), configuration.modelName());
 
         var memoryEstimateParameters = TrainConfigTransformer.toMemoryEstimateParameters(model.trainConfig());
 

@@ -25,6 +25,7 @@ import node2vec.Node2VecParameters;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.embeddings.fastrp.FastRPTask;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTask;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainParameters;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainTask;
 import org.neo4j.gds.embeddings.hashgnn.HashGNNTask;
@@ -48,5 +49,9 @@ public final class NodeEmbeddingsAlgorithmTasks {
 
     public Task graphSageTrain(Graph graph, GraphSageTrainParameters parameters){
         return GraphSageTrainTask.create(graph, parameters);
+    }
+
+    public Task graphSage(Graph graph){
+        return GraphSageTask.create(graph);
     }
 }

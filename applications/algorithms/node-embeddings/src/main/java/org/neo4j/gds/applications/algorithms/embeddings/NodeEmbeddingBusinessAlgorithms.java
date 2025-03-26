@@ -77,11 +77,6 @@ public class NodeEmbeddingBusinessAlgorithms {
         return algorithms.hashGnn(graph, params, progressTracker);
     }
 
-
-    public GraphSageResult graphSage(Graph graph, GraphSageBaseConfig configuration) {
-       return  algorithms.graphSage(graph,configuration);
-    }
-
     public Model<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics> graphSageTrain(
         Graph graph,
         GraphSageTrainConfig configuration
@@ -93,5 +88,13 @@ public class NodeEmbeddingBusinessAlgorithms {
         return algorithms.graphSageTrain(graph, params, configuration, progressTracker);
     }
 
+    public GraphSageResult graphSage(Graph graph, GraphSageBaseConfig configuration) {
+
+        var params = configuration.toParameters();
+        var task = tasks.graphSage(graph);
+        var progressTracker = progressTrackerCreator.createProgressTracker(task,configuration);
+
+        return  algorithms.graphSage(graph, params, progressTracker);
+    }
 
 }
