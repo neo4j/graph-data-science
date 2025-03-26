@@ -19,8 +19,6 @@
  */
 package org.neo4j.gds.embeddings.node2vec;
 
-import node2vec.EmbeddingInitializer;
-import node2vec.TrainParameters;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;

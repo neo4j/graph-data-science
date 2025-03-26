@@ -19,10 +19,6 @@
  */
 package org.neo4j.gds.embeddings.node2vec;
 
-import node2vec.Node2VecParameters;
-import node2vec.SamplingWalkParameters;
-import node2vec.TrainParameters;
-
 public final class Node2VecConfigTransformer {
     private Node2VecConfigTransformer() {}
 

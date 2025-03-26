@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.embeddings.node2vec;
 
-import node2vec.EmbeddingInitializer;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.EmbeddingDimensionConfig;
@@ -56,8 +55,8 @@ public interface Node2VecBaseConfig extends AlgoBaseConfig, EmbeddingDimensionCo
         return 128;
     }
 
-    @Configuration.ConvertWith(method = "node2vec.EmbeddingInitializer#parse", inverse = Configuration.ConvertWith.INVERSE_IS_TO_MAP)
-    @Configuration.ToMapValue("node2vec.EmbeddingInitializer#toString")
+    @Configuration.ConvertWith(method = "org.neo4j.gds.embeddings.node2vec.EmbeddingInitializer#parse", inverse = Configuration.ConvertWith.INVERSE_IS_TO_MAP)
+    @Configuration.ToMapValue("org.neo4j.gds.embeddings.node2vec.EmbeddingInitializer#toString")
     default EmbeddingInitializer embeddingInitializer() {
         return EmbeddingInitializer.NORMALIZED;
     }

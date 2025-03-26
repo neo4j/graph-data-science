@@ -37,18 +37,18 @@ class HashGNNWriteProcTest extends BaseProcTest {
     @Neo4jGraph
     private static final String DB_CYPHER =
         "CREATE" +
-        "  (a:N {f1: 1, f2: [0.0, 0.0]})" +
-        ", (b:N {f1: 0, f2: [1.0, 0.0]})" +
-        ", (c:N {f1: 0, f2: [0.0, 1.0]})" +
-        ", (b)-[:R1]->(a)" +
-        ", (b)-[:R2]->(c)";
+            "  (a:N {f1: 1, f2: [0.0, 0.0]})" +
+            ", (b:N {f1: 0, f2: [1.0, 0.0]})" +
+            ", (c:N {f1: 0, f2: [0.0, 1.0]})" +
+            ", (b)-[:R1]->(a)" +
+            ", (b)-[:R2]->(c)";
 
     static String expectedMutatedGraph = "CREATE" +
-                                         "  (a:N {f1: 1, f2: [0.0, 0.0], embedding: [1.0, 0.0, 0.0]})" +
-                                         ", (b:N {f1: 0, f2: [1.0, 0.0], embedding: [1.0, 0.0, 1.0]})" +
-                                         ", (c:N {f1: 0, f2: [0.0, 1.0], embedding: [0.0, 0.0, 1.0]})" +
-                                         ", (b)-[:R1]->(a)" +
-                                         ", (b)-[:R2]->(c)";
+        "  (a:N {f1: 1, f2: [0.0, 0.0], embedding: [1.0, 0.0, 0.0]})" +
+        ", (b:N {f1: 0, f2: [1.0, 0.0], embedding: [1.0, 0.0, 1.0]})" +
+        ", (c:N {f1: 0, f2: [0.0, 1.0], embedding: [0.0, 0.0, 1.0]})" +
+        ", (b)-[:R1]->(a)" +
+        ", (b)-[:R2]->(c)";
 
     @BeforeEach
     void setupGraph() throws Exception {

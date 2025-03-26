@@ -19,9 +19,6 @@
  */
 package org.neo4j.gds.embeddings.node2vec;
 
-import node2vec.Node2VecParameters;
-import node2vec.SamplingWalkParameters;
-import node2vec.TrainParameters;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.Concurrency;
@@ -39,7 +36,7 @@ import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
 
-public class Node2Vec extends Algorithm<Node2VecResult> {
+public final class Node2Vec extends Algorithm<Node2VecResult> {
 
     private final Graph graph;
     private final Concurrency concurrency;

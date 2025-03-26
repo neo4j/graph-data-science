@@ -19,16 +19,16 @@
  */
 package org.neo4j.gds;
 
-import fastrp.FastRPParameters;
-import hashgnn.HashGNNParameters;
-import node2vec.Node2VecParameters;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.embeddings.fastrp.FastRPParameters;
 import org.neo4j.gds.embeddings.fastrp.FastRPTask;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTask;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainParameters;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainTask;
+import org.neo4j.gds.embeddings.hashgnn.HashGNNParameters;
 import org.neo4j.gds.embeddings.hashgnn.HashGNNTask;
+import org.neo4j.gds.embeddings.node2vec.Node2VecParameters;
 import org.neo4j.gds.embeddings.node2vec.Node2VecTask;
 
 import java.util.List;

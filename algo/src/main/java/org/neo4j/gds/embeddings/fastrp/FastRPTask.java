@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.embeddings.fastrp;
 
-import fastrp.FastRPParameters;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;

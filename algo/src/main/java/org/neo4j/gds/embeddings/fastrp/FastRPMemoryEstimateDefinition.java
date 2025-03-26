@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.embeddings.fastrp;
 
-import fastrp.FastRPParameters;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.mem.Estimate;
 import org.neo4j.gds.mem.MemoryEstimateDefinition;

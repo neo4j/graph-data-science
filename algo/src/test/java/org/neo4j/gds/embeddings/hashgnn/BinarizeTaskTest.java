@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.embeddings.hashgnn;
 
-import hashgnn.BinarizeParameters;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.ha.HugeObjectArray;

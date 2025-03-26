@@ -17,18 +17,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package node2vec;
+package org.neo4j.gds.embeddings.hashgnn;
 
 import org.neo4j.gds.annotation.Parameters;
+import org.neo4j.gds.core.concurrency.Concurrency;
+
+import java.util.List;
+import java.util.Optional;
 
 @Parameters
-public record TrainParameters(
-    double initialLearningRate,
-    double minLearningRate,
+public record HashGNNParameters(
+    Concurrency concurrency,
     int iterations,
-    int windowSize,
-    int negativeSamplingRate,
-    int embeddingDimension,
-    EmbeddingInitializer embeddingInitializer
+    int embeddingDensity,
+    double neighborInfluence,
+    List<String> featureProperties,
+    boolean heterogeneous,
+    Optional<Integer> outputDimension,
+    Optional<BinarizeParameters> binarizeFeatures,
+    Optional<GenerateParameters> generateFeatures,
+    Optional<Long> randomSeed
 ) {
 }

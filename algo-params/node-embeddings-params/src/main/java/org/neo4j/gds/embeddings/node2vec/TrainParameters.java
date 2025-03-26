@@ -17,6 +17,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package hashgnn;
+package org.neo4j.gds.embeddings.node2vec;
 
-public record GenerateParameters(int densityLevel, int dimension) {}
+import org.neo4j.gds.annotation.Parameters;
+
+@Parameters
+public record TrainParameters(
+    double initialLearningRate,
+    double minLearningRate,
+    int iterations,
+    int windowSize,
+    int negativeSamplingRate,
+    int embeddingDimension,
+    EmbeddingInitializer embeddingInitializer
+) {
+}

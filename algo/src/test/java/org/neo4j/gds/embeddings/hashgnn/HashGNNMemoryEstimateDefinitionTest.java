@@ -19,8 +19,6 @@
  */
 package org.neo4j.gds.embeddings.hashgnn;
 
-import hashgnn.GenerateParameters;
-import hashgnn.HashGNNParameters;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;

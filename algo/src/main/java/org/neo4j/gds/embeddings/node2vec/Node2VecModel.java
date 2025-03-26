@@ -19,8 +19,6 @@
  */
 package org.neo4j.gds.embeddings.node2vec;
 
-import node2vec.EmbeddingInitializer;
-import node2vec.TrainParameters;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.concurrency.Concurrency;

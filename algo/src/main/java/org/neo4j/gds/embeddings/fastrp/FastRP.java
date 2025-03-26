@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.embeddings.fastrp;
 
-import fastrp.FastRPParameters;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;

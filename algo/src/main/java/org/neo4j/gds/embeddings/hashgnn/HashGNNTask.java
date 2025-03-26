@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.embeddings.hashgnn;
 
-import hashgnn.HashGNNParameters;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.core.utils.progress.tasks.Task;

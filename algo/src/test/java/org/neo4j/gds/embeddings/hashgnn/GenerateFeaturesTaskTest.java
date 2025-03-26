@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.embeddings.hashgnn;
 
-import hashgnn.GenerateParameters;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.assertj.core.data.Percentage;
 import org.junit.jupiter.api.Test;

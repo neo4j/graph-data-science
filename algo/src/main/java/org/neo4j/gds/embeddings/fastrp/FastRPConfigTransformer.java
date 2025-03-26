@@ -19,8 +19,6 @@
  */
 package org.neo4j.gds.embeddings.fastrp;
 
-import fastrp.FastRPParameters;
-
 public final class FastRPConfigTransformer {
 
     private FastRPConfigTransformer() {}

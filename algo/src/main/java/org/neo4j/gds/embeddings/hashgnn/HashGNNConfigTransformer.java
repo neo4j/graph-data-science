@@ -19,10 +19,6 @@
  */
 package org.neo4j.gds.embeddings.hashgnn;
 
-import hashgnn.BinarizeParameters;
-import hashgnn.GenerateParameters;
-import hashgnn.HashGNNParameters;
-
 import java.util.Optional;
 
 public final class HashGNNConfigTransformer {

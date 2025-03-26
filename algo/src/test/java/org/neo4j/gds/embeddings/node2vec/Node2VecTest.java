@@ -19,10 +19,6 @@
  */
 package org.neo4j.gds.embeddings.node2vec;
 
-import node2vec.EmbeddingInitializer;
-import node2vec.Node2VecParameters;
-import node2vec.SamplingWalkParameters;
-import node2vec.TrainParameters;
 import org.assertj.core.api.junit.jupiter.SoftAssertionsExtension;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;

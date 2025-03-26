@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.embeddings.fastrp;
 
-import fastrp.FastRPParameters;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
