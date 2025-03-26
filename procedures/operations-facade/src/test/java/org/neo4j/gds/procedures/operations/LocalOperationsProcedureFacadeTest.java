@@ -81,7 +81,7 @@ class LocalOperationsProcedureFacadeTest {
         when(taskStore.query("alice")).thenReturn(mockedTasks);
 
         var actualProgress = operationsProcedureFacade.listProgress("", false);
-        assertThat(actualProgress).map(i -> i.taskName).containsExactlyInAnyOrder(
+        assertThat(actualProgress).map(ProgressResult::taskName).containsExactlyInAnyOrder(
             pending.description(),
             running.description()
         );
@@ -129,7 +129,7 @@ class LocalOperationsProcedureFacadeTest {
         when(taskStore.query("alice")).thenReturn(mockedTasks);
 
         var actualProgress = operationsProcedureFacade.listProgress("", true);
-        assertThat(actualProgress).map(i -> i.taskName).containsExactlyInAnyOrder(
+        assertThat(actualProgress).map(ProgressResult::taskName).containsExactlyInAnyOrder(
             pending.description(),
             running.description(),
             cancelled.description(),
