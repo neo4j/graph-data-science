@@ -20,8 +20,8 @@
 package org.neo4j.gds.similarity.knn;
 
 import com.carrotsearch.hppc.LongArrayList;
-import org.neo4j.gds.mem.MemoryEstimateDefinition;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
+import org.neo4j.gds.mem.MemoryEstimateDefinition;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryEstimations;
 import org.neo4j.gds.mem.MemoryRange;
@@ -52,11 +52,11 @@ public class KnnMemoryEstimateDefinition implements MemoryEstimateDefinition {
                     HugeObjectArray.memoryEstimation(nodeCount, 0),
                     HugeObjectArray.memoryEstimation(
                         nodeCount,
-                        sizeOfInstance(LongArrayList.class) + sizeOfLongArray(k.sampledValue)
+                        sizeOfInstance(LongArrayList.class) + sizeOfLongArray(k.sampledValue())
                     )
                 );
 
-                var neighborListEstimate = NeighborList.memoryEstimation(k.value)
+                var neighborListEstimate = NeighborList.memoryEstimation(k.value())
                     .estimate(dim, concurrency)
                     .memoryUsage();
 
@@ -74,12 +74,12 @@ public class KnnMemoryEstimateDefinition implements MemoryEstimateDefinition {
                     .rangePerNode("new-reverse-neighbors", tempListEstimation)
                     .fixed(
                         "initial-random-neighbors (per thread)",
-                        KnnSamplerMemoryEstimation.create(parameters.samplerType(), k.value).times(concurrency.value())
+                        KnnSamplerMemoryEstimation.create(parameters.samplerType(), k.value()).times(concurrency.value())
                     )
                     .fixed(
                         "sampled-random-neighbors (per thread)",
                         MemoryRange.of(
-                            sizeOfIntArray(sizeOfOpenHashContainer(k.sampledValue)) * concurrency.value()
+                            sizeOfIntArray(sizeOfOpenHashContainer(k.sampledValue())) * concurrency.value()
                         )
                     )
                     .build();

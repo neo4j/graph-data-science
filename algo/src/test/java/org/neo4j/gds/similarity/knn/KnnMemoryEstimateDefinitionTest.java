@@ -100,17 +100,17 @@ class KnnMemoryEstimateDefinitionTest {
     ) {
         long knnAlgo = Estimate.sizeOfInstance(Knn.class);
 
-        long topKNeighborList = Estimate.sizeOfInstance(NeighborList.class) + sizeOfLongArray(k.value * 2L);
+        long topKNeighborList = Estimate.sizeOfInstance(NeighborList.class) + sizeOfLongArray(k.value() * 2L);
         long topKNeighborsList = HugeObjectArray.memoryEstimation(nodeCount, topKNeighborList);
 
         long tempNeighborsListMin = HugeObjectArray.memoryEstimation(nodeCount, 0);
         long tempNeighborsListMax = HugeObjectArray.memoryEstimation(
             nodeCount,
-            Estimate.sizeOfInstance(LongArrayList.class) + sizeOfLongArray(k.sampledValue)
+            Estimate.sizeOfInstance(LongArrayList.class) + sizeOfLongArray(k.sampledValue())
         );
 
-        var randomList = KnnSamplerMemoryEstimation.create(initialSampler, k.value);
-        long sampledList = sizeOfIntArray(sizeOfOpenHashContainer(k.sampledValue));
+        var randomList = KnnSamplerMemoryEstimation.create(initialSampler, k.value());
+        long sampledList = sizeOfIntArray(sizeOfOpenHashContainer(k.sampledValue()));
 
         long expectedMin = knnAlgo + topKNeighborsList + 4 * tempNeighborsListMin + randomList.min + sampledList;
         long expectedMax = knnAlgo + topKNeighborsList + 4 * tempNeighborsListMax + randomList.max + sampledList;

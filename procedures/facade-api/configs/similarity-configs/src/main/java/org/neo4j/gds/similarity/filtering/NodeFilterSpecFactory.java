@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.similarity.filtering;
 
+import org.neo4j.gds.similarity.NodeFilterSpec;
 import org.neo4j.graphdb.Node;
 
 import java.util.ArrayList;

@@ -17,25 +17,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.algorithms.machinelearning;
+package org.neo4j.gds.similarity;
 
-import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.annotation.Parameters;
-import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.similarity.NodeFilterSpec;
-
-import java.util.Collection;
-import java.util.List;
-
-@Parameters
-public record KGEPredictParameters(
-    Concurrency concurrency,
-    NodeFilterSpec sourceNodeFilter,
-    NodeFilterSpec targetNodeFilter,
-    Collection<RelationshipType> relationshipTypesFilter,
-    List<Double> relationshipTypeEmbedding,
-    String nodeEmbeddingProperty,
-    ScoreFunction scoringFunction,
-    int topK
-) {
-}
+public record FilteringParameters(
+    NodeFilterSpec sourceFilter,
+    NodeFilterSpec targetFilter
+) {}

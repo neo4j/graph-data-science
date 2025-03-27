@@ -66,7 +66,8 @@ public class FilteredKnnIdMappingTest {
             .sourceNodeFilter(NodeFilterSpecFactory.create(lowestOriginalId))
             .build();
 
-        var knn = FilteredKnn.createWithoutSeeding(graph, config, KnnContext.empty(), TerminationFlag.RUNNING_TRUE);
+        var params = config.toFilteredKnnParameters().finalize(graph.nodeCount());
+        var knn = FilteredKnn.createWithoutSeeding(graph, params, KnnContext.empty(), TerminationFlag.RUNNING_TRUE);
 
         var result = knn.compute();
 

@@ -28,7 +28,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnn;
-import org.neo4j.gds.similarity.filteredknn.FilteredKnnBaseConfig;
+import org.neo4j.gds.similarity.filteredknn.FilteredKnnParameters;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnResult;
 import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityBaseConfig;
 import org.neo4j.gds.similarity.filtering.NodeFilter;
@@ -39,6 +39,7 @@ import org.neo4j.gds.similarity.knn.KnnContext;
 import org.neo4j.gds.similarity.knn.KnnNeighborFilterFactory;
 import org.neo4j.gds.similarity.knn.KnnResult;
 import org.neo4j.gds.similarity.knn.KnnTask;
+import org.neo4j.gds.similarity.knn.SimilarityFunction;
 import org.neo4j.gds.similarity.knn.metrics.SimilarityComputer;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarity;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityBaseConfig;
@@ -47,9 +48,8 @@ import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.wcc.WccStub;
 import org.neo4j.gds.wcc.WccTask;
 
-import java.util.List;
+import java.util.Optional;
 
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.FilteredKNN;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.FilteredNodeSimilarity;
 
 public class SimilarityAlgorithms {
@@ -63,35 +63,9 @@ public class SimilarityAlgorithms {
         this.terminationFlag = terminationFlag;
     }
 
-    FilteredKnnResult filteredKnn(Graph graph, FilteredKnnBaseConfig configuration) {
-        var nodeCount = graph.nodeCount();
-
-        var task = Tasks.task(
-            FilteredKNN.asString(),
-            Tasks.leaf("Initialize random neighbors", nodeCount),
-            Tasks.iterativeDynamic(
-                "Iteration",
-                () -> List.of(
-                    Tasks.leaf("Split old and new neighbors", nodeCount),
-                    Tasks.leaf("Reverse old and new neighbors", nodeCount),
-                    Tasks.leaf("Join neighbors", nodeCount)
-                ),
-                configuration.maxIterations()
-            )
-        );
-        var progressTracker = progressTrackerCreator.createProgressTracker(
-            task,
-            configuration.jobId(),
-            configuration.concurrency(),
-            configuration.logProgress()
-        );
-
-        return filteredKnn(graph, configuration, progressTracker);
-    }
-
     public FilteredKnnResult filteredKnn(
         Graph graph,
-        FilteredKnnBaseConfig configuration,
+        FilteredKnnParameters parameters,
         ProgressTracker progressTracker
     ) {
         var knnContext = ImmutableKnnContext
@@ -100,13 +74,13 @@ public class SimilarityAlgorithms {
             .executor(DefaultPool.INSTANCE)
             .build();
 
-        var algorithm = selectAlgorithmConfiguration(graph, configuration, knnContext);
+        var algorithm = selectAlgorithmConfiguration(graph, parameters, knnContext);
 
         return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
             algorithm,
             progressTracker,
             true,
-            configuration.concurrency()
+            parameters.knnParameters().concurrency()
         );
     }
 
@@ -171,8 +145,9 @@ public class SimilarityAlgorithms {
         var algorithm = Knn.create(
             graph,
             parameters,
-            SimilarityComputer.ofProperties(graph, parameters.nodePropertySpecs()),
+            new SimilarityFunction(SimilarityComputer.ofProperties(graph, parameters.nodePropertySpecs())),
             new KnnNeighborFilterFactory(graph.nodeCount()),
+            Optional.empty(),
             ImmutableKnnContext
                 .builder()
                 .progressTracker(progressTracker)
@@ -256,13 +231,13 @@ public class SimilarityAlgorithms {
 
     private FilteredKnn selectAlgorithmConfiguration(
         Graph graph,
-        FilteredKnnBaseConfig configuration,
+        FilteredKnnParameters knnParameters,
         KnnContext knnContext
     ) {
-        if (configuration.seedTargetNodes()) {
+        if (knnParameters.seedTargetNodes()) {
             return FilteredKnn.createWithDefaultSeeding(
                 graph,
-                configuration,
+                knnParameters,
                 knnContext,
                 terminationFlag
             );
@@ -270,7 +245,7 @@ public class SimilarityAlgorithms {
 
         return FilteredKnn.createWithoutSeeding(
             graph,
-            configuration,
+            knnParameters,
             knnContext,
             terminationFlag
         );

@@ -84,7 +84,9 @@ class FilteredKnnTest {
             .build();
         var knnContext = ImmutableKnnContext.builder().build();
 
-        var knn = FilteredKnn.createWithoutSeeding(graph, knnConfig, knnContext, TerminationFlag.RUNNING_TRUE);
+        var params = knnConfig.toFilteredKnnParameters().finalize(graph.nodeCount());
+
+        var knn = FilteredKnn.createWithoutSeeding(graph, params, knnContext, TerminationFlag.RUNNING_TRUE);
         var result = knn.compute();
 
         assertThat(result).isNotNull();
@@ -139,7 +141,11 @@ class FilteredKnnTest {
                 .sourceNodeFilter(graph.toOriginalNodeId(filteredSourceNode))
                 .build();
             var knnContext = KnnContext.empty();
-            var knn = FilteredKnn.createWithoutSeeding(graph, config, knnContext, TerminationFlag.RUNNING_TRUE);
+
+            var params = config.toFilteredKnnParameters().finalize(graph.nodeCount());
+
+            var knn = FilteredKnn.createWithoutSeeding(graph, params, knnContext, TerminationFlag.RUNNING_TRUE);
+
             var result = knn.compute();
 
             assertThat(result.similarityResultStream()
@@ -160,8 +166,11 @@ class FilteredKnnTest {
                 .concurrency(1)
                 .sourceNodeFilter(filteredNodes.stream().map(graph::toOriginalNodeId).collect(Collectors.toList()))
                 .build();
+
+            var params = config.toFilteredKnnParameters().finalize(graph.nodeCount());
+
             var knnContext = KnnContext.empty();
-            var knn = FilteredKnn.createWithoutSeeding(graph, config, knnContext, TerminationFlag.RUNNING_TRUE);
+            var knn = FilteredKnn.createWithoutSeeding(graph, params, knnContext, TerminationFlag.RUNNING_TRUE);
             var result = knn.compute();
 
             assertThat(result.similarityResultStream()
@@ -195,7 +204,10 @@ class FilteredKnnTest {
                 .targetNodeFilter(graph.toOriginalNodeId(targetNode))
                 .build();
             var knnContext = KnnContext.empty();
-            var knn = FilteredKnn.createWithoutSeeding(graph, config, knnContext, TerminationFlag.RUNNING_TRUE);
+
+            var params = config.toFilteredKnnParameters().finalize(graph.nodeCount());
+
+            var knn = FilteredKnn.createWithoutSeeding(graph, params, knnContext, TerminationFlag.RUNNING_TRUE);
             var result = knn.compute();
 
             assertThat(result.similarityResultStream()
@@ -217,7 +229,10 @@ class FilteredKnnTest {
                 .targetNodeFilter(targetNodes.stream().map(graph::toOriginalNodeId).collect(Collectors.toList()))
                 .build();
             var knnContext = KnnContext.empty();
-            var knn = FilteredKnn.createWithoutSeeding(graph, config, knnContext, TerminationFlag.RUNNING_TRUE);
+
+            var params = config.toFilteredKnnParameters().finalize(graph.nodeCount());
+
+            var knn = FilteredKnn.createWithoutSeeding(graph, params, knnContext, TerminationFlag.RUNNING_TRUE);
             var result = knn.compute();
 
             assertThat(result.similarityResultStream()
@@ -245,7 +260,10 @@ class FilteredKnnTest {
                 .topK(42)
                 .build();
             var knnContext = KnnContext.empty();
-            var knn = FilteredKnn.createWithoutSeeding(graph, config, knnContext, TerminationFlag.RUNNING_TRUE);
+
+            var params = config.toFilteredKnnParameters().finalize(graph.nodeCount());
+
+            var knn = FilteredKnn.createWithoutSeeding(graph, params, knnContext, TerminationFlag.RUNNING_TRUE);
             var result = knn.compute();
 
             /*
@@ -307,7 +325,10 @@ class FilteredKnnTest {
                 .concurrency(1)
                 .build();
             var knnContext = KnnContext.empty();
-            var knn = FilteredKnn.createWithDefaultSeeding(graph, config, knnContext, TerminationFlag.RUNNING_TRUE);
+
+            var params = config.toFilteredKnnParameters().finalize(graph.nodeCount());
+
+            var knn = FilteredKnn.createWithDefaultSeeding(graph, params, knnContext, TerminationFlag.RUNNING_TRUE);
             var result = knn.compute();
 
             /*

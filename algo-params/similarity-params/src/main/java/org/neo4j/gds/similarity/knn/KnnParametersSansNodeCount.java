@@ -24,7 +24,20 @@ import org.neo4j.gds.core.concurrency.Concurrency;
 import java.util.List;
 import java.util.Optional;
 
-public class KnnParametersSansNodeCount {
+public record KnnParametersSansNodeCount(
+        Concurrency concurrency,
+        int maxIterations,
+        double similarityCutoff,
+        double deltaThreshold,
+        double sampleRate,
+        int rawK,
+        double perturbationRate,
+        int randomJoins,
+        int minBatchSize,
+        KnnSampler.SamplerType samplerType,
+        Optional<Long> randomSeed,
+        List<KnnNodePropertySpec> nodePropertySpecs
+    ){
 
     public static KnnParametersSansNodeCount create(
         Concurrency concurrency,
@@ -74,47 +87,6 @@ public class KnnParametersSansNodeCount {
             randomSeed,
             nodePropertySpecs
         );
-    }
-
-    private final Concurrency concurrency;
-    private final int maxIterations;
-    private final double similarityCutoff;
-    private final double deltaThreshold;
-    private final double sampleRate;
-    private final int rawK;
-    private final double perturbationRate;
-    private final int randomJoins;
-    private final int minBatchSize;
-    private final KnnSampler.SamplerType samplerType;
-    private final Optional<Long> randomSeed;
-    private final List<KnnNodePropertySpec> nodePropertySpecs;
-
-    public KnnParametersSansNodeCount(
-        Concurrency concurrency,
-        int maxIterations,
-        double similarityCutoff,
-        double deltaThreshold,
-        double sampleRate,
-        int k,
-        double perturbationRate,
-        int randomJoins,
-        int minBatchSize,
-        KnnSampler.SamplerType samplerType,
-        Optional<Long> randomSeed,
-        List<KnnNodePropertySpec> nodePropertySpecs
-    ) {
-        this.concurrency = concurrency;
-        this.maxIterations = maxIterations;
-        this.similarityCutoff = similarityCutoff;
-        this.deltaThreshold = deltaThreshold;
-        this.sampleRate = sampleRate;
-        this.rawK = k;
-        this.perturbationRate = perturbationRate;
-        this.randomJoins = randomJoins;
-        this.minBatchSize = minBatchSize;
-        this.samplerType = samplerType;
-        this.randomSeed = randomSeed;
-        this.nodePropertySpecs = nodePropertySpecs;
     }
 
     public KnnParameters finalize(long nodeCount) {

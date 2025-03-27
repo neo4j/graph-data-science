@@ -36,7 +36,6 @@ import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.loading.NullPropertyMap;
 import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -98,30 +97,37 @@ class KnnTest {
     @Inject
     private TestGraph multPropMissingGraph;
 
+    private  KnnContext context = ImmutableKnnContext.builder().executor(DefaultPool.INSTANCE).build();
+
     @Test
     void shouldRun() {
         IdFunction idFunction = graph::toMappedNodeId;
 
-        var similarityFunction = new SimilarityFunction(SimilarityComputer.ofProperty(graph, new KnnNodePropertySpec("knn")));
         var k = K.create(1, graph.nodeCount(), 0.5, 0.001);
-        var knn = new Knn(
-            graph,
-            ProgressTracker.NULL_TRACKER,
-            DefaultPool.INSTANCE,
-            k,
+
+        var knnParameters = new KnnParameters(
             new Concurrency(1),
-            1000,
             100,
             0.0,
+            k,
             0.0,
             10,
-            Optional.of(19L),
+            1000,
             KnnSampler.SamplerType.UNIFORM,
-            similarityFunction,
+            Optional.of(19L),
+            List.of(new KnnNodePropertySpec("knn"))
+
+        );
+
+        var knn = Knn.create(
+            graph,
+            knnParameters,
             new KnnNeighborFilterFactory(graph.nodeCount()),
-            NeighbourConsumers.no_op,
+            context,
+            Optional.empty(),
             TerminationFlag.RUNNING_TRUE
         );
+
         var result = knn.compute();
 
         assertThat(result).isNotNull();
@@ -140,26 +146,31 @@ class KnnTest {
     void shouldHaveEachNodeConnected() {
         IdFunction idFunction = graph::toMappedNodeId;
 
-        var similarityFunction = new SimilarityFunction(SimilarityComputer.ofProperty(graph, new KnnNodePropertySpec("knn")));
         var k = K.create(2, graph.nodeCount(), 0.5, 0.001);
-        var knn = new Knn(
-            graph,
-            ProgressTracker.NULL_TRACKER,
-            DefaultPool.INSTANCE,
-            k,
+
+        var knnParameters = new KnnParameters(
             new Concurrency(4),
-            1000,
             100,
             0.0,
+            k,
             0.0,
             10,
-            Optional.empty(),
+            1000,
             KnnSampler.SamplerType.UNIFORM,
-            similarityFunction,
+            Optional.empty(),
+            List.of(new KnnNodePropertySpec("knn"))
+
+        );
+
+        var knn = Knn.create(
+            graph,
+            knnParameters,
             new KnnNeighborFilterFactory(graph.nodeCount()),
-            NeighbourConsumers.no_op,
+            context,
+            Optional.empty(),
             TerminationFlag.RUNNING_TRUE
         );
+
         var result = knn.compute();
 
         assertThat(result).isNotNull();
@@ -194,26 +205,31 @@ class KnnTest {
     void shouldWorkWithMultipleProperties() {
         IdFunction idFunction = graph::toMappedNodeId;
 
-        var similarityFunction = new SimilarityFunction(SimilarityComputer.ofProperties(graph, List.of(new KnnNodePropertySpec("knn"), new KnnNodePropertySpec("prop"))));
         var k = K.create(1, graph.nodeCount(), 0.5, 0.001);
-        var knn = new Knn(
-            graph,
-            ProgressTracker.NULL_TRACKER,
-            DefaultPool.INSTANCE,
-            k,
+
+        var knnParameters = new KnnParameters(
             new Concurrency(1),
-            1000,
             100,
             0.0,
+            k,
             0.0,
             10,
-            Optional.of(19L),
+            1000,
             KnnSampler.SamplerType.UNIFORM,
-            similarityFunction,
+            Optional.of(19L),
+            List.of(new KnnNodePropertySpec("knn"), new KnnNodePropertySpec("prop"))
+
+        );
+
+        var knn = Knn.create(
+            graph,
+            knnParameters,
             new KnnNeighborFilterFactory(graph.nodeCount()),
-            NeighbourConsumers.no_op,
+            context,
+            Optional.empty(),
             TerminationFlag.RUNNING_TRUE
         );
+
         var result = knn.compute();
 
         assertThat(result).isNotNull();
@@ -241,24 +257,27 @@ class KnnTest {
 
     @Test
     void shouldWorkWithMultiplePropertiesEvenIfSomeAreMissing() {
-        var similarityFunction = new SimilarityFunction(SimilarityComputer.ofProperties(multPropMissingGraph, List.of(new KnnNodePropertySpec("prop1"), new KnnNodePropertySpec("prop2"))));
         var k = K.create(2, multPropMissingGraph.nodeCount(), 0.5, 0.001);
-        var knn = new Knn(
-            multPropMissingGraph,
-            ProgressTracker.NULL_TRACKER,
-            DefaultPool.INSTANCE,
-            k,
+
+        var knnParameters = new KnnParameters(
             new Concurrency(1),
-            1000,
             100,
             0.0,
+            k,
             0.0,
             10,
-            Optional.of(19L),
+            1000,
             KnnSampler.SamplerType.UNIFORM,
-            similarityFunction,
+            Optional.of(19L),
+            List.of(new KnnNodePropertySpec("prop1"), new KnnNodePropertySpec("prop2"))
+        );
+
+        var knn = Knn.create(
+            multPropMissingGraph,
+            knnParameters,
             new KnnNeighborFilterFactory(multPropMissingGraph.nodeCount()),
-            NeighbourConsumers.no_op,
+            context,
+            Optional.empty(),
             TerminationFlag.RUNNING_TRUE
         );
         var result = knn.compute();
@@ -285,26 +304,30 @@ class KnnTest {
 
     @Test
     void shouldFilterResultsOfLowSimilarity() {
-        var similarityFunction = new SimilarityFunction(SimilarityComputer.ofProperty(simThresholdGraph, new KnnNodePropertySpec("age")));
         var k = K.create(2, simThresholdGraph.nodeCount(), 0.5, 0.001);
-        var knn = new Knn(
-            simThresholdGraph,
-            ProgressTracker.NULL_TRACKER,
-            DefaultPool.INSTANCE,
-            k,
+
+        var knnParameters = new KnnParameters(
             new Concurrency(1),
-            1000,
             100,
             0.14,
+            k,
             0.0,
             10,
-            Optional.of(19L),
+            1000,
             KnnSampler.SamplerType.UNIFORM,
-            similarityFunction,
+            Optional.of(19L),
+            List.of(new KnnNodePropertySpec("age"))
+        );
+
+        var knn = Knn.create(
+            simThresholdGraph,
+            knnParameters,
             new KnnNeighborFilterFactory(simThresholdGraph.nodeCount()),
-            NeighbourConsumers.no_op,
+            context,
+            Optional.empty(),
             TerminationFlag.RUNNING_TRUE
         );
+
         var result = knn.compute();
 
         assertThat(result).isNotNull();
@@ -324,26 +347,32 @@ class KnnTest {
     @ParameterizedTest
     @MethodSource("emptyProperties")
     void testNonExistingProperties(NodePropertyValues nodePropertyValues) {
-        var similarityFunction = new SimilarityFunction(SimilarityComputer.ofProperty(graph, "knn", nodePropertyValues));
+
         var k = K.create(2, graph.nodeCount(), 0.5, 0.001);
-        var knn = new Knn(
-            graph,
-            ProgressTracker.NULL_TRACKER,
-            DefaultPool.INSTANCE,
-            k,
-            new Concurrency(4),
-            1000,
+
+        var knnParameters = new KnnParameters(
+            new Concurrency(1),
             100,
             0.0,
+            k,
             0.0,
             10,
-            Optional.empty(),
+            1000,
             KnnSampler.SamplerType.UNIFORM,
-            similarityFunction,
+            Optional.empty(),
+            null
+        );
+
+        var knn= Knn.create(
+            graph,
+            knnParameters,
+            new SimilarityFunction(SimilarityComputer.ofProperty(graph, "knn", nodePropertyValues)),
             new KnnNeighborFilterFactory(graph.nodeCount()),
-            NeighbourConsumers.no_op,
+            Optional.empty(),
+            context,
             TerminationFlag.RUNNING_TRUE
         );
+
         var result = knn.compute();
         assertThat(result)
             .isNotNull()
@@ -366,26 +395,32 @@ class KnnTest {
 
         var nodeProperties = new DoubleTestPropertyValues(nodeId -> nodeId == 0 ? Double.NaN : 42.1337);
 
-        var similarityFunction = new SimilarityFunction(SimilarityComputer.ofProperty(graph, "{knn}", nodeProperties));
         var k = K.create(1, graph.nodeCount(), 0.5, 0.001);
-        var knn = new Knn(
-            graph,
-            ProgressTracker.NULL_TRACKER,
-            DefaultPool.INSTANCE,
-            k,
+
+        var knnParameters = new KnnParameters(
             new Concurrency(1),
-            1000,
             100,
             0.0,
+            k,
             0.0,
             10,
-            Optional.of(42L),
+            1000,
             KnnSampler.SamplerType.UNIFORM,
-            similarityFunction,
+            Optional.of(42L),
+            null
+        );
+
+        var knn= Knn.create(
+            graph,
+            knnParameters,
+            new SimilarityFunction(SimilarityComputer.ofProperty(graph, "{knn}", nodeProperties)),
             new KnnNeighborFilterFactory(graph.nodeCount()),
-            NeighbourConsumers.no_op,
+            Optional.empty(),
+            context,
             TerminationFlag.RUNNING_TRUE
         );
+
+
         var result = knn.compute();
 
         softly.assertThat(result)
@@ -473,24 +508,27 @@ class KnnTest {
     void testNegativeFloatArrays() {
         var graph = GdlFactory.of("({weight: [1.0, 2.0]}), ({weight: [3.0, -10.0]})").build().getUnion();
 
-        var similarityFunction = new SimilarityFunction(SimilarityComputer.ofProperty(graph, new KnnNodePropertySpec("weight")));
         var k = K.create(1, graph.nodeCount(), 0.5, 0.001);
-        var knn = new Knn(
-            graph,
-            ProgressTracker.NULL_TRACKER,
-            DefaultPool.INSTANCE,
-            k,
+
+        var knnParameters = new KnnParameters(
             new Concurrency(4),
-            1000,
             100,
             0.0,
+            k,
             0.0,
             10,
-            Optional.empty(),
+            1000,
             KnnSampler.SamplerType.UNIFORM,
-            similarityFunction,
+            Optional.empty(),
+            List.of(new KnnNodePropertySpec("weight"))
+        );
+
+        var knn = Knn.create(
+            graph,
+            knnParameters,
             new KnnNeighborFilterFactory(graph.nodeCount()),
-            NeighbourConsumers.no_op,
+            context,
+            Optional.empty(),
             TerminationFlag.RUNNING_TRUE
         );
 
@@ -508,26 +546,35 @@ class KnnTest {
         var log = new GdsTestLog();
         var progressTracker = new TaskProgressTracker(progressTask, new LoggerForProgressTrackingAdapter(log), new Concurrency(4), EmptyTaskRegistryFactory.INSTANCE);
 
-        var similarityFunction = new SimilarityFunction(SimilarityComputer.ofProperty(graph, new KnnNodePropertySpec("knn")));
         var k = K.create(1, graph.nodeCount(), 0.5, 0.001);
-        var knn = new Knn(
-            graph,
-            progressTracker,
-            DefaultPool.INSTANCE,
-            k,
+
+        var knnParameters = new KnnParameters(
             new Concurrency(1),
-            1000,
-            maxIterations,
+            100,
             0.0,
+            k,
             0.0,
             10,
-            Optional.of(42L),
+            1000,
             KnnSampler.SamplerType.UNIFORM,
-            similarityFunction,
+            Optional.of(42L),
+            List.of(new KnnNodePropertySpec("knn"))
+        );
+
+        var  progressContext = ImmutableKnnContext.builder()
+            .progressTracker(progressTracker)
+            .executor(DefaultPool.INSTANCE)
+            .build();
+
+        var knn = Knn.create(
+            graph,
+            knnParameters,
             new KnnNeighborFilterFactory(graph.nodeCount()),
-            NeighbourConsumers.no_op,
+            progressContext,
+            Optional.empty(),
             TerminationFlag.RUNNING_TRUE
         );
+
         knn.compute();
 
         assertThat(log.getMessages(TestLog.INFO))
@@ -558,26 +605,32 @@ class KnnTest {
     void supportNegativeArrays(String graphCreateQuery, String desc) {
         var graphWithNegativeNodePropertyValues = GdlFactory.of(graphCreateQuery).build().getUnion();
 
-        var similarityFunction = new SimilarityFunction(SimilarityComputer.ofProperty(graphWithNegativeNodePropertyValues, new KnnNodePropertySpec("weight")));
+
         var k = K.create(10, graphWithNegativeNodePropertyValues.nodeCount(), 0.5, 0.001);
-        var knn = new Knn(
-            graphWithNegativeNodePropertyValues,
-            ProgressTracker.NULL_TRACKER,
-            DefaultPool.INSTANCE,
-            k,
+
+        var knnParameters = new KnnParameters(
             new Concurrency(1),
-            1000,
             100,
             0.0,
+            k,
             0.0,
             10,
-            Optional.of(42L),
+            1000,
             KnnSampler.SamplerType.UNIFORM,
-            similarityFunction,
+            Optional.of(42L),
+            null
+        );
+
+        var knn = Knn.create(
+            graphWithNegativeNodePropertyValues,
+            knnParameters,
+            new SimilarityFunction(SimilarityComputer.ofProperty(graphWithNegativeNodePropertyValues, new KnnNodePropertySpec("weight"))),
             new KnnNeighborFilterFactory(graphWithNegativeNodePropertyValues.nodeCount()),
-            NeighbourConsumers.no_op,
+            Optional.empty(),
+            context,
             TerminationFlag.RUNNING_TRUE
         );
+
         var result = knn.compute();
         assertThat(result.streamSimilarityResult())
             .hasSize(2);
@@ -609,24 +662,27 @@ class KnnTest {
 
         @Test
         void shouldRespectIterationLimit() {
-            var similarityFunction = new SimilarityFunction(SimilarityComputer.ofProperty(graph, new KnnNodePropertySpec("knn")));
             var k = K.create(1, graph.nodeCount(), 0.5, 0.0);
-            var knn = new Knn(
-                graph,
-                ProgressTracker.NULL_TRACKER,
-                DefaultPool.INSTANCE,
-                k,
+
+            var knnParameters = new KnnParameters(
                 new Concurrency(1),
-                1000,
                 1,
                 0.0,
+                k,
                 0.0,
                 10,
-                Optional.of(42L),
+                1000,
                 KnnSampler.SamplerType.UNIFORM,
-                similarityFunction,
+                Optional.of(42L),
+                List.of(new KnnNodePropertySpec("knn"))
+            );
+
+            var knn = Knn.create(
+                graph,
+                knnParameters,
                 new KnnNeighborFilterFactory(graph.nodeCount()),
-                NeighbourConsumers.no_op,
+                context,
+                Optional.empty(),
                 TerminationFlag.RUNNING_TRUE
             );
             var result = knn.compute();
@@ -647,26 +703,30 @@ class KnnTest {
 
         @Test
         void shouldReturnCorrectNumberIterationsWhenConverging() {
-            var similarityFunction = new SimilarityFunction(SimilarityComputer.ofProperty(graph, new KnnNodePropertySpec("knn")));
             var k = K.create(10, graph.nodeCount(), 0.5, 1.0);
-            var knn = new Knn(
-                graph,
-                ProgressTracker.NULL_TRACKER,
-                DefaultPool.INSTANCE,
-                k,
+
+            var knnParameters = new KnnParameters(
                 new Concurrency(4),
-                1000,
                 5,
                 0.0,
+                k,
                 0.0,
                 10,
-                Optional.empty(),
+                1000,
                 KnnSampler.SamplerType.UNIFORM,
-                similarityFunction,
+                Optional.empty(),
+                List.of(new KnnNodePropertySpec("knn"))
+            );
+
+            var knn = Knn.create(
+                graph,
+                knnParameters,
                 new KnnNeighborFilterFactory(graph.nodeCount()),
-                NeighbourConsumers.no_op,
+                context,
+                Optional.empty(),
                 TerminationFlag.RUNNING_TRUE
             );
+
             var result = knn.compute();
 
             assertTrue(result.didConverge());
@@ -712,24 +772,30 @@ class KnnTest {
 
             var similarityFunction = new SimilarityFunction(SimilarityComputer.ofProperty(graph, new KnnNodePropertySpec("knn")));
             var k = K.create(4, graph.nodeCount(), 0.5, 0.001);
-            var knn = new Knn(
-                graph,
-                ProgressTracker.NULL_TRACKER,
-                DefaultPool.INSTANCE,
-                k,
+
+
+            var knnParameters = new KnnParameters(
                 new Concurrency(1),
-                1000,
                 1,
                 0.0,
+                k,
                 0.0,
                 0,
-                Optional.of(20L),
+                1000,
                 KnnSampler.SamplerType.RANDOMWALK,
-                similarityFunction,
+                Optional.of(20L),
+                List.of(new KnnNodePropertySpec("knn"))
+            );
+
+            var knn = Knn.create(
+                graph,
+                knnParameters,
                 new KnnNeighborFilterFactory(graph.nodeCount()),
-                NeighbourConsumers.no_op,
+                context,
+                Optional.empty(),
                 TerminationFlag.RUNNING_TRUE
             );
+
             var result = knn.compute();
 
             long nodeAId = idFunction.of("a");

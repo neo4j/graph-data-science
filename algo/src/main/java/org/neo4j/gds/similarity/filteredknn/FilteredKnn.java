@@ -54,15 +54,27 @@ public class FilteredKnn extends Algorithm<FilteredKnnResult> {
     private final StreamProducingTargetNodeFiltering targetNodeFiltering;
     private final NodeFilter sourceNodeFilter;
 
-    public static FilteredKnn createWithoutSeeding(Graph graph, FilteredKnnBaseConfig config, KnnContext context, TerminationFlag terminationFlag) {
-        return create(graph, config, context, Optional.empty(), terminationFlag);
+    public static FilteredKnn createWithoutSeeding(
+        Graph graph,
+        FilteredKnnParameters parameters,
+        KnnContext context,
+        TerminationFlag terminationFlag
+    ) {
+        return create(graph, parameters, context, Optional.empty(), terminationFlag);
     }
 
     // a bit speculative, but we imagine this being used as entrypoint for seeding
-    public static FilteredKnn createWithDefaultSeeding(Graph graph, FilteredKnnBaseConfig config, KnnContext context, TerminationFlag terminationFlag) {
-        var similarityFunction = new SimilarityFunction(SimilarityComputer.ofProperties(graph, config.nodeProperties()));
+    public static FilteredKnn createWithDefaultSeeding(
+        Graph graph,
+        FilteredKnnParameters parameters,
+        KnnContext context,
+        TerminationFlag terminationFlag
+    ) {
+        var similarityFunction = new SimilarityFunction(
+            SimilarityComputer.ofProperties(graph, parameters.knnParameters().nodePropertySpecs())
+        );
 
-        return create(graph, config, context, Optional.of(similarityFunction), terminationFlag);
+        return create(graph, parameters, context, Optional.of(similarityFunction), terminationFlag);
     }
 
     /**
@@ -74,44 +86,37 @@ public class FilteredKnn extends Algorithm<FilteredKnnResult> {
      */
     static FilteredKnn create(
         Graph graph,
-        FilteredKnnBaseConfig config,
+        FilteredKnnParameters parameters,
         KnnContext context,
         Optional<SimilarityFunction> optionalSimilarityFunction,
         TerminationFlag terminationFlag
     ) {
-        var targetNodeFilter = config.targetNodeFilter().toNodeFilter(graph);
-        var sourceNodeFilter = config.sourceNodeFilter().toNodeFilter(graph);
+        var targetNodeFilter = parameters.filteringParameters().targetFilter().toNodeFilter(graph);
+        var sourceNodeFilter = parameters.filteringParameters().sourceFilter().toNodeFilter(graph);
+
+        var knnParameters = parameters.knnParameters();
 
         var targetNodeFiltering = TargetNodeFilteringFactory.create(
             sourceNodeFilter,
             graph.nodeCount(),
-            config.k(graph.nodeCount()).value,
+            knnParameters.kHolder().value(),
             targetNodeFilter,
             optionalSimilarityFunction,
-            config.similarityCutoff(),
-            config.concurrency()
+            knnParameters.similarityCutoff(),
+            knnParameters.concurrency()
         );
         var similarityFunction = optionalSimilarityFunction.orElse(new SimilarityFunction(SimilarityComputer.ofProperties(
             graph,
-            config.nodeProperties()
+            knnParameters.nodePropertySpecs()
         )));
 
-        var knn = new Knn(
+        var knn = Knn.create(
             graph,
-            context.progressTracker(),
-            context.executor(),
-            config.k(graph.nodeCount()),
-            config.concurrency(),
-            1_000,
-            config.maxIterations(),
-            config.similarityCutoff(),
-            config.perturbationRate(),
-            config.randomJoins(),
-            config.randomSeed(),
-            config.initialSampler(),
+            knnParameters,
             similarityFunction,
             new KnnNeighborFilterFactory(graph.nodeCount()),
-            targetNodeFiltering,
+            Optional.of(targetNodeFiltering),
+            context,
             terminationFlag
         );
 

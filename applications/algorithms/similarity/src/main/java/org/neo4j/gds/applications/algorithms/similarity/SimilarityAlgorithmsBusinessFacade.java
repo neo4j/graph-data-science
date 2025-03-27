@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.applications.algorithms.similarity;
 
+import org.neo4j.gds.SimilarityAlgorithmTasks;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -34,6 +35,7 @@ public class SimilarityAlgorithmsBusinessFacade {
 
     private final SimilarityAlgorithms similarityAlgorithms;
     private final ProgressTrackerCreator progressTrackerCreator;
+    private final SimilarityAlgorithmTasks tasks = new SimilarityAlgorithmTasks();
 
     public SimilarityAlgorithmsBusinessFacade(
         SimilarityAlgorithms similarityAlgorithms,
@@ -44,15 +46,10 @@ public class SimilarityAlgorithmsBusinessFacade {
     }
 
     FilteredKnnResult filteredKnn(Graph graph, FilteredKnnBaseConfig configuration) {
-       return similarityAlgorithms.filteredKnn(graph,configuration);
-    }
-
-    public FilteredKnnResult filteredKnn(
-        Graph graph,
-        FilteredKnnBaseConfig configuration,
-        ProgressTracker progressTracker
-    ) {
-        return similarityAlgorithms.filteredKnn(graph,configuration,progressTracker);
+        var parameters = configuration.toFilteredKnnParameters().finalize(graph.nodeCount());
+        var task = tasks.FilteredKnn(graph,parameters);
+        var progressTracker = progressTrackerCreator.createProgressTracker(task,configuration);
+        return similarityAlgorithms.filteredKnn(graph, parameters, progressTracker);
     }
 
     public NodeSimilarityResult filteredNodeSimilarity(Graph graph, FilteredNodeSimilarityBaseConfig configuration) {
@@ -70,7 +67,7 @@ public class SimilarityAlgorithmsBusinessFacade {
     }
 
     KnnResult knn(Graph graph, KnnBaseConfig configuration) {
-      return  similarityAlgorithms.knn(graph,configuration);
+      return similarityAlgorithms.knn(graph,configuration);
     }
 
     public NodeSimilarityResult nodeSimilarity(Graph graph, NodeSimilarityBaseConfig configuration) {
@@ -82,7 +79,7 @@ public class SimilarityAlgorithmsBusinessFacade {
         NodeSimilarityBaseConfig configuration,
         ProgressTracker progressTracker
     ) {
-        return  similarityAlgorithms.nodeSimilarity(graph,configuration,progressTracker);
+        return similarityAlgorithms.nodeSimilarity(graph,configuration,progressTracker);
     }
 
 }

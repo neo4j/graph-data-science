@@ -21,7 +21,8 @@ package org.neo4j.gds.similarity.knn;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public final class K {
+public record K(int value, int sampledValue, long updateThreshold) {
+
     public static K create(int k, long nodeCount, double sampleRate, double deltaThreshold) {
         // user-provided k value must be at least 1
         if (k < 1) throw new IllegalArgumentException("K k must be 1 or more");
@@ -43,13 +44,4 @@ public final class K {
         return new K(boundedValue, sampledValue, updateThreshold);
     }
 
-    public final int value;
-    public final int sampledValue;
-    public final long updateThreshold;
-
-    private K(int value, int sampledValue, long updateThreshold) {
-        this.value = value;
-        this.sampledValue = sampledValue;
-        this.updateThreshold = updateThreshold;
-    }
 }

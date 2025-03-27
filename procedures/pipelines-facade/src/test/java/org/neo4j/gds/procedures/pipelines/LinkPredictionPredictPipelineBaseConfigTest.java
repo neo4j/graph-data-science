@@ -140,8 +140,8 @@ class LinkPredictionPredictPipelineBaseConfigTest {
         ).approximateParameters().finalize(1337);
 
         assertThat(approximateConfig.maxIterations()).isEqualTo(42);
-        assertThat(approximateConfig.kHolder().sampledValue).isEqualTo(4);
-        assertThat(approximateConfig.kHolder().value).isEqualTo(10);
+        assertThat(approximateConfig.kHolder().sampledValue()).isEqualTo(4);
+        assertThat(approximateConfig.kHolder().value()).isEqualTo(10);
         assertThat(approximateConfig.samplerType()).isEqualTo(KnnSampler.SamplerType.RANDOMWALK);
         assertThat(approximateConfig.concurrency()).isEqualTo(new Concurrency(1));
         assertThat(approximateConfig.perturbationRate()).isEqualTo(0.0);

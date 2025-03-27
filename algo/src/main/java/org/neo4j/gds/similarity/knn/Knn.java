@@ -36,17 +36,61 @@ import java.util.SplittableRandom;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.LongStream;
 
-public class Knn extends Algorithm<KnnResult> {
+public final class Knn extends Algorithm<KnnResult> {
 
+    public static Knn create(
+        Graph graph,
+        KnnParameters parameters,
+        NeighborFilterFactory neighborFilterFactory,
+        KnnContext context,
+        Optional<NeighbourConsumers> neighbourConsumers,
+        TerminationFlag terminationFlag
+    ) {
+        var similarityComputer = SimilarityComputer.ofProperties(
+            graph,
+            parameters.nodePropertySpecs()
+        );
+        var similarityFunction = new SimilarityFunction(similarityComputer);
+
+        return create(
+            graph,
+            parameters,
+            similarityFunction,
+            neighborFilterFactory,
+            neighbourConsumers,
+            context,
+            terminationFlag
+        );
+    }
     public static Knn create(
         Graph graph,
         KnnParameters parameters,
         SimilarityComputer similarityComputer,
         NeighborFilterFactory neighborFilterFactory,
+        Optional<NeighbourConsumers> neighbourConsumers,
         KnnContext context,
         TerminationFlag terminationFlag
     ) {
-        var similarityFunction = new SimilarityFunction(similarityComputer);
+        return create(
+            graph,
+            parameters,
+            new SimilarityFunction(similarityComputer),
+            neighborFilterFactory,
+            neighbourConsumers,
+            context,
+            terminationFlag
+        );
+    }
+    public static Knn create(
+        Graph graph,
+        KnnParameters parameters,
+        SimilarityFunction similarityFunction,
+        NeighborFilterFactory neighborFilterFactory,
+        Optional<NeighbourConsumers> neighbourConsumers,
+        KnnContext context,
+        TerminationFlag terminationFlag
+    ) {
+
         return new Knn(
             graph,
             context.progressTracker(),
@@ -62,7 +106,7 @@ public class Knn extends Algorithm<KnnResult> {
             parameters.samplerType(),
             similarityFunction,
             neighborFilterFactory,
-            NeighbourConsumers.no_op,
+            neighbourConsumers.orElse(NeighbourConsumers.no_op),
             terminationFlag
         );
     }
@@ -80,7 +124,7 @@ public class Knn extends Algorithm<KnnResult> {
     private final SplitOldAndNewNeighbors.Factory splitOldAndNewNeighborsFactory;
     private final long updateThreshold;
 
-    public Knn(
+    private Knn(
         Graph graph,
         ProgressTracker progressTracker,
         ExecutorService executorService,
@@ -107,7 +151,7 @@ public class Knn extends Algorithm<KnnResult> {
         this.neighborFilterFactory = neighborFilterFactory;
         this.executorService = executorService;
 
-        this.updateThreshold = k.updateThreshold;
+        this.updateThreshold = k.updateThreshold();
 
         var splittableRandom = randomSeed.map(SplittableRandom::new).orElseGet(SplittableRandom::new);
         switch (initialSamplerType) {
@@ -115,7 +159,7 @@ public class Knn extends Algorithm<KnnResult> {
                 this.samplerFactory = new UniformKnnSampler.Factory(graph.nodeCount(), splittableRandom);
                 break;
             case RANDOMWALK:
-                this.samplerFactory = new RandomWalkKnnSampler.Factory(graph, randomSeed, k.value, splittableRandom);
+                this.samplerFactory = new RandomWalkKnnSampler.Factory(graph, randomSeed, k.value(), splittableRandom);
                 break;
             default:
                 throw new IllegalStateException("Invalid KnnSampler");
@@ -123,18 +167,18 @@ public class Knn extends Algorithm<KnnResult> {
         this.generateRandomNeighborsFactory = new GenerateRandomNeighbors.Factory(
             similarityFunction,
             neighborConsumers,
-            k.value,
+            k.value(),
             splittableRandom,
             progressTracker
         );
         this.splitOldAndNewNeighborsFactory = new SplitOldAndNewNeighbors.Factory(
-            k.sampledValue,
+            k.sampledValue(),
             splittableRandom,
             progressTracker
         );
         this.joinNeighborsFactory = new JoinNeighbors.Factory(
             similarityFunction,
-            k.sampledValue,
+            k.sampledValue(),
             perturbationRate,
             randomJoins,
             splittableRandom,

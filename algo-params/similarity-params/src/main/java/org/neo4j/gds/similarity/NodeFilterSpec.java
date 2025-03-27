@@ -17,23 +17,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.similarity.filtering;
+package org.neo4j.gds.similarity;
 
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.similarity.filtering.NodeFilter;
 
 import java.util.Collection;
 
 /**
- * A {@code NodeFilterSpec} is a partially constructed {@link NodeFilter}. Because we cannot fully construct the
- * {@link NodeFilter} from user inputs alone, we parse and validate what we can, and prepare for completing the
+ * A {@code NodeFilterSpec} is a partially constructed {@link org.neo4j.gds.similarity.filtering.NodeFilter}. Because we cannot fully construct the
+ * {@link org.neo4j.gds.similarity.filtering.NodeFilter} from user inputs alone, we parse and validate what we can, and prepare for completing the
  * construction once the rest is available.
  *
  * There are two types of node filters: ones based on a list of node IDs, and ones based on labels.
  * There are therefore two types of node filter specs, accordingly.
  *
- * The spec is created using {@link NodeFilterSpecFactory#create(Object)} and the {@link NodeFilter} is then created
+ * The spec is created using {@link NodeFilterSpecFactory#create(Object)} and the {@link org.neo4j.gds.similarity.filtering.NodeFilter} is then created
  * using {@link NodeFilterSpec#toNodeFilter(org.neo4j.gds.api.IdMap)}.
  */
 public interface NodeFilterSpec {

@@ -21,8 +21,8 @@ package org.neo4j.gds.procedures.pipelines;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.ml.linkmodels.LinkPredictionResult;
 import org.neo4j.gds.ml.linkmodels.PredictedLink;
 import org.neo4j.gds.ml.models.Classifier;
@@ -34,6 +34,7 @@ import org.neo4j.gds.similarity.knn.KnnResult;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 public class ApproximateLinkPrediction extends LinkPrediction {
@@ -78,6 +79,7 @@ public class ApproximateLinkPrediction extends LinkPrediction {
                 sourceNodeFilter,
                 targetNodeFilter
             ),
+            Optional.empty(),
             ImmutableKnnContext.of(
                 DefaultPool.INSTANCE,
                 progressTracker

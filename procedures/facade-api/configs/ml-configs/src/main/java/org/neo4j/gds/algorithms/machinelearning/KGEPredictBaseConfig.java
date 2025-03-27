@@ -24,7 +24,7 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.similarity.filtering.NodeFilterSpec;
+import org.neo4j.gds.similarity.NodeFilterSpec;
 
 import java.util.Collection;
 import java.util.List;
