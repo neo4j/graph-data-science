@@ -61,22 +61,27 @@ public final class SimilarityApplications {
         var estimationModeFacade = new SimilarityAlgorithmsEstimationModeBusinessFacade(algorithmEstimationTemplate);
         var similarityAlgorithms = new SimilarityAlgorithms(progressTrackerCreator, requestScopedDependencies.terminationFlag());
 
+        var businessFacade = new SimilarityAlgorithmsBusinessFacade(
+            similarityAlgorithms,
+            progressTrackerCreator
+        );
+
         var mutateModeFacade = new SimilarityAlgorithmsMutateModeBusinessFacade(
             estimationModeFacade,
-            similarityAlgorithms,
+            businessFacade,
             algorithmProcessingTemplateConvenience,
             mutateRelationshipService
         );
 
         var statsModeFacade = new SimilarityAlgorithmsStatsModeBusinessFacade(
             estimationModeFacade,
-            similarityAlgorithms,
+            businessFacade,
             algorithmProcessingTemplateConvenience
         );
 
         var streamModeFacade = new SimilarityAlgorithmsStreamModeBusinessFacade(
             estimationModeFacade,
-            similarityAlgorithms,
+            businessFacade,
             algorithmProcessingTemplateConvenience
         );
 
@@ -84,7 +89,7 @@ public final class SimilarityApplications {
 
         var writeModeFacade = new SimilarityAlgorithmsWriteModeBusinessFacade(
             estimationModeFacade,
-            similarityAlgorithms,
+            businessFacade,
             algorithmProcessingTemplateConvenience,
             writeRelationshipService
         );

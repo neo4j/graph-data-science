@@ -42,13 +42,13 @@ import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Nod
 
 public class SimilarityAlgorithmsWriteModeBusinessFacade {
     private final SimilarityAlgorithmsEstimationModeBusinessFacade estimationFacade;
-    private final SimilarityAlgorithms similarityAlgorithms;
+    private final SimilarityAlgorithmsBusinessFacade similarityAlgorithms;
     private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
     private final WriteRelationshipService writeRelationshipService;
 
     SimilarityAlgorithmsWriteModeBusinessFacade(
         SimilarityAlgorithmsEstimationModeBusinessFacade estimationFacade,
-        SimilarityAlgorithms similarityAlgorithms,
+        SimilarityAlgorithmsBusinessFacade similarityAlgorithms,
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
         WriteRelationshipService writeRelationshipService
     ) {
