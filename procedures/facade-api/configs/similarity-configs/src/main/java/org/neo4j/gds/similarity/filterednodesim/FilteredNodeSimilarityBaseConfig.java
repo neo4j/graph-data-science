@@ -23,6 +23,7 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.similarity.FilteringParameters;
 import org.neo4j.gds.similarity.NodeFilterSpec;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityBaseConfig;
 
@@ -58,5 +59,16 @@ public interface FilteredNodeSimilarityBaseConfig extends NodeSimilarityBaseConf
         Collection<RelationshipType> selectedRelationshipTypes
     ) {
         targetNodeFilter().validate(graphStore, selectedLabels, "targetNodeFilter");
+    }
+
+    @Configuration.Ignore
+    default FilteredNodeSimilarityParameters toFilteredParameters() {
+        var nodeSimilarityParameters =  toParameters();
+        var filters = new FilteringParameters(
+            sourceNodeFilter(),
+            targetNodeFilter()
+        );
+
+        return  new FilteredNodeSimilarityParameters(nodeSimilarityParameters,filters);
     }
 }

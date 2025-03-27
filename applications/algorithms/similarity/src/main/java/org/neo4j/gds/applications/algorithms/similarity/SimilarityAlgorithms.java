@@ -30,7 +30,7 @@ import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnn;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnParameters;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnResult;
-import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityBaseConfig;
+import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityParameters;
 import org.neo4j.gds.similarity.filtering.NodeFilter;
 import org.neo4j.gds.similarity.knn.ImmutableKnnContext;
 import org.neo4j.gds.similarity.knn.Knn;
@@ -48,8 +48,6 @@ import org.neo4j.gds.wcc.WccStub;
 import org.neo4j.gds.wcc.WccTask;
 
 import java.util.Optional;
-
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.FilteredNodeSimilarity;
 
 public class SimilarityAlgorithms {
     private final AlgorithmMachinery algorithmMachinery = new AlgorithmMachinery();
@@ -79,41 +77,25 @@ public class SimilarityAlgorithms {
             algorithm,
             progressTracker,
             true,
-            parameters.knnParameters().concurrency()
+            parameters.concurrency()
         );
     }
 
-    public NodeSimilarityResult filteredNodeSimilarity(Graph graph, FilteredNodeSimilarityBaseConfig configuration) {
-        var task = Tasks.task(
-            FilteredNodeSimilarity.asString(),
-            filteredNodeSimilarityProgressTask(graph, configuration.useComponents().computeComponents()),
-            Tasks.leaf("compare node pairs")
-        );
 
-        var progressTracker = progressTrackerCreator.createProgressTracker(
-            task,
-            configuration.jobId(),
-            configuration.concurrency(),
-            configuration.logProgress()
-        );
-
-        return filteredNodeSimilarity(graph, configuration, progressTracker);
-    }
 
     public NodeSimilarityResult filteredNodeSimilarity(
         Graph graph,
-        FilteredNodeSimilarityBaseConfig configuration,
+        FilteredNodeSimilarityParameters  params,
         ProgressTracker progressTracker
     ) {
-        var sourceNodeFilter = configuration.sourceNodeFilter().toNodeFilter(graph);
-        var targetNodeFilter = configuration.targetNodeFilter().toNodeFilter(graph);
+        var sourceNodeFilter = params.filteringParameters().sourceFilter().toNodeFilter(graph);
+        var targetNodeFilter = params.filteringParameters().targetFilter().toNodeFilter(graph);
 
         var wccStub = new WccStub(terminationFlag, algorithmMachinery);
 
         var algorithm = new NodeSimilarity(
             graph,
-            configuration.toParameters(),
-            configuration.concurrency(),
+            params.nodeSimilarityParameters(),
             DefaultPool.INSTANCE,
             progressTracker,
             sourceNodeFilter,
@@ -126,7 +108,7 @@ public class SimilarityAlgorithms {
             algorithm,
             progressTracker,
             true,
-            configuration.concurrency()
+            params.concurrency()
         );
     }
 
@@ -191,7 +173,6 @@ public class SimilarityAlgorithms {
         var algorithm = new NodeSimilarity(
             graph,
             configuration.toParameters(),
-            configuration.concurrency(),
             DefaultPool.INSTANCE,
             progressTracker,
             NodeFilter.ALLOW_EVERYTHING,
@@ -206,17 +187,6 @@ public class SimilarityAlgorithms {
             true,
             configuration.concurrency()
         );
-    }
-
-    private Task filteredNodeSimilarityProgressTask(Graph graph, boolean runWcc) {
-        if (runWcc) {
-            return Tasks.task(
-                "prepare",
-                WccTask.create(graph),
-                Tasks.leaf("initialize", graph.relationshipCount())
-            );
-        }
-        return Tasks.leaf("prepare", graph.relationshipCount());
     }
 
     private FilteredKnn selectAlgorithmConfiguration(

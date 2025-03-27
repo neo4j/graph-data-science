@@ -47,26 +47,22 @@ public class SimilarityAlgorithmsBusinessFacade {
 
     FilteredKnnResult filteredKnn(Graph graph, FilteredKnnBaseConfig configuration) {
         var parameters = configuration.toFilteredKnnParameters().finalize(graph.nodeCount());
-        var task = tasks.FilteredKnn(graph,parameters);
+        var task = tasks.filteredKnn(graph,parameters);
         var progressTracker = progressTrackerCreator.createProgressTracker(task,configuration);
         return similarityAlgorithms.filteredKnn(graph, parameters, progressTracker);
     }
 
     public NodeSimilarityResult filteredNodeSimilarity(Graph graph, FilteredNodeSimilarityBaseConfig configuration) {
-        return similarityAlgorithms.filteredNodeSimilarity(graph,configuration);
+        var parameters = configuration.toFilteredParameters();
+        var task = tasks.filteredNodeSimilarity(graph,parameters);
+        var progressTracker = progressTrackerCreator.createProgressTracker(task,configuration);
+        return similarityAlgorithms.filteredNodeSimilarity(graph,parameters,progressTracker);
     }
 
-    public NodeSimilarityResult filteredNodeSimilarity(
-        Graph graph,
-        FilteredNodeSimilarityBaseConfig configuration,
-        ProgressTracker progressTracker
-    ) {
-        return similarityAlgorithms.filteredNodeSimilarity(graph, configuration, progressTracker);
-    }
 
     KnnResult knn(Graph graph, KnnBaseConfig configuration) {
         var parameters = configuration.toParameters().finalize(graph.nodeCount());
-        var task = tasks.Knn(graph,parameters);
+        var task = tasks.knn(graph,parameters);
         var progressTracker = progressTrackerCreator.createProgressTracker(task,configuration);
         return similarityAlgorithms.knn(graph, parameters, progressTracker);
 

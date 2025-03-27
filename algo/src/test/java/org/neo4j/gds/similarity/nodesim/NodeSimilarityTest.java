@@ -281,6 +281,7 @@ final class NodeSimilarityTest {
         Graph graph = orientation == NATURAL ? naturalGraph : reverseGraph;
 
         var parameters = new NodeSimilarityParameters(
+            new Concurrency(concurrency),
             new JaccardSimilarityComputer(0.0),
             1,
             Integer.MAX_VALUE,
@@ -291,10 +292,10 @@ final class NodeSimilarityTest {
             false,
             null
         );
+
         var nodeSimilarity = constructNodeSimilarity(
             graph,
-            parameters,
-            new Concurrency(concurrency)
+            parameters
         );
 
         Set<String> result = nodeSimilarity
@@ -312,6 +313,7 @@ final class NodeSimilarityTest {
         Graph graph = orientation == NATURAL ? naturalGraph : reverseGraph;
 
         var parameters = new NodeSimilarityParameters(
+            new Concurrency(concurrency),
             new JaccardSimilarityComputer(0.0),
             1,
             Integer.MAX_VALUE,
@@ -324,8 +326,7 @@ final class NodeSimilarityTest {
         );
         NodeSimilarity nodeSimilarity = constructNodeSimilarity(
             graph,
-            parameters,
-            new Concurrency(concurrency)
+            parameters
         );
 
         Set<String> result = nodeSimilarity
@@ -343,6 +344,7 @@ final class NodeSimilarityTest {
         Graph graph = orientation == NATURAL ? naturalGraph : reverseGraph;
 
         var parameters = new NodeSimilarityParameters(
+            new Concurrency(concurrency),
             new JaccardSimilarityComputer(0.0),
             1,
             Integer.MAX_VALUE,
@@ -356,8 +358,7 @@ final class NodeSimilarityTest {
 
         NodeSimilarity nodeSimilarity = constructNodeSimilarity(
             graph,
-            parameters,
-            new Concurrency(concurrency)
+            parameters
         );
 
         Set<String> result = nodeSimilarity
@@ -375,6 +376,7 @@ final class NodeSimilarityTest {
         Graph graph = orientation == NATURAL ? naturalGraph : reverseGraph;
 
         var parameters = new NodeSimilarityParameters(
+            new Concurrency(concurrency),
             new JaccardSimilarityComputer(0.0),
             1,
             Integer.MAX_VALUE,
@@ -388,8 +390,7 @@ final class NodeSimilarityTest {
 
         NodeSimilarity nodeSimilarity = constructNodeSimilarity(
             graph,
-            parameters,
-            new Concurrency(concurrency)
+            parameters
         );
 
         Graph similarityGraph = nodeSimilarity.compute().graphResult().similarityGraph();
@@ -410,6 +411,7 @@ final class NodeSimilarityTest {
         Graph graph = orientation == NATURAL ? naturalGraph : reverseGraph;
 
         var parameters = new NodeSimilarityParameters(
+            new Concurrency(concurrency),
             new JaccardSimilarityComputer(0.0),
             1,
             Integer.MAX_VALUE,
@@ -423,8 +425,7 @@ final class NodeSimilarityTest {
 
         NodeSimilarity nodeSimilarity = constructNodeSimilarity(
             graph,
-            parameters,
-            new Concurrency(concurrency)
+            parameters
         );
 
         Set<String> result = nodeSimilarity
@@ -442,6 +443,7 @@ final class NodeSimilarityTest {
         Graph graph = orientation == NATURAL ? naturalGraph : reverseGraph;
 
         var parameters = new NodeSimilarityParameters(
+            new Concurrency(concurrency),
             new JaccardSimilarityComputer(0.0),
             1,
             Integer.MAX_VALUE,
@@ -455,8 +457,7 @@ final class NodeSimilarityTest {
 
         NodeSimilarity nodeSimilarity = constructNodeSimilarity(
             graph,
-            parameters,
-            new Concurrency(concurrency)
+            parameters
         );
 
         Graph similarityGraph = nodeSimilarity.compute().graphResult().similarityGraph();
@@ -483,6 +484,7 @@ final class NodeSimilarityTest {
         Graph graph = orientation == NATURAL ? naturalGraph : reverseGraph;
 
         var parameters = new NodeSimilarityParameters(
+            new Concurrency(concurrency),
             new JaccardSimilarityComputer(0.1),
             1,
             Integer.MAX_VALUE,
@@ -496,8 +498,7 @@ final class NodeSimilarityTest {
 
         NodeSimilarity nodeSimilarity = constructNodeSimilarity(
             graph,
-            parameters,
-            new Concurrency(concurrency)
+            parameters
         );
 
         Set<String> result = nodeSimilarity
@@ -518,6 +519,7 @@ final class NodeSimilarityTest {
         Graph graph = orientation == NATURAL ? naturalGraph : reverseGraph;
 
         var parameters = new NodeSimilarityParameters(
+            new Concurrency(concurrency),
             new JaccardSimilarityComputer(0.0),
             2,
             Integer.MAX_VALUE,
@@ -531,8 +533,7 @@ final class NodeSimilarityTest {
 
         NodeSimilarity nodeSimilarity = constructNodeSimilarity(
             graph,
-            parameters,
-            new Concurrency(concurrency)
+            parameters
         );
 
         Set<String> result = nodeSimilarity
@@ -551,6 +552,7 @@ final class NodeSimilarityTest {
     @MethodSource("concurrencies")
     void shouldComputeForUndirectedGraphs(int concurrency) {
         var parameters = new NodeSimilarityParameters(
+            new Concurrency(concurrency),
             new JaccardSimilarityComputer(0.0),
             1,
             Integer.MAX_VALUE,
@@ -564,8 +566,7 @@ final class NodeSimilarityTest {
 
         NodeSimilarity nodeSimilarity = constructNodeSimilarity(
             undirectedGraph,
-            parameters,
-            new Concurrency(concurrency)
+            parameters
         );
         Set<SimilarityResult> result = nodeSimilarity.compute()
             .streamResult().collect(Collectors.toSet());
@@ -575,6 +576,7 @@ final class NodeSimilarityTest {
     @Test
     void shouldComputeForUnionGraphs() {
         var parameters = new NodeSimilarityParameters(
+            new Concurrency(1),
             new JaccardSimilarityComputer(0.0),
             1,
             Integer.MAX_VALUE,
@@ -587,16 +589,14 @@ final class NodeSimilarityTest {
         );
         NodeSimilarity nodeSimilarity = constructNodeSimilarity(
             naturalGraph,
-            parameters,
-            new Concurrency(1)
+            parameters
         );
         var result1 = nodeSimilarity.compute()
             .streamResult().collect(Collectors.toSet());
 
         nodeSimilarity = constructNodeSimilarity(
             naturalUnionGraph,
-            parameters,
-            new Concurrency(1)
+            parameters
         );
         var result2 = nodeSimilarity.compute()
             .streamResult().collect(Collectors.toSet());
@@ -610,6 +610,7 @@ final class NodeSimilarityTest {
         Graph graph = orientation == NATURAL ? naturalGraph : reverseGraph;
 
         var parameters = new NodeSimilarityParameters(
+            new Concurrency(concurrency),
             new JaccardSimilarityComputer(0.0),
             1,
             Integer.MAX_VALUE,
@@ -623,8 +624,7 @@ final class NodeSimilarityTest {
 
         NodeSimilarity nodeSimilarity = constructNodeSimilarity(
             graph,
-            parameters,
-            new Concurrency(concurrency)
+            parameters
         );
 
         SimilarityGraphResult similarityGraphResult = nodeSimilarity.compute().graphResult();
@@ -668,6 +668,7 @@ final class NodeSimilarityTest {
         Graph graph = fromGdl(DB_CYPHER + ", (:Unused)".repeat(1024), orientation);
 
         var parameters = new NodeSimilarityParameters(
+            new Concurrency(concurrency),
             new JaccardSimilarityComputer(0.0),
             1,
             Integer.MAX_VALUE,
@@ -681,8 +682,7 @@ final class NodeSimilarityTest {
 
         NodeSimilarity nodeSimilarity = constructNodeSimilarity(
             graph,
-            parameters,
-            new Concurrency(concurrency)
+            parameters
         );
 
         SimilarityGraphResult similarityGraphResult = nodeSimilarity.compute().graphResult();
@@ -717,6 +717,7 @@ final class NodeSimilarityTest {
         Graph graph = fromGdl(gdl, orientation);
 
         var parameters = new NodeSimilarityParameters(
+            new Concurrency(concurrency),
             new JaccardSimilarityComputer(0.0),
             1,
             Integer.MAX_VALUE,
@@ -730,8 +731,7 @@ final class NodeSimilarityTest {
 
         NodeSimilarity nodeSimilarity = constructNodeSimilarity(
             graph,
-            parameters,
-            new Concurrency(concurrency)
+            parameters
         );
 
         Set<String> result = nodeSimilarity
@@ -756,6 +756,7 @@ final class NodeSimilarityTest {
         Graph graph = fromGdl(gdl, orientation);
 
         var parameters = new NodeSimilarityParameters(
+            new Concurrency(concurrency),
             new JaccardSimilarityComputer(0.0),
             1,
             Integer.MAX_VALUE,
@@ -769,8 +770,7 @@ final class NodeSimilarityTest {
 
         NodeSimilarity nodeSimilarity = constructNodeSimilarity(
             graph,
-            parameters,
-            new Concurrency(concurrency)
+            parameters
         );
 
         Set<String> result = nodeSimilarity
@@ -931,6 +931,7 @@ final class NodeSimilarityTest {
         Graph graph = fromGdl(gdl);
 
         var parameters1 = new NodeSimilarityParameters(
+            new Concurrency(1),
             new OverlapSimilarityComputer(0.0),
             1,
             Integer.MAX_VALUE,
@@ -943,8 +944,7 @@ final class NodeSimilarityTest {
         );
         NodeSimilarity nodeSimilarity = constructNodeSimilarity(
             graph,
-            parameters1,
-            new Concurrency(1)
+            parameters1
         );
 
         Set<String> result = nodeSimilarity
@@ -956,6 +956,7 @@ final class NodeSimilarityTest {
         assertThat(result).contains("0,1 0.500000");
 
         var parameters2 = new NodeSimilarityParameters(
+            new Concurrency(1),
             new OverlapSimilarityComputer(1E-42),
             1,
             Integer.MAX_VALUE,
@@ -966,7 +967,7 @@ final class NodeSimilarityTest {
             false,
             null
         );
-        nodeSimilarity = constructNodeSimilarity(graph, parameters2, new Concurrency(1));
+        nodeSimilarity = constructNodeSimilarity(graph, parameters2);
 
         result = nodeSimilarity.compute()
             .streamResult().map(NodeSimilarityTest::resultString).collect(Collectors.toSet());
@@ -1004,6 +1005,7 @@ final class NodeSimilarityTest {
     @MethodSource("degreeCutoffInput")
     void shouldWorkForAllDegreeBoundsCombinations(int lowBound, int upperBound, String... expectedOutput) {
         var parameters = new NodeSimilarityParameters(
+            new Concurrency(4),
             new JaccardSimilarityComputer(0.0),
             lowBound,
             upperBound,
@@ -1017,8 +1019,7 @@ final class NodeSimilarityTest {
 
         NodeSimilarity nodeSimilarity = constructNodeSimilarity(
             naturalGraph,
-            parameters,
-            new Concurrency(4)
+            parameters
         );
 
         Set<String> result = nodeSimilarity
@@ -1032,15 +1033,13 @@ final class NodeSimilarityTest {
 
     private static NodeSimilarity constructNodeSimilarity(
         Graph graph,
-        NodeSimilarityParameters parameters,
-        Concurrency concurrency
+        NodeSimilarityParameters parameters
     ) {
         var wccStub = new WccStub(TerminationFlag.RUNNING_TRUE, new AlgorithmMachinery());
 
         return new NodeSimilarity(
             graph,
             parameters,
-            concurrency,
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER,
             NodeFilter.ALLOW_EVERYTHING,

@@ -140,6 +140,7 @@ public class ComponentPropertyNodeSimilarityTest {
         Graph graph = orientation == NATURAL ? naturalGraph : reverseGraph;
 
         var parameters = new NodeSimilarityParameters(
+            new Concurrency(concurrency),
             new JaccardSimilarityComputer(0.0),
             1,
             Integer.MAX_VALUE,
@@ -154,7 +155,6 @@ public class ComponentPropertyNodeSimilarityTest {
         var nodeSimilarity = new NodeSimilarity(
             graph,
             parameters,
-            new Concurrency(concurrency),
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER,
             NodeFilter.ALLOW_EVERYTHING,

@@ -22,21 +22,22 @@ package org.neo4j.gds.similarity.filterednodesim;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
-import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
+import org.neo4j.gds.SimilarityAlgorithmTasks;
+import org.neo4j.gds.TestProgressTrackerHelper;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmMachinery;
 import org.neo4j.gds.applications.algorithms.similarity.SimilarityAlgorithms;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
-import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
-import org.neo4j.gds.logging.GdsTestLog;
+import org.neo4j.gds.similarity.filtering.NodeFilter;
 import org.neo4j.gds.similarity.filtering.NodeFilterSpecFactory;
+import org.neo4j.gds.similarity.nodesim.NodeSimilarity;
 import org.neo4j.gds.termination.TerminationFlag;
+import org.neo4j.gds.wcc.WccStub;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -79,19 +80,19 @@ class FilteredNodeSimilarityTest {
 
         var sourceNodeFilter = Stream.of("a", "b", "c").map(graph::toOriginalNodeId).collect(Collectors.toList());
 
-        var config = FilteredNodeSimilarityStreamConfigImpl.builder()
+        var params = FilteredNodeSimilarityStreamConfigImpl.builder()
             .sourceNodeFilter(NodeFilterSpecFactory.create(sourceNodeFilter))
-            .build();
+            .build().toFilteredParameters();
 
         // no results for nodes that are not specified in the node filter -- nice
-        var noOfResultsWithSourceNodeOutsideOfFilter = similarityAlgorithms.filteredNodeSimilarity(graph, config, ProgressTracker.NULL_TRACKER)
+        var noOfResultsWithSourceNodeOutsideOfFilter = similarityAlgorithms.filteredNodeSimilarity(graph, params, ProgressTracker.NULL_TRACKER)
             .streamResult()
             .filter(res -> !sourceNodeFilter.contains(graph.toOriginalNodeId(res.node1)))
             .count();
         assertThat(noOfResultsWithSourceNodeOutsideOfFilter).isEqualTo(0L);
 
         // nodes outside of the node filter are not present as target nodes either -- not nice
-        var noOfResultsWithTargetNodeOutSideOfFilter = similarityAlgorithms.filteredNodeSimilarity(graph, config, ProgressTracker.NULL_TRACKER)
+        var noOfResultsWithTargetNodeOutSideOfFilter = similarityAlgorithms.filteredNodeSimilarity(graph, params, ProgressTracker.NULL_TRACKER)
             .streamResult()
             .filter(res -> !sourceNodeFilter.contains(graph.toOriginalNodeId(res.node2)))
             .count();
@@ -104,20 +105,21 @@ class FilteredNodeSimilarityTest {
 
         var sourceNodeFilter = List.of(graph.toOriginalNodeId("d"));
 
-        var config = FilteredNodeSimilarityStreamConfigImpl.builder()
+        var params = FilteredNodeSimilarityStreamConfigImpl.builder()
             .sourceNodeFilter(NodeFilterSpecFactory.create(sourceNodeFilter))
             .concurrency(1)
-            .build();
+            .build()
+            .toFilteredParameters();
 
         // no results for nodes that are not specified in the node filter -- nice
-        var noOfResultsWithSourceNodeOutsideOfFilter = similarityAlgorithms.filteredNodeSimilarity(graph, config, ProgressTracker.NULL_TRACKER)
+        var noOfResultsWithSourceNodeOutsideOfFilter = similarityAlgorithms.filteredNodeSimilarity(graph, params, ProgressTracker.NULL_TRACKER)
             .streamResult()
             .filter(res -> !sourceNodeFilter.contains(graph.toOriginalNodeId(res.node1)))
             .count();
         assertThat(noOfResultsWithSourceNodeOutsideOfFilter).isEqualTo(0L);
 
         // nodes outside of the node filter are not present as target nodes either -- not nice
-        var noOfResultsWithTargetNodeOutSideOfFilter = similarityAlgorithms.filteredNodeSimilarity(graph, config, ProgressTracker.NULL_TRACKER)
+        var noOfResultsWithTargetNodeOutSideOfFilter = similarityAlgorithms.filteredNodeSimilarity(graph, params, ProgressTracker.NULL_TRACKER)
             .streamResult()
             .filter(res -> !sourceNodeFilter.contains(graph.toOriginalNodeId(res.node2)))
             .count();
@@ -131,23 +133,24 @@ class FilteredNodeSimilarityTest {
 
         var sourceNodeFilter = List.of(graph.toOriginalNodeId("d"));
 
-        var config = FilteredNodeSimilarityStreamConfigImpl.builder()
+        var params = FilteredNodeSimilarityStreamConfigImpl.builder()
             .sourceNodeFilter(NodeFilterSpecFactory.create(sourceNodeFilter))
             .concurrency(1)
             .useComponents(enableWcc)
             .topK(1)
             .topN(10)
-            .build();
+            .build()
+            .toFilteredParameters();
 
         // no results for nodes that are not specified in the node filter -- nice
-        var noOfResultsWithSourceNodeOutsideOfFilter = similarityAlgorithms.filteredNodeSimilarity(graph, config, ProgressTracker.NULL_TRACKER)
+        var noOfResultsWithSourceNodeOutsideOfFilter = similarityAlgorithms.filteredNodeSimilarity(graph, params, ProgressTracker.NULL_TRACKER)
             .streamResult()
             .filter(res -> !sourceNodeFilter.contains(graph.toOriginalNodeId(res.node1)))
             .count();
         assertThat(noOfResultsWithSourceNodeOutsideOfFilter).isEqualTo(0L);
 
         // nodes outside of the node filter are not present as target nodes either -- not nice
-        var noOfResultsWithTargetNodeOutSideOfFilter = similarityAlgorithms.filteredNodeSimilarity(graph, config, ProgressTracker.NULL_TRACKER)
+        var noOfResultsWithTargetNodeOutSideOfFilter = similarityAlgorithms.filteredNodeSimilarity(graph, params, ProgressTracker.NULL_TRACKER)
             .streamResult()
             .filter(res -> !sourceNodeFilter.contains(graph.toOriginalNodeId(res.node2)))
             .count();
@@ -157,24 +160,38 @@ class FilteredNodeSimilarityTest {
     @ParameterizedTest
     @ValueSource(ints = {1, 2})
     void shouldLogProgressAccurately(int concurrencyValue) {
-        var log = new GdsTestLog();
-        var requestScopedDependencies = RequestScopedDependencies.builder()
-            .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
-            .terminationFlag(TerminationFlag.RUNNING_TRUE)
-            .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
-            .build();
-        var progressTrackerCreator = new ProgressTrackerCreator(new LoggerForProgressTrackingAdapter(log), requestScopedDependencies);
-        var similarityAlgorithms = new SimilarityAlgorithms(progressTrackerCreator, requestScopedDependencies.terminationFlag());
+
 
         var sourceNodeFilter = List.of(graph.toOriginalNodeId("c"), graph.toOriginalNodeId("d"));
         var concurrency = new Concurrency(concurrencyValue);
-        var config = FilteredNodeSimilarityStreamConfigImpl.builder()
+        var params = FilteredNodeSimilarityStreamConfigImpl.builder()
             .sourceNodeFilter(NodeFilterSpecFactory.create(sourceNodeFilter))
             .concurrency(concurrency.value())
             .topK(1)
             .topN(10)
-            .build();
-        similarityAlgorithms.filteredNodeSimilarity(graph, config);
+            .build()
+            .toFilteredParameters();
+
+        var progressTrackerWithLog = TestProgressTrackerHelper.create(
+            new SimilarityAlgorithmTasks().filteredNodeSimilarity(graph,params),
+            new Concurrency(2)
+        );
+
+        var progressTracker = progressTrackerWithLog.progressTracker();
+        var log = progressTrackerWithLog.log();
+
+        var filteredNodeSimilarity = new NodeSimilarity(
+            graph,
+            params.nodeSimilarityParameters(),
+            DefaultPool.INSTANCE,
+            progressTracker,
+            params.filteringParameters().sourceFilter().toNodeFilter(graph),
+            NodeFilter.ALLOW_EVERYTHING,
+            TerminationFlag.RUNNING_TRUE,
+            new WccStub(TerminationFlag.RUNNING_TRUE, new AlgorithmMachinery())
+        );
+
+        filteredNodeSimilarity.compute();
 
         assertThat(log.getMessages(INFO))
             .extracting(removingThreadId())

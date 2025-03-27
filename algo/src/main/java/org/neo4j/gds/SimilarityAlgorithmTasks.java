@@ -23,15 +23,23 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.similarity.filteredknn.FilteredKNNTask;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnParameters;
+import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityParameters;
 import org.neo4j.gds.similarity.knn.KnnParameters;
 import org.neo4j.gds.similarity.knn.KnnTask;
+import org.neo4j.gds.similarity.nodesim.FilteredNodeSimilarityTask;
 
 public final class SimilarityAlgorithmTasks {
 
-    public Task FilteredKnn(Graph graph, FilteredKnnParameters parameters){
+    public Task filteredKnn(Graph graph, FilteredKnnParameters parameters){
         return FilteredKNNTask.create(graph.nodeCount(), parameters);
     }
-    public Task Knn(Graph graph, KnnParameters parameters){
+
+    public Task knn(Graph graph, KnnParameters parameters){
         return KnnTask.create(graph.nodeCount(), parameters);
     }
+
+    public Task filteredNodeSimilarity(Graph graph, FilteredNodeSimilarityParameters filteredNodeSimilarityParameters){
+        return FilteredNodeSimilarityTask.create(graph,filteredNodeSimilarityParameters.nodeSimilarityParameters());
+    }
+
 }

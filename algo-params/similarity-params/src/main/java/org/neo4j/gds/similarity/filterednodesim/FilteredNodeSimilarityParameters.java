@@ -17,20 +17,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.similarity.filteredknn;
+package org.neo4j.gds.similarity.filterednodesim;
 
 import org.neo4j.gds.AlgorithmParameters;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.similarity.FilteringParameters;
-import org.neo4j.gds.similarity.knn.KnnParameters;
+import org.neo4j.gds.similarity.nodesim.NodeSimilarityParameters;
 
-public record FilteredKnnParameters(
-    KnnParameters knnParameters,
-    FilteringParameters filteringParameters,
-    boolean seedTargetNodes
-)  implements AlgorithmParameters {
+public record FilteredNodeSimilarityParameters(
+    NodeSimilarityParameters nodeSimilarityParameters,
+    FilteringParameters filteringParameters
+ ) implements AlgorithmParameters {
+
     @Override
     public Concurrency concurrency() {
-        return knnParameters.concurrency();
+        return nodeSimilarityParameters.concurrency();
     }
 }

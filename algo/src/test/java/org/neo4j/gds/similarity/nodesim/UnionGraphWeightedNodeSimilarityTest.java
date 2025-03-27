@@ -57,6 +57,7 @@ import static org.assertj.core.api.Assertions.assertThat;
     @Test
     void shouldWorkWithUnionGraph(){
         var parameters = new NodeSimilarityParameters(
+            new Concurrency(1),
             new JaccardSimilarityComputer(1E-42),
             1,
             Integer.MAX_VALUE,
@@ -71,7 +72,6 @@ import static org.assertj.core.api.Assertions.assertThat;
         var nodeSimilarity = new NodeSimilarity(
             graph,
             parameters,
-            new Concurrency(1),
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER,
             NodeFilter.ALLOW_EVERYTHING,

@@ -20,10 +20,13 @@
 package org.neo4j.gds.similarity.nodesim;
 
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.gds.AlgorithmParameters;
 import org.neo4j.gds.annotation.Parameters;
+import org.neo4j.gds.core.concurrency.Concurrency;
 
 @Parameters
 public record NodeSimilarityParameters(
+    Concurrency concurrency,
     MetricSimilarityComputer similarityComputer,
     int degreeCutoff,
     int upperDegreeCutoff,
@@ -33,7 +36,7 @@ public record NodeSimilarityParameters(
     boolean hasRelationshipWeightProperty,
     boolean useComponents,
     @Nullable String componentProperty
-) {
+)  implements AlgorithmParameters {
     boolean hasTopK() {
         return normalizedK != 0;
     }

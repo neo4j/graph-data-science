@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.similarity.knn;
 
+import org.neo4j.gds.AlgorithmParameters;
 import org.neo4j.gds.annotation.Parameters;
 import org.neo4j.gds.core.concurrency.Concurrency;
 
@@ -36,7 +37,7 @@ public record KnnParameters(
     int minBatchSize,
     KnnSampler.SamplerType samplerType,
     Optional<Long> randomSeed,
-    List<KnnNodePropertySpec> nodePropertySpecs) {
+    List<KnnNodePropertySpec> nodePropertySpecs) implements AlgorithmParameters {
 
     static KnnParameters create(
         long nodeCount,

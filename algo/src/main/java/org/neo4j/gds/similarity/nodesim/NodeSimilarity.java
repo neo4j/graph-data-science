@@ -79,7 +79,6 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
     public NodeSimilarity(
         Graph graph,
         NodeSimilarityParameters parameters,
-        Concurrency concurrency,
         ExecutorService executorService,
         ProgressTracker progressTracker,
         NodeFilter sourceNodeFilter,
@@ -92,7 +91,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
         this.sortVectors = graph.schema().relationshipSchema().availableTypes().size() > 1;
         this.sourceNodeFilter = sourceNodeFilter;
         this.targetNodeFilter = targetNodeFilter;
-        this.concurrency = concurrency;
+        this.concurrency = parameters.concurrency();
         this.parameters = parameters;
         this.similarityComputer = parameters.similarityComputer();
         this.executorService = executorService;
