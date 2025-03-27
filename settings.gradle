@@ -26,7 +26,7 @@ include('algo-common')
 project(':algo-common').projectDir = file('algo-common')
 
 include('algo-params-common')
-project(':algo-params-common').projectDir = file('algo-params-common')
+project(':algo-params-common').projectDir = file('algo-params/common/algo-params-common')
 
 include('algo-test')
 project(':algo-test').projectDir = file('algo-test')
