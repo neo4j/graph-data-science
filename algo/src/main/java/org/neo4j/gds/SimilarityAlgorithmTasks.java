@@ -27,6 +27,8 @@ import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityParameters
 import org.neo4j.gds.similarity.knn.KnnParameters;
 import org.neo4j.gds.similarity.knn.KnnTask;
 import org.neo4j.gds.similarity.nodesim.FilteredNodeSimilarityTask;
+import org.neo4j.gds.similarity.nodesim.NodeSimilarityParameters;
+import org.neo4j.gds.similarity.nodesim.NodeSimilarityTask;
 
 public final class SimilarityAlgorithmTasks {
 
@@ -38,8 +40,12 @@ public final class SimilarityAlgorithmTasks {
         return KnnTask.create(graph.nodeCount(), parameters);
     }
 
-    public Task filteredNodeSimilarity(Graph graph, FilteredNodeSimilarityParameters filteredNodeSimilarityParameters){
-        return FilteredNodeSimilarityTask.create(graph,filteredNodeSimilarityParameters.nodeSimilarityParameters());
+    public Task filteredNodeSimilarity(Graph graph, FilteredNodeSimilarityParameters parameters){
+        return FilteredNodeSimilarityTask.create(graph,parameters.nodeSimilarityParameters());
+    }
+
+    public Task nodeSimilarity(Graph graph, NodeSimilarityParameters parameters){
+        return NodeSimilarityTask.create(graph,parameters);
     }
 
 }

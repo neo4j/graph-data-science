@@ -20,13 +20,9 @@
 package org.neo4j.gds.applications.algorithms.similarity;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmMachinery;
-import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.core.utils.progress.tasks.Task;
-import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnn;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnParameters;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnResult;
@@ -41,22 +37,19 @@ import org.neo4j.gds.similarity.knn.KnnResult;
 import org.neo4j.gds.similarity.knn.SimilarityFunction;
 import org.neo4j.gds.similarity.knn.metrics.SimilarityComputer;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarity;
-import org.neo4j.gds.similarity.nodesim.NodeSimilarityBaseConfig;
+import org.neo4j.gds.similarity.nodesim.NodeSimilarityParameters;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.wcc.WccStub;
-import org.neo4j.gds.wcc.WccTask;
 
 import java.util.Optional;
 
 public class SimilarityAlgorithms {
     private final AlgorithmMachinery algorithmMachinery = new AlgorithmMachinery();
 
-    private final ProgressTrackerCreator progressTrackerCreator;
     private final TerminationFlag terminationFlag;
 
-    public SimilarityAlgorithms(ProgressTrackerCreator progressTrackerCreator, TerminationFlag terminationFlag) {
-        this.progressTrackerCreator = progressTrackerCreator;
+    public SimilarityAlgorithms(TerminationFlag terminationFlag) {
         this.terminationFlag = terminationFlag;
     }
 
@@ -136,43 +129,18 @@ public class SimilarityAlgorithms {
         );
     }
 
-    public NodeSimilarityResult nodeSimilarity(Graph graph, NodeSimilarityBaseConfig configuration) {
-        var task = constructNodeSimilarityTask(graph, configuration);
 
-        var progressTracker = progressTrackerCreator.createProgressTracker(
-            task,
-            configuration.jobId(),
-            configuration.concurrency(),
-            configuration.logProgress()
-        );
-
-        return nodeSimilarity(graph, configuration, progressTracker);
-    }
-
-    public Task constructNodeSimilarityTask(Graph graph, NodeSimilarityBaseConfig configuration) {
-        return Tasks.task(
-            AlgorithmLabel.NodeSimilarity.asString(),
-            configuration.useComponents().computeComponents()
-                ? Tasks.task(
-                "prepare",
-                WccTask.create(graph),
-                Tasks.leaf("initialize", graph.relationshipCount())
-            )
-                : Tasks.leaf("prepare", graph.relationshipCount()),
-            Tasks.leaf("compare node pairs")
-        );
-    }
 
     public NodeSimilarityResult nodeSimilarity(
         Graph graph,
-        NodeSimilarityBaseConfig configuration,
+        NodeSimilarityParameters  parameters,
         ProgressTracker progressTracker
     ) {
         var wccStub = new WccStub(terminationFlag, algorithmMachinery);
 
         var algorithm = new NodeSimilarity(
             graph,
-            configuration.toParameters(),
+            parameters,
             DefaultPool.INSTANCE,
             progressTracker,
             NodeFilter.ALLOW_EVERYTHING,
@@ -185,7 +153,7 @@ public class SimilarityAlgorithms {
             algorithm,
             progressTracker,
             true,
-            configuration.concurrency()
+            parameters.concurrency()
         );
     }
 

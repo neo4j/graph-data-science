@@ -76,7 +76,7 @@ class FilteredNodeSimilarityTest {
 
     @Test
     void should() {
-        var similarityAlgorithms = new SimilarityAlgorithms(null, TerminationFlag.RUNNING_TRUE);
+        var similarityAlgorithms = new SimilarityAlgorithms(TerminationFlag.RUNNING_TRUE);
 
         var sourceNodeFilter = Stream.of("a", "b", "c").map(graph::toOriginalNodeId).collect(Collectors.toList());
 
@@ -101,7 +101,7 @@ class FilteredNodeSimilarityTest {
 
     @Test
     void shouldSurviveIoannisObjections() {
-        var similarityAlgorithms = new SimilarityAlgorithms(null, TerminationFlag.RUNNING_TRUE);
+        var similarityAlgorithms = new SimilarityAlgorithms(TerminationFlag.RUNNING_TRUE);
 
         var sourceNodeFilter = List.of(graph.toOriginalNodeId("d"));
 
@@ -129,7 +129,7 @@ class FilteredNodeSimilarityTest {
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
     void shouldSurviveIoannisFurtherObjections(boolean enableWcc) {
-        var similarityAlgorithms = new SimilarityAlgorithms(null, TerminationFlag.RUNNING_TRUE);
+        var similarityAlgorithms = new SimilarityAlgorithms(TerminationFlag.RUNNING_TRUE);
 
         var sourceNodeFilter = List.of(graph.toOriginalNodeId("d"));
 
