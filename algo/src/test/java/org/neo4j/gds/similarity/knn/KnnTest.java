@@ -28,22 +28,20 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.gds.SimilarityAlgorithmTasks;
+import org.neo4j.gds.TestProgressTrackerHelper;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.loading.NullPropertyMap;
-import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
-import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
-import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.gdl.GdlFactory;
-import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.nodeproperties.DoubleArrayTestPropertyValues;
 import org.neo4j.gds.nodeproperties.DoubleTestPropertyValues;
 import org.neo4j.gds.nodeproperties.FloatArrayTestPropertyValues;
@@ -71,33 +69,33 @@ class KnnTest {
     @GdlGraph
     private static final String DB_CYPHER =
         "CREATE" +
-        "  (a { knn: 1.2, prop: 1.0 } )" +
-        ", (b { knn: 1.1, prop: 5.0 } )" +
-        ", (c { knn: 42.0, prop: 10.0 } )";
+            "  (a { knn: 1.2, prop: 1.0 } )" +
+            ", (b { knn: 1.1, prop: 5.0 } )" +
+            ", (c { knn: 42.0, prop: 10.0 } )";
     @Inject
     private TestGraph graph;
 
     @GdlGraph(graphNamePrefix = "simThreshold")
     private static final String nodeCreateQuery =
         "CREATE " +
-        "  (alice:Person {age: 23})" +
-        " ,(carol:Person {age: 24})" +
-        " ,(eve:Person {age: 34})" +
-        " ,(bob:Person {age: 30})";
+            "  (alice:Person {age: 23})" +
+            " ,(carol:Person {age: 24})" +
+            " ,(eve:Person {age: 34})" +
+            " ,(bob:Person {age: 30})";
     @Inject
     private TestGraph simThresholdGraph;
 
     @GdlGraph(graphNamePrefix = "multPropMissing")
     private static final String nodeCreateMultipleQuery =
         "CREATE " +
-        "  (a: P1 {prop1: 1.0, prop2: 5.0})" +
-        " ,(b: P1 {prop2 : 5.0})" +
-        " ,(c: P1 {prop2 : 10.0})" +
-        " ,(d: P1 {prop3 : 10.0})";
+            "  (a: P1 {prop1: 1.0, prop2: 5.0})" +
+            " ,(b: P1 {prop2 : 5.0})" +
+            " ,(c: P1 {prop2 : 10.0})" +
+            " ,(d: P1 {prop3 : 10.0})";
     @Inject
     private TestGraph multPropMissingGraph;
 
-    private  KnnContext context = ImmutableKnnContext.builder().executor(DefaultPool.INSTANCE).build();
+    private KnnContext context = ImmutableKnnContext.builder().executor(DefaultPool.INSTANCE).build();
 
     @Test
     void shouldRun() {
@@ -363,7 +361,7 @@ class KnnTest {
             null
         );
 
-        var knn= Knn.create(
+        var knn = Knn.create(
             graph,
             knnParameters,
             new SimilarityFunction(SimilarityComputer.ofProperty(graph, "knn", nodePropertyValues)),
@@ -410,7 +408,7 @@ class KnnTest {
             null
         );
 
-        var knn= Knn.create(
+        var knn = Knn.create(
             graph,
             knnParameters,
             new SimilarityFunction(SimilarityComputer.ofProperty(graph, "{knn}", nodeProperties)),
@@ -540,11 +538,6 @@ class KnnTest {
 
     @Test
     void shouldLogProgress() {
-        var maxIterations = 100;
-
-        var progressTask = KnnTask.create(graph.nodeCount(), maxIterations);
-        var log = new GdsTestLog();
-        var progressTracker = new TaskProgressTracker(progressTask, new LoggerForProgressTrackingAdapter(log), new Concurrency(4), EmptyTaskRegistryFactory.INSTANCE);
 
         var k = K.create(1, graph.nodeCount(), 0.5, 0.001);
 
@@ -561,10 +554,16 @@ class KnnTest {
             List.of(new KnnNodePropertySpec("knn"))
         );
 
-        var  progressContext = ImmutableKnnContext.builder()
-            .progressTracker(progressTracker)
+        var progressTrackerWithLog = TestProgressTrackerHelper.create(
+            new SimilarityAlgorithmTasks().Knn(graph, knnParameters),
+            new Concurrency(1)
+        );
+
+        var progressContext = ImmutableKnnContext.builder()
+            .progressTracker(progressTrackerWithLog.progressTracker())
             .executor(DefaultPool.INSTANCE)
             .build();
+        var log = progressTrackerWithLog.log();
 
         var knn = Knn.create(
             graph,
@@ -624,7 +623,10 @@ class KnnTest {
         var knn = Knn.create(
             graphWithNegativeNodePropertyValues,
             knnParameters,
-            new SimilarityFunction(SimilarityComputer.ofProperty(graphWithNegativeNodePropertyValues, new KnnNodePropertySpec("weight"))),
+            new SimilarityFunction(SimilarityComputer.ofProperty(
+                graphWithNegativeNodePropertyValues,
+                new KnnNodePropertySpec("weight")
+            )),
             new KnnNeighborFilterFactory(graphWithNegativeNodePropertyValues.nodeCount()),
             Optional.empty(),
             context,
@@ -650,15 +652,15 @@ class KnnTest {
         @GdlGraph
         private static final String DB_CYPHER =
             "CREATE" +
-            "  (a { knn: 1.2 } )" +
-            ", (b { knn: 1.1 } )" +
-            ", (c { knn: 2.1 } )" +
-            ", (d { knn: 3.1 } )" +
-            ", (e { knn: 4.1 } )" +
-            ", (f { knn: 5.1 } )" +
-            ", (g { knn: 6.1 } )" +
-            ", (h { knn: 7.1 } )" +
-            ", (j { knn: 42.0 } )";
+                "  (a { knn: 1.2 } )" +
+                ", (b { knn: 1.1 } )" +
+                ", (c { knn: 2.1 } )" +
+                ", (d { knn: 3.1 } )" +
+                ", (e { knn: 4.1 } )" +
+                ", (f { knn: 5.1 } )" +
+                ", (g { knn: 6.1 } )" +
+                ", (h { knn: 7.1 } )" +
+                ", (j { knn: 42.0 } )";
 
         @Test
         void shouldRespectIterationLimit() {
@@ -698,8 +700,8 @@ class KnnTest {
         @GdlGraph
         private static final String DB_CYPHER =
             "CREATE" +
-            "  (a { knn: 1.0 } )" +
-            ", (b { knn: 1.0 } )";
+                "  (a { knn: 1.0 } )" +
+                ", (b { knn: 1.0 } )";
 
         @Test
         void shouldReturnCorrectNumberIterationsWhenConverging() {
@@ -741,36 +743,39 @@ class KnnTest {
         @GdlGraph
         private static final String DB_CYPHER =
             "CREATE" +
-            "  (a { knn: 1.2 } )" +
-            ", (b { knn: 1.1 } )" +
-            ", (c { knn: 2.1 } )" +
-            ", (d { knn: 3.1 } )" +
-            ", (e { knn: 4.1 } )" +
-            ", (f { knn: 5.1 } )" +
-            ", (g { knn: 6.1 } )" +
+                "  (a { knn: 1.2 } )" +
+                ", (b { knn: 1.1 } )" +
+                ", (c { knn: 2.1 } )" +
+                ", (d { knn: 3.1 } )" +
+                ", (e { knn: 4.1 } )" +
+                ", (f { knn: 5.1 } )" +
+                ", (g { knn: 6.1 } )" +
 
-            ", (a)-[:TYPE1]->(b)" +
-            ", (a)-[:TYPE1]->(d)" +
-            ", (b)-[:TYPE1]->(d)" +
-            ", (b)-[:TYPE1]->(e)" +
-            ", (b)-[:TYPE1]->(f)" +
-            ", (b)-[:TYPE1]->(g)" +
-            ", (c)-[:TYPE1]->(b)" +
-            ", (c)-[:TYPE1]->(e)" +
-            ", (d)-[:TYPE1]->(c)" +
-            ", (d)-[:TYPE1]->(b)" +
-            ", (e)-[:TYPE1]->(b)" +
-            ", (f)-[:TYPE1]->(a)" +
-            ", (f)-[:TYPE1]->(b)" +
-            ", (g)-[:TYPE1]->(b)" +
-            ", (g)-[:TYPE1]->(c)" +
-            ", (g)-[:TYPE1]->(g)";
+                ", (a)-[:TYPE1]->(b)" +
+                ", (a)-[:TYPE1]->(d)" +
+                ", (b)-[:TYPE1]->(d)" +
+                ", (b)-[:TYPE1]->(e)" +
+                ", (b)-[:TYPE1]->(f)" +
+                ", (b)-[:TYPE1]->(g)" +
+                ", (c)-[:TYPE1]->(b)" +
+                ", (c)-[:TYPE1]->(e)" +
+                ", (d)-[:TYPE1]->(c)" +
+                ", (d)-[:TYPE1]->(b)" +
+                ", (e)-[:TYPE1]->(b)" +
+                ", (f)-[:TYPE1]->(a)" +
+                ", (f)-[:TYPE1]->(b)" +
+                ", (g)-[:TYPE1]->(b)" +
+                ", (g)-[:TYPE1]->(c)" +
+                ", (g)-[:TYPE1]->(g)";
 
         @Test
         void testReasonableTopKWithRandomWalk(SoftAssertions softly) {
             IdFunction idFunction = graph::toMappedNodeId;
 
-            var similarityFunction = new SimilarityFunction(SimilarityComputer.ofProperty(graph, new KnnNodePropertySpec("knn")));
+            var similarityFunction = new SimilarityFunction(SimilarityComputer.ofProperty(
+                graph,
+                new KnnNodePropertySpec("knn")
+            ));
             var k = K.create(4, graph.nodeCount(), 0.5, 0.001);
 
 

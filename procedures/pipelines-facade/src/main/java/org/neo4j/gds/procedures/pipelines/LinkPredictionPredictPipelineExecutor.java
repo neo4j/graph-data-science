@@ -23,13 +23,13 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.mem.MemoryEstimation;
-import org.neo4j.gds.mem.MemoryEstimations;
-import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.executor.ExecutionContext;
+import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimations;
+import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.ml.api.TrainingMethod;
 import org.neo4j.gds.ml.linkmodels.LinkPredictionResult;
 import org.neo4j.gds.ml.models.Classifier;
@@ -111,7 +111,7 @@ public class LinkPredictionPredictPipelineExecutor extends PredictPipelineExecut
             config.isApproximateStrategy()
                 ? Tasks.task(
                 "Approximate link prediction",
-                KnnTask.create(nodeCount, config.approximateParameters().finalize(nodeCount).maxIterations())
+                KnnTask.create(nodeCount, config.approximateParameters().finalize(nodeCount))
             )
                 : Tasks.leaf("Exhaustive link prediction", nodeCount * nodeCount / 2)
         );

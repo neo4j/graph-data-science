@@ -34,11 +34,10 @@ import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityBaseConfig
 import org.neo4j.gds.similarity.filtering.NodeFilter;
 import org.neo4j.gds.similarity.knn.ImmutableKnnContext;
 import org.neo4j.gds.similarity.knn.Knn;
-import org.neo4j.gds.similarity.knn.KnnBaseConfig;
 import org.neo4j.gds.similarity.knn.KnnContext;
 import org.neo4j.gds.similarity.knn.KnnNeighborFilterFactory;
+import org.neo4j.gds.similarity.knn.KnnParameters;
 import org.neo4j.gds.similarity.knn.KnnResult;
-import org.neo4j.gds.similarity.knn.KnnTask;
 import org.neo4j.gds.similarity.knn.SimilarityFunction;
 import org.neo4j.gds.similarity.knn.metrics.SimilarityComputer;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarity;
@@ -131,16 +130,7 @@ public class SimilarityAlgorithms {
         );
     }
 
-    KnnResult knn(Graph graph, KnnBaseConfig configuration) {
-        var parameters = configuration.toParameters().finalize(graph.nodeCount());
-
-        var task = KnnTask.create(graph.nodeCount(), configuration.maxIterations());
-        var progressTracker = progressTrackerCreator.createProgressTracker(
-            task,
-            configuration.jobId(),
-            configuration.concurrency(),
-            configuration.logProgress()
-        );
+    KnnResult knn(Graph graph, KnnParameters parameters, ProgressTracker progressTracker) {
 
         var algorithm = Knn.create(
             graph,
@@ -160,7 +150,7 @@ public class SimilarityAlgorithms {
             algorithm,
             progressTracker,
             true,
-            configuration.concurrency()
+            parameters.concurrency()
         );
     }
 

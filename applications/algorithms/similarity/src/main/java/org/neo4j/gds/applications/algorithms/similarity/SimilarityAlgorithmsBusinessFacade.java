@@ -54,7 +54,6 @@ public class SimilarityAlgorithmsBusinessFacade {
 
     public NodeSimilarityResult filteredNodeSimilarity(Graph graph, FilteredNodeSimilarityBaseConfig configuration) {
         return similarityAlgorithms.filteredNodeSimilarity(graph,configuration);
-
     }
 
     public NodeSimilarityResult filteredNodeSimilarity(
@@ -63,11 +62,14 @@ public class SimilarityAlgorithmsBusinessFacade {
         ProgressTracker progressTracker
     ) {
         return similarityAlgorithms.filteredNodeSimilarity(graph, configuration, progressTracker);
-
     }
 
     KnnResult knn(Graph graph, KnnBaseConfig configuration) {
-      return similarityAlgorithms.knn(graph,configuration);
+        var parameters = configuration.toParameters().finalize(graph.nodeCount());
+        var task = tasks.Knn(graph,parameters);
+        var progressTracker = progressTrackerCreator.createProgressTracker(task,configuration);
+        return similarityAlgorithms.knn(graph, parameters, progressTracker);
+
     }
 
     public NodeSimilarityResult nodeSimilarity(Graph graph, NodeSimilarityBaseConfig configuration) {

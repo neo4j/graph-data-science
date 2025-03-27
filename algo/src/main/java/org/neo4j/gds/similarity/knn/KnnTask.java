@@ -28,7 +28,7 @@ import java.util.List;
 public final class KnnTask {
     private KnnTask() {}
 
-    public static Task create(long nodeCount, int maxIterations) {
+    public static Task create(long nodeCount, KnnParameters parameters) {
         return Tasks.task(
             AlgorithmLabel.KNN.asString(),
             Tasks.leaf("Initialize random neighbors", nodeCount),
@@ -39,7 +39,7 @@ public final class KnnTask {
                     Tasks.leaf("Reverse old and new neighbors", nodeCount),
                     Tasks.leaf("Join neighbors", nodeCount)
                 ),
-                maxIterations
+                parameters.maxIterations()
             )
         );
     }
