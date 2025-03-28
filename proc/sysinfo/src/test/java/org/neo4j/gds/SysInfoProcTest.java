@@ -50,48 +50,7 @@ class SysInfoProcTest extends BaseProcTest {
 
     private static final Collection<String> ALL_COMPATIBILITIES = List.of(
         "Neo4j 4.4",
-        "Neo4j Settings 4.4",
-
-        "Neo4j 5.x",
-        "Neo4j 5.x (placeholder)",
-        "Neo4j Settings 5.x",
-        "Neo4j Settings 5.x (placeholder)",
-
-        "Neo4j 5.11",
-        "Neo4j 5.11 (placeholder)",
-
-        "Neo4j 5.12",
-        "Neo4j 5.12 (placeholder)",
-
-        "Neo4j 5.13",
-        "Neo4j 5.13 (placeholder)",
-
-        "Neo4j 5.14",
-        "Neo4j 5.14 (placeholder)",
-
-        "Neo4j 5.15",
-        "Neo4j 5.15 (placeholder)",
-
-        "Neo4j 5.16",
-        "Neo4j 5.16 (placeholder)",
-
-        "Neo4j 5.17",
-        "Neo4j 5.17 (placeholder)",
-
-        "Neo4j 5.18",
-        "Neo4j 5.18 (placeholder)",
-
-        "Neo4j 5.19",
-        "Neo4j 5.19 (placeholder)",
-
-        "Neo4j 5.20",
-        "Neo4j 5.20 (placeholder)",
-
-        "Neo4j DEV",
-        "Neo4j DEV (placeholder)",
-
-        "Neo4j RC",
-        "Neo4j RC (placeholder)"
+        "Neo4j Settings 4.4"
     );
 
     @BeforeEach
@@ -143,95 +102,6 @@ class SysInfoProcTest extends BaseProcTest {
             case V_4_4:
                 expectedCompatibilities = Set.of("Neo4j 4.4", "Neo4j Settings 4.4");
                 break;
-            case V_5_11:
-                expectedCompatibilities = Set.of(
-                    "Neo4j Settings 5.x (placeholder)",
-                    "Neo4j Settings 5.x",
-                    "Neo4j 5.11 (placeholder)",
-                    "Neo4j 5.11"
-                );
-                break;
-            case V_5_12:
-                expectedCompatibilities = Set.of(
-                    "Neo4j Settings 5.x (placeholder)",
-                    "Neo4j Settings 5.x",
-                    "Neo4j 5.12 (placeholder)",
-                    "Neo4j 5.12"
-                );
-                break;
-            case V_5_13:
-                expectedCompatibilities = Set.of(
-                    "Neo4j Settings 5.x (placeholder)",
-                    "Neo4j Settings 5.x",
-                    "Neo4j 5.13 (placeholder)",
-                    "Neo4j 5.13"
-                );
-                break;
-            case V_5_14:
-                expectedCompatibilities = Set.of(
-                    "Neo4j Settings 5.x (placeholder)",
-                    "Neo4j Settings 5.x",
-                    "Neo4j 5.14 (placeholder)",
-                    "Neo4j 5.14"
-                );
-                break;
-            case V_5_15:
-                expectedCompatibilities = Set.of(
-                    "Neo4j Settings 5.x (placeholder)",
-                    "Neo4j Settings 5.x",
-                    "Neo4j 5.15 (placeholder)",
-                    "Neo4j 5.15"
-                );
-                break;
-            case V_5_16:
-                expectedCompatibilities = Set.of(
-                    "Neo4j Settings 5.x (placeholder)",
-                    "Neo4j Settings 5.x",
-                    "Neo4j 5.16 (placeholder)",
-                    "Neo4j 5.16"
-                );
-                break;
-            case V_5_17:
-                expectedCompatibilities = Set.of(
-                    "Neo4j Settings 5.x (placeholder)",
-                    "Neo4j Settings 5.x",
-                    "Neo4j 5.17 (placeholder)",
-                    "Neo4j 5.17"
-                );
-                break;
-            case V_5_18:
-                expectedCompatibilities = Set.of(
-                    "Neo4j Settings 5.x (placeholder)",
-                    "Neo4j Settings 5.x",
-                    "Neo4j 5.18 (placeholder)",
-                    "Neo4j 5.18"
-                );
-                break;
-            case V_5_19:
-                expectedCompatibilities = Set.of(
-                    "Neo4j Settings 5.x (placeholder)",
-                    "Neo4j Settings 5.x",
-                    "Neo4j 5.19 (placeholder)",
-                    "Neo4j 5.19"
-                );
-                break;
-            case V_5_20:
-                expectedCompatibilities = Set.of(
-                    "Neo4j Settings 5.x (placeholder)",
-                    "Neo4j Settings 5.x",
-                    "Neo4j 5.20 (placeholder)",
-                    "Neo4j 5.20"
-                );
-                break;
-            case V_RC:
-                expectedCompatibilities = Set.of(
-                    "Neo4j Settings 5.x",
-                    "Neo4j Settings 5.x (placeholder)",
-                    "Neo4j RC",
-                    "Neo4j DEV (placeholder)",
-                    "Neo4j DEV"
-                );
-                break;
             default:
                 throw new IllegalStateException("Unexpected Neo4j version: " + neo4jVersion);
         }
@@ -243,16 +113,7 @@ class SysInfoProcTest extends BaseProcTest {
             var actualItems = (items instanceof String) ? List.of(items) : items;
             assertThat(actualItems)
                 .asInstanceOf(InstanceOfAssertFactories.list(String.class))
-                .isSubsetOf(expectedCompatibilities)
-                .doesNotContainAnyElementsOf(allCompatibilities);
-        };
-
-        Consumer<Object> unavailableCompat = (items) -> {
-            var actualItems = (items instanceof String) ? List.of(items) : items;
-            assertThat(actualItems)
-                .asInstanceOf(InstanceOfAssertFactories.list(String.class))
-                .isSubsetOf(allCompatibilities)
-                .doesNotContainAnyElementsOf(expectedCompatibilities);
+                .containsExactlyElementsOf(expectedCompatibilities);
         };
 
         assertThat(result)
@@ -265,7 +126,6 @@ class SysInfoProcTest extends BaseProcTest {
             .containsEntry("buildHash", buildInfoProperties.buildHash())
             .containsEntry("neo4jVersion", Version.getNeo4jVersion())
             .hasEntrySatisfying("availableCompatibility", availableCompat)
-            .hasEntrySatisfying("unavailableCompatibility", unavailableCompat)
             .hasEntrySatisfying("gdsEdition", GDS_EDITION)
             .hasEntrySatisfying("availableCPUs", isInteger)
             .hasEntrySatisfying("physicalCPUs", isInteger)
