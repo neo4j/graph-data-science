@@ -11,7 +11,7 @@ ext {
     neo4jVersion = '4.4.41'
 
     // Necessary to generate value classes for Pregel configs
-    immutablesVersion = '2.8.1'
+    immutablesVersion = '2.10.1'
 
     // Necessary compile-time dependency for code generation
     jetbrainsAnnotations = '18.0.0'
