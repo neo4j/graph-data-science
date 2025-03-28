@@ -26,7 +26,6 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.similarity.FilteringParameters;
 import org.neo4j.gds.similarity.NodeFilterSpec;
 import org.neo4j.gds.similarity.knn.KnnBaseConfig;
-import org.neo4j.gds.similarity.knn.KnnParametersSansNodeCount;
 
 import java.util.Collection;
 
@@ -69,20 +68,7 @@ public interface FilteredKnnBaseConfig extends KnnBaseConfig {
 
     @Configuration.Ignore
     default FilteredKnnParametersSansNodeCount toFilteredKnnParameters() {
-        var knn =  KnnParametersSansNodeCount.create(
-            concurrency(),
-            maxIterations(),
-            similarityCutoff(),
-            deltaThreshold(),
-            sampleRate(),
-            topK(),
-            perturbationRate(),
-            randomJoins(),
-            1_000,
-            initialSampler(),
-            randomSeed(),
-            nodeProperties()
-        );
+        var knn =  toParameters();
 
          var filters = new FilteringParameters(
              sourceNodeFilter(),
