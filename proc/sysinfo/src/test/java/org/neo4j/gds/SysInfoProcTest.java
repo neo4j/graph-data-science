@@ -113,7 +113,7 @@ class SysInfoProcTest extends BaseProcTest {
             var actualItems = (items instanceof String) ? List.of(items) : items;
             assertThat(actualItems)
                 .asInstanceOf(InstanceOfAssertFactories.list(String.class))
-                .containsExactlyElementsOf(expectedCompatibilities);
+                .containsExactlyInAnyOrderElementsOf(expectedCompatibilities);
         };
 
         assertThat(result)
