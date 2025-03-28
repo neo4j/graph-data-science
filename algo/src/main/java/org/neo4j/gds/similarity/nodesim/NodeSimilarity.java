@@ -37,6 +37,8 @@ import org.neo4j.gds.similarity.SimilarityGraphBuilder;
 import org.neo4j.gds.similarity.SimilarityGraphResult;
 import org.neo4j.gds.similarity.SimilarityResult;
 import org.neo4j.gds.similarity.filtering.NodeFilter;
+import org.neo4j.gds.similarity.nodesim.metrics.MetricSimilarityComputer;
+import org.neo4j.gds.similarity.nodesim.metrics.MetricSimilarityComputerFactory;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.wcc.WccParameters;
 import org.neo4j.gds.wcc.WccStub;
@@ -93,7 +95,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
         this.targetNodeFilter = targetNodeFilter;
         this.concurrency = parameters.concurrency();
         this.parameters = parameters;
-        this.similarityComputer = parameters.similarityComputer();
+        this.similarityComputer = MetricSimilarityComputerFactory.create(parameters);
         this.executorService = executorService;
         this.sourceNodes = new BitSet(graph.nodeCount());
         this.targetNodes = new BitSet(graph.nodeCount());

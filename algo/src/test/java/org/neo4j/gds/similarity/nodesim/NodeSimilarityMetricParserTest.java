@@ -20,23 +20,37 @@
 package org.neo4j.gds.similarity.nodesim;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 
-class MetricSimilarityComputerTest {
+class NodeSimilarityMetricParserTest {
 
     @Test
     void shouldThrowOnWrongMetric2() {
-        assertThatThrownBy(() -> MetricSimilarityComputer.parse("ovErLaPPPPP"))
+        assertThatThrownBy(() -> NodeSimilarityMetricParser.parse("ovErLaPPPPP"))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("ovErLaPPPPP is not a valid metric");
     }
 
-    @Test
-    void shouldParseCosineSimilarityComputer() {
-        var cosineComputer = MetricSimilarityComputer.parse("CosiNe").build(0);
-        assertThat(cosineComputer)
-            .isExactlyInstanceOf(CosineSimilarityComputer.class);
+    static Stream<Arguments> metrics() {
+        return Stream.of(
+            arguments("CosiNe",NodeSimilarityMetric.COSINE),
+            arguments("jaccard",NodeSimilarityMetric.JACCARD),
+            arguments("OVERLAP",NodeSimilarityMetric.OVERLAP)
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("metrics")
+    void shouldParseCorrectly(String input, NodeSimilarityMetric expected) {
+        var metric = NodeSimilarityMetricParser.parse(input);
+        assertThat(metric).isEqualTo(expected);
     }
 }

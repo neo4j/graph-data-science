@@ -17,11 +17,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.similarity.nodesim;
+package org.neo4j.gds.similarity.nodesim.metrics;
 
 import org.neo4j.gds.functions.similarity.OverlapSimilarity;
 
-final class OverlapSimilarityComputer implements MetricSimilarityComputer {
+public final class OverlapSimilarityComputer implements MetricSimilarityComputer {
     private final double similarityCutoff;
 
     public OverlapSimilarityComputer(double similarityCutoff) {
@@ -38,15 +38,5 @@ final class OverlapSimilarityComputer implements MetricSimilarityComputer {
         return OverlapSimilarity.computeWeightedSimilarity(vector1, vector2, weights1, weights2, similarityCutoff);
     }
 
-    static class Builder implements MetricSimilarityComputerBuilder {
-        @Override
-        public MetricSimilarityComputer build(double similarityCutoff) {
-            return new OverlapSimilarityComputer(similarityCutoff);
-        }
 
-        @Override
-        public String render() {
-            return "OVERLAP";
-        }
-    }
 }

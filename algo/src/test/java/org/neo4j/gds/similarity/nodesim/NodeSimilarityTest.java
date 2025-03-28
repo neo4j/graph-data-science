@@ -284,10 +284,11 @@ final class NodeSimilarityTest {
 
         var parameters = new NodeSimilarityParameters(
             new Concurrency(concurrency),
-            new JaccardSimilarityComputer(0.0),
+            NodeSimilarityMetric.JACCARD,
             1,
             Integer.MAX_VALUE,
             10,
+            0,
             0,
             true,
             true,
@@ -316,10 +317,11 @@ final class NodeSimilarityTest {
 
         var parameters = new NodeSimilarityParameters(
             new Concurrency(concurrency),
-            new JaccardSimilarityComputer(0.0),
+            NodeSimilarityMetric.JACCARD,
             1,
             Integer.MAX_VALUE,
             10,
+            0,
             0,
             true,
             false,
@@ -347,11 +349,12 @@ final class NodeSimilarityTest {
 
         var parameters = new NodeSimilarityParameters(
             new Concurrency(concurrency),
-            new JaccardSimilarityComputer(0.0),
+            NodeSimilarityMetric.JACCARD,
             1,
             Integer.MAX_VALUE,
             10,
             1,
+            0,
             true,
             false,
             false,
@@ -379,11 +382,12 @@ final class NodeSimilarityTest {
 
         var parameters = new NodeSimilarityParameters(
             new Concurrency(concurrency),
-            new JaccardSimilarityComputer(0.0),
+            NodeSimilarityMetric.JACCARD,
             1,
             Integer.MAX_VALUE,
             10,
             -1,
+            0,
             false,
             false,
             false,
@@ -414,10 +418,11 @@ final class NodeSimilarityTest {
 
         var parameters = new NodeSimilarityParameters(
             new Concurrency(concurrency),
-            new JaccardSimilarityComputer(0.0),
+            NodeSimilarityMetric.JACCARD,
             1,
             Integer.MAX_VALUE,
             1,
+            0,
             0,
             true,
             false,
@@ -446,10 +451,11 @@ final class NodeSimilarityTest {
 
         var parameters = new NodeSimilarityParameters(
             new Concurrency(concurrency),
-            new JaccardSimilarityComputer(0.0),
+            NodeSimilarityMetric.JACCARD,
             1,
             Integer.MAX_VALUE,
             -1,
+            0,
             0,
             false,
             false,
@@ -487,11 +493,12 @@ final class NodeSimilarityTest {
 
         var parameters = new NodeSimilarityParameters(
             new Concurrency(concurrency),
-            new JaccardSimilarityComputer(0.1),
+            NodeSimilarityMetric.JACCARD,
             1,
             Integer.MAX_VALUE,
             10,
             0,
+            0.1,
             true,
             false,
             false,
@@ -522,10 +529,11 @@ final class NodeSimilarityTest {
 
         var parameters = new NodeSimilarityParameters(
             new Concurrency(concurrency),
-            new JaccardSimilarityComputer(0.0),
+            NodeSimilarityMetric.JACCARD,
             2,
             Integer.MAX_VALUE,
             10,
+            0,
             0,
             true,
             false,
@@ -555,10 +563,11 @@ final class NodeSimilarityTest {
     void shouldComputeForUndirectedGraphs(int concurrency) {
         var parameters = new NodeSimilarityParameters(
             new Concurrency(concurrency),
-            new JaccardSimilarityComputer(0.0),
+            NodeSimilarityMetric.JACCARD,
             1,
             Integer.MAX_VALUE,
             10,
+            0,
             0,
             true,
             false,
@@ -579,10 +588,11 @@ final class NodeSimilarityTest {
     void shouldComputeForUnionGraphs() {
         var parameters = new NodeSimilarityParameters(
             new Concurrency(1),
-            new JaccardSimilarityComputer(0.0),
+            NodeSimilarityMetric.JACCARD,
             1,
             Integer.MAX_VALUE,
             10,
+            0,
             0,
             true,
             false,
@@ -613,10 +623,11 @@ final class NodeSimilarityTest {
 
         var parameters = new NodeSimilarityParameters(
             new Concurrency(concurrency),
-            new JaccardSimilarityComputer(0.0),
+            NodeSimilarityMetric.JACCARD,
             1,
             Integer.MAX_VALUE,
             10,
+            0,
             0,
             false,
             false,
@@ -671,11 +682,12 @@ final class NodeSimilarityTest {
 
         var parameters = new NodeSimilarityParameters(
             new Concurrency(concurrency),
-            new JaccardSimilarityComputer(0.0),
+            NodeSimilarityMetric.JACCARD,
             1,
             Integer.MAX_VALUE,
             100,
             1,
+            0,
             false,
             false,
             false,
@@ -720,11 +732,12 @@ final class NodeSimilarityTest {
 
         var parameters = new NodeSimilarityParameters(
             new Concurrency(concurrency),
-            new JaccardSimilarityComputer(0.0),
+            NodeSimilarityMetric.JACCARD,
             1,
             Integer.MAX_VALUE,
             10,
             1,
+            0,
             true,
             false,
             false,
@@ -759,10 +772,11 @@ final class NodeSimilarityTest {
 
         var parameters = new NodeSimilarityParameters(
             new Concurrency(concurrency),
-            new JaccardSimilarityComputer(0.0),
+            NodeSimilarityMetric.JACCARD,
             1,
             Integer.MAX_VALUE,
             10,
+            0,
             0,
             true,
             false,
@@ -962,16 +976,18 @@ final class NodeSimilarityTest {
 
         var parameters1 = new NodeSimilarityParameters(
             new Concurrency(1),
-            new OverlapSimilarityComputer(0.0),
+            NodeSimilarityMetric.OVERLAP,
             1,
             Integer.MAX_VALUE,
             10,
+            0,
             0,
             true,
             false,
             false,
             null
         );
+
         NodeSimilarity nodeSimilarity = constructNodeSimilarity(
             graph,
             parameters1
@@ -987,11 +1003,12 @@ final class NodeSimilarityTest {
 
         var parameters2 = new NodeSimilarityParameters(
             new Concurrency(1),
-            new OverlapSimilarityComputer(1E-42),
+            NodeSimilarityMetric.OVERLAP,
             1,
             Integer.MAX_VALUE,
             10,
             0,
+            1E-42,
             true,
             true,
             false,
@@ -1036,10 +1053,11 @@ final class NodeSimilarityTest {
     void shouldWorkForAllDegreeBoundsCombinations(int lowBound, int upperBound, String... expectedOutput) {
         var parameters = new NodeSimilarityParameters(
             new Concurrency(4),
-            new JaccardSimilarityComputer(0.0),
+            NodeSimilarityMetric.JACCARD,
             lowBound,
             upperBound,
             10,
+            0,
             0,
             true,
             false,

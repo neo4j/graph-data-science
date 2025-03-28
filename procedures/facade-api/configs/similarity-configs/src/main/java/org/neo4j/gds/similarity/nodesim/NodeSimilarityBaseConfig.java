@@ -53,10 +53,10 @@ public interface NodeSimilarityBaseConfig extends AlgoBaseConfig, RelationshipWe
         return 1E-42;
     }
 
-    @Configuration.ConvertWith(method = "org.neo4j.gds.similarity.nodesim.MetricSimilarityComputer#parse")
-    @Configuration.ToMapValue("org.neo4j.gds.similarity.nodesim.MetricSimilarityComputer#render")
-    default MetricSimilarityComputer.MetricSimilarityComputerBuilder similarityMetric() {
-        return new JaccardSimilarityComputer.Builder();
+    @Configuration.ConvertWith(method = "org.neo4j.gds.similarity.nodesim.NodeSimilarityMetricParser#parse")
+    @Configuration.ToMapValue("org.neo4j.gds.similarity.nodesim.NodeSimilarityMetricParser#toString")
+    default NodeSimilarityMetric similarityMetric() {
+        return NodeSimilarityMetric.JACCARD;
     }
 
     @Configuration.IntegerRange(min = 1)
@@ -158,11 +158,12 @@ public interface NodeSimilarityBaseConfig extends AlgoBaseConfig, RelationshipWe
         var componentUsage = useComponents();
         return new NodeSimilarityParameters(
             concurrency(),
-            similarityMetric().build(similarityCutoff()),
+            similarityMetric(),
             degreeCutoff(),
             upperDegreeCutoff(),
             normalizedK,
             normalizedN,
+            similarityCutoff(),
             computeToStream(),
             hasRelationshipWeightProperty(),
             componentUsage.useComponents(),

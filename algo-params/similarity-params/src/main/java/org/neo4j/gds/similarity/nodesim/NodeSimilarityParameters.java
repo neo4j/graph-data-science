@@ -27,11 +27,12 @@ import org.neo4j.gds.core.concurrency.Concurrency;
 @Parameters
 public record NodeSimilarityParameters(
     Concurrency concurrency,
-    MetricSimilarityComputer similarityComputer,
+    NodeSimilarityMetric metric,
     int degreeCutoff,
     int upperDegreeCutoff,
     int normalizedK,
     int normalizedN,
+    double similarityCutoff,
     boolean computeToStream,
     boolean hasRelationshipWeightProperty,
     boolean useComponents,

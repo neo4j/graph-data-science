@@ -47,11 +47,12 @@ class NodeSimilarityTerminationTest {
             {
                 var parameters = new NodeSimilarityParameters(
                     new Concurrency(1),
-                    new JaccardSimilarityComputer(1E-42),
+                    NodeSimilarityMetric.JACCARD,
                     1,
                     Integer.MAX_VALUE,
                     10,
                     0,
+                    1E-42,
                     true,
                     false,
                     false,

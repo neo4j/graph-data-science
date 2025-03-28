@@ -17,29 +17,29 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.similarity.nodesim;
+package org.neo4j.gds.similarity.nodesim.metrics;
 
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-class JaccardSimilarityComputerTest {
+class OverlapSimilarityComputerTest {
 
     @Test
     void shouldComputeCorrectSimilarityWhenInputVectorsHaveDifferentSizes() {
-        var vector1 = new long[]{1, 3, 4, 5, 6};
+        var vector1 = new long[]{1, 5, 4, 6, 3};
         var vector2 = new long[]{1, 3, 4, 5};
         var weights1 = new double[]{
             0.5801196133134187,
-            0.5051196133134187,
-            0.5551196133134186,
             0.5801196133134187,
-            0.8213475204444817
+            0.5551196133134186,
+            0.8213475204444817,
+            0.5051196133134187
         };
         var weights2 = new double[]{0.5801196133134187, 0.5051196133134187, 0.5551196133134186, 0.5801196133134187};
 
-        var computer = new JaccardSimilarityComputer(1.0E-42);
+        var computer = new OverlapSimilarityComputer(1.0E-42);
 
         var similarity = computer.computeWeightedSimilarity(
             vector1,
@@ -48,19 +48,19 @@ class JaccardSimilarityComputerTest {
             weights2
         );
 
-        assertThat(similarity).isCloseTo(0.7299820806494354, Offset.offset(1e-15));
+        assertThat(similarity).isCloseTo(0.5225176695260135, Offset.offset(1e-15));
     }
 
     @Test
     void shouldComputeCorrectSimilarityWhenInputVectorsHaveSameSizes() {
-        var vector1 = new long[]{1, 3, 4, 5, 6};
+        var vector1 = new long[]{1, 5, 4, 6, 3};
         var vector2 = new long[]{1, 3, 4, 5, 6};
         var weights1 = new double[]{
             0.5801196133134187,
-            0.5051196133134187,
-            0.5551196133134186,
             0.5801196133134187,
-            0.8213475204444817
+            0.5551196133134186,
+            0.8213475204444817,
+            0.5051196133134187
         };
         var weights2 = new double[]{
             0.5801196133134187,
@@ -70,7 +70,7 @@ class JaccardSimilarityComputerTest {
             0.0
         };
 
-        var computer = new JaccardSimilarityComputer(1.0E-42);
+        var computer = new OverlapSimilarityComputer(1.0E-42);
 
         var similarity = computer.computeWeightedSimilarity(
             vector1,
@@ -79,7 +79,7 @@ class JaccardSimilarityComputerTest {
             weights2
         );
 
-        assertThat(similarity).isCloseTo(0.7299820806494354, Offset.offset(1e-15));
+        assertThat(similarity).isCloseTo(0.5225176695260135, Offset.offset(1e-15));
     }
 
 }

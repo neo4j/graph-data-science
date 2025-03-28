@@ -17,10 +17,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.similarity.nodesim;
+package org.neo4j.gds.similarity.nodesim.metrics;
 
-public enum NodeSimilarityMetric {
-    JACCARD,
-    OVERLAP,
-    COSINE
+public interface MetricSimilarityComputer {
+
+    double computeSimilarity(long[] vector1, long[] vector2);
+
+    double computeWeightedSimilarity(long[] vector1, long[] vector2, double[] weights1, double[] weights2);
+
 }

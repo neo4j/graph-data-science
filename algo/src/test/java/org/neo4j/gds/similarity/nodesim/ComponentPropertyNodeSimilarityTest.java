@@ -141,11 +141,12 @@ public class ComponentPropertyNodeSimilarityTest {
 
         var parameters = new NodeSimilarityParameters(
             new Concurrency(concurrency),
-            new JaccardSimilarityComputer(0.0),
+            NodeSimilarityMetric.JACCARD,
             1,
             Integer.MAX_VALUE,
             10,
             0,
+            0.0,
             true,
             false,
             true,
