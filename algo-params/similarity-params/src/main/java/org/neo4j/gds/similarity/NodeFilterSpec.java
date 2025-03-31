@@ -34,7 +34,8 @@ import java.util.Collection;
  * There are two types of node filters: ones based on a list of node IDs, and ones based on labels.
  * There are therefore two types of node filter specs, accordingly.
  *
- * The spec is created using {@link NodeFilterSpecFactory#create(Object)} and the {@link org.neo4j.gds.similarity.filtering.NodeFilter} is then created
+ * The spec is created using {@code org.neo4j.gds.similarity.filtering.NodeFilterSpecFactory.create(Object);}
+ * and the {@link org.neo4j.gds.similarity.filtering.NodeFilter} is then created
  * using {@link NodeFilterSpec#toNodeFilter(org.neo4j.gds.api.IdMap)}.
  */
 public interface NodeFilterSpec {
