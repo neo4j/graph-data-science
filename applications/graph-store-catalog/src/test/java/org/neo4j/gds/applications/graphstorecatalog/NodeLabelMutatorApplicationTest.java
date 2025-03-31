@@ -89,15 +89,15 @@ class NodeLabelMutatorApplicationTest {
             NodeFilterParser.parseAndValidate(graphStore, "n:A AND n.longProperty > 1")
         );
 
-        assertions.assertThat(result.nodeCount)
+        assertions.assertThat(result.nodeCount())
             .as("Total number of nodes in the graph should be four, including the nodes that didn't get the new label")
             .isEqualTo(4L);
 
-        assertions.assertThat(result.nodeLabel)
+        assertions.assertThat(result.nodeLabel())
             .as("The specified node label should be present in the result")
             .isEqualTo("TestLabel");
 
-        assertions.assertThat(result.nodeLabelsWritten)
+        assertions.assertThat(result.nodeLabelsWritten())
             .as("There should be two nodes having the new label in the in-memory graph")
             .isEqualTo(2L);
 
@@ -146,15 +146,15 @@ class NodeLabelMutatorApplicationTest {
             NodeFilterParser.parseAndValidate(graphStore, "n.floatProperty <= 19.0")
         );
 
-        assertions.assertThat(result.nodeCount)
+        assertions.assertThat(result.nodeCount())
             .as("Total number of nodes in the graph should be four, including the nodes that didn't get the new label")
             .isEqualTo(4L);
 
-        assertions.assertThat(result.nodeLabel)
+        assertions.assertThat(result.nodeLabel())
             .as("The specified node label should be present in the result")
             .isEqualTo("TestLabel");
 
-        assertions.assertThat(result.nodeLabelsWritten)
+        assertions.assertThat(result.nodeLabelsWritten())
             .as("There should be two nodes having the new label in the in-memory graph")
             .isEqualTo(2L);
 
@@ -203,15 +203,15 @@ class NodeLabelMutatorApplicationTest {
             NodeFilterParser.parseAndValidate(graphStore, "n.longProperty <= 2")
         );
 
-        assertions.assertThat(result.nodeCount)
+        assertions.assertThat(result.nodeCount())
             .as("Total number of nodes in the graph should be four, including the nodes that didn't get the new label")
             .isEqualTo(4L);
 
-        assertions.assertThat(result.nodeLabel)
+        assertions.assertThat(result.nodeLabel())
             .as("The specified node label should be present in the result")
             .isEqualTo("TestLabel");
 
-        assertions.assertThat(result.nodeLabelsWritten)
+        assertions.assertThat(result.nodeLabelsWritten())
             .as("There should be three nodes having the new label in the in-memory graph")
             .isEqualTo(3);
 

@@ -23,29 +23,13 @@ import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.Map;
 
-public final class MutateLabelResult {
-    public final long mutateMillis;
-    public final String graphName;
-    public final String nodeLabel;
-    public final long nodeLabelsWritten;
-    public final long nodeCount;
-    public final Map<String, Object> configuration;
-
-    private MutateLabelResult(
-        long mutateMillis,
-        String graphName,
-        String nodeLabel,
-        long nodeLabelsWritten,
-        long nodeCount,
-        Map<String, Object> configuration
-    ) {
-        this.mutateMillis = mutateMillis;
-        this.graphName = graphName;
-        this.nodeLabel = nodeLabel;
-        this.nodeLabelsWritten = nodeLabelsWritten;
-        this.nodeCount = nodeCount;
-        this.configuration = configuration;
-    }
+public record MutateLabelResult(
+    long mutateMillis,
+    String graphName,
+    String nodeLabel,
+    long nodeLabelsWritten,
+    long nodeCount,
+    Map<String, Object> configuration) {
 
     public static Builder builder(String graphName, String nodeLabel) {
         return new Builder(graphName, nodeLabel);
