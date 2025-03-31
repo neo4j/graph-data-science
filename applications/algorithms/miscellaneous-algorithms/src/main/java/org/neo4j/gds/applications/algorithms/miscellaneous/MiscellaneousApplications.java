@@ -65,28 +65,31 @@ public final class MiscellaneousApplications {
             requestScopedDependencies.terminationFlag()
         );
 
+        var business = new MiscellaneousAlgorithmsBusinessFacade(algorithms,progressTrackerCreator);
+
         var estimation = new MiscellaneousApplicationsEstimationModeBusinessFacade(algorithmEstimationTemplate);
         var mutation = new MiscellaneousApplicationsMutateModeBusinessFacade(
             estimation,
-            algorithms,
+            business,
             algorithmProcessingTemplateConvenience,
             mutateNodeProperty,
             mutateRelationshipService
         );
         var stats = new MiscellaneousApplicationsStatsModeBusinessFacade(
             estimation,
-            algorithms,
+            business,
             algorithmProcessingTemplateConvenience
         );
         var stream = new MiscellaneousApplicationsStreamModeBusinessFacade(
             estimation,
-            algorithms,
+            business,
             algorithmProcessingTemplateConvenience
         );
         var writeToDatabase = new WriteToDatabase(log, requestScopedDependencies, writeContext);
+
         var write = new MiscellaneousApplicationsWriteModeBusinessFacade(
             estimation,
-            algorithms,
+            business,
             algorithmProcessingTemplateConvenience,
             writeToDatabase
         );

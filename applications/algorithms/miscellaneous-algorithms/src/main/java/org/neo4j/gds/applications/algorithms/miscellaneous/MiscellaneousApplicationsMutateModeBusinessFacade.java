@@ -43,14 +43,14 @@ import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ToU
 
 public class MiscellaneousApplicationsMutateModeBusinessFacade {
     private final MiscellaneousApplicationsEstimationModeBusinessFacade estimation;
-    private final MiscellaneousAlgorithms algorithms;
+    private final MiscellaneousAlgorithmsBusinessFacade algorithms;
     private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
     private final MutateNodeProperty mutateNodeProperty;
     private final MutateRelationshipService mutateRelationshipService;
 
     MiscellaneousApplicationsMutateModeBusinessFacade(
         MiscellaneousApplicationsEstimationModeBusinessFacade estimation,
-        MiscellaneousAlgorithms algorithms,
+        MiscellaneousAlgorithmsBusinessFacade algorithms,
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
         MutateNodeProperty mutateNodeProperty,
         MutateRelationshipService mutateRelationshipService

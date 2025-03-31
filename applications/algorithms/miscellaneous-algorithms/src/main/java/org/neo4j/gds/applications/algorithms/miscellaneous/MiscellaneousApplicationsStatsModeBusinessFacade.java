@@ -29,12 +29,12 @@ import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Sca
 
 public class MiscellaneousApplicationsStatsModeBusinessFacade {
     private final MiscellaneousApplicationsEstimationModeBusinessFacade estimationFacade;
-    private final MiscellaneousAlgorithms miscellaneousAlgorithms;
+    private final MiscellaneousAlgorithmsBusinessFacade miscellaneousAlgorithms;
     private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
 
     MiscellaneousApplicationsStatsModeBusinessFacade(
         MiscellaneousApplicationsEstimationModeBusinessFacade estimationFacade,
-        MiscellaneousAlgorithms miscellaneousAlgorithms,
+        MiscellaneousAlgorithmsBusinessFacade miscellaneousAlgorithms,
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience
     ) {
         this.estimationFacade = estimationFacade;
