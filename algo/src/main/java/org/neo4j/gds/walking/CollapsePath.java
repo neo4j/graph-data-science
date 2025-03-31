@@ -23,6 +23,8 @@ import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.collapsepath.CollapsePathParameters;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
@@ -49,6 +51,18 @@ public class CollapsePath extends Algorithm<SingleTypeRelationships> {
     private final Concurrency concurrency;
     private final ExecutorService executorService;
 
+
+    public static CollapsePath create(GraphStore graphStore, CollapsePathParameters parameters, ExecutorService executorService ){
+
+        var pathTemplates = CollapsePathListOfGraphsLoader.graphs(graphStore,parameters);
+        return new CollapsePath(
+            pathTemplates,
+            parameters.allowSelfLoops(),
+            RelationshipType.of(parameters.typeToCreate()),
+            parameters.concurrency(),
+            executorService
+        );
+    }
     public CollapsePath(
         List<Graph[]> pathTemplates,
         boolean allowSelfLoops,

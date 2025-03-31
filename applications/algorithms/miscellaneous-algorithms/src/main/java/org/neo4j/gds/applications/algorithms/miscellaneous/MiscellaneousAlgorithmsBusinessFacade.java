@@ -31,6 +31,7 @@ import org.neo4j.gds.scaleproperties.ScalePropertiesBaseConfig;
 import org.neo4j.gds.scaleproperties.ScalePropertiesResult;
 import org.neo4j.gds.undirected.ToUndirectedConfig;
 import org.neo4j.gds.walking.CollapsePathConfig;
+import org.neo4j.gds.walking.CollapsePathParamsTransformer;
 
 import java.util.Map;
 
@@ -46,7 +47,8 @@ public class MiscellaneousAlgorithmsBusinessFacade {
     }
 
     public SingleTypeRelationships collapsePath(GraphStore graphStore, CollapsePathConfig configuration) {
-        return  miscellaneousAlgorithms.collapsePath(graphStore, configuration);
+        var params  = CollapsePathParamsTransformer.create(configuration,graphStore);
+        return miscellaneousAlgorithms.collapsePath(graphStore, params);
     }
 
     Map<RelationshipType, SingleTypeRelationships> indexInverse(

@@ -17,28 +17,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.walking;
+package org.neo4j.gds.collapsepath;
 
-import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.config.MutateRelationshipConfig;
-import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.AlgorithmParameters;
+import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.core.concurrency.Concurrency;
 
+import java.util.Collection;
 import java.util.List;
 
-@Configuration
-public interface CollapsePathConfig extends AlgoBaseConfig, MutateRelationshipConfig {
-
-    List<List<String>> pathTemplates();
-
-    default boolean allowSelfLoops() {
-        return false;
-    }
-
-    static CollapsePathConfig of(CypherMapWrapper userInput) {
-        return new CollapsePathConfigImpl(userInput);
-    }
-
-
-
+public record CollapsePathParameters(
+    Concurrency concurrency,
+    List<List<String>> pathTemplates,
+    Collection<NodeLabel> nodeLabels,
+    boolean allowSelfLoops,
+    String typeToCreate
+)  implements AlgorithmParameters {
 }

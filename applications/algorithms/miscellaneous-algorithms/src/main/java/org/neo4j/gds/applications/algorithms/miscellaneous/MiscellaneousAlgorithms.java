@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.applications.algorithms.miscellaneous;
 
-import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
@@ -27,6 +26,7 @@ import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmMachinery;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
+import org.neo4j.gds.collapsepath.CollapsePathParameters;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.loading.SingleTypeRelationships;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -42,14 +42,8 @@ import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.undirected.ToUndirected;
 import org.neo4j.gds.undirected.ToUndirectedConfig;
 import org.neo4j.gds.walking.CollapsePath;
-import org.neo4j.gds.walking.CollapsePathConfig;
 
-import java.util.Collection;
-import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 public class MiscellaneousAlgorithms {
     private final AlgorithmMachinery algorithmMachinery = new AlgorithmMachinery();
@@ -62,34 +56,12 @@ public class MiscellaneousAlgorithms {
         this.terminationFlag = terminationFlag;
     }
 
-    public SingleTypeRelationships collapsePath(GraphStore graphStore, CollapsePathConfig configuration) {
-        Collection<NodeLabel> nodeLabels = configuration.nodeLabelIdentifiers(graphStore);
+    public SingleTypeRelationships collapsePath(GraphStore graphStore, CollapsePathParameters parameters) {
 
-        /*
-         * here we build a graph-per-relationship type. you can think of them as layers.
-         * the algorithm will take a step in a layer, then a next step in another layer.
-         * that obviously stops of a node in a layer is not connected to anything.
-         */
-        List<Graph[]> pathTemplatesEncodedAsListsOfSingleRelationshipTypeGraphs = configuration.pathTemplates().stream()
-            .map(
-                path -> path.stream()
-                    .map(
-                        relationshipTypeAsString -> graphStore.getGraph(
-                            nodeLabels,
-                            Set.of(RelationshipType.of(relationshipTypeAsString)),
-                            Optional.empty()
-                        )
-                    )
-                    .toArray(Graph[]::new)
-            )
-            .collect(Collectors.toList());
-
-        var algorithm = new CollapsePath(
-            pathTemplatesEncodedAsListsOfSingleRelationshipTypeGraphs,
-            configuration.allowSelfLoops(),
-            RelationshipType.of(configuration.mutateRelationshipType()),
-            configuration.concurrency(),
-            DefaultPool.INSTANCE
+        var algorithm = CollapsePath.create(
+                graphStore,
+                parameters,
+                DefaultPool.INSTANCE
         );
 
         return algorithm.compute();

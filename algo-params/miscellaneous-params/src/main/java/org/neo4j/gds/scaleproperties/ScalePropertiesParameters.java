@@ -27,7 +27,7 @@ import java.util.List;
 
 public record ScalePropertiesParameters(
     Concurrency concurrency,
-   List<String> nodeProperties,
+    List<String> nodeProperties,
     ScalerFactory scaler
 ) implements AlgorithmParameters {
 

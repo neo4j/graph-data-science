@@ -21,11 +21,12 @@ package org.neo4j.gds.walking;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.applications.algorithms.miscellaneous.MiscellaneousAlgorithms;
+import org.neo4j.gds.collapsepath.CollapsePathParameters;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.loading.SingleTypeRelationships;
@@ -36,6 +37,7 @@ import org.neo4j.gds.extension.Inject;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
@@ -192,15 +194,20 @@ class CollapsePathTest {
             var relType = "HAS_FRIEND";
             var mutateRelType = RelationshipType.of("HAS_FRIEND_OF_FRIEND");
 
-            // when no `nodeLabels` specified
-            var config = CollapsePathConfigImpl.builder()
-                .mutateRelationshipType(mutateRelType.name)
-                .pathTemplates(List.of(List.of(relType, relType)))
-                .allowSelfLoops(false)
-                .build();
+            var parameters = new CollapsePathParameters(
+                new Concurrency(4),
+                List.of(List.of(relType, relType)),
+                Set.of(NodeLabel.of("Dog"), NodeLabel.of("Person")),
+                false,
+                mutateRelType.name()
+            );
 
-            var miscellaneousAlgorithms = new MiscellaneousAlgorithms(null, null);
-            var relationships = miscellaneousAlgorithms.collapsePath(graphStore, config);
+            var relationships = CollapsePath.create(
+                graphStore,
+                parameters,
+                DefaultPool.INSTANCE
+            ).compute();
+
             graphStore.addRelationshipType(relationships);
             var resultGraph = graphStore.getGraph(mutateRelType);
 
@@ -215,16 +222,20 @@ class CollapsePathTest {
             var relType = "HAS_FRIEND";
             var mutateRelType = RelationshipType.of("HAS_FRIEND_OF_FRIEND");
 
-            // when Person is specified for `nodeLabels`
-            var config = CollapsePathConfigImpl.builder()
-                .nodeLabels(List.of("Person"))
-                .mutateRelationshipType(mutateRelType.name)
-                .pathTemplates(List.of(List.of(relType, relType)))
-                .allowSelfLoops(false)
-                .build();
+            var parameters = new CollapsePathParameters(
+                new Concurrency(4),
+                List.of(List.of(relType, relType)),
+                Set.of(NodeLabel.of("Person")),
+                false,
+                mutateRelType.name()
+            );
 
-            var miscellaneousAlgorithms = new MiscellaneousAlgorithms(null, null);
-            var relationships = miscellaneousAlgorithms.collapsePath(graphStore, config);
+            var relationships = CollapsePath.create(
+                graphStore,
+                parameters,
+                DefaultPool.INSTANCE
+            ).compute();
+
             graphStore.addRelationshipType(relationships);
             var resultGraph = graphStore.getGraph(mutateRelType);
 

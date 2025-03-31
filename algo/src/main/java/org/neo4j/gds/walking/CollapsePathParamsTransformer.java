@@ -19,26 +19,20 @@
  */
 package org.neo4j.gds.walking;
 
-import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.config.MutateRelationshipConfig;
-import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.collapsepath.CollapsePathParameters;
 
-import java.util.List;
+public class CollapsePathParamsTransformer {
 
-@Configuration
-public interface CollapsePathConfig extends AlgoBaseConfig, MutateRelationshipConfig {
+    public static CollapsePathParameters create(CollapsePathConfig  config, GraphStore graphStore){
 
-    List<List<String>> pathTemplates();
-
-    default boolean allowSelfLoops() {
-        return false;
+        var labels = config.nodeLabelIdentifiers(graphStore);
+        return new CollapsePathParameters(
+            config.concurrency(),
+            config.pathTemplates(),
+            labels,
+            config.allowSelfLoops(),
+            config.mutateRelationshipType()
+        );
     }
-
-    static CollapsePathConfig of(CypherMapWrapper userInput) {
-        return new CollapsePathConfigImpl(userInput);
-    }
-
-
-
 }
