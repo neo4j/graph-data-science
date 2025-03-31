@@ -27,6 +27,7 @@ import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.core.loading.SingleTypeRelationships;
 import org.neo4j.gds.indexInverse.InverseRelationshipsConfig;
+import org.neo4j.gds.indexInverse.InverseRelationshipsParamsTransformer;
 import org.neo4j.gds.scaleproperties.ScalePropertiesBaseConfig;
 import org.neo4j.gds.scaleproperties.ScalePropertiesResult;
 import org.neo4j.gds.undirected.ToUndirectedConfig;
@@ -56,7 +57,12 @@ public class MiscellaneousAlgorithmsBusinessFacade {
         GraphStore graphStore,
         InverseRelationshipsConfig configuration
     ) {
-       return  miscellaneousAlgorithms.indexInverse(idMap,graphStore,configuration);
+
+        var params = InverseRelationshipsParamsTransformer.toParameters(graphStore,configuration);
+        var task = tasks.inverseIndex(idMap.nodeCount(),params);
+
+        var progressTracker =  progressTrackerCreator.createProgressTracker(task, configuration);
+       return  miscellaneousAlgorithms.indexInverse(graphStore,params,progressTracker);
     }
 
     ScalePropertiesResult scaleProperties(Graph graph, ScalePropertiesBaseConfig configuration) {
@@ -67,8 +73,6 @@ public class MiscellaneousAlgorithmsBusinessFacade {
         return miscellaneousAlgorithms.scaleProperties(graph, params, progressTracker);
 
     }
-
-
 
     public SingleTypeRelationships toUndirected(GraphStore graphStore, ToUndirectedConfig configuration) {
         return miscellaneousAlgorithms.toUndirected(graphStore, configuration);

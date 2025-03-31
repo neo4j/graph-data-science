@@ -38,6 +38,7 @@ import org.neo4j.gds.core.loading.construction.RelationshipsBuilderBuilder;
 import org.neo4j.gds.core.utils.partition.DegreePartition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.indexinverse.InverseRelationshipsParameters;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.HashMap;
@@ -75,7 +76,7 @@ public class InverseRelationships extends Algorithm<Map<RelationshipType, Single
     public Map<RelationshipType, SingleTypeRelationships> compute() {
         progressTracker.beginSubTask();
 
-        var fromRelationshipTypes = parameters.internalRelationshipTypes(graphStore);
+        var fromRelationshipTypes = parameters.relationshipTypes();
 
         var relationshipsPerType = new HashMap<RelationshipType, SingleTypeRelationships>();
 

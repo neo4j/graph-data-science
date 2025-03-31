@@ -22,7 +22,6 @@ package org.neo4j.gds.applications.algorithms.miscellaneous;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmMachinery;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
@@ -32,9 +31,7 @@ import org.neo4j.gds.core.loading.SingleTypeRelationships;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.indexInverse.InverseRelationships;
-import org.neo4j.gds.indexInverse.InverseRelationshipsConfig;
-import org.neo4j.gds.indexInverse.InverseRelationshipsConfigTransformer;
-import org.neo4j.gds.indexInverse.InverseRelationshipsProgressTaskCreator;
+import org.neo4j.gds.indexinverse.InverseRelationshipsParameters;
 import org.neo4j.gds.scaleproperties.ScaleProperties;
 import org.neo4j.gds.scaleproperties.ScalePropertiesParameters;
 import org.neo4j.gds.scaleproperties.ScalePropertiesResult;
@@ -68,20 +65,10 @@ public class MiscellaneousAlgorithms {
     }
 
     Map<RelationshipType, SingleTypeRelationships> indexInverse(
-        IdMap idMap,
         GraphStore graphStore,
-        InverseRelationshipsConfig configuration
+        InverseRelationshipsParameters parameters,
+        ProgressTracker progressTracker
     ) {
-        var parameters = InverseRelationshipsConfigTransformer.toParameters(configuration);
-        var relationshipTypes = parameters.internalRelationshipTypes(graphStore);
-
-        var task = InverseRelationshipsProgressTaskCreator.progressTask(idMap.nodeCount(), relationshipTypes);
-        var progressTracker = progressTrackerCreator.createProgressTracker(
-            task,
-            configuration.jobId(),
-            configuration.concurrency(),
-            configuration.logProgress()
-        );
 
         var algorithm = new InverseRelationships(
             graphStore,
@@ -95,7 +82,7 @@ public class MiscellaneousAlgorithms {
             algorithm,
             progressTracker,
             true,
-            configuration.concurrency()
+            parameters.concurrency()
         );
     }
 

@@ -34,6 +34,10 @@ public class HitsHookGenerator {
     }
 
     HitsETLHook createETLHook(HitsConfig hitsConfig){
-        return  new HitsETLHook(hitsConfig,progressTrackerCreator,terminationFlag);
+        return new HitsETLHook(
+            hitsConfig,
+            progressTrackerCreator,
+            terminationFlag
+        );
     }
 }

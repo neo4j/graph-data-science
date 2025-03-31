@@ -17,14 +17,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.indexInverse;
+package org.neo4j.gds.indexinverse;
 
-public final class InverseRelationshipsConfigTransformer {
+import org.neo4j.gds.AlgorithmParameters;
+import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.annotation.Parameters;
+import org.neo4j.gds.core.concurrency.Concurrency;
 
-    private InverseRelationshipsConfigTransformer() {}
+import java.util.Collection;
 
-    public static InverseRelationshipsParameters toParameters(InverseRelationshipsConfig config) {
-        return new InverseRelationshipsParameters(config.concurrency(), config.relationshipTypes());
-    }
+@Parameters
+public record InverseRelationshipsParameters(
+    Concurrency concurrency,
+    Collection<RelationshipType> relationshipTypes
+)  implements AlgorithmParameters {
 
 }

@@ -23,20 +23,20 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.neo4j.gds.MiscellaneousAlgorithmsTasks;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.TestProgressTracker;
+import org.neo4j.gds.TestProgressTrackerHelper;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.ConcurrencyConfig;
+import org.neo4j.gds.config.ElementTypeValidator;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
-import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
-import org.neo4j.gds.logging.GdsTestLog;
+import org.neo4j.gds.indexinverse.InverseRelationshipsParameters;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
@@ -65,8 +65,8 @@ class InverseRelationshipsTest {
     @Inject
     private GraphStore inverseGraphStore;
 
-    static Stream<Object> multipleTypes() {
-        return Stream.of(List.of("T1", "T2"), "*");
+    static Stream<List<String>> multipleTypes() {
+        return Stream.of(List.of("T1", "T2"), List.of("*"));
     }
 
     @ParameterizedTest
@@ -74,7 +74,7 @@ class InverseRelationshipsTest {
     void shouldCreateIndexedRelationships(int concurrency) {
         var relationshipType = RelationshipType.of("T1");
 
-        var parameters = new InverseRelationshipsParameters(new Concurrency(concurrency), List.of(relationshipType.name));
+        var parameters = new InverseRelationshipsParameters(new Concurrency(concurrency), List.of(relationshipType));
 
         var inverseRelationshipsPerType = new InverseRelationships(
             graphStore,
@@ -100,10 +100,12 @@ class InverseRelationshipsTest {
 
     @ParameterizedTest
     @MethodSource("multipleTypes")
-    void shouldIndexMultipleTypes(Object relTypes) {
-        var parameters = new InverseRelationshipsParameters(ConcurrencyConfig.TYPED_DEFAULT_CONCURRENCY, InverseRelationshipsConfig.parseRelTypes(relTypes));
+    void shouldIndexMultipleTypes(List<String> relTypes) {
 
-        var internalTypes = List.copyOf(parameters.internalRelationshipTypes(graphStore));
+        var internalTypes = ElementTypeValidator.resolveTypes(graphStore, relTypes);
+
+        var internalTypesCopy = List.copyOf(internalTypes);
+        var parameters = new InverseRelationshipsParameters(ConcurrencyConfig.TYPED_DEFAULT_CONCURRENCY, internalTypes);
 
         var inverseRelationshipsPerType = new InverseRelationships(
             graphStore,
@@ -115,7 +117,7 @@ class InverseRelationshipsTest {
 
         assertThat(inverseRelationshipsPerType).hasSize(internalTypes.size());
 
-        internalTypes.forEach(internalType -> {
+        internalTypesCopy.forEach(internalType -> {
             // we need to use the same name for assertGraphEquals to work
             graphStore.deleteRelationships(internalType);
             graphStore.addRelationshipType(inverseRelationshipsPerType.get(internalType));
@@ -131,15 +133,32 @@ class InverseRelationshipsTest {
 
     @Test
     void logProgress() {
-        var log = new GdsTestLog();
 
-        var parameters = new InverseRelationshipsParameters(new Concurrency(4), List.of("T1", "T2"));
+        var parameters = new InverseRelationshipsParameters(
+            new Concurrency(4),
+            List.of(
+                RelationshipType.of("T1"),
+                RelationshipType.of("T2")
+            )
+        );
 
-        var factory = new InverseRelationshipsAlgorithmFactory();
-        var task = factory.progressTask(graphStore.nodeCount(), parameters.internalRelationshipTypes(graphStore));
-        var progressTracker = new TestProgressTracker(task, new LoggerForProgressTrackingAdapter(log), parameters.concurrency(), EmptyTaskRegistryFactory.INSTANCE);
-        factory.build(graphStore, parameters, progressTracker).compute();
+        var progressTrackerWithLog = TestProgressTrackerHelper.create(
+            new MiscellaneousAlgorithmsTasks().inverseIndex(graphStore.nodeCount(),parameters),
+            new Concurrency(4)
+        );
 
+        var progressTracker = progressTrackerWithLog.progressTracker();
+        var log = progressTrackerWithLog.log();
+
+        var  algorithm = new InverseRelationships(
+            graphStore,
+            parameters,
+            progressTracker,
+            DefaultPool.INSTANCE,
+            TerminationFlag.RUNNING_TRUE
+        );
+
+        algorithm.compute();
         assertThat(log.getMessages(INFO))
             .extracting(removingThreadId())
             .containsExactly(

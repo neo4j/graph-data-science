@@ -24,14 +24,16 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.loading.PostLoadETLHook;
+import org.neo4j.gds.core.loading.SingleTypeRelationships;
 import org.neo4j.gds.hits.HitsConfig;
 import org.neo4j.gds.indexInverse.InverseRelationships;
 import org.neo4j.gds.indexInverse.InverseRelationshipsConfigImpl;
-import org.neo4j.gds.indexInverse.InverseRelationshipsConfigTransformer;
-import org.neo4j.gds.indexInverse.InverseRelationshipsProgressTaskCreator;
+import org.neo4j.gds.indexInverse.InverseRelationshipsParamsTransformer;
+import org.neo4j.gds.indexInverse.InverseRelationshipsTask;
 import org.neo4j.gds.termination.TerminationFlag;
 
-import java.util.stream.Collectors;
+import java.util.Collection;
+import java.util.List;
 
 class HitsETLHook implements PostLoadETLHook {
     private final ProgressTrackerCreator progressTrackerCreator;
@@ -52,26 +54,38 @@ class HitsETLHook implements PostLoadETLHook {
     public void onGraphStoreLoaded(GraphStore graphStore) {
         var relationshipTypes = configuration.internalRelationshipTypes(graphStore);
 
-        var relationshipTypesWithoutIndex = relationshipTypes
-            .stream()
-            .filter(relType -> !graphStore.inverseIndexedRelationshipTypes().contains(relType))
-            .map(RelationshipType::name)
-            .collect(Collectors.toList());
-
+        var relationshipTypesWithoutIndex = relationshipsWithoutIndices(graphStore, relationshipTypes);
         if (relationshipTypesWithoutIndex.isEmpty()) {
             return;
         }
 
+        var inverseRelationships = createInverseRelationshipsAlgorithm(graphStore,relationshipTypesWithoutIndex);
 
+        inverseRelationships
+            .compute()
+            .forEach((relationshipType, inverseIndex) -> addInverseIndex(relationshipType,inverseIndex,graphStore));
+
+    }
+
+    List<String> relationshipsWithoutIndices(GraphStore graphStore, Collection<RelationshipType> relTypes){
+        return  relTypes
+            .stream()
+            .filter(relType -> !graphStore.inverseIndexedRelationshipTypes().contains(relType))
+            .map(RelationshipType::name)
+            .toList();
+
+    }
+
+    InverseRelationships createInverseRelationshipsAlgorithm(GraphStore graphStore, List<String> relationshipTypesWithoutIndex){
         var inverseConfig = InverseRelationshipsConfigImpl
             .builder()
             .concurrency(configuration.concurrency().value())
             .relationshipTypes(relationshipTypesWithoutIndex)
             .build();
 
-        var parameters = InverseRelationshipsConfigTransformer.toParameters(inverseConfig);
+        var parameters = InverseRelationshipsParamsTransformer.toParameters(graphStore, inverseConfig);
 
-        var task = InverseRelationshipsProgressTaskCreator.progressTask(graphStore.nodeCount(),relationshipTypes);
+        var task = InverseRelationshipsTask.progressTask(graphStore.nodeCount(),parameters);
         var progressTracker =  progressTrackerCreator.createProgressTracker(
             task,
             inverseConfig.jobId(),
@@ -79,16 +93,21 @@ class HitsETLHook implements PostLoadETLHook {
             inverseConfig.logProgress()
         );
 
-        var inverseRelationships=new InverseRelationships(graphStore,parameters,progressTracker, DefaultPool.INSTANCE,terminationFlag);
+        return new InverseRelationships(
+            graphStore,
+            parameters,
+            progressTracker,
+            DefaultPool.INSTANCE,
+            terminationFlag
+        );
+    }
 
-        inverseRelationships
-            .compute()
-            .forEach((relationshipType, inverseIndex) -> graphStore.addInverseIndex(
-                relationshipType,
-                inverseIndex.topology(),
-                inverseIndex.properties()
-            ));
-
+    void addInverseIndex(RelationshipType relationshipType, SingleTypeRelationships inverseIndex, GraphStore graphStore){
+        graphStore.addInverseIndex(
+            relationshipType,
+            inverseIndex.topology(),
+            inverseIndex.properties()
+        );
     }
 
 }

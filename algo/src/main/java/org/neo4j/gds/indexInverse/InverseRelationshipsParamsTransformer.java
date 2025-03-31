@@ -19,18 +19,24 @@
  */
 package org.neo4j.gds.indexInverse;
 
-import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.annotation.Parameters;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.ElementTypeValidator;
 import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.indexinverse.InverseRelationshipsParameters;
 
-import java.util.Collection;
 import java.util.List;
 
-@Parameters
-public record InverseRelationshipsParameters(Concurrency concurrency, List<String> relationshipTypes) {
-    public Collection<RelationshipType> internalRelationshipTypes(GraphStore graphStore) {
-        return ElementTypeValidator.resolveTypes(graphStore, relationshipTypes);
+public final class InverseRelationshipsParamsTransformer {
+
+    private InverseRelationshipsParamsTransformer() {}
+
+    public static InverseRelationshipsParameters toParameters(GraphStore graphStore, InverseRelationshipsConfig config) {
+        return  toParameters(graphStore, config.concurrency(), config.relationshipTypes());
     }
+
+    public static InverseRelationshipsParameters toParameters(GraphStore graphStore,  Concurrency concurrency, List<String> relTypes) {
+        var types = ElementTypeValidator.resolveTypes(graphStore, relTypes);
+        return new InverseRelationshipsParameters(concurrency, types);
+    }
+
 }

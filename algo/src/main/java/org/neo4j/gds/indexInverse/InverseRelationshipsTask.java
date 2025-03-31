@@ -19,20 +19,20 @@
  */
 package org.neo4j.gds.indexInverse;
 
-import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.indexinverse.InverseRelationshipsParameters;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class InverseRelationshipsProgressTaskCreator {
+public class InverseRelationshipsTask {
 
-    public static Task progressTask(long nodeCount, Collection<RelationshipType> relationshipTypes) {
+    public static Task progressTask(long nodeCount, InverseRelationshipsParameters parameters) {
+        var relationshipTypes = parameters.relationshipTypes();
         List<Task> tasks = relationshipTypes.stream().flatMap(type -> Stream.of(
             Tasks.leaf(
                 String.format(Locale.US, "Create inverse relationships of type '%s'", type.name),

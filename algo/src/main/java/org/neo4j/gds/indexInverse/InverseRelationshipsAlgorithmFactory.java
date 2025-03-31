@@ -23,10 +23,11 @@ import org.neo4j.gds.GraphStoreAlgorithmFactory;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.indexinverse.InverseRelationshipsParameters;
+import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Collection;
@@ -42,6 +43,7 @@ public class InverseRelationshipsAlgorithmFactory extends GraphStoreAlgorithmFac
         InverseRelationshipsParameters parameters,
         ProgressTracker progressTracker
     ) {
+
         return new InverseRelationships(graphStore, parameters, progressTracker, DefaultPool.INSTANCE, TerminationFlag.RUNNING_TRUE);
     }
 
@@ -51,7 +53,7 @@ public class InverseRelationshipsAlgorithmFactory extends GraphStoreAlgorithmFac
         InverseRelationshipsConfig configuration,
         ProgressTracker progressTracker
     ) {
-        return build(graphStore, InverseRelationshipsConfigTransformer.toParameters(configuration), progressTracker);
+        return build(graphStore, InverseRelationshipsParamsTransformer.toParameters(graphStore, configuration), progressTracker);
     }
 
     @Override
@@ -70,7 +72,7 @@ public class InverseRelationshipsAlgorithmFactory extends GraphStoreAlgorithmFac
 
     @Override
     public Task progressTask(GraphStore graphStore, InverseRelationshipsConfig config) {
-        return progressTask(graphStore.nodeCount(), InverseRelationshipsConfigTransformer.toParameters(config).internalRelationshipTypes(graphStore));
+        return progressTask(graphStore.nodeCount(), InverseRelationshipsParamsTransformer.toParameters(graphStore,config).relationshipTypes());
     }
 
     @Override

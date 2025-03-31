@@ -21,6 +21,8 @@ package org.neo4j.gds;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.indexInverse.InverseRelationshipsTask;
+import org.neo4j.gds.indexinverse.InverseRelationshipsParameters;
 import org.neo4j.gds.scaleproperties.ScalePropertiesParameters;
 import org.neo4j.gds.scaleproperties.ScalePropertiesTask;
 
@@ -30,5 +32,8 @@ public final class MiscellaneousAlgorithmsTasks {
         return ScalePropertiesTask.create(graph, parameters);
     }
 
+    public Task inverseIndex(long nodecount, InverseRelationshipsParameters parameters){
+        return InverseRelationshipsTask.progressTask(nodecount, parameters);
+    }
 
 }
