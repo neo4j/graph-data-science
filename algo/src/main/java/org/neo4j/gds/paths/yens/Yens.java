@@ -40,17 +40,20 @@ import java.util.stream.Stream;
 public final class Yens extends Algorithm<PathFindingResult> {
 
     private final Graph graph;
-    private final ShortestPathYensBaseConfig config;
-    private final Concurrency concurrency;
     private final boolean trackRelationships;
+
+    private final long sourceNode;
+    private final long targetNode;
+    private final int k;
+    private final Concurrency concurrency;
 
     /**
      * Configure Yens to compute at most one source-target shortest path.
      */
+    @Deprecated(forRemoval = true)
     public static Yens sourceTarget(
         Graph graph,
         ShortestPathYensBaseConfig config,
-        Concurrency concurrency,
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
@@ -60,23 +63,63 @@ public final class Yens extends Algorithm<PathFindingResult> {
         //If not, we need to track which is the next neighbor.
         boolean shouldTrackRelationships = graph.isMultiGraph();
 
-        return new Yens(graph, config, concurrency, shouldTrackRelationships, progressTracker, terminationFlag);
+        return new Yens(
+            graph,
+            shouldTrackRelationships,
+            config.sourceNode(),
+            config.targetNode(),
+            config.k(),
+            config.concurrency(),
+            progressTracker,
+            terminationFlag
+        );
+    }
+
+    /**
+     * Configure Yens to compute at most one source-target shortest path.
+     */
+    public static Yens sourceTarget(
+        Graph graph,
+        YensParameters parameters,
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
+    ) {
+        // If the input graph is a multi-graph, we need to track
+        // parallel relationships ids. This is necessary since shortest
+        // paths can visit the same nodes via different relationships.
+        //If not, we need to track which is the next neighbor.
+        boolean shouldTrackRelationships = graph.isMultiGraph();
+
+        return new Yens(
+            graph,
+            shouldTrackRelationships,
+            parameters.sourceNode(),
+            parameters.targetNode(),
+            parameters.k(),
+            parameters.concurrency(),
+            progressTracker,
+            terminationFlag
+        );
     }
 
     private Yens(
         Graph graph,
-        ShortestPathYensBaseConfig config,
-        Concurrency concurrency,
         boolean trackRelationships,
+        long sourceNode,
+        long targetNode,
+        int k,
+        Concurrency concurrency,
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
         super(progressTracker);
         this.graph = graph;
-        this.config = config;
-        this.concurrency = concurrency;
         this.terminationFlag = terminationFlag;
         this.trackRelationships = trackRelationships;
+        this.sourceNode = sourceNode;
+        this.targetNode = targetNode;
+        this.k = k;
+        this.concurrency = concurrency;
     }
 
     @Override
@@ -103,7 +146,7 @@ public final class Yens extends Algorithm<PathFindingResult> {
 
         progressTracker.beginSubTask("Path growing");
 
-        for (int i = 1; i < config.k(); i++) {
+        for (int i = 1; i < k; i++) {
             var prevPath = kShortestPaths.get(i - 1);
             for (var task : tasks) {
                 task.withPreviousPath(prevPath);
@@ -152,12 +195,12 @@ public final class Yens extends Algorithm<PathFindingResult> {
         for (int concurrentId = 0; concurrentId < concurrency.value(); ++concurrentId) {
             tasks.add(new YensTask(
                 graph.concurrentCopy(),
-                config.targetNode(),
+                targetNode,
                 kShortestPaths,
                 candidatePathsQueue,
                 currentSpurIndexId,
                 trackRelationships,
-                config.k(),
+                k,
                 terminationFlag
             ));
         }
@@ -167,8 +210,8 @@ public final class Yens extends Algorithm<PathFindingResult> {
     private Optional<PathResult> findFirstPath() {
         var dijkstra = new Dijkstra(
             graph,
-            graph.toMappedNodeId(config.sourceNode()),
-            new SingleTarget(graph.toMappedNodeId(config.targetNode())),
+            graph.toMappedNodeId(sourceNode),
+            new SingleTarget(graph.toMappedNodeId(targetNode)),
             trackRelationships,
             Optional.empty(),
             progressTracker,

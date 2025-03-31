@@ -25,15 +25,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
-import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
-import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithms;
 import org.neo4j.gds.compat.TestLog;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
@@ -58,6 +56,8 @@ import static org.neo4j.gds.assertj.Extractors.replaceTimings;
  */
 @GdlExtension
 class KSpanningTreeTest {
+
+    private static final Concurrency DEFAULT_CONCURRENCY = new Concurrency(4);
 
     // setting the idOffset to 0 as there is dedicated testing for id offset
     @GdlGraph(orientation = Orientation.UNDIRECTED, idOffset = 0)
@@ -272,16 +272,22 @@ class KSpanningTreeTest {
     @Test
     void shouldLogProgress() {
         var log = new GdsTestLog();
-        var requestScopedDependencies = RequestScopedDependencies.builder()
-            .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
-            .terminationFlag(TerminationFlag.RUNNING_TRUE)
-            .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
-            .build();
-        var progressTrackerCreator = new ProgressTrackerCreator(new LoggerForProgressTrackingAdapter(log), requestScopedDependencies);
-        var pathFindingAlgorithms = new PathFindingAlgorithms(requestScopedDependencies, progressTrackerCreator);
+        var testTracker = new TestProgressTracker(
+            KSpanningTreeTask.create(graph.relationshipCount()),
+            new LoggerForProgressTrackingAdapter(log),
+            DEFAULT_CONCURRENCY,
+            EmptyTaskRegistryFactory.INSTANCE
+        );
 
-        var config = KSpanningTreeBaseConfigImpl.builder().sourceNode(idFunction.of("a")).k(2).build();
-        pathFindingAlgorithms.kSpanningTree(graph, config);
+        new KSpanningTree(
+            graph,
+            PrimOperators.MIN_OPERATOR,
+            graph.toMappedNodeId(idFunction.of("a")),
+            2,
+            testTracker,
+            TerminationFlag.RUNNING_TRUE
+        ).compute();
+
 
         assertThat(log.getMessages(TestLog.INFO))
             .extracting(removingThreadId())

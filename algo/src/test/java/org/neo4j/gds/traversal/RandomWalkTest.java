@@ -21,15 +21,13 @@ package org.neo4j.gds.traversal;
 
 import org.assertj.core.data.Offset;
 import org.assertj.core.data.Percentage;
+import org.awaitility.Awaitility;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.neo4j.gds.TaskStoreHelper;
 import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.TestSupport;
-import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
-import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithms;
 import org.neo4j.gds.beta.generator.PropertyProducer;
 import org.neo4j.gds.beta.generator.RandomGraphGeneratorBuilder;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
@@ -55,6 +53,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.TreeSet;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -501,145 +500,138 @@ class RandomWalkTest {
         private TestGraph weightedGraph;
 
         @Test
-        void progressLogging() throws InterruptedException {
-
-            var config = RandomWalkStreamConfigImpl.builder()
-                .walkLength(10)
-                .concurrency(4)
-                .walksPerNode(1000)
-                .walkBufferSize(1000)
-                .returnFactor(0.1)
-                .inOutFactor(100000)
-                .randomSeed(87L)
-                .build();
-
+        void progressLogging() {
             var log = new GdsTestLog();
-            var taskStore = new PerDatabaseTaskStore(Duration.ZERO);
-
-            var requestScopedDependencies = RequestScopedDependencies.builder()
-                .taskRegistryFactory(TaskRegistryFactory.local("rw", taskStore))
-                .terminationFlag(TerminationFlag.RUNNING_TRUE)
-                .build();
-
-            var pt = new TestProgressTracker(
-                RandomWalkProgressTask.create(graph),
-                new LoggerForProgressTrackingAdapter(log),
-                config.concurrency(),
-                requestScopedDependencies.taskRegistryFactory()
-            );
-
-            var pathFindingAlgorithms = new PathFindingAlgorithms(requestScopedDependencies, null);
 
             assertThatNoException().isThrownBy(() -> {
-                var randomWalksStream = pathFindingAlgorithms.randomWalk(graph, config, pt);
+                var testTracker = new TestProgressTracker(
+                    RandomWalkProgressTask.create(graph),
+                    new LoggerForProgressTrackingAdapter(log),
+                    new Concurrency(4),
+                    TaskRegistryFactory.local("rw", new PerDatabaseTaskStore(Duration.ZERO))
+                );
+
+                var randomWalksStream = RandomWalk.create(
+                    graph,
+                    new Concurrency(4),
+                    new WalkParameters(1000, 10, 0.1, 100_000),
+                    List.of(),
+                    1000,
+                    Optional.of(87L),
+                    testTracker,
+                    DefaultPool.INSTANCE,
+                    TerminationFlag.RUNNING_TRUE
+                ).compute();
+
                 // Make sure to consume the stream...
                 assertThat(randomWalksStream).hasSize(5000);
             });
 
-            TaskStoreHelper.awaitEmptyTaskStore(taskStore);
-
-            assertThat(log.getMessages(TestLog.INFO))
-                .extracting(removingThreadId())
-                .extracting(replaceTimings())
-                .containsExactly(
-                    "RandomWalk :: Start",
-                    "RandomWalk :: create walks :: Start",
-                    "RandomWalk :: create walks 16%",
-                    "RandomWalk :: create walks 33%",
-                    "RandomWalk :: create walks 50%",
-                    "RandomWalk :: create walks 66%",
-                    "RandomWalk :: create walks 83%",
-                    "RandomWalk :: create walks 100%",
-                    "RandomWalk :: create walks :: Finished",
-                    "RandomWalk :: Finished"
+            Awaitility.await()
+                .atMost(25, TimeUnit.SECONDS)
+                .untilAsserted(
+                    () ->
+                        assertThat(log.getMessages(TestLog.INFO))
+                            .extracting(removingThreadId())
+                            .extracting(replaceTimings())
+                            .containsExactly(
+                                "RandomWalk :: Start",
+                                "RandomWalk :: create walks :: Start",
+                                "RandomWalk :: create walks 16%",
+                                "RandomWalk :: create walks 33%",
+                                "RandomWalk :: create walks 50%",
+                                "RandomWalk :: create walks 66%",
+                                "RandomWalk :: create walks 83%",
+                                "RandomWalk :: create walks 100%",
+                                "RandomWalk :: create walks :: Finished",
+                                "RandomWalk :: Finished"
+                            )
                 );
         }
 
         @Test
         void shouldLogProgressOnWeightedGraph() {
 
-            var config = RandomWalkStreamConfigImpl.builder()
-                .walkLength(10)
-                .concurrency(4)
-                .walksPerNode(1000)
-                .walkBufferSize(1000)
-                .returnFactor(0.1)
-                .inOutFactor(100000)
-                .randomSeed(87L)
-                .build();
-
             var log = new GdsTestLog();
-            var taskStore = new PerDatabaseTaskStore(Duration.ZERO);
-
-            var requestScopedDependencies = RequestScopedDependencies.builder()
-                .taskRegistryFactory(TaskRegistryFactory.local("rw", taskStore))
-                .terminationFlag(TerminationFlag.RUNNING_TRUE)
-                .build();
-            var pathFindingAlgorithms = new PathFindingAlgorithms(requestScopedDependencies, null);
-
-            var pt = new TestProgressTracker(
-                RandomWalkProgressTask.create(weightedGraph),
-                new LoggerForProgressTrackingAdapter(log),
-                config.concurrency(),
-                requestScopedDependencies.taskRegistryFactory()
-            );
 
             assertThatNoException().isThrownBy(() -> {
-                var randomWalksStream = pathFindingAlgorithms.randomWalk(weightedGraph, config, pt);
+                var testTracker = new TestProgressTracker(
+                    RandomWalkProgressTask.create(weightedGraph),
+                    new LoggerForProgressTrackingAdapter(log),
+                    new Concurrency(4),
+                    TaskRegistryFactory.local("rw", new PerDatabaseTaskStore(Duration.ZERO))
+                );
+
+                var randomWalksStream = RandomWalk.create(
+                    weightedGraph,
+                    new Concurrency(4),
+                    new WalkParameters(1000, 10, 0.1, 100_000),
+                    List.of(),
+                    1000,
+                    Optional.of(87L),
+                    testTracker,
+                    DefaultPool.INSTANCE,
+                    TerminationFlag.RUNNING_TRUE
+                ).compute();
+
                 // Make sure to consume the stream...
                 assertThat(randomWalksStream).hasSize(5000);
             });
 
-            TaskStoreHelper.awaitEmptyTaskStore(taskStore);
-
-            assertThat(log.getMessages(TestLog.INFO))
-                .extracting(removingThreadId())
-                .extracting(replaceTimings())
-                .containsExactly(
-                    "RandomWalk :: Start",
-                    "RandomWalk :: DegreeCentrality :: Start",
-                    "RandomWalk :: DegreeCentrality 100%",
-                    "RandomWalk :: DegreeCentrality :: Finished",
-                    "RandomWalk :: create walks :: Start",
-                    "RandomWalk :: create walks 16%",
-                    "RandomWalk :: create walks 33%",
-                    "RandomWalk :: create walks 50%",
-                    "RandomWalk :: create walks 66%",
-                    "RandomWalk :: create walks 83%",
-                    "RandomWalk :: create walks 100%",
-                    "RandomWalk :: create walks :: Finished",
-                    "RandomWalk :: Finished"
+            Awaitility.await()
+                .atMost(25, TimeUnit.SECONDS)
+                .untilAsserted(
+                    () -> assertThat(log.getMessages(TestLog.INFO))
+                        .extracting(removingThreadId())
+                        .extracting(replaceTimings())
+                        .containsExactly(
+                            "RandomWalk :: Start",
+                            "RandomWalk :: DegreeCentrality :: Start",
+                            "RandomWalk :: DegreeCentrality 100%",
+                            "RandomWalk :: DegreeCentrality :: Finished",
+                            "RandomWalk :: create walks :: Start",
+                            "RandomWalk :: create walks 16%",
+                            "RandomWalk :: create walks 33%",
+                            "RandomWalk :: create walks 50%",
+                            "RandomWalk :: create walks 66%",
+                            "RandomWalk :: create walks 83%",
+                            "RandomWalk :: create walks 100%",
+                            "RandomWalk :: create walks :: Finished",
+                            "RandomWalk :: Finished"
+                        )
                 );
         }
 
         @Test
         void shouldLeaveNoOngoingTasksBehind() {
-            var config = RandomWalkStreamConfigImpl.builder().build();
             var taskStore = new PerDatabaseTaskStore(Duration.ZERO);
 
-            var requestScopedDependencies = RequestScopedDependencies.builder()
-                .taskRegistryFactory(TaskRegistryFactory.local("rw", taskStore))
-                .terminationFlag(TerminationFlag.RUNNING_TRUE)
-                .build();
-            var pathFindingAlgorithms = new PathFindingAlgorithms(requestScopedDependencies, null);
-
-            var progressTracker = new TaskProgressTracker(
+            var testTracker = new TaskProgressTracker(
                 RandomWalkProgressTask.create(graph),
                 LoggerForProgressTracking.noOpLog(),
                 new Concurrency(4),
-                requestScopedDependencies.taskRegistryFactory()
+                TaskRegistryFactory.local("rw", taskStore)
             );
 
             // run the algorithm and consume the result stream
-            var result = pathFindingAlgorithms.randomWalk(graph, config, progressTracker);
+            var result = RandomWalk.create(
+                graph,
+                new Concurrency(4),
+                new WalkParameters(10, 80, 1.0, 1.0),
+                List.of(),
+                1000,
+                Optional.empty(),
+                testTracker,
+                DefaultPool.INSTANCE,
+                TerminationFlag.RUNNING_TRUE
+            ).compute();
 
-            //noinspection ResultOfMethodCallIgnored
-            result.count();
+            // Make sure to consume the stream...
+            assertThat(result.count()).isNotNegative();
 
-            TaskStoreHelper.awaitEmptyTaskStore(taskStore);
-
-            // the task store should now be empty
-            assertThat(taskStore.queryRunning()).isEmpty();
+            Awaitility.await()
+                .atMost(25, TimeUnit.SECONDS)
+                .untilAsserted(() -> assertThat(taskStore.queryRunning()).isEmpty());
         }
 
     }

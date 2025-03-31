@@ -65,6 +65,7 @@ public final class DeltaStepping extends Algorithm<PathFindingResult> {
 
     private final ExecutorService executorService;
 
+    @Deprecated(forRemoval = true)
     public static DeltaStepping of(
         Graph graph,
         AllShortestPathsDeltaBaseConfig config,
@@ -76,6 +77,23 @@ public final class DeltaStepping extends Algorithm<PathFindingResult> {
             graph.toMappedNodeId(config.sourceNode()),
             config.delta(),
             config.concurrency(),
+            true,
+            executorService,
+            progressTracker
+        );
+    }
+
+    public static DeltaStepping of(
+        Graph graph,
+        DeltaSteppingParameters parameters,
+        ExecutorService executorService,
+        ProgressTracker progressTracker
+    ) {
+        return new DeltaStepping(
+            graph,
+            graph.toMappedNodeId(parameters.sourceNode()),
+            parameters.delta(),
+            parameters.concurrency(),
             true,
             executorService,
             progressTracker

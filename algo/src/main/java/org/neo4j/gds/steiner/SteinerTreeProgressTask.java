@@ -17,27 +17,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.paths.delta.config;
+package org.neo4j.gds.steiner;
 
-import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.config.RelationshipWeightConfig;
-import org.neo4j.gds.config.SourceNodeConfig;
-import org.neo4j.gds.paths.delta.DeltaSteppingParameters;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
+import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
-public interface AllShortestPathsDeltaBaseConfig extends AlgoBaseConfig, SourceNodeConfig, RelationshipWeightConfig {
+import java.util.ArrayList;
 
-    @Configuration.DoubleRange(min = 0, minInclusive = false)
-    default double delta() {
-        return 2.0;
-    }
+public final class SteinerTreeProgressTask {
 
-    @Configuration.Ignore
-    default DeltaSteppingParameters toParameters() {
-        return new DeltaSteppingParameters(
-            sourceNode(),
-            delta(),
-            concurrency()
-        );
+    private SteinerTreeProgressTask() {}
+
+    public static Task create(SteinerTreeParameters parameters, long nodeCount) {
+        var subtasks = new ArrayList<Task>();
+        subtasks.add(Tasks.leaf("Traverse", parameters.targetNodes().size()));
+        if (parameters.applyRerouting()) {
+            subtasks.add(Tasks.leaf("Reroute", nodeCount));
+        }
+        return Tasks.task(AlgorithmLabel.SteinerTree.asString(), subtasks);
+
     }
 }

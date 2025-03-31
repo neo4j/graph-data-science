@@ -48,12 +48,16 @@ import org.neo4j.gds.dag.topologicalsort.TopologicalSortResult;
 import org.neo4j.gds.degree.DegreeCentralityTask;
 import org.neo4j.gds.kspanningtree.KSpanningTree;
 import org.neo4j.gds.kspanningtree.KSpanningTreeBaseConfig;
+import org.neo4j.gds.kspanningtree.KSpanningTreeTask;
 import org.neo4j.gds.paths.astar.AStar;
+import org.neo4j.gds.paths.astar.AStarTask;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarBaseConfig;
 import org.neo4j.gds.paths.bellmanford.AllShortestPathsBellmanFordBaseConfig;
 import org.neo4j.gds.paths.bellmanford.BellmanFord;
+import org.neo4j.gds.paths.bellmanford.BellmanFordProgressTask;
 import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
 import org.neo4j.gds.paths.delta.DeltaStepping;
+import org.neo4j.gds.paths.delta.DeltaSteppingProgressTask;
 import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaBaseConfig;
 import org.neo4j.gds.paths.dijkstra.Dijkstra;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
@@ -62,6 +66,7 @@ import org.neo4j.gds.paths.dijkstra.config.DijkstraSourceTargetsBaseConfig;
 import org.neo4j.gds.paths.traverse.BfsBaseConfig;
 import org.neo4j.gds.paths.traverse.DfsBaseConfig;
 import org.neo4j.gds.paths.yens.Yens;
+import org.neo4j.gds.paths.yens.YensProgressTask;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensBaseConfig;
 import org.neo4j.gds.pcst.PCSTBaseConfig;
 import org.neo4j.gds.pricesteiner.PCSTFast;
@@ -70,8 +75,10 @@ import org.neo4j.gds.pricesteiner.PrizeSteinerTreeResult;
 import org.neo4j.gds.spanningtree.Prim;
 import org.neo4j.gds.spanningtree.SpanningTree;
 import org.neo4j.gds.spanningtree.SpanningTreeBaseConfig;
+import org.neo4j.gds.spanningtree.SpanningTreeProgressTask;
 import org.neo4j.gds.steiner.ShortestPathsSteinerAlgorithm;
 import org.neo4j.gds.steiner.SteinerTreeBaseConfig;
+import org.neo4j.gds.steiner.SteinerTreeProgressTask;
 import org.neo4j.gds.steiner.SteinerTreeResult;
 import org.neo4j.gds.traversal.RandomWalk;
 import org.neo4j.gds.traversal.RandomWalkBaseConfig;
@@ -79,9 +86,7 @@ import org.neo4j.gds.traversal.RandomWalkCountingNodeVisits;
 import org.neo4j.gds.traversal.RandomWalkProgressTask;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -114,13 +119,7 @@ public class PathFindingAlgorithms {
     }
 
     public BellmanFordResult bellmanFord(Graph graph, AllShortestPathsBellmanFordBaseConfig configuration) {
-        var task = Tasks.iterativeOpen(
-            AlgorithmLabel.BellmanFord.asString(),
-            () -> List.of(
-                Tasks.leaf("Relax"),
-                Tasks.leaf("Sync")
-            )
-        );
+        var task = BellmanFordProgressTask.create();
         var progressTracker = createProgressTracker(task, configuration);
 
         var algorithm = new BellmanFord(
@@ -160,13 +159,7 @@ public class PathFindingAlgorithms {
     }
 
     public PathFindingResult deltaStepping(Graph graph, AllShortestPathsDeltaBaseConfig configuration) {
-        var iterativeTask = Tasks.iterativeOpen(
-            AlgorithmLabel.DeltaStepping.asString(),
-            () -> List.of(
-                Tasks.leaf(DeltaStepping.Phase.RELAX.name()),
-                Tasks.leaf(DeltaStepping.Phase.SYNC.name())
-            )
-        );
+        var iterativeTask = DeltaSteppingProgressTask.create();
         var progressTracker = createProgressTracker(iterativeTask, configuration);
         var algorithm = DeltaStepping.of(graph, configuration, DefaultPool.INSTANCE, progressTracker);
 
@@ -205,11 +198,8 @@ public class PathFindingAlgorithms {
         var parameters = configuration.toKSpanningTreeParameters();
 
         var progressTracker = createProgressTracker(
-            Tasks.task(
-                AlgorithmLabel.KSpanningTree.asString(),
-                Tasks.leaf(AlgorithmLabel.SpanningTree.asString(), graph.relationshipCount()),
-                Tasks.leaf("Remove relationships")
-            ), configuration
+            KSpanningTreeTask.create(graph.relationshipCount()),
+            configuration
         );
 
         var algorithm = new KSpanningTree(
@@ -334,12 +324,13 @@ public class PathFindingAlgorithms {
 
     public PathFindingResult singlePairShortestPathAStar(Graph graph, ShortestPathAStarBaseConfig configuration) {
         var progressTracker = createProgressTracker(
-            Tasks.leaf(AlgorithmLabel.AStar.asString(), graph.relationshipCount()), configuration
+            AStarTask.create(graph.relationshipCount()),
+            configuration
         );
 
         var algorithm = AStar.sourceTarget(
             graph,
-            configuration,
+            configuration.toParameters(),
             progressTracker,
             requestScopedDependencies.terminationFlag()
         );
@@ -382,9 +373,7 @@ public class PathFindingAlgorithms {
     }
 
     public PathFindingResult singlePairShortestPathYens(Graph graph, ShortestPathYensBaseConfig configuration) {
-        var initialTask = Tasks.leaf(AlgorithmLabel.Dijkstra.asString(), graph.relationshipCount());
-        var pathGrowingTask = Tasks.leaf("Path growing", configuration.k() - 1);
-        var yensTask = Tasks.task(AlgorithmLabel.Yens.asString(), initialTask, pathGrowingTask);
+        var yensTask = YensProgressTask.create(graph.relationshipCount(), configuration.k());
 
         var progressTracker = createProgressTracker(
             yensTask, configuration
@@ -400,8 +389,7 @@ public class PathFindingAlgorithms {
     ) {
         var algorithm = Yens.sourceTarget(
             graph,
-            configuration,
-            configuration.concurrency(),
+            configuration.toParameters(),
             progressTracker,
             requestScopedDependencies.terminationFlag()
         );
@@ -437,14 +425,10 @@ public class PathFindingAlgorithms {
     }
 
     public SpanningTree spanningTree(Graph graph, SpanningTreeBaseConfig configuration) {
-        if (!graph.schema().isUndirected()) {
-            throw new IllegalArgumentException(
-                "The Spanning Tree algorithm works only with undirected graphs. Please orient the edges properly");
-        }
-
         var parameters = configuration.toParameters();
         var progressTracker = createProgressTracker(
-            Tasks.leaf(AlgorithmLabel.SpanningTree.asString(), graph.relationshipCount()), configuration
+            SpanningTreeProgressTask.create(graph.relationshipCount()),
+            configuration
         );
 
         var algorithm = new Prim(
@@ -465,19 +449,16 @@ public class PathFindingAlgorithms {
 
     public SteinerTreeResult steinerTree(Graph graph, SteinerTreeBaseConfig configuration) {
         var parameters = configuration.toParameters();
-        var mappedSourceNodeId = graph.toMappedNodeId(parameters.sourceNode());
-        var mappedTargetNodeIds = parameters.targetNodes().stream()
-            .map(graph::safeToMappedNodeId)
-            .collect(Collectors.toList());
 
-        var subtasks = new ArrayList<Task>();
-        subtasks.add(Tasks.leaf("Traverse", configuration.targetNodes().size()));
-        if (configuration.applyRerouting()) {
-            var nodeCount = graph.nodeCount();
-            subtasks.add(Tasks.leaf("Reroute", nodeCount));
-        }
+        var mappedSourceNodeId = graph.toMappedNodeId(parameters.sourceNode());
+        var mappedTargetNodeIds = parameters.targetNodes()
+            .stream()
+            .map(graph::safeToMappedNodeId)
+            .toList();
+
         var progressTracker = createProgressTracker(
-            Tasks.task(AlgorithmLabel.SteinerTree.asString(), subtasks), configuration
+            SteinerTreeProgressTask.create(parameters, graph.nodeCount()),
+            configuration
         );
 
         var algorithm = new ShortestPathsSteinerAlgorithm(

@@ -19,30 +19,25 @@
  */
 package org.neo4j.gds.paths.bellmanford;
 
-import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.config.RelationshipWeightConfig;
-import org.neo4j.gds.config.SourceNodeConfig;
+import org.junit.jupiter.api.Test;
+import org.neo4j.gds.core.concurrency.Concurrency;
 
-public interface AllShortestPathsBellmanFordBaseConfig extends AlgoBaseConfig, SourceNodeConfig, RelationshipWeightConfig {
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 
-    @Configuration.Ignore
-    default boolean trackNegativeCycles() {
-        return true;
+class AllShortestPathsBellmanFordBaseConfigTest {
+
+    @Test
+    void toParameters() {
+        var configMock = spy(AllShortestPathsBellmanFordBaseConfig.class);
+        when(configMock.sourceNode()).thenReturn(1L);
+        when(configMock.trackNegativeCycles()).thenReturn(true);
+        when(configMock.trackPaths()).thenReturn(false);
+        when(configMock.concurrency()).thenReturn(new Concurrency(4));
+
+        assertThat(configMock.toParameters())
+            .isEqualTo(new BellmanFordParameters(1, true, false, new Concurrency(4)));
     }
 
-    @Configuration.Ignore
-    default boolean trackPaths() {
-        return true;
-    }
-
-    @Configuration.Ignore
-    default BellmanFordParameters toParameters() {
-        return new BellmanFordParameters(
-            sourceNode(),
-            trackNegativeCycles(),
-            trackPaths(),
-            concurrency()
-        );
-    }
 }

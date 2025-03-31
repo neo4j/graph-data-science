@@ -21,8 +21,6 @@ package org.neo4j.gds.dag.topologicalsort;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.TestProgressTracker;
-import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
-import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithms;
 import org.neo4j.gds.beta.generator.RandomGraphGenerator;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
 import org.neo4j.gds.collections.ha.HugeLongArray;
@@ -47,18 +45,18 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @GdlExtension
 class TopologicalSortTest {
-    
+
     @GdlGraph(graphNamePrefix = "basic")
     private static final String basicQuery =
         "CREATE" +
-        "  (n0)" +
-        ", (n1)" +
-        ", (n2)" +
-        ", (n3)" +
-        ", (n0)-->(n1)" +
-        ", (n0)-->(n2)" +
-        ", (n2)-->(n1)" +
-        ", (n3)-->(n0)";
+            "  (n0)" +
+            ", (n1)" +
+            ", (n2)" +
+            ", (n3)" +
+            ", (n0)-->(n1)" +
+            ", (n0)-->(n2)" +
+            ", (n2)-->(n1)" +
+            ", (n3)-->(n0)";
 
     @Inject
     private TestGraph basicGraph;
@@ -100,14 +98,14 @@ class TopologicalSortTest {
     @GdlGraph(graphNamePrefix = "allCycle")
     private static final String allCycleQuery =
         "CREATE" +
-        "  (n0)" +
-        ", (n1)" +
-        ", (n2)" +
-        ", (n3)" +
-        ", (n0)-->(n1)" +
-        ", (n1)-->(n3)" +
-        ", (n2)-->(n0)" +
-        ", (n3)-->(n2)";
+            "  (n0)" +
+            ", (n1)" +
+            ", (n2)" +
+            ", (n3)" +
+            ", (n0)-->(n1)" +
+            ", (n1)-->(n3)" +
+            ", (n2)-->(n0)" +
+            ", (n3)-->(n2)";
 
     @Inject
     private TestGraph allCycleGraph;
@@ -144,19 +142,20 @@ class TopologicalSortTest {
     @GdlGraph(graphNamePrefix = "selfLoop")
     private static final String selfLoopQuery =
         "CREATE" +
-        "  (n0)" +
-        ", (n1)" +
-        ", (n2)" +
-        ", (n0)-->(n1)" +
-        ", (n1)-->(n1)" +
-        ", (n2)-->(n2)";
+            "  (n0)" +
+            ", (n1)" +
+            ", (n2)" +
+            ", (n0)-->(n1)" +
+            ", (n1)-->(n1)" +
+            ", (n2)-->(n2)";
 
     @Inject
     private TestGraph selfLoopGraph;
 
     @Test
     void ShouldExcludeSelfLoops() {
-        TopologicalSort ts = new TopologicalSort(selfLoopGraph,
+        TopologicalSort ts = new TopologicalSort(
+            selfLoopGraph,
             ProgressTracker.NULL_TRACKER,
             new Concurrency(4),
             true,
@@ -180,57 +179,57 @@ class TopologicalSortTest {
     @GdlGraph(graphNamePrefix = "last", idOffset = 20)
     private static final String lastQuery =
         "CREATE" +
-        "  (n0)" +
-        ", (n1)" +
-        ", (n2)" +
-        ", (n3)" +
-        ", (n4)" +
-        ", (n5)" +
-        ", (n6)" +
-        ", (n7)" +
-        ", (n8)" +
-        ", (n9)" +
-        ", (n20)" +
-        ", (n21)" +
-        ", (n22)" +
-        ", (n23)" +
-        ", (n24)" +
-        ", (n25)" +
-        ", (n26)" +
-        ", (n27)" +
-        ", (n28)" +
-        ", (n29)" +
-        ", (n100)" +
-        ", (n0)-->(n20)" +
-        ", (n1)-->(n21)" +
-        ", (n2)-->(n22)" +
-        ", (n3)-->(n23)" +
-        ", (n4)-->(n24)" +
-        ", (n5)-->(n25)" +
-        ", (n6)-->(n26)" +
-        ", (n7)-->(n27)" +
-        ", (n8)-->(n28)" +
-        ", (n9)-->(n29)" +
-        ", (n0)-->(n100)" +
-        ", (n1)-->(n100)" +
-        ", (n2)-->(n100)" +
-        ", (n3)-->(n100)" +
-        ", (n4)-->(n100)" +
-        ", (n5)-->(n100)" +
-        ", (n6)-->(n100)" +
-        ", (n7)-->(n100)" +
-        ", (n8)-->(n100)" +
-        ", (n9)-->(n100)" +
-        ", (n20)-->(n100)" +
-        ", (n21)-->(n100)" +
-        ", (n22)-->(n100)" +
-        ", (n23)-->(n100)" +
-        ", (n24)-->(n100)" +
-        ", (n25)-->(n100)" +
-        ", (n26)-->(n100)" +
-        ", (n27)-->(n100)" +
-        ", (n28)-->(n100)" +
-        ", (n29)-->(n100)";
+            "  (n0)" +
+            ", (n1)" +
+            ", (n2)" +
+            ", (n3)" +
+            ", (n4)" +
+            ", (n5)" +
+            ", (n6)" +
+            ", (n7)" +
+            ", (n8)" +
+            ", (n9)" +
+            ", (n20)" +
+            ", (n21)" +
+            ", (n22)" +
+            ", (n23)" +
+            ", (n24)" +
+            ", (n25)" +
+            ", (n26)" +
+            ", (n27)" +
+            ", (n28)" +
+            ", (n29)" +
+            ", (n100)" +
+            ", (n0)-->(n20)" +
+            ", (n1)-->(n21)" +
+            ", (n2)-->(n22)" +
+            ", (n3)-->(n23)" +
+            ", (n4)-->(n24)" +
+            ", (n5)-->(n25)" +
+            ", (n6)-->(n26)" +
+            ", (n7)-->(n27)" +
+            ", (n8)-->(n28)" +
+            ", (n9)-->(n29)" +
+            ", (n0)-->(n100)" +
+            ", (n1)-->(n100)" +
+            ", (n2)-->(n100)" +
+            ", (n3)-->(n100)" +
+            ", (n4)-->(n100)" +
+            ", (n5)-->(n100)" +
+            ", (n6)-->(n100)" +
+            ", (n7)-->(n100)" +
+            ", (n8)-->(n100)" +
+            ", (n9)-->(n100)" +
+            ", (n20)-->(n100)" +
+            ", (n21)-->(n100)" +
+            ", (n22)-->(n100)" +
+            ", (n23)-->(n100)" +
+            ", (n24)-->(n100)" +
+            ", (n25)-->(n100)" +
+            ", (n26)-->(n100)" +
+            ", (n27)-->(n100)" +
+            ", (n28)-->(n100)" +
+            ", (n29)-->(n100)";
 
     @Inject
     private TestGraph lastGraph;
@@ -240,7 +239,8 @@ class TopologicalSortTest {
 
         // Despite all nodes have relations to node 100 (therefore it is in "risk" of being handled not in order), this node must be the last in sorting
         long nodeCount = lastGraph.nodeCount();
-        TopologicalSort ts = new TopologicalSort(lastGraph,
+        TopologicalSort ts = new TopologicalSort(
+            lastGraph,
             ProgressTracker.NULL_TRACKER,
             new Concurrency(4),
             true,
@@ -302,35 +302,36 @@ class TopologicalSortTest {
     @GdlGraph(graphNamePrefix = "cycles")
     private static final String cyclesQuery =
         "CREATE" +
-        "  (n0)" +
-        ", (n1)" +
-        ", (n2)" +
-        ", (n3)" +
-        ", (n4)" +
-        ", (n5)" +
-        ", (n6)" +
-        ", (n7)" +
-        ", (n8)" +
-        ", (n0)-->(n1)" +
-        ", (n0)-->(n2)" +
-        ", (n0)-->(n5)" +
-        ", (n1)-->(n0)" +
-        ", (n1)-->(n5)" +
-        ", (n2)-->(n3)" +
-        ", (n3)-->(n4)" +
-        ", (n4)-->(n3)" +
-        ", (n5)-->(n0)" +
-        ", (n5)-->(n1)" +
-        ", (n6)-->(n1)" +
-        ", (n7)-->(n6)" +
-        ", (n8)-->(n6)";
+            "  (n0)" +
+            ", (n1)" +
+            ", (n2)" +
+            ", (n3)" +
+            ", (n4)" +
+            ", (n5)" +
+            ", (n6)" +
+            ", (n7)" +
+            ", (n8)" +
+            ", (n0)-->(n1)" +
+            ", (n0)-->(n2)" +
+            ", (n0)-->(n5)" +
+            ", (n1)-->(n0)" +
+            ", (n1)-->(n5)" +
+            ", (n2)-->(n3)" +
+            ", (n3)-->(n4)" +
+            ", (n4)-->(n3)" +
+            ", (n5)-->(n0)" +
+            ", (n5)-->(n1)" +
+            ", (n6)-->(n1)" +
+            ", (n7)-->(n6)" +
+            ", (n8)-->(n6)";
 
     @Inject
     private TestGraph cyclesGraph;
 
     @Test
     void shouldNotIncludeCycles() {
-        TopologicalSort ts = new TopologicalSort(cyclesGraph,
+        TopologicalSort ts = new TopologicalSort(
+            cyclesGraph,
             ProgressTracker.NULL_TRACKER,
             new Concurrency(4),
             true,
@@ -373,7 +374,8 @@ class TopologicalSortTest {
             .build()
             .generate();
 
-        TopologicalSort ts = new TopologicalSort(graph,
+        TopologicalSort ts = new TopologicalSort(
+            graph,
             ProgressTracker.NULL_TRACKER,
             new Concurrency(4),
             false,
@@ -394,7 +396,7 @@ class TopologicalSortTest {
             .build()
             .generate();
 
-        TopologicalSort ts =  new TopologicalSort(
+        TopologicalSort ts = new TopologicalSort(
             graph,
             ProgressTracker.NULL_TRACKER,
             new Concurrency(4),
@@ -408,11 +410,6 @@ class TopologicalSortTest {
 
     @Test
     void shouldLogProgress() {
-        var requestScopedDependencies = RequestScopedDependencies.builder()
-            .terminationFlag(TerminationFlag.RUNNING_TRUE)
-            .build();
-        var pathFindingAlgorithms = new PathFindingAlgorithms(requestScopedDependencies, null);
-
         var progressTask = TopSortTask.create(lastGraph);
         var log = new GdsTestLog();
         var testTracker = new TestProgressTracker(
@@ -422,11 +419,13 @@ class TopologicalSortTest {
             EmptyTaskRegistryFactory.INSTANCE
         );
 
-        var configuration = TopologicalSortBaseConfigImpl.builder()
-            .computeMaxDistanceFromSource(false)
-            .concurrency(4)
-            .build();
-        pathFindingAlgorithms.topologicalSort(lastGraph, configuration, testTracker);
+        new TopologicalSort(
+            lastGraph,
+            testTracker,
+            new Concurrency(4),
+            false,
+            TerminationFlag.RUNNING_TRUE
+        ).compute();
 
         assertTrue(log.containsMessage(TestLog.INFO, "TopologicalSort :: Start"));
         assertTrue(log.containsMessage(TestLog.INFO, "TopologicalSort :: Finished"));

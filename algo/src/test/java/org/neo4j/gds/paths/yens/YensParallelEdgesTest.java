@@ -21,8 +21,7 @@ package org.neo4j.gds.paths.yens;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
-import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithms;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -66,17 +65,16 @@ class YensParallelEdgesTest {
 
     @Test
     void shouldWorkWithParallelEdges() {
-        var requestScopedDependencies = RequestScopedDependencies.builder()
-            .terminationFlag(TerminationFlag.RUNNING_TRUE)
-            .build();
-        var pathFindingAlgorithms = new PathFindingAlgorithms(requestScopedDependencies, null);
+        var parameters = new YensParameters(
+            idFunction.of("a"),
+            idFunction.of("d"),
+            9,
+            new Concurrency(1)
+        );
 
-        var config = defaultSourceTargetConfigBuilder()
-            .sourceNode(idFunction.of("a"))
-            .targetNode(idFunction.of("d"))
-            .k(9)
-            .build();
-        var result = pathFindingAlgorithms.singlePairShortestPathYens(graph, config, ProgressTracker.NULL_TRACKER);
+        var result = Yens
+            .sourceTarget(graph, parameters, ProgressTracker.NULL_TRACKER, TerminationFlag.RUNNING_TRUE)
+            .compute();
 
         var associatedCosts = result.pathSet().stream().mapToInt(path -> (int) path.totalCost()).toArray();
         assertThat(associatedCosts.length).isEqualTo(9);

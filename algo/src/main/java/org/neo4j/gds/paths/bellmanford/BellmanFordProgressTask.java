@@ -17,27 +17,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.paths.delta.config;
+package org.neo4j.gds.paths.bellmanford;
 
-import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.config.RelationshipWeightConfig;
-import org.neo4j.gds.config.SourceNodeConfig;
-import org.neo4j.gds.paths.delta.DeltaSteppingParameters;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
+import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
-public interface AllShortestPathsDeltaBaseConfig extends AlgoBaseConfig, SourceNodeConfig, RelationshipWeightConfig {
+import java.util.List;
 
-    @Configuration.DoubleRange(min = 0, minInclusive = false)
-    default double delta() {
-        return 2.0;
-    }
+public final class BellmanFordProgressTask {
 
-    @Configuration.Ignore
-    default DeltaSteppingParameters toParameters() {
-        return new DeltaSteppingParameters(
-            sourceNode(),
-            delta(),
-            concurrency()
+    private BellmanFordProgressTask() {}
+
+    public static Task create() {
+        return Tasks.iterativeOpen(
+            AlgorithmLabel.BellmanFord.asString(),
+            () -> List.of(
+                Tasks.leaf("Relax"),
+                Tasks.leaf("Sync")
+            )
         );
     }
 }

@@ -17,27 +17,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.paths.delta.config;
+package org.neo4j.gds.paths.yens;
 
-import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.config.RelationshipWeightConfig;
-import org.neo4j.gds.config.SourceNodeConfig;
-import org.neo4j.gds.paths.delta.DeltaSteppingParameters;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
+import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
-public interface AllShortestPathsDeltaBaseConfig extends AlgoBaseConfig, SourceNodeConfig, RelationshipWeightConfig {
+public final class YensProgressTask {
 
-    @Configuration.DoubleRange(min = 0, minInclusive = false)
-    default double delta() {
-        return 2.0;
-    }
+    private YensProgressTask() {}
 
-    @Configuration.Ignore
-    default DeltaSteppingParameters toParameters() {
-        return new DeltaSteppingParameters(
-            sourceNode(),
-            delta(),
-            concurrency()
-        );
+    public static Task create(long relationshipCount,  int k) {
+        var initialTask = Tasks.leaf(AlgorithmLabel.Dijkstra.asString(), relationshipCount);
+        var pathGrowingTask = Tasks.leaf("Path growing", k - 1);
+        return Tasks.task(AlgorithmLabel.Yens.asString(), initialTask, pathGrowingTask);
     }
 }

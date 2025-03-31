@@ -24,7 +24,6 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.utils.paged.HugeLongDoubleMap;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.paths.astar.config.ShortestPathAStarBaseConfig;
 import org.neo4j.gds.paths.dijkstra.Dijkstra;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.paths.dijkstra.SingleTarget;
@@ -46,12 +45,12 @@ public final class AStar extends Algorithm<PathFindingResult> {
 
     public static AStar sourceTarget(
         Graph graph,
-        ShortestPathAStarBaseConfig config,
+        AStarParameters parameters,
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
-        var latitudeProperty = config.latitudeProperty();
-        var longitudeProperty = config.longitudeProperty();
+        var latitudeProperty = parameters.latitudeProperty();
+        var longitudeProperty = parameters.longitudeProperty();
 
         if (!graph.availableNodeProperties().contains(latitudeProperty)) {
             throw new IllegalArgumentException(formatWithLocale(
@@ -69,8 +68,8 @@ public final class AStar extends Algorithm<PathFindingResult> {
         var latitudeProperties = graph.nodeProperties(latitudeProperty);
         var longitudeProperties = graph.nodeProperties(longitudeProperty);
 
-        var sourceNode = graph.toMappedNodeId(config.sourceNode());
-        var targetNode = graph.toMappedNodeId(config.targetNode());
+        var sourceNode = graph.toMappedNodeId(parameters.sourceNode());
+        var targetNode = graph.toMappedNodeId(parameters.targetNode());
 
         var heuristic = new HaversineHeuristic(latitudeProperties, longitudeProperties, targetNode);
 

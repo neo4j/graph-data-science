@@ -17,21 +17,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.spanningtree;
+package org.neo4j.gds.paths.astar;
 
-import org.junit.jupiter.api.Test;
-import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithms;
-import org.neo4j.gds.gdl.GdlFactory;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
+import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+public final class AStarTask {
 
-class SpanningTreeAlgorithmFactoryTest {
-    @Test
-    void shouldThrowIfNotUndirected() {
-        var graph = GdlFactory.of("(a)-[:foo{cost:1.0}]->(b)").build().getUnion();
-        var pathFindingAlgorithms = new PathFindingAlgorithms(null, null);
+    private AStarTask() {}
 
-        assertThatThrownBy(() -> pathFindingAlgorithms.spanningTree(graph, null))
-            .hasMessageContaining("undirected");
+    public static Task create(long relationshipCount) {
+        return Tasks.leaf(AlgorithmLabel.AStar.asString(), relationshipCount);
     }
 }

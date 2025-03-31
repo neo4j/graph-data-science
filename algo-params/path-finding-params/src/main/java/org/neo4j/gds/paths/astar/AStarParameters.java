@@ -17,27 +17,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.paths.delta.config;
+package org.neo4j.gds.paths.astar;
 
-import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.config.RelationshipWeightConfig;
-import org.neo4j.gds.config.SourceNodeConfig;
-import org.neo4j.gds.paths.delta.DeltaSteppingParameters;
+import org.neo4j.gds.annotation.Parameters;
 
-public interface AllShortestPathsDeltaBaseConfig extends AlgoBaseConfig, SourceNodeConfig, RelationshipWeightConfig {
-
-    @Configuration.DoubleRange(min = 0, minInclusive = false)
-    default double delta() {
-        return 2.0;
-    }
-
-    @Configuration.Ignore
-    default DeltaSteppingParameters toParameters() {
-        return new DeltaSteppingParameters(
-            sourceNode(),
-            delta(),
-            concurrency()
-        );
-    }
+@Parameters
+public record AStarParameters(
+    String longitudeProperty,
+    String latitudeProperty,
+    long sourceNode,
+    long targetNode
+) {
 }

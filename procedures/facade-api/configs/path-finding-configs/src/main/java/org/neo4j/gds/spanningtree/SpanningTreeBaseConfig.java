@@ -19,12 +19,20 @@
  */
 package org.neo4j.gds.spanningtree;
 
+import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.RelationshipWeightConfig;
 import org.neo4j.gds.config.SourceNodeConfig;
 
+import java.util.Collection;
+import java.util.Set;
 import java.util.function.DoubleUnaryOperator;
+import java.util.stream.Collectors;
+
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @Configuration
 public interface SpanningTreeBaseConfig extends
@@ -42,4 +50,26 @@ public interface SpanningTreeBaseConfig extends
     default SpanningTreeParameters toParameters() {
         return new SpanningTreeParameters(objective(), sourceNode());
     }
+
+    @Configuration.GraphStoreValidationCheck
+    default void validateUndirectedGraph(
+        GraphStore graphStore,
+        Collection<NodeLabel> ignored,
+        Collection<RelationshipType> selectedRelationshipTypes
+    ) {
+        var schema = graphStore.schema();
+        if(schema.isUndirected()) {
+            // nothing to see here, don't go filtering unnecessary
+            return;
+        }
+
+        if (!schema.filterRelationshipTypes(Set.copyOf(selectedRelationshipTypes)).isUndirected()) {
+            throw new IllegalArgumentException(
+                formatWithLocale(
+                    "The Spanning Tree algorithm works only with undirected graphs. Selected relationships `%s` are not all undirected. Please orient the edges properly",
+                    selectedRelationshipTypes.stream().map(RelationshipType::name).collect(Collectors.toSet())
+                ));
+        }
+    }
+
 }

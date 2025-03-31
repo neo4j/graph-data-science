@@ -19,32 +19,24 @@
  */
 package org.neo4j.gds.paths.astar.config;
 
-import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.config.RelationshipWeightConfig;
-import org.neo4j.gds.config.SourceNodeConfig;
-import org.neo4j.gds.config.TargetNodeConfig;
+import org.junit.jupiter.api.Test;
 import org.neo4j.gds.paths.astar.AStarParameters;
 
-public interface ShortestPathAStarBaseConfig extends TargetNodeConfig,
-    AlgoBaseConfig,
-    SourceNodeConfig,
-    RelationshipWeightConfig {
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 
-    String LONGITUDE_PROPERTY_KEY = "longitudeProperty";
-    String LATITUDE_PROPERTY_KEY = "latitudeProperty";
+class ShortestPathAStarBaseConfigTest {
 
-    String longitudeProperty();
+    @Test
+    void toParameters() {
+        var configMock = spy(ShortestPathAStarBaseConfig.class);
+        when(configMock.longitudeProperty()).thenReturn("a");
+        when(configMock.latitudeProperty()).thenReturn("b");
+        when(configMock.sourceNode()).thenReturn(1L);
+        when(configMock.targetNode()).thenReturn(2L);
 
-    String latitudeProperty();
-
-    @Configuration.Ignore
-    default AStarParameters toParameters() {
-        return new AStarParameters(
-            longitudeProperty(),
-            latitudeProperty(),
-            sourceNode(),
-            targetNode()
-        );
+        assertThat(configMock.toParameters())
+            .isEqualTo(new AStarParameters("a", "b", 1, 2));
     }
 }

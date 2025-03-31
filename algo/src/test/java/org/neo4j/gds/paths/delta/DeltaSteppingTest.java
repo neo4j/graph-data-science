@@ -27,27 +27,24 @@ import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.schema.Direction;
-import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
-import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
-import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithms;
 import org.neo4j.gds.beta.generator.PropertyProducer;
 import org.neo4j.gds.beta.generator.RandomGraphGeneratorBuilder;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.logging.GdsTestLog;
-import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaStreamConfigImpl;
 import org.neo4j.gds.paths.dijkstra.Dijkstra;
 import org.neo4j.gds.termination.TerminationFlag;
 
@@ -74,7 +71,6 @@ final class DeltaSteppingTest {
             () -> Stream.of(0L, 42L).map(Arguments::of)
         );
     }
-
 
 
     @GdlExtension
@@ -125,11 +121,7 @@ final class DeltaSteppingTest {
 
             var sourceNode = graph.toOriginalNodeId("a");
 
-            var config = AllShortestPathsDeltaStreamConfigImpl.builder()
-                .concurrency(concurrency)
-                .sourceNode(sourceNode)
-                .delta(delta)
-                .build();
+            var config = new DeltaSteppingParameters(sourceNode, delta, new Concurrency(concurrency));
 
             var paths = DeltaStepping
                 .of(graph, config, DefaultPool.INSTANCE, ProgressTracker.NULL_TRACKER)
@@ -159,14 +151,13 @@ final class DeltaSteppingTest {
 
             var sourceNode = graph.toOriginalNodeId("c");
 
-            var config = AllShortestPathsDeltaStreamConfigImpl.builder()
-                .concurrency(concurrency)
-                .sourceNode(sourceNode)
-                .delta(delta)
-                .build();
-
             var paths = DeltaStepping
-                .of(graph, config, DefaultPool.INSTANCE, ProgressTracker.NULL_TRACKER)
+                .of(
+                    graph,
+                    new DeltaSteppingParameters(sourceNode, delta, new Concurrency(concurrency)),
+                    DefaultPool.INSTANCE,
+                    ProgressTracker.NULL_TRACKER
+                )
                 .compute()
                 .pathSet();
 
@@ -180,20 +171,26 @@ final class DeltaSteppingTest {
         @Test
         void shouldLogProgress() {
             var log = new GdsTestLog();
-            var requestScopedDependencies = RequestScopedDependencies.builder()
-                .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
-                .terminationFlag(TerminationFlag.RUNNING_TRUE)
-                .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
-                .build();
-            var progressTrackerCreator = new ProgressTrackerCreator(new LoggerForProgressTrackingAdapter(log), requestScopedDependencies);
-            var pathFindingAlgorithms = new PathFindingAlgorithms(requestScopedDependencies, progressTrackerCreator);
 
-            var config = AllShortestPathsDeltaStreamConfigImpl.builder()
-                .concurrency(4)
-                .sourceNode(idFunction.of("c"))
-                .delta(5)
-                .build();
-            pathFindingAlgorithms.deltaStepping(graph, config).pathSet();
+            var testTracker = new TestProgressTracker(
+                DeltaSteppingProgressTask.create(),
+                new LoggerForProgressTrackingAdapter(log),
+                new Concurrency(4),
+                EmptyTaskRegistryFactory.INSTANCE
+            );
+
+            DeltaStepping.of(
+                    graph,
+                    new DeltaSteppingParameters(
+                        idFunction.of("c"),
+                        5,
+                        new Concurrency(4)
+                    ),
+                    DefaultPool.INSTANCE,
+                    testTracker
+
+                ).compute()
+                .pathSet();
 
             assertThat(log.getMessages(INFO))
                 // avoid asserting on the thread id
@@ -266,14 +263,13 @@ final class DeltaSteppingTest {
 
             var sourceNode = graph.toOriginalNodeId("n1");
 
-            var config = AllShortestPathsDeltaStreamConfigImpl.builder()
-                .concurrency(concurrency)
-                .sourceNode(sourceNode)
-                .delta(delta)
-                .build();
-
             var paths = DeltaStepping
-                .of(graph, config, DefaultPool.INSTANCE, ProgressTracker.NULL_TRACKER)
+                .of(
+                    graph,
+                    new DeltaSteppingParameters(sourceNode, delta, new Concurrency(concurrency)),
+                    DefaultPool.INSTANCE,
+                    ProgressTracker.NULL_TRACKER
+                )
                 .compute()
                 .pathSet();
 
@@ -326,14 +322,13 @@ final class DeltaSteppingTest {
 
             var sourceNode = graph.toOriginalNodeId("a");
 
-            var config = AllShortestPathsDeltaStreamConfigImpl.builder()
-                .concurrency(concurrency)
-                .sourceNode(sourceNode)
-                .delta(delta)
-                .build();
-
             var paths = DeltaStepping
-                .of(graph, config, DefaultPool.INSTANCE, ProgressTracker.NULL_TRACKER)
+                .of(
+                    graph,
+                    new DeltaSteppingParameters(sourceNode, delta, new Concurrency(concurrency)),
+                    DefaultPool.INSTANCE,
+                    ProgressTracker.NULL_TRACKER
+                )
                 .compute()
                 .pathSet();
 
@@ -363,19 +358,22 @@ final class DeltaSteppingTest {
             .build()
             .generate();
 
-        var config = AllShortestPathsDeltaStreamConfigImpl.builder()
-            .concurrency(concurrency)
-            .sourceNode(start)
-            .build();
         var deltaStepping = DeltaStepping.of(
             newGraph,
-            config,
+            DeltaSteppingParameters.withDefaultDelta(start, new Concurrency(concurrency)),
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         ).compute();
 
         var dijkstraAlgo = Dijkstra
-            .singleSource(newGraph, config.sourceNode(), true, Optional.empty(), ProgressTracker.NULL_TRACKER, TerminationFlag.RUNNING_TRUE)
+            .singleSource(
+                newGraph,
+                start,
+                true,
+                Optional.empty(),
+                ProgressTracker.NULL_TRACKER,
+                TerminationFlag.RUNNING_TRUE
+            )
             .compute();
 
         double[] delta = new double[nodeCount];

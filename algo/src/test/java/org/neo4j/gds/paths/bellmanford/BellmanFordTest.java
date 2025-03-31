@@ -21,10 +21,8 @@ package org.neo4j.gds.paths.bellmanford;
 
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.api.schema.Direction;
-import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
-import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
-import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithms;
 import org.neo4j.gds.beta.generator.PropertyProducer;
 import org.neo4j.gds.beta.generator.RandomGraphGeneratorBuilder;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
@@ -32,7 +30,6 @@ import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
@@ -54,16 +51,16 @@ class BellmanFordTest {
     @GdlGraph
     private static final String DB_CYPHER =
         "CREATE " +
-        "  (a0)," +
-        "  (a1)," +
-        "  (a2)," +
-        "  (a3)," +
-        "  (a4)," +
-        "  (a0)-[:R {weight:  1.0}]->(a1)," +
-        "  (a0)-[:R {weight: -1.0}]->(a2)," +
-        "  (a0)-[:R {weight: 10.0}]->(a3)," +
-        "  (a3)-[:R {weight: -8.0}]->(a4)," +
-        "  (a1)-[:R {weight:  3.0}]->(a4) ";
+            "  (a0)," +
+            "  (a1)," +
+            "  (a2)," +
+            "  (a3)," +
+            "  (a4)," +
+            "  (a0)-[:R {weight:  1.0}]->(a1)," +
+            "  (a0)-[:R {weight: -1.0}]->(a2)," +
+            "  (a0)-[:R {weight: 10.0}]->(a3)," +
+            "  (a3)-[:R {weight: -8.0}]->(a4)," +
+            "  (a1)-[:R {weight:  3.0}]->(a4) ";
 
     @Inject
     private TestGraph graph;
@@ -71,16 +68,16 @@ class BellmanFordTest {
     @GdlGraph(graphNamePrefix = "loop")
     private static final String LOOP_DB_CYPHER =
         "CREATE " +
-        "  (a0)," +
-        "  (a1)," +
-        "  (a2)," +
-        "  (a3)," +
-        "  (a4)," +
-        "  (a0)-[:R {weight:  1.0}]->(a1)," +
-        "  (a0)-[:R {weight: 10.0}]->(a2)," +
-        "  (a2)-[:R {weight: -8.0}]->(a3)," +
-        "  (a3)-[:R {weight: -4.0}]->(a4)," +
-        "  (a4)-[:R {weight:  1.0}]->(a2) ";
+            "  (a0)," +
+            "  (a1)," +
+            "  (a2)," +
+            "  (a3)," +
+            "  (a4)," +
+            "  (a0)-[:R {weight:  1.0}]->(a1)," +
+            "  (a0)-[:R {weight: 10.0}]->(a2)," +
+            "  (a2)-[:R {weight: -8.0}]->(a3)," +
+            "  (a3)-[:R {weight: -4.0}]->(a4)," +
+            "  (a4)-[:R {weight:  1.0}]->(a2) ";
 
     @Inject
     private TestGraph loopGraph;
@@ -89,22 +86,22 @@ class BellmanFordTest {
     @GdlGraph(graphNamePrefix = "third")
     private static final String EXAMPLE_2_DB_CYPHER =
         "CREATE " +
-        "  (A)," +
-        "  (B)," +
-        "  (C)," +
-        "  (D)," +
-        "  (E)," +
-        "  (F)," +
-        "  (L)," +
-        "  (A)-[:R {weight:  6.0}]->(B)," +
-        "  (A)-[:R {weight:  4.0}]->(C)," +
-        "  (A)-[:R {weight:  5.0}]->(D)," +
-        "  (B)-[:R {weight: -1.0}]->(E)," +
-        "  (C)-[:R {weight: -2.0}]->(B)," +
-        "  (C)-[:R {weight:  3.0}]->(E)," +
-        "  (D)-[:R {weight: -2.0}]->(C)," +
-        "  (D)-[:R {weight: -1.0}]->(F)," +
-        "  (E)-[:R {weight:  3.0}]->(F) ";
+            "  (A)," +
+            "  (B)," +
+            "  (C)," +
+            "  (D)," +
+            "  (E)," +
+            "  (F)," +
+            "  (L)," +
+            "  (A)-[:R {weight:  6.0}]->(B)," +
+            "  (A)-[:R {weight:  4.0}]->(C)," +
+            "  (A)-[:R {weight:  5.0}]->(D)," +
+            "  (B)-[:R {weight: -1.0}]->(E)," +
+            "  (C)-[:R {weight: -2.0}]->(B)," +
+            "  (C)-[:R {weight:  3.0}]->(E)," +
+            "  (D)-[:R {weight: -2.0}]->(C)," +
+            "  (D)-[:R {weight: -1.0}]->(F)," +
+            "  (E)-[:R {weight:  3.0}]->(F) ";
 
     @Inject
     private TestGraph thirdGraph;
@@ -196,7 +193,8 @@ class BellmanFordTest {
             idFunction.of("C"),
             idFunction.of("D"),
             idFunction.of("E"),
-            idFunction.of("F")};
+            idFunction.of("F")
+        };
 
         var result = new BellmanFord(
             thirdGraph,
@@ -235,35 +233,26 @@ class BellmanFordTest {
 
     @Test
     void shouldLogProgress() {
-//        var config = AllShortestPathsBellmanFordStatsConfigImpl.builder()
-//            .concurrency(4)
-//            .sourceNode(graph.toOriginalNodeId("a0"))
-//            .build();
-//
-//        var progressTask = new BellmanFordAlgorithmFactory<>().progressTask(graph, config);
-//        var testLog = new GdsTestLog();
-//        var progressTracker = new TestProgressTracker(progressTask, testLog, new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE);
-//
-//        new BellmanFordAlgorithmFactory<>().build(graph, config, progressTracker)
-//            .compute()
-//            .shortestPaths().pathSet();
-//
-//        var messagesInOrder = testLog.getMessages(INFO);
+        var parameters = new BellmanFordParameters(
+            graph.toMappedNodeId("a0"),
+            false,
+            true,
+            new Concurrency(4)
+        );
 
         var log = new GdsTestLog();
-        var requestScopedDependencies = RequestScopedDependencies.builder()
-            .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
-            .terminationFlag(TerminationFlag.RUNNING_TRUE)
-            .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
-            .build();
-        var progressTrackerCreator = new ProgressTrackerCreator(new LoggerForProgressTrackingAdapter(log), requestScopedDependencies);
-        var pathFindingAlgorithms = new PathFindingAlgorithms(requestScopedDependencies, progressTrackerCreator);
+        var testTracker = new TestProgressTracker(
+            BellmanFordProgressTask.create(),
+            new LoggerForProgressTrackingAdapter(log),
+            parameters.concurrency(),
+            EmptyTaskRegistryFactory.INSTANCE
+        );
 
-        var config = AllShortestPathsBellmanFordStatsConfigImpl.builder()
-            .concurrency(4)
-            .sourceNode(graph.toOriginalNodeId("a0"))
-            .build();
-        pathFindingAlgorithms.bellmanFord(graph, config).shortestPaths().pathSet();
+        new BellmanFord(
+            graph,
+            testTracker,
+            parameters
+        ).compute();
 
         assertThat(log.getMessages(INFO))
             // avoid asserting on the thread id
@@ -307,7 +296,14 @@ class BellmanFordTest {
             .shortestPaths();
 
         var dijkstraAlgo = Dijkstra
-            .singleSource(newGraph, config.sourceNode(), true, Optional.empty(), ProgressTracker.NULL_TRACKER, TerminationFlag.RUNNING_TRUE)
+            .singleSource(
+                newGraph,
+                config.sourceNode(),
+                true,
+                Optional.empty(),
+                ProgressTracker.NULL_TRACKER,
+                TerminationFlag.RUNNING_TRUE
+            )
             .compute();
 
         double[] bellman = new double[nodeCount];

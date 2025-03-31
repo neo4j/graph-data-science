@@ -24,6 +24,7 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.RelationshipWeightConfig;
 import org.neo4j.gds.config.SourceNodeConfig;
 import org.neo4j.gds.config.TargetNodeConfig;
+import org.neo4j.gds.paths.yens.YensParameters;
 
 public interface ShortestPathYensBaseConfig extends TargetNodeConfig,
     AlgoBaseConfig,
@@ -33,4 +34,14 @@ public interface ShortestPathYensBaseConfig extends TargetNodeConfig,
     // Number of shortest paths to compute
     @Configuration.IntegerRange(min = 1)
     int k();
+
+    @Configuration.Ignore
+    default YensParameters toParameters() {
+        return new YensParameters(
+            sourceNode(),
+            targetNode(),
+            k(),
+            concurrency()
+        );
+    }
 }

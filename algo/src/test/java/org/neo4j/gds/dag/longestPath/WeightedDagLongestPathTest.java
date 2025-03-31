@@ -22,9 +22,8 @@ package org.neo4j.gds.dag.longestPath;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.TestProgressTracker;
-import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
-import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithms;
 import org.neo4j.gds.compat.TestLog;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -42,9 +41,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @GdlExtension
 class WeightedDagLongestPathTest {
-    private static final DagLongestPathBaseConfig CONFIG = new DagLongestPathStreamConfigImpl.Builder()
-        .concurrency(4)
-        .build();
+
+    private static final Concurrency DEFAULT_CONCURRENCY = new Concurrency(4);
 
     @GdlExtension
     @Nested
@@ -75,12 +73,12 @@ class WeightedDagLongestPathTest {
                 idFunction.of("n3"),
             };
 
-            var requestScopedDependencies = RequestScopedDependencies.builder()
-                .terminationFlag(TerminationFlag.RUNNING_TRUE)
-                .build();
-            var pathFindingAlgorithms = new PathFindingAlgorithms(requestScopedDependencies, null);
-
-            PathFindingResult result = pathFindingAlgorithms.longestPath(graph, CONFIG.concurrency(), ProgressTracker.NULL_TRACKER);
+            PathFindingResult result = new DagLongestPath(
+                graph,
+                ProgressTracker.NULL_TRACKER,
+                DEFAULT_CONCURRENCY,
+                TerminationFlag.RUNNING_TRUE
+            ).compute();
 
             long[][] EXPECTED_PATHS = new long[4][];
             EXPECTED_PATHS[(int) a[0]] = new long[]{a[3], a[0]};
@@ -105,25 +103,22 @@ class WeightedDagLongestPathTest {
 
         @Test
         void shouldLogProgress() {
-            var requestScopedDependencies = RequestScopedDependencies.builder()
-                .terminationFlag(TerminationFlag.RUNNING_TRUE)
-                .build();
-            var pathFindingAlgorithms = new PathFindingAlgorithms(requestScopedDependencies, null);
-
             var progressTask = LongestPathTask.create(graph);
             var log = new GdsTestLog();
             var testTracker = new TestProgressTracker(
                 progressTask,
                 new LoggerForProgressTrackingAdapter(log),
-                CONFIG.concurrency(),
+                DEFAULT_CONCURRENCY,
                 EmptyTaskRegistryFactory.INSTANCE
             );
 
-            var result = pathFindingAlgorithms.longestPath(
+            var result = new DagLongestPath(
                 graph,
-                CONFIG.concurrency(),
-                testTracker
-            );
+                testTracker,
+                DEFAULT_CONCURRENCY,
+                TerminationFlag.RUNNING_TRUE
+            ).compute();
+
 
             result.pathSet();
 
@@ -174,12 +169,13 @@ class WeightedDagLongestPathTest {
 
             };
 
-            var requestScopedDependencies = RequestScopedDependencies.builder()
-                .terminationFlag(TerminationFlag.RUNNING_TRUE)
-                .build();
-            var pathFindingAlgorithms = new PathFindingAlgorithms(requestScopedDependencies, null);
+            PathFindingResult result = new DagLongestPath(
+                graph,
+                ProgressTracker.NULL_TRACKER,
+                DEFAULT_CONCURRENCY,
+                TerminationFlag.RUNNING_TRUE
+            ).compute();
 
-            PathFindingResult result = pathFindingAlgorithms.longestPath(graph, CONFIG.concurrency(), ProgressTracker.NULL_TRACKER);
 
             long[][] EXPECTED_PATHS = new long[7][];
             EXPECTED_PATHS[(int) a[0]] = new long[]{a[0]};
@@ -240,13 +236,12 @@ class WeightedDagLongestPathTest {
                 idFunction.of("n3"),
             };
 
-
-            var requestScopedDependencies = RequestScopedDependencies.builder()
-                .terminationFlag(TerminationFlag.RUNNING_TRUE)
-                .build();
-            var pathFindingAlgorithms = new PathFindingAlgorithms(requestScopedDependencies, null);
-
-            PathFindingResult result = pathFindingAlgorithms.longestPath(graph, CONFIG.concurrency(), ProgressTracker.NULL_TRACKER);
+            PathFindingResult result = new DagLongestPath(
+                graph,
+                ProgressTracker.NULL_TRACKER,
+                DEFAULT_CONCURRENCY,
+                TerminationFlag.RUNNING_TRUE
+            ).compute();
 
             long[][] EXPECTED_PATHS = new long[4][];
             EXPECTED_PATHS[(int) a[0]] = new long[]{a[0]};
@@ -271,25 +266,22 @@ class WeightedDagLongestPathTest {
 
         @Test
         void shouldLogProgress() {
-            var requestScopedDependencies = RequestScopedDependencies.builder()
-                .terminationFlag(TerminationFlag.RUNNING_TRUE)
-                .build();
-            var pathFindingAlgorithms = new PathFindingAlgorithms(requestScopedDependencies, null);
 
             var progressTask = LongestPathTask.create(graph);
             var log = new GdsTestLog();
             var testTracker = new TestProgressTracker(
                 progressTask,
                 new LoggerForProgressTrackingAdapter(log),
-                CONFIG.concurrency(),
+                DEFAULT_CONCURRENCY,
                 EmptyTaskRegistryFactory.INSTANCE
             );
 
-            var result = pathFindingAlgorithms.longestPath(
+            var result = new DagLongestPath(
                 graph,
-                CONFIG.concurrency(),
-                testTracker
-            );
+                testTracker,
+                DEFAULT_CONCURRENCY,
+                TerminationFlag.RUNNING_TRUE
+            ).compute();
 
             result.pathSet();
 

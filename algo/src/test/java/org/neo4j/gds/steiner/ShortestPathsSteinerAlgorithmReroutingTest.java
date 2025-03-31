@@ -22,16 +22,13 @@ package org.neo4j.gds.steiner;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Orientation;
-import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
-import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
-import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithms;
+import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
@@ -338,20 +335,34 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
 
     @Test
     void shouldLogProgress() {
-        var log = new GdsTestLog();
-        var requestScopedDependencies = RequestScopedDependencies.builder()
-            .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
-            .terminationFlag(TerminationFlag.RUNNING_TRUE)
-            .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
-            .build();
-        var progressTrackerCreator = new ProgressTrackerCreator(new LoggerForProgressTrackingAdapter(log), requestScopedDependencies);
-        var pathFindingAlgorithms = new PathFindingAlgorithms(requestScopedDependencies, progressTrackerCreator);
+        var parameters = new SteinerTreeParameters(
+            new Concurrency(4),
+            graph.toMappedNodeId("a0"),
+            List.of(graph.toMappedNodeId("a3"), graph.toMappedNodeId("a4")),
+            2.0,
+            false
+        );
 
-        var config = SteinerTreeBaseConfigImpl.builder()
-            .sourceNode(graph.toOriginalNodeId("a0"))
-            .targetNodes(List.of(graph.toOriginalNodeId("a3"), graph.toOriginalNodeId("a4")))
-            .build();
-        pathFindingAlgorithms.steinerTree(graph, config);
+        var log = new GdsTestLog();
+        var testTracker = new TestProgressTracker(
+            SteinerTreeProgressTask.create(parameters, graph.nodeCount()),
+            new LoggerForProgressTrackingAdapter(log),
+            new Concurrency(4),
+            EmptyTaskRegistryFactory.INSTANCE
+        );
+
+        new ShortestPathsSteinerAlgorithm(
+            graph,
+            parameters.sourceNode(),
+            parameters.targetNodes(),
+            parameters.delta(),
+            parameters.concurrency(),
+            parameters.applyRerouting(),
+            DefaultPool.INSTANCE,
+            testTracker,
+            TerminationFlag.RUNNING_TRUE
+        ).compute();
+
 
         assertThat(log.getMessages(TestLog.INFO))
             .extracting(removingThreadId())
@@ -368,21 +379,33 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
 
     @Test
     void shouldLogProgressWithRerouting() {
-        var log = new GdsTestLog();
-        var requestScopedDependencies = RequestScopedDependencies.builder()
-            .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
-            .terminationFlag(TerminationFlag.RUNNING_TRUE)
-            .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
-            .build();
-        var progressTrackerCreator = new ProgressTrackerCreator(new LoggerForProgressTrackingAdapter(log), requestScopedDependencies);
-        var pathFindingAlgorithms = new PathFindingAlgorithms(requestScopedDependencies, progressTrackerCreator);
+        var parameters = new SteinerTreeParameters(
+            new Concurrency(4),
+            graph.toMappedNodeId("a0"),
+            List.of(graph.toMappedNodeId("a3"), graph.toMappedNodeId("a4")),
+            2.0,
+            true
+        );
 
-        var config = SteinerTreeBaseConfigImpl.builder()
-            .applyRerouting(true)
-            .sourceNode(graph.toOriginalNodeId("a0"))
-            .targetNodes(List.of(graph.toOriginalNodeId("a3"), graph.toOriginalNodeId("a4")))
-            .build();
-        pathFindingAlgorithms.steinerTree(graph, config);
+        var log = new GdsTestLog();
+        var testTracker = new TestProgressTracker(
+            SteinerTreeProgressTask.create(parameters, graph.nodeCount()),
+            new LoggerForProgressTrackingAdapter(log),
+            new Concurrency(4),
+            EmptyTaskRegistryFactory.INSTANCE
+        );
+
+        new ShortestPathsSteinerAlgorithm(
+            graph,
+            parameters.sourceNode(),
+            parameters.targetNodes(),
+            parameters.delta(),
+            parameters.concurrency(),
+            parameters.applyRerouting(),
+            DefaultPool.INSTANCE,
+            testTracker,
+            TerminationFlag.RUNNING_TRUE
+        ).compute();
 
         assertThat(log.getMessages(TestLog.INFO))
             .extracting(removingThreadId())
@@ -407,21 +430,33 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
 
     @Test
     void shouldLogProgressWithInverseRerouting() {
-        var log = new GdsTestLog();
-        var requestScopedDependencies = RequestScopedDependencies.builder()
-            .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
-            .terminationFlag(TerminationFlag.RUNNING_TRUE)
-            .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
-            .build();
-        var progressTrackerCreator = new ProgressTrackerCreator(new LoggerForProgressTrackingAdapter(log), requestScopedDependencies);
-        var pathFindingAlgorithms = new PathFindingAlgorithms(requestScopedDependencies, progressTrackerCreator);
+        var parameters = new SteinerTreeParameters(
+            new Concurrency(4),
+            invGraph.toMappedNodeId("a0"),
+            List.of(invGraph.toMappedNodeId("a3"), invGraph.toMappedNodeId("a4")),
+            2.0,
+            true
+        );
 
-        var config = SteinerTreeBaseConfigImpl.builder()
-            .applyRerouting(true)
-            .sourceNode(invGraph.toOriginalNodeId("a0"))
-            .targetNodes(List.of(invGraph.toOriginalNodeId("a3"), invGraph.toOriginalNodeId("a4")))
-            .build();
-        pathFindingAlgorithms.steinerTree(invGraph, config);
+        var log = new GdsTestLog();
+        var testTracker = new TestProgressTracker(
+            SteinerTreeProgressTask.create(parameters, invGraph.nodeCount()),
+            new LoggerForProgressTrackingAdapter(log),
+            new Concurrency(4),
+            EmptyTaskRegistryFactory.INSTANCE
+        );
+
+        new ShortestPathsSteinerAlgorithm(
+            invGraph,
+            parameters.sourceNode(),
+            parameters.targetNodes(),
+            parameters.delta(),
+            parameters.concurrency(),
+            parameters.applyRerouting(),
+            DefaultPool.INSTANCE,
+            testTracker,
+            TerminationFlag.RUNNING_TRUE
+        ).compute();
 
         assertThat(log.getMessages(TestLog.INFO))
             .extracting(removingThreadId())
@@ -442,7 +477,6 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
                 "SteinerTree :: Finished"
             );
     }
-
 
     @Test
     void shouldNotGetOptimalWithoutBetterRerouting() {

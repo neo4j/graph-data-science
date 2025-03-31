@@ -31,14 +31,14 @@ class YensMemoryEstimateDefinitionTest {
 
     static Stream<Arguments> expectedMemoryEstimation() {
         return Stream.of(
-            Arguments.of(1_000, 3, 1, 56976),
-            Arguments.of(1_000, 3, 4, 227784),
+            Arguments.of(1_000, 3, 1, 56992),
+            Arguments.of(1_000, 3, 4, 227800),
 
-            Arguments.of(1_000_000, 3, 1, 56_125_848L),
-            Arguments.of(1_000_000, 3, 4, 224_503_272L),
+            Arguments.of(1_000_000, 3, 1, 56_125_864L),
+            Arguments.of(1_000_000, 3, 4, 224_503_288L),
 
-            Arguments.of(1_000_000_000, 3, 1, 56_133_545_944L),
-            Arguments.of(1_000_000_000, 3, 4, 224_534_183_656L)
+            Arguments.of(1_000_000_000, 3, 1, 56_133_545_960L),
+            Arguments.of(1_000_000_000, 3, 4, 224_534_183_672L)
 
         );
     }

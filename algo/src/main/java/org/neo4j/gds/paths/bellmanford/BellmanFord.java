@@ -68,6 +68,21 @@ public class BellmanFord extends Algorithm<BellmanFordResult> {
         this.concurrency = concurrency;
     }
 
+    public BellmanFord(
+        Graph graph,
+        ProgressTracker progressTracker,
+        BellmanFordParameters parameters
+    ) {
+        this(
+            graph,
+            progressTracker,
+            parameters.sourceNode(),
+            parameters.trackNegativeCycles(),
+            parameters.trackPaths(),
+            parameters.concurrency()
+        );
+    }
+
     @Override
     public BellmanFordResult compute() {
         progressTracker.beginSubTask();
@@ -138,7 +153,7 @@ public class BellmanFord extends Algorithm<BellmanFordResult> {
             );
 
         Stream<PathResult> negativeCycles = Stream.empty();
-        if(trackNegativeCycles) {
+        if (trackNegativeCycles) {
             negativeCycles = negativeCyclesResults(
                 graph,
                 distanceTracker,
@@ -293,7 +308,7 @@ public class BellmanFord extends Algorithm<BellmanFordResult> {
             }
         }
 
-        if(!shouldAdd) {
+        if (!shouldAdd) {
             return PathResult.EMPTY;
         }
 
@@ -346,12 +361,14 @@ public class BellmanFord extends Algorithm<BellmanFordResult> {
         long endNodeId
     ) {
         var minimumCost = new MutableDouble(Double.MAX_VALUE);
-        localGraph.forEachRelationship(startNode, 1.0, (sourceNodeId, targetNodeId, cost) -> {
-            if (targetNodeId == endNodeId && minimumCost.doubleValue() > cost) {
-                minimumCost.setValue(cost);
+        localGraph.forEachRelationship(
+            startNode, 1.0, (sourceNodeId, targetNodeId, cost) -> {
+                if (targetNodeId == endNodeId && minimumCost.doubleValue() > cost) {
+                    minimumCost.setValue(cost);
+                }
+                return true;
             }
-            return true;
-        });
+        );
         return minimumCost.doubleValue();
     }
 }
