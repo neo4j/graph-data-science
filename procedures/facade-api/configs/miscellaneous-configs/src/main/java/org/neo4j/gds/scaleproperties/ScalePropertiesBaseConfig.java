@@ -104,4 +104,13 @@ public interface ScalePropertiesBaseConfig extends AlgoBaseConfig {
             }
         }
     }
+
+    @Configuration.Ignore
+    default ScalePropertiesParameters toParameters(){
+        return new ScalePropertiesParameters(
+            concurrency(),
+            nodeProperties(),
+            scaler()
+        );
+    }
 }

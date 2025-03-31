@@ -53,21 +53,21 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 public class ScaleProperties extends Algorithm<ScalePropertiesResult> {
 
     private final Graph graph;
-    private final ScalePropertiesBaseConfig config;
+    private final ScalePropertiesParameters params;
     private final ExecutorService executor;
     private final Concurrency concurrency;
 
     public ScaleProperties(
         Graph graph,
-        ScalePropertiesBaseConfig config,
+        ScalePropertiesParameters params,
         ProgressTracker progressTracker,
         ExecutorService executor
     ) {
         super(progressTracker);
         this.graph = graph;
-        this.config = config;
+        this.params = params;
         this.executor = executor;
-        this.concurrency = config.concurrency();
+        this.concurrency = params.concurrency();
     }
 
     @Override
@@ -78,7 +78,7 @@ public class ScaleProperties extends Algorithm<ScalePropertiesResult> {
         // Create a Scaler for each input property
         // Array properties are unrolled into multiple scalers
         progressTracker.beginSubTask("Prepare scalers");
-        var scalers = config.nodeProperties().stream()
+        var scalers = params.nodeProperties().stream()
             .map(this::prepareScalers)
             .collect(Collectors.toList());
         progressTracker.endSubTask("Prepare scalers");
@@ -86,7 +86,7 @@ public class ScaleProperties extends Algorithm<ScalePropertiesResult> {
         var scalerStatistics = IntStream
             .range(0, scalers.size())
             .boxed()
-            .collect(Collectors.toMap(config.nodeProperties()::get, i -> scalers.get(i).statistics()));
+            .collect(Collectors.toMap(params.nodeProperties()::get, i -> scalers.get(i).statistics()));
 
         var outputArrayLength = scalers.stream().mapToInt(Scaler::dimension).sum();
         initializeArrays(scaledProperties, outputArrayLength);
@@ -155,7 +155,7 @@ public class ScaleProperties extends Algorithm<ScalePropertiesResult> {
     }
 
     private Scaler prepareScalers(String propertyName) {
-        var scalerVariant = config.scaler();
+        var scalerVariant = params.scaler();
         var nodeProperties = graph.nodeProperties(propertyName);
 
         if (nodeProperties == null) {

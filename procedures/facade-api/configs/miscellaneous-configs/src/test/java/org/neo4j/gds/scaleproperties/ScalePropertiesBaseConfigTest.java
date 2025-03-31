@@ -39,15 +39,15 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-class ScalePropertiesBaseConfigTest {
+public class ScalePropertiesBaseConfigTest {
 
-    static Stream<Arguments> scalers() {
+    public static Stream<Arguments> scalers() {
         return ScalerFactory.ALL_SCALERS.keySet()
             .stream()
             .filter(s -> !(s.equals(L1Norm.TYPE) || s.equals(L2Norm.TYPE)))
             .map(Arguments::of);
     }
-    static Stream<Arguments> scalersL1L2(){
+    public static Stream<Arguments> scalersL1L2(){
         return ScalerFactory.ALL_SCALERS.keySet()
             .stream()
             .filter(s -> (s.equals(L1Norm.TYPE) || s.equals(L2Norm.TYPE)))

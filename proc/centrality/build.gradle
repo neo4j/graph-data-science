@@ -22,6 +22,8 @@ dependencies {
     integrationTestImplementation project(':proc-common')
     integrationTestImplementation project(':graph-schema-api')
     integrationTestImplementation project(':string-formatting')
+    integrationTestImplementation project(':scaling-utils')
+
 
     integrationTestCompileOnly openGds.immutables.value.annotations
     integrationTestCompileOnly openGds.immutables.builder

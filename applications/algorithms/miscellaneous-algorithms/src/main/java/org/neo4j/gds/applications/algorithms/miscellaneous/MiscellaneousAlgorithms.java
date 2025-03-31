@@ -36,9 +36,8 @@ import org.neo4j.gds.indexInverse.InverseRelationshipsConfig;
 import org.neo4j.gds.indexInverse.InverseRelationshipsConfigTransformer;
 import org.neo4j.gds.indexInverse.InverseRelationshipsProgressTaskCreator;
 import org.neo4j.gds.scaleproperties.ScaleProperties;
-import org.neo4j.gds.scaleproperties.ScalePropertiesBaseConfig;
+import org.neo4j.gds.scaleproperties.ScalePropertiesParameters;
 import org.neo4j.gds.scaleproperties.ScalePropertiesResult;
-import org.neo4j.gds.scaleproperties.ScalePropertiesTask;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.undirected.ToUndirected;
 import org.neo4j.gds.undirected.ToUndirectedConfig;
@@ -128,26 +127,15 @@ public class MiscellaneousAlgorithms {
         );
     }
 
-    ScalePropertiesResult scaleProperties(Graph graph, ScalePropertiesBaseConfig configuration) {
-        var task = ScalePropertiesTask.create(graph, configuration);
-        var progressTracker = progressTrackerCreator.createProgressTracker(
-            task,
-            configuration.jobId(),
-            configuration.concurrency(),
-            configuration.logProgress()
-        );
-
-        return scaleProperties(graph, configuration, progressTracker);
-    }
 
     public ScalePropertiesResult scaleProperties(
         Graph graph,
-        ScalePropertiesBaseConfig configuration,
+        ScalePropertiesParameters params,
         ProgressTracker progressTracker
     ) {
         var algorithm = new ScaleProperties(
             graph,
-            configuration,
+            params,
             progressTracker,
             DefaultPool.INSTANCE
         );
@@ -156,7 +144,7 @@ public class MiscellaneousAlgorithms {
             algorithm,
             progressTracker,
             true,
-            configuration.concurrency()
+            params.concurrency()
         );
     }
 

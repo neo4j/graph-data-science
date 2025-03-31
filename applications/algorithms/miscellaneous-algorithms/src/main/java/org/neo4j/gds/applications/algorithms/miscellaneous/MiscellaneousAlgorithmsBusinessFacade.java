@@ -19,13 +19,13 @@
  */
 package org.neo4j.gds.applications.algorithms.miscellaneous;
 
+import org.neo4j.gds.MiscellaneousAlgorithmsTasks;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.core.loading.SingleTypeRelationships;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.indexInverse.InverseRelationshipsConfig;
 import org.neo4j.gds.scaleproperties.ScalePropertiesBaseConfig;
 import org.neo4j.gds.scaleproperties.ScalePropertiesResult;
@@ -38,6 +38,7 @@ public class MiscellaneousAlgorithmsBusinessFacade {
 
     private final ProgressTrackerCreator progressTrackerCreator;
     private final MiscellaneousAlgorithms miscellaneousAlgorithms;
+    private final MiscellaneousAlgorithmsTasks tasks = new MiscellaneousAlgorithmsTasks();
 
     public MiscellaneousAlgorithmsBusinessFacade(MiscellaneousAlgorithms miscellaneousAlgorithms,ProgressTrackerCreator progressTrackerCreator) {
         this.progressTrackerCreator = progressTrackerCreator;
@@ -57,17 +58,15 @@ public class MiscellaneousAlgorithmsBusinessFacade {
     }
 
     ScalePropertiesResult scaleProperties(Graph graph, ScalePropertiesBaseConfig configuration) {
-        return  miscellaneousAlgorithms.scaleProperties(graph,configuration);
+        var params = configuration.toParameters();
+        var task = tasks.scaleProperties(graph,params);
+        var progressTracker =  progressTrackerCreator.createProgressTracker(task, configuration);
+
+        return miscellaneousAlgorithms.scaleProperties(graph, params, progressTracker);
 
     }
 
-    public ScalePropertiesResult scaleProperties(
-        Graph graph,
-        ScalePropertiesBaseConfig configuration,
-        ProgressTracker progressTracker
-    ) {
-        return  miscellaneousAlgorithms.scaleProperties(graph,configuration,progressTracker);
-    }
+
 
     public SingleTypeRelationships toUndirected(GraphStore graphStore, ToUndirectedConfig configuration) {
         return miscellaneousAlgorithms.toUndirected(graphStore, configuration);

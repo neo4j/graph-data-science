@@ -12,5 +12,6 @@ dependencies {
     implementation project(':annotations')
     implementation project(':concurrency')
     implementation project(':graph-projection-api')
+    implementation project(':scaling-utils')
     implementation project(':string-formatting')
 }

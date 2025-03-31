@@ -27,8 +27,8 @@ import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 public final class ScalePropertiesTask {
     private ScalePropertiesTask() {}
 
-    public static Task create(Graph graph, ScalePropertiesBaseConfig configuration) {
-        int totalPropertyDimension = configuration
+    public static Task create(Graph graph, ScalePropertiesParameters parameters) {
+        int totalPropertyDimension = parameters
             .nodeProperties()
             .stream()
             .map(graph::nodeProperties)
