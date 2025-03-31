@@ -35,6 +35,7 @@ dependencies {
     implementation project(':node-embeddings-params')
     implementation project(':path-finding-params')
     implementation project(':similarity-params')
+    implementation project(':miscellaneous-params')
 
     implementation project(':centrality-configs')
     implementation project(':community-configs')
@@ -64,6 +65,7 @@ dependencies {
     implementation project(':neo4j-api')
     implementation project(':pregel')
     implementation project(':progress-tracking')
+    implementation project(':scaling-utils')
     implementation project(':string-formatting')
     implementation project(':termination')
 

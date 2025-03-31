@@ -38,6 +38,7 @@ dependencies {
     implementation project(':progress-tracking')
 
     implementation project(':string-formatting')
+    implementation project(':scaling-utils')
 
     testImplementation project(':test-utils')
     testImplementation openGds.gdl

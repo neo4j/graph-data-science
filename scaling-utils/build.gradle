@@ -1,0 +1,31 @@
+apply plugin: 'java-library'
+
+description = 'Neo4j Graph Data Science :: Scaling utils'
+
+group = 'org.neo4j.gds'
+
+dependencies {
+    annotationProcessor project(':annotations')
+    annotationProcessor project(':config-generator')
+    annotationProcessor openGds.immutables.value
+
+    compileOnly openGds.jetbrains.annotations
+    compileOnly openGds.immutables.value.annotations
+    neodeps().each {
+        compileOnly(group: 'org.neo4j', name: it, version: ver.'neo4j') {
+            transitive = false
+        }
+    }
+
+    implementation project(':annotations')
+    implementation project(':core')
+    implementation project(':collections')
+    implementation project(':logging')
+    implementation project(':memory-usage')
+    implementation project(':progress-tracking')
+    implementation project(':string-formatting')
+
+    testImplementation openGds.assertj.core
+
+    testImplementation project(':test-utils')
+}

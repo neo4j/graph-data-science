@@ -128,6 +128,9 @@ project(':node-embedding-algorithms').projectDir = file('applications/algorithms
 include('path-finding-algorithms')
 project(':path-finding-algorithms').projectDir = file('applications/algorithms/path-finding')
 
+include('scaling-utils')
+project(':scaling-utils').projectDir = file('scaling-utils')
+
 include('similarity-algorithms')
 project(':similarity-algorithms').projectDir = file('applications/algorithms/similarity')
 
@@ -381,6 +384,9 @@ project(':ml-facade-api').projectDir = file('procedures/facade-api/ml-facade-api
 
 include('ml-configs')
 project(':ml-configs').projectDir = file('procedures/facade-api/configs/ml-configs')
+
+include('miscellaneous-params')
+project(':miscellaneous-params').projectDir = file('algo-params/miscellaneous-params')
 
 include('miscellaneous-facade-api')
 project(':miscellaneous-facade-api').projectDir = file('procedures/facade-api/miscellaneous-facade-api')

@@ -19,10 +19,7 @@
  */
 package org.neo4j.gds.procedures.algorithms.centrality;
 
-import org.neo4j.gds.api.ProcedureReturnColumns;
-import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.procedures.algorithms.results.StandardWriteResult;
-import org.neo4j.gds.result.AbstractCentralityResultBuilder;
 
 import java.util.Map;
 
@@ -47,25 +44,4 @@ public final class BetaClosenessCentralityWriteResult extends StandardWriteResul
         this.nodePropertiesWritten = nodePropertiesWritten;
     }
 
-    public static final class Builder extends AbstractCentralityResultBuilder<BetaClosenessCentralityWriteResult> {
-        public String writeProperty;
-
-        public Builder(ProcedureReturnColumns returnColumns, Concurrency concurrency) {
-            super(returnColumns, concurrency);
-        }
-
-        @Override
-        public BetaClosenessCentralityWriteResult buildResult() {
-            return new BetaClosenessCentralityWriteResult(
-                nodePropertiesWritten,
-                preProcessingMillis,
-                computeMillis,
-                postProcessingMillis,
-                writeMillis,
-                writeProperty,
-                centralityHistogram,
-                config.toMap()
-            );
-        }
-    }
 }

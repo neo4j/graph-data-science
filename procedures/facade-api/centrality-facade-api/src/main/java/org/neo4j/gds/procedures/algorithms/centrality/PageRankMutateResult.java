@@ -19,9 +19,7 @@
  */
 package org.neo4j.gds.procedures.algorithms.centrality;
 
-import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.core.concurrency.Concurrency;
 
 import java.util.Collections;
 import java.util.Map;
@@ -47,24 +45,4 @@ public record PageRankMutateResult(long ranIterations, boolean didConverge, Map<
         );
     }
 
-    public static class Builder extends PageRankProcCompanion.PageRankResultBuilder<PageRankMutateResult> {
-        public Builder(ProcedureReturnColumns returnColumns, Concurrency concurrency) {
-            super(returnColumns, concurrency);
-        }
-
-        @Override
-        public PageRankMutateResult buildResult() {
-            return new PageRankMutateResult(
-                ranIterations,
-                didConverge,
-                centralityHistogram,
-                preProcessingMillis,
-                computeMillis,
-                postProcessingMillis,
-                mutateMillis,
-                nodePropertiesWritten,
-                config.toMap()
-            );
-        }
-    }
 }

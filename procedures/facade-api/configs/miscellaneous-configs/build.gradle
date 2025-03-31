@@ -10,6 +10,10 @@ dependencies {
     annotationProcessor project(':config-generator')
     // This is needed for the generated configuration classes
     compileOnly openGds.jetbrains.annotations
+
+    api project(':miscellaneous-params')
+    api project(':algo-params-common')
+
     // Configuration annotations
     implementation project(':annotations')
 
@@ -34,6 +38,7 @@ dependencies {
     implementation project(':progress-tracking')
 
     implementation project(':string-formatting')
+    implementation project(':scaling-utils')
 
     testImplementation project(':test-utils')
     testImplementation openGds.gdl
