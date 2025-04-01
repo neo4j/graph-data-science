@@ -128,6 +128,8 @@ public class Node2VecModel {
 
         var lossPerIteration = new ArrayList<Double>();
 
+        AtomicInteger taskIndex = new AtomicInteger(0);
+
         for (int iteration = 0; iteration < iterations; iteration++) {
             progressTracker.beginSubTask();
             progressTracker.setVolume(walks.size());
@@ -137,7 +139,7 @@ public class Node2VecModel {
                 initialLearningRate - iteration * learningRateAlpha
             );
 
-            var tasks = createTrainingTasks(learningRate);
+            var tasks = createTrainingTasks(learningRate, taskIndex);
 
             RunWithConcurrency.builder()
                 .concurrency(concurrency)
@@ -288,8 +290,7 @@ public class Node2VecModel {
         }
     }
 
-    List<TrainingTask> createTrainingTasks(float learningRate){
-        AtomicInteger taskIndex = new AtomicInteger(0);
+    List<TrainingTask> createTrainingTasks(float learningRate, AtomicInteger taskIndex){
         return PartitionUtils.degreePartitionWithBatchSize(
             walks.size(),
             walks::walkLength,
