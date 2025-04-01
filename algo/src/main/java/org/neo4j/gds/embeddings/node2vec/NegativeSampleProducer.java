@@ -27,7 +27,7 @@ public class NegativeSampleProducer {
 
     private final HugeLongArray contextNodeDistribution;
     private final long cumulativeProbability;
-    private SplittableRandom splittableRandom;
+    private final SplittableRandom splittableRandom;
 
     public NegativeSampleProducer(
         HugeLongArray contextNodeDistribution,

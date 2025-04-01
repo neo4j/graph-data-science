@@ -61,7 +61,8 @@ class PositiveSampleProducerTest {
             walks.iterator(0, nbrOfWalks),
             HugeDoubleArray.of(LongStream.range(0, nbrOfWalks).mapToDouble((l) -> 1.0).toArray()),
             10,
-            Optional.empty()
+            Optional.empty(),
+            0
         );
 
         var counter = 0L;
@@ -89,7 +90,8 @@ class PositiveSampleProducerTest {
             walks.iterator(0, nbrOfWalks),
             probabilities,
             10,
-            Optional.empty()
+            Optional.empty(),
+            0
         );
         // does not overflow the stack = passes test
 
@@ -113,7 +115,8 @@ class PositiveSampleProducerTest {
             walks.iterator(0, nbrOfWalks / 2),
             HugeDoubleArray.of(LongStream.range(0, nbrOfWalks).mapToDouble((l) -> 1.0).toArray()),
             10,
-            Optional.empty()
+            Optional.empty(),
+            0
         );
 
         var counter = 0L;
@@ -138,7 +141,8 @@ class PositiveSampleProducerTest {
             walks.iterator(0, walks.size()),
             centerNodeProbabilities,
             windowSize,
-            Optional.empty()
+            Optional.empty(),
+            0
         );
         while (producer.next(buffer)) {
             actualPairs.add(Pair.of(buffer[0], buffer[1]));
@@ -161,7 +165,8 @@ class PositiveSampleProducerTest {
             walks.iterator(0, 2),
             centerNodeProbabilities,
             3,
-            Optional.empty()
+            Optional.empty(),
+            0
         );
         while (producer.next(buffer)) {
             actualPairs.add(Pair.of(buffer[0], buffer[1]));
@@ -207,7 +212,8 @@ class PositiveSampleProducerTest {
             walks.iterator(0, walks.size()),
             centerNodeProbabilities,
             3,
-            Optional.empty()
+            Optional.empty(),
+            0
         );
 
         while (producer.next(buffer)) {

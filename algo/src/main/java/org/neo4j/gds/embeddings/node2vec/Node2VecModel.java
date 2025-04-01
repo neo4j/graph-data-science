@@ -30,9 +30,11 @@ import org.neo4j.gds.ml.core.functions.Sigmoid;
 import org.neo4j.gds.ml.core.tensor.FloatVector;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 import java.util.SplittableRandom;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.LongUnaryOperator;
 
 import static org.neo4j.gds.ml.core.tensor.operations.FloatVectorOperations.addInPlace;
@@ -40,7 +42,6 @@ import static org.neo4j.gds.ml.core.tensor.operations.FloatVectorOperations.scal
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class Node2VecModel {
-
 
     private final HugeObjectArray<FloatVector> centerEmbeddings;
     private final HugeObjectArray<FloatVector> contextEmbeddings;
@@ -136,31 +137,7 @@ public class Node2VecModel {
                 initialLearningRate - iteration * learningRateAlpha
             );
 
-            var tasks = PartitionUtils.degreePartitionWithBatchSize(
-                walks.size(),
-                walks::walkLength,
-                BitUtil.ceilDiv(randomWalkProbabilities.sampleCount(), concurrency.value()),
-                partition -> {
-                    var positiveSampleProducer = new PositiveSampleProducer(
-                        walks.iterator(partition.startNode(), partition.nodeCount()),
-                        randomWalkProbabilities.positiveSamplingProbabilities(),
-                        windowSize,
-                        Optional.of(randomSeed)
-                    );
-
-                    return new TrainingTask(
-                        centerEmbeddings,
-                        contextEmbeddings,
-                        positiveSampleProducer,
-                        randomWalkProbabilities.negativeSamplingDistribution(),
-                        learningRate,
-                        negativeSamplingRate,
-                        embeddingDimension,
-                        progressTracker,
-                         randomSeed
-                    );
-                }
-            );
+            var tasks = createTrainingTasks(learningRate);
 
             RunWithConcurrency.builder()
                 .concurrency(concurrency)
@@ -232,12 +209,13 @@ public class Node2VecModel {
             int negativeSamplingRate,
             int embeddingDimensions,
             ProgressTracker progressTracker,
-            long randomSeed
+            long randomSeed,
+            int taskId
         ) {
             this.centerEmbeddings = centerEmbeddings;
             this.contextEmbeddings = contextEmbeddings;
             this.positiveSampleProducer = positiveSampleProducer;
-            this.negativeSampleProducer = new NegativeSampleProducer(negativeSamples, randomSeed + Thread.currentThread().getId());
+            this.negativeSampleProducer = new NegativeSampleProducer(negativeSamples, randomSeed + taskId);
             this.learningRate = learningRate;
             this.negativeSamplingRate = negativeSamplingRate;
 
@@ -308,6 +286,40 @@ public class Node2VecModel {
             System.arraycopy(other.values, 0, values, index, other.index);
             index += other.index;
         }
+    }
+
+    List<TrainingTask> createTrainingTasks(float learningRate){
+        AtomicInteger taskIndex = new AtomicInteger(0);
+        return PartitionUtils.degreePartitionWithBatchSize(
+            walks.size(),
+            walks::walkLength,
+            BitUtil.ceilDiv(randomWalkProbabilities.sampleCount(), concurrency.value()),
+            partition -> {
+
+                var taskId = taskIndex.getAndIncrement();
+                var positiveSampleProducer = new PositiveSampleProducer(
+                    walks.iterator(partition.startNode(), partition.nodeCount()),
+                    randomWalkProbabilities.positiveSamplingProbabilities(),
+                    windowSize,
+                    Optional.of(randomSeed),
+                    taskId
+                );
+
+                return new TrainingTask(
+                    centerEmbeddings,
+                    contextEmbeddings,
+                    positiveSampleProducer,
+                    randomWalkProbabilities.negativeSamplingDistribution(),
+                    learningRate,
+                    negativeSamplingRate,
+                    embeddingDimension,
+                    progressTracker,
+                    randomSeed,
+                    taskId
+                );
+            }
+        );
+
     }
 
 }
