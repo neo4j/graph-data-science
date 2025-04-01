@@ -72,7 +72,8 @@ class PregelCompanionTest {
             relTypes,
             new Concurrency(4),
             Log.noOpLog(),
-            TaskRegistryFactory.empty()
+            TaskRegistryFactory.empty(),
+            true
         );
         assertThat(graphStore.inverseIndexedRelationshipTypes()).containsExactlyElementsOf(relTypes);
     }

@@ -26,20 +26,27 @@ import org.neo4j.gds.api.properties.nodes.DoubleArrayNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.LongArrayNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
+import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
+import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
+import org.neo4j.gds.applications.algorithms.miscellaneous.MiscellaneousAlgorithms;
 import org.neo4j.gds.beta.pregel.PregelConfig;
 import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.beta.pregel.PregelSchema;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
+import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
+import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.core.write.NodeProperty;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.validation.AfterLoadValidation;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
-import org.neo4j.gds.indexInverse.InverseRelationshipsAlgorithmFactory;
-import org.neo4j.gds.indexInverse.InverseRelationshipsConfigImpl;
-import org.neo4j.gds.utils.StringJoining;
+import org.neo4j.gds.indexInverse.InverseRelationshipsParamsTransformer;
+import org.neo4j.gds.indexInverse.InverseRelationshipsTask;
 import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.termination.TerminationFlag;
+import org.neo4j.gds.utils.StringJoining;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -65,7 +72,8 @@ public final class PregelCompanion {
                         config.internalRelationshipTypes(graphStore),
                         config.concurrency(),
                         log,
-                        taskRegistryFactory
+                        taskRegistryFactory,
+                        config.logProgress()
                     )
                 );
             }
@@ -77,7 +85,8 @@ public final class PregelCompanion {
         Collection<RelationshipType> relationshipTypes,
         Concurrency concurrency,
         Log log,
-        TaskRegistryFactory taskRegistryFactory
+        TaskRegistryFactory taskRegistryFactory,
+        boolean logProgress
     ) {
         var relationshipTypesWithoutIndex = relationshipTypes
             .stream()
@@ -89,15 +98,33 @@ public final class PregelCompanion {
             return;
         }
 
-        var inverseConfig = InverseRelationshipsConfigImpl
-            .builder()
-            .concurrency(concurrency.value())
-            .relationshipTypes(relationshipTypesWithoutIndex)
-            .build();
+        var  params = InverseRelationshipsParamsTransformer.toParameters(
+            graphStore,
+            concurrency,
+            relationshipTypesWithoutIndex
+        );
 
-        new InverseRelationshipsAlgorithmFactory()
-            .build(graphStore, inverseConfig, log, taskRegistryFactory)
-            .compute()
+        var progressTrackerCreator = new ProgressTrackerCreator(
+            new LoggerForProgressTrackingAdapter(log),
+            RequestScopedDependencies.builder()
+                .taskRegistryFactory(taskRegistryFactory)
+                .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
+                .build()
+        );
+
+        var task = InverseRelationshipsTask.progressTask(graphStore.nodeCount(), params);
+
+        var progressTracker = progressTrackerCreator.createProgressTracker(task,
+            new JobId(),
+            params.concurrency(),
+            logProgress
+        );
+        var miscAlgs = new MiscellaneousAlgorithms(
+            progressTrackerCreator,
+            TerminationFlag.RUNNING_TRUE
+        );
+
+       miscAlgs.indexInverse(graphStore,params,progressTracker)
             .forEach((relationshipType, inverseIndex) -> graphStore.addInverseIndex(
                 relationshipType,
                 inverseIndex.topology(),

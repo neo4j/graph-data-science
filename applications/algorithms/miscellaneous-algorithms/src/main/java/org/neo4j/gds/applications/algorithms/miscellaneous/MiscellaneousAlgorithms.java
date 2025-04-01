@@ -64,7 +64,7 @@ public class MiscellaneousAlgorithms {
         return algorithm.compute();
     }
 
-    Map<RelationshipType, SingleTypeRelationships> indexInverse(
+    public Map<RelationshipType, SingleTypeRelationships> indexInverse(
         GraphStore graphStore,
         InverseRelationshipsParameters parameters,
         ProgressTracker progressTracker
