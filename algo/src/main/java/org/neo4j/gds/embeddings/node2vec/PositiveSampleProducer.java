@@ -48,7 +48,8 @@ public class PositiveSampleProducer {
         Iterator<long[]> walks,
         HugeDoubleArray samplingProbabilities,
         int windowSize,
-        Optional<Long> maybeRandomSeed
+        Optional<Long> maybeRandomSeed,
+        int taskId
     ) {
         this.walks = walks;
         this.samplingProbabilities = samplingProbabilities;
@@ -60,7 +61,7 @@ public class PositiveSampleProducer {
         this.centerWordIndex = -1;
         this.contextWordIndex = 1;
         probabilitySupplier = maybeRandomSeed
-            .map(seed -> new SplittableRandom(Thread.currentThread().getId() + seed))
+            .map(seed -> new SplittableRandom(taskId + seed))
             .orElseGet(() -> new SplittableRandom(ThreadLocalRandom.current().nextLong()));
 
     }
