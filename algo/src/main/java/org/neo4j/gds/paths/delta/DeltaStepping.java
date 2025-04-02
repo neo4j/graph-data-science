@@ -279,6 +279,9 @@ public final class DeltaStepping extends Algorithm<PathFindingResult> {
 
         private void relaxNode(long nodeId) {
             graph.forEachRelationship(nodeId, 1.0, (sourceNodeId, targetNodeId, weight) -> {
+                if (weight < 0d ){
+                    throw new IllegalArgumentException("Delta-Stepping does not support negative weights on relationships. Please consider Bellman-Ford");
+                }
                 var oldDist = distances.distance(targetNodeId);
                 var newDist = distances.distance(sourceNodeId) + weight;
 
@@ -287,7 +290,6 @@ public final class DeltaStepping extends Algorithm<PathFindingResult> {
 
                     if (Double.compare(witness, oldDist) == 0) {
                         int destBin = (int) (newDist / delta);
-
                         if (destBin >= localBins.length) {
                             this.localBins = Arrays.copyOf(localBins, destBin + 1);
                         }

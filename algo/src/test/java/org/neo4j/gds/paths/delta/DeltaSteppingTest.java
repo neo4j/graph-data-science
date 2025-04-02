@@ -44,6 +44,7 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.paths.dijkstra.Dijkstra;
 import org.neo4j.gds.termination.TerminationFlag;
@@ -55,6 +56,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.compat.TestLog.INFO;
 import static org.neo4j.gds.paths.PathTestUtil.expected;
@@ -397,6 +399,20 @@ final class DeltaSteppingTest {
         }
         assertThat(deltaSum).isCloseTo(dijkstraSum, Offset.offset(1e-5));
 
+    }
+
+    @Test
+    void shouldThrowForNegativeWeights(){
+        var graph = GdlFactory.of("(a)-[R{w: -100}]->(b)").build().getUnion();
+
+        var deltaStepping = DeltaStepping.of(
+            graph,
+            DeltaSteppingParameters.withDefaultDelta(0, new Concurrency(1)),
+            DefaultPool.INSTANCE,
+            ProgressTracker.NULL_TRACKER
+        );
+
+        assertThatThrownBy(() -> deltaStepping.compute().pathSet().stream().toList()).hasMessageContaining("negative");
     }
 
 }
