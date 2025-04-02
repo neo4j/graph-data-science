@@ -19,20 +19,20 @@
  */
 package org.neo4j.gds.embeddings.node2vec;
 
+import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.concurrency.Concurrency;
 
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
+import java.util.HashMap;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class NegativeSampleProducerTest {
 
     @Test
     void shouldProduceSamplesAccordingToNodeDistribution() {
+
         var builder = new RandomWalkProbabilities.Builder(
             2,
             new Concurrency(4),
@@ -46,19 +46,40 @@ class NegativeSampleProducerTest {
         builder.registerWalk(new long[]{1});
 
         RandomWalkProbabilities probabilityComputer = builder.build();
-
         var sampler = new NegativeSampleProducer(probabilityComputer.negativeSamplingDistribution(),0);
 
-        Map<Long, Integer> distribution = IntStream
-            .range(0, 1300)
-            .mapToObj(ignore -> sampler.next())
-            .collect(Collectors.toMap(
-                Function.identity(),
-                ignore -> 1,
-                Integer::sum
-            ));
+        var distribution  = new HashMap<Long,Integer>();
+        int SAMPLES  = 1300;
+        for (int i=0;i<SAMPLES;++i){
+            var next = sampler.next();
+            distribution.put(next,  distribution.getOrDefault(next,0) + 1);
+        }
 
         // We samples nodes with a probability of their number of occurrences^0.75 (16^0.75=12, 1^0.75=1)
-        assertEquals(1.0 / 12, distribution.get(1L).doubleValue() / distribution.get(0L), 0.1);
+        assertThat(distribution.get(1L).doubleValue() / distribution.get(0L)).isCloseTo(1.0/12, Offset.offset(0.1));
     }
+
+    @Test
+    void shouldProduceDifferentlyIfSeeded() {
+
+        var sampler1 = new NegativeSampleProducer(HugeLongArray.of(16,18),0);
+        var sampler2 = new NegativeSampleProducer(HugeLongArray.of(16,18),1);
+
+        var distribution1 = new HashMap<Long,Integer>();
+        var distribution2 = new HashMap<Long,Integer>();
+
+        int SAMPLES = 1300;
+        for (int i=0;i<SAMPLES;++i){
+            var next1 = sampler1.next();
+            distribution1.put(next1,  distribution1.getOrDefault(next1,0) + 1);
+            //
+            var next2 = sampler2.next();
+            distribution2.put(next2,  distribution1.getOrDefault(next2,0) + 1);
+        }
+
+        assertThat(distribution1.get(0L)).isNotEqualTo(distribution2.get(0L));
+        assertThat(distribution1.get(1L)).isNotEqualTo(distribution2.get(1L));
+
+    }
+
 }
