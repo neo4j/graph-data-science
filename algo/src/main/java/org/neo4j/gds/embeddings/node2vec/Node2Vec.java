@@ -163,7 +163,7 @@ public final class Node2Vec extends Algorithm<Node2VecResult> {
         TerminationFlag terminationFlag
     ) {
         List<Node2VecRandomWalkTask> tasks = new ArrayList<>();
-        var randomSeed = maybeRandomSeed.orElseGet(() -> new Random().nextLong());
+        long randomSeed = maybeRandomSeed.orElseGet(() -> new Random().nextLong());
         var nextNodeSupplier = RandomWalkCompanion.nextNodeSupplier(graph, sourceNodes);
         var cumulativeWeightsSupplier = RandomWalkCompanion.cumulativeWeights(
             graph,
@@ -172,8 +172,9 @@ public final class Node2Vec extends Algorithm<Node2VecResult> {
             progressTracker
         );
 
-        AtomicLong index = new AtomicLong();
-        for (int i = 0; i < concurrency.value(); ++i) {
+        var index = new AtomicLong();
+        var c = concurrency.value();
+        for (int i = 0; i < c; ++i) {
             tasks.add(new Node2VecRandomWalkTask(
                 graph.concurrentCopy(),
                 nextNodeSupplier,

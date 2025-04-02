@@ -19,8 +19,11 @@
  */
 package org.neo4j.gds.embeddings.node2vec;
 
+import org.assertj.core.api.SoftAssertions;
+import org.assertj.core.api.junit.jupiter.InjectSoftAssertions;
 import org.assertj.core.api.junit.jupiter.SoftAssertionsExtension;
 import org.assertj.core.data.Offset;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -36,7 +39,6 @@ import org.neo4j.gds.TestProgressTrackerHelper;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.collections.ha.HugeLongArray;
-import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.collections.hsa.HugeSparseLongArray;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.concurrency.Concurrency;
@@ -55,6 +57,8 @@ import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.gds.ml.core.tensor.FloatVector;
 import org.neo4j.gds.termination.TerminationFlag;
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.SplittableRandom;
@@ -62,7 +66,6 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 
 @ExtendWith(SoftAssertionsExtension.class)
@@ -93,9 +96,12 @@ class Node2VecTest {
     @Inject
     private GraphStore graphStore;
 
+    @InjectSoftAssertions
+    private SoftAssertions assertions;
+
     @ParameterizedTest(name = "{0}")
     @MethodSource("graphs")
-    void embeddingsShouldHaveTheConfiguredDimension(String msg, List<NodeLabel> nodeLabels) {
+    void embeddingsShouldHaveTheConfiguredDimension(String msg, Collection<NodeLabel> nodeLabels) {
 
         var currentGraph = graphStore.getGraph(nodeLabels);
         int embeddingDimension = 128;
@@ -121,7 +127,7 @@ class Node2VecTest {
             1000
         );
 
-        HugeObjectArray<FloatVector> node2Vec = Node2Vec.create(
+        var node2Vec = Node2Vec.create(
             currentGraph,
             new Node2VecParameters(
                 samplingWalkParameters,
@@ -133,11 +139,11 @@ class Node2VecTest {
             TerminationFlag.RUNNING_TRUE
         ).compute().embeddings();
 
-        currentGraph.forEachNode(node -> {
-                assertEquals(embeddingDimension, node2Vec.get(node).data().length);
-                return true;
-            }
-        );
+        assertThat(node2Vec.toArray())
+            .hasSize((int) currentGraph.nodeCount())
+            .extracting(FloatVector::data)
+            .as("All embeddings should have the specified `embeddingDimension`.")
+            .allSatisfy(data -> assertThat(data).hasSize(embeddingDimension));
     }
 
     @Test
@@ -180,12 +186,12 @@ class Node2VecTest {
 
     }
 
-    //"The order of the randomWalks + its usage in the training is not deterministic yet. Can guarantee only for concurrency 1")
-    @ParameterizedTest
-    @ValueSource(ints = {1})
-    void randomSeed(int concurrency) {
+    @Test
+    @DisplayName("Should produce the same embeddings for the same randomSeed and single-threaded.")
+    void twoRunsSingleThreadedWithTheSameRandomSeed() {
 
-        int embeddingDimension = 2;
+        var concurrency = new Concurrency(1);
+        int embeddingDimension = 8;
         var walkParameters = new SamplingWalkParameters(
             NO_SOURCE_NODES,
             1,
@@ -207,14 +213,62 @@ class Node2VecTest {
             EmbeddingInitializer.NORMALIZED
         );
 
-        var embeddings = Node2Vec.create(
+        var firstRunEmbeddings = Node2Vec.create(
+            graph,
+            new Node2VecParameters(walkParameters, trainParameters, concurrency, Optional.of(1337L)),
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
+        ).compute().embeddings();
+
+        var secondRunEmbedding = Node2Vec.create(
+            graph,
+            new Node2VecParameters(walkParameters, trainParameters, concurrency, Optional.of(1337L)),
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
+        ).compute().embeddings();
+
+        for (long node = 0; node < graph.nodeCount(); node++) {
+            var e1 = firstRunEmbeddings.get(node).data();
+            var e2 = secondRunEmbedding.get(node).data();
+            assertThat(e1)
+                .isEqualTo(e2);
+        }
+    }
+
+    @ParameterizedTest(name = "Should produce similar embeddings for the same randomSeed and concurrency={0}")
+    @ValueSource(ints = {4, 8})
+    void twoRunsWithTheSameConcurrencyAndRandomSeed(int concurrency) {
+
+        int embeddingDimension = 8;
+        var walkParameters = new SamplingWalkParameters(
+            NO_SOURCE_NODES,
+            1,
+            20,
+            1.0,
+            1.0,
+            0.001,
+            0.75,
+            1000
+        );
+
+        var trainParameters = new TrainParameters(
+            0.025,
+            0.0001,
+            1,
+            1,
+            1,
+            embeddingDimension,
+            EmbeddingInitializer.NORMALIZED
+        );
+
+        var firstRunEmbeddings = Node2Vec.create(
             graph,
             new Node2VecParameters(walkParameters, trainParameters, new Concurrency(concurrency), Optional.of(1337L)),
             ProgressTracker.NULL_TRACKER,
             TerminationFlag.RUNNING_TRUE
         ).compute().embeddings();
 
-        var otherEmbeddings = Node2Vec.create(
+        var secondRunEmbedding = Node2Vec.create(
             graph,
             new Node2VecParameters(walkParameters, trainParameters, new Concurrency(concurrency), Optional.of(1337L)),
             ProgressTracker.NULL_TRACKER,
@@ -222,7 +276,83 @@ class Node2VecTest {
         ).compute().embeddings();
 
         for (long node = 0; node < graph.nodeCount(); node++) {
-            assertThat(otherEmbeddings.get(node)).isEqualTo(embeddings.get(node));
+            var e1 = firstRunEmbeddings.get(node).data();
+            var e2 = secondRunEmbedding.get(node).data();
+            var cosine = Intersections.cosine(e1, e2, embeddingDimension);
+            assertions.assertThat(cosine)
+                .as(
+                    """
+                        Cosine similarity of the embedding for node %s should be close to 1, it was %s.
+                        Actual embeddings are:
+                        e1 = %s,
+                        e2 = %s
+                        """,
+                    node,
+                    cosine,
+                    Arrays.toString(e1),
+                    Arrays.toString(e2)
+                )
+                .isCloseTo(1, Offset.offset(1e-3f));
+        }
+    }
+
+    @Test
+    @DisplayName("Should produce similar embeddings for the same randomSeed and different concurrency values.")
+    void twoRunsSameRandomSeedDifferentConcurrency() {
+        int embeddingDimension = 8;
+        var walkParameters = new SamplingWalkParameters(
+            NO_SOURCE_NODES,
+            1,
+            20,
+            1.0,
+            1.0,
+            0.001,
+            0.75,
+            1000
+        );
+
+        var trainParameters = new TrainParameters(
+            0.025,
+            0.0001,
+            1,
+            1,
+            1,
+            embeddingDimension,
+            EmbeddingInitializer.NORMALIZED
+        );
+
+        var firstRunEmbeddings = Node2Vec.create(
+            graph,
+            new Node2VecParameters(walkParameters, trainParameters, new Concurrency(4), Optional.of(1337L)),
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
+        ).compute().embeddings();
+
+        var secondRunEmbedding = Node2Vec.create(
+            graph,
+            new Node2VecParameters(walkParameters, trainParameters, new Concurrency(8), Optional.of(1337L)),
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
+        ).compute().embeddings();
+
+        for (long node = 0; node < graph.nodeCount(); node++) {
+            var e1 = firstRunEmbeddings.get(node).data();
+            var e2 = secondRunEmbedding.get(node).data();
+            var cosine = Intersections.cosine(e1, e2, embeddingDimension);
+            assertions.assertThat(cosine)
+                .as(
+                    """
+                        Cosine similarity of the embedding for node %s should be close to 1, it was %s.
+                        Actual embeddings are:
+                        e1 = %s,
+                        e2 = %s
+                        """,
+                    node,
+                    cosine,
+                    Arrays.toString(e1),
+                    Arrays.toString(e2)
+                )
+                .isCloseTo(1, Offset.offset(1e-3f));
         }
     }
 

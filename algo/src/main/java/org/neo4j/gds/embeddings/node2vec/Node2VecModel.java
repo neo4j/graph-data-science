@@ -162,17 +162,10 @@ public class Node2VecModel {
             FloatVector.class,
             nodeCount
         );
-        double bound;
-        switch (embeddingInitializer) {
-            case UNIFORM:
-                bound = 1.0;
-                break;
-            case NORMALIZED:
-                bound = 0.5 / embeddingDimensions;
-                break;
-            default:
-                throw new IllegalStateException("Missing implementation for: " + embeddingInitializer);
-        }
+        double bound = switch (embeddingInitializer) {
+            case UNIFORM -> 1.0;
+            case NORMALIZED -> 0.5 / embeddingDimensions;
+        };
 
         for (var i = 0L; i < nodeCount; i++) {
             random.setSeed(toOriginalNodeId.applyAsLong(i) + randomSeed);
