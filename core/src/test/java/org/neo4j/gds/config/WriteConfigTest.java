@@ -102,6 +102,38 @@ class WriteConfigTest {
     }
 
     @ParameterizedTest
+    @EnumSource(WriteMode.class)
+    void doNotBlockWritesWhenWritingToResultStore(WriteMode writeMode) {
+        var config = CypherMapWrapper.empty();
+        var testConfig = new TestWriteConfigImpl
+            .Builder()
+            .writeToResultStore(true)
+            .build();
+
+        var nodes = ImmutableNodes.builder()
+            .idMap(new DirectIdMap(0))
+            .schema(MutableNodeSchema.empty())
+            .build();
+
+        var testGraphStore = new GraphStoreBuilder()
+            .databaseInfo(DatabaseInfo.of(DatabaseId.of("neo4j"), DatabaseLocation.LOCAL))
+            .capabilities(ImmutableStaticCapabilities.of(writeMode))
+            .schema(GraphSchema.mutable())
+            .nodes(nodes)
+            .relationshipImportResult(RelationshipImportResult.of(Map.of()))
+            .concurrency(new Concurrency(1))
+            .build();
+
+        assertThatCode(
+            () -> testConfig.validateGraphIsSuitableForWrite(
+                testGraphStore,
+                List.of(),
+                List.of()
+            )
+        ).doesNotThrowAnyException();
+    }
+
+    @ParameterizedTest
     @MethodSource("baseConfigs")
     void shouldCreateFromExistingConfig(TestWriteConfig baseConfig) {
         assertThatCode(() -> TestWriteConfigImpl.Builder.from(baseConfig).build()).doesNotThrowAnyException();

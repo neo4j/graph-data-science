@@ -60,7 +60,7 @@ public interface PregelProcedureConfig extends
         }
 
         if (!graphStore.capabilities().canWriteToLocalDatabase() && !graphStore.capabilities()
-            .canWriteToRemoteDatabase()) {
+            .canWriteToRemoteDatabase() && !writeToResultStore()) {
             throw new IllegalArgumentException("The provided graph does not support `write` execution mode.");
         }
     }
