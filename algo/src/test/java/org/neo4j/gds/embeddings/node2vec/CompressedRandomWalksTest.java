@@ -25,11 +25,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 class CompressedRandomWalksTest {
 
@@ -43,7 +42,7 @@ class CompressedRandomWalksTest {
                 walk[i] = walkIndex + i;
             }
             return walk;
-        }).collect(Collectors.toList());
+        }).toList();
 
         for (int i = 0; i < walks.size(); ++i) {
             var walk = walks.get(i);
@@ -61,9 +60,10 @@ class CompressedRandomWalksTest {
 
         compressedRandomWalks.add(0L, 1L);
 
-        assertThatThrownBy(() -> compressedRandomWalks.iterator(0, 2))
-            .hasMessageContaining("chunk exceeds the number of stored random walks")
-            .hasMessageContaining("0-1");
+        assertThatIllegalArgumentException()
+            .isThrownBy(() -> compressedRandomWalks.iterator(0, 2))
+            .withMessageContaining("chunk exceeds the number of stored random walks")
+            .withMessageContaining("0-1");
     }
 
     private void assertIteratorContent(Iterator<long[]> iterator, Iterable<long[]> expected) {

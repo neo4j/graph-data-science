@@ -62,7 +62,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
         //neg[i] = 2*pow(16,negativeSamplingExponent) + neg[i-1]
         long expectedNeg0 = 2 * (long) Math.pow(app0, negativeSamplingExponent);
-        long expectedNeg1 = 2 * (long) Math.pow(app1, negativeSamplingExponent) + expectedNeg0 ;
+        long expectedNeg1 = 2 * (long) Math.pow(app1, negativeSamplingExponent) + expectedNeg0;
 
         assertThat(negSampling.get(0)).isEqualTo(expectedNeg0);
         assertThat(negSampling.get(1)).isEqualTo(expectedNeg1);

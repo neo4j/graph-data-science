@@ -19,13 +19,17 @@
  */
 package org.neo4j.gds.embeddings.node2vec;
 
+import org.assertj.core.api.SoftAssertions;
+import org.assertj.core.api.junit.jupiter.InjectSoftAssertions;
+import org.assertj.core.api.junit.jupiter.SoftAssertionsExtension;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.Intersections;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.ml.core.helper.FloatVectorTestUtils;
 
 import java.util.Optional;
 import java.util.Random;
@@ -34,11 +38,15 @@ import java.util.stream.LongStream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@ExtendWith(SoftAssertionsExtension.class)
 class Node2VecModelTest {
+
+    @InjectSoftAssertions
+    private SoftAssertions assertions;
 
     @Test
     void testModel() {
-        Random random = new Random(42);
+        var random = new Random(42);
         int numberOfClusters = 10;
         int clusterSize = 100;
         int numberOfWalks = 10;
@@ -51,7 +59,7 @@ class Node2VecModelTest {
             0.75
         );
 
-        CompressedRandomWalks walks = generateRandomWalks(
+        var walks = generateRandomWalks(
             probabilitiesBuilder,
             numberOfClusters,
             clusterSize,
@@ -60,7 +68,8 @@ class Node2VecModelTest {
             random
         );
 
-        var trainParameters = new TrainParameters(0.05, 0.0001, 5, 10, 1, 10, EmbeddingInitializer.NORMALIZED);
+        var embeddingDimension = 10;
+        var trainParameters = new TrainParameters(0.05, 0.0001, 5, 10, 1, embeddingDimension, EmbeddingInitializer.NORMALIZED);
 
         int nodeCount = numberOfClusters * clusterSize;
 
@@ -80,12 +89,15 @@ class Node2VecModelTest {
         // as the order of the randomWalks is not deterministic, we also have non-fixed losses
         assertThat(trainResult.lossPerIteration())
             .hasSize(5)
-            .allMatch(loss -> loss > 0 && Double.isFinite(loss));
+            .allSatisfy(loss -> assertThat(loss).isPositive().isFinite());
 
         var embeddings = trainResult.embeddings();
+        assertThat(embeddings.size()).isEqualTo(nodeCount);
 
-        for (long idx = 0; idx < embeddings.size(); idx++) {
-            assertThat(FloatVectorTestUtils.notContainsNaN(embeddings.get(idx))).isTrue();
+        for (long idx = 0; idx < nodeCount; idx++) {
+            assertThat(embeddings.get(idx).data())
+                .hasSize(embeddingDimension)
+                .doesNotContain(Float.NaN);
         }
 
         double innerClusterSum = LongStream.range(0, numberOfClusters)
@@ -140,11 +152,10 @@ class Node2VecModelTest {
         );
     }
 
-   // @Disabled("The order of the randomWalks + its usage in the training is not deterministic yet.")
-    //We can only guarantee consstency for concurrency 1
     @ParameterizedTest
     @ValueSource(ints = {0, 1, 4})
-    void randomSeed(int iterations) {
+    @DisplayName("Should produce the same embeddings for the same randomSeed and single-threaded.")
+    void twoRunsSingleThreadedWithTheSameRandomSeed(int iterations) {
         var random = new Random(42);
         int numberOfClusters = 10;
         int clusterSize = 100;
@@ -164,7 +175,7 @@ class Node2VecModelTest {
 
         int nodeCount = numberOfClusters * clusterSize;
 
-        var node2VecModel = new Node2VecModel(
+        var firstRunEmbeddings = new Node2VecModel(
             nodeId -> nodeId,
             nodeCount,
             trainParameters,
@@ -173,9 +184,9 @@ class Node2VecModelTest {
             walks,
             probabilitiesBuilder.build(),
             ProgressTracker.NULL_TRACKER
-        );
+        ).train().embeddings();
 
-        var otherNode2VecModel = new Node2VecModel(
+        var secondRunEmbedding = new Node2VecModel(
             nodeId -> nodeId,
             nodeCount,
             trainParameters,
@@ -184,13 +195,13 @@ class Node2VecModelTest {
             walks,
             probabilitiesBuilder.build(),
             ProgressTracker.NULL_TRACKER
-        );
+        ).train().embeddings();
 
-        var embeddings = node2VecModel.train().embeddings();
-        var otherEmbeddings = otherNode2VecModel.train().embeddings();
-
-        for (int nodeId = 0; nodeId < nodeCount; nodeId++) {
-            assertThat(embeddings.get(nodeId)).isEqualTo(otherEmbeddings.get(nodeId));
+        for (long node = 0; node < nodeCount; node++) {
+            var e1 = firstRunEmbeddings.get(node).data();
+            var e2 = secondRunEmbedding.get(node).data();
+            assertThat(e1)
+                .isEqualTo(e2);
         }
     }
 
