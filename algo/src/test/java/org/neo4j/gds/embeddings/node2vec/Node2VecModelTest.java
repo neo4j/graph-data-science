@@ -19,19 +19,31 @@
  */
 package org.neo4j.gds.embeddings.node2vec;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.Intersections;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.Optional;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.LongUnaryOperator;
 import java.util.stream.LongStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 class Node2VecModelTest {
 
@@ -194,6 +206,53 @@ class Node2VecModelTest {
         for (int nodeId = 0; nodeId < nodeCount; nodeId++) {
             assertThat(embeddings.get(nodeId)).isEqualTo(otherEmbeddings.get(nodeId));
         }
+    }
+
+    @Test
+    @DisplayName("When creating multiple tasks with random seed the actual seed for the task should be `randomSeed + taskId`.")
+    void shouldCreateTrainingTasksWithCorrectRandomSeed() {
+        var randomWalksMock = mock(CompressedRandomWalks.class);
+        when(randomWalksMock.size()).thenReturn(10L);
+        when(randomWalksMock.walkLength(anyLong())).thenReturn(3);
+
+        var randomWalkProbabilitiesMock = mock(RandomWalkProbabilities.class);
+        when(randomWalkProbabilitiesMock.sampleCount()).thenReturn(30L);
+        when(randomWalkProbabilitiesMock.negativeSamplingDistribution()).thenReturn(HugeLongArray.newArray(10));
+
+        var trainParametersMock = mock(TrainParameters.class);
+        when(trainParametersMock.embeddingInitializer()).thenReturn(EmbeddingInitializer.UNIFORM);
+
+        var node2VecModel = spy(
+            new Node2VecModel(
+                LongUnaryOperator.identity(),
+                1000,
+                trainParametersMock,
+                new Concurrency(4),
+                Optional.of(1L), // Random Seed
+                randomWalksMock,
+                randomWalkProbabilitiesMock,
+                ProgressTracker.NULL_TRACKER
+            )
+        );
+
+        var taskIdTracker = new AtomicInteger(0);
+        var trainingTasks = node2VecModel.createTrainingTasks(0.2f, taskIdTracker);
+
+        assertThat(trainingTasks).hasSize(5);
+
+        verify(node2VecModel, times(5)).createPositiveSampleProducer(any(), anyLong());
+        verify(node2VecModel, times(1)).createPositiveSampleProducer(any(), eq(1L));
+        verify(node2VecModel, times(1)).createPositiveSampleProducer(any(), eq(2L));
+        verify(node2VecModel, times(1)).createPositiveSampleProducer(any(), eq(3L));
+        verify(node2VecModel, times(1)).createPositiveSampleProducer(any(), eq(4L));
+        verify(node2VecModel, times(1)).createPositiveSampleProducer(any(), eq(5L));
+
+        verify(node2VecModel, times(5)).createNegativeSampleProducer(anyLong());
+        verify(node2VecModel, times(1)).createNegativeSampleProducer(1L);
+        verify(node2VecModel, times(1)).createNegativeSampleProducer(2L);
+        verify(node2VecModel, times(1)).createNegativeSampleProducer(3L);
+        verify(node2VecModel, times(1)).createNegativeSampleProducer(4L);
+        verify(node2VecModel, times(1)).createNegativeSampleProducer(5L);
     }
 
     private static CompressedRandomWalks generateRandomWalks(

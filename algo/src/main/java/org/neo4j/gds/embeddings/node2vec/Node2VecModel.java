@@ -19,10 +19,10 @@
  */
 package org.neo4j.gds.embeddings.node2vec;
 
-import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
+import org.neo4j.gds.core.utils.partition.DegreePartition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.mem.BitUtil;
@@ -154,10 +154,15 @@ public class Node2VecModel {
         }
         progressTracker.endSubTask();
 
-        return  new Node2VecResult(centerEmbeddings, lossPerIteration);
+        return new Node2VecResult(centerEmbeddings, lossPerIteration);
     }
 
-    private HugeObjectArray<FloatVector> initializeEmbeddings(LongUnaryOperator toOriginalNodeId, long nodeCount, int embeddingDimensions, Random random) {
+    private HugeObjectArray<FloatVector> initializeEmbeddings(
+        LongUnaryOperator toOriginalNodeId,
+        long nodeCount,
+        int embeddingDimensions,
+        Random random
+    ) {
         HugeObjectArray<FloatVector> embeddings = HugeObjectArray.newArray(
             FloatVector.class,
             nodeCount
@@ -206,18 +211,16 @@ public class Node2VecModel {
             HugeObjectArray<FloatVector> centerEmbeddings,
             HugeObjectArray<FloatVector> contextEmbeddings,
             PositiveSampleProducer positiveSampleProducer,
-            HugeLongArray negativeSamples,
+            NegativeSampleProducer negativeSampleProducer,
             float learningRate,
             int negativeSamplingRate,
             int embeddingDimensions,
-            ProgressTracker progressTracker,
-            long randomSeed,
-            int taskId
+            ProgressTracker progressTracker
         ) {
             this.centerEmbeddings = centerEmbeddings;
             this.contextEmbeddings = contextEmbeddings;
             this.positiveSampleProducer = positiveSampleProducer;
-            this.negativeSampleProducer = new NegativeSampleProducer(negativeSamples, randomSeed + taskId);
+            this.negativeSampleProducer = negativeSampleProducer;
             this.learningRate = learningRate;
             this.negativeSamplingRate = negativeSamplingRate;
 
@@ -254,7 +257,7 @@ public class Node2VecModel {
             double positiveSigmoid = Sigmoid.sigmoid(affinity);
             double negativeSigmoid = 1 - positiveSigmoid;
 
-            lossSum -= positive ? Math.log(positiveSigmoid+EPSILON) : Math.log(negativeSigmoid+EPSILON);
+            lossSum -= positive ? Math.log(positiveSigmoid + EPSILON) : Math.log(negativeSigmoid + EPSILON);
 
             float gradient = positive ? (float) -negativeSigmoid : (float) positiveSigmoid;
             // we are doing gradient descent, so we go in the negative direction of the gradient here
@@ -290,37 +293,47 @@ public class Node2VecModel {
         }
     }
 
-    List<TrainingTask> createTrainingTasks(float learningRate, AtomicInteger taskIndex){
+    List<TrainingTask> createTrainingTasks(float learningRate, AtomicInteger taskIndex) {
         return PartitionUtils.degreePartitionWithBatchSize(
             walks.size(),
             walks::walkLength,
             BitUtil.ceilDiv(randomWalkProbabilities.sampleCount(), concurrency.value()),
             partition -> {
-
                 var taskId = taskIndex.getAndIncrement();
-                var positiveSampleProducer = new PositiveSampleProducer(
-                    walks.iterator(partition.startNode(), partition.nodeCount()),
-                    randomWalkProbabilities.positiveSamplingProbabilities(),
-                    windowSize,
-                    Optional.of(randomSeed),
-                    taskId
-                );
-
+                var taskRandomSeed = randomSeed + taskId;
+                var positiveSampleProducer = createPositiveSampleProducer(partition, taskRandomSeed);
+                var negativeSampleProducer = createNegativeSampleProducer(taskRandomSeed);
                 return new TrainingTask(
                     centerEmbeddings,
                     contextEmbeddings,
                     positiveSampleProducer,
-                    randomWalkProbabilities.negativeSamplingDistribution(),
+                    negativeSampleProducer,
                     learningRate,
                     negativeSamplingRate,
                     embeddingDimension,
-                    progressTracker,
-                    randomSeed,
-                    taskId
+                    progressTracker
                 );
             }
         );
+    }
 
+    NegativeSampleProducer createNegativeSampleProducer(long randomSeed) {
+        return new NegativeSampleProducer(
+            randomWalkProbabilities.negativeSamplingDistribution(),
+            randomSeed
+        );
+    }
+
+    PositiveSampleProducer createPositiveSampleProducer(
+        DegreePartition partition,
+        long randomSeed
+    ) {
+        return new PositiveSampleProducer(
+            walks.iterator(partition.startNode(), partition.nodeCount()),
+            randomWalkProbabilities.positiveSamplingProbabilities(),
+            windowSize,
+            randomSeed
+        );
     }
 
 }

@@ -22,9 +22,7 @@ package org.neo4j.gds.embeddings.node2vec;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 
 import java.util.Iterator;
-import java.util.Optional;
 import java.util.SplittableRandom;
-import java.util.concurrent.ThreadLocalRandom;
 
 import static org.neo4j.gds.mem.BitUtil.ceilDiv;
 
@@ -42,14 +40,13 @@ public class PositiveSampleProducer {
     private int contextWordIndex;
     private int currentWindowStart;
     private int currentWindowEnd;
-    private SplittableRandom probabilitySupplier;
+    private final SplittableRandom probabilitySupplier;
 
     PositiveSampleProducer(
         Iterator<long[]> walks,
         HugeDoubleArray samplingProbabilities,
         int windowSize,
-        Optional<Long> maybeRandomSeed,
-        int taskId
+        long randomSeed
     ) {
         this.walks = walks;
         this.samplingProbabilities = samplingProbabilities;
@@ -60,10 +57,7 @@ public class PositiveSampleProducer {
         this.currentWalk = new long[0];
         this.centerWordIndex = -1;
         this.contextWordIndex = 1;
-        probabilitySupplier = maybeRandomSeed
-            .map(seed -> new SplittableRandom(taskId + seed))
-            .orElseGet(() -> new SplittableRandom(ThreadLocalRandom.current().nextLong()));
-
+        probabilitySupplier = new SplittableRandom(randomSeed);
     }
 
     public boolean next(long[] buffer) {
