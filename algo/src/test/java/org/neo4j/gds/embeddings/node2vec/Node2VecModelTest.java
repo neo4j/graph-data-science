@@ -25,7 +25,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.Intersections;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.ml.core.helper.FloatVectorTestUtils;
 
 import java.util.Optional;
 import java.util.Random;
@@ -38,7 +37,7 @@ class Node2VecModelTest {
 
     @Test
     void testModel() {
-        Random random = new Random(42);
+        var random = new Random(42);
         int numberOfClusters = 10;
         int clusterSize = 100;
         int numberOfWalks = 10;
@@ -80,12 +79,15 @@ class Node2VecModelTest {
         // as the order of the randomWalks is not deterministic, we also have non-fixed losses
         assertThat(trainResult.lossPerIteration())
             .hasSize(5)
-            .allMatch(loss -> loss > 0 && Double.isFinite(loss));
+            .allSatisfy(loss -> assertThat(loss).isPositive().isFinite());
 
         var embeddings = trainResult.embeddings();
+        assertThat(embeddings.size()).isEqualTo(nodeCount);
 
-        for (long idx = 0; idx < embeddings.size(); idx++) {
-            assertThat(FloatVectorTestUtils.notContainsNaN(embeddings.get(idx))).isTrue();
+        for (long idx = 0; idx < nodeCount; idx++) {
+            assertThat(embeddings.get(idx).data())
+                .hasSize(trainParameters.embeddingDimension())
+                .doesNotContain(Float.NaN);
         }
 
         double innerClusterSum = LongStream.range(0, numberOfClusters)
