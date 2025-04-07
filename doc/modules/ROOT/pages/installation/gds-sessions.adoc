@@ -5,18 +5,49 @@ NOTE: GDS Sessions are currently in Early Access and not available by default. C
 A GDS Session is an on-demand ephemeral compute environment for running GDS workloads.
 It is offered as part of Neo4j Aura, a fast, scalable, always-on, fully automated cloud graph platform.
 
-A GDS Session reads data from a Neo4j DBMS through a _remote projection_, runs computations on the projected graph, and optionally writes the results back to the DBMS using _remote write-back_.
+A GDS Session reads data from one of three categories of data sources:
+
+- Neo4j AuraDB
+- self-managed Neo4j DBMS
+- a non-Neo4j data source
+
+We call the process of populating the session with data a _remote projection_.
+Once populated, a GDS Session can run GDS workloads, such as algorithms and machine learning models.
+The results from these computations can be written back to the original source, using _remote write-back_ in the case of a Neo4j data source (Aura or self-managed).
 
 
+== Primary API surfaces
 
-== GDS Session management
-
-GDS Sessions, unlike GDS plugin, do not require any installation to a Neo4j DBMS.
+GDS Sessions do not require any installation to a Neo4j DBMS.
 Instead, a GDS Session is started on-demand to perform GDS computations.
-To start a GDS Session, use the latest version of the link:https://neo4j.com/docs/graph-data-science-client/current/gds-session/[GDS Python Client].
+There are two primary APIs for working with GDS Sessions.
 
+.GDS Python Client
 Using the client, it is possible to perform all operations on a GDS Session.
 For a comprehensive API overview including examples and tutorials, see link:https://neo4j.com/docs/graph-data-science-client/current/gds-session/[the GDS Python Client manual].
+
+In particular, the GDS Python Client allows you to:
+
+- link:https://neo4j.com/docs/graph-data-science-client/current/gds-session/#_creating_a_gds_session[Create GDS Sessions]
+- link:https://neo4j.com/docs/graph-data-science-client/current/gds-session/#_projecting_graphs_into_a_gds_session[Project graphs into GDS sessions]
+
+- link:https://neo4j.com/docs/graph-data-science-client/current/gds-session/#_running_algorithms[Run algorithms and machine learning operations]
+- link:https://neo4j.com/docs/graph-data-science-client/current/gds-session/#_remote_write_back[If sourced from a Neo4j DBMS, write back results]
+- link:https://neo4j.com/docs/graph-data-science-client/current/gds-session/#_listing_gds_sessions[List sessions]
+- link:https://neo4j.com/docs/graph-data-science-client/current/gds-session/#_deleting_a_gds_session[Delete sessions]
+
+A good place to start are the Tutorials:
+
+- link:https://neo4j.com/docs/graph-data-science-client/current/tutorials/gds-sessions/[GDS Sessions for AuraDB]
+- link:https://neo4j.com/docs/graph-data-science-client/current/tutorials/gds-sessions-self-managed/[GDS Sessions for Self-Managed Neo4j DB]
+
+.GDS Session Cypher API
+This manual covers all aspects of the GDS Session Cypher API.
+The Cypher API supports remote projections, calling algorithms and machine learning operations, and remote write back to the AuraDB instance.
+It is currently offered only for AuraDB and is used from within a Cypher query context, such as Query in the Aura Console.
+This means that the session is created automatically when a remote graph projection runs, and deleted automatically when the graph is dropped.
+
+In the following sections we will focus only on the GDS Session Cypher API.
 
 
 === Session lifecycle operations
