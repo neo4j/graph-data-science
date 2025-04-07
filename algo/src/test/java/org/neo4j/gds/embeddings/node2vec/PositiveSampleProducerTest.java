@@ -29,7 +29,6 @@ import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
@@ -61,7 +60,6 @@ class PositiveSampleProducerTest {
             walks.iterator(0, nbrOfWalks),
             HugeDoubleArray.of(LongStream.range(0, nbrOfWalks).mapToDouble((l) -> 1.0).toArray()),
             10,
-            Optional.empty(),
             0
         );
 
@@ -90,7 +88,6 @@ class PositiveSampleProducerTest {
             walks.iterator(0, nbrOfWalks),
             probabilities,
             10,
-            Optional.empty(),
             0
         );
         // does not overflow the stack = passes test
@@ -115,7 +112,6 @@ class PositiveSampleProducerTest {
             walks.iterator(0, nbrOfWalks / 2),
             HugeDoubleArray.of(LongStream.range(0, nbrOfWalks).mapToDouble((l) -> 1.0).toArray()),
             10,
-            Optional.empty(),
             0
         );
 
@@ -141,7 +137,6 @@ class PositiveSampleProducerTest {
             walks.iterator(0, walks.size()),
             centerNodeProbabilities,
             windowSize,
-            Optional.empty(),
             0
         );
         while (producer.next(buffer)) {
@@ -165,7 +160,6 @@ class PositiveSampleProducerTest {
             walks.iterator(0, 2),
             centerNodeProbabilities,
             3,
-            Optional.empty(),
             0
         );
         while (producer.next(buffer)) {
@@ -212,7 +206,6 @@ class PositiveSampleProducerTest {
             walks.iterator(0, walks.size()),
             centerNodeProbabilities,
             3,
-            Optional.empty(),
             0
         );
 
