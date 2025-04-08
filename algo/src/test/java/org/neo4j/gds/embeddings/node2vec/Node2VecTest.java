@@ -550,4 +550,139 @@ class Node2VecTest {
                 "Node2Vec :: Finished"
             );
     }
+
+    @Test
+    void shouldCreateWalks(){
+        var trainParameters = new TrainParameters(
+            0.025,
+            0.0001,
+            1,
+            10,
+            5,
+            10,
+            EmbeddingInitializer.NORMALIZED
+        );
+
+        var samplingWalkParameters = new SamplingWalkParameters(
+            NO_SOURCE_NODES,
+            10,
+            80,
+            1.0,
+            1.0,
+            0.001,
+            0.75,
+            1000
+        );
+
+        var params = new Node2VecParameters(
+            samplingWalkParameters,
+            trainParameters,
+            new Concurrency(4),
+            Optional.of(42L)
+        );
+
+        var probabilitiesBuilder = new RandomWalkProbabilities.Builder(
+            graph.nodeCount(),
+            new Concurrency(4),
+            samplingWalkParameters.positiveSamplingFactor(),
+            samplingWalkParameters.negativeSamplingExponent()
+        );
+
+        var node2Vec = Node2Vec.create(
+            graph,
+            params,
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
+        );
+
+        var walks = node2Vec.createWalks(probabilitiesBuilder);
+
+        assertThat(walks.size()).isEqualTo(10*3);
+        for (int i=0;i<walks.size();++i){
+            assertThat(walks.walkLength(i)).isEqualTo(80);
+        }
+
+    }
+
+    @Test
+    void walksShouldDifferWithRandomSeed(){
+        var trainParameters = new TrainParameters(
+            0.025,
+            0.0001,
+            1,
+            10,
+            5,
+            10,
+            EmbeddingInitializer.NORMALIZED
+        );
+
+        var samplingWalkParameters = new SamplingWalkParameters(
+            NO_SOURCE_NODES,
+            10,
+            80,
+            1.0,
+            1.0,
+            0.001,
+            0.75,
+            1000
+        );
+
+        var params1 = new Node2VecParameters(
+            samplingWalkParameters,
+            trainParameters,
+            new Concurrency(1),
+            Optional.of(42L)
+        );
+        var params2 = new Node2VecParameters(
+            samplingWalkParameters,
+            trainParameters,
+            new Concurrency(1),
+            Optional.of(1337L)
+        );
+
+        var probabilitiesBuilder = new RandomWalkProbabilities.Builder(
+            graph.nodeCount(),
+            new Concurrency(4),
+            samplingWalkParameters.positiveSamplingFactor(),
+            samplingWalkParameters.negativeSamplingExponent()
+        );
+
+        var node2Vec1 = Node2Vec.create(
+            graph,
+            params1,
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
+        );
+
+        var node2Vec2 = Node2Vec.create(
+            graph,
+            params2,
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
+        );
+
+        var walks1 = node2Vec1.createWalks(probabilitiesBuilder);
+        var walks2 = node2Vec2.createWalks(probabilitiesBuilder);
+        var iterator1 = walks1.iterator(0,walks1.size());
+        var iterator2 = walks2.iterator(0,walks1.size());
+        assertThat(walks2.size()).isEqualTo(walks1.size());
+        int  uneven =0;
+        while (iterator2.hasNext()){
+            var walk1 = iterator1.next();
+            var walk2 = iterator2.next();
+            if (walk1.length!=walk2.length){
+                uneven++;
+            }
+            else{
+                for (int j=0;j<walk2.length;++j){
+                    if (walk1[j]!=walk2[j]){
+                        uneven++;
+                        break;
+                    }
+                }
+            }
+        }
+        assertThat(uneven).isNotZero();
+
+    }
 }

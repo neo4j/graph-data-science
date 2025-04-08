@@ -99,38 +99,8 @@ public final class Node2Vec extends Algorithm<Node2VecResult> {
             samplingWalkParameters.positiveSamplingFactor(),
             samplingWalkParameters.negativeSamplingExponent()
         );
-        var walks = new CompressedRandomWalks(graph.nodeCount() * samplingWalkParameters.walksPerNode());
 
-        progressTracker.beginSubTask("RandomWalk");
-
-        var tasks = walkTasks(
-            walks,
-            probabilitiesBuilder,
-            graph,
-            maybeRandomSeed,
-            concurrency,
-            samplingWalkParameters.sourceNodes(),
-            samplingWalkParameters,
-            samplingWalkParameters.walkBufferSize(),
-            DefaultPool.INSTANCE,
-            progressTracker,
-            terminationFlag
-        );
-
-        progressTracker.beginSubTask("create walks");
-        RunWithConcurrency.builder().concurrency(concurrency).tasks(tasks).run();
-        walks.setMaxWalkLength(tasks.stream()
-            .map(Node2VecRandomWalkTask::maxWalkLength)
-            .max(Integer::compareTo)
-            .orElse(0));
-
-        walks.setSize(tasks.stream()
-            .map(task -> (1 + task.maxIndex()))
-            .max(Long::compareTo)
-            .orElse(0L));
-
-        progressTracker.endSubTask("create walks");
-        progressTracker.endSubTask("RandomWalk");
+        var walks = createWalks(probabilitiesBuilder);
 
         var node2VecModel = new Node2VecModel(
             graph::toOriginalNodeId,
@@ -193,5 +163,43 @@ public final class Node2Vec extends Algorithm<Node2VecResult> {
             ));
         }
         return tasks;
+    }
+
+
+    CompressedRandomWalks createWalks(RandomWalkProbabilities.Builder probabilitiesBuilder){
+        var walks = new CompressedRandomWalks(graph.nodeCount() * samplingWalkParameters.walksPerNode());
+
+        progressTracker.beginSubTask("RandomWalk");
+
+        var tasks = walkTasks(
+            walks,
+            probabilitiesBuilder,
+            graph,
+            maybeRandomSeed,
+            concurrency,
+            samplingWalkParameters.sourceNodes(),
+            samplingWalkParameters,
+            samplingWalkParameters.walkBufferSize(),
+            DefaultPool.INSTANCE,
+            progressTracker,
+            terminationFlag
+        );
+
+        progressTracker.beginSubTask("create walks");
+        RunWithConcurrency.builder().concurrency(concurrency).tasks(tasks).run();
+        walks.setMaxWalkLength(tasks.stream()
+            .map(Node2VecRandomWalkTask::maxWalkLength)
+            .max(Integer::compareTo)
+            .orElse(0));
+
+        walks.setSize(tasks.stream()
+            .map(task -> (1 + task.maxIndex()))
+            .max(Long::compareTo)
+            .orElse(0L));
+
+        progressTracker.endSubTask("create walks");
+        progressTracker.endSubTask("RandomWalk");
+
+        return walks;
     }
 }

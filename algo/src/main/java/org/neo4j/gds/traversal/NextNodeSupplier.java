@@ -52,7 +52,7 @@ public interface NextNodeSupplier {
         private final List<Long> nodes;
         private final AtomicInteger nextIndex;
 
-        static ListNodeSupplier of(List<Long> sourceNodes, Graph graph) {
+        public static ListNodeSupplier of(List<Long> sourceNodes, Graph graph) {
             var mappedIds = sourceNodes.stream().map(graph::toMappedNodeId).collect(Collectors.toList());
             return new ListNodeSupplier(mappedIds);
         }

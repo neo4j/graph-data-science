@@ -20,9 +20,9 @@
 package org.neo4j.gds.embeddings.node2vec;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.core.samplers.RandomWalkSampler;
+import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.traversal.NextNodeSupplier;
 
 import java.util.concurrent.atomic.AtomicLong;
@@ -82,11 +82,10 @@ final class Node2VecRandomWalkTask implements Runnable {
         this.maxIndex = 0;
     }
 
-    private boolean consumePath(long[] path) {
+     boolean consumePath(long[] path) {
         var index = walkIndex.getAndIncrement(); //perhaps we can also use a buffer to minimize walkIndex atomic operations
         maxIndex = index;
-        randomWalkProbabilitiesBuilder.registerWalk(path);
-        compressedRandomWalks.add(index, path);
+        addPath(index, path);
         maxWalkLength = Math.max(path.length, maxWalkLength);
         if (walks++ == walkBufferSize) {
             walks = 0;
@@ -95,6 +94,10 @@ final class Node2VecRandomWalkTask implements Runnable {
         return true;
     }
 
+    void addPath(long index, long[] path){
+        randomWalkProbabilitiesBuilder.registerWalk(path);
+        compressedRandomWalks.add(index, path);
+    }
     int maxWalkLength() {
         return maxWalkLength;
     }
@@ -117,7 +120,6 @@ final class Node2VecRandomWalkTask implements Runnable {
                 continue;
             }
             sampler.prepareForNewNode(nodeId);
-
             for (int walkIndex = 0; walkIndex < walksPerNode; walkIndex++) {
                 var path = sampler.walk(nodeId);
                 boolean shouldContinue = consumePath(path);
@@ -128,4 +130,5 @@ final class Node2VecRandomWalkTask implements Runnable {
             progressTracker.logProgress();
         }
     }
+
 }
