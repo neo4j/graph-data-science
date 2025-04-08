@@ -121,7 +121,6 @@ public class Node2VecModel {
 
     Node2VecResult train() {
         progressTracker.beginSubTask();
-        var learningRateAlpha = (initialLearningRate - minLearningRate) / iterations;
 
         var lossPerIteration = new ArrayList<Double>();
 
@@ -131,12 +130,9 @@ public class Node2VecModel {
             progressTracker.beginSubTask();
             progressTracker.setVolume(walks.size());
 
-            var learningRate = (float) Math.max(
-                minLearningRate,
-                initialLearningRate - iteration * learningRateAlpha
-            );
+            var iterationLearningRate = learningRate(iteration);
 
-            var tasks = createTrainingTasks(learningRate, taskIndex);
+            var tasks = createTrainingTasks(iterationLearningRate, taskIndex);
 
             RunWithConcurrency.builder()
                 .concurrency(concurrency)
@@ -240,6 +236,14 @@ public class Node2VecModel {
             randomWalkProbabilities.positiveSamplingProbabilities(),
             windowSize,
             randomSeed
+        );
+    }
+
+    float learningRate(int iteration){
+        var learningRateAlpha = (initialLearningRate - minLearningRate) / iterations;
+        return  (float) Math.max(
+            minLearningRate,
+            initialLearningRate - iteration * learningRateAlpha
         );
     }
 

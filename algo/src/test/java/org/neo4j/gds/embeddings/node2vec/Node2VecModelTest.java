@@ -294,4 +294,32 @@ class Node2VecModelTest {
 
         return walks;
     }
+
+    @Test
+    void shouldHaveCorrectLearningRate(){
+        var trainParams = mock(TrainParameters.class);
+        when(trainParams.initialLearningRate()).thenReturn(10d);
+        when(trainParams.minLearningRate()).thenReturn(5d);
+        when(trainParams.iterations()).thenReturn(4);
+        when(trainParams.embeddingInitializer()).thenReturn(EmbeddingInitializer.UNIFORM);
+
+        var node2VecModel = new Node2VecModel(
+            nodeId -> nodeId,
+            10,
+            trainParams,
+            new Concurrency(4),
+            Optional.empty(),
+            null,
+            null,
+            ProgressTracker.NULL_TRACKER
+        );
+
+        assertThat(node2VecModel.learningRate(0)).isEqualTo(10f);
+        assertThat(node2VecModel.learningRate(1)).isEqualTo(8.75f);
+        assertThat(node2VecModel.learningRate(2)).isEqualTo(7.5f);
+        assertThat(node2VecModel.learningRate(3)).isEqualTo(6.25f);
+        assertThat(node2VecModel.learningRate(4)).isEqualTo(5f);
+        assertThat(node2VecModel.learningRate(10000)).isEqualTo(5f);
+
+    }
 }
