@@ -70,20 +70,20 @@ final class TrainingTask implements Runnable {
 
         // this corresponds to a stochastic optimizer as the embeddings are updated after each sample
         while (positiveSampleProducer.next(buffer)) {
-            trainSample(buffer[0], buffer[1], true);
+            trainPositiveSample(buffer[0], buffer[1]);
 
             for (var i = 0; i < negativeSamplingRate; i++) {
-                trainSample(buffer[0], negativeSampleProducer.next(), false);
+                trainNegativeSample(buffer[0], negativeSampleProducer.next());
             }
             progressTracker.logProgress();
         }
     }
 
-     void trainSample(long center, long context, boolean positive) {
+    void trainPositiveSample(long center, long context) {
         var centerEmbedding = centerEmbeddings.get(center);
         var contextEmbedding = contextEmbeddings.get(context);
 
-        var scaledGradient = computeGradient(centerEmbedding,contextEmbedding, positive);
+        var scaledGradient = computePositiveGradient(centerEmbedding, contextEmbedding);
 
         updateEmbeddings(
             centerEmbedding,
@@ -94,7 +94,22 @@ final class TrainingTask implements Runnable {
         );
     }
 
-    float computeGradient(FloatVector centerEmbedding, FloatVector contextEmbedding, boolean positive){
+    void trainNegativeSample(long center, long context) {
+        var centerEmbedding = centerEmbeddings.get(center);
+        var contextEmbedding = contextEmbeddings.get(context);
+
+        var scaledGradient = computeNegativeGradient(centerEmbedding, contextEmbedding);
+
+        updateEmbeddings(
+            centerEmbedding,
+            contextEmbedding,
+            scaledGradient,
+            centerGradientBuffer,
+            contextGradientBuffer
+        );
+    }
+
+    float computePositiveGradient(FloatVector centerEmbedding, FloatVector contextEmbedding) {
         // L_pos = -log sigmoid(center * context)  ; gradient: -sigmoid (-center * context)
         // L_neg = -log sigmoid(-center * context) ; gradient: sigmoid (center * context)
         float affinity = centerEmbedding.innerProduct(contextEmbedding);
@@ -103,18 +118,36 @@ final class TrainingTask implements Runnable {
         double positiveSigmoid = Sigmoid.sigmoid(affinity);
         double negativeSigmoid = 1 - positiveSigmoid;
 
-        lossSum -= positive
-            ? Math.log(positiveSigmoid + Node2VecModel.EPSILON)
-            : Math.log(negativeSigmoid + Node2VecModel.EPSILON);
+        lossSum -= Math.log(positiveSigmoid + Node2VecModel.EPSILON);
 
-        float gradient = positive ? (float) -negativeSigmoid : (float) positiveSigmoid;
+        float gradient = (float) -negativeSigmoid;
         // we are doing gradient descent, so we go in the negative direction of the gradient here
-        float scaledGradient = -gradient * learningRate;
-
-        return  scaledGradient;
+        return -gradient * learningRate;
     }
 
-    void updateEmbeddings(FloatVector centerEmbedding, FloatVector contextEmbedding,  float scaledGradient, FloatVector centerGradientBuffer, FloatVector contextGradientBuffer ){
+    float computeNegativeGradient(FloatVector centerEmbedding, FloatVector contextEmbedding) {
+        // L_pos = -log sigmoid(center * context)  ; gradient: -sigmoid (-center * context)
+        // L_neg = -log sigmoid(-center * context) ; gradient: sigmoid (center * context)
+        float affinity = centerEmbedding.innerProduct(contextEmbedding);
+        //When |affinity| > 40, positiveSigmoid = 1. Double precision is not enough.
+        //Make sure negativeSigmoid can never be 0 to avoid infinity loss.
+        double positiveSigmoid = Sigmoid.sigmoid(affinity);
+        double negativeSigmoid = 1 - positiveSigmoid;
+
+        lossSum -= Math.log(negativeSigmoid + Node2VecModel.EPSILON);
+
+        float gradient = (float) positiveSigmoid;
+        // we are doing gradient descent, so we go in the negative direction of the gradient here
+        return -gradient * learningRate;
+    }
+
+    void updateEmbeddings(
+        FloatVector centerEmbedding,
+        FloatVector contextEmbedding,
+        float scaledGradient,
+        FloatVector centerGradientBuffer,
+        FloatVector contextGradientBuffer
+    ) {
         scale(contextEmbedding.data(), scaledGradient, centerGradientBuffer.data());
         scale(centerEmbedding.data(), scaledGradient, contextGradientBuffer.data());
 
@@ -125,4 +158,5 @@ final class TrainingTask implements Runnable {
     double lossSum() {
         return lossSum;
     }
+
 }

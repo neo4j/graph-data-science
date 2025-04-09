@@ -31,7 +31,6 @@ import java.util.List;
 import java.util.function.BiConsumer;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -61,7 +60,7 @@ class TrainingTaskTest {
         // neg = 1-pos = 0.00033535013
         //gradient =  -0.00033535013
         //scaled = -gradient * neg  = 00033535013 * 0.5  = 0.00016767506;
-        assertThat(task.computeGradient(center,context,true)).isCloseTo(0.00016767506f, Offset.offset(1e-5f));
+        assertThat(task.computePositiveGradient(center,context)).isCloseTo(0.00016767506f, Offset.offset(1e-5f));
 
     }
 
@@ -84,7 +83,7 @@ class TrainingTaskTest {
         // pos = 0.99966464987
         //gradient =  0.99966464987
         //scaled = -gradient * pos  = 0.99966464987 * 0.5  = -0.49983232493;
-        assertThat(task.computeGradient(center,context,false)).isCloseTo(-0.49983232493f, Offset.offset(1e-5f));
+        assertThat(task.computeNegativeGradient(center,context)).isCloseTo(-0.49983232493f, Offset.offset(1e-5f));
     }
 
     @Test
@@ -137,7 +136,7 @@ class TrainingTaskTest {
             ProgressTracker.NULL_TRACKER
         );
 
-        task.trainSample(0,1,false);
+        task.trainNegativeSample(0,1);
 
         //centerbuffer = [0, -0.99966464986, -1.49949697479]
         //contextbuffer= [0, -0.4998323249, -0.99966464986 ]
@@ -176,7 +175,7 @@ class TrainingTaskTest {
             ProgressTracker.NULL_TRACKER
         );
 
-        task.trainSample(0,1,true);
+        task.trainPositiveSample(0,1);
 
         //centerbuffer = [0, 0.00033535012, 0.00050302518]
         //contextbuffer= [0, 0.00016767506f, 0.00033535012 ]
@@ -228,41 +227,36 @@ class TrainingTaskTest {
         task.run();
 
         //for each buffer pair: 1 positive call, 42 negative
-        verify(task, times(8*43)).trainSample(anyLong(), anyLong(),anyBoolean());
+        verify(task, times(8)).trainPositiveSample(anyLong(), anyLong());
+        verify(task, times((42 * 3) + (42 * 2) + (42 * 2) + 42)).trainNegativeSample(anyLong(), anyLong());
 
         //negative call check:  0 has three buffer[0] appearances, 4 has one,  1 and 2 two, multiply by 42
-        verify(task, times(42*3)).trainSample(
+        verify(task, times(42*3)).trainNegativeSample(
             ArgumentMatchers.same(0L),
-            ArgumentMatchers.same(3L),
-            ArgumentMatchers.same(false)
+            ArgumentMatchers.same(3L)
         );
-        verify(task, times(42*2)).trainSample(
+        verify(task, times(42*2)).trainNegativeSample(
             ArgumentMatchers.same(1L),
-            ArgumentMatchers.same(3L),
-            ArgumentMatchers.same(false)
+            ArgumentMatchers.same(3L)
         );
-        verify(task, times(42*2)).trainSample(
+        verify(task, times(42*2)).trainNegativeSample(
             ArgumentMatchers.same(2L),
-            ArgumentMatchers.same(3L),
-            ArgumentMatchers.same(false)
+            ArgumentMatchers.same(3L)
         );
-        verify(task, times(42)).trainSample(
+        verify(task, times(42)).trainNegativeSample(
             ArgumentMatchers.same(4L),
-            ArgumentMatchers.same(3L),
-            ArgumentMatchers.same(false)
+            ArgumentMatchers.same(3L)
         );
         //positive
 
         BiConsumer<Long,Long> positiveSamplingVerify = (a,b) -> {
-            verify(task, times(1)).trainSample(
+            verify(task, times(1)).trainPositiveSample(
                 ArgumentMatchers.same(a),
-                ArgumentMatchers.same(b),
-                ArgumentMatchers.same(true)
+                ArgumentMatchers.same(b)
             );
-            verify(task, times(1)).trainSample(
+            verify(task, times(1)).trainPositiveSample(
                 ArgumentMatchers.same(b),
-                ArgumentMatchers.same(a),
-                ArgumentMatchers.same(true)
+                ArgumentMatchers.same(a)
             );
         };
         positiveSamplingVerify.accept(0L,1L);

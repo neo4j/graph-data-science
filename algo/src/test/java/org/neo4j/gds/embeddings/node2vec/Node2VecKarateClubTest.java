@@ -92,10 +92,12 @@ class Node2VecKarateClubTest {
                 var sim = Intersections.cosine(e1, e2, embeddingDimension);
                 sims[i] += sim;
             }
-            sims[i] = sims[i] / nodeCount;
+            sims[i] /= nodeCount;
         }
 
-        double averageSimilarity = Arrays.stream(sims).sum() / nodeCount;
-        assertThat(averageSimilarity).isGreaterThanOrEqualTo(0.81);
+        var averageSimilarity = Arrays.stream(sims).average();
+        assertThat(averageSimilarity)
+            .isPresent()
+            .satisfies(avg -> avg.ifPresent(val -> assertThat(val).isGreaterThanOrEqualTo(0.81)));
     }
 }
