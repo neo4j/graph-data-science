@@ -75,6 +75,10 @@ public class MiscellaneousAlgorithmsBusinessFacade {
     }
 
     public SingleTypeRelationships toUndirected(GraphStore graphStore, ToUndirectedConfig configuration) {
-        return miscellaneousAlgorithms.toUndirected(graphStore, configuration);
+        var params = configuration.toParameters();
+        var task  = tasks.toUndirected(graphStore);
+        var progressTracker =  progressTrackerCreator.createProgressTracker(task, configuration);
+
+        return miscellaneousAlgorithms.toUndirected(graphStore, params, progressTracker);
     }
 }

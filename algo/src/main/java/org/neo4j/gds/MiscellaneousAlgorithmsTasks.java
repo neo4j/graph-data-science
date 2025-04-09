@@ -20,11 +20,13 @@
 package org.neo4j.gds;
 
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.indexInverse.InverseRelationshipsTask;
 import org.neo4j.gds.indexinverse.InverseRelationshipsParameters;
 import org.neo4j.gds.scaleproperties.ScalePropertiesParameters;
 import org.neo4j.gds.scaleproperties.ScalePropertiesTask;
+import org.neo4j.gds.undirected.ToUndirectedTask;
 
 public final class MiscellaneousAlgorithmsTasks {
 
@@ -36,4 +38,7 @@ public final class MiscellaneousAlgorithmsTasks {
         return InverseRelationshipsTask.progressTask(nodecount, parameters);
     }
 
+    public Task toUndirected(GraphStore graphStore){
+        return  ToUndirectedTask.create(graphStore.nodeCount());
+    }
 }

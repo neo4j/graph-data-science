@@ -46,8 +46,8 @@ public interface ToUndirectedConfig extends AlgoBaseConfig, MutateRelationshipCo
     @Configuration.ConvertWith(method = "validateRelationshipTypeIdentifier")
     String relationshipType();
 
-    @Configuration.ConvertWith(method = "org.neo4j.gds.undirected.ToUndirectedAggregations#of")
-    @Configuration.ToMapValue("org.neo4j.gds.undirected.ToUndirectedAggregations#toString")
+    @Configuration.ConvertWith(method = "org.neo4j.gds.undirected.ToUndirectedAggregationsParser#parse")
+    @Configuration.ToMapValue("org.neo4j.gds.undirected.ToUndirectedAggregationsParser#toString")
     Optional<ToUndirectedAggregations> aggregation();
 
     @Configuration.Ignore
@@ -176,6 +176,16 @@ public interface ToUndirectedConfig extends AlgoBaseConfig, MutateRelationshipCo
 
     static @Nullable String validateRelationshipTypeIdentifier(String input) {
         return validateNoWhiteCharacter(emptyToNull(input), "relationshipType");
+    }
+
+    @Configuration.Ignore
+    default ToUndirectedParameters toParameters(){
+        return new ToUndirectedParameters(
+            concurrency(),
+            aggregation(),
+            mutateRelationshipType(),
+            internalRelationshipType()
+        );
     }
 
 }

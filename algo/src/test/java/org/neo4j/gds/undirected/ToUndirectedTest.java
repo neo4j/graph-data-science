@@ -22,31 +22,27 @@ package org.neo4j.gds.undirected;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.neo4j.gds.MiscellaneousAlgorithmsTasks;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.TestProgressTrackerHelper;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
-import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
-import org.neo4j.gds.applications.algorithms.miscellaneous.MiscellaneousAlgorithms;
 import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.loading.SingleTypeRelationships;
-import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
-import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.gdl.GdlFactory;
-import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Map;
 import java.util.Optional;
 
-import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.compat.TestLog.INFO;
@@ -77,16 +73,18 @@ class ToUndirectedTest {
     @ParameterizedTest
     @ValueSource(ints = {1, 4})
     void shouldCreateUndirectedRelationships(int concurrency) {
-        var config = ToUndirectedConfigImpl
-            .builder()
-            .concurrency(concurrency)
-            .relationshipType("T1")
-            .mutateRelationshipType("T2")
-            .build();
+
+        var  params = new ToUndirectedParameters(
+            new Concurrency(concurrency),
+            Optional.empty(),
+            "T2",
+            RelationshipType.of("T1")
+        );
+
 
         SingleTypeRelationships undirectedRelationships = new ToUndirected(
             directedGraphStore,
-            config,
+            params,
             ProgressTracker.NULL_TRACKER,
             DefaultPool.INSTANCE,
             TerminationFlag.RUNNING_TRUE
@@ -125,16 +123,17 @@ class ToUndirectedTest {
     @ParameterizedTest
     @ValueSource(ints = {1, 4})
     void shouldCreateUndirectedRelationshipsWithSingleRelationshipProperty(int concurrency) {
-        var config = ToUndirectedConfigImpl
-            .builder()
-            .concurrency(concurrency)
-            .relationshipType("T1")
-            .mutateRelationshipType("T2")
-            .build();
+
+        var  params = new ToUndirectedParameters(
+            new Concurrency(concurrency),
+            Optional.empty(),
+            "T2",
+            RelationshipType.of("T1")
+        );
 
         SingleTypeRelationships undirectedRelationships = new ToUndirected(
             singleDirectedGraphStore,
-            config,
+            params,
             ProgressTracker.NULL_TRACKER,
             DefaultPool.INSTANCE,
             TerminationFlag.RUNNING_TRUE
@@ -172,16 +171,18 @@ class ToUndirectedTest {
     @ParameterizedTest
     @ValueSource(ints = {1, 4})
     void shouldCreateUndirectedRelationshipsWithNoRelationshipProperty(int concurrency) {
-        var config = ToUndirectedConfigImpl
-            .builder()
-            .concurrency(concurrency)
-            .relationshipType("T1")
-            .mutateRelationshipType("T2")
-            .build();
+
+        var  params = new ToUndirectedParameters(
+            new Concurrency(concurrency),
+            Optional.empty(),
+            "T2",
+            RelationshipType.of("T1")
+        );
+
 
         SingleTypeRelationships undirectedRelationships = new ToUndirected(
             noPropertyDirectedGraphStore,
-            config,
+            params,
             ProgressTracker.NULL_TRACKER,
             DefaultPool.INSTANCE,
             TerminationFlag.RUNNING_TRUE
@@ -201,20 +202,19 @@ class ToUndirectedTest {
             "  (a), (b)" +
             ", (a)-[:T]->(b)" +
             ", (a)-[:T]->(b)" +
-            ", (a)-[:T]->(a)").build();
-
-        var config = ToUndirectedConfigImpl
-            .builder()
-            .concurrency(4)
-            .relationshipType("T")
-            .mutateRelationshipType("TU")
-            .aggregation(Aggregation.SINGLE)
+            ", (a)-[:T]->(a)")
             .build();
 
+        var  params = new ToUndirectedParameters(
+            new Concurrency(4),
+            Optional.of(new ToUndirectedAggregations.GlobalAggregation(Aggregation.SINGLE)),
+            "TU",
+            RelationshipType.of("T")
+        );
 
         SingleTypeRelationships undirectedRels = new ToUndirected(
             inputGraphStore,
-            config,
+            params,
             ProgressTracker.NULL_TRACKER,
             DefaultPool.INSTANCE,
             TerminationFlag.RUNNING_TRUE
@@ -237,18 +237,16 @@ class ToUndirectedTest {
             ", (a)-[:T {prop1: 1.0D, prop2: 2.0D}]->(b)" +
             ", (a)-[:T {prop1: 4.0D, prop2: 5.0D}]->(a)").build();
 
-        var config = ToUndirectedConfigImpl
-            .builder()
-            .concurrency(4)
-            .relationshipType("T")
-            .mutateRelationshipType("TU")
-            .aggregation(Aggregation.MAX)
-            .build();
-
+        var params = new ToUndirectedParameters(
+            new Concurrency(4),
+            Optional.of(new ToUndirectedAggregations.GlobalAggregation(Aggregation.MAX)),
+            "TU",
+            RelationshipType.of("T")
+        );
 
         SingleTypeRelationships aggregatedUndirectedRelationships = new ToUndirected(
             input,
-            config,
+            params,
             ProgressTracker.NULL_TRACKER,
             DefaultPool.INSTANCE,
             TerminationFlag.RUNNING_TRUE
@@ -280,17 +278,16 @@ class ToUndirectedTest {
             ", (a)-[:T {prop1: 1.0D, prop2: 2.0D}]->(b)" +
             ", (a)-[:T {prop1: 4.0D, prop2: 5.0D}]->(a)").build();
 
-        var config = ToUndirectedConfigImpl
-            .builder()
-            .concurrency(4)
-            .relationshipType("T")
-            .mutateRelationshipType("TU")
-            .aggregation(Map.of("prop1", "min", "prop2", "max"))
-            .build();
+        var params = new ToUndirectedParameters(
+            new Concurrency(4),
+            Optional.of(new ToUndirectedAggregations.AggregationPerProperty(Map.of("prop1", Aggregation.MIN, "prop2", Aggregation.MAX))),
+            "TU",
+            RelationshipType.of("T")
+        );
 
         SingleTypeRelationships aggregatedUndirectedRelationships = new ToUndirected(
             input,
-            config,
+            params,
             ProgressTracker.NULL_TRACKER,
             DefaultPool.INSTANCE,
             TerminationFlag.RUNNING_TRUE
@@ -316,25 +313,29 @@ class ToUndirectedTest {
 
     @Test
     void shouldLogProgress() {
-        var log = new GdsTestLog();
-        var requestScopedDependencies = RequestScopedDependencies.builder()
-            .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
-            .terminationFlag(TerminationFlag.RUNNING_TRUE)
-            .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
-            .build();
-        var progressTrackerCreator = new ProgressTrackerCreator(new LoggerForProgressTrackingAdapter(log), requestScopedDependencies);
-        var miscellaneousAlgorithms = new MiscellaneousAlgorithms(
-            progressTrackerCreator,
-            requestScopedDependencies.terminationFlag()
+
+        var  params = new ToUndirectedParameters(
+            new Concurrency(4),
+            Optional.empty(),
+            "T2",
+            RelationshipType.of("T1")
         );
 
-        var config = ToUndirectedConfigImpl
-            .builder()
-            .concurrency(4)
-            .relationshipType("T1")
-            .mutateRelationshipType("T2")
-            .build();
-        miscellaneousAlgorithms.toUndirected(directedGraphStore, config);
+        var progressTrackerWithLog = TestProgressTrackerHelper.create(
+            new MiscellaneousAlgorithmsTasks().toUndirected(directedGraphStore),
+            new Concurrency(4)
+        );
+
+        var progressTracker = progressTrackerWithLog.progressTracker();
+        var log = progressTrackerWithLog.log();
+
+        new ToUndirected(
+            directedGraphStore,
+            params,
+            progressTracker,
+            DefaultPool.INSTANCE,
+            TerminationFlag.RUNNING_TRUE
+        ).compute();
 
         var messagesInOrder = log.getMessages(INFO);
 

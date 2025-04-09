@@ -22,14 +22,12 @@ package org.neo4j.gds.applications.algorithms.miscellaneous;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmMachinery;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.collapsepath.CollapsePathParameters;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.loading.SingleTypeRelationships;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.indexInverse.InverseRelationships;
 import org.neo4j.gds.indexinverse.InverseRelationshipsParameters;
 import org.neo4j.gds.scaleproperties.ScaleProperties;
@@ -37,7 +35,7 @@ import org.neo4j.gds.scaleproperties.ScalePropertiesParameters;
 import org.neo4j.gds.scaleproperties.ScalePropertiesResult;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.undirected.ToUndirected;
-import org.neo4j.gds.undirected.ToUndirectedConfig;
+import org.neo4j.gds.undirected.ToUndirectedParameters;
 import org.neo4j.gds.walking.CollapsePath;
 
 import java.util.Map;
@@ -107,22 +105,11 @@ public class MiscellaneousAlgorithms {
         );
     }
 
-    public SingleTypeRelationships toUndirected(GraphStore graphStore, ToUndirectedConfig configuration) {
-        var task = Tasks.task(
-            AlgorithmLabel.ToUndirected.asString(),
-            Tasks.leaf("Create Undirected Relationships", graphStore.nodeCount()),
-            Tasks.leaf("Build undirected Adjacency list")
-        );
-        var progressTracker = progressTrackerCreator.createProgressTracker(
-            task,
-            configuration.jobId(),
-            configuration.concurrency(),
-            configuration.logProgress()
-        );
+    public SingleTypeRelationships toUndirected(GraphStore graphStore, ToUndirectedParameters parameters, ProgressTracker progressTracker) {
 
         var algorithm = new ToUndirected(
             graphStore,
-            configuration,
+            parameters,
             progressTracker,
             DefaultPool.INSTANCE,
             terminationFlag
@@ -132,7 +119,7 @@ public class MiscellaneousAlgorithms {
             algorithm,
             progressTracker,
             true,
-            configuration.concurrency()
+            parameters.concurrency()
         );
     }
 }

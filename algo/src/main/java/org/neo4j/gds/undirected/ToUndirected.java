@@ -49,13 +49,14 @@ import java.util.stream.Collectors;
 
 public class ToUndirected extends Algorithm<SingleTypeRelationships> {
     private final GraphStore graphStore;
-    private final ToUndirectedConfig config;
     private final ExecutorService executorService;
     private final Concurrency concurrency;
+    private final ToUndirectedParameters parameters;
+
 
     public ToUndirected(
         GraphStore graphStore,
-        ToUndirectedConfig config,
+        ToUndirectedParameters params,
         ProgressTracker progressTracker,
         ExecutorService executorService,
         TerminationFlag terminationFlag
@@ -63,9 +64,9 @@ public class ToUndirected extends Algorithm<SingleTypeRelationships> {
         super(progressTracker);
 
         this.graphStore = graphStore;
-        this.config = config;
+        this.parameters = params;
         this.executorService = executorService;
-        this.concurrency = config.concurrency();
+        this.concurrency = params.concurrency();
         this.terminationFlag = terminationFlag;
     }
 
@@ -73,7 +74,7 @@ public class ToUndirected extends Algorithm<SingleTypeRelationships> {
     public SingleTypeRelationships compute() {
         progressTracker.beginSubTask();
 
-        RelationshipType fromRelationshipType = config.internalRelationshipType();
+        RelationshipType fromRelationshipType = parameters.internalRelationshipType();
 
         var propertySchemas = graphStore
             .schema()
@@ -82,7 +83,7 @@ public class ToUndirected extends Algorithm<SingleTypeRelationships> {
         var propertyKeys = propertySchemas.stream().map(PropertySchema::key).collect(Collectors.toList());
 
         var relationshipsBuilder = initializeRelationshipsBuilder(
-            RelationshipType.of(config.mutateRelationshipType()),
+            RelationshipType.of(parameters.relationshipTypeToAdd()),
             propertySchemas
         );
 
@@ -122,7 +123,7 @@ public class ToUndirected extends Algorithm<SingleTypeRelationships> {
             .executorService(executorService)
             .orientation(Orientation.UNDIRECTED);
 
-        config
+        parameters
             .aggregation()
             .map(ToUndirectedAggregations::globalAggregation)
             .ifPresent(relationshipsBuilderBuilder::aggregation);
@@ -130,7 +131,7 @@ public class ToUndirected extends Algorithm<SingleTypeRelationships> {
 
         propertySchemas.forEach(propertySchema ->
             {
-                Aggregation aggregation = config.aggregation()
+                Aggregation aggregation = parameters.aggregation()
                     .map(aggregations -> aggregations.localAggregation(propertySchema.key()))
                     .orElse(propertySchema.aggregation());
 
