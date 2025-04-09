@@ -87,6 +87,71 @@ An expired session cannot be used to run workloads, does not cost anything, and 
 It can also be deleted through the Aura Console UI.
 
 
+== Syntax
+
+The GDS Session Cypher API matches the GDS plugin API as closely as possible.
+Thus, most of the content in this manual applies to both products.
+In general, expect to be able to use all query examples in this manual with the GDS Session Cypher API, subject to the limitations described in this section.
+
+
+=== Authentication to Aura API
+
+One key difference is the requirement for the GDS Session Cypher API to authenticate to the Aura API.
+This is done by calling the `gds.aura.api.credentials()` function in each Cypher query.
+An easy way to do that is to use a leading `WITH` clause in all queries.
+
+The function does not return any value, but registers the credentials in the query context of that query.
+The credentials are not persisted anywhere and will be immediately forgotten after the Cypher query has completed.
+
+Due to this requirement, short-form `CALL`-only queries cannot be used.
+This is due to a syntactic sugar rule in Cypher.
+See link:https://neo4j.com/docs/cypher-manual/current/clauses/call/#call-procedure-yield[the Cypher manual] for additional details.
+
+
+==== Examples
+
+.Projecting a graph to a GDS Session:
+[source, cypher]
+----
+// you can use any alias
+WITH gds.aura.api.credentials() AS credentials
+MATCH (n)
+OPTIONAL MATCH (n)-->(m)
+RETURN gds.graph.project('g', n, m, {}, {memory: '4GB'})
+----
+
+.Calling an algorithm in stream mode:
+[source, cypher]
+----
+// you can use any alias
+WITH gds.aura.api.credentials() AS c
+CALL gds.pageRank.stream('g')
+YIELD nodeId, score // must specify YIELD
+RETURN *
+----
+
+
+=== Projecting a graph
+
+Projecting a graph to a GDS Session is done using a xref:management-ops/graph-creation/graph-project-cypher-projection.adoc[Cypher projection].
+Note here that the additional parameters labeled `Aura Graph Analytics Serverless` apply.
+
+
+=== Running algorithms
+
+The GDS Session Cypher API supports most algorithms and machine learning operations.
+The syntax is the same as for the GDS plugin, but with the additional `WITH gds.aura.api.credentials() AS credentials` clause.
+
+
+==== Unsupported algorithms
+
+TODO list these here
+
+
+== Examples
+
+More thorough example with several algorithms and write-back operations.
+
 // === GDS workloads
 //
 // * Perform GDS algorithm computationsfootnote:limitations[See <<Limitations>>], including all execution modes.
