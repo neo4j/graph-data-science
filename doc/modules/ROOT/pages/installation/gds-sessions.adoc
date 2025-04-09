@@ -47,82 +47,110 @@ The Cypher API supports remote projections, calling algorithms and machine learn
 It is currently offered only for AuraDB and is used from within a Cypher query context, such as Query in the Aura Console.
 This means that the session is created automatically when a remote graph projection runs, and deleted automatically when the graph is dropped.
 
-In the following sections we will focus only on the GDS Session Cypher API.
+In the following sections we will focus only on the GDS Session Cypher API, assuming that it is used from an AuraDB instance.
 
 
-=== Session lifecycle operations
+== Session lifecycle and configuration
 
-* Create GDS Sessions connected to an AuraDB instance in the link:https://neo4j.com/docs/aura/auradb/#_plans[Business Critical or Virtual Dedicated Cloud] plan.
-* Create GDS Sessions connected to a self-hosted Neo4j DBMS, version `5.24.0` or newer.
-* List running sessions in a specific Aura project.
-* Delete specific sessions. By default, a session will be cleaned up after 1 hour of inactivity.
-
-
-=== GDS workloads
-
-* Perform GDS algorithm computationsfootnote:limitations[See <<Limitations>>], including all execution modes.
-* Train machine learning modelsfootnote:limitations[].
-* Run machine learning prediction pipelinesfootnote:limitations[].
+In the Cypher API, sessions are managed _implicitly_.
+That means that there is no operation to create or delete a session.
+Instead, a session is created when a remote projection is run, and deleted when the graph is dropped.
+Sessions cannot be listed directly, but _graphs_ can be listed using `gds.graph.list()`.
 
 
-=== Results processing
+=== Session size
 
-* Write back results to a Neo4j DBMS.
-* Stream back results, to
-** the GDS Python Client.
-** an Arrow client for the GDS Arrow Server.
+When the graph projection is requested, a mandatory `memory` parameter must be specified, indicating the size of the session.
+The size of the session is the maximum amount of memory allocated to the analytical process.
+A larger size means faster runtime and an ability to process larger volumes of data, but it will also be more expensive.
 
+Supported values are: `4GB`, `8GB`, `16GB`, `24GB`, `32GB`, `48GB`, `64GB`, `96GB`, `128GB`, `192GB`, `256GB`, `384GB`, and `512GB`.
 
-== Projecting a graph into a GDS Session
-
-Once you have a GDS Session, you can project a graph into it.
-This operation is called _remote projection_ because the data source is not a co-located database, but rather a remote one.
-
-A remote projection is similar to a xref:management-ops/graph-creation/graph-project-cypher-projection.adoc[Cypher projection] and has a similar syntax.
-The projection query runs on the database server, but the GDS graph appears in the GDS Session's Graph Catalog.
-A key difference is also the name of the aggregating function, which is `gds.graph.project.remote`.
-
-The standard ways to project a graph with GDS plugin (Native projections, Cypher projections, Legacy Cypher projections) are _not_ supported in GDS Sessions.
-The projection must be triggered from the data source, which is a Neo4j DBMS or a client of the GDS Arrow Server (see xref:management-ops/graph-creation/graph-project-apache-arrow.adoc[]).
+[NOTE]
+Session maximum size can be configured for your Aura organization.
+Check with your organization administrator what your maximum size is.
 
 
-== Writing back data to a Neo4j DBMS
+=== AuraDB source instance limitations
 
-The GDS Session's in-memory graph is projected from data in a Neo4j DBMS, either an AuraDB instance or a self-managed server.
-Write-back operations will persist the data back to the same Neo4j DBMS server.
-Once all desired results have been written back to the database, the GDS Session can be deleted with no data loss.
+The GDS Session Cypher API is available only for AuraDB instances in the Business Critical or Virtual Dedicated Cloud plans.
+Depending on which plan is used, different limitations apply.
+See link:https://neo4j.com/docs/aura/graph-analytics/#_comparison[Graph analytics in Aura] for a comparison view.
 
 
-== Limitations
+=== Session expiration and deletion
 
-* Native projections are not supported, including
-** `gds.graph.project`
-** `gds.graph.project.estimate`
-* Cypher projections are not supported, including
-** `gds.graph.project` (the aggregating function)
-* Legacy Cypher projections are not supported, including
-** `gds.graph.project.cypher`
-** `gds.graph.project.cypher.estimate`
-* Model Catalog is supported with limitations:
-** Trained models can only be used for prediction using the same Session in which they were trained.
-After the Session is deleted, all trained models will be lost.
-** Model publishing is not supported, including
-*** `gds.model.publish`
-** Model persistence is not supported, including
-*** `gds.model.store`
-*** `gds.model.load`
-*** `gds.model.delete`
-* Topological Link Prediction algorithms are not supported, including
-** `gds.alpha.linkprediction.adamicAdar`
-** `gds.alpha.linkprediction.commonNeighbors`
-** `gds.alpha.linkprediction.preferentialAttachment`
-** `gds.alpha.linkprediction.resourceAllocation`
-** `gds.alpha.linkprediction.sameCommunity`
-** `gds.alpha.linkprediction.totalNeighbors`
-* Graph export is not supported, including
-** `gds.graph.export`
-** `gds.graph.export.csv`
-** `gds.graph.export.csv.estimate`
-* Backup & Restore is not supported, including
-** `gds.backup`
-** `gds.restore`
+When the graph projection is requested, an optional `ttl` parameter can be configured, which specifies how quickly an inactive session will expire.
+The default value for `ttl` is 1 hour and the maximum allowed value is 7 days.
+An expired session cannot be used to run workloads, does not cost anything, and will be deleted automatically after 7 days.
+It can also be deleted through the Aura Console UI.
+
+
+// === GDS workloads
+//
+// * Perform GDS algorithm computationsfootnote:limitations[See <<Limitations>>], including all execution modes.
+// * Train machine learning modelsfootnote:limitations[].
+// * Run machine learning prediction pipelinesfootnote:limitations[].
+//
+//
+// === Results processing
+//
+// * Write back results to a Neo4j DBMS.
+// * Stream back results, to
+// ** the GDS Python Client.
+// ** an Arrow client for the GDS Arrow Server.
+//
+//
+// == Projecting a graph into a GDS Session
+//
+// Once you have a GDS Session, you can project a graph into it.
+// This operation is called _remote projection_ because the data source is not a co-located database, but rather a remote one.
+//
+// A remote projection is similar to a xref:management-ops/graph-creation/graph-project-cypher-projection.adoc[Cypher projection] and has a similar syntax.
+// The projection query runs on the database server, but the GDS graph appears in the GDS Session's Graph Catalog.
+// A key difference is also the name of the aggregating function, which is `gds.graph.project.remote`.
+//
+// The standard ways to project a graph with GDS plugin (Native projections, Cypher projections, Legacy Cypher projections) are _not_ supported in GDS Sessions.
+// The projection must be triggered from the data source, which is a Neo4j DBMS or a client of the GDS Arrow Server (see xref:management-ops/graph-creation/graph-project-apache-arrow.adoc[]).
+//
+//
+// == Writing back data to a Neo4j DBMS
+//
+// The GDS Session's in-memory graph is projected from data in a Neo4j DBMS, either an AuraDB instance or a self-managed server.
+// Write-back operations will persist the data back to the same Neo4j DBMS server.
+// Once all desired results have been written back to the database, the GDS Session can be deleted with no data loss.
+//
+//
+// == Limitations
+//
+// * Native projections are not supported, including
+// ** `gds.graph.project`
+// ** `gds.graph.project.estimate`
+// * Cypher projections are not supported, including
+// ** `gds.graph.project` (the aggregating function)
+// * Legacy Cypher projections are not supported, including
+// ** `gds.graph.project.cypher`
+// ** `gds.graph.project.cypher.estimate`
+// * Model Catalog is supported with limitations:
+// ** Trained models can only be used for prediction using the same Session in which they were trained.
+// After the Session is deleted, all trained models will be lost.
+// ** Model publishing is not supported, including
+// *** `gds.model.publish`
+// ** Model persistence is not supported, including
+// *** `gds.model.store`
+// *** `gds.model.load`
+// *** `gds.model.delete`
+// * Topological Link Prediction algorithms are not supported, including
+// ** `gds.alpha.linkprediction.adamicAdar`
+// ** `gds.alpha.linkprediction.commonNeighbors`
+// ** `gds.alpha.linkprediction.preferentialAttachment`
+// ** `gds.alpha.linkprediction.resourceAllocation`
+// ** `gds.alpha.linkprediction.sameCommunity`
+// ** `gds.alpha.linkprediction.totalNeighbors`
+// * Graph export is not supported, including
+// ** `gds.graph.export`
+// ** `gds.graph.export.csv`
+// ** `gds.graph.export.csv.estimate`
+// * Backup & Restore is not supported, including
+// ** `gds.backup`
+// ** `gds.restore`
