@@ -1,9 +1,10 @@
-= GDS Sessions
+= Aura Graph Analytics Serverless
 
-NOTE: GDS Sessions are currently in Early Access and not available by default. Contact your account manager to get the feature enabled.
+NOTE: Aura Graph Analytics Serverless is currently in Early Access and not available by default. Contact your account manager to get the feature enabled.
 
-A GDS Session is an on-demand ephemeral compute environment for running GDS workloads.
+Aura Graph Analytics Serverless is an on-demand ephemeral compute environment for running GDS workloads.
 It is offered as part of Neo4j Aura, a fast, scalable, always-on, fully automated cloud graph platform.
+We call each unit of this compute environment a _GDS Session_.
 
 A GDS Session reads data from one of three categories of data sources:
 
