@@ -140,16 +140,90 @@ RETURN *
 Projecting a graph to a GDS Session is done using a xref:management-ops/graph-creation/graph-project-cypher-projection.adoc[Cypher projection].
 Note here that the additional parameters labeled `Aura Graph Analytics Serverless` apply.
 
+[WARNING]
+Native projections and legacy Cypher projections are not supported.
+
 
 === Running algorithms
 
-The GDS Session Cypher API supports most algorithms and machine learning operations.
+The GDS Session Cypher API supports most algorithms and machine learning operations in all existing execution modes.
 The syntax is the same as for the GDS plugin, but with the additional `WITH gds.aura.api.credentials() AS credentials` clause.
 
 
 ==== Unsupported algorithms
 
-TODO list these here
+Not all algorithms have been implemented in the GDS Session Cypher API.
+The following algorithms are not supported:
+
+- xref:algorithms/all-pairs-shortest-path.adoc[]
+- xref:algorithms/random-walk.adoc[]
+- xref:algorithms/bfs.adoc[]
+- xref:algorithms/dfs.adoc[]
+- xref:algorithms/bridges.adoc[]
+- xref:algorithms/conductance.adoc[]
+- xref:algorithms/modularity.adoc[]
+- xref:algorithms/hits.adoc[]
+- xref:algorithms/dag/longest-path.adoc[]
+- xref:algorithms/dag/topological-sort.adoc[]
+- xref:algorithms/triangle-count.adoc#algorithms-triangle-count-examples-triangles-listing[Triangles listing]
+- xref:machine-learning/node-embeddings/graph-sage.adoc[]
+
+
+=== API limitations
+
+The GDS Session Cypher API does not support all procedures and functions available in the GDS plugin.
+Some that are mentioned here may be supported in the future, while others may never be supported.
+
+
+==== Graph Catalog
+
+The following Graph Catalog procedures are not supported in GDS Session Cypher API:
+
+* `gds.graph.project`
+* `gds.graph.project.estimate`
+* `gds.graph.project.cypher`
+* `gds.graph.project.cypher.estimate`
+* `gds.graph.export`
+* `gds.graph.export.csv`
+* `gds.graph.export.csv.estimate`
+* `gds.backup`
+* `gds.restore`
+* `gds.graph.graphProperty.drop`
+* `gds.graph.graphProperty.stream`
+
+
+==== Machine Learning
+
+Trained models can only be used for prediction using the same session in which they were trained.
+After the session is deleted, all trained models will be lost.
+
+The following Machine Learning procedures are not supported in GDS Session Cypher API:
+
+* `gds.model.publish`
+* `gds.model.store`
+* `gds.model.load`
+* `gds.model.delete`
+* `gds.alpha.linkprediction.adamicAdar`
+* `gds.alpha.linkprediction.commonNeighbors`
+* `gds.alpha.linkprediction.preferentialAttachment`
+* `gds.alpha.linkprediction.resourceAllocation`
+* `gds.alpha.linkprediction.sameCommunity`
+* `gds.alpha.linkprediction.totalNeighbors`
+* `gds.alpha.ml.splitRelationships`
+
+Additionally, all `pipeline` procedures are unsupported.
+
+
+==== Additional Operations
+
+The following Additional Operations are not supported in GDS Session Cypher API:
+
+* `gds.license.state`
+* `gds.debug.arrow`
+* `gds.debug.sysInfo`
+* `gds.license.state`
+* `gds.userLog`
+* `gds.version`
 
 
 == Examples
@@ -190,37 +264,3 @@ More thorough example with several algorithms and write-back operations.
 // Write-back operations will persist the data back to the same Neo4j DBMS server.
 // Once all desired results have been written back to the database, the GDS Session can be deleted with no data loss.
 //
-//
-// == Limitations
-//
-// * Native projections are not supported, including
-// ** `gds.graph.project`
-// ** `gds.graph.project.estimate`
-// * Cypher projections are not supported, including
-// ** `gds.graph.project` (the aggregating function)
-// * Legacy Cypher projections are not supported, including
-// ** `gds.graph.project.cypher`
-// ** `gds.graph.project.cypher.estimate`
-// * Model Catalog is supported with limitations:
-// ** Trained models can only be used for prediction using the same Session in which they were trained.
-// After the Session is deleted, all trained models will be lost.
-// ** Model publishing is not supported, including
-// *** `gds.model.publish`
-// ** Model persistence is not supported, including
-// *** `gds.model.store`
-// *** `gds.model.load`
-// *** `gds.model.delete`
-// * Topological Link Prediction algorithms are not supported, including
-// ** `gds.alpha.linkprediction.adamicAdar`
-// ** `gds.alpha.linkprediction.commonNeighbors`
-// ** `gds.alpha.linkprediction.preferentialAttachment`
-// ** `gds.alpha.linkprediction.resourceAllocation`
-// ** `gds.alpha.linkprediction.sameCommunity`
-// ** `gds.alpha.linkprediction.totalNeighbors`
-// * Graph export is not supported, including
-// ** `gds.graph.export`
-// ** `gds.graph.export.csv`
-// ** `gds.graph.export.csv.estimate`
-// * Backup & Restore is not supported, including
-// ** `gds.backup`
-// ** `gds.restore`
