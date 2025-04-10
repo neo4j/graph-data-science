@@ -22,8 +22,8 @@ package org.neo4j.gds.transaction;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.internal.kernel.api.security.AccessMode;
 import org.neo4j.internal.kernel.api.security.SecurityContext;
+import org.neo4j.internal.kernel.api.security.StaticAccessMode;
 import org.neo4j.kernel.impl.api.security.RestrictedAccessMode;
 import org.neo4j.kernel.impl.coreapi.InternalTransaction;
 
@@ -116,7 +116,7 @@ public final class DatabaseTransactionContext implements TransactionContext {
     }
 
     @Override
-    public TransactionContext withRestrictedAccess(AccessMode.Static accessMode) {
+    public TransactionContext withRestrictedAccess(StaticAccessMode accessMode) {
         var restrictedMode = new RestrictedAccessMode(securityContext.mode(), accessMode);
         var newContext = securityContext.withMode(restrictedMode);
         return new DatabaseTransactionContext(databaseService, newContext);

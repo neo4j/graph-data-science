@@ -50,7 +50,7 @@ import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 
 import static org.neo4j.gds.legacycypherprojection.CypherQueryEstimator.EstimationResult;
-import static org.neo4j.internal.kernel.api.security.AccessMode.Static.READ;
+import static org.neo4j.internal.kernel.api.security.StaticAccessMode.READ;
 
 public final class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCypherConfig> {
 

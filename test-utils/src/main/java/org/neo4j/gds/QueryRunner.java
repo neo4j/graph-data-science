@@ -42,7 +42,7 @@ import static org.neo4j.gds.compat.GraphDatabaseApiProxy.applyInFullAccessTransa
 import static org.neo4j.gds.compat.GraphDatabaseApiProxy.runInFullAccessTransaction;
 import static org.neo4j.gds.compat.GraphDatabaseApiProxy.runQueryWithoutClosingTheResult;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
-import static org.neo4j.internal.kernel.api.security.AccessMode.Static.READ;
+import static org.neo4j.internal.kernel.api.security.StaticAccessMode.READ;
 
 public final class QueryRunner {
 

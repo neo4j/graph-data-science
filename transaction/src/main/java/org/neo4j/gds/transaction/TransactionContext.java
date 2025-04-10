@@ -20,7 +20,7 @@
 package org.neo4j.gds.transaction;
 
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.internal.kernel.api.security.AccessMode;
+import org.neo4j.internal.kernel.api.security.StaticAccessMode;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.impl.coreapi.InternalTransaction;
 
@@ -73,12 +73,12 @@ public interface TransactionContext {
      * Returns a <strong>new</strong> {@link TransactionContext} restricted by the provided {@link org.neo4j.internal.kernel.api.security.AccessMode}.
      * The mode only restricts but does not override the given {@code SecurityContext}, i.e. you cannot grant more access.
      * <p>
-     * One use-case is to restrict the access to {@link org.neo4j.internal.kernel.api.security.AccessMode.Static#READ} to make sure that only read-only
+     * One use-case is to restrict the access to {@link org.neo4j.internal.kernel.api.security.StaticAccessMode#READ} to make sure that only read-only
      * queries can be executed.
      * <p>
      * A new instance is returned, {@code this} instance remains untouched.
      */
-    TransactionContext withRestrictedAccess(AccessMode.Static accessMode);
+    TransactionContext withRestrictedAccess(StaticAccessMode accessMode);
 
     /**
      * Return a new {@link TransactionContext.SecureTransaction} that owns a newly created top-level {@code Transaction}.

@@ -41,7 +41,7 @@ import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.graphdb.security.AuthorizationViolationException;
-import org.neo4j.internal.kernel.api.security.AccessMode;
+import org.neo4j.internal.kernel.api.security.StaticAccessMode;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
 
@@ -83,7 +83,7 @@ class NativeRelationshipStreamExporterTest extends BaseTest {
             relationship("c", "d", Values.longValue(47L), Values.doubleValue(1337))
         );
 
-        var secureTransaction = TestSupport.fullAccessTransaction(db).withRestrictedAccess(AccessMode.Static.READ);
+        var secureTransaction = TestSupport.fullAccessTransaction(db).withRestrictedAccess(StaticAccessMode.READ);
         var exporter = NativeRelationshipStreamExporter
             .builder(secureTransaction, graph, exportRelationships.stream(), RUNNING_TRUE)
             .build();

@@ -41,7 +41,7 @@ import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.graphdb.security.AuthorizationViolationException;
-import org.neo4j.internal.kernel.api.security.AccessMode;
+import org.neo4j.internal.kernel.api.security.StaticAccessMode;
 import org.neo4j.values.storable.Values;
 
 import java.util.Collections;
@@ -88,7 +88,7 @@ class NativeRelationshipExporterTest extends BaseTest {
             .build()
             .graph();
 
-        var secureTransaction = TestSupport.fullAccessTransaction(db).withRestrictedAccess(AccessMode.Static.READ);
+        var secureTransaction = TestSupport.fullAccessTransaction(db).withRestrictedAccess(StaticAccessMode.READ);
         var exporter = NativeRelationshipExporter.builder(secureTransaction, graph, RUNNING_TRUE).build();
 
         assertThatExceptionOfType(AuthorizationViolationException.class)

@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.transaction;
 
-import org.neo4j.internal.kernel.api.security.AccessMode;
+import org.neo4j.internal.kernel.api.security.StaticAccessMode;
 
 public enum EmptyTransactionContext implements TransactionContext {
     INSTANCE;
@@ -45,7 +45,7 @@ public enum EmptyTransactionContext implements TransactionContext {
     }
 
     @Override
-    public TransactionContext withRestrictedAccess(AccessMode.Static accessMode) {
+    public TransactionContext withRestrictedAccess(StaticAccessMode accessMode) {
         throw new UnsupportedOperationException();
     }
 
