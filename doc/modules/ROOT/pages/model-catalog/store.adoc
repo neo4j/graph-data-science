@@ -2,7 +2,7 @@
 [[model-catalog-store-ops]]
 = Storing models on disk
 
-include::partial$/product-limitations/not-on-gds-session-note.adoc[]
+include::partial$/product-limitations/not-in-serverless.adoc[]
 
 The model catalog exists as long as the Neo4j instance is running.
 When Neo4j is restarted, models are no longer available in the catalog and need to be trained again.
@@ -76,7 +76,7 @@ YIELD
 [[catalog-model-load]]
 == Loading models from disk
 
-include::partial$/product-limitations/not-on-gds-session-note.adoc[]
+include::partial$/product-limitations/not-in-serverless.adoc[]
 
 GDS will discover available models from the configured store location upon database startup.
 During discovery, only model metadata is loaded, not the actual model data.
@@ -132,7 +132,7 @@ The operation is idempotent, and skips loading if the model is already loaded.
 [[catalog-model-delete]]
 == Deleting models from disk
 
-include::partial$/product-limitations/not-on-gds-session-note.adoc[]
+include::partial$/product-limitations/not-in-serverless.adoc[]
 
 To remove a stored model from disk, it has to be deleted.
 This is different from dropping a model.

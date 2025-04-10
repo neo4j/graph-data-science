@@ -4,7 +4,7 @@
 
 include::partial$/common-usage/not-on-aurads-note.adoc[]
 
-include::partial$/product-limitations/not-on-gds-session-note.adoc[]
+include::partial$/product-limitations/not-in-serverless.adoc[]
 include::partial$/operations-reference/beta-note.adoc[]
 
 
