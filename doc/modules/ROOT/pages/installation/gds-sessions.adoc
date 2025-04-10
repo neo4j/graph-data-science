@@ -21,9 +21,11 @@ The results from these computations can be written back to the original source, 
 
 GDS Sessions do not require any installation to a Neo4j DBMS.
 Instead, a GDS Session is started on-demand to perform GDS computations.
-There are two primary APIs for working with GDS Sessions.
+There are two primary APIs for working with GDS Sessions: the GDS Python Client and the GDS Session Cypher API.
 
-.GDS Python Client
+
+=== GDS Python Client
+
 Using the client, it is possible to perform all operations on a GDS Session.
 For a comprehensive API overview including examples and tutorials, see link:https://neo4j.com/docs/graph-data-science-client/current/gds-session/[the GDS Python Client manual].
 
@@ -42,7 +44,9 @@ A good place to start are the Tutorials:
 - link:https://neo4j.com/docs/graph-data-science-client/current/tutorials/gds-sessions/[GDS Sessions for AuraDB]
 - link:https://neo4j.com/docs/graph-data-science-client/current/tutorials/gds-sessions-self-managed/[GDS Sessions for Self-Managed Neo4j DB]
 
-.GDS Session Cypher API
+
+=== GDS Session Cypher API
+
 This manual covers all aspects of the GDS Session Cypher API.
 The Cypher API supports remote projections, calling algorithms and machine learning operations, and remote write back to the AuraDB instance.
 It is currently offered only for AuraDB and is used from within a Cypher query context, such as Query in the Aura Console.
