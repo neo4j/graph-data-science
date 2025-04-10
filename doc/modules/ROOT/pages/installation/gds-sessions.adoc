@@ -228,39 +228,181 @@ The following Additional Operations are not supported in GDS Session Cypher API:
 
 == Examples
 
-More thorough example with several algorithms and write-back operations.
+In this section we will illustrate how to use the GDS Session Cypher API to project a graph, run a few algorithms, and process results.
 
-// === GDS workloads
-//
-// * Perform GDS algorithm computationsfootnote:limitations[See <<Limitations>>], including all execution modes.
-// * Train machine learning modelsfootnote:limitations[].
-// * Run machine learning prediction pipelinesfootnote:limitations[].
-//
-//
-// === Results processing
-//
-// * Write back results to a Neo4j DBMS.
-// * Stream back results, to
-// ** the GDS Python Client.
-// ** an Arrow client for the GDS Arrow Server.
-//
-//
-// == Projecting a graph into a GDS Session
-//
-// Once you have a GDS Session, you can project a graph into it.
-// This operation is called _remote projection_ because the data source is not a co-located database, but rather a remote one.
-//
-// A remote projection is similar to a xref:management-ops/graph-creation/graph-project-cypher-projection.adoc[Cypher projection] and has a similar syntax.
-// The projection query runs on the database server, but the GDS graph appears in the GDS Session's Graph Catalog.
-// A key difference is also the name of the aggregating function, which is `gds.graph.project.remote`.
-//
-// The standard ways to project a graph with GDS plugin (Native projections, Cypher projections, Legacy Cypher projections) are _not_ supported in GDS Sessions.
-// The projection must be triggered from the data source, which is a Neo4j DBMS or a client of the GDS Arrow Server (see xref:management-ops/graph-creation/graph-project-apache-arrow.adoc[]).
-//
-//
-// == Writing back data to a Neo4j DBMS
-//
-// The GDS Session's in-memory graph is projected from data in a Neo4j DBMS, either an AuraDB instance or a self-managed server.
-// Write-back operations will persist the data back to the same Neo4j DBMS server.
-// Once all desired results have been written back to the database, the GDS Session can be deleted with no data loss.
-//
+.The following Cypher statement will create the example graph in the Neo4j database:
+[source, cypher, role=noplay setup-query]
+----
+CREATE
+  (a:User {name: 'Alice', age: 23}),
+  (b:User {name: 'Bridget', age: 34}),
+  (c:User {name: 'Charles', age: 45}),
+  (d:User {name: 'Dana', age: 56}),
+  (e:User {name: 'Eve', age: 67}),
+  (f:User {name: 'Fawad', age: 78}),
+
+  (a)-[:LINK {weight: 0.5}]->(b),
+  (b)-[:LINK {weight: 0.2}]->(a),
+  (a)-[:LINK {weight: 4}]->(c),
+  (c)-[:LINK {weight: 2}]->(e),
+  (e)-[:LINK {weight: 1.1}]->(d),
+  (e)-[:LINK {weight: -2}]->(f);
+----
+
+image::example-graphs/aura-graph-analytics-serverless.png[]
+
+The first thing we must do is to project the graph into a GDS Session.
+We do that by using a remote Cypher projection, and specifying the `memory` and `ttl` parameters.
+
+.Projecting a graph called 'myGraph' using a remote Cypher projection into a new GDS Session:
+[source, cypher, role=noplay graph-project-query]
+----
+WITH gds.aura.api.credentials($clientId, $clientSecret) AS credentials
+MATCH (source:User)
+OPTIONAL MATCH (source)-[r:LINK]->(target:User)
+WITH gds.graph.project('myGraph', source, target, {
+  sourceNodeProperties: source { .age },
+  targetNodeProperties: target { .age },
+  relationshipProperties: r { .weight }
+}, {
+  memory: '4GB', ttl: duration({minutes: 5})
+}) AS g
+RETURN g.graphName, g.nodeCount, g.relationshipCount
+----
+
+.Results
+[opts="header"]
+|===
+| graphName | nodeCount | relationshipCount
+| 'myGraph' | 6         | 6
+|===
+
+After this completes, we now have a GDS Session with a projected graph.
+If you have the Aura Console open, you should be able to see the session listed in the `Sessions` view.
+You can also list the projected graph using the `gds.graph.list()` procedure.
+
+.Listing the projected graph:
+[source, cypher, role=noplay]
+----
+WITH gds.aura.api.credentials($clientId, $clientSecret) AS credentials
+CALL gds.graph.list()
+YIELD graphName, nodeCount, relationshipCount
+RETURN *
+----
+
+.Results
+[opts="header"]
+|===
+| graphName | nodeCount | relationshipCount | credentials
+| 'myGraph' | 6         | 6                 | null
+|===
+
+With a graph projected, we can now run algorithms.
+We will run xref:algorithms/page-rank.adoc[] and xref:machine-learning/node-embeddings/fastrp.adoc[] in `mutate` mode.
+Then we will `stream` the node properties, and lastly we will `write` them back to the AuraDB instance.
+
+.Run PageRank in `mutate` mode:
+[source, cypher, role=noplay]
+----
+WITH gds.aura.api.credentials($clientId, $clientSecret) AS credentials
+CALL gds.pageRank.mutate('myGraph', { mutateProperty: 'pageRank' })
+YIELD ranIterations, nodePropertiesWritten
+RETURN *
+----
+
+.Results
+[opts="header"]
+|===
+| ranIterations | nodePropertiesWritten | credentials
+| 20            | 6                     | null
+|===
+
+We will use the mutated `pageRank` property as input to the FastRP algorithm.
+
+.Run FastRP in `mutate` mode:
+[source, cypher, role=noplay]
+----
+WITH gds.aura.api.credentials($clientId, $clientSecret) AS credentials
+CALL gds.fastRP.mutate('myGraph', {
+  featureProperties: ['pageRank'],
+  relationshipWeightProperty: 'weight',
+  iterationWeights: [1, 1, 1],
+  randomSeed: 42,
+  embeddingDimension: 8,
+  mutateProperty: 'fastrp'
+})
+YIELD nodePropertiesWritten
+RETURN *
+----
+
+.Results
+[opts="header"]
+|===
+| nodePropertiesWritten | credentials
+| 6                     | null
+|===
+
+Now we can stream the node properties back to the AuraDB instance.
+
+.Stream node properties:
+[source, cypher, role=noplay]
+----
+WITH gds.aura.api.credentials($clientId, $clientSecret) AS credentials
+CALL gds.graph.nodeProperty.stream('myGraph', "fastrp")
+YIELD nodeId, propertyValue
+RETURN *
+----
+
+.Results
+[opts="header"]
+|===
+| nodeId | propertyValue
+| 0      | [-0.6834304332733154, 0.0, 0.0, 1.190035343170166, 1.2754640579223633, 0.08542880415916443, 1.3372166156768799, -0.08542880415916443]
+| 1      | [-0.6575959920883179, 0.0, 0.0, 0.6249072551727295, 0.7071067690849304, 0.08219949901103973, 0.739795446395874, -0.08219949901103973]
+| 2      | [0.0, 0.0, 0.0, 1.2844570875167847, 1.2844570875167847, 0.0, 0.5773503184318542, 0.0]
+| 3      | [0, 0, 0, 0, 0, 0, 0, 0]
+| 4      | [0.0, 0.0, 0.0, 0.5773503184318542, 0.5773503184318542, 0.0, 0.5773503184318542, 0.0]
+| 5      | [0, 0, 0, 0, 0, 0, 0, 0]
+|===
+
+We can also `write` the results using the `gds.graph.nodeProperty.write()` procedure.
+It is of course also possible to `write` results directly as an algorithm execution mode:
+
+.Run Louvain in `write` mode:
+[source, cypher, role=noplay]
+----
+WITH gds.aura.api.credentials($clientId, $clientSecret) AS credentials
+CALL gds.louvain.write('myGraph', { writeProperty: 'louvain' })
+YIELD communityCount, modularity
+RETURN communityCount, modularity
+----
+
+.Results
+[opts="header"]
+|===
+| communityCount | modularity
+| 2              | 0.3333333333333333
+|===
+
+Now we can find our results in the AuraDB instance using standard Cypher queries.
+Before we're done, we will drop the projected graph, which will also delete the GDS Session.
+
+.Drop the graph 'myGraph':
+[source, cypher, role=noplay]
+----
+WITH gds.aura.api.credentials($clientId, $clientSecret) AS credentials
+CALL gds.graph.drop('myGraph')
+YIELD graphName
+RETURN graphName
+----
+
+.Results
+[opts="header"]
+|===
+| graphName
+| 'myGraph'
+|===
+
+After this completes, no more costs are incurred for the GDS Session.
+You will find that the session is no longer visible in the Aura Console.
+If you forget to drop the graph, the session will automatically expire after the configured `ttl` time has passed.
