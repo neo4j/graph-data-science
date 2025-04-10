@@ -19,10 +19,13 @@
  */
 package org.neo4j.gds.config;
 
+import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.neo4j.kernel.impl.core.NodeEntity;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -115,5 +118,51 @@ class NodeIdParserTest {
             .hasMessageContaining("Failed to parse `testParam` as a List of node IDs.")
             .hasMessageContaining("this `String` cannot")
             .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void shouldLoadSingleNodeId(){
+        long nodeId = 0;
+        var nodeIdsWithProperties = NodeIdParser.parseToMapOfNodeIdsWithProperties(nodeId, "testParam1");
+        assertThat(nodeIdsWithProperties).hasSize(1);
+        assertThat(nodeIdsWithProperties.get(nodeId)).isEqualTo(1);
+    }
+
+    @Test
+    void shouldLoadListOfNodeIds(){
+        var listOfNodeIds = List.of(0,1,42,1337);
+        var nodeIdsWithProperties = NodeIdParser.parseToMapOfNodeIdsWithProperties(listOfNodeIds, "testParam1");
+        assertThat(nodeIdsWithProperties).hasSize(4);
+        assertThat(nodeIdsWithProperties.keySet()).containsExactlyInAnyOrder(0L,1L,42L,1337L);
+        assertThat(nodeIdsWithProperties.values()).containsExactlyInAnyOrder(1D,1D,1D,1D);
+    }
+
+    @Test
+    void shouldLoadMapOfNodeIdsWithProperties(){
+        var mapOfNodeIdsWithProperties = Map.of(
+            0, 0.2,
+            2, 4.0,
+            43, 3,
+            44, 1.1F
+        );
+        var nodeIdsWithProperties = NodeIdParser.parseToMapOfNodeIdsWithProperties(mapOfNodeIdsWithProperties, "testParam1");
+        assertThat(nodeIdsWithProperties).hasSize(4);
+        assertThat(nodeIdsWithProperties.keySet()).containsExactlyInAnyOrder(0L,2L,43L,44L);
+        assertThat(nodeIdsWithProperties.get(0L)).isEqualTo(0.2);
+        assertThat(nodeIdsWithProperties.get(2L)).isEqualTo(4.0);
+        assertThat(nodeIdsWithProperties.get(43L)).isEqualTo(3);
+        assertThat(nodeIdsWithProperties.get(44L)).isCloseTo(1.1F, Offset.offset(1E-6));
+
+
+    }
+
+    @Test
+    void shouldFailIfValueIsNotANumber(){
+        var mapOfNodeIdsWithProperties = Map.of(
+            0, "0,2",
+            2, "4.0"
+        );
+        assertThatThrownBy( () -> NodeIdParser.parseToMapOfNodeIdsWithProperties(mapOfNodeIdsWithProperties, "testParam1"))
+            .hasMessageContaining("Only numerical values are supported for the map of parameter 'testParam1'");
     }
 }

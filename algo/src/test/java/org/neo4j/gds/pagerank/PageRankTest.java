@@ -22,6 +22,7 @@ package org.neo4j.gds.pagerank;
 import org.assertj.core.api.SoftAssertions;
 import org.assertj.core.api.junit.jupiter.SoftAssertionsExtension;
 import org.assertj.core.data.Offset;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -51,7 +52,9 @@ import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
@@ -70,17 +73,17 @@ class PageRankTest {
         @GdlGraph
         private static final String DB_CYPHER =
             "CREATE" +
-            "  (a:Node { expectedRank: 0.3040965, expectedPersonalizedRank1: 0.17053529152163158 , expectedPersonalizedRank2: 0.017454997930076894 })" +
-            ", (b:Node { expectedRank: 3.5604297, expectedPersonalizedRank1: 0.3216114449911402  , expectedPersonalizedRank2: 0.813246950528992    })" +
-            ", (c:Node { expectedRank: 3.1757906, expectedPersonalizedRank1: 0.27329311398643763 , expectedPersonalizedRank2: 0.690991752640184    })" +
-            ", (d:Node { expectedRank: 0.3625935, expectedPersonalizedRank1: 0.048318333106500536, expectedPersonalizedRank2: 0.041070583050331164 })" +
-            ", (e:Node { expectedRank: 0.7503465, expectedPersonalizedRank1: 0.17053529152163158 , expectedPersonalizedRank2: 0.1449550029964717   })" +
-            ", (f:Node { expectedRank: 0.3625935, expectedPersonalizedRank1: 0.048318333106500536, expectedPersonalizedRank2: 0.041070583050331164 })" +
-            ", (g:Node { expectedRank: 0.15     , expectedPersonalizedRank1: 0.0                 , expectedPersonalizedRank2: 0.0                  })" +
-            ", (h:Node { expectedRank: 0.15     , expectedPersonalizedRank1: 0.0                 , expectedPersonalizedRank2: 0.0                  })" +
-            ", (i:Node { expectedRank: 0.15     , expectedPersonalizedRank1: 0.0                 , expectedPersonalizedRank2: 0.0                  })" +
-            ", (j:Node { expectedRank: 0.15     , expectedPersonalizedRank1: 0.0                 , expectedPersonalizedRank2: 0.0                  })" +
-            ", (k:Node { expectedRank: 0.15     , expectedPersonalizedRank1: 0.0                 , expectedPersonalizedRank2: 0.15000000000000002  })" +
+            "  (a:Node { expectedRank: 0.3040965, expectedPersonalizedRank1: 0.17053529152163158 , expectedPersonalizedRank2: 0.017454997930076894 , expectedPersonalizedRank3: 0.0       })" +
+            ", (b:Node { expectedRank: 3.5604297, expectedPersonalizedRank1: 0.3216114449911402  , expectedPersonalizedRank2: 0.813246950528992    , expectedPersonalizedRank3: 1.7380073 })" +
+            ", (c:Node { expectedRank: 3.1757906, expectedPersonalizedRank1: 0.27329311398643763 , expectedPersonalizedRank2: 0.690991752640184    , expectedPersonalizedRank3: 2.2619927 })" +
+            ", (d:Node { expectedRank: 0.3625935, expectedPersonalizedRank1: 0.048318333106500536, expectedPersonalizedRank2: 0.041070583050331164 , expectedPersonalizedRank3: 1.8119927 })" +
+            ", (e:Node { expectedRank: 0.7503465, expectedPersonalizedRank1: 0.17053529152163158 , expectedPersonalizedRank2: 0.1449550029964717   , expectedPersonalizedRank3: 3.43051475})" +
+            ", (f:Node { expectedRank: 0.3625935, expectedPersonalizedRank1: 0.048318333106500536, expectedPersonalizedRank2: 0.041070583050331164 , expectedPersonalizedRank3: 2.78384275})" +
+            ", (g:Node { expectedRank: 0.15     , expectedPersonalizedRank1: 0.0                 , expectedPersonalizedRank2: 0.0                  , expectedPersonalizedRank3: 2.78384275})" +
+            ", (h:Node { expectedRank: 0.15     , expectedPersonalizedRank1: 0.0                 , expectedPersonalizedRank2: 0.0                  , expectedPersonalizedRank3: 2.78384275})" +
+            ", (i:Node { expectedRank: 0.15     , expectedPersonalizedRank1: 0.0                 , expectedPersonalizedRank2: 0.0                  , expectedPersonalizedRank3: 2.78384275})" +
+            ", (j:Node { expectedRank: 0.15     , expectedPersonalizedRank1: 0.0                 , expectedPersonalizedRank2: 0.0                  , expectedPersonalizedRank3: 0.97185006})" +
+            ", (k:Node { expectedRank: 0.15     , expectedPersonalizedRank1: 0.0                 , expectedPersonalizedRank2: 0.15000000000000002  , expectedPersonalizedRank3: 0.97185006})" +
             ", (b)-[:TYPE]->(c)" +
             ", (c)-[:TYPE]->(b)" +
             ", (d)-[:TYPE]->(a)" +
@@ -173,6 +176,46 @@ class PageRankTest {
             }
         }
 
+        //Alternatively compare with biased sum of singleSourceNode results
+        @Disabled
+        @ParameterizedTest
+        @CsvSource(value = {
+            "b;c,1.0;3,expectedPersonalizedRank3",
+            //"e,k;0.1;0.0;,expectedPersonalizedRank4"
+        })
+        void withBiasedSourceNodes(String sourceNodesString, String biasedSourceNodes, String expectedPropertyKey) {
+            var sourceNodeIds = Arrays.stream(sourceNodesString.split(";"))
+                .map(graph::toOriginalNodeId)
+                .toList();
+
+            var sourceNodeBiases = Arrays.stream(biasedSourceNodes.split(";"))
+                .map(Double::parseDouble)
+                .toList();
+
+            Map<Long, Double> sourceNodesMap = IntStream.range(0, sourceNodeIds.size())
+                .boxed()
+                .collect(Collectors.toMap(sourceNodeIds::get, sourceNodeBiases::get));
+
+            var config = PageRankConfigImpl.builder()
+                .maxIterations(41)
+                .tolerance(0)
+                .concurrency(1)
+                .sourceNodesMap(sourceNodesMap)
+                .build();
+
+            var centralityAlgorithms = new CentralityAlgorithms(null, TerminationFlag.RUNNING_TRUE);
+            var result = centralityAlgorithms.pageRank(graph, config, ProgressTracker.NULL_TRACKER);
+            var rankProvider = result.centralityScoreProvider();
+
+            var expected = graph.nodeProperties(expectedPropertyKey);
+
+            for (int nodeId = 0; nodeId < graph.nodeCount(); nodeId++) {
+                assertThat(rankProvider.applyAsDouble(nodeId)).isEqualTo(
+                    expected.doubleValue(nodeId),
+                    within(SCORE_PRECISION)
+                );
+            }
+        }
         @Test
         void shouldLogProgress() {
             var log = new GdsTestLog();

@@ -19,21 +19,29 @@
  */
 package org.neo4j.gds.pagerank;
 
-import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.config.SourceNodes;
+import com.carrotsearch.hppc.LongScatterSet;
+import com.carrotsearch.hppc.LongSet;
 
-@Configuration("ArticleRankConfigImpl")
-public interface ArticleRankConfig extends RankConfig
-{
-    @Configuration.DoubleRange(min = 0, max = 1, maxInclusive = false)
-    default double dampingFactor() {
-        return 0.85;
+import java.util.Collection;
+
+
+public class SourceBasedRestartProbabilityList implements InitialProbabilityProvider {
+    private final double alpha;
+    private final LongSet sourceNodes;
+
+
+    SourceBasedRestartProbabilityList(double alpha, Collection<Long> sourceNodes) {
+        this.alpha = alpha;
+        this.sourceNodes =  new LongScatterSet(sourceNodes.size());
+        sourceNodes.forEach(this.sourceNodes::add);
     }
 
     @Override
-    @Configuration.ConvertWith(method = "org.neo4j.gds.config.SourceNodesFactory#parseAsList")
-    @Configuration.ToMapValue("org.neo4j.gds.config.SourceNodesFactory#toString")
-    default SourceNodes sourceNodes() {
-        return SourceNodes.EMPTY_SOURCE_NODES;
+    public double provideInitialValue(long nodeId) {
+        if (sourceNodes.contains(nodeId)) {
+            return alpha;
+        }
+        return 0;
     }
+
 }

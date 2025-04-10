@@ -67,6 +67,8 @@ import org.neo4j.gds.pagerank.ArticleRankConfig;
 import org.neo4j.gds.pagerank.DegreeFunctions;
 import org.neo4j.gds.pagerank.EigenvectorComputation;
 import org.neo4j.gds.pagerank.EigenvectorConfig;
+import org.neo4j.gds.pagerank.InitialProbabilityFactory;
+import org.neo4j.gds.pagerank.InitialProbabilityProvider;
 import org.neo4j.gds.pagerank.PageRankAlgorithm;
 import org.neo4j.gds.pagerank.PageRankComputation;
 import org.neo4j.gds.pagerank.PageRankConfig;
@@ -379,8 +381,8 @@ public class CentralityAlgorithms {
             configuration.concurrency()
         );
 
-        var mappedSourceNodes = new LongScatterSet(configuration.sourceNodes().size());
-        configuration.sourceNodes().stream()
+        var mappedSourceNodes = new LongScatterSet(configuration.sourceNodes().sourceNodes().size());
+        configuration.sourceNodes().sourceNodes().stream()
             .mapToLong(graph::toMappedNodeId)
             .forEach(mappedSourceNodes::add);
 
@@ -393,8 +395,8 @@ public class CentralityAlgorithms {
         Graph graph,
         EigenvectorConfig configuration
     ) {
-        var mappedSourceNodes = new LongScatterSet(configuration.sourceNodes().size());
-        configuration.sourceNodes().stream()
+        var mappedSourceNodes = new LongScatterSet(configuration.sourceNodes().sourceNodes().size());
+        configuration.sourceNodes().sourceNodes().stream()
             .mapToLong(graph::toMappedNodeId)
             .forEach(mappedSourceNodes::add);
 
@@ -420,12 +422,9 @@ public class CentralityAlgorithms {
             configuration.hasRelationshipWeightProperty(), configuration.concurrency()
         );
 
-        var mappedSourceNodes = new LongScatterSet(configuration.sourceNodes().size());
-        configuration.sourceNodes().stream()
-            .mapToLong(graph::toMappedNodeId)
-            .forEach(mappedSourceNodes::add);
-
-        return new PageRankComputation<>(configuration, mappedSourceNodes, degreeFunction);
+        var alpha = 1-configuration.dampingFactor();
+        InitialProbabilityProvider probabilityProvider = InitialProbabilityFactory.create(graph::toMappedNodeId, alpha, configuration.sourceNodes());
+        return new PageRankComputation<>(configuration, probabilityProvider, degreeFunction);
     }
 
     private ProgressTracker createProgressTracker(Task task, AlgoBaseConfig configuration) {

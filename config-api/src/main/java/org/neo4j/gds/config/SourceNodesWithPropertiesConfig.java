@@ -17,23 +17,35 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.pagerank;
+package org.neo4j.gds.config;
 
+import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.config.SourceNodes;
+import org.neo4j.gds.api.GraphStore;
 
-@Configuration("ArticleRankConfigImpl")
-public interface ArticleRankConfig extends RankConfig
-{
-    @Configuration.DoubleRange(min = 0, max = 1, maxInclusive = false)
-    default double dampingFactor() {
-        return 0.85;
-    }
+import java.util.Collection;
 
-    @Override
-    @Configuration.ConvertWith(method = "org.neo4j.gds.config.SourceNodesFactory#parseAsList")
+import static org.neo4j.gds.config.ConfigNodesValidations.nodesExistInGraph;
+
+public interface SourceNodesWithPropertiesConfig {
+
+    String SOURCE_NODES_KEY = "sourceNodes";
+
+    @Configuration.ConvertWith(method = "org.neo4j.gds.config.SourceNodesFactory#parse")
     @Configuration.ToMapValue("org.neo4j.gds.config.SourceNodesFactory#toString")
     default SourceNodes sourceNodes() {
         return SourceNodes.EMPTY_SOURCE_NODES;
     }
+
+
+    @Configuration.GraphStoreValidationCheck
+    default void validateSourceLabels(
+        GraphStore graphStore,
+        Collection<NodeLabel> selectedLabels,
+        Collection<RelationshipType> selectedRelationshipTypes
+    ) {
+        nodesExistInGraph(graphStore, selectedLabels, sourceNodes().sourceNodes(), SOURCE_NODES_KEY);
+    }
+
 }

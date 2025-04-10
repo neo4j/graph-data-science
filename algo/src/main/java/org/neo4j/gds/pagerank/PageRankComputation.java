@@ -36,24 +36,20 @@ public final class PageRankComputation<C extends PageRankConfig> implements Preg
 
     static final String PAGE_RANK = "pagerank";
 
-    private final boolean hasSourceNodes;
-    private final LongSet sourceNodes;
+    private final InitialProbabilityProvider initialProbability;
     private final LongToDoubleFunction degreeFunction;
 
     private final double dampingFactor;
     private final double tolerance;
-    private final double alpha;
 
     public PageRankComputation(
         C config,
-        LongSet sourceNodes,
+        InitialProbabilityProvider initialProbability,
         LongToDoubleFunction degreeFunction
     ) {
         this.dampingFactor = config.dampingFactor();
         this.tolerance = config.tolerance();
-        this.alpha = 1 - this.dampingFactor;
-        this.sourceNodes = sourceNodes;
-        this.hasSourceNodes = !sourceNodes.isEmpty();
+        this.initialProbability = initialProbability;
         this.degreeFunction = degreeFunction;
     }
 
@@ -68,10 +64,7 @@ public final class PageRankComputation<C extends PageRankConfig> implements Preg
     }
 
     private double initialValue(InitContext<C> context) {
-        if (!hasSourceNodes || sourceNodes.contains(context.nodeId())) {
-            return alpha;
-        }
-        return 0;
+        return initialProbability.provideInitialValue(context.nodeId());
     }
 
     @Override

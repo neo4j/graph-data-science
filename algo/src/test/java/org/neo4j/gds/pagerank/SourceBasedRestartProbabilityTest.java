@@ -19,21 +19,22 @@
  */
 package org.neo4j.gds.pagerank;
 
-import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.config.SourceNodes;
+import org.junit.jupiter.api.Test;
 
-@Configuration("ArticleRankConfigImpl")
-public interface ArticleRankConfig extends RankConfig
-{
-    @Configuration.DoubleRange(min = 0, max = 1, maxInclusive = false)
-    default double dampingFactor() {
-        return 0.85;
-    }
+import java.util.Map;
 
-    @Override
-    @Configuration.ConvertWith(method = "org.neo4j.gds.config.SourceNodesFactory#parseAsList")
-    @Configuration.ToMapValue("org.neo4j.gds.config.SourceNodesFactory#toString")
-    default SourceNodes sourceNodes() {
-        return SourceNodes.EMPTY_SOURCE_NODES;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
+
+class SourceBasedRestartProbabilityTest {
+
+    @Test
+    void testSingleEntry(){
+        var alpha = 0.2;
+        var map = Map.of(1L,3.0);
+        var sourceBasedRestartProbability = new SourceBasedRestartProbability(alpha, map);
+
+        assertThat(sourceBasedRestartProbability.provideInitialValue(1)).isEqualTo(0.2*3.0);
+        assertThat(sourceBasedRestartProbability.provideInitialValue(2)).isEqualTo(0);
     }
 }

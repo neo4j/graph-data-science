@@ -20,6 +20,7 @@
 package org.neo4j.gds.pagerank;
 
 import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.config.SourceNodes;
 
 @Configuration("PageRankConfigImpl")
 public interface PageRankConfig extends RankConfig {
@@ -27,4 +28,6 @@ public interface PageRankConfig extends RankConfig {
     default double dampingFactor() {
         return 0.85;
     }
+
+
 }

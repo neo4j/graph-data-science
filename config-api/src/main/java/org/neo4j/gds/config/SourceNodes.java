@@ -17,23 +17,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.pagerank;
+package org.neo4j.gds.config;
 
-import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.config.SourceNodes;
+import java.util.Collection;
+import java.util.List;
 
-@Configuration("ArticleRankConfigImpl")
-public interface ArticleRankConfig extends RankConfig
-{
-    @Configuration.DoubleRange(min = 0, max = 1, maxInclusive = false)
-    default double dampingFactor() {
-        return 0.85;
-    }
+public interface SourceNodes {
+    SourceNodes EMPTY_SOURCE_NODES = new ListSourceNodes(List.of());
+    String SOURCE_NODES_KEY = "sourceNodes";
 
-    @Override
-    @Configuration.ConvertWith(method = "org.neo4j.gds.config.SourceNodesFactory#parseAsList")
-    @Configuration.ToMapValue("org.neo4j.gds.config.SourceNodesFactory#toString")
-    default SourceNodes sourceNodes() {
-        return SourceNodes.EMPTY_SOURCE_NODES;
-    }
+    Collection<Long> sourceNodes();
 }

@@ -23,8 +23,11 @@ import org.neo4j.graphdb.Node;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import static org.neo4j.gds.config.ConfigNodesValidations.nodesNotNegative;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class NodeIdParser {
@@ -50,6 +53,37 @@ public final class NodeIdParser {
         }
 
         return nodeIds;
+    }
+
+    public static HashMap<Long, Double> parseToMapOfNodeIdsWithProperties(Object input, String parameterName) {
+        var nodesWithProperties = new HashMap<Long, Double>();
+
+        if (input instanceof Map) {
+            for (Map.Entry<?, ?> entry : ((Map<?, ?>) input).entrySet()) {
+                var nodeId = parseNodeId(entry.getKey(), parameterName);
+                nodesWithProperties.put(nodeId, parsePropertyValue(entry.getValue(), parameterName));
+            }
+
+        }
+        else if (input instanceof Iterable) {
+            for (var item : (Iterable) input) {
+                var nodeId = parseNodeId(item, parameterName);
+                nodesWithProperties.put(nodeId, 1.0);
+            }
+        }
+        else {
+            var nodeId = parseNodeId(input, parameterName);
+            nodesWithProperties.put(nodeId, 1.0);
+        }
+
+        return nodesWithProperties;
+    }
+
+    private static Double parsePropertyValue(Object input, String parameterName) {
+        if (input instanceof Number) {
+            return ((Number) input).doubleValue();
+        }
+        throw new IllegalArgumentException("Only numerical values are supported for the map of parameter '%s'".formatted(parameterName));
     }
 
     private static Long parseNodeId(Object input, String parameterName) {
