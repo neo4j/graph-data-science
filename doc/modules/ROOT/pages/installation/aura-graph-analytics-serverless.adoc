@@ -108,8 +108,15 @@ The function does not return any value, but registers the credentials in the que
 The credentials are not persisted anywhere and will be immediately forgotten after the Cypher query has completed.
 
 Due to this requirement, short-form `CALL`-only queries cannot be used.
-This is due to a syntactic sugar rule in Cypher.
 See link:https://neo4j.com/docs/cypher-manual/current/clauses/call/#call-procedure-yield[the Cypher manual] for additional details.
+
+.Calling an algorithm with only a `CALL` clause:
+[source, cypher]
+----
+CALL gds.wcc.stream('g')
+----
+
+The above will fail with an error indicating the missing call to `gds.aura.api.credentials()`.
 
 
 ==== Examples
@@ -137,8 +144,8 @@ RETURN *
 
 === Projecting a graph
 
-Projecting a graph to a GDS Session is done using a xref:management-ops/graph-creation/graph-project-cypher-projection.adoc[Cypher projection].
-Note here that the additional parameters labeled `Aura Graph Analytics Serverless` apply.
+Use a xref:management-ops/graph-creation/graph-project-cypher-projection.adoc[Cypher projection] to project a graph into a GDS Session.
+Make sure to include all the additional parameters with the `Aura Graph Analytics Serverless` label.
 
 [WARNING]
 Native projections and legacy Cypher projections are not supported.
