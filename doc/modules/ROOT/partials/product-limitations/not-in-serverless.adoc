@@ -1,1 +1,4 @@
-CAUTION: This feature is not available in Aura Graph Analytics Serverless.
+[CAUTION]
+====
+This feature is not available in Aura Graph Analytics Serverless.
+====

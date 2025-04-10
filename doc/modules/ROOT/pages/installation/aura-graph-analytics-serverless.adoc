@@ -1,6 +1,10 @@
 = Aura Graph Analytics Serverless
 
-NOTE: Aura Graph Analytics Serverless is currently in Early Access and not available by default. Contact your account manager to get the feature enabled.
+[NOTE]
+====
+Aura Graph Analytics Serverless is currently in Early Access and not available by default.
+Contact your account manager to get the feature enabled.
+====
 
 Aura Graph Analytics Serverless is an on-demand ephemeral compute environment for running GDS workloads.
 It is offered as part of link:https://neo4j.com/docs/aura/graph-analytics/[Neo4j Aura], a fast, scalable, always-on, fully automated cloud graph platform.
@@ -9,8 +13,8 @@ We call each unit of this compute environment a _GDS Session_.
 A GDS Session reads data from one of three categories of data sources:
 
 - Neo4j AuraDB
-- self-managed Neo4j DBMS
-- a non-Neo4j data source
+- Self-managed Neo4j DBMS
+- A non-Neo4j data source
 
 We call the process of populating the session with data a _remote projection_.
 Once populated, a GDS Session can run GDS workloads, such as algorithms and machine learning models.
