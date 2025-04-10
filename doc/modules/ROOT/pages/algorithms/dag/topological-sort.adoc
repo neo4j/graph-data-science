@@ -6,6 +6,8 @@
 :result: topological sorting of the nodes
 :algorithm: Topological Sort
 
+include::partial$/product-limitations/not-in-serverless.adoc[]
+
 :directed:
 :undirected-unsupported:
 include::partial$/algorithms/shared/algorithm-traits.adoc[]

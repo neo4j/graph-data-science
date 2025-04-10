@@ -487,6 +487,8 @@ As this node is part of all the triangles in the example graph excluding it resu
 [[algorithms-triangle-count-examples-triangles-listing]]
 == Triangles listing
 
+include::partial$/product-limitations/not-in-serverless.adoc[]
+
 It is also possible to list all the triangles in the graph.
 To do this we make use of the  procedure `gds.triangles`.
 

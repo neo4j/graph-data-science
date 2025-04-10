@@ -6,6 +6,8 @@
 :algorithm: Bridges
 :sequential: true
 
+include::partial$/product-limitations/not-in-serverless.adoc[]
+
 :undirected:
 include::partial$/algorithms/shared/algorithm-traits.adoc[]
 
