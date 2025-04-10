@@ -20,6 +20,7 @@
 package org.neo4j.gds.paths.astar.config;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.paths.astar.AStarParameters;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -35,8 +36,9 @@ class ShortestPathAStarBaseConfigTest {
         when(configMock.latitudeProperty()).thenReturn("b");
         when(configMock.sourceNode()).thenReturn(1L);
         when(configMock.targetNode()).thenReturn(2L);
+        when(configMock.concurrency()).thenReturn(new Concurrency(4));
 
         assertThat(configMock.toParameters())
-            .isEqualTo(new AStarParameters("a", "b", 1, 2));
+            .isEqualTo(new AStarParameters("a", "b", 1, 2, new Concurrency(4)));
     }
 }

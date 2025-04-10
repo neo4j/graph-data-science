@@ -74,7 +74,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
     private final RequestScopedDependencies requestScopedDependencies;
     private final WriteContext writeContext;
     private final PathFindingAlgorithmsEstimationModeBusinessFacade estimationFacade;
-    private final PathFindingAlgorithms pathFindingAlgorithms;
+    private final PathFindingAlgorithmsBusinessFacade pathFindingAlgorithms;
 
     PathFindingAlgorithmsWriteModeBusinessFacade(
         Log log,
@@ -82,7 +82,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
         RequestScopedDependencies requestScopedDependencies,
         WriteContext writeContext,
         PathFindingAlgorithmsEstimationModeBusinessFacade estimationFacade,
-        PathFindingAlgorithms pathFindingAlgorithms
+        PathFindingAlgorithmsBusinessFacade pathFindingAlgorithms
     ) {
         this.log = log;
         this.algorithmProcessingTemplateConvenience = algorithmProcessingTemplateConvenience;

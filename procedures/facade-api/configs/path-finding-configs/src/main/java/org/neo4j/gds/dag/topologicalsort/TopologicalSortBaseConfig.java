@@ -27,4 +27,9 @@ public interface TopologicalSortBaseConfig extends AlgoBaseConfig {
     default boolean computeMaxDistanceFromSource() {
         return false;
     }
+
+    @Configuration.Ignore
+    default TopologicalSortParameters toParameters() {
+        return new TopologicalSortParameters(computeMaxDistanceFromSource(), concurrency());
+    }
 }

@@ -17,15 +17,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.dag.longestPath;
+package org.neo4j.gds.traversal;
 
-import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.AlgorithmParameters;
+import org.neo4j.gds.core.concurrency.Concurrency;
 
-public interface DagLongestPathBaseConfig extends AlgoBaseConfig {
+import java.util.List;
 
-    @Configuration.Ignore
-    default DagLongestPathParameters toParameters() {
-        return new DagLongestPathParameters(concurrency());
+public record TraversalParameters(
+    long sourceNode,
+    List<Long> targetNodes,
+    long maxDepth,
+    Concurrency concurrency
+) implements AlgorithmParameters {
+    public static final long NO_MAX_DEPTH = -1L;
+
+    public boolean hasTargetNodes() {
+        return !targetNodes().isEmpty();
+    }
+
+    public boolean hasMaxDepth() {
+        return maxDepth() != NO_MAX_DEPTH;
     }
 }

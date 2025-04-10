@@ -50,12 +50,12 @@ public class PathFindingAlgorithmsStatsModeBusinessFacade {
     private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
 
     private final PathFindingAlgorithmsEstimationModeBusinessFacade estimationFacade;
-    private final PathFindingAlgorithms pathFindingAlgorithms;
+    private final PathFindingAlgorithmsBusinessFacade pathFindingAlgorithms;
 
     PathFindingAlgorithmsStatsModeBusinessFacade(
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
         PathFindingAlgorithmsEstimationModeBusinessFacade estimationFacade,
-        PathFindingAlgorithms pathFindingAlgorithms
+        PathFindingAlgorithmsBusinessFacade pathFindingAlgorithms
     ) {
         this.algorithmProcessingTemplateConvenience = algorithmProcessingTemplateConvenience;
         this.estimationFacade = estimationFacade;

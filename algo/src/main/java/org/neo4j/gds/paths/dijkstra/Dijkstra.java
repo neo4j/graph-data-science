@@ -105,7 +105,8 @@ public final class Dijkstra extends Algorithm<PathFindingResult> {
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
-        return new Dijkstra(graph,
+        return new Dijkstra(
+            graph,
             graph.toMappedNodeId(originalNodeId),
             new AllTargets(),
             trackRelationships,
@@ -122,7 +123,8 @@ public final class Dijkstra extends Algorithm<PathFindingResult> {
         boolean trackRelationships,
         Optional<HeuristicFunction> heuristicFunction,
         ProgressTracker progressTracker,
-        TerminationFlag terminationFlag) {
+        TerminationFlag terminationFlag
+    ) {
         super(progressTracker);
         this.graph = graph;
         this.sourceNode = sourceNode;
@@ -148,7 +150,7 @@ public final class Dijkstra extends Algorithm<PathFindingResult> {
         visited.set(node);
         return this;
     }
-    
+
     public Dijkstra withRelationshipFilter(RelationshipFilter relationshipFilter) {
         this.relationshipFilter = this.relationshipFilter.and(relationshipFilter);
         return this;

@@ -23,6 +23,7 @@ import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.config.OptionalTargetNodeConfig;
 import org.neo4j.gds.config.TargetNodesConfig;
 import org.neo4j.gds.paths.dijkstra.DijkstraMemoryEstimateParameters;
+import org.neo4j.gds.paths.dijkstra.DijkstraSourceTargetParameters;
 
 import java.util.List;
 
@@ -50,6 +51,15 @@ public interface DijkstraSourceTargetsBaseConfig extends OptionalTargetNodeConfi
                 "One of `targetNodes` or `targetNode` parameters must be specified");
         }
 
+    }
+
+    @Configuration.Ignore
+    default DijkstraSourceTargetParameters toParameters() {
+        return new DijkstraSourceTargetParameters(
+            sourceNode(),
+            targetsList(),
+            concurrency()
+        );
     }
 
     @Override

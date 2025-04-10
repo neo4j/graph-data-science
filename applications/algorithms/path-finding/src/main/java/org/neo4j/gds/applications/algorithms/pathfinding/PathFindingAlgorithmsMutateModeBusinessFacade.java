@@ -65,14 +65,14 @@ import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Yen
  */
 public class PathFindingAlgorithmsMutateModeBusinessFacade {
     private final PathFindingAlgorithmsEstimationModeBusinessFacade estimationFacade;
-    private final PathFindingAlgorithms pathFindingAlgorithms;
+    private final PathFindingAlgorithmsBusinessFacade pathFindingAlgorithms;
     private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
     private final MutateNodeProperty mutateNodeProperty;
     private final MutateRelationshipService mutateRelationshipService;
 
     public PathFindingAlgorithmsMutateModeBusinessFacade(
         PathFindingAlgorithmsEstimationModeBusinessFacade estimationFacade,
-        PathFindingAlgorithms pathFindingAlgorithms,
+        PathFindingAlgorithmsBusinessFacade pathFindingAlgorithms,
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
         MutateNodeProperty mutateNodeProperty,
         MutateRelationshipService mutateRelationshipService

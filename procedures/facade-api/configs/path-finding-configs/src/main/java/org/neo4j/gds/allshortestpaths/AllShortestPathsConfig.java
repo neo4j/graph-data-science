@@ -34,4 +34,12 @@ public interface AllShortestPathsConfig extends AlgoBaseConfig, RelationshipWeig
     static AllShortestPathsConfig of(String username, CypherMapWrapper userInput) {
         return of(userInput);
     }
+
+    @Configuration.Ignore
+    default AllShortestPathsParameters toParameters() {
+        return new AllShortestPathsParameters(
+            concurrency(),
+            hasRelationshipWeightProperty()
+        );
+    }
 }

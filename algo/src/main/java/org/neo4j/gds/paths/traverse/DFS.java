@@ -22,11 +22,12 @@ package org.neo4j.gds.paths.traverse;
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.utils.paged.HugeDoubleArrayStack;
 import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.core.utils.paged.HugeDoubleArrayStack;
 import org.neo4j.gds.core.utils.paged.HugeLongArrayStack;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.termination.TerminationFlag;
+import org.neo4j.gds.traversal.TraversalParameters;
 
 public class DFS extends Algorithm<HugeLongArray> {
 
@@ -92,7 +93,7 @@ public class DFS extends Algorithm<HugeLongArray> {
             progressTracker.logProgress(graph.degree(node));
 
             //If there is a maximum depth, and node is already at it, do not waste time with its neighborhood
-            if (maxDepth == DfsBaseConfig.NO_MAX_DEPTH || weight < maxDepth) {
+            if (maxDepth == TraversalParameters.NO_MAX_DEPTH || weight < maxDepth) {
                 graph.forEachRelationship(
                     node,
                     (s, t) -> {
