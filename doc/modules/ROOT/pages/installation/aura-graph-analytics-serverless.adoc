@@ -262,8 +262,8 @@ CREATE
 
 image::example-graphs/aura-graph-analytics-serverless.png[]
 
-The first thing we must do is to project the graph into a GDS Session.
-We do that by using a remote Cypher projection, and specifying the `memory` and `ttl` parameters.
+First, project the graph into a GDS Session, using a remote Cypher projection.
+Specify the `memory` and `ttl` parameters.
 
 .Projecting a graph called 'myGraph' using a remote Cypher projection into a new GDS Session:
 [source, cypher, role=noplay graph-project-query]
@@ -290,7 +290,7 @@ RETURN g.graphName, g.nodeCount, g.relationshipCount
 
 After this completes, we now have a GDS Session with a projected graph.
 If you have the Aura Console open, you should be able to see the session listed in the `Sessions` view.
-You can also list the projected graph using the `gds.graph.list()` procedure.
+Next, list the projected graph using the `gds.graph.list()` procedure.
 
 .Listing the projected graph:
 [source, cypher, role=noplay]
@@ -309,8 +309,8 @@ RETURN *
 |===
 
 With a graph projected, we can now run algorithms.
-We will run xref:algorithms/page-rank.adoc[] and xref:machine-learning/node-embeddings/fastrp.adoc[] in `mutate` mode.
-Then we will `stream` the node properties, and lastly we will `write` them back to the AuraDB instance.
+First, run xref:algorithms/page-rank.adoc[] and xref:machine-learning/node-embeddings/fastrp.adoc[] in `mutate` mode.
+Then, `stream` the node properties and lastly `write` them back to the AuraDB instance.
 
 .Run PageRank in `mutate` mode:
 [source, cypher, role=noplay]
@@ -328,7 +328,7 @@ RETURN *
 | 20            | 6                     | null
 |===
 
-We will use the mutated `pageRank` property as input to the FastRP algorithm.
+Use the mutated `pageRank` property as input to the FastRP algorithm.
 
 .Run FastRP in `mutate` mode:
 [source, cypher, role=noplay]
@@ -353,7 +353,7 @@ RETURN *
 | 6                     | null
 |===
 
-Now we can stream the node properties back to the AuraDB instance.
+Now, stream the node properties back to the AuraDB instance.
 
 .Stream node properties:
 [source, cypher, role=noplay]
@@ -376,8 +376,8 @@ RETURN *
 | 5      | [0, 0, 0, 0, 0, 0, 0, 0]
 |===
 
-We can also `write` the results using the `gds.graph.nodeProperty.write()` procedure.
-It is of course also possible to `write` results directly as an algorithm execution mode:
+It is also possible to write the results using the `gds.graph.nodeProperty.write()` procedure.
+Another alternative is to write results directly using the `write` algorithm execution mode:
 
 .Run Louvain in `write` mode:
 [source, cypher, role=noplay]
@@ -396,7 +396,7 @@ RETURN communityCount, modularity
 |===
 
 Now we can find our results in the AuraDB instance using standard Cypher queries.
-Before we're done, we will drop the projected graph, which will also delete the GDS Session.
+Finally, drop the projected graph, which will also delete the GDS Session.
 
 .Drop the graph 'myGraph':
 [source, cypher, role=noplay]
