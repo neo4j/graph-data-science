@@ -25,6 +25,7 @@ import org.neo4j.gds.core.CypherMapAccess;
 import org.neo4j.values.AnyValue;
 import org.neo4j.values.SequenceValue;
 import org.neo4j.values.storable.BooleanValue;
+import org.neo4j.values.storable.DurationValue;
 import org.neo4j.values.storable.FloatingPointValue;
 import org.neo4j.values.storable.IntegralValue;
 import org.neo4j.values.storable.TextArray;
@@ -207,6 +208,15 @@ public final class ValueMapWrapper implements CypherMapAccess {
                 expectedType.getSimpleName()
             );
             throw new IllegalArgumentException(message);
+        }
+
+        //TODO: is more necessary here? I lack insight
+        @Override
+        public T mapDuration(DurationValue value) {
+            if (DurationValue.class.isAssignableFrom(expectedType)) {
+                return (T) value;
+            }
+            return PartialValueMapper.super.mapDuration(value);
         }
 
         @Override
