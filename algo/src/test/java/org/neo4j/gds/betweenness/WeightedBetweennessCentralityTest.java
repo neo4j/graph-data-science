@@ -111,15 +111,20 @@ class WeightedBetweennessCentralityTest {
     void shouldComputeWithWeights() {
         IdFunction weightedIdFunction = weightedGraph::toMappedNodeId;
 
-         var bc = new BetweennessCentrality(
-             weightedGraph,
-             new RandomDegreeSelectionStrategy(7, Optional.of(42L)),
-             ForwardTraverser.Factory.weighted(),
-             DefaultPool.INSTANCE,
-             new Concurrency(8),
-             ProgressTracker.NULL_TRACKER,
-             TerminationFlag.RUNNING_TRUE
-         );
+        var params = new BetweennessCentralityParameters(
+            new Concurrency(8),
+            Optional.of(7L),
+            Optional.of(42L),
+            true
+        );
+
+        var bc = BetweennessCentrality.create(
+            weightedGraph,
+            params,
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
+        );
+
         var result = bc.compute().centralities();
         var softAssertions = new SoftAssertions();
         softAssertions.assertThat(result.get(weightedIdFunction.of("a1"))).isEqualTo(0.0D);

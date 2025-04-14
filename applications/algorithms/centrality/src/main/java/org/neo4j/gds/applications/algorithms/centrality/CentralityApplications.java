@@ -65,8 +65,7 @@ public final class CentralityApplications {
 
         var business =new CentralityBusinessAlgorithms(
             algorithms,
-            progressTrackerCreator,
-            requestScopedDependencies.terminationFlag()
+            progressTrackerCreator
         );
 
         var hitsHookGenerator =new HitsHookGenerator(progressTrackerCreator,requestScopedDependencies.terminationFlag());

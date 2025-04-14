@@ -27,7 +27,6 @@ import org.neo4j.gds.articulationpoints.ArticulationPointsResult;
 import org.neo4j.gds.articulationpoints.ArticulationPointsToParameters;
 import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.betweenness.BetweennessCentralityBaseConfig;
-import org.neo4j.gds.betweenness.BetweennessCentralityParameters;
 import org.neo4j.gds.betweenness.BetwennessCentralityResult;
 import org.neo4j.gds.bridges.BridgeResult;
 import org.neo4j.gds.closeness.ClosenessCentralityBaseConfig;
@@ -47,26 +46,19 @@ import org.neo4j.gds.pagerank.ArticleRankConfig;
 import org.neo4j.gds.pagerank.EigenvectorConfig;
 import org.neo4j.gds.pagerank.PageRankConfig;
 import org.neo4j.gds.pagerank.PageRankResult;
-import org.neo4j.gds.termination.TerminationFlag;
-
-import java.util.Optional;
-import java.util.function.Function;
 
 public class CentralityBusinessAlgorithms {
 
     private final CentralityAlgorithms centralityAlgorithms;
     private final ProgressTrackerCreator progressTrackerCreator;
-    private final TerminationFlag terminationFlag;
     private final CentralityAlgorithmTasks tasks = new CentralityAlgorithmTasks();
 
     public CentralityBusinessAlgorithms(
         CentralityAlgorithms centralityAlgorithms,
-        ProgressTrackerCreator progressTrackerCreator,
-        TerminationFlag terminationFlag
+        ProgressTrackerCreator progressTrackerCreator
     ) {
         this.centralityAlgorithms = centralityAlgorithms;
         this.progressTrackerCreator = progressTrackerCreator;
-        this.terminationFlag = terminationFlag;
     }
 
     PageRankResult articleRank(Graph graph, ArticleRankConfig configuration) {
@@ -84,21 +76,18 @@ public class CentralityBusinessAlgorithms {
         boolean shouldComputeComponents
     ) {
         var task = tasks.articulationPoints(graph);
-        var  progressTracker =  progressTrackerCreator.createProgressTracker(task,configuration);
+        var progressTracker =  progressTrackerCreator.createProgressTracker(task,configuration);
         var params = ArticulationPointsToParameters.toParameters(configuration, shouldComputeComponents);
         return centralityAlgorithms.articulationPoints(graph, params, progressTracker);
     }
 
     BetwennessCentralityResult betweennessCentrality(Graph graph, BetweennessCentralityBaseConfig configuration) {
-        return centralityAlgorithms.betweennessCentrality(graph, configuration);
-    }
+        var params = configuration.toParameters();
+        var task = tasks.betweennessCentrality(graph, params);
 
-    public BetwennessCentralityResult betweennessCentrality(
-        Graph graph,
-        BetweennessCentralityParameters parameters,
-        Function<Optional<Long>, ProgressTracker> progressTrackerFromSamplingSize
-    ) {
-        return centralityAlgorithms.betweennessCentrality(graph, parameters, progressTrackerFromSamplingSize);
+        var progressTracker =  progressTrackerCreator.createProgressTracker(task,configuration);
+
+        return centralityAlgorithms.betweennessCentrality(graph, params, progressTracker);
     }
 
     BridgeResult bridges(Graph graph, AlgoBaseConfig configuration, boolean shouldComputeComponents) {

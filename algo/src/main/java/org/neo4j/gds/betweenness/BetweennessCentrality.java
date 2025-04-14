@@ -29,6 +29,7 @@ import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.paged.HugeLongArrayStack;
 import org.neo4j.gds.core.utils.paged.ParallelDoublePageCreator;
@@ -52,6 +53,35 @@ public class BetweennessCentrality extends Algorithm<BetwennessCentralityResult>
     private final Concurrency concurrency;
 
 
+    public static  BetweennessCentrality create(
+        Graph graph,
+        BetweennessCentralityParameters parameters,
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
+    ){
+
+        var samplingSize = parameters.samplingSize();
+        var samplingSeed = parameters.samplingSeed();
+
+        var selectionStrategy = samplingSize.isPresent() && samplingSize.get() < graph.nodeCount()
+            ? new RandomDegreeSelectionStrategy(samplingSize.get(), samplingSeed)
+            : new FullSelectionStrategy();
+
+        var traverserFactory = parameters.hasRelationshipWeightProperty()
+            ? ForwardTraverser.Factory.weighted()
+            : ForwardTraverser.Factory.unweighted();
+
+       return new BetweennessCentrality(
+            graph,
+            selectionStrategy,
+            traverserFactory,
+            DefaultPool.INSTANCE,
+            parameters.concurrency(),
+            progressTracker,
+            terminationFlag
+        );
+
+    }
     public BetweennessCentrality(
         Graph graph,
         SelectionStrategy selectionStrategy,

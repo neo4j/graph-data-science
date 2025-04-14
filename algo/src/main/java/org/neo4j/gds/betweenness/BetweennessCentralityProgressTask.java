@@ -17,22 +17,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds;
+package org.neo4j.gds.betweenness;
 
-import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.articulationpoints.ArticulationPointsProgressTaskCreator;
-import org.neo4j.gds.betweenness.BetweennessCentralityParameters;
-import org.neo4j.gds.betweenness.BetweennessCentralityProgressTask;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
-public final class CentralityAlgorithmTasks {
+public final class BetweennessCentralityProgressTask {
 
-    public Task articulationPoints(Graph graph) {
-        return ArticulationPointsProgressTaskCreator.progressTask(graph.nodeCount());
-    }
+    private BetweennessCentralityProgressTask() {}
 
-    public Task betweennessCentrality(Graph graph, BetweennessCentralityParameters parameters){
-        return BetweennessCentralityProgressTask.create(graph.nodeCount(),parameters);
+    public static Task create(long nodeCount, BetweennessCentralityParameters parameters) {
+
+        var actualSamplingSize = parameters.samplingSize().orElse(nodeCount);
+
+        return Tasks.leaf(
+            AlgorithmLabel.BetweennessCentrality.asString(),
+            actualSamplingSize
+        );
     }
 
 }

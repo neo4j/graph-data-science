@@ -19,13 +19,15 @@
  */
 package org.neo4j.gds.betweenness;
 
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
+import org.neo4j.gds.CentralityAlgorithmTasks;
+import org.neo4j.gds.TestProgressTrackerHelper;
+import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.termination.TerminationFlag;
@@ -34,10 +36,13 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.gds.Orientation.UNDIRECTED;
 import static org.neo4j.gds.TestSupport.crossArguments;
 import static org.neo4j.gds.TestSupport.fromGdl;
+import static org.neo4j.gds.assertj.Extractors.removingThreadId;
+import static org.neo4j.gds.assertj.Extractors.replaceTimings;
 
 class BetweennessCentralityTest {
 
@@ -125,17 +130,23 @@ class BetweennessCentralityTest {
 
     @ParameterizedTest(name = "graph={1}, concurrency={0}, samplingSize={2}")
     @MethodSource("org.neo4j.gds.betweenness.BetweennessCentralityTest#testArguments")
-    void sampling(int concurrency, TestGraph graph, int samplingSize, Map<String, Double> expectedResult) {
-        HugeAtomicDoubleArray actualResult = new BetweennessCentrality(
+    void sampling(int concurrency, TestGraph graph, long samplingSize, Map<String, Double> expectedResult) {
+
+       var params = new BetweennessCentralityParameters(
+           new Concurrency(concurrency),
+           Optional.of(samplingSize),
+           Optional.of(42L),
+           false
+       );
+
+        var algorithm = BetweennessCentrality.create(
             graph,
-            new RandomDegreeSelectionStrategy(samplingSize, Optional.of(42L)),
-            ForwardTraverser.Factory.unweighted(),
-            DefaultPool.INSTANCE,
-            new Concurrency(concurrency),
+            params,
             ProgressTracker.NULL_TRACKER,
             TerminationFlag.RUNNING_TRUE
-        ).compute().centralities();
+        );
 
+        var actualResult = algorithm.compute().centralities();
         assertEquals(expectedResult.size(), actualResult.size());
         expectedResult.forEach((variable, expectedCentrality) ->
             assertEquals(expectedCentrality, actualResult.get(graph.toMappedNodeId(variable)), variable)
@@ -146,15 +157,22 @@ class BetweennessCentralityTest {
     @ValueSource(ints = {1, 4})
     void noSampling(int concurrency) {
         TestGraph graph = fromGdl(LINE);
-        var actualResult = new BetweennessCentrality(
-            graph,
-            new FullSelectionStrategy(),
-            ForwardTraverser.Factory.unweighted(),
-            DefaultPool.INSTANCE,
+
+        var params = new BetweennessCentralityParameters(
             new Concurrency(concurrency),
+            Optional.empty(),
+            Optional.empty(),
+            false
+        );
+
+        var algorithm = BetweennessCentrality.create(
+            graph,
+            params,
             ProgressTracker.NULL_TRACKER,
             TerminationFlag.RUNNING_TRUE
-        ).compute().centralities();
+        );
+
+        var actualResult = algorithm.compute().centralities();
 
         assertEquals(5, actualResult.size(), "Expected 5 centrality values");
         assertEquals(0.0, actualResult.get((int) graph.toMappedNodeId("a")));
@@ -163,4 +181,88 @@ class BetweennessCentralityTest {
         assertEquals(3.0, actualResult.get((int) graph.toMappedNodeId("d")));
         assertEquals(0.0, actualResult.get((int) graph.toMappedNodeId("e")));
     }
+
+    @Test
+    void testShouldLogProgress() {
+        var testGraph = fromGdl(DIAMOND, "diamond");
+
+        var parameters = new BetweennessCentralityParameters(
+            new Concurrency(4),
+            Optional.of(2L),
+            Optional.empty(),
+            false
+        );
+
+        var task = new CentralityAlgorithmTasks().betweennessCentrality(testGraph,parameters);
+        var progressTrackerWithLog = TestProgressTrackerHelper.create(
+            task,
+            new Concurrency(4)
+        );
+        var progressTracker = progressTrackerWithLog.progressTracker();
+        var log = progressTrackerWithLog.log();
+
+        var algorithm = BetweennessCentrality.create(
+            testGraph,
+            parameters,
+            progressTracker,
+            TerminationFlag.RUNNING_TRUE
+        );
+
+        algorithm.compute();
+
+        assertThat(log.getMessages(TestLog.INFO))
+            .extracting(removingThreadId())
+            .extracting(replaceTimings())
+            .containsExactly(
+                "Betweenness Centrality :: Start",
+                "Betweenness Centrality 50%",
+                "Betweenness Centrality 100%",
+                "Betweenness Centrality :: Finished"
+            );
+    }
+
+    @Test
+    void testShouldLogProgressNoSampling() {
+        var testGraph = fromGdl(DIAMOND, "diamond");
+
+        var parameters = new BetweennessCentralityParameters(
+            new Concurrency(4),
+            Optional.empty(),
+            Optional.empty(),
+            false
+        );
+        var task = new CentralityAlgorithmTasks().betweennessCentrality(testGraph,parameters);
+
+        var progressTrackerWithLog = TestProgressTrackerHelper.create(
+            task,
+            new Concurrency(4)
+        );
+        var progressTracker = progressTrackerWithLog.progressTracker();
+        var log = progressTrackerWithLog.log();
+
+        var algorithm = BetweennessCentrality.create(
+            testGraph,
+            parameters,
+            progressTracker,
+            TerminationFlag.RUNNING_TRUE
+        );
+
+        algorithm.compute();
+
+        assertThat(log.getMessages(TestLog.INFO))
+            .extracting(removingThreadId())
+            .extracting(replaceTimings())
+            .containsExactly(
+                "Betweenness Centrality :: Start",
+                "Betweenness Centrality 14%",
+                "Betweenness Centrality 28%",
+                "Betweenness Centrality 42%",
+                "Betweenness Centrality 57%",
+                "Betweenness Centrality 71%",
+                "Betweenness Centrality 85%",
+                "Betweenness Centrality 100%",
+                "Betweenness Centrality :: Finished"
+            );
+    }
+
 }

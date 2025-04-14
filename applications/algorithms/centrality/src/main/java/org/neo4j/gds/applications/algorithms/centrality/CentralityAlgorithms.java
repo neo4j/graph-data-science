@@ -30,12 +30,8 @@ import org.neo4j.gds.articulationpoints.ArticulationPointsResult;
 import org.neo4j.gds.beta.pregel.Pregel;
 import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.betweenness.BetweennessCentrality;
-import org.neo4j.gds.betweenness.BetweennessCentralityBaseConfig;
 import org.neo4j.gds.betweenness.BetweennessCentralityParameters;
 import org.neo4j.gds.betweenness.BetwennessCentralityResult;
-import org.neo4j.gds.betweenness.ForwardTraverser;
-import org.neo4j.gds.betweenness.FullSelectionStrategy;
-import org.neo4j.gds.betweenness.RandomDegreeSelectionStrategy;
 import org.neo4j.gds.bridges.BridgeProgressTaskCreator;
 import org.neo4j.gds.bridges.BridgeResult;
 import org.neo4j.gds.bridges.Bridges;
@@ -76,9 +72,6 @@ import org.neo4j.gds.pagerank.PageRankComputation;
 import org.neo4j.gds.pagerank.PageRankConfig;
 import org.neo4j.gds.pagerank.PageRankResult;
 import org.neo4j.gds.termination.TerminationFlag;
-
-import java.util.Optional;
-import java.util.function.Function;
 
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ArticleRank;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.EigenVector;
@@ -137,47 +130,17 @@ public class CentralityAlgorithms {
         );
     }
 
-    BetwennessCentralityResult betweennessCentrality(Graph graph, BetweennessCentralityBaseConfig configuration) {
-        return betweennessCentrality(
-            graph, configuration.toParameters(), samplingSize -> {
-                var task = Tasks.leaf(
-                    AlgorithmLabel.BetweennessCentrality.asString(),
-                    samplingSize.orElse(graph.nodeCount())
-                );
-                return progressTrackerCreator.createProgressTracker(
-                    task,
-                    configuration.jobId(),
-                    configuration.concurrency(),
-                    configuration.logProgress()
-                );
-            }
-        );
-    }
+
 
     public BetwennessCentralityResult betweennessCentrality(
         Graph graph,
         BetweennessCentralityParameters parameters,
-        Function<Optional<Long>, ProgressTracker> progressTrackerFromSamplingSize
+        ProgressTracker progressTracker
     ) {
-        var samplingSize = parameters.samplingSize();
-        var samplingSeed = parameters.samplingSeed();
 
-        var selectionStrategy = samplingSize.isPresent() && samplingSize.get() < graph.nodeCount()
-            ? new RandomDegreeSelectionStrategy(samplingSize.get(), samplingSeed)
-            : new FullSelectionStrategy();
-
-        var traverserFactory = parameters.hasRelationshipWeightProperty()
-            ? ForwardTraverser.Factory.weighted()
-            : ForwardTraverser.Factory.unweighted();
-
-        var progressTracker = progressTrackerFromSamplingSize.apply(samplingSize);
-
-        var algorithm = new BetweennessCentrality(
+        var algorithm = BetweennessCentrality.create(
             graph,
-            selectionStrategy,
-            traverserFactory,
-            DefaultPool.INSTANCE,
-            parameters.concurrency(),
+            parameters,
             progressTracker,
             terminationFlag
         );
