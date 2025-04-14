@@ -24,8 +24,8 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmMachinery;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
+import org.neo4j.gds.articulationPoints.ArticulationPointsParameters;
 import org.neo4j.gds.articulationpoints.ArticulationPoints;
-import org.neo4j.gds.articulationpoints.ArticulationPointsProgressTaskCreator;
 import org.neo4j.gds.articulationpoints.ArticulationPointsResult;
 import org.neo4j.gds.beta.pregel.Pregel;
 import org.neo4j.gds.beta.pregel.PregelResult;
@@ -121,18 +121,19 @@ public class CentralityAlgorithms {
         return articleRank.compute();
     }
 
-    ArticulationPointsResult articulationPoints(Graph graph, AlgoBaseConfig configuration,boolean shouldComputeComponents) {
+    ArticulationPointsResult articulationPoints(
+        Graph graph,
+        ArticulationPointsParameters parameters,
+        ProgressTracker progressTracker)
+    {
 
-        var task = ArticulationPointsProgressTaskCreator.progressTask(graph.nodeCount());
-        var progressTracker = createProgressTracker(task, configuration);
-
-        var algorithm =  ArticulationPoints.create(graph, progressTracker,shouldComputeComponents);
+        var algorithm =  ArticulationPoints.create(graph, parameters, progressTracker);
 
         return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
             algorithm,
             progressTracker,
             true,
-            configuration.concurrency()
+            parameters.concurrency()
         );
     }
 

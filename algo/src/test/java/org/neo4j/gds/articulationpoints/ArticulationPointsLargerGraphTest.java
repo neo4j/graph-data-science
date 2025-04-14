@@ -21,6 +21,7 @@ package org.neo4j.gds.articulationpoints;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.articulationPoints.ArticulationPointsParameters;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -78,7 +79,11 @@ class ArticulationPointsLargerGraphTest {
 
     @Test
     void articulationPoints() {
-        var articulationPoints =  ArticulationPoints.create(graph, ProgressTracker.NULL_TRACKER,true);
+        var articulationPoints =  ArticulationPoints.create(
+            graph,
+            new ArticulationPointsParameters(null, true),
+            ProgressTracker.NULL_TRACKER
+        );
         var result = articulationPoints.compute();
 
         var bitset= result.articulationPoints();

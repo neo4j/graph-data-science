@@ -19,8 +19,14 @@
  */
 package org.neo4j.gds.articulationpoints;
 
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.CentralityAlgorithmTasks;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.TestProgressTrackerHelper;
+import org.neo4j.gds.articulationPoints.ArticulationPointsParameters;
+import org.neo4j.gds.compat.TestLog;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -28,6 +34,8 @@ import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.neo4j.gds.assertj.Extractors.removingThreadId;
+import static org.neo4j.gds.assertj.Extractors.replaceTimings;
 
 @GdlExtension
 class ArticulationPointsTest {
@@ -59,7 +67,12 @@ class ArticulationPointsTest {
     @Test
     void articulationPoints() {
 
-        var articulationPoints =  ArticulationPoints.create(graph, ProgressTracker.NULL_TRACKER,false);
+        var articulationPoints =  ArticulationPoints.create(
+            graph,
+            new ArticulationPointsParameters(null, false),
+            ProgressTracker.NULL_TRACKER
+        );
+
         var result = articulationPoints.compute().articulationPoints();
 
         assertThat(result)
@@ -73,4 +86,39 @@ class ArticulationPointsTest {
                     .isEqualTo(1L);
             });
     }
+
+    @Test
+    void shouldLogProgress(){
+
+        var progressTrackerWithLog = TestProgressTrackerHelper.create(
+            new CentralityAlgorithmTasks().articulationPoints(graph),
+            new Concurrency(1)
+        );
+
+        var progressTracker = progressTrackerWithLog.progressTracker();
+        var log = progressTrackerWithLog.log();
+
+        var articulationPoints =  ArticulationPoints.create(
+            graph,
+            new ArticulationPointsParameters(null, false),
+            progressTracker
+        );
+
+        articulationPoints.compute();
+
+        Assertions.assertThat(log.getMessages(TestLog.INFO))
+            .extracting(removingThreadId())
+            .extracting(replaceTimings())
+            .containsExactly(
+                "ArticulationPoints :: Start",
+                "ArticulationPoints 16%",
+                "ArticulationPoints 33%",
+                "ArticulationPoints 50%",
+                "ArticulationPoints 66%",
+                "ArticulationPoints 83%",
+                "ArticulationPoints 100%",
+                "ArticulationPoints :: Finished"
+            );
+    }
+
 }

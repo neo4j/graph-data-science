@@ -19,9 +19,12 @@
  */
 package org.neo4j.gds.applications.algorithms.centrality;
 
+import org.neo4j.gds.CentralityAlgorithmTasks;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
+import org.neo4j.gds.articulationpoints.ArticulationPointsBaseConfig;
 import org.neo4j.gds.articulationpoints.ArticulationPointsResult;
+import org.neo4j.gds.articulationpoints.ArticulationPointsToParameters;
 import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.betweenness.BetweennessCentralityBaseConfig;
 import org.neo4j.gds.betweenness.BetweennessCentralityParameters;
@@ -54,6 +57,7 @@ public class CentralityBusinessAlgorithms {
     private final CentralityAlgorithms centralityAlgorithms;
     private final ProgressTrackerCreator progressTrackerCreator;
     private final TerminationFlag terminationFlag;
+    private final CentralityAlgorithmTasks tasks = new CentralityAlgorithmTasks();
 
     public CentralityBusinessAlgorithms(
         CentralityAlgorithms centralityAlgorithms,
@@ -76,11 +80,13 @@ public class CentralityBusinessAlgorithms {
 
     ArticulationPointsResult articulationPoints(
         Graph graph,
-        AlgoBaseConfig configuration,
+        ArticulationPointsBaseConfig configuration,
         boolean shouldComputeComponents
     ) {
-
-        return centralityAlgorithms.articulationPoints(graph, configuration, shouldComputeComponents);
+        var task = tasks.articulationPoints(graph);
+        var  progressTracker =  progressTrackerCreator.createProgressTracker(task,configuration);
+        var params = ArticulationPointsToParameters.toParameters(configuration, shouldComputeComponents);
+        return centralityAlgorithms.articulationPoints(graph, params, progressTracker);
     }
 
     BetwennessCentralityResult betweennessCentrality(Graph graph, BetweennessCentralityBaseConfig configuration) {

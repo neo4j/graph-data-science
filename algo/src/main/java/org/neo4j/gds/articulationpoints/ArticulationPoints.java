@@ -23,6 +23,7 @@ import com.carrotsearch.hppc.BitSet;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.articulationPoints.ArticulationPointsParameters;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -53,11 +54,11 @@ public final class ArticulationPoints extends Algorithm<ArticulationPointsResult
         this.articulationPoints = new BitSet(graph.nodeCount());
     }
 
-    public static  ArticulationPoints create(Graph graph, ProgressTracker progressTracker, boolean shouldComputeComponents){
-              if (shouldComputeComponents){
-                    var tracker = new SubtreeTracker(graph.nodeCount());
-                    return new ArticulationPoints(graph,progressTracker,Optional.of(tracker));
-              }
+    public static  ArticulationPoints create(Graph graph, ArticulationPointsParameters parameters, ProgressTracker progressTracker){
+        if (parameters.computeComponents()){
+            var tracker = new SubtreeTracker(graph.nodeCount());
+            return new ArticulationPoints(graph,progressTracker,Optional.of(tracker));
+        }
         return  new ArticulationPoints(graph,progressTracker,Optional.empty());
     }
 
