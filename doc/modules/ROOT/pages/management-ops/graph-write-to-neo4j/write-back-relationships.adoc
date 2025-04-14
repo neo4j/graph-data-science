@@ -44,11 +44,11 @@ YIELD
 |===
 
 .Configuration
-[opts="header",cols="1,1,1,7"]
+[opts="header",cols="1,1,1,1,7"]
 |===
-| Name                   | Type                  | Default           | Description
-| concurrency            | Integer               | 4                 | The number of concurrent threads used for running the procedure. Also provides the default value for `writeConcurrency`. Note, this procedure is always running single-threaded.
-| writeConcurrency       | Integer               | 'concurrency'     | The number of concurrent threads used for writing the relationship properties. Note, this procedure is always running single-threaded.
+| Name                   | Type                  | Default           | Optional | Description
+include::partial$/algorithms/common-configuration/concurrency-entry.adoc[]
+| writeConcurrency       | Integer               | 'concurrency'     | yes | The number of concurrent threads used for writing the relationship properties. Note, this procedure is always running single-threaded.
 |===
 
 .Results

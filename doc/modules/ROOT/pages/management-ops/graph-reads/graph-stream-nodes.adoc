@@ -36,11 +36,11 @@ YIELD
 |===
 
 .Configuration
-[opts="header",cols="1,1,1,7"]
+[opts="header",cols="1,1,1,1,7"]
 |===
-| Name                   | Type                  | Default | Description
-| concurrency            | Integer               | 4       | The number of concurrent threads. Note, this procedure is always running single-threaded.
-| listNodeLabels | Boolean | false | Whether to return a list of node labels for each node.
+| Name                   | Type                  | Default | Optional | Description
+include::partial$/algorithms/common-configuration/concurrency-entry.adoc[]
+| listNodeLabels         | Boolean               | false   | yes      | Whether to return a list of node labels for each node.
 |===
 
 .Results
@@ -85,11 +85,11 @@ YIELD
 |===
 
 .Configuration
-[opts="header",cols="1,1,1,7"]
+[opts="header",cols="1,1,1,1,7"]
 |===
-| Name                   | Type                  | Default | Description
-| concurrency            | Integer               | 4       | The number of concurrent threads. Note, this procedure is always running single-threaded.
-| listNodeLabels | Boolean | false | Whether to return a list of node labels for each node.
+| Name                   | Type                  | Default | Optional | Description
+include::partial$/algorithms/common-configuration/concurrency-entry.adoc[]
+| listNodeLabels | Boolean | false | yes | Whether to return a list of node labels for each node.
 |===
 
 .Results

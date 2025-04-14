@@ -71,7 +71,7 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 | pipeline                                                      | String            | n/a                  | no       | The name of the pipeline to execute.
 | targetNodeLabels                                              | List of String    | ['*']                | yes      | Filter the named graph using the given node labels to obtain nodes that are subject to training and evaluation.
 | xref:common-usage/running-algos.adoc#common-configuration-relationship-types[relationshipTypes] | List of String    | ['*']                | yes      | Filter the named graph using the given relationship types.
-| xref:common-usage/running-algos.adoc#common-configuration-concurrency[concurrency]              | Integer           | 4                    | yes      | The number of concurrent threads used for running the algorithm.
+include::partial$/algorithms/common-configuration/common-configuration-jobid-concurrency-entries.adoc[]
 | targetProperty                                                | String            | n/a                  | no       | The target property of the node. Must be of type Integer or Float.
 | metrics                                                       | List of String    | n/a                  | no       | xref:machine-learning/node-property-prediction/noderegression-pipelines/training.adoc#noderegression-pipeline-metrics[Metrics] used to evaluate the models.
 | randomSeed                                                    | Integer           | n/a                  | yes      | Seed for the random number generator used during training.

@@ -60,8 +60,7 @@ CALL gds.graph.filter(
 [opts="header",cols="2,1,2m,1,5"]
 |===
 | Name               | Type    | Default              | Optional | Description
-| concurrency        | Integer | 4                    | yes      | The number of concurrent threads used for filtering the graph.
-| jobId              | String  | Generated internally | yes      | An ID that can be provided to more easily track the projection's progress.
+include::partial$/algorithms/common-configuration/common-configuration-jobid-concurrency-entries.adoc[]
 | parameters         | Map     | {}                   | yes      | A map of user-defined query parameters that are passed into the node and relationship filters.
 |===
 

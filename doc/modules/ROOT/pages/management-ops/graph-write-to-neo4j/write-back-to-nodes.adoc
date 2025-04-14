@@ -40,11 +40,11 @@ YIELD
 |===
 
 .Configuration
-[opts="header",cols="1,1,1,7"]
+[opts="header",cols="1,1,1,1,7"]
 |===
-| Name                   | Type                  | Default           | Description
-| concurrency            | Integer               | 4                 | The number of concurrent threads used for running the procedure. Also provides the default value for `writeConcurrency`
-| writeConcurrency       | Integer               | 'concurrency'     | The number of concurrent threads used for writing the node properties.
+| Name                   | Type                  | Default           | Optional | Description
+include::partial$algorithms/common-configuration/concurrency-entry.adoc[]
+| writeConcurrency       | Integer               | 'concurrency'     | yes | The number of concurrent threads used for writing the node properties.
 |===
 
 .Results
@@ -87,11 +87,11 @@ YIELD
 |===
 
 .Configuration
-[opts="header",cols="1,1,1,7"]
+[opts="header",cols="1,1,1,1,7"]
 |===
-| Name                   | Type                  | Default           | Description
-| nodeFilter             | String                | n/a               | A Cypher predicate for filtering nodes in the input graph. See xref:management-ops/graph-creation/graph-filter.adoc[Projecting a subgraph].
-| concurrency            | Integer               | 4                 | The number of concurrent threads used for running the procedure.
+| Name                   | Type                  | Default           | Optional | Description
+| nodeFilter             | String                | n/a               | no       | A Cypher predicate for filtering nodes in the input graph. See xref:management-ops/graph-creation/graph-filter.adoc[Projecting a subgraph].
+include::partial$/algorithms/common-configuration/concurrency-entry.adoc[]
 |===
 
 .Results

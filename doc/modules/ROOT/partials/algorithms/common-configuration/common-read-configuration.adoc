@@ -1,0 +1,1 @@
+| readConcurrency              | Integer  | 4       | yes      | The number of concurrent threads used for creating the graph.
