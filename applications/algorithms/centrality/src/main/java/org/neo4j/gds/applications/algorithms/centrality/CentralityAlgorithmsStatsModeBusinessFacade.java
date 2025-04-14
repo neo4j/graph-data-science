@@ -54,14 +54,14 @@ import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Pag
 
 public class CentralityAlgorithmsStatsModeBusinessFacade {
     private final CentralityAlgorithmsEstimationModeBusinessFacade estimationFacade;
-    private final CentralityAlgorithms centralityAlgorithms;
+    private final CentralityBusinessAlgorithms centralityAlgorithms;
     private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
     private final HitsHookGenerator hitsHookGenerator;
 
 
     CentralityAlgorithmsStatsModeBusinessFacade(
         CentralityAlgorithmsEstimationModeBusinessFacade estimationFacade,
-        CentralityAlgorithms centralityAlgorithms,
+        CentralityBusinessAlgorithms centralityAlgorithms,
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
         HitsHookGenerator hitsHookGenerator
     ) {

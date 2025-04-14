@@ -63,24 +63,30 @@ public final class CentralityApplications {
             requestScopedDependencies.terminationFlag()
         );
 
+        var business =new CentralityBusinessAlgorithms(
+            algorithms,
+            progressTrackerCreator,
+            requestScopedDependencies.terminationFlag()
+        );
+
         var hitsHookGenerator =new HitsHookGenerator(progressTrackerCreator,requestScopedDependencies.terminationFlag());
 
         var mutation = new CentralityAlgorithmsMutateModeBusinessFacade(
             estimation,
-            algorithms,
+            business,
             algorithmProcessingTemplateConvenience,
             mutateNodeProperty,
             hitsHookGenerator
         );
         var stats = new CentralityAlgorithmsStatsModeBusinessFacade(
             estimation,
-            algorithms,
+            business,
             algorithmProcessingTemplateConvenience,
             hitsHookGenerator
         );
         var streaming = new CentralityAlgorithmsStreamModeBusinessFacade(
             estimation,
-            algorithms,
+            business,
             algorithmProcessingTemplateConvenience,
             hitsHookGenerator
         );
@@ -89,7 +95,7 @@ public final class CentralityApplications {
             requestScopedDependencies,
             writeContext,
             estimation,
-            algorithms,
+            business,
             algorithmProcessingTemplateConvenience,
             hitsHookGenerator
         );

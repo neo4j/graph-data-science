@@ -60,7 +60,7 @@ import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Pag
 
 public final class CentralityAlgorithmsWriteModeBusinessFacade {
     private final CentralityAlgorithmsEstimationModeBusinessFacade estimationFacade;
-    private final CentralityAlgorithms centralityAlgorithms;
+    private final CentralityBusinessAlgorithms centralityAlgorithms;
     private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
     private final WriteToDatabase writeToDatabase;
     private final HitsHookGenerator hitsHookGenerator;
@@ -68,7 +68,7 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
 
     private CentralityAlgorithmsWriteModeBusinessFacade(
         CentralityAlgorithmsEstimationModeBusinessFacade estimationFacade,
-        CentralityAlgorithms centralityAlgorithms,
+        CentralityBusinessAlgorithms centralityAlgorithms,
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
         WriteToDatabase writeToDatabase,
         HitsHookGenerator hitsHookGenerator
@@ -85,7 +85,7 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
         RequestScopedDependencies requestScopedDependencies,
         WriteContext writeContext,
         CentralityAlgorithmsEstimationModeBusinessFacade estimationFacade,
-        CentralityAlgorithms centralityAlgorithms,
+        CentralityBusinessAlgorithms centralityAlgorithms,
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
         HitsHookGenerator hitsHookGenerator
     ) {
