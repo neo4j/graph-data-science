@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.function.LongUnaryOperator;
 import java.util.stream.Stream;
 
-public interface ResultStoreEntry {
+public sealed interface ResultStoreEntry {
 
     <T> T accept(Visitor<T> visitor);
 
