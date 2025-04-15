@@ -1,1 +1,1 @@
-| readConcurrency              | Integer  | 4       | yes      | The number of concurrent threads used for creating the graph.
+| readConcurrency              | Integer  | 4  footnote:SessionDefault[In a xref:installation/aura-graph-analytics-serverless.adoc[GDS Session] the default is the number of available processors]     | yes      | The number of concurrent threads used for creating the graph.

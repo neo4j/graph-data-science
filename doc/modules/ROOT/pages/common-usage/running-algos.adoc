@@ -77,7 +77,10 @@ To learn more about algorithm specific parameters and to find out if an algorith
 [[common-configuration-concurrency]]
 concurrency - Integer::
 Controls the parallelism with which the algorithm is executed.
-By default this value is set to 4.
+
+For GDS as a plugin, this value is set to 4.
+For a xref:installation/aura-graph-analytics-serverless.adoc[GDS Session], the default is the number of available processors.
+
 For more details on the concurrency settings and limitations please see xref:installation/System-requirements.adoc#system-requirements-cpu[the CPU section] of the System Requirements.
 
 [[common-configuration-node-labels]]
