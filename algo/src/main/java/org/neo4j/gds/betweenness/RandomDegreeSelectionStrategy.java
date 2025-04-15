@@ -46,6 +46,7 @@ public class RandomDegreeSelectionStrategy implements SelectionStrategy {
     private long graphSize;
     private BitSet sampleSet;
 
+
     public RandomDegreeSelectionStrategy(long samplingSize) {
         this(samplingSize, Optional.empty());
     }

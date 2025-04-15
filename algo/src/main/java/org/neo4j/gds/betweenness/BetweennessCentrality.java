@@ -60,12 +60,8 @@ public class BetweennessCentrality extends Algorithm<BetwennessCentralityResult>
         TerminationFlag terminationFlag
     ){
 
-        var samplingSize = parameters.samplingSize();
-        var samplingSeed = parameters.samplingSeed();
 
-        var selectionStrategy = samplingSize.isPresent() && samplingSize.get() < graph.nodeCount()
-            ? new RandomDegreeSelectionStrategy(samplingSize.get(), samplingSeed)
-            : new FullSelectionStrategy();
+        var selectionStrategy = SelectionStrategyFactory.createStrategy(graph.nodeCount(), parameters.samplingParameters());
 
         var traverserFactory = parameters.hasRelationshipWeightProperty()
             ? ForwardTraverser.Factory.weighted()

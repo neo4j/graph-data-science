@@ -19,19 +19,18 @@
  */
 package org.neo4j.gds.betweenness;
 
-import org.neo4j.gds.annotation.Parameters;
-import org.neo4j.gds.core.concurrency.Concurrency;
-
 import java.util.Optional;
 
-@Parameters
-public record BetweennessCentralityParameters(
-    Concurrency concurrency,
-    Optional<SamplingParameters> samplingParameters,
-    boolean hasRelationshipWeightProperty
-) {
+public final class SelectionStrategyFactory {
 
-    Optional<Long> samplingSize(){
-        return samplingParameters.map(SamplingParameters::samplingSize);
+    private SelectionStrategyFactory() {}
+
+    public static SelectionStrategy createStrategy(long nodeCount, Optional<SamplingParameters> samplingParameters) {
+
+        if (samplingParameters.isEmpty()) return  new FullSelectionStrategy();
+        var params = samplingParameters.get();
+        if (params.samplingSize() >=  nodeCount) return new FullSelectionStrategy();
+        return new RandomDegreeSelectionStrategy(params.samplingSize(),params.seed());
+
     }
 }
