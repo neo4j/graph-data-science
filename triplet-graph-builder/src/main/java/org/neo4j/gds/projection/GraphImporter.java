@@ -47,6 +47,7 @@ import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.utils.StringFormatting;
 import org.neo4j.gds.utils.StringJoining;
 
 import java.util.List;
@@ -194,6 +195,16 @@ public final class GraphImporter {
         var graphStore = graphStoreBuilder.schema(this.graphSchemaBuilder.build()).build();
         validateRelTypes(graphStore.schema().relationshipSchema());
         progressTracker.endSubTask("Relationships");
+
+        progressTracker.logInfo(StringFormatting.formatWithLocale(
+            "Imported Graph: {nodes: {count: %d, propertyCount: %d, labelCount: %d}, relationships: {count: %d, typeCount: %d, propertyCount: %d}}'",
+            graphStore.nodeCount(),
+            graphStore.nodePropertyKeys().size(),
+            graphStore.nodeLabels().size(),
+            graphStore.relationshipCount(),
+            graphStore.relationshipTypes().size(),
+            graphStore.relationshipPropertyKeys().size()
+        ));
 
         GraphStoreCatalog.set(this.config, graphStore);
 

@@ -452,6 +452,7 @@ class GraphImporterTest {
         log.assertContainsMessage(TestLog.INFO, "Graph aggregation :: Build graph store :: Relationships 100%");
         log.assertContainsMessage(TestLog.INFO, "Graph aggregation :: Build graph store :: Relationships :: Finished");
         log.assertContainsMessage(TestLog.INFO, "Graph aggregation :: Build graph store :: Finished");
+        log.assertContainsMessage(TestLog.INFO, "Graph aggregation :: Build graph store :: Imported Graph: {nodes: {count: 3, propertyCount: 0, labelCount: 1}, relationships: {count: 2, typeCount: 1, propertyCount: 0}}");
         log.assertContainsMessage(TestLog.INFO, "Graph aggregation :: Finished");
 
         assertThat(taskStore.query()).map(i -> i.task().status()).containsExactly(Status.FINISHED);
