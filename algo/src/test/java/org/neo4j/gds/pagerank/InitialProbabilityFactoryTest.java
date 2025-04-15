@@ -30,6 +30,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 class InitialProbabilityFactoryTest {
+
+    @Test
     void testInitialProbabilityEmpty() {
         var alpha = 0.15;
         var sourceNodes = SourceNodes.EMPTY_SOURCE_NODES;
@@ -37,6 +39,7 @@ class InitialProbabilityFactoryTest {
         assertThat(initialProbabilityProvider).isInstanceOf(GlobalRestartProbability.class);
     }
 
+    @Test
     void testInitialProbabilityList() {
         var alpha = 0.15;
         var sourceNodesList = SourceNodesFactory.parse(List.of(0L,2L,10L));
@@ -44,6 +47,7 @@ class InitialProbabilityFactoryTest {
         assertThat(initialProbabilityProvider).isInstanceOf(SourceBasedRestartProbabilityList.class);
     }
 
+    @Test
     void testInitialProbabilityMap() {
         var alpha = 0.15;
         var sourceNodesMap = SourceNodesFactory.parse(Map.of(0L, 1D, 5L, 0.1D));

@@ -152,8 +152,6 @@ class NodeIdParserTest {
         assertThat(nodeIdsWithProperties.get(2L)).isEqualTo(4.0);
         assertThat(nodeIdsWithProperties.get(43L)).isEqualTo(3);
         assertThat(nodeIdsWithProperties.get(44L)).isCloseTo(1.1F, Offset.offset(1E-6));
-
-
     }
 
     @Test

@@ -31,7 +31,7 @@ public interface ArticleRankConfig extends RankConfig
     }
 
     @Override
-    @Configuration.ConvertWith(method = "org.neo4j.gds.config.SourceNodesFactory#parseAsList")
+    @Configuration.ConvertWith(method = "org.neo4j.gds.config.SourceNodesFactory#parse")
     @Configuration.ToMapValue("org.neo4j.gds.config.SourceNodesFactory#toString")
     default SourceNodes sourceNodes() {
         return SourceNodes.EMPTY_SOURCE_NODES;
