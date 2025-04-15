@@ -25,6 +25,7 @@ import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.similarity.knn.KnnNodePropertySpec;
 import org.neo4j.gds.similarity.knn.metrics.LongArrayPropertySimilarityComputer.SortedLongArrayPropertyValues;
+import org.neo4j.gds.utils.StringJoining;
 
 import java.util.List;
 import java.util.Objects;
@@ -53,7 +54,11 @@ public interface SimilarityComputer {
         var propertyName = knnNodePropertySpec.name();
         var nodeProperties = Objects.requireNonNull(
             graph.nodeProperties(propertyName),
-            () -> formatWithLocale("The property `%s` has not been loaded", propertyName)
+            () -> formatWithLocale(
+                "The property `%s` has not been loaded. Available properties: %s",
+                propertyName,
+                StringJoining.join(graph.availableNodeProperties())
+            )
         );
 
         if (knnNodePropertySpec.metric() == SimilarityMetric.DEFAULT) {
