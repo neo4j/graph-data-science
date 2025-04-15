@@ -86,7 +86,7 @@ With this it is possible to measure the memory consumption of projecting a graph
 | relationshipQuery                                           | String                        | null                   | yes      | The Cypher query used to select the relationships for anonymous graph creation via a Legacy Cypher projection.
 | nodeProperties                                              | String, List of String or Map | null                   | yes      | The node properties to project during anonymous graph creation.
 | relationshipProperties                                      | String, List of String or Map | null                   | yes      | The relationship properties to project during anonymous graph creation.
-include::partial$algorithms/common-configuration/common-configuration-jobid-concurrency-entries.adoc[]
+include::partial$/algorithms/common-configuration/common-configuration-jobid-concurrency-entries.adoc[]
 | readConcurrency                                             | Integer                       | value of 'concurrency' | yes      | The number of concurrent threads used for creating the graph.
 |===
 

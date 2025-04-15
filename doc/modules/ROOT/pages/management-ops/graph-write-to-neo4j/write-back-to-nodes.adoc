@@ -43,7 +43,7 @@ YIELD
 [opts="header",cols="1,1,1,1,7"]
 |===
 | Name                   | Type                  | Default           | Optional | Description
-include::partial$algorithms/common-configuration/concurrency-entry.adoc[]
+include::partial$/algorithms/common-configuration/concurrency-entry.adoc[]
 | writeConcurrency       | Integer               | 'concurrency'     | yes | The number of concurrent threads used for writing the node properties.
 |===
 
