@@ -270,7 +270,8 @@ public final class CSRGraphStore implements GraphStore {
 
     @Override
     public Set<String> nodePropertyKeys() {
-        assert schema().nodeSchema().allProperties().size() == nodeProperties.keySet().size();
+        // nodeProperties might have more entries as schema is label aware but NodePropertyStore is not
+        assert nodeProperties.keySet().containsAll(schema().nodeSchema().allProperties());
         return nodeProperties.keySet();
     }
 
