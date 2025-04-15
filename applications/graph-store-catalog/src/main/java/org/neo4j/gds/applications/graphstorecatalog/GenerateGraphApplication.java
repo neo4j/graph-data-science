@@ -33,6 +33,7 @@ import org.neo4j.gds.core.loading.CSRGraphStoreUtil;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.utils.StringFormatting;
 
 import java.util.Locale;
 import java.util.Map;
@@ -91,6 +92,16 @@ public class GenerateGraphApplication {
                 relationshipProperty,
                 config.readConcurrency()
             );
+
+            log.info(StringFormatting.formatWithLocale(
+                "Generated Graph: {nodes: {count: %d, propertyCount: %d, labelCount: %d}, relationships: {count: %d, typeCount: %d, propertyCount: %d}}'",
+                graphStore.nodeCount(),
+                graphStore.nodePropertyKeys().size(),
+                graphStore.nodeLabels().size(),
+                graphStore.relationshipCount(),
+                graphStore.relationshipTypes().size(),
+                graphStore.relationshipPropertyKeys().size()
+            ));
 
             nodes = graphStore.nodeCount();
             relationships = graphStore.relationshipCount();

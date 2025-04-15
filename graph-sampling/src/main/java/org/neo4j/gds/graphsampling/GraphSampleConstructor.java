@@ -46,6 +46,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.termination.TerminationFlag;
+import org.neo4j.gds.utils.StringFormatting;
 
 import java.util.List;
 import java.util.Map;
@@ -137,6 +138,16 @@ public class GraphSampleConstructor {
             .relationshipImportResult(relationshipImportResult)
             .concurrency(concurrency)
             .build();
+
+        progressTracker.logInfo(StringFormatting.formatWithLocale(
+            "Sampled Graph: {nodes: {count: %d, propertyCount: %d, labelCount: %d}, relationships: {count: %d, typeCount: %d, propertyCount: %d}}",
+            outputGraphStore.nodeCount(),
+            outputGraphStore.nodePropertyKeys().size(),
+            outputGraphStore.nodeLabels().size(),
+            outputGraphStore.relationshipCount(),
+            outputGraphStore.relationshipTypes().size(),
+            outputGraphStore.relationshipPropertyKeys().size()
+        ));
 
         progressTracker.endSubTask("Construct graph");
 
