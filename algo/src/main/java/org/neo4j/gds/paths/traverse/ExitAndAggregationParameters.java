@@ -17,15 +17,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.dag.longestPath;
+package org.neo4j.gds.paths.traverse;
 
-import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.config.AlgoBaseConfig;
-
-public interface DagLongestPathBaseConfig extends AlgoBaseConfig {
-
-    @Configuration.Ignore
-    default DagLongestPathParameters toParameters() {
-        return new DagLongestPathParameters(concurrency());
-    }
+public record ExitAndAggregationParameters(
+    ExitPredicate exitFunction,
+    Aggregator aggregatorFunction
+) {
 }

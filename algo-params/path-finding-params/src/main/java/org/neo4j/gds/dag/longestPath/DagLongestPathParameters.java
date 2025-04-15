@@ -17,12 +17,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.kspanningtree;
+package org.neo4j.gds.dag.longestPath;
 
-import org.neo4j.gds.annotation.Parameters;
+import org.neo4j.gds.AlgorithmParameters;
+import org.neo4j.gds.core.concurrency.Concurrency;
 
-import java.util.function.DoubleUnaryOperator;
-
-@Parameters
-public record KSpanningTreeParameters(DoubleUnaryOperator objective, long sourceNode, long k) {
+public record DagLongestPathParameters(Concurrency concurrency) implements AlgorithmParameters {
 }

@@ -23,18 +23,21 @@ import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.SourceNodeConfig;
 import org.neo4j.gds.config.TargetNodesConfig;
+import org.neo4j.gds.traversal.TraversalParameters;
 
 public interface DfsBaseConfig extends AlgoBaseConfig, SourceNodeConfig, TargetNodesConfig {
 
-    long NO_MAX_DEPTH = -1L;
-
     default long maxDepth() {
-        return NO_MAX_DEPTH;
+        return TraversalParameters.NO_MAX_DEPTH;
     }
 
     @Configuration.Ignore
-    default boolean hasMaxDepth() {
-        return maxDepth() != NO_MAX_DEPTH;
+    default TraversalParameters toParameters() {
+        return new TraversalParameters(
+            sourceNode(),
+            targetNodes(),
+            maxDepth(),
+            concurrency()
+        );
     }
-
 }

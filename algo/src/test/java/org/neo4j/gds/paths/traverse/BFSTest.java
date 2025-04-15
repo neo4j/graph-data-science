@@ -35,6 +35,7 @@ import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.paths.traverse.ExitPredicate.Result;
 import org.neo4j.gds.termination.TerminationFlag;
+import org.neo4j.gds.traversal.TraversalParameters;
 
 import java.util.stream.Stream;
 
@@ -109,7 +110,7 @@ class BFSTest {
             (s, t, w) -> 1.,
             new Concurrency(concurrency),
             ProgressTracker.NULL_TRACKER,
-            BFS.ALL_DEPTHS_ALLOWED,
+            TraversalParameters.NO_MAX_DEPTH,
             TerminationFlag.RUNNING_TRUE
         ).compute().toArray();
 
@@ -136,7 +137,7 @@ class BFSTest {
             Aggregator.NO_AGGREGATION,
             new Concurrency(concurrency),
             ProgressTracker.NULL_TRACKER,
-            BFS.ALL_DEPTHS_ALLOWED,
+            TraversalParameters.NO_MAX_DEPTH,
             TerminationFlag.RUNNING_TRUE
         ).compute().toArray();
         assertEquals(7, nodes.length);
@@ -177,7 +178,7 @@ class BFSTest {
             Aggregator.NO_AGGREGATION,
             new Concurrency(concurrency),
             ProgressTracker.NULL_TRACKER,
-            BFS.ALL_DEPTHS_ALLOWED,
+            TraversalParameters.NO_MAX_DEPTH,
             TerminationFlag.RUNNING_TRUE
         ).compute();
     }
@@ -195,7 +196,7 @@ class BFSTest {
             Aggregator.NO_AGGREGATION,
             new Concurrency(concurrency),
             progressTracker,
-            BFS.ALL_DEPTHS_ALLOWED,
+            TraversalParameters.NO_MAX_DEPTH,
             TerminationFlag.RUNNING_TRUE
         ).compute();
         var messagesInOrder = testLog.getMessages(INFO);

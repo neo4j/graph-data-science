@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.neo4j.gds.TestProgressTracker;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
@@ -34,6 +35,7 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.logging.GdsTestLog;
+import org.neo4j.gds.paths.RelationshipCountProgressTaskFactory;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -102,7 +104,8 @@ class AStarTest {
             "longitude",
             "latitude",
             graph.toOriginalNodeId("nA"),
-            graph.toOriginalNodeId("nX")
+            graph.toOriginalNodeId("nX"),
+            new Concurrency(4)
         );
         var result = AStar
             .sourceTarget(
@@ -124,7 +127,7 @@ class AStarTest {
     void shouldLogProgress() {
         var log = new GdsTestLog();
         var testTracker = new TestProgressTracker(
-            AStarTask.create(graph.relationshipCount()),
+            RelationshipCountProgressTaskFactory.create(AlgorithmLabel.AStar, graph.relationshipCount()),
             new LoggerForProgressTrackingAdapter(log),
             new Concurrency(4),
             EmptyTaskRegistryFactory.INSTANCE
@@ -133,7 +136,8 @@ class AStarTest {
             "longitude",
             "latitude",
             graph.toOriginalNodeId("nA"),
-            graph.toOriginalNodeId("nX")
+            graph.toOriginalNodeId("nX"),
+            new Concurrency(4)
         );
         AStar.sourceTarget(
                 graph,

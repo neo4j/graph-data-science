@@ -37,22 +37,22 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 @Configuration
 public interface PCSTBaseConfig extends AlgoBaseConfig, RelationshipWeightConfig {
 
-     String prizeProperty();
+    String prizeProperty();
 
-        @Configuration.GraphStoreValidationCheck
-        default void validateTargetRelIsUndirected(
-            GraphStore graphStore,
-            Collection<NodeLabel> ignored,
-            Collection<RelationshipType> selectedRelationshipTypes
-        ) {
-            if (!graphStore.schema().filterRelationshipTypes(Set.copyOf(selectedRelationshipTypes)).isUndirected()) {
-                throw new IllegalArgumentException(formatWithLocale(
-                    "Prize-collecting Steineer requires relationship projections to be UNDIRECTED. " +
-                        "Selected relationships `%s` are not all undirected.",
-                    selectedRelationshipTypes.stream().map(RelationshipType::name).collect(Collectors.toSet())
-                ));
-            }
+    @Configuration.GraphStoreValidationCheck
+    default void validateTargetRelIsUndirected(
+        GraphStore graphStore,
+        Collection<NodeLabel> ignored,
+        Collection<RelationshipType> selectedRelationshipTypes
+    ) {
+        if (!graphStore.schema().filterRelationshipTypes(Set.copyOf(selectedRelationshipTypes)).isUndirected()) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "Prize-collecting Steineer requires relationship projections to be UNDIRECTED. " +
+                    "Selected relationships `%s` are not all undirected.",
+                selectedRelationshipTypes.stream().map(RelationshipType::name).collect(Collectors.toSet())
+            ));
         }
+    }
 
     @Configuration.GraphStoreValidationCheck
     default void nodePropertyTypeValidation(
@@ -82,4 +82,8 @@ public interface PCSTBaseConfig extends AlgoBaseConfig, RelationshipWeightConfig
         );
     }
 
+    @Configuration.Ignore
+    default PCSTParameters toParameters() {
+        return new PCSTParameters(prizeProperty(), concurrency());
     }
+}

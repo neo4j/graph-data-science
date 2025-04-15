@@ -70,13 +70,13 @@ import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Yen
  */
 public class PathFindingAlgorithmsStreamModeBusinessFacade {
     private final PathFindingAlgorithmsEstimationModeBusinessFacade estimation;
-    private final PathFindingAlgorithms algorithms;
+    private final PathFindingAlgorithmsBusinessFacade algorithms;
 
     private final AlgorithmProcessingTemplateConvenience convenience;
 
     PathFindingAlgorithmsStreamModeBusinessFacade(
         PathFindingAlgorithmsEstimationModeBusinessFacade estimation,
-        PathFindingAlgorithms algorithms,
+        PathFindingAlgorithmsBusinessFacade algorithms,
         AlgorithmProcessingTemplateConvenience convenience
     ) {
         this.convenience = convenience;

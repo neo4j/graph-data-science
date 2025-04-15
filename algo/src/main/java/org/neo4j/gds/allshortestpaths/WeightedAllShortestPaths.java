@@ -64,11 +64,13 @@ public class WeightedAllShortestPaths extends MSBFSASPAlgorithm {
 
     private volatile boolean outputStreamOpen;
 
-    public WeightedAllShortestPaths(Graph graph, ExecutorService executorService, Concurrency concurrency, TerminationFlag terminationFlag) {
-        super(ProgressTracker.NULL_TRACKER);
-        if (!graph.hasRelationshipProperty()) {
-            throw new UnsupportedOperationException("WeightedAllShortestPaths is not supported on graphs without a weight property");
-        }
+    public WeightedAllShortestPaths(
+        Graph graph,
+        ExecutorService executorService,
+        Concurrency concurrency,
+        ProgressTracker progressTracker, TerminationFlag terminationFlag
+    ) {
+        super(progressTracker);
 
         this.graph = graph;
         this.nodeCount = Math.toIntExact(graph.nodeCount());

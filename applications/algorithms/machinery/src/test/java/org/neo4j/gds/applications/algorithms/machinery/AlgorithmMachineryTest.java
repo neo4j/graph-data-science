@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.applications.algorithms.machinery;
 
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -27,7 +28,10 @@ import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
+import java.util.function.Supplier;
+
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatException;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -43,7 +47,7 @@ class AlgorithmMachineryTest {
     private Algorithm<String> algo;
 
     @Test
-    void shouldRunAlgorithm() {
+    void shouldGetResult() {
         var algorithmMachinery = new AlgorithmMachinery();
 
         var progressTracker = mock(ProgressTracker.class);
@@ -136,5 +140,100 @@ class AlgorithmMachineryTest {
         verify(progressTracker, times(1)).endSubTaskWithFailure();
         verify(progressTracker, times(1)).release();
         verifyNoMoreInteractions(progressTracker);
+    }
+
+    @Nested
+    class SupplierMethodsTest {
+        private static final Concurrency CONCURRENCY = new Concurrency(4);
+
+        @Mock
+        private Supplier<String> resultSupplier;
+
+        @Test
+        void shouldRunAlgorithm() {
+            var algorithmMachinery = new AlgorithmMachinery();
+
+            var progressTracker = mock(ProgressTracker.class);
+
+            when(resultSupplier.get()).thenReturn("Hello, world!");
+
+            var result = algorithmMachinery.getResultWithoutReleasingProgressTracker(
+                resultSupplier,
+                progressTracker,
+                CONCURRENCY
+            );
+
+            assertThat(result).isEqualTo("Hello, world!");
+
+            verify(progressTracker, times(1)).requestedConcurrency(CONCURRENCY);
+            verifyNoMoreInteractions(progressTracker);
+        }
+
+        @Test
+        void shouldReleaseProgressTrackerWhenAsked() {
+            var algorithmMachinery = new AlgorithmMachinery();
+
+            var progressTracker = mock(ProgressTracker.class);
+
+            when(resultSupplier.get()).thenReturn("Dodgers win world series!");
+
+            var result = algorithmMachinery.getResult(
+                resultSupplier,
+                progressTracker,
+                CONCURRENCY
+            );
+
+            assertThat(result).isEqualTo("Dodgers win world series!");
+
+            verify(progressTracker, times(1)).requestedConcurrency(CONCURRENCY);
+            verify(progressTracker, times(1)).release();
+            verifyNoMoreInteractions(progressTracker);
+        }
+
+        @Test
+        void shouldMarkProgressTracker() {
+            var algorithmMachinery = new AlgorithmMachinery();
+
+            var progressTracker = mock(ProgressTracker.class);
+            var exception = new RuntimeException("Whoops!");
+
+            when(resultSupplier.get()).thenThrow(exception);
+
+            assertThatException().isThrownBy(
+                () -> algorithmMachinery.getResultWithoutReleasingProgressTracker(
+                    resultSupplier,
+                    progressTracker,
+                    CONCURRENCY
+                )
+            ).withMessage("Whoops!");
+
+            verify(progressTracker, times(1)).requestedConcurrency(CONCURRENCY);
+            verify(progressTracker, times(1)).endSubTaskWithFailure();
+            verifyNoMoreInteractions(progressTracker);
+        }
+
+        @Test
+        void shouldMarkProgressTrackerAndReleaseIt() {
+            var algorithmMachinery = new AlgorithmMachinery();
+
+            var progressTracker = mock(ProgressTracker.class);
+            var exception = new RuntimeException("Yeah, no...");
+
+            when(resultSupplier.get()).thenThrow(exception);
+
+            assertThatException().isThrownBy(
+                () -> algorithmMachinery.getResult(
+                    resultSupplier,
+                    progressTracker,
+                    CONCURRENCY
+                )
+            ).withMessage("Yeah, no...");
+
+            verify(progressTracker, times(1)).requestedConcurrency(CONCURRENCY);
+            verify(progressTracker, times(1)).endSubTaskWithFailure();
+            verify(progressTracker, times(1)).release();
+            verifyNoMoreInteractions(progressTracker);
+        }
+
     }
 }

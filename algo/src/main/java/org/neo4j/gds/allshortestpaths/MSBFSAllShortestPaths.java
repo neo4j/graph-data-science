@@ -51,9 +51,10 @@ public class MSBFSAllShortestPaths extends MSBFSASPAlgorithm {
         Graph graph,
         Concurrency concurrency,
         ExecutorService executorService,
+        ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
-        super(ProgressTracker.NULL_TRACKER);
+        super(progressTracker);
         this.graph = graph;
         this.concurrency = concurrency;
         this.executorService = executorService;

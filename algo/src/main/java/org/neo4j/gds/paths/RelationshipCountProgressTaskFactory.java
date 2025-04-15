@@ -17,15 +17,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.dag.longestPath;
+package org.neo4j.gds.paths;
 
-import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
+import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
-public interface DagLongestPathBaseConfig extends AlgoBaseConfig {
+public final class RelationshipCountProgressTaskFactory {
 
-    @Configuration.Ignore
-    default DagLongestPathParameters toParameters() {
-        return new DagLongestPathParameters(concurrency());
+    private RelationshipCountProgressTaskFactory() {}
+
+    public static Task create(AlgorithmLabel algorithmLabel, long relationshipCount) {
+        return Tasks.leaf(algorithmLabel.asString(), relationshipCount);
     }
 }

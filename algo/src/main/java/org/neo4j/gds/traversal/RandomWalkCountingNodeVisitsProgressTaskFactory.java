@@ -19,13 +19,27 @@
  */
 package org.neo4j.gds.traversal;
 
-import org.neo4j.gds.annotation.Parameters;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
+import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.degree.DegreeCentralityTask;
 
-@Parameters
-public record WalkParameters(
-    int walksPerNode,
-    int walkLength,
-    double returnFactor,
-    double inOutFactor
-) {
+import java.util.List;
+
+public final class RandomWalkCountingNodeVisitsProgressTaskFactory {
+
+    private RandomWalkCountingNodeVisitsProgressTaskFactory() {}
+
+    public static Task create(Graph graph) {
+        if (graph.hasRelationshipProperty()) {
+            return Tasks.task(
+                AlgorithmLabel.RandomWalk.asString(),
+                List.of(DegreeCentralityTask.create(graph))
+            );
+        }
+
+        return Tasks.leaf(AlgorithmLabel.RandomWalk.asString(), graph.nodeCount());
+    }
+
 }

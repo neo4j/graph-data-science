@@ -17,17 +17,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.kspanningtree;
+package org.neo4j.gds.paths.traverse;
 
-import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.spanningtree.SpanningTreeBaseConfig;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
+import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
-@Configuration
-public interface KSpanningTreeBaseConfig extends SpanningTreeBaseConfig {
-    long k();
+public final class BFSProgressTask {
 
-    @Configuration.Ignore
-    default KSpanningTreeParameters toKSpanningTreeParameters() {
-        return new KSpanningTreeParameters(objective(), sourceNode(), k());
+    private BFSProgressTask() {}
+
+    public static Task create() {
+        return Tasks.leaf(AlgorithmLabel.BFS.asString());
     }
 }

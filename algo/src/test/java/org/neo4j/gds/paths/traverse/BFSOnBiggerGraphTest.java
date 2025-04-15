@@ -29,6 +29,7 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.termination.TerminationFlag;
+import org.neo4j.gds.traversal.TraversalParameters;
 
 import java.util.stream.Stream;
 
@@ -113,7 +114,7 @@ class BFSOnBiggerGraphTest {
             new Concurrency(concurrency),
             ProgressTracker.NULL_TRACKER,
             delta,
-            BFS.ALL_DEPTHS_ALLOWED,
+            TraversalParameters.NO_MAX_DEPTH,
             TerminationFlag.RUNNING_TRUE
         ).compute().toArray();
 

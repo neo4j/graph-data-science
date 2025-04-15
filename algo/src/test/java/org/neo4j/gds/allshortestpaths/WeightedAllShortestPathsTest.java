@@ -25,17 +25,15 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
-import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyDouble;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
@@ -101,7 +99,10 @@ class WeightedAllShortestPathsTest {
 
         TriConsumer<Long, Long, Double> mock = mock(TriConsumer.class);
 
-        new WeightedAllShortestPaths(graph, DefaultPool.INSTANCE, new Concurrency(4), TerminationFlag.RUNNING_TRUE)
+        new WeightedAllShortestPaths(graph, DefaultPool.INSTANCE, new Concurrency(4),
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
+        )
                 .compute()
                 .forEach(r -> {
                     assertNotEquals(Double.POSITIVE_INFINITY, r.distance());
@@ -120,16 +121,4 @@ class WeightedAllShortestPathsTest {
         verify(mock, times(1)).accept(a0, a0, 0.0);
 
     }
-
-    @Test
-    void shouldThrowIfGraphHasNoRelationshipProperty() {
-        var gdlGraph = GdlFactory.of("(a)-[:r]->(b)").build().getUnion();
-
-        UnsupportedOperationException exception = assertThrows(UnsupportedOperationException.class, () -> {
-            new WeightedAllShortestPaths(gdlGraph, DefaultPool.INSTANCE, new Concurrency(4), TerminationFlag.RUNNING_TRUE);
-        });
-
-        assertTrue(exception.getMessage().contains("not supported"));
-    }
-
 }

@@ -23,6 +23,8 @@ import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
+import java.util.function.Supplier;
+
 /**
  * I wish this did not exist quite like this; it is where we encapsulate running an algorithm,
  * managing termination, and handling (progress tracker) resources.
@@ -52,6 +54,36 @@ public class AlgorithmMachinery {
             throw e;
         } finally {
             if (shouldReleaseProgressTracker) progressTracker.release();
+        }
+    }
+
+    public <RESULT> RESULT getResultWithoutReleasingProgressTracker(
+        Supplier<RESULT> resultSupplier,
+        ProgressTracker progressTracker,
+        Concurrency concurrency
+    ) {
+        try {
+            progressTracker.requestedConcurrency(concurrency);
+            return resultSupplier.get();
+        } catch (Exception e) {
+            progressTracker.endSubTaskWithFailure();
+            throw e;
+        }
+    }
+
+    public <RESULT> RESULT getResult(
+        Supplier<RESULT> resultSupplier,
+        ProgressTracker progressTracker,
+        Concurrency concurrency
+    ) {
+        try {
+            progressTracker.requestedConcurrency(concurrency);
+            return resultSupplier.get();
+        } catch (Exception e) {
+            progressTracker.endSubTaskWithFailure();
+            throw e;
+        } finally {
+            progressTracker.release();
         }
     }
 }

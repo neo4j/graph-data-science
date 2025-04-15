@@ -65,7 +65,9 @@ public final class PathFindingApplications {
         MutateNodeProperty mutateNodeProperty,
         MutateRelationshipService mutateRelationshipService
     ) {
-        var pathFindingAlgorithms = new PathFindingAlgorithms(requestScopedDependencies, progressTrackerCreator);
+
+        var algorithms = new PathFindingAlgorithms();
+        var pathFindingAlgorithms = new PathFindingAlgorithmsBusinessFacade(algorithms, requestScopedDependencies, progressTrackerCreator);
 
         var estimationModeFacade = new PathFindingAlgorithmsEstimationModeBusinessFacade(algorithmEstimationTemplate);
 

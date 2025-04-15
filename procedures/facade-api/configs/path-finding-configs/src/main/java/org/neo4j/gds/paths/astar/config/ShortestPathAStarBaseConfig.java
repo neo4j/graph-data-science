@@ -44,7 +44,8 @@ public interface ShortestPathAStarBaseConfig extends TargetNodeConfig,
             longitudeProperty(),
             latitudeProperty(),
             sourceNode(),
-            targetNode()
+            targetNode(),
+            concurrency()
         );
     }
 }

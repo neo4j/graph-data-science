@@ -17,15 +17,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.dag.longestPath;
+package org.neo4j.gds.pcst;
 
-import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.AlgorithmParameters;
+import org.neo4j.gds.core.concurrency.Concurrency;
 
-public interface DagLongestPathBaseConfig extends AlgoBaseConfig {
-
-    @Configuration.Ignore
-    default DagLongestPathParameters toParameters() {
-        return new DagLongestPathParameters(concurrency());
-    }
+public record PCSTParameters(String prizeProperty, Concurrency concurrency) implements AlgorithmParameters {
 }

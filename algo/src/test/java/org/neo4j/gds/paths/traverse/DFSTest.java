@@ -28,6 +28,7 @@ import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.paths.traverse.ExitPredicate.Result;
 import org.neo4j.gds.termination.TerminationFlag;
+import org.neo4j.gds.traversal.TraversalParameters;
 
 import java.util.stream.Stream;
 
@@ -99,7 +100,7 @@ class DFSTest {
             source,
             (s, t, w) -> t == target ? Result.BREAK : Result.FOLLOW,
             Aggregator.NO_AGGREGATION,
-            DfsBaseConfig.NO_MAX_DEPTH,
+            TraversalParameters.NO_MAX_DEPTH,
             ProgressTracker.NULL_TRACKER,
             TerminationFlag.RUNNING_TRUE
         ).compute().toArray();
@@ -121,7 +122,7 @@ class DFSTest {
             source,
             (s, t, w) -> Result.FOLLOW,
             Aggregator.NO_AGGREGATION,
-            DfsBaseConfig.NO_MAX_DEPTH,
+            TraversalParameters.NO_MAX_DEPTH,
             ProgressTracker.NULL_TRACKER,
             TerminationFlag.RUNNING_TRUE
         ).compute().toArray();
@@ -144,7 +145,7 @@ class DFSTest {
             source,
             (s, t, w) -> t == target ? Result.BREAK : Result.FOLLOW,
             Aggregator.NO_AGGREGATION,
-            DfsBaseConfig.NO_MAX_DEPTH,
+            TraversalParameters.NO_MAX_DEPTH,
             ProgressTracker.NULL_TRACKER,
             TerminationFlag.RUNNING_TRUE
         ).compute().toArray();
@@ -179,7 +180,7 @@ class DFSTest {
             0,
             (s, t, w) -> Result.FOLLOW,
             Aggregator.NO_AGGREGATION,
-            DfsBaseConfig.NO_MAX_DEPTH,
+            TraversalParameters.NO_MAX_DEPTH,
             ProgressTracker.NULL_TRACKER,
             TerminationFlag.RUNNING_TRUE
         ).compute();
