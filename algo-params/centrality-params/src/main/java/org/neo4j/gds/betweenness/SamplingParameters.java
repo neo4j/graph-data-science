@@ -19,19 +19,7 @@
  */
 package org.neo4j.gds.betweenness;
 
-import org.neo4j.gds.annotation.Parameters;
-import org.neo4j.gds.core.concurrency.Concurrency;
-
 import java.util.Optional;
 
-@Parameters
-public record BetweennessCentralityParameters(
-    Concurrency concurrency,
-    Optional<SamplingParameters> samplingParameters,
-    boolean hasRelationshipWeightProperty
-) {
-
-    Optional<Long> samplingSize(){
-        return samplingParameters.map(SamplingParameters::samplingSize);
-    }
+public record SamplingParameters(long samplingSize, Optional<Long> seed) {
 }

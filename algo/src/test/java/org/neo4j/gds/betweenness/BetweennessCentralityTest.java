@@ -132,10 +132,14 @@ class BetweennessCentralityTest {
     @MethodSource("org.neo4j.gds.betweenness.BetweennessCentralityTest#testArguments")
     void sampling(int concurrency, TestGraph graph, long samplingSize, Map<String, Double> expectedResult) {
 
+        var samplingParams = new SamplingParameters(
+            samplingSize,
+            Optional.of(42L)
+        );
+
        var params = new BetweennessCentralityParameters(
            new Concurrency(concurrency),
-           Optional.of(samplingSize),
-           Optional.of(42L),
+           Optional.of(samplingParams),
            false
        );
 
@@ -161,7 +165,6 @@ class BetweennessCentralityTest {
         var params = new BetweennessCentralityParameters(
             new Concurrency(concurrency),
             Optional.empty(),
-            Optional.empty(),
             false
         );
 
@@ -186,10 +189,15 @@ class BetweennessCentralityTest {
     void testShouldLogProgress() {
         var testGraph = fromGdl(DIAMOND, "diamond");
 
+        var samplingParams = new SamplingParameters(
+            2,
+            Optional.empty()
+        );
+
         var parameters = new BetweennessCentralityParameters(
             new Concurrency(4),
-            Optional.of(2L),
-            Optional.empty(),
+            Optional.of(samplingParams),
+
             false
         );
 
@@ -228,9 +236,9 @@ class BetweennessCentralityTest {
         var parameters = new BetweennessCentralityParameters(
             new Concurrency(4),
             Optional.empty(),
-            Optional.empty(),
             false
         );
+
         var task = new CentralityAlgorithmTasks().betweennessCentrality(testGraph,parameters);
 
         var progressTrackerWithLog = TestProgressTrackerHelper.create(

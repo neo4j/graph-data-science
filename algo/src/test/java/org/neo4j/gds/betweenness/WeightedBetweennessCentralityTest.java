@@ -110,11 +110,10 @@ class WeightedBetweennessCentralityTest {
     @Test
     void shouldComputeWithWeights() {
         IdFunction weightedIdFunction = weightedGraph::toMappedNodeId;
-
+        var samplingParams = new SamplingParameters(7L, Optional.of(42L));
         var params = new BetweennessCentralityParameters(
             new Concurrency(8),
-            Optional.of(7L),
-            Optional.of(42L),
+            Optional.of(samplingParams),
             true
         );
 
