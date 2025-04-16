@@ -51,6 +51,27 @@ public final class ClosenessCentrality extends Algorithm<ClosenessCentralityResu
     private final HugeAtomicIntArray component;
     private final CentralityComputer centralityComputer;
 
+    public static ClosenessCentrality create(
+        Graph graph,
+        ClosenessCentralityParameters  parameters,
+        ExecutorService executorService,
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
+    ){
+
+        var centralityComputer = parameters.useWassermanFaust()
+            ? new WassermanFaustCentralityComputer(graph.nodeCount())
+            : new DefaultCentralityComputer();
+
+        return  new ClosenessCentrality(
+            graph,
+            parameters.concurrency(),
+            centralityComputer,
+            executorService,
+            progressTracker,
+            terminationFlag
+        );
+    }
     public ClosenessCentrality(
         Graph graph,
         Concurrency concurrency,

@@ -21,18 +21,16 @@ package org.neo4j.gds.closeness;
 
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.TestProgressTracker;
+import org.neo4j.gds.CentralityAlgorithmTasks;
+import org.neo4j.gds.TestProgressTrackerHelper;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
-import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
-import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
@@ -113,9 +111,15 @@ class ClosenessCentralityTest {
 
     @Test
     void shouldLogProgress() {
-        var progressTask = ClosenessCentralityTask.create(graph.nodeCount());
-        var testLog = new GdsTestLog();
-        var progressTracker = new TestProgressTracker(progressTask, new LoggerForProgressTrackingAdapter(testLog), new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE);
+
+        var progressTrackerWithLog = TestProgressTrackerHelper.create(
+            new CentralityAlgorithmTasks().closenessCentrality(graph),
+            new Concurrency(1)
+        );
+
+        var progressTracker = progressTrackerWithLog.progressTracker();
+        var log = progressTrackerWithLog.log();
+
 
         var algo = new ClosenessCentrality(
             graph,
@@ -131,7 +135,7 @@ class ClosenessCentralityTest {
         List<AtomicLong> progresses = progressTracker.getProgresses();
         assertEquals(3, progresses.size());
 
-        var messagesInOrder = testLog.getMessages(INFO);
+        var messagesInOrder = log.getMessages(INFO);
 
         assertThat(messagesInOrder)
             // avoid asserting on the thread id

@@ -32,15 +32,12 @@ import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.betweenness.BetweennessCentrality;
 import org.neo4j.gds.betweenness.BetweennessCentralityParameters;
 import org.neo4j.gds.betweenness.BetwennessCentralityResult;
-import org.neo4j.gds.bridges.BridgeProgressTaskCreator;
 import org.neo4j.gds.bridges.BridgeResult;
 import org.neo4j.gds.bridges.Bridges;
+import org.neo4j.gds.bridges.BridgesParameters;
 import org.neo4j.gds.closeness.ClosenessCentrality;
-import org.neo4j.gds.closeness.ClosenessCentralityBaseConfig;
+import org.neo4j.gds.closeness.ClosenessCentralityParameters;
 import org.neo4j.gds.closeness.ClosenessCentralityResult;
-import org.neo4j.gds.closeness.ClosenessCentralityTask;
-import org.neo4j.gds.closeness.DefaultCentralityComputer;
-import org.neo4j.gds.closeness.WassermanFaustCentralityComputer;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.core.concurrency.Concurrency;
@@ -60,8 +57,8 @@ import org.neo4j.gds.indirectExposure.IndirectExposure;
 import org.neo4j.gds.indirectExposure.IndirectExposureConfig;
 import org.neo4j.gds.indirectExposure.IndirectExposureResult;
 import org.neo4j.gds.influenceMaximization.CELF;
+import org.neo4j.gds.influenceMaximization.CELFParameters;
 import org.neo4j.gds.influenceMaximization.CELFResult;
-import org.neo4j.gds.influenceMaximization.InfluenceMaximizationBaseConfig;
 import org.neo4j.gds.pagerank.ArticleRankComputation;
 import org.neo4j.gds.pagerank.ArticleRankConfig;
 import org.neo4j.gds.pagerank.DegreeFunctions;
@@ -153,61 +150,40 @@ public class CentralityAlgorithms {
         );
     }
 
-    BridgeResult bridges(Graph graph, AlgoBaseConfig configuration, boolean shouldComputeComponents) {
+    BridgeResult bridges(Graph graph, BridgesParameters parameters,  ProgressTracker progressTracker) {
 
-        var task = BridgeProgressTaskCreator.progressTask(graph.nodeCount());
-        var progressTracker = createProgressTracker(task, configuration);
 
-        var algorithm = Bridges.create(graph, progressTracker, shouldComputeComponents);
+        var algorithm = Bridges.create(graph, progressTracker, parameters.computeComponents());
 
         return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
             algorithm,
             progressTracker,
             true,
-            configuration.concurrency()
+            parameters.concurrency()
         );
     }
 
-    public CELFResult celf(Graph graph, InfluenceMaximizationBaseConfig configuration) {
-        var task = Tasks.task(
-            AlgorithmLabel.CELF.asString(),
-            Tasks.leaf("Greedy", graph.nodeCount()),
-            Tasks.leaf("LazyForwarding", configuration.seedSetSize() - 1)
-        );
-        var progressTracker = createProgressTracker(task, configuration);
+    public CELFResult celf(Graph graph, CELFParameters parameters, ProgressTracker progressTracker) {
 
-        var algorithm = new CELF(graph, configuration.toParameters(), DefaultPool.INSTANCE, progressTracker);
+        var algorithm = new CELF(graph, parameters, DefaultPool.INSTANCE, progressTracker);
 
         return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
             algorithm,
             progressTracker,
             true,
-            configuration.concurrency()
+            parameters.concurrency()
         );
     }
 
-    ClosenessCentralityResult closenessCentrality(Graph graph, ClosenessCentralityBaseConfig configuration) {
-        var task = ClosenessCentralityTask.create(graph.nodeCount());
-        var progressTracker = createProgressTracker(task, configuration);
-
-        return closenessCentrality(graph, configuration, progressTracker);
-    }
 
     public ClosenessCentralityResult closenessCentrality(
         Graph graph,
-        ClosenessCentralityBaseConfig configuration,
+        ClosenessCentralityParameters parameters,
         ProgressTracker progressTracker
     ) {
-        var parameters = configuration.toParameters();
-
-        var centralityComputer = parameters.useWassermanFaust()
-            ? new WassermanFaustCentralityComputer(graph.nodeCount())
-            : new DefaultCentralityComputer();
-
-        var algorithm = new ClosenessCentrality(
+        var algorithm =  ClosenessCentrality.create(
             graph,
-            parameters.concurrency(),
-            centralityComputer,
+            parameters,
             DefaultPool.INSTANCE,
             progressTracker,
             terminationFlag
@@ -217,7 +193,7 @@ public class CentralityAlgorithms {
             algorithm,
             progressTracker,
             true,
-            configuration.concurrency()
+            parameters.concurrency()
         );
     }
 

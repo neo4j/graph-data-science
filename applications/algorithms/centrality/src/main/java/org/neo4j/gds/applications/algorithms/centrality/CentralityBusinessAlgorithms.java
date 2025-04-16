@@ -29,6 +29,8 @@ import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.betweenness.BetweennessCentralityBaseConfig;
 import org.neo4j.gds.betweenness.BetwennessCentralityResult;
 import org.neo4j.gds.bridges.BridgeResult;
+import org.neo4j.gds.bridges.BridgesBaseConfig;
+import org.neo4j.gds.bridges.BridgesToParameters;
 import org.neo4j.gds.closeness.ClosenessCentralityBaseConfig;
 import org.neo4j.gds.closeness.ClosenessCentralityResult;
 import org.neo4j.gds.config.AlgoBaseConfig;
@@ -77,7 +79,9 @@ public class CentralityBusinessAlgorithms {
     ) {
         var task = tasks.articulationPoints(graph);
         var progressTracker =  progressTrackerCreator.createProgressTracker(task,configuration);
+
         var params = ArticulationPointsToParameters.toParameters(configuration, shouldComputeComponents);
+
         return centralityAlgorithms.articulationPoints(graph, params, progressTracker);
     }
 
@@ -90,28 +94,38 @@ public class CentralityBusinessAlgorithms {
         return centralityAlgorithms.betweennessCentrality(graph, params, progressTracker);
     }
 
-    BridgeResult bridges(Graph graph, AlgoBaseConfig configuration, boolean shouldComputeComponents) {
+    BridgeResult bridges(Graph graph, BridgesBaseConfig configuration, boolean shouldComputeComponents) {
 
-        return centralityAlgorithms.bridges(graph, configuration, shouldComputeComponents);
+        var task = tasks.bridges(graph);
+        var progressTracker =  progressTrackerCreator.createProgressTracker(task,configuration);
+
+        var params = BridgesToParameters.toParameters(configuration, shouldComputeComponents);
+
+        return centralityAlgorithms.bridges(graph, params, progressTracker);
     }
 
     public CELFResult celf(Graph graph, InfluenceMaximizationBaseConfig configuration) {
 
-        return centralityAlgorithms.celf(graph, configuration);
+        var params = configuration.toParameters();
+        var task = tasks.CELF(graph, params);
+
+        var progressTracker =  progressTrackerCreator.createProgressTracker(task,configuration);
+
+        return centralityAlgorithms.celf(graph, params,progressTracker);
     }
 
-    ClosenessCentralityResult closenessCentrality(Graph graph, ClosenessCentralityBaseConfig configuration) {
-
-        return centralityAlgorithms.closenessCentrality(graph, configuration);
-    }
 
     public ClosenessCentralityResult closenessCentrality(
         Graph graph,
-        ClosenessCentralityBaseConfig configuration,
-        ProgressTracker progressTracker
+        ClosenessCentralityBaseConfig configuration
     ) {
 
-        return centralityAlgorithms.closenessCentrality(graph, configuration, progressTracker);
+        var params = configuration.toParameters();
+        var task = tasks.closenessCentrality(graph);
+
+        var progressTracker =  progressTrackerCreator.createProgressTracker(task,configuration);
+
+        return centralityAlgorithms.closenessCentrality(graph, params, progressTracker);
     }
 
     DegreeCentralityResult degreeCentrality(Graph graph, DegreeCentralityConfig configuration) {

@@ -19,18 +19,20 @@
  */
 package org.neo4j.gds.influenceMaximization;
 
-import org.neo4j.gds.AlgorithmParameters;
-import org.neo4j.gds.annotation.Parameters;
-import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
+import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
-@Parameters
-public record CELFParameters(
-    int seedSetSize,
-    double propagationProbability,
-    int monteCarloSimulations,
-    Concurrency concurrency,
-    long randomSeed,
-    int batchSize
-)  implements AlgorithmParameters {
-    public static final int DEFAULT_BATCH_SIZE = 10;
+public final class CELFProgressTask {
+
+    private CELFProgressTask() {}
+
+    public static Task create(long nodeCount, CELFParameters parameters){
+       return Tasks.task(
+            AlgorithmLabel.CELF.asString(),
+            Tasks.leaf("Greedy", nodeCount),
+            Tasks.leaf("LazyForwarding", parameters.seedSetSize() - 1)
+        );
+    }
+
 }

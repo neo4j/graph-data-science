@@ -17,20 +17,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.influenceMaximization;
+package org.neo4j.gds.bridges;
 
-import org.neo4j.gds.AlgorithmParameters;
-import org.neo4j.gds.annotation.Parameters;
-import org.neo4j.gds.core.concurrency.Concurrency;
+public final class BridgesToParameters {
 
-@Parameters
-public record CELFParameters(
-    int seedSetSize,
-    double propagationProbability,
-    int monteCarloSimulations,
-    Concurrency concurrency,
-    long randomSeed,
-    int batchSize
-)  implements AlgorithmParameters {
-    public static final int DEFAULT_BATCH_SIZE = 10;
+    private BridgesToParameters() {}
+
+    public static BridgesParameters toParameters(BridgesBaseConfig config, boolean shouldComputeComponents){
+        return new BridgesParameters(config.concurrency(), shouldComputeComponents);
+    }
 }

@@ -23,7 +23,11 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.articulationpoints.ArticulationPointsProgressTaskCreator;
 import org.neo4j.gds.betweenness.BetweennessCentralityParameters;
 import org.neo4j.gds.betweenness.BetweennessCentralityProgressTask;
+import org.neo4j.gds.bridges.BridgeProgressTaskCreator;
+import org.neo4j.gds.closeness.ClosenessCentralityTask;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.influenceMaximization.CELFParameters;
+import org.neo4j.gds.influenceMaximization.CELFProgressTask;
 
 public final class CentralityAlgorithmTasks {
 
@@ -33,6 +37,18 @@ public final class CentralityAlgorithmTasks {
 
     public Task betweennessCentrality(Graph graph, BetweennessCentralityParameters parameters){
         return BetweennessCentralityProgressTask.create(graph.nodeCount(),parameters);
+    }
+
+    public Task CELF(Graph graph, CELFParameters parameters){
+        return CELFProgressTask.create(graph.nodeCount(), parameters);
+    }
+
+    public Task bridges(Graph graph){
+        return BridgeProgressTaskCreator.progressTask(graph.nodeCount());
+    }
+
+    public  Task closenessCentrality(Graph graph){
+        return ClosenessCentralityTask.create(graph.nodeCount());
     }
 
 }
