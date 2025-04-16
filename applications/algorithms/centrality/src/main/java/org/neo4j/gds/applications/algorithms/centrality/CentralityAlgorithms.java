@@ -36,11 +36,8 @@ import org.neo4j.gds.bridges.BridgeResult;
 import org.neo4j.gds.bridges.Bridges;
 import org.neo4j.gds.bridges.BridgesParameters;
 import org.neo4j.gds.closeness.ClosenessCentrality;
-import org.neo4j.gds.closeness.ClosenessCentralityBaseConfig;
+import org.neo4j.gds.closeness.ClosenessCentralityParameters;
 import org.neo4j.gds.closeness.ClosenessCentralityResult;
-import org.neo4j.gds.closeness.ClosenessCentralityTask;
-import org.neo4j.gds.closeness.DefaultCentralityComputer;
-import org.neo4j.gds.closeness.WassermanFaustCentralityComputer;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.core.concurrency.Concurrency;
@@ -178,28 +175,15 @@ public class CentralityAlgorithms {
         );
     }
 
-    ClosenessCentralityResult closenessCentrality(Graph graph, ClosenessCentralityBaseConfig configuration) {
-        var task = ClosenessCentralityTask.create(graph.nodeCount());
-        var progressTracker = createProgressTracker(task, configuration);
-
-        return closenessCentrality(graph, configuration, progressTracker);
-    }
 
     public ClosenessCentralityResult closenessCentrality(
         Graph graph,
-        ClosenessCentralityBaseConfig configuration,
+        ClosenessCentralityParameters parameters,
         ProgressTracker progressTracker
     ) {
-        var parameters = configuration.toParameters();
-
-        var centralityComputer = parameters.useWassermanFaust()
-            ? new WassermanFaustCentralityComputer(graph.nodeCount())
-            : new DefaultCentralityComputer();
-
-        var algorithm = new ClosenessCentrality(
+        var algorithm =  ClosenessCentrality.create(
             graph,
-            parameters.concurrency(),
-            centralityComputer,
+            parameters,
             DefaultPool.INSTANCE,
             progressTracker,
             terminationFlag
@@ -209,7 +193,7 @@ public class CentralityAlgorithms {
             algorithm,
             progressTracker,
             true,
-            configuration.concurrency()
+            parameters.concurrency()
         );
     }
 

@@ -114,18 +114,18 @@ public class CentralityBusinessAlgorithms {
         return centralityAlgorithms.celf(graph, params,progressTracker);
     }
 
-    ClosenessCentralityResult closenessCentrality(Graph graph, ClosenessCentralityBaseConfig configuration) {
-
-        return centralityAlgorithms.closenessCentrality(graph, configuration);
-    }
 
     public ClosenessCentralityResult closenessCentrality(
         Graph graph,
-        ClosenessCentralityBaseConfig configuration,
-        ProgressTracker progressTracker
+        ClosenessCentralityBaseConfig configuration
     ) {
 
-        return centralityAlgorithms.closenessCentrality(graph, configuration, progressTracker);
+        var params = configuration.toParameters();
+        var task = tasks.closenessCentrality(graph);
+
+        var progressTracker =  progressTrackerCreator.createProgressTracker(task,configuration);
+
+        return centralityAlgorithms.closenessCentrality(graph, params, progressTracker);
     }
 
     DegreeCentralityResult degreeCentrality(Graph graph, DegreeCentralityConfig configuration) {
