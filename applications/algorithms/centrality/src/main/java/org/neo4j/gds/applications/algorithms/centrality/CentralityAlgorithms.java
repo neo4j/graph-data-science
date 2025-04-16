@@ -60,8 +60,8 @@ import org.neo4j.gds.indirectExposure.IndirectExposure;
 import org.neo4j.gds.indirectExposure.IndirectExposureConfig;
 import org.neo4j.gds.indirectExposure.IndirectExposureResult;
 import org.neo4j.gds.influenceMaximization.CELF;
+import org.neo4j.gds.influenceMaximization.CELFParameters;
 import org.neo4j.gds.influenceMaximization.CELFResult;
-import org.neo4j.gds.influenceMaximization.InfluenceMaximizationBaseConfig;
 import org.neo4j.gds.pagerank.ArticleRankComputation;
 import org.neo4j.gds.pagerank.ArticleRankConfig;
 import org.neo4j.gds.pagerank.DegreeFunctions;
@@ -168,21 +168,15 @@ public class CentralityAlgorithms {
         );
     }
 
-    public CELFResult celf(Graph graph, InfluenceMaximizationBaseConfig configuration) {
-        var task = Tasks.task(
-            AlgorithmLabel.CELF.asString(),
-            Tasks.leaf("Greedy", graph.nodeCount()),
-            Tasks.leaf("LazyForwarding", configuration.seedSetSize() - 1)
-        );
-        var progressTracker = createProgressTracker(task, configuration);
+    public CELFResult celf(Graph graph, CELFParameters parameters, ProgressTracker progressTracker) {
 
-        var algorithm = new CELF(graph, configuration.toParameters(), DefaultPool.INSTANCE, progressTracker);
+        var algorithm = new CELF(graph, parameters, DefaultPool.INSTANCE, progressTracker);
 
         return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
             algorithm,
             progressTracker,
             true,
-            configuration.concurrency()
+            parameters.concurrency()
         );
     }
 

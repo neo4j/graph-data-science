@@ -22,24 +22,18 @@ package org.neo4j.gds.influenceMaximization;
 import org.assertj.core.api.SoftAssertions;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.CentralityAlgorithmTasks;
 import org.neo4j.gds.Orientation;
-import org.neo4j.gds.applications.algorithms.centrality.CentralityAlgorithms;
-import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
-import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
+import org.neo4j.gds.TestProgressTrackerHelper;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
-import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
-import org.neo4j.gds.logging.GdsTestLog;
-import org.neo4j.gds.termination.TerminationFlag;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
@@ -150,16 +144,26 @@ class CELFOnConnectedGraphTest {
 
     @Test
     void shouldLogProgress() {
-        var log = new GdsTestLog();
-        var requestScopedDependencies = RequestScopedDependencies.builder()
-            .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
-            .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
-            .build();
-        var progressTrackerCreator = new ProgressTrackerCreator(new LoggerForProgressTrackingAdapter(log), requestScopedDependencies);
-        var centralityAlgorithms = new CentralityAlgorithms(progressTrackerCreator, TerminationFlag.RUNNING_TRUE);
 
-        var config = InfluenceMaximizationStreamConfigImpl.builder().seedSetSize((int) graph.nodeCount()).build();
-        centralityAlgorithms.celf(graph, config);
+        var params = new CELFParameters(
+            (int)graph.nodeCount(),
+            0.1,
+            100,
+            new Concurrency(4),
+            0L,
+            CELFParameters.DEFAULT_BATCH_SIZE
+        );
+
+        var progressTrackerWithLog = TestProgressTrackerHelper.create(
+            new CentralityAlgorithmTasks().CELF(graph, params),
+            new Concurrency(params.concurrency().value())
+        );
+
+        var progressTracker = progressTrackerWithLog.progressTracker();
+        var log = progressTrackerWithLog.log();
+        var algorithm = new CELF(graph,params,DefaultPool.INSTANCE, progressTracker);
+
+        algorithm.compute();
 
         assertThat(log.getMessages(TestLog.INFO))
             .extracting(removingThreadId())

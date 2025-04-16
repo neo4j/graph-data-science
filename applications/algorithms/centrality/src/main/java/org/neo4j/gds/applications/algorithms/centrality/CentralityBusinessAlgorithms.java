@@ -97,7 +97,12 @@ public class CentralityBusinessAlgorithms {
 
     public CELFResult celf(Graph graph, InfluenceMaximizationBaseConfig configuration) {
 
-        return centralityAlgorithms.celf(graph, configuration);
+        var params = configuration.toParameters();
+        var task = tasks.CELF(graph, params);
+
+        var progressTracker =  progressTrackerCreator.createProgressTracker(task,configuration);
+
+        return centralityAlgorithms.celf(graph, params,progressTracker);
     }
 
     ClosenessCentralityResult closenessCentrality(Graph graph, ClosenessCentralityBaseConfig configuration) {
