@@ -67,7 +67,7 @@ CALL gds.graph.project(
 [opts="header",cols="1,1,1,1,4"]
 |===
 | Name                   | Type                  | Default              | Optional | Description
-include::partial$/algorithms/common-configuration/common-read-configuration.adoc[]
+include::partial$/managment-ops/common-read-configuration.adoc[]
 | nodeProperties         | String, List or Map   | {}                   | yes | The node properties to load from nodes that match _any_ of the labels specified in `nodeProjection`.
 | relationshipProperties | String, List or Map   | {}                   | yes | The relationship properties to load from relationships that match _any_ of the types specified in `relationshipProjection`.
 | validateRelationships  | Boolean               | false                | yes | Whether to throw an error if the `relationshipProjection` includes relationships between nodes not part of the `nodeProjection`.
