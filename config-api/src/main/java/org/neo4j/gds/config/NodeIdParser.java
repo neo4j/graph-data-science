@@ -82,7 +82,7 @@ public final class NodeIdParser {
         if (input instanceof Number) {
             return ((Number) input).doubleValue();
         }
-        throw new IllegalArgumentException(formatWithLocale("Failed to parse `%s` as a List of node IDs. A Node, Number or collection of the same can be parsed, but this `%s` cannot.", input, parameterName));
+        throw new IllegalArgumentException(formatWithLocale("Failed to parse `%s` as a numeric value for the field `%s`.", input, parameterName));
     }
 
     private static Long parseNodeId(Object input, String parameterName) {

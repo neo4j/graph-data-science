@@ -30,6 +30,9 @@ public class SourceBasedRestartProbability implements InitialProbabilityProvider
 
     SourceBasedRestartProbability(double alpha, Map<Long, Double> sourceNodesWithPropertyMap) {
         this.alpha = alpha;
+        if (sourceNodesWithPropertyMap.values().stream().anyMatch(x -> x < 0)) {
+            throw new IllegalArgumentException("Negative values are not supported for the source node bias.");
+        }
         this.sourceNodesWithPropertyMap = sourceNodesWithPropertyMap;
     }
 

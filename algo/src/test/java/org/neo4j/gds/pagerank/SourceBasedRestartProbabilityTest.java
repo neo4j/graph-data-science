@@ -23,7 +23,8 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Map;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
 
 class SourceBasedRestartProbabilityTest {
@@ -36,5 +37,12 @@ class SourceBasedRestartProbabilityTest {
 
         assertThat(sourceBasedRestartProbability.provideInitialValue(1)).isEqualTo(0.2*3.0);
         assertThat(sourceBasedRestartProbability.provideInitialValue(2)).isEqualTo(0);
+    }
+
+    @Test
+    void testNegativeEntry(){
+        var alpha = 0.2;
+        var map = Map.of(1L, 3.0, 5L, -0.1);
+        assertThatThrownBy(() -> new SourceBasedRestartProbability(alpha, map));
     }
 }
