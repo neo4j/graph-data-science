@@ -31,6 +31,6 @@ class SpanningTreeMemoryEstimateDefinitionTest {
         var memoryEstimation = new SpanningTreeMemoryEstimateDefinition().memoryEstimation();
         MemoryEstimationAssert.assertThat(memoryEstimation)
             .memoryRange( GraphDimensions.of(10_000, 100_000), new Concurrency(1))
-            .hasSameMinAndMaxEqualTo(321544);
+            .hasSameMinAndMaxEqualTo(321_536);
     }
 }

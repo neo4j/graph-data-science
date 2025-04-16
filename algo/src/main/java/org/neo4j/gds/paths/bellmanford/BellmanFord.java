@@ -39,6 +39,7 @@ import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 
 import java.util.ArrayList;
 import java.util.Optional;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
@@ -51,6 +52,7 @@ public class BellmanFord extends Algorithm<BellmanFordResult> {
     private final boolean trackNegativeCycles;
     private final boolean trackPaths;
     private final Concurrency concurrency;
+    private final ExecutorService executorService;
 
     public BellmanFord(
         Graph graph,
@@ -58,7 +60,8 @@ public class BellmanFord extends Algorithm<BellmanFordResult> {
         long sourceNode,
         boolean trackNegativeCycles,
         boolean trackPaths,
-        Concurrency concurrency
+        Concurrency concurrency,
+        ExecutorService executorService
     ) {
         super(progressTracker);
         this.graph = graph;
@@ -66,12 +69,14 @@ public class BellmanFord extends Algorithm<BellmanFordResult> {
         this.trackNegativeCycles = trackNegativeCycles;
         this.trackPaths = trackPaths;
         this.concurrency = concurrency;
+        this.executorService = executorService;
     }
 
     public BellmanFord(
         Graph graph,
         ProgressTracker progressTracker,
-        BellmanFordParameters parameters
+        BellmanFordParameters parameters,
+        ExecutorService executorService
     ) {
         this(
             graph,
@@ -79,7 +84,8 @@ public class BellmanFord extends Algorithm<BellmanFordResult> {
             parameters.sourceNode(),
             parameters.trackNegativeCycles(),
             parameters.trackPaths(),
-            parameters.concurrency()
+            parameters.concurrency(),
+            executorService
         );
     }
 
@@ -123,6 +129,7 @@ public class BellmanFord extends Algorithm<BellmanFordResult> {
             RunWithConcurrency.builder()
                 .tasks(tasks)
                 .concurrency(concurrency)
+                .executor(executorService)
                 .run();
             progressTracker.endSubTask();
             progressTracker.beginSubTask();
@@ -130,6 +137,7 @@ public class BellmanFord extends Algorithm<BellmanFordResult> {
             RunWithConcurrency.builder()
                 .tasks(tasks)
                 .concurrency(concurrency)
+                .executor(executorService)
                 .run();
             progressTracker.endSubTask();
         }

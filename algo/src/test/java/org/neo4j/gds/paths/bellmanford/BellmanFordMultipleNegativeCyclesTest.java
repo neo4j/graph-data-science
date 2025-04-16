@@ -22,6 +22,7 @@ package org.neo4j.gds.paths.bellmanford;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -78,7 +79,8 @@ class BellmanFordMultipleNegativeCyclesTest {
                 a[0],
                 true,
                 true,
-                new Concurrency(4)
+                new Concurrency(4),
+                DefaultPool.INSTANCE
             ).compute();
 
             assertThat(result.containsNegativeCycle()).isTrue();
@@ -136,7 +138,8 @@ class BellmanFordMultipleNegativeCyclesTest {
                 a[0],
                 true,
                 true,
-                new Concurrency(4)
+                new Concurrency(4),
+                DefaultPool.INSTANCE
             ).compute();
 
             assertThat(result.negativeCycles().pathSet())

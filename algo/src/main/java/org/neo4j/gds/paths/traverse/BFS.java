@@ -22,13 +22,12 @@ package org.neo4j.gds.paths.traverse;
 
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
-import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
+import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.core.concurrency.ParallelUtil;
+import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.paged.ParalleLongPageCreator;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.termination.TerminationFlag;
@@ -36,6 +35,7 @@ import org.neo4j.gds.termination.TerminationFlag;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -85,6 +85,7 @@ public final class BFS extends Algorithm<HugeLongArray> {
     // each node id in the `traversedNodes`.
     private final HugeAtomicBitSet visited;
 
+    private final ExecutorService executorService;
     private final Concurrency concurrency;
 
     public static BFS create(
@@ -92,9 +93,10 @@ public final class BFS extends Algorithm<HugeLongArray> {
         long startNodeId,
         ExitPredicate exitPredicate,
         Aggregator aggregatorFunction,
+        long maximumDepth,
+        ExecutorService executorService,
         Concurrency concurrency,
         ProgressTracker progressTracker,
-        long maximumDepth,
         TerminationFlag terminationFlag
     ) {
         return create(
@@ -102,10 +104,11 @@ public final class BFS extends Algorithm<HugeLongArray> {
             startNodeId,
             exitPredicate,
             aggregatorFunction,
-            concurrency,
-            progressTracker,
             DEFAULT_DELTA,
             maximumDepth,
+            executorService,
+            concurrency,
+            progressTracker,
             terminationFlag
         );
     }
@@ -115,10 +118,11 @@ public final class BFS extends Algorithm<HugeLongArray> {
         long startNodeId,
         ExitPredicate exitPredicate,
         Aggregator aggregatorFunction,
-        Concurrency concurrency,
-        ProgressTracker progressTracker,
         int delta,
         long maximumDepth,
+        ExecutorService executorService,
+        Concurrency concurrency,
+        ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
 
@@ -136,10 +140,11 @@ public final class BFS extends Algorithm<HugeLongArray> {
             visited,
             exitPredicate,
             aggregatorFunction,
-            concurrency,
-            progressTracker,
             delta,
             maximumDepth,
+            executorService,
+            concurrency,
+            progressTracker,
             terminationFlag
         );
     }
@@ -152,10 +157,11 @@ public final class BFS extends Algorithm<HugeLongArray> {
         HugeAtomicBitSet visited,
         ExitPredicate exitPredicate,
         Aggregator aggregatorFunction,
-        Concurrency concurrency,
-        ProgressTracker progressTracker,
         int delta,
         long maximumDepth,
+        ExecutorService executorService,
+        Concurrency concurrency,
+        ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
         super(progressTracker);
@@ -163,6 +169,7 @@ public final class BFS extends Algorithm<HugeLongArray> {
         this.sourceNodeId = sourceNodeId;
         this.exitPredicate = exitPredicate;
         this.aggregatorFunction = aggregatorFunction;
+        this.executorService = executorService;
         this.concurrency = concurrency;
         this.delta = delta;
         this.maximumDepth = maximumDepth;
@@ -207,7 +214,7 @@ public final class BFS extends Algorithm<HugeLongArray> {
             if (currentDepth == maximumDepth) {
                 break;
             }
-            ParallelUtil.run(bfsTaskList, DefaultPool.INSTANCE);
+            ParallelUtil.run(bfsTaskList, executorService);
 
             if (targetFoundIndex.get() != Long.MAX_VALUE) {
                 break;

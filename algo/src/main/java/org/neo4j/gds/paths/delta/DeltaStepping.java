@@ -35,7 +35,6 @@ import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.paths.PathResult;
-import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaBaseConfig;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 
 import java.util.Arrays;
@@ -64,24 +63,6 @@ public final class DeltaStepping extends Algorithm<PathFindingResult> {
     private final TentativeDistances distances;
 
     private final ExecutorService executorService;
-
-    @Deprecated(forRemoval = true)
-    public static DeltaStepping of(
-        Graph graph,
-        AllShortestPathsDeltaBaseConfig config,
-        ExecutorService executorService,
-        ProgressTracker progressTracker
-    ) {
-        return new DeltaStepping(
-            graph,
-            graph.toMappedNodeId(config.sourceNode()),
-            config.delta(),
-            config.concurrency(),
-            true,
-            executorService,
-            progressTracker
-        );
-    }
 
     public static DeltaStepping of(
         Graph graph,

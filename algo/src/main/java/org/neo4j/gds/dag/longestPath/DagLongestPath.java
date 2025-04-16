@@ -43,7 +43,6 @@ import org.neo4j.gds.termination.TerminationFlag;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountedCompleter;
-import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ForkJoinTask;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.LongFunction;
@@ -115,35 +114,37 @@ public class DagLongestPath extends Algorithm<PathFindingResult> {
     private void traverse() {
         this.progressTracker.beginSubTask("Traversal");
 
-        ForkJoinPool forkJoinPool = ExecutorServiceUtil.createForkJoinPool(concurrency);
-        var tasks = ConcurrentHashMap.<ForkJoinTask<Void>>newKeySet();
+        try(var forkJoinPool = ExecutorServiceUtil.createForkJoinPool(concurrency)) {
+            var tasks = ConcurrentHashMap.<ForkJoinTask<Void>>newKeySet();
 
-        LongFunction<CountedCompleter<Void>> taskProducer =
-            (nodeId) -> new LongestPathTask(
-                null,
-                nodeId,
-                graph.concurrentCopy(),
-                inDegrees,
-                parentsAndDistances
+            LongFunction<CountedCompleter<Void>> taskProducer =
+                (nodeId) -> new LongestPathTask(
+                    null,
+                    nodeId,
+                    graph.concurrentCopy(),
+                    inDegrees,
+                    parentsAndDistances
+                );
+
+            ParallelUtil.parallelForEachNode(
+                nodeCount, concurrency, TerminationFlag.RUNNING_TRUE, nodeId -> {
+                    if (inDegrees.get(nodeId) == 0L) {
+                        tasks.add(taskProducer.apply(nodeId));
+                        parentsAndDistances.set(nodeId, nodeId, 0);
+                    }
+                    // Might not reach 100% if there are cycles in the graph
+                    progressTracker.logProgress();
+                }
             );
 
-        ParallelUtil.parallelForEachNode(nodeCount, concurrency, TerminationFlag.RUNNING_TRUE, nodeId -> {
-            if (inDegrees.get(nodeId) == 0L) {
-                tasks.add(taskProducer.apply(nodeId));
-                parentsAndDistances.set(nodeId, nodeId, 0);
+            for (ForkJoinTask<Void> task : tasks) {
+                forkJoinPool.submit(task);
             }
-            // Might not reach 100% if there are cycles in the graph
-            progressTracker.logProgress();
-        });
 
-        for (ForkJoinTask<Void> task : tasks) {
-               forkJoinPool.submit(task);
+            // calling join makes sure the pool waits for all the tasks to complete before shutting down
+            tasks.forEach(ForkJoinTask::join);
+            this.progressTracker.endSubTask("Traversal");
         }
-
-        // calling join makes sure the pool waits for all the tasks to complete before shutting down
-        tasks.forEach(ForkJoinTask::join);
-        forkJoinPool.shutdown();
-        this.progressTracker.endSubTask("Traversal");
     }
 
     private static final class LongestPathTask extends CountedCompleter<Void> {

@@ -24,9 +24,10 @@ import org.neo4j.gds.allshortestpaths.MSBFSASPAlgorithm;
 import org.neo4j.gds.allshortestpaths.MSBFSAllShortestPaths;
 import org.neo4j.gds.allshortestpaths.WeightedAllShortestPaths;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.termination.TerminationFlag;
+
+import java.util.concurrent.ExecutorService;
 
 final class MSBFSASPAlgorithmFactory {
     private MSBFSASPAlgorithmFactory() {}
@@ -34,6 +35,7 @@ final class MSBFSASPAlgorithmFactory {
     static MSBFSASPAlgorithm create(
         Graph graph,
         AllShortestPathsParameters parameters,
+        ExecutorService executorService,
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
@@ -45,7 +47,7 @@ final class MSBFSASPAlgorithmFactory {
 
             return new WeightedAllShortestPaths(
                 graph,
-                DefaultPool.INSTANCE,
+                executorService,
                 parameters.concurrency(),
                 progressTracker,
                 terminationFlag
@@ -54,7 +56,7 @@ final class MSBFSASPAlgorithmFactory {
             return new MSBFSAllShortestPaths(
                 graph,
                 parameters.concurrency(),
-                DefaultPool.INSTANCE,
+                executorService,
                 progressTracker,
                 terminationFlag
             );

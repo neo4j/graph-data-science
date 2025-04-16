@@ -120,7 +120,7 @@ RETURN nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
 [opts="header"]
 |===
 | nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
-| 9         | 12                | 1336     | 1336      | "1336 Bytes"
+| 9         | 12                | 1344     | 1344      | "1344 Bytes"
 |===
 --
 
@@ -147,7 +147,7 @@ RETURN nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
 [opts="header"]
 |===
 | nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
-| 9         | 12                | 1448     | 1448      | "1448 Bytes"
+| 9         | 12                | 1456     | 1456     | "1456 Bytes"
 |===
 --
 

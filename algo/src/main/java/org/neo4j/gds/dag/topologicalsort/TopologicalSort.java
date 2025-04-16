@@ -27,15 +27,14 @@ import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ExecutorServiceUtil;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.core.utils.paged.ParalleLongPageCreator;
 import org.neo4j.gds.core.utils.paged.ParallelDoublePageCreator;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountedCompleter;
-import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ForkJoinTask;
 import java.util.function.LongFunction;
 
@@ -117,43 +116,45 @@ public class TopologicalSort extends Algorithm<TopologicalSortResult> {
     private void traverse() {
         this.progressTracker.beginSubTask("Traversal");
 
-        ForkJoinPool forkJoinPool = ExecutorServiceUtil.createForkJoinPool(concurrency);
-        var tasks = ConcurrentHashMap.<ForkJoinTask<Void>>newKeySet();
+        try(var forkJoinPool = ExecutorServiceUtil.createForkJoinPool(concurrency)) {
+            var tasks = ConcurrentHashMap.<ForkJoinTask<Void>>newKeySet();
 
-        LongFunction<CountedCompleter<Void>> taskProducer = longestPathDistances.isPresent()
-            ? (nodeId) -> new LongestPathTask(
-            null,
-            nodeId,
-            graph.concurrentCopy(),
-            result,
-            inDegrees,
-            longestPathDistances.get()
-        )
-            : (nodeId) -> new TraversalTask(
-                null,
-                nodeId,
-                graph.concurrentCopy(),
-                result,
-                inDegrees
-            );
+            var taskProducer =
+                longestPathDistances
+                    .<LongFunction<CountedCompleter<Void>>>map(pathDistances -> (nodeId) -> new LongestPathTask(
+                        null,
+                        nodeId,
+                        graph.concurrentCopy(),
+                        result,
+                        inDegrees,
+                        pathDistances
+                    ))
+                    .orElseGet(() -> (nodeId) -> new TraversalTask(
+                        null,
+                        nodeId,
+                        graph.concurrentCopy(),
+                        result,
+                        inDegrees
+                    ));
 
-        ParallelUtil.parallelForEachNode(nodeCount, concurrency, TerminationFlag.RUNNING_TRUE, nodeId -> {
-            if (inDegrees.get(nodeId) == 0L) {
-                result.addNode(nodeId);
-                tasks.add(taskProducer.apply(nodeId));
+            ParallelUtil.parallelForEachNode(nodeCount, concurrency, TerminationFlag.RUNNING_TRUE, nodeId -> {
+                if (inDegrees.get(nodeId) == 0L) {
+                    result.addNode(nodeId);
+                    tasks.add(taskProducer.apply(nodeId));
+                }
+                // Might not reach 100% if there are cycles in the graph
+                progressTracker.logProgress();
+            });
+
+            for (ForkJoinTask<Void> task : tasks) {
+                forkJoinPool.submit(task);
             }
-            // Might not reach 100% if there are cycles in the graph
-            progressTracker.logProgress();
-        });
 
-        for (ForkJoinTask<Void> task : tasks) {
-               forkJoinPool.submit(task);
+            // calling join makes sure the pool waits for all the tasks to complete before shutting down
+            tasks.forEach(ForkJoinTask::join);
+            this.progressTracker.endSubTask("Traversal");
         }
 
-        // calling join makes sure the pool waits for all the tasks to complete before shutting down
-        tasks.forEach(ForkJoinTask::join);
-        forkJoinPool.shutdown();
-        this.progressTracker.endSubTask("Traversal");
     }
 
     private static final class TraversalTask extends CountedCompleter<Void> {

@@ -26,6 +26,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.junitpioneer.jupiter.cartesian.CartesianTest;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -89,7 +90,8 @@ final class BellmanFordCopiedDeltaSteppingTests {
                 sourceNode,
                 true,
                 true,
-                new Concurrency(concurrency)
+                new Concurrency(concurrency),
+                DefaultPool.INSTANCE
             )
                 .compute()
                 .shortestPaths()
@@ -120,7 +122,8 @@ final class BellmanFordCopiedDeltaSteppingTests {
                 sourceNode,
                 true,
                 true,
-                new Concurrency(concurrency)
+                new Concurrency(concurrency),
+                DefaultPool.INSTANCE
             )
                 .compute()
                 .shortestPaths()
@@ -182,7 +185,8 @@ final class BellmanFordCopiedDeltaSteppingTests {
                 sourceNode,
                 true,
                 true,
-                new Concurrency(concurrency)
+                new Concurrency(concurrency),
+                DefaultPool.INSTANCE
             )
                 .compute()
                 .shortestPaths()
@@ -237,7 +241,8 @@ final class BellmanFordCopiedDeltaSteppingTests {
                 sourceNode,
                 true,
                 true,
-                new Concurrency(concurrency)
+                new Concurrency(concurrency),
+                DefaultPool.INSTANCE
             )
                 .compute()
                 .shortestPaths()

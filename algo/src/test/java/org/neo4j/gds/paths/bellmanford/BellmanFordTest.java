@@ -27,6 +27,7 @@ import org.neo4j.gds.beta.generator.PropertyProducer;
 import org.neo4j.gds.beta.generator.RandomGraphGeneratorBuilder;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
 import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -123,7 +124,8 @@ class BellmanFordTest {
             a[0],
             true,
             true,
-            new Concurrency(1)
+            new Concurrency(1),
+            DefaultPool.INSTANCE
         ).compute();
         long[][] EXPECTED_PATHS = new long[5][];
         EXPECTED_PATHS[(int) a[0]] = new long[]{a[0]};
@@ -158,7 +160,8 @@ class BellmanFordTest {
             a0,
             true,
             true,
-            new Concurrency(1)
+            new Concurrency(1),
+            DefaultPool.INSTANCE
         ).compute();
 
         assertThat(result.containsNegativeCycle()).isTrue();
@@ -175,7 +178,8 @@ class BellmanFordTest {
             a0,
             false,
             true,
-            new Concurrency(1)
+            new Concurrency(1),
+            DefaultPool.INSTANCE
         ).compute();
 
         assertThat(result.containsNegativeCycle()).isTrue();
@@ -202,7 +206,8 @@ class BellmanFordTest {
             nodes[0],
             true,
             true,
-            new Concurrency(1)
+            new Concurrency(1),
+            DefaultPool.INSTANCE
         ).compute();
         long[][] EXPECTED_PATHS = new long[6][];
         EXPECTED_PATHS[(int) nodes[0]] = new long[]{nodes[0]};
@@ -251,7 +256,8 @@ class BellmanFordTest {
         new BellmanFord(
             graph,
             testTracker,
-            parameters
+            parameters,
+            DefaultPool.INSTANCE
         ).compute();
 
         assertThat(log.getMessages(INFO))
@@ -291,7 +297,15 @@ class BellmanFordTest {
             .sourceNode(start)
             .build();
 
-        var bellmanFord = new BellmanFord(newGraph, ProgressTracker.NULL_TRACKER, start, true, true, new Concurrency(4))
+        var bellmanFord = new BellmanFord(
+            newGraph,
+            ProgressTracker.NULL_TRACKER,
+            start,
+            true,
+            true,
+            new Concurrency(4),
+            DefaultPool.INSTANCE
+        )
             .compute()
             .shortestPaths();
 

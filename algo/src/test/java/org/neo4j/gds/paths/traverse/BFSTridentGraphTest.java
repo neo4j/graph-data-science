@@ -24,6 +24,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -95,10 +96,11 @@ class BFSTridentGraphTest {
             source,
             (s, t, w) -> targets.contains(t) ? ExitPredicate.Result.BREAK : ExitPredicate.Result.FOLLOW,
             (s, t, w) -> 1.,
-            new Concurrency(concurrency),
-            ProgressTracker.NULL_TRACKER,
             delta,
             TraversalParameters.NO_MAX_DEPTH,
+            DefaultPool.INSTANCE,
+            new Concurrency(concurrency),
+            ProgressTracker.NULL_TRACKER,
             TerminationFlag.RUNNING_TRUE
         ).compute().toArray();
 

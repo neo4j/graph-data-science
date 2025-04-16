@@ -41,7 +41,7 @@ import java.util.function.DoubleUnaryOperator;
  * weights in the MST.
  */
 public class Prim extends Algorithm<SpanningTree> {
-    private  final int EMPTY=-1;
+    private static final int EMPTY = -1;
     private final Graph graph;
     private final DoubleUnaryOperator minMax;
     private final long startNodeId;

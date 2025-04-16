@@ -24,6 +24,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -108,9 +109,10 @@ class BFSTest {
             source,
             (s, t, w) -> t == target ? Result.BREAK : Result.FOLLOW,
             (s, t, w) -> 1.,
+            TraversalParameters.NO_MAX_DEPTH,
+            DefaultPool.INSTANCE,
             new Concurrency(concurrency),
             ProgressTracker.NULL_TRACKER,
-            TraversalParameters.NO_MAX_DEPTH,
             TerminationFlag.RUNNING_TRUE
         ).compute().toArray();
 
@@ -135,9 +137,10 @@ class BFSTest {
             source,
             (s, t, w) -> t == target ? Result.BREAK : Result.FOLLOW,
             Aggregator.NO_AGGREGATION,
+            TraversalParameters.NO_MAX_DEPTH,
+            DefaultPool.INSTANCE,
             new Concurrency(concurrency),
             ProgressTracker.NULL_TRACKER,
-            TraversalParameters.NO_MAX_DEPTH,
             TerminationFlag.RUNNING_TRUE
         ).compute().toArray();
         assertEquals(7, nodes.length);
@@ -159,9 +162,10 @@ class BFSTest {
             source,
             (s, t, w) -> w >= maxHops ? Result.CONTINUE : Result.FOLLOW,
             (s, t, w) -> w + 1.,
+            maxHops - 1,
+            DefaultPool.INSTANCE,
             new Concurrency(concurrency),
             ProgressTracker.NULL_TRACKER,
-            maxHops - 1,
             TerminationFlag.RUNNING_TRUE
         ).compute().toArray();
 
@@ -173,12 +177,15 @@ class BFSTest {
     @ParameterizedTest
     @ValueSource(ints = {1, 4})
     void testBfsOnLoopGraph(int concurrency) {
-        BFS.create(loopGraph, 0,
+        BFS.create(
+            loopGraph,
+            0,
             (s, t, w) -> Result.FOLLOW,
             Aggregator.NO_AGGREGATION,
+            TraversalParameters.NO_MAX_DEPTH,
+            DefaultPool.INSTANCE,
             new Concurrency(concurrency),
             ProgressTracker.NULL_TRACKER,
-            TraversalParameters.NO_MAX_DEPTH,
             TerminationFlag.RUNNING_TRUE
         ).compute();
     }
@@ -194,9 +201,10 @@ class BFSTest {
             0,
             (s, t, w) -> Result.FOLLOW,
             Aggregator.NO_AGGREGATION,
+            TraversalParameters.NO_MAX_DEPTH,
+            DefaultPool.INSTANCE,
             new Concurrency(concurrency),
             progressTracker,
-            TraversalParameters.NO_MAX_DEPTH,
             TerminationFlag.RUNNING_TRUE
         ).compute();
         var messagesInOrder = testLog.getMessages(INFO);

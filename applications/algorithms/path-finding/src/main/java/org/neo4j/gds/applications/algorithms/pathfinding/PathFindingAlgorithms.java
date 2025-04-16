@@ -81,11 +81,13 @@ public class PathFindingAlgorithms {
         Graph graph,
         AllShortestPathsParameters parameters,
         ProgressTracker progressTracker,
-        TerminationFlag terminationFlag
+        TerminationFlag terminationFlag,
+        ExecutorService executorService
     ) {
         var algorithm = MSBFSASPAlgorithmFactory.create(
             graph,
             parameters,
+            executorService,
             progressTracker,
             terminationFlag
         );
@@ -95,7 +97,8 @@ public class PathFindingAlgorithms {
     public BellmanFordResult bellmanFord(
         Graph graph,
         BellmanFordParameters parameters,
-        ProgressTracker progressTracker
+        ProgressTracker progressTracker,
+        ExecutorService executorService
     ) {
         var algorithm = new BellmanFord(
             graph,
@@ -103,18 +106,13 @@ public class PathFindingAlgorithms {
             graph.toMappedNodeId(parameters.sourceNode()),
             parameters.trackNegativeCycles(),
             parameters.trackPaths(),
-            parameters.concurrency()
+            parameters.concurrency(),
+            executorService
         );
 
         return algorithm.compute();
     }
 
-    /**
-     * Here is an example of how resource management and structure collide.
-     * Progress tracker is constructed here for BreadthFirstSearch, then inside it is delegated to BFS.
-     * Ergo we apply the progress tracker resource machinery inside.
-     * But it is not great innit.
-     */
     HugeLongArray breadthFirstSearch(
         Graph graph,
         TraversalParameters parameters,
@@ -129,9 +127,10 @@ public class PathFindingAlgorithms {
             mappedStartNodeId,
             exitAndAggregationConditions.exitFunction(),
             exitAndAggregationConditions.aggregatorFunction(),
+            parameters.maxDepth(),
+            DefaultPool.INSTANCE,
             parameters.concurrency(),
             progressTracker,
-            parameters.maxDepth(),
             terminationFlag
         );
 
@@ -142,9 +141,9 @@ public class PathFindingAlgorithms {
         Graph graph,
         DeltaSteppingParameters parameters,
         ProgressTracker progressTracker,
-        ExecutorService instance
+        ExecutorService executorService
     ) {
-        var algorithm = DeltaStepping.of(graph, parameters, instance, progressTracker);
+        var algorithm = DeltaStepping.of(graph, parameters, executorService, progressTracker);
 
         return algorithm.compute();
     }
@@ -174,7 +173,8 @@ public class PathFindingAlgorithms {
     public SpanningTree kSpanningTree(
         Graph graph,
         KSpanningTreeParameters parameters,
-        ProgressTracker progressTracker, TerminationFlag terminationFlag
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
     ) {
         var algorithm = new KSpanningTree(
             graph,
@@ -208,7 +208,8 @@ public class PathFindingAlgorithms {
         Graph graph,
         RandomWalkParameters parameters,
         ProgressTracker progressTracker,
-        TerminationFlag terminationFlag
+        TerminationFlag terminationFlag,
+        ExecutorService executorService
     ) {
         var algorithm = RandomWalk.create(
             graph,
@@ -218,7 +219,7 @@ public class PathFindingAlgorithms {
             parameters.walkBufferSize(),
             parameters.randomSeed(),
             progressTracker,
-            DefaultPool.INSTANCE,
+            executorService,
             terminationFlag
         );
 
@@ -346,8 +347,11 @@ public class PathFindingAlgorithms {
     }
 
     public SteinerTreeResult steinerTree(
-        Graph graph, SteinerTreeParameters parameters,
-        ProgressTracker progressTracker, TerminationFlag terminationFlag
+        Graph graph,
+        SteinerTreeParameters parameters,
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag,
+        ExecutorService executorService
     ) {
         var mappedSourceNodeId = graph.toMappedNodeId(parameters.sourceNode());
         var mappedTargetNodeIds = parameters.targetNodes()
@@ -362,7 +366,7 @@ public class PathFindingAlgorithms {
             parameters.delta(),
             parameters.concurrency(),
             parameters.applyRerouting(),
-            DefaultPool.INSTANCE,
+            executorService,
             progressTracker,
             terminationFlag
         );

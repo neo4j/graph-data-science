@@ -95,7 +95,8 @@ public class PathFindingAlgorithmsBusinessFacade {
                 graph,
                 configuration.toParameters(),
                 progressTracker,
-                requestScopedDependencies.terminationFlag()
+                requestScopedDependencies.terminationFlag(),
+                DefaultPool.INSTANCE
             ),
             progressTracker,
             configuration.concurrency()
@@ -108,7 +109,12 @@ public class PathFindingAlgorithmsBusinessFacade {
 
 
         return algorithmMachinery.getResultWithoutReleasingProgressTracker(
-            () -> algorithms.bellmanFord(graph, configuration.toParameters(), progressTracker),
+            () -> algorithms.bellmanFord(
+                graph,
+                configuration.toParameters(),
+                progressTracker,
+                DefaultPool.INSTANCE
+            ),
             progressTracker,
             configuration.concurrency()
         );
@@ -215,7 +221,8 @@ public class PathFindingAlgorithmsBusinessFacade {
                 graph,
                 configuration.toParameters(),
                 progressTracker,
-                requestScopedDependencies.terminationFlag()
+                requestScopedDependencies.terminationFlag(),
+                DefaultPool.INSTANCE
             ),
             progressTracker,
             configuration.concurrency()
@@ -360,7 +367,8 @@ public class PathFindingAlgorithmsBusinessFacade {
                 graph,
                 configuration.toParameters(),
                 progressTracker,
-                requestScopedDependencies.terminationFlag()
+                requestScopedDependencies.terminationFlag(),
+                DefaultPool.INSTANCE
             ),
             progressTracker,
             configuration.concurrency()

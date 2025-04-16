@@ -29,6 +29,8 @@ import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.termination.TerminationFlag;
 
+import java.util.concurrent.ExecutorService;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.mockito.Mockito.mock;
@@ -47,6 +49,7 @@ class MSBFSASPAlgorithmFactoryTest {
         var msbfsaspAlgorithm = MSBFSASPAlgorithmFactory.create(
             graphMock,
             parameters,
+            mock(ExecutorService.class),
             ProgressTracker.NULL_TRACKER,
             TerminationFlag.RUNNING_TRUE
         );
@@ -55,20 +58,22 @@ class MSBFSASPAlgorithmFactoryTest {
     }
 
     @Test
-    @DisplayName("Should fail when the algorithm parameters have relationship weight property but the graph is unweighted")
+    @DisplayName(
+        "Should fail when the algorithm parameters have relationship weight property but the graph is unweighted"
+    )
     void shouldFailForUnweightedGraph() {
         var parameters = new AllShortestPathsParameters(new Concurrency(4), true);
         var graphMock = mock(Graph.class);
         when(graphMock.hasRelationshipProperty()).thenReturn(false);
 
-        assertThatIllegalArgumentException().isThrownBy(
-            () -> MSBFSASPAlgorithmFactory.create(
+        assertThatIllegalArgumentException().isThrownBy(() -> MSBFSASPAlgorithmFactory.create(
                 graphMock,
                 parameters,
+                mock(ExecutorService.class),
                 ProgressTracker.NULL_TRACKER,
                 TerminationFlag.RUNNING_TRUE
-            )
-        ).withMessage("WeightedAllShortestPaths is not supported on graphs without a weight property");
+            ))
+            .withMessage("WeightedAllShortestPaths is not supported on graphs without a weight property");
     }
 
 
@@ -79,7 +84,9 @@ class MSBFSASPAlgorithmFactoryTest {
         var msbfsaspAlgorithm = MSBFSASPAlgorithmFactory.create(
             mock(Graph.class),
             parameters,
-            ProgressTracker.NULL_TRACKER, TerminationFlag.RUNNING_TRUE
+            mock(ExecutorService.class),
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         );
 
         assertThat(msbfsaspAlgorithm).isInstanceOf(MSBFSAllShortestPaths.class);
