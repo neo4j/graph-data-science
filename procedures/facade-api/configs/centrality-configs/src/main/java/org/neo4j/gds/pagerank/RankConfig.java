@@ -64,10 +64,4 @@ public interface RankConfig extends
     default Partitioning partitioning() {
         return Partitioning.AUTO;
     }
-
-
-//    @Configuration.Ignore
-//    default InitialScoreProvider  foo(){
-//
-//    }
 }

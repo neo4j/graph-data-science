@@ -27,7 +27,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.neo4j.gds.config.ConfigNodesValidations.nodesNotNegative;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class NodeIdParser {
@@ -83,7 +82,7 @@ public final class NodeIdParser {
         if (input instanceof Number) {
             return ((Number) input).doubleValue();
         }
-        throw new IllegalArgumentException("Only numerical values are supported for the map of parameter '%s'".formatted(parameterName));
+        throw new IllegalArgumentException(formatWithLocale("Failed to parse `%s` as a List of node IDs. A Node, Number or collection of the same can be parsed, but this `%s` cannot.", input, parameterName));
     }
 
     private static Long parseNodeId(Object input, String parameterName) {
