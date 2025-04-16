@@ -106,7 +106,7 @@ RETURN gds.graph.project(
 [opts="header",cols="1,1,1, 1, 4"]
 |===
 | Name                            | Type                  | Default              | Optional | Description
-<include::partial$/managment-ops/common-read-configuration.adoc[]
+include::partial$/management-ops/common-read-configuration.adoc[]
 | undirectedRelationshipTypes     | List of String        | []                   | yes | Declare a number of relationship types as undirected. Relationships with the specified types will be imported as undirected. `*` can be used to declare all relationship types as undirected.
 | inverseIndexedRelationshipTypes | List of String        | []                   | yes | Declare a number of relationship types which will also be indexed in inverse direction. `*` can be used to declare all relationship types as inverse indexed.
 | memory label:serverless[Aura Graph Analytics Serverless]      | String                | -  | <not for Serverless>                  | Declare the memory used for the xref:installation/aura-graph-analytics-serverless.adoc[GDS Session] created for the projected graph.
