@@ -354,6 +354,7 @@ This is equivalent to all the other algorithms within the GDS library.
 | xref:common-usage/running-algos.adoc#common-configuration-max-iterations[maxIterations] | Integer   | -             | no       | Maximum number of supersteps after which the computation will terminate.
 | isAsynchronous                                                                          | Boolean   | false         | yes      | Flag indicating if messages can be sent and received in the same superstep.
 | partitioning                                                                            | String    | "range"       | yes      | Selects the partitioning of the input graph, can be either "range", "degree" or "auto".
+xref:partial$algorithms/common-configuration/common-configuration-jobid-concurrency-entries.adoc[]
 | xref:common-usage/running-algos.adoc#common-configuration-relationship-weight-property[relationshipWeightProperty] | String    | null | yes  | Name of the relationship property to use as weights. If unspecified, the algorithm runs unweighted.
 include::partial$/algorithms/common-configuration/common-write-configuration-entries.adoc[]
 | xref:common-usage/running-algos.adoc#common-configuration-write-property[writeProperty] | String    | "pregel_"     | yes | Prefix string that is prepended to node schema keys in write mode.
