@@ -2,7 +2,7 @@
 = Harmonic Centrality
 :description: This section describes the Harmonic Centrality algorithm
 :entity: node
-:result:
+:result: score
 
 
 :directed:
