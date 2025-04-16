@@ -32,9 +32,9 @@ import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.betweenness.BetweennessCentrality;
 import org.neo4j.gds.betweenness.BetweennessCentralityParameters;
 import org.neo4j.gds.betweenness.BetwennessCentralityResult;
-import org.neo4j.gds.bridges.BridgeProgressTaskCreator;
 import org.neo4j.gds.bridges.BridgeResult;
 import org.neo4j.gds.bridges.Bridges;
+import org.neo4j.gds.bridges.BridgesParameters;
 import org.neo4j.gds.closeness.ClosenessCentrality;
 import org.neo4j.gds.closeness.ClosenessCentralityBaseConfig;
 import org.neo4j.gds.closeness.ClosenessCentralityResult;
@@ -153,18 +153,16 @@ public class CentralityAlgorithms {
         );
     }
 
-    BridgeResult bridges(Graph graph, AlgoBaseConfig configuration, boolean shouldComputeComponents) {
+    BridgeResult bridges(Graph graph, BridgesParameters parameters,  ProgressTracker progressTracker) {
 
-        var task = BridgeProgressTaskCreator.progressTask(graph.nodeCount());
-        var progressTracker = createProgressTracker(task, configuration);
 
-        var algorithm = Bridges.create(graph, progressTracker, shouldComputeComponents);
+        var algorithm = Bridges.create(graph, progressTracker, parameters.computeComponents());
 
         return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
             algorithm,
             progressTracker,
             true,
-            configuration.concurrency()
+            parameters.concurrency()
         );
     }
 

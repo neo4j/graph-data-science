@@ -22,18 +22,16 @@ package org.neo4j.gds.bridges;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.CentralityAlgorithmTasks;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.TestProgressTrackerHelper;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
-import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
-import org.neo4j.gds.logging.GdsTestLog;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
@@ -98,9 +96,13 @@ class SmallBridgesTest {
         @Test
         void shouldLogProgress(){
 
-            var progressTask = BridgeProgressTaskCreator.progressTask(graph.nodeCount());
-            var log = new GdsTestLog();
-            var progressTracker = new TaskProgressTracker(progressTask, new LoggerForProgressTrackingAdapter(log), new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE);
+            var progressTrackerWithLog = TestProgressTrackerHelper.create(
+                new CentralityAlgorithmTasks().bridges(graph),
+                new Concurrency(1)
+            );
+
+            var progressTracker = progressTrackerWithLog.progressTracker();
+            var log = progressTrackerWithLog.log();
 
             var bridges = Bridges.create(graph, progressTracker,false);
             bridges.compute();
