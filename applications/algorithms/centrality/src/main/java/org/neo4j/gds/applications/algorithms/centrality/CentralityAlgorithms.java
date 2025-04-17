@@ -381,14 +381,11 @@ public class CentralityAlgorithms {
             configuration.concurrency()
         );
 
-        var mappedSourceNodes = new LongScatterSet(configuration.sourceNodes().sourceNodes().size());
-        configuration.sourceNodes().sourceNodes().stream()
-            .mapToLong(graph::toMappedNodeId)
-            .forEach(mappedSourceNodes::add);
+        var alpha = 1- configuration.dampingFactor();
+        InitialProbabilityProvider probabilityProvider = InitialProbabilityFactory.create(graph::toMappedNodeId, alpha, configuration.sourceNodes());
 
         double avgDegree = DegreeFunctions.averageDegree(graph, configuration.concurrency());
-
-        return new ArticleRankComputation<>(configuration, mappedSourceNodes, degreeFunction, avgDegree);
+        return new ArticleRankComputation<>(configuration, probabilityProvider, degreeFunction, avgDegree);
     }
 
     private EigenvectorComputation<EigenvectorConfig> eigenvectorComputation(

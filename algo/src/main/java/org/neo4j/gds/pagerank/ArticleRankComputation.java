@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.pagerank;
 
-import com.carrotsearch.hppc.LongSet;
 import org.neo4j.gds.mem.MemoryEstimateDefinition;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.beta.pregel.Messages;
@@ -36,27 +35,23 @@ public final class ArticleRankComputation<C extends ArticleRankConfig> implement
 
     private static final String PAGE_RANK = "pagerank";
 
-    private final boolean hasSourceNodes;
-    private final LongSet sourceNodes;
+    private final InitialProbabilityProvider initialProbability;
     private final LongToDoubleFunction degreeFunction;
 
     private final double dampingFactor;
     private final double tolerance;
-    private final double alpha;
     private final double averageDegree;
 
     public ArticleRankComputation(
         C config,
-        LongSet sourceNodes,
+        InitialProbabilityProvider initialProbabilityProvider,
         LongToDoubleFunction degreeFunction,
         double averageDegree
     ) {
         this.dampingFactor = config.dampingFactor();
         this.tolerance = config.tolerance();
         this.averageDegree = averageDegree;
-        this.alpha = 1 - this.dampingFactor;
-        this.sourceNodes = sourceNodes;
-        this.hasSourceNodes = !sourceNodes.isEmpty();
+        this.initialProbability = initialProbabilityProvider;
         this.degreeFunction = degreeFunction;
     }
 
@@ -71,10 +66,7 @@ public final class ArticleRankComputation<C extends ArticleRankConfig> implement
     }
 
     private double initialValue(InitContext<C> context) {
-        if (!hasSourceNodes || sourceNodes.contains(context.nodeId())) {
-            return alpha;
-        }
-        return 0;
+        return initialProbability.provideInitialValue(context.nodeId());
     }
 
     @Override

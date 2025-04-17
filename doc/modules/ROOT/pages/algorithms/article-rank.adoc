@@ -573,7 +573,20 @@ RETURN gds.util.asNode(nodeId).name AS name, score
 ORDER BY score DESC, name ASC
 ----
 
-//Todo: add table
+.Results
+[opts="header",cols="1,1"]
+|===
+| name      | score
+| "Site A"  | 0.111778363215653612
+| "Site B"  | 0.009744780382903134
+| "Home"    | 0.009744780382903134
+| "About"   | 0.105531128039947505
+| "Links"   | 0.171319162167929667
+| "Product" | 0.321319162167929662
+| "Site C"  | 0.021319162167929635
+| "Site D"  | 0.021319162167929635
+|===
+--
 
 [[algorithms-article-rank-examples-scaler]]
 === Scaling centrality scores

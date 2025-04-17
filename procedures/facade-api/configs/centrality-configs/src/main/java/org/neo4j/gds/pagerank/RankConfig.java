@@ -22,7 +22,6 @@ package org.neo4j.gds.pagerank;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.beta.pregel.Partitioning;
 import org.neo4j.gds.beta.pregel.PregelConfig;
-import org.neo4j.gds.config.SourceNodesConfig;
 import org.neo4j.gds.config.SourceNodesWithPropertiesConfig;
 import org.neo4j.gds.config.ToleranceConfig;
 import org.neo4j.gds.core.CypherMapWrapper;

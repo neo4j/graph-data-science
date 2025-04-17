@@ -20,7 +20,6 @@
 package org.neo4j.gds.pagerank;
 
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.config.SourceNodes;
 
 @Configuration("ArticleRankConfigImpl")
 public interface ArticleRankConfig extends RankConfig

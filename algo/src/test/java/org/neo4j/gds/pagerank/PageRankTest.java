@@ -53,7 +53,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
@@ -442,12 +441,12 @@ class PageRankTest {
         @GdlGraph
         private static final String DB_CYPHER =
             "CREATE" +
-            "  (a:Node { expectedRank: 0.20720 , expectedBiasedPersonalizedRank: 0.01232117 })" +
-            ", (b:Node { expectedRank: 0.47091 , expectedBiasedPersonalizedRank: 1.27435449  })" +
-            ", (c:Node { expectedRank: 0.36067 , expectedBiasedPersonalizedRank: 1.08320117 })" +
-            ", (d:Node { expectedRank: 0.19515 , expectedBiasedPersonalizedRank: 0.028991   })" +
-            ", (e:Node { expectedRank: 0.20720 , expectedBiasedPersonalizedRank: 0.10232117 })" +
-            ", (f:Node { expectedRank: 0.19515 , expectedBiasedPersonalizedRank: 0.028991   })" +
+            "  (a:Node { expectedRank: 0.20720 , expectedBiasedPersonalizedRank: 0.00614168 })" +
+            ", (b:Node { expectedRank: 0.47091 , expectedBiasedPersonalizedRank: 0.41661876  })" +
+            ", (c:Node { expectedRank: 0.36067 , expectedBiasedPersonalizedRank: 0.18638208 })" +
+            ", (d:Node { expectedRank: 0.19515 , expectedBiasedPersonalizedRank: 0.02095396   })" +
+            ", (e:Node { expectedRank: 0.20720 , expectedBiasedPersonalizedRank: 0.09614168 })" +
+            ", (f:Node { expectedRank: 0.19515 , expectedBiasedPersonalizedRank: 0.02095396   })" +
             ", (g:Node { expectedRank: 0.15 ,    expectedBiasedPersonalizedRank: 0.0        })" +
             ", (h:Node { expectedRank: 0.15 ,    expectedBiasedPersonalizedRank: 0.0        })" +
             ", (i:Node { expectedRank: 0.15 ,    expectedBiasedPersonalizedRank: 0.0        })" +
@@ -544,7 +543,7 @@ class PageRankTest {
         void withBiasedSourceNodes() {
             var sourceNodesMap = Map.of(graph.toOriginalNodeId("b"), 2, graph.toOriginalNodeId("e"), 0.6);
 
-            var config = PageRankConfigImpl.builder()
+            var config = ArticleRankStreamConfigImpl.builder()
                 .maxIterations(100)
                 .tolerance(0)
                 .concurrency(1)
@@ -552,7 +551,9 @@ class PageRankTest {
                 .build();
 
             var centralityAlgorithms = new CentralityAlgorithms(null, TerminationFlag.RUNNING_TRUE);
-            var result = centralityAlgorithms.pageRank(graph, config, ProgressTracker.NULL_TRACKER);
+
+            var result = centralityAlgorithms.articleRank(graph, config, ProgressTracker.NULL_TRACKER);
+
             var rankProvider = result.centralityScoreProvider();
 
             var expected = graph.nodeProperties("expectedBiasedPersonalizedRank");
