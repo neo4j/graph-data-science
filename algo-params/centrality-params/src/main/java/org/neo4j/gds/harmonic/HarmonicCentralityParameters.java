@@ -19,14 +19,11 @@
  */
 package org.neo4j.gds.harmonic;
 
-import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.config.MutateNodePropertyConfig;
-import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.AlgorithmParameters;
+import org.neo4j.gds.annotation.Parameters;
+import org.neo4j.gds.core.concurrency.Concurrency;
 
-@Configuration
-public interface HarmonicCentralityMutateConfig extends HarmonicCentralityBaseConfig, MutateNodePropertyConfig {
+@Parameters
+public record HarmonicCentralityParameters(Concurrency concurrency) implements AlgorithmParameters {
 
-    static HarmonicCentralityMutateConfig of(CypherMapWrapper config) {
-        return new HarmonicCentralityMutateConfigImpl(config);
-    }
 }

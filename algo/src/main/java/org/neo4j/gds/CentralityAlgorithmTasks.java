@@ -27,6 +27,7 @@ import org.neo4j.gds.bridges.BridgeProgressTaskCreator;
 import org.neo4j.gds.closeness.ClosenessCentralityTask;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.degree.DegreeCentralityProgressTask;
+import org.neo4j.gds.harmonic.HarmonicCentralityProgressTask;
 import org.neo4j.gds.influenceMaximization.CELFParameters;
 import org.neo4j.gds.influenceMaximization.CELFProgressTask;
 
@@ -56,5 +57,6 @@ public final class CentralityAlgorithmTasks {
         return DegreeCentralityProgressTask.create(graph.nodeCount());
     }
 
+    public Task harmonicCentrality(){ return HarmonicCentralityProgressTask.create(); }
 
 }

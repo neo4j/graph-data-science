@@ -33,11 +33,10 @@ import org.neo4j.gds.bridges.BridgesBaseConfig;
 import org.neo4j.gds.bridges.BridgesToParameters;
 import org.neo4j.gds.closeness.ClosenessCentralityBaseConfig;
 import org.neo4j.gds.closeness.ClosenessCentralityResult;
-import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.degree.DegreeCentralityConfig;
 import org.neo4j.gds.degree.DegreeCentralityResult;
+import org.neo4j.gds.harmonic.HarmonicCentralityBaseConfig;
 import org.neo4j.gds.harmonic.HarmonicResult;
 import org.neo4j.gds.hits.HitsConfig;
 import org.neo4j.gds.indirectExposure.IndirectExposureConfig;
@@ -135,7 +134,7 @@ public class CentralityBusinessAlgorithms {
 
         var progressTracker =  progressTrackerCreator.createProgressTracker(task,configuration);
 
-        return centralityAlgorithms.degreeCentrality(graph, params, progressTracker );
+        return centralityAlgorithms.degreeCentrality(graph, params, progressTracker);
     }
 
     PageRankResult eigenVector(Graph graph, EigenvectorConfig configuration) {
@@ -150,16 +149,13 @@ public class CentralityBusinessAlgorithms {
         return centralityAlgorithms.eigenVector(graph, configuration, progressTracker);
     }
 
-    HarmonicResult harmonicCentrality(Graph graph, AlgoBaseConfig configuration) {
-        return centralityAlgorithms.harmonicCentrality(graph, configuration);
-    }
+    HarmonicResult harmonicCentrality(Graph graph, HarmonicCentralityBaseConfig configuration) {
+        var params = configuration.toParameters();
+        var task = tasks.harmonicCentrality();
 
-    public HarmonicResult harmonicCentrality(
-        Graph graph,
-        ConcurrencyConfig configuration,
-        ProgressTracker progressTracker
-    ) {
-        return centralityAlgorithms.harmonicCentrality(graph, configuration, progressTracker);
+        var progressTracker =  progressTrackerCreator.createProgressTracker(task,configuration);
+
+        return  centralityAlgorithms.harmonicCentrality(graph,params,progressTracker);
     }
 
     PregelResult hits(Graph graph, HitsConfig configuration) {

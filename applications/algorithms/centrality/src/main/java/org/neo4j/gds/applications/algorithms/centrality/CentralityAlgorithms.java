@@ -39,7 +39,6 @@ import org.neo4j.gds.closeness.ClosenessCentrality;
 import org.neo4j.gds.closeness.ClosenessCentralityParameters;
 import org.neo4j.gds.closeness.ClosenessCentralityResult;
 import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -49,6 +48,7 @@ import org.neo4j.gds.degree.DegreeCentrality;
 import org.neo4j.gds.degree.DegreeCentralityParameters;
 import org.neo4j.gds.degree.DegreeCentralityResult;
 import org.neo4j.gds.harmonic.HarmonicCentrality;
+import org.neo4j.gds.harmonic.HarmonicCentralityParameters;
 import org.neo4j.gds.harmonic.HarmonicResult;
 import org.neo4j.gds.hits.Hits;
 import org.neo4j.gds.hits.HitsConfig;
@@ -244,21 +244,15 @@ public class CentralityAlgorithms {
         return eigenvector.compute();
     }
 
-    HarmonicResult harmonicCentrality(Graph graph, AlgoBaseConfig configuration) {
-        var task = Tasks.leaf(AlgorithmLabel.HarmonicCentrality.asString());
-        var progressTracker = createProgressTracker(task, configuration);
-
-        return harmonicCentrality(graph, configuration, progressTracker);
-    }
 
     public HarmonicResult harmonicCentrality(
         Graph graph,
-        ConcurrencyConfig configuration,
+        HarmonicCentralityParameters parameters,
         ProgressTracker progressTracker
     ) {
         var algorithm = new HarmonicCentrality(
             graph,
-            configuration.concurrency(),
+            parameters.concurrency(),
             DefaultPool.INSTANCE,
             progressTracker,
             terminationFlag
@@ -268,7 +262,7 @@ public class CentralityAlgorithms {
             algorithm,
             progressTracker,
             true,
-            configuration.concurrency()
+            parameters.concurrency()
         );
     }
 

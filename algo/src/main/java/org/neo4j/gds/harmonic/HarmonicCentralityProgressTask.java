@@ -19,14 +19,15 @@
  */
 package org.neo4j.gds.harmonic;
 
-import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.config.WritePropertyConfig;
-import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
+import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
-@Configuration
-public interface HarmonicCentralityWriteConfig extends HarmonicCentralityBaseConfig, WritePropertyConfig {
+public final class HarmonicCentralityProgressTask {
 
-    static HarmonicCentralityWriteConfig of(CypherMapWrapper config) {
-        return new HarmonicCentralityWriteConfigImpl(config);
+    private HarmonicCentralityProgressTask() {}
+
+    public static Task create() {
+        return Tasks.leaf(AlgorithmLabel.HarmonicCentrality.asString());
     }
 }
