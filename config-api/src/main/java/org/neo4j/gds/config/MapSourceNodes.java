@@ -22,8 +22,6 @@ package org.neo4j.gds.config;
 import java.util.Collection;
 import java.util.Map;
 
-import static org.neo4j.gds.config.ConfigNodesValidations.nodesNotNegative;
-
 public class MapSourceNodes implements SourceNodes {
     private final Map<Long,Double> sourceNodes;
 

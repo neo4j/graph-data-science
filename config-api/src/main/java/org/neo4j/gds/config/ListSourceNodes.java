@@ -22,8 +22,6 @@ package org.neo4j.gds.config;
 import java.util.Collection;
 import java.util.List;
 
-import static org.neo4j.gds.config.ConfigNodesValidations.nodesNotNegative;
-
 public class ListSourceNodes implements SourceNodes {
     private final List<Long> sourceNodes;
 

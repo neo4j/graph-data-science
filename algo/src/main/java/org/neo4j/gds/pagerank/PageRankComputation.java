@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.pagerank;
 
-import com.carrotsearch.hppc.LongSet;
 import org.neo4j.gds.mem.MemoryEstimateDefinition;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.beta.pregel.Messages;
