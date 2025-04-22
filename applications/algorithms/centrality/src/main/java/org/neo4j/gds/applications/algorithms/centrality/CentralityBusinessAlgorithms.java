@@ -130,7 +130,12 @@ public class CentralityBusinessAlgorithms {
 
     DegreeCentralityResult degreeCentrality(Graph graph, DegreeCentralityConfig configuration) {
 
-        return centralityAlgorithms.degreeCentrality(graph, configuration);
+        var params = configuration.toParameters();
+        var task = tasks.degreeCentrality(graph);
+
+        var progressTracker =  progressTrackerCreator.createProgressTracker(task,configuration);
+
+        return centralityAlgorithms.degreeCentrality(graph, params, progressTracker );
     }
 
     PageRankResult eigenVector(Graph graph, EigenvectorConfig configuration) {

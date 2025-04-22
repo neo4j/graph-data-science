@@ -46,7 +46,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.degree.DegreeCentrality;
-import org.neo4j.gds.degree.DegreeCentralityConfig;
+import org.neo4j.gds.degree.DegreeCentralityParameters;
 import org.neo4j.gds.degree.DegreeCentralityResult;
 import org.neo4j.gds.harmonic.HarmonicCentrality;
 import org.neo4j.gds.harmonic.HarmonicResult;
@@ -197,11 +197,7 @@ public class CentralityAlgorithms {
         );
     }
 
-    DegreeCentralityResult degreeCentrality(Graph graph, DegreeCentralityConfig configuration) {
-        var parameters = configuration.toParameters();
-
-        var task = Tasks.leaf(AlgorithmLabel.DegreeCentrality.asString(), graph.nodeCount());
-        var progressTracker = createProgressTracker(task, configuration);
+    DegreeCentralityResult degreeCentrality(Graph graph, DegreeCentralityParameters parameters, ProgressTracker progressTracker) {
 
         var algorithm = new DegreeCentrality(
             graph,
@@ -217,7 +213,7 @@ public class CentralityAlgorithms {
             algorithm,
             progressTracker,
             true,
-            configuration.concurrency()
+            parameters.concurrency()
         );
     }
 

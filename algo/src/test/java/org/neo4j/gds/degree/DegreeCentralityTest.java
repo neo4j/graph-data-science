@@ -24,20 +24,18 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.neo4j.gds.CentralityAlgorithmTasks;
 import org.neo4j.gds.Orientation;
-import org.neo4j.gds.TestProgressTracker;
+import org.neo4j.gds.TestProgressTrackerHelper;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
-import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
-import org.neo4j.gds.logging.GdsTestLog;
 
 import java.util.List;
 import java.util.Map;
@@ -157,9 +155,16 @@ final class DegreeCentralityTest {
         var concurrency = new Concurrency(4);
         var orientation = Orientation.NATURAL;
 
-        var progressTask = DegreeCentralityTask.create(graph);
-        var log = new GdsTestLog();
-        var progressTracker = new TestProgressTracker(progressTask, new LoggerForProgressTrackingAdapter(log), new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE);
+        var task = new CentralityAlgorithmTasks().harmonicCentrality();
+
+        var progressTrackerWithLog = TestProgressTrackerHelper.create(
+            task,
+            new Concurrency(4)
+        );
+
+        var progressTracker = progressTrackerWithLog.progressTracker();
+        var log = progressTrackerWithLog.log();
+
         var degreeCentrality = new DegreeCentrality(
             graph,
             DefaultPool.INSTANCE,

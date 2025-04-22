@@ -19,17 +19,15 @@
  */
 package org.neo4j.gds.degree;
 
-import org.neo4j.gds.AlgorithmParameters;
-import org.neo4j.gds.Orientation;
-import org.neo4j.gds.annotation.Parameters;
-import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
+import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
-@Parameters
-public record DegreeCentralityParameters(
-    Concurrency concurrency,
-    Orientation orientation,
-    boolean hasRelationshipWeightProperty,
-    int minBatchSize
-)  implements AlgorithmParameters {
-    public static final int DEFAULT_MIN_BATCH_SIZE = 10_000;
+public final class DegreeCentralityProgressTask {
+
+    private DegreeCentralityProgressTask() {}
+
+    public static Task create(long nodeCount){
+        return Tasks.leaf(AlgorithmLabel.DegreeCentrality.asString(), nodeCount);
+    }
 }
