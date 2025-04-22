@@ -51,7 +51,7 @@ import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -177,7 +177,12 @@ class PageRankTest {
         //Alternatively compare with biased sum of singleSourceNode results
         @Test
         void withBiasedSourceNodes() {
-            var sourceNodesMap = Map.of(graph.toOriginalNodeId("b"), 2, graph.toOriginalNodeId("f"), 0.6);
+
+            BiFunction<String, Double, List<?>> entry = (a,b) -> List.of(graph.toOriginalNodeId(a),b);
+            var sourceNodesMap = List.of(
+                    entry.apply("b",2d),
+                    entry.apply("f",0.6d)
+                );
 
             var config = PageRankConfigImpl.builder()
                 .maxIterations(100)
@@ -409,7 +414,12 @@ class PageRankTest {
 
         @Test
         void withWeightsAndBiasedSourceNodes() {
-            var sourceNodesMap = Map.of(graph.toOriginalNodeId("d"), 0.1, graph.toOriginalNodeId("i"), 3);
+
+            BiFunction<String, Double, List<?>> entry = (a,b) -> List.of(graph.toOriginalNodeId(a),b);
+            var sourceNodesMap = List.of(
+                entry.apply("d",0.1d),
+                entry.apply("i",3d)
+            );
 
             var config = PageRankConfigImpl.builder()
                 .maxIterations(100)
@@ -541,8 +551,11 @@ class PageRankTest {
 
         @Test
         void withBiasedSourceNodes() {
-            var sourceNodesMap = Map.of(graph.toOriginalNodeId("b"), 2, graph.toOriginalNodeId("e"), 0.6);
-
+            BiFunction<String, Double, List<?>> entry = (a,b) -> List.of(graph.toOriginalNodeId(a),b);
+            var sourceNodesMap = List.of(
+                entry.apply("b",2d),
+                entry.apply("e",0.6d)
+            );
             var config = ArticleRankStreamConfigImpl.builder()
                 .maxIterations(100)
                 .tolerance(0)

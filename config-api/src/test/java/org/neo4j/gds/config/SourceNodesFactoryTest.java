@@ -22,7 +22,6 @@ package org.neo4j.gds.config;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
-import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -34,10 +33,13 @@ class SourceNodesFactoryTest {
         assertThat(SourceNodesFactory.toString(sourceNodes)).isEqualTo("[1, 42]");
     }
 
-    @Test
-    void testSourceNodesMapToString(){
-        var sourceNodes = SourceNodesFactory.parse(Map.of(0L, 0.2D, 43L, 1D));
-        assertThat(SourceNodesFactory.toString(sourceNodes)).isEqualTo("{0=0.2, 43=1.0}");
+    @Test()
+    void testSourceNodesListOfPairsToString(){
+        var output1 = "[[3, 0.1], [10, 2.0]]";
+        var output2 = "[[10, 2.0], [3, 0.1]]";
+
+        var sourceNodes = SourceNodesFactory.parse(List.of(List.of(3L, 0.1D), List.of(10L, 2D)));
+        assertThat(SourceNodesFactory.toString(sourceNodes)).isIn(List.of(output1,output2));
     }
 
     @Test
@@ -48,10 +50,11 @@ class SourceNodesFactoryTest {
     }
 
     @Test
-    void testMapSourceNodes() {
-        var mapSourceNodes = SourceNodesFactory.parse(Map.of(2,0.2, 5, 1.1));
+    void testMapSourceNodesFromListOfPairs() {
+        var mapSourceNodes = SourceNodesFactory.parse(List.of(List.of(2L, 0.5D), List.of(42L, 3.0D)));
         assertThat(mapSourceNodes).isInstanceOf(MapSourceNodes.class);
-        assertThat(mapSourceNodes.sourceNodes()).containsExactly(2L, 5L);
+        assertThat(mapSourceNodes.sourceNodes()).containsExactly(2L, 42L);
     }
+
 
 }

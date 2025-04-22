@@ -24,7 +24,6 @@ import org.neo4j.gds.config.SourceNodes;
 import org.neo4j.gds.config.SourceNodesFactory;
 
 import java.util.List;
-import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -47,9 +46,9 @@ class InitialProbabilityFactoryTest {
     }
 
     @Test
-    void testInitialProbabilityMap() {
+    void testInitialProbabilityListOfLists() {
         var alpha = 0.15;
-        var sourceNodesMap = SourceNodesFactory.parse(Map.of(0L, 1D, 5L, 0.1D));
+        var sourceNodesMap = SourceNodesFactory.parse(List.of(List.of(0L, 1D), List.of(5L, 0.1D)));
         InitialProbabilityProvider initialProbabilityProvider = InitialProbabilityFactory.create((x) -> (2*x), alpha, sourceNodesMap);
         assertThat(initialProbabilityProvider).isInstanceOf(SourceBasedRestartProbability.class);
     }

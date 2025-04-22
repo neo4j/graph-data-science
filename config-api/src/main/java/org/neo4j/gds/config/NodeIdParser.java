@@ -65,9 +65,21 @@ public final class NodeIdParser {
 
         }
         else if (input instanceof Iterable) {
-            for (var item : (Iterable) input) {
-                var nodeId = parseNodeId(item, parameterName);
-                nodesWithProperties.put(nodeId, 1.0);
+            if (input instanceof List<?> list && !list.isEmpty() && list.get(0) instanceof List) {
+                for (var item : list) {
+                    if (item instanceof List<?> pair && pair.size() == 2) {
+                        nodesWithProperties.put(parseNodeId(pair.get(0), parameterName), parsePropertyValue(pair.get(1), parameterName));
+                    }
+                    else {
+                        throw new IllegalArgumentException(formatWithLocale("Failed to parse `%s` as a node-property pair.", item));
+                    }
+                }
+            }
+            else {
+                for (var item : (Iterable<?>) input) {
+                    var nodeId = parseNodeId(item, parameterName);
+                    nodesWithProperties.put(nodeId, 1.0);
+                }
             }
         }
         else {

@@ -619,7 +619,7 @@ Comparing these results to the ones from the xref:algorithms/page-rank.adoc#algo
 In GDS, personalized PageRank can also be run with a varying bias among the source nodes. Like regular personalized PageRank, this models a random walk that restarts at a specific set of source nodes. In the biased case, the likeliness of a restart (`1-dampingFactor`) stays the same but the destination of the restart will be biased according to settings.
 
 
-The following example shows how to run PageRank centered around 'Site A' and 'Site B', with twice as high bias for 'Site B' than 'Site A'.
+The following example shows how to run PageRank centered around 'Site A' and 'Site B', with twice as high bias for 'Site B' than 'Site A'. The biased source nodes are entered as a list of node-value pairs (lists).
 
 [role=query-example]
 --
@@ -630,7 +630,7 @@ MATCH (siteA:Page {name: 'Site A'}), (siteB:Page {name: 'Site B'})
 CALL gds.pageRank.stream('myGraph', {
   maxIterations: 20,
   dampingFactor: 0.85,
-  sourceNodes: {siteA: 1, siteB: 2}
+  sourceNodes: [[siteA, 1], [siteB, 2]]
 })
 YIELD nodeId, score
 RETURN gds.util.asNode(nodeId).name AS name, score
@@ -641,14 +641,14 @@ ORDER BY score DESC, name ASC
 [opts="header",cols="1,1"]
 |===
 | name      | score
-| Home      | 1.1970687132755635
-| About     | 0.33660455242122994
-| Product   | 0.33660455242122994
-| Links     | 0.33660455242122994
-| Site A    | 0.20670975905180075
-| Site B    | 0.3567097590518008
-| Site C    | 0.05670975905180073
-| Site D    | 0.05670975905180073
+| "Home"      | 1.1970687132755635
+| "Site B"    | 0.3567097590518008
+| "About"     | 0.33660455242122994
+| "Links"     | 0.33660455242122994
+| "Product"   | 0.33660455242122994
+| "Site A"    | 0.20670975905180075
+| "Site C"    | 0.05670975905180073
+| "Site D"    | 0.05670975905180073
 |===
 --
 

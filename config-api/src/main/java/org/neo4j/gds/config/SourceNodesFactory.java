@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.config;
 
-import java.util.Map;
+import java.util.List;
 
 import static org.neo4j.gds.config.ConfigNodesValidations.nodesNotNegative;
 
@@ -30,7 +30,7 @@ public final class SourceNodesFactory {
             return (SourceNodes) object;
         }
 
-        if (object instanceof Map){
+        else if (object instanceof List<?> list && !list.isEmpty() && list.get(0) instanceof List){
             var mapsSourceNodes = new MapSourceNodes(NodeIdParser.parseToMapOfNodeIdsWithProperties(object, SourceNodes.SOURCE_NODES_KEY));
             nodesNotNegative(mapsSourceNodes.sourceNodes(), SourceNodes.SOURCE_NODES_KEY);
             return mapsSourceNodes;
@@ -53,9 +53,14 @@ public final class SourceNodesFactory {
         if ( sourceNodes instanceof ListSourceNodes ) {
             return sourceNodes.sourceNodes().toString();
         } else if ( sourceNodes instanceof MapSourceNodes ) {
-            return ((MapSourceNodes) sourceNodes).map().toString();
+            var listOfListSourceNodes = ((MapSourceNodes) sourceNodes).map()
+                .entrySet()
+                .stream()
+                .map(entry -> List.of(entry.getKey(), entry.getValue()))
+                .toList();
+            return listOfListSourceNodes.toString();
         } else {
-            return ""; //Todo?
+            return "";
         }
     }
 }

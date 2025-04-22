@@ -154,12 +154,29 @@ class NodeIdParserTest {
     }
 
     @Test
+    void shouldLoadListOfNodeIdsWithProperties(){
+        var listOfNodeIdsWithProperties = List.of(
+            List.of(0, 0.3),
+            List.of(3, 5.0),
+            List.of(45, 4),
+            List.of(46, 1.2F)
+        );
+        var nodeIdsWithProperties = NodeIdParser.parseToMapOfNodeIdsWithProperties(listOfNodeIdsWithProperties, "testParam1");
+        assertThat(nodeIdsWithProperties).hasSize(4);
+        assertThat(nodeIdsWithProperties.keySet()).containsExactlyInAnyOrder(0L,3L,45L,46L);
+        assertThat(nodeIdsWithProperties.get(0L)).isEqualTo(0.3);
+        assertThat(nodeIdsWithProperties.get(3L)).isEqualTo(5.0);
+        assertThat(nodeIdsWithProperties.get(45L)).isEqualTo(4);
+        assertThat(nodeIdsWithProperties.get(46L)).isCloseTo(1.2F, Offset.offset(1E-6));
+    }
+
+    @Test
     void shouldFailIfValueIsNotANumber(){
         var mapOfNodeIdsWithProperties = Map.of(
             0, "0,2",
-            2, "4.0"
+            2, 4.0
         );
         assertThatThrownBy( () -> NodeIdParser.parseToMapOfNodeIdsWithProperties(mapOfNodeIdsWithProperties, "testParam1"))
-            .hasMessageContaining("Only numerical values are supported for the map of parameter 'testParam1'");
+            .hasMessageContaining("Failed to parse `0,2` as a numeric value for the field `testParam1`.");
     }
 }

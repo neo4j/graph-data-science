@@ -34,10 +34,10 @@
         },
         {
           "name": "sourceNodes",
-          "type": "Node/Number or List or Map",
+          "type": "Node/Number or List or List of pairs as lists",
           "default": "[]",
           "optional": true,
-          "description": "The nodes or node ids or node-bias map to use for computing Personalized Article Rank. To use different bias for different source nodes, use the Map syntax: `{nodeId1: bias1, nodeId2: bias2, ...}`."
+          "description": "The nodes or node ids or node-bias pairs to use for computing Personalized Article Rank. To use different bias for different source nodes, use the syntax: `[[nodeId1, bias1], [nodeId2, bias2], ...]`."
         },
         {
           "name": "scaler",
@@ -223,10 +223,10 @@
         },
         {
           "name": "sourceNodes",
-          "type": "Node/Number or List or Map",
+          "type": "Node/Number or List or List of pairs as lists",
           "default": "[]",
           "optional": true,
-          "description": "The nodes or node ids or node-bias map to use for computing Personalized Page Rank. To use different bias for different source nodes, use the Map syntax: `{nodeId1: bias1, nodeId2: bias2, ...}`."
+          "description": "The nodes or node ids or node-bias pairs to use for computing Personalized Page Rank. To use different bias for different source nodes, use the use the syntax: `[[nodeId1, bias1], [nodeId2, bias2], ...]`."
 
         },
         {

@@ -556,7 +556,7 @@ Comparing these results to the ones from the xref:algorithms/article-rank.adoc#a
 === Biased Personalized Article Rank
 Similarly to Personalized PageRank, GDS allows weighing the `sourceNodes` differently, increasing the likeliness of teleportation to some nodes more than others.
 
-The following example shows how to run Article Rank centered around 'Site A' and 'Site B' with twice as high bias for 'Site B' than 'Site A'.
+The following example shows how to run Article Rank centered around 'Site A' and 'Site B' with twice as high bias for 'Site B' than 'Site A'. The biased source nodes are entered as a list of node-value pairs (lists).
 
 [role=query-example]
 --
@@ -565,8 +565,9 @@ The following example shows how to run Article Rank centered around 'Site A' and
 ----
 MATCH (siteA:Page {name: 'Site A'}), (siteB:Page {name: 'Site B'})
 CALL gds.articleRank.stream('myGraph', {
-  maxIterations: 20,
-  sourceNodes: {siteA: 1, siteB: 2}
+  maxIterations: 100,
+  tolerance: 0,
+  sourceNodes: [[siteA, 1], [siteB, 2]]
 })
 YIELD nodeId, score
 RETURN gds.util.asNode(nodeId).name AS name, score
@@ -577,14 +578,14 @@ ORDER BY score DESC, name ASC
 [opts="header",cols="1,1"]
 |===
 | name      | score
-| "Site A"  | 0.111778363215653612
-| "Site B"  | 0.009744780382903134
-| "Home"    | 0.009744780382903134
-| "About"   | 0.105531128039947505
-| "Links"   | 0.171319162167929667
-| "Product" | 0.321319162167929662
-| "Site C"  | 0.021319162167929635
-| "Site D"  | 0.021319162167929635
+| "Site B"  | 0.303735818640820054
+| "Home"    | 0.165785031378950204
+| "Site A"  | 0.153735818640819949
+| "About"   | 0.029666795088864776
+| "Links"   | 0.029666795088864776
+| "Product" | 0.029666795088864776
+| "Site C"  | 0.003735818640820008
+| "Site D"  | 0.003735818640820008
 |===
 --
 
