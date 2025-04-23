@@ -22,7 +22,7 @@ package org.neo4j.gds.pagerank;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.beta.pregel.Partitioning;
 import org.neo4j.gds.beta.pregel.PregelConfig;
-import org.neo4j.gds.config.SourceNodesConfig;
+import org.neo4j.gds.config.SourceNodesWithPropertiesConfig;
 import org.neo4j.gds.config.ToleranceConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.scaling.NoneScaler;
@@ -32,7 +32,7 @@ import org.neo4j.gds.scaling.ScalerFactory;
 public interface RankConfig extends
     PregelConfig,
     ToleranceConfig,
-    SourceNodesConfig
+    SourceNodesWithPropertiesConfig
 {
     @Override
     @Configuration.DoubleRange(min = 0D)

@@ -17,19 +17,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.pagerank;
+package org.neo4j.gds.config;
 
-import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.config.SourceNodes;
+import java.util.Collection;
+import java.util.Map;
 
-@Configuration("EigenvectorConfigImpl")
-public interface EigenvectorConfig extends RankConfig
-{
+public class MapSourceNodes implements SourceNodes {
+    private final Map<Long,Double> sourceNodes;
+
+    public MapSourceNodes(Map<Long,Double> sourceNodes) {
+        this.sourceNodes = sourceNodes;
+
+    }
+
     @Override
-    @Configuration.ConvertWith(method = "org.neo4j.gds.config.SourceNodesFactory#parseAsList")
-    @Configuration.ToMapValue("org.neo4j.gds.config.SourceNodesFactory#toString")
-    default SourceNodes sourceNodes() {
-        return SourceNodes.EMPTY_SOURCE_NODES;
+    public Collection<Long> sourceNodes() {
+        return sourceNodes.keySet();
+    }
+
+    public Map<Long,Double> map() {
+        return this.sourceNodes;
     }
 
 }

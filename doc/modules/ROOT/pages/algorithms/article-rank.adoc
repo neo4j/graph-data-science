@@ -514,13 +514,11 @@ However, the computation converges after four iterations, and we can already obs
 
 
 [[algorithms-article-rank-examples-personalised]]
-=== Personalised Article Rank
+=== Personalized Article Rank
 
-Personalized Article Rank is a variation of Article Rank which is biased towards a set of `sourceNodes`.
-By default, the power iteration starts with the same value for all nodes: `1 / |V|`.
-For a given set of source nodes `S`, the initial value of each source node is set to `1 / |S|` and to `0` for all remaining nodes.
+Personalized Article Rank is a variation of Article Rank which is biased towards a set of `sourceNodes`. By default, the random walk teleports to any node in the graph with equal probability. Like in PageRank, this can be changed to only a set of `sourceNodes` instead.
 
-The following examples show how to run Eigenvector centrality centered around 'Site A' and 'Site B'.
+The following examples show how to run Article Rank centered around 'Site A' and 'Site B'.
 
 [role=query-example]
 --
@@ -554,6 +552,42 @@ ORDER BY score DESC, name ASC
 
 Comparing these results to the ones from the xref:algorithms/article-rank.adoc#algorithms-article-rank-examples-stream[stream example] (which is not using `sourceNodes` configuration parameter) shows the 'Site A' and `Site B` nodes we used in the `sourceNodes` list now score second and third instead of fourth and fifth.
 
+[[algorithms-article-rank-examples-biased-personalised]]
+=== Biased Personalized Article Rank
+Similarly to Personalized PageRank, GDS allows weighing the `sourceNodes` differently, increasing the likeliness of teleportation to some nodes more than others.
+
+The following example shows how to run Article Rank centered around 'Site A' and 'Site B' with twice as high bias for 'Site B' than 'Site A'. The biased source nodes are entered as a list of node-value pairs (lists).
+
+[role=query-example]
+--
+.The following will run the algorithm and stream results:
+[source, cypher, role=noplay]
+----
+MATCH (siteA:Page {name: 'Site A'}), (siteB:Page {name: 'Site B'})
+CALL gds.articleRank.stream('myGraph', {
+  maxIterations: 100,
+  tolerance: 0,
+  sourceNodes: [[siteA, 1], [siteB, 2]]
+})
+YIELD nodeId, score
+RETURN gds.util.asNode(nodeId).name AS name, score
+ORDER BY score DESC, name ASC
+----
+
+.Results
+[opts="header",cols="1,1"]
+|===
+| name      | score
+| "Site B"  | 0.303735818640820054
+| "Home"    | 0.165785031378950204
+| "Site A"  | 0.153735818640819949
+| "About"   | 0.029666795088864776
+| "Links"   | 0.029666795088864776
+| "Product" | 0.029666795088864776
+| "Site C"  | 0.003735818640820008
+| "Site D"  | 0.003735818640820008
+|===
+--
 
 [[algorithms-article-rank-examples-scaler]]
 === Scaling centrality scores

@@ -19,17 +19,17 @@
  */
 package org.neo4j.gds.pagerank;
 
-import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.config.SourceNodes;
+public class GlobalRestartProbability implements InitialProbabilityProvider {
 
-@Configuration("EigenvectorConfigImpl")
-public interface EigenvectorConfig extends RankConfig
-{
+    private final double alpha;
+
+    GlobalRestartProbability(double alpha) {
+        this.alpha = alpha;
+    }
+
     @Override
-    @Configuration.ConvertWith(method = "org.neo4j.gds.config.SourceNodesFactory#parseAsList")
-    @Configuration.ToMapValue("org.neo4j.gds.config.SourceNodesFactory#toString")
-    default SourceNodes sourceNodes() {
-        return SourceNodes.EMPTY_SOURCE_NODES;
+    public double provideInitialValue(long nodeId) {
+        return alpha;
     }
 
 }

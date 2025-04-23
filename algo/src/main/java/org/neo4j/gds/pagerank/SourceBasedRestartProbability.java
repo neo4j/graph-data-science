@@ -19,17 +19,26 @@
  */
 package org.neo4j.gds.pagerank;
 
-import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.config.SourceNodes;
 
-@Configuration("EigenvectorConfigImpl")
-public interface EigenvectorConfig extends RankConfig
-{
+import java.util.Map;
+
+public class SourceBasedRestartProbability implements InitialProbabilityProvider {
+
+    private final double alpha;
+    private final Map<Long, Double> sourceNodesWithPropertyMap;
+
+
+    SourceBasedRestartProbability(double alpha, Map<Long, Double> sourceNodesWithPropertyMap) {
+        this.alpha = alpha;
+        if (sourceNodesWithPropertyMap.values().stream().anyMatch(x -> x < 0)) {
+            throw new IllegalArgumentException("Negative values are not supported for the source node bias.");
+        }
+        this.sourceNodesWithPropertyMap = sourceNodesWithPropertyMap;
+    }
+
     @Override
-    @Configuration.ConvertWith(method = "org.neo4j.gds.config.SourceNodesFactory#parseAsList")
-    @Configuration.ToMapValue("org.neo4j.gds.config.SourceNodesFactory#toString")
-    default SourceNodes sourceNodes() {
-        return SourceNodes.EMPTY_SOURCE_NODES;
+    public double provideInitialValue(long nodeId) {
+        return alpha * sourceNodesWithPropertyMap.getOrDefault(nodeId,0d);
     }
 
 }

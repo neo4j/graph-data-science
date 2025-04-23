@@ -27,4 +27,6 @@ public interface PageRankConfig extends RankConfig {
     default double dampingFactor() {
         return 0.85;
     }
+
+
 }

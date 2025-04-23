@@ -19,17 +19,18 @@
  */
 package org.neo4j.gds.pagerank;
 
-import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.config.SourceNodes;
+import org.junit.jupiter.api.Test;
 
-@Configuration("EigenvectorConfigImpl")
-public interface EigenvectorConfig extends RankConfig
-{
-    @Override
-    @Configuration.ConvertWith(method = "org.neo4j.gds.config.SourceNodesFactory#parseAsList")
-    @Configuration.ToMapValue("org.neo4j.gds.config.SourceNodesFactory#toString")
-    default SourceNodes sourceNodes() {
-        return SourceNodes.EMPTY_SOURCE_NODES;
+import static org.assertj.core.api.Assertions.assertThat;
+
+class GlobalRestartProbabilityTest {
+
+    @Test
+    void testGlobalRestartProbabilityIsSame() {
+        var alpha = 0.1;
+        var globalRestartProbability = new GlobalRestartProbability(alpha);
+        assertThat(globalRestartProbability.provideInitialValue(0)).isEqualTo(alpha);
+        assertThat(globalRestartProbability.provideInitialValue(42)).isEqualTo(alpha);
     }
 
 }

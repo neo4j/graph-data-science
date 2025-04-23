@@ -34,10 +34,10 @@
         },
         {
           "name": "sourceNodes",
-          "type": "List or Node or Number",
+          "type": "Node/Number or List or List of pairs as lists",
           "default": "[]",
           "optional": true,
-          "description": "The nodes or node ids to use for computing Personalized Page Rank."
+          "description": "The nodes or node ids or node-bias pairs to use for computing Personalized Article Rank. To use different bias for different source nodes, use the syntax: `[[nodeId1, bias1], [nodeId2, bias2], ...]`."
         },
         {
           "name": "scaler",
@@ -223,10 +223,11 @@
         },
         {
           "name": "sourceNodes",
-          "type": "List of Node or Number",
+          "type": "Node/Number or List or List of pairs as lists",
           "default": "[]",
           "optional": true,
-          "description": "The nodes or node ids to use for computing Personalized Page Rank."
+          "description": "The nodes or node ids or node-bias pairs to use for computing Personalized Page Rank. To use different bias for different source nodes, use the use the syntax: `[[nodeId1, bias1], [nodeId2, bias2], ...]`."
+
         },
         {
           "name": "scaler",
@@ -1733,7 +1734,7 @@
           "type": "Integer",
           "default": "1",
           "optional": true,
-          "description": "Number of training iterations."
+          "description": "Number of training iterations. Higher iterations still sample more random walks and therefore the set of walks will generally become more representative of the entire graph."
         },
         {
           "name": "initialLearningRate",
