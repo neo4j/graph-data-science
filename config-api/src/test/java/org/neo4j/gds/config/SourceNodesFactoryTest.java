@@ -28,18 +28,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 class SourceNodesFactoryTest {
 
     @Test
-    void testSourceNodesListToString(){
+    void testSourceNodesListOutputMapping(){
         var sourceNodes = SourceNodesFactory.parse(List.of(1L, 42L));
-        assertThat(SourceNodesFactory.toString(sourceNodes)).isEqualTo("[1, 42]");
+        assertThat(SourceNodesFactory.toMapOutput(sourceNodes)).containsExactly(1L,42L);
     }
 
     @Test()
     void testSourceNodesListOfPairsToString(){
-        var output1 = "[[3, 0.1], [10, 2.0]]";
-        var output2 = "[[10, 2.0], [3, 0.1]]";
 
         var sourceNodes = SourceNodesFactory.parse(List.of(List.of(3L, 0.1D), List.of(10L, 2D)));
-        assertThat(SourceNodesFactory.toString(sourceNodes)).isIn(List.of(output1,output2));
+        assertThat(SourceNodesFactory.toMapOutput(sourceNodes)).containsExactlyInAnyOrder(List.of(3L, 0.1D), List.of(10L, 2D));
     }
 
     @Test

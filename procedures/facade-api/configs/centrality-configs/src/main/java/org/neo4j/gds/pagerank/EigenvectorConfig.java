@@ -27,7 +27,7 @@ public interface EigenvectorConfig extends RankConfig
 {
     @Override
     @Configuration.ConvertWith(method = "org.neo4j.gds.config.SourceNodesFactory#parseAsList")
-    @Configuration.ToMapValue("org.neo4j.gds.config.SourceNodesFactory#toString")
+    @Configuration.ToMapValue("org.neo4j.gds.config.SourceNodesFactory#toMapOutput")
     default SourceNodes sourceNodes() {
         return SourceNodes.EMPTY_SOURCE_NODES;
     }
