@@ -19,11 +19,14 @@
  */
 package org.neo4j.gds.config;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.neo4j.gds.config.ConfigNodesValidations.nodesNotNegative;
 
 public final class SourceNodesFactory {
+
+    private SourceNodesFactory() {}
 
     public static SourceNodes parse(Object object){
         if ( object instanceof SourceNodes) {
@@ -49,18 +52,17 @@ public final class SourceNodesFactory {
         return listSourceNodes;
     }
 
-    public static String toString(SourceNodes sourceNodes) {
+    public static List toMapOutput(SourceNodes sourceNodes) {
         if ( sourceNodes instanceof ListSourceNodes ) {
-            return sourceNodes.sourceNodes().toString();
+            return new ArrayList<>(sourceNodes.sourceNodes());
         } else if ( sourceNodes instanceof MapSourceNodes ) {
-            var listOfListSourceNodes = ((MapSourceNodes) sourceNodes).map()
+            return ((MapSourceNodes) sourceNodes).map()
                 .entrySet()
                 .stream()
                 .map(entry -> List.of(entry.getKey(), entry.getValue()))
                 .toList();
-            return listOfListSourceNodes.toString();
-        } else {
-            return "";
+        }else{
+            throw  new RuntimeException("Not valid sourceNodes");
         }
     }
 }
