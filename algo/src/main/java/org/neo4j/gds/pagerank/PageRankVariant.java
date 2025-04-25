@@ -19,18 +19,16 @@
  */
 package org.neo4j.gds.pagerank;
 
+import org.neo4j.gds.scaling.L2Norm;
+import org.neo4j.gds.scaling.ScalerFactory;
+
 public enum PageRankVariant {
-    PAGE_RANK("PageRank"),
-    ARTICLE_RANK("ArticleRank"),
-    EIGENVECTOR("EigenVector");
+    PAGE_RANK,
+    ARTICLE_RANK,
+    EIGENVECTOR;
 
-    private final String taskName;
-
-    PageRankVariant(String taskName) {
-        this.taskName = taskName;
-    }
-
-    String taskName() {
-        return taskName;
+    boolean ignoreScaling(ScalerFactory scalerFactory){
+        // Eigenvector produces L2NORM-scaled results by default.
+        return this == EIGENVECTOR &&  scalerFactory.type().equals(L2Norm.TYPE);
     }
 }

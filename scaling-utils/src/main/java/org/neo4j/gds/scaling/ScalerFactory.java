@@ -105,4 +105,8 @@ public interface ScalerFactory {
         ProgressTracker progressTracker,
         ExecutorService executor
     );
+
+    default boolean workingScaler(){
+        return !type().equals(NoneScaler.TYPE);
+    }
 }
