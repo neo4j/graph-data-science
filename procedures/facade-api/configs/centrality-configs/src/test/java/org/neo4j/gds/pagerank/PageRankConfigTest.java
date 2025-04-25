@@ -19,18 +19,22 @@
  */
 package org.neo4j.gds.pagerank;
 
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 @GdlExtension
-public class PageRankConfigTest {
+class PageRankConfigTest {
 
     @GdlGraph
     private static final String DB_CYPHER =
@@ -39,20 +43,41 @@ public class PageRankConfigTest {
             "  (b:node)," +
             "(a)-[:R]->(b)";
 
-
     @Inject
     private GraphStore graphStore;
 
-    @Test
-    void shouldNotAllowNegativeSourceNodes() {
-        assertThatThrownBy(() -> PageRankStreamConfigImpl.builder().sourceNodes(List.of(-1337)).build())
-            .hasMessageContaining("Negative node ids are not supported for the field `sourceNodes`");
+    static Stream<Arguments> negativeSourceNodes() {
+        return Stream.of(
+            arguments(-1337),
+            arguments(List.of(-1337)),
+            arguments(List.of(List.of(-1337, 1.0)))
+        );
     }
 
-    @Test
-    void shouldNotAllowNonExistantSourceNodes() {
+    @ParameterizedTest
+    @MethodSource("negativeSourceNodes")
+    void shouldNotAllowNegativeSourceNodes(Object sourceNodes) {
+        assertThatThrownBy(() -> PageRankStreamConfigImpl
+                .builder()
+                .sourceNodes(sourceNodes)
+                .build()
+            ).hasMessageContaining("Negative node ids are not supported for the field `sourceNodes`");
+    }
+
+    static Stream<Arguments> invalidSourceNodes() {
+        return Stream.of(
+            arguments(421337),
+            arguments(List.of(421337)),
+            arguments(List.of(List.of(421337, 1.0)))
+        );
+    }
+
+
+    @ParameterizedTest
+    @MethodSource("invalidSourceNodes")
+    void shouldNotAllowNonExistantSourceNodes(Object sourceNodes) {
         var config = PageRankStreamConfigImpl.builder()
-            .sourceNodes(List.of(421337)).build();
+            .sourceNodes(sourceNodes).build();
 
         assertThatThrownBy(() -> config.graphStoreValidation(
             graphStore,
