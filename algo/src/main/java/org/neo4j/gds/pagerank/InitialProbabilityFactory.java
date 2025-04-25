@@ -26,30 +26,33 @@ import org.neo4j.gds.config.SourceNodes;
 import java.util.HashMap;
 import java.util.function.LongUnaryOperator;
 
-public class InitialProbabilityFactory {
+public final class InitialProbabilityFactory {
 
-    public static InitialProbabilityProvider create(LongUnaryOperator toMappedId, double alpha, SourceNodes sourceNodes) {
-        if (sourceNodes == SourceNodes.EMPTY_SOURCE_NODES){
+    private InitialProbabilityFactory() {}
+
+    public static InitialProbabilityProvider create(
+        LongUnaryOperator toMappedId,
+        double alpha,
+        SourceNodes sourceNodes
+    ) {
+        if (sourceNodes == SourceNodes.EMPTY_SOURCE_NODES) {
             return new GlobalRestartProbability(alpha);
-        }
-        else if (sourceNodes instanceof ListSourceNodes){
+        } else if (sourceNodes instanceof ListSourceNodes) {
             var newSourceNodes = sourceNodes.sourceNodes()
                 .stream()
                 .mapToLong(toMappedId::applyAsLong)
                 .boxed()
                 .toList();
             return new SourceBasedRestartProbabilityList(alpha, newSourceNodes);
-        }
-        else if (sourceNodes instanceof MapSourceNodes){
+        } else if (sourceNodes instanceof MapSourceNodes) {
             var newMap = new HashMap<Long, Double>();
-            for(var entry : ((MapSourceNodes) sourceNodes).map().entrySet()){
+            for (var entry : ((MapSourceNodes) sourceNodes).map().entrySet()) {
                 var newKey = toMappedId.applyAsLong(entry.getKey());
                 newMap.put(newKey, entry.getValue());
             }
             return new SourceBasedRestartProbability(alpha, newMap);
-        }
-        else {
-            throw new IllegalArgumentException("Unsupported source nodes: ");
+        } else {
+            throw new IllegalArgumentException("Unsupported source nodes type");
         }
     }
 }
