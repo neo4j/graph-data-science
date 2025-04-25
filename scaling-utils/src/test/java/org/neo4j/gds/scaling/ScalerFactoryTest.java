@@ -71,4 +71,10 @@ class ScalerFactoryTest {
         assertThatThrownBy(() -> ScalerFactory.parse(Map.of("type", "log", "offset", false))).hasMessageContaining("The value of `offset` must be of type `Number` but was `Boolean`.");
         assertThatThrownBy(() -> ScalerFactory.parse(Map.of("type", "log", "offsat", 0))).hasMessageContaining("Unexpected configuration key: offsat");
     }
+
+    @Test
+    void shouldAcceptWorkingTypes(){
+        assertThat(ScalerFactory.parse("log").workingScaler()).isTrue();
+        assertThat(ScalerFactory.parse("none").workingScaler()).isFalse();
+    }
 }

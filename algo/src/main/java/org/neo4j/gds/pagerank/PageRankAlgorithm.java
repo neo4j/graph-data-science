@@ -24,13 +24,11 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.beta.pregel.Pregel;
 import org.neo4j.gds.beta.pregel.PregelComputation;
-import org.neo4j.gds.core.concurrency.RunWithConcurrency;
-import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
+import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.scaling.L2Norm;
-import org.neo4j.gds.scaling.NoneScaler;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
@@ -110,8 +108,7 @@ public class PageRankAlgorithm<C extends RankConfig> extends Algorithm<PageRankR
         var scalerFactory = config.scaler();
         var concurrency = config.concurrency();
 
-        // Eigenvector produces L2NORM-scaled results by default.
-        if (scalerFactory.type().equals(NoneScaler.TYPE) || (scalerFactory.type().equals(L2Norm.TYPE) && mode == PageRankVariant.EIGENVECTOR)) {
+        if (!scalerFactory.workingScaler() || mode.ignoreScaling(scalerFactory)) {
             return;
         }
 
