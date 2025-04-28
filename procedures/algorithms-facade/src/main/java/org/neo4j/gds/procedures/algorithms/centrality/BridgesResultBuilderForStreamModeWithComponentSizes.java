@@ -28,8 +28,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class BridgesResultBuilderForStreamMode implements StreamResultBuilder<BridgeResult,BridgesStreamResult> {
-
+class BridgesResultBuilderForStreamModeWithComponentSizes implements StreamResultBuilder<BridgeResult, BridgesStreamResult> {
 
     @Override
     public Stream<BridgesStreamResult> build(
@@ -37,18 +36,17 @@ class BridgesResultBuilderForStreamMode implements StreamResultBuilder<BridgeRes
         GraphStore graphStore,
         Optional<BridgeResult> result
     ) {
-        if (result.isEmpty()) return Stream.empty();
+        if (result.isEmpty()) {
+            return Stream.empty();
+        }
 
-        var bridges = result.get().bridges();
-
-        return  bridges
+        return result.get()
+            .bridges()
             .stream()
-            .map( b ->
-                new BridgesStreamResult(
-                    graph.toOriginalNodeId(b.from()),
-                    graph.toOriginalNodeId(b.to()),
-                    List.of(b.remainingSizes()[0],b.remainingSizes()[1])
-                )
-            );
+            .map(bridge -> new BridgesStreamResult(
+                graph.toOriginalNodeId(bridge.from()),
+                graph.toOriginalNodeId(bridge.to()),
+                List.of(bridge.remainingSizes()[0], bridge.remainingSizes()[1])
+            ));
     }
 }

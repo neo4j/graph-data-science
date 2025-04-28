@@ -659,7 +659,11 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
         String graphName,
         Map<String, Object> configuration
     ) {
-        var resultBuilder = new BridgesResultBuilderForStreamMode();
+        var shouldComputeComponents = procedureReturnColumns.contains("remainingSizes");
+        var resultBuilder = shouldComputeComponents
+            ? new BridgesResultBuilderForStreamModeWithComponentSizes()
+            : new BridgesResultBuilderForStreamModeWithoutComponentSizes();
+
         var parsedConfiguration = configurationParser.parseConfiguration(
             configuration,
             BridgesStreamConfig::of
@@ -669,7 +673,7 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
             GraphName.parse(graphName),
             parsedConfiguration,
             resultBuilder,
-            procedureReturnColumns.contains("remainingSizes")
+            shouldComputeComponents
         );
     }
 

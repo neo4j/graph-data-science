@@ -19,7 +19,9 @@
  */
 package org.neo4j.gds.procedures.algorithms.centrality;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.util.List;
 
-public record BridgesStreamResult(long from, long to, List<Long> remainingSizes) {
+public record BridgesStreamResult(long from, long to, @Nullable List<Long> remainingSizes) {
 }

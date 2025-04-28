@@ -19,7 +19,9 @@
  */
 package org.neo4j.gds.bridges;
 
-public record Bridge(long from, long to,long[] remainingSizes) {
+import org.jetbrains.annotations.Nullable;
+
+public record Bridge(long from, long to, long @Nullable [] remainingSizes) {
 
     static Bridge create(long from, long to, long[] remainingSizes){
         return new Bridge(Math.min(from,to), Math.max(from,to), remainingSizes);

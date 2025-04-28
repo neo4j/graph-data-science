@@ -30,8 +30,9 @@ import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNoException;
 
-class BridgesStreamProcTest  extends BaseProcTest {
+class BridgesStreamProcTest extends BaseProcTest {
 
     @Neo4jGraph
     private static final String DB_CYPHER =
@@ -66,27 +67,34 @@ class BridgesStreamProcTest  extends BaseProcTest {
     }
 
     @Test
-    void shouldStreamBackResults(){
-            var query = GdsCypher.call(DEFAULT_GRAPH_NAME)
-                .algo("gds.bridges")
-                .streamMode()
-                .yields();
+    void shouldStreamBackResults() {
+        var query = "CALL gds.bridges.stream('graph')";
 
-            var expectedNode1 = idFunction.of("a");
-            var expectedNode2 = idFunction.of("b");
+        var expectedNode1 = idFunction.of("a");
+        var expectedNode2 = idFunction.of("b");
 
-        var rowCount = runQueryWithRowConsumer(query, (resultRow) -> {
-            var fromId = resultRow.getNumber("from");
-            var toId = resultRow.getNumber("to");
+        var rowCount = runQueryWithRowConsumer(
+            query, (resultRow) -> {
+                var fromId = resultRow.getNumber("from");
+                var toId = resultRow.getNumber("to");
 
-            assertThat(fromId.longValue()).isNotEqualTo(toId.longValue());
-            assertThat(fromId.longValue()).isIn(expectedNode1, expectedNode2);
-            assertThat(toId.longValue()).isIn(expectedNode1, expectedNode2);
+                assertThat(fromId.longValue()).isNotEqualTo(toId.longValue());
+                assertThat(fromId.longValue()).isIn(expectedNode1, expectedNode2);
+                assertThat(toId.longValue()).isIn(expectedNode1, expectedNode2);
 
-            assertThat(resultRow.get("remainingSizes")).isNotNull();
+                assertThat(resultRow.get("remainingSizes")).isNotNull();
 
-        });
-            assertThat(rowCount).isEqualTo(1l);
-        }
+            }
+        );
+
+        assertThat(rowCount).isEqualTo(1L);
+    }
+
+    @Test
+    void shouldNotFailWhenRemainingSizesIsNotYielded() {
+        assertThatNoException().isThrownBy(
+            () -> runQuery("CALL gds.bridges.stream('graph') YIELD from, to")
+        );
+    }
 
 }
