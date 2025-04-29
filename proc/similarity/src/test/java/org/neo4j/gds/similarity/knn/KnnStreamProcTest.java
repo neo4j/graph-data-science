@@ -33,6 +33,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class KnnStreamProcTest extends BaseProcTest {
 
@@ -136,5 +137,13 @@ class KnnStreamProcTest extends BaseProcTest {
             .yields("node1", "node2", "similarity");
 
         runQueryWithResultConsumer(algoQuery, result -> assertThat(result.stream().count()).isEqualTo(2));
+    }
+
+    @Test
+    void shouldIllegalArgumentExceptionThrowForNullProperty(){
+        runQuery("CALL gds.graph.project('myGraph', {__ALL__: {label: '*', properties: 'knn'}}, 'IGNORE')");
+        var query = "CALL gds.knn.stream('myGraph', {nodeProperties: ['foo']}) YIELD *";
+        assertThatThrownBy(() -> runQuery(query))
+            .hasMessageContaining("Caused by: java.lang.IllegalArgumentException");
     }
 }

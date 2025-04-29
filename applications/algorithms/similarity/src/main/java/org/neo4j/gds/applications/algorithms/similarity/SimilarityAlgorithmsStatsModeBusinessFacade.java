@@ -30,6 +30,9 @@ import org.neo4j.gds.similarity.knn.KnnStatsConfig;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityStatsConfig;
 
+import java.util.List;
+import java.util.Optional;
+
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.FilteredKNN;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.FilteredNodeSimilarity;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.KNN;
@@ -55,13 +58,16 @@ public class SimilarityAlgorithmsStatsModeBusinessFacade {
         FilteredKnnStatsConfig configuration,
         StatsResultBuilder<FilteredKnnResult, RESULT> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
+        return algorithmProcessingTemplateConvenience.processAlgorithmInStatsMode(
             graphName,
             configuration,
             FilteredKNN,
             () -> estimationFacade.filteredKnn(configuration),
             (graph, __) -> similarityAlgorithms.filteredKnn(graph, configuration),
-            resultBuilder
+            resultBuilder,
+            Optional.of(List.of(new KnnHook(configuration.nodeProperties()))),
+            Optional.empty(),
+            Optional.empty()
         );
     }
 
@@ -85,13 +91,16 @@ public class SimilarityAlgorithmsStatsModeBusinessFacade {
         KnnStatsConfig configuration,
         StatsResultBuilder<KnnResult, RESULT> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
+        return algorithmProcessingTemplateConvenience.processAlgorithmInStatsMode(
             graphName,
             configuration,
             KNN,
             () -> estimationFacade.knn(configuration),
             (graph, __) -> similarityAlgorithms.knn(graph, configuration),
-            resultBuilder
+            resultBuilder,
+            Optional.of(List.of(new KnnHook(configuration.nodeProperties()))),
+            Optional.empty(),
+            Optional.empty()
         );
     }
 

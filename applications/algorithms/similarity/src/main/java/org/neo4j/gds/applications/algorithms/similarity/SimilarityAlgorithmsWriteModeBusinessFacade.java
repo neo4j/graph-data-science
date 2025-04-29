@@ -33,7 +33,9 @@ import org.neo4j.gds.similarity.knn.KnnWriteConfig;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityWriteConfig;
 
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.FilteredKNN;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.FilteredNodeSimilarity;
@@ -70,14 +72,18 @@ public class SimilarityAlgorithmsWriteModeBusinessFacade {
             writeRelationshipService
         );
 
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInWriteMode(
+        return algorithmProcessingTemplateConvenience.processAlgorithmInWriteMode(
+            Optional.empty(),
             graphName,
             configuration,
+            Optional.of(List.of(new KnnHook(configuration.nodeProperties()))),
+            Optional.empty(),
             FilteredKNN,
             () -> estimationFacade.filteredKnn(configuration),
             (graph, __) -> similarityAlgorithms.filteredKnn(graph, configuration),
             writeStep,
             resultBuilder
+
         );
     }
 
@@ -116,9 +122,12 @@ public class SimilarityAlgorithmsWriteModeBusinessFacade {
             writeRelationshipService
         );
 
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInWriteMode(
+        return algorithmProcessingTemplateConvenience.processAlgorithmInWriteMode(
+            Optional.empty(),
             graphName,
             configuration,
+            Optional.of(List.of(new KnnHook(configuration.nodeProperties()))),
+            Optional.empty(),
             KNN,
             () -> estimationFacade.knn(configuration),
             (graph, __) -> similarityAlgorithms.knn(graph, configuration),

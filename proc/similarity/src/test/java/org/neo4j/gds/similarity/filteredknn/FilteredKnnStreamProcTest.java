@@ -36,6 +36,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
 class FilteredKnnStreamProcTest extends BaseProcTest {
 
     @Neo4jGraph
@@ -210,5 +212,12 @@ class FilteredKnnStreamProcTest extends BaseProcTest {
         assertCypherResult(algoQuery, List.of(
             Map.of("node1", idMap.get("dave"), "node2", idMap.get("bob"), "similarity", 1.0)
         ));
+    }
+
+    @Test
+    void shouldIllegalArgumentExceptionThrowForNullProperty(){
+        var query = "CALL gds.knn.filtered.stream('filteredKnnGraph', {nodeProperties: ['foo']}) YIELD *";
+        assertThatThrownBy(() -> runQuery(query))
+            .hasMessageContaining("Caused by: java.lang.IllegalArgumentException");
     }
 }

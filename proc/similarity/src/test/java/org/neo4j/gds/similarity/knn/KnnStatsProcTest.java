@@ -29,6 +29,7 @@ import org.neo4j.gds.extension.Neo4jGraph;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.InstanceOfAssertFactories.DOUBLE;
 import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
 import static org.assertj.core.api.InstanceOfAssertFactories.MAP;
@@ -49,16 +50,16 @@ class KnnStatsProcTest extends BaseProcTest {
             KnnStatsProc.class,
             GraphProjectProc.class
         );
-    }
-
-    @Test
-    void testStatsYields() {
         var createQuery = GdsCypher.call("graph")
             .graphProject()
             .withNodeProperty("knn")
             .loadEverything()
             .yields();
         runQuery(createQuery);
+    }
+
+    @Test
+    void testStatsYields() {
 
         var query = GdsCypher
             .call("graph")
@@ -116,5 +117,12 @@ class KnnStatsProcTest extends BaseProcTest {
         assertThat(rowCount)
             .as("`stats` mode should always return one row")
             .isEqualTo(1);
+    }
+
+    @Test
+    void shouldIllegalArgumentExceptionThrowForNullProperty(){
+        var query = "CALL gds.knn.stats('graph', {nodeProperties: ['foo']}) YIELD *";
+        assertThatThrownBy(() -> runQuery(query))
+            .hasMessageContaining("Caused by: java.lang.IllegalArgumentException");
     }
 }

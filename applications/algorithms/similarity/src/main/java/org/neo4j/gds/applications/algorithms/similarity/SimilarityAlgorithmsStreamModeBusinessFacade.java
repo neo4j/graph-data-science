@@ -30,6 +30,8 @@ import org.neo4j.gds.similarity.knn.KnnStreamConfig;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityStreamConfig;
 
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.FilteredKNN;
@@ -57,13 +59,16 @@ public class SimilarityAlgorithmsStreamModeBusinessFacade {
         FilteredKnnStreamConfig configuration,
         StreamResultBuilder<FilteredKnnResult, RESULT> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
+        return algorithmProcessingTemplateConvenience.processAlgorithmInStreamMode(
             graphName,
             configuration,
             FilteredKNN,
             () -> estimationFacade.filteredKnn(configuration),
             (graph, __) -> similarityAlgorithms.filteredKnn(graph, configuration),
-            resultBuilder
+            resultBuilder,
+            Optional.of(List.of(new KnnHook(configuration.nodeProperties()))),
+            Optional.empty(),
+            Optional.empty()
         );
     }
 
@@ -87,13 +92,16 @@ public class SimilarityAlgorithmsStreamModeBusinessFacade {
         KnnStreamConfig configuration,
         StreamResultBuilder<KnnResult, RESULT> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
+        return algorithmProcessingTemplateConvenience.processAlgorithmInStreamMode(
             graphName,
             configuration,
             KNN,
             () -> estimationFacade.knn(configuration),
             (graph, __) -> similarityAlgorithms.knn(graph, configuration),
-            resultBuilder
+            resultBuilder,
+            Optional.of(List.of(new KnnHook(configuration.nodeProperties()))),
+            Optional.empty(),
+            Optional.empty()
         );
     }
 

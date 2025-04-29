@@ -14,9 +14,13 @@ dependencies {
     implementation project(":memory-usage")
     implementation project(":progress-tracking")
     implementation project(":similarity-configs")
+    implementation project(':string-formatting')
     implementation project(":termination")
 
     // this is needed because NodeSimilarity internally calls Wcc
     implementation project(':community-algorithms')
     implementation project(":community-configs")
+
+    testImplementation project(':test-utils')
+
 }
