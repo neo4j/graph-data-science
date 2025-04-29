@@ -111,16 +111,16 @@ public final class NodeEmbeddingAlgorithmsWriteModeBusinessFacade {
 
         var graphSageProcessParameters = graphSageAlgorithmProcessing.graphSageValidationHook(configuration);
         return algorithmProcessingTemplateConvenience.processAlgorithmInWriteMode(
-            graphSageProcessParameters.relationshipWeightPropertyFromTrainConfiguration(),
             graphName,
             configuration,
-            Optional.of(List.of(graphSageProcessParameters.validationHook())),
-            Optional.empty(),
             GraphSage,
             () -> estimationFacade.graphSage(configuration, false),
             (graph, __) -> algorithms.graphSage(graph, configuration),
             writeStep,
-            resultBuilder
+            resultBuilder,
+            graphSageProcessParameters.relationshipWeightPropertyFromTrainConfiguration(),
+            Optional.of(List.of(graphSageProcessParameters.validationHook())),
+            Optional.empty()
         );
     }
     public <RESULT> RESULT hashGnn(
@@ -150,16 +150,16 @@ public final class NodeEmbeddingAlgorithmsWriteModeBusinessFacade {
         var validationHook = new Node2VecValidationHook(configuration);
 
         return algorithmProcessingTemplateConvenience.processAlgorithmInWriteMode(
-            Optional.empty(),
             graphName,
             configuration,
-            Optional.of(List.of(validationHook)),
-            Optional.empty(),
             Node2Vec,
             () -> estimationFacade.node2Vec(configuration),
             (graph, __) -> algorithms.node2Vec(graph, configuration),
             writeStep,
-            resultBuilder
+            resultBuilder,
+            Optional.empty(),
+            Optional.of(List.of(validationHook)),
+            Optional.empty()
         );
     }
 }

@@ -68,16 +68,16 @@ public class NodeEmbeddingAlgorithmsTrainModeBusinessFacade {
         );
 
         return algorithmProcessingTemplateConvenience.processAlgorithmInWriteMode(
-            Optional.empty(),
             graphName,
             configuration,
-            Optional.of(List.of(validationHook)),
-            Optional.empty(),
             GraphSageTrain,
             () -> estimation.graphSageTrain(configuration),
             (graph, __) -> algorithms.graphSageTrain(graph, configuration),
             writeToDiskStep,
-            resultBuilder
+            resultBuilder,
+            Optional.empty(),
+            Optional.of(List.of(validationHook)),
+            Optional.empty()
         );
     }
 }

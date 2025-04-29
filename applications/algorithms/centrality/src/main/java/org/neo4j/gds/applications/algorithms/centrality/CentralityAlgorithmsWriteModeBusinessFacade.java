@@ -269,16 +269,16 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
         var hitsETLHook = hitsHookGenerator.createETLHook(configuration);
 
         return algorithmProcessingTemplateConvenience.processAlgorithmInWriteMode(
-            Optional.empty(),
             graphName,
             configuration,
-            Optional.empty(),
-            Optional.of(List.of(hitsETLHook)),
             HITS,
             estimationFacade::hits,
             (graph, __) -> centralityAlgorithms.hits(graph, configuration),
             writeStep,
-            resultBuilder
+            resultBuilder,
+            Optional.empty(),
+            Optional.empty(),
+            Optional.of(List.of(hitsETLHook))
         );
     }
 

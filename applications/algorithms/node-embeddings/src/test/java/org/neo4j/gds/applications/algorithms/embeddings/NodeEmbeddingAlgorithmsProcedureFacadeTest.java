@@ -41,15 +41,8 @@ class NodeEmbeddingAlgorithmsProcedureFacadeTest {
         facade.node2Vec(null, null, null);
 
         verify(processingTemplate).processAlgorithmInMutateMode(
-            any(),
-            any(),
-            any(),
+            any(), any(), any(), any(), any(), any(), any(), any(),
             node2VecValidationHook(),
-            any(),
-            any(),
-            any(),
-            any(),
-            any(),
             any()
         );
     }
@@ -82,15 +75,8 @@ class NodeEmbeddingAlgorithmsProcedureFacadeTest {
         facade.node2Vec(null, null, null);
 
         verify(processingTemplate).processAlgorithmInWriteMode(
-            any(),
-            any(),
-            any(),
+            any(), any(), any(), any(), any(), any(), any(), any(),
             node2VecValidationHook(),
-            any(),
-            any(),
-            any(),
-            any(),
-            any(),
             any()
         );
     }

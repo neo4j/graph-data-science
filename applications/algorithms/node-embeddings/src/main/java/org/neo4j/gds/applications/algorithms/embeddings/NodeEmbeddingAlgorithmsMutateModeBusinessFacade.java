@@ -88,16 +88,16 @@ public class NodeEmbeddingAlgorithmsMutateModeBusinessFacade {
         var graphSageProcessParameters = graphSageAlgorithmProcessing.graphSageValidationHook(configuration);
 
         return algorithmProcessingTemplateConvenience.processAlgorithmInMutateMode(
-            graphSageProcessParameters.relationshipWeightPropertyFromTrainConfiguration(),
             graphName,
             configuration,
-            Optional.of(List.of(graphSageProcessParameters.validationHook())),
-            Optional.empty(),
             GraphSage,
             () -> estimation.graphSage(configuration, true),
             (graph, __) -> algorithms.graphSage(graph, configuration),
             mutateStep,
-            resultBuilder
+            resultBuilder,
+            graphSageProcessParameters.relationshipWeightPropertyFromTrainConfiguration(),
+            Optional.of(List.of(graphSageProcessParameters.validationHook())),
+            Optional.empty()
         );
     }
 
@@ -128,16 +128,16 @@ public class NodeEmbeddingAlgorithmsMutateModeBusinessFacade {
         var validationHook = new Node2VecValidationHook(configuration);
 
         return algorithmProcessingTemplateConvenience.processAlgorithmInMutateMode(
-            Optional.empty(),
             graphName,
             configuration,
-            Optional.of(List.of(validationHook)),
-            Optional.empty(),
             Node2Vec,
             () -> estimation.node2Vec(configuration),
             (graph, __) -> algorithms.node2Vec(graph, configuration),
             mutateStep,
-            resultBuilder
+            resultBuilder,
+            Optional.empty(),
+            Optional.of(List.of(validationHook)),
+            Optional.empty()
         );
     }
 }

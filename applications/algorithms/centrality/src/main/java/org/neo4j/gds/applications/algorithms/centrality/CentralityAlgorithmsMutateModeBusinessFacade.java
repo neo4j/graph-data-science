@@ -271,16 +271,16 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
         var mutateStep = new HitsMutateStep(mutateNodeProperty, configuration);
         var hook = hitsHookGenerator.createETLHook(configuration);
         return algorithmProcessingTemplateConvenience.processAlgorithmInMutateMode(
-            Optional.empty(),
             graphName,
             configuration,
-            Optional.empty(),
-            Optional.of(List.of(hook)),
             HITS,
             estimation::hits,
             (graph, __) -> algorithms.hits(graph, configuration),
             mutateStep,
-            resultBuilder
+            resultBuilder,
+            Optional.empty(),
+            Optional.empty(),
+            Optional.of(List.of(hook))
         );
     }
 
