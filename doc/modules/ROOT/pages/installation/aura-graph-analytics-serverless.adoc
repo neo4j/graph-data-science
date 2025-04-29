@@ -241,6 +241,9 @@ The following Additional Operations are not supported in GDS Session Cypher API:
 
 In this section we will illustrate how to use the GDS Session Cypher API to project a graph, run a few algorithms, and process results.
 
+
+=== Data & Projection
+
 .The following Cypher statement will create the example graph in the Neo4j database:
 [source, cypher, role=noplay setup-query]
 ----
@@ -307,6 +310,9 @@ RETURN *
 | graphName | nodeCount | relationshipCount | credentials
 | 'myGraph' | 6         | 6                 | null
 |===
+
+
+=== Running algorithms
 
 With a graph projected, we can now run algorithms.
 First, run xref:algorithms/page-rank.adoc[] and xref:machine-learning/node-embeddings/fastrp.adoc[] in `mutate` mode.
@@ -376,8 +382,13 @@ RETURN *
 | 5      | [0, 0, 0, 0, 0, 0, 0, 0]
 |===
 
-It is also possible to write the results using the `gds.graph.nodeProperty.write()` procedure.
-Another alternative is to write results directly using the `write` algorithm execution mode:
+
+=== Writing results to database
+
+It is possible to write mutated results using the `gds.graph.nodeProperty.write()` procedure.
+See xref:management-ops/graph-write-to-neo4j/write-back-to-nodes.adoc[] for more details.
+
+You can also write results directly using the `write` algorithm execution mode, which we will illustrate here.
 
 .Run Louvain in `write` mode:
 [source, cypher, role=noplay]
@@ -396,6 +407,10 @@ RETURN communityCount, modularity
 |===
 
 Now we can find our results in the AuraDB instance using standard Cypher queries.
+
+
+=== Cleaning up
+
 Finally, drop the projected graph, which will also delete the GDS Session.
 
 .Drop the graph 'myGraph':
