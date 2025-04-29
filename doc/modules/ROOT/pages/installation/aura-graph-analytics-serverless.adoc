@@ -153,6 +153,7 @@ RETURN gds.aura.api.credentials(
 [source, cypher]
 ----
 // you can use any alias
+CYPHER runtime=parallel
 WITH gds.aura.api.credentials($clientId, $clientSecret) AS credentials
 MATCH (n)
 OPTIONAL MATCH (n)-->(m)
@@ -174,6 +175,8 @@ RETURN *
 
 Use a xref:management-ops/graph-creation/graph-project-cypher-projection.adoc[Cypher projection] to project a graph into a GDS Session.
 Make sure to include all the additional parameters with the `Aura Graph Analytics Serverless` label.
+
+Use the Cypher parallel runtime to achieve the best performance during projection.
 
 [WARNING]
 Native projections and legacy Cypher projections are not supported.
@@ -295,6 +298,7 @@ Specify the `memory` and `ttl` parameters.
 .Projecting a graph called 'myGraph' using a remote Cypher projection into a new GDS Session:
 [source, cypher, role=noplay graph-project-query]
 ----
+CYPHER runtime=parallel
 WITH gds.aura.api.credentials($clientId, $clientSecret) AS credentials
 MATCH (source:User)
 OPTIONAL MATCH (source)-[r:LINK]->(target:User)
