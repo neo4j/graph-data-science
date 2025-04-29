@@ -271,6 +271,8 @@ In this section we will illustrate how to use the GDS Session Cypher API to proj
 
 === Projecting a graph
 
+In order to project a graph into a GDS Session, we need to have some data in our database.
+
 .The following Cypher statement will create the example graph in the Neo4j database:
 [source, cypher, role=noplay setup-query]
 ----
