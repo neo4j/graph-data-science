@@ -36,6 +36,7 @@ import org.neo4j.gds.extension.Neo4jGraph;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.InstanceOfAssertFactories.DOUBLE;
 import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
 import static org.assertj.core.api.InstanceOfAssertFactories.MAP;
@@ -280,6 +281,13 @@ class FilteredKnnMutateProcTest extends BaseProcTest {
             ),
             mutatedGraph
         );
+    }
+
+    @Test
+    void shouldIllegalArgumentExceptionThrowForNullProperty(){
+        var query = "CALL gds.knn.filtered.mutate('filteredKnnGraph', {nodeProperties: ['foo'],  mutateProperty: 'foo', mutateRelationshipType: 'bar'}) YIELD *";
+        assertThatThrownBy(() -> runQuery(query))
+            .hasMessageContaining("Caused by: java.lang.IllegalArgumentException");
     }
 
 }

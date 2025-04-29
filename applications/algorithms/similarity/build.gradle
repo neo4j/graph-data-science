@@ -19,4 +19,5 @@ dependencies {
     // this is needed because NodeSimilarity internally calls Wcc
     implementation project(':community-algorithms')
     implementation project(":community-configs")
+
 }

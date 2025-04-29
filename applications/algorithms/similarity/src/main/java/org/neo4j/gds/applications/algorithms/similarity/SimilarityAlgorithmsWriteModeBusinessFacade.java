@@ -78,6 +78,7 @@ public class SimilarityAlgorithmsWriteModeBusinessFacade {
             (graph, __) -> similarityAlgorithms.filteredKnn(graph, configuration),
             writeStep,
             resultBuilder
+
         );
     }
 

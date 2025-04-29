@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.InstanceOfAssertFactories.DOUBLE;
 import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
 import static org.assertj.core.api.InstanceOfAssertFactories.MAP;
@@ -277,6 +278,13 @@ class KnnMutateProcTest extends BaseProcTest {
             ),
             mutatedGraph
         );
+    }
+
+    @Test
+    void shouldIllegalArgumentExceptionThrowForNullProperty(){
+        var query = "CALL gds.knn.mutate('myGraph', {nodeProperties: ['foo'],  mutateProperty: 'foo', mutateRelationshipType: 'bar'}) YIELD *";
+        assertThatThrownBy(() -> runQuery(query))
+            .hasMessageContaining("Caused by: java.lang.IllegalArgumentException");
     }
 
 }

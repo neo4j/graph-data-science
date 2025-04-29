@@ -36,6 +36,7 @@ import org.neo4j.gds.extension.Neo4jGraph;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.InstanceOfAssertFactories.DOUBLE;
 import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
 import static org.assertj.core.api.InstanceOfAssertFactories.MAP;
@@ -204,5 +205,13 @@ class KnnWriteProcTest extends BaseProcTest {
             ),
             knnGraph
         );
+    }
+
+    @Test
+    void shouldIllegalArgumentExceptionThrowForNullProperty(){
+        runQuery("CALL gds.graph.project('myGraph', {__ALL__: {label: '*', properties: 'knn'}}, 'IGNORE')");
+        var query = "CALL gds.knn.write('myGraph', {nodeProperties: ['foo'],  writeProperty: 'foo', writeRelationshipType: 'bar'}) YIELD *";
+        assertThatThrownBy(() -> runQuery(query))
+            .hasMessageContaining("Caused by: java.lang.IllegalArgumentException");
     }
 }

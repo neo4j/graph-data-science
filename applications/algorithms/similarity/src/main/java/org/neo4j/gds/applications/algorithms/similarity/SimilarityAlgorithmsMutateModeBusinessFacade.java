@@ -79,6 +79,7 @@ public class SimilarityAlgorithmsMutateModeBusinessFacade {
             mutateStep,
             resultBuilder
         );
+
     }
 
     public <RESULT> RESULT filteredNodeSimilarity(

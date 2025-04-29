@@ -19,12 +19,19 @@
  */
 package org.neo4j.gds.similarity.knn;
 
+import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.IterationsConfig;
 import org.neo4j.gds.config.SingleThreadedRandomSeedConfig;
+import org.neo4j.gds.utils.StringJoining;
 
+import java.util.Collection;
 import java.util.List;
+
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @Configuration
 public interface KnnBaseConfig extends AlgoBaseConfig, IterationsConfig, SingleThreadedRandomSeedConfig {
@@ -101,5 +108,23 @@ public interface KnnBaseConfig extends AlgoBaseConfig, IterationsConfig, SingleT
     @Configuration.Ignore
     default KnnMemoryEstimationParametersBuilder toMemoryEstimationParameters() {
         return new KnnMemoryEstimationParametersBuilder(sampleRate(), topK(), initialSampler());
+    }
+
+    @Configuration.GraphStoreValidationCheck
+    default void checkPropertiesExist(
+        GraphStore graphStore,
+        Collection<NodeLabel> selectedLabels,
+        Collection<RelationshipType> selectedRelationshipTypes
+    ) {
+        for (var property : nodeProperties()){
+            var propertyName = property.name();
+            if (!graphStore.hasNodeProperty(propertyName)){
+                throw  new IllegalArgumentException(
+                    formatWithLocale("The property `%s` has not been loaded. Available properties: %s",
+                        propertyName,
+                        StringJoining.join(graphStore.nodePropertyKeys(selectedLabels)))
+                );
+            }
+        }
     }
 }
