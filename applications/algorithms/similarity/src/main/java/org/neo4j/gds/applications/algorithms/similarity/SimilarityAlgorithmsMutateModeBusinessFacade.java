@@ -33,9 +33,7 @@ import org.neo4j.gds.similarity.knn.KnnResult;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityMutateConfig;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
 
-import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.FilteredKNN;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.FilteredNodeSimilarity;
@@ -72,12 +70,9 @@ public class SimilarityAlgorithmsMutateModeBusinessFacade {
             shouldComputeSimilarityDistribution
         );
 
-        return algorithmProcessingTemplateConvenience.processAlgorithmInMutateMode(
-            Optional.empty(),
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
             graphName,
             configuration,
-            Optional.of(List.of(new KnnHook(configuration.nodeProperties()))),
-            Optional.empty(),
             FilteredKNN,
             () -> estimationFacade.filteredKnn(configuration),
             (graph, __) -> similarityAlgorithms.filteredKnn(graph, configuration),
@@ -121,12 +116,9 @@ public class SimilarityAlgorithmsMutateModeBusinessFacade {
             shouldComputeSimilarityDistribution
         );
 
-        return algorithmProcessingTemplateConvenience.processAlgorithmInMutateMode(
-           Optional.empty(),
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
             graphName,
             configuration,
-            Optional.of(List.of(new KnnHook(configuration.nodeProperties()))),
-            Optional.empty(),
             KNN,
             () -> estimationFacade.knn(configuration),
             (graph, __) -> similarityAlgorithms.knn(graph, configuration),
