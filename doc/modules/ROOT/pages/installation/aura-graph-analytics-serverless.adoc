@@ -122,6 +122,30 @@ CALL gds.wcc.stream('g')
 
 The above will fail with an error indicating the missing call to `gds.aura.api.credentials()`.
 
+.Syntax
+[source, cypher]
+----
+RETURN gds.aura.api.credentials(
+  clientId: String,
+  clientSecret: String
+) AS credentials
+----
+
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name         | Type   | Default | Optional | Description
+| clientId     | String | n/a     | no       | The Client ID for an Aura API key pair.
+| clientSecret | String | n/a     | no       | The Client Secret for an Aura API key pair.
+|===
+
+.Results
+[opts="header"]
+|===
+| Name | Type | Description
+| -    | -    | Always returns `null`.
+|===
+
 
 ==== Examples
 
@@ -129,7 +153,7 @@ The above will fail with an error indicating the missing call to `gds.aura.api.c
 [source, cypher]
 ----
 // you can use any alias
-WITH gds.aura.api.credentials() AS credentials
+WITH gds.aura.api.credentials($clientId, $clientSecret) AS credentials
 MATCH (n)
 OPTIONAL MATCH (n)-->(m)
 RETURN gds.graph.project('g', n, m, {}, {memory: '4GB'})
@@ -139,7 +163,7 @@ RETURN gds.graph.project('g', n, m, {}, {memory: '4GB'})
 [source, cypher]
 ----
 // you can use any alias
-WITH gds.aura.api.credentials() AS c
+WITH gds.aura.api.credentials($clientId, $clientSecret) AS c
 CALL gds.pageRank.stream('g')
 YIELD nodeId, score // must specify YIELD
 RETURN *
