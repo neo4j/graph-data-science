@@ -122,6 +122,30 @@ CALL gds.wcc.stream('g')
 
 The above will fail with an error indicating the missing call to `gds.aura.api.credentials()`.
 
+.Syntax
+[source, cypher]
+----
+RETURN gds.aura.api.credentials(
+  clientId: String,
+  clientSecret: String
+) AS credentials
+----
+
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name         | Type   | Default | Optional | Description
+| clientId     | String | n/a     | no       | The Client ID for an Aura API key pair.
+| clientSecret | String | n/a     | no       | The Client Secret for an Aura API key pair.
+|===
+
+.Results
+[opts="header"]
+|===
+| Name | Type | Description
+| -    | -    | Always returns `null`.
+|===
+
 
 ==== Examples
 
@@ -129,7 +153,8 @@ The above will fail with an error indicating the missing call to `gds.aura.api.c
 [source, cypher]
 ----
 // you can use any alias
-WITH gds.aura.api.credentials() AS credentials
+CYPHER runtime=parallel
+WITH gds.aura.api.credentials($clientId, $clientSecret) AS credentials
 MATCH (n)
 OPTIONAL MATCH (n)-->(m)
 RETURN gds.graph.project('g', n, m, {}, {memory: '4GB'})
@@ -139,7 +164,7 @@ RETURN gds.graph.project('g', n, m, {}, {memory: '4GB'})
 [source, cypher]
 ----
 // you can use any alias
-WITH gds.aura.api.credentials() AS c
+WITH gds.aura.api.credentials($clientId, $clientSecret) AS c
 CALL gds.pageRank.stream('g')
 YIELD nodeId, score // must specify YIELD
 RETURN *
@@ -150,6 +175,8 @@ RETURN *
 
 Use a xref:management-ops/graph-creation/graph-project-cypher-projection.adoc[Cypher projection] to project a graph into a GDS Session.
 Make sure to include all the additional parameters with the `Aura Graph Analytics Serverless` label.
+
+Use the Cypher parallel runtime to achieve the best performance during projection.
 
 [WARNING]
 Native projections and legacy Cypher projections are not supported.
@@ -241,6 +268,11 @@ The following Additional Operations are not supported in GDS Session Cypher API:
 
 In this section we will illustrate how to use the GDS Session Cypher API to project a graph, run a few algorithms, and process results.
 
+
+=== Projecting a graph
+
+In order to project a graph into a GDS Session, we need to have some data in our database.
+
 .The following Cypher statement will create the example graph in the Neo4j database:
 [source, cypher, role=noplay setup-query]
 ----
@@ -268,6 +300,7 @@ Specify the `memory` and `ttl` parameters.
 .Projecting a graph called 'myGraph' using a remote Cypher projection into a new GDS Session:
 [source, cypher, role=noplay graph-project-query]
 ----
+CYPHER runtime=parallel
 WITH gds.aura.api.credentials($clientId, $clientSecret) AS credentials
 MATCH (source:User)
 OPTIONAL MATCH (source)-[r:LINK]->(target:User)
@@ -308,9 +341,12 @@ RETURN *
 | 'myGraph' | 6         | 6                 | null
 |===
 
-With a graph projected, we can now run algorithms.
-First, run xref:algorithms/page-rank.adoc[] and xref:machine-learning/node-embeddings/fastrp.adoc[] in `mutate` mode.
-Then, `stream` the node properties and lastly `write` them back to the AuraDB instance.
+
+=== Running algorithms
+
+You can run algorithms on a projected graph.
+For example, run xref:algorithms/page-rank.adoc[] and xref:machine-learning/node-embeddings/fastrp.adoc[] in `mutate` mode on the example graph.
+Then, `stream` the node properties and `write` them back to the AuraDB instance.
 
 .Run PageRank in `mutate` mode:
 [source, cypher, role=noplay]
@@ -376,8 +412,13 @@ RETURN *
 | 5      | [0, 0, 0, 0, 0, 0, 0, 0]
 |===
 
-It is also possible to write the results using the `gds.graph.nodeProperty.write()` procedure.
-Another alternative is to write results directly using the `write` algorithm execution mode:
+
+=== Writing results to database
+
+It is possible to write mutated results using the `gds.graph.nodeProperty.write()` procedure.
+See xref:management-ops/graph-write-to-neo4j/write-back-to-nodes.adoc[] for more details.
+
+You can also write results directly using the `write` algorithm execution mode.
 
 .Run Louvain in `write` mode:
 [source, cypher, role=noplay]
@@ -395,7 +436,10 @@ RETURN communityCount, modularity
 | 2              | 0.3333333333333333
 |===
 
-Now we can find our results in the AuraDB instance using standard Cypher queries.
+
+
+=== Cleaning up
+
 Finally, drop the projected graph, which will also delete the GDS Session.
 
 .Drop the graph 'myGraph':
