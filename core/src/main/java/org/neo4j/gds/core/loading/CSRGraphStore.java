@@ -734,8 +734,9 @@ public final class CSRGraphStore implements GraphStore {
             if (!relationships.containsKey(relationshipType)) {
                 throw new IllegalArgumentException(
                     formatWithLocale(
-                        "No relationships have been loaded for relationship type '%s'",
-                        relationshipType
+                        "No relationships have been loaded for relationship type '%s'. Available relationship types are: %s",
+                        relationshipType,
+                        StringJoining.join(relationships.keySet().stream().map(RelationshipType::name))
                     )
                 );
             }
@@ -744,9 +745,10 @@ public final class CSRGraphStore implements GraphStore {
                 if (!hasRelationshipProperty(relationshipType, relationshipProperty)) {
                     throw new IllegalArgumentException(
                         formatWithLocale(
-                            "Property '%s' does not exist for relationships with type '%s'.",
+                            "Property '%s' does not exist for relationships with type '%s'. Available properties are: %s",
                             maybeRelationshipProperty.get(),
-                            relationshipType
+                            relationshipType,
+                            StringJoining.join(relationshipPropertyKeys(relationshipType))
                         )
                     );
                 }
