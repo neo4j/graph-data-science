@@ -48,8 +48,7 @@ dependencies {
 
     api(
         project(':core-test-utils'),
-        [openGds.jqwik, openGds.junit.pioneer],
-        [group: 'org.junit.jupiter',       name: 'junit-jupiter-engine',    version: ver.'junit'],
+        [openGds.jqwik, openGds.junit.pioneer, openGds.junit5.jupiter.engine],
     )
 
     api(group: 'org.neo4j.community', name: 'it-test-support', version: ver.'neo4j') {
