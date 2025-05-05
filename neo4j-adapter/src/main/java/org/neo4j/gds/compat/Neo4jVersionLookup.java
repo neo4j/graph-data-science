@@ -35,8 +35,7 @@ final class Neo4jVersionLookup {
         return Neo4jVersionLookup.VERSION;
     }
 
-    @VisibleForTesting
-    static Neo4jVersion findNeo4jVersion() {
+    private static Neo4jVersion findNeo4jVersion() {
         var neo4jVersion = Objects.requireNonNullElse(Version.class.getPackage().getImplementationVersion(), "Unknown");
         // some versions have a build thing attached at the end
         // e.g. 4.0.8,8e921029f7daebacc749034f0cb174f1f2c7a258
@@ -53,9 +52,6 @@ final class Neo4jVersionLookup {
         var minorMajor = matcher.find() ? matcher.group(1) : neo4jVersion;
         return parse(minorMajor, neo4jVersion);
     }
-
-    private static final int SUPPORTED_MAJOR_VERSION = 5;
-    private static final int MIN_SUPPORTED_MINOR_VERSION = 26;
 
     @VisibleForTesting
     static Neo4jVersion parse(CharSequence version, String fullVersion) {
@@ -76,10 +72,6 @@ final class Neo4jVersionLookup {
         var majorVersion = majorMinorVersion[0];
         var minorVersion = majorMinorVersion[1];
 
-        if (majorVersion != SUPPORTED_MAJOR_VERSION || minorVersion < MIN_SUPPORTED_MINOR_VERSION) {
-            return new Neo4jVersion.Unsupported(majorVersion, minorVersion, fullVersion);
-        }
-
-        return new Neo4jVersion.Known(majorVersion, minorVersion, fullVersion);
+        return new Neo4jVersion(majorVersion, minorVersion, fullVersion);
     }
 }

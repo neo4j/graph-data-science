@@ -19,58 +19,16 @@
  */
 package org.neo4j.gds.compat;
 
-import org.jetbrains.annotations.NotNull;
+public record Neo4jVersion(int major, int minor, String fullVersion) {
 
-public sealed interface Neo4jVersion {
-
-    static Neo4jVersion findNeo4jVersion() {
+    public static Neo4jVersion findNeo4jVersion() {
         return Neo4jVersionLookup.neo4jVersion();
     }
-
-    int major();
-
-    int minor();
-
-    String fullVersion();
-
-    default MajorMinor semanticVersion() {
-        return new MajorMinor(this.major(), this.minor());
-    }
-
-    default boolean matches(int major, int minor) {
+    public boolean matches(int major, int minor) {
         return this.major() == major && this.minor() == minor;
     }
 
-    default boolean matches(@NotNull MajorMinor version) {
-        return this.major() == version.major() && this.minor() == version.minor();
-    }
-
-    default boolean isSupported() {
-        return !(this instanceof Unsupported);
-    }
-
-    record MajorMinor(int major, int minor) {
-        @Override
-        public String toString() {
-            return this.major + "." + this.minor;
-        }
-    }
-
-    record Known(int major, int minor, String fullVersion) implements Neo4jVersion {
-        @Override
-        public String toString() {
-            return this.major + "." + this.minor;
-        }
-    }
-
-    record Unsupported(int major, int minor, String fullVersion) implements Neo4jVersion {
-        @Override
-        public String toString() {
-            if (this.major >= 0 && this.minor >= 0) {
-                return this.major + "." + this.minor + " (" + this.fullVersion + ")";
-            } else {
-                return this.fullVersion;
-            }
-        }
+    public String toString() {
+        return this.major + "." + this.minor;
     }
 }
