@@ -25,22 +25,22 @@ There are two primary APIs for working with GDS Sessions: the GDS Python Client 
 === GDS Python Client
 
 Using the client, it is possible to perform all operations on a GDS Session.
-For a comprehensive API overview including examples and tutorials, see link:https://neo4j.com/docs/graph-data-science-client/current/gds-session/[the GDS Python Client manual].
+For a comprehensive API overview including examples and tutorials, see link:https://neo4j.com/docs/graph-data-science-client/current/graph-analytics-serverless/[the GDS Python Client manual].
 
 In particular, the GDS Python Client allows you to:
 
-- link:https://neo4j.com/docs/graph-data-science-client/current/gds-session/#_creating_a_gds_session[Create GDS Sessions]
-- link:https://neo4j.com/docs/graph-data-science-client/current/gds-session/#_projecting_graphs_into_a_gds_session[Project graphs into GDS sessions]
+- link:https://neo4j.com/docs/graph-data-science-client/current/graph-analytics-serverless/#_creating_a_gds_session[Create GDS Sessions]
+- link:https://neo4j.com/docs/graph-data-science-client/current/graph-analytics-serverless/#_projecting_graphs_into_a_gds_session[Project graphs into GDS sessions]
 
-- link:https://neo4j.com/docs/graph-data-science-client/current/gds-session/#_running_algorithms[Run algorithms and machine learning operations]
-- link:https://neo4j.com/docs/graph-data-science-client/current/gds-session/#_remote_write_back[If sourced from a Neo4j DBMS, write back results]
-- link:https://neo4j.com/docs/graph-data-science-client/current/gds-session/#_listing_gds_sessions[List sessions]
-- link:https://neo4j.com/docs/graph-data-science-client/current/gds-session/#_deleting_a_gds_session[Delete sessions]
+- link:https://neo4j.com/docs/graph-data-science-client/current/graph-analytics-serverless/#_running_algorithms[Run algorithms and machine learning operations]
+- link:https://neo4j.com/docs/graph-data-science-client/current/graph-analytics-serverless/#_remote_write_back[If sourced from a Neo4j DBMS, write back results]
+- link:https://neo4j.com/docs/graph-data-science-client/current/graph-analytics-serverless/#_listing_gds_sessions[List sessions]
+- link:https://neo4j.com/docs/graph-data-science-client/current/graph-analytics-serverless/#_deleting_a_gds_session[Delete sessions]
 
 A good place to start are the Tutorials:
 
-- link:https://neo4j.com/docs/graph-data-science-client/current/tutorials/gds-sessions/[GDS Sessions for AuraDB]
-- link:https://neo4j.com/docs/graph-data-science-client/current/tutorials/gds-sessions-self-managed/[GDS Sessions for Self-Managed Neo4j DB]
+- link:https://neo4j.com/docs/graph-data-science-client/current/tutorials/graph-analytics-serverless/[GDS Sessions for AuraDB]
+- link:https://neo4j.com/docs/graph-data-science-client/current/tutorials/graph-analytics-serverless-self-managed/[GDS Sessions for Self-Managed Neo4j DB]
 
 
 === GDS Session Cypher API
