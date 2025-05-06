@@ -20,74 +20,44 @@
 package org.neo4j.gds.compat;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
-import org.neo4j.kernel.internal.CustomVersionSetting;
 import org.neo4j.kernel.internal.Version;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class Neo4jVersionLookupTest {
-    private static final String CUSTOM_VERSION_SETTING = CustomVersionSetting.getConfigKey();
 
     @Test
-    void testParse() {
-        assertThat(Neo4jVersionLookup.parse("5.26.4", "5.26.4"))
-            .returns(new Neo4jVersion.MajorMinor(5, 26), Neo4jVersion::semanticVersion)
-            .returns(true, Neo4jVersion::isSupported);
-    }
-
-    @Test
-    void testParseNext() {
-        assertThat(Neo4jVersionLookup.parse("5.25.0", "5.25.0"))
-            .returns(true, v -> v.matches(5, 25))
-            .returns(false, Neo4jVersion::isSupported);
-    }
-
-    @ParameterizedTest
-    @CsvSource(
-        {
-            "dev",
-            "4.3", // EOL
-            "5.dev",
-            "dev.5",
-            "5.0", // 5.0 was never released to the public
-            "5.1.0",
-            "5.2.0",
-            "5.2.0",
-            "5.3.0", // ^
-            "5.4.0", // |
-            "5.5.0", // 5.x versions no longer supported
-            "5.6.0", // |
-            "5.7.0", // v
-            "5.8.0",
-            "5.9.0",
-            "5.10.0",
-            "5.11.0",
-            "5.12.0",
-            "5.13.0",
-            "5.14.0",
-            "dev.5.dev.1",
-            "5",
-            "6.0.0",
-        }
-    )
-    void testParseInvalid(String input) {
-        var version = Neo4jVersionLookup.parse(input, input);
-        assertThat(version).returns(false, Neo4jVersion::isSupported);
+    void testParseCalVer() {
+        assertThat(Neo4jVersionLookup.parse("2025.04.0", "2025.04.0"))
+            .hasToString("2025.4")
+            .returns(true, v -> v.matches(2025, 4));
     }
 
     @Test
-    void shouldNotRespectVersionOverride() {
-        System.setProperty(Neo4jVersionLookupTest.CUSTOM_VERSION_SETTING, "foobidoobie");
-        assertThat(Neo4jVersionLookup.findNeo4jVersion().toString())
-            .isNotEqualTo(Version.getNeo4jVersion());
+    void testParseV5() {
+        assertThat(Neo4jVersionLookup.parse("5.26.0", "5.26.0"))
+            .returns(true, v -> v.matches(5, 26));
     }
 
     @Test
-    void semanticVersion() {
-        Neo4jVersion version = Neo4jVersionLookup.parse("5.13.37", "5.13.37");
-
-        assertThat(version.semanticVersion()).isEqualTo(new Neo4jVersion.MajorMinor(5, 13));
+    void testParseDevbuild() {
+        String fullVersion = "2025.04.0.dev";
+        Neo4jVersion version = Neo4jVersionLookup.parse("2025.04.0", fullVersion);
+        assertThat(version.fullVersion()).isEqualTo(fullVersion);
+        assertThat(version.matches(2025, 4)).isTrue();
     }
+
+    @Test
+    void parseInvalid() {
+        String fullVersion = "NOT_A_VERSION";
+        Neo4jVersion version = Neo4jVersionLookup.parse(fullVersion, fullVersion);
+        assertThat(version.fullVersion()).isEqualTo(fullVersion);
+    }
+
+    @Test
+    void parsePackagedVersion() {
+        String fullVersion = Version.class.getPackage().getImplementationVersion();
+        assertThat(Neo4jVersionLookup.neo4jVersion().fullVersion()).isEqualTo(fullVersion);
+    }
+
 }
