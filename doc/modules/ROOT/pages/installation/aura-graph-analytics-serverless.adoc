@@ -92,6 +92,13 @@ An expired session cannot be used to run workloads, does not cost anything, and 
 It can also be deleted through the Aura Console UI.
 
 
+==== Maximum lifetime
+
+A session can never be kept active for more than 7 days.
+Even if the session does not expire due to inactivity, it will still expire 7 days after its creation.
+This is a hard limit and cannot be changed.
+
+
 == Syntax
 
 The GDS Session Cypher API matches the GDS plugin API as closely as possible.
