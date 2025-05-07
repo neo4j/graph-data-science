@@ -20,10 +20,10 @@
 package org.neo4j.gds.paths.bellmanford;
 
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryEstimations;
-import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
-import org.neo4j.gds.collections.ha.HugeLongArray;
 
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -43,8 +43,7 @@ public class BellmanFordTask implements Runnable {
     private final HugeLongArray localQueue;
     private final HugeAtomicBitSet validBitset;
     private BellmanFordPhase phase;
-    private final HugeLongArray negativeCycleVertices;
-    private final AtomicLong negativeCycleIndex;
+    private final NegativeCycles negativeCycles;
     private final boolean shouldNotTrackCycles;
     private boolean shouldStop;
 
@@ -55,8 +54,7 @@ public class BellmanFordTask implements Runnable {
         AtomicLong frontierIndex,
         AtomicLong frontierSize,
         HugeAtomicBitSet validBitset,
-        HugeLongArray negativeCycleVertices,
-        AtomicLong negativeCycleIndex
+        NegativeCycles negativeCycles
     ) {
         //a loopless path can contain at most n vertices (i.e., a hamiltonian path).
         // Anything above that suggests a loop somewhere
@@ -69,9 +67,8 @@ public class BellmanFordTask implements Runnable {
         this.validBitset = validBitset;
         this.frontierSize = frontierSize;
         this.phase = BellmanFordPhase.RUN;
-        this.negativeCycleVertices = negativeCycleVertices;
-        this.negativeCycleIndex = negativeCycleIndex;
-        shouldNotTrackCycles = negativeCycleVertices == null;
+        this.negativeCycles = negativeCycles;
+        shouldNotTrackCycles = !negativeCycles.trackNegativeCycles();
     }
 
     static MemoryEstimation memoryEstimation() {
@@ -122,7 +119,7 @@ public class BellmanFordTask implements Runnable {
             for (long idx = offset; (idx < chunkSize); idx++) {
                 long nodeId = frontier.get(idx);
                 processNode(nodeId);
-                if (shouldStop || (shouldNotTrackCycles && negativeCycleIndex.longValue() > 0)) {
+                if (shouldStop || (shouldNotTrackCycles && negativeCycles.containsNegativeCycles())) {
                     shouldStop = true;
                     break;
                 }
@@ -132,7 +129,7 @@ public class BellmanFordTask implements Runnable {
         while (localQueueIndex > 0 && localQueueIndex < LOCAL_QUEUE_BOUND) {
             long nodeId = localQueue.get(--localQueueIndex);
             processNode(nodeId);
-            if (shouldStop || (shouldNotTrackCycles && negativeCycleIndex.longValue() > 0)) {
+            if (shouldStop || (shouldNotTrackCycles && negativeCycles.containsNegativeCycles())) {
                 shouldStop = true;
                 break;
             }
@@ -151,14 +148,12 @@ public class BellmanFordTask implements Runnable {
 
     private void processNegativeCycle(long nodeId) {
         // need to always increment the negativeCycleIndex, it's visible by other tasks.
-        var index = negativeCycleIndex.getAndIncrement();
+        negativeCycles.considerAsStartNode(nodeId);
 
         if(shouldNotTrackCycles) {
             shouldStop = true;
-            return;
         }
 
-        negativeCycleVertices.set(index, nodeId);
     }
 
     @Override
