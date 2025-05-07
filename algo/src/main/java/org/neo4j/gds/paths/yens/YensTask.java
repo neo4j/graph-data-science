@@ -24,10 +24,10 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.paths.PathResult;
 import org.neo4j.gds.paths.dijkstra.Dijkstra;
+import org.neo4j.gds.paths.dijkstra.SingleTarget;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
@@ -151,15 +151,15 @@ public class YensTask implements Runnable {
 
     private void setupDijkstra() {
 
-        this.localDijkstra = Dijkstra.sourceTarget(
+        this.localDijkstra = new Dijkstra(
             localGraph,
-            targetNode, //this is irrelevant
-            List.of(targetNode),
+            targetNode,
+            new SingleTarget(targetNode),
             trackRelationships,
             Optional.empty(),
             ProgressTracker.NULL_TRACKER,
             terminationFlag
-        );
+            );
 
         localDijkstra.withRelationshipFilter(relationshipFilterer::validRelationship);
     }

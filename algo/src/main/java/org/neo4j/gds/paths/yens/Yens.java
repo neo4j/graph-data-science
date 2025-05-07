@@ -66,8 +66,8 @@ public final class Yens extends Algorithm<PathFindingResult> {
         return new Yens(
             graph,
             shouldTrackRelationships,
-            config.sourceNode(),
-            config.targetNode(),
+            graph.toMappedNodeId(config.sourceNode()),
+            graph.toMappedNodeId(config.targetNode()),
             config.k(),
             config.concurrency(),
             progressTracker,
@@ -93,8 +93,8 @@ public final class Yens extends Algorithm<PathFindingResult> {
         return new Yens(
             graph,
             shouldTrackRelationships,
-            parameters.sourceNode(),
-            parameters.targetNode(),
+            graph.toMappedNodeId(parameters.sourceNode()),
+            graph.toMappedNodeId( parameters.targetNode()),
             parameters.k(),
             parameters.concurrency(),
             progressTracker,
@@ -210,8 +210,8 @@ public final class Yens extends Algorithm<PathFindingResult> {
     private Optional<PathResult> findFirstPath() {
         var dijkstra = new Dijkstra(
             graph,
-            graph.toMappedNodeId(sourceNode),
-            new SingleTarget(graph.toMappedNodeId(targetNode)),
+            sourceNode,
+            new SingleTarget(targetNode),
             trackRelationships,
             Optional.empty(),
             progressTracker,

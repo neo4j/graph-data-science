@@ -32,10 +32,8 @@ import org.neo4j.gds.paths.ImmutablePathResult;
 import org.neo4j.gds.paths.PathResult;
 import org.neo4j.gds.termination.TerminationFlag;
 
-import java.util.Collection;
 import java.util.Optional;
 import java.util.function.LongToDoubleFunction;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.paths.dijkstra.TraversalState.CONTINUE;
@@ -69,62 +67,16 @@ public final class Dijkstra extends Algorithm<PathFindingResult> {
     // returns true if the given relationship should be traversed
     private RelationshipFilter relationshipFilter = (sourceId, targetId, relationshipId) -> true;
 
-    /**
-     * Configure Dijkstra to compute at most one source-target shortest path.
-     */
-    public static Dijkstra sourceTarget(
-        Graph graph,
-        long originalNodeId,
-        Collection<Long> targetsList,
-        boolean trackRelationships,
-        Optional<HeuristicFunction> heuristicFunction,
-        ProgressTracker progressTracker,
-        TerminationFlag terminationFlag
-    ) {
-        long sourceNode = graph.toMappedNodeId(originalNodeId);
-        var targets = targetsList.stream().map(graph::toMappedNodeId).collect(Collectors.toList());
-        return new Dijkstra(
-            graph,
-            sourceNode,
-            Targets.of(targets),
-            trackRelationships,
-            heuristicFunction,
-            progressTracker,
-            terminationFlag
-        );
-    }
 
-    /**
-     * Configure Dijkstra to compute all single-source shortest path.
-     */
-    public static Dijkstra singleSource(
-        Graph graph,
-        long originalNodeId,
-        boolean trackRelationships,
-        Optional<HeuristicFunction> heuristicFunction,
-        ProgressTracker progressTracker,
-        TerminationFlag terminationFlag
-    ) {
-        return new Dijkstra(
-            graph,
-            graph.toMappedNodeId(originalNodeId),
-            new AllTargets(),
-            trackRelationships,
-            heuristicFunction,
-            progressTracker,
-            terminationFlag
-        );
-    }
-
-    public Dijkstra(
-        Graph graph,
-        long sourceNode,
-        Targets targets,
-        boolean trackRelationships,
-        Optional<HeuristicFunction> heuristicFunction,
-        ProgressTracker progressTracker,
-        TerminationFlag terminationFlag
-    ) {
+     public Dijkstra(
+         Graph graph,
+         long sourceNode,
+         Targets targets,
+         boolean trackRelationships,
+         Optional<HeuristicFunction> heuristicFunction,
+         ProgressTracker progressTracker,
+         TerminationFlag terminationFlag
+     ) {
         super(progressTracker);
         this.graph = graph;
         this.sourceNode = sourceNode;

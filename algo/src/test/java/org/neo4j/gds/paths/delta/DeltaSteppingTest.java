@@ -46,7 +46,7 @@ import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.gds.logging.GdsTestLog;
-import org.neo4j.gds.paths.dijkstra.Dijkstra;
+import org.neo4j.gds.paths.dijkstra.DijkstraFactory;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Optional;
@@ -367,7 +367,7 @@ final class DeltaSteppingTest {
             ProgressTracker.NULL_TRACKER
         ).compute();
 
-        var dijkstraAlgo = Dijkstra
+        var dijkstraAlgo = DijkstraFactory
             .singleSource(
                 newGraph,
                 start,

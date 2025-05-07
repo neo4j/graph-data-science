@@ -40,7 +40,7 @@ import org.neo4j.gds.paths.bellmanford.BellmanFordParameters;
 import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
 import org.neo4j.gds.paths.delta.DeltaStepping;
 import org.neo4j.gds.paths.delta.DeltaSteppingParameters;
-import org.neo4j.gds.paths.dijkstra.Dijkstra;
+import org.neo4j.gds.paths.dijkstra.DijkstraFactory;
 import org.neo4j.gds.paths.dijkstra.DijkstraSourceTargetParameters;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.paths.traverse.BFS;
@@ -282,7 +282,7 @@ public class PathFindingAlgorithms {
         TerminationFlag terminationFlag
     ) {
 
-        var algorithm = Dijkstra.sourceTarget(
+        var algorithm = DijkstraFactory.sourceTarget(
             graph,
             parameters.sourceNode(),
             parameters.targetsList(),
@@ -317,7 +317,7 @@ public class PathFindingAlgorithms {
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
-        var algorithm = Dijkstra.singleSource(
+        var algorithm = DijkstraFactory.singleSource(
             graph,
             originalNodeId,
             false,

@@ -33,8 +33,6 @@ import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.paths.ImmutablePathResult;
 import org.neo4j.gds.paths.PathResult;
-import org.neo4j.gds.paths.dijkstra.config.AllShortestPathsDijkstraStreamConfigImpl;
-import org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraStreamConfigImpl;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.ArrayList;
@@ -46,7 +44,6 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.gds.paths.PathTestUtil.expected;
 
 @GdlExtension
@@ -54,17 +51,6 @@ final class DijkstraTest {
 
     @GdlGraph
     private static final String DUMMY = "()";
-
-    private static ShortestPathDijkstraStreamConfigImpl.Builder defaultSourceTargetConfigBuilder() {
-        return ShortestPathDijkstraStreamConfigImpl.builder()
-            .concurrency(1);
-    }
-
-    private static AllShortestPathsDijkstraStreamConfigImpl.Builder defaultSingleSourceConfigBuilder() {
-        return AllShortestPathsDijkstraStreamConfigImpl.builder()
-            .concurrency(1);
-    }
-
 
     @Nested
     @TestInstance(value = TestInstance.Lifecycle.PER_CLASS)
@@ -94,15 +80,11 @@ final class DijkstraTest {
 
         @Test
         void nonExisting() {
-            var config = defaultSourceTargetConfigBuilder()
-                .sourceNode(graph.toOriginalNodeId("f"))
-                .targetNode(graph.toOriginalNodeId("a"))
-                .build();
 
-            var paths = Dijkstra.sourceTarget(
+            var paths = new Dijkstra(
                     graph,
-                    config.sourceNode(),
-                    config.targetsList(),
+                    graph.toMappedNodeId("f"),
+                    new SingleTarget(graph.toMappedNodeId("a")),
                     false,
                     Optional.empty(),
                     ProgressTracker.NULL_TRACKER,
@@ -111,30 +93,24 @@ final class DijkstraTest {
                 .compute()
                 .pathSet();
 
-            assertTrue(paths.isEmpty());
+            assertThat(paths).isEmpty();
         }
 
         @Test
         void sourceTarget() {
             var expected = expected(graph::toMappedNodeId, 0, new double[]{0.0, 2.0, 5.0, 9.0, 20.0}, "a", "c", "e", "d", "f");
 
-            var config = defaultSourceTargetConfigBuilder()
-                .sourceNode(graph.toOriginalNodeId("a"))
-                .targetNode(graph.toOriginalNodeId("f"))
-                .build();
-
-            var path = Dijkstra.sourceTarget(
-                    graph,
-                    config.sourceNode(),
-                    config.targetsList(),
-                    false,
-                    Optional.empty(),
-                    ProgressTracker.NULL_TRACKER,
-                    TerminationFlag.RUNNING_TRUE
-                )
-                .compute()
+            var path = new Dijkstra(
+                graph,
+                graph.toMappedNodeId("a"),
+                new SingleTarget(graph.toMappedNodeId("f")),
+                false,
+                Optional.empty(),
+                ProgressTracker.NULL_TRACKER,
+                TerminationFlag.RUNNING_TRUE
+            ).compute()
                 .findFirst()
-                .get();
+                .orElseThrow();
 
             assertEquals(expected, path);
         }
@@ -144,18 +120,10 @@ final class DijkstraTest {
         void sourceTargetWithRelationshipFilter(Dijkstra.RelationshipFilter relationshipFilter, double[] expectedCosts, List<String> expectedPath) {
             var expected = expected(graph::toMappedNodeId, 0, expectedCosts, expectedPath.toArray(String[]::new));
 
-            var sourceNode = graph.toOriginalNodeId(expectedPath.get(0));
-            var targetNode = graph.toOriginalNodeId(expectedPath.get(expectedPath.size() - 1));
-
-            var config = defaultSourceTargetConfigBuilder()
-                .sourceNode(sourceNode)
-                .targetNode(targetNode)
-                .build();
-
-            var dijkstra = Dijkstra.sourceTarget(
+            var dijkstra =  new Dijkstra(
                     graph,
-                    config.sourceNode(),
-                    config.targetsList(),
+                    graph.toMappedNodeId(expectedPath.getFirst()),
+                    new SingleTarget(graph.toMappedNodeId(expectedPath.getLast())),
                     false,
                     Optional.empty(),
                     ProgressTracker.NULL_TRACKER,
@@ -165,7 +133,7 @@ final class DijkstraTest {
             var paths = dijkstra
                 .compute()
                 .findFirst()
-                .get();
+                .orElseThrow();
 
             assertEquals(expected, paths);
         }
@@ -178,15 +146,10 @@ final class DijkstraTest {
                 .relationshipIds(1, 0, 0, 0)
                 .build();
 
-            var config = defaultSourceTargetConfigBuilder()
-                .sourceNode(graph.toOriginalNodeId("a"))
-                .targetNode(graph.toOriginalNodeId("f"))
-                .build();
-
-            var path = Dijkstra.sourceTarget(
+            var path = new Dijkstra(
                     graph,
-                    config.sourceNode(),
-                    config.targetsList(),
+                    graph.toMappedNodeId("a"),
+                    new SingleTarget(graph.toMappedNodeId("f")),
                     true,
                     Optional.empty(),
                     ProgressTracker.NULL_TRACKER,
@@ -194,7 +157,7 @@ final class DijkstraTest {
                 )
                 .compute()
                 .findFirst()
-                .get();
+                .orElseThrow();
 
             assertEquals(expected, path);
         }
@@ -225,15 +188,10 @@ final class DijkstraTest {
                 expected(graph::toMappedNodeId, 5, new double[]{0.0, 2.0, 5.0, 9.0, 20.0}, "a", "c", "e", "d", "f")
             );
 
-            var sourceNode = graph.toOriginalNodeId("a");
-
-            var config = defaultSingleSourceConfigBuilder()
-                .sourceNode(sourceNode)
-                .build();
-
-            var paths = Dijkstra.singleSource(
+            var paths = new Dijkstra(
                     graph,
-                    config.sourceNode(),
+                    graph.toMappedNodeId("a"),
+                    new AllTargets(),
                     false,
                     Optional.empty(),
                     ProgressTracker.NULL_TRACKER,
@@ -255,15 +213,10 @@ final class DijkstraTest {
                 expected(idFunction, 3, new double[]{0.0, 3.0, 7.0, 18.0}, "c", "e", "d", "f")
             );
 
-            var sourceNode = graph.toOriginalNodeId("c");
-
-            var config = defaultSingleSourceConfigBuilder()
-                .sourceNode(sourceNode)
-                .build();
-
-            var paths = Dijkstra.singleSource(
+            var paths = new Dijkstra(
                     graph,
-                    config.sourceNode(),
+                    graph.toMappedNodeId("c"),
+                    new AllTargets(),
                     false,
                     Optional.empty(),
                     ProgressTracker.NULL_TRACKER,
@@ -311,15 +264,10 @@ final class DijkstraTest {
         void sourceTarget() {
             var expected = expected(graph::toMappedNodeId, 0, new double[]{0.0, 2.0, 10.0, 11.0}, "n1", "n3", "n6", "n7");
 
-            var config = defaultSourceTargetConfigBuilder()
-                .sourceNode(graph.toOriginalNodeId("n1"))
-                .targetNode(graph.toOriginalNodeId("n7"))
-                .build();
-
-            var path = Dijkstra.sourceTarget(
+            var path = new Dijkstra(
                     graph,
-                    config.sourceNode(),
-                    config.targetsList(),
+                    graph.toMappedNodeId("n1"),
+                    new SingleTarget(graph.toMappedNodeId("n7")),
                     false,
                     Optional.empty(),
                     ProgressTracker.NULL_TRACKER,
@@ -327,7 +275,7 @@ final class DijkstraTest {
                 )
                 .compute()
                 .findFirst()
-                .get();
+                .orElseThrow();
 
             assertEquals(expected, path);
         }
@@ -338,15 +286,10 @@ final class DijkstraTest {
             var n6 = graph.toMappedNodeId("n6");
             var n7 = graph.toMappedNodeId("n7");
 
-            var config = defaultSourceTargetConfigBuilder()
-                .sourceNode(graph.toOriginalNodeId("n1"))
-                .targetNodes(List.of(graph.toOriginalNodeId(n7), graph.toOriginalNodeId(n6)))
-                .build();
-
-            var path = Dijkstra.sourceTarget(
+            var path = new Dijkstra(
                     graph,
-                    config.sourceNode(),
-                    config.targetsList(),
+                graph.toMappedNodeId("n1"),
+                   Targets.of(List.of(n6,n7)),
                     false,
                     Optional.empty(),
                     ProgressTracker.NULL_TRACKER,
@@ -371,22 +314,15 @@ final class DijkstraTest {
                 expected(mappedId, 6, new double[]{0.0, 2.0, 10.0, 11.0}, "n1", "n3", "n6", "n7")
             );
 
-            var sourceNode = graph.toOriginalNodeId("n1");
-
-            var config = defaultSingleSourceConfigBuilder()
-                .sourceNode(sourceNode)
-                .build();
-
-            var paths = Dijkstra.singleSource(
-                    graph,
-                    config.sourceNode(),
-                    false,
-                    Optional.empty(),
-                    ProgressTracker.NULL_TRACKER,
-                    TerminationFlag.RUNNING_TRUE
-                )
-                .compute()
-                .pathSet();
+            var paths = new Dijkstra(
+                graph,
+                graph.toMappedNodeId("n1"),
+                new AllTargets(),
+                false,
+                Optional.empty(),
+                ProgressTracker.NULL_TRACKER,
+                TerminationFlag.RUNNING_TRUE
+            ).compute().pathSet();
 
             assertEquals(expected, paths);
         }
@@ -419,11 +355,6 @@ final class DijkstraTest {
         void sourceTargetWithHeuristic() {
             var expected = expected(graph::toMappedNodeId, 0, new double[]{0.0, 2.0, 5.0, 9.0, 20.0}, "a", "c", "e", "d", "f");
 
-            var config = defaultSourceTargetConfigBuilder()
-                .sourceNode(graph.toOriginalNodeId("a"))
-                .targetNode(graph.toOriginalNodeId("f"))
-                .build();
-
             var heapComparisons = new ArrayList<Long>();
 
             Dijkstra.HeuristicFunction heuristicFunction = (nodeId) -> {
@@ -431,10 +362,10 @@ final class DijkstraTest {
                 return graph.nodeProperties("distance").doubleValue(nodeId);
             };
 
-            var path = Dijkstra.sourceTarget(
+            var path = new Dijkstra(
                     graph,
-                    config.sourceNode(),
-                    config.targetsList(),
+                    graph.toMappedNodeId("a"),
+                    new SingleTarget(graph.toMappedNodeId("f")),
                     false,
                     Optional.of(heuristicFunction),
                     ProgressTracker.NULL_TRACKER,

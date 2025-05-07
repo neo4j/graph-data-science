@@ -38,7 +38,7 @@ import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaStreamConfigImpl;
-import org.neo4j.gds.paths.dijkstra.Dijkstra;
+import org.neo4j.gds.paths.dijkstra.DijkstraFactory;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Optional;
@@ -309,7 +309,7 @@ class BellmanFordTest {
             .compute()
             .shortestPaths();
 
-        var dijkstraAlgo = Dijkstra
+        var dijkstraAlgo = DijkstraFactory
             .singleSource(
                 newGraph,
                 config.sourceNode(),
