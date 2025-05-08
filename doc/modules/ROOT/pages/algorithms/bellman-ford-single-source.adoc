@@ -26,7 +26,9 @@ A negative cycle is a cycle for which the sum of the relationship weights is neg
 When negative cycles exist, shortest paths cannot easily be defined.
 That is so because we can traverse a negative cycle multiple times to get smaller and smaller costs each time.
 
-When the Bellman-Ford algorithm detects negative cycles, it will return negative cycles instead of shortest paths.
+When the Bellman-Ford algorithm detects negative cycles, it will try to return negative cycles instead of shortest paths.
+Note that in some situations the implementation might not be able to enumerate them due to modifying the algorithm to support a parallel implementation.
+
 As the full set of negative cycles can be too large to enumerate, each node will be included in at most one returned negative cycle.
 
 The ability to handle negative weights makes Bellman-Ford more versatile than Dijkstra, but also slower in practice.
@@ -120,7 +122,7 @@ RETURN nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
 [opts="header"]
 |===
 | nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
-| 9         | 12                | 1344     | 1344      | "1344 Bytes"
+| 9         | 12                | 1424     | 1424      | "1424 Bytes"
 |===
 --
 
@@ -147,7 +149,7 @@ RETURN nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
 [opts="header"]
 |===
 | nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
-| 9         | 12                | 1456     | 1456     | "1456 Bytes"
+| 9         | 12                | 1648     | 1648     | "1648 Bytes"
 |===
 --
 

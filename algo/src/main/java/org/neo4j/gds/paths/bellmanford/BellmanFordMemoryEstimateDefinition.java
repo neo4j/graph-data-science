@@ -19,11 +19,11 @@
  */
 package org.neo4j.gds.paths.bellmanford;
 
-import org.neo4j.gds.mem.MemoryEstimateDefinition;
 import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
+import org.neo4j.gds.mem.MemoryEstimateDefinition;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryEstimations;
-import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 
 public class BellmanFordMemoryEstimateDefinition implements MemoryEstimateDefinition {
 
@@ -38,14 +38,23 @@ public class BellmanFordMemoryEstimateDefinition implements MemoryEstimateDefini
         var builder = MemoryEstimations.builder(BellmanFord.class)
             .perNode("frontier", HugeLongArray::memoryEstimation)
             .perNode("validBitset", HugeAtomicBitSet::memoryEstimation)
+            .perNode("uniqueness bitset", HugeAtomicBitSet::memoryEstimation)
+
             .add(DistanceTracker.memoryEstimation())
             .perThread("BellmanFordTask", BellmanFordTask.memoryEstimation());
 
         if (trackNegativeCycles) {
-            builder.perNode("negativeCyclesVertices", HugeLongArray::memoryEstimation);
+            builder.add(negativeCycles());
         }
 
         return builder.build();
+    }
+
+    private MemoryEstimation negativeCycles(){
+        return MemoryEstimations.builder(NegativeCycles.class)
+            .perNode("negativeCyclesVertices", HugeLongArray::memoryEstimation)
+            .perNode("negative bitset", HugeAtomicBitSet::memoryEstimation)
+            .build();
     }
 
 }

@@ -101,8 +101,7 @@ public class BellmanFord extends Algorithm<BellmanFordResult> {
             graph.nodeCount(),
             concurrency
         );
-        var negativeCyclesVertices = trackNegativeCycles ? HugeLongArray.newArray(graph.nodeCount()) : null;
-        var negativeCyclesIndex = new AtomicLong();
+        var negativeCycles = NegativeCycles.create(graph.nodeCount(),trackNegativeCycles);
         var tasks = new ArrayList<BellmanFordTask>();
 
         for (int i = 0; i < concurrency.value(); ++i) {
@@ -113,8 +112,7 @@ public class BellmanFord extends Algorithm<BellmanFordResult> {
                 frontierIndex,
                 frontierSize,
                 validBitset,
-                negativeCyclesVertices,
-                negativeCyclesIndex
+                negativeCycles
             ));
         }
 
@@ -142,14 +140,14 @@ public class BellmanFord extends Algorithm<BellmanFordResult> {
             progressTracker.endSubTask();
         }
         progressTracker.endSubTask();
-        boolean containsNegativeCycle = negativeCyclesIndex.get() > 0;
-        return produceResult(containsNegativeCycle, negativeCyclesVertices, negativeCyclesIndex, distances);
+        boolean containsNegativeCycle = negativeCycles.containsNegativeCycles();
+        return produceResult(containsNegativeCycle, negativeCycles.negativeCycles(),  negativeCycles.numberOfNegativeCycles(), distances);
     }
 
     private BellmanFordResult produceResult(
         boolean containsNegativeCycle,
         HugeLongArray negativeCyclesVertices,
-        AtomicLong negativeCyclesIndex,
+        long numberOfNegativeCycles,
         DistanceTracker distanceTracker
     ) {
         Stream<PathResult> paths = (containsNegativeCycle || !trackPaths) ?
@@ -165,7 +163,7 @@ public class BellmanFord extends Algorithm<BellmanFordResult> {
             negativeCycles = negativeCyclesResults(
                 graph,
                 distanceTracker,
-                negativeCyclesIndex.longValue(),
+                numberOfNegativeCycles,
                 negativeCyclesVertices,
                 graph.nodeCount(),
                 concurrency
@@ -197,6 +195,7 @@ public class BellmanFord extends Algorithm<BellmanFordResult> {
             Optional.of(1 + (int) numberOfNegativeCycles / concurrency.value())
         );
 
+        HugeAtomicBitSet alreadyEmitted = HugeAtomicBitSet.create(graph.nodeCount());
         return ParallelUtil.parallelStream(
             partitions.stream(),
             concurrency,
@@ -212,7 +211,8 @@ public class BellmanFord extends Algorithm<BellmanFordResult> {
                         negativeCycleVertices.get(indexId),
                         tentativeDistances,
                         localGraph,
-                        nodeCount
+                        nodeCount,
+                        alreadyEmitted
                     )).filter(cycle -> cycle != PathResult.EMPTY);
             })
         );
@@ -297,7 +297,8 @@ public class BellmanFord extends Algorithm<BellmanFordResult> {
         long startNode,
         DistanceTracker tentativeDistances,
         RelationshipIterator localGraph,
-        long nodeCount
+        long nodeCount,
+        HugeAtomicBitSet alreadyEmitted
     ) {
         var pathNodeIds = new LongArrayDeque();
         pathNodeIds.addFirst(startNode);
@@ -307,6 +308,12 @@ public class BellmanFord extends Algorithm<BellmanFordResult> {
         while (currentNode != startNode) {
             pathNodeIds.addFirst(currentNode);
             long predecessor = tentativeDistances.predecessor(currentNode);
+            //this is an edge-case where start node is in a negative cycle originally, but gets updated by
+            //a non-cycle edge(that leads back to  sourceNode), and all its cycle neighbors have been moved to
+            //other cyclesp
+            if (predecessor == -1){
+                return PathResult.EMPTY;
+            }
             length++;
             currentNode = predecessor;
 
@@ -315,18 +322,17 @@ public class BellmanFord extends Algorithm<BellmanFordResult> {
                 break;
             }
         }
-
         if (!shouldAdd) {
             return PathResult.EMPTY;
         }
-
         return createNegativeCycleResult(
             localGraph,
             startNode,
             pathResultBuilder,
             pathNodeIds,
             tentativeDistances,
-            cycleIndex
+            cycleIndex,
+            alreadyEmitted
         );
     }
 
@@ -336,10 +342,23 @@ public class BellmanFord extends Algorithm<BellmanFordResult> {
         ImmutablePathResult.Builder pathResultBuilder,
         LongArrayDeque pathNodeIds,
         DistanceTracker tentativeDistances,
-        AtomicLong cycleIndex
+        AtomicLong cycleIndex,
+        HugeAtomicBitSet alreadyEmitted
     ) {
         pathNodeIds.addFirst(startNodeId);
         var pathArray = pathNodeIds.toArray();
+        var min = startNodeId;
+        //some cycles might be located from different starting nodes with nodes in different order
+        //note that since the `previous` relationship defines an 1-out graph, any node is contained in max one cycle
+        //hence, we can use the minimum element to identify if the path has been output before
+        for (long  pathElement : pathArray) {
+            if (min > pathElement) {
+                min = pathElement;
+            }
+        }
+        if (alreadyEmitted.getAndSet(min)) {
+            return PathResult.EMPTY;
+        }
         var pathLength = pathArray.length;
         var costs = new double[pathLength];
 
@@ -350,6 +369,11 @@ public class BellmanFord extends Algorithm<BellmanFordResult> {
             long node = pathArray[j];
             long previous = pathArray[j - 1];
             double currentDist = tentativeDistances.distance(node) - tentativeDistances.distance(previous);
+            //it can be the case that `previous` is included in multiple cycles, and updated to reach the same length
+            //as `node` which is not updated afterwards. In such cases, let us find the explicit min-edge.
+            if (tentativeDistances.length(node) <= tentativeDistances.length(previous)){
+                currentDist = findMinimumCostBetweenNodes(localGraph,previous,node);
+            }
             costs[j] = costs[j - 1] + currentDist;
         }
 

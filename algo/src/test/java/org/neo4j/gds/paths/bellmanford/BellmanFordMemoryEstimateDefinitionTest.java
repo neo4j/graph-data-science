@@ -36,14 +36,14 @@ class BellmanFordMemoryEstimateDefinitionTest {
         var memoryEstimation = new BellmanFordMemoryEstimateDefinition(trackNegativeCycles).memoryEstimation();
 
         MemoryEstimationAssert.assertThat(memoryEstimation)
-            .memoryRange(10, 23, new Concurrency(4))
+            .memoryRange(11, 23, new Concurrency(4))
             .hasSameMinAndMaxEqualTo(expectedBytes);
     }
 
     private static Stream<Arguments> memoryEstimationSetup() {
         return Stream.of(
-            Arguments.of("Track negative cycles", true, 1528),
-            Arguments.of("Don't track negative cycles", false, 1408)
+            Arguments.of("Track negative cycles", true, 1792),
+            Arguments.of("Don't track negative cycles", false, 1552)
         );
     }
 
