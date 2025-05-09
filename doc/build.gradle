@@ -6,4 +6,10 @@ tasks.register("assembleDocs", Tar) {
     }
  }
 
+tasks.register("copyAssembledDocs", Copy) {
+    dependsOn assembleDocs
+    from(assembleDocs.archiveFile)
+    into(docsDir)
+}
+
 assemble.dependsOn(assembleDocs)

@@ -299,7 +299,7 @@ First, project the graph into a GDS Session, using a remote Cypher projection.
 Specify the `memory` and `ttl` parameters.
 
 .Projecting a graph called 'myGraph' using a remote Cypher projection into a new GDS Session:
-[source, cypher, role=noplay graph-project-query]
+[source, cypher, role=noplay setup-query, operator=neo4j]
 ----
 CYPHER runtime=parallel
 WITH gds.aura.api.credentials($clientId, $clientSecret) AS credentials
@@ -310,7 +310,8 @@ WITH gds.graph.project('myGraph', source, target, {
   targetNodeProperties: target { .age },
   relationshipProperties: r { .weight }
 }, {
-  memory: '4GB', ttl: duration({minutes: 5})
+  memory: '4GB', ttl: duration({minutes: 5}),
+  cloudLocation: { provider: 'gcp', region: 'europe-west1', projectId: $projectId }
 }) AS g
 RETURN g.graphName, g.nodeCount, g.relationshipCount
 ----
@@ -326,21 +327,24 @@ After this completes, we now have a GDS Session with a projected graph.
 If you have the Aura Console open, you should be able to see the session listed in the `Sessions` view.
 Next, list the projected graph using the `gds.graph.list()` procedure.
 
+[role=query-example, operator=neo4j]
+--
 .Listing the projected graph:
 [source, cypher, role=noplay]
 ----
 WITH gds.aura.api.credentials($clientId, $clientSecret) AS credentials
 CALL gds.graph.list()
 YIELD graphName, nodeCount, relationshipCount
-RETURN *
+RETURN graphName, nodeCount, relationshipCount
 ----
 
 .Results
 [opts="header"]
 |===
-| graphName | nodeCount | relationshipCount | credentials
-| 'myGraph' | 6         | 6                 | null
+| graphName | nodeCount | relationshipCount
+| "myGraph"  | 6         | 6
 |===
+--
 
 
 === Running algorithms
@@ -349,26 +353,31 @@ You can run algorithms on a projected graph.
 For example, run xref:algorithms/page-rank.adoc[] and xref:machine-learning/node-embeddings/fastrp.adoc[] in `mutate` mode on the example graph.
 Then, `stream` the node properties and `write` them back to the AuraDB instance.
 
+[role=query-example, operator=neo4j]
+--
 .Run PageRank in `mutate` mode:
-[source, cypher, role=noplay]
+[source, cypher]
 ----
 WITH gds.aura.api.credentials($clientId, $clientSecret) AS credentials
 CALL gds.pageRank.mutate('myGraph', { mutateProperty: 'pageRank' })
 YIELD ranIterations, nodePropertiesWritten
-RETURN *
+RETURN ranIterations, nodePropertiesWritten
 ----
 
 .Results
 [opts="header"]
 |===
-| ranIterations | nodePropertiesWritten | credentials
-| 20            | 6                     | null
+| ranIterations | nodePropertiesWritten
+| 1             | 6
 |===
+--
 
 Use the mutated `pageRank` property as input to the FastRP algorithm.
 
+[role=query-example, operator=neo4j]
+--
 .Run FastRP in `mutate` mode:
-[source, cypher, role=noplay]
+[source, cypher]
 ----
 WITH gds.aura.api.credentials($clientId, $clientSecret) AS credentials
 CALL gds.fastRP.mutate('myGraph', {
@@ -380,38 +389,43 @@ CALL gds.fastRP.mutate('myGraph', {
   mutateProperty: 'fastrp'
 })
 YIELD nodePropertiesWritten
-RETURN *
+RETURN nodePropertiesWritten
 ----
 
 .Results
 [opts="header"]
 |===
-| nodePropertiesWritten | credentials
-| 6                     | null
+| nodePropertiesWritten
+| 6
 |===
+--
 
 Now, stream the node properties back to the AuraDB instance.
 
+[role=query-example, operator=neo4j]
+--
 .Stream node properties:
-[source, cypher, role=noplay]
+[source, cypher]
 ----
 WITH gds.aura.api.credentials($clientId, $clientSecret) AS credentials
 CALL gds.graph.nodeProperty.stream('myGraph', "fastrp")
 YIELD nodeId, propertyValue
-RETURN *
+RETURN nodeId, propertyValue
+ORDER BY nodeId
 ----
 
 .Results
 [opts="header"]
 |===
 | nodeId | propertyValue
-| 0      | [-0.6834304332733154, 0.0, 0.0, 1.190035343170166, 1.2754640579223633, 0.08542880415916443, 1.3372166156768799, -0.08542880415916443]
-| 1      | [-0.6575959920883179, 0.0, 0.0, 0.6249072551727295, 0.7071067690849304, 0.08219949901103973, 0.739795446395874, -0.08219949901103973]
-| 2      | [0.0, 0.0, 0.0, 1.2844570875167847, 1.2844570875167847, 0.0, 0.5773503184318542, 0.0]
-| 3      | [0, 0, 0, 0, 0, 0, 0, 0]
-| 4      | [0.0, 0.0, 0.0, 0.5773503184318542, 0.5773503184318542, 0.0, 0.5773503184318542, 0.0]
-| 5      | [0, 0, 0, 0, 0, 0, 0, 0]
+| 0      | [-0.8200507164, -0.0124960952, 0.2896471024, -0.2785570323, -0.8645128608, -0.1037763357, 0.0, 0.4556654692]
+| 1      | [-0.3894904256, -0.5124961138, 0.9440460801, -0.9576280117, 0.0673641935, -1.0132695436, 0.0, 0.4451318979]
+| 2      | [-0.4223886132, 0.0, 0.3452976346, 0.190074876, -0.4223886132, 0.4223886132, 0.0, 0.0]
+| 3      | [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+| 4      | [-0.4223886132, 0.0, -0.6547023654, 0.190074876, -0.4223886132, 0.4223886132, 0.0, 0.0]
+| 5      | [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
 |===
+--
 
 
 === Writing results to database
@@ -421,8 +435,9 @@ See xref:management-ops/graph-write-to-neo4j/write-back-to-nodes.adoc[] for more
 
 You can also write results directly using the `write` algorithm execution mode.
 
+--
 .Run Louvain in `write` mode:
-[source, cypher, role=noplay]
+[source, cypher]
 ----
 WITH gds.aura.api.credentials($clientId, $clientSecret) AS credentials
 CALL gds.louvain.write('myGraph', { writeProperty: 'louvain' })
@@ -436,6 +451,7 @@ RETURN communityCount, modularity
 | communityCount | modularity
 | 2              | 0.3333333333333333
 |===
+--
 
 
 
@@ -443,8 +459,10 @@ RETURN communityCount, modularity
 
 Finally, drop the projected graph, which will also delete the GDS Session.
 
+[role=query-example, operator=neo4j]
+--
 .Drop the graph 'myGraph':
-[source, cypher, role=noplay]
+[source, cypher]
 ----
 WITH gds.aura.api.credentials($clientId, $clientSecret) AS credentials
 CALL gds.graph.drop('myGraph')
@@ -456,8 +474,9 @@ RETURN graphName
 [opts="header"]
 |===
 | graphName
-| 'myGraph'
+| "myGraph"
 |===
+--
 
 After this completes, no more costs are incurred for the GDS Session.
 You will find that the session is no longer visible in the Aura Console.

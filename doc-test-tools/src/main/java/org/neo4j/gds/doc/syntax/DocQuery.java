@@ -23,6 +23,8 @@ import org.immutables.value.Value;
 import org.neo4j.configuration.GraphDatabaseSettings;
 import org.neo4j.gds.annotation.ValueClass;
 
+import java.util.Map;
+
 /**
  * A doc query has query text and an optional operator
  */
@@ -31,6 +33,11 @@ public interface DocQuery {
     String DEFAULT_OPERATOR = "";
 
     String query();
+
+    @Value.Default
+    default Map<String, Object> parameters() {
+        return Map.of();
+    }
 
     @Value.Derived
     default boolean runAsOperator() {

@@ -38,7 +38,7 @@ public abstract class ModelCatalogDocTestBase extends SingleFileDocTestBase {
 
     @BeforeEach
     @Override
-    void setUp(@TempDir File workingDirectory) throws Exception {
+    protected void setUp(@TempDir File workingDirectory) throws Exception {
         super.setUp(workingDirectory);
         this.modelCatalog = GraphDatabaseApiProxy.resolveDependency(defaultDb, ModelCatalog.class);
 

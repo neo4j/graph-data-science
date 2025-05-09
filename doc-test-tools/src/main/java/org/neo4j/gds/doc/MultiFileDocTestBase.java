@@ -76,16 +76,25 @@ public abstract class MultiFileDocTestBase {
     protected DatabaseManagementService dbms;
 
     protected GraphDatabaseService defaultDb;
+    protected GraphDatabaseService systemDb;
 
     protected abstract List<String> adocPaths();
 
+    protected Map<String, Object> queryParameterValues() {
+        return Map.of();
+    }
+
+    protected void onFailure() {
+
+    }
+
     @BeforeEach
-    void setUp(@TempDir File workingDirectory) throws Exception {
+    protected void setUp(@TempDir File workingDirectory) throws Exception {
         this.dbms = setupDbms(workingDirectory.toPath());
         this.defaultDb = dbms.database("neo4j");
+        this.systemDb = dbms.database("system");
 
         Class<?>[] clazzArray = new Class<?>[0];
-        GraphDatabaseService defaultDb = dbms.database("neo4j");
         registerProcedures(defaultDb, procedures().toArray(clazzArray));
         registerFunctions(defaultDb, functions().toArray(clazzArray));
 
@@ -147,13 +156,18 @@ public abstract class MultiFileDocTestBase {
 
     @TestFactory
     Collection<DynamicTest> runTests() {
-        Assertions.assertThat(queryExampleGroups)
-            .as("Query Example Groups should not be empty!")
-            .isNotEmpty();
+        try {
+            Assertions.assertThat(queryExampleGroups)
+                .as("Query Example Groups should not be empty!")
+                .isNotEmpty();
 
-        return queryExampleGroups.stream()
-            .map(this::createDynamicTest)
-            .collect(Collectors.toList());
+            return queryExampleGroups.stream()
+                .map(this::createDynamicTest)
+                .collect(Collectors.toList());
+        } catch (Exception e) {
+            onFailure();
+            throw e;
+        }
     }
 
     boolean setupNeo4jGraphPerTest() {
@@ -172,9 +186,9 @@ public abstract class MultiFileDocTestBase {
         try {
             if (docQuery.runAsOperator()) {
                 QueryRunner
-                    .runQuery(dbms.database(docQuery.database()), docQuery.operator(), docQuery.query(), Map.of());
+                    .runQuery(dbms.database(docQuery.database()), docQuery.operator(), docQuery.query(), queryParameterValues());
             } else {
-                QueryRunner.runQuery(dbms.database(docQuery.database()), docQuery.query());
+                QueryRunner.runQuery(dbms.database(docQuery.database()), docQuery.query(), queryParameterValues());
             }
         } catch (Exception e) {
             throw new RuntimeException("Failed to run query: " + docQuery.query(), e);
@@ -201,14 +215,14 @@ public abstract class MultiFileDocTestBase {
                 dbms.database(queryExample.database()),
                 queryExample.operator(),
                 queryExample.query(),
-                Map.of(),
+                queryParameterValues(),
                 check
             );
         } else {
             QueryRunner.runQueryWithResultConsumer(
                 dbms.database(queryExample.database()),
                 queryExample.query(),
-                Map.of(),
+                queryParameterValues(),
                 check
             );
         }
