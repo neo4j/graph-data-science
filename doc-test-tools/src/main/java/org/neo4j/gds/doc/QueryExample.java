@@ -24,7 +24,6 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.doc.syntax.DocQuery;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * Query examples are specified in two sections:
@@ -56,11 +55,6 @@ public interface QueryExample extends DocQuery {
     String query();
 
     @Value.Default
-    default Map<String, Object> parameters() {
-        return Map.of();
-    }
-
-    @Value.Default
     default List<String> resultColumns() {
         return List.of();
     }
@@ -74,7 +68,6 @@ public interface QueryExample extends DocQuery {
     default boolean assertResults() {
         return true;
     }
-
 
     @Value.Derived
     default boolean runAsOperator() {
