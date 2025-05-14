@@ -20,7 +20,6 @@
 package org.neo4j.gds.similarity.nodesim;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmMachinery;
 import org.neo4j.gds.beta.generator.RandomGraphGenerator;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
 import org.neo4j.gds.core.concurrency.Concurrency;
@@ -66,7 +65,7 @@ class NodeSimilarityTerminationTest {
                     NodeFilter.ALLOW_EVERYTHING,
                     NodeFilter.ALLOW_EVERYTHING,
                     TerminationFlag.RUNNING_TRUE,
-                    new WccStub(TerminationFlag.RUNNING_TRUE, new AlgorithmMachinery())
+                    new WccStub(TerminationFlag.RUNNING_TRUE)
                 );
                 nodeSimilarity.setTerminationFlag(terminationFlag);
                 nodeSimilarity.compute();

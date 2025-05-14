@@ -20,8 +20,6 @@
 package org.neo4j.gds.modularityoptimization;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmMachinery;
-import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.k1coloring.K1Coloring;
@@ -30,19 +28,15 @@ import org.neo4j.gds.k1coloring.K1ColoringResult;
 import org.neo4j.gds.termination.TerminationFlag;
 
 public class K1ColoringStub {
-    private final AlgorithmMachinery algorithmMachinery;
 
-    public K1ColoringStub(AlgorithmMachinery algorithmMachinery) {
-        this.algorithmMachinery = algorithmMachinery;
+    public K1ColoringStub() {
     }
 
     public K1ColoringResult k1Coloring(
         Graph graph,
         K1ColoringParameters parameters,
         ProgressTracker progressTracker,
-        TerminationFlag terminationFlag,
-        Concurrency concurrency,
-        boolean shouldReleaseProgressTracker
+        TerminationFlag terminationFlag
     ) {
         var algorithm = new K1Coloring(
             graph,
@@ -52,11 +46,6 @@ public class K1ColoringStub {
             terminationFlag
         );
 
-        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
-            algorithm,
-            progressTracker,
-            shouldReleaseProgressTracker,
-            concurrency
-        );
+        return algorithm.compute();
     }
 }

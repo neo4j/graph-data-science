@@ -21,7 +21,6 @@ package org.neo4j.gds.applications.algorithms.community;
 
 import org.neo4j.gds.algorithms.community.CommunityCompanion;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmMachinery;
 import org.neo4j.gds.approxmaxkcut.ApproxMaxKCut;
 import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutParameters;
 import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutResult;
@@ -81,8 +80,6 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 public class CommunityAlgorithms {
-    private final AlgorithmMachinery algorithmMachinery = new AlgorithmMachinery();
-
     private final TerminationFlag terminationFlag;
 
     public CommunityAlgorithms(TerminationFlag terminationFlag) {
@@ -94,25 +91,17 @@ public class CommunityAlgorithms {
         ApproxMaxKCutParameters parameters,
         ProgressTracker progressTracker
     ) {
-        var algorithm = ApproxMaxKCut.create(
+        return ApproxMaxKCut.create(
             graph,
             parameters,
             DefaultPool.INSTANCE,
             progressTracker,
             terminationFlag
-        );
-
-        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
-            algorithm,
-            progressTracker,
-            true,
-            parameters.concurrency()
-        );
+        ).compute();
     }
 
     ConductanceResult conductance(Graph graph, ConductanceParameters parameters, ProgressTracker progressTracker) {
-
-        var algorithm = new Conductance(
+        return new Conductance(
             graph,
             parameters.concurrency(),
             parameters.minBatchSize(),
@@ -120,72 +109,49 @@ public class CommunityAlgorithms {
             parameters.communityProperty(),
             DefaultPool.INSTANCE,
             progressTracker
-        );
-
-        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
-            algorithm,
-            progressTracker,
-            true,
-            parameters.concurrency()
-        );
+        ).compute();
     }
 
     public Labels hdbscan(Graph graph, HDBScanParameters parameters, ProgressTracker progressTracker) {
-        var hdbScan = new HDBScan(
+        return new HDBScan(
             graph,
             graph.nodeProperties(parameters.nodeProperty()),
             parameters,
             progressTracker,
             terminationFlag
-        );
-
-        return hdbScan.compute();
+        ).compute();
     }
 
     public K1ColoringResult k1Coloring(Graph graph, K1ColoringParameters parameters, ProgressTracker progressTracker) {
-
-        var k1ColoringStub = new K1ColoringStub(algorithmMachinery);
-
+        var k1ColoringStub = new K1ColoringStub();
         return k1ColoringStub.k1Coloring(
             graph,
             parameters,
             progressTracker,
-            terminationFlag,
-            parameters.concurrency(),
-            true
+            terminationFlag
         );
     }
-
+    
     KCoreDecompositionResult kCore(
         Graph graph,
         KCoreDecompositionParameters parameters,
         ProgressTracker progressTracker
     ) {
-        var algorithm = new KCoreDecomposition(graph, parameters.concurrency(), progressTracker, terminationFlag);
-
-        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
-            algorithm,
+        return new KCoreDecomposition(
+            graph, 
+            parameters.concurrency(),
             progressTracker,
-            true,
-            parameters.concurrency()
-        );
+            terminationFlag
+        ).compute();
     }
 
     public KmeansResult kMeans(Graph graph, KmeansParameters parameters, ProgressTracker progressTracker) {
-
-        var algorithm = Kmeans.createKmeans(
+        return Kmeans.createKmeans(
             graph,
             parameters,
             new KmeansContext(DefaultPool.INSTANCE, progressTracker),
             terminationFlag
-        );
-
-        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
-            algorithm,
-            progressTracker,
-            true,
-            parameters.concurrency()
-        );
+        ).compute();
     }
 
     LabelPropagationResult labelPropagation(
@@ -193,21 +159,13 @@ public class CommunityAlgorithms {
         LabelPropagationParameters parameters,
         ProgressTracker progressTracker
     ) {
-
-        var algorithm = new LabelPropagation(
+        return new LabelPropagation(
             graph,
             parameters,
             DefaultPool.INSTANCE,
             progressTracker,
             terminationFlag
-        );
-
-        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
-            algorithm,
-            progressTracker,
-            true,
-            parameters.concurrency()
-        );
+        ).compute();
     }
 
     LocalClusteringCoefficientResult lcc(
@@ -215,21 +173,14 @@ public class CommunityAlgorithms {
         LocalClusteringCoefficientParameters parameters,
         ProgressTracker progressTracker
     ) {
-        var algorithm = new LocalClusteringCoefficient(
+        return new LocalClusteringCoefficient(
             graph,
             parameters.concurrency(),
             parameters.maxDegree(),
             parameters.seedProperty(),
             progressTracker,
             terminationFlag
-        );
-
-        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
-            algorithm,
-            progressTracker,
-            true,
-            parameters.concurrency()
-        );
+        ).compute();
     }
 
     public LeidenResult leiden(Graph graph, LeidenParameters parameters, ProgressTracker progressTracker) {
@@ -237,48 +188,31 @@ public class CommunityAlgorithms {
             .map(seedParameter -> CommunityCompanion.extractSeedingNodePropertyValues(graph, seedParameter))
             .orElse(null);
 
-        var algorithm = new Leiden(
+        return new Leiden(
             graph,
             parameters,
             seedValues,
             progressTracker,
             terminationFlag
-        );
-
-        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
-            algorithm,
-            progressTracker,
-            true,
-            parameters.concurrency()
-        );
+        ).compute();
     }
 
     LouvainResult louvain(Graph graph, LouvainParameters parameters, ProgressTracker progressTracker) {
-
-        var algorithm = new Louvain(
+        return new Louvain(
             graph,
             parameters,
             progressTracker,
             DefaultPool.INSTANCE,
             terminationFlag
-        );
-
-        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
-            algorithm,
-            progressTracker,
-            true,
-            parameters.concurrency()
-        );
+        ).compute();
     }
 
     ModularityResult modularity(Graph graph, ModularityParameters parameters) {
-        var algorithm = ModularityCalculator.create(
+        return ModularityCalculator.create(
             graph,
             graph.nodeProperties(parameters.communityProperty())::longValue,
             parameters.concurrency()
-        );
-
-        return algorithm.compute();
+        ).compute();
     }
 
     ModularityOptimizationResult modularityOptimization(
@@ -286,17 +220,11 @@ public class CommunityAlgorithms {
         ModularityOptimizationParameters parameters,
         ProgressTracker progressTracker
     ) {
-
         var seedPropertyValues = parameters.seedProperty()
-            .map(seedProperty ->
-                CommunityCompanion.extractSeedingNodePropertyValues(
-                    graph,
-                    seedProperty
-                )
-            )
+            .map(seedProperty -> CommunityCompanion.extractSeedingNodePropertyValues(graph, seedProperty))
             .orElse(null);
 
-        var algorithm = new ModularityOptimization(
+        return new ModularityOptimization(
             graph,
             parameters.maxIterations(),
             parameters.tolerance(),
@@ -306,25 +234,15 @@ public class CommunityAlgorithms {
             DefaultPool.INSTANCE,
             progressTracker,
             terminationFlag
-        );
-
-        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
-            algorithm,
-            progressTracker,
-            true,
-            parameters.concurrency()
-        );
+        ).compute();
     }
 
     public HugeLongArray scc(Graph graph, SccParameters parameters, ProgressTracker progressTracker) {
-        var algorithm = new Scc(graph, progressTracker, terminationFlag);
-
-        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
-            algorithm,
+        return new Scc(
+            graph,
             progressTracker,
-            true,
-            parameters.concurrency()
-        );
+            terminationFlag
+        ).compute();
     }
 
     public TriangleCountResult triangleCount(
@@ -332,43 +250,28 @@ public class CommunityAlgorithms {
         TriangleCountParameters parameters,
         ProgressTracker progressTracker
     ) {
-
-        var algorithm = IntersectingTriangleCount.create(
+        return IntersectingTriangleCount.create(
             graph,
             parameters.concurrency(),
             parameters.maxDegree(),
             DefaultPool.INSTANCE,
             progressTracker,
             terminationFlag
-        );
-
-        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
-            algorithm,
-            progressTracker,
-            true,
-            parameters.concurrency()
-        );
+        ).compute();
     }
 
-
     Stream<TriangleResult> triangles(Graph graph, TriangleCountParameters parameters) {
-        var algorithm = TriangleStream.create(
+        return TriangleStream.create(
             graph,
             DefaultPool.INSTANCE,
             parameters.concurrency(),
             terminationFlag
-        );
-
-        return algorithm.compute();
+        ).compute();
     }
 
-    public DisjointSetStruct wcc(
-        Graph graph,
-        WccParameters parameters,
-        ProgressTracker progressTracker
-    ) {
-        var wccStub = new WccStub(terminationFlag, algorithmMachinery);
-        return wccStub.wcc(graph, parameters, progressTracker, true);
+    public DisjointSetStruct wcc(Graph graph, WccParameters parameters, ProgressTracker progressTracker) {
+        var wccStub = new WccStub(terminationFlag);
+        return wccStub.wcc(graph, parameters, progressTracker);
     }
 
     PregelResult speakerListenerLPA(
@@ -376,21 +279,12 @@ public class CommunityAlgorithms {
         SpeakerListenerLPAConfig configuration,
         ProgressTracker progressTracker
     ) {
-
-        var algorithm = new SpeakerListenerLPA(
+        return new SpeakerListenerLPA(
             graph,
             configuration,
             DefaultPool.INSTANCE,
             progressTracker,
             Optional.empty()
-        );
-
-        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
-            algorithm,
-            progressTracker,
-            true,
-            configuration.concurrency()
-        );
+        ).compute();
     }
-
 }

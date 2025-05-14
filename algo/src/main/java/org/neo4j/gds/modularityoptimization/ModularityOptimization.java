@@ -28,7 +28,6 @@ import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.properties.relationships.RelationshipIterator;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmMachinery;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
@@ -204,14 +203,12 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
 
     private void computeColoring() {
         var parameters = new K1ColoringParameters(concurrency, K1COLORING_MAX_ITERATIONS, minBatchSize);
-        var k1ColoringStub = new K1ColoringStub(new AlgorithmMachinery());
+        var k1ColoringStub = new K1ColoringStub();
         var k1ColoringResult = k1ColoringStub.k1Coloring(
             graph,
             parameters,
             progressTracker,
-            terminationFlag,
-            concurrency,
-            false
+            terminationFlag
         );
 
         modularityColorArray = ModularityColorArray.create(
