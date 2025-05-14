@@ -19,7 +19,16 @@
  */
 package org.neo4j.gds.embeddings.graphsage.algo;
 
+import org.neo4j.gds.AlgorithmParameters;
+import org.neo4j.gds.core.concurrency.Concurrency;
+
 public record GraphSageParameters(
     ModelParameters modeParameters,
     GraphSageAlgorithmParameters algorithmParameters)
-{}
+ implements AlgorithmParameters {
+
+    @Override
+    public Concurrency concurrency() {
+        return algorithmParameters.concurrency();
+    }
+}

@@ -20,7 +20,6 @@
 package org.neo4j.gds.applications.algorithms.embeddings;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmMachinery;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -46,7 +45,6 @@ import org.neo4j.gds.termination.TerminationFlag;
 public class NodeEmbeddingAlgorithms {
 
     private static final GraphSageTrainAlgorithmFactory graphSageTrainAlgorithmFactory = new GraphSageTrainAlgorithmFactory();
-    private final AlgorithmMachinery algorithmMachinery = new AlgorithmMachinery();
     private final GraphSageModelCatalog graphSageModelCatalog;
     private final TerminationFlag terminationFlag;
 
@@ -71,12 +69,7 @@ public class NodeEmbeddingAlgorithms {
             terminationFlag
         );
 
-        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
-            algorithm,
-            progressTracker,
-            true,
-            parameters.concurrency()
-        );
+        return  algorithm.compute();
     }
 
 
@@ -97,12 +90,7 @@ public class NodeEmbeddingAlgorithms {
             terminationFlag
         );
 
-        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
-            algorithm,
-            progressTracker,
-            true,
-            parameters.algorithmParameters().concurrency()
-        );
+        return algorithm.compute();
     }
 
 
@@ -120,24 +108,14 @@ public class NodeEmbeddingAlgorithms {
             terminationFlag
         );
 
-        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
-            algorithm,
-            progressTracker,
-            true,
-            parameters.concurrency()
-        );
+        return algorithm.compute();
     }
 
     public HashGNNResult hashGnn(Graph graph, HashGNNParameters  parameters, ProgressTracker progressTracker) {
 
         var algorithm = new HashGNN(graph, parameters, progressTracker, terminationFlag);
 
-        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
-            algorithm,
-            progressTracker,
-            true,
-            parameters.concurrency()
-        );
+        return algorithm.compute();
     }
 
     Node2VecResult node2Vec(Graph graph, Node2VecParameters parameters, ProgressTracker progressTracker) {
@@ -149,12 +127,7 @@ public class NodeEmbeddingAlgorithms {
             terminationFlag
         );
 
-        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
-            algorithm,
-            progressTracker,
-            true,
-            parameters.concurrency()
-        );
+        return algorithm.compute();
     }
 
 }
