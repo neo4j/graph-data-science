@@ -41,7 +41,7 @@ public interface DocQuery {
 
     @Value.Derived
     default boolean runAsOperator() {
-        return !operator().equals("");
+        return !operator().isEmpty();
     }
 
     @Value.Default

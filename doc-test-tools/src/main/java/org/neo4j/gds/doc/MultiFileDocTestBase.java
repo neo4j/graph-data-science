@@ -144,12 +144,7 @@ public abstract class MultiFileDocTestBase {
                     Map.of()
                 );
             } else {
-                QueryRunner.runQuery(
-                    dbms.database(docQuery.database()),
-                    docQuery.operator(),
-                    docQuery.query(),
-                    Map.of()
-                );
+                QueryRunner.runQuery(dbms.database(docQuery.database()), docQuery.query());
             }
         } catch (Exception e) {
             throw new RuntimeException("Failed to run query: " + docQuery.query(), e);
