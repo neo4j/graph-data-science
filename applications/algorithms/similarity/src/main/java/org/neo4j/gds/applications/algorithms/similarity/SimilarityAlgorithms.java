@@ -20,17 +20,15 @@
 package org.neo4j.gds.applications.algorithms.similarity;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmMachinery;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.similarity.filteredknn.FilteredKnn;
+import org.neo4j.gds.similarity.filteredknn.FilteredKNNFactory;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnParameters;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnResult;
 import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityParameters;
 import org.neo4j.gds.similarity.filtering.NodeFilter;
 import org.neo4j.gds.similarity.knn.ImmutableKnnContext;
 import org.neo4j.gds.similarity.knn.Knn;
-import org.neo4j.gds.similarity.knn.KnnContext;
 import org.neo4j.gds.similarity.knn.KnnNeighborFilterFactory;
 import org.neo4j.gds.similarity.knn.KnnParameters;
 import org.neo4j.gds.similarity.knn.KnnResult;
@@ -45,7 +43,6 @@ import org.neo4j.gds.wcc.WccStub;
 import java.util.Optional;
 
 public class SimilarityAlgorithms {
-    private final AlgorithmMachinery algorithmMachinery = new AlgorithmMachinery();
 
     private final TerminationFlag terminationFlag;
 
@@ -64,17 +61,10 @@ public class SimilarityAlgorithms {
             .executor(DefaultPool.INSTANCE)
             .build();
 
-        var algorithm = selectAlgorithmConfiguration(graph, parameters, knnContext);
+        var algorithm = FilteredKNNFactory.create(graph, parameters, knnContext,terminationFlag);
 
-        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
-            algorithm,
-            progressTracker,
-            true,
-            parameters.concurrency()
-        );
+        return algorithm.compute();
     }
-
-
 
     public NodeSimilarityResult filteredNodeSimilarity(
         Graph graph,
@@ -84,7 +74,7 @@ public class SimilarityAlgorithms {
         var sourceNodeFilter = params.filteringParameters().sourceFilter().toNodeFilter(graph);
         var targetNodeFilter = params.filteringParameters().targetFilter().toNodeFilter(graph);
 
-        var wccStub = new WccStub(terminationFlag, algorithmMachinery);
+        var wccStub = new WccStub(terminationFlag);
 
         var algorithm = new NodeSimilarity(
             graph,
@@ -97,12 +87,7 @@ public class SimilarityAlgorithms {
             wccStub
         );
 
-        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
-            algorithm,
-            progressTracker,
-            true,
-            params.concurrency()
-        );
+        return algorithm.compute();
     }
 
     KnnResult knn(Graph graph, KnnParameters parameters, ProgressTracker progressTracker) {
@@ -121,12 +106,7 @@ public class SimilarityAlgorithms {
             terminationFlag
         );
 
-        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
-            algorithm,
-            progressTracker,
-            true,
-            parameters.concurrency()
-        );
+        return algorithm.compute();
     }
 
 
@@ -136,7 +116,7 @@ public class SimilarityAlgorithms {
         NodeSimilarityParameters  parameters,
         ProgressTracker progressTracker
     ) {
-        var wccStub = new WccStub(terminationFlag, algorithmMachinery);
+        var wccStub = new WccStub(terminationFlag);
 
         var algorithm = new NodeSimilarity(
             graph,
@@ -149,33 +129,8 @@ public class SimilarityAlgorithms {
             wccStub
         );
 
-        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
-            algorithm,
-            progressTracker,
-            true,
-            parameters.concurrency()
-        );
+        return algorithm.compute();
     }
 
-    private FilteredKnn selectAlgorithmConfiguration(
-        Graph graph,
-        FilteredKnnParameters knnParameters,
-        KnnContext knnContext
-    ) {
-        if (knnParameters.seedTargetNodes()) {
-            return FilteredKnn.createWithDefaultSeeding(
-                graph,
-                knnParameters,
-                knnContext,
-                terminationFlag
-            );
-        }
 
-        return FilteredKnn.createWithoutSeeding(
-            graph,
-            knnParameters,
-            knnContext,
-            terminationFlag
-        );
-    }
 }
