@@ -22,8 +22,6 @@ package org.neo4j.gds.applications.algorithms.miscellaneous;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmMachinery;
-import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.collapsepath.CollapsePathParameters;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.loading.SingleTypeRelationships;
@@ -41,13 +39,10 @@ import org.neo4j.gds.walking.CollapsePath;
 import java.util.Map;
 
 public class MiscellaneousAlgorithms {
-    private final AlgorithmMachinery algorithmMachinery = new AlgorithmMachinery();
 
-    private final ProgressTrackerCreator progressTrackerCreator;
     private final TerminationFlag terminationFlag;
 
-    public MiscellaneousAlgorithms(ProgressTrackerCreator progressTrackerCreator, TerminationFlag terminationFlag) {
-        this.progressTrackerCreator = progressTrackerCreator;
+    public MiscellaneousAlgorithms( TerminationFlag terminationFlag) {
         this.terminationFlag = terminationFlag;
     }
 
@@ -76,12 +71,7 @@ public class MiscellaneousAlgorithms {
             terminationFlag
         );
 
-        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
-            algorithm,
-            progressTracker,
-            true,
-            parameters.concurrency()
-        );
+        return algorithm.compute();
     }
 
 
@@ -97,12 +87,7 @@ public class MiscellaneousAlgorithms {
             DefaultPool.INSTANCE
         );
 
-        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
-            algorithm,
-            progressTracker,
-            true,
-            params.concurrency()
-        );
+        return algorithm.compute();
     }
 
     public SingleTypeRelationships toUndirected(GraphStore graphStore, ToUndirectedParameters parameters, ProgressTracker progressTracker) {
@@ -115,11 +100,6 @@ public class MiscellaneousAlgorithms {
             terminationFlag
         );
 
-        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
-            algorithm,
-            progressTracker,
-            true,
-            parameters.concurrency()
-        );
+        return algorithm.compute();
     }
 }

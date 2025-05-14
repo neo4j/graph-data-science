@@ -61,7 +61,6 @@ public final class MiscellaneousApplications {
         MutateRelationshipService mutateRelationshipService
     ) {
         var algorithms = new MiscellaneousAlgorithms(
-            progressTrackerCreator,
             requestScopedDependencies.terminationFlag()
         );
 

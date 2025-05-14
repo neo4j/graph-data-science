@@ -120,7 +120,6 @@ public final class PregelCompanion {
             logProgress
         );
         var miscAlgs = new MiscellaneousAlgorithms(
-            progressTrackerCreator,
             TerminationFlag.RUNNING_TRUE
         );
 
