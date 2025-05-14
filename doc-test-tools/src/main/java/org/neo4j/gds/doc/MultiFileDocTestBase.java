@@ -192,9 +192,10 @@ public abstract class MultiFileDocTestBase {
     private void runQueryExampleAndAssertResults(QueryExample queryExample) {
         runQueryExampleWithResultConsumer(queryExample, result -> new QueryResultValidator(
             queryExample.query(),
-            result,
             queryExample.resultColumns(),
             queryExample.results(),
+            result.columns(),
+            result.stream().toList(),
             OptionalInt.of(getMaxFloatPrecision())
         ).validate());
     }

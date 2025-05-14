@@ -20,7 +20,6 @@
 package org.neo4j.gds.doc;
 
 import org.jetbrains.annotations.NotNull;
-import org.neo4j.graphdb.Result;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -36,22 +35,22 @@ import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public record QueryResultValidator(String query, Result result, List<String> resultColumns, List<List<String>> expectedResult, OptionalInt maxFloatPrecision) {
+public record QueryResultValidator(String query, List<String> expectedColumns, List<List<String>> expectedResult, List<String> actualColumns, List<Map<String, Object>> actualResult, OptionalInt maxFloatPrecision) {
 
     public void validate() {
-        assertThat(resultColumns).containsExactlyElementsOf(result.columns());
+        assertThat(expectedColumns).containsExactlyElementsOf(actualColumns);
 
         var actualResults = new ArrayList<List<String>>();
 
         var floatFormat = getFloatFormat();
-        while (result.hasNext()) {
-            var actualResultRow = result.next();
-            var actualResultValues = resultColumns
+        actualResult.forEach(row -> {
+            var actualResultValues = expectedColumns
                 .stream()
-                .map(column -> valueToString(actualResultRow.get(column), floatFormat))
-                .collect(Collectors.toList());
+                .map(column -> valueToString(row.get(column), floatFormat))
+                .toList();
             actualResults.add(actualResultValues);
-        }
+        });
+
         var expectedResults = reducePrecisionOfDoubles(expectedResult, floatFormat);
         assertThat(actualResults)
             .as(query)
