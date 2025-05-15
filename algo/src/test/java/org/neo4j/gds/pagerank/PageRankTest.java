@@ -31,6 +31,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.applications.algorithms.centrality.CentralityAlgorithms;
+import org.neo4j.gds.applications.algorithms.centrality.CentralityBusinessAlgorithms;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.beta.generator.RandomGraphGenerator;
@@ -214,10 +215,14 @@ class PageRankTest {
                 .build();
             var progressTrackerCreator = new ProgressTrackerCreator(new LoggerForProgressTrackingAdapter(log), requestScopedDependencies);
             var centralityAlgorithms = new CentralityAlgorithms(progressTrackerCreator, TerminationFlag.RUNNING_TRUE);
+            var businessAlgorithms = new CentralityBusinessAlgorithms(
+                centralityAlgorithms,
+                progressTrackerCreator
+            );
 
             var maxIterations = 10;
             var config = PageRankConfigImpl.builder().maxIterations(maxIterations).build();
-            centralityAlgorithms.pageRank(graph, config);
+            businessAlgorithms.pageRank(graph, config);
 
             assertThat(log.getMessages(TestLog.INFO))
                 .extracting(removingThreadId())

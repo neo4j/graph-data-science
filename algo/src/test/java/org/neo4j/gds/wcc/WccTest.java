@@ -34,7 +34,6 @@ import org.neo4j.gds.CommunityHelper;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.TestProgressTrackerHelper;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmMachinery;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
@@ -283,10 +282,10 @@ class WccTest {
         }
 
         private void assertResults(TestGraph graph) {
-            var wccStub = new WccStub(TerminationFlag.RUNNING_TRUE, new AlgorithmMachinery());
+            var wccStub = new WccStub(TerminationFlag.RUNNING_TRUE);
 
             var parameters = new WccParameters(0D, new Concurrency(4));
-            var dss = wccStub.wcc(graph, parameters, ProgressTracker.NULL_TRACKER, true);
+            var dss = wccStub.wcc(graph, parameters, ProgressTracker.NULL_TRACKER);
 
             var actualCommunities = new ArrayList<Long>();
             graph.forEachNode(node -> actualCommunities.add(dss.setIdOf(node)));

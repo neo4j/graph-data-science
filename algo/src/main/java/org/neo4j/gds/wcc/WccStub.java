@@ -20,7 +20,6 @@
 package org.neo4j.gds.wcc;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmMachinery;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
@@ -33,18 +32,14 @@ import org.neo4j.gds.termination.TerminationFlag;
 public class WccStub {
     private final TerminationFlag terminationFlag;
 
-    private final AlgorithmMachinery algorithmMachinery;
-
-    public WccStub(TerminationFlag terminationFlag, AlgorithmMachinery algorithmMachinery) {
+    public WccStub(TerminationFlag terminationFlag) {
         this.terminationFlag = terminationFlag;
-        this.algorithmMachinery = algorithmMachinery;
     }
 
     public DisjointSetStruct wcc(
         Graph graph,
         WccParameters parameters,
-        ProgressTracker progressTracker,
-        boolean shouldReleaseProgressTracker
+        ProgressTracker progressTracker
     ) {
         var algorithm = new Wcc(
             graph,
@@ -55,11 +50,6 @@ public class WccStub {
             terminationFlag
         );
 
-        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
-            algorithm,
-            progressTracker,
-            shouldReleaseProgressTracker,
-            parameters.concurrency()
-        );
+        return algorithm.compute();
     }
 }

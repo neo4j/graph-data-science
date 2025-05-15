@@ -17,35 +17,34 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.modularityoptimization;
+package org.neo4j.gds.similarity.filteredknn;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.k1coloring.K1Coloring;
-import org.neo4j.gds.k1coloring.K1ColoringParameters;
-import org.neo4j.gds.k1coloring.K1ColoringResult;
+import org.neo4j.gds.similarity.knn.KnnContext;
 import org.neo4j.gds.termination.TerminationFlag;
 
-public class K1ColoringStub {
+public class FilteredKNNFactory {
 
-    public K1ColoringStub() {
-    }
-
-    public K1ColoringResult k1Coloring(
+    public static FilteredKnn create(
         Graph graph,
-        K1ColoringParameters parameters,
-        ProgressTracker progressTracker,
+        FilteredKnnParameters knnParameters,
+        KnnContext knnContext,
         TerminationFlag terminationFlag
     ) {
-        var algorithm = new K1Coloring(
+        if (knnParameters.seedTargetNodes()) {
+            return FilteredKnn.createWithDefaultSeeding(
+                graph,
+                knnParameters,
+                knnContext,
+                terminationFlag
+            );
+        }
+
+        return FilteredKnn.createWithoutSeeding(
             graph,
-            parameters,
-            DefaultPool.INSTANCE,
-            progressTracker,
+            knnParameters,
+            knnContext,
             terminationFlag
         );
-
-        return algorithm.compute();
     }
 }

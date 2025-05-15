@@ -24,7 +24,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.SimilarityAlgorithmTasks;
 import org.neo4j.gds.TestProgressTrackerHelper;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmMachinery;
 import org.neo4j.gds.applications.algorithms.similarity.SimilarityAlgorithms;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
@@ -188,7 +187,7 @@ class FilteredNodeSimilarityTest {
             params.filteringParameters().sourceFilter().toNodeFilter(graph),
             NodeFilter.ALLOW_EVERYTHING,
             TerminationFlag.RUNNING_TRUE,
-            new WccStub(TerminationFlag.RUNNING_TRUE, new AlgorithmMachinery())
+            new WccStub(TerminationFlag.RUNNING_TRUE)
         );
 
         filteredNodeSimilarity.compute();
