@@ -20,6 +20,7 @@
 package org.neo4j.gds.procedures.algorithms.community;
 
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
+import org.neo4j.gds.procedures.algorithms.results.ModeResult;
 
 import java.util.Map;
 
@@ -32,7 +33,7 @@ public record K1ColoringWriteResult(
     long ranIterations,
     boolean didConverge,
     Map<String, Object> configuration
-) {
+)  implements ModeResult {
     static K1ColoringWriteResult emptyFrom(AlgorithmProcessingTimings timings, Map<String, Object> configurationMap) {
         return new K1ColoringWriteResult(
             timings.preProcessingMillis,

@@ -20,6 +20,7 @@
 package org.neo4j.gds.procedures.algorithms.miscellaneous;
 
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
+import org.neo4j.gds.procedures.algorithms.results.StatsResult;
 
 import java.util.Collections;
 import java.util.List;
@@ -31,7 +32,7 @@ public record ScalePropertiesStatsResult(
         long computeMillis,
         long postProcessingMillis,
         Map<String, Object> configuration
-    ) {
+    ) implements StatsResult {
 
 
     static ScalePropertiesStatsResult emptyFrom(

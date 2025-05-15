@@ -34,8 +34,7 @@ public record HDBScanMutateResult(
         long computeMillis,
         long postProcessingMillis,
         Map<String, Object> configuration
-
-    )  implements MutateNodePropertiesResult {
+    ) implements MutateNodePropertiesResult {
 
     public static HDBScanMutateResult emptyFrom(
         AlgorithmProcessingTimings timings,

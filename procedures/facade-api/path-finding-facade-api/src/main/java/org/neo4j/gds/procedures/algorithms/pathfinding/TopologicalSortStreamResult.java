@@ -19,12 +19,5 @@
  */
 package org.neo4j.gds.procedures.algorithms.pathfinding;
 
-public class TopologicalSortStreamResult {
-    public final long nodeId;
-    public final Double maxDistanceFromSource;
-
-    public TopologicalSortStreamResult(long nodeId, Double maxDistanceFromSource) {
-        this.nodeId = nodeId;
-        this.maxDistanceFromSource = maxDistanceFromSource;
-    }
+public record TopologicalSortStreamResult(long nodeId, Double maxDistanceFromSource) {
 }

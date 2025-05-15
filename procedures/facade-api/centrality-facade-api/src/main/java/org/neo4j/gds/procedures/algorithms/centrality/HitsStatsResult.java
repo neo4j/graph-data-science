@@ -20,10 +20,17 @@
 package org.neo4j.gds.procedures.algorithms.centrality;
 
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
+import org.neo4j.gds.procedures.algorithms.results.ModeResult;
 
 import java.util.Map;
 
-public record HitsStatsResult(long ranIterations, boolean didConverge, long preProcessingMillis, long computeMillis, Map<String,Object> configuration){
+public record HitsStatsResult(
+    long ranIterations,
+    boolean didConverge,
+    long preProcessingMillis,
+    long computeMillis,
+    Map<String,Object> configuration
+) implements ModeResult {
 
     static HitsStatsResult emptyFrom(AlgorithmProcessingTimings timings, Map<String, Object> configurationMap) {
         return new HitsStatsResult(0,false,timings.preProcessingMillis,timings.computeMillis,configurationMap);

@@ -20,6 +20,7 @@
 package org.neo4j.gds.procedures.algorithms.community;
 
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
+import org.neo4j.gds.procedures.algorithms.results.ModeResult;
 
 import java.util.Map;
 import java.util.stream.Stream;
@@ -32,7 +33,7 @@ public record K1ColoringStatsResult(
     long ranIterations,
     boolean didConverge,
     Map<String, Object> configuration
-) {
+)  implements ModeResult {
 
     static Stream<K1ColoringStatsResult> emptyFrom(
         AlgorithmProcessingTimings timings,

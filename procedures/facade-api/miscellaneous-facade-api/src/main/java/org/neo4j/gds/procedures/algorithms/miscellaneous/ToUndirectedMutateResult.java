@@ -20,6 +20,7 @@
 package org.neo4j.gds.procedures.algorithms.miscellaneous;
 
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
+import org.neo4j.gds.procedures.algorithms.results.MutateRelationshipsResult;
 
 import java.util.Map;
 
@@ -31,7 +32,7 @@ public record ToUndirectedMutateResult(
         long inputRelationships,
         long relationshipsWritten,
         Map<String, Object> configuration
-    ) {
+    )  implements MutateRelationshipsResult {
 
     public static ToUndirectedMutateResult emptyFrom(
         AlgorithmProcessingTimings timings,

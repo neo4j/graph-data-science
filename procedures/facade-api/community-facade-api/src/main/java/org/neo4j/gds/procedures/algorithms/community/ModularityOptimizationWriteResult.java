@@ -20,6 +20,7 @@
 package org.neo4j.gds.procedures.algorithms.community;
 
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
+import org.neo4j.gds.procedures.algorithms.results.WriteResult;
 
 import java.util.Collections;
 import java.util.Map;
@@ -36,7 +37,7 @@ public record ModularityOptimizationWriteResult(
     long communityCount,
     Map<String, Object> communityDistribution,
     Map<String, Object> configuration
-) {
+) implements WriteResult {
 
     static ModularityOptimizationWriteResult emptyFrom(
         AlgorithmProcessingTimings timings,

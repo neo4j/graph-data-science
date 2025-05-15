@@ -20,6 +20,7 @@
 package org.neo4j.gds.procedures.algorithms.embeddings;
 
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
+import org.neo4j.gds.procedures.algorithms.results.ModeResult;
 
 import java.util.Collections;
 import java.util.List;
@@ -33,7 +34,7 @@ public record Node2VecWriteResult(
     long writeMillis,
     Map<String, Object> configuration,
     List<Double> lossPerIteration
-) {
+)  implements ModeResult {
 
     public static Node2VecWriteResult emptyFrom(
         AlgorithmProcessingTimings timings,

@@ -20,17 +20,20 @@
 package org.neo4j.gds.procedures.algorithms.pathfinding;
 
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
+import org.neo4j.gds.procedures.algorithms.results.ModeResult;
 
 import java.util.Map;
 
-public record PrizeCollectingSteinerTreeWriteResult(long preProcessingMillis,
-                                                    long computeMillis,
-                                                    long writeMillis,
-                                                    long effectiveNodeCount,
-                                                    double totalWeight,
-                                                    double sumOfPrizes,
-                                                    long relationshipsWritten,
-                                                    Map<String, Object> configuration) {
+public record PrizeCollectingSteinerTreeWriteResult(
+    long preProcessingMillis,
+    long computeMillis,
+    long writeMillis,
+    long effectiveNodeCount,
+    double totalWeight,
+    double sumOfPrizes,
+    long relationshipsWritten,
+    Map<String, Object> configuration
+) implements ModeResult {
 
     static PrizeCollectingSteinerTreeWriteResult emptyFrom(AlgorithmProcessingTimings timings,  Map<String, Object> configuration){
         return new PrizeCollectingSteinerTreeWriteResult(

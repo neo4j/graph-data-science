@@ -25,15 +25,7 @@ import org.neo4j.gds.config.WritePropertyConfig;
 import java.util.Collections;
 import java.util.Map;
 
-public final class AlphaHarmonicWriteResult {
-    public final long nodes;
-    public final String writeProperty;
-    public final long writeMillis;
-    public final long computeMillis;
-    public final long preProcessingMillis;
-    public final Map<String, Object> centralityDistribution;
-
-    public AlphaHarmonicWriteResult(
+public record AlphaHarmonicWriteResult(
         long nodes,
         long preProcessingMillis,
         long computeMillis,
@@ -41,14 +33,6 @@ public final class AlphaHarmonicWriteResult {
         String writeProperty,
         Map<String, Object> centralityDistribution
     ) {
-        this.preProcessingMillis = preProcessingMillis;
-        this.computeMillis = computeMillis;
-        this.writeMillis = writeMillis;
-
-        this.writeProperty = writeProperty;
-        this.centralityDistribution = centralityDistribution;
-        this.nodes = nodes;
-    }
 
     static AlphaHarmonicWriteResult emptyFrom(
         AlgorithmProcessingTimings timings,

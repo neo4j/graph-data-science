@@ -19,14 +19,10 @@
  */
 package org.neo4j.gds.procedures.algorithms.machinelearning;
 
-public class KGEStreamResult {
-    public final long sourceNodeId;
-    public final long targetNodeId;
-    public final double score;
+public record KGEStreamResult(
+    long sourceNodeId,
+    long targetNodeId,
+    double score
+){
 
-    public KGEStreamResult(long sourceNodeId, long targetNodeId, double score) {
-        this.sourceNodeId = sourceNodeId;
-        this.targetNodeId = targetNodeId;
-        this.score = score;
-    }
 }

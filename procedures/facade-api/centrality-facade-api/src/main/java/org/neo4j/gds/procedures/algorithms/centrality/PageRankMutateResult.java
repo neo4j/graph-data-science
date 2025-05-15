@@ -20,13 +20,22 @@
 package org.neo4j.gds.procedures.algorithms.centrality;
 
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
+import org.neo4j.gds.procedures.algorithms.results.MutateNodePropertiesResult;
 
 import java.util.Collections;
 import java.util.Map;
 
-public record PageRankMutateResult(long ranIterations, boolean didConverge, Map<String, Object> centralityDistribution,
-                                   long preProcessingMillis, long computeMillis, long postProcessingMillis,
-                                   long mutateMillis, long nodePropertiesWritten, Map<String, Object> configuration) {
+public record PageRankMutateResult(
+    long ranIterations,
+    boolean didConverge,
+    Map<String, Object> centralityDistribution,
+    long preProcessingMillis,
+    long computeMillis,
+    long postProcessingMillis,
+    long mutateMillis,
+    long nodePropertiesWritten,
+    Map<String, Object> configuration
+) implements MutateNodePropertiesResult {
 
     public static PageRankMutateResult emptyFrom(
         AlgorithmProcessingTimings timings,

@@ -42,14 +42,13 @@ public class CelfResultBuilderForMutateMode implements ResultBuilder<InfluenceMa
 
         var celfResult = result.get();
 
-        return CELFMutateResult.builder()
-            .withTotalSpread(celfResult.totalSpread())
-            .withNodeCount(graph.nodeCount())
-            .withPreProcessingMillis(timings.preProcessingMillis)
-            .withComputeMillis(timings.computeMillis)
-            .withMutateMillis(timings.sideEffectMillis)
-            .withNodePropertiesWritten(metadata.orElseThrow().value())
-            .withConfig(configuration)
-            .build();
+        return new CELFMutateResult(
+            timings.sideEffectMillis,
+            metadata.orElseThrow().value(),
+            timings.computeMillis,
+            celfResult.totalSpread(),
+            graph.nodeCount(),
+            configuration.toMap()
+        );
     }
 }

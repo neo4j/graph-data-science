@@ -20,33 +20,11 @@
 package org.neo4j.gds.procedures.algorithms.community;
 
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
+import org.neo4j.gds.procedures.algorithms.results.ModeResult;
 
 import java.util.Map;
 
-public class K1ColoringMutateResult {
-    public static final K1ColoringMutateResult EMPTY = new K1ColoringMutateResult(
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        false,
-        null
-    );
-
-    public final long preProcessingMillis;
-    public final long computeMillis;
-    public final long mutateMillis;
-
-    public final long nodeCount;
-    public final long colorCount;
-    public final long ranIterations;
-    public final boolean didConverge;
-
-    public Map<String, Object> configuration;
-
-    public K1ColoringMutateResult(
+public record K1ColoringMutateResult(
         long preProcessingMillis,
         long computeMillis,
         long mutateMillis,
@@ -55,16 +33,7 @@ public class K1ColoringMutateResult {
         long ranIterations,
         boolean didConverge,
         Map<String, Object> configuration
-    ) {
-        this.preProcessingMillis = preProcessingMillis;
-        this.computeMillis = computeMillis;
-        this.mutateMillis = mutateMillis;
-        this.nodeCount = nodeCount;
-        this.colorCount = colorCount;
-        this.ranIterations = ranIterations;
-        this.didConverge = didConverge;
-        this.configuration = configuration;
-    }
+    )  implements ModeResult {
 
     public static K1ColoringMutateResult emptyFrom(
         AlgorithmProcessingTimings timings,
