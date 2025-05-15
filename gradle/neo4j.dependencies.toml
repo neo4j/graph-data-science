@@ -1,0 +1,36 @@
+[versions]
+neo4j = "2025.04.0"
+
+[libraries]
+annotations = { module = "org.neo4j:annotations", version.ref = "neo4j" }
+bolt = { module = "org.neo4j:neo4j-bolt", version.ref = "neo4j" }
+collections = { module = "org.neo4j:neo4j-collections", version.ref = "neo4j" }
+command-line = { module = "org.neo4j:neo4j-command-line", version.ref = "neo4j" }
+common = { module = "org.neo4j:neo4j-common", version.ref = "neo4j" }
+concurrent = { module = "org.neo4j:neo4j-concurrent", version.ref = "neo4j" }
+configuration = { module = "org.neo4j:neo4j-configuration", version.ref = "neo4j" }
+cypher-runtime-util = { module = "org.neo4j:neo4j-cypher-runtime-util", version.ref = "neo4j" }
+diagnostics = { module = "org.neo4j:neo4j-diagnostics", version.ref = "neo4j" }
+fabric = { module = "org.neo4j:neo4j-fabric", version.ref = "neo4j" }
+gql-status = { module = "org.neo4j:neo4j-gql-status", version.ref = "neo4j" }
+graphdb-api = { module = "org.neo4j:neo4j-graphdb-api", version.ref = "neo4j" }
+id-generator = { module = "org.neo4j:neo4j-id-generator", version.ref = "neo4j" }
+import-api = { module = "org.neo4j:neo4j-import-api", version.ref = "neo4j" }
+import-util = { module = "org.neo4j:neo4j-import-util", version.ref = "neo4j" }
+index = { module = "org.neo4j:neo4j-index", version.ref = "neo4j" }
+io = { module = "org.neo4j:neo4j-io", version.ref = "neo4j" }
+kernel = { module = "org.neo4j:neo4j-kernel", version.ref = "neo4j" }
+kernel-api = { module = "org.neo4j:neo4j-kernel-api", version.ref = "neo4j" }
+layout = { module = "org.neo4j:neo4j-layout", version.ref = "neo4j" }
+lock = { module = "org.neo4j:neo4j-lock", version.ref = "neo4j" }
+logging = { module = "org.neo4j:neo4j-logging", version.ref = "neo4j" }
+monitoring = { module = "org.neo4j:neo4j-monitoring", version.ref = "neo4j" }
+procedure-api = { module = "org.neo4j:neo4j-procedure-api", version.ref = "neo4j" }
+record-storage-engine = { module = "org.neo4j:neo4j-record-storage-engine", version.ref = "neo4j" }
+resource = { module = "org.neo4j:neo4j-resource", version.ref = "neo4j" }
+schema = { module = "org.neo4j:neo4j-schema", version.ref = "neo4j" }
+ssl = { module = "org.neo4j:neo4j-ssl", version.ref = "neo4j" }
+token-api = { module = "org.neo4j:neo4j-token-api", version.ref = "neo4j" }
+unsafe = { module = "org.neo4j:neo4j-unsafe", version.ref = "neo4j" }
+values = { module = "org.neo4j:neo4j-values", version.ref = "neo4j" }
+neo4j = { module = "org.neo4j:neo4j", version.ref = "neo4j" }

@@ -13,6 +13,9 @@ dependencyResolutionManagement {
         openGds {
             from(files("gradle/libs.versions.toml"))
         }
+        neo4j {
+            from(files("gradle/neo4j.dependencies.toml"))
+        }
     }
 }
 
