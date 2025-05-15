@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.procedures.algorithms.pathfinding;
 
-import org.neo4j.gds.api.NodeLookup;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.graphdb.RelationshipType;
 
@@ -37,8 +36,7 @@ public final class TraverseStreamComputationResultConsumer {
         LongUnaryOperator toOriginalNodeId,
         ConcreteResultTransformer<T> resultTransformer,
         PathFactoryFacade pathFactoryFacade,
-        RelationshipType relationshipType,
-        NodeLookup nodeLookup
+        RelationshipType relationshipType
     ) {
         var nodesArray = nodes.toArray();
         var nodeList = Arrays

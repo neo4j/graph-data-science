@@ -44,7 +44,7 @@ public final class PathFactoryFacade {
         List<Long> nodeList,
         RelationshipType relationshipType
     ) {
-        if (!canCreatePaths) return  null;
+        if (!canCreatePaths) return null;
         return PathFactory.create(
             nodeLookup,
             nodeList,

@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.graphdb.Path;
 import org.neo4j.graphdb.RelationshipType;
-import org.neo4j.kernel.impl.coreapi.InternalTransaction;
 
 import java.util.List;
 
@@ -43,10 +42,8 @@ class TraverseStreamComputationResultConsumerTest {
             l -> l,
             TestResult::new,
             pathFactoryFacade,
-            RelationshipType.withName("TEST"),
-            mock(InternalTransaction.class)::getNodeById
+            RelationshipType.withName("TEST")
         );
-
 
         assertThat(result)
             .hasSize(1)
@@ -67,8 +64,7 @@ class TraverseStreamComputationResultConsumerTest {
             l -> l,
             TestResult::new,
             pathFactoryFacadeMock,
-            RelationshipType.withName("TEST"),
-            mock(InternalTransaction.class)::getNodeById
+            RelationshipType.withName("TEST")
         );
 
         assertThat(result)
