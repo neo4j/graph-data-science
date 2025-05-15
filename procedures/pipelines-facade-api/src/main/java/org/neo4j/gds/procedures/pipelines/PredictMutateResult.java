@@ -20,35 +20,41 @@
 package org.neo4j.gds.procedures.pipelines;
 
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.procedures.algorithms.results.StandardMutateResult;
+import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
+import org.neo4j.gds.procedures.algorithms.results.MutateNodePropertiesResult;
 
 import java.util.Map;
 
-public final class PredictMutateResult extends StandardMutateResult {
-    public final long nodePropertiesWritten;
-
-    PredictMutateResult(
+public record PredictMutateResult(
         long preProcessingMillis,
         long computeMillis,
         long mutateMillis,
+        long postProcessingMillis,
         long nodePropertiesWritten,
         Map<String, Object> configuration
-    ) {
-        super(
-            preProcessingMillis,
-            computeMillis,
-            0L,
-            mutateMillis,
-            configuration
-        );
-        this.nodePropertiesWritten = nodePropertiesWritten;
-    }
+    ) implements MutateNodePropertiesResult {
 
+
+    static PredictMutateResult create(
+        AlgorithmProcessingTimings timings,
+        NodePropertiesWritten nodePropertiesWritten,
+        Map<String, Object> configurationMap
+    ){
+        return new PredictMutateResult(
+            timings.preProcessingMillis,
+            timings.computeMillis,
+            timings.sideEffectMillis,
+            0,
+            nodePropertiesWritten.value(),
+            configurationMap
+        );
+    }
     static PredictMutateResult emptyFrom(AlgorithmProcessingTimings timings, Map<String, Object> configurationMap) {
         return new PredictMutateResult(
             timings.preProcessingMillis,
             timings.computeMillis,
             timings.sideEffectMillis,
+            0,
             0,
             configurationMap
         );

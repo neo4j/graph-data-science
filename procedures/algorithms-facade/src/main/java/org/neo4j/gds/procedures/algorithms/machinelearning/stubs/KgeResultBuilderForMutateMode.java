@@ -40,10 +40,8 @@ class KgeResultBuilderForMutateMode implements ResultBuilder<KGEPredictMutateCon
     ) {
         if (result.isEmpty()) return KGEMutateResult.emptyFrom(timings, configuration.toMap());
 
-        return new KGEMutateResult(
-            timings.preProcessingMillis,
-            timings.computeMillis,
-            timings.sideEffectMillis,
+        return  KGEMutateResult.create(
+            timings,
             metadata.orElseThrow().value(),
             configuration.toMap()
         );

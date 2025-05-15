@@ -19,31 +19,22 @@
  */
 package org.neo4j.gds.pregel.proc;
 
-import org.neo4j.gds.procedures.algorithms.results.StandardMutateResult;
+import org.neo4j.gds.procedures.algorithms.results.MutateNodePropertiesResult;
 
 import java.util.Map;
 
 @SuppressWarnings("unused")
-public final class PregelMutateResult extends StandardMutateResult {
-
-    public final long nodePropertiesWritten;
-    public final long ranIterations;
-    public final boolean didConverge;
-
-    private PregelMutateResult(
+public record PregelMutateResult(
         long nodePropertiesWritten,
         long preProcessingMillis,
         long computeMillis,
         long mutateMillis,
+        long postProcessingMillis,
         long ranIterations,
         boolean didConverge,
         Map<String, Object> configuration
-    ) {
-        super(preProcessingMillis, computeMillis, 0L, mutateMillis, configuration);
-        this.nodePropertiesWritten = nodePropertiesWritten;
-        this.ranIterations = ranIterations;
-        this.didConverge = didConverge;
-    }
+    ) implements MutateNodePropertiesResult {
+
 
     public static class Builder extends AbstractPregelResultBuilder<PregelMutateResult> {
 
@@ -54,6 +45,7 @@ public final class PregelMutateResult extends StandardMutateResult {
                 preProcessingMillis,
                 computeMillis,
                 mutateMillis,
+                0,
                 ranIterations,
                 didConverge,
                 config.toMap()

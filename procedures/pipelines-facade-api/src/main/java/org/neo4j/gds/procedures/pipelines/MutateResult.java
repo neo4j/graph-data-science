@@ -20,43 +20,49 @@
 package org.neo4j.gds.procedures.pipelines;
 
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.procedures.algorithms.results.StandardMutateResult;
+import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
+import org.neo4j.gds.procedures.algorithms.results.MutateRelationshipsResult;
 
 import java.util.Collections;
 import java.util.Map;
 
-public final class MutateResult extends StandardMutateResult {
-    public final long relationshipsWritten;
-    public final Map<String, Object> probabilityDistribution;
-    public final Map<String, Object> samplingStats;
+public record MutateResult(
+    long preProcessingMillis,
+    long computeMillis,
+    long mutateMillis,
+    long postProcessingMillis,
+    long relationshipsWritten,
+    Map<String, Object> configuration,
+    Map<String, Object> probabilityDistribution,
+    Map<String, Object> samplingStats
+    )  implements MutateRelationshipsResult  {
 
-    MutateResult(
-        long preProcessingMillis,
-        long computeMillis,
-        long mutateMillis,
-        long relationshipsWritten,
-        Map<String, Object> configuration,
+
+    public static MutateResult create(
+        AlgorithmProcessingTimings timings,
+        RelationshipsWritten metadata,
+        Map<String, Object> configurationMap,
         Map<String, Object> probabilityDistribution,
         Map<String, Object> samplingStats
-    ) {
-        super(
-            preProcessingMillis,
-            computeMillis,
-            0L,
-            mutateMillis,
-            configuration
-        );
-
-        this.relationshipsWritten = relationshipsWritten;
-        this.probabilityDistribution = probabilityDistribution;
-        this.samplingStats = samplingStats;
-    }
-
-    static MutateResult emptyFrom(AlgorithmProcessingTimings timings, Map<String, Object> configurationMap) {
+    ){
         return new MutateResult(
             timings.preProcessingMillis,
             timings.computeMillis,
             timings.sideEffectMillis,
+            0,
+            metadata.value(),
+            configurationMap,
+            probabilityDistribution,
+            samplingStats
+        );
+    }
+
+    public static MutateResult emptyFrom(AlgorithmProcessingTimings timings, Map<String, Object> configurationMap) {
+        return new MutateResult(
+            timings.preProcessingMillis,
+            timings.computeMillis,
+            timings.sideEffectMillis,
+            0,
             0,
             configurationMap,
             Collections.emptyMap(),

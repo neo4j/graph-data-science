@@ -19,13 +19,21 @@
  */
 package org.neo4j.gds.procedures.algorithms.pathfinding;
 
-import org.neo4j.gds.procedures.algorithms.results.StandardMutateResult;
-import org.neo4j.gds.result.AbstractResultBuilder;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
+import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
+import org.neo4j.gds.procedures.algorithms.results.MutateRelationshipsResult;
 
 import java.util.Map;
+import java.util.Optional;
 
-public final class PathFindingMutateResult extends StandardMutateResult {
+public class PathFindingMutateResult implements MutateRelationshipsResult {
+
+    public final long preProcessingMillis;
+    public final long computeMillis;
+    public final long mutateMillis;
+    public final long postProcessingMillis;
     public final long relationshipsWritten;
+    public final Map<String, Object> configuration;
 
     public PathFindingMutateResult(
         long preProcessingMillis,
@@ -35,21 +43,59 @@ public final class PathFindingMutateResult extends StandardMutateResult {
         long relationshipsWritten,
         Map<String, Object> configuration
     ) {
-        super(preProcessingMillis, computeMillis, postProcessingMillis, mutateMillis, configuration);
+        this.preProcessingMillis = preProcessingMillis;
+        this.computeMillis = computeMillis;
+        this.mutateMillis = mutateMillis;
+        this.postProcessingMillis = postProcessingMillis;
         this.relationshipsWritten = relationshipsWritten;
+        this.configuration = configuration;
     }
 
-    public static class Builder extends AbstractResultBuilder<PathFindingMutateResult> {
-        @Override
-        public PathFindingMutateResult build() {
-            return new PathFindingMutateResult(
-                preProcessingMillis,
-                computeMillis,
-                0L,
-                mutateMillis,
-                relationshipsWritten,
-                config.toMap()
-            );
-        }
+    public static PathFindingMutateResult create(
+        AlgorithmProcessingTimings timings,
+        Optional<RelationshipsWritten> metadata,
+        Map<String, Object> configuration){
+
+        return new PathFindingMutateResult(
+            timings.preProcessingMillis,
+            timings.computeMillis,
+            timings.sideEffectMillis,
+            0L,
+            metadata.map(RelationshipsWritten::value).orElse(0L),
+            configuration
+        );
+
+
+    }
+
+    //add getters to maintain the interface
+    @Override
+    public long relationshipsWritten() {
+        return relationshipsWritten;
+    }
+
+    @Override
+    public long mutateMillis() {
+        return mutateMillis;
+    }
+
+    @Override
+    public long postProcessingMillis() {
+        return postProcessingMillis;
+    }
+
+    @Override
+    public long preProcessingMillis() {
+        return preProcessingMillis;
+    }
+
+    @Override
+    public long computeMillis() {
+        return computeMillis;
+    }
+
+    @Override
+    public Map<String, Object> configuration() {
+        return configuration;
     }
 }

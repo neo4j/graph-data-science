@@ -38,18 +38,13 @@ public class BellmanFordResultBuilderForMutateMode implements ResultBuilder<AllS
         AlgorithmProcessingTimings timings,
         Optional<RelationshipsWritten> metadata
     ) {
-        var resultBuilder = new BellmanFordMutateResult.Builder();
-        resultBuilder.withConfig(configuration);
 
-        resultBuilder.withPreProcessingMillis(timings.preProcessingMillis);
-        resultBuilder.withComputeMillis(timings.computeMillis);
-        resultBuilder.withMutateMillis(timings.sideEffectMillis);
+        return result.map( bw -> BellmanFordMutateResult.create(
+            timings,
+            metadata,
+            configuration.toMap(),
+            bw.containsNegativeCycle()
+            )).orElse(BellmanFordMutateResult.emptyFrom(timings,configuration.toMap()));
 
-        metadata.ifPresent(rw -> resultBuilder.withRelationshipsWritten(rw.value()));
-
-        //noinspection OptionalIsPresent
-        if (result.isPresent()) resultBuilder.withContainsNegativeCycle(result.get().containsNegativeCycle());
-
-        return resultBuilder.build();
     }
 }

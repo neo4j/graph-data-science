@@ -38,14 +38,11 @@ public class BreadthFirstSearchResultBuilderForMutateMode implements ResultBuild
         AlgorithmProcessingTimings timings,
         Optional<RelationshipsWritten> metadata
     ) {
-        var resultBuilder = new PathFindingMutateResult.Builder()
-            .withConfig(configuration)
-            .withPreProcessingMillis(timings.preProcessingMillis)
-            .withComputeMillis(timings.computeMillis)
-            .withMutateMillis(timings.sideEffectMillis);
+        return PathFindingMutateResult.create(
+            timings,
+            metadata,
+            configuration.toMap()
+        );
 
-        metadata.ifPresent(rw -> resultBuilder.withRelationshipsWritten(rw.value()));
-
-        return resultBuilder.build();
     }
 }

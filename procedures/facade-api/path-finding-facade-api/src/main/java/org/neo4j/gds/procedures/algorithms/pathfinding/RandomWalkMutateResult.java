@@ -19,37 +19,32 @@
  */
 package org.neo4j.gds.procedures.algorithms.pathfinding;
 
-import org.neo4j.gds.procedures.algorithms.results.StandardMutateResult;
-import org.neo4j.gds.result.AbstractResultBuilder;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
+import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
+import org.neo4j.gds.procedures.algorithms.results.MutateNodePropertiesResult;
+import org.neo4j.gds.traversal.RandomWalkMutateConfig;
 
 import java.util.Map;
+import java.util.Optional;
 
-public final class RandomWalkMutateResult extends StandardMutateResult {
-    public final long nodePropertiesWritten;
+public record RandomWalkMutateResult(
+    long preProcessingMillis,
+    long computeMillis,
+    long mutateMillis,
+    long postProcessingMillis,
+    long nodePropertiesWritten,
+    Map<String, Object> configuration
+) implements MutateNodePropertiesResult {
 
-    public RandomWalkMutateResult(
-        long preProcessingMillis,
-        long computeMillis,
-        long mutateMillis,
-        long postProcessingMillis,
-        long nodePropertiesWritten,
-        Map<String, Object> configuration
-    ) {
-        super(preProcessingMillis, computeMillis, postProcessingMillis, mutateMillis, configuration);
-        this.nodePropertiesWritten = nodePropertiesWritten;
-    }
+    public static  RandomWalkMutateResult create(AlgorithmProcessingTimings timings, Optional<NodePropertiesWritten> metadata, RandomWalkMutateConfig config) {
 
-    public static class Builder extends AbstractResultBuilder<RandomWalkMutateResult> {
-        @Override
-        public RandomWalkMutateResult build() {
-            return new RandomWalkMutateResult(
-                preProcessingMillis,
-                computeMillis,
-                0L,
-                mutateMillis,
-                nodePropertiesWritten,
-                config.toMap()
-            );
-        }
+        return new RandomWalkMutateResult(
+            timings.preProcessingMillis,
+            timings.computeMillis,
+            timings.sideEffectMillis,
+            0L,
+            metadata.orElse(new NodePropertiesWritten(0L)).value(),
+            config.toMap()
+        );
     }
 }

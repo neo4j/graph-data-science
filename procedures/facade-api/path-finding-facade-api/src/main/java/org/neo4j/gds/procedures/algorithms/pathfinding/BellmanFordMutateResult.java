@@ -19,34 +19,51 @@
  */
 package org.neo4j.gds.procedures.algorithms.pathfinding;
 
-import org.neo4j.gds.result.AbstractResultBuilder;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
+import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
+import org.neo4j.gds.procedures.algorithms.results.MutateRelationshipsResult;
 
 import java.util.Map;
+import java.util.Optional;
 
-public record BellmanFordMutateResult(long preProcessingMillis, long computeMillis, long postProcessingMillis,
-                                      long mutateMillis, Map<String, Object> configuration,
-                                      boolean containsNegativeCycle, long relationshipsWritten) {
+public record BellmanFordMutateResult(
+    long preProcessingMillis,
+    long computeMillis,
+    long mutateMillis, long postProcessingMillis,
+    Map<String, Object> configuration,
+    boolean containsNegativeCycle,
+    long relationshipsWritten
+) implements MutateRelationshipsResult {
 
+    public static BellmanFordMutateResult create(
+        AlgorithmProcessingTimings timings,
+        Optional<RelationshipsWritten> metadata,
+        Map<String, Object> configuration,
+        boolean containsNegativeCycle
+    ) {
+        return new BellmanFordMutateResult(
+            timings.preProcessingMillis,
+            timings.computeMillis,
+            timings.sideEffectMillis,
+            0L,
+            configuration,
+            containsNegativeCycle,
+            metadata.map(RelationshipsWritten::value).orElse(0L)
+        );
+    }
 
-    public static class Builder extends AbstractResultBuilder<BellmanFordMutateResult> {
-        private boolean containsNegativeCycle;
-
-        public Builder withContainsNegativeCycle(boolean containsNegativeCycle) {
-            this.containsNegativeCycle = containsNegativeCycle;
-            return this;
-        }
-
-        @Override
-        public BellmanFordMutateResult build() {
-            return new BellmanFordMutateResult(
-                preProcessingMillis,
-                computeMillis,
-                0L,
-                mutateMillis,
-                config.toMap(),
-                containsNegativeCycle,
-                relationshipsWritten
-            );
-        }
+    public static BellmanFordMutateResult emptyFrom(
+        AlgorithmProcessingTimings timings,
+        Map<String, Object> configuration
+    ) {
+        return new BellmanFordMutateResult(
+            timings.preProcessingMillis,
+            timings.computeMillis,
+            timings.sideEffectMillis,
+            0L,
+            configuration,
+            false,
+            0L
+        );
     }
 }

@@ -20,16 +20,11 @@
 package org.neo4j.gds.procedures.algorithms.community;
 
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.procedures.algorithms.results.StandardMutateResult;
-import org.neo4j.gds.result.AbstractResultBuilder;
+import org.neo4j.gds.procedures.algorithms.results.MutateNodePropertiesResult;
 
 import java.util.Map;
 
-public class KCoreDecompositionMutateResult extends StandardMutateResult {
-    public final long nodePropertiesWritten;
-    public final long degeneracy;
-
-    public KCoreDecompositionMutateResult(
+public record KCoreDecompositionMutateResult(
         long nodePropertiesWritten,
         long degeneracy,
         long preProcessingMillis,
@@ -37,11 +32,7 @@ public class KCoreDecompositionMutateResult extends StandardMutateResult {
         long postProcessingMillis,
         long mutateMillis,
         Map<String, Object> configuration
-    ) {
-        super(preProcessingMillis, computeMillis, postProcessingMillis, mutateMillis, configuration);
-        this.nodePropertiesWritten = nodePropertiesWritten;
-        this.degeneracy = degeneracy;
-    }
+    ) implements MutateNodePropertiesResult{
 
     public static KCoreDecompositionMutateResult emptyFrom(
         AlgorithmProcessingTimings timings,
@@ -58,24 +49,4 @@ public class KCoreDecompositionMutateResult extends StandardMutateResult {
         );
     }
 
-    public static final class Builder extends AbstractResultBuilder<KCoreDecompositionMutateResult> {
-        private long degeneracy;
-
-        public Builder withDegeneracy(long degeneracy) {
-            this.degeneracy = degeneracy;
-            return this;
-        }
-
-        public KCoreDecompositionMutateResult build() {
-            return new KCoreDecompositionMutateResult(
-                nodePropertiesWritten,
-                degeneracy,
-                preProcessingMillis,
-                computeMillis,
-                -1L,
-                mutateMillis,
-                config.toMap()
-            );
-        }
-    }
 }

@@ -37,12 +37,9 @@ public class PathFindingResultBuilderForMutateMode<CONFIGURATION extends ToMapCo
         AlgorithmProcessingTimings timings,
         Optional<RelationshipsWritten> metadata
     ) {
-        return new PathFindingMutateResult(
-            timings.preProcessingMillis,
-            timings.computeMillis,
-            0, // yeah, I don't understand it either :shrug:
-            timings.sideEffectMillis,
-            metadata.map(rw -> rw.value()).orElse(0L),
+        return PathFindingMutateResult.create(
+            timings,
+            metadata,
             configuration.toMap()
         );
     }

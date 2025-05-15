@@ -38,14 +38,6 @@ public class RandomWalkResultBuilderForMutateMode implements ResultBuilder<Rando
         AlgorithmProcessingTimings timings,
         Optional<NodePropertiesWritten> metadata
     ) {
-        var resultBuilder = new RandomWalkMutateResult.Builder()
-            .withConfig(configuration)
-            .withPreProcessingMillis(timings.preProcessingMillis)
-            .withComputeMillis(timings.computeMillis)
-            .withMutateMillis(timings.sideEffectMillis);
-
-        metadata.ifPresent(nodePropertiesWritten -> resultBuilder.withNodePropertiesWritten(nodePropertiesWritten.value()));
-
-        return resultBuilder.build();
+        return RandomWalkMutateResult.create(timings,metadata, configuration);
     }
 }

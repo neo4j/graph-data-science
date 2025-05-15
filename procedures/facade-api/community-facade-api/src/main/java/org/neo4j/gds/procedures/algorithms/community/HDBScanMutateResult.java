@@ -20,17 +20,11 @@
 package org.neo4j.gds.procedures.algorithms.community;
 
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.procedures.algorithms.results.StandardMutateResult;
+import org.neo4j.gds.procedures.algorithms.results.MutateNodePropertiesResult;
 
 import java.util.Map;
 
-public final class HDBScanMutateResult extends StandardMutateResult {
-    public final long nodeCount;
-    public final long numberOfClusters;
-    public final long numberOfNoisePoints;
-    public final long nodePropertiesWritten;
-
-    public HDBScanMutateResult(
+public record HDBScanMutateResult(
         long nodeCount,
         long numberOfClusters,
         long numberOfNoisePoints,
@@ -41,13 +35,7 @@ public final class HDBScanMutateResult extends StandardMutateResult {
         long postProcessingMillis,
         Map<String, Object> configuration
 
-    ) {
-        super(preProcessingMillis, computeMillis, postProcessingMillis, mutateMillis,configuration);
-        this.nodeCount = nodeCount;
-        this.numberOfClusters = numberOfClusters;
-        this.numberOfNoisePoints = numberOfNoisePoints;
-        this.nodePropertiesWritten = nodePropertiesWritten;
-    }
+    )  implements MutateNodePropertiesResult {
 
     public static HDBScanMutateResult emptyFrom(
         AlgorithmProcessingTimings timings,
