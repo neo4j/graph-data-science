@@ -37,19 +37,11 @@ class BellmanFordResultBuilderForWriteMode implements ResultBuilder<AllShortestP
         AlgorithmProcessingTimings timings,
         Optional<RelationshipsWritten> metadata
     ) {
-        var builder = BellmanFordWriteResult.builder();
-
-        builder.withConfig(configuration);
-
-        builder.withPreProcessingMillis(timings.preProcessingMillis);
-        builder.withComputeMillis(timings.computeMillis);
-        builder.withWriteMillis(timings.sideEffectMillis);
-
-        metadata.ifPresent(rw -> builder.withRelationshipsWritten(rw.value()));
-
-        //noinspection OptionalIsPresent
-        if (result.isPresent()) builder.withContainsNegativeCycle(result.get().containsNegativeCycle());
-
-        return builder.build();
+        return result.map( bw -> BellmanFordWriteResult.create(
+            timings,
+            metadata,
+            configuration.toMap(),
+            bw.containsNegativeCycle()
+        )).orElse(BellmanFordWriteResult.emptyFrom(timings,configuration.toMap()));
     }
 }

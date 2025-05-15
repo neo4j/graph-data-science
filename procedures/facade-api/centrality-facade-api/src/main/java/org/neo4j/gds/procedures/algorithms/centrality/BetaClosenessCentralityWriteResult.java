@@ -19,16 +19,11 @@
  */
 package org.neo4j.gds.procedures.algorithms.centrality;
 
-import org.neo4j.gds.procedures.algorithms.results.StandardWriteResult;
+import org.neo4j.gds.procedures.algorithms.results.WriteNodePropertiesResult;
 
 import java.util.Map;
 
-public final class BetaClosenessCentralityWriteResult extends StandardWriteResult {
-    public final long nodePropertiesWritten;
-    public final String writeProperty;
-    public final Map<String, Object> centralityDistribution;
-
-    public BetaClosenessCentralityWriteResult(
+public record BetaClosenessCentralityWriteResult(
         long nodePropertiesWritten,
         long preProcessingMillis,
         long computeMillis,
@@ -36,12 +31,7 @@ public final class BetaClosenessCentralityWriteResult extends StandardWriteResul
         long writeMillis,
         String writeProperty,
         Map<String, Object> centralityDistribution,
-        Map<String, Object> config
-    ) {
-        super(preProcessingMillis, computeMillis, postProcessingMillis, writeMillis, config);
-        this.writeProperty = writeProperty;
-        this.centralityDistribution = centralityDistribution;
-        this.nodePropertiesWritten = nodePropertiesWritten;
-    }
+        Map<String, Object> configuration
+    ) implements WriteNodePropertiesResult {
 
 }

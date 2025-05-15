@@ -19,42 +19,48 @@
  */
 package org.neo4j.gds.procedures.algorithms.pathfinding;
 
-import org.neo4j.gds.procedures.algorithms.results.StandardWriteResult;
-import org.neo4j.gds.result.AbstractResultBuilder;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
+import org.neo4j.gds.procedures.algorithms.results.WriteResult;
 
 import java.util.Map;
 
-public final class KSpanningTreeWriteResult extends StandardWriteResult {
-    public final long effectiveNodeCount;
-
-    public KSpanningTreeWriteResult(
+public record KSpanningTreeWriteResult(
         long preProcessingMillis,
         long computeMillis,
         long writeMillis,
+        long postProcessingMillis,
+        long effectiveNodeCount,
+        Map<String, Object> configuration
+    )  implements WriteResult {
+
+    public static KSpanningTreeWriteResult create(
+        AlgorithmProcessingTimings timings,
         long effectiveNodeCount,
         Map<String, Object> configuration
     ) {
-        super(preProcessingMillis, computeMillis, 0, writeMillis, configuration);
-        this.effectiveNodeCount = effectiveNodeCount;
+        return new KSpanningTreeWriteResult(
+            timings.preProcessingMillis,
+            timings.computeMillis,
+            timings.sideEffectMillis,
+            0L,
+            effectiveNodeCount,
+            configuration
+        );
     }
 
-    public static class Builder extends AbstractResultBuilder<KSpanningTreeWriteResult> {
-        private long effectiveNodeCount;
-
-        public Builder withEffectiveNodeCount(long effectiveNodeCount) {
-            this.effectiveNodeCount = effectiveNodeCount;
-            return this;
-        }
-
-        @Override
-        public KSpanningTreeWriteResult build() {
-            return new KSpanningTreeWriteResult(
-                preProcessingMillis,
-                computeMillis,
-                writeMillis,
-                effectiveNodeCount,
-                config.toMap()
-            );
-        }
+    public static KSpanningTreeWriteResult emptyFrom(
+        AlgorithmProcessingTimings timings,
+        Map<String, Object> configuration
+    ) {
+        return new KSpanningTreeWriteResult(
+            timings.preProcessingMillis,
+            timings.computeMillis,
+            timings.sideEffectMillis,
+            0L,
+            0,
+            configuration
+        );
     }
+
+
 }

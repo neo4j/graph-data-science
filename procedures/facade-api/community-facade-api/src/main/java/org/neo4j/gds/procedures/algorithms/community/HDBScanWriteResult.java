@@ -20,17 +20,11 @@
 package org.neo4j.gds.procedures.algorithms.community;
 
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.procedures.algorithms.results.StandardWriteResult;
+import org.neo4j.gds.procedures.algorithms.results.WriteNodePropertiesResult;
 
 import java.util.Map;
 
-public final class HDBScanWriteResult extends StandardWriteResult {
-    public final long nodeCount;
-    public final long numberOfClusters;
-    public final long numberOfNoisePoints;
-    public final long nodePropertiesWritten;
-
-    public HDBScanWriteResult(
+public record HDBScanWriteResult(
         long nodeCount,
         long numberOfClusters,
         long numberOfNoisePoints,
@@ -41,13 +35,7 @@ public final class HDBScanWriteResult extends StandardWriteResult {
         long postProcessingMillis,
         Map<String, Object> configuration
 
-    ) {
-        super(preProcessingMillis, computeMillis, postProcessingMillis,writeMillis, configuration);
-        this.nodeCount = nodeCount;
-        this.numberOfClusters = numberOfClusters;
-        this.numberOfNoisePoints = numberOfNoisePoints;
-        this.nodePropertiesWritten = nodePropertiesWritten;
-    }
+    ) implements WriteNodePropertiesResult{
 
     public static HDBScanWriteResult emptyFrom(
         AlgorithmProcessingTimings timings,

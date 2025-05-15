@@ -19,52 +19,53 @@
  */
 package org.neo4j.gds.procedures.algorithms.pathfinding;
 
-import org.neo4j.gds.procedures.algorithms.results.StandardWriteResult;
-import org.neo4j.gds.result.AbstractResultBuilder;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
+import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
+import org.neo4j.gds.procedures.algorithms.results.WriteRelationshipsResult;
 
 import java.util.Map;
+import java.util.Optional;
 
-public class BellmanFordWriteResult extends StandardWriteResult {
-    public final long relationshipsWritten;
-    public final boolean containsNegativeCycle;
+public record BellmanFordWriteResult(
+    long preProcessingMillis,
+    long computeMillis,
+    long writeMillis,
+    long postProcessingMillis,
+    long relationshipsWritten,
+    boolean containsNegativeCycle,
+    Map<String, Object> configuration
+    )  implements WriteRelationshipsResult {
 
-    public BellmanFordWriteResult(
-        long preProcessingMillis,
-        long computeMillis,
-        long postProcessingMillis,
-        long writeMillis,
-        long relationshipsWritten,
-        boolean containsNegativeCycle,
+    public static BellmanFordWriteResult create(
+        AlgorithmProcessingTimings timings,
+        Optional<RelationshipsWritten> metadata,
+        Map<String, Object> configuration,
+        boolean containsNegativeCycle
+    ) {
+        return new BellmanFordWriteResult(
+            timings.preProcessingMillis,
+            timings.computeMillis,
+            timings.sideEffectMillis,
+            0L,
+            metadata.map(RelationshipsWritten::value).orElse(0L),
+            containsNegativeCycle,
+            configuration
+        );
+    }
+
+    public static BellmanFordWriteResult emptyFrom(
+        AlgorithmProcessingTimings timings,
         Map<String, Object> configuration
     ) {
-        super(preProcessingMillis, computeMillis, postProcessingMillis, writeMillis, configuration);
-        this.relationshipsWritten = relationshipsWritten;
-        this.containsNegativeCycle = containsNegativeCycle;
+        return new BellmanFordWriteResult(
+            timings.preProcessingMillis,
+            timings.computeMillis,
+            timings.sideEffectMillis,
+            0L,
+            0L,
+            false,
+            configuration
+        );
     }
 
-    public static Builder builder() {
-        return new Builder();
-    }
-
-    public static class Builder extends AbstractResultBuilder<BellmanFordWriteResult> {
-        private boolean containsNegativeCycle;
-
-        public Builder withContainsNegativeCycle(boolean containsNegativeCycle) {
-            this.containsNegativeCycle = containsNegativeCycle;
-            return this;
-        }
-
-        @Override
-        public BellmanFordWriteResult build() {
-            return new BellmanFordWriteResult(
-                preProcessingMillis,
-                computeMillis,
-                0L,
-                writeMillis,
-                relationshipsWritten,
-                containsNegativeCycle,
-                config.toMap()
-            );
-        }
-    }
 }

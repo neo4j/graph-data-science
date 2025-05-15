@@ -19,31 +19,22 @@
  */
 package org.neo4j.gds.pregel.proc;
 
-import org.neo4j.gds.procedures.algorithms.results.StandardWriteResult;
+import org.neo4j.gds.procedures.algorithms.results.WriteNodePropertiesResult;
 
 import java.util.Map;
 
 @SuppressWarnings("unused")
-public final class PregelWriteResult extends StandardWriteResult {
-
-    public final long nodePropertiesWritten;
-    public final long ranIterations;
-    public final boolean didConverge;
-
-    private PregelWriteResult(
+public record PregelWriteResult(
         long nodePropertiesWritten,
         long preProcessingMillis,
         long computeMillis,
+        long postProcessingMillis,
         long writeMillis,
         long ranIterations,
         boolean didConverge,
         Map<String, Object> configuration
-    ) {
-        super(preProcessingMillis, computeMillis, 0L, writeMillis, configuration);
-        this.nodePropertiesWritten = nodePropertiesWritten;
-        this.ranIterations = ranIterations;
-        this.didConverge = didConverge;
-    }
+    )  implements WriteNodePropertiesResult {
+
 
     public static class Builder extends AbstractPregelResultBuilder<PregelWriteResult> {
 
@@ -53,6 +44,7 @@ public final class PregelWriteResult extends StandardWriteResult {
                 nodePropertiesWritten,
                 preProcessingMillis,
                 computeMillis,
+                0,
                 writeMillis,
                 ranIterations,
                 didConverge,

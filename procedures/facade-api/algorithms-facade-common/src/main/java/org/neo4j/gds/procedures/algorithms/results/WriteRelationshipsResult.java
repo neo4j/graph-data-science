@@ -19,27 +19,6 @@
  */
 package org.neo4j.gds.procedures.algorithms.results;
 
-import java.util.Map;
-
-public class StandardWriteResult  {
-    public final long writeMillis;
-    public final long preProcessingMillis;
-    public final long computeMillis;
-    public final long postProcessingMillis;
-    public final Map<String, Object> configuration;
-
-
-    public StandardWriteResult(
-        long preProcessingMillis,
-        long computeMillis,
-        long postProcessingMillis,
-        long writeMillis,
-        Map<String, Object> configuration
-    ) {
-        this.writeMillis = writeMillis;
-        this.postProcessingMillis = postProcessingMillis;
-        this.preProcessingMillis = preProcessingMillis;
-        this.configuration = configuration;
-        this.computeMillis = computeMillis;
-    }
+public interface WriteRelationshipsResult extends WriteResult {
+    long relationshipsWritten();
 }

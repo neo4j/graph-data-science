@@ -20,35 +20,42 @@
 package org.neo4j.gds.procedures.pipelines;
 
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.procedures.algorithms.results.StandardWriteResult;
+import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
+import org.neo4j.gds.procedures.algorithms.results.WriteNodePropertiesResult;
 
 import java.util.Map;
 
-public final class WriteResult extends StandardWriteResult {
-    public final long nodePropertiesWritten;
-
-    WriteResult(
+public record WriteResult(
         long preProcessingMillis,
         long computeMillis,
         long writeMillis,
+        long postProcessingMillis,
         long nodePropertiesWritten,
         Map<String, Object> configuration
-    ) {
-        super(
-            preProcessingMillis,
-            computeMillis,
-            0L,
-            writeMillis,
-            configuration
-        );
-        this.nodePropertiesWritten = nodePropertiesWritten;
-    }
+    )  implements WriteNodePropertiesResult {
 
+
+    static WriteResult create(
+        AlgorithmProcessingTimings timings,
+        NodePropertiesWritten metadata,
+        Map<String, Object> configurationMap){
+
+        return new WriteResult(
+            timings.preProcessingMillis,
+            timings.computeMillis,
+            timings.sideEffectMillis,
+            0L,
+            metadata.value(),
+            configurationMap
+        );
+
+    }
     static WriteResult emptyFrom(AlgorithmProcessingTimings timings, Map<String, Object> configurationMap) {
         return new WriteResult(
             timings.preProcessingMillis,
             timings.computeMillis,
             timings.sideEffectMillis,
+            0,
             0,
             configurationMap
         );
