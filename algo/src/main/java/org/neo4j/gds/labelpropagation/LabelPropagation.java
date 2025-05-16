@@ -41,9 +41,10 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 
 import static java.util.concurrent.TimeUnit.MICROSECONDS;
-import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_LABEL;
 
 public class LabelPropagation extends Algorithm<LabelPropagationResult> {
+
+    private static final int NO_SUCH_LABEL = -1;
 
     static final String LABEL_PROPAGATION_DESCRIPTION =
         "The Label Propagation algorithm is a fast algorithm for finding communities in a graph.";
