@@ -19,11 +19,7 @@
  */
 package org.neo4j.gds.procedures.algorithms.community;
 
-import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.config.WritePropertyConfig;
-import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 
 public class AlphaSccWriteResult {
     public final long preProcessingMillis;
@@ -113,44 +109,4 @@ public class AlphaSccWriteResult {
         );
     }
 
-    public static class Builder extends AbstractCommunityResultBuilder<AlphaSccWriteResult> {
-        public Builder(ProcedureReturnColumns returnColumns, Concurrency concurrency) {
-            super(returnColumns, concurrency);
-        }
-
-        @Override
-        public AlphaSccWriteResult buildResult() {
-            return new AlphaSccWriteResult(
-                preProcessingMillis,
-                computeMillis,
-                writeMillis,
-                postProcessingDuration,
-                nodeCount,
-                maybeCommunityCount.orElse(0),
-                maybeCommunityHistogram.map(h -> h.getValueAtPercentile(100)).orElse(0L),
-                maybeCommunityHistogram.map(h -> h.getValueAtPercentile(99)).orElse(0L),
-                maybeCommunityHistogram.map(h -> h.getValueAtPercentile(95)).orElse(0L),
-                maybeCommunityHistogram.map(h -> h.getValueAtPercentile(90)).orElse(0L),
-                maybeCommunityHistogram.map(h -> h.getValueAtPercentile(75)).orElse(0L),
-                maybeCommunityHistogram.map(h -> h.getValueAtPercentile(50)).orElse(0L),
-                maybeCommunityHistogram.map(h -> h.getValueAtPercentile(25)).orElse(0L),
-                maybeCommunityHistogram.map(h -> h.getValueAtPercentile(10)).orElse(0L),
-                maybeCommunityHistogram.map(h -> h.getValueAtPercentile(5)).orElse(0L),
-                maybeCommunityHistogram.map(h -> h.getValueAtPercentile(1)).orElse(0L),
-                maybeCommunityHistogram.map(h -> h.getMinNonZeroValue()).orElse(0L),
-                maybeCommunityHistogram.map(h -> h.getMaxValue()).orElse(0L),
-                config instanceof WritePropertyConfig ? ((WritePropertyConfig) config).writeProperty() : ""
-            );
-        }
-
-        public Builder buildHistogram(boolean buildHistogram) {
-            this.buildHistogram = buildHistogram;
-            return this;
-        }
-
-        public Builder buildCommunityCount(boolean buildCommunityCount) {
-            this.buildCommunityCount = buildCommunityCount;
-            return this;
-        }
-    }
 }
