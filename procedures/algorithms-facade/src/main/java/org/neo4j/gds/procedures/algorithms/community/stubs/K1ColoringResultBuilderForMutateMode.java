@@ -49,10 +49,8 @@ public class K1ColoringResultBuilderForMutateMode implements ResultBuilder<K1Col
 
         long usedColors = (computeUsedColors) ? k1ColoringResult.usedColors().cardinality() : 0;
 
-        return new K1ColoringMutateResult(
-            timings.preProcessingMillis,
-            timings.computeMillis,
-            timings.sideEffectMillis,
+        return K1ColoringMutateResult.create(
+            timings,
             k1ColoringResult.colors().size(),
             usedColors,
             k1ColoringResult.ranIterations(),

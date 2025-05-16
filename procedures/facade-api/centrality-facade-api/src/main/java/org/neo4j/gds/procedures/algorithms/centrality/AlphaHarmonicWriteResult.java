@@ -34,6 +34,22 @@ public record AlphaHarmonicWriteResult(
         Map<String, Object> centralityDistribution
     ) {
 
+    static AlphaHarmonicWriteResult create(
+        AlgorithmProcessingTimings timings,
+        long nodes,
+        Map<String, Object> centralityDistribution,
+        WritePropertyConfig configuration
+    ) {
+        return new AlphaHarmonicWriteResult(
+            nodes,
+            timings.preProcessingMillis,
+            timings.computeMillis,
+            timings.sideEffectMillis,
+            configuration.writeProperty(),
+            centralityDistribution
+        );
+    }
+
     static AlphaHarmonicWriteResult emptyFrom(
         AlgorithmProcessingTimings timings,
         WritePropertyConfig configuration

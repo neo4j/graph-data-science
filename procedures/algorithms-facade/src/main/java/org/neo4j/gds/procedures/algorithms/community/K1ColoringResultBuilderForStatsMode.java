@@ -49,9 +49,8 @@ class K1ColoringResultBuilderForStatsMode implements StatsResultBuilder<K1Colori
 
         var usedColors = (computeUsedColors) ? k1ColoringResult.usedColors().cardinality() : 0;
 
-        var k1ColoringStatsResult = new K1ColoringStatsResult(
-            timings.preProcessingMillis,
-            timings.computeMillis,
+        var k1ColoringStatsResult =  K1ColoringStatsResult.create(
+            timings,
             k1ColoringResult.colors().size(),
             usedColors,
             k1ColoringResult.ranIterations(),

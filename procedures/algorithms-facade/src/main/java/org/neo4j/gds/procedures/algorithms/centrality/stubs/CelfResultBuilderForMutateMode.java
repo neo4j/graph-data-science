@@ -30,6 +30,7 @@ import org.neo4j.gds.procedures.algorithms.centrality.CELFMutateResult;
 import java.util.Optional;
 
 public class CelfResultBuilderForMutateMode implements ResultBuilder<InfluenceMaximizationMutateConfig, CELFResult, CELFMutateResult, NodePropertiesWritten> {
+
     @Override
     public CELFMutateResult build(
         Graph graph,
@@ -38,17 +39,16 @@ public class CelfResultBuilderForMutateMode implements ResultBuilder<InfluenceMa
         AlgorithmProcessingTimings timings,
         Optional<NodePropertiesWritten> metadata
     ) {
-        if (result.isEmpty()) return CELFMutateResult.emptyFrom(timings, configuration.toMap());
 
-        var celfResult = result.get();
+        return result.map(
+            celf-> CELFMutateResult.create(
+                timings,
+                metadata.orElseThrow(),
+                celf.totalSpread(),
+                graph.nodeCount(),
+                configuration.toMap()
+            )
+        ).orElse(CELFMutateResult.emptyFrom(timings, configuration.toMap()));
 
-        return new CELFMutateResult(
-            timings.sideEffectMillis,
-            metadata.orElseThrow().value(),
-            timings.computeMillis,
-            celfResult.totalSpread(),
-            graph.nodeCount(),
-            configuration.toMap()
-        );
     }
 }

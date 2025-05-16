@@ -39,22 +39,18 @@ class HDBScanResultBuilderForWriteMode implements ResultBuilder<HDBScanWriteConf
         AlgorithmProcessingTimings timings,
         Optional<NodePropertiesWritten> nodePropertiesWritten
     ) {
-        if (result.isEmpty()) return Stream.of(HDBScanWriteResult.emptyFrom(timings, configuration.toMap()));
 
-        var labels = result.get();
+        var modeResult = result.map(
+            hdb -> HDBScanWriteResult.create(
+                 timings,
+                 graph.nodeCount(),
+                 hdb.numberOfClusters(),
+                 hdb.numberOfNoisePoints(),
+                 nodePropertiesWritten.orElseThrow(),
+                 configuration.toMap()
+             )
+        ).orElse(HDBScanWriteResult.emptyFrom(timings, configuration.toMap()));
 
-        var writeResult = new HDBScanWriteResult(
-            graph.nodeCount(),
-            labels.numberOfClusters(),
-            labels.numberOfNoisePoints(),
-            timings.sideEffectMillis,
-            nodePropertiesWritten.map(NodePropertiesWritten::value).orElseThrow(),
-            timings.preProcessingMillis,
-            timings.computeMillis,
-            0,
-            configuration.toMap()
-        );
-
-        return Stream.of(writeResult);
+        return Stream.of(modeResult);
     }
 }

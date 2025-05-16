@@ -53,6 +53,8 @@ import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
  */
 class CELFStatsProcTest extends BaseProcTest {
 
+    private static final long NODE_COUNT = 10L;
+
     @Neo4jGraph
     private static final String DB_CYPHER =
         "CREATE " +
@@ -130,6 +132,10 @@ class CELFStatsProcTest extends BaseProcTest {
             assertThat(row.getNumber("computeMillis"))
                 .asInstanceOf(LONG)
                 .isGreaterThanOrEqualTo(0L);
+
+            assertThat(row.getNumber("nodeCount"))
+                .asInstanceOf(LONG)
+                .isEqualTo(NODE_COUNT);
 
             assertThat(row.getNumber("totalSpread"))
                 .asInstanceOf(DOUBLE)

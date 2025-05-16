@@ -20,6 +20,7 @@
 package org.neo4j.gds.procedures.algorithms.centrality;
 
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
+import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 
 import java.util.Map;
 
@@ -31,6 +32,23 @@ public record CELFWriteResult(
     long nodeCount,
     Map<String, Object> configuration
 ) {
+
+    public  static CELFWriteResult create(
+        AlgorithmProcessingTimings timings,
+        NodePropertiesWritten metadata,
+        double totalSpread,
+        long nodeCount,
+        Map<String, Object> configurationMap
+    ){
+        return new CELFWriteResult(
+            timings.sideEffectMillis,
+            metadata.value(),
+            timings.computeMillis,
+            totalSpread,
+            nodeCount,
+            configurationMap
+        );
+    }
 
     static CELFWriteResult emptyFrom(AlgorithmProcessingTimings timings, Map<String, Object> configurationMap) {
         return new CELFWriteResult(

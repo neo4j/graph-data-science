@@ -35,6 +35,27 @@ public record K1ColoringMutateResult(
         Map<String, Object> configuration
     )  implements ModeResult {
 
+
+    public static K1ColoringMutateResult create(
+        AlgorithmProcessingTimings timings,
+        long nodeCount,
+        long colorCount,
+        long ranIterations,
+        boolean didConverge,
+        Map<String, Object> configurationMap
+    ) {
+        return new K1ColoringMutateResult(
+            timings.preProcessingMillis,
+            timings.computeMillis,
+            timings.sideEffectMillis,
+            nodeCount,
+            colorCount,
+            ranIterations,
+            didConverge,
+            configurationMap
+        );
+    }
+
     public static K1ColoringMutateResult emptyFrom(
         AlgorithmProcessingTimings timings,
         Map<String, Object> configurationMap

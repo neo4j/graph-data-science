@@ -34,6 +34,27 @@ public record K1ColoringWriteResult(
     boolean didConverge,
     Map<String, Object> configuration
 )  implements ModeResult {
+
+    public static K1ColoringWriteResult create(
+        AlgorithmProcessingTimings timings,
+        long nodeCount,
+        long colorCount,
+        long ranIterations,
+        boolean didConverge,
+        Map<String, Object> configurationMap
+    ) {
+        return new K1ColoringWriteResult(
+            timings.preProcessingMillis,
+            timings.computeMillis,
+            timings.sideEffectMillis,
+            nodeCount,
+            colorCount,
+            ranIterations,
+            didConverge,
+            configurationMap
+        );
+    }
+
     static K1ColoringWriteResult emptyFrom(AlgorithmProcessingTimings timings, Map<String, Object> configurationMap) {
         return new K1ColoringWriteResult(
             timings.preProcessingMillis,

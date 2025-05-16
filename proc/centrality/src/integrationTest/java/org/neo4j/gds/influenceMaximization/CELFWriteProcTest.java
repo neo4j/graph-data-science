@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.influenceMaximization;
 
+import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -34,6 +35,7 @@ import org.neo4j.gds.extension.Neo4jGraph;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatNoException;
+import static org.assertj.core.api.InstanceOfAssertFactories.DOUBLE;
 import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
 
 /**
@@ -120,7 +122,7 @@ class CELFWriteProcTest extends BaseProcTest {
         var cypher = GdsCypher.call("celfGraph")
             .algo(tieredProcedure)
             .writeMode()
-            .addParameter("seedSetSize", 10)
+            .addParameter("seedSetSize", 5)
             .addParameter("propagationProbability", 0.2)
             .addParameter("monteCarloSimulations", 10)
             .addParameter("writeProperty", "celf")
@@ -130,9 +132,18 @@ class CELFWriteProcTest extends BaseProcTest {
             assertThat(resultRow.getNumber("writeMillis"))
                 .asInstanceOf(LONG)
                 .isGreaterThanOrEqualTo(0L);
+            assertThat(resultRow.getNumber("computeMillis"))
+                .asInstanceOf(LONG)
+                .isGreaterThanOrEqualTo(0L);
             assertThat(resultRow.getNumber("nodePropertiesWritten"))
                 .asInstanceOf(LONG)
                 .isEqualTo(NODE_COUNT);
+            assertThat(resultRow.getNumber("nodeCount"))
+                .asInstanceOf(LONG)
+                .isEqualTo(NODE_COUNT);
+            assertThat(resultRow.getNumber("totalSpread"))
+                .asInstanceOf(DOUBLE)
+                .isCloseTo(6.4, Offset.offset(1e-7));
         });
 
         assertThat(rowCount).isEqualTo(1);
@@ -142,7 +153,7 @@ class CELFWriteProcTest extends BaseProcTest {
             resultRow -> {
                 assertThat(resultRow.getNumber("influentialNodes"))
                     .asInstanceOf(LONG)
-                    .isEqualTo(10);
+                    .isEqualTo(5);
             }
         );
 
@@ -153,7 +164,7 @@ class CELFWriteProcTest extends BaseProcTest {
             resultRow -> {
                 assertThat(resultRow.getNumber("notInfluentialNodes"))
                     .asInstanceOf(LONG)
-                    .isEqualTo(NODE_COUNT - 10);
+                    .isEqualTo(NODE_COUNT - 5);
             }
         );
 
@@ -180,6 +191,7 @@ class CELFWriteProcTest extends BaseProcTest {
             assertThat(resultRow.getNumber("nodePropertiesWritten"))
                 .asInstanceOf(LONG)
                 .isEqualTo(NODE_COUNT);
+
         });
 
         assertThat(rowCount).isEqualTo(1);

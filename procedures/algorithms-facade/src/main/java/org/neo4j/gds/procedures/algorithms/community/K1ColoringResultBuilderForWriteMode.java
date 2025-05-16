@@ -47,10 +47,8 @@ class K1ColoringResultBuilderForWriteMode implements ResultBuilder<K1ColoringWri
 
         long usedColors = (computeUsedColors) ? k1ColoringResult.usedColors().cardinality() : 0;
 
-        var k1ColoringWriteResult = new K1ColoringWriteResult(
-            timings.preProcessingMillis,
-            timings.computeMillis,
-            timings.sideEffectMillis,
+        var k1ColoringWriteResult =  K1ColoringWriteResult.create(
+            timings,
             k1ColoringResult.colors().size(),
             usedColors,
             k1ColoringResult.ranIterations(),

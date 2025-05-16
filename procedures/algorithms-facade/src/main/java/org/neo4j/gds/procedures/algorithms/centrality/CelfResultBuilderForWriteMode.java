@@ -38,22 +38,18 @@ class CelfResultBuilderForWriteMode implements ResultBuilder<InfluenceMaximizati
         AlgorithmProcessingTimings timings,
         Optional<NodePropertiesWritten> nodePropertiesWritten
     ) {
-        if (result.isEmpty()) return Stream.of(CELFWriteResult.emptyFrom(
-            timings,
-            configuration.toMap()
-        ));
-
-        var celfResult = result.get();
 
         return Stream.of(
-            new CELFWriteResult(
-                timings.sideEffectMillis,
-                nodePropertiesWritten.orElseThrow().value(),
-                timings.computeMillis,
-                celfResult.totalSpread(),
-                graph.nodeCount(),
-                configuration.toMap()
-            )
+            result.map(
+                celf -> CELFWriteResult.create(
+                    timings,
+                    nodePropertiesWritten.orElseThrow(),
+                    celf.totalSpread(),
+                    graph.nodeCount(),
+                    configuration.toMap()
+                )
+            ).orElse(CELFWriteResult.emptyFrom(timings, configuration.toMap()))
         );
+
     }
 }

@@ -30,6 +30,20 @@ public record CELFStatsResult(
     Map<String, Object> configuration
 ) {
 
+    public static CELFStatsResult create(
+        AlgorithmProcessingTimings timings,
+        double totalSpread,
+        long nodeCount,
+        Map<String, Object> configurationMap
+    ){
+        return new CELFStatsResult(
+            timings.computeMillis,
+            totalSpread,
+            nodeCount,
+            configurationMap
+        );
+    }
+
     static CELFStatsResult emptyFrom(AlgorithmProcessingTimings timings, Map<String, Object> configurationMap) {
         return new CELFStatsResult(timings.computeMillis, 0, 0, configurationMap);
     }

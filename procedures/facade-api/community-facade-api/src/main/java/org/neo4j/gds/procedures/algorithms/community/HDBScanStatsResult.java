@@ -34,6 +34,24 @@ public record HDBScanStatsResult(
         Map<String, Object> configuration
     ) implements StatsResult {
 
+    public static  HDBScanStatsResult create(
+        AlgorithmProcessingTimings timings,
+        long nodeCount,
+        long numberOfClusters,
+        long numberOfNoisePoints,
+        Map<String, Object> configurationMap
+    ){
+        return new HDBScanStatsResult(
+            nodeCount,
+            numberOfClusters,
+            numberOfNoisePoints,
+            timings.preProcessingMillis,
+            timings.computeMillis,
+            0,
+            configurationMap
+        );
+    }
+
     static HDBScanStatsResult emptyFrom(AlgorithmProcessingTimings timings, Map<String, Object> configurationMap) {
         return new HDBScanStatsResult(
             0,

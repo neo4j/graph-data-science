@@ -39,20 +39,16 @@ class HDBScanResultBuilderForMutateMode implements ResultBuilder<HDBScanMutateCo
         AlgorithmProcessingTimings timings,
         Optional<NodePropertiesWritten> metadata
     ) {
-        if (result.isEmpty()) return HDBScanMutateResult.emptyFrom(timings, configuration.toMap());
+        return result.map(
+            hdb -> HDBScanMutateResult.create(
+                timings,
+                graph.nodeCount(),
+                hdb.numberOfClusters(),
+                hdb.numberOfNoisePoints(),
+                metadata.orElse(new NodePropertiesWritten(-1L)),
+                configuration.toMap()
+            )
+        ).orElse(HDBScanMutateResult.emptyFrom(timings, configuration.toMap()));
 
-        var labels = result.get();
-
-        return new HDBScanMutateResult(
-            graph.nodeCount(),
-            labels.numberOfClusters(),
-            labels.numberOfNoisePoints(),
-            timings.sideEffectMillis,
-            metadata.map(NodePropertiesWritten::value).orElse(-1L),
-            timings.preProcessingMillis,
-            timings.preProcessingMillis,
-            0,
-            configuration.toMap()
-        );
     }
 }

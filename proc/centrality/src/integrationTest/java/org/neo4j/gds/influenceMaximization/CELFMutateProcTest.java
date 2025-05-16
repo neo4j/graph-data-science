@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.influenceMaximization;
 
+import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -37,6 +38,7 @@ import java.util.concurrent.atomic.LongAdder;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatNoException;
+import static org.assertj.core.api.InstanceOfAssertFactories.DOUBLE;
 import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
 
 /**
@@ -124,7 +126,7 @@ class CELFMutateProcTest extends BaseProcTest {
         var cypher = GdsCypher.call("celfGraph")
             .algo(tieredProcedure)
             .mutateMode()
-            .addParameter("seedSetSize", 10)
+            .addParameter("seedSetSize", 5)
             .addParameter("propagationProbability", 0.2)
             .addParameter("monteCarloSimulations", 10)
             .addParameter("mutateProperty", "celf")
@@ -133,9 +135,18 @@ class CELFMutateProcTest extends BaseProcTest {
             assertThat(resultRow.getNumber("mutateMillis"))
                 .asInstanceOf(LONG)
                 .isGreaterThanOrEqualTo(0L);
+            assertThat(resultRow.getNumber("computeMillis"))
+                .asInstanceOf(LONG)
+                .isGreaterThanOrEqualTo(0L);
             assertThat(resultRow.getNumber("nodePropertiesWritten"))
                 .asInstanceOf(LONG)
                 .isEqualTo(NODE_COUNT);
+            assertThat(resultRow.getNumber("nodeCount"))
+                .asInstanceOf(LONG)
+                .isEqualTo(NODE_COUNT);
+            assertThat(resultRow.getNumber("totalSpread"))
+                .asInstanceOf(DOUBLE)
+                .isCloseTo(6.4, Offset.offset(1e-7));
         });
 
         LongAdder influentialNodes = new LongAdder();
@@ -149,8 +160,8 @@ class CELFMutateProcTest extends BaseProcTest {
             }
         });
 
-        assertThat(influentialNodes.longValue()).isEqualTo(10);
-        assertThat(notInfluentialNodes.longValue()).isEqualTo(NODE_COUNT - 10);
+        assertThat(influentialNodes.longValue()).isEqualTo(5);
+        assertThat(notInfluentialNodes.longValue()).isEqualTo(NODE_COUNT - 5);
     }
 
     @ParameterizedTest

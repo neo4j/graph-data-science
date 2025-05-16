@@ -35,23 +35,22 @@ class CelfResultBuilderForStatsMode implements StatsResultBuilder<CELFResult, St
         this.configuration = configuration;
     }
 
+
     @Override
     public Stream<CELFStatsResult> build(
         Graph graph,
         Optional<CELFResult> result,
         AlgorithmProcessingTimings timings
     ) {
-        if (result.isEmpty()) return Stream.of(CELFStatsResult.emptyFrom(timings, configuration.toMap()));
-
-        var celfResult = result.get();
-
         return Stream.of(
-            new CELFStatsResult(
-                timings.computeMillis,
-                celfResult.totalSpread(),
-                graph.nodeCount(),
-                configuration.toMap()
-            )
+            result.map(
+                celf -> CELFStatsResult.create(
+                    timings,
+                    celf.totalSpread(),
+                    graph.nodeCount(),
+                    configuration.toMap()
+                )
+            ).orElse(CELFStatsResult.emptyFrom(timings, configuration.toMap()))
         );
     }
 }

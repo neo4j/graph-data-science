@@ -35,6 +35,26 @@ public record K1ColoringStatsResult(
     Map<String, Object> configuration
 )  implements ModeResult {
 
+
+    public static K1ColoringStatsResult create(
+        AlgorithmProcessingTimings timings,
+        long nodeCount,
+        long colorCount,
+        long ranIterations,
+        boolean didConverge,
+        Map<String, Object> configurationMap
+    ) {
+        return new K1ColoringStatsResult(
+            timings.preProcessingMillis,
+            timings.computeMillis,
+            nodeCount,
+            colorCount,
+            ranIterations,
+            didConverge,
+            configurationMap
+        );
+    }
+
     static Stream<K1ColoringStatsResult> emptyFrom(
         AlgorithmProcessingTimings timings,
         Map<String, Object> configurationMap

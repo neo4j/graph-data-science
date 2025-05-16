@@ -29,7 +29,6 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 class HDBScanResultBuilderForStatsMode implements StatsResultBuilder<Labels, Stream<HDBScanStatsResult>> {
-    private final CommunityStatisticsWithTimingComputer communityStatisticsWithTimingComputer = new CommunityStatisticsWithTimingComputer();
 
     private final HDBScanStatsConfig configuration;
 
@@ -45,19 +44,16 @@ class HDBScanResultBuilderForStatsMode implements StatsResultBuilder<Labels, Str
         Optional<Labels> result,
         AlgorithmProcessingTimings timings
     ) {
-        if (result.isEmpty()) return Stream.of(HDBScanStatsResult.emptyFrom(timings, configuration.toMap()));
+        var modeResult = result.map(
+            hdb -> HDBScanStatsResult.create(
+                timings,
+                graph.nodeCount(),
+                hdb.numberOfClusters(),
+                hdb.numberOfNoisePoints(),
+                configuration.toMap()
+            )
+        ).orElse(HDBScanStatsResult.emptyFrom(timings, configuration.toMap()));
 
-        var labels = result.get();
-
-        var hdbScanStatsResult = new HDBScanStatsResult(
-            graph.nodeCount(),
-            labels.numberOfClusters(),
-            labels.numberOfNoisePoints(),
-            timings.preProcessingMillis,
-            timings.computeMillis,
-            0,
-            configuration.toMap()
-        );
-        return Stream.of(hdbScanStatsResult);
+        return Stream.of(modeResult);
     }
 }
