@@ -11,11 +11,6 @@ dependencies {
 
     compileOnly openGds.jetbrains.annotations
     compileOnly openGds.immutables.value.annotations
-    neodeps().each {
-        compileOnly(group: 'org.neo4j', name: it, version: ver.'neo4j') {
-            transitive = false
-        }
-    }
 
     implementation project(':annotations')
     implementation project(':core')
