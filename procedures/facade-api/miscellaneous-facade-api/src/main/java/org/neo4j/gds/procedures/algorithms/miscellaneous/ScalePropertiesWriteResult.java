@@ -20,6 +20,7 @@
 package org.neo4j.gds.procedures.algorithms.miscellaneous;
 
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
+import org.neo4j.gds.procedures.algorithms.results.WriteNodePropertiesResult;
 
 import java.util.Collections;
 import java.util.List;
@@ -33,7 +34,7 @@ public record ScalePropertiesWriteResult(
     long postProcessingMillis,
     long nodePropertiesWritten,
     Map<String, Object> configuration
-){
+) implements WriteNodePropertiesResult {
 
     static ScalePropertiesWriteResult emptyFrom(
         AlgorithmProcessingTimings timings,

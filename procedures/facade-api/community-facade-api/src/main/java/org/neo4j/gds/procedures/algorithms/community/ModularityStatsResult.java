@@ -20,6 +20,7 @@
 package org.neo4j.gds.procedures.algorithms.community;
 
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
+import org.neo4j.gds.procedures.algorithms.results.StatsResult;
 
 import java.util.Map;
 
@@ -32,7 +33,7 @@ public record ModularityStatsResult(
         long computeMillis,
         long postProcessingMillis,
         Map<String, Object> configuration
-    ) {
+    ) implements StatsResult {
 
     static ModularityStatsResult emptyFrom(AlgorithmProcessingTimings timings, Map<String, Object> configurationMap) {
         return new ModularityStatsResult(

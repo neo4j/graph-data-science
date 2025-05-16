@@ -19,21 +19,13 @@
  */
 package org.neo4j.gds.procedures.algorithms.community;
 
-import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.procedures.algorithms.results.StandardWriteResult;
-import org.neo4j.gds.result.AbstractCommunityResultBuilder;
+import org.neo4j.gds.procedures.algorithms.results.WriteNodePropertiesResult;
 
 import java.util.Collections;
 import java.util.Map;
 
-public class SccWriteResult extends StandardWriteResult {
-    public final long componentCount;
-    public final Map<String, Object> componentDistribution;
-    public final long nodePropertiesWritten;
-
-    public SccWriteResult(
+public record SccWriteResult(
         long componentCount,
         Map<String, Object> componentDistribution,
         long preProcessingMillis,
@@ -42,13 +34,8 @@ public class SccWriteResult extends StandardWriteResult {
         long writeMillis,
         long nodePropertiesWritten,
         Map<String, Object> configuration
-    ) {
-        super(preProcessingMillis, computeMillis, postProcessingMillis, writeMillis, configuration);
+    )  implements WriteNodePropertiesResult {
 
-        this.nodePropertiesWritten = nodePropertiesWritten;
-        this.componentCount = componentCount;
-        this.componentDistribution = componentDistribution;
-    }
 
     static SccWriteResult emptyFrom(AlgorithmProcessingTimings timings, Map<String, Object> configurationMap) {
         return new SccWriteResult(
@@ -63,32 +50,5 @@ public class SccWriteResult extends StandardWriteResult {
         );
     }
 
-    public static class Builder extends AbstractCommunityResultBuilder<SccWriteResult> {
-        public Builder(ProcedureReturnColumns returnColumns, Concurrency concurrency) {
-            super(returnColumns, concurrency);
-        }
 
-        @Override
-        public SccWriteResult buildResult() {
-            return new SccWriteResult(
-                maybeCommunityCount.orElse(0L),
-                communityHistogramOrNull(),
-                preProcessingMillis,
-                computeMillis,
-                postProcessingDuration,
-                writeMillis,
-                nodePropertiesWritten,
-                config.toMap()
-            );
-        }
-        public Builder buildHistogram(boolean buildHistogram) {
-            this.buildHistogram = buildHistogram;
-            return this;
-        }
-
-        public Builder buildCommunityCount(boolean buildCommunityCount) {
-            this.buildCommunityCount = buildCommunityCount;
-            return this;
-        }
-    }
 }

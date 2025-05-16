@@ -36,24 +36,10 @@ class KSpanningTreeResultBuilderForWriteMode implements ResultBuilder<KSpanningT
         AlgorithmProcessingTimings timings,
         Optional<Void> metadata
     ) {
-        var builder = new KSpanningTreeWriteResult.Builder();
-
-        if (result.isEmpty()) {
-            return builder.build();
-        }
-
-        var spanningTree = result.get();
-
-        builder.withEffectiveNodeCount(spanningTree.effectiveNodeCount());
-
-        builder.withPreProcessingMillis(timings.preProcessingMillis);
-        builder.withComputeMillis(timings.computeMillis);
-        builder.withWriteMillis(timings.sideEffectMillis);
-
-        //builder.withNodePropertiesWritten(...);
-
-        builder.withConfig(configuration);
-
-        return builder.build();
+        return result.map( kst -> KSpanningTreeWriteResult.create(
+            timings,
+            kst.effectiveNodeCount(),
+            configuration.toMap()
+        )).orElse(KSpanningTreeWriteResult.emptyFrom(timings,configuration.toMap()));
     }
 }

@@ -20,6 +20,7 @@
 package org.neo4j.gds.procedures.algorithms.centrality;
 
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
+import org.neo4j.gds.procedures.algorithms.results.StatsResult;
 
 import java.util.Collections;
 import java.util.Map;
@@ -30,7 +31,7 @@ public record CentralityStatsResult(
         long computeMillis,
         long postProcessingMillis,
         Map<String, Object> configuration
-    ) {
+    ) implements StatsResult {
 
     static CentralityStatsResult emptyFrom(
         AlgorithmProcessingTimings timings,

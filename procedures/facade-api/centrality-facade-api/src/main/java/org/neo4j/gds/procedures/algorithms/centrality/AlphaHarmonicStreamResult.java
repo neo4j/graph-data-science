@@ -19,12 +19,6 @@
  */
 package org.neo4j.gds.procedures.algorithms.centrality;
 
-public final class AlphaHarmonicStreamResult {
-    public final long nodeId;
-    public final double centrality;
+public record AlphaHarmonicStreamResult(long nodeId, double centrality) {
 
-    public AlphaHarmonicStreamResult(long nodeId, double centrality) {
-        this.nodeId = nodeId;
-        this.centrality = centrality;
-    }
 }

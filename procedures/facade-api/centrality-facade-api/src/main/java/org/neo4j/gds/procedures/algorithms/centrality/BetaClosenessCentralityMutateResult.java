@@ -19,30 +19,19 @@
  */
 package org.neo4j.gds.procedures.algorithms.centrality;
 
-import org.neo4j.gds.procedures.algorithms.results.StandardMutateResult;
+import org.neo4j.gds.procedures.algorithms.results.MutateNodePropertiesResult;
 
 import java.util.Map;
 
-public final class BetaClosenessCentralityMutateResult extends StandardMutateResult {
-
-    public final long nodePropertiesWritten;
-    public final String mutateProperty;
-    public final Map<String, Object> centralityDistribution;
-
-    public BetaClosenessCentralityMutateResult(
-        long nodePropertiesWritten,
-        long preProcessingMillis,
-        long computeMillis,
-        long postProcessingMillis,
-        long mutateMillis,
-        String mutateProperty,
-        Map<String, Object> centralityDistribution,
-        Map<String, Object> config
-    ) {
-        super(preProcessingMillis, computeMillis, postProcessingMillis, mutateMillis, config);
-        this.mutateProperty = mutateProperty;
-        this.centralityDistribution = centralityDistribution;
-        this.nodePropertiesWritten = nodePropertiesWritten;
-    }
+public record BetaClosenessCentralityMutateResult(
+    long nodePropertiesWritten,
+    long preProcessingMillis,
+    long computeMillis,
+    long postProcessingMillis,
+    long mutateMillis,
+    String mutateProperty,
+    Map<String, Object> centralityDistribution,
+    Map<String, Object> configuration
+)   implements MutateNodePropertiesResult {
 
 }

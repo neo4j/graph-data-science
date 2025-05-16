@@ -20,6 +20,7 @@
 package org.neo4j.gds.procedures.algorithms.community;
 
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
+import org.neo4j.gds.procedures.algorithms.results.ModeResult;
 
 import java.util.Map;
 
@@ -31,7 +32,7 @@ public record SpeakerListenerLPAMutateResult(
     long mutateMillis,
     long nodePropertiesWritten,
     Map<String,Object> configuration
-){
+) implements ModeResult {
 
     public static SpeakerListenerLPAMutateResult emptyFrom(
         AlgorithmProcessingTimings timings,

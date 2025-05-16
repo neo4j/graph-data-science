@@ -23,26 +23,14 @@ import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTiming
 
 import java.util.Map;
 
-public final class KGEWriteResult {
-    public final long preProcessingMillis;
-    public final long computeMillis;
-    public final long writeMillis;
-    public final long relationshipsWritten;
-    public final Map<String, Object> configuration;
-
-    KGEWriteResult(
+public record KGEWriteResult(
         long preProcessingMillis,
         long computeMillis,
         long writeMillis,
         long relationshipsWritten,
         Map<String, Object> configuration
     ) {
-        this.preProcessingMillis = preProcessingMillis;
-        this.computeMillis = computeMillis;
-        this.writeMillis = writeMillis;
-        this.relationshipsWritten = relationshipsWritten;
-        this.configuration = configuration;
-    }
+
 
     static KGEWriteResult emptyFrom(AlgorithmProcessingTimings timings, Map<String, Object> configurationMap) {
         return new KGEWriteResult(

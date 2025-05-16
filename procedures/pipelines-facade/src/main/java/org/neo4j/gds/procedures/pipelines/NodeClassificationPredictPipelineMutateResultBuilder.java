@@ -43,11 +43,9 @@ class NodeClassificationPredictPipelineMutateResultBuilder implements ResultBuil
     ) {
         if (result.isEmpty()) return PredictMutateResult.emptyFrom(timings, this.configuration.toMap());
 
-        return new PredictMutateResult(
-            timings.preProcessingMillis,
-            timings.computeMillis,
-            timings.sideEffectMillis,
-            metadata.orElseThrow().value(),
+        return PredictMutateResult.create(
+            timings,
+            metadata.orElseThrow(),
             this.configuration.toMap()
         );
     }

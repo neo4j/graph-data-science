@@ -19,12 +19,6 @@
  */
 package org.neo4j.gds.procedures.algorithms.community;
 
-public class ConductanceStreamResult {
-    public final long community;
-    public final double conductance;
+public record ConductanceStreamResult(long community, double conductance) {
 
-    public ConductanceStreamResult(long community, double conductance) {
-        this.community = community;
-        this.conductance = conductance;
-    }
 }

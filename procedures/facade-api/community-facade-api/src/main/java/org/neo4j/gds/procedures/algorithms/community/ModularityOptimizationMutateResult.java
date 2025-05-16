@@ -19,27 +19,13 @@
  */
 package org.neo4j.gds.procedures.algorithms.community;
 
-import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.procedures.algorithms.results.MutateResult;
 
 import java.util.Collections;
 import java.util.Map;
 
-public class ModularityOptimizationMutateResult {
-    public final long preProcessingMillis;
-    public final long computeMillis;
-    public final long mutateMillis;
-    public final long postProcessingMillis;
-    public final long nodes;
-    public boolean didConverge;
-    public long ranIterations;
-    public double modularity;
-    public final long communityCount;
-    public final Map<String, Object> communityDistribution;
-    public final Map<String, Object> configuration;
-
-    public ModularityOptimizationMutateResult(
+public record ModularityOptimizationMutateResult(
         long preProcessingMillis,
         long computeMillis,
         long postProcessingMillis,
@@ -51,19 +37,8 @@ public class ModularityOptimizationMutateResult {
         long communityCount,
         Map<String, Object> communityDistribution,
         Map<String, Object> configuration
-    ) {
-        this.preProcessingMillis = preProcessingMillis;
-        this.computeMillis = computeMillis;
-        this.mutateMillis = mutateMillis;
-        this.postProcessingMillis = postProcessingMillis;
-        this.nodes = nodes;
-        this.didConverge = didConverge;
-        this.ranIterations = ranIterations;
-        this.modularity = modularity;
-        this.communityCount = communityCount;
-        this.communityDistribution = communityDistribution;
-        this.configuration = configuration;
-    }
+    ) implements MutateResult {
+
 
     public static ModularityOptimizationMutateResult emptyFrom(
         AlgorithmProcessingTimings timings,
@@ -83,27 +58,5 @@ public class ModularityOptimizationMutateResult {
             configurationMap
         );
     }
-
-    public static class Builder extends ModularityOptimizationResultBuilder<ModularityOptimizationMutateResult> {
-        public Builder(ProcedureReturnColumns returnColumns, Concurrency concurrency) {
-            super(returnColumns, concurrency);
-        }
-
-        @Override
-        protected ModularityOptimizationMutateResult buildResult() {
-            return new ModularityOptimizationMutateResult(
-                preProcessingMillis,
-                computeMillis,
-                postProcessingDuration,
-                mutateMillis,
-                nodeCount,
-                didConverge,
-                ranIterations,
-                modularity,
-                maybeCommunityCount.orElse(0),
-                communityHistogramOrNull(),
-                config.toMap()
-            );
-        }
-    }
+    
 }

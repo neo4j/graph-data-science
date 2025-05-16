@@ -19,36 +19,23 @@
  */
 package org.neo4j.gds.procedures.algorithms.community;
 
-import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.procedures.algorithms.results.StandardMutateResult;
-import org.neo4j.gds.result.AbstractCommunityResultBuilder;
+import org.neo4j.gds.procedures.algorithms.results.MutateNodePropertiesResult;
 
 import java.util.Collections;
 import java.util.Map;
 
-public class SccMutateResult extends StandardMutateResult {
-    public final long componentCount;
-    public final Map<String, Object> componentDistribution;
-    public final long nodePropertiesWritten;
+public record SccMutateResult(
+    long componentCount,
+    Map<String, Object> componentDistribution,
+    long preProcessingMillis,
+    long computeMillis,
+    long postProcessingMillis,
+    long mutateMillis,
+    long nodePropertiesWritten,
+    Map<String, Object> configuration
+) implements MutateNodePropertiesResult {
 
-    public SccMutateResult(
-        long componentCount,
-        Map<String, Object> componentDistribution,
-        long preProcessingMillis,
-        long computeMillis,
-        long postProcessingMillis,
-        long mutateMillis,
-        long nodePropertiesWritten,
-        Map<String, Object> configuration
-    ) {
-        super(preProcessingMillis, computeMillis, postProcessingMillis,mutateMillis, configuration);
-
-        this.componentCount = componentCount;
-        this.componentDistribution = componentDistribution;
-        this.nodePropertiesWritten = nodePropertiesWritten;
-    }
 
     public static SccMutateResult emptyFrom(AlgorithmProcessingTimings timings, Map<String, Object> configurationMap) {
         return new SccMutateResult(
@@ -63,33 +50,4 @@ public class SccMutateResult extends StandardMutateResult {
         );
     }
 
-    public static class Builder extends AbstractCommunityResultBuilder<SccMutateResult> {
-        public Builder(ProcedureReturnColumns returnColumns, Concurrency concurrency) {
-            super(returnColumns, concurrency);
-        }
-
-        @Override
-        public SccMutateResult buildResult() {
-            return new SccMutateResult(
-                maybeCommunityCount.orElse(0L),
-                communityHistogramOrNull(),
-                preProcessingMillis,
-                computeMillis,
-                postProcessingDuration,
-                mutateMillis,
-                nodePropertiesWritten,
-                config.toMap()
-            );
-        }
-
-        public SccMutateResult.Builder buildHistogram(boolean buildHistogram) {
-            this.buildHistogram = buildHistogram;
-            return this;
-        }
-
-        public SccMutateResult.Builder buildCommunityCount(boolean buildCommunityCount) {
-            this.buildCommunityCount = buildCommunityCount;
-            return this;
-        }
-    }
 }

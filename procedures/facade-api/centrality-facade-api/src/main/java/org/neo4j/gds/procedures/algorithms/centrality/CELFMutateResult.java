@@ -20,19 +20,10 @@
 package org.neo4j.gds.procedures.algorithms.centrality;
 
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.Map;
 
-public final class CELFMutateResult {
-    public final long mutateMillis;
-    public final long nodePropertiesWritten;
-    public final long computeMillis;
-    public final double totalSpread;
-    public final long nodeCount;
-    public final Map<String, Object> configuration;
-
-    public CELFMutateResult(
+public record CELFMutateResult(
         long mutateMillis,
         long nodePropertiesWritten,
         long computeMillis,
@@ -40,17 +31,6 @@ public final class CELFMutateResult {
         long nodeCount,
         Map<String, Object> configuration
     ) {
-        this.mutateMillis = mutateMillis;
-        this.nodePropertiesWritten = nodePropertiesWritten;
-        this.computeMillis = computeMillis;
-        this.totalSpread = totalSpread;
-        this.nodeCount = nodeCount;
-        this.configuration = configuration;
-    }
-
-    public static Builder builder() {
-        return new Builder();
-    }
 
     public static CELFMutateResult emptyFrom(AlgorithmProcessingTimings timings, Map<String, Object> configurationMap) {
         return new CELFMutateResult(
@@ -63,21 +43,5 @@ public final class CELFMutateResult {
         );
     }
 
-    public static class Builder extends AbstractResultBuilder<CELFMutateResult> {
-        private double totalSpread;
 
-        public Builder withTotalSpread(double totalSpread) {
-            this.totalSpread = totalSpread;
-            return this;
-        }
-
-        public CELFMutateResult build() {
-            return new CELFMutateResult(mutateMillis, nodePropertiesWritten,
-                computeMillis,
-                totalSpread,
-                nodeCount,
-                config.toMap()
-            );
-        }
-    }
 }

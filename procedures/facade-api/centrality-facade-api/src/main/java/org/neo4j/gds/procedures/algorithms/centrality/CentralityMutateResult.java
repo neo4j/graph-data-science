@@ -20,6 +20,7 @@
 package org.neo4j.gds.procedures.algorithms.centrality;
 
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
+import org.neo4j.gds.procedures.algorithms.results.MutateNodePropertiesResult;
 
 import java.util.Collections;
 import java.util.Map;
@@ -32,7 +33,7 @@ public record CentralityMutateResult(
         long mutateMillis,
         Map<String, Object> centralityDistribution,
         Map<String, Object> configuration
-    ) {
+    )  implements MutateNodePropertiesResult {
 
     public static CentralityMutateResult emptyFrom(
         AlgorithmProcessingTimings timings,

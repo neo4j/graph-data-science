@@ -20,6 +20,7 @@
 package org.neo4j.gds.procedures.algorithms.community;
 
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
+import org.neo4j.gds.procedures.algorithms.results.MutateNodePropertiesResult;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -39,7 +40,7 @@ public record LouvainMutateResult(
         long mutateMillis,
         long nodePropertiesWritten,
         Map<String, Object> configuration
-    ) {
+    ) implements MutateNodePropertiesResult {
 
     public static LouvainMutateResult emptyFrom(
         AlgorithmProcessingTimings timings,

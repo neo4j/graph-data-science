@@ -43,11 +43,9 @@ class NodeClassificationPredictPipelineWriteResultBuilder implements ResultBuild
     ) {
         if (result.isEmpty()) return WriteResult.emptyFrom(timings, this.configuration.toMap());
 
-        return new WriteResult(
-            timings.preProcessingMillis,
-            timings.computeMillis,
-            timings.sideEffectMillis,
-            metadata.orElseThrow().value(),
+        return  WriteResult.create(
+            timings,
+            metadata.orElseThrow(),
             this.configuration.toMap()
         );
     }

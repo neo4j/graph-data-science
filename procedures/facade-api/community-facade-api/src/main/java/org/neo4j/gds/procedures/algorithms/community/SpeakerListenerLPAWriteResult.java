@@ -20,10 +20,19 @@
 package org.neo4j.gds.procedures.algorithms.community;
 
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
+import org.neo4j.gds.procedures.algorithms.results.ModeResult;
 
 import java.util.Map;
 
-public record SpeakerListenerLPAWriteResult(long ranIterations, boolean didConverge, long preProcessingMillis, long computeMillis, long writeMillis, long nodePropertiesWritten, Map<String,Object> configuration){
+public record SpeakerListenerLPAWriteResult(
+    long ranIterations,
+    boolean didConverge,
+    long preProcessingMillis,
+    long computeMillis,
+    long writeMillis,
+    long nodePropertiesWritten,
+    Map<String,Object> configuration
+) implements ModeResult {
 
     static SpeakerListenerLPAWriteResult emptyFrom(AlgorithmProcessingTimings timings, Map<String, Object> configurationMap) {
         return new SpeakerListenerLPAWriteResult(0,false,timings.preProcessingMillis,timings.computeMillis,timings.sideEffectMillis, 0,configurationMap);

@@ -27,26 +27,28 @@ import org.neo4j.gds.ml.linkmodels.LinkPredictionResult;
 import java.util.Optional;
 
 class LinkPredictionPipelineMutateResultBuilder implements ResultBuilder<LinkPredictionPredictPipelineMutateConfig, LinkPredictionResult, MutateResult, LinkPredictionMutateMetadata> {
+
     @Override
     public MutateResult build(
         Graph graph,
         LinkPredictionPredictPipelineMutateConfig configuration,
         Optional<LinkPredictionResult> result,
         AlgorithmProcessingTimings timings,
-        Optional<LinkPredictionMutateMetadata> metadata
+        Optional<LinkPredictionMutateMetadata> optionalMetadata
     ) {
         if (result.isEmpty()) return MutateResult.emptyFrom(timings, configuration.toMap());
 
         var linkPredictionResult = result.get();
 
-        return new MutateResult(
-            timings.preProcessingMillis,
-            timings.computeMillis,
-            timings.sideEffectMillis,
-            metadata.orElseThrow().relationshipsWritten().value(),
+        var metadata = optionalMetadata.orElseThrow();
+
+        return MutateResult.create(
+            timings,
+            metadata.relationshipsWritten(),
             configuration.toMap(),
-            metadata.orElseThrow().probabilityDistribution(),
+            metadata.probabilityDistribution(),
             linkPredictionResult.samplingStats()
         );
+
     }
 }

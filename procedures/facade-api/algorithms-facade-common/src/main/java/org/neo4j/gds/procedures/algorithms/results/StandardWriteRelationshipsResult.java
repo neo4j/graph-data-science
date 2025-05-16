@@ -28,5 +28,5 @@ public record StandardWriteRelationshipsResult(
     long writeMillis,
     long relationshipsWritten,
     Map<String, Object> configuration
-) implements WriteResult {
+) implements WriteRelationshipsResult {
 }

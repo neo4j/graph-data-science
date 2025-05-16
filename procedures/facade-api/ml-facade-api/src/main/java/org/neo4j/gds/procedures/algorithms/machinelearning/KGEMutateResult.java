@@ -20,33 +20,38 @@
 package org.neo4j.gds.procedures.algorithms.machinelearning;
 
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.procedures.algorithms.results.StandardMutateResult;
+import org.neo4j.gds.procedures.algorithms.results.MutateRelationshipsResult;
 
 import java.util.Map;
 
-public final class KGEMutateResult extends StandardMutateResult {
-    public final long relationshipsWritten;
+public record KGEMutateResult(
+    long relationshipsWritten,
+    long preProcessingMillis,
+    long computeMillis,
+    long mutateMillis,
+    long postProcessingMillis,
+    Map<String, Object> configuration
+) implements MutateRelationshipsResult {
 
-    public KGEMutateResult(
-        long preProcessingMillis,
-        long computeMillis,
-        long mutateMillis,
+    public static KGEMutateResult create(
+        AlgorithmProcessingTimings timings,
         long relationshipsWritten,
         Map<String, Object> configuration
     ) {
-        super(
-            preProcessingMillis,
-            computeMillis,
+        return new KGEMutateResult(
+            relationshipsWritten,
+            timings.preProcessingMillis,
+            timings.computeMillis,
+            timings.sideEffectMillis,
             0L,
-            mutateMillis,
             configuration
         );
 
-        this.relationshipsWritten = relationshipsWritten;
     }
 
     public static KGEMutateResult emptyFrom(AlgorithmProcessingTimings timings, Map<String, Object> configurationMap) {
         return new KGEMutateResult(
+            0,
             timings.preProcessingMillis,
             timings.computeMillis,
             timings.sideEffectMillis,
