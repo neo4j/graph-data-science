@@ -11,11 +11,6 @@ dependencies {
     compileOnly openGds.recordBuilder
     compileOnly openGds.jetbrains.annotations
 
-    neodeps().each {
-        compileOnly(group: 'org.neo4j', name: it, version: ver.'neo4j') {
-            transitive = false
-        }
-    }
     implementation project(':algo-common')
     // `CypherMapWrapper`
     implementation project(':annotations')
