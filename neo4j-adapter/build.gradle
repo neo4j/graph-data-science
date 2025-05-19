@@ -7,17 +7,19 @@ group = 'org.neo4j.gds'
 dependencies {
     annotationProcessor project(':annotations')
     annotationProcessor openGds.immutables.value
-    annotationProcessor group: 'org.neo4j',      name: 'annotations',        version: ver.'neo4j'
 
     compileOnly project(':annotations')
-    compileOnly         openGds.immutables.value.annotations
-    compileOnly         openGds.jetbrains.annotations
-    neodeps().each {
-        compileOnly(group: 'org.neo4j', name: it, version: ver.'neo4j') {
-            transitive = false
-        }
-    }
+    compileOnly openGds.immutables.value.annotations
+    compileOnly openGds.jetbrains.annotations
 
+    // Neo4j dependencies
+    compileOnly(neo4j.id.generator) { transitive = false }
+    compileOnly(neo4j.index) { transitive = false }
+    compileOnly(neo4j.io) { transitive = false }
+    compileOnly(neo4j.kernel) { transitive = false }
+    compileOnly(neo4j.record.storage.engine) { transitive = false }
+
+    // Test dependencies
     testImplementation group: 'org.neo4j',       name: 'neo4j-kernel',       version: ver.'neo4j'
     testImplementation project(":test-utils")
 }
