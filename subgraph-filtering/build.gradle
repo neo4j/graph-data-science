@@ -8,15 +8,9 @@ dependencies {
     annotationProcessor project(':annotations')
     annotationProcessor openGds.immutables.value
 
-    compileOnly         openGds.jetbrains.annotations
-    compileOnly         openGds.immutables.value.annotations
-    compileOnly         group: 'org.scala-lang',           name: 'scala-library',      version: ver.'scala'
-
-    neodeps().each {
-        compileOnly(group: 'org.neo4j', name: it, version: ver.'neo4j') {
-            transitive = false
-        }
-    }
+    compileOnly openGds.jetbrains.annotations
+    compileOnly openGds.immutables.value.annotations
+    compileOnly group: 'org.scala-lang', name: 'scala-library', version: ver.'scala'
 
     implementation project(':annotations')
     implementation project(':config-api')
