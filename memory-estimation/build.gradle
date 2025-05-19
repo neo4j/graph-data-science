@@ -6,9 +6,11 @@ group = 'org.neo4j.gds'
 
 dependencies {
     annotationProcessor project(':annotations')
-
     annotationProcessor openGds.immutables.builder
     annotationProcessor openGds.immutables.value
+
+    compileOnly openGds.immutables.value.annotations
+    compileOnly openGds.jetbrains.annotations
 
     implementation project(':annotations')
     implementation project(':config-api')
@@ -19,24 +21,15 @@ dependencies {
     implementation project(':progress-tracking')
     implementation project(':string-formatting')
 
-    compileOnly openGds.immutables.value.annotations
-    compileOnly openGds.jetbrains.annotations
-
-    neodeps().each {
-        compileOnly(group: 'org.neo4j', name: it, version: ver.'neo4j') {
-            transitive = false
-        }
-    }
-
-    testCompileOnly openGds.immutables.builder
-
-    testImplementation project(':algo-test')
-    testImplementation project(':test-utils')
-    testImplementation project(':proc-catalog')
-
+    // Test dependencies
     testAnnotationProcessor project(':annotations')
     testAnnotationProcessor project(':config-generator')
     testAnnotationProcessor openGds.immutables.value
 
+    testCompileOnly openGds.immutables.builder
+
+    testImplementation project(':algo-test')
     testImplementation project(':opengds-extension')
+    testImplementation project(':proc-catalog')
+    testImplementation project(':test-utils')
 }
