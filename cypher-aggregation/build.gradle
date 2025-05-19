@@ -8,16 +8,22 @@ dependencies {
     annotationProcessor project(':config-generator')
     annotationProcessor openGds.immutables.builder
     annotationProcessor openGds.immutables.value
-    annotationProcessor group: 'org.neo4j',       name: 'annotations', version: ver.'neo4j'
+    annotationProcessor neo4j.annotations
 
     compileOnly openGds.immutables.value.annotations
     compileOnly openGds.jetbrains.annotations
 
-    neodeps().each {
-        compileOnly(group: 'org.neo4j', name: it, version: ver.'neo4j') {
-            transitive = false
-        }
-    }
+    // Neo4j dependencies
+    compileOnly(neo4j.common) { transitive = false }
+    compileOnly(neo4j.gql.status) { transitive = false }
+    compileOnly(neo4j.graphdb.api) { transitive = false }
+    compileOnly(neo4j.id.generator) { transitive = false }
+    compileOnly(neo4j.kernel) { transitive = false }
+    compileOnly(neo4j.kernel.api) { transitive = false }
+    compileOnly(neo4j.logging) { transitive = false }
+    compileOnly(neo4j.procedure.api) { transitive = false }
+    compileOnly(neo4j.resource) { transitive = false }
+    compileOnly(neo4j.values) { transitive = false }
 
     implementation project(':annotations')
     implementation project(':config-api')
@@ -33,13 +39,13 @@ dependencies {
     implementation project(':transaction')
     implementation project(':triplet-graph-builder')
 
-
     implementation openGds.jol.core
     implementation(openGds.opencypher.ccparser) {
         transitive = false
     }
     implementation openGds.hdrhistogram
 
+    // Test dependencies
     testAnnotationProcessor project(':annotations')
 
     testCompileOnly openGds.immutables.builder
