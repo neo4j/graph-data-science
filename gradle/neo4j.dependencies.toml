@@ -19,6 +19,7 @@ import-api = { module = "org.neo4j:neo4j-import-api", version.ref = "neo4j" }
 import-util = { module = "org.neo4j:neo4j-import-util", version.ref = "neo4j" }
 index = { module = "org.neo4j:neo4j-index", version.ref = "neo4j" }
 io = { module = "org.neo4j:neo4j-io", version.ref = "neo4j" }
+it-test-support = { module = "org.neo4j.community:it-test-support", version.ref = "neo4j" }
 kernel = { module = "org.neo4j:neo4j-kernel", version.ref = "neo4j" }
 kernel-api = { module = "org.neo4j:neo4j-kernel-api", version.ref = "neo4j" }
 layout = { module = "org.neo4j:neo4j-layout", version.ref = "neo4j" }
