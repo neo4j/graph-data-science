@@ -9,11 +9,8 @@ dependencies {
     compileOnly openGds.immutables.value.annotations
     compileOnly openGds.jetbrains.annotations
 
-    neodeps().each {
-        compileOnly(group: 'org.neo4j', name: it, version: ver.'neo4j') {
-            transitive = false
-        }
-    }
+    // Neo4j dependencies
+    compileOnly(neo4j.graphdb.api) { transitive = false }
 
     implementation project(':config-api')
 }
