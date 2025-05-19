@@ -9,22 +9,25 @@ dependencies {
     annotationProcessor project(':config-generator')
     annotationProcessor openGds.immutables.builder
     annotationProcessor openGds.immutables.value
-    annotationProcessor group: 'org.neo4j',                name: 'annotations',        version: ver.'neo4j'
+    annotationProcessor neo4j.annotations
 
-    compileOnly         openGds.immutables.builder
-    compileOnly         openGds.immutables.value.annotations
-    compileOnly         openGds.jetbrains.annotations
+    compileOnly openGds.immutables.builder
+    compileOnly openGds.immutables.value.annotations
+    compileOnly openGds.jetbrains.annotations
 
-    neodeps().each {
-        compileOnly(group: 'org.neo4j', name: it, version: ver.'neo4j') {
-            transitive = false
-        }
-    }
+    // Neo4j dependencies
+    compileOnly(neo4j.common) { transitive = false }
+    compileOnly(neo4j.gql.status) { transitive = false }
+    compileOnly(neo4j.graphdb.api) { transitive = false }
+    compileOnly(neo4j.kernel.api) { transitive = false }
+    compileOnly(neo4j.kernel) { transitive = false }
+    compileOnly(neo4j.schema) { transitive = false }
+    compileOnly(neo4j.values) { transitive = false }
 
     implementation project(':annotations')
     implementation project(':concurrency')
     implementation project(':config-api')
-    // Becase `:core` exposes StatementApi which in turn is used in the various exporters
+    // Because `:core` exposes StatementApi which in turn is used in the various exporters
     implementation project(':core')
     implementation project(':core-api')
     implementation project(':core-utils')
@@ -34,7 +37,6 @@ dependencies {
     implementation project(':graph-schema-api')
     implementation project(':transaction')
     implementation project(':termination')
-
 
     // TEST DEPENDENCIES
     testImplementation project(':test-graph-loaders')
