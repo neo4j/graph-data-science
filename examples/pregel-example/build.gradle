@@ -9,8 +9,13 @@ dependencies {
     annotationProcessor project(':config-generator')
     annotationProcessor project(':pregel-proc-generator')
 
-    implementation project(':algo')
+    compileOnly openGds.immutables.value.annotations
+    compileOnly openGds.jetbrains.annotations
 
+    // Neo4j dependencies
+    compileOnly(neo4j.procedure.api) { transitive = false }
+
+    implementation project(':algo')
     implementation project(':algorithms-machinery')
     implementation project(':algorithms-procedure-facade')
     implementation project(':algo-common')
@@ -28,14 +33,7 @@ dependencies {
     implementation project(':termination')
     implementation project(':transaction')
 
-    compileOnly openGds.immutables.value.annotations
-    compileOnly openGds.jetbrains.annotations
-    neodeps().each {
-        compileOnly(group: 'org.neo4j', name: it, version: ver.'neo4j') {
-            transitive = false
-        }
-    }
-
+    // Test dependencies
     testAnnotationProcessor project(':annotations')
 
     testImplementation project(':proc-test')
