@@ -33,7 +33,6 @@ dependencies {
     implementation project(':neo4j-settings')
     implementation project(':opengds-procedure-facade')
     implementation project(':open-model-catalog')
-    implementation project(':open-write-services')
     implementation project(':proc-common')
     implementation project(':procedures-facade-api')
     implementation project(':progress-tracking')
