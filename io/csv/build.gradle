@@ -6,13 +6,17 @@ group = 'org.neo4j.gds'
 
 dependencies {
     annotationProcessor project(':annotations')
-
     annotationProcessor openGds.immutables.builder
     annotationProcessor openGds.immutables.value
 
-    compileOnly         openGds.immutables.builder
-    compileOnly         openGds.immutables.value.annotations
-    compileOnly         openGds.jetbrains.annotations
+    compileOnly openGds.immutables.builder
+    compileOnly openGds.immutables.value.annotations
+    compileOnly openGds.jetbrains.annotations
+
+    // Neo4j dependencies
+    compileOnly(neo4j.common) { transitive = false }
+    compileOnly(neo4j.graphdb.api) { transitive = false }
+    compileOnly(neo4j.import.api) { transitive = false }
 
     implementation project(':annotations')
     implementation project(':config-api')
@@ -32,13 +36,6 @@ dependencies {
     implementation openGds.fastcsv
     implementation(openGds.opencypher.ccparser) {
         transitive = false
-    }
-
-
-    neodeps().each {
-        compileOnly(group: 'org.neo4j', name: it, version: ver.'neo4j') {
-            transitive = false
-        }
     }
 
     testImplementation project(':test-utils')
