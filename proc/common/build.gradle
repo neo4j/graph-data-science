@@ -7,21 +7,31 @@ group = 'org.neo4j.gds'
 dependencies {
     annotationProcessor project(':annotations')
     annotationProcessor project(':procedure-collector')
-
     annotationProcessor openGds.recordBuilder
     annotationProcessor openGds.immutables.builder
     annotationProcessor openGds.immutables.value
 
-    api project(':metrics-api')
-    api(project(':model-catalog-api'))
+    api(
+        project(':metrics-api'),
+        project(':model-catalog-api'),
+        // Bubble up `MemoryEstimateResult`
+        project(':memory-usage')
+    )
 
-    // Bubble up `MemoryEstimateResult`
-    api project(':memory-usage')
+    compileOnly openGds.recordBuilder
+    compileOnly openGds.immutables.value.annotations
+    compileOnly openGds.jetbrains.annotations
+
+    // Neo4j dependencies
+    compileOnly(neo4j.common) { transitive = false }
+    compileOnly(neo4j.graphdb.api) { transitive = false }
+    compileOnly(neo4j.kernel.api) { transitive = false }
+    compileOnly(neo4j.logging) { transitive = false }
+    compileOnly(neo4j.procedure.api) { transitive = false }
 
     implementation project(':algo-common')
     implementation project(':algorithms-facade-api')
     implementation project(':algorithms-machinery')
-//    implementation project(':algorithms-procedure-facade')
     implementation project(':annotations')
     implementation project(':config-api')
     implementation project(':core')
@@ -38,8 +48,6 @@ dependencies {
     implementation project(':model-catalog-api')
     implementation project(':neo4j-api')
     implementation project(':neo4j-log-adapter')
-    // this is needed because of `TransactionNodeLookup` 🙈
-//    implementation project(':opengds-procedure-facade')
     implementation project(':open-licensing')
     implementation project(':pregel')
     implementation project(':procedure-integration')
@@ -52,18 +60,7 @@ dependencies {
     implementation openGds.reflections
     implementation openGds.hdrhistogram
 
-    compileOnly openGds.recordBuilder
-    compileOnly openGds.immutables.value.annotations
-    compileOnly openGds.jetbrains.annotations
-
-    neodeps().each {
-        compileOnly(group: 'org.neo4j', name: it, version: ver.'neo4j') {
-            transitive = false
-        }
-    }
-
-    compileOnly group: 'org.neo4j', name: 'neo4j-unsafe', version: ver.'neo4j'
-
+    // Test dependencies
     testAnnotationProcessor project(':annotations')
     testAnnotationProcessor project(':config-generator')
     testAnnotationProcessor openGds.immutables.value
