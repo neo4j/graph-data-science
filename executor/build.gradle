@@ -6,9 +6,17 @@ group = 'org.neo4j.gds'
 
 dependencies {
     annotationProcessor project(':annotations')
-
     annotationProcessor openGds.immutables.builder
     annotationProcessor openGds.immutables.value
+
+    compileOnly openGds.immutables.value.annotations
+    compileOnly openGds.jetbrains.annotations
+
+    // Neo4j dependencies
+    compileOnly(neo4j.common) { transitive = false }
+    compileOnly(neo4j.configuration) { transitive = false }
+    compileOnly(neo4j.gql.status) { transitive = false }
+    compileOnly(neo4j.graphdb.api) { transitive = false }
 
     implementation project(':annotations')
     implementation project(':algorithms-facade-api')
@@ -33,18 +41,9 @@ dependencies {
     implementation project(':defaults-and-limits-configuration')
     implementation project(':licensing')
     implementation project(':termination')
-
     implementation openGds.reflections
 
-    compileOnly openGds.immutables.value.annotations
-    compileOnly openGds.jetbrains.annotations
-
-    neodeps().each {
-        compileOnly(group: 'org.neo4j', name: it, version: ver.'neo4j') {
-            transitive = false
-        }
-    }
-
+    // Test dependencies
     integrationTestCompileOnly openGds.immutables.builder
     integrationTestCompileOnly project(':graph-schema-api')
 
