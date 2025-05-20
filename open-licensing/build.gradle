@@ -5,10 +5,12 @@ description = 'Neo4j Graph Data Science :: Open Licensing'
 group = 'org.neo4j.gds'
 
 dependencies {
-    annotationProcessor group: 'org.neo4j', name: 'annotations', version: ver.'neo4j'
+    annotationProcessor neo4j.annotations
 
-    compileOnly group: 'org.neo4j', name: 'annotations',         version: ver.'neo4j'
-    compileOnly group: 'org.neo4j', name: 'neo4j-configuration', version: ver.'neo4j'
+    // Neo4j libraries
+    compileOnly(neo4j.annotations) { transitive = false }
+    compileOnly(neo4j.configuration) { transitive = false }
+    compileOnly(neo4j.graphdb.api) { transitive = false }
 
     implementation project(':licensing')
 }
