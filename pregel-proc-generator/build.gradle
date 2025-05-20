@@ -29,8 +29,10 @@ dependencies {
     implementation project(':string-formatting')
     implementation project(':termination')
 
-    implementation group: 'org.neo4j',                name: 'neo4j-logging',        version: ver.'neo4j'
-    implementation group: 'org.neo4j',                name: 'neo4j-procedure-api',  version: ver.'neo4j'
+    // Neo4j dependencies
+    implementation(neo4j.logging) { transitive = false }
+    implementation(neo4j.procedure.api) { transitive = false}
+
     implementation openGds.immutables.value.annotations
     implementation openGds.google.auto.common
     implementation openGds.javapoet
