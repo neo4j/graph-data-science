@@ -7,10 +7,11 @@ group = 'org.neo4j.gds'
 dependencies {
 
     // Neo4j Dependencies
-    compileOnly(
-        [group: 'org.neo4j', name: 'neo4j-graphdb-api', version: ver.'neo4j'],
-        [group: 'org.neo4j', name: 'neo4j-kernel', version: ver.'neo4j'],
-    )
+    compileOnly(neo4j.common) { transitive = false }
+    compileOnly(neo4j.gql.status) { transitive = false }
+    compileOnly(neo4j.graphdb.api) { transitive = false }
+    compileOnly(neo4j.kernel) { transitive = false }
+    compileOnly(neo4j.kernel.api) { transitive = false }
 
     implementation project(':procedures-facade-api')
 
