@@ -20,6 +20,5 @@ dependencies {
     compileOnly(neo4j.record.storage.engine) { transitive = false }
 
     // Test dependencies
-    testImplementation group: 'org.neo4j',       name: 'neo4j-kernel',       version: ver.'neo4j'
     testImplementation project(":test-utils")
 }
