@@ -17,13 +17,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.algorithms.similarity;
+package org.neo4j.gds.applications.algorithms.machinery;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.properties.relationships.RelationshipWithPropertyConsumer;
-import org.neo4j.gds.core.utils.ProgressTimer;
+import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
@@ -34,10 +34,9 @@ import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicLong;
 
 final class Neo4jDatabaseRelationshipWriter {
-    static WriteRelationshipResult writeRelationship(
+    static RelationshipsWritten writeRelationship(
         String writeRelationshipType,
         String writeProperty,
         TaskRegistryFactory taskRegistryFactory,
@@ -51,9 +50,8 @@ final class Neo4jDatabaseRelationshipWriter {
         RelationshipWithPropertyConsumer relationshipConsumer,
         JobId jobId
     ){
-        var writeMillis = new AtomicLong();
-        try (ProgressTimer ignored = ProgressTimer.start(writeMillis::set)) {
-            var progressTracker = new TaskProgressTracker(
+
+        var progressTracker = new TaskProgressTracker(
                 RelationshipExporter.baseTask(taskName, graph.relationshipCount()),
                 new LoggerForProgressTrackingAdapter(log),
                 RelationshipExporterBuilder.TYPED_DEFAULT_WRITE_CONCURRENCY,
@@ -69,14 +67,22 @@ final class Neo4jDatabaseRelationshipWriter {
                 .withJobId(jobId)
                 .build();
 
+
+        try {
             exporter.write(
                 writeRelationshipType,
                 writeProperty,
-               relationshipConsumer
+                relationshipConsumer
             );
-
+        } catch (Exception e) {
+            progressTracker.endSubTaskWithFailure();
+            throw e;
+        } finally {
+            progressTracker.release();
         }
-        return new WriteRelationshipResult(graph.relationshipCount(), writeMillis.get());
+
+        return new RelationshipsWritten(graph.relationshipCount());
+
     }
 
     private Neo4jDatabaseRelationshipWriter() {}
