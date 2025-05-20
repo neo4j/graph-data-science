@@ -13,6 +13,7 @@ cypher-runtime-util = { module = "org.neo4j:neo4j-cypher-runtime-util", version.
 diagnostics = { module = "org.neo4j:neo4j-diagnostics", version.ref = "neo4j" }
 fabric = { module = "org.neo4j:neo4j-fabric", version.ref = "neo4j" }
 gql-status = { module = "org.neo4j:neo4j-gql-status", version.ref = "neo4j" }
+graph-algo = { module = "org.neo4j:neo4j-graph-algo", version.ref = "neo4j" }
 graphdb-api = { module = "org.neo4j:neo4j-graphdb-api", version.ref = "neo4j" }
 id-generator = { module = "org.neo4j:neo4j-id-generator", version.ref = "neo4j" }
 import-api = { module = "org.neo4j:neo4j-import-api", version.ref = "neo4j" }
