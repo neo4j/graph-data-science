@@ -32,12 +32,12 @@ import org.neo4j.gds.logging.Log;
 
 import java.util.List;
 
-public class WriteToDatabase {
+public class WriteNodePropertyService {
     private final Log log;
     private final RequestScopedDependencies requestScopedDependencies;
     private final WriteContext writeContext;
 
-    public WriteToDatabase(Log log, RequestScopedDependencies requestScopedDependencies, WriteContext writeContext) {
+    public WriteNodePropertyService(Log log, RequestScopedDependencies requestScopedDependencies, WriteContext writeContext) {
         this.log = log;
         this.requestScopedDependencies = requestScopedDependencies;
         this.writeContext = writeContext;

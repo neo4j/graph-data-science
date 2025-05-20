@@ -23,8 +23,8 @@ import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmResult;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
+import org.neo4j.gds.applications.algorithms.machinery.WriteNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.WriteStep;
-import org.neo4j.gds.applications.algorithms.machinery.WriteToDatabase;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.closeness.ClosenessCentralityWriteConfig;
 import org.neo4j.gds.core.utils.progress.JobId;
@@ -32,11 +32,11 @@ import org.neo4j.gds.core.utils.progress.JobId;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ClosenessCentrality;
 
 class ClosenessCentralityWriteStep implements WriteStep<CentralityAlgorithmResult, NodePropertiesWritten> {
-    private final WriteToDatabase writeToDatabase;
+    private final WriteNodePropertyService writeNodePropertyService;
     private final ClosenessCentralityWriteConfig configuration;
 
-    ClosenessCentralityWriteStep(WriteToDatabase writeToDatabase, ClosenessCentralityWriteConfig configuration) {
-        this.writeToDatabase = writeToDatabase;
+    ClosenessCentralityWriteStep(WriteNodePropertyService writeNodePropertyService, ClosenessCentralityWriteConfig configuration) {
+        this.writeNodePropertyService = writeNodePropertyService;
         this.configuration = configuration;
     }
 
@@ -48,7 +48,7 @@ class ClosenessCentralityWriteStep implements WriteStep<CentralityAlgorithmResul
         CentralityAlgorithmResult result,
         JobId jobId
     ) {
-        return writeToDatabase.perform(
+        return writeNodePropertyService.perform(
             graph,
             graphStore,
             resultStore,

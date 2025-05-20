@@ -23,8 +23,8 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
+import org.neo4j.gds.applications.algorithms.machinery.WriteNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.WriteStep;
-import org.neo4j.gds.applications.algorithms.machinery.WriteToDatabase;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.kcore.KCoreDecompositionResult;
@@ -33,11 +33,11 @@ import org.neo4j.gds.kcore.KCoreDecompositionWriteConfig;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.KCore;
 
 class KCoreWriteStep implements WriteStep<KCoreDecompositionResult, NodePropertiesWritten> {
-    private final WriteToDatabase writeToDatabase;
+    private final WriteNodePropertyService writeNodePropertyService;
     private final KCoreDecompositionWriteConfig configuration;
 
-    KCoreWriteStep(WriteToDatabase writeToDatabase, KCoreDecompositionWriteConfig configuration) {
-        this.writeToDatabase = writeToDatabase;
+    KCoreWriteStep(WriteNodePropertyService writeNodePropertyService, KCoreDecompositionWriteConfig configuration) {
+        this.writeNodePropertyService = writeNodePropertyService;
         this.configuration = configuration;
     }
 
@@ -49,7 +49,7 @@ class KCoreWriteStep implements WriteStep<KCoreDecompositionResult, NodeProperti
         KCoreDecompositionResult result,
         JobId jobId
     ) {
-        return writeToDatabase.perform(
+        return writeNodePropertyService.perform(
             graph,
             graphStore,
             resultStore,

@@ -23,8 +23,8 @@ import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmResult;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
+import org.neo4j.gds.applications.algorithms.machinery.WriteNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.WriteStep;
-import org.neo4j.gds.applications.algorithms.machinery.WriteToDatabase;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.degree.DegreeCentralityWriteConfig;
@@ -32,11 +32,11 @@ import org.neo4j.gds.degree.DegreeCentralityWriteConfig;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.DegreeCentrality;
 
 class DegreeCentralityWriteStep implements WriteStep<CentralityAlgorithmResult, NodePropertiesWritten> {
-    private final WriteToDatabase writeToDatabase;
+    private final WriteNodePropertyService writeNodePropertyService;
     private final DegreeCentralityWriteConfig configuration;
 
-    DegreeCentralityWriteStep(WriteToDatabase writeToDatabase, DegreeCentralityWriteConfig configuration) {
-        this.writeToDatabase = writeToDatabase;
+    DegreeCentralityWriteStep(WriteNodePropertyService writeNodePropertyService, DegreeCentralityWriteConfig configuration) {
+        this.writeNodePropertyService = writeNodePropertyService;
         this.configuration = configuration;
     }
 
@@ -48,7 +48,7 @@ class DegreeCentralityWriteStep implements WriteStep<CentralityAlgorithmResult, 
         CentralityAlgorithmResult result,
         JobId jobId
     ) {
-        return writeToDatabase.perform(
+        return writeNodePropertyService.perform(
             graph,
             graphStore,
             resultStore,

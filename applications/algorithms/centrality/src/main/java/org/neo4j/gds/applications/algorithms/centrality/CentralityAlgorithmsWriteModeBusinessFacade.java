@@ -25,7 +25,7 @@ import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTempla
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
-import org.neo4j.gds.applications.algorithms.machinery.WriteToDatabase;
+import org.neo4j.gds.applications.algorithms.machinery.WriteNodePropertyService;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.articulationpoints.ArticulationPointsResult;
 import org.neo4j.gds.articulationpoints.ArticulationPointsWriteConfig;
@@ -62,7 +62,7 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
     private final CentralityAlgorithmsEstimationModeBusinessFacade estimationFacade;
     private final CentralityBusinessAlgorithms centralityAlgorithms;
     private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
-    private final WriteToDatabase writeToDatabase;
+    private final WriteNodePropertyService writeNodePropertyService;
     private final HitsHookGenerator hitsHookGenerator;
 
 
@@ -70,13 +70,13 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
         CentralityAlgorithmsEstimationModeBusinessFacade estimationFacade,
         CentralityBusinessAlgorithms centralityAlgorithms,
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
-        WriteToDatabase writeToDatabase,
+        WriteNodePropertyService writeNodePropertyService,
         HitsHookGenerator hitsHookGenerator
     ) {
         this.estimationFacade = estimationFacade;
         this.centralityAlgorithms = centralityAlgorithms;
         this.algorithmProcessingTemplateConvenience = algorithmProcessingTemplateConvenience;
-        this.writeToDatabase = writeToDatabase;
+        this.writeNodePropertyService = writeNodePropertyService;
         this.hitsHookGenerator = hitsHookGenerator;
     }
 
@@ -89,7 +89,7 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
         HitsHookGenerator hitsHookGenerator
     ) {
-        var writeToDatabase = new WriteToDatabase(log, requestScopedDependencies, writeContext);
+        var writeToDatabase = new WriteNodePropertyService(log, requestScopedDependencies, writeContext);
 
         return new CentralityAlgorithmsWriteModeBusinessFacade(
             estimationFacade,
@@ -105,7 +105,7 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
         ArticleRankWriteConfig configuration,
         ResultBuilder<ArticleRankWriteConfig, PageRankResult, RESULT, NodePropertiesWritten> resultBuilder
     ) {
-        var writeStep = new PageRankWriteStep<>(writeToDatabase, configuration, ArticleRank);
+        var writeStep = new PageRankWriteStep<>(writeNodePropertyService, configuration, ArticleRank);
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInWriteMode(
             graphName,
@@ -123,7 +123,7 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
         BetweennessCentralityWriteConfig configuration,
         ResultBuilder<BetweennessCentralityWriteConfig, CentralityAlgorithmResult, RESULT, NodePropertiesWritten> resultBuilder
     ) {
-        var writeStep = new BetweennessCentralityWriteStep(writeToDatabase, configuration);
+        var writeStep = new BetweennessCentralityWriteStep(writeNodePropertyService, configuration);
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInWriteMode(
             graphName,
@@ -147,7 +147,7 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
             ArticulationPoints,
             ()-> estimationFacade.articulationPoints(false),
             (graph, __) -> centralityAlgorithms.articulationPoints(graph, configuration,false),
-            new ArticulationPointsWriteStep(configuration, writeToDatabase),
+            new ArticulationPointsWriteStep(configuration, writeNodePropertyService),
             resultBuilder
         );
     }
@@ -157,7 +157,7 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
         CONFIGURATION configuration,
         ResultBuilder<CONFIGURATION, CELFResult, RESULT, NodePropertiesWritten> resultBuilder
     ) {
-        var writeStep = new CelfWriteStep(writeToDatabase, configuration);
+        var writeStep = new CelfWriteStep(writeNodePropertyService, configuration);
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInWriteMode(
             graphName,
@@ -175,7 +175,7 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
         ClosenessCentralityWriteConfig configuration,
         ResultBuilder<ClosenessCentralityWriteConfig, CentralityAlgorithmResult, RESULT, NodePropertiesWritten> resultBuilder
     ) {
-        var writeStep = new ClosenessCentralityWriteStep(writeToDatabase, configuration);
+        var writeStep = new ClosenessCentralityWriteStep(writeNodePropertyService, configuration);
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInWriteMode(
             graphName,
@@ -193,7 +193,7 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
         DegreeCentralityWriteConfig configuration,
         ResultBuilder<DegreeCentralityWriteConfig, CentralityAlgorithmResult, RESULT, NodePropertiesWritten> resultBuilder
     ) {
-        var writeStep = new DegreeCentralityWriteStep(writeToDatabase, configuration);
+        var writeStep = new DegreeCentralityWriteStep(writeNodePropertyService, configuration);
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInWriteMode(
             graphName,
@@ -211,7 +211,7 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
         EigenvectorWriteConfig configuration,
         ResultBuilder<EigenvectorWriteConfig, PageRankResult, RESULT, NodePropertiesWritten> resultBuilder
     ) {
-        var writeStep = new PageRankWriteStep<>(writeToDatabase, configuration, EigenVector);
+        var writeStep = new PageRankWriteStep<>(writeNodePropertyService, configuration, EigenVector);
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInWriteMode(
             graphName,
@@ -229,7 +229,7 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
         CONFIGURATION configuration,
         ResultBuilder<CONFIGURATION, HarmonicResult, RESULT, NodePropertiesWritten> resultBuilder
     ) {
-        var writeStep = new HarmonicCentralityWriteStep(writeToDatabase, configuration);
+        var writeStep = new HarmonicCentralityWriteStep(writeNodePropertyService, configuration);
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInWriteMode(
             graphName,
@@ -247,7 +247,7 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
         PageRankWriteConfig configuration,
         ResultBuilder<PageRankWriteConfig, PageRankResult, RESULT, NodePropertiesWritten> resultBuilder
     ) {
-        var writeStep = new PageRankWriteStep<>(writeToDatabase, configuration, ArticleRank);
+        var writeStep = new PageRankWriteStep<>(writeNodePropertyService, configuration, ArticleRank);
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInWriteMode(
             graphName,
@@ -265,7 +265,7 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
         HitsConfig configuration,
         ResultBuilder<HitsConfig, PregelResult, RESULT, NodePropertiesWritten> resultBuilder
     ) {
-        var writeStep = new HitsWriteStep(writeToDatabase, configuration, HITS);
+        var writeStep = new HitsWriteStep(writeNodePropertyService, configuration, HITS);
         var hitsETLHook = hitsHookGenerator.createETLHook(configuration);
 
         return algorithmProcessingTemplateConvenience.processAlgorithmInWriteMode(

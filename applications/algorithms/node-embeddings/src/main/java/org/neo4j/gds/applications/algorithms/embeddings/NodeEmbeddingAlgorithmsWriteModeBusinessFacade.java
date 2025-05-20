@@ -24,7 +24,7 @@ import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTempla
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
-import org.neo4j.gds.applications.algorithms.machinery.WriteToDatabase;
+import org.neo4j.gds.applications.algorithms.machinery.WriteNodePropertyService;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.embeddings.fastrp.FastRPResult;
 import org.neo4j.gds.embeddings.fastrp.FastRPWriteConfig;
@@ -48,19 +48,19 @@ public final class NodeEmbeddingAlgorithmsWriteModeBusinessFacade {
     private final NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimationFacade;
     private final NodeEmbeddingBusinessAlgorithms algorithms;
     private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
-    private final WriteToDatabase writeToDatabase;
+    private final WriteNodePropertyService writeNodePropertyService;
     private final GraphSageAlgorithmProcessing graphSageAlgorithmProcessing;
 
     NodeEmbeddingAlgorithmsWriteModeBusinessFacade(
         NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimationFacade,
         NodeEmbeddingBusinessAlgorithms algorithms,
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
-        WriteToDatabase writeToDatabase, GraphSageAlgorithmProcessing graphSageAlgorithmProcessing
+        WriteNodePropertyService writeNodePropertyService, GraphSageAlgorithmProcessing graphSageAlgorithmProcessing
     ) {
         this.estimationFacade = estimationFacade;
         this.algorithms = algorithms;
         this.algorithmProcessingTemplateConvenience = algorithmProcessingTemplateConvenience;
-        this.writeToDatabase = writeToDatabase;
+        this.writeNodePropertyService = writeNodePropertyService;
         this.graphSageAlgorithmProcessing = graphSageAlgorithmProcessing;
     }
 
@@ -73,7 +73,7 @@ public final class NodeEmbeddingAlgorithmsWriteModeBusinessFacade {
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
         GraphSageAlgorithmProcessing graphSageAlgorithmProcessing
     ) {
-        var writeToDatabase = new WriteToDatabase(log, requestScopedDependencies, writeContext);
+        var writeToDatabase = new WriteNodePropertyService(log, requestScopedDependencies, writeContext);
 
         return new NodeEmbeddingAlgorithmsWriteModeBusinessFacade(
             estimationFacade,
@@ -89,7 +89,7 @@ public final class NodeEmbeddingAlgorithmsWriteModeBusinessFacade {
         FastRPWriteConfig configuration,
         ResultBuilder<FastRPWriteConfig, FastRPResult, RESULT, NodePropertiesWritten> resultBuilder
     ) {
-        var writeStep = new FastRPWriteStep(writeToDatabase, configuration);
+        var writeStep = new FastRPWriteStep(writeNodePropertyService, configuration);
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInWriteMode(
             graphName,
@@ -107,7 +107,7 @@ public final class NodeEmbeddingAlgorithmsWriteModeBusinessFacade {
         GraphSageWriteConfig configuration,
         ResultBuilder<GraphSageWriteConfig, GraphSageResult, RESULT, NodePropertiesWritten> resultBuilder
     ) {
-        var writeStep = new GraphSageWriteStep(writeToDatabase, configuration);
+        var writeStep = new GraphSageWriteStep(writeNodePropertyService, configuration);
 
         var graphSageProcessParameters = graphSageAlgorithmProcessing.graphSageValidationHook(configuration);
         return algorithmProcessingTemplateConvenience.processAlgorithmInWriteMode(
@@ -128,7 +128,7 @@ public final class NodeEmbeddingAlgorithmsWriteModeBusinessFacade {
         HashGNNWriteConfig configuration,
         ResultBuilder<HashGNNWriteConfig, HashGNNResult, RESULT, NodePropertiesWritten> resultBuilder
     ) {
-        var writeStep = new HashGnnWriteStep(writeToDatabase, configuration);
+        var writeStep = new HashGnnWriteStep(writeNodePropertyService, configuration);
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInWriteMode(
             graphName,
@@ -146,7 +146,7 @@ public final class NodeEmbeddingAlgorithmsWriteModeBusinessFacade {
         Node2VecWriteConfig configuration,
         ResultBuilder<Node2VecWriteConfig, Node2VecResult, RESULT, NodePropertiesWritten> resultBuilder
     ) {
-        var writeStep = new Node2VecWriteStep(writeToDatabase, configuration);
+        var writeStep = new Node2VecWriteStep(writeNodePropertyService, configuration);
         var validationHook = new Node2VecValidationHook(configuration);
 
         return algorithmProcessingTemplateConvenience.processAlgorithmInWriteMode(

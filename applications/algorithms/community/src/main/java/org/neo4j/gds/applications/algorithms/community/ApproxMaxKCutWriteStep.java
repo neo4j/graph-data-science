@@ -24,8 +24,8 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
+import org.neo4j.gds.applications.algorithms.machinery.WriteNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.WriteStep;
-import org.neo4j.gds.applications.algorithms.machinery.WriteToDatabase;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutResult;
 import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutWriteConfig;
@@ -34,11 +34,11 @@ import org.neo4j.gds.core.utils.progress.JobId;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ApproximateMaximumKCut;
 
 class ApproxMaxKCutWriteStep implements WriteStep<ApproxMaxKCutResult, NodePropertiesWritten> {
-    private final WriteToDatabase writeToDatabase;
+    private final WriteNodePropertyService writeNodePropertyService;
     private final ApproxMaxKCutWriteConfig configuration;
 
-    ApproxMaxKCutWriteStep(WriteToDatabase writeToDatabase, ApproxMaxKCutWriteConfig configuration) {
-        this.writeToDatabase = writeToDatabase;
+    ApproxMaxKCutWriteStep(WriteNodePropertyService writeNodePropertyService, ApproxMaxKCutWriteConfig configuration) {
+        this.writeNodePropertyService = writeNodePropertyService;
         this.configuration = configuration;
     }
 
@@ -53,7 +53,7 @@ class ApproxMaxKCutWriteStep implements WriteStep<ApproxMaxKCutResult, NodePrope
         var longNodePropertyValues = NodePropertyValuesAdapter.adapt(result.candidateSolution());
         var nodePropertyValues = CommunityCompanion.nodePropertyValues(false, longNodePropertyValues);
 
-        return writeToDatabase.perform(
+        return writeNodePropertyService.perform(
             graph,
             graphStore,
             resultStore,

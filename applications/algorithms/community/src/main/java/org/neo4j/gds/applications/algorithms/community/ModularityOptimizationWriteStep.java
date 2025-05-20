@@ -23,8 +23,8 @@ import org.neo4j.gds.algorithms.community.CommunityCompanion;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
+import org.neo4j.gds.applications.algorithms.machinery.WriteNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.WriteStep;
-import org.neo4j.gds.applications.algorithms.machinery.WriteToDatabase;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationResult;
@@ -33,11 +33,11 @@ import org.neo4j.gds.modularityoptimization.ModularityOptimizationWriteConfig;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ModularityOptimization;
 
 class ModularityOptimizationWriteStep implements WriteStep<ModularityOptimizationResult, NodePropertiesWritten> {
-    private final WriteToDatabase writeToDatabase;
+    private final WriteNodePropertyService writeNodePropertyService;
     private final ModularityOptimizationWriteConfig configuration;
 
-    ModularityOptimizationWriteStep(WriteToDatabase writeToDatabase, ModularityOptimizationWriteConfig configuration) {
-        this.writeToDatabase = writeToDatabase;
+    ModularityOptimizationWriteStep(WriteNodePropertyService writeNodePropertyService, ModularityOptimizationWriteConfig configuration) {
+        this.writeNodePropertyService = writeNodePropertyService;
         this.configuration = configuration;
     }
 
@@ -60,7 +60,7 @@ class ModularityOptimizationWriteStep implements WriteStep<ModularityOptimizatio
             () -> graphStore.nodeProperty(configuration.seedProperty())
         );
 
-        return writeToDatabase.perform(
+        return writeNodePropertyService.perform(
             graph,
             graphStore,
             resultStore,

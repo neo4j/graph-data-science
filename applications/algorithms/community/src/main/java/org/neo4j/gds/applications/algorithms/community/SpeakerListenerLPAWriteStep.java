@@ -25,8 +25,8 @@ import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.applications.algorithms.machinery.Label;
+import org.neo4j.gds.applications.algorithms.machinery.WriteNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.WriteStep;
-import org.neo4j.gds.applications.algorithms.machinery.WriteToDatabase;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.core.utils.progress.JobId;
@@ -34,16 +34,16 @@ import org.neo4j.gds.sllpa.SpeakerListenerLPA;
 import org.neo4j.gds.sllpa.SpeakerListenerLPAConfig;
 
 class SpeakerListenerLPAWriteStep implements WriteStep<PregelResult, NodePropertiesWritten> {
-    private final WriteToDatabase writeToDatabase;
+    private final WriteNodePropertyService writeNodePropertyService;
     private final SpeakerListenerLPAConfig configuration;
     private final Label label;
 
     SpeakerListenerLPAWriteStep(
-        WriteToDatabase writeToDatabase,
+        WriteNodePropertyService writeNodePropertyService,
         SpeakerListenerLPAConfig configuration,
         Label label
     ) {
-        this.writeToDatabase = writeToDatabase;
+        this.writeNodePropertyService = writeNodePropertyService;
         this.configuration = configuration;
         this.label = label;
     }
@@ -56,7 +56,7 @@ class SpeakerListenerLPAWriteStep implements WriteStep<PregelResult, NodePropert
         PregelResult result,
         JobId jobId
     ) {
-        return writeToDatabase.perform(
+        return writeNodePropertyService.perform(
             graph,
             graphStore,
             resultStore,

@@ -23,8 +23,8 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.applications.algorithms.machinery.Label;
+import org.neo4j.gds.applications.algorithms.machinery.WriteNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.WriteStep;
-import org.neo4j.gds.applications.algorithms.machinery.WriteToDatabase;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.config.WritePropertyConfig;
 import org.neo4j.gds.core.utils.progress.JobId;
@@ -32,16 +32,16 @@ import org.neo4j.gds.pagerank.PageRankResult;
 import org.neo4j.gds.pagerank.RankConfig;
 
 class PageRankWriteStep<C extends RankConfig & WritePropertyConfig> implements WriteStep<PageRankResult, NodePropertiesWritten> {
-    private final WriteToDatabase writeToDatabase;
+    private final WriteNodePropertyService writeNodePropertyService;
     private final C configuration;
     private final Label label;
 
     PageRankWriteStep(
-        WriteToDatabase writeToDatabase,
+        WriteNodePropertyService writeNodePropertyService,
         C configuration,
         Label label
     ) {
-        this.writeToDatabase = writeToDatabase;
+        this.writeNodePropertyService = writeNodePropertyService;
         this.configuration = configuration;
         this.label = label;
     }
@@ -54,7 +54,7 @@ class PageRankWriteStep<C extends RankConfig & WritePropertyConfig> implements W
         PageRankResult result,
         JobId jobId
     ) {
-        return writeToDatabase.perform(
+        return writeNodePropertyService.perform(
             graph,
             graphStore,
             resultStore,

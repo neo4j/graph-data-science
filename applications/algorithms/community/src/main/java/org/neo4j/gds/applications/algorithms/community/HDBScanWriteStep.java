@@ -23,8 +23,8 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
+import org.neo4j.gds.applications.algorithms.machinery.WriteNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.WriteStep;
-import org.neo4j.gds.applications.algorithms.machinery.WriteToDatabase;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.hdbscan.HDBScanWriteConfig;
@@ -33,11 +33,11 @@ import org.neo4j.gds.hdbscan.Labels;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.WCC;
 
 class HDBScanWriteStep implements WriteStep<Labels, NodePropertiesWritten> {
-    private final WriteToDatabase writeToDatabase;
+    private final WriteNodePropertyService writeNodePropertyService;
     private final HDBScanWriteConfig configuration;
 
-    HDBScanWriteStep(WriteToDatabase writeToDatabase, HDBScanWriteConfig configuration) {
-        this.writeToDatabase = writeToDatabase;
+    HDBScanWriteStep(WriteNodePropertyService writeNodePropertyService, HDBScanWriteConfig configuration) {
+        this.writeNodePropertyService = writeNodePropertyService;
         this.configuration = configuration;
     }
 
@@ -49,7 +49,7 @@ class HDBScanWriteStep implements WriteStep<Labels, NodePropertiesWritten> {
         Labels result,
         JobId jobId
     ) {
-        return writeToDatabase.perform(
+        return writeNodePropertyService.perform(
             graph,
             graphStore,
             resultStore,

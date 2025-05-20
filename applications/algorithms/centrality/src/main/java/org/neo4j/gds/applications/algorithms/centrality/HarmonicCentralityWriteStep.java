@@ -22,8 +22,8 @@ package org.neo4j.gds.applications.algorithms.centrality;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
+import org.neo4j.gds.applications.algorithms.machinery.WriteNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.WriteStep;
-import org.neo4j.gds.applications.algorithms.machinery.WriteToDatabase;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.harmonic.HarmonicCentralityWriteConfig;
@@ -32,11 +32,11 @@ import org.neo4j.gds.harmonic.HarmonicResult;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.HarmonicCentrality;
 
 class HarmonicCentralityWriteStep implements WriteStep<HarmonicResult, NodePropertiesWritten> {
-    private final WriteToDatabase writeToDatabase;
+    private final WriteNodePropertyService writeNodePropertyService;
     private final HarmonicCentralityWriteConfig configuration;
 
-    HarmonicCentralityWriteStep(WriteToDatabase writeToDatabase, HarmonicCentralityWriteConfig configuration) {
-        this.writeToDatabase = writeToDatabase;
+    HarmonicCentralityWriteStep(WriteNodePropertyService writeNodePropertyService, HarmonicCentralityWriteConfig configuration) {
+        this.writeNodePropertyService = writeNodePropertyService;
         this.configuration = configuration;
     }
 
@@ -48,7 +48,7 @@ class HarmonicCentralityWriteStep implements WriteStep<HarmonicResult, NodePrope
         HarmonicResult result,
         JobId jobId
     ) {
-        return writeToDatabase.perform(
+        return writeNodePropertyService.perform(
             graph,
             graphStore,
             resultStore,

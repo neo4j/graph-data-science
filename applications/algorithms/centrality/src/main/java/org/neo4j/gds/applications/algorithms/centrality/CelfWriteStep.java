@@ -22,8 +22,8 @@ package org.neo4j.gds.applications.algorithms.centrality;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
+import org.neo4j.gds.applications.algorithms.machinery.WriteNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.WriteStep;
-import org.neo4j.gds.applications.algorithms.machinery.WriteToDatabase;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.influenceMaximization.CELFNodeProperties;
@@ -33,11 +33,11 @@ import org.neo4j.gds.influenceMaximization.InfluenceMaximizationWriteConfig;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.CELF;
 
 class CelfWriteStep implements WriteStep<CELFResult, NodePropertiesWritten> {
-    private final WriteToDatabase writeToDatabase;
+    private final WriteNodePropertyService writeNodePropertyService;
     private final InfluenceMaximizationWriteConfig configuration;
 
-    CelfWriteStep(WriteToDatabase writeToDatabase, InfluenceMaximizationWriteConfig configuration) {
-        this.writeToDatabase = writeToDatabase;
+    CelfWriteStep(WriteNodePropertyService writeNodePropertyService, InfluenceMaximizationWriteConfig configuration) {
+        this.writeNodePropertyService = writeNodePropertyService;
         this.configuration = configuration;
     }
 
@@ -51,7 +51,7 @@ class CelfWriteStep implements WriteStep<CELFResult, NodePropertiesWritten> {
     ) {
         var nodePropertyValues = new CELFNodeProperties(result.seedSetNodes(), graph.nodeCount());
 
-        return writeToDatabase.perform(
+        return writeNodePropertyService.perform(
             graph,
             graphStore,
             resultStore,

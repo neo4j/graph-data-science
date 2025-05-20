@@ -26,7 +26,7 @@ import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTempla
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
-import org.neo4j.gds.applications.algorithms.machinery.WriteToDatabase;
+import org.neo4j.gds.applications.algorithms.machinery.WriteNodePropertyService;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutResult;
 import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutWriteConfig;
@@ -77,18 +77,18 @@ public final class CommunityAlgorithmsWriteModeBusinessFacade {
     private final CommunityAlgorithmsEstimationModeBusinessFacade estimationFacade;
     private final CommunityAlgorithmsBusinessFacade algorithms;
     private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
-    private final WriteToDatabase writeToDatabase;
+    private final WriteNodePropertyService writeNodePropertyService;
 
     private CommunityAlgorithmsWriteModeBusinessFacade(
         CommunityAlgorithmsEstimationModeBusinessFacade estimationFacade,
         CommunityAlgorithmsBusinessFacade algorithms,
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
-        WriteToDatabase writeToDatabase
+        WriteNodePropertyService writeNodePropertyService
     ) {
         this.estimationFacade = estimationFacade;
         this.algorithms = algorithms;
         this.algorithmProcessingTemplateConvenience = algorithmProcessingTemplateConvenience;
-        this.writeToDatabase = writeToDatabase;
+        this.writeNodePropertyService = writeNodePropertyService;
     }
 
     public static CommunityAlgorithmsWriteModeBusinessFacade create(
@@ -99,7 +99,7 @@ public final class CommunityAlgorithmsWriteModeBusinessFacade {
         CommunityAlgorithmsBusinessFacade algorithms,
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience
     ) {
-        var writeToDatabase = new WriteToDatabase(log, requestScopedDependencies, writeContext);
+        var writeToDatabase = new WriteNodePropertyService(log, requestScopedDependencies, writeContext);
 
         return new CommunityAlgorithmsWriteModeBusinessFacade(
             estimation,
@@ -114,7 +114,7 @@ public final class CommunityAlgorithmsWriteModeBusinessFacade {
         ApproxMaxKCutWriteConfig configuration,
         ResultBuilder<ApproxMaxKCutWriteConfig, ApproxMaxKCutResult, RESULT, NodePropertiesWritten> resultBuilder
     ) {
-        var writeStep = new ApproxMaxKCutWriteStep(writeToDatabase, configuration);
+        var writeStep = new ApproxMaxKCutWriteStep(writeNodePropertyService, configuration);
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInWriteMode(
             graphName,
@@ -132,7 +132,7 @@ public final class CommunityAlgorithmsWriteModeBusinessFacade {
         K1ColoringWriteConfig configuration,
         ResultBuilder<K1ColoringWriteConfig, K1ColoringResult, RESULT, Void> resultBuilder
     ) {
-        var writeStep = new K1ColoringWriteStep(writeToDatabase, configuration);
+        var writeStep = new K1ColoringWriteStep(writeNodePropertyService, configuration);
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInWriteMode(
             graphName,
@@ -150,7 +150,7 @@ public final class CommunityAlgorithmsWriteModeBusinessFacade {
         KCoreDecompositionWriteConfig configuration,
         ResultBuilder<KCoreDecompositionWriteConfig, KCoreDecompositionResult, RESULT, NodePropertiesWritten> resultBuilder
     ) {
-        var writeStep = new KCoreWriteStep(writeToDatabase, configuration);
+        var writeStep = new KCoreWriteStep(writeNodePropertyService, configuration);
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInWriteMode(
             graphName,
@@ -168,7 +168,7 @@ public final class CommunityAlgorithmsWriteModeBusinessFacade {
         KmeansWriteConfig configuration,
         ResultBuilder<KmeansWriteConfig, KmeansResult, RESULT, NodePropertiesWritten> resultBuilder
     ) {
-        var writeStep = new KMeansWriteStep(writeToDatabase, configuration);
+        var writeStep = new KMeansWriteStep(writeNodePropertyService, configuration);
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInWriteMode(
             graphName,
@@ -186,7 +186,7 @@ public final class CommunityAlgorithmsWriteModeBusinessFacade {
         LabelPropagationWriteConfig configuration,
         ResultBuilder<LabelPropagationWriteConfig, LabelPropagationResult, RESULT, Pair<NodePropertiesWritten, NodePropertyValues>> resultBuilder
     ) {
-        var writeStep = new LabelPropagationWriteStep(writeToDatabase, configuration);
+        var writeStep = new LabelPropagationWriteStep(writeNodePropertyService, configuration);
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInWriteMode(
             graphName,
@@ -204,7 +204,7 @@ public final class CommunityAlgorithmsWriteModeBusinessFacade {
         LocalClusteringCoefficientWriteConfig configuration,
         ResultBuilder<LocalClusteringCoefficientWriteConfig, LocalClusteringCoefficientResult, RESULT, NodePropertiesWritten> resultBuilder
     ) {
-        var writeStep = new LccWriteStep(writeToDatabase, configuration);
+        var writeStep = new LccWriteStep(writeNodePropertyService, configuration);
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInWriteMode(
             graphName,
@@ -222,7 +222,7 @@ public final class CommunityAlgorithmsWriteModeBusinessFacade {
         LeidenWriteConfig configuration,
         ResultBuilder<LeidenWriteConfig, LeidenResult, RESULT, Pair<NodePropertiesWritten, NodePropertyValues>> resultBuilder
     ) {
-        var writeStep = new LeidenWriteStep(writeToDatabase, configuration);
+        var writeStep = new LeidenWriteStep(writeNodePropertyService, configuration);
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInWriteMode(
             graphName,
@@ -240,7 +240,7 @@ public final class CommunityAlgorithmsWriteModeBusinessFacade {
         LouvainWriteConfig configuration,
         ResultBuilder<LouvainWriteConfig, LouvainResult, RESULT, NodePropertiesWritten> resultBuilder
     ) {
-        var writeStep = new LouvainWriteStep(writeToDatabase, configuration);
+        var writeStep = new LouvainWriteStep(writeNodePropertyService, configuration);
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInWriteMode(
             graphName,
@@ -258,7 +258,7 @@ public final class CommunityAlgorithmsWriteModeBusinessFacade {
         ModularityOptimizationWriteConfig configuration,
         ResultBuilder<ModularityOptimizationWriteConfig, ModularityOptimizationResult, RESULT, NodePropertiesWritten> resultBuilder
     ) {
-        var writeStep = new ModularityOptimizationWriteStep(writeToDatabase, configuration);
+        var writeStep = new ModularityOptimizationWriteStep(writeNodePropertyService, configuration);
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInWriteMode(
             graphName,
@@ -276,7 +276,7 @@ public final class CommunityAlgorithmsWriteModeBusinessFacade {
         SccWriteConfig configuration,
         ResultBuilder<SccWriteConfig, HugeLongArray, RESULT, NodePropertiesWritten> resultBuilder
     ) {
-        var writeStep = new SccWriteStep(writeToDatabase, configuration);
+        var writeStep = new SccWriteStep(writeNodePropertyService, configuration);
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInWriteMode(
             graphName,
@@ -294,7 +294,7 @@ public final class CommunityAlgorithmsWriteModeBusinessFacade {
         SccAlphaWriteConfig configuration,
         ResultBuilder<SccAlphaWriteConfig, HugeLongArray, RESULT, NodePropertiesWritten> resultBuilder
     ) {
-        var writeStep = new SccAlphaWriteStep(writeToDatabase, configuration);
+        var writeStep = new SccAlphaWriteStep(writeNodePropertyService, configuration);
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInWriteMode(
             graphName,
@@ -312,7 +312,7 @@ public final class CommunityAlgorithmsWriteModeBusinessFacade {
         TriangleCountWriteConfig configuration,
         ResultBuilder<TriangleCountWriteConfig, TriangleCountResult, RESULT, NodePropertiesWritten> resultBuilder
     ) {
-        var writeStep = new TriangleCountWriteStep(writeToDatabase, configuration);
+        var writeStep = new TriangleCountWriteStep(writeNodePropertyService, configuration);
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInWriteMode(
             graphName,
@@ -330,7 +330,7 @@ public final class CommunityAlgorithmsWriteModeBusinessFacade {
         WccWriteConfig configuration,
         ResultBuilder<WccWriteConfig, DisjointSetStruct, RESULT, Pair<NodePropertiesWritten, NodePropertyValues>> resultBuilder
     ) {
-        var writeStep = new WccWriteStep(writeToDatabase, configuration);
+        var writeStep = new WccWriteStep(writeNodePropertyService, configuration);
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInWriteMode(
             graphName,
@@ -348,7 +348,7 @@ public final class CommunityAlgorithmsWriteModeBusinessFacade {
         SpeakerListenerLPAConfig configuration,
         ResultBuilder<SpeakerListenerLPAConfig, PregelResult, RESULT, NodePropertiesWritten> resultBuilder
     ) {
-        var writeStep = new SpeakerListenerLPAWriteStep(writeToDatabase, configuration, SLLPA);
+        var writeStep = new SpeakerListenerLPAWriteStep(writeNodePropertyService, configuration, SLLPA);
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInWriteMode(
             graphName,
@@ -366,7 +366,7 @@ public final class CommunityAlgorithmsWriteModeBusinessFacade {
         HDBScanWriteConfig configuration,
         ResultBuilder<HDBScanWriteConfig, Labels, RESULT, NodePropertiesWritten> resultBuilder
     ) {
-        var writeStep = new HDBScanWriteStep(writeToDatabase, configuration);
+        var writeStep = new HDBScanWriteStep(writeNodePropertyService, configuration);
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInWriteMode(
             graphName,

@@ -23,8 +23,8 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
+import org.neo4j.gds.applications.algorithms.machinery.WriteNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.WriteStep;
-import org.neo4j.gds.applications.algorithms.machinery.WriteToDatabase;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientResult;
@@ -33,11 +33,11 @@ import org.neo4j.gds.triangle.LocalClusteringCoefficientWriteConfig;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Leiden;
 
 class LccWriteStep implements WriteStep<LocalClusteringCoefficientResult, NodePropertiesWritten> {
-    private final WriteToDatabase writeToDatabase;
+    private final WriteNodePropertyService writeNodePropertyService;
     private final LocalClusteringCoefficientWriteConfig configuration;
 
-    LccWriteStep(WriteToDatabase writeToDatabase, LocalClusteringCoefficientWriteConfig configuration) {
-        this.writeToDatabase = writeToDatabase;
+    LccWriteStep(WriteNodePropertyService writeNodePropertyService, LocalClusteringCoefficientWriteConfig configuration) {
+        this.writeNodePropertyService = writeNodePropertyService;
         this.configuration = configuration;
     }
 
@@ -49,7 +49,7 @@ class LccWriteStep implements WriteStep<LocalClusteringCoefficientResult, NodePr
         LocalClusteringCoefficientResult result,
         JobId jobId
     ) {
-        return writeToDatabase.perform(
+        return writeNodePropertyService.perform(
             graph,
             graphStore,
             resultStore,

@@ -23,8 +23,8 @@ import org.neo4j.gds.algorithms.embeddings.FloatEmbeddingNodePropertyValues;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
+import org.neo4j.gds.applications.algorithms.machinery.WriteNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.WriteStep;
-import org.neo4j.gds.applications.algorithms.machinery.WriteToDatabase;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.embeddings.node2vec.Node2VecResult;
@@ -33,11 +33,11 @@ import org.neo4j.gds.embeddings.node2vec.Node2VecWriteConfig;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.GraphSage;
 
 class Node2VecWriteStep implements WriteStep<Node2VecResult, NodePropertiesWritten> {
-    private final WriteToDatabase writeToDatabase;
+    private final WriteNodePropertyService writeNodePropertyService;
     private final Node2VecWriteConfig configuration;
 
-    Node2VecWriteStep(WriteToDatabase writeToDatabase, Node2VecWriteConfig configuration) {
-        this.writeToDatabase = writeToDatabase;
+    Node2VecWriteStep(WriteNodePropertyService writeNodePropertyService, Node2VecWriteConfig configuration) {
+        this.writeNodePropertyService = writeNodePropertyService;
         this.configuration = configuration;
     }
 
@@ -51,7 +51,7 @@ class Node2VecWriteStep implements WriteStep<Node2VecResult, NodePropertiesWritt
     ) {
         var nodePropertyValues = new FloatEmbeddingNodePropertyValues(result.embeddings());
 
-        return writeToDatabase.perform(
+        return writeNodePropertyService.perform(
             graph,
             graphStore,
             resultStore,

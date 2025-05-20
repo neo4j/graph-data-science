@@ -23,8 +23,8 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
+import org.neo4j.gds.applications.algorithms.machinery.WriteNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.WriteStep;
-import org.neo4j.gds.applications.algorithms.machinery.WriteToDatabase;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.JobId;
@@ -33,11 +33,11 @@ import org.neo4j.gds.scc.SccAlphaWriteConfig;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.SCC;
 
 class SccAlphaWriteStep implements WriteStep<HugeLongArray, NodePropertiesWritten> {
-    private final WriteToDatabase writeToDatabase;
+    private final WriteNodePropertyService writeNodePropertyService;
     private final SccAlphaWriteConfig configuration;
 
-    SccAlphaWriteStep(WriteToDatabase writeToDatabase, SccAlphaWriteConfig configuration) {
-        this.writeToDatabase = writeToDatabase;
+    SccAlphaWriteStep(WriteNodePropertyService writeNodePropertyService, SccAlphaWriteConfig configuration) {
+        this.writeNodePropertyService = writeNodePropertyService;
         this.configuration = configuration;
     }
 
@@ -51,7 +51,7 @@ class SccAlphaWriteStep implements WriteStep<HugeLongArray, NodePropertiesWritte
     ) {
         var nodePropertyValues = NodePropertyValuesAdapter.adapt(result);
 
-        return writeToDatabase.perform(
+        return writeNodePropertyService.perform(
             graph,
             graphStore,
             resultStore,

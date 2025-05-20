@@ -24,7 +24,7 @@ import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.machinery.StandardLabel;
 import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
-import org.neo4j.gds.applications.algorithms.machinery.WriteToDatabase;
+import org.neo4j.gds.applications.algorithms.machinery.WriteNodePropertyService;
 import org.neo4j.gds.beta.pregel.PregelProcedureConfig;
 import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.core.utils.ProgressTimer;
@@ -68,7 +68,7 @@ public class PregelWriteComputationResultConsumer<
                             .with(executionContext.nodePropertyExporterBuilder())
                             .build();
 
-                        var requestScopedDepedencies = RequestScopedDependencies
+                        var requestScopedDependencies = RequestScopedDependencies
                             .builder()
                             .terminationFlag(computationResult.algorithm().getTerminationFlag())
                             .taskRegistryFactory(executionContext.taskRegistryFactory())
@@ -76,9 +76,9 @@ public class PregelWriteComputationResultConsumer<
 
                         var log  = executionContext.log();
 
-                        var writeToDatabase = new WriteToDatabase(
+                        var writeToDatabase = new WriteNodePropertyService(
                             log,
-                            requestScopedDepedencies,
+                            requestScopedDependencies,
                             writeContext
                         );
 

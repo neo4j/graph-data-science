@@ -22,7 +22,7 @@ package org.neo4j.gds.applications.algorithms.miscellaneous;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
-import org.neo4j.gds.applications.algorithms.machinery.WriteToDatabase;
+import org.neo4j.gds.applications.algorithms.machinery.WriteNodePropertyService;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.scaleproperties.ScalePropertiesResult;
 import org.neo4j.gds.scaleproperties.ScalePropertiesWriteConfig;
@@ -33,18 +33,18 @@ public class MiscellaneousApplicationsWriteModeBusinessFacade {
     private final MiscellaneousApplicationsEstimationModeBusinessFacade estimationFacade;
     private final MiscellaneousAlgorithmsBusinessFacade miscellaneousAlgorithms;
     private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
-    private final WriteToDatabase writeToDatabase;
+    private final WriteNodePropertyService writeNodePropertyService;
 
     MiscellaneousApplicationsWriteModeBusinessFacade(
         MiscellaneousApplicationsEstimationModeBusinessFacade estimationFacade,
         MiscellaneousAlgorithmsBusinessFacade miscellaneousAlgorithms,
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
-        WriteToDatabase writeToDatabase
+        WriteNodePropertyService writeNodePropertyService
     ) {
         this.estimationFacade = estimationFacade;
         this.miscellaneousAlgorithms = miscellaneousAlgorithms;
         this.algorithmProcessingTemplateConvenience = algorithmProcessingTemplateConvenience;
-        this.writeToDatabase = writeToDatabase;
+        this.writeNodePropertyService = writeNodePropertyService;
     }
 
     public <RESULT> RESULT scaleProperties(
@@ -52,7 +52,7 @@ public class MiscellaneousApplicationsWriteModeBusinessFacade {
         ScalePropertiesWriteConfig configuration,
         ResultBuilder<ScalePropertiesWriteConfig, ScalePropertiesResult, RESULT, NodePropertiesWritten> resultBuilder
     ) {
-        var writeStep = new ScalePropertiesWriteStep(writeToDatabase, configuration);
+        var writeStep = new ScalePropertiesWriteStep(writeNodePropertyService, configuration);
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInWriteMode(
             graphName,

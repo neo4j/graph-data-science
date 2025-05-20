@@ -25,8 +25,8 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.applications.algorithms.machinery.WriteNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.WriteStep;
-import org.neo4j.gds.applications.algorithms.machinery.WriteToDatabase;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.core.utils.progress.JobId;
@@ -35,11 +35,11 @@ import org.neo4j.gds.wcc.WccWriteConfig;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.WCC;
 
 class WccWriteStep implements WriteStep<DisjointSetStruct, Pair<NodePropertiesWritten, NodePropertyValues>> {
-    private final WriteToDatabase writeToDatabase;
+    private final WriteNodePropertyService writeNodePropertyService;
     private final WccWriteConfig configuration;
 
-    WccWriteStep(WriteToDatabase writeToDatabase, WccWriteConfig configuration) {
-        this.writeToDatabase = writeToDatabase;
+    WccWriteStep(WriteNodePropertyService writeNodePropertyService, WccWriteConfig configuration) {
+        this.writeNodePropertyService = writeNodePropertyService;
         this.configuration = configuration;
     }
 
@@ -62,7 +62,7 @@ class WccWriteStep implements WriteStep<DisjointSetStruct, Pair<NodePropertiesWr
             () -> graphStore.nodeProperty(configuration.seedProperty())
         );
 
-        var nodePropertiesWritten = writeToDatabase.perform(
+        var nodePropertiesWritten = writeNodePropertyService.perform(
             graph,
             graphStore,
             resultStore,

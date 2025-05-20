@@ -23,8 +23,8 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
+import org.neo4j.gds.applications.algorithms.machinery.WriteNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.WriteStep;
-import org.neo4j.gds.applications.algorithms.machinery.WriteToDatabase;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.articulationpoints.ArticulationPointsResult;
 import org.neo4j.gds.articulationpoints.ArticulationPointsWriteConfig;
@@ -34,13 +34,13 @@ import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Art
 
 class ArticulationPointsWriteStep implements WriteStep<ArticulationPointsResult, NodePropertiesWritten> {
     private final ArticulationPointsWriteConfig configuration;
-    private final WriteToDatabase writeToDatabase;
+    private final WriteNodePropertyService writeNodePropertyService;
 
     public ArticulationPointsWriteStep(
-        ArticulationPointsWriteConfig configuration, WriteToDatabase writeToDatabase
+        ArticulationPointsWriteConfig configuration, WriteNodePropertyService writeNodePropertyService
     ) {
         this.configuration = configuration;
-        this.writeToDatabase = writeToDatabase;
+        this.writeNodePropertyService = writeNodePropertyService;
     }
 
     @Override
@@ -64,7 +64,7 @@ class ArticulationPointsWriteStep implements WriteStep<ArticulationPointsResult,
             }
         };
 
-        return writeToDatabase.perform(
+        return writeNodePropertyService.perform(
             graph,
             graphStore,
             resultStore,

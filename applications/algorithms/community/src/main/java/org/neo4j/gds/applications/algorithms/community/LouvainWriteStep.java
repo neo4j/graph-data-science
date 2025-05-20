@@ -25,8 +25,8 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
+import org.neo4j.gds.applications.algorithms.machinery.WriteNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.WriteStep;
-import org.neo4j.gds.applications.algorithms.machinery.WriteToDatabase;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.louvain.LouvainResult;
@@ -35,11 +35,11 @@ import org.neo4j.gds.louvain.LouvainWriteConfig;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Louvain;
 
 class LouvainWriteStep implements WriteStep<LouvainResult, NodePropertiesWritten> {
-    private final WriteToDatabase writeToDatabase;
+    private final WriteNodePropertyService writeNodePropertyService;
     private final LouvainWriteConfig configuration;
 
-    LouvainWriteStep(WriteToDatabase writeToDatabase, LouvainWriteConfig configuration) {
-        this.writeToDatabase = writeToDatabase;
+    LouvainWriteStep(WriteNodePropertyService writeNodePropertyService, LouvainWriteConfig configuration) {
+        this.writeNodePropertyService = writeNodePropertyService;
         this.configuration = configuration;
     }
 
@@ -53,7 +53,7 @@ class LouvainWriteStep implements WriteStep<LouvainResult, NodePropertiesWritten
     ) {
         var nodePropertyValues = constructNodePropertyValues(graphStore, result);
 
-        return writeToDatabase.perform(
+        return writeNodePropertyService.perform(
             graph,
             graphStore,
             resultStore,

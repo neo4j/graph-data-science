@@ -25,8 +25,8 @@ import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyRecord;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.applications.algorithms.machinery.Label;
+import org.neo4j.gds.applications.algorithms.machinery.WriteNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.WriteStep;
-import org.neo4j.gds.applications.algorithms.machinery.WriteToDatabase;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.core.utils.progress.JobId;
@@ -35,16 +35,16 @@ import org.neo4j.gds.hits.HitsConfig;
 import java.util.List;
 
 class HitsWriteStep implements WriteStep<PregelResult, NodePropertiesWritten> {
-    private final WriteToDatabase writeToDatabase;
+    private final WriteNodePropertyService writeNodePropertyService;
     private final HitsConfig configuration;
     private final Label label;
 
     HitsWriteStep(
-        WriteToDatabase writeToDatabase,
+        WriteNodePropertyService writeNodePropertyService,
         HitsConfig configuration,
         Label label
     ) {
-        this.writeToDatabase = writeToDatabase;
+        this.writeNodePropertyService = writeNodePropertyService;
         this.configuration = configuration;
         this.label = label;
     }
@@ -57,7 +57,7 @@ class HitsWriteStep implements WriteStep<PregelResult, NodePropertiesWritten> {
         PregelResult result,
         JobId jobId
     ) {
-        return writeToDatabase.perform(
+        return writeNodePropertyService.perform(
             graph,
             graphStore,
             resultStore,

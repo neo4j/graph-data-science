@@ -23,8 +23,8 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
+import org.neo4j.gds.applications.algorithms.machinery.WriteNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.WriteStep;
-import org.neo4j.gds.applications.algorithms.machinery.WriteToDatabase;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.embeddings.fastrp.FastRPResult;
@@ -33,11 +33,11 @@ import org.neo4j.gds.embeddings.fastrp.FastRPWriteConfig;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.FastRP;
 
 class FastRPWriteStep implements WriteStep<FastRPResult, NodePropertiesWritten> {
-    private final WriteToDatabase writeToDatabase;
+    private final WriteNodePropertyService writeNodePropertyService;
     private final FastRPWriteConfig configuration;
 
-    FastRPWriteStep(WriteToDatabase writeToDatabase, FastRPWriteConfig configuration) {
-        this.writeToDatabase = writeToDatabase;
+    FastRPWriteStep(WriteNodePropertyService writeNodePropertyService, FastRPWriteConfig configuration) {
+        this.writeNodePropertyService = writeNodePropertyService;
         this.configuration = configuration;
     }
 
@@ -51,7 +51,7 @@ class FastRPWriteStep implements WriteStep<FastRPResult, NodePropertiesWritten> 
     ) {
         var nodePropertyValues = NodePropertyValuesAdapter.adapt(result.embeddings());
 
-        return writeToDatabase.perform(
+        return writeNodePropertyService.perform(
             graph,
             graphStore,
             resultStore,

@@ -26,7 +26,7 @@ import org.neo4j.gds.applications.algorithms.machinery.MutateRelationshipService
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
-import org.neo4j.gds.applications.algorithms.machinery.WriteToDatabase;
+import org.neo4j.gds.applications.algorithms.machinery.WriteNodePropertyService;
 import org.neo4j.gds.logging.Log;
 
 public final class MiscellaneousApplications {
@@ -84,7 +84,7 @@ public final class MiscellaneousApplications {
             business,
             algorithmProcessingTemplateConvenience
         );
-        var writeToDatabase = new WriteToDatabase(log, requestScopedDependencies, writeContext);
+        var writeToDatabase = new WriteNodePropertyService(log, requestScopedDependencies, writeContext);
 
         var write = new MiscellaneousApplicationsWriteModeBusinessFacade(
             estimation,

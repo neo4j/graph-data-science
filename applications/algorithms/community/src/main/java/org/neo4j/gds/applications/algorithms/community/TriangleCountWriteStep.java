@@ -23,8 +23,8 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
+import org.neo4j.gds.applications.algorithms.machinery.WriteNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.WriteStep;
-import org.neo4j.gds.applications.algorithms.machinery.WriteToDatabase;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.triangle.TriangleCountResult;
@@ -33,11 +33,11 @@ import org.neo4j.gds.triangle.TriangleCountWriteConfig;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.TriangleCount;
 
 class TriangleCountWriteStep implements WriteStep<TriangleCountResult, NodePropertiesWritten> {
-    private final WriteToDatabase writeToDatabase;
+    private final WriteNodePropertyService writeNodePropertyService;
     private final TriangleCountWriteConfig configuration;
 
-    TriangleCountWriteStep(WriteToDatabase writeToDatabase, TriangleCountWriteConfig configuration) {
-        this.writeToDatabase = writeToDatabase;
+    TriangleCountWriteStep(WriteNodePropertyService writeNodePropertyService, TriangleCountWriteConfig configuration) {
+        this.writeNodePropertyService = writeNodePropertyService;
         this.configuration = configuration;
     }
 
@@ -51,7 +51,7 @@ class TriangleCountWriteStep implements WriteStep<TriangleCountResult, NodePrope
     ) {
         var nodePropertyValues = NodePropertyValuesAdapter.adapt(result.localTriangles());
 
-        return writeToDatabase.perform(
+        return writeNodePropertyService.perform(
             graph,
             graphStore,
             resultStore,

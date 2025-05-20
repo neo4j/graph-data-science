@@ -22,8 +22,8 @@ package org.neo4j.gds.applications.algorithms.embeddings;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
+import org.neo4j.gds.applications.algorithms.machinery.WriteNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.WriteStep;
-import org.neo4j.gds.applications.algorithms.machinery.WriteToDatabase;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.embeddings.hashgnn.HashGNNResult;
@@ -32,11 +32,11 @@ import org.neo4j.gds.embeddings.hashgnn.HashGNNWriteConfig;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.GraphSage;
 
 class HashGnnWriteStep implements WriteStep<HashGNNResult, NodePropertiesWritten> {
-    private final WriteToDatabase writeToDatabase;
+    private final WriteNodePropertyService writeNodePropertyService;
     private final HashGNNWriteConfig configuration;
 
-    HashGnnWriteStep(WriteToDatabase writeToDatabase, HashGNNWriteConfig configuration) {
-        this.writeToDatabase = writeToDatabase;
+    HashGnnWriteStep(WriteNodePropertyService writeNodePropertyService, HashGNNWriteConfig configuration) {
+        this.writeNodePropertyService = writeNodePropertyService;
         this.configuration = configuration;
     }
 
@@ -50,7 +50,7 @@ class HashGnnWriteStep implements WriteStep<HashGNNResult, NodePropertiesWritten
     ) {
         var nodePropertyValues = result.embeddings();
 
-        return writeToDatabase.perform(
+        return writeNodePropertyService.perform(
             graph,
             graphStore,
             resultStore,
