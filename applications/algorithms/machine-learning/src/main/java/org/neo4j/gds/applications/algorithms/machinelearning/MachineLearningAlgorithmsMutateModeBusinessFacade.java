@@ -21,9 +21,9 @@ package org.neo4j.gds.applications.algorithms.machinelearning;
 
 import org.neo4j.gds.algorithms.machinelearning.KGEPredictMutateConfig;
 import org.neo4j.gds.algorithms.machinelearning.KGEPredictResult;
-import org.neo4j.gds.algorithms.similarity.MutateRelationshipService;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
+import org.neo4j.gds.applications.algorithms.machinery.MutateRelationshipService;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
