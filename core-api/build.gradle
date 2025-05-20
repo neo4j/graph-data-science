@@ -16,10 +16,9 @@ dependencies {
     compileOnly openGds.jetbrains.annotations
 
     // Neo4j Dependencies
+    compileOnly(neo4j.values) { transitive = false }
     // `ExportedRelationship` references `org.neo4j.values.storable.Value`
-    compileOnly(
-        [group: 'org.neo4j', name: 'neo4j-values', version: ver.'neo4j'],
-    )
+    compileOnly(neo4j.common) { transitive = false }
 
     implementation project(':annotations')
     implementation project(':collections')
@@ -29,6 +28,7 @@ dependencies {
     implementation project(':graph-schema-api')
     implementation project(':string-formatting')
 
+    implementation openGds.commons.lang3
     implementation openGds.hdrhistogram
     implementation openGds.hppc
 
