@@ -7,9 +7,7 @@ group = 'org.neo4j.gds'
 dependencies {
 
     // Neo4j Dependencies
-    compileOnly(
-        [group: 'org.neo4j', name: 'neo4j-graphdb-api', version: ver.'neo4j'],
-    )
+    compileOnly(neo4j.graphdb.api) { transitive = false }
 
     // This is here because of `org.neo4j.gds.applications.algorithms.machinery.WriteContext`
     // TODO: refactor the `WriteContext` - move it where it actually belongs.
@@ -31,10 +29,9 @@ dependencies {
     implementation project(':termination')
     implementation project(':transaction')
 
+    // Test dependencies
     // Neo4j Dependencies
-    testImplementation(
-        [group: 'org.neo4j', name: 'neo4j-graphdb-api', version: ver.'neo4j']
-    )
+    testImplementation(neo4j.graphdb.api) { transitive = false }
 
     testImplementation project(':annotations')
 
