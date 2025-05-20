@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.graphsampling.samplers.rw;
 
-import org.neo4j.function.TriFunction;
+import org.apache.commons.lang3.function.TriFunction;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
 
