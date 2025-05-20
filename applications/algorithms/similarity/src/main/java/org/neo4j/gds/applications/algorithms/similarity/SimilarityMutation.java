@@ -20,10 +20,10 @@
 package org.neo4j.gds.applications.algorithms.similarity;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.neo4j.gds.algorithms.similarity.MutateRelationshipService;
 import org.neo4j.gds.algorithms.similarity.SimilaritySingleTypeRelationshipsHandler;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.applications.algorithms.machinery.MutateRelationshipService;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 import org.neo4j.gds.config.MutateRelationshipConfig;
 import org.neo4j.gds.config.MutateRelationshipPropertyConfig;
