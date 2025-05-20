@@ -29,8 +29,7 @@ public interface ConsecutiveIdsConfig {
 
     @Configuration.Check
     default void forbidSeedingAndConsecutiveIds() {
-        if (this instanceof SeedConfig) {
-            var thisAsASeedConfig = (SeedConfig) this;
+        if (this instanceof SeedConfig thisAsASeedConfig) {
             if (thisAsASeedConfig.isIncremental() && consecutiveIds()) {
                 throw new IllegalArgumentException(
                     "Seeding and the `consecutiveIds` option cannot be used at the same time.");
