@@ -30,8 +30,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-import static org.neo4j.gds.legacycypherprojection.GraphProjectFromCypherConfig.RELATIONSHIP_QUERY_KEY;
 import static org.neo4j.gds.core.ProcedureConstants.DIRECTION_KEY;
+import static org.neo4j.gds.legacycypherprojection.GraphProjectFromCypherConfig.RELATIONSHIP_QUERY_KEY;
 
 public class LinkPredictionFunc {
 
@@ -114,7 +114,8 @@ public class LinkPredictionFunc {
     public double sameCommunity(@Name("node1") Node node1, @Name("node2") Node node2,
                                  @Name(value = "communityProperty", defaultValue = "community") String communityProperty) {
         if(!node1.hasProperty(communityProperty) || !node2.hasProperty(communityProperty)) {
-            return 0.0;        }
+            return 0.0;
+        }
 
         return node1.getProperty(communityProperty).equals(node2.getProperty(communityProperty)) ? 1.0 : 0.0;
     }
@@ -179,28 +180,12 @@ public class LinkPredictionFunc {
                 return defaultDirection;
             }
 
-            switch (directionString.toLowerCase(Locale.ENGLISH)) {
-
-                case "outgoing":
-                case "out":
-                case "o":
-                case ">":
-                    return Direction.OUTGOING;
-
-                case "incoming":
-                case "in":
-                case "i":
-                case "<":
-                    return Direction.INCOMING;
-
-                case "both":
-                case "b":
-                case "<>":
-                    return Direction.BOTH;
-
-                default:
-                    return defaultDirection;
-            }
+            return switch (directionString.toLowerCase(Locale.ENGLISH)) {
+                case "outgoing", "out", "o", ">" -> Direction.OUTGOING;
+                case "incoming", "in", "i", "<" -> Direction.INCOMING;
+                case "both", "b", "<>" -> Direction.BOTH;
+                default -> defaultDirection;
+            };
         }
 
         public static String toString(Direction direction) {
