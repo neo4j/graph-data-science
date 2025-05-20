@@ -27,6 +27,7 @@ layout = { module = "org.neo4j:neo4j-layout", version.ref = "neo4j" }
 lock = { module = "org.neo4j:neo4j-lock", version.ref = "neo4j" }
 logging = { module = "org.neo4j:neo4j-logging", version.ref = "neo4j" }
 monitoring = { module = "org.neo4j:neo4j-monitoring", version.ref = "neo4j" }
+neo4j = { module = "org.neo4j:neo4j", version.ref = "neo4j" }
 procedure-api = { module = "org.neo4j:neo4j-procedure-api", version.ref = "neo4j" }
 record-storage-engine = { module = "org.neo4j:neo4j-record-storage-engine", version.ref = "neo4j" }
 resource = { module = "org.neo4j:neo4j-resource", version.ref = "neo4j" }
@@ -35,4 +36,3 @@ ssl = { module = "org.neo4j:neo4j-ssl", version.ref = "neo4j" }
 token-api = { module = "org.neo4j:neo4j-token-api", version.ref = "neo4j" }
 unsafe = { module = "org.neo4j:neo4j-unsafe", version.ref = "neo4j" }
 values = { module = "org.neo4j:neo4j-values", version.ref = "neo4j" }
-neo4j = { module = "org.neo4j:neo4j", version.ref = "neo4j" }
