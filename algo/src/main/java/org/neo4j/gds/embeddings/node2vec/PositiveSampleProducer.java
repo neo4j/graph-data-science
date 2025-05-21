@@ -20,6 +20,7 @@
 package org.neo4j.gds.embeddings.node2vec;
 
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.Iterator;
 import java.util.SplittableRandom;
@@ -41,18 +42,22 @@ public class PositiveSampleProducer {
     private int currentWindowStart;
     private int currentWindowEnd;
     private final SplittableRandom probabilitySupplier;
+    private final ProgressTracker progressTracker;
+    private boolean attemptedSamplingWalks = false;
 
     PositiveSampleProducer(
         Iterator<long[]> walks,
         HugeDoubleArray samplingProbabilities,
         int windowSize,
-        long randomSeed
+        long randomSeed,
+        ProgressTracker progressTracker
     ) {
         this.walks = walks;
         this.samplingProbabilities = samplingProbabilities;
 
         prefixWindowSize = ceilDiv(windowSize - 1, 2);
         postfixWindowSize = (windowSize - 1) / 2;
+        this.progressTracker = progressTracker;
 
         this.currentWalk = new long[0];
         this.centerWordIndex = -1;
@@ -71,15 +76,22 @@ public class PositiveSampleProducer {
     }
 
     private boolean nextWalk() {
+        if (attemptedSamplingWalks){ //this means a walk has been exhausted
+            progressTracker.logProgress();
+        }
+        attemptedSamplingWalks = true; //this is because first time nextWalk() is called, it doesnt have any walk lol
+
         if (!walks.hasNext()) {
             return false;
         }
         long[] walk = walks.next();
+
         int filteredWalkLength = filter(walk);
 
         while (filteredWalkLength < 2 && walks.hasNext()) {
             walk = walks.next();
             filteredWalkLength = filter(walk);
+
         }
 
         if (filteredWalkLength >= 2) {

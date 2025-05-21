@@ -301,7 +301,7 @@ public class Node2VecModel {
             partition -> {
                 var taskId = taskIndex.getAndIncrement();
                 var taskRandomSeed = randomSeed + taskId;
-                var positiveSampleProducer = createPositiveSampleProducer(partition, taskRandomSeed);
+                var positiveSampleProducer = createPositiveSampleProducer(partition, taskRandomSeed, progressTracker);
                 var negativeSampleProducer = createNegativeSampleProducer(taskRandomSeed);
                 return new TrainingTask(
                     centerEmbeddings,
@@ -310,8 +310,7 @@ public class Node2VecModel {
                     negativeSampleProducer,
                     learningRate,
                     negativeSamplingRate,
-                    embeddingDimension,
-                    progressTracker
+                    embeddingDimension
                 );
             }
         );
@@ -326,13 +325,15 @@ public class Node2VecModel {
 
     PositiveSampleProducer createPositiveSampleProducer(
         DegreePartition partition,
-        long randomSeed
+        long randomSeed,
+        ProgressTracker progressTracker
     ) {
         return new PositiveSampleProducer(
             walks.iterator(partition.startNode(), partition.nodeCount()),
             randomWalkProbabilities.positiveSamplingProbabilities(),
             windowSize,
-            randomSeed
+            randomSeed,
+            progressTracker
         );
     }
 
