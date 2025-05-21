@@ -75,26 +75,31 @@ public class PositiveSampleProducer {
         return false;
     }
 
+    private boolean skipWalk(long[] walk){
+        int filteredWalkLength = filter(walk);
+        boolean skipWalk = filteredWalkLength < 2;
+        if (skipWalk){
+            progressTracker.logProgress(); //a walk has been sampled and ignored
+        }
+        return skipWalk;
+    }
     private boolean nextWalk() {
         if (attemptedSamplingWalks){ //this means a walk has been exhausted
             progressTracker.logProgress();
         }
-        attemptedSamplingWalks = true; //this is because first time nextWalk() is called, it doesnt have any walk lol
+        attemptedSamplingWalks = true; //this is because first time nextWalk() is called, it doesnt have any walk
 
         if (!walks.hasNext()) {
             return false;
         }
         long[] walk = walks.next();
 
-        int filteredWalkLength = filter(walk);
-
-        while (filteredWalkLength < 2 && walks.hasNext()) {
+        boolean walkSkipped;
+        while ((walkSkipped = skipWalk(walk)) && walks.hasNext()) {
             walk = walks.next();
-            filteredWalkLength = filter(walk);
-
         }
 
-        if (filteredWalkLength >= 2) {
+        if (!walkSkipped) {
             this.currentWalk = walk;
             centerWordIndex = -1;
             return nextCenterWord();
