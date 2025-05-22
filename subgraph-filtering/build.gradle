@@ -10,7 +10,7 @@ dependencies {
 
     compileOnly openGds.jetbrains.annotations
     compileOnly openGds.immutables.value.annotations
-    compileOnly group: 'org.scala-lang', name: 'scala-library', version: ver.'scala'
+    compileOnly openGds.scala.library
 
     implementation project(':annotations')
     implementation project(':config-api')

@@ -18,7 +18,7 @@ dependencies {
     compileOnly openGds.eclipse.collections
 
     // This is needed by `neo4j.logging`
-    compileOnly group: 'org.apache.logging.log4j', name: 'log4j-api', version: ver.'log4j'
+    compileOnly openGds.log4j.api
 
     // Neo4j dependencies
     compileOnly neo4j.annotations

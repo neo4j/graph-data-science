@@ -31,6 +31,7 @@ jqwik = "1.9.0"
 junit-pioneer = "2.2.0"
 junit5bom = "5.11.0"
 junit5 = "5.11.0"
+log4j = "2.20.0"
 memoryfilesystem = "2.8.0"
 mockito-junit-jupiter = "5.13.0"
 opencypher-front-end = "9.0.20210312"
@@ -40,6 +41,8 @@ qala-datagen = "2.5.1"
 record-builder = "42"
 reflections = "0.10.2"
 sb-contrib = "7.6.3"
+# the scala version should be aligned with the one used by Neo4j?
+scala = "2.13.11"
 stormpot = "3.2"
 
 [libraries]
@@ -87,6 +90,7 @@ junit5-jupiter-params = { module = "org.junit.jupiter:junit-jupiter-params" }
 junit5-migration = { module = "org.junit.jupiter:junit-jupiter-migrationsupport" }
 junit5-platform = { module = "org.junit.platform:junit-platform-launcher" }
 junit5bom = { module = "org.junit:junit-bom", version.ref = "junit5bom" }
+log4j-api = { module = "org.apache.logging.log4j:log4j-api", version.ref = "log4j" }
 memoryfilesystem = { module = "com.github.marschall:memoryfilesystem", version.ref = "memoryfilesystem" }
 mockito-junit-jupiter = { module = "org.mockito:mockito-junit-jupiter", version.ref = "mockito-junit-jupiter" }
 neo4j-cypher-dsl = { module = "org.neo4j:neo4j-cypher-dsl", version.ref = "cypher-dsl" }
@@ -98,6 +102,7 @@ protoc = { module = "com.google.protobuf:protoc", version.ref = "protobuf" }
 qaladatagen = { module = "io.qala.datagen:qala-datagen-junit5", version.ref = "qala-datagen" }
 recordBuilder = { module = "io.soabase.record-builder:record-builder-processor", version.ref = "record-builder" }
 reflections = { module = "org.reflections:reflections", version.ref = "reflections" }
+scala-library = { module = "org.scala-lang:scala-library", version.ref = "scala" }
 stormpot = { module = "com.github.chrisvest:stormpot", version.ref = "stormpot" }
 
 [plugins]
