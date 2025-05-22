@@ -7,14 +7,15 @@ group = 'org.neo4j.gds'
 dependencies {
     annotationProcessor project(':annotations')
     annotationProcessor openGds.immutables.value
-    annotationProcessor group: 'org.neo4j',      name: 'annotations',   version: ver.neo4j
+    annotationProcessor neo4j.annotations
 
     compileOnly openGds.immutables.value.annotations
     compileOnly openGds.jetbrains.annotations
 
-    compileOnly group: 'org.neo4j', name: 'annotations',         version: ver.neo4j, transitive: false
-    compileOnly group: 'org.neo4j', name: 'neo4j-configuration', version: ver.neo4j, transitive: false
-    compileOnly group: 'org.neo4j', name: 'neo4j-graphdb-api',   version: ver.neo4j, transitive: false
+    // Neo4j dependencies
+    compileOnly(neo4j.annotations) { transitive = false }
+    compileOnly(neo4j.configuration) { transitive = false }
+    compileOnly(neo4j.graphdb.api) { transitive = false }
 
     implementation project(':annotations')
     implementation project(':config-api')

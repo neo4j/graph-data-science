@@ -17,9 +17,10 @@ dependencies {
     compileOnly project(':annotations')
     compileOnly openGds.immutables.value.annotations
 
-    compileOnly group: 'org.neo4j', name: 'neo4j-procedure-api', version: ver.neo4j
-    compileOnly group: 'org.neo4j', name: 'neo4j-configuration', version: ver.neo4j
-    compileOnly group: 'org.neo4j', name: 'neo4j-kernel', version: ver.neo4j
+    // Neo4j dependencies
+    compileOnly(neo4j.configuration)
+    compileOnly(neo4j.kernel)
+    compileOnly(neo4j.procedure.api)
 
     implementation project(':core')
     implementation project(':core-utils')

@@ -13,7 +13,8 @@ dependencies {
     // Configuration annotations
     implementation project(':annotations')
 
-    compileOnly group: 'org.neo4j', name: 'neo4j-graphdb-api', version: ver.neo4j, transitive: false
+    // Neo4j dependencies
+    compileOnly(neo4j.graphdb.api) { transitive = false }
 
     // Make this `api` dependency - the various `toParameters` methods return classes from here.
     api project(':similarity-params')
