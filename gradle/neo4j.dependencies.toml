@@ -1,4 +1,5 @@
 [versions]
+java-driver = "5.28.2"
 neo4j = "2025.04.0"
 
 [libraries]
@@ -21,6 +22,7 @@ import-util = { module = "org.neo4j:neo4j-import-util", version.ref = "neo4j" }
 index = { module = "org.neo4j:neo4j-index", version.ref = "neo4j" }
 io = { module = "org.neo4j:neo4j-io", version.ref = "neo4j" }
 it-test-support = { module = "org.neo4j.community:it-test-support", version.ref = "neo4j" }
+java-driver = { module = "org.neo4j.driver:neo4j-java-driver", version.ref = "java-driver"}
 kernel = { module = "org.neo4j:neo4j-kernel", version.ref = "neo4j" }
 kernel-api = { module = "org.neo4j:neo4j-kernel-api", version.ref = "neo4j" }
 layout = { module = "org.neo4j:neo4j-layout", version.ref = "neo4j" }
