@@ -22,3 +22,9 @@ dependencies {
     // Test dependencies
     testImplementation project(":test-utils")
 }
+
+tasks.register('printNeo4jVersion', {
+    doFirst {
+        println("Neo4j version : ${neo4j.versions.neo4j.get()}")
+    }
+})
