@@ -1,9 +1,6 @@
-apply from: "$publicDir/gradle/neo4j-version.gradle"
-
 ext {
     ver = [
         'log4j'                : '2.20.0',
-        'neo4j'                : properties.getOrDefault('neo4jOverride', neo4jRCVersion),
         'scala'                : '2.13.11',
         'shiro'                : '2.0.1',
     ]

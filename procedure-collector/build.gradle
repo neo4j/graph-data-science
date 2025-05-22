@@ -14,7 +14,7 @@ dependencies {
 
     implementation project(':annotations')
     implementation project(':executor')
-    implementation group: 'org.neo4j',       name: 'neo4j-procedure-api', version: ver.neo4j
+    implementation (neo4j.procedure.api)
     implementation openGds.immutables.value.annotations
     implementation openGds.google.auto.common
     implementation openGds.javapoet

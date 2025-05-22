@@ -8,10 +8,11 @@ dependencies {
     annotationProcessor project(':annotations')
     annotationProcessor project(':procedure-collector')
 
+    // Neo4j dependencies
+    compileOnly(neo4j.procedure.api)
+
     implementation project(':procedures-facade-api')
     implementation project(':proc-common')
-
-    compileOnly group: 'org.neo4j', name: 'neo4j-procedure-api', version: ver.neo4j
 
     testAnnotationProcessor project(':annotations')
 
