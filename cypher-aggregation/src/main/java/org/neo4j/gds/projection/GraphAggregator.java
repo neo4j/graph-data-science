@@ -99,7 +99,7 @@ abstract class GraphAggregator implements UserAggregationReducer, UserAggregatio
     private volatile @Nullable GraphImporter importer;
 
     // #result() may be called twice, we cache the result of the first call to return it again in the second invocation
-    private @Nullable AggregationResult result;
+    private @Nullable ProjectionResult result;
     private ProgressTracker progressTracker;
 
     GraphAggregator(
@@ -281,7 +281,7 @@ abstract class GraphAggregator implements UserAggregationReducer, UserAggregatio
     @Override
     public AnyValue result() throws ProcedureException {
         var projectionMetric = projectionMetricsService.createCypherV2();
-        AggregationResult result;
+        ProjectionResult result;
         try (projectionMetric) {
             projectionMetric.start();
             result = buildGraph();
@@ -314,7 +314,7 @@ abstract class GraphAggregator implements UserAggregationReducer, UserAggregatio
         return projectResult;
     }
 
-    public @Nullable AggregationResult buildGraph() {
+    public @Nullable ProjectionResult buildGraph() {
         var importer = this.importer;
         if (importer == null) {
             // Nothing aggregated

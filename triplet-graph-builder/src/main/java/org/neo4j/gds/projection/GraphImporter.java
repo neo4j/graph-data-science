@@ -161,7 +161,7 @@ public final class GraphImporter {
         progressTracker.logProgress();
     }
 
-    public AggregationResult result(
+    public ProjectionResult result(
         DatabaseInfo databaseInfo,
         ProgressTimer timer,
         boolean hasSeenArbitraryId
@@ -213,7 +213,7 @@ public final class GraphImporter {
         progressTracker.endSubTask("Build graph store");
         progressTracker.endSubTask("Graph aggregation");
 
-        return AggregationResultBuilder.builder()
+        return ProjectionResultBuilder.builder()
             .graphName(graphName)
             .nodeCount(graphStore.nodeCount())
             .relationshipCount(graphStore.relationshipCount())

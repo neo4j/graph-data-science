@@ -24,7 +24,7 @@ import org.neo4j.gds.annotation.GenerateBuilder;
 import java.util.Map;
 
 @GenerateBuilder
-public record AggregationResult(
+public record ProjectionResult(
     String graphName,
     long nodeCount,
     long relationshipCount,

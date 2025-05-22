@@ -70,7 +70,7 @@ public class CypherAggregation implements CallableUserAggregationFunction {
 
     // NOTE: keep in sync with `FUNCTION_NAME` and `signature`
     @CustomProcedure(value = "gds.graph.project", namespace = CustomProcedure.Namespace.AGGREGATION_FUNCTION)
-    public AggregationResult procedureSyntax(
+    public ProjectionResult procedureSyntax(
         @Name("graphName") TextValue graphName,
         @Name("sourceNode") AnyValue sourceNode,
         @Name("targetNode") AnyValue targetNode,
