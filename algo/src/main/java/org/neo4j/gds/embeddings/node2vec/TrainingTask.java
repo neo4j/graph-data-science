@@ -20,7 +20,6 @@
 package org.neo4j.gds.embeddings.node2vec;
 
 import org.neo4j.gds.collections.ha.HugeObjectArray;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.core.functions.Sigmoid;
 import org.neo4j.gds.ml.core.tensor.FloatVector;
 
@@ -38,8 +37,6 @@ final class TrainingTask implements Runnable {
     private final int negativeSamplingRate;
     private final float learningRate;
 
-    private final ProgressTracker progressTracker;
-
     private double lossSum;
 
     TrainingTask(
@@ -49,8 +46,7 @@ final class TrainingTask implements Runnable {
         NegativeSampleProducer negativeSampleProducer,
         float learningRate,
         int negativeSamplingRate,
-        int embeddingDimensions,
-        ProgressTracker progressTracker
+        int embeddingDimensions
     ) {
         this.centerEmbeddings = centerEmbeddings;
         this.contextEmbeddings = contextEmbeddings;
@@ -61,7 +57,6 @@ final class TrainingTask implements Runnable {
 
         this.centerGradientBuffer = new FloatVector(embeddingDimensions);
         this.contextGradientBuffer = new FloatVector(embeddingDimensions);
-        this.progressTracker = progressTracker;
     }
 
     @Override
@@ -71,11 +66,9 @@ final class TrainingTask implements Runnable {
         // this corresponds to a stochastic optimizer as the embeddings are updated after each sample
         while (positiveSampleProducer.next(buffer)) {
             trainPositiveSample(buffer[0], buffer[1]);
-
             for (var i = 0; i < negativeSamplingRate; i++) {
                 trainNegativeSample(buffer[0], negativeSampleProducer.next());
             }
-            progressTracker.logProgress();
         }
     }
 

@@ -248,12 +248,12 @@ class Node2VecModelTest {
 
         assertThat(trainingTasks).hasSize(5);
 
-        verify(node2VecModel, times(5)).createPositiveSampleProducer(any(), anyLong());
-        verify(node2VecModel, times(1)).createPositiveSampleProducer(any(), eq(1L));
-        verify(node2VecModel, times(1)).createPositiveSampleProducer(any(), eq(2L));
-        verify(node2VecModel, times(1)).createPositiveSampleProducer(any(), eq(3L));
-        verify(node2VecModel, times(1)).createPositiveSampleProducer(any(), eq(4L));
-        verify(node2VecModel, times(1)).createPositiveSampleProducer(any(), eq(5L));
+        verify(node2VecModel, times(5)).createPositiveSampleProducer(any(), anyLong(),any(ProgressTracker.class));
+        verify(node2VecModel, times(1)).createPositiveSampleProducer(any(), eq(1L),any(ProgressTracker.class));
+        verify(node2VecModel, times(1)).createPositiveSampleProducer(any(), eq(2L),any(ProgressTracker.class));
+        verify(node2VecModel, times(1)).createPositiveSampleProducer(any(), eq(3L),any(ProgressTracker.class));
+        verify(node2VecModel, times(1)).createPositiveSampleProducer(any(), eq(4L),any(ProgressTracker.class));
+        verify(node2VecModel, times(1)).createPositiveSampleProducer(any(), eq(5L),any(ProgressTracker.class));
 
         verify(node2VecModel, times(5)).createNegativeSampleProducer(anyLong());
         verify(node2VecModel, times(1)).createNegativeSampleProducer(1L);

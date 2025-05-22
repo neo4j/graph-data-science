@@ -49,8 +49,7 @@ class TrainingTaskTest {
             null,
             0.5f,
             0,
-            3,
-            ProgressTracker.NULL_TRACKER
+            3
         );
         var center = new FloatVector(new float[]{0f,  1f, 2f});
         var context = new FloatVector(new float[]{0f, 2f, 3f});
@@ -73,8 +72,7 @@ class TrainingTaskTest {
             null,
             0.5f,
             0,
-            3,
-            ProgressTracker.NULL_TRACKER
+            3
         );
         var center = new FloatVector(new float[]{0f,  1f, 2f});
         var context = new FloatVector(new float[]{0f, 2f, 3f});
@@ -95,8 +93,7 @@ class TrainingTaskTest {
             null,
             0.5f,
             0,
-            3,
-            ProgressTracker.NULL_TRACKER
+            3
         );
         var center = new FloatVector(new float[]{0f,  1f, 2f});
         var context = new FloatVector(new float[]{1f, 2f, 3f});
@@ -132,8 +129,7 @@ class TrainingTaskTest {
             null,
             0.5f,
             0,
-            3,
-            ProgressTracker.NULL_TRACKER
+            3
         );
 
         task.trainNegativeSample(0,1);
@@ -171,8 +167,7 @@ class TrainingTaskTest {
             null,
             0.5f,
             0,
-            3,
-            ProgressTracker.NULL_TRACKER
+            3
         );
 
         task.trainPositiveSample(0,1);
@@ -198,7 +193,8 @@ class TrainingTaskTest {
             List.of(new long[]{0,1,2}, new long[]{0,3,4}).iterator(),
             HugeDoubleArray.of(1d,1d,1d,-11d,1d),
             5,
-            42 //seed is irrelevant because probability values is rigged to always pick everything except 3
+            42, //seed is irrelevant because probability values is rigged to always pick everything except 3
+            ProgressTracker.NULL_TRACKER
         );
         //positiveSampleProducer returns
 
@@ -220,8 +216,7 @@ class TrainingTaskTest {
             negativeSampleProducer,
             0.5f,
             42,
-            3,
-            ProgressTracker.NULL_TRACKER
+            3
         ));
 
         task.run();
@@ -272,7 +267,8 @@ class TrainingTaskTest {
             List.of(new long[]{0,1}, new long[]{0,2}).iterator(),
             HugeDoubleArray.of(1d,1d,1d,1d),
             5,
-            42 //seed is irrelevant because probability values is rigged to always pick everything except 3
+            42, //seed is irrelevant because probability values is rigged to always pick everything except 3
+            ProgressTracker.NULL_TRACKER
         );
 
         NegativeSampleProducer negativeSampleProducer = mock(NegativeSampleProducer.class);
@@ -293,8 +289,7 @@ class TrainingTaskTest {
             negativeSampleProducer,
             0.5f,
             1,
-            1,
-            ProgressTracker.NULL_TRACKER
+            1
         );
 
         task.run();
