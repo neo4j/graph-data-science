@@ -21,10 +21,15 @@ package org.neo4j.gds.applications.algorithms.pathfinding;
 
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphName;
+import org.neo4j.gds.api.ResultStore;
+import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
-import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
+import org.neo4j.gds.applications.algorithms.machinery.DimensionTransformer;
+import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
 import org.neo4j.gds.applications.algorithms.machinery.MutateRelationshipService;
+import org.neo4j.gds.applications.algorithms.machinery.MutateResultRenderer;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
@@ -48,6 +53,9 @@ import org.neo4j.gds.steiner.SteinerTreeMutateConfig;
 import org.neo4j.gds.steiner.SteinerTreeResult;
 import org.neo4j.gds.traversal.RandomWalkMutateConfig;
 
+import java.util.List;
+import java.util.Optional;
+
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.AStar;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.BFS;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.BellmanFord;
@@ -67,20 +75,23 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
     private final PathFindingAlgorithmsEstimationModeBusinessFacade estimationFacade;
     private final PathFindingAlgorithmsBusinessFacade pathFindingAlgorithms;
     private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
-    private final MutateNodePropertyService mutateNodePropertyService;
+    private final AlgorithmProcessingTemplate algorithmProcessingTemplate;
+    private final MutateNodeProperty mutateNodeProperty;
     private final MutateRelationshipService mutateRelationshipService;
 
     public PathFindingAlgorithmsMutateModeBusinessFacade(
         PathFindingAlgorithmsEstimationModeBusinessFacade estimationFacade,
         PathFindingAlgorithmsBusinessFacade pathFindingAlgorithms,
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
-        MutateNodePropertyService mutateNodePropertyService,
+        AlgorithmProcessingTemplate algorithmProcessingTemplate,
+        MutateNodeProperty mutateNodeProperty,
         MutateRelationshipService mutateRelationshipService
     ) {
         this.pathFindingAlgorithms = pathFindingAlgorithms;
         this.estimationFacade = estimationFacade;
         this.algorithmProcessingTemplateConvenience = algorithmProcessingTemplateConvenience;
-        this.mutateNodePropertyService = mutateNodePropertyService;
+        this.algorithmProcessingTemplate = algorithmProcessingTemplate;
+        this.mutateNodeProperty = mutateNodeProperty;
         this.mutateRelationshipService = mutateRelationshipService;
     }
 
@@ -179,7 +190,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
         RandomWalkMutateConfig configuration,
         ResultBuilder<RandomWalkMutateConfig, HugeAtomicLongArray, RESULT, NodePropertiesWritten> resultBuilder
     ) {
-        var mutateStep = new RandomWalkCountingNodeVisitsMutateStep(mutateNodePropertyService, configuration);
+        var mutateStep = new RandomWalkCountingNodeVisitsMutateStep(mutateNodeProperty, configuration);
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
             graphName,
@@ -227,6 +238,29 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
             mutateStep,
             resultBuilder
         );
+    }
+
+    public <RESULT> RESULT singlePairShortestPathDijkstraWithPaths(
+        GraphName graphName,
+        ShortestPathDijkstraMutateConfig configuration,
+        ResultStore resultStore,
+        ResultBuilder<ShortestPathDijkstraMutateConfig, PathFindingResult, RESULT, RelationshipsWritten> resultBuilder
+    ) {
+
+        return algorithmProcessingTemplate.processAlgorithmAndAnySideEffects(
+            Optional.empty(),
+            graphName,
+            configuration,
+            Optional.empty(),
+            Optional.empty(),
+            Dijkstra,
+            DimensionTransformer.DISABLED,
+            () -> estimationFacade.singlePairShortestPathDijkstra(configuration),
+            (graph, __) -> pathFindingAlgorithms.singlePairShortestPathDijkstra(graph, configuration),
+            Optional.of(new StorePathsSideEffect(resultStore, configuration.mutateRelationshipType(), List.of("totalCost", "nodeIds", "costs"), List.of(ValueType.DOUBLE, ValueType.LONG_ARRAY, ValueType.DOUBLE_ARRAY))),
+            new MutateResultRenderer<>(configuration, resultBuilder)
+        );
+
     }
 
     public <RESULT> RESULT singlePairShortestPathYens(

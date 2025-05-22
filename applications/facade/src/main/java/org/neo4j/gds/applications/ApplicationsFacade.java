@@ -199,6 +199,7 @@ public final class ApplicationsFacade {
             writeContext,
             algorithmEstimationTemplate,
             algorithmProcessingTemplateConvenience,
+            algorithmProcessingTemplate,
             progressTrackerCreator,
             mutateNodeProperty,
             mutateRelationshipService

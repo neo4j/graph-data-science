@@ -24,12 +24,12 @@ import org.neo4j.gds.core.loading.GraphResources;
 
 import java.util.Optional;
 
-class MutateResultRenderer<RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, MUTATE_METADATA, CONFIGURATION extends AlgoBaseConfig> implements
+public class MutateResultRenderer<RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, MUTATE_METADATA, CONFIGURATION extends AlgoBaseConfig> implements
     ResultRenderer<RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, MUTATE_METADATA> {
     private final CONFIGURATION configuration;
     private final ResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, MUTATE_METADATA> resultBuilder;
 
-    MutateResultRenderer(
+    public MutateResultRenderer(
         CONFIGURATION configuration,
         ResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, MUTATE_METADATA> resultBuilder
     ) {
