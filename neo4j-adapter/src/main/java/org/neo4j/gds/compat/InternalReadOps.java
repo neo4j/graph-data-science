@@ -93,12 +93,23 @@ public final class InternalReadOps {
         BlockFormat() {
             try {
                 var blockIdType = Class.forName("com.neo4j.internal.blockformat.BlockIdType");
-                var blockTypes = Objects.requireNonNull(blockIdType.getEnumConstants());
-                for (Object blockType : blockTypes) {
-                    var type = (Enum<?>) blockType;
-                    switch (type.name()) {
-                        case "NODE" -> this.nodeType = (org.neo4j.internal.id.IdType) type;
-                        case "DYNAMIC_NODE" -> this.dynamicNodeType = (org.neo4j.internal.id.IdType) type;
+                if (!blockIdType.isInterface()) {
+                    var blockTypes = Objects.requireNonNull(blockIdType.getEnumConstants());
+                    for (Object blockType : blockTypes) {
+                        var type = (Enum<?>) blockType;
+                        switch (type.name()) {
+                            case "NODE" -> this.nodeType = (org.neo4j.internal.id.IdType) type;
+                            case "DYNAMIC_NODE" -> this.dynamicNodeType = (org.neo4j.internal.id.IdType) type;
+                        }
+                    }
+                } else {
+                    blockIdType = Class.forName("com.neo4j.internal.blockformat.BareBoneSingleFileStoreIdType");
+                    var blockTypes = Objects.requireNonNull(blockIdType.getEnumConstants());
+                    for (Object blockType : blockTypes) {
+                        var type = (Enum<?>) blockType;
+                        switch (type.name()) {
+                            case "XD_NODE" -> this.nodeType = (org.neo4j.internal.id.IdType) type;
+                        }
                     }
                 }
             } catch (ClassNotFoundException | NullPointerException | ClassCastException ignored) {
