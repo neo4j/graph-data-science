@@ -22,41 +22,30 @@ package org.neo4j.gds.pregel.proc;
 import java.util.Map;
 
 @SuppressWarnings("unused")
-public final class PregelStatsResult  {
+public record PregelStatsResult(
+        long preProcessingMillis,
+        long computeMillis,
+        long postProcessingMillis,
+        long ranIterations,
+        boolean didConverge,
+        Map<String, Object> configuration
+    ) {
 
-    public final long preProcessingMillis;
-    public final long computeMillis;
-    public final Map<String, Object> configuration;
-    public final long ranIterations;
-    public final boolean didConverge;
-    public final long postProcessingMillis;
-
-    private PregelStatsResult(
+    static PregelStatsResult create(
         long preProcessingMillis,
         long computeMillis,
         long ranIterations,
         boolean didConverge,
         Map<String, Object> configuration
-    ) {
-        this.ranIterations = ranIterations;
-        this.didConverge = didConverge;
-        this.preProcessingMillis = preProcessingMillis;
-        this.postProcessingMillis = 0;
-        this.computeMillis = computeMillis;
-        this.configuration = configuration;
-    }
+    ){
+        return new PregelStatsResult(
+            preProcessingMillis,
+            computeMillis,
+            0,
+            ranIterations,
+            didConverge,
+            configuration
+        );
 
-    public static class Builder extends AbstractPregelResultBuilder<PregelStatsResult> {
-
-        @Override
-        public PregelStatsResult build() {
-            return new PregelStatsResult(
-                preProcessingMillis,
-                computeMillis,
-                ranIterations,
-                didConverge,
-                config.toMap()
-            );
-        }
     }
 }

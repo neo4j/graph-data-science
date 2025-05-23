@@ -20,28 +20,98 @@
 package org.neo4j.gds.pregel.proc;
 
 import org.neo4j.gds.Algorithm;
-import org.neo4j.gds.WriteNodePropertiesComputationResultConsumer;
+import org.neo4j.gds.api.ResultStore;
+import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
+import org.neo4j.gds.applications.algorithms.machinery.StandardLabel;
+import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
+import org.neo4j.gds.applications.algorithms.machinery.WriteToDatabase;
 import org.neo4j.gds.beta.pregel.PregelProcedureConfig;
 import org.neo4j.gds.beta.pregel.PregelResult;
+import org.neo4j.gds.core.utils.ProgressTimer;
+import org.neo4j.gds.executor.ComputationResult;
+import org.neo4j.gds.executor.ComputationResultConsumer;
+import org.neo4j.gds.executor.ExecutionContext;
+
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Stream;
+
+import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
 
 public class PregelWriteComputationResultConsumer<
     ALGO extends Algorithm<PregelResult>,
     CONFIG extends PregelProcedureConfig
-  > extends WriteNodePropertiesComputationResultConsumer<ALGO, PregelResult, CONFIG, PregelWriteResult>
-{
+  > implements
+    ComputationResultConsumer<ALGO, PregelResult, CONFIG, Stream<PregelWriteResult>> {
 
-    public PregelWriteComputationResultConsumer() {
-        super(
-            (computationResult, executionContext) -> {
+    @Override
+    public Stream<PregelWriteResult> consume(
+        ComputationResult<ALGO, PregelResult, CONFIG> computationResult,
+        ExecutionContext executionContext
+    ) {
+        return runWithExceptionLogging(
+            "Graph write failed", executionContext.log(), () -> {
+                CONFIG config = computationResult.config();
                 var ranIterations = computationResult.result().map(PregelResult::ranIterations).orElse(0);
                 var didConverge = computationResult.result().map(PregelResult::didConverge).orElse(false);
-                return new PregelWriteResult.Builder().withRanIterations(ranIterations).didConverge(didConverge);
-            },
-            (computationResult) -> PregelCompanion.nodeProperties(
-                computationResult,
-                computationResult.config().writeProperty()
-            ),
-            "PregelWrite"
+
+                AtomicLong writeMillis = new AtomicLong();
+                AtomicLong nodePropertiesWritten = new AtomicLong();
+                try (ProgressTimer ignored = ProgressTimer.start(writeMillis::set)) {
+                    if (!computationResult.isGraphEmpty()) {
+                        var nodePropertyMap = PregelCompanion.nodePropertiesAsMap(
+                            computationResult,
+                            config.writeProperty()
+                        );
+
+                        var writeContext = WriteContext
+                            .builder()
+                            .with(executionContext.nodePropertyExporterBuilder())
+                            .build();
+
+                        var requestScopedDepedencies = RequestScopedDependencies
+                            .builder()
+                            .terminationFlag(computationResult.algorithm().getTerminationFlag())
+                            .taskRegistryFactory(executionContext.taskRegistryFactory())
+                            .build();
+
+                        var log  = executionContext.log();
+
+                        var writeToDatabase = new WriteToDatabase(
+                            log,
+                            requestScopedDepedencies,
+                            writeContext
+                        );
+
+                        var resultStore = config.resolveResultStore(computationResult.resultStore()).orElse(ResultStore.EMPTY);
+
+                        var nodePropsWritten = writeToDatabase.perform(
+                            computationResult.graph(),
+                            computationResult.graphStore(),
+                            resultStore,
+                            config,
+                            new StandardLabel("PregelWrite"),
+                            config.jobId(),
+                            nodePropertyMap
+                            );
+
+                        nodePropertiesWritten.set(nodePropsWritten.value());
+                    }
+                }
+
+                var result = PregelWriteResult.create(
+                    nodePropertiesWritten.get(),
+                    computationResult.preProcessingMillis(),
+                    computationResult.computeMillis(),
+                    writeMillis.get(),
+                    ranIterations,
+                    didConverge,
+                    config.toMap()
+                );
+
+                return Stream.of(result);
+            }
         );
     }
 }
+
+

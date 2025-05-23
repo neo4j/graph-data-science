@@ -35,21 +35,26 @@ public record PregelWriteResult(
         Map<String, Object> configuration
     )  implements WriteNodePropertiesResult {
 
+    static PregelWriteResult create(
+        long nodePropertiesWritten,
+        long preProcessingMillis,
+        long computeMillis,
+        long writeMillis,
+        long ranIterations,
+        boolean didConverge,
+        Map<String, Object> configuration
+    ){
+        return new PregelWriteResult(
+            nodePropertiesWritten,
+            preProcessingMillis,
+            computeMillis,
+            writeMillis,
+            0,
+            ranIterations,
+            didConverge,
+            configuration
+        );
 
-    public static class Builder extends AbstractPregelResultBuilder<PregelWriteResult> {
-
-        @Override
-        public PregelWriteResult build() {
-            return new PregelWriteResult(
-                nodePropertiesWritten,
-                preProcessingMillis,
-                computeMillis,
-                0,
-                writeMillis,
-                ranIterations,
-                didConverge,
-                config.toMap()
-            );
-        }
     }
+
 }

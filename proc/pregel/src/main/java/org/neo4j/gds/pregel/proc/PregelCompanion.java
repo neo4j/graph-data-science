@@ -22,6 +22,7 @@ package org.neo4j.gds.pregel.proc;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.nodes.DoubleArrayNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.LongArrayNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
@@ -29,6 +30,7 @@ import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.miscellaneous.MiscellaneousAlgorithms;
+import org.neo4j.gds.beta.pregel.NodeValue;
 import org.neo4j.gds.beta.pregel.PregelConfig;
 import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.beta.pregel.PregelSchema;
@@ -50,8 +52,10 @@ import org.neo4j.gds.utils.StringJoining;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -166,29 +170,61 @@ public final class PregelCompanion {
             .filter(element -> element.visibility() == PregelSchema.Visibility.PUBLIC)
             .map(element -> {
                 var propertyKey = element.propertyKey();
-
-                NodePropertyValues nodePropertyValues;
-                switch (element.propertyType()) {
-                    case LONG:
-                        nodePropertyValues = NodePropertyValuesAdapter.adapt(compositeNodeValue.longProperties(propertyKey));
-                        break;
-                    case DOUBLE:
-                        nodePropertyValues = NodePropertyValuesAdapter.adapt(compositeNodeValue.doubleProperties(propertyKey));
-                        break;
-                    case LONG_ARRAY:
-                        nodePropertyValues = new HugeObjectArrayLongArrayPropertyValues(compositeNodeValue.longArrayProperties(propertyKey));
-                        break;
-                    case DOUBLE_ARRAY:
-                        nodePropertyValues = new HugeObjectArrayDoubleArrayPropertyValues(compositeNodeValue.doubleArrayProperties(propertyKey));
-                        break;
-                    default:
-                        throw new IllegalArgumentException("Unsupported property type: " + element.propertyType());
-                }
-
+                var nodePropertyValues  = adaptNodeProperty(
+                    propertyKey,
+                    element.propertyType(),
+                    compositeNodeValue
+                );
                 return NodeProperty.of(formatWithLocale("%s%s", propertyPrefix, propertyKey), nodePropertyValues);
             }).collect(Collectors.toList());
     }
 
+    static <ALGO extends Algorithm<PregelResult>, CONFIG extends PregelConfig> Map<String,NodePropertyValues> nodePropertiesAsMap(
+        ComputationResult<ALGO, PregelResult, CONFIG> computationResult, String propertyPrefix
+    ) {
+        if (computationResult.result().isEmpty()) {
+            return Collections.emptyMap();
+        }
+
+        var result = computationResult.result().get();
+        var compositeNodeValue = result.nodeValues();
+        var schema = compositeNodeValue.schema();
+        // TODO change this to generic prefix setting
+
+        var map =new HashMap<String, NodePropertyValues>();
+         schema
+            .elements()
+            .stream()
+            .filter(element -> element.visibility() == PregelSchema.Visibility.PUBLIC)
+            .forEach(element -> {
+                var propertyKey = element.propertyKey();
+                var nodePropertyValues  = adaptNodeProperty(
+                    propertyKey,
+                    element.propertyType(),
+                    compositeNodeValue
+                );
+                var formattedName = formatWithLocale("%s%s", propertyPrefix, propertyKey);
+                map.put(formattedName,nodePropertyValues);
+            });
+         return  map;
+    }
+
+   private static NodePropertyValues adaptNodeProperty(
+       String propertyKey,
+       ValueType propertyType,
+       NodeValue compositeNodeValue
+   ){
+
+        return switch (propertyType) {
+            case LONG -> NodePropertyValuesAdapter.adapt(compositeNodeValue.longProperties(propertyKey));
+            case DOUBLE -> NodePropertyValuesAdapter.adapt(compositeNodeValue.doubleProperties(propertyKey));
+            case LONG_ARRAY -> new HugeObjectArrayLongArrayPropertyValues(compositeNodeValue.longArrayProperties(
+                propertyKey));
+            case DOUBLE_ARRAY -> new HugeObjectArrayDoubleArrayPropertyValues(compositeNodeValue.doubleArrayProperties(
+                propertyKey));
+            default -> throw new IllegalArgumentException("Unsupported property type: " + propertyType);
+        };
+    }
     private PregelCompanion() {}
 
     static class HugeObjectArrayLongArrayPropertyValues implements LongArrayNodePropertyValues {

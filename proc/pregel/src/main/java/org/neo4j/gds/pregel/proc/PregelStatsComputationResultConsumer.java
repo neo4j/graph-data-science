@@ -33,29 +33,29 @@ import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
 public class PregelStatsComputationResultConsumer<
     ALGO extends Algorithm<PregelResult>,
     CONFIG extends PregelProcedureConfig
-  > implements ComputationResultConsumer<ALGO, PregelResult, CONFIG, Stream<PregelStatsResult>> {
+    > implements ComputationResultConsumer<ALGO, PregelResult, CONFIG, Stream<PregelStatsResult>> {
 
     @Override
     public Stream<PregelStatsResult> consume(
         ComputationResult<ALGO, PregelResult, CONFIG> computationResult,
         ExecutionContext executionContext
     ) {
-        return runWithExceptionLogging("Stats call failed", executionContext.log(), () -> Stream.of(
-            resultBuilder(computationResult, executionContext)
-                .withPreProcessingMillis(computationResult.preProcessingMillis())
-                .withComputeMillis(computationResult.computeMillis())
-                .withNodeCount(computationResult.graph().nodeCount())
-                .withConfig(computationResult.config())
-                .build()
-        ));
+        return runWithExceptionLogging(
+            "Stats call failed", executionContext.log(), () -> {
+                var ranIterations = computationResult.result().map(PregelResult::ranIterations).orElse(0);
+                var didConverge = computationResult.result().map(PregelResult::didConverge).orElse(false);
+
+                var statsResult = PregelStatsResult.create(
+                    computationResult.preProcessingMillis(),
+                    computationResult.computeMillis(),
+                    ranIterations,
+                    didConverge,
+                    computationResult.config().toMap()
+                );
+
+                return Stream.of(statsResult);
+            }
+        );
     }
 
-    protected AbstractPregelResultBuilder<PregelStatsResult> resultBuilder(
-        ComputationResult<ALGO, PregelResult, CONFIG> computeResult,
-        ExecutionContext executionContext
-    ) {
-        var ranIterations = computeResult.result().map(PregelResult::ranIterations).orElse(0);
-        var didConverge = computeResult.result().map(PregelResult::didConverge).orElse(false);
-        return new PregelStatsResult.Builder().withRanIterations(ranIterations).didConverge(didConverge);
-    }
 }

@@ -36,20 +36,26 @@ public record PregelMutateResult(
     ) implements MutateNodePropertiesResult {
 
 
-    public static class Builder extends AbstractPregelResultBuilder<PregelMutateResult> {
+    static PregelMutateResult create(
+        long nodePropertiesWritten,
+        long preProcessingMillis,
+        long computeMillis,
+        long mutateMillis,
+        long ranIterations,
+        boolean didConverge,
+        Map<String, Object> configuration
+    ){
+        return new PregelMutateResult(
+            nodePropertiesWritten,
+            preProcessingMillis,
+            computeMillis,
+            mutateMillis,
+            0,
+            ranIterations,
+            didConverge,
+            configuration
+        );
 
-        @Override
-        public PregelMutateResult build() {
-            return new PregelMutateResult(
-                nodePropertiesWritten,
-                preProcessingMillis,
-                computeMillis,
-                mutateMillis,
-                0,
-                ranIterations,
-                didConverge,
-                config.toMap()
-            );
-        }
     }
+
 }

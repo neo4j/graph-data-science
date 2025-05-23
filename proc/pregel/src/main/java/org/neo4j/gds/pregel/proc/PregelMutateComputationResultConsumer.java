@@ -20,15 +20,15 @@
 package org.neo4j.gds.pregel.proc;
 
 import org.neo4j.gds.Algorithm;
-import org.neo4j.gds.GraphStoreUpdater;
+import org.neo4j.gds.applications.algorithms.machinery.GraphStoreService;
 import org.neo4j.gds.beta.pregel.PregelProcedureConfig;
 import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.result.AbstractResultBuilder;
 
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
@@ -36,34 +36,51 @@ import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
 public class PregelMutateComputationResultConsumer<
     ALGO extends Algorithm<PregelResult>,
     CONFIG extends PregelProcedureConfig
-  > implements ComputationResultConsumer<ALGO, PregelResult, CONFIG, Stream<PregelMutateResult>> {
+    > implements ComputationResultConsumer<ALGO, PregelResult, CONFIG, Stream<PregelMutateResult>> {
 
     @Override
-    public Stream<PregelMutateResult> consume(ComputationResult<ALGO, PregelResult, CONFIG> computationResult, ExecutionContext executionContext) {
-        return runWithExceptionLogging("Graph mutation failed", executionContext.log(), () -> {
-            CONFIG config = computationResult.config();
+    public Stream<PregelMutateResult> consume(
+        ComputationResult<ALGO, PregelResult, CONFIG> computationResult,
+        ExecutionContext executionContext
+    ) {
+        return runWithExceptionLogging(
+            "Graph mutation failed", executionContext.log(), () -> {
+                CONFIG config = computationResult.config();
+                var ranIterations = computationResult.result().map(PregelResult::ranIterations).orElse(0);
+                var didConverge = computationResult.result().map(PregelResult::didConverge).orElse(false);
 
-            var ranIterations = computationResult.result().map(PregelResult::ranIterations).orElse(0);
-            var didConverge = computationResult.result().map(PregelResult::didConverge).orElse(false);
-            AbstractResultBuilder<PregelMutateResult> resultBuilder = new PregelMutateResult.Builder()
-                .withRanIterations(ranIterations)
-                .didConverge(didConverge)
-                .withPreProcessingMillis(computationResult.preProcessingMillis())
-                .withComputeMillis(computationResult.computeMillis())
-                .withNodeCount(computationResult.graph().nodeCount())
-                .withConfig(config);
+                AtomicLong mutateMillis = new AtomicLong();
+                AtomicLong nodePropertiesWritten = new AtomicLong();
+                try (ProgressTimer ignored = ProgressTimer.start(mutateMillis::set)) {
+                    if (!computationResult.isGraphEmpty()) {
+                        var nodePropertyList = PregelCompanion.nodeProperties(
+                            computationResult,
+                            config.mutateProperty()
+                        );
 
-            try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withMutateMillis)) {
-                if (!computationResult.isGraphEmpty()) {
-                    var nodePropertyList = PregelCompanion.nodeProperties(
-                        computationResult,
-                        config.mutateProperty()
-                    );
-                    GraphStoreUpdater.UpdateGraphStore(resultBuilder, computationResult, executionContext, nodePropertyList);
+                        var graphStoreService = new GraphStoreService(executionContext.log());
+                        var nodePropsWritten = graphStoreService.addNodeProperties(
+                            computationResult.graph(),
+                            computationResult.graphStore(),
+                            config,
+                            nodePropertyList
+                        );
+                        nodePropertiesWritten.set(nodePropsWritten.value());
+                    }
                 }
-            }
 
-            return Stream.of(resultBuilder.build());
-        });
+                var result = PregelMutateResult.create(
+                    nodePropertiesWritten.get(),
+                    computationResult.preProcessingMillis(),
+                    computationResult.computeMillis(),
+                    mutateMillis.get(),
+                    ranIterations,
+                    didConverge,
+                    config.toMap()
+                );
+
+                return Stream.of(result);
+            }
+        );
     }
 }
