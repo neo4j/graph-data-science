@@ -32,6 +32,7 @@ import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 
 class WriteNodeLabelApplication {
     private final Log log;
@@ -50,11 +51,11 @@ class WriteNodeLabelApplication {
         WriteLabelConfig configuration,
         Expression nodeFilter
     ) {
-        var resultBuilder = WriteLabelResult
-            .builder(graphName.value(), nodeLabel)
-            .withConfig(configuration.toMap());
 
-        try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withWriteMillis)) {
+        var writeMillis = new AtomicLong();
+        var nodeCounter = new AtomicLong();
+
+        try (ProgressTimer ignored = ProgressTimer.start(writeMillis::set)) {
             var filteredNodes = NodesFilter.filterNodes(
                 graphStore,
                 nodeFilter,
@@ -74,15 +75,20 @@ class WriteNodeLabelApplication {
 
             try {
                 nodeLabelExporter.write(nodeLabel);
-
-                resultBuilder
-                    .withNodeLabelsWritten(nodeLabelExporter.nodeLabelsWritten())
-                    .withNodeCount(graphStore.nodeCount());
+                nodeCounter.set(nodeLabelExporter.nodeLabelsWritten());
             } catch (RuntimeException e) {
                 log.warn("Node label writing failed", e);
                 throw e;
             }
         }
-        return resultBuilder.build();
+
+        return new WriteLabelResult(
+            writeMillis.get(),
+            graphName.value(),
+            nodeLabel,
+            nodeCounter.longValue(),
+            graphStore.nodeCount(),
+            configuration.toMap()
+        );
     }
 }

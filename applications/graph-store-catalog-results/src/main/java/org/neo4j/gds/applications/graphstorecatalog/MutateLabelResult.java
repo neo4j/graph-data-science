@@ -19,8 +19,6 @@
  */
 package org.neo4j.gds.applications.graphstorecatalog;
 
-import org.neo4j.gds.result.AbstractResultBuilder;
-
 import java.util.Map;
 
 public record MutateLabelResult(
@@ -31,39 +29,4 @@ public record MutateLabelResult(
     long nodeCount,
     Map<String, Object> configuration) {
 
-    public static Builder builder(String graphName, String nodeLabel) {
-        return new Builder(graphName, nodeLabel);
-    }
-
-    public static class Builder extends AbstractResultBuilder<MutateLabelResult> {
-        private long nodeLabelsWritten;
-        private Map<String, Object> configuration;
-        private final String graphName;
-        private final String nodeLabel;
-
-        public Builder(String graphName, String nodeLabel) {
-            this.graphName = graphName;
-            this.nodeLabel = nodeLabel;}
-
-        Builder withNodeLabelsWritten(long propertiesWritten) {
-            this.nodeLabelsWritten = propertiesWritten;
-            return this;
-        }
-
-        Builder withConfig(Map<String, Object> configuration) {
-            this.configuration = configuration;
-            return this;
-        }
-
-        public MutateLabelResult build() {
-            return new MutateLabelResult(
-                mutateMillis,
-                graphName,
-                nodeLabel,
-                nodeLabelsWritten,
-                nodeCount,
-                configuration
-            );
-        }
-    }
 }

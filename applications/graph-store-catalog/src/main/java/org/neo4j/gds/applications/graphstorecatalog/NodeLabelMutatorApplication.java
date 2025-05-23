@@ -29,6 +29,7 @@ import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.LongAdder;
 
 public class NodeLabelMutatorApplication {
@@ -39,10 +40,11 @@ public class NodeLabelMutatorApplication {
         MutateLabelConfig configuration,
         Expression nodeFilter
     ) {
-        var resultBuilder = MutateLabelResult.builder(graphName.value(), nodeLabelAsString)
-            .withConfig(configuration.toMap());
 
-        try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withMutateMillis)) {
+
+        var mutateMillis = new AtomicLong();
+        var nodeCounter = new LongAdder();
+        try (ProgressTimer ignored = ProgressTimer.start(mutateMillis::set)) {
             var filteredNodes = NodesFilter.filterNodes(
                 graphStore,
                 nodeFilter,
@@ -52,7 +54,6 @@ public class NodeLabelMutatorApplication {
                 ProgressTracker.NULL_TRACKER
             );
 
-            var nodeCounter = new LongAdder();
             var idMap = filteredNodes.idMap();
             var nodeLabelToMutate = NodeLabel.of(nodeLabelAsString);
             graphStore.addNodeLabel(nodeLabelToMutate);
@@ -66,11 +67,15 @@ public class NodeLabelMutatorApplication {
                 }
             );
 
-            resultBuilder
-                .withNodeLabelsWritten(nodeCounter.longValue())
-                .withNodeCount(graphStore.nodeCount());
-        }
 
-        return resultBuilder.build();
+        }
+        return new MutateLabelResult(
+            mutateMillis.get(),
+            graphName.value(),
+            nodeLabelAsString,
+            nodeCounter.longValue(),
+            graphStore.nodeCount(),
+            configuration.toMap()
+        );
     }
 }

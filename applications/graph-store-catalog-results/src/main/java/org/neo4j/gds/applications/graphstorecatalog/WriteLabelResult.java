@@ -19,69 +19,15 @@
  */
 package org.neo4j.gds.applications.graphstorecatalog;
 
-import org.neo4j.gds.result.AbstractResultBuilder;
-
 import java.util.Map;
 
-public final class WriteLabelResult {
-    public final long writeMillis;
-    public final String graphName;
-    public final String nodeLabel;
-    public final long nodeCount;
-    @SuppressWarnings("WeakerAccess")
-    public final long nodeLabelsWritten;
-    public final Map<String, Object> configuration;
-
-    private WriteLabelResult(
+public record WriteLabelResult(
         long writeMillis,
         String graphName,
         String nodeLabel,
         long nodeLabelsWritten,
         long nodeCount,
         Map<String, Object> configuration
-    ) {
-        this.writeMillis = writeMillis;
-        this.graphName = graphName;
-        this.nodeLabel = nodeLabel;
-        this.nodeLabelsWritten = nodeLabelsWritten;
-        this.nodeCount = nodeCount;
-        this.configuration = configuration;
-    }
+    ){
 
-    public static Builder builder(String graphName, String nodeLabel) {
-        return new Builder(graphName, nodeLabel);
-    }
-
-    public static class Builder extends AbstractResultBuilder<WriteLabelResult> {
-        private final String graphName;
-        private final String nodeLabel;
-        private long nodeLabelsWritten;
-        private Map<String, Object> configuration;
-
-        Builder(String graphName, String nodeLabel) {
-            this.graphName = graphName;
-            this.nodeLabel = nodeLabel;
-        }
-
-        public Builder withNodeLabelsWritten(long propertiesWritten) {
-            this.nodeLabelsWritten = propertiesWritten;
-            return this;
-        }
-
-        public Builder withConfig(Map<String, Object> configuration) {
-            this.configuration = configuration;
-            return this;
-        }
-
-        public WriteLabelResult build() {
-            return new WriteLabelResult(
-                writeMillis,
-                graphName,
-                nodeLabel,
-                nodeLabelsWritten,
-                nodeCount,
-                configuration
-            );
-        }
-    }
 }
