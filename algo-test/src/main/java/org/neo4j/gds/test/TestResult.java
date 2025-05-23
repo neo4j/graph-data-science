@@ -19,41 +19,7 @@
  */
 package org.neo4j.gds.test;
 
-import org.neo4j.gds.result.AbstractResultBuilder;
-
 import java.util.Map;
 
-public final class TestResult {
-
-    public long preProcessingMillis;
-    public long computeMillis;
-    public long relationshipCount;
-    public Map<String, Object> configuration;
-
-    TestResult(long preProcessingMillis, long computeMillis, long relationshipCount, Map<String, Object> configuration) {
-        this.preProcessingMillis = preProcessingMillis;
-        this.computeMillis = computeMillis;
-        this.relationshipCount = relationshipCount;
-        this.configuration = configuration;
-    }
-
-    public static class TestResultBuilder extends AbstractResultBuilder<TestResult> {
-
-        long relationshipCount = 0;
-
-        @Override
-        public TestResult build() {
-            return new TestResult(
-                preProcessingMillis,
-                computeMillis,
-                relationshipCount,
-                config.toMap()
-            );
-        }
-
-        public TestResultBuilder withRelationshipCount(long relationshipCount) {
-            this.relationshipCount = relationshipCount;
-            return this;
-        }
-    }
+public record TestResult(long preProcessingMillis, long computeMillis, long relationshipCount, Map<String, Object> configuration) {
 }

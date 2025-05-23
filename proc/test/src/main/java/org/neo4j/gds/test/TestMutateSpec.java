@@ -22,9 +22,8 @@ package org.neo4j.gds.test;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
-import org.neo4j.gds.mem.MemoryEstimation;
-import org.neo4j.gds.mem.MemoryEstimations;
-import org.neo4j.gds.mem.MemoryRange;
+import org.neo4j.gds.applications.algorithms.machinery.GraphStoreService;
+import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.write.NodeProperty;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
@@ -34,11 +33,16 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.ExecutionMode;
 import org.neo4j.gds.executor.GdsCallable;
+import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimations;
+import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
 import static org.neo4j.gds.test.Constants.STATS_DESCRIPTION;
 
 @GdsCallable(
@@ -91,10 +95,37 @@ public class TestMutateSpec implements AlgorithmSpec<TestAlgorithm, TestAlgorith
 
     @Override
     public ComputationResultConsumer<TestAlgorithm, TestAlgorithmResult, TestMutateConfig, Stream<TestResult>> computationResultConsumer() {
-        return new MutatePropertyComputationResultConsumer<>(
-            this::nodePropertyList,
-            this::resultBuilder
-        );
+        return  (computationResult,executionContext)->{
+            return runWithExceptionLogging("Graph mutation failed", executionContext.log(), () -> {
+                var config = computationResult.config();
+
+
+                AtomicLong mutateMillis =new AtomicLong();
+                try (ProgressTimer ignored = ProgressTimer.start(mutateMillis::set)) {
+                    if (!computationResult.isGraphEmpty()) {
+                        var nodePropertyList = nodePropertyList(computationResult);
+
+                        var log = executionContext.log();
+
+                        var graphStoreService = new GraphStoreService(log);
+                        graphStoreService.addNodeProperties(
+                            computationResult.graph(),
+                            computationResult.graphStore(),
+                            computationResult.config(),
+                            nodePropertyList
+                        );
+                    }
+                }
+                var mutateResult = new TestResult(
+                    computationResult.preProcessingMillis(),
+                    computationResult.computeMillis(),
+                    computationResult.result().map(TestAlgorithmResult::relationshipCount).orElse(-1L),
+                    config.toMap()
+                );
+                return Stream.of(mutateResult);
+            });
+        };
+
     }
 
     private List<NodeProperty> nodePropertyList(ComputationResult<TestAlgorithm, TestAlgorithmResult, TestMutateConfig> computationResult) {
@@ -114,12 +145,4 @@ public class TestMutateSpec implements AlgorithmSpec<TestAlgorithm, TestAlgorith
         ));
     }
 
-    private TestResult.TestResultBuilder resultBuilder(
-        ComputationResult<TestAlgorithm, TestAlgorithmResult, TestMutateConfig> computeResult,
-        ExecutionContext executionContext
-    ) {
-        return new TestResult.TestResultBuilder().withRelationshipCount(computeResult.result()
-            .map(TestAlgorithmResult::relationshipCount)
-            .orElse(-1L));
-    }
 }

@@ -19,16 +19,5 @@
  */
 package org.neo4j.gds.test;
 
-public class TestAlgorithmResult {
-
-    private final long relationshipCount;
-
-    TestAlgorithmResult(long relationshipCount) {
-        this.relationshipCount = relationshipCount;
-    }
-
-    public long relationshipCount() {
-        return relationshipCount;
-    }
-
+public record  TestAlgorithmResult(long relationshipCount) {
 }

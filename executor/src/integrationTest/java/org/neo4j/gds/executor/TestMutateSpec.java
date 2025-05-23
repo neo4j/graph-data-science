@@ -46,15 +46,13 @@ public class TestMutateSpec implements AlgorithmSpec<TestAlgorithm, TestAlgorith
 
     @Override
     public ComputationResultConsumer<TestAlgorithm, TestAlgorithmResult, TestMutateConfig, TestResult> computationResultConsumer() {
-        return (computationResult, executionContext) -> new TestResult.TestResultBuilder()
-            .withRelationshipCount(computationResult.result().map(TestAlgorithmResult::relationshipCount).orElse(-1L))
-            .withNodeCount(computationResult.graph().nodeCount())
-            .withPreProcessingMillis(42)
-            .withComputeMillis(42)
-            .withMutateMillis(42)
-            .withWriteMillis(42)
-            .withNodePropertiesWritten(42)
-            .withConfig(computationResult.config())
-            .build();
+        return (computationResult, executionContext) ->
+            new TestResult(
+                42L,
+                42L,
+                computationResult.result().map(TestAlgorithmResult::relationshipCount).orElse(-1L),
+                computationResult.config().toMap()
+            );
+
     }
 }
