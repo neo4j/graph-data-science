@@ -35,22 +35,23 @@ import org.neo4j.values.storable.Values;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 
 public class StorePathsSideEffect implements SideEffect<PathFindingResult, RelationshipsWritten> {
     private final ResultStore resultStore;
-    private final String relationshipType;
+    private final String relationshipTypeAsString;
     private final List<String> propertyKeys;
     private final List<ValueType> propertyTypes;
 
     public StorePathsSideEffect(
         ResultStore resultStore,
-        String relationshipType,
+        String relationshipTypeAsString,
         List<String> propertyKeys,
         List<ValueType> propertyTypes
     ) {
         this.resultStore = resultStore;
-        this.relationshipType = relationshipType;
+        this.relationshipTypeAsString = relationshipTypeAsString;
         this.propertyKeys = propertyKeys;
         this.propertyTypes = propertyTypes;
     }
@@ -59,15 +60,22 @@ public class StorePathsSideEffect implements SideEffect<PathFindingResult, Relat
     @Override
     public Optional<RelationshipsWritten> process(GraphResources graphResources, Optional<PathFindingResult> pathFindingResult) {
         return pathFindingResult.map(result -> {
-            Stream<ExportedRelationship> relationshipStream = result.mapPaths(
-                pathResult -> new ExportedRelationship(
-                    pathResult.sourceNode(),
-                    pathResult.targetNode(),
-                    createValues(graphResources.graph(), pathResult)
-                ));
+                var relCounter = new AtomicLong(0);
 
-            resultStore.add(JobId.parse(relationshipType), new ResultStoreEntry.RelationshipStream(relationshipType, propertyKeys, propertyTypes, relationshipStream, graphResources.graph()::toOriginalNodeId));
-            return new RelationshipsWritten(42L);
+                Stream<ExportedRelationship> relationshipStream = result.mapPaths(
+                    pathResult -> {
+                        relCounter.incrementAndGet();
+                        return new ExportedRelationship(
+                            pathResult.sourceNode(),
+                            pathResult.targetNode(),
+                            createValues(graphResources.graph(), pathResult)
+                        );
+                    });
+
+            resultStore.add(JobId.parse("banana"), new ResultStoreEntry.RelationshipStream(
+                relationshipTypeAsString, propertyKeys, propertyTypes, relationshipStream, graphResources.graph()::toOriginalNodeId));
+
+            return new RelationshipsWritten(relCounter.get());
         });
     }
 

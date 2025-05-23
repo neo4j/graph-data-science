@@ -19,9 +19,7 @@
  */
 package org.neo4j.gds.applications.algorithms.machinery;
 
-import org.neo4j.gds.api.EphemeralResultStore;
 import org.neo4j.gds.api.GraphName;
-import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.loading.PostLoadETLHook;
 import org.neo4j.gds.core.loading.PostLoadValidationHook;
@@ -57,7 +55,6 @@ import java.util.stream.Stream;
  *  and _instrument_ with bespoke result rendering.
  */
 public interface AlgorithmProcessingTemplate {
-    ResultStore AvalancheHackyResultStoreMoveMeIfYouWant = new EphemeralResultStore();
 
     <CONFIGURATION extends AlgoBaseConfig, RESULT_TO_CALLER, RESULT_FROM_ALGORITHM, WRITE_METADATA>
     RESULT_TO_CALLER processAlgorithmForWrite(

@@ -27,7 +27,7 @@ import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.DimensionTransformer;
-import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
+import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.MutateRelationshipService;
 import org.neo4j.gds.applications.algorithms.machinery.MutateResultRenderer;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
@@ -76,7 +76,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
     private final PathFindingAlgorithmsBusinessFacade pathFindingAlgorithms;
     private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
     private final AlgorithmProcessingTemplate algorithmProcessingTemplate;
-    private final MutateNodeProperty mutateNodeProperty;
+    private final MutateNodePropertyService mutateNodeProperty;
     private final MutateRelationshipService mutateRelationshipService;
 
     public PathFindingAlgorithmsMutateModeBusinessFacade(
@@ -84,7 +84,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
         PathFindingAlgorithmsBusinessFacade pathFindingAlgorithms,
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
         AlgorithmProcessingTemplate algorithmProcessingTemplate,
-        MutateNodeProperty mutateNodeProperty,
+        MutateNodePropertyService mutateNodeProperty,
         MutateRelationshipService mutateRelationshipService
     ) {
         this.pathFindingAlgorithms = pathFindingAlgorithms;
