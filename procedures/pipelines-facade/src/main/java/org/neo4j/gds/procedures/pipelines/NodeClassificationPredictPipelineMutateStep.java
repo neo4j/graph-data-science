@@ -21,21 +21,21 @@ package org.neo4j.gds.procedures.pipelines;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.applications.algorithms.machinery.GraphStoreService;
+import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 
 import java.util.Optional;
 
 class NodeClassificationPredictPipelineMutateStep implements MutateStep<NodeClassificationPipelineResult, NodePropertiesWritten> {
-    private final GraphStoreService graphStoreService;
+    private final MutateNodeProperty mutateNodeProperty;
     private final NodeClassificationPredictPipelineMutateConfig configuration;
 
     NodeClassificationPredictPipelineMutateStep(
-        GraphStoreService graphStoreService,
+        MutateNodeProperty mutateNodeProperty,
         NodeClassificationPredictPipelineMutateConfig configuration
     ) {
-        this.graphStoreService = graphStoreService;
+        this.mutateNodeProperty = mutateNodeProperty;
         this.configuration = configuration;
     }
 
@@ -51,6 +51,11 @@ class NodeClassificationPredictPipelineMutateStep implements MutateStep<NodeClas
             configuration.predictedProbabilityProperty()
         );
 
-        return graphStoreService.addNodeProperties(graph, graphStore, configuration, nodeProperties);
+        return mutateNodeProperty.mutateNodeProperties(
+            graph,
+            graphStore,
+            configuration,
+            nodeProperties
+        );
     }
 }

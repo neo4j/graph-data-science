@@ -23,7 +23,7 @@ import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyRecord;
-import org.neo4j.gds.applications.algorithms.machinery.GraphStoreService;
+import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
@@ -107,11 +107,11 @@ public class TestMutateSpec implements AlgorithmSpec<TestAlgorithm, TestAlgorith
 
                         var log = executionContext.log();
 
-                        var graphStoreService = new GraphStoreService(log);
-                        graphStoreService.addNodeProperties(
+                        var mutateNodeProperty = new MutateNodeProperty(log);
+                        mutateNodeProperty.mutateNodeProperties(
                             computationResult.graph(),
                             computationResult.graphStore(),
-                            computationResult.config(),
+                            computationResult.config().nodeLabelIdentifiers(computationResult.graphStore()),
                             nodePropertyList
                         );
                     }

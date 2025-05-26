@@ -61,6 +61,21 @@ public class MutateNodeProperty {
     public NodePropertiesWritten mutateNodeProperties(
         Graph graph,
         GraphStore graphStore,
+        MutateNodePropertyConfig configuration,
+        List<NodePropertyRecord> nodeProperties
+    )
+    {
+        return mutateNodeProperties(
+            graph,
+            graphStore,
+            configuration.nodeLabelIdentifiers(graphStore),
+            nodeProperties
+        );
+    }
+
+    public NodePropertiesWritten mutateNodeProperties(
+        Graph graph,
+        GraphStore graphStore,
         Collection<NodeLabel> labelsToUpdate,
         List<NodePropertyRecord> nodeProperties
     ) {

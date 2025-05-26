@@ -30,9 +30,9 @@ import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTempla
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.Computation;
 import org.neo4j.gds.applications.algorithms.machinery.DimensionTransformer;
-import org.neo4j.gds.applications.algorithms.machinery.GraphStoreService;
 import org.neo4j.gds.applications.algorithms.machinery.Label;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
+import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
 import org.neo4j.gds.applications.algorithms.machinery.NodePropertyWriter;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.applications.algorithms.machinery.StandardLabel;
@@ -80,7 +80,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 public class PipelineApplications {
     private final Log log;
     private final GraphStoreCatalogService graphStoreCatalogService;
-    private final GraphStoreService graphStoreService;
+    private final MutateNodeProperty mutateNodeProperty;
     private final ModelCatalog modelCatalog;
     private final PipelineRepository pipelineRepository;
 
@@ -119,7 +119,7 @@ public class PipelineApplications {
     PipelineApplications(
         Log log,
         GraphStoreCatalogService graphStoreCatalogService,
-        GraphStoreService graphStoreService,
+        MutateNodeProperty mutateNodeProperty,
         ModelCatalog modelCatalog,
         PipelineRepository pipelineRepository,
         CloseableResourceRegistry closeableResourceRegistry,
@@ -150,7 +150,7 @@ public class PipelineApplications {
     ) {
         this.log = log;
         this.graphStoreCatalogService = graphStoreCatalogService;
-        this.graphStoreService = graphStoreService;
+        this.mutateNodeProperty = mutateNodeProperty;
         this.modelCatalog = modelCatalog;
         this.pipelineRepository = pipelineRepository;
         this.closeableResourceRegistry = closeableResourceRegistry;
@@ -205,7 +205,7 @@ public class PipelineApplications {
         AlgorithmEstimationTemplate algorithmEstimationTemplate,
         AlgorithmProcessingTemplate algorithmProcessingTemplate
     ) {
-        var graphStoreService = new GraphStoreService(loggers.log());
+        var mutateNodeProperty = new MutateNodeProperty(loggers.log());
 
         var modelPersister = new ModelPersister(loggers.log(), modelCatalog, modelRepository);
         var linkPredictionPipelineEstimator = new LinkPredictionPipelineEstimator(
@@ -250,7 +250,7 @@ public class PipelineApplications {
         return new PipelineApplications(
             loggers.log(),
             graphStoreCatalogService,
-            graphStoreService,
+            mutateNodeProperty,
             modelCatalog,
             pipelineRepository,
             closeableResourceRegistry,
@@ -525,7 +525,7 @@ public class PipelineApplications {
         var configuration = pipelineConfigurationParser.parseNodeClassificationPredictMutateConfig(rawConfiguration);
         var label = new StandardLabel("NodeClassificationPredictPipelineMutate");
         var computation = constructNodeClassificationPredictComputation(configuration, label);
-        var mutateStep = new NodeClassificationPredictPipelineMutateStep(graphStoreService, configuration);
+        var mutateStep = new NodeClassificationPredictPipelineMutateStep(mutateNodeProperty, configuration);
         var resultBuilder = new NodeClassificationPredictPipelineMutateResultBuilder(configuration);
 
         return algorithmProcessingTemplate.processAlgorithmForMutate(
@@ -648,7 +648,7 @@ public class PipelineApplications {
         var configuration = pipelineConfigurationParser.parseNodeRegressionPredictPipelineMutateConfig(rawConfiguration);
         var label = new StandardLabel("NodeRegressionPredictPipelineMutate");
         var computation = constructNodeRegressionPredictComputation(configuration, label);
-        var mutateStep = new NodeRegressionPredictPipelineMutateStep(graphStoreService, configuration);
+        var mutateStep = new NodeRegressionPredictPipelineMutateStep(mutateNodeProperty, configuration);
         var resultBuilder = new NodeRegressionPredictPipelineMutateResultBuilder(configuration);
 
         return algorithmProcessingTemplate.processAlgorithmForMutate(
