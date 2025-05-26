@@ -23,18 +23,18 @@ import org.neo4j.gds.algorithms.community.CommunityCompanion;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
-import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
+import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutResult;
 import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutMutateConfig;
 
 class ApproxMaxKCutMutateStep implements MutateStep<ApproxMaxKCutResult, NodePropertiesWritten> {
-    private final MutateNodeProperty mutateNodeProperty;
+    private final MutateNodePropertyService mutateNodePropertyService;
     private final ApproxMaxKCutMutateConfig configuration;
 
-    ApproxMaxKCutMutateStep(MutateNodeProperty mutateNodeProperty, ApproxMaxKCutMutateConfig configuration) {
-        this.mutateNodeProperty = mutateNodeProperty;
+    ApproxMaxKCutMutateStep(MutateNodePropertyService mutateNodePropertyService, ApproxMaxKCutMutateConfig configuration) {
+        this.mutateNodePropertyService = mutateNodePropertyService;
         this.configuration = configuration;
     }
 
@@ -47,7 +47,7 @@ class ApproxMaxKCutMutateStep implements MutateStep<ApproxMaxKCutResult, NodePro
         var longNodePropertyValues = NodePropertyValuesAdapter.adapt(result.candidateSolution());
         var nodePropertyValues = CommunityCompanion.nodePropertyValues(false, longNodePropertyValues);
 
-        return mutateNodeProperty.mutateNodeProperties(
+        return mutateNodePropertyService.mutateNodeProperties(
             graph,
             graphStore,
             configuration,

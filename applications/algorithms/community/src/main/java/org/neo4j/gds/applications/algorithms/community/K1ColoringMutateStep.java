@@ -22,17 +22,17 @@ package org.neo4j.gds.applications.algorithms.community;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
-import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
+import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.k1coloring.K1ColoringMutateConfig;
 import org.neo4j.gds.k1coloring.K1ColoringResult;
 
 class K1ColoringMutateStep implements MutateStep<K1ColoringResult, Void> {
-    private final MutateNodeProperty mutateNodeProperty;
+    private final MutateNodePropertyService mutateNodePropertyService;
     private final K1ColoringMutateConfig configuration;
 
-    K1ColoringMutateStep(MutateNodeProperty mutateNodeProperty, K1ColoringMutateConfig configuration) {
-        this.mutateNodeProperty = mutateNodeProperty;
+    K1ColoringMutateStep(MutateNodePropertyService mutateNodePropertyService, K1ColoringMutateConfig configuration) {
+        this.mutateNodePropertyService = mutateNodePropertyService;
         this.configuration = configuration;
     }
 
@@ -44,7 +44,7 @@ class K1ColoringMutateStep implements MutateStep<K1ColoringResult, Void> {
     ) {
         var nodePropertyValues = NodePropertyValuesAdapter.adapt(result.colors());
 
-        mutateNodeProperty.mutateNodeProperties(
+        mutateNodePropertyService.mutateNodeProperties(
             graph,
             graphStore,
             configuration,

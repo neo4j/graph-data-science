@@ -36,10 +36,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class MutateNodeProperty {
+public class MutateNodePropertyService {
     private final Log log;
 
-    public MutateNodeProperty(Log log) {
+    public MutateNodePropertyService(Log log) {
         this.log = log;
     }
 

@@ -22,21 +22,21 @@ package org.neo4j.gds.applications.algorithms.community;
 import org.neo4j.gds.algorithms.community.CommunityCompanion;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
+import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationMutateConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationResult;
 
 class ModularityOptimizationMutateStep implements MutateStep<ModularityOptimizationResult, NodePropertiesWritten> {
-    private final MutateNodeProperty mutateNodeProperty;
+    private final MutateNodePropertyService mutateNodePropertyService;
     private final ModularityOptimizationMutateConfig configuration;
 
     ModularityOptimizationMutateStep(
-        MutateNodeProperty mutateNodeProperty,
+        MutateNodePropertyService mutateNodePropertyService,
         ModularityOptimizationMutateConfig configuration
     ) {
-        this.mutateNodeProperty = mutateNodeProperty;
+        this.mutateNodePropertyService = mutateNodePropertyService;
         this.configuration = configuration;
     }
 
@@ -55,7 +55,7 @@ class ModularityOptimizationMutateStep implements MutateStep<ModularityOptimizat
             () -> graphStore.nodeProperty(configuration.seedProperty())
         );
 
-        return mutateNodeProperty.mutateNodeProperties(
+        return mutateNodePropertyService.mutateNodeProperties(
             graph,
             graphStore,
             configuration,

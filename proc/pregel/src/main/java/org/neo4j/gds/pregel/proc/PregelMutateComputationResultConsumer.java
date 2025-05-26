@@ -20,7 +20,7 @@
 package org.neo4j.gds.pregel.proc;
 
 import org.neo4j.gds.Algorithm;
-import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
+import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.beta.pregel.PregelProcedureConfig;
 import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.core.utils.ProgressTimer;
@@ -58,7 +58,7 @@ public class PregelMutateComputationResultConsumer<
                             config.mutateProperty()
                         );
 
-                        var mutateNodeProperty = new MutateNodeProperty(executionContext.log());
+                        var mutateNodeProperty = new MutateNodePropertyService(executionContext.log());
                         var nodePropsWritten = mutateNodeProperty.mutateNodeProperties(
                             computationResult.graph(),
                             computationResult.graphStore(),

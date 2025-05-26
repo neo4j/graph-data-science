@@ -22,18 +22,18 @@ package org.neo4j.gds.applications.algorithms.community;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
-import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
+import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientMutateConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientResult;
 
 class LccMutateStep implements MutateStep<LocalClusteringCoefficientResult, NodePropertiesWritten> {
-    private final MutateNodeProperty mutateNodeProperty;
+    private final MutateNodePropertyService mutateNodePropertyService;
     private final LocalClusteringCoefficientMutateConfig configuration;
 
-    LccMutateStep(MutateNodeProperty mutateNodeProperty, LocalClusteringCoefficientMutateConfig configuration) {
-        this.mutateNodeProperty = mutateNodeProperty;
+    LccMutateStep(MutateNodePropertyService mutateNodePropertyService, LocalClusteringCoefficientMutateConfig configuration) {
+        this.mutateNodePropertyService = mutateNodePropertyService;
         this.configuration = configuration;
     }
 
@@ -45,7 +45,7 @@ class LccMutateStep implements MutateStep<LocalClusteringCoefficientResult, Node
     ) {
         var nodePropertyValues = NodePropertyValuesAdapter.adapt(result.localClusteringCoefficients());
 
-        return mutateNodeProperty.mutateNodeProperties(
+        return mutateNodePropertyService.mutateNodeProperties(
             graph,
             graphStore,
             configuration,

@@ -22,18 +22,18 @@ package org.neo4j.gds.applications.algorithms.community;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
-import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
+import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.hdbscan.HDBScanMutateConfig;
 import org.neo4j.gds.hdbscan.Labels;
 
 class HDBScanMutateStep implements MutateStep<Labels, NodePropertiesWritten> {
-    private final MutateNodeProperty mutateNodeProperty;
+    private final MutateNodePropertyService mutateNodePropertyService;
     private final HDBScanMutateConfig configuration;
 
-    HDBScanMutateStep(MutateNodeProperty mutateNodeProperty, HDBScanMutateConfig configuration) {
-        this.mutateNodeProperty = mutateNodeProperty;
+    HDBScanMutateStep(MutateNodePropertyService mutateNodePropertyService, HDBScanMutateConfig configuration) {
+        this.mutateNodePropertyService = mutateNodePropertyService;
         this.configuration = configuration;
     }
 
@@ -45,7 +45,7 @@ class HDBScanMutateStep implements MutateStep<Labels, NodePropertiesWritten> {
     ) {
         var nodeProperties = NodePropertyValuesAdapter.adapt(result.labels());
 
-        return mutateNodeProperty.mutateNodeProperties(
+        return mutateNodePropertyService.mutateNodeProperties(
             graph,
             graphStore,
             configuration,

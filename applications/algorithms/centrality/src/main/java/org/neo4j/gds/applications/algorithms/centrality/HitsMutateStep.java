@@ -23,7 +23,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyRecord;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
-import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
+import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.beta.pregel.PregelResult;
@@ -32,13 +32,13 @@ import org.neo4j.gds.hits.HitsConfig;
 import java.util.List;
 
 class HitsMutateStep implements MutateStep<PregelResult, NodePropertiesWritten> {
-    private final MutateNodeProperty mutateNodeProperty;
+    private final MutateNodePropertyService mutateNodePropertyService;
     private final HitsConfig configuration;
 
     HitsMutateStep(
-        MutateNodeProperty mutateNodeProperty,
+        MutateNodePropertyService mutateNodePropertyService,
         HitsConfig configuration) {
-        this.mutateNodeProperty = mutateNodeProperty;
+        this.mutateNodePropertyService = mutateNodePropertyService;
         this.configuration = configuration;
     }
 
@@ -56,7 +56,7 @@ class HitsMutateStep implements MutateStep<PregelResult, NodePropertiesWritten> 
         var authRecord = NodePropertyRecord.of(authProperty, authValues);
         var hubRecord = NodePropertyRecord.of(hubProperty, hubValues);
 
-        return mutateNodeProperty.mutateNodeProperties(
+        return mutateNodePropertyService.mutateNodeProperties(
             graph,
             graphStore,
             configuration.nodeLabelIdentifiers(graphStore),

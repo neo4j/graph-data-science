@@ -21,21 +21,21 @@ package org.neo4j.gds.applications.algorithms.centrality;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
+import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.betweenness.BetweennessCentralityMutateConfig;
 import org.neo4j.gds.betweenness.BetwennessCentralityResult;
 
 class BetweennessCentralityMutateStep implements MutateStep<BetwennessCentralityResult, NodePropertiesWritten> {
-    private final MutateNodeProperty mutateNodeProperty;
+    private final MutateNodePropertyService mutateNodePropertyService;
     private final BetweennessCentralityMutateConfig configuration;
 
     BetweennessCentralityMutateStep(
-        MutateNodeProperty mutateNodeProperty,
+        MutateNodePropertyService mutateNodePropertyService,
         BetweennessCentralityMutateConfig configuration
     ) {
-        this.mutateNodeProperty = mutateNodeProperty;
+        this.mutateNodePropertyService = mutateNodePropertyService;
         this.configuration = configuration;
     }
 
@@ -45,7 +45,7 @@ class BetweennessCentralityMutateStep implements MutateStep<BetwennessCentrality
         GraphStore graphStore,
         BetwennessCentralityResult result
     ) {
-        return mutateNodeProperty.mutateNodeProperties(
+        return mutateNodePropertyService.mutateNodeProperties(
             graph,
             graphStore,
             configuration,

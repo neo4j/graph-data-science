@@ -21,7 +21,7 @@ package org.neo4j.gds.applications.algorithms.centrality;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
+import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.influenceMaximization.CELFNodeProperties;
@@ -29,11 +29,11 @@ import org.neo4j.gds.influenceMaximization.CELFResult;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationMutateConfig;
 
 class CelfMutateStep implements MutateStep<CELFResult, NodePropertiesWritten> {
-    private final MutateNodeProperty mutateNodeProperty;
+    private final MutateNodePropertyService mutateNodePropertyService;
     private final InfluenceMaximizationMutateConfig configuration;
 
-    CelfMutateStep(MutateNodeProperty mutateNodeProperty, InfluenceMaximizationMutateConfig configuration) {
-        this.mutateNodeProperty = mutateNodeProperty;
+    CelfMutateStep(MutateNodePropertyService mutateNodePropertyService, InfluenceMaximizationMutateConfig configuration) {
+        this.mutateNodePropertyService = mutateNodePropertyService;
         this.configuration = configuration;
     }
 
@@ -45,7 +45,7 @@ class CelfMutateStep implements MutateStep<CELFResult, NodePropertiesWritten> {
     ) {
         var nodeProperties = new CELFNodeProperties(result.seedSetNodes(), graph.nodeCount());
 
-        return mutateNodeProperty.mutateNodeProperties(
+        return mutateNodePropertyService.mutateNodeProperties(
             graph,
             graphStore,
             configuration,

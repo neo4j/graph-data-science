@@ -22,18 +22,18 @@ package org.neo4j.gds.applications.algorithms.community;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
-import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
+import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.kcore.KCoreDecompositionMutateConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionResult;
 
 class KCoreMutateStep implements MutateStep<KCoreDecompositionResult, NodePropertiesWritten> {
-    private final MutateNodeProperty mutateNodeProperty;
+    private final MutateNodePropertyService mutateNodePropertyService;
     private final KCoreDecompositionMutateConfig configuration;
 
-    KCoreMutateStep(MutateNodeProperty mutateNodeProperty, KCoreDecompositionMutateConfig configuration) {
-        this.mutateNodeProperty = mutateNodeProperty;
+    KCoreMutateStep(MutateNodePropertyService mutateNodePropertyService, KCoreDecompositionMutateConfig configuration) {
+        this.mutateNodePropertyService = mutateNodePropertyService;
         this.configuration = configuration;
     }
 
@@ -43,7 +43,7 @@ class KCoreMutateStep implements MutateStep<KCoreDecompositionResult, NodeProper
         GraphStore graphStore,
         KCoreDecompositionResult result
     ) {
-        return mutateNodeProperty.mutateNodeProperties(
+        return mutateNodePropertyService.mutateNodeProperties(
             graph,
             graphStore,
             configuration,

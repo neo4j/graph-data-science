@@ -23,18 +23,18 @@ import org.neo4j.gds.algorithms.community.CommunityCompanion;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
-import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
+import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.labelpropagation.LabelPropagationMutateConfig;
 import org.neo4j.gds.labelpropagation.LabelPropagationResult;
 
 class LabelPropagationMutateStep implements MutateStep<LabelPropagationResult, NodePropertiesWritten> {
-    private final MutateNodeProperty mutateNodeProperty;
+    private final MutateNodePropertyService mutateNodePropertyService;
     private final LabelPropagationMutateConfig configuration;
 
-    LabelPropagationMutateStep(MutateNodeProperty mutateNodeProperty, LabelPropagationMutateConfig configuration) {
-        this.mutateNodeProperty = mutateNodeProperty;
+    LabelPropagationMutateStep(MutateNodePropertyService mutateNodePropertyService, LabelPropagationMutateConfig configuration) {
+        this.mutateNodePropertyService = mutateNodePropertyService;
         this.configuration = configuration;
     }
 
@@ -53,7 +53,7 @@ class LabelPropagationMutateStep implements MutateStep<LabelPropagationResult, N
             () -> graphStore.nodeProperty(configuration.seedProperty())
         );
 
-        return mutateNodeProperty.mutateNodeProperties(
+        return mutateNodePropertyService.mutateNodeProperties(
             graph,
             graphStore,
             configuration,

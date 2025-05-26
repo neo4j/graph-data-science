@@ -21,21 +21,21 @@ package org.neo4j.gds.applications.algorithms.centrality;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
+import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.closeness.ClosenessCentralityMutateConfig;
 import org.neo4j.gds.closeness.ClosenessCentralityResult;
 
 class ClosenessCentralityMutateStep implements MutateStep<ClosenessCentralityResult, NodePropertiesWritten> {
-    private final MutateNodeProperty mutateNodeProperty;
+    private final MutateNodePropertyService mutateNodePropertyService;
     private final ClosenessCentralityMutateConfig configuration;
 
     ClosenessCentralityMutateStep(
-        MutateNodeProperty mutateNodeProperty,
+        MutateNodePropertyService mutateNodePropertyService,
         ClosenessCentralityMutateConfig configuration
     ) {
-        this.mutateNodeProperty = mutateNodeProperty;
+        this.mutateNodePropertyService = mutateNodePropertyService;
         this.configuration = configuration;
     }
 
@@ -45,7 +45,7 @@ class ClosenessCentralityMutateStep implements MutateStep<ClosenessCentralityRes
         GraphStore graphStore,
         ClosenessCentralityResult result
     ) {
-        return mutateNodeProperty.mutateNodeProperties(
+        return mutateNodePropertyService.mutateNodeProperties(
             graph,
             graphStore,
             configuration,

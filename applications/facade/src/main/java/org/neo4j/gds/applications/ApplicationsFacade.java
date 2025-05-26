@@ -26,7 +26,7 @@ import org.neo4j.gds.applications.algorithms.machinelearning.MachineLearningAppl
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
-import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
+import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.MutateRelationshipService;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
@@ -118,7 +118,7 @@ public final class ApplicationsFacade {
     ) {
         var algorithmProcessingTemplateConvenience = new AlgorithmProcessingTemplateConvenience(algorithmProcessingTemplate);
 
-        var mutateNodeProperty = new MutateNodeProperty(loggers.log());
+        var mutateNodeProperty = new MutateNodePropertyService(loggers.log());
         var mutateRelationshipService =new MutateRelationshipService(loggers.log());
 
         var centralityApplications = CentralityApplications.create(

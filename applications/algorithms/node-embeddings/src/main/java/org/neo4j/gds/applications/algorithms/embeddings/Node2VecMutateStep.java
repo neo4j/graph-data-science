@@ -22,18 +22,18 @@ package org.neo4j.gds.applications.algorithms.embeddings;
 import org.neo4j.gds.algorithms.embeddings.FloatEmbeddingNodePropertyValues;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
+import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.embeddings.node2vec.Node2VecMutateConfig;
 import org.neo4j.gds.embeddings.node2vec.Node2VecResult;
 
 class Node2VecMutateStep implements MutateStep<Node2VecResult, NodePropertiesWritten> {
-    private final MutateNodeProperty mutateNodeProperty;
+    private final MutateNodePropertyService mutateNodePropertyService;
     private final Node2VecMutateConfig configuration;
 
-    Node2VecMutateStep(MutateNodeProperty mutateNodeProperty, Node2VecMutateConfig configuration) {
-        this.mutateNodeProperty = mutateNodeProperty;
+    Node2VecMutateStep(MutateNodePropertyService mutateNodePropertyService, Node2VecMutateConfig configuration) {
+        this.mutateNodePropertyService = mutateNodePropertyService;
         this.configuration = configuration;
     }
 
@@ -45,7 +45,7 @@ class Node2VecMutateStep implements MutateStep<Node2VecResult, NodePropertiesWri
     ) {
         var nodePropertyValues = new FloatEmbeddingNodePropertyValues(result.embeddings());
 
-        return mutateNodeProperty.mutateNodeProperties(
+        return mutateNodePropertyService.mutateNodeProperties(
             graph,
             graphStore,
             configuration,

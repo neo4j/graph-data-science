@@ -21,7 +21,7 @@ package org.neo4j.gds.applications.algorithms.embeddings;
 
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
-import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
+import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
@@ -60,7 +60,7 @@ public final class NodeEmbeddingApplications {
         AlgorithmEstimationTemplate algorithmEstimationTemplate,
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
         ProgressTrackerCreator progressTrackerCreator,
-        MutateNodeProperty mutateNodeProperty,
+        MutateNodePropertyService mutateNodePropertyService,
         ModelCatalog modelCatalog,
         ModelRepository modelRepository
     ) {
@@ -87,7 +87,7 @@ public final class NodeEmbeddingApplications {
             estimationMode,
             businessFacade,
             algorithmProcessingTemplateConvenience,
-            mutateNodeProperty,
+            mutateNodePropertyService,
             graphSageAlgorithmProcessing
         );
         var statsMode = new NodeEmbeddingAlgorithmsStatsModeBusinessFacade(

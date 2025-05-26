@@ -23,7 +23,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyRecord;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
-import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
+import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
@@ -31,14 +31,14 @@ import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import java.util.List;
 
 class NodeRegressionPredictPipelineMutateStep implements MutateStep<HugeDoubleArray, NodePropertiesWritten> {
-    private final MutateNodeProperty mutateNodeProperty;
+    private final MutateNodePropertyService mutateNodePropertyService;
     private final NodeRegressionPredictPipelineMutateConfig configuration;
 
     NodeRegressionPredictPipelineMutateStep(
-        MutateNodeProperty mutateNodeProperty,
+        MutateNodePropertyService mutateNodePropertyService,
         NodeRegressionPredictPipelineMutateConfig configuration
     ) {
-        this.mutateNodeProperty = mutateNodeProperty;
+        this.mutateNodePropertyService = mutateNodePropertyService;
         this.configuration = configuration;
     }
 
@@ -51,7 +51,7 @@ class NodeRegressionPredictPipelineMutateStep implements MutateStep<HugeDoubleAr
             )
         );
 
-        return mutateNodeProperty.mutateNodeProperties(
+        return mutateNodePropertyService.mutateNodeProperties(
             graph,
             graphStore,
             configuration,

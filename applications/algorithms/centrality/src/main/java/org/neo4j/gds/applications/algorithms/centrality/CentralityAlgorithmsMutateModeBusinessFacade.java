@@ -21,7 +21,7 @@ package org.neo4j.gds.applications.algorithms.centrality;
 
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
-import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
+import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.articulationpoints.ArticulationPointsMutateConfig;
@@ -64,7 +64,7 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
     private final CentralityAlgorithmsEstimationModeBusinessFacade estimation;
     private final CentralityBusinessAlgorithms algorithms;
     private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
-    private final MutateNodeProperty mutateNodeProperty;
+    private final MutateNodePropertyService mutateNodePropertyService;
     private final HitsHookGenerator hitsHookGenerator;
 
 
@@ -72,13 +72,13 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
         CentralityAlgorithmsEstimationModeBusinessFacade estimation,
         CentralityBusinessAlgorithms algorithms,
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
-        MutateNodeProperty mutateNodeProperty,
+        MutateNodePropertyService mutateNodePropertyService,
         HitsHookGenerator hitsHookGenerator
     ) {
         this.estimation = estimation;
         this.algorithms = algorithms;
         this.algorithmProcessingTemplateConvenience = algorithmProcessingTemplateConvenience;
-        this.mutateNodeProperty = mutateNodeProperty;
+        this.mutateNodePropertyService = mutateNodePropertyService;
         this.hitsHookGenerator = hitsHookGenerator;
     }
 
@@ -87,7 +87,7 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
         ArticleRankMutateConfig configuration,
         ResultBuilder<ArticleRankMutateConfig, PageRankResult, RESULT, NodePropertiesWritten> resultBuilder
     ) {
-        var mutateStep = new PageRankMutateStep<>(mutateNodeProperty, configuration);
+        var mutateStep = new PageRankMutateStep<>(mutateNodePropertyService, configuration);
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
             graphName,
@@ -105,7 +105,7 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
         ArticulationPointsMutateConfig configuration,
         ResultBuilder<ArticulationPointsMutateConfig, ArticulationPointsResult, RESULT, NodePropertiesWritten> resultBuilder
     ) {
-        var mutateStep = new ArticulationPointsMutateStep(mutateNodeProperty, configuration);
+        var mutateStep = new ArticulationPointsMutateStep(mutateNodePropertyService, configuration);
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
             graphName,
@@ -124,7 +124,7 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
         BetweennessCentralityMutateConfig configuration,
         ResultBuilder<BetweennessCentralityMutateConfig, BetwennessCentralityResult, RESULT, NodePropertiesWritten> resultBuilder
     ) {
-        var mutateStep = new BetweennessCentralityMutateStep(mutateNodeProperty, configuration);
+        var mutateStep = new BetweennessCentralityMutateStep(mutateNodePropertyService, configuration);
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
             graphName,
@@ -142,7 +142,7 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
         InfluenceMaximizationMutateConfig configuration,
         ResultBuilder<InfluenceMaximizationMutateConfig, CELFResult, RESULT, NodePropertiesWritten> resultBuilder
     ) {
-        var mutateStep = new CelfMutateStep(mutateNodeProperty, configuration);
+        var mutateStep = new CelfMutateStep(mutateNodePropertyService, configuration);
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
             graphName,
@@ -160,7 +160,7 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
         ClosenessCentralityMutateConfig configuration,
         ResultBuilder<ClosenessCentralityMutateConfig, ClosenessCentralityResult, RESULT, NodePropertiesWritten> resultBuilder
     ) {
-        var mutateStep = new ClosenessCentralityMutateStep(mutateNodeProperty, configuration);
+        var mutateStep = new ClosenessCentralityMutateStep(mutateNodePropertyService, configuration);
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
             graphName,
@@ -178,7 +178,7 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
         DegreeCentralityMutateConfig configuration,
         ResultBuilder<DegreeCentralityMutateConfig, DegreeCentralityResult, RESULT, NodePropertiesWritten> resultBuilder
     ) {
-        var mutateStep = new DegreeCentralityMutateStep(mutateNodeProperty, configuration);
+        var mutateStep = new DegreeCentralityMutateStep(mutateNodePropertyService, configuration);
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
             graphName,
@@ -196,7 +196,7 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
         EigenvectorMutateConfig configuration,
         ResultBuilder<EigenvectorMutateConfig, PageRankResult, RESULT, NodePropertiesWritten> resultBuilder
     ) {
-        var mutateStep = new PageRankMutateStep<>(mutateNodeProperty, configuration);
+        var mutateStep = new PageRankMutateStep<>(mutateNodePropertyService, configuration);
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
             graphName,
@@ -214,7 +214,7 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
         HarmonicCentralityMutateConfig configuration,
         ResultBuilder<HarmonicCentralityMutateConfig, HarmonicResult, RESULT, NodePropertiesWritten> resultBuilder
     ) {
-        var mutateStep = new HarmonicCentralityMutateStep(mutateNodeProperty, configuration);
+        var mutateStep = new HarmonicCentralityMutateStep(mutateNodePropertyService, configuration);
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
             graphName,
@@ -232,7 +232,7 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
         PageRankMutateConfig configuration,
         ResultBuilder<PageRankMutateConfig, PageRankResult, RESULT, NodePropertiesWritten> resultBuilder
     ) {
-        var mutateStep = new PageRankMutateStep<>(mutateNodeProperty, configuration);
+        var mutateStep = new PageRankMutateStep<>(mutateNodePropertyService, configuration);
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
             graphName,
@@ -250,7 +250,7 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
         IndirectExposureMutateConfig configuration,
         ResultBuilder<IndirectExposureMutateConfig, IndirectExposureResult, RESULT, NodePropertiesWritten> resultBuilder
     ) {
-        var mutateStep = new IndirectExposureMutateStep(mutateNodeProperty, configuration);
+        var mutateStep = new IndirectExposureMutateStep(mutateNodePropertyService, configuration);
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
             graphName,
@@ -268,7 +268,7 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
         HitsConfig configuration,
         ResultBuilder<HitsConfig, PregelResult, RESULT, NodePropertiesWritten> resultBuilder
     ) {
-        var mutateStep = new HitsMutateStep(mutateNodeProperty, configuration);
+        var mutateStep = new HitsMutateStep(mutateNodePropertyService, configuration);
         var hook = hitsHookGenerator.createETLHook(configuration);
         return algorithmProcessingTemplateConvenience.processAlgorithmInMutateMode(
             graphName,

@@ -21,7 +21,7 @@ package org.neo4j.gds.applications.algorithms.community;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
+import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.louvain.LouvainMutateConfig;
@@ -30,11 +30,11 @@ import org.neo4j.gds.louvain.LouvainResult;
 class LouvainMutateStep implements MutateStep<LouvainResult, NodePropertiesWritten> {
     private final LouvainNodePropertyValuesComputer louvainNodePropertyValuesComputer = new LouvainNodePropertyValuesComputer();
 
-    private final MutateNodeProperty mutateNodeProperty;
+    private final MutateNodePropertyService mutateNodePropertyService;
     private final LouvainMutateConfig configuration;
 
-    LouvainMutateStep(MutateNodeProperty mutateNodeProperty, LouvainMutateConfig configuration) {
-        this.mutateNodeProperty = mutateNodeProperty;
+    LouvainMutateStep(MutateNodePropertyService mutateNodePropertyService, LouvainMutateConfig configuration) {
+        this.mutateNodePropertyService = mutateNodePropertyService;
         this.configuration = configuration;
     }
 
@@ -51,7 +51,7 @@ class LouvainMutateStep implements MutateStep<LouvainResult, NodePropertiesWritt
             result
         );
 
-        return mutateNodeProperty.mutateNodeProperties(
+        return mutateNodePropertyService.mutateNodeProperties(
             graph,
             graphStore,
             configuration,

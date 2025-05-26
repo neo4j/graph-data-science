@@ -23,18 +23,18 @@ import org.neo4j.gds.algorithms.community.CommunityCompanion;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
-import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
+import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.scc.SccMutateConfig;
 
 class SccMutateStep implements MutateStep<HugeLongArray, NodePropertiesWritten> {
-    private final MutateNodeProperty mutateNodeProperty;
+    private final MutateNodePropertyService mutateNodePropertyService;
     private final SccMutateConfig configuration;
 
-    SccMutateStep(MutateNodeProperty mutateNodeProperty, SccMutateConfig configuration) {
-        this.mutateNodeProperty = mutateNodeProperty;
+    SccMutateStep(MutateNodePropertyService mutateNodePropertyService, SccMutateConfig configuration) {
+        this.mutateNodePropertyService = mutateNodePropertyService;
         this.configuration = configuration;
     }
 
@@ -49,7 +49,7 @@ class SccMutateStep implements MutateStep<HugeLongArray, NodePropertiesWritten> 
             NodePropertyValuesAdapter.adapt(result)
         );
 
-        return mutateNodeProperty.mutateNodeProperties(
+        return mutateNodePropertyService.mutateNodeProperties(
             graph,
             graphStore,
             configuration,

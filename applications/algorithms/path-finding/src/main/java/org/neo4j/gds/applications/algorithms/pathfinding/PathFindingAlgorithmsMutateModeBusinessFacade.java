@@ -23,7 +23,7 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
-import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
+import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.MutateRelationshipService;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
@@ -67,20 +67,20 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
     private final PathFindingAlgorithmsEstimationModeBusinessFacade estimationFacade;
     private final PathFindingAlgorithmsBusinessFacade pathFindingAlgorithms;
     private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
-    private final MutateNodeProperty mutateNodeProperty;
+    private final MutateNodePropertyService mutateNodePropertyService;
     private final MutateRelationshipService mutateRelationshipService;
 
     public PathFindingAlgorithmsMutateModeBusinessFacade(
         PathFindingAlgorithmsEstimationModeBusinessFacade estimationFacade,
         PathFindingAlgorithmsBusinessFacade pathFindingAlgorithms,
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
-        MutateNodeProperty mutateNodeProperty,
+        MutateNodePropertyService mutateNodePropertyService,
         MutateRelationshipService mutateRelationshipService
     ) {
         this.pathFindingAlgorithms = pathFindingAlgorithms;
         this.estimationFacade = estimationFacade;
         this.algorithmProcessingTemplateConvenience = algorithmProcessingTemplateConvenience;
-        this.mutateNodeProperty = mutateNodeProperty;
+        this.mutateNodePropertyService = mutateNodePropertyService;
         this.mutateRelationshipService = mutateRelationshipService;
     }
 
@@ -179,7 +179,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
         RandomWalkMutateConfig configuration,
         ResultBuilder<RandomWalkMutateConfig, HugeAtomicLongArray, RESULT, NodePropertiesWritten> resultBuilder
     ) {
-        var mutateStep = new RandomWalkCountingNodeVisitsMutateStep(mutateNodeProperty, configuration);
+        var mutateStep = new RandomWalkCountingNodeVisitsMutateStep(mutateNodePropertyService, configuration);
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
             graphName,

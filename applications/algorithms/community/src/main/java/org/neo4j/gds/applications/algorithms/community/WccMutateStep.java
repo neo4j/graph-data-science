@@ -22,18 +22,18 @@ package org.neo4j.gds.applications.algorithms.community;
 import org.neo4j.gds.algorithms.community.CommunityCompanion;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
+import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.wcc.WccMutateConfig;
 
 class WccMutateStep implements MutateStep<DisjointSetStruct, NodePropertiesWritten> {
-    private final MutateNodeProperty mutateNodeProperty;
+    private final MutateNodePropertyService mutateNodePropertyService;
     private final WccMutateConfig configuration;
 
-    WccMutateStep(MutateNodeProperty mutateNodeProperty, WccMutateConfig configuration) {
-        this.mutateNodeProperty = mutateNodeProperty;
+    WccMutateStep(MutateNodePropertyService mutateNodePropertyService, WccMutateConfig configuration) {
+        this.mutateNodePropertyService = mutateNodePropertyService;
         this.configuration = configuration;
     }
 
@@ -52,7 +52,7 @@ class WccMutateStep implements MutateStep<DisjointSetStruct, NodePropertiesWritt
             result.asNodeProperties(),
             () -> graphStore.nodeProperty(configuration.seedProperty()));
 
-        return mutateNodeProperty.mutateNodeProperties(
+        return mutateNodePropertyService.mutateNodeProperties(
             graph,
             graphStore,
             configuration,

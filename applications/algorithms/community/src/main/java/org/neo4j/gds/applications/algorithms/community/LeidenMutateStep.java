@@ -25,18 +25,18 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
-import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
+import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.leiden.LeidenMutateConfig;
 import org.neo4j.gds.leiden.LeidenResult;
 
 class LeidenMutateStep implements MutateStep<LeidenResult, Pair<NodePropertiesWritten, NodePropertyValues>> {
-    private final MutateNodeProperty mutateNodeProperty;
+    private final MutateNodePropertyService mutateNodePropertyService;
     private final LeidenMutateConfig configuration;
 
-    LeidenMutateStep(MutateNodeProperty mutateNodeProperty, LeidenMutateConfig configuration) {
-        this.mutateNodeProperty = mutateNodeProperty;
+    LeidenMutateStep(MutateNodePropertyService mutateNodePropertyService, LeidenMutateConfig configuration) {
+        this.mutateNodePropertyService = mutateNodePropertyService;
         this.configuration = configuration;
     }
 
@@ -48,7 +48,7 @@ class LeidenMutateStep implements MutateStep<LeidenResult, Pair<NodePropertiesWr
     ) {
         var nodePropertyValues = calculateNodePropertyValues(graphStore, result);
 
-        var nodePropertiesWritten = mutateNodeProperty.mutateNodeProperties(
+        var nodePropertiesWritten = mutateNodePropertyService.mutateNodeProperties(
             graph,
             graphStore,
             configuration,

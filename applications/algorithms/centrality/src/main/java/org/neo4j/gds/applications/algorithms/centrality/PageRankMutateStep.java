@@ -21,7 +21,7 @@ package org.neo4j.gds.applications.algorithms.centrality;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
+import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.config.MutateNodePropertyConfig;
@@ -29,14 +29,14 @@ import org.neo4j.gds.pagerank.PageRankResult;
 import org.neo4j.gds.pagerank.RankConfig;
 
 class PageRankMutateStep<C extends RankConfig & MutateNodePropertyConfig> implements MutateStep<PageRankResult, NodePropertiesWritten> {
-    private final MutateNodeProperty mutateNodeProperty;
+    private final MutateNodePropertyService mutateNodePropertyService;
     private final C configuration;
 
     PageRankMutateStep(
-        MutateNodeProperty mutateNodeProperty,
+        MutateNodePropertyService mutateNodePropertyService,
         C configuration
     ) {
-        this.mutateNodeProperty = mutateNodeProperty;
+        this.mutateNodePropertyService = mutateNodePropertyService;
         this.configuration = configuration;
     }
 
@@ -46,7 +46,7 @@ class PageRankMutateStep<C extends RankConfig & MutateNodePropertyConfig> implem
         GraphStore graphStore,
         PageRankResult result
     ) {
-        return mutateNodeProperty.mutateNodeProperties(
+        return mutateNodePropertyService.mutateNodeProperties(
             graph,
             graphStore,
             configuration,

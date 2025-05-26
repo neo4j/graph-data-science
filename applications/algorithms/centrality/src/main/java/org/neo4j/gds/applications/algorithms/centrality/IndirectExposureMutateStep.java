@@ -22,7 +22,7 @@ package org.neo4j.gds.applications.algorithms.centrality;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyRecord;
-import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
+import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.indirectExposure.IndirectExposureMutateConfig;
@@ -31,14 +31,14 @@ import org.neo4j.gds.indirectExposure.IndirectExposureResult;
 import java.util.List;
 
 class IndirectExposureMutateStep implements MutateStep<IndirectExposureResult, NodePropertiesWritten> {
-    private final MutateNodeProperty mutateNodeProperty;
+    private final MutateNodePropertyService mutateNodePropertyService;
     private final IndirectExposureMutateConfig config;
 
     IndirectExposureMutateStep(
-        MutateNodeProperty mutateNodeProperty,
+        MutateNodePropertyService mutateNodePropertyService,
         IndirectExposureMutateConfig configuration
     ) {
-        this.mutateNodeProperty = mutateNodeProperty;
+        this.mutateNodePropertyService = mutateNodePropertyService;
         this.config = configuration;
     }
 
@@ -55,7 +55,7 @@ class IndirectExposureMutateStep implements MutateStep<IndirectExposureResult, N
         var parents = NodePropertyRecord.of( mutateProperties.parents(), result.parentValues());
         var roots = NodePropertyRecord.of( mutateProperties.roots(), result.rootValues());
 
-        return mutateNodeProperty.mutateNodeProperties(
+        return mutateNodePropertyService.mutateNodeProperties(
             graph,
             graphStore,
             config.nodeLabelIdentifiers(graphStore),

@@ -22,7 +22,7 @@ package org.neo4j.gds.applications.algorithms.miscellaneous;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
-import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
+import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.MutateRelationshipService;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
@@ -45,20 +45,20 @@ public class MiscellaneousApplicationsMutateModeBusinessFacade {
     private final MiscellaneousApplicationsEstimationModeBusinessFacade estimation;
     private final MiscellaneousAlgorithmsBusinessFacade algorithms;
     private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
-    private final MutateNodeProperty mutateNodeProperty;
+    private final MutateNodePropertyService mutateNodePropertyService;
     private final MutateRelationshipService mutateRelationshipService;
 
     MiscellaneousApplicationsMutateModeBusinessFacade(
         MiscellaneousApplicationsEstimationModeBusinessFacade estimation,
         MiscellaneousAlgorithmsBusinessFacade algorithms,
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
-        MutateNodeProperty mutateNodeProperty,
+        MutateNodePropertyService mutateNodePropertyService,
         MutateRelationshipService mutateRelationshipService
     ) {
         this.estimation = estimation;
         this.algorithms = algorithms;
         this.algorithmProcessingTemplateConvenience = algorithmProcessingTemplateConvenience;
-        this.mutateNodeProperty = mutateNodeProperty;
+        this.mutateNodePropertyService = mutateNodePropertyService;
         this.mutateRelationshipService = mutateRelationshipService;
     }
 
@@ -103,7 +103,7 @@ public class MiscellaneousApplicationsMutateModeBusinessFacade {
         ScalePropertiesMutateConfig configuration,
         ResultBuilder<ScalePropertiesMutateConfig, ScalePropertiesResult, RESULT, NodePropertiesWritten> resultBuilder
     ) {
-        var mutateStep = new ScalePropertiesMutateStep(mutateNodeProperty, configuration);
+        var mutateStep = new ScalePropertiesMutateStep(mutateNodePropertyService, configuration);
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
             graphName,

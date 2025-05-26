@@ -21,7 +21,7 @@ package org.neo4j.gds.applications.algorithms.embeddings;
 
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
-import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
+import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.embeddings.fastrp.FastRPMutateConfig;
@@ -45,19 +45,19 @@ public class NodeEmbeddingAlgorithmsMutateModeBusinessFacade {
     private final NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimation;
     private final NodeEmbeddingBusinessAlgorithms algorithms;
     private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
-    private final MutateNodeProperty mutateNodeProperty;
+    private final MutateNodePropertyService mutateNodePropertyService;
     private final GraphSageAlgorithmProcessing graphSageAlgorithmProcessing;
 
     public NodeEmbeddingAlgorithmsMutateModeBusinessFacade(
         NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimation,
         NodeEmbeddingBusinessAlgorithms algorithms,
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
-        MutateNodeProperty mutateNodeProperty,
+        MutateNodePropertyService mutateNodePropertyService,
         GraphSageAlgorithmProcessing graphSageAlgorithmProcessing) {
         this.estimation = estimation;
         this.algorithms = algorithms;
         this.algorithmProcessingTemplateConvenience = algorithmProcessingTemplateConvenience;
-        this.mutateNodeProperty = mutateNodeProperty;
+        this.mutateNodePropertyService = mutateNodePropertyService;
         this.graphSageAlgorithmProcessing = graphSageAlgorithmProcessing;
     }
 
@@ -66,7 +66,7 @@ public class NodeEmbeddingAlgorithmsMutateModeBusinessFacade {
         FastRPMutateConfig configuration,
         ResultBuilder<FastRPMutateConfig, FastRPResult, RESULT, NodePropertiesWritten> resultBuilder
     ) {
-        var mutateStep = new FastRPMutateStep(mutateNodeProperty, configuration);
+        var mutateStep = new FastRPMutateStep(mutateNodePropertyService, configuration);
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
             graphName,
@@ -84,7 +84,7 @@ public class NodeEmbeddingAlgorithmsMutateModeBusinessFacade {
         GraphSageMutateConfig configuration,
         ResultBuilder<GraphSageMutateConfig, GraphSageResult, RESULT, NodePropertiesWritten> resultBuilder
     ) {
-        var mutateStep = new GraphSageMutateStep(mutateNodeProperty, configuration);
+        var mutateStep = new GraphSageMutateStep(mutateNodePropertyService, configuration);
         var graphSageProcessParameters = graphSageAlgorithmProcessing.graphSageValidationHook(configuration);
 
         return algorithmProcessingTemplateConvenience.processAlgorithmInMutateMode(
@@ -106,7 +106,7 @@ public class NodeEmbeddingAlgorithmsMutateModeBusinessFacade {
         HashGNNMutateConfig configuration,
         ResultBuilder<HashGNNMutateConfig, HashGNNResult, RESULT, NodePropertiesWritten> resultBuilder
     ) {
-        var mutateStep = new HashGnnMutateStep(mutateNodeProperty, configuration);
+        var mutateStep = new HashGnnMutateStep(mutateNodePropertyService, configuration);
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
             graphName,
@@ -124,7 +124,7 @@ public class NodeEmbeddingAlgorithmsMutateModeBusinessFacade {
         Node2VecMutateConfig configuration,
         ResultBuilder<Node2VecMutateConfig, Node2VecResult, RESULT, NodePropertiesWritten> resultBuilder
     ) {
-        var mutateStep = new Node2VecMutateStep(mutateNodeProperty, configuration);
+        var mutateStep = new Node2VecMutateStep(mutateNodePropertyService, configuration);
         var validationHook = new Node2VecValidationHook(configuration);
 
         return algorithmProcessingTemplateConvenience.processAlgorithmInMutateMode(

@@ -22,18 +22,18 @@ package org.neo4j.gds.applications.algorithms.community;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
-import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
+import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.kmeans.KmeansMutateConfig;
 import org.neo4j.gds.kmeans.KmeansResult;
 
 class KMeansMutateStep implements MutateStep<KmeansResult, NodePropertiesWritten> {
-    private final MutateNodeProperty mutateNodeProperty;
+    private final MutateNodePropertyService mutateNodePropertyService;
     private final KmeansMutateConfig configuration;
 
-    KMeansMutateStep(MutateNodeProperty mutateNodeProperty, KmeansMutateConfig configuration) {
-        this.mutateNodeProperty = mutateNodeProperty;
+    KMeansMutateStep(MutateNodePropertyService mutateNodePropertyService, KmeansMutateConfig configuration) {
+        this.mutateNodePropertyService = mutateNodePropertyService;
         this.configuration = configuration;
     }
 
@@ -43,7 +43,7 @@ class KMeansMutateStep implements MutateStep<KmeansResult, NodePropertiesWritten
         GraphStore graphStore,
         KmeansResult result
     ) {
-        return mutateNodeProperty.mutateNodeProperties(
+        return mutateNodePropertyService.mutateNodeProperties(
             graph,
             graphStore,
             configuration,

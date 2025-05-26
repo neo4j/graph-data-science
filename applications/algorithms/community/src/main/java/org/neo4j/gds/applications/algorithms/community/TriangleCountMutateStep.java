@@ -22,18 +22,18 @@ package org.neo4j.gds.applications.algorithms.community;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
-import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
+import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.triangle.TriangleCountMutateConfig;
 import org.neo4j.gds.triangle.TriangleCountResult;
 
 class TriangleCountMutateStep implements MutateStep<TriangleCountResult, NodePropertiesWritten> {
-    private final MutateNodeProperty mutateNodeProperty;
+    private final MutateNodePropertyService mutateNodePropertyService;
     private final TriangleCountMutateConfig configuration;
 
-    TriangleCountMutateStep(MutateNodeProperty mutateNodeProperty, TriangleCountMutateConfig configuration) {
-        this.mutateNodeProperty = mutateNodeProperty;
+    TriangleCountMutateStep(MutateNodePropertyService mutateNodePropertyService, TriangleCountMutateConfig configuration) {
+        this.mutateNodePropertyService = mutateNodePropertyService;
         this.configuration = configuration;
     }
 
@@ -43,7 +43,7 @@ class TriangleCountMutateStep implements MutateStep<TriangleCountResult, NodePro
         GraphStore graphStore,
         TriangleCountResult result
     ) {
-        return mutateNodeProperty.mutateNodeProperties(
+        return mutateNodePropertyService.mutateNodeProperties(
             graph,
             graphStore,
             configuration,

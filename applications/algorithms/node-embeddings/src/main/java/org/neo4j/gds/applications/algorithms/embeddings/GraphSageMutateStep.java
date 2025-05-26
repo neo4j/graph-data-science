@@ -22,18 +22,18 @@ package org.neo4j.gds.applications.algorithms.embeddings;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
-import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
+import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageMutateConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageResult;
 
 class GraphSageMutateStep implements MutateStep<GraphSageResult, NodePropertiesWritten> {
-    private final MutateNodeProperty mutateNodeProperty;
+    private final MutateNodePropertyService mutateNodePropertyService;
     private final GraphSageMutateConfig configuration;
 
-    GraphSageMutateStep(MutateNodeProperty mutateNodeProperty, GraphSageMutateConfig configuration) {
-        this.mutateNodeProperty = mutateNodeProperty;
+    GraphSageMutateStep(MutateNodePropertyService mutateNodePropertyService, GraphSageMutateConfig configuration) {
+        this.mutateNodePropertyService = mutateNodePropertyService;
         this.configuration = configuration;
     }
 
@@ -45,7 +45,7 @@ class GraphSageMutateStep implements MutateStep<GraphSageResult, NodePropertiesW
     ) {
         var nodePropertyValues = NodePropertyValuesAdapter.adapt(result.embeddings());
 
-        return mutateNodeProperty.mutateNodeProperties(
+        return mutateNodePropertyService.mutateNodeProperties(
             graph,
             graphStore,
             configuration,

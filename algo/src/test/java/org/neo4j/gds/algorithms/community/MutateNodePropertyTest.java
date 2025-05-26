@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
-import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
+import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.config.MutateNodePropertyConfig;
 import org.neo4j.gds.extension.GdlExtension;
@@ -65,7 +65,7 @@ class MutateNodePropertyTest {
         values.setAll(graph::toOriginalNodeId);
         var nodePropertyValuesToMutate = NodePropertyValuesAdapter.adapt(values);
 
-        var mutateNodeProperty = new MutateNodeProperty(mock(Log.class));
+        var mutateNodeProperty = new MutateNodePropertyService(mock(Log.class));
         var result = mutateNodeProperty.mutateNodeProperties(
             graph,
             graphStore,
