@@ -21,12 +21,12 @@ package org.neo4j.gds.procedures.pipelines;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.properties.nodes.NodePropertyRecord;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.applications.algorithms.machinery.GraphStoreService;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
-import org.neo4j.gds.core.write.NodeProperty;
 
 import java.util.List;
 
@@ -45,7 +45,7 @@ class NodeRegressionPredictPipelineMutateStep implements MutateStep<HugeDoubleAr
     @Override
     public NodePropertiesWritten execute(Graph graph, GraphStore graphStore, HugeDoubleArray result) {
         var nodeProperties = List.of(
-            NodeProperty.of(
+            NodePropertyRecord.of(
                 configuration.mutateProperty(),
                 NodePropertyValuesAdapter.adapt(result)
             )

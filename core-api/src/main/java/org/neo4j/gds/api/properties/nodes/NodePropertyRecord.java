@@ -17,15 +17,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.write;
+package org.neo4j.gds.api.properties.nodes;
 
-import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-
-public record NodeProperty(
+public record NodePropertyRecord(
     String key,
     NodePropertyValues values
 ) {
-    public static NodeProperty of(String key, NodePropertyValues values) {
-        return new NodeProperty(key, values);
+    public static NodePropertyRecord of(String key, NodePropertyValues values) {
+        return new NodePropertyRecord(key, values);
     }
 }

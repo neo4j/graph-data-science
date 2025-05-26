@@ -28,6 +28,7 @@ import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.properties.nodes.NodePropertyRecord;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
@@ -116,9 +117,9 @@ class NativeNodePropertyExporterTest extends BaseTest {
         int[] intData = {23, 42, 84};
         double[] doubleData = {123D, 142D, 184D};
 
-        List<NodeProperty> nodeProperties = Arrays.asList(
-            NodeProperty.of("newProp1", new LongTestPropertyValues(nodeId -> intData[(int) nodeId])),
-            NodeProperty.of("newProp2", new DoubleTestPropertyValues(nodeId -> doubleData[(int) nodeId]))
+        List<NodePropertyRecord> nodeProperties = Arrays.asList(
+            NodePropertyRecord.of("newProp1", new LongTestPropertyValues(nodeId -> intData[(int) nodeId])),
+            NodePropertyRecord.of("newProp2", new DoubleTestPropertyValues(nodeId -> doubleData[(int) nodeId]))
         );
 
         exporter.write(nodeProperties);

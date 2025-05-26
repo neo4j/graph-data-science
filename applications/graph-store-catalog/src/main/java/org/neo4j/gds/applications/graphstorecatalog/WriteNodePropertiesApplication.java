@@ -23,6 +23,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
+import org.neo4j.gds.api.properties.nodes.NodePropertyRecord;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.logging.GdsLoggers;
@@ -32,7 +33,6 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
-import org.neo4j.gds.core.write.NodeProperty;
 import org.neo4j.gds.core.write.NodePropertyExporter;
 import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.termination.TerminationFlag;
@@ -138,7 +138,7 @@ public class WriteNodePropertiesApplication {
             var writeNodeProperties = config.nodeProperties()
                 .stream()
                 .map(
-                    nodePropertyKey -> NodeProperty.of(
+                    nodePropertyKey -> NodePropertyRecord.of(
                         nodePropertyKey.writeProperty(),
                         subGraph.nodeProperties(nodePropertyKey.nodeProperty())
                     )

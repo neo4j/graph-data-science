@@ -23,6 +23,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.ResultStore;
+import org.neo4j.gds.api.properties.nodes.NodePropertyRecord;
 import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.config.WriteConfig;
@@ -34,7 +35,6 @@ import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.LoggerForProgressTracking;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
-import org.neo4j.gds.core.write.NodeProperty;
 import org.neo4j.gds.core.write.NodePropertyExporter;
 import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.termination.TerminationFlag;
@@ -72,7 +72,7 @@ public class NodePropertyWriter {
         Graph graph,
         GraphStore graphStore,
         Optional<ResultStore> resultStore,
-        Collection<NodeProperty> nodeProperties,
+        Collection<NodePropertyRecord> nodeProperties,
         JobId jobId,
         Label label,
         WriteConfig writeConfig
@@ -140,7 +140,7 @@ public class NodePropertyWriter {
     private void preFlightCheck(
         Capabilities.WriteMode writeMode,
         Map<String, PropertySchema> propertySchemas,
-        Collection<NodeProperty> nodeProperties
+        Collection<NodePropertyRecord> nodeProperties
     ) {
         if (writeMode == Capabilities.WriteMode.REMOTE) throw new IllegalArgumentException(
             "Missing arrow connection information");
@@ -180,7 +180,7 @@ public class NodePropertyWriter {
 
     private NodePropertiesWritten writeNodeProperties(
         NodePropertyExporter nodePropertyExporter,
-        Collection<NodeProperty> nodeProperties
+        Collection<NodePropertyRecord> nodeProperties
     ) {
         nodePropertyExporter.write(nodeProperties);
 

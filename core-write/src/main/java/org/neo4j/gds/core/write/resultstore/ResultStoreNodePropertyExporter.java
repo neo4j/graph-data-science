@@ -21,9 +21,9 @@ package org.neo4j.gds.core.write.resultstore;
 
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.ResultStoreEntry;
+import org.neo4j.gds.api.properties.nodes.NodePropertyRecord;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.utils.progress.JobId;
-import org.neo4j.gds.core.write.NodeProperty;
 import org.neo4j.gds.core.write.NodePropertyExporter;
 
 import java.util.ArrayList;
@@ -48,16 +48,16 @@ public class ResultStoreNodePropertyExporter implements NodePropertyExporter {
 
     @Override
     public void write(String property, NodePropertyValues properties) {
-        write(NodeProperty.of(property, properties));
+        write(NodePropertyRecord.of(property, properties));
     }
 
     @Override
-    public void write(NodeProperty nodeProperty) {
+    public void write(NodePropertyRecord nodeProperty) {
         write(List.of(nodeProperty));
     }
 
     @Override
-    public void write(Collection<NodeProperty> nodeProperties) {
+    public void write(Collection<NodePropertyRecord> nodeProperties) {
         var propertyKeys = new ArrayList<String>();
         var propertyValues = new ArrayList<NodePropertyValues>();
         nodeProperties.forEach(nodeProperty -> {

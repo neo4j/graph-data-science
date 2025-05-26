@@ -20,8 +20,8 @@
 package org.neo4j.gds.procedures.pipelines;
 
 import org.jetbrains.annotations.NotNull;
+import org.neo4j.gds.api.properties.nodes.NodePropertyRecord;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
-import org.neo4j.gds.core.write.NodeProperty;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -32,22 +32,22 @@ public final class PredictedProbabilities {
     private PredictedProbabilities() {}
 
     @NotNull
-    public static List<NodeProperty> asProperties(
+    public static List<NodePropertyRecord> asProperties(
         Optional<NodeClassificationPipelineResult> result,
         String propertyName,
         Optional<String> predictedProbabilityProperty
     ) {
         if (result.isEmpty()) return Collections.emptyList();
 
-        var nodeProperties = new ArrayList<NodeProperty>();
+        var nodeProperties = new ArrayList<NodePropertyRecord>();
 
         var classProperties = NodePropertyValuesAdapter.adapt(result.get().predictedClasses());
-        nodeProperties.add(NodeProperty.of(propertyName, classProperties));
+        nodeProperties.add(NodePropertyRecord.of(propertyName, classProperties));
 
         if (result.get().predictedProbabilities().isEmpty()) return nodeProperties;
 
         var nodePropertyValues = NodePropertyValuesAdapter.adapt(result.get().predictedProbabilities().get());
-        nodeProperties.add(NodeProperty.of(predictedProbabilityProperty.orElseThrow(), nodePropertyValues));
+        nodeProperties.add(NodePropertyRecord.of(predictedProbabilityProperty.orElseThrow(), nodePropertyValues));
 
         return nodeProperties;
     }

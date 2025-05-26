@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.write;
 
+import org.neo4j.gds.api.properties.nodes.NodePropertyRecord;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
@@ -32,9 +33,9 @@ public interface NodePropertyExporter {
 
     void write(String property, NodePropertyValues properties);
 
-    void write(NodeProperty nodeProperty);
+    void write(NodePropertyRecord nodeProperty);
 
-    void write(Collection<NodeProperty> nodeProperties);
+    void write(Collection<NodePropertyRecord> nodeProperties);
 
     long propertiesWritten();
 
