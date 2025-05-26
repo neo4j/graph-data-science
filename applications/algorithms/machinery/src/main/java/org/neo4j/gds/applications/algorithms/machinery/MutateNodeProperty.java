@@ -19,9 +19,12 @@
  */
 package org.neo4j.gds.applications.algorithms.machinery;
 
+import org.agrona.collections.MutableLong;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.properties.nodes.NodePropertyRecord;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.config.MutateNodePropertyConfig;
@@ -30,6 +33,8 @@ import org.neo4j.gds.logging.Log;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class MutateNodeProperty {
     private final Log log;
@@ -42,14 +47,14 @@ public class MutateNodeProperty {
         Graph graph,
         GraphStore graphStore,
         MutateNodePropertyConfig configuration,
-        NodePropertyValues nodePropertyValues)
+        NodePropertyValues nodePropertyValues
+    )
     {
        return mutateNodeProperties(
            graph,
            graphStore,
            configuration.nodeLabelIdentifiers(graphStore),
-           configuration.mutateProperty(),
-           nodePropertyValues
+           List.of(NodePropertyRecord.of(configuration.mutateProperty(),nodePropertyValues))
        );
     }
 
@@ -57,26 +62,50 @@ public class MutateNodeProperty {
         Graph graph,
         GraphStore graphStore,
         Collection<NodeLabel> labelsToUpdate,
-        String mutateProperty,
-        NodePropertyValues nodePropertyValues
+        List<NodePropertyRecord> nodeProperties
     ) {
-        var maybeFilteredNodePropertyValues = graph
-            .asNodeFilteredGraph()
-            .map(filteredGraph ->
-                FilteredNodePropertyValues.OriginalToFilteredNodePropertyValues.create(
-                    nodePropertyValues,
-                    filteredGraph
-                ))
-            .orElse(nodePropertyValues);
-
         log.info("Updating in-memory graph store");
 
-        graphStore.addNodeProperty(
-            new HashSet<>(labelsToUpdate),
-            mutateProperty,
-            maybeFilteredNodePropertyValues
+        var translatedProperties = translateProperties(graph, nodeProperties);
+        MutableLong nodePropertiesWritten = new MutableLong();
+        translatedProperties.forEach(
+            property ->{
+                var written = mutateNodeProperty(graph,graphStore,property,labelsToUpdate);
+                nodePropertiesWritten.addAndGet(written);
+            }
         );
 
-        return new NodePropertiesWritten(graph.nodeCount());
+        return new NodePropertiesWritten(nodePropertiesWritten.longValue());
+    }
+
+    private long mutateNodeProperty(
+        IdMap graph,
+        GraphStore graphStore,
+        NodePropertyRecord property,
+        Collection<NodeLabel> labelsToUpdate
+    ){
+        graphStore.addNodeProperty(
+            new HashSet<>(labelsToUpdate),
+            property.key(),
+            property.values()
+        );
+        return graph.nodeCount();
+    }
+
+
+    private List<NodePropertyRecord> translateProperties(Graph graph, List<NodePropertyRecord> nodeProperties) {
+        return graph
+            .asNodeFilteredGraph()
+            .map(filteredGraph -> nodeProperties
+                .stream()
+                .map(nodeProperty -> NodePropertyRecord.of(
+                    nodeProperty.key(),
+                    FilteredNodePropertyValues.OriginalToFilteredNodePropertyValues.create(
+                        nodeProperty.values(),
+                        filteredGraph
+                    )
+                ))
+                .collect(Collectors.toList()))
+            .orElse(nodeProperties);
     }
 }

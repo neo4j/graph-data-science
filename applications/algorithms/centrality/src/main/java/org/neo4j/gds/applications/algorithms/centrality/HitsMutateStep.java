@@ -21,13 +21,15 @@ package org.neo4j.gds.applications.algorithms.centrality;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.api.properties.nodes.NodePropertyRecord;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.hits.HitsConfig;
+
+import java.util.List;
 
 class HitsMutateStep implements MutateStep<PregelResult, NodePropertiesWritten> {
     private final MutateNodeProperty mutateNodeProperty;
@@ -50,27 +52,17 @@ class HitsMutateStep implements MutateStep<PregelResult, NodePropertiesWritten> 
         var hubValues = NodePropertyValuesAdapter.adapt(result.nodeValues().doubleProperties(configuration.authProperty()));
         var authProperty = configuration.authProperty().concat(configuration.mutateProperty());
         var hubProperty = configuration.hubProperty().concat(configuration.mutateProperty());
+        
+        var authRecord = NodePropertyRecord.of(authProperty, authValues);
+        var hubRecord = NodePropertyRecord.of(hubProperty, hubValues);
 
-        var authWritten = mutate(graph, graphStore, authProperty,authValues);
-        var hubWritten = mutate(graph, graphStore, hubProperty,hubValues);
-
-        return new NodePropertiesWritten(
-            authWritten.value() + hubWritten.value()
-        );
-    }
-
-    private NodePropertiesWritten mutate(
-        Graph graph,
-        GraphStore graphStore,
-        String mutateProperty,
-        NodePropertyValues values
-    ) {
         return mutateNodeProperty.mutateNodeProperties(
             graph,
             graphStore,
             configuration.nodeLabelIdentifiers(graphStore),
-            mutateProperty,
-            values
+            List.of(authRecord,hubRecord)
         );
+
     }
+
 }

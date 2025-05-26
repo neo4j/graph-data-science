@@ -21,12 +21,14 @@ package org.neo4j.gds.applications.algorithms.centrality;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.api.properties.nodes.NodePropertyRecord;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.indirectExposure.IndirectExposureMutateConfig;
 import org.neo4j.gds.indirectExposure.IndirectExposureResult;
+
+import java.util.List;
 
 class IndirectExposureMutateStep implements MutateStep<IndirectExposureResult, NodePropertiesWritten> {
     private final MutateNodeProperty mutateNodeProperty;
@@ -47,28 +49,19 @@ class IndirectExposureMutateStep implements MutateStep<IndirectExposureResult, N
         IndirectExposureResult result
     ) {
         var mutateProperties = this.config.mutateProperties();
-        var exposuresWritten = mutate(graph, graphStore, mutateProperties.exposures(), result.exposureValues());
-        var hopsWritten = mutate(graph, graphStore, mutateProperties.hops(), result.hopValues());
-        var parentsWritten = mutate(graph, graphStore, mutateProperties.parents(), result.parentValues());
-        var rootsWritten = mutate(graph, graphStore, mutateProperties.roots(), result.rootValues());
 
-        return new NodePropertiesWritten(
-            exposuresWritten.value() + hopsWritten.value() + parentsWritten.value() + rootsWritten.value()
-        );
-    }
+        var exposure = NodePropertyRecord.of(mutateProperties.exposures(), result.exposureValues());
+        var hops =  NodePropertyRecord.of( mutateProperties.hops(), result.hopValues());
+        var parents = NodePropertyRecord.of( mutateProperties.parents(), result.parentValues());
+        var roots = NodePropertyRecord.of( mutateProperties.roots(), result.rootValues());
 
-    private NodePropertiesWritten mutate(
-        Graph graph,
-        GraphStore graphStore,
-        String mutateProperty,
-        NodePropertyValues values
-    ) {
         return mutateNodeProperty.mutateNodeProperties(
             graph,
             graphStore,
             config.nodeLabelIdentifiers(graphStore),
-            mutateProperty,
-            values
+            List.of(exposure, hops, parents, roots)
         );
+
     }
+
 }
