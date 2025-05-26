@@ -58,7 +58,7 @@ public class PregelWriteComputationResultConsumer<
                 AtomicLong nodePropertiesWritten = new AtomicLong();
                 try (ProgressTimer ignored = ProgressTimer.start(writeMillis::set)) {
                     if (!computationResult.isGraphEmpty()) {
-                        var nodePropertyMap = PregelCompanion.nodePropertiesAsMap(
+                        var nodePropertyList = PregelCompanion.nodeProperties(
                             computationResult,
                             config.writeProperty()
                         );
@@ -91,7 +91,7 @@ public class PregelWriteComputationResultConsumer<
                             config,
                             new StandardLabel("PregelWrite"),
                             config.jobId(),
-                            nodePropertyMap
+                            nodePropertyList
                             );
 
                         nodePropertiesWritten.set(nodePropsWritten.value());

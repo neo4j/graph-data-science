@@ -22,9 +22,9 @@ package org.neo4j.gds.core.write.resultstore;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.EphemeralResultStore;
 import org.neo4j.gds.api.ResultStoreEntry;
+import org.neo4j.gds.api.properties.nodes.NodePropertyRecord;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.utils.progress.JobId;
-import org.neo4j.gds.core.write.NodeProperty;
 
 import java.util.List;
 import java.util.function.LongUnaryOperator;
@@ -73,8 +73,8 @@ class ResultStoreNodePropertyExporterTest {
 
         var nodePropertyExporter = new ResultStoreNodePropertyExporter(jobId, resultStore, List.of(PROJECT_ALL), toOriginalId);
         nodePropertyExporter.write(List.of(
-                NodeProperty.of("prop1", nodePropertyValues1),
-                NodeProperty.of("prop2", nodePropertyValues2)
+                NodePropertyRecord.of("prop1", nodePropertyValues1),
+                NodePropertyRecord.of("prop2", nodePropertyValues2)
             )
         );
 

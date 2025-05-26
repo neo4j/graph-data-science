@@ -22,6 +22,7 @@ package org.neo4j.gds.applications.algorithms.machinery;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
+import org.neo4j.gds.api.properties.nodes.NodePropertyRecord;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.config.WriteConfig;
@@ -29,7 +30,7 @@ import org.neo4j.gds.config.WritePropertyConfig;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.logging.Log;
 
-import java.util.Map;
+import java.util.List;
 
 public class WriteToDatabase {
     private final Log log;
@@ -75,16 +76,15 @@ public class WriteToDatabase {
         WriteConfig writeConfiguration,
         Label label,
         JobId jobId,
-        Map<String,NodePropertyValues> nodePropertyValuesMap
+        List<NodePropertyRecord> nodePropertes
     ) {
-
         return Neo4jDatabaseNodePropertyWriter.writeNodeProperties(
             writeContext.nodePropertyExporterBuilder(),
             requestScopedDependencies.taskRegistryFactory(),
             graph,
             graphStore,
             writeConfiguration.writeConcurrency(),
-            nodePropertyValuesMap,
+            nodePropertes,
             label.asString(),
             writeConfiguration.resolveResultStore(resultStore),
             jobId,
@@ -92,5 +92,7 @@ public class WriteToDatabase {
             log
         );
     }
+
+
 
 }

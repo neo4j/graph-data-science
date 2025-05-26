@@ -22,7 +22,7 @@ package org.neo4j.gds.applications.algorithms.centrality;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.api.properties.nodes.NodePropertyRecord;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.applications.algorithms.machinery.Label;
 import org.neo4j.gds.applications.algorithms.machinery.WriteStep;
@@ -32,7 +32,7 @@ import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.hits.HitsConfig;
 
-import java.util.Map;
+import java.util.List;
 
 class HitsWriteStep implements WriteStep<PregelResult, NodePropertiesWritten> {
     private final WriteToDatabase writeToDatabase;
@@ -68,11 +68,15 @@ class HitsWriteStep implements WriteStep<PregelResult, NodePropertiesWritten> {
         );
     }
 
-    Map<String,NodePropertyValues> nodeProperties(PregelResult pregelResult, HitsConfig config){
+    private List<NodePropertyRecord> nodeProperties(PregelResult pregelResult, HitsConfig config){
         var authValues = NodePropertyValuesAdapter.adapt(pregelResult.nodeValues().doubleProperties(config.authProperty()));
         var hubValues = NodePropertyValuesAdapter.adapt(pregelResult.nodeValues().doubleProperties(config.authProperty()));
         var authProperty = config.authProperty().concat(config.writeProperty());
         var hubProperty = config.hubProperty().concat(config.writeProperty());
-        return Map.of(authProperty,authValues,hubProperty,hubValues);
+
+        var authRecord = NodePropertyRecord.of(authProperty, authValues);
+        var hubRecord = NodePropertyRecord.of(hubProperty, hubValues);
+
+        return List.of(authRecord,hubRecord);
     }
 }

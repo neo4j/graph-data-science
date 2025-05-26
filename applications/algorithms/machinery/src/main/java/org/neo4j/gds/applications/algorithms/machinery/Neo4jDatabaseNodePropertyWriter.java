@@ -24,6 +24,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.ResultStore;
+import org.neo4j.gds.api.properties.nodes.NodePropertyRecord;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
@@ -35,7 +36,6 @@ import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
-import org.neo4j.gds.core.write.NodeProperty;
 import org.neo4j.gds.core.write.NodePropertyExporter;
 import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.logging.Log;
@@ -71,7 +71,7 @@ final class Neo4jDatabaseNodePropertyWriter {
         TerminationFlag terminationFlag,
         Log log
     ) {
-        var nodeProperties = List.of(new NodeProperty(writeProperty, nodePropertyValues));
+        var nodeProperties = List.of(new NodePropertyRecord(writeProperty, nodePropertyValues));
         return  writeNodeProperties(
             nodePropertyExporterBuilder,
             taskRegistryFactory,
@@ -94,41 +94,7 @@ final class Neo4jDatabaseNodePropertyWriter {
         Graph graph,
         GraphStore graphStore,
         Concurrency writeConcurrency,
-        Map<String,NodePropertyValues> nodePropertyValuesMap,
-        String procedureName,
-        Optional<ResultStore> resultStore,
-        JobId jobId,
-        TerminationFlag terminationFlag,
-        Log log
-    ) {
-        var nodeProperties = nodePropertyValuesMap
-            .entrySet()
-            .stream()
-            .map( v-> new NodeProperty(v.getKey(),v.getValue()))
-            .toList();
-
-        return  writeNodeProperties(
-            nodePropertyExporterBuilder,
-            taskRegistryFactory,
-            graph,
-            graphStore,
-            writeConcurrency,
-            nodeProperties,
-            procedureName,
-            resultStore,
-            jobId,
-            terminationFlag,
-            log
-        );
-    }
-
-    static NodePropertiesWritten writeNodeProperties(
-        NodePropertyExporterBuilder nodePropertyExporterBuilder,
-        TaskRegistryFactory taskRegistryFactory,
-        Graph graph,
-        GraphStore graphStore,
-        Concurrency writeConcurrency,
-        List<NodeProperty> nodeProperties,
+        List<NodePropertyRecord> nodeProperties,
         String procedureName,
         Optional<ResultStore> resultStore,
         JobId jobId,
@@ -196,7 +162,7 @@ final class Neo4jDatabaseNodePropertyWriter {
     private static void validatePropertiesCanBeWritten(
         Capabilities.WriteMode writeMode,
         Map<String, PropertySchema> propertySchemas,
-        Collection<NodeProperty> nodeProperties,
+        Collection<NodePropertyRecord> nodeProperties,
         boolean useResultStore
     ) {
         if (writeMode == Capabilities.WriteMode.REMOTE && !useResultStore) {

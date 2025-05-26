@@ -21,10 +21,10 @@ package org.neo4j.gds.applications.algorithms.machinery;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.properties.nodes.NodePropertyRecord;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.huge.FilteredNodePropertyValues;
-import org.neo4j.gds.core.write.NodeProperty;
 import org.neo4j.gds.logging.Log;
 
 import java.util.HashSet;
@@ -42,7 +42,7 @@ public class GraphStoreService {
         Graph graph,
         GraphStore graphStore,
         AlgoBaseConfig configuration,
-        List<NodeProperty> nodeProperties
+        List<NodePropertyRecord> nodeProperties
     ) {
         var translatedProperties = translateProperties(graph, nodeProperties);
 
@@ -58,12 +58,12 @@ public class GraphStoreService {
         return new NodePropertiesWritten(translatedProperties.size() * graph.nodeCount());
     }
 
-    private List<NodeProperty> translateProperties(Graph graph, List<NodeProperty> nodeProperties) {
+    private List<NodePropertyRecord> translateProperties(Graph graph, List<NodePropertyRecord> nodeProperties) {
         return graph
             .asNodeFilteredGraph()
             .map(filteredGraph -> nodeProperties
                 .stream()
-                .map(nodeProperty -> NodeProperty.of(
+                .map(nodeProperty -> NodePropertyRecord.of(
                     nodeProperty.key(),
                     FilteredNodePropertyValues.OriginalToFilteredNodePropertyValues.create(
                         nodeProperty.values(),

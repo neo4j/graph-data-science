@@ -20,6 +20,7 @@
 package org.neo4j.gds.core.write;
 
 import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.properties.nodes.NodePropertyRecord;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
@@ -60,7 +61,7 @@ public class NativeNodePropertyExporter extends StatementApi implements NodeProp
 
     record ResolvedNodeProperty(int token, String key, Neo4jNodePropertyValues values) {
 
-        static ResolvedNodeProperty of(NodeProperty nodeProperty, int token) {
+        static ResolvedNodeProperty of(NodePropertyRecord nodeProperty, int token) {
             return new ResolvedNodeProperty(
                 token,
                 nodeProperty.key(),
@@ -94,15 +95,15 @@ public class NativeNodePropertyExporter extends StatementApi implements NodeProp
 
     @Override
     public void write(String property, NodePropertyValues properties) {
-        write(NodeProperty.of(property, properties));
+        write(NodePropertyRecord.of(property, properties));
     }
 
     @Override
-    public void write(NodeProperty nodeProperty) {
+    public void write(NodePropertyRecord nodeProperty) {
         write(List.of(nodeProperty));
     }
 
-    private static NativeNodePropertyExporter.ResolvedNodeProperty resolveWith(NodeProperty property, int propertyToken) {
+    private static NativeNodePropertyExporter.ResolvedNodeProperty resolveWith(NodePropertyRecord property, int propertyToken) {
         if (propertyToken == -1) {
             throw new IllegalStateException("No write property token id is set.");
         }
@@ -110,7 +111,7 @@ public class NativeNodePropertyExporter extends StatementApi implements NodeProp
     }
 
     @Override
-    public void write(Collection<NodeProperty> nodeProperties) {
+    public void write(Collection<NodePropertyRecord> nodeProperties) {
         var resolvedNodeProperties = nodeProperties.stream()
             .map(desc -> resolveWith(desc, getOrCreatePropertyToken(desc.key())))
             .collect(Collectors.toList());

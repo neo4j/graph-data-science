@@ -22,10 +22,10 @@ package org.neo4j.gds.test;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
+import org.neo4j.gds.api.properties.nodes.NodePropertyRecord;
 import org.neo4j.gds.applications.algorithms.machinery.GraphStoreService;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.core.write.NodeProperty;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
@@ -128,8 +128,8 @@ public class TestMutateSpec implements AlgorithmSpec<TestAlgorithm, TestAlgorith
 
     }
 
-    private List<NodeProperty> nodePropertyList(ComputationResult<TestAlgorithm, TestAlgorithmResult, TestMutateConfig> computationResult) {
-        return List.of(NodeProperty.of(
+    private List<NodePropertyRecord> nodePropertyList(ComputationResult<TestAlgorithm, TestAlgorithmResult, TestMutateConfig> computationResult) {
+        return List.of(NodePropertyRecord.of(
             computationResult.config().mutateProperty(),
             new LongNodePropertyValues() {
                 @Override

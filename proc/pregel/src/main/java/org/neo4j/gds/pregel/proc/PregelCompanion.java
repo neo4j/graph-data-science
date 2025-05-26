@@ -25,6 +25,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.nodes.DoubleArrayNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.LongArrayNodePropertyValues;
+import org.neo4j.gds.api.properties.nodes.NodePropertyRecord;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
@@ -40,7 +41,6 @@ import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
-import org.neo4j.gds.core.write.NodeProperty;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.validation.AfterLoadValidation;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
@@ -52,10 +52,8 @@ import org.neo4j.gds.utils.StringJoining;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -152,7 +150,7 @@ public final class PregelCompanion {
         }
     }
 
-    static <ALGO extends Algorithm<PregelResult>, CONFIG extends PregelConfig> List<NodeProperty> nodeProperties(
+    static <ALGO extends Algorithm<PregelResult>, CONFIG extends PregelConfig> List<NodePropertyRecord> nodeProperties(
         ComputationResult<ALGO, PregelResult, CONFIG> computationResult, String propertyPrefix
     ) {
         if (computationResult.result().isEmpty()) {
@@ -175,39 +173,10 @@ public final class PregelCompanion {
                     element.propertyType(),
                     compositeNodeValue
                 );
-                return NodeProperty.of(formatWithLocale("%s%s", propertyPrefix, propertyKey), nodePropertyValues);
+                return NodePropertyRecord.of(formatWithLocale("%s%s", propertyPrefix, propertyKey), nodePropertyValues);
             }).collect(Collectors.toList());
     }
 
-    static <ALGO extends Algorithm<PregelResult>, CONFIG extends PregelConfig> Map<String,NodePropertyValues> nodePropertiesAsMap(
-        ComputationResult<ALGO, PregelResult, CONFIG> computationResult, String propertyPrefix
-    ) {
-        if (computationResult.result().isEmpty()) {
-            return Collections.emptyMap();
-        }
-
-        var result = computationResult.result().get();
-        var compositeNodeValue = result.nodeValues();
-        var schema = compositeNodeValue.schema();
-        // TODO change this to generic prefix setting
-
-        var map =new HashMap<String, NodePropertyValues>();
-         schema
-            .elements()
-            .stream()
-            .filter(element -> element.visibility() == PregelSchema.Visibility.PUBLIC)
-            .forEach(element -> {
-                var propertyKey = element.propertyKey();
-                var nodePropertyValues  = adaptNodeProperty(
-                    propertyKey,
-                    element.propertyType(),
-                    compositeNodeValue
-                );
-                var formattedName = formatWithLocale("%s%s", propertyPrefix, propertyKey);
-                map.put(formattedName,nodePropertyValues);
-            });
-         return  map;
-    }
 
    private static NodePropertyValues adaptNodeProperty(
        String propertyKey,

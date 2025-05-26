@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.write;
 
+import org.neo4j.gds.api.properties.nodes.NodePropertyRecord;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.values.Neo4jNodePropertyValues;
 import org.neo4j.gds.values.Neo4jNodePropertyValuesUtil;
@@ -27,7 +28,7 @@ public record Neo4jNodeProperty(
     String key,
     Neo4jNodePropertyValues values
 ) {
-    public static Neo4jNodeProperty of(NodeProperty nodeProperty) {
+    public static Neo4jNodeProperty of(NodePropertyRecord nodeProperty) {
         return new Neo4jNodeProperty(
             nodeProperty.key(),
             Neo4jNodePropertyValuesUtil.of(nodeProperty.values())
