@@ -68,7 +68,7 @@ class SpeakerListenerLPAWriteStep implements WriteStep<PregelResult, NodePropert
         );
     }
 
-    NodePropertyValues nodePropertyValues(PregelResult pregelResult){
+    private NodePropertyValues nodePropertyValues(PregelResult pregelResult){
         return NodePropertyValuesAdapter.adapt(pregelResult.nodeValues().longArrayProperties(SpeakerListenerLPA.LABELS_PROPERTY));
     }
 }
