@@ -17,18 +17,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.similarity.filteredknn;
+package org.neo4j.gds.similarity.knn;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.similarity.knn.KnnBaseConfig;
-import org.neo4j.gds.similarity.knn.KnnNodePropertySpec;
+import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.similarity.knn.metrics.SimilarityMetric;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doCallRealMethod;
@@ -77,4 +80,35 @@ import static org.mockito.Mockito.when;
         assertThatThrownBy(() -> config.checkPropertiesExist(graphStore,Set.of(),Set.of()))
             .hasMessageContaining("The property `bar` has not been loaded. Available properties: ['foo']");
     }
+
+     @Test
+     void shouldRenderNodePropertiesWithResolvedDefaultMetrics() {
+         var userInput = CypherMapWrapper.create(
+             Map.of(
+                 "nodeProperties", List.of("knn")
+             )
+         );
+         var knnConfig = new KnnBaseConfigImpl(userInput);
+
+         knnConfig.nodeProperties()
+             .stream()
+             .findFirst()
+             .orElseThrow()
+             .setMetric(SimilarityMetric.DOUBLE_PROPERTY_METRIC);
+         assertThat(knnConfig.toMap().get("nodeProperties")).isEqualTo(
+             Map.of(
+                 "knn", SimilarityMetric.DOUBLE_PROPERTY_METRIC.name()
+             )
+         );
+     }
+
+     @Test
+     void invalidRandomParameters() {
+         var configBuilder = KnnBaseConfigImpl.builder()
+             .nodeProperties(List.of(new KnnNodePropertySpec("dummy")))
+             .concurrency(4)
+             .randomSeed(1337L);
+         assertThrows(IllegalArgumentException.class, configBuilder::build);
+     }
+
 }

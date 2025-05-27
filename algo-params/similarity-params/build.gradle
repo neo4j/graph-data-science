@@ -16,4 +16,5 @@ dependencies {
     // Because of `Intersections`
     // TODO: move Intersections out of `core`
     implementation project(':core')
+    testImplementation project(':test-utils')
 }

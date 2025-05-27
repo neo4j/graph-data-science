@@ -29,21 +29,13 @@ import org.neo4j.gds.SimilarityAlgorithmTasks;
 import org.neo4j.gds.TestProgressTrackerHelper;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
-import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
-import org.neo4j.gds.applications.algorithms.similarity.SimilarityAlgorithms;
-import org.neo4j.gds.applications.algorithms.similarity.SimilarityAlgorithmsBusinessFacade;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
-import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
-import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.similarity.SimilarityGraphResult;
 import org.neo4j.gds.similarity.SimilarityResult;
 import org.neo4j.gds.similarity.filtering.NodeFilter;
@@ -800,7 +792,20 @@ final class NodeSimilarityTest {
     @Test
     void shouldLogMessages() {
 
-        var params =  NodeSimilarityBaseConfigImpl.builder().build().toParameters();
+        var params =  new NodeSimilarityParameters(
+            new Concurrency(4),
+            NodeSimilarityMetric.JACCARD,
+            1,
+            Integer.MAX_VALUE,
+            10,
+            0,
+            0,
+            true,
+            true,
+            false,
+            null
+        );
+
         var progressTrackerWithLog = TestProgressTrackerHelper.create(
             new SimilarityAlgorithmTasks().nodeSimilarity(naturalGraph, params),
             new Concurrency(2)
@@ -832,38 +837,25 @@ final class NodeSimilarityTest {
             );
     }
 
-    @Test
-    void shouldNotLogMessagesWhenLoggingIsDisabled() {
-        var log = new GdsTestLog();
-        var requestScopedDependencies = RequestScopedDependencies.builder()
-            .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
-            .terminationFlag(TerminationFlag.RUNNING_TRUE)
-            .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
-            .build();
-        var progressTrackerCreator = new ProgressTrackerCreator(new LoggerForProgressTrackingAdapter(log), requestScopedDependencies);
-        var similarityAlgorithms = new SimilarityAlgorithms(requestScopedDependencies.terminationFlag());
-
-        var similarityBusiness = new SimilarityAlgorithmsBusinessFacade(similarityAlgorithms,progressTrackerCreator);
-
-        similarityBusiness.nodeSimilarity(naturalGraph, NodeSimilarityBaseConfigImpl.builder().logProgress(false).build());
-
-        assertThat(log.getMessages(INFO))
-            .as("When progress logging is disabled we only log `start` and `finished`.")
-            .extracting(removingThreadId())
-            .containsExactly(
-                "Node Similarity :: Start",
-                "Node Similarity :: prepare :: Start",
-                "Node Similarity :: prepare :: Finished",
-                "Node Similarity :: compare node pairs :: Start",
-                "Node Similarity :: compare node pairs :: Finished",
-                "Node Similarity :: Finished"
-            );
-    }
 
     @ParameterizedTest(name = "concurrency = {0}")
     @ValueSource(ints = {1, 2})
     void shouldLogProgress(int concurrencyValue) {
-        var params =  NodeSimilarityBaseConfigImpl.builder().build().toParameters();
+
+        var params =  new NodeSimilarityParameters(
+            new Concurrency(4),
+            NodeSimilarityMetric.JACCARD,
+            1,
+            Integer.MAX_VALUE,
+            10,
+            0,
+            0,
+            true,
+            true,
+            false,
+            null
+        );
+
         var progressTrackerWithLog = TestProgressTrackerHelper.create(
             new SimilarityAlgorithmTasks().nodeSimilarity(naturalGraph, params),
             new Concurrency(concurrencyValue)
@@ -904,11 +896,19 @@ final class NodeSimilarityTest {
     @Test
     void shouldLogProgressForWccOptimization() {
 
-        var params =  NodeSimilarityBaseConfigImpl
-            .builder()
-            .useComponents(true)
-            .build()
-            .toParameters();
+        var params =  new NodeSimilarityParameters(
+            new Concurrency(4),
+            NodeSimilarityMetric.JACCARD,
+            1,
+            Integer.MAX_VALUE,
+            10,
+            0,
+            0,
+            true,
+            true,
+            true,
+            null
+        );
 
         var progressTrackerWithLog = TestProgressTrackerHelper.create(
             new SimilarityAlgorithmTasks().nodeSimilarity(naturalGraph, params),

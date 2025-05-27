@@ -21,22 +21,29 @@ package org.neo4j.gds.similarity.filteredknn;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
-import org.neo4j.gds.similarity.filtering.NodeFilterSpecFactory;
+import org.neo4j.gds.similarity.FilteringParameters;
+import org.neo4j.gds.similarity.NodeFilterSpec;
+import org.neo4j.gds.similarity.filtering.NodeIdNodeFilterSpec;
 import org.neo4j.gds.similarity.knn.KnnContext;
 import org.neo4j.gds.similarity.knn.KnnNodePropertySpec;
+import org.neo4j.gds.similarity.knn.KnnParametersSansNodeCount;
+import org.neo4j.gds.similarity.knn.KnnSampler;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @GdlExtension
-public class FilteredKnnIdMappingTest {
+ class FilteredKnnIdMappingTest {
 
     @GdlGraph(idOffset = 4242)
     private static final String DB_CYPHER =
@@ -52,21 +59,33 @@ public class FilteredKnnIdMappingTest {
     @Test
     void shouldIdMapTheSourceNodeFilter() {
 
-
         var lowestOriginalId = LongStream.range(0, graph.nodeCount()).map(graph::toOriginalNodeId).min().orElse(-1);
         assertThat(lowestOriginalId).isPositive();
 
-        var config = FilteredKnnBaseConfigImpl.builder()
-            .nodeProperties(List.of(new KnnNodePropertySpec("knn")))
-            .topK(3)
-            .randomJoins(0)
-            .maxIterations(1)
-            .randomSeed(20L)
-            .concurrency(1)
-            .sourceNodeFilter(NodeFilterSpecFactory.create(lowestOriginalId))
-            .build();
+        var knnSans = KnnParametersSansNodeCount.create(
+            new Concurrency(1),
+            1,
+            0,
+            0.01,
+            0.5,
+            3,
+            0,
+            0,
+            10000,
+            KnnSampler.SamplerType.UNIFORM,
+            Optional.of(20L),
+            List.of(new KnnNodePropertySpec("knn"))
+        );
+        var filteredSans = new FilteredKnnParametersSansNodeCount(
+            knnSans,
+            new FilteringParameters(
+                new NodeIdNodeFilterSpec(Set.of(lowestOriginalId)),
+                NodeFilterSpec.noOp
+            ),
+            false
+        );
 
-        var params = config.toFilteredKnnParameters().finalize(graph.nodeCount());
+        var params = filteredSans.finalize(graph.nodeCount());
         var knn = FilteredKnn.createWithoutSeeding(graph, params, KnnContext.empty(), TerminationFlag.RUNNING_TRUE);
 
         var result = knn.compute();
