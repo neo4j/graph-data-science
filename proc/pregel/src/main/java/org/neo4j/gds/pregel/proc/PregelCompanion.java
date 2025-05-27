@@ -23,8 +23,6 @@ import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.gds.api.properties.nodes.DoubleArrayNodePropertyValues;
-import org.neo4j.gds.api.properties.nodes.LongArrayNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyRecord;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
@@ -35,7 +33,6 @@ import org.neo4j.gds.beta.pregel.NodeValue;
 import org.neo4j.gds.beta.pregel.PregelConfig;
 import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.beta.pregel.PregelSchema;
-import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.utils.progress.JobId;
@@ -183,52 +180,14 @@ public final class PregelCompanion {
        ValueType propertyType,
        NodeValue compositeNodeValue
    ){
-
         return switch (propertyType) {
             case LONG -> NodePropertyValuesAdapter.adapt(compositeNodeValue.longProperties(propertyKey));
             case DOUBLE -> NodePropertyValuesAdapter.adapt(compositeNodeValue.doubleProperties(propertyKey));
-            case LONG_ARRAY -> new HugeObjectArrayLongArrayPropertyValues(compositeNodeValue.longArrayProperties(
-                propertyKey));
-            case DOUBLE_ARRAY -> new HugeObjectArrayDoubleArrayPropertyValues(compositeNodeValue.doubleArrayProperties(
-                propertyKey));
+            case LONG_ARRAY -> NodePropertyValuesAdapter.adapt(compositeNodeValue.longArrayProperties(propertyKey));
+            case DOUBLE_ARRAY -> NodePropertyValuesAdapter.adapt(compositeNodeValue.doubleArrayProperties(propertyKey));
             default -> throw new IllegalArgumentException("Unsupported property type: " + propertyType);
         };
     }
     private PregelCompanion() {}
-
-    static class HugeObjectArrayLongArrayPropertyValues implements LongArrayNodePropertyValues {
-        private final HugeObjectArray<long[]> longArrays;
-
-        HugeObjectArrayLongArrayPropertyValues(HugeObjectArray<long[]> longArrays) {this.longArrays = longArrays;}
-
-        @Override
-        public long nodeCount() {
-            // Its backed by a dense array
-            return longArrays.size();
-        }
-
-        @Override
-        public long[] longArrayValue(long nodeId) {
-            return longArrays.get(nodeId);
-        }
-    }
-
-    static class HugeObjectArrayDoubleArrayPropertyValues implements DoubleArrayNodePropertyValues {
-        private final HugeObjectArray<double[]> doubleArrays;
-
-        HugeObjectArrayDoubleArrayPropertyValues(HugeObjectArray<double[]> doubleArrays) {this.doubleArrays = doubleArrays;}
-
-        @Override
-        public long nodeCount() {
-            // its backed by dense array
-            return doubleArrays.size();
-        }
-
-
-        @Override
-        public double[] doubleArrayValue(long nodeId) {
-            return doubleArrays.get(nodeId);
-        }
-    }
 
 }
