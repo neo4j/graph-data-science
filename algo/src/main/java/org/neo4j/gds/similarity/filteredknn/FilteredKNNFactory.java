@@ -23,7 +23,9 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.similarity.knn.KnnContext;
 import org.neo4j.gds.termination.TerminationFlag;
 
-public class FilteredKNNFactory {
+public final class FilteredKNNFactory {
+
+    private FilteredKNNFactory() {}
 
     public static FilteredKnn create(
         Graph graph,

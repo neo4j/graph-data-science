@@ -21,20 +21,29 @@ package org.neo4j.gds.similarity.filteredknn;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.similarity.FilteringParameters;
+import org.neo4j.gds.similarity.NodeFilterSpec;
 import org.neo4j.gds.similarity.SimilarityResult;
+import org.neo4j.gds.similarity.filtering.NodeIdNodeFilterSpec;
 import org.neo4j.gds.similarity.knn.ImmutableKnnContext;
 import org.neo4j.gds.similarity.knn.KnnContext;
 import org.neo4j.gds.similarity.knn.KnnNodePropertySpec;
+import org.neo4j.gds.similarity.knn.KnnParametersSansNodeCount;
+import org.neo4j.gds.similarity.knn.KnnSampler;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -76,15 +85,30 @@ class FilteredKnnTest {
     void shouldRunJustLikeKnnWhenYouDoNotSpecifySourceNodeFilterOrTargetNodeFilter() {
         IdFunction idFunction = graph::toMappedNodeId;
 
-        var knnConfig = FilteredKnnBaseConfigImpl.builder()
-            .nodeProperties(List.of(new KnnNodePropertySpec("knn")))
-            .concurrency(1)
-            .randomSeed(19L)
-            .topK(1)
-            .build();
-        var knnContext = ImmutableKnnContext.builder().build();
+        var knnSans = KnnParametersSansNodeCount.create(
+            new Concurrency(1),
+            100,
+            0,
+            0.001,
+            0.5,
+            1,
+            0,
+            10,
+            1_000,
+            KnnSampler.SamplerType.UNIFORM,
+            Optional.of(19L),
+            List.of(new KnnNodePropertySpec("knn"))
+        );
 
-        var params = knnConfig.toFilteredKnnParameters().finalize(graph.nodeCount());
+        var filteredSans = new FilteredKnnParametersSansNodeCount(
+            knnSans,
+            new FilteringParameters(NodeFilterSpec.noOp,NodeFilterSpec.noOp),
+            false
+        );
+        var params = filteredSans.finalize(graph.nodeCount());
+
+
+        var knnContext = ImmutableKnnContext.builder().build();
 
         var knn = FilteredKnn.createWithoutSeeding(graph, params, knnContext, TerminationFlag.RUNNING_TRUE);
         var result = knn.compute();
@@ -131,19 +155,31 @@ class FilteredKnnTest {
         @Test
         void shouldOnlyProduceResultsForFilteredSourceNode() {
             var filteredSourceNode = "a";
-            var config = FilteredKnnBaseConfigImpl.builder()
-                .nodeProperties(List.of("knn"))
-                .topK(3)
-                .randomJoins(0)
-                .maxIterations(1)
-                .randomSeed(20L)
-                .concurrency(1)
-                .sourceNodeFilter(graph.toOriginalNodeId(filteredSourceNode))
-                .build();
+            var originalId = graph.toOriginalNodeId(filteredSourceNode);
+
+            var knnSans = KnnParametersSansNodeCount.create(
+                new Concurrency(1),
+                1,
+                0,
+                0.001,
+                0.5,
+                3,
+                0,
+                0,
+                1_000,
+                KnnSampler.SamplerType.UNIFORM,
+                Optional.of(20L),
+                List.of(new KnnNodePropertySpec("knn"))
+            );
+
+            var filteredSans = new FilteredKnnParametersSansNodeCount(
+                knnSans,
+                new FilteringParameters(new NodeIdNodeFilterSpec(Set.of(originalId)),NodeFilterSpec.noOp),
+                false
+            );
+            var params = filteredSans.finalize(graph.nodeCount());
+
             var knnContext = KnnContext.empty();
-
-            var params = config.toFilteredKnnParameters().finalize(graph.nodeCount());
-
             var knn = FilteredKnn.createWithoutSeeding(graph, params, knnContext, TerminationFlag.RUNNING_TRUE);
 
             var result = knn.compute();
@@ -157,17 +193,30 @@ class FilteredKnnTest {
         @Test
         void shouldOnlyProduceResultsForMultipleFilteredSourceNode() {
             var filteredNodes = List.of("a", "b");
-            var config = FilteredKnnBaseConfigImpl.builder()
-                .nodeProperties("knn")
-                .topK(3)
-                .randomJoins(0)
-                .maxIterations(1)
-                .randomSeed(20L)
-                .concurrency(1)
-                .sourceNodeFilter(filteredNodes.stream().map(graph::toOriginalNodeId).collect(Collectors.toList()))
-                .build();
+            var originalFilteredNodes = filteredNodes.stream().map(graph::toOriginalNodeId).toList();
 
-            var params = config.toFilteredKnnParameters().finalize(graph.nodeCount());
+            var knnSans = KnnParametersSansNodeCount.create(
+                new Concurrency(1),
+                1,
+                0,
+                0.001,
+                0.5,
+                3,
+                0,
+                0,
+                1_000,
+                KnnSampler.SamplerType.UNIFORM,
+                Optional.of(20L),
+                List.of(new KnnNodePropertySpec("knn"))
+            );
+
+            var filteredSans = new FilteredKnnParametersSansNodeCount(
+                knnSans,
+                new FilteringParameters(new NodeIdNodeFilterSpec(new HashSet<>(originalFilteredNodes)),NodeFilterSpec.noOp),
+                false
+            );
+
+            var params = filteredSans.finalize(graph.nodeCount());
 
             var knnContext = KnnContext.empty();
             var knn = FilteredKnn.createWithoutSeeding(graph, params, knnContext, TerminationFlag.RUNNING_TRUE);
@@ -194,18 +243,33 @@ class FilteredKnnTest {
         @Test
         void shouldOnlyProduceResultsForFilteredTargetNode() {
             var targetNode = "a";
-            var config = FilteredKnnBaseConfigImpl.builder()
-                .nodeProperties(List.of("knn"))
-                .topK(3)
-                .randomJoins(0)
-                .maxIterations(1)
-                .randomSeed(20L)
-                .concurrency(1)
-                .targetNodeFilter(graph.toOriginalNodeId(targetNode))
-                .build();
+            var originalNode = graph.toOriginalNodeId(targetNode);
+
+            var knnSans = KnnParametersSansNodeCount.create(
+                new Concurrency(1),
+                1,
+                0,
+                0.001,
+                0.5,
+                3,
+                0,
+                0,
+                1_000,
+                KnnSampler.SamplerType.UNIFORM,
+                Optional.of(20L),
+                List.of(new KnnNodePropertySpec("knn"))
+            );
+
+            var filteredSans = new FilteredKnnParametersSansNodeCount(
+                knnSans,
+                new FilteringParameters(NodeFilterSpec.noOp,new NodeIdNodeFilterSpec(Set.of(originalNode))),
+                false
+            );
+            var params = filteredSans.finalize(graph.nodeCount());
+
+
             var knnContext = KnnContext.empty();
 
-            var params = config.toFilteredKnnParameters().finalize(graph.nodeCount());
 
             var knn = FilteredKnn.createWithoutSeeding(graph, params, knnContext, TerminationFlag.RUNNING_TRUE);
             var result = knn.compute();
@@ -219,18 +283,31 @@ class FilteredKnnTest {
         @Test
         void shouldOnlyProduceResultsForFilteredTargetNodes() {
             var targetNodes = List.of("a", "b");
-            var config = FilteredKnnBaseConfigImpl.builder()
-                .nodeProperties("knn")
-                .topK(3)
-                .randomJoins(0)
-                .maxIterations(1)
-                .randomSeed(20L)
-                .concurrency(1)
-                .targetNodeFilter(targetNodes.stream().map(graph::toOriginalNodeId).collect(Collectors.toList()))
-                .build();
-            var knnContext = KnnContext.empty();
+            var originalTargetNodes = targetNodes.stream().map(graph::toOriginalNodeId).toList();
 
-            var params = config.toFilteredKnnParameters().finalize(graph.nodeCount());
+            var knnSans = KnnParametersSansNodeCount.create(
+                new Concurrency(1),
+                1,
+                0,
+                0.001,
+                0.5,
+                3,
+                0,
+                0,
+                1_000,
+                KnnSampler.SamplerType.UNIFORM,
+                Optional.of(20L),
+                List.of(new KnnNodePropertySpec("knn"))
+            );
+
+            var filteredSans = new FilteredKnnParametersSansNodeCount(
+                knnSans,
+                new FilteringParameters(NodeFilterSpec.noOp,new NodeIdNodeFilterSpec(new HashSet<>(originalTargetNodes))),
+                false
+            );
+            var params = filteredSans.finalize(graph.nodeCount());
+
+            var knnContext = KnnContext.empty();
 
             var knn = FilteredKnn.createWithoutSeeding(graph, params, knnContext, TerminationFlag.RUNNING_TRUE);
             var result = knn.compute();
@@ -255,13 +332,31 @@ class FilteredKnnTest {
 
         @Test
         void shouldIgnoreDuplicates() {
-            var config = FilteredKnnBaseConfigImpl.builder()
-                .nodeProperties(List.of("knn"))
-                .topK(42)
-                .build();
-            var knnContext = KnnContext.empty();
 
-            var params = config.toFilteredKnnParameters().finalize(graph.nodeCount());
+            var knnSans = KnnParametersSansNodeCount.create(
+                new Concurrency(1),
+                100,
+                0,
+                0.001,
+                0.5,
+                42,
+                0,
+                10,
+                1_000,
+                KnnSampler.SamplerType.UNIFORM,
+                Optional.of(19L),
+                List.of(new KnnNodePropertySpec("knn"))
+            );
+
+            var filteredSans = new FilteredKnnParametersSansNodeCount(
+                knnSans,
+                new FilteringParameters(NodeFilterSpec.noOp,NodeFilterSpec.noOp),
+                false
+            );
+            var params = filteredSans.finalize(graph.nodeCount());
+
+
+            var knnContext = KnnContext.empty();
 
             var knn = FilteredKnn.createWithoutSeeding(graph, params, knnContext, TerminationFlag.RUNNING_TRUE);
             var result = knn.compute();
@@ -317,16 +412,29 @@ class FilteredKnnTest {
             var targetNodeA = graph.toMappedNodeId("a");
             assertThat(targetNodeX).isLessThan(targetNodeY).isLessThan(targetNodeZ).isLessThan(targetNodeA);
 
-            // no target node filter specified -> everything is a target node
-            var config = FilteredKnnBaseConfigImpl.builder()
-                .nodeProperties(List.of("knn"))
-                .topK(4)
-                .randomSeed(87L)
-                .concurrency(1)
-                .build();
-            var knnContext = KnnContext.empty();
+            var knnSans = KnnParametersSansNodeCount.create(
+                new Concurrency(1),
+                100,
+                0,
+                0.001,
+                0.5,
+                4,
+                0,
+                10,
+                1_000,
+                KnnSampler.SamplerType.UNIFORM,
+                Optional.of(87L),
+                List.of(new KnnNodePropertySpec("knn"))
+            );
+            //no target node filter specified -> everything is a target node
+            var filteredSans = new FilteredKnnParametersSansNodeCount(
+                knnSans,
+                new FilteringParameters(NodeFilterSpec.noOp,NodeFilterSpec.noOp),
+                true
+            );
+            var params = filteredSans.finalize(graph.nodeCount());
 
-            var params = config.toFilteredKnnParameters().finalize(graph.nodeCount());
+            var knnContext = KnnContext.empty();
 
             var knn = FilteredKnn.createWithDefaultSeeding(graph, params, knnContext, TerminationFlag.RUNNING_TRUE);
             var result = knn.compute();

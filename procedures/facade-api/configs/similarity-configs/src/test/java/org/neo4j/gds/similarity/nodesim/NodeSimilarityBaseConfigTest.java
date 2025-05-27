@@ -22,6 +22,7 @@ package org.neo4j.gds.similarity.nodesim;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class NodeSimilarityBaseConfigTest {
 
@@ -54,6 +55,11 @@ class NodeSimilarityBaseConfigTest {
         var parameters = config.toParameters();
 
         assertThat(parameters.useComponents()).isFalse();
+    }
 
+    @Test
+    void shouldThrowIfUpperIsSmaller() {
+        assertThatThrownBy(NodeSimilarityStreamConfigImpl.builder().upperDegreeCutoff(3).degreeCutoff(4)::build)
+            .hasMessageContaining("upperDegreeCutoff cannot be smaller than degreeCutoff");
     }
 }

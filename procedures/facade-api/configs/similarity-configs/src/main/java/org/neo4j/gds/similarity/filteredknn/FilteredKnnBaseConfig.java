@@ -75,7 +75,7 @@ public interface FilteredKnnBaseConfig extends KnnBaseConfig {
              targetNodeFilter()
          );
 
-         return  new FilteredKnnParametersSansNodeCount(knn,filters,seedTargetNodes());
+         return new FilteredKnnParametersSansNodeCount(knn,filters,seedTargetNodes());
     }
 
 }
