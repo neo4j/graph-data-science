@@ -38,7 +38,6 @@ dependencies {
     implementation project(':ml-configs')
     implementation project(':node-embeddings-configs')
     implementation project(':path-finding-configs')
-    implementation project(':similarity-configs')
 
     implementation project(':collections-memory-estimation')
     implementation project(':config-api')
