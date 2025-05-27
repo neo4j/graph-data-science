@@ -108,7 +108,8 @@ public final class InternalReadOps {
                     for (Object blockType : blockTypes) {
                         var type = (Enum<?>) blockType;
                         switch (type.name()) {
-                            case "XD_NODE" -> this.nodeType = (org.neo4j.internal.id.IdType) type;
+                            case "X1" -> this.nodeType = (org.neo4j.internal.id.IdType) type;
+                            case "XD_NODE" -> this.dynamicNodeType = (org.neo4j.internal.id.IdType) type;
                         }
                     }
                 }
