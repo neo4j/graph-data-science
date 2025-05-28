@@ -22,7 +22,9 @@ package org.neo4j.gds.walking;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.collapsepath.CollapsePathParameters;
 
-public class CollapsePathParamsTransformer {
+public final class CollapsePathParamsTransformer {
+
+    private CollapsePathParamsTransformer() {}
 
     public static CollapsePathParameters create(CollapsePathConfig  config, GraphStore graphStore){
 
