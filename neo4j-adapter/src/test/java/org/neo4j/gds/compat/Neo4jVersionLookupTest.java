@@ -32,7 +32,7 @@ class Neo4jVersionLookupTest {
 
     @Test
     void testParse() {
-        assertThat(Neo4jVersionLookup.parse("5.26.6", "5.26.6"))
+        assertThat(Neo4jVersionLookup.parse("5.26.7", "5.26.7"))
             .returns(new Neo4jVersion.MajorMinor(5, 26), Neo4jVersion::semanticVersion)
             .returns(true, Neo4jVersion::isSupported);
     }
