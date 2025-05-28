@@ -36,6 +36,7 @@ import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
 public class AllShortestPathsDijkstraWriteProc {
+
     @Context
     public GraphDataScienceProcedures facade;
 
