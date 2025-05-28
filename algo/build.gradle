@@ -34,7 +34,6 @@ dependencies {
 
     implementation project(':centrality-configs')
     implementation project(':community-configs')
-    implementation project(':miscellaneous-configs')
     implementation project(':ml-configs')
     implementation project(':node-embeddings-configs')
     implementation project(':path-finding-configs')
