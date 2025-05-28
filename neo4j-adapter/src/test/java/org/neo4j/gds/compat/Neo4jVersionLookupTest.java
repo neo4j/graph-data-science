@@ -35,7 +35,7 @@ class Neo4jVersionLookupTest {
 
     @Test
     void testParseV5() {
-        assertThat(Neo4jVersionLookup.parse("5.26.6", "5.26.6"))
+        assertThat(Neo4jVersionLookup.parse("5.26.7", "5.26.7"))
             .returns(true, v -> v.matches(5, 26));
     }
 
