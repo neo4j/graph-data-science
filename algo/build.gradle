@@ -49,7 +49,6 @@ dependencies {
     implementation project(':logging')
     implementation project(':memory-estimation')
     implementation project(':memory-usage')
-    implementation project(':metrics-api')
     implementation project(':ml-core')
     implementation project(':ml-algo')
     implementation project(':ml-api')
