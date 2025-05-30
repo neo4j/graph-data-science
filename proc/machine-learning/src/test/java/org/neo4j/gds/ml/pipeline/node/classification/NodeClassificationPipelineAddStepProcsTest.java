@@ -24,6 +24,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.api.User;
+import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
+import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
 import org.neo4j.gds.core.utils.logging.GdsLoggers;
 import org.neo4j.gds.core.utils.progress.tasks.LoggerForProgressTracking;
 import org.neo4j.gds.logging.Log;
@@ -46,6 +48,13 @@ import static org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictionSplit
 class NodeClassificationPipelineAddStepProcsTest extends BaseProcTest {
     @BeforeEach
     void setUp() {
+
+        var requestScopedDependencies =  RequestScopedDependencies.builder()
+            .user(new User(getUsername(), false))
+            .build();
+
+        var writeContext = WriteContext.builder().build();
+
         LocalPipelinesProcedureFacade.create(
             new GdsLoggers(Log.noOpLog(), LoggerForProgressTracking.noOpLog()),
             null,
@@ -57,13 +66,8 @@ class NodeClassificationPipelineAddStepProcsTest extends BaseProcTest {
             null,
             null,
             null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            new User(getUsername(), false),
+            requestScopedDependencies,
+            writeContext,
             null,
             null,
             null,
@@ -321,6 +325,12 @@ class NodeClassificationPipelineAddStepProcsTest extends BaseProcTest {
     }
 
     private GraphDataScienceProcedures buildFacade() {
+        var requestScopedDependencies =  RequestScopedDependencies.builder()
+            .user(new User(getUsername(), false))
+            .build();
+
+        var writeContext = WriteContext.builder().build();
+
         return new GraphDataScienceProceduresBuilder(Log.noOpLog())
             .with(LocalPipelinesProcedureFacade.create(
                 new GdsLoggers(Log.noOpLog(), LoggerForProgressTracking.noOpLog()),
@@ -333,13 +343,8 @@ class NodeClassificationPipelineAddStepProcsTest extends BaseProcTest {
                 null,
                 null,
                 null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                new User(getUsername(), false),
+                requestScopedDependencies,
+                writeContext,
                 null,
                 null,
                 null,

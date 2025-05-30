@@ -76,7 +76,7 @@ public class WriteNodePropertyService {
         WriteConfig writeConfiguration,
         Label label,
         JobId jobId,
-        List<NodePropertyRecord> nodePropertes
+        List<NodePropertyRecord> nodeProperties
     ) {
         return Neo4jDatabaseNodePropertyWriter.writeNodeProperties(
             writeContext.nodePropertyExporterBuilder(),
@@ -84,7 +84,7 @@ public class WriteNodePropertyService {
             graph,
             graphStore,
             writeConfiguration.writeConcurrency(),
-            nodePropertes,
+            nodeProperties,
             label.asString(),
             writeConfiguration.resolveResultStore(resultStore),
             jobId,

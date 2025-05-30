@@ -22,8 +22,8 @@ package org.neo4j.gds.procedures.pipelines;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
-import org.neo4j.gds.applications.algorithms.machinery.NodePropertyWriter;
 import org.neo4j.gds.applications.algorithms.machinery.StandardLabel;
+import org.neo4j.gds.applications.algorithms.machinery.WriteNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.WriteStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.core.utils.progress.JobId;
@@ -31,14 +31,14 @@ import org.neo4j.gds.core.utils.progress.JobId;
 import java.util.Optional;
 
 class NodeClassificationPredictPipelineWriteStep implements WriteStep<NodeClassificationPipelineResult, NodePropertiesWritten> {
-    private final NodePropertyWriter nodePropertyWriter;
+    private final WriteNodePropertyService writeNodePropertyService;
     private final NodeClassificationPredictPipelineWriteConfig configuration;
 
     NodeClassificationPredictPipelineWriteStep(
-        NodePropertyWriter nodePropertyWriter,
+        WriteNodePropertyService writeNodePropertyService,
         NodeClassificationPredictPipelineWriteConfig configuration
     ) {
-        this.nodePropertyWriter = nodePropertyWriter;
+        this.writeNodePropertyService = writeNodePropertyService;
         this.configuration = configuration;
     }
 
@@ -56,14 +56,14 @@ class NodeClassificationPredictPipelineWriteStep implements WriteStep<NodeClassi
             configuration.predictedProbabilityProperty()
         );
 
-        return nodePropertyWriter.writeNodeProperties(
+        return writeNodePropertyService.perform(
             graph,
             graphStore,
-            configuration.resolveResultStore(resultStore),
-            nodeProperties,
-            jobId,
+            resultStore,
+            configuration,
             new StandardLabel("NodeClassificationPipelineWrite"),
-            configuration
+            jobId,
+            nodeProperties
         );
     }
 }

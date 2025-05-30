@@ -33,9 +33,11 @@ import org.neo4j.gds.applications.algorithms.machinery.DimensionTransformer;
 import org.neo4j.gds.applications.algorithms.machinery.Label;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
-import org.neo4j.gds.applications.algorithms.machinery.NodePropertyWriter;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
+import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.machinery.StandardLabel;
+import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
+import org.neo4j.gds.applications.algorithms.machinery.WriteNodePropertyService;
 import org.neo4j.gds.applications.modelcatalog.ModelRepository;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
@@ -81,6 +83,7 @@ public class PipelineApplications {
     private final Log log;
     private final GraphStoreCatalogService graphStoreCatalogService;
     private final MutateNodePropertyService mutateNodePropertyService;
+    private final WriteNodePropertyService writeNodePropertyService;
     private final ModelCatalog modelCatalog;
     private final PipelineRepository pipelineRepository;
 
@@ -105,7 +108,6 @@ public class PipelineApplications {
     private final LinkPredictionPipelineEstimator linkPredictionPipelineEstimator;
     private final NodeClassificationPredictPipelineEstimator nodeClassificationPredictPipelineEstimator;
 
-    private final NodePropertyWriter nodePropertyWriter;
 
     private final AlgorithmsProcedureFacade algorithmsProcedureFacade;
     private final AlgorithmEstimationTemplate algorithmEstimationTemplate;
@@ -120,6 +122,7 @@ public class PipelineApplications {
         Log log,
         GraphStoreCatalogService graphStoreCatalogService,
         MutateNodePropertyService mutateNodePropertyService,
+        WriteNodePropertyService writeNodePropertyService,
         ModelCatalog modelCatalog,
         PipelineRepository pipelineRepository,
         CloseableResourceRegistry closeableResourceRegistry,
@@ -140,7 +143,6 @@ public class PipelineApplications {
         ModelPersister modelPersister,
         LinkPredictionPipelineEstimator linkPredictionPipelineEstimator,
         NodeClassificationPredictPipelineEstimator nodeClassificationPredictPipelineEstimator,
-        NodePropertyWriter nodePropertyWriter,
         AlgorithmsProcedureFacade algorithmsProcedureFacade,
         AlgorithmEstimationTemplate algorithmEstimationTemplate,
         AlgorithmProcessingTemplate algorithmProcessingTemplate,
@@ -151,6 +153,7 @@ public class PipelineApplications {
         this.log = log;
         this.graphStoreCatalogService = graphStoreCatalogService;
         this.mutateNodePropertyService = mutateNodePropertyService;
+        this.writeNodePropertyService = writeNodePropertyService;
         this.modelCatalog = modelCatalog;
         this.pipelineRepository = pipelineRepository;
         this.closeableResourceRegistry = closeableResourceRegistry;
@@ -171,7 +174,6 @@ public class PipelineApplications {
         this.modelPersister = modelPersister;
         this.linkPredictionPipelineEstimator = linkPredictionPipelineEstimator;
         this.nodeClassificationPredictPipelineEstimator = nodeClassificationPredictPipelineEstimator;
-        this.nodePropertyWriter = nodePropertyWriter;
         this.algorithmsProcedureFacade = algorithmsProcedureFacade;
         this.algorithmEstimationTemplate = algorithmEstimationTemplate;
         this.algorithmProcessingTemplate = algorithmProcessingTemplate;
@@ -187,18 +189,13 @@ public class PipelineApplications {
         ModelRepository modelRepository,
         PipelineRepository pipelineRepository,
         CloseableResourceRegistry closeableResourceRegistry,
-        DatabaseId databaseId,
         DependencyResolver dependencyResolver,
         Metrics metrics,
         NodeLookup nodeLookup,
-        NodePropertyExporterBuilder nodePropertyExporterBuilder,
         ProcedureReturnColumns procedureReturnColumns,
-        RelationshipExporterBuilder relationshipExporterBuilder,
-        TaskRegistryFactory taskRegistryFactory,
         TerminationMonitor terminationMonitor,
-        TerminationFlag terminationFlag,
-        User user,
-        UserLogRegistryFactory userLogRegistryFactory,
+        RequestScopedDependencies requestScopedDependencies,
+        WriteContext writeContext,
         PipelineConfigurationParser pipelineConfigurationParser,
         ProgressTrackerCreator progressTrackerCreator,
         AlgorithmsProcedureFacade algorithmsProcedureFacade,
@@ -217,11 +214,10 @@ public class PipelineApplications {
             algorithmsProcedureFacade
         );
 
-        var nodePropertyWriter = new NodePropertyWriter(
-            loggers.loggerForProgressTracking(),
-            nodePropertyExporterBuilder,
-            taskRegistryFactory,
-            terminationFlag
+        var writeNodePropertyService = new WriteNodePropertyService(
+            loggers.log(),
+            requestScopedDependencies,
+            writeContext
         );
 
         var trainedLPPipelineModel = new TrainedLPPipelineModel(modelCatalog);
@@ -232,17 +228,17 @@ public class PipelineApplications {
             modelCatalog,
             pipelineRepository,
             closeableResourceRegistry,
-            databaseId,
+            requestScopedDependencies.databaseId(),
             dependencyResolver,
             metrics,
             nodeLookup,
-            nodePropertyExporterBuilder,
+            writeContext.nodePropertyExporterBuilder(),
             procedureReturnColumns,
-            relationshipExporterBuilder,
-            taskRegistryFactory,
-            terminationFlag,
+            writeContext.relationshipExporterBuilder(),
+            requestScopedDependencies.taskRegistryFactory(),
+            requestScopedDependencies.terminationFlag(),
             terminationMonitor,
-            userLogRegistryFactory,
+            requestScopedDependencies.userLogRegistryFactory(),
             progressTrackerCreator,
             algorithmsProcedureFacade
         );
@@ -251,27 +247,27 @@ public class PipelineApplications {
             loggers.log(),
             graphStoreCatalogService,
             mutateNodeProperty,
+            writeNodePropertyService,
             modelCatalog,
             pipelineRepository,
             closeableResourceRegistry,
-            databaseId,
+            requestScopedDependencies.databaseId(),
             dependencyResolver,
             metrics,
             nodeLookup,
-            nodePropertyExporterBuilder,
+            writeContext.nodePropertyExporterBuilder(),
             procedureReturnColumns,
-            relationshipExporterBuilder,
-            taskRegistryFactory,
+            writeContext.relationshipExporterBuilder(),
+            requestScopedDependencies.taskRegistryFactory(),
             terminationMonitor,
-            terminationFlag,
-            user,
-            userLogRegistryFactory,
+            requestScopedDependencies.terminationFlag(),
+            requestScopedDependencies.user(),
+            requestScopedDependencies.userLogRegistryFactory(),
             pipelineConfigurationParser,
             progressTrackerCreator,
             modelPersister,
             linkPredictionPipelineEstimator,
             nodeClassificationPredictPipelineEstimator,
-            nodePropertyWriter,
             algorithmsProcedureFacade,
             algorithmEstimationTemplate,
             algorithmProcessingTemplate,
@@ -568,7 +564,7 @@ public class PipelineApplications {
         var configuration = pipelineConfigurationParser.parseNodeClassificationPredictWriteConfig(rawConfiguration);
         var label = new StandardLabel("NodeClassificationPredictPipelineWrite");
         var computation = constructNodeClassificationPredictComputation(configuration, label);
-        var writeStep = new NodeClassificationPredictPipelineWriteStep(nodePropertyWriter, configuration);
+        var writeStep = new NodeClassificationPredictPipelineWriteStep(writeNodePropertyService, configuration);
         var resultBuilder = new NodeClassificationPredictPipelineWriteResultBuilder(configuration);
 
         return algorithmProcessingTemplate.processAlgorithmForWrite(

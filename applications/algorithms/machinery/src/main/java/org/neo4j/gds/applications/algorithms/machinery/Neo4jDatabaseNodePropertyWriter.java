@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.applications.algorithms.machinery;
 
-import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.PropertyState;
@@ -46,7 +45,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -102,7 +100,13 @@ final class Neo4jDatabaseNodePropertyWriter {
         Log log
     ) {
 
-        var propertiesWritten = new MutableLong();
+
+        validatePropertiesCanBeWritten(
+            graphStore.capabilities().writeMode(),
+            graph.schema().nodeSchema().unionProperties(),
+            nodeProperties,
+            resultStore.isPresent()
+        );
 
         var progressTracker = createProgressTracker(
             taskRegistryFactory,
@@ -110,16 +114,6 @@ final class Neo4jDatabaseNodePropertyWriter {
             writeConcurrency,
             procedureName,
             log
-        );
-        var writeMode = graphStore.capabilities().writeMode();
-        var nodePropertySchema = graph.schema().nodeSchema().unionProperties();
-
-
-        validatePropertiesCanBeWritten(
-            writeMode,
-            nodePropertySchema,
-            nodeProperties,
-            resultStore.isPresent()
         );
 
         var exporter = nodePropertyExporterBuilder
@@ -133,15 +127,13 @@ final class Neo4jDatabaseNodePropertyWriter {
 
         try {
             exporter.write(nodeProperties);
-            propertiesWritten.setValue(exporter.propertiesWritten());
+             return new NodePropertiesWritten(exporter.propertiesWritten());
         } catch (Exception e) {
             progressTracker.endSubTaskWithFailure();
             throw e;
         } finally {
             progressTracker.release();
         }
-
-        return new NodePropertiesWritten(propertiesWritten.getValue());
     }
 
     private static ProgressTracker createProgressTracker(
@@ -190,7 +182,7 @@ final class Neo4jDatabaseNodePropertyWriter {
                     propertySchemas.get(nodeProperty.key()).state()
                 )
             )
-            .collect(Collectors.toList());
+            .toList();
 
         if (!unexpectedProperties.isEmpty()) {
             throw new IllegalStateException(
@@ -204,22 +196,21 @@ final class Neo4jDatabaseNodePropertyWriter {
     }
 
     private static Predicate<PropertyState> expectedPropertyStateForWriteMode(Capabilities.WriteMode writeMode) {
-        switch (writeMode) {
-            case LOCAL:
+        return switch (writeMode) {
+            case LOCAL ->
                 // We need to allow persistent and transient as for example algorithms that support seeding will reuse a
                 // mutated (transient) property to write back properties that are in fact backed by a database
-                return state -> state == PropertyState.PERSISTENT || state == PropertyState.TRANSIENT;
-            case REMOTE:
+                state -> state == PropertyState.PERSISTENT || state == PropertyState.TRANSIENT;
+            case REMOTE ->
                 // We allow transient properties for the same reason as above
-                return state -> state == PropertyState.REMOTE || state == PropertyState.TRANSIENT;
-            default:
-                throw new IllegalStateException(
-                    formatWithLocale(
-                        "Graph with write mode `%s` cannot write back to a database",
-                        writeMode
-                    )
-                );
-        }
+                state -> state == PropertyState.REMOTE || state == PropertyState.TRANSIENT;
+            default -> throw new IllegalStateException(
+                formatWithLocale(
+                    "Graph with write mode `%s` cannot write back to a database",
+                    writeMode
+                )
+            );
+        };
     }
 
 }

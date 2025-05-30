@@ -21,25 +21,20 @@ package org.neo4j.gds.procedures.pipelines;
 
 import org.neo4j.common.DependencyResolver;
 import org.neo4j.gds.api.CloseableResourceRegistry;
-import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.NodeLookup;
 import org.neo4j.gds.api.ProcedureReturnColumns;
-import org.neo4j.gds.api.User;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
+import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
+import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
 import org.neo4j.gds.applications.modelcatalog.ModelRepository;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.logging.GdsLoggers;
-import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
-import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
-import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
-import org.neo4j.gds.core.write.RelationshipExporterBuilder;
 import org.neo4j.gds.metrics.Metrics;
 import org.neo4j.gds.ml.pipeline.TrainingPipeline;
 import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
-import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.termination.TerminationMonitor;
 
 import java.util.Optional;
@@ -71,24 +66,19 @@ public final class LocalPipelinesProcedureFacade implements PipelinesProcedureFa
         ModelRepository modelRepository,
         PipelineRepository pipelineRepository,
         CloseableResourceRegistry closeableResourceRegistry,
-        DatabaseId databaseId,
         DependencyResolver dependencyResolver,
         Metrics metrics,
         NodeLookup nodeLookup,
-        NodePropertyExporterBuilder nodePropertyExporterBuilder,
         ProcedureReturnColumns procedureReturnColumns,
-        RelationshipExporterBuilder relationshipExporterBuilder,
-        TaskRegistryFactory taskRegistryFactory,
+        RequestScopedDependencies requestScopedDependencies,
+        WriteContext writeContext,
         TerminationMonitor terminationMonitor,
-        TerminationFlag terminationFlag,
-        User user,
-        UserLogRegistryFactory userLogRegistryFactory,
         ProgressTrackerCreator progressTrackerCreator,
         AlgorithmsProcedureFacade algorithmsProcedureFacade,
         AlgorithmEstimationTemplate algorithmEstimationTemplate,
         AlgorithmProcessingTemplate algorithmProcessingTemplate
     ) {
-        var pipelineConfigurationParser = new PipelineConfigurationParser(user);
+        var pipelineConfigurationParser = new PipelineConfigurationParser(requestScopedDependencies.user());
 
         var pipelineApplications = PipelineApplications.create(
             loggers,
@@ -97,18 +87,13 @@ public final class LocalPipelinesProcedureFacade implements PipelinesProcedureFa
             modelRepository,
             pipelineRepository,
             closeableResourceRegistry,
-            databaseId,
             dependencyResolver,
             metrics,
             nodeLookup,
-            nodePropertyExporterBuilder,
             procedureReturnColumns,
-            relationshipExporterBuilder,
-            taskRegistryFactory,
             terminationMonitor,
-            terminationFlag,
-            user,
-            userLogRegistryFactory,
+            requestScopedDependencies,
+            writeContext,
             pipelineConfigurationParser,
             progressTrackerCreator,
             algorithmsProcedureFacade,
@@ -117,7 +102,7 @@ public final class LocalPipelinesProcedureFacade implements PipelinesProcedureFa
         );
 
         var linkPredictionFacade = LocalLinkPredictionFacade.create(
-            user,
+            requestScopedDependencies.user(),
             pipelineConfigurationParser,
             pipelineApplications,
             pipelineRepository
@@ -125,7 +110,7 @@ public final class LocalPipelinesProcedureFacade implements PipelinesProcedureFa
 
         var nodeClassificationFacade = LocalNodeClassificationFacade.create(
             modelCatalog,
-            user,
+            requestScopedDependencies.user(),
             pipelineConfigurationParser,
             pipelineApplications,
             pipelineRepository
@@ -133,7 +118,7 @@ public final class LocalPipelinesProcedureFacade implements PipelinesProcedureFa
 
         var nodeRegressionFacade = LocalNodeRegressionFacade.create(
             modelCatalog,
-            user,
+            requestScopedDependencies.user(),
             pipelineConfigurationParser,
             pipelineApplications,
             pipelineRepository
