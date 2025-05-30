@@ -13,8 +13,6 @@ include::partial$/algorithms/shared/algorithm-traits.adoc[]
 Harmonic centrality (also known as valued centrality) is a variant of closeness centrality, that was invented to solve the problem the original formula had when dealing with unconnected graphs.
 As with many of the centrality algorithms, it originates from the field of social network analysis.
 
-include::partial$/operations-reference/alpha-note.adoc[]
-
 
 [[algorithms-harmonic-centrality-context]]
 == History and explanation
@@ -54,6 +52,120 @@ include::partial$/algorithms/shared/syntax-intro-named-graph.adoc[]
 .Harmonic Centrality syntax per mode
 [.tabbed-example, caption = ]
 ====
+
+[.include-with-stream]
+======
+.The following will run the algorithm and stream results:
+[source, cypher, role=noplay]
+----
+CALL gds.closeness.harmonic.stream(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  nodeId: Integer,
+  score: Float
+----
+
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.Configuration
+[opts="header",cols="1,1,1,1,4"]
+|===
+| Name                          | Type    | Default                | Optional | Description
+include::partial$/algorithms/common-configuration/common-stream-stats-configuration-entries.adoc[]
+|===
+
+.Results
+[opts="header"]
+|===
+| Name   | Type    | Description
+| nodeId | Integer | Node ID.
+| score  | Float   | Harmonic centrality score.
+|===
+
+======
+
+[.include-with-stats]
+======
+.The following will run the algorithm and return statistics:
+[source, cypher, role=noplay]
+----
+CALL gds.closeness.harmonic.stats(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  centralityDistribution: Map,
+  preProcessingMillis: Integer,
+  computeMillis: Integer,
+  postProcessingMillis: Integer,
+  configuration: Map
+----
+
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.Configuration
+[opts="header",cols="1,1,1,1,4"]
+|===
+| Name             | Type    | Default                | Optional | Description
+include::partial$/algorithms/common-configuration/common-configuration-jobid-concurrency-entries.adoc[]
+|===
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                   | Type      | Description
+| centralityDistribution | Map       | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of centrality values.
+| preProcessingMillis    | Integer   | Milliseconds for preprocessing the graph.
+| computeMillis          | Integer   | Milliseconds for running the algorithm.
+| postProcessingMillis   | Integer   | Milliseconds for computing the statistics.
+| configuration          | Map       | The configuration used for running the algorithm.
+|===
+
+======
+
+[.include-with-mutate]
+======
+.The following will run the algorithm and update the graph:
+[source, cypher, role=noplay]
+----
+CALL gds.closeness.harmonic.mutate(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  centralityDistribution: Map,
+  preProcessingMillis: Integer,
+  computeMillis: Integer,
+  mutateMillis: Integer,
+  nodePropertiesWritten: Integer,
+  configuration: Map
+----
+
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.Configuration
+[opts="header",cols="1,1,1,1,4"]
+|===
+| Name             | Type    | Default                | Optional | Description
+include::partial$/algorithms/common-configuration/common-configuration-jobid-concurrency-entries.adoc[]
+include::partial$/algorithms/common-configuration/common-mutate-configuration-entries.adoc[]
+|===
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                   | Type      | Description
+| centralityDistribution | Map       | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of centrality values.
+| preProcessingMillis    | Integer   | Milliseconds for preprocessing the graph.
+| computeMillis          | Integer   | Milliseconds for running the algorithm.
+| mutateMillis          | Integer   | Milliseconds for adding properties to the projected graph.
+| nodePropertiesWritten  | Integer   | Number of properties written to the projected graph.
+| configuration          | Map       | The configuration used for running the algorithm.
+|===
+
+======
 
 [.include-with-write]
 ======
@@ -95,40 +207,6 @@ include::partial$/algorithms/common-configuration/common-write-configuration-ent
 | writeMillis            | Integer   | Milliseconds for writing result data back.
 | nodePropertiesWritten  | Integer   | Number of properties written to Neo4j.
 | configuration          | Map       | The configuration used for running the algorithm.
-|===
-
-======
-
-
-[.include-with-stream]
-======
-.The following will run the algorithm and stream results:
-[source, cypher, role=noplay]
-----
-CALL gds.closeness.harmonic.stream(
-  graphName: String,
-  configuration: Map
-)
-YIELD
-  nodeId: Integer,
-  score: Float
-----
-
-include::partial$/algorithms/common-configuration/common-parameters.adoc[]
-
-.Configuration
-[opts="header",cols="1,1,1,1,4"]
-|===
-| Name                          | Type    | Default                | Optional | Description
-include::partial$/algorithms/common-configuration/common-stream-stats-configuration-entries.adoc[]
-|===
-
-.Results
-[opts="header"]
-|===
-| Name   | Type    | Description
-| nodeId | Integer | Node ID.
-| score  | Float   | Harmonic centrality score.
 |===
 
 ======
@@ -184,6 +262,40 @@ ORDER BY score DESC
 | "Charles" | 0.375
 | "Doug"    | 0.25
 | "Ethan"   | 0.25
+|===
+--
+
+[role=query-example]
+--
+.The following will run the algorithm and return statistics:
+[source, cypher, role=noplay]
+----
+CALL gds.closeness.harmonic.stats('graph', {})
+YIELD centralityDistribution
+----
+
+.Results
+[opts="header"]
+|===
+| centralityDistribution
+| {max=0.5000038147, mean=0.3500003815, min=0.25, p50=0.375, p75=0.375, p90=0.5000019073, p95=0.5000019073, p99=0.5000019073, p999=0.5000019073}
+|===
+--
+
+[role=query-example]
+--
+.The following will run the algorithm and update the graph:
+[source, cypher, role=noplay]
+----
+CALL gds.closeness.harmonic.mutate('graph', {mutateProperty: 'harmonicScore'})
+YIELD nodePropertiesWritten, centralityDistribution
+----
+
+.Results
+[opts="header"]
+|===
+| nodePropertiesWritten | centralityDistribution
+| 5                     | {max=0.5000038147, mean=0.3500003815, min=0.25, p50=0.375, p75=0.375, p90=0.5000019073, p95=0.5000019073, p99=0.5000019073, p999=0.5000019073}
 |===
 --
 
