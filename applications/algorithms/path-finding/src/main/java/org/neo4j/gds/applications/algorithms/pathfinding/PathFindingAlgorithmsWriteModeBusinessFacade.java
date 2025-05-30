@@ -102,9 +102,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
         ResultBuilder<AllShortestPathsBellmanFordWriteConfig, BellmanFordResult, RESULT, RelationshipsWritten> resultBuilder
     ) {
         var writeStep = new BellmanFordWriteStep(
-            log,
-            requestScopedDependencies,
-            writeContext,
+            writeRelationshipService,
             configuration
         );
 
@@ -287,8 +285,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
     ) {
         var writeStep = new ShortestPathWriteStep<>(
             log,
-            requestScopedDependencies,
-            writeContext,
+            writeRelationshipService,
             configuration
         );
 

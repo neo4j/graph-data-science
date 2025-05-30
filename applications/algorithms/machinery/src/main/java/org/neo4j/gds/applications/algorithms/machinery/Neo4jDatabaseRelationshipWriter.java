@@ -19,21 +19,28 @@
  */
 package org.neo4j.gds.applications.algorithms.machinery;
 
+import org.neo4j.gds.api.ExportedRelationship;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.ResultStore;
+import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.relationships.RelationshipWithPropertyConsumer;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.write.RelationshipExporter;
 import org.neo4j.gds.core.write.RelationshipExporterBuilder;
+import org.neo4j.gds.core.write.RelationshipStreamExporter;
+import org.neo4j.gds.core.write.RelationshipStreamExporterBuilder;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.termination.TerminationFlag;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 final class Neo4jDatabaseRelationshipWriter {
 
@@ -50,23 +57,23 @@ final class Neo4jDatabaseRelationshipWriter {
         Optional<ResultStore> resultStore,
         RelationshipWithPropertyConsumer relationshipConsumer,
         JobId jobId
-    ){
+    ) {
 
         var progressTracker = new TaskProgressTracker(
-                RelationshipExporter.baseTask(taskName, graph.relationshipCount()),
-                new LoggerForProgressTrackingAdapter(log),
-                RelationshipExporterBuilder.TYPED_DEFAULT_WRITE_CONCURRENCY,
-                taskRegistryFactory
-            );
+            RelationshipExporter.baseTask(taskName, graph.relationshipCount()),
+            new LoggerForProgressTrackingAdapter(log),
+            RelationshipExporterBuilder.TYPED_DEFAULT_WRITE_CONCURRENCY,
+            taskRegistryFactory
+        );
 
-            var exporter = relationshipExporterBuilder
-                .withIdMappingOperator(rootIdMap::toOriginalNodeId)
-                .withGraph(graph)
-                .withTerminationFlag(algorithmTerminationFlag)
-                .withProgressTracker(progressTracker)
-                .withResultStore(resultStore)
-                .withJobId(jobId)
-                .build();
+        var exporter = relationshipExporterBuilder
+            .withIdMappingOperator(rootIdMap::toOriginalNodeId)
+            .withGraph(graph)
+            .withTerminationFlag(algorithmTerminationFlag)
+            .withProgressTracker(progressTracker)
+            .withResultStore(resultStore)
+            .withJobId(jobId)
+            .build();
 
         try {
             exporter.write(
@@ -84,5 +91,56 @@ final class Neo4jDatabaseRelationshipWriter {
         return new RelationshipsWritten(graph.relationshipCount());
     }
 
+    static RelationshipsWritten writeRelationshipsFromStream(
+        String writeRelationshipType,
+        List<String> properties,
+        List<ValueType> valueTypes,
+        TaskRegistryFactory taskRegistryFactory,
+        RelationshipStreamExporterBuilder relationshipStreamExporterBuilder,
+        Stream<ExportedRelationship> relationshipStream,
+        IdMap rootIdMap,
+        Log log,
+        String taskName,
+        TerminationFlag algorithmTerminationFlag,
+        Optional<ResultStore> maybeResultStore,
+        JobId jobId
+    ) {
+
+        var progressTracker = new TaskProgressTracker(
+            RelationshipStreamExporter.baseTask(taskName),
+            new LoggerForProgressTrackingAdapter(log),
+            new Concurrency(1),
+            taskRegistryFactory
+        );
+
+        // When we are writing to the result store, the result stream might not be consumed
+        // inside the current transaction. This causes the stream to immediately return an empty stream
+        // as the termination flag, which is bound to the current transaction is set to true. We therefore
+        // need to collect the stream and trigger an eager computation.
+        var maybeCollectedStream = maybeResultStore
+            .map(__ -> relationshipStream.toList().stream())
+            .orElse(relationshipStream);
+
+        // configure the exporter
+        var relationshipStreamExporter = relationshipStreamExporterBuilder
+            .withResultStore(maybeResultStore)
+            .withIdMappingOperator(rootIdMap::toOriginalNodeId)
+            .withProgressTracker(progressTracker)
+            .withRelationships(maybeCollectedStream)
+            .withTerminationFlag(algorithmTerminationFlag)
+            .withJobId(jobId)
+            .build();
+
+        var relationshipsWritten = relationshipStreamExporter.write(
+            writeRelationshipType,
+            properties,
+            valueTypes
+        );
+
+        return new RelationshipsWritten(relationshipsWritten);
+    }
+
+
     private Neo4jDatabaseRelationshipWriter() {}
 }
+
