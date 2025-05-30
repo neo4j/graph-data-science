@@ -67,7 +67,7 @@ class SteinerTreeWriteStep implements WriteStep<SteinerTreeResult, Relationships
              configuration.writeRelationshipType(),
              configuration.writeProperty(),
              spanningGraph,
-             spanningGraph.rootIdMap(),
+             graph,
              "SteinerWrite",
              configuration.resolveResultStore(resultStore),
              (a,b,c)-> true,

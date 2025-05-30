@@ -70,7 +70,7 @@ class PrizeCollectingSteinerTreeWriteStep implements WriteStep<PrizeSteinerTreeR
             configuration.writeRelationshipType(),
             configuration.writeProperty(),
             spanningGraph,
-            spanningGraph.rootIdMap(),
+            spanningGraph,
             "PrizeCollectingSteinerWrite",
             configuration.resolveResultStore(resultStore),
             (a,b,c)-> true,

@@ -58,7 +58,7 @@ class SpanningTreeWriteStep implements WriteStep<SpanningTree, RelationshipsWrit
             configuration.writeRelationshipType(),
             configuration.writeProperty(),
             spanningGraph,
-            spanningGraph.rootIdMap(),
+            graph,
             AlgorithmLabel.SpanningTree.asString(),
             configuration.resolveResultStore(resultStore),
             (a,b,c)-> true,

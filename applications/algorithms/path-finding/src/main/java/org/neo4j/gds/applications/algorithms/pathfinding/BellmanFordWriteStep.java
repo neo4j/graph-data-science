@@ -70,7 +70,7 @@ class BellmanFordWriteStep implements WriteStep<BellmanFordResult, Relationships
                 keys,
                 types,
                 relationshipStream,
-                graph.rootIdMap(),
+                graph,
                 "Write shortest Paths",
                 configuration.resolveResultStore(resultStore),
                 configuration.jobId()

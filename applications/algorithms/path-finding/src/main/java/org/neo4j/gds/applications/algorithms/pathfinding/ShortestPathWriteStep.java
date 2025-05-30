@@ -88,7 +88,7 @@ class ShortestPathWriteStep<CONFIGURATION extends WriteRelationshipConfig & Writ
                 keys,
                 types,
                 relationshipStream,
-                graph.rootIdMap(),
+                graph,
                 "Write shortest Paths",
                 configuration.resolveResultStore(resultStore),
                 configuration.jobId()
