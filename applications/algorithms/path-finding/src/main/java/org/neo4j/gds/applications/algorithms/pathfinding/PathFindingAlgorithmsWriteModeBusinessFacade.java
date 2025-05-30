@@ -241,9 +241,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
         ResultBuilder<SpanningTreeWriteConfig, SpanningTree, RESULT, RelationshipsWritten> resultBuilder
     ) {
         var writeStep = new SpanningTreeWriteStep(
-            log,
-            requestScopedDependencies,
-            writeContext,
+            writeRelationshipService,
             configuration
         );
 
