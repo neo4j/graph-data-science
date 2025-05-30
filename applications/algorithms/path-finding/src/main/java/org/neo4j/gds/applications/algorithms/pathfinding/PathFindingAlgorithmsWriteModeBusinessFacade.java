@@ -162,7 +162,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
         PCSTWriteConfig configuration,
         ResultBuilder<PCSTWriteConfig, PrizeSteinerTreeResult, RESULT, RelationshipsWritten> resultBuilder
     ) {
-        var writeStep = new PrizeCollectingSteinerTreeWriteStep(requestScopedDependencies, writeContext, configuration);
+        var writeStep = new PrizeCollectingSteinerTreeWriteStep(requestScopedDependencies, writeRelationshipService, configuration);
 
         return runAlgorithmAndWrite(
             graphName,

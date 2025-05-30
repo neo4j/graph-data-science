@@ -23,11 +23,10 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
-import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
+import org.neo4j.gds.applications.algorithms.machinery.WriteRelationshipService;
 import org.neo4j.gds.applications.algorithms.machinery.WriteStep;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 import org.neo4j.gds.core.utils.progress.JobId;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.pcst.PCSTWriteConfig;
 import org.neo4j.gds.pricesteiner.PrizeSteinerTreeResult;
 import org.neo4j.gds.spanningtree.SpanningGraph;
@@ -36,16 +35,16 @@ import org.neo4j.gds.spanningtree.SpanningTree;
 class PrizeCollectingSteinerTreeWriteStep implements WriteStep<PrizeSteinerTreeResult, RelationshipsWritten> {
     private final RequestScopedDependencies requestScopedDependencies;
     private final PCSTWriteConfig configuration;
-    private final WriteContext writeContext;
+    private final WriteRelationshipService writeRelationshipService;
 
     PrizeCollectingSteinerTreeWriteStep(
         RequestScopedDependencies requestScopedDependencies,
-        WriteContext writeContext,
+        WriteRelationshipService writeRelationshipService,
         PCSTWriteConfig configuration
     ) {
         this.requestScopedDependencies = requestScopedDependencies;
         this.configuration = configuration;
-        this.writeContext = writeContext;
+        this.writeRelationshipService = writeRelationshipService;
     }
 
     @Override
@@ -67,17 +66,15 @@ class PrizeCollectingSteinerTreeWriteStep implements WriteStep<PrizeSteinerTreeR
         );
         var spanningGraph = new SpanningGraph(graph, spanningTree);
 
-        var relationshipExporter = writeContext.relationshipExporterBuilder()
-            .withGraph(spanningGraph)
-            .withIdMappingOperator(spanningGraph::toOriginalNodeId)
-            .withTerminationFlag(requestScopedDependencies.terminationFlag())
-            .withProgressTracker(ProgressTracker.NULL_TRACKER)
-            .withResultStore(configuration.resolveResultStore(resultStore))
-            .withJobId(configuration.jobId())
-            .build();
-
-        relationshipExporter.write(configuration.writeRelationshipType(), configuration.writeProperty());
-
-        return new RelationshipsWritten(steinerTreeResult.effectiveNodeCount() - 1);
+        return writeRelationshipService.writeFromGraph(
+            configuration.writeRelationshipType(),
+            configuration.writeProperty(),
+            spanningGraph,
+            spanningGraph.rootIdMap(),
+            "PrizeCollectingSteinerWrite",
+            configuration.resolveResultStore(resultStore),
+            (a,b,c)-> true,
+            configuration.jobId()
+        );
     }
 }
