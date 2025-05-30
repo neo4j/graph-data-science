@@ -263,7 +263,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
         SteinerTreeWriteConfig configuration,
         ResultBuilder<SteinerTreeWriteConfig, SteinerTreeResult, RESULT, RelationshipsWritten> resultBuilder
     ) {
-        var writeStep = new SteinerTreeWriteStep(requestScopedDependencies, writeContext, configuration);
+        var writeStep = new SteinerTreeWriteStep(writeRelationshipService, configuration);
 
         return runAlgorithmAndWrite(
             graphName,

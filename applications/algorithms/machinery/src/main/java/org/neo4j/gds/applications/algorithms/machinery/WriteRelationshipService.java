@@ -50,7 +50,7 @@ public class WriteRelationshipService {
         RelationshipWithPropertyConsumer relationshipWithPropertyConsumer,
         JobId jobId
     ) {
-        return Neo4jDatabaseRelationshipWriter.writeRelationship(
+        return Neo4jDatabaseRelationshipWriter.writeRelationshipsFromGraph(
             writeRelationshipType,
             writeProperty,
             requestScopedDependencies.taskRegistryFactory(),

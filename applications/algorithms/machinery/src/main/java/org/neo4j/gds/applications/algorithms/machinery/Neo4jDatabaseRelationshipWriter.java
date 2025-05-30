@@ -36,7 +36,8 @@ import org.neo4j.gds.termination.TerminationFlag;
 import java.util.Optional;
 
 final class Neo4jDatabaseRelationshipWriter {
-    static RelationshipsWritten writeRelationship(
+
+    static RelationshipsWritten writeRelationshipsFromGraph(
         String writeRelationshipType,
         String writeProperty,
         TaskRegistryFactory taskRegistryFactory,
@@ -67,7 +68,6 @@ final class Neo4jDatabaseRelationshipWriter {
                 .withJobId(jobId)
                 .build();
 
-
         try {
             exporter.write(
                 writeRelationshipType,
@@ -82,7 +82,6 @@ final class Neo4jDatabaseRelationshipWriter {
         }
 
         return new RelationshipsWritten(graph.relationshipCount());
-
     }
 
     private Neo4jDatabaseRelationshipWriter() {}
