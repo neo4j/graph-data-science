@@ -26,6 +26,7 @@ import org.neo4j.gds.applications.algorithms.machinery.MutateRelationshipService
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
+import org.neo4j.gds.applications.algorithms.machinery.WriteRelationshipService;
 import org.neo4j.gds.logging.Log;
 
 /**
@@ -70,6 +71,7 @@ public final class PathFindingApplications {
         var pathFindingAlgorithms = new PathFindingAlgorithmsBusinessFacade(algorithms, requestScopedDependencies, progressTrackerCreator);
 
         var estimationModeFacade = new PathFindingAlgorithmsEstimationModeBusinessFacade(algorithmEstimationTemplate);
+        var writeRelationshipService = new WriteRelationshipService(log, requestScopedDependencies, writeContext);
 
         var mutateModeFacade = new PathFindingAlgorithmsMutateModeBusinessFacade(
             estimationModeFacade,
@@ -96,6 +98,7 @@ public final class PathFindingApplications {
             algorithmProcessingTemplateConvenience,
             requestScopedDependencies,
             writeContext,
+            writeRelationshipService,
             estimationModeFacade,
             pathFindingAlgorithms
         );

@@ -40,7 +40,7 @@ public class WriteRelationshipService {
         this.writeContext = writeContext;
     }
 
-    public RelationshipsWritten write(
+    public RelationshipsWritten writeFromGraph(
         String writeRelationshipType,
         String writeProperty,
         Graph graph,
