@@ -29,7 +29,6 @@ import org.neo4j.gds.paths.PathResult;
 import org.neo4j.gds.paths.dijkstra.Dijkstra;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.paths.dijkstra.SingleTarget;
-import org.neo4j.gds.paths.yens.config.ShortestPathYensBaseConfig;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.ArrayList;
@@ -46,34 +45,6 @@ public final class Yens extends Algorithm<PathFindingResult> {
     private final long targetNode;
     private final int k;
     private final Concurrency concurrency;
-
-    /**
-     * Configure Yens to compute at most one source-target shortest path.
-     */
-    @Deprecated(forRemoval = true)
-    public static Yens sourceTarget(
-        Graph graph,
-        ShortestPathYensBaseConfig config,
-        ProgressTracker progressTracker,
-        TerminationFlag terminationFlag
-    ) {
-        // If the input graph is a multi-graph, we need to track
-        // parallel relationships ids. This is necessary since shortest
-        // paths can visit the same nodes via different relationships.
-        //If not, we need to track which is the next neighbor.
-        boolean shouldTrackRelationships = graph.isMultiGraph();
-
-        return new Yens(
-            graph,
-            shouldTrackRelationships,
-            graph.toMappedNodeId(config.sourceNode()),
-            graph.toMappedNodeId(config.targetNode()),
-            config.k(),
-            config.concurrency(),
-            progressTracker,
-            terminationFlag
-        );
-    }
 
     /**
      * Configure Yens to compute at most one source-target shortest path.

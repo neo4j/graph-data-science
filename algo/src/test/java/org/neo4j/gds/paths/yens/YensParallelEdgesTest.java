@@ -27,16 +27,12 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
-import org.neo4j.gds.paths.yens.config.ShortestPathYensStreamConfigImpl;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @GdlExtension
 class YensParallelEdgesTest {
-    static ShortestPathYensStreamConfigImpl.Builder defaultSourceTargetConfigBuilder() {
-        return ShortestPathYensStreamConfigImpl.builder().concurrency(1);
-    }
 
     @GdlGraph
     private static final String DB_CYPHER =

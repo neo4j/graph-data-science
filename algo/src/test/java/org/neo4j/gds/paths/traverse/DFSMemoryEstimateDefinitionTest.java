@@ -23,14 +23,10 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.assertions.MemoryEstimationAssert;
 import org.neo4j.gds.core.concurrency.Concurrency;
 
-import static org.mockito.Mockito.mock;
-
 class DFSMemoryEstimateDefinitionTest {
 
     @Test
     void testMemoryEstimation(){
-
-        var config = mock(DfsBaseConfig.class);
 
         var memoryEstimation = new DfsMemoryEstimateDefinition();
 

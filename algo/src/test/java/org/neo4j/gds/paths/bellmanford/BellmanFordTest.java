@@ -37,7 +37,6 @@ import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.logging.GdsTestLog;
-import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaStreamConfigImpl;
 import org.neo4j.gds.paths.dijkstra.DijkstraFactory;
 import org.neo4j.gds.termination.TerminationFlag;
 
@@ -292,11 +291,6 @@ class BellmanFordTest {
             .build()
             .generate();
 
-        var config = AllShortestPathsDeltaStreamConfigImpl.builder()
-            .concurrency(concurrency)
-            .sourceNode(start)
-            .build();
-
         var bellmanFord = new BellmanFord(
             newGraph,
             ProgressTracker.NULL_TRACKER,
@@ -312,7 +306,7 @@ class BellmanFordTest {
         var dijkstraAlgo = DijkstraFactory
             .singleSource(
                 newGraph,
-                config.sourceNode(),
+                start,
                 true,
                 Optional.empty(),
                 ProgressTracker.NULL_TRACKER,

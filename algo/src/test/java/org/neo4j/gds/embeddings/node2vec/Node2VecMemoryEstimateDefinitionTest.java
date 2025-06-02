@@ -22,7 +22,6 @@ package org.neo4j.gds.embeddings.node2vec;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.assertions.MemoryEstimationAssert;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.traversal.WalkParameters;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -31,11 +30,16 @@ class Node2VecMemoryEstimateDefinitionTest {
 
     @Test
     void shouldEstimateMemory() {
-        var configMock = mock(Node2VecBaseConfig.class);
-        when(configMock.embeddingDimension()).thenReturn(128);
-        when(configMock.walkParameters()).thenReturn(new WalkParameters(10, 80, 1.0, 1.0));
 
-        var memoryEstimation = new Node2VecMemoryEstimateDefinition(Node2VecConfigTransformer.node2VecParameters(configMock)).memoryEstimation();
+        var trainParams = mock(TrainParameters.class);
+        when(trainParams.embeddingDimension()).thenReturn(128);
+        var samplingWalkParameters = new SamplingWalkParameters(null,10, 80, 1.0, 1.0,1,1,1);
+
+        var params = mock(Node2VecParameters.class);
+        when(params.samplingWalkParameters()).thenReturn(samplingWalkParameters);
+        when(params.trainParameters()).thenReturn(trainParams);
+
+        var memoryEstimation = new Node2VecMemoryEstimateDefinition(params).memoryEstimation();
 
         MemoryEstimationAssert.assertThat(memoryEstimation)
             .memoryRange(1000, new Concurrency(1))

@@ -64,7 +64,7 @@ class ShortestPathConfigTest {
             .sourceNode(-1337)
             .targetNode(0);
 
-        assertThatThrownBy(() -> config.build())
+        assertThatThrownBy(config::build)
             .hasMessageContaining("Negative node ids are not supported for the field `sourceNode`");
 
     }
@@ -77,7 +77,7 @@ class ShortestPathConfigTest {
             .sourceNode(0)
             .targetNode(-1337);
 
-        assertThatThrownBy(() -> config.build())
+        assertThatThrownBy(config::build)
             .hasMessageContaining("Negative node ids are not supported for the field `targetNode`");
 
     }

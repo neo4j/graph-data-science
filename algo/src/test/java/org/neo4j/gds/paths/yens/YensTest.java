@@ -41,7 +41,6 @@ import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.paths.ImmutablePathResult;
 import org.neo4j.gds.paths.PathResult;
-import org.neo4j.gds.paths.yens.config.ShortestPathYensStreamConfigImpl;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.s1ck.gdl.GDLHandler;
 import org.s1ck.gdl.model.Edge;
@@ -59,9 +58,6 @@ import static org.neo4j.gds.assertj.Extractors.replaceTimings;
 
 @GdlExtension
 class YensTest {
-    static ShortestPathYensStreamConfigImpl.Builder defaultSourceTargetConfigBuilder(int concurrency) {
-        return ShortestPathYensStreamConfigImpl.builder().concurrency(concurrency);
-    }
 
     // https://en.wikipedia.org/wiki/Yen%27s_algorithm#/media/File:Yen's_K-Shortest_Path_Algorithm,_K=3,_A_to_F.gif
     @GdlGraph(aggregation = Aggregation.SINGLE)

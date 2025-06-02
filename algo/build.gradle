@@ -36,7 +36,6 @@ dependencies {
     implementation project(':community-configs')
     implementation project(':ml-configs')
     implementation project(':node-embeddings-configs')
-    implementation project(':path-finding-configs')
 
     implementation project(':collections-memory-estimation')
     implementation project(':config-api')
@@ -61,7 +60,6 @@ dependencies {
 
     // TEST DEPENDENCIES
     testAnnotationProcessor project(':annotations')
-    testAnnotationProcessor project(':config-generator')
 
     testImplementation project(':edition-api')
     testImplementation project(':test-utils')

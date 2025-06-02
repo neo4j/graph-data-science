@@ -22,7 +22,6 @@ package org.neo4j.gds.wcc;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.util.Map;
@@ -39,7 +38,7 @@ class WccBaseConfigTest {
             "relationshipWeightProperty", "threshold"
         ));
 
-        var config = TestWccBaseConfig.of(map);
+        var config = WccStreamConfig.of(map);
         assertThat(config.threshold()).isEqualTo(3.14);
     }
 
@@ -50,7 +49,7 @@ class WccBaseConfigTest {
             "relationshipWeightProperty", "threshold"
         ));
 
-        var config = TestWccBaseConfig.of(map);
+        var config = WccStreamConfig.of(map);
         assertThat(config.threshold()).isEqualTo(3);
     }
 
@@ -61,7 +60,7 @@ class WccBaseConfigTest {
             "consecutiveIds", consecutiveIds
         ));
 
-        var config = TestWccBaseConfig.of(map);
+        var config = WccStreamConfig.of(map);
         assertThat(config.consecutiveIds()).isEqualTo(consecutiveIds);
     }
 
@@ -72,7 +71,7 @@ class WccBaseConfigTest {
             "seedProperty", "seed"
         ));
 
-        assertThatThrownBy(() -> TestWccBaseConfig.of(map))
+        assertThatThrownBy(() -> WccStreamConfig.of(map))
             .hasMessageContaining("Seeding and the `consecutiveIds` option cannot be used at the same time.")
             .isInstanceOf(IllegalArgumentException.class);
     }
@@ -83,16 +82,11 @@ class WccBaseConfigTest {
             "threshold", 3.14
         ));
 
-        assertThatThrownBy(() -> TestWccBaseConfig.of(map))
+        assertThatThrownBy(() -> WccStreamConfig.of(map))
             .hasMessageContaining("Specifying a threshold requires `relationshipWeightProperty` to be set")
             .isInstanceOf(IllegalArgumentException.class);
     }
 
-    @Configuration
-    interface TestWccBaseConfig extends WccBaseConfig {
-        static TestWccBaseConfig of(CypherMapWrapper map) {
-            return new TestWccBaseConfigImpl(map);
-        }
-    }
+
 
 }

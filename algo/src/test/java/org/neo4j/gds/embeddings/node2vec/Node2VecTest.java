@@ -482,8 +482,33 @@ class Node2VecTest {
 
         var unweighted = graphStore.getGraph(RelationshipType.of("REL"), Optional.empty());
 
-        var configuration = Node2VecStreamConfigImpl.builder().embeddingDimension(128).build();
-        var params = Node2VecConfigTransformer.node2VecParameters(configuration);
+        var walkParameters = new SamplingWalkParameters(
+            NO_SOURCE_NODES,
+            10,
+            80,
+            1.0,
+            1.0,
+            0.01,
+            0.75,
+            1000
+        );
+
+        var trainParameters = new TrainParameters(
+            0.025,
+            0.0001,
+            1,
+            10,
+            5,
+            10,
+            EmbeddingInitializer.UNIFORM
+        );
+
+        var params = new Node2VecParameters(
+            walkParameters,
+            trainParameters,
+            new Concurrency(4),
+            Optional.empty()
+        );
 
         var progressTrackerWithLog = TestProgressTrackerHelper.create(
             new NodeEmbeddingsAlgorithmTasks().node2Vec(unweighted, params),
@@ -517,8 +542,33 @@ class Node2VecTest {
     @Test
     void shouldLogProgressForNode2VecWithRelationshipWeights() {
 
-        var configuration = Node2VecStreamConfigImpl.builder().embeddingDimension(128).build();
-        var params = Node2VecConfigTransformer.node2VecParameters(configuration);
+        var walkParameters = new SamplingWalkParameters(
+            NO_SOURCE_NODES,
+            10,
+            80,
+            1.0,
+            1.0,
+            0.01,
+            0.75,
+            1000
+        );
+
+        var trainParameters = new TrainParameters(
+            0.025,
+            0.0001,
+            1,
+            10,
+            5,
+            10,
+            EmbeddingInitializer.UNIFORM
+        );
+
+        var params = new Node2VecParameters(
+            walkParameters,
+            trainParameters,
+            new Concurrency(4),
+            Optional.empty()
+        );
 
         var progressTrackerWithLog = TestProgressTrackerHelper.create(
             new NodeEmbeddingsAlgorithmTasks().node2Vec(graph, params),
