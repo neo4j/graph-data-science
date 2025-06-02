@@ -27,6 +27,7 @@ import org.neo4j.gds.applications.algorithms.machinery.Label;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
+import org.neo4j.gds.applications.algorithms.machinery.WriteRelationshipService;
 import org.neo4j.gds.applications.algorithms.machinery.WriteStep;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 import org.neo4j.gds.config.AlgoBaseConfig;
@@ -73,6 +74,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
     private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
     private final RequestScopedDependencies requestScopedDependencies;
     private final WriteContext writeContext;
+    private final WriteRelationshipService writeRelationshipService;
     private final PathFindingAlgorithmsEstimationModeBusinessFacade estimationFacade;
     private final PathFindingAlgorithmsBusinessFacade pathFindingAlgorithms;
 
@@ -81,6 +83,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
         RequestScopedDependencies requestScopedDependencies,
         WriteContext writeContext,
+        WriteRelationshipService writeRelationshipService,
         PathFindingAlgorithmsEstimationModeBusinessFacade estimationFacade,
         PathFindingAlgorithmsBusinessFacade pathFindingAlgorithms
     ) {
@@ -88,6 +91,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
         this.algorithmProcessingTemplateConvenience = algorithmProcessingTemplateConvenience;
         this.requestScopedDependencies = requestScopedDependencies;
         this.writeContext = writeContext;
+        this.writeRelationshipService = writeRelationshipService;
         this.estimationFacade = estimationFacade;
         this.pathFindingAlgorithms = pathFindingAlgorithms;
     }
@@ -98,9 +102,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
         ResultBuilder<AllShortestPathsBellmanFordWriteConfig, BellmanFordResult, RESULT, RelationshipsWritten> resultBuilder
     ) {
         var writeStep = new BellmanFordWriteStep(
-            log,
-            requestScopedDependencies,
-            writeContext,
+            writeRelationshipService,
             configuration
         );
 
@@ -158,7 +160,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
         PCSTWriteConfig configuration,
         ResultBuilder<PCSTWriteConfig, PrizeSteinerTreeResult, RESULT, RelationshipsWritten> resultBuilder
     ) {
-        var writeStep = new PrizeCollectingSteinerTreeWriteStep(requestScopedDependencies, writeContext, configuration);
+        var writeStep = new PrizeCollectingSteinerTreeWriteStep(requestScopedDependencies, writeRelationshipService, configuration);
 
         return runAlgorithmAndWrite(
             graphName,
@@ -237,9 +239,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
         ResultBuilder<SpanningTreeWriteConfig, SpanningTree, RESULT, RelationshipsWritten> resultBuilder
     ) {
         var writeStep = new SpanningTreeWriteStep(
-            log,
-            requestScopedDependencies,
-            writeContext,
+            writeRelationshipService,
             configuration
         );
 
@@ -259,7 +259,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
         SteinerTreeWriteConfig configuration,
         ResultBuilder<SteinerTreeWriteConfig, SteinerTreeResult, RESULT, RelationshipsWritten> resultBuilder
     ) {
-        var writeStep = new SteinerTreeWriteStep(requestScopedDependencies, writeContext, configuration);
+        var writeStep = new SteinerTreeWriteStep(writeRelationshipService, configuration);
 
         return runAlgorithmAndWrite(
             graphName,
@@ -285,8 +285,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
     ) {
         var writeStep = new ShortestPathWriteStep<>(
             log,
-            requestScopedDependencies,
-            writeContext,
+            writeRelationshipService,
             configuration
         );
 

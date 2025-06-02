@@ -19,15 +19,19 @@
  */
 package org.neo4j.gds.applications.algorithms.machinery;
 
+import org.neo4j.gds.api.ExportedRelationship;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.ResultStore;
+import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.relationships.RelationshipWithPropertyConsumer;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.logging.Log;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 public class WriteRelationshipService {
     private final Log log;
@@ -40,22 +44,23 @@ public class WriteRelationshipService {
         this.writeContext = writeContext;
     }
 
-    public RelationshipsWritten write(
+    public RelationshipsWritten writeFromGraph(
         String writeRelationshipType,
         String writeProperty,
-        Graph graph,
+        Graph writeGraph,
         IdMap rootIdMap,
         String taskName,
         Optional<ResultStore> resultStore,
         RelationshipWithPropertyConsumer relationshipWithPropertyConsumer,
         JobId jobId
     ) {
-        return Neo4jDatabaseRelationshipWriter.writeRelationship(
+
+        return Neo4jDatabaseRelationshipWriter.writeRelationshipsFromGraph(
             writeRelationshipType,
             writeProperty,
             requestScopedDependencies.taskRegistryFactory(),
             writeContext.relationshipExporterBuilder(),
-            graph,
+            writeGraph,
             rootIdMap,
             log,
             taskName,
@@ -65,4 +70,33 @@ public class WriteRelationshipService {
             jobId
         );
     }
+
+    public RelationshipsWritten writeFromRelationshipStream(
+        String writeRelationshipType,
+        List<String> properties,
+        List<ValueType> valueTypes,
+        Stream<ExportedRelationship> relationshipStream,
+        IdMap rootIdMap,
+        String taskName,
+        Optional<ResultStore> resultStore,
+        JobId jobId
+    ){
+
+        return Neo4jDatabaseRelationshipWriter.writeRelationshipsFromStream(
+            writeRelationshipType,
+            properties,
+            valueTypes,
+            requestScopedDependencies.taskRegistryFactory(),
+            writeContext.relationshipStreamExporterBuilder(),
+            relationshipStream,
+            rootIdMap,
+            log,
+            taskName,
+            requestScopedDependencies.terminationFlag(),
+            resultStore,
+            jobId
+        );
+    }
+
+
 }

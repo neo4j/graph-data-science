@@ -23,34 +23,23 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
-import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
-import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
+import org.neo4j.gds.applications.algorithms.machinery.WriteRelationshipService;
 import org.neo4j.gds.applications.algorithms.machinery.WriteStep;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
-import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.utils.progress.JobId;
-import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
-import org.neo4j.gds.core.write.NodePropertyExporter;
-import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.spanningtree.SpanningGraph;
 import org.neo4j.gds.spanningtree.SpanningTree;
 import org.neo4j.gds.spanningtree.SpanningTreeWriteConfig;
 
 class SpanningTreeWriteStep implements WriteStep<SpanningTree, RelationshipsWritten> {
-    private final Log log;
-    private final RequestScopedDependencies requestScopedDependencies;
-    private final WriteContext writeContext;
+    private final WriteRelationshipService writeRelationshipService;
     private final SpanningTreeWriteConfig configuration;
 
     SpanningTreeWriteStep(
-        Log log,
-        RequestScopedDependencies requestScopedDependencies,
-        WriteContext writeContext,
+        WriteRelationshipService writeRelationshipService,
         SpanningTreeWriteConfig configuration
     ) {
-        this.log = log;
-        this.requestScopedDependencies = requestScopedDependencies;
-        this.writeContext = writeContext;
+        this.writeRelationshipService = writeRelationshipService;
         this.configuration = configuration;
     }
 
@@ -64,26 +53,16 @@ class SpanningTreeWriteStep implements WriteStep<SpanningTree, RelationshipsWrit
     ) {
         var spanningGraph = new SpanningGraph(graph, result);
 
-        var progressTracker = new TaskProgressTracker(
-            NodePropertyExporter.baseTask(AlgorithmLabel.SpanningTree.asString(), graph.nodeCount()),
-            new LoggerForProgressTrackingAdapter(log),
-            configuration.writeConcurrency(),
-            requestScopedDependencies.taskRegistryFactory()
+
+        return writeRelationshipService.writeFromGraph(
+            configuration.writeRelationshipType(),
+            configuration.writeProperty(),
+            spanningGraph,
+            graph,
+            AlgorithmLabel.SpanningTree.asString(),
+            configuration.resolveResultStore(resultStore),
+            (a,b,c)-> true,
+            configuration.jobId()
         );
-
-        var relationshipExporter = writeContext.relationshipExporterBuilder()
-            .withGraph(spanningGraph)
-            .withIdMappingOperator(spanningGraph::toOriginalNodeId)
-            .withTerminationFlag(requestScopedDependencies.terminationFlag())
-            .withProgressTracker(progressTracker)
-            .withResultStore(configuration.resolveResultStore(resultStore))
-            .withJobId(configuration.jobId())
-            .build();
-
-        // effect
-        relationshipExporter.write(configuration.writeRelationshipType(), configuration.writeProperty());
-
-        // reporting
-        return new RelationshipsWritten(result.effectiveNodeCount() - 1);
     }
 }

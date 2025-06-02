@@ -95,7 +95,7 @@ class SimilarityWrite {
 
         var similarityDistributionBuilder = SimilaritySummaryBuilder.of(shouldComputeSimilarityDistribution);
 
-        var relationshipsWritten = writeRelationshipService.write(
+        var relationshipsWritten = writeRelationshipService.writeFromGraph(
             writeRelationshipConfiguration.writeRelationshipType(),
             writePropertyConfiguration.writeProperty(),
             similarityGraph,
