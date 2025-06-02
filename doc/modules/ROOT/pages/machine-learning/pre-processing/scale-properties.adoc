@@ -47,9 +47,9 @@ The minimum and maximum values are reported as statistics when this scaler is us
 [[algorithms-scale-properties-max]]
 === Max scaler
 
-Scales all property values into the range `[-1, 1]` where the absolute maximum value(s) get the scaled value `1`, according to this formula:
+Scales all property values into the range `[-1, 1]` where the maximum absolute value(s) get the scaled value `1`, according to this formula:
 
-image::equations/scale-properties/max.svg[scaled p equals p divided by the absolute maximum of p,align="center"]
+image::equations/scale-properties/max.svg[scaled p equals p divided by the maximum of absolute p,align="center"]
 
 The maximum absolute value is reported as statistic when this scaler is used.
 
