@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.msbfs;
 
-final class SourceNodes implements BfsSources {
+public final class SourceNodes implements BfsSources {
     private final long[] sourceNodes;
     private final int maxPos;
     private final int startPos;
