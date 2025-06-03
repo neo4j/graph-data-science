@@ -17,31 +17,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.msbfs;
+package org.neo4j.gds.harmonic;
 
-import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.mem.MemoryEstimateDefinition;
+import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryEstimations;
+import org.neo4j.gds.msbfs.MSBFSMemoryEstimation;
 
-public final class MSBFSMemoryEstimation {
+public final class HarmonicCentralityAlgorithmEstimateDefinition implements MemoryEstimateDefinition {
 
-    private MSBFSMemoryEstimation() {}
-
-    private static MemoryEstimations.Builder MSBFS(){
-
-        return MemoryEstimations.builder(MultiSourceBFSAccessMethods.class)
-            .perThread("visits", HugeLongArray::memoryEstimation)
-            .perThread("visitsNext", HugeLongArray::memoryEstimation)
-            .perThread("seens", HugeLongArray::memoryEstimation);
-    }
-
-    public static MemoryEstimation MSBFSWithPredecessorStrategy(){
-        return MSBFS()
-            .perThread("seenNext", HugeLongArray::memoryEstimation)
+    @Override
+    public MemoryEstimation memoryEstimation() {
+        return MemoryEstimations.builder(HarmonicCentrality.class)
+            .perNode("inverse farness", HugeAtomicDoubleArray::memoryEstimation)
+            .add("MSBFS", MSBFSMemoryEstimation.MSBFSWithANPStrategy())
             .build();
     }
-    public static MemoryEstimation MSBFSWithANPStrategy(){
-        return MSBFS()
-            .build();
-    }
+
 }
