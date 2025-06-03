@@ -65,19 +65,14 @@ public final class MultiSourceBFSRunnable implements Runnable {
     private final RelationshipIterator relationships;
     private final ExecutionStrategy strategy;
     private final boolean allowStartNodeTraversal;
-    private final long @Nullable [] sourceNodes;
-
-    // hypothesis: you supply actual source nodes, or you provide a count - if so that should be rationalised
-    private final int sourceNodeCount;
-    private final long nodeOffset;
+    private final SourceNodesSpec sourceNodesSpec;
 
     public static MultiSourceBFSRunnable createWithoutSeensNext(
         long nodeCount,
         RelationshipIterator relationships,
         ExecutionStrategy strategy,
         boolean allowStartNodeTraversal,
-        int sourceNodeCount,
-        long nodeOffset
+        SourceNodesSpec sourceNodesSpec
     ) {
         var visits = new LocalHugeLongArray(nodeCount);
         var visitsNext = new LocalHugeLongArray(nodeCount);
@@ -92,9 +87,7 @@ public final class MultiSourceBFSRunnable implements Runnable {
             relationships,
             strategy,
             allowStartNodeTraversal,
-            null,
-            sourceNodeCount,
-            nodeOffset
+            sourceNodesSpec
         );
     }
 
@@ -110,9 +103,7 @@ public final class MultiSourceBFSRunnable implements Runnable {
         RelationshipIterator relationships,
         ExecutionStrategy strategy,
         boolean allowStartNodeTraversal,
-        long @Nullable [] sourceNodes,
-        int sourceNodeCount,
-        long nodeOffset
+        SourceNodesSpec sourceNodesSpec
     ) {
 
         this.visits = visits;
@@ -123,9 +114,7 @@ public final class MultiSourceBFSRunnable implements Runnable {
         this.relationships = relationships;
         this.strategy = strategy;
         this.allowStartNodeTraversal = allowStartNodeTraversal;
-        this.sourceNodes = sourceNodes;
-        this.sourceNodeCount = sourceNodeCount;
-        this.nodeOffset = nodeOffset;
+        this.sourceNodesSpec = sourceNodesSpec;
     }
 
     /**
@@ -138,62 +127,11 @@ public final class MultiSourceBFSRunnable implements Runnable {
         var seenSet = seens.get();
         var seenNextSet = seensNext != null ? seensNext.get() : null;
 
-        SourceNodes sourceNodes = this.sourceNodes == null
-            ? prepareOffsetSources(visitSet, seenSet, allowStartNodeTraversal)
-            : prepareSpecifiedSources(visitSet, seenSet, this.sourceNodes, allowStartNodeTraversal);
+
+        var sourceNodes  = sourceNodesSpec.setUp(visitSet,seenSet,allowStartNodeTraversal);
 
         strategy.run(relationships, nodeCount, sourceNodes, visitSet, visitNextSet, seenSet, seenNextSet);
     }
 
-    private SourceNodes prepareOffsetSources(
-        HugeLongArray visitSet,
-        HugeLongArray seenSet,
-        boolean allowStartNodeTraversal
-    ) {
-        var localNodeCount = this.sourceNodeCount;
-        var nodeOffset = this.nodeOffset;
 
-        for (int i = 0; i < localNodeCount; ++i) {
-            long currentNode = nodeOffset + i;
-
-            if (!allowStartNodeTraversal) {
-                seenSet.set(currentNode, 1L << i);
-            }
-            
-            visitSet.or(currentNode, 1L << i);
-        }
-
-        return new SourceNodes(nodeOffset, localNodeCount);
-    }
-
-    private static SourceNodes prepareSpecifiedSources(
-        HugeLongArray visitSet,
-        HugeLongArray seenSet,
-        long[] sourceNodes,
-        boolean allowStartNodeTraversal
-    ) {
-        for (int i = 0; i < sourceNodes.length; ++i) {
-            long nodeId = sourceNodes[i];
-            if (!allowStartNodeTraversal) {
-                seenSet.set(nodeId, 1L << i);
-            }
-            visitSet.or(nodeId, 1L << i);
-        }
-
-        return new SourceNodes(sourceNodes);
-    }
-
-    @Override
-    public String toString() {
-        if (sourceNodes != null && sourceNodes.length > 0) {
-            return "MSBFS{" + sourceNodes[0] +
-                   " .. " + (sourceNodes[sourceNodes.length - 1] + 1) +
-                   " (" + sourceNodes.length +
-                   ")}";
-        }
-        return "MSBFS{" + nodeOffset +
-               " .. " + (nodeOffset + sourceNodeCount) +
-               " (" + sourceNodeCount +
-               ")}";
-    }
 }

@@ -23,6 +23,7 @@ import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.properties.relationships.RelationshipIterator;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
+import org.neo4j.gds.msbfs.EmptySourceNodesSpec;
 import org.neo4j.gds.msbfs.MSBFSConstants;
 import org.neo4j.gds.msbfs.MultiSourceBFSRunnable;
 
@@ -155,8 +156,7 @@ final class CollapsePathTaskSupplier implements Supplier<Runnable> {
             null,
             executionStrategy,
             allowSelfLoops,
-            sourceNodeCount,
-            nodeOffset
+            new EmptySourceNodesSpec(nodeOffset, sourceNodeCount)
         );
     }
 }
