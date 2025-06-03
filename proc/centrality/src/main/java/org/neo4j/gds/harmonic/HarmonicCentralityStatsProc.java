@@ -21,6 +21,7 @@ package org.neo4j.gds.harmonic;
 
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.algorithms.centrality.CentralityStatsResult;
+import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -30,6 +31,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.harmonic.Constants.HARMONIC_CENTRALITY_DESCRIPTION;
+import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public class HarmonicCentralityStatsProc {
@@ -43,5 +45,14 @@ public class HarmonicCentralityStatsProc {
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         return facade.algorithms().centrality().harmonicCentralityStats(graphName, configuration);
+    }
+
+    @Procedure(name = "gds.closeness.harmonic.stats.estimate", mode = READ)
+    @Description(MEMORY_ESTIMATION_DESCRIPTION)
+    public Stream<MemoryEstimateResult> estimate(
+        @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
+        @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
+    ) {
+        return facade.algorithms().centrality().harmonicCentralityStatsEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 }

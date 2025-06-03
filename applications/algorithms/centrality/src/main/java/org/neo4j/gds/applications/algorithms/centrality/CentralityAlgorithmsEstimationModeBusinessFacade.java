@@ -40,6 +40,8 @@ import org.neo4j.gds.influenceMaximization.InfluenceMaximizationBaseConfig;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.pagerank.PageRankMemoryEstimateDefinition;
 import org.neo4j.gds.pagerank.RankConfig;
+import org.neo4j.gds.harmonic.HarmonicCentralityAlgorithmEstimateDefinition;
+import org.neo4j.gds.harmonic.HarmonicCentralityBaseConfig;
 
 public class CentralityAlgorithmsEstimationModeBusinessFacade {
     private final AlgorithmEstimationTemplate algorithmEstimationTemplate;
@@ -133,7 +135,20 @@ public class CentralityAlgorithmsEstimationModeBusinessFacade {
     }
 
     public MemoryEstimation harmonicCentrality() {
-        throw new MemoryEstimationNotImplementedException();
+        return new HarmonicCentralityAlgorithmEstimateDefinition().memoryEstimation();
+    }
+
+    public MemoryEstimateResult harmonicCentrality(
+        HarmonicCentralityBaseConfig configuration,
+        Object graphNameOrConfiguration
+    ) {
+        var memoryEstimation = harmonicCentrality();
+
+        return algorithmEstimationTemplate.estimate(
+            configuration,
+            graphNameOrConfiguration,
+            memoryEstimation
+        );
     }
 
     public MemoryEstimation pageRank() {
