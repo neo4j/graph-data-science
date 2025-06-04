@@ -67,29 +67,22 @@ public class StorePathsSideEffect implements SideEffect<PathFindingResult, Relat
                         return new ExportedRelationship(
                             pathResult.sourceNode(),
                             pathResult.targetNode(),
-                            createValues(graphResources.graph(), pathResult)
+                            createValues(pathResult)
                         );
                     });
 
-            resultStore.add(JobId.parse("banana"), new ResultStoreEntry.RelationshipStream(
+            resultStore.add(JobId.parse(this.relationshipTypeAsString), new ResultStoreEntry.RelationshipStream(
                 relationshipTypeAsString, propertyKeys, propertyTypes, relationshipStream, graphResources.graph()::toOriginalNodeId));
 
             return new RelationshipsWritten(relCounter.get());
         });
     }
 
-    private Value[] createValues(IdMap idMap, PathResult pathResult) {
+    private Value[] createValues(PathResult pathResult) {
         return new Value[]{
             Values.doubleValue(pathResult.totalCost()),
             Values.longArray(pathResult.nodeIds()),
             Values.doubleArray(pathResult.costs())
         };
-    }
-
-    private long[] toOriginalIds(IdMap idMap, long[] internalIds) {
-        for (int i = 0; i < internalIds.length; i++) {
-            internalIds[i] = idMap.toOriginalNodeId(internalIds[i]);
-        }
-        return internalIds;
     }
 }
