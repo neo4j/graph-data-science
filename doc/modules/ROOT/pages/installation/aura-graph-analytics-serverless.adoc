@@ -201,6 +201,7 @@ The following algorithms are not supported:
 - xref:algorithms/bridges.adoc[]
 - xref:algorithms/conductance.adoc[]
 - xref:algorithms/modularity.adoc[]
+- xref:algorithms/hdbscan.adoc[]
 - xref:algorithms/hits.adoc[]
 - xref:algorithms/dag/longest-path.adoc[]
 - xref:algorithms/dag/topological-sort.adoc[]
