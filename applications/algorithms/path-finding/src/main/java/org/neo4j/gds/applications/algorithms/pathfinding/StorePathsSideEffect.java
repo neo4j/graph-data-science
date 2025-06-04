@@ -56,7 +56,6 @@ public class StorePathsSideEffect implements SideEffect<PathFindingResult, Relat
         this.propertyTypes = propertyTypes;
     }
 
-
     @Override
     public Optional<RelationshipsWritten> process(GraphResources graphResources, Optional<PathFindingResult> pathFindingResult) {
         return pathFindingResult.map(result -> {
@@ -82,7 +81,7 @@ public class StorePathsSideEffect implements SideEffect<PathFindingResult, Relat
     private Value[] createValues(IdMap idMap, PathResult pathResult) {
         return new Value[]{
             Values.doubleValue(pathResult.totalCost()),
-            Values.longArray(toOriginalIds(idMap, pathResult.nodeIds())),
+            Values.longArray(pathResult.nodeIds()),
             Values.doubleArray(pathResult.costs())
         };
     }
