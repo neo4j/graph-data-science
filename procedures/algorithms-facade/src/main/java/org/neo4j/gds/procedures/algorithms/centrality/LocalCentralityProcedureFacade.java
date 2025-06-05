@@ -1108,6 +1108,14 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
     }
 
     @Override
+    public Stream<MemoryEstimateResult> harmonicCentralityMutateEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        return stubs.harmonic().estimate(graphNameOrConfiguration, algorithmConfiguration);
+    }
+
+    @Override
     public Stream<CentralityStatsResult> harmonicCentralityStats(String graphName, Map<String, Object> configuration) {
         var shouldComputeSimilarityDistribution = procedureReturnColumns.contains("centralityDistribution");
 
@@ -1125,6 +1133,22 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
             parsedConfiguration,
             resultBuilder
         );
+    }
+
+    @Override
+    public Stream<MemoryEstimateResult> harmonicCentralityStatsEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var parsedConfiguration = configurationParser.parseConfiguration(
+            algorithmConfiguration,
+            HarmonicCentralityStatsConfig::of
+        );
+
+        return Stream.of(estimationModeBusinessFacade.harmonicCentrality(
+            parsedConfiguration,
+            graphNameOrConfiguration
+        ));
     }
 
     @Override
@@ -1147,6 +1171,22 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
     }
 
     @Override
+    public Stream<MemoryEstimateResult> harmonicCentralityStreamEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var parsedConfiguration = configurationParser.parseConfiguration(
+            algorithmConfiguration,
+            HarmonicCentralityStreamConfig::of
+        );
+
+        return Stream.of(estimationModeBusinessFacade.harmonicCentrality(
+            parsedConfiguration,
+            graphNameOrConfiguration
+        ));
+    }
+
+    @Override
     public Stream<CentralityWriteResult> harmonicCentralityWrite(String graphName, Map<String, Object> configuration) {
         var shouldComputeCentralityDistribution = procedureReturnColumns.contains("centralityDistribution");
         var resultBuilder = new HarmonicCentralityResultBuilderForWriteMode(shouldComputeCentralityDistribution);
@@ -1161,6 +1201,22 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
             parsedConfiguration,
             resultBuilder
         );
+    }
+
+    @Override
+    public Stream<MemoryEstimateResult> harmonicCentralityWriteEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var parsedConfiguration = configurationParser.parseConfiguration(
+            algorithmConfiguration,
+            HarmonicCentralityWriteConfig::of
+        );
+
+        return Stream.of(estimationModeBusinessFacade.harmonicCentrality(
+            parsedConfiguration,
+            graphNameOrConfiguration
+        ));
     }
 
     @Override

@@ -80,9 +80,13 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         "gds.conductance.stream",
 
         "gds.closeness.harmonic.mutate",
+        "gds.closeness.harmonic.mutate.estimate",
         "gds.closeness.harmonic.stats",
+        "gds.closeness.harmonic.stats.estimate",
         "gds.closeness.harmonic.stream",
+        "gds.closeness.harmonic.stream.estimate",
         "gds.closeness.harmonic.write",
+        "gds.closeness.harmonic.write.estimate",
 
         "gds.closeness.mutate",
         "gds.closeness.stats",
@@ -611,7 +615,7 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         );
 
         // If you find yourself updating this count, please also update the count in SmokeTest.kt
-        int expectedCount = 451;
+        int expectedCount = 455;
         assertEquals(
             expectedCount,
             returnedRows,

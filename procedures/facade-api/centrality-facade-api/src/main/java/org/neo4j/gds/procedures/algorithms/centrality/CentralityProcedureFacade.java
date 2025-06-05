@@ -284,14 +284,34 @@ public interface CentralityProcedureFacade {
 
     Stream<CentralityMutateResult> harmonicCentralityMutate(String graphName, Map<String, Object> configuration);
 
+    Stream<MemoryEstimateResult> harmonicCentralityMutateEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    );
+
     Stream<CentralityStatsResult> harmonicCentralityStats(String graphName, Map<String, Object> configuration);
+
+    Stream<MemoryEstimateResult> harmonicCentralityStatsEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    );
 
     Stream<CentralityStreamResult> harmonicCentralityStream(
         String graphName,
         Map<String, Object> configuration
     );
 
+    Stream<MemoryEstimateResult> harmonicCentralityStreamEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    );
+
     Stream<CentralityWriteResult> harmonicCentralityWrite(String graphName, Map<String, Object> configuration);
+
+    Stream<MemoryEstimateResult> harmonicCentralityWriteEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    );
 
     Stream<PageRankMutateResult> pageRankMutate(String graphName, Map<String, Object> configuration);
 

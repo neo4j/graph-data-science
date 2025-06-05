@@ -22,6 +22,7 @@ package org.neo4j.gds.harmonic;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.algorithms.centrality.CentralityWriteResult;
 import org.neo4j.gds.procedures.algorithms.centrality.AlphaHarmonicWriteResult;
+import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
@@ -33,6 +34,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.harmonic.Constants.HARMONIC_CENTRALITY_DESCRIPTION;
 import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
+import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
 public class HarmonicCentralityWriteProc {
@@ -46,6 +48,15 @@ public class HarmonicCentralityWriteProc {
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         return facade.algorithms().centrality().harmonicCentralityWrite(graphName, configuration);
+    }
+
+    @Procedure(name = "gds.closeness.harmonic.write.estimate", mode = READ)
+    @Description(MEMORY_ESTIMATION_DESCRIPTION)
+    public Stream<MemoryEstimateResult> estimate(
+        @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
+        @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
+    ) {
+        return facade.algorithms().centrality().harmonicCentralityWriteEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
     @Deprecated(forRemoval = true)
