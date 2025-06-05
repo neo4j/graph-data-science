@@ -20,6 +20,7 @@
 package org.neo4j.gds.msbfs;
 
 import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.mem.Estimate;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryEstimations;
 
@@ -27,21 +28,30 @@ public final class MSBFSMemoryEstimation {
 
     private MSBFSMemoryEstimation() {}
 
-    private static MemoryEstimations.Builder MSBFS(){
 
-        return MemoryEstimations.builder(MultiSourceBFSAccessMethods.class)
+    private static MemoryEstimations.Builder MSBFS(int sourceNodes){
+        var runnable = MemoryEstimations.builder(MultiSourceBFSRunnable.class).build();
+
+        var builder = MemoryEstimations.builder(MultiSourceBFSAccessMethods.class)
             .perThread("visits", HugeLongArray::memoryEstimation)
             .perThread("visitsNext", HugeLongArray::memoryEstimation)
-            .perThread("seens", HugeLongArray::memoryEstimation);
+            .perThread("seens", HugeLongArray::memoryEstimation)
+            .perThread("runnable", runnable);
+
+        if (sourceNodes > 0 ) {
+            builder.fixed("source nodes", Estimate.sizeOfLongArray(sourceNodes));
+        }
+
+        return builder;
     }
 
-    public static MemoryEstimation MSBFSWithPredecessorStrategy(){
-        return MSBFS()
+    public static MemoryEstimation MSBFSWithPredecessorStrategy(int sourceNodes){
+        return MSBFS(sourceNodes)
             .perThread("seenNext", HugeLongArray::memoryEstimation)
             .build();
     }
-    public static MemoryEstimation MSBFSWithANPStrategy(){
-        return MSBFS()
+    public static MemoryEstimation MSBFSWithANPStrategy(int sourceNodes){
+        return MSBFS(sourceNodes)
             .build();
     }
 }
