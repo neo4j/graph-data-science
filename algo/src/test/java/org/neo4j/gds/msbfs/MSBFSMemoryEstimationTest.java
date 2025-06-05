@@ -29,22 +29,27 @@ class MSBFSMemoryEstimationTest {
 
     @ParameterizedTest
     @CsvSource({
-        "100,1,264",
-        "100,4,360"
+        "100,1,0, 328",
+        "100,1,10, 424",
+        "100,4,0, 616",
+        "100,4,10, 712"
+
     })
-    void shouldWorkForPredecessor(long nodeCount, int concurrency, long expectedMemory){
-        MemoryEstimationAssert.assertThat(MSBFSMemoryEstimation.MSBFSWithPredecessorStrategy())
+    void shouldWorkForPredecessor(long nodeCount, int concurrency,  int sourceNodesSize, long expectedMemory){
+        MemoryEstimationAssert.assertThat(MSBFSMemoryEstimation.MSBFSWithPredecessorStrategy(sourceNodesSize))
             .memoryRange(GraphDimensions.of(nodeCount),new Concurrency(concurrency))
             .hasSameMinAndMaxEqualTo(expectedMemory);
     }
 
     @ParameterizedTest
     @CsvSource({
-        "100,1,216",
-        "100,4,288"
+        "100,1,0,280",
+        "100,1,10,376",
+        "100,4,0,544",
+        "100,4,10,640"
     })
-    void shouldWorkForANP(long nodeCount, int concurrency, long expectedMemory){
-        MemoryEstimationAssert.assertThat(MSBFSMemoryEstimation.MSBFSWithANPStrategy())
+    void shouldWorkForANP(long nodeCount, int concurrency,  int sourceNodesSize, long expectedMemory){
+        MemoryEstimationAssert.assertThat(MSBFSMemoryEstimation.MSBFSWithANPStrategy(sourceNodesSize))
             .memoryRange(GraphDimensions.of(nodeCount),new Concurrency(concurrency))
             .hasSameMinAndMaxEqualTo(expectedMemory);
     }

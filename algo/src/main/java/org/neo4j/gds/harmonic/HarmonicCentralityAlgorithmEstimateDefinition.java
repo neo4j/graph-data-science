@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.harmonic;
 
-import org.neo4j.gds.mem.MemoryEstimateDefinition;
 import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
+import org.neo4j.gds.mem.MemoryEstimateDefinition;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryEstimations;
 import org.neo4j.gds.msbfs.MSBFSMemoryEstimation;
@@ -31,7 +31,7 @@ public final class HarmonicCentralityAlgorithmEstimateDefinition implements Memo
     public MemoryEstimation memoryEstimation() {
         return MemoryEstimations.builder(HarmonicCentrality.class)
             .perNode("inverse farness", HugeAtomicDoubleArray::memoryEstimation)
-            .add("MSBFS", MSBFSMemoryEstimation.MSBFSWithANPStrategy())
+            .add("MSBFS", MSBFSMemoryEstimation.MSBFSWithANPStrategy(0))
             .build();
     }
 
