@@ -38,7 +38,7 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 
-public class StorePathsSideEffect implements SideEffect<PathFindingResult, RelationshipsWritten> {
+public class StorePathsSideEffect implements SideEffect<PathFindingResult, Void> {
     private final ResultStore resultStore;
     private final String relationshipTypeAsString;
     private final List<String> propertyKeys;
@@ -57,25 +57,28 @@ public class StorePathsSideEffect implements SideEffect<PathFindingResult, Relat
     }
 
     @Override
-    public Optional<RelationshipsWritten> process(GraphResources graphResources, Optional<PathFindingResult> pathFindingResult) {
-        return pathFindingResult.map(result -> {
-                var relCounter = new AtomicLong(0);
+    public Optional<Void> process(GraphResources graphResources, Optional<PathFindingResult> pathFindingResult) {
+        if (pathFindingResult.isEmpty()) {
+            return Optional.empty();
+        }
+        var actualPathResult  = pathFindingResult.get();
+        Stream<ExportedRelationship> relationshipStream = actualPathResult.mapPaths(
+            pathResult -> new ExportedRelationship(
+                pathResult.sourceNode(),
+                pathResult.targetNode(),
+                createValues(pathResult)
+            ));
 
-                Stream<ExportedRelationship> relationshipStream = result.mapPaths(
-                    pathResult -> {
-                        relCounter.incrementAndGet();
-                        return new ExportedRelationship(
-                            pathResult.sourceNode(),
-                            pathResult.targetNode(),
-                            createValues(pathResult)
-                        );
-                    });
+        ResultStoreEntry.RelationshipStream streamEntry = new ResultStoreEntry.RelationshipStream(
+            relationshipTypeAsString,
+            propertyKeys,
+            propertyTypes,
+            relationshipStream,
+            graphResources.graph()::toOriginalNodeId
+        );
+        resultStore.add(JobId.parse(this.relationshipTypeAsString), streamEntry);
 
-            resultStore.add(JobId.parse(this.relationshipTypeAsString), new ResultStoreEntry.RelationshipStream(
-                relationshipTypeAsString, propertyKeys, propertyTypes, relationshipStream, graphResources.graph()::toOriginalNodeId));
-
-            return new RelationshipsWritten(relCounter.get());
-        });
+        return Optional.empty();
     }
 
     private Value[] createValues(PathResult pathResult) {

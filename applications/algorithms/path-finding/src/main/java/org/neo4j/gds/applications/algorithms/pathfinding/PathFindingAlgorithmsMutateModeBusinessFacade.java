@@ -244,7 +244,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
         GraphName graphName,
         ShortestPathDijkstraMutateConfig configuration,
         ResultStore resultStore,
-        ResultBuilder<ShortestPathDijkstraMutateConfig, PathFindingResult, RESULT, RelationshipsWritten> resultBuilder
+        ResultBuilder<ShortestPathDijkstraMutateConfig, PathFindingResult, RESULT, Void> resultBuilder
     ) {
 
         return algorithmProcessingTemplate.processAlgorithmAndAnySideEffects(
