@@ -20,12 +20,10 @@
 package org.neo4j.gds.applications.algorithms.pathfinding;
 
 import org.neo4j.gds.api.ExportedRelationship;
-import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.ResultStoreEntry;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.applications.algorithms.machinery.SideEffect;
-import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 import org.neo4j.gds.core.loading.GraphResources;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.paths.PathResult;
@@ -35,7 +33,6 @@ import org.neo4j.values.storable.Values;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 
 public class StorePathsSideEffect implements SideEffect<PathFindingResult, Void> {
