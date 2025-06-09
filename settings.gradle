@@ -157,23 +157,8 @@ project(':neo4j-adapter').projectDir = file('neo4j-adapter')
 include('neo4j-kernel-adapter')
 project(':neo4j-kernel-adapter').projectDir = file('compatibility/common/neo4j-kernel-adapter')
 
-include('neo4j-kernel-adapter-5-common')
-project(':neo4j-kernel-adapter-5-common').projectDir = file('compatibility/5-common/neo4j-kernel-adapter')
-
 include('neo4j-kernel-adapter-4.4')
 project(':neo4j-kernel-adapter-4.4').projectDir = file('compatibility/4.4/neo4j-kernel-adapter')
-
-include('neo4j-kernel-adapter-5.11')
-project(':neo4j-kernel-adapter-5.11').projectDir = file('compatibility/5.11/neo4j-kernel-adapter')
-
-include('neo4j-kernel-adapter-5.12')
-project(':neo4j-kernel-adapter-5.12').projectDir = file('compatibility/5.12/neo4j-kernel-adapter')
-
-include('neo4j-kernel-adapter-5.13')
-project(':neo4j-kernel-adapter-5.13').projectDir = file('compatibility/5.13/neo4j-kernel-adapter')
-
-include('neo4j-kernel-adapter-5.14')
-project(':neo4j-kernel-adapter-5.14').projectDir = file('compatibility/5.14/neo4j-kernel-adapter')
 
 include('neo4j-kernel-adapter-api')
 project(':neo4j-kernel-adapter-api').projectDir = file('compatibility/api/neo4j-kernel-adapter')
@@ -262,18 +247,6 @@ project(':storage-engine-adapter').projectDir = file('compatibility/common/stora
 include('storage-engine-adapter-4.4')
 project(':storage-engine-adapter-4.4').projectDir = file('compatibility/4.4/storage-engine-adapter')
 
-include('storage-engine-adapter-5.11')
-project(':storage-engine-adapter-5.11').projectDir = file('compatibility/5.11/storage-engine-adapter')
-
-include('storage-engine-adapter-5.12')
-project(':storage-engine-adapter-5.12').projectDir = file('compatibility/5.12/storage-engine-adapter')
-
-include('storage-engine-adapter-5.13')
-project(':storage-engine-adapter-5.13').projectDir = file('compatibility/5.13/storage-engine-adapter')
-
-include('storage-engine-adapter-5.14')
-project(':storage-engine-adapter-5.14').projectDir = file('compatibility/5.14/storage-engine-adapter')
-
 include('storage-engine-adapter-api')
 project(':storage-engine-adapter-api').projectDir = file('compatibility/api/storage-engine-adapter')
 
@@ -303,33 +276,3 @@ project(':open-write-services').projectDir = file('open-write-services')
 
 include('defaults-and-limits-configuration')
 project(':defaults-and-limits-configuration').projectDir = file('defaults-and-limits-configuration')
-
-include('neo4j-kernel-adapter-5.15')
-project(':neo4j-kernel-adapter-5.15').projectDir = file('compatibility/5.15/neo4j-kernel-adapter')
-include('storage-engine-adapter-5.15')
-project(':storage-engine-adapter-5.15').projectDir = file('compatibility/5.15/storage-engine-adapter')
-
-include('neo4j-kernel-adapter-5.16')
-project(':neo4j-kernel-adapter-5.16').projectDir = file('compatibility/5.16/neo4j-kernel-adapter')
-include('storage-engine-adapter-5.16')
-project(':storage-engine-adapter-5.16').projectDir = file('compatibility/5.16/storage-engine-adapter')
-
-include('neo4j-kernel-adapter-5.17')
-project(':neo4j-kernel-adapter-5.17').projectDir = file('compatibility/5.17/neo4j-kernel-adapter')
-include('storage-engine-adapter-5.17')
-project(':storage-engine-adapter-5.17').projectDir = file('compatibility/5.17/storage-engine-adapter')
-
-include('neo4j-kernel-adapter-5.18')
-project(':neo4j-kernel-adapter-5.18').projectDir = file('compatibility/5.18/neo4j-kernel-adapter')
-include('storage-engine-adapter-5.18')
-project(':storage-engine-adapter-5.18').projectDir = file('compatibility/5.18/storage-engine-adapter')
-
-include('neo4j-kernel-adapter-5.19')
-project(':neo4j-kernel-adapter-5.19').projectDir = file('compatibility/5.19/neo4j-kernel-adapter')
-include('storage-engine-adapter-5.19')
-project(':storage-engine-adapter-5.19').projectDir = file('compatibility/5.19/storage-engine-adapter')
-
-include('neo4j-kernel-adapter-5.20')
-project(':neo4j-kernel-adapter-5.20').projectDir = file('compatibility/5.20/neo4j-kernel-adapter')
-include('storage-engine-adapter-5.20')
-project(':storage-engine-adapter-5.20').projectDir = file('compatibility/5.20/storage-engine-adapter')
