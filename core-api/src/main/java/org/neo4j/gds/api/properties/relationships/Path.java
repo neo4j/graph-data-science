@@ -26,7 +26,9 @@ import org.neo4j.gds.annotation.ValueClass;
 @Value.Modifiable
 public interface Path {
 
-    String[] nodeIds();
+    Object[] nodeIds();
+
+    Object[] nodeIdKeyTypes();
 
     String[] nodeLabels();
 
