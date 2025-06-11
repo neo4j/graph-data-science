@@ -34,7 +34,6 @@ import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.loading.NullPropertyMap;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -95,7 +94,7 @@ class KnnTest {
     @Inject
     private TestGraph multPropMissingGraph;
 
-    private KnnContext context = ImmutableKnnContext.builder().executor(DefaultPool.INSTANCE).build();
+    private final KnnContext context = KnnContext.empty();
 
     @Test
     void shouldRun() {
@@ -559,10 +558,7 @@ class KnnTest {
             new Concurrency(1)
         );
 
-        var progressContext = ImmutableKnnContext.builder()
-            .progressTracker(progressTrackerWithLog.progressTracker())
-            .executor(DefaultPool.INSTANCE)
-            .build();
+        var progressContext = new KnnContext(progressTrackerWithLog.progressTracker());
         var log = progressTrackerWithLog.log();
 
         var knn = Knn.create(

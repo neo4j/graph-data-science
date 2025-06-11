@@ -20,15 +20,14 @@
 package org.neo4j.gds.procedures.pipelines;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.ml.linkmodels.LinkPredictionResult;
 import org.neo4j.gds.ml.linkmodels.PredictedLink;
 import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureExtractor;
-import org.neo4j.gds.similarity.knn.ImmutableKnnContext;
 import org.neo4j.gds.similarity.knn.Knn;
+import org.neo4j.gds.similarity.knn.KnnContext;
 import org.neo4j.gds.similarity.knn.KnnParameters;
 import org.neo4j.gds.similarity.knn.KnnResult;
 import org.neo4j.gds.termination.TerminationFlag;
@@ -80,8 +79,7 @@ public class ApproximateLinkPrediction extends LinkPrediction {
                 targetNodeFilter
             ),
             Optional.empty(),
-            ImmutableKnnContext.of(
-                DefaultPool.INSTANCE,
+            new KnnContext(
                 progressTracker
             ),
             TerminationFlag.RUNNING_TRUE

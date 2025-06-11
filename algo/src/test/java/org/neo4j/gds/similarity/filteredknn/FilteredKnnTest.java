@@ -31,7 +31,6 @@ import org.neo4j.gds.similarity.FilteringParameters;
 import org.neo4j.gds.similarity.NodeFilterSpec;
 import org.neo4j.gds.similarity.SimilarityResult;
 import org.neo4j.gds.similarity.filtering.NodeIdNodeFilterSpec;
-import org.neo4j.gds.similarity.knn.ImmutableKnnContext;
 import org.neo4j.gds.similarity.knn.KnnContext;
 import org.neo4j.gds.similarity.knn.KnnNodePropertySpec;
 import org.neo4j.gds.similarity.knn.KnnParametersSansNodeCount;
@@ -108,7 +107,7 @@ class FilteredKnnTest {
         var params = filteredSans.finalize(graph.nodeCount());
 
 
-        var knnContext = ImmutableKnnContext.builder().build();
+        var knnContext = KnnContext.empty();
 
         var knn = FilteredKnn.createWithoutSeeding(graph, params, knnContext, TerminationFlag.RUNNING_TRUE);
         var result = knn.compute();

@@ -27,8 +27,8 @@ import org.neo4j.gds.similarity.filteredknn.FilteredKnnParameters;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnResult;
 import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityParameters;
 import org.neo4j.gds.similarity.filtering.NodeFilter;
-import org.neo4j.gds.similarity.knn.ImmutableKnnContext;
 import org.neo4j.gds.similarity.knn.Knn;
+import org.neo4j.gds.similarity.knn.KnnContext;
 import org.neo4j.gds.similarity.knn.KnnNeighborFilterFactory;
 import org.neo4j.gds.similarity.knn.KnnParameters;
 import org.neo4j.gds.similarity.knn.KnnResult;
@@ -55,11 +55,7 @@ public class SimilarityAlgorithms {
         FilteredKnnParameters parameters,
         ProgressTracker progressTracker
     ) {
-        var knnContext = ImmutableKnnContext
-            .builder()
-            .progressTracker(progressTracker)
-            .executor(DefaultPool.INSTANCE)
-            .build();
+        var knnContext = new KnnContext(progressTracker);
 
         var algorithm = FilteredKNNFactory.create(graph, parameters, knnContext,terminationFlag);
 
@@ -98,11 +94,7 @@ public class SimilarityAlgorithms {
             new SimilarityFunction(SimilarityComputer.ofProperties(graph, parameters.nodePropertySpecs())),
             new KnnNeighborFilterFactory(graph.nodeCount()),
             Optional.empty(),
-            ImmutableKnnContext
-                .builder()
-                .progressTracker(progressTracker)
-                .executor(DefaultPool.INSTANCE)
-                .build(),
+            new KnnContext(progressTracker),
             terminationFlag
         );
 

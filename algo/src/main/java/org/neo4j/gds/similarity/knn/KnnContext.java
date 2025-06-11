@@ -19,27 +19,21 @@
  */
 package org.neo4j.gds.similarity.knn;
 
-import org.immutables.value.Value;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.concurrent.ExecutorService;
 
-@ValueClass
-public interface KnnContext {
+public record KnnContext(ExecutorService executor, ProgressTracker progressTracker) {
 
-    @Value.Default
-    default ExecutorService executor() {
-        return DefaultPool.INSTANCE;
+    public KnnContext(ProgressTracker progressTracker) {
+        this(DefaultPool.INSTANCE, progressTracker);
     }
 
-    @Value.Default
-    default ProgressTracker progressTracker() {
-        return ProgressTracker.NULL_TRACKER;
-    }
-
-    static KnnContext empty() {
-        return ImmutableKnnContext.builder().build();
+    public static KnnContext empty() {
+        return new KnnContext(
+            DefaultPool.INSTANCE,
+            ProgressTracker.NULL_TRACKER
+        );
     }
 }
