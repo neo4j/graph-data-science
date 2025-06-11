@@ -24,7 +24,6 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.similarity.filtering.NodeFilter;
-import org.neo4j.gds.similarity.knn.ImmutableKnnResult;
 import org.neo4j.gds.similarity.knn.Knn;
 import org.neo4j.gds.similarity.knn.KnnContext;
 import org.neo4j.gds.similarity.knn.KnnNeighborFilterFactory;
@@ -141,7 +140,7 @@ public class FilteredKnn extends Algorithm<FilteredKnnResult> {
     public FilteredKnnResult compute() {
         var seedingSummary = targetNodeFiltering.seedingSummary();
         KnnResult result = (seedingSummary.seededOptimally()) ?
-            ImmutableKnnResult.of(
+            new KnnResult(
                 HugeObjectArray.newArray(NeighborList.class, 0),
                 0,
                 true,

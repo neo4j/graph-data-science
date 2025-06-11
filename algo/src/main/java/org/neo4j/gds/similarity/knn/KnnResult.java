@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.similarity.knn;
 
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.collections.cursor.HugeCursor;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.similarity.SimilarityResult;
@@ -31,18 +30,13 @@ import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-@ValueClass
-public abstract class KnnResult {
-    abstract HugeObjectArray<NeighborList> neighborList();
-
-    public abstract int ranIterations();
-
-    public abstract boolean didConverge();
-
-    public abstract long nodePairsConsidered();
-
-    public abstract long nodesCompared();
-
+public record KnnResult(
+    HugeObjectArray<NeighborList> neighborList,
+    int ranIterations,
+    boolean didConverge,
+    long nodePairsConsidered,
+    long nodesCompared
+) {
 
     public LongStream neighborsOf(long nodeId) {
         return neighborList().get(nodeId).elements().map(NeighborList::clearCheckedFlag);
@@ -103,5 +97,15 @@ public abstract class KnnResult {
 
     public long size() {
         return neighborList().size();
+    }
+
+    static KnnResult empty() {
+        return new KnnResult(
+            HugeObjectArray.of(),
+            0,
+            false,
+            0L,
+            0L
+        );
     }
 }

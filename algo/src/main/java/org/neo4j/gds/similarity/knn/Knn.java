@@ -34,7 +34,6 @@ import org.neo4j.gds.termination.TerminationFlag;
 import java.util.Optional;
 import java.util.SplittableRandom;
 import java.util.concurrent.ExecutorService;
-import java.util.stream.LongStream;
 
 public final class Knn extends Algorithm<KnnResult> {
 
@@ -195,7 +194,7 @@ public final class Knn extends Algorithm<KnnResult> {
     @Override
     public KnnResult compute() {
         if (graph.nodeCount() < 2) {
-            return new EmptyResult();
+            return KnnResult.empty();
         }
         progressTracker.beginSubTask();
         progressTracker.beginSubTask();
@@ -234,7 +233,7 @@ public final class Knn extends Algorithm<KnnResult> {
         progressTracker.endSubTask();
 
         progressTracker.endSubTask();
-        return ImmutableKnnResult.of(
+        return new KnnResult(
             neighbors.data(),
             iteration,
             didConverge,
@@ -369,41 +368,4 @@ public final class Knn extends Algorithm<KnnResult> {
         }
     }
 
-    private static final class EmptyResult extends KnnResult {
-
-        @Override
-        HugeObjectArray<NeighborList> neighborList() {
-            return HugeObjectArray.of();
-        }
-
-        @Override
-        public int ranIterations() {
-            return 0;
-        }
-
-        @Override
-        public boolean didConverge() {
-            return false;
-        }
-
-        @Override
-        public long nodePairsConsidered() {
-            return 0;
-        }
-
-        @Override
-        public LongStream neighborsOf(long nodeId) {
-            return LongStream.empty();
-        }
-
-        @Override
-        public long size() {
-            return 0;
-        }
-
-        @Override
-        public long nodesCompared() {
-            return 0;
-        }
-    }
 }
