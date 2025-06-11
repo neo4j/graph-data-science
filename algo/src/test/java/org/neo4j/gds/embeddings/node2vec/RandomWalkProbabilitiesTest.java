@@ -31,7 +31,7 @@ import static org.assertj.core.api.Assertions.assertThat;
     void shouldProduceSamplesAccordingToNodeDistribution() {
         double positiveSamplingFactor = 0.001;
         double negativeSamplingExponent = 0.75;
-        var builder = new RandomWalkProbabilities.Builder(
+        var builder = new RandomWalkProbabilitiesBuilder(
             2,
             new Concurrency(4),
             positiveSamplingFactor,

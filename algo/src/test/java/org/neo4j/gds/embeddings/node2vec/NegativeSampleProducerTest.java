@@ -33,7 +33,7 @@ class NegativeSampleProducerTest {
     @Test
     void shouldProduceSamplesAccordingToNodeDistribution() {
 
-        var builder = new RandomWalkProbabilities.Builder(
+        var builder = new RandomWalkProbabilitiesBuilder(
             2,
             new Concurrency(4),
             0.001,

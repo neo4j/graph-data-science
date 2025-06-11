@@ -19,13 +19,6 @@
  */
 package org.neo4j.gds.algorithms.machinelearning;
 
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.similarity.nodesim.TopKMap;
 
-@ValueClass
-public interface KGEPredictResult {
-    TopKMap topKMap();
-    static KGEPredictResult of(TopKMap topKMap) {
-        return ImmutableKGEPredictResult.of(topKMap);
-    }
-}
+public record KGEPredictResult(TopKMap topKMap) {}

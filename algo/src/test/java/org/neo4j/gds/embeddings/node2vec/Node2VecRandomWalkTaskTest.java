@@ -71,7 +71,7 @@ class Node2VecRandomWalkTaskTest {
 
         var walks = new CompressedRandomWalks(20);
 
-        var probabilitiesBuilder = new RandomWalkProbabilities.Builder(
+        var probabilitiesBuilder = new RandomWalkProbabilitiesBuilder(
             graph.nodeCount(),
             new Concurrency(1),
             0.5,
@@ -119,7 +119,7 @@ class Node2VecRandomWalkTaskTest {
     void shouldConsumePathCorrectly(){
         var walks = new CompressedRandomWalks(20);
 
-        var probabilitiesBuilder = new RandomWalkProbabilities.Builder(
+        var probabilitiesBuilder = new RandomWalkProbabilitiesBuilder(
             graph.nodeCount(),
             new Concurrency(1),
             0.5,

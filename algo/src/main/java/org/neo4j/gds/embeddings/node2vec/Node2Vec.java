@@ -93,7 +93,7 @@ public final class Node2Vec extends Algorithm<Node2VecResult> {
             );
         }
 
-        var probabilitiesBuilder = new RandomWalkProbabilities.Builder(
+        var probabilitiesBuilder = new RandomWalkProbabilitiesBuilder(
             graph.nodeCount(),
             concurrency,
             samplingWalkParameters.positiveSamplingFactor(),
@@ -121,7 +121,7 @@ public final class Node2Vec extends Algorithm<Node2VecResult> {
 
     private List<Node2VecRandomWalkTask> walkTasks(
         CompressedRandomWalks compressedRandomWalks,
-        RandomWalkProbabilities.Builder randomWalkPropabilitiesBuilder,
+        RandomWalkProbabilitiesBuilder randomWalkPropabilitiesBuilder,
         Graph graph,
         Optional<Long> maybeRandomSeed,
         Concurrency concurrency,
@@ -166,7 +166,7 @@ public final class Node2Vec extends Algorithm<Node2VecResult> {
     }
 
 
-    CompressedRandomWalks createWalks(RandomWalkProbabilities.Builder probabilitiesBuilder){
+    CompressedRandomWalks createWalks(RandomWalkProbabilitiesBuilder probabilitiesBuilder){
         var walks = new CompressedRandomWalks(graph.nodeCount() * samplingWalkParameters.walksPerNode());
 
         progressTracker.beginSubTask("RandomWalk");

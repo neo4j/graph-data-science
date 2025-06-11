@@ -36,7 +36,7 @@ final class Node2VecRandomWalkTask implements Runnable {
     private final TerminationFlag terminationFlag;
     private final AtomicLong walkIndex;
     private final CompressedRandomWalks compressedRandomWalks;
-    private final RandomWalkProbabilities.Builder randomWalkProbabilitiesBuilder;
+    private final RandomWalkProbabilitiesBuilder randomWalkProbabilitiesBuilder;
     private final RandomWalkSampler sampler;
     private final int walkBufferSize;
     private int walks;
@@ -52,7 +52,7 @@ final class Node2VecRandomWalkTask implements Runnable {
         TerminationFlag terminationFlag,
         AtomicLong walkIndex,
         CompressedRandomWalks compressedRandomWalks,
-        RandomWalkProbabilities.Builder randomWalkProbabilitiesBuilder,
+        RandomWalkProbabilitiesBuilder randomWalkProbabilitiesBuilder,
         int walkBufferSize,
         long randomSeed,
         int walkLength,

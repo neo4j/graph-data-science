@@ -128,7 +128,7 @@ public class TopKMapComputer extends Algorithm<KGEPredictResult> {
 
         progressTracker.endSubTask();
 
-        return KGEPredictResult.of(topKMap);
+        return new KGEPredictResult(topKMap);
     }
 
 

@@ -292,15 +292,10 @@ public class GraphSageModelTrainer {
             progressTracker.endSubTask("Iteration");
         }
 
-        return ImmutableEpochResult.of(converged, iterationLosses);
+        return new EpochResult(converged, iterationLosses);
     }
 
-    @ValueClass
-    interface EpochResult {
-        boolean converged();
-
-        List<Double> losses();
-    }
+    private record EpochResult(boolean converged, List<Double> losses) {}
 
     static class BatchTask implements Runnable {
 
@@ -384,22 +379,13 @@ public class GraphSageModelTrainer {
         }
     }
 
-    @ValueClass
-    public interface ModelTrainResult {
-
-        GraphSageTrainMetrics metrics();
-
-        Layer[] layers();
-
+    public record ModelTrainResult(GraphSageTrainMetrics metrics, Layer[] layers) {
         static ModelTrainResult of(
             List<List<Double>> iterationLossesPerEpoch,
             boolean converged,
             Layer[] layers
         ) {
-            return ImmutableModelTrainResult.builder()
-                .layers(layers)
-                .metrics(ImmutableGraphSageTrainMetrics.of(iterationLossesPerEpoch, converged))
-                .build();
+            return new ModelTrainResult(ImmutableGraphSageTrainMetrics.of(iterationLossesPerEpoch, converged), layers);
         }
     }
 }

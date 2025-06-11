@@ -631,7 +631,7 @@ class Node2VecTest {
             Optional.of(42L)
         );
 
-        var probabilitiesBuilder = new RandomWalkProbabilities.Builder(
+        var probabilitiesBuilder = new RandomWalkProbabilitiesBuilder(
             graph.nodeCount(),
             new Concurrency(4),
             samplingWalkParameters.positiveSamplingFactor(),
@@ -690,7 +690,7 @@ class Node2VecTest {
             Optional.of(1337L)
         );
 
-        var probabilitiesBuilder = new RandomWalkProbabilities.Builder(
+        var probabilitiesBuilder = new RandomWalkProbabilitiesBuilder(
             graph.nodeCount(),
             new Concurrency(4),
             samplingWalkParameters.positiveSamplingFactor(),

@@ -63,7 +63,7 @@ class Node2VecModelTest {
         int numberOfWalks = 10;
         int walkLength = 80;
 
-        var probabilitiesBuilder = new RandomWalkProbabilities.Builder(
+        var probabilitiesBuilder = new RandomWalkProbabilitiesBuilder(
             numberOfClusters * clusterSize,
             new Concurrency(4),
             0.001,
@@ -173,7 +173,7 @@ class Node2VecModelTest {
         int numberOfWalks = 10;
         int walkLength = 80;
 
-        var probabilitiesBuilder = new RandomWalkProbabilities.Builder(
+        var probabilitiesBuilder = new RandomWalkProbabilitiesBuilder(
             numberOfClusters * clusterSize,
             new Concurrency(4),
             0.001,
@@ -264,7 +264,7 @@ class Node2VecModelTest {
     }
 
     private static CompressedRandomWalks generateRandomWalks(
-        RandomWalkProbabilities.Builder probabilitiesBuilder,
+        RandomWalkProbabilitiesBuilder probabilitiesBuilder,
         long numberOfClusters,
         int clusterSize,
         long numberOfWalks,
