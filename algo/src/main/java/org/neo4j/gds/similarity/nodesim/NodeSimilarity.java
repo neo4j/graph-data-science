@@ -113,14 +113,14 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
         if (parameters.computeToStream()) {
             var computeToStream = computeToStream();
             progressTracker.endSubTask();
-            return ImmutableNodeSimilarityResult.of(
+            return new NodeSimilarityResult(
                 Optional.of(computeToStream),
                 Optional.empty()
             );
         } else {
             var computeToGraph = computeToGraph();
             progressTracker.endSubTask();
-            return ImmutableNodeSimilarityResult.of(
+            return new NodeSimilarityResult(
                 Optional.empty(),
                 Optional.of(computeToGraph)
             );

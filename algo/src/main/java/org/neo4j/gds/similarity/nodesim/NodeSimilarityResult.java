@@ -19,23 +19,22 @@
  */
 package org.neo4j.gds.similarity.nodesim;
 
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.similarity.SimilarityGraphResult;
 import org.neo4j.gds.similarity.SimilarityResult;
 
 import java.util.Optional;
 import java.util.stream.Stream;
 
-@ValueClass
-public interface NodeSimilarityResult {
-    Optional<Stream<SimilarityResult>> maybeStreamResult();
-    Optional<SimilarityGraphResult> maybeGraphResult();
+public record NodeSimilarityResult(
+    Optional<Stream<SimilarityResult>> maybeStreamResult,
+    Optional<SimilarityGraphResult> maybeGraphResult
+) {
 
-    default Stream<SimilarityResult> streamResult() {
+    public Stream<SimilarityResult> streamResult() {
         return maybeStreamResult().orElseThrow();
     }
 
-    default SimilarityGraphResult graphResult() {
+    public SimilarityGraphResult graphResult() {
         return maybeGraphResult().orElseThrow();
     }
 }
