@@ -21,8 +21,6 @@ package org.neo4j.gds.applications.algorithms.pathfinding;
 
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphName;
-import org.neo4j.gds.api.ResultStore;
-import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
@@ -53,8 +51,9 @@ import org.neo4j.gds.steiner.SteinerTreeMutateConfig;
 import org.neo4j.gds.steiner.SteinerTreeResult;
 import org.neo4j.gds.traversal.RandomWalkMutateConfig;
 
-import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.AStar;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.BFS;
@@ -243,9 +242,10 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
     public <RESULT> RESULT singlePairShortestPathDijkstraWithPaths(
         GraphName graphName,
         ShortestPathDijkstraMutateConfig configuration,
-        ResultStore resultStore,
+        Map<String, Stream<PathUsingInternalNodeIds>> pathStore,
         ResultBuilder<ShortestPathDijkstraMutateConfig, PathFindingResult, RESULT, Void> resultBuilder
     ) {
+        var sideEffect = new StorePathsSideEffect(pathStore, configuration.mutateRelationshipType());
 
         return algorithmProcessingTemplate.processAlgorithmAndAnySideEffects(
             Optional.empty(),
@@ -257,10 +257,9 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
             DimensionTransformer.DISABLED,
             () -> estimationFacade.singlePairShortestPathDijkstra(configuration),
             (graph, __) -> pathFindingAlgorithms.singlePairShortestPathDijkstra(graph, configuration),
-            Optional.of(new StorePathsSideEffect(resultStore, configuration.mutateRelationshipType(), List.of("totalCost", "nodeIds", "costs"), List.of(ValueType.DOUBLE, ValueType.LONG_ARRAY, ValueType.DOUBLE_ARRAY))),
+            Optional.of(sideEffect),
             new MutateResultRenderer<>(configuration, resultBuilder)
         );
-
     }
 
     public <RESULT> RESULT singlePairShortestPathYens(

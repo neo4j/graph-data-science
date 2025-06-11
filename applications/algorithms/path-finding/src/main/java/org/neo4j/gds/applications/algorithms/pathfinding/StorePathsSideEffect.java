@@ -19,38 +19,30 @@
  */
 package org.neo4j.gds.applications.algorithms.pathfinding;
 
-import org.neo4j.gds.api.ExportedRelationship;
-import org.neo4j.gds.api.ResultStore;
-import org.neo4j.gds.api.ResultStoreEntry;
-import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.applications.algorithms.machinery.SideEffect;
 import org.neo4j.gds.core.loading.GraphResources;
-import org.neo4j.gds.core.utils.progress.JobId;
-import org.neo4j.gds.paths.PathResult;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
-import org.neo4j.values.storable.Value;
-import org.neo4j.values.storable.Values;
 
-import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-public class StorePathsSideEffect implements SideEffect<PathFindingResult, Void> {
-    private final ResultStore resultStore;
+/**
+ * This is our hook for storing Dijkstra paths in a place where they can later be found.
+ * I.e. we stick them in a map, keyed by relationship type as a pseudo parameter.
+ * The paths themselves are represented as internal node ids, costs of the hops between them, and the sum of the costs.
+ * It is the responsibility of outer layers to map the internal node ids back into user space.
+ */
+class StorePathsSideEffect implements SideEffect<PathFindingResult, Void> {
+    private final Map<String, Stream<PathUsingInternalNodeIds>> paths;
     private final String relationshipTypeAsString;
-    private final List<String> propertyKeys;
-    private final List<ValueType> propertyTypes;
 
-    public StorePathsSideEffect(
-        ResultStore resultStore,
-        String relationshipTypeAsString,
-        List<String> propertyKeys,
-        List<ValueType> propertyTypes
+    StorePathsSideEffect(
+        Map<String, Stream<PathUsingInternalNodeIds>> paths,
+        String relationshipTypeAsString
     ) {
-        this.resultStore = resultStore;
+        this.paths = paths;
         this.relationshipTypeAsString = relationshipTypeAsString;
-        this.propertyKeys = propertyKeys;
-        this.propertyTypes = propertyTypes;
     }
 
     @Override
@@ -58,31 +50,23 @@ public class StorePathsSideEffect implements SideEffect<PathFindingResult, Void>
         if (pathFindingResult.isEmpty()) {
             return Optional.empty();
         }
-        var actualPathResult  = pathFindingResult.get();
-        Stream<ExportedRelationship> relationshipStream = actualPathResult.mapPaths(
-            pathResult -> new ExportedRelationship(
+
+        var actualPathResult = pathFindingResult.get();
+
+        // just record the paths, no conversions, that happens later
+        var pathStream = actualPathResult.mapPaths(
+            pathResult -> new PathUsingInternalNodeIds(
                 pathResult.sourceNode(),
                 pathResult.targetNode(),
-                createValues(pathResult)
-            ));
-
-        ResultStoreEntry.RelationshipStream streamEntry = new ResultStoreEntry.RelationshipStream(
-            relationshipTypeAsString,
-            propertyKeys,
-            propertyTypes,
-            relationshipStream,
-            graphResources.graph()::toOriginalNodeId
+                pathResult.nodeIds(),
+                pathResult.costs(),
+                pathResult.totalCost()
+            )
         );
-        resultStore.add(JobId.parse(this.relationshipTypeAsString), streamEntry);
 
+        paths.put(relationshipTypeAsString, pathStream);
+
+        // we have no interesting metadata
         return Optional.empty();
-    }
-
-    private Value[] createValues(PathResult pathResult) {
-        return new Value[]{
-            Values.doubleValue(pathResult.totalCost()),
-            Values.longArray(pathResult.nodeIds()),
-            Values.doubleArray(pathResult.costs())
-        };
     }
 }
