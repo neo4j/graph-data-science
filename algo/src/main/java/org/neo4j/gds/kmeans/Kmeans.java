@@ -121,7 +121,7 @@ public final class Kmeans extends Algorithm<KmeansResult> {
             for (int i = 0; i < (int) graph.nodeCount(); ++i) {
                 bestCentroids[i] = nodePropertyValues.doubleArrayValue(i);
             }
-            return ImmutableKmeansResult.of(bestCommunities, distanceFromCentroid, bestCentroids, 0.0, silhouette, 0.0);
+            return new KmeansResult(bestCommunities, distanceFromCentroid, bestCentroids, 0.0, silhouette, 0.0);
         }
         long nodeCount = graph.nodeCount();
 
@@ -146,7 +146,7 @@ public final class Kmeans extends Algorithm<KmeansResult> {
             calculateSilhouette();
         }
         progressTracker.endSubTask(); // KMeans end
-        return ImmutableKmeansResult.of(
+        return new KmeansResult(
             bestCommunities,
             distanceFromCentroid,
             bestCentroids,

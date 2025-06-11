@@ -20,23 +20,14 @@
 package org.neo4j.gds.kmeans;
 
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeIntArray;
 
-
-@ValueClass
-public interface KmeansResult {
-    HugeIntArray communities();
-
-    HugeDoubleArray distanceFromCenter();
-
-    double[][] centers();
-
-    double averageDistanceToCentroid();
-
-    @Nullable
-    HugeDoubleArray silhouette();
-
-    double averageSilhouette();
-}
+public record KmeansResult(
+    HugeIntArray communities,
+    HugeDoubleArray distanceFromCenter,
+    double[][] centers,
+    double averageDistanceToCentroid,
+    @Nullable HugeDoubleArray silhouette,
+    double averageSilhouette
+) {}
