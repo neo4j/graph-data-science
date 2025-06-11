@@ -22,7 +22,6 @@ package org.neo4j.gds.louvain;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 
-@SuppressWarnings("immutables:subtype")
 public record LouvainResult(
         HugeLongArray communities,
         int ranLevels,

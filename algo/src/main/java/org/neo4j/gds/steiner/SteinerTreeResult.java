@@ -22,7 +22,6 @@ package org.neo4j.gds.steiner;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 
-@SuppressWarnings("immutables:subtype")
 public record SteinerTreeResult(
         HugeLongArray parentArray,
         HugeDoubleArray relationshipToParentCost,

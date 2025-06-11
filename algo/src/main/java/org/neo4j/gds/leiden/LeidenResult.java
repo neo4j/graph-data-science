@@ -24,7 +24,6 @@ import org.neo4j.gds.collections.ha.HugeLongArray;
 
 import java.util.function.LongUnaryOperator;
 
-@SuppressWarnings("immutables:subtype")
 public record LeidenResult(
     HugeLongArray communities,
     int ranLevels,

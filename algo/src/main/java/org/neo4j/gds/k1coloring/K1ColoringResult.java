@@ -23,7 +23,6 @@ import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 
 
-@SuppressWarnings("immutables:subtype")
 public record K1ColoringResult(HugeLongArray colors,
                                long ranIterations,
                                boolean didConverge) {
@@ -41,4 +40,3 @@ public record K1ColoringResult(HugeLongArray colors,
     }
 
 }
-
