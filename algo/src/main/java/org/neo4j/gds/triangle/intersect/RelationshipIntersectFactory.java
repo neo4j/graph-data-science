@@ -28,5 +28,5 @@ public interface RelationshipIntersectFactory {
 
     boolean canLoad(Graph graph);
 
-    RelationshipIntersect load(Graph graph, RelationshipIntersectConfig config);
+    RelationshipIntersect load(Graph graph, long maxDegree);
 }

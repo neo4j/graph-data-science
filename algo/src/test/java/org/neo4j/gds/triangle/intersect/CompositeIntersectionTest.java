@@ -52,7 +52,7 @@ final class CompositeIntersectionTest {
 
         var intersect = new UnionGraphIntersect.UnionGraphIntersectFactory().load(
             graph,
-            ImmutableRelationshipIntersectConfig.builder().build()
+            Long.MAX_VALUE
         );
 
         intersect.intersectAll(start2, (a, b, c) -> {
@@ -76,10 +76,7 @@ final class CompositeIntersectionTest {
 
         var start2 = Math.max(graph.toMappedNodeId(DEGREE + 1), graph.toMappedNodeId(DEGREE));
 
-        var intersect = new UnionGraphIntersect.UnionGraphIntersectFactory().load(
-            graph,
-            ImmutableRelationshipIntersectConfig.builder().maxDegree(0).build()
-        );
+        var intersect = new UnionGraphIntersect.UnionGraphIntersectFactory().load(graph, 0);
         assertThatNoException().isThrownBy(
             () ->
                 intersect.intersectAll(start2, (a, b, c) ->

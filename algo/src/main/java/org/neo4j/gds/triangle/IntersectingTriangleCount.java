@@ -29,8 +29,6 @@ import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.paged.ParalleLongPageCreator;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.termination.TerminationFlag;
-import org.neo4j.gds.triangle.intersect.ImmutableRelationshipIntersectConfig;
-import org.neo4j.gds.triangle.intersect.RelationshipIntersectConfig;
 import org.neo4j.gds.triangle.intersect.RelationshipIntersectFactory;
 import org.neo4j.gds.triangle.intersect.RelationshipIntersectFactoryLocator;
 
@@ -58,7 +56,6 @@ public final class IntersectingTriangleCount extends Algorithm<TriangleCountResu
 
     private final Graph graph;
     private final RelationshipIntersectFactory intersectFactory;
-    private final RelationshipIntersectConfig intersectConfig;
     private final ExecutorService executorService;
     private final AtomicLong queue;
 
@@ -100,7 +97,6 @@ public final class IntersectingTriangleCount extends Algorithm<TriangleCountResu
         this.intersectFactory = intersectFactory;
         this.concurrency = concurrency;
         this.maxDegree = maxDegree;
-        this.intersectConfig = ImmutableRelationshipIntersectConfig.of(maxDegree);
         this.triangleCounts = HugeAtomicLongArray.of(graph.nodeCount(), ParalleLongPageCreator.passThrough(concurrency));
         this.executorService = executorService;
         this.globalTriangleCounter = new LongAdder();
@@ -117,7 +113,7 @@ public final class IntersectingTriangleCount extends Algorithm<TriangleCountResu
         // create tasks
         final Collection<? extends Runnable> tasks = ParallelUtil.tasks(
             concurrency,
-            () -> new IntersectTask(intersectFactory.load(graph, intersectConfig))
+            () -> new IntersectTask(intersectFactory.load(graph, maxDegree))
         );
         // run
         ParallelUtil.run(tasks, executorService);

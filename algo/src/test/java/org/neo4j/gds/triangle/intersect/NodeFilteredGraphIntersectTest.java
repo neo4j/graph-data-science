@@ -52,13 +52,13 @@ class NodeFilteredGraphIntersectTest {
     @Test
     void testFilter() {
         var graph = graphStore.getGraph("B", RelationshipType.ALL_RELATIONSHIPS.name(), Optional.empty());
-        var config = ImmutableRelationshipIntersectConfig.builder().build();
+        var maxDegree = Long.MAX_VALUE;
         var nodeCount = graph.nodeCount();
 
         assertThat(nodeCount).isEqualTo(3);
         assertThat(graph.relationshipCount()).isEqualTo(6);
 
-        var intersect = new NodeFilteredGraphIntersect.NodeFilteredGraphIntersectFactory().load(graph, config);
+        var intersect = new NodeFilteredGraphIntersect.NodeFilteredGraphIntersectFactory().load(graph, maxDegree);
 
         var triangleCount = new MutableInt(0);
         intersect.intersectAll(                 //triangles are found in reverse, so must change from 'a' to 'c'

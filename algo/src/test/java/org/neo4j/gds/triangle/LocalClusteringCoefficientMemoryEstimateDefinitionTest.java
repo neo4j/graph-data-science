@@ -36,7 +36,7 @@ class LocalClusteringCoefficientMemoryEstimateDefinitionTest {
         var memoryEstimation = new LocalClusteringCoefficientMemoryEstimateDefinition(null)
             .memoryEstimation();
 
-        long triangleCountEstimate = 56 + 24 + nodeCount * 8 + 16;
+        long triangleCountEstimate = 48 + 24 + nodeCount * 8 + 16;
         long hugeDoubleArray = 16 + nodeCount * 8 + 16;
         long expected = 80 + hugeDoubleArray + triangleCountEstimate;
 
@@ -68,7 +68,7 @@ class LocalClusteringCoefficientMemoryEstimateDefinitionTest {
         var memoryEstimation = new LocalClusteringCoefficientMemoryEstimateDefinition(null)
             .memoryEstimation();
 
-        long triangleCountEstimate = 56 + 32 + sizeOfHugeArray;
+        long triangleCountEstimate = 48 + 32 + sizeOfHugeArray;
         long hugeDoubleArray = 24 + sizeOfHugeArray;
         long expected = 80 + hugeDoubleArray + triangleCountEstimate;
 

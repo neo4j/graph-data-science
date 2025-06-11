@@ -46,7 +46,7 @@ final class HugeIntersectionTest {
 
         var intersect = RelationshipIntersectFactoryLocator.lookup(graph)
             .orElseThrow(IllegalArgumentException::new)
-            .load(graph, ImmutableRelationshipIntersectConfig.builder().build());
+            .load(graph, Long.MAX_VALUE);
 
         var start1 = Math.min(graph.toMappedNodeId(DEGREE + 1), graph.toMappedNodeId(DEGREE));
         var start2 = Math.max(graph.toMappedNodeId(DEGREE + 1), graph.toMappedNodeId(DEGREE));

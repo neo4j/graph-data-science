@@ -69,14 +69,14 @@ public final class UnionGraphIntersect extends GraphIntersect<CompositeAdjacency
         }
 
         @Override
-        public UnionGraphIntersect load(Graph graph, RelationshipIntersectConfig config) {
+        public UnionGraphIntersect load(Graph graph, long maxDegree) {
             assert graph instanceof UnionGraph;
             var topology = ((UnionGraph) graph).relationshipTopology();
             return new UnionGraphIntersect(
                 graph::degree,
                 i -> i,
                 topology,
-                config.maxDegree()
+                maxDegree
             );
         }
     }
@@ -93,14 +93,14 @@ public final class UnionGraphIntersect extends GraphIntersect<CompositeAdjacency
         }
 
         @Override
-        public UnionGraphIntersect load(Graph graph, RelationshipIntersectConfig config) {
+        public UnionGraphIntersect load(Graph graph, long maxDegree) {
             assert graph instanceof UnionGraph;
             var topology = ((UnionGraph) graph).relationshipTopology();
             return new UnionGraphIntersect(
                 graph::degree,
                 graph::toRootNodeId,
                 topology,
-                config.maxDegree()
+                maxDegree
             );
         }
     }

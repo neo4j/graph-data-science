@@ -63,7 +63,7 @@ public final class NodeFilteredGraphIntersect implements RelationshipIntersect {
         }
 
         @Override
-        public RelationshipIntersect load(Graph graph, RelationshipIntersectConfig config) {
+        public RelationshipIntersect load(Graph graph, long maxDegree) {
             assert graph instanceof NodeFilteredGraph;
             var nodeFilteredGraph = (NodeFilteredGraph) graph;
             var innerGraph = nodeFilteredGraph.graph();
@@ -71,7 +71,7 @@ public final class NodeFilteredGraphIntersect implements RelationshipIntersect {
             var relationshipIntersect = RelationshipIntersectFactoryLocator
                 .lookup(innerGraph)
                 .orElseThrow(() -> new IllegalArgumentException("No intersect factory found for graph type " + innerGraph.getClass()))
-                .load(innerGraph, config);
+                .load(innerGraph, maxDegree);
 
             return new NodeFilteredGraphIntersect(nodeFilteredGraph, relationshipIntersect);
         }

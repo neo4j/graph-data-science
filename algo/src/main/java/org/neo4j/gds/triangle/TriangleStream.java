@@ -26,10 +26,8 @@ import org.neo4j.gds.api.IntersectionConsumer;
 import org.neo4j.gds.api.RelationshipIntersect;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.triangle.intersect.ImmutableRelationshipIntersectConfig;
-import org.neo4j.gds.triangle.intersect.RelationshipIntersectConfig;
+import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.triangle.intersect.RelationshipIntersectFactory;
 import org.neo4j.gds.triangle.intersect.RelationshipIntersectFactoryLocator;
 
@@ -54,7 +52,6 @@ public final class TriangleStream extends Algorithm<Stream<TriangleResult>> {
 
     private final Graph graph;
     private final RelationshipIntersectFactory intersectFactory;
-    private final RelationshipIntersectConfig intersectConfig;
     private final ExecutorService executorService;
     private final AtomicInteger queue;
     private final Concurrency concurrency;
@@ -86,7 +83,6 @@ public final class TriangleStream extends Algorithm<Stream<TriangleResult>> {
         super(ProgressTracker.NULL_TRACKER);
         this.graph = graph;
         this.intersectFactory = intersectFactory;
-        this.intersectConfig = ImmutableRelationshipIntersectConfig.builder().build();
         this.executorService = executorService;
         this.concurrency = concurrency;
         this.nodeCount = Math.toIntExact(graph.nodeCount());
@@ -124,7 +120,7 @@ public final class TriangleStream extends Algorithm<Stream<TriangleResult>> {
         queue.set(0);
         runningThreads.set(0);
         final Collection<Runnable> tasks;
-        tasks = ParallelUtil.tasks(concurrency, () -> new IntersectTask(intersectFactory.load(graph, intersectConfig)));
+        tasks = ParallelUtil.tasks(concurrency, () -> new IntersectTask(intersectFactory.load(graph, Long.MAX_VALUE)));
         ParallelUtil.run(tasks, false, executorService, null);
     }
 
