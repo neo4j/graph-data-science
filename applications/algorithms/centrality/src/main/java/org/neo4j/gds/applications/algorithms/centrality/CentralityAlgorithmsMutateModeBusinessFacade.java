@@ -166,7 +166,7 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
             graphName,
             configuration,
             ClosenessCentrality,
-            () -> estimation.closenessCentrality(configuration),
+            estimation::closenessCentrality,
             (graph, __) -> algorithms.closenessCentrality(graph, configuration),
             mutateStep,
             resultBuilder

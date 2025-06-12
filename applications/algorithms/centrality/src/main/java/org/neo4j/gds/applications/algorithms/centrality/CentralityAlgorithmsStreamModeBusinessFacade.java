@@ -162,7 +162,7 @@ public class CentralityAlgorithmsStreamModeBusinessFacade {
             graphName,
             configuration,
             ClosenessCentrality,
-            () -> estimationFacade.closenessCentrality(configuration),
+            estimationFacade::closenessCentrality,
             (graph, __) -> centralityAlgorithms.closenessCentrality(graph, configuration),
             streamResultBuilder
         );

@@ -59,7 +59,7 @@ public class LocalBetaClosenessCentralityMutateStub implements BetaClosenessCent
         return genericStub.getMemoryEstimation(
             configuration,
             ClosenessCentralityMutateConfig::of,
-            estimationModeBusinessFacade::closenessCentrality
+            __ -> estimationModeBusinessFacade.closenessCentrality()
         );
     }
 
@@ -69,7 +69,7 @@ public class LocalBetaClosenessCentralityMutateStub implements BetaClosenessCent
             graphName,
             configuration,
             ClosenessCentralityMutateConfig::of,
-            estimationModeBusinessFacade::closenessCentrality
+            __ -> estimationModeBusinessFacade.closenessCentrality()
         );
     }
 

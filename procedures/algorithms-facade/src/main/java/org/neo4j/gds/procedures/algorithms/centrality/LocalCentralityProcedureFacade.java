@@ -819,6 +819,14 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
     }
 
     @Override
+    public Stream<MemoryEstimateResult> closenessCentralityMutateEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        return stubs.closeness().estimate(graphNameOrConfiguration, algorithmConfiguration);
+    }
+
+    @Override
     public Stream<CentralityStatsResult> closenessCentralityStats(String graphName, Map<String, Object> configuration) {
         var shouldComputeSimilarityDistribution = procedureReturnColumns.contains("centralityDistribution");
 
@@ -836,6 +844,22 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
             parsedConfiguration,
             resultBuilder
         );
+    }
+
+    @Override
+    public Stream<MemoryEstimateResult> closenessCentralityStatsEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var parsedConfiguration = configurationParser.parseConfiguration(
+            algorithmConfiguration,
+            ClosenessCentralityStatsConfig::of
+        );
+
+        return Stream.of(estimationModeBusinessFacade.closenessCentrality(
+            parsedConfiguration,
+            graphNameOrConfiguration
+        ));
     }
 
     @Override
@@ -858,6 +882,22 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
     }
 
     @Override
+    public Stream<MemoryEstimateResult> closenessCentralityStreamEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var parsedConfiguration = configurationParser.parseConfiguration(
+            algorithmConfiguration,
+            ClosenessCentralityStreamConfig::of
+        );
+
+        return Stream.of(estimationModeBusinessFacade.closenessCentrality(
+            parsedConfiguration,
+            graphNameOrConfiguration
+        ));
+    }
+
+    @Override
     public Stream<CentralityWriteResult> closenessCentralityWrite(String graphName, Map<String, Object> configuration) {
         var shouldComputeCentralityDistribution = procedureReturnColumns.contains("centralityDistribution");
         var resultBuilder = new ClosenessCentralityResultBuilderForWriteMode(shouldComputeCentralityDistribution);
@@ -872,6 +912,22 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
             parsedConfiguration,
             resultBuilder
         );
+    }
+
+    @Override
+    public Stream<MemoryEstimateResult> closenessCentralityWriteEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var parsedConfiguration = configurationParser.parseConfiguration(
+            algorithmConfiguration,
+            ClosenessCentralityWriteConfig::of
+        );
+
+        return Stream.of(estimationModeBusinessFacade.closenessCentrality(
+            parsedConfiguration,
+            graphNameOrConfiguration
+        ));
     }
 
     @Override

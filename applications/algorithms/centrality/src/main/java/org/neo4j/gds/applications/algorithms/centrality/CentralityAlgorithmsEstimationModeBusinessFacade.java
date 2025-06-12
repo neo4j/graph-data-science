@@ -27,11 +27,11 @@ import org.neo4j.gds.betweenness.BetweennessCentralityBaseConfig;
 import org.neo4j.gds.betweenness.BetweennessCentralityMemoryEstimateDefinition;
 import org.neo4j.gds.bridges.BridgesBaseConfig;
 import org.neo4j.gds.bridges.BridgesMemoryEstimateDefinition;
+import org.neo4j.gds.closeness.ClosenessCentralityAlgorithmEstimateDefinition;
 import org.neo4j.gds.closeness.ClosenessCentralityBaseConfig;
 import org.neo4j.gds.config.RelationshipWeightConfig;
 import org.neo4j.gds.degree.DegreeCentralityAlgorithmEstimateDefinition;
 import org.neo4j.gds.degree.DegreeCentralityConfig;
-import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.gds.hits.HitsConfig;
 import org.neo4j.gds.hits.HitsMemoryEstimateDefinition;
 import org.neo4j.gds.indirectExposure.IndirectExposureMemoryEstimationDefinition;
@@ -113,8 +113,21 @@ public class CentralityAlgorithmsEstimationModeBusinessFacade {
         );
     }
 
-    public MemoryEstimation closenessCentrality(ClosenessCentralityBaseConfig ignored) {
-        throw new MemoryEstimationNotImplementedException();
+    public MemoryEstimation closenessCentrality() {
+        return new ClosenessCentralityAlgorithmEstimateDefinition().memoryEstimation();
+    }
+
+    public MemoryEstimateResult closenessCentrality(
+        ClosenessCentralityBaseConfig configuration,
+        Object graphNameOrConfiguration
+    ) {
+        var memoryEstimation = closenessCentrality();
+
+        return algorithmEstimationTemplate.estimate(
+            configuration,
+            graphNameOrConfiguration,
+            memoryEstimation
+        );
     }
 
     public MemoryEstimation degreeCentrality(RelationshipWeightConfig configuration) {

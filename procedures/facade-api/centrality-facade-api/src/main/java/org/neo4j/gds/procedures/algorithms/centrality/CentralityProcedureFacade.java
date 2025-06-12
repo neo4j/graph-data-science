@@ -212,14 +212,34 @@ public interface CentralityProcedureFacade {
 
     Stream<CentralityMutateResult> closenessCentralityMutate(String graphName, Map<String, Object> configuration);
 
+    Stream<MemoryEstimateResult> closenessCentralityMutateEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    );
+
     Stream<CentralityStatsResult> closenessCentralityStats(String graphName, Map<String, Object> configuration);
+
+    Stream<MemoryEstimateResult> closenessCentralityStatsEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    );
 
     Stream<CentralityStreamResult> closenessCentralityStream(
         String graphName,
         Map<String, Object> configuration
     );
 
+    Stream<MemoryEstimateResult> closenessCentralityStreamEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    );
+
     Stream<CentralityWriteResult> closenessCentralityWrite(String graphName, Map<String, Object> configuration);
+
+    Stream<MemoryEstimateResult> closenessCentralityWriteEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    );
 
     Stream<CentralityMutateResult> degreeCentralityMutate(String graphName, Map<String, Object> configuration);
 

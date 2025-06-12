@@ -140,7 +140,7 @@ public class CentralityAlgorithmsStatsModeBusinessFacade {
             graphName,
             configuration,
             ClosenessCentrality,
-            () -> estimationFacade.closenessCentrality(configuration),
+            estimationFacade::closenessCentrality,
             (graph, __) -> centralityAlgorithms.closenessCentrality(graph, configuration),
             resultBuilder
         );
