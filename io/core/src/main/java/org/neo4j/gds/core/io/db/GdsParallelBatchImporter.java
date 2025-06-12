@@ -44,6 +44,7 @@ import org.neo4j.kernel.api.index.IndexProvidersAccess;
 import org.neo4j.kernel.impl.index.schema.DefaultIndexProvidersAccess;
 import org.neo4j.kernel.impl.index.schema.IndexImporterFactoryImpl;
 import org.neo4j.kernel.impl.scheduler.JobSchedulerFactory;
+import org.neo4j.kernel.impl.transaction.log.files.LogTailMetadataFactoryImpl;
 import org.neo4j.kernel.impl.transaction.log.files.TransactionLogInitializer;
 import org.neo4j.kernel.lifecycle.LifeSupport;
 import org.neo4j.logging.internal.LogService;
@@ -250,6 +251,7 @@ public final class GdsParallelBatchImporter {
         return storageEngineFactory.batchImporter(
             databaseLayout,
             this.fileSystem,
+            false, // overrideExistingDatabase
             PageCacheTracer.NULL,
             importConfig,
             logService,
@@ -264,6 +266,8 @@ public final class GdsParallelBatchImporter {
             new IndexImporterFactoryImpl(),
             EmptyMemoryTracker.INSTANCE,
             CursorContextFactory.NULL_CONTEXT_FACTORY,
+            1,
+            new LogTailMetadataFactoryImpl(this.fileSystem),
             indexProvidersAccess
         );
     }
