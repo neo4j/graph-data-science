@@ -37,4 +37,4 @@ public final class ClosenessCentralityAlgorithmEstimateDefinition implements Mem
             .add("MSBFS", MSBFSMemoryEstimation.MSBFSWithANPStrategy(0))
             .build();
     }
-} 
+}
