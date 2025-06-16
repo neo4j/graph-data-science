@@ -23,16 +23,20 @@ They suggested a different way of calculating the average distance to that used 
 Rather than summing the distances of a node to all other nodes, the harmonic centrality algorithm sums the inverse of those distances.
 This enables it deal with infinite values.
 
-The *raw harmonic centrality* for a node is calculated using the following formula:
+The *raw harmonic centrality* for a node _u_ is calculated using the following formula:
 
-`raw harmonic centrality(node) = sum(1 / distance from node to every other node excluding itself)`
+image::harmonic-formulas/raw-harmonic.svg[title="Raw harmonic formula for node _u_", float="center"]
 
-As with closeness centrality, we can also calculate a *normalized harmonic centrality* with the following formula:
+That is, for every node _j_ (excluding _u_)  we compute its minimum distance from _u_ and sum up its inverse.
+If there is no path  from _u_ to _j_,  _1/d(u,v)_ is treated as `0`.
 
-`normalized harmonic centrality(node) = sum(1 / distance from node to every other node excluding itself) / (number of nodes - 1)`
+Similar to Closeness centrality, we can also calculate a *normalized harmonic centrality* value for  node  with the following formula:
 
+image::harmonic-formulas/norm-harmonic.svg[title="Normalized harmonic formula for node _u_", float="center"]
+
+Here, we divide the raw value by the number of nodes minus one to normalize the returned value.
 In this formula, ∞ values are handled cleanly.
-
+The Neo4j GDS Library calculates normalized harmonic centrality values.
 
 [[algorithms-harmonic-centrality-usecase]]
 == Use-cases - when to use the Harmonic Centrality algorithm
