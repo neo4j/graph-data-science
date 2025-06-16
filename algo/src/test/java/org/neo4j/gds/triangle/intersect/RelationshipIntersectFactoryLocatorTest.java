@@ -36,14 +36,20 @@ class RelationshipIntersectFactoryLocatorTest {
     void supportsHugeGraph() {
         var graph = TestSupport.fromGdl("()-->()").graph();
         assertThat(graph).isInstanceOf(HugeGraph.class);
-        assertThat(RelationshipIntersectFactoryLocator.lookup(graph)).isPresent();
+        var  intersect = RelationshipIntersectFactoryLocator.lookup(graph);
+        assertThat(intersect).isPresent()
+            .get()
+            .isInstanceOf(HugeGraphIntersect.HugeGraphIntersectFactory.class);
     }
 
     @Test
     void supportsUnionGraph() {
         var graph = TestSupport.fromGdl("()-[:A]->()-[:B]->()").graph();
         assertThat(graph).isInstanceOf(UnionGraph.class);
-        assertThat(RelationshipIntersectFactoryLocator.lookup(graph)).isPresent();
+        var  intersect = RelationshipIntersectFactoryLocator.lookup(graph);
+        assertThat(intersect).isPresent()
+            .get()
+            .isInstanceOf(UnionGraphIntersect.UnionGraphIntersectFactory.class);
     }
 
     @Test
@@ -53,6 +59,9 @@ class RelationshipIntersectFactoryLocatorTest {
             .build()
             .getGraph("A", "A", Optional.empty());
         assertThat(graph).isInstanceOf(NodeFilteredGraph.class);
-        assertThat(RelationshipIntersectFactoryLocator.lookup(graph)).isPresent();
+        var  intersect = RelationshipIntersectFactoryLocator.lookup(graph);
+        assertThat(intersect).isPresent()
+            .get()
+            .isInstanceOf(NodeFilteredGraphIntersect.NodeFilteredGraphIntersectFactory.class);
     }
 }
