@@ -23,7 +23,6 @@ import org.neo4j.gds.collections.ArrayUtil;
 import org.neo4j.gds.collections.ha.HugeIntArray;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryEstimations;
-import org.neo4j.gds.mem.Estimate;
 
 /**
  * A PriorityQueue specialized for ints that maintains a partial ordering of
