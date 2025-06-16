@@ -21,7 +21,6 @@ package org.neo4j.gds.allshortestpaths;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.neo4j.gds.assertions.MemoryEstimationAssert;
 import org.neo4j.gds.core.concurrency.Concurrency;
 
 import static org.neo4j.gds.assertions.MemoryEstimationAssert.assertThat;
@@ -30,14 +29,14 @@ class AllShortestPathsMemoryEstimateDefinitionTest {
 
     @ParameterizedTest
     @CsvSource({
-        "10_000, 1, false, 280",
-        "10_000, 4, false, 544",
-        "500_000, 4, false, 27_200",
-        "10_000_000, 4, false, 544_000",
-        "10_000, 1, true, 1_120_456",
-        "10_000, 4, true, 1_120_720",
-        "500_000, 4, true, 56_000_720",
-        "10_000_000, 4, true, 1_120_000_720"
+        "10_000, 1, false, 320",
+        "10_000, 4, false, 584",
+        "500_000, 4, false, 584",
+        "10_000_000, 4, false, 584",
+        "10_000, 1, true, 120_280",
+        "10_000, 4, true, 480_976",
+        "500_000, 4, true, 24_000_976",
+        "10_000_000, 4, true, 480_000_976"
     })
     void testMemoryEstimation(long nodeCount, int concurrency, boolean weighted, long expectedMemory) {
         var memoryEstimation = new AllShortestPathsMemoryEstimateDefinition(weighted).memoryEstimation();
