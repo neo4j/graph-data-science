@@ -1,7 +1,6 @@
-:page-aliases: alpha-algorithms/all-pairs-shortest-path.adoc
+:page-aliases: algorithms/all-pairs-shortest-path.adoc
 
 [[algorithm-all-pairs-shortest-path]]
-[.alpha]
 = All Pairs Shortest Path
 :description: This section describes the All Pairs Shortest Path algorithm in the Neo4j Graph Data Science library.
 
@@ -9,9 +8,6 @@ include::partial$/product-limitations/not-in-serverless.adoc[]
 
 The All Pairs Shortest Path (APSP) calculates the shortest (weighted) path between all pairs of nodes.
 This algorithm has optimizations that make it quicker than calling the Single Source Shortest Path algorithm for every pair of nodes in the graph.
-
-include::partial$/operations-reference/alpha-note.adoc[]
-
 
 :directed:
 :undirected:
@@ -77,6 +73,45 @@ include::partial$/algorithms/common-configuration/common-stream-stats-configurat
 | sourceNodeId               | Integer   | The source node.
 | targetNodeId               | Integer   | The target node.
 | distance  | Float |  The distance of the shortest path from source to target.
+|===
+
+======
+
+[.include-with-estimate]
+======
+.The following will estimate the memory requirements for running the algorithm:
+[source, cypher, role=noplay]
+----
+CALL gds.allShortestPaths.stream.estimate(
+  graphNameOrConfiguration: string or map,
+  configuration: map
+)
+YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
+----
+
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name          | Type   | Default | Optional | Description
+include::partial$/algorithms/common-configuration/common-estimate-configuration-entries.adoc[]
+| xref:common-usage/running-algos.adoc#common-configuration-relationship-weight-property[relationshipWeightProperty] | String  | null                   | yes      | Name of the relationship property to use as weights. If unspecified, the algorithm runs unweighted.
+|===
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                  | Type      | Description
+| nodeCount             | Integer   | The number of nodes in the graph.
+| relationshipCount     | Integer   | The number of relationships in the graph.
+| requiredMemory        | String    | An estimation of the required memory in a human readable format.
+| treeView              | String    | A more detailed representation of the required memory, including estimates of the different components in human readable format.
+| mapView               | Map       | A more detailed representation of the required memory, including estimates of the different components in structured format.
+| bytesMin              | Integer   | The minimum number of bytes required.
+| bytesMax              | Integer   | The maximum number of bytes required.
+| heapPercentageMin     | Float     | The minimum percentage of the configured maximum heap required.
+| heapPercentageMax     | Float     | The maximum percentage of the configured maximum heap required.
 |===
 
 ======
