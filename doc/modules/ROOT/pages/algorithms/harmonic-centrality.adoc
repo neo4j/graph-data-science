@@ -213,10 +213,17 @@ include::partial$/algorithms/common-configuration/common-write-configuration-ent
 
 ====
 
-[[algorithms-harmonic-centrality-sample]]
-== Harmonic Centrality algorithm example
+[[algorithms-harmonic-centrality-examples]]
+== Examples
 
-.The following will create a sample graph:
+include::partial$/algorithms/shared/examples-named-native-note.adoc[]
+
+:algorithm-name: {algorithm}
+:graph-description: user network
+:image-file: wcc-graph.svg
+include::partial$/algorithms/shared/examples-intro.adoc[]
+
+.The following Cypher statement will create the example graph in the Neo4j database:
 [source, cypher, role=noplay setup-query]
 ----
 CREATE (a:User {name: "Alice"}),
@@ -229,7 +236,7 @@ CREATE (a:User {name: "Alice"}),
        (d)-[:LINK]->(e)
 ----
 
-.The following will project and store a named graph:
+.The following statement will project a graph using a Cypher projection and store it in the graph catalog under the name 'graph'.
 [source, cypher, role=noplay graph-project-query]
 ----
 MATCH (source:User)-[r:LINK]->(target:User)
@@ -242,6 +249,33 @@ RETURN gds.graph.project(
 )
 ----
 
+In the following examples we will demonstrate using the Harmonic Centrality algorithm on this graph.
+
+[[algorithms-harmonic-examples-memory-estimation]]
+=== Memory Estimation
+
+:mode: stream
+include::partial$/algorithms/shared/examples-estimate-intro.adoc[]
+
+[role=query-example]
+--
+.The following will estimate the memory requirements for running the algorithm in stream mode:
+[source, cypher, role=noplay]
+----
+CALL gds.closeness.harmonic.stream.estimate('graph', {})
+YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
+----
+
+.Results
+[opts="header"]
+|===
+| nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
+| 5         | 6                | 672      | 672      | "672 Bytes"
+|===
+--
+
+[[algorithms-harmonic-examples-stream]]
+=== Stream
 [role=query-example]
 --
 .The following will run the algorithm and stream results:
@@ -265,6 +299,9 @@ ORDER BY score DESC
 |===
 --
 
+[[algorithms-harmonic-examples-stats]]
+=== Stats
+
 [role=query-example]
 --
 .The following will run the algorithm and return statistics:
@@ -282,9 +319,11 @@ YIELD centralityDistribution
 |===
 --
 
+[[algorithms-harmonic-examples-mutate]]
+=== Mutate
 [role=query-example]
 --
-.The following will run the algorithm and update the graph:
+.The following will run the algorithm in mutate mode  and update the in-memory graph:
 [source, cypher, role=noplay]
 ----
 CALL gds.closeness.harmonic.mutate('graph', {mutateProperty: 'harmonicScore'})
@@ -299,9 +338,11 @@ YIELD nodePropertiesWritten, centralityDistribution
 |===
 --
 
+[[algorithms-harmonic-examples-write]]
+=== Write
 [role=query-example]
 --
-.The following will run the algorithm and write back results:
+.The following will run the algorithm and write the results back to the Neo4j database:
 [source, cypher, role=noplay]
 ----
 CALL gds.closeness.harmonic.write('graph', {writeProperty: 'score'})
