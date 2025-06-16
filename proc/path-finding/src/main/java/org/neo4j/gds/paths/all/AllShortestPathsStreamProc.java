@@ -21,6 +21,7 @@ package org.neo4j.gds.paths.all;
 
 import org.neo4j.gds.allshortestpaths.AllShortestPathsStreamResult;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
+import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
@@ -31,6 +32,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.paths.all.Constants.ALL_PAIRS_SHORTEST_PATH_DESCRIPTION;
+import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public class AllShortestPathsStreamProc {
@@ -44,6 +46,15 @@ public class AllShortestPathsStreamProc {
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         return facade.algorithms().pathFinding().allShortestPathStream(graphName, configuration);
+    }
+
+    @Procedure(name = "gds.allShortestPaths.stream.estimate", mode = READ)
+    @Description(MEMORY_ESTIMATION_DESCRIPTION)
+    public Stream<MemoryEstimateResult> estimate(
+        @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
+        @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
+    ) {
+        return facade.algorithms().pathFinding().allShortestPathStreamEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
     @Procedure(name = "gds.alpha.allShortestPaths.stream", mode = READ, deprecatedBy = "gds.allShortestPaths.stream")

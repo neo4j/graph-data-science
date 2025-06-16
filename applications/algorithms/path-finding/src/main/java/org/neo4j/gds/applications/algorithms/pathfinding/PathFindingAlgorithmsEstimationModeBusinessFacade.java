@@ -49,6 +49,8 @@ import org.neo4j.gds.traversal.RandomWalkBaseConfig;
 import org.neo4j.gds.traversal.RandomWalkCountingVisitsMemoryEstimateDefinition;
 import org.neo4j.gds.traversal.RandomWalkMemoryEstimateDefinition;
 import org.neo4j.gds.traversal.RandomWalkMutateConfig;
+import org.neo4j.gds.allshortestpaths.AllShortestPathsMemoryEstimateDefinition;
+import org.neo4j.gds.allshortestpaths.AllShortestPathsConfig;
 
 /**
  * Here is the top level business facade for all your path finding memory estimation needs.
@@ -61,8 +63,14 @@ public class PathFindingAlgorithmsEstimationModeBusinessFacade {
         this.algorithmEstimationTemplate = algorithmEstimationTemplate;
     }
 
-    MemoryEstimation allShortestPaths() {
-        throw new MemoryEstimationNotImplementedException();
+    public MemoryEstimation allShortestPaths(AllShortestPathsConfig configuration) {
+        return new AllShortestPathsMemoryEstimateDefinition(configuration.hasRelationshipWeightProperty()).memoryEstimation();
+    }
+
+    public MemoryEstimateResult allShortestPaths(AllShortestPathsConfig configuration, Object graphNameOrConfiguration) {
+        var memoryEstimation = allShortestPaths(configuration);
+
+        return runEstimation(configuration, graphNameOrConfiguration, memoryEstimation);
     }
 
     public MemoryEstimateResult bellmanFord(AllShortestPathsBellmanFordBaseConfig configuration, Object graphNameOrConfiguration) {
