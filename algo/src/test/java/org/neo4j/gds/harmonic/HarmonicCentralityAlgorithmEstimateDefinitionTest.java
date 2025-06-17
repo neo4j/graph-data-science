@@ -29,12 +29,12 @@ class HarmonicCentralityAlgorithmEstimateDefinitionTest {
 
     @ParameterizedTest
     @CsvSource({
-        "10_000, 1, 80_368",
-        "10_000, 4, 80_632",
-        "500_000, 4, 4_000_632",
-        "10_000_000, 4, 80_000_632",
-        "10_000, 2, 80_456",
-        "10_000, 128, 91_544"
+        "10_000, 1, 320_344",
+        "10_000, 4, 1_040_896",
+        "500_000, 4, 52_000_896",
+        "10_000_000, 4, 1_040_000_896",
+        "10_000, 2, 560_528",
+        "10_000, 128, 30_823_712"
     })
     void testMemoryEstimation(long nodeCount, int concurrency, long expectedMemory) {
         var memoryEstimation = new HarmonicCentralityAlgorithmEstimateDefinition().memoryEstimation();

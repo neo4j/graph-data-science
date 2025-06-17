@@ -29,29 +29,36 @@ public final class MSBFSMemoryEstimation {
     private MSBFSMemoryEstimation() {}
 
 
-    private static MemoryEstimations.Builder MSBFS(int sourceNodes){
-        var runnable = MemoryEstimations.builder(MultiSourceBFSRunnable.class).build();
+    private  static MemoryEstimation MSBFSRunnable(boolean seenNext){
+        var builder =  MemoryEstimations.builder(MultiSourceBFSRunnable.class)
+            .perNode("visits", HugeLongArray::memoryEstimation)
+            .perNode("visitsNext", HugeLongArray::memoryEstimation)
+            .perNode("seens", HugeLongArray::memoryEstimation);
 
-        var builder = MemoryEstimations.builder(MultiSourceBFSAccessMethods.class)
-            .perThread("visits", HugeLongArray::memoryEstimation)
-            .perThread("visitsNext", HugeLongArray::memoryEstimation)
-            .perThread("seens", HugeLongArray::memoryEstimation)
-            .perThread("runnable", runnable);
+        if (seenNext) {
+            builder.perNode("seenNext", HugeLongArray::memoryEstimation);
+        }
+
+        return  builder.build();
+
+    }
+    private static MemoryEstimations.Builder MSBFS(int sourceNodes, boolean seenNext){
+
+        var builder = MemoryEstimations.builder(MultiSourceBFSAccessMethods.class);
 
         if (sourceNodes > 0 ) {
             builder.fixed("source nodes", Estimate.sizeOfLongArray(sourceNodes));
         }
 
+        builder.perThread("runnable", MSBFSRunnable(seenNext));
+
         return builder;
     }
 
     public static MemoryEstimation MSBFSWithPredecessorStrategy(int sourceNodes){
-        return MSBFS(sourceNodes)
-            .perThread("seenNext", HugeLongArray::memoryEstimation)
-            .build();
+        return MSBFS(sourceNodes,true).build();
     }
     public static MemoryEstimation MSBFSWithANPStrategy(int sourceNodes){
-        return MSBFS(sourceNodes)
-            .build();
+        return MSBFS(sourceNodes,false).build();
     }
 }

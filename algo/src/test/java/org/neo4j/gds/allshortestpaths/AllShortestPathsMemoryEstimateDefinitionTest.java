@@ -29,10 +29,10 @@ class AllShortestPathsMemoryEstimateDefinitionTest {
 
     @ParameterizedTest
     @CsvSource({
-        "10_000, 1, false, 320",
-        "10_000, 4, false, 584",
-        "500_000, 4, false, 584",
-        "10_000_000, 4, false, 584",
+        "10_000, 1, false, 24_0296",
+        "10_000, 4, false, 960_848",
+        "500_000, 4, false, 48_000_848",
+        "10_000_000, 4, false, 960_000_848",
         "10_000, 1, true, 120_280",
         "10_000, 4, true, 480_976",
         "500_000, 4, true, 24_000_976",

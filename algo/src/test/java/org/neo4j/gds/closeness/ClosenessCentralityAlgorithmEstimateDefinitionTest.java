@@ -29,12 +29,12 @@ class ClosenessCentralityAlgorithmEstimateDefinitionTest {
 
     @ParameterizedTest
     @CsvSource({
-        "10_000, 1, 160_456",
-        "10_000, 4, 160_720",
-        "500_000, 4, 8_000_720",
-        "10_000_000, 4, 160_000_720",
-        "10_000, 2, 160_544",
-        "10_000, 128, 171_632"
+        "10_000, 1, 400_432",
+        "10_000, 4, 1_120_984",
+        "500_000, 4, 56_000_984",
+        "10_000_000, 4, 1_120_000_984",
+        "10_000, 2, 640_616",
+        "10_000, 128, 30_903_800"
     })
     void testMemoryEstimation(long nodeCount, int concurrency, long expectedMemory) {
         var memoryEstimation = new ClosenessCentralityAlgorithmEstimateDefinition().memoryEstimation();
