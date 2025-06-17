@@ -22,8 +22,6 @@ package org.neo4j.gds.paths;
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.ValueClass;
 
-import java.nio.file.Path;
-
 @ValueClass
 public interface PathResult {
 
