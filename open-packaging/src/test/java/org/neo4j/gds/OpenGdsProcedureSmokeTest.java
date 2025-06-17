@@ -53,6 +53,7 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         "gds.graph.sample.cnarw.estimate",
 
         "gds.allShortestPaths.stream",
+        "gds.allShortestPaths.stream.estimate",
 
         "gds.articulationPoints.mutate",
         "gds.articulationPoints.mutate.estimate",
@@ -619,7 +620,7 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         );
 
         // If you find yourself updating this count, please also update the count in SmokeTest.kt
-        int expectedCount = 459;
+        int expectedCount = 460;
         assertEquals(
             expectedCount,
             returnedRows,

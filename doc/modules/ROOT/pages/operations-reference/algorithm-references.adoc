@@ -27,6 +27,9 @@
 | `gds.allShortestPaths.dijkstra.write.estimate` label:procedure[Procedure]
 | `gds.allShortestPaths.dijkstra.mutate` label:procedure[Procedure]
 | `gds.allShortestPaths.dijkstra.mutate.estimate` label:procedure[Procedure]
+.2+<.^| xref:algorithms/all-pairs-shortest-path.adoc[All Shortest Paths]
+| `gds.allShortestPaths.stream` label:procedure[Procedure]
+| `gds.allShortestPaths.stream.estimate` label:procedure[Procedure]
 .8+<.^|xref:algorithms/article-rank.adoc[ArticleRank]
 | `gds.articleRank.mutate` label:procedure[Procedure]
 | `gds.articleRank.mutate.estimate` label:procedure[Procedure]
@@ -405,8 +408,6 @@
 |===
 |Algorithm name | Operation
 | xref:alpha-algorithms/adamic-adar.adoc[Adamic Adar] | `gds.alpha.linkprediction.adamicAdar` label:function[Function]
-.1+<.^|xref:algorithms/all-pairs-shortest-path.adoc[All Shortest Paths]
-| `gds.allShortestPaths.stream` label:procedure[Procedure]
 | xref:alpha-algorithms/common-neighbors.adoc[Common Neighbors] | `gds.alpha.linkprediction.commonNeighbors` label:function[Function]
 .8+<.^|xref:algorithms/harmonic-centrality.adoc[Harmonic Centrality]
 | `gds.closeness.harmonic.mutate` label:procedure[Procedure]

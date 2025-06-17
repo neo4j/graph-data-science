@@ -93,7 +93,7 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
             graphName,
             configuration,
             AllShortestPaths,
-            estimation::allShortestPaths,
+            () -> estimation.allShortestPaths(configuration),
             (graph, __) -> algorithms.allShortestPaths(graph, configuration),
             resultBuilder
         );

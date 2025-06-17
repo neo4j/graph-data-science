@@ -38,6 +38,11 @@ public interface PathFindingProcedureFacade {
         Map<String, Object> configuration
     );
 
+    Stream<MemoryEstimateResult> allShortestPathStreamEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    );
+
     Stream<BellmanFordStreamResult> bellmanFordStream(String graphName, Map<String, Object> configuration);
 
     Stream<MemoryEstimateResult> bellmanFordStreamEstimate(

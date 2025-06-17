@@ -266,6 +266,22 @@ public final class LocalPathFindingProcedureFacade implements PathFindingProcedu
     }
 
     @Override
+    public Stream<MemoryEstimateResult> allShortestPathStreamEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var parsedConfiguration = configurationParser.parseConfiguration(
+            algorithmConfiguration,
+            AllShortestPathsConfig::of
+        );
+
+        return Stream.of(estimationModeBusinessFacade.allShortestPaths(
+            parsedConfiguration,
+            graphNameOrConfiguration
+        ));
+    }
+
+    @Override
     public Stream<BellmanFordStreamResult> bellmanFordStream(String graphName, Map<String, Object> configuration) {
         var routeRequested = procedureReturnColumns.contains("route");
         var resultBuilder = new BellmanFordResultBuilderForStreamMode(

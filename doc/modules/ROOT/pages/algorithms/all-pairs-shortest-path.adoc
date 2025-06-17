@@ -1,7 +1,4 @@
-:page-aliases: alpha-algorithms/all-pairs-shortest-path.adoc
-
 [[algorithm-all-pairs-shortest-path]]
-[.alpha]
 = All Pairs Shortest Path
 :description: This section describes the All Pairs Shortest Path algorithm in the Neo4j Graph Data Science library.
 
@@ -9,9 +6,6 @@ include::partial$/product-limitations/not-in-serverless.adoc[]
 
 The All Pairs Shortest Path (APSP) calculates the shortest (weighted) path between all pairs of nodes.
 This algorithm has optimizations that make it quicker than calling the Single Source Shortest Path algorithm for every pair of nodes in the graph.
-
-include::partial$/operations-reference/alpha-note.adoc[]
-
 
 :directed:
 :undirected:
@@ -122,6 +116,39 @@ RETURN gds.graph.project(
   { undirectedRelationshipTypes: ['ROAD'] }
 )
 ----
+
+[[algorithm-all-pairs-shortest-path-examples-memory-estimation]]
+=== Memory Estimation
+
+:mode: stream
+include::partial$/algorithms/shared/examples-estimate-intro.adoc[]
+
+[role=query-example]
+--
+.The following will estimate the memory requirements for running the algorithm:
+[source, cypher, role=noplay]
+----
+CALL gds.allShortestPaths.stream.estimate('cypherGraph', {
+  relationshipWeightProperty: 'cost'
+})
+YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
+RETURN nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
+----
+
+.Results
+[opts="header"]
+|===
+| nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
+| 6         | 18                | 1264     | 1264     | "1264 Bytes"
+|===
+--
+
+[[algorithm-all-pairs-shortest-path-examples-stream]]
+=== Stream
+
+:!stream-details:
+In the `stream` execution mode, the algorithm returns the shortest path distance for each source-target pair.
+This allows us to inspect the results directly or post-process them in Cypher without any side effects.
 
 [role=query-example]
 --

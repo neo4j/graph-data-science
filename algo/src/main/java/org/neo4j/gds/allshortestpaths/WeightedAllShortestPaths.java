@@ -109,7 +109,7 @@ public class WeightedAllShortestPaths extends MSBFSASPAlgorithm {
      * Dijkstra Task. Takes one element of the counter at a time
      * and starts dijkstra on it.
      */
-    private final class ShortestPathTask implements Runnable {
+    public final class ShortestPathTask implements Runnable {
 
         private final IntPriorityQueue queue;
         private final double[] distance;
