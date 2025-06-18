@@ -78,12 +78,7 @@ public final class MultiSourceBFSAccessMethods {
     private final boolean allowStartNodeTraversal;
     private final long @Nullable [] sourceNodes;
 
-    // hypothesis: you supply actual source nodes, or you provide a count - if so that should be rationalised
-    private final int sourceNodeCount;
-    private final long nodeOffset;
-
     private final TerminationFlag terminationFlag;
-
 
     public static MultiSourceBFSAccessMethods aggregatedNeighborProcessing(
         long nodeCount,
@@ -157,8 +152,6 @@ public final class MultiSourceBFSAccessMethods {
             strategy,
             spec.allowStartNodeTraversal(),
             sourceNodes,
-            0,
-            0,
             terminationFlag
         );
 
@@ -177,8 +170,6 @@ public final class MultiSourceBFSAccessMethods {
         ExecutionStrategy strategy,
         boolean allowStartNodeTraversal,
         long @Nullable [] sourceNodes,
-        int sourceNodeCount,
-        long nodeOffset,
         TerminationFlag terminationFlag
     ) {
         this.visits = visits;
@@ -190,8 +181,6 @@ public final class MultiSourceBFSAccessMethods {
         this.strategy = strategy;
         this.allowStartNodeTraversal = allowStartNodeTraversal;
         this.sourceNodes = sourceNodes;
-        this.sourceNodeCount = sourceNodeCount;
-        this.nodeOffset = nodeOffset;
         this.terminationFlag = terminationFlag;
     }
 
@@ -213,14 +202,9 @@ public final class MultiSourceBFSAccessMethods {
     }
 
     private long sourceLength() {
-        if (sourceNodes != null) {
-            return sourceNodes.length;
-        }
-        if (sourceNodeCount == 0) {
-            return nodeCount;
-        }
-        return sourceNodeCount;
-    }
+        if (sourceNodes == null || sourceNodes.length==0) return  nodeCount;
+        return sourceNodes.length;
+     }
 
     private int numberOfThreads() {
         long sourceLength = sourceLength();
@@ -233,30 +217,8 @@ public final class MultiSourceBFSAccessMethods {
 
     // lazily creates MS-BFS instances for OMEGA sized source chunks
     private Collection<MultiSourceBFSRunnable> allSourceBfss(int threads) {
-        if (sourceNodes == null) {
-            long sourceLength = nodeCount;
-            return new ParallelMultiSources(threads, sourceLength) {
-                @Override
-                MultiSourceBFSRunnable next(final long from, final int length) {
-                    return new MultiSourceBFSRunnable(
-                        visits,
-                        visitsNext,
-                        seens,
-                        seensNext,
-                        sourceLength,
-                        relationships.concurrentCopy(),
-                        strategy,
-                        allowStartNodeTraversal,
-                        null,
-                        length,
-                        from
-                    );
-                }
-            };
-        }
-        long[] sourceNodes = this.sourceNodes;
-        int sourceLength = sourceNodes.length;
-        return new ParallelMultiSources(threads, sourceLength) {
+        var producer = SourceNodeSpecFactory.createProducer(sourceNodes);
+        return new ParallelMultiSources(threads, sourceLength()) {
             @Override
             MultiSourceBFSRunnable next(final long from, final int length) {
                 return new MultiSourceBFSRunnable(
@@ -268,25 +230,10 @@ public final class MultiSourceBFSAccessMethods {
                     relationships.concurrentCopy(),
                     strategy,
                     allowStartNodeTraversal,
-                    Arrays.copyOfRange(sourceNodes, (int) from, (int) (from + length)),
-                    0,
-                    0
+                    producer.create(from,length)
                 );
             }
         };
     }
 
-    @Override
-    public String toString() {
-        if (sourceNodes != null && sourceNodes.length > 0) {
-            return "MSBFS{" + sourceNodes[0] +
-                " .. " + (sourceNodes[sourceNodes.length - 1] + 1) +
-                " (" + sourceNodes.length +
-                ")}";
-        }
-        return "MSBFS{" + nodeOffset +
-            " .. " + (nodeOffset + sourceNodeCount) +
-            " (" + sourceNodeCount +
-            ")}";
-    }
 }

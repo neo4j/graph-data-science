@@ -29,14 +29,14 @@ class MSBFSMemoryEstimationTest {
 
     @ParameterizedTest
     @CsvSource({
-        "100,1,0, 3496",
-        "100,1,10, 3592",
-        "100,4,0, 13768",
-        "100,4,10, 13864",
-        "200,1,0, 6696",
-        "200,1,10, 6792",
-        "200,4,0, 26568",
-        "201,4,10, 26792"
+        "100,1,0, 3472",
+        "100,1,10, 3568",
+        "100,4,0, 13720",
+        "100,4,10, 13816",
+        "200,1,0, 6672",
+        "200,1,10, 6768",
+        "200,4,0, 26520",
+        "201,4,10, 26744"
 
     })
     void shouldWorkForPredecessor(long nodeCount, int concurrency,  int sourceNodesSize, long expectedMemory){
@@ -47,14 +47,14 @@ class MSBFSMemoryEstimationTest {
 
     @ParameterizedTest
     @CsvSource({
-        "100,1,0, 2656",
-        "100,1,10, 2752",
-        "100,4,0, 10408",
-        "100,4,10, 10504",
-        "200,1,0, 5056",
-        "200,1,10, 5152",
-        "200,4,0, 20008",
-        "200,4,10, 20104"
+        "100,1,0, 2632",
+        "100,1,10, 2728",
+        "100,4,0, 10360",
+        "100,4,10, 10456",
+        "200,1,0, 5032",
+        "200,1,10, 5128",
+        "200,4,0, 19960",
+        "200,4,10, 20056"
     })
     void shouldWorkForANP(long nodeCount, int concurrency,  int sourceNodesSize, long expectedMemory){
         MemoryEstimationAssert.assertThat(MSBFSMemoryEstimation.MSBFSWithANPStrategy(sourceNodesSize))
