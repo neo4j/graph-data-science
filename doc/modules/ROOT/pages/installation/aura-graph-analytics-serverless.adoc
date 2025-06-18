@@ -22,6 +22,7 @@ Instead, a GDS Session is started on-demand to perform GDS computations.
 There are two primary APIs for working with GDS Sessions: the GDS Python Client and the GDS Session Cypher API.
 
 
+[[gds-python-client]]
 === GDS Python Client
 
 Using the client, it is possible to perform all operations on a GDS Session.
@@ -48,18 +49,11 @@ A good place to start are the Tutorials:
 This manual covers all aspects of the GDS Session Cypher API.
 The Cypher API supports remote projections, calling algorithms and machine learning operations, and remote write back to the AuraDB instance.
 It is currently offered only for AuraDB and is used from within a Cypher query context, such as Query in the Aura Console.
-This means that the session is created automatically when a remote graph projection runs, and deleted automatically when the graph is dropped.
 
 In the following sections we will focus only on the GDS Session Cypher API, assuming that it is used from an AuraDB instance.
 
 
-== Session lifecycle and configuration
-
-In the Cypher API, sessions are managed _implicitly_.
-That means that there is no operation to create or delete a session.
-Instead, a session is created when a remote projection is run, and deleted when the graph is dropped.
-Sessions cannot be listed directly, but _graphs_ can be listed using `gds.graph.list()`.
-
+== Session configuration
 
 === Session size
 
@@ -94,6 +88,172 @@ It can also be deleted through the Aura Console UI.
 A session can never be kept active for more than 7 days.
 Even if the session does not expire due to inactivity, it will still expire 7 days after its creation.
 This is a hard limit and cannot be changed.
+
+
+== Session management and lifecycle
+
+In the Cypher API, sessions can be managed in two different ways:
+ . <<implicit-session-management,Implicitly>>
+ . <<explicit-session-management,Explicitly>>
+
+The implicit session management is the default way of working with GDS Sessions in the Cypher API.
+After a session is created and the graph is projected, both options are identical in the use of GDS algorithms.
+
+[[implicit-session-management]]
+=== Implicit session management
+
+In the implicit managed sessions option, a GDS Session is created automatically when a remote projection is run, and deleted when the graph is dropped.
+Sessions can still be listed and dropped via the corresponding <<session-management-procedures,session management procedures>>.
+In the case where additional graphs are projected into the same session, for example via xref:management-ops/graph-creation/graph-filter.adoc[graph filtering], the session will not be deleted until all graphs are dropped.
+
+
+[[explicit-session-management]]
+=== Explicit session management
+
+In the explicit managed sessions option, a GDS Session has to be created explicitly before executing any projection using the <<session-create-procedure,`gds.session.getOrCreate`>> procedure. To project a graph onto the created GDS Session, the `id` column of the <<session-create-procedure-results,procedure result table>> must be passed as the `gds.graph.project` functions's `sessionId` xref:management-ops/graph-creation/graph-project-cypher-projection.adoc#graph-project-cypher-projection-syntax-configuration[configuration parameter].
+
+
+[[session-management-procedures]]
+== Session management procedures
+
+The session management procedures allow to explicitly manage GDS Sessions without having to project a graph. They allow to list and delete existing sessions, or create new sessions and are designed to mimic the workflow of the <<gds-python-client, GDS Python Client>>.
+
+
+[[session-create-procedure]]
+=== Creating sessions
+
+Calling the `gds.session.getOrCreate` procedure will trigger the creation of a GDS Session based on the specified procedure parameters if no other session with the given name an configuration already exists. If such a session already exists, that session will be returned instead.
+
+
+==== Syntax
+
+[source, cypher]
+----
+CALL gds.session.getOrCreate(
+  sessionName: String,
+  memory: String,
+  ttl: Duration
+  cloudLocation: Map
+) YIELD
+  id: String,
+  name: String,
+  auraInstanceId: String,
+  memory: String,
+  status: String,
+  creationTime: Datetime,
+  host: String,
+  expiryDate: Datetime,
+  ttl: TemporalAmount,
+  errorMessage: String
+----
+
+.Parameters
+[opts="header",cols="1,1,1,4"]
+|===
+| Name          | Type      | Optional | Description
+| sessionName   | String    | no       | The name of the GDS Session to create or return.
+| memory        | String    | no       | The size of the GDS Session, e.g. `4GB`, `8GB`, etc.
+| ttl           | Duration  | yes      | The time to live of the GDS Session when no activity is recorded, e.g. `duration({days: 1})`, `duration({hours: 12})`, etc. The default value is 2 days.
+|===
+
+[[session-create-procedure-results]]
+.Results
+[opts="header",cols="3m,1,6"]
+|===
+| Name                   | Type     | Description
+| id                     | String   | The unique identifier of the GDS Session.
+| name                   | String   | The name of the GDS Session.
+| auraInstanceId         | String   | The Aura instance ID to which the GDS Session is attached to.
+| memory                 | String   | The size of the GDS Session, e.g. `4GB`, `8GB`, etc.
+| status                 | String   | The status of the GDS Session, e.g. `Creating`, `Ready`, `Expired`, etc.
+| creationTime           | Datetime | The time when the GDS Session was created.
+| host                   | String   | The public host address of the GDS Session.
+| expiryDate             | Datetime | The time when the GDS Session will definitely expire.
+| ttl                    | TemporalAmount | The time that is left until the GDS Session expires due to inactivity.
+| errorMessage           | String   | The error message, if the GDS Session could not be created or is in an unhealthy state.
+|===
+
+
+=== Listing sessions
+
+Calling the `gds.session.list` procedure will return GDS Sessions that are available to the current aura user.
+
+
+==== Syntax
+
+[source, cypher]
+----
+CALL gds.session.list(
+  projectId: String,
+  filterAuraInstanceId: boolean
+) YIELD
+  id: String,
+  name: String,
+  auraInstanceId: String,
+  memory: String,
+  status: String,
+  creationTime: Datetime,
+  host: String,
+  expiryDate: Datetime,
+  ttl: TemporalAmount,
+  errorMessage: String
+----
+
+.Parameters
+[opts="header",cols="1,1,1,1,4"]
+|===
+| Name               | Type      | Optional | Default | Description
+| projectId          | String    | yes      | ""      | The ID of the project to which the GDS Sessions belong. If not specified, all sessions of the aura user are returned.
+| filterAuraInstance | String    | yes      | false   | If set to `true`, only sessions that are attached to current Aura instance are returned. If not specified, all sessions of the aura user are returned.
+|===
+
+.Results
+[opts="header",cols="3m,1,6"]
+|===
+| Name                   | Type     | Description
+| id                     | String   | The unique identifier of the GDS Session.
+| name                   | String   | The name of the GDS Session.
+| auraInstanceId         | String   | The Aura instance ID to which the GDS Session is attached to.
+| memory                 | String   | The size of the GDS Session, e.g. `4GB`, `8GB`, etc.
+| status                 | String   | The status of the GDS Session, e.g. `Creating`, `Ready`, `Expired`, etc.
+| creationTime           | Datetime | The time when the GDS Session was created.
+| host                   | String   | The public host address of the GDS Session.
+| expiryDate             | Datetime | The time when the GDS Session will definitely expire.
+| ttl                    | TemporalAmount | The time that is left until the GDS Session expires due to inactivity.
+| errorMessage           | String   | The error message, if the GDS Session could not be created or is in an unhealthy state.
+|===
+
+
+=== Deleting sessions
+
+Calling the `gds.session.delete` procedure will delete a GDS Session with the given ID. If the session is not found, an error is raised.
+
+
+==== Syntax
+
+[source, cypher]
+----
+CALL gds.session.delete(
+  name: String,
+  projectId: String
+) YIELD
+  deleted: boolean
+----
+
+.Parameters
+[opts="header",cols="1,1,1,1,4"]
+|===
+| Name       | Type      | Optional | Default | Description
+| name       | String    | no       | n/a     | The name of the GDS Session to delete.
+| projectId  | String    | yes      | ""      | The ID of the project to which the GDS Session belongs. If similar sessions exist in different projects an error is thrown that indicates to provide a project ID.
+|===
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name       | Type      | Description
+| deleted    | Boolean   | True, if the GDS Session was successfully deleted, false otherwise.
+|===
 
 
 == Syntax
