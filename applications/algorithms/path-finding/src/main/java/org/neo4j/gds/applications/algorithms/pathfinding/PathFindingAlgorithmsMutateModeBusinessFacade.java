@@ -298,6 +298,30 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
         );
     }
 
+    public <RESULT> RESULT singleSourceShortestPathDijkstraWithPaths(
+        GraphName graphName,
+        AllShortestPathsDijkstraMutateConfig configuration,
+        Map<String, Stream<PathUsingInternalNodeIds>> pathStore,
+        ResultBuilder<AllShortestPathsDijkstraMutateConfig, PathFindingResult, RESULT, Void> resultBuilder
+    ) {
+        var sideEffect = new StorePathsSideEffect(pathStore, configuration.mutateRelationshipType());
+
+        return algorithmProcessingTemplate.processAlgorithmAndAnySideEffects(
+            Optional.empty(),
+            graphName,
+            configuration,
+            Optional.empty(),
+            Optional.empty(),
+            SingleSourceDijkstra,
+            DimensionTransformer.DISABLED,
+            () -> estimationFacade.singleSourceShortestPathDijkstra(configuration),
+            (graph, __) -> pathFindingAlgorithms.singleSourceShortestPathDijkstra(graph, configuration),
+            Optional.of(sideEffect),
+            new MutateResultRenderer<>(configuration, resultBuilder)
+        );
+    }
+
+
     public <RESULT> RESULT spanningTree(
         GraphName graphName,
         SpanningTreeMutateConfig configuration,
