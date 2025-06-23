@@ -61,6 +61,7 @@ public class DocExampleQueryParser {
         return new ParseResult(
             queryProcessor.getBeforeEachQueries(),
             queryProcessor.getBeforeAllQueries(),
+            queryProcessor.getAfterAllQueries(),
             queryProcessor.getQueryExampleGroups()
         );
     }
@@ -76,6 +77,7 @@ public class DocExampleQueryParser {
     public record ParseResult(
             List<DocQuery> beforeEachQueries,
             List<DocQuery> beforeAllQueries,
-            List<QueryExampleGroup> queryExampleGroups) {
-    }
+            List<QueryExample> afterAllQueries,
+            List<QueryExampleGroup> queryExampleGroups
+    ) {}
 }

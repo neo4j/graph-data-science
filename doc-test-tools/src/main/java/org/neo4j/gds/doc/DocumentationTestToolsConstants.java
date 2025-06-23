@@ -36,6 +36,7 @@ final class DocumentationTestToolsConstants {
     static final String CODE_BLOCK_CONTEXT = ":listing";
     static final String TABLE_CONTEXT = ":table";
     static final String SETUP_QUERY_ROLE = "setup-query";
+    static final String CLEANUP_QUERY_ROLE = "cleanup-query";
     static final String GRAPH_PROJECT_QUERY_ROLE = "graph-project-query";
     static final String QUERY_EXAMPLE_ROLE = "query-example";
     static final String TEST_TYPE_NO_RESULT = "no-result";

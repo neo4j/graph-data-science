@@ -620,7 +620,7 @@ RETURN communityCount, modularity
 
 Finally, drop the projected graph, which will also delete the GDS Session.
 
-[role=query-example]
+[role=cleanup-query]
 --
 .Drop the graph 'myGraph':
 [source, cypher]

@@ -36,6 +36,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static org.neo4j.gds.doc.DocumentationTestToolsConstants.CLEANUP_QUERY_ROLE;
 import static org.neo4j.gds.doc.DocumentationTestToolsConstants.CODE_BLOCK_CONTEXT;
 import static org.neo4j.gds.doc.DocumentationTestToolsConstants.GRAPH_PROJECT_QUERY_ROLE;
 import static org.neo4j.gds.doc.DocumentationTestToolsConstants.QUERY_EXAMPLE_ROLE;
@@ -70,6 +71,8 @@ public class QueryCollectingTreeProcessor extends Treeprocessor {
 
     private final List<DocQuery> beforeEachQueries = new ArrayList<>();
 
+    private final List<QueryExample> afterAllQueries = new ArrayList<>();
+
     /**
      * "Group encounter order" is preserved if we use a LinkedHashMap, and while that is not strictly necessary, I think
      * it is a nice touch. Not sure if JUnit UI reflects it, TBD.
@@ -86,6 +89,7 @@ public class QueryCollectingTreeProcessor extends Treeprocessor {
         collectBeforeAllQueries(document);
         collectBeforeEachQueries(document);
         collectQueryExamples(document);
+        collectAfterAllExampleQueries(document);
 
         return document;
     }
@@ -96,6 +100,10 @@ public class QueryCollectingTreeProcessor extends Treeprocessor {
 
     public List<DocQuery> getBeforeEachQueries() {
         return beforeEachQueries;
+    }
+
+    public List<QueryExample> getAfterAllQueries() {
+        return afterAllQueries;
     }
 
     /**
@@ -111,16 +119,24 @@ public class QueryCollectingTreeProcessor extends Treeprocessor {
     }
 
     private void collectBeforeAllQueries(StructuralNode document) {
-        var queries = CollectSetupQueries(document, SETUP_QUERY_ROLE);
+        var queries = collectSetupQueries(document, SETUP_QUERY_ROLE);
         beforeAllQueries.addAll(queries);
     }
 
     private void collectBeforeEachQueries(StructuralNode document) {
-        var queries = CollectSetupQueries(document, GRAPH_PROJECT_QUERY_ROLE);
+        var queries = collectSetupQueries(document, GRAPH_PROJECT_QUERY_ROLE);
         beforeEachQueries.addAll(queries);
     }
 
-    private static List<DocQuery> CollectSetupQueries(StructuralNode node, String setupQueryType) {
+    private void collectAfterAllExampleQueries(StructuralNode document) {
+        var examples = document.findBy(Map.of(ROLE_SELECTOR, CLEANUP_QUERY_ROLE));
+        for (StructuralNode example : examples) {
+            var queryExample = convertToQueryExample(example);
+            afterAllQueries.add(queryExample);
+        }
+    }
+
+    private static List<DocQuery> collectSetupQueries(StructuralNode node, String setupQueryType) {
         var nodes = node.findBy(Map.of(ROLE_SELECTOR, setupQueryType));
 
         return nodes.stream()
