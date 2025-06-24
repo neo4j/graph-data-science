@@ -161,7 +161,7 @@ final class Neo4jDatabaseNodePropertyWriter {
             throw new IllegalArgumentException("Missing arrow connection information");
         }
 
-        var expectedPropertyState = expectedPropertyStateForWriteMode(writeMode);
+        var expectedPropertyState = expectedPropertyStateForWriteMode(writeMode, useResultStore);
 
         var unexpectedProperties = nodeProperties
             .stream()
@@ -195,7 +195,11 @@ final class Neo4jDatabaseNodePropertyWriter {
         }
     }
 
-    private static Predicate<PropertyState> expectedPropertyStateForWriteMode(Capabilities.WriteMode writeMode) {
+    private static Predicate<PropertyState> expectedPropertyStateForWriteMode(Capabilities.WriteMode writeMode, boolean useResultStore) {
+        if (useResultStore) {
+            return (__) -> true;
+        }
+
         return switch (writeMode) {
             case LOCAL ->
                 // We need to allow persistent and transient as for example algorithms that support seeding will reuse a
