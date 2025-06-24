@@ -87,12 +87,18 @@ public class MappedParameterResolver implements BeforeEachMethodAdapter, Paramet
     public void invokeBeforeEachMethod(ExtensionContext context, ExtensionRegistry registry) throws Throwable {
         this.parameterizedTestParameterResolver = registry.getExtensions(ParameterResolver.class)
             .stream()
-            .filter(parameterResolver -> parameterResolver.getClass()
-                .getName()
-                .contains("ParameterizedTestParameterResolver"))
+            .filter(parameterResolver -> {
+                var resolverName = parameterResolver.getClass()
+                    .getName();
+                return
+                    // JUnit 5.13+ for some reason some sub-projects are updating the JUnit version and we need to cater for that
+                    resolverName.contains("ParameterizedTestMethodParameterResolver")
+                    // JUnit 5.11 is the version we currently work with
+                    || resolverName.contains("ParameterizedTestParameterResolver");
+            })
             .findFirst()
             .orElseThrow(() -> new IllegalStateException(
-                "ParameterizedTestParameterResolver not found. Test needs to be @ParameterizedTest")
+                "ParameterizedTestMethodParameterResolver not found. Test needs to be @ParameterizedTest")
             );
     }
 
