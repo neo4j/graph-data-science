@@ -29,6 +29,7 @@ dependencies {
     testImplementation project(':proc-test')
     testImplementation project(':proc-common')
     testImplementation project(':ml-core')
+    testImplementation project(':progress-tracking')
     testCompileOnly openGds.immutables.value.annotations
     testCompileOnly openGds.immutables.builder
     testCompileOnly openGds.jetbrains.annotations
