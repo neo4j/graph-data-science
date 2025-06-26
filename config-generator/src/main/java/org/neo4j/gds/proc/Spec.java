@@ -52,6 +52,7 @@ record Spec(TypeElement root, TypeMirror rootType, List<Member> members, boolean
         @NotNull ExecutableElement method,
         @Nullable String lookupKey,
         boolean collectsKeys,
+        boolean collectsProvidedKeys,
         boolean toMap,
         boolean validatesIntegerRange,
         boolean validatesLongRange,
@@ -71,7 +72,7 @@ record Spec(TypeElement root, TypeMirror rootType, List<Member> members, boolean
             if (!trimmedKey.equals(resolvedKey)) {
                 throw new InvalidMemberException("The key must not be surrounded by whitespace");
             }
-            if (collectsKeys && (validates || normalizes)) {
+            if ((collectsKeys || collectsProvidedKeys) && (validates || normalizes)) {
                 throw new InvalidMemberException(String.format(
                     Locale.ENGLISH,
                     "Cannot combine @%s with @%s",
@@ -94,7 +95,7 @@ record Spec(TypeElement root, TypeMirror rootType, List<Member> members, boolean
         }
 
         boolean isConfigValue() {
-            return !collectsKeys() && !toMap() && !validates() && !normalizes() && !graphStoreValidation() && !graphStoreValidationCheck();
+            return !collectsKeys() && !collectsProvidedKeys() && !toMap() && !validates() && !normalizes() && !graphStoreValidation() && !graphStoreValidationCheck();
         }
 
         boolean isConfigMapEntry() {

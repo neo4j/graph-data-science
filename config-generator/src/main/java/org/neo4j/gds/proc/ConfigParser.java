@@ -212,6 +212,7 @@ final class ConfigParser {
             .method(method);
 
         validateCollectKeys(method, memberBuilder);
+        validateCollectProvidedKeys(method, memberBuilder);
         validateToMap(method, memberBuilder);
 
         memberBuilder.validatesIntegerRange(isAnnotationPresent(method, Configuration.IntegerRange.class));
@@ -290,6 +291,24 @@ final class ConfigParser {
             }
 
             memberBuilder.collectsKeys(true);
+        }
+    }
+
+    private void validateCollectProvidedKeys(ExecutableElement method, MemberBuilder memberBuilder) {
+        if (isAnnotationPresent(method, Configuration.CollectProvidedKeys.class)) {
+            TypeElement collectionType = elementUtils.getTypeElement(Collection.class.getTypeName());
+            TypeMirror stringType = elementUtils.getTypeElement(String.class.getTypeName()).asType();
+            DeclaredType collectionOfStringType = typeUtils.getDeclaredType(collectionType, stringType);
+
+            if (!typeUtils.isSubtype(method.getReturnType(), collectionOfStringType)) {
+                messager.printMessage(
+                    Diagnostic.Kind.ERROR,
+                    "Method must return Collection<String>",
+                    method
+                );
+            }
+
+            memberBuilder.collectsProvidedKeys(true);
         }
     }
 

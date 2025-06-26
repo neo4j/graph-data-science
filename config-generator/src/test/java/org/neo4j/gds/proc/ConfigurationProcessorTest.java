@@ -59,10 +59,11 @@ class ConfigurationProcessorTest {
         "Conversions",
         "ConvertingParameters",
         "CollectingKeys",
+        "CollectingProvidedKeys",
         "ToMap",
         "Validation",
         "RangeValidation",
-        "GSValidation"
+        "GSValidation",
     })
     void positiveTest(String className) {
         assertContentEquals(className);

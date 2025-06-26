@@ -47,6 +47,7 @@ import javax.lang.model.element.Modifier;
 import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
@@ -181,13 +182,20 @@ final class GenerateConfiguration {
         NameAllocator names = new NameAllocator();
 
         ImmutableFieldDefinitions.Builder builder = ImmutableFieldDefinitions.builder().names(names);
-        config.members().stream().filter(Spec.Member::isConfigValue).map(member ->
-            FieldSpec.builder(
-                member.typeSpecWithAnnotation(Nullable.class),
-                names.newName(member.methodName(), member),
-                Modifier.PRIVATE
-            ).build()
-        ).forEach(builder::addField);
+        config.members().stream()
+            .filter(m -> m.isConfigValue() || m.collectsProvidedKeys())
+            .map(member -> {
+                var fieldBuilder = FieldSpec.builder(
+                    member.typeSpecWithAnnotation(Nullable.class),
+                    names.newName(member.methodName(), member),
+                    Modifier.PRIVATE
+                );
+                if (member.collectsProvidedKeys()) {
+                    fieldBuilder.addModifiers(Modifier.FINAL);
+                }
+                return fieldBuilder.build();
+            })
+            .forEach(builder::addField);
         return builder.build();
     }
 
@@ -201,6 +209,19 @@ final class GenerateConfiguration {
             .addModifiers(Modifier.PUBLIC);
 
         boolean requiredMapParameter = false;
+
+        for (var implMember : implMembers) {
+            if (implMember.member().collectsProvidedKeys()) {
+                requiredMapParameter = true;
+                constructorMethodBuilder.addStatement(
+                    "this.$N = $T.copyOf($N.$N())",
+                    implMember.fieldName(),
+                    Set.class,
+                    implMember.configParamName(),
+                    implMember.methodName()
+                );
+            }
+        }
 
         String errorsVarName = names.newName("errors");
         if (!implMembers.isEmpty()) {
@@ -218,7 +239,7 @@ final class GenerateConfiguration {
             if (parsedMember.isConfigMapEntry()) {
                 requiredMapParameter = true;
                 addConfigFieldToConstructor(constructorMethodBuilder, implMember, errorsVarName);
-            } else {
+            } else if (parsedMember.isConfigParameter()) {
                 addParameterToConstructor(
                     constructorMethodBuilder,
                     implMember,
@@ -452,6 +473,20 @@ final class GenerateConfiguration {
     }
 
     private Optional<MemberDefinition> memberDefinition(NameAllocator names, Spec.Member member) {
+        if (member.collectsProvidedKeys()) {
+            return Optional.of(ImmutableMemberDefinition
+                .builder()
+                .member(member)
+                .fieldName(names.get(member))
+                .configParamName(names.get(CONFIG_VAR))
+                .configKey(member.lookupKey())
+                .fieldType(member.method().getReturnType())
+                .methodName("keySet")
+                .parameterType(this.typeUtils.getNoType(TypeKind.VOID))
+                .methodPrefix("")
+                .build());
+        }
+
         if (!member.isConfigValue()) {
             return Optional.empty();
         }
@@ -717,7 +752,7 @@ final class GenerateConfiguration {
                                 member.method()
                             );
                         } else {
-                            maybeInnerType = Optional.of(ClassName.get(asTypeElement(typeArguments.get(0))));
+                            maybeInnerType = Optional.of(ClassName.get(asTypeElement(typeArguments.getFirst())));
                         }
                     }
 
@@ -755,9 +790,9 @@ final class GenerateConfiguration {
             builder
                 .methodPrefix("get")
                 .defaultProvider(CodeBlock.of(
-                    "$T.super.$N()",
-                    member.owner().asType(),
-                    member.methodName()
+                        "$T.super.$N()",
+                        member.owner().asType(),
+                        member.methodName()
                     )
                 );
         }

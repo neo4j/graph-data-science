@@ -66,7 +66,7 @@ final class GenerateConfigurationMethods {
             GenerateConfigurationMethods.injectToMapCode(config, builder);
         } else if (member.graphStoreValidation()) {
             GenerateConfigurationMethods.graphStoreValidationCode(member, config, names, builder);
-        } else if (member.isConfigValue()) {
+        } else if (member.isConfigValue() || member.collectsProvidedKeys()) {
             builder.addStatement("return this.$N", names.get(member));
         } else {
             return Optional.empty();
@@ -79,7 +79,7 @@ final class GenerateConfigurationMethods {
             .members()
             .stream()
             .filter(Spec.Member::isConfigMapEntry)
-            .collect(Collectors.toList());
+            .toList();
 
         switch (configMembers.size()) {
             case 0:
@@ -150,18 +150,17 @@ final class GenerateConfigurationMethods {
             .map(Spec.Member::lookupKey)
             .collect(Collectors.toCollection(LinkedHashSet::new));
 
-        switch (configKeys.size()) {
-            case 0:
-                return CodeBlock.of("return $T.emptyList()", Collections.class);
-            case 1:
-                return CodeBlock.of("return $T.singleton($S)", Collections.class, configKeys.iterator().next());
-            default:
+        return switch (configKeys.size()) {
+            case 0 -> CodeBlock.of("return $T.emptyList()", Collections.class);
+            case 1 -> CodeBlock.of("return $T.singleton($S)", Collections.class, configKeys.iterator().next());
+            default -> {
                 CodeBlock keys = configKeys
                     .stream()
                     .map(name -> CodeBlock.of("$S", name))
                     .collect(CodeBlock.joining(", "));
-                return CodeBlock.of("return $T.asList($L)", Arrays.class, keys);
-        }
+                yield CodeBlock.of("return $T.asList($L)", Arrays.class, keys);
+            }
+        };
     }
 
     private static void graphStoreValidationCode(
@@ -172,7 +171,7 @@ final class GenerateConfigurationMethods {
     ) {
         var graphStoreValidationMethods = config.members().stream()
             .filter(Spec.Member::graphStoreValidationCheck)
-            .collect(Collectors.toList());
+            .toList();
         var parameters = validationMethod.method().getParameters();
 
         String errorsVarName = names.newName("errors");

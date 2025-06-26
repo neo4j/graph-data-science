@@ -134,6 +134,17 @@ public @interface Configuration {
     }
 
     /**
+     * Use this annotation on a method to return the keys that have benn provided at runtime.
+     * <p>
+     * This is different from {@link org.neo4j.gds.annotation.Configuration.CollectKeys} in that it collects the keys provided at runtime, not the keys that could have been proviced.
+     */
+    @Documented
+    @Target(ElementType.METHOD)
+    @Retention(RetentionPolicy.RUNTIME)
+    @interface CollectProvidedKeys {
+    }
+
+    /**
      * Annotated function will return the map representation of the configuration.
      * The return type of the method must be of type Map&lt;String, Object&gt;.
      *
