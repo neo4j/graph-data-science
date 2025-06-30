@@ -48,8 +48,8 @@ public class DijkstraWithPathsResult implements MutateResult {
 
     public static DijkstraWithPathsResult create(
         AlgorithmProcessingTimings timings,
-        Map<String, Object> configuration){
-
+        Map<String, Object> configuration
+    ){
         return new DijkstraWithPathsResult(
             timings.preProcessingMillis,
             timings.computeMillis,
@@ -57,8 +57,6 @@ public class DijkstraWithPathsResult implements MutateResult {
             0L,
             configuration
         );
-
-
     }
 
     //add getters to maintain the interface

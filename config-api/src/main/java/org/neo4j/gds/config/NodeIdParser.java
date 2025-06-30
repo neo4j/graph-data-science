@@ -44,7 +44,7 @@ public final class NodeIdParser {
         var nodeIds = new ArrayList<Long>();
 
         if (input instanceof Iterable) {
-            for (var item : (Iterable) input) {
+            for (var item : (Iterable<?>) input) {
                 nodeIds.add(parseNodeId(item, parameterName));
             }
         } else {
