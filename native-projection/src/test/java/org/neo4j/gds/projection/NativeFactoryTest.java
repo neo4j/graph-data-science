@@ -19,23 +19,40 @@
  */
 package org.neo4j.gds.projection;
 
+import com.carrotsearch.hppc.LongHashSet;
+import org.agrona.collections.MutableBoolean;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.ImmutableRelationshipProjections;
+import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.NodeProjection;
 import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.CSRGraphStoreFactory;
+import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.core.utils.progress.JobId;
+import org.neo4j.gds.core.utils.progress.TaskRegistry;
+import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
+import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryTree;
 
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 class NativeFactoryTest {
 
@@ -141,5 +158,68 @@ class NativeFactoryTest {
 
         assertEquals(12_056_534_400L, estimate.memoryUsage().min);
         assertEquals(13_667_147_136L, estimate.memoryUsage().max);
+    }
+
+    @Test
+    void shouldCleanTaskOnValidateFailure(){
+
+        var mockRegistry = mock(TaskRegistry.class);
+
+        var mockRegistryFactory = mock(TaskRegistryFactory.class);
+        when(mockRegistryFactory.newInstance(any())).thenReturn(mockRegistry);
+        var mockgraphLoaderContext = mock(GraphLoaderContext.class);
+        when(mockgraphLoaderContext.taskRegistryFactory()).thenReturn(mockRegistryFactory);
+        when(mockgraphLoaderContext.log()).thenReturn(Log.noOpLog());
+
+        var labelSet = new LongHashSet();
+        labelSet.add(GraphDimensions.NO_SUCH_LABEL);
+        var graphDimensions =ImmutableGraphDimensions.builder()
+            .nodeCount(100)
+            .nodeLabelTokens(labelSet)
+            .build();
+
+        var config = mock(GraphProjectFromStoreConfig.class);
+        when(config.relationshipProjections()).thenReturn(new RelationshipProjections() {
+            @Override
+            public Map<RelationshipType, RelationshipProjection> projections() {
+                return Map.of();
+            }
+        });
+
+        when(config.nodeProjections()).thenReturn(new NodeProjections() {
+            @Override
+            public Map<NodeLabel, NodeProjection> projections() {
+                return Map.of(
+                    NodeLabel.of("foo"), new NodeProjection() {
+                        @Override
+                        public String label() {
+                            return "bar";
+                        }
+                    }
+                );
+            }
+        });
+
+        when(config.logProgress()).thenReturn(true);
+        when(config.jobId()).thenReturn(new JobId("foo"));
+        when(config.readConcurrency()).thenReturn(new Concurrency(1));
+
+        var nativeFactory = NativeFactory.nativeFactory(
+            config,
+            mockgraphLoaderContext,
+            Optional.of(graphDimensions)
+        );
+
+        MutableBoolean failed = new MutableBoolean(false);
+        try {
+            nativeFactory.build();
+        } catch (Exception ignored){
+            failed.set(true);
+        }
+
+        assertThat(failed.get()).isTrue();
+        verify(mockRegistry,times(1)).registerTask(any());
+        verify(mockRegistry,times(1)).markCompleted();
+
     }
 }

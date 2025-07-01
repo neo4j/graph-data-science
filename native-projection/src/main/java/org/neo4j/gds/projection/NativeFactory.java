@@ -133,11 +133,12 @@ final class NativeFactory extends CSRGraphStoreFactory<GraphProjectFromStoreConf
 
     @Override
     public CSRGraphStore build() {
-        validate(dimensions, storeConfig);
-
-        var concurrency = graphProjectConfig.readConcurrency();
         try {
+            // Start the sub-task so it will be registered in the task store
             progressTracker.beginSubTask();
+            // `validate` can raise an exception which has to be handled in order to end the sub-task with failure
+            validate(dimensions, storeConfig);
+            var concurrency = graphProjectConfig.readConcurrency();
             Nodes nodes = loadNodes(concurrency);
             RelationshipImportResult relationships = loadRelationships(nodes.idMap(), concurrency);
             CSRGraphStore graphStore = createGraphStore(nodes, relationships);

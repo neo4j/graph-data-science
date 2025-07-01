@@ -42,7 +42,12 @@ public class MemoryUsageValidator {
     private final MemoryTracker memoryTracker;
     private final String username;
 
-    public MemoryUsageValidator(String username,MemoryTracker memoryTracker, boolean useMaxMemoryEstimation, Log log) {
+    public MemoryUsageValidator(
+        String username,
+        MemoryTracker memoryTracker,
+        boolean useMaxMemoryEstimation,
+        Log log
+    ) {
         this.log = log;
         this.useMaxMemoryEstimation = useMaxMemoryEstimation;
         this.memoryTracker = memoryTracker;
