@@ -61,7 +61,7 @@ When the graph projection is requested, a mandatory `memory` parameter must be s
 The size of the session is the maximum amount of memory allocated to the analytical process.
 A larger size means faster runtime and an ability to process larger volumes of data, but it will also be more expensive.
 
-Supported values are: `4GB`, `8GB`, `16GB`, `24GB`, `32GB`, `48GB`, `64GB`, `96GB`, `128GB`, `192GB`, `256GB`, `384GB`, and `512GB`.
+Supported values are: `2GB`, `4GB`, `8GB`, `16GB`, `24GB`, `32GB`, `48GB`, `64GB`, `96GB`, `128GB`, `192GB`, `256GB`, `384GB`, and `512GB`.
 
 [NOTE]
 Session maximum size can be configured for your Aura organization.
