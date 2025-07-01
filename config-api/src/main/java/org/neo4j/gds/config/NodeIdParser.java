@@ -98,17 +98,27 @@ public final class NodeIdParser {
     }
 
     private static Long parseNodeId(Object input, String parameterName) {
-        if (input instanceof Node) {
-            return ((Node) input).getId();
-        } else if (input instanceof Number) {
-            return ((Number) input).longValue();
+        if (input instanceof Number num) {
+            return num.longValue();
         }
 
-        throw new IllegalArgumentException(formatWithLocale(
-            "Failed to parse `%s` as a List of node IDs. A Node, Number or collection of the same can be parsed, but this `%s` cannot.",
-            parameterName,
-            input.getClass().getSimpleName()
-        ));
+        try {
+            if (input instanceof Node node) {
+                return node.getId();
+            }
+
+            throw new IllegalArgumentException(formatWithLocale(
+                "Failed to parse `%s` as a List of node IDs. A Node, Number or collection of the same can be parsed, but this `%s` cannot.",
+                parameterName,
+                input.getClass().getSimpleName()
+            ));
+        } catch (NoClassDefFoundError neo4jNotAvailable) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "Failed to parse `%s` as a List of node IDs. A number or collection of numbers can be parsed, but this `%s` cannot.",
+                parameterName,
+                input.getClass().getSimpleName()
+            ));
+        }
     }
 
     /**
@@ -120,7 +130,7 @@ public final class NodeIdParser {
      * @return A {@code java.lang.Long} of node IDs.
      */
     public static long parseToSingleNodeId(Object input, String parameterName) {
-        if (input instanceof Collection collection) {
+        if (input instanceof Collection<?> collection) {
             if (collection.size() != 1) {
                 throw new IllegalArgumentException(formatWithLocale(
                     "Failed to parse `%s` as a single node ID. A collection can be parsed if it contains a single element, but this `%s` contains `%s` elements.",
@@ -131,16 +141,25 @@ public final class NodeIdParser {
             }
             input = collection.iterator().next();
         }
-        if (input instanceof Number) {
-            return ((Number) input).longValue();
+        if (input instanceof Number num) {
+            return num.longValue();
         }
-        if (input instanceof Node) {
-            return ((Node) input).getId();
+        try {
+            if (input instanceof Node node) {
+                return node.getId();
+            }
+
+            throw new IllegalArgumentException(formatWithLocale(
+                "Failed to parse `%s` as a single node ID. A Node, a Number or a collection containing a single Node or Number can be parsed, but this `%s` cannot.",
+                parameterName,
+                input.getClass().getSimpleName()
+            ));
+        } catch (NoClassDefFoundError neo4jNotAvailable) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "Failed to parse `%s` as a single node ID. A number or a collection containing a single number can be parsed, but this `%s` cannot.",
+                parameterName,
+                input.getClass().getSimpleName()
+            ));
         }
-        throw new IllegalArgumentException(formatWithLocale(
-            "Failed to parse `%s` as a single node ID. A Node, a Number or a collection containing a single Node or Number can be parsed, but this `%s` cannot.",
-            parameterName,
-            input.getClass().getSimpleName()
-        ));
     }
 }
