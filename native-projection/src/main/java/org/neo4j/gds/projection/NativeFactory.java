@@ -41,8 +41,6 @@ import org.neo4j.gds.mem.MemoryEstimation;
 
 import java.util.Optional;
 
-import static org.neo4j.gds.projection.GraphDimensionsValidation.validate;
-
 final class NativeFactory extends CSRGraphStoreFactory<GraphProjectFromStoreConfig> {
 
     private final GraphProjectFromStoreConfig storeConfig;
@@ -64,18 +62,21 @@ final class NativeFactory extends CSRGraphStoreFactory<GraphProjectFromStoreConf
         return new NativeFactory(
             graphProjectFromStoreConfig,
             loadingContext,
-            dimensions
+            dimensions,
+            initProgressTracker(graphProjectFromStoreConfig, loadingContext, dimensions)
         );
     }
 
-    private NativeFactory(
+    // Package-private constructor used in tests
+    NativeFactory(
         GraphProjectFromStoreConfig graphProjectConfig,
         GraphLoaderContext loadingContext,
-        GraphDimensions graphDimensions
+        GraphDimensions graphDimensions,
+        ProgressTracker progressTracker
     ) {
         super(graphProjectConfig, ImmutableStaticCapabilities.of(WriteMode.LOCAL), loadingContext, graphDimensions);
         this.storeConfig = graphProjectConfig;
-        this.progressTracker = initProgressTracker();
+        this.progressTracker = progressTracker;
     }
 
     @Override
@@ -88,7 +89,10 @@ final class NativeFactory extends CSRGraphStoreFactory<GraphProjectFromStoreConf
         return getMemoryEstimation(storeConfig.nodeProjections(), storeConfig.relationshipProjections(), false);
     }
 
-    private ProgressTracker initProgressTracker() {
+    private static ProgressTracker initProgressTracker(
+        GraphProjectFromStoreConfig graphProjectConfig,
+        GraphLoaderContext loadingContext, GraphDimensions dimensions
+    ) {
         long relationshipCount = graphProjectConfig
             .relationshipProjections()
             .projections()
@@ -137,7 +141,7 @@ final class NativeFactory extends CSRGraphStoreFactory<GraphProjectFromStoreConf
             // Start the sub-task so it will be registered in the task store
             progressTracker.beginSubTask();
             // `validate` can raise an exception which has to be handled in order to end the sub-task with failure
-            validate(dimensions, storeConfig);
+            validate();
             var concurrency = graphProjectConfig.readConcurrency();
             Nodes nodes = loadNodes(concurrency);
             RelationshipImportResult relationships = loadRelationships(nodes.idMap(), concurrency);
@@ -151,6 +155,11 @@ final class NativeFactory extends CSRGraphStoreFactory<GraphProjectFromStoreConf
             progressTracker.endSubTaskWithFailure();
             throw e;
         }
+    }
+
+    // Allows for mocking the validation behaviour.
+    void validate() throws IllegalArgumentException {
+        GraphDimensionsValidation.validate(dimensions, storeConfig);
     }
 
     private Nodes loadNodes(Concurrency concurrency) {

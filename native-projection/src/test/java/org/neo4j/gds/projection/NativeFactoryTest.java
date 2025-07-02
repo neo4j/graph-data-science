@@ -19,12 +19,8 @@
  */
 package org.neo4j.gds.projection;
 
-import com.carrotsearch.hppc.LongHashSet;
-import org.agrona.collections.MutableBoolean;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.ImmutableRelationshipProjections;
-import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.NodeProjection;
 import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipProjection;
@@ -35,24 +31,20 @@ import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.core.utils.progress.JobId;
-import org.neo4j.gds.core.utils.progress.TaskRegistry;
-import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
-import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryTree;
 
-import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 class NativeFactoryTest {
 
@@ -161,65 +153,24 @@ class NativeFactoryTest {
     }
 
     @Test
-    void shouldCleanTaskOnValidateFailure(){
+    void shouldCleanTaskOnValidateFailure() {
+        var progressTrackerMock = mock(ProgressTracker.class);
 
-        var mockRegistry = mock(TaskRegistry.class);
+        var nativeFactorySpy = spy(new NativeFactory(
+            mock(GraphProjectFromStoreConfig.class),
+            mock(GraphLoaderContext.class),
+            mock(GraphDimensions.class),
+            progressTrackerMock
+        ));
 
-        var mockRegistryFactory = mock(TaskRegistryFactory.class);
-        when(mockRegistryFactory.newInstance(any())).thenReturn(mockRegistry);
-        var mockgraphLoaderContext = mock(GraphLoaderContext.class);
-        when(mockgraphLoaderContext.taskRegistryFactory()).thenReturn(mockRegistryFactory);
-        when(mockgraphLoaderContext.log()).thenReturn(Log.noOpLog());
+        doThrow(new IllegalArgumentException("Intentionally failing validation")).when(nativeFactorySpy).validate();
 
-        var labelSet = new LongHashSet();
-        labelSet.add(GraphDimensions.NO_SUCH_LABEL);
-        var graphDimensions =ImmutableGraphDimensions.builder()
-            .nodeCount(100)
-            .nodeLabelTokens(labelSet)
-            .build();
+        assertThatIllegalArgumentException()
+            .isThrownBy(nativeFactorySpy::build)
+            .withMessageContaining("Intentionally failing validation");
 
-        var config = mock(GraphProjectFromStoreConfig.class);
-        when(config.relationshipProjections()).thenReturn(new RelationshipProjections() {
-            @Override
-            public Map<RelationshipType, RelationshipProjection> projections() {
-                return Map.of();
-            }
-        });
-
-        when(config.nodeProjections()).thenReturn(new NodeProjections() {
-            @Override
-            public Map<NodeLabel, NodeProjection> projections() {
-                return Map.of(
-                    NodeLabel.of("foo"), new NodeProjection() {
-                        @Override
-                        public String label() {
-                            return "bar";
-                        }
-                    }
-                );
-            }
-        });
-
-        when(config.logProgress()).thenReturn(true);
-        when(config.jobId()).thenReturn(new JobId("foo"));
-        when(config.readConcurrency()).thenReturn(new Concurrency(1));
-
-        var nativeFactory = NativeFactory.nativeFactory(
-            config,
-            mockgraphLoaderContext,
-            Optional.of(graphDimensions)
-        );
-
-        MutableBoolean failed = new MutableBoolean(false);
-        try {
-            nativeFactory.build();
-        } catch (Exception ignored){
-            failed.set(true);
-        }
-
-        assertThat(failed.get()).isTrue();
-        verify(mockRegistry,times(1)).registerTask(any());
-        verify(mockRegistry,times(1)).markCompleted();
-
+        verify(progressTrackerMock, times(1)).beginSubTask();
+        verify(progressTrackerMock, times(1)).endSubTaskWithFailure();
+        verifyNoMoreInteractions(progressTrackerMock);
     }
 }
