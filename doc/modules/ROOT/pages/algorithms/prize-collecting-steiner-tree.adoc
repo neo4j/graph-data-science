@@ -12,10 +12,10 @@ include::partial$/algorithms/shared/algorithm-traits.adoc[]
 
 == Introduction
 
-A spanning tree is a graph such that there is exactly one path between any two nodes in the set.
-A graph can have many possible spanning tree subsets depending on the set of nodes/relationships selected.
+Given a graph, a subtree can be formed by selecting a set of relationships under the constraint that the resulting subgraph is connected and there is exactly one path between every two nodes in it.
+A graph can have many possible subtrees depending on which nodes/relationships are selected.
 
-Given a weighted graph where each node has a prize, the Prize-Collecting Steiner Tree problem asks for the  spanning tree that  satisfies the following conditions:
+Given a weighted graph where each node has a prize, the Prize-Collecting Steiner Tree problem asks for a subtree that  satisfies the following conditions:
 
 - the sum of prizes for the nodes in the graph is maximized.
 - the sum of weights of relationships and prizes for nodes not in the tree is minimized.
@@ -72,8 +72,8 @@ include::partial$/algorithms/prize-steiner/specific-configuration.adoc[]
 [opts="header",cols="1,1,6"]
 |===
 | Name     | Type    | Description
-| nodeId   | Integer | A node in the discovered spanning tree.
-| parentId | Integer | The parent of nodeId in the spanning tree or nodeId if it is equal to the source node.
+| nodeId   | Integer | A node in the discovered subtree.
+| parentId | Integer | The parent of nodeId in the tree or nodeId if it is equal to the source node.
 | weight   | Float   | The weight of the relationship from parentId to nodeId.
 |===
 
@@ -110,9 +110,9 @@ include::partial$/algorithms/prize-steiner/specific-configuration.adoc[]
 [opts="header",cols="1,1,6"]
 |===
 | Name                      | Type    | Description
-| effectiveNodeCount        | Integer | The number of nodes in the spanning tree.
-| totalWeight               | Float   | The sum of the weights of the relationships in the spanning tree.
-| sumOfPrizes               | Float   | The sum of prizes for the nodes in the spanning tree.
+| effectiveNodeCount        | Integer | The number of nodes in the subtree.
+| totalWeight               | Float   | The sum of the weights of the relationships in the  subtree.
+| sumOfPrizes               | Float   | The sum of prizes for the nodes in the  subtree.
 | preProcessingMillis       | Integer | Milliseconds for preprocessing the data.
 | computeMillis             | Integer | Milliseconds for running the algorithm.
 | configuration             | Map     | The configuration used for running the algorithm.
@@ -153,9 +153,9 @@ include::partial$/algorithms/prize-steiner/specific-configuration.adoc[]
 [opts="header",cols="1,1,6"]
 |===
 | Name                      | Type    | Description
-| effectiveNodeCount        | Integer | The number of nodes in the spanning tree.
-| totalWeight               | Float   | The sum of the weights of the relationships in the spanning tree.
-| sumOfPrizes               | Float   | The sum of prizes for the nodes in the spanning tree.
+| effectiveNodeCount        | Integer | The number of nodes in the subtree.
+| totalWeight               | Float   | The sum of the weights of the relationships in the subtree.
+| sumOfPrizes               | Float   | The sum of prizes for the nodes in the subtree.
 | preProcessingMillis       | Integer | Milliseconds for preprocessing the data.
 | computeMillis             | Integer | Milliseconds for running the algorithm.
 | mutateMillis              | Integer | Milliseconds for writing result data back.
@@ -198,9 +198,9 @@ include::partial$/algorithms/prize-steiner/specific-configuration.adoc[]
 [opts="header",cols="1,1,6"]
 |===
 | Name                      | Type    | Description
-| effectiveNodeCount        | Integer | The number of nodes in the spanning tree.
-| totalWeight               | Float   | The sum of the weights of the relationships in the spanning tree.
-| sumOfPrizes               | Float   | The sum of prizes for the nodes in the spanning tree.
+| effectiveNodeCount        | Integer | The number of nodes in the  subtree.
+| totalWeight               | Float   | The sum of the weights of the relationships in the subtree.
+| sumOfPrizes               | Float   | The sum of prizes for the nodes in the subtree.
 | preProcessingMillis       | Integer | Milliseconds for preprocessing the data.
 | computeMillis             | Integer | Milliseconds for running the algorithm.
 | writeMillis               | Integer | Milliseconds for writing result data back.
