@@ -17,32 +17,32 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.config;
 
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.neo4j.gds.config.RandomSeedConfig;
+
+import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 
-import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.core.CypherMapWrapper;
+class RandomSeedConfigTest {
 
-@Configuration
-public interface RandomSeedConfig {
-    @Configuration.ConvertWith(method = "toLong")
-    Optional<Long> randomSeed();
-
-    static Long toLong(Object obj) {
-        if (obj instanceof Integer) {
-            return ((Integer) obj).longValue();
-        } else if (obj instanceof Long) {
-            return (Long) obj;
-        } else {
-            throw new IllegalArgumentException("Object must be of type int, Integer, long, or Long");
-        }
+    @Test
+    void shouldAcceptInt() {
+        var config = RandomSeedConfig.of(Map.of("randomSeed", 42));
+        Assertions.assertEquals(42L, config.randomSeed().get());
     }
 
-    static RandomSeedConfig of(@Nullable Map<String, ?> userInput) {
-        return new RandomSeedConfigImpl(CypherMapWrapper.create(userInput));
+    @Test
+    void shouldAcceptLong() {
+        var config = RandomSeedConfig.of(Map.of("randomSeed", 42L));
+        Assertions.assertEquals(42L, config.randomSeed().get());
+    }
+
+    @Test
+    void shouldAcceptEmpty() {
+        var config = RandomSeedConfig.of(Collections.emptyMap());
+        Assertions.assertEquals(Optional.empty(), config.randomSeed());
     }
 }
-
