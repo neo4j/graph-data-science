@@ -54,7 +54,7 @@ public class MemoryUsageValidator {
         this.username = username;
     }
 
-    public <C extends BaseConfig & JobIdConfig> MemoryRange tryValidateMemoryUsage(
+    public synchronized  <C extends BaseConfig & JobIdConfig> MemoryRange tryValidateMemoryUsage(
         String taskName,
         C config,
         Function<C, MemoryTreeWithDimensions> runEstimation
