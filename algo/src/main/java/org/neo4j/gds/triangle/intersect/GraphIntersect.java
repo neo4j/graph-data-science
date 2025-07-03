@@ -21,6 +21,7 @@ package org.neo4j.gds.triangle.intersect;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.AdjacencyCursor;
+import org.neo4j.gds.api.AdjacencyCursorUtils;
 import org.neo4j.gds.api.IntersectionConsumer;
 import org.neo4j.gds.api.RelationshipIntersect;
 
@@ -67,7 +68,7 @@ public abstract class GraphIntersect<CURSOR extends AdjacencyCursor> implements 
         CURSOR neighborsOfa,
         IntersectionConsumer consumer
     ) {
-        long b = next(neighborsOfa);
+        long b = AdjacencyCursorUtils.next(neighborsOfa);
         while (b != NOT_FOUND && b < a) {
             var degreeOfb = degree(b);
             if (degreeFilter.test(degreeOfb)) {
@@ -88,23 +89,23 @@ public abstract class GraphIntersect<CURSOR extends AdjacencyCursor> implements 
                 ); //find all triangles involving the edge (a-b)
             }
 
-            b = next(neighborsOfa);
+            b = AdjacencyCursorUtils.next(neighborsOfa);
         }
 
     }
 
     private void triangles(long a, long b, CURSOR neighborsOfa, CURSOR neighborsOfb, IntersectionConsumer consumer) {
-        long c = next(neighborsOfb);
-        long currentOfa = next(neighborsOfa);
+        long c = AdjacencyCursorUtils.next(neighborsOfb);
+        long currentOfa = AdjacencyCursorUtils.next(neighborsOfa);
         while (c != NOT_FOUND && currentOfa != NOT_FOUND && c < b) {
             var degreeOfc = degree(c);
             if (degreeFilter.test(degreeOfc)) {
-                currentOfa = advance(neighborsOfa, currentOfa, c);
+                currentOfa = AdjacencyCursorUtils.advance(neighborsOfa, currentOfa, c);
                 //now print all triangles a-b-c  (taking into consideration the parallel edges of c)
                 checkForAndEmitTriangle(consumer, a, b, currentOfa, c);
 
             }
-            c = next(neighborsOfb);
+            c = AdjacencyCursorUtils.next(neighborsOfb);
         }
     }
 
@@ -123,35 +124,6 @@ public abstract class GraphIntersect<CURSOR extends AdjacencyCursor> implements 
         }
     }
 
-    private long advance(CURSOR adjacencyList, long start, long target) {
-        long current = start;
-        while (current != NOT_FOUND && current < target) {
-            current = next(adjacencyList);
-        }
-        return current;
-    }
-    private long next(CURSOR adjacencyList) {
-
-        if (!adjacencyList.hasNextVLong()) {
-            return NOT_FOUND;
-        }
-        var value = adjacencyList.nextVLong();
-
-        while (peek(adjacencyList) == value) {
-            adjacencyList.nextVLong();
-        }
-
-        return value;
-    }
-
-    private long peek(CURSOR adjacencyList) {
-
-        if (!adjacencyList.hasNextVLong()) {
-            return NOT_FOUND;
-        }
-
-        return adjacencyList.peekVLong();
-    }
 
     protected abstract CURSOR cursorForNode(@Nullable CURSOR reuse, long node, int degree);
 
