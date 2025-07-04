@@ -27,15 +27,24 @@ import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.CSRGraphStoreFactory;
+import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryTree;
 
 import java.util.concurrent.atomic.AtomicReference;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 class NativeFactoryTest {
 
@@ -141,5 +150,27 @@ class NativeFactoryTest {
 
         assertEquals(12_056_534_400L, estimate.memoryUsage().min);
         assertEquals(13_667_147_136L, estimate.memoryUsage().max);
+    }
+
+    @Test
+    void shouldCleanTaskOnValidateFailure() {
+        var progressTrackerMock = mock(ProgressTracker.class);
+
+        var nativeFactorySpy = spy(new NativeFactory(
+            mock(GraphProjectFromStoreConfig.class),
+            mock(GraphLoaderContext.class),
+            mock(GraphDimensions.class),
+            progressTrackerMock
+        ));
+
+        doThrow(new IllegalArgumentException("Intentionally failing validation")).when(nativeFactorySpy).validate();
+
+        assertThatIllegalArgumentException()
+            .isThrownBy(nativeFactorySpy::build)
+            .withMessageContaining("Intentionally failing validation");
+
+        verify(progressTrackerMock, times(1)).beginSubTask();
+        verify(progressTrackerMock, times(1)).endSubTaskWithFailure();
+        verifyNoMoreInteractions(progressTrackerMock);
     }
 }
