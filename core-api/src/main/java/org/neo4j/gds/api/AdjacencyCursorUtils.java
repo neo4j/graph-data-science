@@ -33,6 +33,15 @@ public final class AdjacencyCursorUtils {
         return current;
     }
 
+    public static <CURSOR extends AdjacencyCursor> long advance(CURSOR adjacencyList, long target) {
+        long current = peek(adjacencyList);
+        while (current != NOT_FOUND && current < target) {
+            current = next(adjacencyList);
+        }
+        return current;
+    }
+
+
     public static <CURSOR extends AdjacencyCursor> long next(CURSOR adjacencyList) {
 
         if (!adjacencyList.hasNextVLong()) {
@@ -54,4 +63,13 @@ public final class AdjacencyCursorUtils {
         }
         return adjacencyList.peekVLong();
     }
+
+    public static <CURSOR extends AdjacencyCursor> boolean isEmpty(CURSOR adjacencyList) {
+
+        return  !adjacencyList.hasNextVLong();
+
+    }
+
+
+
 }

@@ -103,8 +103,8 @@ public class CommunityAlgorithms {
         ).compute();
     }
 
-    public CliqueCountingResult cliqueCounting(Graph graph, CliqueCountingParameters parameters ,ProgressTracker progressTracker) {
-        return new CliqueCounting(
+    public CliqueCountingResult cliqueCounting(Graph graph, CliqueCountingParameters parameters, ProgressTracker progressTracker) {
+        return CliqueCounting.create(
             graph,
             parameters,
             DefaultPool.INSTANCE,
