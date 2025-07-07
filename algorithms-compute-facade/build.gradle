@@ -6,10 +6,12 @@ group = 'org.neo4j.gds'
 
 dependencies {
 
+    implementation project(':algo')
     implementation project(':algo-common')
-    // This probably should be `api` since `JobId` is input parameter
+    implementation project(':collections')
     implementation project(':core-api')
     implementation project(':logging')
+    implementation project(':path-finding-params')
 
     // Test dependencies
     testImplementation platform(openGds.junit5bom)
