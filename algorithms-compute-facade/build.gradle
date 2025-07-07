@@ -1,0 +1,20 @@
+apply plugin: 'java-library'
+
+description = 'Neo4j Graph Data Science :: Algorithms Compute Facade'
+
+group = 'org.neo4j.gds'
+
+dependencies {
+
+    implementation project(':algo-common')
+    // This probably should be `api` since `JobId` is input parameter
+    implementation project(':core-api')
+    implementation project(':logging')
+
+    // Test dependencies
+    testImplementation platform(openGds.junit5bom)
+    testImplementation openGds.assertj.core
+    testImplementation libs.awaitility
+    testImplementation openGds.junit5.jupiter
+    testImplementation openGds.mockito.junit.jupiter
+}

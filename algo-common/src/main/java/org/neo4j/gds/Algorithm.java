@@ -19,10 +19,12 @@
  */
 package org.neo4j.gds;
 
-import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.termination.TerminationFlag;
 
-public abstract class Algorithm<RESULT> {
+import java.util.concurrent.Callable;
+
+public abstract class Algorithm<RESULT> implements Callable<RESULT> {
     protected final ProgressTracker progressTracker;
 
     protected TerminationFlag terminationFlag = TerminationFlag.RUNNING_TRUE;
@@ -32,6 +34,11 @@ public abstract class Algorithm<RESULT> {
     }
 
     public abstract RESULT compute();
+
+    @Override
+    public RESULT call() throws Exception {
+        return compute();
+    }
 
     public void setTerminationFlag(TerminationFlag terminationFlag) {
         this.terminationFlag = terminationFlag;
