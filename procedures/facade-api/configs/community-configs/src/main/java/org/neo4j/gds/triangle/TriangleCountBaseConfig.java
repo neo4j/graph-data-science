@@ -68,6 +68,41 @@ public interface TriangleCountBaseConfig extends AlgoBaseConfig {
         }
     }
 
+    @Configuration.GraphStoreValidationCheck
+    default void validateLabelFilter(
+        GraphStore ignored,
+        Collection<NodeLabel> nodeLabels,
+        Collection<RelationshipType> algoIgnored
+    ) {
+        if (aLabel().isPresent()) {
+            var _aLabel = NodeLabel.of(aLabel().get());
+            if (!nodeLabels.contains(_aLabel)) {
+                throw new IllegalArgumentException(formatWithLocale(
+                    "TriangleCount requires the provided 'aLabel' node label '%s' to be present in the graph.",
+                    _aLabel.name()
+                ));
+            }
+        }
+        if (bLabel().isPresent()) {
+            var _bLabel = NodeLabel.of(bLabel().get());
+            if (!nodeLabels.contains(_bLabel)) {
+                throw new IllegalArgumentException(formatWithLocale(
+                    "TriangleCount requires the provided 'bLabel' node label '%s' to be present in the graph.",
+                    _bLabel.name()
+                ));
+            }
+        }
+        if (cLabel().isPresent()) {
+            var _cLabel = NodeLabel.of(cLabel().get());
+            if (!nodeLabels.contains(_cLabel)) {
+                throw new IllegalArgumentException(formatWithLocale(
+                    "TriangleCount requires the provided 'cLabel' node label '%s' to be present in the graph.",
+                    _cLabel.name()
+                ));
+            }
+        }
+    }
+
     static TriangleCountBaseConfig of(CypherMapWrapper userInput) {
         return new TriangleCountBaseConfigImpl(userInput);
     }

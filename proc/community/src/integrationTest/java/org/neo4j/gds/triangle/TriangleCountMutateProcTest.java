@@ -33,6 +33,7 @@ import org.neo4j.gds.extension.Neo4jGraph;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatRuntimeException;
 import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
 import static org.neo4j.gds.TestSupport.fromGdl;
@@ -41,21 +42,21 @@ class TriangleCountMutateProcTest extends BaseProcTest {
 
     @Neo4jGraph
     public static final String DB_CYPHER = "CREATE " +
-                                           "(a:A)-[:T]->(b:A), " +
-                                           "(b)-[:T]->(c:A), " +
-                                           "(c)-[:T]->(a)";
+        "(a:A)-[:T]->(b:A), " +
+        "(b)-[:T]->(c:A), " +
+        "(c)-[:T]->(a)";
 
     String expectedMutatedGraph =
         "  (a: A { mutatedTriangleCount: 1 })" +
-        ", (b: A { mutatedTriangleCount: 1 })" +
-        ", (c: A { mutatedTriangleCount: 1 })" +
-        // Graph is UNDIRECTED, e.g. each rel twice
-        ", (a)-[:T]->(b)" +
-        ", (b)-[:T]->(a)" +
-        ", (b)-[:T]->(c)" +
-        ", (c)-[:T]->(b)" +
-        ", (a)-[:T]->(c)" +
-        ", (c)-[:T]->(a)";
+            ", (b: A { mutatedTriangleCount: 1 })" +
+            ", (c: A { mutatedTriangleCount: 1 })" +
+            // Graph is UNDIRECTED, e.g. each rel twice
+            ", (a)-[:T]->(b)" +
+            ", (b)-[:T]->(a)" +
+            ", (b)-[:T]->(c)" +
+            ", (c)-[:T]->(b)" +
+            ", (a)-[:T]->(c)" +
+            ", (c)-[:T]->(a)";
 
     @BeforeEach
     void setup() throws Exception {
@@ -77,41 +78,43 @@ class TriangleCountMutateProcTest extends BaseProcTest {
             .yields();
 
 
-        var rowCount = runQueryWithRowConsumer(query, row -> {
-            assertThat(row.getNumber("globalTriangleCount"))
-                .asInstanceOf(LONG)
-                .isEqualTo(1L);
+        var rowCount = runQueryWithRowConsumer(
+            query, row -> {
+                assertThat(row.getNumber("globalTriangleCount"))
+                    .asInstanceOf(LONG)
+                    .isEqualTo(1L);
 
-            assertThat(row.getNumber("nodeCount"))
-                .asInstanceOf(LONG)
-                .isEqualTo(3L);
+                assertThat(row.getNumber("nodeCount"))
+                    .asInstanceOf(LONG)
+                    .isEqualTo(3L);
 
-            assertThat(row.getNumber("preProcessingMillis"))
-                .asInstanceOf(LONG)
-                .isGreaterThan(-1L);
+                assertThat(row.getNumber("preProcessingMillis"))
+                    .asInstanceOf(LONG)
+                    .isGreaterThan(-1L);
 
-            assertThat(row.getNumber("computeMillis"))
-                .asInstanceOf(LONG)
-                .isGreaterThan(-1L);
+                assertThat(row.getNumber("computeMillis"))
+                    .asInstanceOf(LONG)
+                    .isGreaterThan(-1L);
 
-            assertThat(row.getNumber("postProcessingMillis"))
-                .asInstanceOf(LONG)
-                .isGreaterThan(-1L);
+                assertThat(row.getNumber("postProcessingMillis"))
+                    .asInstanceOf(LONG)
+                    .isGreaterThan(-1L);
 
-            assertThat(row.getNumber("mutateMillis"))
-                .asInstanceOf(LONG)
-                .isGreaterThan(-1L);
+                assertThat(row.getNumber("mutateMillis"))
+                    .asInstanceOf(LONG)
+                    .isGreaterThan(-1L);
 
-            assertThat(row.get("configuration"))
-                .isInstanceOf(Map.class);
+                assertThat(row.get("configuration"))
+                    .isInstanceOf(Map.class);
 
-            assertThat(row.getNumber("nodePropertiesWritten"))
-                .asInstanceOf(LONG)
-                .isEqualTo(3L);
-        });
+                assertThat(row.getNumber("nodePropertiesWritten"))
+                    .asInstanceOf(LONG)
+                    .isEqualTo(3L);
+            }
+        );
         assertThat(rowCount).isEqualTo(1L);
 
-        
+
         Graph mutatedGraph = GraphStoreCatalog
             .get(getUsername(), DatabaseId.of(db.databaseName()), "graph")
             .graphStore()
@@ -125,8 +128,8 @@ class TriangleCountMutateProcTest extends BaseProcTest {
         // Add a single node and connect it to the triangle
         // to be able to apply the maxDegree filter.
         runQuery("MATCH (n) " +
-                 "WITH n LIMIT 1 " +
-                 "CREATE (d)-[:REL]->(n)");
+            "WITH n LIMIT 1 " +
+            "CREATE (d)-[:REL]->(n)");
 
         var createQuery = GdsCypher.call("testGraph")
             .graphProject()
@@ -142,19 +145,21 @@ class TriangleCountMutateProcTest extends BaseProcTest {
             .addParameter("maxDegree", 2)
             .yields("globalTriangleCount", "nodeCount", "nodePropertiesWritten");
 
-        var rowCount = runQueryWithRowConsumer(query, row -> {
-            assertThat(row.getNumber("globalTriangleCount"))
-                .asInstanceOf(LONG)
-                .isEqualTo(0L);
+        var rowCount = runQueryWithRowConsumer(
+            query, row -> {
+                assertThat(row.getNumber("globalTriangleCount"))
+                    .asInstanceOf(LONG)
+                    .isEqualTo(0L);
 
-            assertThat(row.getNumber("nodeCount"))
-                .asInstanceOf(LONG)
-                .isEqualTo(4L);
+                assertThat(row.getNumber("nodeCount"))
+                    .asInstanceOf(LONG)
+                    .isEqualTo(4L);
 
-            assertThat(row.getNumber("nodePropertiesWritten"))
-                .asInstanceOf(LONG)
-                .isEqualTo(4L);
-        });
+                assertThat(row.getNumber("nodePropertiesWritten"))
+                    .asInstanceOf(LONG)
+                    .isEqualTo(4L);
+            }
+        );
 
         assertThat(rowCount).isEqualTo(1L);
 
@@ -166,19 +171,47 @@ class TriangleCountMutateProcTest extends BaseProcTest {
         assertGraphEquals(
             fromGdl(
                 "  (a { mutatedTriangleCount: -1 })" +
-                ", (b { mutatedTriangleCount: 0 })" +
-                ", (c { mutatedTriangleCount: 0 })" +
-                ", (d { mutatedTriangleCount: 0 })" +
-                // Graph is UNDIRECTED, e.g. each rel twice
-                ", (a)-->(b)" +
-                ", (b)-->(a)" +
-                ", (b)-->(c)" +
-                ", (c)-->(b)" +
-                ", (a)-->(c)" +
-                ", (c)-->(a)" +
-                ", (d)-->(a)" +
-                ", (a)-->(d)"
-            ), mutatedGraph);
+                    ", (b { mutatedTriangleCount: 0 })" +
+                    ", (c { mutatedTriangleCount: 0 })" +
+                    ", (d { mutatedTriangleCount: 0 })" +
+                    // Graph is UNDIRECTED, e.g. each rel twice
+                    ", (a)-->(b)" +
+                    ", (b)-->(a)" +
+                    ", (b)-->(c)" +
+                    ", (c)-->(b)" +
+                    ", (a)-->(c)" +
+                    ", (c)-->(a)" +
+                    ", (d)-->(a)" +
+                    ", (a)-->(d)"
+            ), mutatedGraph
+        );
+    }
+
+    @Test
+    void shouldAcceptValidNodeLabelFilter() {
+        String query = GdsCypher
+            .call(DEFAULT_GRAPH_NAME)
+            .algo("triangleCount")
+            .mutateMode()
+            .addParameter("mutateProperty", "mutatedTriangleCount")
+            .addParameter("aLabel", "A")
+            .yields();
+    }
+
+    @Test
+    void shouldThrowOnInvalidNodeLabelFilter() {
+        String query = GdsCypher
+            .call(DEFAULT_GRAPH_NAME)
+            .algo("triangleCount")
+            .mutateMode()
+            .addParameter("mutateProperty", "mutatedTriangleCount")
+            .addParameter("aLabel", "X")
+            .yields();
+
+        assertThatRuntimeException()
+            .isThrownBy(() -> runQuery(query))
+            .withMessage(
+                "Failed to invoke procedure `gds.triangleCount.mutate`: Caused by: java.lang.IllegalArgumentException: TriangleCount requires the provided 'aLabel' node label 'X' to be present in the graph.");
     }
 }
 
