@@ -29,10 +29,10 @@ import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.concurrent.ExecutorService;
 
-final class MSBFSASPAlgorithmFactory {
+public final class MSBFSASPAlgorithmFactory {
     private MSBFSASPAlgorithmFactory() {}
 
-    static MSBFSASPAlgorithm create(
+    public static MSBFSASPAlgorithm create(
         Graph graph,
         AllShortestPathsParameters parameters,
         ExecutorService executorService,
@@ -40,6 +40,9 @@ final class MSBFSASPAlgorithmFactory {
         TerminationFlag terminationFlag
     ) {
         if (parameters.hasRelationshipWeightProperty()) {
+            // TODO: do we need this check,
+            //  this should be handled by the relationship property validation
+            //  see `org.neo4j.gds.core.loading.GraphStoreValidation.validateRelationshipProperty`
             if (!graph.hasRelationshipProperty()) {
                 throw new IllegalArgumentException(
                     "WeightedAllShortestPaths is not supported on graphs without a weight property");

@@ -9,9 +9,13 @@ dependencies {
     implementation project(':algo')
     implementation project(':algo-common')
     implementation project(':collections')
+    implementation project(':core')
     implementation project(':core-api')
     implementation project(':logging')
+    implementation project(':path-finding-algorithms')
     implementation project(':path-finding-params')
+    implementation project(':progress-tracking')
+    implementation project(':termination')
 
     // Test dependencies
     testImplementation platform(openGds.junit5bom)
@@ -19,4 +23,5 @@ dependencies {
     testImplementation libs.awaitility
     testImplementation openGds.junit5.jupiter
     testImplementation openGds.mockito.junit.jupiter
+    testImplementation project(':test-utils')
 }

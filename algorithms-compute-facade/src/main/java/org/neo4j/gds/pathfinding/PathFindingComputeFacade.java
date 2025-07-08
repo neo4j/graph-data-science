@@ -19,23 +19,105 @@
  */
 package org.neo4j.gds.pathfinding;
 
+import org.neo4j.gds.GraphParameters;
+import org.neo4j.gds.ProgressTrackerFactory;
+import org.neo4j.gds.allshortestpaths.AllShortestPathsParameters;
 import org.neo4j.gds.allshortestpaths.AllShortestPathsStreamResult;
+import org.neo4j.gds.api.DatabaseId;
+import org.neo4j.gds.api.GraphName;
+import org.neo4j.gds.api.User;
+import org.neo4j.gds.applications.algorithms.pathfinding.MSBFSASPAlgorithmFactory;
+import org.neo4j.gds.async.AsyncAlgorithmCaller;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
+import org.neo4j.gds.core.loading.GraphStoreCatalogService;
+import org.neo4j.gds.core.loading.NoAlgorithmValidation;
+import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortResult;
 import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.pricesteiner.PrizeSteinerTreeResult;
 import org.neo4j.gds.spanningtree.SpanningTree;
 import org.neo4j.gds.steiner.SteinerTreeResult;
+import org.neo4j.gds.termination.TerminationFlag;
 
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
 import java.util.stream.Stream;
 
 public class PathFindingComputeFacade {
 
-    CompletableFuture<Stream<AllShortestPathsStreamResult>> allShortestPaths() {
-        throw new RuntimeException("Not yet implemented");
+    // Global dependencies
+    private final GraphStoreCatalogService graphStoreCatalogService;
+    // This is created with its own ExecutorService workerPool,
+    // which determines how many algorithms can run in parallel.
+    private final AsyncAlgorithmCaller algorithmCaller;
+    private final ProgressTrackerFactory progressTrackerFactory;
+    // This service is what the algorithms use for parallelism.
+    private final ExecutorService executorService;
+
+    // Request scope dependencies -- can we move these as method parameters?! 🤔
+    private final User user;
+    private final DatabaseId databaseId;
+    private final TerminationFlag terminationFlag;
+
+    public PathFindingComputeFacade(
+        GraphStoreCatalogService graphStoreCatalogService,
+        AsyncAlgorithmCaller algorithmCaller,
+        User user,
+        DatabaseId databaseId,
+        ExecutorService executorService,
+        TerminationFlag terminationFlag,
+        ProgressTrackerFactory progressTrackerFactory
+    ) {
+        this.graphStoreCatalogService = graphStoreCatalogService;
+        this.algorithmCaller = algorithmCaller;
+        this.user = user;
+        this.databaseId = databaseId;
+        this.executorService = executorService;
+        this.terminationFlag = terminationFlag;
+        this.progressTrackerFactory = progressTrackerFactory;
+    }
+
+    CompletableFuture<Stream<AllShortestPathsStreamResult>> allShortestPaths(
+        GraphName graphName,
+        GraphParameters graphParameters,
+        Optional<String> relationshipProperty,
+        AllShortestPathsParameters parameters,
+        JobId jobId
+    ) {
+        // Create ProgressTracker
+        // `allShortestPaths` doesn't use progress tracker (yet 🤔)
+        var progressTracker = progressTrackerFactory.nullTracker();
+
+        // Fetch the Graph the algorithm will operate on
+        var graph = graphStoreCatalogService.fetchGraphResources(
+            graphName,
+            graphParameters,
+            relationshipProperty,
+            new NoAlgorithmValidation(),
+            Optional.empty(),
+            Optional.empty(),
+            user,
+            databaseId
+        ).graph();
+
+        // Create the algorithm
+        var allShortestPaths = MSBFSASPAlgorithmFactory.create(
+            graph,
+            parameters,
+            executorService,
+            progressTracker,
+            terminationFlag
+        );
+
+        // Submit the algorithm for async computation
+        return algorithmCaller.run(
+            allShortestPaths::compute,
+            jobId
+        );
+
     }
 
     CompletableFuture<BellmanFordResult> bellmanFord() {
@@ -101,4 +183,5 @@ public class PathFindingComputeFacade {
     CompletableFuture<TopologicalSortResult> topologicalSort() {
         throw new RuntimeException("Not yet implemented");
     }
+
 }

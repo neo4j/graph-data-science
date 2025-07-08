@@ -20,6 +20,7 @@
 package org.neo4j.gds.config;
 
 import org.neo4j.gds.ElementProjection;
+import org.neo4j.gds.GraphParameters;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
@@ -100,5 +101,15 @@ public interface AlgoBaseConfig extends BaseConfig, ConcurrencyConfig, JobIdConf
         Collection<RelationshipType> selectedRelationshipTypes
     ) {
         ElementTypeValidator.validateTypes(graphStore, selectedRelationshipTypes, "`relationshipTypes`");
+    }
+
+    @Configuration.Ignore
+    default GraphParameters toGraphParameters() {
+        return new GraphParameters(
+            nodeLabelsFilter(),
+            relationshipTypesFilter(),
+            projectAllRelationshipTypes(),
+            usernameOverride()
+        );
     }
 }

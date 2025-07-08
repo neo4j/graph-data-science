@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.loading;
 
+import org.neo4j.gds.GraphParameters;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DatabaseId;
@@ -90,7 +91,16 @@ public class GraphStoreCatalogService {
             configuration.relationshipTypesFilter(),
             configuration.projectAllRelationshipTypes(),
             relationshipProperty,
-            configuration::graphStoreValidation,
+            new GraphStoreValidation() {
+                @Override
+                protected void validateAlgorithmRequirements(
+                    GraphStore graphStore,
+                    Collection<NodeLabel> selectedLabels,
+                    Collection<RelationshipType> selectedRelationshipTypes
+                ) {
+                    configuration.graphStoreValidation(graphStore, selectedLabels, selectedRelationshipTypes);
+                }
+            },
             postGraphStoreLoadValidationHooks,
             postGraphStoreLoadETLHooks,
             user,
@@ -130,7 +140,7 @@ public class GraphStoreCatalogService {
             : relationshipTypesFilter;
 
         // Validate the graph store before going any further
-        graphStoreValidation.validate(graphStore, nodeLabels, relationshipTypes);
+        graphStoreValidation.validate(graphStore, nodeLabels, relationshipTypes, relationshipProperty);
 
         postGraphStoreLoadETLHooks.ifPresent(postLoadETLHooks -> extractAndTransform(graphStore, postLoadETLHooks));
 
@@ -141,18 +151,29 @@ public class GraphStoreCatalogService {
         return new GraphResources(graphStore, graph, graphStoreCatalogEntry.resultStore());
     }
 
-    private static Collection<RelationshipType> getRelationshipTypes(AlgoBaseConfig config, GraphStore graphStore) {
-        if (config.projectAllRelationshipTypes()) return graphStore.relationshipTypes();
-
-        return config.relationshipTypesFilter();
-    }
-
-    private static Collection<NodeLabel> getNodeLabels(AlgoBaseConfig config, GraphStore graphStore) {
-        var nodeLabels = config.nodeLabelsFilter();
-
-        if (nodeLabels.isEmpty()) return graphStore.nodeLabels();
-
-        return nodeLabels;
+    public GraphResources fetchGraphResources(
+        GraphName graphName,
+        GraphParameters graphParameters,
+        Optional<String> relationshipProperty,
+        GraphStoreValidation graphStoreValidation,
+        Optional<Iterable<PostLoadValidationHook>> postGraphStoreLoadValidationHooks,
+        Optional<Iterable<PostLoadETLHook>> postGraphStoreLoadETLHooks,
+        User user,
+        DatabaseId databaseId
+    ) {
+        return getGraphResources(
+            graphName,
+            graphParameters.nodeLabelsFilter(),
+            graphParameters.relationshipTypesFilter(),
+            graphParameters.loadAllRelationshipTypes(),
+            relationshipProperty,
+            graphStoreValidation,
+            postGraphStoreLoadValidationHooks,
+            postGraphStoreLoadETLHooks,
+            user,
+            graphParameters.usernameOverride(),
+            databaseId
+        );
     }
 
     /**
