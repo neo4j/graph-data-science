@@ -28,6 +28,15 @@ For more information on this algorithm, see:
 This is described in http://chato.cl/papers/becchetti_2007_approximate_count_triangles.pdf["Efficient Semi-streaming Algorithms for Local Triangle Counting in Massive Graphs"].
 
 
+== Node label filtering
+
+For some use-cases it is useful to only count triangles that contain nodes with specific labels.
+This is also something that can save computation time, as the algorithm will not have to consider nodes that do not match the specified labels.
+
+The algorithm supports node label filtering by allowing you to specify labels for each of the three nodes in the triangle, using the `aLabel`, `bLabel`, and `cLabel` configuration parameters.
+They are optional and can be used individually or in combination.
+
+
 [[algorithms-triangle-count-syntax]]
 == Syntax
 

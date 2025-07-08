@@ -1,2 +1,5 @@
 // DO NOT EDIT: File generated automatically by the process_conf.py script
 | maxDegree | Integer | 2^63^ - 1 | yes | If a node has a degree higher than this it will not be considered by the algorithm. The triangle count for these nodes will be `-1`.
+| aLabel | String | null | yes | The required node label of the first node in the triangle. If not specified, the algorithm will not filter by label.
+| bLabel | String | null | yes | The required node label of the second node in the triangle. If not specified, the algorithm will not filter by label.
+| cLabel | String | null | yes | The required node label of the third node in the triangle. If not specified, the algorithm will not filter by label.
