@@ -40,11 +40,11 @@ public interface TriangleCountBaseConfig extends AlgoBaseConfig {
         return Long.MAX_VALUE;
     }
 
-    Optional<String> ALabel();
+    Optional<String> aLabel();
 
-    Optional<String> BLabel();
+    Optional<String> bLabel();
 
-    Optional<String> CLabel();
+    Optional<String> cLabel();
 
     @Configuration.Check
     default void validateMaxDegree() {
@@ -74,6 +74,6 @@ public interface TriangleCountBaseConfig extends AlgoBaseConfig {
 
     @Configuration.Ignore
     default TriangleCountParameters toParameters() {
-        return new TriangleCountParameters(concurrency(), maxDegree(), ALabel(), BLabel(), CLabel());
+        return new TriangleCountParameters(concurrency(), maxDegree(), aLabel(), bLabel(), cLabel());
     }
 }
