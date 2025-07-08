@@ -38,7 +38,7 @@ class LocalClusteringCoefficientMemoryEstimateDefinitionTest {
 
         long triangleCountEstimate = 48 + 24 + nodeCount * 8 + 16;
         long hugeDoubleArray = 16 + nodeCount * 8 + 16;
-        long expected = 80 + hugeDoubleArray + triangleCountEstimate;
+        long expected = 96 + hugeDoubleArray + triangleCountEstimate;
 
         MemoryEstimationAssert.assertThat(memoryEstimation)
             .memoryRange(graphDimensions, new Concurrency(1))
@@ -70,7 +70,7 @@ class LocalClusteringCoefficientMemoryEstimateDefinitionTest {
 
         long triangleCountEstimate = 48 + 32 + sizeOfHugeArray;
         long hugeDoubleArray = 24 + sizeOfHugeArray;
-        long expected = 80 + hugeDoubleArray + triangleCountEstimate;
+        long expected = 96 + hugeDoubleArray + triangleCountEstimate;
 
         MemoryEstimationAssert.assertThat(memoryEstimation)
             .memoryRange(graphDimensions, new Concurrency(1))
