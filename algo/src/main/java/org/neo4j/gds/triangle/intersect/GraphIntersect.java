@@ -20,11 +20,14 @@
 package org.neo4j.gds.triangle.intersect;
 
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.AdjacencyCursor;
 import org.neo4j.gds.api.AdjacencyCursorUtils;
 import org.neo4j.gds.api.IntersectionConsumer;
 import org.neo4j.gds.api.RelationshipIntersect;
 
+import java.util.Optional;
+import java.util.function.BiFunction;
 import java.util.function.IntPredicate;
 
 import static org.neo4j.gds.api.AdjacencyCursor.NOT_FOUND;
@@ -38,15 +41,29 @@ import static org.neo4j.gds.api.AdjacencyCursor.NOT_FOUND;
 public abstract class GraphIntersect<CURSOR extends AdjacencyCursor> implements RelationshipIntersect {
 
     private final IntPredicate degreeFilter;
+    private final Optional<NodeLabel> BLabel;
+    private final Optional<NodeLabel> CLabel;
+    private final BiFunction<Long, NodeLabel, Boolean> hasLabel;
+    private final boolean filtered;
     private CURSOR origNeighborsOfa;
     private CURSOR helpingCursorOfa;
     private CURSOR helpingCursorOfb;
 
 
-    protected GraphIntersect(long maxDegree) {
+    protected GraphIntersect(
+        long maxDegree,
+        Optional<NodeLabel> BLabel,
+        Optional<NodeLabel> CLabel,
+        BiFunction<Long, NodeLabel, Boolean> hasLabel,
+        boolean filtered
+    ) {
         this.degreeFilter = maxDegree < Long.MAX_VALUE
             ? (degree) -> degree <= maxDegree
             : (ignore) -> true;
+        this.BLabel = BLabel;
+        this.CLabel = CLabel;
+        this.hasLabel = hasLabel;
+        this.filtered =  filtered;
     }
 
     @Override
@@ -69,24 +86,26 @@ public abstract class GraphIntersect<CURSOR extends AdjacencyCursor> implements 
         IntersectionConsumer consumer
     ) {
         long b = AdjacencyCursorUtils.next(neighborsOfa);
-        while (b != NOT_FOUND && b < a) {
-            var degreeOfb = degree(b);
-            if (degreeFilter.test(degreeOfb)) {
-                helpingCursorOfb = cursorForNode(
-                    helpingCursorOfb,
-                    b,
-                    degreeOfb
-                );
+        while (b != NOT_FOUND && (b < a || filtered)) {
+            if (BLabel.isEmpty() || hasLabel.apply(b, BLabel.get())) {
+                var degreeOfb = degree(b);
+                if (degreeFilter.test(degreeOfb)) {
+                    helpingCursorOfb = cursorForNode(
+                        helpingCursorOfb,
+                        b,
+                        degreeOfb
+                    );
 
-                helpingCursorOfa = cursorForNode(helpingCursorOfa, a, degreeOfa);
+                    helpingCursorOfa = cursorForNode(helpingCursorOfa, a, degreeOfa);
 
-                triangles(
-                    a,
-                    b,
-                    helpingCursorOfa,
-                    helpingCursorOfb,
-                    consumer
-                ); //find all triangles involving the edge (a-b)
+                    triangles(
+                        a,
+                        b,
+                        helpingCursorOfa,
+                        helpingCursorOfb,
+                        consumer
+                    ); //find all triangles involving the edge (a-b)
+                }
             }
 
             b = AdjacencyCursorUtils.next(neighborsOfa);
@@ -97,13 +116,14 @@ public abstract class GraphIntersect<CURSOR extends AdjacencyCursor> implements 
     private void triangles(long a, long b, CURSOR neighborsOfa, CURSOR neighborsOfb, IntersectionConsumer consumer) {
         long c = AdjacencyCursorUtils.next(neighborsOfb);
         long currentOfa = AdjacencyCursorUtils.next(neighborsOfa);
-        while (c != NOT_FOUND && currentOfa != NOT_FOUND && c < b) {
-            var degreeOfc = degree(c);
-            if (degreeFilter.test(degreeOfc)) {
-                currentOfa = AdjacencyCursorUtils.advance(neighborsOfa, currentOfa, c);
-                //now print all triangles a-b-c  (taking into consideration the parallel edges of c)
-                checkForAndEmitTriangle(consumer, a, b, currentOfa, c);
-
+        while (c != NOT_FOUND && currentOfa != NOT_FOUND && (c < b || filtered)) {
+            if (CLabel.isEmpty() || hasLabel.apply(c, CLabel.get())) {
+                var degreeOfc = degree(c);
+                if (degreeFilter.test(degreeOfc)) {
+                    currentOfa = AdjacencyCursorUtils.advance(neighborsOfa, currentOfa, c);
+                    //now print all triangles a-b-c  (taking into consideration the parallel edges of c)
+                    checkForAndEmitTriangle(consumer, a, b, currentOfa, c);
+                }
             }
             c = AdjacencyCursorUtils.next(neighborsOfb);
         }

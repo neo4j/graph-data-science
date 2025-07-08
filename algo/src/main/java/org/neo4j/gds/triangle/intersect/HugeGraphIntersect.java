@@ -21,18 +21,29 @@ package org.neo4j.gds.triangle.intersect;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.annotations.service.ServiceProvider;
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.AdjacencyCursor;
 import org.neo4j.gds.api.AdjacencyList;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.RelationshipIntersect;
 import org.neo4j.gds.core.huge.HugeGraph;
 
+import java.util.Optional;
+import java.util.function.BiFunction;
+
 public final class HugeGraphIntersect extends GraphIntersect<AdjacencyCursor> {
 
     private final AdjacencyList adjacencyList;
 
-    private HugeGraphIntersect(AdjacencyList adjacency, long maxDegree) {
-        super(maxDegree);
+    private HugeGraphIntersect(
+        AdjacencyList adjacency,
+        long maxDegree,
+        Optional<NodeLabel> BLabel,
+        Optional<NodeLabel> CLabel,
+        BiFunction<Long, NodeLabel, Boolean> hasLabel,
+        boolean filtered
+    ) {
+        super(maxDegree, BLabel, CLabel, hasLabel, filtered);
         this.adjacencyList = adjacency;
     }
 
@@ -55,11 +66,17 @@ public final class HugeGraphIntersect extends GraphIntersect<AdjacencyCursor> {
         }
 
         @Override
-        public RelationshipIntersect load(Graph graph, long maxDegree) {
+        public RelationshipIntersect load(
+            Graph graph,
+            long maxDegree,
+            Optional<NodeLabel> BLabel,
+            Optional<NodeLabel> CLabel,
+            boolean filtered
+        ) {
             assert graph instanceof HugeGraph;
             var hugeGraph = (HugeGraph) graph;
             var topology = hugeGraph.relationshipTopology().adjacencyList();
-            return new HugeGraphIntersect(topology, maxDegree);
+            return new HugeGraphIntersect(topology, maxDegree, BLabel, CLabel, graph::hasLabel, filtered);
         }
     }
 }

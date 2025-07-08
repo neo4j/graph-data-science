@@ -31,6 +31,7 @@ import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.termination.TerminationFlag;
 
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -102,7 +103,15 @@ class TriangleStreamTest {
         AtomicInteger centerAppearances = new AtomicInteger();
         AtomicInteger allAppearances = new AtomicInteger();
 
-        TriangleStream.create(graph, DefaultPool.INSTANCE, new Concurrency(concurrency), TerminationFlag.RUNNING_TRUE)
+        TriangleStream.create(
+                graph,
+                DefaultPool.INSTANCE,
+                new Concurrency(concurrency),
+                Optional.empty(),
+                Optional.empty(),
+                Optional.empty(),
+                TerminationFlag.RUNNING_TRUE
+            )
             .compute()
             .forEach(r -> {
                 if (r.nodeA == centerId || r.nodeB == centerId || r.nodeC == centerId) {

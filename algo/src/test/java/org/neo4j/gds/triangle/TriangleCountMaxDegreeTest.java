@@ -28,6 +28,8 @@ import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.termination.TerminationFlag;
 
+import java.util.Optional;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 class TriangleCountMaxDegreeTest {
@@ -43,7 +45,13 @@ class TriangleCountMaxDegreeTest {
             .build()
             .generate();
 
-        var tc = IntersectingTriangleCount.create(graph, new Concurrency(4), 100, DefaultPool.INSTANCE, ProgressTracker.NULL_TRACKER, TerminationFlag.RUNNING_TRUE).compute();
+        var tc = IntersectingTriangleCount.create(
+            graph, new Concurrency(4), 100,
+            Optional.empty(),
+            Optional.empty(),
+            Optional.empty(),
+            DefaultPool.INSTANCE, ProgressTracker.NULL_TRACKER, TerminationFlag.RUNNING_TRUE
+        ).compute();
         assertThat(tc.globalTriangles()).isEqualTo(1262L);
     }
 }

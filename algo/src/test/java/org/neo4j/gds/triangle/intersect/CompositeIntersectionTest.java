@@ -30,6 +30,7 @@ import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -52,18 +53,23 @@ final class CompositeIntersectionTest {
 
         var intersect = new UnionGraphIntersect.UnionGraphIntersectFactory().load(
             graph,
-            Long.MAX_VALUE
+            Long.MAX_VALUE,
+            Optional.empty(),
+            Optional.empty(),
+            false
         );
 
-        intersect.intersectAll(start2, (a, b, c) -> {
+        intersect.intersectAll(
+            start2, (a, b, c) -> {
 
-            Long next = targetIterator.next();
-            var targetMappedId = graph.toMappedNodeId(next);
-            assertThat(a).isEqualTo(targetMappedId);
-            assertThat(b).isEqualTo(start1);
-            assertThat(c).isEqualTo(start2);
+                Long next = targetIterator.next();
+                var targetMappedId = graph.toMappedNodeId(next);
+                assertThat(a).isEqualTo(targetMappedId);
+                assertThat(b).isEqualTo(start1);
+                assertThat(c).isEqualTo(start2);
 
-        });
+            }
+        );
 
         assertThat(targetIterator.hasNext()).isFalse();
 
@@ -76,13 +82,21 @@ final class CompositeIntersectionTest {
 
         var start2 = Math.max(graph.toMappedNodeId(DEGREE + 1), graph.toMappedNodeId(DEGREE));
 
-        var intersect = new UnionGraphIntersect.UnionGraphIntersectFactory().load(graph, 0);
+        var intersect = new UnionGraphIntersect.UnionGraphIntersectFactory().load(
+            graph,
+            0,
+            Optional.empty(),
+            Optional.empty(),
+            false
+        );
         assertThatNoException().isThrownBy(
             () ->
-                intersect.intersectAll(start2, (a, b, c) ->
-                {
-                    throw new IllegalArgumentException();
-                })
+                intersect.intersectAll(
+                    start2, (a, b, c) ->
+                    {
+                        throw new IllegalArgumentException();
+                    }
+                )
         );
 
     }

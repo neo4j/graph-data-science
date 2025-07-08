@@ -20,6 +20,7 @@
 package org.neo4j.gds.triangle;
 
 import org.neo4j.gds.Algorithm;
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IntersectionConsumer;
 import org.neo4j.gds.api.RelationshipIntersect;
@@ -33,6 +34,7 @@ import org.neo4j.gds.triangle.intersect.RelationshipIntersectFactory;
 import org.neo4j.gds.triangle.intersect.RelationshipIntersectFactoryLocator;
 
 import java.util.Collection;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.LongAdder;
@@ -63,6 +65,9 @@ public final class IntersectingTriangleCount extends Algorithm<TriangleCountResu
     private final HugeAtomicLongArray triangleCounts;
     private final long maxDegree;
     private final Concurrency concurrency;
+    private final Optional<NodeLabel> ALabel;
+    private final Optional<NodeLabel> BLabel;
+    private final Optional<NodeLabel> CLabel;
     private long globalTriangleCount;
 
     private final LongAdder globalTriangleCounter;
@@ -71,6 +76,9 @@ public final class IntersectingTriangleCount extends Algorithm<TriangleCountResu
         Graph graph,
         Concurrency concurrency,
         long maxDegree,
+        Optional<String> ALabel,
+        Optional<String> BLabel,
+        Optional<String> CLabel,
         ExecutorService executorService,
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
@@ -80,7 +88,18 @@ public final class IntersectingTriangleCount extends Algorithm<TriangleCountResu
             .orElseThrow(
                 () -> new IllegalArgumentException("No relationship intersect factory registered for graph: " + graph.getClass())
             );
-        return new IntersectingTriangleCount(graph, factory, concurrency, maxDegree, executorService, progressTracker, terminationFlag);
+        return new IntersectingTriangleCount(
+            graph,
+            factory,
+            concurrency,
+            maxDegree,
+            ALabel,
+            BLabel,
+            CLabel,
+            executorService,
+            progressTracker,
+            terminationFlag
+        );
     }
 
     private IntersectingTriangleCount(
@@ -88,6 +107,9 @@ public final class IntersectingTriangleCount extends Algorithm<TriangleCountResu
         RelationshipIntersectFactory intersectFactory,
         Concurrency concurrency,
         long maxDegree,
+        Optional<String> ALabel,
+        Optional<String> BLabel,
+        Optional<String> CLabel,
         ExecutorService executorService,
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
@@ -97,7 +119,13 @@ public final class IntersectingTriangleCount extends Algorithm<TriangleCountResu
         this.intersectFactory = intersectFactory;
         this.concurrency = concurrency;
         this.maxDegree = maxDegree;
-        this.triangleCounts = HugeAtomicLongArray.of(graph.nodeCount(), ParalleLongPageCreator.passThrough(concurrency));
+        this.ALabel = ALabel.map(NodeLabel::of);
+        this.BLabel = BLabel.map(NodeLabel::of);
+        this.CLabel = CLabel.map(NodeLabel::of);
+        this.triangleCounts = HugeAtomicLongArray.of(
+            graph.nodeCount(),
+            ParalleLongPageCreator.passThrough(concurrency)
+        );
         this.executorService = executorService;
         this.globalTriangleCounter = new LongAdder();
         this.queue = new AtomicLong();
@@ -110,10 +138,12 @@ public final class IntersectingTriangleCount extends Algorithm<TriangleCountResu
         progressTracker.beginSubTask();
         queue.set(0);
         globalTriangleCounter.reset();
+
+        boolean filtered = ALabel.isPresent() || BLabel.isPresent() || CLabel.isPresent();
         // create tasks
         final Collection<? extends Runnable> tasks = ParallelUtil.tasks(
             concurrency,
-            () -> new IntersectTask(intersectFactory.load(graph, maxDegree))
+            () -> new IntersectTask(intersectFactory.load(graph, maxDegree, BLabel, CLabel, filtered))
         );
         // run
         ParallelUtil.run(tasks, executorService);
@@ -140,7 +170,9 @@ public final class IntersectingTriangleCount extends Algorithm<TriangleCountResu
             long node;
             while ((node = queue.getAndIncrement()) < graph.nodeCount() && terminationFlag.running()) {
                 if (graph.degree(node) <= maxDegree) {
-                    intersect.intersectAll(node, this);
+                    if (ALabel.isEmpty() || graph.hasLabel(node, ALabel.get())) {
+                        intersect.intersectAll(node, this);
+                    }
                 } else {
                     triangleCounts.set(node, EXCLUDED_NODE_TRIANGLE_COUNT);
                 }

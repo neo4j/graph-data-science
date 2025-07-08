@@ -21,6 +21,7 @@ package org.neo4j.gds.triangle;
 
 import com.carrotsearch.hppc.AbstractIterator;
 import org.neo4j.gds.Algorithm;
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IntersectionConsumer;
 import org.neo4j.gds.api.RelationshipIntersect;
@@ -34,6 +35,7 @@ import org.neo4j.gds.triangle.intersect.RelationshipIntersectFactoryLocator;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Spliterators;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -55,6 +57,9 @@ public final class TriangleStream extends Algorithm<Stream<TriangleResult>> {
     private final ExecutorService executorService;
     private final AtomicInteger queue;
     private final Concurrency concurrency;
+    private final Optional<NodeLabel> ALabel;
+    private final Optional<NodeLabel> BLabel;
+    private final Optional<NodeLabel> CLabel;
     private final int nodeCount;
     private final AtomicInteger runningThreads;
     private final BlockingQueue<TriangleResult> resultQueue;
@@ -63,6 +68,9 @@ public final class TriangleStream extends Algorithm<Stream<TriangleResult>> {
         Graph graph,
         ExecutorService executorService,
         Concurrency concurrency,
+        Optional<String> ALabel,
+        Optional<String> BLabel,
+        Optional<String> CLabel,
         TerminationFlag terminationFlag
     ) {
         var factory = RelationshipIntersectFactoryLocator
@@ -70,7 +78,16 @@ public final class TriangleStream extends Algorithm<Stream<TriangleResult>> {
             .orElseThrow(
                 () -> new IllegalArgumentException("No relationship intersect factory registered for graph: " + graph.getClass())
             );
-        return new TriangleStream(graph, factory, executorService, concurrency, terminationFlag);
+        return new TriangleStream(
+            graph,
+            factory,
+            executorService,
+            concurrency,
+            ALabel,
+            BLabel,
+            CLabel,
+            terminationFlag
+        );
     }
 
     private TriangleStream(
@@ -78,6 +95,9 @@ public final class TriangleStream extends Algorithm<Stream<TriangleResult>> {
         RelationshipIntersectFactory intersectFactory,
         ExecutorService executorService,
         Concurrency concurrency,
+        Optional<String> ALabel,
+        Optional<String> BLabel,
+        Optional<String> CLabel,
         TerminationFlag terminationFlag
     ) {
         super(ProgressTracker.NULL_TRACKER);
@@ -85,6 +105,9 @@ public final class TriangleStream extends Algorithm<Stream<TriangleResult>> {
         this.intersectFactory = intersectFactory;
         this.executorService = executorService;
         this.concurrency = concurrency;
+        this.ALabel = ALabel.map(NodeLabel::of);
+        this.BLabel = BLabel.map(NodeLabel::of);
+        this.CLabel = CLabel.map(NodeLabel::of);
         this.nodeCount = Math.toIntExact(graph.nodeCount());
         this.resultQueue = new ArrayBlockingQueue<>(concurrency.value() << 10);
         this.runningThreads = new AtomicInteger();
@@ -111,16 +134,20 @@ public final class TriangleStream extends Algorithm<Stream<TriangleResult>> {
         };
 
         return StreamSupport
-                .stream(Spliterators.spliteratorUnknownSize(it, 0), false)
-                .filter(Objects::nonNull)
-                .onClose(progressTracker::endSubTask);
+            .stream(Spliterators.spliteratorUnknownSize(it, 0), false)
+            .filter(Objects::nonNull)
+            .onClose(progressTracker::endSubTask);
     }
 
     private void submitTasks() {
         queue.set(0);
         runningThreads.set(0);
         final Collection<Runnable> tasks;
-        tasks = ParallelUtil.tasks(concurrency, () -> new IntersectTask(intersectFactory.load(graph, Long.MAX_VALUE)));
+        boolean filtered = ALabel.isPresent() || BLabel.isPresent() || CLabel.isPresent();
+        tasks = ParallelUtil.tasks(
+            concurrency,
+            () -> new IntersectTask(intersectFactory.load(graph, Long.MAX_VALUE, BLabel, CLabel, filtered))
+        );
         ParallelUtil.run(tasks, false, executorService, null);
     }
 
@@ -135,7 +162,9 @@ public final class TriangleStream extends Algorithm<Stream<TriangleResult>> {
             try {
                 int node;
                 while ((node = queue.getAndIncrement()) < nodeCount && terminationFlag.running()) {
-                    evaluateNode(node);
+                    if (ALabel.isEmpty() || graph.hasLabel(node, ALabel.get())) {
+                        evaluateNode(node);
+                    }
                     progressTracker.logProgress();
                 }
             } finally {
@@ -147,9 +176,10 @@ public final class TriangleStream extends Algorithm<Stream<TriangleResult>> {
 
         void emit(long nodeA, long nodeB, long nodeC) {
             var result = new TriangleResult(
-                    graph.toOriginalNodeId(nodeA),
-                    graph.toOriginalNodeId(nodeB),
-                    graph.toOriginalNodeId(nodeC));
+                graph.toOriginalNodeId(nodeA),
+                graph.toOriginalNodeId(nodeB),
+                graph.toOriginalNodeId(nodeC)
+            );
             resultQueue.offer(result);
         }
     }

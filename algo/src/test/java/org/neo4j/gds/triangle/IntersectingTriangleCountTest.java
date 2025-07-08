@@ -32,6 +32,7 @@ import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.termination.TerminationFlag;
 
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -104,6 +105,31 @@ class IntersectingTriangleCountTest {
             assertEquals(6, result.localTriangles().get(i));
         }
     }
+
+    @Test
+    void filtered() {
+        // Should count a1-a2-a3 triangle, but not a1-a4-a5
+        var graph = fromGdl(
+            "CREATE " +
+                " (a1:A)-[:T]->(a2:B), " +
+                " (a2)-[:T]->(a3:C), " +
+                " (a3)-[:T]->(a1), " +
+                " (a1)-[:T]->(a4:D), " +
+                " (a4)-[:T]->(a5:E), " +
+                " (a5)-[:T]->(a1)"
+        );
+
+        TriangleCountResult result = compute(graph, new Concurrency(4), Long.MAX_VALUE, Optional.of("A"), Optional.of("B"), Optional.of("C"));
+
+        assertEquals(1, result.globalTriangles());
+        assertEquals(5, result.localTriangles().size());
+        assertEquals(1, result.localTriangles().get(0)); // a1
+        assertEquals(1, result.localTriangles().get(1)); // a2
+        assertEquals(1, result.localTriangles().get(2)); // a3
+        assertEquals(0, result.localTriangles().get(3)); // a4
+        assertEquals(0, result.localTriangles().get(4)); // a5
+    }
+
 
     @Test
     void clique5UnionGraph() {
@@ -516,6 +542,23 @@ class IntersectingTriangleCountTest {
             graph,
             concurrency,
             maxDegree,
+            Optional.empty(),
+            Optional.empty(),
+            Optional.empty(),
+            DefaultPool.INSTANCE,
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
+        ).compute();
+    }
+
+    private TriangleCountResult compute(Graph graph, Concurrency concurrency, long maxDegree, Optional<String> ALabel, Optional<String> BLabel, Optional<String> CLabel) {
+        return IntersectingTriangleCount.create(
+            graph,
+            concurrency,
+            maxDegree,
+            ALabel,
+            BLabel,
+            CLabel,
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER,
             TerminationFlag.RUNNING_TRUE

@@ -27,6 +27,7 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.util.Collection;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -38,6 +39,12 @@ public interface TriangleCountBaseConfig extends AlgoBaseConfig {
     default long maxDegree() {
         return Long.MAX_VALUE;
     }
+
+    Optional<String> ALabel();
+
+    Optional<String> BLabel();
+
+    Optional<String> CLabel();
 
     @Configuration.Check
     default void validateMaxDegree() {
@@ -67,6 +74,6 @@ public interface TriangleCountBaseConfig extends AlgoBaseConfig {
 
     @Configuration.Ignore
     default TriangleCountParameters toParameters() {
-        return new TriangleCountParameters(concurrency(), maxDegree());
+        return new TriangleCountParameters(concurrency(), maxDegree(), ALabel(), BLabel(), CLabel());
     }
 }

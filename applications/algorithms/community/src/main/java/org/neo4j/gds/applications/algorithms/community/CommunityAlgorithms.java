@@ -254,6 +254,9 @@ public class CommunityAlgorithms {
             graph,
             parameters.concurrency(),
             parameters.maxDegree(),
+            parameters.ALabel(),
+            parameters.BLabel(),
+            parameters.CLabel(),
             DefaultPool.INSTANCE,
             progressTracker,
             terminationFlag
@@ -265,6 +268,9 @@ public class CommunityAlgorithms {
             graph,
             DefaultPool.INSTANCE,
             parameters.concurrency(),
+            parameters.ALabel(),
+            parameters.BLabel(),
+            parameters.CLabel(),
             terminationFlag
         ).compute();
     }
