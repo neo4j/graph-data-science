@@ -145,7 +145,7 @@ class ToUndirectedProcTest extends BaseProcTest {
             .isInstanceOf(QueryExecutionException.class)
             .hasRootCauseInstanceOf(IllegalArgumentException.class)
             .hasRootCauseMessage(
-                "Could not find the specified `relationshipType` of ['REL2']. Available relationship types are ['REL'].");
+                "Could not find the specified `relationshipTypes` of ['REL2']. Available relationship types are ['REL'].");
     }
 
     @Test
