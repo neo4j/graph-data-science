@@ -1098,8 +1098,8 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
     private GraphStore getGraphStore(GraphName graphName, BaseConfig configuration) {
         var graphStoreCatalogEntry = graphStoreCatalogService.getGraphStoreCatalogEntry(
             graphName,
-            configuration,
             requestScopedDependencies.user(),
+            configuration.usernameOverride(),
             requestScopedDependencies.databaseId()
         );
 

@@ -27,7 +27,6 @@ import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.config.BaseConfig;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.loading.GraphStoreCatalog.GraphStoreCatalogEntryWithUsername;
 
@@ -147,11 +146,11 @@ public class GraphStoreCatalogService {
 
     public GraphStoreCatalogEntry getGraphStoreCatalogEntry(
         GraphName graphName,
-        BaseConfig config,
         User user,
+        Optional<String> usernameOverride,
         DatabaseId databaseId
     ) {
-        var catalogRequest = CatalogRequest.of(user, databaseId, config.usernameOverride());
+        var catalogRequest = CatalogRequest.of(user, databaseId, usernameOverride);
 
         return get(catalogRequest, graphName);
     }

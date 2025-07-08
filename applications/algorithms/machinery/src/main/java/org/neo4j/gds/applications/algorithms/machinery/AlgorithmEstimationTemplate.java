@@ -124,8 +124,8 @@ public class AlgorithmEstimationTemplate {
     ) {
         var graphStore = graphStoreCatalogService.getGraphStoreCatalogEntry(
             graphName,
-            configuration,
             requestScopedDependencies.user(),
+            configuration.usernameOverride(),
             requestScopedDependencies.databaseId()
         ).graphStore();
 
