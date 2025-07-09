@@ -179,13 +179,13 @@ class CliqueCountingTest {
         long[] subclique1 = {0, 1, 2};
         long[] subclique2 = {0, 4};
         CliqueCountingResult result2 = compute(graph, 4, HugeObjectArray.of(subclique1, subclique2));
-        assertEquals(2L, result2.perSubcliqueCount().get(0L).length);
-        assertEquals(1L, result2.perSubcliqueCount().get(0L)[3 - 3]);
-        assertEquals(1L, result2.perSubcliqueCount().get(0L)[4 - 3]);
+        assertEquals(2L, result2.perSubcliqueCount()[0].length);
+        assertEquals(1L, result2.perSubcliqueCount()[0][3 - 3]);
+        assertEquals(1L, result2.perSubcliqueCount()[0][4 - 3]);
 
-        assertEquals(2L, result2.perSubcliqueCount().get(1L).length);
-        assertEquals(2L, result2.perSubcliqueCount().get(1L)[3 - 3]);
-        assertEquals(1L, result2.perSubcliqueCount().get(1L)[4 - 3]);
+        assertEquals(2L, result2.perSubcliqueCount()[1].length);
+        assertEquals(2L, result2.perSubcliqueCount()[1][3 - 3]);
+        assertEquals(1L, result2.perSubcliqueCount()[1][4 - 3]);
     }
 
     @Test

@@ -33,7 +33,6 @@ import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.termination.TerminationFlag;
 
-import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.concurrent.ExecutorService;
@@ -67,22 +66,9 @@ public final class CliqueCounting extends Algorithm<CliqueCountingResult> {
     private final AtomicLong rootQueue;
 
     private final CliqueCountingMode countingMode;
-    private final HugeObjectArray<long[]> subcliques;
-
-    //results
-//    private final CliqueCount globalCliqueCount; //integer is big enough since degree is int
-//    private final HugeObjectArray<CliqueCount> nodeCliqueCount;
-    private final HugeObjectArray<CliqueCount> subcliqueCliqueCount;
-
-    private final CliqueAdjacency cliqueAdjacency;
-
-    private final ListCliqueCount globalCliqueCount;
-    private final HugeObjectArray<ListCliqueCount> nodeCliqueCount;
-
-
-//    private final NewCliqueCount newGlobalCliqueCount;
-//    private final HugeObjectArray<NewCliqueCount> newNodeCliqueCount;
-//    private final HugeObjectArray<NewCliqueCount> newSubcliqueCliqueCount;
+    private final long[][] subcliques;
+    CliqueAdjacency cliqueAdjacency;
+    CliqueCountsHandler cliqueCountsHandler;
 
     private CliqueCounting(
         Graph graph,
@@ -90,27 +76,21 @@ public final class CliqueCounting extends Algorithm<CliqueCountingResult> {
         ExecutorService executorService,
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag,
-//        CliqueCount globalCliqueCount,
-//        HugeObjectArray<CliqueCount> nodeCliqueCount,
-        ListCliqueCount globalCliqueCount,//new
-        HugeObjectArray<ListCliqueCount> nodeCliqueCount, //new
-
-        HugeObjectArray<long[]> subcliques,
-        HugeObjectArray<CliqueCount> subcliqueCliqueCount,
-        CliqueAdjacency cliqueAdjacency
+        long[][] subcliques,
+        CliqueAdjacency cliqueAdjacency,
+        AtomicLong rootQueue,
+        CliqueCountsHandler cliqueCountsHandler
     ) {
         super(progressTracker);
         this.graph = graph;
         this.concurrency = parameters.concurrency();
         this.executorService = executorService;
         this.terminationFlag = terminationFlag;
-        this.rootQueue = new AtomicLong(0L);
+        this.rootQueue = rootQueue;
         this.countingMode = parameters.countingMode();
-        this.globalCliqueCount = globalCliqueCount;
-        this.nodeCliqueCount = nodeCliqueCount;
         this.subcliques = subcliques;
-        this.subcliqueCliqueCount = subcliqueCliqueCount;
         this.cliqueAdjacency = cliqueAdjacency;
+        this.cliqueCountsHandler = cliqueCountsHandler;
     }
 
     public static CliqueCounting create(
@@ -120,44 +100,14 @@ public final class CliqueCounting extends Algorithm<CliqueCountingResult> {
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
-//        CliqueCount globalCliqueCount;
-//        HugeObjectArray<CliqueCount> nodeCliqueCount;
-
-//        ListCliqueCount altGlobalCliqueCount = new ListCliqueCount(); //new
-        ListCliqueCount globalCliqueCount = new ListCliqueCount(); //new
-        HugeObjectArray<ListCliqueCount> nodeCliqueCount; //new
-        HugeObjectArray<long[]> subcliques;
-        HugeObjectArray<CliqueCount> subcliqueCliqueCount;
-        switch (parameters.countingMode()) {
-            case GloballyOnly -> {
-//                globalCliqueCount = new CliqueCount();
-                nodeCliqueCount = HugeObjectArray.of();
-                subcliques = HugeObjectArray.of();
-                subcliqueCliqueCount = HugeObjectArray.of();
-            }
-            case ForEveryNode -> {
-//                globalCliqueCount = new CliqueCount();
-//                nodeCliqueCount = HugeObjectArray.newArray(CliqueCount.class, graph.nodeCount());
-//                nodeCliqueCount.setAll(_x -> new CliqueCount());
-                nodeCliqueCount = HugeObjectArray.newArray(ListCliqueCount.class, graph.nodeCount());
-                nodeCliqueCount.setAll(_x -> new ListCliqueCount());
-                subcliques = HugeObjectArray.of();
-                subcliqueCliqueCount = HugeObjectArray.of();
-            }
-            case ForEveryRelationship -> {
-                throw new IllegalArgumentException("For every relationship is not supported yet");
-            }
-            case ForGivenSubcliques -> {
-//                globalCliqueCount = new CliqueCount();
-                nodeCliqueCount = HugeObjectArray.of();
-                subcliqueCliqueCount = HugeObjectArray.newArray(CliqueCount.class, parameters.subcliques().size());
-                subcliqueCliqueCount.setAll(_x -> new CliqueCount());
-                subcliques = HugeObjectArray.newArray(long[].class, parameters.subcliques().size());
-                subcliques.setAll(i -> parameters.subcliques().get((int) i));
-            }
-            default -> throw new IllegalStateException("Unexpected value: " + parameters.countingMode());
+//        long[][] subcliques = (long[][]) parameters.subcliques().toArray();
+        long[][] subcliques = new long[parameters.subcliques().size()][];
+        for (int i = 0; i < parameters.subcliques().size(); i++) {
+            subcliques[i] = parameters.subcliques().get(i);
         }
+        var rootQueue = new AtomicLong(0L);
         CliqueAdjacency cliqueAdjacency = CliqueAdjacencyFactory.createCliqueAdjacency(graph);
+        CliqueCountsHandler cliqueCountsHandler = new CliqueCountsHandler(graph.nodeCount());
 
         return new CliqueCounting(
             graph,
@@ -165,11 +115,10 @@ public final class CliqueCounting extends Algorithm<CliqueCountingResult> {
             executorService,
             progressTracker,
             terminationFlag,
-            globalCliqueCount,
-            nodeCliqueCount,
             subcliques,
-            subcliqueCliqueCount,
-            cliqueAdjacency
+            cliqueAdjacency,
+            rootQueue,
+            cliqueCountsHandler
         );
     }
 
@@ -186,55 +135,75 @@ public final class CliqueCounting extends Algorithm<CliqueCountingResult> {
                 ) :
                 ParallelUtil.tasks(
                     concurrency,
-                    () -> new GlobalCliqueCountingTask(graph.concurrentCopy())
+                    () -> new GlobalCliqueCountingTask(graph.concurrentCopy(), cliqueCountsHandler.takeOrCreate())
                 );
+
         ParallelUtil.run(tasks, executorService);
         progressTracker.endSubTask();
 
-        var globalCliqueCountArray = globalCliqueCount.toLongArray();
-//        var globalCliqueCountArray = altGlobalCliqueCount.toLongArray();
-
-        var nodeCliqueCountArrays = HugeObjectArray.newArray(long[].class, nodeCliqueCount.size());
-        nodeCliqueCountArrays.setAll(node -> nodeCliqueCount.get(node).toLongArray());
-
-        var subcliqueCliqueCountArrays = HugeObjectArray.newArray(long[].class, subcliqueCliqueCount.size());
-        subcliqueCliqueCountArrays.setAll(subclique_idx -> subcliqueCliqueCount.get(subclique_idx).toLongArray());
-
-        return new CliqueCountingResult(globalCliqueCountArray, nodeCliqueCountArrays, subcliqueCliqueCountArrays);
+        switch (countingMode) {
+            case GloballyOnly -> {
+                return new CliqueCountingResult(
+                    cliqueCountsHandler.merge().globalCount.toLongArray(),
+                    HugeObjectArray.of(),
+                    new long[0][0]
+                );
+            }
+            case ForEveryNode -> {
+                var sizeFrequencies = cliqueCountsHandler.merge();
+                HugeObjectArray<long[]> perNodeCount = HugeObjectArray.newArray(long[].class, graph.nodeCount());
+                perNodeCount.setAll(node -> sizeFrequencies.perNodeCount.get(node).toLongArray());
+                return new CliqueCountingResult(
+                    sizeFrequencies.globalCount.toLongArray(),
+                    perNodeCount,
+                    new long[0][0]
+                );
+            }
+            case ForGivenSubcliques -> {
+                return new CliqueCountingResult(
+                    new long[0],
+                    HugeObjectArray.of(),
+                    cliqueCountsHandler.free.stream().map(sizeFrequencies -> sizeFrequencies.globalCount.toLongArray()).toArray(long[][]::new)
+                );
+            }
+            default -> throw new IllegalStateException("Unexpected value: " + countingMode);
+        }
     }
 
-
-
-    private void recursiveSctCliqueCount(long[] subset, NodeStatus[] cliqueVertices, long rootSubcliqueIdx) {
-        //TODO: Replace cliqueVertices with structure that's cheap to push to back on.
+    private void recursiveSctCliqueCount(long[] subset, NodeStatus[] cliqueNodes, SizeFrequencies sizeFrequencies) {
         if (subset.length == 0) {
-//            updateCliqueCount(cliqueVertices, rootSubcliqueIdx);
-            newUpdateCliqueCount(cliqueVertices, rootSubcliqueIdx);
+            long[] requiredNodes = Arrays.stream(cliqueNodes)
+                .filter(NodeStatus::required)
+                .mapToLong(NodeStatus::nodeId)
+                .toArray();
+            long[] optionalNodes = Arrays.stream(cliqueNodes)
+                .filter(v -> !v.required())
+                .mapToLong(NodeStatus::nodeId)
+                .toArray();
+            sizeFrequencies.updateFrequencies(countingMode, requiredNodes, optionalNodes);
             return;
         }
 
         int[] intersectionSizes = Arrays.stream(subset).mapToInt(node -> neighborhoodIntersectionSize(subset, node)).toArray();
         SubsetPartition partition = partitionSubset(subset, intersectionSizes);
 
-
         recursiveSctCliqueCount(
             partition.nsp(),
-            Stream.concat(Arrays.stream(cliqueVertices), Stream.of(new NodeStatus(partition.pivot(), false)))
+            Stream.concat(Arrays.stream(cliqueNodes), Stream.of(new NodeStatus(partition.pivot(), false)))
                 .toArray(NodeStatus[]::new),
-            rootSubcliqueIdx
+            sizeFrequencies
         );
 
         var viSubsetSize = Arrays.stream(partition.vsIds()).map(viIdx -> intersectionSizes[viIdx]).toArray();
         var vs = Arrays.stream(partition.vsIds()).mapToLong(viIdx -> subset[viIdx]).toArray();
         for (int i = 0; i < vs.length; i++) {
             var NSvi = neighborhoodIntersection(subset, vs[i], viSubsetSize[i]);
-//            NodeStatus[] newCliqueVertices = Arrays.copyOf(cliqueVertices, cliqueVertices.length+1);  //This is significantly slower 7.2s->8.5s
-//            newCliqueVertices[cliqueVertices.length] = new NodeStatus(vs[i], true);
+//            NodeStatus[] newCliqueVertices = Arrays.copyOf(cliqueNodes, cliqueNodes.length+1);  //This is significantly slower 7.2s->8.5s
+//            newCliqueVertices[cliqueNodes.length] = new NodeStatus(vs[i], true);
             recursiveSctCliqueCount(
                 difference(NSvi, vs, i),
-//                newCliqueVertices,
-                 Stream.concat(Arrays.stream(cliqueVertices), Stream.of(new NodeStatus(vs[i], true))).toArray(NodeStatus[]::new),
-                rootSubcliqueIdx
+                 Stream.concat(Arrays.stream(cliqueNodes), Stream.of(new NodeStatus(vs[i], true))).toArray(NodeStatus[]::new),
+                sizeFrequencies
             );
         }
     }
@@ -278,30 +247,6 @@ public final class CliqueCounting extends Algorithm<CliqueCountingResult> {
         return intersectionSizeConsumer.size;
     }
 
-////    size of intersection S n N(vi)
-//    public int neighborhoodIntersectionSize(long[] subset, long v) {
-//        var intersectionSize = 0;
-//        var subsetPointer = 0;
-//
-//        var neighborIterator = graph.streamRelationships(v, -1).iterator(); //concurrentCopy()?
-//        Optional<Long> nextNeighbor = neighborIterator.hasNext() ? Optional.of(neighborIterator.next().targetId()) : Optional.empty();
-//        while (subsetPointer < subset.length && nextNeighbor.isPresent()) {
-//            switch (Long.compare(subset[subsetPointer], nextNeighbor.get())) {
-//                case -1:
-//                    subsetPointer++;
-//                    break;
-//                case 0:
-//                    intersectionSize++;
-//                    nextNeighbor = neighborIterator.hasNext() ? Optional.of(neighborIterator.next().targetId()) : Optional.empty();
-//                    break;
-//                case 1:
-//                    nextNeighbor = neighborIterator.hasNext() ? Optional.of(neighborIterator.next().targetId()) : Optional.empty();
-//                    break;
-//            }
-//        }
-//        return intersectionSize;
-//    }
-
 
 //    sorted intersection  S n N(v_i)
     private long[] neighborhoodIntersection(long[] subset, long node, int intersectionSize) { //way slower than previous. 7.2s vs 3.4s
@@ -309,32 +254,6 @@ public final class CliqueCounting extends Algorithm<CliqueCountingResult> {
         neighborhoodIntersection(subset, node, intersectionConsumer);
         return intersectionConsumer.intersection;
     }
-
-    //sorted intersection  S n N(v_i)
-//    private long[] neighborhoodIntersection(long[] subset, long vi, int intersectionSize) {
-//        var intersection = new long[Math.min(subset.length, graph.degree(vi))];
-////        var intersection = new long[intersectionSize]; //no noticeable gain
-//        var intersectionPointer = 0;
-//        var subsetPointer = 0;
-//        var neighborIterator = graph.streamRelationships(vi, -1).iterator();
-//        Optional<Long> nextNeighbor = neighborIterator.hasNext() ? Optional.of(neighborIterator.next().targetId()) : Optional.empty();
-//        while (subsetPointer < subset.length && nextNeighbor.isPresent()) {
-//            switch (Long.compare(subset[subsetPointer], nextNeighbor.get())) {
-//                case -1:
-//                    subsetPointer++;
-//                    break;
-//                case 0:
-//                    intersection[intersectionPointer++] = subset[subsetPointer++];
-//                    nextNeighbor = neighborIterator.hasNext() ? Optional.of(neighborIterator.next().targetId()) : Optional.empty();
-//                    break;
-//                case 1:
-//                    nextNeighbor = neighborIterator.hasNext() ? Optional.of(neighborIterator.next().targetId()) : Optional.empty();
-//                    break;
-//            }
-//        }
-//        return Arrays.copyOf(intersection, intersectionPointer);
-////        return intersection;
-//    }
 
     private void neighborhoodIntersection(long[] subset, long node, Consumer<Long> consumer) {
         AdjacencyCursor neighborCursor = cliqueAdjacency.createCursor(node);
@@ -367,132 +286,58 @@ public final class CliqueCounting extends Algorithm<CliqueCountingResult> {
         return Arrays.copyOf(difference, differencePointer);
     }
 
-    private void newUpdateCliqueCount(NodeStatus[] cliqueNodes, long rootSubcliqueIdx) {
-        long[] requiredNodes = Arrays.stream(cliqueNodes)
-            .filter(NodeStatus::required)
-            .mapToLong(NodeStatus::nodeId)
-            .toArray();
-        long[] optionalNodes = Arrays.stream(cliqueNodes)
-            .filter(v -> !v.required())
-            .mapToLong(NodeStatus::nodeId)
-            .toArray();
-
-        switch (countingMode) {
-            case GloballyOnly -> globalCliqueCount.add(requiredNodes.length, optionalNodes.length);
-            case ForEveryNode -> {
-                //fixme, reuse binomial computations even better.
-                globalCliqueCount.add(requiredNodes.length, optionalNodes.length);
-
-                var requiredNodesCliqueCount = Arrays.stream(requiredNodes).mapToObj(nodeCliqueCount::get).toList();
-                ListCliqueCount.add(requiredNodes.length, optionalNodes.length, requiredNodesCliqueCount);
-                if (optionalNodes.length > 0) {
-                    var optionalNodesCliqueCount = Arrays.stream(optionalNodes).mapToObj(nodeCliqueCount::get).toList();
-                    ListCliqueCount.add(requiredNodes.length+1, optionalNodes.length-1, optionalNodesCliqueCount);
-                }
-            }
-            case ForGivenSubcliques -> {
-                for (int numOptionalNodes = 0; numOptionalNodes <= optionalNodes.length; numOptionalNodes++) {
-                    var cliqueSize = requiredNodes.length + numOptionalNodes;
-                    var cliqueCount = binomialCoefficient(optionalNodes.length, numOptionalNodes);
-                    subcliqueCliqueCount.get(rootSubcliqueIdx).merge(cliqueSize, cliqueCount, BigInteger::add);
-                }
-//                newSubcliqueCliqueCount.get(rootSubcliqueIdx).add(requiredNodes.length, optionalNodes.length);
-            }
-        }
-    }
-
-    private void updateCliqueCount(NodeStatus[] cliqueNodes, long rootSubcliqueIdx) {
-        long[] requiredNodes = Arrays.stream(cliqueNodes)
-            .filter(NodeStatus::required)
-            .mapToLong(NodeStatus::nodeId)
-            .toArray();
-        long[] optionalNodes = Arrays.stream(cliqueNodes)
-            .filter(v -> !v.required())
-            .mapToLong(NodeStatus::nodeId)
-            .toArray();
-        var numRequiredNodes = requiredNodes.length;
-        var maxNumOptionalNodes = optionalNodes.length;
-
-        //Todo: Ignore size < 3
-        switch (countingMode) {
-            case GloballyOnly -> {
-                globalCliqueCount.add(numRequiredNodes, maxNumOptionalNodes); //new
-//                altGlobalCliqueCount.add(numRequiredNodes, maxNumOptionalNodes);
-//                for (int numOptionalNodes = 0; numOptionalNodes <= maxNumOptionalNodes; numOptionalNodes++) {
-//                    var cliqueSize = numRequiredNodes + numOptionalNodes;
-//                    var cliqueCount = binomialCoefficient(maxNumOptionalNodes, numOptionalNodes);
-//                    globalCliqueCount.merge(cliqueSize, cliqueCount, BigInteger::add);
-//                }
-            }
-            case ForEveryNode -> {
-                globalCliqueCount.add(numRequiredNodes, maxNumOptionalNodes); //new
-//                altGlobalCliqueCount.add(numRequiredNodes, maxNumOptionalNodes);
-//                for (int numOptionalNodes = 0; numOptionalNodes <= maxNumOptionalNodes; numOptionalNodes++) {
-//                    var cliqueSize = numRequiredNodes + numOptionalNodes;
-//                    var cliqueCount = binomialCoefficient(maxNumOptionalNodes, numOptionalNodes);
-//                    globalCliqueCount.merge(cliqueSize, cliqueCount, BigInteger::add);
-//                    for (long node : requiredNodes) {
-//                        nodeCliqueCount.get(node).merge(cliqueSize, cliqueCount, BigInteger::add);
-//                    }
-//                }
-                for (long node : requiredNodes) {
-                    nodeCliqueCount.get(node).add(numRequiredNodes, maxNumOptionalNodes);
-                }
-//                for (int numOptionalNodes = 0; numOptionalNodes <= maxNumOptionalNodes - 1; numOptionalNodes++) {
-//                    for (long node : optionalNodes) {
-//                        var cliqueSize = numRequiredNodes + 1 + numOptionalNodes;
-//                        var cliqueCount = binomialCoefficient(maxNumOptionalNodes - 1, numOptionalNodes);
-//                        nodeCliqueCount.get(node).merge(cliqueSize, cliqueCount, BigInteger::add);
-//                    }
-//                }
-                for (long node : optionalNodes) {
-                    nodeCliqueCount.get(node).add(numRequiredNodes+1, maxNumOptionalNodes-1);
-                }
-            }
-            case ForGivenSubcliques -> {
-                for (int numOptionalNodes = 0; numOptionalNodes <= maxNumOptionalNodes; numOptionalNodes++) {
-                    var cliqueSize = numRequiredNodes + numOptionalNodes;
-                    var cliqueCount = binomialCoefficient(maxNumOptionalNodes, numOptionalNodes);
-                    subcliqueCliqueCount.get(rootSubcliqueIdx).merge(cliqueSize, cliqueCount, BigInteger::add);
-                }
-            }
-        }
-    }
-
-    private static BigInteger binomialCoefficient(int n, int k) {
-        //TODO: Calculate multiple at the same time. Always need j for 3<=j<=k
-        var k_ = Math.min(k, n - k);
-        BigInteger numerator = BigInteger.ONE;
-        BigInteger denominator = BigInteger.ONE;
-        for (var i = 0; i < k_; i++) {
-            numerator = numerator.multiply(BigInteger.valueOf(n - i));
-            denominator = denominator.multiply(BigInteger.valueOf(i+1));
-        }
-        return numerator.divide(denominator);
-    }
-
     private record NodeStatus(long nodeId, boolean required) { }
 
     private record SubsetPartition(long[] nsp, int[] vsIds, long pivot) { }
 
     private class GlobalCliqueCountingTask implements Runnable {
+        //Fixme: Doesn't work for subcliques since they don't use positive neighborhood
         Graph graph;
-        GlobalCliqueCountingTask(Graph graph) {
+        SizeFrequencies sizeFrequencies;
+
+        GlobalCliqueCountingTask(Graph graph, SizeFrequencies sizeFrequencies) {
             this.graph = graph;
+            this.sizeFrequencies = sizeFrequencies;
         }
 
-        @Override
         public void run() {
             long rootNode;
             while ((rootNode = rootQueue.getAndIncrement()) < graph.nodeCount() && terminationFlag.running()) {
-                NodeStatus[] cliqueVertices = {new NodeStatus(rootNode, true)};
+                NodeStatus[] cliqueNodes = {new NodeStatus(rootNode, true)};
                 long[] positiveNeighborhood = graph
                     .streamRelationships(rootNode, -1)
                     .filter(r -> r.targetId() > r.sourceId())
                     .mapToLong(RelationshipCursor::targetId)
                     .toArray();
-                recursiveSctCliqueCount(positiveNeighborhood, cliqueVertices, -1);
-                progressTracker.logProgress();
+                recursiveSctCliqueCount(positiveNeighborhood, cliqueNodes, sizeFrequencies);
+            }
+            cliqueCountsHandler.giveBack(sizeFrequencies);
+        }
+    }
+
+    private class SubcliqueCliqueCountingTask implements Runnable {
+        Graph graph;
+
+        SubcliqueCliqueCountingTask(Graph graph) {
+            this.graph = graph;
+        }
+
+        public void run() {
+            int subcliqueIdx;
+            while ((subcliqueIdx = (int)rootQueue.getAndIncrement()) < subcliques.length && terminationFlag.running()) {
+                var subclique = subcliques[subcliqueIdx];
+                var sizeFrequencies = cliqueCountsHandler.create();
+                NodeStatus[] cliqueNodes = Arrays.stream(subclique).mapToObj(node -> new NodeStatus(node, true)).toArray(NodeStatus[]::new);
+                long[] subset = graph
+                    .streamRelationships(subclique[0], -1)
+                    .mapToLong(RelationshipCursor::targetId)
+                    .toArray();
+                for (var node : subclique) { //first is unnecessary
+                    var newSubsetSize = neighborhoodIntersectionSize(subset, node);
+                    subset = neighborhoodIntersection(subset, node, newSubsetSize); //S = N(v1) n N(v2) n ... n N(vk)
+                }
+                recursiveSctCliqueCount(subset, cliqueNodes, sizeFrequencies);
+                cliqueCountsHandler.giveBack(sizeFrequencies); //Needs to be stored but not be used by another thread.
             }
         }
     }
@@ -518,29 +363,6 @@ public final class CliqueCounting extends Algorithm<CliqueCountingResult> {
 
         public void accept(Long node) {
             intersection[intersectionPointer++] = node;
-        }
-    }
-
-    private class SubcliqueCliqueCountingTask implements Runnable {
-        Graph graph;
-        SubcliqueCliqueCountingTask(Graph graph) {
-            this.graph = graph;
-        }
-
-        @Override
-        public void run() {
-            long rootSubcliqueIdx;
-            while ((rootSubcliqueIdx = rootQueue.getAndIncrement()) < subcliques.size() && terminationFlag.running()) {
-                long[] subclique = subcliques.get(rootSubcliqueIdx);
-                NodeStatus[] cliqueVertices = Arrays.stream(subclique).mapToObj(v -> new NodeStatus(v, true)).toArray(NodeStatus[]::new);
-                long[] intersectedNeighborhoods = graph.streamRelationships(subclique[0], -1).mapToLong(RelationshipCursor::targetId).toArray();
-                for (long node : subclique) {
-                    var intersectionSize = neighborhoodIntersectionSize(intersectedNeighborhoods, node);
-                    intersectedNeighborhoods = neighborhoodIntersection(intersectedNeighborhoods, node, intersectionSize);
-                }
-                recursiveSctCliqueCount(intersectedNeighborhoods, cliqueVertices, rootSubcliqueIdx);
-                progressTracker.logProgress();
-            }
         }
     }
 }

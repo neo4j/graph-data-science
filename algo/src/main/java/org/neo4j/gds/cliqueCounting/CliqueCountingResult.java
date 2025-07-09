@@ -24,5 +24,5 @@ import org.neo4j.gds.collections.ha.HugeObjectArray;
 public record CliqueCountingResult(
     long[] globalCount,
     HugeObjectArray<long[]> perNodeCount,
-    HugeObjectArray<long[]> perSubcliqueCount //todo: turn this into a map of long[] instead?
+    long[][] perSubcliqueCount //todo: turn this into a map of long[] instead?
 ){}
