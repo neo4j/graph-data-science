@@ -56,7 +56,7 @@ asciidoc:
     # sectnums: true, removed so they are off by default
     # sectnumlevel: 3,
     experimental: ''
-    copyright: 2024
+    copyright: 2025
     common-license-page-uri: https://neo4j.com/docs/license/
     operations-manual-base-uri: https://neo4j.com/docs/operations-manual/
     gds-docs-base-uri: https://neo4j.com/docs/graph-data-science
