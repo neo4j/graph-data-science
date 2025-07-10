@@ -38,12 +38,9 @@ public final class HugeGraphIntersect extends GraphIntersect<AdjacencyCursor> {
     private HugeGraphIntersect(
         AdjacencyList adjacency,
         long maxDegree,
-        Optional<NodeLabel> BLabel,
-        Optional<NodeLabel> CLabel,
-        BiFunction<Long, NodeLabel, Boolean> hasLabel,
-        boolean filtered
+        BiFunction<Long, NodeLabel, Boolean> hasLabel
     ) {
-        super(maxDegree, BLabel, CLabel, hasLabel, filtered);
+        super(maxDegree, hasLabel);
         this.adjacencyList = adjacency;
     }
 
@@ -68,15 +65,12 @@ public final class HugeGraphIntersect extends GraphIntersect<AdjacencyCursor> {
         @Override
         public RelationshipIntersect load(
             Graph graph,
-            long maxDegree,
-            Optional<NodeLabel> BLabel,
-            Optional<NodeLabel> CLabel,
-            boolean filtered
+            long maxDegree
         ) {
             assert graph instanceof HugeGraph;
             var hugeGraph = (HugeGraph) graph;
             var topology = hugeGraph.relationshipTopology().adjacencyList();
-            return new HugeGraphIntersect(topology, maxDegree, BLabel, CLabel, graph::hasLabel, filtered);
+            return new HugeGraphIntersect(topology, maxDegree, graph::hasLabel);
         }
     }
 }

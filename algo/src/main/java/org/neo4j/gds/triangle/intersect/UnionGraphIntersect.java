@@ -43,12 +43,9 @@ public final class UnionGraphIntersect extends GraphIntersect<CompositeAdjacency
         LongToLongFunction fromFilteredIdFunction,
         CompositeAdjacencyList compositeAdjacencyList,
         long maxDegree,
-        Optional<NodeLabel> BLabel,
-        Optional<NodeLabel> CLabel,
-        BiFunction<Long, NodeLabel, Boolean> hasLabel,
-        boolean filtered
+        BiFunction<Long, NodeLabel, Boolean> hasLabel
     ) {
-        super(maxDegree, BLabel, CLabel, hasLabel, filtered);
+        super(maxDegree, hasLabel);
         this.degreeFunction = degreeFunction;
         this.fromFilteredIdFunction = fromFilteredIdFunction;
         this.compositeAdjacencyList = compositeAdjacencyList;
@@ -78,10 +75,7 @@ public final class UnionGraphIntersect extends GraphIntersect<CompositeAdjacency
         @Override
         public UnionGraphIntersect load(
             Graph graph,
-            long maxDegree,
-            Optional<NodeLabel> BLabel,
-            Optional<NodeLabel> CLabel,
-            boolean filtered
+            long maxDegree
         ) {
             assert graph instanceof UnionGraph;
             var topology = ((UnionGraph) graph).relationshipTopology();
@@ -90,10 +84,7 @@ public final class UnionGraphIntersect extends GraphIntersect<CompositeAdjacency
                 i -> i,
                 topology,
                 maxDegree,
-                BLabel,
-                CLabel,
-                graph::hasLabel,
-                filtered
+                graph::hasLabel
             );
         }
     }
@@ -112,10 +103,7 @@ public final class UnionGraphIntersect extends GraphIntersect<CompositeAdjacency
         @Override
         public UnionGraphIntersect load(
             Graph graph,
-            long maxDegree,
-            Optional<NodeLabel> BLabel,
-            Optional<NodeLabel> CLabel,
-            boolean filtered
+            long maxDegree
         ) {
             assert graph instanceof UnionGraph;
             var topology = ((UnionGraph) graph).relationshipTopology();
@@ -124,10 +112,7 @@ public final class UnionGraphIntersect extends GraphIntersect<CompositeAdjacency
                 graph::toRootNodeId,
                 topology,
                 maxDegree,
-                BLabel,
-                CLabel,
-                graph::hasLabel,
-                filtered
+                graph::hasLabel
             );
         }
     }

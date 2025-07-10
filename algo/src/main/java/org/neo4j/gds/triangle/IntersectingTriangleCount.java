@@ -68,6 +68,8 @@ public final class IntersectingTriangleCount extends Algorithm<TriangleCountResu
     private final Optional<NodeLabel> ALabel;
     private final Optional<NodeLabel> BLabel;
     private final Optional<NodeLabel> CLabel;
+    private final boolean bTraversal;
+    private final boolean cTraversal;
     private long globalTriangleCount;
 
     private final LongAdder globalTriangleCounter;
@@ -130,6 +132,12 @@ public final class IntersectingTriangleCount extends Algorithm<TriangleCountResu
         this.globalTriangleCounter = new LongAdder();
         this.queue = new AtomicLong();
 
+        this.bTraversal = ALabel.isPresent() && ((BLabel.isPresent() && !ALabel.get()
+            .equals(BLabel.get())) || BLabel.isEmpty());
+        this.cTraversal = (ALabel.isPresent() && ((CLabel.isPresent() && !ALabel.get()
+            .equals(CLabel.get())) || CLabel.isEmpty()) && (BLabel.isPresent() && ((CLabel.isPresent() && !BLabel.get()
+            .equals(CLabel.get())) || CLabel.isEmpty())));
+
         this.terminationFlag = terminationFlag;
     }
 
@@ -139,11 +147,10 @@ public final class IntersectingTriangleCount extends Algorithm<TriangleCountResu
         queue.set(0);
         globalTriangleCounter.reset();
 
-        boolean filtered = ALabel.isPresent() || BLabel.isPresent() || CLabel.isPresent();
         // create tasks
         final Collection<? extends Runnable> tasks = ParallelUtil.tasks(
             concurrency,
-            () -> new IntersectTask(intersectFactory.load(graph, maxDegree, BLabel, CLabel, filtered))
+            () -> new IntersectTask(intersectFactory.load(graph, maxDegree))
         );
         // run
         ParallelUtil.run(tasks, executorService);
@@ -171,7 +178,13 @@ public final class IntersectingTriangleCount extends Algorithm<TriangleCountResu
             while ((node = queue.getAndIncrement()) < graph.nodeCount() && terminationFlag.running()) {
                 if (graph.degree(node) <= maxDegree) {
                     if (ALabel.isEmpty() || graph.hasLabel(node, ALabel.get())) {
-                        intersect.intersectAll(node, this);
+                        intersect.intersectAll(node, this, BLabel, CLabel);
+                    }
+                    if (bTraversal && (BLabel.isEmpty() || graph.hasLabel(node, BLabel.get()))) {
+                        intersect.intersectAll(node, this, CLabel, ALabel);
+                    }
+                    if (cTraversal && (CLabel.isEmpty() || graph.hasLabel(node, CLabel.get()))) {
+                        intersect.intersectAll(node, this, ALabel, BLabel);
                     }
                 } else {
                     triangleCounts.set(node, EXCLUDED_NODE_TRIANGLE_COUNT);

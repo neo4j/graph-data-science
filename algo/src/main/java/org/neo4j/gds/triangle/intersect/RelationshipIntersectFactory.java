@@ -31,7 +31,8 @@ public interface RelationshipIntersectFactory {
 
     boolean canLoad(Graph graph);
 
-    RelationshipIntersect load(Graph graph, long maxDegree, Optional<NodeLabel> BLabel, Optional<NodeLabel> CLabel,
-        boolean filtered
+    RelationshipIntersect load(
+        Graph graph,
+        long maxDegree
     );
 }

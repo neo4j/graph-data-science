@@ -41,10 +41,7 @@ import static org.neo4j.gds.api.AdjacencyCursor.NOT_FOUND;
 public abstract class GraphIntersect<CURSOR extends AdjacencyCursor> implements RelationshipIntersect {
 
     private final IntPredicate degreeFilter;
-    private final Optional<NodeLabel> BLabel;
-    private final Optional<NodeLabel> CLabel;
     private final BiFunction<Long, NodeLabel, Boolean> hasLabel;
-    private final boolean filtered;
     private CURSOR origNeighborsOfa;
     private CURSOR helpingCursorOfa;
     private CURSOR helpingCursorOfb;
@@ -52,22 +49,21 @@ public abstract class GraphIntersect<CURSOR extends AdjacencyCursor> implements 
 
     protected GraphIntersect(
         long maxDegree,
-        Optional<NodeLabel> BLabel,
-        Optional<NodeLabel> CLabel,
-        BiFunction<Long, NodeLabel, Boolean> hasLabel,
-        boolean filtered
+        BiFunction<Long, NodeLabel, Boolean> hasLabel
     ) {
         this.degreeFilter = maxDegree < Long.MAX_VALUE
             ? (degree) -> degree <= maxDegree
             : (ignore) -> true;
-        this.BLabel = BLabel;
-        this.CLabel = CLabel;
         this.hasLabel = hasLabel;
-        this.filtered =  filtered;
     }
 
     @Override
-    public void intersectAll(long a, IntersectionConsumer consumer) {
+    public void intersectAll(
+        long a,
+        IntersectionConsumer consumer,
+        Optional<NodeLabel> bLabel,
+        Optional<NodeLabel> cLabel
+    ) {
         // check the first node's degree
         int degreeOfa = degree(a);
         if (!degreeFilter.test(degreeOfa)) {
@@ -76,18 +72,23 @@ public abstract class GraphIntersect<CURSOR extends AdjacencyCursor> implements 
 
         origNeighborsOfa = cursorForNode(origNeighborsOfa, a, degreeOfa);
 
-        triangles(a, degreeOfa, origNeighborsOfa, consumer);
+        triangles(a, degreeOfa, origNeighborsOfa, consumer, bLabel, cLabel);
     }
 
     private void triangles(
         long a,
         int degreeOfa,
         CURSOR neighborsOfa,
-        IntersectionConsumer consumer
+        IntersectionConsumer consumer,
+        Optional<NodeLabel> bLabel,
+        Optional<NodeLabel> cLabel
     ) {
         long b = AdjacencyCursorUtils.next(neighborsOfa);
-        while (b != NOT_FOUND && (b < a || filtered)) {
-            if (BLabel.isEmpty() || hasLabel.apply(b, BLabel.get())) {
+        boolean cTraversal = bLabel.isPresent() && ((cLabel.isPresent() && !bLabel.get()
+            .equals(cLabel.get())) || cLabel.isEmpty());
+
+        while (b != NOT_FOUND && (b < a)) {
+            if (bLabel.isEmpty() || hasLabel.apply(b, bLabel.get())) {
                 var degreeOfb = degree(b);
                 if (degreeFilter.test(degreeOfb)) {
                     helpingCursorOfb = cursorForNode(
@@ -103,8 +104,32 @@ public abstract class GraphIntersect<CURSOR extends AdjacencyCursor> implements 
                         b,
                         helpingCursorOfa,
                         helpingCursorOfb,
-                        consumer
+                        consumer,
+                        cLabel
                     ); //find all triangles involving the edge (a-b)
+                }
+            }
+            if (cTraversal) {
+                if (cLabel.isEmpty() || hasLabel.apply(b, cLabel.get())) {
+                    var degreeOfb = degree(b);
+                    if (degreeFilter.test(degreeOfb)) {
+                        helpingCursorOfb = cursorForNode(
+                            helpingCursorOfb,
+                            b,
+                            degreeOfb
+                        );
+
+                        helpingCursorOfa = cursorForNode(helpingCursorOfa, a, degreeOfa);
+
+                        triangles(
+                            a,
+                            b,
+                            helpingCursorOfa,
+                            helpingCursorOfb,
+                            consumer,
+                            bLabel
+                        ); //find all triangles involving the edge (a-b)
+                    }
                 }
             }
 
@@ -113,11 +138,18 @@ public abstract class GraphIntersect<CURSOR extends AdjacencyCursor> implements 
 
     }
 
-    private void triangles(long a, long b, CURSOR neighborsOfa, CURSOR neighborsOfb, IntersectionConsumer consumer) {
+    private void triangles(
+        long a,
+        long b,
+        CURSOR neighborsOfa,
+        CURSOR neighborsOfb,
+        IntersectionConsumer consumer,
+        Optional<NodeLabel> cLabel
+    ) {
         long c = AdjacencyCursorUtils.next(neighborsOfb);
         long currentOfa = AdjacencyCursorUtils.next(neighborsOfa);
-        while (c != NOT_FOUND && currentOfa != NOT_FOUND && (c < b || filtered)) {
-            if (CLabel.isEmpty() || hasLabel.apply(c, CLabel.get())) {
+        while (c != NOT_FOUND && currentOfa != NOT_FOUND && (c < b)) {
+            if (cLabel.isEmpty() || hasLabel.apply(c, cLabel.get())) {
                 var degreeOfc = degree(c);
                 if (degreeFilter.test(degreeOfc)) {
                     currentOfa = AdjacencyCursorUtils.advance(neighborsOfa, currentOfa, c);

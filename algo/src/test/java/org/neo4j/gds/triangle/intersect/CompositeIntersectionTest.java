@@ -53,22 +53,19 @@ final class CompositeIntersectionTest {
 
         var intersect = new UnionGraphIntersect.UnionGraphIntersectFactory().load(
             graph,
-            Long.MAX_VALUE,
-            Optional.empty(),
-            Optional.empty(),
-            false
+            Long.MAX_VALUE
         );
 
         intersect.intersectAll(
             start2, (a, b, c) -> {
-
                 Long next = targetIterator.next();
                 var targetMappedId = graph.toMappedNodeId(next);
                 assertThat(a).isEqualTo(targetMappedId);
                 assertThat(b).isEqualTo(start1);
                 assertThat(c).isEqualTo(start2);
-
-            }
+            },
+            Optional.empty(),
+            Optional.empty()
         );
 
         assertThat(targetIterator.hasNext()).isFalse();
@@ -84,10 +81,7 @@ final class CompositeIntersectionTest {
 
         var intersect = new UnionGraphIntersect.UnionGraphIntersectFactory().load(
             graph,
-            0,
-            Optional.empty(),
-            Optional.empty(),
-            false
+            0
         );
         assertThatNoException().isThrownBy(
             () ->
@@ -95,7 +89,9 @@ final class CompositeIntersectionTest {
                     start2, (a, b, c) ->
                     {
                         throw new IllegalArgumentException();
-                    }
+                    },
+                    Optional.empty(),
+                    Optional.empty()
                 )
         );
 

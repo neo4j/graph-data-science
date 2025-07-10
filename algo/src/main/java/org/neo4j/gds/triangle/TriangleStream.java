@@ -143,10 +143,9 @@ public final class TriangleStream extends Algorithm<Stream<TriangleResult>> {
         queue.set(0);
         runningThreads.set(0);
         final Collection<Runnable> tasks;
-        boolean filtered = ALabel.isPresent() || BLabel.isPresent() || CLabel.isPresent();
         tasks = ParallelUtil.tasks(
             concurrency,
-            () -> new IntersectTask(intersectFactory.load(graph, Long.MAX_VALUE, BLabel, CLabel, filtered))
+            () -> new IntersectTask(intersectFactory.load(graph, Long.MAX_VALUE))
         );
         ParallelUtil.run(tasks, false, executorService, null);
     }
@@ -163,7 +162,13 @@ public final class TriangleStream extends Algorithm<Stream<TriangleResult>> {
                 int node;
                 while ((node = queue.getAndIncrement()) < nodeCount && terminationFlag.running()) {
                     if (ALabel.isEmpty() || graph.hasLabel(node, ALabel.get())) {
-                        evaluateNode(node);
+                        evaluateNode(node, BLabel, CLabel);
+                    }
+                    if (BLabel.isEmpty() || graph.hasLabel(node, BLabel.get())) {
+                        evaluateNode(node, CLabel, ALabel);
+                    }
+                    if (CLabel.isEmpty() || graph.hasLabel(node, CLabel.get())) {
+                        evaluateNode(node, ALabel, BLabel);
                     }
                     progressTracker.logProgress();
                 }
@@ -172,7 +177,7 @@ public final class TriangleStream extends Algorithm<Stream<TriangleResult>> {
             }
         }
 
-        abstract void evaluateNode(int nodeId);
+        abstract void evaluateNode(int nodeId, Optional<NodeLabel> blabel, Optional<NodeLabel> cLabel);
 
         void emit(long nodeA, long nodeB, long nodeC) {
             var result = new TriangleResult(
@@ -193,8 +198,8 @@ public final class TriangleStream extends Algorithm<Stream<TriangleResult>> {
         }
 
         @Override
-        void evaluateNode(final int nodeId) {
-            intersect.intersectAll(nodeId, this);
+        void evaluateNode(final int nodeId, Optional<NodeLabel> bLabel, Optional<NodeLabel> cLabel) {
+            intersect.intersectAll(nodeId, this, bLabel, cLabel);
         }
 
         @Override

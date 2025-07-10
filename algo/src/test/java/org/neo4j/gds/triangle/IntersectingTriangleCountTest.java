@@ -107,7 +107,7 @@ class IntersectingTriangleCountTest {
     }
 
     @Test
-    void filtered() {
+    void basic_filtered() {
         // Should count a1-a2-a3 triangle, but not a1-a4-a5
         var graph = fromGdl(
             "CREATE " +
@@ -128,8 +128,137 @@ class IntersectingTriangleCountTest {
         assertEquals(1, result.localTriangles().get(2)); // a3
         assertEquals(0, result.localTriangles().get(3)); // a4
         assertEquals(0, result.localTriangles().get(4)); // a5
+
+        // DIFFERENT ORDER OF LABELS
+
+        result = compute(graph, new Concurrency(4), Long.MAX_VALUE, Optional.of("B"), Optional.of("A"), Optional.of("C"));
+
+        assertEquals(1, result.globalTriangles());
+        assertEquals(5, result.localTriangles().size());
+        assertEquals(1, result.localTriangles().get(0)); // a1
+        assertEquals(1, result.localTriangles().get(1)); // a2
+        assertEquals(1, result.localTriangles().get(2)); // a3
+        assertEquals(0, result.localTriangles().get(3)); // a4
+        assertEquals(0, result.localTriangles().get(4)); // a5
+
+        // DIFFERENT ORDER OF LABELS
+
+        result = compute(graph, new Concurrency(4), Long.MAX_VALUE, Optional.of("B"), Optional.of("C"), Optional.of("A"));
+
+        assertEquals(1, result.globalTriangles());
+        assertEquals(5, result.localTriangles().size());
+        assertEquals(1, result.localTriangles().get(0)); // a1
+        assertEquals(1, result.localTriangles().get(1)); // a2
+        assertEquals(1, result.localTriangles().get(2)); // a3
+        assertEquals(0, result.localTriangles().get(3)); // a4
+        assertEquals(0, result.localTriangles().get(4)); // a5
     }
 
+    @Test
+    void duplicate_label_filtered() {
+        // Should count a1-a2-a3 triangle, but not a1-a4-a5
+        var graph = fromGdl(
+            "CREATE " +
+                " (a1:A)-[:T]->(a2:A), " +
+                " (a2)-[:T]->(a3:C), " +
+                " (a3)-[:T]->(a1), " +
+                " (a1)-[:T]->(a4:D), " +
+                " (a4)-[:T]->(a5:E), " +
+                " (a5)-[:T]->(a1)"
+        );
+
+        TriangleCountResult result = compute(graph, new Concurrency(4), Long.MAX_VALUE, Optional.of("A"), Optional.of("A"), Optional.of("C"));
+
+        assertEquals(1, result.globalTriangles());
+        assertEquals(5, result.localTriangles().size());
+        assertEquals(1, result.localTriangles().get(0)); // a1
+        assertEquals(1, result.localTriangles().get(1)); // a2
+        assertEquals(1, result.localTriangles().get(2)); // a3
+        assertEquals(0, result.localTriangles().get(3)); // a4
+        assertEquals(0, result.localTriangles().get(4)); // a5
+
+        result = compute(graph, new Concurrency(4), Long.MAX_VALUE, Optional.of("A"), Optional.of("C"), Optional.of("A"));
+
+        assertEquals(1, result.globalTriangles());
+        assertEquals(5, result.localTriangles().size());
+        assertEquals(1, result.localTriangles().get(0)); // a1
+        assertEquals(1, result.localTriangles().get(1)); // a2
+        assertEquals(1, result.localTriangles().get(2)); // a3
+        assertEquals(0, result.localTriangles().get(3)); // a4
+        assertEquals(0, result.localTriangles().get(4)); // a5
+
+        // Should count a1-a2-a3 triangle, but not a1-a4-a5
+        graph = fromGdl(
+            "CREATE " +
+                " (a1:A)-[:T]->(a2:A), " +
+                " (a2)-[:T]->(a3:A), " +
+                " (a3)-[:T]->(a1), " +
+                " (a1)-[:T]->(a4:D), " +
+                " (a4)-[:T]->(a5:E), " +
+                " (a5)-[:T]->(a1)"
+        );
+        result = compute(graph, new Concurrency(4), Long.MAX_VALUE, Optional.of("A"), Optional.of("A"), Optional.of("A"));
+
+        assertEquals(1, result.globalTriangles());
+        assertEquals(5, result.localTriangles().size());
+        assertEquals(1, result.localTriangles().get(0)); // a1
+        assertEquals(1, result.localTriangles().get(1)); // a2
+        assertEquals(1, result.localTriangles().get(2)); // a3
+        assertEquals(0, result.localTriangles().get(3)); // a4
+        assertEquals(0, result.localTriangles().get(4)); // a5
+    }
+
+    @Test
+    void filtered_with_emptys_test() {
+        var graph = fromGdl(
+            "CREATE " +
+                " (a1:A)-[:T]->(a2:A), " +
+                " (a2)-[:T]->(a3:B), " +
+                " (a3)-[:T]->(a1)"
+        );
+
+        TriangleCountResult result = compute(graph, new Concurrency(4), Long.MAX_VALUE, Optional.of("A"), Optional.empty(), Optional.empty());
+
+        assertEquals(1, result.globalTriangles());
+        assertEquals(3, result.localTriangles().size());
+        assertEquals(1, result.localTriangles().get(0)); // a1
+        assertEquals(1, result.localTriangles().get(1)); // a2
+        assertEquals(1, result.localTriangles().get(2)); // a3
+
+        result = compute(graph, new Concurrency(4), Long.MAX_VALUE, Optional.of("A"), Optional.of("A"), Optional.empty());
+
+        assertEquals(1, result.globalTriangles());
+        assertEquals(3, result.localTriangles().size());
+        assertEquals(1, result.localTriangles().get(0)); // a1
+        assertEquals(1, result.localTriangles().get(1)); // a2
+        assertEquals(1, result.localTriangles().get(2)); // a3
+
+        result = compute(graph, new Concurrency(4), Long.MAX_VALUE, Optional.of("A"), Optional.of("B"), Optional.empty());
+
+        assertEquals(1, result.globalTriangles());
+        assertEquals(3, result.localTriangles().size());
+        assertEquals(1, result.localTriangles().get(0)); // a1
+        assertEquals(1, result.localTriangles().get(1)); // a2
+        assertEquals(1, result.localTriangles().get(2)); // a3
+    }
+
+    @Test
+    void filtered_with_multilabel_nodes_test() {
+        var graph = fromGdl(
+            "CREATE " +
+                " (a1:A:B)-[:T]->(a2:A), " +
+                " (a2)-[:T]->(a3:C), " +
+                " (a3)-[:T]->(a1)"
+        );
+
+        TriangleCountResult result = compute(graph, new Concurrency(4), Long.MAX_VALUE, Optional.of("A"), Optional.of("B"), Optional.empty());
+
+        assertEquals(1, result.globalTriangles());
+        assertEquals(3, result.localTriangles().size());
+        assertEquals(1, result.localTriangles().get(0)); // a1
+        assertEquals(1, result.localTriangles().get(1)); // a2
+        assertEquals(1, result.localTriangles().get(2)); // a3
+    }
 
     @Test
     void clique5UnionGraph() {
