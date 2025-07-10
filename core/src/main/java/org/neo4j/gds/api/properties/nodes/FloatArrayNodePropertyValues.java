@@ -55,8 +55,8 @@ public interface FloatArrayNodePropertyValues extends NodePropertyValues {
     }
 
     @Override
-    default Optional<Integer> dimension() {
-        var value = floatArrayValue(0);
+    default Optional<Integer> dimension(long nodeId) {
+        var value = floatArrayValue(nodeId);
         if (value == null) {
             return Optional.empty();
         }

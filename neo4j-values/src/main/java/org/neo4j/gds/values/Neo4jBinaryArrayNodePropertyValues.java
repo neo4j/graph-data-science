@@ -57,8 +57,8 @@ public class Neo4jBinaryArrayNodePropertyValues implements Neo4jNodePropertyValu
     }
 
     @Override
-    public Optional<Integer> dimension() {
-        return internal.dimension();
+    public Optional<Integer> dimension(long nodeId) {
+        return internal.dimension(nodeId);
     }
 
     @Override

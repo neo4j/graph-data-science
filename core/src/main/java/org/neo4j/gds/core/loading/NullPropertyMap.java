@@ -34,7 +34,7 @@ import java.util.OptionalLong;
 public abstract class NullPropertyMap implements NodePropertyValues {
 
     @Override
-    public Optional<Integer> dimension() {
+    public Optional<Integer> dimension(long nodeId) {
         return Optional.of(1);
     }
 
