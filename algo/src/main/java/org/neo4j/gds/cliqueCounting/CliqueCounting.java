@@ -67,8 +67,8 @@ public final class CliqueCounting extends Algorithm<CliqueCountingResult> {
 
     private final CliqueCountingMode countingMode;
     private final long[][] subcliques;
-    CliqueAdjacency cliqueAdjacency;
-    CliqueCountsHandler cliqueCountsHandler;
+    private final CliqueAdjacency cliqueAdjacency;
+    private final CliqueCountsHandler cliqueCountsHandler;
 
     private CliqueCounting(
         Graph graph,
@@ -143,8 +143,11 @@ public final class CliqueCounting extends Algorithm<CliqueCountingResult> {
 
         switch (countingMode) {
             case GloballyOnly -> {
+                var globalCount = cliqueCountsHandler.merge().globalCount.toLongArray();
+                System.out.println("Global clique count: " + Arrays.toString(globalCount));
                 return new CliqueCountingResult(
-                    cliqueCountsHandler.merge().globalCount.toLongArray(),
+//                    cliqueCountsHandler.merge().globalCount.toLongArray(),
+                    globalCount,
                     HugeObjectArray.of(),
                     new long[0][0]
                 );
@@ -153,6 +156,7 @@ public final class CliqueCounting extends Algorithm<CliqueCountingResult> {
                 var sizeFrequencies = cliqueCountsHandler.merge();
                 HugeObjectArray<long[]> perNodeCount = HugeObjectArray.newArray(long[].class, graph.nodeCount());
                 perNodeCount.setAll(node -> sizeFrequencies.perNodeCount.get(node).toLongArray());
+                System.out.println("Global clique count: " + Arrays.toString(sizeFrequencies.globalCount.toLongArray()));
                 return new CliqueCountingResult(
                     sizeFrequencies.globalCount.toLongArray(),
                     perNodeCount,
@@ -171,6 +175,7 @@ public final class CliqueCounting extends Algorithm<CliqueCountingResult> {
     }
 
     private void recursiveSctCliqueCount(long[] subset, NodeStatus[] cliqueNodes, SizeFrequencies sizeFrequencies) {
+//        System.out.println("Working on subset: " + Arrays.toString(subset));
         if (subset.length == 0) {
             long[] requiredNodes = Arrays.stream(cliqueNodes)
                 .filter(NodeStatus::required)
@@ -183,6 +188,9 @@ public final class CliqueCounting extends Algorithm<CliqueCountingResult> {
             sizeFrequencies.updateFrequencies(countingMode, requiredNodes, optionalNodes);
             return;
         }
+    // node 0  intersetcts node 1:  there exists edge (0,1)
+        //user symmetry: so for node j: you can only consider nodes after >j or (<j) and brek early
+        //if j intersects i, do int[i]++ and int[j]++
 
         int[] intersectionSizes = Arrays.stream(subset).mapToInt(node -> neighborhoodIntersectionSize(subset, node)).toArray();
         SubsetPartition partition = partitionSubset(subset, intersectionSizes);
@@ -269,7 +277,7 @@ public final class CliqueCounting extends Algorithm<CliqueCountingResult> {
         }//subset is exhausted
     }
 
-    // S \ (v_1,...,v_{i-1})
+    // S \ (v_1,...,v_{i-1}) // here S \ (v_0,...,v_{i-1}) where i is one lower.
     private long[] difference(long[] subset, long[] vs, int i){
         var difference = new long[subset.length];
         int differencePointer = 0;
@@ -301,14 +309,24 @@ public final class CliqueCounting extends Algorithm<CliqueCountingResult> {
         }
 
         public void run() {
+            long nodeCount = graph.nodeCount();
             long rootNode;
             while ((rootNode = rootQueue.getAndIncrement()) < graph.nodeCount() && terminationFlag.running()) {
                 NodeStatus[] cliqueNodes = {new NodeStatus(rootNode, true)};
+                long finalRootNode = rootNode;
                 long[] positiveNeighborhood = graph
                     .streamRelationships(rootNode, -1)
-                    .filter(r -> r.targetId() > r.sourceId())
                     .mapToLong(RelationshipCursor::targetId)
+                    .sorted()
+                    .distinct()
+                    .filter(target -> target > finalRootNode)
+//                    .filter(r -> r.targetId() > r.sourceId())
+//                    .mapToLong(RelationshipCursor::targetId)
                     .toArray();
+                if (rootNode % 100_000 == 99_999) {
+                    System.out.println("Processing root node: " + rootNode + "/" + nodeCount + ". With positive neighborhood: " + Arrays.toString(
+                        positiveNeighborhood));
+                }
                 recursiveSctCliqueCount(positiveNeighborhood, cliqueNodes, sizeFrequencies);
             }
             cliqueCountsHandler.giveBack(sizeFrequencies);
@@ -331,6 +349,8 @@ public final class CliqueCounting extends Algorithm<CliqueCountingResult> {
                 long[] subset = graph
                     .streamRelationships(subclique[0], -1)
                     .mapToLong(RelationshipCursor::targetId)
+                    .sorted()
+                    .distinct()
                     .toArray();
                 for (var node : subclique) { //first is unnecessary
                     var newSubsetSize = neighborhoodIntersectionSize(subset, node);

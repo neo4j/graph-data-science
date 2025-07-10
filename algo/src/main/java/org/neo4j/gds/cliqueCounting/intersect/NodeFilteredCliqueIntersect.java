@@ -41,6 +41,7 @@ public final class NodeFilteredCliqueIntersect implements CliqueAdjacency {
     @Override
     public AdjacencyCursor createCursor(long node) {
         if (filteredGraph.containsRootNodeId(node)) {
+            //fixme. Shouldn't we filter out target-ids too?
             return innerCliqueAdjacency.createCursor(node);
         } else{
             return AdjacencyCursor.EmptyAdjacencyCursor.INSTANCE;

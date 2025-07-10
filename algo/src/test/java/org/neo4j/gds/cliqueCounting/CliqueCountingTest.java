@@ -173,6 +173,8 @@ class CliqueCountingTest {
         assertEquals(2L, result1.perNodeCount().get(0L)[4 - 3]);
     }
 
+
+
     @MethodSource("starAndTrianglesQuery")
     @ParameterizedTest(name = "{1}")
     void subcliqueCount(Graph graph, String ignoredName) {
@@ -193,7 +195,7 @@ class CliqueCountingTest {
         //Expected: [38542, 31170, 17387, 6306, 1273, 114, 1]
         String gdlString = Files.readString(Path.of("/Users/alfred/graph-analytics/public/algo/src/test/java/org/neo4j/gds/cliqueCounting/gdl_n1k_m20_p0.05.txt"));
         Graph graph = fromGdl(gdlString);
-        CliqueCountingResult result = compute(graph, 1, HugeObjectArray.of()); //todo: use concurrency
+        CliqueCountingResult result = compute(graph, 16, HugeObjectArray.of()); //todo: use concurrency
         System.out.println(Arrays.toString(result.globalCount()));
     }
 
@@ -203,9 +205,13 @@ class CliqueCountingTest {
         String gdlString = Files.readString(Path.of("/Users/alfred/graph-analytics/public/algo/src/test/java/org/neo4j/gds/cliqueCounting/gdl_n10k_m25_p0.05.txt"));
         Graph graph = fromGdl(gdlString);
         var start = System.nanoTime();
-        CliqueCountingResult result = compute(graph, 1, HugeObjectArray.of()); //todo: use concurrency
+        CliqueCountingResult result = compute(graph, 16, HugeObjectArray.of()); //todo: use concurrency
         var end = System.nanoTime();
         System.out.println("Execution time: " + (end - start)/1_000_000 + "ms");
         System.out.println(Arrays.toString(result.globalCount()));
     }
+
+    //todo
+    //test for duplicate edges
+
 }
