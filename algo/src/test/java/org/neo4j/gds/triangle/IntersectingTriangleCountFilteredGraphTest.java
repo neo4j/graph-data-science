@@ -78,8 +78,6 @@ class IntersectingTriangleCountFilteredGraphTest {
             new Concurrency(4),
             Long.MAX_VALUE,
             Optional.empty(),
-            Optional.empty(),
-            Optional.empty(),
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER,
             TerminationFlag.RUNNING_TRUE

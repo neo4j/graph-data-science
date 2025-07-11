@@ -105,8 +105,6 @@ class UnionGraphTriangleCountingTest {
             new Concurrency(1),
             Long.MAX_VALUE,
             Optional.empty(),
-            Optional.empty(),
-            Optional.empty(),
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER,
             TerminationFlag.RUNNING_TRUE

@@ -84,8 +84,7 @@ public abstract class GraphIntersect<CURSOR extends AdjacencyCursor> implements 
         Optional<NodeLabel> cLabel
     ) {
         long b = AdjacencyCursorUtils.next(neighborsOfa);
-        boolean cTraversal = bLabel.isPresent() && ((cLabel.isPresent() && !bLabel.get()
-            .equals(cLabel.get())) || cLabel.isEmpty());
+        boolean cTraversal = bLabel.isPresent() && !bLabel.get().equals(cLabel.get());
 
         while (b != NOT_FOUND && (b < a)) {
             if (bLabel.isEmpty() || hasLabel.apply(b, bLabel.get())) {

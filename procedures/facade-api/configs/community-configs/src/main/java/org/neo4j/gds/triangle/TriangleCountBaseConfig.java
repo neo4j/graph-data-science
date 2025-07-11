@@ -26,7 +26,10 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -36,15 +39,15 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 @Configuration
 public interface TriangleCountBaseConfig extends AlgoBaseConfig {
 
+    static List<String> NO_VALUE = new ArrayList<>();
+
     default long maxDegree() {
         return Long.MAX_VALUE;
     }
 
-    Optional<String> aLabel();
-
-    Optional<String> bLabel();
-
-    Optional<String> cLabel();
+    default List<String> labelFilter() {
+        return NO_VALUE;
+    }
 
     @Configuration.Check
     default void validateMaxDegree() {
@@ -62,42 +65,42 @@ public interface TriangleCountBaseConfig extends AlgoBaseConfig {
         if (!graphStore.schema().filterRelationshipTypes(Set.copyOf(selectedRelationshipTypes)).isUndirected()) {
             throw new IllegalArgumentException(formatWithLocale(
                 "TriangleCount requires relationship projections to be UNDIRECTED. " +
-                "Selected relationships `%s` are not all undirected.",
+                    "Selected relationships `%s` are not all undirected.",
                 selectedRelationshipTypes.stream().map(RelationshipType::name).collect(Collectors.toSet())
             ));
         }
     }
 
+
+    @Configuration.Check
+    default void validateCorrectNumberOfLabels() {
+        if (labelFilter() == NO_VALUE) {
+            return;
+        }
+        if (labelFilter().size() != 3) {
+            String givenLabels = String.join(", ", labelFilter());
+            throw new IllegalArgumentException(formatWithLocale(
+                "A list of exactly three node labels must be provided in the 'labelFilter' parameter, given: '[%s]'.",
+                givenLabels
+            ));
+        }
+    }
+
     @Configuration.GraphStoreValidationCheck
-    default void validateLabelFilter(
+    default void validateLabelsExist(
         GraphStore ignored,
         Collection<NodeLabel> nodeLabels,
-        Collection<RelationshipType> algoIgnored
+        Collection<RelationshipType> alsoIgnored
     ) {
-        if (aLabel().isPresent()) {
-            var _aLabel = NodeLabel.of(aLabel().get());
-            if (!nodeLabels.contains(_aLabel)) {
-                throw new IllegalArgumentException(formatWithLocale(
-                    "TriangleCount requires the provided 'aLabel' node label '%s' to be present in the graph.",
-                    _aLabel.name()
-                ));
-            }
+        if (labelFilter() == NO_VALUE) {
+            return;
         }
-        if (bLabel().isPresent()) {
-            var _bLabel = NodeLabel.of(bLabel().get());
-            if (!nodeLabels.contains(_bLabel)) {
+        for (String givenLabelString : labelFilter()) {
+            var givenLabel = NodeLabel.of(givenLabelString);
+            if (!nodeLabels.contains(givenLabel)) {
                 throw new IllegalArgumentException(formatWithLocale(
-                    "TriangleCount requires the provided 'bLabel' node label '%s' to be present in the graph.",
-                    _bLabel.name()
-                ));
-            }
-        }
-        if (cLabel().isPresent()) {
-            var _cLabel = NodeLabel.of(cLabel().get());
-            if (!nodeLabels.contains(_cLabel)) {
-                throw new IllegalArgumentException(formatWithLocale(
-                    "TriangleCount requires the provided 'cLabel' node label '%s' to be present in the graph.",
-                    _cLabel.name()
+                    "TriangleCount requires the provided 'labelFilter' node label '%s' to be present in the graph.",
+                    givenLabel.name()
                 ));
             }
         }
@@ -109,6 +112,10 @@ public interface TriangleCountBaseConfig extends AlgoBaseConfig {
 
     @Configuration.Ignore
     default TriangleCountParameters toParameters() {
-        return new TriangleCountParameters(concurrency(), maxDegree(), aLabel(), bLabel(), cLabel());
+        return new TriangleCountParameters(
+            concurrency(),
+            maxDegree(),
+            labelFilter() == NO_VALUE ? Optional.empty() : Optional.of(labelFilter())
+        );
     }
 }

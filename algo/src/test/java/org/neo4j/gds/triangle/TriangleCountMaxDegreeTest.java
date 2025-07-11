@@ -48,9 +48,9 @@ class TriangleCountMaxDegreeTest {
         var tc = IntersectingTriangleCount.create(
             graph, new Concurrency(4), 100,
             Optional.empty(),
-            Optional.empty(),
-            Optional.empty(),
-            DefaultPool.INSTANCE, ProgressTracker.NULL_TRACKER, TerminationFlag.RUNNING_TRUE
+            DefaultPool.INSTANCE,
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         ).compute();
         assertThat(tc.globalTriangles()).isEqualTo(1262L);
     }

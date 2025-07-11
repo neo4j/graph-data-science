@@ -30,6 +30,7 @@ import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
 
+import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -199,19 +200,35 @@ class TriangleCountMutateProcTest extends BaseProcTest {
     }
 
     @Test
-    void shouldThrowOnInvalidNodeLabelFilter() {
+    void shouldThrowOnTooFewLabelsInFilter() {
         String query = GdsCypher
             .call(DEFAULT_GRAPH_NAME)
             .algo("triangleCount")
             .mutateMode()
             .addParameter("mutateProperty", "mutatedTriangleCount")
-            .addParameter("aLabel", "X")
+            .addParameter("labelFilter", List.of("A"))
             .yields();
 
         assertThatRuntimeException()
             .isThrownBy(() -> runQuery(query))
             .withMessage(
-                "Failed to invoke procedure `gds.triangleCount.mutate`: Caused by: java.lang.IllegalArgumentException: TriangleCount requires the provided 'aLabel' node label 'X' to be present in the graph.");
+                "Failed to invoke procedure `gds.triangleCount.mutate`: Caused by: java.lang.IllegalArgumentException: A list of exactly three node labels must be provided in the 'labelFilter' parameter, given: '[A]'.");
+    }
+
+    @Test
+    void shouldThrowInvalidLabelsInFilter() {
+        String query = GdsCypher
+            .call(DEFAULT_GRAPH_NAME)
+            .algo("triangleCount")
+            .mutateMode()
+            .addParameter("mutateProperty", "mutatedTriangleCount")
+            .addParameter("labelFilter", List.of("X", "Y", "Z"))
+            .yields();
+
+        assertThatRuntimeException()
+            .isThrownBy(() -> runQuery(query))
+            .withMessage(
+                "Failed to invoke procedure `gds.triangleCount.mutate`: Caused by: java.lang.IllegalArgumentException: TriangleCount requires the provided 'labelFilter' node label 'X' to be present in the graph.");
     }
 }
 

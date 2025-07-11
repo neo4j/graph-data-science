@@ -30,11 +30,11 @@ This is described in http://chato.cl/papers/becchetti_2007_approximate_count_tri
 
 == Node label filtering
 
-For some use-cases it is useful to only count triangles that contain nodes with specific labels.
-This is also something that can save computation time, as the algorithm will not have to consider nodes that do not match the specified labels.
+For some use-cases it is useful to only count triangles that contain nodes with specific node labels.
+This is also something that can save computation time, as the algorithm will not have to consider nodes that do not have the specified labels.
 
-The algorithm supports node label filtering by allowing you to specify labels for each of the three nodes in the triangle, using the `aLabel`, `bLabel`, and `cLabel` configuration parameters.
-They are optional and can be used individually or in combination.
+The algorithm supports node label filtering by allowing you to specify a list of three node labels in the configuration.
+The algorithm will then only count triangles where all three nodes have one of the specified labels.
 
 
 [[algorithms-triangle-count-syntax]]

@@ -34,6 +34,7 @@ import org.neo4j.gds.triangle.intersect.RelationshipIntersectFactoryLocator;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Spliterators;
@@ -63,14 +64,14 @@ public final class TriangleStream extends Algorithm<Stream<TriangleResult>> {
     private final int nodeCount;
     private final AtomicInteger runningThreads;
     private final BlockingQueue<TriangleResult> resultQueue;
+    private final boolean bTraversal;
+    private final boolean cTraversal;
 
     public static TriangleStream create(
         Graph graph,
         ExecutorService executorService,
         Concurrency concurrency,
-        Optional<String> ALabel,
-        Optional<String> BLabel,
-        Optional<String> CLabel,
+        Optional<List<String>> labelFilter,
         TerminationFlag terminationFlag
     ) {
         var factory = RelationshipIntersectFactoryLocator
@@ -83,9 +84,7 @@ public final class TriangleStream extends Algorithm<Stream<TriangleResult>> {
             factory,
             executorService,
             concurrency,
-            ALabel,
-            BLabel,
-            CLabel,
+            labelFilter,
             terminationFlag
         );
     }
@@ -95,9 +94,7 @@ public final class TriangleStream extends Algorithm<Stream<TriangleResult>> {
         RelationshipIntersectFactory intersectFactory,
         ExecutorService executorService,
         Concurrency concurrency,
-        Optional<String> ALabel,
-        Optional<String> BLabel,
-        Optional<String> CLabel,
+        Optional<List<String>> labelFilter,
         TerminationFlag terminationFlag
     ) {
         super(ProgressTracker.NULL_TRACKER);
@@ -105,13 +102,25 @@ public final class TriangleStream extends Algorithm<Stream<TriangleResult>> {
         this.intersectFactory = intersectFactory;
         this.executorService = executorService;
         this.concurrency = concurrency;
-        this.ALabel = ALabel.map(NodeLabel::of);
-        this.BLabel = BLabel.map(NodeLabel::of);
-        this.CLabel = CLabel.map(NodeLabel::of);
         this.nodeCount = Math.toIntExact(graph.nodeCount());
         this.resultQueue = new ArrayBlockingQueue<>(concurrency.value() << 10);
         this.runningThreads = new AtomicInteger();
         this.queue = new AtomicInteger();
+
+        if (labelFilter.isPresent()) {
+            var labelFilterList = labelFilter.get();
+            this.ALabel = Optional.of(NodeLabel.of(labelFilterList.get(0)));
+            this.BLabel = Optional.of(NodeLabel.of(labelFilterList.get(1)));
+            this.CLabel = Optional.of(NodeLabel.of(labelFilterList.get(2)));
+            this.bTraversal = !ALabel.get().equals(BLabel.get());
+            this.cTraversal = !ALabel.get().equals(CLabel.get()) || !BLabel.get().equals(CLabel.get());
+        } else {
+            this.ALabel = Optional.empty();
+            this.BLabel = Optional.empty();
+            this.CLabel = Optional.empty();
+            this.bTraversal = false;
+            this.cTraversal = false;
+        }
 
         this.terminationFlag = terminationFlag;
     }
@@ -164,10 +173,10 @@ public final class TriangleStream extends Algorithm<Stream<TriangleResult>> {
                     if (ALabel.isEmpty() || graph.hasLabel(node, ALabel.get())) {
                         evaluateNode(node, BLabel, CLabel);
                     }
-                    if (BLabel.isEmpty() || graph.hasLabel(node, BLabel.get())) {
+                    if (bTraversal && graph.hasLabel(node, BLabel.get())) {
                         evaluateNode(node, CLabel, ALabel);
                     }
-                    if (CLabel.isEmpty() || graph.hasLabel(node, CLabel.get())) {
+                    if (cTraversal && graph.hasLabel(node, CLabel.get())) {
                         evaluateNode(node, ALabel, BLabel);
                     }
                     progressTracker.logProgress();

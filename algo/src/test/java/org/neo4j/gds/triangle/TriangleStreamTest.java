@@ -108,8 +108,6 @@ class TriangleStreamTest {
                 DefaultPool.INSTANCE,
                 new Concurrency(concurrency),
                 Optional.empty(),
-                Optional.empty(),
-                Optional.empty(),
                 TerminationFlag.RUNNING_TRUE
             )
             .compute()

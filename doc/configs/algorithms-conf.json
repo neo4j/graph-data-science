@@ -683,25 +683,11 @@
           "description": "If a node has a degree higher than this it will not be considered by the algorithm. The triangle count for these nodes will be `-1`."
         },
         {
-          "name": "aLabel",
-          "type": "String",
+          "name": "labelFilter",
+          "type": "List of String",
           "default": "null",
           "optional": true,
-          "description": "The required node label of the first node in the triangle. If not specified, the algorithm will not filter by label."
-        },
-        {
-          "name": "bLabel",
-          "type": "String",
-          "default": "null",
-          "optional": true,
-          "description": "The required node label of the second node in the triangle. If not specified, the algorithm will not filter by label."
-        },
-        {
-          "name": "cLabel",
-          "type": "String",
-          "default": "null",
-          "optional": true,
-          "description": "The required node label of the third node in the triangle. If not specified, the algorithm will not filter by label."
+          "description": "A list of exactly three node labels as strings. If specified, only triangles with nodes of these labels will be counted. If not specified, all triangles will be counted."
         }
       ],
       "page_path": "algorithms/triangle-count/"

@@ -34,6 +34,7 @@ import org.neo4j.gds.triangle.intersect.RelationshipIntersectFactory;
 import org.neo4j.gds.triangle.intersect.RelationshipIntersectFactoryLocator;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
@@ -78,9 +79,7 @@ public final class IntersectingTriangleCount extends Algorithm<TriangleCountResu
         Graph graph,
         Concurrency concurrency,
         long maxDegree,
-        Optional<String> ALabel,
-        Optional<String> BLabel,
-        Optional<String> CLabel,
+        Optional<List<String>> labelFilter,
         ExecutorService executorService,
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
@@ -95,9 +94,7 @@ public final class IntersectingTriangleCount extends Algorithm<TriangleCountResu
             factory,
             concurrency,
             maxDegree,
-            ALabel,
-            BLabel,
-            CLabel,
+            labelFilter,
             executorService,
             progressTracker,
             terminationFlag
@@ -109,9 +106,7 @@ public final class IntersectingTriangleCount extends Algorithm<TriangleCountResu
         RelationshipIntersectFactory intersectFactory,
         Concurrency concurrency,
         long maxDegree,
-        Optional<String> ALabel,
-        Optional<String> BLabel,
-        Optional<String> CLabel,
+        Optional<List<String>> labelFilter,
         ExecutorService executorService,
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
@@ -121,9 +116,6 @@ public final class IntersectingTriangleCount extends Algorithm<TriangleCountResu
         this.intersectFactory = intersectFactory;
         this.concurrency = concurrency;
         this.maxDegree = maxDegree;
-        this.ALabel = ALabel.map(NodeLabel::of);
-        this.BLabel = BLabel.map(NodeLabel::of);
-        this.CLabel = CLabel.map(NodeLabel::of);
         this.triangleCounts = HugeAtomicLongArray.of(
             graph.nodeCount(),
             ParalleLongPageCreator.passThrough(concurrency)
@@ -132,11 +124,20 @@ public final class IntersectingTriangleCount extends Algorithm<TriangleCountResu
         this.globalTriangleCounter = new LongAdder();
         this.queue = new AtomicLong();
 
-        this.bTraversal = ALabel.isPresent() && ((BLabel.isPresent() && !ALabel.get()
-            .equals(BLabel.get())) || BLabel.isEmpty());
-        this.cTraversal = (ALabel.isPresent() && ((CLabel.isPresent() && !ALabel.get()
-            .equals(CLabel.get())) || CLabel.isEmpty()) && (BLabel.isPresent() && ((CLabel.isPresent() && !BLabel.get()
-            .equals(CLabel.get())) || CLabel.isEmpty())));
+        if (labelFilter.isPresent()) {
+            var labelFilterList = labelFilter.get();
+            this.ALabel = Optional.of(NodeLabel.of(labelFilterList.get(0)));
+            this.BLabel = Optional.of(NodeLabel.of(labelFilterList.get(1)));
+            this.CLabel = Optional.of(NodeLabel.of(labelFilterList.get(2)));
+            this.bTraversal = !ALabel.get().equals(BLabel.get());
+            this.cTraversal = !ALabel.get().equals(CLabel.get()) || !BLabel.get().equals(CLabel.get());
+        } else {
+            this.ALabel = Optional.empty();
+            this.BLabel = Optional.empty();
+            this.CLabel = Optional.empty();
+            this.bTraversal = false;
+            this.cTraversal = false;
+        }
 
         this.terminationFlag = terminationFlag;
     }
@@ -180,10 +181,10 @@ public final class IntersectingTriangleCount extends Algorithm<TriangleCountResu
                     if (ALabel.isEmpty() || graph.hasLabel(node, ALabel.get())) {
                         intersect.intersectAll(node, this, BLabel, CLabel);
                     }
-                    if (bTraversal && (BLabel.isEmpty() || graph.hasLabel(node, BLabel.get()))) {
+                    if (bTraversal && graph.hasLabel(node, BLabel.get())) {
                         intersect.intersectAll(node, this, CLabel, ALabel);
                     }
-                    if (cTraversal && (CLabel.isEmpty() || graph.hasLabel(node, CLabel.get()))) {
+                    if (cTraversal && graph.hasLabel(node, CLabel.get())) {
                         intersect.intersectAll(node, this, ALabel, BLabel);
                     }
                 } else {

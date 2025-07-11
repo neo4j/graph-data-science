@@ -137,8 +137,6 @@ public class LocalClusteringCoefficient extends Algorithm<LocalClusteringCoeffic
             concurrency,
             maxDegree,
             Optional.empty(),
-            Optional.empty(),
-            Optional.empty(),
             DefaultPool.INSTANCE,
             progressTracker,
             TerminationFlag.RUNNING_TRUE
