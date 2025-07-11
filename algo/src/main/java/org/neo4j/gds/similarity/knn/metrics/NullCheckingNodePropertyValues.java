@@ -80,8 +80,8 @@ public final class NullCheckingNodePropertyValues implements NodePropertyValues 
     }
 
     @Override
-    public Optional<Integer> dimension() {
-        return properties.dimension();
+    public Optional<Integer> dimension(long nodeId) {
+        return properties.dimension(nodeId);
     }
 
     @Override

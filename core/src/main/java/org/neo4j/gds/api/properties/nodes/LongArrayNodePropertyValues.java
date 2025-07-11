@@ -39,8 +39,8 @@ public interface LongArrayNodePropertyValues extends NodePropertyValues {
     }
 
     @Override
-    default Optional<Integer> dimension() {
-        var value = longArrayValue(0);
+    default Optional<Integer> dimension(long nodeId) {
+        var value = longArrayValue(nodeId);
         if (value == null) {
             return Optional.empty();
         }

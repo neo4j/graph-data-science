@@ -67,7 +67,19 @@ public interface NodePropertyValues extends PropertyValues {
      *
      * @return the dimension of the properties stored, or empty if the dimension cannot easily be retrieved.
      */
-    Optional<Integer> dimension();
+    default Optional<Integer> dimension() {
+        return dimension(0L);
+    }
+
+    /**
+     * The dimension of the properties.
+     * For scalar values, this is 1.
+     * For arrays, this is the length of the array stored for the given node id.
+     * If that array is {@code null}, this method returns {@link Optional#empty()}.
+     *
+     * @return the dimension of the properties stored, or empty if the dimension cannot easily be retrieved.
+     */
+    Optional<Integer> dimension(long nodeId);
 
     /**
      * @return the maximum long value contained in the mapping or an empty {@link OptionalLong} if the mapping is

@@ -43,7 +43,7 @@ public interface LongNodePropertyValues extends NodePropertyValues {
     }
 
     @Override
-    default Optional<Integer> dimension() {
+    default Optional<Integer> dimension(long nodeId) {
         return Optional.of(1);
     }
 

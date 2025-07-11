@@ -54,8 +54,8 @@ public interface DoubleArrayNodePropertyValues extends NodePropertyValues {
     }
 
     @Override
-    default Optional<Integer> dimension() {
-        var value = doubleArrayValue(0);
+    default Optional<Integer> dimension(long nodeId) {
+        var value = doubleArrayValue(nodeId);
         if (value == null) {
             return Optional.empty();
         }

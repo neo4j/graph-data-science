@@ -77,8 +77,8 @@ public abstract class FilteredNodePropertyValues implements NodePropertyValues {
     }
 
     @Override
-    public Optional<Integer> dimension() {
-        return properties.dimension();
+    public Optional<Integer> dimension(long nodeId) {
+        return properties.dimension(translateId(nodeId));
     }
 
     @Override
