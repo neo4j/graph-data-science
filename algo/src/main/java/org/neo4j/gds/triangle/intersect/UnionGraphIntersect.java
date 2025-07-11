@@ -28,7 +28,6 @@ import org.neo4j.gds.core.huge.CompositeAdjacencyCursor;
 import org.neo4j.gds.core.huge.CompositeAdjacencyList;
 import org.neo4j.gds.core.huge.UnionGraph;
 
-import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.LongToIntFunction;
 

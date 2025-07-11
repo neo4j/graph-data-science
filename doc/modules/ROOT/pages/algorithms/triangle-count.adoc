@@ -28,6 +28,7 @@ For more information on this algorithm, see:
 This is described in http://chato.cl/papers/becchetti_2007_approximate_count_triangles.pdf["Efficient Semi-streaming Algorithms for Local Triangle Counting in Massive Graphs"].
 
 
+[[algorithms-triangle-count-filtering]]
 == Node label filtering
 
 For some use-cases it is useful to only count triangles that contain nodes with specific node labels.
@@ -35,6 +36,13 @@ This is also something that can save computation time, as the algorithm will not
 
 The algorithm supports node label filtering by allowing you to specify a list of three node labels in the configuration.
 The algorithm will then only count triangles where all three nodes have one of the specified labels.
+
+
+[TIP]
+====
+Triangle counting is a very expensive operation, especially in large graphs.
+To speed up the computation, apart from using xref:algorithms-triangle-count-filtering[node label filtering] if that is applicable to your use-case, you should also consider including only the node labels and relationship types relevant for the computation in the graph projection.
+====
 
 
 [[algorithms-triangle-count-syntax]]

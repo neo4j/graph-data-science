@@ -28,7 +28,6 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.RelationshipIntersect;
 import org.neo4j.gds.core.huge.HugeGraph;
 
-import java.util.Optional;
 import java.util.function.BiFunction;
 
 public final class HugeGraphIntersect extends GraphIntersect<AdjacencyCursor> {
