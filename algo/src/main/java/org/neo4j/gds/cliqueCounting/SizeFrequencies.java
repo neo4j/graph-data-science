@@ -38,6 +38,30 @@ class SizeFrequencies {
         perNodeCount.setAll(_x -> new SizeFrequency()); //initialized already?
     }
 
+    public void updateFrequencies(CliqueCountingMode mode, long[] nodes, int requiredCount) {
+        switch (mode) {
+            case GloballyOnly -> globalCount.add(requiredCount, nodes.length-requiredCount);
+            case ForEveryNode -> {
+                //required nodes + global
+                var requiredNodes = Arrays.copyOf(nodes, requiredCount);
+                var sizeFrequencyRefs = Stream.concat(
+                    Arrays.stream(requiredNodes).mapToObj(node -> perNodeCount.get(node)),
+                    Stream.of(globalCount)
+                ).toList();
+                SizeFrequency.add(requiredCount, nodes.length-requiredCount, sizeFrequencyRefs);
+
+//                optional nodes
+                var optionalNodes = Arrays.copyOfRange(nodes, requiredCount, nodes.length);
+                sizeFrequencyRefs = Arrays.stream(optionalNodes).mapToObj(node -> perNodeCount.get(node)).toList();
+                SizeFrequency.add(requiredCount + 1, nodes.length - requiredCount - 1, sizeFrequencyRefs);
+            }
+            case ForGivenSubcliques -> globalCount.add(
+                requiredCount,
+                nodes.length - requiredCount
+            ); //but should be handled differently afterwards!
+        }
+    }
+
     public void updateFrequencies(CliqueCountingMode mode, long[] requiredNodes, long[] optionalNodes) {
         switch (mode) {
             case GloballyOnly -> globalCount.add(requiredNodes.length, optionalNodes.length);
@@ -58,7 +82,6 @@ class SizeFrequencies {
                 optionalNodes.length
             ); //but should be handled differently afterwards!
         }
-
     }
 
     public void merge(SizeFrequencies other) {

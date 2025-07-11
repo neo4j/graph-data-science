@@ -38,7 +38,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
-import java.util.List;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -58,58 +57,41 @@ class CliqueCountingTest {
         );
     }
 
-    @Test
-    public void testIntersectionSize() {
-        var graph = fromGdl("CREATE (a), (b), (c), (d), (a)-[:T]->(b), (a)-[:T]->(d)");
-        long[] subset = {2, 3};
-        graph.forEachRelationship(
-            0, (a, b) -> {
-                System.out.println(a + " " + b);
-                return true;
-            }
+    private static Stream<Arguments> cliqueOfFourWithDuplicateEdgesQuery() {
+        return Stream.of(
+            Arguments.of(
+                fromGdl("CREATE (a1)-[:T]->(a2)-[:T]->(a3)-[:T]->(a4), (a2)-[:T]->(a4)-[:T]->(a1)-[:T]->(a3), (a1)-[:T]->(a2), (a1)-[:T1]->(a3)"),
+                "fourClique"
+            )
         );
-        var cliqueCounting = CliqueCounting.create(
-            graph,
-            new CliqueCountingParameters(
-                CliqueCountingMode.ForEveryNode,
-                List.of(),
-                new Concurrency(1)
-            ),
-            DefaultPool.INSTANCE,
-            ProgressTracker.NULL_TRACKER,
-            TerminationFlag.RUNNING_TRUE
-        );
-        var count = cliqueCounting.neighborhoodIntersectionSize(subset, 0L);
-        assertEquals(1, count);
     }
 
-    @Test
-    public void testPartitionSubset() {
-        var graph = fromGdl("CREATE (a), (b), (c), (d), (b)-[:T]->(c)-[:T]->(d), (d)-[:T]->(b)");
-        long[] subset = {1, 2, 3};
-        graph.forEachRelationship(
-            0, (a, b) -> {
-                System.out.println(a + " " + b);
-                return true;
-            }
-        );
-        var cliqueCounting = CliqueCounting.create(
-            graph,
-            new CliqueCountingParameters(
-                CliqueCountingMode.ForEveryNode,
-                List.of(),
-                new Concurrency(1)
-            ),
-            DefaultPool.INSTANCE,
-            ProgressTracker.NULL_TRACKER,
-            TerminationFlag.RUNNING_TRUE
-        );
-//        var count = cliqueCounting.neighborhoodIntersectionSize(graph, subset, 0L);
-        int[] intersectionSizes = {2, 2, 2};
-        var partition = cliqueCounting.partitionSubset(subset, intersectionSizes);
-//        assertEquals(1, count);
-        System.out.println(partition);
-    }
+//    public void testPartitionSubset() {
+//        var graph = fromGdl("CREATE (a), (b), (c), (d), (b)-[:T]->(c)-[:T]->(d), (d)-[:T]->(b)");
+//        long[] subset = {1, 2, 3};
+//        graph.forEachRelationship(
+//            0, (a, b) -> {
+//                System.out.println(a + " " + b);
+//                return true;
+//            }
+//        );
+//        var cliqueCounting = CliqueCounting.create(
+//            graph,
+//            new CliqueCountingParameters(
+//                CliqueCountingMode.ForEveryNode,
+//                List.of(),
+//                new Concurrency(1)
+//            ),
+//            DefaultPool.INSTANCE,
+//            ProgressTracker.NULL_TRACKER,
+//            TerminationFlag.RUNNING_TRUE
+//        );
+////        var count = cliqueCounting.neighborhoodIntersectionSize(graph, subset, 0L);
+//        int[] intersectionSizes = {2, 2, 2};
+//        var partition = cliqueCounting.partitionSubset(subset);
+////        assertEquals(1, count);
+//        System.out.println(partition);
+//    }
 
     private static Stream<Arguments> starAndTrianglesQuery() {
         return Stream.of(
@@ -137,7 +119,7 @@ class CliqueCountingTest {
             new CliqueCountingParameters(
                 cliqueCountingMode,
                 Arrays.stream(subcliques.toArray()).toList(),
-                new Concurrency(1)
+                new Concurrency(concurrency)
             ),
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER,
@@ -148,6 +130,21 @@ class CliqueCountingTest {
     @MethodSource("cliqueOfFourQuery")
     @ParameterizedTest(name = "{1}")
     void cliqueOfFour(Graph graph, String ignoredName) {
+        CliqueCountingResult result = compute(graph, 4, HugeObjectArray.of());
+
+        assertEquals(5 - 3, result.globalCount().length);
+        assertEquals(4L, result.globalCount()[3 - 3]);
+        assertEquals(1L, result.globalCount()[4 - 3]);
+
+        assertEquals(2L, result.perNodeCount().get(1L).length);
+        assertEquals(3L, result.perNodeCount().get(1L)[3 - 3]);
+        assertEquals(1L, result.perNodeCount().get(1L)[4 - 3]);
+
+    }
+
+    @MethodSource("cliqueOfFourWithDuplicateEdgesQuery")
+    @ParameterizedTest(name = "{1}")
+    void duplicateEdges(Graph graph, String ignoredName) {
         CliqueCountingResult result = compute(graph, 4, HugeObjectArray.of());
 
         assertEquals(5 - 3, result.globalCount().length);
@@ -195,7 +192,14 @@ class CliqueCountingTest {
         //Expected: [38542, 31170, 17387, 6306, 1273, 114, 1]
         String gdlString = Files.readString(Path.of("/Users/alfred/graph-analytics/public/algo/src/test/java/org/neo4j/gds/cliqueCounting/gdl_n1k_m20_p0.05.txt"));
         Graph graph = fromGdl(gdlString);
-        CliqueCountingResult result = compute(graph, 16, HugeObjectArray.of()); //todo: use concurrency
+        CliqueCountingResult result = compute(graph, 16, HugeObjectArray.of());
+        assertEquals(38542L, result.globalCount()[3 - 3]);
+        assertEquals(31170L, result.globalCount()[4 - 3]);
+        assertEquals(17387L, result.globalCount()[5 - 3]);
+        assertEquals(6306L, result.globalCount()[6 - 3]);
+        assertEquals(1273L, result.globalCount()[7 - 3]);
+        assertEquals(114L, result.globalCount()[8 - 3]);
+        assertEquals(1L, result.globalCount()[9 - 3]);
         System.out.println(Arrays.toString(result.globalCount()));
     }
 
@@ -204,14 +208,16 @@ class CliqueCountingTest {
         //Expected:
         String gdlString = Files.readString(Path.of("/Users/alfred/graph-analytics/public/algo/src/test/java/org/neo4j/gds/cliqueCounting/gdl_n10k_m25_p0.05.txt"));
         Graph graph = fromGdl(gdlString);
+
+        CliqueCountingResult result = compute(graph, 16, HugeObjectArray.of());
         var start = System.nanoTime();
-        CliqueCountingResult result = compute(graph, 16, HugeObjectArray.of()); //todo: use concurrency
+        for (int i = 0; i < 10; i++) {
+            result = compute(graph, 16, HugeObjectArray.of());
+        }
         var end = System.nanoTime();
-        System.out.println("Execution time: " + (end - start)/1_000_000 + "ms");
-        System.out.println(Arrays.toString(result.globalCount()));
+        System.out.println("Avg execution time: " + (end - start)/10_000_000 + "ms");
+//        System.out.println(Arrays.toString(result.globalCount()));
     }
 
-    //todo
-    //test for duplicate edges
 
 }
