@@ -21,7 +21,6 @@ package org.neo4j.gds.triangle;
 
 import com.carrotsearch.hppc.AbstractIterator;
 import org.neo4j.gds.Algorithm;
-import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IntersectionConsumer;
 import org.neo4j.gds.api.RelationshipIntersect;
@@ -36,7 +35,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Spliterators;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -58,12 +56,10 @@ public final class TriangleStream extends Algorithm<Stream<TriangleResult>> {
     private final ExecutorService executorService;
     private final AtomicInteger queue;
     private final Concurrency concurrency;
-    private final Optional<NodeLabel> aLabel;
-    private final Optional<NodeLabel> bLabel;
-    private final Optional<NodeLabel> cLabel;
     private final int nodeCount;
     private final AtomicInteger runningThreads;
     private final BlockingQueue<TriangleResult> resultQueue;
+    private final LabelFilterChecker labelFilterChecker;
 
     public static TriangleStream create(
         Graph graph,
@@ -104,23 +100,7 @@ public final class TriangleStream extends Algorithm<Stream<TriangleResult>> {
         this.resultQueue = new ArrayBlockingQueue<>(concurrency.value() << 10);
         this.runningThreads = new AtomicInteger();
         this.queue = new AtomicInteger();
-
-        if (!labelFilter.isEmpty()) {
-            this.aLabel = Optional.of(NodeLabel.of(labelFilter.getFirst()));
-        } else {
-            this.aLabel = Optional.empty();
-        }
-        if (labelFilter.size() > 1) {
-            this.bLabel = Optional.of(NodeLabel.of(labelFilter.get(1)));
-        } else {
-            this.bLabel = Optional.empty();
-        }
-        if (labelFilter.size() > 2) {
-            this.cLabel = Optional.of(NodeLabel.of(labelFilter.get(2)));
-        } else {
-            this.cLabel = Optional.empty();
-        }
-
+        this.labelFilterChecker = new LabelFilterChecker(labelFilter, graph::hasLabel);
         this.terminationFlag = terminationFlag;
     }
 
@@ -153,7 +133,7 @@ public final class TriangleStream extends Algorithm<Stream<TriangleResult>> {
         final Collection<Runnable> tasks;
         tasks = ParallelUtil.tasks(
             concurrency,
-            () -> new IntersectTask(intersectFactory.load(graph, Long.MAX_VALUE, this.aLabel, this.bLabel, this.cLabel))
+            () -> new IntersectTask(intersectFactory.load(graph, Long.MAX_VALUE, labelFilterChecker))
         );
         ParallelUtil.run(tasks, false, executorService, null);
     }
@@ -169,10 +149,7 @@ public final class TriangleStream extends Algorithm<Stream<TriangleResult>> {
             try {
                 int node;
                 while ((node = queue.getAndIncrement()) < nodeCount && terminationFlag.running()) {
-                    if (cLabel.isEmpty() || bLabel.isEmpty() || aLabel.isEmpty()
-                        || graph.hasLabel(node, aLabel.get())
-                        || graph.hasLabel(node, bLabel.get())
-                        || graph.hasLabel(node, cLabel.get())) {
+                    if (labelFilterChecker.check(node)) {
                         evaluateNode(node);
                     }
                     progressTracker.logProgress();

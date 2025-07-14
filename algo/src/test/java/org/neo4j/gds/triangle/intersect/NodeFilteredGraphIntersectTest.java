@@ -27,7 +27,9 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.triangle.LabelFilterChecker;
 
+import java.util.Collections;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -61,9 +63,7 @@ class NodeFilteredGraphIntersectTest {
         var intersect = new NodeFilteredGraphIntersect.NodeFilteredGraphIntersectFactory().load(
             graph,
             maxDegree,
-            Optional.empty(),
-            Optional.empty(),
-            Optional.empty()
+            new LabelFilterChecker(Collections.emptyList(), graph::hasLabel)
         );
 
         var triangleCount = new MutableInt(0);

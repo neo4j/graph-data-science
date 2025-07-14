@@ -20,7 +20,6 @@
 package org.neo4j.gds.triangle;
 
 import org.neo4j.gds.Algorithm;
-import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IntersectionConsumer;
 import org.neo4j.gds.api.RelationshipIntersect;
@@ -35,7 +34,6 @@ import org.neo4j.gds.triangle.intersect.RelationshipIntersectFactoryLocator;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.LongAdder;
@@ -66,9 +64,7 @@ public final class IntersectingTriangleCount extends Algorithm<TriangleCountResu
     private final HugeAtomicLongArray triangleCounts;
     private final long maxDegree;
     private final Concurrency concurrency;
-    private final Optional<NodeLabel> aLabel;
-    private final Optional<NodeLabel> bLabel;
-    private final Optional<NodeLabel> cLabel;
+    private final LabelFilterChecker labelFilterChecker;
     private long globalTriangleCount;
 
     private final LongAdder globalTriangleCounter;
@@ -122,21 +118,7 @@ public final class IntersectingTriangleCount extends Algorithm<TriangleCountResu
         this.globalTriangleCounter = new LongAdder();
         this.queue = new AtomicLong();
 
-        if (!labelFilter.isEmpty()) {
-            this.aLabel = Optional.of(NodeLabel.of(labelFilter.getFirst()));
-        } else {
-            this.aLabel = Optional.empty();
-        }
-        if (labelFilter.size() > 1) {
-            this.bLabel = Optional.of(NodeLabel.of(labelFilter.get(1)));
-        } else {
-            this.bLabel = Optional.empty();
-        }
-        if (labelFilter.size() > 2) {
-            this.cLabel = Optional.of(NodeLabel.of(labelFilter.get(2)));
-        } else {
-            this.cLabel = Optional.empty();
-        }
+        this.labelFilterChecker = new LabelFilterChecker(labelFilter, graph::hasLabel);
 
         this.terminationFlag = terminationFlag;
     }
@@ -150,7 +132,7 @@ public final class IntersectingTriangleCount extends Algorithm<TriangleCountResu
         // create tasks
         final Collection<? extends Runnable> tasks = ParallelUtil.tasks(
             concurrency,
-            () -> new IntersectTask(intersectFactory.load(graph, maxDegree, this.aLabel, this.bLabel, this.cLabel))
+            () -> new IntersectTask(intersectFactory.load(graph, maxDegree, labelFilterChecker))
         );
         // run
         ParallelUtil.run(tasks, executorService);
@@ -177,10 +159,7 @@ public final class IntersectingTriangleCount extends Algorithm<TriangleCountResu
             long node;
             while ((node = queue.getAndIncrement()) < graph.nodeCount() && terminationFlag.running()) {
                 if (graph.degree(node) <= maxDegree) {
-                    if (cLabel.isEmpty() || bLabel.isEmpty() || aLabel.isEmpty()
-                        || graph.hasLabel(node, aLabel.get())
-                        || graph.hasLabel(node, bLabel.get())
-                        || graph.hasLabel(node, cLabel.get())) {
+                    if (labelFilterChecker.check(node)) {
                         intersect.intersectAll(node, this);
                     }
                 } else {

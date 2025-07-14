@@ -20,13 +20,11 @@
 package org.neo4j.gds.triangle.intersect;
 
 import org.neo4j.annotations.service.ServiceProvider;
-import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IntersectionConsumer;
 import org.neo4j.gds.api.RelationshipIntersect;
 import org.neo4j.gds.core.huge.NodeFilteredGraph;
-
-import java.util.Optional;
+import org.neo4j.gds.triangle.LabelFilterChecker;
 
 /**
  * An instance of this is not thread-safe; Iteration/Intersection on multiple threads will
@@ -75,9 +73,7 @@ public final class NodeFilteredGraphIntersect implements RelationshipIntersect {
         public RelationshipIntersect load(
             Graph graph,
             long maxDegree,
-            Optional<NodeLabel> aLabel,
-            Optional<NodeLabel> bLabel,
-            Optional<NodeLabel> cLabel
+            LabelFilterChecker labelFilterChecker
         ) {
             assert graph instanceof NodeFilteredGraph;
             var nodeFilteredGraph = (NodeFilteredGraph) graph;
@@ -86,7 +82,7 @@ public final class NodeFilteredGraphIntersect implements RelationshipIntersect {
             var relationshipIntersect = RelationshipIntersectFactoryLocator
                 .lookup(innerGraph)
                 .orElseThrow(() -> new IllegalArgumentException("No intersect factory found for graph type " + innerGraph.getClass()))
-                .load(innerGraph, maxDegree, aLabel, bLabel, cLabel);
+                .load(innerGraph, maxDegree, labelFilterChecker);
 
             return new NodeFilteredGraphIntersect(nodeFilteredGraph, relationshipIntersect);
         }

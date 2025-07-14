@@ -27,9 +27,10 @@ import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
+import org.neo4j.gds.triangle.LabelFilterChecker;
 
 import java.util.ArrayList;
-import java.util.Optional;
+import java.util.Collections;
 import java.util.Random;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -47,7 +48,7 @@ final class HugeIntersectionTest {
 
         var intersect = RelationshipIntersectFactoryLocator.lookup(graph)
             .orElseThrow(IllegalArgumentException::new)
-            .load(graph, Long.MAX_VALUE, Optional.empty(), Optional.empty(), Optional.empty());
+            .load(graph, Long.MAX_VALUE, new LabelFilterChecker(Collections.emptyList(), graph::hasLabel));
 
         var start1 = Math.min(graph.toMappedNodeId(DEGREE + 1), graph.toMappedNodeId(DEGREE));
         var start2 = Math.max(graph.toMappedNodeId(DEGREE + 1), graph.toMappedNodeId(DEGREE));

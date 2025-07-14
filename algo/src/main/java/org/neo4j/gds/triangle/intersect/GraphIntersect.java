@@ -20,14 +20,12 @@
 package org.neo4j.gds.triangle.intersect;
 
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.AdjacencyCursor;
 import org.neo4j.gds.api.AdjacencyCursorUtils;
 import org.neo4j.gds.api.IntersectionConsumer;
 import org.neo4j.gds.api.RelationshipIntersect;
+import org.neo4j.gds.triangle.LabelFilterChecker;
 
-import java.util.Optional;
-import java.util.function.BiFunction;
 import java.util.function.IntPredicate;
 
 import static org.neo4j.gds.api.AdjacencyCursor.NOT_FOUND;
@@ -41,10 +39,7 @@ import static org.neo4j.gds.api.AdjacencyCursor.NOT_FOUND;
 public abstract class GraphIntersect<CURSOR extends AdjacencyCursor> implements RelationshipIntersect {
 
     private final IntPredicate degreeFilter;
-    private final BiFunction<Long, NodeLabel, Boolean> hasLabel;
-    private final Optional<NodeLabel> aLabel;
-    private final Optional<NodeLabel> bLabel;
-    private final Optional<NodeLabel> cLabel;
+    private final LabelFilterChecker labelFilterChecker;
     private CURSOR origNeighborsOfa;
     private CURSOR helpingCursorOfa;
     private CURSOR helpingCursorOfb;
@@ -52,18 +47,12 @@ public abstract class GraphIntersect<CURSOR extends AdjacencyCursor> implements 
 
     protected GraphIntersect(
         long maxDegree,
-        BiFunction<Long, NodeLabel, Boolean> hasLabel,
-        Optional<NodeLabel> aLabel,
-        Optional<NodeLabel> bLabel,
-        Optional<NodeLabel> cLabel
+        LabelFilterChecker labelFilterChecker
     ) {
         this.degreeFilter = maxDegree < Long.MAX_VALUE
             ? (degree) -> degree <= maxDegree
             : (ignore) -> true;
-        this.hasLabel = hasLabel;
-        this.aLabel = aLabel;
-        this.bLabel = bLabel;
-        this.cLabel = cLabel;
+        this.labelFilterChecker = labelFilterChecker;
     }
 
     @Override
@@ -90,21 +79,7 @@ public abstract class GraphIntersect<CURSOR extends AdjacencyCursor> implements 
     ) {
         long b = AdjacencyCursorUtils.next(neighborsOfa);
         while (b != NOT_FOUND && (b < a)) {
-            // No filters
-            if ((aLabel.isEmpty() && bLabel.isEmpty() && cLabel.isEmpty())
-                // One filter
-                || (bLabel.isEmpty() && cLabel.isEmpty() && (hasLabel.apply(a, aLabel.get()) || hasLabel.apply(b, aLabel.get())))
-                // Two filters
-                || (cLabel.isEmpty() && aLabel.isPresent() && bLabel.isPresent()
-                    && (hasLabel.apply(a, aLabel.get()) || hasLabel.apply(a, bLabel.get()) || hasLabel.apply(b, aLabel.get()) && hasLabel.apply(b, bLabel.get())))
-                // Three filters
-                || (aLabel.isPresent() && bLabel.isPresent() && cLabel.isPresent()
-                    && ((hasLabel.apply(a, aLabel.get()) && hasLabel.apply(b, bLabel.get()))
-                    || (hasLabel.apply(a, aLabel.get()) && hasLabel.apply(b, cLabel.get()))
-                    || (hasLabel.apply(a, bLabel.get()) && hasLabel.apply(b, aLabel.get()))
-                    || (hasLabel.apply(a, bLabel.get()) && hasLabel.apply(b, cLabel.get()))
-                    || (hasLabel.apply(a, cLabel.get()) && hasLabel.apply(b, aLabel.get()))
-                    || (hasLabel.apply(a, cLabel.get()) && hasLabel.apply(b, bLabel.get()))))) {
+            if (labelFilterChecker.check(a, b)) {
                 var degreeOfb = degree(b);
                 if (degreeFilter.test(degreeOfb)) {
                     helpingCursorOfb = cursorForNode(
@@ -140,24 +115,7 @@ public abstract class GraphIntersect<CURSOR extends AdjacencyCursor> implements 
         long c = AdjacencyCursorUtils.next(neighborsOfb);
         long currentOfa = AdjacencyCursorUtils.next(neighborsOfa);
         while (c != NOT_FOUND && currentOfa != NOT_FOUND && (c < b)) {
-            // No filters
-            if ((aLabel.isEmpty() && bLabel.isEmpty() && cLabel.isEmpty())
-                // One filter
-                || (bLabel.isEmpty() && cLabel.isEmpty() && (hasLabel.apply(a, aLabel.get()) || hasLabel.apply(b, aLabel.get()) || hasLabel.apply(c, aLabel.get())))
-                // Two filters
-                || (cLabel.isEmpty() && aLabel.isPresent() && bLabel.isPresent()
-                    && ((hasLabel.apply(a, bLabel.get()) && (hasLabel.apply(b, aLabel.get()) || hasLabel.apply(c, aLabel.get())))
-                    || (hasLabel.apply(b, bLabel.get()) && (hasLabel.apply(a, aLabel.get()) || hasLabel.apply(c, aLabel.get())))
-                    || (hasLabel.apply(c, bLabel.get()) && (hasLabel.apply(a, aLabel.get()) || hasLabel.apply(b, aLabel.get())))))
-                // Three filters
-                || (aLabel.isPresent() && bLabel.isPresent() && cLabel.isPresent())
-                    && ((hasLabel.apply(a, aLabel.get()) && hasLabel.apply(b, bLabel.get()) && hasLabel.apply(c, cLabel.get()))
-                    || (hasLabel.apply(a, aLabel.get()) && hasLabel.apply(c, aLabel.get()) && hasLabel.apply(b, cLabel.get()))
-                    || (hasLabel.apply(b, aLabel.get()) && hasLabel.apply(a, bLabel.get()) && hasLabel.apply(c, cLabel.get()))
-                    || (hasLabel.apply(b, aLabel.get()) && hasLabel.apply(c, bLabel.get()) && hasLabel.apply(a, cLabel.get()))
-                    || (hasLabel.apply(c, aLabel.get()) && hasLabel.apply(a, bLabel.get()) && hasLabel.apply(b, cLabel.get()))
-                    || (hasLabel.apply(c, aLabel.get()) && hasLabel.apply(b, bLabel.get()) && hasLabel.apply(a, cLabel.get())))) {
-
+            if (labelFilterChecker.check(a, b, c)) {
                 var degreeOfc = degree(c);
                 if (degreeFilter.test(degreeOfc)) {
                     currentOfa = AdjacencyCursorUtils.advance(neighborsOfa, currentOfa, c);

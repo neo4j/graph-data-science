@@ -27,10 +27,11 @@ import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.huge.UnionGraph;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
+import org.neo4j.gds.triangle.LabelFilterChecker;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.Random;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -54,9 +55,7 @@ final class CompositeIntersectionTest {
         var intersect = new UnionGraphIntersect.UnionGraphIntersectFactory().load(
             graph,
             Long.MAX_VALUE,
-            Optional.empty(),
-            Optional.empty(),
-            Optional.empty()
+            new LabelFilterChecker(Collections.emptyList(), graph::hasLabel)
         );
 
         intersect.intersectAll(
@@ -83,9 +82,7 @@ final class CompositeIntersectionTest {
         var intersect = new UnionGraphIntersect.UnionGraphIntersectFactory().load(
             graph,
             0,
-            Optional.empty(),
-            Optional.empty(),
-            Optional.empty()
+            new LabelFilterChecker(Collections.emptyList(), graph::hasLabel)
         );
         assertThatNoException().isThrownBy(
             () ->

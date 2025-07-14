@@ -21,15 +21,12 @@ package org.neo4j.gds.triangle.intersect;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.annotations.service.ServiceProvider;
-import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.AdjacencyCursor;
 import org.neo4j.gds.api.AdjacencyList;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.RelationshipIntersect;
 import org.neo4j.gds.core.huge.HugeGraph;
-
-import java.util.Optional;
-import java.util.function.BiFunction;
+import org.neo4j.gds.triangle.LabelFilterChecker;
 
 public final class HugeGraphIntersect extends GraphIntersect<AdjacencyCursor> {
 
@@ -38,12 +35,9 @@ public final class HugeGraphIntersect extends GraphIntersect<AdjacencyCursor> {
     private HugeGraphIntersect(
         AdjacencyList adjacency,
         long maxDegree,
-        BiFunction<Long, NodeLabel, Boolean> hasLabel,
-        Optional<NodeLabel> aLabel,
-        Optional<NodeLabel> bLabel,
-        Optional<NodeLabel> cLabel
+        LabelFilterChecker labelFilterChecker
     ) {
-        super(maxDegree, hasLabel, aLabel, bLabel, cLabel);
+        super(maxDegree, labelFilterChecker);
         this.adjacencyList = adjacency;
     }
 
@@ -69,14 +63,12 @@ public final class HugeGraphIntersect extends GraphIntersect<AdjacencyCursor> {
         public RelationshipIntersect load(
             Graph graph,
             long maxDegree,
-            Optional<NodeLabel> aLabel,
-            Optional<NodeLabel> bLabel,
-            Optional<NodeLabel> cLabel
+            LabelFilterChecker labelFilterChecker
         ) {
             assert graph instanceof HugeGraph;
             var hugeGraph = (HugeGraph) graph;
             var topology = hugeGraph.relationshipTopology().adjacencyList();
-            return new HugeGraphIntersect(topology, maxDegree, graph::hasLabel, aLabel, bLabel, cLabel);
+            return new HugeGraphIntersect(topology, maxDegree, labelFilterChecker);
         }
     }
 }
