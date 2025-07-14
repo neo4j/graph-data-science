@@ -177,10 +177,10 @@ public final class CliqueCounting extends Algorithm<CliqueCountingResult> {
             var optionalPointer = cliqueNodes.length - 1;
             long[] nodes = new long[cliqueNodes.length];
             for (var cliqueNode : cliqueNodes) {
-                if (cliqueNode.required) {
-                    nodes[requiredPointer++] = cliqueNode.nodeId;
+                if (cliqueNode.required()) {
+                    nodes[requiredPointer++] = cliqueNode.nodeId();
                 } else {
-                    nodes[optionalPointer--] = cliqueNode.nodeId;
+                    nodes[optionalPointer--] = cliqueNode.nodeId();
                 }
             }
             sizeFrequencies.updateFrequencies(countingMode, nodes, requiredPointer);
@@ -193,13 +193,13 @@ public final class CliqueCounting extends Algorithm<CliqueCountingResult> {
         }
         SubsetPartitionIds partitionIds = partitionSubsetIds(subset, intersectionIds);
 
-        var nsp = new long[partitionIds.nspIds.length];
-        for (int i = 0; i < partitionIds.nspIds.length; i++) {
-            nsp[i] = subset[partitionIds.nspIds[i]];
+        var nsp = new long[partitionIds.nspIds().length];
+        for (int i = 0; i < partitionIds.nspIds().length; i++) {
+            nsp[i] = subset[partitionIds.nspIds()[i]];
         }
         var newFeasibleNeighborhoods = new long[nsp.length][];
         for (int j = 0; j < nsp.length; j++) {
-            var subsetIdx = partitionIds.nspIds[j];
+            var subsetIdx = partitionIds.nspIds()[j];
             newFeasibleNeighborhoods[j] = new long[intersectionIds[subsetIdx].length];
             for (int k = 0; k < intersectionIds[subsetIdx].length; k++) {
                 newFeasibleNeighborhoods[j][k] = subset[intersectionIds[subsetIdx][k]];
@@ -207,7 +207,7 @@ public final class CliqueCounting extends Algorithm<CliqueCountingResult> {
         }
 
         var newCliqueNodes = Arrays.copyOf(cliqueNodes, cliqueNodes.length+1);
-        newCliqueNodes[cliqueNodes.length] = new NodeStatus(subset[partitionIds.pivotIdx], false);
+        newCliqueNodes[cliqueNodes.length] = new NodeStatus(subset[partitionIds.pivotIndex()], false);
         recursiveSctCliqueCount(
             nsp,
             newFeasibleNeighborhoods,
@@ -215,7 +215,7 @@ public final class CliqueCounting extends Algorithm<CliqueCountingResult> {
             sizeFrequencies
         );
 
-        var vsIds = partitionIds.vsIds;
+        var vsIds = partitionIds.vsIds();
         for (int i = 0; i < vsIds.length; i++) {
             var newSubsetAsSubsetIds = difference(intersectionIds[vsIds[i]], vsIds, i);
             var newSubset = new long[newSubsetAsSubsetIds.length];
@@ -245,10 +245,10 @@ public final class CliqueCounting extends Algorithm<CliqueCountingResult> {
             var optionalPointer = cliqueNodes.length - 1;
             long[] nodes = new long[cliqueNodes.length];
             for (var cliqueNode : cliqueNodes) {
-                if (cliqueNode.required) {
-                    nodes[requiredPointer++] = cliqueNode.nodeId;
+                if (cliqueNode.required()) {
+                    nodes[requiredPointer++] = cliqueNode.nodeId();
                 } else {
-                    nodes[optionalPointer--] = cliqueNode.nodeId;
+                    nodes[optionalPointer--] = cliqueNode.nodeId();
                 }
             }
             sizeFrequencies.updateFrequencies(countingMode, nodes, requiredPointer);
@@ -263,7 +263,7 @@ public final class CliqueCounting extends Algorithm<CliqueCountingResult> {
         SubsetPartition partition = partitionSubset(subset, intersections);
 
         var newCliqueNodes = Arrays.copyOf(cliqueNodes, cliqueNodes.length+1);
-        newCliqueNodes[cliqueNodes.length] = new NodeStatus(partition.pivot, false);
+        newCliqueNodes[cliqueNodes.length] = new NodeStatus(partition.pivot(), false);
 
         recursiveSctCliqueCount(
             partition.nsp(),
@@ -271,16 +271,16 @@ public final class CliqueCounting extends Algorithm<CliqueCountingResult> {
             sizeFrequencies
         );
 
-        var vs = new long[partition.vsIds.length];
+        var vs = new long[partition.vsIds().length];
         for (int i = 0; i < vs.length; i++) {
-            vs[i] = subset[partition.vsIds[i]];
+            vs[i] = subset[partition.vsIds()[i]];
         }
 
         for (int i = 0; i < partition.vsIds().length; i++) {
             newCliqueNodes = Arrays.copyOf(cliqueNodes, cliqueNodes.length+1);
             newCliqueNodes[cliqueNodes.length] = new NodeStatus(vs[i], true);
             recursiveSctCliqueCount(
-                Intersections.sortedDifference(intersections[partition.vsIds[i]], vs, Optional.of(i)),
+                Intersections.sortedDifference(intersections[partition.vsIds()[i]], vs, Optional.of(i)),
                 newCliqueNodes,
                 sizeFrequencies
             );
@@ -317,7 +317,7 @@ public final class CliqueCounting extends Algorithm<CliqueCountingResult> {
                 differenceIds[differencePointer++] = subsetIdx;
             }
             //check if subsetIdx is in intersectionIds[i]
-            //if not (and if not pivotIdx) add to diff
+            //if not (and if not pivotIndex) add to diff
         }
 
         return new SubsetPartitionIds(intersectionIds[pivotIdx], differenceIds, pivotIdx);
@@ -409,12 +409,6 @@ public final class CliqueCounting extends Algorithm<CliqueCountingResult> {
         }
         return Arrays.copyOf(difference, differencePointer);
     }
-
-    private record NodeStatus(long nodeId, boolean required) { }
-
-    private record SubsetPartition(long[] nsp, int[] vsIds, long pivot) { }
-
-    private record SubsetPartitionIds(int[] nspIds, int[] vsIds, int pivotIdx) { }
 
     private class GlobalCliqueCountingTask implements Runnable {
         Graph graph;
