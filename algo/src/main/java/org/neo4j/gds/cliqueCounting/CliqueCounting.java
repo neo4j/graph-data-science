@@ -30,11 +30,13 @@ import org.neo4j.gds.cliquecounting.CliqueCountingParameters;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
+import org.neo4j.gds.core.utils.Intersections;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -278,7 +280,7 @@ public final class CliqueCounting extends Algorithm<CliqueCountingResult> {
             newCliqueNodes = Arrays.copyOf(cliqueNodes, cliqueNodes.length+1);
             newCliqueNodes[cliqueNodes.length] = new NodeStatus(vs[i], true);
             recursiveSctCliqueCount(
-                difference(intersections[partition.vsIds[i]], vs, i),
+                Intersections.sortedDifference(intersections[partition.vsIds[i]], vs, Optional.of(i)),
                 newCliqueNodes,
                 sizeFrequencies
             );
@@ -389,22 +391,7 @@ public final class CliqueCounting extends Algorithm<CliqueCountingResult> {
     }
 
 
-    // S \ (v_1,...,v_{i-1}) // here S \ (v_0,...,v_{i-1}) where i is one lower.
-    private long[] difference(long[] subset, long[] vs, int i){
-        var difference = new long[subset.length];
-        int differencePointer = 0;
-        int j = 0;
-        outer:
-        for (var subsetNode : subset) {
-            for (;j < i && vs[j] <= subsetNode; j++) {
-                if (subsetNode == vs[j]) {
-                    continue outer;
-                }
-            }
-            difference[differencePointer++] = subsetNode;
-        }
-        return Arrays.copyOf(difference, differencePointer);
-    }
+
 
     // S \ (v_1,...,v_{i-1}) // here S \ (v_0,...,v_{i-1}) where i is one lower.
     private int[] difference(int[] subset, int[] vs, int i){
