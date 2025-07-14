@@ -23,6 +23,8 @@ import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.StatsResultBuilder;
 import org.neo4j.gds.beta.pregel.PregelResult;
+import org.neo4j.gds.cliqueCounting.CliqueCountingResult;
+import org.neo4j.gds.cliquecounting.CliqueCountingStatsConfig;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.hdbscan.HDBScanStatsConfig;
@@ -51,6 +53,7 @@ import org.neo4j.gds.triangle.TriangleCountResult;
 import org.neo4j.gds.triangle.TriangleCountStatsConfig;
 import org.neo4j.gds.wcc.WccStatsConfig;
 
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.CliqueCounting;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.HDBScan;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.K1Coloring;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.KCore;
@@ -80,6 +83,22 @@ public class CommunityAlgorithmsStatsModeBusinessFacade {
         this.communityAlgorithms = communityAlgorithms;
         this.algorithmProcessingTemplateConvenience = algorithmProcessingTemplateConvenience;
     }
+
+    public <RESULT> RESULT cliqueCounting(
+        GraphName graphName,
+        CliqueCountingStatsConfig configuration,
+        StatsResultBuilder<CliqueCountingResult, RESULT> resultBuilder
+    ) {
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
+            graphName,
+            configuration,
+            CliqueCounting,
+            estimationFacade::cliqueCounting,
+            (graph, __) -> communityAlgorithms.cliqueCounting(graph, configuration),
+            resultBuilder
+        );
+    }
+
 
     public <RESULT> RESULT k1Coloring(
         GraphName graphName,

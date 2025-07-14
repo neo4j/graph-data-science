@@ -29,6 +29,8 @@ import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutResult;
 import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutMutateConfig;
 import org.neo4j.gds.beta.pregel.PregelResult;
+import org.neo4j.gds.cliqueCounting.CliqueCountingResult;
+import org.neo4j.gds.cliquecounting.CliqueCountingMutateConfig;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.hdbscan.HDBScanMutateConfig;
@@ -56,6 +58,7 @@ import org.neo4j.gds.triangle.TriangleCountResult;
 import org.neo4j.gds.wcc.WccMutateConfig;
 
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ApproximateMaximumKCut;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.CliqueCounting;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.K1Coloring;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.KCore;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.KMeans;
@@ -100,6 +103,24 @@ public class CommunityAlgorithmsMutateModeBusinessFacade {
             ApproximateMaximumKCut,
             () -> estimation.approximateMaximumKCut(configuration),
             (graph, __) -> algorithms.approximateMaximumKCut(graph, configuration),
+            mutateStep,
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT cliqueCounting(
+        GraphName graphName,
+        CliqueCountingMutateConfig configuration,
+        ResultBuilder<CliqueCountingMutateConfig, CliqueCountingResult, RESULT, Void> resultBuilder
+    ) {
+        var mutateStep = new CliqueCountingMutateStep(mutateNodePropertyService, configuration);
+
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
+            graphName,
+            configuration,
+            CliqueCounting,
+            estimation::cliqueCounting,
+            (graph, __) -> algorithms.cliqueCounting(graph, configuration),
             mutateStep,
             resultBuilder
         );

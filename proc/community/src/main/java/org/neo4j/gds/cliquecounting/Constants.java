@@ -17,23 +17,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.algorithms.community.stubs;
+package org.neo4j.gds.cliquecounting;
 
-public record CommunityStubs(
-    ApproximateMaximumKCutMutateStub approxMaxKCut,
-    CliqueCountingMutateStub cliqueCounting,
-    HDBScanMutateStub hdbscan,
-    K1ColoringMutateStub k1Coloring,
-    KCoreMutateStub kCore,
-    KMeansMutateStub kMeans,
-    LabelPropagationMutateStub labelPropagation,
-    LccMutateStub lcc,
-    LeidenMutateStub leiden,
-    LouvainMutateStub louvain,
-    ModularityOptimizationMutateStub modularityOptimization,
-    SccMutateStub scc,
-    SpeakerListenerLPAMutateStub sllpa,
-    TriangleCountMutateStub triangleCount,
-    WccMutateStub wcc
-) {
+final class Constants {
+    static final String CLIQUE_COUNTING_DESCRIPTION = "The Clique Counting algorithm count the number of cliques of each size for every node in the graph.";
+
+    private Constants() {}
+
 }
