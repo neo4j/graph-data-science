@@ -20,6 +20,7 @@
 package org.neo4j.gds.cliqueCounting.intersect;
 
 import org.neo4j.gds.api.AdjacencyCursor;
+import org.neo4j.gds.core.huge.NodeFilteredAdjacencyCursor;
 import org.neo4j.gds.core.huge.NodeFilteredGraph;
 
 /**
@@ -30,21 +31,22 @@ import org.neo4j.gds.core.huge.NodeFilteredGraph;
 
 public final class NodeFilteredCliqueIntersect implements CliqueAdjacency {
 
-    private final NodeFilteredGraph filteredGraph;
+    private final NodeFilteredGraph nodeFilteredGraph;
     private final CliqueAdjacency innerCliqueAdjacency;
 
-    public NodeFilteredCliqueIntersect(NodeFilteredGraph filteredGraph, CliqueAdjacency innerCliqueAdjacency) {
-        this.filteredGraph = filteredGraph;
+    public NodeFilteredCliqueIntersect(NodeFilteredGraph nodeFilteredGraph, CliqueAdjacency innerCliqueAdjacency) {
+        this.nodeFilteredGraph = nodeFilteredGraph;
         this.innerCliqueAdjacency = innerCliqueAdjacency;
     }
 
     @Override
     public AdjacencyCursor createCursor(long node) {
-        if (filteredGraph.containsRootNodeId(node)) {
-            //fixme. Shouldn't we filter out target-ids too?
-            return innerCliqueAdjacency.createCursor(node);
+        if (nodeFilteredGraph.containsRootNodeId(node)) {
+            return new NodeFilteredAdjacencyCursor(innerCliqueAdjacency.createCursor(node),nodeFilteredGraph );
         } else{
             return AdjacencyCursor.EmptyAdjacencyCursor.INSTANCE;
         }
     }
+
+
 }

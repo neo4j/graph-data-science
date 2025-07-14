@@ -25,6 +25,7 @@ import org.neo4j.gds.api.AdjacencyCursorUtils;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.properties.relationships.RelationshipCursor;
 import org.neo4j.gds.cliqueCounting.intersect.CliqueAdjacency;
+import org.neo4j.gds.cliqueCounting.intersect.CliqueAdjacencyFactory;
 import org.neo4j.gds.cliquecounting.CliqueCountingMode;
 import org.neo4j.gds.cliquecounting.CliqueCountingParameters;
 import org.neo4j.gds.collections.ha.HugeObjectArray;

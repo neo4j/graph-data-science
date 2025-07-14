@@ -17,13 +17,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.cliqueCounting;
+package org.neo4j.gds.cliqueCounting.intersect;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.cliqueCounting.intersect.CliqueAdjacency;
-import org.neo4j.gds.cliqueCounting.intersect.HugeGraphCliqueIntersect;
-import org.neo4j.gds.cliqueCounting.intersect.NodeFilteredCliqueIntersect;
-import org.neo4j.gds.cliqueCounting.intersect.UnionGraphCliqueIntersect;
 import org.neo4j.gds.core.huge.HugeGraph;
 import org.neo4j.gds.core.huge.NodeFilteredGraph;
 import org.neo4j.gds.core.huge.UnionGraph;
@@ -32,13 +28,21 @@ public final class CliqueAdjacencyFactory {
 
     private CliqueAdjacencyFactory() {}
 
-    static CliqueAdjacency createCliqueAdjacency(Graph graph) {
+    public static CliqueAdjacency createCliqueAdjacency(Graph graph) {
         switch (graph) {
             case HugeGraph hugeGraph -> {
                 return new HugeGraphCliqueIntersect(hugeGraph.relationshipTopology().adjacencyList());
             }
             case UnionGraph unionGraph -> {
-                return new UnionGraphCliqueIntersect(i -> i, unionGraph.relationshipTopology());
+                 var  asNodeFiltered = unionGraph.asNodeFilteredGraph();
+                 if (asNodeFiltered.isEmpty()) {
+                     return new UnionGraphCliqueIntersect(i -> i, unionGraph.relationshipTopology());
+                 }else{
+                     return new UnionGraphCliqueIntersect(
+                         graph::toRootNodeId,
+                         unionGraph.relationshipTopology()
+                     );
+                 }
             }
             case NodeFilteredGraph nodeFilteredGraph -> {
                 var innerGraph = nodeFilteredGraph.graph();
