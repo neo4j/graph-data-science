@@ -7,6 +7,7 @@ Community detection algorithms are used to evaluate how groups of nodes are clus
 The Neo4j GDS library includes the following community detection algorithms, grouped by quality tier:
 
 * Production-quality
+** xref:algorithms/clique-counting.adoc[Clique counting]
 ** xref:algorithms/conductance.adoc[Conductance metric]
 ** xref:algorithms/hdbscan.adoc[HDBSCAN]
 ** xref:algorithms/k-core.adoc[K-Core Decomposition]

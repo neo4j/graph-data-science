@@ -68,6 +68,7 @@
 *** xref:algorithms/harmonic-centrality.adoc[]
 *** xref:algorithms/hits.adoc[]
 ** xref:algorithms/community.adoc[]
+*** xref:algorithms/clique-counting.adoc[]
 *** xref:algorithms/conductance.adoc[]
 *** xref:algorithms/hdbscan.adoc[]
 *** xref:algorithms/k-core.adoc[]
