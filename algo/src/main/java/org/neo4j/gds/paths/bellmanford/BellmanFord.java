@@ -72,7 +72,7 @@ public class BellmanFord extends Algorithm<BellmanFordResult> {
         this.executorService = executorService;
     }
 
-    public BellmanFord(
+    BellmanFord(
         Graph graph,
         ProgressTracker progressTracker,
         BellmanFordParameters parameters,

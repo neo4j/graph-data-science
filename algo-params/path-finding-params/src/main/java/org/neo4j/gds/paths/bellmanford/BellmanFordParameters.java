@@ -25,6 +25,7 @@ import org.neo4j.gds.core.concurrency.Concurrency;
 
 @Parameters
 public record BellmanFordParameters(
+    // This is the original nodeId and has to be translated to internal before being passed to the algorithm.
     long sourceNode,
     boolean trackNegativeCycles,
     boolean trackPaths,

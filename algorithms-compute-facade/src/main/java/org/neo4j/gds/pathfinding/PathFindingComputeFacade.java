@@ -34,6 +34,9 @@ import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.loading.NoAlgorithmValidation;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortResult;
+import org.neo4j.gds.paths.bellmanford.BellmanFord;
+import org.neo4j.gds.paths.bellmanford.BellmanFordParameters;
+import org.neo4j.gds.paths.bellmanford.BellmanFordProgressTask;
 import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.pricesteiner.PrizeSteinerTreeResult;
@@ -120,8 +123,50 @@ public class PathFindingComputeFacade {
 
     }
 
-    CompletableFuture<BellmanFordResult> bellmanFord() {
-        throw new RuntimeException("Not yet implemented");
+    CompletableFuture<BellmanFordResult> bellmanFord(
+        GraphName graphName,
+        GraphParameters graphParameters,
+        Optional<String> relationshipProperty,
+        BellmanFordParameters parameters,
+        JobId jobId,
+        boolean logProgress
+    ) {
+        // Create ProgressTracker
+        var progressTracker = progressTrackerFactory.create(
+            BellmanFordProgressTask.create(),
+            jobId,
+            parameters.concurrency(),
+            logProgress
+        );
+
+        // Fetch the Graph the algorithm will operate on
+        var graph = graphStoreCatalogService.fetchGraphResources(
+            graphName,
+            graphParameters,
+            relationshipProperty,
+            new NoAlgorithmValidation(),
+            Optional.empty(),
+            Optional.empty(),
+            user,
+            databaseId
+        ).graph();
+
+        // Create the algorithm
+        var bellmanFord = new BellmanFord(
+            graph,
+            progressTracker,
+            graph.toMappedNodeId(parameters.sourceNode()),
+            parameters.trackNegativeCycles(),
+            parameters.trackPaths(),
+            parameters.concurrency(),
+            executorService
+        );
+
+        // Submit the algorithm for async computation
+        return algorithmCaller.run(
+            bellmanFord::compute,
+            jobId
+        );
     }
 
     CompletableFuture<HugeLongArray> breadthFirstSearch() {
