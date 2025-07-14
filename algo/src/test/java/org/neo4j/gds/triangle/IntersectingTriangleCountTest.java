@@ -32,6 +32,7 @@ import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.termination.TerminationFlag;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -124,7 +125,7 @@ class IntersectingTriangleCountTest {
             graph,
             new Concurrency(4),
             Long.MAX_VALUE,
-            Optional.of(List.of("A", "B", "C"))
+            List.of("A", "B", "C")
         );
 
         assertEquals(1, result.globalTriangles());
@@ -137,7 +138,7 @@ class IntersectingTriangleCountTest {
 
         // DIFFERENT ORDER OF LABELS
 
-        result = compute(graph, new Concurrency(4), Long.MAX_VALUE, Optional.of(List.of("B", "A", "C")));
+        result = compute(graph, new Concurrency(4), Long.MAX_VALUE, List.of("B", "A", "C"));
 
         assertEquals(1, result.globalTriangles());
         assertEquals(5, result.localTriangles().size());
@@ -149,7 +150,7 @@ class IntersectingTriangleCountTest {
 
         // DIFFERENT ORDER OF LABELS
 
-        result = compute(graph, new Concurrency(4), Long.MAX_VALUE, Optional.of(List.of("B", "C", "A")));
+        result = compute(graph, new Concurrency(4), Long.MAX_VALUE, List.of("B", "C", "A"));
 
         assertEquals(1, result.globalTriangles());
         assertEquals(5, result.localTriangles().size());
@@ -177,7 +178,7 @@ class IntersectingTriangleCountTest {
             graph,
             new Concurrency(4),
             Long.MAX_VALUE,
-            Optional.of(List.of("A", "A", "C"))
+            List.of("A", "A", "C")
         );
 
         assertEquals(1, result.globalTriangles());
@@ -188,7 +189,7 @@ class IntersectingTriangleCountTest {
         assertEquals(0, result.localTriangles().get(3)); // a4
         assertEquals(0, result.localTriangles().get(4)); // a5
 
-        result = compute(graph, new Concurrency(4), Long.MAX_VALUE, Optional.of(List.of("A", "C", "A")));
+        result = compute(graph, new Concurrency(4), Long.MAX_VALUE, List.of("A", "C", "A"));
 
         assertEquals(1, result.globalTriangles());
         assertEquals(5, result.localTriangles().size());
@@ -208,7 +209,7 @@ class IntersectingTriangleCountTest {
                 " (a4)-[:T]->(a5:E), " +
                 " (a5)-[:T]->(a1)"
         );
-        result = compute(graph, new Concurrency(4), Long.MAX_VALUE, Optional.of(List.of("A", "A", "A")));
+        result = compute(graph, new Concurrency(4), Long.MAX_VALUE, List.of("A", "A", "A"));
 
         assertEquals(1, result.globalTriangles());
         assertEquals(5, result.localTriangles().size());
@@ -228,7 +229,41 @@ class IntersectingTriangleCountTest {
                 " (a3)-[:T]->(a1)"
         );
 
-        TriangleCountResult result = compute(graph, new Concurrency(4), Long.MAX_VALUE, Optional.of(List.of("A", "B", "C")));
+        TriangleCountResult result = compute(graph, new Concurrency(4), Long.MAX_VALUE, List.of("A", "B", "C"));
+
+        assertEquals(1, result.globalTriangles());
+        assertEquals(3, result.localTriangles().size());
+        assertEquals(1, result.localTriangles().get(0)); // a1
+        assertEquals(1, result.localTriangles().get(1)); // a2
+        assertEquals(1, result.localTriangles().get(2)); // a3
+    }
+
+    @Test
+    void filteredWithFewerFilters() {
+        var graph = fromGdl(
+            "CREATE " +
+                " (a1:A)-[:T]->(a2:A), " +
+                " (a2)-[:T]->(a3:B), " +
+                " (a3)-[:T]->(a1)"
+        );
+
+        TriangleCountResult result = compute(graph, new Concurrency(4), Long.MAX_VALUE, List.of("A"));
+
+        assertEquals(1, result.globalTriangles());
+        assertEquals(3, result.localTriangles().size());
+        assertEquals(1, result.localTriangles().get(0)); // a1
+        assertEquals(1, result.localTriangles().get(1)); // a2
+        assertEquals(1, result.localTriangles().get(2)); // a3
+
+        result = compute(graph, new Concurrency(4), Long.MAX_VALUE, List.of("A", "A"));
+
+        assertEquals(1, result.globalTriangles());
+        assertEquals(3, result.localTriangles().size());
+        assertEquals(1, result.localTriangles().get(0)); // a1
+        assertEquals(1, result.localTriangles().get(1)); // a2
+        assertEquals(1, result.localTriangles().get(2)); // a3
+
+        result = compute(graph, new Concurrency(4), Long.MAX_VALUE, List.of("A", "B"));
 
         assertEquals(1, result.globalTriangles());
         assertEquals(3, result.localTriangles().size());
@@ -648,7 +683,7 @@ class IntersectingTriangleCountTest {
             graph,
             concurrency,
             maxDegree,
-            Optional.empty(),
+            Collections.emptyList(),
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER,
             TerminationFlag.RUNNING_TRUE
@@ -659,7 +694,7 @@ class IntersectingTriangleCountTest {
         Graph graph,
         Concurrency concurrency,
         long maxDegree,
-        Optional<List<String>> labelFilter
+        List<String> labelFilter
     ) {
         return IntersectingTriangleCount.create(
             graph,

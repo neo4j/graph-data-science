@@ -28,6 +28,7 @@ import org.neo4j.gds.core.huge.CompositeAdjacencyCursor;
 import org.neo4j.gds.core.huge.CompositeAdjacencyList;
 import org.neo4j.gds.core.huge.UnionGraph;
 
+import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.LongToIntFunction;
 
@@ -42,9 +43,12 @@ public final class UnionGraphIntersect extends GraphIntersect<CompositeAdjacency
         LongToLongFunction fromFilteredIdFunction,
         CompositeAdjacencyList compositeAdjacencyList,
         long maxDegree,
-        BiFunction<Long, NodeLabel, Boolean> hasLabel
+        BiFunction<Long, NodeLabel, Boolean> hasLabel,
+        Optional<NodeLabel> aLabel,
+        Optional<NodeLabel> bLabel,
+        Optional<NodeLabel> cLabel
     ) {
-        super(maxDegree, hasLabel);
+        super(maxDegree, hasLabel, aLabel, bLabel, cLabel);
         this.degreeFunction = degreeFunction;
         this.fromFilteredIdFunction = fromFilteredIdFunction;
         this.compositeAdjacencyList = compositeAdjacencyList;
@@ -74,7 +78,8 @@ public final class UnionGraphIntersect extends GraphIntersect<CompositeAdjacency
         @Override
         public UnionGraphIntersect load(
             Graph graph,
-            long maxDegree
+            long maxDegree,
+            Optional<NodeLabel> aLabel, Optional<NodeLabel> bLabel, Optional<NodeLabel> cLabel
         ) {
             assert graph instanceof UnionGraph;
             var topology = ((UnionGraph) graph).relationshipTopology();
@@ -83,7 +88,10 @@ public final class UnionGraphIntersect extends GraphIntersect<CompositeAdjacency
                 i -> i,
                 topology,
                 maxDegree,
-                graph::hasLabel
+                graph::hasLabel,
+                aLabel,
+                bLabel,
+                cLabel
             );
         }
     }
@@ -102,7 +110,8 @@ public final class UnionGraphIntersect extends GraphIntersect<CompositeAdjacency
         @Override
         public UnionGraphIntersect load(
             Graph graph,
-            long maxDegree
+            long maxDegree,
+            Optional<NodeLabel> aLabel, Optional<NodeLabel> bLabel, Optional<NodeLabel> cLabel
         ) {
             assert graph instanceof UnionGraph;
             var topology = ((UnionGraph) graph).relationshipTopology();
@@ -111,7 +120,10 @@ public final class UnionGraphIntersect extends GraphIntersect<CompositeAdjacency
                 graph::toRootNodeId,
                 topology,
                 maxDegree,
-                graph::hasLabel
+                graph::hasLabel,
+                aLabel,
+                bLabel,
+                cLabel
             );
         }
     }

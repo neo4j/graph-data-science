@@ -28,6 +28,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.RelationshipIntersect;
 import org.neo4j.gds.core.huge.HugeGraph;
 
+import java.util.Optional;
 import java.util.function.BiFunction;
 
 public final class HugeGraphIntersect extends GraphIntersect<AdjacencyCursor> {
@@ -37,9 +38,12 @@ public final class HugeGraphIntersect extends GraphIntersect<AdjacencyCursor> {
     private HugeGraphIntersect(
         AdjacencyList adjacency,
         long maxDegree,
-        BiFunction<Long, NodeLabel, Boolean> hasLabel
+        BiFunction<Long, NodeLabel, Boolean> hasLabel,
+        Optional<NodeLabel> aLabel,
+        Optional<NodeLabel> bLabel,
+        Optional<NodeLabel> cLabel
     ) {
-        super(maxDegree, hasLabel);
+        super(maxDegree, hasLabel, aLabel, bLabel, cLabel);
         this.adjacencyList = adjacency;
     }
 
@@ -64,12 +68,15 @@ public final class HugeGraphIntersect extends GraphIntersect<AdjacencyCursor> {
         @Override
         public RelationshipIntersect load(
             Graph graph,
-            long maxDegree
+            long maxDegree,
+            Optional<NodeLabel> aLabel,
+            Optional<NodeLabel> bLabel,
+            Optional<NodeLabel> cLabel
         ) {
             assert graph instanceof HugeGraph;
             var hugeGraph = (HugeGraph) graph;
             var topology = hugeGraph.relationshipTopology().adjacencyList();
-            return new HugeGraphIntersect(topology, maxDegree, graph::hasLabel);
+            return new HugeGraphIntersect(topology, maxDegree, graph::hasLabel, aLabel, bLabel, cLabel);
         }
     }
 }

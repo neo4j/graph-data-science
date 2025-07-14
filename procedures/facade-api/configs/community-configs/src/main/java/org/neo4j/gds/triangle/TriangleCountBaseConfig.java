@@ -28,6 +28,7 @@ import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -45,7 +46,7 @@ public interface TriangleCountBaseConfig extends AlgoBaseConfig {
     }
 
     default List<String> labelFilter() {
-        return NO_VALUE;
+        return Collections.emptyList();
     }
 
     @Configuration.Check
@@ -73,13 +74,10 @@ public interface TriangleCountBaseConfig extends AlgoBaseConfig {
 
     @Configuration.Check
     default void validateCorrectNumberOfLabels() {
-        if (labelFilter() == NO_VALUE) {
-            return;
-        }
-        if (labelFilter().size() != 3) {
+        if (labelFilter().size() > 3) {
             String givenLabels = String.join(", ", labelFilter());
             throw new IllegalArgumentException(formatWithLocale(
-                "A list of exactly three node labels must be provided in the 'labelFilter' parameter, given: '[%s]'.",
+                "The provided 'labelFilter' list must only contain up to three elements. Given: '[%s]'.",
                 givenLabels
             ));
         }
@@ -91,9 +89,6 @@ public interface TriangleCountBaseConfig extends AlgoBaseConfig {
         Collection<NodeLabel> nodeLabels,
         Collection<RelationshipType> alsoIgnored
     ) {
-        if (labelFilter() == NO_VALUE) {
-            return;
-        }
         for (String givenLabelString : labelFilter()) {
             var givenLabel = NodeLabel.of(givenLabelString);
             if (!nodeLabels.contains(givenLabel)) {
@@ -114,7 +109,7 @@ public interface TriangleCountBaseConfig extends AlgoBaseConfig {
         return new TriangleCountParameters(
             concurrency(),
             maxDegree(),
-            labelFilter() == NO_VALUE ? Optional.empty() : Optional.of(labelFilter())
+            labelFilter()
         );
     }
 }

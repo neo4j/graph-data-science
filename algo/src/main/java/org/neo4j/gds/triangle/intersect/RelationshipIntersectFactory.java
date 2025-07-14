@@ -20,8 +20,11 @@
 package org.neo4j.gds.triangle.intersect;
 
 import org.neo4j.annotations.service.Service;
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.RelationshipIntersect;
+
+import java.util.Optional;
 
 @Service
 public interface RelationshipIntersectFactory {
@@ -30,6 +33,9 @@ public interface RelationshipIntersectFactory {
 
     RelationshipIntersect load(
         Graph graph,
-        long maxDegree
+        long maxDegree,
+        Optional<NodeLabel> ALabel,
+        Optional<NodeLabel> BLabel,
+        Optional<NodeLabel> CLabel
     );
 }

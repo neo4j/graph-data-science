@@ -77,7 +77,7 @@ class IntersectingTriangleCountFilteredGraphTest {
             graph,
             new Concurrency(4),
             Long.MAX_VALUE,
-            Optional.empty(),
+            Collections.emptyList(),
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER,
             TerminationFlag.RUNNING_TRUE

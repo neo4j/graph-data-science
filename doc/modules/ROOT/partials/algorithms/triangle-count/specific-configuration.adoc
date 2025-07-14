@@ -1,3 +1,3 @@
 // DO NOT EDIT: File generated automatically by the process_conf.py script
 | maxDegree | Integer | 2^63^ - 1 | yes | If a node has a degree higher than this it will not be considered by the algorithm. The triangle count for these nodes will be `-1`.
-| labelFilter | List of String | null | yes | A list of exactly three node labels as strings. If specified, only triangles with nodes of these labels will be counted. If not specified, all triangles will be counted.
+| labelFilter | List of String | [] | yes | A list of up to three node labels as strings. Only triangles with nodes having representatives for each specified label will be counted. If left empty (default), all triangles will be counted.

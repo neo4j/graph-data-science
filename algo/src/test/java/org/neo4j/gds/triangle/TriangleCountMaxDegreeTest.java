@@ -28,6 +28,7 @@ import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.termination.TerminationFlag;
 
+import java.util.Collections;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -46,8 +47,9 @@ class TriangleCountMaxDegreeTest {
             .generate();
 
         var tc = IntersectingTriangleCount.create(
-            graph, new Concurrency(4), 100,
-            Optional.empty(),
+            graph, new Concurrency(4),
+            100,
+            Collections.emptyList(),
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER,
             TerminationFlag.RUNNING_TRUE

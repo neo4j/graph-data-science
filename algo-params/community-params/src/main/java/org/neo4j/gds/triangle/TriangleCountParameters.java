@@ -27,5 +27,5 @@ import java.util.List;
 import java.util.Optional;
 
 @Parameters
-public record TriangleCountParameters(Concurrency concurrency, long maxDegree, Optional<List<String>> labelFilter) implements AlgorithmParameters {
+public record TriangleCountParameters(Concurrency concurrency, long maxDegree, List<String> labelFilter) implements AlgorithmParameters {
 }

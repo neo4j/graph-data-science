@@ -31,6 +31,7 @@ import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.termination.TerminationFlag;
 
+import java.util.Collections;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -107,7 +108,7 @@ class TriangleStreamTest {
                 graph,
                 DefaultPool.INSTANCE,
                 new Concurrency(concurrency),
-                Optional.empty(),
+                Collections.emptyList(),
                 TerminationFlag.RUNNING_TRUE
             )
             .compute()

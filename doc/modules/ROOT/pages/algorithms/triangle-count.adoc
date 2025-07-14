@@ -34,15 +34,10 @@ This is described in http://chato.cl/papers/becchetti_2007_approximate_count_tri
 For some use-cases it is useful to only count triangles that contain nodes with specific node labels.
 This is also something that can save computation time, as the algorithm will not have to consider nodes that do not have the specified labels.
 
-The algorithm supports node label filtering by allowing you to specify a list of three node labels in the configuration.
-The algorithm will then only count triangles where all three nodes have one of the specified labels.
-
-
-[TIP]
-====
-Triangle counting is a very expensive operation, especially in large graphs.
-To speed up the computation, apart from using xref:algorithms-triangle-count-filtering[node label filtering] if that is applicable to your use-case, you should also consider including only the node labels and relationship types relevant for the computation in the graph projection.
-====
+The algorithm supports node label filtering by allowing you to specify a list of up to three node labels in the configuration.
+If three labels are specified, the algorithm will only count triangles that contain nodes with all three labels, and each label must be represented by at least one node in the triangle.
+If fewer than three labels are specified, the algorithm will count triangles where each specified label is represented by at least one node in the triangle, but nodes with no specified label can also be part of the triangle.
+If a label is repeated in the list, it will represented by as many nodes as times it appears in the list.
 
 
 [[algorithms-triangle-count-syntax]]

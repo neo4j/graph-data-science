@@ -32,6 +32,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.utils.CloseableThreadLocal;
 
+import java.util.Collections;
 import java.util.Optional;
 import java.util.concurrent.atomic.DoubleAdder;
 import java.util.function.LongToDoubleFunction;
@@ -136,7 +137,7 @@ public class LocalClusteringCoefficient extends Algorithm<LocalClusteringCoeffic
             graph,
             concurrency,
             maxDegree,
-            Optional.empty(),
+            Collections.emptyList(),
             DefaultPool.INSTANCE,
             progressTracker,
             TerminationFlag.RUNNING_TRUE

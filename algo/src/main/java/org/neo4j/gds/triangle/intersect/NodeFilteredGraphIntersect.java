@@ -48,7 +48,7 @@ public final class NodeFilteredGraphIntersect implements RelationshipIntersect {
     }
 
     @Override
-    public void intersectAll(long nodeIdA, IntersectionConsumer consumer, Optional<NodeLabel> bLabel, Optional<NodeLabel> cLabel) {
+    public void intersectAll(long nodeIdA, IntersectionConsumer consumer) {
         wrappedRelationshipIntersect.intersectAll(
             filteredGraph.toRootNodeId(nodeIdA), (a, b, c) -> {
                 if (filteredGraph.containsRootNodeId(a) && filteredGraph.containsRootNodeId(b) && filteredGraph.containsRootNodeId(
@@ -59,9 +59,7 @@ public final class NodeFilteredGraphIntersect implements RelationshipIntersect {
                         filteredGraph.toFilteredNodeId(c)
                     );
                 }
-            },
-            bLabel,
-            cLabel
+            }
         );
     }
 
@@ -76,7 +74,10 @@ public final class NodeFilteredGraphIntersect implements RelationshipIntersect {
         @Override
         public RelationshipIntersect load(
             Graph graph,
-            long maxDegree
+            long maxDegree,
+            Optional<NodeLabel> aLabel,
+            Optional<NodeLabel> bLabel,
+            Optional<NodeLabel> cLabel
         ) {
             assert graph instanceof NodeFilteredGraph;
             var nodeFilteredGraph = (NodeFilteredGraph) graph;
@@ -85,7 +86,7 @@ public final class NodeFilteredGraphIntersect implements RelationshipIntersect {
             var relationshipIntersect = RelationshipIntersectFactoryLocator
                 .lookup(innerGraph)
                 .orElseThrow(() -> new IllegalArgumentException("No intersect factory found for graph type " + innerGraph.getClass()))
-                .load(innerGraph, maxDegree);
+                .load(innerGraph, maxDegree, aLabel, bLabel, cLabel);
 
             return new NodeFilteredGraphIntersect(nodeFilteredGraph, relationshipIntersect);
         }

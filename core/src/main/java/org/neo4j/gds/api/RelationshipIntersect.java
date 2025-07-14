@@ -19,11 +19,7 @@
  */
 package org.neo4j.gds.api;
 
-import org.neo4j.gds.NodeLabel;
-
-import java.util.Optional;
-
 public interface RelationshipIntersect {
 
-    void intersectAll(long nodeIdA, IntersectionConsumer consumer, Optional<NodeLabel> bLabel, Optional<NodeLabel> cLabel);
+    void intersectAll(long nodeIdA, IntersectionConsumer consumer);
 }

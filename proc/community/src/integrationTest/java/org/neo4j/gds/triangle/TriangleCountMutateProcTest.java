@@ -200,19 +200,19 @@ class TriangleCountMutateProcTest extends BaseProcTest {
     }
 
     @Test
-    void shouldThrowOnTooFewLabelsInFilter() {
+    void shouldThrowOnTooManyLabelsInFilter() {
         String query = GdsCypher
             .call(DEFAULT_GRAPH_NAME)
             .algo("triangleCount")
             .mutateMode()
             .addParameter("mutateProperty", "mutatedTriangleCount")
-            .addParameter("labelFilter", List.of("A"))
+            .addParameter("labelFilter", List.of("A", "B", "C", "D"))
             .yields();
 
         assertThatRuntimeException()
             .isThrownBy(() -> runQuery(query))
             .withMessage(
-                "Failed to invoke procedure `gds.triangleCount.mutate`: Caused by: java.lang.IllegalArgumentException: A list of exactly three node labels must be provided in the 'labelFilter' parameter, given: '[A]'.");
+                "Failed to invoke procedure `gds.triangleCount.mutate`: Caused by: java.lang.IllegalArgumentException: The provided 'labelFilter' list must only contain up to three elements. Given: '[A, B, C, D]'.");
     }
 
     @Test

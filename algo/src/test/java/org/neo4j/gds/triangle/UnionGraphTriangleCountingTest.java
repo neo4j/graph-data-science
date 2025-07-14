@@ -30,6 +30,7 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.termination.TerminationFlag;
 
+import java.util.Collections;
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -104,7 +105,7 @@ class UnionGraphTriangleCountingTest {
             graph,
             new Concurrency(1),
             Long.MAX_VALUE,
-            Optional.empty(),
+            Collections.emptyList(),
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER,
             TerminationFlag.RUNNING_TRUE

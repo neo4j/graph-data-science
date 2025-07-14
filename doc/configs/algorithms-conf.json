@@ -685,9 +685,9 @@
         {
           "name": "labelFilter",
           "type": "List of String",
-          "default": "null",
+          "default": "[]",
           "optional": true,
-          "description": "A list of exactly three node labels as strings. If specified, only triangles with nodes of these labels will be counted. If not specified, all triangles will be counted."
+          "description": "A list of up to three node labels as strings. Only triangles with nodes having representatives for each specified label will be counted. If left empty (default), all triangles will be counted."
         }
       ],
       "page_path": "algorithms/triangle-count/"

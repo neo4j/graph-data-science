@@ -58,20 +58,18 @@ public final class TriangleStream extends Algorithm<Stream<TriangleResult>> {
     private final ExecutorService executorService;
     private final AtomicInteger queue;
     private final Concurrency concurrency;
-    private final Optional<NodeLabel> ALabel;
-    private final Optional<NodeLabel> BLabel;
-    private final Optional<NodeLabel> CLabel;
+    private final Optional<NodeLabel> aLabel;
+    private final Optional<NodeLabel> bLabel;
+    private final Optional<NodeLabel> cLabel;
     private final int nodeCount;
     private final AtomicInteger runningThreads;
     private final BlockingQueue<TriangleResult> resultQueue;
-    private final boolean bTraversal;
-    private final boolean cTraversal;
 
     public static TriangleStream create(
         Graph graph,
         ExecutorService executorService,
         Concurrency concurrency,
-        Optional<List<String>> labelFilter,
+        List<String> labelFilter,
         TerminationFlag terminationFlag
     ) {
         var factory = RelationshipIntersectFactoryLocator
@@ -94,7 +92,7 @@ public final class TriangleStream extends Algorithm<Stream<TriangleResult>> {
         RelationshipIntersectFactory intersectFactory,
         ExecutorService executorService,
         Concurrency concurrency,
-        Optional<List<String>> labelFilter,
+        List<String> labelFilter,
         TerminationFlag terminationFlag
     ) {
         super(ProgressTracker.NULL_TRACKER);
@@ -107,19 +105,20 @@ public final class TriangleStream extends Algorithm<Stream<TriangleResult>> {
         this.runningThreads = new AtomicInteger();
         this.queue = new AtomicInteger();
 
-        if (labelFilter.isPresent()) {
-            var labelFilterList = labelFilter.get();
-            this.ALabel = Optional.of(NodeLabel.of(labelFilterList.get(0)));
-            this.BLabel = Optional.of(NodeLabel.of(labelFilterList.get(1)));
-            this.CLabel = Optional.of(NodeLabel.of(labelFilterList.get(2)));
-            this.bTraversal = !ALabel.get().equals(BLabel.get());
-            this.cTraversal = !ALabel.get().equals(CLabel.get()) || !BLabel.get().equals(CLabel.get());
+        if (!labelFilter.isEmpty()) {
+            this.aLabel = Optional.of(NodeLabel.of(labelFilter.getFirst()));
         } else {
-            this.ALabel = Optional.empty();
-            this.BLabel = Optional.empty();
-            this.CLabel = Optional.empty();
-            this.bTraversal = false;
-            this.cTraversal = false;
+            this.aLabel = Optional.empty();
+        }
+        if (labelFilter.size() > 1) {
+            this.bLabel = Optional.of(NodeLabel.of(labelFilter.get(1)));
+        } else {
+            this.bLabel = Optional.empty();
+        }
+        if (labelFilter.size() > 2) {
+            this.cLabel = Optional.of(NodeLabel.of(labelFilter.get(2)));
+        } else {
+            this.cLabel = Optional.empty();
         }
 
         this.terminationFlag = terminationFlag;
@@ -154,7 +153,7 @@ public final class TriangleStream extends Algorithm<Stream<TriangleResult>> {
         final Collection<Runnable> tasks;
         tasks = ParallelUtil.tasks(
             concurrency,
-            () -> new IntersectTask(intersectFactory.load(graph, Long.MAX_VALUE))
+            () -> new IntersectTask(intersectFactory.load(graph, Long.MAX_VALUE, this.aLabel, this.bLabel, this.cLabel))
         );
         ParallelUtil.run(tasks, false, executorService, null);
     }
@@ -170,14 +169,11 @@ public final class TriangleStream extends Algorithm<Stream<TriangleResult>> {
             try {
                 int node;
                 while ((node = queue.getAndIncrement()) < nodeCount && terminationFlag.running()) {
-                    if (ALabel.isEmpty() || graph.hasLabel(node, ALabel.get())) {
-                        evaluateNode(node, BLabel, CLabel);
-                    }
-                    if (bTraversal && graph.hasLabel(node, BLabel.get())) {
-                        evaluateNode(node, CLabel, ALabel);
-                    }
-                    if (cTraversal && graph.hasLabel(node, CLabel.get())) {
-                        evaluateNode(node, ALabel, BLabel);
+                    if (cLabel.isEmpty() || bLabel.isEmpty() || aLabel.isEmpty()
+                        || graph.hasLabel(node, aLabel.get())
+                        || graph.hasLabel(node, bLabel.get())
+                        || graph.hasLabel(node, cLabel.get())) {
+                        evaluateNode(node);
                     }
                     progressTracker.logProgress();
                 }
@@ -186,7 +182,7 @@ public final class TriangleStream extends Algorithm<Stream<TriangleResult>> {
             }
         }
 
-        abstract void evaluateNode(int nodeId, Optional<NodeLabel> blabel, Optional<NodeLabel> cLabel);
+        abstract void evaluateNode(int nodeId);
 
         void emit(long nodeA, long nodeB, long nodeC) {
             var result = new TriangleResult(
@@ -207,8 +203,8 @@ public final class TriangleStream extends Algorithm<Stream<TriangleResult>> {
         }
 
         @Override
-        void evaluateNode(final int nodeId, Optional<NodeLabel> bLabel, Optional<NodeLabel> cLabel) {
-            intersect.intersectAll(nodeId, this, bLabel, cLabel);
+        void evaluateNode(final int nodeId) {
+            intersect.intersectAll(nodeId, this);
         }
 
         @Override

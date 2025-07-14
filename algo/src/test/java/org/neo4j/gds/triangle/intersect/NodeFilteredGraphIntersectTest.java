@@ -58,14 +58,18 @@ class NodeFilteredGraphIntersectTest {
         assertThat(nodeCount).isEqualTo(3);
         assertThat(graph.relationshipCount()).isEqualTo(6);
 
-        var intersect = new NodeFilteredGraphIntersect.NodeFilteredGraphIntersectFactory().load(graph, maxDegree);
+        var intersect = new NodeFilteredGraphIntersect.NodeFilteredGraphIntersectFactory().load(
+            graph,
+            maxDegree,
+            Optional.empty(),
+            Optional.empty(),
+            Optional.empty()
+        );
 
         var triangleCount = new MutableInt(0);
         intersect.intersectAll(                 //triangles are found in reverse, so must change from 'a' to 'c'
             graph.toMappedNodeId(idFunction.of("c")),
-            (nodeA, nodeB, nodeC) -> triangleCount.increment(),
-            Optional.empty(),
-            Optional.empty()
+            (nodeA, nodeB, nodeC) -> triangleCount.increment()
         );
 
         assertThat(triangleCount.intValue()).isEqualTo(1);
