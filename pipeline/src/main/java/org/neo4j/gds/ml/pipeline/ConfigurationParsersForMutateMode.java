@@ -94,6 +94,7 @@ public class ConfigurationParsersForMutateMode {
             case BFS -> BfsMutateConfig::of;
             case Bridges -> null;
             case CELF -> InfluenceMaximizationMutateConfig::of;
+            case CliqueCounting ->  null;
             case ClosenessCentrality -> ClosenessCentralityMutateConfig::of;
             case CollapsePath -> CollapsePathConfig::of;
             case Conductance -> null;

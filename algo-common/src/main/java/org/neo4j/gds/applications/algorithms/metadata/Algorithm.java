@@ -38,6 +38,7 @@ public enum Algorithm {
     BFS,
     Bridges,
     CELF,
+    CliqueCounting,
     ClosenessCentrality,
     CollapsePath,
     Conductance,
