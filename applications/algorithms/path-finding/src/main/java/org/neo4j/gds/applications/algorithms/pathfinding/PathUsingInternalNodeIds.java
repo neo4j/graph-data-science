@@ -19,7 +19,28 @@
  */
 package org.neo4j.gds.applications.algorithms.pathfinding;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 /**
  * Back in the day, this would be a DTO I guess
  */
-public record PathUsingInternalNodeIds(long sourceNode, long targetNode, long[] nodeIds, double[] costs, double totalCost) {}
+public record PathUsingInternalNodeIds(
+    long sourceNode,
+    long targetNode,
+    long[] nodeIds,
+    double[] costs,
+    double totalCost) {
+    /**
+     * Arrays are the bane of pretty code
+     */
+    @Override
+    public boolean equals(Object obj) {
+        return EqualsBuilder.reflectionEquals(this, obj);
+    }
+
+    @Override
+    public int hashCode() {
+        return HashCodeBuilder.reflectionHashCode(this);
+    }
+}
