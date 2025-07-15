@@ -44,6 +44,21 @@ class NodeFilteredAdjacencyCursorTest {
     }
 
     @Test
+    void shouldNotStartWithNegativeValues(){
+        adjacencyCursor.init(0,0);
+        assertThat(adjacencyCursor.peekVLong()).isNotEqualTo(AdjacencyCursor.NOT_FOUND);
+        assertThat(adjacencyCursor.nextVLong()).isNotEqualTo(AdjacencyCursor.NOT_FOUND);
+
+    }
+
+    @Test
+    void nextShouldApplyFiltering(){
+        adjacencyCursor.init(0,0);
+        adjacencyCursor.nextVLong();
+        assertThat(adjacencyCursor.peekVLong()).isEqualTo(2);
+    }
+
+    @Test
     void shouldIterateWithFilter() {
         List<Long> actual = new ArrayList<>();
         while (adjacencyCursor.hasNextVLong()) {
