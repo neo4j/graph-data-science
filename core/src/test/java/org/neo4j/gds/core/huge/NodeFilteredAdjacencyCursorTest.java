@@ -94,6 +94,18 @@ class NodeFilteredAdjacencyCursorTest {
     }
 
     @Test
+    void shouldNotMissElementsInBetween(){
+        var inner = new TestAdjacencyCursor(List.of(1L,2L,3L));
+        var filterIdMap = new FilteredDirectIdMap(3, l -> l <=2);
+        var cursor = new NodeFilteredAdjacencyCursor(inner, filterIdMap);
+
+        cursor.init(0,0);
+        assertThat(cursor.nextVLong()).isEqualTo(1L);
+        assertThat(cursor.nextVLong()).isEqualTo(2L);
+        assertThat(cursor.nextVLong()).isEqualTo(AdjacencyCursor.NOT_FOUND);
+
+    }
+    @Test
     void shouldAdvanceWithFilter() {
         assertThat(adjacencyCursor.advance(6L)).isEqualTo(6L);
         assertThat(adjacencyCursor.advance(7L)).isEqualTo(8L);

@@ -34,7 +34,7 @@ public class TestAdjacencyCursor implements AdjacencyCursor {
 
     @Override
     public void init(long index, int degree) {
-        this.cursor = targetIds.indexOf(index);
+        this.cursor = 0;
     }
 
     @Override
