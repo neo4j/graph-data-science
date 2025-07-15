@@ -41,19 +41,17 @@ class NodeFilteredAdjacencyCursorTest {
         var innerCursor = new TestAdjacencyCursor(LongStream.range(0, 10).boxed().collect(Collectors.toList()));
         var filterIdMap = new FilteredDirectIdMap(10, l -> l % 2 == 0);
         this.adjacencyCursor = new NodeFilteredAdjacencyCursor(innerCursor, filterIdMap);
+        adjacencyCursor.init(0,0);
     }
 
     @Test
     void shouldNotStartWithNegativeValues(){
-        adjacencyCursor.init(0,0);
         assertThat(adjacencyCursor.peekVLong()).isNotEqualTo(AdjacencyCursor.NOT_FOUND);
         assertThat(adjacencyCursor.nextVLong()).isNotEqualTo(AdjacencyCursor.NOT_FOUND);
-
     }
 
     @Test
     void nextShouldApplyFiltering(){
-        adjacencyCursor.init(0,0);
         adjacencyCursor.nextVLong();
         assertThat(adjacencyCursor.peekVLong()).isEqualTo(2);
     }
