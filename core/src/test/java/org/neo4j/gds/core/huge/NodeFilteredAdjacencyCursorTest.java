@@ -86,6 +86,14 @@ class NodeFilteredAdjacencyCursorTest {
     }
 
     @Test
+    void shouldTestToInfinity(){
+        for (int i=0;i<20;++i){
+            adjacencyCursor.nextVLong();
+        }
+        assertThat(adjacencyCursor.peekVLong()).isEqualTo(AdjacencyCursor.NOT_FOUND);
+    }
+
+    @Test
     void shouldAdvanceWithFilter() {
         assertThat(adjacencyCursor.advance(6L)).isEqualTo(6L);
         assertThat(adjacencyCursor.advance(7L)).isEqualTo(8L);

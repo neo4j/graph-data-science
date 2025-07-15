@@ -54,6 +54,7 @@ public class NodeFilteredAdjacencyCursor implements AdjacencyCursor {
 
     @Override
     public boolean hasNextVLong() {
+        this.currentLongValue = AdjacencyCursor.NOT_FOUND;
         if (innerCursor.hasNextVLong()) {
             var innerNextLong = innerCursor.peekVLong();
             if (!idMap.containsRootNodeId(innerNextLong)) {
