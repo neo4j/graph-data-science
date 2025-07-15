@@ -29,18 +29,19 @@ public class NodeFilteredAdjacencyCursor implements AdjacencyCursor {
     private final AdjacencyCursor innerCursor;
     private final FilteredIdMap idMap;
 
-    private long nextLongValue;
+    private long currentLongValue;
 
     NodeFilteredAdjacencyCursor(AdjacencyCursor innerCursor, FilteredIdMap idMap) {
         this.innerCursor = innerCursor;
         this.idMap = idMap;
 
-        this.nextLongValue = -1L;
+        this.currentLongValue = -1L;
     }
 
     @Override
     public void init(long index, int degree) {
         innerCursor.init(index, degree);
+        hasNextVLong();
     }
 
     @Override
@@ -59,7 +60,7 @@ public class NodeFilteredAdjacencyCursor implements AdjacencyCursor {
                 innerCursor.nextVLong();
                 return hasNextVLong();
             }
-            this.nextLongValue = idMap.toFilteredNodeId(innerNextLong);
+            this.currentLongValue = idMap.toFilteredNodeId(innerNextLong);
             return true;
         }
         return false;
@@ -67,15 +68,17 @@ public class NodeFilteredAdjacencyCursor implements AdjacencyCursor {
 
     @Override
     public long nextVLong() {
+        var valueAtReturn = this.currentLongValue;
         if (innerCursor.hasNextVLong()) {
             innerCursor.nextVLong();
         }
-        return this.nextLongValue;
+        hasNextVLong();
+        return valueAtReturn;
     }
 
     @Override
     public long peekVLong() {
-        return this.nextLongValue;
+        return this.currentLongValue;
     }
 
     @Override
@@ -88,26 +91,26 @@ public class NodeFilteredAdjacencyCursor implements AdjacencyCursor {
 
     @Override
     public long skipUntil(long nodeId) {
-        while (nextLongValue <= nodeId) {
+        while (currentLongValue <= nodeId) {
             if (hasNextVLong()) {
                 nextVLong();
             } else {
                 return AdjacencyCursor.NOT_FOUND;
             }
         }
-        return nextLongValue;
+        return currentLongValue;
     }
 
     @Override
     public long advance(long nodeId) {
-        while (nextLongValue < nodeId) {
+        while (currentLongValue < nodeId) {
             if (hasNextVLong()) {
                 nextVLong();
             } else {
                 return AdjacencyCursor.NOT_FOUND;
             }
         }
-        return nextLongValue;
+        return currentLongValue;
     }
 
     @Override
@@ -117,7 +120,7 @@ public class NodeFilteredAdjacencyCursor implements AdjacencyCursor {
         while (hasNextVLong()) {
             nextVLong();
             if (n-- == 0) {
-                return nextLongValue;
+                return currentLongValue;
             }
         }
         return NOT_FOUND;
