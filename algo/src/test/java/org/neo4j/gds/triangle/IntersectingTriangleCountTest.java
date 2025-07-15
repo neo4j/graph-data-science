@@ -34,7 +34,6 @@ import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
