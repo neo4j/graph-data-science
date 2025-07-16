@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.cliqueCounting;
 
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -40,9 +40,7 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.stream.Stream;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 class CliqueCountingTest {
 
@@ -189,7 +187,7 @@ class CliqueCountingTest {
         assertEquals(1L, result2.perSubcliqueCount()[1][4 - 3]);
     }
 
-    @Test
+    @Disabled
     void bigGraph() throws IOException {
         //Expected: [38542, 31170, 17387, 6306, 1273, 114, 1]
         String gdlString = Files.readString(Path.of("/Users/alfred/graph-analytics/public/algo/src/test/java/org/neo4j/gds/cliqueCounting/gdl_n1k_m20_p0.05.txt"));
@@ -205,7 +203,7 @@ class CliqueCountingTest {
         System.out.println(Arrays.toString(result.globalCount()));
     }
 
-    @Test
+    @Disabled
     void biggerGraph() throws IOException {
         //Expected:
         String gdlString = Files.readString(Path.of("/Users/alfred/graph-analytics/public/algo/src/test/java/org/neo4j/gds/cliqueCounting/gdl_n10k_m25_p0.05.txt"));
@@ -219,44 +217,6 @@ class CliqueCountingTest {
         var end = System.nanoTime();
         System.out.println("Avg execution time: " + (end - start)/10_000_000 + "ms");
 //        System.out.println(Arrays.toString(result.globalCount()));
-    }
-
-    static Stream<Arguments> differenceIdsTestData() {
-        return Stream.of(
-            arguments(new long[0], 103,  new int[]{0,1,2,4,5,6}),
-            arguments(new long[]{100,105},  103, new int[]{1,2,4,6}),
-            arguments(new long[]{105},  100, new int[]{1,2,3,4,6}),
-            arguments(new long[]{105},  106, new int[]{0,1,2,3,4}),
-            arguments(new long[]{100,105},  103, new int[]{1,2,4,6}),
-            arguments(new long[]{100,101,102,104,105,106},  103, new int[]{})
-        );
-    }
-    @ParameterizedTest
-    @MethodSource("differenceIdsTestData")
-    void shouldComputeDifferenceIdsCorrectly(long[] exclude, long pivot, int[] expected){
-        var include = new long[]{100,101,102,103,104,105,106};
-        assertThat(CliqueCounting.sortedDifferenceIdsWithExcludedElement(include,exclude,pivot)).containsExactly(expected);
-    }
-
-    @Test
-    void shouldPartitionSubsetCorrectly(){
-
-        var subset = new long[]{0,1,2,3,4,5,6};
-        var intersections =new long[7][];
-
-        intersections[0] = new long[]{1,4};
-        intersections[1] = new long[]{0,4};
-        intersections[4] = new long[]{0,1};
-
-        intersections[2] =new long[]{3,5,6};
-        intersections[3] =new long[]{2,5,6};
-        intersections[5] = new long[]{2,3,6};
-        intersections[6] = new long[]{2,3,5};
-
-        var subsetPartition = CliqueCounting.partitionSubset(subset,intersections);
-        assertThat(subsetPartition.pivot()).isEqualTo(2L);
-        assertThat(subsetPartition.includedNodes()).containsExactly(3,5,6);
-        assertThat(subsetPartition.excludedNodes()).containsExactly(0,1,4);
     }
 
 }

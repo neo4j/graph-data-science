@@ -172,8 +172,6 @@ public final class CliqueCounting extends Algorithm<CliqueCountingResult> {
         }
     }
 
-
-
     private void recursiveSctCliqueCount(long[] subset, NodeStatus[] cliqueNodes, SizeFrequencies sizeFrequencies) {
         if (subset.length == 0) {
             var requiredPointer = 0;
@@ -190,10 +188,7 @@ public final class CliqueCounting extends Algorithm<CliqueCountingResult> {
             return;
         }
 
-        long[][] intersections = new long[subset.length][];
-        for (int i = 0; i < subset.length; i++) {
-            intersections[i] = neighborhoodIntersection(subset, subset[i]);
-        }
+        var intersections = computeIntersections(subset);
 
         SubsetPartition partition = partitionSubset(subset, intersections);
 
@@ -222,6 +217,14 @@ public final class CliqueCounting extends Algorithm<CliqueCountingResult> {
         }
     }
 
+    long[][] computeIntersections(long[] subset){
+        long[][] intersections = new long[subset.length][];
+        for (int i = 0; i < subset.length; i++) {
+            intersections[i] = neighborhoodIntersection(subset, subset[i]);
+        }
+        return intersections;
+
+    }
     static SubsetPartition partitionSubset(long[] subset, long[][] intersections) {
         long pivot = -1;
         int maxSize = -1;
