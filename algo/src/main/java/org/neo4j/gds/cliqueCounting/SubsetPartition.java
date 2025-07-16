@@ -19,4 +19,4 @@
  */
 package org.neo4j.gds.cliqueCounting;
 
-record SubsetPartition(long[] nsp, int[] vsIds, long pivot) { }
+record SubsetPartition(long[] includedNodes, int[] excludedNodes, long pivot) { }

@@ -201,57 +201,63 @@ public final class CliqueCounting extends Algorithm<CliqueCountingResult> {
         newCliqueNodes[cliqueNodes.length] = new NodeStatus(partition.pivot(), false);
 
         recursiveSctCliqueCount(
-            partition.nsp(),
+            partition.includedNodes(),
             newCliqueNodes,
             sizeFrequencies
         );
 
-        var vs = new long[partition.vsIds().length];
+        var vs = new long[partition.excludedNodes().length];
         for (int i = 0; i < vs.length; i++) {
-            vs[i] = subset[partition.vsIds()[i]];
+            vs[i] = subset[partition.excludedNodes()[i]];
         }
 
-        for (int i = 0; i < partition.vsIds().length; i++) {
+        for (int i = 0; i < partition.excludedNodes().length; i++) {
             newCliqueNodes = Arrays.copyOf(cliqueNodes, cliqueNodes.length+1);
             newCliqueNodes[cliqueNodes.length] = new NodeStatus(vs[i], true);
             recursiveSctCliqueCount(
-                Intersections.sortedDifference(intersections[partition.vsIds()[i]], vs, Optional.of(i)),
+                Intersections.sortedDifference(intersections[partition.excludedNodes()[i]], vs, Optional.of(i)),
                 newCliqueNodes,
                 sizeFrequencies
             );
         }
     }
 
-    public SubsetPartition partitionSubset(long[] subset, long[][] intersections) {
-        //TODO: Assure self loops are handled correctly!
+    static SubsetPartition partitionSubset(long[] subset, long[][] intersections) {
         long pivot = -1;
         int maxSize = -1;
+        int pivotId = -1;
         for(int i = 0; i < subset.length; i++) {
             if (intersections[i].length > maxSize) {
                 maxSize = intersections[i].length;
                 pivot = subset[i];
+                pivotId = i;
             }
         }
-        long[] intersection = new long[maxSize];
-        int[] differenceIds = new int[subset.length-maxSize-1];
-        int intersectionPointer = 0;
+         var differenceIds = sortedDifferenceIdsWithExcludedElement(subset,intersections[pivotId], pivot);
+        return new SubsetPartition(intersections[pivotId], differenceIds, pivot); //fixme
+    }
+
+    static int[] sortedDifferenceIdsWithExcludedElement(long[] includingSet, long[] excludingSet, long forbidden){
+        var difference = new int[includingSet.length - excludingSet.length - 1];
+        var excludingLength = excludingSet.length;
         int differencePointer = 0;
+        int j = 0;
 
-        AdjacencyCursor neighborCursor = cliqueAdjacency.createCursor(pivot);
-        var current = AdjacencyCursorUtils.peek(neighborCursor);
-
-        for (int subsetIdx = 0; subsetIdx < subset.length; subsetIdx++) {
-            var subsetNode = subset[subsetIdx];
-            current = AdjacencyCursorUtils.advance(neighborCursor, current, subsetNode);
-
-            if (subsetNode == current) {
-                intersection[intersectionPointer++] = current;
-            } else if (subsetNode != pivot) {
-                differenceIds[differencePointer++] = subsetIdx;
+        for (int i=0; i < includingSet.length;++i) {
+            var subsetNode = includingSet[i];
+            if (subsetNode == forbidden) continue;
+            boolean found = false;
+            for (;j < excludingLength && excludingSet[j] <= subsetNode; j++) {
+                if (subsetNode == excludingSet[j]) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                difference[differencePointer++] = i;
             }
         }
-
-        return new SubsetPartition(intersection, differenceIds, pivot); //fixme
+        return difference;
     }
 
     private long[] neighborhoodIntersection(long[] subset, long node) {
