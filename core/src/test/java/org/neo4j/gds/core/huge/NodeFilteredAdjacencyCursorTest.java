@@ -41,7 +41,6 @@ class NodeFilteredAdjacencyCursorTest {
         var innerCursor = new TestAdjacencyCursor(LongStream.range(0, 10).boxed().collect(Collectors.toList()));
         var filterIdMap = new FilteredDirectIdMap(10, l -> l % 2 == 0);
         this.adjacencyCursor = new NodeFilteredAdjacencyCursor(innerCursor, filterIdMap);
-        adjacencyCursor.init(0,0);
     }
 
     @Test

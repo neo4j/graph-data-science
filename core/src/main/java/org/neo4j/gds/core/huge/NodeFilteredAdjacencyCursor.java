@@ -31,11 +31,10 @@ public class NodeFilteredAdjacencyCursor implements AdjacencyCursor {
 
     private long currentLongValue;
 
-    NodeFilteredAdjacencyCursor(AdjacencyCursor innerCursor, FilteredIdMap idMap) {
+    public NodeFilteredAdjacencyCursor(AdjacencyCursor innerCursor, FilteredIdMap idMap) {
         this.innerCursor = innerCursor;
         this.idMap = idMap;
-
-        this.currentLongValue = -1L;
+        hasNextVLong();
     }
 
     @Override

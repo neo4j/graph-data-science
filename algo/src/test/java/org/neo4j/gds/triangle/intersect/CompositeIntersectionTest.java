@@ -19,19 +19,29 @@
  */
 package org.neo4j.gds.triangle.intersect;
 
+import org.apache.commons.lang3.mutable.MutableInt;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.huge.UnionGraph;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
+import org.neo4j.gds.extension.GdlExtension;
+import org.neo4j.gds.extension.GdlGraph;
+import org.neo4j.gds.extension.IdFunction;
+import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.triangle.LabelFilterChecker;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -148,5 +158,49 @@ final class CompositeIntersectionTest {
 
         return UnionGraph.of(List.of(graph1, graph2));
 
+    }
+    @GdlExtension
+    @Nested
+    class UnionGraphWithFilters {
+        @GdlGraph(idOffset = 87, orientation = Orientation.UNDIRECTED)
+        public static final String GRAPH =
+            "(:A),(:A),(:A),(:A)," +
+                "(a:B),(b:B),(c:B)," +
+                "(a)-[:R1]->(b)," +
+                "(b)-[:R]->(c)," +
+                "(c)-[:R]->(a)";
+        @Inject
+        private GraphStore graphStore;
+
+        @Inject
+        private IdFunction idFunction;
+
+        @Test
+        void testFilter() {
+            var graph = graphStore.getGraph(
+                List.of(NodeLabel.of("B")),
+                List.of(RelationshipType.of("R"), RelationshipType.of("R1")),
+                Optional.empty()
+            );
+            var maxDegree = Long.MAX_VALUE;
+            var nodeCount = graph.nodeCount();
+
+                assertThat(nodeCount).isEqualTo(3);
+                assertThat(graph.relationshipCount()).isEqualTo(6);
+
+            var intersect = new UnionGraphIntersect.NodeFilteredUnionGraphIntersectFactory().load(
+                graph,
+                maxDegree,
+                new LabelFilterChecker(Collections.emptyList(), graph::hasLabel)
+            );
+
+            var triangleCount = new MutableInt(0);
+            intersect.intersectAll(                 //triangles are found in reverse, so must change from 'a' to 'c'
+                graph.toMappedNodeId(idFunction.of("c")),
+                (nodeA, nodeB, nodeC) -> triangleCount.increment()
+            );
+
+            assertThat(triangleCount.intValue()).isEqualTo(1);
+        }
     }
 }
