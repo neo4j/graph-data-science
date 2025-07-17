@@ -22,9 +22,7 @@ package org.neo4j.gds.cliqueCounting;
 import org.neo4j.gds.cliquecounting.CliqueCountingMode;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 
-import java.math.BigInteger;
 import java.util.Arrays;
-import java.util.List;
 import java.util.stream.Stream;
 
 class SizeFrequencies {
@@ -92,76 +90,4 @@ class SizeFrequencies {
         }
     }
 
-    static class SizeFrequency {
-        BigInteger[] data;
-
-        SizeFrequency() {
-            this.data = new BigInteger[0];
-        }
-
-        public void growIfNeeded(int newLength) {
-            var oldLength = this.data.length;
-            if (oldLength < newLength) {
-                this.data = Arrays.copyOf(this.data, newLength);
-                for (int i = oldLength; i < newLength; i++) {
-                    this.data[i] = BigInteger.valueOf(0L);
-                }
-            }
-        }
-
-        protected void add(int requiredNodesCount, int optionalNodesCount) {
-            add(requiredNodesCount, optionalNodesCount, List.of(this));
-        }
-
-        protected static void add(
-            int requiredNodesCount,
-            int optionalNodesCount,
-            Iterable<SizeFrequency> sizeFrequencyRefs
-        ) {
-            {
-                //grow if needed
-                var newLength = requiredNodesCount + optionalNodesCount - 2;
-                for (SizeFrequency sizeFrequency : sizeFrequencyRefs) {
-                    sizeFrequency.growIfNeeded(newLength);
-                }
-
-                //0 optional nodes
-                BigInteger numerator = BigInteger.ONE;
-                BigInteger denominator = BigInteger.ONE;
-                var cliqueSizeIdx = requiredNodesCount - 3;
-                var count = numerator.divide(denominator);
-                if (cliqueSizeIdx >= 0) {
-                    for (SizeFrequency sizeFrequency : sizeFrequencyRefs) {
-                        sizeFrequency.data[cliqueSizeIdx] = sizeFrequency.data[cliqueSizeIdx].add(count);
-                    }
-                }
-
-                //>=1 optional node(s)
-                for (var selectedOptionalNodesCount = 1; selectedOptionalNodesCount <= optionalNodesCount; selectedOptionalNodesCount++) {
-                    numerator = numerator.multiply(BigInteger.valueOf(optionalNodesCount - selectedOptionalNodesCount + 1));
-                    denominator = denominator.multiply(BigInteger.valueOf(selectedOptionalNodesCount));
-                    cliqueSizeIdx = requiredNodesCount + selectedOptionalNodesCount - 3;
-                    if (cliqueSizeIdx < 0) {
-                        continue;
-                    }
-                    count = numerator.divide(denominator);
-                    for (SizeFrequency sizeFrequency : sizeFrequencyRefs) {
-                        //binomial(optionalNodesCount, selectedOptionalNodesCount) = numerator / denominator
-                        sizeFrequency.data[cliqueSizeIdx] = sizeFrequency.data[cliqueSizeIdx].add(count);
-                    }
-                }
-            }
-        }
-
-        protected void merge(SizeFrequency other) {
-            this.growIfNeeded(other.data.length);
-            for (int idx = 0; idx < other.data.length; idx++) {
-                data[idx] = data[idx].add(other.data[idx]);
-            }
-        }
-
-        public long[] toLongArray() {
-            return Arrays.stream(this.data).mapToLong(BigInteger::longValueExact).toArray();
-        }
-    }
 }
