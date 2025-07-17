@@ -322,6 +322,30 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
     }
 
 
+    public <RESULT> RESULT deltaSteppingWithPaths(
+        GraphName graphName,
+        AllShortestPathsDeltaMutateConfig configuration,
+        Map<String, Stream<PathUsingInternalNodeIds>> pathStore,
+        ResultBuilder<AllShortestPathsDeltaMutateConfig, PathFindingResult, RESULT, Void> resultBuilder
+    ) {
+        var sideEffect = new StorePathsSideEffect(pathStore, configuration.mutateRelationshipType());
+
+        return algorithmProcessingTemplate.processAlgorithmAndAnySideEffects(
+            Optional.empty(),
+            graphName,
+            configuration,
+            Optional.empty(),
+            Optional.empty(),
+            DeltaStepping,
+            DimensionTransformer.DISABLED,
+            estimationFacade::deltaStepping,
+            (graph, __) -> pathFindingAlgorithms.deltaStepping(graph, configuration),
+            Optional.of(sideEffect),
+            new MutateResultRenderer<>(configuration, resultBuilder)
+        );
+    }
+
+
     public <RESULT> RESULT spanningTree(
         GraphName graphName,
         SpanningTreeMutateConfig configuration,
