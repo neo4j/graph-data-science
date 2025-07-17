@@ -55,24 +55,6 @@ import static org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraWriteConfi
 
     }
 
-     static SingleTypeRelationshipsProducer fromPathToPathFindingResult(PathFindingResult result, Graph graph){
-
-         return (mutateRelationshipType, mutateProperty) -> {
-             var relationshipsBuilder = GraphFactory
-                 .initRelationshipsBuilder()
-                 .relationshipType(RelationshipType.of(mutateRelationshipType))
-                 .nodes(graph)
-                 .addPropertyConfig(GraphFactory.PropertyConfig.of(TOTAL_COST_KEY))
-                 .orientation(Orientation.NATURAL)
-                 .build();
-
-             result.forEachPath(pathResult -> relationshipsBuilder.add(0L, 0L, new double[5]));
-
-             return relationshipsBuilder.build();
-         };
-
-     }
-
     static SingleTypeRelationshipsProducer fromBellmanFordResult(BellmanFordResult bellmanFordResult,Graph graph, boolean mutateNegativeCycles){
 
         var pathFindingResult = bellmanFordResult.shortestPaths();
