@@ -40,7 +40,7 @@ public final class ConfigNodesValidations {
      * @param nodes collection of nodes to validate
      * @param parameterKey the parameter key under which the user submitted these nodes
      */
-    static void nodesNotNegative(Collection<Long> nodes, String parameterKey) {
+    public static void nodesNotNegative(Collection<Long> nodes, String parameterKey) {
         var negativeNodes = nodes.stream().filter(n -> n < 0).collect(Collectors.toList());
         if (negativeNodes.isEmpty()) return;
         throw new IllegalArgumentException(formatWithLocale(
@@ -56,7 +56,7 @@ public final class ConfigNodesValidations {
      * @param filteredNodeLabels
      * @param parameterKey the parameter key under which the user submitted these nodes
      */
-    static void nodesExistInGraph(
+    public static void nodesExistInGraph(
         GraphStore graphStore,
         Collection<NodeLabel> filteredNodeLabels,
         Collection<Long> nodes,
@@ -78,6 +78,28 @@ public final class ConfigNodesValidations {
                 parameterKey,
                 nodeLabelFilterDescription(filteredNodeLabels, graphStore),
                 missingNodes
+            ));
+        }
+    }
+
+    public static void nodeExistInGraph(
+        GraphStore graphStore,
+        Collection<NodeLabel> filteredNodeLabels,
+        long node,
+        String parameterKey
+    ) {
+        var nodeIsMissing = labelFilteredGraphNotContainsNode(
+            filteredNodeLabels,
+            graphStore.nodes(),
+            node
+        );
+
+        if (nodeIsMissing) {
+            throw new IllegalArgumentException(StringFormatting.formatWithLocale(
+                "%s node do not exist in the in-memory graph%s: %s",
+                parameterKey,
+                nodeLabelFilterDescription(filteredNodeLabels, graphStore),
+                node
             ));
         }
     }

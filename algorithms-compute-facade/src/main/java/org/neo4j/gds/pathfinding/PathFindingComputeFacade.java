@@ -32,6 +32,7 @@ import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.loading.NoAlgorithmValidation;
+import org.neo4j.gds.core.loading.SourceNodeTargetNodesGraphStoreValidation;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortResult;
 import org.neo4j.gds.paths.bellmanford.BellmanFord;
@@ -39,10 +40,14 @@ import org.neo4j.gds.paths.bellmanford.BellmanFordParameters;
 import org.neo4j.gds.paths.bellmanford.BellmanFordProgressTask;
 import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
+import org.neo4j.gds.paths.traverse.BFS;
+import org.neo4j.gds.paths.traverse.BFSProgressTask;
+import org.neo4j.gds.paths.traverse.ExitAndAggregation;
 import org.neo4j.gds.pricesteiner.PrizeSteinerTreeResult;
 import org.neo4j.gds.spanningtree.SpanningTree;
 import org.neo4j.gds.steiner.SteinerTreeResult;
 import org.neo4j.gds.termination.TerminationFlag;
+import org.neo4j.gds.traversal.TraversalParameters;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -169,8 +174,57 @@ public class PathFindingComputeFacade {
         );
     }
 
-    CompletableFuture<HugeLongArray> breadthFirstSearch() {
-        throw new RuntimeException("Not yet implemented");
+    CompletableFuture<HugeLongArray> breadthFirstSearch(
+        GraphName graphName,
+        GraphParameters graphParameters,
+        TraversalParameters parameters,
+        JobId jobId,
+        boolean logProgress
+    ) {
+        // Create ProgressTracker
+        var progressTracker = progressTrackerFactory.create(
+            BFSProgressTask.create(),
+            jobId,
+            parameters.concurrency(),
+            logProgress
+        );
+
+        // Fetch the Graph the algorithm will operate on
+        var graph = graphStoreCatalogService.fetchGraphResources(
+            graphName,
+            graphParameters,
+            Optional.empty(),
+            new SourceNodeTargetNodesGraphStoreValidation(
+                parameters.sourceNode(),
+                parameters.targetNodes()
+            ),
+            Optional.empty(),
+            Optional.empty(),
+            user,
+            databaseId
+        ).graph();
+
+        // Create the algorithm
+        var exitAndAggregationConditions = ExitAndAggregation.create(graph, parameters);
+        var mappedStartNodeId = graph.toMappedNodeId(parameters.sourceNode());
+
+        var bfs = BFS.create(
+            graph,
+            mappedStartNodeId,
+            exitAndAggregationConditions.exitFunction(),
+            exitAndAggregationConditions.aggregatorFunction(),
+            parameters.maxDepth(),
+            executorService,
+            parameters.concurrency(),
+            progressTracker,
+            terminationFlag
+        );
+
+        // Submit the algorithm for async computation
+        return algorithmCaller.run(
+            bfs::compute,
+            jobId
+        );
     }
 
     CompletableFuture<PathFindingResult> deltaStepping() {

@@ -50,6 +50,7 @@ import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.paths.bellmanford.BellmanFordParameters;
 import org.neo4j.gds.termination.TerminationFlag;
+import org.neo4j.gds.traversal.TraversalParameters;
 
 import java.util.List;
 import java.util.Optional;
@@ -69,6 +70,13 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 @GdlExtension
 class PathFindingComputeFacadeTest {
+
+    private static final GraphParameters GRAPH_PARAMETERS = new GraphParameters(
+        List.of(NodeLabel.of("Node")),
+        List.of(RelationshipType.of("REL")),
+        true,
+        Optional.empty()
+    );
 
     @Mock
     private GraphStoreCatalogService catalogServiceMock;
@@ -118,16 +126,9 @@ class PathFindingComputeFacadeTest {
             progressTrackerFactoryMock
         );
 
-        var graphParameters = new GraphParameters(
-            List.of(NodeLabel.of("Node")),
-            List.of(RelationshipType.of("REL")),
-            true,
-            Optional.empty()
-        );
-
         var future = facade.allShortestPaths(
             new GraphName("foo"),
-            graphParameters,
+            GRAPH_PARAMETERS,
             Optional.empty(),
             new AllShortestPathsParameters(new Concurrency(4), false),
             mock(JobId.class)
@@ -161,16 +162,9 @@ class PathFindingComputeFacadeTest {
             progressTrackerFactoryMock
         );
 
-        var graphParameters = new GraphParameters(
-            List.of(NodeLabel.of("Node")),
-            List.of(RelationshipType.of("REL")),
-            true,
-            Optional.empty()
-        );
-
         var future = facade.bellmanFord(
             new GraphName("foo"),
-            graphParameters,
+            GRAPH_PARAMETERS,
             Optional.empty(),
             new BellmanFordParameters(
                 idFunction.of("a"),
@@ -188,6 +182,40 @@ class PathFindingComputeFacadeTest {
         verify(progressTrackerFactoryMock, times(1))
             .create(isA(IterativeTask.class), eq(jobIdMock), eq(new Concurrency(4)), eq(false));
         verifyNoMoreInteractions(progressTrackerFactoryMock);
+    }
+
+
+    @Test
+    void breadthFirstSearch() {
+
+        var algorithmCaller = new AsyncAlgorithmCaller(Executors.newSingleThreadExecutor(), mock(Log.class));
+        var progressTrackerFactoryMock = mock(ProgressTrackerFactory.class);
+        when(progressTrackerFactoryMock.create(any(), any(), any(), anyBoolean()))
+            .thenReturn(ProgressTracker.NULL_TRACKER);
+
+        var facade = new PathFindingComputeFacade(
+            catalogServiceMock,
+            algorithmCaller,
+            mock(User.class),
+            DatabaseId.DEFAULT,
+            DefaultPool.INSTANCE,
+            TerminationFlag.RUNNING_TRUE,
+            progressTrackerFactoryMock
+        );
+
+        var future = facade.breadthFirstSearch(
+            new GraphName("foo"),
+            GRAPH_PARAMETERS,
+            new TraversalParameters(
+                idFunction.of("a"),
+                List.of(idFunction.of("c")),
+                3L,
+                new Concurrency(2)
+            ),
+            mock(JobId.class),
+            false
+        );
+        assertThat(future.join()).isNotNull();
     }
 
 }
