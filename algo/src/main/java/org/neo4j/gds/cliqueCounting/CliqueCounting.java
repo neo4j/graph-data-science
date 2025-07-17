@@ -31,6 +31,7 @@ import org.neo4j.gds.cliquecounting.CliqueCountingParameters;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
+import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.Intersections;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.termination.TerminationFlag;
@@ -127,25 +128,24 @@ public final class CliqueCounting extends Algorithm<CliqueCountingResult> {
     public CliqueCountingResult compute() {
         progressTracker.beginSubTask();
 
-        final Collection<? extends Runnable> tasks =
-            countingMode == CliqueCountingMode.ForGivenSubcliques ?
-                ParallelUtil.tasks(
-                    concurrency,
-                    () -> new SubcliqueCliqueCountingTask(graph.concurrentCopy())
-                ) :
-                ParallelUtil.tasks(
-                    concurrency,
-                    () -> new GlobalCliqueCountingTask(graph.concurrentCopy(), cliqueCountsHandler.takeOrCreate())
-                );
+        var tasks = createTasks();
+        RunWithConcurrency
+            .builder()
+            .tasks(tasks)
+            .concurrency(concurrency)
+            .executor(executorService)
+            .run();
 
-        ParallelUtil.run(tasks, executorService);
         progressTracker.endSubTask();
 
+      return createResult();
+    }
+
+    CliqueCountingResult createResult(){
         switch (countingMode) {
             case GloballyOnly -> {
                 var globalCount = cliqueCountsHandler.merge().globalCount.toLongArray();
                 return new CliqueCountingResult(
-//                    cliqueCountsHandler.merge().globalCount.toLongArray(),
                     globalCount,
                     HugeObjectArray.of(),
                     new long[0][0]
@@ -170,6 +170,19 @@ public final class CliqueCounting extends Algorithm<CliqueCountingResult> {
             }
             default -> throw new IllegalStateException("Unexpected value: " + countingMode);
         }
+    }
+
+    private  Collection<? extends Runnable> createTasks(){
+        return countingMode == CliqueCountingMode.ForGivenSubcliques ?
+            ParallelUtil.tasks(
+                concurrency,
+                () -> new SubcliqueCliqueCountingTask(graph.concurrentCopy())
+            ) :
+            ParallelUtil.tasks(
+                concurrency,
+                () -> new GlobalCliqueCountingTask(graph.concurrentCopy(), cliqueCountsHandler.takeOrCreate())
+            );
+
     }
 
     private void recursiveSctCliqueCount(long[] subset, NodeStatus[] cliqueNodes, SizeFrequencies sizeFrequencies) {
@@ -306,11 +319,6 @@ public final class CliqueCounting extends Algorithm<CliqueCountingResult> {
                     System.out.println("Processing root node: " + rootNode + "/" + nodeCount + ". With positive neighborhood: " + Arrays.toString(
                         positiveNeighborhood));
                 }
-//                long[][] feasibleNeighborhoods = Arrays
-//                    .stream(positiveNeighborhood)
-//                    .mapToObj(node -> graph.streamRelationships(node, -1).mapToLong(RelationshipCursor::targetId).sorted().distinct().toArray())
-//                    .toArray(long[][]::new);
-//                recursiveSctCliqueCount(positiveNeighborhood, feasibleNeighborhoods, cliqueNodes, sizeFrequencies);
                 recursiveSctCliqueCount(positiveNeighborhood, cliqueNodes, sizeFrequencies);
 
             }
