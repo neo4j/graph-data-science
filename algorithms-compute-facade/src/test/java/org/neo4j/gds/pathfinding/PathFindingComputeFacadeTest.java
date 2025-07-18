@@ -250,4 +250,36 @@ class PathFindingComputeFacadeTest {
         assertThat(future.join()).isNotNull();
     }
 
+    @Test
+    void depthFirstSearch() {
+        var algorithmCaller = new AsyncAlgorithmCaller(Executors.newSingleThreadExecutor(), mock(Log.class));
+        var progressTrackerFactoryMock = mock(ProgressTrackerFactory.class);
+        when(progressTrackerFactoryMock.create(any(), any(), any(), anyBoolean()))
+            .thenReturn(mock(org.neo4j.gds.core.utils.progress.tasks.ProgressTracker.class));
+
+        var facade = new PathFindingComputeFacade(
+            catalogServiceMock,
+            algorithmCaller,
+            mock(User.class),
+            DatabaseId.DEFAULT,
+            DefaultPool.INSTANCE,
+            TerminationFlag.RUNNING_TRUE,
+            progressTrackerFactoryMock
+        );
+
+        var future = facade.depthFirstSearch(
+            new GraphName("foo"),
+            GRAPH_PARAMETERS,
+            new TraversalParameters(
+                idFunction.of("a"),
+                List.of(idFunction.of("c")),
+                3L,
+                new Concurrency(2)
+            ),
+            mock(JobId.class),
+            false
+        );
+        assertThat(future.join()).isNotNull();
+    }
+
 }

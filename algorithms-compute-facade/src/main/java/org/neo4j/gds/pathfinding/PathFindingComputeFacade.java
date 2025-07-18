@@ -46,6 +46,8 @@ import org.neo4j.gds.paths.delta.DeltaSteppingProgressTask;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.paths.traverse.BFS;
 import org.neo4j.gds.paths.traverse.BFSProgressTask;
+import org.neo4j.gds.paths.traverse.DFS;
+import org.neo4j.gds.paths.traverse.DFSProgressTask;
 import org.neo4j.gds.paths.traverse.ExitAndAggregation;
 import org.neo4j.gds.pricesteiner.PrizeSteinerTreeResult;
 import org.neo4j.gds.spanningtree.SpanningTree;
@@ -270,13 +272,56 @@ public class PathFindingComputeFacade {
         );
     }
 
-    CompletableFuture<HugeLongArray> depthFirstSearch() {
-        // Create ProgressTracker
-        // Fetch the Graph the algorithm will operate on
-        // Create the algorithm
-        // Submit the algorithm for async computation
+    CompletableFuture<HugeLongArray> depthFirstSearch(
+        GraphName graphName,
+        GraphParameters graphParameters,
+        TraversalParameters parameters,
+        JobId jobId,
+        boolean logProgress
 
-        return CompletableFuture.failedFuture(new RuntimeException("Not yet implemented"));
+    ) {
+        // Create ProgressTracker
+        var progressTracker = progressTrackerFactory.create(
+            DFSProgressTask.create(),
+            jobId,
+            parameters.concurrency(),
+            logProgress
+        );
+
+        // Fetch the Graph the algorithm will operate on
+        var graph = graphStoreCatalogService.fetchGraphResources(
+            graphName,
+            graphParameters,
+            Optional.empty(),
+            new SourceNodeTargetNodesGraphStoreValidation(
+                parameters.sourceNode(),
+                parameters.targetNodes()
+            ),
+            Optional.empty(),
+            Optional.empty(),
+            user,
+            databaseId
+        ).graph();
+
+        // Create the algorithm
+        var exitAndAggregationConditions = ExitAndAggregation.create(graph, parameters);
+        var mappedStartNodeId = graph.toMappedNodeId(parameters.sourceNode());
+
+        var dfs = new DFS(
+            graph,
+            mappedStartNodeId,
+            exitAndAggregationConditions.exitFunction(),
+            exitAndAggregationConditions.aggregatorFunction(),
+            parameters.maxDepth(),
+            progressTracker,
+            terminationFlag
+        );
+
+        // Submit the algorithm for async computation
+        return algorithmCaller.run(
+            dfs::compute,
+            jobId
+        );
     }
 
     CompletableFuture<SpanningTree> kSpanningTree() {
