@@ -36,6 +36,10 @@ import org.neo4j.gds.core.loading.validation.SourceNodeGraphStoreValidation;
 import org.neo4j.gds.core.loading.validation.SourceNodeTargetNodesGraphStoreValidation;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortResult;
+import org.neo4j.gds.kspanningtree.KSpanningTree;
+import org.neo4j.gds.kspanningtree.KSpanningTreeParameters;
+import org.neo4j.gds.kspanningtree.KSpanningTreeTask;
+import org.neo4j.gds.pathfinding.validation.KSpanningTreeGraphStoreValidation;
 import org.neo4j.gds.paths.bellmanford.BellmanFord;
 import org.neo4j.gds.paths.bellmanford.BellmanFordParameters;
 import org.neo4j.gds.paths.bellmanford.BellmanFordProgressTask;
@@ -324,13 +328,48 @@ public class PathFindingComputeFacade {
         );
     }
 
-    CompletableFuture<SpanningTree> kSpanningTree() {
-        // Create ProgressTracker
+    CompletableFuture<SpanningTree> kSpanningTree(
+        GraphName graphName,
+        GraphParameters graphParameters,
+        Optional<String> relationshipProperty,
+        KSpanningTreeParameters parameters,
+        JobId jobId, boolean logProgress
+    ) {
         // Fetch the Graph the algorithm will operate on
-        // Create the algorithm
-        // Submit the algorithm for async computation
+        var graph = graphStoreCatalogService.fetchGraphResources(
+            graphName,
+            graphParameters,
+            relationshipProperty,
+            new KSpanningTreeGraphStoreValidation(parameters.sourceNode()),
+            Optional.empty(),
+            Optional.empty(),
+            user,
+            databaseId
+        ).graph();
 
-        return CompletableFuture.failedFuture(new RuntimeException("Not yet implemented"));
+        // Create ProgressTracker
+        var progressTracker = progressTrackerFactory.create(
+            KSpanningTreeTask.create(graph.relationshipCount()),
+            jobId,
+            parameters.concurrency(),
+            logProgress
+        );
+
+        // Create the algorithm
+        var kSpanningTree = new KSpanningTree(
+            graph,
+            parameters.objective(),
+            graph.toMappedNodeId(parameters.sourceNode()),
+            parameters.k(),
+            progressTracker,
+            terminationFlag
+        );
+
+        // Submit the algorithm for async computation
+        return algorithmCaller.run(
+            kSpanningTree::compute,
+            jobId
+        );
     }
 
     CompletableFuture<PathFindingResult> longestPath() {

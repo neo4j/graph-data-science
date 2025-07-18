@@ -40,7 +40,7 @@ public class SourceNodeGraphStoreValidation extends GraphStoreValidation {
     }
 
     @Override
-    protected void validateAlgorithmRequirements(
+    public void validateAlgorithmRequirements(
         GraphStore graphStore,
         Collection<NodeLabel> selectedLabels,
         Collection<RelationshipType> selectedRelationshipTypes
