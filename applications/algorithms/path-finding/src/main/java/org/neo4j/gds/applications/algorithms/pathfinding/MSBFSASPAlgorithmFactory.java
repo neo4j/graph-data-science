@@ -42,7 +42,7 @@ public final class MSBFSASPAlgorithmFactory {
         if (parameters.hasRelationshipWeightProperty()) {
             // TODO: do we need this check,
             //  this should be handled by the relationship property validation
-            //  see `org.neo4j.gds.core.loading.GraphStoreValidation.validateRelationshipProperty`
+            //  see `org.neo4j.gds.core.loading.validation.GraphStoreValidation.validateRelationshipProperty`
             if (!graph.hasRelationshipProperty()) {
                 throw new IllegalArgumentException(
                     "WeightedAllShortestPaths is not supported on graphs without a weight property");

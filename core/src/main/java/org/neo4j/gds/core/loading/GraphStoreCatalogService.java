@@ -30,6 +30,7 @@ import org.neo4j.gds.api.User;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.loading.GraphStoreCatalog.GraphStoreCatalogEntryWithUsername;
+import org.neo4j.gds.core.loading.validation.GraphStoreValidation;
 
 import java.util.Collection;
 import java.util.Map;
@@ -73,7 +74,7 @@ public class GraphStoreCatalogService {
     /**
      * Load GraphStore and graph, with copious validation.
      *
-     * @deprecated use the overload instead {@link #getGraphResources(org.neo4j.gds.api.GraphName, java.util.Collection, java.util.Collection, boolean, java.util.Optional, org.neo4j.gds.core.loading.GraphStoreValidation, java.util.Optional, java.util.Optional, org.neo4j.gds.api.User, java.util.Optional, org.neo4j.gds.api.DatabaseId)}
+     * @deprecated use the overload instead {@link #getGraphResources(org.neo4j.gds.api.GraphName, java.util.Collection, java.util.Collection, boolean, java.util.Optional, org.neo4j.gds.core.loading.validation.GraphStoreValidation, java.util.Optional, java.util.Optional, org.neo4j.gds.api.User, java.util.Optional, org.neo4j.gds.api.DatabaseId)}
      */
     @Deprecated(forRemoval = true, since = "2.20.0")
     public GraphResources getGraphResources(

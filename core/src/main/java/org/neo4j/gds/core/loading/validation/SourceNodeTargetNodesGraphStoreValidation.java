@@ -17,33 +17,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.loading;
+package org.neo4j.gds.core.loading.validation;
 
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.config.ConfigNodesValidations;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
-
-import static org.neo4j.gds.config.ConfigNodesValidations.nodesNotNegative;
 
 public class SourceNodeTargetNodesGraphStoreValidation extends GraphStoreValidation {
 
-    private static final String SOURCE_NODE_KEY = "sourceNode";
-    private static final String TARGET_NODES_KEY = "targetNodes";
-
-    private final long sourceNode;
-    private final List<Long> targetNodes;
+    private final SourceNodeGraphStoreValidation sourceNodeValidation;
+    private final TargetNodesGraphStoreValidation targetNodesValidation;
 
     public SourceNodeTargetNodesGraphStoreValidation(
         long sourceNode,
         List<Long> targetNodes
     ) {
-        this.sourceNode = sourceNode;
-        this.targetNodes = targetNodes;
+        this.sourceNodeValidation = new SourceNodeGraphStoreValidation(sourceNode);
+        this.targetNodesValidation = new TargetNodesGraphStoreValidation(targetNodes);
     }
 
     @Override
@@ -52,24 +45,11 @@ public class SourceNodeTargetNodesGraphStoreValidation extends GraphStoreValidat
         Collection<NodeLabel> selectedLabels,
         Collection<RelationshipType> selectedRelationshipTypes
     ) {
-        nodesNotNegative(Set.of(sourceNode), SOURCE_NODE_KEY);
-        nodesNotNegative(targetNodes, TARGET_NODES_KEY);
-
         // validate the source node
-        ConfigNodesValidations.nodeExistInGraph(
-            graphStore,
-            selectedLabels,
-            sourceNode,
-            SOURCE_NODE_KEY
-        );
+        sourceNodeValidation.validateAlgorithmRequirements(graphStore, selectedLabels, selectedRelationshipTypes);
 
         // validate the target nodes
-        ConfigNodesValidations.nodesExistInGraph(
-            graphStore,
-            selectedLabels,
-            targetNodes,
-            TARGET_NODES_KEY
-        );
+        targetNodesValidation.validateAlgorithmRequirements(graphStore, selectedLabels, selectedRelationshipTypes);
     }
 
 }

@@ -17,21 +17,40 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.loading;
+package org.neo4j.gds.core.loading.validation;
 
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.config.ConfigNodesValidations;
 
 import java.util.Collection;
 
-public class NoAlgorithmValidation extends GraphStoreValidation {
+import static org.neo4j.gds.config.ConfigNodesValidations.nodesNotNegative;
+
+public class TargetNodesGraphStoreValidation extends GraphStoreValidation {
+
+    private static final String TARGET_NODES_KEY = "targetNodes";
+
+    private final Collection<Long> targetNodes;
+
+    public TargetNodesGraphStoreValidation(Collection<Long> targetNodes) {
+        this.targetNodes = targetNodes;
+    }
+
     @Override
     protected void validateAlgorithmRequirements(
         GraphStore graphStore,
         Collection<NodeLabel> selectedLabels,
         Collection<RelationshipType> selectedRelationshipTypes
     ) {
-        // NOOP
+        nodesNotNegative(targetNodes, TARGET_NODES_KEY);
+        ConfigNodesValidations.nodesExistInGraph(
+            graphStore,
+            selectedLabels,
+            targetNodes,
+            TARGET_NODES_KEY
+        );
     }
+
 }

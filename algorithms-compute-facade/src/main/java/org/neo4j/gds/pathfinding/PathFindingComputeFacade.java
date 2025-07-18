@@ -31,14 +31,18 @@ import org.neo4j.gds.async.AsyncAlgorithmCaller;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
-import org.neo4j.gds.core.loading.NoAlgorithmValidation;
-import org.neo4j.gds.core.loading.SourceNodeTargetNodesGraphStoreValidation;
+import org.neo4j.gds.core.loading.validation.NoAlgorithmValidation;
+import org.neo4j.gds.core.loading.validation.SourceNodeGraphStoreValidation;
+import org.neo4j.gds.core.loading.validation.SourceNodeTargetNodesGraphStoreValidation;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortResult;
 import org.neo4j.gds.paths.bellmanford.BellmanFord;
 import org.neo4j.gds.paths.bellmanford.BellmanFordParameters;
 import org.neo4j.gds.paths.bellmanford.BellmanFordProgressTask;
 import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
+import org.neo4j.gds.paths.delta.DeltaStepping;
+import org.neo4j.gds.paths.delta.DeltaSteppingParameters;
+import org.neo4j.gds.paths.delta.DeltaSteppingProgressTask;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.paths.traverse.BFS;
 import org.neo4j.gds.paths.traverse.BFSProgressTask;
@@ -227,13 +231,43 @@ public class PathFindingComputeFacade {
         );
     }
 
-    CompletableFuture<PathFindingResult> deltaStepping() {
+    CompletableFuture<PathFindingResult> deltaStepping(
+        GraphName graphName,
+        GraphParameters graphParameters,
+        Optional<String> relationshipProperty,
+        DeltaSteppingParameters parameters,
+        JobId jobId,
+        boolean logProgress
+    ) {
         // Create ProgressTracker
+        var progressTracker = progressTrackerFactory.create(
+            DeltaSteppingProgressTask.create(),
+            jobId,
+            parameters.concurrency(),
+            logProgress
+        );
+
         // Fetch the Graph the algorithm will operate on
+        var graph = graphStoreCatalogService.fetchGraphResources(
+            graphName,
+            graphParameters,
+            relationshipProperty,
+            new SourceNodeGraphStoreValidation(parameters.sourceNode()),
+            Optional.empty(),
+            Optional.empty(),
+            user,
+            databaseId
+        ).graph();
+
         // Create the algorithm
+        var deltaStepping = DeltaStepping.of(graph, parameters, executorService, progressTracker);
+
         // Submit the algorithm for async computation
 
-        return CompletableFuture.failedFuture(new RuntimeException("Not yet implemented"));
+        return algorithmCaller.run(
+            deltaStepping::compute,
+            jobId
+        );
     }
 
     CompletableFuture<HugeLongArray> depthFirstSearch() {

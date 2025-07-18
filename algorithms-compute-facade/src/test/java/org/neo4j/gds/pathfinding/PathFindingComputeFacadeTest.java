@@ -49,6 +49,7 @@ import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.paths.bellmanford.BellmanFordParameters;
+import org.neo4j.gds.paths.delta.DeltaSteppingParameters;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.traversal.TraversalParameters;
 
@@ -210,6 +211,37 @@ class PathFindingComputeFacadeTest {
                 idFunction.of("a"),
                 List.of(idFunction.of("c")),
                 3L,
+                new Concurrency(2)
+            ),
+            mock(JobId.class),
+            false
+        );
+        assertThat(future.join()).isNotNull();
+    }
+
+    @Test
+    void deltaStepping() {
+        var algorithmCaller = new AsyncAlgorithmCaller(Executors.newSingleThreadExecutor(), mock(Log.class));
+        var progressTrackerFactoryMock = mock(ProgressTrackerFactory.class);
+        when(progressTrackerFactoryMock.create(any(), any(), any(), anyBoolean()))
+            .thenReturn(ProgressTracker.NULL_TRACKER);
+
+        var facade = new PathFindingComputeFacade(
+            catalogServiceMock,
+            algorithmCaller,
+            mock(User.class),
+            DatabaseId.DEFAULT,
+            DefaultPool.INSTANCE,
+            TerminationFlag.RUNNING_TRUE,
+            progressTrackerFactoryMock
+        );
+
+        var future = facade.deltaStepping(
+            new GraphName("foo"),
+            GRAPH_PARAMETERS,
+            Optional.empty(),
+            DeltaSteppingParameters.withDefaultDelta(
+                idFunction.of("a"),
                 new Concurrency(2)
             ),
             mock(JobId.class),
