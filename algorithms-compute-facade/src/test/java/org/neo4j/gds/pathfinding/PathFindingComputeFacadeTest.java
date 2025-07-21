@@ -74,15 +74,24 @@ import static org.mockito.Mockito.when;
 @GdlExtension
 class PathFindingComputeFacadeTest {
 
-    private static final GraphParameters GRAPH_PARAMETERS = new GraphParameters(
-        List.of(NodeLabel.of("Node")),
-        List.of(RelationshipType.of("REL")),
-        true,
-        Optional.empty()
-    );
-
     @Mock
     private GraphStoreCatalogService catalogServiceMock;
+
+    @Mock(strictness = Mock.Strictness.LENIENT)
+    private ProgressTrackerFactory progressTrackerFactoryMock;
+    @Mock
+    private ProgressTracker progressTrackerMock;
+
+    @Mock
+    private JobId jobIdMock;
+
+    @Mock
+    private User userMock;
+
+    @Mock
+    private Log logMock;
+
+    private AsyncAlgorithmCaller algorithmCaller;
 
     @GdlGraph
     private static final String GDL = """
@@ -99,30 +108,24 @@ class PathFindingComputeFacadeTest {
 
     @BeforeEach
     void setUp() {
-        when(catalogServiceMock.fetchGraphResources(
-            any(),
-            any(),
-            any(),
-            any(),
-            any(),
-            any(),
-            any(),
-            any()
-        )).thenReturn(new GraphResources(mock(GraphStore.class), graph, mock(ResultStore.class)));
+        when(catalogServiceMock.fetchGraphResources(any(), any(), any(), any(), any(), any(), any(), any()))
+            .thenReturn(new GraphResources(mock(GraphStore.class), graph, mock(ResultStore.class)));
+
+        algorithmCaller = new AsyncAlgorithmCaller(Executors.newSingleThreadExecutor(), logMock);
+
+        when(progressTrackerFactoryMock.nullTracker())
+            .thenReturn(ProgressTracker.NULL_TRACKER);
+        when(progressTrackerFactoryMock.create(any(), any(), any(), anyBoolean()))
+            .thenReturn(progressTrackerMock);
+
     }
 
     @Test
     void allShortestPaths() {
-
-        var algorithmCaller = new AsyncAlgorithmCaller(Executors.newSingleThreadExecutor(), mock(Log.class));
-
-        var progressTrackerFactoryMock = mock(ProgressTrackerFactory.class);
-        when(progressTrackerFactoryMock.nullTracker()).thenReturn(ProgressTracker.NULL_TRACKER);
-
         var facade = new PathFindingComputeFacade(
             catalogServiceMock,
             algorithmCaller,
-            mock(User.class),
+            userMock,
             DatabaseId.DEFAULT,
             DefaultPool.INSTANCE,
             TerminationFlag.RUNNING_TRUE,
@@ -131,10 +134,15 @@ class PathFindingComputeFacadeTest {
 
         var future = facade.allShortestPaths(
             new GraphName("foo"),
-            GRAPH_PARAMETERS,
+            new GraphParameters(
+                List.of(NodeLabel.of("Node")),
+                List.of(RelationshipType.of("REL")),
+                true,
+                Optional.empty()
+            ),
             Optional.empty(),
             new AllShortestPathsParameters(new Concurrency(4), false),
-            mock(JobId.class)
+            jobIdMock
         );
 
         var results = future.join();
@@ -148,17 +156,10 @@ class PathFindingComputeFacadeTest {
 
     @Test
     void bellmanFord() {
-        var jobIdMock = mock(JobId.class);
-        var algorithmCaller = new AsyncAlgorithmCaller(Executors.newSingleThreadExecutor(), mock(Log.class));
-
-        var progressTrackerFactoryMock = mock(ProgressTrackerFactory.class);
-        when(progressTrackerFactoryMock.create(any(), any(), any(), anyBoolean()))
-            .thenReturn(ProgressTracker.NULL_TRACKER);
-
         var facade = new PathFindingComputeFacade(
             catalogServiceMock,
             algorithmCaller,
-            mock(User.class),
+            userMock,
             DatabaseId.DEFAULT,
             DefaultPool.INSTANCE,
             TerminationFlag.RUNNING_TRUE,
@@ -167,7 +168,12 @@ class PathFindingComputeFacadeTest {
 
         var future = facade.bellmanFord(
             new GraphName("foo"),
-            GRAPH_PARAMETERS,
+            new GraphParameters(
+                List.of(NodeLabel.of("Node")),
+                List.of(RelationshipType.of("REL")),
+                true,
+                Optional.empty()
+            ),
             Optional.empty(),
             new BellmanFordParameters(
                 idFunction.of("a"),
@@ -190,16 +196,10 @@ class PathFindingComputeFacadeTest {
 
     @Test
     void breadthFirstSearch() {
-
-        var algorithmCaller = new AsyncAlgorithmCaller(Executors.newSingleThreadExecutor(), mock(Log.class));
-        var progressTrackerFactoryMock = mock(ProgressTrackerFactory.class);
-        when(progressTrackerFactoryMock.create(any(), any(), any(), anyBoolean()))
-            .thenReturn(ProgressTracker.NULL_TRACKER);
-
         var facade = new PathFindingComputeFacade(
             catalogServiceMock,
             algorithmCaller,
-            mock(User.class),
+            userMock,
             DatabaseId.DEFAULT,
             DefaultPool.INSTANCE,
             TerminationFlag.RUNNING_TRUE,
@@ -208,14 +208,19 @@ class PathFindingComputeFacadeTest {
 
         var future = facade.breadthFirstSearch(
             new GraphName("foo"),
-            GRAPH_PARAMETERS,
+            new GraphParameters(
+                List.of(NodeLabel.of("Node")),
+                List.of(RelationshipType.of("REL")),
+                true,
+                Optional.empty()
+            ),
             new TraversalParameters(
                 idFunction.of("a"),
                 List.of(idFunction.of("c")),
                 3L,
                 new Concurrency(2)
             ),
-            mock(JobId.class),
+            jobIdMock,
             false
         );
         assertThat(future.join()).isNotNull();
@@ -223,15 +228,10 @@ class PathFindingComputeFacadeTest {
 
     @Test
     void deltaStepping() {
-        var algorithmCaller = new AsyncAlgorithmCaller(Executors.newSingleThreadExecutor(), mock(Log.class));
-        var progressTrackerFactoryMock = mock(ProgressTrackerFactory.class);
-        when(progressTrackerFactoryMock.create(any(), any(), any(), anyBoolean()))
-            .thenReturn(ProgressTracker.NULL_TRACKER);
-
         var facade = new PathFindingComputeFacade(
             catalogServiceMock,
             algorithmCaller,
-            mock(User.class),
+            userMock,
             DatabaseId.DEFAULT,
             DefaultPool.INSTANCE,
             TerminationFlag.RUNNING_TRUE,
@@ -240,13 +240,18 @@ class PathFindingComputeFacadeTest {
 
         var future = facade.deltaStepping(
             new GraphName("foo"),
-            GRAPH_PARAMETERS,
+            new GraphParameters(
+                List.of(NodeLabel.of("Node")),
+                List.of(RelationshipType.of("REL")),
+                true,
+                Optional.empty()
+            ),
             Optional.empty(),
             DeltaSteppingParameters.withDefaultDelta(
                 idFunction.of("a"),
                 new Concurrency(2)
             ),
-            mock(JobId.class),
+            jobIdMock,
             false
         );
         assertThat(future.join()).isNotNull();
@@ -254,15 +259,10 @@ class PathFindingComputeFacadeTest {
 
     @Test
     void depthFirstSearch() {
-        var algorithmCaller = new AsyncAlgorithmCaller(Executors.newSingleThreadExecutor(), mock(Log.class));
-        var progressTrackerFactoryMock = mock(ProgressTrackerFactory.class);
-        when(progressTrackerFactoryMock.create(any(), any(), any(), anyBoolean()))
-            .thenReturn(mock(org.neo4j.gds.core.utils.progress.tasks.ProgressTracker.class));
-
         var facade = new PathFindingComputeFacade(
             catalogServiceMock,
             algorithmCaller,
-            mock(User.class),
+            userMock,
             DatabaseId.DEFAULT,
             DefaultPool.INSTANCE,
             TerminationFlag.RUNNING_TRUE,
@@ -271,14 +271,19 @@ class PathFindingComputeFacadeTest {
 
         var future = facade.depthFirstSearch(
             new GraphName("foo"),
-            GRAPH_PARAMETERS,
+            new GraphParameters(
+                List.of(NodeLabel.of("Node")),
+                List.of(RelationshipType.of("REL")),
+                true,
+                Optional.empty()
+            ),
             new TraversalParameters(
                 idFunction.of("a"),
                 List.of(idFunction.of("c")),
                 3L,
                 new Concurrency(2)
             ),
-            mock(JobId.class),
+            jobIdMock,
             false
         );
         assertThat(future.join()).isNotNull();
@@ -286,16 +291,10 @@ class PathFindingComputeFacadeTest {
 
     @Test
     void kSpanningTree() {
-
-        var algorithmCaller = new AsyncAlgorithmCaller(Executors.newSingleThreadExecutor(), mock(Log.class));
-        var progressTrackerFactoryMock = mock(ProgressTrackerFactory.class);
-        when(progressTrackerFactoryMock.create(any(), any(), any(), anyBoolean()))
-            .thenReturn(mock(org.neo4j.gds.core.utils.progress.tasks.ProgressTracker.class));
-
         var facade = new PathFindingComputeFacade(
             catalogServiceMock,
             algorithmCaller,
-            mock(User.class),
+            userMock,
             DatabaseId.DEFAULT,
             DefaultPool.INSTANCE,
             TerminationFlag.RUNNING_TRUE,
@@ -304,7 +303,12 @@ class PathFindingComputeFacadeTest {
 
         var future = facade.kSpanningTree(
             new GraphName("foo"),
-            GRAPH_PARAMETERS,
+            new GraphParameters(
+                List.of(NodeLabel.of("Node")),
+                List.of(RelationshipType.of("REL")),
+                true,
+                Optional.empty()
+            ),
             Optional.empty(),
             new KSpanningTreeParameters(
                 PrimOperators.MIN_OPERATOR,
@@ -312,7 +316,7 @@ class PathFindingComputeFacadeTest {
                 2L,
                 new Concurrency(2)
             ),
-            mock(JobId.class),
+            jobIdMock,
             false
         );
         assertThat(future.join()).isNotNull();
