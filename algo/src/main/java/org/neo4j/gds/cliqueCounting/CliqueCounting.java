@@ -23,7 +23,6 @@ import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.AdjacencyCursor;
 import org.neo4j.gds.api.AdjacencyCursorUtils;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.properties.relationships.RelationshipCursor;
 import org.neo4j.gds.cliqueCounting.intersect.CliqueAdjacency;
 import org.neo4j.gds.cliqueCounting.intersect.CliqueAdjacencyFactory;
 import org.neo4j.gds.cliquecounting.CliqueCountingMode;
@@ -36,6 +35,7 @@ import org.neo4j.gds.core.utils.Intersections;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.termination.TerminationFlag;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Optional;
@@ -122,6 +122,25 @@ public final class CliqueCounting extends Algorithm<CliqueCountingResult> {
             cliqueCountsHandler
         );
     }
+
+    long[] rootNodeNeighbors(long rootNode, boolean filter){
+        ArrayList<Long> neighbors =new ArrayList<>();
+        var lastEntered = -1L;
+        var cursor  = cliqueAdjacency.createCursor(rootNode);
+        while (cursor.hasNextVLong()){
+            var  nodeId  =  cursor.nextVLong();
+            if (nodeId != NOT_FOUND && nodeId!=lastEntered){
+                boolean should = !filter || (nodeId > rootNode);
+                if (should) {
+                    neighbors.add(nodeId);
+                    lastEntered = nodeId;
+                }
+            }
+        }
+
+        return neighbors.stream().mapToLong(Long::longValue).toArray();
+    }
+
 
     //public compute method
     @Override
@@ -307,14 +326,8 @@ public final class CliqueCounting extends Algorithm<CliqueCountingResult> {
             long rootNode;
             while ((rootNode = rootQueue.getAndIncrement()) < graph.nodeCount() && terminationFlag.running()) {
                 NodeStatus[] cliqueNodes = {new NodeStatus(rootNode, true)};
-                long finalRootNode = rootNode;
-                long[] positiveNeighborhood = graph
-                    .streamRelationships(rootNode, -1)
-                    .mapToLong(RelationshipCursor::targetId)
-                    .sorted()
-                    .distinct()
-                    .filter(target -> target > finalRootNode)
-                    .toArray();
+                var positiveNeighborhood= rootNodeNeighbors(rootNode,true);
+
                 if (rootNode % 100_000 == 99_999) {
                     System.out.println("Processing root node: " + rootNode + "/" + nodeCount + ". With positive neighborhood: " + Arrays.toString(
                         positiveNeighborhood));
@@ -339,12 +352,8 @@ public final class CliqueCounting extends Algorithm<CliqueCountingResult> {
                 var subclique = subcliques[subcliqueIdx];
                 var sizeFrequencies = cliqueCountsHandler.create();
                 NodeStatus[] cliqueNodes = Arrays.stream(subclique).mapToObj(node -> new NodeStatus(node, true)).toArray(NodeStatus[]::new);
-                long[] subset = graph
-                    .streamRelationships(subclique[0], -1)
-                    .mapToLong(RelationshipCursor::targetId)
-                    .sorted()
-                    .distinct()
-                    .toArray();
+
+                var subset = rootNodeNeighbors(subclique[0],false);
                 for (var node : subclique) { //first is unnecessary
                     subset = neighborhoodIntersection(subset, node); //S = N(v1) n N(v2) n ... n N(vk)
                 }

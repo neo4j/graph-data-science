@@ -111,4 +111,35 @@ class CliqueCountingFunctionsTest {
         assertThat(subsetPartition.includedNodes()).containsExactly(3,5,6);
         assertThat(subsetPartition.excludedNodes()).containsExactly(0,1,4);
     }
+
+    static Stream<Arguments>  rootNeighbors() {
+        return Stream.of(
+            arguments(false,new long[]{0,1,3,4}),
+            arguments(true, new long[]{3,4})
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("rootNeighbors")
+    void shouldFindRootNodesNeighbors(boolean filter, long[] expected){
+        var inputQuery = "CREATE (a0),(a1),(a2),(a3),(a4)" +
+            "(a2)-->(a0),  (a2)-->(a0),(a2)-->(a1), (a2)-->(a3),  (a2)-->(a3), (a2)-->(a3), (a2)-->(a4)";
+
+        var graph = TestSupport.fromGdl(inputQuery, Orientation.UNDIRECTED).graph();
+
+        var params  = mock(CliqueCountingParameters.class);
+        when(params.subcliques()).thenReturn(List.of());
+
+        var cliqueCounting = CliqueCounting.create(
+            graph,
+            params,
+            DefaultPool.INSTANCE,
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
+        );
+
+        var neighbors = cliqueCounting.rootNodeNeighbors(2,filter);
+        assertThat(neighbors).containsExactly(expected);
+
+    }
 }
