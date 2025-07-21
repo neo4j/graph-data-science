@@ -74,6 +74,7 @@ dependencies {
     testAnnotationProcessor openGds.immutables.value
 
     testImplementation project(':edition-api')
+    testImplementation project(':gdl-graph')
     testImplementation project(':legacy-cypher-projection')
     testImplementation project(':progress-tracking')
     testImplementation project(':test-graph-loaders')

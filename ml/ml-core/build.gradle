@@ -26,6 +26,7 @@ dependencies {
     testCompileOnly openGds.immutables.value.annotations
     testCompileOnly openGds.jetbrains.annotations
 
+    testImplementation project(':gdl-graph')
     testImplementation project(':test-utils')
     testImplementation project(':graph-schema-api')
     testImplementation project(':ml-test-utils')

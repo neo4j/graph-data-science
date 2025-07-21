@@ -61,6 +61,7 @@ dependencies {
     // Test dependencies
     testAnnotationProcessor project(':annotations')
 
+    testImplementation project(':gdl-graph')
     testImplementation project(':open-model-catalog')
     testImplementation project(':proc-test')
     testImplementation project(':proc-common')

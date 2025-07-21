@@ -21,6 +21,7 @@ dependencies {
     integrationTestImplementation project(':annotations')
     integrationTestImplementation project(':config-api')
     integrationTestImplementation project(':core')
+    integrationTestImplementation project(':gdl-graph')
     integrationTestImplementation project(':graph-projection-api')
     integrationTestImplementation project(':graph-schema-api')
     integrationTestImplementation project(':licensing')

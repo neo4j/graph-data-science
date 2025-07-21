@@ -62,6 +62,7 @@ dependencies {
     testAnnotationProcessor project(':annotations')
 
     testImplementation project(':edition-api')
+    testImplementation project(':gdl-graph')
     testImplementation project(':test-utils')
     testImplementation project(':ml-test-utils')
     testImplementation project(':ml-algo')

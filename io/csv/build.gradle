@@ -38,5 +38,6 @@ dependencies {
         transitive = false
     }
 
+    testImplementation project(':gdl-graph')
     testImplementation project(':test-utils')
 }

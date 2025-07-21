@@ -39,6 +39,7 @@ dependencies {
     implementation project(':termination')
 
     // TEST DEPENDENCIES
+    testImplementation project(':gdl-graph')
     testImplementation project(':test-graph-loaders')
     testImplementation project(':test-utils')
 
