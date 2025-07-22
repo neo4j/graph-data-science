@@ -23,6 +23,7 @@ dependencies {
     testAnnotationProcessor project(':config-generator')
     testAnnotationProcessor project(':annotations')
 
+    testImplementation project(':gdl-graph')
     testImplementation project(':test-utils')
     // GdlFactory extends CSRGraphStoreFactory which lives in :core
     // Suggests :core should be an api dependency of :test-utils

@@ -41,6 +41,7 @@ dependencies {
     implementation project(':scaling-utils')
 
     testImplementation project(':test-utils')
+    testImplementation project(':gdl-graph')
     testImplementation openGds.gdl
 
 }

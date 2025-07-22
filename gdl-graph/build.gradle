@@ -1,7 +1,6 @@
 apply plugin: 'java-library'
 
-description = 'Neo4j Graph Data Science :: Test Utils'
-
+description = 'Neo4j Graph Data Science :: GDS GDL Graphs'
 group = 'org.neo4j.gds'
 
 dependencies {
@@ -11,15 +10,16 @@ dependencies {
     annotationProcessor openGds.immutables.value
     annotationProcessor neo4j.annotations
 
+    compileOnly openGds.immutables.value
     compileOnly openGds.immutables.builder
     compileOnly openGds.jetbrains.annotations
+    compileOnly(neo4j.values) { transitive = false }
 
     implementation project(':algo-common')
     implementation project(':annotations')
     implementation project(':config-api')
     implementation project(':core')
     implementation project(':core-utils')
-    implementation project(':gdl-graph')
     implementation project(':gds-values')
     implementation project(':legacy-cypher-projection')
     implementation project(':native-projection')
@@ -44,18 +44,9 @@ dependencies {
         openGds.gdl,
     )
 
-    api(
-        project(':core-test-utils'),
-        [openGds.jqwik, openGds.junit.pioneer, openGds.junit5.jupiter.engine],
-    )
-
-    api(neo4j.it.test.support) {
-        exclude group:'org.junit.vintage', module: 'junit-vintage-engine'
-    }
-
-    testImplementation project(':edition-api')
-    testImplementation project(':graph-schema-api')
-
-    testCompileOnly openGds.immutables.builder
-
+    testImplementation  project(':test-utils')
+    testImplementation  platform(openGds.junit5bom)
+    testImplementation  openGds.junit.pioneer
+    testImplementation  openGds.junit5.jupiter
+    testImplementation  openGds.assertj.core
 }

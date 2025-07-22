@@ -53,13 +53,10 @@ import org.neo4j.gds.core.loading.construction.NodeLabelTokens;
 import org.neo4j.gds.core.loading.construction.PropertyValues;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.extension.GdlSupportPerMethodExtension;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryEstimations;
 import org.neo4j.gds.values.GdsValue;
 import org.neo4j.gds.values.primitive.PrimitiveValues;
-import org.neo4j.values.SequenceValue;
-import org.neo4j.values.storable.Values;
 import org.s1ck.gdl.GDLHandler;
 import org.s1ck.gdl.model.Element;
 import org.s1ck.gdl.model.Vertex;
@@ -130,7 +127,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
             gdlHandler,
             config,
             graphDimensions,
-            databaseId.orElse(GdlSupportPerMethodExtension.DATABASE_ID),
+            databaseId.orElse(DatabaseId.of("GDL")),
             capabilities,
             idMapBuilderType.orElse(IdMap.NO_TYPE)
         );
@@ -419,12 +416,10 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
 
             var nodePropertyDimensions = new HashMap<String, Optional<Integer>>();
             gdlHandler.getVertices().forEach(v -> v.getProperties().forEach((propertyKey, propertyValue) -> {
-                if (propertyValue instanceof List<?>) {
-                    var array = convertListProperty(((List<?>) propertyValue));
-                    var listValue = (SequenceValue) Values.of(array);
+                if (propertyValue instanceof List<?> propertyList) {
                     nodePropertyDimensions.put(
                         propertyKey,
-                        Optional.of(listValue.intSize())
+                        Optional.of(propertyList.size())
                     );
                 } else {
                     nodePropertyDimensions.put(propertyKey, Optional.of(1));

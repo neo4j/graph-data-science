@@ -149,6 +149,9 @@ project(':algorithms-machinery').projectDir = file('applications/algorithms/mach
 include 'procedure-collector'
 project(':procedure-collector').projectDir = file('procedure-collector')
 
+include('gdl-graph')
+project(':gdl-graph').projectDir = file('gdl-graph')
+
 include('graph-dimensions')
 project(':graph-dimensions').projectDir = file('graph-dimensions')
 
