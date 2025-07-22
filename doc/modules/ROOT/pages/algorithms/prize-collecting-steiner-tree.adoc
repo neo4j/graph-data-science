@@ -5,6 +5,7 @@
 :result: weight
 :algorithm: Prize-Collecting Steiner Tree algorithm
 
+:no-directed:
 :undirected:
 :weighted:
 include::partial$/algorithms/shared/algorithm-traits.adoc[]
