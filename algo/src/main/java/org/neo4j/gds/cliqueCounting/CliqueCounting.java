@@ -204,49 +204,43 @@ public final class CliqueCounting extends Algorithm<CliqueCountingResult> {
 
     }
 
-    private void recursiveSctCliqueCount(long[] subset, NodeStatus[] cliqueNodes, SizeFrequencies sizeFrequencies) {
+    private void recursiveSctCliqueCount(long[] subset, RecursiveCliqueNodes cliqueNodes, SizeFrequencies sizeFrequencies) {
         if (subset.length == 0) {
-            var requiredPointer = 0;
-            var optionalPointer = cliqueNodes.length - 1;
-            long[] nodes = new long[cliqueNodes.length];
-            for (var cliqueNode : cliqueNodes) {
-                if (cliqueNode.required()) {
-                    nodes[requiredPointer++] = cliqueNode.nodeId();
-                } else {
-                    nodes[optionalPointer--] = cliqueNode.nodeId();
-                }
-            }
+            var  nodes = cliqueNodes.activeNodes();
+            var requiredPointer = cliqueNodes.requiredNodes();
             sizeFrequencies.updateFrequencies(countingMode, nodes, requiredPointer);
-            return;
-        }
+        }else {
 
-        var intersections = computeIntersections(subset);
+            var intersections = computeIntersections(subset);
 
-        SubsetPartition partition = partitionSubset(subset, intersections);
+            SubsetPartition partition = partitionSubset(subset, intersections);
 
-        var newCliqueNodes = Arrays.copyOf(cliqueNodes, cliqueNodes.length+1);
-        newCliqueNodes[cliqueNodes.length] = new NodeStatus(partition.pivot(), false);
+            cliqueNodes.add(partition.pivot(), false);
 
-        recursiveSctCliqueCount(
-            partition.includedNodes(),
-            newCliqueNodes,
-            sizeFrequencies
-        );
-
-        var vs = new long[partition.excludedNodes().length];
-        for (int i = 0; i < vs.length; i++) {
-            vs[i] = subset[partition.excludedNodes()[i]];
-        }
-
-        for (int i = 0; i < partition.excludedNodes().length; i++) {
-            newCliqueNodes = Arrays.copyOf(cliqueNodes, cliqueNodes.length+1);
-            newCliqueNodes[cliqueNodes.length] = new NodeStatus(vs[i], true);
             recursiveSctCliqueCount(
-                Intersections.sortedDifference(intersections[partition.excludedNodes()[i]], vs, Optional.of(i)),
-                newCliqueNodes,
+                partition.includedNodes(),
+                cliqueNodes,
                 sizeFrequencies
             );
+
+            var vs = new long[partition.excludedNodes().length];
+            for (int i = 0; i < vs.length; i++) {
+                vs[i] = subset[partition.excludedNodes()[i]];
+            }
+
+            for (int i = 0; i < partition.excludedNodes().length; i++) {
+
+                cliqueNodes.add(vs[i], true);
+
+                recursiveSctCliqueCount(
+                    Intersections.sortedDifference(intersections[partition.excludedNodes()[i]], vs, Optional.of(i)),
+                    cliqueNodes,
+                    sizeFrequencies
+                );
+            }
         }
+        cliqueNodes.finishRecursionLevel();
+
     }
 
     long[][] computeIntersections(long[] subset){
@@ -325,7 +319,8 @@ public final class CliqueCounting extends Algorithm<CliqueCountingResult> {
             long nodeCount = graph.nodeCount();
             long rootNode;
             while ((rootNode = rootQueue.getAndIncrement()) < graph.nodeCount() && terminationFlag.running()) {
-                NodeStatus[] cliqueNodes = {new NodeStatus(rootNode, true)};
+
+                var cliqueNodes = RecursiveCliqueNodes.create(rootNode, graph.degree(rootNode));
                 var positiveNeighborhood= rootNodeNeighbors(rootNode,true);
 
                 if (rootNode % 100_000 == 99_999) {
@@ -351,7 +346,14 @@ public final class CliqueCounting extends Algorithm<CliqueCountingResult> {
             while ((subcliqueIdx = (int)rootQueue.getAndIncrement()) < subcliques.length && terminationFlag.running()) {
                 var subclique = subcliques[subcliqueIdx];
                 var sizeFrequencies = cliqueCountsHandler.create();
-                NodeStatus[] cliqueNodes = Arrays.stream(subclique).mapToObj(node -> new NodeStatus(node, true)).toArray(NodeStatus[]::new);
+                var  upperBound = Integer.MAX_VALUE;
+                for (var node : subclique){
+                    upperBound = Math.min(upperBound, graph.degree(node)+1);
+                }
+                var cliqueNodes  = new RecursiveCliqueNodes(upperBound);
+                for (var node : subclique){
+                    cliqueNodes.add(node,true);
+                }
 
                 var subset = rootNodeNeighbors(subclique[0],false);
                 for (var node : subclique) { //first is unnecessary
