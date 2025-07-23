@@ -42,6 +42,7 @@ import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.tasks.IterativeTask;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.dag.longestPath.DagLongestPathParameters;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
@@ -91,8 +92,6 @@ class PathFindingComputeFacadeTest {
     @Mock
     private Log logMock;
 
-    private AsyncAlgorithmCaller algorithmCaller;
-
     @GdlGraph
     private static final String GDL = """
         (a:Node)-[:REL]->(b:Node),
@@ -105,33 +104,31 @@ class PathFindingComputeFacadeTest {
 
     @Inject
     private IdFunction idFunction;
+    private PathFindingComputeFacade facade;
 
     @BeforeEach
     void setUp() {
         when(catalogServiceMock.fetchGraphResources(any(), any(), any(), any(), any(), any(), any(), any()))
             .thenReturn(new GraphResources(mock(GraphStore.class), graph, mock(ResultStore.class)));
 
-        algorithmCaller = new AsyncAlgorithmCaller(Executors.newSingleThreadExecutor(), logMock);
-
         when(progressTrackerFactoryMock.nullTracker())
             .thenReturn(ProgressTracker.NULL_TRACKER);
         when(progressTrackerFactoryMock.create(any(), any(), any(), anyBoolean()))
             .thenReturn(progressTrackerMock);
 
-    }
-
-    @Test
-    void allShortestPaths() {
-        var facade = new PathFindingComputeFacade(
+        facade = new PathFindingComputeFacade(
             catalogServiceMock,
-            algorithmCaller,
+            new AsyncAlgorithmCaller(Executors.newSingleThreadExecutor(), logMock),
             userMock,
             DatabaseId.DEFAULT,
             DefaultPool.INSTANCE,
             TerminationFlag.RUNNING_TRUE,
             progressTrackerFactoryMock
         );
+    }
 
+    @Test
+    void allShortestPaths() {
         var future = facade.allShortestPaths(
             new GraphName("foo"),
             new GraphParameters(
@@ -156,16 +153,6 @@ class PathFindingComputeFacadeTest {
 
     @Test
     void bellmanFord() {
-        var facade = new PathFindingComputeFacade(
-            catalogServiceMock,
-            algorithmCaller,
-            userMock,
-            DatabaseId.DEFAULT,
-            DefaultPool.INSTANCE,
-            TerminationFlag.RUNNING_TRUE,
-            progressTrackerFactoryMock
-        );
-
         var future = facade.bellmanFord(
             new GraphName("foo"),
             new GraphParameters(
@@ -196,16 +183,6 @@ class PathFindingComputeFacadeTest {
 
     @Test
     void breadthFirstSearch() {
-        var facade = new PathFindingComputeFacade(
-            catalogServiceMock,
-            algorithmCaller,
-            userMock,
-            DatabaseId.DEFAULT,
-            DefaultPool.INSTANCE,
-            TerminationFlag.RUNNING_TRUE,
-            progressTrackerFactoryMock
-        );
-
         var future = facade.breadthFirstSearch(
             new GraphName("foo"),
             new GraphParameters(
@@ -228,16 +205,6 @@ class PathFindingComputeFacadeTest {
 
     @Test
     void deltaStepping() {
-        var facade = new PathFindingComputeFacade(
-            catalogServiceMock,
-            algorithmCaller,
-            userMock,
-            DatabaseId.DEFAULT,
-            DefaultPool.INSTANCE,
-            TerminationFlag.RUNNING_TRUE,
-            progressTrackerFactoryMock
-        );
-
         var future = facade.deltaStepping(
             new GraphName("foo"),
             new GraphParameters(
@@ -259,16 +226,6 @@ class PathFindingComputeFacadeTest {
 
     @Test
     void depthFirstSearch() {
-        var facade = new PathFindingComputeFacade(
-            catalogServiceMock,
-            algorithmCaller,
-            userMock,
-            DatabaseId.DEFAULT,
-            DefaultPool.INSTANCE,
-            TerminationFlag.RUNNING_TRUE,
-            progressTrackerFactoryMock
-        );
-
         var future = facade.depthFirstSearch(
             new GraphName("foo"),
             new GraphParameters(
@@ -291,16 +248,6 @@ class PathFindingComputeFacadeTest {
 
     @Test
     void kSpanningTree() {
-        var facade = new PathFindingComputeFacade(
-            catalogServiceMock,
-            algorithmCaller,
-            userMock,
-            DatabaseId.DEFAULT,
-            DefaultPool.INSTANCE,
-            TerminationFlag.RUNNING_TRUE,
-            progressTrackerFactoryMock
-        );
-
         var future = facade.kSpanningTree(
             new GraphName("foo"),
             new GraphParameters(
@@ -318,6 +265,25 @@ class PathFindingComputeFacadeTest {
             ),
             jobIdMock,
             false
+        );
+        assertThat(future.join()).isNotNull();
+    }
+
+    @Test
+    void longestPath() {
+        var future = facade.longestPath(
+            new GraphName("foo"),
+            new GraphParameters(
+                List.of(NodeLabel.of("Node")),
+                List.of(RelationshipType.of("REL")),
+                true,
+                Optional.empty()
+            ),
+            new DagLongestPathParameters(
+                new Concurrency(2)
+            ),
+            jobIdMock,
+            true
         );
         assertThat(future.join()).isNotNull();
     }

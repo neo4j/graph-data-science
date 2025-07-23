@@ -35,6 +35,9 @@ import org.neo4j.gds.core.loading.validation.NoAlgorithmValidation;
 import org.neo4j.gds.core.loading.validation.SourceNodeGraphStoreValidation;
 import org.neo4j.gds.core.loading.validation.SourceNodeTargetNodesGraphStoreValidation;
 import org.neo4j.gds.core.utils.progress.JobId;
+import org.neo4j.gds.dag.longestPath.DagLongestPath;
+import org.neo4j.gds.dag.longestPath.DagLongestPathParameters;
+import org.neo4j.gds.dag.longestPath.LongestPathTask;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortResult;
 import org.neo4j.gds.kspanningtree.KSpanningTree;
 import org.neo4j.gds.kspanningtree.KSpanningTreeParameters;
@@ -333,7 +336,8 @@ public class PathFindingComputeFacade {
         GraphParameters graphParameters,
         Optional<String> relationshipProperty,
         KSpanningTreeParameters parameters,
-        JobId jobId, boolean logProgress
+        JobId jobId,
+        boolean logProgress
     ) {
         // Fetch the Graph the algorithm will operate on
         var graph = graphStoreCatalogService.fetchGraphResources(
@@ -372,13 +376,46 @@ public class PathFindingComputeFacade {
         );
     }
 
-    CompletableFuture<PathFindingResult> longestPath() {
+    CompletableFuture<PathFindingResult> longestPath(
+        GraphName graphName,
+        GraphParameters graphParameters,
+        DagLongestPathParameters parameters,
+        JobId jobId,
+        boolean logProgress
+    ) {
         // Fetch the Graph the algorithm will operate on
-        // Create ProgressTracker
-        // Create the algorithm
-        // Submit the algorithm for async computation
+        var graph = graphStoreCatalogService.fetchGraphResources(
+            graphName,
+            graphParameters,
+            Optional.empty(),
+            new NoAlgorithmValidation(),
+            Optional.empty(),
+            Optional.empty(),
+            user,
+            databaseId
+        ).graph();
 
-        return CompletableFuture.failedFuture(new RuntimeException("Not yet implemented"));
+        // Create ProgressTracker
+        var progressTracker = progressTrackerFactory.create(
+            LongestPathTask.create(graph.nodeCount()),
+            jobId,
+            parameters.concurrency(),
+            logProgress
+        );
+
+        // Create the algorithm
+        var dagLongestPath = new DagLongestPath(
+            graph,
+            progressTracker,
+            parameters.concurrency(),
+            terminationFlag
+        );
+
+        // Submit the algorithm for async computation
+        return algorithmCaller.run(
+            dagLongestPath::compute,
+            null
+        );
     }
 
     CompletableFuture<Stream<long[]>> randomWalk() {
