@@ -70,7 +70,7 @@ Check with your organization administrator what your maximum size is.
 
 === AuraDB source instance limitations
 
-The GDS Session Cypher API is available only for AuraDB instances in the Business Critical or Virtual Dedicated Cloud plans.
+The GDS Session Cypher API is available only for AuraDB instances in the Professional, Business Critical or Virtual Dedicated Cloud plans.
 Depending on which plan is used, different limitations apply.
 See link:https://neo4j.com/docs/aura/graph-analytics/#_comparison[Graph analytics in Aura] for a comparison view.
 
