@@ -577,7 +577,7 @@ ORDER BY name ASC
 [[algorithms-leiden-examples-stream-seeded]]
 === Seeded
 
-It is possible to run the  Louvain algorithm incrementally, by providing a seed property.
+It is possible to run the Leiden algorithm incrementally, by providing a seed property.
 If specified, the seed property provides an initial community mapping for a subset of the loaded nodes.
 The algorithm will try to keep the seeded community IDs.
 
