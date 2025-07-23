@@ -105,10 +105,6 @@ public class PathFindingComputeFacade {
         AllShortestPathsParameters parameters,
         JobId jobId
     ) {
-        // Create ProgressTracker
-        // `allShortestPaths` doesn't use progress tracker (yet 🤔)
-        var progressTracker = progressTrackerFactory.nullTracker();
-
         // Fetch the Graph the algorithm will operate on
         var graph = graphStoreCatalogService.fetchGraphResources(
             graphName,
@@ -120,6 +116,10 @@ public class PathFindingComputeFacade {
             user,
             databaseId
         ).graph();
+
+        // Create ProgressTracker
+        // `allShortestPaths` doesn't use progress tracker (yet 🤔)
+        var progressTracker = progressTrackerFactory.nullTracker();
 
         // Create the algorithm
         var allShortestPaths = MSBFSASPAlgorithmFactory.create(
@@ -146,14 +146,6 @@ public class PathFindingComputeFacade {
         JobId jobId,
         boolean logProgress
     ) {
-        // Create ProgressTracker
-        var progressTracker = progressTrackerFactory.create(
-            BellmanFordProgressTask.create(),
-            jobId,
-            parameters.concurrency(),
-            logProgress
-        );
-
         // Fetch the Graph the algorithm will operate on
         var graph = graphStoreCatalogService.fetchGraphResources(
             graphName,
@@ -165,6 +157,14 @@ public class PathFindingComputeFacade {
             user,
             databaseId
         ).graph();
+
+        // Create ProgressTracker
+        var progressTracker = progressTrackerFactory.create(
+            BellmanFordProgressTask.create(),
+            jobId,
+            parameters.concurrency(),
+            logProgress
+        );
 
         // Create the algorithm
         var bellmanFord = new BellmanFord(
@@ -191,14 +191,6 @@ public class PathFindingComputeFacade {
         JobId jobId,
         boolean logProgress
     ) {
-        // Create ProgressTracker
-        var progressTracker = progressTrackerFactory.create(
-            BFSProgressTask.create(),
-            jobId,
-            parameters.concurrency(),
-            logProgress
-        );
-
         // Fetch the Graph the algorithm will operate on
         var graph = graphStoreCatalogService.fetchGraphResources(
             graphName,
@@ -213,6 +205,14 @@ public class PathFindingComputeFacade {
             user,
             databaseId
         ).graph();
+
+        // Create ProgressTracker
+        var progressTracker = progressTrackerFactory.create(
+            BFSProgressTask.create(),
+            jobId,
+            parameters.concurrency(),
+            logProgress
+        );
 
         // Create the algorithm
         var exitAndAggregationConditions = ExitAndAggregation.create(graph, parameters);
@@ -245,14 +245,6 @@ public class PathFindingComputeFacade {
         JobId jobId,
         boolean logProgress
     ) {
-        // Create ProgressTracker
-        var progressTracker = progressTrackerFactory.create(
-            DeltaSteppingProgressTask.create(),
-            jobId,
-            parameters.concurrency(),
-            logProgress
-        );
-
         // Fetch the Graph the algorithm will operate on
         var graph = graphStoreCatalogService.fetchGraphResources(
             graphName,
@@ -264,6 +256,14 @@ public class PathFindingComputeFacade {
             user,
             databaseId
         ).graph();
+
+        // Create ProgressTracker
+        var progressTracker = progressTrackerFactory.create(
+            DeltaSteppingProgressTask.create(),
+            jobId,
+            parameters.concurrency(),
+            logProgress
+        );
 
         // Create the algorithm
         var deltaStepping = DeltaStepping.of(graph, parameters, executorService, progressTracker);
@@ -284,14 +284,6 @@ public class PathFindingComputeFacade {
         boolean logProgress
 
     ) {
-        // Create ProgressTracker
-        var progressTracker = progressTrackerFactory.create(
-            DFSProgressTask.create(),
-            jobId,
-            parameters.concurrency(),
-            logProgress
-        );
-
         // Fetch the Graph the algorithm will operate on
         var graph = graphStoreCatalogService.fetchGraphResources(
             graphName,
@@ -306,6 +298,14 @@ public class PathFindingComputeFacade {
             user,
             databaseId
         ).graph();
+
+        // Create ProgressTracker
+        var progressTracker = progressTrackerFactory.create(
+            DFSProgressTask.create(),
+            jobId,
+            parameters.concurrency(),
+            logProgress
+        );
 
         // Create the algorithm
         var exitAndAggregationConditions = ExitAndAggregation.create(graph, parameters);
@@ -373,8 +373,8 @@ public class PathFindingComputeFacade {
     }
 
     CompletableFuture<PathFindingResult> longestPath() {
-        // Create ProgressTracker
         // Fetch the Graph the algorithm will operate on
+        // Create ProgressTracker
         // Create the algorithm
         // Submit the algorithm for async computation
 
@@ -382,8 +382,8 @@ public class PathFindingComputeFacade {
     }
 
     CompletableFuture<Stream<long[]>> randomWalk() {
-        // Create ProgressTracker
         // Fetch the Graph the algorithm will operate on
+        // Create ProgressTracker
         // Create the algorithm
         // Submit the algorithm for async computation
 
@@ -391,8 +391,8 @@ public class PathFindingComputeFacade {
     }
 
     CompletableFuture<HugeAtomicLongArray> randomWalkCountingNodeVisits() {
-        // Create ProgressTracker
         // Fetch the Graph the algorithm will operate on
+        // Create ProgressTracker
         // Create the algorithm
         // Submit the algorithm for async computation
 
@@ -400,8 +400,8 @@ public class PathFindingComputeFacade {
     }
 
     CompletableFuture<PrizeSteinerTreeResult> pcst() {
-        // Create ProgressTracker
         // Fetch the Graph the algorithm will operate on
+        // Create ProgressTracker
         // Create the algorithm
         // Submit the algorithm for async computation
 
@@ -409,8 +409,8 @@ public class PathFindingComputeFacade {
     }
 
     CompletableFuture<PathFindingResult> singlePairShortestPathAStar() {
-        // Create ProgressTracker
         // Fetch the Graph the algorithm will operate on
+        // Create ProgressTracker
         // Create the algorithm
         // Submit the algorithm for async computation
 
@@ -418,8 +418,8 @@ public class PathFindingComputeFacade {
     }
 
     CompletableFuture<PathFindingResult> singlePairShortestPathDijkstra() {
-        // Create ProgressTracker
         // Fetch the Graph the algorithm will operate on
+        // Create ProgressTracker
         // Create the algorithm
         // Submit the algorithm for async computation
 
@@ -427,8 +427,8 @@ public class PathFindingComputeFacade {
     }
 
     CompletableFuture<PathFindingResult> singlePairShortestPathYens() {
-        // Create ProgressTracker
         // Fetch the Graph the algorithm will operate on
+        // Create ProgressTracker
         // Create the algorithm
         // Submit the algorithm for async computation
 
@@ -436,8 +436,8 @@ public class PathFindingComputeFacade {
     }
 
     CompletableFuture<PathFindingResult> singleSourceShortestPathDijkstra() {
-        // Create ProgressTracker
         // Fetch the Graph the algorithm will operate on
+        // Create ProgressTracker
         // Create the algorithm
         // Submit the algorithm for async computation
 
@@ -445,8 +445,8 @@ public class PathFindingComputeFacade {
     }
 
     CompletableFuture<SpanningTree> spanningTree() {
-        // Create ProgressTracker
         // Fetch the Graph the algorithm will operate on
+        // Create ProgressTracker
         // Create the algorithm
         // Submit the algorithm for async computation
 
@@ -454,8 +454,8 @@ public class PathFindingComputeFacade {
     }
 
     CompletableFuture<SteinerTreeResult> steinerTree() {
-        // Create ProgressTracker
         // Fetch the Graph the algorithm will operate on
+        // Create ProgressTracker
         // Create the algorithm
         // Submit the algorithm for async computation
 
@@ -463,8 +463,8 @@ public class PathFindingComputeFacade {
     }
 
     CompletableFuture<TopologicalSortResult> topologicalSort() {
-        // Create ProgressTracker
         // Fetch the Graph the algorithm will operate on
+        // Create ProgressTracker
         // Create the algorithm
         // Submit the algorithm for async computation
 
