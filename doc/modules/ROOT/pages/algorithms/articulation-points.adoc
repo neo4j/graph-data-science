@@ -6,6 +6,7 @@
 :algorithm: Articulation Points
 :sequential: true
 
+:no-directed:
 :undirected:
 include::partial$/algorithms/shared/algorithm-traits.adoc[]
 
