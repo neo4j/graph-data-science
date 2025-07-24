@@ -58,6 +58,8 @@ import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
 import org.neo4j.gds.paths.delta.DeltaStepping;
 import org.neo4j.gds.paths.delta.DeltaSteppingParameters;
 import org.neo4j.gds.paths.delta.DeltaSteppingProgressTask;
+import org.neo4j.gds.paths.dijkstra.DijkstraFactory;
+import org.neo4j.gds.paths.dijkstra.DijkstraSourceTargetParameters;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.paths.traverse.BFS;
 import org.neo4j.gds.paths.traverse.BFSProgressTask;
@@ -596,13 +598,49 @@ public class PathFindingComputeFacade {
         );
     }
 
-    CompletableFuture<PathFindingResult> singlePairShortestPathDijkstra() {
+    CompletableFuture<PathFindingResult> singlePairShortestPathDijkstra(
+        GraphName graphName,
+        GraphParameters graphParameters,
+        Optional<String> relationshipProperty,
+        DijkstraSourceTargetParameters parameters,
+        JobId jobId,
+        boolean logProgress
+    ) {
         // Fetch the Graph the algorithm will operate on
-        // Create ProgressTracker
-        // Create the algorithm
-        // Submit the algorithm for async computation
+        var graph = graphStoreCatalogService.fetchGraphResources(
+            graphName,
+            graphParameters,
+            relationshipProperty,
+            new SourceNodeTargetNodesGraphStoreValidation(parameters.sourceNode(), parameters.targetsList()),
+            Optional.of(new RandomWalkGraphValidation(parameters.concurrency(), executorService)),
+            user,
+            databaseId
+        ).graph();
 
-        return CompletableFuture.failedFuture(new RuntimeException("Not yet implemented"));
+        // Create ProgressTracker
+        var progressTracker = progressTrackerFactory.create(
+            RelationshipCountProgressTaskFactory.create(AlgorithmLabel.Dijkstra, graph.relationshipCount()),
+            jobId,
+            parameters.concurrency(),
+            logProgress
+        );
+
+        // Create the algorithm
+        var dijkstra = DijkstraFactory.sourceTarget(
+            graph,
+            parameters.sourceNode(),
+            parameters.targetsList(),
+            false,
+            Optional.empty(),
+            progressTracker,
+            terminationFlag
+        );
+
+        // Submit the algorithm for async computation
+        return algorithmCaller.run(
+            dijkstra::compute,
+            jobId
+        );
     }
 
     CompletableFuture<PathFindingResult> singlePairShortestPathYens() {
