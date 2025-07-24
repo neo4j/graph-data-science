@@ -16,6 +16,7 @@ dependencies {
     implementation project(':path-finding-algorithms')
     implementation project(':path-finding-params')
     implementation project(':progress-tracking')
+    implementation project(':string-formatting')
     implementation project(':termination')
 
     // Test dependencies

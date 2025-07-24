@@ -90,6 +90,26 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
         );
     }
 
+    public static RandomWalk create(
+        Graph graph,
+        RandomWalkParameters parameters,
+        ProgressTracker progressTracker,
+        ExecutorService executorService,
+        TerminationFlag terminationFlag
+    ) {
+        return new RandomWalk(
+            graph,
+            parameters.concurrency(),
+            executorService,
+            parameters.walkParameters(),
+            parameters.sourceNodes(),
+            parameters.walkBufferSize(),
+            parameters.randomSeed(),
+            progressTracker,
+            terminationFlag
+        );
+    }
+
     private RandomWalk(
         Graph graph,
         Concurrency concurrency,
@@ -118,7 +138,8 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
         progressTracker.beginSubTask("RandomWalk");
         var taskSupplier = createRandomWalkTaskSupplier();
 
-        startWalkers(taskSupplier,
+        startWalkers(
+            taskSupplier,
             progressTracker::endSubTask,
             progressTracker::endSubTaskWithFailure
         );

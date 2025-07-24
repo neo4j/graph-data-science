@@ -31,6 +31,7 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.loading.GraphStoreCatalog.GraphStoreCatalogEntryWithUsername;
 import org.neo4j.gds.core.loading.validation.GraphStoreValidation;
+import org.neo4j.gds.core.loading.validation.GraphValidation;
 
 import java.util.Collection;
 import java.util.Map;
@@ -113,7 +114,7 @@ public class GraphStoreCatalogService {
     /**
      * Load GraphStore and graph, with copious validation.
      */
-    public GraphResources getGraphResources(
+    private GraphResources getGraphResources(
         GraphName graphName,
         Collection<NodeLabel> nodeLabelsFilter,
         Collection<RelationshipType> relationshipTypesFilter,
@@ -157,24 +158,32 @@ public class GraphStoreCatalogService {
         GraphParameters graphParameters,
         Optional<String> relationshipProperty,
         GraphStoreValidation graphStoreValidation,
-        Optional<Iterable<PostLoadValidationHook>> postGraphStoreLoadValidationHooks,
-        Optional<Iterable<PostLoadETLHook>> postGraphStoreLoadETLHooks,
+        Optional<GraphValidation> graphValidation,
         User user,
         DatabaseId databaseId
     ) {
-        return getGraphResources(
+        var graphStoreCatalogEntry = getGraphStoreCatalogEntry(
             graphName,
-            graphParameters.nodeLabelsFilter(),
-            graphParameters.relationshipTypesFilter(),
-            graphParameters.loadAllRelationshipTypes(),
-            relationshipProperty,
-            graphStoreValidation,
-            postGraphStoreLoadValidationHooks,
-            postGraphStoreLoadETLHooks,
-            user,
-            graphParameters.usernameOverride(),
-            databaseId
+            user, graphParameters.usernameOverride(), databaseId
         );
+
+        var graphStore = graphStoreCatalogEntry.graphStore();
+
+        var nodeLabels = graphParameters.nodeLabelsFilter().isEmpty()
+            ? graphStore.nodeLabels()
+            : graphParameters.nodeLabelsFilter();
+        var relationshipTypes = graphParameters.loadAllRelationshipTypes()
+            ? graphStore.relationshipTypes()
+            : graphParameters.relationshipTypesFilter();
+
+        // Validate the graph store before going any further
+        graphStoreValidation.validate(graphStore, nodeLabels, relationshipTypes, relationshipProperty);
+
+        var graph = graphStore.getGraph(nodeLabels, relationshipTypes, relationshipProperty);
+        // Validate the graph if the caller requires it
+        graphValidation.ifPresent(gv -> gv.validate(graph));
+
+        return new GraphResources(graphStore, graph, graphStoreCatalogEntry.resultStore());
     }
 
     /**

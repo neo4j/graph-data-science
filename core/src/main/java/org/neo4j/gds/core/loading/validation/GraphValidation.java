@@ -17,16 +17,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.traversal;
+package org.neo4j.gds.core.loading.validation;
 
-import org.neo4j.gds.annotation.Parameters;
+import org.neo4j.gds.api.Graph;
 
-@Parameters
-public record WalkParameters(
-    int walksPerNode,
-    int walkLength,
-    double returnFactor,
-    double inOutFactor
-) {
-    public static final WalkParameters DEFAULTS = new WalkParameters(10, 80, 1.0, 1.0);
+public interface GraphValidation {
+    void validate(Graph graph);
 }

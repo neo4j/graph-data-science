@@ -54,7 +54,9 @@ import org.neo4j.gds.paths.bellmanford.BellmanFordParameters;
 import org.neo4j.gds.paths.delta.DeltaSteppingParameters;
 import org.neo4j.gds.spanningtree.PrimOperators;
 import org.neo4j.gds.termination.TerminationFlag;
+import org.neo4j.gds.traversal.RandomWalkParameters;
 import org.neo4j.gds.traversal.TraversalParameters;
+import org.neo4j.gds.traversal.WalkParameters;
 
 import java.util.List;
 import java.util.Optional;
@@ -108,7 +110,7 @@ class PathFindingComputeFacadeTest {
 
     @BeforeEach
     void setUp() {
-        when(catalogServiceMock.fetchGraphResources(any(), any(), any(), any(), any(), any(), any(), any()))
+        when(catalogServiceMock.fetchGraphResources(any(), any(), any(), any(), any(), any(), any()))
             .thenReturn(new GraphResources(mock(GraphStore.class), graph, mock(ResultStore.class)));
 
         when(progressTrackerFactoryMock.nullTracker())
@@ -280,6 +282,30 @@ class PathFindingComputeFacadeTest {
                 Optional.empty()
             ),
             new DagLongestPathParameters(
+                new Concurrency(2)
+            ),
+            jobIdMock,
+            true
+        );
+        assertThat(future.join()).isNotNull();
+    }
+
+    @Test
+    void randomWalk() {
+        var future = facade.randomWalk(
+            new GraphName("foo"),
+            new GraphParameters(
+                List.of(NodeLabel.of("Node")),
+                List.of(RelationshipType.of("REL")),
+                true,
+                Optional.empty()
+            ),
+            Optional.empty(),
+            new RandomWalkParameters(
+                List.of(idFunction.of("a")),
+                WalkParameters.DEFAULTS,
+                1000,
+                Optional.of(19L),
                 new Concurrency(2)
             ),
             jobIdMock,

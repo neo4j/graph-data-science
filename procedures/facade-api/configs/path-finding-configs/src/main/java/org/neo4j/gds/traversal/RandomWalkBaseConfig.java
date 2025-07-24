@@ -29,12 +29,12 @@ public interface RandomWalkBaseConfig extends AlgoBaseConfig, RelationshipWeight
 
     @Configuration.IntegerRange(min = 2)
     default int walkLength() {
-        return 80;
+        return WalkParameters.DEFAULTS.walkLength();
     }
 
     @Configuration.IntegerRange(min = 1)
     default int walksPerNode() {
-        return 10;
+        return WalkParameters.DEFAULTS.walksPerNode();
     }
 
     @Configuration.IntegerRange(min = 1)
@@ -44,12 +44,12 @@ public interface RandomWalkBaseConfig extends AlgoBaseConfig, RelationshipWeight
 
     @Configuration.DoubleRange(min = 0.0)
     default double inOutFactor() {
-        return 1.0;
+        return WalkParameters.DEFAULTS.inOutFactor();
     }
 
     @Configuration.DoubleRange(min = 0.0)
     default double returnFactor() {
-        return 1.0;
+        return WalkParameters.DEFAULTS.returnFactor();
     }
 
     @Configuration.Ignore

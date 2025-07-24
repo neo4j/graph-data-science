@@ -34,6 +34,7 @@ import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.loading.validation.NoAlgorithmValidation;
 import org.neo4j.gds.core.loading.validation.SourceNodeGraphStoreValidation;
 import org.neo4j.gds.core.loading.validation.SourceNodeTargetNodesGraphStoreValidation;
+import org.neo4j.gds.core.loading.validation.SourceNodesGraphStoreValidation;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.dag.longestPath.DagLongestPath;
 import org.neo4j.gds.dag.longestPath.DagLongestPathParameters;
@@ -43,6 +44,7 @@ import org.neo4j.gds.kspanningtree.KSpanningTree;
 import org.neo4j.gds.kspanningtree.KSpanningTreeParameters;
 import org.neo4j.gds.kspanningtree.KSpanningTreeTask;
 import org.neo4j.gds.pathfinding.validation.KSpanningTreeGraphStoreValidation;
+import org.neo4j.gds.pathfinding.validation.RandomWalkGraphValidation;
 import org.neo4j.gds.paths.bellmanford.BellmanFord;
 import org.neo4j.gds.paths.bellmanford.BellmanFordParameters;
 import org.neo4j.gds.paths.bellmanford.BellmanFordProgressTask;
@@ -60,6 +62,9 @@ import org.neo4j.gds.pricesteiner.PrizeSteinerTreeResult;
 import org.neo4j.gds.spanningtree.SpanningTree;
 import org.neo4j.gds.steiner.SteinerTreeResult;
 import org.neo4j.gds.termination.TerminationFlag;
+import org.neo4j.gds.traversal.RandomWalk;
+import org.neo4j.gds.traversal.RandomWalkParameters;
+import org.neo4j.gds.traversal.RandomWalkProgressTask;
 import org.neo4j.gds.traversal.TraversalParameters;
 
 import java.util.Optional;
@@ -115,7 +120,6 @@ public class PathFindingComputeFacade {
             relationshipProperty,
             new NoAlgorithmValidation(),
             Optional.empty(),
-            Optional.empty(),
             user,
             databaseId
         ).graph();
@@ -155,7 +159,6 @@ public class PathFindingComputeFacade {
             graphParameters,
             relationshipProperty,
             new NoAlgorithmValidation(),
-            Optional.empty(),
             Optional.empty(),
             user,
             databaseId
@@ -203,7 +206,6 @@ public class PathFindingComputeFacade {
                 parameters.sourceNode(),
                 parameters.targetNodes()
             ),
-            Optional.empty(),
             Optional.empty(),
             user,
             databaseId
@@ -255,7 +257,6 @@ public class PathFindingComputeFacade {
             relationshipProperty,
             new SourceNodeGraphStoreValidation(parameters.sourceNode()),
             Optional.empty(),
-            Optional.empty(),
             user,
             databaseId
         ).graph();
@@ -296,7 +297,6 @@ public class PathFindingComputeFacade {
                 parameters.sourceNode(),
                 parameters.targetNodes()
             ),
-            Optional.empty(),
             Optional.empty(),
             user,
             databaseId
@@ -346,7 +346,6 @@ public class PathFindingComputeFacade {
             relationshipProperty,
             new KSpanningTreeGraphStoreValidation(parameters.sourceNode()),
             Optional.empty(),
-            Optional.empty(),
             user,
             databaseId
         ).graph();
@@ -390,7 +389,6 @@ public class PathFindingComputeFacade {
             Optional.empty(),
             new NoAlgorithmValidation(),
             Optional.empty(),
-            Optional.empty(),
             user,
             databaseId
         ).graph();
@@ -418,13 +416,46 @@ public class PathFindingComputeFacade {
         );
     }
 
-    CompletableFuture<Stream<long[]>> randomWalk() {
+    CompletableFuture<Stream<long[]>> randomWalk(
+        GraphName graphName,
+        GraphParameters graphParameters,
+        Optional<String> relationshipProperty,
+        RandomWalkParameters parameters,
+        JobId jobId,
+        boolean logProgress
+    ) {
         // Fetch the Graph the algorithm will operate on
-        // Create ProgressTracker
-        // Create the algorithm
-        // Submit the algorithm for async computation
+        var graph = graphStoreCatalogService.fetchGraphResources(
+            graphName,
+            graphParameters,
+            relationshipProperty,
+            new SourceNodesGraphStoreValidation(parameters.sourceNodes()),
+            Optional.of(new RandomWalkGraphValidation(parameters.concurrency(), executorService)),
+            user,
+            databaseId
+        ).graph();
 
-        return CompletableFuture.failedFuture(new RuntimeException("Not yet implemented"));
+        // Create ProgressTracker
+        var progressTracker = progressTrackerFactory.create(
+            RandomWalkProgressTask.create(graph),
+            jobId,
+            parameters.concurrency(),
+            logProgress
+        );
+        // Create the algorithm
+        var randomWalk = RandomWalk.create(
+            graph,
+            parameters,
+            progressTracker,
+            executorService,
+            terminationFlag
+        );
+
+        // Submit the algorithm for async computation
+        return algorithmCaller.run(
+            randomWalk::compute,
+            jobId
+        );
     }
 
     CompletableFuture<HugeAtomicLongArray> randomWalkCountingNodeVisits() {
