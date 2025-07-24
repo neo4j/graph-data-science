@@ -26,6 +26,7 @@ import org.neo4j.gds.allshortestpaths.AllShortestPathsStreamResult;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.User;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.applications.algorithms.pathfinding.MSBFSASPAlgorithmFactory;
 import org.neo4j.gds.async.AsyncAlgorithmCaller;
 import org.neo4j.gds.collections.ha.HugeLongArray;
@@ -33,6 +34,7 @@ import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.loading.validation.NoAlgorithmValidation;
 import org.neo4j.gds.core.loading.validation.SourceNodeGraphStoreValidation;
+import org.neo4j.gds.core.loading.validation.SourceNodeTargetNodeGraphStoreValidation;
 import org.neo4j.gds.core.loading.validation.SourceNodeTargetNodesGraphStoreValidation;
 import org.neo4j.gds.core.loading.validation.SourceNodesGraphStoreValidation;
 import org.neo4j.gds.core.utils.progress.JobId;
@@ -46,6 +48,9 @@ import org.neo4j.gds.kspanningtree.KSpanningTreeTask;
 import org.neo4j.gds.pathfinding.validation.KSpanningTreeGraphStoreValidation;
 import org.neo4j.gds.pathfinding.validation.PCSTGraphStoreValidation;
 import org.neo4j.gds.pathfinding.validation.RandomWalkGraphValidation;
+import org.neo4j.gds.paths.RelationshipCountProgressTaskFactory;
+import org.neo4j.gds.paths.astar.AStar;
+import org.neo4j.gds.paths.astar.AStarParameters;
 import org.neo4j.gds.paths.bellmanford.BellmanFord;
 import org.neo4j.gds.paths.bellmanford.BellmanFordParameters;
 import org.neo4j.gds.paths.bellmanford.BellmanFordProgressTask;
@@ -549,13 +554,46 @@ public class PathFindingComputeFacade {
         );
     }
 
-    CompletableFuture<PathFindingResult> singlePairShortestPathAStar() {
+    CompletableFuture<PathFindingResult> singlePairShortestPathAStar(
+        GraphName graphName,
+        GraphParameters graphParameters,
+        Optional<String> relationshipProperty,
+        AStarParameters parameters,
+        JobId jobId,
+        boolean logProgress
+    ) {
         // Fetch the Graph the algorithm will operate on
-        // Create ProgressTracker
-        // Create the algorithm
-        // Submit the algorithm for async computation
+        var graph = graphStoreCatalogService.fetchGraphResources(
+            graphName,
+            graphParameters,
+            relationshipProperty,
+            new SourceNodeTargetNodeGraphStoreValidation(parameters.sourceNode(), parameters.targetNode()),
+            Optional.of(new RandomWalkGraphValidation(parameters.concurrency(), executorService)),
+            user,
+            databaseId
+        ).graph();
 
-        return CompletableFuture.failedFuture(new RuntimeException("Not yet implemented"));
+        // Create ProgressTracker
+        var progressTracker = progressTrackerFactory.create(
+            RelationshipCountProgressTaskFactory.create(AlgorithmLabel.AStar, graph.relationshipCount()),
+            jobId,
+            parameters.concurrency(),
+            logProgress
+        );
+
+        // Create the algorithm
+        var aStar = AStar.sourceTarget(
+            graph,
+            parameters,
+            progressTracker,
+            terminationFlag
+        );
+
+        // Submit the algorithm for async computation
+        return algorithmCaller.run(
+            aStar::compute,
+            jobId
+        );
     }
 
     CompletableFuture<PathFindingResult> singlePairShortestPathDijkstra() {
