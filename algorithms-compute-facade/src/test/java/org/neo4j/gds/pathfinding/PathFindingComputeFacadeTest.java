@@ -314,4 +314,28 @@ class PathFindingComputeFacadeTest {
         assertThat(future.join()).isNotNull();
     }
 
+    @Test
+    void randomWalkCountingNodeVisits() {
+        var future = facade.randomWalkCountingNodeVisits(
+            new GraphName("foo"),
+            new GraphParameters(
+                List.of(NodeLabel.of("Node")),
+                List.of(RelationshipType.of("REL")),
+                true,
+                Optional.empty()
+            ),
+            Optional.empty(),
+            new RandomWalkParameters(
+                List.of(idFunction.of("a")),
+                WalkParameters.DEFAULTS,
+                1000,
+                Optional.of(19L),
+                new Concurrency(2)
+            ),
+            jobIdMock,
+            true
+        );
+        assertThat(future.join()).isNotNull();
+    }
+
 }

@@ -78,6 +78,25 @@ public final class RandomWalkCountingNodeVisits extends Algorithm<HugeAtomicLong
         );
     }
 
+    public static RandomWalkCountingNodeVisits create(
+        Graph graph,
+        RandomWalkParameters parameters,
+        ProgressTracker progressTracker,
+        ExecutorService executorService,
+        TerminationFlag terminationFlag
+    ) {
+        return new RandomWalkCountingNodeVisits(
+            graph,
+            parameters.concurrency(),
+            executorService,
+            parameters.walkParameters(),
+            parameters.sourceNodes(),
+            parameters.randomSeed().orElseGet(() -> new Random().nextLong()),
+            progressTracker,
+            terminationFlag
+        );
+    }
+
     private RandomWalkCountingNodeVisits(
         Graph graph,
         Concurrency concurrency,

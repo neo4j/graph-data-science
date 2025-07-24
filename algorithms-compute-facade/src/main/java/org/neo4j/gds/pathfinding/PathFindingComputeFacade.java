@@ -63,6 +63,8 @@ import org.neo4j.gds.spanningtree.SpanningTree;
 import org.neo4j.gds.steiner.SteinerTreeResult;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.traversal.RandomWalk;
+import org.neo4j.gds.traversal.RandomWalkCountingNodeVisits;
+import org.neo4j.gds.traversal.RandomWalkCountingNodeVisitsProgressTaskFactory;
 import org.neo4j.gds.traversal.RandomWalkParameters;
 import org.neo4j.gds.traversal.RandomWalkProgressTask;
 import org.neo4j.gds.traversal.TraversalParameters;
@@ -458,13 +460,48 @@ public class PathFindingComputeFacade {
         );
     }
 
-    CompletableFuture<HugeAtomicLongArray> randomWalkCountingNodeVisits() {
+    CompletableFuture<HugeAtomicLongArray> randomWalkCountingNodeVisits(
+        GraphName graphName,
+        GraphParameters graphParameters,
+        Optional<String> relationshipProperty,
+        RandomWalkParameters parameters,
+        JobId jobId,
+        boolean logProgress
+    ) {
         // Fetch the Graph the algorithm will operate on
-        // Create ProgressTracker
-        // Create the algorithm
-        // Submit the algorithm for async computation
+        var graph = graphStoreCatalogService.fetchGraphResources(
+            graphName,
+            graphParameters,
+            relationshipProperty,
+            new SourceNodesGraphStoreValidation(parameters.sourceNodes()),
+            Optional.of(new RandomWalkGraphValidation(parameters.concurrency(), executorService)),
+            user,
+            databaseId
+        ).graph();
 
-        return CompletableFuture.failedFuture(new RuntimeException("Not yet implemented"));
+
+        // Create ProgressTracker
+        var progressTracker = progressTrackerFactory.create(
+            RandomWalkCountingNodeVisitsProgressTaskFactory.create(graph),
+            jobId,
+            parameters.concurrency(),
+            logProgress
+        );
+
+        // Create the algorithm
+        var randomWalkCountingNodeVisits = RandomWalkCountingNodeVisits.create(
+            graph,
+            parameters,
+            progressTracker,
+            executorService,
+            terminationFlag
+        );
+
+        // Submit the algorithm for async computation
+        return algorithmCaller.run(
+            randomWalkCountingNodeVisits::compute,
+            jobId
+        );
     }
 
     CompletableFuture<PrizeSteinerTreeResult> pcst() {
