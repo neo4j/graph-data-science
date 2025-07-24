@@ -52,6 +52,7 @@ import org.neo4j.gds.kspanningtree.KSpanningTreeParameters;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.paths.bellmanford.BellmanFordParameters;
 import org.neo4j.gds.paths.delta.DeltaSteppingParameters;
+import org.neo4j.gds.pcst.PCSTParameters;
 import org.neo4j.gds.spanningtree.PrimOperators;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.traversal.RandomWalkParameters;
@@ -96,8 +97,8 @@ class PathFindingComputeFacadeTest {
 
     @GdlGraph
     private static final String GDL = """
-        (a:Node)-[:REL]->(b:Node),
-        (b)-[:REL]->(c:Node),
+        (a:Node { prize: 1.0 })-[:REL]->(b:Node { prize: 2.0 }),
+        (b)-[:REL]->(c:Node { prize: 3.0 }),
         (a)-[:REL]->(c)
         """;
 
@@ -330,6 +331,26 @@ class PathFindingComputeFacadeTest {
                 WalkParameters.DEFAULTS,
                 1000,
                 Optional.of(19L),
+                new Concurrency(2)
+            ),
+            jobIdMock,
+            true
+        );
+        assertThat(future.join()).isNotNull();
+    }
+
+    @Test
+    void pcst() {
+        var future = facade.pcst(
+            new GraphName("foo"),
+            new GraphParameters(
+                List.of(NodeLabel.of("Node")),
+                List.of(RelationshipType.of("REL")),
+                true,
+                Optional.empty()
+            ),
+            new PCSTParameters(
+                "prize",
                 new Concurrency(2)
             ),
             jobIdMock,
