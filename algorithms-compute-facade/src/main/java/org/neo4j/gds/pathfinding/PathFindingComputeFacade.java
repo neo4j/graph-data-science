@@ -59,6 +59,7 @@ import org.neo4j.gds.paths.delta.DeltaStepping;
 import org.neo4j.gds.paths.delta.DeltaSteppingParameters;
 import org.neo4j.gds.paths.delta.DeltaSteppingProgressTask;
 import org.neo4j.gds.paths.dijkstra.DijkstraFactory;
+import org.neo4j.gds.paths.dijkstra.DijkstraSingleSourceParameters;
 import org.neo4j.gds.paths.dijkstra.DijkstraSourceTargetParameters;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.paths.traverse.BFS;
@@ -691,13 +692,48 @@ public class PathFindingComputeFacade {
         );
     }
 
-    CompletableFuture<PathFindingResult> singleSourceShortestPathDijkstra() {
+    CompletableFuture<PathFindingResult> singleSourceShortestPathDijkstra(
+        GraphName graphName,
+        GraphParameters graphParameters,
+        Optional<String> relationshipProperty,
+        DijkstraSingleSourceParameters parameters,
+        JobId jobId,
+        boolean logProgress
+    ) {
         // Fetch the Graph the algorithm will operate on
-        // Create ProgressTracker
-        // Create the algorithm
-        // Submit the algorithm for async computation
+        var graph = graphStoreCatalogService.fetchGraphResources(
+            graphName,
+            graphParameters,
+            relationshipProperty,
+            new SourceNodeGraphStoreValidation(parameters.sourceNode()),
+            Optional.empty(),
+            user,
+            databaseId
+        ).graph();
 
-        return CompletableFuture.failedFuture(new RuntimeException("Not yet implemented"));
+        // Create ProgressTracker
+        var progressTracker = progressTrackerFactory.create(
+            RelationshipCountProgressTaskFactory.create(AlgorithmLabel.SingleSourceDijkstra, graph.relationshipCount()),
+            jobId,
+            parameters.concurrency(),
+            logProgress
+        );
+
+        // Create the algorithm
+        var dijkstra = DijkstraFactory.singleSource(
+            graph,
+            parameters.sourceNode(),
+            false,
+            Optional.empty(),
+            progressTracker,
+            terminationFlag
+        );
+
+        // Submit the algorithm for async computation
+        return algorithmCaller.run(
+            dijkstra::compute,
+            jobId
+        );
     }
 
     CompletableFuture<SpanningTree> spanningTree() {

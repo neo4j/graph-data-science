@@ -53,6 +53,7 @@ import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.paths.astar.AStarParameters;
 import org.neo4j.gds.paths.bellmanford.BellmanFordParameters;
 import org.neo4j.gds.paths.delta.DeltaSteppingParameters;
+import org.neo4j.gds.paths.dijkstra.DijkstraSingleSourceParameters;
 import org.neo4j.gds.paths.dijkstra.DijkstraSourceTargetParameters;
 import org.neo4j.gds.paths.yens.YensParameters;
 import org.neo4j.gds.pcst.PCSTParameters;
@@ -425,6 +426,24 @@ class PathFindingComputeFacadeTest {
                 1,
                 new Concurrency(2)
             ),
+            jobIdMock,
+            true
+        );
+        assertThat(future.join()).isNotNull();
+    }
+
+    @Test
+    void singleSourceShortestPathDijkstra() {
+        var future = facade.singleSourceShortestPathDijkstra(
+            new GraphName("foo"),
+            new GraphParameters(
+                List.of(NodeLabel.of("Node")),
+                List.of(RelationshipType.of("REL")),
+                true,
+                Optional.empty()
+            ),
+            Optional.empty(),
+            new DijkstraSingleSourceParameters(idFunction.of("a")),
             jobIdMock,
             true
         );
