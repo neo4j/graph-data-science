@@ -93,12 +93,13 @@ class KmeansGridTest {
         var kmeansContext = KmeansContext.defaults();
 
         var nodePropertyValues = graph.nodeProperties("kmeans");
-
-        ClusterManager clusterManager = ClusterManager.createClusterManager(nodePropertyValues, 2, 2);
+        var coordinateSuppler = new CoordinatesSupplier(nodePropertyValues,2,2);
+        ClusterManager clusterManager = ClusterManager.create(nodePropertyValues, 2, 2,coordinateSuppler);
         HugeIntArray communities = HugeIntArray.newArray(graph.nodeCount());
         HugeDoubleArray distanceFromCentroid = HugeDoubleArray.newArray(graph.nodeCount());
         var tasks = List.of(
             KmeansTask.createTask(
+                coordinateSuppler,
                 SamplerType.KMEANSPP,
                 clusterManager,
                 nodePropertyValues,

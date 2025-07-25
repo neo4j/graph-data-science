@@ -20,19 +20,20 @@
 package org.neo4j.gds.kmeans;
 
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.mem.MemoryEstimation;
-import org.neo4j.gds.mem.MemoryEstimations;
-import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeIntArray;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.mem.Estimate;
+import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimations;
+import org.neo4j.gds.mem.MemoryRange;
 
 
-public abstract class KmeansTask implements Runnable {
+public  class KmeansTask implements Runnable {
     private final ClusterManager clusterManager;
     private final Partition partition;
     final NodePropertyValues nodePropertyValues;
+    private  final Coordinates clusterContributions;
 
     private final HugeDoubleArray distanceFromCentroid;
 
@@ -67,9 +68,7 @@ public abstract class KmeansTask implements Runnable {
         return builder.build();
     }
 
-    abstract void reset();
 
-    abstract void updateAfterAssignmentToCentroid(long nodeId, int community);
 
     KmeansTask(
         SamplerType samplerType,
@@ -79,7 +78,8 @@ public abstract class KmeansTask implements Runnable {
         HugeDoubleArray distanceFromCentroid,
         int k,
         int dimensions,
-        Partition partition
+        Partition partition,
+        Coordinates coordinates
     ) {
         this.clusterManager = clusterManager;
         this.nodePropertyValues = nodePropertyValues;
@@ -89,6 +89,7 @@ public abstract class KmeansTask implements Runnable {
         this.dimensions = dimensions;
         this.partition = partition;
         this.communitySizes = new long[k];
+        this.clusterContributions = coordinates;
         if (samplerType == SamplerType.UNIFORM) {
             this.phase = TaskPhase.ITERATION;
         } else {
@@ -98,6 +99,7 @@ public abstract class KmeansTask implements Runnable {
     }
 
     static KmeansTask createTask(
+        CoordinatesSupplier coordinatesSupplier,
         SamplerType samplerType,
         ClusterManager clusterManager,
         NodePropertyValues nodePropertyValues,
@@ -107,8 +109,7 @@ public abstract class KmeansTask implements Runnable {
         int dimensions,
         Partition partition
     ) {
-        if (clusterManager instanceof DoubleClusterManager) {
-            return new DoubleKmeansTask(
+            return new KmeansTask(
                 samplerType,
                 clusterManager,
                 nodePropertyValues,
@@ -116,21 +117,18 @@ public abstract class KmeansTask implements Runnable {
                 distanceFromCentroid,
                 k,
                 dimensions,
-                partition
+                partition,
+                coordinatesSupplier.get()
             );
-        }
-        return new FloatKmeansTask(
-            samplerType,
-            clusterManager,
-            nodePropertyValues,
-            communities,
-            distanceFromCentroid,
-            k,
-            dimensions,
-            partition
-        );
+
     }
 
+    void reset(){
+            for (int community = 0; community < k; ++community) {
+                communitySizes[community] = 0;
+                clusterContributions.reset(community);
+            }
+    }
     void switchToPhase(TaskPhase newPhase) {
         phase = newPhase;
     }
@@ -153,7 +151,8 @@ public abstract class KmeansTask implements Runnable {
             //we keep as is and do a subtraction when a node changes its cluster.
             //On that note,  maybe we can skip stable communities (i.e., communities that did not change between one iteration to another)
             // or avoid calculating their distance from other nodes etc...
-            updateAfterAssignmentToCentroid(nodeId, closestCommunity);
+
+            clusterContributions.addTo(nodeId,closestCommunity);
         }
     }
 
@@ -202,11 +201,14 @@ public abstract class KmeansTask implements Runnable {
                 }
                 int communityId = communities.get(nodeId);
                 communitySizes[communityId]++;
-                updateAfterAssignmentToCentroid(nodeId, communityId);
+                clusterContributions.addTo(nodeId,communityId);
             }
         }
     }
 
+    Coordinates clusterContributions(){
+        return  clusterContributions;
+    }
     @Override
     public void run() {
         var startNode = partition.startNode();

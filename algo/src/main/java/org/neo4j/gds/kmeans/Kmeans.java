@@ -166,11 +166,13 @@ public final class Kmeans extends Algorithm<KmeansResult> {
         //note: currentDistanceFromCentroid is not reset to a [0,...,0] distance array, but it does not have to
         // it's used only in K-Means++ (where it is essentially reset; see func distanceFromLastSampledCentroid in KmeansTask)
         // or during final distance calculation where it is reset as well (see calculateFinalDistance in KmeansTask)
+        var coordinateSupplier  = new CoordinatesSupplier(nodePropertyValues,dimensions,parameters.k());
 
-        ClusterManager clusterManager = ClusterManager.createClusterManager(
+        var clusterManager = ClusterManager.create(
             nodePropertyValues,
             dimensions,
-            parameters.k()
+            parameters.k(),
+            coordinateSupplier
         );
 
         currentCommunities.setAll(v -> UNASSIGNED);
@@ -179,6 +181,7 @@ public final class Kmeans extends Algorithm<KmeansResult> {
             concurrency,
             nodeCount,
             partition -> KmeansTask.createTask(
+                coordinateSupplier,
                 parameters.samplerType(),
                 clusterManager,
                 nodePropertyValues,

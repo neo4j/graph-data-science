@@ -73,11 +73,14 @@ public class KmeansPlusPlusTest {
 
         var nodePropertyValues = graph.nodeProperties("kmeans");
 
-        ClusterManager clusterManager = ClusterManager.createClusterManager(nodePropertyValues, 1, 3);
+        var coordinateSuppler = new CoordinatesSupplier(nodePropertyValues,1,3);
+
+        ClusterManager clusterManager = ClusterManager.create(nodePropertyValues, 1, 3,coordinateSuppler);
         HugeIntArray communities = HugeIntArray.newArray(10);
         HugeDoubleArray distanceFromCentroid = HugeDoubleArray.newArray(10);
         var tasks = List.of(
             KmeansTask.createTask(
+                coordinateSuppler,
                 SamplerType.KMEANSPP,
                 clusterManager,
                 nodePropertyValues,
@@ -88,6 +91,7 @@ public class KmeansPlusPlusTest {
                 new Partition(0, 5)
             ),
             KmeansTask.createTask(
+                coordinateSuppler,
                 SamplerType.KMEANSPP,
                 clusterManager,
                 nodePropertyValues,

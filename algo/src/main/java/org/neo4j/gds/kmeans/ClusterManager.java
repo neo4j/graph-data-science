@@ -19,40 +19,50 @@
  */
 package org.neo4j.gds.kmeans;
 
-import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.mem.Estimate;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryEstimations;
 import org.neo4j.gds.mem.MemoryRange;
-import org.neo4j.gds.mem.Estimate;
 
 import java.util.List;
 
-abstract class ClusterManager {
+final class ClusterManager {
 
-    final long[] nodesInCluster;
+    private final long[] nodesInCluster;
+    private final Coordinates centroids;
+    private final boolean[] shouldReset;
+    private final int dimensions;
+    private final int k;
 
-    final boolean[] shouldReset;
-    final NodePropertyValues nodePropertyValues;
-    final int dimensions;
-    final int k;
+    private int currentlyAssigned;
 
-    int currentlyAssigned;
-
-    ClusterManager(NodePropertyValues values, int dimensions, int k) {
+   private ClusterManager(Coordinates centroids, NodePropertyValues values, int dimensions, int k) {
         this.dimensions = dimensions;
         this.k = k;
-        this.nodePropertyValues = values;
-        this.nodesInCluster = new long[k];
+       this.nodesInCluster = new long[k];
         this.currentlyAssigned = 0;
         this.shouldReset = new boolean[k];
+        this.centroids = centroids;
     }
+    static ClusterManager create( NodePropertyValues values, int dimensions, int k, CoordinatesSupplier coordinatesSupplier){
+       var centroids = coordinatesSupplier.get();
+       return new ClusterManager(
+           centroids,
+           values,
+           dimensions
+           ,k
+       );
+    }
+
 
     int getCurrentlyAssigned() {
         return currentlyAssigned;
     }
 
-    abstract void initialAssignCluster(long id);
+    void initialAssignCluster(long nodeId){
+            centroids.assignTo(nodeId,currentlyAssigned++);
+   }
 
     void reset() {
         for (int centroidId = 0; centroidId < k; ++centroidId) {
@@ -70,43 +80,53 @@ abstract class ClusterManager {
             }
         }
     }
-    abstract  void normalize(int centroidId,int dimension);
+    void normalize(int centroidId,int dimension){
+        centroids.normalizeDimension(centroidId,dimension,nodesInCluster[centroidId]);
+    }
 
-    abstract void updateFromTask(KmeansTask task);
+    void  updateFromTask(KmeansTask task){
+        for (int centroidId = 0; centroidId < k; ++centroidId) {
+            var contribution = task.getNumAssignedAtCluster(centroidId);
+            if (contribution > 0) {
+                if (shouldReset[centroidId]) {
+                    centroids.reset(centroidId);
+                    shouldReset[centroidId] = false;
+                }
+                nodesInCluster[centroidId] += contribution;
+                centroids.add(centroidId,task.clusterContributions());
+            }
+        }
+    }
 
     void initializeCentroids(List<Long> initialCentroidIds) {
-        currentlyAssigned = 0;
         for (Long currentId : initialCentroidIds) {
             initialAssignCluster(currentId);
         }
     }
 
-    abstract double[][] getCentroids();
+     double[][] getCentroids(){
+        return  centroids.coordinates();
+     }
 
-    public long[] getNodesInCluster() {
+     long[] getNodesInCluster() {
         return nodesInCluster;
     }
 
-    static ClusterManager createClusterManager(NodePropertyValues values, int dimensions, int k) {
-        if (values.valueType() == ValueType.FLOAT_ARRAY) {
-            return new FloatClusterManager(values, dimensions, k);
-        }
-        return new DoubleClusterManager(values, dimensions, k);
-    }
-
-    public abstract double euclidean(long nodeId, int centroidId);
-
-    public int findClosestCentroid(long nodeId) {
+    int findClosestCentroid(long nodeId) {
         int community = 0;
         double smallestDistance = Double.MAX_VALUE;
         for (int centroidId = 0; centroidId < k; ++centroidId) {
-            double distance = euclidean(nodeId, centroidId);
+            double distance = centroids.euclideanDistance(nodeId, centroidId);
             if (Double.compare(distance, smallestDistance) < 0) {
                 smallestDistance = distance;
                 community = centroidId;
             }
         }
         return community;
+    }
+
+    double euclidean(long nodeId, int centroidId){
+       return  centroids.euclideanDistance(nodeId,centroidId);
     }
 
     static MemoryEstimation memoryEstimation(int k, int fakeDimensions) {
@@ -121,5 +141,8 @@ abstract class ClusterManager {
         return builder.build();
     }
 
-    public abstract void assignSeededCentroids(List<List<Double>> seededCentroids);
+    void assignSeededCentroids(List<List<Double>> seededCentroids){
+       centroids.assign(seededCentroids);
+       currentlyAssigned+=seededCentroids.size();
+    }
 }
