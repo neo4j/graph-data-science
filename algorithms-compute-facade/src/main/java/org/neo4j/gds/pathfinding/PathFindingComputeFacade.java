@@ -77,6 +77,9 @@ import org.neo4j.gds.pricesteiner.PrizeSteinerTreeResult;
 import org.neo4j.gds.spanningtree.Prim;
 import org.neo4j.gds.spanningtree.SpanningTree;
 import org.neo4j.gds.spanningtree.SpanningTreeParameters;
+import org.neo4j.gds.steiner.ShortestPathsSteinerAlgorithm;
+import org.neo4j.gds.steiner.SteinerTreeParameters;
+import org.neo4j.gds.steiner.SteinerTreeProgressTask;
 import org.neo4j.gds.steiner.SteinerTreeResult;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.traversal.RandomWalk;
@@ -781,13 +784,57 @@ public class PathFindingComputeFacade {
         );
     }
 
-    CompletableFuture<SteinerTreeResult> steinerTree() {
+    CompletableFuture<SteinerTreeResult> steinerTree(
+        GraphName graphName,
+        GraphParameters graphParameters,
+        Optional<String> relationshipProperty,
+        SteinerTreeParameters parameters,
+        JobId jobId,
+        boolean logProgress
+    ) {
         // Fetch the Graph the algorithm will operate on
-        // Create ProgressTracker
-        // Create the algorithm
-        // Submit the algorithm for async computation
+        var graph = graphStoreCatalogService.fetchGraphResources(
+            graphName,
+            graphParameters,
+            relationshipProperty,
+            new SourceNodeTargetNodesGraphStoreValidation(parameters.sourceNode(), parameters.targetNodes()),
+            Optional.empty(),
+            user,
+            databaseId
+        ).graph();
 
-        return CompletableFuture.failedFuture(new RuntimeException("Not yet implemented"));
+        // Create ProgressTracker
+        var progressTracker = progressTrackerFactory.create(
+            SteinerTreeProgressTask.create(parameters, graph.nodeCount()),
+            jobId,
+            parameters.concurrency(),
+            logProgress
+        );
+
+        // Create the algorithm
+        var mappedSourceNodeId = graph.toMappedNodeId(parameters.sourceNode());
+        var mappedTargetNodeIds = parameters.targetNodes()
+            .stream()
+            .map(graph::safeToMappedNodeId)
+            .toList();
+
+        var steinerTree = new ShortestPathsSteinerAlgorithm(
+            graph,
+            mappedSourceNodeId,
+            mappedTargetNodeIds,
+            parameters.delta(),
+            parameters.concurrency(),
+            parameters.applyRerouting(),
+            executorService,
+            progressTracker,
+            terminationFlag
+        );
+
+        // Submit the algorithm for async computation
+        return algorithmCaller.run(
+            steinerTree::compute,
+            jobId
+        );
     }
 
     CompletableFuture<TopologicalSortResult> topologicalSort() {
