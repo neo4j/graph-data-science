@@ -66,6 +66,9 @@ import org.neo4j.gds.paths.traverse.BFSProgressTask;
 import org.neo4j.gds.paths.traverse.DFS;
 import org.neo4j.gds.paths.traverse.DFSProgressTask;
 import org.neo4j.gds.paths.traverse.ExitAndAggregation;
+import org.neo4j.gds.paths.yens.Yens;
+import org.neo4j.gds.paths.yens.YensParameters;
+import org.neo4j.gds.paths.yens.YensProgressTask;
 import org.neo4j.gds.pcst.PCSTParameters;
 import org.neo4j.gds.pricesteiner.PCSTFast;
 import org.neo4j.gds.pricesteiner.PCSTProgressTrackerTaskCreator;
@@ -643,13 +646,49 @@ public class PathFindingComputeFacade {
         );
     }
 
-    CompletableFuture<PathFindingResult> singlePairShortestPathYens() {
+    CompletableFuture<PathFindingResult> singlePairShortestPathYens(
+        GraphName graphName,
+        GraphParameters graphParameters,
+        Optional<String> relationshipProperty,
+        YensParameters parameters,
+        JobId jobId,
+        boolean logProgress
+    ) {
         // Fetch the Graph the algorithm will operate on
-        // Create ProgressTracker
-        // Create the algorithm
-        // Submit the algorithm for async computation
+        var graph = graphStoreCatalogService.fetchGraphResources(
+            graphName,
+            graphParameters,
+            relationshipProperty,
+            new SourceNodeTargetNodeGraphStoreValidation(parameters.sourceNode(), parameters.targetNode()),
+            Optional.empty(),
+            user,
+            databaseId
+        ).graph();
 
-        return CompletableFuture.failedFuture(new RuntimeException("Not yet implemented"));
+        // Create ProgressTracker
+        var progressTracker = progressTrackerFactory.create(
+            YensProgressTask.create(
+                graph.relationshipCount(),
+                parameters.k()
+            ),
+            jobId,
+            parameters.concurrency(),
+            logProgress
+        );
+
+        // Create the algorithm
+        var yens = Yens.sourceTarget(
+            graph,
+            parameters,
+            progressTracker,
+            terminationFlag
+        );
+
+        // Submit the algorithm for async computation
+        return algorithmCaller.run(
+            yens::compute,
+            jobId
+        );
     }
 
     CompletableFuture<PathFindingResult> singleSourceShortestPathDijkstra() {
