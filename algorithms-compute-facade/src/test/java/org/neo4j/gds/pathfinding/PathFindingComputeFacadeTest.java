@@ -43,6 +43,7 @@ import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.tasks.IterativeTask;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.dag.longestPath.DagLongestPathParameters;
+import org.neo4j.gds.dag.topologicalsort.TopologicalSortParameters;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
@@ -490,6 +491,27 @@ class PathFindingComputeFacadeTest {
                 List.of(idFunction.of("c")),
                 2.0,
                 false
+            ),
+            jobIdMock,
+            true
+        );
+        assertThat(future.join()).isNotNull();
+    }
+
+    @Test
+    void topologicalSort() {
+        var future = facade.topologicalSort(
+            new GraphName("foo"),
+            new GraphParameters(
+                List.of(NodeLabel.of("Node")),
+                List.of(RelationshipType.of("REL")),
+                true,
+                Optional.empty()
+            ),
+            Optional.empty(),
+            new TopologicalSortParameters(
+                false,
+                new Concurrency(4)
             ),
             jobIdMock,
             true

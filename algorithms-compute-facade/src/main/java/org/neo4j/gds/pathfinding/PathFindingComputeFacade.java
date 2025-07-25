@@ -41,6 +41,9 @@ import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.dag.longestPath.DagLongestPath;
 import org.neo4j.gds.dag.longestPath.DagLongestPathParameters;
 import org.neo4j.gds.dag.longestPath.LongestPathTask;
+import org.neo4j.gds.dag.topologicalsort.TopSortTask;
+import org.neo4j.gds.dag.topologicalsort.TopologicalSort;
+import org.neo4j.gds.dag.topologicalsort.TopologicalSortParameters;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortResult;
 import org.neo4j.gds.kspanningtree.KSpanningTree;
 import org.neo4j.gds.kspanningtree.KSpanningTreeParameters;
@@ -837,13 +840,47 @@ public class PathFindingComputeFacade {
         );
     }
 
-    CompletableFuture<TopologicalSortResult> topologicalSort() {
+    CompletableFuture<TopologicalSortResult> topologicalSort(
+        GraphName graphName,
+        GraphParameters graphParameters,
+        Optional<String> relationshipProperty,
+        TopologicalSortParameters parameters,
+        JobId jobId,
+        boolean logProgress
+    ) {
         // Fetch the Graph the algorithm will operate on
-        // Create ProgressTracker
-        // Create the algorithm
-        // Submit the algorithm for async computation
+        var graph = graphStoreCatalogService.fetchGraphResources(
+            graphName,
+            graphParameters,
+            relationshipProperty,
+            new NoAlgorithmValidation(),
+            Optional.empty(),
+            user,
+            databaseId
+        ).graph();
 
-        return CompletableFuture.failedFuture(new RuntimeException("Not yet implemented"));
+        // Create ProgressTracker
+        var progressTracker = progressTrackerFactory.create(
+            TopSortTask.create(graph),
+            jobId,
+            parameters.concurrency(),
+            logProgress
+        );
+
+        // Create the algorithm
+        var topologicalSort = new TopologicalSort(
+            graph,
+            progressTracker,
+            parameters.concurrency(),
+            parameters.computeMaxDistanceFromSource(),
+            terminationFlag
+        );
+
+        // Submit the algorithm for async computation
+        return algorithmCaller.run(
+            topologicalSort::compute,
+            jobId
+        );
     }
 
 }
