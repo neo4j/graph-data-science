@@ -19,10 +19,18 @@
  */
 package org.neo4j.gds.spanningtree;
 
+import org.neo4j.gds.AlgorithmParameters;
 import org.neo4j.gds.annotation.Parameters;
+import org.neo4j.gds.core.concurrency.Concurrency;
 
 import java.util.function.DoubleUnaryOperator;
 
 @Parameters
-public record SpanningTreeParameters(DoubleUnaryOperator objective, long sourceNode) {
+public record SpanningTreeParameters(DoubleUnaryOperator objective, long sourceNode) implements AlgorithmParameters {
+    private static final Concurrency SINGLE_THREADED = new Concurrency(1);
+
+    @Override
+    public Concurrency concurrency() {
+        return SINGLE_THREADED;
+    }
 }

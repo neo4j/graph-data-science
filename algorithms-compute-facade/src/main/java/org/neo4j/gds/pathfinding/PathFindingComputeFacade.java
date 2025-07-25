@@ -74,7 +74,9 @@ import org.neo4j.gds.pcst.PCSTParameters;
 import org.neo4j.gds.pricesteiner.PCSTFast;
 import org.neo4j.gds.pricesteiner.PCSTProgressTrackerTaskCreator;
 import org.neo4j.gds.pricesteiner.PrizeSteinerTreeResult;
+import org.neo4j.gds.spanningtree.Prim;
 import org.neo4j.gds.spanningtree.SpanningTree;
+import org.neo4j.gds.spanningtree.SpanningTreeParameters;
 import org.neo4j.gds.steiner.SteinerTreeResult;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.traversal.RandomWalk;
@@ -736,13 +738,47 @@ public class PathFindingComputeFacade {
         );
     }
 
-    CompletableFuture<SpanningTree> spanningTree() {
+    CompletableFuture<SpanningTree> spanningTree(
+        GraphName graphName,
+        GraphParameters graphParameters,
+        Optional<String> relationshipProperty,
+        SpanningTreeParameters parameters,
+        JobId jobId,
+        boolean logProgress
+    ) {
         // Fetch the Graph the algorithm will operate on
-        // Create ProgressTracker
-        // Create the algorithm
-        // Submit the algorithm for async computation
+        var graph = graphStoreCatalogService.fetchGraphResources(
+            graphName,
+            graphParameters,
+            relationshipProperty,
+            new SourceNodeGraphStoreValidation(parameters.sourceNode()),
+            Optional.empty(),
+            user,
+            databaseId
+        ).graph();
 
-        return CompletableFuture.failedFuture(new RuntimeException("Not yet implemented"));
+        // Create ProgressTracker
+        var progressTracker = progressTrackerFactory.create(
+            RelationshipCountProgressTaskFactory.create(AlgorithmLabel.SpanningTree, graph.relationshipCount()),
+            jobId,
+            parameters.concurrency(),
+            logProgress
+        );
+
+        // Create the algorithm
+        var prim = new Prim(
+            graph,
+            parameters.objective(),
+            graph.toMappedNodeId(parameters.sourceNode()),
+            progressTracker,
+            terminationFlag
+        );
+
+        // Submit the algorithm for async computation
+        return algorithmCaller.run(
+            prim::compute,
+            jobId
+        );
     }
 
     CompletableFuture<SteinerTreeResult> steinerTree() {
