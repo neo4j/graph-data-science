@@ -19,28 +19,29 @@
  */
 package org.neo4j.gds.kmeans;
 
-import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.core.utils.Intersections;
 
-import java.util.function.Supplier;
+class DoubleArrayDistances implements Distances {
 
-public final class CoordinatesSupplier implements Supplier<Coordinate> {
+    private final NodePropertyValues nodePropertyValues;
 
-    private final NodePropertyValues values;
-    private final  int dimensions;
-
-    public CoordinatesSupplier(NodePropertyValues nodePropertyValues, int dimensions, int k) {
-        this.values = nodePropertyValues;
-        this.dimensions = dimensions;
+    DoubleArrayDistances(NodePropertyValues nodePropertyValues) {
+        this.nodePropertyValues = nodePropertyValues;
     }
 
     @Override
-    public Coordinate get() {
-        if (values.valueType() == ValueType.FLOAT_ARRAY) {
-            return new FloatArrayCoordinate(dimensions, values);
-         } else if (values.valueType() == ValueType.DOUBLE_ARRAY) {
-            return new DoubleArrayCoordinate(dimensions, values);
-        }
-        throw new IllegalArgumentException("Incorrect data type");
+    public double distance(long nodeA, long nodeB) {
+        double[] left = nodePropertyValues.doubleArrayValue(nodeA);
+        double[] right = nodePropertyValues.doubleArrayValue(nodeB);
+        return Math.sqrt(Intersections.sumSquareDelta(left, right, right.length));
+    }
+
+    @Override
+    public double distance(long nodeA, Coordinate coordinate) {
+        double[] left = nodePropertyValues.doubleArrayValue(nodeA);
+        double[] right =  coordinate.coordinate();
+        return Math.sqrt(Intersections.sumSquareDelta(left, right, right.length));
+
     }
 }

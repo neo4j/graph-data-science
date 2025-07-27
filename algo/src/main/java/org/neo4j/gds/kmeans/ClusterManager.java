@@ -32,27 +32,38 @@ final class ClusterManager {
     private final long[] nodesInCluster;
     private final Coordinates centroids;
     private final boolean[] shouldReset;
-    private final int dimensions;
     private final int k;
 
     private int currentlyAssigned;
 
-   private ClusterManager(Coordinates centroids, NodePropertyValues values, int dimensions, int k) {
-        this.dimensions = dimensions;
+    private final Distances distances;
+
+    private ClusterManager(
+        Distances distances,
+        Coordinates centroids,
+        int k
+    ) {
         this.k = k;
-       this.nodesInCluster = new long[k];
+        this.nodesInCluster = new long[k];
         this.currentlyAssigned = 0;
         this.shouldReset = new boolean[k];
         this.centroids = centroids;
+        this.distances = distances;
     }
-    static ClusterManager create( NodePropertyValues values, int dimensions, int k, CoordinatesSupplier coordinatesSupplier){
-       var centroids = coordinatesSupplier.get();
-       return new ClusterManager(
-           centroids,
-           values,
-           dimensions
-           ,k
-       );
+
+    static ClusterManager create(
+        NodePropertyValues values,
+        int dimensions,
+        int k,
+        CoordinatesSupplier coordinatesSupplier,
+        Distances distances
+    ) {
+        var centroids = Coordinates.create(k, dimensions, coordinatesSupplier);
+        return new ClusterManager(
+            distances,
+            centroids,
+            k
+        );
     }
 
 
@@ -60,9 +71,9 @@ final class ClusterManager {
         return currentlyAssigned;
     }
 
-    void initialAssignCluster(long nodeId){
-            centroids.assignTo(nodeId,currentlyAssigned++);
-   }
+    void initialAssignCluster(long nodeId) {
+        centroids.assignTo(nodeId, currentlyAssigned++);
+    }
 
     void reset() {
         for (int centroidId = 0; centroidId < k; ++centroidId) {
@@ -71,20 +82,15 @@ final class ClusterManager {
         }
     }
 
-     void normalizeClusters(){
+    void normalizeClusters() {
         for (int centroidId = 0; centroidId < k; ++centroidId) {
             if (nodesInCluster[centroidId] > 0) {
-                for (int dimension = 0; dimension < dimensions; ++dimension) {
-                    normalize(centroidId,dimension);
-                }
+                centroids.normalizeDimension(centroidId, nodesInCluster[centroidId]);
             }
         }
     }
-    void normalize(int centroidId,int dimension){
-        centroids.normalizeDimension(centroidId,dimension,nodesInCluster[centroidId]);
-    }
 
-    void  updateFromTask(KmeansTask task){
+    void updateFromTask(KmeansTask task) {
         for (int centroidId = 0; centroidId < k; ++centroidId) {
             var contribution = task.getNumAssignedAtCluster(centroidId);
             if (contribution > 0) {
@@ -93,7 +99,7 @@ final class ClusterManager {
                     shouldReset[centroidId] = false;
                 }
                 nodesInCluster[centroidId] += contribution;
-                centroids.add(centroidId,task.clusterContributions());
+                centroids.add(centroidId, task.clusterContributions());
             }
         }
     }
@@ -104,11 +110,11 @@ final class ClusterManager {
         }
     }
 
-     double[][] getCentroids(){
-        return  centroids.coordinates();
-     }
+    double[][] getCentroids() {
+        return centroids.coordinates();
+    }
 
-     long[] getNodesInCluster() {
+    long[] getNodesInCluster() {
         return nodesInCluster;
     }
 
@@ -116,7 +122,7 @@ final class ClusterManager {
         int community = 0;
         double smallestDistance = Double.MAX_VALUE;
         for (int centroidId = 0; centroidId < k; ++centroidId) {
-            double distance = centroids.euclideanDistance(nodeId, centroidId);
+            double distance = distances.distance(nodeId, centroids.coordinateAt(centroidId));
             if (Double.compare(distance, smallestDistance) < 0) {
                 smallestDistance = distance;
                 community = centroidId;
@@ -125,8 +131,8 @@ final class ClusterManager {
         return community;
     }
 
-    double euclidean(long nodeId, int centroidId){
-       return  centroids.euclideanDistance(nodeId,centroidId);
+    double euclidean(long nodeId, int centroid) {
+        return distances.distance(nodeId, centroids.coordinateAt(centroid));
     }
 
     static MemoryEstimation memoryEstimation(int k, int fakeDimensions) {
@@ -134,15 +140,19 @@ final class ClusterManager {
         builder
             .fixed("nodesInCluster", Estimate.sizeOfLongArray(k))
             .fixed("shouldReset", Estimate.sizeOfArray(k, 1L))
-            .add("centroidsSize", MemoryEstimations.of("centroidsSize", MemoryRange.of(
-                Estimate.sizeOfFloatArray(fakeDimensions),
-                Estimate.sizeOfDoubleArray(fakeDimensions)
-            )));
+            .add(
+                "centroidsSize", MemoryEstimations.of(
+                    "centroidsSize", MemoryRange.of(
+                        Estimate.sizeOfFloatArray(fakeDimensions),
+                        Estimate.sizeOfDoubleArray(fakeDimensions)
+                    )
+                )
+            );
         return builder.build();
     }
 
-    void assignSeededCentroids(List<List<Double>> seededCentroids){
-       centroids.assign(seededCentroids);
-       currentlyAssigned+=seededCentroids.size();
+    void assignSeededCentroids(List<List<Double>> seededCentroids) {
+        centroids.assign(seededCentroids);
+        currentlyAssigned += seededCentroids.size();
     }
 }

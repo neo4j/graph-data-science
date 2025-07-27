@@ -22,18 +22,25 @@ package org.neo4j.gds.kmeans;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.utils.Intersections;
 
-class DoubleArraySilhouetteDistances implements SilhouetteDistances{
+class FloatArrayDistances implements Distances {
 
     private final NodePropertyValues nodePropertyValues;
 
-    DoubleArraySilhouetteDistances(NodePropertyValues nodePropertyValues) {
+    FloatArrayDistances(NodePropertyValues nodePropertyValues) {
         this.nodePropertyValues = nodePropertyValues;
     }
 
     @Override
     public double distance(long nodeA, long nodeB) {
-        double[] left = nodePropertyValues.doubleArrayValue(nodeA);
-        double[] right = nodePropertyValues.doubleArrayValue(nodeB);
+        float[] left = nodePropertyValues.floatArrayValue(nodeA);
+        float[] right = nodePropertyValues.floatArrayValue(nodeB);
+        return Math.sqrt(Intersections.sumSquareDelta(left, right, right.length));
+    }
+
+    @Override
+    public double distance(long nodeA, Coordinate coordinate) {
+        float[] left = nodePropertyValues.floatArrayValue(nodeA);
+        float[] right =  ((FloatArrayCoordinate)coordinate).floatCoordinate();
         return Math.sqrt(Intersections.sumSquareDelta(left, right, right.length));
     }
 }

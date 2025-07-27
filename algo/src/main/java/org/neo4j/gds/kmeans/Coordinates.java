@@ -21,15 +21,66 @@ package org.neo4j.gds.kmeans;
 
 import java.util.List;
 
-public interface Coordinates {
+public final class Coordinates {
 
-    void addTo(long nodeId, int coordinateId);
-    void normalizeDimension(int coordinateId, int dimension, long length);
-    void add(int coordinateId, Coordinates outsideCoordinates);
-    void reset(int coordinateId);
-    double euclideanDistance(long nodeId, int coordinateId);
-    double[][] coordinates();
-    void assign(List<List<Double>>  seededCoordinates);
-    void assignTo(long nodeId, int coordinateId);
+    private final Coordinate[] coordinates;
+    private final int k;
+    private final int dimensions;
 
+    private Coordinates(Coordinate[] coordinates, int k, int dimensions) {
+        this.coordinates = coordinates;
+        this.k = k;
+        this.dimensions = dimensions;
+    }
+
+    static Coordinates create(
+        int k,
+        int dimensions,
+        CoordinatesSupplier coordinatesSupplier
+    ){
+        var coordinates = new Coordinate[k];
+        for (int i=0;i<k;++i){
+            coordinates[i] = coordinatesSupplier.get();
+        }
+         return  new Coordinates(coordinates,k,dimensions);
+    }
+
+
+    public void addTo(long nodeId, int coordinateId) {
+        coordinates[coordinateId].addTo(nodeId);
+    }
+
+    void normalizeDimension(int coordinateId, long length) {
+            coordinates[coordinateId].normalize(length);
+    }
+
+    public void assign(List<List<Double>>  seededCoordinates) {
+        int currentlyAssigned =0;
+        for (List<Double> coordinate : seededCoordinates) {
+            coordinates[currentlyAssigned++].assign(coordinate);
+        }
+    }
+
+
+    public void add(int coordinateId, Coordinates outsideCoordinates) {
+        coordinates[coordinateId].add(outsideCoordinates.coordinateAt(coordinateId));
+    }
+
+    public void reset(int coordinateId) {
+        coordinates[coordinateId].reset();
+    }
+    Coordinate coordinateAt(int coordinateId){
+        return  coordinates[coordinateId];
+    }
+    double[][] coordinates() {
+        double[][] doubleCoordinates = new double[k][dimensions];
+        for (int i = 0; i < k; ++i) {
+            doubleCoordinates[i] = coordinates[i].coordinate();
+        }
+        return doubleCoordinates;
+    }
+
+    void assignTo(long nodeId, int coordinateId) {
+         coordinates[coordinateId].assign(nodeId);
+    }
 }

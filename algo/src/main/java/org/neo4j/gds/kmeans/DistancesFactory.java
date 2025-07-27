@@ -22,17 +22,17 @@ package org.neo4j.gds.kmeans;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 
-final class SilhouetteDistancesFactory {
+final class DistancesFactory {
 
 
-    private SilhouetteDistancesFactory() {}
+    private DistancesFactory() {}
 
-    static SilhouetteDistances create(NodePropertyValues values){
+    static Distances create(NodePropertyValues values){
 
         if (values.valueType() == ValueType.FLOAT_ARRAY) {
-            return new FloatArraySilhouetteDistances(values);
+            return new FloatArrayDistances(values);
         } else if (values.valueType() == ValueType.DOUBLE_ARRAY) {
-            return new DoubleArraySilhouetteDistances(values);
+            return new DoubleArrayDistances(values);
         }
 
         throw new IllegalArgumentException("Incorrect data type");

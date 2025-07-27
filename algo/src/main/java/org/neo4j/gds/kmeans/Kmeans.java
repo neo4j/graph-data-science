@@ -167,12 +167,14 @@ public final class Kmeans extends Algorithm<KmeansResult> {
         // it's used only in K-Means++ (where it is essentially reset; see func distanceFromLastSampledCentroid in KmeansTask)
         // or during final distance calculation where it is reset as well (see calculateFinalDistance in KmeansTask)
         var coordinateSupplier  = new CoordinatesSupplier(nodePropertyValues,dimensions,parameters.k());
+        var distances = DistancesFactory.create(nodePropertyValues);
 
         var clusterManager = ClusterManager.create(
             nodePropertyValues,
             dimensions,
             parameters.k(),
-            coordinateSupplier
+            coordinateSupplier,
+            distances
         );
 
         currentCommunities.setAll(v -> UNASSIGNED);
@@ -182,6 +184,7 @@ public final class Kmeans extends Algorithm<KmeansResult> {
             nodeCount,
             partition -> KmeansTask.createTask(
                 coordinateSupplier,
+                distances,
                 parameters.samplerType(),
                 clusterManager,
                 nodePropertyValues,
@@ -340,7 +343,7 @@ public final class Kmeans extends Algorithm<KmeansResult> {
         progressTracker.beginSubTask();
         this.silhouette = HugeDoubleArray.newArray(nodeCount);
 
-        var silhouetteDistances = SilhouetteDistancesFactory.create(nodePropertyValues);
+        var silhouetteDistances = DistancesFactory.create(nodePropertyValues);
         var tasks = PartitionUtils.rangePartition(
             concurrency,
             nodeCount,
@@ -379,7 +382,7 @@ public final class Kmeans extends Algorithm<KmeansResult> {
             .run();
         double averageDistanceFromCentroid = 0;
         for (KmeansTask task : tasks) {
-            averageDistanceFromCentroid += task.getDistanceFromCentroidNormalized();
+            averageDistanceFromCentroid += task.distanceFromCentroidNormalized();
         }
         return averageDistanceFromCentroid;
     }

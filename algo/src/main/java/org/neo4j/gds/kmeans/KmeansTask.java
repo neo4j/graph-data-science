@@ -33,7 +33,8 @@ public  class KmeansTask implements Runnable {
     private final ClusterManager clusterManager;
     private final Partition partition;
     final NodePropertyValues nodePropertyValues;
-    private  final Coordinates clusterContributions;
+    private final Coordinates clusterContributions;
+    private final Distances distances;
 
     private final HugeDoubleArray distanceFromCentroid;
 
@@ -79,7 +80,8 @@ public  class KmeansTask implements Runnable {
         int k,
         int dimensions,
         Partition partition,
-        Coordinates coordinates
+        Coordinates coordinates,
+        Distances distances
     ) {
         this.clusterManager = clusterManager;
         this.nodePropertyValues = nodePropertyValues;
@@ -96,10 +98,12 @@ public  class KmeansTask implements Runnable {
             this.phase = TaskPhase.INITIAL;
         }
         this.distance = 0d;
+        this.distances = distances;
     }
 
     static KmeansTask createTask(
         CoordinatesSupplier coordinatesSupplier,
+        Distances distances,
         SamplerType samplerType,
         ClusterManager clusterManager,
         NodePropertyValues nodePropertyValues,
@@ -109,6 +113,8 @@ public  class KmeansTask implements Runnable {
         int dimensions,
         Partition partition
     ) {
+
+        var coordinates  = Coordinates.create(k,dimensions,coordinatesSupplier);
             return new KmeansTask(
                 samplerType,
                 clusterManager,
@@ -118,12 +124,13 @@ public  class KmeansTask implements Runnable {
                 k,
                 dimensions,
                 partition,
-                coordinatesSupplier.get()
+                coordinates,
+                distances
             );
 
     }
 
-    void reset(){
+    private void reset(){
             for (int community = 0; community < k; ++community) {
                 communitySizes[community] = 0;
                 clusterContributions.reset(community);
@@ -156,11 +163,11 @@ public  class KmeansTask implements Runnable {
         }
     }
 
-    public double getDistanceFromCentroidNormalized() {
+    double distanceFromCentroidNormalized() {
         return distance / communities.size();
     }
 
-    public double getSquaredDistance() {
+    double squaredDistance() {
         return squaredDistance;
     }
 
@@ -168,7 +175,7 @@ public  class KmeansTask implements Runnable {
 
 
         for (long nodeId = startNode; nodeId < endNode; nodeId++) {
-            double nodeCentroidDistance = clusterManager.euclidean(nodeId, communities.get(nodeId));
+            double nodeCentroidDistance =  clusterManager.euclidean(nodeId, communities.get(nodeId));
             distance += nodeCentroidDistance;
             distanceFromCentroid.set(nodeId, nodeCentroidDistance);
 

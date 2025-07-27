@@ -30,7 +30,7 @@ import java.util.List;
 import java.util.SplittableRandom;
 import java.util.concurrent.ExecutorService;
 
-public class KmeansPlusPlusSampler extends KmeansSampler {
+class KmeansPlusPlusSampler extends KmeansSampler {
 
     private final List<KmeansTask> tasks;
     private final Concurrency concurrency;
@@ -39,7 +39,7 @@ public class KmeansPlusPlusSampler extends KmeansSampler {
     private final ExecutorService executorService;
 
 
-    public KmeansPlusPlusSampler(
+    KmeansPlusPlusSampler(
         SplittableRandom random,
         ClusterManager clusterManager,
         long nodeCount,
@@ -76,7 +76,7 @@ public class KmeansPlusPlusSampler extends KmeansSampler {
 
             double squaredDistance = 0;
             for (KmeansTask task : tasks) {
-                squaredDistance += task.getSquaredDistance();
+                squaredDistance += task.squaredDistance();
             }
             long nextNode = -1;
 

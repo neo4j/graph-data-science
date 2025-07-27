@@ -19,21 +19,8 @@
  */
 package org.neo4j.gds.kmeans;
 
-import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.core.utils.Intersections;
+interface Distances {
 
-class FloatArraySilhouetteDistances implements SilhouetteDistances{
-
-    private final NodePropertyValues nodePropertyValues;
-
-    FloatArraySilhouetteDistances(NodePropertyValues nodePropertyValues) {
-        this.nodePropertyValues = nodePropertyValues;
-    }
-
-    @Override
-    public double distance(long nodeA, long nodeB) {
-        float[] left = nodePropertyValues.floatArrayValue(nodeA);
-        float[] right = nodePropertyValues.floatArrayValue(nodeB);
-        return Math.sqrt(Intersections.sumSquareDelta(left, right, right.length));
-    }
+    double distance(long nodeA, long nodeB);
+    double distance(long nodeA, Coordinate coordinate);
 }

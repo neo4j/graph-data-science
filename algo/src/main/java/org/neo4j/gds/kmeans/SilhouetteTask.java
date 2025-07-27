@@ -36,12 +36,12 @@ class SilhouetteTask implements Runnable {
     private final long[] nodesInCluster;
 
     private final int k;
-    private final SilhouetteDistances silhouetteDistances;
+    private final Distances distances;
 
     private double averageSilhouette;
 
     SilhouetteTask(
-        SilhouetteDistances silhouetteDistances,
+        Distances distances,
         HugeIntArray communities,
         HugeDoubleArray silhouette,
         int k,
@@ -49,7 +49,7 @@ class SilhouetteTask implements Runnable {
         Partition partition,
         ProgressTracker progressTracker
     ) {
-        this.silhouetteDistances = silhouetteDistances;
+        this.distances = distances;
         this.communities = communities;
         this.k = k;
         this.partition = partition;
@@ -78,7 +78,7 @@ class SilhouetteTask implements Runnable {
                     if (oNodeId == nodeId) {
                         continue;
                     }
-                    double euclidean = silhouetteDistances.distance(nodeId, oNodeId);
+                    double euclidean = distances.distance(nodeId, oNodeId);
                     int oClusterId = communities.get(oNodeId);
                     clusterDistance[oClusterId] += euclidean;
                 }

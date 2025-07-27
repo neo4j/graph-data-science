@@ -19,8 +19,15 @@
  */
 package org.neo4j.gds.kmeans;
 
-@FunctionalInterface
-interface SilhouetteDistances {
+import java.util.List;
 
-    double distance(long nodeA, long nodeB);
+public interface Coordinate {
+
+    double[] coordinate();
+    void reset();
+    void assign(long nodeId);
+    void assign(List<Double> coordinate);
+    void normalize(long length);
+    void add(Coordinate externalCoordinate);
+    void addTo(long nodeId);
 }
