@@ -39,9 +39,9 @@ public final class CoordinatesSupplier implements Supplier<Coordinates> {
     @Override
     public Coordinates get() {
         if (values.valueType() == ValueType.FLOAT_ARRAY) {
-            return new FloatCoordinates(k, dimensions,values);
+            return new FloatArrayCoordinates(k, dimensions,values);
         } else if (values.valueType() == ValueType.DOUBLE_ARRAY) {
-            return new DoubleCoordinates(k, dimensions, values);
+            return new DoubleArrayCoordinates(k, dimensions, values);
         }
         throw new IllegalArgumentException("Incorrect data type");
     }

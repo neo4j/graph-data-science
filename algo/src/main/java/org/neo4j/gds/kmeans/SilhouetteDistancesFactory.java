@@ -19,17 +19,22 @@
  */
 package org.neo4j.gds.kmeans;
 
-import java.util.List;
+import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 
-public interface Coordinates {
+final class SilhouetteDistancesFactory {
 
-    void addTo(long nodeId, int coordinateId);
-    void normalizeDimension(int coordinateId, int dimension, long length);
-    void add(int coordinateId, Coordinates outsideCoordinates);
-    void reset(int coordinateId);
-    double euclideanDistance(long nodeId, int coordinateId);
-    double[][] coordinates();
-    void assign(List<List<Double>>  seededCoordinates);
-    void assignTo(long nodeId, int coordinateId);
 
+    private SilhouetteDistancesFactory() {}
+
+    static SilhouetteDistances create(NodePropertyValues values){
+
+        if (values.valueType() == ValueType.FLOAT_ARRAY) {
+            return new FloatArraySilhouetteDistances(values);
+        } else if (values.valueType() == ValueType.DOUBLE_ARRAY) {
+            return new DoubleArraySilhouetteDistances(values);
+        }
+
+        throw new IllegalArgumentException("Incorrect data type");
+    }
 }

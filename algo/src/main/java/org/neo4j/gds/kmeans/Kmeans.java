@@ -339,15 +339,16 @@ public final class Kmeans extends Algorithm<KmeansResult> {
         var nodeCount = graph.nodeCount();
         progressTracker.beginSubTask();
         this.silhouette = HugeDoubleArray.newArray(nodeCount);
+
+        var silhouetteDistances = SilhouetteDistancesFactory.create(nodePropertyValues);
         var tasks = PartitionUtils.rangePartition(
             concurrency,
             nodeCount,
-            partition -> SilhouetteTask.createTask(
-                nodePropertyValues,
+            partition -> new SilhouetteTask(
+                silhouetteDistances,
                 bestCommunities,
                 silhouette,
                 parameters.k(),
-                dimensions,
                 nodesInCluster,
                 partition,
                 progressTracker
@@ -361,7 +362,7 @@ public final class Kmeans extends Algorithm<KmeansResult> {
             .run();
 
         for (var task : tasks) {
-            averageSilhouette += task.getAverageSilhouette();
+            averageSilhouette += task.averageSilhouette();
         }
         progressTracker.endSubTask();
 

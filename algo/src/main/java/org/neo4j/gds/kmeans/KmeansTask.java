@@ -218,7 +218,7 @@ public  class KmeansTask implements Runnable {
         } else if (phase == TaskPhase.DISTANCE) {
             calculateFinalDistance(startNode, endNode);
         } else {
-            distanceFromLastSampledCentroid(startNode, endNode, clusterManager.getCurrentlyAssigned());
+            distanceFromLastSampledCentroid(startNode, endNode, clusterManager.currentlyAssigned());
         }
     }
 }

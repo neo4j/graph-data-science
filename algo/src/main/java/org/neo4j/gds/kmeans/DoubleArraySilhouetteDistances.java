@@ -19,17 +19,21 @@
  */
 package org.neo4j.gds.kmeans;
 
-import java.util.List;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.core.utils.Intersections;
 
-public interface Coordinates {
+class DoubleArraySilhouetteDistances implements SilhouetteDistances{
 
-    void addTo(long nodeId, int coordinateId);
-    void normalizeDimension(int coordinateId, int dimension, long length);
-    void add(int coordinateId, Coordinates outsideCoordinates);
-    void reset(int coordinateId);
-    double euclideanDistance(long nodeId, int coordinateId);
-    double[][] coordinates();
-    void assign(List<List<Double>>  seededCoordinates);
-    void assignTo(long nodeId, int coordinateId);
+    private final NodePropertyValues nodePropertyValues;
 
+    DoubleArraySilhouetteDistances(NodePropertyValues nodePropertyValues) {
+        this.nodePropertyValues = nodePropertyValues;
+    }
+
+    @Override
+    public double distance(long nodeA, long nodeB) {
+        double[] left = nodePropertyValues.doubleArrayValue(nodeA);
+        double[] right = nodePropertyValues.doubleArrayValue(nodeB);
+        return Math.sqrt(Intersections.sumSquareDelta(left, right, right.length));
+    }
 }

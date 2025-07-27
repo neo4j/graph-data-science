@@ -19,48 +19,39 @@
  */
 package org.neo4j.gds.kmeans;
 
-import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.core.utils.Intersections;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeIntArray;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
-public abstract class SilhouetteTask implements Runnable {
+class SilhouetteTask implements Runnable {
 
-    final HugeIntArray communities;
-    final HugeDoubleArray silhouette;
+    private final HugeIntArray communities;
+    private final HugeDoubleArray silhouette;
 
-    final double[] clusterDistance;
-    final ProgressTracker progressTracker;
-    final Partition partition;
+    private final double[] clusterDistance;
+    private final ProgressTracker progressTracker;
+    private final Partition partition;
 
-    final long[] nodesInCluster;
+    private final long[] nodesInCluster;
 
-    final int k;
-    final int dimensions;
+    private final int k;
+    private final SilhouetteDistances silhouetteDistances;
 
-    double averageSilhouette;
-    final NodePropertyValues nodePropertyValues;
-
-    abstract double distance(long nodeA, long nodeB);
-
+    private double averageSilhouette;
 
     SilhouetteTask(
-        NodePropertyValues nodePropertyValues,
+        SilhouetteDistances silhouetteDistances,
         HugeIntArray communities,
         HugeDoubleArray silhouette,
         int k,
-        int dimensions,
         long[] nodesInCluster,
         Partition partition,
         ProgressTracker progressTracker
     ) {
-        this.nodePropertyValues = nodePropertyValues;
+        this.silhouetteDistances = silhouetteDistances;
         this.communities = communities;
         this.k = k;
-        this.dimensions = dimensions;
         this.partition = partition;
         this.progressTracker = progressTracker;
         this.silhouette = silhouette;
@@ -87,7 +78,7 @@ public abstract class SilhouetteTask implements Runnable {
                     if (oNodeId == nodeId) {
                         continue;
                     }
-                    double euclidean = distance(nodeId, oNodeId);
+                    double euclidean = silhouetteDistances.distance(nodeId, oNodeId);
                     int oClusterId = communities.get(oNodeId);
                     clusterDistance[oClusterId] += euclidean;
                 }
@@ -108,108 +99,8 @@ public abstract class SilhouetteTask implements Runnable {
         }
     }
 
-    public double getAverageSilhouette() {return averageSilhouette / (double) (communities.size());}
-
-    public static SilhouetteTask createTask(
-        NodePropertyValues nodePropertyValues,
-        HugeIntArray communities,
-        HugeDoubleArray silhouette,
-        int k,
-        int dimensions,
-        long[] nodesInCluster,
-        Partition partition,
-        ProgressTracker progressTracker
-    ) {
-        if (nodePropertyValues.valueType() == ValueType.FLOAT_ARRAY) {
-            return new FloatSilhouetteTask(
-                nodePropertyValues,
-                communities,
-                silhouette,
-                k,
-                dimensions,
-                nodesInCluster,
-                partition,
-                progressTracker
-            );
-        }
-        return new DoubleSilhouetteTask(
-            nodePropertyValues,
-            communities,
-            silhouette,
-            k,
-            dimensions,
-            nodesInCluster,
-            partition,
-            progressTracker
-        );
-
-    }
+    public double averageSilhouette() {return averageSilhouette / (double) (communities.size());}
 }
 
-class DoubleSilhouetteTask extends SilhouetteTask {
-
-    DoubleSilhouetteTask(
-        NodePropertyValues nodePropertyValues,
-        HugeIntArray communities,
-        HugeDoubleArray silhouette,
-        int k,
-        int dimensions,
-        long[] nodesInCluster,
-        Partition partition,
-        ProgressTracker progressTracker
-    ) {
-        super(
-            nodePropertyValues,
-            communities,
-            silhouette,
-            k,
-            dimensions,
-            nodesInCluster,
-            partition,
-            progressTracker
-        );
-    }
-
-
-    @Override
-    double distance(long nodeA, long nodeB) {
-        double[] left = nodePropertyValues.doubleArrayValue(nodeA);
-        double[] right = nodePropertyValues.doubleArrayValue(nodeB);
-        return Math.sqrt(Intersections.sumSquareDelta(left, right, right.length));
-    }
-}
-
-class FloatSilhouetteTask extends SilhouetteTask {
-
-    FloatSilhouetteTask(
-        NodePropertyValues nodePropertyValues,
-        HugeIntArray communities,
-        HugeDoubleArray silhouette,
-        int k,
-        int dimensions,
-        long[] nodesInCluster,
-        Partition partition,
-        ProgressTracker progressTracker
-    ) {
-        super(
-            nodePropertyValues,
-            communities,
-            silhouette,
-            k,
-            dimensions,
-            nodesInCluster,
-            partition,
-            progressTracker
-        );
-    }
-
-    @Override
-    double distance(long nodeA, long nodeB) {
-        float[] left = nodePropertyValues.floatArrayValue(nodeA);
-        float[] right = nodePropertyValues.floatArrayValue(nodeB);
-        return Math.sqrt(Intersections.sumSquareDelta(left, right, right.length));
-
-    }
-}
 
 

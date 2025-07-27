@@ -56,7 +56,7 @@ final class ClusterManager {
     }
 
 
-    int getCurrentlyAssigned() {
+    int currentlyAssigned() {
         return currentlyAssigned;
     }
 
