@@ -83,10 +83,8 @@ public class KmeansPlusPlusTest {
         var tasks = List.of(
             KmeansTask.createTask(
                 coordinateSuppler,
-                distances,
                 SamplerType.KMEANSPP,
                 clusterManager,
-                nodePropertyValues,
                 communities,
                 distanceFromCentroid,
                 3,
@@ -95,10 +93,8 @@ public class KmeansPlusPlusTest {
             ),
             KmeansTask.createTask(
                 coordinateSuppler,
-                distances,
                 SamplerType.KMEANSPP,
                 clusterManager,
-                nodePropertyValues,
                 communities,
                 distanceFromCentroid,
                 3,

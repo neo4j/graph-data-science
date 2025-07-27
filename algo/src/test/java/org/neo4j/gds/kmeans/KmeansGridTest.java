@@ -107,10 +107,8 @@ class KmeansGridTest {
         var tasks = List.of(
             KmeansTask.createTask(
                 coordinateSuppler,
-                distances,
                 SamplerType.KMEANSPP,
                 clusterManager,
-                nodePropertyValues,
                 communities,
                 distanceFromCentroid,
                 2,

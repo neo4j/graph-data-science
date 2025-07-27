@@ -19,11 +19,11 @@
  */
 package org.neo4j.gds.kmeans;
 
-public class KmeansIterationStopper {
+class KmeansIterationStopper {
     private final long swapsBound;
     private final int maxIterations;
 
-    public KmeansIterationStopper(
+    KmeansIterationStopper(
         double deltaSwaps,
         int maxIterations,
         long nodeCount
@@ -36,9 +36,7 @@ public class KmeansIterationStopper {
         if (iteration == maxIterations) {
             return true;
         }
-        if (iteration > 1 && swaps <= swapsBound) { //in the first iteration, it should never care about swaps  as it starts from a blank state
-            return true;
-        }
-        return false;
+        //in the first iteration, it should never care about swaps  as it starts from a blank state
+        return iteration > 1 && swaps <= swapsBound;
     }
 }

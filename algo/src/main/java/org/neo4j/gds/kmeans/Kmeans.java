@@ -184,10 +184,8 @@ public final class Kmeans extends Algorithm<KmeansResult> {
             nodeCount,
             partition -> KmeansTask.createTask(
                 coordinateSupplier,
-                distances,
                 parameters.samplerType(),
                 clusterManager,
-                nodePropertyValues,
                 currentCommunities,
                 currentDistanceFromCentroid,
                 parameters.k(),
@@ -233,7 +231,7 @@ public final class Kmeans extends Algorithm<KmeansResult> {
                     .run();
 
                 for (KmeansTask task : tasks) {
-                    numberOfSwaps += task.getSwaps();
+                    numberOfSwaps += task.swaps();
                 }
             }
             recomputeCentroids(clusterManager, tasks);

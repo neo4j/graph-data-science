@@ -36,7 +36,7 @@ public class KmeansUniformSampler extends KmeansSampler {
         clusterManager.initializeCentroids(initialCentroids);
     }
 
-    public KmeansUniformSampler(
+    KmeansUniformSampler(
         SplittableRandom random,
         ClusterManager clusterManager,
         long nodeCount,

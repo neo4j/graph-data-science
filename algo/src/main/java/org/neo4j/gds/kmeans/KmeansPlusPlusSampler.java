@@ -101,10 +101,9 @@ class KmeansPlusPlusSampler extends KmeansSampler {
                 }
             }
             if (nextNode == -1) {
-                nextNode = random.nextLong(nodeCount);
-                while (bitSet.get(nextNode)) {
+                do {
                     nextNode = random.nextLong(nodeCount);
-                }
+                } while (bitSet.get(nextNode));
             }
             assignToCluster(bitSet, selectionClusterId, nextNode);
             progressTracker.logProgress(1);

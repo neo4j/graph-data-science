@@ -27,7 +27,7 @@ import org.neo4j.gds.mem.MemoryRange;
 
 import java.util.List;
 
-final class ClusterManager {
+public final class ClusterManager {
 
     private final long[] nodesInCluster;
     private final Coordinates centroids;
@@ -92,7 +92,7 @@ final class ClusterManager {
 
     void updateFromTask(KmeansTask task) {
         for (int centroidId = 0; centroidId < k; ++centroidId) {
-            var contribution = task.getNumAssignedAtCluster(centroidId);
+            var contribution = task.assignedToCluster(centroidId);
             if (contribution > 0) {
                 if (shouldReset[centroidId]) {
                     centroids.reset(centroidId);

@@ -38,7 +38,7 @@ public abstract class KmeansSampler {
 
     public abstract void performInitialSampling();
 
-    public KmeansSampler(
+    KmeansSampler(
         SplittableRandom random,
         ClusterManager clusterManager,
         long nodeCount,

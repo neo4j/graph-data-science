@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.kmeans;
 
-import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeIntArray;
 import org.neo4j.gds.core.utils.partition.Partition;
@@ -32,16 +31,13 @@ import org.neo4j.gds.mem.MemoryRange;
 public  class KmeansTask implements Runnable {
     private final ClusterManager clusterManager;
     private final Partition partition;
-    final NodePropertyValues nodePropertyValues;
     private final Coordinates clusterContributions;
-    private final Distances distances;
 
     private final HugeDoubleArray distanceFromCentroid;
 
-    final HugeIntArray communities;
-    final long[] communitySizes;
-    final int k;
-    final int dimensions;
+    private final HugeIntArray communities;
+    private final long[] communitySizes;
+    private final int k;
     private long swaps;
 
     private double distance;
@@ -50,11 +46,11 @@ public  class KmeansTask implements Runnable {
 
     private TaskPhase phase;
 
-    long getNumAssignedAtCluster(int ith) {
+    long assignedToCluster(int ith) {
         return communitySizes[ith];
     }
 
-    long getSwaps() {
+    long swaps() {
         return swaps;
     }
 
@@ -71,24 +67,19 @@ public  class KmeansTask implements Runnable {
 
 
 
-    KmeansTask(
+    private KmeansTask(
         SamplerType samplerType,
         ClusterManager clusterManager,
-        NodePropertyValues nodePropertyValues,
         HugeIntArray communities,
         HugeDoubleArray distanceFromCentroid,
         int k,
-        int dimensions,
         Partition partition,
-        Coordinates coordinates,
-        Distances distances
+        Coordinates coordinates
     ) {
         this.clusterManager = clusterManager;
-        this.nodePropertyValues = nodePropertyValues;
         this.communities = communities;
         this.distanceFromCentroid = distanceFromCentroid;
         this.k = k;
-        this.dimensions = dimensions;
         this.partition = partition;
         this.communitySizes = new long[k];
         this.clusterContributions = coordinates;
@@ -98,15 +89,12 @@ public  class KmeansTask implements Runnable {
             this.phase = TaskPhase.INITIAL;
         }
         this.distance = 0d;
-        this.distances = distances;
     }
 
     static KmeansTask createTask(
         CoordinatesSupplier coordinatesSupplier,
-        Distances distances,
         SamplerType samplerType,
         ClusterManager clusterManager,
-        NodePropertyValues nodePropertyValues,
         HugeIntArray communities,
         HugeDoubleArray distanceFromCentroid,
         int k,
@@ -118,14 +106,11 @@ public  class KmeansTask implements Runnable {
             return new KmeansTask(
                 samplerType,
                 clusterManager,
-                nodePropertyValues,
                 communities,
                 distanceFromCentroid,
                 k,
-                dimensions,
                 partition,
-                coordinates,
-                distances
+                coordinates
             );
 
     }
