@@ -40,6 +40,8 @@ public final class CoordinatesSupplier implements Supplier<Coordinate> {
             return new FloatArrayCoordinate(dimensions, values);
          } else if (values.valueType() == ValueType.DOUBLE_ARRAY) {
             return new DoubleArrayCoordinate(dimensions, values);
+        }else if (values.valueType()== ValueType.DOUBLE){
+            return  new ScalarCoordinate(values);
         }
         throw new IllegalArgumentException("Incorrect data type");
     }

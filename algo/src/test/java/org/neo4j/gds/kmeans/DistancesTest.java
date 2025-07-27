@@ -22,6 +22,7 @@ package org.neo4j.gds.kmeans;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.properties.nodes.DoubleArrayNodePropertyValues;
+import org.neo4j.gds.api.properties.nodes.DoubleNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.FloatArrayNodePropertyValues;
 
 import java.util.List;
@@ -82,4 +83,32 @@ class DistancesTest {
 
     }
 
+    @Test
+    void shouldWorkWithScalarValues(){
+        var values = new DoubleNodePropertyValues(){
+
+
+            @Override
+            public double doubleValue(long nodeId) {
+                return nodeId;
+            }
+
+            @Override
+            public long nodeCount() {
+                return 10;
+            }
+        };
+        var distances = new ScalarDistances(values);
+
+        assertThat(distances.distance(2,5)).isEqualTo(3);
+        assertThat(distances.distance(5,2)).isEqualTo(3);
+
+
+        var scalarCoordinate = new ScalarCoordinate(values);
+        scalarCoordinate.assign(List.of(5d));
+
+        assertThat(distances.distance(2,scalarCoordinate)).isEqualTo(3);
+        assertThat(distances.distance(5,scalarCoordinate)).isEqualTo(0);
+
+    }
 }

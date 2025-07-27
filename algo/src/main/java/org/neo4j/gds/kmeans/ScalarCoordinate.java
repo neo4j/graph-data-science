@@ -21,70 +21,58 @@ package org.neo4j.gds.kmeans;
 
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 
-import java.util.Arrays;
 import java.util.List;
 
-class DoubleArrayCoordinate implements Coordinate {
+class ScalarCoordinate implements Coordinate {
 
-    private final int dimensions;
-    private final double[] coordinate;
+    private double value;
     private final NodePropertyValues nodePropertyValues;
 
-    DoubleArrayCoordinate(int dimensions, NodePropertyValues nodePropertyValues) {
-        this.coordinate = new double[dimensions];
+    ScalarCoordinate(NodePropertyValues nodePropertyValues) {
+        this.value = 0;
         this.nodePropertyValues = nodePropertyValues;
-        this.dimensions = dimensions;
     }
 
     @Override
     public double[] coordinate() {
-        return coordinate;
+        return new double[]{value};
     }
 
     @Override
     public void reset() {
-        Arrays.fill(coordinate, 0d);
+        value = 0;
     }
 
     @Override
     public void assign(long nodeId) {
-        var property = nodePropertyValues.doubleArrayValue(nodeId);
-        System.arraycopy(property, 0, coordinate, 0, dimensions);
+        value = nodePropertyValues.doubleValue(nodeId);
+
     }
 
     @Override
     public void assign(List<Double> coordinate) {
-        int index = 0;
-        for (double value : coordinate) {
-            this.coordinate[index++] = (float) value;
-        }
+        value = coordinate.getFirst();
     }
 
     @Override
     public void normalize(long length) {
-        for (int i = 0; i < dimensions; ++i) {
-            coordinate[i] /= (double) length;
-        }
+        value /= (double) length;
     }
 
     @Override
     public void add(Coordinate externalCoordinate) {
-        var doubleArrayCoordinate = (DoubleArrayCoordinate) externalCoordinate;
-        for (int i = 0; i < dimensions; ++i) {
-            coordinate[i] += doubleArrayCoordinate.valueAt(i);
-        }
+        var scalarCoordinate = (ScalarCoordinate) externalCoordinate;
+        value += scalarCoordinate.value();
     }
 
     @Override
     public void addTo(long nodeId) {
-        var property = nodePropertyValues.doubleArrayValue(nodeId);
-        for (int i = 0; i < dimensions; ++i) {
-            coordinate[i] += property[i];
-        }
+        var property = nodePropertyValues.doubleValue(nodeId);
+        value += property;
     }
 
-    private double valueAt(int index) {
-        return coordinate[index];
+    double value() {
+        return value;
     }
 
 }

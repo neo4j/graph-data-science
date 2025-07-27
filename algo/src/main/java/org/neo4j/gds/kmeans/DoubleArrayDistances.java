@@ -40,7 +40,7 @@ class DoubleArrayDistances implements Distances {
     @Override
     public double distance(long nodeA, Coordinate coordinate) {
         double[] left = nodePropertyValues.doubleArrayValue(nodeA);
-        double[] right =  coordinate.coordinate();
+        double[] right = coordinate.coordinate();
         return Math.sqrt(Intersections.sumSquareDelta(left, right, right.length));
 
     }

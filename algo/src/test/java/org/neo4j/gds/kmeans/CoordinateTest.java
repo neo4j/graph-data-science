@@ -21,6 +21,7 @@ package org.neo4j.gds.kmeans;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.properties.nodes.DoubleArrayNodePropertyValues;
+import org.neo4j.gds.api.properties.nodes.DoubleNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.FloatArrayNodePropertyValues;
 
 import java.util.List;
@@ -95,4 +96,36 @@ class CoordinateTest {
         assertThat(coordinate.coordinate()).containsExactly(2d,2d);
     }
 
+    @Test
+    void shouldWorkWithScalars(){
+        var values = new DoubleNodePropertyValues(){
+
+
+            @Override
+            public double doubleValue(long nodeId) {
+                return nodeId;
+            }
+
+            @Override
+            public long nodeCount() {
+                return 5;
+            }
+        };
+
+        var coordinate = new ScalarCoordinate(values);
+        coordinate.assign(List.of(1d));
+        assertThat(coordinate.coordinate()).containsExactly(1d);
+        coordinate.reset();
+        assertThat(coordinate.coordinate()).containsExactly(0d);
+        coordinate.assign(3);
+        assertThat(coordinate.coordinate()).containsExactly(3d);
+        coordinate.addTo(1);
+        assertThat(coordinate.coordinate()).containsExactly(4d);
+        var toAdd = new ScalarCoordinate(values);
+        toAdd.assign(2);
+        coordinate.add(toAdd);
+        assertThat(coordinate.coordinate()).containsExactly(6d);
+        coordinate.normalize(3);
+        assertThat(coordinate.coordinate()).containsExactly(2d);
+    }
 }

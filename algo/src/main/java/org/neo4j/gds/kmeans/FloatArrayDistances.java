@@ -40,7 +40,7 @@ class FloatArrayDistances implements Distances {
     @Override
     public double distance(long nodeA, Coordinate coordinate) {
         float[] left = nodePropertyValues.floatArrayValue(nodeA);
-        float[] right =  ((FloatArrayCoordinate)coordinate).floatCoordinate();
+        float[] right = ((FloatArrayCoordinate) coordinate).floatCoordinate();
         return Math.sqrt(Intersections.sumSquareDelta(left, right, right.length));
     }
 }

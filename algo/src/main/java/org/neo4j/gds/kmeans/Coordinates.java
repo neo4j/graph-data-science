@@ -37,12 +37,12 @@ public final class Coordinates {
         int k,
         int dimensions,
         CoordinatesSupplier coordinatesSupplier
-    ){
+    ) {
         var coordinates = new Coordinate[k];
-        for (int i=0;i<k;++i){
+        for (int i = 0; i < k; ++i) {
             coordinates[i] = coordinatesSupplier.get();
         }
-         return  new Coordinates(coordinates,k,dimensions);
+        return new Coordinates(coordinates, k, dimensions);
     }
 
 
@@ -51,11 +51,11 @@ public final class Coordinates {
     }
 
     void normalizeDimension(int coordinateId, long length) {
-            coordinates[coordinateId].normalize(length);
+        coordinates[coordinateId].normalize(length);
     }
 
-    public void assign(List<List<Double>>  seededCoordinates) {
-        int currentlyAssigned =0;
+    public void assign(List<List<Double>> seededCoordinates) {
+        int currentlyAssigned = 0;
         for (List<Double> coordinate : seededCoordinates) {
             coordinates[currentlyAssigned++].assign(coordinate);
         }
@@ -69,9 +69,11 @@ public final class Coordinates {
     public void reset(int coordinateId) {
         coordinates[coordinateId].reset();
     }
-    Coordinate coordinateAt(int coordinateId){
-        return  coordinates[coordinateId];
+
+    Coordinate coordinateAt(int coordinateId) {
+        return coordinates[coordinateId];
     }
+
     double[][] coordinates() {
         double[][] doubleCoordinates = new double[k][dimensions];
         for (int i = 0; i < k; ++i) {
@@ -81,6 +83,6 @@ public final class Coordinates {
     }
 
     void assignTo(long nodeId, int coordinateId) {
-         coordinates[coordinateId].assign(nodeId);
+        coordinates[coordinateId].assign(nodeId);
     }
 }

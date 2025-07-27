@@ -122,7 +122,7 @@ public final class ClusterManager {
         int community = 0;
         double smallestDistance = Double.MAX_VALUE;
         for (int centroidId = 0; centroidId < k; ++centroidId) {
-            double distance = distances.distance(nodeId, centroids.coordinateAt(centroidId));
+            double distance = distanceFromCentroid(nodeId,centroidId);
             if (Double.compare(distance, smallestDistance) < 0) {
                 smallestDistance = distance;
                 community = centroidId;
@@ -131,7 +131,7 @@ public final class ClusterManager {
         return community;
     }
 
-    double euclidean(long nodeId, int centroid) {
+    double distanceFromCentroid(long nodeId, int centroid) {
         return distances.distance(nodeId, centroids.coordinateAt(centroid));
     }
 

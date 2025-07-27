@@ -59,7 +59,12 @@ public final class Kmeans extends Algorithm<KmeansResult> {
     private long[] nodesInCluster;
 
 
-    public static Kmeans createKmeans(Graph graph, KmeansParameters parameters, KmeansContext context, TerminationFlag terminationFlag) {
+    public static Kmeans createKmeans(
+        Graph graph,
+        KmeansParameters parameters,
+        KmeansContext context,
+        TerminationFlag terminationFlag
+    ) {
         String nodeWeightProperty = parameters.nodeProperty();
         NodePropertyValues nodeProperties = graph.nodeProperties(nodeWeightProperty);
         if (nodeProperties == null) {
@@ -92,7 +97,7 @@ public final class Kmeans extends Algorithm<KmeansResult> {
         this.random = random;
         this.bestCommunities = HugeIntArray.newArray(graph.nodeCount());
         this.nodePropertyValues = nodePropertyValues;
-        this.dimensions = nodePropertyValues.doubleArrayValue(0).length;
+        this.dimensions = dimensions(nodePropertyValues);
         this.kmeansIterationStopper = new KmeansIterationStopper(
             parameters.deltaThreshold(),
             parameters.maxIterations(),
@@ -166,7 +171,7 @@ public final class Kmeans extends Algorithm<KmeansResult> {
         //note: currentDistanceFromCentroid is not reset to a [0,...,0] distance array, but it does not have to
         // it's used only in K-Means++ (where it is essentially reset; see func distanceFromLastSampledCentroid in KmeansTask)
         // or during final distance calculation where it is reset as well (see calculateFinalDistance in KmeansTask)
-        var coordinateSupplier  = new CoordinatesSupplier(nodePropertyValues,dimensions,parameters.k());
+        var coordinateSupplier = new CoordinatesSupplier(nodePropertyValues, dimensions, parameters.k());
         var distances = DistancesFactory.create(nodePropertyValues);
 
         var clusterManager = ClusterManager.create(
@@ -314,7 +319,7 @@ public final class Kmeans extends Algorithm<KmeansResult> {
                             }
                         }
                     }
-                } else {
+                } else if (nodePropertyValues.valueType() == ValueType.DOUBLE_ARRAY) {
                     var value = nodePropertyValues.doubleArrayValue(nodeId);
                     if (value == null) {
                         throw new IllegalArgumentException("Property '" + parameters.nodeProperty() + "' does not exist for all nodes");
@@ -326,15 +331,17 @@ public final class Kmeans extends Algorithm<KmeansResult> {
                         for (int dimension = 0; dimension < dimensions; ++dimension) {
                             if (Double.isNaN(value[dimension])) {
                                 throw new IllegalArgumentException("Input for K-Means should not contain any NaN values");
-
                             }
                         }
+                    }
+                } else if (nodePropertyValues.valueType() == ValueType.DOUBLE) {
+                    if (Double.isNaN(nodePropertyValues.doubleValue(nodeId))) {
+                        throw new IllegalArgumentException("Input for K-Means should not contain any NaN values");
                     }
                 }
             }
         );
     }
-
 
     private void calculateSilhouette() {
         var nodeCount = graph.nodeCount();
@@ -419,6 +426,17 @@ public final class Kmeans extends Algorithm<KmeansResult> {
             }
 
         }
+    }
+
+    private static int dimensions(NodePropertyValues values) {
+        if (values.valueType() == ValueType.FLOAT_ARRAY) {
+            return values.floatArrayValue(0).length;
+        } else if (values.valueType() == ValueType.DOUBLE_ARRAY) {
+            return values.doubleArrayValue(0).length;
+        } else if (values.valueType() == ValueType.DOUBLE) {
+            return 1;
+        }
+        throw new RuntimeException("Values type not accepted:  " + values.valueType());
     }
 
 }

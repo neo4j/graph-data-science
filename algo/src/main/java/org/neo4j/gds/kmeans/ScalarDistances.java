@@ -19,24 +19,28 @@
  */
 package org.neo4j.gds.kmeans;
 
-import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 
-final class DistancesFactory {
+class ScalarDistances implements Distances {
 
+    private final NodePropertyValues nodePropertyValues;
 
-    private DistancesFactory() {}
+    ScalarDistances(NodePropertyValues nodePropertyValues) {
+        this.nodePropertyValues = nodePropertyValues;
+    }
 
-    static Distances create(NodePropertyValues values){
+    @Override
+    public double distance(long nodeA, long nodeB) {
+        var left = nodePropertyValues.doubleValue(nodeA);
+        var right = nodePropertyValues.doubleValue(nodeB);
+        return Math.abs(left - right);
+    }
 
-        if (values.valueType() == ValueType.FLOAT_ARRAY) {
-            return new FloatArrayDistances(values);
-        } else if (values.valueType() == ValueType.DOUBLE_ARRAY) {
-            return new DoubleArrayDistances(values);
-        }else if (values.valueType() == ValueType.DOUBLE){
-            return  new ScalarDistances(values);
-        }
+    @Override
+    public double distance(long nodeA, Coordinate coordinate) {
+        var left = nodePropertyValues.doubleValue(nodeA);
+        var right = ((ScalarCoordinate) coordinate).value();
+        return Math.abs(left - right);
 
-        throw new IllegalArgumentException("Incorrect data type");
     }
 }

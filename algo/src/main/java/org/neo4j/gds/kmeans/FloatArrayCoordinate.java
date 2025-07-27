@@ -24,7 +24,7 @@ import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import java.util.Arrays;
 import java.util.List;
 
-class FloatArrayCoordinate  implements Coordinate {
+class FloatArrayCoordinate implements Coordinate {
 
     private final int dimensions;
     private final float[] coordinate;
@@ -38,8 +38,8 @@ class FloatArrayCoordinate  implements Coordinate {
 
     @Override
     public double[] coordinate() {
-        var  array =new double[dimensions];
-        for (int i=0; i<dimensions;++i){
+        var array = new double[dimensions];
+        for (int i = 0; i < dimensions; ++i) {
             array[i] = coordinate[i];
         }
         return array;
@@ -52,46 +52,46 @@ class FloatArrayCoordinate  implements Coordinate {
 
     @Override
     public void assign(long nodeId) {
-        var  property = nodePropertyValues.floatArrayValue(nodeId);
+        var property = nodePropertyValues.floatArrayValue(nodeId);
         System.arraycopy(property, 0, coordinate, 0, dimensions);
     }
 
     @Override
     public void assign(List<Double> coordinate) {
-        int index=0;
+        int index = 0;
         for (double value : coordinate) {
-            this.coordinate[index++] =(float)  value;
+            this.coordinate[index++] = (float) value;
         }
     }
 
     @Override
     public void normalize(long length) {
-        for (int i=0;i<dimensions;++i){
-            coordinate[i]/=(float)length;
+        for (int i = 0; i < dimensions; ++i) {
+            coordinate[i] /= (float) length;
         }
     }
 
     @Override
     public void add(Coordinate externalCoordinate) {
-        var  floatArrayCoordinate = (FloatArrayCoordinate) externalCoordinate;
-        for (int i=0;i<dimensions;++i){
-            coordinate[i]+=floatArrayCoordinate.valueAt(i);
+        var floatArrayCoordinate = (FloatArrayCoordinate) externalCoordinate;
+        for (int i = 0; i < dimensions; ++i) {
+            coordinate[i] += floatArrayCoordinate.valueAt(i);
         }
     }
 
     @Override
     public void addTo(long nodeId) {
-        var  property = nodePropertyValues.floatArrayValue(nodeId);
-        for (int i=0;i<dimensions;++i){
-            coordinate[i]+= property[i];
+        var property = nodePropertyValues.floatArrayValue(nodeId);
+        for (int i = 0; i < dimensions; ++i) {
+            coordinate[i] += property[i];
         }
     }
 
-    private float valueAt(int index){
-        return  coordinate[index];
+    private float valueAt(int index) {
+        return coordinate[index];
     }
 
-    float[] floatCoordinate(){
-        return  coordinate;
+    float[] floatCoordinate() {
+        return coordinate;
     }
 }

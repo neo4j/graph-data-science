@@ -28,7 +28,7 @@ import org.neo4j.gds.mem.MemoryEstimations;
 import org.neo4j.gds.mem.MemoryRange;
 
 
-public  class KmeansTask implements Runnable {
+public class KmeansTask implements Runnable {
     private final ClusterManager clusterManager;
     private final Partition partition;
     private final Coordinates clusterContributions;
@@ -58,13 +58,16 @@ public  class KmeansTask implements Runnable {
         var builder = MemoryEstimations.builder(KmeansTask.class);
         builder
             .fixed("communitySizes", Estimate.sizeOfLongArray(k))
-            .add("communityCoordinateSums", MemoryEstimations.of("communityCoordinateSums", MemoryRange.of(
-                k * Estimate.sizeOfFloatArray(fakeDimensions),
-                k * Estimate.sizeOfDoubleArray(fakeDimensions)
-            )));
+            .add(
+                "communityCoordinateSums", MemoryEstimations.of(
+                    "communityCoordinateSums", MemoryRange.of(
+                        k * Estimate.sizeOfFloatArray(fakeDimensions),
+                        k * Estimate.sizeOfDoubleArray(fakeDimensions)
+                    )
+                )
+            );
         return builder.build();
     }
-
 
 
     private KmeansTask(
@@ -102,25 +105,26 @@ public  class KmeansTask implements Runnable {
         Partition partition
     ) {
 
-        var coordinates  = Coordinates.create(k,dimensions,coordinatesSupplier);
-            return new KmeansTask(
-                samplerType,
-                clusterManager,
-                communities,
-                distanceFromCentroid,
-                k,
-                partition,
-                coordinates
-            );
+        var coordinates = Coordinates.create(k, dimensions, coordinatesSupplier);
+        return new KmeansTask(
+            samplerType,
+            clusterManager,
+            communities,
+            distanceFromCentroid,
+            k,
+            partition,
+            coordinates
+        );
 
     }
 
-    private void reset(){
-            for (int community = 0; community < k; ++community) {
-                communitySizes[community] = 0;
-                clusterContributions.reset(community);
-            }
+    private void reset() {
+        for (int community = 0; community < k; ++community) {
+            communitySizes[community] = 0;
+            clusterContributions.reset(community);
+        }
     }
+
     void switchToPhase(TaskPhase newPhase) {
         phase = newPhase;
     }
@@ -144,7 +148,7 @@ public  class KmeansTask implements Runnable {
             //On that note,  maybe we can skip stable communities (i.e., communities that did not change between one iteration to another)
             // or avoid calculating their distance from other nodes etc...
 
-            clusterContributions.addTo(nodeId,closestCommunity);
+            clusterContributions.addTo(nodeId, closestCommunity);
         }
     }
 
@@ -160,7 +164,7 @@ public  class KmeansTask implements Runnable {
 
 
         for (long nodeId = startNode; nodeId < endNode; nodeId++) {
-            double nodeCentroidDistance =  clusterManager.euclidean(nodeId, communities.get(nodeId));
+            double nodeCentroidDistance = clusterManager.distanceFromCentroid(nodeId, communities.get(nodeId));
             distance += nodeCentroidDistance;
             distanceFromCentroid.set(nodeId, nodeCentroidDistance);
 
@@ -171,7 +175,7 @@ public  class KmeansTask implements Runnable {
         squaredDistance = 0;
         for (long nodeId = startNode; nodeId < endNode; nodeId++) {
             if (distanceFromCentroid.get(nodeId) > -1) {
-                double nodeCentroidDistance = clusterManager.euclidean(nodeId, numAssigned - 1);
+                double nodeCentroidDistance = clusterManager.distanceFromCentroid(nodeId, numAssigned - 1);
                 if (numAssigned == 1) {
                     distanceFromCentroid.set(nodeId, nodeCentroidDistance);
                     squaredDistance += nodeCentroidDistance * nodeCentroidDistance;
@@ -193,14 +197,15 @@ public  class KmeansTask implements Runnable {
                 }
                 int communityId = communities.get(nodeId);
                 communitySizes[communityId]++;
-                clusterContributions.addTo(nodeId,communityId);
+                clusterContributions.addTo(nodeId, communityId);
             }
         }
     }
 
-    Coordinates clusterContributions(){
-        return  clusterContributions;
+    Coordinates clusterContributions() {
+        return clusterContributions;
     }
+
     @Override
     public void run() {
         var startNode = partition.startNode();

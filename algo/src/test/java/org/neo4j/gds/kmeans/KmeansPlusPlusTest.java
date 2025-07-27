@@ -36,8 +36,7 @@ import java.util.SplittableRandom;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @GdlExtension
-
-public class KmeansPlusPlusTest {
+class KmeansPlusPlusTest {
 
     // override offset as test involved sampling
     @GdlGraph(idOffset = 0)
