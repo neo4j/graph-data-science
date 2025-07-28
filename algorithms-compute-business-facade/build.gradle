@@ -6,15 +6,15 @@ group = 'org.neo4j.gds'
 
 dependencies {
 
-    implementation project(':algo')
-    implementation project(':algo-common')
+    implementation project(':algo') // TODO: extract the results to a separate module and depend on it
+    implementation project(':algorithms-compute-facade')
     implementation project(':collections')
-    implementation project(':core')
-    implementation project(':core-api')
+    implementation project(':core') // TODO: this is here because of the `GraphStoreCatalogService` --> refactor it so we can use the service without bringing the entire sub-project
+    implementation project(':graph-schema-api')
     implementation project(':logging')
-    implementation project(':path-finding-algorithms')
     implementation project(':path-finding-params')
     implementation project(':progress-tracking')
+    implementation project(':string-formatting')
     implementation project(':termination')
 
     // Test dependencies
