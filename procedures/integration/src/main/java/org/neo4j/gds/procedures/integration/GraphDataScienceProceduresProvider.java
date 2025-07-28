@@ -67,7 +67,7 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
     private final DatabaseIdAccessor databaseIdAccessor = new DatabaseIdAccessor();
     private final KernelTransactionAccessor kernelTransactionAccessor = new KernelTransactionAccessor();
     private final ProcedureTransactionAccessor procedureTransactionAccessor = new ProcedureTransactionAccessor();
-    private final UserAccessor userAccessor = new UserAccessor();
+    private final UserAccessor userAccessor;
 
     private final GdsLoggers loggers;
     private final Configuration neo4jConfiguration;
@@ -114,7 +114,8 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
         Optional<Function<AlgorithmProcessingTemplate, AlgorithmProcessingTemplate>> algorithmProcessingTemplateDecorator,
         Optional<Function<GraphCatalogApplications, GraphCatalogApplications>> graphCatalogApplicationsDecorator,
         Optional<Function<ModelCatalogApplications, ModelCatalogApplications>> modelCatalogApplicationsDecorator,
-        MemoryTracker memoryTracker
+        MemoryTracker memoryTracker,
+        UserAccessor userAccessor
     ) {
         this.loggers = loggers;
         this.neo4jConfiguration = neo4jConfiguration;
@@ -139,6 +140,7 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
         this.graphCatalogApplicationsDecorator = graphCatalogApplicationsDecorator;
         this.modelCatalogApplicationsDecorator = modelCatalogApplicationsDecorator;
         this.memoryTracker = memoryTracker;
+        this.userAccessor = userAccessor;
     }
 
     @Override

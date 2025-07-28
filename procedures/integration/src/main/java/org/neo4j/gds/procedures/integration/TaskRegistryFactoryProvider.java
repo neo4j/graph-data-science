@@ -21,8 +21,8 @@ package org.neo4j.gds.procedures.integration;
 
 import org.neo4j.function.ThrowingFunction;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
-import org.neo4j.gds.procedures.TaskRegistryFactoryService;
 import org.neo4j.gds.procedures.DatabaseIdAccessor;
+import org.neo4j.gds.procedures.TaskRegistryFactoryService;
 import org.neo4j.gds.procedures.UserAccessor;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.kernel.api.procedure.Context;
@@ -33,12 +33,13 @@ import org.neo4j.kernel.api.procedure.Context;
 @Deprecated
 public class TaskRegistryFactoryProvider implements ThrowingFunction<Context, TaskRegistryFactory, ProcedureException> {
     private final DatabaseIdAccessor databaseIdAccessor = new DatabaseIdAccessor();
-    private final UserAccessor userAccessor = new UserAccessor();
+    private final UserAccessor userAccessor;
 
     private final TaskRegistryFactoryService taskRegistryFactoryService;
 
-    TaskRegistryFactoryProvider(TaskRegistryFactoryService taskRegistryFactoryService) {
+    TaskRegistryFactoryProvider(TaskRegistryFactoryService taskRegistryFactoryService, UserAccessor userAccessor) {
         this.taskRegistryFactoryService = taskRegistryFactoryService;
+        this.userAccessor = userAccessor;
     }
 
     @Override

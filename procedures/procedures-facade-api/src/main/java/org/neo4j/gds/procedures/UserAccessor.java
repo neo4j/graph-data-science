@@ -23,14 +23,32 @@ import org.neo4j.gds.api.User;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
 import org.neo4j.internal.kernel.api.security.SecurityContext;
 
+import java.util.function.Predicate;
+
 /**
  * An abstraction that allows us to stack off Neo4j concerns cleanly.
  */
-public class UserAccessor {
+public final class UserAccessor {
+
+    private final Predicate<String> roleMatcher;
+
+    private UserAccessor(Predicate<String> roleMatcher) {
+        this.roleMatcher = roleMatcher;
+    }
+
+    public static UserAccessor create() {
+        return new UserAccessor(role -> role.equals("admin"));
+    }
+
+    public static UserAccessor createForAuraDS() {
+        // see https://github.com/neo-technology/neo4j-cloud/blob/master/components/database-role-definitions/k8s/base/cypher-roles.yaml for defined roles in Aura
+        return new UserAccessor(role -> role.contains("_admin_") || role.equals("admin"));
+    }
+
     public User getUser(SecurityContext securityContext) {
         AuthSubject subject = securityContext.subject();
         String username = subject.executingUser();
-        boolean isAdmin = securityContext.roles().contains("admin");
+        boolean isAdmin = securityContext.roles().stream().anyMatch(roleMatcher);
         return new User(username, isAdmin);
     }
 }

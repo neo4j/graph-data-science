@@ -33,11 +33,12 @@ import org.neo4j.kernel.api.procedure.Context;
 @Deprecated
 public class UserLogRegistryFactoryProvider implements ThrowingFunction<Context, UserLogRegistryFactory, ProcedureException> {
     private final DatabaseIdAccessor databaseIdAccessor = new DatabaseIdAccessor();
-    private final UserAccessor userAccessor = new UserAccessor();
+    private final UserAccessor userAccessor;
 
     private final UserLogServices userLogServices;
 
-    UserLogRegistryFactoryProvider(UserLogServices userLogServices) {
+    UserLogRegistryFactoryProvider(UserAccessor userAccessor, UserLogServices userLogServices) {
+        this.userAccessor = userAccessor;
         this.userLogServices = userLogServices;
     }
 

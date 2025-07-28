@@ -94,6 +94,7 @@ public final class OpenGraphDataScienceExtensionBuilder {
     private final boolean useMaxMemoryEstimation;
     private final UserLogServices userLogServices;
     private final Lifecycle gcListener;
+    private final UserAccessor userAccessor;
 
     private OpenGraphDataScienceExtensionBuilder(
         Log log,
@@ -106,7 +107,8 @@ public final class OpenGraphDataScienceExtensionBuilder {
         TaskRegistryFactoryService taskRegistryFactoryService,
         boolean useMaxMemoryEstimation,
         UserLogServices userLogServices,
-        Lifecycle gcListener
+        Lifecycle gcListener,
+        UserAccessor userAccessor
     ) {
         this.log = log;
         this.componentRegistration = componentRegistration;
@@ -119,6 +121,7 @@ public final class OpenGraphDataScienceExtensionBuilder {
         this.useMaxMemoryEstimation = useMaxMemoryEstimation;
         this.userLogServices = userLogServices;
         this.gcListener = gcListener;
+        this.userAccessor = userAccessor;
     }
 
     /**
@@ -187,9 +190,9 @@ public final class OpenGraphDataScienceExtensionBuilder {
         );
 
         var componentRegistration = new ComponentRegistration(log, dependencySatisfier, globalProcedures);
+        var userAccessor = UserAccessor.create();
 
         componentRegistration.registerComponent("GDS Memory Facade", MemoryFacade.class, context -> {
-             var userAccessor = new UserAccessor();
             var user  = userAccessor.getUser(context.securityContext());
            return new MemoryFacade(user,memoryTracker);
         });
@@ -227,7 +230,8 @@ public final class OpenGraphDataScienceExtensionBuilder {
             taskRegistryFactoryService,
             useMaxMemoryEstimation,
             userLogServices,
-            gcListener
+            gcListener,
+            userAccessor
         );
 
         return Triple.of(graphDataScienceExtensionBuilder, taskRegistryFactoryService, taskStoreService);
@@ -269,7 +273,8 @@ public final class OpenGraphDataScienceExtensionBuilder {
             taskRegistryFactoryService,
             taskStoreService,
             useMaxMemoryEstimation,
-            userLogServices
+            userLogServices,
+            userAccessor
         );
 
         componentRegistration.registerComponent(
@@ -307,7 +312,7 @@ public final class OpenGraphDataScienceExtensionBuilder {
     }
 
     private void registerTaskRegistryFactoryComponent(TaskRegistryFactoryService taskRegistryFactoryService) {
-        var taskRegistryFactoryProvider = new TaskRegistryFactoryProvider(taskRegistryFactoryService);
+        var taskRegistryFactoryProvider = new TaskRegistryFactoryProvider(taskRegistryFactoryService, userAccessor);
 
         componentRegistration.registerComponent(
             "Task Registry Factory",
@@ -317,7 +322,7 @@ public final class OpenGraphDataScienceExtensionBuilder {
     }
 
     private void registerUserLogRegistryFactoryComponent(UserLogServices userLogServices) {
-        var userLogRegistryFactoryProvider = new UserLogRegistryFactoryProvider(userLogServices);
+        var userLogRegistryFactoryProvider = new UserLogRegistryFactoryProvider(userAccessor, userLogServices);
 
         componentRegistration.registerComponent(
             "User Log Registry Factory",
