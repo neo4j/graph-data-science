@@ -24,20 +24,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.neo4j.gds.GraphParameters;
-import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.ProgressTrackerFactory;
-import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.allshortestpaths.AllShortestPathsParameters;
-import org.neo4j.gds.api.DatabaseId;
-import org.neo4j.gds.api.GraphName;
-import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.async.AsyncAlgorithmCaller;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.core.loading.GraphResources;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.tasks.IterativeTask;
@@ -75,7 +67,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -118,19 +109,13 @@ class PathFindingComputeFacadeTest {
 
     @BeforeEach
     void setUp() {
-        when(catalogServiceMock.fetchGraphResources(any(), any(), any(), any(), any(), any(), any()))
-            .thenReturn(new GraphResources(mock(GraphStore.class), graph, mock(ResultStore.class)));
-
         when(progressTrackerFactoryMock.nullTracker())
             .thenReturn(ProgressTracker.NULL_TRACKER);
         when(progressTrackerFactoryMock.create(any(), any(), any(), anyBoolean()))
             .thenReturn(progressTrackerMock);
 
         facade = new PathFindingComputeFacade(
-            catalogServiceMock,
             new AsyncAlgorithmCaller(Executors.newSingleThreadExecutor(), logMock),
-            userMock,
-            DatabaseId.DEFAULT,
             DefaultPool.INSTANCE,
             TerminationFlag.RUNNING_TRUE,
             progressTrackerFactoryMock
@@ -140,14 +125,7 @@ class PathFindingComputeFacadeTest {
     @Test
     void allShortestPaths() {
         var future = facade.allShortestPaths(
-            new GraphName("foo"),
-            new GraphParameters(
-                List.of(NodeLabel.of("Node")),
-                List.of(RelationshipType.of("REL")),
-                true,
-                Optional.empty()
-            ),
-            Optional.empty(),
+            graph,
             new AllShortestPathsParameters(new Concurrency(4), false),
             jobIdMock
         );
@@ -164,14 +142,7 @@ class PathFindingComputeFacadeTest {
     @Test
     void bellmanFord() {
         var future = facade.bellmanFord(
-            new GraphName("foo"),
-            new GraphParameters(
-                List.of(NodeLabel.of("Node")),
-                List.of(RelationshipType.of("REL")),
-                true,
-                Optional.empty()
-            ),
-            Optional.empty(),
+            graph,
             new BellmanFordParameters(
                 idFunction.of("a"),
                 false,
@@ -194,13 +165,7 @@ class PathFindingComputeFacadeTest {
     @Test
     void breadthFirstSearch() {
         var future = facade.breadthFirstSearch(
-            new GraphName("foo"),
-            new GraphParameters(
-                List.of(NodeLabel.of("Node")),
-                List.of(RelationshipType.of("REL")),
-                true,
-                Optional.empty()
-            ),
+            graph,
             new TraversalParameters(
                 idFunction.of("a"),
                 List.of(idFunction.of("c")),
@@ -216,14 +181,7 @@ class PathFindingComputeFacadeTest {
     @Test
     void deltaStepping() {
         var future = facade.deltaStepping(
-            new GraphName("foo"),
-            new GraphParameters(
-                List.of(NodeLabel.of("Node")),
-                List.of(RelationshipType.of("REL")),
-                true,
-                Optional.empty()
-            ),
-            Optional.empty(),
+            graph,
             DeltaSteppingParameters.withDefaultDelta(
                 idFunction.of("a"),
                 new Concurrency(2)
@@ -237,13 +195,7 @@ class PathFindingComputeFacadeTest {
     @Test
     void depthFirstSearch() {
         var future = facade.depthFirstSearch(
-            new GraphName("foo"),
-            new GraphParameters(
-                List.of(NodeLabel.of("Node")),
-                List.of(RelationshipType.of("REL")),
-                true,
-                Optional.empty()
-            ),
+            graph,
             new TraversalParameters(
                 idFunction.of("a"),
                 List.of(idFunction.of("c")),
@@ -259,14 +211,7 @@ class PathFindingComputeFacadeTest {
     @Test
     void kSpanningTree() {
         var future = facade.kSpanningTree(
-            new GraphName("foo"),
-            new GraphParameters(
-                List.of(NodeLabel.of("Node")),
-                List.of(RelationshipType.of("REL")),
-                true,
-                Optional.empty()
-            ),
-            Optional.empty(),
+            graph,
             new KSpanningTreeParameters(
                 PrimOperators.MIN_OPERATOR,
                 idFunction.of("a"),
@@ -282,13 +227,7 @@ class PathFindingComputeFacadeTest {
     @Test
     void longestPath() {
         var future = facade.longestPath(
-            new GraphName("foo"),
-            new GraphParameters(
-                List.of(NodeLabel.of("Node")),
-                List.of(RelationshipType.of("REL")),
-                true,
-                Optional.empty()
-            ),
+            graph,
             new DagLongestPathParameters(
                 new Concurrency(2)
             ),
@@ -301,14 +240,7 @@ class PathFindingComputeFacadeTest {
     @Test
     void randomWalk() {
         var future = facade.randomWalk(
-            new GraphName("foo"),
-            new GraphParameters(
-                List.of(NodeLabel.of("Node")),
-                List.of(RelationshipType.of("REL")),
-                true,
-                Optional.empty()
-            ),
-            Optional.empty(),
+            graph,
             new RandomWalkParameters(
                 List.of(idFunction.of("a")),
                 WalkParameters.DEFAULTS,
@@ -325,14 +257,7 @@ class PathFindingComputeFacadeTest {
     @Test
     void randomWalkCountingNodeVisits() {
         var future = facade.randomWalkCountingNodeVisits(
-            new GraphName("foo"),
-            new GraphParameters(
-                List.of(NodeLabel.of("Node")),
-                List.of(RelationshipType.of("REL")),
-                true,
-                Optional.empty()
-            ),
-            Optional.empty(),
+            graph,
             new RandomWalkParameters(
                 List.of(idFunction.of("a")),
                 WalkParameters.DEFAULTS,
@@ -349,13 +274,7 @@ class PathFindingComputeFacadeTest {
     @Test
     void pcst() {
         var future = facade.pcst(
-            new GraphName("foo"),
-            new GraphParameters(
-                List.of(NodeLabel.of("Node")),
-                List.of(RelationshipType.of("REL")),
-                true,
-                Optional.empty()
-            ),
+            graph,
             new PCSTParameters(
                 "prize",
                 new Concurrency(2)
@@ -369,14 +288,7 @@ class PathFindingComputeFacadeTest {
     @Test
     void singlePairShortestPathAStar() {
         var future = facade.singlePairShortestPathAStar(
-            new GraphName("foo"),
-            new GraphParameters(
-                List.of(NodeLabel.of("Node")),
-                List.of(RelationshipType.of("REL")),
-                true,
-                Optional.empty()
-            ),
-            Optional.empty(),
+            graph,
             new AStarParameters(
                 "prize",
                 "prize",
@@ -393,14 +305,7 @@ class PathFindingComputeFacadeTest {
     @Test
     void singlePairShortestPathDijkstra() {
         var future = facade.singlePairShortestPathDijkstra(
-            new GraphName("foo"),
-            new GraphParameters(
-                List.of(NodeLabel.of("Node")),
-                List.of(RelationshipType.of("REL")),
-                true,
-                Optional.empty()
-            ),
-            Optional.empty(),
+            graph,
             new DijkstraSourceTargetParameters(
                 idFunction.of("a"),
                 List.of(idFunction.of("c")),
@@ -415,14 +320,7 @@ class PathFindingComputeFacadeTest {
     @Test
     void singlePairShortestPathYens() {
         var future = facade.singlePairShortestPathYens(
-            new GraphName("foo"),
-            new GraphParameters(
-                List.of(NodeLabel.of("Node")),
-                List.of(RelationshipType.of("REL")),
-                true,
-                Optional.empty()
-            ),
-            Optional.empty(),
+            graph,
             new YensParameters(
                 idFunction.of("a"),
                 idFunction.of("c"),
@@ -438,14 +336,7 @@ class PathFindingComputeFacadeTest {
     @Test
     void singleSourceShortestPathDijkstra() {
         var future = facade.singleSourceShortestPathDijkstra(
-            new GraphName("foo"),
-            new GraphParameters(
-                List.of(NodeLabel.of("Node")),
-                List.of(RelationshipType.of("REL")),
-                true,
-                Optional.empty()
-            ),
-            Optional.empty(),
+            graph,
             new DijkstraSingleSourceParameters(idFunction.of("a")),
             jobIdMock,
             true
@@ -456,14 +347,7 @@ class PathFindingComputeFacadeTest {
     @Test
     void spanningTree() {
         var future = facade.spanningTree(
-            new GraphName("foo"),
-            new GraphParameters(
-                List.of(NodeLabel.of("Node")),
-                List.of(RelationshipType.of("REL")),
-                true,
-                Optional.empty()
-            ),
-            Optional.empty(),
+            graph,
             new SpanningTreeParameters(
                 PrimOperators.MIN_OPERATOR,
                 idFunction.of("a")
@@ -477,14 +361,7 @@ class PathFindingComputeFacadeTest {
     @Test
     void steinerTree() {
         var future = facade.steinerTree(
-            new GraphName("foo"),
-            new GraphParameters(
-                List.of(NodeLabel.of("Node")),
-                List.of(RelationshipType.of("REL")),
-                true,
-                Optional.empty()
-            ),
-            Optional.empty(),
+            graph,
             new SteinerTreeParameters(
                 new Concurrency(4),
                 idFunction.of("a"),
@@ -501,14 +378,7 @@ class PathFindingComputeFacadeTest {
     @Test
     void topologicalSort() {
         var future = facade.topologicalSort(
-            new GraphName("foo"),
-            new GraphParameters(
-                List.of(NodeLabel.of("Node")),
-                List.of(RelationshipType.of("REL")),
-                true,
-                Optional.empty()
-            ),
-            Optional.empty(),
+            graph,
             new TopologicalSortParameters(
                 false,
                 new Concurrency(4)

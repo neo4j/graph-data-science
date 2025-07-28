@@ -19,24 +19,15 @@
  */
 package org.neo4j.gds.pathfinding;
 
-import org.neo4j.gds.GraphParameters;
 import org.neo4j.gds.ProgressTrackerFactory;
 import org.neo4j.gds.allshortestpaths.AllShortestPathsParameters;
 import org.neo4j.gds.allshortestpaths.AllShortestPathsStreamResult;
-import org.neo4j.gds.api.DatabaseId;
-import org.neo4j.gds.api.GraphName;
-import org.neo4j.gds.api.User;
+import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.applications.algorithms.pathfinding.MSBFSASPAlgorithmFactory;
 import org.neo4j.gds.async.AsyncAlgorithmCaller;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
-import org.neo4j.gds.core.loading.GraphStoreCatalogService;
-import org.neo4j.gds.core.loading.validation.NoAlgorithmValidation;
-import org.neo4j.gds.core.loading.validation.SourceNodeGraphStoreValidation;
-import org.neo4j.gds.core.loading.validation.SourceNodeTargetNodeGraphStoreValidation;
-import org.neo4j.gds.core.loading.validation.SourceNodeTargetNodesGraphStoreValidation;
-import org.neo4j.gds.core.loading.validation.SourceNodesGraphStoreValidation;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.dag.longestPath.DagLongestPath;
 import org.neo4j.gds.dag.longestPath.DagLongestPathParameters;
@@ -48,9 +39,6 @@ import org.neo4j.gds.dag.topologicalsort.TopologicalSortResult;
 import org.neo4j.gds.kspanningtree.KSpanningTree;
 import org.neo4j.gds.kspanningtree.KSpanningTreeParameters;
 import org.neo4j.gds.kspanningtree.KSpanningTreeTask;
-import org.neo4j.gds.pathfinding.validation.KSpanningTreeGraphStoreValidation;
-import org.neo4j.gds.pathfinding.validation.PCSTGraphStoreValidation;
-import org.neo4j.gds.pathfinding.validation.RandomWalkGraphValidation;
 import org.neo4j.gds.paths.RelationshipCountProgressTaskFactory;
 import org.neo4j.gds.paths.astar.AStar;
 import org.neo4j.gds.paths.astar.AStarParameters;
@@ -100,7 +88,6 @@ import java.util.stream.Stream;
 public class PathFindingComputeFacade {
 
     // Global dependencies
-    private final GraphStoreCatalogService graphStoreCatalogService;
     // This is created with its own ExecutorService workerPool,
     // which determines how many algorithms can run in parallel.
     private final AsyncAlgorithmCaller algorithmCaller;
@@ -109,46 +96,25 @@ public class PathFindingComputeFacade {
     private final ExecutorService executorService;
 
     // Request scope dependencies -- can we move these as method parameters?! 🤔
-    private final User user;
-    private final DatabaseId databaseId;
     private final TerminationFlag terminationFlag;
 
     public PathFindingComputeFacade(
-        GraphStoreCatalogService graphStoreCatalogService,
         AsyncAlgorithmCaller algorithmCaller,
-        User user,
-        DatabaseId databaseId,
         ExecutorService executorService,
         TerminationFlag terminationFlag,
         ProgressTrackerFactory progressTrackerFactory
     ) {
-        this.graphStoreCatalogService = graphStoreCatalogService;
         this.algorithmCaller = algorithmCaller;
-        this.user = user;
-        this.databaseId = databaseId;
         this.executorService = executorService;
         this.terminationFlag = terminationFlag;
         this.progressTrackerFactory = progressTrackerFactory;
     }
 
-    CompletableFuture<Stream<AllShortestPathsStreamResult>> allShortestPaths(
-        GraphName graphName,
-        GraphParameters graphParameters,
-        Optional<String> relationshipProperty,
+    public CompletableFuture<Stream<AllShortestPathsStreamResult>> allShortestPaths(
+        Graph graph,
         AllShortestPathsParameters parameters,
         JobId jobId
     ) {
-        // Fetch the Graph the algorithm will operate on
-        var graph = graphStoreCatalogService.fetchGraphResources(
-            graphName,
-            graphParameters,
-            relationshipProperty,
-            new NoAlgorithmValidation(),
-            Optional.empty(),
-            user,
-            databaseId
-        ).graph();
-
         // Create ProgressTracker
         // `allShortestPaths` doesn't use progress tracker (yet 🤔)
         var progressTracker = progressTrackerFactory.nullTracker();
@@ -170,25 +136,12 @@ public class PathFindingComputeFacade {
 
     }
 
-    CompletableFuture<BellmanFordResult> bellmanFord(
-        GraphName graphName,
-        GraphParameters graphParameters,
-        Optional<String> relationshipProperty,
+    public CompletableFuture<BellmanFordResult> bellmanFord(
+        Graph graph,
         BellmanFordParameters parameters,
         JobId jobId,
         boolean logProgress
     ) {
-        // Fetch the Graph the algorithm will operate on
-        var graph = graphStoreCatalogService.fetchGraphResources(
-            graphName,
-            graphParameters,
-            relationshipProperty,
-            new NoAlgorithmValidation(),
-            Optional.empty(),
-            user,
-            databaseId
-        ).graph();
-
         // Create ProgressTracker
         var progressTracker = progressTrackerFactory.create(
             BellmanFordProgressTask.create(),
@@ -215,27 +168,12 @@ public class PathFindingComputeFacade {
         );
     }
 
-    CompletableFuture<HugeLongArray> breadthFirstSearch(
-        GraphName graphName,
-        GraphParameters graphParameters,
+    public CompletableFuture<HugeLongArray> breadthFirstSearch(
+        Graph graph,
         TraversalParameters parameters,
         JobId jobId,
         boolean logProgress
     ) {
-        // Fetch the Graph the algorithm will operate on
-        var graph = graphStoreCatalogService.fetchGraphResources(
-            graphName,
-            graphParameters,
-            Optional.empty(),
-            new SourceNodeTargetNodesGraphStoreValidation(
-                parameters.sourceNode(),
-                parameters.targetNodes()
-            ),
-            Optional.empty(),
-            user,
-            databaseId
-        ).graph();
-
         // Create ProgressTracker
         var progressTracker = progressTrackerFactory.create(
             BFSProgressTask.create(),
@@ -267,25 +205,12 @@ public class PathFindingComputeFacade {
         );
     }
 
-    CompletableFuture<PathFindingResult> deltaStepping(
-        GraphName graphName,
-        GraphParameters graphParameters,
-        Optional<String> relationshipProperty,
+    public CompletableFuture<PathFindingResult> deltaStepping(
+        Graph graph,
         DeltaSteppingParameters parameters,
         JobId jobId,
         boolean logProgress
     ) {
-        // Fetch the Graph the algorithm will operate on
-        var graph = graphStoreCatalogService.fetchGraphResources(
-            graphName,
-            graphParameters,
-            relationshipProperty,
-            new SourceNodeGraphStoreValidation(parameters.sourceNode()),
-            Optional.empty(),
-            user,
-            databaseId
-        ).graph();
-
         // Create ProgressTracker
         var progressTracker = progressTrackerFactory.create(
             DeltaSteppingProgressTask.create(),
@@ -305,28 +230,13 @@ public class PathFindingComputeFacade {
         );
     }
 
-    CompletableFuture<HugeLongArray> depthFirstSearch(
-        GraphName graphName,
-        GraphParameters graphParameters,
+    public CompletableFuture<HugeLongArray> depthFirstSearch(
+        Graph graph,
         TraversalParameters parameters,
         JobId jobId,
         boolean logProgress
 
     ) {
-        // Fetch the Graph the algorithm will operate on
-        var graph = graphStoreCatalogService.fetchGraphResources(
-            graphName,
-            graphParameters,
-            Optional.empty(),
-            new SourceNodeTargetNodesGraphStoreValidation(
-                parameters.sourceNode(),
-                parameters.targetNodes()
-            ),
-            Optional.empty(),
-            user,
-            databaseId
-        ).graph();
-
         // Create ProgressTracker
         var progressTracker = progressTrackerFactory.create(
             DFSProgressTask.create(),
@@ -356,25 +266,12 @@ public class PathFindingComputeFacade {
         );
     }
 
-    CompletableFuture<SpanningTree> kSpanningTree(
-        GraphName graphName,
-        GraphParameters graphParameters,
-        Optional<String> relationshipProperty,
+    public CompletableFuture<SpanningTree> kSpanningTree(
+        Graph graph,
         KSpanningTreeParameters parameters,
         JobId jobId,
         boolean logProgress
     ) {
-        // Fetch the Graph the algorithm will operate on
-        var graph = graphStoreCatalogService.fetchGraphResources(
-            graphName,
-            graphParameters,
-            relationshipProperty,
-            new KSpanningTreeGraphStoreValidation(parameters.sourceNode()),
-            Optional.empty(),
-            user,
-            databaseId
-        ).graph();
-
         // Create ProgressTracker
         var progressTracker = progressTrackerFactory.create(
             KSpanningTreeTask.create(graph.relationshipCount()),
@@ -400,24 +297,12 @@ public class PathFindingComputeFacade {
         );
     }
 
-    CompletableFuture<PathFindingResult> longestPath(
-        GraphName graphName,
-        GraphParameters graphParameters,
+    public CompletableFuture<PathFindingResult> longestPath(
+        Graph graph,
         DagLongestPathParameters parameters,
         JobId jobId,
         boolean logProgress
     ) {
-        // Fetch the Graph the algorithm will operate on
-        var graph = graphStoreCatalogService.fetchGraphResources(
-            graphName,
-            graphParameters,
-            Optional.empty(),
-            new NoAlgorithmValidation(),
-            Optional.empty(),
-            user,
-            databaseId
-        ).graph();
-
         // Create ProgressTracker
         var progressTracker = progressTrackerFactory.create(
             LongestPathTask.create(graph.nodeCount()),
@@ -441,25 +326,12 @@ public class PathFindingComputeFacade {
         );
     }
 
-    CompletableFuture<Stream<long[]>> randomWalk(
-        GraphName graphName,
-        GraphParameters graphParameters,
-        Optional<String> relationshipProperty,
+    public CompletableFuture<Stream<long[]>> randomWalk(
+        Graph graph,
         RandomWalkParameters parameters,
         JobId jobId,
         boolean logProgress
     ) {
-        // Fetch the Graph the algorithm will operate on
-        var graph = graphStoreCatalogService.fetchGraphResources(
-            graphName,
-            graphParameters,
-            relationshipProperty,
-            new SourceNodesGraphStoreValidation(parameters.sourceNodes()),
-            Optional.of(new RandomWalkGraphValidation(parameters.concurrency(), executorService)),
-            user,
-            databaseId
-        ).graph();
-
         // Create ProgressTracker
         var progressTracker = progressTrackerFactory.create(
             RandomWalkProgressTask.create(graph),
@@ -483,25 +355,12 @@ public class PathFindingComputeFacade {
         );
     }
 
-    CompletableFuture<HugeAtomicLongArray> randomWalkCountingNodeVisits(
-        GraphName graphName,
-        GraphParameters graphParameters,
-        Optional<String> relationshipProperty,
+    public CompletableFuture<HugeAtomicLongArray> randomWalkCountingNodeVisits(
+        Graph graph,
         RandomWalkParameters parameters,
         JobId jobId,
         boolean logProgress
     ) {
-        // Fetch the Graph the algorithm will operate on
-        var graph = graphStoreCatalogService.fetchGraphResources(
-            graphName,
-            graphParameters,
-            relationshipProperty,
-            new SourceNodesGraphStoreValidation(parameters.sourceNodes()),
-            Optional.of(new RandomWalkGraphValidation(parameters.concurrency(), executorService)),
-            user,
-            databaseId
-        ).graph();
-
 
         // Create ProgressTracker
         var progressTracker = progressTrackerFactory.create(
@@ -527,24 +386,12 @@ public class PathFindingComputeFacade {
         );
     }
 
-    CompletableFuture<PrizeSteinerTreeResult> pcst(
-        GraphName graphName,
-        GraphParameters graphParameters,
+    public CompletableFuture<PrizeSteinerTreeResult> pcst(
+        Graph graph,
         PCSTParameters parameters,
         JobId jobId,
         boolean logProgress
     ) {
-        // Fetch the Graph the algorithm will operate on
-        var graph = graphStoreCatalogService.fetchGraphResources(
-            graphName,
-            graphParameters,
-            Optional.empty(),
-            new PCSTGraphStoreValidation(parameters.prizeProperty()),
-            Optional.empty(),
-            user,
-            databaseId
-        ).graph();
-
         // Create ProgressTracker
         var progressTracker = progressTrackerFactory.create(
             PCSTProgressTrackerTaskCreator.progressTask(graph.nodeCount(), graph.relationshipCount()),
@@ -568,25 +415,12 @@ public class PathFindingComputeFacade {
         );
     }
 
-    CompletableFuture<PathFindingResult> singlePairShortestPathAStar(
-        GraphName graphName,
-        GraphParameters graphParameters,
-        Optional<String> relationshipProperty,
+    public CompletableFuture<PathFindingResult> singlePairShortestPathAStar(
+        Graph graph,
         AStarParameters parameters,
         JobId jobId,
         boolean logProgress
     ) {
-        // Fetch the Graph the algorithm will operate on
-        var graph = graphStoreCatalogService.fetchGraphResources(
-            graphName,
-            graphParameters,
-            relationshipProperty,
-            new SourceNodeTargetNodeGraphStoreValidation(parameters.sourceNode(), parameters.targetNode()),
-            Optional.of(new RandomWalkGraphValidation(parameters.concurrency(), executorService)),
-            user,
-            databaseId
-        ).graph();
-
         // Create ProgressTracker
         var progressTracker = progressTrackerFactory.create(
             RelationshipCountProgressTaskFactory.create(AlgorithmLabel.AStar, graph.relationshipCount()),
@@ -610,25 +444,12 @@ public class PathFindingComputeFacade {
         );
     }
 
-    CompletableFuture<PathFindingResult> singlePairShortestPathDijkstra(
-        GraphName graphName,
-        GraphParameters graphParameters,
-        Optional<String> relationshipProperty,
+    public CompletableFuture<PathFindingResult> singlePairShortestPathDijkstra(
+        Graph graph,
         DijkstraSourceTargetParameters parameters,
         JobId jobId,
         boolean logProgress
     ) {
-        // Fetch the Graph the algorithm will operate on
-        var graph = graphStoreCatalogService.fetchGraphResources(
-            graphName,
-            graphParameters,
-            relationshipProperty,
-            new SourceNodeTargetNodesGraphStoreValidation(parameters.sourceNode(), parameters.targetsList()),
-            Optional.of(new RandomWalkGraphValidation(parameters.concurrency(), executorService)),
-            user,
-            databaseId
-        ).graph();
-
         // Create ProgressTracker
         var progressTracker = progressTrackerFactory.create(
             RelationshipCountProgressTaskFactory.create(AlgorithmLabel.Dijkstra, graph.relationshipCount()),
@@ -655,25 +476,12 @@ public class PathFindingComputeFacade {
         );
     }
 
-    CompletableFuture<PathFindingResult> singlePairShortestPathYens(
-        GraphName graphName,
-        GraphParameters graphParameters,
-        Optional<String> relationshipProperty,
+    public CompletableFuture<PathFindingResult> singlePairShortestPathYens(
+        Graph graph,
         YensParameters parameters,
         JobId jobId,
         boolean logProgress
     ) {
-        // Fetch the Graph the algorithm will operate on
-        var graph = graphStoreCatalogService.fetchGraphResources(
-            graphName,
-            graphParameters,
-            relationshipProperty,
-            new SourceNodeTargetNodeGraphStoreValidation(parameters.sourceNode(), parameters.targetNode()),
-            Optional.empty(),
-            user,
-            databaseId
-        ).graph();
-
         // Create ProgressTracker
         var progressTracker = progressTrackerFactory.create(
             YensProgressTask.create(
@@ -700,25 +508,12 @@ public class PathFindingComputeFacade {
         );
     }
 
-    CompletableFuture<PathFindingResult> singleSourceShortestPathDijkstra(
-        GraphName graphName,
-        GraphParameters graphParameters,
-        Optional<String> relationshipProperty,
+    public CompletableFuture<PathFindingResult> singleSourceShortestPathDijkstra(
+        Graph graph,
         DijkstraSingleSourceParameters parameters,
         JobId jobId,
         boolean logProgress
     ) {
-        // Fetch the Graph the algorithm will operate on
-        var graph = graphStoreCatalogService.fetchGraphResources(
-            graphName,
-            graphParameters,
-            relationshipProperty,
-            new SourceNodeGraphStoreValidation(parameters.sourceNode()),
-            Optional.empty(),
-            user,
-            databaseId
-        ).graph();
-
         // Create ProgressTracker
         var progressTracker = progressTrackerFactory.create(
             RelationshipCountProgressTaskFactory.create(AlgorithmLabel.SingleSourceDijkstra, graph.relationshipCount()),
@@ -744,25 +539,12 @@ public class PathFindingComputeFacade {
         );
     }
 
-    CompletableFuture<SpanningTree> spanningTree(
-        GraphName graphName,
-        GraphParameters graphParameters,
-        Optional<String> relationshipProperty,
+    public CompletableFuture<SpanningTree> spanningTree(
+        Graph graph,
         SpanningTreeParameters parameters,
         JobId jobId,
         boolean logProgress
     ) {
-        // Fetch the Graph the algorithm will operate on
-        var graph = graphStoreCatalogService.fetchGraphResources(
-            graphName,
-            graphParameters,
-            relationshipProperty,
-            new SourceNodeGraphStoreValidation(parameters.sourceNode()),
-            Optional.empty(),
-            user,
-            databaseId
-        ).graph();
-
         // Create ProgressTracker
         var progressTracker = progressTrackerFactory.create(
             RelationshipCountProgressTaskFactory.create(AlgorithmLabel.SpanningTree, graph.relationshipCount()),
@@ -787,24 +569,12 @@ public class PathFindingComputeFacade {
         );
     }
 
-    CompletableFuture<SteinerTreeResult> steinerTree(
-        GraphName graphName,
-        GraphParameters graphParameters,
-        Optional<String> relationshipProperty,
+    public CompletableFuture<SteinerTreeResult> steinerTree(
+        Graph graph,
         SteinerTreeParameters parameters,
         JobId jobId,
         boolean logProgress
     ) {
-        // Fetch the Graph the algorithm will operate on
-        var graph = graphStoreCatalogService.fetchGraphResources(
-            graphName,
-            graphParameters,
-            relationshipProperty,
-            new SourceNodeTargetNodesGraphStoreValidation(parameters.sourceNode(), parameters.targetNodes()),
-            Optional.empty(),
-            user,
-            databaseId
-        ).graph();
 
         // Create ProgressTracker
         var progressTracker = progressTrackerFactory.create(
@@ -840,25 +610,12 @@ public class PathFindingComputeFacade {
         );
     }
 
-    CompletableFuture<TopologicalSortResult> topologicalSort(
-        GraphName graphName,
-        GraphParameters graphParameters,
-        Optional<String> relationshipProperty,
+    public CompletableFuture<TopologicalSortResult> topologicalSort(
+        Graph graph,
         TopologicalSortParameters parameters,
         JobId jobId,
         boolean logProgress
     ) {
-        // Fetch the Graph the algorithm will operate on
-        var graph = graphStoreCatalogService.fetchGraphResources(
-            graphName,
-            graphParameters,
-            relationshipProperty,
-            new NoAlgorithmValidation(),
-            Optional.empty(),
-            user,
-            databaseId
-        ).graph();
-
         // Create ProgressTracker
         var progressTracker = progressTrackerFactory.create(
             TopSortTask.create(graph),
