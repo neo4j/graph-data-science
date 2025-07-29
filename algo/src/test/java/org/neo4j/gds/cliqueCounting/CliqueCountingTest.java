@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.cliqueCounting;
 
-import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -35,8 +35,8 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.stream.Stream;
 
@@ -65,33 +65,6 @@ class CliqueCountingTest {
             )
         );
     }
-
-//    public void testPartitionSubset() {
-//        var graph = fromGdl("CREATE (a), (b), (c), (d), (b)-[:T]->(c)-[:T]->(d), (d)-[:T]->(b)");
-//        long[] subset = {1, 2, 3};
-//        graph.forEachRelationship(
-//            0, (a, b) -> {
-//                System.out.println(a + " " + b);
-//                return true;
-//            }
-//        );
-//        var cliqueCounting = CliqueCounting.create(
-//            graph,
-//            new CliqueCountingParameters(
-//                CliqueCountingMode.ForEveryNode,
-//                List.of(),
-//                new Concurrency(1)
-//            ),
-//            DefaultPool.INSTANCE,
-//            ProgressTracker.NULL_TRACKER,
-//            TerminationFlag.RUNNING_TRUE
-//        );
-////        var count = cliqueCounting.neighborhoodIntersectionSize(graph, subset, 0L);
-//        int[] intersectionSizes = {2, 2, 2};
-//        var partition = cliqueCounting.partitionSubset(subset);
-////        assertEquals(1, count);
-//        System.out.println(partition);
-//    }
 
     private static Stream<Arguments> starAndTrianglesQuery() {
         return Stream.of(
@@ -170,8 +143,6 @@ class CliqueCountingTest {
         assertEquals(2L, result1.perNodeCount().get(0L)[4 - 3]);
     }
 
-
-
     @MethodSource("starAndTrianglesQuery")
     @ParameterizedTest(name = "{1}")
     void subcliqueCount(Graph graph, String ignoredName) {
@@ -187,10 +158,11 @@ class CliqueCountingTest {
         assertEquals(1L, result2.perSubcliqueCount()[1][4 - 3]);
     }
 
-    @Disabled
+    @Test
     void bigGraph() throws IOException {
         //Expected: [38542, 31170, 17387, 6306, 1273, 114, 1]
-        String gdlString = Files.readString(Path.of("/Users/alfred/graph-analytics/public/algo/src/test/java/org/neo4j/gds/cliqueCounting/gdl_n1k_m20_p0.05.txt"));
+        var gdlStream = getClass().getResourceAsStream("/gdl_n1k_m20_p0.05.txt");
+        String gdlString = new String(gdlStream.readAllBytes(), StandardCharsets.UTF_8);
         Graph graph = fromGdl(gdlString);
         CliqueCountingResult result = compute(graph, 16, HugeObjectArray.of());
         assertEquals(38542L, result.globalCount()[3 - 3]);
@@ -200,23 +172,22 @@ class CliqueCountingTest {
         assertEquals(1273L, result.globalCount()[7 - 3]);
         assertEquals(114L, result.globalCount()[8 - 3]);
         assertEquals(1L, result.globalCount()[9 - 3]);
-        System.out.println(Arrays.toString(result.globalCount()));
     }
 
-    @Disabled
+    @Test
     void biggerGraph() throws IOException {
-        //Expected:
-        String gdlString = Files.readString(Path.of("/Users/alfred/graph-analytics/public/algo/src/test/java/org/neo4j/gds/cliqueCounting/gdl_n10k_m25_p0.05.txt"));
+        InputStream gdlStream = getClass().getResourceAsStream("/gdl_n10k_m25_p0.05.txt");
+        String gdlString = new String(gdlStream.readAllBytes(), StandardCharsets.UTF_8);
         Graph graph = fromGdl(gdlString);
-
         CliqueCountingResult result = compute(graph, 16, HugeObjectArray.of());
-        var start = System.nanoTime();
-        for (int i = 0; i < 10; i++) {
-            result = compute(graph, 16, HugeObjectArray.of());
-        }
-        var end = System.nanoTime();
-        System.out.println("Avg execution time: " + (end - start)/10_000_000 + "ms");
-//        System.out.println(Arrays.toString(result.globalCount()));
+        assertEquals(198335L, result.globalCount()[3 - 3]);
+        assertEquals(98332L, result.globalCount()[4 - 3]);
+        assertEquals(66558L, result.globalCount()[5 - 3]);
+        assertEquals(37598L, result.globalCount()[6 - 3]);
+        assertEquals(13449L, result.globalCount()[7 - 3]);
+        assertEquals(2604L, result.globalCount()[8 - 3]);
+        assertEquals(232L, result.globalCount()[9 - 3]);
+        assertEquals(6L, result.globalCount()[10 - 3]);
     }
 
 }
