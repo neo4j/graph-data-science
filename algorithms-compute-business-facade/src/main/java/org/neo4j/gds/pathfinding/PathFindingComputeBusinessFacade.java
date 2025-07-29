@@ -77,7 +77,10 @@ public class PathFindingComputeBusinessFacade {
 
     public PathFindingComputeBusinessFacade(
         GraphStoreCatalogService graphStoreCatalogService,
-        PathFindingComputeFacade computeFacade, ExecutorService executorService, User user, DatabaseId databaseId
+        PathFindingComputeFacade computeFacade,
+        ExecutorService executorService,
+        User user,
+        DatabaseId databaseId
     ) {
         this.graphStoreCatalogService = graphStoreCatalogService;
         this.computeFacade = computeFacade;
@@ -86,7 +89,7 @@ public class PathFindingComputeBusinessFacade {
         this.databaseId = databaseId;
     }
 
-    <TR> CompletableFuture<TR> allShortestPaths(
+    public <TR> CompletableFuture<TR> allShortestPaths(
         GraphName graphName,
         GraphParameters graphParameters,
         Optional<String> relationshipProperty,
@@ -112,7 +115,7 @@ public class PathFindingComputeBusinessFacade {
         ).thenApply(resultTransformerBuilder.build(graph));
     }
 
-    <TR> CompletableFuture<TR> bellmanFord(
+    public <TR> CompletableFuture<TR> bellmanFord(
         GraphName graphName,
         GraphParameters graphParameters,
         Optional<String> relationshipProperty,
@@ -140,7 +143,7 @@ public class PathFindingComputeBusinessFacade {
         ).thenApply(resultTransformerBuilder.build(graph));
     }
 
-    <TR> CompletableFuture<TR> breadthFirstSearch(
+    public <TR> CompletableFuture<TR> breadthFirstSearch(
         GraphName graphName,
         GraphParameters graphParameters,
         TraversalParameters parameters,
@@ -170,7 +173,7 @@ public class PathFindingComputeBusinessFacade {
         ).thenApply(resultTransformerBuilder.build(graph));
     }
 
-    <TR> CompletableFuture<TR> deltaStepping(
+    public <TR> CompletableFuture<TR> deltaStepping(
         GraphName graphName,
         GraphParameters graphParameters,
         Optional<String> relationshipProperty,
@@ -198,7 +201,7 @@ public class PathFindingComputeBusinessFacade {
         ).thenApply(resultTransformerBuilder.build(graph));
     }
 
-    <TR> CompletableFuture<TR> depthFirstSearch(
+    public <TR> CompletableFuture<TR> depthFirstSearch(
         GraphName graphName,
         GraphParameters graphParameters,
         TraversalParameters parameters,
@@ -228,7 +231,7 @@ public class PathFindingComputeBusinessFacade {
         ).thenApply(resultTransformerBuilder.build(graph));
     }
 
-    <TR> CompletableFuture<TR> kSpanningTree(
+    public <TR> CompletableFuture<TR> kSpanningTree(
         GraphName graphName,
         GraphParameters graphParameters,
         Optional<String> relationshipProperty,
@@ -256,7 +259,7 @@ public class PathFindingComputeBusinessFacade {
         ).thenApply(resultTransformerBuilder.build(graph));
     }
 
-    <TR> CompletableFuture<TR> longestPath(
+    public <TR> CompletableFuture<TR> longestPath(
         GraphName graphName,
         GraphParameters graphParameters,
         DagLongestPathParameters parameters,
@@ -283,7 +286,7 @@ public class PathFindingComputeBusinessFacade {
         ).thenApply(resultTransformerBuilder.build(graph));
     }
 
-    <TR> CompletableFuture<TR> randomWalk(
+    public <TR> CompletableFuture<TR> randomWalk(
         GraphName graphName,
         GraphParameters graphParameters,
         Optional<String> relationshipProperty,
@@ -311,7 +314,7 @@ public class PathFindingComputeBusinessFacade {
         ).thenApply(resultTransformerBuilder.build(graph));
     }
 
-    <TR> CompletableFuture<TR> randomWalkCountingNodeVisits(
+    public <TR> CompletableFuture<TR> randomWalkCountingNodeVisits(
         GraphName graphName,
         GraphParameters graphParameters,
         Optional<String> relationshipProperty,
@@ -365,7 +368,7 @@ public class PathFindingComputeBusinessFacade {
         );
     }
 
-    <TR> CompletableFuture<TR> singlePairShortestPathAStar(
+    public <TR> CompletableFuture<TR> singlePairShortestPathAStar(
         GraphName graphName,
         GraphParameters graphParameters,
         Optional<String> relationshipProperty,
@@ -393,7 +396,7 @@ public class PathFindingComputeBusinessFacade {
         ).thenApply(resultTransformerBuilder.build(graph));
     }
 
-    <TR> CompletableFuture<TR> singlePairShortestPathDijkstra(
+    public <TR> CompletableFuture<TR> singlePairShortestPathDijkstra(
         GraphName graphName,
         GraphParameters graphParameters,
         Optional<String> relationshipProperty,
@@ -421,7 +424,7 @@ public class PathFindingComputeBusinessFacade {
         ).thenApply(resultTransformerBuilder.build(graph));
     }
 
-    <TR> CompletableFuture<TR> singlePairShortestPathYens(
+    public <TR> CompletableFuture<TR> singlePairShortestPathYens(
         GraphName graphName,
         GraphParameters graphParameters,
         Optional<String> relationshipProperty,
@@ -449,7 +452,7 @@ public class PathFindingComputeBusinessFacade {
         ).thenApply(resultTransformerBuilder.build(graph));
     }
 
-    <TR> CompletableFuture<TR> singleSourceShortestPathDijkstra(
+    public <TR> CompletableFuture<TR> singleSourceShortestPathDijkstra(
         GraphName graphName,
         GraphParameters graphParameters,
         Optional<String> relationshipProperty,
@@ -477,7 +480,7 @@ public class PathFindingComputeBusinessFacade {
         ).thenApply(resultTransformerBuilder.build(graph));
     }
 
-    <TR> CompletableFuture<TR> spanningTree(
+    public <TR> CompletableFuture<TR> spanningTree(
         GraphName graphName,
         GraphParameters graphParameters,
         Optional<String> relationshipProperty,
@@ -505,7 +508,7 @@ public class PathFindingComputeBusinessFacade {
         ).thenApply(resultTransformerBuilder.build(graph));
     }
 
-    <TR> CompletableFuture<TR> steinerTree(
+    public <TR> CompletableFuture<TR> steinerTree(
         GraphName graphName,
         GraphParameters graphParameters,
         Optional<String> relationshipProperty,
@@ -533,7 +536,7 @@ public class PathFindingComputeBusinessFacade {
         ).thenApply(resultTransformerBuilder.build(graph));
     }
 
-    <TR> CompletableFuture<TR> topologicalSort(
+    public <TR> CompletableFuture<TR> topologicalSort(
         GraphName graphName,
         GraphParameters graphParameters,
         Optional<String> relationshipProperty,
