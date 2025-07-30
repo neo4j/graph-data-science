@@ -25,4 +25,11 @@ public record BellmanFordResult(
     PathFindingResult shortestPaths,
     PathFindingResult negativeCycles,
     boolean containsNegativeCycle
-) {}
+) {
+    public static final BellmanFordResult EMPTY = new BellmanFordResult(
+        PathFindingResult.EMPTY,
+        PathFindingResult.EMPTY,
+        false
+    );
+
+}

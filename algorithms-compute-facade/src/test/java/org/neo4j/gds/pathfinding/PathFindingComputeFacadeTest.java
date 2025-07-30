@@ -26,11 +26,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.neo4j.gds.ProgressTrackerFactory;
 import org.neo4j.gds.allshortestpaths.AllShortestPathsParameters;
-import org.neo4j.gds.api.User;
 import org.neo4j.gds.async.AsyncAlgorithmCaller;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.tasks.IterativeTask;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -76,9 +74,6 @@ import static org.mockito.Mockito.when;
 @GdlExtension
 class PathFindingComputeFacadeTest {
 
-    @Mock
-    private GraphStoreCatalogService catalogServiceMock;
-
     @Mock(strictness = Mock.Strictness.LENIENT)
     private ProgressTrackerFactory progressTrackerFactoryMock;
     @Mock
@@ -86,9 +81,6 @@ class PathFindingComputeFacadeTest {
 
     @Mock
     private JobId jobIdMock;
-
-    @Mock
-    private User userMock;
 
     @Mock
     private Log logMock;

@@ -32,6 +32,12 @@ public record PrizeSteinerTreeResult(
     public static final long  PRUNED=-2;
     public static final long  ROOT=-1;
 
-
+    public static final PrizeSteinerTreeResult EMPTY = new PrizeSteinerTreeResult(
+        HugeLongArray.newArray(0),
+        HugeDoubleArray.newArray(0),
+        0,
+        0.0,
+        0.0
+    );
 
 }

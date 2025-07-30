@@ -30,6 +30,9 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class PathFindingResult {
+
+    public static final PathFindingResult EMPTY = new PathFindingResult(Stream.empty());
+
     private final Stream<PathResult> paths;
 
     private final Runnable closeStreamAction;

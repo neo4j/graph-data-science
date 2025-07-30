@@ -31,6 +31,15 @@ import java.util.function.LongToDoubleFunction;
  */
 public class SpanningTree {
 
+    public static final SpanningTree EMPTY = new SpanningTree(
+        -1L,
+        0,
+        0,
+        HugeLongArray.newArray(0),
+        n -> 0.0,
+        0.0
+    );
+
     final long head;
     final long nodeCount;
     final long effectiveNodeCount;
@@ -54,7 +63,6 @@ public class SpanningTree {
         this.totalWeight = totalWeight;
     }
 
- 
     public long effectiveNodeCount() {
         return effectiveNodeCount;
     }

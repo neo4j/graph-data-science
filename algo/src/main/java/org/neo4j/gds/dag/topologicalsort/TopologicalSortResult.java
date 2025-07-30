@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.dag.topologicalsort;
 
-import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
 
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
@@ -29,6 +29,9 @@ import java.util.concurrent.atomic.AtomicLong;
  * An implementation of the result with message queues instead of synchronization.
  */
 public class TopologicalSortResult {
+
+    public static final TopologicalSortResult EMPTY = new TopologicalSortResult(0, Optional.empty());
+
     private final HugeLongArray sortedNodes;
     private final AtomicLong addIndex = new AtomicLong(0);
     private final Optional<HugeAtomicDoubleArray> maxSourceDistances;

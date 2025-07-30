@@ -28,4 +28,13 @@ public record SteinerTreeResult(
         double totalCost,
         long effectiveNodeCount,
         long effectiveTargetNodesCount
-    ) {}
+    ) {
+
+    public static final SteinerTreeResult EMPTY = new SteinerTreeResult(
+        HugeLongArray.newArray(0),
+        HugeDoubleArray.newArray(0),
+        0.0,
+        0,
+        0
+    );
+}

@@ -28,6 +28,7 @@ import org.neo4j.gds.applications.algorithms.pathfinding.MSBFSASPAlgorithmFactor
 import org.neo4j.gds.async.AsyncAlgorithmCaller;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
+import org.neo4j.gds.core.utils.paged.ParalleLongPageCreator;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.dag.longestPath.DagLongestPath;
 import org.neo4j.gds.dag.longestPath.DagLongestPathParameters;
@@ -115,6 +116,10 @@ public class PathFindingComputeFacade {
         AllShortestPathsParameters parameters,
         JobId jobId
     ) {
+        if (graph.isEmpty()) {
+            return CompletableFuture.completedFuture(Stream.empty());
+        }
+
         // Create ProgressTracker
         // `allShortestPaths` doesn't use progress tracker (yet 🤔)
         var progressTracker = progressTrackerFactory.nullTracker();
@@ -142,6 +147,11 @@ public class PathFindingComputeFacade {
         JobId jobId,
         boolean logProgress
     ) {
+        // If the input graph is empty return a completed future with empty result
+        if (graph.isEmpty()) {
+            return CompletableFuture.completedFuture(BellmanFordResult.EMPTY);
+        }
+
         // Create ProgressTracker
         var progressTracker = progressTrackerFactory.create(
             BellmanFordProgressTask.create(),
@@ -174,6 +184,11 @@ public class PathFindingComputeFacade {
         JobId jobId,
         boolean logProgress
     ) {
+        // If the input graph is empty return a completed future with empty result
+        if (graph.isEmpty()) {
+            return CompletableFuture.completedFuture(HugeLongArray.newArray(0L));
+        }
+
         // Create ProgressTracker
         var progressTracker = progressTrackerFactory.create(
             BFSProgressTask.create(),
@@ -211,6 +226,11 @@ public class PathFindingComputeFacade {
         JobId jobId,
         boolean logProgress
     ) {
+        // If the input graph is empty return a completed future with empty result
+        if (graph.isEmpty()) {
+            return CompletableFuture.completedFuture(PathFindingResult.EMPTY);
+        }
+
         // Create ProgressTracker
         var progressTracker = progressTrackerFactory.create(
             DeltaSteppingProgressTask.create(),
@@ -235,8 +255,12 @@ public class PathFindingComputeFacade {
         TraversalParameters parameters,
         JobId jobId,
         boolean logProgress
-
     ) {
+        // If the input graph is empty return a completed future with empty result
+        if (graph.isEmpty()) {
+            return CompletableFuture.completedFuture(HugeLongArray.newArray(0L));
+        }
+
         // Create ProgressTracker
         var progressTracker = progressTrackerFactory.create(
             DFSProgressTask.create(),
@@ -272,6 +296,11 @@ public class PathFindingComputeFacade {
         JobId jobId,
         boolean logProgress
     ) {
+        // If the input graph is empty return a completed future with empty result
+        if (graph.isEmpty()) {
+            return CompletableFuture.completedFuture(SpanningTree.EMPTY);
+        }
+
         // Create ProgressTracker
         var progressTracker = progressTrackerFactory.create(
             KSpanningTreeTask.create(graph.relationshipCount()),
@@ -303,6 +332,11 @@ public class PathFindingComputeFacade {
         JobId jobId,
         boolean logProgress
     ) {
+        // If the input graph is empty return a completed future with empty result
+        if (graph.isEmpty()) {
+            return CompletableFuture.completedFuture(PathFindingResult.EMPTY);
+        }
+
         // Create ProgressTracker
         var progressTracker = progressTrackerFactory.create(
             LongestPathTask.create(graph.nodeCount()),
@@ -332,6 +366,11 @@ public class PathFindingComputeFacade {
         JobId jobId,
         boolean logProgress
     ) {
+        // If the input graph is empty return a completed future with empty result
+        if (graph.isEmpty()) {
+            return CompletableFuture.completedFuture(Stream.empty());
+        }
+
         // Create ProgressTracker
         var progressTracker = progressTrackerFactory.create(
             RandomWalkProgressTask.create(graph),
@@ -361,6 +400,13 @@ public class PathFindingComputeFacade {
         JobId jobId,
         boolean logProgress
     ) {
+        // If the input graph is empty return a completed future with empty result
+        if (graph.isEmpty()) {
+            return CompletableFuture.completedFuture(HugeAtomicLongArray.of(
+                0,
+                ParalleLongPageCreator.passThrough(parameters.concurrency())
+            ));
+        }
 
         // Create ProgressTracker
         var progressTracker = progressTrackerFactory.create(
@@ -392,6 +438,11 @@ public class PathFindingComputeFacade {
         JobId jobId,
         boolean logProgress
     ) {
+        // If the input graph is empty return a completed future with empty result
+        if (graph.isEmpty()) {
+            return CompletableFuture.completedFuture(PrizeSteinerTreeResult.EMPTY);
+        }
+
         // Create ProgressTracker
         var progressTracker = progressTrackerFactory.create(
             PCSTProgressTrackerTaskCreator.progressTask(graph.nodeCount(), graph.relationshipCount()),
@@ -421,6 +472,11 @@ public class PathFindingComputeFacade {
         JobId jobId,
         boolean logProgress
     ) {
+        // If the input graph is empty return a completed future with empty result
+        if (graph.isEmpty()) {
+            return CompletableFuture.completedFuture(PathFindingResult.EMPTY);
+        }
+
         // Create ProgressTracker
         var progressTracker = progressTrackerFactory.create(
             RelationshipCountProgressTaskFactory.create(AlgorithmLabel.AStar, graph.relationshipCount()),
@@ -450,6 +506,11 @@ public class PathFindingComputeFacade {
         JobId jobId,
         boolean logProgress
     ) {
+        // If the input graph is empty return a completed future with empty result
+        if (graph.isEmpty()) {
+            return CompletableFuture.completedFuture(PathFindingResult.EMPTY);
+        }
+
         // Create ProgressTracker
         var progressTracker = progressTrackerFactory.create(
             RelationshipCountProgressTaskFactory.create(AlgorithmLabel.Dijkstra, graph.relationshipCount()),
@@ -482,6 +543,11 @@ public class PathFindingComputeFacade {
         JobId jobId,
         boolean logProgress
     ) {
+        // If the input graph is empty return a completed future with empty result
+        if (graph.isEmpty()) {
+            return CompletableFuture.completedFuture(PathFindingResult.EMPTY);
+        }
+
         // Create ProgressTracker
         var progressTracker = progressTrackerFactory.create(
             YensProgressTask.create(
@@ -514,6 +580,11 @@ public class PathFindingComputeFacade {
         JobId jobId,
         boolean logProgress
     ) {
+        // If the input graph is empty return a completed future with empty result
+        if (graph.isEmpty()) {
+            return CompletableFuture.completedFuture(PathFindingResult.EMPTY);
+        }
+
         // Create ProgressTracker
         var progressTracker = progressTrackerFactory.create(
             RelationshipCountProgressTaskFactory.create(AlgorithmLabel.SingleSourceDijkstra, graph.relationshipCount()),
@@ -545,6 +616,11 @@ public class PathFindingComputeFacade {
         JobId jobId,
         boolean logProgress
     ) {
+        // If the input graph is empty return a completed future with empty result
+        if (graph.isEmpty()) {
+            return CompletableFuture.completedFuture(SpanningTree.EMPTY);
+        }
+
         // Create ProgressTracker
         var progressTracker = progressTrackerFactory.create(
             RelationshipCountProgressTaskFactory.create(AlgorithmLabel.SpanningTree, graph.relationshipCount()),
@@ -575,6 +651,10 @@ public class PathFindingComputeFacade {
         JobId jobId,
         boolean logProgress
     ) {
+        // If the input graph is empty return a completed future with empty result
+        if (graph.isEmpty()) {
+            return CompletableFuture.completedFuture(SteinerTreeResult.EMPTY);
+        }
 
         // Create ProgressTracker
         var progressTracker = progressTrackerFactory.create(
@@ -616,6 +696,11 @@ public class PathFindingComputeFacade {
         JobId jobId,
         boolean logProgress
     ) {
+        // If the input graph is empty return a completed future with empty result
+        if (graph.isEmpty()) {
+            return CompletableFuture.completedFuture(TopologicalSortResult.EMPTY);
+        }
+
         // Create ProgressTracker
         var progressTracker = progressTrackerFactory.create(
             TopSortTask.create(graph),
