@@ -30,6 +30,7 @@ import org.neo4j.gds.dag.topologicalsort.TopologicalSortStreamConfig;
 import org.neo4j.gds.pathfinding.PathFindingComputeBusinessFacade;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarStreamConfig;
 import org.neo4j.gds.paths.bellmanford.AllShortestPathsBellmanFordStreamConfig;
+import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaStreamConfig;
 import org.neo4j.gds.paths.dijkstra.config.AllShortestPathsDijkstraStreamConfig;
 import org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraStreamConfig;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensStreamConfig;
@@ -247,7 +248,27 @@ public class PushbackPathFindingProcedureFacade implements PathFindingProcedureF
 
     @Override
     public Stream<PathFindingStreamResult> deltaSteppingStream(String graphName, Map<String, Object> configuration) {
-        return Stream.empty();
+        var config = configurationParser.parseConfiguration(
+            configuration,
+            AllShortestPathsDeltaStreamConfig::of
+        );
+        var routeRequested = procedureReturnColumns.contains("path");
+
+        var pathFindingResultTransformerBuilder = new PathFindingStreamResultTransformerBuilder(
+            closeableResourceRegistry,
+            nodeLookup,
+            routeRequested
+        );
+
+        return businessFacade.deltaStepping(
+            GraphName.parse(graphName),
+            config.toGraphParameters(),
+            config.relationshipWeightProperty(),
+            config.toParameters(),
+            config.jobId(),
+            config.logProgress(),
+            pathFindingResultTransformerBuilder
+        ).join();
     }
 
     @Override
