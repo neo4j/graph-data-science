@@ -32,6 +32,7 @@ import org.neo4j.gds.paths.bellmanford.AllShortestPathsBellmanFordStreamConfig;
 import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.PathFindingStubs;
 import org.neo4j.gds.procedures.algorithms.results.StandardStatsResult;
+import org.neo4j.gds.steiner.SteinerTreeStreamConfig;
 
 import java.util.Map;
 import java.util.Optional;
@@ -628,7 +629,7 @@ public class PushbackPathFindingProcedureFacade implements PathFindingProcedureF
 
     @Override
     public Stream<SpanningTreeStreamResult> spanningTreeStream(String graphName, Map<String, Object> configuration) {
-        return Stream.empty();
+        return  Stream.empty();
     }
 
     @Override
@@ -680,7 +681,20 @@ public class PushbackPathFindingProcedureFacade implements PathFindingProcedureF
 
     @Override
     public Stream<SpanningTreeStreamResult> steinerTreeStream(String graphName, Map<String, Object> configuration) {
-        return Stream.empty();
+        var config = configurationParser.parseConfiguration(
+            configuration,
+            SteinerTreeStreamConfig::of
+        );
+        var resultTransformerBuilder  = new SteinerTreeStreamResultTransformerBuilder(config.sourceNode());
+        return businessFacade.steinerTree(
+            GraphName.parse(graphName),
+            config.toGraphParameters(),
+            config.relationshipWeightProperty(),
+            config.toParameters(),
+            config.jobId(),
+            config.logProgress(),
+            resultTransformerBuilder
+        ).join();
     }
 
     @Override
