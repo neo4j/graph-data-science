@@ -360,15 +360,17 @@ public class PathFindingComputeBusinessFacade {
         ).thenApply(resultTransformerBuilder.build(graph, graphStore));
     }
 
-    CompletableFuture<PrizeSteinerTreeResult> pcst(
+    public <TR> CompletableFuture<TR> pcst(
         GraphName graphName,
         GraphParameters graphParameters,
+        Optional<String> relationshipProperty,
         PCSTParameters parameters,
         JobId jobId,
-        boolean logProgress
+        boolean logProgress,
+        ResultTransformerBuilder<PrizeSteinerTreeResult, TR> resultTransformerBuilder
     ) {
         // Fetch the Graph the algorithm will operate on
-        var graph = graphStoreCatalogService.fetchGraphResources(
+        var graphResources = graphStoreCatalogService.fetchGraphResources(
             graphName,
             graphParameters,
             Optional.empty(),
@@ -376,14 +378,18 @@ public class PathFindingComputeBusinessFacade {
             Optional.empty(),
             user,
             databaseId
-        ).graph();
+        );
+
+        var graph = graphResources.graph();
+        var graphStore = graphResources.graphStore();
+
 
         return computeFacade.pcst(
             graph,
             parameters,
             jobId,
             logProgress
-        );
+        ).thenApply(resultTransformerBuilder.build(graph, graphStore));
     }
 
     public <TR> CompletableFuture<TR> singlePairShortestPathAStar(
