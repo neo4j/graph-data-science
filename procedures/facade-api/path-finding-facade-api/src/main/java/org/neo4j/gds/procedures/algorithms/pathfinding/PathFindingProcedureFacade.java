@@ -88,7 +88,7 @@ public interface PathFindingProcedureFacade {
         Map<String, Object> algorithmConfiguration
     );
 
-    Stream<BfsStreamResult> breadthFirstSearchStream(String graphName, Map<String, Object> configuration);
+    Stream<TraversalStreamResult> breadthFirstSearchStream(String graphName, Map<String, Object> configuration);
 
     Stream<MemoryEstimateResult> breadthFirstSearchStreamEstimate(
         Object graphNameOrConfiguration,
@@ -133,7 +133,7 @@ public interface PathFindingProcedureFacade {
         Map<String, Object> algorithmConfiguration
     );
 
-    Stream<DfsStreamResult> depthFirstSearchStream(String graphName, Map<String, Object> configuration);
+    Stream<TraversalStreamResult> depthFirstSearchStream(String graphName, Map<String, Object> configuration);
 
     Stream<MemoryEstimateResult> depthFirstSearchStreamEstimate(
         Object graphNameOrConfiguration,

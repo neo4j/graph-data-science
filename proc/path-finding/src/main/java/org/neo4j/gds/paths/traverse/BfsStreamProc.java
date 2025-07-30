@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.paths.traverse;
 
-import org.neo4j.gds.procedures.GraphDataScienceProcedures;
-import org.neo4j.gds.procedures.algorithms.pathfinding.BfsStreamResult;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
+import org.neo4j.gds.procedures.GraphDataScienceProcedures;
+import org.neo4j.gds.procedures.algorithms.pathfinding.TraversalStreamResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -40,7 +40,7 @@ public class BfsStreamProc {
 
     @Procedure(name = "gds.bfs.stream", mode = READ)
     @Description(BFS_DESCRIPTION)
-    public Stream<BfsStreamResult> bfs(
+    public Stream<TraversalStreamResult> bfs(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {

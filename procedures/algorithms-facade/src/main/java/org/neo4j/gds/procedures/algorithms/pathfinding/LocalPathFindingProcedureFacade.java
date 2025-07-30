@@ -427,7 +427,7 @@ public final class LocalPathFindingProcedureFacade implements PathFindingProcedu
     }
 
     @Override
-    public Stream<BfsStreamResult> breadthFirstSearchStream(String graphName, Map<String, Object> configuration) {
+    public Stream<TraversalStreamResult> breadthFirstSearchStream(String graphName, Map<String, Object> configuration) {
         var parsedConfig = configurationParser.parseConfiguration(configuration, BfsStreamConfig::of);
         return streamModeBusinessFacade.breadthFirstSearch(
             GraphName.parse(graphName),
@@ -560,7 +560,7 @@ public final class LocalPathFindingProcedureFacade implements PathFindingProcedu
 
 
     @Override
-    public Stream<DfsStreamResult> depthFirstSearchStream(String graphName, Map<String, Object> configuration) {
+    public Stream<TraversalStreamResult> depthFirstSearchStream(String graphName, Map<String, Object> configuration) {
         var parsedConfig = configurationParser.parseConfiguration(configuration, DfsStreamConfig::of);
         return streamModeBusinessFacade.depthFirstSearch(
             GraphName.parse(graphName),

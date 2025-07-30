@@ -30,9 +30,9 @@ import org.neo4j.graphdb.RelationshipType;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.procedures.algorithms.pathfinding.BfsStreamResult.RELATIONSHIP_TYPE_NAME;
+import static org.neo4j.gds.procedures.algorithms.pathfinding.TraversalStreamResult.RELATIONSHIP_TYPE_NAME;
 
-class BfsStreamResultBuilder implements StreamResultBuilder<HugeLongArray, BfsStreamResult> {
+class BfsStreamResultBuilder implements StreamResultBuilder<HugeLongArray, TraversalStreamResult> {
     private final NodeLookup nodeLookup;
     private final boolean pathRequested;
     private final BfsStreamConfig configuration;
@@ -44,7 +44,7 @@ class BfsStreamResultBuilder implements StreamResultBuilder<HugeLongArray, BfsSt
     }
 
     @Override
-    public Stream<BfsStreamResult> build(
+    public Stream<TraversalStreamResult> build(
         Graph graph,
         GraphStore graphStore,
         Optional<HugeLongArray> result
@@ -56,7 +56,7 @@ class BfsStreamResultBuilder implements StreamResultBuilder<HugeLongArray, BfsSt
             configuration.sourceNode(),
             result.get(),
             graph::toOriginalNodeId,
-            BfsStreamResult::new,
+            TraversalStreamResult::new,
             PathFactoryFacade.create(pathRequested, nodeLookup, graphStore.capabilities().canWriteToLocalDatabase()),
             RelationshipType.withName(RELATIONSHIP_TYPE_NAME)
         );

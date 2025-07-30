@@ -33,6 +33,8 @@ import org.neo4j.gds.paths.bellmanford.AllShortestPathsBellmanFordStreamConfig;
 import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaStreamConfig;
 import org.neo4j.gds.paths.dijkstra.config.AllShortestPathsDijkstraStreamConfig;
 import org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraStreamConfig;
+import org.neo4j.gds.paths.traverse.BfsStreamConfig;
+import org.neo4j.gds.paths.traverse.DfsStreamConfig;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensStreamConfig;
 import org.neo4j.gds.pcst.PCSTStreamConfig;
 import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
@@ -205,8 +207,28 @@ public class PushbackPathFindingProcedureFacade implements PathFindingProcedureF
     }
 
     @Override
-    public Stream<BfsStreamResult> breadthFirstSearchStream(String graphName, Map<String, Object> configuration) {
-        return Stream.empty();
+    public Stream<TraversalStreamResult> breadthFirstSearchStream(String graphName, Map<String, Object> configuration) {
+        var config = configurationParser.parseConfiguration(
+            configuration,
+            BfsStreamConfig::of
+        );
+        var routeRequested = procedureReturnColumns.contains("path");
+
+        var traversalResultTransformerBuilder = new TraversalStreamResultTransformerBuilder(
+            closeableResourceRegistry,
+            nodeLookup,
+            routeRequested,
+            config.sourceNode()
+        );
+
+        return businessFacade.depthFirstSearch(
+            GraphName.parse(graphName),
+            config.toGraphParameters(),
+            config.toParameters(),
+            config.jobId(),
+            config.logProgress(),
+            traversalResultTransformerBuilder
+        ).join();
     }
 
     @Override
@@ -309,8 +331,28 @@ public class PushbackPathFindingProcedureFacade implements PathFindingProcedureF
     }
 
     @Override
-    public Stream<DfsStreamResult> depthFirstSearchStream(String graphName, Map<String, Object> configuration) {
-        return Stream.empty();
+    public Stream<TraversalStreamResult> depthFirstSearchStream(String graphName, Map<String, Object> configuration) {
+        var config = configurationParser.parseConfiguration(
+            configuration,
+            DfsStreamConfig::of
+        );
+        var routeRequested = procedureReturnColumns.contains("path");
+
+        var traversalResultTransformerBuilder = new TraversalStreamResultTransformerBuilder(
+            closeableResourceRegistry,
+            nodeLookup,
+            routeRequested,
+            config.sourceNode()
+        );
+
+        return businessFacade.depthFirstSearch(
+            GraphName.parse(graphName),
+            config.toGraphParameters(),
+            config.toParameters(),
+            config.jobId(),
+            config.logProgress(),
+            traversalResultTransformerBuilder
+        ).join();
     }
 
     @Override
