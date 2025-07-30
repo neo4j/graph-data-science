@@ -14,6 +14,9 @@ dependencies {
     // TODO: we only need `neo4j.graph.algo` because of `PathImpl` maybe copy it around 🤔
     compileOnly(neo4j.graph.algo) { transitive = false }
 
+    // Algorithm results are here, we need to move them out
+    implementation project(':algo')
+
     // Various result builders are here
     implementation project(':algo-common')
 

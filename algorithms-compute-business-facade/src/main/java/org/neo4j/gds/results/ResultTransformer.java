@@ -19,9 +19,8 @@
  */
 package org.neo4j.gds.results;
 
-import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
+import java.util.function.Function;
 
-public interface ResultTransformerBuilder<AR, TR> {
-    ResultTransformer<AR, TR> build(Graph graph, GraphStore graphStore);
+public interface ResultTransformer<AR, TR> extends Function<AR, TR> {
+    TR apply(AR algorithmResult);
 }

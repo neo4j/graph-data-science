@@ -21,7 +21,9 @@ package org.neo4j.gds.procedures.algorithms.pathfinding;
 
 import org.neo4j.gds.allshortestpaths.AllShortestPathsConfig;
 import org.neo4j.gds.allshortestpaths.AllShortestPathsStreamResult;
+import org.neo4j.gds.api.CloseableResourceRegistry;
 import org.neo4j.gds.api.GraphName;
+import org.neo4j.gds.api.NodeLookup;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.pathfinding.PathFindingComputeBusinessFacade;
@@ -36,15 +38,23 @@ import java.util.stream.Stream;
 public class PushbackPathFindingProcedureFacade implements PathFindingProcedureFacade {
 
     private final PathFindingComputeBusinessFacade businessFacade;
+
     private final UserSpecificConfigurationParser configurationParser;
+
+    private final CloseableResourceRegistry closeableResourceRegistry;
+    private final NodeLookup nodeLookup;
     private final ProcedureReturnColumns procedureReturnColumns;
 
     public PushbackPathFindingProcedureFacade(
         PathFindingComputeBusinessFacade businessFacade,
-        UserSpecificConfigurationParser configurationParser, ProcedureReturnColumns procedureReturnColumns
+        UserSpecificConfigurationParser configurationParser,
+        CloseableResourceRegistry closeableResourceRegistry,
+        NodeLookup nodeLookup, ProcedureReturnColumns procedureReturnColumns
     ) {
         this.businessFacade = businessFacade;
         this.configurationParser = configurationParser;
+        this.closeableResourceRegistry = closeableResourceRegistry;
+        this.nodeLookup = nodeLookup;
         this.procedureReturnColumns = procedureReturnColumns;
     }
 
@@ -66,7 +76,7 @@ public class PushbackPathFindingProcedureFacade implements PathFindingProcedureF
                 config.relationshipWeightProperty(),
                 config.toParameters(),
                 config.jobId(),
-                graph -> r -> r // `MSBFSASPAlgorithm` implementations already maps the ids to the original ones => no need for transformation
+                (graph, graphStore) -> r -> r // `MSBFSASPAlgorithm` implementations already maps the ids to the original ones => no need for transformation
             )
             .join();
     }
@@ -81,15 +91,27 @@ public class PushbackPathFindingProcedureFacade implements PathFindingProcedureF
 
     @Override
     public Stream<BellmanFordStreamResult> bellmanFordStream(String graphName, Map<String, Object> configuration) {
-        var routeRequested = procedureReturnColumns.contains("route");
-        var bellmanFordStreamConfig = configurationParser.parseConfiguration(
+        var config = configurationParser.parseConfiguration(
             configuration,
             AllShortestPathsBellmanFordStreamConfig::of
         );
 
+        var routeRequested = procedureReturnColumns.contains("route");
+        var resultTransformerBuilder = new BellmanFordStreamResultTransformerBuilder(
+            closeableResourceRegistry,
+            nodeLookup,
+            routeRequested
+        );
 
-
-        return Stream.empty();
+        return businessFacade.bellmanFord(
+            GraphName.parse(graphName),
+            config.toGraphParameters(),
+            config.relationshipWeightProperty(),
+            config.toParameters(),
+            config.jobId(),
+            config.logProgress(),
+            resultTransformerBuilder
+        ).join();
     }
 
     @Override
