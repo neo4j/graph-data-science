@@ -24,37 +24,37 @@ public class RecursiveCliqueNodes {
     private final long[] nodes;
     private final boolean[] required;
     private int index = 0;
-    private int requiredNodes =0;
+    private int requiredNodes = 0;
 
     RecursiveCliqueNodes(int maxSize) {
         this.nodes = new long[maxSize];
         this.required = new boolean[maxSize];
     }
 
-    public static RecursiveCliqueNodes create(long node, int degree){
-            var cliqueNodes = new RecursiveCliqueNodes(degree+1);
-            cliqueNodes.add(node,true);
-            return  cliqueNodes;
+    public static RecursiveCliqueNodes create(long node, int degree) {
+        var cliqueNodes = new RecursiveCliqueNodes(degree + 1);
+        cliqueNodes.add(node, true);
+        return cliqueNodes;
     }
 
-    void add(long nodeId, boolean nodeRequired){
+    void add(long nodeId, boolean nodeRequired) {
         nodes[index] = nodeId;
         required[index++] = nodeRequired;
         if (nodeRequired) requiredNodes++;
     }
 
 
-    void finishRecursionLevel(){
+    void finishRecursionLevel() {
         index--;
         if (required[index]) requiredNodes--;
 
     }
 
-    long[] activeNodes(){
+    long[] activeNodes() {
         var requiredPointer = 0;
         var optionalPointer = index - 1;
         long[] active = new long[index];
-        for (int i=0;i < index;++i){
+        for (int i = 0; i < index; ++i) {
             var cliqueNode = nodes[i];
             if (required[i]) {
                 active[requiredPointer++] = cliqueNode;
@@ -65,8 +65,8 @@ public class RecursiveCliqueNodes {
         return active;
     }
 
-    int requiredNodes(){
-        return  requiredNodes;
+    int requiredNodes() {
+        return requiredNodes;
     }
 
 }

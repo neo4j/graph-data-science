@@ -31,14 +31,12 @@ import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
-import org.neo4j.gds.core.utils.Intersections;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -71,6 +69,8 @@ public final class CliqueCounting extends Algorithm<CliqueCountingResult> {
     private final long[][] subcliques;
     private final CliqueAdjacency cliqueAdjacency;
     private final CliqueCountsHandler cliqueCountsHandler;
+
+    public final int MAX_CLIQUE_SIZE = Integer.MAX_VALUE;
 
     private CliqueCounting(
         Graph graph,
@@ -123,25 +123,6 @@ public final class CliqueCounting extends Algorithm<CliqueCountingResult> {
         );
     }
 
-    long[] rootNodeNeighbors(long rootNode, boolean filter){
-        ArrayList<Long> neighbors =new ArrayList<>();
-        var lastEntered = -1L;
-        var cursor  = cliqueAdjacency.createCursor(rootNode);
-        while (cursor.hasNextVLong()){
-            var  nodeId  =  cursor.nextVLong();
-            if (nodeId != NOT_FOUND && nodeId!=lastEntered){
-                boolean should = !filter || (nodeId > rootNode);
-                if (should) {
-                    neighbors.add(nodeId);
-                    lastEntered = nodeId;
-                }
-            }
-        }
-
-        return neighbors.stream().mapToLong(Long::longValue).toArray();
-    }
-
-
     //public compute method
     @Override
     public CliqueCountingResult compute() {
@@ -156,7 +137,6 @@ public final class CliqueCounting extends Algorithm<CliqueCountingResult> {
             .run();
 
         progressTracker.endSubTask();
-
       return createResult();
     }
 
@@ -204,43 +184,64 @@ public final class CliqueCounting extends Algorithm<CliqueCountingResult> {
 
     }
 
-    private void recursiveSctCliqueCount(long[] subset, RecursiveCliqueNodes cliqueNodes, SizeFrequencies sizeFrequencies) {
+    private void recursiveSctCliqueCount(long[] subset, long[][] feasibleNeighborhoods, RecursiveCliqueNodes cliqueNodes, SizeFrequencies sizeFrequencies) {
         if (subset.length == 0) {
-            var  nodes = cliqueNodes.activeNodes();
+            var nodes = cliqueNodes.activeNodes();
             var requiredPointer = cliqueNodes.requiredNodes();
             sizeFrequencies.updateFrequencies(countingMode, nodes, requiredPointer);
-        }else {
+        } else {
+            int[][] intersectionIds = new int[subset.length][];
+            for (int i = 0; i < subset.length; i++) {
+                intersectionIds[i] = intersectionIds(subset, feasibleNeighborhoods[i]);
+            }
+            SubsetPartitionIds partitionIds = partitionSubsetIds(subset, intersectionIds);
 
-            var intersections = computeIntersections(subset);
+            var nsp = new long[partitionIds.includedNodesIds().length];
+            for (int i = 0; i < partitionIds.includedNodesIds().length; i++) {
+                nsp[i] = subset[partitionIds.includedNodesIds()[i]];
+            }
+            var newFeasibleNeighborhoods = new long[nsp.length][];
+            for (int j = 0; j < nsp.length; j++) {
+                var subsetIdx = partitionIds.includedNodesIds()[j];
+                newFeasibleNeighborhoods[j] = new long[intersectionIds[subsetIdx].length];
+                for (int k = 0; k < intersectionIds[subsetIdx].length; k++) {
+                    newFeasibleNeighborhoods[j][k] = subset[intersectionIds[subsetIdx][k]];
+                }
+            }
 
-            SubsetPartition partition = partitionSubset(subset, intersections);
-
-            cliqueNodes.add(partition.pivot(), false);
+            var pivot = subset[partitionIds.pivotIndex()];
+            cliqueNodes.add(pivot, false);
 
             recursiveSctCliqueCount(
-                partition.includedNodes(),
+                nsp,
+                newFeasibleNeighborhoods,
                 cliqueNodes,
                 sizeFrequencies
             );
 
-            var vs = new long[partition.excludedNodes().length];
-            for (int i = 0; i < vs.length; i++) {
-                vs[i] = subset[partition.excludedNodes()[i]];
-            }
-
-            for (int i = 0; i < partition.excludedNodes().length; i++) {
-
-                cliqueNodes.add(vs[i], true);
-
+            var vsIds = partitionIds.excludedNodesIds();
+            for (int i = 0; i < vsIds.length; i++) {
+                var newSubsetAsSubsetIds = difference(intersectionIds[vsIds[i]], vsIds, i);
+                var newSubset = new long[newSubsetAsSubsetIds.length];
+                newFeasibleNeighborhoods = new long[newSubset.length][];
+                for (int j = 0; j < newSubsetAsSubsetIds.length; j++) {
+                    newSubset[j] = subset[newSubsetAsSubsetIds[j]];
+                    newFeasibleNeighborhoods[j] = new long[intersectionIds[newSubsetAsSubsetIds[j]].length];
+                    for (int k = 0; k < intersectionIds[newSubsetAsSubsetIds[j]].length; k++) {
+                        newFeasibleNeighborhoods[j][k] = subset[intersectionIds[newSubsetAsSubsetIds[j]][k]];
+                    }
+                }
+                var vi = subset[vsIds[i]];
+                cliqueNodes.add(vi, true);
                 recursiveSctCliqueCount(
-                    Intersections.sortedDifference(intersections[partition.excludedNodes()[i]], vs, Optional.of(i)),
+                    newSubset,
+                    newFeasibleNeighborhoods,
                     cliqueNodes,
                     sizeFrequencies
                 );
             }
         }
         cliqueNodes.finishRecursionLevel();
-
     }
 
     long[][] computeIntersections(long[] subset){
@@ -249,46 +250,9 @@ public final class CliqueCounting extends Algorithm<CliqueCountingResult> {
             intersections[i] = neighborhoodIntersection(subset, subset[i]);
         }
         return intersections;
-
-    }
-    static SubsetPartition partitionSubset(long[] subset, long[][] intersections) {
-        long pivot = -1;
-        int maxSize = -1;
-        int pivotId = -1;
-        for(int i = 0; i < subset.length; i++) {
-            if (intersections[i].length > maxSize) {
-                maxSize = intersections[i].length;
-                pivot = subset[i];
-                pivotId = i;
-            }
-        }
-         var differenceIds = sortedDifferenceIdsWithExcludedElement(subset,intersections[pivotId], pivot);
-        return new SubsetPartition(intersections[pivotId], differenceIds, pivot); //fixme
     }
 
-    static int[] sortedDifferenceIdsWithExcludedElement(long[] includingSet, long[] excludingSet, long forbidden){
-        var difference = new int[includingSet.length - excludingSet.length - 1];
-        var excludingLength = excludingSet.length;
-        int differencePointer = 0;
-        int j = 0;
-
-        for (int i=0; i < includingSet.length;++i) {
-            var subsetNode = includingSet[i];
-            if (subsetNode == forbidden) continue;
-            boolean found = false;
-            for (;j < excludingLength && excludingSet[j] <= subsetNode; j++) {
-                if (subsetNode == excludingSet[j]) {
-                    found = true;
-                    break;
-                }
-            }
-            if (!found) {
-                difference[differencePointer++] = i;
-            }
-        }
-        return difference;
-    }
-
+    // S n N(v)
     private long[] neighborhoodIntersection(long[] subset, long node) {
         long[] intersection = new long[subset.length];
         int intersectionPointer = 0;
@@ -306,68 +270,8 @@ public final class CliqueCounting extends Algorithm<CliqueCountingResult> {
         return Arrays.copyOf(intersection, intersectionPointer);
     }
 
-    private class GlobalCliqueCountingTask implements Runnable {
-        Graph graph;
-        SizeFrequencies sizeFrequencies;
-
-        GlobalCliqueCountingTask(Graph graph, SizeFrequencies sizeFrequencies) {
-            this.graph = graph;
-            this.sizeFrequencies = sizeFrequencies;
-        }
-
-        public void run() {
-            long nodeCount = graph.nodeCount();
-            long rootNode;
-            while ((rootNode = rootQueue.getAndIncrement()) < graph.nodeCount() && terminationFlag.running()) {
-
-                var cliqueNodes = RecursiveCliqueNodes.create(rootNode, graph.degree(rootNode));
-                var positiveNeighborhood= rootNodeNeighbors(rootNode,true);
-
-                if (rootNode % 100_000 == 99_999) {
-                    System.out.println("Processing root node: " + rootNode + "/" + nodeCount + ". With positive neighborhood: " + Arrays.toString(
-                        positiveNeighborhood));
-                }
-                recursiveSctCliqueCount(positiveNeighborhood, cliqueNodes, sizeFrequencies);
-
-            }
-            cliqueCountsHandler.giveBack(sizeFrequencies);
-        }
-    }
-
-    private class SubcliqueCliqueCountingTask implements Runnable {
-        Graph graph;
-
-        SubcliqueCliqueCountingTask(Graph graph) {
-            this.graph = graph;
-        }
-
-        public void run() {
-            int subcliqueIdx;
-            while ((subcliqueIdx = (int)rootQueue.getAndIncrement()) < subcliques.length && terminationFlag.running()) {
-                var subclique = subcliques[subcliqueIdx];
-                var sizeFrequencies = cliqueCountsHandler.create();
-                var  upperBound = Integer.MAX_VALUE;
-                for (var node : subclique){
-                    upperBound = Math.min(upperBound, graph.degree(node)+1);
-                }
-                var cliqueNodes  = new RecursiveCliqueNodes(upperBound);
-                for (var node : subclique){
-                    cliqueNodes.add(node,true);
-                }
-
-                var subset = rootNodeNeighbors(subclique[0],false);
-                for (var node : subclique) { //first is unnecessary
-                    subset = neighborhoodIntersection(subset, node); //S = N(v1) n N(v2) n ... n N(vk)
-                }
-                recursiveSctCliqueCount(subset, cliqueNodes, sizeFrequencies);
-                cliqueCountsHandler.giveBack(sizeFrequencies); //Needs to be stored but not be used by another thread.
-            }
-        }
-    }
-
-    //****
     // S \ (v_1,...,v_{i-1}) // here S \ (v_0,...,v_{i-1}) where i is one lower.
-    private int[] difference(int[] subset, int[] vs, int i){
+    static int[] difference(int[] subset, int[] vs, int i){
         var difference = new int[subset.length];
         int differencePointer = 0;
         int j = 0;
@@ -382,6 +286,8 @@ public final class CliqueCounting extends Algorithm<CliqueCountingResult> {
         }
         return Arrays.copyOf(difference, differencePointer);
     }
+
+    // S n N, as ids of S
     private int[] intersectionIds(long[] subset, long[] neighborhood) {
         int[] intersectionIds = new int[subset.length]; //min of lengths
         int intersectionPointer = 0;
@@ -399,7 +305,9 @@ public final class CliqueCounting extends Algorithm<CliqueCountingResult> {
         }
         return Arrays.copyOf(intersectionIds, intersectionPointer);
     }
-    public SubsetPartitionIds partitionSubsetIds(long[] subset, int[][] intersectionIds) {
+
+    // Partition subset into Included, Excluded, pivot. Where entries are ids of subet.
+    static SubsetPartitionIds partitionSubsetIds(long[] subset, int[][] intersectionIds) {
         //TODO: Assure self loops are handled correctly!
         int pivotIdx = -1;
         int maxSize = -1;
@@ -435,73 +343,77 @@ public final class CliqueCounting extends Algorithm<CliqueCountingResult> {
         return new SubsetPartitionIds(intersectionIds[pivotIdx], differenceIds, pivotIdx);
     }
 
-    private void recursiveSctCliqueCount(long[] subset, long[][] feasibleNeighborhoods, NodeStatus[] cliqueNodes, SizeFrequencies sizeFrequencies) {
-        if (subset.length == 0) {
-            var requiredPointer = 0;
-            var optionalPointer = cliqueNodes.length - 1;
-            long[] nodes = new long[cliqueNodes.length];
-            for (var cliqueNode : cliqueNodes) {
-                if (cliqueNode.required()) {
-                    nodes[requiredPointer++] = cliqueNode.nodeId();
-                } else {
-                    nodes[optionalPointer--] = cliqueNode.nodeId();
+    long[] rootNodeNeighbors(long rootNode, boolean filter){
+        ArrayList<Long> neighbors = new ArrayList<>();
+        var lastEntered = -1L;
+        var cursor  = cliqueAdjacency.createCursor(rootNode);
+        while (cursor.hasNextVLong()){
+            var  nodeId  =  cursor.nextVLong();
+            if (nodeId != NOT_FOUND && nodeId!=lastEntered){
+                boolean should = !filter || (nodeId > rootNode);
+                if (should) {
+                    neighbors.add(nodeId);
+                    lastEntered = nodeId;
                 }
             }
-            sizeFrequencies.updateFrequencies(countingMode, nodes, requiredPointer);
-            return;
         }
 
-        int[][] intersectionIds = new int[subset.length][];
-        for (int i = 0; i < subset.length; i++) {
-            intersectionIds[i] = intersectionIds(subset, feasibleNeighborhoods[i]);
-        }
-        SubsetPartitionIds partitionIds = partitionSubsetIds(subset, intersectionIds);
+        return neighbors.stream().mapToLong(Long::longValue).toArray();
+    }
 
-        var nsp = new long[partitionIds.nspIds().length];
-        for (int i = 0; i < partitionIds.nspIds().length; i++) {
-            nsp[i] = subset[partitionIds.nspIds()[i]];
+    private class GlobalCliqueCountingTask implements Runnable {
+        Graph graph;
+        SizeFrequencies sizeFrequencies;
+
+        GlobalCliqueCountingTask(Graph graph, SizeFrequencies sizeFrequencies) {
+            this.graph = graph;
+            this.sizeFrequencies = sizeFrequencies;
         }
-        var newFeasibleNeighborhoods = new long[nsp.length][];
-        for (int j = 0; j < nsp.length; j++) {
-            var subsetIdx = partitionIds.nspIds()[j];
-            newFeasibleNeighborhoods[j] = new long[intersectionIds[subsetIdx].length];
-            for (int k = 0; k < intersectionIds[subsetIdx].length; k++) {
-                newFeasibleNeighborhoods[j][k] = subset[intersectionIds[subsetIdx][k]];
+
+        public void run() {
+            long rootNode;
+            while ((rootNode = rootQueue.getAndIncrement()) < graph.nodeCount() && terminationFlag.running()) {
+
+                var cliqueNodes = new RecursiveCliqueNodes(Math.min(MAX_CLIQUE_SIZE, graph.degree(rootNode)+1));
+                cliqueNodes.add(rootNode, true);
+                var positiveNeighborhood = rootNodeNeighbors(rootNode, true);
+                long[][] feasibleNeighborhoods = computeIntersections(positiveNeighborhood);
+                recursiveSctCliqueCount(positiveNeighborhood, feasibleNeighborhoods, cliqueNodes, sizeFrequencies);
+
             }
-        }
-
-        var newCliqueNodes = Arrays.copyOf(cliqueNodes, cliqueNodes.length+1);
-        newCliqueNodes[cliqueNodes.length] = new NodeStatus(subset[partitionIds.pivotIndex()], false);
-        recursiveSctCliqueCount(
-            nsp,
-            newFeasibleNeighborhoods,
-            newCliqueNodes,
-            sizeFrequencies
-        );
-
-        var vsIds = partitionIds.vsIds();
-        for (int i = 0; i < vsIds.length; i++) {
-            var newSubsetAsSubsetIds = difference(intersectionIds[vsIds[i]], vsIds, i);
-            var newSubset = new long[newSubsetAsSubsetIds.length];
-            newFeasibleNeighborhoods = new long[newSubset.length][];
-            for (int j = 0; j < newSubsetAsSubsetIds.length; j++) {
-                newSubset[j] = subset[newSubsetAsSubsetIds[j]];
-                newFeasibleNeighborhoods[j] = new long[intersectionIds[newSubsetAsSubsetIds[j]].length];
-                for (int k = 0; k < intersectionIds[newSubsetAsSubsetIds[j]].length; k++) {
-                    newFeasibleNeighborhoods[j][k] = subset[intersectionIds[newSubsetAsSubsetIds[j]][k]];
-                }
-            }
-            var vi = subset[vsIds[i]];
-            newCliqueNodes = Arrays.copyOf(cliqueNodes, cliqueNodes.length+1);
-            newCliqueNodes[cliqueNodes.length] = new NodeStatus(vi, true);
-            recursiveSctCliqueCount(
-                newSubset,
-                newFeasibleNeighborhoods,
-                newCliqueNodes,
-                sizeFrequencies
-            );
+            cliqueCountsHandler.giveBack(sizeFrequencies);
         }
     }
-    //****
 
+    private class SubcliqueCliqueCountingTask implements Runnable {
+        Graph graph;
+
+        SubcliqueCliqueCountingTask(Graph graph) {
+            this.graph = graph;
+        }
+
+        public void run() {
+            int subcliqueIdx;
+            while ((subcliqueIdx = (int)rootQueue.getAndIncrement()) < subcliques.length && terminationFlag.running()) {
+                var subclique = subcliques[subcliqueIdx];
+                var sizeFrequencies = cliqueCountsHandler.create();
+                var upperBound = MAX_CLIQUE_SIZE;
+                for (var node : subclique){
+                    upperBound = Math.min(upperBound, graph.degree(node)+1);
+                }
+                var cliqueNodes  = new RecursiveCliqueNodes(upperBound);
+                for (var node : subclique){
+                    cliqueNodes.add(node,true);
+                }
+
+                var subset = rootNodeNeighbors(subclique[0],false);
+                for (var node : subclique) { //first is unnecessary
+                    subset = neighborhoodIntersection(subset, node); //S = N(v1) n N(v2) n ... n N(vk)
+                }
+                long[][] feasibleNeighborhoods = computeIntersections(subset);
+                recursiveSctCliqueCount(subset, feasibleNeighborhoods, cliqueNodes, sizeFrequencies);
+                cliqueCountsHandler.giveBack(sizeFrequencies); //Needs to be stored but not be used by another thread.
+            }
+        }
+    }
 }

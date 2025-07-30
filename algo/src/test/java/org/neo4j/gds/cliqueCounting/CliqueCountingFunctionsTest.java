@@ -69,47 +69,44 @@ class CliqueCountingFunctionsTest {
         assertThat(intersections[3]).containsExactly(2,5,6);
         assertThat(intersections[5]).containsExactly(2,3,6);
         assertThat(intersections[6]).containsExactly(2,3,5);
-
     }
-
 
 
     static Stream<Arguments> differenceIdsTestData() {
         return Stream.of(
-            arguments(new long[0], 103,  new int[]{0,1,2,4,5,6}),
-            arguments(new long[]{100,105},  103, new int[]{1,2,4,6}),
-            arguments(new long[]{105},  100, new int[]{1,2,3,4,6}),
-            arguments(new long[]{105},  106, new int[]{0,1,2,3,4}),
-            arguments(new long[]{100,105},  103, new int[]{1,2,4,6}),
-            arguments(new long[]{100,101,102,104,105,106},  103, new int[]{})
+            arguments(new int[0], 0, new int[]{100,101,102,103,104,105,106}),
+            arguments(new int[]{100,105}, 1, new int[]{101,102,103,104,105,106}),
+            arguments(new int[]{102,104,106}, 2, new int[]{100,101,103,105,106}),
+            arguments(new int[]{100,101,102,104,105,106}, 5, new int[]{103, 106})
         );
     }
     @ParameterizedTest
     @MethodSource("differenceIdsTestData")
-    void shouldComputeDifferenceIdsCorrectly(long[] exclude, long pivot, int[] expected){
-        var include = new long[]{100,101,102,103,104,105,106};
-        assertThat(CliqueCounting.sortedDifferenceIdsWithExcludedElement(include,exclude,pivot)).containsExactly(expected);
+    void shouldComputeDifferenceCorrectly(int[] exclude, int i, int[] expected){
+        var include = new int[]{100,101,102,103,104,105,106};
+        assertThat(CliqueCounting.difference(include, exclude, i)).containsExactly(expected);
     }
 
+
     @Test
-    void shouldPartitionSubsetCorrectly(){
+    void shouldPartitionSubsetIdsCorrectly(){
 
-        var subset = new long[]{0,1,2,3,4,5,6};
-        var intersections =new long[7][];
+        var subset = new long[]{10,11,12,13,14,15,16};
+        var intersectionsIds = new int[7][];
 
-        intersections[0] = new long[]{1,4};
-        intersections[1] = new long[]{0,4};
-        intersections[4] = new long[]{0,1};
+        intersectionsIds[0] = new int[]{1,4};
+        intersectionsIds[1] = new int[]{0,4};
+        intersectionsIds[4] = new int[]{0,1};
 
-        intersections[2] =new long[]{3,5,6};
-        intersections[3] =new long[]{2,5,6};
-        intersections[5] = new long[]{2,3,6};
-        intersections[6] = new long[]{2,3,5};
+        intersectionsIds[2] =new int[]{3,5,6};
+        intersectionsIds[3] =new int[]{2,5,6};
+        intersectionsIds[5] = new int[]{2,3,6};
+        intersectionsIds[6] = new int[]{2,3,5};
 
-        var subsetPartition = CliqueCounting.partitionSubset(subset,intersections);
-        assertThat(subsetPartition.pivot()).isEqualTo(2L);
-        assertThat(subsetPartition.includedNodes()).containsExactly(3,5,6);
-        assertThat(subsetPartition.excludedNodes()).containsExactly(0,1,4);
+        var subsetPartition = CliqueCounting.partitionSubsetIds(subset, intersectionsIds);
+        assertThat(subsetPartition.pivotIndex()).isEqualTo(2L);
+        assertThat(subsetPartition.includedNodesIds()).containsExactly(3,5,6);
+        assertThat(subsetPartition.excludedNodesIds()).containsExactly(0,1,4);
     }
 
     static Stream<Arguments>  rootNeighbors() {
