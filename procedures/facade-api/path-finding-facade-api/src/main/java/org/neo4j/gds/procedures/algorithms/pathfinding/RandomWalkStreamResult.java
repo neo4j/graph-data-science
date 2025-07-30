@@ -23,15 +23,8 @@ import org.neo4j.graphdb.Path;
 
 import java.util.List;
 
-public class RandomWalkStreamResult {
+public record RandomWalkStreamResult(List<Long> nodeIds, Path path){
 
     public static final String RELATIONSHIP_TYPE_NAME = "NEXT";
 
-    public final List<Long> nodeIds;
-    public final Path path;
-
-    public RandomWalkStreamResult(List<Long> nodeIds, Path path) {
-        this.nodeIds = nodeIds;
-        this.path = path;
-    }
 }

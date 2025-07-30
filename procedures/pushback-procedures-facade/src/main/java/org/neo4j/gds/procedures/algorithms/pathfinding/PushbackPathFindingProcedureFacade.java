@@ -38,6 +38,7 @@ import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.PathFindingStubs;
 import org.neo4j.gds.procedures.algorithms.results.StandardStatsResult;
 import org.neo4j.gds.spanningtree.SpanningTreeStreamConfig;
 import org.neo4j.gds.steiner.SteinerTreeStreamConfig;
+import org.neo4j.gds.traversal.RandomWalkStreamConfig;
 
 import java.util.Map;
 import java.util.Optional;
@@ -390,7 +391,27 @@ public class PushbackPathFindingProcedureFacade implements PathFindingProcedureF
 
     @Override
     public Stream<RandomWalkStreamResult> randomWalkStream(String graphName, Map<String, Object> configuration) {
-        return Stream.empty();
+        var config = configurationParser.parseConfiguration(
+            configuration,
+            RandomWalkStreamConfig::of
+        );
+        var routeRequested = procedureReturnColumns.contains("path");
+
+        var randomWalkStreamResultTransformerBuilder = new RandomWalkStreamResultTransformerBuilder(
+            closeableResourceRegistry,
+            nodeLookup,
+            routeRequested
+        );
+
+        return businessFacade.randomWalk(
+            GraphName.parse(graphName),
+            config.toGraphParameters(),
+            config.relationshipWeightProperty(),
+            config.toParameters(),
+            config.jobId(),
+            config.logProgress(),
+            randomWalkStreamResultTransformerBuilder
+        ).join();
     }
 
     @Override
