@@ -24,11 +24,19 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.RelationshipWeightConfig;
 import org.neo4j.gds.config.SourceNodeConfig;
 import org.neo4j.gds.paths.dijkstra.DijkstraMemoryEstimateParameters;
+import org.neo4j.gds.paths.dijkstra.DijkstraSingleSourceParameters;
 
 public interface DijkstraBaseConfig extends AlgoBaseConfig, SourceNodeConfig, RelationshipWeightConfig {
 
     @Configuration.Ignore
     default DijkstraMemoryEstimateParameters toMemoryEstimateParameters() {
         return new DijkstraMemoryEstimateParameters(false, false);
+    }
+
+    @Configuration.Ignore
+    default DijkstraSingleSourceParameters toSingleSourceParameters() {
+        return new DijkstraSingleSourceParameters(
+            sourceNode()
+        );
     }
 }

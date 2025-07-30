@@ -29,6 +29,7 @@ import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortStreamConfig;
 import org.neo4j.gds.pathfinding.PathFindingComputeBusinessFacade;
 import org.neo4j.gds.paths.bellmanford.AllShortestPathsBellmanFordStreamConfig;
+import org.neo4j.gds.paths.dijkstra.config.AllShortestPathsDijkstraStreamConfig;
 import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.PathFindingStubs;
 import org.neo4j.gds.procedures.algorithms.results.StandardStatsResult;
@@ -559,7 +560,28 @@ public class PushbackPathFindingProcedureFacade implements PathFindingProcedureF
         String graphName,
         Map<String, Object> configuration
     ) {
-        return Stream.empty();
+        var config = configurationParser.parseConfiguration(
+            configuration,
+            AllShortestPathsDijkstraStreamConfig::of
+        );
+        var routeRequested = procedureReturnColumns.contains("route");
+
+
+        var pathFindingResultTransformerBuilder =new PathFindingStreamResultTransformerBuilder(
+            closeableResourceRegistry,
+            nodeLookup,
+            routeRequested
+        );
+
+        return businessFacade.singleSourceShortestPathDijkstra(
+            GraphName.parse(graphName),
+            config.toGraphParameters(),
+            config.relationshipWeightProperty(),
+            config.toSingleSourceParameters(),
+            config.jobId(),
+            config.logProgress(),
+            pathFindingResultTransformerBuilder
+        ).join();
     }
 
     @Override
