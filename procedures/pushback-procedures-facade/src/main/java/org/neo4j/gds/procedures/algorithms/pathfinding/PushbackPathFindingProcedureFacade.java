@@ -26,6 +26,7 @@ import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.NodeLookup;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
+import org.neo4j.gds.dag.topologicalsort.TopologicalSortStreamConfig;
 import org.neo4j.gds.pathfinding.PathFindingComputeBusinessFacade;
 import org.neo4j.gds.paths.bellmanford.AllShortestPathsBellmanFordStreamConfig;
 import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
@@ -33,6 +34,7 @@ import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.PathFindingStubs;
 import org.neo4j.gds.procedures.algorithms.results.StandardStatsResult;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 public class PushbackPathFindingProcedureFacade implements PathFindingProcedureFacade {
@@ -707,6 +709,20 @@ public class PushbackPathFindingProcedureFacade implements PathFindingProcedureF
         String graphName,
         Map<String, Object> configuration
     ) {
-        return Stream.empty();
+
+        var config = configurationParser.parseConfiguration(
+            configuration,
+            TopologicalSortStreamConfig::of
+        );
+
+        return businessFacade.topologicalSort(
+            GraphName.parse(graphName),
+            config.toGraphParameters(),
+            Optional.empty(), //no exposed property?
+            config.toParameters(),
+            config.jobId(),
+            config.logProgress(),
+            new TopologicalSortStreamResultTransformerBuilder()
+        ).join();
     }
 }
