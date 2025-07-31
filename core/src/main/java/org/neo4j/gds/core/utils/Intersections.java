@@ -21,6 +21,9 @@ package org.neo4j.gds.core.utils;
 
 import com.carrotsearch.hppc.LongHashSet;
 
+import java.util.Arrays;
+import java.util.Optional;
+
 public final class Intersections {
 
     public static long intersection(LongHashSet targets1, LongHashSet targets2) {
@@ -204,6 +207,30 @@ public final class Intersections {
 
         return (float) (dotProduct / Math.sqrt(xLength * yLength));
     }
+
+    // S \ (v_1,...,v_{i-1}) // here S \ (v_0,...,v_{i-1})
+    //assume both sets are sorted in increasing order.
+    public static long[] sortedDifference(long[] includingSet, long[] excludingSet, Optional<Integer> excludingSetBound){
+        var difference = new long[includingSet.length];
+        int differencePointer = 0;
+        int j = 0;
+        var actualBound = excludingSetBound.orElse(excludingSet.length);
+
+        for (var subsetNode : includingSet) {
+            boolean found = false;
+            for (;j < actualBound && excludingSet[j] <= subsetNode; j++) {
+                if (subsetNode == excludingSet[j]) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                difference[differencePointer++] = subsetNode;
+            }
+        }
+        return Arrays.copyOf(difference, differencePointer);
+    }
+
 
     private Intersections() {}
 }

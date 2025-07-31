@@ -33,6 +33,7 @@ public enum AlgorithmLabel implements Label {
     BFS("BFS"),
     Bridges("Bridges"),
     CELF("CELF"),
+    CliqueCounting("Clique Counting"),
     ClosenessCentrality("Closeness Centrality"),
     CollapsePath("CollapsePath"),
     Conductance("Conductance"),
@@ -104,6 +105,7 @@ public enum AlgorithmLabel implements Label {
             case Algorithm.BFS -> BFS;
             case Algorithm.Bridges -> Bridges;
             case Algorithm.CELF -> CELF;
+            case Algorithm.CliqueCounting -> CliqueCounting;
             case Algorithm.ClosenessCentrality -> ClosenessCentrality;
             case Algorithm.CollapsePath -> CollapsePath;
             case Algorithm.Conductance -> Conductance;

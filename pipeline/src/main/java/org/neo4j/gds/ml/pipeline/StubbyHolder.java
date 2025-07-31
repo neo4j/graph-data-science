@@ -94,6 +94,7 @@ class StubbyHolder {
             case BFS -> new BreadthFirstSearchStub();
             case Bridges -> null;
             case CELF -> new CelfStub();
+            case CliqueCounting ->  null;
             case ClosenessCentrality -> new ClosenessCentralityStub();
             case CollapsePath -> new CollapsePathStub();
             case Conductance -> null;

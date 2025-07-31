@@ -25,6 +25,9 @@ import org.neo4j.gds.approxmaxkcut.ApproxMaxKCut;
 import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutParameters;
 import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutResult;
 import org.neo4j.gds.beta.pregel.PregelResult;
+import org.neo4j.gds.cliqueCounting.CliqueCounting;
+import org.neo4j.gds.cliqueCounting.CliqueCountingResult;
+import org.neo4j.gds.cliquecounting.CliqueCountingParameters;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.conductance.Conductance;
 import org.neo4j.gds.conductance.ConductanceParameters;
@@ -92,6 +95,16 @@ public class CommunityAlgorithms {
         ProgressTracker progressTracker
     ) {
         return ApproxMaxKCut.create(
+            graph,
+            parameters,
+            DefaultPool.INSTANCE,
+            progressTracker,
+            terminationFlag
+        ).compute();
+    }
+
+    public CliqueCountingResult cliqueCounting(Graph graph, CliqueCountingParameters parameters, ProgressTracker progressTracker) {
+        return CliqueCounting.create(
             graph,
             parameters,
             DefaultPool.INSTANCE,

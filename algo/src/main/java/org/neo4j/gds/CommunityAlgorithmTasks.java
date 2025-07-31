@@ -51,6 +51,10 @@ public final class CommunityAlgorithmTasks {
         return ApproximateKCutTaskFactory.createTask(graph, parameters);
     }
 
+    public Task cliqueCounting(Graph graph) {
+        return Tasks.leaf(AlgorithmLabel.CliqueCounting.asString(), -1); //todo
+    }
+
     public Task conductance(Graph graph) {
         return Tasks.task(
             AlgorithmLabel.Conductance.asString(),
