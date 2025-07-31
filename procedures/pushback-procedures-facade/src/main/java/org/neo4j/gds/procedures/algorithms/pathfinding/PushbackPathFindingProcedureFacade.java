@@ -26,6 +26,7 @@ import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.NodeLookup;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
+import org.neo4j.gds.dag.longestPath.DagLongestPathStreamConfig;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortStreamConfig;
 import org.neo4j.gds.pathfinding.PathFindingComputeBusinessFacade;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarStreamConfig;
@@ -370,7 +371,25 @@ public class PushbackPathFindingProcedureFacade implements PathFindingProcedureF
 
     @Override
     public Stream<PathFindingStreamResult> longestPathStream(String graphName, Map<String, Object> configuration) {
-        return Stream.empty();
+        var config = configurationParser.parseConfiguration(
+            configuration,
+            DagLongestPathStreamConfig::of
+        );
+
+        var pathFindingResultTransformerBuilder = new PathFindingStreamResultTransformerBuilder(
+            closeableResourceRegistry,
+            nodeLookup,
+            procedureReturnColumns.contains("path")
+        );
+
+        return businessFacade.longestPath(
+            GraphName.parse(graphName),
+            config.toGraphParameters(),
+            config.toParameters(),
+            config.jobId(),
+            config.logProgress(),
+            pathFindingResultTransformerBuilder
+        ).join();
     }
 
     @Override
