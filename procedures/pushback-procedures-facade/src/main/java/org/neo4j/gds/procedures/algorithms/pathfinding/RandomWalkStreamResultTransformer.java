@@ -29,9 +29,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
-public class RandomWalkStreamResultTransformer implements ResultTransformer<Stream<long[]>, Stream<RandomWalkStreamResult>>{
+public class RandomWalkStreamResultTransformer implements ResultTransformer<Stream<long[]>, Stream<RandomWalkStreamResult>> {
 
-    private final static String RELATIONSHIP_TYPE_NAME = "NEXT";
+    private static final String RELATIONSHIP_TYPE_NAME = "NEXT";
     private final Graph graph;
     private final CloseableResourceRegistry closeableResourceRegistry;
     private final PathFactoryFacade pathFactoryFacade;

@@ -27,9 +27,7 @@ import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
 import org.neo4j.gds.results.ResultTransformer;
 import org.neo4j.graphdb.RelationshipType;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -77,16 +75,19 @@ public class BellmanFordStreamResultTransformer implements ResultTransformer<Bel
         boolean negativeCycle,
         PathFactoryFacade pathFactoryFacade
     ) {
-        var nodeIds = pathResult.nodeIds();
-        for (int i = 0; i < nodeIds.length; i++) {
-            nodeIds[i] = idMap.toOriginalNodeId(nodeIds[i]);
-        }
         var relationshipType = RelationshipType.withName(formatWithLocale(
             RELATIONSHIP_TYPE_TEMPLATE,
             pathResult.index()
         ));
 
-        var costs = pathResult.costs();
+        var nodeIds = Arrays.stream(pathResult.nodeIds())
+            .map(idMap::toOriginalNodeId)
+            .boxed()
+            .toList();
+
+        var costs = Arrays.stream(pathResult.costs())
+            .boxed()
+            .toList();
 
         var path = pathFactoryFacade.createPath(
             nodeIds,
@@ -100,9 +101,8 @@ public class BellmanFordStreamResultTransformer implements ResultTransformer<Bel
             idMap.toOriginalNodeId(pathResult.sourceNode()),
             idMap.toOriginalNodeId(pathResult.targetNode()),
             pathResult.totalCost(),
-            // 😿
-            Arrays.stream(nodeIds).boxed().collect(Collectors.toCollection(() -> new ArrayList<>(nodeIds.length))),
-            Arrays.stream(costs).boxed().collect(Collectors.toCollection(() -> new ArrayList<>(costs.length))),
+            nodeIds,
+            costs,
             path,
             negativeCycle
         );

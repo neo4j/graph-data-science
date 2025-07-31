@@ -26,9 +26,7 @@ import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.results.ResultTransformer;
 import org.neo4j.graphdb.RelationshipType;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -55,24 +53,25 @@ public class PathFindingStreamResultTransformer implements ResultTransformer<Pat
     @Override
     public Stream<PathFindingStreamResult> apply(PathFindingResult pathFindingResult) {
 
-        var resultStream = pathFindingResult.mapPaths(pathResult -> mapPath(pathResult,graph,pathFactoryFacade));
+        var resultStream = pathFindingResult.mapPaths(pathResult -> mapPath(pathResult, graph, pathFactoryFacade));
 
         closeableResourceRegistry.register(resultStream);
 
         return resultStream;
     }
 
-    PathFindingStreamResult mapPath(PathResult pathResult, Graph graph, PathFactoryFacade pathFactoryFacade){
-        var nodeIds = pathResult.nodeIds();
-        var costs = pathResult.costs();
+    private PathFindingStreamResult mapPath(PathResult pathResult, Graph graph, PathFactoryFacade pathFactoryFacade) {
+        var nodeIds = Arrays.stream(pathResult.nodeIds())
+            .map(graph::toOriginalNodeId)
+            .boxed()
+            .toList();
+        var costs = Arrays.stream(pathResult.costs())
+            .boxed()
+            .toList();
         var pathIndex = pathResult.index();
 
         var relationshipType = RelationshipType.withName(formatWithLocale(RELATIONSHIP_TYPE_TEMPLATE, pathIndex));
 
-        // convert internal ids to Neo ids
-        for (int i = 0; i < nodeIds.length; i++) {
-            nodeIds[i] = graph.toOriginalNodeId(nodeIds[i]);
-        }
         var path = pathFactoryFacade.createPath(
             nodeIds,
             costs,
@@ -85,13 +84,8 @@ public class PathFindingStreamResultTransformer implements ResultTransformer<Pat
             graph.toOriginalNodeId(pathResult.sourceNode()),
             graph.toOriginalNodeId(pathResult.targetNode()),
             pathResult.totalCost(),
-            // 😿
-            Arrays.stream(nodeIds)
-                .boxed()
-                .collect(Collectors.toCollection(() -> new ArrayList<>(nodeIds.length))),
-            Arrays.stream(costs)
-                .boxed()
-                .collect(Collectors.toCollection(() -> new ArrayList<>(costs.length))),
+            nodeIds,
+            costs,
             path
         );
     }

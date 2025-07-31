@@ -20,7 +20,6 @@
 package org.neo4j.gds.procedures.algorithms.pathfinding;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.api.CloseableResourceRegistry;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.graphdb.Path;
@@ -37,17 +36,17 @@ class TraversalStreamResultTransformerTest {
     @Test
     void shouldTransformNonEmptyResult() {
         var graphMock = mock(Graph.class);
-        var closeableResourceRegistryMock = mock(CloseableResourceRegistry.class);
         var pathFactoryFacadeMock = mock(PathFactoryFacade.class);
 
         var transformer = new TraversalStreamResultTransformer(
             graphMock,
-            closeableResourceRegistryMock,
             pathFactoryFacadeMock,
             10
         );
 
-        when(graphMock.toOriginalNodeId(anyLong())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(graphMock.toOriginalNodeId(anyLong()))
+            // don't return the same original id as the input
+            .thenAnswer(invocation -> ((long) invocation.getArgument(0)) + 19L);
         when(pathFactoryFacadeMock.createPath(any(long[].class), any(double[].class), any(), anyString()))
             .thenReturn(mock(Path.class));
 
@@ -55,7 +54,7 @@ class TraversalStreamResultTransformerTest {
 
         assertThat(streamResult).hasSize(1);
         var result = streamResult.getFirst();
-        assertThat(result.nodeIds()).containsExactly(3L,2L,1L,0L);
+        assertThat(result.nodeIds()).containsExactly(22L, 21L, 20L, 19L);
         assertThat(result.sourceNode()).isEqualTo(10);
     }
 

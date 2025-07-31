@@ -19,32 +19,27 @@
  */
 package org.neo4j.gds.procedures.algorithms.pathfinding;
 
-import org.neo4j.gds.api.CloseableResourceRegistry;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.results.ResultTransformer;
 import org.neo4j.graphdb.RelationshipType;
 
 import java.util.Arrays;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class TraversalStreamResultTransformer implements ResultTransformer<HugeLongArray, Stream<TraversalStreamResult>> {
 
-    private static String RELATIONSHIP_TYPE = "NEXT";
+    private static final String RELATIONSHIP_TYPE = "NEXT";
     private final Graph graph;
-    private final CloseableResourceRegistry closeableResourceRegistry;
     private final PathFactoryFacade pathFactoryFacade;
     private final long sourceNodeId;
 
     public TraversalStreamResultTransformer(
         Graph graph,
-        CloseableResourceRegistry closeableResourceRegistry,
         PathFactoryFacade pathFactoryFacade,
         long sourceNodeId
     ) {
         this.graph = graph;
-        this.closeableResourceRegistry = closeableResourceRegistry;
         this.pathFactoryFacade = pathFactoryFacade;
         this.sourceNodeId = sourceNodeId;
     }
@@ -53,11 +48,10 @@ public class TraversalStreamResultTransformer implements ResultTransformer<HugeL
     @Override
     public Stream<TraversalStreamResult> apply(HugeLongArray nodes) {
         var nodesArray = nodes.toArray();
-        var nodeList = Arrays
-            .stream(nodesArray)
-            .boxed()
+        var nodeList = Arrays.stream(nodesArray)
             .map(graph::toOriginalNodeId)
-            .collect(Collectors.toList());
+            .boxed()
+            .toList();
 
         var  path = pathFactoryFacade.createPath(
             nodeList,
@@ -66,9 +60,9 @@ public class TraversalStreamResultTransformer implements ResultTransformer<HugeL
 
         return Stream.of(
             new TraversalStreamResult(
-            sourceNodeId, // should be node[0]
-            nodeList,
-            path
+                sourceNodeId, // should be node[0]
+                nodeList,
+                path
             )
         );
     }

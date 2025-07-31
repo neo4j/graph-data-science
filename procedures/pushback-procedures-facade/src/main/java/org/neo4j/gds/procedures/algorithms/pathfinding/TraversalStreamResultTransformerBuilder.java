@@ -56,7 +56,6 @@ public class TraversalStreamResultTransformerBuilder implements ResultTransforme
         );
         return new TraversalStreamResultTransformer(
             graph,
-            closeableResourceRegistry,
             pathFactoryFacade,
             sourceNode
         );

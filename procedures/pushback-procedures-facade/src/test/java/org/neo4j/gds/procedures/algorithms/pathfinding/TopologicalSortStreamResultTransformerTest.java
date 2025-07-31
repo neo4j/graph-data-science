@@ -60,16 +60,16 @@ class TopologicalSortStreamResultTransformerTest {
         );
 
         var topoSort = mock(TopologicalSortResult.class);
-        var  array = HugeAtomicDoubleArray.of(2,ParallelDoublePageCreator.of(new Concurrency(1),  v->  3.0*(1-v)));
+        var array = HugeAtomicDoubleArray.of(4, ParallelDoublePageCreator.of(new Concurrency(1), v -> v + 1.0));
         when(topoSort.maxSourceDistances()).thenReturn(Optional.of(array));
-        when(topoSort.sortedNodes()).thenReturn(HugeLongArray.of(3,0));
+        when(topoSort.sortedNodes()).thenReturn(HugeLongArray.of(3, 0));
         when(graphMock.toOriginalNodeId(anyLong())).thenAnswer(invocation -> invocation.getArgument(0));
 
         var streamResult = transformer.apply(topoSort).toList();
 
         assertThat(streamResult).hasSize(2);
-        assertThat(streamResult.getFirst()).isEqualTo(new TopologicalSortStreamResult(3,10.0));
-        assertThat(streamResult.getLast()).isEqualTo(new TopologicalSortStreamResult(0,7.0));
+        assertThat(streamResult.getFirst()).isEqualTo(new TopologicalSortStreamResult(3, 4.0));
+        assertThat(streamResult.getLast()).isEqualTo(new TopologicalSortStreamResult(0, 1.0));
 
     }
 
@@ -84,14 +84,14 @@ class TopologicalSortStreamResultTransformerTest {
         var topoSort = mock(TopologicalSortResult.class);
 
 
-        when(topoSort.sortedNodes()).thenReturn(HugeLongArray.of(3,0));
+        when(topoSort.sortedNodes()).thenReturn(HugeLongArray.of(3, 0));
         when(graphMock.toOriginalNodeId(anyLong())).thenAnswer(invocation -> invocation.getArgument(0));
 
         var streamResult = transformer.apply(topoSort).toList();
 
         assertThat(streamResult).hasSize(2);
-        assertThat(streamResult.getFirst()).isEqualTo(new TopologicalSortStreamResult(3,null));
-        assertThat(streamResult.getLast()).isEqualTo(new TopologicalSortStreamResult(0,null));
+        assertThat(streamResult.getFirst()).isEqualTo(new TopologicalSortStreamResult(3, null));
+        assertThat(streamResult.getLast()).isEqualTo(new TopologicalSortStreamResult(0, null));
 
     }
 
