@@ -53,6 +53,7 @@ import org.neo4j.gds.traversal.RandomWalkParameters;
 import org.neo4j.gds.traversal.TraversalParameters;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.InstanceOfAssertFactories.SET;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -142,7 +143,11 @@ class PathFindingComputeFacadeEmptyGraphTest {
         );
         var result = future.join();
 
-        assertThat(result).isNotNull().isEqualTo(PathFindingResult.EMPTY);
+        assertThat(result)
+            .isNotNull()
+            .extracting(PathFindingResult::pathSet)
+            .asInstanceOf(SET)
+            .isEmpty();
 
         verifyNoInteractions(progressTrackerFactoryMock);
         verifyNoInteractions(algorithmCallerMock);
@@ -191,7 +196,11 @@ class PathFindingComputeFacadeEmptyGraphTest {
         );
         var result = future.join();
 
-        assertThat(result).isNotNull().isEqualTo(PathFindingResult.EMPTY);
+        assertThat(result)
+            .isNotNull()
+            .extracting(PathFindingResult::pathSet)
+            .asInstanceOf(SET)
+            .isEmpty();
 
         verifyNoInteractions(progressTrackerFactoryMock);
         verifyNoInteractions(algorithmCallerMock);
@@ -257,7 +266,11 @@ class PathFindingComputeFacadeEmptyGraphTest {
         );
         var result = future.join();
 
-        assertThat(result).isNotNull().isEqualTo(PathFindingResult.EMPTY);
+        assertThat(result)
+            .isNotNull()
+            .extracting(PathFindingResult::pathSet)
+            .asInstanceOf(SET)
+            .isEmpty();
 
         verifyNoInteractions(progressTrackerFactoryMock);
         verifyNoInteractions(algorithmCallerMock);
@@ -273,7 +286,11 @@ class PathFindingComputeFacadeEmptyGraphTest {
         );
         var result = future.join();
 
-        assertThat(result).isNotNull().isEqualTo(PathFindingResult.EMPTY);
+        assertThat(result)
+            .isNotNull()
+            .extracting(PathFindingResult::pathSet)
+            .asInstanceOf(SET)
+            .isEmpty();
 
         verifyNoInteractions(progressTrackerFactoryMock);
         verifyNoInteractions(algorithmCallerMock);
@@ -289,7 +306,11 @@ class PathFindingComputeFacadeEmptyGraphTest {
         );
         var result = future.join();
 
-        assertThat(result).isNotNull().isEqualTo(PathFindingResult.EMPTY);
+        assertThat(result)
+            .isNotNull()
+            .extracting(PathFindingResult::pathSet)
+            .asInstanceOf(SET)
+            .isEmpty();
 
         verifyNoInteractions(progressTrackerFactoryMock);
         verifyNoInteractions(algorithmCallerMock);
@@ -305,7 +326,11 @@ class PathFindingComputeFacadeEmptyGraphTest {
         );
         var result = future.join();
 
-        assertThat(result).isNotNull().isEqualTo(PathFindingResult.EMPTY);
+        assertThat(result)
+            .isNotNull()
+            .extracting(PathFindingResult::pathSet)
+            .asInstanceOf(SET)
+            .isEmpty();
 
         verifyNoInteractions(progressTrackerFactoryMock);
         verifyNoInteractions(algorithmCallerMock);

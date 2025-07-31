@@ -31,8 +31,6 @@ import java.util.stream.Stream;
 
 public class PathFindingResult {
 
-    public static final PathFindingResult EMPTY = new PathFindingResult(Stream.empty());
-
     private final Stream<PathResult> paths;
 
     private final Runnable closeStreamAction;
@@ -74,5 +72,9 @@ public class PathFindingResult {
         if (consumptionTriggered.compareAndSet(false, true)) {
             closeStreamAction.run();
         }
+    }
+
+    public static PathFindingResult empty() {
+        return new PathFindingResult(Stream.empty());
     }
 }

@@ -228,7 +228,7 @@ public class PathFindingComputeFacade {
     ) {
         // If the input graph is empty return a completed future with empty result
         if (graph.isEmpty()) {
-            return CompletableFuture.completedFuture(PathFindingResult.EMPTY);
+            return CompletableFuture.completedFuture(PathFindingResult.empty());
         }
 
         // Create ProgressTracker
@@ -334,7 +334,7 @@ public class PathFindingComputeFacade {
     ) {
         // If the input graph is empty return a completed future with empty result
         if (graph.isEmpty()) {
-            return CompletableFuture.completedFuture(PathFindingResult.EMPTY);
+            return CompletableFuture.completedFuture(PathFindingResult.empty());
         }
 
         // Create ProgressTracker
@@ -474,7 +474,7 @@ public class PathFindingComputeFacade {
     ) {
         // If the input graph is empty return a completed future with empty result
         if (graph.isEmpty()) {
-            return CompletableFuture.completedFuture(PathFindingResult.EMPTY);
+            return CompletableFuture.completedFuture(PathFindingResult.empty());
         }
 
         // Create ProgressTracker
@@ -508,7 +508,7 @@ public class PathFindingComputeFacade {
     ) {
         // If the input graph is empty return a completed future with empty result
         if (graph.isEmpty()) {
-            return CompletableFuture.completedFuture(PathFindingResult.EMPTY);
+            return CompletableFuture.completedFuture(PathFindingResult.empty());
         }
 
         // Create ProgressTracker
@@ -545,7 +545,7 @@ public class PathFindingComputeFacade {
     ) {
         // If the input graph is empty return a completed future with empty result
         if (graph.isEmpty()) {
-            return CompletableFuture.completedFuture(PathFindingResult.EMPTY);
+            return CompletableFuture.completedFuture(PathFindingResult.empty());
         }
 
         // Create ProgressTracker
@@ -582,7 +582,7 @@ public class PathFindingComputeFacade {
     ) {
         // If the input graph is empty return a completed future with empty result
         if (graph.isEmpty()) {
-            return CompletableFuture.completedFuture(PathFindingResult.EMPTY);
+            return CompletableFuture.completedFuture(PathFindingResult.empty());
         }
 
         // Create ProgressTracker

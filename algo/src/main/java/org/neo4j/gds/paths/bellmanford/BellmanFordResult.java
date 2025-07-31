@@ -27,8 +27,8 @@ public record BellmanFordResult(
     boolean containsNegativeCycle
 ) {
     public static final BellmanFordResult EMPTY = new BellmanFordResult(
-        PathFindingResult.EMPTY,
-        PathFindingResult.EMPTY,
+        PathFindingResult.empty(),
+        PathFindingResult.empty(),
         false
     );
 

@@ -50,7 +50,7 @@ class PathFindingStreamResultTransformerTest {
             pathFactoryFacadeMock
         );
 
-        var streamResult = transformer.apply(PathFindingResult.EMPTY);
+        var streamResult = transformer.apply(PathFindingResult.empty());
         assertThat(streamResult).isEmpty();
 
         verifyNoInteractions(graphMock);
