@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.cliquecounting;
 
-import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.algorithms.community.CliqueCountingStreamResult;
 import org.neo4j.procedure.Context;
@@ -31,7 +30,6 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.cliquecounting.Constants.CLIQUE_COUNTING_DESCRIPTION;
-import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public class CliqueCountingStreamProc {
@@ -47,12 +45,12 @@ public class CliqueCountingStreamProc {
         return facade.algorithms().community().cliqueCountingStream(graphName, configuration);
     }
 
-    @Procedure(value = "gds.cliqueCounting.stream.estimate", mode = READ)
-    @Description(MEMORY_ESTIMATION_DESCRIPTION)
-    public Stream<MemoryEstimateResult> estimate(
-        @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
-        @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
-    ) {
-        return facade.algorithms().community().cliqueCountingStreamEstimate(graphNameOrConfiguration, algoConfiguration);
-    }
+//    @Procedure(value = "gds.cliqueCounting.stream.estimate", mode = READ)
+//    @Description(MEMORY_ESTIMATION_DESCRIPTION)
+//    public Stream<MemoryEstimateResult> estimate(
+//        @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
+//        @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
+//    ) {
+//        return facade.algorithms().community().cliqueCountingStreamEstimate(graphNameOrConfiguration, algoConfiguration);
+//    }
 }

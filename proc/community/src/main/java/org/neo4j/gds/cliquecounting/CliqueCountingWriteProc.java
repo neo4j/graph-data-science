@@ -19,12 +19,10 @@
  */
 package org.neo4j.gds.cliquecounting;
 
-import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.algorithms.community.CliqueCountingWriteResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
-import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
@@ -32,9 +30,6 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.cliquecounting.Constants.CLIQUE_COUNTING_DESCRIPTION;
-//import static org.neo4j.gds.k1coloring.Constants.K1_COLORING_DESCRIPTION;
-import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
-import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
 public class CliqueCountingWriteProc {
@@ -52,12 +47,12 @@ public class CliqueCountingWriteProc {
         return facade.algorithms().community().cliqueCountingWrite(graphName, configuration);
     }
 
-    @Procedure(value = "gds.cliqueCounting.write.estimate", mode = READ)
-    @Description(MEMORY_ESTIMATION_DESCRIPTION)
-    public Stream<MemoryEstimateResult> estimate(
-        @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
-        @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
-    ) {
-        return facade.algorithms().community().cliqueCountingWriteEstimate(graphNameOrConfiguration, algoConfiguration);
-    }
+//    @Procedure(value = "gds.cliqueCounting.write.estimate", mode = READ)
+//    @Description(MEMORY_ESTIMATION_DESCRIPTION)
+//    public Stream<MemoryEstimateResult> estimate(
+//        @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
+//        @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
+//    ) {
+//        return facade.algorithms().community().cliqueCountingWriteEstimate(graphNameOrConfiguration, algoConfiguration);
+//    }
 }
