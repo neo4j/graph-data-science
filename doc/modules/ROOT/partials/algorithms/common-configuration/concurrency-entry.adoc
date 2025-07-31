@@ -1,5 +1,5 @@
 ifeval::[{sequential} != true]
-| xref:common-usage/running-algos.adoc#common-configuration-concurrency[concurrency]              | Integer  | 4 footnote:SessionDefault[In a xref:installation/aura-graph-analytics-serverless.adoc[GDS Session] the default is the number of available processors]      | yes      | The number of concurrent threads used for running the algorithm.
+| xref:common-usage/running-algos.adoc#common-configuration-concurrency[concurrency]              | Integer  | 4 footnote:SessionDefault[In a xref:aura-graph-analytics/index.adoc[GDS Session], the default is the number of available processors.]      | yes      | The number of concurrent threads used for running the algorithm.
 endif::[]
 // There is no "elseifeval" at the moment
 ifeval::[{sequential} == true]

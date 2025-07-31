@@ -1,0 +1,74 @@
+= Aura Graph Analytics
+:page-aliases: installation/aura-graph-analytics-serverless.adoc
+:max-lifetime: 7 days
+
+Aura Graph Analytics is an on-demand ephemeral compute environment for running graph data science workloads.
+
+Aura Graph Analytics is based on _sessions_.
+Each session is a standalone link:https://neo4j.com/docs/aura/graph-analytics/#aura-gds-serverless[Neo4j Aura compute environment] that is created when needed and deleted when no longer usefulfootnote:[Or when the <<max-lifetime, maximum session lifetime>> is reached.], all without any instance management operations.
+You only need to have link:https://neo4j.com/docs/aura/api/authentication/[Aura API credentials] ready before you can start using sessions.
+
+Depending on where your data is, you can use three types of session:
+
+* *Attached*: when the data source is a Neo4j AuraDB instance.
+* *Self-managed*: when the data source is a self-managed Neo4j DBMS.
+* *Standalone*: when the data source is not based on Neo4j.
+
+== Workflow
+
+The typical workflow with Aura Graph Analytics is:
+
+. Create a session.
+. Load your data into a session via a _remote projection_ (similar to a standard xref:management-ops/graph-creation/graph-project-cypher-projection.adoc[Cypher projection]).
+. Run graph algorithms or train machine learning models on the data.
+. Write the results back to the original data source using _remote write-back_ (for attached and self-managed sessions) or a custom method (for standalone sessions).
+. Delete the session.
+
+You can create and use sessions with the Cypher API (a collection of Cypher procedures shown in the xref:aura-graph-analytics/quickstart.adoc[] and, more in detail, in the xref:aura-graph-analytics/cypher.adoc[] page) or with the Python client (see the link:https://neo4j.com/docs/graph-data-science-client/current/graph-analytics-serverless/[overview] and the tutorials on link:https://neo4j.com/docs/graph-data-science-client/current/tutorials/graph-analytics-serverless/[attached], link:https://neo4j.com/docs/graph-data-science-client/current/tutorials/graph-analytics-serverless-self-managed/[self-managed], and link:https://neo4j.com/docs/graph-data-science-client/current/tutorials/graph-analytics-serverless-standalone/[standalone] sessions).
+
+[IMPORTANT]
+====
+The Cypher API is available only for sessions attached to AuraDB instances in the Professional, Business Critical, or Virtual Dedicated Cloud plans.
+Depending on which plan is used, different limitations apply.
+See link:https://neo4j.com/docs/aura/graph-analytics/#_comparison[Graph analytics in Aura] for a comparison.
+====
+
+[[implicit-sessions]]
+=== Implicit sessions
+
+If you use the Cypher API, you can skip the first and last step by creating a session automatically with the first remote projection.
+
+In this case, the session is deleted when the projected graph is dropped.
+If additional graphs are projected into the same session, for example via xref:management-ops/graph-creation/graph-filter.adoc[graph filtering], the session is deleted only after all graphs are dropped.
+
+Implicit sessions can still be listed and dropped via the corresponding xref:aura-graph-analytics/cypher.adoc#session-management[session management procedures].
+
+== Configuration
+
+[[session-size]]
+=== Session size
+
+When creating a session (either explicitly or via a remote graph projection), you must set the `memory` parameter to specify the maximum amount of memory allocated to the process.
+A larger size means faster runtime and the ability to process larger volumes of data, but also increased link:https://neo4j.com/pricing/#graph-analytics[cost].
+
+The supported values are `2GB`, `4GB`, `8GB`, `16GB`, `24GB`, `32GB`, `48GB`, `64GB`, `96GB`, `128GB`, `192GB`, `256GB`, `384GB`, and `512GB`.
+
+[NOTE]
+The session maximum size can be configured for your whole Aura organization.
+Check with your organization administrator what your maximum size is.
+
+[[session-expiration]]
+=== Session expiration
+
+When creating a session (either explicitly or via a remote graph projection), you can set an optional `ttl` parameter to specify how quickly an inactive session will expire.
+The default value for `ttl` is 1 hour and the maximum allowed value is {max-lifetime}.
+
+An expired session cannot be used to run workloads, does not incur any cost, and will be deleted automatically after {max-lifetime}.
+It can also be deleted through the Aura Console UI.
+
+[[max-lifetime]]
+==== Maximum lifetime
+
+A session can never be kept active for more than {max-lifetime}.
+Even if the session does not expire due to inactivity, it will still expire {max-lifetime} after its creation.
+This is a hard limit and cannot be changed.

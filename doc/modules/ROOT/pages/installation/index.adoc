@@ -11,7 +11,7 @@ The plugin needs to be installed into the database and configured.
 
 [NOTE]
 ====
-xref:installation/aura-graph-analytics-serverless.adoc[] is the new fully managed, on-demand analytics-as-a-service offering in Neo4j Aura.
+xref:aura-graph-analytics/index.adoc[] is the new fully managed, on-demand analytics-as-a-service offering in Neo4j Aura.
 
 link:https://neo4j.com/data-science-sandbox/[Neo4j Data Science Sandbox] is a free, cloud-based instance of Neo4j with GDS Community Edition preinstalled.
 
@@ -36,9 +36,16 @@ On Neo4j Desktop you can install the GDS library directly xref:installation/neo4
 
 .GDS Enterprise Edition
 
-The Enterprise Edition (EE) of the library requires a _license key_ as well. You can find more details on requesting and configuring a license key in the xref:installation/installation-enterprise-edition.adoc[] section.
+The Enterprise Edition (EE) of the library requires a _license key_ as well.
+You can find more details on requesting and configuring a license key in the xref:installation/installation-enterprise-edition.adoc[] section.
 
-GDS EE includes Apache Arrow for advanced graph import and export capabilities. Arrow can be enabled and configured as detailed in the xref:installation/configure-apache-arrow-server.adoc[Apache Arrow] guide.
+GDS EE includes Apache Arrow for advanced graph import and export capabilities.
+Arrow can be enabled and configured as detailed in the xref:installation/configure-apache-arrow-server.adoc[Apache Arrow] guide.
+
+=== GDS as a service
+
+You can run GDS as a service using xref:aura-graph-analytics/index.adoc[].
+This option does not require any installation and gives access to the enterprise features without needing a license.
 
 == Verifying the installation
 

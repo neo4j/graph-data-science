@@ -1,0 +1,370 @@
+= Cypher API
+
+The Cypher API for Aura Graph Analytics matches the GDS plugin API as closely as possible.
+Except for some <<limitations, limitations>>, you can adapt most of the examples from the rest of the documentation.
+
+[[aura-api-auth]]
+== Authentication to the Aura API
+
+One key difference with the GDS plugin is the requirement to authenticate to the link:https://neo4j.com/docs/aura/api/authentication/[Aura API] using the `gds.aura.api.credentials()` function **in each Cypher query**.
+
+.Use of `gds.aura.api.credentials`
+[source, cypher]
+----
+WITH gds.aura.api.credentials($clientId, $clientSecret) AS credentials // <1>
+MATCH (source)
+OPTIONAL MATCH (source)-->(target)
+RETURN gds.graph.project('g',
+  source,
+  target,
+  {},
+  { memory: '4GB' }
+)
+----
+<1> You can use any alias, provided that you specify one.
+
+The function does not return any value, but registers the credentials in the query context.
+The credentials are not persisted anywhere and are immediately discarded after the query has completed.
+
+Once you have created a graph within a session, a query like the following will fail with an error indicating the missing call to `gds.aura.api.credentials()`.
+
+.Call an algorithm procedure without Aura API credentials
+[source, cypher]
+----
+CALL gds.wcc.stream('g') // This alone will not work
+----
+
+=== Syntax
+
+[source, cypher]
+----
+RETURN gds.aura.api.credentials(
+  clientId: String,
+  clientSecret: String
+) AS credentials
+----
+
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name         | Type   | Default | Optional | Description
+| clientId     | String | n/a     | no       | The Client ID for an Aura API key pair.
+| clientSecret | String | n/a     | no       | The Client Secret for an Aura API key pair.
+|===
+
+.Results
+[opts="header"]
+|===
+| Name | Type | Description
+| -    | -    | Always returns `null`.
+|===
+
+== Projecting a graph
+
+[IMPORTANT]
+====
+Native projections and legacy Cypher projections are not supported in Aura Graph Analytics.
+====
+
+Use a xref:management-ops/graph-creation/graph-project-cypher-projection.adoc[Cypher projection] with the additional authentication clause to project a graph into a GDS Session.
+
+Make sure to include the additional parameters with the `Aura Graph Analytics` label to create a session at the same time.
+
+.Project a graph into a new GDS Session
+[source, cypher]
+----
+CYPHER runtime=parallel // <1>
+WITH gds.aura.api.credentials($clientId, $clientSecret) AS credentials
+MATCH (source)
+OPTIONAL MATCH (source)-->(target)
+RETURN gds.graph.project('g', 
+  source,
+  target,
+  {},
+  { memory: '4GB' } // <2>
+)
+----
+<1> The Cypher `parallel` runtime is recommended but not mandatory.
+<2> Map containing session-related parameters such as `memory` (mandatory).
+
+If you have created a session <<session-create-procedure, explicitly>>, add the session ID as the `sessionId` parameter to use that session instead.
+
+.Project a graph into an existing GDS Session
+[source, cypher]
+----
+CYPHER runtime=parallel // <1>
+WITH gds.aura.api.credentials($clientId, $clientSecret) AS credentials
+MATCH (source)
+OPTIONAL MATCH (source)-->(target)
+RETURN gds.graph.project('g',
+  source,
+  target,
+  {},
+  { sessionId: '00000000-11111111' }
+)
+----
+<1> The Cypher `parallel` runtime is recommended but not mandatory.
+
+== Running algorithms
+
+[IMPORTANT]
+====
+See the <<limitations>> section for the list of unsupported algorithms.
+====
+
+The Cypher API for Aura Graph Analytics supports most algorithms and machine learning operations in all existing execution modes.
+The syntax is the same as for the GDS plugin, with the additional authentication clause.
+
+.Call an algorithm procedure in `stream` mode
+[source, cypher]
+----
+WITH gds.aura.api.credentials($clientId, $clientSecret) AS credentials
+CALL gds.pageRank.stream('g')
+YIELD nodeId, score // <1>
+RETURN *
+----
+<1> Due to the authentication requirement, you must always add a `YIELD` clause.
+See link:https://neo4j.com/docs/cypher-manual/current/clauses/call/#call-procedure-yield[the Cypher manual] for additional details.
+
+[[session-management]]
+== Session management
+
+The session management procedures allow to explicitly create new sessions without any attached graphs, or to list and delete existing sessions.
+
+[[session-create-procedure]]
+=== Creating sessions
+
+Calling the `gds.session.getOrCreate` procedure triggers the creation of a GDS Session based on the specified procedure parameters.
+If a session with the given name and configuration already exists, that session is returned instead.
+
+.Create an empty GDS Session
+[source, cypher]
+----
+WITH gds.aura.api.credentials($clientId, $clientSecret) AS credentials
+CALL gds.session.getOrCreate(
+  'test-session',
+  '4GB',
+  duration({minutes: 5})
+)
+YIELD id AS sessionId, name AS sessionName
+RETURN sessionId, sessionName
+----
+
+When you create a session explicitly with `gds.session.getOrCreate`, note down the `sessionId` and set it as a xref:management-ops/graph-creation/graph-project-cypher-projection.adoc#graph-project-cypher-projection-syntax-configuration[configuration parameter] for the `gds.graph.project` procedure when you project a new graph.
+
+==== Syntax
+
+[source, cypher]
+----
+CALL gds.session.getOrCreate(
+  sessionName: String,
+  memory: String,
+  ttl: Duration
+  cloudLocation: Map
+) YIELD
+  id: String,
+  name: String,
+  auraInstanceId: String,
+  memory: String,
+  status: String,
+  creationTime: Datetime,
+  host: String,
+  expiryDate: Datetime,
+  ttl: TemporalAmount,
+  errorMessage: String
+----
+
+.Parameters
+[opts="header",cols="1,1,1,4"]
+|===
+| Name          | Type      | Optional | Description
+| sessionName   | String    | no       | The name of the GDS Session to create or return.
+| memory        | String    | no       | The size of the GDS Session, e.g. `4GB`, `8GB`, etc.
+| ttl           | Duration  | yes      | The time to live of the GDS Session when no activity is recorded, e.g. `duration({days: 1})`, `duration({hours: 12})`, etc. The default value is 2 days.
+|===
+
+[[session-create-procedure-results]]
+.Results
+[opts="header",cols="3m,1,6"]
+|===
+| Name                   | Type     | Description
+| id                     | String   | The unique identifier of the GDS Session.
+| name                   | String   | The name of the GDS Session.
+| auraInstanceId         | String   | The Aura instance ID to which the GDS Session is attached to.
+| memory                 | String   | The size of the GDS Session, e.g. `4GB`, `8GB`, etc.
+| status                 | String   | The status of the GDS Session, e.g. `Creating`, `Ready`, `Expired`, etc.
+| creationTime           | Datetime | The time when the GDS Session was created.
+| host                   | String   | The public host address of the GDS Session.
+| expiryDate             | Datetime | The time when the GDS Session will definitely expire.
+| ttl                    | TemporalAmount | The time that is left until the GDS Session expires due to inactivity.
+| errorMessage           | String   | The error message, if the GDS Session could not be created or is in an unhealthy state.
+|===
+
+=== Listing sessions
+
+The `gds.session.list` procedure returns all the GDS Sessions that are available to the current Aura user.
+
+==== Syntax
+
+[source, cypher]
+----
+CALL gds.session.list(
+  projectId: String,
+  filterAuraInstanceId: boolean
+) YIELD
+  id: String,
+  name: String,
+  auraInstanceId: String,
+  memory: String,
+  status: String,
+  creationTime: Datetime,
+  host: String,
+  expiryDate: Datetime,
+  ttl: TemporalAmount,
+  errorMessage: String
+----
+
+.Parameters
+[opts="header",cols="1,1,1,1,4"]
+|===
+| Name               | Type      | Optional | Default | Description
+| projectId          | String    | yes      | ""      | The ID of the project to which the GDS Sessions belong. If not specified, all sessions of the Aura user are returned.
+| filterAuraInstance | String    | yes      | false   | If set to `true`, only sessions that are attached to current Aura instance are returned. If not specified, all sessions of the Aura user are returned.
+|===
+
+.Results
+[opts="header",cols="3m,1,6"]
+|===
+| Name                   | Type     | Description
+| id                     | String   | The unique identifier of the GDS Session.
+| name                   | String   | The name of the GDS Session.
+| auraInstanceId         | String   | The Aura instance ID to which the GDS Session is attached to.
+| memory                 | String   | The size of the GDS Session, e.g. `4GB`, `8GB`, etc.
+| status                 | String   | The status of the GDS Session, e.g. `Creating`, `Ready`, `Expired`, etc.
+| creationTime           | Datetime | The time when the GDS Session was created.
+| host                   | String   | The public host address of the GDS Session.
+| expiryDate             | Datetime | The time when the GDS Session will definitely expire.
+| ttl                    | TemporalAmount | The time that is left until the GDS Session expires due to inactivity.
+| errorMessage           | String   | The error message, if the GDS Session could not be created or is in an unhealthy state.
+|===
+
+=== Deleting sessions
+
+The `gds.session.delete` procedure deletes a GDS Session with the given ID.
+If the session is not found, an error is raised.
+
+[source, cypher]
+----
+WITH gds.aura.api.credentials($clientId, $clientSecret) AS credentials
+CALL gds.session.delete(
+  'test-session_00000000-1111-2222-3333-0123456789ab'
+)
+YIELD deleted
+RETURN deleted
+----
+
+==== Syntax
+
+[source, cypher]
+----
+CALL gds.session.delete(
+  name: String,
+  projectId: String
+) YIELD
+  deleted: boolean
+----
+
+.Parameters
+[opts="header",cols="1,1,1,1,4"]
+|===
+| Name       | Type      | Optional | Default | Description
+| name       | String    | no       | n/a     | The name of the GDS Session to delete.
+| projectId  | String    | yes      | ""      | The ID of the project to which the GDS Session belongs. If similar sessions exist in different projects an error is thrown that indicates to provide a project ID.
+|===
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name       | Type      | Description
+| deleted    | Boolean   | True, if the GDS Session was successfully deleted, false otherwise.
+|===
+
+[[limitations]]
+== Limitations
+
+When compared to the GDS plugin, the Cypher API for Aura Graph Analytics has some limitations.
+
+=== Algorithms
+
+The following algorithms are not supported:
+
+- xref:algorithms/all-pairs-shortest-path.adoc[]
+- xref:algorithms/random-walk.adoc[]
+- xref:algorithms/bfs.adoc[]
+- xref:algorithms/dfs.adoc[]
+- xref:algorithms/bridges.adoc[]
+- xref:algorithms/conductance.adoc[]
+- xref:algorithms/modularity.adoc[]
+- xref:algorithms/hdbscan.adoc[]
+- xref:algorithms/hits.adoc[]
+- xref:algorithms/dag/longest-path.adoc[]
+- xref:algorithms/dag/topological-sort.adoc[]
+- xref:algorithms/triangle-count.adoc#algorithms-triangle-count-examples-triangles-listing[Triangles listing]
+- xref:machine-learning/node-embeddings/graph-sage.adoc[]
+
+
+=== Other procedures and functions
+
+The Cypher API for Aura Graph Analytics does not support all procedures and functions available in the GDS plugin.
+Some that are mentioned here may be supported in the future, while others may never be supported.
+
+
+==== Graph catalog
+
+The following graph catalog procedures are not supported:
+
+* `gds.graph.project`
+* `gds.graph.project.estimate`
+* `gds.graph.project.cypher`
+* `gds.graph.project.cypher.estimate`
+* `gds.graph.export`
+* `gds.graph.export.csv`
+* `gds.graph.export.csv.estimate`
+* `gds.backup`
+* `gds.restore`
+* `gds.graph.graphProperty.drop`
+* `gds.graph.graphProperty.stream`
+
+
+==== Machine learning
+
+Trained models can only be used for prediction using the same session in which they were trained.
+After the session is deleted, all trained models will be lost.
+
+The following Machine Learning procedures are not supported:
+
+* `gds.model.publish`
+* `gds.model.store`
+* `gds.model.load`
+* `gds.model.delete`
+* `gds.alpha.linkprediction.adamicAdar`
+* `gds.alpha.linkprediction.commonNeighbors`
+* `gds.alpha.linkprediction.preferentialAttachment`
+* `gds.alpha.linkprediction.resourceAllocation`
+* `gds.alpha.linkprediction.sameCommunity`
+* `gds.alpha.linkprediction.totalNeighbors`
+* `gds.alpha.ml.splitRelationships`
+
+Additionally, all `pipeline` procedures are unsupported.
+
+
+==== Additional operations
+
+The following additional operations are not supported:
+
+* `gds.license.state`
+* `gds.debug.arrow`
+* `gds.debug.sysInfo`
+* `gds.license.state`
+* `gds.userLog`
+* `gds.version`

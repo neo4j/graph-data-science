@@ -79,7 +79,7 @@ concurrency - Integer::
 Controls the parallelism with which the algorithm is executed.
 
 This value is set to 4.
-Unless, for xref:installation/aura-graph-analytics-serverless.adoc[], the default is the number of available processors.
+In a xref:aura-graph-analytics/index.adoc[GDS Session], the default is the number of available processors.
 
 For more details on the concurrency settings and limitations please see xref:installation/System-requirements.adoc#system-requirements-cpu[the CPU section] of the System Requirements.
 

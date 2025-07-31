@@ -8,7 +8,6 @@
 ** xref:installation/installation-enterprise-edition.adoc[]
 ** xref:installation/configure-apache-arrow-server.adoc[]
 ** xref:installation/System-requirements.adoc[]
-** xref:installation/aura-graph-analytics-serverless.adoc[]
 * xref:getting-started/index.adoc[]
 ** xref:getting-started/basic-workflow.adoc[]
 ** xref:getting-started/fastrp-knn-example.adoc[]
@@ -171,6 +170,9 @@
 ** xref:production-deployment/configuration-settings.adoc[]
 ** xref:production-deployment/feature-toggles.adoc[]
 * xref:python-client/index.adoc[]
+* xref:aura-graph-analytics/index.adoc[]
+** xref:aura-graph-analytics/quickstart.adoc[]
+** xref:aura-graph-analytics/cypher.adoc[]
 * link:https://neo4j.com/docs/bloom-user-guide/current/bloom-tutorial/gds-integration/[Bloom visualization]
 * Appendix
 ** xref:operations-reference/appendix-a.adoc[]
