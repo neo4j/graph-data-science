@@ -126,7 +126,7 @@ class PathFindingComputeFacadeTest {
         long a = idFunction.of("a");
         long c = idFunction.of("c");
 
-        assertThat(results).isNotEmpty()
+        assertThat(results.result()).isNotEmpty()
             .anySatisfy(r -> assertThat(r.sourceNodeId()).isEqualTo(a))
             .anySatisfy(r -> assertThat(r.targetNodeId()).isEqualTo(c));
     }
@@ -146,7 +146,7 @@ class PathFindingComputeFacadeTest {
         );
 
         var result = future.join();
-        assertThat(result).isNotNull();
+        assertThat(result.result()).isNotNull();
 
         verify(progressTrackerFactoryMock, times(1))
             .create(isA(IterativeTask.class), eq(jobIdMock), eq(new Concurrency(4)), eq(false));

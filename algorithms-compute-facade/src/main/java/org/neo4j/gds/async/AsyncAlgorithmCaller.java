@@ -19,11 +19,14 @@
  */
 package org.neo4j.gds.async;
 
+import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.result.TimedAlgorithmResult;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.atomic.AtomicLong;
 
 public final class AsyncAlgorithmCaller {
 
@@ -35,7 +38,7 @@ public final class AsyncAlgorithmCaller {
         this.log = log;
     }
 
-    public <R> CompletableFuture<R> run(
+    public <R> CompletableFuture<TimedAlgorithmResult<R>> run(
         AlgorithmCallable<R> algorithm,
         JobId jobId
     ) {
@@ -43,7 +46,12 @@ public final class AsyncAlgorithmCaller {
             .supplyAsync(
                 () -> {
                     log.debug("Job: `%s` - Starting", jobId);
-                    return algorithm.call();
+                    R result;
+                    var computeMillis = new AtomicLong();
+                    try(var ignored = ProgressTimer.start(computeMillis::set)) {
+                        result = algorithm.call();
+                    }
+                    return new TimedAlgorithmResult<>(result, computeMillis.get());
                 },
                 workerPool
             ).whenComplete((r, e) -> {

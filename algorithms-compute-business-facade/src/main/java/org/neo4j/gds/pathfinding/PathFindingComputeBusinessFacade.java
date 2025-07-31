@@ -51,6 +51,7 @@ import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.paths.yens.YensParameters;
 import org.neo4j.gds.pcst.PCSTParameters;
 import org.neo4j.gds.pricesteiner.PrizeSteinerTreeResult;
+import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.results.ResultTransformerBuilder;
 import org.neo4j.gds.spanningtree.SpanningTree;
 import org.neo4j.gds.spanningtree.SpanningTreeParameters;
@@ -95,7 +96,7 @@ public class PathFindingComputeBusinessFacade {
         Optional<String> relationshipProperty,
         AllShortestPathsParameters parameters,
         JobId jobId,
-        ResultTransformerBuilder<Stream<AllShortestPathsStreamResult>, TR> resultTransformerBuilder
+        ResultTransformerBuilder<TimedAlgorithmResult<Stream<AllShortestPathsStreamResult>>, TR> resultTransformerBuilder
     ) {
         // Fetch the Graph the algorithm will operate on
         var graphResources = graphStoreCatalogService.fetchGraphResources(
@@ -124,7 +125,7 @@ public class PathFindingComputeBusinessFacade {
         BellmanFordParameters parameters,
         JobId jobId,
         boolean logProgress,
-        ResultTransformerBuilder<BellmanFordResult, TR> resultTransformerBuilder
+        ResultTransformerBuilder<TimedAlgorithmResult<BellmanFordResult>, TR> resultTransformerBuilder
     ) {
         // Fetch the Graph the algorithm will operate on
         var graphResources = graphStoreCatalogService.fetchGraphResources(
@@ -153,7 +154,7 @@ public class PathFindingComputeBusinessFacade {
         TraversalParameters parameters,
         JobId jobId,
         boolean logProgress,
-        ResultTransformerBuilder<HugeLongArray, TR> resultTransformerBuilder
+        ResultTransformerBuilder<TimedAlgorithmResult<HugeLongArray>, TR> resultTransformerBuilder
     ) {
         // Fetch the Graph the algorithm will operate on
         var graphResources = graphStoreCatalogService.fetchGraphResources(
@@ -186,7 +187,7 @@ public class PathFindingComputeBusinessFacade {
         DeltaSteppingParameters parameters,
         JobId jobId,
         boolean logProgress,
-        ResultTransformerBuilder<PathFindingResult, TR> resultTransformerBuilder
+        ResultTransformerBuilder<TimedAlgorithmResult<PathFindingResult>, TR> resultTransformerBuilder
     ) {
         // Fetch the Graph the algorithm will operate on
         var graphResources = graphStoreCatalogService.fetchGraphResources(
@@ -215,7 +216,7 @@ public class PathFindingComputeBusinessFacade {
         TraversalParameters parameters,
         JobId jobId,
         boolean logProgress,
-        ResultTransformerBuilder<HugeLongArray, TR> resultTransformerBuilder
+        ResultTransformerBuilder<TimedAlgorithmResult<HugeLongArray>, TR> resultTransformerBuilder
     ) {
         // Fetch the Graph the algorithm will operate on
         var graphResources = graphStoreCatalogService.fetchGraphResources(
@@ -248,7 +249,7 @@ public class PathFindingComputeBusinessFacade {
         KSpanningTreeParameters parameters,
         JobId jobId,
         boolean logProgress,
-        ResultTransformerBuilder<SpanningTree, TR> resultTransformerBuilder
+        ResultTransformerBuilder<TimedAlgorithmResult<SpanningTree>, TR> resultTransformerBuilder
     ) {
         // Fetch the Graph the algorithm will operate on
         var graphResources = graphStoreCatalogService.fetchGraphResources(
@@ -277,7 +278,7 @@ public class PathFindingComputeBusinessFacade {
         DagLongestPathParameters parameters,
         JobId jobId,
         boolean logProgress,
-        ResultTransformerBuilder<PathFindingResult, TR> resultTransformerBuilder
+        ResultTransformerBuilder<TimedAlgorithmResult<PathFindingResult>, TR> resultTransformerBuilder
     ) {
         // Fetch the Graph the algorithm will operate on
         var graphResources = graphStoreCatalogService.fetchGraphResources(
@@ -307,7 +308,7 @@ public class PathFindingComputeBusinessFacade {
         RandomWalkParameters parameters,
         JobId jobId,
         boolean logProgress,
-        ResultTransformerBuilder<Stream<long[]>, TR> resultTransformerBuilder
+        ResultTransformerBuilder<TimedAlgorithmResult<Stream<long[]>>, TR> resultTransformerBuilder
     ) {
         // Fetch the Graph the algorithm will operate on
         var graphResources = graphStoreCatalogService.fetchGraphResources(
@@ -337,7 +338,7 @@ public class PathFindingComputeBusinessFacade {
         RandomWalkParameters parameters,
         JobId jobId,
         boolean logProgress,
-        ResultTransformerBuilder<HugeAtomicLongArray, TR> resultTransformerBuilder
+        ResultTransformerBuilder<TimedAlgorithmResult<HugeAtomicLongArray>, TR> resultTransformerBuilder
     ) {
         // Fetch the Graph the algorithm will operate on
         var graphResources = graphStoreCatalogService.fetchGraphResources(
@@ -367,7 +368,7 @@ public class PathFindingComputeBusinessFacade {
         PCSTParameters parameters,
         JobId jobId,
         boolean logProgress,
-        ResultTransformerBuilder<PrizeSteinerTreeResult, TR> resultTransformerBuilder
+        ResultTransformerBuilder<TimedAlgorithmResult<PrizeSteinerTreeResult>, TR> resultTransformerBuilder
     ) {
         // Fetch the Graph the algorithm will operate on
         var graphResources = graphStoreCatalogService.fetchGraphResources(
@@ -399,7 +400,7 @@ public class PathFindingComputeBusinessFacade {
         AStarParameters parameters,
         JobId jobId,
         boolean logProgress,
-        ResultTransformerBuilder<PathFindingResult, TR> resultTransformerBuilder
+        ResultTransformerBuilder<TimedAlgorithmResult<PathFindingResult>, TR> resultTransformerBuilder
     ) {
         // Fetch the Graph the algorithm will operate on
         var graphResources = graphStoreCatalogService.fetchGraphResources(
@@ -429,7 +430,7 @@ public class PathFindingComputeBusinessFacade {
         DijkstraSourceTargetParameters parameters,
         JobId jobId,
         boolean logProgress,
-        ResultTransformerBuilder<PathFindingResult, TR> resultTransformerBuilder
+        ResultTransformerBuilder<TimedAlgorithmResult<PathFindingResult>, TR> resultTransformerBuilder
     ) {
         // Fetch the Graph the algorithm will operate on
         var graphResources = graphStoreCatalogService.fetchGraphResources(
@@ -459,7 +460,7 @@ public class PathFindingComputeBusinessFacade {
         YensParameters parameters,
         JobId jobId,
         boolean logProgress,
-        ResultTransformerBuilder<PathFindingResult, TR> resultTransformerBuilder
+        ResultTransformerBuilder<TimedAlgorithmResult<PathFindingResult>, TR> resultTransformerBuilder
     ) {
         // Fetch the Graph the algorithm will operate on
         var graphResources = graphStoreCatalogService.fetchGraphResources(
@@ -489,7 +490,7 @@ public class PathFindingComputeBusinessFacade {
         DijkstraSingleSourceParameters parameters,
         JobId jobId,
         boolean logProgress,
-        ResultTransformerBuilder<PathFindingResult, TR> resultTransformerBuilder
+        ResultTransformerBuilder<TimedAlgorithmResult<PathFindingResult>, TR> resultTransformerBuilder
     ) {
         // Fetch the Graph the algorithm will operate on
         var graphResources = graphStoreCatalogService.fetchGraphResources(
@@ -519,7 +520,7 @@ public class PathFindingComputeBusinessFacade {
         SpanningTreeParameters parameters,
         JobId jobId,
         boolean logProgress,
-        ResultTransformerBuilder<SpanningTree, TR> resultTransformerBuilder
+        ResultTransformerBuilder<TimedAlgorithmResult<SpanningTree>, TR> resultTransformerBuilder
     ) {
         // Fetch the Graph the algorithm will operate on
         var graphResources = graphStoreCatalogService.fetchGraphResources(
@@ -549,7 +550,7 @@ public class PathFindingComputeBusinessFacade {
         SteinerTreeParameters parameters,
         JobId jobId,
         boolean logProgress,
-        ResultTransformerBuilder<SteinerTreeResult, TR> resultTransformerBuilder
+        ResultTransformerBuilder<TimedAlgorithmResult<SteinerTreeResult>, TR> resultTransformerBuilder
     ) {
         // Fetch the Graph the algorithm will operate on
         var graphResources = graphStoreCatalogService.fetchGraphResources(
@@ -575,17 +576,16 @@ public class PathFindingComputeBusinessFacade {
     public <TR> CompletableFuture<TR> topologicalSort(
         GraphName graphName,
         GraphParameters graphParameters,
-        Optional<String> relationshipProperty,
         TopologicalSortParameters parameters,
         JobId jobId,
         boolean logProgress,
-        ResultTransformerBuilder<TopologicalSortResult, TR> resultTransformerBuilder
+        ResultTransformerBuilder<TimedAlgorithmResult<TopologicalSortResult>, TR> resultTransformerBuilder
     ) {
         // Fetch the Graph the algorithm will operate on
         var graphResources = graphStoreCatalogService.fetchGraphResources(
             graphName,
             graphParameters,
-            relationshipProperty,
+            Optional.empty(),
             new NoAlgorithmValidation(),
             Optional.empty(),
             user,

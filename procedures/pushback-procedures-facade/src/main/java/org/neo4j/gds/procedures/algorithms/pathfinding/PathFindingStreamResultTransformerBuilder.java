@@ -24,11 +24,12 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.NodeLookup;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
+import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.results.ResultTransformerBuilder;
 
 import java.util.stream.Stream;
 
-public class PathFindingStreamResultTransformerBuilder implements ResultTransformerBuilder<PathFindingResult, Stream<PathFindingStreamResult>> {
+public class PathFindingStreamResultTransformerBuilder implements ResultTransformerBuilder<TimedAlgorithmResult<PathFindingResult>, Stream<PathFindingStreamResult>> {
     private final CloseableResourceRegistry closeableResourceRegistry;
     private final NodeLookup nodeLookup;
     private final boolean pathRequested;

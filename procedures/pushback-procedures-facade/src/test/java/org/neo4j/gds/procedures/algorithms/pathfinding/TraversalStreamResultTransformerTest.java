@@ -22,6 +22,7 @@ package org.neo4j.gds.procedures.algorithms.pathfinding;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.graphdb.Path;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -50,7 +51,7 @@ class TraversalStreamResultTransformerTest {
         when(pathFactoryFacadeMock.createPath(any(long[].class), any(double[].class), any(), anyString()))
             .thenReturn(mock(Path.class));
 
-        var streamResult = transformer.apply(HugeLongArray.of(3,2,1,0)).toList();
+        var streamResult = transformer.apply(new TimedAlgorithmResult<>(HugeLongArray.of(3,2,1,0), 1)).toList();
 
         assertThat(streamResult).hasSize(1);
         var result = streamResult.getFirst();

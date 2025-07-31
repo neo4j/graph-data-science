@@ -17,23 +17,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.algorithms.pathfinding;
+package org.neo4j.gds.result;
 
-import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.dag.topologicalsort.TopologicalSortResult;
-import org.neo4j.gds.result.TimedAlgorithmResult;
-import org.neo4j.gds.results.ResultTransformerBuilder;
+public record TimedAlgorithmResult<AR>(AR result, long computeMillis) {
 
-import java.util.stream.Stream;
-
-public class TopologicalSortStreamResultTransformerBuilder implements ResultTransformerBuilder<TimedAlgorithmResult<TopologicalSortResult>, Stream<TopologicalSortStreamResult>> {
-
-    @Override
-    public TopologicalSortStreamResultTransformer build(Graph graph, GraphStore graphStore) {
-
-        return new TopologicalSortStreamResultTransformer(
-            graph
-        );
+    public static <R> TimedAlgorithmResult<R> empty(R result) {
+        return new TimedAlgorithmResult<>(result, 0L);
     }
 }

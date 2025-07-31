@@ -66,6 +66,7 @@ import org.neo4j.gds.pcst.PCSTParameters;
 import org.neo4j.gds.pricesteiner.PCSTFast;
 import org.neo4j.gds.pricesteiner.PCSTProgressTrackerTaskCreator;
 import org.neo4j.gds.pricesteiner.PrizeSteinerTreeResult;
+import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.spanningtree.Prim;
 import org.neo4j.gds.spanningtree.SpanningTree;
 import org.neo4j.gds.spanningtree.SpanningTreeParameters;
@@ -111,13 +112,13 @@ public class PathFindingComputeFacade {
         this.progressTrackerFactory = progressTrackerFactory;
     }
 
-    public CompletableFuture<Stream<AllShortestPathsStreamResult>> allShortestPaths(
+    public CompletableFuture<TimedAlgorithmResult<Stream<AllShortestPathsStreamResult>>> allShortestPaths(
         Graph graph,
         AllShortestPathsParameters parameters,
         JobId jobId
     ) {
         if (graph.isEmpty()) {
-            return CompletableFuture.completedFuture(Stream.empty());
+            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(Stream.empty()));
         }
 
         // Create ProgressTracker
@@ -141,7 +142,7 @@ public class PathFindingComputeFacade {
 
     }
 
-    public CompletableFuture<BellmanFordResult> bellmanFord(
+    public CompletableFuture<TimedAlgorithmResult<BellmanFordResult>> bellmanFord(
         Graph graph,
         BellmanFordParameters parameters,
         JobId jobId,
@@ -149,7 +150,7 @@ public class PathFindingComputeFacade {
     ) {
         // If the input graph is empty return a completed future with empty result
         if (graph.isEmpty()) {
-            return CompletableFuture.completedFuture(BellmanFordResult.empty());
+            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(BellmanFordResult.empty()));
         }
 
         // Create ProgressTracker
@@ -178,7 +179,7 @@ public class PathFindingComputeFacade {
         );
     }
 
-    public CompletableFuture<HugeLongArray> breadthFirstSearch(
+    public CompletableFuture<TimedAlgorithmResult<HugeLongArray>> breadthFirstSearch(
         Graph graph,
         TraversalParameters parameters,
         JobId jobId,
@@ -186,7 +187,7 @@ public class PathFindingComputeFacade {
     ) {
         // If the input graph is empty return a completed future with empty result
         if (graph.isEmpty()) {
-            return CompletableFuture.completedFuture(HugeLongArray.newArray(0L));
+            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(HugeLongArray.newArray(0L)));
         }
 
         // Create ProgressTracker
@@ -220,7 +221,7 @@ public class PathFindingComputeFacade {
         );
     }
 
-    public CompletableFuture<PathFindingResult> deltaStepping(
+    public CompletableFuture<TimedAlgorithmResult<PathFindingResult>> deltaStepping(
         Graph graph,
         DeltaSteppingParameters parameters,
         JobId jobId,
@@ -228,7 +229,7 @@ public class PathFindingComputeFacade {
     ) {
         // If the input graph is empty return a completed future with empty result
         if (graph.isEmpty()) {
-            return CompletableFuture.completedFuture(PathFindingResult.empty());
+            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(PathFindingResult.empty()));
         }
 
         // Create ProgressTracker
@@ -250,7 +251,7 @@ public class PathFindingComputeFacade {
         );
     }
 
-    public CompletableFuture<HugeLongArray> depthFirstSearch(
+    public CompletableFuture<TimedAlgorithmResult<HugeLongArray>> depthFirstSearch(
         Graph graph,
         TraversalParameters parameters,
         JobId jobId,
@@ -258,7 +259,7 @@ public class PathFindingComputeFacade {
     ) {
         // If the input graph is empty return a completed future with empty result
         if (graph.isEmpty()) {
-            return CompletableFuture.completedFuture(HugeLongArray.newArray(0L));
+            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(HugeLongArray.newArray(0L)));
         }
 
         // Create ProgressTracker
@@ -290,7 +291,7 @@ public class PathFindingComputeFacade {
         );
     }
 
-    public CompletableFuture<SpanningTree> kSpanningTree(
+    public CompletableFuture<TimedAlgorithmResult<SpanningTree>> kSpanningTree(
         Graph graph,
         KSpanningTreeParameters parameters,
         JobId jobId,
@@ -298,7 +299,7 @@ public class PathFindingComputeFacade {
     ) {
         // If the input graph is empty return a completed future with empty result
         if (graph.isEmpty()) {
-            return CompletableFuture.completedFuture(SpanningTree.EMPTY);
+            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(SpanningTree.EMPTY));
         }
 
         // Create ProgressTracker
@@ -326,7 +327,7 @@ public class PathFindingComputeFacade {
         );
     }
 
-    public CompletableFuture<PathFindingResult> longestPath(
+    public CompletableFuture<TimedAlgorithmResult<PathFindingResult>> longestPath(
         Graph graph,
         DagLongestPathParameters parameters,
         JobId jobId,
@@ -334,7 +335,7 @@ public class PathFindingComputeFacade {
     ) {
         // If the input graph is empty return a completed future with empty result
         if (graph.isEmpty()) {
-            return CompletableFuture.completedFuture(PathFindingResult.empty());
+            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(PathFindingResult.empty()));
         }
 
         // Create ProgressTracker
@@ -360,7 +361,7 @@ public class PathFindingComputeFacade {
         );
     }
 
-    public CompletableFuture<Stream<long[]>> randomWalk(
+    public CompletableFuture<TimedAlgorithmResult<Stream<long[]>>> randomWalk(
         Graph graph,
         RandomWalkParameters parameters,
         JobId jobId,
@@ -368,7 +369,7 @@ public class PathFindingComputeFacade {
     ) {
         // If the input graph is empty return a completed future with empty result
         if (graph.isEmpty()) {
-            return CompletableFuture.completedFuture(Stream.empty());
+            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(Stream.empty()));
         }
 
         // Create ProgressTracker
@@ -394,7 +395,7 @@ public class PathFindingComputeFacade {
         );
     }
 
-    public CompletableFuture<HugeAtomicLongArray> randomWalkCountingNodeVisits(
+    public CompletableFuture<TimedAlgorithmResult<HugeAtomicLongArray>> randomWalkCountingNodeVisits(
         Graph graph,
         RandomWalkParameters parameters,
         JobId jobId,
@@ -402,9 +403,11 @@ public class PathFindingComputeFacade {
     ) {
         // If the input graph is empty return a completed future with empty result
         if (graph.isEmpty()) {
-            return CompletableFuture.completedFuture(HugeAtomicLongArray.of(
-                0,
-                ParalleLongPageCreator.passThrough(parameters.concurrency())
+            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(
+                HugeAtomicLongArray.of(
+                    0,
+                    ParalleLongPageCreator.passThrough(parameters.concurrency())
+                )
             ));
         }
 
@@ -432,7 +435,7 @@ public class PathFindingComputeFacade {
         );
     }
 
-    public CompletableFuture<PrizeSteinerTreeResult> pcst(
+    public CompletableFuture<TimedAlgorithmResult<PrizeSteinerTreeResult>> pcst(
         Graph graph,
         PCSTParameters parameters,
         JobId jobId,
@@ -440,7 +443,7 @@ public class PathFindingComputeFacade {
     ) {
         // If the input graph is empty return a completed future with empty result
         if (graph.isEmpty()) {
-            return CompletableFuture.completedFuture(PrizeSteinerTreeResult.EMPTY);
+            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(PrizeSteinerTreeResult.EMPTY));
         }
 
         // Create ProgressTracker
@@ -466,7 +469,7 @@ public class PathFindingComputeFacade {
         );
     }
 
-    public CompletableFuture<PathFindingResult> singlePairShortestPathAStar(
+    public CompletableFuture<TimedAlgorithmResult<PathFindingResult>> singlePairShortestPathAStar(
         Graph graph,
         AStarParameters parameters,
         JobId jobId,
@@ -474,7 +477,7 @@ public class PathFindingComputeFacade {
     ) {
         // If the input graph is empty return a completed future with empty result
         if (graph.isEmpty()) {
-            return CompletableFuture.completedFuture(PathFindingResult.empty());
+            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(PathFindingResult.empty()));
         }
 
         // Create ProgressTracker
@@ -500,7 +503,7 @@ public class PathFindingComputeFacade {
         );
     }
 
-    public CompletableFuture<PathFindingResult> singlePairShortestPathDijkstra(
+    public CompletableFuture<TimedAlgorithmResult<PathFindingResult>> singlePairShortestPathDijkstra(
         Graph graph,
         DijkstraSourceTargetParameters parameters,
         JobId jobId,
@@ -508,7 +511,7 @@ public class PathFindingComputeFacade {
     ) {
         // If the input graph is empty return a completed future with empty result
         if (graph.isEmpty()) {
-            return CompletableFuture.completedFuture(PathFindingResult.empty());
+            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(PathFindingResult.empty()));
         }
 
         // Create ProgressTracker
@@ -537,7 +540,7 @@ public class PathFindingComputeFacade {
         );
     }
 
-    public CompletableFuture<PathFindingResult> singlePairShortestPathYens(
+    public CompletableFuture<TimedAlgorithmResult<PathFindingResult>> singlePairShortestPathYens(
         Graph graph,
         YensParameters parameters,
         JobId jobId,
@@ -545,7 +548,7 @@ public class PathFindingComputeFacade {
     ) {
         // If the input graph is empty return a completed future with empty result
         if (graph.isEmpty()) {
-            return CompletableFuture.completedFuture(PathFindingResult.empty());
+            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(PathFindingResult.empty()));
         }
 
         // Create ProgressTracker
@@ -574,7 +577,7 @@ public class PathFindingComputeFacade {
         );
     }
 
-    public CompletableFuture<PathFindingResult> singleSourceShortestPathDijkstra(
+    public CompletableFuture<TimedAlgorithmResult<PathFindingResult>> singleSourceShortestPathDijkstra(
         Graph graph,
         DijkstraSingleSourceParameters parameters,
         JobId jobId,
@@ -582,7 +585,7 @@ public class PathFindingComputeFacade {
     ) {
         // If the input graph is empty return a completed future with empty result
         if (graph.isEmpty()) {
-            return CompletableFuture.completedFuture(PathFindingResult.empty());
+            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(PathFindingResult.empty()));
         }
 
         // Create ProgressTracker
@@ -610,7 +613,7 @@ public class PathFindingComputeFacade {
         );
     }
 
-    public CompletableFuture<SpanningTree> spanningTree(
+    public CompletableFuture<TimedAlgorithmResult<SpanningTree>> spanningTree(
         Graph graph,
         SpanningTreeParameters parameters,
         JobId jobId,
@@ -618,7 +621,7 @@ public class PathFindingComputeFacade {
     ) {
         // If the input graph is empty return a completed future with empty result
         if (graph.isEmpty()) {
-            return CompletableFuture.completedFuture(SpanningTree.EMPTY);
+            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(SpanningTree.EMPTY));
         }
 
         // Create ProgressTracker
@@ -645,7 +648,7 @@ public class PathFindingComputeFacade {
         );
     }
 
-    public CompletableFuture<SteinerTreeResult> steinerTree(
+    public CompletableFuture<TimedAlgorithmResult<SteinerTreeResult>> steinerTree(
         Graph graph,
         SteinerTreeParameters parameters,
         JobId jobId,
@@ -653,7 +656,7 @@ public class PathFindingComputeFacade {
     ) {
         // If the input graph is empty return a completed future with empty result
         if (graph.isEmpty()) {
-            return CompletableFuture.completedFuture(SteinerTreeResult.EMPTY);
+            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(SteinerTreeResult.EMPTY));
         }
 
         // Create ProgressTracker
@@ -690,7 +693,7 @@ public class PathFindingComputeFacade {
         );
     }
 
-    public CompletableFuture<TopologicalSortResult> topologicalSort(
+    public CompletableFuture<TimedAlgorithmResult<TopologicalSortResult>> topologicalSort(
         Graph graph,
         TopologicalSortParameters parameters,
         JobId jobId,
@@ -698,7 +701,7 @@ public class PathFindingComputeFacade {
     ) {
         // If the input graph is empty return a completed future with empty result
         if (graph.isEmpty()) {
-            return CompletableFuture.completedFuture(TopologicalSortResult.EMPTY);
+            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(TopologicalSortResult.EMPTY));
         }
 
         // Create ProgressTracker

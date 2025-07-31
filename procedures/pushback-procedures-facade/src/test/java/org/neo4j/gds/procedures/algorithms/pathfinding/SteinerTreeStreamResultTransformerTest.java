@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.steiner.SteinerTreeResult;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -42,7 +43,7 @@ class SteinerTreeStreamResultTransformerTest {
             1
         );
 
-        var streamResult = transformer.apply(SteinerTreeResult.EMPTY);
+        var streamResult = transformer.apply(TimedAlgorithmResult.empty(SteinerTreeResult.EMPTY));
         assertThat(streamResult).isEmpty();
     }
 
@@ -61,7 +62,7 @@ class SteinerTreeStreamResultTransformerTest {
         when(steinerResult.parentArray()).thenReturn(HugeLongArray.of(4,3,1));
         when(steinerResult.relationshipToParentCost()).thenReturn(HugeDoubleArray.of(10,9,8));
 
-        var streamResult = transformer.apply(steinerResult).toList();
+        var streamResult = transformer.apply(new TimedAlgorithmResult<>(steinerResult, 10L)).toList();
         assertThat(streamResult.getFirst()).isEqualTo(new SpanningTreeStreamResult(0,4,10.0));
         assertThat(streamResult.get(1)).isEqualTo(new SpanningTreeStreamResult(1,1,9.0));
         assertThat(streamResult.getLast()).isEqualTo(new SpanningTreeStreamResult(2,1,8.0));

@@ -22,6 +22,7 @@ package org.neo4j.gds.procedures.algorithms.pathfinding;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.CloseableResourceRegistry;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.graphdb.Path;
 
 import java.util.stream.Stream;
@@ -53,7 +54,7 @@ class RandomWalkStreamResultTransformerTest {
 
         var result =Stream.of(new long[]{2,3,4});
 
-        var streamResult = transformer.apply(result).toList();
+        var streamResult = transformer.apply(new TimedAlgorithmResult<>(result, 1)).toList();
 
         assertThat(streamResult).hasSize(1);
         var pathResult = streamResult.getFirst();

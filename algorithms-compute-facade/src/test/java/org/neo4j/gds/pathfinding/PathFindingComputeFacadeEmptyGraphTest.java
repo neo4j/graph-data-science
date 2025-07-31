@@ -92,7 +92,7 @@ class PathFindingComputeFacadeEmptyGraphTest {
             jobIdMock
         );
         var result = future.join();
-        assertThat(result).isEmpty();
+        assertThat(result.result()).isEmpty();
 
         verifyNoInteractions(progressTrackerFactoryMock);
         verifyNoInteractions(algorithmCallerMock);
@@ -109,14 +109,16 @@ class PathFindingComputeFacadeEmptyGraphTest {
         var result = future.join();
 
         assertThat(result).isNotNull();
-        assertThat(result.shortestPaths())
+        assertThat(result.result().shortestPaths())
             .extracting(PathFindingResult::pathSet)
             .asInstanceOf(SET)
             .isEmpty();
-        assertThat(result.negativeCycles())
+        assertThat(result.result().negativeCycles())
             .extracting(PathFindingResult::pathSet)
             .asInstanceOf(SET)
             .isEmpty();
+        assertThat(result.result().containsNegativeCycle()).isFalse();
+        assertThat(result.computeMillis()).isZero();
 
         verifyNoInteractions(progressTrackerFactoryMock);
         verifyNoInteractions(algorithmCallerMock);
@@ -133,7 +135,7 @@ class PathFindingComputeFacadeEmptyGraphTest {
         var result = future.join();
 
         assertThat(result).isNotNull();
-        assertThat(result.size()).isZero();
+        assertThat(result.result().size()).isZero();
 
         verifyNoInteractions(progressTrackerFactoryMock);
         verifyNoInteractions(algorithmCallerMock);
@@ -149,7 +151,7 @@ class PathFindingComputeFacadeEmptyGraphTest {
         );
         var result = future.join();
 
-        assertThat(result)
+        assertThat(result.result())
             .isNotNull()
             .extracting(PathFindingResult::pathSet)
             .asInstanceOf(SET)
@@ -170,7 +172,7 @@ class PathFindingComputeFacadeEmptyGraphTest {
         var result = future.join();
 
         assertThat(result).isNotNull();
-        assertThat(result.size()).isZero();
+        assertThat(result.result().size()).isZero();
 
         verifyNoInteractions(progressTrackerFactoryMock);
         verifyNoInteractions(algorithmCallerMock);
@@ -186,7 +188,7 @@ class PathFindingComputeFacadeEmptyGraphTest {
         );
         var result = future.join();
 
-        assertThat(result).isNotNull().isEqualTo(SpanningTree.EMPTY);
+        assertThat(result.result()).isNotNull().isEqualTo(SpanningTree.EMPTY);
 
         verifyNoInteractions(progressTrackerFactoryMock);
         verifyNoInteractions(algorithmCallerMock);
@@ -202,7 +204,7 @@ class PathFindingComputeFacadeEmptyGraphTest {
         );
         var result = future.join();
 
-        assertThat(result)
+        assertThat(result.result())
             .isNotNull()
             .extracting(PathFindingResult::pathSet)
             .asInstanceOf(SET)
@@ -222,7 +224,7 @@ class PathFindingComputeFacadeEmptyGraphTest {
         );
         var result = future.join();
 
-        assertThat(result).isNotNull().isEmpty();
+        assertThat(result.result()).isNotNull().isEmpty();
 
         verifyNoInteractions(progressTrackerFactoryMock);
         verifyNoInteractions(algorithmCallerMock);
@@ -240,7 +242,7 @@ class PathFindingComputeFacadeEmptyGraphTest {
         var result = future.join();
 
         assertThat(result).isNotNull();
-        assertThat(result.size()).isZero();
+        assertThat(result.result().size()).isZero();
 
         verifyNoInteractions(progressTrackerFactoryMock);
         verifyNoInteractions(algorithmCallerMock);
@@ -256,7 +258,7 @@ class PathFindingComputeFacadeEmptyGraphTest {
         );
         var result = future.join();
 
-        assertThat(result).isNotNull().isEqualTo(PrizeSteinerTreeResult.EMPTY);
+        assertThat(result.result()).isNotNull().isEqualTo(PrizeSteinerTreeResult.EMPTY);
 
         verifyNoInteractions(progressTrackerFactoryMock);
         verifyNoInteractions(algorithmCallerMock);
@@ -272,7 +274,7 @@ class PathFindingComputeFacadeEmptyGraphTest {
         );
         var result = future.join();
 
-        assertThat(result)
+        assertThat(result.result())
             .isNotNull()
             .extracting(PathFindingResult::pathSet)
             .asInstanceOf(SET)
@@ -292,7 +294,7 @@ class PathFindingComputeFacadeEmptyGraphTest {
         );
         var result = future.join();
 
-        assertThat(result)
+        assertThat(result.result())
             .isNotNull()
             .extracting(PathFindingResult::pathSet)
             .asInstanceOf(SET)
@@ -312,7 +314,7 @@ class PathFindingComputeFacadeEmptyGraphTest {
         );
         var result = future.join();
 
-        assertThat(result)
+        assertThat(result.result())
             .isNotNull()
             .extracting(PathFindingResult::pathSet)
             .asInstanceOf(SET)
@@ -332,7 +334,7 @@ class PathFindingComputeFacadeEmptyGraphTest {
         );
         var result = future.join();
 
-        assertThat(result)
+        assertThat(result.result())
             .isNotNull()
             .extracting(PathFindingResult::pathSet)
             .asInstanceOf(SET)
@@ -352,7 +354,7 @@ class PathFindingComputeFacadeEmptyGraphTest {
         );
         var result = future.join();
 
-        assertThat(result).isNotNull().isEqualTo(SpanningTree.EMPTY);
+        assertThat(result.result()).isNotNull().isEqualTo(SpanningTree.EMPTY);
 
         verifyNoInteractions(progressTrackerFactoryMock);
         verifyNoInteractions(algorithmCallerMock);
@@ -368,7 +370,7 @@ class PathFindingComputeFacadeEmptyGraphTest {
         );
         var result = future.join();
 
-        assertThat(result).isNotNull().isEqualTo(SteinerTreeResult.EMPTY);
+        assertThat(result.result()).isNotNull().isEqualTo(SteinerTreeResult.EMPTY);
 
         verifyNoInteractions(progressTrackerFactoryMock);
         verifyNoInteractions(algorithmCallerMock);
@@ -384,7 +386,7 @@ class PathFindingComputeFacadeEmptyGraphTest {
         );
         var result = future.join();
 
-        assertThat(result).isNotNull().isEqualTo(TopologicalSortResult.EMPTY);
+        assertThat(result.result()).isNotNull().isEqualTo(TopologicalSortResult.EMPTY);
 
         verifyNoInteractions(progressTrackerFactoryMock);
         verifyNoInteractions(algorithmCallerMock);

@@ -21,13 +21,14 @@ package org.neo4j.gds.procedures.algorithms.pathfinding;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.results.ResultTransformer;
 import org.neo4j.gds.spanningtree.SpanningTree;
 
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-public class SpanningTreeStreamResultTransformer implements ResultTransformer<SpanningTree, Stream<SpanningTreeStreamResult>> {
+public class SpanningTreeStreamResultTransformer implements ResultTransformer<TimedAlgorithmResult<SpanningTree>, Stream<SpanningTreeStreamResult>> {
 
     private final Graph graph;
     private final long sourceNodeId;
@@ -38,8 +39,8 @@ public class SpanningTreeStreamResultTransformer implements ResultTransformer<Sp
     }
 
     @Override
-    public Stream<SpanningTreeStreamResult> apply(SpanningTree spanningTree) {
-
+    public Stream<SpanningTreeStreamResult> apply(TimedAlgorithmResult<SpanningTree> timedAlgorithmResult) {
+        var spanningTree = timedAlgorithmResult.result();
         return LongStream.range(IdMap.START_NODE_ID, graph.nodeCount())
             .filter(nodeId -> spanningTree.parent(nodeId) >= 0 || sourceNodeId == graph.toOriginalNodeId(nodeId))
             .mapToObj(nodeId -> {

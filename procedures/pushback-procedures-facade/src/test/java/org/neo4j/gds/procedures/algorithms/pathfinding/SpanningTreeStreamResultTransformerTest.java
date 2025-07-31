@@ -21,6 +21,7 @@ package org.neo4j.gds.procedures.algorithms.pathfinding;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.spanningtree.SpanningTree;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -40,7 +41,7 @@ class SpanningTreeStreamResultTransformerTest {
             1
         );
 
-        var streamResult = transformer.apply(SpanningTree.EMPTY);
+        var streamResult = transformer.apply(TimedAlgorithmResult.empty(SpanningTree.EMPTY));
         assertThat(streamResult).isEmpty();
     }
 
@@ -68,7 +69,7 @@ class SpanningTreeStreamResultTransformerTest {
             return  values[(int)id];
         });
 
-        var streamResult = transformer.apply(spanningTree).toList();
+        var streamResult = transformer.apply(new TimedAlgorithmResult<>(spanningTree, 1L)).toList();
         assertThat(streamResult.getFirst()).isEqualTo(new SpanningTreeStreamResult(0,4,10.0));
         assertThat(streamResult.get(1)).isEqualTo(new SpanningTreeStreamResult(1,1,9.0));
         assertThat(streamResult.getLast()).isEqualTo(new SpanningTreeStreamResult(2,1,8.0));

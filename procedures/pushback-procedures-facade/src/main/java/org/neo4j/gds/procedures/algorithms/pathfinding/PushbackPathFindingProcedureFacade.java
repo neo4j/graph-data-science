@@ -41,12 +41,12 @@ import org.neo4j.gds.pcst.PCSTStreamConfig;
 import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.PathFindingStubs;
 import org.neo4j.gds.procedures.algorithms.results.StandardStatsResult;
+import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.spanningtree.SpanningTreeStreamConfig;
 import org.neo4j.gds.steiner.SteinerTreeStreamConfig;
 import org.neo4j.gds.traversal.RandomWalkStreamConfig;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 public class PushbackPathFindingProcedureFacade implements PathFindingProcedureFacade {
@@ -90,7 +90,8 @@ public class PushbackPathFindingProcedureFacade implements PathFindingProcedureF
                 config.relationshipWeightProperty(),
                 config.toParameters(),
                 config.jobId(),
-                (graph, graphStore) -> r -> r // `MSBFSASPAlgorithm` implementations already maps the ids to the original ones => no need for transformation
+                // `MSBFSASPAlgorithm` implementations already maps the ids to the original ones => no need for transformation
+                (graph, graphStore) -> TimedAlgorithmResult::result
             )
             .join();
     }
@@ -216,13 +217,12 @@ public class PushbackPathFindingProcedureFacade implements PathFindingProcedureF
         var routeRequested = procedureReturnColumns.contains("path");
 
         var traversalResultTransformerBuilder = new TraversalStreamResultTransformerBuilder(
-            closeableResourceRegistry,
             nodeLookup,
             routeRequested,
             config.sourceNode()
         );
 
-        return businessFacade.depthFirstSearch(
+        return businessFacade.breadthFirstSearch(
             GraphName.parse(graphName),
             config.toGraphParameters(),
             config.toParameters(),
@@ -340,7 +340,6 @@ public class PushbackPathFindingProcedureFacade implements PathFindingProcedureF
         var routeRequested = procedureReturnColumns.contains("path");
 
         var traversalResultTransformerBuilder = new TraversalStreamResultTransformerBuilder(
-            closeableResourceRegistry,
             nodeLookup,
             routeRequested,
             config.sourceNode()
@@ -949,7 +948,6 @@ public class PushbackPathFindingProcedureFacade implements PathFindingProcedureF
         return businessFacade.topologicalSort(
             GraphName.parse(graphName),
             config.toGraphParameters(),
-            Optional.empty(), //no exposed property?
             config.toParameters(),
             config.jobId(),
             config.logProgress(),

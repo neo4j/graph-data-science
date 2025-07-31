@@ -24,6 +24,7 @@ import org.neo4j.gds.api.CloseableResourceRegistry;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.paths.PathResult;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
+import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.graphdb.Path;
 
 import java.util.stream.Stream;
@@ -50,7 +51,7 @@ class PathFindingStreamResultTransformerTest {
             pathFactoryFacadeMock
         );
 
-        var streamResult = transformer.apply(PathFindingResult.empty());
+        var streamResult = transformer.apply(TimedAlgorithmResult.empty(PathFindingResult.empty()));
         assertThat(streamResult).isEmpty();
 
         verifyNoInteractions(graphMock);
@@ -83,7 +84,7 @@ class PathFindingStreamResultTransformerTest {
 
         var result =new PathFindingResult(Stream.of(pathResultMock));
 
-        var streamResult = transformer.apply(result).toList();
+        var streamResult = transformer.apply(new TimedAlgorithmResult<>(result, 1)).toList();
 
         assertThat(streamResult).hasSize(1);
         var pathResult = streamResult.getFirst();

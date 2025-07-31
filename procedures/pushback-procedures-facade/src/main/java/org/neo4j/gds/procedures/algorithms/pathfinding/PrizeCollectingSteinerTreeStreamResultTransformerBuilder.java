@@ -22,11 +22,12 @@ package org.neo4j.gds.procedures.algorithms.pathfinding;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.pricesteiner.PrizeSteinerTreeResult;
+import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.results.ResultTransformerBuilder;
 
 import java.util.stream.Stream;
 
-public class PrizeCollectingSteinerTreeStreamResultTransformerBuilder implements ResultTransformerBuilder<PrizeSteinerTreeResult, Stream<SpanningTreeStreamResult>> {
+public class PrizeCollectingSteinerTreeStreamResultTransformerBuilder implements ResultTransformerBuilder<TimedAlgorithmResult<PrizeSteinerTreeResult>, Stream<SpanningTreeStreamResult>> {
 
     @Override
     public PrizeCollectingSteinerTreeResultTransformer build(Graph graph, GraphStore graphStore) {

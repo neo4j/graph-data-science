@@ -21,6 +21,7 @@ package org.neo4j.gds.procedures.algorithms.pathfinding;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.results.ResultTransformer;
 import org.neo4j.gds.steiner.ShortestPathsSteinerAlgorithm;
 import org.neo4j.gds.steiner.SteinerTreeResult;
@@ -28,7 +29,7 @@ import org.neo4j.gds.steiner.SteinerTreeResult;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-public class SteinerTreeStreamResultTransformer implements ResultTransformer<SteinerTreeResult, Stream<SpanningTreeStreamResult>> {
+public class SteinerTreeStreamResultTransformer implements ResultTransformer<TimedAlgorithmResult<SteinerTreeResult>, Stream<SpanningTreeStreamResult>> {
 
     private final Graph graph;
     private final long sourceNodeId;
@@ -39,7 +40,8 @@ public class SteinerTreeStreamResultTransformer implements ResultTransformer<Ste
     }
 
     @Override
-    public Stream<SpanningTreeStreamResult> apply(SteinerTreeResult steinerTreeResult) {
+    public Stream<SpanningTreeStreamResult> apply(TimedAlgorithmResult<SteinerTreeResult> timedAlgorithmResult) {
+        var steinerTreeResult = timedAlgorithmResult.result();
 
         var parents = steinerTreeResult.parentArray();
         var costs = steinerTreeResult.relationshipToParentCost();

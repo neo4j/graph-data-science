@@ -22,6 +22,7 @@ package org.neo4j.gds.procedures.algorithms.pathfinding;
 import org.neo4j.gds.api.CloseableResourceRegistry;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.results.ResultTransformer;
 import org.neo4j.graphdb.RelationshipType;
 
@@ -29,7 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
-public class RandomWalkStreamResultTransformer implements ResultTransformer<Stream<long[]>, Stream<RandomWalkStreamResult>> {
+public class RandomWalkStreamResultTransformer implements ResultTransformer<TimedAlgorithmResult<Stream<long[]>>, Stream<RandomWalkStreamResult>> {
 
     private static final String RELATIONSHIP_TYPE_NAME = "NEXT";
     private final Graph graph;
@@ -47,9 +48,9 @@ public class RandomWalkStreamResultTransformer implements ResultTransformer<Stre
     }
 
     @Override
-    public Stream<RandomWalkStreamResult> apply(Stream<long[]> streamOfLongArrays) {
+    public Stream<RandomWalkStreamResult> apply(TimedAlgorithmResult<Stream<long[]>> streamOfLongArrays) {
 
-        var resultStream = streamOfLongArrays.map(nodes -> {
+        var resultStream = streamOfLongArrays.result().map(nodes -> {
             var translatedNodes = translateInternalToNeoIds(nodes, graph);
             var path = pathFactoryFacade.createPath(translatedNodes, RelationshipType.withName(RELATIONSHIP_TYPE_NAME));
             return new RandomWalkStreamResult(translatedNodes, path);

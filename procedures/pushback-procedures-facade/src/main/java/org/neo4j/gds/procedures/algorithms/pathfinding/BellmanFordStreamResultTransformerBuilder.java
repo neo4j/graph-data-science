@@ -24,11 +24,12 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.NodeLookup;
 import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
+import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.results.ResultTransformerBuilder;
 
 import java.util.stream.Stream;
 
-public class BellmanFordStreamResultTransformerBuilder implements ResultTransformerBuilder<BellmanFordResult, Stream<BellmanFordStreamResult>> {
+public class BellmanFordStreamResultTransformerBuilder implements ResultTransformerBuilder<TimedAlgorithmResult<BellmanFordResult>, Stream<BellmanFordStreamResult>> {
     private final CloseableResourceRegistry closeableResourceRegistry;
     private final NodeLookup nodeLookup;
     private final boolean routeRequested;

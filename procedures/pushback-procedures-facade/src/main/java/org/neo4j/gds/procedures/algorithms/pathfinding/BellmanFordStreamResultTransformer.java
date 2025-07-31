@@ -24,6 +24,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.paths.PathResult;
 import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
+import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.results.ResultTransformer;
 import org.neo4j.graphdb.RelationshipType;
 
@@ -32,7 +33,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public class BellmanFordStreamResultTransformer implements ResultTransformer<BellmanFordResult, Stream<BellmanFordStreamResult>> {
+public class BellmanFordStreamResultTransformer implements ResultTransformer<TimedAlgorithmResult<BellmanFordResult>, Stream<BellmanFordStreamResult>> {
 
     private static final String COST_PROPERTY_NAME = "cost";
     private static final String RELATIONSHIP_TYPE_TEMPLATE = "PATH_%d";
@@ -51,7 +52,8 @@ public class BellmanFordStreamResultTransformer implements ResultTransformer<Bel
         this.pathFactoryFacade = pathFactoryFacade;
     }
 
-    public Stream<BellmanFordStreamResult> apply(BellmanFordResult bellmanFordResult) {
+    public Stream<BellmanFordStreamResult> apply(TimedAlgorithmResult<BellmanFordResult> timedAlgorithmResult) {
+        var bellmanFordResult = timedAlgorithmResult.result();
         var containsNegativeCycle = bellmanFordResult.containsNegativeCycle();
         var paths = containsNegativeCycle
             ? bellmanFordResult.negativeCycles()

@@ -26,6 +26,7 @@ import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.paged.ParallelDoublePageCreator;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortResult;
+import org.neo4j.gds.result.TimedAlgorithmResult;
 
 import java.util.Optional;
 
@@ -45,7 +46,7 @@ class TopologicalSortStreamResultTransformerTest {
             graphMock
         );
 
-        var streamResult = transformer.apply(TopologicalSortResult.EMPTY);
+        var streamResult = transformer.apply(TimedAlgorithmResult.empty(TopologicalSortResult.EMPTY));
         assertThat(streamResult).isEmpty();
 
         verifyNoMoreInteractions(graphMock);
@@ -65,7 +66,7 @@ class TopologicalSortStreamResultTransformerTest {
         when(topoSort.sortedNodes()).thenReturn(HugeLongArray.of(3, 0));
         when(graphMock.toOriginalNodeId(anyLong())).thenAnswer(invocation -> invocation.getArgument(0));
 
-        var streamResult = transformer.apply(topoSort).toList();
+        var streamResult = transformer.apply(new TimedAlgorithmResult<>(topoSort, 1)).toList();
 
         assertThat(streamResult).hasSize(2);
         assertThat(streamResult.getFirst()).isEqualTo(new TopologicalSortStreamResult(3, 4.0));
@@ -87,7 +88,7 @@ class TopologicalSortStreamResultTransformerTest {
         when(topoSort.sortedNodes()).thenReturn(HugeLongArray.of(3, 0));
         when(graphMock.toOriginalNodeId(anyLong())).thenAnswer(invocation -> invocation.getArgument(0));
 
-        var streamResult = transformer.apply(topoSort).toList();
+        var streamResult = transformer.apply(new TimedAlgorithmResult<>(topoSort, 1)).toList();
 
         assertThat(streamResult).hasSize(2);
         assertThat(streamResult.getFirst()).isEqualTo(new TopologicalSortStreamResult(3, null));

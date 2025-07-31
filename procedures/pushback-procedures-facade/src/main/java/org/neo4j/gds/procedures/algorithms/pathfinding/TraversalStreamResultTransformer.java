@@ -21,13 +21,14 @@ package org.neo4j.gds.procedures.algorithms.pathfinding;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.results.ResultTransformer;
 import org.neo4j.graphdb.RelationshipType;
 
 import java.util.Arrays;
 import java.util.stream.Stream;
 
-public class TraversalStreamResultTransformer implements ResultTransformer<HugeLongArray, Stream<TraversalStreamResult>> {
+public class TraversalStreamResultTransformer implements ResultTransformer<TimedAlgorithmResult<HugeLongArray>, Stream<TraversalStreamResult>> {
 
     private static final String RELATIONSHIP_TYPE = "NEXT";
     private final Graph graph;
@@ -46,7 +47,9 @@ public class TraversalStreamResultTransformer implements ResultTransformer<HugeL
 
 
     @Override
-    public Stream<TraversalStreamResult> apply(HugeLongArray nodes) {
+    public Stream<TraversalStreamResult> apply(TimedAlgorithmResult<HugeLongArray> result) {
+        var nodes = result.result();
+
         var nodesArray = nodes.toArray();
         var nodeList = Arrays.stream(nodesArray)
             .map(graph::toOriginalNodeId)

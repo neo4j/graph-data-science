@@ -21,12 +21,13 @@ package org.neo4j.gds.procedures.algorithms.pathfinding;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.results.ResultTransformerBuilder;
 import org.neo4j.gds.steiner.SteinerTreeResult;
 
 import java.util.stream.Stream;
 
-public class SteinerTreeStreamResultTransformerBuilder implements ResultTransformerBuilder<SteinerTreeResult, Stream<SpanningTreeStreamResult>> {
+public class SteinerTreeStreamResultTransformerBuilder implements ResultTransformerBuilder<TimedAlgorithmResult<SteinerTreeResult>, Stream<SpanningTreeStreamResult>> {
 
     private final long sourceNode;
 

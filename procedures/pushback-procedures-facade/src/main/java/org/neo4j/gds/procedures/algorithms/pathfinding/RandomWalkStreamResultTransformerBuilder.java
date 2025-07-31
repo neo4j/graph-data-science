@@ -23,11 +23,12 @@ import org.neo4j.gds.api.CloseableResourceRegistry;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.NodeLookup;
+import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.results.ResultTransformerBuilder;
 
 import java.util.stream.Stream;
 
-public class RandomWalkStreamResultTransformerBuilder implements ResultTransformerBuilder<Stream<long[]>, Stream<RandomWalkStreamResult>> {
+public class RandomWalkStreamResultTransformerBuilder implements ResultTransformerBuilder<TimedAlgorithmResult<Stream<long[]>>, Stream<RandomWalkStreamResult>> {
     private final CloseableResourceRegistry closeableResourceRegistry;
     private final NodeLookup nodeLookup;
     private final boolean pathRequested;

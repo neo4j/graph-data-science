@@ -19,28 +19,25 @@
  */
 package org.neo4j.gds.procedures.algorithms.pathfinding;
 
-import org.neo4j.gds.api.CloseableResourceRegistry;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.NodeLookup;
 import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.results.ResultTransformerBuilder;
 
 import java.util.stream.Stream;
 
-public class TraversalStreamResultTransformerBuilder implements ResultTransformerBuilder<HugeLongArray, Stream<TraversalStreamResult>> {
-    private final CloseableResourceRegistry closeableResourceRegistry;
+public class TraversalStreamResultTransformerBuilder implements ResultTransformerBuilder<TimedAlgorithmResult<HugeLongArray>, Stream<TraversalStreamResult>> {
     private final NodeLookup nodeLookup;
     private final boolean pathRequested;
     private final long sourceNode;
 
     TraversalStreamResultTransformerBuilder(
-        CloseableResourceRegistry closeableResourceRegistry,
         NodeLookup nodeLookup,
         boolean routeRequested,
         long sourceNode
     ) {
-        this.closeableResourceRegistry = closeableResourceRegistry;
         this.nodeLookup = nodeLookup;
         this.pathRequested = routeRequested;
         this.sourceNode = sourceNode;

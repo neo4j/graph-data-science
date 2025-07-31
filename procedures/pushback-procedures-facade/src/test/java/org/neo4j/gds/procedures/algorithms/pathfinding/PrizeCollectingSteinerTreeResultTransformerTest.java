@@ -24,6 +24,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.pricesteiner.PrizeSteinerTreeResult;
+import org.neo4j.gds.result.TimedAlgorithmResult;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -41,7 +42,7 @@ class PrizeCollectingSteinerTreeResultTransformerTest {
             graphMock
         );
 
-        var streamResult = transformer.apply(PrizeSteinerTreeResult.EMPTY);
+        var streamResult = transformer.apply(TimedAlgorithmResult.empty(PrizeSteinerTreeResult.EMPTY));
         assertThat(streamResult).isEmpty();
     }
 
@@ -58,7 +59,7 @@ class PrizeCollectingSteinerTreeResultTransformerTest {
         when(steinerResult.parentArray()).thenReturn(HugeLongArray.of(4,3,1));
         when(steinerResult.relationshipToParentCost()).thenReturn(HugeDoubleArray.of(10,9,8));
 
-        var streamResult = transformer.apply(steinerResult).toList();
+        var streamResult = transformer.apply(new TimedAlgorithmResult<>(steinerResult, 1)).toList();
         assertThat(streamResult.getFirst()).isEqualTo(new SpanningTreeStreamResult(0,4,10.0));
         assertThat(streamResult.get(1)).isEqualTo(new SpanningTreeStreamResult(1,3,9.0));
         assertThat(streamResult.getLast()).isEqualTo(new SpanningTreeStreamResult(2,1,8.0));

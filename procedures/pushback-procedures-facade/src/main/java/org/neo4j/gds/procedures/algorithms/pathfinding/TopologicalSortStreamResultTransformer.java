@@ -22,20 +22,22 @@ package org.neo4j.gds.procedures.algorithms.pathfinding;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortResult;
+import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.results.ResultTransformer;
 
 import java.util.function.LongFunction;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-public class TopologicalSortStreamResultTransformer implements ResultTransformer<TopologicalSortResult, Stream<TopologicalSortStreamResult>> {
+public class TopologicalSortStreamResultTransformer implements ResultTransformer<TimedAlgorithmResult<TopologicalSortResult>, Stream<TopologicalSortStreamResult>> {
 
     private final Graph graph;
 
     TopologicalSortStreamResultTransformer(Graph graph) {this.graph = graph;}
 
     @Override
-    public Stream<TopologicalSortStreamResult> apply(TopologicalSortResult topologicalSortResult) {
+    public Stream<TopologicalSortStreamResult> apply(TimedAlgorithmResult<TopologicalSortResult> timedAlgorithmResult) {
+        var topologicalSortResult = timedAlgorithmResult.result();
 
         var distances = topologicalSortResult.maxSourceDistances().orElse(null);
         LongFunction<Double> distanceFunction = distances != null

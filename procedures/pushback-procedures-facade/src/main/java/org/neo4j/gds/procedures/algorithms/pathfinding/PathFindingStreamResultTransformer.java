@@ -23,6 +23,7 @@ import org.neo4j.gds.api.CloseableResourceRegistry;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.paths.PathResult;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
+import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.results.ResultTransformer;
 import org.neo4j.graphdb.RelationshipType;
 
@@ -31,7 +32,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public class PathFindingStreamResultTransformer implements ResultTransformer<PathFindingResult, Stream<PathFindingStreamResult>> {
+public class PathFindingStreamResultTransformer implements ResultTransformer<TimedAlgorithmResult<PathFindingResult>, Stream<PathFindingStreamResult>> {
 
     private static final String COST_PROPERTY_NAME = "cost";
     private static final String RELATIONSHIP_TYPE_TEMPLATE = "PATH_%d";
@@ -51,9 +52,9 @@ public class PathFindingStreamResultTransformer implements ResultTransformer<Pat
     }
 
     @Override
-    public Stream<PathFindingStreamResult> apply(PathFindingResult pathFindingResult) {
+    public Stream<PathFindingStreamResult> apply(TimedAlgorithmResult<PathFindingResult> pathFindingResult) {
 
-        var resultStream = pathFindingResult.mapPaths(pathResult -> mapPath(pathResult, graph, pathFactoryFacade));
+        var resultStream = pathFindingResult.result().mapPaths(pathResult -> mapPath(pathResult, graph, pathFactoryFacade));
 
         closeableResourceRegistry.register(resultStream);
 

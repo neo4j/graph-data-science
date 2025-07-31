@@ -25,6 +25,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.paths.PathResult;
 import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
+import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.graphdb.Path;
 
 import java.util.stream.Stream;
@@ -51,7 +52,7 @@ class BellmanFordStreamResultTransformerTest {
             pathFactoryFacadeMock
         );
 
-        var streamResult = transformer.apply(BellmanFordResult.empty());
+        var streamResult = transformer.apply(TimedAlgorithmResult.empty(BellmanFordResult.empty()));
         assertThat(streamResult).isEmpty();
 
         verifyNoInteractions(graphMock);
@@ -85,7 +86,7 @@ class BellmanFordStreamResultTransformerTest {
         when(pathFactoryFacadeMock.createPath(any(long[].class), any(double[].class), any(), anyString()))
             .thenReturn(mock(Path.class));
 
-        var streamResult = transformer.apply(bellmanFordResultMock).toList();
+        var streamResult = transformer.apply(new TimedAlgorithmResult<>(bellmanFordResultMock, 1)).toList();
 
         assertThat(streamResult).hasSize(1);
         var result = streamResult.getFirst();
@@ -120,7 +121,7 @@ class BellmanFordStreamResultTransformerTest {
         when(pathFactoryFacadeMock.createPath(any(long[].class), any(double[].class), any(), anyString()))
             .thenReturn(mock(Path.class));
 
-        var streamResult = transformer.apply(bellmanFordResultMock).toList();
+        var streamResult = transformer.apply(new TimedAlgorithmResult<>(bellmanFordResultMock, 1)).toList();
 
         assertThat(streamResult).hasSize(1);
         var result = streamResult.getFirst();
