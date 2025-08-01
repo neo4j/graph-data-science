@@ -21,11 +21,15 @@ package org.neo4j.gds.gdl;
 
 import org.immutables.value.Value;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.Username;
+
+import java.util.List;
+import java.util.Map;
 
 @ValueClass
 public interface GraphProjectFromGdlConfig extends GraphProjectConfig {
@@ -55,5 +59,10 @@ public interface GraphProjectFromGdlConfig extends GraphProjectConfig {
 
     @Value.Default
     default boolean indexInverse() { return false; }
+
+    @Configuration.Ignore
+    default Map<String, Object> asProcedureResultConfigurationField() {
+        return cleansed(toMap(), List.of());
+    }
 
 }
