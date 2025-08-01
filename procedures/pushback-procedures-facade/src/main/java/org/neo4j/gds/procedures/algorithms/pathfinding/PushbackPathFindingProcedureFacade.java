@@ -19,57 +19,22 @@
  */
 package org.neo4j.gds.procedures.algorithms.pathfinding;
 
-import org.neo4j.gds.allshortestpaths.AllShortestPathsConfig;
 import org.neo4j.gds.allshortestpaths.AllShortestPathsStreamResult;
-import org.neo4j.gds.api.CloseableResourceRegistry;
-import org.neo4j.gds.api.GraphName;
-import org.neo4j.gds.api.NodeLookup;
-import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
-import org.neo4j.gds.dag.longestPath.DagLongestPathStreamConfig;
-import org.neo4j.gds.dag.topologicalsort.TopologicalSortStreamConfig;
-import org.neo4j.gds.pathfinding.PathFindingComputeBusinessFacade;
-import org.neo4j.gds.paths.astar.config.ShortestPathAStarStreamConfig;
-import org.neo4j.gds.paths.bellmanford.AllShortestPathsBellmanFordStreamConfig;
-import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaStreamConfig;
-import org.neo4j.gds.paths.dijkstra.config.AllShortestPathsDijkstraStreamConfig;
-import org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraStreamConfig;
-import org.neo4j.gds.paths.traverse.BfsStreamConfig;
-import org.neo4j.gds.paths.traverse.DfsStreamConfig;
-import org.neo4j.gds.paths.yens.config.ShortestPathYensStreamConfig;
-import org.neo4j.gds.pcst.PCSTStreamConfig;
-import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.PathFindingStubs;
 import org.neo4j.gds.procedures.algorithms.results.StandardStatsResult;
-import org.neo4j.gds.result.TimedAlgorithmResult;
-import org.neo4j.gds.spanningtree.SpanningTreeStreamConfig;
-import org.neo4j.gds.steiner.SteinerTreeStreamConfig;
-import org.neo4j.gds.traversal.RandomWalkStreamConfig;
 
 import java.util.Map;
 import java.util.stream.Stream;
 
 public class PushbackPathFindingProcedureFacade implements PathFindingProcedureFacade {
 
-    private final PathFindingComputeBusinessFacade businessFacade;
-
-    private final UserSpecificConfigurationParser configurationParser;
-
-    private final CloseableResourceRegistry closeableResourceRegistry;
-    private final NodeLookup nodeLookup;
-    private final ProcedureReturnColumns procedureReturnColumns;
+    private final PushbackPathFindingStreamProcedureFacade streamProcedureFacade;
 
     public PushbackPathFindingProcedureFacade(
-        PathFindingComputeBusinessFacade businessFacade,
-        UserSpecificConfigurationParser configurationParser,
-        CloseableResourceRegistry closeableResourceRegistry,
-        NodeLookup nodeLookup, ProcedureReturnColumns procedureReturnColumns
+        PushbackPathFindingStreamProcedureFacade streamProcedureFacade
     ) {
-        this.businessFacade = businessFacade;
-        this.configurationParser = configurationParser;
-        this.closeableResourceRegistry = closeableResourceRegistry;
-        this.nodeLookup = nodeLookup;
-        this.procedureReturnColumns = procedureReturnColumns;
+        this.streamProcedureFacade = streamProcedureFacade;
     }
 
     @Override
@@ -82,18 +47,7 @@ public class PushbackPathFindingProcedureFacade implements PathFindingProcedureF
         String graphName,
         Map<String, Object> configuration
     ) {
-        var config = configurationParser.parseConfiguration(configuration, AllShortestPathsConfig::of);
-
-        return businessFacade.allShortestPaths(
-                GraphName.parse(graphName),
-                config.toGraphParameters(),
-                config.relationshipWeightProperty(),
-                config.toParameters(),
-                config.jobId(),
-                // `MSBFSASPAlgorithm` implementations already maps the ids to the original ones => no need for transformation
-                (graph, graphStore) -> TimedAlgorithmResult::result
-            )
-            .join();
+        return streamProcedureFacade.allShortestPaths(graphName, configuration);
     }
 
     @Override
@@ -106,27 +60,7 @@ public class PushbackPathFindingProcedureFacade implements PathFindingProcedureF
 
     @Override
     public Stream<BellmanFordStreamResult> bellmanFordStream(String graphName, Map<String, Object> configuration) {
-        var config = configurationParser.parseConfiguration(
-            configuration,
-            AllShortestPathsBellmanFordStreamConfig::of
-        );
-
-        var routeRequested = procedureReturnColumns.contains("route");
-        var resultTransformerBuilder = new BellmanFordStreamResultTransformerBuilder(
-            closeableResourceRegistry,
-            nodeLookup,
-            routeRequested
-        );
-
-        return businessFacade.bellmanFord(
-            GraphName.parse(graphName),
-            config.toGraphParameters(),
-            config.relationshipWeightProperty(),
-            config.toParameters(),
-            config.jobId(),
-            config.logProgress(),
-            resultTransformerBuilder
-        ).join();
+        return streamProcedureFacade.bellmanFord(graphName, configuration);
     }
 
     @Override
@@ -210,26 +144,7 @@ public class PushbackPathFindingProcedureFacade implements PathFindingProcedureF
 
     @Override
     public Stream<TraversalStreamResult> breadthFirstSearchStream(String graphName, Map<String, Object> configuration) {
-        var config = configurationParser.parseConfiguration(
-            configuration,
-            BfsStreamConfig::of
-        );
-        var routeRequested = procedureReturnColumns.contains("path");
-
-        var traversalResultTransformerBuilder = new TraversalStreamResultTransformerBuilder(
-            nodeLookup,
-            routeRequested,
-            config.sourceNode()
-        );
-
-        return businessFacade.breadthFirstSearch(
-            GraphName.parse(graphName),
-            config.toGraphParameters(),
-            config.toParameters(),
-            config.jobId(),
-            config.logProgress(),
-            traversalResultTransformerBuilder
-        ).join();
+        return streamProcedureFacade.breadthFirstSearch(graphName, configuration);
     }
 
     @Override
@@ -271,27 +186,7 @@ public class PushbackPathFindingProcedureFacade implements PathFindingProcedureF
 
     @Override
     public Stream<PathFindingStreamResult> deltaSteppingStream(String graphName, Map<String, Object> configuration) {
-        var config = configurationParser.parseConfiguration(
-            configuration,
-            AllShortestPathsDeltaStreamConfig::of
-        );
-        var routeRequested = procedureReturnColumns.contains("path");
-
-        var pathFindingResultTransformerBuilder = new PathFindingStreamResultTransformerBuilder(
-            closeableResourceRegistry,
-            nodeLookup,
-            routeRequested
-        );
-
-        return businessFacade.deltaStepping(
-            GraphName.parse(graphName),
-            config.toGraphParameters(),
-            config.relationshipWeightProperty(),
-            config.toParameters(),
-            config.jobId(),
-            config.logProgress(),
-            pathFindingResultTransformerBuilder
-        ).join();
+        return streamProcedureFacade.deltaStepping(graphName, configuration);
     }
 
     @Override
@@ -333,26 +228,7 @@ public class PushbackPathFindingProcedureFacade implements PathFindingProcedureF
 
     @Override
     public Stream<TraversalStreamResult> depthFirstSearchStream(String graphName, Map<String, Object> configuration) {
-        var config = configurationParser.parseConfiguration(
-            configuration,
-            DfsStreamConfig::of
-        );
-        var routeRequested = procedureReturnColumns.contains("path");
-
-        var traversalResultTransformerBuilder = new TraversalStreamResultTransformerBuilder(
-            nodeLookup,
-            routeRequested,
-            config.sourceNode()
-        );
-
-        return businessFacade.depthFirstSearch(
-            GraphName.parse(graphName),
-            config.toGraphParameters(),
-            config.toParameters(),
-            config.jobId(),
-            config.logProgress(),
-            traversalResultTransformerBuilder
-        ).join();
+        return streamProcedureFacade.depthFirstSearch(graphName, configuration);
     }
 
     @Override
@@ -370,25 +246,7 @@ public class PushbackPathFindingProcedureFacade implements PathFindingProcedureF
 
     @Override
     public Stream<PathFindingStreamResult> longestPathStream(String graphName, Map<String, Object> configuration) {
-        var config = configurationParser.parseConfiguration(
-            configuration,
-            DagLongestPathStreamConfig::of
-        );
-
-        var pathFindingResultTransformerBuilder = new PathFindingStreamResultTransformerBuilder(
-            closeableResourceRegistry,
-            nodeLookup,
-            procedureReturnColumns.contains("path")
-        );
-
-        return businessFacade.longestPath(
-            GraphName.parse(graphName),
-            config.toGraphParameters(),
-            config.toParameters(),
-            config.jobId(),
-            config.logProgress(),
-            pathFindingResultTransformerBuilder
-        ).join();
+        return streamProcedureFacade.longestPath(graphName, configuration);
     }
 
     @Override
@@ -396,20 +254,7 @@ public class PushbackPathFindingProcedureFacade implements PathFindingProcedureF
         String graphName,
         Map<String, Object> configuration
     ) {
-        var config = configurationParser.parseConfiguration(
-            configuration,
-            PCSTStreamConfig::of
-        );
-
-        return businessFacade.pcst(
-            GraphName.parse(graphName),
-            config.toGraphParameters(),
-            config.relationshipWeightProperty(),
-            config.toParameters(),
-            config.jobId(),
-            config.logProgress(),
-            new PrizeCollectingSteinerTreeStreamResultTransformerBuilder()
-        ).join();
+        return streamProcedureFacade.prizeCollectingSteinerTree(graphName, configuration);
     }
 
     @Override
@@ -486,27 +331,7 @@ public class PushbackPathFindingProcedureFacade implements PathFindingProcedureF
 
     @Override
     public Stream<RandomWalkStreamResult> randomWalkStream(String graphName, Map<String, Object> configuration) {
-        var config = configurationParser.parseConfiguration(
-            configuration,
-            RandomWalkStreamConfig::of
-        );
-        var routeRequested = procedureReturnColumns.contains("path");
-
-        var randomWalkStreamResultTransformerBuilder = new RandomWalkStreamResultTransformerBuilder(
-            closeableResourceRegistry,
-            nodeLookup,
-            routeRequested
-        );
-
-        return businessFacade.randomWalk(
-            GraphName.parse(graphName),
-            config.toGraphParameters(),
-            config.relationshipWeightProperty(),
-            config.toParameters(),
-            config.jobId(),
-            config.logProgress(),
-            randomWalkStreamResultTransformerBuilder
-        ).join();
+        return streamProcedureFacade.randomWalk(graphName, configuration);
     }
 
     @Override
@@ -535,27 +360,7 @@ public class PushbackPathFindingProcedureFacade implements PathFindingProcedureF
         String graphName,
         Map<String, Object> configuration
     ) {
-        var config = configurationParser.parseConfiguration(
-            configuration,
-            ShortestPathAStarStreamConfig::of
-        );
-        var routeRequested = procedureReturnColumns.contains("path");
-
-        var pathFindingResultTransformerBuilder = new PathFindingStreamResultTransformerBuilder(
-            closeableResourceRegistry,
-            nodeLookup,
-            routeRequested
-        );
-
-        return businessFacade.singlePairShortestPathAStar(
-            GraphName.parse(graphName),
-            config.toGraphParameters(),
-            config.relationshipWeightProperty(),
-            config.toParameters(),
-            config.jobId(),
-            config.logProgress(),
-            pathFindingResultTransformerBuilder
-        ).join();
+        return streamProcedureFacade.singlePairShortestPathAStar(graphName, configuration);
     }
 
     @Override
@@ -603,28 +408,7 @@ public class PushbackPathFindingProcedureFacade implements PathFindingProcedureF
         String graphName,
         Map<String, Object> configuration
     ) {
-        var config = configurationParser.parseConfiguration(
-            configuration,
-            ShortestPathDijkstraStreamConfig::of
-        );
-        var routeRequested = procedureReturnColumns.contains("path");
-
-
-        var pathFindingResultTransformerBuilder = new PathFindingStreamResultTransformerBuilder(
-            closeableResourceRegistry,
-            nodeLookup,
-            routeRequested
-        );
-
-        return businessFacade.singlePairShortestPathDijkstra(
-            GraphName.parse(graphName),
-            config.toGraphParameters(),
-            config.relationshipWeightProperty(),
-            config.toParameters(),
-            config.jobId(),
-            config.logProgress(),
-            pathFindingResultTransformerBuilder
-        ).join();
+        return streamProcedureFacade.singlePairShortestPathDijkstra(graphName, configuration);
     }
 
     @Override
@@ -672,27 +456,7 @@ public class PushbackPathFindingProcedureFacade implements PathFindingProcedureF
         String graphName,
         Map<String, Object> configuration
     ) {
-        var config = configurationParser.parseConfiguration(
-            configuration,
-            ShortestPathYensStreamConfig::of
-        );
-        var routeRequested = procedureReturnColumns.contains("path");
-
-        var pathFindingResultTransformerBuilder = new PathFindingStreamResultTransformerBuilder(
-            closeableResourceRegistry,
-            nodeLookup,
-            routeRequested
-        );
-
-        return businessFacade.singlePairShortestPathYens(
-            GraphName.parse(graphName),
-            config.toGraphParameters(),
-            config.relationshipWeightProperty(),
-            config.toParameters(),
-            config.jobId(),
-            config.logProgress(),
-            pathFindingResultTransformerBuilder
-        ).join();
+        return streamProcedureFacade.singlePairShortestPathYens(graphName, configuration);
     }
 
     @Override
@@ -740,28 +504,7 @@ public class PushbackPathFindingProcedureFacade implements PathFindingProcedureF
         String graphName,
         Map<String, Object> configuration
     ) {
-        var config = configurationParser.parseConfiguration(
-            configuration,
-            AllShortestPathsDijkstraStreamConfig::of
-        );
-        var routeRequested = procedureReturnColumns.contains("path");
-
-
-        var pathFindingResultTransformerBuilder = new PathFindingStreamResultTransformerBuilder(
-            closeableResourceRegistry,
-            nodeLookup,
-            routeRequested
-        );
-
-        return businessFacade.singleSourceShortestPathDijkstra(
-            GraphName.parse(graphName),
-            config.toGraphParameters(),
-            config.relationshipWeightProperty(),
-            config.toSingleSourceParameters(),
-            config.jobId(),
-            config.logProgress(),
-            pathFindingResultTransformerBuilder
-        ).join();
+        return streamProcedureFacade.singleSourceShortestPathDijkstra(graphName, configuration);
     }
 
     @Override
@@ -832,20 +575,7 @@ public class PushbackPathFindingProcedureFacade implements PathFindingProcedureF
 
     @Override
     public Stream<SpanningTreeStreamResult> spanningTreeStream(String graphName, Map<String, Object> configuration) {
-        var config = configurationParser.parseConfiguration(
-            configuration,
-            SpanningTreeStreamConfig::of
-        );
-        var resultTransformerBuilder  = new SpanningTreeStreamResultTransformerBuilder(config.sourceNode());
-        return businessFacade.spanningTree(
-            GraphName.parse(graphName),
-            config.toGraphParameters(),
-            config.relationshipWeightProperty(),
-            config.toParameters(),
-            config.jobId(),
-            config.logProgress(),
-            resultTransformerBuilder
-        ).join();
+        return streamProcedureFacade.spanningTree(graphName, configuration);
     }
 
     @Override
@@ -897,20 +627,7 @@ public class PushbackPathFindingProcedureFacade implements PathFindingProcedureF
 
     @Override
     public Stream<SpanningTreeStreamResult> steinerTreeStream(String graphName, Map<String, Object> configuration) {
-        var config = configurationParser.parseConfiguration(
-            configuration,
-            SteinerTreeStreamConfig::of
-        );
-        var resultTransformerBuilder  = new SteinerTreeStreamResultTransformerBuilder(config.sourceNode());
-        return businessFacade.steinerTree(
-            GraphName.parse(graphName),
-            config.toGraphParameters(),
-            config.relationshipWeightProperty(),
-            config.toParameters(),
-            config.jobId(),
-            config.logProgress(),
-            resultTransformerBuilder
-        ).join();
+        return streamProcedureFacade.steinerTree(graphName, configuration);
     }
 
     @Override
@@ -939,19 +656,6 @@ public class PushbackPathFindingProcedureFacade implements PathFindingProcedureF
         String graphName,
         Map<String, Object> configuration
     ) {
-
-        var config = configurationParser.parseConfiguration(
-            configuration,
-            TopologicalSortStreamConfig::of
-        );
-
-        return businessFacade.topologicalSort(
-            GraphName.parse(graphName),
-            config.toGraphParameters(),
-            config.toParameters(),
-            config.jobId(),
-            config.logProgress(),
-            new TopologicalSortStreamResultTransformerBuilder()
-        ).join();
+        return streamProcedureFacade.topologicalSort(graphName, configuration);
     }
 }
