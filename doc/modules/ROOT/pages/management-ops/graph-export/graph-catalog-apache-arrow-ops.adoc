@@ -27,7 +27,7 @@ To identify the graph and the procedure that we want to mirror, the ticket must 
 |===
 | Name              | Type      | Description
 | graph_name        | String    | The name of the graph in the graph catalog.
-| database_name     | String    | The database the graph is associated with.
+| database_name     | String    | The database the graph is associated with.footnote:[Database aliases are not currently supported.]
 | procedure_name    | String    | The mirrored property stream procedure.
 | configuration     | Map       | The procedure specific configuration.
 |===
