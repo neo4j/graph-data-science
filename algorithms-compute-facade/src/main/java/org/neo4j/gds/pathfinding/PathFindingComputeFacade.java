@@ -149,7 +149,7 @@ public class PathFindingComputeFacade {
     ) {
         // If the input graph is empty return a completed future with empty result
         if (graph.isEmpty()) {
-            return CompletableFuture.completedFuture(BellmanFordResult.EMPTY);
+            return CompletableFuture.completedFuture(BellmanFordResult.empty());
         }
 
         // Create ProgressTracker

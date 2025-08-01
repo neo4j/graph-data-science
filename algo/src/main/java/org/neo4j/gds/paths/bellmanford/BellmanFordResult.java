@@ -26,10 +26,12 @@ public record BellmanFordResult(
     PathFindingResult negativeCycles,
     boolean containsNegativeCycle
 ) {
-    public static final BellmanFordResult EMPTY = new BellmanFordResult(
-        PathFindingResult.empty(),
-        PathFindingResult.empty(),
-        false
-    );
+    public static BellmanFordResult empty() {
+        return new BellmanFordResult(
+            PathFindingResult.empty(),
+            PathFindingResult.empty(),
+            false
+        );
+    }
 
 }

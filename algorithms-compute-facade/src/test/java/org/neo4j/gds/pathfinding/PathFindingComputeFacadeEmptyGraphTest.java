@@ -36,7 +36,6 @@ import org.neo4j.gds.dag.topologicalsort.TopologicalSortResult;
 import org.neo4j.gds.kspanningtree.KSpanningTreeParameters;
 import org.neo4j.gds.paths.astar.AStarParameters;
 import org.neo4j.gds.paths.bellmanford.BellmanFordParameters;
-import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
 import org.neo4j.gds.paths.delta.DeltaSteppingParameters;
 import org.neo4j.gds.paths.dijkstra.DijkstraSingleSourceParameters;
 import org.neo4j.gds.paths.dijkstra.DijkstraSourceTargetParameters;
@@ -110,7 +109,14 @@ class PathFindingComputeFacadeEmptyGraphTest {
         var result = future.join();
 
         assertThat(result).isNotNull();
-        assertThat(result).isEqualTo(BellmanFordResult.EMPTY);
+        assertThat(result.shortestPaths())
+            .extracting(PathFindingResult::pathSet)
+            .asInstanceOf(SET)
+            .isEmpty();
+        assertThat(result.negativeCycles())
+            .extracting(PathFindingResult::pathSet)
+            .asInstanceOf(SET)
+            .isEmpty();
 
         verifyNoInteractions(progressTrackerFactoryMock);
         verifyNoInteractions(algorithmCallerMock);

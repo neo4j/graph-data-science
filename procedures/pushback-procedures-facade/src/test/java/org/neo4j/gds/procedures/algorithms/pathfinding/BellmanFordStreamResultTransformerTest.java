@@ -51,7 +51,7 @@ class BellmanFordStreamResultTransformerTest {
             pathFactoryFacadeMock
         );
 
-        var streamResult = transformer.apply(BellmanFordResult.EMPTY);
+        var streamResult = transformer.apply(BellmanFordResult.empty());
         assertThat(streamResult).isEmpty();
 
         verifyNoInteractions(graphMock);
