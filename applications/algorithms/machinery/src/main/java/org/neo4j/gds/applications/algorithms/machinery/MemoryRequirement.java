@@ -19,30 +19,22 @@
  */
 package org.neo4j.gds.applications.algorithms.machinery;
 
-import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.applications.services.GraphDimensionFactory;
-import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.mem.MemoryEstimation;
-
-import java.util.function.Supplier;
 
 public record MemoryRequirement(long requiredMemory) {
 
-    static  <CONFIGURATION extends AlgoBaseConfig> MemoryRequirement create(
-        Supplier<MemoryEstimation> estimationFactory,
-        GraphStore graphStore,
-        GraphDimensionFactory graphDimensionFactory,
+    static MemoryRequirement create(
+        MemoryEstimation memoryEstimation,
+        GraphDimensions graphDimensions,
         DimensionTransformer dimensionTransformer,
-        CONFIGURATION configuration,
+        Concurrency concurrency,
         boolean useMaxMemoryEstimation
     ) {
-        var memoryEstimation = estimationFactory.get();
-
-        var graphDimensions = graphDimensionFactory.create(graphStore, configuration);
-
         var transformedGraphDimensions = dimensionTransformer.transform(graphDimensions);
 
-        var memoryTree = memoryEstimation.estimate(transformedGraphDimensions, configuration.concurrency());
+        var memoryTree = memoryEstimation.estimate(transformedGraphDimensions, concurrency);
 
         var memoryRange = memoryTree.memoryUsage();
 

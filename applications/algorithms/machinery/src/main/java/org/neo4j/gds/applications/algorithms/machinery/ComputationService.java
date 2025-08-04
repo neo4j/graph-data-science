@@ -51,7 +51,16 @@ class ComputationService {
         Computation<RESULT_FROM_ALGORITHM> computation,
         DimensionTransformer dimensionTransformer
     ) {
-        memoryGuard.assertAlgorithmCanRun(username,estimationSupplier, graphResources.graphStore(), configuration, label, dimensionTransformer);
+        memoryGuard.assertAlgorithmCanRun(
+            graphResources.graph(),
+            graphResources.graphStore(),
+            configuration.relationshipTypesFilter(), configuration.concurrency(), estimationSupplier,
+            label,
+            dimensionTransformer,
+            username,
+            configuration.jobId(),
+            configuration.sudo()
+        );
 
         return computeWithMetrics(graphResources, label, computation);
     }

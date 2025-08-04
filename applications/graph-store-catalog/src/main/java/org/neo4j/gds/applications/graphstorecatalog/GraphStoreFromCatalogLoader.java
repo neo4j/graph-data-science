@@ -69,10 +69,7 @@ public final class GraphStoreFromCatalogLoader implements GraphStoreLoader {
 
     @Override
     public GraphDimensions graphDimensions() {
-        var graphStore = graphStore();
-        var configuration = config;
-
-        return new GraphDimensionFactory().create(graphStore, configuration);
+        return new GraphDimensionFactory().create(graphStore(), config);
     }
 
     private static GraphStoreCatalogEntry graphStoreFromCatalog(

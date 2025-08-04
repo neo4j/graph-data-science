@@ -19,24 +19,30 @@
  */
 package org.neo4j.gds.applications.algorithms.machinery;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.applications.services.GraphDimensionFactory;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.mem.MemoryTracker;
 import org.neo4j.gds.mem.MemoryTree;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import java.util.Set;
+
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
+import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.Mockito.when;
 
 /**
@@ -45,147 +51,168 @@ import static org.mockito.Mockito.when;
  * And im not in the mood to change that right this minute.
  * So bear with and take it in the best spirit.
  */
+@ExtendWith(MockitoExtension.class)
 class DefaultMemoryGuardTest {
+
+    private static final Concurrency CONCURRENCY = new Concurrency(4);
+
+    @Mock
+    private GraphDimensionFactory graphDimensionFactoryMock;
+
+    @Mock
+    private Log logMock;
+
+    @Mock
+    private Graph graphMock;
+
+    @Mock
+    private GraphStore graphStoreMock;
+
+    @Mock
+    private JobId jobIdMock;
+
+    @Mock
+    private MemoryEstimation memoryEstimation;
+
+    @Mock
+    private MemoryTree memoryTree;
+
+    @BeforeEach
+    void setUp() {
+        when(graphDimensionFactoryMock.create(any(Graph.class), any(GraphStore.class), anyCollection()))
+            .thenReturn(GraphDimensions.of(23L, 87L));
+        when(memoryEstimation.estimate(any(GraphDimensions.class), any(Concurrency.class)))
+            .thenReturn(memoryTree);
+    }
 
     @Test
     void shouldAllowExecution() {
-        var graphDimensionFactory = mock(GraphDimensionFactory.class);
-        var memoryGuard = new DefaultMemoryGuard(
-            null,
-            graphDimensionFactory,
-            false,
-            new MemoryTracker(42, Log.noOpLog())
-        );
-
-        var graphStore = mock(GraphStore.class);
-        var configuration = new ExampleConfiguration();
-        when(graphDimensionFactory.create(graphStore, configuration)).thenReturn(GraphDimensions.of(23L, 87L));
-        var memoryEstimation = mock(MemoryEstimation.class);
-        var memoryTree = mock(MemoryTree.class);
-        var concurrency = new Concurrency(7);
-        when(memoryEstimation.estimate(GraphDimensions.of(23L, 87L), concurrency)).thenReturn(memoryTree);
         when(memoryTree.memoryUsage()).thenReturn(MemoryRange.of(13, 19));
+
+        var memoryGuard = new DefaultMemoryGuard(
+            logMock,
+            graphDimensionFactoryMock,
+            false,
+            new MemoryTracker(42, logMock)
+        );
 
         // there is enough memory available
         memoryGuard.assertAlgorithmCanRun(
-            User.DEFAULT.getUsername(),
-            ()-> memoryEstimation,
-            graphStore,
-            configuration,
+            graphMock,
+            graphStoreMock,
+            Set.of(),
+            CONCURRENCY,
+            () -> memoryEstimation,
             new StandardLabel("some label"),
-            DimensionTransformer.DISABLED
+            DimensionTransformer.DISABLED,
+            User.DEFAULT.getUsername(),
+            jobIdMock,
+            false
         );
     }
 
     @Test
     void shouldGuardExecutionUsingMinimumEstimate() {
-        var graphDimensionFactory = mock(GraphDimensionFactory.class);
-        var memoryGuard = new DefaultMemoryGuard(
-            null,
-            graphDimensionFactory,
-            false,
-            new MemoryTracker(42, Log.noOpLog())
-        );
 
-        var graphStore = mock(GraphStore.class);
-        var configuration = new ExampleConfiguration();
-        when(graphDimensionFactory.create(graphStore, configuration)).thenReturn(GraphDimensions.of(23L, 87L));
-        var memoryEstimation = mock(MemoryEstimation.class);
-        var memoryTree = mock(MemoryTree.class);
-        var concurrency = new Concurrency(7);
-        when(memoryEstimation.estimate(GraphDimensions.of(23L, 87L), concurrency)).thenReturn(memoryTree);
         when(memoryTree.memoryUsage()).thenReturn(MemoryRange.of(117, 243));
 
-        // uh oh
-        try {
-            memoryGuard.assertAlgorithmCanRun(
-                User.DEFAULT.getUsername(),
-                () -> memoryEstimation,
-                graphStore,
-                configuration,
-                new StandardLabel("some other label"),
-                DimensionTransformer.DISABLED
-            );
+        var memoryGuard = new DefaultMemoryGuard(
+            logMock,
+            graphDimensionFactoryMock,
+            false,
+            new MemoryTracker(42, logMock)
+        );
 
-            fail();
-        } catch (IllegalStateException e) {
-            assertThat(e).hasMessage("Memory required to run some other label (117b) exceeds available memory (42b)");
-        }
+        // uh oh
+        assertThatIllegalStateException()
+            .isThrownBy(
+                () -> memoryGuard.assertAlgorithmCanRun(
+                    graphMock,
+                    graphStoreMock,
+                    Set.of(),
+                    CONCURRENCY,
+                    () -> memoryEstimation,
+                    new StandardLabel("some other label"),
+                    DimensionTransformer.DISABLED,
+                    User.DEFAULT.getUsername(),
+                    jobIdMock,
+                    false
+                )
+            )
+            .withMessage("Memory required to run some other label (117b) exceeds available memory (42b)");
     }
 
     @Test
     void shouldGuardExecutionUsingMaximumEstimate() {
-        var graphDimensionFactory = mock(GraphDimensionFactory.class);
-        var memoryGuard = new DefaultMemoryGuard(
-            null,
-            graphDimensionFactory,
-            true,
-            new MemoryTracker(42, Log.noOpLog())
-        );
 
-        var graphStore = mock(GraphStore.class);
-        var configuration = new ExampleConfiguration();
-        when(graphDimensionFactory.create(graphStore, configuration)).thenReturn(GraphDimensions.of(23L, 87L));
-        var memoryEstimation = mock(MemoryEstimation.class);
-        var memoryTree = mock(MemoryTree.class);
-        var concurrency = new Concurrency(7);
-        when(memoryEstimation.estimate(GraphDimensions.of(23L, 87L), concurrency)).thenReturn(memoryTree);
         when(memoryTree.memoryUsage()).thenReturn(MemoryRange.of(117, 243));
 
-        // uh oh
-        try {
-            memoryGuard.assertAlgorithmCanRun(
-                User.DEFAULT.getUsername(),
-                () -> memoryEstimation,
-                graphStore,
-                configuration,
-                new StandardLabel("yet another label"),
-                DimensionTransformer.DISABLED
-            );
+        var memoryGuard = new DefaultMemoryGuard(
+            logMock,
+            graphDimensionFactoryMock,
+            true,
+            new MemoryTracker(42, logMock)
+        );
 
-            fail();
-        } catch (IllegalStateException e) {
-            assertThat(e).hasMessage("Memory required to run yet another label (243b) exceeds available memory (42b)");
-        }
+        // uh oh
+        assertThatIllegalStateException()
+            .isThrownBy(
+                () -> memoryGuard.assertAlgorithmCanRun(
+                    graphMock,
+                    graphStoreMock,
+                    Set.of(),
+                    CONCURRENCY,
+                    () -> memoryEstimation,
+                    new StandardLabel("yet another label"),
+                    DimensionTransformer.DISABLED,
+                    User.DEFAULT.getUsername(),
+                    jobIdMock,
+                    false
+                )
+            )
+            .withMessage("Memory required to run yet another label (243b) exceeds available memory (42b)");
     }
 
     @Test
     void shouldRespectSudoFlag() {
-        var graphDimensionFactory = mock(GraphDimensionFactory.class);
-        var memoryGuard = new DefaultMemoryGuard(
-            null,
-            graphDimensionFactory,
-            false,
-            new MemoryTracker(42, Log.noOpLog())
-        );
 
-        var graphStore = mock(GraphStore.class);
-
-        when(graphDimensionFactory.create(any(), any())).thenReturn(GraphDimensions.of(23L, 87L));
-
-        var memoryEstimation = mock(MemoryEstimation.class);
-        var memoryTree = mock(MemoryTree.class);
-        var concurrency = new Concurrency(7);
-        when(memoryEstimation.estimate(GraphDimensions.of(23L, 87L), concurrency)).thenReturn(memoryTree);
         when(memoryTree.memoryUsage()).thenReturn(MemoryRange.of(43, 99));
 
-        assertThatIllegalStateException().isThrownBy(() -> memoryGuard.assertAlgorithmCanRun(
-            User.DEFAULT.getUsername(),
-            () -> memoryEstimation,
-            graphStore,
-            new ExampleConfiguration(false),
-            new StandardLabel("some other label"),
-            DimensionTransformer.DISABLED
-        ));
+        var memoryGuard = new DefaultMemoryGuard(
+            logMock,
+            graphDimensionFactoryMock,
+            false,
+            new MemoryTracker(42, logMock)
+        );
 
-        // now with sudo
+        assertThatIllegalStateException()
+            .isThrownBy(
+                () -> memoryGuard.assertAlgorithmCanRun(
+                    graphMock,
+                    graphStoreMock,
+                    Set.of(),
+                    CONCURRENCY,
+                    () -> memoryEstimation,
+                    new StandardLabel("some other label"),
+                    DimensionTransformer.DISABLED,
+                    User.DEFAULT.getUsername(),
+                    jobIdMock,
+                    false
+                )
+            );
+
+        // now bypass the memory guard
         assertDoesNotThrow(() -> memoryGuard.assertAlgorithmCanRun(
-            User.DEFAULT.getUsername(),
+            graphMock,
+            graphStoreMock,
+            Set.of(),
+            CONCURRENCY,
             () -> memoryEstimation,
-            graphStore,
-            new ExampleConfiguration(true),
             new StandardLabel("some other label"),
-            DimensionTransformer.DISABLED
+            DimensionTransformer.DISABLED,
+            User.DEFAULT.getUsername(),
+            jobIdMock,
+            true
         ));
     }
 }

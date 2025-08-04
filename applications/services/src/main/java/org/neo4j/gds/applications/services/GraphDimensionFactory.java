@@ -28,6 +28,7 @@ import org.neo4j.gds.core.DimensionsMap;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -51,7 +52,15 @@ public class GraphDimensionFactory {
         configuration.graphStoreValidation(graphStore, labelFilter, typeFilter);
 
         var filteredGraph = graphStore.getGraph(labelFilter, typeFilter, Optional.empty());
-        var relCount = filteredGraph.relationshipCount();
+        return create(filteredGraph, graphStore, typeFilter);
+    }
+
+    public GraphDimensions create(
+        Graph graph,
+        GraphStore graphStore,
+        Collection<RelationshipType> relationshipTypesFilter
+    ) {
+        var relCount = graph.relationshipCount();
 
         var relationshipTypeTokens = new HashMap<String, Integer>();
         var i = 0;
@@ -59,28 +68,29 @@ public class GraphDimensionFactory {
             relationshipTypeTokens.put(key, i++);
         }
 
-        var nodePropertyDimensions = filteredGraph
+        var nodePropertyDimensions = graph
             .availableNodeProperties()
             .stream()
             .collect(Collectors.toMap(
                 Function.identity(),
-                property -> filteredGraph
+                property -> graph
                     .nodeProperties(property)
                     .dimension()
             ));
 
         return ImmutableGraphDimensions.builder()
-            .nodeCount(filteredGraph.nodeCount())
-            .relationshipCounts(filteredGraphRelationshipCounts(typeFilter.stream(), filteredGraph))
+            .nodeCount(graph.nodeCount())
+            .relationshipCounts(graphRelationshipCounts(graph, relationshipTypesFilter.stream()))
             .relCountUpperBound(relCount)
             .relationshipPropertyTokens(relationshipTypeTokens)
             .nodePropertyDimensions(new DimensionsMap(nodePropertyDimensions))
             .build();
     }
 
-    private Map<RelationshipType, Long> filteredGraphRelationshipCounts(
-        Stream<RelationshipType> typeFilter,
-        Graph filteredGraph
+
+    private Map<RelationshipType, Long> graphRelationshipCounts(
+        Graph filteredGraph,
+        Stream<RelationshipType> typeFilter
     ) {
         var relCount = filteredGraph.relationshipCount();
         return Stream.concat(typeFilter, Stream.of(RelationshipType.ALL_RELATIONSHIPS))

@@ -19,10 +19,14 @@
  */
 package org.neo4j.gds.applications.algorithms.machinery;
 
+import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.mem.MemoryEstimation;
 
+import java.util.Collection;
 import java.util.function.Supplier;
 
 /**
@@ -34,13 +38,16 @@ public interface MemoryGuard {
      */
     MemoryGuard DISABLED = new MemoryGuard() {
         @Override
-        public <CONFIGURATION extends AlgoBaseConfig> void assertAlgorithmCanRun(
-            String username,
+        public void assertAlgorithmCanRun(
+            Graph graph, GraphStore graphStore,
+            Collection<RelationshipType> relationshipTypesFilter,
+            Concurrency concurrency,
             Supplier<MemoryEstimation> estimationFactory,
-            GraphStore graphStore,
-            CONFIGURATION configuration,
             Label label,
-            DimensionTransformer dimensionTransformer
+            DimensionTransformer dimensionTransformer,
+            String username,
+            JobId jobId,
+            boolean bypassMemoryEstimation
         ) {
         }
     };
@@ -50,12 +57,16 @@ public interface MemoryGuard {
      *
      * @throws IllegalStateException when there is not enough memory available to run the algorithm in the given configuration on the given graph
      */
-    <CONFIGURATION extends AlgoBaseConfig> void assertAlgorithmCanRun(
-        String username,
-        Supplier<MemoryEstimation> estimationFactory,
+    void assertAlgorithmCanRun(
+        Graph graph,
         GraphStore graphStore,
-        CONFIGURATION configuration,
+        Collection<RelationshipType> relationshipTypesFilter,
+        Concurrency concurrency,
+        Supplier<MemoryEstimation> estimationFactory,
         Label label,
-        DimensionTransformer dimensionTransformer
+        DimensionTransformer dimensionTransformer,
+        String username,
+        JobId jobId,
+        boolean bypassMemoryEstimation
     ) throws IllegalStateException;
 }
