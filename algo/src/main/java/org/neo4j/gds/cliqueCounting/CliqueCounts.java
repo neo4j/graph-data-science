@@ -32,9 +32,12 @@ class CliqueCountsHandler {
         this.free = new ArrayList<>();
     }
 
-    public SizeFrequencies create() {
+    public SizeFrequencies createAtIdx(int idx) {
         synchronized (this) {
-            return new SizeFrequencies(nodeCount);
+            while (free.size() <= idx) {
+                free.add(new SizeFrequencies(nodeCount));
+            }
+            return this.free.get(idx);
         }
     }
 
@@ -58,4 +61,3 @@ class CliqueCountsHandler {
         return sizeFrequencies;
     }
 }
-

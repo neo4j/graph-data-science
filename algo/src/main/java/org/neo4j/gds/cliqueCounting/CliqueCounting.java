@@ -396,7 +396,7 @@ public final class CliqueCounting extends Algorithm<CliqueCountingResult> {
             int subcliqueIdx;
             while ((subcliqueIdx = (int)rootQueue.getAndIncrement()) < subcliques.length && terminationFlag.running()) {
                 var subclique = subcliques[subcliqueIdx];
-                var sizeFrequencies = cliqueCountsHandler.create();
+                var sizeFrequencies = cliqueCountsHandler.createAtIdx(subcliqueIdx);
                 var upperBound = MAX_CLIQUE_SIZE;
                 for (var node : subclique){
                     upperBound = Math.min(upperBound, graph.degree(node)+1);
@@ -412,7 +412,6 @@ public final class CliqueCounting extends Algorithm<CliqueCountingResult> {
                 }
                 long[][] feasibleNeighborhoods = computeIntersections(subset);
                 recursiveSctCliqueCount(subset, feasibleNeighborhoods, cliqueNodes, sizeFrequencies);
-                cliqueCountsHandler.giveBack(sizeFrequencies); //Needs to be stored but not be used by another thread.
             }
         }
     }
