@@ -26,7 +26,6 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -37,8 +36,6 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @Configuration
 public interface TriangleCountBaseConfig extends AlgoBaseConfig {
-
-    static List<String> NO_VALUE = new ArrayList<>();
 
     default long maxDegree() {
         return Long.MAX_VALUE;
