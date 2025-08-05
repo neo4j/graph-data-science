@@ -56,9 +56,9 @@ include::partial$/algorithms/common-configuration/common-stream-stats-configurat
 .Results
 [opts="header",cols="1,1,6"]
 |===
-| Name          | Type          | Description
-| nodeId        | Integer       | Node ID.
-| perNodeCount  | List[Integer] | Number of cliques of size ≥ 3 that this node is part of.
+| Name          | Type            | Description
+| nodeId        | Integer         | Node ID.
+| perNodeCount  | List of Integer | Number of cliques of size ≥ 3 that this node is part of.
 |===
 ======
 
@@ -92,12 +92,12 @@ include::partial$/algorithms/common-configuration/common-stream-stats-configurat
 .Results
 [opts="header",cols="1,1,6"]
 |===
-| Name                 | Type          | Description
-| globalCount          | List[Integer] | Number of cliques of sizes ≥ 3 in the graph.
-| preProcessingMillis  | Integer       | Milliseconds for preprocessing the graph.
-| computeMillis        | Integer       | Milliseconds for running the algorithm.
-| postProcessingMillis | Integer       | Milliseconds for computing the global metrics.
-| configuration        | Map           | The configuration used for running the algorithm.
+| Name                 | Type            | Description
+| globalCount          | List of Integer | Number of cliques of sizes ≥ 3 in the graph.
+| preProcessingMillis  | Integer         | Milliseconds for preprocessing the graph.
+| computeMillis        | Integer         | Milliseconds for running the algorithm.
+| postProcessingMillis | Integer         | Milliseconds for computing the global metrics.
+| configuration        | Map             | The configuration used for running the algorithm.
 |===
 ======
 
@@ -134,14 +134,14 @@ include::partial$/algorithms/common-configuration/common-mutate-configuration-en
 .Results
 [opts="header",cols="1,1,6"]
 |===
-| Name                        | Type          | Description
-| globalCount                 | List[Integer] | Number of cliques of sizes ≥ 3 in the graph.
-| nodePropertiesWritten       | Integer       | Number of properties added to the projected graph.
-| preProcessingMillis         | Integer       | Milliseconds for preprocessing the graph.
-| computeMillis               | Integer       | Milliseconds for running the algorithm.
-| postProcessingMillis        | Integer       | Milliseconds for computing the global metrics.
-| mutateMillis                | Integer       | Milliseconds for adding properties to the projected graph.
-| configuration               | Map           | The configuration used for running the algorithm.
+| Name                        | Type            | Description
+| globalCount                 | List of Integer | Number of cliques of sizes ≥ 3 in the graph.
+| nodePropertiesWritten       | Integer         | Number of properties added to the projected graph.
+| preProcessingMillis         | Integer         | Milliseconds for preprocessing the graph.
+| computeMillis               | Integer         | Milliseconds for running the algorithm.
+| postProcessingMillis        | Integer         | Milliseconds for computing the global metrics.
+| mutateMillis                | Integer         | Milliseconds for adding properties to the projected graph.
+| configuration               | Map             | The configuration used for running the algorithm.
 |===
 ======
 
@@ -177,14 +177,14 @@ include::partial$/algorithms/common-configuration/common-mutate-configuration-en
 .Results
 [opts="header",cols="1,1,6"]
 |===
-| Name                        | Type          | Description
-| globalCount                 | List[Integer] | Number of cliques of sizes ≥ 3 in the graph.
-| nodePropertiesWritten       | Integer       | Number of properties written to Neo4j.
-| preProcessingMillis         | Integer       | Milliseconds for preprocessing the graph.
-| computeMillis               | Integer       | Milliseconds for running the algorithm.
-| postProcessingMillis        | Integer       | Milliseconds for computing the global metrics.
-| writeMillis                 | Integer       | Milliseconds for writing results back to Neo4j.
-| configuration               | Map           | The configuration used for running the algorithm.
+| Name                        | Type            | Description
+| globalCount                 | List of Integer | Number of cliques of sizes ≥ 3 in the graph.
+| nodePropertiesWritten       | Integer         | Number of properties written to Neo4j.
+| preProcessingMillis         | Integer         | Milliseconds for preprocessing the graph.
+| computeMillis               | Integer         | Milliseconds for running the algorithm.
+| postProcessingMillis        | Integer         | Milliseconds for computing the global metrics.
+| writeMillis                 | Integer         | Milliseconds for writing results back to Neo4j.
+| configuration               | Map             | The configuration used for running the algorithm.
 |===
 ======
 ====
