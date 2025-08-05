@@ -47,6 +47,7 @@ public interface LouvainBaseConfig extends
         return 10;
     }
 
+    @Configuration.IntegerRange(min = 1)
     default int maxLevels() {
         return 10;
     }

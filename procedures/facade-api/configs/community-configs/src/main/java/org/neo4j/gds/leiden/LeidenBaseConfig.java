@@ -52,6 +52,7 @@ public interface LeidenBaseConfig extends
         return 0.01;
     }
 
+    @Configuration.IntegerRange(min = 1)
     default int maxLevels() {
         return 10;
     }
