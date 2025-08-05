@@ -30,6 +30,10 @@ import org.neo4j.gds.applications.algorithms.community.CommunityAlgorithmsWriteM
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutStreamConfig;
 import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutWriteConfig;
+import org.neo4j.gds.cliquecounting.CliqueCountingMutateConfig;
+import org.neo4j.gds.cliquecounting.CliqueCountingStatsConfig;
+import org.neo4j.gds.cliquecounting.CliqueCountingStreamConfig;
+import org.neo4j.gds.cliquecounting.CliqueCountingWriteConfig;
 import org.neo4j.gds.conductance.ConductanceStreamConfig;
 import org.neo4j.gds.hdbscan.HDBScanStatsConfig;
 import org.neo4j.gds.hdbscan.HDBScanStreamConfig;
@@ -59,6 +63,7 @@ import org.neo4j.gds.modularityoptimization.ModularityOptimizationStreamConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationWriteConfig;
 import org.neo4j.gds.procedures.algorithms.community.stubs.CommunityStubs;
 import org.neo4j.gds.procedures.algorithms.community.stubs.LocalApproximateMaximumKCutMutateStub;
+import org.neo4j.gds.procedures.algorithms.community.stubs.LocalCliqueCountingMutateStub;
 import org.neo4j.gds.procedures.algorithms.community.stubs.LocalHDBScanMutateStub;
 import org.neo4j.gds.procedures.algorithms.community.stubs.LocalK1ColoringMutateStub;
 import org.neo4j.gds.procedures.algorithms.community.stubs.LocalKCoreMutateStub;
@@ -138,6 +143,12 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
     ) {
         var communityApplications = applicationsFacade.community();
         var approximateMaximumKCutMutateStub = new LocalApproximateMaximumKCutMutateStub(
+            genericStub,
+            communityApplications.mutate(),
+            communityApplications.estimate()
+        );
+
+        var cliqueCountingMutateStub = new LocalCliqueCountingMutateStub(
             genericStub,
             communityApplications.mutate(),
             communityApplications.estimate()
@@ -230,6 +241,7 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
 
         var communityStubs = new CommunityStubs(
             approximateMaximumKCutMutateStub,
+            cliqueCountingMutateStub,
             hdbscanMutateStub,
             k1ColoringMutateStub,
             kCoreMutateStub,
@@ -309,6 +321,90 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
 
         var parsedConfig = configurationParser.parseConfiguration(configuration, ApproxMaxKCutWriteConfig::of);
         return writeModeBusinessFacade.approxMaxKCut(GraphName.parse(graphName), parsedConfig, resultBuilder);
+    }
+
+    public Stream<CliqueCountingMutateResult> cliqueCountingMutate(
+        String graphName,
+        Map<String, Object> rawConfiguration
+    ) {
+        return stubs.cliqueCounting().execute(graphName, rawConfiguration);
+    }
+
+    //todo: mutate estimate
+    public Stream<MemoryEstimateResult> cliqueCountingMutateEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var configuration = configurationParser.parseConfiguration(
+            algorithmConfiguration,
+            CliqueCountingMutateConfig::of
+        );
+        return Stream.of(estimationModeBusinessFacade.cliqueCounting(configuration, graphNameOrConfiguration));
+    }
+
+    public Stream<CliqueCountingStatsResult> cliqueCountingStats(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var parsedConfig = configurationParser.parseConfiguration(configuration, CliqueCountingStatsConfig::of);
+        var resultBuilder = new CliqueCountingResultBuilderForStatsMode(parsedConfig);
+        return statsModeBusinessFacade.cliqueCounting(GraphName.parse(graphName), parsedConfig, resultBuilder);
+    }
+
+    //todo: stats estimate
+    public Stream<MemoryEstimateResult> cliqueCountingStatsEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var configuration = configurationParser.parseConfiguration(
+            algorithmConfiguration,
+            CliqueCountingStatsConfig::of
+        );
+        return Stream.of(estimationModeBusinessFacade.cliqueCounting(configuration, graphNameOrConfiguration));
+    }
+
+    public Stream<CliqueCountingStreamResult> cliqueCountingStream(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var parsedConfig = configurationParser.parseConfiguration(configuration, CliqueCountingStreamConfig::of);
+        var resultBuilder = new CliqueCountingResultBuilderForStreamMode();
+
+        return streamModeBusinessFacade.cliqueCounting(GraphName.parse(graphName), parsedConfig, resultBuilder);
+    }
+
+    //todo: stream estimate
+    public Stream<MemoryEstimateResult> cliqueCountingStreamEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var configuration = configurationParser.parseConfiguration(
+            algorithmConfiguration,
+            CliqueCountingStreamConfig::of
+        );
+        return Stream.of(estimationModeBusinessFacade.cliqueCounting(configuration, graphNameOrConfiguration));
+    }
+
+    public Stream<CliqueCountingWriteResult> cliqueCountingWrite(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var resultBuilder = new CliqueCountingResultBuilderForWriteMode();
+
+        var parsedConfig = configurationParser.parseConfiguration(configuration, CliqueCountingWriteConfig::of);
+        return writeModeBusinessFacade.cliqueCounting(GraphName.parse(graphName), parsedConfig, resultBuilder);
+    }
+
+    //todo: write estimate
+    public Stream<MemoryEstimateResult> cliqueCountingWriteEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var configuration = configurationParser.parseConfiguration(
+            algorithmConfiguration,
+            CliqueCountingWriteConfig::of
+        );
+        return Stream.of(estimationModeBusinessFacade.cliqueCounting(configuration, graphNameOrConfiguration));
     }
 
     @Override

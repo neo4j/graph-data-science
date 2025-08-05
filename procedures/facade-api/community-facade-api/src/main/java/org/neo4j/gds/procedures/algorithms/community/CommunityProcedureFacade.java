@@ -55,6 +55,46 @@ public interface CommunityProcedureFacade {
         Map<String, Object> configuration
     );
 
+    Stream<CliqueCountingMutateResult> cliqueCountingMutate(
+        String graphName,
+        Map<String, Object> configuration
+    );
+
+    Stream<MemoryEstimateResult> cliqueCountingMutateEstimate( //todo
+        Object graphNameOrConfiguration,
+        Map<String, Object> rawConfiguration
+    );
+
+    Stream<CliqueCountingStatsResult> cliqueCountingStats(
+        String graphName,
+        Map<String, Object> configuration
+    );
+
+    Stream<MemoryEstimateResult> cliqueCountingStatsEstimate( //todo
+        Object graphNameOrConfiguration,
+        Map<String, Object> rawConfiguration
+    );
+
+    Stream<CliqueCountingStreamResult> cliqueCountingStream(
+        String graphName,
+        Map<String, Object> configuration
+    );
+
+    Stream<MemoryEstimateResult> cliqueCountingStreamEstimate( //todo
+        Object graphNameOrConfiguration,
+        Map<String, Object> rawConfiguration
+    );
+
+    Stream<CliqueCountingWriteResult> cliqueCountingWrite(
+        String graphName,
+        Map<String, Object> configuration
+    );
+
+    Stream<MemoryEstimateResult> cliqueCountingWriteEstimate( //todo
+        Object graphNameOrConfiguration,
+        Map<String, Object> rawConfiguration
+    );
+
     Stream<ConductanceStreamResult> conductanceStream(
         String graphName,
         Map<String, Object> configuration

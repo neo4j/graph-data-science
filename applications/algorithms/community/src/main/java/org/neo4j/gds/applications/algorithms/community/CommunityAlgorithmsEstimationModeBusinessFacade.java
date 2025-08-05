@@ -23,6 +23,8 @@ import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTempla
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutMemoryEstimateDefinition;
 import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutBaseConfig;
+import org.neo4j.gds.cliquecounting.CliqueCountingBaseConfig;
+import org.neo4j.gds.cliqueCounting.CliqueCountingMemoryEstimateDefinition;
 import org.neo4j.gds.config.SeedConfig;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.gds.hdbscan.HDBScanBaseConfig;
@@ -71,6 +73,22 @@ public class CommunityAlgorithmsEstimationModeBusinessFacade {
         Object graphNameOrConfiguration
     ) {
         var memoryEstimation = approximateMaximumKCut(configuration);
+
+        return algorithmEstimationTemplate.estimate(
+            configuration,
+            graphNameOrConfiguration,
+            memoryEstimation
+        );
+    }
+
+
+    public MemoryEstimation cliqueCounting() { //fixme
+        return new CliqueCountingMemoryEstimateDefinition().memoryEstimation();
+//        throw new MemoryEstimationNotImplementedException();
+    }
+
+    public MemoryEstimateResult cliqueCounting(CliqueCountingBaseConfig configuration, Object graphNameOrConfiguration) { //fixme
+        var memoryEstimation = cliqueCounting();
 
         return algorithmEstimationTemplate.estimate(
             configuration,

@@ -25,6 +25,8 @@ import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutResult;
 import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutStreamConfig;
 import org.neo4j.gds.beta.pregel.PregelResult;
+import org.neo4j.gds.cliqueCounting.CliqueCountingResult;
+import org.neo4j.gds.cliquecounting.CliqueCountingStreamConfig;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.conductance.ConductanceResult;
 import org.neo4j.gds.conductance.ConductanceStreamConfig;
@@ -60,6 +62,7 @@ import org.neo4j.gds.wcc.WccStreamConfig;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ApproximateMaximumKCut;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.CliqueCounting;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Conductance;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.HDBScan;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.K1Coloring;
@@ -103,6 +106,21 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
             ApproximateMaximumKCut,
             () -> estimationFacade.approximateMaximumKCut(configuration),
             (graph, __) -> algorithms.approximateMaximumKCut(graph, configuration),
+            streamResultBuilder
+        );
+    }
+
+    public <RESULT> Stream<RESULT> cliqueCounting(
+        GraphName graphName,
+        CliqueCountingStreamConfig configuration,
+        StreamResultBuilder<CliqueCountingResult, RESULT> streamResultBuilder
+    ) {
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
+            graphName,
+            configuration,
+            CliqueCounting,
+            estimationFacade::cliqueCounting,
+            (graph, __) -> algorithms.cliqueCounting(graph, configuration),
             streamResultBuilder
         );
     }

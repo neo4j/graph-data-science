@@ -17,23 +17,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.algorithms.community.stubs;
+package org.neo4j.gds.cliquecounting;
 
-public record CommunityStubs(
-    ApproximateMaximumKCutMutateStub approxMaxKCut,
-    CliqueCountingMutateStub cliqueCounting,
-    HDBScanMutateStub hdbscan,
-    K1ColoringMutateStub k1Coloring,
-    KCoreMutateStub kCore,
-    KMeansMutateStub kMeans,
-    LabelPropagationMutateStub labelPropagation,
-    LccMutateStub lcc,
-    LeidenMutateStub leiden,
-    LouvainMutateStub louvain,
-    ModularityOptimizationMutateStub modularityOptimization,
-    SccMutateStub scc,
-    SpeakerListenerLPAMutateStub sllpa,
-    TriangleCountMutateStub triangleCount,
-    WccMutateStub wcc
-) {
+import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.core.CypherMapWrapper;
+
+@Configuration
+public interface CliqueCountingStatsConfig extends CliqueCountingBaseConfig {
+    static CliqueCountingStatsConfig of(CypherMapWrapper config) {
+        return new CliqueCountingStatsConfigImpl(config);
+    }
+
+    @Override
+    @Configuration.ToMapValue("org.neo4j.gds.cliquecounting.CliqueCountingMode#toString")
+    default CliqueCountingMode getMode() {
+        return CliqueCountingMode.GloballyOnly;
+    }
 }
