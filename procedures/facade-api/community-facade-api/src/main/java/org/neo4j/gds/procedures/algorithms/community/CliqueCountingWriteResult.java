@@ -30,14 +30,14 @@ public record CliqueCountingWriteResult(
     long preProcessingMillis,
     long computeMillis,
     long writeMillis,
-    long nodeCount,
+    long nodePropertiesWritten,
     List<Long> globalCount,
     Map<String, Object> configuration
 )  implements ModeResult {
 
     public static CliqueCountingWriteResult create(
         AlgorithmProcessingTimings timings,
-        long nodeCount,
+        long nodePropertiesWritten,
         long[] globalCount,
         Map<String, Object> configurationMap
     ) {
@@ -45,7 +45,7 @@ public record CliqueCountingWriteResult(
             timings.preProcessingMillis,
             timings.computeMillis,
             timings.sideEffectMillis,
-            nodeCount,
+            nodePropertiesWritten,
             Arrays.stream(globalCount).boxed().toList(),
             configurationMap
         );

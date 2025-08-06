@@ -12,7 +12,7 @@ include::partial$/algorithms/shared/algorithm-traits.adoc[]
 
 [[algorithms-clique-counting-intro]]
 == Introduction
-A clique is a subset of nodes where all nodes are connected to each other, sometimes called a complete subgraph. The clique counting algorithm counts the number of cliques of various sizes in the graph. In GDS this is done efficiently, without realizing every clique, through a Succinct Clique Tree-structure, see https://dl.acm.org/doi/pdf/10.1145/3336191.3371839[The Power of Pivoting for Exact Clique Counting]
+A clique is a subset of nodes where all nodes are connected to each other, sometimes called a complete subgraph. The clique counting algorithm counts the number of cliques of various sizes in the graph. In GDS this is done efficiently, without realizing every clique, through a Succinct Clique Tree-structure, see https://dl.acm.org/doi/pdf/10.1145/3336191.3371839[The Power of Pivoting for Exact Clique Counting].
 
 Counting the number of cliques in the graph, can give an understanding for the topology and clustering of the graph in its entirety as well as for individual nodes. The algorithm counts only cliques of size 3 or larger, since cliques of sizes 1 and 2 are trivial (nodes and relationships, respectively). If you are only interested in triangles (cliques of size 3), the xref:algorithms/triangle-count.adoc[Triangle Count] is a better choice.
 
@@ -40,9 +40,8 @@ CALL gds.cliqueCounting.stream(
 )
 YIELD
   nodeId: Integer,
-  perNodeCount: List
+  counts: List
 ----
-//todo: check above
 
 include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 
@@ -56,9 +55,9 @@ include::partial$/algorithms/common-configuration/common-stream-stats-configurat
 .Results
 [opts="header",cols="1,1,6"]
 |===
-| Name          | Type            | Description
-| nodeId        | Integer         | Node ID.
-| perNodeCount  | List of Integer | Number of cliques of size ≥ 3 that this node is part of.
+| Name    | Type            | Description
+| nodeId  | Integer         | Node ID.
+| counts  | List of Integer | Number of cliques of size ≥ 3 that this node is part of.
 |===
 ======
 
@@ -76,10 +75,8 @@ YIELD
   globalCount: List,
   preProcessingMillis: Integer,
   computeMillis: Integer,
-  postProcessingMillis: Integer,
   configuration: Map
 ----
-//todo: Test this
 include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 
 .Configuration
@@ -96,7 +93,6 @@ include::partial$/algorithms/common-configuration/common-stream-stats-configurat
 | globalCount          | List of Integer | Number of cliques of sizes ≥ 3 in the graph.
 | preProcessingMillis  | Integer         | Milliseconds for preprocessing the graph.
 | computeMillis        | Integer         | Milliseconds for running the algorithm.
-| postProcessingMillis | Integer         | Milliseconds for computing the global metrics.
 | configuration        | Map             | The configuration used for running the algorithm.
 |===
 ======
@@ -108,7 +104,7 @@ include::partial$/algorithms/common-configuration/common-stream-stats-configurat
 .Run Clique Counting in mutate mode on a named graph:
 [source, cypher, role=noplay]
 ----
-CALL gds.cliqueCount.mutate(
+CALL gds.cliqueCounting.mutate(
   graphName: String,
   configuration: Map
 )
@@ -117,11 +113,9 @@ YIELD
   nodePropertiesWritten: Integer,
   preProcessingMillis: Integer,
   computeMillis: Integer,
-  postProcessingMillis: Integer,
   mutateMillis: Integer,
   configuration: Map
 ----
-//todo: Test this
 include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 
 .Configuration
@@ -139,7 +133,6 @@ include::partial$/algorithms/common-configuration/common-mutate-configuration-en
 | nodePropertiesWritten       | Integer         | Number of properties added to the projected graph.
 | preProcessingMillis         | Integer         | Milliseconds for preprocessing the graph.
 | computeMillis               | Integer         | Milliseconds for running the algorithm.
-| postProcessingMillis        | Integer         | Milliseconds for computing the global metrics.
 | mutateMillis                | Integer         | Milliseconds for adding properties to the projected graph.
 | configuration               | Map             | The configuration used for running the algorithm.
 |===
@@ -160,11 +153,9 @@ YIELD
   nodePropertiesWritten: Integer,
   preProcessingMillis: Integer,
   computeMillis: Integer,
-  postProcessingMillis: Integer,
   writeMillis: Integer,
   configuration: Map
 ----
-//todo: Test this
 include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 
 .Configuration
@@ -182,7 +173,6 @@ include::partial$/algorithms/common-configuration/common-mutate-configuration-en
 | nodePropertiesWritten       | Integer         | Number of properties written to Neo4j.
 | preProcessingMillis         | Integer         | Milliseconds for preprocessing the graph.
 | computeMillis               | Integer         | Milliseconds for running the algorithm.
-| postProcessingMillis        | Integer         | Milliseconds for computing the global metrics.
 | writeMillis                 | Integer         | Milliseconds for writing results back to Neo4j.
 | configuration               | Map             | The configuration used for running the algorithm.
 |===
@@ -252,7 +242,6 @@ In the following examples we will demonstrate using the Clique Counting algorith
 [[algorithms-clique-counting-examples-stream]]
 === Stream
 
-// :stream-details: For example, we can order the results to find the nodes with the highest triangle count. // todo
 include::partial$/algorithms/shared/examples-stream-intro.adoc[]
 
 .The following will run the algorithm in `stream` mode:
@@ -261,24 +250,23 @@ include::partial$/algorithms/shared/examples-stream-intro.adoc[]
 [source, cypher, role=noplay]
 ----
 CALL gds.cliqueCounting.stream('myGraph')
-YIELD nodeId, perNodeCount
-RETURN gds.util.asNode(nodeId).name AS name, perNodeCount
+YIELD nodeId, counts
+RETURN gds.util.asNode(nodeId).name AS name, counts
+ORDER BY name ASC
 ----
-// ORDER BY triangleCount DESC, name ASC //fixme
-//todo: Test this
 .Results
 [opts="header",cols="1,1"]
 |===
-| name      | perNodeCount
-| "Chris"   | [4,1]
-| "Karin"   | [4,1]
-| "Alice"   | [3,1]
-| "Michael" | [3,1]
+| name      | counts
+| "Alice"   | [3, 1]
+| "Chris"   | [4, 1]
+| "Karin"   | [4, 1]
+| "Mark"    | []
+| "Michael" | [3, 1]
 | "Will"    | [1]
-| "Mark"    | [ ]
 |===
 --
-Here we find that the 'Chris' node is part of 4 triangles and a four-clique, while the 'Will' node is part of only a triangle. This can be verified in the xref:algorithms/clique-counting.adoc#algorithms-clique-counting-examples[example graph]. Since the 'Dan' node is linked only to Bob, it is not part of any clique of size three or larger and we therefore get an empty list.
+Here we find that the 'Chris' node is part of 4 triangles and a four-clique, while the 'Will' node is part of only a triangle. This can be verified in the xref:algorithms/clique-counting.adoc#algorithms-clique-counting-examples[example graph]. Since the 'Mark' node is linked only to the 'Will' node, it is not part of any clique of size three or larger and we therefore get an empty list.
 
 Note that with a clique of size k, you are guaranteed to have a clique also of size k-1 since any subset of a clique is also a clique.
 
@@ -299,12 +287,11 @@ include::partial$/algorithms/shared/examples-stats-intro.adoc[]
 CALL gds.cliqueCounting.stats('myGraph')
 YIELD globalCount
 ----
-//todo: Test this
 .Results
 [opts="header"]
 |===
 | globalCount
-| [5,1]
+| [5, 1]
 |===
 --
 
@@ -317,7 +304,6 @@ In other words, that node is part of most cliques in the graph and thus has a ve
 [[algorithms-clique-counting-examples-mutate]]
 === Mutate
 
-// :mutate-details: For example, using the clique counting to compute the xref:algorithms/local-clustering-coefficient.adoc#algorithms-local-clustering-coefficient-examples-pre-computed[local clustering coefficient].
 include::partial$/algorithms/shared/examples-mutate-intro.adoc[]
 
 [role=query-example]
@@ -330,13 +316,12 @@ CALL gds.cliqueCounting.mutate('myGraph', {
 })
 YIELD globalCount
 ----
-//todo: test this
 
 .Results
 [opts="header"]
 |===
 | globalCount
-| [5,1]
+| [5, 1]
 |===
 --
 
@@ -361,13 +346,12 @@ CALL gds.cliqueCounting.write('myGraph', {
 })
 YIELD globalCount
 ----
-//todo: Test this
 
 .Results
 [opts="header"]
 |===
 | globalCount
-| [5,1]
+| [5, 1]
 |===
 --
 
