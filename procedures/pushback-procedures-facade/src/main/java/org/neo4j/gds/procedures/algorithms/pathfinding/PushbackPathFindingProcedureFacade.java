@@ -30,11 +30,14 @@ import java.util.stream.Stream;
 public class PushbackPathFindingProcedureFacade implements PathFindingProcedureFacade {
 
     private final PushbackPathFindingStreamProcedureFacade streamProcedureFacade;
+    private final PushbackPathFindingStatsProcedureFacade statsProcedureFacade;
 
     public PushbackPathFindingProcedureFacade(
-        PushbackPathFindingStreamProcedureFacade streamProcedureFacade
+        PushbackPathFindingStreamProcedureFacade streamProcedureFacade,
+        PushbackPathFindingStatsProcedureFacade statsProcedureFacade
     ) {
         this.streamProcedureFacade = streamProcedureFacade;
+        this.statsProcedureFacade = statsProcedureFacade;
     }
 
     @Override
@@ -86,7 +89,7 @@ public class PushbackPathFindingProcedureFacade implements PathFindingProcedureF
 
     @Override
     public Stream<BellmanFordStatsResult> bellmanFordStats(String graphName, Map<String, Object> configuration) {
-        return Stream.empty();
+        return statsProcedureFacade.bellmanFordStats(graphName, configuration);
     }
 
     @Override
@@ -131,7 +134,7 @@ public class PushbackPathFindingProcedureFacade implements PathFindingProcedureF
         String graphName,
         Map<String, Object> configuration
     ) {
-        return Stream.empty();
+        return statsProcedureFacade.breadthFirstSearchStats(graphName, configuration);
     }
 
     @Override
@@ -173,7 +176,7 @@ public class PushbackPathFindingProcedureFacade implements PathFindingProcedureF
         String graphName,
         Map<String, Object> configuration
     ) {
-        return Stream.empty();
+        return statsProcedureFacade.deltaSteppingStats(graphName, configuration);
     }
 
     @Override
@@ -286,7 +289,7 @@ public class PushbackPathFindingProcedureFacade implements PathFindingProcedureF
         String graphName,
         Map<String, Object> configuration
     ) {
-        return Stream.empty();
+        return statsProcedureFacade.prizeCollectingSteinerTreeStats(graphName, configuration);
     }
 
     @Override
@@ -318,7 +321,7 @@ public class PushbackPathFindingProcedureFacade implements PathFindingProcedureF
         String graphName,
         Map<String, Object> configuration
     ) {
-        return Stream.empty();
+        return statsProcedureFacade.randomWalkStats(graphName, configuration);
     }
 
     @Override
@@ -549,7 +552,7 @@ public class PushbackPathFindingProcedureFacade implements PathFindingProcedureF
 
     @Override
     public Stream<SpanningTreeStatsResult> spanningTreeStats(String graphName, Map<String, Object> configuration) {
-        return Stream.empty();
+        return statsProcedureFacade.spanningTreeStats(graphName, configuration);
     }
 
     @Override
@@ -601,7 +604,7 @@ public class PushbackPathFindingProcedureFacade implements PathFindingProcedureF
 
     @Override
     public Stream<SteinerStatsResult> steinerTreeStats(String graphName, Map<String, Object> configuration) {
-        return Stream.empty();
+        return statsProcedureFacade.steinerTreeStats(graphName, configuration);
     }
 
     @Override
