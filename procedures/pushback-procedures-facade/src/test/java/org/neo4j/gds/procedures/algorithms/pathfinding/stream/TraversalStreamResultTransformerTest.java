@@ -17,15 +17,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.algorithms.pathfinding;
+package org.neo4j.gds.procedures.algorithms.pathfinding.stream;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.api.CloseableResourceRegistry;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.procedures.algorithms.pathfinding.PathFactoryFacade;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.graphdb.Path;
-
-import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -34,31 +33,31 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-class RandomWalkStreamResultTransformerTest {
+class TraversalStreamResultTransformerTest {
 
     @Test
     void shouldTransformNonEmptyResult() {
         var graphMock = mock(Graph.class);
-        var closeableResourceRegistryMock = mock(CloseableResourceRegistry.class);
         var pathFactoryFacadeMock = mock(PathFactoryFacade.class);
 
-        var transformer = new RandomWalkStreamResultTransformer(
+        var transformer = new TraversalStreamResultTransformer(
             graphMock,
-            closeableResourceRegistryMock,
-            pathFactoryFacadeMock
+            pathFactoryFacadeMock,
+            10
         );
 
-        when(graphMock.toOriginalNodeId(anyLong())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(graphMock.toOriginalNodeId(anyLong()))
+            // don't return the same original id as the input
+            .thenAnswer(invocation -> ((long) invocation.getArgument(0)) + 19L);
         when(pathFactoryFacadeMock.createPath(any(long[].class), any(double[].class), any(), anyString()))
             .thenReturn(mock(Path.class));
 
-        var result =Stream.of(new long[]{2,3,4});
-
-        var streamResult = transformer.apply(new TimedAlgorithmResult<>(result, 1)).toList();
+        var streamResult = transformer.apply(new TimedAlgorithmResult<>(HugeLongArray.of(3,2,1,0), 1)).toList();
 
         assertThat(streamResult).hasSize(1);
-        var pathResult = streamResult.getFirst();
-        assertThat(pathResult.nodeIds()).containsExactly(2L,3L,4L);
+        var result = streamResult.getFirst();
+        assertThat(result.nodeIds()).containsExactly(22L, 21L, 20L, 19L);
+        assertThat(result.sourceNode()).isEqualTo(10);
     }
 
 }

@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.algorithms.pathfinding;
+package org.neo4j.gds.procedures.algorithms.pathfinding.stream;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.CloseableResourceRegistry;
@@ -25,6 +25,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.paths.PathResult;
 import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
+import org.neo4j.gds.procedures.algorithms.pathfinding.PathFactoryFacade;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.graphdb.Path;
 

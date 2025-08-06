@@ -17,18 +17,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.algorithms.pathfinding;
+package org.neo4j.gds.procedures.algorithms.pathfinding.stream;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.NodeLookup;
 import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.procedures.algorithms.pathfinding.PathFactoryFacade;
+import org.neo4j.gds.procedures.algorithms.pathfinding.TraversalStreamResult;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.results.ResultTransformerBuilder;
 
 import java.util.stream.Stream;
 
-public class TraversalStreamResultTransformerBuilder implements ResultTransformerBuilder<TimedAlgorithmResult<HugeLongArray>, Stream<TraversalStreamResult>> {
+class TraversalStreamResultTransformerBuilder implements ResultTransformerBuilder<TimedAlgorithmResult<HugeLongArray>, Stream<TraversalStreamResult>> {
     private final NodeLookup nodeLookup;
     private final boolean pathRequested;
     private final long sourceNode;

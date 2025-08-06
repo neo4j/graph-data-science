@@ -17,23 +17,32 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.algorithms.pathfinding;
+package org.neo4j.gds.procedures.algorithms.pathfinding.stream;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.dag.topologicalsort.TopologicalSortResult;
+import org.neo4j.gds.procedures.algorithms.pathfinding.SpanningTreeStreamResult;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.results.ResultTransformerBuilder;
+import org.neo4j.gds.spanningtree.SpanningTree;
 
 import java.util.stream.Stream;
 
-public class TopologicalSortStreamResultTransformerBuilder implements ResultTransformerBuilder<TimedAlgorithmResult<TopologicalSortResult>, Stream<TopologicalSortStreamResult>> {
+class SpanningTreeStreamResultTransformerBuilder implements ResultTransformerBuilder<TimedAlgorithmResult<SpanningTree>, Stream<SpanningTreeStreamResult>> {
+
+    private final long sourceNode;
+
+    SpanningTreeStreamResultTransformerBuilder(long sourceNode) {
+        this.sourceNode = sourceNode;
+    }
 
     @Override
-    public TopologicalSortStreamResultTransformer build(Graph graph, GraphStore graphStore) {
+    public SpanningTreeStreamResultTransformer build(Graph graph, GraphStore graphStore) {
 
-        return new TopologicalSortStreamResultTransformer(
-            graph
+        return new SpanningTreeStreamResultTransformer(
+            graph,
+            sourceNode
         );
     }
+
 }

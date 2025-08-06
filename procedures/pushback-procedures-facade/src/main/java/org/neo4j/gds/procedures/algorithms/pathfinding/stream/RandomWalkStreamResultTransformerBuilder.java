@@ -17,42 +17,43 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.algorithms.pathfinding;
+package org.neo4j.gds.procedures.algorithms.pathfinding.stream;
 
 import org.neo4j.gds.api.CloseableResourceRegistry;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.NodeLookup;
-import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
+import org.neo4j.gds.procedures.algorithms.pathfinding.PathFactoryFacade;
+import org.neo4j.gds.procedures.algorithms.pathfinding.RandomWalkStreamResult;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.results.ResultTransformerBuilder;
 
 import java.util.stream.Stream;
 
-public class BellmanFordStreamResultTransformerBuilder implements ResultTransformerBuilder<TimedAlgorithmResult<BellmanFordResult>, Stream<BellmanFordStreamResult>> {
+class RandomWalkStreamResultTransformerBuilder implements ResultTransformerBuilder<TimedAlgorithmResult<Stream<long[]>>, Stream<RandomWalkStreamResult>> {
     private final CloseableResourceRegistry closeableResourceRegistry;
     private final NodeLookup nodeLookup;
-    private final boolean routeRequested;
+    private final boolean pathRequested;
 
-    BellmanFordStreamResultTransformerBuilder(
+    RandomWalkStreamResultTransformerBuilder(
         CloseableResourceRegistry closeableResourceRegistry,
         NodeLookup nodeLookup,
-        boolean routeRequested
+        boolean pathRequested
     ) {
         this.closeableResourceRegistry = closeableResourceRegistry;
         this.nodeLookup = nodeLookup;
-        this.routeRequested = routeRequested;
+        this.pathRequested = pathRequested;
     }
 
     @Override
-    public BellmanFordStreamResultTransformer build(Graph graph, GraphStore graphStore) {
+    public RandomWalkStreamResultTransformer build(Graph graph, GraphStore graphStore) {
         // this is us handling the case of generated graphs and such
         var pathFactoryFacade = PathFactoryFacade.create(
-            routeRequested,
+            pathRequested,
             nodeLookup,
             graphStore.capabilities().canWriteToLocalDatabase()
         );
-        return new BellmanFordStreamResultTransformer(
+        return new RandomWalkStreamResultTransformer(
             graph,
             closeableResourceRegistry,
             pathFactoryFacade

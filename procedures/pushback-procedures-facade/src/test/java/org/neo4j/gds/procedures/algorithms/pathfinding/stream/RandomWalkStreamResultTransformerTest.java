@@ -17,13 +17,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.algorithms.pathfinding;
+package org.neo4j.gds.procedures.algorithms.pathfinding.stream;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.CloseableResourceRegistry;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.paths.PathResult;
-import org.neo4j.gds.paths.dijkstra.PathFindingResult;
+import org.neo4j.gds.procedures.algorithms.pathfinding.PathFactoryFacade;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.graphdb.Path;
 
@@ -34,29 +33,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
-class PathFindingStreamResultTransformerTest {
-
-    @Test
-    void shouldReturnEmptyStreamOnEmptyResult() {
-        var graphMock = mock(Graph.class);
-        var closeableResourceRegistryMock = mock(CloseableResourceRegistry.class);
-        var pathFactoryFacadeMock = mock(PathFactoryFacade.class);
-
-        var transformer = new PathFindingStreamResultTransformer(
-            graphMock,
-            closeableResourceRegistryMock,
-            pathFactoryFacadeMock
-        );
-
-        var streamResult = transformer.apply(TimedAlgorithmResult.empty(PathFindingResult.empty()));
-        assertThat(streamResult).isEmpty();
-
-        verifyNoInteractions(graphMock);
-        verifyNoInteractions(pathFactoryFacadeMock);
-    }
+class RandomWalkStreamResultTransformerTest {
 
     @Test
     void shouldTransformNonEmptyResult() {
@@ -64,32 +43,23 @@ class PathFindingStreamResultTransformerTest {
         var closeableResourceRegistryMock = mock(CloseableResourceRegistry.class);
         var pathFactoryFacadeMock = mock(PathFactoryFacade.class);
 
-        var transformer = new PathFindingStreamResultTransformer(
+        var transformer = new RandomWalkStreamResultTransformer(
             graphMock,
             closeableResourceRegistryMock,
             pathFactoryFacadeMock
         );
 
-        var pathResultMock = mock(PathResult.class);
-
-        when(pathResultMock.nodeIds()).thenReturn(new long[]{1L, 2L});
-        when(pathResultMock.costs()).thenReturn(new double[]{1.0});
-        when(pathResultMock.index()).thenReturn(0L);
-        when(pathResultMock.sourceNode()).thenReturn(1L);
-        when(pathResultMock.targetNode()).thenReturn(2L);
-        when(pathResultMock.totalCost()).thenReturn(1.0);
         when(graphMock.toOriginalNodeId(anyLong())).thenAnswer(invocation -> invocation.getArgument(0));
         when(pathFactoryFacadeMock.createPath(any(long[].class), any(double[].class), any(), anyString()))
             .thenReturn(mock(Path.class));
 
-        var result =new PathFindingResult(Stream.of(pathResultMock));
+        var result =Stream.of(new long[]{2,3,4});
 
         var streamResult = transformer.apply(new TimedAlgorithmResult<>(result, 1)).toList();
 
         assertThat(streamResult).hasSize(1);
         var pathResult = streamResult.getFirst();
-        assertThat(pathResult.nodeIds()).containsExactly(1L, 2L);
-        assertThat(pathResult.costs()).containsExactly(1.0);
+        assertThat(pathResult.nodeIds()).containsExactly(2L,3L,4L);
     }
 
 }

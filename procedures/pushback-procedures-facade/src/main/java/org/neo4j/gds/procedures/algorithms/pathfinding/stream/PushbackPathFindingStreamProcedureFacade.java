@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.algorithms.pathfinding;
+package org.neo4j.gds.procedures.algorithms.pathfinding.stream;
 
 import org.neo4j.gds.allshortestpaths.AllShortestPathsConfig;
 import org.neo4j.gds.allshortestpaths.AllShortestPathsStreamResult;
@@ -38,6 +38,12 @@ import org.neo4j.gds.paths.traverse.DfsStreamConfig;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensStreamConfig;
 import org.neo4j.gds.pcst.PCSTStreamConfig;
 import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
+import org.neo4j.gds.procedures.algorithms.pathfinding.BellmanFordStreamResult;
+import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingStreamResult;
+import org.neo4j.gds.procedures.algorithms.pathfinding.RandomWalkStreamResult;
+import org.neo4j.gds.procedures.algorithms.pathfinding.SpanningTreeStreamResult;
+import org.neo4j.gds.procedures.algorithms.pathfinding.TopologicalSortStreamResult;
+import org.neo4j.gds.procedures.algorithms.pathfinding.TraversalStreamResult;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.spanningtree.SpanningTreeStreamConfig;
 import org.neo4j.gds.steiner.SteinerTreeStreamConfig;
@@ -46,7 +52,7 @@ import org.neo4j.gds.traversal.RandomWalkStreamConfig;
 import java.util.Map;
 import java.util.stream.Stream;
 
-public class PushbackPathFindingStreamProcedureFacade {
+public final class PushbackPathFindingStreamProcedureFacade {
     private final PathFindingComputeBusinessFacade businessFacade;
 
     private final UserSpecificConfigurationParser configurationParser;

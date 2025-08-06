@@ -17,19 +17,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.algorithms.pathfinding;
+package org.neo4j.gds.procedures.algorithms.pathfinding.stream;
 
 import org.neo4j.gds.api.CloseableResourceRegistry;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.NodeLookup;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
+import org.neo4j.gds.procedures.algorithms.pathfinding.PathFactoryFacade;
+import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingStreamResult;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.results.ResultTransformerBuilder;
 
 import java.util.stream.Stream;
 
-public class PathFindingStreamResultTransformerBuilder implements ResultTransformerBuilder<TimedAlgorithmResult<PathFindingResult>, Stream<PathFindingStreamResult>> {
+class PathFindingStreamResultTransformerBuilder implements ResultTransformerBuilder<TimedAlgorithmResult<PathFindingResult>, Stream<PathFindingStreamResult>> {
     private final CloseableResourceRegistry closeableResourceRegistry;
     private final NodeLookup nodeLookup;
     private final boolean pathRequested;

@@ -17,33 +17,32 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.algorithms.pathfinding;
+package org.neo4j.gds.procedures.algorithms.pathfinding.stream;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.collections.ha.HugeDoubleArray;
-import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.procedures.algorithms.pathfinding.SpanningTreeStreamResult;
 import org.neo4j.gds.result.TimedAlgorithmResult;
-import org.neo4j.gds.steiner.SteinerTreeResult;
+import org.neo4j.gds.spanningtree.SpanningTree;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-class SteinerTreeStreamResultTransformerTest {
+class SpanningTreeStreamResultTransformerTest {
 
     @Test
     void shouldReturnEmptyStreamOnEmptyResult() {
         var graphMock = mock(Graph.class);
         when(graphMock.nodeCount()).thenReturn(0L);
 
-        var transformer = new SteinerTreeStreamResultTransformer(
+        var transformer = new SpanningTreeStreamResultTransformer(
             graphMock,
             1
         );
 
-        var streamResult = transformer.apply(TimedAlgorithmResult.empty(SteinerTreeResult.EMPTY));
+        var streamResult = transformer.apply(TimedAlgorithmResult.empty(SpanningTree.EMPTY));
         assertThat(streamResult).isEmpty();
     }
 
@@ -52,17 +51,26 @@ class SteinerTreeStreamResultTransformerTest {
         var graphMock = mock(Graph.class);
         when(graphMock.toOriginalNodeId(anyLong())).thenAnswer(invocation -> invocation.getArgument(0));
         when(graphMock.nodeCount()).thenReturn(3L);
-        var transformer = new SteinerTreeStreamResultTransformer(
+        var transformer = new SpanningTreeStreamResultTransformer(
             graphMock,
             1
         );
 
+        var spanningTree = mock(SpanningTree.class);
+        long[] parents = new long[]{4,3,1};
 
-        var steinerResult = mock(SteinerTreeResult.class);
-        when(steinerResult.parentArray()).thenReturn(HugeLongArray.of(4,3,1));
-        when(steinerResult.relationshipToParentCost()).thenReturn(HugeDoubleArray.of(10,9,8));
+        when(spanningTree.parent(anyLong())).thenAnswer(invocation -> {
+            long  id = invocation.getArgument(0);
+            return  parents[(int)id];
+        });
 
-        var streamResult = transformer.apply(new TimedAlgorithmResult<>(steinerResult, 10L)).toList();
+        double[] values = new double[]{10,9,8};
+        when(spanningTree.costToParent(anyLong())).thenAnswer(invocation -> {
+            long  id = invocation.getArgument(0);
+            return  values[(int)id];
+        });
+
+        var streamResult = transformer.apply(new TimedAlgorithmResult<>(spanningTree, 1L)).toList();
         assertThat(streamResult.getFirst()).isEqualTo(new SpanningTreeStreamResult(0,4,10.0));
         assertThat(streamResult.get(1)).isEqualTo(new SpanningTreeStreamResult(1,1,9.0));
         assertThat(streamResult.getLast()).isEqualTo(new SpanningTreeStreamResult(2,1,8.0));

@@ -17,10 +17,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.algorithms.pathfinding;
+package org.neo4j.gds.procedures.algorithms.pathfinding.stream;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.procedures.algorithms.pathfinding.PathFactoryFacade;
+import org.neo4j.gds.procedures.algorithms.pathfinding.TraversalStreamResult;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.results.ResultTransformer;
 import org.neo4j.graphdb.RelationshipType;
@@ -28,7 +30,7 @@ import org.neo4j.graphdb.RelationshipType;
 import java.util.Arrays;
 import java.util.stream.Stream;
 
-public class TraversalStreamResultTransformer implements ResultTransformer<TimedAlgorithmResult<HugeLongArray>, Stream<TraversalStreamResult>> {
+class TraversalStreamResultTransformer implements ResultTransformer<TimedAlgorithmResult<HugeLongArray>, Stream<TraversalStreamResult>> {
 
     private static final String RELATIONSHIP_TYPE = "NEXT";
     private final Graph graph;

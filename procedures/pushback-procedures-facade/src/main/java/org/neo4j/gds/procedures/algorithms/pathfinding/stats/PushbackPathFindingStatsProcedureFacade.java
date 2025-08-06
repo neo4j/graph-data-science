@@ -17,8 +17,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.algorithms.pathfinding;
+package org.neo4j.gds.procedures.algorithms.pathfinding.stats;
 
+import org.neo4j.gds.procedures.algorithms.pathfinding.BellmanFordStatsResult;
+import org.neo4j.gds.procedures.algorithms.pathfinding.PrizeCollectingSteinerTreeStatsResult;
+import org.neo4j.gds.procedures.algorithms.pathfinding.SpanningTreeStatsResult;
+import org.neo4j.gds.procedures.algorithms.pathfinding.SteinerStatsResult;
 import org.neo4j.gds.procedures.algorithms.results.StandardStatsResult;
 
 import java.util.Map;

@@ -17,12 +17,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.algorithms.pathfinding;
+package org.neo4j.gds.procedures.algorithms.pathfinding.stream;
 
 import org.neo4j.gds.api.CloseableResourceRegistry;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.paths.PathResult;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
+import org.neo4j.gds.procedures.algorithms.pathfinding.PathFactoryFacade;
+import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingStreamResult;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.results.ResultTransformer;
 import org.neo4j.graphdb.RelationshipType;
@@ -32,7 +34,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public class PathFindingStreamResultTransformer implements ResultTransformer<TimedAlgorithmResult<PathFindingResult>, Stream<PathFindingStreamResult>> {
+class PathFindingStreamResultTransformer implements ResultTransformer<TimedAlgorithmResult<PathFindingResult>, Stream<PathFindingStreamResult>> {
 
     private static final String COST_PROPERTY_NAME = "cost";
     private static final String RELATIONSHIP_TYPE_TEMPLATE = "PATH_%d";
@@ -41,7 +43,7 @@ public class PathFindingStreamResultTransformer implements ResultTransformer<Tim
     private final CloseableResourceRegistry closeableResourceRegistry;
     private final PathFactoryFacade pathFactoryFacade;
 
-    public PathFindingStreamResultTransformer(
+    PathFindingStreamResultTransformer(
         Graph graph,
         CloseableResourceRegistry closeableResourceRegistry,
         PathFactoryFacade pathFactoryFacade

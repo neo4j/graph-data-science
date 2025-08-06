@@ -17,11 +17,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.algorithms.pathfinding;
+package org.neo4j.gds.procedures.algorithms.pathfinding.stream;
 
 import org.neo4j.gds.api.CloseableResourceRegistry;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.procedures.algorithms.pathfinding.PathFactoryFacade;
+import org.neo4j.gds.procedures.algorithms.pathfinding.RandomWalkStreamResult;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.results.ResultTransformer;
 import org.neo4j.graphdb.RelationshipType;
@@ -30,14 +32,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
-public class RandomWalkStreamResultTransformer implements ResultTransformer<TimedAlgorithmResult<Stream<long[]>>, Stream<RandomWalkStreamResult>> {
+class RandomWalkStreamResultTransformer implements ResultTransformer<TimedAlgorithmResult<Stream<long[]>>, Stream<RandomWalkStreamResult>> {
 
     private static final String RELATIONSHIP_TYPE_NAME = "NEXT";
     private final Graph graph;
     private final CloseableResourceRegistry closeableResourceRegistry;
     private final PathFactoryFacade pathFactoryFacade;
 
-    public RandomWalkStreamResultTransformer(
+    RandomWalkStreamResultTransformer(
         Graph graph,
         CloseableResourceRegistry closeableResourceRegistry,
         PathFactoryFacade pathFactoryFacade

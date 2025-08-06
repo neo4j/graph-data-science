@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.algorithms.pathfinding;
+package org.neo4j.gds.procedures.algorithms.pathfinding.stream;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.Graph;
@@ -26,6 +26,7 @@ import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.paged.ParallelDoublePageCreator;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortResult;
+import org.neo4j.gds.procedures.algorithms.pathfinding.TopologicalSortStreamResult;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 
 import java.util.Optional;

@@ -17,10 +17,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.algorithms.pathfinding;
+package org.neo4j.gds.procedures.algorithms.pathfinding.stream;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.procedures.algorithms.pathfinding.SpanningTreeStreamResult;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.results.ResultTransformer;
 import org.neo4j.gds.spanningtree.SpanningTree;
@@ -28,7 +29,7 @@ import org.neo4j.gds.spanningtree.SpanningTree;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-public class SpanningTreeStreamResultTransformer implements ResultTransformer<TimedAlgorithmResult<SpanningTree>, Stream<SpanningTreeStreamResult>> {
+class SpanningTreeStreamResultTransformer implements ResultTransformer<TimedAlgorithmResult<SpanningTree>, Stream<SpanningTreeStreamResult>> {
 
     private final Graph graph;
     private final long sourceNodeId;

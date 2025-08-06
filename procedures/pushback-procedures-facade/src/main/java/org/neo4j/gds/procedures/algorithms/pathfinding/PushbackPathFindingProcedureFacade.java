@@ -21,6 +21,8 @@ package org.neo4j.gds.procedures.algorithms.pathfinding;
 
 import org.neo4j.gds.allshortestpaths.AllShortestPathsStreamResult;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
+import org.neo4j.gds.procedures.algorithms.pathfinding.stats.PushbackPathFindingStatsProcedureFacade;
+import org.neo4j.gds.procedures.algorithms.pathfinding.stream.PushbackPathFindingStreamProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.PathFindingStubs;
 import org.neo4j.gds.procedures.algorithms.results.StandardStatsResult;
 
