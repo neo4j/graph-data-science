@@ -22,6 +22,7 @@ package org.neo4j.gds.procedures.algorithms.pathfinding.stats;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.pathfinding.PathFindingComputeBusinessFacade;
 import org.neo4j.gds.paths.bellmanford.AllShortestPathsBellmanFordStatsConfig;
+import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaStatsConfig;
 import org.neo4j.gds.paths.traverse.BfsStatsConfig;
 import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
 import org.neo4j.gds.procedures.algorithms.pathfinding.BellmanFordStatsResult;
@@ -88,7 +89,20 @@ public class PushbackPathFindingStatsProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        return Stream.empty();
+        var config = configurationParser.parseConfiguration(
+            configuration,
+            AllShortestPathsDeltaStatsConfig::of
+        );
+
+        return businessFacade.deltaStepping(
+            GraphName.parse(graphName),
+            config.toGraphParameters(),
+            config.relationshipWeightProperty(),
+            config.toParameters(),
+            config.jobId(),
+            config.logProgress(),
+            new DeltaSteppingStatsResultTransformerBuilder(config)
+        ).join();
     }
 
     public Stream<PrizeCollectingSteinerTreeStatsResult> prizeCollectingSteinerTreeStats(
