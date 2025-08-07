@@ -19,6 +19,10 @@
  */
 package org.neo4j.gds.procedures.algorithms.pathfinding.stats;
 
+import org.neo4j.gds.api.GraphName;
+import org.neo4j.gds.pathfinding.PathFindingComputeBusinessFacade;
+import org.neo4j.gds.paths.bellmanford.AllShortestPathsBellmanFordStatsConfig;
+import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
 import org.neo4j.gds.procedures.algorithms.pathfinding.BellmanFordStatsResult;
 import org.neo4j.gds.procedures.algorithms.pathfinding.PrizeCollectingSteinerTreeStatsResult;
 import org.neo4j.gds.procedures.algorithms.pathfinding.SpanningTreeStatsResult;
@@ -29,9 +33,34 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 public class PushbackPathFindingStatsProcedureFacade {
+    private final PathFindingComputeBusinessFacade businessFacade;
+
+    private final UserSpecificConfigurationParser configurationParser;
+
+    public PushbackPathFindingStatsProcedureFacade(
+        PathFindingComputeBusinessFacade businessFacade,
+        UserSpecificConfigurationParser configurationParser
+    ) {
+        this.businessFacade = businessFacade;
+        this.configurationParser = configurationParser;
+    }
+
 
     public Stream<BellmanFordStatsResult> bellmanFordStats(String graphName, Map<String, Object> configuration) {
-        return Stream.empty();
+        var config = configurationParser.parseConfiguration(
+            configuration,
+            AllShortestPathsBellmanFordStatsConfig::of
+        );
+
+        return businessFacade.bellmanFord(
+            GraphName.parse(graphName),
+            config.toGraphParameters(),
+            config.relationshipWeightProperty(),
+            config.toParameters(),
+            config.jobId(),
+            config.logProgress(),
+            new BellmanFordStatsResultTransformerBuilder(config)
+        ).join();
     }
 
     public Stream<StandardStatsResult> breadthFirstSearchStats(
