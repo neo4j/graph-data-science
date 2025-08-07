@@ -53,7 +53,7 @@ public class PushbackPathFindingStatsProcedureFacade {
     }
 
 
-    public Stream<BellmanFordStatsResult> bellmanFordStats(String graphName, Map<String, Object> configuration) {
+    public Stream<BellmanFordStatsResult> bellmanFord(String graphName, Map<String, Object> configuration) {
         var config = configurationParser.parseConfiguration(
             configuration,
             AllShortestPathsBellmanFordStatsConfig::of
@@ -70,7 +70,7 @@ public class PushbackPathFindingStatsProcedureFacade {
         ).join();
     }
 
-    public Stream<StandardStatsResult> breadthFirstSearchStats(
+    public Stream<StandardStatsResult> breadthFirstSearch(
         String graphName,
         Map<String, Object> configuration
     ) {
@@ -89,7 +89,7 @@ public class PushbackPathFindingStatsProcedureFacade {
         ).join();
     }
 
-    public Stream<StandardStatsResult> deltaSteppingStats(
+    public Stream<StandardStatsResult> deltaStepping(
         String graphName,
         Map<String, Object> configuration
     ) {
@@ -109,7 +109,7 @@ public class PushbackPathFindingStatsProcedureFacade {
         ).join();
     }
 
-    public Stream<PrizeCollectingSteinerTreeStatsResult> prizeCollectingSteinerTreeStats(
+    public Stream<PrizeCollectingSteinerTreeStatsResult> prizeCollectingSteinerTree(
         String graphName,
         Map<String, Object> configuration
     ) {
@@ -129,7 +129,7 @@ public class PushbackPathFindingStatsProcedureFacade {
         ).join();
     }
 
-    public Stream<StandardModeResult> randomWalkStats(
+    public Stream<StandardModeResult> randomWalk(
         String graphName,
         Map<String, Object> configuration
     ) {
@@ -149,7 +149,7 @@ public class PushbackPathFindingStatsProcedureFacade {
         ).join();
     }
 
-    public Stream<SpanningTreeStatsResult> spanningTreeStats(String graphName, Map<String, Object> configuration) {
+    public Stream<SpanningTreeStatsResult> spanningTree(String graphName, Map<String, Object> configuration) {
         var config = configurationParser.parseConfiguration(
             configuration,
             SpanningTreeStatsConfig::of
@@ -166,7 +166,7 @@ public class PushbackPathFindingStatsProcedureFacade {
         ).join();
     }
 
-    public Stream<SteinerStatsResult> steinerTreeStats(String graphName, Map<String, Object> configuration) {
+    public Stream<SteinerStatsResult> steinerTree(String graphName, Map<String, Object> configuration) {
         var config = configurationParser.parseConfiguration(
             configuration,
             SteinerTreeStatsConfig::of
