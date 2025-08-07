@@ -33,6 +33,7 @@ import org.neo4j.gds.procedures.algorithms.pathfinding.SteinerStatsResult;
 import org.neo4j.gds.procedures.algorithms.results.StandardModeResult;
 import org.neo4j.gds.procedures.algorithms.results.StandardStatsResult;
 import org.neo4j.gds.spanningtree.SpanningTreeStatsConfig;
+import org.neo4j.gds.steiner.SteinerTreeStatsConfig;
 import org.neo4j.gds.traversal.RandomWalkStatsConfig;
 
 import java.util.Map;
@@ -166,7 +167,21 @@ public class PushbackPathFindingStatsProcedureFacade {
     }
 
     public Stream<SteinerStatsResult> steinerTreeStats(String graphName, Map<String, Object> configuration) {
-        return Stream.empty();
+        var config = configurationParser.parseConfiguration(
+            configuration,
+            SteinerTreeStatsConfig::of
+        );
+
+        return businessFacade.steinerTree(
+            GraphName.parse(graphName),
+            config.toGraphParameters(),
+            config.relationshipWeightProperty(),
+            config.toParameters(),
+            config.jobId(),
+            config.logProgress(),
+            new SteinerTreeStatsResultTransformerBuilder(config)
+        ).join();
+
     }
 
 }
