@@ -50,5 +50,7 @@ dependencies {
 
     implementation project(':string-formatting')
 
+    // Test Dependencies
     testImplementation project(':test-utils')
+    testImplementation openGds.mockito.junit.jupiter
 }

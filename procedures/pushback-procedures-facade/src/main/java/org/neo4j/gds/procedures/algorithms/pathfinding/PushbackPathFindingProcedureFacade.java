@@ -24,6 +24,7 @@ import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stats.PushbackPathFindingStatsProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stream.PushbackPathFindingStreamProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.PathFindingStubs;
+import org.neo4j.gds.procedures.algorithms.results.StandardModeResult;
 import org.neo4j.gds.procedures.algorithms.results.StandardStatsResult;
 
 import java.util.Map;
@@ -319,7 +320,7 @@ public class PushbackPathFindingProcedureFacade implements PathFindingProcedureF
     }
 
     @Override
-    public Stream<org.neo4j.gds.procedures.algorithms.results.StandardModeResult> randomWalkStats(
+    public Stream<StandardModeResult> randomWalkStats(
         String graphName,
         Map<String, Object> configuration
     ) {

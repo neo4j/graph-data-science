@@ -22,11 +22,13 @@ package org.neo4j.gds.procedures.algorithms.pathfinding.stats;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.pathfinding.PathFindingComputeBusinessFacade;
 import org.neo4j.gds.paths.bellmanford.AllShortestPathsBellmanFordStatsConfig;
+import org.neo4j.gds.paths.traverse.BfsStatsConfig;
 import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
 import org.neo4j.gds.procedures.algorithms.pathfinding.BellmanFordStatsResult;
 import org.neo4j.gds.procedures.algorithms.pathfinding.PrizeCollectingSteinerTreeStatsResult;
 import org.neo4j.gds.procedures.algorithms.pathfinding.SpanningTreeStatsResult;
 import org.neo4j.gds.procedures.algorithms.pathfinding.SteinerStatsResult;
+import org.neo4j.gds.procedures.algorithms.results.StandardModeResult;
 import org.neo4j.gds.procedures.algorithms.results.StandardStatsResult;
 
 import java.util.Map;
@@ -67,7 +69,19 @@ public class PushbackPathFindingStatsProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        return Stream.empty();
+        var config = configurationParser.parseConfiguration(
+            configuration,
+            BfsStatsConfig::of
+        );
+
+        return businessFacade.breadthFirstSearch(
+            GraphName.parse(graphName),
+            config.toGraphParameters(),
+            config.toParameters(),
+            config.jobId(),
+            config.logProgress(),
+            new TraversalStatsResultTransformerBuilder(config::toMap)
+        ).join();
     }
 
     public Stream<StandardStatsResult> deltaSteppingStats(
@@ -84,7 +98,7 @@ public class PushbackPathFindingStatsProcedureFacade {
         return Stream.empty();
     }
 
-    public Stream<org.neo4j.gds.procedures.algorithms.results.StandardModeResult> randomWalkStats(
+    public Stream<StandardModeResult> randomWalkStats(
         String graphName,
         Map<String, Object> configuration
     ) {
