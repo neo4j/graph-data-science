@@ -24,15 +24,19 @@ import org.neo4j.gds.procedures.algorithms.results.ModeResult;
 
 import java.util.Map;
 
-public record PrizeCollectingSteinerTreeStatsResult(long preProcessingMillis,
-                                                    long computeMillis,
-                                                    long effectiveNodeCount,
-                                                    double totalWeight,
-                                                    double sumOfPrizes,
-                                                    Map<String, Object> configuration
+public record PrizeCollectingSteinerTreeStatsResult(
+    long preProcessingMillis,
+    long computeMillis,
+    long effectiveNodeCount,
+    double totalWeight,
+    double sumOfPrizes,
+    Map<String, Object> configuration
 ) implements ModeResult {
 
-    static PrizeCollectingSteinerTreeStatsResult emptyFrom(AlgorithmProcessingTimings timings,  Map<String, Object> configuration){
+    static PrizeCollectingSteinerTreeStatsResult emptyFrom(
+        AlgorithmProcessingTimings timings,
+        Map<String, Object> configuration
+    ) {
         return new PrizeCollectingSteinerTreeStatsResult(
             timings.preProcessingMillis,
             timings.computeMillis,
@@ -41,6 +45,5 @@ public record PrizeCollectingSteinerTreeStatsResult(long preProcessingMillis,
             0,
             configuration
         );
-
     }
 }

@@ -17,21 +17,31 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.algorithms.pathfinding.stream;
+package org.neo4j.gds.procedures.algorithms.pathfinding.stats;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.pcst.PCSTStatsConfig;
 import org.neo4j.gds.pricesteiner.PrizeSteinerTreeResult;
-import org.neo4j.gds.procedures.algorithms.pathfinding.SpanningTreeStreamResult;
+import org.neo4j.gds.procedures.algorithms.pathfinding.PrizeCollectingSteinerTreeStatsResult;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.results.ResultTransformerBuilder;
 
 import java.util.stream.Stream;
 
-class PrizeCollectingSteinerTreeStreamResultTransformerBuilder implements ResultTransformerBuilder<TimedAlgorithmResult<PrizeSteinerTreeResult>, Stream<SpanningTreeStreamResult>> {
+class PrizeCollectingSteinerTreeStatsResultTransformerBuilder implements ResultTransformerBuilder<TimedAlgorithmResult<PrizeSteinerTreeResult>, Stream<PrizeCollectingSteinerTreeStatsResult>> {
+
+    private final PCSTStatsConfig configuration;
+
+    PrizeCollectingSteinerTreeStatsResultTransformerBuilder(PCSTStatsConfig configuration) {
+        this.configuration = configuration;
+    }
 
     @Override
-    public PrizeCollectingSteinerTreeResultTransformer build(Graph graph, GraphStore graphStore) {
-        return new PrizeCollectingSteinerTreeResultTransformer(graph);
+    public PrizeCollectingSteinerTreeStatsResultTransformer build(
+        Graph graph,
+        GraphStore graphStore
+    ) {
+        return new PrizeCollectingSteinerTreeStatsResultTransformer(configuration.toMap());
     }
 }
