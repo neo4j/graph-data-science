@@ -60,3 +60,4 @@ asciidoc:
     common-license-page-uri: https://neo4j.com/docs/license/
     operations-manual-base-uri: https://neo4j.com/docs/operations-manual/
     gds-docs-base-uri: https://neo4j.com/docs/graph-data-science
+    gds-client-docs-base-uri: https://neo4j.com/docs/graph-data-science-client

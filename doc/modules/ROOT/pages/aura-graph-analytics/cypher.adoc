@@ -294,6 +294,12 @@ CALL gds.session.delete(
 
 When compared to the GDS plugin, the Cypher API for Aura Graph Analytics has some limitations.
 
+[IMPORTANT]
+====
+If you use Aura Graph Analytics via the GDS Python client, some of these limitations might not apply.
+See the link:{gds-client-docs-base-uri}/current/graph-analytics-serverless/#_limitations[Python client docs] for more information.
+====
+
 === Algorithms
 
 The following algorithms are not supported:
