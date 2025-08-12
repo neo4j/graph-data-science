@@ -23,6 +23,8 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutParameters;
 import org.neo4j.gds.approxmaxkcut.ApproximateKCutTaskFactory;
+import org.neo4j.gds.cliqueCounting.CliqueCountingTaskFactory;
+import org.neo4j.gds.cliquecounting.CliqueCountingParameters;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.hdbscan.HDBScanProgressTrackerCreator;
@@ -51,8 +53,8 @@ public final class CommunityAlgorithmTasks {
         return ApproximateKCutTaskFactory.createTask(graph, parameters);
     }
 
-    public Task cliqueCounting(Graph graph) {
-        return Tasks.leaf(AlgorithmLabel.CliqueCounting.asString(), -1); //todo
+    public Task cliqueCounting(Graph graph, CliqueCountingParameters parameters) {
+        return CliqueCountingTaskFactory.createTask(graph, parameters);
     }
 
     public Task conductance(Graph graph) {

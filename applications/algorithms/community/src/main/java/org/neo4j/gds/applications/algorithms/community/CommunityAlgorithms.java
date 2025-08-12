@@ -27,7 +27,6 @@ import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutResult;
 import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.cliqueCounting.CliqueCounting;
 import org.neo4j.gds.cliqueCounting.CliqueCountingResult;
-import org.neo4j.gds.cliquecounting.CliqueCountingParameters;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.conductance.Conductance;
 import org.neo4j.gds.conductance.ConductanceParameters;
@@ -103,7 +102,7 @@ public class CommunityAlgorithms {
         ).compute();
     }
 
-    public CliqueCountingResult cliqueCounting(Graph graph, CliqueCountingParameters parameters, ProgressTracker progressTracker) {
+    public CliqueCountingResult cliqueCounting(Graph graph, org.neo4j.gds.cliquecounting.CliqueCountingParameters parameters, ProgressTracker progressTracker) {
         return CliqueCounting.create(
             graph,
             parameters,

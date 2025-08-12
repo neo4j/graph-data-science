@@ -175,11 +175,11 @@ public final class CliqueCounting extends Algorithm<CliqueCountingResult> {
         return countingMode == CliqueCountingMode.ForGivenSubcliques ?
             ParallelUtil.tasks(
                 concurrency,
-                () -> new SubcliqueCliqueCountingTask(graph.concurrentCopy())
+                () -> new SubcliqueCliqueCountingTask(graph.concurrentCopy(), progressTracker)
             ) :
             ParallelUtil.tasks(
                 concurrency,
-                () -> new GlobalCliqueCountingTask(graph.concurrentCopy(), cliqueCountsHandler.takeOrCreate())
+                () -> new GlobalCliqueCountingTask(graph.concurrentCopy(), cliqueCountsHandler.takeOrCreate(), progressTracker)
             );
 
     }
@@ -364,10 +364,12 @@ public final class CliqueCounting extends Algorithm<CliqueCountingResult> {
     private class GlobalCliqueCountingTask implements Runnable {
         Graph graph;
         SizeFrequencies sizeFrequencies;
+        ProgressTracker progressTracker;
 
-        GlobalCliqueCountingTask(Graph graph, SizeFrequencies sizeFrequencies) {
+        GlobalCliqueCountingTask(Graph graph, SizeFrequencies sizeFrequencies, ProgressTracker progressTracker) {
             this.graph = graph;
             this.sizeFrequencies = sizeFrequencies;
+            this.progressTracker = progressTracker;
         }
 
         public void run() {
@@ -380,6 +382,7 @@ public final class CliqueCounting extends Algorithm<CliqueCountingResult> {
                 long[][] feasibleNeighborhoods = computeIntersections(positiveNeighborhood);
                 recursiveSctCliqueCount(positiveNeighborhood, feasibleNeighborhoods, cliqueNodes, sizeFrequencies);
 
+               progressTracker.logProgress();
             }
             cliqueCountsHandler.giveBack(sizeFrequencies);
         }
@@ -387,9 +390,11 @@ public final class CliqueCounting extends Algorithm<CliqueCountingResult> {
 
     private class SubcliqueCliqueCountingTask implements Runnable {
         Graph graph;
+        ProgressTracker progressTracker;
 
-        SubcliqueCliqueCountingTask(Graph graph) {
+        SubcliqueCliqueCountingTask(Graph graph, ProgressTracker progressTracker) {
             this.graph = graph;
+            this.progressTracker = progressTracker;
         }
 
         public void run() {
@@ -412,6 +417,7 @@ public final class CliqueCounting extends Algorithm<CliqueCountingResult> {
                 }
                 long[][] feasibleNeighborhoods = computeIntersections(subset);
                 recursiveSctCliqueCount(subset, feasibleNeighborhoods, cliqueNodes, sizeFrequencies);
+                progressTracker.logProgress();
             }
         }
     }

@@ -19,16 +19,20 @@
  */
 package org.neo4j.gds.cliqueCounting;
 
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.gds.CommunityAlgorithmTasks;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.TestProgressTrackerHelper;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.cliquecounting.CliqueCountingMode;
 import org.neo4j.gds.cliquecounting.CliqueCountingParameters;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
+import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -38,9 +42,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.neo4j.gds.assertj.Extractors.removingThreadId;
+import static org.neo4j.gds.assertj.Extractors.replaceTimings;
 
 class CliqueCountingTest {
 
@@ -189,5 +196,62 @@ class CliqueCountingTest {
         assertEquals(232L, result.globalCount()[9 - 3]);
         assertEquals(6L, result.globalCount()[10 - 3]);
     }
+
+    @Test
+    void shouldLogProgress(){
+        Graph graph = fromGdl("CREATE (a1)-[:T]->(a2)-[:T]->(a3)-[:T]->(a4), (a2)-[:T]->(a4)-[:T]->(a1)-[:T]->(a3), (a1)-[:T]->(a2), (a1)-[:T1]->(a3)");
+        var params = new CliqueCountingParameters(CliqueCountingMode.ForEveryNode, List.of(), new Concurrency(4));
+
+        var progressTrackerWithLog = TestProgressTrackerHelper.create(
+            new CommunityAlgorithmTasks().cliqueCounting(graph, params),
+            new Concurrency(4)
+        );
+
+        var progressTracker = progressTrackerWithLog.progressTracker();
+        var log = progressTrackerWithLog.log();
+
+        var cliques = CliqueCounting.create(graph, params, DefaultPool.INSTANCE, progressTracker, TerminationFlag.RUNNING_TRUE);
+        cliques.compute();
+
+        Assertions.assertThat(log.getMessages(TestLog.INFO))
+            .extracting(removingThreadId())
+            .extracting(replaceTimings())
+            .containsExactly(
+                "Clique Counting :: Start",
+                "Clique Counting 25%",
+                "Clique Counting 50%",
+                "Clique Counting 75%",
+                "Clique Counting 100%",
+                "Clique Counting :: Finished"
+            );
+    }
+
+    @Test
+    void shouldLogProgressSubclique(){
+        Graph graph = fromGdl("CREATE (a1)-[:T]->(a2)-[:T]->(a3)-[:T]->(a4), (a2)-[:T]->(a4)-[:T]->(a1)-[:T]->(a3), (a1)-[:T]->(a2), (a1)-[:T1]->(a3)");
+        var params = new CliqueCountingParameters(CliqueCountingMode.ForEveryNode, List.of(new long[] {0L, 1L}, new long[] {3L}), new Concurrency(4));
+
+        var progressTrackerWithLog = TestProgressTrackerHelper.create(
+            new CommunityAlgorithmTasks().cliqueCounting(graph, params),
+            new Concurrency(4)
+        );
+
+        var progressTracker = progressTrackerWithLog.progressTracker();
+        var log = progressTrackerWithLog.log();
+
+        var cliques = CliqueCounting.create(graph, params, DefaultPool.INSTANCE, progressTracker, TerminationFlag.RUNNING_TRUE);
+        cliques.compute();
+
+        Assertions.assertThat(log.getMessages(TestLog.INFO))
+            .extracting(removingThreadId())
+            .extracting(replaceTimings())
+            .containsExactly(
+                "Clique Counting :: Start",
+                "Clique Counting 50%",
+                "Clique Counting 100%",
+                "Clique Counting :: Finished"
+            );
+    }
+
 
 }

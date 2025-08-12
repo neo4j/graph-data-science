@@ -89,9 +89,9 @@ public class CommunityAlgorithmsBusinessFacade {
     }
 
     public CliqueCountingResult cliqueCounting(Graph graph, CliqueCountingBaseConfig configuration) {
-        var task = tasks.cliqueCounting(graph);
-        var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
         var params = configuration.toParameters();
+        var task = tasks.cliqueCounting(graph, params);
+        var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
 
         return algorithmMachinery.getResult(
             () -> algorithms.cliqueCounting(graph, params, progressTracker),
