@@ -20,25 +20,44 @@
 package org.neo4j.gds.cliqueCounting;
 
 //import org.neo4j.gds.collections.ha.HugeLongArray;
-import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
-//import org.neo4j.gds.k1coloring.ColoringStep;
-//import org.neo4j.gds.k1coloring.K1Coloring;
-//import org.neo4j.gds.mem.Estimate;
+
 import org.neo4j.gds.mem.MemoryEstimateDefinition;
 import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimations;
+import org.neo4j.gds.mem.MemoryRange;
 //import org.neo4j.gds.mem.MemoryEstimations;
 
 public final class CliqueCountingMemoryEstimateDefinition implements MemoryEstimateDefinition {
+
+    public CliqueCountingMemoryEstimateDefinition() {
+    }
+
     @Override
     public MemoryEstimation memoryEstimation() {
-        throw new MemoryEstimationNotImplementedException();
-//        return MemoryEstimations.builder(K1Coloring.class)
-//            .perNode("colors", HugeLongArray::memoryEstimation)
-//            .perNode("nodesToColor", Estimate::sizeOfBitset)
-//            .perThread("coloring", MemoryEstimations.builder()
-//                .field("coloringStep", ColoringStep.class)
-//                .perNode("forbiddenColors", Estimate::sizeOfBitset)
-//                .build())
-//            .build();
+
+        return  MemoryEstimations.builder(CliqueCounting.class)
+            .perThread("intersection cost per thread",  thread())
+            .build();
     }
+
+    private MemoryEstimation thread(){
+            return MemoryEstimations.builder()
+                .rangePerGraphDimension("Intersections",((graphDimensions, concurrency) -> {
+                    var  bound1 = (long)(graphDimensions.averageDegree()*2.7);
+                    var bound2  = (long) (0.48*Math.sqrt(graphDimensions.relCountUpperBound())); //a theoretical bound  ¯\_(ツ)_/¯
+                    var cost1 = cost(bound1);
+                    var cost2 = cost(bound2);
+                    return MemoryRange.of(Math.min(cost1, cost2), Math.max(cost1, cost2));
+                }))
+                .build();
+
+    }
+
+    private long cost(long bound) {
+        //very very loose bounds
+        long recursionLevels = bound;
+        long intersectionsPerLevel = (bound * (bound-1))/2;
+        return recursionLevels * intersectionsPerLevel;
+    }
+
 }
