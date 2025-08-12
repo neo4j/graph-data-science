@@ -1,0 +1,359 @@
+[[algorithms-clique-counting]]
+= Clique Counting
+:description: This section describes the Clique Counting algorithm in the Neo4j Graph Data Science library.
+:entity: node
+:result: clique counts
+:algorithm: Clique Counting
+
+:no-directed:
+:undirected:
+include::partial$/algorithms/shared/algorithm-traits.adoc[]
+
+
+[[algorithms-clique-counting-intro]]
+== Introduction
+A clique is a subset of nodes where all nodes are connected to each other, sometimes called a complete subgraph. The clique counting algorithm counts the number of cliques of various sizes in the graph. In GDS this is done efficiently, without realizing every clique, through a Succinct Clique Tree-structure, see https://dl.acm.org/doi/pdf/10.1145/3336191.3371839[The Power of Pivoting for Exact Clique Counting].
+
+Counting the number of cliques in the graph, can give an understanding for the topology and clustering of the graph in its entirety as well as for individual nodes. The algorithm counts only cliques of size 3 or larger, since cliques of sizes 1 and 2 are trivial (nodes and relationships, respectively). If you are only interested in triangles (cliques of size 3), the xref:algorithms/triangle-count.adoc[Triangle Count] is a better choice.
+
+For more about cliques, including applications, see https://en.wikipedia.org/wiki/Clique_(graph_theory)[].
+
+
+[[algorithms-clique-counting-syntax]]
+== Syntax
+
+include::partial$/algorithms/shared/syntax-intro-named-graph.adoc[]
+
+
+.Clique Counting syntax per mode
+[.tabbed-example, caption = ]
+====
+
+[.include-with-stream]
+======
+.Run Clique Counting in stream mode on a named graph:
+[source, cypher, role=noplay]
+----
+CALL gds.cliqueCounting.stream(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  nodeId: Integer,
+  counts: List
+----
+
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name          | Type   | Default | Optional | Description
+include::partial$/algorithms/common-configuration/common-stream-stats-configuration-entries.adoc[]
+|===
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name    | Type            | Description
+| nodeId  | Integer         | Node ID.
+| counts  | List of Integer | Number of cliques of size ≥ 3 that this node is part of.
+|===
+======
+
+
+[.include-with-stats]
+======
+.Run Clique Counting in stats mode on a named graph:
+[source, cypher, role=noplay]
+----
+CALL gds.cliqueCounting.stats(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  globalCount: List,
+  preProcessingMillis: Integer,
+  computeMillis: Integer,
+  configuration: Map
+----
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name          | Type   | Default | Optional | Description
+include::partial$/algorithms/common-configuration/common-stream-stats-configuration-entries.adoc[]
+|===
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                 | Type            | Description
+| globalCount          | List of Integer | Number of cliques of sizes ≥ 3 in the graph.
+| preProcessingMillis  | Integer         | Milliseconds for preprocessing the graph.
+| computeMillis        | Integer         | Milliseconds for running the algorithm.
+| configuration        | Map             | The configuration used for running the algorithm.
+|===
+======
+
+
+
+[.include-with-mutate]
+======
+.Run Clique Counting in mutate mode on a named graph:
+[source, cypher, role=noplay]
+----
+CALL gds.cliqueCounting.mutate(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  globalCount: List,
+  nodePropertiesWritten: Integer,
+  preProcessingMillis: Integer,
+  computeMillis: Integer,
+  mutateMillis: Integer,
+  configuration: Map
+----
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name          | Type   | Default | Optional | Description
+include::partial$/algorithms/common-configuration/common-mutate-configuration-entries.adoc[]
+|===
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                        | Type            | Description
+| globalCount                 | List of Integer | Number of cliques of sizes ≥ 3 in the graph.
+| nodePropertiesWritten       | Integer         | Number of properties added to the projected graph.
+| preProcessingMillis         | Integer         | Milliseconds for preprocessing the graph.
+| computeMillis               | Integer         | Milliseconds for running the algorithm.
+| mutateMillis                | Integer         | Milliseconds for adding properties to the projected graph.
+| configuration               | Map             | The configuration used for running the algorithm.
+|===
+======
+
+
+[.include-with-write]
+======
+.Run Clique Counting in write mode on a named graph:
+[source, cypher, role=noplay]
+----
+CALL gds.cliqueCounting.write(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  globalCount: List,
+  nodePropertiesWritten: Integer,
+  preProcessingMillis: Integer,
+  computeMillis: Integer,
+  writeMillis: Integer,
+  configuration: Map
+----
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name          | Type   | Default | Optional | Description
+include::partial$/algorithms/common-configuration/common-mutate-configuration-entries.adoc[]
+|===
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                        | Type            | Description
+| globalCount                 | List of Integer | Number of cliques of sizes ≥ 3 in the graph.
+| nodePropertiesWritten       | Integer         | Number of properties written to Neo4j.
+| preProcessingMillis         | Integer         | Milliseconds for preprocessing the graph.
+| computeMillis               | Integer         | Milliseconds for running the algorithm.
+| writeMillis                 | Integer         | Milliseconds for writing results back to Neo4j.
+| configuration               | Map             | The configuration used for running the algorithm.
+|===
+======
+====
+
+
+
+
+[[algorithms-clique-counting-examples]]
+== Examples
+
+include::partial$/algorithms/shared/examples-named-native-note.adoc[]
+
+:algorithm-name: {algorithm}
+:graph-description: social network
+:image-file: clique-counting.svg
+include::partial$/algorithms/shared/examples-intro.adoc[]
+
+.The following Cypher statement will create the example graph in the Neo4j database:
+[source, cypher, role=noplay setup-query]
+----
+CREATE
+  (alice:Person {name: 'Alice'}),
+  (michael:Person {name: 'Michael'}),
+  (karin:Person {name: 'Karin'}),
+  (chris:Person {name: 'Chris'}),
+  (will:Person {name: 'Will'}),
+  (mark:Person {name: 'Mark'}),
+
+  (alice)-[:KNOWS]->(michael),
+  (alice)-[:KNOWS]->(karin),
+  (alice)-[:KNOWS]->(chris),
+  (michael)-[:KNOWS]->(karin),
+  (michael)-[:KNOWS]->(chris),
+  (karin)-[:KNOWS]->(chris),
+
+  (karin)-[:KNOWS]->(will),
+  (chris)-[:KNOWS]->(will),
+  (will)-[:KNOWS]->(mark)
+----
+
+With the graph in Neo4j we can now project it into the graph catalog to prepare it for algorithm execution.
+We do this using a Cypher projection targeting the `Person` nodes and the `KNOWS` relationships.
+For the relationships we must use the `UNDIRECTED` orientation.
+This is because the Clique Counting algorithm is defined only for undirected graphs.
+
+.The following statement will project a graph using a Cypher projection and store it in the graph catalog under the name 'myGraph'.
+[source, cypher, role=noplay graph-project-query]
+----
+MATCH (source:Person)-[r:KNOWS]->(target:Person)
+RETURN gds.graph.project(
+  'myGraph',
+  source,
+  target,
+  {},
+  { undirectedRelationshipTypes: ['*'] }
+)
+----
+
+include::partial$/algorithms/shared/undirected-req-note.adoc[]
+
+In the following examples we will demonstrate using the Clique Counting algorithm on this graph.
+
+//todo: Memory Estimation
+
+[[algorithms-clique-counting-examples-stream]]
+=== Stream
+
+include::partial$/algorithms/shared/examples-stream-intro.adoc[]
+
+.The following will run the algorithm in `stream` mode:
+[role=query-example]
+--
+[source, cypher, role=noplay]
+----
+CALL gds.cliqueCounting.stream('myGraph')
+YIELD nodeId, counts
+RETURN gds.util.asNode(nodeId).name AS name, counts
+ORDER BY name ASC
+----
+.Results
+[opts="header",cols="1,1"]
+|===
+| name      | counts
+| "Alice"   | [3, 1]
+| "Chris"   | [4, 1]
+| "Karin"   | [4, 1]
+| "Mark"    | []
+| "Michael" | [3, 1]
+| "Will"    | [1]
+|===
+--
+Here we find that the 'Chris' node is part of 4 triangles and a four-clique, while the 'Will' node is part of only a triangle. This can be verified in the xref:algorithms/clique-counting.adoc#algorithms-clique-counting-examples[example graph]. Since the 'Mark' node is linked only to the 'Will' node, it is not part of any clique of size three or larger and we therefore get an empty list.
+
+Note that with a clique of size k, you are guaranteed to have a clique also of size k-1 since any subset of a clique is also a clique.
+
+
+
+[[algorithms-clique-counting-examples-stats]]
+=== Stats
+
+:stats-details: The summary result contains the global clique count, which is the total number of cliques of each size in the entire graph.
+:stats-syntax: algorithms-clique-counting-syntax
+include::partial$/algorithms/shared/examples-stats-intro.adoc[]
+
+.The following will run the algorithm in `stats` mode:
+[role=query-example]
+--
+[source, cypher, role=noplay]
+----
+CALL gds.cliqueCounting.stats('myGraph')
+YIELD globalCount
+----
+.Results
+[opts="header"]
+|===
+| globalCount
+| [5, 1]
+|===
+--
+
+Here we can see that the graph has six nodes with a total number of five triangles, one four-clique and no larger cliques.
+Comparing this to the xref:algorithms/clique-counting.adoc#algorithms-clique-counting-examples-stream[stream example] we can see that the 'Chris' node is part of almost every clique. The exception is the 'Michael-Karin-Alice'-triangle.
+In other words, that node is part of most cliques in the graph and thus has a very central position in the graph.
+
+
+
+[[algorithms-clique-counting-examples-mutate]]
+=== Mutate
+
+include::partial$/algorithms/shared/examples-mutate-intro.adoc[]
+
+[role=query-example]
+--
+.The following will run the algorithm in `mutate` mode:
+[source, cypher, role=noplay]
+----
+CALL gds.cliqueCounting.mutate('myGraph', {
+  mutateProperty: 'cliqueCount'
+})
+YIELD globalCount
+----
+
+.Results
+[opts="header"]
+|===
+| globalCount
+| [5, 1]
+|===
+--
+
+The returned result is the same as in the `stats` example.
+Additionally, the graph 'myGraph' now has a node property `cliqueCount` which stores the clique counts for each node.
+To find out how to inspect the new schema of the in-memory graph, see xref:management-ops/graph-list.adoc[Listing graphs].
+
+
+
+[[algorithms-clique-counting-examples-write]]
+=== Write
+
+include::partial$/algorithms/shared/examples-write-intro.adoc[]
+
+[role=query-example]
+--
+.The following will run the algorithm in `write` mode:
+[source, cypher, role=noplay]
+----
+CALL gds.cliqueCounting.write('myGraph', {
+  writeProperty: 'cliqueCount'
+})
+YIELD globalCount
+----
+
+.Results
+[opts="header"]
+|===
+| globalCount
+| [5, 1]
+|===
+--
+
+The returned result is the same as in the `stats` example.
+Additionally, each of the six nodes now has a new property `cliqueCount` in the Neo4j database, containing the clique counts for that node.

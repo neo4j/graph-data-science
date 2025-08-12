@@ -30,7 +30,7 @@ public record CliqueCountingMutateResult(
         long preProcessingMillis,
         long computeMillis,
         long mutateMillis,
-        long nodeCount,
+        long nodePropertiesWritten,
         List<Long> globalCount,
         Map<String, Object> configuration
     )  implements ModeResult {

@@ -124,7 +124,7 @@ public class CliqueCountingMutateProcTest extends BaseProcTest {
         var rowCount=runQueryWithRowConsumer(query, row -> {
             assertThat(row.getNumber("preProcessingMillis").longValue()).isGreaterThanOrEqualTo(0);
             assertThat(row.getNumber("computeMillis").longValue()).isGreaterThanOrEqualTo(0);
-            assertThat(row.getNumber("nodeCount").longValue()).isEqualTo(5);
+            assertThat(row.getNumber("nodePropertiesWritten").longValue()).isEqualTo(5);
             assertThat((List<Long>) row.get("globalCount")).containsExactly(5L,1L);
         });
 
@@ -152,10 +152,10 @@ public class CliqueCountingMutateProcTest extends BaseProcTest {
         String query = GdsCypher.call(CLIQUE_COUNTING_GRAPH).algo("gds.cliqueCounting")
             .mutateEstimation()
             .addParameter("mutateProperty", "globalCount")
-            .yields("nodeCount", "bytesMin", "bytesMax", "requiredMemory");
+            .yields("nodePropertiesWritten", "bytesMin", "bytesMax", "requiredMemory");
 
         assertCypherResult(query, List.of(Map.of(  //todo
-            "nodeCount", 4L,
+            "nodePropertiesWritten", 4L,
             "bytesMin", 544L,
             "bytesMax", 544L,
             "requiredMemory", "544 Bytes"
@@ -277,7 +277,7 @@ public class CliqueCountingMutateProcTest extends BaseProcTest {
         var rowCount=runQueryWithRowConsumer(query, row -> {
             AssertionsForClassTypes.assertThat(row.getNumber("preProcessingMillis").longValue()).isNotEqualTo(-1);
             AssertionsForClassTypes.assertThat(row.getNumber("computeMillis").longValue()).isEqualTo(-1);
-            AssertionsForClassTypes.assertThat(row.getNumber("nodeCount").longValue()).isEqualTo(0);
+            AssertionsForClassTypes.assertThat(row.getNumber("nodePropertiesWritten").longValue()).isEqualTo(0);
             AssertionsForClassTypes.assertThat(((List<Long>) row.get("globalCount")).size()).isEqualTo(0);
         });
 

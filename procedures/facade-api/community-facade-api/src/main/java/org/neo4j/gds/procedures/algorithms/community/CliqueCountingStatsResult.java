@@ -30,7 +30,6 @@ import java.util.stream.Stream;
 public record CliqueCountingStatsResult(
     long preProcessingMillis,
     long computeMillis,
-    long nodeCount,
     List<Long> globalCount,
     Map<String, Object> configuration
 )  implements ModeResult {
@@ -45,7 +44,6 @@ public record CliqueCountingStatsResult(
         return new CliqueCountingStatsResult(
             timings.preProcessingMillis,
             timings.computeMillis,
-            nodeCount,
             Arrays.stream(globalCount).boxed().toList(),
             configurationMap
         );
@@ -59,7 +57,6 @@ public record CliqueCountingStatsResult(
             new CliqueCountingStatsResult(
                 timings.preProcessingMillis,
                 timings.computeMillis,
-                0,
                 List.of(),
                 configurationMap
             )

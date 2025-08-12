@@ -99,7 +99,7 @@ class CliqueCountingWriteProcTest extends BaseProcTest {
             assertThat(row.getNumber("preProcessingMillis").longValue()).isGreaterThanOrEqualTo(0);
             assertThat(row.getNumber("computeMillis").longValue()).isGreaterThanOrEqualTo(0);
             assertThat(row.getNumber("writeMillis").longValue()).isGreaterThanOrEqualTo(0);
-            assertThat(row.getNumber("nodeCount").longValue()).isEqualTo(5);
+            assertThat(row.getNumber("nodePropertiesWritten").longValue()).isEqualTo(5);
             Assertions.assertThat((List<Long>) row.get("globalCount")).containsExactly(4L, 1L);
            assertUserInput(row, "writeProperty", "perNodeCount");
 
@@ -163,7 +163,7 @@ class CliqueCountingWriteProcTest extends BaseProcTest {
         var rowCount=runQueryWithRowConsumer(query, row -> {
             AssertionsForClassTypes.assertThat(row.getNumber("preProcessingMillis").longValue()).isNotEqualTo(-1);
             assertThat(row.getNumber("computeMillis").longValue()).isEqualTo(-1);
-            assertThat(row.getNumber("nodeCount").longValue()).isEqualTo(0);
+            assertThat(row.getNumber("nodePropertiesWritten").longValue()).isEqualTo(0);
             Assertions.assertThat((List<Long>) row.get("globalCount")).isEmpty();
         });
 
