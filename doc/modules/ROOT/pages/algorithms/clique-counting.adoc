@@ -237,7 +237,29 @@ include::partial$/algorithms/shared/undirected-req-note.adoc[]
 
 In the following examples we will demonstrate using the Clique Counting algorithm on this graph.
 
-//todo: Memory Estimation
+[[algorithms-triangle-count-examples-memory-estimation]]
+=== Memory Estimation
+
+:mode: write
+include::partial$/algorithms/shared/examples-estimate-intro.adoc[]
+
+[role=query-example]
+--
+.The following will estimate the memory requirements for running the algorithm in write mode:
+[source, cypher, role=noplay]
+----
+CALL gds.cliqueCounting.write.estimate('myGraph', { writeProperty: 'cliqueCount' })
+YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
+----
+
+.Results
+[opts="header"]
+|===
+| nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
+| 6         | 18                | 64       | 952      | "[64 Bytes \... 952 Bytes]"
+|===
+--
+
 
 [[algorithms-clique-counting-examples-stream]]
 === Stream

@@ -77,9 +77,13 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         "gds.bridges.stream.estimate",
 
         "gds.cliqueCounting.mutate",
+        "gds.cliqueCounting.mutate.estimate",
         "gds.cliqueCounting.stats",
+        "gds.cliqueCounting.stats.estimate",
         "gds.cliqueCounting.stream",
+        "gds.cliqueCounting.stream.estimate",
         "gds.cliqueCounting.write",
+        "gds.cliqueCounting.write.estimate",
 
         "gds.collapsePath.mutate",
 
@@ -625,7 +629,7 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         );
 
         // If you find yourself updating this count, please also update the count in SmokeTest.kt
-        int expectedCount = 464;
+        int expectedCount = 468;
         assertEquals(
             expectedCount,
             returnedRows,

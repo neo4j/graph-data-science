@@ -60,7 +60,7 @@ public interface CommunityProcedureFacade {
         Map<String, Object> configuration
     );
 
-    Stream<MemoryEstimateResult> cliqueCountingMutateEstimate( //todo
+    Stream<MemoryEstimateResult> cliqueCountingMutateEstimate(
         Object graphNameOrConfiguration,
         Map<String, Object> rawConfiguration
     );

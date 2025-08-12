@@ -23,7 +23,6 @@ import org.assertj.core.api.Assertions;
 import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
@@ -105,7 +104,7 @@ class CliqueCountingStreamProcTest extends BaseProcTest {
         Assertions.assertThat(perNodeCountResult.get("e")).hasSize(0);
     }
 
-    @Disabled
+    @Test
     void testStreamingEstimate() {
         @Language("Cypher")
         String query = GdsCypher.call(CLIQUE_COUNTING_GRAPH).algo("gds.cliqueCounting")
@@ -113,8 +112,8 @@ class CliqueCountingStreamProcTest extends BaseProcTest {
             .yields("requiredMemory", "treeView", "bytesMin", "bytesMax");
 
         runQueryWithRowConsumer(query, row -> {
-            assertTrue(row.getNumber("bytesMin").longValue() > 0);
-            assertTrue(row.getNumber("bytesMax").longValue() > 0);
+            assertThat(row.getNumber("bytesMin").longValue()).isPositive();
+            assertThat(row.getNumber("bytesMax").longValue()).isPositive();
 
             String bytesHuman = Estimate.humanReadable(row.getNumber("bytesMin").longValue());
             assertNotNull(bytesHuman);
@@ -122,40 +121,6 @@ class CliqueCountingStreamProcTest extends BaseProcTest {
         });
     }
 
-//    static Stream<Arguments> communitySizeInputs() {
-//        return Stream.of(
-//            Arguments.of(Map.of("minCommunitySize", 1), Map.of(
-//                "a", 1L,
-//                "b", 0L,
-//                "c", 0L,
-//                "d", 0L
-//            )),
-//            Arguments.of(Map.of("minCommunitySize", 2), Map.of(
-//                "b", 0L,
-//                "c", 0L,
-//                "d", 0L
-//            ))
-//        );
-//    }
-
-//    @ParameterizedTest
-//    @MethodSource("communitySizeInputs")
-//    void testStreamingMinCommunitySize(Map<String, Long> parameter, Map<String, Long> expectedResult) {
-//        @Language("Cypher")
-//        String yields = GdsCypher.call(CLIQUE_COUNTING_GRAPH).algo("gds", "k1coloring")
-//                .streamMode()
-//                .addAllParameters(parameter)
-//                .yields("nodeId", "color");
-//
-//        Map<String, Long> coloringResult = new HashMap<>(4);
-//        runQueryWithRowConsumer(yields, (row) -> {
-//            long nodeId = row.getNumber("nodeId").longValue();
-//            long color = row.getNumber("color").longValue();
-//            coloringResult.put(idToVariable.of(nodeId), color);
-//        });
-//
-//        assertEquals(coloringResult, expectedResult);
-//    }
 
     @Test
     void testRunOnEmptyGraph() {

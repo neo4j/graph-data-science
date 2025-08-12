@@ -24,7 +24,6 @@ import org.neo4j.gds.applications.algorithms.community.CommunityAlgorithmsMutate
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.cliquecounting.CliqueCountingMutateConfig;
 import org.neo4j.gds.mem.MemoryEstimation;
-import org.neo4j.gds.mem.MemoryEstimations;
 import org.neo4j.gds.procedures.algorithms.community.CliqueCountingMutateResult;
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 
@@ -54,12 +53,11 @@ public class LocalCliqueCountingMutateStub implements CliqueCountingMutateStub {
 
     @Override
     public MemoryEstimation getMemoryEstimation(String username, Map<String, Object> configuration) {
-        return MemoryEstimations.builder().build();
-//        return genericStub.getMemoryEstimation(
-//            configuration,
-//            CliqueCountingMutateConfig::of,
-//            __ -> estimationModeBusinessFacade.cliqueCounting()
-//        );
+        return genericStub.getMemoryEstimation(
+            configuration,
+            CliqueCountingMutateConfig::of,
+            __ -> estimationModeBusinessFacade.cliqueCounting()
+        );
     }
 
     @Override

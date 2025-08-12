@@ -30,7 +30,6 @@ import org.neo4j.gds.applications.algorithms.community.CommunityAlgorithmsWriteM
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutStreamConfig;
 import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutWriteConfig;
-import org.neo4j.gds.cliquecounting.CliqueCountingMutateConfig;
 import org.neo4j.gds.cliquecounting.CliqueCountingStatsConfig;
 import org.neo4j.gds.cliquecounting.CliqueCountingStreamConfig;
 import org.neo4j.gds.cliquecounting.CliqueCountingWriteConfig;
@@ -330,16 +329,11 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
         return stubs.cliqueCounting().execute(graphName, rawConfiguration);
     }
 
-    //todo: mutate estimate
     public Stream<MemoryEstimateResult> cliqueCountingMutateEstimate(
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     ) {
-        var configuration = configurationParser.parseConfiguration(
-            algorithmConfiguration,
-            CliqueCountingMutateConfig::of
-        );
-        return Stream.of(estimationModeBusinessFacade.cliqueCounting(configuration, graphNameOrConfiguration));
+        return stubs.cliqueCounting().estimate(graphNameOrConfiguration, algorithmConfiguration);
     }
 
     public Stream<CliqueCountingStatsResult> cliqueCountingStats(
@@ -351,7 +345,6 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
         return statsModeBusinessFacade.cliqueCounting(GraphName.parse(graphName), parsedConfig, resultBuilder);
     }
 
-    //todo: stats estimate
     public Stream<MemoryEstimateResult> cliqueCountingStatsEstimate(
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
@@ -373,7 +366,6 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
         return streamModeBusinessFacade.cliqueCounting(GraphName.parse(graphName), parsedConfig, resultBuilder);
     }
 
-    //todo: stream estimate
     public Stream<MemoryEstimateResult> cliqueCountingStreamEstimate(
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
@@ -395,7 +387,6 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
         return writeModeBusinessFacade.cliqueCounting(GraphName.parse(graphName), parsedConfig, resultBuilder);
     }
 
-    //todo: write estimate
     public Stream<MemoryEstimateResult> cliqueCountingWriteEstimate(
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration

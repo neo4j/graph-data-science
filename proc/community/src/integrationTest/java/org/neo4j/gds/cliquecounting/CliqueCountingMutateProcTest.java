@@ -23,7 +23,6 @@ import org.assertj.core.api.AssertionsForClassTypes;
 import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
@@ -52,8 +51,6 @@ import static org.neo4j.gds.TestSupport.fromGdl;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class CliqueCountingMutateProcTest extends BaseProcTest {
-
-    //todo
 
     private static final String TEST_USERNAME = Username.EMPTY_USERNAME.username();
     private static final String CLIQUE_COUNTING_GRAPH = "myGraph";
@@ -146,19 +143,18 @@ public class CliqueCountingMutateProcTest extends BaseProcTest {
         assertThat(containsMutateProperty).isTrue();
     }
 
-    @Disabled
+    @Test
     void testMutateEstimate() {
         @Language("Cypher")
         String query = GdsCypher.call(CLIQUE_COUNTING_GRAPH).algo("gds.cliqueCounting")
             .mutateEstimation()
             .addParameter("mutateProperty", "globalCount")
-            .yields("nodePropertiesWritten", "bytesMin", "bytesMax", "requiredMemory");
+            .yields("bytesMin", "bytesMax", "requiredMemory");
 
-        assertCypherResult(query, List.of(Map.of(  //todo
-            "nodePropertiesWritten", 4L,
-            "bytesMin", 544L,
-            "bytesMax", 544L,
-            "requiredMemory", "544 Bytes"
+        assertCypherResult(query, List.of(Map.of(
+            "bytesMin", 56L,
+            "bytesMax", 952L,
+            "requiredMemory", "[56 Bytes ... 952 Bytes]"
         )));
     }
 

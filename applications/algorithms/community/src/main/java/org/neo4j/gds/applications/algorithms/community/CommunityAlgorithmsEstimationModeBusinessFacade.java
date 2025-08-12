@@ -82,12 +82,11 @@ public class CommunityAlgorithmsEstimationModeBusinessFacade {
     }
 
 
-    public MemoryEstimation cliqueCounting() { //fixme
+    public MemoryEstimation cliqueCounting() {
         return new CliqueCountingMemoryEstimateDefinition().memoryEstimation();
-//        throw new MemoryEstimationNotImplementedException();
     }
 
-    public MemoryEstimateResult cliqueCounting(CliqueCountingBaseConfig configuration, Object graphNameOrConfiguration) { //fixme
+    public MemoryEstimateResult cliqueCounting(CliqueCountingBaseConfig configuration, Object graphNameOrConfiguration) {
         var memoryEstimation = cliqueCounting();
 
         return algorithmEstimationTemplate.estimate(
