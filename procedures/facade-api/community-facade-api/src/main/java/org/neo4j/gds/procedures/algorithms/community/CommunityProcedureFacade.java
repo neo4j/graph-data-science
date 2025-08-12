@@ -70,7 +70,7 @@ public interface CommunityProcedureFacade {
         Map<String, Object> configuration
     );
 
-    Stream<MemoryEstimateResult> cliqueCountingStatsEstimate( //todo
+    Stream<MemoryEstimateResult> cliqueCountingStatsEstimate(
         Object graphNameOrConfiguration,
         Map<String, Object> rawConfiguration
     );
@@ -80,7 +80,7 @@ public interface CommunityProcedureFacade {
         Map<String, Object> configuration
     );
 
-    Stream<MemoryEstimateResult> cliqueCountingStreamEstimate( //todo
+    Stream<MemoryEstimateResult> cliqueCountingStreamEstimate(
         Object graphNameOrConfiguration,
         Map<String, Object> rawConfiguration
     );
@@ -90,7 +90,7 @@ public interface CommunityProcedureFacade {
         Map<String, Object> configuration
     );
 
-    Stream<MemoryEstimateResult> cliqueCountingWriteEstimate( //todo
+    Stream<MemoryEstimateResult> cliqueCountingWriteEstimate(
         Object graphNameOrConfiguration,
         Map<String, Object> rawConfiguration
     );

@@ -37,8 +37,6 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 class CliqueCountingStatsProcTest extends BaseProcTest {
 
-    //todo
-
     private static final String CLIQUE_COUNTING_GRAPH = "myGraph";
 
     @Neo4jGraph
@@ -102,7 +100,7 @@ class CliqueCountingStatsProcTest extends BaseProcTest {
         GraphStoreCatalog.removeAllLoadedGraphs();
 
         String  projectQuery = GdsCypher.call("foo")
-                .graphProject().loadEverything(Orientation.UNDIRECTED).yields();
+            .graphProject().loadEverything(Orientation.UNDIRECTED).yields();
         runQuery(projectQuery);
 
         String query = GdsCypher.call("foo")

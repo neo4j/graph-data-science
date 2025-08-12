@@ -24,7 +24,6 @@ import org.assertj.core.api.AssertionsForClassTypes;
 import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
@@ -120,10 +119,8 @@ class CliqueCountingWriteProcTest extends BaseProcTest {
         Assertions.assertThat(cliqueCountingResult.get("e")).isEmpty();
     }
 
-    @Disabled
+    @Test
     void testWritingEstimate() {
-        //todo?
-
         @Language("Cypher")
         String query = GdsCypher.call(CLIQUE_COUNTING_GRAPH).algo("gds.cliqueCounting")
             .estimationMode(GdsCypher.ExecutionModes.WRITE)
