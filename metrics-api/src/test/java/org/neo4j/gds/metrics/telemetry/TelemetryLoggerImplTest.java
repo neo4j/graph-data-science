@@ -19,44 +19,44 @@
  */
 package org.neo4j.gds.metrics.telemetry;
 
-import org.junit.jupiter.api.BeforeEach;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.logging.GdsTestLog;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class TelemetryLoggerTest {
-
-    private GdsTestLog testLog;
-    private TelemetryLogger telemetryLogger;
-    private TelemetryConfigImpl testConfig;
-
-    @BeforeEach
-    void setUp() {
-        testLog = new GdsTestLog();
-        telemetryLogger = new TelemetryLogger(testLog);
-        testConfig = new TelemetryConfigImpl(CypherMapWrapper.empty());
-    }
+class TelemetryLoggerImplTest {
 
     @Test
-    void shouldLogSuccessfulAlgorithmTelemetry() {
+    void shouldLogSuccessfulAlgorithmTelemetry() throws JsonProcessingException {
+        var testLog = new GdsTestLog();
+        var telemetryLogger = new TelemetryLoggerImpl(testLog);
+        var testConfig = new TelemetryConfigImpl(CypherMapWrapper.empty());
+
         telemetryLogger.log_algorithm("pageRank", testConfig, 1500L);
 
-        testLog.assertContainsMessage(GdsTestLog.INFO, "Algorithm Telemetry:");
-        testLog.assertContainsMessage(GdsTestLog.INFO, "pageRank");
-        testLog.assertContainsMessage(GdsTestLog.INFO, "1500");
-        testLog.assertContainsMessage(GdsTestLog.INFO, "configuredParameters");
-        testLog.assertContainsMessage(GdsTestLog.INFO, "[]");
+        TelemetryLoggerImpl.AlgorithmLogEntry entry = extractLog(testLog);
+
+        assertThat(entry).isEqualTo(new TelemetryLoggerImpl.AlgorithmLogEntry(
+            "pageRank",
+            1500L,
+            List.of()
+        ));
     }
 
     @Test
-    void shouldLogAlgorithmTelemetryWithConfiguredParameters() {
+    void shouldLogAlgorithmTelemetryWithConfiguredParameters() throws JsonProcessingException {
+        var testLog = new GdsTestLog();
+        var telemetryLogger = new TelemetryLoggerImpl(testLog);
+
         var configWithParams = new TelemetryConfigImpl(
             CypherMapWrapper.create(Map.of(
                 "optionalParam", "custom-value"
@@ -65,24 +65,25 @@ class TelemetryLoggerTest {
 
         telemetryLogger.log_algorithm("louvain", configWithParams, 2500L);
 
-        testLog.assertContainsMessage(GdsTestLog.INFO, "Algorithm Telemetry:");
-        testLog.assertContainsMessage(GdsTestLog.INFO, "louvain");
-        testLog.assertContainsMessage(GdsTestLog.INFO, "2500");
-        testLog.assertContainsMessage(GdsTestLog.INFO, "optionalParam");
+        TelemetryLoggerImpl.AlgorithmLogEntry entry = extractLog(testLog);
+
+        assertThat(entry).isEqualTo(new TelemetryLoggerImpl.AlgorithmLogEntry(
+            "louvain",
+            2500L,
+            List.of("optionalParam")
+        ));
     }
 
-    @Test
-    void shouldIncludeAllRequiredFieldsInLogEntry() {
-        telemetryLogger.log_algorithm("wcc", testConfig, 750L);
+    TelemetryLoggerImpl.AlgorithmLogEntry extractLog(GdsTestLog log) throws JsonProcessingException {
+        var messages = log.getMessages(GdsTestLog.INFO);
+        assertThat(messages).hasSize(1);
 
-        var infoMessages = testLog.getMessages(GdsTestLog.INFO);
-        assertThat(infoMessages).hasSize(1);
+        var message = messages.getFirst();
 
-        String logMessage = infoMessages.get(0);
-        assertThat(logMessage).contains("Algorithm Telemetry:");
-        assertThat(logMessage).contains("\"algorithm\":\"wcc\"");
-        assertThat(logMessage).contains("\"computeMillis\":750");
-        assertThat(logMessage).contains("\"configuredParameters\":");
+        return new ObjectMapper().readValue(
+            message.replace("Algorithm Telemetry:", ""),
+            TelemetryLoggerImpl.AlgorithmLogEntry.class
+        );
     }
 
     // Helper interface for testing - matches pattern from ConfigAnalyzerTest

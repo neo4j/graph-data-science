@@ -21,6 +21,7 @@ package org.neo4j.gds.metrics.telemetry;
 
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.logging.Log;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.InvocationTargetException;
@@ -32,7 +33,7 @@ import java.util.Optional;
 
 public final class ConfigAnalyzer {
 
-    public static List<String> nonDefaultParameters(AlgoBaseConfig config) {
+    public static List<String> nonDefaultParameters(AlgoBaseConfig config, Log log) {
         Class<?>[] interfaces = config.getClass().getInterfaces();
 
         if (interfaces.length != 1) {
@@ -47,7 +48,7 @@ public final class ConfigAnalyzer {
             .filter(method -> method.getAnnotation(Configuration.ToMap.class) == null)
             .filter(method -> method.getParameters().length == 0)
             .filter(method ->
-                optionalValueIsSet(config, method) || valueEqualsDefaultImplementation(config, configInterface, method))
+                optionalValueIsSet(config, method) || isNotDefaultValue(config, configInterface, method, log))
             .map(Method::getName)
             .filter(name -> !name.equals("jobId"))
             .toList();
@@ -64,10 +65,11 @@ public final class ConfigAnalyzer {
         return false;
     }
 
-    private static boolean valueEqualsDefaultImplementation(
+    private static boolean isNotDefaultValue(
         AlgoBaseConfig config,
         Class<?> configInterface,
-        Method method
+        Method method,
+        Log log
     ) {
         if (!method.isDefault()) {
             return false;
@@ -83,6 +85,7 @@ public final class ConfigAnalyzer {
             return !Objects.equals(defaultValue, configureValue);
 
         } catch (Throwable e) {
+            log.error("Failed to get default value for %s#%s: %s", config.getClass().getSimpleName(), method.getName(), e.getMessage(), e);
             return false;
         }
     }

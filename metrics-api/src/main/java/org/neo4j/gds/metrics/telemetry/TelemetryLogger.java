@@ -19,40 +19,12 @@
  */
 package org.neo4j.gds.metrics.telemetry;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.logging.Log;
 
-import java.util.List;
+public interface TelemetryLogger {
+    void log_algorithm(String algorithm, AlgoBaseConfig config, long computeMillis);
 
-public class TelemetryLogger {
+    TelemetryLogger DISABLED = (algorithm, config, computeMillis) -> {
 
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-
-    private final Log log;
-
-    public TelemetryLogger(Log log) {
-        this.log = log;
-    }
-
-    public void log_algorithm(String algorithm, AlgoBaseConfig config, long computeMillis) {
-        try {
-            var configuredParameters = ConfigAnalyzer.nonDefaultParameters(config);
-
-            var logEntry = new AlgorithmLogEntry(algorithm, computeMillis, configuredParameters);
-
-            var jsonEntry = OBJECT_MAPPER.writeValueAsString(logEntry);
-            log.info("Algorithm Telemetry: %s", jsonEntry);
-        } catch (Exception e) {
-            log.warn("Failed to log telemetry: %s", e.getMessage());
-        }
-    }
-
-    private record AlgorithmLogEntry(
-        String algorithm,
-        long computeMillis,
-        List<String> configuredParameters
-    ) {
-
-    }
+    };
 }

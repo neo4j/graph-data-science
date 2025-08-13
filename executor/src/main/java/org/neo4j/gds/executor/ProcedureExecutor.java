@@ -29,7 +29,7 @@ import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
-import org.neo4j.gds.metrics.telemetry.TelemetryLogger;
+import org.neo4j.gds.metrics.telemetry.TelemetryLoggerImpl;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.graphdb.TransactionTerminatedException;
 import org.neo4j.kernel.api.exceptions.Status;
@@ -138,7 +138,7 @@ public class ProcedureExecutor<
         return runWithExceptionLogging(
             "Computation failed",
             () -> {
-                var telemetryLogger = new TelemetryLogger(executionContext.log());
+                var telemetryLogger = new TelemetryLoggerImpl(executionContext.log());
                 var algorithmMetric = algorithmMetricsService.create(
                     // we don't want to use `spec.name()` because it's different for the different procedure modes;
                     // we want to capture the algorithm name as defined by the algorithm factory `taskName()`

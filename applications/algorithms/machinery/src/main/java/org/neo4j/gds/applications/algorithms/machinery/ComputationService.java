@@ -36,18 +36,20 @@ class ComputationService {
     private final Log log;
     private final MemoryGuard memoryGuard;
     private final AlgorithmMetricsService algorithmMetricsService;
+    private final TelemetryLogger telemetryLogger;
     private final String username;
 
     ComputationService(
         String username,
         Log log,
         MemoryGuard memoryGuard,
-        AlgorithmMetricsService algorithmMetricsService
+        AlgorithmMetricsService algorithmMetricsService, TelemetryLogger telemetryLogger
     ) {
         this.log = log;
         this.memoryGuard = memoryGuard;
         this.algorithmMetricsService = algorithmMetricsService;
         this.username = username;
+        this.telemetryLogger = telemetryLogger;
     }
 
     <CONFIGURATION extends AlgoBaseConfig, RESULT_FROM_ALGORITHM> RESULT_FROM_ALGORITHM computeAlgorithm(
@@ -81,7 +83,6 @@ class ComputationService {
         Computation<RESULT_FROM_ALGORITHM> computation
     ) {
         var executionMetric = algorithmMetricsService.create(label.asString());
-        var telemetryLogger = new TelemetryLogger(log);
 
         try (executionMetric) {
             executionMetric.start();

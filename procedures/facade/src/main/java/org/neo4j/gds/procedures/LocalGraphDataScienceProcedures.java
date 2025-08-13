@@ -45,6 +45,7 @@ import org.neo4j.gds.memest.DatabaseGraphStoreEstimationService;
 import org.neo4j.gds.metrics.Metrics;
 import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
 import org.neo4j.gds.metrics.procedures.DeprecatedProceduresMetricService;
+import org.neo4j.gds.metrics.telemetry.TelemetryLogger;
 import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationParser;
 import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
@@ -269,6 +270,7 @@ public class LocalGraphDataScienceProcedures implements GraphDataScienceProcedur
         var algorithmProcessingTemplate = DefaultAlgorithmProcessingTemplate.create(
             log,
             algorithmMetricsService,
+            TelemetryLogger.DISABLED,
             graphStoreCatalogService,
             memoryGuard,
             requestScopedDependencies

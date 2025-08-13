@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.logging.GdsTestLog;
 
 import java.util.Collection;
 import java.util.List;
@@ -35,17 +36,19 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ConfigAnalyzerTest {
 
     CypherMapWrapper defaultConfig;
+    GdsTestLog log;
 
     @BeforeEach
     void setUp() {
         this.defaultConfig = CypherMapWrapper.create(Map.of("abstractMethod", "foo"));
+        this.log = new GdsTestLog();
     }
 
     @Test
     void shouldReturnEmptyListForConfigWithAllDefaultValues() {
         var config = new TestConfigImpl(defaultConfig);
 
-        var result = ConfigAnalyzer.nonDefaultParameters(config);
+        var result = ConfigAnalyzer.nonDefaultParameters(config, log);
 
         assertThat(result).isEmpty();
     }
@@ -54,7 +57,7 @@ class ConfigAnalyzerTest {
     void shouldReturnMethodNamesForOptionalParametersWhenSet() {
         var config = new TestConfigImpl(defaultConfig.withEntry("optionalParam", "some-value"));
 
-        var result = ConfigAnalyzer.nonDefaultParameters(config);
+        var result = ConfigAnalyzer.nonDefaultParameters(config, log);
         assertThat(result).containsExactly("optionalParam");
     }
 
@@ -62,14 +65,14 @@ class ConfigAnalyzerTest {
     void shouldIgnoreGeneratedMethods() {
         var config = new TestConfigImpl(defaultConfig);
 
-        var result = ConfigAnalyzer.nonDefaultParameters(config);
+        var result = ConfigAnalyzer.nonDefaultParameters(config, log);
         assertThat(result).doesNotContain("ignoredMethod", "collectKeysMethod", "toMap");
     }
 
     @Test
     void shouldIgnoreMethodsWithParameters() {
         var config = new TestConfigImpl(defaultConfig);
-        var result = ConfigAnalyzer.nonDefaultParameters(config);
+        var result = ConfigAnalyzer.nonDefaultParameters(config, log);
 
         assertThat(result).doesNotContain("methodWithParameters");
     }
@@ -78,22 +81,12 @@ class ConfigAnalyzerTest {
     void shouldReturnMethodNamesForChangedDefaultImplementations() {
         var config = new TestConfigImpl(defaultConfig.withEntry("defaultMethodWithOverride", "non-default-value"));
 
-        var result = ConfigAnalyzer.nonDefaultParameters(config);
+        var result = ConfigAnalyzer.nonDefaultParameters(config, log);
         assertThat(result).contains("defaultMethodWithOverride");
     }
 
 
     interface BaseTestConfig extends AlgoBaseConfig {
-        @Configuration.Key("stringParam")
-        default String stringParam() {
-            return "default-value";
-        }
-
-        @Configuration.Key("intParam")
-        default int intParam() {
-            return 0;
-        }
-
         @Configuration.Key("optionalParam")
         Optional<String> optionalParam();
 
