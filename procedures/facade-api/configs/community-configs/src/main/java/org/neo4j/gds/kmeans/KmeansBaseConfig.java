@@ -69,13 +69,14 @@ public interface KmeansBaseConfig extends AlgoBaseConfig, IterationsConfig, Rand
         Collection<RelationshipType> selectedRelationshipTypes
     ) {
         var valueType = graphStore.nodeProperty(nodeProperty()).valueType();
-        if (valueType == ValueType.DOUBLE_ARRAY || valueType == ValueType.FLOAT_ARRAY) {
+        if (valueType == ValueType.DOUBLE_ARRAY || valueType == ValueType.FLOAT_ARRAY || valueType == ValueType.DOUBLE) {
             return;
         }
         throw new IllegalArgumentException(
             StringFormatting.formatWithLocale(
-                "Unsupported node property value type [%s]. Value type required: [%s] or [%s].",
+                "Unsupported node property value type [%s]. Value type required: [%s], [%s] or [%s].",
                 valueType,
+                ValueType.DOUBLE,
                 ValueType.DOUBLE_ARRAY,
                 ValueType.FLOAT_ARRAY
             )
