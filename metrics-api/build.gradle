@@ -6,11 +6,22 @@ group = 'org.neo4j.gds'
 
 dependencies {
 
-    testImplementation(
-        platform(openGds.junit5bom),
-        openGds.junit5.jupiter,
-    )
+    implementation project(":annotations")
+    implementation project(":config-api")
+    implementation project(":core-utils")
+    implementation project(":logging")
+
+    implementation openGds.jackson.databind
+
+    testAnnotationProcessor project(':config-generator')
+    testImplementation project(":concurrency")
+    testImplementation project(":core-api")
+    testImplementation project(":graph-projection-api")
 
     testImplementation openGds.assertj.core
     testImplementation openGds.mockito.junit.jupiter
+    testImplementation platform(openGds.junit5bom)
+    testImplementation openGds.junit5.jupiter
+    testCompileOnly openGds.jetbrains.annotations
+
 }
