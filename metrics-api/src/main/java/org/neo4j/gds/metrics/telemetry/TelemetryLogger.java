@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.metrics.telemetry;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.logging.Log;
@@ -37,15 +36,15 @@ public class TelemetryLogger {
     }
 
     public void log_algorithm(String algorithm, AlgoBaseConfig config, long computeMillis) {
-        var configuredParameters = ConfigAnalyzer.nonDefaultParameters(config);
-
-        var logEntry = new AlgorithmLogEntry(algorithm, computeMillis, configuredParameters);
-
         try {
+            var configuredParameters = ConfigAnalyzer.nonDefaultParameters(config);
+
+            var logEntry = new AlgorithmLogEntry(algorithm, computeMillis, configuredParameters);
+
             var jsonEntry = OBJECT_MAPPER.writeValueAsString(logEntry);
             log.info("Algorithm Telemetry: %s", jsonEntry);
-        } catch (JsonProcessingException e) {
-            log.warn("Could not serialize telemetry log entry: %s", e.getMessage());
+        } catch (Exception e) {
+            log.warn("Failed to log telemetry: %s", e.getMessage());
         }
     }
 
