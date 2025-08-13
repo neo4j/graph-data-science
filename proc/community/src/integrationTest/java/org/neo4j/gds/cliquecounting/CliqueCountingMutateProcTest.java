@@ -172,6 +172,8 @@ public class CliqueCountingMutateProcTest extends BaseProcTest {
             .graphProject()
             .withNodeLabel("A")
             .withNodeLabel("B")
+            .withRelationshipType("REL1",Orientation.UNDIRECTED)
+            .withRelationshipType("REL2",Orientation.UNDIRECTED)
             .yields();
         runQuery(projectQuery);
 
@@ -223,6 +225,7 @@ public class CliqueCountingMutateProcTest extends BaseProcTest {
             .graphProject()
             .withNodeLabel("A")
             .withNodeLabel("B")
+            .withRelationshipType("REL",Orientation.UNDIRECTED)
             .yields();
         runQuery(projectQuery);
 
@@ -265,7 +268,7 @@ public class CliqueCountingMutateProcTest extends BaseProcTest {
         GraphStoreCatalog.removeAllLoadedGraphs();
 
         String  projectQuery = GdsCypher.call("foo")
-            .graphProject().withNodeLabel("X").yields();
+            .graphProject().loadEverything(Orientation.UNDIRECTED).yields();
         runQuery(projectQuery);
 
         String query = GdsCypher.call("foo")

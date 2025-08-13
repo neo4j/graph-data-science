@@ -102,7 +102,7 @@ class CliqueCountingStatsProcTest extends BaseProcTest {
         GraphStoreCatalog.removeAllLoadedGraphs();
 
         String  projectQuery = GdsCypher.call("foo")
-                .graphProject().withNodeLabel("X").yields();
+                .graphProject().loadEverything(Orientation.UNDIRECTED).yields();
         runQuery(projectQuery);
 
         String query = GdsCypher.call("foo")
