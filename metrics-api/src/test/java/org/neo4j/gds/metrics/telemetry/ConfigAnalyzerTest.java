@@ -45,7 +45,7 @@ class ConfigAnalyzerTest {
     void shouldReturnEmptyListForConfigWithAllDefaultValues() {
         var config = new TestConfigImpl(defaultConfig);
 
-        var result = ConfigAnalyzer.nonDefaultParameters(config, TestConfig.class);
+        var result = ConfigAnalyzer.nonDefaultParameters(config);
 
         assertThat(result).isEmpty();
     }
@@ -54,7 +54,7 @@ class ConfigAnalyzerTest {
     void shouldReturnMethodNamesForOptionalParametersWhenSet() {
         var config = new TestConfigImpl(defaultConfig.withEntry("optionalParam", "some-value"));
 
-        var result = ConfigAnalyzer.nonDefaultParameters(config, TestConfig.class);
+        var result = ConfigAnalyzer.nonDefaultParameters(config);
         assertThat(result).containsExactly("optionalParam");
     }
 
@@ -62,14 +62,14 @@ class ConfigAnalyzerTest {
     void shouldIgnoreGeneratedMethods() {
         var config = new TestConfigImpl(defaultConfig);
 
-        var result = ConfigAnalyzer.nonDefaultParameters(config, TestConfig.class);
+        var result = ConfigAnalyzer.nonDefaultParameters(config);
         assertThat(result).doesNotContain("ignoredMethod", "collectKeysMethod", "toMap");
     }
 
     @Test
     void shouldIgnoreMethodsWithParameters() {
         var config = new TestConfigImpl(defaultConfig);
-        var result = ConfigAnalyzer.nonDefaultParameters(config, TestConfig.class);
+        var result = ConfigAnalyzer.nonDefaultParameters(config);
 
         assertThat(result).doesNotContain("methodWithParameters");
     }
@@ -78,13 +78,12 @@ class ConfigAnalyzerTest {
     void shouldReturnMethodNamesForChangedDefaultImplementations() {
         var config = new TestConfigImpl(defaultConfig.withEntry("defaultMethodWithOverride", "non-default-value"));
 
-        var result = ConfigAnalyzer.nonDefaultParameters(config, TestConfig.class);
+        var result = ConfigAnalyzer.nonDefaultParameters(config);
         assertThat(result).contains("defaultMethodWithOverride");
     }
 
-    @Configuration
-    interface TestConfig extends AlgoBaseConfig {
 
+    interface BaseTestConfig extends AlgoBaseConfig {
         @Configuration.Key("stringParam")
         default String stringParam() {
             return "default-value";
@@ -126,4 +125,7 @@ class ConfigAnalyzerTest {
         // Abstract method without default implementation
         String abstractMethod();
     }
+
+    @Configuration
+    interface TestConfig extends BaseTestConfig {}
 }

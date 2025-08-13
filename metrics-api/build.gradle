@@ -17,6 +17,7 @@ dependencies {
     testImplementation project(":concurrency")
     testImplementation project(":core-api")
     testImplementation project(":graph-projection-api")
+    testImplementation project(":test-utils")
 
     testImplementation openGds.assertj.core
     testImplementation openGds.mockito.junit.jupiter

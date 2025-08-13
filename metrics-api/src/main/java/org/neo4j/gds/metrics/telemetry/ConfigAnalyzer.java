@@ -32,8 +32,16 @@ import java.util.Optional;
 
 public final class ConfigAnalyzer {
 
-    public static List<String> nonDefaultParameters(AlgoBaseConfig config, Class<?> configInterface) {
-        return Arrays.stream(configInterface.getMethods())
+    public static List<String> nonDefaultParameters(AlgoBaseConfig config) {
+        Class<?>[] interfaces = config.getClass().getInterfaces();
+
+        if (interfaces.length != 1) {
+            throw new IllegalArgumentException("Config class must implement exactly one interface");
+        }
+
+        Class<?> configInterface = interfaces[0];
+
+        return Arrays.stream(interfaces[0].getMethods())
             .filter(method -> method.getAnnotation(Configuration.Ignore.class) == null)
             .filter(method -> method.getAnnotation(Configuration.CollectKeys.class) == null)
             .filter(method -> method.getAnnotation(Configuration.ToMap.class) == null)
@@ -56,7 +64,11 @@ public final class ConfigAnalyzer {
         return false;
     }
 
-    private static boolean valueEqualsDefaultImplementation(AlgoBaseConfig config, Class<?> configInterface, Method method) {
+    private static boolean valueEqualsDefaultImplementation(
+        AlgoBaseConfig config,
+        Class<?> configInterface,
+        Method method
+    ) {
         if (!method.isDefault()) {
             return false;
         }
