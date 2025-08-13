@@ -107,20 +107,9 @@ class KmeansStreamProcTest extends BaseProcTest {
             );
 
         });
-        assertThat(rowCount).isEqualTo(4l);
+        assertThat(rowCount).isEqualTo(4L);
     }
 
-    class KmeansTestStreamResult {
-
-        public long communityId;
-        public double distanceFromCentroid;
-        public double silhouette;
-
-        public KmeansTestStreamResult(long communityId, double distanceFromCentroid, double silhouette) {
-            this.communityId = communityId;
-            this.distanceFromCentroid = distanceFromCentroid;
-            this.silhouette = silhouette;
-        }
-    }
+    private record KmeansTestStreamResult(long communityId, double distanceFromCentroid, double silhouette) {}
     
 }
