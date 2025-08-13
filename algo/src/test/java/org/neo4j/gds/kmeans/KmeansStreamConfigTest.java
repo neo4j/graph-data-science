@@ -72,7 +72,7 @@ class KmeansStreamConfigTest {
         assertThatIllegalArgumentException()
             .isThrownBy(() -> streamConfig.graphStoreValidation(graphStoreMock, List.of(), List.of()))
             .withMessageContaining("Unsupported node property value type")
-            .withMessageContaining("Value type required: [DOUBLE_ARRAY] or [FLOAT_ARRAY].");
+            .withMessageContaining("Value type required: [DOUBLE], [DOUBLE_ARRAY] or [FLOAT_ARRAY].");
     }
 
     @ParameterizedTest
@@ -93,13 +93,14 @@ class KmeansStreamConfigTest {
     static Stream<Arguments> validNodePropertyValueTypes() {
         return Stream.of(
             Arguments.of(ValueType.DOUBLE_ARRAY),
-            Arguments.of(ValueType.FLOAT_ARRAY)
+            Arguments.of(ValueType.FLOAT_ARRAY),
+            Arguments.of(ValueType.DOUBLE)
         );
     }
 
     static Stream<Arguments> invalidNodePropertyValueTypes() {
         return Arrays.stream(ValueType.values())
-            .filter(t -> t != ValueType.DOUBLE_ARRAY && t != ValueType.FLOAT_ARRAY)
+            .filter(t -> t != ValueType.DOUBLE_ARRAY && t != ValueType.FLOAT_ARRAY && t != ValueType.DOUBLE)
             .map(Arguments::of);
     }
 

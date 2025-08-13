@@ -53,6 +53,7 @@ This sampling strategy tries to spread the initial clusters more evenly so as to
 
 
 It is also possible to explicitly give the list of initial centroids to the algorithm via the `seedCentroids` parameter. In this case, the value of the `initialSampler` parameter is ignored, even if changed in the configuration.
+Note that although the algorithm supports clustering single double numbers, when  seeded through the `seedCentroids` parameter, the initial centroids must be passed as arrays e.g., [[1.5],[2.5]] for initializing  with 1.5 and 2.5 respectively.
 
 [[algorithm-k-means-considerations]]
 == Considerations
