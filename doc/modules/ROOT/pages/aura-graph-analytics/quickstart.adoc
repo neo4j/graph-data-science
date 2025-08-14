@@ -33,7 +33,7 @@ The next step is to project the data into a graph within a remote session.
 The following example shows how to run a Cypher projection and xref:aura-graph-analytics/index.adoc#implicit-sessions[create a session] at the same time.
 
 [IMPORTANT]
-Make sure that the credentials you use here are the Aura API keys (client ID and client secret), *not* your AuraDB credentials (username and password).
+Make sure that the credentials you use here are the link:https://neo4j.com/docs/aura/api/authentication/[Aura API keys] (client ID and client secret), *not* your AuraDB credentials (username and password).
 
 .Project a graph called 'myGraph' using a remote Cypher projection into a new GDS Session
 [source, cypher, role=noplay setup-query]
@@ -47,13 +47,13 @@ WITH gds.graph.project('myGraph', source, target, {
   targetNodeProperties: target { .age },
   relationshipProperties: r { .weight }
 }, {
-  memory: '4GB', ttl: duration({minutes: 5}) // <3>
+  memory: '4GB', ttl: duration({minutes: 30}) // <3>
 }) AS g
 RETURN g.graphName, g.nodeCount, g.relationshipCount
 ----
 <1> The Cypher `parallel` runtime is recommended but not mandatory.
 <2> Add the `gds.aura.api.credentials` function before the actual query.
-You need to set the `clientId` and `clientSecret` link:https://neo4j.com/docs/cypher-manual/current/syntax/parameters/[query parameters] first.
+You need to set the string values for `clientId` and `clientSecret` as link:https://neo4j.com/docs/cypher-manual/current/syntax/parameters/[query parameters] first.
 <3> Set the `memory` (mandatory) and `ttl` (optional) parameters.
 
 .Results

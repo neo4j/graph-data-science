@@ -144,7 +144,7 @@ WITH gds.aura.api.credentials($clientId, $clientSecret) AS credentials
 CALL gds.session.getOrCreate(
   'test-session',
   '4GB',
-  duration({minutes: 5})
+  duration({minutes: 30})
 )
 YIELD id AS sessionId, name AS sessionName
 RETURN sessionId, sessionName
@@ -180,7 +180,7 @@ CALL gds.session.getOrCreate(
 | Name          | Type      | Optional | Description
 | sessionName   | String    | no       | The name of the GDS Session to create or return.
 | memory        | String    | no       | The size of the GDS Session, e.g. `4GB`, `8GB`, etc.
-| ttl           | Duration  | yes      | The time to live of the GDS Session when no activity is recorded, e.g. `duration({days: 1})`, `duration({hours: 12})`, etc. The default value is 2 days.
+| ttl           | Duration  | yes      | The time to live of the GDS Session when no activity is recorded, e.g. `duration({days: 1})`, `duration({hours: 12})`, etc. The default value is 1 hour.
 |===
 
 [[session-create-procedure-results]]
