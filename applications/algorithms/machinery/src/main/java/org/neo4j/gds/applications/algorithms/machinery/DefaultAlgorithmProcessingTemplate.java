@@ -30,6 +30,7 @@ import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
+import org.neo4j.gds.metrics.telemetry.TelemetryLogger;
 
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -53,6 +54,7 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
     public static DefaultAlgorithmProcessingTemplate create(
         Log log,
         AlgorithmMetricsService algorithmMetricsService,
+        TelemetryLogger telemetryLogger,
         GraphStoreCatalogService graphStoreCatalogService,
         MemoryGuard memoryGuard,
         RequestScopedDependencies requestScopedDependencies
@@ -61,7 +63,8 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
             requestScopedDependencies.user().getUsername(),
             log,
             memoryGuard,
-            algorithmMetricsService
+            algorithmMetricsService,
+            telemetryLogger
         );
 
         return new DefaultAlgorithmProcessingTemplate(

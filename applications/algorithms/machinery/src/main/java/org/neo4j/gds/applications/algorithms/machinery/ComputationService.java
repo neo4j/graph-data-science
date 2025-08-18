@@ -21,9 +21,11 @@ package org.neo4j.gds.applications.algorithms.machinery;
 
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.loading.GraphResources;
+import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
+import org.neo4j.gds.metrics.telemetry.TelemetryLogger;
 
 import java.util.function.Supplier;
 
@@ -34,13 +36,20 @@ class ComputationService {
     private final Log log;
     private final MemoryGuard memoryGuard;
     private final AlgorithmMetricsService algorithmMetricsService;
+    private final TelemetryLogger telemetryLogger;
     private final String username;
 
-    ComputationService(String username,Log log, MemoryGuard memoryGuard, AlgorithmMetricsService algorithmMetricsService) {
+    ComputationService(
+        String username,
+        Log log,
+        MemoryGuard memoryGuard,
+        AlgorithmMetricsService algorithmMetricsService, TelemetryLogger telemetryLogger
+    ) {
         this.log = log;
         this.memoryGuard = memoryGuard;
         this.algorithmMetricsService = algorithmMetricsService;
         this.username = username;
+        this.telemetryLogger = telemetryLogger;
     }
 
     <CONFIGURATION extends AlgoBaseConfig, RESULT_FROM_ALGORITHM> RESULT_FROM_ALGORITHM computeAlgorithm(
@@ -54,7 +63,9 @@ class ComputationService {
         memoryGuard.assertAlgorithmCanRun(
             graphResources.graph(),
             graphResources.graphStore(),
-            configuration.relationshipTypesFilter(), configuration.concurrency(), estimationSupplier,
+            configuration.relationshipTypesFilter(),
+            configuration.concurrency(),
+            estimationSupplier,
             label,
             dimensionTransformer,
             username,
@@ -62,10 +73,11 @@ class ComputationService {
             configuration.sudo()
         );
 
-        return computeWithMetrics(graphResources, label, computation);
+        return computeWithMetrics(configuration, graphResources, label, computation);
     }
 
-    private <RESULT_FROM_ALGORITHM> RESULT_FROM_ALGORITHM computeWithMetrics(
+    private <CONFIGURATION extends AlgoBaseConfig, RESULT_FROM_ALGORITHM> RESULT_FROM_ALGORITHM computeWithMetrics(
+        CONFIGURATION configuration,
         GraphResources graphResources,
         Label label,
         Computation<RESULT_FROM_ALGORITHM> computation
@@ -74,8 +86,14 @@ class ComputationService {
 
         try (executionMetric) {
             executionMetric.start();
+            var timer = ProgressTimer.start();
 
-            return computation.compute(graphResources.graph(), graphResources.graphStore());
+            var result = computation.compute(graphResources.graph(), graphResources.graphStore());
+
+            timer.stop();
+            telemetryLogger.log_algorithm(label.asString(), configuration, timer.getDuration());
+
+            return result;
         } catch (RuntimeException e) {
             log.warn("computation failed, halting metrics gathering", e);
             executionMetric.failed(e);

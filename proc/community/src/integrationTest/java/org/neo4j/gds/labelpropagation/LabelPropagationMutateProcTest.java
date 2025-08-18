@@ -74,6 +74,7 @@ import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
 import org.neo4j.gds.metrics.procedures.DeprecatedProceduresMetricService;
+import org.neo4j.gds.metrics.telemetry.TelemetryLogger;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.community.LocalCommunityProcedureFacade;
@@ -517,6 +518,7 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
         var algorithmProcessingTemplate = DefaultAlgorithmProcessingTemplate.create(
             logMock,
             AlgorithmMetricsService.DISABLED,
+            TelemetryLogger.DISABLED,
             graphStoreCatalogService,
             MemoryGuard.DISABLED,
             requestScopedDependencies
