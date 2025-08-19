@@ -21,6 +21,7 @@ package org.neo4j.gds.procedures.algorithms.pathfinding;
 
 import org.neo4j.gds.allshortestpaths.AllShortestPathsStreamResult;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
+import org.neo4j.gds.procedures.algorithms.pathfinding.mutate.PushbackPathFindingMutateProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stats.PushbackPathFindingStatsProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stream.PushbackPathFindingStreamProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.PathFindingStubs;
@@ -30,17 +31,20 @@ import org.neo4j.gds.procedures.algorithms.results.StandardStatsResult;
 import java.util.Map;
 import java.util.stream.Stream;
 
-public class PushbackPathFindingProcedureFacade implements PathFindingProcedureFacade {
+public final class PushbackPathFindingProcedureFacade implements PathFindingProcedureFacade {
 
-    private final PushbackPathFindingStreamProcedureFacade streamProcedureFacade;
+    private final PushbackPathFindingMutateProcedureFacade mutateProcedureFacade;
     private final PushbackPathFindingStatsProcedureFacade statsProcedureFacade;
+    private final PushbackPathFindingStreamProcedureFacade streamProcedureFacade;
 
     public PushbackPathFindingProcedureFacade(
-        PushbackPathFindingStreamProcedureFacade streamProcedureFacade,
-        PushbackPathFindingStatsProcedureFacade statsProcedureFacade
+        PushbackPathFindingMutateProcedureFacade mutateProcedureFacade,
+        PushbackPathFindingStatsProcedureFacade statsProcedureFacade,
+        PushbackPathFindingStreamProcedureFacade streamProcedureFacade
     ) {
-        this.streamProcedureFacade = streamProcedureFacade;
+        this.mutateProcedureFacade = mutateProcedureFacade;
         this.statsProcedureFacade = statsProcedureFacade;
+        this.streamProcedureFacade = streamProcedureFacade;
     }
 
     @Override
@@ -79,7 +83,7 @@ public class PushbackPathFindingProcedureFacade implements PathFindingProcedureF
 
     @Override
     public Stream<BellmanFordMutateResult> bellmanFordMutate(String graphName, Map<String, Object> configuration) {
-        return Stream.empty();
+        return mutateProcedureFacade.bellmanFord(graphName, configuration);
     }
 
     @Override
@@ -121,7 +125,7 @@ public class PushbackPathFindingProcedureFacade implements PathFindingProcedureF
         String graphName,
         Map<String, Object> configuration
     ) {
-        return Stream.empty();
+        return mutateProcedureFacade.breadthFirstSearch(graphName, configuration);
     }
 
     @Override
@@ -163,7 +167,7 @@ public class PushbackPathFindingProcedureFacade implements PathFindingProcedureF
 
     @Override
     public Stream<PathFindingMutateResult> deltaSteppingMutate(String graphName, Map<String, Object> configuration) {
-        return Stream.empty();
+        return mutateProcedureFacade.deltaStepping(graphName, configuration);
     }
 
     @Override
@@ -221,7 +225,7 @@ public class PushbackPathFindingProcedureFacade implements PathFindingProcedureF
 
     @Override
     public Stream<PathFindingMutateResult> depthFirstSearchMutate(String graphName, Map<String, Object> configuration) {
-        return Stream.empty();
+        return mutateProcedureFacade.depthFirstSearch(graphName, configuration);
     }
 
     @Override
@@ -268,7 +272,7 @@ public class PushbackPathFindingProcedureFacade implements PathFindingProcedureF
         String graphName,
         Map<String, Object> configuration
     ) {
-        return Stream.empty();
+        return mutateProcedureFacade.prizeCollectingSteinerTree(graphName, configuration);
     }
 
     @Override
@@ -350,7 +354,7 @@ public class PushbackPathFindingProcedureFacade implements PathFindingProcedureF
 
     @Override
     public Stream<RandomWalkMutateResult> randomWalkMutate(String graphName, Map<String, Object> configuration) {
-        return Stream.empty();
+        return mutateProcedureFacade.randomWalk(graphName, configuration);
     }
 
     @Override
@@ -382,7 +386,7 @@ public class PushbackPathFindingProcedureFacade implements PathFindingProcedureF
         String graphName,
         Map<String, Object> configuration
     ) {
-        return Stream.empty();
+        return mutateProcedureFacade.singlePairShortestPathAStar(graphName, configuration);
     }
 
     @Override
@@ -430,7 +434,7 @@ public class PushbackPathFindingProcedureFacade implements PathFindingProcedureF
         String graphName,
         Map<String, Object> configuration
     ) {
-        return Stream.empty();
+        return mutateProcedureFacade.singlePairShortestPathDijkstra(graphName, configuration);
     }
 
     @Override
@@ -478,7 +482,7 @@ public class PushbackPathFindingProcedureFacade implements PathFindingProcedureF
         String graphName,
         Map<String, Object> configuration
     ) {
-        return Stream.empty();
+        return mutateProcedureFacade.singlePairShortestPathYens(graphName, configuration);
     }
 
     @Override
@@ -526,7 +530,7 @@ public class PushbackPathFindingProcedureFacade implements PathFindingProcedureF
         String graphName,
         Map<String, Object> configuration
     ) {
-        return Stream.empty();
+        return mutateProcedureFacade.singleSourceShortestPathDijkstra(graphName, configuration);
     }
 
     @Override
@@ -568,7 +572,7 @@ public class PushbackPathFindingProcedureFacade implements PathFindingProcedureF
 
     @Override
     public Stream<SpanningTreeMutateResult> spanningTreeMutate(String graphName, Map<String, Object> configuration) {
-        return Stream.empty();
+        return mutateProcedureFacade.spanningTree(graphName, configuration);
     }
 
     @Override
@@ -620,7 +624,7 @@ public class PushbackPathFindingProcedureFacade implements PathFindingProcedureF
 
     @Override
     public Stream<SteinerMutateResult> steinerTreeMutate(String graphName, Map<String, Object> configuration) {
-        return Stream.empty();
+        return mutateProcedureFacade.steinerTree(graphName, configuration);
     }
 
     @Override
