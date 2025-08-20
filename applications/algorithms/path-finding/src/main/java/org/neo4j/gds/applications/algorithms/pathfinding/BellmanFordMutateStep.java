@@ -24,15 +24,20 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.MutateRelationshipService;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
-import org.neo4j.gds.paths.bellmanford.AllShortestPathsBellmanFordMutateConfig;
 import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
 
 class BellmanFordMutateStep implements MutateStep<BellmanFordResult, RelationshipsWritten> {
-    private final AllShortestPathsBellmanFordMutateConfig configuration;
+    private final String mutateRelationshipType;
+    private final boolean mutateNegativeCycles;
     private final MutateRelationshipService mutateRelationshipService;
 
-    BellmanFordMutateStep( MutateRelationshipService mutateRelationshipService,AllShortestPathsBellmanFordMutateConfig configuration) {
-        this.configuration = configuration;
+    BellmanFordMutateStep(
+        String mutateRelationshipType,
+        boolean mutateNegativeCycles,
+        MutateRelationshipService mutateRelationshipService
+    ) {
+        this.mutateRelationshipType = mutateRelationshipType;
+        this.mutateNegativeCycles = mutateNegativeCycles;
         this.mutateRelationshipService = mutateRelationshipService;
     }
 
@@ -42,16 +47,15 @@ class BellmanFordMutateStep implements MutateStep<BellmanFordResult, Relationshi
         GraphStore graphStore,
         BellmanFordResult result
     ) {
-
         var singleTypeRelationshipsProducer = PathFindingSingleTypeRelationshipsFactory.fromBellmanFordResult(
             result,
             graph,
-            configuration.mutateNegativeCycles()
+            mutateNegativeCycles
         );
 
         return mutateRelationshipService.mutate(
             graphStore,
-            configuration.mutateRelationshipType(),
+            mutateRelationshipType,
             singleTypeRelationshipsProducer
         );
     }

@@ -99,7 +99,11 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
         AllShortestPathsBellmanFordMutateConfig configuration,
         ResultBuilder<AllShortestPathsBellmanFordMutateConfig, BellmanFordResult, RESULT, RelationshipsWritten> resultBuilder
     ) {
-        var mutateStep = new BellmanFordMutateStep(mutateRelationshipService,configuration);
+        var mutateStep = new BellmanFordMutateStep(
+            configuration.mutateRelationshipType(),
+            configuration.mutateNegativeCycles(),
+            mutateRelationshipService
+        );
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
             graphName,
