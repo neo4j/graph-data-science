@@ -69,6 +69,6 @@ public class MutateRelationshipService {
 
         graphStore.addRelationshipType(singleTypeRelationships);
 
-        return new RelationshipsWritten(singleTypeRelationships.topology().elementCount());
+        return new RelationshipsWritten(singleTypeRelationships.count());
     }
 }

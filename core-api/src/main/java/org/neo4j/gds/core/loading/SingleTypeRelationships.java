@@ -52,6 +52,10 @@ public interface SingleTypeRelationships {
 
     Optional<RelationshipPropertyStore> inverseProperties();
 
+    default long count() {
+        return topology().elementCount();
+    }
+
     /**
      * Filters the relationships to include only the given property if present.
      */
