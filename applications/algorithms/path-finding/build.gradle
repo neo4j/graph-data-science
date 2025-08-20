@@ -25,6 +25,7 @@ dependencies {
     implementation project(':memory-usage')
     implementation project(':metrics-api')
     implementation project(':path-finding-configs')
+    implementation project(':path-finding-mutate-steps')
     implementation project(':progress-tracking')
     implementation project(':string-formatting')
     implementation project(':termination')

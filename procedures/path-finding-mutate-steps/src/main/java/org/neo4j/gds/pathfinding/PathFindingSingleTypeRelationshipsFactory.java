@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.applications.algorithms.pathfinding;
+package org.neo4j.gds.pathfinding;
 
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
@@ -27,9 +27,8 @@ import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 
-import static org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraWriteConfig.TOTAL_COST_KEY;
-
  final class PathFindingSingleTypeRelationshipsFactory {
+     private static final String TOTAL_COST_KEY = "totalCost";
 
      private PathFindingSingleTypeRelationshipsFactory() {}
 

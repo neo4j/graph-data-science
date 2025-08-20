@@ -17,24 +17,27 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.applications.algorithms.pathfinding;
+package org.neo4j.gds.pathfinding;
 
-import org.neo4j.gds.Orientation;
-import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.MutateRelationshipService;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
-import org.neo4j.gds.collections.ha.HugeLongArray;
-import org.neo4j.gds.core.loading.construction.GraphFactory;
+import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
 
-class SearchMutateStep implements MutateStep<HugeLongArray, RelationshipsWritten> {
-    private final RelationshipType mutateRelationshipType;
+public class BellmanFordMutateStep implements MutateStep<BellmanFordResult, RelationshipsWritten> {
+    private final String mutateRelationshipType;
+    private final boolean mutateNegativeCycles;
     private final MutateRelationshipService mutateRelationshipService;
 
-    SearchMutateStep(MutateRelationshipService mutateRelationshipService, RelationshipType mutateRelationshipType) {
+    public BellmanFordMutateStep(
+        String mutateRelationshipType,
+        boolean mutateNegativeCycles,
+        MutateRelationshipService mutateRelationshipService
+    ) {
         this.mutateRelationshipType = mutateRelationshipType;
+        this.mutateNegativeCycles = mutateNegativeCycles;
         this.mutateRelationshipService = mutateRelationshipService;
     }
 
@@ -42,25 +45,18 @@ class SearchMutateStep implements MutateStep<HugeLongArray, RelationshipsWritten
     public RelationshipsWritten execute(
         Graph graph,
         GraphStore graphStore,
-        HugeLongArray result
+        BellmanFordResult result
     ) {
+        var singleTypeRelationshipsProducer = PathFindingSingleTypeRelationshipsFactory.fromBellmanFordResult(
+            result,
+            graph,
+            mutateNegativeCycles
+        );
 
-        var relationshipsBuilder = GraphFactory
-            .initRelationshipsBuilder()
-            .nodes(graph)
-            .relationshipType(mutateRelationshipType)
-            .orientation(Orientation.NATURAL)
-            .build();
-
-        var source = result.get(0);
-        for (long i = 1; i < result.size(); i++) {
-            var target = result.get(i);
-            relationshipsBuilder.addFromInternal(source, target);
-            source = target;
-        }
-
-        var relationships = relationshipsBuilder.build();
-
-        return  mutateRelationshipService.mutate(graphStore,relationships);
+        return mutateRelationshipService.mutate(
+            graphStore,
+            mutateRelationshipType,
+            singleTypeRelationshipsProducer
+        );
     }
 }

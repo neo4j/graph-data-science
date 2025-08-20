@@ -17,27 +17,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.applications.algorithms.pathfinding;
+package org.neo4j.gds.pathfinding;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.MutateRelationshipService;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
-import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
+import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 
-class BellmanFordMutateStep implements MutateStep<BellmanFordResult, RelationshipsWritten> {
+public class ShortestPathMutateStep implements MutateStep<PathFindingResult, RelationshipsWritten> {
     private final String mutateRelationshipType;
-    private final boolean mutateNegativeCycles;
     private final MutateRelationshipService mutateRelationshipService;
 
-    BellmanFordMutateStep(
-        String mutateRelationshipType,
-        boolean mutateNegativeCycles,
-        MutateRelationshipService mutateRelationshipService
-    ) {
+    public ShortestPathMutateStep(String mutateRelationshipType, MutateRelationshipService mutateRelationshipService) {
         this.mutateRelationshipType = mutateRelationshipType;
-        this.mutateNegativeCycles = mutateNegativeCycles;
         this.mutateRelationshipService = mutateRelationshipService;
     }
 
@@ -45,12 +39,12 @@ class BellmanFordMutateStep implements MutateStep<BellmanFordResult, Relationshi
     public RelationshipsWritten execute(
         Graph graph,
         GraphStore graphStore,
-        BellmanFordResult result
+        PathFindingResult result
     ) {
-        var singleTypeRelationshipsProducer = PathFindingSingleTypeRelationshipsFactory.fromBellmanFordResult(
+
+        var singleTypeRelationshipsProducer = PathFindingSingleTypeRelationshipsFactory.fromPathFindingResult(
             result,
-            graph,
-            mutateNegativeCycles
+            graph
         );
 
         return mutateRelationshipService.mutate(

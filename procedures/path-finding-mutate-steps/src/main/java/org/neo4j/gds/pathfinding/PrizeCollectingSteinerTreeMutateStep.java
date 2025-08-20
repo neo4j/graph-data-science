@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.applications.algorithms.pathfinding;
+package org.neo4j.gds.pathfinding;
 
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
@@ -27,19 +27,22 @@ import org.neo4j.gds.applications.algorithms.machinery.MutateRelationshipService
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
-import org.neo4j.gds.steiner.ShortestPathsSteinerAlgorithm;
-import org.neo4j.gds.steiner.SteinerTreeMutateConfig;
-import org.neo4j.gds.steiner.SteinerTreeResult;
+import org.neo4j.gds.pricesteiner.PrizeSteinerTreeResult;
 
 import java.util.stream.LongStream;
 
-class SteinerTreeMutateStep implements MutateStep<SteinerTreeResult, RelationshipsWritten> {
-    private final SteinerTreeMutateConfig configuration;
+public class PrizeCollectingSteinerTreeMutateStep implements MutateStep<PrizeSteinerTreeResult, RelationshipsWritten> {
+    private final String mutateRelationshipType;
+    private final String mutateProperty;
     private final MutateRelationshipService mutateRelationshipService;
 
-
-    SteinerTreeMutateStep(MutateRelationshipService mutateRelationshipService, SteinerTreeMutateConfig configuration) {
-        this.configuration = configuration;
+    public PrizeCollectingSteinerTreeMutateStep(
+        String mutateRelationshipType,
+        String mutateProperty,
+        MutateRelationshipService mutateRelationshipService
+    ) {
+        this.mutateRelationshipType = mutateRelationshipType;
+        this.mutateProperty = mutateProperty;
         this.mutateRelationshipService = mutateRelationshipService;
     }
 
@@ -47,34 +50,30 @@ class SteinerTreeMutateStep implements MutateStep<SteinerTreeResult, Relationshi
     public RelationshipsWritten execute(
         Graph graph,
         GraphStore graphStore,
-        SteinerTreeResult steinerTreeResult
+        PrizeSteinerTreeResult treeResult
     ) {
-        var mutateRelationshipType = RelationshipType.of(configuration.mutateRelationshipType());
 
         var relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
             .nodes(graph)
-            .relationshipType(mutateRelationshipType)
-            .addPropertyConfig(GraphFactory.PropertyConfig.of(configuration.mutateProperty()))
+            .relationshipType(RelationshipType.of(mutateRelationshipType))
+            .addPropertyConfig(GraphFactory.PropertyConfig.of(mutateProperty))
             .orientation(Orientation.NATURAL)
             .build();
 
-        var parentArray = steinerTreeResult.parentArray();
-        var costArray = steinerTreeResult.relationshipToParentCost();
+        var parentArray = treeResult.parentArray();
+        var costArray = treeResult.relationshipToParentCost();
         LongStream.range(0, graph.nodeCount())
-            .filter(nodeId -> parentArray.get(nodeId) != ShortestPathsSteinerAlgorithm.PRUNED)
+            .filter(nodeId -> parentArray.get(nodeId) != PrizeSteinerTreeResult.PRUNED)
+            .filter(nodeId -> parentArray.get(nodeId) != PrizeSteinerTreeResult.ROOT)
             .forEach(nodeId -> {
-                var sourceNodeId = (configuration.sourceNode() == graph.toOriginalNodeId(nodeId)) ?
-                    nodeId :
-                    parentArray.get(nodeId);
+                var parentId = parentArray.get(nodeId);
+                relationshipsBuilder.addFromInternal(parentId, nodeId, costArray.get(nodeId));
 
-                if (nodeId != sourceNodeId) {
-                    relationshipsBuilder.addFromInternal(sourceNodeId, nodeId, costArray.get(nodeId));
-                }
             });
 
         var relationships = relationshipsBuilder.build();
 
-        return  mutateRelationshipService.mutate(graphStore,relationships);
+        return mutateRelationshipService.mutate(graphStore, relationships);
 
     }
 }

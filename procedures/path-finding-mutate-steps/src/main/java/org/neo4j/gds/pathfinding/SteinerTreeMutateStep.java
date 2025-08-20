@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.applications.algorithms.pathfinding;
+package org.neo4j.gds.pathfinding;
 
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
@@ -27,17 +27,27 @@ import org.neo4j.gds.applications.algorithms.machinery.MutateRelationshipService
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
-import org.neo4j.gds.pcst.PCSTMutateConfig;
-import org.neo4j.gds.pricesteiner.PrizeSteinerTreeResult;
+import org.neo4j.gds.steiner.ShortestPathsSteinerAlgorithm;
+import org.neo4j.gds.steiner.SteinerTreeResult;
 
 import java.util.stream.LongStream;
 
-class PrizeCollectingSteinerTreeMutateStep implements MutateStep<PrizeSteinerTreeResult, RelationshipsWritten> {
-    private final PCSTMutateConfig configuration;
+public class SteinerTreeMutateStep implements MutateStep<SteinerTreeResult, RelationshipsWritten> {
+    private final String mutateRelationshipType;
+    private final String mutateProperty;
+    private final long sourceNode;
     private final MutateRelationshipService mutateRelationshipService;
 
-    PrizeCollectingSteinerTreeMutateStep(MutateRelationshipService mutateRelationshipService, PCSTMutateConfig configuration) {
-        this.configuration = configuration;
+
+    public SteinerTreeMutateStep(
+        String mutateRelationshipType,
+        String mutateProperty,
+        long sourceNode,
+        MutateRelationshipService mutateRelationshipService
+    ) {
+        this.mutateRelationshipType = mutateRelationshipType;
+        this.mutateProperty = mutateProperty;
+        this.sourceNode = sourceNode;
         this.mutateRelationshipService = mutateRelationshipService;
     }
 
@@ -45,31 +55,32 @@ class PrizeCollectingSteinerTreeMutateStep implements MutateStep<PrizeSteinerTre
     public RelationshipsWritten execute(
         Graph graph,
         GraphStore graphStore,
-        PrizeSteinerTreeResult treeResult
+        SteinerTreeResult steinerTreeResult
     ) {
-        var mutateRelationshipType = RelationshipType.of(configuration.mutateRelationshipType());
-
         var relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
             .nodes(graph)
-            .relationshipType(mutateRelationshipType)
-            .addPropertyConfig(GraphFactory.PropertyConfig.of(configuration.mutateProperty()))
+            .relationshipType(RelationshipType.of(mutateRelationshipType))
+            .addPropertyConfig(GraphFactory.PropertyConfig.of(mutateProperty))
             .orientation(Orientation.NATURAL)
             .build();
 
-        var parentArray = treeResult.parentArray();
-        var costArray = treeResult.relationshipToParentCost();
+        var parentArray = steinerTreeResult.parentArray();
+        var costArray = steinerTreeResult.relationshipToParentCost();
         LongStream.range(0, graph.nodeCount())
-            .filter(nodeId -> parentArray.get(nodeId) != PrizeSteinerTreeResult.PRUNED )
-            .filter(nodeId -> parentArray.get(nodeId) != PrizeSteinerTreeResult.ROOT )
+            .filter(nodeId -> parentArray.get(nodeId) != ShortestPathsSteinerAlgorithm.PRUNED)
             .forEach(nodeId -> {
-                var parentId = parentArray.get(nodeId);
-                    relationshipsBuilder.addFromInternal(parentId, nodeId, costArray.get(nodeId));
+                var sourceNodeId = (sourceNode == graph.toOriginalNodeId(nodeId)) ?
+                    nodeId :
+                    parentArray.get(nodeId);
 
+                if (nodeId != sourceNodeId) {
+                    relationshipsBuilder.addFromInternal(sourceNodeId, nodeId, costArray.get(nodeId));
+                }
             });
 
         var relationships = relationshipsBuilder.build();
 
-        return  mutateRelationshipService.mutate(graphStore, relationships);
+        return mutateRelationshipService.mutate(graphStore, relationships);
 
     }
 }

@@ -17,27 +17,34 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.applications.algorithms.pathfinding;
+package org.neo4j.gds.pathfinding;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.properties.nodes.NodePropertyRecord;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
-import org.neo4j.gds.traversal.RandomWalkMutateConfig;
+import org.neo4j.gds.config.ElementTypeValidator;
 
-class RandomWalkCountingNodeVisitsMutateStep implements MutateStep<HugeAtomicLongArray, NodePropertiesWritten> {
+import java.util.Collection;
+import java.util.List;
+
+public class RandomWalkCountingNodeVisitsMutateStep implements MutateStep<HugeAtomicLongArray, NodePropertiesWritten> {
+    private final Collection<String> labelsToUpdate;
+    private final String mutateProperty;
     private final MutateNodePropertyService mutateNodePropertyService;
-    private final RandomWalkMutateConfig configuration;
 
-    RandomWalkCountingNodeVisitsMutateStep(
-        MutateNodePropertyService mutateNodePropertyService,
-        RandomWalkMutateConfig configuration
+    public RandomWalkCountingNodeVisitsMutateStep(
+        Collection<String> labelsToUpdate,
+        String mutateProperty,
+        MutateNodePropertyService mutateNodePropertyService
     ) {
+        this.labelsToUpdate = labelsToUpdate;
+        this.mutateProperty = mutateProperty;
         this.mutateNodePropertyService = mutateNodePropertyService;
-        this.configuration = configuration;
     }
 
     @Override
@@ -51,8 +58,8 @@ class RandomWalkCountingNodeVisitsMutateStep implements MutateStep<HugeAtomicLon
         return mutateNodePropertyService.mutateNodeProperties(
             graph,
             graphStore,
-            configuration,
-            nodePropertyValues
+            ElementTypeValidator.resolve(graphStore, labelsToUpdate),
+            List.of(NodePropertyRecord.of(mutateProperty, nodePropertyValues))
         );
     }
 }

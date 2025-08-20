@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.applications.algorithms.pathfinding;
+package org.neo4j.gds.pathfinding;
 
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
@@ -29,15 +29,20 @@ import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.spanningtree.SpanningGraph;
 import org.neo4j.gds.spanningtree.SpanningTree;
-import org.neo4j.gds.spanningtree.SpanningTreeMutateConfig;
 
-class SpanningTreeMutateStep implements MutateStep<SpanningTree, RelationshipsWritten> {
-    private final SpanningTreeMutateConfig configuration;
+public class SpanningTreeMutateStep implements MutateStep<SpanningTree, RelationshipsWritten> {
+    private final String mutateRelationshipType;
+    private final String mutateProperty;
     private final MutateRelationshipService mutateRelationshipService;
 
-    SpanningTreeMutateStep(MutateRelationshipService mutateRelationshipService, SpanningTreeMutateConfig configuration) {
+    public SpanningTreeMutateStep(
+        String mutateRelationshipType,
+        String mutateProperty,
+        MutateRelationshipService mutateRelationshipService
+    ) {
+        this.mutateRelationshipType = mutateRelationshipType;
+        this.mutateProperty = mutateProperty;
         this.mutateRelationshipService = mutateRelationshipService;
-        this.configuration = configuration;
     }
 
     @Override
@@ -46,13 +51,12 @@ class SpanningTreeMutateStep implements MutateStep<SpanningTree, RelationshipsWr
         GraphStore graphStore,
         SpanningTree result
     ) {
-        var mutateRelationshipType = RelationshipType.of(configuration.mutateRelationshipType());
         var relationshipsBuilder = GraphFactory
             .initRelationshipsBuilder()
-            .relationshipType(mutateRelationshipType)
+            .relationshipType(RelationshipType.of(mutateRelationshipType))
             .nodes(graph)
             .addPropertyConfig(GraphFactory.PropertyConfig.builder()
-                .propertyKey(configuration.mutateProperty())
+                .propertyKey(mutateProperty)
                 .build())
             .orientation(Orientation.NATURAL)
             .build();
@@ -60,7 +64,8 @@ class SpanningTreeMutateStep implements MutateStep<SpanningTree, RelationshipsWr
 
         var spanningGraph = new SpanningGraph(graph, result);
         spanningGraph.forEachNode(nodeId -> {
-                spanningGraph.forEachRelationship(nodeId, 1.0, (s, t, w) ->
+                spanningGraph.forEachRelationship(
+                    nodeId, 1.0, (s, t, w) ->
                     {
                         relationshipsBuilder.addFromInternal(s, t, w);
                         return true;
@@ -72,6 +77,6 @@ class SpanningTreeMutateStep implements MutateStep<SpanningTree, RelationshipsWr
 
         var relationships = relationshipsBuilder.build();
 
-        return  mutateRelationshipService.mutate(graphStore,relationships);
+        return mutateRelationshipService.mutate(graphStore, relationships);
     }
 }
