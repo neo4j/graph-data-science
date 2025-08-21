@@ -37,10 +37,14 @@ dependencies {
 
     implementation project(':graph-schema-api')
 
+    implementation project(':logging')
+
     // this is needed because of `MemoryEstimation`
     implementation project(':memory-usage')
 
     implementation project(':neo4j-api')
+
+    implementation project(':path-finding-mutate-steps')
 
     // we bring this in only to use `PregelConfig` and `Partitioning` enum
     implementation project(':pregel')

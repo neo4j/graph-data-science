@@ -20,6 +20,7 @@
 package org.neo4j.gds.procedures.algorithms.pathfinding.mutate;
 
 import org.neo4j.gds.api.GraphName;
+import org.neo4j.gds.applications.algorithms.machinery.MutateRelationshipService;
 import org.neo4j.gds.pathfinding.PathFindingComputeBusinessFacade;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarMutateConfig;
 import org.neo4j.gds.paths.bellmanford.AllShortestPathsBellmanFordMutateConfig;
@@ -50,12 +51,17 @@ public final class PushbackPathFindingMutateProcedureFacade {
 
     private final UserSpecificConfigurationParser configurationParser;
 
+    private final MutateRelationshipService mutateRelationshipService;
+
+
     public PushbackPathFindingMutateProcedureFacade(
         PathFindingComputeBusinessFacade businessFacade,
-        UserSpecificConfigurationParser configurationParser
+        UserSpecificConfigurationParser configurationParser,
+        MutateRelationshipService mutateRelationshipService
     ) {
         this.businessFacade = businessFacade;
         this.configurationParser = configurationParser;
+        this.mutateRelationshipService = mutateRelationshipService;
     }
 
     public Stream<BellmanFordMutateResult> bellmanFord(String graphName, Map<String, Object> configuration) {
@@ -71,7 +77,10 @@ public final class PushbackPathFindingMutateProcedureFacade {
             config.toParameters(),
             config.jobId(),
             config.logProgress(),
-            (g, gs) -> (r) -> Stream.<BellmanFordMutateResult>empty()
+            new BellmanFordMutateResultTransformerBuilder(
+                mutateRelationshipService,
+                config
+            )
         ).join();
     }
 

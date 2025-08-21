@@ -29,7 +29,8 @@ import java.util.Optional;
 public record BellmanFordMutateResult(
     long preProcessingMillis,
     long computeMillis,
-    long mutateMillis, long postProcessingMillis,
+    long mutateMillis,
+    long postProcessingMillis,
     Map<String, Object> configuration,
     boolean containsNegativeCycle,
     long relationshipsWritten
