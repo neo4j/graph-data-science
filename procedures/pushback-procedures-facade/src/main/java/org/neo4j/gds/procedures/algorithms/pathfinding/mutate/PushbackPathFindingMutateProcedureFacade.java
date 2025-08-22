@@ -113,7 +113,7 @@ public final class PushbackPathFindingMutateProcedureFacade {
             config.toParameters(),
             config.jobId(),
             config.logProgress(),
-            (g, gs) -> (r) -> Stream.<PathFindingMutateResult>empty()
+            new PathFindingMutateResultTransformerBuilder(mutateRelationshipService,config)
         ).join();
     }
 
@@ -186,7 +186,7 @@ public final class PushbackPathFindingMutateProcedureFacade {
             config.toParameters(),
             config.jobId(),
             config.logProgress(),
-            (g, gs) -> (r) -> Stream.<PathFindingMutateResult>empty()
+            new PathFindingMutateResultTransformerBuilder(mutateRelationshipService,config)
         ).join();
     }
 
@@ -206,7 +206,7 @@ public final class PushbackPathFindingMutateProcedureFacade {
             config.toParameters(),
             config.jobId(),
             config.logProgress(),
-            (g, gs) -> (r) -> Stream.<PathFindingMutateResult>empty()
+            new PathFindingMutateResultTransformerBuilder(mutateRelationshipService,config)
         ).join();
     }
 
@@ -226,7 +226,7 @@ public final class PushbackPathFindingMutateProcedureFacade {
             config.toParameters(),
             config.jobId(),
             config.logProgress(),
-            (g, gs) -> (r) -> Stream.<PathFindingMutateResult>empty()
+            new PathFindingMutateResultTransformerBuilder(mutateRelationshipService,config)
         ).join();
     }
 
@@ -246,7 +246,7 @@ public final class PushbackPathFindingMutateProcedureFacade {
             config.toSingleSourceParameters(),
             config.jobId(),
             config.logProgress(),
-            (g, gs) -> (r) -> Stream.<PathFindingMutateResult>empty()
+            new PathFindingMutateResultTransformerBuilder(mutateRelationshipService,config)
         ).join();
     }
 
