@@ -30,10 +30,10 @@ import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 
 public class SearchMutateStep implements MutateStep<HugeLongArray, RelationshipsWritten> {
-    private final RelationshipType mutateRelationshipType;
+    private final String  mutateRelationshipType;
     private final MutateRelationshipService mutateRelationshipService;
 
-    public SearchMutateStep(MutateRelationshipService mutateRelationshipService, RelationshipType mutateRelationshipType) {
+    public SearchMutateStep(MutateRelationshipService mutateRelationshipService, String mutateRelationshipType) {
         this.mutateRelationshipType = mutateRelationshipType;
         this.mutateRelationshipService = mutateRelationshipService;
     }
@@ -44,11 +44,12 @@ public class SearchMutateStep implements MutateStep<HugeLongArray, Relationships
         GraphStore graphStore,
         HugeLongArray result
     ) {
+        if (result.size() == 0) return  new RelationshipsWritten(0);
 
         var relationshipsBuilder = GraphFactory
             .initRelationshipsBuilder()
             .nodes(graph)
-            .relationshipType(mutateRelationshipType)
+            .relationshipType(RelationshipType.of(mutateRelationshipType))
             .orientation(Orientation.NATURAL)
             .build();
 

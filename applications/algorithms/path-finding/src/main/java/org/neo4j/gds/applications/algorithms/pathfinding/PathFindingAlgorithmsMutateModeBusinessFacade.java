@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.applications.algorithms.pathfinding;
 
-import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
@@ -130,7 +129,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
     ) {
         var mutateStep = new SearchMutateStep(
             mutateRelationshipService,
-            RelationshipType.of(configuration.mutateRelationshipType())
+            configuration.mutateRelationshipType()
         );
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
@@ -169,7 +168,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
     ) {
         var mutateStep = new SearchMutateStep(
             mutateRelationshipService,
-            RelationshipType.of(configuration.mutateRelationshipType())
+            configuration.mutateRelationshipType()
         );
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
