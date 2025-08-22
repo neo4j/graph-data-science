@@ -263,7 +263,7 @@ public final class PushbackPathFindingMutateProcedureFacade {
             config.toParameters(),
             config.jobId(),
             config.logProgress(),
-            (g, gs) -> (r) -> Stream.<SpanningTreeMutateResult>empty()
+            new SpanningTreeMutateResultTransformerBuilder(mutateRelationshipService,config)
         ).join();
     }
 
