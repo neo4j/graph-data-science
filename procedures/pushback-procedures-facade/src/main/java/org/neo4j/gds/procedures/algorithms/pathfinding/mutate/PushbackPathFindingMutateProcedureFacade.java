@@ -20,6 +20,7 @@
 package org.neo4j.gds.procedures.algorithms.pathfinding.mutate;
 
 import org.neo4j.gds.api.GraphName;
+import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.MutateRelationshipService;
 import org.neo4j.gds.pathfinding.PathFindingComputeBusinessFacade;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarMutateConfig;
@@ -52,16 +53,19 @@ public final class PushbackPathFindingMutateProcedureFacade {
     private final UserSpecificConfigurationParser configurationParser;
 
     private final MutateRelationshipService mutateRelationshipService;
+    private final MutateNodePropertyService mutateNodePropertyService;
 
 
     public PushbackPathFindingMutateProcedureFacade(
         PathFindingComputeBusinessFacade businessFacade,
         UserSpecificConfigurationParser configurationParser,
-        MutateRelationshipService mutateRelationshipService
+        MutateRelationshipService mutateRelationshipService,
+        MutateNodePropertyService mutateNodePropertyService
     ) {
         this.businessFacade = businessFacade;
         this.configurationParser = configurationParser;
         this.mutateRelationshipService = mutateRelationshipService;
+        this.mutateNodePropertyService = mutateNodePropertyService;
     }
 
     public Stream<BellmanFordMutateResult> bellmanFord(String graphName, Map<String, Object> configuration) {
@@ -159,14 +163,14 @@ public final class PushbackPathFindingMutateProcedureFacade {
             RandomWalkMutateConfig::of
         );
 
-        return businessFacade.randomWalk(
+        return businessFacade.randomWalkCountingNodeVisits(
             GraphName.parse(graphName),
             config.toGraphParameters(),
             config.relationshipWeightProperty(),
             config.toParameters(),
             config.jobId(),
             config.logProgress(),
-            (g, gs) -> (r) -> Stream.<RandomWalkMutateResult>empty()
+            new RandomWalkMutateResultTransformerBuilder(mutateNodePropertyService,config)
         ).join();
     }
 
