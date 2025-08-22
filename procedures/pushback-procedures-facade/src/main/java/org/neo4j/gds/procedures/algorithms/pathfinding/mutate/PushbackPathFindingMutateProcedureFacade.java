@@ -149,7 +149,7 @@ public final class PushbackPathFindingMutateProcedureFacade {
             config.toParameters(),
             config.jobId(),
             config.logProgress(),
-            (g, gs) -> (r) -> Stream.<PrizeCollectingSteinerTreeMutateResult>empty()
+            new PrizeSteinerMutateResultTransformerBuilder(mutateRelationshipService,config)
         ).join();
     }
 
