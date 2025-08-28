@@ -29,6 +29,7 @@ jol = "0.17"
 jqwik = "1.9.0"
 junit-pioneer = "2.2.0"
 junit5bom = "5.10.3"
+junit5 = "5.10.3"
 memoryfilesystem = "2.8.0"
 mockito-junit-jupiter = "5.12.0"
 opencypher-front-end = "9.0.20210312"
@@ -77,7 +78,7 @@ jqwik = { module = "net.jqwik:jqwik", version.ref = "jqwik" }
 junit-pioneer = { module = "org.junit-pioneer:junit-pioneer", version.ref = "junit-pioneer" }
 junit5-jupiter = { module = "org.junit.jupiter:junit-jupiter" }
 junit5-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api" }
-junit5-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine" }
+junit5-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref="junit5" }
 junit5-jupiter-params = { module = "org.junit.jupiter:junit-jupiter-params" }
 junit5-migration = { module = "org.junit.jupiter:junit-jupiter-migrationsupport" }
 junit5-platform = { module = "org.junit.platform:junit-platform-launcher" }
