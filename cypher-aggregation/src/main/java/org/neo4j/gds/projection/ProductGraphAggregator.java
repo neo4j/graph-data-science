@@ -25,7 +25,6 @@ import org.neo4j.gds.core.utils.progress.TaskStore;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.metrics.projections.ProjectionMetricsService;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
-import org.neo4j.kernel.api.exceptions.Status;
 import org.neo4j.values.AnyValue;
 import org.neo4j.values.storable.TextValue;
 
@@ -58,11 +57,8 @@ public class ProductGraphAggregator extends GraphAggregator {
                 input[5]
             );
         } catch (Exception e) {
-            throw new ProcedureException(
-                Status.Procedure.ProcedureCallFailed,
-                e,
-                "Failed to invoke function `%s`: Caused by: %s",
-                CypherAggregation.FUNCTION_NAME,
+            throw ProcedureException.generalProcedureException(
+                CypherAggregation.FUNCTION_NAME.name(),
                 e
             );
         }
