@@ -51,6 +51,7 @@ import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.wcc.WccStreamProc;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.QueryExecutionException;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Result;
 import org.neo4j.kernel.api.QueryLanguage;
@@ -71,6 +72,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.InstanceOfAssertFactories.type;
 import static org.hamcrest.Matchers.any;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -120,6 +122,25 @@ class CypherAggregationTest extends BaseProcTest {
         if (!alreadyExists) {
             GraphDatabaseApiProxy.register(db, function);
         }
+    }
+
+    @Test
+    void catchesExceptionsAndRethrowsGqlCompliantOnResult() {
+        runQuery("RETURN gds.graph.project('g', 0, 1)");
+        var exception = assertThatThrownBy(() -> runQuery("RETURN gds.graph.project('g', 0, 1)")).asInstanceOf(type(
+                QueryExecutionException.class)).actual();
+        var gqlCause = exception.gqlStatusObject().cause().orElse(exception.gqlStatusObject());
+        assertThat(gqlCause.gqlStatus()).isEqualTo("53U00");
+        assertThat(gqlCause.getMessage()).isEqualTo("53U00: Execution of the function gds.graph.project() failed due to java.lang.IllegalArgumentException: Graph g already exists.");
+    }
+
+    @Test
+    void catchesExceptionsAndRethrowsGqlCompliantOnUpdate() {
+        var exception = assertThatThrownBy(() -> runQuery("RETURN gds.graph.project('g', null, null)")).asInstanceOf(type(
+                QueryExecutionException.class)).actual();
+        var gqlCause = exception.gqlStatusObject().cause().orElse(exception.gqlStatusObject());
+        assertThat(gqlCause.gqlStatus()).isEqualTo("53U00");
+        assertThat(gqlCause.getMessage()).isEqualTo("53U00: Execution of the function gds.graph.project() failed due to java.lang.IllegalArgumentException: The node has to be either a NODE or an INTEGER, but got NO_VALUE.");
     }
 
     @Test

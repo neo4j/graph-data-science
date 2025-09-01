@@ -82,35 +82,42 @@ public class CypherAggregation implements CallableUserAggregationFunction {
 
     @Override
     public UserAggregationReducer createReducer(Context ctx) throws ProcedureException {
-        var databaseService = ctx.graphDatabaseAPI();
-        var metrics = GraphDatabaseApiProxy.lookupComponentProvider(ctx, Metrics.class, true);
-        var taskStore = GraphDatabaseApiProxy.lookupComponentProvider(ctx, TaskStore.class, true);
-        var log = GraphDatabaseApiProxy.lookupComponentProvider(ctx, Log.class, true);
-        var username = ctx.kernelTransaction().securityContext().subject().executingUser();
-        var transaction = ctx.transaction();
+        try {
+            var databaseService = ctx.graphDatabaseAPI();
+            var metrics = GraphDatabaseApiProxy.lookupComponentProvider(ctx, Metrics.class, true);
+            var taskStore = GraphDatabaseApiProxy.lookupComponentProvider(ctx, TaskStore.class, true);
+            var log = GraphDatabaseApiProxy.lookupComponentProvider(ctx, Log.class, true);
+            var username = ctx.kernelTransaction().securityContext().subject().executingUser();
+            var transaction = ctx.transaction();
 
-        var runsOnCompositeDatabase = AggregationInitializationHelper.runsOnCompositeDatabase(ctx);
-        var queryProvider = AggregationInitializationHelper.getQueryProvider(ctx, runsOnCompositeDatabase);
+            var runsOnCompositeDatabase = AggregationInitializationHelper.runsOnCompositeDatabase(ctx);
+            var queryProvider = AggregationInitializationHelper.getQueryProvider(ctx, runsOnCompositeDatabase);
 
-        var writeMode = runsOnCompositeDatabase
-            ? WriteMode.NONE
-            : WriteMode.LOCAL;
+            var writeMode = runsOnCompositeDatabase
+                ? WriteMode.NONE
+                : WriteMode.LOCAL;
 
-        var queryEstimator = QueryEstimator.fromTransaction(DatabaseTransactionContext.of(databaseService, transaction));
+            var queryEstimator = QueryEstimator.fromTransaction(DatabaseTransactionContext.of(
+                databaseService,
+                transaction
+            ));
 
-        ProductGraphAggregator productGraphAggregator = new ProductGraphAggregator(
-            DatabaseId.of(databaseService.databaseName()),
-            username,
-            writeMode,
-            queryEstimator,
-            queryProvider,
-            metrics.projectionMetrics(),
-            taskStore,
-            new LogAdapter(log)
-        );
+            ProductGraphAggregator productGraphAggregator = new ProductGraphAggregator(
+                DatabaseId.of(databaseService.databaseName()),
+                username,
+                writeMode,
+                queryEstimator,
+                queryProvider,
+                metrics.projectionMetrics(),
+                taskStore,
+                new LogAdapter(log)
+            );
 
-        ctx.internalTransaction().registerCloseableResource(productGraphAggregator);
+            ctx.internalTransaction().registerCloseableResource(productGraphAggregator);
 
-        return productGraphAggregator;
+            return productGraphAggregator;
+        } catch (Throwable T) {
+            throw ProcedureException.invocationFailed("function", FUNCTION_NAME.toString(), T);
+        }
     }
 }

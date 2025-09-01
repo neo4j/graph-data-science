@@ -66,6 +66,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import static org.neo4j.gds.projection.CypherAggregation.FUNCTION_NAME;
 import static org.neo4j.gds.projection.GraphImporter.NO_TARGET_NODE;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -279,35 +280,36 @@ abstract class GraphAggregator implements UserAggregationReducer, UserAggregatio
 
     @Override
     public AnyValue result() throws ProcedureException {
-        var projectionMetric = projectionMetricsService.createCypherV2();
-        ProjectionResult result;
-        try (projectionMetric) {
-            projectionMetric.start();
-            result = buildGraph();
-        } catch (Exception e) {
-            projectionMetric.failed(e);
-            throw ProcedureException.generalProcedureException(
-                CypherAggregation.FUNCTION_NAME.name(),
-                e
-            );
+        try {
+            var projectionMetric = projectionMetricsService.createCypherV2();
+            ProjectionResult result;
+            try (projectionMetric) {
+                projectionMetric.start();
+                result = buildGraph();
+            } catch (Exception e) {
+                projectionMetric.failed(e);
+                throw e;
+            }
+
+            if (result == null) {
+                return Values.NO_VALUE;
+            }
+
+            var builder = new MapValueBuilder(6);
+            builder.add("graphName", Values.stringValue(result.graphName()));
+            builder.add("nodeCount", Values.longValue(result.nodeCount()));
+            builder.add("relationshipCount", Values.longValue(result.relationshipCount()));
+            builder.add("projectMillis", Values.longValue(result.projectMillis()));
+            builder.add("configuration", ValueUtils.asAnyValue(result.configuration()));
+            builder.add("query", ValueUtils.asAnyValue(result.query()));
+            MapValue projectResult = builder.build();
+
+            this.completedSuccessfully.set(true);
+
+            return projectResult;
+        } catch (Throwable T) {
+            throw ProcedureException.invocationFailed("function", FUNCTION_NAME.toString(), T);
         }
-
-        if (result == null) {
-            return Values.NO_VALUE;
-        }
-
-        var builder = new MapValueBuilder(6);
-        builder.add("graphName", Values.stringValue(result.graphName()));
-        builder.add("nodeCount", Values.longValue(result.nodeCount()));
-        builder.add("relationshipCount", Values.longValue(result.relationshipCount()));
-        builder.add("projectMillis", Values.longValue(result.projectMillis()));
-        builder.add("configuration", ValueUtils.asAnyValue(result.configuration()));
-        builder.add("query", ValueUtils.asAnyValue(result.query()));
-        MapValue projectResult = builder.build();
-
-        this.completedSuccessfully.set(true);
-
-        return projectResult;
     }
 
     public @Nullable ProjectionResult buildGraph() {

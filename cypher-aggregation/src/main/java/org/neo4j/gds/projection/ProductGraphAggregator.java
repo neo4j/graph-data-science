@@ -28,6 +28,8 @@ import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.values.AnyValue;
 import org.neo4j.values.storable.TextValue;
 
+import static org.neo4j.gds.projection.CypherAggregation.FUNCTION_NAME;
+
 // public is required for the Cypher runtime
 @SuppressWarnings("WeakerAccess")
 public class ProductGraphAggregator extends GraphAggregator {
@@ -56,11 +58,8 @@ public class ProductGraphAggregator extends GraphAggregator {
                 input[4],
                 input[5]
             );
-        } catch (Exception e) {
-            throw ProcedureException.generalProcedureException(
-                CypherAggregation.FUNCTION_NAME.name(),
-                e
-            );
+        } catch (Throwable T) {
+            throw ProcedureException.invocationFailed("function", FUNCTION_NAME.toString(), T);
         }
     }
 }
