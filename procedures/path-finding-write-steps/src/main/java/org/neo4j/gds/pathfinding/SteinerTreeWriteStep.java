@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.applications.algorithms.pathfinding;
+package org.neo4j.gds.pathfinding;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
@@ -29,18 +29,31 @@ import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.spanningtree.SpanningGraph;
 import org.neo4j.gds.spanningtree.SpanningTree;
 import org.neo4j.gds.steiner.SteinerTreeResult;
-import org.neo4j.gds.steiner.SteinerTreeWriteConfig;
 
-class SteinerTreeWriteStep implements WriteStep<SteinerTreeResult, RelationshipsWritten> {
-    private final SteinerTreeWriteConfig configuration;
+import java.util.Optional;
+import java.util.function.Function;
+
+public class SteinerTreeWriteStep implements WriteStep<SteinerTreeResult, RelationshipsWritten> {
     private final WriteRelationshipService writeRelationshipService;
+    private final long sourceNodeId;
+    private final String writeRelationshipType;
+    private final String writeProperty;
+    private final Function<ResultStore, Optional<ResultStore>> resultStoreResolver;
+    private final JobId jobId;
 
-    SteinerTreeWriteStep(
-        WriteRelationshipService writeRelationshipService,
-        SteinerTreeWriteConfig configuration
+    public SteinerTreeWriteStep(
+        WriteRelationshipService writeRelationshipService, long sourceNodeId,
+        String writeRelationshipType,
+        String writeProperty,
+        Function<ResultStore, Optional<ResultStore>> resultStoreResolver,
+        JobId jobId
     ) {
-        this.configuration = configuration;
         this.writeRelationshipService = writeRelationshipService;
+        this.sourceNodeId = sourceNodeId;
+        this.writeRelationshipType = writeRelationshipType;
+        this.writeProperty = writeProperty;
+        this.resultStoreResolver = resultStoreResolver;
+        this.jobId = jobId;
     }
 
     @Override
@@ -51,8 +64,6 @@ class SteinerTreeWriteStep implements WriteStep<SteinerTreeResult, Relationships
         SteinerTreeResult steinerTreeResult,
         JobId jobId
     ) {
-        var sourceNodeId = configuration.sourceNode();
-
         var spanningTree = new SpanningTree(
             graph.toMappedNodeId(sourceNodeId),
             graph.nodeCount(),
@@ -64,14 +75,14 @@ class SteinerTreeWriteStep implements WriteStep<SteinerTreeResult, Relationships
         var spanningGraph = new SpanningGraph(graph, spanningTree);
 
         return writeRelationshipService.writeFromGraph(
-             configuration.writeRelationshipType(),
-             configuration.writeProperty(),
+             writeRelationshipType,
+             writeProperty,
              spanningGraph,
              graph,
              "SteinerWrite",
-             configuration.resolveResultStore(resultStore),
+             resultStoreResolver.apply(resultStore),
              (a,b,c)-> true,
-             configuration.jobId()
+             this.jobId
          );
     }
 }
