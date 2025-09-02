@@ -17,16 +17,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.applications.algorithms.pathfinding;
+package org.neo4j.gds.pathfinding;
 
 import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
 import org.neo4j.gds.spanningtree.SpanningTree;
 
-public class KSpanningTreeBackedNodePropertyValues implements LongNodePropertyValues {
+class KSpanningTreeBackedNodePropertyValues implements LongNodePropertyValues {
     private final SpanningTree spanningTree;
     private final long nodeCount;
 
-    public KSpanningTreeBackedNodePropertyValues(
+    KSpanningTreeBackedNodePropertyValues(
         SpanningTree spanningTree,
         long nodeCount
     ) {

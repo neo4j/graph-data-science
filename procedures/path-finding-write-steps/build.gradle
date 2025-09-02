@@ -15,6 +15,9 @@ dependencies {
     //  extract them in a separate project and bring it instead
     implementation project(':algo')
 
+    // FIXME: AlgorithmLabel 🙄
+    implementation project(':algo-common')
+
     implementation project(':algorithms-machinery')
 
     // FIXME: Massively annoying we need to bring this in because services use configs;
@@ -25,4 +28,9 @@ dependencies {
     implementation project(':core-api')
     implementation project(':logging')
     implementation project(':string-formatting')
+
+    // FIXME: These don't belong here, the write should be abstracted via service.
+    implementation project(':core-write')
+    implementation project(':progress-tracking')
+    implementation project(':termination')
 }

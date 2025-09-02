@@ -37,6 +37,7 @@ import org.neo4j.gds.kspanningtree.KSpanningTreeWriteConfig;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.pathfinding.BellmanFordWriteStep;
+import org.neo4j.gds.pathfinding.KSpanningTreeWriteStep;
 import org.neo4j.gds.paths.WritePathOptionsConfig;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarWriteConfig;
 import org.neo4j.gds.paths.bellmanford.AllShortestPathsBellmanFordWriteConfig;
@@ -144,10 +145,14 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
         ResultBuilder<KSpanningTreeWriteConfig, SpanningTree, RESULT, Void> resultBuilder
     ) {
         var writeStep = new KSpanningTreeWriteStep(
-            log,
-            requestScopedDependencies,
+            configuration.writeProperty(),
             writeContext,
-            configuration
+            configuration::resolveResultStore,
+            configuration.jobId(),
+            configuration.writeConcurrency(),
+            log,
+            requestScopedDependencies.taskRegistryFactory(),
+            requestScopedDependencies.terminationFlag()
         );
 
         return runAlgorithmAndWrite(
