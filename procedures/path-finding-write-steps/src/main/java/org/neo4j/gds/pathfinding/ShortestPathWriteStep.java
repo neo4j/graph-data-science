@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.applications.algorithms.pathfinding;
+package org.neo4j.gds.pathfinding;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
@@ -25,32 +25,38 @@ import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.applications.algorithms.machinery.WriteRelationshipService;
 import org.neo4j.gds.applications.algorithms.machinery.WriteStep;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
-import org.neo4j.gds.config.JobIdConfig;
-import org.neo4j.gds.config.WriteRelationshipConfig;
 import org.neo4j.gds.core.utils.progress.JobId;
-import org.neo4j.gds.logging.Log;
-import org.neo4j.gds.pathfinding.PathFindingWriteRelationshipSpecification;
-import org.neo4j.gds.paths.WritePathOptionsConfig;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
+
+import java.util.Optional;
+import java.util.function.Function;
 
 
 /**
  * This is relationship writes as needed by path finding algorithms (for now).
  */
-class ShortestPathWriteStep<CONFIGURATION extends WriteRelationshipConfig & WritePathOptionsConfig & JobIdConfig> implements
-    WriteStep<PathFindingResult, RelationshipsWritten> {
-    private final Log log;
+public class ShortestPathWriteStep implements WriteStep<PathFindingResult, RelationshipsWritten> {
     private final WriteRelationshipService writeRelationshipService;
-    private final CONFIGURATION configuration;
+    private final String writeRelationshipType;
+    private final boolean writeNodeIds;
+    private final boolean writeCosts;
+    private final Function<ResultStore, Optional<ResultStore>> resultStoreResolver;
+    private final JobId jobId;
 
-    ShortestPathWriteStep(
-        Log log,
+    public ShortestPathWriteStep(
         WriteRelationshipService writeRelationshipService,
-        CONFIGURATION configuration
+        String writeRelationshipType,
+        boolean writeNodeIds,
+        boolean writeCosts,
+        Function<ResultStore, Optional<ResultStore>> resultStoreResolver,
+        JobId jobId
     ) {
-        this.log = log;
         this.writeRelationshipService = writeRelationshipService;
-        this.configuration = configuration;
+        this.writeRelationshipType = writeRelationshipType;
+        this.writeNodeIds = writeNodeIds;
+        this.writeCosts = writeCosts;
+        this.resultStoreResolver = resultStoreResolver;
+        this.jobId = jobId;
     }
 
     /**
@@ -65,8 +71,6 @@ class ShortestPathWriteStep<CONFIGURATION extends WriteRelationshipConfig & Writ
         PathFindingResult result,
         JobId jobId
     ) {
-        var writeNodeIds = configuration.writeNodeIds();
-        var writeCosts = configuration.writeCosts();
 
         var specification = new PathFindingWriteRelationshipSpecification(graph,writeNodeIds,writeCosts);
         var keys = specification.createKeys();
@@ -85,14 +89,14 @@ class ShortestPathWriteStep<CONFIGURATION extends WriteRelationshipConfig & Writ
 
             // the final result is the side effect of writing to the database, plus this metadata
             return writeRelationshipService.writeFromRelationshipStream(
-                configuration.writeRelationshipType(),
+                writeRelationshipType,
                 keys,
                 types,
                 relationshipStream,
                 graph,
                 "Write shortest Paths",
-                configuration.resolveResultStore(resultStore),
-                configuration.jobId()
+                resultStoreResolver.apply(resultStore),
+                this.jobId
             );
         }
     }

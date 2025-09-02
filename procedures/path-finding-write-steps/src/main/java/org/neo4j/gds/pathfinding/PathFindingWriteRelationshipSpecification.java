@@ -28,7 +28,7 @@ import org.neo4j.values.storable.Values;
 
 import java.util.List;
 
-public final class PathFindingWriteRelationshipSpecification {
+final class PathFindingWriteRelationshipSpecification {
 
     private static final String TOTAL_COST_KEY = "totalCost";
     private static final String NODE_IDS_KEY = "nodeIds";
@@ -39,13 +39,13 @@ public final class PathFindingWriteRelationshipSpecification {
     private final boolean writeNodeIds;
     private final boolean writeCosts;
 
-    public PathFindingWriteRelationshipSpecification(IdMap idMap, boolean writeNodeIds, boolean writeCosts) {
+    PathFindingWriteRelationshipSpecification(IdMap idMap, boolean writeNodeIds, boolean writeCosts) {
         this.idMap = idMap;
         this.writeNodeIds = writeNodeIds;
         this.writeCosts = writeCosts;
     }
 
-    public List<String> createKeys() {
+    List<String> createKeys() {
         if (writeNodeIds && writeCosts) {
             return List.of(
                 TOTAL_COST_KEY,
@@ -68,7 +68,7 @@ public final class PathFindingWriteRelationshipSpecification {
         return List.of(TOTAL_COST_KEY);
     }
 
-     public List<ValueType> createTypes() {
+     List<ValueType> createTypes() {
         if (writeNodeIds && writeCosts) {
             return List.of(
                 ValueType.DOUBLE,
@@ -124,7 +124,7 @@ public final class PathFindingWriteRelationshipSpecification {
         return internalIds;
     }
 
-     public ExportedRelationship createRelationship(PathResult pathResult){
+     ExportedRelationship createRelationship(PathResult pathResult){
         return new ExportedRelationship(
             pathResult.sourceNode(),
             pathResult.targetNode(),
