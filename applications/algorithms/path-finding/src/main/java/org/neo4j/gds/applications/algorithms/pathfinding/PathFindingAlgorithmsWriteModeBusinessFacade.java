@@ -38,6 +38,7 @@ import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.pathfinding.BellmanFordWriteStep;
 import org.neo4j.gds.pathfinding.KSpanningTreeWriteStep;
+import org.neo4j.gds.pathfinding.PrizeCollectingSteinerTreeWriteStep;
 import org.neo4j.gds.pathfinding.ShortestPathWriteStep;
 import org.neo4j.gds.paths.WritePathOptionsConfig;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarWriteConfig;
@@ -172,7 +173,13 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
         PCSTWriteConfig configuration,
         ResultBuilder<PCSTWriteConfig, PrizeSteinerTreeResult, RESULT, RelationshipsWritten> resultBuilder
     ) {
-        var writeStep = new PrizeCollectingSteinerTreeWriteStep(requestScopedDependencies, writeRelationshipService, configuration);
+        var writeStep = new PrizeCollectingSteinerTreeWriteStep(
+            writeRelationshipService,
+            configuration.writeRelationshipType(),
+            configuration.writeProperty(),
+            configuration::resolveResultStore,
+            configuration.jobId()
+        );
 
         return runAlgorithmAndWrite(
             graphName,
