@@ -36,6 +36,7 @@ import org.neo4j.gds.config.WriteRelationshipConfig;
 import org.neo4j.gds.kspanningtree.KSpanningTreeWriteConfig;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.pathfinding.BellmanFordWriteStep;
 import org.neo4j.gds.paths.WritePathOptionsConfig;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarWriteConfig;
 import org.neo4j.gds.paths.bellmanford.AllShortestPathsBellmanFordWriteConfig;
@@ -103,7 +104,12 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
     ) {
         var writeStep = new BellmanFordWriteStep(
             writeRelationshipService,
-            configuration
+            configuration.writeRelationshipType(),
+            configuration.writeNegativeCycles(),
+            configuration.writeNodeIds(),
+            configuration.writeCosts(),
+            configuration::resolveResultStore,
+            configuration.jobId()
         );
 
         return runAlgorithmAndWrite(

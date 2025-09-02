@@ -376,6 +376,9 @@ project(':path-finding-mutate-steps').projectDir = file('procedures/path-finding
 include('path-finding-params')
 project(':path-finding-params').projectDir = file('algo-params/path-finding-params')
 
+include 'path-finding-write-steps'
+project(':path-finding-write-steps').projectDir = file("procedures/path-finding-write-steps")
+
 include('node-embeddings-facade-api')
 project(':node-embeddings-facade-api').projectDir = file('procedures/facade-api/node-embeddings-facade-api')
 

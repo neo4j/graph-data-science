@@ -29,6 +29,7 @@ import org.neo4j.gds.config.JobIdConfig;
 import org.neo4j.gds.config.WriteRelationshipConfig;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.pathfinding.PathFindingWriteRelationshipSpecification;
 import org.neo4j.gds.paths.WritePathOptionsConfig;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 

@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.applications.algorithms.pathfinding;
+package org.neo4j.gds.pathfinding;
 
 import org.neo4j.gds.api.ExportedRelationship;
 import org.neo4j.gds.api.IdMap;
@@ -28,11 +28,12 @@ import org.neo4j.values.storable.Values;
 
 import java.util.List;
 
-import static org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraWriteConfig.COSTS_KEY;
-import static org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraWriteConfig.NODE_IDS_KEY;
-import static org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraWriteConfig.TOTAL_COST_KEY;
-
 final class PathFindingWriteRelationshipSpecification {
+
+    private static final String TOTAL_COST_KEY = "totalCost";
+    private static final String NODE_IDS_KEY = "nodeIds";
+    private static final String COSTS_KEY = "costs";
+
 
     private final IdMap idMap;
     private final boolean writeNodeIds;

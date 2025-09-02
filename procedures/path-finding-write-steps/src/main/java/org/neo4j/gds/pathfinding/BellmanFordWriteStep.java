@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.applications.algorithms.pathfinding;
+package org.neo4j.gds.pathfinding;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
@@ -26,19 +26,36 @@ import org.neo4j.gds.applications.algorithms.machinery.WriteRelationshipService;
 import org.neo4j.gds.applications.algorithms.machinery.WriteStep;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 import org.neo4j.gds.core.utils.progress.JobId;
-import org.neo4j.gds.paths.bellmanford.AllShortestPathsBellmanFordWriteConfig;
 import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
 
-class BellmanFordWriteStep implements WriteStep<BellmanFordResult, RelationshipsWritten> {
-    private final WriteRelationshipService writeRelationshipService;
-    private final AllShortestPathsBellmanFordWriteConfig configuration;
+import java.util.Optional;
+import java.util.function.Function;
 
-    BellmanFordWriteStep(
+public final class BellmanFordWriteStep implements WriteStep<BellmanFordResult, RelationshipsWritten> {
+    private final WriteRelationshipService writeRelationshipService;
+    private final String writeRelationshipType;
+    private final boolean writeNegativeCycles;
+    private final boolean writeNodeIds;
+    private final boolean writeCosts;
+    private final Function<ResultStore, Optional<ResultStore>> resultStoreResolver;
+    private final JobId jobId;
+
+    public BellmanFordWriteStep(
         WriteRelationshipService writeRelationshipService,
-        AllShortestPathsBellmanFordWriteConfig configuration
+        String writeRelationshipType,
+        boolean writeNegativeCycles,
+        boolean writeNodeIds,
+        boolean writeCosts,
+        Function<ResultStore, Optional<ResultStore>> resultStoreResolver,
+        JobId jobId
     ) {
-        this.configuration = configuration;
         this.writeRelationshipService = writeRelationshipService;
+        this.writeRelationshipType = writeRelationshipType;
+        this.writeNegativeCycles = writeNegativeCycles;
+        this.writeNodeIds = writeNodeIds;
+        this.writeCosts = writeCosts;
+        this.resultStoreResolver = resultStoreResolver;
+        this.jobId = jobId;
     }
 
     @Override
@@ -49,16 +66,12 @@ class BellmanFordWriteStep implements WriteStep<BellmanFordResult, Relationships
         BellmanFordResult result,
         JobId jobId
     ) {
-
-        var writeNodeIds = configuration.writeNodeIds();
-        var writeCosts = configuration.writeCosts();
-
-        var specification = new PathFindingWriteRelationshipSpecification(graph,writeNodeIds,writeCosts);
+        var specification = new PathFindingWriteRelationshipSpecification(graph, writeNodeIds, writeCosts);
         var keys = specification.createKeys();
-        var types=  specification.createTypes();
+        var types = specification.createTypes();
 
         var paths = result.shortestPaths();
-        if (configuration.writeNegativeCycles() && result.containsNegativeCycle()) {
+        if (writeNegativeCycles && result.containsNegativeCycle()) {
             paths = result.negativeCycles();
         }
         try (
@@ -66,14 +79,14 @@ class BellmanFordWriteStep implements WriteStep<BellmanFordResult, Relationships
         ) {
 
             return writeRelationshipService.writeFromRelationshipStream(
-                configuration.writeRelationshipType(),
+                writeRelationshipType,
                 keys,
                 types,
                 relationshipStream,
                 graph,
                 "Write shortest Paths",
-                configuration.resolveResultStore(resultStore),
-                configuration.jobId()
+                resultStoreResolver.apply(resultStore),
+                this.jobId
             );
         }
     }

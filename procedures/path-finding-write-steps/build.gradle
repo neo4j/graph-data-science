@@ -1,0 +1,28 @@
+apply plugin: 'java-library'
+
+description = 'Neo4j Graph Data Science :: Path Finding Write Steps'
+
+group = 'org.neo4j.gds'
+
+dependencies {
+
+    // Neo4j dependencies
+    compileOnly(neo4j.common) { transitive = false }
+    compileOnly(neo4j.values) { transitive = false }
+
+
+    // FIXME: we need `:algo` because the algorithm results are there,
+    //  extract them in a separate project and bring it instead
+    implementation project(':algo')
+
+    implementation project(':algorithms-machinery')
+
+    // FIXME: Massively annoying we need to bring this in because services use configs;
+    //  Also `ElementTypeValidator` is there even though it's not depending on any config 🤷
+    implementation project(':config-api')
+
+    implementation project(':core')
+    implementation project(':core-api')
+    implementation project(':logging')
+    implementation project(':string-formatting')
+}
