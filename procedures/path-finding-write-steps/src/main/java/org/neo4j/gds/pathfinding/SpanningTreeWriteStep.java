@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.applications.algorithms.pathfinding;
+package org.neo4j.gds.pathfinding;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
@@ -29,18 +29,29 @@ import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.spanningtree.SpanningGraph;
 import org.neo4j.gds.spanningtree.SpanningTree;
-import org.neo4j.gds.spanningtree.SpanningTreeWriteConfig;
 
-class SpanningTreeWriteStep implements WriteStep<SpanningTree, RelationshipsWritten> {
+import java.util.Optional;
+import java.util.function.Function;
+
+public class SpanningTreeWriteStep implements WriteStep<SpanningTree, RelationshipsWritten> {
     private final WriteRelationshipService writeRelationshipService;
-    private final SpanningTreeWriteConfig configuration;
+    private final String writeRelationshipType;
+    private final String writeProperty;
+    private final Function<ResultStore, Optional<ResultStore>> resultStoreResolver;
+    private final JobId jobId;
 
-    SpanningTreeWriteStep(
+    public SpanningTreeWriteStep(
         WriteRelationshipService writeRelationshipService,
-        SpanningTreeWriteConfig configuration
+        String writeRelationshipType,
+        String writeProperty,
+        Function<ResultStore, Optional<ResultStore>> resultStoreResolver,
+        JobId jobId
     ) {
         this.writeRelationshipService = writeRelationshipService;
-        this.configuration = configuration;
+        this.writeRelationshipType = writeRelationshipType;
+        this.writeProperty = writeProperty;
+        this.resultStoreResolver = resultStoreResolver;
+        this.jobId = jobId;
     }
 
     @Override
@@ -53,16 +64,15 @@ class SpanningTreeWriteStep implements WriteStep<SpanningTree, RelationshipsWrit
     ) {
         var spanningGraph = new SpanningGraph(graph, result);
 
-
         return writeRelationshipService.writeFromGraph(
-            configuration.writeRelationshipType(),
-            configuration.writeProperty(),
+            writeRelationshipType,
+            writeProperty,
             spanningGraph,
             graph,
             AlgorithmLabel.SpanningTree.asString(),
-            configuration.resolveResultStore(resultStore),
+            resultStoreResolver.apply(resultStore),
             (a,b,c)-> true,
-            configuration.jobId()
+            this.jobId
         );
     }
 }
