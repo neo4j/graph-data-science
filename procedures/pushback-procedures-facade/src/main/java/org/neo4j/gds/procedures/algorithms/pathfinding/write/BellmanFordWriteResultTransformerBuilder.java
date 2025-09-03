@@ -21,6 +21,7 @@ package org.neo4j.gds.procedures.algorithms.pathfinding.write;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.pathfinding.BellmanFordWriteStep;
 import org.neo4j.gds.paths.bellmanford.AllShortestPathsBellmanFordWriteConfig;
 import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
 import org.neo4j.gds.procedures.algorithms.pathfinding.BellmanFordWriteResult;
@@ -31,7 +32,7 @@ import org.neo4j.gds.results.ResultTransformerBuilder;
 import java.util.stream.Stream;
 
 class BellmanFordWriteResultTransformerBuilder implements ResultTransformerBuilder<TimedAlgorithmResult<BellmanFordResult>, Stream<BellmanFordWriteResult>> {
-    BellmanFordWriteResultTransformerBuilder(AllShortestPathsBellmanFordWriteConfig config) {}
+    BellmanFordWriteResultTransformerBuilder(BellmanFordWriteStep writeStep, AllShortestPathsBellmanFordWriteConfig config) {}
 
     @Override
     public ResultTransformer<TimedAlgorithmResult<BellmanFordResult>, Stream<BellmanFordWriteResult>> build(Graph graph, GraphStore graphStore) {

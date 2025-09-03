@@ -20,9 +20,24 @@
 package org.neo4j.gds.procedures.algorithms.pathfinding.write;
 
 import org.neo4j.gds.api.GraphName;
+import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
+import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
+import org.neo4j.gds.applications.algorithms.machinery.WriteRelationshipService;
+import org.neo4j.gds.kspanningtree.KSpanningTreeWriteConfig;
+import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.pathfinding.BellmanFordWriteStep;
+import org.neo4j.gds.pathfinding.KSpanningTreeWriteStep;
 import org.neo4j.gds.pathfinding.PathFindingComputeBusinessFacade;
+import org.neo4j.gds.pathfinding.PrizeCollectingSteinerTreeWriteStep;
+import org.neo4j.gds.pathfinding.ShortestPathWriteStep;
+import org.neo4j.gds.pathfinding.SpanningTreeWriteStep;
+import org.neo4j.gds.pathfinding.SteinerTreeWriteStep;
+import org.neo4j.gds.paths.astar.config.ShortestPathAStarWriteConfig;
 import org.neo4j.gds.paths.bellmanford.AllShortestPathsBellmanFordWriteConfig;
 import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaWriteConfig;
+import org.neo4j.gds.paths.dijkstra.config.AllShortestPathsDijkstraWriteConfig;
+import org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraWriteConfig;
+import org.neo4j.gds.paths.yens.config.ShortestPathYensWriteConfig;
 import org.neo4j.gds.pcst.PCSTWriteConfig;
 import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
 import org.neo4j.gds.procedures.algorithms.pathfinding.BellmanFordWriteResult;
@@ -40,13 +55,26 @@ import java.util.stream.Stream;
 public class PushbackPathFindingWriteProcedureFacade {
     private final PathFindingComputeBusinessFacade businessFacade;
 
+    private final RequestScopedDependencies requestScopedDependencies;
+    private final WriteContext writeContext;
+
+    private final Log log;
+
+    private final WriteRelationshipService writeRelationshipService;
     private final UserSpecificConfigurationParser configurationParser;
 
     public PushbackPathFindingWriteProcedureFacade(
         PathFindingComputeBusinessFacade businessFacade,
+        RequestScopedDependencies requestScopedDependencies,
+        WriteContext writeContext, Log log,
+        WriteRelationshipService writeRelationshipService,
         UserSpecificConfigurationParser configurationParser
     ) {
         this.businessFacade = businessFacade;
+        this.requestScopedDependencies = requestScopedDependencies;
+        this.writeContext = writeContext;
+        this.log = log;
+        this.writeRelationshipService = writeRelationshipService;
         this.configurationParser = configurationParser;
     }
 
@@ -56,6 +84,16 @@ public class PushbackPathFindingWriteProcedureFacade {
             AllShortestPathsBellmanFordWriteConfig::of
         );
 
+        var writeStep = new BellmanFordWriteStep(
+            writeRelationshipService,
+            config.writeRelationshipType(),
+            config.writeNegativeCycles(),
+            config.writeNodeIds(),
+            config.writeCosts(),
+            config::resolveResultStore,
+            config.jobId()
+        );
+
         return businessFacade.bellmanFord(
             GraphName.parse(graphName),
             config.toGraphParameters(),
@@ -63,7 +101,7 @@ public class PushbackPathFindingWriteProcedureFacade {
             config.toParameters(),
             config.jobId(),
             config.logProgress(),
-            new BellmanFordWriteResultTransformerBuilder(config)
+            new BellmanFordWriteResultTransformerBuilder(writeStep, config)
         ).join();
     }
 
@@ -76,6 +114,16 @@ public class PushbackPathFindingWriteProcedureFacade {
             AllShortestPathsDeltaWriteConfig::of
         );
 
+        var writeStep = new ShortestPathWriteStep(
+            writeRelationshipService,
+            config.writeRelationshipType(),
+            config.writeNodeIds(),
+            config.writeCosts(),
+            config::resolveResultStore,
+            config.jobId()
+        );
+
+
         return businessFacade.deltaStepping(
             GraphName.parse(graphName),
             config.toGraphParameters(),
@@ -83,7 +131,7 @@ public class PushbackPathFindingWriteProcedureFacade {
             config.toParameters(),
             config.jobId(),
             config.logProgress(),
-            new DeltaSteppingWriteResultTransformerBuilder(config)
+            new DeltaSteppingWriteResultTransformerBuilder(writeStep, config)
         ).join();
     }
 
@@ -91,6 +139,22 @@ public class PushbackPathFindingWriteProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
+        var config = configurationParser.parseConfiguration(
+            configuration,
+            KSpanningTreeWriteConfig::of
+        );
+
+        var writeStep = new KSpanningTreeWriteStep(
+            config.writeProperty(),
+            writeContext,
+            config::resolveResultStore,
+            config.jobId(),
+            config.writeConcurrency(),
+            log,
+            requestScopedDependencies.taskRegistryFactory(),
+            requestScopedDependencies.terminationFlag()
+        );
+
         return Stream.empty();
     }
 
@@ -103,6 +167,13 @@ public class PushbackPathFindingWriteProcedureFacade {
             configuration,
             PCSTWriteConfig::of
         );
+        var writeStep = new PrizeCollectingSteinerTreeWriteStep(
+            writeRelationshipService,
+            config.writeRelationshipType(),
+            config.writeProperty(),
+            config::resolveResultStore,
+            config.jobId()
+        );
 
         return businessFacade.pcst(
             GraphName.parse(graphName),
@@ -111,7 +182,7 @@ public class PushbackPathFindingWriteProcedureFacade {
             config.toParameters(),
             config.jobId(),
             config.logProgress(),
-            new PCSTWriteResultTransformerBuilder(config)
+            new PCSTWriteResultTransformerBuilder(writeStep, config)
         ).join();
     }
 
@@ -119,6 +190,20 @@ public class PushbackPathFindingWriteProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
+        var config = configurationParser.parseConfiguration(
+            configuration,
+            ShortestPathAStarWriteConfig::of
+        );
+
+        var writeStep = new ShortestPathWriteStep(
+            writeRelationshipService,
+            config.writeRelationshipType(),
+            config.writeNodeIds(),
+            config.writeCosts(),
+            config::resolveResultStore,
+            config.jobId()
+        );
+
         return Stream.empty();
     }
 
@@ -126,6 +211,20 @@ public class PushbackPathFindingWriteProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
+        var config = configurationParser.parseConfiguration(
+            configuration,
+            ShortestPathDijkstraWriteConfig::of
+        );
+
+        var writeStep = new ShortestPathWriteStep(
+            writeRelationshipService,
+            config.writeRelationshipType(),
+            config.writeNodeIds(),
+            config.writeCosts(),
+            config::resolveResultStore,
+            config.jobId()
+        );
+
         return Stream.empty();
     }
 
@@ -133,6 +232,21 @@ public class PushbackPathFindingWriteProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
+
+        var config = configurationParser.parseConfiguration(
+            configuration,
+            ShortestPathYensWriteConfig::of
+        );
+
+        var writeStep = new ShortestPathWriteStep(
+            writeRelationshipService,
+            config.writeRelationshipType(),
+            config.writeNodeIds(),
+            config.writeCosts(),
+            config::resolveResultStore,
+            config.jobId()
+        );
+
         return Stream.empty();
     }
 
@@ -140,6 +254,21 @@ public class PushbackPathFindingWriteProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
+
+        var config = configurationParser.parseConfiguration(
+            configuration,
+            AllShortestPathsDijkstraWriteConfig::of
+        );
+
+        var writeStep = new ShortestPathWriteStep(
+            writeRelationshipService,
+            config.writeRelationshipType(),
+            config.writeNodeIds(),
+            config.writeCosts(),
+            config::resolveResultStore,
+            config.jobId()
+        );
+
         return Stream.empty();
     }
 
@@ -149,6 +278,14 @@ public class PushbackPathFindingWriteProcedureFacade {
             SpanningTreeWriteConfig::of
         );
 
+        var writeStep = new SpanningTreeWriteStep(
+            writeRelationshipService,
+            config.writeRelationshipType(),
+            config.writeProperty(),
+            config::resolveResultStore,
+            config.jobId()
+        );
+
         return businessFacade.spanningTree(
             GraphName.parse(graphName),
             config.toGraphParameters(),
@@ -156,7 +293,7 @@ public class PushbackPathFindingWriteProcedureFacade {
             config.toParameters(),
             config.jobId(),
             config.logProgress(),
-            new SpanningTreeWriteResultTransformerBuilder(config)
+            new SpanningTreeWriteResultTransformerBuilder(writeStep, config)
         ).join();
     }
 
@@ -166,6 +303,15 @@ public class PushbackPathFindingWriteProcedureFacade {
             SteinerTreeWriteConfig::of
         );
 
+        var writeStep = new SteinerTreeWriteStep(
+            writeRelationshipService,
+            config.sourceNode(),
+            config.writeRelationshipType(),
+            config.writeProperty(),
+            config::resolveResultStore,
+            config.jobId()
+        );
+
         return businessFacade.steinerTree(
             GraphName.parse(graphName),
             config.toGraphParameters(),
@@ -173,7 +319,7 @@ public class PushbackPathFindingWriteProcedureFacade {
             config.toParameters(),
             config.jobId(),
             config.logProgress(),
-            new SteinerTreeWriteResultTransformerBuilder(config)
+            new SteinerTreeWriteResultTransformerBuilder(writeStep, config)
         ).join();
 
     }

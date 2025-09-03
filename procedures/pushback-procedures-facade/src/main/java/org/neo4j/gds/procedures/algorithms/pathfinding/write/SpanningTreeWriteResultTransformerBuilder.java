@@ -21,6 +21,7 @@ package org.neo4j.gds.procedures.algorithms.pathfinding.write;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.pathfinding.SpanningTreeWriteStep;
 import org.neo4j.gds.procedures.algorithms.pathfinding.SpanningTreeWriteResult;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.results.ResultTransformer;
@@ -31,7 +32,7 @@ import org.neo4j.gds.spanningtree.SpanningTreeWriteConfig;
 import java.util.stream.Stream;
 
 class SpanningTreeWriteResultTransformerBuilder implements ResultTransformerBuilder<TimedAlgorithmResult<SpanningTree>, Stream<SpanningTreeWriteResult>> {
-    SpanningTreeWriteResultTransformerBuilder(SpanningTreeWriteConfig config) {}
+    SpanningTreeWriteResultTransformerBuilder(SpanningTreeWriteStep writeStep, SpanningTreeWriteConfig config) {}
 
     @Override
     public ResultTransformer<TimedAlgorithmResult<SpanningTree>, Stream<SpanningTreeWriteResult>> build(Graph graph, GraphStore graphStore) {

@@ -45,6 +45,7 @@ dependencies {
     implementation project(':neo4j-api')
 
     implementation project(':path-finding-mutate-steps')
+    implementation project(':path-finding-write-steps')
 
     // we bring this in only to use `PregelConfig` and `Partitioning` enum
     implementation project(':pregel')
@@ -53,6 +54,9 @@ dependencies {
     implementation project(':progress-tracking')
 
     implementation project(':string-formatting')
+
+
+    implementation project(':termination')
 
     // Test Dependencies
     testImplementation project(':test-utils')
