@@ -25,8 +25,10 @@ import org.neo4j.gds.procedures.algorithms.pathfinding.mutate.PushbackPathFindin
 import org.neo4j.gds.procedures.algorithms.pathfinding.stats.PushbackPathFindingStatsProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stream.PushbackPathFindingStreamProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.PathFindingStubs;
+import org.neo4j.gds.procedures.algorithms.pathfinding.write.PushbackPathFindingWriteProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.results.StandardModeResult;
 import org.neo4j.gds.procedures.algorithms.results.StandardStatsResult;
+import org.neo4j.gds.procedures.algorithms.results.StandardWriteRelationshipsResult;
 
 import java.util.Map;
 import java.util.stream.Stream;
@@ -36,15 +38,18 @@ public final class PushbackPathFindingProcedureFacade implements PathFindingProc
     private final PushbackPathFindingMutateProcedureFacade mutateProcedureFacade;
     private final PushbackPathFindingStatsProcedureFacade statsProcedureFacade;
     private final PushbackPathFindingStreamProcedureFacade streamProcedureFacade;
+    private final PushbackPathFindingWriteProcedureFacade writeProcedureFacade;
 
     public PushbackPathFindingProcedureFacade(
         PushbackPathFindingMutateProcedureFacade mutateProcedureFacade,
         PushbackPathFindingStatsProcedureFacade statsProcedureFacade,
-        PushbackPathFindingStreamProcedureFacade streamProcedureFacade
+        PushbackPathFindingStreamProcedureFacade streamProcedureFacade,
+        PushbackPathFindingWriteProcedureFacade writeProcedureFacade
     ) {
         this.mutateProcedureFacade = mutateProcedureFacade;
         this.statsProcedureFacade = statsProcedureFacade;
         this.streamProcedureFacade = streamProcedureFacade;
+        this.writeProcedureFacade = writeProcedureFacade;
     }
 
     @Override
@@ -109,7 +114,7 @@ public final class PushbackPathFindingProcedureFacade implements PathFindingProc
 
     @Override
     public Stream<BellmanFordWriteResult> bellmanFordWrite(String graphName, Map<String, Object> configuration) {
-        return Stream.empty();
+        return writeProcedureFacade.bellmanFord(graphName, configuration);
     }
 
     @Override
@@ -208,11 +213,11 @@ public final class PushbackPathFindingProcedureFacade implements PathFindingProc
     }
 
     @Override
-    public Stream<org.neo4j.gds.procedures.algorithms.results.StandardWriteRelationshipsResult> deltaSteppingWrite(
+    public Stream<StandardWriteRelationshipsResult> deltaSteppingWrite(
         String graphName,
         Map<String, Object> configuration
     ) {
-        return Stream.empty();
+        return writeProcedureFacade.deltaStepping(graphName, configuration);
     }
 
     @Override
@@ -251,7 +256,7 @@ public final class PushbackPathFindingProcedureFacade implements PathFindingProc
 
     @Override
     public Stream<KSpanningTreeWriteResult> kSpanningTreeWrite(String graphName, Map<String, Object> configuration) {
-        return Stream.empty();
+        return writeProcedureFacade.kSpanningTree(graphName, configuration);
     }
 
     @Override
@@ -312,7 +317,7 @@ public final class PushbackPathFindingProcedureFacade implements PathFindingProc
         String graphName,
         Map<String, Object> configuration
     ) {
-        return Stream.empty();
+        return writeProcedureFacade.pcst(graphName, configuration);
     }
 
     @Override
@@ -398,11 +403,11 @@ public final class PushbackPathFindingProcedureFacade implements PathFindingProc
     }
 
     @Override
-    public Stream<org.neo4j.gds.procedures.algorithms.results.StandardWriteRelationshipsResult> singlePairShortestPathAStarWrite(
+    public Stream<StandardWriteRelationshipsResult> singlePairShortestPathAStarWrite(
         String graphName,
         Map<String, Object> configuration
     ) {
-        return Stream.empty();
+        return writeProcedureFacade.singlePairShortestPathAStar(graphName, configuration);
     }
 
     @Override
@@ -446,11 +451,11 @@ public final class PushbackPathFindingProcedureFacade implements PathFindingProc
     }
 
     @Override
-    public Stream<org.neo4j.gds.procedures.algorithms.results.StandardWriteRelationshipsResult> singlePairShortestPathDijkstraWrite(
+    public Stream<StandardWriteRelationshipsResult> singlePairShortestPathDijkstraWrite(
         String graphName,
         Map<String, Object> configuration
     ) {
-        return Stream.empty();
+        return writeProcedureFacade.singlePairShortestPathDijkstra(graphName, configuration);
     }
 
     @Override
@@ -494,11 +499,11 @@ public final class PushbackPathFindingProcedureFacade implements PathFindingProc
     }
 
     @Override
-    public Stream<org.neo4j.gds.procedures.algorithms.results.StandardWriteRelationshipsResult> singlePairShortestPathYensWrite(
+    public Stream<StandardWriteRelationshipsResult> singlePairShortestPathYensWrite(
         String graphName,
         Map<String, Object> configuration
     ) {
-        return Stream.empty();
+        return writeProcedureFacade.singlePairShortestPathYens(graphName, configuration);
     }
 
     @Override
@@ -542,11 +547,11 @@ public final class PushbackPathFindingProcedureFacade implements PathFindingProc
     }
 
     @Override
-    public Stream<org.neo4j.gds.procedures.algorithms.results.StandardWriteRelationshipsResult> singleSourceShortestPathDijkstraWrite(
+    public Stream<StandardWriteRelationshipsResult> singleSourceShortestPathDijkstraWrite(
         String graphName,
         Map<String, Object> configuration
     ) {
-        return Stream.empty();
+        return writeProcedureFacade.singleSourceShortestPathDijkstra(graphName, configuration);
     }
 
     @Override
@@ -598,7 +603,7 @@ public final class PushbackPathFindingProcedureFacade implements PathFindingProc
 
     @Override
     public Stream<SpanningTreeWriteResult> spanningTreeWrite(String graphName, Map<String, Object> configuration) {
-        return Stream.empty();
+        return writeProcedureFacade.spanningTree(graphName, configuration);
     }
 
     @Override
@@ -650,7 +655,7 @@ public final class PushbackPathFindingProcedureFacade implements PathFindingProc
 
     @Override
     public Stream<SteinerWriteResult> steinerTreeWrite(String graphName, Map<String, Object> configuration) {
-        return Stream.empty();
+        return writeProcedureFacade.steinerTree(graphName, configuration);
     }
 
     @Override
