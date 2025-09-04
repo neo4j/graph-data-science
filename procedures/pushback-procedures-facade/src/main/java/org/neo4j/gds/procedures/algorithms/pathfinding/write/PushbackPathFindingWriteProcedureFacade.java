@@ -155,7 +155,15 @@ public class PushbackPathFindingWriteProcedureFacade {
             requestScopedDependencies.terminationFlag()
         );
 
-        return Stream.empty();
+        return businessFacade.kSpanningTree(
+            GraphName.parse(graphName),
+            config.toGraphParameters(),
+            config.relationshipWeightProperty(),
+            config.toKSpanningTreeParameters(),
+            config.jobId(),
+            config.logProgress(),
+            new KSpanningTreeWriteResultTransformer(writeStep, config)
+        ).join();
     }
 
 
@@ -204,7 +212,15 @@ public class PushbackPathFindingWriteProcedureFacade {
             config.jobId()
         );
 
-        return Stream.empty();
+        return businessFacade.singlePairShortestPathAStar(
+            GraphName.parse(graphName),
+            config.toGraphParameters(),
+            config.relationshipWeightProperty(),
+            config.toParameters(),
+            config.jobId(),
+            config.logProgress(),
+            new ShortestPathWriteResultTransformer(writeStep)
+        ).join();
     }
 
     public Stream<StandardWriteRelationshipsResult> singlePairShortestPathDijkstra(
@@ -225,7 +241,15 @@ public class PushbackPathFindingWriteProcedureFacade {
             config.jobId()
         );
 
-        return Stream.empty();
+        return businessFacade.singlePairShortestPathDijkstra(
+            GraphName.parse(graphName),
+            config.toGraphParameters(),
+            config.relationshipWeightProperty(),
+            config.toParameters(),
+            config.jobId(),
+            config.logProgress(),
+            new ShortestPathWriteResultTransformer(writeStep)
+        ).join();
     }
 
     public Stream<StandardWriteRelationshipsResult> singlePairShortestPathYens(
@@ -247,7 +271,15 @@ public class PushbackPathFindingWriteProcedureFacade {
             config.jobId()
         );
 
-        return Stream.empty();
+        return businessFacade.singlePairShortestPathYens(
+            GraphName.parse(graphName),
+            config.toGraphParameters(),
+            config.relationshipWeightProperty(),
+            config.toParameters(),
+            config.jobId(),
+            config.logProgress(),
+            new ShortestPathWriteResultTransformer(writeStep)
+        ).join();
     }
 
     public Stream<StandardWriteRelationshipsResult> singleSourceShortestPathDijkstra(
@@ -269,7 +301,15 @@ public class PushbackPathFindingWriteProcedureFacade {
             config.jobId()
         );
 
-        return Stream.empty();
+        return businessFacade.singleSourceShortestPathDijkstra(
+            GraphName.parse(graphName),
+            config.toGraphParameters(),
+            config.relationshipWeightProperty(),
+            config.toSingleSourceParameters(),
+            config.jobId(),
+            config.logProgress(),
+            new ShortestPathWriteResultTransformer(writeStep)
+        ).join();
     }
 
     public Stream<SpanningTreeWriteResult> spanningTree(String graphName, Map<String, Object> configuration) {
