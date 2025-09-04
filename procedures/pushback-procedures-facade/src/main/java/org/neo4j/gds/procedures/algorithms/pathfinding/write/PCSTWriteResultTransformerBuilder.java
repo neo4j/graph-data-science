@@ -19,8 +19,7 @@
  */
 package org.neo4j.gds.procedures.algorithms.pathfinding.write;
 
-import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.core.loading.GraphResources;
 import org.neo4j.gds.pathfinding.PrizeCollectingSteinerTreeWriteStep;
 import org.neo4j.gds.pcst.PCSTWriteConfig;
 import org.neo4j.gds.pricesteiner.PrizeSteinerTreeResult;
@@ -36,8 +35,7 @@ class PCSTWriteResultTransformerBuilder implements ResultTransformerBuilder<Time
 
     @Override
     public ResultTransformer<TimedAlgorithmResult<PrizeSteinerTreeResult>, Stream<PrizeCollectingSteinerTreeWriteResult>> build(
-        Graph graph,
-        GraphStore graphStore
+        GraphResources graphResources
     ) {
         return ar -> Stream.empty();
     }

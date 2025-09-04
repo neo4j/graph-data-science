@@ -19,8 +19,7 @@
  */
 package org.neo4j.gds.procedures.algorithms.pathfinding.stats;
 
-import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.core.loading.GraphResources;
 import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaStatsConfig;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.procedures.algorithms.results.StandardStatsResult;
@@ -39,8 +38,7 @@ class DeltaSteppingStatsResultTransformerBuilder implements ResultTransformerBui
 
     @Override
     public DeltaSteppingStatsResultTransformer build(
-        Graph graph,
-        GraphStore graphStore
+        GraphResources graphResources
     ) {
         return new DeltaSteppingStatsResultTransformer(configuration.toMap());
     }

@@ -19,9 +19,8 @@
  */
 package org.neo4j.gds.results;
 
-import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.core.loading.GraphResources;
 
 public interface ResultTransformerBuilder<AR, TR> {
-    ResultTransformer<AR, TR> build(Graph graph, GraphStore graphStore);
+    ResultTransformer<AR, TR> build(GraphResources graphResources);
 }

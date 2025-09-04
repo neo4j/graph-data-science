@@ -19,9 +19,8 @@
  */
 package org.neo4j.gds.procedures.algorithms.pathfinding.mutate;
 
-import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.MutateRelationshipService;
+import org.neo4j.gds.core.loading.GraphResources;
 import org.neo4j.gds.pathfinding.PrizeCollectingSteinerTreeMutateStep;
 import org.neo4j.gds.pcst.PCSTMutateConfig;
 import org.neo4j.gds.pricesteiner.PrizeSteinerTreeResult;
@@ -46,8 +45,7 @@ class PrizeSteinerMutateResultTransformerBuilder implements ResultTransformerBui
 
     @Override
     public PrizeSteinerTreeMutateResultTransformer build(
-        Graph graph,
-        GraphStore graphStore
+        GraphResources graphResources
     ) {
         var mutateStep = new PrizeCollectingSteinerTreeMutateStep(
             configuration.mutateRelationshipType(),
@@ -56,8 +54,8 @@ class PrizeSteinerMutateResultTransformerBuilder implements ResultTransformerBui
         );
         return new PrizeSteinerTreeMutateResultTransformer(
             mutateStep,
-            graph,
-            graphStore,
+            graphResources.graph(),
+            graphResources.graphStore(), 
             configuration.toMap()
         );
     }

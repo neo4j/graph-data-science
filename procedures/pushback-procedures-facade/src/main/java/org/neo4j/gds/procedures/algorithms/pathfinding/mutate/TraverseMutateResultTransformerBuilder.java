@@ -19,11 +19,10 @@
  */
 package org.neo4j.gds.procedures.algorithms.pathfinding.mutate;
 
-import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.MutateRelationshipService;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.config.MutateRelationshipConfig;
+import org.neo4j.gds.core.loading.GraphResources;
 import org.neo4j.gds.pathfinding.SearchMutateStep;
 import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingMutateResult;
 import org.neo4j.gds.result.TimedAlgorithmResult;
@@ -46,8 +45,7 @@ class TraverseMutateResultTransformerBuilder implements ResultTransformerBuilder
 
     @Override
     public TraverseMutateResultTransformer build(
-        Graph graph,
-        GraphStore graphStore
+        GraphResources graphResources
     ) {
         var mutateStep = new SearchMutateStep(
             mutateRelationshipService,
@@ -55,8 +53,8 @@ class TraverseMutateResultTransformerBuilder implements ResultTransformerBuilder
         );
         return new TraverseMutateResultTransformer(
             mutateStep,
-            graph,
-            graphStore,
+            graphResources.graph(),
+            graphResources.graphStore(), 
             configuration.toMap()
         );
     }

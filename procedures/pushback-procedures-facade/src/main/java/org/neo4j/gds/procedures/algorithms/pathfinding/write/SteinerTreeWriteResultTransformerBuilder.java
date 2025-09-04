@@ -19,8 +19,7 @@
  */
 package org.neo4j.gds.procedures.algorithms.pathfinding.write;
 
-import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.core.loading.GraphResources;
 import org.neo4j.gds.pathfinding.SteinerTreeWriteStep;
 import org.neo4j.gds.procedures.algorithms.pathfinding.SteinerWriteResult;
 import org.neo4j.gds.result.TimedAlgorithmResult;
@@ -35,7 +34,7 @@ class SteinerTreeWriteResultTransformerBuilder implements ResultTransformerBuild
     SteinerTreeWriteResultTransformerBuilder(SteinerTreeWriteStep writeStep, SteinerTreeWriteConfig config) {}
 
     @Override
-    public ResultTransformer<TimedAlgorithmResult<SteinerTreeResult>, Stream<SteinerWriteResult>> build(Graph graph, GraphStore graphStore) {
+    public ResultTransformer<TimedAlgorithmResult<SteinerTreeResult>, Stream<SteinerWriteResult>> build(GraphResources graphResources) {
         return ar -> Stream.empty();
     }
 }

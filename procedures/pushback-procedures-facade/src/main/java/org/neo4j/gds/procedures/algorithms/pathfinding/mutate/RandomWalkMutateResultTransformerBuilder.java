@@ -19,10 +19,9 @@
  */
 package org.neo4j.gds.procedures.algorithms.pathfinding.mutate;
 
-import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
+import org.neo4j.gds.core.loading.GraphResources;
 import org.neo4j.gds.pathfinding.RandomWalkCountingNodeVisitsMutateStep;
 import org.neo4j.gds.procedures.algorithms.pathfinding.RandomWalkMutateResult;
 import org.neo4j.gds.result.TimedAlgorithmResult;
@@ -46,8 +45,7 @@ class RandomWalkMutateResultTransformerBuilder implements ResultTransformerBuild
 
     @Override
     public RandomWalkMutateResultTransformer build(
-        Graph graph,
-        GraphStore graphStore
+        GraphResources graphResources
     ) {
         var mutateStep = new RandomWalkCountingNodeVisitsMutateStep(
             configuration.nodeLabels(),
@@ -56,8 +54,8 @@ class RandomWalkMutateResultTransformerBuilder implements ResultTransformerBuild
         );
         return new RandomWalkMutateResultTransformer(
             mutateStep,
-            graph,
-            graphStore,
+            graphResources.graph(),
+            graphResources.graphStore(), 
             configuration.toMap()
         );
     }

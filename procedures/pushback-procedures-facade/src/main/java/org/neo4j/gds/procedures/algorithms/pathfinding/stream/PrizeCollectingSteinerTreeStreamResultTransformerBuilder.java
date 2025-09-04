@@ -19,8 +19,7 @@
  */
 package org.neo4j.gds.procedures.algorithms.pathfinding.stream;
 
-import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.core.loading.GraphResources;
 import org.neo4j.gds.pricesteiner.PrizeSteinerTreeResult;
 import org.neo4j.gds.procedures.algorithms.pathfinding.SpanningTreeStreamResult;
 import org.neo4j.gds.result.TimedAlgorithmResult;
@@ -31,7 +30,7 @@ import java.util.stream.Stream;
 class PrizeCollectingSteinerTreeStreamResultTransformerBuilder implements ResultTransformerBuilder<TimedAlgorithmResult<PrizeSteinerTreeResult>, Stream<SpanningTreeStreamResult>> {
 
     @Override
-    public PrizeCollectingSteinerTreeResultTransformer build(Graph graph, GraphStore graphStore) {
-        return new PrizeCollectingSteinerTreeResultTransformer(graph);
+    public PrizeCollectingSteinerTreeResultTransformer build(GraphResources graphResources) {
+        return new PrizeCollectingSteinerTreeResultTransformer(graphResources.graph());
     }
 }

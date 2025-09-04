@@ -19,8 +19,7 @@
  */
 package org.neo4j.gds.procedures.algorithms.pathfinding.write;
 
-import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.core.loading.GraphResources;
 import org.neo4j.gds.pathfinding.ShortestPathWriteStep;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.procedures.algorithms.results.StandardWriteRelationshipsResult;
@@ -34,7 +33,9 @@ public class ShortestPathWriteResultTransformer implements ResultTransformerBuil
     public ShortestPathWriteResultTransformer(ShortestPathWriteStep writeStep) {}
 
     @Override
-    public ResultTransformer<TimedAlgorithmResult<PathFindingResult>, Stream<StandardWriteRelationshipsResult>> build(Graph graph, GraphStore graphStore) {
+    public ResultTransformer<TimedAlgorithmResult<PathFindingResult>, Stream<StandardWriteRelationshipsResult>> build(
+        GraphResources graphResources
+    ) {
         return ar -> Stream.empty();
     }
 }

@@ -19,9 +19,8 @@
  */
 package org.neo4j.gds.procedures.algorithms.pathfinding.stats;
 
-import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.core.loading.GraphResources;
 import org.neo4j.gds.procedures.algorithms.results.StandardStatsResult;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.results.ResultTransformerBuilder;
@@ -40,8 +39,7 @@ class TraversalStatsResultTransformerBuilder implements ResultTransformerBuilder
 
     @Override
     public TraversalStatsResultTransformer build(
-        Graph graph,
-        GraphStore graphStore
+        GraphResources graphResources
     ) {
         return new TraversalStatsResultTransformer(configurationSupplier);
     }

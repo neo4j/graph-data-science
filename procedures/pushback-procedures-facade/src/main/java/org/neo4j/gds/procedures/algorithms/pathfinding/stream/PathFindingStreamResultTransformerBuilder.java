@@ -20,9 +20,8 @@
 package org.neo4j.gds.procedures.algorithms.pathfinding.stream;
 
 import org.neo4j.gds.api.CloseableResourceRegistry;
-import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.NodeLookup;
+import org.neo4j.gds.core.loading.GraphResources;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.procedures.algorithms.pathfinding.PathFactoryFacade;
 import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingStreamResult;
@@ -47,7 +46,10 @@ class PathFindingStreamResultTransformerBuilder implements ResultTransformerBuil
     }
 
     @Override
-    public PathFindingStreamResultTransformer build(Graph graph, GraphStore graphStore) {
+    public PathFindingStreamResultTransformer build(GraphResources graphResources) {
+        var graph = graphResources.graph();
+        var graphStore = graphResources.graphStore();
+
         // this is us handling the case of generated graphs and such
         var pathFactoryFacade = PathFactoryFacade.create(
             pathRequested,

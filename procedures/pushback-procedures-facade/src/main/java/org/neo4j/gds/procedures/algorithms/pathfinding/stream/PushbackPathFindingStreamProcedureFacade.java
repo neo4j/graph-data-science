@@ -88,7 +88,7 @@ public final class PushbackPathFindingStreamProcedureFacade {
                 config.toParameters(),
                 config.jobId(),
                 // `MSBFSASPAlgorithm` implementations already maps the ids to the original ones => no need for transformation
-                (graph, graphStore) -> TimedAlgorithmResult::result
+                (graphResources) -> TimedAlgorithmResult::result
             )
             .join();
     }

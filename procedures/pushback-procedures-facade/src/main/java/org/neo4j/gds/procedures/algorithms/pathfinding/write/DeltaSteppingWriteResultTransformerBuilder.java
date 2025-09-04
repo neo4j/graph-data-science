@@ -19,8 +19,7 @@
  */
 package org.neo4j.gds.procedures.algorithms.pathfinding.write;
 
-import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.core.loading.GraphResources;
 import org.neo4j.gds.pathfinding.ShortestPathWriteStep;
 import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaWriteConfig;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
@@ -35,7 +34,9 @@ class DeltaSteppingWriteResultTransformerBuilder implements ResultTransformerBui
     DeltaSteppingWriteResultTransformerBuilder(ShortestPathWriteStep writeStep, AllShortestPathsDeltaWriteConfig config) {}
 
     @Override
-    public ResultTransformer<TimedAlgorithmResult<PathFindingResult>, Stream<StandardWriteRelationshipsResult>> build(Graph graph, GraphStore graphStore) {
+    public ResultTransformer<TimedAlgorithmResult<PathFindingResult>, Stream<StandardWriteRelationshipsResult>> build(
+        GraphResources graphResources
+    ) {
         return ar -> Stream.empty();
     }
 }

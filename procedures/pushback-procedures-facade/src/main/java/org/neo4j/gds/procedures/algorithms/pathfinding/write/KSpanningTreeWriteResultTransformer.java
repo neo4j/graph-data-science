@@ -19,8 +19,7 @@
  */
 package org.neo4j.gds.procedures.algorithms.pathfinding.write;
 
-import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.core.loading.GraphResources;
 import org.neo4j.gds.kspanningtree.KSpanningTreeWriteConfig;
 import org.neo4j.gds.pathfinding.KSpanningTreeWriteStep;
 import org.neo4j.gds.procedures.algorithms.pathfinding.KSpanningTreeWriteResult;
@@ -36,7 +35,7 @@ class KSpanningTreeWriteResultTransformer implements ResultTransformerBuilder<Ti
     KSpanningTreeWriteResultTransformer(KSpanningTreeWriteStep writeStep, KSpanningTreeWriteConfig config) {}
 
     @Override
-    public ResultTransformer<TimedAlgorithmResult<SpanningTree>, Stream<KSpanningTreeWriteResult>> build(Graph graph, GraphStore graphStore) {
+    public ResultTransformer<TimedAlgorithmResult<SpanningTree>, Stream<KSpanningTreeWriteResult>> build(GraphResources graphResources) {
         return ar -> Stream.empty();
     }
 }

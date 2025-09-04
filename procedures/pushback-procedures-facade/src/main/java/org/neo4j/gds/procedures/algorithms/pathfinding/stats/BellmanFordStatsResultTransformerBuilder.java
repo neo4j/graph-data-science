@@ -19,8 +19,7 @@
  */
 package org.neo4j.gds.procedures.algorithms.pathfinding.stats;
 
-import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.core.loading.GraphResources;
 import org.neo4j.gds.paths.bellmanford.AllShortestPathsBellmanFordStatsConfig;
 import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
 import org.neo4j.gds.procedures.algorithms.pathfinding.BellmanFordStatsResult;
@@ -40,8 +39,7 @@ class BellmanFordStatsResultTransformerBuilder implements ResultTransformerBuild
 
     @Override
     public ResultTransformer<TimedAlgorithmResult<BellmanFordResult>, Stream<BellmanFordStatsResult>> build(
-        Graph graph,
-        GraphStore graphStore
+        GraphResources graphResources
     ) {
         return new BellmanFordStatsResultTransformer(configuration.toMap());
     }

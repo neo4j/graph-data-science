@@ -19,9 +19,8 @@
  */
 package org.neo4j.gds.procedures.algorithms.pathfinding.mutate;
 
-import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.MutateRelationshipService;
+import org.neo4j.gds.core.loading.GraphResources;
 import org.neo4j.gds.pathfinding.BellmanFordMutateStep;
 import org.neo4j.gds.paths.bellmanford.AllShortestPathsBellmanFordMutateConfig;
 import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
@@ -46,8 +45,7 @@ class BellmanFordMutateResultTransformerBuilder implements ResultTransformerBuil
 
     @Override
     public BellmanFordMutateResultTransformer build(
-        Graph graph,
-        GraphStore graphStore
+        GraphResources graphResources
     ) {
         var mutateStep = new BellmanFordMutateStep(
             configuration.mutateRelationshipType(),
@@ -56,8 +54,8 @@ class BellmanFordMutateResultTransformerBuilder implements ResultTransformerBuil
         );
         return new BellmanFordMutateResultTransformer(
             mutateStep,
-            graph,
-            graphStore,
+            graphResources.graph(),
+            graphResources.graphStore(),
             configuration.toMap()
         );
     }

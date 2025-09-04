@@ -19,8 +19,7 @@
  */
 package org.neo4j.gds.procedures.algorithms.pathfinding.stats;
 
-import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.core.loading.GraphResources;
 import org.neo4j.gds.procedures.algorithms.results.StandardModeResult;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.results.ResultTransformerBuilder;
@@ -38,7 +37,7 @@ class StandardModeStatsResultTransformerBuilder<R> implements ResultTransformerB
     }
 
     @Override
-    public StandardModeStatsResultTransformer<R> build(Graph graph, GraphStore graphStore) {
+    public StandardModeStatsResultTransformer<R> build(GraphResources graphResources) {
         return new StandardModeStatsResultTransformer<>(configurationSupplier);
     }
 }

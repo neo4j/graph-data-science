@@ -19,8 +19,7 @@
  */
 package org.neo4j.gds.procedures.algorithms.pathfinding.stats;
 
-import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.core.loading.GraphResources;
 import org.neo4j.gds.pcst.PCSTStatsConfig;
 import org.neo4j.gds.pricesteiner.PrizeSteinerTreeResult;
 import org.neo4j.gds.procedures.algorithms.pathfinding.PrizeCollectingSteinerTreeStatsResult;
@@ -39,8 +38,7 @@ class PrizeCollectingSteinerTreeStatsResultTransformerBuilder implements ResultT
 
     @Override
     public PrizeCollectingSteinerTreeStatsResultTransformer build(
-        Graph graph,
-        GraphStore graphStore
+        GraphResources graphResources
     ) {
         return new PrizeCollectingSteinerTreeStatsResultTransformer(configuration.toMap());
     }

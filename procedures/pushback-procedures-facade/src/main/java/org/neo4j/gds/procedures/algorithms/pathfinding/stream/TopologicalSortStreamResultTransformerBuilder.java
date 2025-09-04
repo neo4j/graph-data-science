@@ -19,8 +19,7 @@
  */
 package org.neo4j.gds.procedures.algorithms.pathfinding.stream;
 
-import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.core.loading.GraphResources;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortResult;
 import org.neo4j.gds.procedures.algorithms.pathfinding.TopologicalSortStreamResult;
 import org.neo4j.gds.result.TimedAlgorithmResult;
@@ -31,10 +30,7 @@ import java.util.stream.Stream;
 class TopologicalSortStreamResultTransformerBuilder implements ResultTransformerBuilder<TimedAlgorithmResult<TopologicalSortResult>, Stream<TopologicalSortStreamResult>> {
 
     @Override
-    public TopologicalSortStreamResultTransformer build(Graph graph, GraphStore graphStore) {
-
-        return new TopologicalSortStreamResultTransformer(
-            graph
-        );
+    public TopologicalSortStreamResultTransformer build(GraphResources graphResources) {
+        return new TopologicalSortStreamResultTransformer(graphResources.graph());
     }
 }

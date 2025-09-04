@@ -19,8 +19,7 @@
  */
 package org.neo4j.gds.procedures.algorithms.pathfinding.stream;
 
-import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.core.loading.GraphResources;
 import org.neo4j.gds.procedures.algorithms.pathfinding.SpanningTreeStreamResult;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.results.ResultTransformerBuilder;
@@ -37,10 +36,10 @@ class SteinerTreeStreamResultTransformerBuilder implements ResultTransformerBuil
     }
 
     @Override
-    public SteinerTreeStreamResultTransformer build(Graph graph, GraphStore graphStore) {
+    public SteinerTreeStreamResultTransformer build(GraphResources graphResources) {
 
         return new SteinerTreeStreamResultTransformer(
-            graph,
+            graphResources.graph(),
             sourceNode
         );
     }

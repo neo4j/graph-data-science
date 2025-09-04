@@ -109,13 +109,12 @@ public class PathFindingComputeBusinessFacade {
             databaseId
         );
         var graph = graphResources.graph();
-        var graphStore = graphResources.graphStore();
 
         return computeFacade.allShortestPaths(
             graph,
             parameters,
             jobId
-        ).thenApply(resultTransformerBuilder.build(graph, graphStore));
+        ).thenApply(resultTransformerBuilder.build(graphResources));
     }
 
     public <TR> CompletableFuture<TR> bellmanFord(
@@ -138,14 +137,13 @@ public class PathFindingComputeBusinessFacade {
             databaseId
         );
         var graph = graphResources.graph();
-        var graphStore = graphResources.graphStore();
 
         return computeFacade.bellmanFord(
             graph,
             parameters,
             jobId,
             logProgress
-        ).thenApply(resultTransformerBuilder.build(graph, graphStore));
+        ).thenApply(resultTransformerBuilder.build(graphResources));
     }
 
     public <TR> CompletableFuture<TR> breadthFirstSearch(
@@ -170,14 +168,13 @@ public class PathFindingComputeBusinessFacade {
             databaseId
         );
         var graph = graphResources.graph();
-        var graphStore = graphResources.graphStore();
 
         return computeFacade.breadthFirstSearch(
             graph,
             parameters,
             jobId,
             logProgress
-        ).thenApply(resultTransformerBuilder.build(graph, graphStore));
+        ).thenApply(resultTransformerBuilder.build(graphResources));
     }
 
     public <TR> CompletableFuture<TR> deltaStepping(
@@ -200,14 +197,13 @@ public class PathFindingComputeBusinessFacade {
             databaseId
         );
         var graph = graphResources.graph();
-        var graphStore = graphResources.graphStore();
 
         return computeFacade.deltaStepping(
             graph,
             parameters,
             jobId,
             logProgress
-        ).thenApply(resultTransformerBuilder.build(graph, graphStore));
+        ).thenApply(resultTransformerBuilder.build(graphResources));
     }
 
     public <TR> CompletableFuture<TR> depthFirstSearch(
@@ -232,14 +228,13 @@ public class PathFindingComputeBusinessFacade {
             databaseId
         );
         var graph = graphResources.graph();
-        var graphStore = graphResources.graphStore();
 
         return computeFacade.depthFirstSearch(
             graph,
             parameters,
             jobId,
             logProgress
-        ).thenApply(resultTransformerBuilder.build(graph, graphStore));
+        ).thenApply(resultTransformerBuilder.build(graphResources));
     }
 
     public <TR> CompletableFuture<TR> kSpanningTree(
@@ -262,14 +257,13 @@ public class PathFindingComputeBusinessFacade {
             databaseId
         );
         var graph = graphResources.graph();
-        var graphStore = graphResources.graphStore();
 
         return computeFacade.kSpanningTree(
             graph,
             parameters,
             jobId,
             logProgress
-        ).thenApply(resultTransformerBuilder.build(graph, graphStore));
+        ).thenApply(resultTransformerBuilder.build(graphResources));
     }
 
     public <TR> CompletableFuture<TR> longestPath(
@@ -291,14 +285,13 @@ public class PathFindingComputeBusinessFacade {
             databaseId
         );
         var graph = graphResources.graph();
-        var graphStore = graphResources.graphStore();
 
         return computeFacade.longestPath(
             graph,
             parameters,
             jobId,
             logProgress
-        ).thenApply(resultTransformerBuilder.build(graph, graphStore));
+        ).thenApply(resultTransformerBuilder.build(graphResources));
     }
 
     public <TR> CompletableFuture<TR> randomWalk(
@@ -321,14 +314,13 @@ public class PathFindingComputeBusinessFacade {
             databaseId
         );
         var graph = graphResources.graph();
-        var graphStore = graphResources.graphStore();
 
         return computeFacade.randomWalk(
             graph,
             parameters,
             jobId,
             logProgress
-        ).thenApply(resultTransformerBuilder.build(graph, graphStore));
+        ).thenApply(resultTransformerBuilder.build(graphResources));
     }
 
     public <TR> CompletableFuture<TR> randomWalkCountingNodeVisits(
@@ -351,14 +343,13 @@ public class PathFindingComputeBusinessFacade {
             databaseId
         );
         var graph = graphResources.graph();
-        var graphStore = graphResources.graphStore();
 
         return computeFacade.randomWalkCountingNodeVisits(
             graph,
             parameters,
             jobId,
             logProgress
-        ).thenApply(resultTransformerBuilder.build(graph, graphStore));
+        ).thenApply(resultTransformerBuilder.build(graphResources));
     }
 
     public <TR> CompletableFuture<TR> pcst(
@@ -382,7 +373,6 @@ public class PathFindingComputeBusinessFacade {
         );
 
         var graph = graphResources.graph();
-        var graphStore = graphResources.graphStore();
 
 
         return computeFacade.pcst(
@@ -390,7 +380,7 @@ public class PathFindingComputeBusinessFacade {
             parameters,
             jobId,
             logProgress
-        ).thenApply(resultTransformerBuilder.build(graph, graphStore));
+        ).thenApply(resultTransformerBuilder.build(graphResources));
     }
 
     public <TR> CompletableFuture<TR> singlePairShortestPathAStar(
@@ -413,14 +403,13 @@ public class PathFindingComputeBusinessFacade {
             databaseId
         );
         var graph = graphResources.graph();
-        var graphStore = graphResources.graphStore();
 
         return computeFacade.singlePairShortestPathAStar(
             graph,
             parameters,
             jobId,
             logProgress
-        ).thenApply(resultTransformerBuilder.build(graph, graphStore));
+        ).thenApply(resultTransformerBuilder.build(graphResources));
     }
 
     public <TR> CompletableFuture<TR> singlePairShortestPathDijkstra(
@@ -443,14 +432,13 @@ public class PathFindingComputeBusinessFacade {
             databaseId
         );
         var graph = graphResources.graph();
-        var graphStore = graphResources.graphStore();
 
         return computeFacade.singlePairShortestPathDijkstra(
             graph,
             parameters,
             jobId,
             logProgress
-        ).thenApply(resultTransformerBuilder.build(graph, graphStore));
+        ).thenApply(resultTransformerBuilder.build(graphResources));
     }
 
     public <TR> CompletableFuture<TR> singlePairShortestPathYens(
@@ -473,14 +461,13 @@ public class PathFindingComputeBusinessFacade {
             databaseId
         );
         var graph = graphResources.graph();
-        var graphStore = graphResources.graphStore();
 
         return computeFacade.singlePairShortestPathYens(
             graph,
             parameters,
             jobId,
             logProgress
-        ).thenApply(resultTransformerBuilder.build(graph, graphStore));
+        ).thenApply(resultTransformerBuilder.build(graphResources));
     }
 
     public <TR> CompletableFuture<TR> singleSourceShortestPathDijkstra(
@@ -503,14 +490,13 @@ public class PathFindingComputeBusinessFacade {
             databaseId
         );
         var graph = graphResources.graph();
-        var graphStore = graphResources.graphStore();
 
         return computeFacade.singleSourceShortestPathDijkstra(
             graph,
             parameters,
             jobId,
             logProgress
-        ).thenApply(resultTransformerBuilder.build(graph, graphStore));
+        ).thenApply(resultTransformerBuilder.build(graphResources));
     }
 
     public <TR> CompletableFuture<TR> spanningTree(
@@ -533,14 +519,13 @@ public class PathFindingComputeBusinessFacade {
             databaseId
         );
         var graph = graphResources.graph();
-        var graphStore = graphResources.graphStore();
 
         return computeFacade.spanningTree(
             graph,
             parameters,
             jobId,
             logProgress
-        ).thenApply(resultTransformerBuilder.build(graph, graphStore));
+        ).thenApply(resultTransformerBuilder.build(graphResources));
     }
 
     public <TR> CompletableFuture<TR> steinerTree(
@@ -563,14 +548,13 @@ public class PathFindingComputeBusinessFacade {
             databaseId
         );
         var graph = graphResources.graph();
-        var graphStore = graphResources.graphStore();
 
         return computeFacade.steinerTree(
             graph,
             parameters,
             jobId,
             logProgress
-        ).thenApply(resultTransformerBuilder.build(graph, graphStore));
+        ).thenApply(resultTransformerBuilder.build(graphResources));
     }
 
     public <TR> CompletableFuture<TR> topologicalSort(
@@ -592,13 +576,12 @@ public class PathFindingComputeBusinessFacade {
             databaseId
         );
         var graph = graphResources.graph();
-        var graphStore = graphResources.graphStore();
 
         return computeFacade.topologicalSort(
             graph,
             parameters,
             jobId,
             logProgress
-        ).thenApply(resultTransformerBuilder.build(graph, graphStore));
+        ).thenApply(resultTransformerBuilder.build(graphResources));
     }
 }

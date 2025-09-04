@@ -19,9 +19,8 @@
  */
 package org.neo4j.gds.procedures.algorithms.pathfinding.mutate;
 
-import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.MutateRelationshipService;
+import org.neo4j.gds.core.loading.GraphResources;
 import org.neo4j.gds.pathfinding.SpanningTreeMutateStep;
 import org.neo4j.gds.procedures.algorithms.pathfinding.SpanningTreeMutateResult;
 import org.neo4j.gds.result.TimedAlgorithmResult;
@@ -46,8 +45,7 @@ class SpanningTreeMutateResultTransformerBuilder implements ResultTransformerBui
 
     @Override
     public SpanningTreeMutateResultTransformer build(
-        Graph graph,
-        GraphStore graphStore
+        GraphResources graphResources
     ) {
         var mutateStep = new SpanningTreeMutateStep(
             configuration.mutateRelationshipType(),
@@ -56,8 +54,8 @@ class SpanningTreeMutateResultTransformerBuilder implements ResultTransformerBui
         );
         return new SpanningTreeMutateResultTransformer(
             mutateStep,
-            graph,
-            graphStore,
+            graphResources.graph(),
+            graphResources.graphStore(), 
             configuration.toMap()
         );
     }

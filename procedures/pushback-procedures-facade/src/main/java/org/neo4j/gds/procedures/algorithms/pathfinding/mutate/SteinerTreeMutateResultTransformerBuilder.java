@@ -19,9 +19,8 @@
  */
 package org.neo4j.gds.procedures.algorithms.pathfinding.mutate;
 
-import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.MutateRelationshipService;
+import org.neo4j.gds.core.loading.GraphResources;
 import org.neo4j.gds.pathfinding.SteinerTreeMutateStep;
 import org.neo4j.gds.procedures.algorithms.pathfinding.SteinerMutateResult;
 import org.neo4j.gds.result.TimedAlgorithmResult;
@@ -46,8 +45,7 @@ class SteinerTreeMutateResultTransformerBuilder implements ResultTransformerBuil
 
     @Override
     public SteinerTreeMutateResultTransformer build(
-        Graph graph,
-        GraphStore graphStore
+        GraphResources graphResources
     ) {
         var mutateStep = new SteinerTreeMutateStep(
             configuration.mutateRelationshipType(),
@@ -57,8 +55,8 @@ class SteinerTreeMutateResultTransformerBuilder implements ResultTransformerBuil
         );
         return new SteinerTreeMutateResultTransformer(
             mutateStep,
-            graph,
-            graphStore,
+            graphResources.graph(),
+            graphResources.graphStore(), 
             configuration.toMap()
         );
     }
