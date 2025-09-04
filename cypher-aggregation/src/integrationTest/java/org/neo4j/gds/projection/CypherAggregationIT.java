@@ -77,7 +77,7 @@ import static org.hamcrest.Matchers.any;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-class CypherAggregationTest extends BaseProcTest {
+class CypherAggregationIT extends BaseProcTest {
 
     @Neo4jGraph
     public static final String GRAPH = "CREATE" +

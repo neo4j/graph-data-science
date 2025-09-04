@@ -42,7 +42,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-class ProductGraphAggregatorTest {
+class ProductGraphAggregatorIT {
 
     @Test
     void shouldImportHighNodeIds() {
