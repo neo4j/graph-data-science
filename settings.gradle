@@ -370,6 +370,9 @@ project(':path-finding-facade-api').projectDir = file('procedures/facade-api/pat
 include('path-finding-configs')
 project(':path-finding-configs').projectDir = file('procedures/facade-api/configs/path-finding-configs')
 
+include('path-finding-mutate-steps')
+project(':path-finding-mutate-steps').projectDir = file('procedures/path-finding-mutate-steps')
+
 include('path-finding-params')
 project(':path-finding-params').projectDir = file('algo-params/path-finding-params')
 
