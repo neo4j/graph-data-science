@@ -26,4 +26,4 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
       - name: Run cipr task
-        run: ./gradlew cipr --continue
+        run: ./gradlew cipr --continue --parallel
