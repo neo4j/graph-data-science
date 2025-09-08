@@ -25,5 +25,7 @@ jobs:
           java-version: '21'
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
+      - name: Setup gradle properties
+        run: echo "-Xms2g -Xmx3g -XX:+UseParallelGC -Dfile.encoding=UTF-8" > ./gradle.properties
       - name: Run cipr task
         run: ./gradlew cipr --continue --parallel
