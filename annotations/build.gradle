@@ -4,6 +4,10 @@ description = 'Neo4j Graph Data Science :: Annotations'
 
 group = 'org.neo4j.gds'
 
+test {
+    useJUnitPlatform()
+}
+
 dependencies {
     annotationProcessor openGds.recordBuilder
     annotationProcessor openGds.immutables.builder
@@ -16,6 +20,7 @@ dependencies {
     testCompileOnly openGds.jetbrains.annotations
 
     testImplementation platform(openGds.junit5bom)
-    testImplementation openGds.junit5.jupiter
-    testImplementation openGds.assertj.core
+    testImplementation openGds.bundles.test.basic
+
+    testRuntimeOnly openGds.bundles.test.platforms
 }

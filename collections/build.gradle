@@ -12,11 +12,12 @@ dependencies {
     implementation openGds.hppc
 
     testImplementation platform(openGds.junit5bom)
-    testImplementation openGds.junit5.jupiter
-    testImplementation openGds.junit5.migration
-    testImplementation openGds.assertj.core
+    testImplementation openGds.bundles.test.basic
+
     testImplementation openGds.qaladatagen
     testImplementation openGds.hamcrest
+
+    testRuntimeOnly openGds.bundles.test.platforms
 }
 
 sourceSets {

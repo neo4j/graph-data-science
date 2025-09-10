@@ -32,9 +32,7 @@ dependencies {
 
     // Test dependencies
     testImplementation platform(openGds.junit5bom)
-    testImplementation openGds.assertj.core
-    testImplementation openGds.junit5.jupiter.api
-    testImplementation openGds.junit5.jupiter.engine
-    testImplementation openGds.junit5.jupiter.params
-    testImplementation openGds.mockito.junit.jupiter
+    testImplementation openGds.bundles.test.mocking
+
+    testRuntimeOnly openGds.bundles.test.platforms
 }

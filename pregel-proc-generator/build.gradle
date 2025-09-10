@@ -42,7 +42,9 @@ dependencies {
 
     testImplementation platform(openGds.junit5bom)
     testImplementation project(':core-test-utils')
-    testImplementation openGds.junit5.jupiter
+    testImplementation openGds.bundles.test.basic
     testImplementation openGds.junit5.migration
     testImplementation openGds.google.testing.compile
+
+    testRuntimeOnly openGds.bundles.test.platforms
 }

@@ -30,7 +30,6 @@ jol = "0.17"
 jqwik = "1.9.0"
 junit-pioneer = "2.2.0"
 junit5bom = "5.11.0"
-junit5 = "5.11.0"
 log4j = "2.20.0"
 memoryfilesystem = "2.8.0"
 mockito-junit-jupiter = "5.13.0"
@@ -85,7 +84,7 @@ jqwik = { module = "net.jqwik:jqwik", version.ref = "jqwik" }
 junit-pioneer = { module = "org.junit-pioneer:junit-pioneer", version.ref = "junit-pioneer" }
 junit5-jupiter = { module = "org.junit.jupiter:junit-jupiter" }
 junit5-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api" }
-junit5-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit5" }
+junit5-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine" }
 junit5-jupiter-params = { module = "org.junit.jupiter:junit-jupiter-params" }
 junit5-migration = { module = "org.junit.jupiter:junit-jupiter-migrationsupport" }
 junit5-platform = { module = "org.junit.platform:junit-platform-launcher" }
@@ -112,3 +111,14 @@ google-protobuf = "com.google.protobuf:0.9.4"
 nebula-dependencies = "nebula.info-dependencies:11.4.1"
 shadowjar = "com.gradleup.shadow:8.3.2"
 spawn = "ch.kk7.spawn:1.0.20180924200750"
+
+[bundles]
+test-basic = [ "junit5-jupiter", "assertj-core" ]
+test-mocking = [ "junit5-jupiter", "assertj-core", "mockito-junit-jupiter" ]
+test-platforms = [
+    "junit5-platform",
+    # `jqwik` is declared as test engine in `defaults-java.gradle`
+    # and exposed as transitive dependency of `test-utils`
+    # we don't need to bring the whole `test-utils` module everywhere
+    "jqwik"
+]

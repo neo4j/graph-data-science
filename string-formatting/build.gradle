@@ -10,7 +10,7 @@ dependencies {
     compileOnly openGds.jetbrains.annotations
 
     testImplementation platform(openGds.junit5bom)
-    testImplementation openGds.junit5.jupiter
-    testImplementation openGds.assertj.core
-    testImplementation openGds.hamcrest
+    testImplementation openGds.bundles.test.basic
+
+    testRuntimeOnly openGds.bundles.test.platforms
 }

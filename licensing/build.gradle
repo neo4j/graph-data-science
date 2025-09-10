@@ -16,4 +16,7 @@ dependencies {
     // Test dependencies
     testImplementation project(':core-test-utils')
     testImplementation openGds.mockito.junit.jupiter
+    testImplementation openGds.bundles.test.basic
+
+    testRuntimeOnly openGds.bundles.test.platforms
 }

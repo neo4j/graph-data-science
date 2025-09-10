@@ -17,10 +17,8 @@ dependencies {
     implementation project(':string-formatting')
 
     testImplementation platform(openGds.junit5bom)
-    testImplementation openGds.junit5.jupiter.api
-    testImplementation openGds.junit5.jupiter.params
-    testRuntimeOnly openGds.junit5.jupiter.engine
+    testImplementation openGds.bundles.test.basic
 
-    testImplementation openGds.assertj.core
+    testRuntimeOnly openGds.bundles.test.platforms
 
 }

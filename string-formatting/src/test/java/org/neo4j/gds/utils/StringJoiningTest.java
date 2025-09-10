@@ -19,20 +19,19 @@
  */
 package org.neo4j.gds.utils;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class StringJoiningTest {
 
     @Test
     void joinVerbose() {
-        Assertions.assertEquals("A", StringJoining.joinVerbose(List.of("A")));
-        assertEquals("A and B", StringJoining.joinVerbose(List.of("A", "B")));
-        assertEquals("A, B and C", StringJoining.joinVerbose(List.of("A", "B", "C")));
+        assertThat(StringJoining.joinVerbose(List.of("A"))).isEqualTo("A");
+        assertThat(StringJoining.joinVerbose(List.of("A", "B"))).isEqualTo("A and B");
+        assertThat(StringJoining.joinVerbose(List.of("A", "B", "C"))).isEqualTo("A, B and C");
     }
 
 }
