@@ -39,7 +39,7 @@ class Node2VecMemoryEstimateDefinitionTest {
 
         MemoryEstimationAssert.assertThat(memoryEstimation)
             .memoryRange(1000, new Concurrency(1))
-            .hasSameMinAndMaxEqualTo(7688456L);
+            .hasSameMinAndMaxEqualTo(7688464L);
     }
 
 }

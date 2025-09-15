@@ -33,6 +33,7 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.logging.GdsTestLog;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Optional;
 
@@ -73,7 +74,7 @@ class NodeEmbeddingAlgorithmsTest {
             .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
             .build();
         var progressTrackerCreator = new ProgressTrackerCreator(log, requestScopedDependencies);
-        var nodeEmbeddingAlgorithms = new NodeEmbeddingAlgorithms(null, progressTrackerCreator, null);
+        var nodeEmbeddingAlgorithms = new NodeEmbeddingAlgorithms(null, progressTrackerCreator, TerminationFlag.RUNNING_TRUE);
 
         var configuration = Node2VecStreamConfigImpl.builder().embeddingDimension(128).build();
 
@@ -106,7 +107,7 @@ class NodeEmbeddingAlgorithmsTest {
             .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
             .build();
         var progressTrackerCreator = new ProgressTrackerCreator(log, requestScopedDependencies);
-        var nodeEmbeddingAlgorithms = new NodeEmbeddingAlgorithms(null, progressTrackerCreator, null);
+        var nodeEmbeddingAlgorithms = new NodeEmbeddingAlgorithms(null, progressTrackerCreator, TerminationFlag.RUNNING_TRUE);
 
         var configuration = Node2VecStreamConfigImpl.builder().embeddingDimension(128).build();
         nodeEmbeddingAlgorithms.node2Vec(graph, configuration);

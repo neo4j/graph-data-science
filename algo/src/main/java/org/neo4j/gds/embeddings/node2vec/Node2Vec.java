@@ -130,7 +130,8 @@ public class Node2Vec extends Algorithm<Node2VecResult> {
             maybeRandomSeed,
             walks,
             probabilitiesBuilder.build(),
-            progressTracker
+            progressTracker,
+            terminationFlag
         );
 
         var result = node2VecModel.train();

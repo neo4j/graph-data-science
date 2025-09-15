@@ -27,6 +27,8 @@ import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.Intersections;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.termination.TerminatedException;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Optional;
 import java.util.Random;
@@ -35,6 +37,7 @@ import java.util.function.LongUnaryOperator;
 import java.util.stream.LongStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -83,7 +86,8 @@ class Node2VecModelTest {
             Optional.empty(),
             walks,
             probabilitiesBuilder.build(),
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         );
 
         var trainResult = node2VecModel.train();
@@ -186,7 +190,8 @@ class Node2VecModelTest {
             Optional.of(1337L),
             walks,
             probabilitiesBuilder.build(),
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         );
 
         var otherNode2VecModel = new Node2VecModel(
@@ -197,7 +202,8 @@ class Node2VecModelTest {
             Optional.of(1337L),
             walks,
             probabilitiesBuilder.build(),
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         );
 
         var embeddings = node2VecModel.train().embeddings();
@@ -231,7 +237,8 @@ class Node2VecModelTest {
                 Optional.of(1L), // Random Seed
                 randomWalksMock,
                 randomWalkProbabilitiesMock,
-                ProgressTracker.NULL_TRACKER
+                ProgressTracker.NULL_TRACKER,
+                TerminationFlag.RUNNING_TRUE
             )
         );
 
@@ -286,4 +293,57 @@ class Node2VecModelTest {
 
         return walks;
     }
+
+    @Test
+    void shouldRespectTerminationFlag() {
+        var random = new Random(42);
+        int numberOfClusters = 2;
+        int clusterSize = 5;
+        int numberOfWalks = 2;
+        int walkLength = 5;
+
+        var probabilitiesBuilder = new RandomWalkProbabilities.Builder(
+            numberOfClusters * clusterSize,
+            new Concurrency(1),
+            0.001,
+            0.75
+        );
+
+        var walks = generateRandomWalks(
+            probabilitiesBuilder,
+            numberOfClusters,
+            clusterSize,
+            numberOfWalks,
+            walkLength,
+            random
+        );
+
+        var trainParameters = new TrainParameters(0.05, 0.0001, 10, 2, 1, 2, EmbeddingInitializer.NORMALIZED);
+
+        var terminationFlag = new TerminationFlag() {
+            private int callCount = 0;
+            @Override
+            public boolean running() {
+                ++callCount;
+                return callCount == 2;
+            }
+        };
+
+        var node2VecModel = new Node2VecModel(
+            nodeId -> nodeId,
+            1000,
+            trainParameters,
+            new Concurrency(4),
+            Optional.of(19L),
+            walks,
+            probabilitiesBuilder.build(),
+            ProgressTracker.NULL_TRACKER,
+            terminationFlag
+        );
+
+        assertThatExceptionOfType(TerminatedException.class)
+            .isThrownBy(node2VecModel::train);
+
+    }
+
 }
