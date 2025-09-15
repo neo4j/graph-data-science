@@ -20,7 +20,6 @@
 package org.neo4j.gds.procedures.pipelines;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.common.DependencyResolver;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.CloseableResourceRegistry;
@@ -34,6 +33,7 @@ import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
+import org.neo4j.gds.executor.MemoryEstimationContext;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.metrics.Metrics;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
@@ -122,7 +122,7 @@ class NodeClassificationTrainComputationTest {
             pipelineRepository,
             CloseableResourceRegistry.EMPTY,
             DatabaseId.DEFAULT,
-            mock(DependencyResolver.class),
+            new MemoryEstimationContext(false),
             Metrics.DISABLED,
             NodeLookup.EMPTY,
             null,

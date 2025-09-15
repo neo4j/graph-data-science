@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.procedures.pipelines;
 
-import org.neo4j.common.DependencyResolver;
 import org.neo4j.gds.api.CloseableResourceRegistry;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.NodeLookup;
@@ -31,6 +30,7 @@ import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.core.write.RelationshipExporterBuilder;
+import org.neo4j.gds.executor.MemoryEstimationContext;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.metrics.Metrics;
 import org.neo4j.gds.ml.pipeline.nodePipeline.regression.NodeRegressionPipelineTrainConfig;
@@ -46,7 +46,7 @@ class NodeRegressionTrainComputationFactory {
 
     private final CloseableResourceRegistry closeableResourceRegistry;
     private final DatabaseId databaseId;
-    private final DependencyResolver dependencyResolver;
+    private final MemoryEstimationContext memoryEstimationContext;
     private final Metrics metrics;
     private final NodeLookup nodeLookup;
     private final NodePropertyExporterBuilder nodePropertyExporterBuilder;
@@ -67,7 +67,7 @@ class NodeRegressionTrainComputationFactory {
         PipelineRepository pipelineRepository,
         CloseableResourceRegistry closeableResourceRegistry,
         DatabaseId databaseId,
-        DependencyResolver dependencyResolver,
+        MemoryEstimationContext memoryEstimationContext,
         Metrics metrics,
         NodeLookup nodeLookup,
         NodePropertyExporterBuilder nodePropertyExporterBuilder,
@@ -85,7 +85,7 @@ class NodeRegressionTrainComputationFactory {
         this.pipelineRepository = pipelineRepository;
         this.closeableResourceRegistry = closeableResourceRegistry;
         this.databaseId = databaseId;
-        this.dependencyResolver = dependencyResolver;
+        this.memoryEstimationContext = memoryEstimationContext;
         this.metrics = metrics;
         this.nodeLookup = nodeLookup;
         this.nodePropertyExporterBuilder = nodePropertyExporterBuilder;
@@ -106,7 +106,7 @@ class NodeRegressionTrainComputationFactory {
             pipelineRepository,
             closeableResourceRegistry,
             databaseId,
-            dependencyResolver,
+            memoryEstimationContext,
             metrics,
             nodeLookup,
             nodePropertyExporterBuilder,

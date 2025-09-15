@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.procedures.pipelines;
 
-import org.neo4j.common.DependencyResolver;
 import org.neo4j.gds.api.CloseableResourceRegistry;
 import org.neo4j.gds.api.NodeLookup;
 import org.neo4j.gds.api.ProcedureReturnColumns;
@@ -32,6 +31,7 @@ import org.neo4j.gds.applications.modelcatalog.ModelRepository;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.logging.GdsLoggers;
+import org.neo4j.gds.executor.MemoryEstimationContext;
 import org.neo4j.gds.metrics.Metrics;
 import org.neo4j.gds.ml.pipeline.TrainingPipeline;
 import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
@@ -66,7 +66,7 @@ public final class LocalPipelinesProcedureFacade implements PipelinesProcedureFa
         ModelRepository modelRepository,
         PipelineRepository pipelineRepository,
         CloseableResourceRegistry closeableResourceRegistry,
-        DependencyResolver dependencyResolver,
+        MemoryEstimationContext memoryEstimationContext,
         Metrics metrics,
         NodeLookup nodeLookup,
         ProcedureReturnColumns procedureReturnColumns,
@@ -80,6 +80,7 @@ public final class LocalPipelinesProcedureFacade implements PipelinesProcedureFa
     ) {
         var pipelineConfigurationParser = new PipelineConfigurationParser(requestScopedDependencies.user());
 
+
         var pipelineApplications = PipelineApplications.create(
             loggers,
             graphStoreCatalogService,
@@ -87,7 +88,7 @@ public final class LocalPipelinesProcedureFacade implements PipelinesProcedureFa
             modelRepository,
             pipelineRepository,
             closeableResourceRegistry,
-            dependencyResolver,
+            memoryEstimationContext,
             metrics,
             nodeLookup,
             procedureReturnColumns,

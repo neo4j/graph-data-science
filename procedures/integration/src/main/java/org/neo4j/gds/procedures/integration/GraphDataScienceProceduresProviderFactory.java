@@ -32,6 +32,7 @@ import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.logging.GdsLoggers;
 import org.neo4j.gds.core.utils.progress.TaskStoreService;
+import org.neo4j.gds.executor.MemoryEstimationContext;
 import org.neo4j.gds.mem.MemoryTracker;
 import org.neo4j.gds.metrics.Metrics;
 import org.neo4j.gds.procedures.ExporterBuildersProviderService;
@@ -125,6 +126,7 @@ final class GraphDataScienceProceduresProviderFactory {
             graphStoreCatalogService,
             limitsConfiguration,
             memoryGuard,
+            new MemoryEstimationContext(useMaxMemoryEstimation),
             metrics,
             modelCatalog,
             modelRepository,

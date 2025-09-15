@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.procedures;
 
-import org.neo4j.common.DependencyResolver;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTemplate;
@@ -39,6 +38,7 @@ import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.logging.GdsLoggers;
+import org.neo4j.gds.executor.MemoryEstimationContext;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.MemoryTracker;
 import org.neo4j.gds.memest.DatabaseGraphStoreEstimationService;
@@ -102,13 +102,13 @@ public class LocalGraphDataScienceProcedures implements GraphDataScienceProcedur
     public static GraphDataScienceProcedures create(
         GdsLoggers loggers,
         DefaultsConfiguration defaultsConfiguration,
-        DependencyResolver dependencyResolver,
         ExportLocation exportLocation,
         GraphCatalogProcedureFacadeFactory graphCatalogProcedureFacadeFactory,
         FeatureTogglesRepository featureTogglesRepository,
         GraphStoreCatalogService graphStoreCatalogService,
         LimitsConfiguration limitsConfiguration,
         MemoryGuard memoryGuard,
+        MemoryEstimationContext memoryEstimationContext,
         Metrics metrics,
         ModelCatalog modelCatalog,
         ModelRepository modelRepository,
@@ -208,7 +208,7 @@ public class LocalGraphDataScienceProcedures implements GraphDataScienceProcedur
             modelRepository,
             pipelineRepository,
             closeableResourceRegistry,
-            dependencyResolver,
+            memoryEstimationContext,
             metrics,
             nodeLookup,
             procedureReturnColumns,

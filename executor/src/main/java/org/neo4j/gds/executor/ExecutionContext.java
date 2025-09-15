@@ -47,6 +47,8 @@ public interface ExecutionContext {
 
     DependencyResolver dependencyResolver();
 
+    MemoryEstimationContext memoryEstimationContext();
+
     @Nullable
     ModelCatalog modelCatalog();
 
@@ -112,6 +114,8 @@ public interface ExecutionContext {
         }
     };
 
+
+    MemoryEstimationContext EMPTY_MEMORY_CONTEXT = new MemoryEstimationContext(false);
     ExecutionContext EMPTY = new ExecutionContext() {
 
         @Override
@@ -122,6 +126,11 @@ public interface ExecutionContext {
         @Override
         public DependencyResolver dependencyResolver() {
             return EMPTY_DEPENDENCY_RESOLVER;
+        }
+
+        @Override
+        public MemoryEstimationContext memoryEstimationContext() {
+            return EMPTY_MEMORY_CONTEXT;
         }
 
         @Override

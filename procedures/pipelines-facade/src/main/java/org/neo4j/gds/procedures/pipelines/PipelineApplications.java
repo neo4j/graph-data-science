@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.procedures.pipelines;
 
-import org.neo4j.common.DependencyResolver;
 import org.neo4j.gds.api.CloseableResourceRegistry;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphName;
@@ -48,6 +47,7 @@ import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.core.write.RelationshipExporterBuilder;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
+import org.neo4j.gds.executor.MemoryEstimationContext;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryEstimations;
@@ -89,7 +89,7 @@ public class PipelineApplications {
 
     private final CloseableResourceRegistry closeableResourceRegistry;
     private final DatabaseId databaseId;
-    private final DependencyResolver dependencyResolver;
+    private final MemoryEstimationContext memoryEstimationContext;
     private final Metrics metrics;
     private final NodeLookup nodeLookup;
     private final NodePropertyExporterBuilder nodePropertyExporterBuilder;
@@ -127,7 +127,7 @@ public class PipelineApplications {
         PipelineRepository pipelineRepository,
         CloseableResourceRegistry closeableResourceRegistry,
         DatabaseId databaseId,
-        DependencyResolver dependencyResolver,
+        MemoryEstimationContext memoryEstimationContext,
         Metrics metrics,
         NodeLookup nodeLookup,
         NodePropertyExporterBuilder nodePropertyExporterBuilder,
@@ -158,7 +158,7 @@ public class PipelineApplications {
         this.pipelineRepository = pipelineRepository;
         this.closeableResourceRegistry = closeableResourceRegistry;
         this.databaseId = databaseId;
-        this.dependencyResolver = dependencyResolver;
+        this.memoryEstimationContext = memoryEstimationContext;
         this.metrics = metrics;
         this.nodeLookup = nodeLookup;
         this.nodePropertyExporterBuilder = nodePropertyExporterBuilder;
@@ -189,7 +189,7 @@ public class PipelineApplications {
         ModelRepository modelRepository,
         PipelineRepository pipelineRepository,
         CloseableResourceRegistry closeableResourceRegistry,
-        DependencyResolver dependencyResolver,
+        MemoryEstimationContext memoryEstimationContext,
         Metrics metrics,
         NodeLookup nodeLookup,
         ProcedureReturnColumns procedureReturnColumns,
@@ -229,7 +229,7 @@ public class PipelineApplications {
             pipelineRepository,
             closeableResourceRegistry,
             requestScopedDependencies.databaseId(),
-            dependencyResolver,
+            memoryEstimationContext,
             metrics,
             nodeLookup,
             writeContext.nodePropertyExporterBuilder(),
@@ -252,7 +252,7 @@ public class PipelineApplications {
             pipelineRepository,
             closeableResourceRegistry,
             requestScopedDependencies.databaseId(),
-            dependencyResolver,
+            memoryEstimationContext,
             metrics,
             nodeLookup,
             writeContext.nodePropertyExporterBuilder(),
@@ -729,7 +729,7 @@ public class PipelineApplications {
             modelCatalog,
             closeableResourceRegistry,
             databaseId,
-            dependencyResolver,
+            memoryEstimationContext,
             metrics,
             nodeLookup,
             nodePropertyExporterBuilder,
@@ -756,7 +756,7 @@ public class PipelineApplications {
             pipelineRepository,
             closeableResourceRegistry,
             databaseId,
-            dependencyResolver,
+            memoryEstimationContext,
             metrics,
             nodeLookup,
             nodePropertyExporterBuilder,
@@ -782,7 +782,7 @@ public class PipelineApplications {
             modelCatalog,
             closeableResourceRegistry,
             databaseId,
-            dependencyResolver,
+            memoryEstimationContext,
             metrics,
             nodeLookup,
             nodePropertyExporterBuilder,
@@ -808,7 +808,7 @@ public class PipelineApplications {
             pipelineRepository,
             closeableResourceRegistry,
             databaseId,
-            dependencyResolver,
+            memoryEstimationContext,
             metrics,
             nodeLookup,
             nodePropertyExporterBuilder,
@@ -828,12 +828,14 @@ public class PipelineApplications {
         NodeRegressionPredictPipelineBaseConfig configuration,
         Label label
     ) {
+
+
         return NodeRegressionPredictComputation.create(
             log,
             modelCatalog,
             closeableResourceRegistry,
             databaseId,
-            dependencyResolver,
+            memoryEstimationContext,
             metrics,
             nodeLookup,
             nodePropertyExporterBuilder,

@@ -37,6 +37,7 @@ import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogStore;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
+import org.neo4j.gds.executor.MemoryEstimationContext;
 import org.neo4j.gds.logging.LogAdapter;
 import org.neo4j.gds.mem.MemoryTracker;
 import org.neo4j.gds.metrics.Metrics;
@@ -176,12 +177,12 @@ public final class ProcedureRunner {
             loggers,
             DefaultsConfiguration.Instance,
             null,
-            null,
             catalogProcedureFacadeFactory,
             null,
             graphStoreCatalogService,
             LimitsConfiguration.Instance,
             MemoryGuard.DISABLED,
+            new MemoryEstimationContext(false),
             Metrics.DISABLED,
             modelCatalog,
             null,

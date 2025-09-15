@@ -36,6 +36,7 @@ import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.logging.GdsLoggers;
 import org.neo4j.gds.core.utils.progress.TaskStoreService;
 import org.neo4j.gds.core.write.ExporterContext;
+import org.neo4j.gds.executor.MemoryEstimationContext;
 import org.neo4j.gds.mem.MemoryTracker;
 import org.neo4j.gds.metrics.Metrics;
 import org.neo4j.gds.procedures.DatabaseIdAccessor;
@@ -80,6 +81,7 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
     private final GraphStoreCatalogService graphStoreCatalogService;
     private final LimitsConfiguration limitsConfiguration;
     private final MemoryGuard memoryGuard;
+    private final MemoryEstimationContext memoryEstimationContext;
     private final Metrics metrics;
     private final ModelCatalog modelCatalog;
     private final ModelRepository modelRepository;
@@ -104,6 +106,7 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
         GraphStoreCatalogService graphStoreCatalogService,
         LimitsConfiguration limitsConfiguration,
         MemoryGuard memoryGuard,
+        MemoryEstimationContext memoryEstimationContext,
         Metrics metrics,
         ModelCatalog modelCatalog,
         ModelRepository modelRepository,
@@ -128,6 +131,7 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
         this.graphStoreCatalogService = graphStoreCatalogService;
         this.limitsConfiguration = limitsConfiguration;
         this.memoryGuard = memoryGuard;
+        this.memoryEstimationContext = memoryEstimationContext;
         this.metrics = metrics;
         this.modelCatalog = modelCatalog;
         this.modelRepository = modelRepository;
@@ -189,13 +193,13 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
         return LocalGraphDataScienceProcedures.create(
             loggers,
             defaultsConfiguration,
-            dependencyResolver,
             exportLocation,
             graphCatalogProcedureFacadeFactory,
             featureTogglesRepository,
             graphStoreCatalogService,
             limitsConfiguration,
             memoryGuard,
+            memoryEstimationContext,
             metrics,
             modelCatalog,
             modelRepository,
