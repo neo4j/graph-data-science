@@ -20,8 +20,8 @@
   "author": "Neo4j",
   "license": "ISC",
   "dependencies": {
-    "@antora/cli": "^3.1.7",
-    "@antora/site-generator-default": "^3.1.7",
+    "@antora/cli": "^3.1.12",
+    "@antora/site-generator-default": "^3.1.12",
     "@neo4j-antora/antora-add-notes": "^0.3.1",
     "@neo4j-antora/antora-modify-sitemaps": "^0.4.4",
     "@neo4j-antora/antora-page-roles": "^0.3.2",
@@ -29,12 +29,12 @@
     "@neo4j-documentation/macros": "^1.0.2",
     "@neo4j-documentation/remote-include": "^1.0.0",
     "js-yaml": "^4.1.0",
-    "simple-git": "^3.5.0",
-    "yargs": "^17.5.1"
+    "simple-git": "^3.28.0",
+    "yargs": "^18.0.0"
   },
   "devDependencies": {
-    "express": "^4.18.2",
-    "nodemon": "^3.0.2"
+    "express": "^5.1.0",
+    "nodemon": "^3.1.10"
   },
   "overrides": {
     "@antora/site-generator-default": {
