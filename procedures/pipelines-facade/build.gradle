@@ -13,9 +13,6 @@ dependencies {
     compileOnly openGds.immutables.value.annotations
     compileOnly openGds.jetbrains.annotations
 
-    // Neo4j dependencies
-    compileOnly(neo4j.common) { transitive = false }
-
     implementation project(':algo')
     implementation project(':algo-common')
     implementation project(':algorithms-facade-api')
