@@ -27,6 +27,7 @@ import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.mem.BitUtil;
 import org.neo4j.gds.ml.core.tensor.FloatVector;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,6 +55,7 @@ public class Node2VecModel {
     private final RandomWalkProbabilities randomWalkProbabilities;
     private final ProgressTracker progressTracker;
     private final long randomSeed;
+    private final TerminationFlag terminationFlag;
 
     static final double EPSILON = 1e-10;
 
@@ -65,7 +67,8 @@ public class Node2VecModel {
         Optional<Long> maybeRandomSeed,
         CompressedRandomWalks walks,
         RandomWalkProbabilities randomWalkProbabilities,
-        ProgressTracker progressTracker
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
     ) {
         this(
             toOriginalId,
@@ -81,7 +84,8 @@ public class Node2VecModel {
             maybeRandomSeed,
             walks,
             randomWalkProbabilities,
-            progressTracker
+            progressTracker,
+            terminationFlag
         );
     }
 
@@ -99,7 +103,8 @@ public class Node2VecModel {
         Optional<Long> maybeRandomSeed,
         CompressedRandomWalks walks,
         RandomWalkProbabilities randomWalkProbabilities,
-        ProgressTracker progressTracker
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
     ) {
         this.initialLearningRate = initialLearningRate;
         this.minLearningRate = minLearningRate;
@@ -113,6 +118,7 @@ public class Node2VecModel {
         this.randomWalkProbabilities = randomWalkProbabilities;
         this.progressTracker = progressTracker;
         this.randomSeed = maybeRandomSeed.orElseGet(() -> new SplittableRandom().nextLong());
+        this.terminationFlag = terminationFlag;
 
         var random = new Random();
         centerEmbeddings = initializeEmbeddings(toOriginalId, nodeCount, embeddingDimension, random);
@@ -136,6 +142,7 @@ public class Node2VecModel {
 
             RunWithConcurrency.builder()
                 .concurrency(concurrency)
+                .terminationFlag(terminationFlag)
                 .tasks(tasks)
                 .run();
 
