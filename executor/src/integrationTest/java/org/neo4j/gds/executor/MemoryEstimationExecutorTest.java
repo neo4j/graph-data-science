@@ -74,6 +74,7 @@ class MemoryEstimationExecutorTest extends BaseTest {
             .builder()
             .databaseId(DatabaseId.of(db.databaseName()))
             .dependencyResolver(GraphDatabaseApiProxy.dependencyResolver(db))
+            .memoryEstimationContext(new MemoryEstimationContext(true))
             .returnColumns(ProcedureReturnColumns.EMPTY)
             .log(Log.noOpLog())
             .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)

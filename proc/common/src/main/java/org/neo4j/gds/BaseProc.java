@@ -26,16 +26,17 @@ import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.ImmutableExecutionContext;
+import org.neo4j.gds.executor.MemoryEstimationContext;
 import org.neo4j.gds.logging.LogAdapter;
 import org.neo4j.gds.metrics.Metrics;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.ProcedureCallContextReturnColumns;
-import org.neo4j.gds.transaction.TransactionCloseableResourceRegistry;
-import org.neo4j.gds.transaction.TransactionNodeLookup;
 import org.neo4j.gds.termination.TransactionTerminationMonitor;
 import org.neo4j.gds.transaction.DatabaseTransactionContext;
 import org.neo4j.gds.transaction.EmptyTransactionContext;
+import org.neo4j.gds.transaction.TransactionCloseableResourceRegistry;
 import org.neo4j.gds.transaction.TransactionContext;
+import org.neo4j.gds.transaction.TransactionNodeLookup;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
@@ -82,12 +83,15 @@ public abstract class BaseProc {
     }
 
     public ExecutionContext executionContext() {
+
         return databaseService == null
             ? ExecutionContext.EMPTY
             : ImmutableExecutionContext
                 .builder()
                 .databaseId(databaseId())
                 .dependencyResolver(GraphDatabaseApiProxy.dependencyResolver(databaseService))
+                //Base Proc is only used by pregel  generated codes which have have same min-max expectation so fine
+                .memoryEstimationContext(new MemoryEstimationContext(true))
                 .log(new LogAdapter(log))
                 .returnColumns(new ProcedureCallContextReturnColumns(callContext))
                 .userLogRegistryFactory(userLogRegistryFactory)

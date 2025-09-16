@@ -45,6 +45,7 @@ public interface ExecutionContext {
 
     DatabaseId databaseId();
 
+    @Nullable
     DependencyResolver dependencyResolver();
 
     MemoryEstimationContext memoryEstimationContext();
@@ -114,8 +115,8 @@ public interface ExecutionContext {
         }
     };
 
-
     MemoryEstimationContext EMPTY_MEMORY_CONTEXT = new MemoryEstimationContext(false);
+
     ExecutionContext EMPTY = new ExecutionContext() {
 
         @Override

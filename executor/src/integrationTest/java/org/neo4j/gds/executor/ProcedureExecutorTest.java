@@ -22,8 +22,6 @@ package org.neo4j.gds.executor;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.common.DependencyResolver;
-import org.neo4j.configuration.Config;
 import org.neo4j.gds.api.CloseableResourceRegistry;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.NodeLookup;
@@ -48,7 +46,6 @@ import org.neo4j.gds.termination.TerminationMonitor;
 import java.time.Duration;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -143,25 +140,7 @@ class ProcedureExecutorTest {
             .nodeLookup(NodeLookup.EMPTY)
             .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
             .metrics(Metrics.DISABLED)
-            .dependencyResolver(new DependencyResolver() {
-                @Override
-                public <T> T resolveDependency(Class<T> aClass, SelectionStrategy selectionStrategy) {
-                    if (aClass == Config.class){
-                        return (T) Config.defaults();
-                    }
-                    throw new IllegalStateException("What are you doing here, young one?");
-                }
-
-                @Override
-                public <T> Optional<T> resolveOptionalDependency(Class<T> aClass) {
-                    return Optional.empty();
-                }
-
-                @Override
-                public boolean containsDependency(Class<?> aClass) {
-                    return false;
-                }
-            })
+            .memoryEstimationContext(new MemoryEstimationContext(true))
             .build();
     }
 
