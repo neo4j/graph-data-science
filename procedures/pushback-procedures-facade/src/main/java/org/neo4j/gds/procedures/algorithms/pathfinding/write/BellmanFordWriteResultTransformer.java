@@ -22,8 +22,6 @@ package org.neo4j.gds.procedures.algorithms.pathfinding.write;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
-import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
-import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.pathfinding.BellmanFordWriteStep;
 import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
@@ -32,7 +30,6 @@ import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.results.ResultTransformer;
 
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 
 class BellmanFordWriteResultTransformer implements ResultTransformer<TimedAlgorithmResult<BellmanFordResult>, Stream<BellmanFordWriteResult>> {
@@ -65,26 +62,23 @@ class BellmanFordWriteResultTransformer implements ResultTransformer<TimedAlgori
     @Override
     public Stream<BellmanFordWriteResult> apply(TimedAlgorithmResult<BellmanFordResult> algorithmResult) {
 
-        RelationshipsWritten relationshipsWritten;
-        var writeMillis = new AtomicLong();
         var result = algorithmResult.result();
-        try (var ignored = ProgressTimer.start(writeMillis::set)) {
-            relationshipsWritten = writeStep.execute(
-                graph,
-                graphStore,
-                resultStore,
-                result,
-                jobId
-            );
-        }
+        var writeRelationshipsMetadata = WriteStepExecute.executeWriteRelationshipStep(
+            writeStep,
+            graph,
+            graphStore,
+            jobId,
+            result,
+            resultStore
+        );
 
         return Stream.of(
             new BellmanFordWriteResult(
                 0,
                 algorithmResult.computeMillis(),
-                writeMillis.get(),
+                writeRelationshipsMetadata.writeMillis(),
                 0,
-                relationshipsWritten.value(),
+                writeRelationshipsMetadata.relationshipsWritten(),
                 result.containsNegativeCycle(),
                 configuration
             )
