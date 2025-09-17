@@ -37,7 +37,7 @@ import java.util.stream.Stream;
 
 class BellmanFordWriteResultTransformer implements ResultTransformer<TimedAlgorithmResult<BellmanFordResult>, Stream<BellmanFordWriteResult>> {
 
-    private final BellmanFordWriteStep bellmanFordWriteStep;
+    private final BellmanFordWriteStep writeStep;
     private final Graph graph;
     private final GraphStore graphStore;
     @Deprecated(forRemoval = true)
@@ -46,7 +46,7 @@ class BellmanFordWriteResultTransformer implements ResultTransformer<TimedAlgori
     private final Map<String, Object> configuration;
 
     BellmanFordWriteResultTransformer(
-        BellmanFordWriteStep bellmanFordWriteStep,
+        BellmanFordWriteStep writeStep,
         Graph graph,
         GraphStore graphStore,
         @Deprecated(forRemoval = true)
@@ -54,7 +54,7 @@ class BellmanFordWriteResultTransformer implements ResultTransformer<TimedAlgori
         JobId jobId,
         Map<String, Object> configuration
     ) {
-        this.bellmanFordWriteStep = bellmanFordWriteStep;
+        this.writeStep = writeStep;
         this.graph = graph;
         this.graphStore = graphStore;
         this.resultStore = resultStore;
@@ -69,7 +69,7 @@ class BellmanFordWriteResultTransformer implements ResultTransformer<TimedAlgori
         var writeMillis = new AtomicLong();
         var result = algorithmResult.result();
         try (var ignored = ProgressTimer.start(writeMillis::set)) {
-            relationshipsWritten = bellmanFordWriteStep.execute(
+            relationshipsWritten = writeStep.execute(
                 graph,
                 graphStore,
                 resultStore,

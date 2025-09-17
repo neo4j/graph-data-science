@@ -19,23 +19,73 @@
  */
 package org.neo4j.gds.procedures.algorithms.pathfinding.write;
 
-import org.neo4j.gds.core.loading.GraphResources;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.ResultStore;
+import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
+import org.neo4j.gds.core.utils.ProgressTimer;
+import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.pathfinding.ShortestPathWriteStep;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.procedures.algorithms.results.StandardWriteRelationshipsResult;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.results.ResultTransformer;
-import org.neo4j.gds.results.ResultTransformerBuilder;
 
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 
-public class ShortestPathWriteResultTransformer implements ResultTransformerBuilder<TimedAlgorithmResult<PathFindingResult>, Stream<StandardWriteRelationshipsResult>> {
-    public ShortestPathWriteResultTransformer(ShortestPathWriteStep writeStep) {}
+class ShortestPathWriteResultTransformer implements ResultTransformer<TimedAlgorithmResult<PathFindingResult>, Stream<StandardWriteRelationshipsResult>> {
+    private final ShortestPathWriteStep writeStep;
+    private final Graph graph;
+    private final GraphStore graphStore;
+    @Deprecated(forRemoval = true)
+    private final ResultStore resultStore;
+    private final JobId jobId;
+    private final Map<String, Object> configurationMap;
+
+    ShortestPathWriteResultTransformer(
+        ShortestPathWriteStep writeStep,
+        Graph graph,
+        GraphStore graphStore,
+        @Deprecated(forRemoval = true)
+        ResultStore resultStore,
+        JobId jobId,
+        Map<String, Object> configurationMap
+    ) {
+        this.writeStep = writeStep;
+        this.graph = graph;
+        this.graphStore = graphStore;
+        this.resultStore = resultStore;
+        this.jobId = jobId;
+        this.configurationMap = configurationMap;
+    }
 
     @Override
-    public ResultTransformer<TimedAlgorithmResult<PathFindingResult>, Stream<StandardWriteRelationshipsResult>> build(
-        GraphResources graphResources
-    ) {
-        return ar -> Stream.empty();
+    public Stream<StandardWriteRelationshipsResult> apply(TimedAlgorithmResult<PathFindingResult> algorithmResult) {
+
+        RelationshipsWritten relationshipsWritten;
+        var writeMillis = new AtomicLong();
+        var result = algorithmResult.result();
+        try (var ignored = ProgressTimer.start(writeMillis::set)) {
+            relationshipsWritten = writeStep.execute(
+                graph,
+                graphStore,
+                resultStore,
+                result,
+                jobId
+            );
+        }
+
+        return Stream.of(
+            new StandardWriteRelationshipsResult(
+                0,
+                algorithmResult.computeMillis(),
+                0,
+                writeMillis.get(),
+                relationshipsWritten.value(),
+                configurationMap
+            )
+        );
     }
 }

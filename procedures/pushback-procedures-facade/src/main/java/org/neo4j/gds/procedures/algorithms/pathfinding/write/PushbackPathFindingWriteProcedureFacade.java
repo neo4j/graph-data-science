@@ -131,7 +131,7 @@ public class PushbackPathFindingWriteProcedureFacade {
             config.toParameters(),
             config.jobId(),
             config.logProgress(),
-            new DeltaSteppingWriteResultTransformerBuilder(writeStep, config)
+            new ShortestPathWriteResultTransformerBuilder(writeStep, config.jobId(), config.toMap())
         ).join();
     }
 
@@ -219,7 +219,7 @@ public class PushbackPathFindingWriteProcedureFacade {
             config.toParameters(),
             config.jobId(),
             config.logProgress(),
-            new ShortestPathWriteResultTransformer(writeStep)
+            new ShortestPathWriteResultTransformerBuilder(writeStep, config.jobId(), config.toMap())
         ).join();
     }
 
@@ -248,7 +248,7 @@ public class PushbackPathFindingWriteProcedureFacade {
             config.toParameters(),
             config.jobId(),
             config.logProgress(),
-            new ShortestPathWriteResultTransformer(writeStep)
+            new ShortestPathWriteResultTransformerBuilder(writeStep, config.jobId(), config.toMap())
         ).join();
     }
 
@@ -278,7 +278,7 @@ public class PushbackPathFindingWriteProcedureFacade {
             config.toParameters(),
             config.jobId(),
             config.logProgress(),
-            new ShortestPathWriteResultTransformer(writeStep)
+            new ShortestPathWriteResultTransformerBuilder(writeStep, config.jobId(), config.toMap())
         ).join();
     }
 
@@ -308,7 +308,7 @@ public class PushbackPathFindingWriteProcedureFacade {
             config.toSingleSourceParameters(),
             config.jobId(),
             config.logProgress(),
-            new ShortestPathWriteResultTransformer(writeStep)
+            new ShortestPathWriteResultTransformerBuilder(writeStep, config.jobId(), config.toMap())
         ).join();
     }
 

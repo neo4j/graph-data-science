@@ -45,16 +45,15 @@ import static org.mockito.Mockito.when;
 class BellmanFordWriteResultTransformerTest {
 
     @Mock
-    private BellmanFordWriteStep bellmanFordWriteStep;
+    private BellmanFordWriteStep bellmanFordWriteStepMock;
     @Mock
-    private Graph graph;
+    private Graph graphMock;
     @Mock
-    private GraphStore graphStore;
+    private GraphStore graphStoreMock;
     @Mock
-    private ResultStore resultStore;
+    private ResultStore resultStoreMock;
     @Mock
-    private JobId jobId;
-
+    private JobId jobIdMock;
     @Mock
     private TimedAlgorithmResult<BellmanFordResult> timedResultMock;
 
@@ -63,18 +62,13 @@ class BellmanFordWriteResultTransformerTest {
 
     @BeforeEach
     void setUp() {
-        bellmanFordWriteStep = mock(BellmanFordWriteStep.class);
-        graph = mock(Graph.class);
-        graphStore = mock(GraphStore.class);
-        resultStore = mock(ResultStore.class);
-        jobId = mock(JobId.class);
         configuration = Map.of("key", "value");
         transformer = new BellmanFordWriteResultTransformer(
-            bellmanFordWriteStep,
-            graph,
-            graphStore,
-            resultStore,
-            jobId,
+            bellmanFordWriteStepMock,
+            graphMock,
+            graphStoreMock,
+            resultStoreMock,
+            jobIdMock,
             configuration
         );
     }
@@ -89,7 +83,7 @@ class BellmanFordWriteResultTransformerTest {
 
         var relationshipsWritten = new RelationshipsWritten(42);
 
-        when(bellmanFordWriteStep.execute(graph, graphStore, resultStore, bellmanFordResult, jobId))
+        when(bellmanFordWriteStepMock.execute(graphMock, graphStoreMock, resultStoreMock, bellmanFordResult, jobIdMock))
                 .thenReturn(relationshipsWritten);
 
         Stream<BellmanFordWriteResult> resultStream = transformer.apply(timedResultMock);
@@ -112,8 +106,7 @@ class BellmanFordWriteResultTransformerTest {
 
         var relationshipsWritten = new RelationshipsWritten(0);
 
-        when(bellmanFordWriteStep.execute(graph, graphStore, resultStore, bellmanFordResult, jobId))
-                .thenReturn(relationshipsWritten);
+        when(bellmanFordWriteStepMock.execute(graphMock, graphStoreMock, resultStoreMock, bellmanFordResult, jobIdMock))                .thenReturn(relationshipsWritten);
 
         var resultStream = transformer.apply(timedResultMock);
         var result = resultStream.findFirst().orElseThrow();

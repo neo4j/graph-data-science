@@ -20,23 +20,43 @@
 package org.neo4j.gds.procedures.algorithms.pathfinding.write;
 
 import org.neo4j.gds.core.loading.GraphResources;
+import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.pathfinding.ShortestPathWriteStep;
-import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaWriteConfig;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.procedures.algorithms.results.StandardWriteRelationshipsResult;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.results.ResultTransformer;
 import org.neo4j.gds.results.ResultTransformerBuilder;
 
+import java.util.Map;
 import java.util.stream.Stream;
 
-class DeltaSteppingWriteResultTransformerBuilder implements ResultTransformerBuilder<TimedAlgorithmResult<PathFindingResult>, Stream<StandardWriteRelationshipsResult>> {
-    DeltaSteppingWriteResultTransformerBuilder(ShortestPathWriteStep writeStep, AllShortestPathsDeltaWriteConfig config) {}
+class ShortestPathWriteResultTransformerBuilder implements ResultTransformerBuilder<TimedAlgorithmResult<PathFindingResult>, Stream<StandardWriteRelationshipsResult>> {
+    private final ShortestPathWriteStep writeStep;
+    private final JobId jobId;
+    private final Map<String, Object> configurationMap;
+
+    ShortestPathWriteResultTransformerBuilder(
+        ShortestPathWriteStep writeStep,
+        JobId jobId,
+        Map<String, Object> configurationMap
+    ) {
+        this.writeStep = writeStep;
+        this.jobId = jobId;
+        this.configurationMap = configurationMap;
+    }
 
     @Override
     public ResultTransformer<TimedAlgorithmResult<PathFindingResult>, Stream<StandardWriteRelationshipsResult>> build(
         GraphResources graphResources
     ) {
-        return ar -> Stream.empty();
+        return new ShortestPathWriteResultTransformer(
+            writeStep,
+            graphResources.graph(),
+            graphResources.graphStore(),
+            graphResources.resultStore(),
+            jobId,
+            configurationMap
+        );
     }
 }
