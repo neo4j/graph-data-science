@@ -31,12 +31,24 @@ import org.neo4j.gds.results.ResultTransformerBuilder;
 import java.util.stream.Stream;
 
 class BellmanFordWriteResultTransformerBuilder implements ResultTransformerBuilder<TimedAlgorithmResult<BellmanFordResult>, Stream<BellmanFordWriteResult>> {
-    BellmanFordWriteResultTransformerBuilder(BellmanFordWriteStep writeStep, AllShortestPathsBellmanFordWriteConfig config) {}
+    private final BellmanFordWriteStep writeStep;
+    private final AllShortestPathsBellmanFordWriteConfig config;
+
+    BellmanFordWriteResultTransformerBuilder(BellmanFordWriteStep writeStep, AllShortestPathsBellmanFordWriteConfig config) {this.writeStep = writeStep;
+        this.config = config;
+    }
 
     @Override
     public ResultTransformer<TimedAlgorithmResult<BellmanFordResult>, Stream<BellmanFordWriteResult>> build(
         GraphResources graphResources
     ) {
-        return ar -> Stream.empty();
+        return new BellmanFordWriteResultTransformer(
+            writeStep,
+            graphResources.graph(),
+            graphResources.graphStore(),
+            graphResources.resultStore(),
+            config.jobId(),
+            config.toMap()
+        );
     }
 }
