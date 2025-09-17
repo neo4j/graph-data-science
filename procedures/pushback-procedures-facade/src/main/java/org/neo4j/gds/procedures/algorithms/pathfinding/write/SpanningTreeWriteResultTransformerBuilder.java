@@ -31,10 +31,26 @@ import org.neo4j.gds.spanningtree.SpanningTreeWriteConfig;
 import java.util.stream.Stream;
 
 class SpanningTreeWriteResultTransformerBuilder implements ResultTransformerBuilder<TimedAlgorithmResult<SpanningTree>, Stream<SpanningTreeWriteResult>> {
-    SpanningTreeWriteResultTransformerBuilder(SpanningTreeWriteStep writeStep, SpanningTreeWriteConfig config) {}
+
+    private final SpanningTreeWriteConfig config;
+    private final SpanningTreeWriteStep writeStep;
+
+    SpanningTreeWriteResultTransformerBuilder(
+        SpanningTreeWriteStep writeStep,
+        SpanningTreeWriteConfig config
+    ) {
+        this.writeStep = writeStep;
+        this.config = config;
+    }
 
     @Override
     public ResultTransformer<TimedAlgorithmResult<SpanningTree>, Stream<SpanningTreeWriteResult>> build(GraphResources graphResources) {
-        return ar -> Stream.empty();
-    }
+        return new SpanningTreeWriteResultTransformer(
+            writeStep,
+            graphResources.graph(),
+            graphResources.graphStore(),
+            graphResources.resultStore(),
+            config.jobId(),
+            config.toMap()
+        );    }
 }
