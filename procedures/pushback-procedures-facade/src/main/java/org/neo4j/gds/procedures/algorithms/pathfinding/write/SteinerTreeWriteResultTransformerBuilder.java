@@ -31,10 +31,25 @@ import org.neo4j.gds.steiner.SteinerTreeWriteConfig;
 import java.util.stream.Stream;
 
 class SteinerTreeWriteResultTransformerBuilder implements ResultTransformerBuilder<TimedAlgorithmResult<SteinerTreeResult>, Stream<SteinerWriteResult>> {
-    SteinerTreeWriteResultTransformerBuilder(SteinerTreeWriteStep writeStep, SteinerTreeWriteConfig config) {}
+   private final SteinerTreeWriteStep writeStep;
+   private final SteinerTreeWriteConfig config;
+
+    SteinerTreeWriteResultTransformerBuilder(SteinerTreeWriteStep writeStep, SteinerTreeWriteConfig config) {
+        this.writeStep = writeStep;
+        this.config = config;
+    }
+
 
     @Override
     public ResultTransformer<TimedAlgorithmResult<SteinerTreeResult>, Stream<SteinerWriteResult>> build(GraphResources graphResources) {
-        return ar -> Stream.empty();
+        return new SteinerTreeWriteResultTransformer(
+            writeStep,
+            graphResources.graph(),
+            graphResources.graphStore(),
+            graphResources.resultStore(),
+            config.jobId(),
+            config.toMap()
+        );
     }
+
 }

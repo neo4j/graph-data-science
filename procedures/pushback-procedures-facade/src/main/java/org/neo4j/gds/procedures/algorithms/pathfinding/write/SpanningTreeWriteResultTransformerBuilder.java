@@ -52,5 +52,6 @@ class SpanningTreeWriteResultTransformerBuilder implements ResultTransformerBuil
             graphResources.resultStore(),
             config.jobId(),
             config.toMap()
-        );    }
+        );
+    }
 }
