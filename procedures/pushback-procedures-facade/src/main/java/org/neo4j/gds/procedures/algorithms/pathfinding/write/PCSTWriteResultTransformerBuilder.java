@@ -31,12 +31,25 @@ import org.neo4j.gds.results.ResultTransformerBuilder;
 import java.util.stream.Stream;
 
 class PCSTWriteResultTransformerBuilder implements ResultTransformerBuilder<TimedAlgorithmResult<PrizeSteinerTreeResult>, Stream<PrizeCollectingSteinerTreeWriteResult>> {
-    PCSTWriteResultTransformerBuilder(PrizeCollectingSteinerTreeWriteStep writeStep, PCSTWriteConfig config) {}
+    private final PrizeCollectingSteinerTreeWriteStep writeStep;
+    private final PCSTWriteConfig config;
+
+    PCSTWriteResultTransformerBuilder(PrizeCollectingSteinerTreeWriteStep writeStep, PCSTWriteConfig config) {
+        this.writeStep = writeStep;
+        this.config = config;
+    }
 
     @Override
     public ResultTransformer<TimedAlgorithmResult<PrizeSteinerTreeResult>, Stream<PrizeCollectingSteinerTreeWriteResult>> build(
         GraphResources graphResources
     ) {
-        return ar -> Stream.empty();
+        return new PCSTWriteResultTransformer(
+            writeStep,
+            graphResources.graph(),
+            graphResources.graphStore(),
+            graphResources.resultStore(),
+            config.jobId(),
+            config.toMap()
+        );
     }
 }
