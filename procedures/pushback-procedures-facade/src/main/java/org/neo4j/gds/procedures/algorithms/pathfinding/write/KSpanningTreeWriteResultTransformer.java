@@ -19,23 +19,71 @@
  */
 package org.neo4j.gds.procedures.algorithms.pathfinding.write;
 
-import org.neo4j.gds.core.loading.GraphResources;
-import org.neo4j.gds.kspanningtree.KSpanningTreeWriteConfig;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.ResultStore;
+import org.neo4j.gds.core.utils.ProgressTimer;
+import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.pathfinding.KSpanningTreeWriteStep;
 import org.neo4j.gds.procedures.algorithms.pathfinding.KSpanningTreeWriteResult;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.results.ResultTransformer;
-import org.neo4j.gds.results.ResultTransformerBuilder;
 import org.neo4j.gds.spanningtree.SpanningTree;
 
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 
-class KSpanningTreeWriteResultTransformer implements ResultTransformerBuilder<TimedAlgorithmResult<SpanningTree>, Stream<KSpanningTreeWriteResult>> {
+class KSpanningTreeWriteResultTransformer implements ResultTransformer<TimedAlgorithmResult<SpanningTree>, Stream<KSpanningTreeWriteResult>> {
 
-    KSpanningTreeWriteResultTransformer(KSpanningTreeWriteStep writeStep, KSpanningTreeWriteConfig config) {}
+        private final KSpanningTreeWriteStep writeStep;
+        private final Graph graph;
+        private final GraphStore graphStore;
+        @Deprecated(forRemoval = true)
+        private final ResultStore resultStore;
+        private final JobId jobId;
+        private final Map<String, Object> configuration;
 
-    @Override
-    public ResultTransformer<TimedAlgorithmResult<SpanningTree>, Stream<KSpanningTreeWriteResult>> build(GraphResources graphResources) {
-        return ar -> Stream.empty();
+        KSpanningTreeWriteResultTransformer(
+            KSpanningTreeWriteStep writeStep,
+            Graph graph,
+            GraphStore graphStore,
+            ResultStore resultStore,
+            JobId jobId,
+            Map<String, Object> configuration
+        ) {
+            this.writeStep = writeStep;
+            this.graph = graph;
+            this.graphStore = graphStore;
+            this.resultStore = resultStore;
+            this.jobId = jobId;
+            this.configuration = configuration;
+        }
+
+        @Override
+        public Stream<KSpanningTreeWriteResult> apply(TimedAlgorithmResult<SpanningTree> algorithmResult) {
+            var writeMillis = new AtomicLong();
+            var result = algorithmResult.result();
+            try (var ignored = ProgressTimer.start(writeMillis::set)) {
+                writeStep.execute(
+                    graph,
+                    graphStore,
+                    resultStore,
+                    result,
+                    jobId
+                );
+            }
+
+            return Stream.of(
+                new KSpanningTreeWriteResult(
+                    0,
+                    algorithmResult.computeMillis(),
+                    writeMillis.get(),
+                    0,
+                    result.effectiveNodeCount(),
+                    configuration
+                )
+            );
+        }
     }
-}
+

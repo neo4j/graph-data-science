@@ -162,7 +162,7 @@ public class PushbackPathFindingWriteProcedureFacade {
             config.toKSpanningTreeParameters(),
             config.jobId(),
             config.logProgress(),
-            new KSpanningTreeWriteResultTransformer(writeStep, config)
+            new KSpanningTreeWriteResultTransformerBuilder(writeStep, config)
         ).join();
     }
 
