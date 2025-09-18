@@ -22,7 +22,17 @@ package org.neo4j.gds.embeddings.node2vec;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.ml.core.tensor.FloatVector;
 
+import java.util.Collections;
 import java.util.List;
 
-public record Node2VecResult(HugeObjectArray<FloatVector> embeddings,List<Double> lossPerIteration)
-{ }
+public record Node2VecResult(
+    HugeObjectArray<FloatVector> embeddings,
+    List<Double> lossPerIteration
+) {
+    public static Node2VecResult empty() {
+        return new Node2VecResult(
+            HugeObjectArray.newArray(FloatVector.class, 0L),
+            Collections.emptyList()
+        );
+    }
+}

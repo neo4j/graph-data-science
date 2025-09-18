@@ -19,6 +19,12 @@
  */
 package org.neo4j.gds.embeddings.hashgnn;
 
+import org.neo4j.gds.api.properties.nodes.EmptyDoubleArrayNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 
-public record HashGNNResult(NodePropertyValues embeddings) {}
+public record HashGNNResult(NodePropertyValues embeddings) {
+
+    public static HashGNNResult empty() {
+        return new HashGNNResult(EmptyDoubleArrayNodePropertyValues.INSTANCE);
+    }
+}
