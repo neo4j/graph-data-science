@@ -31,10 +31,14 @@ public record FastRPParameters(
     List<String> featureProperties,
     List<Number> iterationWeights,
     int embeddingDimension,
-    int propertyDimension,
+    double propertyRatio,
     Optional<String> relationshipWeightProperty,
     float normalizationStrength,
     Number nodeSelfInfluence,
     Concurrency concurrency,
     Optional<Long> randomSeed
-)  implements AlgorithmParameters { }
+)  implements AlgorithmParameters {
+    public int propertyDimension() {
+        return (int) (embeddingDimension() * propertyRatio());
+    }
+}

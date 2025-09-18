@@ -118,7 +118,7 @@ class NodeEmbeddingComputeFacadeTest {
                 List.of("f"),
                 List.of(1.0D),
                 DEFAULT_EMBEDDING_DIMENSION,
-                (int) (0.5 * DEFAULT_EMBEDDING_DIMENSION),
+                0.0,
                 Optional.empty(),
                 0.0F,
                 0,

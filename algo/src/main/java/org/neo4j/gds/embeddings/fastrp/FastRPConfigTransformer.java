@@ -28,7 +28,7 @@ public final class FastRPConfigTransformer {
             config.featureProperties(),
             config.iterationWeights(),
             config.embeddingDimension(),
-            config.propertyDimension(),
+            config.propertyRatio(),
             config.relationshipWeightProperty(),
             config.normalizationStrength(),
             config.nodeSelfInfluence(),
