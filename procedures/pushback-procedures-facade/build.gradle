@@ -6,7 +6,7 @@ group = 'org.neo4j.gds'
 
 dependencies {
 
-    api project(':path-finding-facade-api')
+    api project(':algorithms-facade-api')
 
     compileOnly openGds.jetbrains.annotations
 
@@ -54,7 +54,6 @@ dependencies {
     implementation project(':progress-tracking')
 
     implementation project(':string-formatting')
-
 
     implementation project(':termination')
 
