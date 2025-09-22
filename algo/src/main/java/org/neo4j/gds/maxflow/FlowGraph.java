@@ -1,0 +1,203 @@
+/*
+ * Copyright (c) "Neo4j"
+ * Neo4j Sweden AB [http://neo4j.com]
+ *
+ * This file is part of Neo4j.
+ *
+ * Neo4j is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+package org.neo4j.gds.maxflow;
+
+import org.apache.commons.lang3.mutable.MutableLong;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.properties.relationships.RelationshipWithPropertyConsumer;
+import org.neo4j.gds.collections.ha.HugeDoubleArray;
+import org.neo4j.gds.collections.ha.HugeLongArray;
+
+public final class FlowGraph {
+    private final Graph graph;
+    private final HugeLongArray indPtr;
+    private final HugeDoubleArray originalCapacity;
+    private final HugeDoubleArray flow;
+    private final HugeLongArray reverseAdjacency;
+    private final HugeLongArray reverseToRelIdx;
+    private final HugeLongArray reverseIndPtr;
+
+    private FlowGraph(
+        Graph graph,
+        HugeLongArray indPtr,
+        HugeDoubleArray originalCapacity,
+        HugeDoubleArray flow,
+        HugeLongArray reverseAdjacency,
+        HugeLongArray reverseToRelIdx,
+        HugeLongArray reverseIndPtr
+    ) {
+        this.graph = graph;
+        this.indPtr = indPtr;
+        this.originalCapacity = originalCapacity;
+        this.flow = flow;
+        this.reverseAdjacency = reverseAdjacency;
+        this.reverseToRelIdx = reverseToRelIdx;
+        this.reverseIndPtr = reverseIndPtr;
+    }
+
+    public static FlowGraph create(Graph graph) {
+        var reverseDegree = HugeLongArray.newArray(graph.nodeCount());
+        reverseDegree.setAll(x -> 0L);
+
+        for (long nodeId = 0; nodeId < graph.nodeCount(); nodeId++) {
+            graph.forEachRelationship(
+                nodeId, 0D, (s, t, capacity) -> {
+                    reverseDegree.addTo(t, 1);
+                    return true;
+                }
+            );
+        }
+
+        //Construct CSR ptrs.
+        var indPtr = HugeLongArray.newArray(graph.nodeCount() + 1);
+        indPtr.set(0, 0);
+        var reverseIndPtr = HugeLongArray.newArray(graph.nodeCount() + 1);
+        reverseIndPtr.set(0, 0);
+        for (long nodeId = 0; nodeId < graph.nodeCount(); nodeId++) {
+            indPtr.set(nodeId + 1, indPtr.get(nodeId) + graph.degree(nodeId));
+            reverseIndPtr.set(nodeId + 1, reverseIndPtr.get(nodeId) + reverseDegree.get(nodeId));
+        }
+
+        var originalCapacity = HugeDoubleArray.newArray(graph.relationshipCount());
+        var reverseToRelIdx = HugeLongArray.newArray(graph.relationshipCount());
+        var reverseAdjacency = HugeLongArray.newArray(graph.relationshipCount());
+
+        //Populate CSRs
+        reverseDegree.setAll(x -> 0L); //reuse
+        var relIdx = new MutableLong(0L);
+        RelationshipWithPropertyConsumer consumer = (s, t, capacity) -> {
+            var reverseRelIdx = reverseIndPtr.get(t) + reverseDegree.get(t);
+            reverseAdjacency.set(reverseRelIdx, s);
+            reverseToRelIdx.set(reverseRelIdx, relIdx.longValue());
+            reverseDegree.addTo(t, 1);
+            originalCapacity.set(relIdx.longValue(), capacity);
+            relIdx.increment();
+            return true;
+        };
+        for (long nodeId = 0; nodeId < graph.nodeCount(); nodeId++) {
+            graph.forEachRelationship(nodeId, 0D, consumer);
+        }
+
+
+        var flow = HugeDoubleArray.newArray(graph.relationshipCount());
+        flow.setAll(x -> 0D);
+
+        return new FlowGraph(graph, indPtr, originalCapacity, flow, reverseAdjacency, reverseToRelIdx, reverseIndPtr);
+    }
+
+    public FlowGraph concurrentCopy() {
+        return new FlowGraph(
+            graph.concurrentCopy(),
+            indPtr,
+            originalCapacity,
+            flow,
+            reverseAdjacency,
+            reverseToRelIdx,
+            reverseIndPtr
+        );
+    }
+
+    private void forEachOriginalRelationship(long nodeId, ResidualEdgeConsumer consumer) {
+        var relIdx = new MutableLong(indPtr.get(nodeId));
+        RelationshipWithPropertyConsumer originalConsumer = (s, t, capacity) -> {
+            var residualCapacity = capacity - flow.get(relIdx.longValue());
+            var isReverse = false;
+            consumer.accept(s, t, relIdx.longValue(), residualCapacity, isReverse);
+            relIdx.increment();
+            return true;
+        };
+        graph.forEachRelationship(nodeId, 0D, originalConsumer);
+    }
+
+    private void forEachReverseRelationship(long nodeId, ResidualEdgeConsumer consumer) {
+        for (long reverseRelIdx = reverseIndPtr.get(nodeId); reverseRelIdx < reverseIndPtr.get(nodeId + 1); reverseRelIdx++) {
+            var t = reverseAdjacency.get(reverseRelIdx);
+            var relIdx = reverseToRelIdx.get(reverseRelIdx);
+            var residualCapacity = flow.get(relIdx);
+            var isReverse = true;
+            consumer.accept(nodeId, t, relIdx, residualCapacity, isReverse);
+        }
+    }
+
+    public void forEachRelationship(long nodeId, ResidualEdgeConsumer consumer) {
+        forEachOriginalRelationship(nodeId, consumer);
+        forEachReverseRelationship(nodeId, consumer);
+    }
+
+    public double flow(long relIdx) {
+        return flow.get(relIdx);
+    }
+
+    public void push(long relIdx, double delta, boolean isReverse) {
+        //(s)-[rel]->(t)
+        if (isReverse) {
+            flow.addTo(relIdx, -delta);
+        } else {
+            flow.addTo(relIdx, delta);
+        }
+    }
+
+    long edgeCount() {
+        return graph.relationshipCount();
+    }
+
+    public long nodeCount() {
+        return graph.nodeCount();
+    }
+
+    long outDegree(long nodeId) {
+        var degreeFromReverseEdges = reverseIndPtr.get(nodeId) + reverseIndPtr.get(nodeId + 1);
+        return graph.degree(nodeId) + degreeFromReverseEdges;
+    }
+
+    double residualCapacity(long relIdx, boolean isReverse) {
+        if (!isReverse) {
+            return flow.get(relIdx);
+        }
+        return originalCapacity.get(relIdx) - flow.get(relIdx);
+    }
+
+    FlowResult createFlowResult(long target) {
+        var flowResult = new FlowResult(edgeCount());
+        var idx = new MutableLong(0L);
+        for (long nodeId = 0; nodeId < nodeCount(); nodeId++) {
+            var relIdx = new MutableLong(indPtr.get(nodeId));
+            graph.forEachRelationship(
+                nodeId,
+                0D,
+                (s, t, _capacity) -> {
+                    var flow = this.flow.get(relIdx.longValue());
+                    if (flow > 0.0) {
+                        var flowRelationship = new FlowRelationship(s, t, flow);
+                        flowResult.flow.set(idx.getAndIncrement(), flowRelationship);
+                        if (t == target) {
+                            flowResult.totalFlow += flow;
+                        }
+                    }
+                    relIdx.increment();
+
+                    return true;
+                }
+            );
+        }
+        flowResult.chop(idx.longValue());
+        return flowResult;
+    }
+}
