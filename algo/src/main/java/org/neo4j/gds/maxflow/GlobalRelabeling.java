@@ -26,6 +26,11 @@ import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.paged.HugeLongArrayQueue;
 
+enum Phase {
+    TRAVERSE,
+    SYNC
+}
+
 public class GlobalRelabeling {
     public static void globalRelabeling(
         FlowGraph flowGraph,
@@ -57,15 +62,16 @@ public class GlobalRelabeling {
         label.set(source, flowGraph.nodeCount());
     }
 }
+
 class GlobalRelabellingBFSTask implements Runnable {
     private final FlowGraph flowGraph;
     private final AtomicWorkingSet frontier;
     private final HugeLongArrayQueue localDiscoveredVertices;
     private final HugeAtomicBitSet verticesIsDiscovered;
     private final HugeLongArray label;
-    private Phase phase;
     private final long batchSize;
     private final long LOCAL_QUEUE_BOUND = 128L;
+    private Phase phase;
 
     GlobalRelabellingBFSTask(
         FlowGraph flowGraph,
@@ -84,40 +90,35 @@ class GlobalRelabellingBFSTask implements Runnable {
 
     @Override
     public void run() {
-        if (phase == Phase.TRAVERSE){
+        if (phase == Phase.TRAVERSE) {
             traverse();
         } else {
             addToFrontier();
         }
     }
 
-    private void batchTraverse(long from, long to) {
-        for(long idx = from; idx < to; idx++) {
-            long v = frontier.unsafePeek(idx);
-            singleTraverse(v);
-        }
-    }
-
-    private void singleTraverse(long v){
+    private void singleTraverse(long v) {
         var newLabel = label.get(v) + 1;
-        flowGraph.forEachRelationship(v, (s, t, relIdx, residualCapacity, isReverse) -> {
-            //(s)-->(t) //want t-->s to have free capacity. (can push from t to s)
-            if(flowGraph.residualCapacity(relIdx, isReverse) <= 0.0) {
+        flowGraph.forEachRelationship(
+            v, (s, t, relIdx, residualCapacity, isReverse) -> {
+                //(s)-->(t) //want t-->s to have free capacity. (can push from t to s)
+                if (flowGraph.residualCapacity(relIdx, isReverse) <= 0.0) {
+                    return true;
+                }
+                if (!verticesIsDiscovered.getAndSet(t)) {
+                    localDiscoveredVertices.add(t);
+                    label.set(t, newLabel);
+                }
                 return true;
             }
-            if(!verticesIsDiscovered.getAndSet(t)) {
-                localDiscoveredVertices.add(t);
-                label.set(t, newLabel);
-            }
-            return true;
-        });
+        );
     }
 
     public void traverse() {
         long oldIdx;
-        while((oldIdx = frontier.getAndAdd(batchSize)) < frontier.size()) {
+        while ((oldIdx = frontier.getAndAdd(batchSize)) < frontier.size()) {
             long toIdx = Math.min(oldIdx + batchSize, frontier.size());
-            batchTraverse(oldIdx, toIdx);
+            frontier.consumeBatch(oldIdx, toIdx, this::singleTraverse);
         }
 
         //do some local processing if the localQueue is small enough
@@ -132,9 +133,4 @@ class GlobalRelabellingBFSTask implements Runnable {
         frontier.batchPush(localDiscoveredVertices);
         phase = Phase.TRAVERSE;
     }
-}
-
-enum Phase {
-    TRAVERSE,
-    SYNC
 }

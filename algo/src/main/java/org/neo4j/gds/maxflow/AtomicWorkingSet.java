@@ -23,6 +23,7 @@ import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArrayQueue;
 
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Consumer;
 
 public class AtomicWorkingSet {
     private final HugeLongArray workingSet;
@@ -59,7 +60,7 @@ public class AtomicWorkingSet {
 
     void batchPush(HugeLongArrayQueue queue) {
         long idx = size.getAndAdd(queue.size());
-        while(!queue.isEmpty()) {
+        while (!queue.isEmpty()) {
             var node = queue.remove();
             workingSet.set(idx++, node);
         }
@@ -80,6 +81,13 @@ public class AtomicWorkingSet {
         } else {
 //            index.decrementAndGet(); //undo increment
             return -1L;
+        }
+    }
+
+    void consumeBatch(long from, long to, Consumer<Long> consumer) {
+        for (long idx = from; idx < to; idx++) {
+            long v = unsafePeek(idx);
+            consumer.accept(v);
         }
     }
 }
