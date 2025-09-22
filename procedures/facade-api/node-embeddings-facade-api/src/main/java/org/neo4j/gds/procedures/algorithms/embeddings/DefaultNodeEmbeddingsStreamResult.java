@@ -22,16 +22,14 @@ package org.neo4j.gds.procedures.algorithms.embeddings;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public record DefaultNodeEmbeddingsStreamResult(long nodeId, List<Double> embedding) {
 
-    static DefaultNodeEmbeddingsStreamResult create(long nodeId, double[] embeddings) {
-        return new DefaultNodeEmbeddingsStreamResult(nodeId, Arrays.stream(embeddings).boxed().collect(
-            Collectors.toList()));
+    public static DefaultNodeEmbeddingsStreamResult create(long nodeId, double[] embeddings) {
+        return new DefaultNodeEmbeddingsStreamResult(nodeId, Arrays.stream(embeddings).boxed().toList());
     }
 
-    static DefaultNodeEmbeddingsStreamResult create(long nodeId, float[] embeddingAsArray) {
+    public static DefaultNodeEmbeddingsStreamResult create(long nodeId, float[] embeddingAsArray) {
         var embedding = new ArrayList<Double>(embeddingAsArray.length);
         for (var f : embeddingAsArray) {
             embedding.add((double) f);

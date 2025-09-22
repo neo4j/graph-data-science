@@ -42,6 +42,8 @@ dependencies {
     // this is needed because of `MemoryEstimation`
     implementation project(':memory-usage')
 
+    implementation project(':ml-core')
+
     implementation project(':neo4j-api')
 
     implementation project(':path-finding-mutate-steps')

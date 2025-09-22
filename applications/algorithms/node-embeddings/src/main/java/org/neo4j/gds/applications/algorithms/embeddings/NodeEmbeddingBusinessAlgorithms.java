@@ -69,7 +69,7 @@ public class NodeEmbeddingBusinessAlgorithms {
     }
 
     Node2VecResult node2Vec(Graph graph, Node2VecBaseConfig configuration) {
-        var params = Node2VecConfigTransformer.node2VecParameters(configuration);
+        var params = Node2VecConfigTransformer.toParameters(configuration);
         var task = tasks.node2Vec(graph,params);
         var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
 

@@ -97,7 +97,6 @@ public class NodeEmbeddingComputeBusinessFacade {
         GraphParameters graphParameters,
         // FIXME: `relationshipTypes` is only used to create progress tracker tasks, and in there only the count...
         List<String> relationshipTypes,
-        Optional<String> relationshipProperty,
         HashGNNParameters parameters,
         JobId jobId,
         boolean logProgress,
@@ -107,7 +106,7 @@ public class NodeEmbeddingComputeBusinessFacade {
         var graphResources = graphStoreCatalogService.fetchGraphResources(
             graphName,
             graphParameters,
-            relationshipProperty,
+            Optional.empty(),
             new FeaturePropertiesMustExistOnAllNodeLabels(parameters.featureProperties()),
             Optional.empty(),
             user,

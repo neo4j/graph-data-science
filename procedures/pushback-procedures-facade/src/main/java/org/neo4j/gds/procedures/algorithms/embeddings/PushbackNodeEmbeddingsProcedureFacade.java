@@ -20,12 +20,21 @@
 package org.neo4j.gds.procedures.algorithms.embeddings;
 
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
+import org.neo4j.gds.procedures.algorithms.embeddings.stream.PushbackNodeEmbeddingsStreamProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.embeddings.stubs.NodeEmbeddingsStubs;
 
 import java.util.Map;
 import java.util.stream.Stream;
 
 public class PushbackNodeEmbeddingsProcedureFacade implements NodeEmbeddingsProcedureFacade {
+
+    private final PushbackNodeEmbeddingsStreamProcedureFacade streamProcedureFacade;
+
+    public PushbackNodeEmbeddingsProcedureFacade(
+        PushbackNodeEmbeddingsStreamProcedureFacade streamProcedureFacade
+    ) {
+        this.streamProcedureFacade = streamProcedureFacade;
+    }
 
     @Override
     public NodeEmbeddingsStubs nodeEmbeddingStubs() {
@@ -47,7 +56,7 @@ public class PushbackNodeEmbeddingsProcedureFacade implements NodeEmbeddingsProc
 
     @Override
     public Stream<DefaultNodeEmbeddingsStreamResult> fastRPStream(String graphName, Map<String, Object> configuration) {
-        return Stream.empty();
+        return streamProcedureFacade.fastRP(graphName, configuration);
     }
 
     @Override
@@ -150,7 +159,7 @@ public class PushbackNodeEmbeddingsProcedureFacade implements NodeEmbeddingsProc
         String graphName,
         Map<String, Object> configuration
     ) {
-        return Stream.empty();
+        return streamProcedureFacade.hashGnn(graphName, configuration);
     }
 
     @Override
@@ -192,7 +201,7 @@ public class PushbackNodeEmbeddingsProcedureFacade implements NodeEmbeddingsProc
         String graphName,
         Map<String, Object> configuration
     ) {
-        return Stream.empty();
+        return streamProcedureFacade.node2Vec(graphName, configuration);
     }
 
     @Override

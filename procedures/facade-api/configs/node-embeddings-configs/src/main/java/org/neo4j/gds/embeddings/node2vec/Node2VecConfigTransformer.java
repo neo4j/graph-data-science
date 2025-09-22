@@ -22,7 +22,7 @@ package org.neo4j.gds.embeddings.node2vec;
 public final class Node2VecConfigTransformer {
     private Node2VecConfigTransformer() {}
 
-    public static Node2VecParameters node2VecParameters(Node2VecBaseConfig config) {
+    public static Node2VecParameters toParameters(Node2VecBaseConfig config) {
         var walkParameters = config.walkParameters();
 
         var samplingWalkParameters = new SamplingWalkParameters(
