@@ -28,6 +28,7 @@ import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.neo4j.gds.maxflow.FlowGraphTest.createFlowGraph;
 
 @GdlExtension
 class GlobalRelabelingTest {
@@ -58,7 +59,7 @@ class GlobalRelabelingTest {
 
     @Test
     void test() {
-        var flowGraph = FlowGraph.create(graph);
+        var flowGraph = createFlowGraph(graph, graph.toMappedNodeId("a"), graph.toMappedNodeId("b"));
 
         var label = HugeLongArray.newArray(flowGraph.nodeCount());
         label.setAll((i) -> flowGraph.nodeCount());
@@ -72,14 +73,14 @@ class GlobalRelabelingTest {
 
         assertThat(label.get(graph.toMappedNodeId("a"))).isEqualTo(1L);
         assertThat(label.get(graph.toMappedNodeId("b"))).isEqualTo(2L);
-        assertThat(label.get(graph.toMappedNodeId("c"))).isEqualTo(5L);
+        assertThat(label.get(graph.toMappedNodeId("c"))).isEqualTo(7L);
         assertThat(label.get(graph.toMappedNodeId("d"))).isEqualTo(0L);
-        assertThat(label.get(graph.toMappedNodeId("e"))).isEqualTo(5L);
+        assertThat(label.get(graph.toMappedNodeId("e"))).isEqualTo(7L);
     }
 
     @Test
     void test2() {
-        var flowGraph = FlowGraph.create(graph);
+        var flowGraph = createFlowGraph(graph, graph.toMappedNodeId("a"), graph.toMappedNodeId("b"));
 
         var label = HugeLongArray.newArray(flowGraph.nodeCount());
         label.setAll((i) -> flowGraph.nodeCount());
@@ -91,10 +92,33 @@ class GlobalRelabelingTest {
             new Concurrency(1)
         );
 
-        assertThat(label.get(graph.toMappedNodeId("a"))).isEqualTo(5L);
-        assertThat(label.get(graph.toMappedNodeId("b"))).isEqualTo(5L);
-        assertThat(label.get(graph.toMappedNodeId("c"))).isEqualTo(5L);
+        assertThat(label.get(graph.toMappedNodeId("a"))).isEqualTo(7L);
+        assertThat(label.get(graph.toMappedNodeId("b"))).isEqualTo(7L);
+        assertThat(label.get(graph.toMappedNodeId("c"))).isEqualTo(7L);
         assertThat(label.get(graph.toMappedNodeId("d"))).isEqualTo(1L);
         assertThat(label.get(graph.toMappedNodeId("e"))).isEqualTo(0L);
+    }
+
+    @Test
+    void test3() {
+        var flowGraph = createFlowGraph(graph, graph.toMappedNodeId("c"), graph.toMappedNodeId("e"));
+
+        var label = HugeLongArray.newArray(flowGraph.nodeCount());
+        label.setAll((i) -> flowGraph.nodeCount());
+        GlobalRelabeling.globalRelabeling(
+            flowGraph,
+            label,
+            flowGraph.superSource(),
+            flowGraph.superTarget(),
+            new Concurrency(1)
+        );
+
+        assertThat(label.get(flowGraph.superTarget())).isEqualTo(0L);
+        assertThat(label.get(graph.toMappedNodeId("e"))).isEqualTo(1L);
+        assertThat(label.get(graph.toMappedNodeId("d"))).isEqualTo(2L);
+        assertThat(label.get(graph.toMappedNodeId("a"))).isEqualTo(3L);
+        assertThat(label.get(graph.toMappedNodeId("b"))).isEqualTo(4L);
+        assertThat(label.get(graph.toMappedNodeId("c"))).isEqualTo(4L);
+        assertThat(label.get(flowGraph.superSource())).isEqualTo(7L);
     }
 }

@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.properties.relationships.RelationshipCursor;
 import org.neo4j.gds.beta.generator.PropertyProducer;
 import org.neo4j.gds.beta.generator.RandomGraphGenerator;
 import org.neo4j.gds.core.concurrency.Concurrency;
@@ -74,11 +75,21 @@ class MaxFlowTest {
         return graph;
     }
 
-    void testGraph(Graph graph, long sourceNode, long targetNode, double expectedFlow, int concurrency) {
+    void testGraph(Graph graph, NodeWithValue[] supply, NodeWithValue[] demand, double expectedFlow, int concurrency) {
         var params = new MaxFlowParameters(new Concurrency(concurrency), ALPHA, BETA, FREQ);
-        var x = MaxFlow.create(graph, sourceNode, targetNode, params, null, null, null); //fixme
+        var x = MaxFlow.create(graph, supply, demand, params, null, null, null); //fixme
         var result = x.compute();
         assertThat(result.totalFlow).isCloseTo(expectedFlow, Offset.offset(TOLERANCE));
+    }
+
+    void testGraph(Graph graph, long sourceNode, long targetNode, double expectedFlow, int concurrency) {
+        double outgoingCapacityFromSource = graph.streamRelationships(sourceNode, 0D)
+            .map(RelationshipCursor::property)
+            .reduce(0D, Double::sum);
+        NodeWithValue[] supply = {new NodeWithValue(sourceNode, outgoingCapacityFromSource)};
+        NodeWithValue[] demand = {new NodeWithValue(targetNode, outgoingCapacityFromSource)}; //more is useless since this is max in network
+
+        testGraph(graph, supply, demand, expectedFlow, concurrency);
     }
 
     void testGraph(TestGraph graph, String sourceNode, String targetNode, double expectedFlow) {
@@ -309,11 +320,24 @@ class MaxFlowTest {
     void test4() {
         var graph = generateUniform(200L, 10);
         testGraph(graph, 50, 100, 434.3606561583014, 4);
+
+        testGraph(graph,
+            new NodeWithValue[]{new NodeWithValue(1, 103.1), new NodeWithValue(23, 129.5), new NodeWithValue(101, 242.2)},
+            new NodeWithValue[]{new NodeWithValue(5, 117.7), new NodeWithValue(199, 199.0), new NodeWithValue(150, 204.5)},
+            474.8,
+            4);
     }
 
     @Test
     void test5() {
         var graph = generateUniform(1000L, 25);
         testGraph(graph, 100, 200, 1091.5727039914948, 4);
+
+
+        testGraph(graph,
+            new NodeWithValue[]{new NodeWithValue(1, 100.1), new NodeWithValue(23, 120.5), new NodeWithValue(501, 142.2)},
+            new NodeWithValue[]{new NodeWithValue(5, 157.7), new NodeWithValue(299, 109.0), new NodeWithValue(450, 204.5)},
+            362.79999999999995,
+            4);
     }
 }

@@ -37,15 +37,15 @@ public final class MaxFlow extends Algorithm<FlowResult> {
     static final int ALPHA = 6;
     static final int BETA = 12;
     private final Graph graph;
-    private final long source;
-    private final long target;
+    private final NodeWithValue[] supply;
+    private final NodeWithValue[] demand;
     private final MaxFlowParameters parameters;
     private final ExecutorService executorService;
 
     private MaxFlow(
         Graph graph,
-        long source,
-        long target,
+        NodeWithValue[] supply,
+        NodeWithValue[] demand,
         MaxFlowParameters parameters,
         ExecutorService executorService,
         ProgressTracker progressTracker,
@@ -53,8 +53,8 @@ public final class MaxFlow extends Algorithm<FlowResult> {
     ) {
         super(progressTracker);
         this.graph = graph;
-        this.source = source;
-        this.target = target;
+        this.supply = supply;
+        this.demand = demand;
         this.parameters = parameters;
         this.executorService = executorService;
         this.terminationFlag = terminationFlag;
@@ -62,8 +62,8 @@ public final class MaxFlow extends Algorithm<FlowResult> {
 
     public static MaxFlow create(
         Graph graph,
-        long sourceNode,
-        long targetNode,
+        NodeWithValue[] supply,
+        NodeWithValue[] demand,
         MaxFlowParameters parameters,
         ExecutorService executorService,
         ProgressTracker progressTracker,
@@ -71,8 +71,8 @@ public final class MaxFlow extends Algorithm<FlowResult> {
     ) {
         return new MaxFlow(
             graph,
-            sourceNode,
-            targetNode,
+            supply,
+            demand,
             parameters,
             executorService,
             progressTracker,
@@ -81,18 +81,20 @@ public final class MaxFlow extends Algorithm<FlowResult> {
     }
 
     public FlowResult compute() {
-        var preflow = initPreflow(source);
-        maximizeFlow(preflow, source, target);
-        maximizeFlow(preflow, target, source);
-        return preflow.flowGraph().createFlowResult(target);
+        var preflow = initPreflow();
+        var superSource = preflow.flowGraph().superSource();
+        var superTarget = preflow.flowGraph().superTarget();
+        maximizeFlow(preflow, superSource, superTarget);
+        maximizeFlow(preflow, superTarget, superSource);
+        return preflow.flowGraph().createFlowResult();
     }
 
-    private Preflow initPreflow(long source) {
-        var excess = HugeDoubleArray.newArray(graph.nodeCount());
+    private Preflow initPreflow() {
+        var flowGraph = FlowGraph.create(graph, supply, demand);
+        var excess = HugeDoubleArray.newArray(flowGraph.nodeCount());
         excess.setAll(x -> 0D);
-        var flowGraph = FlowGraph.create(graph);
         flowGraph.forEachRelationship(
-            source, (s, t, relIdx, residualCapacity, isReverse) -> {
+            flowGraph.superSource(), (s, t, relIdx, residualCapacity, isReverse) -> {
                 flowGraph.push(relIdx, residualCapacity, isReverse);
                 excess.set(t, residualCapacity);
                 return true;

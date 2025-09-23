@@ -43,6 +43,9 @@ public class Discharging {
         AtomicLong workSinceLastGR,
         Concurrency concurrency
     ) {
+
+        //Todo: Refactor so that dischargeTasks can be reused between iterations.
+
         var dischargeTasks = ParallelUtil.tasks(
             concurrency,
             () -> new DischargeTask(

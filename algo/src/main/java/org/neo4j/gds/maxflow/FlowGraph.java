@@ -33,6 +33,8 @@ public final class FlowGraph {
     private final HugeLongArray reverseAdjacency;
     private final HugeLongArray reverseToRelIdx;
     private final HugeLongArray reverseIndPtr;
+    private final NodeWithValue[] supply;
+    private final NodeWithValue[] demand;
 
     private FlowGraph(
         Graph graph,
@@ -41,7 +43,9 @@ public final class FlowGraph {
         HugeDoubleArray flow,
         HugeLongArray reverseAdjacency,
         HugeLongArray reverseToRelIdx,
-        HugeLongArray reverseIndPtr
+        HugeLongArray reverseIndPtr,
+        NodeWithValue[] supply,
+        NodeWithValue[] demand
     ) {
         this.graph = graph;
         this.indPtr = indPtr;
@@ -50,10 +54,16 @@ public final class FlowGraph {
         this.reverseAdjacency = reverseAdjacency;
         this.reverseToRelIdx = reverseToRelIdx;
         this.reverseIndPtr = reverseIndPtr;
+        this.supply = supply;
+        this.demand = demand;
     }
 
-    public static FlowGraph create(Graph graph) {
-        var reverseDegree = HugeLongArray.newArray(graph.nodeCount());
+    public static FlowGraph create(Graph graph, NodeWithValue[] supply, NodeWithValue[] demand) {
+        var superSource = graph.nodeCount();
+        var superTarget = graph.nodeCount() + 1;
+        var newNodeCount = graph.nodeCount() + 2;
+
+        var reverseDegree = HugeLongArray.newArray(newNodeCount);
         reverseDegree.setAll(x -> 0L);
 
         for (long nodeId = 0; nodeId < graph.nodeCount(); nodeId++) {
@@ -64,20 +74,33 @@ public final class FlowGraph {
                 }
             );
         }
+        for (var source : supply) {
+            reverseDegree.addTo(source.node(), 1);
+        }
+        for (var target : demand) {
+            reverseDegree.addTo(target.node(), 1);
+        }
 
         //Construct CSR ptrs.
-        var indPtr = HugeLongArray.newArray(graph.nodeCount() + 1);
+        var indPtr = HugeLongArray.newArray(newNodeCount + 1);
         indPtr.set(0, 0);
-        var reverseIndPtr = HugeLongArray.newArray(graph.nodeCount() + 1);
+        var reverseIndPtr = HugeLongArray.newArray(newNodeCount + 1);
         reverseIndPtr.set(0, 0);
-        for (long nodeId = 0; nodeId < graph.nodeCount(); nodeId++) {
-            indPtr.set(nodeId + 1, indPtr.get(nodeId) + graph.degree(nodeId));
+        for (long nodeId = 0; nodeId <= superTarget; nodeId++) {
+            var degree = nodeId < graph.nodeCount()
+                ? graph.degree(nodeId)
+                : (nodeId == superSource ? supply.length : demand.length);
+            indPtr.set(nodeId + 1, indPtr.get(nodeId) + degree);
             reverseIndPtr.set(nodeId + 1, reverseIndPtr.get(nodeId) + reverseDegree.get(nodeId));
         }
 
-        var originalCapacity = HugeDoubleArray.newArray(graph.relationshipCount());
-        var reverseToRelIdx = HugeLongArray.newArray(graph.relationshipCount());
-        var reverseAdjacency = HugeLongArray.newArray(graph.relationshipCount());
+        var newRelationshipCount = graph.relationshipCount() + supply.length + demand.length;
+        var originalCapacity = HugeDoubleArray.newArray(newRelationshipCount);
+        var reverseToRelIdx = HugeLongArray.newArray(newRelationshipCount);
+        var reverseAdjacency = HugeLongArray.newArray(newRelationshipCount);
+
+        var flow = HugeDoubleArray.newArray(newRelationshipCount);
+        flow.setAll(x -> 0D);
 
         //Populate CSRs
         reverseDegree.setAll(x -> 0L); //reuse
@@ -94,12 +117,26 @@ public final class FlowGraph {
         for (long nodeId = 0; nodeId < graph.nodeCount(); nodeId++) {
             graph.forEachRelationship(nodeId, 0D, consumer);
         }
+        for (var source : supply) {
+            consumer.accept(superSource, source.node(), source.value());
+        }
+        for (var target : demand) {
+            //Fake a fully utilized (capacity) edge FROM superTarget. Flow TO superTarget can therefore be increased by capacity.
+            flow.set(relIdx.longValue(), target.value());
+            consumer.accept(superTarget, target.node(), target.value());
+        }
 
-
-        var flow = HugeDoubleArray.newArray(graph.relationshipCount());
-        flow.setAll(x -> 0D);
-
-        return new FlowGraph(graph, indPtr, originalCapacity, flow, reverseAdjacency, reverseToRelIdx, reverseIndPtr);
+        return new FlowGraph(
+            graph,
+            indPtr,
+            originalCapacity,
+            flow,
+            reverseAdjacency,
+            reverseToRelIdx,
+            reverseIndPtr,
+            supply,
+            demand
+        );
     }
 
     public FlowGraph concurrentCopy() {
@@ -110,11 +147,14 @@ public final class FlowGraph {
             flow,
             reverseAdjacency,
             reverseToRelIdx,
-            reverseIndPtr
+            reverseIndPtr,
+            supply,
+            demand
         );
     }
 
     private void forEachOriginalRelationship(long nodeId, ResidualEdgeConsumer consumer) {
+        //todo: Rename original, since it also includes 'non-reverse' edges from superNodes
         var relIdx = new MutableLong(indPtr.get(nodeId));
         RelationshipWithPropertyConsumer originalConsumer = (s, t, capacity) -> {
             var residualCapacity = capacity - flow.get(relIdx.longValue());
@@ -123,7 +163,17 @@ public final class FlowGraph {
             relIdx.increment();
             return true;
         };
-        graph.forEachRelationship(nodeId, 0D, originalConsumer);
+        if (nodeId == superSource()) {
+            for (var source : supply) {
+                originalConsumer.accept(superSource(), source.node(), source.value());
+            }
+        } else if (nodeId == superTarget()) {
+            for (var target : demand) {
+                originalConsumer.accept(superTarget(), target.node(), target.value());
+            }
+        } else {
+            graph.forEachRelationship(nodeId, 0D, originalConsumer);
+        }
     }
 
     private void forEachReverseRelationship(long nodeId, ResidualEdgeConsumer consumer) {
@@ -154,12 +204,20 @@ public final class FlowGraph {
         }
     }
 
-    long edgeCount() {
+    long originalEdgeCount() {
         return graph.relationshipCount();
     }
 
-    public long nodeCount() {
+    long edgeCount() {
+        return graph.relationshipCount() + supply.length + demand.length;
+    }
+
+    public long originalNodeCount() {
         return graph.nodeCount();
+    }
+
+    public long nodeCount() {
+        return graph.nodeCount() + 2;
     }
 
     long outDegree(long nodeId) {
@@ -174,10 +232,18 @@ public final class FlowGraph {
         return originalCapacity.get(relIdx) - flow.get(relIdx);
     }
 
-    FlowResult createFlowResult(long target) {
-        var flowResult = new FlowResult(edgeCount());
+    long superSource() {
+        return graph.nodeCount();
+    }
+
+    long superTarget() {
+        return graph.nodeCount() + 1;
+    }
+
+    FlowResult createFlowResult() {
+        var flowResult = new FlowResult(originalEdgeCount());
         var idx = new MutableLong(0L);
-        for (long nodeId = 0; nodeId < nodeCount(); nodeId++) {
+        for (long nodeId = 0; nodeId < originalNodeCount(); nodeId++) {
             var relIdx = new MutableLong(indPtr.get(nodeId));
             graph.forEachRelationship(
                 nodeId,
@@ -187,16 +253,27 @@ public final class FlowGraph {
                     if (flow > 0.0) {
                         var flowRelationship = new FlowRelationship(s, t, flow);
                         flowResult.flow.set(idx.getAndIncrement(), flowRelationship);
-                        if (t == target) {
-                            flowResult.totalFlow += flow;
-                        }
+//                        if (t == target) {
+//                            flowResult.totalFlow += flow;
+//                        }
                     }
                     relIdx.increment();
-
                     return true;
                 }
             );
+
         }
+        //compute flow to superTarget
+        forEachOriginalRelationship(
+            superTarget(), (_s, _t, relIdx, _capacity, _isReverse) -> {
+                //superTarget--[rel]-->target
+                var fakeFlowFromSuperTarget = this.flow.get(relIdx);
+                var actualFlowFromSuperTarget = fakeFlowFromSuperTarget - originalCapacity.get(relIdx);
+                var actualFlowToSuperTarget = -actualFlowFromSuperTarget;
+                flowResult.totalFlow += actualFlowToSuperTarget;
+                return true;
+            }
+        );
         flowResult.chop(idx.longValue());
         return flowResult;
     }

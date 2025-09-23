@@ -20,6 +20,8 @@
 package org.neo4j.gds.maxflow;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.properties.relationships.RelationshipCursor;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
@@ -53,9 +55,18 @@ class FlowGraphTest {
     @Inject
     private TestGraph graph;
 
+    static FlowGraph createFlowGraph(Graph graph, long source, long target) {
+        double outgoingCapacityFromSource = graph.streamRelationships(source, 0D)
+            .map(RelationshipCursor::property)
+            .reduce(0D, Double::sum);
+        NodeWithValue[] supply = {new NodeWithValue(source, outgoingCapacityFromSource)};
+        NodeWithValue[] demand = {new NodeWithValue(target, outgoingCapacityFromSource)}; //more is useless since this is max in network
+        return FlowGraph.create(graph, supply, demand);
+    }
+
     @Test
     void test() {
-        var flowGraph = FlowGraph.create(graph);
+        var flowGraph = createFlowGraph(graph, graph.toMappedNodeId("a"), graph.toMappedNodeId("b"));
 
         Map<Long, Arc> map = new HashMap<>();
         Set<Long> set = new HashSet<>();
@@ -72,7 +83,8 @@ class FlowGraphTest {
         assertThat(map.entrySet()).containsExactlyInAnyOrder(
             Map.entry(graph.toMappedNodeId("d"), new Arc(4D, false)),
             Map.entry(graph.toMappedNodeId("b"), new Arc(0D, true)),
-            Map.entry(graph.toMappedNodeId("c"), new Arc(0D, true))
+            Map.entry(graph.toMappedNodeId("c"), new Arc(0D, true)),
+            Map.entry(flowGraph.superSource(), new Arc(0D, true))
         );
 
 
@@ -93,7 +105,8 @@ class FlowGraphTest {
         assertThat(map.entrySet()).containsExactlyInAnyOrder(
             Map.entry(graph.toMappedNodeId("d"), new Arc(3D, false)),
             Map.entry(graph.toMappedNodeId("b"), new Arc(1D, true)),
-            Map.entry(graph.toMappedNodeId("c"), new Arc(1D, true))
+            Map.entry(graph.toMappedNodeId("c"), new Arc(1D, true)),
+            Map.entry(flowGraph.superSource(), new Arc(1D, true))
         );
 
 
@@ -113,27 +126,30 @@ class FlowGraphTest {
         assertThat(map.entrySet()).containsExactlyInAnyOrder(
             Map.entry(graph.toMappedNodeId("d"), new Arc(4D, false)),
             Map.entry(graph.toMappedNodeId("b"), new Arc(0D, true)),
-            Map.entry(graph.toMappedNodeId("c"), new Arc(0D, true))
+            Map.entry(graph.toMappedNodeId("c"), new Arc(0D, true)),
+            Map.entry(flowGraph.superSource(), new Arc(0D, true))
         );
     }
 
     @Test
     void testCreateFlowResult() {
-        var flowGraph = FlowGraph.create(graph);
+        var flowGraph = createFlowGraph(graph, graph.toMappedNodeId("b"), graph.toMappedNodeId("a"));
+
         flowGraph.forEachRelationship(
             graph.toMappedNodeId("a"), (s, t, relIdx, residualCapacity, isReverse) -> {
-                flowGraph.push(relIdx, residualCapacity, isReverse);
+                flowGraph.push(relIdx, 2D, isReverse);
                 return true;
             }
+            //pushes 2 to both 'd' and superTarget.
         );
 
-        var result = flowGraph.createFlowResult(graph.toMappedNodeId("d"));
+        var result = flowGraph.createFlowResult();
 
-        assertThat(result.totalFlow).isEqualTo(4D);
+        assertThat(result.totalFlow).isEqualTo(2D);
         assertThat(result.flow.toArray()).containsExactlyInAnyOrder(new FlowRelationship(
             graph.toMappedNodeId("a"),
             graph.toMappedNodeId("d"),
-            4D
+            2D
         ));
     }
 

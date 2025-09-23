@@ -36,6 +36,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.neo4j.gds.maxflow.FlowGraphTest.createFlowGraph;
 
 @GdlExtension
 class DischargeTaskTest {
@@ -61,7 +62,8 @@ class DischargeTaskTest {
 
     @Test
     void discharge() {
-        var flowGraph = FlowGraph.create(graph);
+        var targetNode = graph.toMappedNodeId("d");
+        var flowGraph = createFlowGraph(graph, graph.toMappedNodeId("e"), targetNode);
 
         var excess = HugeDoubleArray.newArray(flowGraph.nodeCount());
         var label = HugeLongArray.newArray(flowGraph.nodeCount());
@@ -72,7 +74,7 @@ class DischargeTaskTest {
         var beta = 12;
         var workSinceLastGR = new AtomicLong(0L);
 
-        var targetNode = graph.toMappedNodeId("d");
+
 
         //init excess
         excess.set(graph.toMappedNodeId("c"), 10D);
@@ -106,7 +108,7 @@ class DischargeTaskTest {
         workingSet.reset();
 
         assertThat(label.get(graph.toMappedNodeId("a"))).isEqualTo(2L);
-        assertThat(label.get(graph.toMappedNodeId("c"))).isEqualTo(5L);
+        assertThat(label.get(graph.toMappedNodeId("c"))).isEqualTo(7L);
         assertThat(excess.get(graph.toMappedNodeId("a"))).isEqualTo(0D);
         assertThat(excess.get(graph.toMappedNodeId("c"))).isEqualTo(8D);
 
@@ -115,7 +117,7 @@ class DischargeTaskTest {
         workingSet.resetIdx();
 
         assertThat(label.get(graph.toMappedNodeId("a"))).isEqualTo(2L);
-        assertThat(label.get(graph.toMappedNodeId("c"))).isEqualTo(5L);
+        assertThat(label.get(graph.toMappedNodeId("c"))).isEqualTo(7L);
         assertThat(excess.get(graph.toMappedNodeId("a"))).isEqualTo(2D);
         assertThat(excess.get(graph.toMappedNodeId("c"))).isEqualTo(8D);
 
