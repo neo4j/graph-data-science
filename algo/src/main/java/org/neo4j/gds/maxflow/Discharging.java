@@ -67,11 +67,7 @@ public class Discharging {
         RunWithConcurrency.builder().concurrency(concurrency).tasks(dischargeTasks).build().run();
         workingSet.reset();
 
-        //Update working set
+        //Update and sync new working set
         RunWithConcurrency.builder().concurrency(concurrency).tasks(dischargeTasks).build().run();
-
-        //Sync new working set
-        RunWithConcurrency.builder().concurrency(concurrency).tasks(dischargeTasks).build().run();
-        workingSet.resetIdx();
     }
 }

@@ -110,9 +110,8 @@ class DischargeTaskTest {
         assertThat(excess.get(graph.toMappedNodeId("a"))).isEqualTo(0D);
         assertThat(excess.get(graph.toMappedNodeId("c"))).isEqualTo(8D);
 
-        task.updateWorkingSet();
+        task.updateAndSyncNewWorkingSet();
 
-        task.syncNewWorkingSet();
         workingSet.resetIdx();
 
         assertThat(label.get(graph.toMappedNodeId("a"))).isEqualTo(2L);

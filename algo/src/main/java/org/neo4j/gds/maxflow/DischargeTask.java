@@ -84,8 +84,7 @@ public class DischargeTask implements Runnable {
         switch (phase) {
             case PHASE.DISCHARGE -> dischargeWorkingSet();
             case PHASE.SYNC_WORKING_SET -> syncWorkingSet();
-            case PHASE.UPDATE_WORKING_SET -> updateWorkingSet();
-            case PHASE.SYNC_NEW_WORKING_SET -> syncNewWorkingSet();
+            case PHASE.UPDATE_WORKING_SET -> updateAndSyncNewWorkingSet();
         }
     }
 
@@ -178,24 +177,18 @@ public class DischargeTask implements Runnable {
         phase = PHASE.UPDATE_WORKING_SET;
     }
 
-    void updateWorkingSet() {
-        workingSet.batchPush(localDiscoveredVertices);
-        phase = PHASE.SYNC_NEW_WORKING_SET;
-    }
-
-    void syncNewWorkingSet() {
-        batchConsumeWorkingSet((v) -> {
+    void updateAndSyncNewWorkingSet() {
+        workingSet.batchPushAndConsume(localDiscoveredVertices, (v) -> {
             excess.addTo(v, addedExcess.get(v));
             addedExcess.set(v, 0);
             isDiscovered.clear(v);
         });
-        phase = PHASE.UPDATE_WORKING_SET;
+        phase = PHASE.DISCHARGE;
     }
 
     enum PHASE {
         DISCHARGE,
         SYNC_WORKING_SET,
         UPDATE_WORKING_SET,
-        SYNC_NEW_WORKING_SET
     }
 }
