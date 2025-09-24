@@ -20,8 +20,8 @@
 package org.neo4j.gds.pagerank;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.config.SourceNodes;
-import org.neo4j.gds.config.SourceNodesFactory;
+import org.neo4j.gds.config.InputNodes;
+import org.neo4j.gds.config.InputNodesFactory;
 
 import java.util.List;
 
@@ -32,7 +32,7 @@ class InitialProbabilityFactoryTest {
     @Test
     void testInitialProbabilityEmpty() {
         var alpha = 0.15;
-        var sourceNodes = SourceNodes.EMPTY_SOURCE_NODES;
+        var sourceNodes = InputNodes.EMPTY_INPUT_NODES;
         InitialProbabilityProvider initialProbabilityProvider = InitialProbabilityFactory.create((x) -> (2*x), alpha, sourceNodes);
         assertThat(initialProbabilityProvider).isInstanceOf(GlobalRestartProbability.class);
     }
@@ -40,7 +40,7 @@ class InitialProbabilityFactoryTest {
     @Test
     void testInitialProbabilityList() {
         var alpha = 0.15;
-        var sourceNodesList = SourceNodesFactory.parse(List.of(0L,2L,10L));
+        var sourceNodesList = InputNodesFactory.parse(List.of(0L,2L,10L),"FOO");
         InitialProbabilityProvider initialProbabilityProvider = InitialProbabilityFactory.create((x) -> (2*x), alpha, sourceNodesList);
         assertThat(initialProbabilityProvider).isInstanceOf(SourceBasedRestartProbabilityList.class);
     }
@@ -48,7 +48,7 @@ class InitialProbabilityFactoryTest {
     @Test
     void testInitialProbabilityListOfLists() {
         var alpha = 0.15;
-        var sourceNodesMap = SourceNodesFactory.parse(List.of(List.of(0L, 1D), List.of(5L, 0.1D)));
+        var sourceNodesMap = InputNodesFactory.parse(List.of(List.of(0L, 1D), List.of(5L, 0.1D)),"FOO");
         InitialProbabilityProvider initialProbabilityProvider = InitialProbabilityFactory.create((x) -> (2*x), alpha, sourceNodesMap);
         assertThat(initialProbabilityProvider).isInstanceOf(SourceBasedRestartProbability.class);
     }

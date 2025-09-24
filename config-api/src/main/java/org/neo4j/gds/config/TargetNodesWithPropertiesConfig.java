@@ -29,13 +29,13 @@ import java.util.List;
 
 import static org.neo4j.gds.config.ConfigNodesValidations.nodesExistInGraph;
 
-public interface SourceNodesWithPropertiesConfig {
+public interface TargetNodesWithPropertiesConfig {
 
-    String SOURCE_NODES_KEY = "sourceNodes";
+    String TARGET_NODES_KEY = "targetNodes";
 
-    @Configuration.ConvertWith(method = "org.neo4j.gds.config.SourceNodesWithPropertiesConfig.SourceNodesFactory#parse")
-    @Configuration.ToMapValue("org.neo4j.gds.config.SourceNodesWithPropertiesConfig.SourceNodesFactory#toMapOutput")
-    default InputNodes sourceNodes() {
+    @Configuration.ConvertWith(method = "org.neo4j.gds.config.TargetNodesWithPropertiesConfig.TargetNodesFactory#parse")
+    @Configuration.ToMapValue("org.neo4j.gds.config.TargetNodesWithPropertiesConfig.TargetNodesFactory#toMapOutput")
+    default InputNodes targetNodes() {
         return InputNodes.EMPTY_INPUT_NODES;
     }
 
@@ -45,23 +45,23 @@ public interface SourceNodesWithPropertiesConfig {
         Collection<NodeLabel> selectedLabels,
         Collection<RelationshipType> selectedRelationshipTypes
     ) {
-        nodesExistInGraph(graphStore, selectedLabels, sourceNodes().inputNodes(), SOURCE_NODES_KEY);
+        nodesExistInGraph(graphStore, selectedLabels, targetNodes().inputNodes(), TARGET_NODES_KEY);
     }
 
-     final class SourceNodesFactory {
+    final class TargetNodesFactory {
 
-        private SourceNodesFactory() {}
+        private TargetNodesFactory() {}
 
-       public static InputNodes parse(Object object){
-            return InputNodesFactory.parse(object,SOURCE_NODES_KEY);
+        public static InputNodes parse(Object object){
+            return InputNodesFactory.parse(object,TARGET_NODES_KEY);
         }
 
         public static InputNodes parseAsList(Object object) {
-            return InputNodesFactory.parseAsList(object,SOURCE_NODES_KEY);
+            return InputNodesFactory.parseAsList(object,TARGET_NODES_KEY);
         }
 
-        public  static List toMapOutput(InputNodes sourceNodes) {
-            return InputNodesFactory.toMapOutput(sourceNodes,SOURCE_NODES_KEY);
+        public static List toMapOutput(InputNodes sourceNodes) {
+            return InputNodesFactory.toMapOutput(sourceNodes,TARGET_NODES_KEY);
         }
     }
 }

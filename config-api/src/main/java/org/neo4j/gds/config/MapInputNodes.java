@@ -20,18 +20,23 @@
 package org.neo4j.gds.config;
 
 import java.util.Collection;
-import java.util.List;
+import java.util.Map;
 
-public class ListSourceNodes implements SourceNodes {
-    private final List<Long> sourceNodes;
+public class MapInputNodes implements InputNodes {
+    private final Map<Long,Double> sourceNodes;
 
-    public ListSourceNodes(List<Long> sourceNodes) {
+    public MapInputNodes(Map<Long,Double> sourceNodes) {
         this.sourceNodes = sourceNodes;
+
     }
 
     @Override
-    public Collection<Long> sourceNodes() {
-        return sourceNodes;
+    public Collection<Long> inputNodes() {
+        return sourceNodes.keySet();
+    }
+
+    public Map<Long,Double> map() {
+        return this.sourceNodes;
     }
 
 }

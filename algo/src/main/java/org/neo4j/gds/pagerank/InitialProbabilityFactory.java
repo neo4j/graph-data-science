@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.pagerank;
 
-import org.neo4j.gds.config.ListSourceNodes;
-import org.neo4j.gds.config.MapSourceNodes;
-import org.neo4j.gds.config.SourceNodes;
+import org.neo4j.gds.config.InputNodes;
+import org.neo4j.gds.config.ListInputNodes;
+import org.neo4j.gds.config.MapInputNodes;
 
 import java.util.HashMap;
 import java.util.function.LongUnaryOperator;
@@ -33,20 +33,20 @@ public final class InitialProbabilityFactory {
     public static InitialProbabilityProvider create(
         LongUnaryOperator toMappedId,
         double alpha,
-        SourceNodes sourceNodes
+        InputNodes sourceNodes
     ) {
-        if (sourceNodes == SourceNodes.EMPTY_SOURCE_NODES) {
+        if (sourceNodes == InputNodes.EMPTY_INPUT_NODES) {
             return new GlobalRestartProbability(alpha);
-        } else if (sourceNodes instanceof ListSourceNodes) {
-            var newSourceNodes = sourceNodes.sourceNodes()
+        } else if (sourceNodes instanceof ListInputNodes) {
+            var newSourceNodes = sourceNodes.inputNodes()
                 .stream()
                 .mapToLong(toMappedId::applyAsLong)
                 .boxed()
                 .toList();
             return new SourceBasedRestartProbabilityList(alpha, newSourceNodes);
-        } else if (sourceNodes instanceof MapSourceNodes) {
+        } else if (sourceNodes instanceof MapInputNodes) {
             var newMap = new HashMap<Long, Double>();
-            for (var entry : ((MapSourceNodes) sourceNodes).map().entrySet()) {
+            for (var entry : ((MapInputNodes) sourceNodes).map().entrySet()) {
                 var newKey = toMappedId.applyAsLong(entry.getKey());
                 newMap.put(newKey, entry.getValue());
             }

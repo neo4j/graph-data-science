@@ -22,9 +22,8 @@ package org.neo4j.gds.config;
 import java.util.Collection;
 import java.util.List;
 
-public interface SourceNodes {
-    SourceNodes EMPTY_SOURCE_NODES = new ListSourceNodes(List.of());
-    String SOURCE_NODES_KEY = "sourceNodes";
+public interface InputNodes {
+    InputNodes EMPTY_INPUT_NODES = new ListInputNodes(List.of());
 
-    Collection<Long> sourceNodes();
+    Collection<Long> inputNodes();
 }

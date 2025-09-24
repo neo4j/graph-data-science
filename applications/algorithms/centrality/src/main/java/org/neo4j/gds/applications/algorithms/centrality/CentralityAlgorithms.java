@@ -266,8 +266,8 @@ public class CentralityAlgorithms {
         Graph graph,
         EigenvectorConfig configuration
     ) {
-        var mappedSourceNodes = new LongScatterSet(configuration.sourceNodes().sourceNodes().size());
-        configuration.sourceNodes().sourceNodes().stream()
+        var mappedSourceNodes = new LongScatterSet(configuration.sourceNodes().inputNodes().size());
+        configuration.sourceNodes().inputNodes().stream()
             .mapToLong(graph::toMappedNodeId)
             .forEach(mappedSourceNodes::add);
 
