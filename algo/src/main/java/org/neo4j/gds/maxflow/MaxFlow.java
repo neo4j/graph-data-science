@@ -25,6 +25,7 @@ import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
+import org.neo4j.gds.core.utils.paged.HugeLongArrayQueue;
 import org.neo4j.gds.core.utils.paged.ParallelDoublePageCreator;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.termination.TerminationFlag;
@@ -127,24 +128,41 @@ public final class MaxFlow extends Algorithm<FlowResult> {
 
         var workSinceLastGR = new AtomicLong(Long.MAX_VALUE);
 
+        HugeLongArrayQueue[] threadQueues = new HugeLongArrayQueue[parameters.concurrency().value()];
+        for (int i = 0; i < threadQueues.length; i++) {
+            threadQueues[i] = HugeLongArrayQueue.newQueue(nodeCount);
+        }
+
+        var globalRelabeling = GlobalRelabeling.createRelabeling(
+            flowGraph,
+            label,
+            sourceNode,
+            targetNode,
+            parameters.concurrency(),
+            threadQueues
+        );
+
+        var discharging = Discharging.createDischarging(
+            flowGraph,
+            excess,
+            label,
+            tempLabel,
+            addedExcess,
+            isDiscovered,
+            workingSet,
+            targetNode,
+            parameters.beta(),
+            workSinceLastGR,
+            parameters.concurrency(),
+            threadQueues
+            );
+
         while (!workingSet.isEmpty()) {
             if (parameters.freq() * workSinceLastGR.doubleValue() > parameters.alpha() * nodeCount + edgeCount) {
-                GlobalRelabeling.globalRelabeling(flowGraph, label, sourceNode, targetNode, parameters.concurrency());
+                globalRelabeling.globalRelabeling();
                 workSinceLastGR.set(0L);
             }
-            Discharging.processWorkingSet(
-                flowGraph,
-                excess,
-                label,
-                tempLabel,
-                addedExcess,
-                isDiscovered,
-                workingSet,
-                targetNode,
-                parameters.beta(),
-                workSinceLastGR,
-                parameters.concurrency()
-            );
+            discharging.processWorkingSet();
         }
     }
 }

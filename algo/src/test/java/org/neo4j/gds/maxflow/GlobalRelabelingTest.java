@@ -22,6 +22,7 @@ package org.neo4j.gds.maxflow;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.core.utils.paged.HugeLongArrayQueue;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
@@ -63,13 +64,22 @@ class GlobalRelabelingTest {
 
         var label = HugeLongArray.newArray(flowGraph.nodeCount());
         label.setAll((i) -> flowGraph.nodeCount());
-        GlobalRelabeling.globalRelabeling(
+
+        HugeLongArrayQueue[] threadQueues = new HugeLongArrayQueue[1];
+        for (int i = 0; i < threadQueues.length; i++) {
+            threadQueues[i] = HugeLongArrayQueue.newQueue(flowGraph.nodeCount());
+        }
+
+        var globalRelabeling = GlobalRelabeling.createRelabeling(
             flowGraph,
             label,
             graph.toMappedNodeId("c"),
             graph.toMappedNodeId("d"),
-            new Concurrency(1)
+            new Concurrency(1),
+            threadQueues
         );
+
+        globalRelabeling.globalRelabeling();
 
         assertThat(label.get(graph.toMappedNodeId("a"))).isEqualTo(1L);
         assertThat(label.get(graph.toMappedNodeId("b"))).isEqualTo(2L);
@@ -84,13 +94,22 @@ class GlobalRelabelingTest {
 
         var label = HugeLongArray.newArray(flowGraph.nodeCount());
         label.setAll((i) -> flowGraph.nodeCount());
-        GlobalRelabeling.globalRelabeling(
+
+        HugeLongArrayQueue[] threadQueues = new HugeLongArrayQueue[1];
+        for (int i = 0; i < threadQueues.length; i++) {
+            threadQueues[i] = HugeLongArrayQueue.newQueue(flowGraph.nodeCount());
+        }
+
+        var globalRelabeling = GlobalRelabeling.createRelabeling(
             flowGraph,
             label,
             graph.toMappedNodeId("a"),
             graph.toMappedNodeId("e"),
-            new Concurrency(1)
+            new Concurrency(1),
+            threadQueues
         );
+
+        globalRelabeling.globalRelabeling();
 
         assertThat(label.get(graph.toMappedNodeId("a"))).isEqualTo(7L);
         assertThat(label.get(graph.toMappedNodeId("b"))).isEqualTo(7L);
@@ -105,13 +124,22 @@ class GlobalRelabelingTest {
 
         var label = HugeLongArray.newArray(flowGraph.nodeCount());
         label.setAll((i) -> flowGraph.nodeCount());
-        GlobalRelabeling.globalRelabeling(
+
+        HugeLongArrayQueue[] threadQueues = new HugeLongArrayQueue[1];
+        for (int i = 0; i < threadQueues.length; i++) {
+            threadQueues[i] = HugeLongArrayQueue.newQueue(flowGraph.nodeCount());
+        }
+
+        var globalRelabeling = GlobalRelabeling.createRelabeling(
             flowGraph,
             label,
             flowGraph.superSource(),
             flowGraph.superTarget(),
-            new Concurrency(1)
+            new Concurrency(1),
+            threadQueues
         );
+
+        globalRelabeling.globalRelabeling();
 
         assertThat(label.get(flowGraph.superTarget())).isEqualTo(0L);
         assertThat(label.get(graph.toMappedNodeId("e"))).isEqualTo(1L);

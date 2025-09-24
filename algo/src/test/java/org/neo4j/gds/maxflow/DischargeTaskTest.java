@@ -25,6 +25,7 @@ import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
+import org.neo4j.gds.core.utils.paged.HugeLongArrayQueue;
 import org.neo4j.gds.core.utils.paged.ParallelDoublePageCreator;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -86,7 +87,13 @@ class DischargeTaskTest {
 
 
         workingSet.push(graph.toMappedNodeId("c"));
-        var task = new DischargeTask(flowGraph.concurrentCopy(), excess, label, tempLabel, addedExcess, isDiscovered, workingSet, targetNode, beta, workSinceLastGR);
+
+        HugeLongArrayQueue[] threadQueues = new HugeLongArrayQueue[1];
+        for (int i = 0; i < threadQueues.length; i++) {
+            threadQueues[i] = HugeLongArrayQueue.newQueue(flowGraph.nodeCount());
+        }
+
+        var task = new DischargeTask(flowGraph.concurrentCopy(), excess, label, tempLabel, addedExcess, isDiscovered, workingSet, targetNode, beta, workSinceLastGR, threadQueues[0]);
 
         task.discharge(graph.toMappedNodeId("c"));
         workingSet.resetIdx();

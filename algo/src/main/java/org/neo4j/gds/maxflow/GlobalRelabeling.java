@@ -21,10 +21,13 @@ package org.neo4j.gds.maxflow;
 
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.paged.HugeLongArrayQueue;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 enum Phase {
     TRAVERSE,
@@ -32,34 +35,60 @@ enum Phase {
 }
 
 public class GlobalRelabeling {
-    public static void globalRelabeling(
+    private final long nodeCount;
+    private final HugeLongArray label;
+    private final AtomicWorkingSet frontier;
+    private final HugeAtomicBitSet vertexIsDiscovered;
+    private final long source;
+    private final long target;
+    private final Concurrency concurrency;
+    private final Collection<Runnable> globalRelabelingTasks;
+
+    static GlobalRelabeling createRelabeling(
         FlowGraph flowGraph,
         HugeLongArray label,
         long source,
         long target,
-        Concurrency concurrency
+        Concurrency concurrency,
+        HugeLongArrayQueue[] threadQueues
     ) {
-        label.setAll((i) -> flowGraph.nodeCount());
-        label.set(target, 0L);
         var vertexIsDiscovered = HugeAtomicBitSet.create(flowGraph.nodeCount());
-
         var frontier = new AtomicWorkingSet(flowGraph.nodeCount());
-        frontier.push(target);
-        vertexIsDiscovered.set(target);
-        vertexIsDiscovered.set(source);
 
-
-        var tasks = ParallelUtil.tasks(
-            concurrency,
-            () -> new GlobalRelabellingBFSTask(flowGraph.concurrentCopy(), frontier, vertexIsDiscovered, label)
-        );
-
-        while (!frontier.isEmpty()) {
-            RunWithConcurrency.builder().concurrency(concurrency).tasks(tasks).build().run();
-            frontier.reset();
-            RunWithConcurrency.builder().concurrency(concurrency).tasks(tasks).build().run();
+        List<Runnable> globalRelabelingTasks = new ArrayList<>();
+        for (int i = 0; i < concurrency.value(); i++) {
+            globalRelabelingTasks.add(new GlobalRelabellingBFSTask(flowGraph.concurrentCopy(), frontier, vertexIsDiscovered, label, threadQueues[i]));
         }
-        label.set(source, flowGraph.nodeCount());
+
+        return new GlobalRelabeling(flowGraph.nodeCount(), label, frontier, vertexIsDiscovered, source, target, concurrency, globalRelabelingTasks);
+    }
+
+    private GlobalRelabeling(long nodeCount, HugeLongArray label, AtomicWorkingSet frontier, HugeAtomicBitSet vertexIsDiscovered, long source, long target, Concurrency concurrency, Collection<Runnable> globalRelabelingTasks) {
+        this.nodeCount = nodeCount;
+        this.label = label;
+        this.frontier = frontier;
+        this.vertexIsDiscovered = vertexIsDiscovered;
+        this.source = source;
+        this.target = target;
+        this.concurrency = concurrency;
+        this.globalRelabelingTasks = globalRelabelingTasks;
+    }
+
+    public void globalRelabeling() {
+        label.setAll((i) -> nodeCount);
+        label.set(target, 0L);
+        frontier.reset();
+        frontier.push(target);
+        vertexIsDiscovered.clear();
+        vertexIsDiscovered.set(source);
+        vertexIsDiscovered.set(target);
+        while (!frontier.isEmpty()) {
+            RunWithConcurrency.builder().concurrency(concurrency).tasks(globalRelabelingTasks).build().run();
+            frontier.reset();
+            RunWithConcurrency.builder().concurrency(concurrency).tasks(globalRelabelingTasks).build().run();
+        }
+        label.set(source, nodeCount);
+
     }
 }
 
@@ -77,11 +106,13 @@ class GlobalRelabellingBFSTask implements Runnable {
         FlowGraph flowGraph,
         AtomicWorkingSet frontier,
         HugeAtomicBitSet vertexIsDiscovered,
-        HugeLongArray label
+        HugeLongArray label,
+        HugeLongArrayQueue localDiscoveredVertices
     ) {
         this.flowGraph = flowGraph;
         this.frontier = frontier;
-        this.localDiscoveredVertices = HugeLongArrayQueue.newQueue(flowGraph.nodeCount()); //think
+//        this.localDiscoveredVertices = HugeLongArrayQueue.newQueue(flowGraph.nodeCount()); //think //fixme: Don't allocate every time
+        this.localDiscoveredVertices = localDiscoveredVertices;
         this.verticesIsDiscovered = vertexIsDiscovered;
         this.label = label;
         this.phase = Phase.TRAVERSE;

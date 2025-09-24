@@ -23,14 +23,21 @@ import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
+import org.neo4j.gds.core.utils.paged.HugeLongArrayQueue;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class Discharging {
-    public static void processWorkingSet(
+    private final AtomicWorkingSet workingSet;
+    private final Concurrency concurrency;
+    private final Collection<Runnable> dischargeTasks;
+
+    public static Discharging createDischarging(
         FlowGraph flowGraph,
         HugeDoubleArray excess,
         HugeLongArray label,
@@ -41,14 +48,13 @@ public class Discharging {
         long targetNode,
         long beta,
         AtomicLong workSinceLastGR,
-        Concurrency concurrency
-    ) {
-
-        //Todo: Refactor so that dischargeTasks can be reused between iterations.
-
-        var dischargeTasks = ParallelUtil.tasks(
-            concurrency,
-            () -> new DischargeTask(
+        Concurrency concurrency,
+        HugeLongArrayQueue[] threadQueues
+    )
+    {
+        List<Runnable> dischargeTasks = new ArrayList<>();
+        for (int i = 0; i < concurrency.value(); i++) {
+            dischargeTasks.add(new DischargeTask(
                 flowGraph.concurrentCopy(),
                 excess,
                 label,
@@ -58,10 +64,21 @@ public class Discharging {
                 workingSet,
                 targetNode,
                 beta,
-                workSinceLastGR
-            )
-        );
+                workSinceLastGR,
+                threadQueues[i]
+            ));
+        }
 
+        return new Discharging(workingSet, dischargeTasks, concurrency);
+    }
+
+    private Discharging(AtomicWorkingSet workingSet, Collection<Runnable> dischargeTasks, Concurrency concurrency) {
+        this.workingSet = workingSet;
+        this.dischargeTasks = dischargeTasks;
+        this.concurrency = concurrency;
+    }
+
+    public void processWorkingSet() {
         //Discharge working set
         RunWithConcurrency.builder().concurrency(concurrency).tasks(dischargeTasks).build().run();
         workingSet.resetIdx();

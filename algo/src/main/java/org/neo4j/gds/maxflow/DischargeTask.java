@@ -49,6 +49,8 @@ public class DischargeTask implements Runnable {
     private PHASE phase;
     private long localWork;
 
+
+
     public DischargeTask(
         FlowGraph flowGraph,
         HugeDoubleArray excess,
@@ -59,7 +61,8 @@ public class DischargeTask implements Runnable {
         AtomicWorkingSet workingSet,
         long targetNode,
         long beta,
-        AtomicLong workSinceLastGR
+        AtomicLong workSinceLastGR,
+        HugeLongArrayQueue localDiscoveredVertices
     ) {
         this.excess = excess;
         this.flowGraph = flowGraph;
@@ -77,7 +80,7 @@ public class DischargeTask implements Runnable {
 
         this.localWork = 0;
         this.nodeCount = flowGraph.nodeCount();
-        this.localDiscoveredVertices = HugeLongArrayQueue.newQueue(flowGraph.nodeCount());
+        this.localDiscoveredVertices = localDiscoveredVertices;
     }
 
     public void run() {
