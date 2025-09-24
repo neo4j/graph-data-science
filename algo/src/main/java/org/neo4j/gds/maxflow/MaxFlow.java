@@ -38,15 +38,11 @@ public final class MaxFlow extends Algorithm<FlowResult> {
     static final int ALPHA = 6;
     static final int BETA = 12;
     private final Graph graph;
-    private final NodeWithValue[] supply;
-    private final NodeWithValue[] demand;
     private final MaxFlowParameters parameters;
     private final ExecutorService executorService;
 
-    private MaxFlow(
+    public MaxFlow(
         Graph graph,
-        NodeWithValue[] supply,
-        NodeWithValue[] demand,
         MaxFlowParameters parameters,
         ExecutorService executorService,
         ProgressTracker progressTracker,
@@ -54,31 +50,9 @@ public final class MaxFlow extends Algorithm<FlowResult> {
     ) {
         super(progressTracker);
         this.graph = graph;
-        this.supply = supply;
-        this.demand = demand;
         this.parameters = parameters;
         this.executorService = executorService;
         this.terminationFlag = terminationFlag;
-    }
-
-    public static MaxFlow create(
-        Graph graph,
-        NodeWithValue[] supply,
-        NodeWithValue[] demand,
-        MaxFlowParameters parameters,
-        ExecutorService executorService,
-        ProgressTracker progressTracker,
-        TerminationFlag terminationFlag
-    ) {
-        return new MaxFlow(
-            graph,
-            supply,
-            demand,
-            parameters,
-            executorService,
-            progressTracker,
-            terminationFlag
-        );
     }
 
     public FlowResult compute() {
@@ -91,7 +65,7 @@ public final class MaxFlow extends Algorithm<FlowResult> {
     }
 
     private Preflow initPreflow() {
-        var flowGraph = FlowGraph.create(graph, supply, demand);
+        var flowGraph = FlowGraph.create(graph, parameters.supply(), parameters.demand());
         var excess = HugeDoubleArray.newArray(flowGraph.nodeCount());
         excess.setAll(x -> 0D);
         flowGraph.forEachRelationship(

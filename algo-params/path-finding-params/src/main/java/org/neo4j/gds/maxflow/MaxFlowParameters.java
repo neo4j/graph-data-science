@@ -22,5 +22,5 @@ package org.neo4j.gds.maxflow;
 
 import org.neo4j.gds.core.concurrency.Concurrency;
 
-public record MaxFlowParameters(Concurrency concurrency, long alpha, long beta, double freq) {
+public record MaxFlowParameters(NodeWithValue[] supply, NodeWithValue[] demand, Concurrency concurrency, long alpha, long beta, double freq) {
 }

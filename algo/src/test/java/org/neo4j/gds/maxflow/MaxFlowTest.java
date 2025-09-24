@@ -76,8 +76,8 @@ class MaxFlowTest {
     }
 
     void testGraph(Graph graph, NodeWithValue[] supply, NodeWithValue[] demand, double expectedFlow, int concurrency) {
-        var params = new MaxFlowParameters(new Concurrency(concurrency), ALPHA, BETA, FREQ);
-        var x = MaxFlow.create(graph, supply, demand, params, null, null, null); //fixme
+        var params = new MaxFlowParameters(supply, demand, new Concurrency(concurrency), ALPHA, BETA, FREQ);
+        var x = new MaxFlow(graph, params, null, null, null); //fixme
         var result = x.compute();
         assertThat(result.totalFlow).isCloseTo(expectedFlow, Offset.offset(TOLERANCE));
     }
