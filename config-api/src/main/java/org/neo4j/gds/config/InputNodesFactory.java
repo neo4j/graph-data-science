@@ -19,6 +19,9 @@
  */
 package org.neo4j.gds.config;
 
+import org.neo4j.gds.InputNodes;
+import org.neo4j.gds.ListInputNodes;
+import org.neo4j.gds.MapInputNodes;
 import org.neo4j.gds.utils.StringFormatting;
 
 import java.util.ArrayList;

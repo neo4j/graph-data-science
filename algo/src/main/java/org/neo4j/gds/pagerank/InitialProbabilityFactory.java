@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.pagerank;
 
-import org.neo4j.gds.config.InputNodes;
-import org.neo4j.gds.config.ListInputNodes;
-import org.neo4j.gds.config.MapInputNodes;
+import org.neo4j.gds.InputNodes;
+import org.neo4j.gds.ListInputNodes;
+import org.neo4j.gds.MapInputNodes;
 
 import java.util.HashMap;
 import java.util.function.LongUnaryOperator;

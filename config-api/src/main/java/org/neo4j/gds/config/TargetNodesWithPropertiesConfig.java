@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.config;
 
+import org.neo4j.gds.InputNodes;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
@@ -40,7 +41,7 @@ public interface TargetNodesWithPropertiesConfig {
     }
 
     @Configuration.GraphStoreValidationCheck
-    default void validateSourceLabels(
+    default void validateTargetLabels(
         GraphStore graphStore,
         Collection<NodeLabel> selectedLabels,
         Collection<RelationshipType> selectedRelationshipTypes

@@ -22,10 +22,12 @@ package org.neo4j.gds.maxflow;
 
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.InputNodes;
+import org.neo4j.gds.ListInputNodes;
+import org.neo4j.gds.MapInputNodes;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.properties.relationships.RelationshipCursor;
 import org.neo4j.gds.beta.generator.PropertyProducer;
 import org.neo4j.gds.beta.generator.RandomGraphGenerator;
 import org.neo4j.gds.core.concurrency.Concurrency;
@@ -33,6 +35,9 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+
+import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.beta.generator.RelationshipDistribution.UNIFORM;
@@ -75,21 +80,18 @@ class MaxFlowTest {
         return graph;
     }
 
-    void testGraph(Graph graph, NodeWithValue[] supply, NodeWithValue[] demand, double expectedFlow, int concurrency) {
-        var params = new MaxFlowParameters(supply, demand, new Concurrency(concurrency), ALPHA, BETA, FREQ);
-        var x = new MaxFlow(graph, params, null, null, null); //fixme
+    void testGraph(Graph graph, InputNodes sourceNodes, InputNodes targetNodes, double expectedFlow, int concurrency) {
+        var params = new MaxFlowParameters(sourceNodes, targetNodes, new Concurrency(concurrency), ALPHA, BETA, FREQ);
+        var x = new MaxFlow(graph, params, null, null); //fixme
         var result = x.compute();
         assertThat(result.totalFlow).isCloseTo(expectedFlow, Offset.offset(TOLERANCE));
     }
 
     void testGraph(Graph graph, long sourceNode, long targetNode, double expectedFlow, int concurrency) {
-        double outgoingCapacityFromSource = graph.streamRelationships(sourceNode, 0D)
-            .map(RelationshipCursor::property)
-            .reduce(0D, Double::sum);
-        NodeWithValue[] supply = {new NodeWithValue(sourceNode, outgoingCapacityFromSource)};
-        NodeWithValue[] demand = {new NodeWithValue(targetNode, outgoingCapacityFromSource)}; //more is useless since this is max in network
+        var sourceNodes = new ListInputNodes(List.of(sourceNode));
+        var targetNodes = new ListInputNodes(List.of(targetNode));
 
-        testGraph(graph, supply, demand, expectedFlow, concurrency);
+        testGraph(graph, sourceNodes, targetNodes, expectedFlow, concurrency);
     }
 
     void testGraph(TestGraph graph, String sourceNode, String targetNode, double expectedFlow) {
@@ -322,8 +324,8 @@ class MaxFlowTest {
         testGraph(graph, 50, 100, 434.3606561583014, 4);
 
         testGraph(graph,
-            new NodeWithValue[]{new NodeWithValue(1, 103.1), new NodeWithValue(23, 129.5), new NodeWithValue(101, 242.2)},
-            new NodeWithValue[]{new NodeWithValue(5, 117.7), new NodeWithValue(199, 199.0), new NodeWithValue(150, 204.5)},
+            new MapInputNodes(Map.of(1L, 103.1, 23L, 129.5, 101L, 242.2)),
+            new MapInputNodes(Map.of(5L, 117.7, 199L, 199.0, 150L, 204.5)),
             474.8,
             4);
     }
@@ -335,8 +337,8 @@ class MaxFlowTest {
 
 
         testGraph(graph,
-            new NodeWithValue[]{new NodeWithValue(1, 100.1), new NodeWithValue(23, 120.5), new NodeWithValue(501, 142.2)},
-            new NodeWithValue[]{new NodeWithValue(5, 157.7), new NodeWithValue(299, 109.0), new NodeWithValue(450, 204.5)},
+            new MapInputNodes(Map.of(1L, 100.1, 23L, 120.5, 501L, 142.2)),
+            new MapInputNodes(Map.of(5L, 157.7, 299L, 109.0, 450L, 204.5)),
             362.79999999999995,
             4);
     }

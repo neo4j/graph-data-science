@@ -20,6 +20,8 @@
 package org.neo4j.gds.config;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.ListInputNodes;
+import org.neo4j.gds.MapInputNodes;
 
 import java.util.List;
 

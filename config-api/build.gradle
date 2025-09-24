@@ -26,6 +26,7 @@ dependencies {
     api openGds.commons.lang3
 
     implementation(
+        project(':algo-params-common'),
         project(':concurrency'),
         project(':concurrency-validation-api'),
         project(':core-api'),

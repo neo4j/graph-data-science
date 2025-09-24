@@ -69,6 +69,9 @@ public final class FlowGraph {
         for (long nodeId = 0; nodeId < graph.nodeCount(); nodeId++) {
             graph.forEachRelationship(
                 nodeId, 0D, (s, t, capacity) -> {
+                    if(capacity < 0D){
+                        throw new IllegalArgumentException("Negative capacity not allowed");
+                    }
                     reverseDegree.addTo(t, 1);
                     return true;
                 }

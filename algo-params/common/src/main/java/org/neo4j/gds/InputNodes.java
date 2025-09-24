@@ -17,26 +17,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.config;
+package org.neo4j.gds;
 
 import java.util.Collection;
-import java.util.Map;
+import java.util.List;
 
-public class MapInputNodes implements InputNodes {
-    private final Map<Long,Double> sourceNodes;
+public interface InputNodes {
+    InputNodes EMPTY_INPUT_NODES = new ListInputNodes(List.of());
 
-    public MapInputNodes(Map<Long,Double> sourceNodes) {
-        this.sourceNodes = sourceNodes;
-
-    }
-
-    @Override
-    public Collection<Long> inputNodes() {
-        return sourceNodes.keySet();
-    }
-
-    public Map<Long,Double> map() {
-        return this.sourceNodes;
-    }
-
+    Collection<Long> inputNodes();
 }

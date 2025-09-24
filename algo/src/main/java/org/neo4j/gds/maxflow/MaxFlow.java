@@ -30,7 +30,6 @@ import org.neo4j.gds.core.utils.paged.ParallelDoublePageCreator;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.termination.TerminationFlag;
 
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
 
 public final class MaxFlow extends Algorithm<FlowResult> {
@@ -39,19 +38,16 @@ public final class MaxFlow extends Algorithm<FlowResult> {
     static final int BETA = 12;
     private final Graph graph;
     private final MaxFlowParameters parameters;
-    private final ExecutorService executorService;
 
     public MaxFlow(
         Graph graph,
         MaxFlowParameters parameters,
-        ExecutorService executorService,
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
         super(progressTracker);
         this.graph = graph;
         this.parameters = parameters;
-        this.executorService = executorService;
         this.terminationFlag = terminationFlag;
     }
 
@@ -65,7 +61,8 @@ public final class MaxFlow extends Algorithm<FlowResult> {
     }
 
     private Preflow initPreflow() {
-        var flowGraph = FlowGraph.create(graph, parameters.supply(), parameters.demand());
+        var supplyAndDemand = SupplyAndDemandFactory.create(graph, parameters.sourceNodes(), parameters.targetNodes());
+        var flowGraph = FlowGraph.create(graph, supplyAndDemand.getLeft(), supplyAndDemand.getRight());
         var excess = HugeDoubleArray.newArray(flowGraph.nodeCount());
         excess.setAll(x -> 0D);
         flowGraph.forEachRelationship(

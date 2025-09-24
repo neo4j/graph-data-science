@@ -20,7 +20,7 @@
 package org.neo4j.gds.pagerank;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.config.InputNodes;
+import org.neo4j.gds.InputNodes;
 import org.neo4j.gds.config.InputNodesFactory;
 
 import java.util.List;

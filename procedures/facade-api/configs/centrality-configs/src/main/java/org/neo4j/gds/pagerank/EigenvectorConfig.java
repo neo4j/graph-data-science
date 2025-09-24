@@ -20,7 +20,7 @@
 package org.neo4j.gds.pagerank;
 
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.config.InputNodes;
+import org.neo4j.gds.InputNodes;
 
 @Configuration("EigenvectorConfigImpl")
 public interface EigenvectorConfig extends RankConfig
