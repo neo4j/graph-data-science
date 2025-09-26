@@ -24,6 +24,8 @@ import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.StatsResultBuilder;
 import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.maxflow.FlowResult;
+import org.neo4j.gds.maxflow.MaxFlowStatsConfig;
 import org.neo4j.gds.paths.bellmanford.AllShortestPathsBellmanFordStatsConfig;
 import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
 import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaStatsConfig;
@@ -42,6 +44,7 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.BFS;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.BellmanFord;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.DeltaStepping;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.MaxFlow;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.PCST;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.RandomWalk;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.SteinerTree;
@@ -103,6 +106,21 @@ public class PathFindingAlgorithmsStatsModeBusinessFacade {
             DeltaStepping,
             estimationFacade::deltaStepping,
             (graph, __) -> pathFindingAlgorithms.deltaStepping(graph, configuration),
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT maxFlow(
+        GraphName graphName,
+        MaxFlowStatsConfig configuration,
+        StatsResultBuilder<FlowResult, RESULT> resultBuilder
+    ) {
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
+            graphName,
+            configuration,
+            MaxFlow,
+            estimationFacade::maxFlow,
+            (graph, __) -> pathFindingAlgorithms.maxFlow(graph, configuration),
             resultBuilder
         );
     }
