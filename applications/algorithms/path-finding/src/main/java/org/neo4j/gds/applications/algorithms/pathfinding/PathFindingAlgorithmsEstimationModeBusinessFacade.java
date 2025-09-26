@@ -130,6 +130,9 @@ public class PathFindingAlgorithmsEstimationModeBusinessFacade {
         throw new MemoryEstimationNotImplementedException();
     }
 
+    MemoryEstimation maxFlow() {
+        throw new MemoryEstimationNotImplementedException();
+    }
 
     public MemoryEstimateResult pcst(
         PCSTBaseConfig configuration,

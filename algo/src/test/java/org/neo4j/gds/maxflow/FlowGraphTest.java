@@ -145,8 +145,8 @@ class FlowGraphTest {
 
         var result = flowGraph.createFlowResult();
 
-        assertThat(result.totalFlow).isEqualTo(2D);
-        assertThat(result.flow.toArray()).containsExactlyInAnyOrder(new FlowRelationship(
+        assertThat(result.totalFlow()).isEqualTo(2D);
+        assertThat(result.flow().toArray()).containsExactlyInAnyOrder(new FlowRelationship(
             graph.toMappedNodeId("a"),
             graph.toMappedNodeId("d"),
             2D

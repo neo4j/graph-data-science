@@ -34,6 +34,7 @@ import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsWr
 import org.neo4j.gds.dag.longestPath.DagLongestPathStreamConfig;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortStreamConfig;
 import org.neo4j.gds.kspanningtree.KSpanningTreeWriteConfig;
+import org.neo4j.gds.maxflow.MaxFlowStreamConfig;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarStreamConfig;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarWriteConfig;
 import org.neo4j.gds.paths.bellmanford.AllShortestPathsBellmanFordStatsConfig;
@@ -604,6 +605,16 @@ public final class LocalPathFindingProcedureFacade implements PathFindingProcedu
         return streamModeBusinessFacade.longestPath(
             GraphName.parse(graphName),
             configurationParser.parseConfiguration(configuration, DagLongestPathStreamConfig::of),
+            resultBuilder
+        );
+    }
+
+    @Override
+    public Stream<MaxFlowStreamResult> maxFlowStream(String graphName, Map<String, Object> configuration) {
+        var resultBuilder = new MaxFlowResultBuilderForStreamMode();
+        return streamModeBusinessFacade.maxFlow(
+            GraphName.parse(graphName),
+            configurationParser.parseConfiguration(configuration, MaxFlowStreamConfig::of),
             resultBuilder
         );
     }

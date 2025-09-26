@@ -60,9 +60,13 @@ class SupplyAndDemandFactoryTest {
         var b = graph.toMappedNodeId("b");
         var c = graph.toMappedNodeId("c");
         var d = graph.toMappedNodeId("d");
+        var aOriginal = graph.toOriginalNodeId("a");
+        var bOriginal = graph.toOriginalNodeId("b");
+        var cOriginal = graph.toOriginalNodeId("c");
+        var dOriginal = graph.toOriginalNodeId("d");
 
-        var sourceNodes = new ListInputNodes(List.of(a, b));
-        var targetNodes = new ListInputNodes(List.of(c, d));
+        var sourceNodes = new ListInputNodes(List.of(aOriginal, bOriginal));
+        var targetNodes = new ListInputNodes(List.of(cOriginal, dOriginal));
 
         var result = SupplyAndDemandFactory.create(graph, sourceNodes, targetNodes);
 
@@ -77,9 +81,15 @@ class SupplyAndDemandFactoryTest {
         var c = graph.toMappedNodeId("c");
         var e = graph.toMappedNodeId("e");
 
+
+        var aOriginal = graph.toOriginalNodeId("a");
+        var bOriginal = graph.toOriginalNodeId("b");
+        var cOriginal = graph.toOriginalNodeId("c");
+        var eOriginal = graph.toOriginalNodeId("e");
+
         // Arrange
-        var sourceNodes = new ListInputNodes(List.of(a, b));
-        var targetNodes = new MapInputNodes(Map.of(c, 5.0, e, 8.0));
+        var sourceNodes = new ListInputNodes(List.of(aOriginal, bOriginal));
+        var targetNodes = new MapInputNodes(Map.of(cOriginal, 5.0, eOriginal, 8.0));
 
         // Act
         var result = SupplyAndDemandFactory.create(graph, sourceNodes, targetNodes);
@@ -96,8 +106,13 @@ class SupplyAndDemandFactoryTest {
         var d = graph.toMappedNodeId("d");
         var e = graph.toMappedNodeId("e");
 
-        var sourceNodes = new MapInputNodes(Map.of(a, 1.2, d, 10.0));
-        var targetNodes = new ListInputNodes(List.of(c, e));
+        var aOriginal = graph.toOriginalNodeId("a");
+        var cOriginal = graph.toOriginalNodeId("c");
+        var dOriginal = graph.toOriginalNodeId("d");
+        var eOriginal = graph.toOriginalNodeId("e");
+
+        var sourceNodes = new MapInputNodes(Map.of(aOriginal, 1.2, dOriginal, 10.0));
+        var targetNodes = new ListInputNodes(List.of(cOriginal, eOriginal));
 
         var result = SupplyAndDemandFactory.create(graph, sourceNodes, targetNodes);
 
@@ -112,8 +127,13 @@ class SupplyAndDemandFactoryTest {
         var d = graph.toMappedNodeId("d");
         var e = graph.toMappedNodeId("e");
 
-        var sourceNodes = new MapInputNodes(Map.of(a, 1.0, c, 3.0));
-        var targetNodes = new MapInputNodes(Map.of(d, 5.1, e, 9.0));
+        var aOriginal = graph.toOriginalNodeId("a");
+        var cOriginal = graph.toOriginalNodeId("c");
+        var dOriginal = graph.toOriginalNodeId("d");
+        var eOriginal = graph.toOriginalNodeId("e");
+
+        var sourceNodes = new MapInputNodes(Map.of(aOriginal, 1.0, cOriginal, 3.0));
+        var targetNodes = new MapInputNodes(Map.of(dOriginal, 5.1, eOriginal, 9.0));
 
         var result = SupplyAndDemandFactory.create(graph, sourceNodes, targetNodes);
 

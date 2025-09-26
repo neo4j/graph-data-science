@@ -27,6 +27,7 @@ import org.neo4j.gds.config.SourceNodesWithPropertiesConfig;
 import org.neo4j.gds.config.TargetNodesWithPropertiesConfig;
 
 import java.util.HashSet;
+import java.util.Optional;
 
 @Configuration
 public interface MaxFlowBaseConfig extends AlgoBaseConfig, RelationshipWeightConfig, SourceNodesWithPropertiesConfig,
@@ -40,6 +41,10 @@ public interface MaxFlowBaseConfig extends AlgoBaseConfig, RelationshipWeightCon
 
     @Configuration.DoubleRange(min = 0.0, minInclusive = true)
     default double freq() {return 0.5;}
+
+    @Override
+    @Configuration.Key("capacityProperty")
+    Optional<String> relationshipWeightProperty();
 
     @Configuration.Check()
     default void assertNoDuplicateInputNodes() {

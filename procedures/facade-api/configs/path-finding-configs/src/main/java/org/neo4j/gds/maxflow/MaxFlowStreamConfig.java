@@ -19,9 +19,12 @@
  */
 package org.neo4j.gds.maxflow;
 
-import org.neo4j.gds.collections.ha.HugeObjectArray;
+import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.core.CypherMapWrapper;
 
-public record FlowResult(HugeObjectArray<FlowRelationship> flow, double totalFlow) {
-
-    public static FlowResult EMPTY = new FlowResult(HugeObjectArray.newArray(FlowRelationship.class, 0), 0D);
+@Configuration
+public interface MaxFlowStreamConfig extends MaxFlowBaseConfig {
+    static MaxFlowStreamConfig of(CypherMapWrapper userInput) {
+        return new MaxFlowStreamConfigImpl(userInput);
+    }
 }

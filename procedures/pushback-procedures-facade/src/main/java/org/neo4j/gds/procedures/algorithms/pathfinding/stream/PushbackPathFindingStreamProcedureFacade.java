@@ -27,6 +27,7 @@ import org.neo4j.gds.api.NodeLookup;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.dag.longestPath.DagLongestPathStreamConfig;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortStreamConfig;
+import org.neo4j.gds.maxflow.MaxFlowStreamConfig;
 import org.neo4j.gds.pathfinding.PathFindingComputeBusinessFacade;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarStreamConfig;
 import org.neo4j.gds.paths.bellmanford.AllShortestPathsBellmanFordStreamConfig;
@@ -39,6 +40,7 @@ import org.neo4j.gds.paths.yens.config.ShortestPathYensStreamConfig;
 import org.neo4j.gds.pcst.PCSTStreamConfig;
 import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
 import org.neo4j.gds.procedures.algorithms.pathfinding.BellmanFordStreamResult;
+import org.neo4j.gds.procedures.algorithms.pathfinding.MaxFlowStreamResult;
 import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingStreamResult;
 import org.neo4j.gds.procedures.algorithms.pathfinding.RandomWalkStreamResult;
 import org.neo4j.gds.procedures.algorithms.pathfinding.SpanningTreeStreamResult;
@@ -206,6 +208,24 @@ public final class PushbackPathFindingStreamProcedureFacade {
             config.jobId(),
             config.logProgress(),
             pathFindingResultTransformerBuilder
+        ).join();
+    }
+
+    public Stream<MaxFlowStreamResult> maxFlow(String graphName, Map<String, Object> configuration) {
+        var config = configurationParser.parseConfiguration(
+            configuration,
+            MaxFlowStreamConfig::of
+        );
+
+        var maxFlowResultTransformerBuilder = new MaxFlowStreamResultTransformerBuilder();
+        return businessFacade.maxFlow(
+            GraphName.parse(graphName),
+            config.toGraphParameters(),
+            config.relationshipWeightProperty(),
+            config.toParameters(),
+            config.jobId(),
+            config.logProgress(),
+            maxFlowResultTransformerBuilder
         ).join();
     }
 
