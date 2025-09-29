@@ -33,16 +33,6 @@ import java.util.concurrent.atomic.LongAdder;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-/**
- * a                a
- * 1 /   \ 2          /  \
- * /     \          /    \
- * b --3-- c        b      c
- * |       |   =>   |      |
- * 4       5        |      |
- * |       |        |      |
- * d --6-- e        d      e
- */
 class MaxFlowStreamProcTest extends BaseProcTest {
 
     @Neo4jGraph(offsetIds = true)

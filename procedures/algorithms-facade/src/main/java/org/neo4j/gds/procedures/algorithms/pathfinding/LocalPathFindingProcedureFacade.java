@@ -61,6 +61,7 @@ import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.LocalBFSMutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.LocalBellmanFordMutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.LocalDFSMutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.LocalDeltaSteppingMutateStub;
+import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.LocalMaxFlowMutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.LocalPrizeCollectingSteinerTreeMutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.LocalRandomWalkMutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.LocalSinglePairShortestPathAStarMutateStub;
@@ -179,6 +180,12 @@ public final class LocalPathFindingProcedureFacade implements PathFindingProcedu
             estimationModeBusinessFacade
         );
 
+        var maxFlowMutateStub = new LocalMaxFlowMutateStub(
+            genericStub,
+            mutateModeBusinessFacade,
+            estimationModeBusinessFacade
+        );
+
         var prizeCollectingSteinerTreeMutateStub = new LocalPrizeCollectingSteinerTreeMutateStub(
             genericStub,
             mutateModeBusinessFacade,
@@ -234,7 +241,8 @@ public final class LocalPathFindingProcedureFacade implements PathFindingProcedu
             yensStub,
             singleSourceDijkstraStub,
             spanningTreeMutateStub,
-            steinerTreeMutateStub
+            steinerTreeMutateStub,
+            maxFlowMutateStub
         );
 
         return new LocalPathFindingProcedureFacade(
@@ -608,6 +616,11 @@ public final class LocalPathFindingProcedureFacade implements PathFindingProcedu
             configurationParser.parseConfiguration(configuration, DagLongestPathStreamConfig::of),
             resultBuilder
         );
+    }
+
+    @Override
+    public Stream<MaxFlowMutateResult> maxFlowMutate(String graphName, Map<String, Object> configuration) {
+        return stubs.maxFlow().execute(graphName, configuration);
     }
 
     @Override

@@ -144,6 +144,8 @@ public interface PathFindingProcedureFacade {
 
     Stream<PathFindingStreamResult> longestPathStream(String graphName, Map<String, Object> configuration);
 
+    Stream<MaxFlowMutateResult> maxFlowMutate(String graphName, Map<String, Object> configuration);
+
     Stream<MaxFlowStreamResult> maxFlowStream(String graphName, Map<String, Object> configuration);
 
     Stream<MaxFlowStatsResult> maxFlowStats(String graphName, Map<String, Object> configuration);
@@ -174,7 +176,6 @@ public interface PathFindingProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     );
-
 
     Stream<StandardModeResult> randomWalkStats(String graphName, Map<String, Object> configuration);
 
@@ -388,4 +389,5 @@ public interface PathFindingProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     );
+
 }
