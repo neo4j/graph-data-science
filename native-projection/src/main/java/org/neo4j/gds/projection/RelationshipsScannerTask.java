@@ -156,7 +156,7 @@ final class RelationshipsScannerTask extends StatementAction implements RecordSc
                         buffers[idx.getAndIncrement()] = buffer;
 
                     PropertyReader<Reference> propertyReader = importer.loadProperties()
-                            ? storeBackedPropertyReader(transaction)
+                            ? storeBackedPropertyReader(transaction, importer.typeId())
                             : emptyPropertyReader();
 
                         return importer.threadLocalImporter(
@@ -208,7 +208,7 @@ final class RelationshipsScannerTask extends StatementAction implements RecordSc
     }
 
     @NotNull
-    private static PropertyReader<Reference> storeBackedPropertyReader(KernelTransaction kernelTransaction) {
+    private static PropertyReader<Reference> storeBackedPropertyReader(KernelTransaction kernelTransaction, int relationshipTypeId) {
         return (producer, propertyKeyIds, defaultPropertyValues, aggregations, atLeastOnePropertyToLoad) -> {
             long[][] properties = new long[propertyKeyIds.length][producer.numberOfElements()];
             if (atLeastOnePropertyToLoad) {
@@ -222,6 +222,7 @@ final class RelationshipsScannerTask extends StatementAction implements RecordSc
                     producer.forEach((index, relationshipReference, propertyReference) -> {
                         read.relationshipProperties(
                             relationshipReference,
+                            relationshipTypeId,
                             propertyReference,
                             PropertySelection.ALL_PROPERTIES,
                             pc
