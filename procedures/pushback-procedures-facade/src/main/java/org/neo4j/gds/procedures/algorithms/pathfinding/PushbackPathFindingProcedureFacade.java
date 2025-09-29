@@ -280,6 +280,11 @@ public final class PushbackPathFindingProcedureFacade implements PathFindingProc
     }
 
     @Override
+    public Stream<MaxFlowWriteResult> maxFlowWrite(String graphName, Map<String, Object> configuration) {
+        return Stream.empty();
+    }
+
+    @Override
     public Stream<SpanningTreeStreamResult> prizeCollectingSteinerTreeStream(
         String graphName,
         Map<String, Object> configuration

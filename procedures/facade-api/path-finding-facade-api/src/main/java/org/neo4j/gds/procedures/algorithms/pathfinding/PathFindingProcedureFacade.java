@@ -150,6 +150,8 @@ public interface PathFindingProcedureFacade {
 
     Stream<MaxFlowStatsResult> maxFlowStats(String graphName, Map<String, Object> configuration);
 
+    Stream<MaxFlowWriteResult> maxFlowWrite(String graphName, Map<String, Object> configuration);
+
     Stream<SpanningTreeStreamResult> prizeCollectingSteinerTreeStream(String graphName, Map<String, Object> configuration);
 
     Stream<PrizeCollectingSteinerTreeMutateResult> prizeCollectingSteinerTreeMutate(String graphName, Map<String, Object> configuration);

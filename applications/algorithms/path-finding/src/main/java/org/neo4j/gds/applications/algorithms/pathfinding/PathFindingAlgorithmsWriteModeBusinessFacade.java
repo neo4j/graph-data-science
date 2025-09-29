@@ -35,9 +35,12 @@ import org.neo4j.gds.config.RelationshipWeightConfig;
 import org.neo4j.gds.config.WriteRelationshipConfig;
 import org.neo4j.gds.kspanningtree.KSpanningTreeWriteConfig;
 import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.maxflow.FlowResult;
+import org.neo4j.gds.maxflow.MaxFlowWriteConfig;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.pathfinding.BellmanFordWriteStep;
 import org.neo4j.gds.pathfinding.KSpanningTreeWriteStep;
+import org.neo4j.gds.pathfinding.MaxFlowWriteStep;
 import org.neo4j.gds.pathfinding.PrizeCollectingSteinerTreeWriteStep;
 import org.neo4j.gds.pathfinding.ShortestPathWriteStep;
 import org.neo4j.gds.pathfinding.SpanningTreeWriteStep;
@@ -65,6 +68,7 @@ import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Bel
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.DeltaStepping;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Dijkstra;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.KSpanningTree;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.MaxFlow;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.PCST;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.SingleSourceDijkstra;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.SteinerTree;
@@ -165,6 +169,30 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
             KSpanningTree,
             estimationFacade::kSpanningTree,
             (graph, __) -> pathFindingAlgorithms.kSpanningTree(graph, configuration),
+            writeStep,
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT maxFlow(
+        GraphName graphName,
+        MaxFlowWriteConfig configuration,
+        ResultBuilder<MaxFlowWriteConfig, FlowResult, RESULT, RelationshipsWritten> resultBuilder
+    ) {
+        var writeStep = new MaxFlowWriteStep(
+            writeRelationshipService,
+            configuration.writeRelationshipType(),
+            configuration.writeProperty(),
+            configuration::resolveResultStore,
+            configuration.jobId()
+        );
+
+        return runAlgorithmAndWrite(
+            graphName,
+            configuration,
+            MaxFlow,
+            estimationFacade::maxFlow,
+            (graph, __) -> pathFindingAlgorithms.maxFlow(graph, configuration),
             writeStep,
             resultBuilder
         );

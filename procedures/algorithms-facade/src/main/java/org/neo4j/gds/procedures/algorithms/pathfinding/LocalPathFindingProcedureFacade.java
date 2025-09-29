@@ -36,6 +36,7 @@ import org.neo4j.gds.dag.topologicalsort.TopologicalSortStreamConfig;
 import org.neo4j.gds.kspanningtree.KSpanningTreeWriteConfig;
 import org.neo4j.gds.maxflow.MaxFlowStatsConfig;
 import org.neo4j.gds.maxflow.MaxFlowStreamConfig;
+import org.neo4j.gds.maxflow.MaxFlowWriteConfig;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarStreamConfig;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarWriteConfig;
 import org.neo4j.gds.paths.bellmanford.AllShortestPathsBellmanFordStatsConfig;
@@ -644,6 +645,17 @@ public final class LocalPathFindingProcedureFacade implements PathFindingProcedu
             GraphName.parse(graphName),
             configurationParser.parseConfiguration(configuration, MaxFlowStreamConfig::of),
             resultBuilder
+        );
+    }
+
+    @Override
+    public Stream<MaxFlowWriteResult> maxFlowWrite(String graphName, Map<String, Object> configuration) {
+        return Stream.of(
+            writeModeBusinessFacade.maxFlow(
+                GraphName.parse(graphName),
+                configurationParser.parseConfiguration(configuration, MaxFlowWriteConfig::of),
+                new MaxFlowResultBuilderForWriteMode()
+            )
         );
     }
 
