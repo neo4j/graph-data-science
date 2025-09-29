@@ -24,6 +24,7 @@ import org.neo4j.batchimport.api.IndexConfig;
 import org.neo4j.batchimport.api.Monitor;
 import org.neo4j.batchimport.api.input.Collector;
 import org.neo4j.batchimport.api.input.Input;
+import org.neo4j.common.EmptyDependencyResolver;
 import org.neo4j.configuration.GraphDatabaseSettings;
 import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.gds.RelationshipType;
@@ -258,6 +259,7 @@ public final class GdsParallelBatchImporter {
             progressOutput,
             verboseProgressOutput,
             DefaultAdditionalIds.EMPTY,
+            new LogTailMetadataFactoryImpl(this.fileSystem),
             this.databaseConfig,
             this.executionMonitor,
             jobScheduler,
@@ -266,9 +268,9 @@ public final class GdsParallelBatchImporter {
             new IndexImporterFactoryImpl(),
             EmptyMemoryTracker.INSTANCE,
             CursorContextFactory.NULL_CONTEXT_FACTORY,
+            indexProvidersAccess,
             1,
-            new LogTailMetadataFactoryImpl(this.fileSystem),
-            indexProvidersAccess
+            EmptyDependencyResolver.EMPTY_RESOLVER
         );
     }
 
