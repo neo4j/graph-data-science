@@ -132,8 +132,8 @@ allprojects {
                     } else {
                         events TestLogEvent.FAILED
                     }
-                    exceptionFormat TestExceptionFormat.FULL
-                    showExceptions true
+                    exceptionFormat = TestExceptionFormat.FULL
+                    showExceptions = true
                 }
 
                 // set options for log level INFO
@@ -142,8 +142,8 @@ allprojects {
                         TestLogEvent.SKIPPED,
                         TestLogEvent.STANDARD_ERROR,
                         TestLogEvent.STANDARD_OUT
-                    exceptionFormat TestExceptionFormat.FULL
-                    showExceptions true
+                    exceptionFormat = TestExceptionFormat.FULL
+                    showExceptions = true
                 }
 
                 // set options for log level DEBUG
@@ -154,10 +154,10 @@ allprojects {
                         TestLogEvent.SKIPPED,
                         TestLogEvent.STANDARD_ERROR,
                         TestLogEvent.STANDARD_OUT
-                    exceptionFormat TestExceptionFormat.FULL
-                    showExceptions true
-                    showCauses true
-                    showStackTraces true
+                    exceptionFormat = TestExceptionFormat.FULL
+                    showExceptions = true
+                    showCauses = true
+                    showStackTraces = true
                 }
 
                 afterSuite { desc, result ->
@@ -195,7 +195,7 @@ allprojects {
         afterEvaluate {
             if (group.startsWith('com.neo4j.gds')) {
                 javadoc {
-                    enabled false
+                    enabled = false
                 }
             }
         }

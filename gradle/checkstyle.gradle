@@ -31,7 +31,7 @@ if (shouldCheckstyle) {
                     // Keeping this here for local checks/investigation.
                     setRequired(true)
                     setOutputLocation(file("${checkstyleReportsDir}/html/${fileName}.html"))
-                    stylesheet resources.text.fromFile("$publicDir/etc/checkstyle/xsl/checkstyle-simple.xsl")
+                    stylesheet = resources.text.fromFile("$publicDir/etc/checkstyle/xsl/checkstyle-simple.xsl")
                 }
             }
         }
