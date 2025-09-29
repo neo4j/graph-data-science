@@ -22,6 +22,7 @@ package org.neo4j.gds.procedures.algorithms.pathfinding.mutate;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.MutateRelationshipService;
+import org.neo4j.gds.maxflow.MaxFlowMutateConfig;
 import org.neo4j.gds.pathfinding.PathFindingComputeBusinessFacade;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarMutateConfig;
 import org.neo4j.gds.paths.bellmanford.AllShortestPathsBellmanFordMutateConfig;
@@ -34,6 +35,7 @@ import org.neo4j.gds.paths.yens.config.ShortestPathYensMutateConfig;
 import org.neo4j.gds.pcst.PCSTMutateConfig;
 import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
 import org.neo4j.gds.procedures.algorithms.pathfinding.BellmanFordMutateResult;
+import org.neo4j.gds.procedures.algorithms.pathfinding.MaxFlowMutateResult;
 import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingMutateResult;
 import org.neo4j.gds.procedures.algorithms.pathfinding.PrizeCollectingSteinerTreeMutateResult;
 import org.neo4j.gds.procedures.algorithms.pathfinding.RandomWalkMutateResult;
@@ -134,6 +136,26 @@ public final class PushbackPathFindingMutateProcedureFacade {
             config.jobId(),
             config.logProgress(),
             new TraverseMutateResultTransformerBuilder(mutateRelationshipService,config)
+        ).join();
+    }
+
+    public Stream<MaxFlowMutateResult> maxFlow(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var config = configurationParser.parseConfiguration(
+            configuration,
+            MaxFlowMutateConfig::of
+        );
+
+        return businessFacade.maxFlow(
+            GraphName.parse(graphName),
+            config.toGraphParameters(),
+            config.relationshipWeightProperty(),
+            config.toParameters(),
+            config.jobId(),
+            config.logProgress(),
+            new MaxFlowMutateResultTransformerBuilder(mutateRelationshipService, config)
         ).join();
     }
 
