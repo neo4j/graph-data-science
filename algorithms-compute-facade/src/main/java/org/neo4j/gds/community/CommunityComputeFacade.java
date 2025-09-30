@@ -34,7 +34,11 @@ import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.conductance.Conductance;
 import org.neo4j.gds.conductance.ConductanceParameters;
 import org.neo4j.gds.conductance.ConductanceResult;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
+import org.neo4j.gds.core.concurrency.ParallelUtil;
+import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
+import org.neo4j.gds.core.utils.paged.dss.HugeAtomicDisjointSetStruct;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.hdbscan.HDBScan;
 import org.neo4j.gds.hdbscan.HDBScanParameters;
@@ -74,6 +78,8 @@ import org.neo4j.gds.triangle.LocalClusteringCoefficientParameters;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientResult;
 import org.neo4j.gds.triangle.TriangleCountParameters;
 import org.neo4j.gds.triangle.TriangleCountResult;
+import org.neo4j.gds.wcc.Wcc;
+import org.neo4j.gds.wcc.WccParameters;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -576,6 +582,39 @@ public class CommunityComputeFacade {
             parameters.maxDegree(),
             parameters.labelFilter(),
             DefaultPool.INSTANCE,
+            progressTracker,
+            terminationFlag
+        );
+
+        return algorithmCaller.run(
+            algorithm::compute,
+            jobId
+        );
+    }
+
+    CompletableFuture<TimedAlgorithmResult<DisjointSetStruct>> wcc(
+        Graph graph,
+        WccParameters parameters,
+        JobId jobId,
+        boolean logProgress
+    ) {
+
+        if (graph.isEmpty()) {
+            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty( new HugeAtomicDisjointSetStruct(0 , new Concurrency(1))));
+        }
+
+        var progressTracker = progressTrackerFactory.create(
+            tasks.wcc(graph),
+            jobId,
+            parameters.concurrency(),
+            logProgress
+        );
+
+        var algorithm = new Wcc(
+            graph,
+            DefaultPool.INSTANCE,
+            ParallelUtil.DEFAULT_BATCH_SIZE,
+            parameters,
             progressTracker,
             terminationFlag
         );

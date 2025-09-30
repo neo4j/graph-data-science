@@ -54,6 +54,7 @@ import org.neo4j.gds.scc.SccParameters;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientParameters;
 import org.neo4j.gds.triangle.TriangleCountParameters;
+import org.neo4j.gds.wcc.WccParameters;
 
 import java.util.List;
 import java.util.Optional;
@@ -411,6 +412,25 @@ class CommunityComputeFacadeTest {
         var results = future.join();
 
         assertThat(results.result().globalTriangles()).isEqualTo(1L);
+        assertThat(results.computeMillis()).isNotNegative();
+    }
+
+    @Test
+    void wcc(){
+        var future = facade.wcc(
+            graph,
+            new WccParameters(
+                0,
+                null,
+                new Concurrency(4)
+            ),
+            jobIdMock,
+            false
+        );
+
+        var results = future.join();
+
+        assertThat(results.result().size()).isEqualTo(3L);
         assertThat(results.computeMillis()).isNotNegative();
     }
 
