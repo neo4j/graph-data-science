@@ -68,9 +68,12 @@ import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.scc.Scc;
 import org.neo4j.gds.scc.SccParameters;
 import org.neo4j.gds.termination.TerminationFlag;
+import org.neo4j.gds.triangle.IntersectingTriangleCount;
 import org.neo4j.gds.triangle.LocalClusteringCoefficient;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientParameters;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientResult;
+import org.neo4j.gds.triangle.TriangleCountParameters;
+import org.neo4j.gds.triangle.TriangleCountResult;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -539,6 +542,40 @@ public class CommunityComputeFacade {
 
         var algorithm = new Scc(
             graph,
+            progressTracker,
+            terminationFlag
+        );
+
+        return algorithmCaller.run(
+            algorithm::compute,
+            jobId
+        );
+    }
+
+    CompletableFuture<TimedAlgorithmResult<TriangleCountResult>> triangleCount(
+        Graph graph,
+        TriangleCountParameters parameters,
+        JobId jobId,
+        boolean logProgress
+    ) {
+
+        if (graph.isEmpty()) {
+            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(TriangleCountResult.EMPTY));
+        }
+
+        var progressTracker = progressTrackerFactory.create(
+            tasks.triangleCount(graph),
+            jobId,
+            parameters.concurrency(),
+            logProgress
+        );
+
+        var algorithm = IntersectingTriangleCount.create(
+            graph,
+            parameters.concurrency(),
+            parameters.maxDegree(),
+            parameters.labelFilter(),
+            DefaultPool.INSTANCE,
             progressTracker,
             terminationFlag
         );

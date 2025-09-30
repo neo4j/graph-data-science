@@ -20,8 +20,13 @@
 package org.neo4j.gds.triangle;
 
 import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
+import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.core.utils.paged.ParalleLongPageCreator;
 
 public record TriangleCountResult(
         HugeAtomicLongArray localTriangles,
         long globalTriangles
-    ) {}
+    ) {
+
+    public static TriangleCountResult EMPTY = new TriangleCountResult(HugeAtomicLongArray.of(0, ParalleLongPageCreator.passThrough(new Concurrency(1))),0);
+}

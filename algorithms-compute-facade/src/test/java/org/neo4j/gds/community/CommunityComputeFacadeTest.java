@@ -53,6 +53,7 @@ import org.neo4j.gds.modularityoptimization.ModularityOptimizationParameters;
 import org.neo4j.gds.scc.SccParameters;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientParameters;
+import org.neo4j.gds.triangle.TriangleCountParameters;
 
 import java.util.List;
 import java.util.Optional;
@@ -391,6 +392,25 @@ class CommunityComputeFacadeTest {
         var results = future.join();
 
         assertThat(results.result().toArray()).hasSize(3);
+        assertThat(results.computeMillis()).isNotNegative();
+    }
+
+    @Test
+    void triangleCount(){
+        var future = facade.triangleCount(
+            graph,
+            new TriangleCountParameters(
+                new Concurrency(4),
+                10,
+                List.of()
+            ),
+            jobIdMock,
+            false
+        );
+
+        var results = future.join();
+
+        assertThat(results.result().globalTriangles()).isEqualTo(1L);
         assertThat(results.computeMillis()).isNotNegative();
     }
 

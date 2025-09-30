@@ -55,6 +55,8 @@ import org.neo4j.gds.scc.SccParameters;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientParameters;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientResult;
+import org.neo4j.gds.triangle.TriangleCountParameters;
+import org.neo4j.gds.triangle.TriangleCountResult;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -323,4 +325,22 @@ class CommunityComputeFacadeEmptyGraphTest {
         verifyNoInteractions(progressTrackerFactoryMock);
         verifyNoInteractions(algorithmCallerMock);
     }
+
+    @Test
+    void triangleCount(){
+
+        var future = facade.triangleCount(
+            graph,
+            mock(TriangleCountParameters.class),
+            jobIdMock,
+            false
+        );
+
+        var results = future.join();
+
+        assertThat(results.result()).isEqualTo(TriangleCountResult.EMPTY);
+        verifyNoInteractions(progressTrackerFactoryMock);
+        verifyNoInteractions(algorithmCallerMock);
+    }
+
 }
