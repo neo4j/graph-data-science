@@ -41,9 +41,7 @@ import org.neo4j.gds.k1coloring.K1ColoringResult;
 import org.neo4j.gds.kcore.KCoreDecompositionParameters;
 import org.neo4j.gds.kcore.KCoreDecompositionResult;
 import org.neo4j.gds.kmeans.KmeansParameters;
-import org.neo4j.gds.labelpropagation.LabelPropagationParameters;
 import org.neo4j.gds.labelpropagation.LabelPropagationResult;
-import org.neo4j.gds.leiden.LeidenParameters;
 import org.neo4j.gds.leiden.LeidenResult;
 import org.neo4j.gds.louvain.LouvainParameters;
 import org.neo4j.gds.louvain.LouvainResult;
@@ -215,7 +213,7 @@ class CommunityComputeFacadeEmptyGraphTest {
 
         var future = facade.labelPropagation(
             graph,
-            mock(LabelPropagationParameters.class),
+            null,
             jobIdMock,
             false
         );
@@ -249,7 +247,7 @@ class CommunityComputeFacadeEmptyGraphTest {
 
         var future = facade.leiden(
             graph,
-            mock(LeidenParameters.class),
+            null,
             jobIdMock,
             false
         );
@@ -344,6 +342,21 @@ class CommunityComputeFacadeEmptyGraphTest {
         verifyNoInteractions(progressTrackerFactoryMock);
         verifyNoInteractions(algorithmCallerMock);
     }
+
+    @Test
+    void triangles() {
+        var future = facade.triangles(
+            graph,
+            mock(TriangleCountParameters.class),
+            jobIdMock
+        );
+        var result = future.join();
+        assertThat(result.result()).isEmpty();
+
+        verifyNoInteractions(progressTrackerFactoryMock);
+        verifyNoInteractions(algorithmCallerMock);
+    }
+
 
     @Test
     void wcc(){

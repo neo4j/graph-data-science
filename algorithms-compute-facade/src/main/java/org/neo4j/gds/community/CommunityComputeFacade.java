@@ -28,7 +28,9 @@ import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutParameters;
 import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutResult;
 import org.neo4j.gds.async.AsyncAlgorithmCaller;
 import org.neo4j.gds.beta.pregel.ImmutablePregelResult;
+import org.neo4j.gds.beta.pregel.NodeValue;
 import org.neo4j.gds.beta.pregel.PregelResult;
+import org.neo4j.gds.beta.pregel.PregelSchema;
 import org.neo4j.gds.cliqueCounting.CliqueCounting;
 import org.neo4j.gds.cliqueCounting.CliqueCountingResult;
 import org.neo4j.gds.cliquecounting.CliqueCountingParameters;
@@ -82,11 +84,14 @@ import org.neo4j.gds.triangle.LocalClusteringCoefficientParameters;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientResult;
 import org.neo4j.gds.triangle.TriangleCountParameters;
 import org.neo4j.gds.triangle.TriangleCountResult;
+import org.neo4j.gds.triangle.TriangleResult;
+import org.neo4j.gds.triangle.TriangleStream;
 import org.neo4j.gds.wcc.Wcc;
 import org.neo4j.gds.wcc.WccParameters;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Stream;
 
 public class CommunityComputeFacade {
 
@@ -596,6 +601,29 @@ public class CommunityComputeFacade {
         );
     }
 
+    CompletableFuture<TimedAlgorithmResult<Stream<TriangleResult>>> triangles(
+        Graph graph,
+        TriangleCountParameters parameters,
+        JobId jobId) {
+
+        if (graph.isEmpty()) {
+            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty( Stream.empty()));
+        }
+
+        var algorithm = TriangleStream.create(
+            graph,
+            DefaultPool.INSTANCE,
+            parameters.concurrency(),
+            parameters.labelFilter(),
+            terminationFlag
+        );
+
+        return algorithmCaller.run(
+            algorithm::compute,
+            jobId
+        );
+    }
+
     CompletableFuture<TimedAlgorithmResult<DisjointSetStruct>> wcc(
         Graph graph,
         WccParameters parameters,
@@ -628,6 +656,7 @@ public class CommunityComputeFacade {
             jobId
         );
     }
+
     CompletableFuture<TimedAlgorithmResult<PregelResult>> sllpa(
         Graph graph,
         SpeakerListenerLPAConfig configuration,
@@ -636,7 +665,8 @@ public class CommunityComputeFacade {
     ) {
 
         if (graph.isEmpty()) {
-            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(ImmutablePregelResult.of(null, 0, false)));
+            var empty = NodeValue.of(new PregelSchema.Builder().build(),0,new Concurrency(1));
+            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(ImmutablePregelResult.of(empty, 0, false)));
         }
 
         var progressTracker = progressTrackerFactory.create(

@@ -26,6 +26,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.ProgressTrackerFactory;
+import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutParameters;
 import org.neo4j.gds.async.AsyncAlgorithmCaller;
 import org.neo4j.gds.cliquecounting.CliqueCountingMode;
@@ -38,7 +39,6 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
-import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.hdbscan.HDBScanParameters;
 import org.neo4j.gds.k1coloring.K1ColoringParameters;
 import org.neo4j.gds.kcore.KCoreDecompositionParameters;
@@ -89,7 +89,7 @@ class CommunityComputeFacadeTest {
         """;
 
     @Inject
-    private TestGraph graph;
+    private Graph graph;
 
     @Inject
     private IdFunction idFunction;
@@ -120,7 +120,7 @@ class CommunityComputeFacadeTest {
                 new Concurrency(4),
                 10_000,
                 Optional.empty(),
-                List.of(),
+                List.of(0L,0L),
                 false,
                 false
             ),
@@ -180,9 +180,9 @@ class CommunityComputeFacadeTest {
             graph,
             new HDBScanParameters(
                 new Concurrency(4),
-                1,
+                2,
                 3,
-                1,
+                2,
                 "prop2"
             ),
             jobIdMock,
@@ -417,12 +417,32 @@ class CommunityComputeFacadeTest {
     }
 
     @Test
+    void triangles() {
+        var future = facade.triangles(
+            graph,
+            new TriangleCountParameters(new Concurrency(4), 100,List.of()),
+            jobIdMock
+        );
+
+        var results = future.join();
+        long a = idFunction.of("a");
+        long b = idFunction.of("b");
+        long c = idFunction.of("c");
+
+        assertThat(results.result()).isNotEmpty()
+            .anySatisfy(r -> {
+                long[] triangleArray = new long[]{r.nodeA,r.nodeB,r.nodeC};
+                assertThat(triangleArray).containsExactlyInAnyOrder(a,b,c);
+            });
+    }
+
+    @Test
     void wcc(){
         var future = facade.wcc(
             graph,
             new WccParameters(
                 0,
-                null,
+                Optional.empty(),
                 new Concurrency(4)
             ),
             jobIdMock,
