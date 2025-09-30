@@ -26,6 +26,9 @@ import org.neo4j.gds.approxmaxkcut.ApproxMaxKCut;
 import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutParameters;
 import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutResult;
 import org.neo4j.gds.async.AsyncAlgorithmCaller;
+import org.neo4j.gds.cliqueCounting.CliqueCounting;
+import org.neo4j.gds.cliqueCounting.CliqueCountingResult;
+import org.neo4j.gds.cliquecounting.CliqueCountingParameters;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.result.TimedAlgorithmResult;
@@ -90,6 +93,37 @@ public class CommunityComputeFacade {
         );
     }
 
+    CompletableFuture<TimedAlgorithmResult<CliqueCountingResult>> cliqueCounting(
+        Graph graph,
+        CliqueCountingParameters parameters,
+        JobId jobId,
+        boolean logProgress
+    ) {
 
+        if (graph.isEmpty()) {
+            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(CliqueCountingResult.EMPTY));
+        }
+
+        var progressTracker = progressTrackerFactory.create(
+            tasks.cliqueCounting(graph, parameters),
+            jobId,
+            parameters.concurrency(),
+            logProgress
+        );
+
+        var algorithm = CliqueCounting.create(
+            graph,
+            parameters,
+            DefaultPool.INSTANCE,
+            progressTracker,
+            terminationFlag
+        );
+
+        return algorithmCaller.run(
+            algorithm::compute,
+            jobId
+        );
+
+    }
 
 }
