@@ -25,8 +25,10 @@ import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
 import org.neo4j.gds.applications.algorithms.machinery.WriteRelationshipService;
 import org.neo4j.gds.kspanningtree.KSpanningTreeWriteConfig;
 import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.maxflow.MaxFlowWriteConfig;
 import org.neo4j.gds.pathfinding.BellmanFordWriteStep;
 import org.neo4j.gds.pathfinding.KSpanningTreeWriteStep;
+import org.neo4j.gds.pathfinding.MaxFlowWriteStep;
 import org.neo4j.gds.pathfinding.PathFindingComputeBusinessFacade;
 import org.neo4j.gds.pathfinding.PrizeCollectingSteinerTreeWriteStep;
 import org.neo4j.gds.pathfinding.ShortestPathWriteStep;
@@ -42,6 +44,7 @@ import org.neo4j.gds.pcst.PCSTWriteConfig;
 import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
 import org.neo4j.gds.procedures.algorithms.pathfinding.BellmanFordWriteResult;
 import org.neo4j.gds.procedures.algorithms.pathfinding.KSpanningTreeWriteResult;
+import org.neo4j.gds.procedures.algorithms.pathfinding.MaxFlowWriteResult;
 import org.neo4j.gds.procedures.algorithms.pathfinding.PrizeCollectingSteinerTreeWriteResult;
 import org.neo4j.gds.procedures.algorithms.pathfinding.SpanningTreeWriteResult;
 import org.neo4j.gds.procedures.algorithms.pathfinding.SteinerWriteResult;
@@ -166,6 +169,30 @@ public class PushbackPathFindingWriteProcedureFacade {
         ).join();
     }
 
+    public Stream<MaxFlowWriteResult> maxFlow(String graphName, Map<String, Object> configuration) {
+        var config = configurationParser.parseConfiguration(
+            configuration,
+            MaxFlowWriteConfig::of
+        );
+
+        var writeStep = new MaxFlowWriteStep(
+            writeRelationshipService,
+            config.writeRelationshipType(),
+            config.writeProperty(),
+            config::resolveResultStore,
+            config.jobId()
+        );
+
+        return businessFacade.maxFlow(
+            GraphName.parse(graphName),
+            config.toGraphParameters(),
+            config.relationshipWeightProperty(),
+            config.toParameters(),
+            config.jobId(),
+            config.logProgress(),
+            new MaxFlowWriteResultTransformerBuilder(writeStep, config)
+        ).join();
+    }
 
     public Stream<PrizeCollectingSteinerTreeWriteResult> pcst(
         String graphName,

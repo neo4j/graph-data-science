@@ -281,7 +281,7 @@ public final class PushbackPathFindingProcedureFacade implements PathFindingProc
 
     @Override
     public Stream<MaxFlowWriteResult> maxFlowWrite(String graphName, Map<String, Object> configuration) {
-        return Stream.empty();
+        return writeProcedureFacade.maxFlow(graphName, configuration);
     }
 
     @Override
