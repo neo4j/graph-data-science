@@ -9,6 +9,7 @@ dependencies {
     implementation project(':algo')
     implementation project(':algo-common')
     implementation project(':collections')
+    implementation project(':community-params')
     implementation project(':core')
     implementation project(':core-api')
     implementation project(':logging')
