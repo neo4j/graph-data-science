@@ -42,6 +42,8 @@ import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.hdbscan.HDBScanParameters;
 import org.neo4j.gds.k1coloring.K1ColoringParameters;
 import org.neo4j.gds.kcore.KCoreDecompositionParameters;
+import org.neo4j.gds.kmeans.KmeansParameters;
+import org.neo4j.gds.kmeans.SamplerType;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.termination.TerminationFlag;
 
@@ -171,7 +173,7 @@ class CommunityComputeFacadeTest {
                 1,
                 3,
                 1,
-                "prop"
+                "prop2"
             ),
             jobIdMock,
             false
@@ -216,6 +218,32 @@ class CommunityComputeFacadeTest {
         var results = future.join();
 
         assertThat(results.result().degeneracy()).isGreaterThan(0);
+        assertThat(results.computeMillis()).isNotNegative();
+    }
+
+    @Test
+    void kMeans(){
+        var future = facade.kMeans(
+            graph,
+            new KmeansParameters(
+                3,
+                10,
+                0.5,
+                1,
+                false,
+                new Concurrency(4),
+                "prop2",
+                SamplerType.UNIFORM,
+                List.of(),
+                Optional.empty()
+            ),
+            jobIdMock,
+            false
+        );
+
+        var results = future.join();
+
+        assertThat(results.result().communities().toArray()).hasSize(3);
         assertThat(results.computeMillis()).isNotNegative();
     }
 

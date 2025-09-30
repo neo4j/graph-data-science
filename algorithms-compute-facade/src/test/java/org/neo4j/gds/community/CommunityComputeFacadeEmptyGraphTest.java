@@ -40,6 +40,7 @@ import org.neo4j.gds.k1coloring.K1ColoringParameters;
 import org.neo4j.gds.k1coloring.K1ColoringResult;
 import org.neo4j.gds.kcore.KCoreDecompositionParameters;
 import org.neo4j.gds.kcore.KCoreDecompositionResult;
+import org.neo4j.gds.kmeans.KmeansParameters;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -167,6 +168,27 @@ class CommunityComputeFacadeEmptyGraphTest {
         var results = future.join();
 
         assertThat(results.result()).isEqualTo(KCoreDecompositionResult.EMPTY);
+        verifyNoInteractions(progressTrackerFactoryMock);
+        verifyNoInteractions(algorithmCallerMock);
+    }
+
+    @Test
+    void kMeans(){
+        var params = mock(KmeansParameters.class);
+        when(params.k()).thenReturn(3);
+
+        var future = facade.kMeans(
+            graph,
+            params,
+            jobIdMock,
+            false
+        );
+
+        var results = future.join();
+
+        assertThat(results.result().communities().toArray()).hasSize(0);
+        assertThat(results.result().centers()).hasDimensions(3,0);
+
         verifyNoInteractions(progressTrackerFactoryMock);
         verifyNoInteractions(algorithmCallerMock);
     }

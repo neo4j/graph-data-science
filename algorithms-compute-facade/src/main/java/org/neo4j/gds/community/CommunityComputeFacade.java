@@ -43,6 +43,10 @@ import org.neo4j.gds.k1coloring.K1ColoringResult;
 import org.neo4j.gds.kcore.KCoreDecomposition;
 import org.neo4j.gds.kcore.KCoreDecompositionParameters;
 import org.neo4j.gds.kcore.KCoreDecompositionResult;
+import org.neo4j.gds.kmeans.Kmeans;
+import org.neo4j.gds.kmeans.KmeansContext;
+import org.neo4j.gds.kmeans.KmeansParameters;
+import org.neo4j.gds.kmeans.KmeansResult;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.termination.TerminationFlag;
 
@@ -265,4 +269,36 @@ public class CommunityComputeFacade {
             jobId
         );
     }
+
+    CompletableFuture<TimedAlgorithmResult<KmeansResult>> kMeans(
+        Graph graph,
+        KmeansParameters parameters,
+        JobId jobId,
+        boolean logProgress
+    ) {
+
+        if (graph.isEmpty()) {
+            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(KmeansResult.empty(parameters.k())));
+        }
+
+        var progressTracker = progressTrackerFactory.create(
+            tasks.kMeans(graph,parameters),
+            jobId,
+            parameters.concurrency(),
+            logProgress
+        );
+
+        var algorithm = Kmeans.createKmeans(
+            graph,
+            parameters,
+            new KmeansContext(DefaultPool.INSTANCE, progressTracker),
+            terminationFlag
+        );
+
+        return algorithmCaller.run(
+            algorithm::compute,
+            jobId
+        );
+    }
+
 }
