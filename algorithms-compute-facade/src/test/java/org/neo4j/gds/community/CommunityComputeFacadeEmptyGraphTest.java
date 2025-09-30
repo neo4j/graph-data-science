@@ -38,6 +38,8 @@ import org.neo4j.gds.hdbscan.HDBScanParameters;
 import org.neo4j.gds.hdbscan.Labels;
 import org.neo4j.gds.k1coloring.K1ColoringParameters;
 import org.neo4j.gds.k1coloring.K1ColoringResult;
+import org.neo4j.gds.kcore.KCoreDecompositionParameters;
+import org.neo4j.gds.kcore.KCoreDecompositionResult;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -148,6 +150,23 @@ class CommunityComputeFacadeEmptyGraphTest {
         var results = future.join();
 
         assertThat(results.result()).isEqualTo(K1ColoringResult.EMPTY);
+        verifyNoInteractions(progressTrackerFactoryMock);
+        verifyNoInteractions(algorithmCallerMock);
+    }
+
+    @Test
+    void kCore(){
+
+        var future = facade.kCore(
+            graph,
+            mock(KCoreDecompositionParameters.class),
+            jobIdMock,
+            false
+        );
+
+        var results = future.join();
+
+        assertThat(results.result()).isEqualTo(KCoreDecompositionResult.EMPTY);
         verifyNoInteractions(progressTrackerFactoryMock);
         verifyNoInteractions(algorithmCallerMock);
     }

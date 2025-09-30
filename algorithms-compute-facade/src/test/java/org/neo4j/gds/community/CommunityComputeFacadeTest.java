@@ -41,6 +41,7 @@ import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.hdbscan.HDBScanParameters;
 import org.neo4j.gds.k1coloring.K1ColoringParameters;
+import org.neo4j.gds.kcore.KCoreDecompositionParameters;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.termination.TerminationFlag;
 
@@ -200,4 +201,22 @@ class CommunityComputeFacadeTest {
         assertThat(results.result().ranIterations()).isGreaterThan(0);
         assertThat(results.computeMillis()).isNotNegative();
     }
+
+    @Test
+    void kCore(){
+        var future = facade.kCore(
+            graph,
+            new KCoreDecompositionParameters(
+                new Concurrency(4)
+            ),
+            jobIdMock,
+            false
+        );
+
+        var results = future.join();
+
+        assertThat(results.result().degeneracy()).isGreaterThan(0);
+        assertThat(results.computeMillis()).isNotNegative();
+    }
+
 }

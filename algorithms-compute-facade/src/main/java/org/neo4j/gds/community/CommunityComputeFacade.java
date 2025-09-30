@@ -40,6 +40,9 @@ import org.neo4j.gds.hdbscan.Labels;
 import org.neo4j.gds.k1coloring.K1Coloring;
 import org.neo4j.gds.k1coloring.K1ColoringParameters;
 import org.neo4j.gds.k1coloring.K1ColoringResult;
+import org.neo4j.gds.kcore.KCoreDecomposition;
+import org.neo4j.gds.kcore.KCoreDecompositionParameters;
+import org.neo4j.gds.kcore.KCoreDecompositionResult;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.termination.TerminationFlag;
 
@@ -222,6 +225,37 @@ public class CommunityComputeFacade {
             graph,
             parameters,
             DefaultPool.INSTANCE,
+            progressTracker,
+            terminationFlag
+        );
+
+        return algorithmCaller.run(
+            algorithm::compute,
+            jobId
+        );
+    }
+
+    CompletableFuture<TimedAlgorithmResult<KCoreDecompositionResult>> kCore(
+        Graph graph,
+        KCoreDecompositionParameters parameters,
+        JobId jobId,
+        boolean logProgress
+    ) {
+
+        if (graph.isEmpty()) {
+            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(KCoreDecompositionResult.EMPTY));
+        }
+
+        var progressTracker = progressTrackerFactory.create(
+            tasks.kCore(graph),
+            jobId,
+            parameters.concurrency(),
+            logProgress
+        );
+
+        var algorithm = new KCoreDecomposition(
+            graph,
+            parameters.concurrency(),
             progressTracker,
             terminationFlag
         );
