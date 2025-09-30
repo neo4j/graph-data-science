@@ -57,6 +57,9 @@ import org.neo4j.gds.leiden.LeidenResult;
 import org.neo4j.gds.louvain.Louvain;
 import org.neo4j.gds.louvain.LouvainParameters;
 import org.neo4j.gds.louvain.LouvainResult;
+import org.neo4j.gds.modularity.ModularityCalculator;
+import org.neo4j.gds.modularity.ModularityParameters;
+import org.neo4j.gds.modularity.ModularityResult;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.triangle.LocalClusteringCoefficient;
@@ -440,6 +443,28 @@ public class CommunityComputeFacade {
             progressTracker,
             DefaultPool.INSTANCE,
             terminationFlag
+        );
+
+        return algorithmCaller.run(
+            algorithm::compute,
+            jobId
+        );
+    }
+
+    CompletableFuture<TimedAlgorithmResult<ModularityResult>> modularity(
+        Graph graph,
+        ModularityParameters parameters,
+        JobId jobId
+    ) {
+
+        if (graph.isEmpty()) {
+            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(ModularityResult.EMPTY));
+        }
+
+        var algorithm = ModularityCalculator.create(
+            graph,
+            graph.nodeProperties(parameters.communityProperty())::longValue,
+            parameters.concurrency()
         );
 
         return algorithmCaller.run(

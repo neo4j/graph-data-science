@@ -47,6 +47,8 @@ import org.neo4j.gds.leiden.LeidenParameters;
 import org.neo4j.gds.leiden.LeidenResult;
 import org.neo4j.gds.louvain.LouvainParameters;
 import org.neo4j.gds.louvain.LouvainResult;
+import org.neo4j.gds.modularity.ModularityParameters;
+import org.neo4j.gds.modularity.ModularityResult;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientParameters;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientResult;
@@ -265,6 +267,22 @@ class CommunityComputeFacadeEmptyGraphTest {
         var results = future.join();
 
         assertThat(results.result()).isEqualTo(LouvainResult.EMPTY);
+        verifyNoInteractions(progressTrackerFactoryMock);
+        verifyNoInteractions(algorithmCallerMock);
+    }
+
+    @Test
+    void modularity(){
+
+        var future = facade.modularity(
+            graph,
+            mock(ModularityParameters.class),
+            jobIdMock
+        );
+
+        var results = future.join();
+
+        assertThat(results.result()).isEqualTo(ModularityResult.EMPTY);
         verifyNoInteractions(progressTrackerFactoryMock);
         verifyNoInteractions(algorithmCallerMock);
     }

@@ -48,6 +48,7 @@ import org.neo4j.gds.labelpropagation.LabelPropagationParameters;
 import org.neo4j.gds.leiden.LeidenParameters;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.louvain.LouvainParameters;
+import org.neo4j.gds.modularity.ModularityParameters;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientParameters;
 
@@ -333,6 +334,23 @@ class CommunityComputeFacadeTest {
         var results = future.join();
 
         assertThat(results.result().ranLevels()).isGreaterThan(0);
+        assertThat(results.computeMillis()).isNotNegative();
+    }
+
+    @Test
+    void modularity(){
+        var future = facade.modularity(
+            graph,
+            new ModularityParameters(
+               "prop",
+                new Concurrency(4)
+            ),
+            jobIdMock
+        );
+
+        var results = future.join();
+
+        assertThat(results.result().nodeCount()).isEqualTo(3);
         assertThat(results.computeMillis()).isNotNegative();
     }
 
