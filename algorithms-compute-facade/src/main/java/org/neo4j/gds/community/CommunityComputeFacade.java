@@ -60,6 +60,9 @@ import org.neo4j.gds.louvain.LouvainResult;
 import org.neo4j.gds.modularity.ModularityCalculator;
 import org.neo4j.gds.modularity.ModularityParameters;
 import org.neo4j.gds.modularity.ModularityResult;
+import org.neo4j.gds.modularityoptimization.ModularityOptimization;
+import org.neo4j.gds.modularityoptimization.ModularityOptimizationParameters;
+import org.neo4j.gds.modularityoptimization.ModularityOptimizationResult;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.triangle.LocalClusteringCoefficient;
@@ -465,6 +468,46 @@ public class CommunityComputeFacade {
             graph,
             graph.nodeProperties(parameters.communityProperty())::longValue,
             parameters.concurrency()
+        );
+
+        return algorithmCaller.run(
+            algorithm::compute,
+            jobId
+        );
+    }
+
+    CompletableFuture<TimedAlgorithmResult<ModularityOptimizationResult>> modularityOptimization(
+        Graph graph,
+        ModularityOptimizationParameters parameters,
+        JobId jobId,
+        boolean logProgress
+    ) {
+
+        if (graph.isEmpty()) {
+            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(ModularityOptimizationResult.EMPTY));
+        }
+
+        var progressTracker = progressTrackerFactory.create(
+            tasks.modularityOptimization(graph,parameters),
+            jobId,
+            parameters.concurrency(),
+            logProgress
+        );
+
+        var seedPropertyValues = parameters.seedProperty()
+            .map(seedProperty -> CommunityCompanion.extractSeedingNodePropertyValues(graph, seedProperty))
+            .orElse(null);
+
+        var algorithm = new ModularityOptimization(
+            graph,
+            parameters.maxIterations(),
+            parameters.tolerance(),
+            seedPropertyValues,
+            parameters.concurrency(),
+            parameters.batchSize(),
+            DefaultPool.INSTANCE,
+            progressTracker,
+            terminationFlag
         );
 
         return algorithmCaller.run(
