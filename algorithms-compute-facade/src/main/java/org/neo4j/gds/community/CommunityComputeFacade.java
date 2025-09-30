@@ -47,6 +47,9 @@ import org.neo4j.gds.kmeans.Kmeans;
 import org.neo4j.gds.kmeans.KmeansContext;
 import org.neo4j.gds.kmeans.KmeansParameters;
 import org.neo4j.gds.kmeans.KmeansResult;
+import org.neo4j.gds.labelpropagation.LabelPropagation;
+import org.neo4j.gds.labelpropagation.LabelPropagationParameters;
+import org.neo4j.gds.labelpropagation.LabelPropagationResult;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.termination.TerminationFlag;
 
@@ -292,6 +295,38 @@ public class CommunityComputeFacade {
             graph,
             parameters,
             new KmeansContext(DefaultPool.INSTANCE, progressTracker),
+            terminationFlag
+        );
+
+        return algorithmCaller.run(
+            algorithm::compute,
+            jobId
+        );
+    }
+
+    CompletableFuture<TimedAlgorithmResult<LabelPropagationResult>> labelPropagation(
+        Graph graph,
+        LabelPropagationParameters parameters,
+        JobId jobId,
+        boolean logProgress
+    ) {
+
+        if (graph.isEmpty()) {
+            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(LabelPropagationResult.EMPTY));
+        }
+
+        var progressTracker = progressTrackerFactory.create(
+            tasks.labelPropagation(graph,parameters),
+            jobId,
+            parameters.concurrency(),
+            logProgress
+        );
+
+        var algorithm = new LabelPropagation(
+            graph,
+            parameters,
+            DefaultPool.INSTANCE,
+            progressTracker,
             terminationFlag
         );
 

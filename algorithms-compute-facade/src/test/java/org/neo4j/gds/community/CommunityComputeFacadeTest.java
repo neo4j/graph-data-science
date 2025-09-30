@@ -44,6 +44,7 @@ import org.neo4j.gds.k1coloring.K1ColoringParameters;
 import org.neo4j.gds.kcore.KCoreDecompositionParameters;
 import org.neo4j.gds.kmeans.KmeansParameters;
 import org.neo4j.gds.kmeans.SamplerType;
+import org.neo4j.gds.labelpropagation.LabelPropagationParameters;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.termination.TerminationFlag;
 
@@ -244,6 +245,26 @@ class CommunityComputeFacadeTest {
         var results = future.join();
 
         assertThat(results.result().communities().toArray()).hasSize(3);
+        assertThat(results.computeMillis()).isNotNegative();
+    }
+
+    @Test
+    void labelPropagation(){
+        var future = facade.labelPropagation(
+            graph,
+            new LabelPropagationParameters(
+                new Concurrency(4),
+                10,
+                null,
+                null
+            ),
+            jobIdMock,
+            false
+        );
+
+        var results = future.join();
+
+        assertThat(results.result().ranIterations()).isGreaterThan(0);
         assertThat(results.computeMillis()).isNotNegative();
     }
 

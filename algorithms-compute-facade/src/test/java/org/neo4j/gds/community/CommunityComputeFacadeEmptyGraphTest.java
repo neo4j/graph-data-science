@@ -41,6 +41,8 @@ import org.neo4j.gds.k1coloring.K1ColoringResult;
 import org.neo4j.gds.kcore.KCoreDecompositionParameters;
 import org.neo4j.gds.kcore.KCoreDecompositionResult;
 import org.neo4j.gds.kmeans.KmeansParameters;
+import org.neo4j.gds.labelpropagation.LabelPropagationParameters;
+import org.neo4j.gds.labelpropagation.LabelPropagationResult;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -193,4 +195,20 @@ class CommunityComputeFacadeEmptyGraphTest {
         verifyNoInteractions(algorithmCallerMock);
     }
 
+    @Test
+    void labelPropagation(){
+
+        var future = facade.labelPropagation(
+            graph,
+            mock(LabelPropagationParameters.class),
+            jobIdMock,
+            false
+        );
+
+        var results = future.join();
+
+        assertThat(results.result()).isEqualTo(LabelPropagationResult.EMPTY);
+        verifyNoInteractions(progressTrackerFactoryMock);
+        verifyNoInteractions(algorithmCallerMock);
+    }
 }
