@@ -40,6 +40,7 @@ import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.hdbscan.HDBScanParameters;
+import org.neo4j.gds.k1coloring.K1ColoringParameters;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.termination.TerminationFlag;
 
@@ -178,6 +179,25 @@ class CommunityComputeFacadeTest {
         var results = future.join();
 
         assertThat(results.result().labels().toArray()).hasSize(3);
+        assertThat(results.computeMillis()).isNotNegative();
+    }
+
+    @Test
+    void k1Coloring(){
+        var future = facade.k1Coloring(
+            graph,
+            new K1ColoringParameters(
+                new Concurrency(4),
+                1,
+                10_000
+            ),
+            jobIdMock,
+            false
+        );
+
+        var results = future.join();
+
+        assertThat(results.result().ranIterations()).isGreaterThan(0);
         assertThat(results.computeMillis()).isNotNegative();
     }
 }

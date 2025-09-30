@@ -39,4 +39,6 @@ public record K1ColoringResult(HugeLongArray colors,
         return usedColors;
     }
 
+    public static  K1ColoringResult EMPTY = new K1ColoringResult(HugeLongArray.newArray(0),0, false);
+
 }

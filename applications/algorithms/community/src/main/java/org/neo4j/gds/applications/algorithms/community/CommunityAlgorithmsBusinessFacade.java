@@ -124,9 +124,10 @@ public class CommunityAlgorithmsBusinessFacade {
     }
 
     public K1ColoringResult k1Coloring(Graph graph, K1ColoringBaseConfig configuration) {
-        var task = tasks.k1Coloring(graph, configuration);
-        var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
         var params = configuration.toParameters();
+
+        var task = tasks.k1Coloring(graph, params);
+        var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
 
         return algorithmMachinery.getResult(
             () -> algorithms.k1Coloring(graph, params, progressTracker),

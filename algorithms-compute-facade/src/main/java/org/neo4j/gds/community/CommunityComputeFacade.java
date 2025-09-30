@@ -37,6 +37,9 @@ import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.hdbscan.HDBScan;
 import org.neo4j.gds.hdbscan.HDBScanParameters;
 import org.neo4j.gds.hdbscan.Labels;
+import org.neo4j.gds.k1coloring.K1Coloring;
+import org.neo4j.gds.k1coloring.K1ColoringParameters;
+import org.neo4j.gds.k1coloring.K1ColoringResult;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.termination.TerminationFlag;
 
@@ -187,6 +190,38 @@ public class CommunityComputeFacade {
             graph,
             graph.nodeProperties(parameters.nodeProperty()),
             parameters,
+            progressTracker,
+            terminationFlag
+        );
+
+        return algorithmCaller.run(
+            algorithm::compute,
+            jobId
+        );
+    }
+
+    CompletableFuture<TimedAlgorithmResult<K1ColoringResult>> k1Coloring(
+        Graph graph,
+        K1ColoringParameters parameters,
+        JobId jobId,
+        boolean logProgress
+    ) {
+
+        if (graph.isEmpty()) {
+            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(K1ColoringResult.EMPTY));
+        }
+
+        var progressTracker = progressTrackerFactory.create(
+            tasks.k1Coloring(graph, parameters),
+            jobId,
+            parameters.concurrency(),
+            logProgress
+        );
+
+        var algorithm = new K1Coloring(
+            graph,
+            parameters,
+            DefaultPool.INSTANCE,
             progressTracker,
             terminationFlag
         );

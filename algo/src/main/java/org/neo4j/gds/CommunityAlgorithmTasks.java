@@ -28,7 +28,7 @@ import org.neo4j.gds.cliquecounting.CliqueCountingParameters;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.hdbscan.HDBScanProgressTrackerCreator;
-import org.neo4j.gds.k1coloring.K1ColoringBaseConfig;
+import org.neo4j.gds.k1coloring.K1ColoringParameters;
 import org.neo4j.gds.k1coloring.K1ColoringProgressTrackerTaskCreator;
 import org.neo4j.gds.kmeans.KMeansTaskFactory;
 import org.neo4j.gds.kmeans.KmeansParameters;
@@ -70,10 +70,10 @@ public final class CommunityAlgorithmTasks {
         return HDBScanProgressTrackerCreator.hdbscanTask(AlgorithmLabel.HDBScan.asString(), graph.nodeCount());
     }
 
-    public Task k1Coloring(Graph graph, K1ColoringBaseConfig configuration) {
+    public Task k1Coloring(Graph graph, K1ColoringParameters parameters) {
         return K1ColoringProgressTrackerTaskCreator.progressTask(
             graph.nodeCount(),
-            configuration.maxIterations()
+            parameters.maxIterations()
         );
     }
 
