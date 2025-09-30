@@ -108,8 +108,7 @@ The following query will project such a graph:
 [source, cypher, role=noplay graph-project-query]
 ----
 MATCH (p:Person)-[:PLAYS]->(i:Instrument)
-CALL {
-  WITH p, i
+CALL (p, i) {
   RETURN id(p) AS sourceId, id(i) AS targetId, 'PLAYS' AS rType
   UNION
   WITH p, i

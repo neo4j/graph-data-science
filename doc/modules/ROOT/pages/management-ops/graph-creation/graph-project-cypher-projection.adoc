@@ -400,8 +400,7 @@ To add both a relationship with its natural _and_ with its reverse orientation, 
 [source, cypher, role=noplay]
 ----
 MATCH (source:Person)-[:KNOWS]->(target:Person)
-CALL {
-  WITH source, target
+CALL (source, target) {
   RETURN id(source) AS sourceId, id(target) AS targetId, 'KNOWS' AS rType
   UNION
   WITH source, target

@@ -66,7 +66,7 @@ First we need to project a named graph on the analytical database shard.
 
 [source, cypher, role=noplay]
 ----
-CALL {
+CALL () {
   USE COMPOSITE_DB_NAME.ANALYTICS_DB
   CALL gds.graph.project('graph', 'Person', 'KNOWS')
   YIELD graphName
@@ -79,13 +79,13 @@ Using the composite database, we can now calculate the PageRank score for each P
 
 [source, cypher, role=noplay]
 ----
-CALL {
+CALL () {
   USE COMPOSITE_DB_NAME.ANALYTICS_DB
   CALL gds.pagerank.stream('graph', {})
   YIELD nodeId, score AS pageRank
   RETURN gds.util.asNode(nodeId).id AS personId, pageRank
 }
-CALL {
+CALL () {
   USE COMPOSITE_DB_NAME.OPERATIONAL_DB
   WITH personId
   MATCH (p {id: personId})
@@ -133,7 +133,7 @@ We now need to query the shards in order to drive the import process on the prox
 
 [source, cypher, role=noplay]
 ----
-CALL {
+CALL () {
   USE COMPOSITE_DB_NAME.COMPOSITE_SHARD_0_NAME
   MATCH (p:Person) OPTIONAL MATCH (p)-[:KNOWS]->(n:Person)
   RETURN p, n
