@@ -21,4 +21,7 @@ package org.neo4j.gds.hdbscan;
 
 import org.neo4j.gds.collections.ha.HugeLongArray;
 
-public record Labels(HugeLongArray labels, long numberOfNoisePoints, long numberOfClusters) {}
+public record Labels(HugeLongArray labels, long numberOfNoisePoints, long numberOfClusters) {
+
+    public static Labels EMPTY = new Labels(HugeLongArray.newArray(0),0, 0);
+}

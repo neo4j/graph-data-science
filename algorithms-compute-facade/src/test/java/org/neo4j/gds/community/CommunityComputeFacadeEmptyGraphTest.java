@@ -34,6 +34,8 @@ import org.neo4j.gds.cliquecounting.CliqueCountingParameters;
 import org.neo4j.gds.conductance.ConductanceParameters;
 import org.neo4j.gds.conductance.ConductanceResult;
 import org.neo4j.gds.core.utils.progress.JobId;
+import org.neo4j.gds.hdbscan.HDBScanParameters;
+import org.neo4j.gds.hdbscan.Labels;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -110,6 +112,23 @@ class CommunityComputeFacadeEmptyGraphTest {
         var results = future.join();
 
         assertThat(results.result()).isEqualTo(ConductanceResult.EMPTY);
+        verifyNoInteractions(progressTrackerFactoryMock);
+        verifyNoInteractions(algorithmCallerMock);
+    }
+
+    @Test
+    void hdbscan(){
+
+        var future = facade.hdbscan(
+            graph,
+            mock(HDBScanParameters.class),
+            jobIdMock,
+            false
+        );
+
+        var results = future.join();
+
+        assertThat(results.result()).isEqualTo(Labels.EMPTY);
         verifyNoInteractions(progressTrackerFactoryMock);
         verifyNoInteractions(algorithmCallerMock);
     }

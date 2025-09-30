@@ -39,6 +39,7 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.hdbscan.HDBScanParameters;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.termination.TerminationFlag;
 
@@ -156,6 +157,27 @@ class CommunityComputeFacadeTest {
         var results = future.join();
 
         assertThat(results.result().globalAverageConductance()).isGreaterThan(0d);
+        assertThat(results.computeMillis()).isNotNegative();
+    }
+
+    @Test
+    void hdbscan(){
+        var future = facade.hdbscan(
+            graph,
+            new HDBScanParameters(
+                new Concurrency(4),
+                1,
+                3,
+                1,
+                "prop"
+            ),
+            jobIdMock,
+            false
+        );
+
+        var results = future.join();
+
+        assertThat(results.result().labels().toArray()).hasSize(3);
         assertThat(results.computeMillis()).isNotNegative();
     }
 }

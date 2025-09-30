@@ -34,6 +34,9 @@ import org.neo4j.gds.conductance.ConductanceParameters;
 import org.neo4j.gds.conductance.ConductanceResult;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.JobId;
+import org.neo4j.gds.hdbscan.HDBScan;
+import org.neo4j.gds.hdbscan.HDBScanParameters;
+import org.neo4j.gds.hdbscan.Labels;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.termination.TerminationFlag;
 
@@ -162,4 +165,35 @@ public class CommunityComputeFacade {
         );
     }
 
+    CompletableFuture<TimedAlgorithmResult<Labels>> hdbscan(
+        Graph graph,
+        HDBScanParameters parameters,
+        JobId jobId,
+        boolean logProgress
+    ) {
+
+        if (graph.isEmpty()) {
+            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(Labels.EMPTY));
+        }
+
+        var progressTracker = progressTrackerFactory.create(
+            tasks.hdbscan(graph),
+            jobId,
+            parameters.concurrency(),
+            logProgress
+        );
+
+        var algorithm = new HDBScan(
+            graph,
+            graph.nodeProperties(parameters.nodeProperty()),
+            parameters,
+            progressTracker,
+            terminationFlag
+        );
+
+        return algorithmCaller.run(
+            algorithm::compute,
+            jobId
+        );
+    }
 }
