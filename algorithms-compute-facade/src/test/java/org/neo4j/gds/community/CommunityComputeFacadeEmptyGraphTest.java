@@ -44,6 +44,8 @@ import org.neo4j.gds.kmeans.KmeansParameters;
 import org.neo4j.gds.labelpropagation.LabelPropagationParameters;
 import org.neo4j.gds.labelpropagation.LabelPropagationResult;
 import org.neo4j.gds.termination.TerminationFlag;
+import org.neo4j.gds.triangle.LocalClusteringCoefficientParameters;
+import org.neo4j.gds.triangle.LocalClusteringCoefficientResult;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -208,6 +210,23 @@ class CommunityComputeFacadeEmptyGraphTest {
         var results = future.join();
 
         assertThat(results.result()).isEqualTo(LabelPropagationResult.EMPTY);
+        verifyNoInteractions(progressTrackerFactoryMock);
+        verifyNoInteractions(algorithmCallerMock);
+    }
+
+    @Test
+    void lcc(){
+
+        var future = facade.lcc(
+            graph,
+            mock(LocalClusteringCoefficientParameters.class),
+            jobIdMock,
+            false
+        );
+
+        var results = future.join();
+
+        assertThat(results.result()).isEqualTo(LocalClusteringCoefficientResult.EMPTY);
         verifyNoInteractions(progressTrackerFactoryMock);
         verifyNoInteractions(algorithmCallerMock);
     }

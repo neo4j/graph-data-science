@@ -47,6 +47,7 @@ import org.neo4j.gds.kmeans.SamplerType;
 import org.neo4j.gds.labelpropagation.LabelPropagationParameters;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.termination.TerminationFlag;
+import org.neo4j.gds.triangle.LocalClusteringCoefficientParameters;
 
 import java.util.List;
 import java.util.Optional;
@@ -265,6 +266,25 @@ class CommunityComputeFacadeTest {
         var results = future.join();
 
         assertThat(results.result().ranIterations()).isGreaterThan(0);
+        assertThat(results.computeMillis()).isNotNegative();
+    }
+
+    @Test
+    void lcc(){
+        var future = facade.lcc(
+            graph,
+            new LocalClusteringCoefficientParameters(
+                new Concurrency(4),
+                100,
+                null
+            ),
+            jobIdMock,
+            false
+        );
+
+        var results = future.join();
+
+        assertThat(results.result().averageClusteringCoefficient()).isGreaterThan(0d);
         assertThat(results.computeMillis()).isNotNegative();
     }
 

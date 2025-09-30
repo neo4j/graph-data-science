@@ -24,4 +24,7 @@ import org.neo4j.gds.collections.ha.HugeDoubleArray;
 public record LocalClusteringCoefficientResult(
         HugeDoubleArray localClusteringCoefficients,
         double averageClusteringCoefficient
-    ){}
+    ){
+
+    public static LocalClusteringCoefficientResult EMPTY = new LocalClusteringCoefficientResult(HugeDoubleArray.newArray(0), 0D);
+}
