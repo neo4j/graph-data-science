@@ -29,6 +29,9 @@ import org.neo4j.gds.async.AsyncAlgorithmCaller;
 import org.neo4j.gds.cliqueCounting.CliqueCounting;
 import org.neo4j.gds.cliqueCounting.CliqueCountingResult;
 import org.neo4j.gds.cliquecounting.CliqueCountingParameters;
+import org.neo4j.gds.conductance.Conductance;
+import org.neo4j.gds.conductance.ConductanceParameters;
+import org.neo4j.gds.conductance.ConductanceResult;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.result.TimedAlgorithmResult;
@@ -123,7 +126,40 @@ public class CommunityComputeFacade {
             algorithm::compute,
             jobId
         );
+    }
 
+    CompletableFuture<TimedAlgorithmResult<ConductanceResult>> conductance(
+        Graph graph,
+        ConductanceParameters parameters,
+        JobId jobId,
+        boolean logProgress
+    ) {
+
+        if (graph.isEmpty()) {
+            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(ConductanceResult.EMPTY));
+        }
+
+        var progressTracker = progressTrackerFactory.create(
+            tasks.conductance(graph),
+            jobId,
+            parameters.concurrency(),
+            logProgress
+        );
+
+        var algorithm = new Conductance(
+            graph,
+            parameters.concurrency(),
+            parameters.minBatchSize(),
+            parameters.hasRelationshipWeightProperty(),
+            parameters.communityProperty(),
+            DefaultPool.INSTANCE,
+            progressTracker
+        );
+
+        return algorithmCaller.run(
+            algorithm::compute,
+            jobId
+        );
     }
 
 }

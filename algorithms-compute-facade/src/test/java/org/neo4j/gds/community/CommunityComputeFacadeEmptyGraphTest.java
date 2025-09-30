@@ -30,13 +30,11 @@ import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutParameters;
 import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutResult;
 import org.neo4j.gds.async.AsyncAlgorithmCaller;
 import org.neo4j.gds.cliqueCounting.CliqueCountingResult;
-import org.neo4j.gds.cliquecounting.CliqueCountingMode;
 import org.neo4j.gds.cliquecounting.CliqueCountingParameters;
-import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.conductance.ConductanceParameters;
+import org.neo4j.gds.conductance.ConductanceResult;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.termination.TerminationFlag;
-
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -88,11 +86,7 @@ class CommunityComputeFacadeEmptyGraphTest {
     void cliqueCounting(){
         var future = facade.cliqueCounting(
             graph,
-            new CliqueCountingParameters(
-                CliqueCountingMode.GloballyOnly,
-                List.of(),
-                new Concurrency(4)
-            ),
+            mock(CliqueCountingParameters.class),
             jobIdMock,
             false
         );
@@ -104,5 +98,20 @@ class CommunityComputeFacadeEmptyGraphTest {
         verifyNoInteractions(algorithmCallerMock);
     }
 
+    @Test
+    void conductance(){
+        var future = facade.conductance(
+            graph,
+            mock(ConductanceParameters.class),
+            jobIdMock,
+            false
+        );
+
+        var results = future.join();
+
+        assertThat(results.result()).isEqualTo(ConductanceResult.EMPTY);
+        verifyNoInteractions(progressTrackerFactoryMock);
+        verifyNoInteractions(algorithmCallerMock);
+    }
 
 }

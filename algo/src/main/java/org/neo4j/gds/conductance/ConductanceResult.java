@@ -24,4 +24,7 @@ import org.neo4j.gds.collections.hsa.HugeSparseDoubleArray;
 public record ConductanceResult(
         HugeSparseDoubleArray communityConductances,
         double globalAverageConductance
-    ) {}
+    ) {
+
+    public static ConductanceResult EMPTY = new ConductanceResult(HugeSparseDoubleArray.builder(0).build(),0d);
+}
