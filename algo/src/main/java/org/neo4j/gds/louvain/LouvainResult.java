@@ -55,4 +55,12 @@ public record LouvainResult(
         return communities.size();
     }
 
+    public static LouvainResult EMPTY = new LouvainResult(
+        HugeLongArray.newArray(0),
+        0,
+        null,
+        new double[0],
+        0
+    );
+
 }

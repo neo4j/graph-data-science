@@ -45,6 +45,8 @@ import org.neo4j.gds.labelpropagation.LabelPropagationParameters;
 import org.neo4j.gds.labelpropagation.LabelPropagationResult;
 import org.neo4j.gds.leiden.LeidenParameters;
 import org.neo4j.gds.leiden.LeidenResult;
+import org.neo4j.gds.louvain.LouvainParameters;
+import org.neo4j.gds.louvain.LouvainResult;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientParameters;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientResult;
@@ -246,6 +248,23 @@ class CommunityComputeFacadeEmptyGraphTest {
         var results = future.join();
 
         assertThat(results.result()).isEqualTo(LeidenResult.EMPTY);
+        verifyNoInteractions(progressTrackerFactoryMock);
+        verifyNoInteractions(algorithmCallerMock);
+    }
+
+    @Test
+    void louvain(){
+
+        var future = facade.louvain(
+            graph,
+            mock(LouvainParameters.class),
+            jobIdMock,
+            false
+        );
+
+        var results = future.join();
+
+        assertThat(results.result()).isEqualTo(LouvainResult.EMPTY);
         verifyNoInteractions(progressTrackerFactoryMock);
         verifyNoInteractions(algorithmCallerMock);
     }

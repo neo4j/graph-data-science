@@ -54,6 +54,9 @@ import org.neo4j.gds.labelpropagation.LabelPropagationResult;
 import org.neo4j.gds.leiden.Leiden;
 import org.neo4j.gds.leiden.LeidenParameters;
 import org.neo4j.gds.leiden.LeidenResult;
+import org.neo4j.gds.louvain.Louvain;
+import org.neo4j.gds.louvain.LouvainParameters;
+import org.neo4j.gds.louvain.LouvainResult;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.triangle.LocalClusteringCoefficient;
@@ -413,5 +416,36 @@ public class CommunityComputeFacade {
         );
     }
 
+    CompletableFuture<TimedAlgorithmResult<LouvainResult>> louvain(
+        Graph graph,
+        LouvainParameters parameters,
+        JobId jobId,
+        boolean logProgress
+    ) {
+
+        if (graph.isEmpty()) {
+            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(LouvainResult.EMPTY));
+        }
+
+        var progressTracker = progressTrackerFactory.create(
+            tasks.louvain(graph,parameters),
+            jobId,
+            parameters.concurrency(),
+            logProgress
+        );
+
+        var algorithm = new Louvain(
+            graph,
+            parameters,
+            progressTracker,
+            DefaultPool.INSTANCE,
+            terminationFlag
+        );
+
+        return algorithmCaller.run(
+            algorithm::compute,
+            jobId
+        );
+    }
 
 }
