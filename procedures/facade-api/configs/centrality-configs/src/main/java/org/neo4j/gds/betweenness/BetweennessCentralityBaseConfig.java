@@ -37,8 +37,10 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public interface BetweennessCentralityBaseConfig extends AlgoBaseConfig, RelationshipWeightConfig {
 
+    @Configuration.ConvertWith(method = "toLong")
     Optional<Long> samplingSize();
 
+    @Configuration.ConvertWith(method = "toLong")
     Optional<Long> samplingSeed();
 
     @Configuration.Check
@@ -99,5 +101,15 @@ public interface BetweennessCentralityBaseConfig extends AlgoBaseConfig, Relatio
             samplingParameters,
             hasRelationshipWeightProperty()
         );
+    }
+
+    static Long toLong(Object obj) {
+        if (obj instanceof Integer) {
+            return ((Integer) obj).longValue();
+        } else if (obj instanceof Long) {
+            return (Long) obj;
+        } else {
+            throw new IllegalArgumentException("Object must be of type int, Integer, long, or Long");
+        }
     }
 }
