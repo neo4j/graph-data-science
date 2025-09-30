@@ -21,6 +21,7 @@ package org.neo4j.gds.community;
 
 import org.neo4j.gds.CommunityAlgorithmTasks;
 import org.neo4j.gds.ProgressTrackerFactory;
+import org.neo4j.gds.algorithms.community.CommunityCompanion;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.approxmaxkcut.ApproxMaxKCut;
 import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutParameters;
@@ -50,12 +51,16 @@ import org.neo4j.gds.kmeans.KmeansResult;
 import org.neo4j.gds.labelpropagation.LabelPropagation;
 import org.neo4j.gds.labelpropagation.LabelPropagationParameters;
 import org.neo4j.gds.labelpropagation.LabelPropagationResult;
+import org.neo4j.gds.leiden.Leiden;
+import org.neo4j.gds.leiden.LeidenParameters;
+import org.neo4j.gds.leiden.LeidenResult;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.triangle.LocalClusteringCoefficient;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientParameters;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientResult;
 
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 public class CommunityComputeFacade {
@@ -362,6 +367,42 @@ public class CommunityComputeFacade {
             parameters.concurrency(),
             parameters.maxDegree(),
             parameters.seedProperty(),
+            progressTracker,
+            terminationFlag
+        );
+
+        return algorithmCaller.run(
+            algorithm::compute,
+            jobId
+        );
+    }
+
+    CompletableFuture<TimedAlgorithmResult<LeidenResult>> leiden(
+        Graph graph,
+        LeidenParameters parameters,
+        JobId jobId,
+        boolean logProgress
+    ) {
+
+        if (graph.isEmpty()) {
+            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(LeidenResult.EMPTY));
+        }
+
+        var progressTracker = progressTrackerFactory.create(
+            tasks.leiden(graph,parameters),
+            jobId,
+            parameters.concurrency(),
+            logProgress
+        );
+
+        var seedValues = Optional.ofNullable(parameters.seedProperty())
+            .map(seedParameter -> CommunityCompanion.extractSeedingNodePropertyValues(graph, seedParameter))
+            .orElse(null);
+
+        var algorithm = new Leiden(
+            graph,
+            parameters,
+            seedValues,
             progressTracker,
             terminationFlag
         );

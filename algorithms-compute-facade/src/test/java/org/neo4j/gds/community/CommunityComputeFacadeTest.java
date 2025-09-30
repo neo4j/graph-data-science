@@ -45,6 +45,7 @@ import org.neo4j.gds.kcore.KCoreDecompositionParameters;
 import org.neo4j.gds.kmeans.KmeansParameters;
 import org.neo4j.gds.kmeans.SamplerType;
 import org.neo4j.gds.labelpropagation.LabelPropagationParameters;
+import org.neo4j.gds.leiden.LeidenParameters;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientParameters;
@@ -285,6 +286,30 @@ class CommunityComputeFacadeTest {
         var results = future.join();
 
         assertThat(results.result().averageClusteringCoefficient()).isGreaterThan(0d);
+        assertThat(results.computeMillis()).isNotNegative();
+    }
+
+    @Test
+    void leiden(){
+        var future = facade.leiden(
+            graph,
+            new LeidenParameters(
+               new Concurrency(4),
+                0,
+                null,
+                10,
+                1,
+                1,
+                false,
+                Optional.empty()
+            ),
+            jobIdMock,
+            false
+        );
+
+        var results = future.join();
+
+        assertThat(results.result().ranLevels()).isGreaterThan(0);
         assertThat(results.computeMillis()).isNotNegative();
     }
 

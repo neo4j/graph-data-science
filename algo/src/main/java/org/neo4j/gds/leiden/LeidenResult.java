@@ -22,8 +22,6 @@ package org.neo4j.gds.leiden;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 
-import java.util.function.LongUnaryOperator;
-
 public record LeidenResult(
     HugeLongArray communities,
     int ranLevels,
@@ -50,8 +48,13 @@ public record LeidenResult(
 
     }
 
-    public  LongUnaryOperator communitiesFunction() {
-        return communities::get;
-    }
+    public static LeidenResult EMPTY = new LeidenResult(
+        HugeLongArray.newArray(0),
+        0,
+        false,
+        null,
+        new double[0],
+        0
+    );
 
 }
