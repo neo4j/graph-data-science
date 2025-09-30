@@ -52,6 +52,7 @@ import org.neo4j.gds.modularity.ModularityResult;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationParameters;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationResult;
 import org.neo4j.gds.scc.SccParameters;
+import org.neo4j.gds.sllpa.SpeakerListenerLPAConfig;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientParameters;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientResult;
@@ -357,6 +358,23 @@ class CommunityComputeFacadeEmptyGraphTest {
         var results = future.join();
 
         assertThat(results.result().size()).isEqualTo(0L);
+        verifyNoInteractions(progressTrackerFactoryMock);
+        verifyNoInteractions(algorithmCallerMock);
+    }
+
+    @Test
+    void sllpa(){
+
+        var future = facade.sllpa(
+            graph,
+            mock(SpeakerListenerLPAConfig.class),
+            jobIdMock,
+            false
+        );
+
+        var results = future.join();
+
+        assertThat(results.result().ranIterations()).isEqualTo(0L);
         verifyNoInteractions(progressTrackerFactoryMock);
         verifyNoInteractions(algorithmCallerMock);
     }

@@ -27,6 +27,8 @@ import org.neo4j.gds.approxmaxkcut.ApproxMaxKCut;
 import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutParameters;
 import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutResult;
 import org.neo4j.gds.async.AsyncAlgorithmCaller;
+import org.neo4j.gds.beta.pregel.ImmutablePregelResult;
+import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.cliqueCounting.CliqueCounting;
 import org.neo4j.gds.cliqueCounting.CliqueCountingResult;
 import org.neo4j.gds.cliquecounting.CliqueCountingParameters;
@@ -71,6 +73,8 @@ import org.neo4j.gds.modularityoptimization.ModularityOptimizationResult;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.scc.Scc;
 import org.neo4j.gds.scc.SccParameters;
+import org.neo4j.gds.sllpa.SpeakerListenerLPA;
+import org.neo4j.gds.sllpa.SpeakerListenerLPAConfig;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.triangle.IntersectingTriangleCount;
 import org.neo4j.gds.triangle.LocalClusteringCoefficient;
@@ -600,7 +604,7 @@ public class CommunityComputeFacade {
     ) {
 
         if (graph.isEmpty()) {
-            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty( new HugeAtomicDisjointSetStruct(0 , new Concurrency(1))));
+            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(new HugeAtomicDisjointSetStruct(0, new Concurrency(1))));
         }
 
         var progressTracker = progressTrackerFactory.create(
@@ -617,6 +621,37 @@ public class CommunityComputeFacade {
             parameters,
             progressTracker,
             terminationFlag
+        );
+
+        return algorithmCaller.run(
+            algorithm::compute,
+            jobId
+        );
+    }
+    CompletableFuture<TimedAlgorithmResult<PregelResult>> sllpa(
+        Graph graph,
+        SpeakerListenerLPAConfig configuration,
+        JobId jobId,
+        boolean logProgress
+    ) {
+
+        if (graph.isEmpty()) {
+            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(ImmutablePregelResult.of(null, 0, false)));
+        }
+
+        var progressTracker = progressTrackerFactory.create(
+            tasks.speakerListenerLPA(graph,configuration),
+            jobId,
+            configuration.concurrency(),
+            logProgress
+        );
+
+        var algorithm = new SpeakerListenerLPA(
+            graph,
+            configuration,
+            DefaultPool.INSTANCE,
+            progressTracker,
+            Optional.empty()
         );
 
         return algorithmCaller.run(

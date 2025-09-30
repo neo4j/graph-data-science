@@ -51,6 +51,7 @@ import org.neo4j.gds.louvain.LouvainParameters;
 import org.neo4j.gds.modularity.ModularityParameters;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationParameters;
 import org.neo4j.gds.scc.SccParameters;
+import org.neo4j.gds.sllpa.SpeakerListenerLPAConfigImpl;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientParameters;
 import org.neo4j.gds.triangle.TriangleCountParameters;
@@ -431,6 +432,24 @@ class CommunityComputeFacadeTest {
         var results = future.join();
 
         assertThat(results.result().size()).isEqualTo(3L);
+        assertThat(results.computeMillis()).isNotNegative();
+    }
+
+    @Test
+    void sllpa(){
+
+        var config = SpeakerListenerLPAConfigImpl.builder().concurrency(4).minAssociationStrength(0.00).maxIterations(10).build();
+
+        var future = facade.sllpa(
+            graph,
+            config,
+            jobIdMock,
+            false
+        );
+
+        var results = future.join();
+
+        assertThat(results.result().ranIterations()).isGreaterThan(0);
         assertThat(results.computeMillis()).isNotNegative();
     }
 
