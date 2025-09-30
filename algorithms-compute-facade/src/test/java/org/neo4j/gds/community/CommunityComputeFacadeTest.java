@@ -50,6 +50,7 @@ import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.louvain.LouvainParameters;
 import org.neo4j.gds.modularity.ModularityParameters;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationParameters;
+import org.neo4j.gds.scc.SccParameters;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientParameters;
 
@@ -373,6 +374,23 @@ class CommunityComputeFacadeTest {
         var results = future.join();
 
         assertThat(results.result().ranIterations()).isGreaterThan(0);
+        assertThat(results.computeMillis()).isNotNegative();
+    }
+
+    @Test
+    void scc(){
+        var future = facade.scc(
+            graph,
+            new SccParameters(
+                new Concurrency(4)
+            ),
+            jobIdMock,
+            false
+        );
+
+        var results = future.join();
+
+        assertThat(results.result().toArray()).hasSize(3);
         assertThat(results.computeMillis()).isNotNegative();
     }
 
