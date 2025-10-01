@@ -21,6 +21,7 @@ package org.neo4j.gds.core.utils.progress.tasks;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.logging.Log;
 
 import java.util.List;
@@ -36,7 +37,7 @@ class TaskProgressLoggerTest {
         var taskAB = Tasks.task("A B", List.of(taskA));
         var task = Tasks.task("T", List.of(taskA));
 
-        var logger =new TaskProgressLogger(Log.noOpLog(),task,new Concurrency(1));
+        var logger =new TaskProgressLogger(Log.noOpLog(), new JobId(), task,new Concurrency(1));
 
         assertThatNoException().isThrownBy(
             ()-> {

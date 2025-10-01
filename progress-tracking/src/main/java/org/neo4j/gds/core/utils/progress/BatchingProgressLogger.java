@@ -36,6 +36,7 @@ public class BatchingProgressLogger implements ProgressLogger {
     public static final long MAXIMUM_LOG_INTERVAL = (long) Math.pow(2, 13);
 
     private final Log log;
+    private final JobId jobId;
     private final Concurrency concurrency;
     private long taskVolume;
     private long batchSize;
@@ -58,12 +59,13 @@ public class BatchingProgressLogger implements ProgressLogger {
         return Math.max(1, BitUtil.nextHighestPowerOfTwo(batchSize));
     }
 
-    public BatchingProgressLogger(Log log, Task task, Concurrency concurrency) {
-        this(log, task, calculateBatchSize(task, concurrency), concurrency);
+    public BatchingProgressLogger(Log log, JobId jobId, Task task, Concurrency concurrency) {
+        this(log, jobId, task, calculateBatchSize(task, concurrency), concurrency);
     }
 
-    public BatchingProgressLogger(Log log, Task task, long batchSize, Concurrency concurrency) {
+    public BatchingProgressLogger(Log log, JobId jobId, Task task, long batchSize, Concurrency concurrency) {
         this.log = log;
+        this.jobId = jobId;
         this.taskVolume = task.getProgress().volume();
         this.batchSize = batchSize;
         this.taskName = task.description();
@@ -136,18 +138,16 @@ public class BatchingProgressLogger implements ProgressLogger {
     }
 
     private void logProgress(int nextPercentage) {
-        logInfo(formatWithLocale("[%s] %s %d%%", Thread.currentThread().getName(), taskName, nextPercentage));
+        logMessage(formatWithLocale("%d%%", nextPercentage));
     }
 
     private void logProgressWithMessage(int nextPercentage, String msg) {
-        logInfo(
-            formatWithLocale("[%s] %s %d%% %s", Thread.currentThread().getName(), taskName, nextPercentage, msg)
-        );
+        logMessage(formatWithLocale("%d%% %s", nextPercentage, msg));
     }
 
     @Override
     public void logMessage(String msg) {
-        log.info("[%s] %s %s", Thread.currentThread().getName(), taskName, msg);
+        log.info("[%s] [%s] %s %s", jobId.asString(), Thread.currentThread().getName(), taskName, msg);
     }
 
     @Override
@@ -155,25 +155,21 @@ public class BatchingProgressLogger implements ProgressLogger {
         logMessage(Objects.requireNonNull(msg.get()));
     }
 
-    private void logInfo(String message) {
-        log.info(message);
-    }
-
     @Override
     public void logDebug(Supplier<String> msg) {
         if (log.isDebugEnabled()) {
-            log.debug("[%s] %s %s", Thread.currentThread().getName(), taskName, msg.get());
+            log.debug("[%s] [%s] %s %s", jobId.asString(), Thread.currentThread().getName(), taskName, msg.get());
         }
     }
 
     @Override
     public void logWarning(String message) {
-        log.warn("[%s] %s %s", Thread.currentThread().getName(), taskName, message);
+        log.warn("[%s] [%s] %s %s", jobId.asString(), Thread.currentThread().getName(), taskName, message);
     }
 
     @Override
     public void logError(String message) {
-        log.error("[%s] %s %s", Thread.currentThread().getName(), taskName, message);
+        log.error("[%s] [%s] %s %s", jobId.asString(), Thread.currentThread().getName(), taskName, message);
     }
 
     @Override

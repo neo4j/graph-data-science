@@ -25,9 +25,11 @@ import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.RenamesCurrentThread;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
+import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.PerDatabaseTaskStore;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.core.utils.progress.UserTask;
+import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.utils.GdsFeatureToggles;
@@ -179,20 +181,20 @@ class TaskProgressTrackerTest {
         try (var ignored = RenamesCurrentThread.renameThread("test")) {
             var task = Tasks.leaf("leaf", 4);
             var log = new GdsTestLog();
-            var progressTracker = new TaskProgressTracker(task, log, new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE);
+            var progressTracker = new TaskProgressTracker(task, log, new Concurrency(1), new JobId("our job id"), EmptyTaskRegistryFactory.INSTANCE, EmptyUserLogRegistryFactory.INSTANCE);
             progressTracker.beginSubTask();
             progressTracker.logProgress(1);
 
             assertThat(log.getMessages(TestLog.INFO)).contains(
-                "[test] leaf :: Start",
-                "[test] leaf 25%"
+                "[our job id] [test] leaf :: Start",
+                "[our job id] [test] leaf 25%"
             );
 
             progressTracker.endSubTask();
 
             assertThat(log.getMessages(TestLog.INFO)).contains(
-                "[test] leaf 100%",
-                "[test] leaf :: Finished"
+                "[our job id] [test] leaf 100%",
+                "[our job id] [test] leaf :: Finished"
             );
         }
     }
@@ -202,7 +204,7 @@ class TaskProgressTrackerTest {
         try (var ignored = RenamesCurrentThread.renameThread("test")) {
             var task = Tasks.task("root", Tasks.leaf("leaf", 4));
             var log = new GdsTestLog();
-            var progressTracker = new TaskProgressTracker(task, log, new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE);
+            var progressTracker = new TaskProgressTracker(task, log, new Concurrency(1), new JobId("what job id?"), EmptyTaskRegistryFactory.INSTANCE, EmptyUserLogRegistryFactory.INSTANCE);
 
             progressTracker.beginSubTask("root");
             progressTracker.beginSubTask("leaf");
@@ -211,12 +213,12 @@ class TaskProgressTrackerTest {
             progressTracker.endSubTask("root");
 
             assertThat(log.getMessages(TestLog.INFO)).contains(
-                "[test] root :: Start",
-                "[test] root :: leaf :: Start",
-                "[test] root :: leaf 25%",
-                "[test] root :: leaf 100%",
-                "[test] root :: leaf :: Finished",
-                "[test] root :: Finished"
+                "[what job id?] [test] root :: Start",
+                "[what job id?] [test] root :: leaf :: Start",
+                "[what job id?] [test] root :: leaf 25%",
+                "[what job id?] [test] root :: leaf 100%",
+                "[what job id?] [test] root :: leaf :: Finished",
+                "[what job id?] [test] root :: Finished"
             );
         }
     }
@@ -245,7 +247,7 @@ class TaskProgressTrackerTest {
         progressTracker.setSteps(13);
         progressTracker.logProgress(3);
         progressTracker.logSteps(1);
-        double expectedDoubleProgressFromFirstStep = 100.0 * 1.0 / 13.0;
+        double expectedDoubleProgressFromFirstStep = 100.0 / 13.0;
         long progressAfterFirstStep = leafTask.getProgress().progress();
         assertThat(progressAfterFirstStep).isEqualTo((long) expectedDoubleProgressFromFirstStep + 3);
 
