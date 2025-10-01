@@ -17,11 +17,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.maxflow;
+package org.neo4j.gds.paths.maxflow;
 
-import org.neo4j.gds.collections.ha.HugeObjectArray;
-
-public record FlowResult(HugeObjectArray<FlowRelationship> flow, double totalFlow) {
-
-    public static FlowResult EMPTY = new FlowResult(HugeObjectArray.newArray(FlowRelationship.class, 0), 0D);
+public interface MaxFlowConstants {
+    String MAXFLOW_DESCRIPTION = "The max-flow algorithm computes the maximal flow over the relationships from the source nodes to the target nodes.";
 }

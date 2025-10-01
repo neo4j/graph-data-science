@@ -29,6 +29,8 @@ import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.dag.longestPath.DagLongestPathStreamConfig;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortResult;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortStreamConfig;
+import org.neo4j.gds.maxflow.FlowResult;
+import org.neo4j.gds.maxflow.MaxFlowStreamConfig;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarStreamConfig;
 import org.neo4j.gds.paths.bellmanford.AllShortestPathsBellmanFordStreamConfig;
 import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
@@ -57,6 +59,7 @@ import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.DFS
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.DeltaStepping;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Dijkstra;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.LongestPath;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.MaxFlow;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.PCST;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.RandomWalk;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.SingleSourceDijkstra;
@@ -170,6 +173,21 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
             LongestPath,
             estimation::longestPath,
             (graph, __) -> algorithms.longestPath(graph, configuration),
+            resultBuilder
+        );
+    }
+
+    public <RESULT> Stream<RESULT> maxFlow(
+        GraphName graphName,
+        MaxFlowStreamConfig configuration,
+        StreamResultBuilder<FlowResult, RESULT> resultBuilder
+    ) {
+        return convenience.processRegularAlgorithmInStreamMode(
+            graphName,
+            configuration,
+            MaxFlow,
+            estimation::maxFlow,
+            (graph, __) -> algorithms.maxFlow(graph, configuration),
             resultBuilder
         );
     }

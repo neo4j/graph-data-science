@@ -84,7 +84,7 @@ class MaxFlowTest {
         var params = new MaxFlowParameters(sourceNodes, targetNodes, new Concurrency(concurrency), ALPHA, BETA, FREQ);
         var x = new MaxFlow(graph, params, null, null); //fixme
         var result = x.compute();
-        assertThat(result.totalFlow).isCloseTo(expectedFlow, Offset.offset(TOLERANCE));
+        assertThat(result.totalFlow()).isCloseTo(expectedFlow, Offset.offset(TOLERANCE));
     }
 
     void testGraph(Graph graph, long sourceNode, long targetNode, double expectedFlow, int concurrency) {
@@ -95,7 +95,7 @@ class MaxFlowTest {
     }
 
     void testGraph(TestGraph graph, String sourceNode, String targetNode, double expectedFlow) {
-        testGraph(graph.graph(), graph.toMappedNodeId(sourceNode), graph.toMappedNodeId(targetNode), expectedFlow, 1);
+        testGraph(graph.graph(), graph.toOriginalNodeId(sourceNode), graph.toOriginalNodeId(targetNode), expectedFlow, 1);
     }
 
     @Test

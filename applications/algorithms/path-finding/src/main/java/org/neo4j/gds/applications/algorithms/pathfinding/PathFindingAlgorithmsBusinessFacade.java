@@ -39,6 +39,8 @@ import org.neo4j.gds.dag.topologicalsort.TopologicalSortBaseConfig;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortResult;
 import org.neo4j.gds.kspanningtree.KSpanningTreeBaseConfig;
 import org.neo4j.gds.kspanningtree.KSpanningTreeTask;
+import org.neo4j.gds.maxflow.FlowResult;
+import org.neo4j.gds.maxflow.MaxFlowBaseConfig;
 import org.neo4j.gds.paths.RelationshipCountProgressTaskFactory;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarBaseConfig;
 import org.neo4j.gds.paths.bellmanford.AllShortestPathsBellmanFordBaseConfig;
@@ -202,6 +204,21 @@ public class PathFindingAlgorithmsBusinessFacade {
 
         return algorithmMachinery.getResult(
             () -> algorithms.longestPath(
+                graph,
+                configuration.toParameters(),
+                progressTracker,
+                requestScopedDependencies.terminationFlag()
+            ),
+            progressTracker,
+            configuration.concurrency()
+        );
+    }
+
+    FlowResult maxFlow(Graph graph, MaxFlowBaseConfig configuration) {
+        var progressTracker = ProgressTracker.NULL_TRACKER;
+
+        return algorithmMachinery.getResult(
+            () -> algorithms.maxFlow(
                 graph,
                 configuration.toParameters(),
                 progressTracker,

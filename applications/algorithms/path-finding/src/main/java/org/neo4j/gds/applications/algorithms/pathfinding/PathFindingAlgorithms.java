@@ -33,6 +33,9 @@ import org.neo4j.gds.dag.topologicalsort.TopologicalSortParameters;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortResult;
 import org.neo4j.gds.kspanningtree.KSpanningTree;
 import org.neo4j.gds.kspanningtree.KSpanningTreeParameters;
+import org.neo4j.gds.maxflow.FlowResult;
+import org.neo4j.gds.maxflow.MaxFlow;
+import org.neo4j.gds.maxflow.MaxFlowParameters;
 import org.neo4j.gds.paths.astar.AStar;
 import org.neo4j.gds.paths.astar.AStarParameters;
 import org.neo4j.gds.paths.bellmanford.BellmanFord;
@@ -198,6 +201,22 @@ public class PathFindingAlgorithms {
             graph,
             progressTracker,
             parameters.concurrency(),
+            terminationFlag
+        );
+
+        return algorithm.compute();
+    }
+
+    public FlowResult maxFlow(
+        Graph graph,
+        MaxFlowParameters parameters,
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
+    ) {
+        var algorithm = new MaxFlow(
+            graph,
+            parameters,
+            progressTracker,
             terminationFlag
         );
 

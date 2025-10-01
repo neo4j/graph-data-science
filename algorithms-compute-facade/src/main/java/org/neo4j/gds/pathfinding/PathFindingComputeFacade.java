@@ -30,6 +30,7 @@ import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
 import org.neo4j.gds.core.utils.paged.ParalleLongPageCreator;
 import org.neo4j.gds.core.utils.progress.JobId;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.dag.longestPath.DagLongestPath;
 import org.neo4j.gds.dag.longestPath.DagLongestPathParameters;
 import org.neo4j.gds.dag.longestPath.LongestPathTask;
@@ -40,6 +41,9 @@ import org.neo4j.gds.dag.topologicalsort.TopologicalSortResult;
 import org.neo4j.gds.kspanningtree.KSpanningTree;
 import org.neo4j.gds.kspanningtree.KSpanningTreeParameters;
 import org.neo4j.gds.kspanningtree.KSpanningTreeTask;
+import org.neo4j.gds.maxflow.FlowResult;
+import org.neo4j.gds.maxflow.MaxFlow;
+import org.neo4j.gds.maxflow.MaxFlowParameters;
 import org.neo4j.gds.paths.RelationshipCountProgressTaskFactory;
 import org.neo4j.gds.paths.astar.AStar;
 import org.neo4j.gds.paths.astar.AStarParameters;
@@ -358,6 +362,35 @@ public class PathFindingComputeFacade {
         return algorithmCaller.run(
             dagLongestPath::compute,
             null
+        );
+    }
+
+    public CompletableFuture<TimedAlgorithmResult<FlowResult>> maxFlow(
+        Graph graph,
+        MaxFlowParameters parameters,
+        JobId jobId,
+        boolean logProgress
+    ) {
+        // If the input graph is empty return a completed future with empty result
+        if (graph.isEmpty()) {
+            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(FlowResult.EMPTY));
+        }
+
+        // Create ProgressTracker
+        var progressTracker = ProgressTracker.NULL_TRACKER;
+
+        // Create the algorithm
+        var algo = new MaxFlow(
+            graph,
+            parameters,
+            progressTracker,
+            terminationFlag
+        );
+
+        // Submit the algorithm for async computation
+        return algorithmCaller.run(
+            algo::compute,
+            jobId
         );
     }
 

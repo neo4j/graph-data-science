@@ -124,6 +124,7 @@ public class ConfigurationParsersForMutateMode {
             case Leiden -> LeidenMutateConfig::of;
             case Louvain -> LouvainMutateConfig::of;
             case LongestPath -> null;
+            case MaxFlow -> null;
             case Modularity -> null;
             case ModularityOptimization -> ModularityOptimizationMutateConfig::of;
             case NodeSimilarity -> NodeSimilarityMutateConfig::of;

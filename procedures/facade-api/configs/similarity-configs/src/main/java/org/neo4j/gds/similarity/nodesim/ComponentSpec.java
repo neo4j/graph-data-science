@@ -47,12 +47,12 @@ public final class ComponentSpec {
             throw new IllegalArgumentException("Invalid component spec: cannot parse null as node property");
         }
         if (userInput instanceof String) {
-            return parse((String) userInput);
+            return parseString((String) userInput);
         }
         throw new IllegalArgumentException(formatWithLocale("Invalid component spec: cannot parse type %s with value %s", userInput.getClass().getSimpleName(), userInput.toString()));
     }
 
-    private static ComponentSpec parse(@NotNull String userInput) {
+    private static ComponentSpec parseString(@NotNull String userInput) {
         if (userInput.isBlank()) {
             throw new IllegalArgumentException("Invalid component spec: expected a valid node property");
         }

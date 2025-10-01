@@ -38,7 +38,7 @@ final class SupplyAndDemandFactory {
         InputNodes targetNodes
     ) {
         var supply = createSupply(sourceNodes, graph);
-        var demand = createDemand(targetNodes, supply);
+        var demand = createDemand(targetNodes, graph, supply);
         return Pair.of(supply, demand);
     }
 
@@ -46,28 +46,28 @@ final class SupplyAndDemandFactory {
         return
             switch (sourceNodes) {
                 case ListInputNodes list -> list.inputNodes().stream().map(sourceNode -> new NodeWithValue(
-                    sourceNode, graph.streamRelationships(
-                    sourceNode,
+                    graph.toMappedNodeId(sourceNode), graph.streamRelationships(
+                    graph.toMappedNodeId(sourceNode),
                     0D
                 ).map(RelationshipCursor::property).reduce(0D, Double::sum)
                 )).toArray(NodeWithValue[]::new);
                 case MapInputNodes map -> map.map().entrySet().stream().map(entry -> new NodeWithValue(
-                    entry.getKey(),
+                    graph.toMappedNodeId(entry.getKey()),
                     entry.getValue()
                 )).toArray(NodeWithValue[]::new);
                 default -> throw new IllegalStateException("Unexpected value: " + sourceNodes); //fixme
             };
     }
 
-    private static NodeWithValue[] createDemand(InputNodes targetNodes, NodeWithValue[] supply) {
+    private static NodeWithValue[] createDemand(InputNodes targetNodes, Graph graph, NodeWithValue[] supply) {
         return
             switch (targetNodes) {
                 case ListInputNodes list -> {
                     var totalOutgoing = Arrays.stream(supply).map(nodeWithValue -> nodeWithValue.value()).reduce(0D, Double::sum);
-                    yield list.inputNodes().stream().map(sourceNode -> new NodeWithValue(sourceNode, totalOutgoing)).toArray(NodeWithValue[]::new);
+                    yield list.inputNodes().stream().map(sourceNode -> new NodeWithValue(graph.toMappedNodeId(sourceNode), totalOutgoing)).toArray(NodeWithValue[]::new);
                 }
                 case MapInputNodes map -> map.map().entrySet().stream().map(entry -> new NodeWithValue(
-                    entry.getKey(),
+                    graph.toMappedNodeId(entry.getKey()),
                     entry.getValue()
                 )).toArray(NodeWithValue[]::new);
                 default -> throw new IllegalStateException("Unexpected value: " + targetNodes); //fixme

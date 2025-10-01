@@ -17,11 +17,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.maxflow;
+package org.neo4j.gds.procedures.algorithms.pathfinding.stream;
 
-import org.neo4j.gds.collections.ha.HugeObjectArray;
+import org.neo4j.gds.core.loading.GraphResources;
+import org.neo4j.gds.maxflow.FlowResult;
+import org.neo4j.gds.procedures.algorithms.pathfinding.MaxFlowStreamResult;
+import org.neo4j.gds.result.TimedAlgorithmResult;
+import org.neo4j.gds.results.ResultTransformerBuilder;
 
-public record FlowResult(HugeObjectArray<FlowRelationship> flow, double totalFlow) {
+import java.util.stream.Stream;
 
-    public static FlowResult EMPTY = new FlowResult(HugeObjectArray.newArray(FlowRelationship.class, 0), 0D);
+class MaxFlowStreamResultTransformerBuilder implements ResultTransformerBuilder<TimedAlgorithmResult<FlowResult>, Stream<MaxFlowStreamResult>> {
+
+    MaxFlowStreamResultTransformerBuilder() {}
+
+    @Override
+    public MaxFlowStreamResultTransformer build(GraphResources graphResources) {
+
+        return new MaxFlowStreamResultTransformer(graphResources.graph());
+    }
+
 }

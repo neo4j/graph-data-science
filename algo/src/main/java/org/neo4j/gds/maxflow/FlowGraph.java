@@ -19,11 +19,13 @@
  */
 package org.neo4j.gds.maxflow;
 
+import org.apache.commons.lang3.mutable.MutableDouble;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.properties.relationships.RelationshipWithPropertyConsumer;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.collections.ha.HugeObjectArray;
 
 public final class FlowGraph {
     private final Graph graph;
@@ -244,7 +246,9 @@ public final class FlowGraph {
     }
 
     FlowResult createFlowResult() {
-        var flowResult = new FlowResult(originalEdgeCount());
+        var flow = HugeObjectArray.newArray(FlowRelationship.class, originalEdgeCount());
+        var totalFlow = new MutableDouble(0D);
+
         var idx = new MutableLong(0L);
         for (long nodeId = 0; nodeId < originalNodeCount(); nodeId++) {
             var relIdx = new MutableLong(indPtr.get(nodeId));
@@ -252,13 +256,10 @@ public final class FlowGraph {
                 nodeId,
                 0D,
                 (s, t, _capacity) -> {
-                    var flow = this.flow.get(relIdx.longValue());
-                    if (flow > 0.0) {
-                        var flowRelationship = new FlowRelationship(s, t, flow);
-                        flowResult.flow.set(idx.getAndIncrement(), flowRelationship);
-//                        if (t == target) {
-//                            flowResult.totalFlow += flow;
-//                        }
+                    var flow_ = this.flow.get(relIdx.longValue());
+                    if (flow_ > 0.0) {
+                        var flowRelationship = new FlowRelationship(s, t, flow_);
+                        flow.set(idx.getAndIncrement(), flowRelationship);
                     }
                     relIdx.increment();
                     return true;
@@ -273,11 +274,10 @@ public final class FlowGraph {
                 var fakeFlowFromSuperTarget = this.flow.get(relIdx);
                 var actualFlowFromSuperTarget = fakeFlowFromSuperTarget - originalCapacity.get(relIdx);
                 var actualFlowToSuperTarget = -actualFlowFromSuperTarget;
-                flowResult.totalFlow += actualFlowToSuperTarget;
+                totalFlow.add(actualFlowToSuperTarget);
                 return true;
             }
         );
-        flowResult.chop(idx.longValue());
-        return flowResult;
+        return new FlowResult(flow.copyOf(idx.longValue()), totalFlow.doubleValue());
     }
 }

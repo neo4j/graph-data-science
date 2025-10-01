@@ -246,6 +246,13 @@ class PushbackPathFindingProcedureFacadeTest {
         }
 
         @Test
+        void maxFlow() {
+            facade.maxFlowStream(graphName, config);
+            verify(streamFacadeMock).maxFlow(graphName, config);
+            verifyNoInteractions(mutateFacadeMock, statsFacadeMock, writeFacadeMock);
+        }
+
+        @Test
         void prizeCollectingSteinerTreeStream() {
             facade.prizeCollectingSteinerTreeStream(graphName, config);
             verify(streamFacadeMock).prizeCollectingSteinerTree(graphName, config);

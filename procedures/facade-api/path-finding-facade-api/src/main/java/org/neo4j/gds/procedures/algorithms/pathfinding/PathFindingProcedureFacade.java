@@ -144,6 +144,7 @@ public interface PathFindingProcedureFacade {
 
     Stream<PathFindingStreamResult> longestPathStream(String graphName, Map<String, Object> configuration);
 
+    Stream<MaxFlowStreamResult> maxFlowStream(String graphName, Map<String, Object> configuration);
 
     Stream<SpanningTreeStreamResult> prizeCollectingSteinerTreeStream(String graphName, Map<String, Object> configuration);
 

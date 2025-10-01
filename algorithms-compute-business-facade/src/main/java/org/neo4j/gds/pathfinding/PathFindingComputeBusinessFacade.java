@@ -38,6 +38,8 @@ import org.neo4j.gds.dag.longestPath.DagLongestPathParameters;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortParameters;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortResult;
 import org.neo4j.gds.kspanningtree.KSpanningTreeParameters;
+import org.neo4j.gds.maxflow.FlowResult;
+import org.neo4j.gds.maxflow.MaxFlowParameters;
 import org.neo4j.gds.pathfinding.validation.KSpanningTreeGraphStoreValidation;
 import org.neo4j.gds.pathfinding.validation.PCSTGraphStoreValidation;
 import org.neo4j.gds.pathfinding.validation.RandomWalkGraphValidation;
@@ -287,6 +289,34 @@ public class PathFindingComputeBusinessFacade {
         var graph = graphResources.graph();
 
         return computeFacade.longestPath(
+            graph,
+            parameters,
+            jobId,
+            logProgress
+        ).thenApply(resultTransformerBuilder.build(graphResources));
+    }
+
+    public <TR> CompletableFuture<TR> maxFlow(
+        GraphName graphName,
+        GraphParameters graphParameters,
+        Optional<String> relationshipProperty,
+        MaxFlowParameters parameters,
+        JobId jobId,
+        boolean logProgress,
+        ResultTransformerBuilder<TimedAlgorithmResult<FlowResult>, TR> resultTransformerBuilder
+    ) {
+        var graphResources = graphStoreCatalogService.fetchGraphResources(
+            graphName,
+            graphParameters,
+            relationshipProperty,
+            new NoAlgorithmValidation(),
+            Optional.empty(),
+            user,
+            databaseId
+        );
+        var graph = graphResources.graph();
+
+        return computeFacade.maxFlow(
             graph,
             parameters,
             jobId,

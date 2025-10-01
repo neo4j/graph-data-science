@@ -469,6 +469,8 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         "gds.louvain.write",
         "gds.louvain.write.estimate",
 
+        "gds.maxFlow.stream",
+
         "gds.nodeSimilarity.mutate",
         "gds.nodeSimilarity.mutate.estimate",
         "gds.nodeSimilarity.stats",
@@ -629,7 +631,7 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         );
 
         // If you find yourself updating this count, please also update the count in SmokeTest.kt
-        int expectedCount = 468;
+        int expectedCount = 469;
         assertEquals(
             expectedCount,
             returnedRows,

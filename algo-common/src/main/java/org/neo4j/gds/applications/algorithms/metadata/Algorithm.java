@@ -68,6 +68,7 @@ public enum Algorithm {
     Leiden,
     Louvain,
     LongestPath,
+    MaxFlow,
     Modularity,
     ModularityOptimization,
     NodeSimilarity,
