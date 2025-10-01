@@ -40,6 +40,7 @@ public final class TaskTreeProgressTracker extends TaskProgressTracker {
             taskRegistryFactory,
             new TaskProgressLogger(
                 log,
+                jobId,
                 baseTask,
                 concurrency,
                 new PassThroughTaskVisitor()
