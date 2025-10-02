@@ -38,7 +38,7 @@ public final class TaskTreeProgressTracker extends TaskProgressTracker {
             baseTask,
             jobId,
             taskRegistryFactory,
-            new TaskProgressLogger(
+            TaskProgressLogger.create(
                 log,
                 jobId,
                 baseTask,
