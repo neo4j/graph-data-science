@@ -68,10 +68,10 @@ public class TaskProgressTracker implements ProgressTracker {
         TaskRegistryFactory taskRegistryFactory,
         UserLogRegistryFactory userLogRegistryFactory
     ) {
-        this(baseTask, jobId, taskRegistryFactory, new TaskProgressLogger(log, baseTask, concurrency), userLogRegistryFactory);
+        this(baseTask, jobId, taskRegistryFactory, TaskProgressLogger.create(log, jobId, baseTask, concurrency), userLogRegistryFactory);
     }
 
-    protected TaskProgressTracker(
+    public TaskProgressTracker(
         Task baseTask,
         JobId jobId,
         TaskRegistryFactory taskRegistryFactory,

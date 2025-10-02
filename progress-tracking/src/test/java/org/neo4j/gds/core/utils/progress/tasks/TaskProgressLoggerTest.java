@@ -21,24 +21,28 @@ package org.neo4j.gds.core.utils.progress.tasks;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.core.utils.progress.JobId;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThatNoException;
 
 class TaskProgressLoggerTest {
-
     @Test
-    void shouldNotEliminateParentTaskIfCommonPreffix(){
-
+    void shouldNotEliminateParentTaskIfCommonPrefix() {
         var taskA = Tasks.leaf("A");
         var taskAB = Tasks.task("A B", List.of(taskA));
         var task = Tasks.task("T", List.of(taskA));
 
-        var logger =new TaskProgressLogger(LoggerForProgressTracking.noOpLog(),task,new Concurrency(1));
+        var logger = TaskProgressLogger.create(
+            LoggerForProgressTracking.noOpLog(),
+            new JobId(),
+            task,
+            new Concurrency(1)
+        );
 
         assertThatNoException().isThrownBy(
-            ()-> {
+            () -> {
                 logger.startSubTask("T");
                 logger.startSubTask("A B");
                 logger.startSubTask("A ");
@@ -47,7 +51,5 @@ class TaskProgressLoggerTest {
                 logger.finishSubTask("T");
             }
         );
-
     }
-
 }

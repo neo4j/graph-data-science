@@ -22,25 +22,36 @@ package org.neo4j.gds.core.utils.progress.tasks;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.BatchingProgressLogger;
+import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.ProgressLogger;
+
+import java.util.function.Supplier;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public class TaskProgressLogger extends BatchingProgressLogger {
-
+@SuppressWarnings("ClassCanBeRecord")
+public final class TaskProgressLogger implements ProgressLogger {
+    private final BatchingProgressLogger batchingProgressLogger;
     private final Task baseTask;
     private final TaskVisitor loggingLeafTaskVisitor;
 
-    TaskProgressLogger(LoggerForProgressTracking log, Task baseTask, Concurrency concurrency) {
-        super(log, baseTask, concurrency);
-        this.baseTask = baseTask;
-        this.loggingLeafTaskVisitor = new LoggingLeafTaskVisitor(this);
+    static TaskProgressLogger create(LoggerForProgressTracking log, JobId jobId, Task baseTask, Concurrency concurrency) {
+        var batchingProgressLogger = new BatchingProgressLogger(log, jobId, baseTask, concurrency);
+        var loggingLeafTaskVisitor = new LoggingLeafTaskVisitor(batchingProgressLogger);
 
+        return new TaskProgressLogger(batchingProgressLogger, baseTask, loggingLeafTaskVisitor);
     }
-    TaskProgressLogger(LoggerForProgressTracking log, Task baseTask, Concurrency concurrency, TaskVisitor leafTaskVisitor) {
-        super(log, baseTask, concurrency);
+
+    static TaskProgressLogger create(LoggerForProgressTracking log, JobId jobId, Task baseTask, Concurrency concurrency, TaskVisitor leafTaskVisitor) {
+        var batchingProgressLogger = new BatchingProgressLogger(log, jobId, baseTask, concurrency);
+
+        return new TaskProgressLogger(batchingProgressLogger, baseTask, leafTaskVisitor);
+    }
+
+    private TaskProgressLogger(BatchingProgressLogger batchingProgressLogger, Task baseTask, TaskVisitor loggingLeafTaskVisitor) {
+        this.batchingProgressLogger = batchingProgressLogger;
         this.baseTask = baseTask;
-        this.loggingLeafTaskVisitor = leafTaskVisitor;
+        this.loggingLeafTaskVisitor = loggingLeafTaskVisitor;
     }
 
     void logBeginSubTask(Task task, Task parentTask) {
@@ -104,20 +115,13 @@ public class TaskProgressLogger extends BatchingProgressLogger {
 
     private String taskDescription(Task task, Task parentTask) {
         String taskName;
-        if (parentTask instanceof IterativeTask) {
-            var iterativeParentTask = (IterativeTask) parentTask;
+        if (parentTask instanceof IterativeTask iterativeParentTask) {
             var iterativeTaskMode = iterativeParentTask.mode();
-            switch (iterativeTaskMode) {
-                case DYNAMIC:
-                case FIXED:
-                    taskName = boundedIterationsTaskName(iterativeParentTask, task);
-                    break;
-                case OPEN:
-                    taskName = unboundedIterationsTaskName(iterativeParentTask, task);
-                    break;
-                default:
-                    throw new UnsupportedOperationException(formatWithLocale("Enum value %s is not supported", iterativeTaskMode));
-            }
+
+            taskName = switch (iterativeTaskMode) {
+                case DYNAMIC, FIXED -> boundedIterationsTaskName(iterativeParentTask, task);
+                case OPEN -> unboundedIterationsTaskName(iterativeParentTask, task);
+            };
         } else {
             taskName = taskDescription(task);
         }
@@ -134,17 +138,58 @@ public class TaskProgressLogger extends BatchingProgressLogger {
         task.visit(loggingLeafTaskVisitor);
     }
 
-    private static final class LoggingLeafTaskVisitor implements TaskVisitor {
+    @Override
+    public String getTask() {
+        return batchingProgressLogger.getTask();
+    }
 
-        private final ProgressLogger progressLogger;
+    @Override
+    public void setTask(String task) {
+        batchingProgressLogger.setTask(task);
+    }
 
-        private LoggingLeafTaskVisitor(ProgressLogger progressLogger) {
-            this.progressLogger = progressLogger;
-        }
+    @Override
+    public void logProgress(Supplier<String> msgFactory) {
+        batchingProgressLogger.logProgress(msgFactory);
+    }
 
-        @Override
-        public void visitLeafTask(LeafTask leafTask) {
-            progressLogger.logFinishPercentage();
-        }
+    @Override
+    public void logProgress(long progress, Supplier<String> msgFactory) {
+        batchingProgressLogger.logProgress(progress, msgFactory);
+    }
+
+    @Override
+    public void logMessage(Supplier<String> msg) {
+        batchingProgressLogger.logMessage(msg);
+    }
+
+    @Override
+    public void logFinishPercentage() {
+        batchingProgressLogger.logFinishPercentage();
+    }
+
+    @Override
+    public void logDebug(Supplier<String> msg) {
+        batchingProgressLogger.logDebug(msg);
+    }
+
+    @Override
+    public void logWarning(String msg) {
+        batchingProgressLogger.logWarning(msg);
+    }
+
+    @Override
+    public void logError(String msg) {
+        batchingProgressLogger.logError(msg);
+    }
+
+    @Override
+    public long reset(long newTaskVolume) {
+        return batchingProgressLogger.reset(newTaskVolume);
+    }
+
+    @Override
+    public void release() {
+        batchingProgressLogger.release();
     }
 }

@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.utils;
+package org.neo4j.gds.core.utils.progress;
 
 import org.assertj.core.api.junit.jupiter.SoftAssertionsExtension;
 import org.eclipse.collections.impl.utility.ListIterate;
@@ -28,10 +28,11 @@ import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
-import org.neo4j.gds.core.utils.progress.BatchingProgressLogger;
+import org.neo4j.gds.core.utils.progress.tasks.LeafTask;
 import org.neo4j.gds.core.utils.progress.tasks.LoggerForProgressTracking;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.logging.GdsTestLog;
+import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.BitUtil;
 import org.neo4j.gds.utils.CloseableThreadLocal;
 
@@ -47,6 +48,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -61,6 +65,7 @@ class BatchingProgressLoggerTest {
         var concurrency = new Concurrency(1);
         var logger = new BatchingProgressLogger(
             new LoggerForProgressTrackingAdapter(log),
+            new JobId("some job id"),
             Tasks.leaf("foo", taskVolume),
             batchSize,
             concurrency
@@ -72,13 +77,13 @@ class BatchingProgressLoggerTest {
         }
 
         var threadName = Thread.currentThread().getName();
-        var messageTemplate = "[%s] foo %d%% %d";
+        var messageTemplate = "[%s] [%s] foo %d%% %d";
         var expectedMessages = List.of(
-            formatWithLocale(messageTemplate, threadName, 1 * batchSize * 100 / taskVolume, 1 * batchSize - 1),
-            formatWithLocale(messageTemplate, threadName, 2 * batchSize * 100 / taskVolume, 2 * batchSize - 1),
-            formatWithLocale(messageTemplate, threadName, 3 * batchSize * 100 / taskVolume, 3 * batchSize - 1),
-            formatWithLocale(messageTemplate, threadName, 4 * batchSize * 100 / taskVolume, 4 * batchSize - 1),
-            formatWithLocale(messageTemplate, threadName, 5 * batchSize * 100 / taskVolume, 5 * batchSize - 1)
+            formatWithLocale(messageTemplate, "some job id", threadName, 1 * batchSize * 100 / taskVolume, 1 * batchSize - 1),
+            formatWithLocale(messageTemplate, "some job id", threadName, 2 * batchSize * 100 / taskVolume, 2 * batchSize - 1),
+            formatWithLocale(messageTemplate, "some job id", threadName, 3 * batchSize * 100 / taskVolume, 3 * batchSize - 1),
+            formatWithLocale(messageTemplate, "some job id", threadName, 4 * batchSize * 100 / taskVolume, 4 * batchSize - 1),
+            formatWithLocale(messageTemplate, "some job id", threadName, 5 * batchSize * 100 / taskVolume, 5 * batchSize - 1)
         );
 
         var messages = log.getMessages("info");
@@ -94,6 +99,7 @@ class BatchingProgressLoggerTest {
         var concurrency = new Concurrency(1);
         var logger = new BatchingProgressLogger(
             new LoggerForProgressTrackingAdapter(log),
+            new JobId("a job id"),
             Tasks.leaf("foo", taskVolume),
             batchSize,
             concurrency
@@ -104,7 +110,7 @@ class BatchingProgressLoggerTest {
         }
 
         var threadName = Thread.currentThread().getName();
-        var messageTemplate = "[%s] foo %d%%";
+        var messageTemplate = "[%s] [%s] foo %d%%";
 
         var progressSteps = IntStream
             .iterate(0, i -> i < taskVolume, i -> i + progressStep)
@@ -114,7 +120,7 @@ class BatchingProgressLoggerTest {
 
         var expectedMessages = loggedProgressSteps.stream()
             .skip(1)
-            .map(i -> formatWithLocale(messageTemplate, threadName, i * 100 / taskVolume))
+            .map(i -> formatWithLocale(messageTemplate, "a job id", threadName, i * 100 / taskVolume))
             .collect(Collectors.toList());
 
         var messages = log.getMessages("info");
@@ -151,7 +157,11 @@ class BatchingProgressLoggerTest {
         var taskVolume = 1337;
 
         var log = new GdsTestLog();
-        var logger = new BatchingProgressLogger(new LoggerForProgressTrackingAdapter(log), Tasks.leaf("Test", taskVolume), concurrency); // batchSize is 13
+        var logger = new BatchingProgressLogger(
+            new LoggerForProgressTrackingAdapter(log),
+            new JobId(),
+            Tasks.leaf("Test", taskVolume),
+            concurrency); // batchSize is 13
         logger.reset(taskVolume);
         logger.logProgress(20); // callCount is 20, call count after logging == 20 - 13 = 7
         assertThat(log.getMessages(TestLog.INFO))
@@ -168,7 +178,7 @@ class BatchingProgressLoggerTest {
     void log100Percent() {
         var log = new GdsTestLog();
         var concurrency = new Concurrency(1);
-        var testProgressLogger = new BatchingProgressLogger(new LoggerForProgressTrackingAdapter(log), Tasks.leaf("Test"), concurrency);
+        var testProgressLogger = new BatchingProgressLogger(new LoggerForProgressTrackingAdapter(log), new JobId(), Tasks.leaf("Test"), concurrency);
         testProgressLogger.reset(1337);
         testProgressLogger.logFinishPercentage();
         assertThat(log.getMessages(TestLog.INFO))
@@ -180,7 +190,7 @@ class BatchingProgressLoggerTest {
     void shouldLog100OnlyOnce() {
         var log = new GdsTestLog();
         var concurrency = new Concurrency(1);
-        var testProgressLogger = new BatchingProgressLogger(new LoggerForProgressTrackingAdapter(log), Tasks.leaf("Test"), concurrency);
+        var testProgressLogger = new BatchingProgressLogger(new LoggerForProgressTrackingAdapter(log), new JobId(), Tasks.leaf("Test"), concurrency);
         testProgressLogger.reset(1);
         testProgressLogger.logProgress(1);
         testProgressLogger.logFinishPercentage();
@@ -193,7 +203,7 @@ class BatchingProgressLoggerTest {
     void shouldNotExceed100Percent() {
         var log = new GdsTestLog();
         var concurrency = new Concurrency(1);
-        var testProgressLogger = new BatchingProgressLogger(new LoggerForProgressTrackingAdapter(log), Tasks.leaf("Test"), concurrency);
+        var testProgressLogger = new BatchingProgressLogger(new LoggerForProgressTrackingAdapter(log), new JobId(), Tasks.leaf("Test"), concurrency);
         testProgressLogger.reset(1);
         testProgressLogger.logProgress(1); // reaches 100 %
         testProgressLogger.logProgress(1); // exceeds 100 %
@@ -206,6 +216,7 @@ class BatchingProgressLoggerTest {
     void closesThreadLocal() {
         var logger = new BatchingProgressLogger(
             LoggerForProgressTracking.noOpLog(),
+            new JobId(),
             Tasks.leaf("foo", 42),
             new Concurrency(1)
         );
@@ -227,7 +238,7 @@ class BatchingProgressLoggerTest {
 
     private static List<Integer> performLogging(long taskVolume, Concurrency concurrency) {
         var log = new GdsTestLog();
-        var logger = new BatchingProgressLogger(new LoggerForProgressTrackingAdapter(log), Tasks.leaf("Test", taskVolume), concurrency);
+        var logger = new BatchingProgressLogger(new LoggerForProgressTrackingAdapter(log), new JobId("the_job_id"), Tasks.leaf("Test", taskVolume), concurrency);
         logger.reset(taskVolume);
 
         var batchSize = (int) BitUtil.ceilDiv(taskVolume, concurrency.value());
@@ -249,9 +260,69 @@ class BatchingProgressLoggerTest {
         return log
             .getMessages(TestLog.INFO)
             .stream()
-            .map(progress -> progress.split(" ")[2].replace("%", ""))
+            .map(progress -> progress.split(" ")[3].replace("%", ""))
             .map(Integer::parseInt)
             .collect(Collectors.toList());
     }
 
+    @Test
+    void shouldPrependCorrelationIdToInfoLogMessages() {
+        var log = mock(Log.class);
+        var batchingProgressLogger = new BatchingProgressLogger(
+            new LoggerForProgressTrackingAdapter(log),
+            JobId.parse("my job id"),
+            new LeafTask("Monsieur Alfonse", 42),
+            new Concurrency(87)
+        );
+
+        batchingProgressLogger.logMessage("Swiftly, and with style");
+
+        verify(log).info("[%s] [%s] %s %s", "my job id", "Test worker", "Monsieur Alfonse", "Swiftly, and with style");
+    }
+
+    @Test
+    void shouldPrependCorrelationIdToDebugLogMessages() {
+        var log = mock(Log.class);
+        var batchingProgressLogger = new BatchingProgressLogger(
+            new LoggerForProgressTrackingAdapter(log),
+            JobId.parse("my job id"),
+            new LeafTask("Monsieur Alfonse", 42),
+            new Concurrency(87)
+        );
+
+        when(log.isDebugEnabled()).thenReturn(true);
+        batchingProgressLogger.logDebug("Swiftly, and with style");
+
+        verify(log).debug("[%s] [%s] %s %s", "my job id", "Test worker", "Monsieur Alfonse", "Swiftly, and with style");
+    }
+
+    @Test
+    void shouldPrependCorrelationIdToWarningLogMessages() {
+        var log = mock(Log.class);
+        var batchingProgressLogger = new BatchingProgressLogger(
+            new LoggerForProgressTrackingAdapter(log),
+            JobId.parse("my job id"),
+            new LeafTask("Monsieur Alfonse", 42),
+            new Concurrency(87)
+        );
+
+        batchingProgressLogger.logWarning("Swiftly, and with style");
+
+        verify(log).warn("[%s] [%s] %s %s", "my job id", "Test worker", "Monsieur Alfonse", "Swiftly, and with style");
+    }
+
+    @Test
+    void shouldPrependCorrelationIdToErrorLogMessages() {
+        var log = mock(Log.class);
+        var batchingProgressLogger = new BatchingProgressLogger(
+            new LoggerForProgressTrackingAdapter(log),
+            JobId.parse("my job id"),
+            new LeafTask("Monsieur Alfonse", 42),
+            new Concurrency(87)
+        );
+
+        batchingProgressLogger.logError("Swiftly, and with style");
+
+        verify(log).error("[%s] [%s] %s %s", "my job id", "Test worker", "Monsieur Alfonse", "Swiftly, and with style");
+    }
 }
