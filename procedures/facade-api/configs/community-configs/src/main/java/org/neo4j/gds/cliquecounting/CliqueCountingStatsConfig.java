@@ -29,6 +29,7 @@ public interface CliqueCountingStatsConfig extends CliqueCountingBaseConfig {
     }
 
     @Override
+    @Configuration.Ignore
     @Configuration.ToMapValue("org.neo4j.gds.cliquecounting.CliqueCountingMode#toString")
     default CliqueCountingMode getMode() {
         return CliqueCountingMode.GloballyOnly;

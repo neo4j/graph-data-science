@@ -32,14 +32,12 @@ import java.util.stream.Collectors;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-@Configuration
 public interface CliqueCountingBaseConfig extends AlgoBaseConfig {
 
-//    @Configuration.ToMapValue("org.neo4j.gds.similarity.knn.KnnSampler.SamplerType#toString")
-    @Configuration.ToMapValue("org.neo4j.gds.cliquecounting.CliqueCountingMode#toString")
+    @Configuration.Ignore
     CliqueCountingMode getMode();
 
-    //todo: fix type
+    @Configuration.Ignore
     default List<long[]> subcliques() {
         return List.of();
     }
