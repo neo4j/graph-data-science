@@ -34,7 +34,6 @@ import org.neo4j.gds.similarity.knn.metrics.SimilarityComputer;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Optional;
-import java.util.concurrent.ExecutorService;
 
 /**
  * Filtered KNN is the same as ordinary KNN, _but_ we allow users to regulate final output in two ways.
@@ -83,7 +82,7 @@ public class FilteredKnn extends Algorithm<FilteredKnnResult> {
      *
      * @param optionalSimilarityFunction An actual similarity function if you want seeding, empty otherwise
      */
-    static FilteredKnn create(
+    private static FilteredKnn create(
         Graph graph,
         FilteredKnnParameters parameters,
         KnnContext context,
@@ -119,21 +118,19 @@ public class FilteredKnn extends Algorithm<FilteredKnnResult> {
             terminationFlag
         );
 
-        return new FilteredKnn(context.progressTracker(), knn, targetNodeFiltering, sourceNodeFilter, terminationFlag);
+        return new FilteredKnn(context.progressTracker(), knn, targetNodeFiltering, sourceNodeFilter);
     }
 
     private FilteredKnn(
         ProgressTracker progressTracker,
         Knn delegate,
         StreamProducingTargetNodeFiltering targetNodeFiltering,
-        NodeFilter sourceNodeFilter,
-        TerminationFlag terminationFlag
+        NodeFilter sourceNodeFilter
     ) {
         super(progressTracker);
         this.delegate = delegate;
         this.targetNodeFiltering = targetNodeFiltering;
         this.sourceNodeFilter = sourceNodeFilter;
-        this.terminationFlag = terminationFlag;
     }
 
     @Override
@@ -153,9 +150,5 @@ public class FilteredKnn extends Algorithm<FilteredKnnResult> {
             result,
             sourceNodeFilter
         );
-    }
-
-    ExecutorService executorService() {
-        return delegate.executorService();
     }
 }
