@@ -215,7 +215,6 @@ public class CommunityAlgorithms {
             graph,
             parameters,
             progressTracker,
-            DefaultPool.INSTANCE,
             terminationFlag
         ).compute();
     }

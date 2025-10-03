@@ -101,7 +101,7 @@ public final class Louvain extends Algorithm<LouvainResult> {
         this.terminationFlag = terminationFlag;
     }
 
-    public Louvain(Graph graph, LouvainParameters parameters, ProgressTracker progressTracker, ExecutorService executorService, TerminationFlag terminationFlag) {
+    public Louvain(Graph graph, LouvainParameters parameters, ProgressTracker progressTracker, TerminationFlag terminationFlag) {
         this(
             graph,
             parameters.concurrency(),

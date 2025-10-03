@@ -475,7 +475,6 @@ class LouvainTest {
                 graph,
                 parameters,
                 progressTrackerWithLog.progressTracker(),
-                DefaultPool.INSTANCE,
                 TerminationFlag.RUNNING_TRUE
             );
             louvain.compute();
