@@ -36,16 +36,20 @@ import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+@SuppressWarnings("ClassCanBeRecord")
 public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTemplate {
+    private final Log log;
     private final GraphStoreCatalogService graphStoreCatalogService;
     private final RequestScopedDependencies requestScopedDependencies;
     private final ComputationService computationService;
 
     DefaultAlgorithmProcessingTemplate(
+        Log log,
         GraphStoreCatalogService graphStoreCatalogService,
         RequestScopedDependencies requestScopedDependencies,
         ComputationService computationService
     ) {
+        this.log = log;
         this.graphStoreCatalogService = graphStoreCatalogService;
         this.requestScopedDependencies = requestScopedDependencies;
         this.computationService = computationService;
@@ -68,6 +72,7 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
         );
 
         return new DefaultAlgorithmProcessingTemplate(
+            log,
             graphStoreCatalogService,
             requestScopedDependencies,
             algorithmComputer
@@ -220,31 +225,37 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
         Optional<SideEffect<RESULT_FROM_ALGORITHM, SIDE_EFFECT_METADATA>> sideEffect,
         ResultRenderer<RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, SIDE_EFFECT_METADATA> resultRenderer
     ) {
-        // as we progress through the steps we gather timings
-        var timingsBuilder = new AlgorithmProcessingTimingsBuilder();
+        try (RequestScopedLog log = RequestScopedLog.create(this.log, configuration.jobId())) {
+            // as we progress through the steps we gather timings
+            var timingsBuilder = new AlgorithmProcessingTimingsBuilder();
 
-        var graphResources = loadAndValidateGraph(
-            timingsBuilder,
-            relationshipWeightOverride,
-            graphName,
-            configuration,
-            postGraphStoreLoadValidationHooks,
-            postGraphStoreLoadETLHooks
-        );
+            log.onLoadingGraph();
+            var graphResources = loadAndValidateGraph(
+                timingsBuilder,
+                relationshipWeightOverride,
+                graphName,
+                configuration,
+                postGraphStoreLoadValidationHooks,
+                postGraphStoreLoadETLHooks
+            );
 
-        var result = runComputation(
-            configuration,
-            graphResources,
-            label,
-            estimationSupplier,
-            computation,
-            timingsBuilder,
-            dimensionTransformer
-        );
+            log.onComputing();
+            var result = runComputation(
+                configuration,
+                graphResources,
+                label,
+                estimationSupplier,
+                computation,
+                timingsBuilder,
+                dimensionTransformer
+            );
 
-        var metadata = processSideEffect(timingsBuilder, graphResources, result, sideEffect);
+            log.onProcessingResult();
+            var metadata = processSideEffect(timingsBuilder, graphResources, result, sideEffect);
 
-        return resultRenderer.render(graphResources, result, timingsBuilder.build(), metadata);
+            log.onRenderingOutput();
+            return resultRenderer.render(graphResources, result, timingsBuilder.build(), metadata);
+        }
     }
 
     /**

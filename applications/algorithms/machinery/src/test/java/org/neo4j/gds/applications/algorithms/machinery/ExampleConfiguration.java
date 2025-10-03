@@ -22,26 +22,35 @@ package org.neo4j.gds.applications.algorithms.machinery;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.RelationshipWeightConfig;
 import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.core.utils.progress.JobId;
 
 import java.util.Optional;
 
 /**
  * A fake configuration that we can slowly build out
  */
+@SuppressWarnings("ClassCanBeRecord")
 class ExampleConfiguration implements AlgoBaseConfig, RelationshipWeightConfig {
+    private final JobId jobId;
     private final boolean sudo;
 
-    ExampleConfiguration() {
-        this(false);
+    ExampleConfiguration(JobId jobId) {
+        this(jobId, false);
     }
 
-    ExampleConfiguration(boolean sudo) {
+    private ExampleConfiguration(JobId jobId, boolean sudo) {
+        this.jobId = jobId;
         this.sudo = sudo;
     }
 
     @Override
     public Concurrency concurrency() {
         return new Concurrency(7);
+    }
+
+    @Override
+    public JobId jobId() {
+        return jobId;
     }
 
     @Override
@@ -56,6 +65,6 @@ class ExampleConfiguration implements AlgoBaseConfig, RelationshipWeightConfig {
 
     @Override
     public Optional<String> usernameOverride() {
-        throw new UnsupportedOperationException("TODO");
+        return Optional.empty();
     }
 }

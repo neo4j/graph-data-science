@@ -114,7 +114,7 @@ public class GraphStoreCatalogService {
     /**
      * Load GraphStore and graph, with copious validation.
      */
-    private GraphResources getGraphResources(
+    public GraphResources getGraphResources(
         GraphName graphName,
         Collection<NodeLabel> nodeLabelsFilter,
         Collection<RelationshipType> relationshipTypesFilter,

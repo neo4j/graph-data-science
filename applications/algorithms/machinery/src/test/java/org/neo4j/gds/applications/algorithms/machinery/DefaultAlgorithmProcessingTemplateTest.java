@@ -24,11 +24,17 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.core.loading.GraphResources;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
+import org.neo4j.gds.core.utils.progress.JobId;
+import org.neo4j.gds.logging.Log;
 
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
@@ -39,16 +45,18 @@ import static org.mockito.Mockito.when;
 class DefaultAlgorithmProcessingTemplateTest {
     @Test
     void shouldDoFourStepProcess() {
+        var log = mock(Log.class);
         var graphStoreCatalogService = mock(GraphStoreCatalogService.class);
         var requestScopedDependencies = RequestScopedDependencies.builder().build();
         var algorithmComputer = mock(ComputationService.class);
         var template = new DefaultAlgorithmProcessingTemplate(
+            log,
             graphStoreCatalogService,
             requestScopedDependencies,
             algorithmComputer
         );
 
-        var configuration = new ExampleConfiguration();
+        var configuration = new ExampleConfiguration(new JobId("my little job id"));
         var graphResources = new GraphResources(null, mock(Graph.class), null);
         when(graphStoreCatalogService.getGraphResources(
             GraphName.parse("some graph"),
@@ -90,20 +98,28 @@ class DefaultAlgorithmProcessingTemplateTest {
         );
 
         assertThat(renderedResult).isEqualTo("some rendered result");
+
+        verify(log).info("[my little job id] Algorithm processing commencing");
+        verify(log).info("[my little job id] Computing algorithm");
+        verify(log).info("[my little job id] Processing algorithm result");
+        verify(log).info("[my little job id] Rendering output");
+        verify(log).info("[my little job id] Algorithm processing complete");
     }
 
     @Test
     void shouldSkipSideEffect() {
+        var log = mock(Log.class);
         var graphStoreCatalogService = mock(GraphStoreCatalogService.class);
         var requestScopedDependencies = RequestScopedDependencies.builder().build();
         var algorithmComputer = mock(ComputationService.class);
         var template = new DefaultAlgorithmProcessingTemplate(
+            log,
             graphStoreCatalogService,
             requestScopedDependencies,
             algorithmComputer
         );
 
-        var configuration = new ExampleConfiguration();
+        var configuration = new ExampleConfiguration(new JobId("job's a good 'un"));
         var graphResources = new GraphResources(null, mock(Graph.class), null);
         when(graphStoreCatalogService.getGraphResources(
             GraphName.parse("some other graph"),
@@ -145,5 +161,80 @@ class DefaultAlgorithmProcessingTemplateTest {
         );
 
         assertThat(renderedResult).isEqualTo("some other rendered result");
+
+        verify(log).info("[job's a good 'un] Algorithm processing commencing");
+        verify(log).info("[job's a good 'un] Computing algorithm");
+        verify(log).info("[job's a good 'un] Processing algorithm result");
+        verify(log).info("[job's a good 'un] Rendering output");
+        verify(log).info("[job's a good 'un] Algorithm processing complete");
+    }
+
+    @Test
+    void shouldLogProcessingEvenWhenErrorsHappen() {
+        var log = mock(Log.class);
+        var graphStoreCatalogService = mock(GraphStoreCatalogService.class);
+        var requestScopedDependencies = RequestScopedDependencies.builder().build();
+        var algorithmComputer = mock(ComputationService.class);
+        var template = new DefaultAlgorithmProcessingTemplate(
+            log,
+            graphStoreCatalogService,
+            requestScopedDependencies,
+            algorithmComputer
+        );
+
+        var configuration = new ExampleConfiguration(new JobId("opaque job ids ftw"));
+        var graphResources = new GraphResources(null, mock(Graph.class), null);
+        when(graphStoreCatalogService.getGraphResources(
+            GraphName.parse("some other graph"),
+            configuration,
+            Optional.empty(),
+            Optional.empty(),
+            Optional.empty(),
+            requestScopedDependencies.user(),
+            requestScopedDependencies.databaseId()
+        )).thenReturn(graphResources);
+        when(algorithmComputer.computeAlgorithm(
+            configuration,
+            graphResources,
+            new StandardLabel("some other compute job"),
+            null,
+            null,
+            DimensionTransformer.DISABLED
+        )).thenReturn("some other result");
+
+        try {
+            template.processAlgorithmAndAnySideEffects(
+                Optional.empty(),
+                GraphName.parse("some other graph"),
+                configuration,
+                Optional.empty(),
+                Optional.empty(),
+                new StandardLabel("some other compute job"),
+                DimensionTransformer.DISABLED,
+                null,
+                null,
+                Optional.of((__, ___) -> {
+                    try {
+                        throw new RuntimeException("Fly, you fools!");
+                    } finally {
+                        log.info("[opaque job ids ftw] Error: wouldn't it be nice if it behaved like this");
+                    }
+                }),
+                null
+            );
+
+            fail();
+        } catch (RuntimeException e) {
+            assertEquals("Fly, you fools!", e.getMessage());
+        }
+
+        verify(log).info("[opaque job ids ftw] Algorithm processing commencing");
+        verify(log).info("[opaque job ids ftw] Computing algorithm");
+        verify(log).info("[opaque job ids ftw] Processing algorithm result");
+        verify(log).info("[opaque job ids ftw] Error: wouldn't it be nice if it behaved like this");
+        // it would be nice, actually, but this is just logging, so bits of our code can opt in,
+        // but we cannot mandate nor guarantee
+        verify(log, never()).info("[opaque job ids ftw] Rendering output"); // because exception happened
+        verify(log).info("[opaque job ids ftw] Algorithm processing complete"); // but you get the finaliser
     }
 }
