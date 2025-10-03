@@ -48,16 +48,15 @@ public class KCoreDecomposition extends Algorithm<KCoreDecompositionResult> {
     //When only 2% nodes remain in the graph, we can create a smaller array to loop over these ones only
     static double REBUILD_CONSTANT = 0.02;
 
-    public KCoreDecomposition(Graph graph, Concurrency concurrency, ProgressTracker progressTracker, TerminationFlag terminationFlag) {
-        this(graph, concurrency, progressTracker, CHUNK_SIZE, terminationFlag);
+    public KCoreDecomposition(Graph graph, Concurrency concurrency, ProgressTracker progressTracker) {
+        this(graph, concurrency, progressTracker, CHUNK_SIZE);
     }
 
-    KCoreDecomposition(Graph graph, Concurrency concurrency, ProgressTracker progressTracker, int chunkSize, TerminationFlag terminationFlag) {
+    KCoreDecomposition(Graph graph, Concurrency concurrency, ProgressTracker progressTracker, int chunkSize) {
         super(progressTracker);
         this.graph = graph;
         this.concurrency = concurrency;
         this.chunkSize = chunkSize;
-        this.terminationFlag = terminationFlag;
     }
 
     @Override
