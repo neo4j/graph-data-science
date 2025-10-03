@@ -188,7 +188,8 @@ class ShortestPathDijkstraWriteProcTest extends BaseProcTest {
         runQuery(query);
 
         var messages = testLog.getMessages(TestLog.INFO);
-        assertThat(messages.get(messages.size() - 1)).contains(":: Finished");
+
+        assertThat(messages.get(messages.size() - 3)).contains(":: Finished");
     }
 
     @Test

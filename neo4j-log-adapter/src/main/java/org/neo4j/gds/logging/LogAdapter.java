@@ -46,7 +46,6 @@ public class LogAdapter implements Log {
         neo4jUserLog.warn(message, e);
     }
 
-
     @Override
     public void warn(String format, Object... arguments) {
         neo4jUserLog.warn(format, arguments);
@@ -76,5 +75,4 @@ public class LogAdapter implements Log {
     public void error(String messageFormat, Throwable exception, Object... arguments) {
         neo4jUserLog.error(StringFormatting.formatWithLocale(messageFormat, arguments), exception);
     }
-
 }
