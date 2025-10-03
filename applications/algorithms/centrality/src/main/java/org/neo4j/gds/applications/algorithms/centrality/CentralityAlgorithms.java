@@ -21,7 +21,6 @@ package org.neo4j.gds.applications.algorithms.centrality;
 
 import com.carrotsearch.hppc.LongScatterSet;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.articulationPoints.ArticulationPointsParameters;
 import org.neo4j.gds.articulationpoints.ArticulationPoints;
 import org.neo4j.gds.articulationpoints.ArticulationPointsResult;
@@ -71,11 +70,9 @@ import static org.neo4j.gds.pagerank.PageRankVariant.PAGE_RANK;
 
 public class CentralityAlgorithms {
 
-    private final ProgressTrackerCreator progressTrackerCreator;
     private final TerminationFlag terminationFlag;
 
-    public CentralityAlgorithms(ProgressTrackerCreator progressTrackerCreator, TerminationFlag terminationFlag) {
-        this.progressTrackerCreator = progressTrackerCreator;
+    public CentralityAlgorithms(TerminationFlag terminationFlag) {
         this.terminationFlag = terminationFlag;
     }
 

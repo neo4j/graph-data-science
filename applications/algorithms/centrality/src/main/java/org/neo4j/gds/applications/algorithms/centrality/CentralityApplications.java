@@ -59,7 +59,6 @@ public final class CentralityApplications {
     ) {
         var estimation = new CentralityAlgorithmsEstimationModeBusinessFacade(estimationTemplate);
         var algorithms = new CentralityAlgorithms(
-            progressTrackerCreator,
             requestScopedDependencies.terminationFlag()
         );
 

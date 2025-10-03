@@ -112,7 +112,7 @@ class PageRankTest {
                 .tolerance(0)
                 .build();
 
-            var centralityAlgorithms = new CentralityAlgorithms(null, TerminationFlag.RUNNING_TRUE);
+            var centralityAlgorithms = new CentralityAlgorithms(TerminationFlag.RUNNING_TRUE);
             var result = centralityAlgorithms.pageRank(graph, config, ProgressTracker.NULL_TRACKER);
             var rankProvider = result.centralityScoreProvider();
 
@@ -135,7 +135,7 @@ class PageRankTest {
                 .tolerance(tolerance)
                 .build();
 
-            var centralityAlgorithms = new CentralityAlgorithms(null, TerminationFlag.RUNNING_TRUE);
+            var centralityAlgorithms = new CentralityAlgorithms(TerminationFlag.RUNNING_TRUE);
 
             var pregelResult = centralityAlgorithms.pageRank(graph, config, ProgressTracker.NULL_TRACKER);
 
@@ -161,7 +161,7 @@ class PageRankTest {
                 .sourceNodes(sourceNodeIds)
                 .build();
 
-            var centralityAlgorithms = new CentralityAlgorithms(null, TerminationFlag.RUNNING_TRUE);
+            var centralityAlgorithms = new CentralityAlgorithms(TerminationFlag.RUNNING_TRUE);
             var result = centralityAlgorithms.pageRank(graph, config, ProgressTracker.NULL_TRACKER);
             var rankProvider = result.centralityScoreProvider();
 
@@ -192,7 +192,7 @@ class PageRankTest {
                 .sourceNodes(sourceNodesMap)
                 .build();
 
-            var centralityAlgorithms = new CentralityAlgorithms(null, TerminationFlag.RUNNING_TRUE);
+            var centralityAlgorithms = new CentralityAlgorithms(TerminationFlag.RUNNING_TRUE);
             var result = centralityAlgorithms.pageRank(graph, config, ProgressTracker.NULL_TRACKER);
             var rankProvider = result.centralityScoreProvider();
 
@@ -214,7 +214,7 @@ class PageRankTest {
                 .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
                 .build();
             var progressTrackerCreator = new ProgressTrackerCreator(new LoggerForProgressTrackingAdapter(log), requestScopedDependencies);
-            var centralityAlgorithms = new CentralityAlgorithms(progressTrackerCreator, TerminationFlag.RUNNING_TRUE);
+            var centralityAlgorithms = new CentralityAlgorithms(TerminationFlag.RUNNING_TRUE);
             var businessAlgorithms = new CentralityBusinessAlgorithms(
                 centralityAlgorithms,
                 progressTrackerCreator
@@ -294,7 +294,7 @@ class PageRankTest {
 
         @Test
         void checkTerminationFlag() {
-            var centralityAlgorithms = new CentralityAlgorithms(null, TerminationFlag.STOP_RUNNING);
+            var centralityAlgorithms = new CentralityAlgorithms(TerminationFlag.STOP_RUNNING);
 
             var config = PageRankStreamConfigImpl.builder()
                 .maxIterations(40)
@@ -380,7 +380,7 @@ class PageRankTest {
                 .concurrency(1)
                 .build();
 
-            var centralityAlgorithms = new CentralityAlgorithms(null, TerminationFlag.RUNNING_TRUE);
+            var centralityAlgorithms = new CentralityAlgorithms(TerminationFlag.RUNNING_TRUE);
             var result = centralityAlgorithms.pageRank(graph, config, ProgressTracker.NULL_TRACKER);
             var rankProvider = result.centralityScoreProvider();
 
@@ -403,7 +403,7 @@ class PageRankTest {
                 .concurrency(1)
                 .build();
 
-            var centralityAlgorithms = new CentralityAlgorithms(null, TerminationFlag.RUNNING_TRUE);
+            var centralityAlgorithms = new CentralityAlgorithms(TerminationFlag.RUNNING_TRUE);
             var result = centralityAlgorithms.pageRank(zeroWeightsGraph, config, ProgressTracker.NULL_TRACKER);
             var rankProvider = result.centralityScoreProvider();
 
@@ -434,7 +434,7 @@ class PageRankTest {
                 .sourceNodes(sourceNodesMap)
                 .build();
 
-            var centralityAlgorithms = new CentralityAlgorithms(null, TerminationFlag.RUNNING_TRUE);
+            var centralityAlgorithms = new CentralityAlgorithms(TerminationFlag.RUNNING_TRUE);
             var result = centralityAlgorithms.pageRank(graph, config, ProgressTracker.NULL_TRACKER);
             var rankProvider = result.centralityScoreProvider();
 
@@ -516,7 +516,7 @@ class PageRankTest {
                 .concurrency(1)
                 .build();
 
-            var centralityAlgorithms = new CentralityAlgorithms(null, TerminationFlag.RUNNING_TRUE);
+            var centralityAlgorithms = new CentralityAlgorithms(TerminationFlag.RUNNING_TRUE);
 
             var result = centralityAlgorithms.articleRank(graph, config, ProgressTracker.NULL_TRACKER);
 
@@ -540,7 +540,7 @@ class PageRankTest {
                 .concurrency(1)
                 .build();
 
-            var centralityAlgorithms = new CentralityAlgorithms(null, TerminationFlag.RUNNING_TRUE);
+            var centralityAlgorithms = new CentralityAlgorithms(TerminationFlag.RUNNING_TRUE);
 
             var result = centralityAlgorithms.articleRank(paperGraph, config, ProgressTracker.NULL_TRACKER);
 
@@ -568,7 +568,7 @@ class PageRankTest {
                 .sourceNodes(sourceNodesMap)
                 .build();
 
-            var centralityAlgorithms = new CentralityAlgorithms(null, TerminationFlag.RUNNING_TRUE);
+            var centralityAlgorithms = new CentralityAlgorithms(TerminationFlag.RUNNING_TRUE);
 
             var result = centralityAlgorithms.articleRank(graph, config, ProgressTracker.NULL_TRACKER);
 
@@ -627,7 +627,7 @@ class PageRankTest {
                 .concurrency(1)
                 .build();
 
-            var centralityAlgorithms = new CentralityAlgorithms(null, TerminationFlag.RUNNING_TRUE);
+            var centralityAlgorithms = new CentralityAlgorithms(TerminationFlag.RUNNING_TRUE);
 
             var result = centralityAlgorithms.eigenVector(graph, config, ProgressTracker.NULL_TRACKER);
 
@@ -653,7 +653,7 @@ class PageRankTest {
                 .concurrency(1)
                 .build();
 
-            var centralityAlgorithms = new CentralityAlgorithms(null, TerminationFlag.RUNNING_TRUE);
+            var centralityAlgorithms = new CentralityAlgorithms(TerminationFlag.RUNNING_TRUE);
 
             var result = centralityAlgorithms.eigenVector(graph, config, ProgressTracker.NULL_TRACKER);
 
@@ -679,7 +679,7 @@ class PageRankTest {
                 .sourceNodes(List.of(idFunction.of("d")))
                 .build();
 
-            var centralityAlgorithms = new CentralityAlgorithms(null, TerminationFlag.RUNNING_TRUE);
+            var centralityAlgorithms = new CentralityAlgorithms(TerminationFlag.RUNNING_TRUE);
 
             var result = centralityAlgorithms.eigenVector(graph, config, ProgressTracker.NULL_TRACKER);
 
@@ -736,7 +736,7 @@ class PageRankTest {
                 .scaler(ScalerFactory.parse(scalerName))
                 .build();
 
-            var centralityAlgorithms = new CentralityAlgorithms(null, TerminationFlag.RUNNING_TRUE);
+            var centralityAlgorithms = new CentralityAlgorithms(TerminationFlag.RUNNING_TRUE);
 
             var result = centralityAlgorithms.pageRank(graph, config, ProgressTracker.NULL_TRACKER);
             var rankProvider = result.centralityScoreProvider();
@@ -764,7 +764,7 @@ class PageRankTest {
         var configBuilder = PageRankConfigImpl.builder();
 
         PageRankConfig config1 = configBuilder.concurrency(1).build();
-        var centralityAlgorithms = new CentralityAlgorithms(null, TerminationFlag.RUNNING_TRUE);
+        var centralityAlgorithms = new CentralityAlgorithms(TerminationFlag.RUNNING_TRUE);
         var result = centralityAlgorithms.pageRank(graph, config1, ProgressTracker.NULL_TRACKER);
         var singleThreaded = result.centralityScoreProvider();
 
