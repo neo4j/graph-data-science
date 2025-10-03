@@ -64,7 +64,6 @@ import org.neo4j.gds.modularityoptimization.ModularityOptimization;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationParameters;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationResult;
 import org.neo4j.gds.scc.Scc;
-import org.neo4j.gds.scc.SccParameters;
 import org.neo4j.gds.sllpa.SpeakerListenerLPA;
 import org.neo4j.gds.sllpa.SpeakerListenerLPAConfig;
 import org.neo4j.gds.termination.TerminationFlag;
@@ -249,7 +248,7 @@ public class CommunityAlgorithms {
         ).compute();
     }
 
-    public HugeLongArray scc(Graph graph, SccParameters parameters, ProgressTracker progressTracker) {
+    public HugeLongArray scc(Graph graph, ProgressTracker progressTracker) {
         return new Scc(
             graph,
             progressTracker,

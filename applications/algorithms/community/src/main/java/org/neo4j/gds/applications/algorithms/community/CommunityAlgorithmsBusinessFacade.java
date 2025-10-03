@@ -227,7 +227,7 @@ public class CommunityAlgorithmsBusinessFacade {
         var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
         var params = configuration.toParameters();
         return algorithmMachinery.getResult(
-            () -> algorithms.scc(graph, params, progressTracker),
+            () -> algorithms.scc(graph, progressTracker),
             progressTracker,
             params.concurrency()
         );
