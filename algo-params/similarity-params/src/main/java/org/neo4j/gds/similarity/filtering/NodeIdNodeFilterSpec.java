@@ -67,7 +67,7 @@ public class NodeIdNodeFilterSpec implements NodeFilterSpec {
             var errorMessage = formatWithLocale(
                 "Invalid configuration value `%s`, the following nodes are missing from the graph: [%s]",
                 nodeFilterType,
-                String.join(",", missingNodes)
+                missingNodes
             );
 
             throw new IllegalArgumentException(errorMessage);
