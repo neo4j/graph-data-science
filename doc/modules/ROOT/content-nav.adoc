@@ -106,6 +106,7 @@
 *** xref:algorithms/bfs.adoc[]
 *** xref:algorithms/dfs.adoc[]
 *** xref:algorithms/bellman-ford-single-source.adoc[Bellman-Ford Single-Source Shortest Path]
+*** xref:algorithms/max-flow.adoc[]
 *** xref:algorithms/dag/longest-path.adoc[]
 ** xref:algorithms/dag/dag-algorithms.adoc[]
 *** xref:algorithms/dag/topological-sort.adoc[]

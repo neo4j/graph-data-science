@@ -34,12 +34,15 @@ public interface MaxFlowBaseConfig extends AlgoBaseConfig, RelationshipWeightCon
     TargetNodesWithPropertiesConfig {
 
     @Configuration.LongRange(min = 0, minInclusive = false)
+    @Configuration.Ignore
     default long alpha() {return 6;}
 
     @Configuration.LongRange(min = 0, minInclusive = false)
+    @Configuration.Ignore
     default long beta() {return 12;}
 
     @Configuration.DoubleRange(min = 0.0, minInclusive = true)
+    @Configuration.Ignore
     default double freq() {return 0.5;}
 
     @Override

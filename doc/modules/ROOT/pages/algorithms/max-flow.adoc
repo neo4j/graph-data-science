@@ -1,0 +1,437 @@
+[[algorithms-maximum-flow]]
+= Maximum flow
+:description: This section describes the Maximum Flow algorithm in the Neo4j Graph Data Science library.
+:entity: relationship
+:result: flow
+:algorithm: Maximum flow algorithm
+
+:directed:
+:weighted:
+include::partial$/algorithms/shared/algorithm-traits.adoc[]
+
+== Introduction
+
+Given a source node, a target node and relationships with capacity constraints,
+the max-flow algorithm assigns a flow to each relationship to achieve maximal transport from source to target.
+
+The flow is a scalar property for each relationship and must satisfy:
+
+- Flow into a node equals flow out of a node (preservation)
+- Flow is restricted by the capacity of a relationship
+
+The source nodes are given either as a list of nodes, or a list of nodes paired with a scalar. The latter is interpreted as a maximal out-flow from each source node where as for the former input option, out-flow is restricted only by the capacity of the relationships.
+
+For the target nodes, there is an equivalent option, where the scalar determines how much flow each target node accepts. It is unrestricted if not given.
+
+The Neo4j GDS Library implementation is based on a parallel push-relabel algorithm from https://arxiv.org/abs/1507.01926[this paper], with some modifications.
+
+
+[[algorithms-max-flow-syntax]]
+== Syntax
+
+include::partial$/algorithms/shared/syntax-intro-named-graph.adoc[]
+
+.Max flow syntax per mode
+[.tabbed-example, caption = ]
+====
+
+[.include-with-stream]
+======
+.Run the algorithm in stream mode on a named graph.
+[source, cypher, role=noplay]
+----
+CALL gds.maxFlow.stream(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  source: Integer,
+  target: Integer,
+  flow: Float
+----
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name | Type | Default | Optional | Description
+include::partial$/algorithms/common-configuration/common-stream-stats-configuration-entries.adoc[]
+include::partial$/algorithms/max-flow/specific-configuration.adoc[]
+|===
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name     | Type    | Description
+| source | Integer | The first node of the returned relationship.
+| target | Integer | The second node of the returned relationship.
+| flow   | Float   | The flow over the returned relationship.
+|===
+
+======
+
+[.include-with-stats]
+======
+.Run the algorithm in stats mode on a named graph.
+[source, cypher, role=noplay]
+----
+CALL gds.maxFlow.stats(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  totalFlow: Float,
+  preProcessingMillis: Integer,
+  computeMillis: Integer,
+  configuration: Map
+----
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name | Type | Default | Optional | Description
+include::partial$/algorithms/common-configuration/common-stream-stats-configuration-entries.adoc[]
+include::partial$/algorithms/max-flow/specific-configuration.adoc[]
+|===
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                      | Type    | Description
+| totalFlow                 | Float   | The net-flow to all target nodes.
+| preProcessingMillis       | Integer | Milliseconds for preprocessing the data.
+| computeMillis             | Integer | Milliseconds for running the algorithm.
+| configuration             | Map     | The configuration used for running the algorithm.
+|===
+
+======
+
+[.include-with-mutate]
+======
+.Run the algorithm in mutate mode on a named graph.
+[source, cypher, role=noplay]
+----
+CALL gds.maxFlow.mutate(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  totalFlow: Float,
+  preProcessingMillis: Integer,
+  computeMillis: Integer,
+  mutateMillis: Integer,
+  relationshipsWritten: Integer,
+  configuration: Map
+----
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name | Type | Default | Optional | Description
+include::partial$/algorithms/common-configuration/common-mutate-configuration-entries.adoc[]
+include::partial$/algorithms/max-flow/specific-configuration.adoc[]
+|===
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                      | Type    | Description
+| totalFlow                 | Float   | The net-flow to all target nodes.
+| preProcessingMillis       | Integer | Milliseconds for preprocessing the data.
+| computeMillis             | Integer | Milliseconds for running the algorithm.
+| mutateMillis              | Integer | Milliseconds for writing result data back.
+| relationshipsWritten      | Integer | The number of relationships added to the in-memory graph.
+| configuration             | Map     | The configuration used for running the algorithm.
+|===
+
+======
+
+[.include-with-write]
+======
+.Run the algorithm in write mode on a named graph.
+[source, cypher, role=noplay]
+----
+CALL gds.maxFlow.write(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  totalFlow: Float,
+  preProcessingMillis: Integer,
+  computeMillis: Integer,
+  writeMillis: Integer,
+  relationshipsWritten: Integer,
+  configuration: Map
+----
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name | Type | Default | Optional | Description
+include::partial$/algorithms/common-configuration/common-write-configuration-entries.adoc[]
+include::partial$/algorithms/max-flow/specific-configuration.adoc[]
+|===
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                      | Type    | Description
+| totalFlow                 | Float   | The net-flow to all target nodes.
+| preProcessingMillis       | Integer | Milliseconds for preprocessing the data.
+| computeMillis             | Integer | Milliseconds for running the algorithm.
+| writeMillis               | Integer | Milliseconds for writing result data back.
+| relationshipsWritten      | Integer | The number of relationships written to the graph.
+| configuration             | Map     | The configuration used for running the algorithm.
+|===
+
+======
+
+====
+
+
+[[algorithms-max-flow-example]]
+== Examples
+
+include::partial$/algorithms/shared/examples-named-native-note.adoc[]
+
+:algorithm-name: {algorithm}
+:graph-description: road network
+:image-file: steiner-graph.svg
+include::partial$/algorithms/shared/examples-intro.adoc[]
+
+
+.The following will create the sample graph depicted in the figure:
+[source, cypher, role=noplay setup-query]
+----
+CREATE (a:Place {id: 'A'}),
+       (b:Place {id: 'B'}),
+       (c:Place {id: 'C'}),
+       (d:Place {id: 'D'}),
+       (e:Place {id: 'E'}),
+       (f:Place {id: 'F'}),
+       (a)-[:LINK {capacity: 10}]->(f),
+       (a)-[:LINK {capacity: 3}]->(b),
+       (a)-[:LINK {capacity: 7}]->(e),
+       (b)-[:LINK {capacity: 1}]->(c),
+       (c)-[:LINK {capacity: 4}]->(d),
+       (c)-[:LINK {capacity: 6}]->(e),
+       (f)-[:LINK {capacity: 3}]->(d);
+----
+
+.The following will project and store a named graph:
+[source, cypher, role=noplay graph-project-query]
+----
+MATCH (source:Place)-[r:LINK]->(target:Place)
+RETURN gds.graph.project(
+  'graph',
+  source,
+  target,
+{
+    relationshipProperties: r { .capacity }
+  }
+)
+----
+[[algorithms-max-flow-examples-mem]]
+=== Memory estimation
+
+:mode: stream
+include::partial$/algorithms/shared/examples-estimate-intro.adoc[]
+
+[role=query-example]
+--
+.The following will estimate the memory requirements for running the algorithm in stream mode:
+[source, cypher, role=noplay]
+----
+MATCH (a:Place {id: 'A'}), (d:Place {id: 'D'})
+CALL gds.maxFlow.stream.estimate('graph', {
+  sourceNodes: [a],
+  targetNodes: [d],
+  capacityProperty: 'capacity'
+})
+YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
+RETURN nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
+----
+.Results
+[opts="header"]
+|===
+| nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
+| 6         | 7                 | 2256     | 2256     | "2256 Bytes"
+|===
+--
+
+
+[[algorithms-max-flow-examples-stream]]
+=== Stream
+:!stream-details:
+
+include::partial$/algorithms/shared/examples-stream-intro.adoc[]
+
+[role=query-example]
+--
+.The following will run the max-flow algorithm in stream mode and return results for each valid node.
+[source,cypher,role=noplay]
+----
+MATCH (a:Place {id: 'A'}), (d:Place {id: 'D'})
+CALL gds.maxFlow.stream('graph', {
+  sourceNodes: [a],
+  targetNodes: [d],
+  capacityProperty: 'capacity'
+})
+YIELD source, target, flow
+RETURN gds.util.asNode(source).id AS src, gds.util.asNode(target).id AS tgt , flow
+ORDER BY src, tgt
+----
+
+.Results
+[opts="header"]
+|===
+| src  | tgt  | flow
+| "A"  | "B"  | 1.0
+| "A"  | "F"  | 3.0
+| "B"  | "C"  | 1.0
+| "C"  | "D"  | 1.0
+| "F"  | "D"  | 3.0
+|===
+--
+
+The algorithm leads the flow from source (A) to target (D) through B-C and F respectively. Along the two paths the lowest capacity (bottleneck) is 1 and 3. This gives a total flow of 4 from node A to node D.
+
+=== Stats
+:stats-syntax: algorithms-max-flow-syntax
+include::partial$/algorithms/shared/examples-stats-intro.adoc[]
+
+[role=query-example]
+--
+.The following will run the max-flow algorithm in stats mode and return its statistics.
+[source,cypher,role=noplay]
+----
+MATCH (a:Place {id: 'A'}), (d:Place {id: 'D'})
+CALL gds.maxFlow.stats('graph', {
+  sourceNodes: [a],
+  targetNodes: [d],
+  capacityProperty: 'capacity'
+})
+YIELD totalFlow
+RETURN totalFlow
+----
+
+.Results
+[opts="header"]
+|===
+| totalFlow
+| 4.0
+|===
+--
+
+The stats mode provides us with information about the total net-flow to the target nodes (D), which is `4.0`.
+
+=== Mutate
+
+include::partial$/algorithms/shared/examples-mutate-intro.adoc[]
+
+[role=query-example]
+--
+.The following will run the max-flow algorithm in mutate mode and return its statistics.
+[source,cypher,role=noplay]
+----
+MATCH (a:Place {id: 'A'}), (d:Place {id: 'D'})
+CALL gds.maxFlow.mutate('graph', {
+  sourceNodes: [a],
+  targetNodes: [d],
+  capacityProperty: 'capacity',
+  mutateProperty: 'flow',
+  mutateRelationshipType: 'FLOW_REL'
+})
+YIELD totalFlow, relationshipsWritten
+RETURN totalFlow, relationshipsWritten
+----
+
+.Results
+[opts="header"]
+|===
+| totalFlow | relationshipsWritten
+| 4.0         | 5
+|===
+--
+
+The mutate mode updates the in-memory graph `graph` with  new relationship type
+called `FLOW_REL` with a single property `flow`.
+From the `relationshipsWritten` column, we can see that exactly five such relationships were added.
+They connect the nodes of the flow graph, and their property is the flow over each relationship.
+
+[NOTE]
+====
+The relationships added back to the graph are always directed, even if the input graph is undirected. They point in the order of the flow.
+====
+
+=== Write
+
+include::partial$/algorithms/shared/examples-write-intro.adoc[]
+
+[role=query-example]
+--
+.The following will run the max-flow algorithm in write mode and return its statistics.
+[source,cypher,role=noplay]
+----
+MATCH (a:Place {id: 'A'}), (d:Place {id: 'D'})
+CALL gds.maxFlow.write('graph', {
+  sourceNodes: [a],
+  targetNodes: [d],
+  capacityProperty: 'capacity',
+  writeProperty: 'flow',
+  writeRelationshipType: 'FLOW_REL'
+})
+YIELD totalFlow, relationshipsWritten
+RETURN totalFlow, relationshipsWritten
+----
+
+.Results
+[opts="header"]
+|===
+| totalFlow | relationshipsWritten
+| 4.0       | 5
+|===
+--
+
+This query writes back to the database five new relationships
+each of type `FLOW_REL` with a single property `flow`.
+
+[NOTE]
+====
+The relationships added back  are always directed, even if the input graph is undirected. They point in the order of the flow.
+====
+
+=== Supply and demand example
+
+If there is a restriction on how much a source/target node can output/receive, this can be modeled using supply and demand. For example, how much produce can be transported from a set of production facilities (with a given supply/production per entity) to a set of destinations (each with a specific demand)?
+
+[role=query-example]
+--
+.The following will run the max-flow algorithm in stream mode with supply and demand.
+[source,cypher,role=noplay]
+----
+MATCH (a:Place {id: 'A'}), (b:Place {id: 'B'}), (d:Place {id: 'D'}), (e:Place {id: 'E'})
+CALL gds.maxFlow.stream('graph', {
+  sourceNodes: [[a, 9.0], [b, 5.0]],
+  targetNodes: [[d, 50.0], [e, 10.0]],
+  capacityProperty: 'capacity'
+})
+YIELD source, target, flow
+RETURN gds.util.asNode(source).id AS src, gds.util.asNode(target).id AS tgt, flow
+ORDER BY src, tgt
+----
+
+.Results
+[opts="header"]
+|===
+| src  | tgt  | flow
+| "A"  | "E"  | 7.0
+| "A"  | "F"  | 2.0
+| "B"  | "C"  | 1.0
+| "C"  | "D"  | 1.0
+| "F"  | "D"  | 2.0
+|===
+--

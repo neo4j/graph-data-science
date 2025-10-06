@@ -227,7 +227,7 @@
 | `gds.louvain.stream.estimate` label:procedure[Procedure]
 | `gds.louvain.stats` label:procedure[Procedure]
 | `gds.louvain.stats.estimate` label:procedure[Procedure]
-.8+<.^|Max Flow
+.8+<.^|xref:algorithms/max-flow.adoc[]
 | `gds.maxFlow.mutate` label:procedure[Procedure]
 | `gds.maxFlow.mutate.estimate` label:procedure[Procedure]
 | `gds.maxFlow.stats` label:procedure[Procedure]
