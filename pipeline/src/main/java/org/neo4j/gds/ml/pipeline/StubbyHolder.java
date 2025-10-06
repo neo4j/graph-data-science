@@ -51,6 +51,7 @@ import org.neo4j.gds.ml.pipeline.stubs.LabelPropagationStub;
 import org.neo4j.gds.ml.pipeline.stubs.LccStub;
 import org.neo4j.gds.ml.pipeline.stubs.LeidenStub;
 import org.neo4j.gds.ml.pipeline.stubs.LouvainStub;
+import org.neo4j.gds.ml.pipeline.stubs.MaxFlowStub;
 import org.neo4j.gds.ml.pipeline.stubs.ModularityOptimizationStub;
 import org.neo4j.gds.ml.pipeline.stubs.Node2VecStub;
 import org.neo4j.gds.ml.pipeline.stubs.NodeSimilarityStub;
@@ -124,7 +125,7 @@ class StubbyHolder {
             case Leiden -> new LeidenStub();
             case Louvain -> new LouvainStub();
             case LongestPath -> null;
-            case MaxFlow -> null;
+            case MaxFlow -> new MaxFlowStub();
             case Modularity -> null;
             case ModularityOptimization -> new ModularityOptimizationStub();
             case NodeSimilarity -> new NodeSimilarityStub();

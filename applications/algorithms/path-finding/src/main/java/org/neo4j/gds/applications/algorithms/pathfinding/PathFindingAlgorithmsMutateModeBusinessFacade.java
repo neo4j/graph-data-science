@@ -32,7 +32,10 @@ import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
+import org.neo4j.gds.maxflow.FlowResult;
+import org.neo4j.gds.maxflow.MaxFlowMutateConfig;
 import org.neo4j.gds.pathfinding.BellmanFordMutateStep;
+import org.neo4j.gds.pathfinding.MaxFlowMutateStep;
 import org.neo4j.gds.pathfinding.PrizeCollectingSteinerTreeMutateStep;
 import org.neo4j.gds.pathfinding.RandomWalkCountingNodeVisitsMutateStep;
 import org.neo4j.gds.pathfinding.SearchMutateStep;
@@ -67,6 +70,7 @@ import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Bel
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.DFS;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.DeltaStepping;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Dijkstra;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.MaxFlow;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.RandomWalk;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.SingleSourceDijkstra;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.SteinerTree;
@@ -177,6 +181,28 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
             DFS,
             estimationFacade::depthFirstSearch,
             (graph, __) -> pathFindingAlgorithms.depthFirstSearch(graph, configuration),
+            mutateStep,
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT maxFlow(
+        GraphName graphName,
+        MaxFlowMutateConfig configuration,
+        ResultBuilder<MaxFlowMutateConfig, FlowResult, RESULT, RelationshipsWritten> resultBuilder
+    ) {
+        var mutateStep = new MaxFlowMutateStep(
+            configuration.mutateRelationshipType(),
+            configuration.mutateProperty(),
+            mutateRelationshipService
+        );
+
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
+            graphName,
+            configuration,
+            MaxFlow,
+            estimationFacade::maxFlow,
+            (graph, __) -> pathFindingAlgorithms.maxFlow(graph, configuration),
             mutateStep,
             resultBuilder
         );

@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.paths.maxflow;
 
+import org.apache.commons.lang3.tuple.Triple;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
@@ -29,11 +30,10 @@ import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 
 import java.util.HashSet;
-import java.util.concurrent.atomic.LongAdder;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class MaxFlowStreamProcTest extends BaseProcTest {
+class MaxFlowWriteProcTest extends BaseProcTest {
 
     @Neo4jGraph(offsetIds = true)
     static final String DB_CYPHER = """
@@ -55,7 +55,7 @@ class MaxFlowStreamProcTest extends BaseProcTest {
 
     @BeforeEach
     void setup() throws Exception {
-        registerProcedures(MaxFlowStreamProc.class, GraphProjectProc.class);
+        registerProcedures(MaxFlowWriteProc.class, GraphProjectProc.class);
         var createQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .graphProject()
             .withAnyLabel()
@@ -68,36 +68,41 @@ class MaxFlowStreamProcTest extends BaseProcTest {
     void testYields() {
         String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .algo("gds.maxFlow")
-            .streamMode()
+            .writeMode()
             .addParameter("sourceNodes", idFunction.of("a"))
             .addParameter("capacityProperty", "w")
             .addParameter("targetNodes", idFunction.of("e"))
+            .addParameter("writeProperty", "flow")
+            .addParameter("writeRelationshipType", "MAX_FLOW")
             .yields(
-                "source", "target", "flow"
+                "preProcessingMillis",
+                "computeMillis",
+                "writeMillis",
+                "relationshipsWritten",
+                "totalFlow"
             );
-        LongAdder relCount = new LongAdder();
 
-        var set = new HashSet<Arc>();
-        runQuery(query, result -> {
-            assertThat(result.columns()).containsExactlyInAnyOrder("source", "target", "flow");
+        runQueryWithRowConsumer(
+            query,
+            res -> {
+                assertThat(res.getNumber("preProcessingMillis").longValue()).isGreaterThanOrEqualTo(0L);
+                assertThat(res.getNumber("computeMillis").longValue()).isGreaterThanOrEqualTo(0L);
+                assertThat(res.getNumber("writeMillis").longValue()).isGreaterThanOrEqualTo(0L);
+                assertThat(res.getNumber("relationshipsWritten").longValue()).isEqualTo(2L);
+                assertThat(res.getNumber("totalFlow").doubleValue()).isEqualTo(4L);
 
-            while (result.hasNext()) {
-                var next = result.next();
-                assertThat(next.get("source")).isInstanceOf(Long.class);
-                assertThat(next.get("target")).isInstanceOf(Long.class);
-                assertThat(next.get("flow")).isInstanceOf(Double.class);
-
-                set.add(new Arc((long)next.get("source"), (long)next.get("target"), (double)next.get("flow")));
-                relCount.increment();
             }
+        );
 
-            return true;
-
+        var set = new HashSet<Triple<Long, Long, Double>>();
+        runQueryWithRowConsumer("MATCH (a)-[r:MAX_FLOW]->(b) return id(a) AS a, id(b) AS b, r.flow AS flow",
+            resultRow -> {
+                set.add(Triple.of(resultRow.getNumber("a").longValue(), resultRow.getNumber("b").longValue(), resultRow.getNumber("flow").doubleValue()));
         });
-        assertThat(relCount.intValue()).isEqualTo(2);
-        assertThat(set).containsExactlyInAnyOrder(new Arc(idFunction.of("a"), idFunction.of("d"), 4.0D), new Arc(idFunction.of("d"), idFunction.of("e"), 4.0D));
-    }
-
-    private record Arc(long source, long target, double flow) {
+        assertThat(set).containsExactlyInAnyOrder(
+            Triple.of(idFunction.of("a"), idFunction.of("d"), 4D),
+            Triple.of(idFunction.of("d"), idFunction.of("e"), 4D)
+        );
+        assertThat(set.size()).isEqualTo(2);
     }
 }

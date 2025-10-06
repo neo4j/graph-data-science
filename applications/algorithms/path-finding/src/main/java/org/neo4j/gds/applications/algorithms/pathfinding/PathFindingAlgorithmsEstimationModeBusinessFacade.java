@@ -19,10 +19,13 @@
  */
 package org.neo4j.gds.applications.algorithms.pathfinding;
 
+import org.neo4j.gds.allshortestpaths.AllShortestPathsConfig;
+import org.neo4j.gds.allshortestpaths.AllShortestPathsMemoryEstimateDefinition;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
+import org.neo4j.gds.maxflow.MaxFlowBaseConfig;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.paths.astar.AStarMemoryEstimateDefinition;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarBaseConfig;
@@ -49,8 +52,6 @@ import org.neo4j.gds.traversal.RandomWalkBaseConfig;
 import org.neo4j.gds.traversal.RandomWalkCountingVisitsMemoryEstimateDefinition;
 import org.neo4j.gds.traversal.RandomWalkMemoryEstimateDefinition;
 import org.neo4j.gds.traversal.RandomWalkMutateConfig;
-import org.neo4j.gds.allshortestpaths.AllShortestPathsMemoryEstimateDefinition;
-import org.neo4j.gds.allshortestpaths.AllShortestPathsConfig;
 
 /**
  * Here is the top level business facade for all your path finding memory estimation needs.
@@ -130,8 +131,15 @@ public class PathFindingAlgorithmsEstimationModeBusinessFacade {
         throw new MemoryEstimationNotImplementedException();
     }
 
-    MemoryEstimation maxFlow() {
+    public MemoryEstimation maxFlow() {
         throw new MemoryEstimationNotImplementedException();
+    }
+
+    MemoryEstimation maxFlow(
+        MaxFlowBaseConfig configuration,
+        Object graphNameOrConfiguration
+    ) {
+        return maxFlow();
     }
 
     public MemoryEstimateResult pcst(

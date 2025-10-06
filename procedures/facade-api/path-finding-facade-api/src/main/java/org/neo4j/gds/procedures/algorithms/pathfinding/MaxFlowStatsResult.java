@@ -17,20 +17,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.algorithms.pathfinding.stubs;
+package org.neo4j.gds.procedures.algorithms.pathfinding;
 
-public record PathFindingStubs(
-    BellmanFordMutateStub bellmanFord,
-    BFSMutateStub bfs,
-    DeltaSteppingMutateStub deltaStepping,
-    DFSMutateStub dfs,
-    PrizeCollectingSteinerTreeMutateStub pcst,
-    RandomWalkMutateStub randomWalk,
-    SinglePairShortestPathAStarMutateStub aStar,
-    SinglePairShortestPathDijkstraMutateStub singlePairDijkstra,
-    SinglePairShortestPathYensMutateStub yens,
-    SingleSourceShortestPathDijkstraMutateStub singleSourceDijktra,
-    SpanningTreeMutateStub spanningTree,
-    SteinerTreeMutateStub steinerTree,
-    MaxFlowMutateStub maxFlow
-) {}
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
+import org.neo4j.gds.procedures.algorithms.results.ModeResult;
+
+import java.util.Map;
+
+public record MaxFlowStatsResult(
+        long preProcessingMillis,
+        long computeMillis,
+        double totalFlow,
+        Map<String, Object> configuration
+    ) implements ModeResult {
+
+
+    static MaxFlowStatsResult emptyFrom(AlgorithmProcessingTimings timings, Map<String, Object> configuration)
+    {
+        return  new MaxFlowStatsResult(
+            timings.preProcessingMillis,
+            timings.computeMillis,
+            0D,
+            configuration
+        );
+    }
+}

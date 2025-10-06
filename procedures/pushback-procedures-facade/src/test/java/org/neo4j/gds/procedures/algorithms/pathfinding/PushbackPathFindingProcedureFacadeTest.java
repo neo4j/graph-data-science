@@ -93,6 +93,13 @@ class PushbackPathFindingProcedureFacadeTest {
         }
 
         @Test
+        void maxFlowMutate() {
+            facade.maxFlowMutate(graphName, config);
+            verify(mutateFacadeMock).maxFlow(graphName, config);
+            verifyNoInteractions(streamFacadeMock, statsFacadeMock, writeFacadeMock);
+        }
+
+        @Test
         void prizeCollectingSteinerTreeMutate() {
             facade.prizeCollectingSteinerTreeMutate(graphName, config);
             verify(mutateFacadeMock).prizeCollectingSteinerTree(graphName, config);
@@ -173,6 +180,13 @@ class PushbackPathFindingProcedureFacadeTest {
         }
 
         @Test
+        void maxFlowStats() {
+            facade.maxFlowStats(graphName, config);
+            verify(statsFacadeMock).maxFlow(graphName, config);
+            verifyNoInteractions(mutateFacadeMock, streamFacadeMock, writeFacadeMock);
+        }
+
+        @Test
         void prizeCollectingSteinerTreeStats() {
             facade.prizeCollectingSteinerTreeStats(graphName, config);
             verify(statsFacadeMock).prizeCollectingSteinerTree(graphName, config);
@@ -246,7 +260,7 @@ class PushbackPathFindingProcedureFacadeTest {
         }
 
         @Test
-        void maxFlow() {
+        void maxFlowStream() {
             facade.maxFlowStream(graphName, config);
             verify(streamFacadeMock).maxFlow(graphName, config);
             verifyNoInteractions(mutateFacadeMock, statsFacadeMock, writeFacadeMock);
@@ -336,6 +350,13 @@ class PushbackPathFindingProcedureFacadeTest {
         void kSpanningTreeWrite() {
             facade.kSpanningTreeWrite(graphName, config);
             verify(writeFacadeMock).kSpanningTree(graphName, config);
+            verifyNoInteractions(mutateFacadeMock, statsFacadeMock, streamFacadeMock);
+        }
+
+        @Test
+        void maxFlowWrite() {
+            facade.maxFlowWrite(graphName, config);
+            verify(writeFacadeMock).maxFlow(graphName, config);
             verifyNoInteractions(mutateFacadeMock, statsFacadeMock, streamFacadeMock);
         }
 

@@ -227,8 +227,11 @@
 | `gds.louvain.stream.estimate` label:procedure[Procedure]
 | `gds.louvain.stats` label:procedure[Procedure]
 | `gds.louvain.stats.estimate` label:procedure[Procedure]
-.1+<.^|Max flow
+.4+<.^|Max flow
+| `gds.maxFlow.mutate` label:procedure[Procedure]
+| `gds.maxFlow.stats` label:procedure[Procedure]
 | `gds.maxFlow.stream` label:procedure[Procedure]
+| `gds.maxFlow.write` label:procedure[Procedure]
 .4+<.^|xref:algorithms/approx-max-k-cut.adoc[Approximate Maximum k-cut]
 | `gds.maxkcut.mutate` label:procedure[Procedure]
 | `gds.maxkcut.mutate.estimate` label:procedure[Procedure]

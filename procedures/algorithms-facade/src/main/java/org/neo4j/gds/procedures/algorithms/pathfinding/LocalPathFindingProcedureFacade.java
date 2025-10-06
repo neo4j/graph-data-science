@@ -34,7 +34,9 @@ import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsWr
 import org.neo4j.gds.dag.longestPath.DagLongestPathStreamConfig;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortStreamConfig;
 import org.neo4j.gds.kspanningtree.KSpanningTreeWriteConfig;
+import org.neo4j.gds.maxflow.MaxFlowStatsConfig;
 import org.neo4j.gds.maxflow.MaxFlowStreamConfig;
+import org.neo4j.gds.maxflow.MaxFlowWriteConfig;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarStreamConfig;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarWriteConfig;
 import org.neo4j.gds.paths.bellmanford.AllShortestPathsBellmanFordStatsConfig;
@@ -60,6 +62,7 @@ import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.LocalBFSMutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.LocalBellmanFordMutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.LocalDFSMutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.LocalDeltaSteppingMutateStub;
+import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.LocalMaxFlowMutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.LocalPrizeCollectingSteinerTreeMutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.LocalRandomWalkMutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.LocalSinglePairShortestPathAStarMutateStub;
@@ -178,6 +181,12 @@ public final class LocalPathFindingProcedureFacade implements PathFindingProcedu
             estimationModeBusinessFacade
         );
 
+        var maxFlowMutateStub = new LocalMaxFlowMutateStub(
+            genericStub,
+            mutateModeBusinessFacade,
+            estimationModeBusinessFacade
+        );
+
         var prizeCollectingSteinerTreeMutateStub = new LocalPrizeCollectingSteinerTreeMutateStub(
             genericStub,
             mutateModeBusinessFacade,
@@ -233,7 +242,8 @@ public final class LocalPathFindingProcedureFacade implements PathFindingProcedu
             yensStub,
             singleSourceDijkstraStub,
             spanningTreeMutateStub,
-            steinerTreeMutateStub
+            steinerTreeMutateStub,
+            maxFlowMutateStub
         );
 
         return new LocalPathFindingProcedureFacade(
@@ -610,12 +620,42 @@ public final class LocalPathFindingProcedureFacade implements PathFindingProcedu
     }
 
     @Override
+    public Stream<MaxFlowMutateResult> maxFlowMutate(String graphName, Map<String, Object> configuration) {
+        return stubs.maxFlow().execute(graphName, configuration);
+    }
+
+    @Override
+    public Stream<MaxFlowStatsResult> maxFlowStats(String graphName, Map<String, Object> rawConfiguration) {
+        var configuration = configurationParser.parseConfiguration(
+            rawConfiguration,
+            MaxFlowStatsConfig::of
+        );
+
+        return statsModeBusinessFacade.maxFlow(
+            GraphName.parse(graphName),
+            configuration,
+            new MaxFlowResultBuilderForStatsMode(configuration)
+        );
+    }
+
+    @Override
     public Stream<MaxFlowStreamResult> maxFlowStream(String graphName, Map<String, Object> configuration) {
         var resultBuilder = new MaxFlowResultBuilderForStreamMode();
         return streamModeBusinessFacade.maxFlow(
             GraphName.parse(graphName),
             configurationParser.parseConfiguration(configuration, MaxFlowStreamConfig::of),
             resultBuilder
+        );
+    }
+
+    @Override
+    public Stream<MaxFlowWriteResult> maxFlowWrite(String graphName, Map<String, Object> configuration) {
+        return Stream.of(
+            writeModeBusinessFacade.maxFlow(
+                GraphName.parse(graphName),
+                configurationParser.parseConfiguration(configuration, MaxFlowWriteConfig::of),
+                new MaxFlowResultBuilderForWriteMode()
+            )
         );
     }
 

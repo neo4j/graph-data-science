@@ -17,20 +17,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.algorithms.pathfinding.stubs;
+package org.neo4j.gds.maxflow;
 
-public record PathFindingStubs(
-    BellmanFordMutateStub bellmanFord,
-    BFSMutateStub bfs,
-    DeltaSteppingMutateStub deltaStepping,
-    DFSMutateStub dfs,
-    PrizeCollectingSteinerTreeMutateStub pcst,
-    RandomWalkMutateStub randomWalk,
-    SinglePairShortestPathAStarMutateStub aStar,
-    SinglePairShortestPathDijkstraMutateStub singlePairDijkstra,
-    SinglePairShortestPathYensMutateStub yens,
-    SingleSourceShortestPathDijkstraMutateStub singleSourceDijktra,
-    SpanningTreeMutateStub spanningTree,
-    SteinerTreeMutateStub steinerTree,
-    MaxFlowMutateStub maxFlow
-) {}
+import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.config.WritePropertyConfig;
+import org.neo4j.gds.config.WriteRelationshipConfig;
+import org.neo4j.gds.core.CypherMapWrapper;
+
+@Configuration
+public interface MaxFlowWriteConfig extends MaxFlowBaseConfig, WritePropertyConfig, WriteRelationshipConfig {
+    
+    static MaxFlowWriteConfig of(CypherMapWrapper userInput) {
+        return new MaxFlowWriteConfigImpl(userInput);
+    }
+}
