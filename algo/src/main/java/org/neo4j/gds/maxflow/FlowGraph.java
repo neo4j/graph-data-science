@@ -209,7 +209,7 @@ public final class FlowGraph {
         }
     }
 
-    long originalEdgeCount() {
+    private long originalEdgeCount() {
         return graph.relationshipCount();
     }
 
@@ -217,7 +217,7 @@ public final class FlowGraph {
         return graph.relationshipCount() + supply.length + demand.length;
     }
 
-    public long originalNodeCount() {
+    long originalNodeCount() {
         return graph.nodeCount();
     }
 
