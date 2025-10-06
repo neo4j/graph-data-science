@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.paths.maxflow;
 
+import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.algorithms.pathfinding.MaxFlowStatsResult;
 import org.neo4j.procedure.Context;
@@ -30,13 +31,16 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.paths.maxflow.MaxFlowConstants.MAXFLOW_DESCRIPTION;
+import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public class MaxFlowStatsProc {
+    private static final String proc = "gds.maxFlow.stats";
+
     @Context
     public GraphDataScienceProcedures facade;
 
-    @Procedure(name = "gds.maxFlow.stats", mode = READ)
+    @Procedure(name = proc, mode = READ)
     @Description(MAXFLOW_DESCRIPTION)
     public Stream<MaxFlowStatsResult> stream(
         @Name(value = "graphName") String graphName,
@@ -44,4 +48,14 @@ public class MaxFlowStatsProc {
     ) {
         return facade.algorithms().pathFinding().maxFlowStats(graphName, configuration);
     }
+
+    @Procedure(value = proc + ".estimate", mode = READ)
+    @Description(MEMORY_ESTIMATION_DESCRIPTION)
+    public Stream<MemoryEstimateResult> estimate(
+        @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
+        @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
+    ) {
+        return facade.algorithms().pathFinding().maxFlowStatsEstimate(graphNameOrConfiguration, algoConfiguration);
+    }
+
 }

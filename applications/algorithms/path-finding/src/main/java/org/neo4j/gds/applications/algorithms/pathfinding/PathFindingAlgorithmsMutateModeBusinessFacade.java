@@ -201,7 +201,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
             graphName,
             configuration,
             MaxFlow,
-            estimationFacade::maxFlow,
+            () -> estimationFacade.maxFlow(configuration),
             (graph, __) -> pathFindingAlgorithms.maxFlow(graph, configuration),
             mutateStep,
             resultBuilder

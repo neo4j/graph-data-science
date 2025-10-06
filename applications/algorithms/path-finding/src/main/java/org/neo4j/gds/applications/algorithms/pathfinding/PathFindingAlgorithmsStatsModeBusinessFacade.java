@@ -119,7 +119,7 @@ public class PathFindingAlgorithmsStatsModeBusinessFacade {
             graphName,
             configuration,
             MaxFlow,
-            estimationFacade::maxFlow,
+            () -> estimationFacade.maxFlow(configuration),
             (graph, __) -> pathFindingAlgorithms.maxFlow(graph, configuration),
             resultBuilder
         );

@@ -26,4 +26,8 @@ public interface InputNodes {
     InputNodes EMPTY_INPUT_NODES = new ListInputNodes(List.of());
 
     Collection<Long> inputNodes();
+
+    default  int size(){
+        return inputNodes().size();
+    }
 }

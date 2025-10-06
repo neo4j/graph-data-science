@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.paths.maxflow;
 
+import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.algorithms.pathfinding.MaxFlowWriteResult;
 import org.neo4j.procedure.Context;
@@ -30,18 +31,31 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.paths.maxflow.MaxFlowConstants.MAXFLOW_DESCRIPTION;
+import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
+import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
 public class MaxFlowWriteProc {
+    private static final String proc = "gds.maxFlow.write";
+
     @Context
     public GraphDataScienceProcedures facade;
 
-    @Procedure(value = "gds.maxFlow.write", mode = WRITE)
+    @Procedure(value = proc, mode = WRITE)
     @Description(MAXFLOW_DESCRIPTION)
     public Stream<MaxFlowWriteResult> maxFlow(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         return facade.algorithms().pathFinding().maxFlowWrite(graphName, configuration);
+    }
+
+    @Procedure(value = proc + ".estimate", mode = READ)
+    @Description(MEMORY_ESTIMATION_DESCRIPTION)
+    public Stream<MemoryEstimateResult> estimate(
+        @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
+        @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
+    ) {
+        return facade.algorithms().pathFinding().maxFlowWriteEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 }

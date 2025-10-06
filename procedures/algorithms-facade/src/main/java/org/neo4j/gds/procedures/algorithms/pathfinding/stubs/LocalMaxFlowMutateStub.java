@@ -55,7 +55,7 @@ public class LocalMaxFlowMutateStub implements
         return genericStub.getMemoryEstimation(
             configuration,
             MaxFlowMutateConfig::of,
-            __ -> estimationModeBusinessFacade.maxFlow()
+            estimationModeBusinessFacade::maxFlow
         );
     }
 
@@ -65,7 +65,7 @@ public class LocalMaxFlowMutateStub implements
             graphName,
             configuration,
             MaxFlowMutateConfig::of,
-            __ -> estimationModeBusinessFacade.maxFlow()
+            estimationModeBusinessFacade::maxFlow
         );
     }
 
