@@ -29,8 +29,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-
-
 public final class GlobalRelabeling {
     private final long nodeCount;
     private final HugeLongArray label;
@@ -88,4 +86,3 @@ public final class GlobalRelabeling {
 
     }
 }
-

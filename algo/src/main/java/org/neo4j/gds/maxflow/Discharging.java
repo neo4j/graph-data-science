@@ -52,8 +52,8 @@ final class Discharging {
     )
     {
 
-        var tempLabel = HugeLongArray.newArray(flowGraph.originalNodeCount());
-        var isDiscovered = HugeAtomicBitSet.create(flowGraph.originalNodeCount());
+        var tempLabel = HugeLongArray.newArray(flowGraph.nodeCount());
+        var isDiscovered = HugeAtomicBitSet.create(flowGraph.nodeCount());
 
         List<Runnable> dischargeTasks = new ArrayList<>();
         for (int i = 0; i < concurrency.value(); i++) {

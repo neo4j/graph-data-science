@@ -24,7 +24,6 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
-import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.paged.HugeLongArrayQueue;
 import org.neo4j.gds.core.utils.paged.ParallelDoublePageCreator;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -87,9 +86,7 @@ public final class MaxFlow extends Algorithm<FlowResult> {
         var addedExcess = HugeAtomicDoubleArray.of(
             nodeCount,
             ParallelDoublePageCreator.passThrough(parameters.concurrency())
-        ); //fixme
-        var tempLabel = HugeLongArray.newArray(nodeCount);
-        var isDiscovered = HugeAtomicBitSet.create(nodeCount);
+        );
         var workingSet = new AtomicWorkingSet(nodeCount);
         for (var nodeId = 0; nodeId < nodeCount; nodeId++) {
             if (excess.get(nodeId) > 0.0) {
