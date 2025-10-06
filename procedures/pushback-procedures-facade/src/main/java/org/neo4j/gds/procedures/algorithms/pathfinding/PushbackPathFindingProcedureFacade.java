@@ -270,8 +270,24 @@ public final class PushbackPathFindingProcedureFacade implements PathFindingProc
     }
 
     @Override
+    public Stream<MemoryEstimateResult> maxFlowMutateEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        return Stream.empty();
+    }
+
+    @Override
     public Stream<MaxFlowStreamResult> maxFlowStream(String graphName, Map<String, Object> configuration) {
         return streamProcedureFacade.maxFlow(graphName, configuration);
+    }
+
+    @Override
+    public Stream<MemoryEstimateResult> maxFlowStreamEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        return Stream.empty();
     }
 
     @Override
@@ -280,8 +296,24 @@ public final class PushbackPathFindingProcedureFacade implements PathFindingProc
     }
 
     @Override
+    public Stream<MemoryEstimateResult> maxFlowStatsEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        return Stream.empty();
+    }
+
+    @Override
     public Stream<MaxFlowWriteResult> maxFlowWrite(String graphName, Map<String, Object> configuration) {
         return writeProcedureFacade.maxFlow(graphName, configuration);
+    }
+
+    @Override
+    public Stream<MemoryEstimateResult> maxFlowWriteEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        return Stream.empty();
     }
 
     @Override
