@@ -52,7 +52,7 @@ public class KCoreDecomposition extends Algorithm<KCoreDecompositionResult> {
         this(graph, concurrency, progressTracker, CHUNK_SIZE);
     }
 
-    KCoreDecomposition(Graph graph, Concurrency concurrency, ProgressTracker progressTracker, int chunkSize) {
+    public KCoreDecomposition(Graph graph, Concurrency concurrency, ProgressTracker progressTracker, int chunkSize) {
         super(progressTracker);
         this.graph = graph;
         this.concurrency = concurrency;
