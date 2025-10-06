@@ -25,4 +25,7 @@ public record CliqueCountingResult(
     long[] globalCount,
     HugeObjectArray<long[]> perNodeCount,
     long[][] perSubcliqueCount
-){}
+){
+
+    public static CliqueCountingResult EMPTY = new CliqueCountingResult(new long[0], HugeObjectArray.newArray(long[].class,0), new long[0][0]);
+}

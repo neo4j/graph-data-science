@@ -22,15 +22,15 @@ package org.neo4j.gds.beta.pregel;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.termination.TerminationFlag;
-import org.neo4j.gds.mem.MemoryEstimation;
-import org.neo4j.gds.mem.MemoryEstimations;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
+import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.mem.Estimate;
+import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimations;
+import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.utils.StringFormatting;
 import org.neo4j.gds.utils.StringJoining;
 import org.neo4j.gds.values.FloatingPointValue;
@@ -57,7 +57,7 @@ public abstract class NodeValue {
             .collect(Collectors.toMap(Element::propertyKey, Element::propertyType));
     }
 
-    static NodeValue of(PregelSchema schema, long nodeCount, Concurrency concurrency) {
+    public static NodeValue of(PregelSchema schema, long nodeCount, Concurrency concurrency) {
         var properties = schema.elements()
             .stream()
             .collect(Collectors.toMap(

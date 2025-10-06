@@ -21,4 +21,7 @@ package org.neo4j.gds.kcore;
 
 import org.neo4j.gds.collections.ha.HugeIntArray;
 
-public record KCoreDecompositionResult(HugeIntArray coreValues, int degeneracy){}
+public record KCoreDecompositionResult(HugeIntArray coreValues, int degeneracy){
+
+public static KCoreDecompositionResult EMPTY = new KCoreDecompositionResult(HugeIntArray.newArray(0), 0);
+}

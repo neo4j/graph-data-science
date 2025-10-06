@@ -9,6 +9,9 @@ dependencies {
     implementation project(':algo')
     implementation project(':algo-common')
     implementation project(':collections')
+    implementation project(":community-configs")
+    implementation project(':community-params')
+    implementation project(":config-api")
     implementation project(':core')
     implementation project(':core-api')
     implementation project(':logging')
@@ -16,6 +19,7 @@ dependencies {
     implementation project(':node-embeddings-params')
     implementation project(':path-finding-algorithms')
     implementation project(':path-finding-params')
+    implementation project(":pregel")
     implementation project(':progress-tracking')
     implementation project(':termination')
 

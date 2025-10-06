@@ -27,4 +27,13 @@ public record ModularityResult(
         double totalModularity,
         long communityCount,
         HugeObjectArray<CommunityModularity> modularityScores
-    ) { }
+    ) {
+
+    public static  ModularityResult EMPTY  = new ModularityResult(
+        0,
+        0,
+        0,
+        0,
+        HugeObjectArray.newArray(CommunityModularity.class,0)
+    );
+}

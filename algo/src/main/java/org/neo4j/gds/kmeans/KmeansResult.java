@@ -30,4 +30,16 @@ public record KmeansResult(
     double averageDistanceToCentroid,
     @Nullable HugeDoubleArray silhouette,
     double averageSilhouette
-) {}
+) {
+    public static KmeansResult empty(int k) {
+        return new KmeansResult(
+            HugeIntArray.newArray(0),
+            HugeDoubleArray.newArray(0),
+            new double[k][0],
+            0,
+            null,
+            0
+        );
+    }
+
+}

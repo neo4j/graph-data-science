@@ -24,4 +24,7 @@ import org.neo4j.gds.collections.ha.HugeByteArray;
 public record ApproxMaxKCutResult(
         HugeByteArray candidateSolution,
         double cutCost
-    ) {}
+    ) {
+
+    public static ApproxMaxKCutResult EMPTY  = new ApproxMaxKCutResult(HugeByteArray.newArray(0),0d);
+}

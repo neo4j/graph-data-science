@@ -48,4 +48,12 @@ public record ModularityOptimizationResult(
             }
         };
     }
+
+    public static ModularityOptimizationResult EMPTY = new ModularityOptimizationResult(
+         i -> 0,
+        0,
+        0,
+        false,
+        0
+    );
 }

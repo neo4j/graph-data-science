@@ -21,4 +21,7 @@ package org.neo4j.gds.labelpropagation;
 
 import org.neo4j.gds.collections.ha.HugeLongArray;
 
-public record LabelPropagationResult(HugeLongArray labels, boolean didConverge, long ranIterations) {}
+public record LabelPropagationResult(HugeLongArray labels, boolean didConverge, long ranIterations) {
+
+    public static LabelPropagationResult EMPTY = new LabelPropagationResult(HugeLongArray.newArray(0), false, 0);
+}
