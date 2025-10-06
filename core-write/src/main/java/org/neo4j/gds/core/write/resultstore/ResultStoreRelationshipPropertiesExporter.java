@@ -23,7 +23,7 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.ResultStoreEntry;
-import org.neo4j.gds.core.utils.progress.JobId;
+import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.write.RelationshipPropertiesExporter;
 
 import java.util.List;

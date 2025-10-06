@@ -20,12 +20,12 @@
 package org.neo4j.gds.config;
 
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.core.utils.progress.JobId;
+import org.neo4j.gds.core.JobId;
 
 @Configuration
 public interface JobIdConfig {
-    @Configuration.ConvertWith(method = "org.neo4j.gds.core.utils.progress.JobId#parse")
-    @Configuration.ToMapValue("org.neo4j.gds.core.utils.progress.JobId#asString")
+    @Configuration.ConvertWith(method = "org.neo4j.gds.config.JobIdParser#parse")
+    @Configuration.ToMapValue("org.neo4j.gds.config.JobIdParser#asString")
     default JobId jobId() {
         return new JobId();
     }

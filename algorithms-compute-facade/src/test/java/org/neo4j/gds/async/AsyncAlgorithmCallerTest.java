@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.neo4j.gds.core.utils.progress.JobId;
+import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.logging.Log;
 
 import java.util.concurrent.Executors;

@@ -25,7 +25,7 @@ import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.loading.validation.NoAlgorithmValidation;
-import org.neo4j.gds.core.utils.progress.JobId;
+import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.embeddings.fastrp.FastRPParameters;
 import org.neo4j.gds.embeddings.fastrp.FastRPResult;
 import org.neo4j.gds.embeddings.hashgnn.HashGNNParameters;

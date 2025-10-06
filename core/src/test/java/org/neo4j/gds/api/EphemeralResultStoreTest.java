@@ -21,7 +21,7 @@ package org.neo4j.gds.api;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.core.utils.progress.JobId;
+import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.extension.FakeClockExtension;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.time.FakeClock;

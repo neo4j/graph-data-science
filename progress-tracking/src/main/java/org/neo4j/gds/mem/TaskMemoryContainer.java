@@ -20,7 +20,7 @@
 package org.neo4j.gds.mem;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.neo4j.gds.core.utils.progress.JobId;
+import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.utils.progress.UserTask;
 
 import java.util.HashSet;

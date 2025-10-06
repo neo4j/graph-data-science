@@ -21,7 +21,7 @@ package org.neo4j.gds.core.write;
 
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
-import org.neo4j.gds.core.utils.progress.JobId;
+import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.values.storable.Values;

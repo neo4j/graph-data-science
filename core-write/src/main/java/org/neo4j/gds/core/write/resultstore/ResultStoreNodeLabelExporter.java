@@ -21,7 +21,7 @@ package org.neo4j.gds.core.write.resultstore;
 
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.ResultStoreEntry;
-import org.neo4j.gds.core.utils.progress.JobId;
+import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.write.NodeLabelExporter;
 
 import java.util.function.LongUnaryOperator;

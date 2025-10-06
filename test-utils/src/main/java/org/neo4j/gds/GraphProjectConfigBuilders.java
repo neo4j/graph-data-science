@@ -24,7 +24,7 @@ import org.immutables.value.Value;
 import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.core.utils.progress.JobId;
+import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.legacycypherprojection.GraphProjectFromCypherConfig;
 import org.neo4j.gds.legacycypherprojection.GraphProjectFromCypherConfigImpl;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;

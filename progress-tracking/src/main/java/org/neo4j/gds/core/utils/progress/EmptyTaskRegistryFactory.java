@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.core.utils.progress;
 
+import org.neo4j.gds.core.JobId;
+
 public enum EmptyTaskRegistryFactory implements TaskRegistryFactory {
     INSTANCE;
 

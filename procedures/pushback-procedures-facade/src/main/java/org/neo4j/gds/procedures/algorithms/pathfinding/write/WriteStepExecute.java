@@ -25,7 +25,7 @@ import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.applications.algorithms.machinery.WriteStep;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 import org.neo4j.gds.core.utils.ProgressTimer;
-import org.neo4j.gds.core.utils.progress.JobId;
+import org.neo4j.gds.core.JobId;
 
 import java.util.concurrent.atomic.AtomicLong;
 

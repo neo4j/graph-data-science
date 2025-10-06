@@ -20,7 +20,7 @@
 package org.neo4j.gds.applications.algorithms.machinery;
 
 import org.neo4j.gds.core.loading.GraphResources;
-import org.neo4j.gds.core.utils.progress.JobId;
+import org.neo4j.gds.core.JobId;
 
 import java.util.Optional;
 import java.util.function.Function;

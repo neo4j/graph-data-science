@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.applications.algorithms.machinery;
 
-import org.neo4j.gds.core.utils.progress.JobId;
+import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.utils.StringFormatting;
 

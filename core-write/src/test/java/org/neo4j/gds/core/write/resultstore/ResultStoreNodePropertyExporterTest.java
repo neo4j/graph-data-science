@@ -24,7 +24,7 @@ import org.neo4j.gds.api.EphemeralResultStore;
 import org.neo4j.gds.api.ResultStoreEntry;
 import org.neo4j.gds.api.properties.nodes.NodePropertyRecord;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.core.utils.progress.JobId;
+import org.neo4j.gds.core.JobId;
 
 import java.util.List;
 import java.util.function.LongUnaryOperator;

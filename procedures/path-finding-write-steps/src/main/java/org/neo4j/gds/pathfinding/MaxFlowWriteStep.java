@@ -28,7 +28,7 @@ import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.applications.algorithms.machinery.WriteRelationshipService;
 import org.neo4j.gds.applications.algorithms.machinery.WriteStep;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
-import org.neo4j.gds.core.utils.progress.JobId;
+import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.maxflow.FlowResult;
 import org.neo4j.values.storable.Values;
 

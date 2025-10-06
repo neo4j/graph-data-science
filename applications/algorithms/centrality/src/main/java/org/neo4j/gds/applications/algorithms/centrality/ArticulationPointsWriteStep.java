@@ -28,7 +28,7 @@ import org.neo4j.gds.applications.algorithms.machinery.WriteStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.articulationpoints.ArticulationPointsResult;
 import org.neo4j.gds.articulationpoints.ArticulationPointsWriteConfig;
-import org.neo4j.gds.core.utils.progress.JobId;
+import org.neo4j.gds.core.JobId;
 
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ArticulationPoints;
 

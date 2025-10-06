@@ -22,7 +22,7 @@ package org.neo4j.gds.core.utils.progress.tasks;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.BatchingProgressLogger;
-import org.neo4j.gds.core.utils.progress.JobId;
+import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.utils.progress.ProgressLogger;
 
 import java.util.function.Supplier;

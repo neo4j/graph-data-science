@@ -20,6 +20,7 @@
 package org.neo4j.gds.core.utils.progress;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.utils.progress.tasks.LeafTask;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 

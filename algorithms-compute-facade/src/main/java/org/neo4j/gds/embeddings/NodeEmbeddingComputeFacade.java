@@ -23,7 +23,7 @@ import org.neo4j.gds.NodeEmbeddingsAlgorithmTasks;
 import org.neo4j.gds.ProgressTrackerFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.async.AsyncAlgorithmCaller;
-import org.neo4j.gds.core.utils.progress.JobId;
+import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.embeddings.fastrp.FastRP;
 import org.neo4j.gds.embeddings.fastrp.FastRPParameters;
 import org.neo4j.gds.embeddings.fastrp.FastRPResult;

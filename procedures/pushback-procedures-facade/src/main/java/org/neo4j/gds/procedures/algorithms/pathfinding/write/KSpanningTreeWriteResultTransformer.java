@@ -23,7 +23,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.core.utils.ProgressTimer;
-import org.neo4j.gds.core.utils.progress.JobId;
+import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.pathfinding.KSpanningTreeWriteStep;
 import org.neo4j.gds.procedures.algorithms.pathfinding.KSpanningTreeWriteResult;
 import org.neo4j.gds.result.TimedAlgorithmResult;
@@ -86,4 +86,3 @@ class KSpanningTreeWriteResultTransformer implements ResultTransformer<TimedAlgo
             );
         }
     }
-

@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.neo4j.gds.assertj.Extractors;
 import org.neo4j.gds.compat.TestLog;
+import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
@@ -270,7 +271,7 @@ class BatchingProgressLoggerTest {
         var log = mock(Log.class);
         var batchingProgressLogger = new BatchingProgressLogger(
             new LoggerForProgressTrackingAdapter(log),
-            JobId.parse("my job id"),
+            new JobId("my job id"),
             new LeafTask("Monsieur Alfonse", 42),
             new Concurrency(87)
         );
@@ -285,7 +286,7 @@ class BatchingProgressLoggerTest {
         var log = mock(Log.class);
         var batchingProgressLogger = new BatchingProgressLogger(
             new LoggerForProgressTrackingAdapter(log),
-            JobId.parse("my job id"),
+            new JobId("my job id"),
             new LeafTask("Monsieur Alfonse", 42),
             new Concurrency(87)
         );
@@ -301,7 +302,7 @@ class BatchingProgressLoggerTest {
         var log = mock(Log.class);
         var batchingProgressLogger = new BatchingProgressLogger(
             new LoggerForProgressTrackingAdapter(log),
-            JobId.parse("my job id"),
+            new JobId("my job id"),
             new LeafTask("Monsieur Alfonse", 42),
             new Concurrency(87)
         );
@@ -316,7 +317,7 @@ class BatchingProgressLoggerTest {
         var log = mock(Log.class);
         var batchingProgressLogger = new BatchingProgressLogger(
             new LoggerForProgressTrackingAdapter(log),
-            JobId.parse("my job id"),
+            new JobId("my job id"),
             new LeafTask("Monsieur Alfonse", 42),
             new Concurrency(87)
         );

@@ -24,7 +24,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
-import org.neo4j.gds.core.utils.progress.JobId;
+import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.maxflow.FlowResult;
 import org.neo4j.gds.pathfinding.MaxFlowWriteStep;
 import org.neo4j.gds.result.TimedAlgorithmResult;

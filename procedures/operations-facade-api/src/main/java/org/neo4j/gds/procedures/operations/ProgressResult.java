@@ -21,7 +21,7 @@ package org.neo4j.gds.procedures.operations;
 
 import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.neo4j.gds.core.utils.ClockService;
-import org.neo4j.gds.core.utils.progress.JobId;
+import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.utils.progress.UserTask;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 

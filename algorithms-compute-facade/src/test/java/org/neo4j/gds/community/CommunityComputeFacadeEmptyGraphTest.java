@@ -33,7 +33,7 @@ import org.neo4j.gds.cliqueCounting.CliqueCountingResult;
 import org.neo4j.gds.cliquecounting.CliqueCountingParameters;
 import org.neo4j.gds.conductance.ConductanceParameters;
 import org.neo4j.gds.conductance.ConductanceResult;
-import org.neo4j.gds.core.utils.progress.JobId;
+import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.hdbscan.HDBScanParameters;
 import org.neo4j.gds.hdbscan.Labels;
 import org.neo4j.gds.k1coloring.K1ColoringParameters;

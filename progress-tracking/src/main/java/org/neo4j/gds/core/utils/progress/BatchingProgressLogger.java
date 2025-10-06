@@ -20,6 +20,7 @@
 package org.neo4j.gds.core.utils.progress;
 
 import org.apache.commons.lang3.mutable.MutableLong;
+import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.LoggerForProgressTracking;
 import org.neo4j.gds.core.utils.progress.tasks.Task;

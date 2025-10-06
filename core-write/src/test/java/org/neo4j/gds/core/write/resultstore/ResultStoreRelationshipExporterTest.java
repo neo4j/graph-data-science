@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.EphemeralResultStore;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.ResultStoreEntry;
-import org.neo4j.gds.core.utils.progress.JobId;
+import org.neo4j.gds.core.JobId;
 
 import java.util.function.LongUnaryOperator;
 

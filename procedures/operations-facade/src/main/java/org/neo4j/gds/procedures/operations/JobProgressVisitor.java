@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.procedures.operations;
 
-import org.neo4j.gds.core.utils.progress.JobId;
+import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.utils.progress.tasks.DepthAwareTaskVisitor;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 

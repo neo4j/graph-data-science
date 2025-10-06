@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.mem;
 
-import org.neo4j.gds.core.utils.progress.JobId;
+import org.neo4j.gds.core.JobId;
 
 public record UserEntityMemory(String user, String name, String entity, long memoryInBytes) {
 

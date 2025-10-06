@@ -20,7 +20,7 @@
 package org.neo4j.gds.async;
 
 import org.neo4j.gds.core.utils.ProgressTimer;
-import org.neo4j.gds.core.utils.progress.JobId;
+import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 

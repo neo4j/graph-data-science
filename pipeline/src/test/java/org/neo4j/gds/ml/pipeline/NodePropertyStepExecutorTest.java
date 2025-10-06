@@ -32,7 +32,7 @@ import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
-import org.neo4j.gds.core.utils.progress.JobId;
+import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.utils.progress.PerDatabaseTaskStore;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.executor.ExecutionContext;
@@ -228,7 +228,7 @@ class NodePropertyStepExecutorTest {
         var progressTracker = new InspectableTestProgressTracker(
             NodePropertyStepExecutor.tasks(steps, graphStore.nodeCount()),
             "user",
-            JobId.parse("42"),
+            new JobId("42"),
             new PerDatabaseTaskStore(
                 Duration.ofMinutes(1)),
             new LoggerForProgressTrackingAdapter(log)

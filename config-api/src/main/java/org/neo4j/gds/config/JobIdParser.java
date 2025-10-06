@@ -17,38 +17,30 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.utils.progress;
+package org.neo4j.gds.config;
+
+import org.neo4j.gds.core.JobId;
 
 import java.util.Locale;
-import java.util.UUID;
 
-public record JobId(String value) {
-    public static final JobId EMPTY = new JobId("");
-
-    public JobId() {
-        this(UUID.randomUUID().toString());
-    }
-
-    public JobId(UUID id) {
-        this(id.toString());
-    }
-
-    public String asString() {
-        return value;
-    }
+/**
+ * Just a helper for integration
+ */
+@SuppressWarnings("unused")
+public final class JobIdParser {
+    private JobIdParser() {}
 
     public static JobId parse(Object input) {
-        if (input instanceof String) {
-            return new JobId((String) input);
-        } else if (input instanceof JobId) {
-            return (JobId) input;
-        }
+        if (input instanceof String jobIdAsString) return new JobId(jobIdAsString);
+        if (input instanceof JobId jobId) return jobId;
 
-        throw new IllegalArgumentException(String.format(
-            Locale.ENGLISH,
-            "Expected JobId or String. Got %s.",
-            input.getClass().getSimpleName()
-        ));
+        throw new IllegalArgumentException(
+            String.format(
+                Locale.ENGLISH,
+                "Expected JobId or String. Got %s.",
+                input.getClass().getSimpleName()
+            )
+        );
     }
 
     public static String asString(JobId jobId) {

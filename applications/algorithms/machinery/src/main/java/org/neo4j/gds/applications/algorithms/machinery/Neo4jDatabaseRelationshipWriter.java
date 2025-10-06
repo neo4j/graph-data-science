@@ -28,7 +28,7 @@ import org.neo4j.gds.api.properties.relationships.RelationshipWithPropertyConsum
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
-import org.neo4j.gds.core.utils.progress.JobId;
+import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.write.RelationshipExporter;
@@ -143,4 +143,3 @@ final class Neo4jDatabaseRelationshipWriter {
 
     private Neo4jDatabaseRelationshipWriter() {}
 }
-

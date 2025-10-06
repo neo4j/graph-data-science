@@ -20,7 +20,7 @@
 package org.neo4j.gds.procedures.operations;
 
 import org.neo4j.gds.applications.ApplicationsFacade;
-import org.neo4j.gds.core.utils.progress.JobId;
+import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.utils.progress.tasks.Status;
 import org.neo4j.gds.core.utils.warnings.UserLogEntry;
 

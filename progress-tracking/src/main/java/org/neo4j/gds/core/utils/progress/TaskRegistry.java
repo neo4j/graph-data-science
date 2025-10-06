@@ -20,6 +20,7 @@
 package org.neo4j.gds.core.utils.progress;
 
 import org.jetbrains.annotations.TestOnly;
+import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 
 public class TaskRegistry {

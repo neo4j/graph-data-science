@@ -22,7 +22,7 @@ package org.neo4j.gds.core.write;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.api.ExportedRelationship;
 import org.neo4j.gds.api.ResultStore;
-import org.neo4j.gds.core.utils.progress.JobId;
+import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.termination.TerminationFlag;
 

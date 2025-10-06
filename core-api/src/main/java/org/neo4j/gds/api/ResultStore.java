@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.api;
 
-import org.neo4j.gds.core.utils.progress.JobId;
+import org.neo4j.gds.core.JobId;
 
 /**
  * A store for write results that are not immediately persisted in the database.
@@ -30,7 +30,7 @@ import org.neo4j.gds.core.utils.progress.JobId;
 public interface ResultStore {
 
     /**
-     * Stores a shallow entry representing result store data in this store given a {@link org.neo4j.gds.core.utils.progress.JobId}.
+     * Stores a shallow entry representing result store data in this store given a {@link org.neo4j.gds.core.JobId}.
      */
     void add(JobId jobId, ResultStoreEntry entry);
 
@@ -40,12 +40,12 @@ public interface ResultStore {
     ResultStoreEntry get(JobId jobId);
 
     /**
-     * Checks if this store contains an entry for the given {@link org.neo4j.gds.core.utils.progress.JobId}.
+     * Checks if this store contains an entry for the given {@link org.neo4j.gds.core.JobId}.
      */
     boolean hasEntry(JobId jobId);
 
     /**
-     * Removes a stored entry based on the given {@link org.neo4j.gds.core.utils.progress.JobId}.
+     * Removes a stored entry based on the given {@link org.neo4j.gds.core.JobId}.
      */
     void remove(JobId jobId);
 

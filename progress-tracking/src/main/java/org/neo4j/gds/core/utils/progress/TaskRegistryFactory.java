@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.core.utils.progress;
 
+import org.neo4j.gds.core.JobId;
+
 @FunctionalInterface
 public interface TaskRegistryFactory {
     TaskRegistry newInstance(JobId jobId);

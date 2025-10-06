@@ -26,7 +26,7 @@ import com.github.benmanes.caffeine.cache.Ticker;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.core.concurrency.ExecutorServiceUtil;
 import org.neo4j.gds.core.utils.ClockService;
-import org.neo4j.gds.core.utils.progress.JobId;
+import org.neo4j.gds.core.JobId;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;

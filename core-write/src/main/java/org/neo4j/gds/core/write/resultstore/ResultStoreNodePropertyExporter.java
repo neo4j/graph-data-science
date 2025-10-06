@@ -23,7 +23,7 @@ import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.ResultStoreEntry;
 import org.neo4j.gds.api.properties.nodes.NodePropertyRecord;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.core.utils.progress.JobId;
+import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.write.NodePropertyExporter;
 
 import java.util.ArrayList;

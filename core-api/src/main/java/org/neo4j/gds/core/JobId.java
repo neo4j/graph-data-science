@@ -17,29 +17,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.api;
+package org.neo4j.gds.core;
 
-import org.neo4j.gds.core.JobId;
+import java.util.UUID;
 
-public class EmptyResultStore implements ResultStore {
-
-    @Override
-    public void add(JobId jobId, ResultStoreEntry entry) {
-
+public record JobId(String value) {
+    public JobId() {
+        this("jid-" + UUID.randomUUID());
     }
 
-    @Override
-    public ResultStoreEntry get(JobId jobId) {
-        return null;
-    }
-
-    @Override
-    public boolean hasEntry(JobId jobId) {
-        return false;
-    }
-
-    @Override
-    public void remove(JobId jobId) {
-
+    public String asString() {
+        return value;
     }
 }

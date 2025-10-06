@@ -24,7 +24,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.ResultStoreEntry;
 import org.neo4j.gds.api.properties.relationships.RelationshipWithPropertyConsumer;
-import org.neo4j.gds.core.utils.progress.JobId;
+import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.write.RelationshipExporter;
 
 import java.util.function.LongUnaryOperator;

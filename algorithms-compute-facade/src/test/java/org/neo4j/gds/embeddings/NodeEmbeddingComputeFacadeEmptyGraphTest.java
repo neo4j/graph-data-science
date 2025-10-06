@@ -27,7 +27,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.neo4j.gds.ProgressTrackerFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.async.AsyncAlgorithmCaller;
-import org.neo4j.gds.core.utils.progress.JobId;
+import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.embeddings.fastrp.FastRPParameters;
 import org.neo4j.gds.embeddings.hashgnn.HashGNNParameters;
 import org.neo4j.gds.embeddings.node2vec.Node2VecParameters;

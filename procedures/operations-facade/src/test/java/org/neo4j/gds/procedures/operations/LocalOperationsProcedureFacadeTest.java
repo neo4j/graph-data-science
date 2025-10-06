@@ -24,7 +24,7 @@ import org.neo4j.gds.api.User;
 import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.operations.OperationsApplications;
-import org.neo4j.gds.core.utils.progress.JobId;
+import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.utils.progress.TaskStore;
 import org.neo4j.gds.core.utils.progress.UserTask;
 import org.neo4j.gds.core.utils.progress.tasks.LeafTask;
@@ -71,12 +71,13 @@ class LocalOperationsProcedureFacadeTest {
         failed.fail();
 
 
+        var jobId = new JobId("a job id");
         var mockedTasks = Stream.of(
-            new UserTask("alice", JobId.EMPTY, pending),
-            new UserTask("alice", JobId.EMPTY, running),
-            new UserTask("alice",  JobId.EMPTY, failed),
-            new UserTask("alice",  JobId.EMPTY, cancelled),
-            new UserTask("alice",  JobId.EMPTY, finished)
+            new UserTask("alice", jobId, pending),
+            new UserTask("alice", jobId, running),
+            new UserTask("alice", jobId, failed),
+            new UserTask("alice", jobId, cancelled),
+            new UserTask("alice", jobId, finished)
         );
         when(taskStore.query("alice")).thenReturn(mockedTasks);
 
@@ -119,12 +120,13 @@ class LocalOperationsProcedureFacadeTest {
         failed.fail();
 
 
+        var jobId = new JobId("another job id");
         var mockedTasks = Stream.of(
-            new UserTask("alice", JobId.EMPTY, pending),
-            new UserTask("alice", JobId.EMPTY, running),
-            new UserTask("alice",  JobId.EMPTY, failed),
-            new UserTask("alice",  JobId.EMPTY, cancelled),
-            new UserTask("alice",  JobId.EMPTY, finished)
+            new UserTask("alice", jobId, pending),
+            new UserTask("alice", jobId, running),
+            new UserTask("alice", jobId, failed),
+            new UserTask("alice", jobId, cancelled),
+            new UserTask("alice", jobId, finished)
         );
         when(taskStore.query("alice")).thenReturn(mockedTasks);
 

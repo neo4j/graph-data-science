@@ -22,7 +22,7 @@ package org.neo4j.gds.applications.graphstorecatalog;
 import org.neo4j.gds.config.BaseConfig;
 import org.neo4j.gds.config.JobIdConfig;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.gds.core.utils.progress.JobId;
+import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.Estimate;
