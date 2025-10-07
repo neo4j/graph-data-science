@@ -29,6 +29,7 @@ import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutResult;
 import org.neo4j.gds.cliqueCounting.CliqueCountingResult;
 import org.neo4j.gds.cliquecounting.CliqueCountingParameters;
 import org.neo4j.gds.community.validation.ApproxMaxKCutValidation;
+import org.neo4j.gds.community.validation.LocalClusteringCoefficientGraphStoreValidation;
 import org.neo4j.gds.conductance.ConductanceParameters;
 import org.neo4j.gds.conductance.ConductanceResult;
 import org.neo4j.gds.core.JobId;
@@ -50,6 +51,8 @@ import org.neo4j.gds.labelpropagation.LabelPropagationParameters;
 import org.neo4j.gds.labelpropagation.LabelPropagationResult;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.results.ResultTransformerBuilder;
+import org.neo4j.gds.triangle.LocalClusteringCoefficientParameters;
+import org.neo4j.gds.triangle.LocalClusteringCoefficientResult;
 
 import java.util.List;
 import java.util.Optional;
@@ -309,6 +312,36 @@ public class CommunityComputeBusinessFacade {
         var graph = graphResources.graph();
 
         return computeFacade.labelPropagation(
+            graph,
+            parameters,
+            jobId,
+            logProgress
+
+        ).thenApply(resultTransformerBuilder.build(graphResources));
+    }
+
+    public <TR> CompletableFuture<TR> lcc(
+        GraphName graphName,
+        GraphParameters graphParameters,
+        Optional<String> relationshipProperty,
+        LocalClusteringCoefficientParameters parameters,
+        JobId jobId,
+        boolean logProgress,
+        ResultTransformerBuilder<TimedAlgorithmResult<LocalClusteringCoefficientResult>, TR> resultTransformerBuilder
+    ) {
+        // Fetch the Graph the algorithm will operate on
+        var graphResources = graphStoreCatalogService.fetchGraphResources(
+            graphName,
+            graphParameters,
+            relationshipProperty,
+             LocalClusteringCoefficientGraphStoreValidation.create(parameters.seedProperty()),
+            Optional.empty(),
+            user,
+            databaseId
+        );
+        var graph = graphResources.graph();
+
+        return computeFacade.lcc(
             graph,
             parameters,
             jobId,
