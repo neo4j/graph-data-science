@@ -2,20 +2,11 @@
 = Neo4j Server
 
 On a self-managed Neo4j Server you need to install and configure GDS manually.
-
-* If you have the Neo4j Enterprise Edition, you will find the GDS plugin bundled within the Neo4j Server distribution.
-  The GDS plugin is located in the `products` directory.
-  This is the <<installation-neo4j-server-bundled>> option.
-
-* If you are using the Neo4j Community Edition, you must download GDS manually from the link:https://neo4j.com/deployment-center/#gds-tab[Neo4j Deployment Center].
-This is the <<installation-neo4j-server-custom>> option.
-
-
-[[installation-neo4j-server-bundled]]
-== Bundled installation
-
+For both the Neo4j Enterprise Edition and Neo4j Community Edition, you will find the GDS plugin bundled within the Neo4j Server distribution.
 The GDS plugin is always compatible with the version of the Neo4j Server distribution with which it is bundled.
-To install the GDS plugin in a Neo4j Enterprise Edition installation, follow these steps:
+
+The GDS plugin is located in the `products` directory.
+To install the GDS plugin in a Neo4j Enterprise Edition or Neo4j Community Edition installation, follow these steps:
 
 [NOTE]
 All paths in the following instructions are relative to the Neo4j installation directory.
@@ -29,40 +20,8 @@ dbms.security.procedures.unrestricted=gds.*
 ----
 This configuration entry is necessary because the GDS library accesses low-level components of Neo4j to maximise performance.
 +
-. Check if the procedure allowlist is enabled in the `conf/neo4j.conf` file, namely if the `dbms.security.procedures.allowlist` option is _not_ commented out with a leading `#` sign. In this case, add the GDS library to the allowlist:
-+
-----
-dbms.security.procedures.allowlist=gds.*
-----
-You can find more information on allow listing in the link:https://neo4j.com/docs/operations-manual/current/security/securing-extensions/#allow-listing[Operations Manual].
-+
-
-. Restart the Neo4j Server, using for example `bin/neo4j restart`.
-
-
-[[installation-neo4j-server-custom]]
-== Custom installation
-
-To install the GDS plugin in a Neo4j Community Edition installation, follow these steps:
-
-[NOTE]
-All paths in the following instructions are relative to the Neo4j installation directory.
-
-. Open the link:https://neo4j.com/deployment-center/#gds-tab[Neo4j Deployment Center] and head to the Graph Data Science Self-Managed section.
-
-. Check that the version of the Neo4j Graph Data Science Library is xref:installation/supported-neo4j-versions.adoc[compatible] with your Neo4j Server and download the compressed file.
-
-. Decompress the file and move the `neo4j-graph-data-science-[version].jar` file into the `plugins` directory.
-
-. Add the following to your `conf/neo4j.conf` file:
-+
-----
-dbms.security.procedures.unrestricted=gds.*
-----
-This configuration entry is necessary because the GDS library accesses low-level components of Neo4j to maximise performance.
-+
-
-. Check if the procedure allowlist is enabled in the `conf/neo4j.conf` file, namely if the `dbms.security.procedures.allowlist` option is _not_ commented out with a leading `#` sign. In this case, add the GDS library to the allowlist:
+. Check if the procedure allowlist is enabled in the `conf/neo4j.conf` file, namely if the `dbms.security.procedures.allowlist` option is _not_ commented out with a leading `#` sign.
+In this case, add the GDS library to the allowlist:
 +
 ----
 dbms.security.procedures.allowlist=gds.*
