@@ -25,9 +25,12 @@ import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutParameters;
 import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutResult;
+import org.neo4j.gds.cliqueCounting.CliqueCountingResult;
+import org.neo4j.gds.cliquecounting.CliqueCountingParameters;
 import org.neo4j.gds.community.validation.ApproxMaxKCutValidation;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
+import org.neo4j.gds.core.loading.validation.UndirectedOnlyGraphStoreValidation;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.results.ResultTransformerBuilder;
 
@@ -85,4 +88,35 @@ public class CommunityComputeBusinessFacade {
 
         ).thenApply(resultTransformerBuilder.build(graphResources));
     }
+
+    public <TR> CompletableFuture<TR> cliqueCounting(
+        GraphName graphName,
+        GraphParameters graphParameters,
+        Optional<String> relationshipProperty,
+        CliqueCountingParameters parameters,
+        JobId jobId,
+        boolean logProgress,
+        ResultTransformerBuilder<TimedAlgorithmResult<CliqueCountingResult>, TR> resultTransformerBuilder
+    ) {
+        // Fetch the Graph the algorithm will operate on
+        var graphResources = graphStoreCatalogService.fetchGraphResources(
+            graphName,
+            graphParameters,
+            relationshipProperty,
+            new UndirectedOnlyGraphStoreValidation("Clique Counting"),
+            Optional.empty(),
+            user,
+            databaseId
+        );
+        var graph = graphResources.graph();
+
+        return computeFacade.cliqueCounting(
+            graph,
+            parameters,
+            jobId,
+            logProgress
+
+        ).thenApply(resultTransformerBuilder.build(graphResources));
+    }
+
 }
