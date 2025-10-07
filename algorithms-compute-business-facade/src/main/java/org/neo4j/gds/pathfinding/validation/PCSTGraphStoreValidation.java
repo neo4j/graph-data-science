@@ -25,24 +25,26 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.core.loading.validation.GraphStoreValidation;
 import org.neo4j.gds.core.loading.validation.NodePropertyAllExistsGraphStoreValidation;
+import org.neo4j.gds.core.loading.validation.NodePropertyTypeGraphStoreValidation;
 import org.neo4j.gds.core.loading.validation.UndirectedOnlyGraphStoreValidation;
-import org.neo4j.gds.utils.StringFormatting;
 
 import java.util.Collection;
+import java.util.List;
 
 public class PCSTGraphStoreValidation extends GraphStoreValidation {
 
-    private final String prizeProperty;
     private final UndirectedOnlyGraphStoreValidation undirectedOnlyGraphStoreValidation;
     private final NodePropertyAllExistsGraphStoreValidation nodePropertyAllExistsGraphStoreValidation;
+    private final NodePropertyTypeGraphStoreValidation nodePropertyTypeGraphStoreValidation;
 
 
     public PCSTGraphStoreValidation(
-        String prizeProperty,
         UndirectedOnlyGraphStoreValidation undirectedOnlyGraphStoreValidation,
-        NodePropertyAllExistsGraphStoreValidation nodePropertyAllExistsGraphStoreValidation
+        NodePropertyAllExistsGraphStoreValidation nodePropertyAllExistsGraphStoreValidation,
+        NodePropertyTypeGraphStoreValidation nodePropertyTypeGraphStoreValidation
     ) {
-        this.prizeProperty = prizeProperty;
+        this.nodePropertyTypeGraphStoreValidation = nodePropertyTypeGraphStoreValidation;
+        ;
         this.undirectedOnlyGraphStoreValidation = undirectedOnlyGraphStoreValidation;
         this.nodePropertyAllExistsGraphStoreValidation = nodePropertyAllExistsGraphStoreValidation;
     }
@@ -51,12 +53,14 @@ public class PCSTGraphStoreValidation extends GraphStoreValidation {
 
         var nodePropertyAllExistsGraphStoreValidation = new NodePropertyAllExistsGraphStoreValidation(prizeProperty);
         var undirectedOnlyGraphStoreValidation = new UndirectedOnlyGraphStoreValidation("Prize-collecting Steiner Tree");
-
-        return new PCSTGraphStoreValidation(
+        var nodePropertyTypeGraphStoreValidation = new NodePropertyTypeGraphStoreValidation(
             prizeProperty,
+            List.of(ValueType.DOUBLE)
+        );
+        return new PCSTGraphStoreValidation(
             undirectedOnlyGraphStoreValidation,
-            nodePropertyAllExistsGraphStoreValidation
-
+            nodePropertyAllExistsGraphStoreValidation,
+            nodePropertyTypeGraphStoreValidation
         );
     }
 
@@ -68,22 +72,10 @@ public class PCSTGraphStoreValidation extends GraphStoreValidation {
     ) {
         undirectedOnlyGraphStoreValidation.validateAlgorithmRequirements(graphStore,selectedLabels,selectedRelationshipTypes);
         nodePropertyAllExistsGraphStoreValidation.validateAlgorithmRequirements(graphStore,selectedLabels,selectedRelationshipTypes);
-        validatePropertyType(graphStore);
+        nodePropertyTypeGraphStoreValidation.validateAlgorithmRequirements(graphStore,selectedLabels,selectedRelationshipTypes);
     }
 
 
-    void validatePropertyType(GraphStore graphStore){
-        var valueType = graphStore.nodeProperty(prizeProperty).valueType();
-        if (valueType == ValueType.DOUBLE) {
-            return;
-        }
-        throw new IllegalArgumentException(
-            StringFormatting.formatWithLocale(
-                "Unsupported node property value type [%s]. Value type required: [%s]",
-                valueType,
-                ValueType.DOUBLE
-            )
-        );
-    }
+
 
 }

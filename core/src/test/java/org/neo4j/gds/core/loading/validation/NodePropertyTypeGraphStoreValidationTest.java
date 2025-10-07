@@ -17,12 +17,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.pathfinding.validation;
+package org.neo4j.gds.core.loading.validation;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.nodes.NodeProperty;
+
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -30,7 +32,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-class PCSTGraphStoreValidationTest {
+class NodePropertyTypeGraphStoreValidationTest {
 
     @Test
     void shouldNotThrowForValidPropertyType() {
@@ -39,7 +41,7 @@ class PCSTGraphStoreValidationTest {
         when(nodeProperty.valueType()).thenReturn(ValueType.DOUBLE);
         when(graphStore.nodeProperty(anyString())).thenReturn(nodeProperty);
 
-        var validation = PCSTGraphStoreValidation.create("p");
+        var validation = new NodePropertyTypeGraphStoreValidation("p", List.of(ValueType.DOUBLE));
 
         assertThatNoException().isThrownBy(() -> validation.validatePropertyType(
             graphStore
@@ -55,13 +57,12 @@ class PCSTGraphStoreValidationTest {
         when(nodeProperty.valueType()).thenReturn(ValueType.FLOAT_ARRAY);
         when(graphStore.nodeProperty(anyString())).thenReturn(nodeProperty);
 
-
-        var validation = PCSTGraphStoreValidation.create("p");
+        var validation = new NodePropertyTypeGraphStoreValidation("p", List.of(ValueType.DOUBLE, ValueType.LONG));
 
         assertThatThrownBy(() -> validation.validatePropertyType(
             graphStore
         ))
-            .hasMessageContaining("Unsupported node property value type [FLOAT_ARRAY]. Value type required: [DOUBLE]");
+            .hasMessageContaining("Unsupported node property value type for property `p`: FLOAT_ARRAY. Value types accepted: ['DOUBLE', 'LONG']");
 
     }
 
