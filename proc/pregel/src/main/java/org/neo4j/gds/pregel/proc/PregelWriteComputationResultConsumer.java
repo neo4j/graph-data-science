@@ -27,6 +27,7 @@ import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
 import org.neo4j.gds.applications.algorithms.machinery.WriteNodePropertyService;
 import org.neo4j.gds.beta.pregel.PregelProcedureConfig;
 import org.neo4j.gds.beta.pregel.PregelResult;
+import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
@@ -70,6 +71,7 @@ public class PregelWriteComputationResultConsumer<
 
                         var requestScopedDependencies = RequestScopedDependencies
                             .builder()
+                            .correlationId(new PlainSimpleRequestCorrelationId())
                             .terminationFlag(computationResult.algorithm().getTerminationFlag())
                             .taskRegistryFactory(executionContext.taskRegistryFactory())
                             .build();
@@ -113,5 +115,3 @@ public class PregelWriteComputationResultConsumer<
         );
     }
 }
-
-

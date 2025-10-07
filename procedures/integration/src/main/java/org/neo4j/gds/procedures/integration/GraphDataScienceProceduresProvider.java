@@ -155,6 +155,7 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
         var procedureCallContext = context.procedureCallContext();
         var procedureTransaction = procedureTransactionAccessor.getProcedureTransaction(context);
 
+        var correlationId = Neo4jPoweredRequestCorrelationId.create(kernelTransaction.getTransactionId());
         var databaseId = databaseIdAccessor.getDatabaseId(graphDatabaseService);
         var procedureReturnColumns = new ProcedureCallContextReturnColumns(procedureCallContext);
         var terminationMonitor = new TransactionTerminationMonitor(kernelTransaction);
@@ -179,6 +180,7 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
         );
 
         var requestScopedDependencies = RequestScopedDependencies.builder()
+            .correlationId(correlationId)
             .databaseId(databaseId)
             .graphLoaderContext(graphLoaderContext)
             .taskRegistryFactory(taskRegistryFactory)

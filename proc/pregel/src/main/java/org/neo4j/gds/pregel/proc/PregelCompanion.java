@@ -33,6 +33,7 @@ import org.neo4j.gds.beta.pregel.NodeValue;
 import org.neo4j.gds.beta.pregel.PregelConfig;
 import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.beta.pregel.PregelSchema;
+import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.JobId;
@@ -106,6 +107,7 @@ public final class PregelCompanion {
         var progressTrackerCreator = new ProgressTrackerCreator(
             new LoggerForProgressTrackingAdapter(log),
             RequestScopedDependencies.builder()
+                .correlationId(new PlainSimpleRequestCorrelationId())
                 .taskRegistryFactory(taskRegistryFactory)
                 .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
                 .build()

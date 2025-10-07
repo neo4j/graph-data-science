@@ -27,6 +27,7 @@ import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
+import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
 import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.model.OpenModelCatalog;
@@ -157,6 +158,7 @@ public final class ProcedureRunner {
         var procedureContext = WriteContext.builder().build();
 
         var requestScopedDependencies = RequestScopedDependencies.builder()
+            .correlationId(new PlainSimpleRequestCorrelationId())
             .databaseId(new DatabaseIdAccessor().getDatabaseId(graphDatabaseService))
             .graphLoaderContext(GraphLoaderContext.NULL_CONTEXT)
             .taskRegistryFactory(taskRegistryFactory)
