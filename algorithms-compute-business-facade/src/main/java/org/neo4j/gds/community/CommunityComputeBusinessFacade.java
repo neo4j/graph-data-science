@@ -43,6 +43,7 @@ import org.neo4j.gds.core.loading.validation.NodePropertyAnyExistsGraphStoreVali
 import org.neo4j.gds.core.loading.validation.NodePropertyTypeGraphStoreValidation;
 import org.neo4j.gds.core.loading.validation.SeedPropertyGraphStoreValidation;
 import org.neo4j.gds.core.loading.validation.UndirectedOnlyGraphStoreValidation;
+import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.hdbscan.HDBScanParameters;
 import org.neo4j.gds.hdbscan.Labels;
 import org.neo4j.gds.k1coloring.K1ColoringParameters;
@@ -70,6 +71,7 @@ import org.neo4j.gds.triangle.LocalClusteringCoefficientResult;
 import org.neo4j.gds.triangle.TriangleCountParameters;
 import org.neo4j.gds.triangle.TriangleCountResult;
 import org.neo4j.gds.triangle.TriangleResult;
+import org.neo4j.gds.wcc.WccParameters;
 
 import java.util.List;
 import java.util.Optional;
@@ -600,6 +602,36 @@ public class CommunityComputeBusinessFacade {
             graph,
             parameters,
             jobId
+        ).thenApply(resultTransformerBuilder.build(graphResources));
+    }
+
+    public <TR> CompletableFuture<TR> wcc(
+        GraphName graphName,
+        GraphParameters graphParameters,
+        Optional<String> relationshipProperty,
+        WccParameters parameters,
+        JobId jobId,
+        boolean logProgress,
+        ResultTransformerBuilder<TimedAlgorithmResult<DisjointSetStruct>, TR> resultTransformerBuilder
+    ) {
+        // Fetch the Graph the algorithm will operate on
+        var graphResources = graphStoreCatalogService.fetchGraphResources(
+            graphName,
+            graphParameters,
+            relationshipProperty,
+            SeedPropertyGraphStoreValidation.create(parameters.seedProperty().orElse(null)),
+            Optional.empty(),
+            user,
+            databaseId
+        );
+        var graph = graphResources.graph();
+
+        return computeFacade.wcc(
+            graph,
+            parameters,
+            jobId,
+            logProgress
+
         ).thenApply(resultTransformerBuilder.build(graphResources));
     }
 
