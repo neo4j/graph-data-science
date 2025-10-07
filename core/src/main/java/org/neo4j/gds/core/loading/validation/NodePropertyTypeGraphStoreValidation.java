@@ -29,7 +29,7 @@ import org.neo4j.gds.utils.StringJoining;
 import java.util.Collection;
 import java.util.List;
 
-public class NodePropertyTypeGraphStoreValidation extends  GraphStoreValidation {
+public class NodePropertyTypeGraphStoreValidation extends GraphStoreValidation {
     private final String nodeProperty;
     private final List<ValueType> allowedValueTypes;
 
@@ -48,9 +48,9 @@ public class NodePropertyTypeGraphStoreValidation extends  GraphStoreValidation 
 
     }
 
-    void validatePropertyType(GraphStore graphStore){
+    void validatePropertyType(GraphStore graphStore) {
         var valueType = graphStore.nodeProperty(nodeProperty).valueType();
-        for (var currentValueType : allowedValueTypes){
+        for (var currentValueType : allowedValueTypes) {
             if (valueType == currentValueType) {
                 return;
             }

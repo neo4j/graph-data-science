@@ -40,11 +40,13 @@ public class NodePropertyAnyExistsGraphStoreValidation extends GraphStoreValidat
         Collection<NodeLabel> selectedLabels,
         Collection<RelationshipType> selectedRelationshipTypes
     ) {
-        validatePropertyExists(graphStore,selectedLabels);
+        validatePropertyExists(graphStore, selectedLabels);
     }
 
-    void validatePropertyExists(GraphStore graphStore,
-        Collection<NodeLabel> selectedLabels){
+    void validatePropertyExists(
+        GraphStore graphStore,
+        Collection<NodeLabel> selectedLabels
+    ) {
         if (selectedLabels
             .stream()
             .anyMatch(label -> graphStore.nodePropertyKeys(label).contains(nodeProperty))) {

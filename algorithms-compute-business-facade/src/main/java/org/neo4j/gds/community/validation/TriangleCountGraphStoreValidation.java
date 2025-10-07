@@ -35,9 +35,13 @@ public final class TriangleCountGraphStoreValidation extends GraphStoreValidatio
     private final UndirectedOnlyGraphStoreValidation undirectedOnlyGraphStoreValidation;
     private final List<String> labelFilter;
 
-    public static TriangleCountGraphStoreValidation create(List<String> labelFilter){
-        return new TriangleCountGraphStoreValidation(new UndirectedOnlyGraphStoreValidation("Triangle Counting"),labelFilter);
+    public static TriangleCountGraphStoreValidation create(List<String> labelFilter) {
+        return new TriangleCountGraphStoreValidation(
+            new UndirectedOnlyGraphStoreValidation("Triangle Counting"),
+            labelFilter
+        );
     }
+
     private TriangleCountGraphStoreValidation(
         UndirectedOnlyGraphStoreValidation undirectedOnlyGraphStoreValidation,
         List<String> labelFilter
@@ -53,8 +57,12 @@ public final class TriangleCountGraphStoreValidation extends GraphStoreValidatio
         Collection<NodeLabel> selectedLabels,
         Collection<RelationshipType> selectedRelationshipTypes
     ) {
-            undirectedOnlyGraphStoreValidation.validateAlgorithmRequirements(graphStore,selectedLabels,selectedRelationshipTypes);
-            validateLabelsExist(selectedLabels);
+        undirectedOnlyGraphStoreValidation.validateAlgorithmRequirements(
+            graphStore,
+            selectedLabels,
+            selectedRelationshipTypes
+        );
+        validateLabelsExist(selectedLabels);
     }
 
 

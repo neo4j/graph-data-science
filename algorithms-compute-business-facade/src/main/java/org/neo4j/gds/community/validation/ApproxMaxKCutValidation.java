@@ -29,7 +29,7 @@ import java.util.List;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public class ApproxMaxKCutValidation extends GraphStoreValidation  {
+public class ApproxMaxKCutValidation extends GraphStoreValidation {
 
     private final List<Long> minCommunitySizes;
 
@@ -47,7 +47,7 @@ public class ApproxMaxKCutValidation extends GraphStoreValidation  {
         validateMinCommunitySizesSum(graphStore);
     }
 
-    void validateMinCommunitySizesSum(GraphStore graphStore){
+    void validateMinCommunitySizesSum(GraphStore graphStore) {
         long minCommunitySizesSum = minCommunitySizes.stream().mapToLong(Long::valueOf).sum();
         long halfNodeCount = graphStore.nodeCount() / 2;
         if (minCommunitySizesSum > halfNodeCount) {

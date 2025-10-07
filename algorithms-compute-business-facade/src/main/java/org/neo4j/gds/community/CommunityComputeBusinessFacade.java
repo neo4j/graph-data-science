@@ -291,7 +291,7 @@ public class CommunityComputeBusinessFacade {
             Optional.empty(),
             new NodePropertyTypeGraphStoreValidation(
                 "nodeProperty",
-                List.of(ValueType.DOUBLE_ARRAY, ValueType.FLOAT_ARRAY,ValueType.DOUBLE)
+                List.of(ValueType.DOUBLE_ARRAY, ValueType.FLOAT_ARRAY, ValueType.DOUBLE)
             ),
             Optional.empty(),
             user,

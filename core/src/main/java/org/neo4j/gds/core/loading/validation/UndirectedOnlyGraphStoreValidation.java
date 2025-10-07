@@ -41,10 +41,10 @@ public final class UndirectedOnlyGraphStoreValidation extends GraphStoreValidati
         Collection<NodeLabel> selectedLabels,
         Collection<RelationshipType> selectedRelationshipTypes
     ) {
-        validateOnlyUndirected(graphStore,selectedRelationshipTypes);
+        validateOnlyUndirected(graphStore, selectedRelationshipTypes);
     }
 
-    void validateOnlyUndirected(GraphStore graphStore,Collection<RelationshipType> selectedRelationshipTypes ){
+    void validateOnlyUndirected(GraphStore graphStore, Collection<RelationshipType> selectedRelationshipTypes) {
         if (!graphStore.schema().filterRelationshipTypes(Set.copyOf(selectedRelationshipTypes)).isUndirected()) {
             throw new IllegalArgumentException(formatWithLocale(
                 "The %s algorithm requires relationship projections to be UNDIRECTED. " +

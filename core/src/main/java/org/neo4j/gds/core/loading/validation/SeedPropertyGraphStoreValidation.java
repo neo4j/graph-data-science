@@ -25,25 +25,26 @@ import org.neo4j.gds.api.GraphStore;
 
 import java.util.Collection;
 
-public final class SeedPropertyGraphStoreValidation extends  GraphStoreValidation {
+public final class SeedPropertyGraphStoreValidation extends GraphStoreValidation {
 
     private GraphStoreValidation validation;
 
     private SeedPropertyGraphStoreValidation(GraphStoreValidation validation) {this.validation = validation;}
 
-    public static SeedPropertyGraphStoreValidation create(String seedProperty){
-        if (seedProperty == null){
-            return  new SeedPropertyGraphStoreValidation(new NoAlgorithmValidation());
-        }else {
-            return  new SeedPropertyGraphStoreValidation(new NodePropertyAllExistsGraphStoreValidation("seedProperty"));
+    public static SeedPropertyGraphStoreValidation create(String seedProperty) {
+        if (seedProperty == null) {
+            return new SeedPropertyGraphStoreValidation(new NoAlgorithmValidation());
+        } else {
+            return new SeedPropertyGraphStoreValidation(new NodePropertyAllExistsGraphStoreValidation("seedProperty"));
         }
     }
+
     @Override
     public void validateAlgorithmRequirements(
         GraphStore graphStore,
         Collection<NodeLabel> selectedLabels,
         Collection<RelationshipType> selectedRelationshipTypes
     ) {
-        validation.validateAlgorithmRequirements(graphStore,selectedLabels,selectedRelationshipTypes);
+        validation.validateAlgorithmRequirements(graphStore, selectedLabels, selectedRelationshipTypes);
     }
 }

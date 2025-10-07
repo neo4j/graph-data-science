@@ -26,7 +26,7 @@ import org.neo4j.gds.core.loading.validation.GraphStoreValidation;
 
 import java.util.Collection;
 
-public class SpeakerListenerLPAGraphStoreValidation  extends GraphStoreValidation {
+public class SpeakerListenerLPAGraphStoreValidation extends GraphStoreValidation {
 
     private final String writeProperty;
 
@@ -43,7 +43,7 @@ public class SpeakerListenerLPAGraphStoreValidation  extends GraphStoreValidatio
         validateCanWrite(graphStore);
     }
 
-    private void validateCanWrite(GraphStore graphStore){
+    private void validateCanWrite(GraphStore graphStore) {
         // See PregelProcedureConfig for exaplanation of this
         if (writeProperty.isBlank()) {
             return;
