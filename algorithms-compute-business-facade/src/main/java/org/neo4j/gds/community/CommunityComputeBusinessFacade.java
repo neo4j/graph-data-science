@@ -55,6 +55,8 @@ import org.neo4j.gds.louvain.LouvainParameters;
 import org.neo4j.gds.louvain.LouvainResult;
 import org.neo4j.gds.modularity.ModularityParameters;
 import org.neo4j.gds.modularity.ModularityResult;
+import org.neo4j.gds.modularityoptimization.ModularityOptimizationParameters;
+import org.neo4j.gds.modularityoptimization.ModularityOptimizationResult;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.results.ResultTransformerBuilder;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientParameters;
@@ -440,6 +442,36 @@ public class CommunityComputeBusinessFacade {
             graph,
             parameters,
             jobId
+
+        ).thenApply(resultTransformerBuilder.build(graphResources));
+    }
+
+    public <TR> CompletableFuture<TR> modularityOptimization(
+        GraphName graphName,
+        GraphParameters graphParameters,
+        Optional<String> relationshipProperty,
+        ModularityOptimizationParameters parameters,
+        JobId jobId,
+        boolean logProgress,
+        ResultTransformerBuilder<TimedAlgorithmResult<ModularityOptimizationResult>, TR> resultTransformerBuilder
+    ) {
+        // Fetch the Graph the algorithm will operate on
+        var graphResources = graphStoreCatalogService.fetchGraphResources(
+            graphName,
+            graphParameters,
+            relationshipProperty,
+            SeedPropertyGraphStoreValidation.create(parameters.seedProperty().orElse(null)),
+            Optional.empty(),
+            user,
+            databaseId
+        );
+        var graph = graphResources.graph();
+
+        return computeFacade.modularityOptimization(
+            graph,
+            parameters,
+            jobId,
+            logProgress
 
         ).thenApply(resultTransformerBuilder.build(graphResources));
     }
