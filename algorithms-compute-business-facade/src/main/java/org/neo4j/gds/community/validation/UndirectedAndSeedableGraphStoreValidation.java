@@ -28,18 +28,18 @@ import org.neo4j.gds.core.loading.validation.UndirectedOnlyGraphStoreValidation;
 
 import java.util.Collection;
 
-public class LocalClusteringCoefficientGraphStoreValidation extends GraphStoreValidation {
+public class UndirectedAndSeedableGraphStoreValidation extends GraphStoreValidation {
 
     private final SeedPropertyGraphStoreValidation seedPropertyGraphStoreValidation;
     private final UndirectedOnlyGraphStoreValidation undirectedOnlyGraphStoreValidation;
 
-    public static LocalClusteringCoefficientGraphStoreValidation create(String seedProperty){
+    public static UndirectedAndSeedableGraphStoreValidation create(String seedProperty){
         var seedPropertyGraphStoreValidation =  SeedPropertyGraphStoreValidation.create(seedProperty);
         var undirectedOnlyGraphStoreValidation = new UndirectedOnlyGraphStoreValidation("LocalClusteringCoefficient");
 
-        return new LocalClusteringCoefficientGraphStoreValidation(seedPropertyGraphStoreValidation,undirectedOnlyGraphStoreValidation);
+        return new UndirectedAndSeedableGraphStoreValidation(seedPropertyGraphStoreValidation,undirectedOnlyGraphStoreValidation);
     }
-    private LocalClusteringCoefficientGraphStoreValidation(
+    private UndirectedAndSeedableGraphStoreValidation(
         SeedPropertyGraphStoreValidation seedPropertyGraphStoreValidation,
         UndirectedOnlyGraphStoreValidation undirectedOnlyGraphStoreValidation
     ) {

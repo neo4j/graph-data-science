@@ -29,7 +29,7 @@ import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutResult;
 import org.neo4j.gds.cliqueCounting.CliqueCountingResult;
 import org.neo4j.gds.cliquecounting.CliqueCountingParameters;
 import org.neo4j.gds.community.validation.ApproxMaxKCutValidation;
-import org.neo4j.gds.community.validation.LocalClusteringCoefficientGraphStoreValidation;
+import org.neo4j.gds.community.validation.UndirectedAndSeedableGraphStoreValidation;
 import org.neo4j.gds.conductance.ConductanceParameters;
 import org.neo4j.gds.conductance.ConductanceResult;
 import org.neo4j.gds.core.JobId;
@@ -49,6 +49,8 @@ import org.neo4j.gds.kmeans.KmeansParameters;
 import org.neo4j.gds.kmeans.KmeansResult;
 import org.neo4j.gds.labelpropagation.LabelPropagationParameters;
 import org.neo4j.gds.labelpropagation.LabelPropagationResult;
+import org.neo4j.gds.leiden.LeidenParameters;
+import org.neo4j.gds.leiden.LeidenResult;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.results.ResultTransformerBuilder;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientParameters;
@@ -334,7 +336,7 @@ public class CommunityComputeBusinessFacade {
             graphName,
             graphParameters,
             relationshipProperty,
-             LocalClusteringCoefficientGraphStoreValidation.create(parameters.seedProperty()),
+             UndirectedAndSeedableGraphStoreValidation.create(parameters.seedProperty()),
             Optional.empty(),
             user,
             databaseId
@@ -349,6 +351,37 @@ public class CommunityComputeBusinessFacade {
 
         ).thenApply(resultTransformerBuilder.build(graphResources));
     }
+
+    public <TR> CompletableFuture<TR> leiden(
+        GraphName graphName,
+        GraphParameters graphParameters,
+        Optional<String> relationshipProperty,
+        LeidenParameters parameters,
+        JobId jobId,
+        boolean logProgress,
+        ResultTransformerBuilder<TimedAlgorithmResult<LeidenResult>, TR> resultTransformerBuilder
+    ) {
+        // Fetch the Graph the algorithm will operate on
+        var graphResources = graphStoreCatalogService.fetchGraphResources(
+            graphName,
+            graphParameters,
+            relationshipProperty,
+            UndirectedAndSeedableGraphStoreValidation.create(parameters.seedProperty()),
+            Optional.empty(),
+            user,
+            databaseId
+        );
+        var graph = graphResources.graph();
+
+        return computeFacade.leiden(
+            graph,
+            parameters,
+            jobId,
+            logProgress
+
+        ).thenApply(resultTransformerBuilder.build(graphResources));
+    }
+
 
 
 }
