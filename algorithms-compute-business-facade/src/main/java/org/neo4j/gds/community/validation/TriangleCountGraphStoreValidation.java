@@ -36,7 +36,7 @@ public final class TriangleCountGraphStoreValidation extends GraphStoreValidatio
     private final List<String> labelFilter;
 
     public static TriangleCountGraphStoreValidation create(List<String> labelFilter){
-        return  new TriangleCountGraphStoreValidation(new UndirectedOnlyGraphStoreValidation("Triangle Counting"),labelFilter);
+        return new TriangleCountGraphStoreValidation(new UndirectedOnlyGraphStoreValidation("Triangle Counting"),labelFilter);
     }
     private TriangleCountGraphStoreValidation(
         UndirectedOnlyGraphStoreValidation undirectedOnlyGraphStoreValidation,

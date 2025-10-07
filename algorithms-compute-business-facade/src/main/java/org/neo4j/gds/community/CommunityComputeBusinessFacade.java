@@ -33,11 +33,11 @@ import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.community.validation.ApproxMaxKCutValidation;
 import org.neo4j.gds.community.validation.SpeakerListenerLPAGraphStoreValidation;
 import org.neo4j.gds.community.validation.TriangleCountGraphStoreValidation;
-import org.neo4j.gds.community.validation.UndirectedAndSeedableGraphStoreValidation;
 import org.neo4j.gds.conductance.ConductanceParameters;
 import org.neo4j.gds.conductance.ConductanceResult;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
+import org.neo4j.gds.core.loading.validation.CompoundGraphStoreValidationsBuilder;
 import org.neo4j.gds.core.loading.validation.NoAlgorithmValidation;
 import org.neo4j.gds.core.loading.validation.NodePropertyAnyExistsGraphStoreValidation;
 import org.neo4j.gds.core.loading.validation.NodePropertyTypeGraphStoreValidation;
@@ -133,7 +133,6 @@ public class CommunityComputeBusinessFacade {
     public <TR> CompletableFuture<TR> cliqueCounting(
         GraphName graphName,
         GraphParameters graphParameters,
-        Optional<String> relationshipProperty,
         CliqueCountingParameters parameters,
         JobId jobId,
         boolean logProgress,
@@ -143,7 +142,7 @@ public class CommunityComputeBusinessFacade {
         var graphResources = graphStoreCatalogService.fetchGraphResources(
             graphName,
             graphParameters,
-            relationshipProperty,
+            Optional.empty(),
             new UndirectedOnlyGraphStoreValidation("Clique Counting"),
             Optional.empty(),
             user,
@@ -193,7 +192,6 @@ public class CommunityComputeBusinessFacade {
     public <TR> CompletableFuture<TR> hdbscan(
         GraphName graphName,
         GraphParameters graphParameters,
-        Optional<String> relationshipProperty,
         HDBScanParameters parameters,
         JobId jobId,
         boolean logProgress,
@@ -203,7 +201,7 @@ public class CommunityComputeBusinessFacade {
         var graphResources = graphStoreCatalogService.fetchGraphResources(
             graphName,
             graphParameters,
-            relationshipProperty,
+            Optional.empty(),
             new NodePropertyAnyExistsGraphStoreValidation("nodeProperty"),
             Optional.empty(),
             user,
@@ -223,7 +221,6 @@ public class CommunityComputeBusinessFacade {
     public <TR> CompletableFuture<TR> k1Coloring(
         GraphName graphName,
         GraphParameters graphParameters,
-        Optional<String> relationshipProperty,
         K1ColoringParameters parameters,
         JobId jobId,
         boolean logProgress,
@@ -233,7 +230,7 @@ public class CommunityComputeBusinessFacade {
         var graphResources = graphStoreCatalogService.fetchGraphResources(
             graphName,
             graphParameters,
-            relationshipProperty,
+            Optional.empty(),
             new NoAlgorithmValidation(),
             Optional.empty(),
             user,
@@ -253,7 +250,6 @@ public class CommunityComputeBusinessFacade {
     public <TR> CompletableFuture<TR> kCoreDecomposition(
         GraphName graphName,
         GraphParameters graphParameters,
-        Optional<String> relationshipProperty,
         KCoreDecompositionParameters parameters,
         JobId jobId,
         boolean logProgress,
@@ -263,7 +259,7 @@ public class CommunityComputeBusinessFacade {
         var graphResources = graphStoreCatalogService.fetchGraphResources(
             graphName,
             graphParameters,
-            relationshipProperty,
+            Optional.empty(),
             new UndirectedOnlyGraphStoreValidation("K-Core-Decomposition"),
             Optional.empty(),
             user,
@@ -283,7 +279,6 @@ public class CommunityComputeBusinessFacade {
     public <TR> CompletableFuture<TR> kMeans(
         GraphName graphName,
         GraphParameters graphParameters,
-        Optional<String> relationshipProperty,
         KmeansParameters parameters,
         JobId jobId,
         boolean logProgress,
@@ -293,8 +288,11 @@ public class CommunityComputeBusinessFacade {
         var graphResources = graphStoreCatalogService.fetchGraphResources(
             graphName,
             graphParameters,
-            relationshipProperty,
-            new NodePropertyTypeGraphStoreValidation("nodeProperty", List.of(ValueType.DOUBLE_ARRAY, ValueType.FLOAT_ARRAY,ValueType.DOUBLE)),
+            Optional.empty(),
+            new NodePropertyTypeGraphStoreValidation(
+                "nodeProperty",
+                List.of(ValueType.DOUBLE_ARRAY, ValueType.FLOAT_ARRAY,ValueType.DOUBLE)
+            ),
             Optional.empty(),
             user,
             databaseId
@@ -343,7 +341,6 @@ public class CommunityComputeBusinessFacade {
     public <TR> CompletableFuture<TR> lcc(
         GraphName graphName,
         GraphParameters graphParameters,
-        Optional<String> relationshipProperty,
         LocalClusteringCoefficientParameters parameters,
         JobId jobId,
         boolean logProgress,
@@ -353,8 +350,11 @@ public class CommunityComputeBusinessFacade {
         var graphResources = graphStoreCatalogService.fetchGraphResources(
             graphName,
             graphParameters,
-            relationshipProperty,
-             UndirectedAndSeedableGraphStoreValidation.create(parameters.seedProperty()),
+            Optional.empty(),
+            new CompoundGraphStoreValidationsBuilder()
+                .withGraphStoreValidation(new UndirectedOnlyGraphStoreValidation("LocalClusteringCoefficient"))
+                .withGraphStoreValidation(SeedPropertyGraphStoreValidation.create(parameters.seedProperty()))
+                .build(),
             Optional.empty(),
             user,
             databaseId
@@ -384,7 +384,10 @@ public class CommunityComputeBusinessFacade {
             graphName,
             graphParameters,
             relationshipProperty,
-            UndirectedAndSeedableGraphStoreValidation.create(parameters.seedProperty()),
+            new CompoundGraphStoreValidationsBuilder()
+                .withGraphStoreValidation(new UndirectedOnlyGraphStoreValidation("Leiden"))
+                .withGraphStoreValidation(SeedPropertyGraphStoreValidation.create(parameters.seedProperty()))
+                .build(),
             Optional.empty(),
             user,
             databaseId
@@ -491,7 +494,6 @@ public class CommunityComputeBusinessFacade {
     public <TR> CompletableFuture<TR> scc(
         GraphName graphName,
         GraphParameters graphParameters,
-        Optional<String> relationshipProperty,
         SccParameters parameters,
         JobId jobId,
         boolean logProgress,
@@ -501,7 +503,7 @@ public class CommunityComputeBusinessFacade {
         var graphResources = graphStoreCatalogService.fetchGraphResources(
             graphName,
             graphParameters,
-            relationshipProperty,
+            Optional.empty(),
             new NoAlgorithmValidation(),
             Optional.empty(),
             user,
@@ -521,7 +523,6 @@ public class CommunityComputeBusinessFacade {
     public <TR> CompletableFuture<TR> sllpa(
         GraphName graphName,
         GraphParameters graphParameters,
-        Optional<String> relationshipProperty,
         SpeakerListenerLPAConfig config,
         JobId jobId,
         boolean logProgress,
@@ -531,7 +532,7 @@ public class CommunityComputeBusinessFacade {
         var graphResources = graphStoreCatalogService.fetchGraphResources(
             graphName,
             graphParameters,
-            relationshipProperty,
+            Optional.empty(),
             new SpeakerListenerLPAGraphStoreValidation(config.writeProperty()),
             Optional.empty(),
             user,
@@ -550,7 +551,6 @@ public class CommunityComputeBusinessFacade {
     public <TR> CompletableFuture<TR> triangleCount(
         GraphName graphName,
         GraphParameters graphParameters,
-        Optional<String> relationshipProperty,
         TriangleCountParameters parameters,
         JobId jobId,
         boolean logProgress,
@@ -560,7 +560,7 @@ public class CommunityComputeBusinessFacade {
         var graphResources = graphStoreCatalogService.fetchGraphResources(
             graphName,
             graphParameters,
-            relationshipProperty,
+            Optional.empty(),
             TriangleCountGraphStoreValidation.create(parameters.labelFilter()),
             Optional.empty(),
             user,
@@ -580,7 +580,6 @@ public class CommunityComputeBusinessFacade {
     public <TR> CompletableFuture<TR> triangles(
         GraphName graphName,
         GraphParameters graphParameters,
-        Optional<String> relationshipProperty,
         TriangleCountParameters parameters,
         JobId jobId,
         boolean logProgress,
@@ -590,7 +589,7 @@ public class CommunityComputeBusinessFacade {
         var graphResources = graphStoreCatalogService.fetchGraphResources(
             graphName,
             graphParameters,
-            relationshipProperty,
+            Optional.empty(),
             TriangleCountGraphStoreValidation.create(parameters.labelFilter()),
             Optional.empty(),
             user,

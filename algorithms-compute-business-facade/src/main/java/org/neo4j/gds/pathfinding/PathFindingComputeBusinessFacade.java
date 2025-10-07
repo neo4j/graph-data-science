@@ -25,25 +25,27 @@ import org.neo4j.gds.allshortestpaths.AllShortestPathsStreamResult;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.User;
+import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
+import org.neo4j.gds.core.loading.validation.CompoundGraphStoreValidationsBuilder;
 import org.neo4j.gds.core.loading.validation.NoAlgorithmValidation;
+import org.neo4j.gds.core.loading.validation.NodePropertyAllExistsGraphStoreValidation;
+import org.neo4j.gds.core.loading.validation.NodePropertyTypeGraphStoreValidation;
 import org.neo4j.gds.core.loading.validation.SourceNodeGraphStoreValidation;
 import org.neo4j.gds.core.loading.validation.SourceNodeTargetNodeGraphStoreValidation;
 import org.neo4j.gds.core.loading.validation.SourceNodeTargetNodesGraphStoreValidation;
 import org.neo4j.gds.core.loading.validation.SourceNodesGraphStoreValidation;
+import org.neo4j.gds.core.loading.validation.UndirectedOnlyGraphStoreValidation;
 import org.neo4j.gds.dag.longestPath.DagLongestPathParameters;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortParameters;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortResult;
 import org.neo4j.gds.kspanningtree.KSpanningTreeParameters;
 import org.neo4j.gds.maxflow.FlowResult;
 import org.neo4j.gds.maxflow.MaxFlowParameters;
-import org.neo4j.gds.pathfinding.validation.KSpanningTreeGraphStoreValidation;
-import org.neo4j.gds.pathfinding.validation.PCSTGraphStoreValidation;
 import org.neo4j.gds.pathfinding.validation.RandomWalkGraphValidation;
-import org.neo4j.gds.pathfinding.validation.SpanningTreeGraphStoreValidation;
 import org.neo4j.gds.paths.astar.AStarParameters;
 import org.neo4j.gds.paths.bellmanford.BellmanFordParameters;
 import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
@@ -63,6 +65,7 @@ import org.neo4j.gds.steiner.SteinerTreeResult;
 import org.neo4j.gds.traversal.RandomWalkParameters;
 import org.neo4j.gds.traversal.TraversalParameters;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
@@ -254,7 +257,10 @@ public class PathFindingComputeBusinessFacade {
             graphName,
             graphParameters,
             relationshipProperty,
-            new KSpanningTreeGraphStoreValidation(parameters.sourceNode()),
+            new CompoundGraphStoreValidationsBuilder()
+                .withGraphStoreValidation(new SourceNodeGraphStoreValidation(parameters.sourceNode()))
+                .withGraphStoreValidation(new UndirectedOnlyGraphStoreValidation("K-Spanning Tree"))
+                .build(),
             Optional.empty(),
             user,
             databaseId
@@ -397,14 +403,17 @@ public class PathFindingComputeBusinessFacade {
             graphName,
             graphParameters,
             Optional.empty(),
-             PCSTGraphStoreValidation.create(parameters.prizeProperty()),
+             new CompoundGraphStoreValidationsBuilder()
+                 .withGraphStoreValidation(new UndirectedOnlyGraphStoreValidation("Prize-collecting Steiner Tree"))
+                 .withGraphStoreValidation(new NodePropertyAllExistsGraphStoreValidation(parameters.prizeProperty()))
+                 .withGraphStoreValidation(new NodePropertyTypeGraphStoreValidation(parameters.prizeProperty(), List.of(ValueType.DOUBLE)))
+                 .build(),
             Optional.empty(),
             user,
             databaseId
         );
 
         var graph = graphResources.graph();
-
 
         return computeFacade.pcst(
             graph,
@@ -544,7 +553,10 @@ public class PathFindingComputeBusinessFacade {
             graphName,
             graphParameters,
             relationshipProperty,
-            SpanningTreeGraphStoreValidation.create(parameters.sourceNode()),
+            new CompoundGraphStoreValidationsBuilder()
+                .withGraphStoreValidation(new SourceNodeGraphStoreValidation(parameters.sourceNode()))
+                .withGraphStoreValidation(new UndirectedOnlyGraphStoreValidation("Spanning Tree"))
+                .build(),
             Optional.empty(),
             user,
             databaseId
