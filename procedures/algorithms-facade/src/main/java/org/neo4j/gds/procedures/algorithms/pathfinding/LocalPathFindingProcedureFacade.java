@@ -625,6 +625,15 @@ public final class LocalPathFindingProcedureFacade implements PathFindingProcedu
     }
 
     @Override
+    public Stream<MemoryEstimateResult> maxFlowMutateEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        return stubs.maxFlow().estimate(graphNameOrConfiguration,algorithmConfiguration);
+
+    }
+
+    @Override
     public Stream<MaxFlowStatsResult> maxFlowStats(String graphName, Map<String, Object> rawConfiguration) {
         var configuration = configurationParser.parseConfiguration(
             rawConfiguration,
@@ -639,6 +648,19 @@ public final class LocalPathFindingProcedureFacade implements PathFindingProcedu
     }
 
     @Override
+    public Stream<MemoryEstimateResult> maxFlowStatsEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        return Stream.of(
+            estimationModeBusinessFacade.maxFlow(
+                configurationParser.parseConfiguration(algorithmConfiguration, MaxFlowStatsConfig::of),
+                graphNameOrConfiguration
+            )
+        );
+    }
+
+    @Override
     public Stream<MaxFlowStreamResult> maxFlowStream(String graphName, Map<String, Object> configuration) {
         var resultBuilder = new MaxFlowResultBuilderForStreamMode();
         return streamModeBusinessFacade.maxFlow(
@@ -649,12 +671,38 @@ public final class LocalPathFindingProcedureFacade implements PathFindingProcedu
     }
 
     @Override
+    public Stream<MemoryEstimateResult> maxFlowStreamEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        return Stream.of(
+            estimationModeBusinessFacade.maxFlow(
+                configurationParser.parseConfiguration(algorithmConfiguration, MaxFlowStreamConfig::of),
+                graphNameOrConfiguration
+            )
+        );
+    }
+
+    @Override
     public Stream<MaxFlowWriteResult> maxFlowWrite(String graphName, Map<String, Object> configuration) {
         return Stream.of(
             writeModeBusinessFacade.maxFlow(
                 GraphName.parse(graphName),
                 configurationParser.parseConfiguration(configuration, MaxFlowWriteConfig::of),
                 new MaxFlowResultBuilderForWriteMode()
+            )
+        );
+    }
+
+    @Override
+    public Stream<MemoryEstimateResult> maxFlowWriteEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        return Stream.of(
+            estimationModeBusinessFacade.maxFlow(
+                configurationParser.parseConfiguration(algorithmConfiguration, MaxFlowWriteConfig::of),
+                graphNameOrConfiguration
             )
         );
     }

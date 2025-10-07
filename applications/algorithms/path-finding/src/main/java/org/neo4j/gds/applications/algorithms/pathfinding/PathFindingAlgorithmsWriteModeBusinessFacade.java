@@ -191,7 +191,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
             graphName,
             configuration,
             MaxFlow,
-            estimationFacade::maxFlow,
+            () -> estimationFacade.maxFlow(configuration),
             (graph, __) -> pathFindingAlgorithms.maxFlow(graph, configuration),
             writeStep,
             resultBuilder

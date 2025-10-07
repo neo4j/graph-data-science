@@ -146,11 +146,21 @@ public interface PathFindingProcedureFacade {
 
     Stream<MaxFlowMutateResult> maxFlowMutate(String graphName, Map<String, Object> configuration);
 
+    Stream<MemoryEstimateResult> maxFlowMutateEstimate( Object graphNameOrConfiguration, Map<String, Object> algorithmConfiguration);
+
     Stream<MaxFlowStreamResult> maxFlowStream(String graphName, Map<String, Object> configuration);
+
+    Stream<MemoryEstimateResult> maxFlowStreamEstimate( Object graphNameOrConfiguration, Map<String, Object> algorithmConfiguration);
+
 
     Stream<MaxFlowStatsResult> maxFlowStats(String graphName, Map<String, Object> configuration);
 
+    Stream<MemoryEstimateResult> maxFlowStatsEstimate( Object graphNameOrConfiguration, Map<String, Object> algorithmConfiguration);
+
+
     Stream<MaxFlowWriteResult> maxFlowWrite(String graphName, Map<String, Object> configuration);
+
+    Stream<MemoryEstimateResult> maxFlowWriteEstimate( Object graphNameOrConfiguration, Map<String, Object> algorithmConfiguration);
 
     Stream<SpanningTreeStreamResult> prizeCollectingSteinerTreeStream(String graphName, Map<String, Object> configuration);
 

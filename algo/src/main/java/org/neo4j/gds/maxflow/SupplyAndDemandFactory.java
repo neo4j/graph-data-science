@@ -55,7 +55,7 @@ final class SupplyAndDemandFactory {
                     graph.toMappedNodeId(entry.getKey()),
                     entry.getValue()
                 )).toArray(NodeWithValue[]::new);
-                default -> throw new IllegalStateException("Unexpected value: " + sourceNodes); //fixme
+                default -> throw new IllegalStateException("Unexpected value: " + sourceNodes);
             };
     }
 
@@ -70,7 +70,7 @@ final class SupplyAndDemandFactory {
                     graph.toMappedNodeId(entry.getKey()),
                     entry.getValue()
                 )).toArray(NodeWithValue[]::new);
-                default -> throw new IllegalStateException("Unexpected value: " + targetNodes); //fixme
+                default -> throw new IllegalStateException("Unexpected value: " + targetNodes);
             };
     }
 }

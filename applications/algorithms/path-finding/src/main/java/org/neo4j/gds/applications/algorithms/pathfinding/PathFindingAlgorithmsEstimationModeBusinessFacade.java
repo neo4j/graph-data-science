@@ -26,6 +26,7 @@ import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.gds.maxflow.MaxFlowBaseConfig;
+import org.neo4j.gds.maxflow.MaxFlowMemoryEstimateDefinition;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.paths.astar.AStarMemoryEstimateDefinition;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarBaseConfig;
@@ -131,15 +132,20 @@ public class PathFindingAlgorithmsEstimationModeBusinessFacade {
         throw new MemoryEstimationNotImplementedException();
     }
 
-    public MemoryEstimation maxFlow() {
-        throw new MemoryEstimationNotImplementedException();
+    public MemoryEstimation maxFlow(MaxFlowBaseConfig configuration) {
+        var params = configuration.toParameters();
+
+        var estimateDefinition = new MaxFlowMemoryEstimateDefinition(params.sourceNodes().size(),params.targetNodes().size());
+
+        return  estimateDefinition.memoryEstimation();
     }
 
-    MemoryEstimation maxFlow(
+    public MemoryEstimateResult maxFlow(
         MaxFlowBaseConfig configuration,
         Object graphNameOrConfiguration
     ) {
-        return maxFlow();
+        var memoryEstimation= maxFlow(configuration);
+        return runEstimation(configuration, graphNameOrConfiguration, memoryEstimation);
     }
 
     public MemoryEstimateResult pcst(

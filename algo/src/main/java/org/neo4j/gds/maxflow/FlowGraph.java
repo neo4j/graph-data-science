@@ -159,7 +159,6 @@ public final class FlowGraph {
     }
 
     private void forEachOriginalRelationship(long nodeId, ResidualEdgeConsumer consumer) {
-        //todo: Rename original, since it also includes 'non-reverse' edges from superNodes
         var relIdx = new MutableLong(indPtr.get(nodeId));
         RelationshipWithPropertyConsumer originalConsumer = (s, t, capacity) -> {
             var residualCapacity = capacity - flow.get(relIdx.longValue());
@@ -209,7 +208,7 @@ public final class FlowGraph {
         }
     }
 
-    long originalEdgeCount() {
+    private long originalEdgeCount() {
         return graph.relationshipCount();
     }
 
@@ -217,7 +216,7 @@ public final class FlowGraph {
         return graph.relationshipCount() + supply.length + demand.length;
     }
 
-    public long originalNodeCount() {
+    long originalNodeCount() {
         return graph.nodeCount();
     }
 

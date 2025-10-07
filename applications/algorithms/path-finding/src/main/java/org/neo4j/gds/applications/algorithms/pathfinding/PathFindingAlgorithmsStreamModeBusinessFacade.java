@@ -186,7 +186,7 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
             graphName,
             configuration,
             MaxFlow,
-            estimation::maxFlow,
+            () -> estimation.maxFlow(configuration),
             (graph, __) -> algorithms.maxFlow(graph, configuration),
             resultBuilder
         );

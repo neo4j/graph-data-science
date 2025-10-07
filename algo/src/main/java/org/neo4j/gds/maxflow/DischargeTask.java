@@ -49,8 +49,6 @@ public class DischargeTask implements Runnable {
     private PHASE phase;
     private long localWork;
 
-
-
     public DischargeTask(
         FlowGraph flowGraph,
         HugeDoubleArray excess,

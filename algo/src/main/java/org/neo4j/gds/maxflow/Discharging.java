@@ -32,18 +32,17 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
-public class Discharging {
+final class Discharging {
     private final AtomicWorkingSet workingSet;
     private final Concurrency concurrency;
     private final Collection<Runnable> dischargeTasks;
 
-    public static Discharging createDischarging(
+
+    static Discharging createDischarging(
         FlowGraph flowGraph,
         HugeDoubleArray excess,
         HugeLongArray label,
-        HugeLongArray tempLabel,
         HugeAtomicDoubleArray addedExcess,
-        HugeAtomicBitSet isDiscovered,
         AtomicWorkingSet workingSet,
         long targetNode,
         long beta,
@@ -52,6 +51,10 @@ public class Discharging {
         HugeLongArrayQueue[] threadQueues
     )
     {
+
+        var tempLabel = HugeLongArray.newArray(flowGraph.nodeCount());
+        var isDiscovered = HugeAtomicBitSet.create(flowGraph.nodeCount());
+
         List<Runnable> dischargeTasks = new ArrayList<>();
         for (int i = 0; i < concurrency.value(); i++) {
             dischargeTasks.add(new DischargeTask(
@@ -78,7 +81,7 @@ public class Discharging {
         this.concurrency = concurrency;
     }
 
-    public void processWorkingSet() {
+    void processWorkingSet() {
         //Discharge working set
         RunWithConcurrency.builder().concurrency(concurrency).tasks(dischargeTasks).build().run();
         workingSet.resetIdx();
