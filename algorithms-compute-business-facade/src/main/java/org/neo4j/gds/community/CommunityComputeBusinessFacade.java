@@ -36,6 +36,7 @@ import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.loading.validation.NoAlgorithmValidation;
 import org.neo4j.gds.core.loading.validation.NodePropertyAnyExistsGraphStoreValidation;
 import org.neo4j.gds.core.loading.validation.NodePropertyTypeGraphStoreValidation;
+import org.neo4j.gds.core.loading.validation.SeedPropertyGraphStoreValidation;
 import org.neo4j.gds.core.loading.validation.UndirectedOnlyGraphStoreValidation;
 import org.neo4j.gds.hdbscan.HDBScanParameters;
 import org.neo4j.gds.hdbscan.Labels;
@@ -45,6 +46,8 @@ import org.neo4j.gds.kcore.KCoreDecompositionParameters;
 import org.neo4j.gds.kcore.KCoreDecompositionResult;
 import org.neo4j.gds.kmeans.KmeansParameters;
 import org.neo4j.gds.kmeans.KmeansResult;
+import org.neo4j.gds.labelpropagation.LabelPropagationParameters;
+import org.neo4j.gds.labelpropagation.LabelPropagationResult;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.results.ResultTransformerBuilder;
 
@@ -283,5 +286,36 @@ public class CommunityComputeBusinessFacade {
 
         ).thenApply(resultTransformerBuilder.build(graphResources));
     }
+
+    public <TR> CompletableFuture<TR> labelPropagation(
+        GraphName graphName,
+        GraphParameters graphParameters,
+        Optional<String> relationshipProperty,
+        LabelPropagationParameters parameters,
+        JobId jobId,
+        boolean logProgress,
+        ResultTransformerBuilder<TimedAlgorithmResult<LabelPropagationResult>, TR> resultTransformerBuilder
+    ) {
+        // Fetch the Graph the algorithm will operate on
+        var graphResources = graphStoreCatalogService.fetchGraphResources(
+            graphName,
+            graphParameters,
+            relationshipProperty,
+            SeedPropertyGraphStoreValidation.create(parameters.seedProperty()),
+            Optional.empty(),
+            user,
+            databaseId
+        );
+        var graph = graphResources.graph();
+
+        return computeFacade.labelPropagation(
+            graph,
+            parameters,
+            jobId,
+            logProgress
+
+        ).thenApply(resultTransformerBuilder.build(graphResources));
+    }
+
 
 }
