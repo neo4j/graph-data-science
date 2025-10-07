@@ -24,6 +24,7 @@ import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.paged.HugeLongArrayQueue;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -38,6 +39,7 @@ public final class GlobalRelabeling {
     private final long target;
     private final Concurrency concurrency;
     private final Collection<Runnable> globalRelabelingTasks;
+    private final TerminationFlag terminationFlag;
 
     static GlobalRelabeling createRelabeling(
         FlowGraph flowGraph,
@@ -45,7 +47,8 @@ public final class GlobalRelabeling {
         long source,
         long target,
         Concurrency concurrency,
-        HugeLongArrayQueue[] threadQueues
+        HugeLongArrayQueue[] threadQueues,
+        TerminationFlag terminationFlag
     ) {
         var vertexIsDiscovered = HugeAtomicBitSet.create(flowGraph.nodeCount());
         var frontier = new AtomicWorkingSet(flowGraph.nodeCount());
@@ -55,10 +58,22 @@ public final class GlobalRelabeling {
             globalRelabelingTasks.add(new GlobalRelabellingBFSTask(flowGraph.concurrentCopy(), frontier, vertexIsDiscovered, label, threadQueues[i]));
         }
 
-        return new GlobalRelabeling(flowGraph.nodeCount(), label, frontier, vertexIsDiscovered, source, target, concurrency, globalRelabelingTasks);
+        return new GlobalRelabeling(
+            flowGraph.nodeCount(),
+            label,
+            frontier,
+            vertexIsDiscovered,
+            source,
+            target,
+            concurrency,
+            globalRelabelingTasks,
+            terminationFlag
+        );
     }
 
-    private GlobalRelabeling(long nodeCount, HugeLongArray label, AtomicWorkingSet frontier, HugeAtomicBitSet vertexIsDiscovered, long source, long target, Concurrency concurrency, Collection<Runnable> globalRelabelingTasks) {
+    private GlobalRelabeling(long nodeCount, HugeLongArray label, AtomicWorkingSet frontier, HugeAtomicBitSet vertexIsDiscovered, long source, long target, Concurrency concurrency, Collection<Runnable> globalRelabelingTasks,
+        TerminationFlag terminationFlag
+    ) {
         this.nodeCount = nodeCount;
         this.label = label;
         this.frontier = frontier;
@@ -67,6 +82,7 @@ public final class GlobalRelabeling {
         this.target = target;
         this.concurrency = concurrency;
         this.globalRelabelingTasks = globalRelabelingTasks;
+        this.terminationFlag = terminationFlag;
     }
 
     public void globalRelabeling() {
@@ -78,11 +94,22 @@ public final class GlobalRelabeling {
         vertexIsDiscovered.set(source);
         vertexIsDiscovered.set(target);
         while (!frontier.isEmpty()) {
-            RunWithConcurrency.builder().concurrency(concurrency).tasks(globalRelabelingTasks).build().run();
+            //relax nodes in the frontier
+            runTasks();
             frontier.reset();
-            RunWithConcurrency.builder().concurrency(concurrency).tasks(globalRelabelingTasks).build().run();
+            //update the frontier
+            runTasks();
         }
         label.set(source, nodeCount);
 
+    }
+
+   private void runTasks(){
+       RunWithConcurrency.builder()
+           .concurrency(concurrency)
+           .terminationFlag(terminationFlag)
+           .tasks(globalRelabelingTasks)
+           .build()
+           .run();
     }
 }
