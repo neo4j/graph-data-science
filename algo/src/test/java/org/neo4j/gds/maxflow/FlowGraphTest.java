@@ -26,6 +26,7 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -61,7 +62,7 @@ class FlowGraphTest {
             .reduce(0D, Double::sum);
         NodeWithValue[] supply = {new NodeWithValue(source, outgoingCapacityFromSource)};
         NodeWithValue[] demand = {new NodeWithValue(target, outgoingCapacityFromSource)}; //more is useless since this is max in network
-        return FlowGraph.create(graph, supply, demand);
+        return FlowGraph.create(graph, supply, demand, TerminationFlag.RUNNING_TRUE);
     }
 
     @Test

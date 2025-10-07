@@ -26,6 +26,7 @@ import org.neo4j.gds.api.properties.relationships.RelationshipWithPropertyConsum
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
+import org.neo4j.gds.termination.TerminationFlag;
 
 public final class FlowGraph {
     private final Graph graph;
@@ -60,7 +61,7 @@ public final class FlowGraph {
         this.demand = demand;
     }
 
-    public static FlowGraph create(Graph graph, NodeWithValue[] supply, NodeWithValue[] demand) {
+    public static FlowGraph create(Graph graph, NodeWithValue[] supply, NodeWithValue[] demand, TerminationFlag terminationFlag) {
         var superSource = graph.nodeCount();
         var superTarget = graph.nodeCount() + 1;
         var newNodeCount = graph.nodeCount() + 2;
@@ -69,6 +70,7 @@ public final class FlowGraph {
         reverseDegree.setAll(x -> 0L);
 
         for (long nodeId = 0; nodeId < graph.nodeCount(); nodeId++) {
+            terminationFlag.assertRunning();
             graph.forEachRelationship(
                 nodeId, 0D, (s, t, capacity) -> {
                     if(capacity < 0D){
@@ -120,9 +122,11 @@ public final class FlowGraph {
             return true;
         };
         for (long nodeId = 0; nodeId < graph.nodeCount(); nodeId++) {
+            terminationFlag.assertRunning();
             graph.forEachRelationship(nodeId, 0D, consumer);
         }
         for (var source : supply) {
+            terminationFlag.assertRunning();
             consumer.accept(superSource, source.node(), source.value());
         }
         for (var target : demand) {

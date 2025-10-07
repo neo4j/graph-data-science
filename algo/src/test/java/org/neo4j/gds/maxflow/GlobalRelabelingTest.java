@@ -27,6 +27,7 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.maxflow.FlowGraphTest.createFlowGraph;
@@ -76,7 +77,8 @@ class GlobalRelabelingTest {
             graph.toMappedNodeId("c"),
             graph.toMappedNodeId("d"),
             new Concurrency(1),
-            threadQueues
+            threadQueues,
+            TerminationFlag.RUNNING_TRUE
         );
 
         globalRelabeling.globalRelabeling();
@@ -106,7 +108,8 @@ class GlobalRelabelingTest {
             graph.toMappedNodeId("a"),
             graph.toMappedNodeId("e"),
             new Concurrency(1),
-            threadQueues
+            threadQueues,
+            TerminationFlag.RUNNING_TRUE
         );
 
         globalRelabeling.globalRelabeling();
@@ -136,7 +139,8 @@ class GlobalRelabelingTest {
             flowGraph.superSource(),
             flowGraph.superTarget(),
             new Concurrency(1),
-            threadQueues
+            threadQueues,
+            TerminationFlag.RUNNING_TRUE
         );
 
         globalRelabeling.globalRelabeling();

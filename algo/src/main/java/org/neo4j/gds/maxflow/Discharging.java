@@ -26,6 +26,7 @@ import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.paged.HugeLongArrayQueue;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -36,6 +37,7 @@ final class Discharging {
     private final AtomicWorkingSet workingSet;
     private final Concurrency concurrency;
     private final Collection<Runnable> dischargeTasks;
+    private final  TerminationFlag terminationFlag;
 
 
     static Discharging createDischarging(
@@ -48,7 +50,8 @@ final class Discharging {
         long beta,
         AtomicLong workSinceLastGR,
         Concurrency concurrency,
-        HugeLongArrayQueue[] threadQueues
+        HugeLongArrayQueue[] threadQueues,
+        TerminationFlag terminationFlag
     )
     {
 
@@ -72,25 +75,38 @@ final class Discharging {
             ));
         }
 
-        return new Discharging(workingSet, dischargeTasks, concurrency);
+        return new Discharging(workingSet, dischargeTasks, concurrency, terminationFlag);
     }
 
-    private Discharging(AtomicWorkingSet workingSet, Collection<Runnable> dischargeTasks, Concurrency concurrency) {
+    private Discharging(AtomicWorkingSet workingSet, Collection<Runnable> dischargeTasks, Concurrency concurrency,
+        TerminationFlag terminationFlag
+    ) {
         this.workingSet = workingSet;
         this.dischargeTasks = dischargeTasks;
         this.concurrency = concurrency;
+        this.terminationFlag = terminationFlag;
     }
 
     void processWorkingSet() {
         //Discharge working set
-        RunWithConcurrency.builder().concurrency(concurrency).tasks(dischargeTasks).build().run();
+        runTasks();
         workingSet.resetIdx();
 
         //Sync working set
-        RunWithConcurrency.builder().concurrency(concurrency).tasks(dischargeTasks).build().run();
+        runTasks();
         workingSet.reset();
 
         //Update and sync new working set
-        RunWithConcurrency.builder().concurrency(concurrency).tasks(dischargeTasks).build().run();
+        runTasks();
+
+    }
+
+    private void runTasks(){
+        RunWithConcurrency.builder()
+            .concurrency(concurrency)
+            .terminationFlag(terminationFlag)
+            .tasks(dischargeTasks)
+            .build()
+            .run();
     }
 }

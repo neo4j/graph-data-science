@@ -61,7 +61,7 @@ public final class MaxFlow extends Algorithm<FlowResult> {
 
     private Preflow initPreflow() {
         var supplyAndDemand = SupplyAndDemandFactory.create(graph, parameters.sourceNodes(), parameters.targetNodes());
-        var flowGraph = FlowGraph.create(graph, supplyAndDemand.getLeft(), supplyAndDemand.getRight());
+        var flowGraph = FlowGraph.create(graph, supplyAndDemand.getLeft(), supplyAndDemand.getRight(), terminationFlag);
         var excess = HugeDoubleArray.newArray(flowGraph.nodeCount());
         excess.setAll(x -> 0D);
         flowGraph.forEachRelationship(
@@ -107,7 +107,8 @@ public final class MaxFlow extends Algorithm<FlowResult> {
             sourceNode,
             targetNode,
             parameters.concurrency(),
-            threadQueues
+            threadQueues,
+            terminationFlag
         );
 
         var discharging = Discharging.createDischarging(
@@ -120,7 +121,8 @@ public final class MaxFlow extends Algorithm<FlowResult> {
             parameters.beta(),
             workSinceLastGR,
             parameters.concurrency(),
-            threadQueues
+            threadQueues,
+            terminationFlag
             );
 
         while (!workingSet.isEmpty()) {
