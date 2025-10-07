@@ -30,6 +30,7 @@ import org.neo4j.gds.cliqueCounting.CliqueCountingResult;
 import org.neo4j.gds.cliquecounting.CliqueCountingParameters;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.community.validation.ApproxMaxKCutValidation;
+import org.neo4j.gds.community.validation.TriangleCountGraphStoreValidation;
 import org.neo4j.gds.community.validation.UndirectedAndSeedableGraphStoreValidation;
 import org.neo4j.gds.conductance.ConductanceParameters;
 import org.neo4j.gds.conductance.ConductanceResult;
@@ -63,6 +64,8 @@ import org.neo4j.gds.results.ResultTransformerBuilder;
 import org.neo4j.gds.scc.SccParameters;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientParameters;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientResult;
+import org.neo4j.gds.triangle.TriangleCountParameters;
+import org.neo4j.gds.triangle.TriangleCountResult;
 
 import java.util.List;
 import java.util.Optional;
@@ -507,5 +510,36 @@ public class CommunityComputeBusinessFacade {
 
         ).thenApply(resultTransformerBuilder.build(graphResources));
     }
+
+    public <TR> CompletableFuture<TR> triangleCount(
+        GraphName graphName,
+        GraphParameters graphParameters,
+        Optional<String> relationshipProperty,
+        TriangleCountParameters parameters,
+        JobId jobId,
+        boolean logProgress,
+        ResultTransformerBuilder<TimedAlgorithmResult<TriangleCountResult>, TR> resultTransformerBuilder
+    ) {
+        // Fetch the Graph the algorithm will operate on
+        var graphResources = graphStoreCatalogService.fetchGraphResources(
+            graphName,
+            graphParameters,
+            relationshipProperty,
+            TriangleCountGraphStoreValidation.create(parameters.labelFilter()),
+            Optional.empty(),
+            user,
+            databaseId
+        );
+        var graph = graphResources.graph();
+
+        return computeFacade.triangleCount(
+            graph,
+            parameters,
+            jobId,
+            logProgress
+
+        ).thenApply(resultTransformerBuilder.build(graphResources));
+    }
+
 
 }
