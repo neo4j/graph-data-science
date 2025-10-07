@@ -28,6 +28,7 @@ import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutParameters;
 import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutResult;
 import org.neo4j.gds.cliqueCounting.CliqueCountingResult;
 import org.neo4j.gds.cliquecounting.CliqueCountingParameters;
+import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.community.validation.ApproxMaxKCutValidation;
 import org.neo4j.gds.community.validation.UndirectedAndSeedableGraphStoreValidation;
 import org.neo4j.gds.conductance.ConductanceParameters;
@@ -59,6 +60,7 @@ import org.neo4j.gds.modularityoptimization.ModularityOptimizationParameters;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationResult;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.results.ResultTransformerBuilder;
+import org.neo4j.gds.scc.SccParameters;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientParameters;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientResult;
 
@@ -476,5 +478,34 @@ public class CommunityComputeBusinessFacade {
         ).thenApply(resultTransformerBuilder.build(graphResources));
     }
 
+    public <TR> CompletableFuture<TR> scc(
+        GraphName graphName,
+        GraphParameters graphParameters,
+        Optional<String> relationshipProperty,
+        SccParameters parameters,
+        JobId jobId,
+        boolean logProgress,
+        ResultTransformerBuilder<TimedAlgorithmResult<HugeLongArray>, TR> resultTransformerBuilder
+    ) {
+        // Fetch the Graph the algorithm will operate on
+        var graphResources = graphStoreCatalogService.fetchGraphResources(
+            graphName,
+            graphParameters,
+            relationshipProperty,
+            new NoAlgorithmValidation(),
+            Optional.empty(),
+            user,
+            databaseId
+        );
+        var graph = graphResources.graph();
+
+        return computeFacade.scc(
+            graph,
+            parameters,
+            jobId,
+            logProgress
+
+        ).thenApply(resultTransformerBuilder.build(graphResources));
+    }
 
 }
