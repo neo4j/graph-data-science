@@ -53,6 +53,8 @@ import org.neo4j.gds.leiden.LeidenParameters;
 import org.neo4j.gds.leiden.LeidenResult;
 import org.neo4j.gds.louvain.LouvainParameters;
 import org.neo4j.gds.louvain.LouvainResult;
+import org.neo4j.gds.modularity.ModularityParameters;
+import org.neo4j.gds.modularity.ModularityResult;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.results.ResultTransformerBuilder;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientParameters;
@@ -410,6 +412,34 @@ public class CommunityComputeBusinessFacade {
             parameters,
             jobId,
             logProgress
+
+        ).thenApply(resultTransformerBuilder.build(graphResources));
+    }
+
+    public <TR> CompletableFuture<TR> modularity(
+        GraphName graphName,
+        GraphParameters graphParameters,
+        Optional<String> relationshipProperty,
+        ModularityParameters parameters,
+        JobId jobId,
+        ResultTransformerBuilder<TimedAlgorithmResult<ModularityResult>, TR> resultTransformerBuilder
+    ) {
+        // Fetch the Graph the algorithm will operate on
+        var graphResources = graphStoreCatalogService.fetchGraphResources(
+            graphName,
+            graphParameters,
+            relationshipProperty,
+            new NodePropertyAnyExistsGraphStoreValidation("communityProperty"),
+            Optional.empty(),
+            user,
+            databaseId
+        );
+        var graph = graphResources.graph();
+
+        return computeFacade.modularity(
+            graph,
+            parameters,
+            jobId
 
         ).thenApply(resultTransformerBuilder.build(graphResources));
     }
