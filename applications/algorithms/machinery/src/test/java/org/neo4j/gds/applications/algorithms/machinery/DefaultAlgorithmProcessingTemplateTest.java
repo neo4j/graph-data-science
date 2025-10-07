@@ -22,9 +22,9 @@ package org.neo4j.gds.applications.algorithms.machinery;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphName;
+import org.neo4j.gds.core.RequestCorrelationId;
 import org.neo4j.gds.core.loading.GraphResources;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
-import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.logging.Log;
 
 import java.util.Optional;
@@ -47,7 +47,12 @@ class DefaultAlgorithmProcessingTemplateTest {
     void shouldDoFourStepProcess() {
         var log = mock(Log.class);
         var graphStoreCatalogService = mock(GraphStoreCatalogService.class);
-        var requestScopedDependencies = RequestScopedDependencies.builder().build();
+        var requestScopedDependencies = RequestScopedDependencies.builder().correlationId(new RequestCorrelationId() {
+            @Override
+            public String toString() {
+                return "my little gid";
+            }
+        }).build();
         var algorithmComputer = mock(ComputationService.class);
         var template = new DefaultAlgorithmProcessingTemplate(
             log,
@@ -56,7 +61,7 @@ class DefaultAlgorithmProcessingTemplateTest {
             algorithmComputer
         );
 
-        var configuration = new ExampleConfiguration(new JobId("my little job id"));
+        var configuration = new ExampleConfiguration();
         var graphResources = new GraphResources(null, mock(Graph.class), null);
         when(graphStoreCatalogService.getGraphResources(
             GraphName.parse("some graph"),
@@ -99,18 +104,23 @@ class DefaultAlgorithmProcessingTemplateTest {
 
         assertThat(renderedResult).isEqualTo("some rendered result");
 
-        verify(log).info("[my little job id] Algorithm processing commencing");
-        verify(log).info("[my little job id] Computing algorithm");
-        verify(log).info("[my little job id] Processing algorithm result");
-        verify(log).info("[my little job id] Rendering output");
-        verify(log).info("[my little job id] Algorithm processing complete");
+        verify(log).info("[my little gid] Algorithm processing commencing");
+        verify(log).info("[my little gid] Computing algorithm");
+        verify(log).info("[my little gid] Processing algorithm result");
+        verify(log).info("[my little gid] Rendering output");
+        verify(log).info("[my little gid] Algorithm processing complete");
     }
 
     @Test
     void shouldSkipSideEffect() {
         var log = mock(Log.class);
         var graphStoreCatalogService = mock(GraphStoreCatalogService.class);
-        var requestScopedDependencies = RequestScopedDependencies.builder().build();
+        var requestScopedDependencies = RequestScopedDependencies.builder().correlationId(new RequestCorrelationId() {
+            @Override
+            public String toString() {
+                return "job's a good 'un";
+            }
+        }).build();
         var algorithmComputer = mock(ComputationService.class);
         var template = new DefaultAlgorithmProcessingTemplate(
             log,
@@ -119,7 +129,7 @@ class DefaultAlgorithmProcessingTemplateTest {
             algorithmComputer
         );
 
-        var configuration = new ExampleConfiguration(new JobId("job's a good 'un"));
+        var configuration = new ExampleConfiguration();
         var graphResources = new GraphResources(null, mock(Graph.class), null);
         when(graphStoreCatalogService.getGraphResources(
             GraphName.parse("some other graph"),
@@ -173,7 +183,12 @@ class DefaultAlgorithmProcessingTemplateTest {
     void shouldLogProcessingEvenWhenErrorsHappen() {
         var log = mock(Log.class);
         var graphStoreCatalogService = mock(GraphStoreCatalogService.class);
-        var requestScopedDependencies = RequestScopedDependencies.builder().build();
+        var requestScopedDependencies = RequestScopedDependencies.builder().correlationId(new RequestCorrelationId() {
+            @Override
+            public String toString() {
+                return "opaque job ids ftw";
+            }
+        }).build();
         var algorithmComputer = mock(ComputationService.class);
         var template = new DefaultAlgorithmProcessingTemplate(
             log,
@@ -182,7 +197,7 @@ class DefaultAlgorithmProcessingTemplateTest {
             algorithmComputer
         );
 
-        var configuration = new ExampleConfiguration(new JobId("opaque job ids ftw"));
+        var configuration = new ExampleConfiguration();
         var graphResources = new GraphResources(null, mock(Graph.class), null);
         when(graphStoreCatalogService.getGraphResources(
             GraphName.parse("some other graph"),

@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.applications.algorithms.machinery;
 
-import org.neo4j.gds.core.JobId;
+import org.neo4j.gds.core.RequestCorrelationId;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.utils.StringFormatting;
 
@@ -31,33 +31,33 @@ import org.neo4j.gds.utils.StringFormatting;
 @SuppressWarnings("ClassCanBeRecord")
 final class RequestScopedLog implements AutoCloseable {
     private final Log log;
-    private final JobId jobId;
+    private final RequestCorrelationId requestCorrelationId;
 
-    private RequestScopedLog(Log log, JobId jobId) {
+    private RequestScopedLog(Log log, RequestCorrelationId requestCorrelationId) {
         this.log = log;
-        this.jobId = jobId;
+        this.requestCorrelationId = requestCorrelationId;
     }
 
-    static RequestScopedLog create(Log log, JobId jobId) {
-        log(log, "[%s] Algorithm processing commencing", jobId);
+    static RequestScopedLog create(Log log, RequestCorrelationId requestCorrelationId) {
+        log(log, "[%s] Algorithm processing commencing", requestCorrelationId);
 
-        return new RequestScopedLog(log, jobId);
+        return new RequestScopedLog(log, requestCorrelationId);
     }
 
     void onLoadingGraph() {
-        log(log, "[%s] Loading graph", jobId);
+        log(log, "[%s] Loading graph", requestCorrelationId);
     }
 
     void onComputing() {
-        log(log, "[%s] Computing algorithm", jobId);
+        log(log, "[%s] Computing algorithm", requestCorrelationId);
     }
 
     void onProcessingResult() {
-        log(log, "[%s] Processing algorithm result", jobId);
+        log(log, "[%s] Processing algorithm result", requestCorrelationId);
     }
 
     void onRenderingOutput() {
-        log(log, "[%s] Rendering output", jobId);
+        log(log, "[%s] Rendering output", requestCorrelationId);
     }
 
     /**
@@ -65,11 +65,14 @@ final class RequestScopedLog implements AutoCloseable {
      */
     @Override
     public void close() {
-        log(log, "[%s] Algorithm processing complete", jobId);
+        log(log, "[%s] Algorithm processing complete", requestCorrelationId);
     }
 
-    private static void log(Log log, String template, JobId jobId) {
-        @SuppressWarnings("PatternValidation") var logMessage = StringFormatting.formatWithLocale(template, jobId.asString());
+    private static void log(Log log, String template, RequestCorrelationId requestCorrelationId) {
+        @SuppressWarnings("PatternValidation") var logMessage = StringFormatting.formatWithLocale(
+            template,
+            requestCorrelationId
+        );
 
         log.info(logMessage);
     }

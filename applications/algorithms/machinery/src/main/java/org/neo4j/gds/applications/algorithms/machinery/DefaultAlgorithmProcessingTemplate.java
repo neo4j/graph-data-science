@@ -225,7 +225,7 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
         Optional<SideEffect<RESULT_FROM_ALGORITHM, SIDE_EFFECT_METADATA>> sideEffect,
         ResultRenderer<RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, SIDE_EFFECT_METADATA> resultRenderer
     ) {
-        try (var requestLog = RequestScopedLog.create(log, configuration.jobId())) {
+        try (var requestLog = RequestScopedLog.create(log, requestScopedDependencies.correlationId())) {
             // as we progress through the steps we gather timings
             var timingsBuilder = new AlgorithmProcessingTimingsBuilder();
 
