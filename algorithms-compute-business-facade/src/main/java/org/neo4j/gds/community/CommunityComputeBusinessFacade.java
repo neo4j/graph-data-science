@@ -28,8 +28,11 @@ import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutResult;
 import org.neo4j.gds.cliqueCounting.CliqueCountingResult;
 import org.neo4j.gds.cliquecounting.CliqueCountingParameters;
 import org.neo4j.gds.community.validation.ApproxMaxKCutValidation;
+import org.neo4j.gds.conductance.ConductanceParameters;
+import org.neo4j.gds.conductance.ConductanceResult;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
+import org.neo4j.gds.core.loading.validation.NodePropertyAnyExistsGraphStoreValidation;
 import org.neo4j.gds.core.loading.validation.UndirectedOnlyGraphStoreValidation;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.results.ResultTransformerBuilder;
@@ -111,6 +114,36 @@ public class CommunityComputeBusinessFacade {
         var graph = graphResources.graph();
 
         return computeFacade.cliqueCounting(
+            graph,
+            parameters,
+            jobId,
+            logProgress
+
+        ).thenApply(resultTransformerBuilder.build(graphResources));
+    }
+
+    public <TR> CompletableFuture<TR> conductance(
+        GraphName graphName,
+        GraphParameters graphParameters,
+        Optional<String> relationshipProperty,
+        ConductanceParameters parameters,
+        JobId jobId,
+        boolean logProgress,
+        ResultTransformerBuilder<TimedAlgorithmResult<ConductanceResult>, TR> resultTransformerBuilder
+    ) {
+        // Fetch the Graph the algorithm will operate on
+        var graphResources = graphStoreCatalogService.fetchGraphResources(
+            graphName,
+            graphParameters,
+            relationshipProperty,
+            new NodePropertyAnyExistsGraphStoreValidation("communityProperty"),
+            Optional.empty(),
+            user,
+            databaseId
+        );
+        var graph = graphResources.graph();
+
+        return computeFacade.conductance(
             graph,
             parameters,
             jobId,

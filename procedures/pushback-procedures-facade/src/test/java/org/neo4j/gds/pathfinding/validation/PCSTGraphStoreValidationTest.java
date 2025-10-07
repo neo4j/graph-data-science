@@ -20,50 +20,17 @@
 package org.neo4j.gds.pathfinding.validation;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.nodes.NodeProperty;
 
-import java.util.Set;
-
 import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 class PCSTGraphStoreValidationTest {
-
-    @Test
-    void shouldNotThrowForExistingProperty() {
-        var graphStore = mock(GraphStore.class);
-        var collectionString = Set.of("p");
-        when(graphStore.nodePropertyKeys(anySet())).thenReturn(collectionString);
-
-        var validation = new PCSTGraphStoreValidation("p");
-        assertThatNoException().isThrownBy(() -> validation.validatePropertyExistence(
-            graphStore,
-            Set.of(NodeLabel.of("Node"))
-        ));
-    }
-
-    @Test
-    void shouldThrowForNonexistingProperty() {
-        var graphStore = mock(GraphStore.class);
-        var collectionString = Set.of("pNo");
-        when(graphStore.nodePropertyKeys(anySet())).thenReturn(collectionString);
-
-        var validation = new PCSTGraphStoreValidation("p");
-        assertThatThrownBy(() -> validation.validatePropertyExistence(
-            graphStore,
-            Set.of(NodeLabel.of("Node"))
-        )).hasMessageContaining(
-            "Prize node property value type [p] not found in the graph."
-        );
-    }
-
 
     @Test
     void shouldNotThrowForValidPropertyType() {
@@ -72,7 +39,7 @@ class PCSTGraphStoreValidationTest {
         when(nodeProperty.valueType()).thenReturn(ValueType.DOUBLE);
         when(graphStore.nodeProperty(anyString())).thenReturn(nodeProperty);
 
-        var validation = new PCSTGraphStoreValidation("p");
+        var validation = PCSTGraphStoreValidation.create("p");
 
         assertThatNoException().isThrownBy(() -> validation.validatePropertyType(
             graphStore
@@ -89,7 +56,7 @@ class PCSTGraphStoreValidationTest {
         when(graphStore.nodeProperty(anyString())).thenReturn(nodeProperty);
 
 
-        var validation = new PCSTGraphStoreValidation("p");
+        var validation = PCSTGraphStoreValidation.create("p");
 
         assertThatThrownBy(() -> validation.validatePropertyType(
             graphStore

@@ -397,7 +397,7 @@ public class PathFindingComputeBusinessFacade {
             graphName,
             graphParameters,
             Optional.empty(),
-            new PCSTGraphStoreValidation(parameters.prizeProperty()),
+             PCSTGraphStoreValidation.create(parameters.prizeProperty()),
             Optional.empty(),
             user,
             databaseId
