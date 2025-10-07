@@ -26,10 +26,12 @@ import org.neo4j.gds.api.User;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutParameters;
 import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutResult;
+import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.cliqueCounting.CliqueCountingResult;
 import org.neo4j.gds.cliquecounting.CliqueCountingParameters;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.community.validation.ApproxMaxKCutValidation;
+import org.neo4j.gds.community.validation.SpeakerListenerLPAGraphStoreValidation;
 import org.neo4j.gds.community.validation.TriangleCountGraphStoreValidation;
 import org.neo4j.gds.community.validation.UndirectedAndSeedableGraphStoreValidation;
 import org.neo4j.gds.conductance.ConductanceParameters;
@@ -62,6 +64,7 @@ import org.neo4j.gds.modularityoptimization.ModularityOptimizationResult;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.results.ResultTransformerBuilder;
 import org.neo4j.gds.scc.SccParameters;
+import org.neo4j.gds.sllpa.SpeakerListenerLPAConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientParameters;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientResult;
 import org.neo4j.gds.triangle.TriangleCountParameters;
@@ -510,6 +513,35 @@ public class CommunityComputeBusinessFacade {
             jobId,
             logProgress
 
+        ).thenApply(resultTransformerBuilder.build(graphResources));
+    }
+
+    public <TR> CompletableFuture<TR> sllpa(
+        GraphName graphName,
+        GraphParameters graphParameters,
+        Optional<String> relationshipProperty,
+        SpeakerListenerLPAConfig config,
+        JobId jobId,
+        boolean logProgress,
+        ResultTransformerBuilder<TimedAlgorithmResult<PregelResult>, TR> resultTransformerBuilder
+    ) {
+        // Fetch the Graph the algorithm will operate on
+        var graphResources = graphStoreCatalogService.fetchGraphResources(
+            graphName,
+            graphParameters,
+            relationshipProperty,
+            new SpeakerListenerLPAGraphStoreValidation(config.writeProperty()),
+            Optional.empty(),
+            user,
+            databaseId
+        );
+        var graph = graphResources.graph();
+
+        return computeFacade.sllpa(
+            graph,
+            config,
+            jobId,
+            logProgress
         ).thenApply(resultTransformerBuilder.build(graphResources));
     }
 

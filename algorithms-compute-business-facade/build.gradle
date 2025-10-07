@@ -10,12 +10,16 @@ dependencies {
     implementation project(':algo-common') // TODO: extract the results to a separate module and depend on it
     implementation project(':algorithms-compute-facade')
     implementation project(':collections')
+    implementation project(":community-configs") //Need for SLLPA
     implementation project(':community-params')
+    implementation project(":config-api") //Need for SLLPA
+
     implementation project(':core') // TODO: this is here because of the `GraphStoreCatalogService` --> refactor it so we can use the service without bringing the entire sub-project
     implementation project(':graph-schema-api')
     implementation project(':logging')
     implementation project(':node-embeddings-params')
     implementation project(':path-finding-params')
+    implementation project(":pregel") //Need for SLLPA
     implementation project(':progress-tracking')
     implementation project(':string-formatting')
     implementation project(':termination')

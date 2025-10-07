@@ -565,6 +565,39 @@ public class CommunityComputeFacade {
         );
     }
 
+    CompletableFuture<TimedAlgorithmResult<PregelResult>> sllpa(
+        Graph graph,
+        SpeakerListenerLPAConfig configuration,
+        JobId jobId,
+        boolean logProgress
+    ) {
+
+        if (graph.isEmpty()) {
+            var empty = NodeValue.of(new PregelSchema.Builder().build(),0,new Concurrency(1));
+            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(ImmutablePregelResult.of(empty, 0, false)));
+        }
+
+        var progressTracker = progressTrackerFactory.create(
+            tasks.speakerListenerLPA(graph,configuration),
+            jobId,
+            configuration.concurrency(),
+            logProgress
+        );
+
+        var algorithm = new SpeakerListenerLPA(
+            graph,
+            configuration,
+            DefaultPool.INSTANCE,
+            progressTracker,
+            Optional.empty()
+        );
+
+        return algorithmCaller.run(
+            algorithm::compute,
+            jobId
+        );
+    }
+
     CompletableFuture<TimedAlgorithmResult<TriangleCountResult>> triangleCount(
         Graph graph,
         TriangleCountParameters parameters,
@@ -647,39 +680,6 @@ public class CommunityComputeFacade {
             parameters,
             progressTracker,
             terminationFlag
-        );
-
-        return algorithmCaller.run(
-            algorithm::compute,
-            jobId
-        );
-    }
-
-    CompletableFuture<TimedAlgorithmResult<PregelResult>> sllpa(
-        Graph graph,
-        SpeakerListenerLPAConfig configuration,
-        JobId jobId,
-        boolean logProgress
-    ) {
-
-        if (graph.isEmpty()) {
-            var empty = NodeValue.of(new PregelSchema.Builder().build(),0,new Concurrency(1));
-            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(ImmutablePregelResult.of(empty, 0, false)));
-        }
-
-        var progressTracker = progressTrackerFactory.create(
-            tasks.speakerListenerLPA(graph,configuration),
-            jobId,
-            configuration.concurrency(),
-            logProgress
-        );
-
-        var algorithm = new SpeakerListenerLPA(
-            graph,
-            configuration,
-            DefaultPool.INSTANCE,
-            progressTracker,
-            Optional.empty()
         );
 
         return algorithmCaller.run(
