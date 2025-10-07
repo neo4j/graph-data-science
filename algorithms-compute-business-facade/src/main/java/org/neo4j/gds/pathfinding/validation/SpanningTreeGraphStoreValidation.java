@@ -22,22 +22,31 @@ package org.neo4j.gds.pathfinding.validation;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.core.loading.validation.GraphStoreValidation;
+import org.neo4j.gds.core.loading.validation.SourceNodeGraphStoreValidation;
 import org.neo4j.gds.core.loading.validation.UndirectedOnlyGraphStoreValidation;
-import org.neo4j.gds.utils.StringFormatting;
 
 import java.util.Collection;
 
-public class PCSTGraphStoreValidation extends GraphStoreValidation {
+public class SpanningTreeGraphStoreValidation extends GraphStoreValidation {
 
-    private final String prizeProperty;
+    private final SourceNodeGraphStoreValidation sourceNodeGraphStoreValidation;
     private final UndirectedOnlyGraphStoreValidation undirectedOnlyGraphStoreValidation;
 
-    public PCSTGraphStoreValidation(String prizeProperty) {
 
-        this.prizeProperty = prizeProperty;
-        this.undirectedOnlyGraphStoreValidation = new UndirectedOnlyGraphStoreValidation("Prize-collecting Steiner Tree");
+    public static SpanningTreeGraphStoreValidation create(long sourceNode){
+        return  new SpanningTreeGraphStoreValidation(
+            new SourceNodeGraphStoreValidation(sourceNode),
+            new UndirectedOnlyGraphStoreValidation("Spanning Tree")
+        );
+    }
+
+    private SpanningTreeGraphStoreValidation(
+        SourceNodeGraphStoreValidation sourceNodeGraphStoreValidation,
+        UndirectedOnlyGraphStoreValidation undirectedOnlyGraphStoreValidation
+    ) {
+        this.sourceNodeGraphStoreValidation = sourceNodeGraphStoreValidation;
+        this.undirectedOnlyGraphStoreValidation = undirectedOnlyGraphStoreValidation;
     }
 
     @Override
@@ -46,35 +55,7 @@ public class PCSTGraphStoreValidation extends GraphStoreValidation {
         Collection<NodeLabel> selectedLabels,
         Collection<RelationshipType> selectedRelationshipTypes
     ) {
+        sourceNodeGraphStoreValidation.validateAlgorithmRequirements(graphStore,selectedLabels,selectedRelationshipTypes);
         undirectedOnlyGraphStoreValidation.validateAlgorithmRequirements(graphStore,selectedLabels,selectedRelationshipTypes);
-        validatePropertyExistence(graphStore,selectedLabels);
-        validatePropertyType(graphStore);
     }
-
-    void validatePropertyExistence(GraphStore graphStore, Collection<NodeLabel> selectedLabels){
-            if (!graphStore.nodePropertyKeys(selectedLabels).contains(prizeProperty)) {
-                throw new IllegalArgumentException(
-                    StringFormatting.formatWithLocale(
-                        "Prize node property value type [%s] not found in the graph.",
-                        prizeProperty
-                    )
-                );
-            }
-
-    }
-
-    void validatePropertyType(GraphStore graphStore){
-        var valueType = graphStore.nodeProperty(prizeProperty).valueType();
-        if (valueType == ValueType.DOUBLE) {
-            return;
-        }
-        throw new IllegalArgumentException(
-            StringFormatting.formatWithLocale(
-                "Unsupported node property value type [%s]. Value type required: [%s]",
-                valueType,
-                ValueType.DOUBLE
-            )
-        );
-    }
-
 }

@@ -27,13 +27,13 @@ import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
+import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.loading.validation.NoAlgorithmValidation;
 import org.neo4j.gds.core.loading.validation.SourceNodeGraphStoreValidation;
 import org.neo4j.gds.core.loading.validation.SourceNodeTargetNodeGraphStoreValidation;
 import org.neo4j.gds.core.loading.validation.SourceNodeTargetNodesGraphStoreValidation;
 import org.neo4j.gds.core.loading.validation.SourceNodesGraphStoreValidation;
-import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.dag.longestPath.DagLongestPathParameters;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortParameters;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortResult;
@@ -43,6 +43,7 @@ import org.neo4j.gds.maxflow.MaxFlowParameters;
 import org.neo4j.gds.pathfinding.validation.KSpanningTreeGraphStoreValidation;
 import org.neo4j.gds.pathfinding.validation.PCSTGraphStoreValidation;
 import org.neo4j.gds.pathfinding.validation.RandomWalkGraphValidation;
+import org.neo4j.gds.pathfinding.validation.SpanningTreeGraphStoreValidation;
 import org.neo4j.gds.paths.astar.AStarParameters;
 import org.neo4j.gds.paths.bellmanford.BellmanFordParameters;
 import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
@@ -543,7 +544,7 @@ public class PathFindingComputeBusinessFacade {
             graphName,
             graphParameters,
             relationshipProperty,
-            new SourceNodeGraphStoreValidation(parameters.sourceNode()),
+            SpanningTreeGraphStoreValidation.create(parameters.sourceNode()),
             Optional.empty(),
             user,
             databaseId

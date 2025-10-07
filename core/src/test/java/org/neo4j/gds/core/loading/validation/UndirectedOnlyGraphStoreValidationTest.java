@@ -63,7 +63,7 @@ class UndirectedOnlyGraphStoreValidationTest {
 
         var validation = new UndirectedOnlyGraphStoreValidation("foo");
         assertThatThrownBy(() -> validation.validateOnlyUndirected(graphStore, List.of(RelationshipType.of("REL1"))))
-            .hasMessageContaining("foo requires relationship projections to be UNDIRECTED. " +
+            .hasMessageContaining("The foo algorithm requires relationship projections to be UNDIRECTED. " +
                 "Selected relationships `[REL1]` are not all undirected");
 
     }
