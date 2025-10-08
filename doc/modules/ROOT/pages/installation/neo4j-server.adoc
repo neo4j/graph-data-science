@@ -9,11 +9,11 @@ The GDS plugin is located in the `products` directory.
 To install the GDS plugin in a Neo4j Enterprise Edition or Neo4j Community Edition installation, follow these steps:
 
 [NOTE]
-All paths in the following instructions are relative to the Neo4j installation directory.
+All file paths in the following instructions are relative to the Neo4j installation directory.
 
 . Copy or move the file `neo4j-graph-data-science-[version].jar` from the `products` directory to the `plugins` directory.
 
-. Add the following to your `conf/neo4j.conf` file:
+. Add the following wildcard match for all GDS procedures to your `conf/neo4j.conf` file:
 +
 ----
 dbms.security.procedures.unrestricted=gds.*
@@ -21,7 +21,7 @@ dbms.security.procedures.unrestricted=gds.*
 This configuration entry is necessary because the GDS library accesses low-level components of Neo4j to maximise performance.
 +
 . Check if the procedure allowlist is enabled in the `conf/neo4j.conf` file, namely if the `dbms.security.procedures.allowlist` option is _not_ commented out with a leading `#` sign.
-In this case, add the GDS library to the allowlist:
+In this case, add a wildcard match for all GDS procedures to the allowlist:
 +
 ----
 dbms.security.procedures.allowlist=gds.*
@@ -29,4 +29,4 @@ dbms.security.procedures.allowlist=gds.*
 You can find more information on allow listing in the link:https://neo4j.com/docs/operations-manual/current/security/securing-extensions/#allow-listing[Operations Manual].
 +
 
-. Restart the Neo4j Server, using for example `bin/neo4j restart`.
+. Start (or restart) the Neo4j Server.
