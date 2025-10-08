@@ -107,7 +107,7 @@ public final class PregelCompanion {
         var progressTrackerCreator = new ProgressTrackerCreator(
             new LoggerForProgressTrackingAdapter(log),
             RequestScopedDependencies.builder()
-                .correlationId(new PlainSimpleRequestCorrelationId())
+                .correlationId(PlainSimpleRequestCorrelationId.create())
                 .taskRegistryFactory(taskRegistryFactory)
                 .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
                 .build()

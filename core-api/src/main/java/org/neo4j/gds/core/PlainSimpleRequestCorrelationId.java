@@ -26,8 +26,17 @@ import java.util.UUID;
  * then this is a perfectly good correlation id to use.
  * It will look something like "gid-74b4d", which is descriptive, and unique enough for the lifetime of a GDS instance.
  */
-public class PlainSimpleRequestCorrelationId implements RequestCorrelationId {
-    private final String id = "gid-" + UUID.randomUUID().toString().substring(0, 5);
+@SuppressWarnings("ClassCanBeRecord")
+public final class PlainSimpleRequestCorrelationId implements RequestCorrelationId {
+    private final String id;
+
+    private PlainSimpleRequestCorrelationId(String id) {this.id = id;}
+
+    public static PlainSimpleRequestCorrelationId create() {
+        var id = "gid-" + UUID.randomUUID().toString().substring(0, 5);
+
+        return new PlainSimpleRequestCorrelationId(id);
+    }
 
     @Override
     public String toString() {

@@ -158,7 +158,7 @@ public final class ProcedureRunner {
         var procedureContext = WriteContext.builder().build();
 
         var requestScopedDependencies = RequestScopedDependencies.builder()
-            .correlationId(new PlainSimpleRequestCorrelationId())
+            .correlationId(PlainSimpleRequestCorrelationId.create())
             .databaseId(new DatabaseIdAccessor().getDatabaseId(graphDatabaseService))
             .graphLoaderContext(GraphLoaderContext.NULL_CONTEXT)
             .taskRegistryFactory(taskRegistryFactory)

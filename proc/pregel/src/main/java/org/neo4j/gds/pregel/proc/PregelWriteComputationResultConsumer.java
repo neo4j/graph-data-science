@@ -71,7 +71,7 @@ public class PregelWriteComputationResultConsumer<
 
                         var requestScopedDependencies = RequestScopedDependencies
                             .builder()
-                            .correlationId(new PlainSimpleRequestCorrelationId())
+                            .correlationId(PlainSimpleRequestCorrelationId.create())
                             .terminationFlag(computationResult.algorithm().getTerminationFlag())
                             .taskRegistryFactory(executionContext.taskRegistryFactory())
                             .build();
