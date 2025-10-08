@@ -29,10 +29,10 @@ class MaxFlowMemoryEstimateDefinitionTest {
     @ParameterizedTest
     @CsvSource(
         {
-            "1_000,     1_000,      110_288",
-            "1_000,     10_000,     794_288",
-            "1_000_000, 1_000_000,  109_252_248",
-            "1_000_000, 10_000_000, 793_263_232"
+            "1_000,     1_000,      110_312",
+            "1_000,     10_000,     794_312",
+            "1_000_000, 1_000_000,  109_252_272",
+            "1_000_000, 10_000_000, 793_263_256"
         }
     )
     void shouldEstimateMemoryWithChangingGraphDimensionsCorrectly(long nodeCount, long  relationshipCount, long expected){
@@ -47,10 +47,10 @@ class MaxFlowMemoryEstimateDefinitionTest {
     @ParameterizedTest
     @CsvSource(
         {
-            "1_000,   1,  110_288",
-            "1_000,   4,  113_744",
-            "100_000, 1,  10_926_160",
-            "100_000, 4,  11_226_616"
+            "1_000,   1,  110_312",
+            "1_000,   4,  113_792",
+            "100_000, 1,  10_926_184",
+            "100_000, 4,  11_226_664"
         }
     )
     void shouldEstimateMemoryWithChangingConcurrencyCorrectly(long nodeAndRelCount, int  concurrency, long expected){
@@ -65,10 +65,10 @@ class MaxFlowMemoryEstimateDefinitionTest {
     @ParameterizedTest
     @CsvSource(
         {
-            "1_000,1,1,   110_288",
-            "1_000,10,1,  110_864",
-            "1_000,1,10,  110_864",
-            "1_000,10,10, 111_440"
+            "1_000,1,1,   110_312",
+            "1_000,10,1,  110_888",
+            "1_000,1,10,  110_888",
+            "1_000,10,10, 111_464"
 
         }
     )

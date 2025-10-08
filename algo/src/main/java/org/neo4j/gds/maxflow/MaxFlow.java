@@ -51,11 +51,13 @@ public final class MaxFlow extends Algorithm<FlowResult> {
     }
 
     public FlowResult compute() {
+        progressTracker.beginSubTask();
         var preflow = initPreflow();
         var superSource = preflow.flowGraph().superSource();
         var superTarget = preflow.flowGraph().superTarget();
         maximizeFlow(preflow, superSource, superTarget);
         maximizeFlow(preflow, superTarget, superSource);
+        progressTracker.endSubTask();
         return preflow.flowGraph().createFlowResult();
     }
 
@@ -88,7 +90,9 @@ public final class MaxFlow extends Algorithm<FlowResult> {
             ParallelDoublePageCreator.passThrough(parameters.concurrency())
         );
         var workingSet = new AtomicWorkingSet(nodeCount);
+        var initialTotalExcess = 0D;
         for (var nodeId = 0; nodeId < nodeCount; nodeId++) {
+            initialTotalExcess += excess.get(nodeId);
             if (excess.get(nodeId) > 0.0) {
                 workingSet.push(nodeId);
             }
@@ -123,14 +127,19 @@ public final class MaxFlow extends Algorithm<FlowResult> {
             parameters.concurrency(),
             threadQueues,
             terminationFlag
-            );
+        );
 
+        var excessAtDestinations = excess.get(sourceNode) + excess.get(targetNode);
         while (!workingSet.isEmpty()) {
             if (parameters.freq() * workSinceLastGR.doubleValue() > parameters.alpha() * nodeCount + edgeCount) {
                 globalRelabeling.globalRelabeling();
                 workSinceLastGR.set(0L);
             }
             discharging.processWorkingSet();
+
+            var newExcessAtDestinations = excess.get(sourceNode) + excess.get(targetNode);
+            progressTracker.logProgress((long) ( Math.ceil(newExcessAtDestinations * progressTracker.currentVolume() / initialTotalExcess) - Math.ceil(excessAtDestinations * progressTracker.currentVolume() / initialTotalExcess) ));
+            excessAtDestinations = newExcessAtDestinations;
         }
     }
 }

@@ -49,6 +49,8 @@ public class DischargeTask implements Runnable {
     private PHASE phase;
     private long localWork;
 
+    double TOLERANCE = 1e-9;
+
     public DischargeTask(
         FlowGraph flowGraph,
         HugeDoubleArray excess,
@@ -110,19 +112,17 @@ public class DischargeTask implements Runnable {
         tempLabel.set(v, label.get(v));
         final var e = new MutableDouble(excess.get(v));
 
-        while (e.doubleValue() > 0) {
+        while (e.doubleValue() > TOLERANCE) {
             final var newLabel = new MutableLong(nodeCount);
             final var breakOuter = new MutableBoolean(false);
 
-            //todo: Check to improve zero comparisons!
-
             ResidualEdgeConsumer consumer = (long s, long t, long relIdx, double residualCapacity, boolean isReverse) -> {
-                if (residualCapacity <= 0.0) {
+                if (residualCapacity < TOLERANCE) {
                     return true; //skip
                 }
                 var admissible = (tempLabel.get(s) == label.get(t) + 1);
                 if (admissible) {
-                    if (excess.get(t) > 0.0) {
+                    if (excess.get(t) > TOLERANCE) {
                         boolean win = (label.get(s) == label.get(t) + 1 || label.get(s) + 1 < label.get(t) || (label.get(
                             s) == label.get(t) && s < t));
                         if (!win) {
@@ -138,7 +138,7 @@ public class DischargeTask implements Runnable {
                     if (!isDiscovered.getAndSet(t)) {
                         localDiscoveredVertices.add(t);
                     }
-                    if (e.doubleValue() <= 0.0) {
+                    if (e.doubleValue() < TOLERANCE) {
                         breakOuter.setTrue();
                         return false;
                     }
@@ -161,7 +161,7 @@ public class DischargeTask implements Runnable {
             }
         }
         addedExcess.getAndAdd(v, (e.doubleValue() - excess.get(v)));
-        if (e.doubleValue() > 0.0 && !isDiscovered.getAndSet(v)) {
+        if (e.doubleValue() > TOLERANCE && !isDiscovered.getAndSet(v)) {
             localDiscoveredVertices.add(v);
         }
     }

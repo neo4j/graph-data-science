@@ -26,20 +26,29 @@ import org.neo4j.gds.InputNodes;
 import org.neo4j.gds.ListInputNodes;
 import org.neo4j.gds.MapInputNodes;
 import org.neo4j.gds.Orientation;
-import org.neo4j.gds.TestSupport;
+import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.beta.generator.PropertyProducer;
 import org.neo4j.gds.beta.generator.RandomGraphGenerator;
+import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
+import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.logging.GdsTestLog;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.neo4j.gds.TestSupport.fromGdl;
+import static org.neo4j.gds.assertj.Extractors.removingThreadId;
+import static org.neo4j.gds.assertj.Extractors.replaceTimings;
 import static org.neo4j.gds.beta.generator.RelationshipDistribution.UNIFORM;
 import static org.neo4j.gds.maxflow.MaxFlow.ALPHA;
 import static org.neo4j.gds.maxflow.MaxFlow.BETA;
@@ -82,7 +91,7 @@ class MaxFlowTest {
 
     void testGraph(Graph graph, InputNodes sourceNodes, InputNodes targetNodes, double expectedFlow, int concurrency) {
         var params = new MaxFlowParameters(sourceNodes, targetNodes, new Concurrency(concurrency), ALPHA, BETA, FREQ);
-        var x = new MaxFlow(graph, params, null, null);
+        var x = new MaxFlow(graph, params, ProgressTracker.NULL_TRACKER, TerminationFlag.RUNNING_TRUE);
         var result = x.compute();
         assertThat(result.totalFlow()).isCloseTo(expectedFlow, Offset.offset(TOLERANCE));
     }
@@ -105,7 +114,7 @@ class MaxFlowTest {
 
     @Test
     void test2a() {
-        var graph = TestSupport.fromGdl(
+        var graph = fromGdl(
             """
                 CREATE
                     (a0)-[:R {capacity: 91}]->(a1),
@@ -123,7 +132,7 @@ class MaxFlowTest {
 
     @Test
     void test2() {
-        var graph = TestSupport.fromGdl(
+        var graph = fromGdl(
             """
                 CREATE
                     (a0)-[:R {capacity: 50}]->(a5),
@@ -160,7 +169,7 @@ class MaxFlowTest {
 
     @Test
     void test3() {
-        var graph = TestSupport.fromGdl(
+        var graph = fromGdl(
             """
                 CREATE
                     (a0)-[:R {capacity: 50}]->(a10),
@@ -341,5 +350,48 @@ class MaxFlowTest {
             new MapInputNodes(Map.of(5L, 157.7, 299L, 109.0, 450L, 204.5)),
             362.79999999999995,
             4);
+    }
+
+    @Test
+    void shouldLogProgress() {
+        var graph = generateUniform(100L, 10);
+        var log = new GdsTestLog();
+        var testTracker = new TestProgressTracker(
+            MaxFlowTask.create(),
+            new LoggerForProgressTrackingAdapter(log),
+            new Concurrency(4),
+            EmptyTaskRegistryFactory.INSTANCE
+        );
+
+        new MaxFlow(
+            graph,
+            new MaxFlowParameters(
+                new ListInputNodes(List.of(0L)),
+                new ListInputNodes(List.of(2L)),
+                new Concurrency(4),
+                6L,
+                12L,
+                .5D
+            ),
+            testTracker,
+            TerminationFlag.RUNNING_TRUE
+        ).compute();
+
+        assertThat(log.getMessages(TestLog.INFO))
+            .extracting(removingThreadId())
+            .extracting(replaceTimings())
+            .containsExactly(
+                "MaxFlow :: Start",
+                "MaxFlow 7%",
+                "MaxFlow 40%",
+                "MaxFlow 61%",
+                "MaxFlow 68%",
+                "MaxFlow 81%",
+                "MaxFlow 88%",
+                "MaxFlow 89%",
+                "MaxFlow 94%",
+                "MaxFlow 100%",
+                "MaxFlow :: Finished"
+            );
     }
 }
