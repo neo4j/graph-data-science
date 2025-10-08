@@ -41,6 +41,7 @@ import org.neo4j.gds.kspanningtree.KSpanningTreeBaseConfig;
 import org.neo4j.gds.kspanningtree.KSpanningTreeTask;
 import org.neo4j.gds.maxflow.FlowResult;
 import org.neo4j.gds.maxflow.MaxFlowBaseConfig;
+import org.neo4j.gds.maxflow.MaxFlowTask;
 import org.neo4j.gds.paths.RelationshipCountProgressTaskFactory;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarBaseConfig;
 import org.neo4j.gds.paths.bellmanford.AllShortestPathsBellmanFordBaseConfig;
@@ -215,7 +216,10 @@ public class PathFindingAlgorithmsBusinessFacade {
     }
 
     FlowResult maxFlow(Graph graph, MaxFlowBaseConfig configuration) {
-        var progressTracker = ProgressTracker.NULL_TRACKER;
+        var progressTracker = createProgressTracker(
+            MaxFlowTask.create(),
+            configuration
+        );
 
         return algorithmMachinery.getResult(
             () -> algorithms.maxFlow(
