@@ -32,6 +32,7 @@ dependencies {
     implementation project(':logging')
     implementation project(':metrics-api')
     implementation project(':neo4j-kernel-adapter-api')
+    implementation project(':neo4j-integration-tools')
     implementation project(':neo4j-log-adapter')
     implementation project(':neo4j-values')
     implementation project(':progress-tracking')

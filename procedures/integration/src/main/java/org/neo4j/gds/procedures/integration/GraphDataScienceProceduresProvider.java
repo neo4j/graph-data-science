@@ -37,6 +37,7 @@ import org.neo4j.gds.core.utils.logging.GdsLoggers;
 import org.neo4j.gds.core.utils.progress.TaskStoreService;
 import org.neo4j.gds.core.write.ExporterContext;
 import org.neo4j.gds.executor.MemoryEstimationContext;
+import org.neo4j.gds.integration.Neo4jPoweredRequestCorrelationId;
 import org.neo4j.gds.mem.MemoryTracker;
 import org.neo4j.gds.metrics.Metrics;
 import org.neo4j.gds.procedures.DatabaseIdAccessor;

@@ -32,9 +32,20 @@ public final class PlainSimpleRequestCorrelationId implements RequestCorrelation
 
     private PlainSimpleRequestCorrelationId(String id) {this.id = id;}
 
+    /**
+     * For internal use, a neatly laid out unique id with a recognisable qualifier.
+     */
     public static PlainSimpleRequestCorrelationId create() {
         var id = "gid-" + UUID.randomUUID().toString().substring(0, 5);
 
+        return new PlainSimpleRequestCorrelationId(id);
+    }
+
+    /**
+     * @deprecated I need this for a shunt. I probably won't want it longer term.
+     */
+    @Deprecated
+    public static PlainSimpleRequestCorrelationId create(String id) {
         return new PlainSimpleRequestCorrelationId(id);
     }
 

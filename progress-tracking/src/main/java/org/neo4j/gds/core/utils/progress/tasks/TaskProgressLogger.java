@@ -20,9 +20,10 @@
 package org.neo4j.gds.core.utils.progress.tasks;
 
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.gds.core.JobId;
+import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.BatchingProgressLogger;
-import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.utils.progress.ProgressLogger;
 
 import java.util.function.Supplier;
@@ -36,14 +37,16 @@ public final class TaskProgressLogger implements ProgressLogger {
     private final TaskVisitor loggingLeafTaskVisitor;
 
     static TaskProgressLogger create(LoggerForProgressTracking log, JobId jobId, Task baseTask, Concurrency concurrency) {
-        var batchingProgressLogger = new BatchingProgressLogger(log, jobId, baseTask, concurrency);
+        var requestCorrelationId = PlainSimpleRequestCorrelationId.create(jobId.asString());
+        var batchingProgressLogger = new BatchingProgressLogger(log, requestCorrelationId, baseTask, concurrency);
         var loggingLeafTaskVisitor = new LoggingLeafTaskVisitor(batchingProgressLogger);
 
         return new TaskProgressLogger(batchingProgressLogger, baseTask, loggingLeafTaskVisitor);
     }
 
     static TaskProgressLogger create(LoggerForProgressTracking log, JobId jobId, Task baseTask, Concurrency concurrency, TaskVisitor leafTaskVisitor) {
-        var batchingProgressLogger = new BatchingProgressLogger(log, jobId, baseTask, concurrency);
+        var requestCorrelationId = PlainSimpleRequestCorrelationId.create(jobId.asString());
+        var batchingProgressLogger = new BatchingProgressLogger(log, requestCorrelationId, baseTask, concurrency);
 
         return new TaskProgressLogger(batchingProgressLogger, baseTask, leafTaskVisitor);
     }

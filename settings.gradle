@@ -173,6 +173,9 @@ project(':logging').projectDir = file('logging')
 include 'neo4j-log-adapter'
 project(':neo4j-log-adapter').projectDir = file('neo4j-log-adapter')
 
+include 'neo4j-integration-tools'
+project(':neo4j-integration-tools').projectDir = file('neo4j-integration-tools')
+
 include('proc-machine-learning')
 project(':proc-machine-learning').projectDir = file('proc/machine-learning')
 

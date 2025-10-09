@@ -25,7 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.neo4j.gds.assertj.Extractors;
 import org.neo4j.gds.compat.TestLog;
-import org.neo4j.gds.core.JobId;
+import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
@@ -65,7 +65,7 @@ class BatchingProgressLoggerTest {
         var concurrency = new Concurrency(1);
         var logger = new BatchingProgressLogger(
             new LoggerForProgressTrackingAdapter(log),
-            new JobId("some job id"),
+            PlainSimpleRequestCorrelationId.create("some job id"),
             Tasks.leaf("foo", taskVolume),
             batchSize,
             concurrency
@@ -99,7 +99,7 @@ class BatchingProgressLoggerTest {
         var concurrency = new Concurrency(1);
         var logger = new BatchingProgressLogger(
             new LoggerForProgressTrackingAdapter(log),
-            new JobId("a job id"),
+            PlainSimpleRequestCorrelationId.create("a job id"),
             Tasks.leaf("foo", taskVolume),
             batchSize,
             concurrency
@@ -159,7 +159,7 @@ class BatchingProgressLoggerTest {
         var log = new GdsTestLog();
         var logger = new BatchingProgressLogger(
             new LoggerForProgressTrackingAdapter(log),
-            new JobId(),
+            PlainSimpleRequestCorrelationId.create(),
             Tasks.leaf("Test", taskVolume),
             concurrency); // batchSize is 13
         logger.reset(taskVolume);
@@ -178,7 +178,7 @@ class BatchingProgressLoggerTest {
     void log100Percent() {
         var log = new GdsTestLog();
         var concurrency = new Concurrency(1);
-        var testProgressLogger = new BatchingProgressLogger(new LoggerForProgressTrackingAdapter(log), new JobId(), Tasks.leaf("Test"), concurrency);
+        var testProgressLogger = new BatchingProgressLogger(new LoggerForProgressTrackingAdapter(log), PlainSimpleRequestCorrelationId.create(), Tasks.leaf("Test"), concurrency);
         testProgressLogger.reset(1337);
         testProgressLogger.logFinishPercentage();
         assertThat(log.getMessages(TestLog.INFO))
@@ -190,7 +190,7 @@ class BatchingProgressLoggerTest {
     void shouldLog100OnlyOnce() {
         var log = new GdsTestLog();
         var concurrency = new Concurrency(1);
-        var testProgressLogger = new BatchingProgressLogger(new LoggerForProgressTrackingAdapter(log), new JobId(), Tasks.leaf("Test"), concurrency);
+        var testProgressLogger = new BatchingProgressLogger(new LoggerForProgressTrackingAdapter(log), PlainSimpleRequestCorrelationId.create(), Tasks.leaf("Test"), concurrency);
         testProgressLogger.reset(1);
         testProgressLogger.logProgress(1);
         testProgressLogger.logFinishPercentage();
@@ -203,7 +203,7 @@ class BatchingProgressLoggerTest {
     void shouldNotExceed100Percent() {
         var log = new GdsTestLog();
         var concurrency = new Concurrency(1);
-        var testProgressLogger = new BatchingProgressLogger(new LoggerForProgressTrackingAdapter(log), new JobId(), Tasks.leaf("Test"), concurrency);
+        var testProgressLogger = new BatchingProgressLogger(new LoggerForProgressTrackingAdapter(log), PlainSimpleRequestCorrelationId.create(), Tasks.leaf("Test"), concurrency);
         testProgressLogger.reset(1);
         testProgressLogger.logProgress(1); // reaches 100 %
         testProgressLogger.logProgress(1); // exceeds 100 %
@@ -216,7 +216,7 @@ class BatchingProgressLoggerTest {
     void closesThreadLocal() {
         var logger = new BatchingProgressLogger(
             LoggerForProgressTracking.noOpLog(),
-            new JobId(),
+            PlainSimpleRequestCorrelationId.create(),
             Tasks.leaf("foo", 42),
             new Concurrency(1)
         );
@@ -238,7 +238,7 @@ class BatchingProgressLoggerTest {
 
     private static List<Integer> performLogging(long taskVolume, Concurrency concurrency) {
         var log = new GdsTestLog();
-        var logger = new BatchingProgressLogger(new LoggerForProgressTrackingAdapter(log), new JobId("the_job_id"), Tasks.leaf("Test", taskVolume), concurrency);
+        var logger = new BatchingProgressLogger(new LoggerForProgressTrackingAdapter(log), PlainSimpleRequestCorrelationId.create("the_job_id"), Tasks.leaf("Test", taskVolume), concurrency);
         logger.reset(taskVolume);
 
         var batchSize = (int) BitUtil.ceilDiv(taskVolume, concurrency.value());
@@ -270,7 +270,7 @@ class BatchingProgressLoggerTest {
         var log = mock(Log.class);
         var batchingProgressLogger = new BatchingProgressLogger(
             new LoggerForProgressTrackingAdapter(log),
-            new JobId("my job id"),
+            PlainSimpleRequestCorrelationId.create("my job id"),
             new LeafTask("Monsieur Alfonse", 42),
             new Concurrency(87)
         );
@@ -285,7 +285,7 @@ class BatchingProgressLoggerTest {
         var log = mock(Log.class);
         var batchingProgressLogger = new BatchingProgressLogger(
             new LoggerForProgressTrackingAdapter(log),
-            new JobId("my job id"),
+            PlainSimpleRequestCorrelationId.create("my job id"),
             new LeafTask("Monsieur Alfonse", 42),
             new Concurrency(87)
         );
@@ -301,7 +301,7 @@ class BatchingProgressLoggerTest {
         var log = mock(Log.class);
         var batchingProgressLogger = new BatchingProgressLogger(
             new LoggerForProgressTrackingAdapter(log),
-            new JobId("my job id"),
+            PlainSimpleRequestCorrelationId.create("my job id"),
             new LeafTask("Monsieur Alfonse", 42),
             new Concurrency(87)
         );
@@ -316,7 +316,7 @@ class BatchingProgressLoggerTest {
         var log = mock(Log.class);
         var batchingProgressLogger = new BatchingProgressLogger(
             new LoggerForProgressTrackingAdapter(log),
-            new JobId("my job id"),
+            PlainSimpleRequestCorrelationId.create("my job id"),
             new LeafTask("Monsieur Alfonse", 42),
             new Concurrency(87)
         );

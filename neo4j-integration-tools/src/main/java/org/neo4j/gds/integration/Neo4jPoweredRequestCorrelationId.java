@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.integration;
+package org.neo4j.gds.integration;
 
 import org.neo4j.gds.core.RequestCorrelationId;
 
@@ -26,14 +26,14 @@ import org.neo4j.gds.core.RequestCorrelationId;
  * This allows you to trace calls all the way from the edge of Neo4j Server, to the bottom of GDS' call stack. Powerful.
  */
 @SuppressWarnings("ClassCanBeRecord")
-final class Neo4jPoweredRequestCorrelationId implements RequestCorrelationId {
+public final class Neo4jPoweredRequestCorrelationId implements RequestCorrelationId {
     private final String id;
 
     private Neo4jPoweredRequestCorrelationId(String id) {
         this.id = id;
     }
 
-    static Neo4jPoweredRequestCorrelationId create(long transactionId) {
+    public static Neo4jPoweredRequestCorrelationId create(long transactionId) {
         return new Neo4jPoweredRequestCorrelationId(String.valueOf(transactionId));
     }
 

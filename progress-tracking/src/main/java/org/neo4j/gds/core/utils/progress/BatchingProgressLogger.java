@@ -20,7 +20,7 @@
 package org.neo4j.gds.core.utils.progress;
 
 import org.apache.commons.lang3.mutable.MutableLong;
-import org.neo4j.gds.core.JobId;
+import org.neo4j.gds.core.RequestCorrelationId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.LoggerForProgressTracking;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
@@ -37,7 +37,7 @@ public class BatchingProgressLogger implements ProgressLogger {
     public static final long MAXIMUM_LOG_INTERVAL = (long) Math.pow(2, 13);
 
     private final LoggerForProgressTracking log;
-    private final JobId jobId;
+    private final RequestCorrelationId requestCorrelationId;
     private final Concurrency concurrency;
     private long taskVolume;
     private long batchSize;
@@ -60,13 +60,13 @@ public class BatchingProgressLogger implements ProgressLogger {
         return Math.max(1, BitUtil.nextHighestPowerOfTwo(batchSize));
     }
 
-    public BatchingProgressLogger(LoggerForProgressTracking log, JobId jobId, Task task, Concurrency concurrency) {
-        this(log, jobId, task, calculateBatchSize(task, concurrency), concurrency);
+    public BatchingProgressLogger(LoggerForProgressTracking log, RequestCorrelationId requestCorrelationId, Task task, Concurrency concurrency) {
+        this(log, requestCorrelationId, task, calculateBatchSize(task, concurrency), concurrency);
     }
 
-    public BatchingProgressLogger(LoggerForProgressTracking log, JobId jobId, Task task, long batchSize, Concurrency concurrency) {
+    public BatchingProgressLogger(LoggerForProgressTracking log, RequestCorrelationId requestCorrelationId, Task task, long batchSize, Concurrency concurrency) {
         this.log = log;
-        this.jobId = jobId;
+        this.requestCorrelationId = requestCorrelationId;
         this.taskVolume = task.getProgress().volume();
         this.batchSize = batchSize;
         this.taskName = task.description();
@@ -148,7 +148,7 @@ public class BatchingProgressLogger implements ProgressLogger {
 
     @Override
     public void logMessage(String msg) {
-        log.info("[%s] [%s] %s %s", jobId.asString(), Thread.currentThread().getName(), taskName, msg);
+        log.info("[%s] [%s] %s %s", requestCorrelationId, Thread.currentThread().getName(), taskName, msg);
     }
 
     @Override
@@ -159,18 +159,18 @@ public class BatchingProgressLogger implements ProgressLogger {
     @Override
     public void logDebug(Supplier<String> msg) {
         if (log.isDebugEnabled()) {
-            log.debug("[%s] [%s] %s %s", jobId.asString(), Thread.currentThread().getName(), taskName, msg.get());
+            log.debug("[%s] [%s] %s %s", requestCorrelationId, Thread.currentThread().getName(), taskName, msg.get());
         }
     }
 
     @Override
     public void logWarning(String message) {
-        log.warn("[%s] [%s] %s %s", jobId.asString(), Thread.currentThread().getName(), taskName, message);
+        log.warn("[%s] [%s] %s %s", requestCorrelationId, Thread.currentThread().getName(), taskName, message);
     }
 
     @Override
     public void logError(String message) {
-        log.error("[%s] [%s] %s %s", jobId.asString(), Thread.currentThread().getName(), taskName, message);
+        log.error("[%s] [%s] %s %s", requestCorrelationId, Thread.currentThread().getName(), taskName, message);
     }
 
     @Override

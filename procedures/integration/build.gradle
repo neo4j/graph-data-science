@@ -39,6 +39,7 @@ dependencies {
     implementation project(':model-catalog-applications')
     implementation project(':native-projection')
     implementation project(':neo4j-api')
+    implementation project(':neo4j-integration-tools')
     implementation project(':neo4j-log-adapter')
     implementation project(':neo4j-settings')
     implementation project(':node-embedding-algorithms')
