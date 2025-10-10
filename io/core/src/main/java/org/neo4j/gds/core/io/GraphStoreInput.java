@@ -189,7 +189,8 @@ public final class GraphStoreInput {
             () -> new RelationshipImporter(relationshipStore, batchSize, idMode.get(), idMapFunction),
             this.idMode.idType,
             estimate,
-            this.idMode.readableGroups
+            this.idMode.readableGroups,
+            false
         );
     }
 
