@@ -136,7 +136,7 @@ public class FilteredKnn extends Algorithm<FilteredKnnResult> {
     @Override
     public FilteredKnnResult compute() {
         var seedingSummary = targetNodeFiltering.seedingSummary();
-        KnnResult result = (seedingSummary.seededOptimally()) ?
+        KnnResult result = seedingSummary.seededOptimally() ?
             new KnnResult(
                 HugeObjectArray.newArray(NeighborList.class, 0),
                 0,

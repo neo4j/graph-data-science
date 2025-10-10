@@ -117,7 +117,7 @@ public class StrongPruning {
                 }
                 var actualParentCost = parentCost.getValue();
 
-                if (Double.compare(actualParentCost, (dp.get(nextLeaf))) < 0) {
+                if (Double.compare(actualParentCost, dp.get(nextLeaf)) < 0) {
                     dp.addTo(actualParent, dp.get(nextLeaf) - actualParentCost);
                     parentArray.set(nextLeaf, actualParent);
                     parentCostArray.set(nextLeaf, actualParentCost);

@@ -52,14 +52,14 @@ public class BridgesMemoryEstimateDefinition implements MemoryEstimateDefinition
                     .perNode("treeSize", HugeLongArray::memoryEstimation)
                      .build());
         }
-        builder.rangePerGraphDimension("stack", ((graphDimensions, concurrency) -> {
+        builder.rangePerGraphDimension("stack", (graphDimensions, concurrency) -> {
             long relationshipCount = graphDimensions.relCountUpperBound();
             return MemoryRange.of(
                 HugeObjectArray.memoryEstimation(relationshipCount, Estimate.sizeOfInstance(Bridges.StackEvent.class))
             );
 
 
-        }));
+        });
 
         return builder.build();
     }

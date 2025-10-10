@@ -39,11 +39,11 @@ public interface Converters {
     }
 
     static RelationshipWithPropertyConsumer longToIntConsumer(IntIntDoublePredicate p) {
-        return ((sourceNodeId, targetNodeId, property) -> {
+        return (sourceNodeId, targetNodeId, property) -> {
             int s = Math.toIntExact(sourceNodeId);
             int t = Math.toIntExact(targetNodeId);
             return p.test(s, t, property);
-        });
+        };
     }
 
     @FunctionalInterface

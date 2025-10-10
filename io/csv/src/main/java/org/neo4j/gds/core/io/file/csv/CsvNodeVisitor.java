@@ -80,13 +80,13 @@ public class CsvNodeVisitor extends NodeVisitor {
             fileAppender.startLine();
             fileAppender.append(id());
             // write properties
-            forEachProperty(((key, value) -> {
+            forEachProperty((key, value) -> {
                 try {
                     fileAppender.appendAny(value);
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
-            }));
+            });
 
             fileAppender.endLine();
         } catch (IOException e) {
@@ -133,7 +133,7 @@ public class CsvNodeVisitor extends NodeVisitor {
             headerAppender.startLine();
             headerAppender.append(ID_COLUMN_NAME);
 
-            forEachPropertyWithType(((key, value, type) -> {
+            forEachPropertyWithType((key, value, type) -> {
                 var propertyHeader = formatWithLocale(
                     "%s:%s",
                     key,
@@ -144,7 +144,7 @@ public class CsvNodeVisitor extends NodeVisitor {
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
-            }));
+            });
 
             headerAppender.endLine();
         } catch (IOException e) {

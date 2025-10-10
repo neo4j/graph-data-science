@@ -176,7 +176,7 @@ public class NeighborList {
             ) {
                 var upperBound = Math.max(upperBoundIdxExclusive, lowerBoundIdxInclusive + 2);
                 for (int i = lowerBoundIdxInclusive; i < upperBound; i += 2) {
-                    if ((clearCheckedFlag(priorityElementPairs[i + 1])) == element) {
+                    if (clearCheckedFlag(priorityElementPairs[i + 1]) == element) {
                         return NOT_INSERTED;
                     }
                 }

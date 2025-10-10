@@ -36,7 +36,7 @@ public class KCoreDecompositionMemoryEstimateDefinition implements MemoryEstimat
             .perNode("cores", HugeIntArray::memoryEstimation)
             .perThread("KCoreDecompositionTask", KCoreDecompositionTask.memoryEstimation());
 
-        builder.perGraphDimension("RebuildTask", ((graphDimensions, concurrency) -> {
+        builder.perGraphDimension("RebuildTask", (graphDimensions, concurrency) -> {
             var resizedNodeCount = Math.max(
                 1,
                 (long) Math.ceil(graphDimensions.nodeCount() * KCoreDecomposition.REBUILD_CONSTANT)
@@ -46,7 +46,7 @@ public class KCoreDecompositionMemoryEstimateDefinition implements MemoryEstimat
             var rebuildArray = HugeIntArray.memoryEstimation(resizedNodeCount);
             return MemoryRange.of(totalRebuildTasks + rebuildArray);
 
-        }));
+        });
 
         return builder.build();
     }

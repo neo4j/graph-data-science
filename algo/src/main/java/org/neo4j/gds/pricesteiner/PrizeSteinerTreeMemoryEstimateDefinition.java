@@ -56,12 +56,12 @@ public class PrizeSteinerTreeMemoryEstimateDefinition implements MemoryEstimateD
             .add("cluster structure", clusterStructureSpecificMemory())
             .add("edge queue", edgeQueueSpecificMemory())
             .add("cluster queue", clusterQueueSpecificMemory())
-            .rangePerGraphDimension("edge save", ((graphDimensions, concurrency) -> {
+            .rangePerGraphDimension("edge save", (graphDimensions, concurrency) -> {
                 long  edges = graphDimensions.relCountUpperBound();
                 var edgePartsSize = HugeLongArray.memoryEstimation(edges);
                 var edgeWeightsSize=  HugeDoubleArray.memoryEstimation(edges/2);
                 return MemoryRange.of(edgePartsSize +edgeWeightsSize);
-            }))
+            })
             .perNode("tree edges", HugeLongArray::memoryEstimation)
             .build();
     }

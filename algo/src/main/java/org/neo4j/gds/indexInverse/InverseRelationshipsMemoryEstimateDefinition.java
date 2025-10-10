@@ -50,14 +50,14 @@ public class InverseRelationshipsMemoryEstimateDefinition implements MemoryEstim
                     AdjacencyListBehavior.adjacencyListsFromStarEstimation(false)
                 );
 
-                builderForType.perGraphDimension("All properties", ((graphDimensions, concurrency) -> {
+                builderForType.perGraphDimension("All properties", (graphDimensions, concurrency) -> {
                     var singlePropertyEstimation = AdjacencyListBehavior
                         .adjacencyPropertiesFromStarEstimation( false)
                         .estimate(graphDimensions, concurrency)
                         .memoryUsage();
 
                     return singlePropertyEstimation.times(graphDimensions.relationshipPropertyTokens().size());
-                }));
+                });
 
                 builder.add(String.format(Locale.US, "Inverse '%s'", typeName), builderForType.build());
             } else {
@@ -69,14 +69,14 @@ public class InverseRelationshipsMemoryEstimateDefinition implements MemoryEstim
                 );
 
 
-                builderForType.perGraphDimension("properties", ((graphDimensions, concurrency) -> {
+                builderForType.perGraphDimension("properties", (graphDimensions, concurrency) -> {
                     var singlePropertyEstimation = AdjacencyListBehavior
                         .adjacencyPropertiesEstimation(relationshipType, false)
                         .estimate(graphDimensions, concurrency)
                         .memoryUsage();
 
                     return singlePropertyEstimation.times(graphDimensions.relationshipPropertyTokens().size());
-                }));
+                });
 
                 builder.add(String.format(Locale.US, "Inverse '%s'", typeName), builderForType.build());
             }

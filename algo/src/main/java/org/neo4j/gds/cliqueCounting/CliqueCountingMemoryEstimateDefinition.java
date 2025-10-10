@@ -42,13 +42,13 @@ public final class CliqueCountingMemoryEstimateDefinition implements MemoryEstim
 
     private MemoryEstimation thread(){
             return MemoryEstimations.builder()
-                .rangePerGraphDimension("Intersections",((graphDimensions, concurrency) -> {
+                .rangePerGraphDimension("Intersections", (graphDimensions, concurrency) -> {
                     var  bound1 = (long)(graphDimensions.averageDegree()*2.7);
                     var bound2  = (long) (0.48*Math.sqrt(graphDimensions.relCountUpperBound())); //a theoretical bound  ¯\_(ツ)_/¯
                     var cost1 = cost(bound1);
                     var cost2 = cost(bound2);
                     return MemoryRange.of(Math.min(cost1, cost2), Math.max(cost1, cost2));
-                }))
+                })
                 .build();
 
     }

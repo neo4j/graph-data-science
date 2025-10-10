@@ -89,7 +89,7 @@ public final class ExistingTargetNodeFiltering implements StreamProducingTargetN
             }
         });
 
-        var seededOptimally = (startingSeeds[k] == -1) && (optionalSimilarityFunction.isPresent()); //if there less than `k+1` targets, we optimally find solution just by seeding.
+        var seededOptimally = (startingSeeds[k] == -1) && optionalSimilarityFunction.isPresent(); //if there less than `k+1` targets, we optimally find solution just by seeding.
         return new ExistingTargetNodeFiltering(
             neighbourConsumers,
             new SeedingSummary(nodeCountAdder.longValue(), nodepairAdder.longValue(), seededOptimally)

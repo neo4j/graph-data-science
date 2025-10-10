@@ -68,7 +68,7 @@ public class ComputationContext {
     }
 
     public void backward(Variable<?> function) {
-        assert (Dimensions.isScalar(function.dimensions())) : "Root variable must be scalar.";
+        assert Dimensions.isScalar(function.dimensions()) : "Root variable must be scalar.";
         assert function.requireGradient() : "Root variable must have requireGradient==true";
 
         gradients.clear();

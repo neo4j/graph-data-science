@@ -73,7 +73,7 @@ public class Bridges extends Algorithm<BridgeResult> {
         //each edge may have at most one event to the stack at the same time
         var stack = HugeObjectArray.newArray(StackEvent.class, graph.relationshipCount());
 
-        BiConsumer<Long,Long> onLastChildVisit = (treeSizeTracker.isPresent()) ? treeSizeTracker.get()::recordTreeChild : (a,b)->{};
+        BiConsumer<Long,Long> onLastChildVisit = treeSizeTracker.isPresent() ? treeSizeTracker.get()::recordTreeChild : (a,b)->{};
         int listIndex=0;
         var n = graph.nodeCount();
         for (long i = 0; i < n; ++i) {

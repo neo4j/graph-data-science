@@ -106,7 +106,7 @@ class NodeSubscriber extends ErrorCachingQuerySubscriber {
                 maxNeoId = neoId;
             }
         } else if (offset == labelOffset) {
-            if (!(value.isSequenceValue())) {
+            if (!value.isSequenceValue()) {
                 //throwing here will abort execution and error will appear in onError
                 throw new IllegalArgumentException(formatWithLocale(
                     "Type of column `%s` should be of type List, but was `%s`",
