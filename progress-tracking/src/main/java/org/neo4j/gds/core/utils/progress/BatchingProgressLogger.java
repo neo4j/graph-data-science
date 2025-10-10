@@ -148,7 +148,7 @@ public class BatchingProgressLogger implements ProgressLogger {
 
     @Override
     public void logMessage(String msg) {
-        log.info("[%s] [%s] %s %s", requestCorrelationId, Thread.currentThread().getName(), taskName, msg);
+        log.info("[%s] [%s] %s %s", requestCorrelationId.toString(), Thread.currentThread().getName(), taskName, msg);
     }
 
     @Override
@@ -159,18 +159,18 @@ public class BatchingProgressLogger implements ProgressLogger {
     @Override
     public void logDebug(Supplier<String> msg) {
         if (log.isDebugEnabled()) {
-            log.debug("[%s] [%s] %s %s", requestCorrelationId, Thread.currentThread().getName(), taskName, msg.get());
+            log.debug("[%s] [%s] %s %s", requestCorrelationId.toString(), Thread.currentThread().getName(), taskName, msg.get());
         }
     }
 
     @Override
     public void logWarning(String message) {
-        log.warn("[%s] [%s] %s %s", requestCorrelationId, Thread.currentThread().getName(), taskName, message);
+        log.warn("[%s] [%s] %s %s", requestCorrelationId.toString(), Thread.currentThread().getName(), taskName, message);
     }
 
     @Override
     public void logError(String message) {
-        log.error("[%s] [%s] %s %s", requestCorrelationId, Thread.currentThread().getName(), taskName, message);
+        log.error("[%s] [%s] %s %s", requestCorrelationId.toString(), Thread.currentThread().getName(), taskName, message);
     }
 
     @Override
