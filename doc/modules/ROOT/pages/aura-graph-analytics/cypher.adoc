@@ -374,3 +374,4 @@ The following additional operations are not supported:
 * `gds.license.state`
 * `gds.userLog`
 * `gds.version`
+* `gds.util.nodeProperty`
