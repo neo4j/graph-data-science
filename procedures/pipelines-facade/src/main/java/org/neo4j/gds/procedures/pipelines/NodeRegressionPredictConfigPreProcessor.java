@@ -40,7 +40,7 @@ public class NodeRegressionPredictConfigPreProcessor {
 
     void enhanceInputWithPipelineParameters(Map<String, Object> userInput) {
         Optional.ofNullable(userInput.get("modelName"))
-            .map(modelName -> {
+            .ifPresent(modelName -> {
                 assert modelCatalog != null : "ModelCatalog should have been set in the ExecutionContext by this point!!!";
 
                 var trainedModel = modelCatalog.get(
@@ -61,7 +61,6 @@ public class NodeRegressionPredictConfigPreProcessor {
 
                 userInput.put("targetNodeLabels", combinedTargetNodeLabels);
                 userInput.put("relationshipTypes", combinedRelationshipTypes);
-                return userInput;
             });
     }
 }

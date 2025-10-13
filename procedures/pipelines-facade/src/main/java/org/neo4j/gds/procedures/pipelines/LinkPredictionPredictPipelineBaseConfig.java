@@ -149,7 +149,9 @@ public interface LinkPredictionPredictPipelineBaseConfig extends
             );
             validateStrategySpecificParameters(approximateStrategyParameters, "less than 1");
 
-            topN().orElseThrow(() -> MissingParameterExceptions.missingValueFor("topN", Collections.emptyList()));
+            if (topN().isEmpty()) {
+                throw MissingParameterExceptions.missingValueFor("topN", Collections.emptyList());
+            }
         }
     }
 
