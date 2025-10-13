@@ -31,7 +31,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static org.neo4j.gds.collections.TestGeneratorUtils.ASSERTJ_ASSERTIONS;
@@ -235,16 +234,12 @@ final class HugeSparseArrayTestGenerator implements CollectionStep.Generator<Hug
                     "   for (long idx = start; idx < end; idx++) {\n" +
                     "       builder.set(idx, $L);\n" +
                     "   }\n" +
-                    "}).collect($T.toList());",
+                    "}).toList()",
                     IntStream.class,
                     Runnable.class,
-                    variableValue(valueType, "threadId"),
-                    Collectors.class
+                    variableValue(valueType, "threadId")
                 )
-                .addStatement(
-                    "var futures = tasks.stream().map(executor::submit).collect($T.toList())",
-                    Collectors.class
-                )
+                .addStatement("var futures = tasks.stream().map(executor::submit).toList()")
                 .beginControlFlow("for (var future : futures)")
                 .addStatement("future.get()")
                 .endControlFlow()
