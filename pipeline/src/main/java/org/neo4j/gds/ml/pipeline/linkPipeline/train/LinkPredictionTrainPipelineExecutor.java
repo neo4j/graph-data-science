@@ -93,15 +93,16 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
 
     public static Task progressTask(String taskName, LinkPredictionTrainingPipeline pipeline, long relationshipCount) {
         var sizes = pipeline.splitConfig().expectedSetSizes(relationshipCount);
-        return Tasks.task(taskName, new ArrayList<>() {{
-            add(LinkPredictionRelationshipSampler.progressTask(sizes));
-            add(NodePropertyStepExecutor.tasks(pipeline.nodePropertySteps(), sizes.featureInputSize()));
-            addAll(LinkPredictionTrain.progressTasks(
-                relationshipCount,
-                pipeline.splitConfig(),
-                pipeline.numberOfModelSelectionTrials()
-            ));
-        }});
+        List<Task> childTasks = new ArrayList<>();
+        childTasks.add(LinkPredictionRelationshipSampler.progressTask(sizes));
+        childTasks.add(NodePropertyStepExecutor.tasks(pipeline.nodePropertySteps(), sizes.featureInputSize()));
+        childTasks.addAll(LinkPredictionTrain.progressTasks(
+            relationshipCount,
+            pipeline.splitConfig(),
+            pipeline.numberOfModelSelectionTrials()
+        ));
+
+        return Tasks.task(taskName, childTasks);
     }
 
     public static MemoryEstimation estimate(
