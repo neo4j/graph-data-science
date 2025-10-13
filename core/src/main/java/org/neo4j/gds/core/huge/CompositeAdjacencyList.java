@@ -155,7 +155,7 @@ public final class CompositeAdjacencyList implements AdjacencyList {
 
     @Override
     public MemoryInfo memoryInfo() {
-        var memoryInfo = this.adjacencyLists.stream().map(AdjacencyList::memoryInfo).collect(Collectors.toList());
+        var memoryInfo = this.adjacencyLists.stream().map(AdjacencyList::memoryInfo).toList();
 
         var pages = memoryInfo
             .stream()

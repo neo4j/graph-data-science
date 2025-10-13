@@ -24,7 +24,6 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 
-import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
@@ -32,7 +31,7 @@ public class StreamRelationshipsApplication {
     Stream<TopologyResult> compute(GraphStore graphStore, GraphStreamRelationshipsConfig configuration) {
         var relationshipTypesAndGraphs = configuration.relationshipTypeIdentifiers(graphStore).stream()
             .map(relationshipType -> Tuples.pair(relationshipType.name(), graphStore.getGraph(relationshipType)))
-            .collect(Collectors.toList());
+            .toList();
 
         return ParallelUtil.parallelStream(
             LongStream.range(0, graphStore.nodeCount()),

@@ -145,7 +145,7 @@ class CsvToGraphStoreImporterIntegrationTest {
         var expectedDoubleArrayProperties = LongStream
             .range(0, 1337)
             .mapToObj(i -> new double[]{(double) i, 42.0})
-            .collect(Collectors.toList())
+            .toList()
             .toArray(new double[0][0]);
         assertThat(userGraphStore.graphProperty("doubleArrayProp").values().doubleArrayValues().collect(Collectors.toList()))
             .containsExactlyInAnyOrder(expectedDoubleArrayProperties);

@@ -25,7 +25,6 @@ import org.neo4j.gds.core.utils.progress.UserTask;
 import org.neo4j.gds.core.utils.progress.tasks.TaskTraversal;
 
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -41,7 +40,7 @@ class DefaultResultRenderer implements ResultRenderer<ProgressResult> {
     public Stream<ProgressResult> renderAdministratorView(Stream<UserTask> results) {
         var progressResultStream = results.flatMap(this::jobProgress);
 
-        var progressResults = progressResultStream.collect(Collectors.toList());
+        var progressResults = progressResultStream.toList();
 
         if (progressResults.isEmpty()) throw createException();
 

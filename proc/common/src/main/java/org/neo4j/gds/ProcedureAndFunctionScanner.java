@@ -25,7 +25,6 @@ import org.reflections.scanners.Scanners;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public final class ProcedureAndFunctionScanner {
@@ -37,7 +36,7 @@ public final class ProcedureAndFunctionScanner {
     private static final List<Reflections> reflections = PACKAGES_TO_SCAN
         .stream()
         .map(pkg -> new Reflections(pkg, Scanners.MethodsAnnotated))
-        .collect(Collectors.toList());
+        .toList();
 
     private ProcedureAndFunctionScanner() {}
 

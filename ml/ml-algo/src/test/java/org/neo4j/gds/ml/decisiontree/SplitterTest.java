@@ -33,7 +33,6 @@ import org.neo4j.gds.ml.models.FeaturesFactory;
 
 import java.util.Arrays;
 import java.util.SplittableRandom;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -174,7 +173,7 @@ class SplitterTest {
 
         Group leftChildGroup = split.groups().left();
         assertThat(leftChildGroup.size()).isEqualTo(expectedLeftChildArray.size());
-        var leftChildAsList = Arrays.stream(leftChildGroup.array().toArray()).boxed().collect(Collectors.toList());
+        var leftChildAsList = Arrays.stream(leftChildGroup.array().toArray()).boxed().toList();
         for (long i = 0; i < expectedLeftChildArray.size(); i++) {
             assertThat((long) leftChildAsList.indexOf(expectedLeftChildArray.get(i)))
                 .isLessThan(leftChildGroup.startIdx() + expectedLeftChildArray.size())
@@ -183,7 +182,7 @@ class SplitterTest {
 
         Group rightChildGroup = split.groups().right();
         assertThat(rightChildGroup.size()).isEqualTo(expectedRightChildArray.size());
-        var rightChildAsList = Arrays.stream(rightChildGroup.array().toArray()).boxed().collect(Collectors.toList());
+        var rightChildAsList = Arrays.stream(rightChildGroup.array().toArray()).boxed().toList();
         for (long i = 0; i < expectedRightChildArray.size(); i++) {
             assertThat((long)rightChildAsList.indexOf(expectedRightChildArray.get(i)))
                 .isLessThan(rightChildGroup.startIdx() + expectedRightChildArray.size())

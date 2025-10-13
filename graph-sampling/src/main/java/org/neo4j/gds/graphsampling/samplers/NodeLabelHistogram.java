@@ -35,7 +35,6 @@ import org.neo4j.gds.termination.TerminationFlag;
 import java.util.Comparator;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.stream.Collectors;
 
 public final class NodeLabelHistogram {
 
@@ -55,7 +54,7 @@ public final class NodeLabelHistogram {
         var availableNodeLabels = inputGraph.availableNodeLabels()
             .stream()
             .sorted(Comparator.comparing(ElementIdentifier::name))
-            .collect(Collectors.toList())
+            .toList()
             .toArray(NodeLabel[]::new);
 
         var localLabelCounts = new ConcurrentLinkedQueue<LongLongHashMap>();

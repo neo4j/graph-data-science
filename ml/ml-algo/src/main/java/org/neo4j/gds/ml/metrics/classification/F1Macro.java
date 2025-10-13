@@ -24,7 +24,6 @@ import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 
 import java.util.Comparator;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 public class F1Macro implements ClassificationMetric{
 
@@ -50,7 +49,7 @@ public class F1Macro implements ClassificationMetric{
     public double compute(HugeIntArray targets, HugeIntArray predictions) {
         var metrics = classIdMap.getMappings()
             .map(idMap -> new F1Score(idMap.key, idMap.value))
-            .collect(Collectors.toList());
+            .toList();
 
         return metrics
             .stream()

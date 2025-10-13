@@ -22,7 +22,6 @@ package org.neo4j.gds.core;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
-import java.util.stream.Collectors;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.gds.utils.StringFormatting.toUpperCaseWithLocale;
@@ -112,7 +111,7 @@ public enum Aggregation {
     private static final List<String> VALUES = Arrays
         .stream(Aggregation.values())
         .map(Aggregation::name)
-        .collect(Collectors.toList());
+        .toList();
 
     public static Aggregation parse(Object input) {
         if (input instanceof String) {

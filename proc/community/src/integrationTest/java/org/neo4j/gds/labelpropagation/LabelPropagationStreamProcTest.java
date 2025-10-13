@@ -44,7 +44,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -105,9 +104,7 @@ class LabelPropagationStreamProcTest extends BaseProcTest {
 
         var expectedCommunities = Stream.of("c", "h", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l")
             .map(idFunction::of)
-            .collect(
-                Collectors.toList()
-            );
+            .toList();
 
         var rowIdx = new MutableInt();
         var rowCount = runQueryWithRowConsumer(query, row -> {

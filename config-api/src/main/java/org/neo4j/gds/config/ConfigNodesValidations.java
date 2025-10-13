@@ -41,7 +41,7 @@ public final class ConfigNodesValidations {
      * @param parameterKey the parameter key under which the user submitted these nodes
      */
     public static void nodesNotNegative(Collection<Long> nodes, String parameterKey) {
-        var negativeNodes = nodes.stream().filter(n -> n < 0).collect(Collectors.toList());
+        var negativeNodes = nodes.stream().filter(n -> n < 0).toList();
         if (negativeNodes.isEmpty()) return;
         throw new IllegalArgumentException(formatWithLocale(
             "Negative node ids are not supported for the field `%s`. Negative node ids: %s",

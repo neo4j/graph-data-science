@@ -164,7 +164,7 @@ final class RelationshipsScannerTask extends StatementAction implements RecordSc
                             propertyReader
                         );
                     }
-                ).collect(Collectors.toList());
+                ).toList();
 
             var compositeBuffer = new BufferedCompositeRelationshipConsumerBuilder()
                 .buffers(buffers)

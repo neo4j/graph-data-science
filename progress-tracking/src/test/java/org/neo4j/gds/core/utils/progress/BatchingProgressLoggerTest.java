@@ -42,7 +42,6 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -116,13 +115,13 @@ class BatchingProgressLoggerTest {
         var progressSteps = IntStream
             .iterate(0, i -> i < taskVolume, i -> i + progressStep)
             .boxed()
-            .collect(Collectors.toList());
+            .toList();
         var loggedProgressSteps = ListIterate.distinctBy(progressSteps, i -> i / batchSize);
 
         var expectedMessages = loggedProgressSteps.stream()
             .skip(1)
             .map(i -> formatWithLocale(messageTemplate, "a job id", threadName, i * 100 / taskVolume))
-            .collect(Collectors.toList());
+            .toList();
 
         var messages = log.getMessages("info");
         assertEquals(expectedMessages, messages);
@@ -131,7 +130,7 @@ class BatchingProgressLoggerTest {
     @Test
     void shouldLogEveryPercentageOnlyOnce() {
         var loggedPercentages = performLogging(400, new Concurrency(4));
-        var expected = loggedPercentages.stream().distinct().collect(Collectors.toList());
+        var expected = loggedPercentages.stream().distinct().toList();
 
         assertEquals(expected.size(), loggedPercentages.size());
     }
@@ -139,7 +138,7 @@ class BatchingProgressLoggerTest {
     @Test
     void shouldLogPercentagesSequentially() {
         var loggedPercentages = performLogging(400, new Concurrency(4));
-        var expected = loggedPercentages.stream().sorted().collect(Collectors.toList());
+        var expected = loggedPercentages.stream().sorted().toList();
 
         assertEquals(expected, loggedPercentages);
     }
@@ -147,7 +146,7 @@ class BatchingProgressLoggerTest {
     @Test
     void shouldLogEveryPercentageUnderHeavyContention() {
         var loggedPercentages = performLogging(20, new Concurrency(4));
-        var expected = IntStream.rangeClosed(1, 20).map(p -> p * 5).boxed().collect(Collectors.toList());
+        var expected = IntStream.rangeClosed(1, 20).map(p -> p * 5).boxed().toList();
 
         assertEquals(expected, loggedPercentages);
     }
@@ -251,7 +250,7 @@ class BatchingProgressLoggerTest {
                     LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(1));
                     logger.logProgress();
                 }))
-            .collect(Collectors.toList());
+            .toList();
 
         RunWithConcurrency.builder()
             .concurrency(concurrency)
@@ -263,7 +262,7 @@ class BatchingProgressLoggerTest {
             .stream()
             .map(progress -> progress.split(" ")[3].replace("%", ""))
             .map(Integer::parseInt)
-            .collect(Collectors.toList());
+            .toList();
     }
 
     @Test

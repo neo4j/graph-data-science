@@ -125,7 +125,7 @@ final class IntMinPriorityQueueTest {
                 .keySet()
                 .stream()
                 .sorted()
-                .collect(Collectors.toList());
+                .toList();
 
         for (Double weight : weightGroups) {
             final Set<Integer> allowedIds = byWeight.get(weight);

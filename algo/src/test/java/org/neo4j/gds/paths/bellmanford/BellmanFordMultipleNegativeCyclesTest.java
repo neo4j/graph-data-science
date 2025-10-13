@@ -28,8 +28,7 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
-
-import java.util.stream.Collectors;
+import org.neo4j.gds.paths.PathResult;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -88,14 +87,14 @@ class BellmanFordMultipleNegativeCyclesTest {
                 .negativeCycles()
                 .pathSet()
                 .stream()
-                .collect(Collectors.toList());
+                .toList();
 
-            var negativeCyclesNodes = negativeCycles.stream().map(v -> v.nodeIds()).collect(Collectors.toList());
+            var negativeCyclesNodes = negativeCycles.stream().map(PathResult::nodeIds).toList();
             assertThat(negativeCyclesNodes).containsExactlyInAnyOrder(
                 new long[]{a[1], a[3], a[4], a[1]},
                 new long[]{a[2], a[5], a[6], a[2]}
             );
-            var negativeCyclesWeights = negativeCycles.stream().map(v -> v.costs()).collect(Collectors.toList());
+            var negativeCyclesWeights = negativeCycles.stream().map(PathResult::costs).toList();
             assertThat(negativeCyclesWeights).containsExactlyInAnyOrder(
                 new double[]{0, -1, -3, -1},
                 new double[]{0, -100, -95, -89}

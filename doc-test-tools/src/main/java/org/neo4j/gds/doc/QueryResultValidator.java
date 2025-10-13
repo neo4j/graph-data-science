@@ -76,7 +76,7 @@ public record QueryResultValidator(String query, List<String> expectedColumns, L
         } else if (value instanceof List<?>) {
             return ((List<?>) value).stream()
                 .map(v -> valueToString(v, floatFormat))
-                .collect(Collectors.toList())
+                .toList()
                 .toString();
         } else if (value instanceof Map<?, ?>) {
             var mappedMap = ((Map<?, ?>) value).entrySet()

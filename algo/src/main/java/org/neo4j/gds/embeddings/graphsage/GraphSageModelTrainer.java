@@ -154,8 +154,7 @@ public class GraphSageModelTrainer {
                         layers,
                         weights,
                         epochLocalSeed
-                    ))
-                    .collect(Collectors.toList());
+                    )).toList();
 
                 batchTaskSampler = () -> IntStream
                     .range(0, parameters.batchesPerIteration(graph.nodeCount()))

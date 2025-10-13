@@ -54,7 +54,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatNoException;
@@ -101,7 +100,7 @@ class RandomWalkTest {
             TerminationFlag.RUNNING_TRUE
         );
 
-        List<long[]> result = randomWalk.compute().collect(Collectors.toList());
+        List<long[]> result = randomWalk.compute().toList();
 
         int expectedNumberOfWalks = walkParameters.walksPerNode() * 3;
         assertEquals(expectedNumberOfWalks, result.size());
@@ -133,7 +132,7 @@ class RandomWalkTest {
             ProgressTracker.NULL_TRACKER,
             DefaultPool.INSTANCE,
             TerminationFlag.RUNNING_TRUE
-        ).compute().collect(Collectors.toList());
+        ).compute().toList();
 
         var secondResult = RandomWalk.create(
             graph,
@@ -145,7 +144,7 @@ class RandomWalkTest {
             ProgressTracker.NULL_TRACKER,
             DefaultPool.INSTANCE,
             TerminationFlag.RUNNING_TRUE
-        ).compute().collect(Collectors.toList());
+        ).compute().toList();
 
         var firstResultAsSet = new TreeSet<long[]>(Arrays::compare);
         firstResultAsSet.addAll(firstResult);
@@ -174,7 +173,7 @@ class RandomWalkTest {
         );
 
         int expectedNumberOfWalks = walkParameters.walksPerNode() * 3;
-        List<long[]> result = randomWalk.compute().collect(Collectors.toList());
+        List<long[]> result = randomWalk.compute().toList();
         assertEquals(expectedNumberOfWalks, result.size());
         long nodeZero = graph.toMappedNodeId("a");
         long[] walkForNodeZero = result
@@ -381,8 +380,9 @@ class RandomWalkTest {
             DefaultPool.INSTANCE,
             TerminationFlag.RUNNING_TRUE
         );
+        var actual = randomWalk.compute().toList();
 
-        assertThat(randomWalk.compute().collect(Collectors.toList()))
+        assertThat(actual)
             .matches(walks -> walks.size() <= nodeCount * walksPerNode)
             .allMatch(walk -> walk.length <= walkLength);
     }
@@ -411,8 +411,9 @@ class RandomWalkTest {
             DefaultPool.INSTANCE,
             TerminationFlag.RUNNING_TRUE
         );
+        var actual = randomWalk.compute().toList();
 
-        assertThat(randomWalk.compute().collect(Collectors.toList()))
+        assertThat(actual)
             .matches(walks -> walks.size() == 2)
             .anyMatch(walk -> walk[0] == aInternalId)
             .anyMatch(walk -> walk[0] == bInternalId);

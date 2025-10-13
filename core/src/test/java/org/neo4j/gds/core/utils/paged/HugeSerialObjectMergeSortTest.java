@@ -28,7 +28,6 @@ import org.neo4j.gds.collections.ha.HugeObjectArray;
 
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.List;
 import java.util.Random;
 import java.util.stream.Stream;
 
@@ -51,7 +50,7 @@ class HugeSerialObjectMergeSortTest {
                 )
             ).map(Arguments::of),
             // single vs paged array
-            () -> List.of(true, false).stream().map(Arguments::of)
+            () -> Stream.of(true, false).map(Arguments::of)
         );
     }
 

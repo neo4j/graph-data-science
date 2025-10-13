@@ -23,7 +23,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.function.LongPredicate;
-import java.util.stream.Collectors;
 
 public interface KnnSampler {
 
@@ -45,7 +44,7 @@ public interface KnnSampler {
         private static final List<String> VALUES = Arrays
             .stream(SamplerType.values())
             .map(SamplerType::name)
-            .collect(Collectors.toList());
+            .toList();
 
         public static SamplerType parse(Object input) {
             if (input instanceof String) {

@@ -56,7 +56,7 @@ public interface GraphWriteNodePropertiesConfig extends GraphNodePropertiesConfi
         List<String> nodePropertiesRequestedByUser = nodeProperties()
             .stream()
             .map(UserInputWriteProperties.PropertySpec::nodeProperty)
-            .collect(Collectors.toList());
+            .toList();
 
         return nodeLabelIdentifiers(graphStore)
             .stream()

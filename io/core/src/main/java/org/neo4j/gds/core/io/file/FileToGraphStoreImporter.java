@@ -166,12 +166,11 @@ public abstract class FileToGraphStoreImporter {
         progressTracker.beginSubTask();
         MutableNodeSchema nodeSchema = fileInput.nodeSchema();
         graphSchemaBuilder.nodeSchema(nodeSchema);
-        nodeSchema.entries().stream().forEach(entry -> log.info("Imported node label schema: %s", entry.identifier()));
+        nodeSchema.entries().forEach(entry -> log.info("Imported node label schema: %s", entry.identifier()));
         var labelMapping = fileInput.labelMapping();
         if (labelMapping.isPresent()) {
             labelMapping.get()
-                .entrySet()
-                .forEach(entry -> log.info("Label mapping: %s -> %s", entry.getKey(), entry.getValue()));
+                .forEach((key, value) -> log.info("Label mapping: %s -> %s", key, value));
         } else {
             log.info("Label mapping file was not found, continuing import without label mapping");
         }

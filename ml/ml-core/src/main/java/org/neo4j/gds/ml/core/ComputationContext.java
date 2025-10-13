@@ -30,7 +30,6 @@ import java.util.Optional;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.stream.Collectors;
 
 /**
  * The computation context is used for forward and backward propagation over a computation graphs consiting of {@link org.neo4j.gds.ml.core.Variable}s.
@@ -150,7 +149,7 @@ public class ComputationContext {
             .entrySet()
             .stream()
             .filter(entry -> !expectedVariables.contains(entry.getKey()))
-            .collect(Collectors.toList());
+            .toList();
 
         if (!unmatchedGradients.isEmpty()) {
             result.append("Found gradients but no data for: ");

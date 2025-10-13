@@ -107,7 +107,7 @@ class HugeLongPriorityQueueTest {
             .keySet()
             .stream()
             .sorted()
-            .collect(Collectors.toList());
+            .toList();
 
         for (var cost : costGroups) {
             var allowedElements = byCost.get(cost);

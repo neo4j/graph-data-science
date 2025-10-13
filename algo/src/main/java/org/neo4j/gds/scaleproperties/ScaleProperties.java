@@ -80,7 +80,7 @@ public class ScaleProperties extends Algorithm<ScalePropertiesResult> {
         progressTracker.beginSubTask("Prepare scalers");
         var scalers = params.nodeProperties().stream()
             .map(this::prepareScalers)
-            .collect(Collectors.toList());
+            .toList();
         progressTracker.endSubTask("Prepare scalers");
 
         var scalerStatistics = IntStream

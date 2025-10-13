@@ -184,7 +184,7 @@ public interface GraphDimensions {
             Map<RelationshipType, Long> relCounts = relationshipCounts();
             List<RelationshipType> relationshipTypes = relationshipTypeNames.stream()
                 .map(RelationshipType::of)
-                .collect(Collectors.toList());
+                .toList();
 
             if (relCounts.keySet().containsAll(relationshipTypes)) {
                 return relationshipTypes.stream().mapToLong(relCounts::get).sum();

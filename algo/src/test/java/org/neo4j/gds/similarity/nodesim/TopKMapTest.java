@@ -28,7 +28,6 @@ import org.neo4j.gds.similarity.SimilarityResult;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -53,7 +52,7 @@ class TopKMapTest {
         input.add(new SimilarityResult(0, 4, 20.0));
         input.add(new SimilarityResult(0, 5, 25.0));
         input.add(new SimilarityResult(0, 6, 30.0));
-        input.addAll(input.stream().map(SimilarityResult::reverse).collect(Collectors.toList()));
+        input.addAll(input.stream().map(SimilarityResult::reverse).toList());
 
         BitSet bitSet = new BitSet();
         bitSet.set(0, input.size());
@@ -62,7 +61,7 @@ class TopKMapTest {
 
         input.forEach(sim -> topKMap.put(sim.node1, sim.node2, sim.similarity));
 
-        List<SimilarityResult> actual = topKMap.stream().collect(Collectors.toList());
+        List<SimilarityResult> actual = topKMap.stream().toList();
 
         assertEquals(expected, actual);
     }
@@ -89,7 +88,7 @@ class TopKMapTest {
 
         input.forEach(sim -> topKMap.put(sim.node1, sim.node2, sim.similarity));
 
-        List<SimilarityResult> actual = topKMap.stream().collect(Collectors.toList());
+        List<SimilarityResult> actual = topKMap.stream().toList();
 
         assertEquals(expected, actual);
     }
@@ -116,7 +115,7 @@ class TopKMapTest {
 
         input.forEach(sim -> topKMap.put(sim.node1, sim.node2, sim.similarity));
 
-        List<SimilarityResult> actual = topKMap.stream().collect(Collectors.toList());
+        List<SimilarityResult> actual = topKMap.stream().toList();
 
         assertEquals(expected, actual);
     }
@@ -148,7 +147,7 @@ class TopKMapTest {
 
         input.forEach(sim -> topKMap.put(sim.node1, sim.node2, sim.similarity));
 
-        List<SimilarityResult> actual = topKMap.stream().collect(Collectors.toList());
+        List<SimilarityResult> actual = topKMap.stream().toList();
 
         assertEquals(expected, actual);
     }

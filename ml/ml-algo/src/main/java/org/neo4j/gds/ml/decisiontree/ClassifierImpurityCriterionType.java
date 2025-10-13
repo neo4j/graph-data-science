@@ -22,7 +22,6 @@ package org.neo4j.gds.ml.decisiontree;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
-import java.util.stream.Collectors;
 
 public enum ClassifierImpurityCriterionType {
     GINI,
@@ -31,7 +30,7 @@ public enum ClassifierImpurityCriterionType {
     private static final List<String> VALUES = Arrays
         .stream(ClassifierImpurityCriterionType.values())
         .map(ClassifierImpurityCriterionType::name)
-        .collect(Collectors.toList());
+        .toList();
 
     public static ClassifierImpurityCriterionType parse(Object input) {
         if (input instanceof String) {

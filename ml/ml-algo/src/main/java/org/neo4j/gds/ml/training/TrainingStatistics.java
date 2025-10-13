@@ -52,12 +52,12 @@ public final class TrainingStatistics {
 
     @TestOnly
     public List<EvaluationScores> getTrainStats(Metric metric) {
-        return modelCandidateStats.stream().map(stats -> stats.trainingStats().get(metric)).collect(Collectors.toList());
+        return modelCandidateStats.stream().map(stats -> stats.trainingStats().get(metric)).toList();
     }
 
     @TestOnly
     public List<EvaluationScores> getValidationStats(Metric metric) {
-        return modelCandidateStats.stream().map(stats -> stats.validationStats().get(metric)).collect(Collectors.toList());
+        return modelCandidateStats.stream().map(stats -> stats.validationStats().get(metric)).toList();
     }
 
     @TestOnly
@@ -74,7 +74,7 @@ public final class TrainingStatistics {
         return Map.of(
             "bestParameters", bestParameters().toMapWithTrainerMethod(),
             "bestTrial", getBestTrialIdx() + 1,
-            "modelCandidates", modelCandidateStats.stream().map(ModelCandidateStats::toMap).collect(Collectors.toList())
+            "modelCandidates", modelCandidateStats.stream().map(ModelCandidateStats::toMap).toList()
         );
     }
 
@@ -126,7 +126,7 @@ public final class TrainingStatistics {
         return modelCandidateStats
             .stream()
             .map(stats -> stats.validationStats().get(evaluationMetric()).avg())
-            .collect(Collectors.toList())
+            .toList()
             .indexOf(getBestTrialScore());
     }
     public ModelCandidateStats bestCandidate() {

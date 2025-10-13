@@ -30,7 +30,6 @@ import org.neo4j.gds.ml.models.randomforest.RandomForestClassifierTrainerConfigI
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -155,7 +154,7 @@ class TunableTrainerConfigTest {
     void shouldMaterializeCornerCasesWhenConcrete() {
         var userInput = Map.<String, Object>of();
         var config = TunableTrainerConfig.of(userInput, TrainingMethod.RandomForestClassification);
-        var trainerConfigs = config.streamCornerCaseConfigs().collect(Collectors.toList());
+        var trainerConfigs = config.streamCornerCaseConfigs().toList();
         assertThat(trainerConfigs.size()).isEqualTo(1);
         assertThat(trainerConfigs.get(0))
             .usingRecursiveComparison()

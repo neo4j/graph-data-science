@@ -54,7 +54,7 @@ public final class ElementTypeValidator {
             .stream()
             .filter(label -> !availableLabels.contains(label))
             .map(NodeLabel::name)
-            .collect(Collectors.toList());
+            .toList();
 
         if (!invalidLabels.isEmpty()) {
             throw new IllegalArgumentException(formatWithLocale(
@@ -73,7 +73,7 @@ public final class ElementTypeValidator {
             .stream()
             .filter(label -> !availableTypes.contains(label))
             .map(RelationshipType::name)
-            .collect(Collectors.toList());
+            .toList();
 
         if (!invalidLabels.isEmpty()) {
             throw new IllegalArgumentException(formatWithLocale(

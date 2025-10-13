@@ -33,7 +33,6 @@ import org.neo4j.gds.api.properties.relationships.ImmutableRelationshipCursor;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
@@ -61,7 +60,7 @@ class WeightedUniformSamplerTest {
         var input = LongStream.range(1, 100).mapToObj(targetId -> {
             var weight = highWeightNodes.contains(targetId) ? 99D : 1D;
             return ImmutableRelationshipCursor.of(0, targetId, weight);
-        }).collect(Collectors.toList());
+        }).toList();
 
         var tries = 1000;
         for (int i = 0; i < tries; i++) {
@@ -92,7 +91,7 @@ class WeightedUniformSamplerTest {
         var input = LongStream.range(0, 18).mapToObj(targetId -> {
             var weight = 1D;
             return ImmutableRelationshipCursor.of(0, targetId, weight);
-        }).collect(Collectors.toList());
+        }).toList();
 
         var sampler = new WeightedUniformSampler(19L);
         var sample = sampler.sample(input.stream(), 18, numberOfSamples);
@@ -109,7 +108,7 @@ class WeightedUniformSamplerTest {
         var input = LongStream.of(1, 1, 1).mapToObj(targetId -> {
             var weight = 1D;
             return ImmutableRelationshipCursor.of(0, targetId, weight);
-        }).collect(Collectors.toList());
+        }).toList();
 
 
         var sampler = new WeightedUniformSampler(19L);
@@ -121,7 +120,7 @@ class WeightedUniformSamplerTest {
     @Test
     void zeroWeights() {
         var input = LongStream.of(1, 1, 1)
-            .mapToObj(targetId -> ImmutableRelationshipCursor.of(0, targetId, 0D)).collect(Collectors.toList());
+            .mapToObj(targetId -> ImmutableRelationshipCursor.of(0, targetId, 0D)).toList();
 
         var sampler = new WeightedUniformSampler(19L);
         var samples = sampler.sample(input.stream(), 3, 2).toArray();
@@ -135,7 +134,7 @@ class WeightedUniformSamplerTest {
         var input = sourceNodes.stream().map(targetId -> {
             var weight = 1D;
             return ImmutableRelationshipCursor.of(0, targetId, weight);
-        }).collect(Collectors.toList());
+        }).toList();
 
         var actual = new WeightedUniformSampler(42L)
             .sample(input.stream(), 3, 2, sample -> !samplesToExclude.contains(sample));

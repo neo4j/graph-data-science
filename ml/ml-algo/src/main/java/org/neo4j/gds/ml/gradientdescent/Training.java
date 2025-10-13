@@ -194,7 +194,7 @@ public class Training {
                 .weights()
                 .stream()
                 .map(ctx::gradient)
-                .collect(Collectors.toList());
+                .toList();
 
             for (int i = 0; i < summedWeightGradients.size(); i++) {
                 summedWeightGradients.get(i).addInPlace(localWeightGradient.get(i));

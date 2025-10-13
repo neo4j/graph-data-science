@@ -27,7 +27,6 @@ import org.neo4j.gds.beta.generator.RelationshipDistribution;
 import org.neo4j.gds.core.concurrency.Concurrency;
 
 import java.util.Arrays;
-import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -53,7 +52,7 @@ class LazyDegreePartitionIteratorTest {
                 graph::degree
             )
             .stream()
-            .collect(Collectors.toList());
+            .toList();
 
         assertThat(partitions.stream().mapToLong(DegreePartition::relationshipCount).sum()).isEqualTo(graph.relationshipCount());
 

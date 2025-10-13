@@ -321,7 +321,7 @@ class CypherAggregationIT extends BaseProcTest {
             List<long[]> rows = lines.stream().map(i -> {
                 var values = i.split(",");
                 return new long[]{Long.parseLong(values[0]), Long.parseLong(values[1])};
-            }).collect(Collectors.toList());
+            }).toList();
 
             runQuery(
                 "UNWIND $data AS data WITH data RETURN gds.graph.project('g', data[0], data[1], {}, {readConcurrency: 1})",

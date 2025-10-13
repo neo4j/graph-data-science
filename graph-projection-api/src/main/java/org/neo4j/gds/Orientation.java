@@ -22,7 +22,6 @@ package org.neo4j.gds;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
-import java.util.stream.Collectors;
 
 public enum Orientation {
 
@@ -50,7 +49,7 @@ public enum Orientation {
     private static final List<String> VALUES = Arrays
         .stream(Orientation.values())
         .map(Orientation::name)
-        .collect(Collectors.toList());
+        .toList();
 
     public static Orientation parse(Object input) {
         if (input instanceof String) {

@@ -88,7 +88,7 @@ public enum RegressionMetrics implements Metric {
     private static final List<String> VALUES = Arrays
         .stream(RegressionMetrics.values())
         .map(RegressionMetrics::name)
-        .collect(Collectors.toList());
+        .toList();
 
     public static List<RegressionMetrics> parseList(List<?> input) {
         return input.stream().map(RegressionMetrics::parse).collect(Collectors.toList());

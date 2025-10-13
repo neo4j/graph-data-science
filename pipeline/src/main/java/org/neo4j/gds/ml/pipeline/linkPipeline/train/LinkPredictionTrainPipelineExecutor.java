@@ -226,7 +226,7 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
             .stream()
             .flatMap(graphFilter -> graphFilter.relationshipTypes().stream())
             .distinct()
-            .collect(Collectors.toList())
+            .toList()
             .forEach(graphStore::deleteRelationships);
     }
 

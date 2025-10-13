@@ -26,7 +26,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.stream.Collectors;
 
 /**
  * Calculates the average number of relationship property characters by sampling.
@@ -76,14 +75,14 @@ final class RelationshipPropertySampler {
         var graphs = propertyKeys
             .stream()
             .map(property -> graphStore.getGraph(relationshipType, Optional.of(property)))
-            .collect(Collectors.toList());
+            .toList();
 
         var relationshipsToSample = (int) Math.round(graphs.get(0).relationshipCount() * samplingFactor);
 
         var propertyCharactersSamples = graphs
             .stream()
             .map((ignore) -> new ArrayList<Integer>(relationshipsToSample))
-            .collect(Collectors.toList());
+            .toList();
 
         long relationshipsSampled = 0;
         while (relationshipsSampled < relationshipsToSample) {
@@ -116,4 +115,3 @@ final class RelationshipPropertySampler {
         return o.toString().getBytes(StandardCharsets.UTF_8).length;
     }
 }
-

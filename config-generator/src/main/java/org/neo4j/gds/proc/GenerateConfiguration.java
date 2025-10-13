@@ -293,7 +293,7 @@ final class GenerateConfiguration {
             .members()
             .stream()
             .filter(Spec.Member::normalizes)
-            .collect(Collectors.toList());
+            .toList();
 
         if (normalizers.isEmpty()) {
             return Optional.empty();

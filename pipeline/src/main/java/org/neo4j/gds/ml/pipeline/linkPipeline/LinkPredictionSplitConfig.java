@@ -34,7 +34,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.ml.pipeline.NonEmptySetValidation.MIN_SET_SIZE;
@@ -126,7 +125,7 @@ public interface LinkPredictionSplitConfig extends ToMapConvertible {
         var invalidTypes = reservedTypes
             .filter(graphStore::hasRelationshipType)
             .map(RelationshipType::name)
-            .collect(Collectors.toList());
+            .toList();
 
         if (!invalidTypes.isEmpty()) {
             throw new IllegalArgumentException(
