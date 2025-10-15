@@ -3,11 +3,12 @@
   <groupId>com.github.hierynomus.license</groupId>
   <artifactId>com.github.hierynomus.license.gradle.plugin</artifactId>
   <versioning>
-    <latest>0.16.2-37dde1f</latest>
-    <release>0.16.2-37dde1f</release>
+    <latest>0.16.3-63da64d</latest>
+    <release>0.16.3-63da64d</release>
     <versions>
       <version>0.16.2-37dde1f</version>
+      <version>0.16.3-63da64d</version>
     </versions>
-    <lastUpdated>20220128142712</lastUpdated>
+    <lastUpdated>20251015064240</lastUpdated>
   </versioning>
 </metadata>

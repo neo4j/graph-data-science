@@ -1,5 +1,5 @@
 plugins {
-    id 'com.github.hierynomus.license'              version '0.16.2-37dde1f'        apply false
+    id 'com.github.hierynomus.license'              version '0.16.3-63da64d'        apply false
 
     alias(openGds.plugins.forbiddenapis).apply(false)
     alias(openGds.plugins.google.protobuf).apply(false)

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.github.hierynomus.license</groupId>
+  <artifactId>com.github.hierynomus.license.gradle.plugin</artifactId>
+  <version>0.16.3-63da64d</version>
+  <packaging>pom</packaging>
+  <name>License plugin for Gradle</name>
+  <description>Applies a header to files, typically a license</description>
+  <dependencies>
+    <dependency>
+      <groupId>com.hierynomus.gradle.plugins</groupId>
+      <artifactId>license-gradle-plugin</artifactId>
+      <version>0.16.3-63da64d</version>
+    </dependency>
+  </dependencies>
+</project>

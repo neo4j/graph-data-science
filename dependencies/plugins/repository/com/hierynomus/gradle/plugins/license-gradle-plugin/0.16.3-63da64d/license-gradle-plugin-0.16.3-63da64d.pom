@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <!-- This module was also published with a richer model, Gradle metadata,  -->
+  <!-- which should be used instead. Do not delete the following line which  -->
+  <!-- is to indicate to Gradle or any Gradle module metadata file consumer  -->
+  <!-- that they should prefer consuming it instead. -->
+  <!-- do_not_remove: published-with-gradle-metadata -->
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.hierynomus.gradle.plugins</groupId>
+  <artifactId>license-gradle-plugin</artifactId>
+  <version>0.16.3-63da64d</version>
+  <name>license-gradle-plugin</name>
+  <url>https://github.com/hierynomus/license-gradle-plugin</url>
+  <inceptionYear>2011</inceptionYear>
+  <licenses>
+    <license>
+      <name>The Apache Software License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+  <developers>
+    <developer>
+      <id>hierynomus</id>
+      <name>Jeroen van Erp</name>
+      <email>jeroen@javadude.nl</email>
+      <url>http://www.javadude.nl/</url>
+      <roles>
+        <role>Developer</role>
+      </roles>
+    </developer>
+  </developers>
+  <contributors>
+    <contributor>
+      <name>Tim Harsch</name>
+      <email>harschware@yahoo.com</email>
+    </contributor>
+    <contributor>
+      <name>Justin Ryan</name>
+      <email>jryan@netflix.com</email>
+    </contributor>
+    <contributor>
+      <name>Veselin Nikolov</name>
+      <email>nickolov.vesselin@gmail.com</email>
+    </contributor>
+  </contributors>
+  <scm>
+    <url>https://github.com/hierynomus/license-gradle-plugin.git</url>
+  </scm>
+  <dependencies>
+    <dependency>
+      <groupId>org.codehaus.plexus</groupId>
+      <artifactId>plexus-utils</artifactId>
+      <version>4.0.2</version>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.mycila.xmltool</groupId>
+      <artifactId>xmltool</artifactId>
+      <version>3.3</version>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.mycila</groupId>
+      <artifactId>license-maven-plugin</artifactId>
+      <version>3.0</version>
+      <scope>runtime</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.apache.maven</groupId>
+          <artifactId>maven-plugin-api</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.maven</groupId>
+          <artifactId>maven-project</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+  </dependencies>
+</project>

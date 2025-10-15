@@ -1,0 +1,133 @@
+{
+  "formatVersion": "1.1",
+  "component": {
+    "group": "com.hierynomus.gradle.plugins",
+    "module": "license-gradle-plugin",
+    "version": "0.16.3-63da64d",
+    "attributes": {
+      "org.gradle.status": "release"
+    }
+  },
+  "createdBy": {
+    "gradle": {
+      "version": "9.1.0"
+    }
+  },
+  "variants": [
+    {
+      "name": "apiElements",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.jvm.version": 21,
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.usage": "java-api"
+      },
+      "files": [
+        {
+          "name": "license-gradle-plugin-0.16.3-63da64d.jar",
+          "url": "license-gradle-plugin-0.16.3-63da64d.jar",
+          "size": 301590,
+          "sha512": "874f54c6e18277ca683fa3dda3f1319341fadbad8f6fb883ad0789f9571a19f91dbdb3c977a08ffb8dc5c7960ba76ee212c2f0b0a24b3072b93c6bc952a49418",
+          "sha256": "157a3cea8449c2cd5540acf66e3d94b52dc7035d3a58f1098d946145d066fece",
+          "sha1": "aaf6d992a03b9b1d9fa103092743c5cac1d06551",
+          "md5": "e51af946b04eba9ce30f91a58b90813e"
+        }
+      ]
+    },
+    {
+      "name": "runtimeElements",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.jvm.version": 21,
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.usage": "java-runtime"
+      },
+      "dependencies": [
+        {
+          "group": "org.codehaus.plexus",
+          "module": "plexus-utils",
+          "version": {
+            "requires": "4.0.2"
+          }
+        },
+        {
+          "group": "com.mycila.xmltool",
+          "module": "xmltool",
+          "version": {
+            "requires": "3.3"
+          }
+        },
+        {
+          "group": "com.mycila",
+          "module": "license-maven-plugin",
+          "version": {
+            "requires": "3.0"
+          },
+          "excludes": [
+            {
+              "group": "org.apache.maven",
+              "module": "maven-plugin-api"
+            },
+            {
+              "group": "org.apache.maven",
+              "module": "maven-project"
+            }
+          ]
+        }
+      ],
+      "files": [
+        {
+          "name": "license-gradle-plugin-0.16.3-63da64d.jar",
+          "url": "license-gradle-plugin-0.16.3-63da64d.jar",
+          "size": 301590,
+          "sha512": "874f54c6e18277ca683fa3dda3f1319341fadbad8f6fb883ad0789f9571a19f91dbdb3c977a08ffb8dc5c7960ba76ee212c2f0b0a24b3072b93c6bc952a49418",
+          "sha256": "157a3cea8449c2cd5540acf66e3d94b52dc7035d3a58f1098d946145d066fece",
+          "sha1": "aaf6d992a03b9b1d9fa103092743c5cac1d06551",
+          "md5": "e51af946b04eba9ce30f91a58b90813e"
+        }
+      ]
+    },
+    {
+      "name": "javadocElements",
+      "attributes": {
+        "org.gradle.category": "documentation",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.docstype": "javadoc",
+        "org.gradle.usage": "java-runtime"
+      },
+      "files": [
+        {
+          "name": "license-gradle-plugin-0.16.3-63da64d-javadoc.jar",
+          "url": "license-gradle-plugin-0.16.3-63da64d-javadoc.jar",
+          "size": 107759,
+          "sha512": "5932cb767cc76071e998eec7fa4a093577eb1691fd881190ced5438bab51ab12c5904b1529d1266babfdddc70646e374c37a813e161037a87746942508345ce9",
+          "sha256": "bc0cbe7642d4972cd0bf564ef4fbfcf77a76c3b1b0bcbd4be1b4f3078af9c5dc",
+          "sha1": "5999c9776d1060194adf6eb7a53a8ecc08be5520",
+          "md5": "39101543eac3ec37a79129cf20727985"
+        }
+      ]
+    },
+    {
+      "name": "sourcesElements",
+      "attributes": {
+        "org.gradle.category": "documentation",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.docstype": "sources",
+        "org.gradle.usage": "java-runtime"
+      },
+      "files": [
+        {
+          "name": "license-gradle-plugin-0.16.3-63da64d-sources.jar",
+          "url": "license-gradle-plugin-0.16.3-63da64d-sources.jar",
+          "size": 93499,
+          "sha512": "b13b37d4b57df2b01e8e9933acf25df0e6e742aefab39fb3b0cf66393083f1a05f760142566c58028aa9ee9538fdfdb580f13eafae7f86b57472cf3dadce08fb",
+          "sha256": "a08a3f300a9d672a47f3d02b034ed6803085991d763dd2a00252e95ce82f1a8a",
+          "sha1": "5c4823b557468ff24419a346e37d05c68cea1917",
+          "md5": "609fe68654725f83319ca4ad0f53cd27"
+        }
+      ]
+    }
+  ]
+}
