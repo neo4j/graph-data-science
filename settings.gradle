@@ -2,7 +2,7 @@ pluginManagement {
     repositories {
         gradlePluginPortal()
         maven {
-            name = 'GDS local-hosted plugins'
+            name = 'OpenGDS local-hosted plugins'
             url = 'dependencies/plugins/repository'
         }
     }
