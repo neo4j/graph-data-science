@@ -1,9 +1,9 @@
 apply plugin: 'java-library'
-apply plugin: 'nebula.info-broker'
-apply plugin: 'nebula.info-props'
-apply plugin: 'nebula.info-basic'
-apply plugin: 'nebula.info-java'
-apply plugin: 'nebula.info-scm'
+apply plugin: 'com.netflix.nebula.info-broker'
+apply plugin: 'com.netflix.nebula.info-props'
+apply plugin: 'com.netflix.nebula.info-basic'
+apply plugin: 'com.netflix.nebula.info-java'
+apply plugin: 'com.netflix.nebula.info-scm'
 
 description = 'Neo4j Graph Data Science :: Procedures :: Sysinfo'
 
