@@ -32,8 +32,26 @@ image::example-graphs/aura-graph-analytics-serverless.png[]
 The next step is to project the data into a graph within a remote session.
 The following example shows how to run a Cypher projection and xref:aura-graph-analytics/index.adoc#implicit-sessions[create a session] at the same time.
 
+To run the example, you must first set two query parameters called `clientId` and `clientSecret` to your link:https://neo4j.com/docs/aura/api/authentication/[Aura API keys].
+
+[NOTE]
+====
+It is good practice to use link:https://neo4j.com/docs/cypher-manual/current/syntax/parameters/[query parameters] for sensitive data such as credentials.
+This also removes the need to enter the same strings multiple times.
+
+In the Aura console, you can set query parameters within the link:https://neo4j.com/docs/aura/query/operations/#query-parameters[Query tool^].
+For other environments, see the link:https://neo4j.com/docs/cypher-manual/current/syntax/parameters[Cypher manual].
+====
+
 [IMPORTANT]
+====
 Make sure that the credentials you use here are the link:https://neo4j.com/docs/aura/api/authentication/[Aura API keys] (client ID and client secret), *not* your AuraDB credentials (username and password).
+
+Aura API keys examples:
+
+* Client ID: `n1lYYI2Zxxxxxxxxxxxxxxxxv1Cddvbp`
+* Client secret: `MduaDb4CxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxINtP_7Lt`
+====
 
 .Project a graph called 'myGraph' using a remote Cypher projection into a new GDS Session
 [source, cypher, role=noplay setup-query]
@@ -53,7 +71,7 @@ RETURN g.graphName, g.nodeCount, g.relationshipCount
 ----
 <1> The Cypher `parallel` runtime is recommended but not mandatory.
 <2> Add the `gds.aura.api.credentials` function before the actual query.
-You need to set the string values for `clientId` and `clientSecret` as link:https://neo4j.com/docs/cypher-manual/current/syntax/parameters/[query parameters] first.
+You need to set the string values for `clientId` and `clientSecret` as query parameters first.
 <3> Set the `memory` (mandatory) and `ttl` (optional) parameters.
 
 .Results
