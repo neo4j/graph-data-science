@@ -17,98 +17,221 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.pathfinding;
+package org.neo4j.gds.community;
 
 import org.neo4j.gds.GraphParameters;
-import org.neo4j.gds.allshortestpaths.AllShortestPathsParameters;
-import org.neo4j.gds.allshortestpaths.AllShortestPathsStreamResult;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutParameters;
+import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutResult;
+import org.neo4j.gds.beta.pregel.PregelResult;
+import org.neo4j.gds.cliqueCounting.CliqueCountingResult;
+import org.neo4j.gds.cliquecounting.CliqueCountingParameters;
 import org.neo4j.gds.collections.ha.HugeLongArray;
-import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
+import org.neo4j.gds.community.validation.ApproxMaxKCutValidation;
+import org.neo4j.gds.community.validation.SpeakerListenerLPAGraphStoreValidation;
+import org.neo4j.gds.community.validation.TriangleCountGraphStoreValidation;
+import org.neo4j.gds.conductance.ConductanceParameters;
+import org.neo4j.gds.conductance.ConductanceResult;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.loading.validation.CompoundGraphStoreValidationsBuilder;
 import org.neo4j.gds.core.loading.validation.NoAlgorithmValidation;
 import org.neo4j.gds.core.loading.validation.NodePropertyAllExistsGraphStoreValidation;
+import org.neo4j.gds.core.loading.validation.NodePropertyAnyExistsGraphStoreValidation;
 import org.neo4j.gds.core.loading.validation.NodePropertyTypeGraphStoreValidation;
-import org.neo4j.gds.core.loading.validation.SourceNodeGraphStoreValidation;
-import org.neo4j.gds.core.loading.validation.SourceNodeTargetNodeGraphStoreValidation;
-import org.neo4j.gds.core.loading.validation.SourceNodeTargetNodesGraphStoreValidation;
-import org.neo4j.gds.core.loading.validation.SourceNodesGraphStoreValidation;
+import org.neo4j.gds.core.loading.validation.SeedPropertyGraphStoreValidation;
 import org.neo4j.gds.core.loading.validation.UndirectedOnlyGraphStoreValidation;
-import org.neo4j.gds.dag.longestPath.DagLongestPathParameters;
-import org.neo4j.gds.dag.topologicalsort.TopologicalSortParameters;
-import org.neo4j.gds.dag.topologicalsort.TopologicalSortResult;
-import org.neo4j.gds.kspanningtree.KSpanningTreeParameters;
-import org.neo4j.gds.maxflow.FlowResult;
-import org.neo4j.gds.maxflow.MaxFlowParameters;
-import org.neo4j.gds.pathfinding.validation.RandomWalkGraphValidation;
-import org.neo4j.gds.paths.astar.AStarParameters;
-import org.neo4j.gds.paths.bellmanford.BellmanFordParameters;
-import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
-import org.neo4j.gds.paths.delta.DeltaSteppingParameters;
-import org.neo4j.gds.paths.dijkstra.DijkstraSingleSourceParameters;
-import org.neo4j.gds.paths.dijkstra.DijkstraSourceTargetParameters;
-import org.neo4j.gds.paths.dijkstra.PathFindingResult;
-import org.neo4j.gds.paths.yens.YensParameters;
-import org.neo4j.gds.pcst.PCSTParameters;
-import org.neo4j.gds.pricesteiner.PrizeSteinerTreeResult;
+import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
+import org.neo4j.gds.hdbscan.HDBScanParameters;
+import org.neo4j.gds.hdbscan.Labels;
+import org.neo4j.gds.k1coloring.K1ColoringParameters;
+import org.neo4j.gds.k1coloring.K1ColoringResult;
+import org.neo4j.gds.kcore.KCoreDecompositionParameters;
+import org.neo4j.gds.kcore.KCoreDecompositionResult;
+import org.neo4j.gds.kmeans.KmeansParameters;
+import org.neo4j.gds.kmeans.KmeansResult;
+import org.neo4j.gds.labelpropagation.LabelPropagationParameters;
+import org.neo4j.gds.labelpropagation.LabelPropagationResult;
+import org.neo4j.gds.leiden.LeidenParameters;
+import org.neo4j.gds.leiden.LeidenResult;
+import org.neo4j.gds.louvain.LouvainParameters;
+import org.neo4j.gds.louvain.LouvainResult;
+import org.neo4j.gds.modularity.ModularityParameters;
+import org.neo4j.gds.modularity.ModularityResult;
+import org.neo4j.gds.modularityoptimization.ModularityOptimizationParameters;
+import org.neo4j.gds.modularityoptimization.ModularityOptimizationResult;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.results.ResultTransformerBuilder;
-import org.neo4j.gds.spanningtree.SpanningTree;
-import org.neo4j.gds.spanningtree.SpanningTreeParameters;
-import org.neo4j.gds.steiner.SteinerTreeParameters;
-import org.neo4j.gds.steiner.SteinerTreeResult;
-import org.neo4j.gds.traversal.RandomWalkParameters;
-import org.neo4j.gds.traversal.TraversalParameters;
+import org.neo4j.gds.scc.SccParameters;
+import org.neo4j.gds.sllpa.SpeakerListenerLPAConfig;
+import org.neo4j.gds.triangle.LocalClusteringCoefficientParameters;
+import org.neo4j.gds.triangle.LocalClusteringCoefficientResult;
+import org.neo4j.gds.triangle.TriangleCountParameters;
+import org.neo4j.gds.triangle.TriangleCountResult;
+import org.neo4j.gds.triangle.TriangleResult;
+import org.neo4j.gds.wcc.WccParameters;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
 import java.util.stream.Stream;
 
-public class PathFindingComputeBusinessFacade {
+public class CommunityComputeBusinessFacade {
 
     // Global dependencies
     private final GraphStoreCatalogService graphStoreCatalogService;
-    private final PathFindingComputeFacade computeFacade;
-    private final ExecutorService executorService;
+    private final CommunityComputeFacade computeFacade;
 
     // Request scope dependencies -- can we move these as method parameters?! 🤔
     private final User user;
     private final DatabaseId databaseId;
 
-    public PathFindingComputeBusinessFacade(
+    public CommunityComputeBusinessFacade(
         GraphStoreCatalogService graphStoreCatalogService,
-        PathFindingComputeFacade computeFacade,
-        ExecutorService executorService,
+        CommunityComputeFacade computeFacade,
         User user,
         DatabaseId databaseId
     ) {
         this.graphStoreCatalogService = graphStoreCatalogService;
         this.computeFacade = computeFacade;
-        this.executorService = executorService;
         this.user = user;
         this.databaseId = databaseId;
     }
 
-    public <TR> CompletableFuture<TR> allShortestPaths(
+    public <TR> CompletableFuture<TR> approxMaxKCut(
         GraphName graphName,
         GraphParameters graphParameters,
         Optional<String> relationshipProperty,
-        AllShortestPathsParameters parameters,
+        ApproxMaxKCutParameters parameters,
         JobId jobId,
-        ResultTransformerBuilder<TimedAlgorithmResult<Stream<AllShortestPathsStreamResult>>, TR> resultTransformerBuilder
+        boolean logProgress,
+        ResultTransformerBuilder<TimedAlgorithmResult<ApproxMaxKCutResult>, TR> resultTransformerBuilder
     ) {
         // Fetch the Graph the algorithm will operate on
         var graphResources = graphStoreCatalogService.fetchGraphResources(
             graphName,
             graphParameters,
             relationshipProperty,
+            new ApproxMaxKCutValidation(parameters.minCommunitySizes()),
+            Optional.empty(),
+            user,
+            databaseId
+        );
+        var graph = graphResources.graph();
+
+        return computeFacade.approxMaxKCut(
+            graph,
+            parameters,
+            jobId,
+            logProgress
+
+        ).thenApply(resultTransformerBuilder.build(graphResources));
+    }
+
+    public <TR> CompletableFuture<TR> cliqueCounting(
+        GraphName graphName,
+        GraphParameters graphParameters,
+        CliqueCountingParameters parameters,
+        JobId jobId,
+        boolean logProgress,
+        ResultTransformerBuilder<TimedAlgorithmResult<CliqueCountingResult>, TR> resultTransformerBuilder
+    ) {
+        // Fetch the Graph the algorithm will operate on
+        var graphResources = graphStoreCatalogService.fetchGraphResources(
+            graphName,
+            graphParameters,
+            Optional.empty(),
+            new UndirectedOnlyGraphStoreValidation("Clique Counting"),
+            Optional.empty(),
+            user,
+            databaseId
+        );
+        var graph = graphResources.graph();
+
+        return computeFacade.cliqueCounting(
+            graph,
+            parameters,
+            jobId,
+            logProgress
+
+        ).thenApply(resultTransformerBuilder.build(graphResources));
+    }
+
+    public <TR> CompletableFuture<TR> conductance(
+        GraphName graphName,
+        GraphParameters graphParameters,
+        Optional<String> relationshipProperty,
+        ConductanceParameters parameters,
+        JobId jobId,
+        boolean logProgress,
+        ResultTransformerBuilder<TimedAlgorithmResult<ConductanceResult>, TR> resultTransformerBuilder
+    ) {
+        // Fetch the Graph the algorithm will operate on
+        var graphResources = graphStoreCatalogService.fetchGraphResources(
+            graphName,
+            graphParameters,
+            relationshipProperty,
+            new NodePropertyAnyExistsGraphStoreValidation("communityProperty"),
+            Optional.empty(),
+            user,
+            databaseId
+        );
+        var graph = graphResources.graph();
+
+        return computeFacade.conductance(
+            graph,
+            parameters,
+            jobId,
+            logProgress
+
+        ).thenApply(resultTransformerBuilder.build(graphResources));
+    }
+
+    public <TR> CompletableFuture<TR> hdbscan(
+        GraphName graphName,
+        GraphParameters graphParameters,
+        HDBScanParameters parameters,
+        JobId jobId,
+        boolean logProgress,
+        ResultTransformerBuilder<TimedAlgorithmResult<Labels>, TR> resultTransformerBuilder
+    ) {
+        // Fetch the Graph the algorithm will operate on
+        var graphResources = graphStoreCatalogService.fetchGraphResources(
+            graphName,
+            graphParameters,
+            Optional.empty(),
+            new NodePropertyAnyExistsGraphStoreValidation("nodeProperty"),
+            Optional.empty(),
+            user,
+            databaseId
+        );
+        var graph = graphResources.graph();
+
+        return computeFacade.hdbscan(
+            graph,
+            parameters,
+            jobId,
+            logProgress
+
+        ).thenApply(resultTransformerBuilder.build(graphResources));
+    }
+
+    public <TR> CompletableFuture<TR> k1Coloring(
+        GraphName graphName,
+        GraphParameters graphParameters,
+        K1ColoringParameters parameters,
+        JobId jobId,
+        boolean logProgress,
+        ResultTransformerBuilder<TimedAlgorithmResult<K1ColoringResult>, TR> resultTransformerBuilder
+    ) {
+        // Fetch the Graph the algorithm will operate on
+        var graphResources = graphStoreCatalogService.fetchGraphResources(
+            graphName,
+            graphParameters,
+            Optional.empty(),
             new NoAlgorithmValidation(),
             Optional.empty(),
             user,
@@ -116,515 +239,404 @@ public class PathFindingComputeBusinessFacade {
         );
         var graph = graphResources.graph();
 
-        return computeFacade.allShortestPaths(
+        return computeFacade.k1Coloring(
+            graph,
+            parameters,
+            jobId,
+            logProgress
+
+        ).thenApply(resultTransformerBuilder.build(graphResources));
+    }
+
+    public <TR> CompletableFuture<TR> kCoreDecomposition(
+        GraphName graphName,
+        GraphParameters graphParameters,
+        KCoreDecompositionParameters parameters,
+        JobId jobId,
+        boolean logProgress,
+        ResultTransformerBuilder<TimedAlgorithmResult<KCoreDecompositionResult>, TR> resultTransformerBuilder
+    ) {
+        // Fetch the Graph the algorithm will operate on
+        var graphResources = graphStoreCatalogService.fetchGraphResources(
+            graphName,
+            graphParameters,
+            Optional.empty(),
+            new UndirectedOnlyGraphStoreValidation("K-Core-Decomposition"),
+            Optional.empty(),
+            user,
+            databaseId
+        );
+        var graph = graphResources.graph();
+
+        return computeFacade.kCore(
+            graph,
+            parameters,
+            jobId,
+            logProgress
+
+        ).thenApply(resultTransformerBuilder.build(graphResources));
+    }
+
+    public <TR> CompletableFuture<TR> kMeans(
+        GraphName graphName,
+        GraphParameters graphParameters,
+        KmeansParameters parameters,
+        JobId jobId,
+        boolean logProgress,
+        ResultTransformerBuilder<TimedAlgorithmResult<KmeansResult>, TR> resultTransformerBuilder
+    ) {
+        // Fetch the Graph the algorithm will operate on
+        var graphResources = graphStoreCatalogService.fetchGraphResources(
+            graphName,
+            graphParameters,
+            Optional.empty(),
+            new NodePropertyTypeGraphStoreValidation(
+                "nodeProperty",
+                List.of(ValueType.DOUBLE_ARRAY, ValueType.FLOAT_ARRAY, ValueType.DOUBLE)
+            ),
+            Optional.empty(),
+            user,
+            databaseId
+        );
+        var graph = graphResources.graph();
+
+        return computeFacade.kMeans(
+            graph,
+            parameters,
+            jobId,
+            logProgress
+
+        ).thenApply(resultTransformerBuilder.build(graphResources));
+    }
+
+    public <TR> CompletableFuture<TR> labelPropagation(
+        GraphName graphName,
+        GraphParameters graphParameters,
+        Optional<String> relationshipProperty,
+        LabelPropagationParameters parameters,
+        JobId jobId,
+        boolean logProgress,
+        ResultTransformerBuilder<TimedAlgorithmResult<LabelPropagationResult>, TR> resultTransformerBuilder
+    ) {
+        // Fetch the Graph the algorithm will operate on
+        var graphResources = graphStoreCatalogService.fetchGraphResources(
+            graphName,
+            graphParameters,
+            relationshipProperty,
+            new CompoundGraphStoreValidationsBuilder()
+                .withGraphStoreValidation(SeedPropertyGraphStoreValidation.create(parameters.seedProperty()))
+                .withGraphStoreValidation(new NodePropertyAllExistsGraphStoreValidation(parameters.nodeWeightProperty()))
+                .build(),
+            Optional.empty(),
+            user,
+            databaseId
+        );
+        var graph = graphResources.graph();
+
+        return computeFacade.labelPropagation(
+            graph,
+            parameters,
+            jobId,
+            logProgress
+
+        ).thenApply(resultTransformerBuilder.build(graphResources));
+    }
+
+    public <TR> CompletableFuture<TR> lcc(
+        GraphName graphName,
+        GraphParameters graphParameters,
+        LocalClusteringCoefficientParameters parameters,
+        JobId jobId,
+        boolean logProgress,
+        ResultTransformerBuilder<TimedAlgorithmResult<LocalClusteringCoefficientResult>, TR> resultTransformerBuilder
+    ) {
+        // Fetch the Graph the algorithm will operate on
+        var graphResources = graphStoreCatalogService.fetchGraphResources(
+            graphName,
+            graphParameters,
+            Optional.empty(),
+            new CompoundGraphStoreValidationsBuilder()
+                .withGraphStoreValidation(new UndirectedOnlyGraphStoreValidation("LocalClusteringCoefficient"))
+                .withGraphStoreValidation(SeedPropertyGraphStoreValidation.create(parameters.seedProperty()))
+                .build(),
+            Optional.empty(),
+            user,
+            databaseId
+        );
+        var graph = graphResources.graph();
+
+        return computeFacade.lcc(
+            graph,
+            parameters,
+            jobId,
+            logProgress
+
+        ).thenApply(resultTransformerBuilder.build(graphResources));
+    }
+
+    public <TR> CompletableFuture<TR> leiden(
+        GraphName graphName,
+        GraphParameters graphParameters,
+        Optional<String> relationshipProperty,
+        LeidenParameters parameters,
+        JobId jobId,
+        boolean logProgress,
+        ResultTransformerBuilder<TimedAlgorithmResult<LeidenResult>, TR> resultTransformerBuilder
+    ) {
+        // Fetch the Graph the algorithm will operate on
+        var graphResources = graphStoreCatalogService.fetchGraphResources(
+            graphName,
+            graphParameters,
+            relationshipProperty,
+            new CompoundGraphStoreValidationsBuilder()
+                .withGraphStoreValidation(new UndirectedOnlyGraphStoreValidation("Leiden"))
+                .withGraphStoreValidation(SeedPropertyGraphStoreValidation.create(parameters.seedProperty()))
+                .build(),
+            Optional.empty(),
+            user,
+            databaseId
+        );
+        var graph = graphResources.graph();
+
+        return computeFacade.leiden(
+            graph,
+            parameters,
+            jobId,
+            logProgress
+
+        ).thenApply(resultTransformerBuilder.build(graphResources));
+    }
+
+    public <TR> CompletableFuture<TR> louvain(
+        GraphName graphName,
+        GraphParameters graphParameters,
+        Optional<String> relationshipProperty,
+        LouvainParameters parameters,
+        JobId jobId,
+        boolean logProgress,
+        ResultTransformerBuilder<TimedAlgorithmResult<LouvainResult>, TR> resultTransformerBuilder
+    ) {
+        // Fetch the Graph the algorithm will operate on
+        var graphResources = graphStoreCatalogService.fetchGraphResources(
+            graphName,
+            graphParameters,
+            relationshipProperty,
+            SeedPropertyGraphStoreValidation.create(parameters.seedProperty()),
+            Optional.empty(),
+            user,
+            databaseId
+        );
+        var graph = graphResources.graph();
+
+        return computeFacade.louvain(
+            graph,
+            parameters,
+            jobId,
+            logProgress
+
+        ).thenApply(resultTransformerBuilder.build(graphResources));
+    }
+
+    public <TR> CompletableFuture<TR> modularity(
+        GraphName graphName,
+        GraphParameters graphParameters,
+        Optional<String> relationshipProperty,
+        ModularityParameters parameters,
+        JobId jobId,
+        ResultTransformerBuilder<TimedAlgorithmResult<ModularityResult>, TR> resultTransformerBuilder
+    ) {
+        // Fetch the Graph the algorithm will operate on
+        var graphResources = graphStoreCatalogService.fetchGraphResources(
+            graphName,
+            graphParameters,
+            relationshipProperty,
+            new NodePropertyAnyExistsGraphStoreValidation("communityProperty"),
+            Optional.empty(),
+            user,
+            databaseId
+        );
+        var graph = graphResources.graph();
+
+        return computeFacade.modularity(
+            graph,
+            parameters,
+            jobId
+
+        ).thenApply(resultTransformerBuilder.build(graphResources));
+    }
+
+    public <TR> CompletableFuture<TR> modularityOptimization(
+        GraphName graphName,
+        GraphParameters graphParameters,
+        Optional<String> relationshipProperty,
+        ModularityOptimizationParameters parameters,
+        JobId jobId,
+        boolean logProgress,
+        ResultTransformerBuilder<TimedAlgorithmResult<ModularityOptimizationResult>, TR> resultTransformerBuilder
+    ) {
+        // Fetch the Graph the algorithm will operate on
+        var graphResources = graphStoreCatalogService.fetchGraphResources(
+            graphName,
+            graphParameters,
+            relationshipProperty,
+            SeedPropertyGraphStoreValidation.create(parameters.seedProperty().orElse(null)),
+            Optional.empty(),
+            user,
+            databaseId
+        );
+        var graph = graphResources.graph();
+
+        return computeFacade.modularityOptimization(
+            graph,
+            parameters,
+            jobId,
+            logProgress
+
+        ).thenApply(resultTransformerBuilder.build(graphResources));
+    }
+
+    public <TR> CompletableFuture<TR> scc(
+        GraphName graphName,
+        GraphParameters graphParameters,
+        SccParameters parameters,
+        JobId jobId,
+        boolean logProgress,
+        ResultTransformerBuilder<TimedAlgorithmResult<HugeLongArray>, TR> resultTransformerBuilder
+    ) {
+        // Fetch the Graph the algorithm will operate on
+        var graphResources = graphStoreCatalogService.fetchGraphResources(
+            graphName,
+            graphParameters,
+            Optional.empty(),
+            new NoAlgorithmValidation(),
+            Optional.empty(),
+            user,
+            databaseId
+        );
+        var graph = graphResources.graph();
+
+        return computeFacade.scc(
+            graph,
+            parameters,
+            jobId,
+            logProgress
+
+        ).thenApply(resultTransformerBuilder.build(graphResources));
+    }
+
+    public <TR> CompletableFuture<TR> sllpa(
+        GraphName graphName,
+        GraphParameters graphParameters,
+        SpeakerListenerLPAConfig config,
+        JobId jobId,
+        boolean logProgress,
+        ResultTransformerBuilder<TimedAlgorithmResult<PregelResult>, TR> resultTransformerBuilder
+    ) {
+        // Fetch the Graph the algorithm will operate on
+        var graphResources = graphStoreCatalogService.fetchGraphResources(
+            graphName,
+            graphParameters,
+            Optional.empty(),
+            new SpeakerListenerLPAGraphStoreValidation(config.writeProperty()),
+            Optional.empty(),
+            user,
+            databaseId
+        );
+        var graph = graphResources.graph();
+
+        return computeFacade.sllpa(
+            graph,
+            config,
+            jobId,
+            logProgress
+        ).thenApply(resultTransformerBuilder.build(graphResources));
+    }
+
+    public <TR> CompletableFuture<TR> triangleCount(
+        GraphName graphName,
+        GraphParameters graphParameters,
+        TriangleCountParameters parameters,
+        JobId jobId,
+        boolean logProgress,
+        ResultTransformerBuilder<TimedAlgorithmResult<TriangleCountResult>, TR> resultTransformerBuilder
+    ) {
+        // Fetch the Graph the algorithm will operate on
+        var graphResources = graphStoreCatalogService.fetchGraphResources(
+            graphName,
+            graphParameters,
+            Optional.empty(),
+            TriangleCountGraphStoreValidation.create(parameters.labelFilter()),
+            Optional.empty(),
+            user,
+            databaseId
+        );
+        var graph = graphResources.graph();
+
+        return computeFacade.triangleCount(
+            graph,
+            parameters,
+            jobId,
+            logProgress
+
+        ).thenApply(resultTransformerBuilder.build(graphResources));
+    }
+
+    public <TR> CompletableFuture<TR> triangles(
+        GraphName graphName,
+        GraphParameters graphParameters,
+        TriangleCountParameters parameters,
+        JobId jobId,
+        boolean logProgress,
+        ResultTransformerBuilder<TimedAlgorithmResult<Stream<TriangleResult>>, TR> resultTransformerBuilder
+    ) {
+        // Fetch the Graph the algorithm will operate on
+        var graphResources = graphStoreCatalogService.fetchGraphResources(
+            graphName,
+            graphParameters,
+            Optional.empty(),
+            TriangleCountGraphStoreValidation.create(parameters.labelFilter()),
+            Optional.empty(),
+            user,
+            databaseId
+        );
+        var graph = graphResources.graph();
+
+        return computeFacade.triangles(
             graph,
             parameters,
             jobId
         ).thenApply(resultTransformerBuilder.build(graphResources));
     }
 
-    public <TR> CompletableFuture<TR> bellmanFord(
+    public <TR> CompletableFuture<TR> wcc(
         GraphName graphName,
         GraphParameters graphParameters,
         Optional<String> relationshipProperty,
-        BellmanFordParameters parameters,
+        WccParameters parameters,
         JobId jobId,
         boolean logProgress,
-        ResultTransformerBuilder<TimedAlgorithmResult<BellmanFordResult>, TR> resultTransformerBuilder
+        ResultTransformerBuilder<TimedAlgorithmResult<DisjointSetStruct>, TR> resultTransformerBuilder
     ) {
         // Fetch the Graph the algorithm will operate on
         var graphResources = graphStoreCatalogService.fetchGraphResources(
             graphName,
             graphParameters,
             relationshipProperty,
-            new NoAlgorithmValidation(),
+            SeedPropertyGraphStoreValidation.create(parameters.seedProperty().orElse(null)),
             Optional.empty(),
             user,
             databaseId
         );
         var graph = graphResources.graph();
 
-        return computeFacade.bellmanFord(
+        return computeFacade.wcc(
             graph,
             parameters,
             jobId,
             logProgress
+
         ).thenApply(resultTransformerBuilder.build(graphResources));
     }
 
-    public <TR> CompletableFuture<TR> breadthFirstSearch(
-        GraphName graphName,
-        GraphParameters graphParameters,
-        TraversalParameters parameters,
-        JobId jobId,
-        boolean logProgress,
-        ResultTransformerBuilder<TimedAlgorithmResult<HugeLongArray>, TR> resultTransformerBuilder
-    ) {
-        // Fetch the Graph the algorithm will operate on
-        var graphResources = graphStoreCatalogService.fetchGraphResources(
-            graphName,
-            graphParameters,
-            Optional.empty(),
-            new SourceNodeTargetNodesGraphStoreValidation(
-                parameters.sourceNode(),
-                parameters.targetNodes()
-            ),
-            Optional.empty(),
-            user,
-            databaseId
-        );
-        var graph = graphResources.graph();
 
-        return computeFacade.breadthFirstSearch(
-            graph,
-            parameters,
-            jobId,
-            logProgress
-        ).thenApply(resultTransformerBuilder.build(graphResources));
-    }
-
-    public <TR> CompletableFuture<TR> deltaStepping(
-        GraphName graphName,
-        GraphParameters graphParameters,
-        Optional<String> relationshipProperty,
-        DeltaSteppingParameters parameters,
-        JobId jobId,
-        boolean logProgress,
-        ResultTransformerBuilder<TimedAlgorithmResult<PathFindingResult>, TR> resultTransformerBuilder
-    ) {
-        // Fetch the Graph the algorithm will operate on
-        var graphResources = graphStoreCatalogService.fetchGraphResources(
-            graphName,
-            graphParameters,
-            relationshipProperty,
-            new SourceNodeGraphStoreValidation(parameters.sourceNode()),
-            Optional.empty(),
-            user,
-            databaseId
-        );
-        var graph = graphResources.graph();
-
-        return computeFacade.deltaStepping(
-            graph,
-            parameters,
-            jobId,
-            logProgress
-        ).thenApply(resultTransformerBuilder.build(graphResources));
-    }
-
-    public <TR> CompletableFuture<TR> depthFirstSearch(
-        GraphName graphName,
-        GraphParameters graphParameters,
-        TraversalParameters parameters,
-        JobId jobId,
-        boolean logProgress,
-        ResultTransformerBuilder<TimedAlgorithmResult<HugeLongArray>, TR> resultTransformerBuilder
-    ) {
-        // Fetch the Graph the algorithm will operate on
-        var graphResources = graphStoreCatalogService.fetchGraphResources(
-            graphName,
-            graphParameters,
-            Optional.empty(),
-            new SourceNodeTargetNodesGraphStoreValidation(
-                parameters.sourceNode(),
-                parameters.targetNodes()
-            ),
-            Optional.empty(),
-            user,
-            databaseId
-        );
-        var graph = graphResources.graph();
-
-        return computeFacade.depthFirstSearch(
-            graph,
-            parameters,
-            jobId,
-            logProgress
-        ).thenApply(resultTransformerBuilder.build(graphResources));
-    }
-
-    public <TR> CompletableFuture<TR> kSpanningTree(
-        GraphName graphName,
-        GraphParameters graphParameters,
-        Optional<String> relationshipProperty,
-        KSpanningTreeParameters parameters,
-        JobId jobId,
-        boolean logProgress,
-        ResultTransformerBuilder<TimedAlgorithmResult<SpanningTree>, TR> resultTransformerBuilder
-    ) {
-        // Fetch the Graph the algorithm will operate on
-        var graphResources = graphStoreCatalogService.fetchGraphResources(
-            graphName,
-            graphParameters,
-            relationshipProperty,
-            new CompoundGraphStoreValidationsBuilder()
-                .withGraphStoreValidation(new SourceNodeGraphStoreValidation(parameters.sourceNode()))
-                .withGraphStoreValidation(new UndirectedOnlyGraphStoreValidation("K-Spanning Tree"))
-                .build(),
-            Optional.empty(),
-            user,
-            databaseId
-        );
-        var graph = graphResources.graph();
-
-        return computeFacade.kSpanningTree(
-            graph,
-            parameters,
-            jobId,
-            logProgress
-        ).thenApply(resultTransformerBuilder.build(graphResources));
-    }
-
-    public <TR> CompletableFuture<TR> longestPath(
-        GraphName graphName,
-        GraphParameters graphParameters,
-        DagLongestPathParameters parameters,
-        JobId jobId,
-        boolean logProgress,
-        ResultTransformerBuilder<TimedAlgorithmResult<PathFindingResult>, TR> resultTransformerBuilder
-    ) {
-        // Fetch the Graph the algorithm will operate on
-        var graphResources = graphStoreCatalogService.fetchGraphResources(
-            graphName,
-            graphParameters,
-            Optional.empty(),
-            new NoAlgorithmValidation(),
-            Optional.empty(),
-            user,
-            databaseId
-        );
-        var graph = graphResources.graph();
-
-        return computeFacade.longestPath(
-            graph,
-            parameters,
-            jobId,
-            logProgress
-        ).thenApply(resultTransformerBuilder.build(graphResources));
-    }
-
-    public <TR> CompletableFuture<TR> maxFlow(
-        GraphName graphName,
-        GraphParameters graphParameters,
-        Optional<String> relationshipProperty,
-        MaxFlowParameters parameters,
-        JobId jobId,
-        boolean logProgress,
-        ResultTransformerBuilder<TimedAlgorithmResult<FlowResult>, TR> resultTransformerBuilder
-    ) {
-        var graphResources = graphStoreCatalogService.fetchGraphResources(
-            graphName,
-            graphParameters,
-            relationshipProperty,
-            new NoAlgorithmValidation(),
-            Optional.empty(),
-            user,
-            databaseId
-        );
-        var graph = graphResources.graph();
-
-        return computeFacade.maxFlow(
-            graph,
-            parameters,
-            jobId,
-            logProgress
-        ).thenApply(resultTransformerBuilder.build(graphResources));
-    }
-
-    public <TR> CompletableFuture<TR> randomWalk(
-        GraphName graphName,
-        GraphParameters graphParameters,
-        Optional<String> relationshipProperty,
-        RandomWalkParameters parameters,
-        JobId jobId,
-        boolean logProgress,
-        ResultTransformerBuilder<TimedAlgorithmResult<Stream<long[]>>, TR> resultTransformerBuilder
-    ) {
-        // Fetch the Graph the algorithm will operate on
-        var graphResources = graphStoreCatalogService.fetchGraphResources(
-            graphName,
-            graphParameters,
-            relationshipProperty,
-            new SourceNodesGraphStoreValidation(parameters.sourceNodes()),
-            Optional.of(new RandomWalkGraphValidation(parameters.concurrency(), executorService)),
-            user,
-            databaseId
-        );
-        var graph = graphResources.graph();
-
-        return computeFacade.randomWalk(
-            graph,
-            parameters,
-            jobId,
-            logProgress
-        ).thenApply(resultTransformerBuilder.build(graphResources));
-    }
-
-    public <TR> CompletableFuture<TR> randomWalkCountingNodeVisits(
-        GraphName graphName,
-        GraphParameters graphParameters,
-        Optional<String> relationshipProperty,
-        RandomWalkParameters parameters,
-        JobId jobId,
-        boolean logProgress,
-        ResultTransformerBuilder<TimedAlgorithmResult<HugeAtomicLongArray>, TR> resultTransformerBuilder
-    ) {
-        // Fetch the Graph the algorithm will operate on
-        var graphResources = graphStoreCatalogService.fetchGraphResources(
-            graphName,
-            graphParameters,
-            relationshipProperty,
-            new SourceNodesGraphStoreValidation(parameters.sourceNodes()),
-            Optional.of(new RandomWalkGraphValidation(parameters.concurrency(), executorService)),
-            user,
-            databaseId
-        );
-        var graph = graphResources.graph();
-
-        return computeFacade.randomWalkCountingNodeVisits(
-            graph,
-            parameters,
-            jobId,
-            logProgress
-        ).thenApply(resultTransformerBuilder.build(graphResources));
-    }
-
-    public <TR> CompletableFuture<TR> pcst(
-        GraphName graphName,
-        GraphParameters graphParameters,
-        Optional<String> relationshipProperty,
-        PCSTParameters parameters,
-        JobId jobId,
-        boolean logProgress,
-        ResultTransformerBuilder<TimedAlgorithmResult<PrizeSteinerTreeResult>, TR> resultTransformerBuilder
-    ) {
-        // Fetch the Graph the algorithm will operate on
-        var graphResources = graphStoreCatalogService.fetchGraphResources(
-            graphName,
-            graphParameters,
-            Optional.empty(),
-             new CompoundGraphStoreValidationsBuilder()
-                 .withGraphStoreValidation(new UndirectedOnlyGraphStoreValidation("Prize-collecting Steiner Tree"))
-                 .withGraphStoreValidation(new NodePropertyAllExistsGraphStoreValidation(parameters.prizeProperty()))
-                 .withGraphStoreValidation(new NodePropertyTypeGraphStoreValidation(parameters.prizeProperty(), List.of(ValueType.DOUBLE)))
-                 .build(),
-            Optional.empty(),
-            user,
-            databaseId
-        );
-
-        var graph = graphResources.graph();
-
-        return computeFacade.pcst(
-            graph,
-            parameters,
-            jobId,
-            logProgress
-        ).thenApply(resultTransformerBuilder.build(graphResources));
-    }
-
-    public <TR> CompletableFuture<TR> singlePairShortestPathAStar(
-        GraphName graphName,
-        GraphParameters graphParameters,
-        Optional<String> relationshipProperty,
-        AStarParameters parameters,
-        JobId jobId,
-        boolean logProgress,
-        ResultTransformerBuilder<TimedAlgorithmResult<PathFindingResult>, TR> resultTransformerBuilder
-    ) {
-        // Fetch the Graph the algorithm will operate on
-        var graphResources = graphStoreCatalogService.fetchGraphResources(
-            graphName,
-            graphParameters,
-            relationshipProperty,
-            new SourceNodeTargetNodeGraphStoreValidation(parameters.sourceNode(), parameters.targetNode()),
-            Optional.of(new RandomWalkGraphValidation(parameters.concurrency(), executorService)),
-            user,
-            databaseId
-        );
-        var graph = graphResources.graph();
-
-        return computeFacade.singlePairShortestPathAStar(
-            graph,
-            parameters,
-            jobId,
-            logProgress
-        ).thenApply(resultTransformerBuilder.build(graphResources));
-    }
-
-    public <TR> CompletableFuture<TR> singlePairShortestPathDijkstra(
-        GraphName graphName,
-        GraphParameters graphParameters,
-        Optional<String> relationshipProperty,
-        DijkstraSourceTargetParameters parameters,
-        JobId jobId,
-        boolean logProgress,
-        ResultTransformerBuilder<TimedAlgorithmResult<PathFindingResult>, TR> resultTransformerBuilder
-    ) {
-        // Fetch the Graph the algorithm will operate on
-        var graphResources = graphStoreCatalogService.fetchGraphResources(
-            graphName,
-            graphParameters,
-            relationshipProperty,
-            new SourceNodeTargetNodesGraphStoreValidation(parameters.sourceNode(), parameters.targetsList()),
-            Optional.of(new RandomWalkGraphValidation(parameters.concurrency(), executorService)),
-            user,
-            databaseId
-        );
-        var graph = graphResources.graph();
-
-        return computeFacade.singlePairShortestPathDijkstra(
-            graph,
-            parameters,
-            jobId,
-            logProgress
-        ).thenApply(resultTransformerBuilder.build(graphResources));
-    }
-
-    public <TR> CompletableFuture<TR> singlePairShortestPathYens(
-        GraphName graphName,
-        GraphParameters graphParameters,
-        Optional<String> relationshipProperty,
-        YensParameters parameters,
-        JobId jobId,
-        boolean logProgress,
-        ResultTransformerBuilder<TimedAlgorithmResult<PathFindingResult>, TR> resultTransformerBuilder
-    ) {
-        // Fetch the Graph the algorithm will operate on
-        var graphResources = graphStoreCatalogService.fetchGraphResources(
-            graphName,
-            graphParameters,
-            relationshipProperty,
-            new SourceNodeTargetNodeGraphStoreValidation(parameters.sourceNode(), parameters.targetNode()),
-            Optional.empty(),
-            user,
-            databaseId
-        );
-        var graph = graphResources.graph();
-
-        return computeFacade.singlePairShortestPathYens(
-            graph,
-            parameters,
-            jobId,
-            logProgress
-        ).thenApply(resultTransformerBuilder.build(graphResources));
-    }
-
-    public <TR> CompletableFuture<TR> singleSourceShortestPathDijkstra(
-        GraphName graphName,
-        GraphParameters graphParameters,
-        Optional<String> relationshipProperty,
-        DijkstraSingleSourceParameters parameters,
-        JobId jobId,
-        boolean logProgress,
-        ResultTransformerBuilder<TimedAlgorithmResult<PathFindingResult>, TR> resultTransformerBuilder
-    ) {
-        // Fetch the Graph the algorithm will operate on
-        var graphResources = graphStoreCatalogService.fetchGraphResources(
-            graphName,
-            graphParameters,
-            relationshipProperty,
-            new SourceNodeGraphStoreValidation(parameters.sourceNode()),
-            Optional.empty(),
-            user,
-            databaseId
-        );
-        var graph = graphResources.graph();
-
-        return computeFacade.singleSourceShortestPathDijkstra(
-            graph,
-            parameters,
-            jobId,
-            logProgress
-        ).thenApply(resultTransformerBuilder.build(graphResources));
-    }
-
-    public <TR> CompletableFuture<TR> spanningTree(
-        GraphName graphName,
-        GraphParameters graphParameters,
-        Optional<String> relationshipProperty,
-        SpanningTreeParameters parameters,
-        JobId jobId,
-        boolean logProgress,
-        ResultTransformerBuilder<TimedAlgorithmResult<SpanningTree>, TR> resultTransformerBuilder
-    ) {
-        // Fetch the Graph the algorithm will operate on
-        var graphResources = graphStoreCatalogService.fetchGraphResources(
-            graphName,
-            graphParameters,
-            relationshipProperty,
-            new CompoundGraphStoreValidationsBuilder()
-                .withGraphStoreValidation(new SourceNodeGraphStoreValidation(parameters.sourceNode()))
-                .withGraphStoreValidation(new UndirectedOnlyGraphStoreValidation("Spanning Tree"))
-                .build(),
-            Optional.empty(),
-            user,
-            databaseId
-        );
-        var graph = graphResources.graph();
-
-        return computeFacade.spanningTree(
-            graph,
-            parameters,
-            jobId,
-            logProgress
-        ).thenApply(resultTransformerBuilder.build(graphResources));
-    }
-
-    public <TR> CompletableFuture<TR> steinerTree(
-        GraphName graphName,
-        GraphParameters graphParameters,
-        Optional<String> relationshipProperty,
-        SteinerTreeParameters parameters,
-        JobId jobId,
-        boolean logProgress,
-        ResultTransformerBuilder<TimedAlgorithmResult<SteinerTreeResult>, TR> resultTransformerBuilder
-    ) {
-        // Fetch the Graph the algorithm will operate on
-        var graphResources = graphStoreCatalogService.fetchGraphResources(
-            graphName,
-            graphParameters,
-            relationshipProperty,
-            new SourceNodeTargetNodesGraphStoreValidation(parameters.sourceNode(), parameters.targetNodes()),
-            Optional.empty(),
-            user,
-            databaseId
-        );
-        var graph = graphResources.graph();
-
-        return computeFacade.steinerTree(
-            graph,
-            parameters,
-            jobId,
-            logProgress
-        ).thenApply(resultTransformerBuilder.build(graphResources));
-    }
-
-    public <TR> CompletableFuture<TR> topologicalSort(
-        GraphName graphName,
-        GraphParameters graphParameters,
-        TopologicalSortParameters parameters,
-        JobId jobId,
-        boolean logProgress,
-        ResultTransformerBuilder<TimedAlgorithmResult<TopologicalSortResult>, TR> resultTransformerBuilder
-    ) {
-        // Fetch the Graph the algorithm will operate on
-        var graphResources = graphStoreCatalogService.fetchGraphResources(
-            graphName,
-            graphParameters,
-            Optional.empty(),
-            new NoAlgorithmValidation(),
-            Optional.empty(),
-            user,
-            databaseId
-        );
-        var graph = graphResources.graph();
-
-        return computeFacade.topologicalSort(
-            graph,
-            parameters,
-            jobId,
-            logProgress
-        ).thenApply(resultTransformerBuilder.build(graphResources));
-    }
 }

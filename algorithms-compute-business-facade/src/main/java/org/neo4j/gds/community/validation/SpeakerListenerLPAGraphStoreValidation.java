@@ -17,23 +17,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.pathfinding.validation;
+package org.neo4j.gds.community.validation;
 
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.loading.validation.GraphStoreValidation;
-import org.neo4j.gds.core.loading.validation.SourceNodeGraphStoreValidation;
 
 import java.util.Collection;
-import java.util.Set;
 
-public class KSpanningTreeGraphStoreValidation extends GraphStoreValidation {
+public class SpeakerListenerLPAGraphStoreValidation extends GraphStoreValidation {
 
-    private final SourceNodeGraphStoreValidation sourceNodeValidation;
+    private final String writeProperty;
 
-    public KSpanningTreeGraphStoreValidation(long sourceNode) {
-        this.sourceNodeValidation = new SourceNodeGraphStoreValidation(sourceNode);
+    public SpeakerListenerLPAGraphStoreValidation(String writeProperty) {
+        this.writeProperty = writeProperty;
     }
 
     @Override
@@ -42,17 +40,18 @@ public class KSpanningTreeGraphStoreValidation extends GraphStoreValidation {
         Collection<NodeLabel> selectedLabels,
         Collection<RelationshipType> selectedRelationshipTypes
     ) {
-        validateUndirectedGraph(graphStore, selectedRelationshipTypes);
-        sourceNodeValidation.validateAlgorithmRequirements(graphStore, selectedLabels, selectedRelationshipTypes);
+        validateCanWrite(graphStore);
     }
 
-    private void validateUndirectedGraph(
-        GraphStore graphStore,
-        Collection<RelationshipType> selectedRelationshipTypes
-    ) {
-        if (!graphStore.schema().filterRelationshipTypes(Set.copyOf(selectedRelationshipTypes)).isUndirected()) {
-            throw new IllegalArgumentException(
-                "The K-Spanning Tree algorithm works only with undirected graphs. Please orient the edges properly");
+    private void validateCanWrite(GraphStore graphStore) {
+        // See PregelProcedureConfig for exaplanation of this
+        if (writeProperty.isBlank()) {
+            return;
+        }
+
+        if (!graphStore.capabilities().canWriteToLocalDatabase() && !graphStore.capabilities()
+            .canWriteToRemoteDatabase()) { //skip result store  ¯\\_(ツ)_/¯
+            throw new IllegalArgumentException("The provided graph does not support `write` execution mode.");
         }
     }
 }

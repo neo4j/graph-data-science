@@ -17,14 +17,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.pathfinding.validation;
+package org.neo4j.gds.core.loading.validation;
 
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.gds.core.loading.validation.GraphStoreValidation;
-import org.neo4j.gds.utils.StringFormatting;
 
 import java.util.Collection;
 import java.util.Set;
@@ -32,46 +29,30 @@ import java.util.stream.Collectors;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public class PCSTGraphStoreValidation extends GraphStoreValidation {
+public final class UndirectedOnlyGraphStoreValidation extends GraphStoreValidation {
 
-    private final String prizeProperty;
+    private final String algorithm;
 
-    public PCSTGraphStoreValidation(String prizeProperty) {
-        this.prizeProperty = prizeProperty;
-    }
+    public UndirectedOnlyGraphStoreValidation(String algorithm) {this.algorithm = algorithm;}
 
     @Override
-    protected void validateAlgorithmRequirements(
+    public void validateAlgorithmRequirements(
         GraphStore graphStore,
         Collection<NodeLabel> selectedLabels,
         Collection<RelationshipType> selectedRelationshipTypes
     ) {
+        validateOnlyUndirected(graphStore, selectedRelationshipTypes);
+    }
+
+    void validateOnlyUndirected(GraphStore graphStore, Collection<RelationshipType> selectedRelationshipTypes) {
         if (!graphStore.schema().filterRelationshipTypes(Set.copyOf(selectedRelationshipTypes)).isUndirected()) {
             throw new IllegalArgumentException(formatWithLocale(
-                "Prize-collecting Steineer requires relationship projections to be UNDIRECTED. " +
+                "The %s algorithm requires relationship projections to be UNDIRECTED. " +
                     "Selected relationships `%s` are not all undirected.",
+                algorithm,
                 selectedRelationshipTypes.stream().map(RelationshipType::name).collect(Collectors.toSet())
             ));
         }
-
-        if (!graphStore.nodePropertyKeys().contains(prizeProperty)) {
-            throw new IllegalArgumentException(
-                StringFormatting.formatWithLocale(
-                    "Prize node property value type [%s] not found in the graph.",
-                    prizeProperty
-                )
-            );
-        }
-        var valueType = graphStore.nodeProperty(prizeProperty).valueType();
-        if (valueType == ValueType.DOUBLE) {
-            return;
-        }
-        throw new IllegalArgumentException(
-            StringFormatting.formatWithLocale(
-                "Unsupported node property value type [%s]. Value type required: [%s]",
-                valueType,
-                ValueType.DOUBLE
-            )
-        );
     }
+
 }

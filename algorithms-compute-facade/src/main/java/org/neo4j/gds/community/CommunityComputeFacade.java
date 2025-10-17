@@ -38,12 +38,12 @@ import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.conductance.Conductance;
 import org.neo4j.gds.conductance.ConductanceParameters;
 import org.neo4j.gds.conductance.ConductanceResult;
+import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.core.utils.paged.dss.HugeAtomicDisjointSetStruct;
-import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.hdbscan.HDBScan;
 import org.neo4j.gds.hdbscan.HDBScanParameters;
 import org.neo4j.gds.hdbscan.Labels;
@@ -565,6 +565,39 @@ public class CommunityComputeFacade {
         );
     }
 
+    CompletableFuture<TimedAlgorithmResult<PregelResult>> sllpa(
+        Graph graph,
+        SpeakerListenerLPAConfig configuration,
+        JobId jobId,
+        boolean logProgress
+    ) {
+
+        if (graph.isEmpty()) {
+            var empty = NodeValue.of(new PregelSchema.Builder().build(),0,new Concurrency(1));
+            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(ImmutablePregelResult.of(empty, 0, false)));
+        }
+
+        var progressTracker = progressTrackerFactory.create(
+            tasks.speakerListenerLPA(graph,configuration),
+            jobId,
+            configuration.concurrency(),
+            logProgress
+        );
+
+        var algorithm = new SpeakerListenerLPA(
+            graph,
+            configuration,
+            DefaultPool.INSTANCE,
+            progressTracker,
+            Optional.empty()
+        );
+
+        return algorithmCaller.run(
+            algorithm::compute,
+            jobId
+        );
+    }
+
     CompletableFuture<TimedAlgorithmResult<TriangleCountResult>> triangleCount(
         Graph graph,
         TriangleCountParameters parameters,
@@ -605,7 +638,7 @@ public class CommunityComputeFacade {
         JobId jobId) {
 
         if (graph.isEmpty()) {
-            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty( Stream.empty()));
+            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(Stream.empty()));
         }
 
         var algorithm = TriangleStream.create(
@@ -647,39 +680,6 @@ public class CommunityComputeFacade {
             parameters,
             progressTracker,
             terminationFlag
-        );
-
-        return algorithmCaller.run(
-            algorithm::compute,
-            jobId
-        );
-    }
-
-    CompletableFuture<TimedAlgorithmResult<PregelResult>> sllpa(
-        Graph graph,
-        SpeakerListenerLPAConfig configuration,
-        JobId jobId,
-        boolean logProgress
-    ) {
-
-        if (graph.isEmpty()) {
-            var empty = NodeValue.of(new PregelSchema.Builder().build(),0,new Concurrency(1));
-            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(ImmutablePregelResult.of(empty, 0, false)));
-        }
-
-        var progressTracker = progressTrackerFactory.create(
-            tasks.speakerListenerLPA(graph,configuration),
-            jobId,
-            configuration.concurrency(),
-            logProgress
-        );
-
-        var algorithm = new SpeakerListenerLPA(
-            graph,
-            configuration,
-            DefaultPool.INSTANCE,
-            progressTracker,
-            Optional.empty()
         );
 
         return algorithmCaller.run(
