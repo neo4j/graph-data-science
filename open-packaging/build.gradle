@@ -57,7 +57,9 @@ shadowJar {
     relocate('stormpot', 'com.neo4j.gds.shaded.stormpot')
 
 
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
     mergeServiceFiles()
+
     archiveBaseName.set("open-gds")
     archiveClassifier.set("")
     exclude 'META-INF/versions/**/*'
