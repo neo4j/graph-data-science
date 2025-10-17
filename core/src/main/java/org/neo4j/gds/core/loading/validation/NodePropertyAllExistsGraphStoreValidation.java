@@ -22,9 +22,12 @@ package org.neo4j.gds.core.loading.validation;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.utils.StringFormatting;
+import org.neo4j.gds.utils.StringJoining;
 
 import java.util.Collection;
+import java.util.stream.Collectors;
+
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class NodePropertyAllExistsGraphStoreValidation extends GraphStoreValidation {
 
@@ -45,13 +48,23 @@ public class NodePropertyAllExistsGraphStoreValidation extends GraphStoreValidat
         GraphStore graphStore,
         Collection<NodeLabel> selectedLabels
     ) {
-        if (!graphStore.nodePropertyKeys(selectedLabels).contains(nodeProperty)) {
-            throw new IllegalArgumentException(
-                StringFormatting.formatWithLocale(
-                    "Node property [%s] not found in the graph.",
-                    nodeProperty
-                )
-            );
+        if (nodeProperty!=null){
+        if (!graphStore.hasNodeProperty(selectedLabels, nodeProperty)) {
+            var labelsWithMissingProperty = selectedLabels
+                .stream()
+                .filter(label -> !graphStore.nodePropertyKeys(label).contains(nodeProperty))
+                .map(NodeLabel::name)
+                .collect(Collectors.toList());
+
+            throw new IllegalArgumentException(formatWithLocale(
+                "Node property `%s` is not present for all requested labels. Requested labels: %s. Labels without the property key: %s. Properties available on all requested labels: %s",
+                nodeProperty,
+                StringJoining.join(selectedLabels.stream().map(NodeLabel::name)),
+                StringJoining.join(labelsWithMissingProperty),
+                StringJoining.join(graphStore.nodePropertyKeys(selectedLabels))
+            ));
         }
+        }
+
     }
 }

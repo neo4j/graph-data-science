@@ -29,6 +29,7 @@ import java.util.Set;
 import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.anySet;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -39,6 +40,7 @@ class NodePropertyAllExistsGraphStoreValidationTest {
     void shouldNotThrowForExistingProperty() {
         var graphStore = mock(GraphStore.class);
         var collectionString = Set.of("p");
+        when(graphStore.hasNodeProperty(ArgumentMatchers.anyCollection(),anyString())).thenReturn(true);
         when(graphStore.nodePropertyKeys(ArgumentMatchers.any(NodeLabel.class))).thenReturn(collectionString);
         doCallRealMethod().when(graphStore).nodePropertyKeys(anySet());
 
@@ -57,6 +59,8 @@ class NodePropertyAllExistsGraphStoreValidationTest {
 
         var nodeLabel1 = NodeLabel.of("Node");
         var nodeLabel2 = NodeLabel.of("Node1");
+        when(graphStore.hasNodeProperty(ArgumentMatchers.anyCollection(),anyString())).thenReturn(false);
+
         when(graphStore.nodePropertyKeys(ArgumentMatchers.eq(nodeLabel1))).thenReturn(collectionString1);
         when(graphStore.nodePropertyKeys(ArgumentMatchers.eq(nodeLabel2))).thenReturn(collectionString2);
         doCallRealMethod().when(graphStore).nodePropertyKeys(anySet());
@@ -66,7 +70,7 @@ class NodePropertyAllExistsGraphStoreValidationTest {
             graphStore,
             Set.of(nodeLabel1,nodeLabel2)
         )).hasMessageContaining(
-            "Node property [p] not found in the graph"
+            "Node property `p` is not present for all requested labels. Requested labels: ['Node', 'Node1']. Labels without the property key: ['Node']"
         );
     }
 
@@ -77,6 +81,7 @@ class NodePropertyAllExistsGraphStoreValidationTest {
 
         var nodeLabel1 = NodeLabel.of("Node");
         var nodeLabel2 = NodeLabel.of("Node1");
+        when(graphStore.hasNodeProperty(ArgumentMatchers.anyCollection(),anyString())).thenReturn(false);
         when(graphStore.nodePropertyKeys(ArgumentMatchers.eq(nodeLabel1))).thenReturn(collectionString);
         when(graphStore.nodePropertyKeys(ArgumentMatchers.eq(nodeLabel2))).thenReturn(collectionString);
         doCallRealMethod().when(graphStore).nodePropertyKeys(anySet());
@@ -86,7 +91,7 @@ class NodePropertyAllExistsGraphStoreValidationTest {
             graphStore,
             Set.of(nodeLabel1,nodeLabel2)
         )).hasMessageContaining(
-            "Node property [p] not found in the graph"
+            "Node property `p` is not present for all requested labels. Requested labels: ['Node', 'Node1']. Labels without the property key: ['Node', 'Node1']"
         );
     }
 

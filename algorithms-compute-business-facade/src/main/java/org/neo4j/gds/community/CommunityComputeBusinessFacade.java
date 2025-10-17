@@ -39,6 +39,7 @@ import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.loading.validation.CompoundGraphStoreValidationsBuilder;
 import org.neo4j.gds.core.loading.validation.NoAlgorithmValidation;
+import org.neo4j.gds.core.loading.validation.NodePropertyAllExistsGraphStoreValidation;
 import org.neo4j.gds.core.loading.validation.NodePropertyAnyExistsGraphStoreValidation;
 import org.neo4j.gds.core.loading.validation.NodePropertyTypeGraphStoreValidation;
 import org.neo4j.gds.core.loading.validation.SeedPropertyGraphStoreValidation;
@@ -322,7 +323,10 @@ public class CommunityComputeBusinessFacade {
             graphName,
             graphParameters,
             relationshipProperty,
-            SeedPropertyGraphStoreValidation.create(parameters.seedProperty()),
+            new CompoundGraphStoreValidationsBuilder()
+                .withGraphStoreValidation(SeedPropertyGraphStoreValidation.create(parameters.seedProperty()))
+                .withGraphStoreValidation(new NodePropertyAllExistsGraphStoreValidation(parameters.nodeWeightProperty()))
+                .build(),
             Optional.empty(),
             user,
             databaseId
