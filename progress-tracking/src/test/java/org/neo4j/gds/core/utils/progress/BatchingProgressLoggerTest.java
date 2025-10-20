@@ -65,7 +65,7 @@ class BatchingProgressLoggerTest {
         var concurrency = new Concurrency(1);
         var logger = new BatchingProgressLogger(
             new LoggerForProgressTrackingAdapter(log),
-            PlainSimpleRequestCorrelationId.create("some job id"),
+            PlainSimpleRequestCorrelationId.create("some request correlation id"),
             Tasks.leaf("foo", taskVolume),
             batchSize,
             concurrency
@@ -79,11 +79,11 @@ class BatchingProgressLoggerTest {
         var threadName = Thread.currentThread().getName();
         var messageTemplate = "[%s] [%s] foo %d%% %d";
         var expectedMessages = List.of(
-            formatWithLocale(messageTemplate, "some job id", threadName, 1 * batchSize * 100 / taskVolume, 1 * batchSize - 1),
-            formatWithLocale(messageTemplate, "some job id", threadName, 2 * batchSize * 100 / taskVolume, 2 * batchSize - 1),
-            formatWithLocale(messageTemplate, "some job id", threadName, 3 * batchSize * 100 / taskVolume, 3 * batchSize - 1),
-            formatWithLocale(messageTemplate, "some job id", threadName, 4 * batchSize * 100 / taskVolume, 4 * batchSize - 1),
-            formatWithLocale(messageTemplate, "some job id", threadName, 5 * batchSize * 100 / taskVolume, 5 * batchSize - 1)
+            formatWithLocale(messageTemplate, "some request correlation id", threadName, 1 * batchSize * 100 / taskVolume, 1 * batchSize - 1),
+            formatWithLocale(messageTemplate, "some request correlation id", threadName, 2 * batchSize * 100 / taskVolume, 2 * batchSize - 1),
+            formatWithLocale(messageTemplate, "some request correlation id", threadName, 3 * batchSize * 100 / taskVolume, 3 * batchSize - 1),
+            formatWithLocale(messageTemplate, "some request correlation id", threadName, 4 * batchSize * 100 / taskVolume, 4 * batchSize - 1),
+            formatWithLocale(messageTemplate, "some request correlation id", threadName, 5 * batchSize * 100 / taskVolume, 5 * batchSize - 1)
         );
 
         var messages = log.getMessages("info");
@@ -99,7 +99,7 @@ class BatchingProgressLoggerTest {
         var concurrency = new Concurrency(1);
         var logger = new BatchingProgressLogger(
             new LoggerForProgressTrackingAdapter(log),
-            PlainSimpleRequestCorrelationId.create("a job id"),
+            PlainSimpleRequestCorrelationId.create("a request correlation id"),
             Tasks.leaf("foo", taskVolume),
             batchSize,
             concurrency
@@ -120,7 +120,7 @@ class BatchingProgressLoggerTest {
 
         var expectedMessages = loggedProgressSteps.stream()
             .skip(1)
-            .map(i -> formatWithLocale(messageTemplate, "a job id", threadName, i * 100 / taskVolume))
+            .map(i -> formatWithLocale(messageTemplate, "a request correlation id", threadName, i * 100 / taskVolume))
             .toList();
 
         var messages = log.getMessages("info");
@@ -238,7 +238,7 @@ class BatchingProgressLoggerTest {
 
     private static List<Integer> performLogging(long taskVolume, Concurrency concurrency) {
         var log = new GdsTestLog();
-        var logger = new BatchingProgressLogger(new LoggerForProgressTrackingAdapter(log), PlainSimpleRequestCorrelationId.create("the_job_id"), Tasks.leaf("Test", taskVolume), concurrency);
+        var logger = new BatchingProgressLogger(new LoggerForProgressTrackingAdapter(log), PlainSimpleRequestCorrelationId.create("the_request_correlation_id"), Tasks.leaf("Test", taskVolume), concurrency);
         logger.reset(taskVolume);
 
         var batchSize = (int) BitUtil.ceilDiv(taskVolume, concurrency.value());
@@ -270,14 +270,14 @@ class BatchingProgressLoggerTest {
         var log = mock(Log.class);
         var batchingProgressLogger = new BatchingProgressLogger(
             new LoggerForProgressTrackingAdapter(log),
-            PlainSimpleRequestCorrelationId.create("my job id"),
+            PlainSimpleRequestCorrelationId.create("my request correlation id"),
             new LeafTask("Monsieur Alfonse", 42),
             new Concurrency(87)
         );
 
         batchingProgressLogger.logMessage("Swiftly, and with style");
 
-        verify(log).info("[%s] [%s] %s %s", "my job id", "Test worker", "Monsieur Alfonse", "Swiftly, and with style");
+        verify(log).info("[%s] [%s] %s %s", "my request correlation id", "Test worker", "Monsieur Alfonse", "Swiftly, and with style");
     }
 
     @Test
@@ -285,7 +285,7 @@ class BatchingProgressLoggerTest {
         var log = mock(Log.class);
         var batchingProgressLogger = new BatchingProgressLogger(
             new LoggerForProgressTrackingAdapter(log),
-            PlainSimpleRequestCorrelationId.create("my job id"),
+            PlainSimpleRequestCorrelationId.create("my request correlation id"),
             new LeafTask("Monsieur Alfonse", 42),
             new Concurrency(87)
         );
@@ -293,7 +293,7 @@ class BatchingProgressLoggerTest {
         when(log.isDebugEnabled()).thenReturn(true);
         batchingProgressLogger.logDebug("Swiftly, and with style");
 
-        verify(log).debug("[%s] [%s] %s %s", "my job id", "Test worker", "Monsieur Alfonse", "Swiftly, and with style");
+        verify(log).debug("[%s] [%s] %s %s", "my request correlation id", "Test worker", "Monsieur Alfonse", "Swiftly, and with style");
     }
 
     @Test
@@ -301,14 +301,14 @@ class BatchingProgressLoggerTest {
         var log = mock(Log.class);
         var batchingProgressLogger = new BatchingProgressLogger(
             new LoggerForProgressTrackingAdapter(log),
-            PlainSimpleRequestCorrelationId.create("my job id"),
+            PlainSimpleRequestCorrelationId.create("my request correlation id"),
             new LeafTask("Monsieur Alfonse", 42),
             new Concurrency(87)
         );
 
         batchingProgressLogger.logWarning("Swiftly, and with style");
 
-        verify(log).warn("[%s] [%s] %s %s", "my job id", "Test worker", "Monsieur Alfonse", "Swiftly, and with style");
+        verify(log).warn("[%s] [%s] %s %s", "my request correlation id", "Test worker", "Monsieur Alfonse", "Swiftly, and with style");
     }
 
     @Test
@@ -316,13 +316,13 @@ class BatchingProgressLoggerTest {
         var log = mock(Log.class);
         var batchingProgressLogger = new BatchingProgressLogger(
             new LoggerForProgressTrackingAdapter(log),
-            PlainSimpleRequestCorrelationId.create("my job id"),
+            PlainSimpleRequestCorrelationId.create("my request correlation id"),
             new LeafTask("Monsieur Alfonse", 42),
             new Concurrency(87)
         );
 
         batchingProgressLogger.logError("Swiftly, and with style");
 
-        verify(log).error("[%s] [%s] %s %s", "my job id", "Test worker", "Monsieur Alfonse", "Swiftly, and with style");
+        verify(log).error("[%s] [%s] %s %s", "my request correlation id", "Test worker", "Monsieur Alfonse", "Swiftly, and with style");
     }
 }

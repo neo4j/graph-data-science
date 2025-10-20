@@ -43,7 +43,7 @@ public final class TaskTreeProgressTracker implements ProgressTracker {
         UserLogRegistryFactory userLogRegistryFactory
     ) {
         var taskVisitor = new PassThroughTaskVisitor();
-        var requestCorrelationId = PlainSimpleRequestCorrelationId.create(jobId.asString()); // shunt
+        var requestCorrelationId = PlainSimpleRequestCorrelationId.createShunt(jobId);
         var taskProgressLogger = TaskProgressLogger.create(log, requestCorrelationId, baseTask, concurrency, taskVisitor);
         var delegate = TaskProgressTracker.create(
             baseTask,

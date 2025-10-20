@@ -69,7 +69,7 @@ public final class TaskProgressTracker implements ProgressTracker {
         TaskRegistryFactory taskRegistryFactory,
         UserLogRegistryFactory userLogRegistryFactory
     ) {
-        var requestCorrelationId = PlainSimpleRequestCorrelationId.create(jobId.asString());
+        var requestCorrelationId = PlainSimpleRequestCorrelationId.createShunt(jobId);
         var taskProgressLogger = TaskProgressLogger.create(log, requestCorrelationId, baseTask, concurrency);
 
         return create(baseTask, jobId, taskRegistryFactory, taskProgressLogger, userLogRegistryFactory);

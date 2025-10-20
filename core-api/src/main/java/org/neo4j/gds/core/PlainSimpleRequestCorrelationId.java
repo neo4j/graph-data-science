@@ -41,12 +41,16 @@ public final class PlainSimpleRequestCorrelationId implements RequestCorrelation
         return new PlainSimpleRequestCorrelationId(id);
     }
 
+    public static RequestCorrelationId create(String id) {
+        return new PlainSimpleRequestCorrelationId(id);
+    }
+
     /**
      * @deprecated I need this for a shunt. I probably won't want it longer term.
      */
     @Deprecated
-    public static PlainSimpleRequestCorrelationId create(String id) {
-        return new PlainSimpleRequestCorrelationId(id);
+    public static PlainSimpleRequestCorrelationId createShunt(JobId jobId) {
+        return new PlainSimpleRequestCorrelationId(jobId.asString());
     }
 
     @Override
