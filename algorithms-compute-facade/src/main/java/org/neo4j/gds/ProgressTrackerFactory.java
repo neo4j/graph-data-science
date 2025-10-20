@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds;
 
+import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
@@ -67,6 +68,7 @@ public class ProgressTrackerFactory {
                 log,
                 concurrency,
                 jobId,
+                PlainSimpleRequestCorrelationId.createShunt(jobId),
                 taskRegistryFactory,
                 userLogRegistryFactory
             );

@@ -22,6 +22,7 @@ package org.neo4j.gds;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
 import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -87,11 +88,20 @@ public interface AlgorithmFactory<G, ALGO extends Algorithm<?>, CONFIG extends A
                 userLogRegistryFactory
             );
         } else {
+            /*
+             * For Pregel stuff I am going to shortcut request correlation.
+             * That old code is a bridge too far.
+             * And you do get the benefit of mostly having correlation, just using job id,
+             * instead of something neat injected from the integration layer.
+             */
+            var requestCorrelationId = PlainSimpleRequestCorrelationId.create(configuration.jobId().asString());
+
             progressTracker = TaskTreeProgressTracker.create(
                 progressTask,
                 new LoggerForProgressTrackingAdapter(log),
                 configuration.concurrency(),
                 configuration.jobId(),
+                requestCorrelationId,
                 taskRegistryFactory,
                 userLogRegistryFactory
             );

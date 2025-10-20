@@ -71,6 +71,7 @@ public class ProgressTrackerCreator {
             log,
             concurrency,
             jobId,
+            requestScopedDependencies.correlationId(),
             requestScopedDependencies.taskRegistryFactory(),
             requestScopedDependencies.userLogRegistryFactory()
         );
