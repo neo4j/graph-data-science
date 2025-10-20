@@ -20,8 +20,8 @@
 package org.neo4j.gds.core.utils.progress.tasks;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.core.JobId;
 
 import java.util.List;
 
@@ -36,7 +36,7 @@ class TaskProgressLoggerTest {
 
         var logger = TaskProgressLogger.create(
             LoggerForProgressTracking.noOpLog(),
-            new JobId(),
+            PlainSimpleRequestCorrelationId.create(),
             task,
             new Concurrency(1)
         );
