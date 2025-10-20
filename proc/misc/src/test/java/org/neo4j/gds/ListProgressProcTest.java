@@ -158,7 +158,7 @@ class ListProgressProcTest extends BaseProgressTest {
             var taskRegistry = taskRegistryFactory.newInstance(new JobId());
             this.taskRegistryFactory = jobId -> new NonReleasingTaskRegistry(taskRegistry);
 
-            var taskProgressTracker = new TaskProgressTracker(
+            var taskProgressTracker = TaskProgressTracker.create(
                 task,
                 LoggerForProgressTracking.noOpLog(),
                 new Concurrency(1),

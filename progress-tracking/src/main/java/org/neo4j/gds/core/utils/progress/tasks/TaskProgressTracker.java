@@ -41,26 +41,26 @@ import java.util.function.Supplier;
 import static org.neo4j.gds.core.utils.progress.tasks.Task.UNKNOWN_VOLUME;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public class TaskProgressTracker implements ProgressTracker {
-
+public final class TaskProgressTracker implements ProgressTracker {
     private static final long UNKNOWN_STEPS = -1;
+
+    private final Stack<Task> nestedTasks = new Stack<>();
 
     private final Task baseTask;
     private final TaskRegistry taskRegistry;
     private final UserLogRegistry userLogRegistry;
     private final TaskProgressLogger taskProgressLogger;
-    private final Stack<Task> nestedTasks;
-    protected Optional<Task> currentTask;
-    private long currentTotalSteps;
-    private double progressLeftOvers;
-
     private final Consumer<RuntimeException> onError;
 
-    public TaskProgressTracker(Task baseTask, LoggerForProgressTracking log, Concurrency concurrency, TaskRegistryFactory taskRegistryFactory) {
-        this(baseTask, log, concurrency, new JobId(), taskRegistryFactory, EmptyUserLogRegistryFactory.INSTANCE);
+    public Optional<Task> currentTask = Optional.empty();
+    public long currentTotalSteps = UNKNOWN_STEPS;
+    public double progressLeftOvers = 0;
+
+    public static TaskProgressTracker create(Task baseTask, LoggerForProgressTracking log, Concurrency concurrency, TaskRegistryFactory taskRegistryFactory) {
+        return create(baseTask, log, concurrency, new JobId(), taskRegistryFactory, EmptyUserLogRegistryFactory.INSTANCE);
     }
 
-    public TaskProgressTracker(
+    public static TaskProgressTracker create(
         Task baseTask,
         LoggerForProgressTracking log,
         Concurrency concurrency,
@@ -68,37 +68,49 @@ public class TaskProgressTracker implements ProgressTracker {
         TaskRegistryFactory taskRegistryFactory,
         UserLogRegistryFactory userLogRegistryFactory
     ) {
-        this(baseTask, jobId, taskRegistryFactory, TaskProgressLogger.create(log, jobId, baseTask, concurrency), userLogRegistryFactory);
+        var taskProgressLogger = TaskProgressLogger.create(log, jobId, baseTask, concurrency);
+
+        return create(baseTask, jobId, taskRegistryFactory, taskProgressLogger, userLogRegistryFactory);
     }
 
-    public TaskProgressTracker(
+    private TaskProgressTracker(
+        Task baseTask,
+        TaskRegistry taskRegistry,
+        UserLogRegistry userLogRegistry,
+        TaskProgressLogger taskProgressLogger,
+        Consumer<RuntimeException> onError
+    ) {
+        this.baseTask = baseTask;
+        this.taskRegistry = taskRegistry;
+        this.userLogRegistry = userLogRegistry;
+        this.taskProgressLogger = taskProgressLogger;
+        this.onError = onError;
+    }
+
+    public static TaskProgressTracker create(
         Task baseTask,
         JobId jobId,
         TaskRegistryFactory taskRegistryFactory,
         TaskProgressLogger taskProgressLogger,
         UserLogRegistryFactory userLogRegistryFactory
     ) {
-        this.baseTask = baseTask;
-        this.taskRegistry = taskRegistryFactory.newInstance(jobId);
-        this.taskProgressLogger = taskProgressLogger;
-        this.currentTask = Optional.empty();
-        this.currentTotalSteps = UNKNOWN_STEPS;
-        this.progressLeftOvers = 0;
-        this.nestedTasks = new Stack<>();
-        this.userLogRegistry = userLogRegistryFactory.newInstance();
+        Consumer<RuntimeException>  onError;
+
         if (GdsFeatureToggles.FAIL_ON_PROGRESS_TRACKER_ERRORS.isEnabled()) {
-            this.onError = error -> {
+            onError = error -> {
                 throw error;
             };
         } else {
-            AtomicBoolean didLog = new AtomicBoolean(false);
-            this.onError = error -> {
+            var didLog = new AtomicBoolean(false);
+            onError = error -> {
                 if (!didLog.get()) {
                     taskProgressLogger.logWarning(String.format(Locale.US, ":: %s", error.getMessage()));
                     didLog.set(true);
                 }
             };
         }
+
+        return new TaskProgressTracker(baseTask, taskRegistryFactory.newInstance(jobId), userLogRegistryFactory.newInstance(), taskProgressLogger, onError);
     }
 
     @Override
@@ -154,7 +166,7 @@ public class TaskProgressTracker implements ProgressTracker {
     }
 
     @Override
-    public void logSteps(long steps) {
+    public void logSteps(long steps) { // x
         requireCurrentTask();
         currentTask.ifPresent(task -> {
             long volume = task.getProgress().volume();
@@ -166,7 +178,7 @@ public class TaskProgressTracker implements ProgressTracker {
     }
 
     @Override
-    public void beginSubTask(String expectedTaskDescription, long taskVolume) {
+    public void beginSubTask(String expectedTaskDescription, long taskVolume) { // x
         beginSubTask();
         assertSubTask(expectedTaskDescription);
         setVolume(taskVolume);
@@ -298,7 +310,7 @@ public class TaskProgressTracker implements ProgressTracker {
         }
     }
 
-    private void requireCurrentTask() {
+    public void requireCurrentTask() {
         if (currentTask.isEmpty()) {
             onError.accept(new IllegalStateException("Tried to log progress, but there are no running tasks being tracked"));
         }
@@ -319,7 +331,7 @@ public class TaskProgressTracker implements ProgressTracker {
         }
     }
 
-    private void assertSubTask(String subTaskSubString) {
+    public void assertSubTask(String subTaskSubString) {
         currentTask.ifPresent(task -> {
             var currentTaskDescription = task.description();
             assert currentTaskDescription.contains(subTaskSubString) : formatWithLocale(
@@ -328,5 +340,9 @@ public class TaskProgressTracker implements ProgressTracker {
                 currentTaskDescription
             );
         });
+    }
+
+    public Optional<Task> getCurrentTask() {
+        return currentTask;
     }
 }

@@ -81,7 +81,7 @@ public class KSpanningTreeWriteStep implements WriteStep<SpanningTree, Void> {
     ) {
         var properties = new KSpanningTreeBackedNodePropertyValues(spanningTree, graph.nodeCount());
 
-        var progressTracker = new TaskProgressTracker(
+        var progressTracker = TaskProgressTracker.create(
             NodePropertyExporter.baseTask(AlgorithmLabel.KSpanningTree.asString(), graph.nodeCount()),
             new LoggerForProgressTrackingAdapter(log),
             writeConcurrency,

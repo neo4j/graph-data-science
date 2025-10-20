@@ -50,7 +50,7 @@ class CrossValidationTest {
     void shouldLogProgress() {
         var log = new GdsTestLog();
 
-        TestProgressTracker progressTracker = new TestProgressTracker(
+        TestProgressTracker progressTracker = TestProgressTracker.create(
             Tasks.task("test", CrossValidation.progressTasks(3, 2, 4)),
             new LoggerForProgressTrackingAdapter(log),
             new Concurrency(3),

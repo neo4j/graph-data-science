@@ -195,7 +195,7 @@ class BFSTest {
     void shouldLogProgress(int concurrency) {
         var progressTask = Tasks.leaf("BFS", naturalGraph.relationshipCount());
         var testLog = new GdsTestLog();
-        var progressTracker = new TestProgressTracker(progressTask, new LoggerForProgressTrackingAdapter(testLog), new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE);
+        var progressTracker = TestProgressTracker.create(progressTask, new LoggerForProgressTrackingAdapter(testLog), new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE);
         BFS.create(
             naturalGraph,
             0,

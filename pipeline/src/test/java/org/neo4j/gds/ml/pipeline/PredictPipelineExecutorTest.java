@@ -97,7 +97,7 @@ class PredictPipelineExecutorTest {
             pipeline,
             graphStore,
             new PipelineExecutorTestConfig(),
-            new TestProgressTracker(taskTree(pipeline), new LoggerForProgressTrackingAdapter(log), new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE)
+            TestProgressTracker.create(taskTree(pipeline), new LoggerForProgressTrackingAdapter(log), new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE)
         );
 
         assertThatNoException().isThrownBy(pipelineExecutor::compute);
@@ -136,7 +136,7 @@ class PredictPipelineExecutorTest {
             pipeline,
             graphStore,
             new PipelineExecutorTestConfig(),
-            new TestProgressTracker(taskTree(pipeline), new LoggerForProgressTrackingAdapter(log), new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE)
+            TestProgressTracker.create(taskTree(pipeline), new LoggerForProgressTrackingAdapter(log), new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE)
         );
 
         assertThatThrownBy(pipelineExecutor::compute).isExactlyInstanceOf(PipelineExecutionTestFailure.class);

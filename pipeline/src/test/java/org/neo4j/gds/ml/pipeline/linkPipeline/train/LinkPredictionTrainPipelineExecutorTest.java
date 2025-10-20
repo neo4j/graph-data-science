@@ -389,7 +389,7 @@ final class LinkPredictionTrainPipelineExecutorTest {
                 .mapToLong(graphStore::relationshipCount)
                 .sum();
             var log = new GdsTestLog();
-            var progressTracker = new InspectableTestProgressTracker(
+            var progressTracker = InspectableTestProgressTracker.create(
                 LinkPredictionTrainPipelineExecutor.progressTask(
                     "Link Prediction Train Pipeline",
                     pipeline,

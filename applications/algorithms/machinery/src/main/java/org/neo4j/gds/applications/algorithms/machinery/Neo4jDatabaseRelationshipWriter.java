@@ -59,7 +59,7 @@ final class Neo4jDatabaseRelationshipWriter {
         JobId jobId
     ) {
 
-        var progressTracker = new TaskProgressTracker(
+        var progressTracker = TaskProgressTracker.create(
             RelationshipExporter.baseTask(taskName, graph.relationshipCount()),
             new LoggerForProgressTrackingAdapter(log),
             RelationshipExporterBuilder.TYPED_DEFAULT_WRITE_CONCURRENCY,
@@ -106,7 +106,7 @@ final class Neo4jDatabaseRelationshipWriter {
         JobId jobId
     ) {
 
-        var progressTracker = new TaskProgressTracker(
+        var progressTracker = TaskProgressTracker.create(
             RelationshipStreamExporter.baseTask(taskName),
             new LoggerForProgressTrackingAdapter(log),
             new Concurrency(1),

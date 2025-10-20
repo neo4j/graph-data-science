@@ -115,7 +115,7 @@ final class NativeFactory extends CSRGraphStoreFactory<GraphProjectFromStoreConf
         );
 
         if (graphProjectConfig.logProgress()) {
-            return new TaskProgressTracker(
+            return TaskProgressTracker.create(
                 task,
                 new LoggerForProgressTrackingAdapter(loadingContext.log()),
                 graphProjectConfig.readConcurrency(),
@@ -125,7 +125,7 @@ final class NativeFactory extends CSRGraphStoreFactory<GraphProjectFromStoreConf
             );
         }
 
-        return new TaskTreeProgressTracker(
+        return TaskTreeProgressTracker.create(
             task,
             new LoggerForProgressTrackingAdapter(loadingContext.log()),
             graphProjectConfig.readConcurrency(),

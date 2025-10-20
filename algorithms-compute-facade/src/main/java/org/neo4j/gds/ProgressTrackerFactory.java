@@ -53,7 +53,7 @@ public class ProgressTrackerFactory {
     ) {
         ProgressTracker progressTracker;
         if (logProgress) {
-            progressTracker = new TaskProgressTracker(
+            progressTracker = TaskProgressTracker.create(
                 task,
                 log,
                 concurrency,
@@ -62,7 +62,7 @@ public class ProgressTrackerFactory {
                 userLogRegistryFactory
             );
         } else {
-            progressTracker = new TaskTreeProgressTracker(
+            progressTracker = TaskTreeProgressTracker.create(
                 task,
                 log,
                 concurrency,

@@ -395,7 +395,7 @@ class GraphImporterTest {
         var log = new TestLogImpl();
         var jobId = new JobId("test");
         var taskStore = new TestTaskStore();
-        var progressTracker = new TaskProgressTracker(
+        var progressTracker = TaskProgressTracker.create(
             GraphImporter.graphImporterTask(2),
             new LoggerForProgressTrackingAdapter(new LogAdapter(log)),
             new Concurrency(1),

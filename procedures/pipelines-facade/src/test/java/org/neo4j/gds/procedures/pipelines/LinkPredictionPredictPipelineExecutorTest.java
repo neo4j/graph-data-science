@@ -145,7 +145,7 @@ class LinkPredictionPredictPipelineExecutorTest {
                 )),
             Weights.ofVector(0.0)
         );
-        var progressTracker = new InspectableTestProgressTracker(
+        var progressTracker = InspectableTestProgressTracker.create(
             LinkPredictionPredictPipelineExecutor.progressTask(
                 "Link Prediction Train Pipeline",
                 pipeline,
@@ -383,7 +383,7 @@ class LinkPredictionPredictPipelineExecutorTest {
             ));
 
         var log = new GdsTestLog();
-        var progressTracker = new InspectableTestProgressTracker(
+        var progressTracker = InspectableTestProgressTracker.create(
             LinkPredictionPredictPipelineExecutor.progressTask(
                 "Link Prediction Predict Pipeline",
                 pipeline,

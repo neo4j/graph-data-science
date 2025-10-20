@@ -701,7 +701,7 @@ class CommonNeighbourAwareRandomWalkTest {
 
         TestTaskStore taskStore = new TestTaskStore();
         var taskRegistryFactory = new LocalTaskRegistryFactory("user", taskStore);
-        var tracker = new TestProgressTracker(task, new LoggerForProgressTrackingAdapter(new GdsTestLog()), new Concurrency(4), taskRegistryFactory);
+        var tracker = TestProgressTracker.create(task, new LoggerForProgressTrackingAdapter(new GdsTestLog()), new Concurrency(4), taskRegistryFactory);
 
         cnar.compute(tinyGraph, tracker);
 

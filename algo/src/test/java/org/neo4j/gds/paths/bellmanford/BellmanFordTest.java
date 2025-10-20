@@ -245,7 +245,7 @@ class BellmanFordTest {
         );
 
         var log = new GdsTestLog();
-        var testTracker = new TestProgressTracker(
+        var testTracker = TestProgressTracker.create(
             BellmanFordProgressTask.create(),
             new LoggerForProgressTrackingAdapter(log),
             parameters.concurrency(),

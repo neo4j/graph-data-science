@@ -77,7 +77,7 @@ public abstract class BaseProgressTest extends BaseTest {
                 task.setMaxConcurrency(new Concurrency(REQUESTED_CPU_CORES));
             }
 
-            var taskProgressTracker = new TaskProgressTracker(task, LoggerForProgressTracking.noOpLog(), new Concurrency(1), taskRegistryFactory);
+            var taskProgressTracker = TaskProgressTracker.create(task, LoggerForProgressTracking.noOpLog(), new Concurrency(1), taskRegistryFactory);
             taskProgressTracker.beginSubTask();
             taskProgressTracker.beginSubTask();
             taskProgressTracker.logProgress(1);

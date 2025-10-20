@@ -104,7 +104,7 @@ class Node2VecProgressTrackingTest {
             return null;
         }).when(lazyMock).info(anyString(),anyString(),anyString(),anyString());
 
-        var progressTracker = new TestProgressTracker(
+        var progressTracker = TestProgressTracker.create(
             Node2VecTask.create(graph, parameters),
             new LoggerForProgressTrackingAdapter(lazyMock),
             new Concurrency(concurrency),

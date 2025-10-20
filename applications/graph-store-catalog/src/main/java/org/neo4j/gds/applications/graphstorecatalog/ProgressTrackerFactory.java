@@ -48,7 +48,7 @@ class ProgressTrackerFactory {
     }
 
     ProgressTracker create(Task task) {
-        return new TaskProgressTracker(
+        return TaskProgressTracker.create(
             task,
             log,
             new Concurrency(1),

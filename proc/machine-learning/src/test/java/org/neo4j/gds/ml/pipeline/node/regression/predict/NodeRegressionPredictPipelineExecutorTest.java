@@ -159,7 +159,7 @@ class NodeRegressionPredictPipelineExecutorTest extends BaseProcTest {
         var modelData = createModelData(weights, bias);
 
         var log = new GdsTestLog();
-        var progressTracker = new InspectableTestProgressTracker(
+        var progressTracker = InspectableTestProgressTracker.create(
             NodeRegressionPredictPipelineExecutor.progressTask("Node Regression Predict Pipeline", pipeline, graphStore),
             getUsername(),
             config.jobId(),

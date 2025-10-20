@@ -214,7 +214,7 @@ public final class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCy
         );
 
         if (graphProjectConfig.logProgress()) {
-            return new TaskProgressTracker(
+            return TaskProgressTracker.create(
                 task,
                 new LoggerForProgressTrackingAdapter(loadingContext.log()),
                 graphProjectConfig.readConcurrency(),
@@ -224,7 +224,7 @@ public final class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCy
             );
         }
 
-        return new TaskTreeProgressTracker(
+        return TaskTreeProgressTracker.create(
             task,
             new LoggerForProgressTrackingAdapter(loadingContext.log()),
             graphProjectConfig.readConcurrency(),

@@ -119,7 +119,7 @@ class FootballTest {
             graph.relationshipCount(),
             maxIterations
         );
-        var progressTracker = new TestProgressTracker(progressTask, new LoggerForProgressTrackingAdapter(log), concurrency, EmptyTaskRegistryFactory.INSTANCE);
+        var progressTracker = TestProgressTracker.create(progressTask, new LoggerForProgressTrackingAdapter(log), concurrency, EmptyTaskRegistryFactory.INSTANCE);
 
         return new ModularityOptimization(
             graph,

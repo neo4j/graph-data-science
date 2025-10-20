@@ -153,7 +153,7 @@ class ClusterHierarchyTest {
 
         var progressTask = HDBScanProgressTrackerCreator.hierarchyTask("foo",3);
         var log = new GdsTestLog();
-        var progressTracker = new TaskProgressTracker(progressTask, new LoggerForProgressTrackingAdapter(log), new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE);
+        var progressTracker = TaskProgressTracker.create(progressTask, new LoggerForProgressTrackingAdapter(log), new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE);
 
         ClusterHierarchy.create(3, edges, progressTracker);
 

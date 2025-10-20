@@ -105,7 +105,7 @@ class WeightedDagLongestPathTest {
         void shouldLogProgress() {
             var progressTask = LongestPathTask.create(graph.nodeCount());
             var log = new GdsTestLog();
-            var testTracker = new TestProgressTracker(
+            var testTracker = TestProgressTracker.create(
                 progressTask,
                 new LoggerForProgressTrackingAdapter(log),
                 DEFAULT_CONCURRENCY,
@@ -269,7 +269,7 @@ class WeightedDagLongestPathTest {
 
             var progressTask = LongestPathTask.create(graph.nodeCount());
             var log = new GdsTestLog();
-            var testTracker = new TestProgressTracker(
+            var testTracker = TestProgressTracker.create(
                 progressTask,
                 new LoggerForProgressTrackingAdapter(log),
                 DEFAULT_CONCURRENCY,

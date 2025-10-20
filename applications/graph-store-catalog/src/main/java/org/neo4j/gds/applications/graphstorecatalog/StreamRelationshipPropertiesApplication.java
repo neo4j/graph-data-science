@@ -76,7 +76,7 @@ public class StreamRelationshipPropertiesApplication {
             graphStore.nodeCount() * relationshipPropertyKeysAndValues.size()
         );
 
-        var taskProgressTracker = new TaskProgressTracker(
+        var taskProgressTracker = TaskProgressTracker.create(
             task,
             log,
             configuration.concurrency(),

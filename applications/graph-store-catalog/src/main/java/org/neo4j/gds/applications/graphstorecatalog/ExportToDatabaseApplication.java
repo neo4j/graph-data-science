@@ -69,7 +69,7 @@ class ExportToDatabaseApplication {
         GraphStoreToDatabaseExporterConfig configuration,
         GraphStore graphStore
     ) {
-        var progressTracker = new TaskProgressTracker(
+        var progressTracker = TaskProgressTracker.create(
             ProgressTrackerExecutionMonitor.progressTask(graphStore),
             loggers.loggerForProgressTracking(),
             configuration.typedWriteConcurrency(),

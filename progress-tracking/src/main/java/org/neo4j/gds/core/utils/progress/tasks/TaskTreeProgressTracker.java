@@ -19,14 +19,21 @@
  */
 package org.neo4j.gds.core.utils.progress.tasks;
 
-import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.JobId;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
+import org.neo4j.gds.mem.MemoryRange;
 
-public final class TaskTreeProgressTracker extends TaskProgressTracker {
+import java.util.function.Supplier;
 
-    public TaskTreeProgressTracker(
+@SuppressWarnings("ClassCanBeRecord")
+public final class TaskTreeProgressTracker implements ProgressTracker {
+    private final TaskProgressTracker delegate;
+
+    private TaskTreeProgressTracker(TaskProgressTracker delegate) {this.delegate = delegate;}
+
+    public static TaskTreeProgressTracker create(
         Task baseTask,
         LoggerForProgressTracking log,
         Concurrency concurrency,
@@ -34,24 +41,72 @@ public final class TaskTreeProgressTracker extends TaskProgressTracker {
         TaskRegistryFactory taskRegistryFactory,
         UserLogRegistryFactory userLogRegistryFactory
     ) {
-        super(
+        var taskVisitor = new PassThroughTaskVisitor();
+        var taskProgressLogger = TaskProgressLogger.create(log, jobId, baseTask, concurrency, taskVisitor);
+        var delegate = TaskProgressTracker.create(
             baseTask,
             jobId,
             taskRegistryFactory,
-            TaskProgressLogger.create(
-                log,
-                jobId,
-                baseTask,
-                concurrency,
-                new PassThroughTaskVisitor()
-            ),
+            taskProgressLogger,
             userLogRegistryFactory
         );
+
+        return new TaskTreeProgressTracker(delegate);
     }
 
     @Override
     public void logSteps(long steps) {
         // NOOP
+    }
+
+    @Override
+    public void setEstimatedResourceFootprint(MemoryRange memoryEstimationInBytes) {
+        delegate.setEstimatedResourceFootprint(memoryEstimationInBytes);
+    }
+
+    @Override
+    public void requestedConcurrency(Concurrency concurrency) {
+        delegate.requestedConcurrency(concurrency);
+    }
+
+    @Override
+    public void beginSubTask() {
+        delegate.beginSubTask();
+    }
+
+    @Override
+    public void beginSubTask(long taskVolume) {
+        delegate.beginSubTask(taskVolume);
+    }
+
+    @Override
+    public void beginSubTask(String expectedTaskDescription) {
+        delegate.beginSubTask(expectedTaskDescription);
+    }
+
+    @Override
+    public void beginSubTask(String expectedTaskDescription, long taskVolume) {
+        delegate.beginSubTask(expectedTaskDescription, taskVolume);
+    }
+
+    @Override
+    public void endSubTask() {
+        delegate.endSubTask();
+    }
+
+    @Override
+    public void endSubTask(String expectedTaskDescription) {
+        delegate.endSubTask(expectedTaskDescription);
+    }
+
+    @Override
+    public void endSubTaskWithFailure() {
+        delegate.endSubTaskWithFailure();
+    }
+
+    @Override
+    public void endSubTaskWithFailure(String expectedTaskDescription) {
+        delegate.endSubTaskWithFailure(expectedTaskDescription);
     }
 
     @Override
@@ -62,6 +117,36 @@ public final class TaskTreeProgressTracker extends TaskProgressTracker {
     @Override
     public void logProgress(long value, String messageTemplate) {
         // NOOP
+    }
+
+    @Override
+    public void setVolume(long volume) {
+        delegate.setVolume(volume);
+    }
+
+    @Override
+    public long currentVolume() {
+        return delegate.currentVolume();
+    }
+
+    @Override
+    public void logDebug(Supplier<String> messageSupplier) {
+        delegate.logDebug(messageSupplier);
+    }
+
+    @Override
+    public void logMessage(LogLevel level, String message) {
+        delegate.logMessage(level, message);
+    }
+
+    @Override
+    public void release() {
+        delegate.release();
+    }
+
+    @Override
+    public void setSteps(long steps) {
+        delegate.setSteps(steps);
     }
 
     private static class PassThroughTaskVisitor implements TaskVisitor {

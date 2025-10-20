@@ -37,7 +37,7 @@ class TaskProgressTrackerFailMethodTest {
         var failingTask = Tasks.leaf("failingTask");
         var log = new GdsTestLog();
         var taskStore = new TestTaskStore();
-        var tracker = new TaskProgressTracker(failingTask, new LoggerForProgressTrackingAdapter(log), new Concurrency(1), TaskRegistryFactory.local("", taskStore));
+        var tracker = TaskProgressTracker.create(failingTask, new LoggerForProgressTrackingAdapter(log), new Concurrency(1), TaskRegistryFactory.local("", taskStore));
 
         tracker.beginSubTask();
         tracker.endSubTaskWithFailure();
@@ -62,7 +62,7 @@ class TaskProgressTrackerFailMethodTest {
         var rootTask = Tasks.task("rootTask", failingSubTask);
         var log = new GdsTestLog();
         var taskStore = new TestTaskStore();
-        var tracker = new TaskProgressTracker(rootTask, new LoggerForProgressTrackingAdapter(log), new Concurrency(1), TaskRegistryFactory.local("", taskStore));
+        var tracker = TaskProgressTracker.create(rootTask, new LoggerForProgressTrackingAdapter(log), new Concurrency(1), TaskRegistryFactory.local("", taskStore));
 
         tracker.beginSubTask("rootTask");
         tracker.beginSubTask("failingSubTask");

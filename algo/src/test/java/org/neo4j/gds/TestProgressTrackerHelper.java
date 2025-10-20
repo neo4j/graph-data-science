@@ -32,7 +32,7 @@ public final class TestProgressTrackerHelper {
     public static ProgressTrackerWithLog create(Task task, Concurrency concurrency) {
         var log = new GdsTestLog();
 
-        var progressTracker = new TestProgressTracker(
+        var progressTracker = TestProgressTracker.create(
             task,
             new LoggerForProgressTrackingAdapter(log),
             concurrency,

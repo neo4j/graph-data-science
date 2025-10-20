@@ -476,7 +476,7 @@ class LinkPredictionTrainTest {
         pipeline.addFeatureStep(new L2FeatureStep(List.of("scalar", "array")));
 
         var log = new GdsTestLog();
-        var progressTracker = new TestProgressTracker(
+        var progressTracker = TestProgressTracker.create(
             progressTask(
                 trainGraph.relationshipCount(),
                 pipeline.splitConfig(),
@@ -574,7 +574,7 @@ class LinkPredictionTrainTest {
         pipeline.addFeatureStep(new L2FeatureStep(List.of("scalar", "array")));
 
         var log = new GdsTestLog();
-        var progressTracker = new TestProgressTracker(
+        var progressTracker = TestProgressTracker.create(
             progressTask(
                 trainGraph.relationshipCount(),
                 pipeline.splitConfig(),
@@ -640,7 +640,7 @@ class LinkPredictionTrainTest {
         pipeline.addFeatureStep(new L2FeatureStep(List.of("scalar", "array")));
 
         var log = new GdsTestLog();
-        var progressTracker = new TestProgressTracker(
+        var progressTracker = TestProgressTracker.create(
             progressTask(
                 2 * trainGraph.relationshipCount(),
                 pipeline.splitConfig(),

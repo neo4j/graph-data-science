@@ -333,7 +333,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
         var modelData = createClassifierData(weights, bias);
 
         var log = new GdsTestLog();
-        var progressTracker = new InspectableTestProgressTracker(
+        var progressTracker = InspectableTestProgressTracker.create(
             NodeClassificationPredictPipelineExecutor.progressTask(
                 "Node Classification Predict Pipeline",
                 pipeline,

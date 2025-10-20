@@ -99,7 +99,7 @@ class HDBScanE2ETest {
 
             var progressTask = HDBScanProgressTrackerCreator.hdbscanTask("foo", graph.nodeCount());
             var log = new GdsTestLog();
-            var progressTracker = new TaskProgressTracker(
+            var progressTracker = TaskProgressTracker.create(
                 progressTask,
                 new LoggerForProgressTrackingAdapter(log),
                 new Concurrency(1),

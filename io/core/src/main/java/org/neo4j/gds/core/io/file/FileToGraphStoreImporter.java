@@ -159,7 +159,7 @@ public abstract class FileToGraphStoreImporter {
             importTasks
         );
 
-        return new TaskProgressTracker(task, new LoggerForProgressTrackingAdapter(log), concurrency, taskRegistryFactory);
+        return TaskProgressTracker.create(task, new LoggerForProgressTrackingAdapter(log), concurrency, taskRegistryFactory);
     }
 
     private Nodes importNodes(FileInput fileInput) {

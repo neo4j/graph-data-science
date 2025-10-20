@@ -212,7 +212,7 @@ class KdTreeBuilderTest {
 
             var progressTask = HDBScanProgressTrackerCreator.kdBuildingTask("foo",graph.nodeCount());
             var log = new GdsTestLog();
-            var progressTracker = new TaskProgressTracker(
+            var progressTracker = TaskProgressTracker.create(
                 progressTask,
                 new LoggerForProgressTrackingAdapter(log),
                 new Concurrency(1),

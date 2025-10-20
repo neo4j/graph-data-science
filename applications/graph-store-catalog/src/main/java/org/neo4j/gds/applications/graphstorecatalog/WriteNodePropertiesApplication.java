@@ -73,7 +73,7 @@ public class WriteNodePropertiesApplication {
             ),
             validNodeLabels.size()
         );
-        var progressTracker = new TaskProgressTracker(
+        var progressTracker = TaskProgressTracker.create(
             task,
             loggers.loggerForProgressTracking(),
             configuration.writeConcurrency(),

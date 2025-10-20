@@ -99,7 +99,7 @@ class TaskProgressTrackerTest {
         GdsFeatureToggles.FAIL_ON_PROGRESS_TRACKER_ERRORS.disableAndRun(() -> {
             var task = Tasks.leaf("leaf");
             var log = new GdsTestLog();
-            var progressTracker = new TaskProgressTracker(task, new LoggerForProgressTrackingAdapter(log), new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE);
+            var progressTracker = TaskProgressTracker.create(task, new LoggerForProgressTrackingAdapter(log), new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE);
             progressTracker.beginSubTask();
             progressTracker.endSubTask();
             assertThatNoException()
@@ -183,7 +183,7 @@ class TaskProgressTrackerTest {
         try (var ignored = RenamesCurrentThread.renameThread("test")) {
             var task = Tasks.leaf("leaf", 4);
             var log = new GdsTestLog();
-            var progressTracker = new TaskProgressTracker(task, new LoggerForProgressTrackingAdapter(log), new Concurrency(1), new JobId("our job id"), EmptyTaskRegistryFactory.INSTANCE, EmptyUserLogRegistryFactory.INSTANCE);
+            var progressTracker = TaskProgressTracker.create(task, new LoggerForProgressTrackingAdapter(log), new Concurrency(1), new JobId("our job id"), EmptyTaskRegistryFactory.INSTANCE, EmptyUserLogRegistryFactory.INSTANCE);
             progressTracker.beginSubTask();
             progressTracker.logProgress(1);
 
@@ -206,7 +206,7 @@ class TaskProgressTrackerTest {
         try (var ignored = RenamesCurrentThread.renameThread("test")) {
             var task = Tasks.task("root", Tasks.leaf("leaf", 4));
             var log = new GdsTestLog();
-            var progressTracker = new TaskProgressTracker(task, new LoggerForProgressTrackingAdapter(log), new Concurrency(1), new JobId("what job id?"), EmptyTaskRegistryFactory.INSTANCE, EmptyUserLogRegistryFactory.INSTANCE);
+            var progressTracker = TaskProgressTracker.create(task, new LoggerForProgressTrackingAdapter(log), new Concurrency(1), new JobId("what job id?"), EmptyTaskRegistryFactory.INSTANCE, EmptyUserLogRegistryFactory.INSTANCE);
 
             progressTracker.beginSubTask("root");
             progressTracker.beginSubTask("leaf");
@@ -231,7 +231,7 @@ class TaskProgressTrackerTest {
 
         var taskStore = new PerDatabaseTaskStore(Duration.ZERO);
         var taskRegistry = new TaskRegistry("", taskStore);
-        var progressTracker = new TaskProgressTracker(task, LoggerForProgressTracking.noOpLog(), new Concurrency(1), jobId -> taskRegistry);
+        var progressTracker = TaskProgressTracker.create(task, LoggerForProgressTracking.noOpLog(), new Concurrency(1), jobId -> taskRegistry);
 
         assertThat(taskStore.query("")).isEmpty();
 
@@ -283,7 +283,7 @@ class TaskProgressTrackerTest {
     }
 
     private TaskProgressTracker progressTracker(Task task, Log log) {
-        return new TaskProgressTracker(task, new LoggerForProgressTrackingAdapter(log), new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE);
+        return TaskProgressTracker.create(task, new LoggerForProgressTrackingAdapter(log), new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE);
     }
 
     private TaskProgressTracker progressTracker(Task task) {

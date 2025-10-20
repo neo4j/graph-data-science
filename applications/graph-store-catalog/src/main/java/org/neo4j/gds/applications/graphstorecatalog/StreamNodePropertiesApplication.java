@@ -93,7 +93,7 @@ public class StreamNodePropertiesApplication {
             idMap.nodeCount() * nodePropertyKeysAndValues.size()
         );
 
-        var progressTracker = new TaskProgressTracker(
+        var progressTracker = TaskProgressTracker.create(
             task,
             log,
             configuration.concurrency(),

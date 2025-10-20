@@ -56,7 +56,7 @@ public class ProgressTrackerCreator {
         boolean logProgress
     ) {
         if (logProgress) {
-            return new TaskProgressTracker(
+            return TaskProgressTracker.create(
                 task,
                 log,
                 concurrency,
@@ -66,7 +66,7 @@ public class ProgressTrackerCreator {
             );
         }
 
-        return new TaskTreeProgressTracker(
+        return TaskTreeProgressTracker.create(
             task,
             log,
             concurrency,

@@ -63,7 +63,7 @@ public final class GraphSamplingApplication {
             var samplerConfig = samplerProvider.config();
 
             var samplerAlgorithm = samplerProvider.algorithm();
-            var progressTracker = new TaskProgressTracker(
+            var progressTracker = TaskProgressTracker.create(
                 GraphSampleConstructor.progressTask(graphStore, samplerAlgorithm),
                 log,
                 samplerConfig.concurrency(),

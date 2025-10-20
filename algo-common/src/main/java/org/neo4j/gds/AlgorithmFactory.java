@@ -78,7 +78,7 @@ public interface AlgorithmFactory<G, ALGO extends Algorithm<?>, CONFIG extends A
     ) {
         ProgressTracker progressTracker;
         if (configuration.logProgress()) {
-            progressTracker = new TaskProgressTracker(
+            progressTracker = TaskProgressTracker.create(
                 progressTask,
                 new LoggerForProgressTrackingAdapter(log),
                 configuration.concurrency(),
@@ -87,7 +87,7 @@ public interface AlgorithmFactory<G, ALGO extends Algorithm<?>, CONFIG extends A
                 userLogRegistryFactory
             );
         } else {
-            progressTracker = new TaskTreeProgressTracker(
+            progressTracker = TaskTreeProgressTracker.create(
                 progressTask,
                 new LoggerForProgressTrackingAdapter(log),
                 configuration.concurrency(),

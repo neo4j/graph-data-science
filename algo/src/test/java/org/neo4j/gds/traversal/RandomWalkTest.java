@@ -505,7 +505,7 @@ class RandomWalkTest {
             var log = new GdsTestLog();
 
             assertThatNoException().isThrownBy(() -> {
-                var testTracker = new TestProgressTracker(
+                var testTracker = TestProgressTracker.create(
                     RandomWalkProgressTask.create(graph),
                     new LoggerForProgressTrackingAdapter(log),
                     new Concurrency(4),
@@ -556,7 +556,7 @@ class RandomWalkTest {
             var log = new GdsTestLog();
 
             assertThatNoException().isThrownBy(() -> {
-                var testTracker = new TestProgressTracker(
+                var testTracker = TestProgressTracker.create(
                     RandomWalkProgressTask.create(weightedGraph),
                     new LoggerForProgressTrackingAdapter(log),
                     new Concurrency(4),
@@ -607,7 +607,7 @@ class RandomWalkTest {
         void shouldLeaveNoOngoingTasksBehind() {
             var taskStore = new PerDatabaseTaskStore(Duration.ZERO);
 
-            var testTracker = new TaskProgressTracker(
+            var testTracker = TaskProgressTracker.create(
                 RandomWalkProgressTask.create(graph),
                 LoggerForProgressTracking.noOpLog(),
                 new Concurrency(4),

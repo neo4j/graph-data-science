@@ -225,7 +225,7 @@ class NodePropertyStepExecutorTest {
         );
 
         var log = new GdsTestLog();
-        var progressTracker = new InspectableTestProgressTracker(
+        var progressTracker = InspectableTestProgressTracker.create(
             NodePropertyStepExecutor.tasks(steps, graphStore.nodeCount()),
             "user",
             new JobId("42"),

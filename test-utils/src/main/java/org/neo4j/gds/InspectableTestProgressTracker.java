@@ -23,34 +23,51 @@ import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.TaskStore;
+import org.neo4j.gds.core.utils.progress.tasks.LogLevel;
 import org.neo4j.gds.core.utils.progress.tasks.LoggerForProgressTracking;
 import org.neo4j.gds.core.utils.progress.tasks.Progress;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
+import org.neo4j.gds.mem.MemoryRange;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.neo4j.gds.core.utils.progress.tasks.Task.UNKNOWN_VOLUME;
 
-public class InspectableTestProgressTracker extends TaskProgressTracker {
+public final class InspectableTestProgressTracker implements ProgressTracker {
+    private final List<Optional<Progress>> progressHistory = new ArrayList<>();
 
+    private final ProgressTracker delegate;
     private final TaskStore taskStore;
     private final JobId jobId;
     private final String userName;
-    private final List<Optional<Progress>> progressHistory = new ArrayList<>();
 
-    public InspectableTestProgressTracker(
+    private InspectableTestProgressTracker(
+        ProgressTracker delegate,
+        TaskStore taskStore,
+        JobId jobId,
+        String userName
+    ) {
+        this.delegate = delegate;
+        this.taskStore = taskStore;
+        this.jobId = jobId;
+        this.userName = userName;
+    }
+
+    public static InspectableTestProgressTracker create(
         Task baseTask,
         String userName,
         JobId jobId,
         TaskStore taskStore,
         LoggerForProgressTracking log
     ) {
-        super(
+        var delegate = TaskProgressTracker.create(
             baseTask,
             log,
             new Concurrency(1),
@@ -58,32 +75,105 @@ public class InspectableTestProgressTracker extends TaskProgressTracker {
             TaskRegistryFactory.local(userName, taskStore),
             EmptyUserLogRegistryFactory.INSTANCE
         );
-        baseTask.getProgress();
-        this.userName = userName;
-        this.jobId = jobId;
-        this.taskStore = taskStore;
+
+        return new InspectableTestProgressTracker(delegate, taskStore, jobId, userName);
     }
 
     @Override
     public void logProgress(long progress) {
-        super.logProgress(progress);
+        delegate.logProgress(progress);
+    }
+
+    @Override
+    public void logProgress(long value, String messageTemplate) {
+        delegate.logProgress(value, messageTemplate);
+    }
+
+    @Override
+    public void setEstimatedResourceFootprint(MemoryRange memoryEstimationInBytes) {
+        delegate.setEstimatedResourceFootprint(memoryEstimationInBytes);
+    }
+
+    @Override
+    public void requestedConcurrency(Concurrency concurrency) {
+        delegate.requestedConcurrency(concurrency);
     }
 
     @Override
     public void beginSubTask() {
-        super.beginSubTask();
+        delegate.beginSubTask();
         progressHistory.add(taskStore.query(userName, jobId).map(userTask -> userTask.task().getProgress()));
+    }
+
+    @Override
+    public void beginSubTask(long taskVolume) {
+        delegate.beginSubTask(taskVolume);
+    }
+
+    @Override
+    public void beginSubTask(String expectedTaskDescription) {
+        delegate.beginSubTask(expectedTaskDescription);
+    }
+
+    @Override
+    public void beginSubTask(String expectedTaskDescription, long taskVolume) {
+        delegate.beginSubTask(expectedTaskDescription, taskVolume);
     }
 
     @Override
     public void endSubTask() {
-        super.endSubTask();
+        delegate.endSubTask();
         progressHistory.add(taskStore.query(userName, jobId).map(userTask -> userTask.task().getProgress()));
     }
 
     @Override
+    public void endSubTask(String expectedTaskDescription) {
+        delegate.endSubTask(expectedTaskDescription);
+    }
+
+    @Override
+    public void endSubTaskWithFailure() {
+        delegate.endSubTaskWithFailure();
+    }
+
+    @Override
+    public void endSubTaskWithFailure(String expectedTaskDescription) {
+        delegate.endSubTaskWithFailure(expectedTaskDescription);
+    }
+
+    @Override
     public void setVolume(long volume) {
-        super.setVolume(volume);
+        delegate.setVolume(volume);
+    }
+
+    @Override
+    public long currentVolume() {
+        return delegate.currentVolume();
+    }
+
+    @Override
+    public void logDebug(Supplier<String> messageSupplier) {
+        delegate.logDebug(messageSupplier);
+    }
+
+    @Override
+    public void logMessage(LogLevel level, String message) {
+        delegate.logMessage(level, message);
+    }
+
+    @Override
+    public void release() {
+        delegate.release();
+    }
+
+    @Override
+    public void setSteps(long steps) {
+        delegate.setSteps(steps);
+    }
+
+    @Override
+    public void logSteps(long steps) {
+        delegate.logSteps(steps);
     }
 
     public void assertValidProgressEvolution() {
@@ -103,5 +193,4 @@ public class InspectableTestProgressTracker extends TaskProgressTracker {
         }
         assertThat(previousProgress.progress()).isEqualTo(previousProgress.volume());
     }
-
 }

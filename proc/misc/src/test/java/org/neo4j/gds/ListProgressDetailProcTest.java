@@ -154,7 +154,7 @@ class ListProgressDetailProcTest extends BaseProgressTest {
                 Tasks.leaf("leaf", 3)
             );
 
-            var taskProgressTracker = new TaskProgressTracker(task, LoggerForProgressTracking.noOpLog(), new Concurrency(1), executionContext().taskRegistryFactory());
+            var taskProgressTracker = TaskProgressTracker.create(task, LoggerForProgressTracking.noOpLog(), new Concurrency(1), executionContext().taskRegistryFactory());
 
             taskProgressTracker.beginSubTask("root");
             taskProgressTracker.beginSubTask("iterative");

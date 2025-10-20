@@ -58,7 +58,7 @@ class WriteRelationshipsApplication {
         var relationshipType = RelationshipType.of(configuration.relationshipType());
         var relationshipCount = graphStore.relationshipCount(relationshipType);
 
-        var progressTracker = new TaskProgressTracker(
+        var progressTracker = TaskProgressTracker.create(
             RelationshipExporter.baseTask("Graph", relationshipCount),
             loggers.loggerForProgressTracking(),
             RelationshipExporterBuilder.TYPED_DEFAULT_WRITE_CONCURRENCY,

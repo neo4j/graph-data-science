@@ -209,7 +209,7 @@ class LinkPredictionRelationshipSamplerTest {
 
 
         var log = new GdsTestLog();
-        var progressTracker = new InspectableTestProgressTracker(
+        var progressTracker = InspectableTestProgressTracker.create(
             progressTask(splitConfig.expectedSetSizes(graphStore.relationshipCount())),
             "user",
             new JobId(),

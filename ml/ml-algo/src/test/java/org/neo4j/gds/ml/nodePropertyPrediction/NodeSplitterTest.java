@@ -88,7 +88,7 @@ class NodeSplitterTest {
     @Test
     void shouldLogWarnings() {
         var log = new GdsTestLog();
-        var progressTracker = new InspectableTestProgressTracker(
+        var progressTracker = InspectableTestProgressTracker.create(
             Tasks.leaf("DUMMY"),
             "",
             new JobId(),

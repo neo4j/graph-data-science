@@ -304,7 +304,7 @@ class GraphSampleConstructorTest {
         var rwr = new RandomWalkWithRestarts(config);
 
         var log = new GdsTestLog();
-        var progressTracker = new TaskProgressTracker(
+        var progressTracker = TaskProgressTracker.create(
             GraphSampleConstructor.progressTask(naturalGraphStore, rwr),
             new LoggerForProgressTrackingAdapter(log),
             new Concurrency(1),

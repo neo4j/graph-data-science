@@ -52,7 +52,7 @@ class CommunityAlgorithmsBusinessFacadeTest {
         var progressCreator = mock(ProgressTrackerCreator.class);
 
         when(progressCreator.createProgressTracker(any(),any())).thenReturn(
-            new TestProgressTracker(
+            TestProgressTracker.create(
                 Tasks.leaf("foo",2),
                 new LoggerForProgressTrackingAdapter(log),
                 new Concurrency(1),

@@ -106,7 +106,7 @@ class HitsTest {
         var config = HitsConfigImpl.builder().concurrency(1).hitsIterations(5).build();
         var progressTask = HitsProgressTrackerCreator.progressTask(graph.nodeCount(),config.maxIterations(),"Hits");
         var log = new GdsTestLog();
-        var progressTracker = new TaskProgressTracker(progressTask, new LoggerForProgressTrackingAdapter(log), new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE);
+        var progressTracker = TaskProgressTracker.create(progressTask, new LoggerForProgressTrackingAdapter(log), new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE);
 
         var hitsp =new Hits(graph,config,DefaultPool.INSTANCE,progressTracker);
         hitsp.compute();

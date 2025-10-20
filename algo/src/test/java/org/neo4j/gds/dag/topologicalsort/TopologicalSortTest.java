@@ -412,7 +412,7 @@ class TopologicalSortTest {
     void shouldLogProgress() {
         var progressTask = TopSortTask.create(lastGraph);
         var log = new GdsTestLog();
-        var testTracker = new TestProgressTracker(
+        var testTracker = TestProgressTracker.create(
             progressTask,
             new LoggerForProgressTrackingAdapter(log),
             new Concurrency(4),
