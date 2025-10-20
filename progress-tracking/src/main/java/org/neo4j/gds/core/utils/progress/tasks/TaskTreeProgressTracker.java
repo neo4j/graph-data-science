@@ -20,6 +20,7 @@
 package org.neo4j.gds.core.utils.progress.tasks;
 
 import org.neo4j.gds.core.JobId;
+import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
@@ -42,7 +43,8 @@ public final class TaskTreeProgressTracker implements ProgressTracker {
         UserLogRegistryFactory userLogRegistryFactory
     ) {
         var taskVisitor = new PassThroughTaskVisitor();
-        var taskProgressLogger = TaskProgressLogger.create(log, jobId, baseTask, concurrency, taskVisitor);
+        var requestCorrelationId = PlainSimpleRequestCorrelationId.create(jobId.asString()); // shunt
+        var taskProgressLogger = TaskProgressLogger.create(log, requestCorrelationId, baseTask, concurrency, taskVisitor);
         var delegate = TaskProgressTracker.create(
             baseTask,
             jobId,

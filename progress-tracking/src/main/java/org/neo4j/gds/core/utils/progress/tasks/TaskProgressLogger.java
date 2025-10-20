@@ -22,6 +22,7 @@ package org.neo4j.gds.core.utils.progress.tasks;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
+import org.neo4j.gds.core.RequestCorrelationId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.BatchingProgressLogger;
 import org.neo4j.gds.core.utils.progress.ProgressLogger;
@@ -44,8 +45,7 @@ public final class TaskProgressLogger implements ProgressLogger {
         return new TaskProgressLogger(batchingProgressLogger, baseTask, loggingLeafTaskVisitor);
     }
 
-    static TaskProgressLogger create(LoggerForProgressTracking log, JobId jobId, Task baseTask, Concurrency concurrency, TaskVisitor leafTaskVisitor) {
-        var requestCorrelationId = PlainSimpleRequestCorrelationId.create(jobId.asString());
+    static TaskProgressLogger create(LoggerForProgressTracking log, RequestCorrelationId requestCorrelationId, Task baseTask, Concurrency concurrency, TaskVisitor leafTaskVisitor) {
         var batchingProgressLogger = new BatchingProgressLogger(log, requestCorrelationId, baseTask, concurrency);
 
         return new TaskProgressLogger(batchingProgressLogger, baseTask, leafTaskVisitor);
