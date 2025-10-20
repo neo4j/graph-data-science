@@ -77,26 +77,16 @@ public interface AlgorithmFactory<G, ALGO extends Algorithm<?>, CONFIG extends A
         UserLogRegistryFactory userLogRegistryFactory,
         Task progressTask
     ) {
-        ProgressTracker progressTracker;
-        if (configuration.logProgress()) {
-            progressTracker = TaskProgressTracker.create(
-                progressTask,
-                new LoggerForProgressTrackingAdapter(log),
-                configuration.concurrency(),
-                configuration.jobId(),
-                taskRegistryFactory,
-                userLogRegistryFactory
-            );
-        } else {
-            /*
-             * For Pregel stuff I am going to shortcut request correlation.
-             * That old code is a bridge too far.
-             * And you do get the benefit of mostly having correlation, just using job id,
-             * instead of something neat injected from the integration layer.
-             */
-            var requestCorrelationId = PlainSimpleRequestCorrelationId.create(configuration.jobId().asString());
+        /*
+         * For Pregel stuff I am going to shortcut request correlation.
+         * That old code is a bridge too far.
+         * And you do get the benefit of mostly having correlation, just using job id,
+         * instead of something neat injected from the integration layer.
+         */
+        var requestCorrelationId = PlainSimpleRequestCorrelationId.create(configuration.jobId().asString());
 
-            progressTracker = TaskTreeProgressTracker.create(
+        if (configuration.logProgress()) {
+            return TaskProgressTracker.create(
                 progressTask,
                 new LoggerForProgressTrackingAdapter(log),
                 configuration.concurrency(),
@@ -106,7 +96,16 @@ public interface AlgorithmFactory<G, ALGO extends Algorithm<?>, CONFIG extends A
                 userLogRegistryFactory
             );
         }
-        return progressTracker;
+
+        return TaskTreeProgressTracker.create(
+            progressTask,
+            new LoggerForProgressTrackingAdapter(log),
+            configuration.concurrency(),
+            configuration.jobId(),
+            requestCorrelationId,
+            taskRegistryFactory,
+            userLogRegistryFactory
+        );
     }
 
     ALGO build(

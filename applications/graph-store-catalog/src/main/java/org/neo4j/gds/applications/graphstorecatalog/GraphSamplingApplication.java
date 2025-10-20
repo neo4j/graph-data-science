@@ -24,6 +24,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
@@ -68,6 +69,7 @@ public final class GraphSamplingApplication {
                 log,
                 samplerConfig.concurrency(),
                 samplerConfig.jobId(),
+                PlainSimpleRequestCorrelationId.createShunt(samplerConfig.jobId()),
                 taskRegistryFactory,
                 userLogRegistryFactory
             );

@@ -24,6 +24,7 @@ import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.logging.GdsLoggers;
 import org.neo4j.gds.core.JobId;
@@ -63,6 +64,7 @@ class WriteRelationshipsApplication {
             loggers.loggerForProgressTracking(),
             RelationshipExporterBuilder.TYPED_DEFAULT_WRITE_CONCURRENCY,
             configuration.jobId(),
+            PlainSimpleRequestCorrelationId.createShunt(configuration.jobId()),
             taskRegistryFactory,
             userLogRegistryFactory
         );

@@ -23,6 +23,7 @@ import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.io.GraphStoreExporter;
 import org.neo4j.gds.core.io.NeoNodeProperties;
@@ -74,6 +75,7 @@ class ExportToDatabaseApplication {
             loggers.loggerForProgressTracking(),
             configuration.typedWriteConcurrency(),
             configuration.jobId(),
+            PlainSimpleRequestCorrelationId.createShunt(configuration.jobId()),
             taskRegistryFactory,
             userLogRegistryFactory
         );

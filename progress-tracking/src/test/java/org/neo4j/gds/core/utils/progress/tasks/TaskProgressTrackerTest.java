@@ -22,6 +22,7 @@ package org.neo4j.gds.core.utils.progress.tasks;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.compat.TestLog;
+import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.RenamesCurrentThread;
 import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
@@ -183,20 +184,28 @@ class TaskProgressTrackerTest {
         try (var ignored = RenamesCurrentThread.renameThread("test")) {
             var task = Tasks.leaf("leaf", 4);
             var log = new GdsTestLog();
-            var progressTracker = TaskProgressTracker.create(task, new LoggerForProgressTrackingAdapter(log), new Concurrency(1), new JobId("our job id"), EmptyTaskRegistryFactory.INSTANCE, EmptyUserLogRegistryFactory.INSTANCE);
+            var progressTracker = TaskProgressTracker.create(
+                task,
+                new LoggerForProgressTrackingAdapter(log),
+                new Concurrency(1),
+                new JobId(),
+                PlainSimpleRequestCorrelationId.create("our request correlation id"),
+                EmptyTaskRegistryFactory.INSTANCE,
+                EmptyUserLogRegistryFactory.INSTANCE
+            );
             progressTracker.beginSubTask();
             progressTracker.logProgress(1);
 
             assertThat(log.getMessages(TestLog.INFO)).contains(
-                "[our job id] [test] leaf :: Start",
-                "[our job id] [test] leaf 25%"
+                "[our request correlation id] [test] leaf :: Start",
+                "[our request correlation id] [test] leaf 25%"
             );
 
             progressTracker.endSubTask();
 
             assertThat(log.getMessages(TestLog.INFO)).contains(
-                "[our job id] [test] leaf 100%",
-                "[our job id] [test] leaf :: Finished"
+                "[our request correlation id] [test] leaf 100%",
+                "[our request correlation id] [test] leaf :: Finished"
             );
         }
     }
@@ -206,7 +215,12 @@ class TaskProgressTrackerTest {
         try (var ignored = RenamesCurrentThread.renameThread("test")) {
             var task = Tasks.task("root", Tasks.leaf("leaf", 4));
             var log = new GdsTestLog();
-            var progressTracker = TaskProgressTracker.create(task, new LoggerForProgressTrackingAdapter(log), new Concurrency(1), new JobId("what job id?"), EmptyTaskRegistryFactory.INSTANCE, EmptyUserLogRegistryFactory.INSTANCE);
+            var progressTracker = TaskProgressTracker.create(task, new LoggerForProgressTrackingAdapter(log), new Concurrency(1),
+                new JobId(),
+                PlainSimpleRequestCorrelationId.create("what request correlation id?"),
+                EmptyTaskRegistryFactory.INSTANCE,
+                EmptyUserLogRegistryFactory.INSTANCE
+            );
 
             progressTracker.beginSubTask("root");
             progressTracker.beginSubTask("leaf");
@@ -215,12 +229,12 @@ class TaskProgressTrackerTest {
             progressTracker.endSubTask("root");
 
             assertThat(log.getMessages(TestLog.INFO)).contains(
-                "[what job id?] [test] root :: Start",
-                "[what job id?] [test] root :: leaf :: Start",
-                "[what job id?] [test] root :: leaf 25%",
-                "[what job id?] [test] root :: leaf 100%",
-                "[what job id?] [test] root :: leaf :: Finished",
-                "[what job id?] [test] root :: Finished"
+                "[what request correlation id?] [test] root :: Start",
+                "[what request correlation id?] [test] root :: leaf :: Start",
+                "[what request correlation id?] [test] root :: leaf 25%",
+                "[what request correlation id?] [test] root :: leaf 100%",
+                "[what request correlation id?] [test] root :: leaf :: Finished",
+                "[what request correlation id?] [test] root :: Finished"
             );
         }
     }

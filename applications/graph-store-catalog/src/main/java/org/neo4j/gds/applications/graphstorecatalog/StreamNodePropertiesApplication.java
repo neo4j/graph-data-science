@@ -25,6 +25,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.JobId;
+import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.LoggerForProgressTracking;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -93,11 +94,13 @@ public class StreamNodePropertiesApplication {
             idMap.nodeCount() * nodePropertyKeysAndValues.size()
         );
 
+        var jobId = new JobId();
         var progressTracker = TaskProgressTracker.create(
             task,
             log,
             configuration.concurrency(),
-            new JobId(),
+            jobId,
+            PlainSimpleRequestCorrelationId.createShunt(jobId),
             taskRegistryFactory,
             userLogRegistryFactory
         );

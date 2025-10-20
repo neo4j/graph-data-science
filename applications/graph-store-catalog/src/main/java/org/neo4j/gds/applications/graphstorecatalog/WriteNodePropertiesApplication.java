@@ -24,6 +24,7 @@ import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyRecord;
+import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.logging.GdsLoggers;
@@ -73,11 +74,13 @@ public class WriteNodePropertiesApplication {
             ),
             validNodeLabels.size()
         );
+        var jobId = new JobId();
         var progressTracker = TaskProgressTracker.create(
             task,
             loggers.loggerForProgressTracking(),
             configuration.writeConcurrency(),
-            new JobId(),
+            jobId,
+            PlainSimpleRequestCorrelationId.createShunt(jobId),
             taskRegistryFactory,
             userLogRegistryFactory
         );

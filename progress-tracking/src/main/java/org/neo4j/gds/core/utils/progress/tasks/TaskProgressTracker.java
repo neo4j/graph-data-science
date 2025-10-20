@@ -22,6 +22,7 @@ package org.neo4j.gds.core.utils.progress.tasks;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
+import org.neo4j.gds.core.RequestCorrelationId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
@@ -58,7 +59,9 @@ public final class TaskProgressTracker implements ProgressTracker {
     public double progressLeftOvers = 0;
 
     public static TaskProgressTracker create(Task baseTask, LoggerForProgressTracking log, Concurrency concurrency, TaskRegistryFactory taskRegistryFactory) {
-        return create(baseTask, log, concurrency, new JobId(), taskRegistryFactory, EmptyUserLogRegistryFactory.INSTANCE);
+        var jobId = new JobId();
+        var requestCorrelationId = PlainSimpleRequestCorrelationId.createShunt(jobId);
+        return create(baseTask, log, concurrency, jobId, requestCorrelationId, taskRegistryFactory, EmptyUserLogRegistryFactory.INSTANCE);
     }
 
     public static TaskProgressTracker create(
@@ -66,10 +69,10 @@ public final class TaskProgressTracker implements ProgressTracker {
         LoggerForProgressTracking log,
         Concurrency concurrency,
         JobId jobId,
+        RequestCorrelationId requestCorrelationId,
         TaskRegistryFactory taskRegistryFactory,
         UserLogRegistryFactory userLogRegistryFactory
     ) {
-        var requestCorrelationId = PlainSimpleRequestCorrelationId.createShunt(jobId);
         var taskProgressLogger = TaskProgressLogger.create(log, requestCorrelationId, baseTask, concurrency);
 
         return create(baseTask, jobId, taskRegistryFactory, taskProgressLogger, userLogRegistryFactory);

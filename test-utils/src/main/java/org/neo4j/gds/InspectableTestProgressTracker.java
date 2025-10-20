@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds;
 
+import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
@@ -72,6 +73,7 @@ public final class InspectableTestProgressTracker implements ProgressTracker {
             log,
             new Concurrency(1),
             jobId,
+            PlainSimpleRequestCorrelationId.create(),
             TaskRegistryFactory.local(userName, taskStore),
             EmptyUserLogRegistryFactory.INSTANCE
         );

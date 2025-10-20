@@ -29,6 +29,7 @@ import org.neo4j.gds.api.ImmutableDatabaseInfo;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.core.ConfigKeyValidation;
 import org.neo4j.gds.core.CypherMapAccess;
+import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.loading.Capabilities.WriteMode;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
@@ -215,6 +216,7 @@ abstract class GraphAggregator implements UserAggregationReducer, UserAggregatio
             new LoggerForProgressTrackingAdapter(log),
             config.readConcurrency(),
             config.jobId(),
+            PlainSimpleRequestCorrelationId.createShunt(config.jobId()),
             TaskRegistryFactory.local(username, taskStore),
             EmptyUserLogRegistryFactory.INSTANCE
         );

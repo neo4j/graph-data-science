@@ -52,6 +52,8 @@ public class ProgressTrackerFactory {
         Concurrency concurrency,
         boolean logProgress
     ) {
+        var requestCorrelationId = PlainSimpleRequestCorrelationId.createShunt(jobId);
+
         ProgressTracker progressTracker;
         if (logProgress) {
             progressTracker = TaskProgressTracker.create(
@@ -59,6 +61,7 @@ public class ProgressTrackerFactory {
                 log,
                 concurrency,
                 jobId,
+                requestCorrelationId,
                 taskRegistryFactory,
                 userLogRegistryFactory
             );
@@ -68,7 +71,7 @@ public class ProgressTrackerFactory {
                 log,
                 concurrency,
                 jobId,
-                PlainSimpleRequestCorrelationId.createShunt(jobId),
+                requestCorrelationId,
                 taskRegistryFactory,
                 userLogRegistryFactory
             );

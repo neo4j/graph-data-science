@@ -25,6 +25,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.beta.filter.GraphFilterResult;
 import org.neo4j.gds.beta.filter.GraphStoreFilterService;
 import org.neo4j.gds.config.GraphProjectFromGraphConfig;
+import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.utils.ProgressTimer;
@@ -129,6 +130,7 @@ public class SubGraphProjectApplication {
             loggers.loggerForProgressTracking(),
             configuration.typedConcurrency(),
             configuration.jobId(),
+            PlainSimpleRequestCorrelationId.createShunt(configuration.jobId()),
             taskRegistryFactory,
             userLogRegistryFactory
         );
