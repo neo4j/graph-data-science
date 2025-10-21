@@ -22,6 +22,7 @@ package org.neo4j.gds.applications.algorithms.similarity;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
+import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
 import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
@@ -57,6 +58,7 @@ class SimilarityAlgorithmsBusinessFacadeTest {
     void shouldNotLogMessagesWhenLoggingIsDisabled() {
         var log = new GdsTestLog();
         var requestScopedDependencies = RequestScopedDependencies.builder()
+            .correlationId(PlainSimpleRequestCorrelationId.create())
             .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
             .terminationFlag(TerminationFlag.RUNNING_TRUE)
             .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
