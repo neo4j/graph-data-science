@@ -22,6 +22,7 @@ package org.neo4j.gds.core.loading.validation;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.GraphStore;
 
+import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -30,22 +31,22 @@ import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 
-class CompoundGraphStoreValidationsTest {
+class CompoundAlgorithmGraphStoreRequirementsTest {
 
     @Test
-    void shouldWorkWithMultipleValidations(){
-        var goodValidation1 = mock(GraphStoreValidation.class);
-        var badValidation = mock(GraphStoreValidation.class);
-        var goodValidation2 = mock(GraphStoreValidation.class);
+    void shouldWorkWithMultipleValidations() {
+        var goodValidation1 = mock(AlgorithmGraphStoreRequirements.class);
+        var badValidation = mock(AlgorithmGraphStoreRequirements.class);
+        var goodValidation2 = mock(AlgorithmGraphStoreRequirements.class);
 
-        doThrow(new RuntimeException("OOPS")).when(badValidation).validateAlgorithmRequirements(any(GraphStore.class),anySet(),anySet());
-        var validations = new CompoundGraphStoreValidationsBuilder()
-            .withGraphStoreValidation(goodValidation1)
-            .withGraphStoreValidation(badValidation)
-            .withGraphStoreValidation(goodValidation2)
-            .build();
+        doThrow(new RuntimeException("OOPS")).when(badValidation).validate(any(GraphStore.class), anySet(), anySet());
+        var validations = new CompoundAlgorithmGraphStoreRequirements(List.of(
+            goodValidation1,
+            badValidation,
+            goodValidation2
+        ));
 
-        assertThatThrownBy(()->validations.validateAlgorithmRequirements(mock(GraphStore.class), Set.of(), Set.of()))
+        assertThatThrownBy(() -> validations.validate(mock(GraphStore.class), Set.of(), Set.of()))
             .hasMessageContaining("OOPS");
 
     }

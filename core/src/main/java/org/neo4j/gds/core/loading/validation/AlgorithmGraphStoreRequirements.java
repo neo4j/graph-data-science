@@ -19,19 +19,18 @@
  */
 package org.neo4j.gds.core.loading.validation;
 
-import java.util.ArrayList;
-import java.util.List;
+import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.api.GraphStore;
 
-public class CompoundGraphStoreValidationsBuilder {
+import java.util.Collection;
 
-    private final List<GraphStoreValidation> graphStoreValidationList = new ArrayList<>();
+public interface AlgorithmGraphStoreRequirements {
 
-    public CompoundGraphStoreValidationsBuilder withGraphStoreValidation(GraphStoreValidation graphStoreValidation) {
-        graphStoreValidationList.add(graphStoreValidation);
-        return this;
-    }
+    void validate(
+        GraphStore graphStore,
+        Collection<NodeLabel> selectedLabels,
+        Collection<RelationshipType> selectedRelationshipTypes
+    );
 
-    public CompoundGraphStoreValidations build() {
-        return new CompoundGraphStoreValidations(graphStoreValidationList);
-    }
 }

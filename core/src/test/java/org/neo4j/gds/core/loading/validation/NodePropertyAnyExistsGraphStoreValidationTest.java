@@ -39,7 +39,7 @@ class NodePropertyAnyExistsGraphStoreValidationTest {
         var collectionString = Set.of("p");
         when(graphStore.nodePropertyKeys(ArgumentMatchers.any(NodeLabel.class))).thenReturn(collectionString);
 
-        var validation = new NodePropertyAnyExistsGraphStoreValidation("p");
+        var validation = new NodePropertyMustExistOnAnyLabel("p");
         assertThatNoException().isThrownBy(() -> validation.validatePropertyExists(
             graphStore,
             Set.of(NodeLabel.of("Node"))
@@ -57,7 +57,7 @@ class NodePropertyAnyExistsGraphStoreValidationTest {
         when(graphStore.nodePropertyKeys(ArgumentMatchers.eq(nodeLabel1))).thenReturn(collectionString1);
         when(graphStore.nodePropertyKeys(ArgumentMatchers.eq(nodeLabel2))).thenReturn(collectionString2);
 
-        var validation = new NodePropertyAnyExistsGraphStoreValidation("p");
+        var validation = new NodePropertyMustExistOnAnyLabel("p");
         assertThatNoException().isThrownBy(() -> validation.validatePropertyExists(
             graphStore,
             Set.of(NodeLabel.of("Node"),NodeLabel.of("Node1"))
@@ -74,7 +74,7 @@ class NodePropertyAnyExistsGraphStoreValidationTest {
         when(graphStore.nodePropertyKeys(ArgumentMatchers.eq(nodeLabel1))).thenReturn(collectionString);
         when(graphStore.nodePropertyKeys(ArgumentMatchers.eq(nodeLabel2))).thenReturn(collectionString);
 
-        var validation = new NodePropertyAnyExistsGraphStoreValidation("p");
+        var validation = new NodePropertyMustExistOnAnyLabel("p");
         assertThatThrownBy(() -> validation.validatePropertyExists(
             graphStore,
             Set.of(nodeLabel1,nodeLabel2)

@@ -29,16 +29,16 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-class ApproxMaxKCutValidationTest {
+class MinCommunitySizeSumRequirementTest {
 
     @Test
     void shouldNotThrowIfMinCommunitySizesIsValid(){
 
         var graphStore = mock(GraphStore.class);
         when(graphStore.nodeCount()).thenReturn(202L);
-        var validation = new ApproxMaxKCutValidation(List.of(100L));
+        var validation = new MinCommunitySizeSumRequirement(List.of(100L));
 
-        assertThatNoException().isThrownBy(() -> validation.validateMinCommunitySizesSum(graphStore));
+        assertThatNoException().isThrownBy(() -> validation.validate(graphStore, null, null));
     }
 
     @Test
@@ -46,9 +46,9 @@ class ApproxMaxKCutValidationTest {
 
         var graphStore = mock(GraphStore.class);
         when(graphStore.nodeCount()).thenReturn(2L);
-        var validation = new ApproxMaxKCutValidation(List.of(100L));
+        var validation = new MinCommunitySizeSumRequirement(List.of(100L));
 
-        assertThatThrownBy(()-> validation.validateMinCommunitySizesSum(graphStore))
+        assertThatThrownBy(()-> validation.validate(graphStore, null, null))
             .hasMessageContaining("The sum of min community sizes is larger than half of the number of nodes in the graph: 100 > 1");
     }
 }

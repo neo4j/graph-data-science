@@ -93,16 +93,7 @@ public class GraphStoreCatalogService {
             configuration.relationshipTypesFilter(),
             configuration.projectAllRelationshipTypes(),
             relationshipProperty,
-            new GraphStoreValidation() {
-                @Override
-                protected void validateAlgorithmRequirements(
-                    GraphStore graphStore,
-                    Collection<NodeLabel> selectedLabels,
-                    Collection<RelationshipType> selectedRelationshipTypes
-                ) {
-                    configuration.graphStoreValidation(graphStore, selectedLabels, selectedRelationshipTypes);
-                }
-            },
+            new GraphStoreValidation(configuration::graphStoreValidation),
             postGraphStoreLoadValidationHooks,
             postGraphStoreLoadETLHooks,
             user,

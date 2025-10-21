@@ -22,32 +22,23 @@ package org.neo4j.gds.community.validation;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.core.loading.validation.GraphStoreValidation;
+import org.neo4j.gds.core.loading.validation.AlgorithmGraphStoreRequirements;
 
 import java.util.Collection;
-import java.util.List;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public class ApproxMaxKCutValidation extends GraphStoreValidation {
+public class MinCommunitySizeSumRequirement implements AlgorithmGraphStoreRequirements {
+    private final Collection<Long> minCommunitySizes;
 
-    private final List<Long> minCommunitySizes;
-
-    public ApproxMaxKCutValidation(List<Long> minCommunitySizes) {
-        this.minCommunitySizes = minCommunitySizes;
-    }
-
+    public MinCommunitySizeSumRequirement(Collection<Long> minCommunitySizes) {this.minCommunitySizes = minCommunitySizes;}
 
     @Override
-    protected void validateAlgorithmRequirements(
+    public void validate(
         GraphStore graphStore,
         Collection<NodeLabel> selectedLabels,
         Collection<RelationshipType> selectedRelationshipTypes
     ) {
-        validateMinCommunitySizesSum(graphStore);
-    }
-
-    void validateMinCommunitySizesSum(GraphStore graphStore) {
         long minCommunitySizesSum = minCommunitySizes.stream().mapToLong(Long::valueOf).sum();
         long halfNodeCount = graphStore.nodeCount() / 2;
         if (minCommunitySizesSum > halfNodeCount) {

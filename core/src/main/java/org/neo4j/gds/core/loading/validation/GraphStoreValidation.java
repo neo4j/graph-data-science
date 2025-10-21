@@ -31,7 +31,13 @@ import java.util.stream.Collectors;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public abstract class GraphStoreValidation {
+public class GraphStoreValidation {
+
+    private final AlgorithmGraphStoreRequirements algorithmRequirements;
+
+    public GraphStoreValidation(AlgorithmGraphStoreRequirements algorithmRequirements) {
+        this.algorithmRequirements = algorithmRequirements;
+    }
 
     public void validate(
         GraphStore graphStore,
@@ -79,10 +85,12 @@ public abstract class GraphStoreValidation {
         });
     }
 
-    protected abstract void validateAlgorithmRequirements(
+    protected void validateAlgorithmRequirements(
         GraphStore graphStore,
         Collection<NodeLabel> selectedLabels,
         Collection<RelationshipType> selectedRelationshipTypes
-    );
+    ) {
+        algorithmRequirements.validate(graphStore, selectedLabels, selectedRelationshipTypes);
+    }
 
 }

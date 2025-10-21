@@ -22,33 +22,36 @@ package org.neo4j.gds.core.loading.validation;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.config.ConfigNodesValidations;
 
 import java.util.Collection;
+import java.util.Set;
 
-public class SourceNodeTargetNodeGraphStoreValidation extends GraphStoreValidation {
+import static org.neo4j.gds.config.ConfigNodesValidations.nodesNotNegative;
 
-    private final SourceNodeGraphStoreValidation sourceNodeValidation;
-    private final TargetNodeGraphStoreValidation targetNodeValidation;
+public class SourceNodeRequirement implements AlgorithmGraphStoreRequirements {
 
-    public SourceNodeTargetNodeGraphStoreValidation(
-        long sourceNode,
-        long targetNode
-    ) {
-        this.sourceNodeValidation = new SourceNodeGraphStoreValidation(sourceNode);
-        this.targetNodeValidation = new TargetNodeGraphStoreValidation(targetNode);
+    private static final String SOURCE_NODE_KEY = "sourceNode";
+
+    private final long sourceNode;
+
+    public SourceNodeRequirement(long sourceNode) {
+        this.sourceNode = sourceNode;
     }
 
     @Override
-    protected void validateAlgorithmRequirements(
+    public void validate(
         GraphStore graphStore,
         Collection<NodeLabel> selectedLabels,
         Collection<RelationshipType> selectedRelationshipTypes
     ) {
-        // validate the source node
-        sourceNodeValidation.validateAlgorithmRequirements(graphStore, selectedLabels, selectedRelationshipTypes);
-
-        // validate the target node
-        targetNodeValidation.validateAlgorithmRequirements(graphStore, selectedLabels, selectedRelationshipTypes);
+        nodesNotNegative(Set.of(sourceNode), SOURCE_NODE_KEY);
+        ConfigNodesValidations.nodeExistInGraph(
+            graphStore,
+            selectedLabels,
+            sourceNode,
+            SOURCE_NODE_KEY
+        );
     }
 
 }

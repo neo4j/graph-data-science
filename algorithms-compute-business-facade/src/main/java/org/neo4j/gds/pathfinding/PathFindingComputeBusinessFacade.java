@@ -30,15 +30,16 @@ import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
-import org.neo4j.gds.core.loading.validation.CompoundGraphStoreValidationsBuilder;
-import org.neo4j.gds.core.loading.validation.NoAlgorithmValidation;
-import org.neo4j.gds.core.loading.validation.NodePropertyAllExistsGraphStoreValidation;
-import org.neo4j.gds.core.loading.validation.NodePropertyTypeGraphStoreValidation;
-import org.neo4j.gds.core.loading.validation.SourceNodeGraphStoreValidation;
-import org.neo4j.gds.core.loading.validation.SourceNodeTargetNodeGraphStoreValidation;
+import org.neo4j.gds.core.loading.validation.AlgorithmGraphStoreRequirementsBuilder;
+import org.neo4j.gds.core.loading.validation.GraphStoreValidation;
+import org.neo4j.gds.core.loading.validation.NoAlgorithmRequirements;
+import org.neo4j.gds.core.loading.validation.NodePropertyMustExistOnAllLabels;
+import org.neo4j.gds.core.loading.validation.NodePropertyTypeRequirement;
+import org.neo4j.gds.core.loading.validation.SourceNodeRequirement;
+import org.neo4j.gds.core.loading.validation.SourceNodeTargetNodeRequirement;
 import org.neo4j.gds.core.loading.validation.SourceNodeTargetNodesGraphStoreValidation;
-import org.neo4j.gds.core.loading.validation.SourceNodesGraphStoreValidation;
-import org.neo4j.gds.core.loading.validation.UndirectedOnlyGraphStoreValidation;
+import org.neo4j.gds.core.loading.validation.SourceNodesRequirement;
+import org.neo4j.gds.core.loading.validation.UndirectedOnlyRequirement;
 import org.neo4j.gds.dag.longestPath.DagLongestPathParameters;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortParameters;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortResult;
@@ -109,7 +110,7 @@ public class PathFindingComputeBusinessFacade {
             graphName,
             graphParameters,
             relationshipProperty,
-            new NoAlgorithmValidation(),
+            new GraphStoreValidation(new NoAlgorithmRequirements()),
             Optional.empty(),
             user,
             databaseId
@@ -137,7 +138,7 @@ public class PathFindingComputeBusinessFacade {
             graphName,
             graphParameters,
             relationshipProperty,
-            new NoAlgorithmValidation(),
+            new GraphStoreValidation(new NoAlgorithmRequirements()),
             Optional.empty(),
             user,
             databaseId
@@ -165,10 +166,10 @@ public class PathFindingComputeBusinessFacade {
             graphName,
             graphParameters,
             Optional.empty(),
-            new SourceNodeTargetNodesGraphStoreValidation(
+            new GraphStoreValidation(new SourceNodeTargetNodesGraphStoreValidation(
                 parameters.sourceNode(),
                 parameters.targetNodes()
-            ),
+            )),
             Optional.empty(),
             user,
             databaseId
@@ -197,7 +198,7 @@ public class PathFindingComputeBusinessFacade {
             graphName,
             graphParameters,
             relationshipProperty,
-            new SourceNodeGraphStoreValidation(parameters.sourceNode()),
+            new GraphStoreValidation(new SourceNodeRequirement(parameters.sourceNode())),
             Optional.empty(),
             user,
             databaseId
@@ -225,10 +226,10 @@ public class PathFindingComputeBusinessFacade {
             graphName,
             graphParameters,
             Optional.empty(),
-            new SourceNodeTargetNodesGraphStoreValidation(
+            new GraphStoreValidation(new SourceNodeTargetNodesGraphStoreValidation(
                 parameters.sourceNode(),
                 parameters.targetNodes()
-            ),
+            )),
             Optional.empty(),
             user,
             databaseId
@@ -257,9 +258,9 @@ public class PathFindingComputeBusinessFacade {
             graphName,
             graphParameters,
             relationshipProperty,
-            new CompoundGraphStoreValidationsBuilder()
-                .withGraphStoreValidation(new SourceNodeGraphStoreValidation(parameters.sourceNode()))
-                .withGraphStoreValidation(new UndirectedOnlyGraphStoreValidation("K-Spanning Tree"))
+            new AlgorithmGraphStoreRequirementsBuilder()
+                .withAlgorithmRequirement(new SourceNodeRequirement(parameters.sourceNode()))
+                .withAlgorithmRequirement(new UndirectedOnlyRequirement("K-Spanning Tree"))
                 .build(),
             Optional.empty(),
             user,
@@ -288,7 +289,7 @@ public class PathFindingComputeBusinessFacade {
             graphName,
             graphParameters,
             Optional.empty(),
-            new NoAlgorithmValidation(),
+            new GraphStoreValidation(new NoAlgorithmRequirements()),
             Optional.empty(),
             user,
             databaseId
@@ -316,7 +317,7 @@ public class PathFindingComputeBusinessFacade {
             graphName,
             graphParameters,
             relationshipProperty,
-            new NoAlgorithmValidation(),
+            new GraphStoreValidation(new NoAlgorithmRequirements()),
             Optional.empty(),
             user,
             databaseId
@@ -345,7 +346,7 @@ public class PathFindingComputeBusinessFacade {
             graphName,
             graphParameters,
             relationshipProperty,
-            new SourceNodesGraphStoreValidation(parameters.sourceNodes()),
+            new GraphStoreValidation(new SourceNodesRequirement(parameters.sourceNodes())),
             Optional.of(new RandomWalkGraphValidation(parameters.concurrency(), executorService)),
             user,
             databaseId
@@ -374,7 +375,7 @@ public class PathFindingComputeBusinessFacade {
             graphName,
             graphParameters,
             relationshipProperty,
-            new SourceNodesGraphStoreValidation(parameters.sourceNodes()),
+            new GraphStoreValidation(new SourceNodesRequirement(parameters.sourceNodes())),
             Optional.of(new RandomWalkGraphValidation(parameters.concurrency(), executorService)),
             user,
             databaseId
@@ -403,10 +404,10 @@ public class PathFindingComputeBusinessFacade {
             graphName,
             graphParameters,
             Optional.empty(),
-             new CompoundGraphStoreValidationsBuilder()
-                 .withGraphStoreValidation(new UndirectedOnlyGraphStoreValidation("Prize-collecting Steiner Tree"))
-                 .withGraphStoreValidation(new NodePropertyAllExistsGraphStoreValidation(parameters.prizeProperty()))
-                 .withGraphStoreValidation(new NodePropertyTypeGraphStoreValidation(parameters.prizeProperty(), List.of(ValueType.DOUBLE)))
+             new AlgorithmGraphStoreRequirementsBuilder()
+                 .withAlgorithmRequirement(new UndirectedOnlyRequirement("Prize-collecting Steiner Tree"))
+                 .withAlgorithmRequirement(new NodePropertyMustExistOnAllLabels(parameters.prizeProperty()))
+                 .withAlgorithmRequirement(new NodePropertyTypeRequirement(parameters.prizeProperty(), List.of(ValueType.DOUBLE)))
                  .build(),
             Optional.empty(),
             user,
@@ -437,7 +438,7 @@ public class PathFindingComputeBusinessFacade {
             graphName,
             graphParameters,
             relationshipProperty,
-            new SourceNodeTargetNodeGraphStoreValidation(parameters.sourceNode(), parameters.targetNode()),
+            new GraphStoreValidation(new SourceNodeTargetNodeRequirement(parameters.sourceNode(), parameters.targetNode())),
             Optional.of(new RandomWalkGraphValidation(parameters.concurrency(), executorService)),
             user,
             databaseId
@@ -466,7 +467,7 @@ public class PathFindingComputeBusinessFacade {
             graphName,
             graphParameters,
             relationshipProperty,
-            new SourceNodeTargetNodesGraphStoreValidation(parameters.sourceNode(), parameters.targetsList()),
+            new GraphStoreValidation(new SourceNodeTargetNodesGraphStoreValidation(parameters.sourceNode(), parameters.targetsList())),
             Optional.of(new RandomWalkGraphValidation(parameters.concurrency(), executorService)),
             user,
             databaseId
@@ -495,7 +496,7 @@ public class PathFindingComputeBusinessFacade {
             graphName,
             graphParameters,
             relationshipProperty,
-            new SourceNodeTargetNodeGraphStoreValidation(parameters.sourceNode(), parameters.targetNode()),
+            new GraphStoreValidation(new SourceNodeTargetNodeRequirement(parameters.sourceNode(), parameters.targetNode())),
             Optional.empty(),
             user,
             databaseId
@@ -524,7 +525,7 @@ public class PathFindingComputeBusinessFacade {
             graphName,
             graphParameters,
             relationshipProperty,
-            new SourceNodeGraphStoreValidation(parameters.sourceNode()),
+            new GraphStoreValidation(new SourceNodeRequirement(parameters.sourceNode())),
             Optional.empty(),
             user,
             databaseId
@@ -553,9 +554,9 @@ public class PathFindingComputeBusinessFacade {
             graphName,
             graphParameters,
             relationshipProperty,
-            new CompoundGraphStoreValidationsBuilder()
-                .withGraphStoreValidation(new SourceNodeGraphStoreValidation(parameters.sourceNode()))
-                .withGraphStoreValidation(new UndirectedOnlyGraphStoreValidation("Spanning Tree"))
+            new AlgorithmGraphStoreRequirementsBuilder()
+                .withAlgorithmRequirement(new SourceNodeRequirement(parameters.sourceNode()))
+                .withAlgorithmRequirement(new UndirectedOnlyRequirement("Spanning Tree"))
                 .build(),
             Optional.empty(),
             user,
@@ -585,7 +586,7 @@ public class PathFindingComputeBusinessFacade {
             graphName,
             graphParameters,
             relationshipProperty,
-            new SourceNodeTargetNodesGraphStoreValidation(parameters.sourceNode(), parameters.targetNodes()),
+            new GraphStoreValidation(new SourceNodeTargetNodesGraphStoreValidation(parameters.sourceNode(), parameters.targetNodes())),
             Optional.empty(),
             user,
             databaseId
@@ -613,7 +614,7 @@ public class PathFindingComputeBusinessFacade {
             graphName,
             graphParameters,
             Optional.empty(),
-            new NoAlgorithmValidation(),
+            new GraphStoreValidation(new NoAlgorithmRequirements()),
             Optional.empty(),
             user,
             databaseId

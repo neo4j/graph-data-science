@@ -30,20 +30,21 @@ import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.cliqueCounting.CliqueCountingResult;
 import org.neo4j.gds.cliquecounting.CliqueCountingParameters;
 import org.neo4j.gds.collections.ha.HugeLongArray;
-import org.neo4j.gds.community.validation.ApproxMaxKCutValidation;
-import org.neo4j.gds.community.validation.SpeakerListenerLPAGraphStoreValidation;
-import org.neo4j.gds.community.validation.TriangleCountGraphStoreValidation;
+import org.neo4j.gds.community.validation.MinCommunitySizeSumRequirement;
+import org.neo4j.gds.community.validation.SpeakerListenerLPAGraphStoreRequirements;
+import org.neo4j.gds.community.validation.TriangleCountGraphStoreRequirements;
 import org.neo4j.gds.conductance.ConductanceParameters;
 import org.neo4j.gds.conductance.ConductanceResult;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
-import org.neo4j.gds.core.loading.validation.CompoundGraphStoreValidationsBuilder;
-import org.neo4j.gds.core.loading.validation.NoAlgorithmValidation;
-import org.neo4j.gds.core.loading.validation.NodePropertyAllExistsGraphStoreValidation;
-import org.neo4j.gds.core.loading.validation.NodePropertyAnyExistsGraphStoreValidation;
-import org.neo4j.gds.core.loading.validation.NodePropertyTypeGraphStoreValidation;
-import org.neo4j.gds.core.loading.validation.SeedPropertyGraphStoreValidation;
-import org.neo4j.gds.core.loading.validation.UndirectedOnlyGraphStoreValidation;
+import org.neo4j.gds.core.loading.validation.AlgorithmGraphStoreRequirementsBuilder;
+import org.neo4j.gds.core.loading.validation.GraphStoreValidation;
+import org.neo4j.gds.core.loading.validation.NoAlgorithmRequirements;
+import org.neo4j.gds.core.loading.validation.NodePropertyMustExistOnAllLabels;
+import org.neo4j.gds.core.loading.validation.NodePropertyMustExistOnAnyLabel;
+import org.neo4j.gds.core.loading.validation.NodePropertyTypeRequirement;
+import org.neo4j.gds.core.loading.validation.SeedPropertyGraphStoreRequirement;
+import org.neo4j.gds.core.loading.validation.UndirectedOnlyRequirement;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.hdbscan.HDBScanParameters;
 import org.neo4j.gds.hdbscan.Labels;
@@ -115,7 +116,7 @@ public class CommunityComputeBusinessFacade {
             graphName,
             graphParameters,
             relationshipProperty,
-            new ApproxMaxKCutValidation(parameters.minCommunitySizes()),
+            new GraphStoreValidation(new MinCommunitySizeSumRequirement(parameters.minCommunitySizes())),
             Optional.empty(),
             user,
             databaseId
@@ -144,7 +145,7 @@ public class CommunityComputeBusinessFacade {
             graphName,
             graphParameters,
             Optional.empty(),
-            new UndirectedOnlyGraphStoreValidation("Clique Counting"),
+            new GraphStoreValidation(new UndirectedOnlyRequirement("Clique Counting")),
             Optional.empty(),
             user,
             databaseId
@@ -174,7 +175,7 @@ public class CommunityComputeBusinessFacade {
             graphName,
             graphParameters,
             relationshipProperty,
-            new NodePropertyAnyExistsGraphStoreValidation("communityProperty"),
+            new GraphStoreValidation(new NodePropertyMustExistOnAnyLabel("communityProperty")),
             Optional.empty(),
             user,
             databaseId
@@ -203,7 +204,7 @@ public class CommunityComputeBusinessFacade {
             graphName,
             graphParameters,
             Optional.empty(),
-            new NodePropertyAnyExistsGraphStoreValidation("nodeProperty"),
+            new GraphStoreValidation(new NodePropertyMustExistOnAnyLabel("nodeProperty")),
             Optional.empty(),
             user,
             databaseId
@@ -232,7 +233,7 @@ public class CommunityComputeBusinessFacade {
             graphName,
             graphParameters,
             Optional.empty(),
-            new NoAlgorithmValidation(),
+            new GraphStoreValidation(new NoAlgorithmRequirements()),
             Optional.empty(),
             user,
             databaseId
@@ -261,7 +262,7 @@ public class CommunityComputeBusinessFacade {
             graphName,
             graphParameters,
             Optional.empty(),
-            new UndirectedOnlyGraphStoreValidation("K-Core-Decomposition"),
+            new GraphStoreValidation(new UndirectedOnlyRequirement("K-Core-Decomposition")),
             Optional.empty(),
             user,
             databaseId
@@ -290,10 +291,10 @@ public class CommunityComputeBusinessFacade {
             graphName,
             graphParameters,
             Optional.empty(),
-            new NodePropertyTypeGraphStoreValidation(
+            new GraphStoreValidation(new NodePropertyTypeRequirement(
                 "nodeProperty",
                 List.of(ValueType.DOUBLE_ARRAY, ValueType.FLOAT_ARRAY, ValueType.DOUBLE)
-            ),
+            )),
             Optional.empty(),
             user,
             databaseId
@@ -323,9 +324,9 @@ public class CommunityComputeBusinessFacade {
             graphName,
             graphParameters,
             relationshipProperty,
-            new CompoundGraphStoreValidationsBuilder()
-                .withGraphStoreValidation(SeedPropertyGraphStoreValidation.create(parameters.seedProperty()))
-                .withGraphStoreValidation(new NodePropertyAllExistsGraphStoreValidation(parameters.nodeWeightProperty()))
+            new AlgorithmGraphStoreRequirementsBuilder()
+                .withAlgorithmRequirement(SeedPropertyGraphStoreRequirement.create(Optional.ofNullable(parameters.seedProperty())))
+                .withAlgorithmRequirement(new NodePropertyMustExistOnAllLabels(parameters.nodeWeightProperty()))
                 .build(),
             Optional.empty(),
             user,
@@ -355,9 +356,9 @@ public class CommunityComputeBusinessFacade {
             graphName,
             graphParameters,
             Optional.empty(),
-            new CompoundGraphStoreValidationsBuilder()
-                .withGraphStoreValidation(new UndirectedOnlyGraphStoreValidation("LocalClusteringCoefficient"))
-                .withGraphStoreValidation(SeedPropertyGraphStoreValidation.create(parameters.seedProperty()))
+            new AlgorithmGraphStoreRequirementsBuilder()
+                .withAlgorithmRequirement(new UndirectedOnlyRequirement("LocalClusteringCoefficient"))
+                .withAlgorithmRequirement(SeedPropertyGraphStoreRequirement.create(Optional.ofNullable(parameters.seedProperty())))
                 .build(),
             Optional.empty(),
             user,
@@ -388,9 +389,9 @@ public class CommunityComputeBusinessFacade {
             graphName,
             graphParameters,
             relationshipProperty,
-            new CompoundGraphStoreValidationsBuilder()
-                .withGraphStoreValidation(new UndirectedOnlyGraphStoreValidation("Leiden"))
-                .withGraphStoreValidation(SeedPropertyGraphStoreValidation.create(parameters.seedProperty()))
+            new AlgorithmGraphStoreRequirementsBuilder()
+                .withAlgorithmRequirement(new UndirectedOnlyRequirement("Leiden"))
+                .withAlgorithmRequirement(SeedPropertyGraphStoreRequirement.create(Optional.ofNullable(parameters.seedProperty())))
                 .build(),
             Optional.empty(),
             user,
@@ -421,7 +422,7 @@ public class CommunityComputeBusinessFacade {
             graphName,
             graphParameters,
             relationshipProperty,
-            SeedPropertyGraphStoreValidation.create(parameters.seedProperty()),
+            new GraphStoreValidation(SeedPropertyGraphStoreRequirement.create(Optional.ofNullable(parameters.seedProperty()))),
             Optional.empty(),
             user,
             databaseId
@@ -450,7 +451,7 @@ public class CommunityComputeBusinessFacade {
             graphName,
             graphParameters,
             relationshipProperty,
-            new NodePropertyAnyExistsGraphStoreValidation("communityProperty"),
+            new GraphStoreValidation(new NodePropertyMustExistOnAnyLabel("communityProperty")),
             Optional.empty(),
             user,
             databaseId
@@ -479,7 +480,7 @@ public class CommunityComputeBusinessFacade {
             graphName,
             graphParameters,
             relationshipProperty,
-            SeedPropertyGraphStoreValidation.create(parameters.seedProperty().orElse(null)),
+            new GraphStoreValidation(SeedPropertyGraphStoreRequirement.create(parameters.seedProperty())),
             Optional.empty(),
             user,
             databaseId
@@ -508,7 +509,7 @@ public class CommunityComputeBusinessFacade {
             graphName,
             graphParameters,
             Optional.empty(),
-            new NoAlgorithmValidation(),
+            new GraphStoreValidation(new NoAlgorithmRequirements()),
             Optional.empty(),
             user,
             databaseId
@@ -537,7 +538,7 @@ public class CommunityComputeBusinessFacade {
             graphName,
             graphParameters,
             Optional.empty(),
-            new SpeakerListenerLPAGraphStoreValidation(config.writeProperty()),
+            new GraphStoreValidation(new SpeakerListenerLPAGraphStoreRequirements(config.writeProperty())),
             Optional.empty(),
             user,
             databaseId
@@ -565,7 +566,7 @@ public class CommunityComputeBusinessFacade {
             graphName,
             graphParameters,
             Optional.empty(),
-            TriangleCountGraphStoreValidation.create(parameters.labelFilter()),
+            new GraphStoreValidation(TriangleCountGraphStoreRequirements.create(parameters.labelFilter())),
             Optional.empty(),
             user,
             databaseId
@@ -594,7 +595,7 @@ public class CommunityComputeBusinessFacade {
             graphName,
             graphParameters,
             Optional.empty(),
-            TriangleCountGraphStoreValidation.create(parameters.labelFilter()),
+            new GraphStoreValidation(TriangleCountGraphStoreRequirements.create(parameters.labelFilter())),
             Optional.empty(),
             user,
             databaseId
@@ -622,7 +623,7 @@ public class CommunityComputeBusinessFacade {
             graphName,
             graphParameters,
             relationshipProperty,
-            SeedPropertyGraphStoreValidation.create(parameters.seedProperty().orElse(null)),
+            new GraphStoreValidation(SeedPropertyGraphStoreRequirement.create(parameters.seedProperty())),
             Optional.empty(),
             user,
             databaseId

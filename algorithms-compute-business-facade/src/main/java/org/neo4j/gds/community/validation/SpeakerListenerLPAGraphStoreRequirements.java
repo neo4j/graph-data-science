@@ -17,41 +17,38 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.loading.validation;
+package org.neo4j.gds.community.validation;
 
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.config.ConfigNodesValidations;
+import org.neo4j.gds.core.loading.validation.AlgorithmGraphStoreRequirements;
 
 import java.util.Collection;
-import java.util.Set;
 
-import static org.neo4j.gds.config.ConfigNodesValidations.nodesNotNegative;
+public class SpeakerListenerLPAGraphStoreRequirements implements AlgorithmGraphStoreRequirements {
 
-public class TargetNodeGraphStoreValidation extends GraphStoreValidation {
+    private final String writeProperty;
 
-    private static final String TARGET_NODE_KEY = "targetNode";
-
-    private final long targetNode;
-
-    public TargetNodeGraphStoreValidation(long targetNode) {
-        this.targetNode = targetNode;
+    public SpeakerListenerLPAGraphStoreRequirements(String writeProperty) {
+        this.writeProperty = writeProperty;
     }
 
     @Override
-    protected void validateAlgorithmRequirements(
+    public void validate(
         GraphStore graphStore,
         Collection<NodeLabel> selectedLabels,
         Collection<RelationshipType> selectedRelationshipTypes
     ) {
-        nodesNotNegative(Set.of(targetNode), TARGET_NODE_KEY);
-        ConfigNodesValidations.nodeExistInGraph(
-            graphStore,
-            selectedLabels,
-            targetNode,
-            TARGET_NODE_KEY
-        );
+        // See PregelProcedureConfig for exaplanation of this
+        if (writeProperty.isBlank()) {
+            return;
+        }
+
+        if (!graphStore.capabilities().canWriteToLocalDatabase() && !graphStore.capabilities()
+            .canWriteToRemoteDatabase()) { //skip result store  ¯\\_(ツ)_/¯
+            throw new IllegalArgumentException("The provided graph does not support `write` execution mode.");
+        }
     }
 
 }

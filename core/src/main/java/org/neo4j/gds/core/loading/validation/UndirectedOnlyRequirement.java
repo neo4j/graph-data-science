@@ -17,27 +17,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.embeddings.validation;
+package org.neo4j.gds.core.loading.validation;
 
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.core.loading.validation.AlgorithmGraphStoreRequirements;
-import org.neo4j.gds.utils.StringJoining;
 
 import java.util.Collection;
-import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public class FeaturePropertiesMustExistOnAllNodeLabels implements AlgorithmGraphStoreRequirements {
+public final class UndirectedOnlyRequirement implements AlgorithmGraphStoreRequirements {
 
-    private final List<String> featureProperties;
+    private final String algorithm;
 
-    public FeaturePropertiesMustExistOnAllNodeLabels(List<String> featureProperties) {
-        this.featureProperties = featureProperties;
-    }
+    public UndirectedOnlyRequirement(String algorithm) {this.algorithm = algorithm;}
 
     @Override
     public void validate(
@@ -45,20 +41,18 @@ public class FeaturePropertiesMustExistOnAllNodeLabels implements AlgorithmGraph
         Collection<NodeLabel> selectedLabels,
         Collection<RelationshipType> selectedRelationshipTypes
     ) {
+        validateOnlyUndirected(graphStore, selectedRelationshipTypes);
+    }
 
-        var missingProperties = featureProperties
-            .stream()
-            .filter(featureProperty -> !graphStore.hasNodeProperty(selectedLabels, featureProperty))
-            .collect(Collectors.toList());
-
-        if (!missingProperties.isEmpty()) {
+    void validateOnlyUndirected(GraphStore graphStore, Collection<RelationshipType> selectedRelationshipTypes) {
+        if (!graphStore.schema().filterRelationshipTypes(Set.copyOf(selectedRelationshipTypes)).isUndirected()) {
             throw new IllegalArgumentException(formatWithLocale(
-                "The feature properties %s are not present for all requested labels. " +
-                    "Requested labels: %s. Properties available on all requested labels: %s",
-                StringJoining.join(missingProperties),
-                StringJoining.join(selectedLabels.stream().map(NodeLabel::name)),
-                StringJoining.join(graphStore.nodePropertyKeys(selectedLabels))
+                "The %s algorithm requires relationship projections to be UNDIRECTED. " +
+                    "Selected relationships `%s` are not all undirected.",
+                algorithm,
+                selectedRelationshipTypes.stream().map(RelationshipType::name).collect(Collectors.toSet())
             ));
         }
     }
+
 }

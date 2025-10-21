@@ -32,7 +32,7 @@ import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-class UndirectedOnlyGraphStoreValidationTest {
+class UndirectedOnlyRequirementTest {
 
     @Test
     void shouldNotThrowForUndirectedSchema() {
@@ -43,9 +43,10 @@ class UndirectedOnlyGraphStoreValidationTest {
         when(graphStore.schema()).thenReturn(schema);
         when(schema.filterRelationshipTypes(anySet())).thenReturn(schema2);
 
-        var validation = new UndirectedOnlyGraphStoreValidation("foo");
-        assertThatNoException().isThrownBy(() -> validation.validateOnlyUndirected(
+        var validation = new UndirectedOnlyRequirement("foo");
+        assertThatNoException().isThrownBy(() -> validation.validate(
             graphStore,
+            null,
             List.of(RelationshipType.of("REL1"))
         ));
 
@@ -61,8 +62,8 @@ class UndirectedOnlyGraphStoreValidationTest {
         when(schema.filterRelationshipTypes(anySet())).thenReturn(schema2);
 
 
-        var validation = new UndirectedOnlyGraphStoreValidation("foo");
-        assertThatThrownBy(() -> validation.validateOnlyUndirected(graphStore, List.of(RelationshipType.of("REL1"))))
+        var validation = new UndirectedOnlyRequirement("foo");
+        assertThatThrownBy(() -> validation.validate(graphStore, null, List.of(RelationshipType.of("REL1"))))
             .hasMessageContaining("The foo algorithm requires relationship projections to be UNDIRECTED. " +
                 "Selected relationships `[REL1]` are not all undirected");
 

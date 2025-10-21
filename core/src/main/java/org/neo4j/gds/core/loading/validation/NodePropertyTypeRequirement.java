@@ -22,45 +22,46 @@ package org.neo4j.gds.core.loading.validation;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.utils.StringFormatting;
 import org.neo4j.gds.utils.StringJoining;
 
 import java.util.Collection;
+import java.util.List;
 
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
-
-public class NodePropertyAnyExistsGraphStoreValidation extends GraphStoreValidation {
-
+public class NodePropertyTypeRequirement implements AlgorithmGraphStoreRequirements {
     private final String nodeProperty;
+    private final List<ValueType> allowedValueTypes;
 
-    public NodePropertyAnyExistsGraphStoreValidation(String nodeProperty) {this.nodeProperty = nodeProperty;}
+    public NodePropertyTypeRequirement(String nodeProperty, List<ValueType> allowedValueTypes) {
+        this.nodeProperty = nodeProperty;
+        this.allowedValueTypes = allowedValueTypes;
+    }
 
     @Override
-    public void validateAlgorithmRequirements(
+    public void validate(
         GraphStore graphStore,
         Collection<NodeLabel> selectedLabels,
         Collection<RelationshipType> selectedRelationshipTypes
     ) {
-        validatePropertyExists(graphStore, selectedLabels);
+        validatePropertyType(graphStore);
+
     }
 
-    void validatePropertyExists(
-        GraphStore graphStore,
-        Collection<NodeLabel> selectedLabels
-    ) {
-        if (selectedLabels
-            .stream()
-            .anyMatch(label -> graphStore.nodePropertyKeys(label).contains(nodeProperty))) {
-            return;
+    void validatePropertyType(GraphStore graphStore) {
+        var valueType = graphStore.nodeProperty(nodeProperty).valueType();
+        for (var currentValueType : allowedValueTypes) {
+            if (valueType == currentValueType) {
+                return;
+            }
         }
-        throw new IllegalArgumentException(formatWithLocale(
-            "Node Property `%s` is not present for any requested node labels. Requested labels: %s. Labels with `%1$s` present: %s",
-            nodeProperty,
-            StringJoining.join(selectedLabels.stream().map(NodeLabel::name)),
-            StringJoining.join(graphStore
-                .nodeLabels()
-                .stream()
-                .filter(label -> graphStore.nodePropertyKeys(label).contains(nodeProperty))
-                .map(NodeLabel::name))
-        ));
+        throw new IllegalArgumentException(
+            StringFormatting.formatWithLocale(
+                "Unsupported node property value type for property `%s`: %s. Value types accepted: %s",
+                nodeProperty,
+                valueType,
+                StringJoining.join(allowedValueTypes.stream().map(Enum::name))
+            )
+        );
     }
 }

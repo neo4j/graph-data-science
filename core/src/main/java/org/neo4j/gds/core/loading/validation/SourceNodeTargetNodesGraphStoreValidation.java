@@ -26,30 +26,30 @@ import org.neo4j.gds.api.GraphStore;
 import java.util.Collection;
 import java.util.List;
 
-public class SourceNodeTargetNodesGraphStoreValidation extends GraphStoreValidation {
+public class SourceNodeTargetNodesGraphStoreValidation implements AlgorithmGraphStoreRequirements {
 
-    private final SourceNodeGraphStoreValidation sourceNodeValidation;
-    private final TargetNodesGraphStoreValidation targetNodesValidation;
+    private final SourceNodeRequirement sourceNodeValidation;
+    private final TargetNodesRequirement targetNodesValidation;
 
     public SourceNodeTargetNodesGraphStoreValidation(
         long sourceNode,
         List<Long> targetNodes
     ) {
-        this.sourceNodeValidation = new SourceNodeGraphStoreValidation(sourceNode);
-        this.targetNodesValidation = new TargetNodesGraphStoreValidation(targetNodes);
+        this.sourceNodeValidation = new SourceNodeRequirement(sourceNode);
+        this.targetNodesValidation = new TargetNodesRequirement(targetNodes);
     }
 
     @Override
-    protected void validateAlgorithmRequirements(
+    public void validate(
         GraphStore graphStore,
         Collection<NodeLabel> selectedLabels,
         Collection<RelationshipType> selectedRelationshipTypes
     ) {
         // validate the source node
-        sourceNodeValidation.validateAlgorithmRequirements(graphStore, selectedLabels, selectedRelationshipTypes);
+        sourceNodeValidation.validate(graphStore, selectedLabels, selectedRelationshipTypes);
 
         // validate the target nodes
-        targetNodesValidation.validateAlgorithmRequirements(graphStore, selectedLabels, selectedRelationshipTypes);
+        targetNodesValidation.validate(graphStore, selectedLabels, selectedRelationshipTypes);
     }
 
 }

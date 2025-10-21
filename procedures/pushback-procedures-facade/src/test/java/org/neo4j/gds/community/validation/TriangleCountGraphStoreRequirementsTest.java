@@ -27,17 +27,17 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-class TriangleCountGraphStoreValidationTest {
+class TriangleCountGraphStoreRequirementsTest {
 
     @Test
     void shouldNotComplainForExistingLabels(){
-        var validation = TriangleCountGraphStoreValidation.create(List.of("A"));
+        var validation = TriangleCountGraphStoreRequirements.create(List.of("A"));
         assertThatNoException().isThrownBy(() -> validation.validateLabelsExist(List.of(NodeLabel.of("A"),NodeLabel.of("B"))));
     }
 
     @Test
     void shouldComplainForMissingLabels(){
-        var validation = TriangleCountGraphStoreValidation.create(List.of("C"));
+        var validation = TriangleCountGraphStoreRequirements.create(List.of("C"));
         assertThatThrownBy(()-> validation.validateLabelsExist(List.of(NodeLabel.of("A"),NodeLabel.of("B"))))
             .hasMessageContaining("TriangleCount requires the provided 'labelFilter' node label 'C' to be present in the graph");
     }

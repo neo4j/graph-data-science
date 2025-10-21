@@ -22,28 +22,28 @@ package org.neo4j.gds.community.validation;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.core.loading.validation.GraphStoreValidation;
-import org.neo4j.gds.core.loading.validation.UndirectedOnlyGraphStoreValidation;
+import org.neo4j.gds.core.loading.validation.AlgorithmGraphStoreRequirements;
+import org.neo4j.gds.core.loading.validation.UndirectedOnlyRequirement;
 
 import java.util.Collection;
 import java.util.List;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public final class TriangleCountGraphStoreValidation extends GraphStoreValidation {
+public final class TriangleCountGraphStoreRequirements implements AlgorithmGraphStoreRequirements {
 
-    private final UndirectedOnlyGraphStoreValidation undirectedOnlyGraphStoreValidation;
+    private final UndirectedOnlyRequirement undirectedOnlyGraphStoreValidation;
     private final List<String> labelFilter;
 
-    public static TriangleCountGraphStoreValidation create(List<String> labelFilter) {
-        return new TriangleCountGraphStoreValidation(
-            new UndirectedOnlyGraphStoreValidation("Triangle Counting"),
+    public static TriangleCountGraphStoreRequirements create(List<String> labelFilter) {
+        return new TriangleCountGraphStoreRequirements(
+            new UndirectedOnlyRequirement("Triangle Counting"),
             labelFilter
         );
     }
 
-    private TriangleCountGraphStoreValidation(
-        UndirectedOnlyGraphStoreValidation undirectedOnlyGraphStoreValidation,
+    private TriangleCountGraphStoreRequirements(
+        UndirectedOnlyRequirement undirectedOnlyGraphStoreValidation,
         List<String> labelFilter
     ) {
         this.undirectedOnlyGraphStoreValidation = undirectedOnlyGraphStoreValidation;
@@ -52,12 +52,12 @@ public final class TriangleCountGraphStoreValidation extends GraphStoreValidatio
 
 
     @Override
-    protected void validateAlgorithmRequirements(
+    public void validate(
         GraphStore graphStore,
         Collection<NodeLabel> selectedLabels,
         Collection<RelationshipType> selectedRelationshipTypes
     ) {
-        undirectedOnlyGraphStoreValidation.validateAlgorithmRequirements(
+        undirectedOnlyGraphStoreValidation.validate(
             graphStore,
             selectedLabels,
             selectedRelationshipTypes

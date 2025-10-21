@@ -17,41 +17,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.community.validation;
+package org.neo4j.gds.core.loading.validation;
 
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.core.loading.validation.GraphStoreValidation;
 
 import java.util.Collection;
 
-public class SpeakerListenerLPAGraphStoreValidation extends GraphStoreValidation {
-
-    private final String writeProperty;
-
-    public SpeakerListenerLPAGraphStoreValidation(String writeProperty) {
-        this.writeProperty = writeProperty;
-    }
-
+public class NoAlgorithmRequirements implements AlgorithmGraphStoreRequirements {
     @Override
-    protected void validateAlgorithmRequirements(
+    public void validate(
         GraphStore graphStore,
         Collection<NodeLabel> selectedLabels,
         Collection<RelationshipType> selectedRelationshipTypes
     ) {
-        validateCanWrite(graphStore);
-    }
-
-    private void validateCanWrite(GraphStore graphStore) {
-        // See PregelProcedureConfig for exaplanation of this
-        if (writeProperty.isBlank()) {
-            return;
-        }
-
-        if (!graphStore.capabilities().canWriteToLocalDatabase() && !graphStore.capabilities()
-            .canWriteToRemoteDatabase()) { //skip result store  ¯\\_(ツ)_/¯
-            throw new IllegalArgumentException("The provided graph does not support `write` execution mode.");
-        }
+        // NOOP
     }
 }

@@ -22,37 +22,35 @@ package org.neo4j.gds.core.loading.validation;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.config.ConfigNodesValidations;
 
 import java.util.Collection;
-import java.util.Set;
-import java.util.stream.Collectors;
 
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.gds.config.ConfigNodesValidations.nodesNotNegative;
 
-public final class UndirectedOnlyGraphStoreValidation extends GraphStoreValidation {
+public class SourceNodesRequirement implements AlgorithmGraphStoreRequirements {
 
-    private final String algorithm;
+    private static final String SOURCE_NODES_KEY = "sourceNodes";
 
-    public UndirectedOnlyGraphStoreValidation(String algorithm) {this.algorithm = algorithm;}
+    private final Collection<Long> sourceNodes;
+
+    public SourceNodesRequirement(Collection<Long> sourceNodes) {
+        this.sourceNodes = sourceNodes;
+    }
 
     @Override
-    public void validateAlgorithmRequirements(
+    public void validate(
         GraphStore graphStore,
         Collection<NodeLabel> selectedLabels,
         Collection<RelationshipType> selectedRelationshipTypes
     ) {
-        validateOnlyUndirected(graphStore, selectedRelationshipTypes);
-    }
-
-    void validateOnlyUndirected(GraphStore graphStore, Collection<RelationshipType> selectedRelationshipTypes) {
-        if (!graphStore.schema().filterRelationshipTypes(Set.copyOf(selectedRelationshipTypes)).isUndirected()) {
-            throw new IllegalArgumentException(formatWithLocale(
-                "The %s algorithm requires relationship projections to be UNDIRECTED. " +
-                    "Selected relationships `%s` are not all undirected.",
-                algorithm,
-                selectedRelationshipTypes.stream().map(RelationshipType::name).collect(Collectors.toSet())
-            ));
-        }
+        nodesNotNegative(sourceNodes, SOURCE_NODES_KEY);
+        ConfigNodesValidations.nodesExistInGraph(
+            graphStore,
+            selectedLabels,
+            sourceNodes,
+            SOURCE_NODES_KEY
+        );
     }
 
 }

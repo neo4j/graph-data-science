@@ -22,16 +22,36 @@ package org.neo4j.gds.core.loading.validation;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.config.ConfigNodesValidations;
 
 import java.util.Collection;
+import java.util.Set;
 
-public class NoAlgorithmValidation extends GraphStoreValidation {
+import static org.neo4j.gds.config.ConfigNodesValidations.nodesNotNegative;
+
+public class TargetNodeRequirement implements AlgorithmGraphStoreRequirements {
+
+    private static final String TARGET_NODE_KEY = "targetNode";
+
+    private final long targetNode;
+
+    public TargetNodeRequirement(long targetNode) {
+        this.targetNode = targetNode;
+    }
+
     @Override
-    protected void validateAlgorithmRequirements(
+    public void validate(
         GraphStore graphStore,
         Collection<NodeLabel> selectedLabels,
         Collection<RelationshipType> selectedRelationshipTypes
     ) {
-        // NOOP
+        nodesNotNegative(Set.of(targetNode), TARGET_NODE_KEY);
+        ConfigNodesValidations.nodeExistInGraph(
+            graphStore,
+            selectedLabels,
+            targetNode,
+            TARGET_NODE_KEY
+        );
     }
+
 }

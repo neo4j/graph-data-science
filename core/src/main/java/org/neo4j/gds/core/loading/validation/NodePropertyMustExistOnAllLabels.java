@@ -29,14 +29,14 @@ import java.util.stream.Collectors;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public class NodePropertyAllExistsGraphStoreValidation extends GraphStoreValidation {
+public class NodePropertyMustExistOnAllLabels implements AlgorithmGraphStoreRequirements {
 
     private final String nodeProperty;
 
-    public NodePropertyAllExistsGraphStoreValidation(String nodeProperty) {this.nodeProperty = nodeProperty;}
+    public NodePropertyMustExistOnAllLabels(String nodeProperty) {this.nodeProperty = nodeProperty;}
 
     @Override
-    public void validateAlgorithmRequirements(
+    public void validate(
         GraphStore graphStore,
         Collection<NodeLabel> selectedLabels,
         Collection<RelationshipType> selectedRelationshipTypes

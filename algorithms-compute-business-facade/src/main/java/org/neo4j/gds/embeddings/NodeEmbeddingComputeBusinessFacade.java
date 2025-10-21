@@ -23,9 +23,10 @@ import org.neo4j.gds.GraphParameters;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.User;
-import org.neo4j.gds.core.loading.GraphStoreCatalogService;
-import org.neo4j.gds.core.loading.validation.NoAlgorithmValidation;
 import org.neo4j.gds.core.JobId;
+import org.neo4j.gds.core.loading.GraphStoreCatalogService;
+import org.neo4j.gds.core.loading.validation.GraphStoreValidation;
+import org.neo4j.gds.core.loading.validation.NoAlgorithmRequirements;
 import org.neo4j.gds.embeddings.fastrp.FastRPParameters;
 import org.neo4j.gds.embeddings.fastrp.FastRPResult;
 import org.neo4j.gds.embeddings.hashgnn.HashGNNParameters;
@@ -78,7 +79,7 @@ public class NodeEmbeddingComputeBusinessFacade {
             graphName,
             graphParameters,
             relationshipProperty,
-            new FeaturePropertiesMustExistOnAllNodeLabels(parameters.featureProperties()),
+            new GraphStoreValidation(new FeaturePropertiesMustExistOnAllNodeLabels(parameters.featureProperties())),
             Optional.empty(),
             user,
             databaseId
@@ -107,7 +108,7 @@ public class NodeEmbeddingComputeBusinessFacade {
             graphName,
             graphParameters,
             Optional.empty(),
-            new FeaturePropertiesMustExistOnAllNodeLabels(parameters.featureProperties()),
+            new GraphStoreValidation(new FeaturePropertiesMustExistOnAllNodeLabels(parameters.featureProperties())),
             Optional.empty(),
             user,
             databaseId
@@ -136,7 +137,7 @@ public class NodeEmbeddingComputeBusinessFacade {
             graphName,
             graphParameters,
             relationshipProperty,
-            new NoAlgorithmValidation(),
+            new GraphStoreValidation(new NoAlgorithmRequirements()),
             Optional.of(new Node2VecGraphValidation(
                 parameters.samplingWalkParameters().walksPerNode(),
                 parameters.samplingWalkParameters().walkLength()

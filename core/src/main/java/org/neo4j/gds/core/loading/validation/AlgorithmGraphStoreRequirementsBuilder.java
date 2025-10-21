@@ -19,30 +19,19 @@
  */
 package org.neo4j.gds.core.loading.validation;
 
-import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.api.GraphStore;
-
 import java.util.Collection;
-import java.util.List;
+import java.util.HashSet;
 
-public final class CompoundGraphStoreValidations extends GraphStoreValidation {
+public class AlgorithmGraphStoreRequirementsBuilder {
 
-    private final List<GraphStoreValidation> graphStoreValidationList;
+    private final Collection<AlgorithmGraphStoreRequirements> requirements = new HashSet<>();
 
-    CompoundGraphStoreValidations(List<GraphStoreValidation> graphStoreValidationList) {
-        this.graphStoreValidationList = graphStoreValidationList;
+    public AlgorithmGraphStoreRequirementsBuilder withAlgorithmRequirement(AlgorithmGraphStoreRequirements graphStoreValidation) {
+        requirements.add(graphStoreValidation);
+        return this;
     }
 
-    @Override
-    protected void validateAlgorithmRequirements(
-        GraphStore graphStore,
-        Collection<NodeLabel> selectedLabels,
-        Collection<RelationshipType> selectedRelationshipTypes
-    ) {
-        for (var validation : graphStoreValidationList) {
-            validation.validateAlgorithmRequirements(graphStore, selectedLabels, selectedRelationshipTypes);
-        }
+    public GraphStoreValidation build() {
+        return new GraphStoreValidation(new CompoundAlgorithmGraphStoreRequirements(requirements));
     }
-
 }

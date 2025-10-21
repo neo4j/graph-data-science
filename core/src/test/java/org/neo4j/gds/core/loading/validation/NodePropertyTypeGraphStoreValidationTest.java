@@ -41,7 +41,7 @@ class NodePropertyTypeGraphStoreValidationTest {
         when(nodeProperty.valueType()).thenReturn(ValueType.DOUBLE);
         when(graphStore.nodeProperty(anyString())).thenReturn(nodeProperty);
 
-        var validation = new NodePropertyTypeGraphStoreValidation("p", List.of(ValueType.DOUBLE));
+        var validation = new NodePropertyTypeRequirement("p", List.of(ValueType.DOUBLE));
 
         assertThatNoException().isThrownBy(() -> validation.validatePropertyType(
             graphStore
@@ -57,7 +57,7 @@ class NodePropertyTypeGraphStoreValidationTest {
         when(nodeProperty.valueType()).thenReturn(ValueType.FLOAT_ARRAY);
         when(graphStore.nodeProperty(anyString())).thenReturn(nodeProperty);
 
-        var validation = new NodePropertyTypeGraphStoreValidation("p", List.of(ValueType.DOUBLE, ValueType.LONG));
+        var validation = new NodePropertyTypeRequirement("p", List.of(ValueType.DOUBLE, ValueType.LONG));
 
         assertThatThrownBy(() -> validation.validatePropertyType(
             graphStore

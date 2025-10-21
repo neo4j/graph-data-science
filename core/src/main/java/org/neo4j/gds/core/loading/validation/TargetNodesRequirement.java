@@ -25,32 +25,31 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.ConfigNodesValidations;
 
 import java.util.Collection;
-import java.util.Set;
 
 import static org.neo4j.gds.config.ConfigNodesValidations.nodesNotNegative;
 
-public class SourceNodeGraphStoreValidation extends GraphStoreValidation {
+public class TargetNodesRequirement implements AlgorithmGraphStoreRequirements {
 
-    private static final String SOURCE_NODE_KEY = "sourceNode";
+    private static final String TARGET_NODES_KEY = "targetNodes";
 
-    private final long sourceNode;
+    private final Collection<Long> targetNodes;
 
-    public SourceNodeGraphStoreValidation(long sourceNode) {
-        this.sourceNode = sourceNode;
+    public TargetNodesRequirement(Collection<Long> targetNodes) {
+        this.targetNodes = targetNodes;
     }
 
     @Override
-    public void validateAlgorithmRequirements(
+    public void validate(
         GraphStore graphStore,
         Collection<NodeLabel> selectedLabels,
         Collection<RelationshipType> selectedRelationshipTypes
     ) {
-        nodesNotNegative(Set.of(sourceNode), SOURCE_NODE_KEY);
-        ConfigNodesValidations.nodeExistInGraph(
+        nodesNotNegative(targetNodes, TARGET_NODES_KEY);
+        ConfigNodesValidations.nodesExistInGraph(
             graphStore,
             selectedLabels,
-            sourceNode,
-            SOURCE_NODE_KEY
+            targetNodes,
+            TARGET_NODES_KEY
         );
     }
 
