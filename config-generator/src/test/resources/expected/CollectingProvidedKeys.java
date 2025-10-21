@@ -33,7 +33,7 @@ import org.neo4j.gds.core.CypherMapWrapper;
 public final class CollectingProvidedKeysConfig implements CollectingProvidedKeys {
     private final Set<String> providedKeys;
 
-    public CollectingKeysConfig(@NotNull CypherMapAccess config) {
+    public CollectingProvidedKeysConfig(@NotNull CypherMapAccess config) {
         this.providedKeys = Set.copyOf(config.keySet());
         ArrayList<IllegalArgumentException> errors = new ArrayList<>();
         if (!errors.isEmpty()) {

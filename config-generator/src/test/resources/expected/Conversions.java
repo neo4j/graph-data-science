@@ -169,7 +169,7 @@ public final class ConversionsConfig implements Conversions.MyConversion {
         }
 
         public ConversionsConfig.Builder optional(Map optional) {
-            this.config.put("optional", optional));
+            this.config.put("optional", optional);
             return this;
         }
 

@@ -32,7 +32,7 @@ import org.neo4j.gds.core.CypherMapWrapper;
 public final class MyConfigImpl implements Ignores.MyConfig {
     private long notIgnored;
 
-    public MyConfig(@NotNull CypherMapAccess config) {
+    public MyConfigImpl(@NotNull CypherMapAccess config) {
         ArrayList<IllegalArgumentException> errors = new ArrayList<>();
         try {
             this.notIgnored = config.requireLong("notIgnored");
