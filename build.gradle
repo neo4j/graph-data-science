@@ -15,7 +15,6 @@ group = 'org.neo4j.gds'
 
 ext {
     distributionDir = "${layout.buildDirectory.get()}/distributions"
-    cliDistributionDir = "${layout.buildDirectory.get()}/distributions/estimation-cli"
     publicDir = "${project.rootDir}"
 
     checkstyleReportsDir = "${layout.buildDirectory.get()}/reports/checkstyle/"
