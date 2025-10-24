@@ -99,6 +99,13 @@ class PushbackCommunityProcedureFacadeTest {
             verify(streamFacadeMock).kMeans(graphName, config);
             //verifyNoInteractions(mutateFacadeMock, statsFacadeMock, writeFacadeMock);
         }
+
+        @Test
+        void labelPropagation() {
+            facade.labelPropagationStream(graphName, config);
+            verify(streamFacadeMock).labelPropagation(graphName, config);
+            //verifyNoInteractions(mutateFacadeMock, statsFacadeMock, writeFacadeMock);
+        }
     }
 
 }

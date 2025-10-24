@@ -329,7 +329,7 @@ public class PushbackCommunityProcedureFacade implements  CommunityProcedureFaca
         String graphName,
         Map<String, Object> configuration
     ) {
-        return Stream.empty();
+        return streamProcedureFacade.labelPropagation(graphName,configuration);
     }
 
     @Override
