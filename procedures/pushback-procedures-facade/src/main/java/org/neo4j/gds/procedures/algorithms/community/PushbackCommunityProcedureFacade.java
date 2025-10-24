@@ -164,7 +164,7 @@ public class PushbackCommunityProcedureFacade implements  CommunityProcedureFaca
 
     @Override
     public Stream<K1ColoringStreamResult> k1ColoringStream(String graphName, Map<String, Object> configuration) {
-        return Stream.empty();
+        return streamProcedureFacade.k1Coloring(graphName,configuration);
     }
 
     @Override
