@@ -61,7 +61,14 @@ class PushbackCommunityProcedureFacadeTest {
         @Test
         void cliqueCounting() {
             facade.cliqueCountingStream(graphName, config);
-            verify(streamFacadeMock).approxMaxKCut(graphName, config);
+            verify(streamFacadeMock).cliqueCounting(graphName, config);
+            //verifyNoInteractions(mutateFacadeMock, statsFacadeMock, writeFacadeMock);
+        }
+
+        @Test
+        void conductance() {
+            facade.conductanceStream(graphName, config);
+            verify(streamFacadeMock).conductance(graphName, config);
             //verifyNoInteractions(mutateFacadeMock, statsFacadeMock, writeFacadeMock);
         }
     }

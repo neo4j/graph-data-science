@@ -133,7 +133,7 @@ public class PushbackCommunityProcedureFacade implements  CommunityProcedureFaca
 
     @Override
     public Stream<ConductanceStreamResult> conductanceStream(String graphName, Map<String, Object> configuration) {
-        return Stream.empty();
+        return streamProcedureFacade.conductance(graphName,configuration);
     }
 
     @Override

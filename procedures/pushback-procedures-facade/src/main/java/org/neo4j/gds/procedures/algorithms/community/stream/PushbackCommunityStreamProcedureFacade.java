@@ -23,8 +23,11 @@ import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutStreamConfig;
 import org.neo4j.gds.cliquecounting.CliqueCountingStreamConfig;
 import org.neo4j.gds.community.CommunityComputeBusinessFacade;
+import org.neo4j.gds.conductance.ConductanceConfigTransformer;
+import org.neo4j.gds.conductance.ConductanceStreamConfig;
 import org.neo4j.gds.procedures.algorithms.community.ApproxMaxKCutStreamResult;
 import org.neo4j.gds.procedures.algorithms.community.CliqueCountingStreamResult;
+import org.neo4j.gds.procedures.algorithms.community.ConductanceStreamResult;
 import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
 
 import java.util.Map;
@@ -69,6 +72,20 @@ public class PushbackCommunityStreamProcedureFacade {
             config.jobId(),
             config.logProgress(),
             graphResources -> new CliqueCountingStreamTransformer(graphResources.graph())
+        ).join();
+    }
+
+    public Stream<ConductanceStreamResult> conductance(String graphName, Map<String, Object> configuration) {
+        var config = configurationParser.parseConfiguration(configuration, ConductanceStreamConfig::of);
+
+        return businessFacade.conductance(
+            GraphName.parse(graphName),
+            config.toGraphParameters(),
+            config.relationshipWeightProperty(),
+            ConductanceConfigTransformer.toParameters(config),
+            config.jobId(),
+            config.logProgress(),
+            graphResources -> new ConductanceStreamTransformer()
         ).join();
     }
 }
