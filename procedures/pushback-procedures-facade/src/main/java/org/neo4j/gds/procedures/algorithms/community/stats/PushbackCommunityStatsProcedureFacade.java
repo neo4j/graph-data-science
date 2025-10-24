@@ -20,9 +20,12 @@
 package org.neo4j.gds.procedures.algorithms.community.stats;
 
 import org.neo4j.gds.api.GraphName;
+import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.cliquecounting.CliqueCountingStatsConfig;
 import org.neo4j.gds.community.CommunityComputeBusinessFacade;
+import org.neo4j.gds.k1coloring.K1ColoringStatsConfig;
 import org.neo4j.gds.procedures.algorithms.community.CliqueCountingStatsResult;
+import org.neo4j.gds.procedures.algorithms.community.K1ColoringStatsResult;
 import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
 
 import java.util.Map;
@@ -32,13 +35,17 @@ public class PushbackCommunityStatsProcedureFacade {
 
     private final CommunityComputeBusinessFacade businessFacade;
     private final UserSpecificConfigurationParser configurationParser;
+    private final ProcedureReturnColumns procedureReturnColumns;
+
 
     public PushbackCommunityStatsProcedureFacade(
         CommunityComputeBusinessFacade businessFacade,
-        UserSpecificConfigurationParser configurationParser
+        UserSpecificConfigurationParser configurationParser,
+        ProcedureReturnColumns procedureReturnColumns
     ) {
         this.businessFacade = businessFacade;
         this.configurationParser = configurationParser;
+        this.procedureReturnColumns = procedureReturnColumns;
     }
 
     public Stream<CliqueCountingStatsResult> cliqueCounting(String graphName, Map<String, Object> configuration) {
@@ -54,22 +61,23 @@ public class PushbackCommunityStatsProcedureFacade {
             graphResources -> new CliqueCountingStatsResultTransformer(config.toMap())
         ).join();
     }
-    /*
-    public Stream<ConductanceStreamResult> conductance(String graphName, Map<String, Object> configuration) {
-        var config = configurationParser.parseConfiguration(configuration, ConductanceStreamConfig::of);
 
-        return businessFacade.conductance(
+    public Stream<K1ColoringStatsResult> k1Coloring(String graphName, Map<String, Object> configuration) {
+        var config = configurationParser.parseConfiguration(configuration, K1ColoringStatsConfig::of);
+
+        var parameters = config.toParameters();
+        return businessFacade.k1Coloring(
             GraphName.parse(graphName),
             config.toGraphParameters(),
-            config.relationshipWeightProperty(),
-            ConductanceConfigTransformer.toParameters(config),
+            parameters,
             config.jobId(),
             config.logProgress(),
-            graphResources -> new ConductanceStreamTransformer()
+            graphResources -> new K1ColoringStatsResultTransformer(config.toMap(), procedureReturnColumns.contains("colorCount"))
         ).join();
     }
+    /*
 
-    public Stream<HDBScanStreamResult> hdbscan(String graphName, Map<String, Object> configuration) {
+     public Stream<HDBScanStreamResult> hdbscan(String graphName, Map<String, Object> configuration) {
         var config = configurationParser.parseConfiguration(configuration, HDBScanStreamConfig::of);
 
         return businessFacade.hdbscan(
@@ -82,19 +90,6 @@ public class PushbackCommunityStatsProcedureFacade {
         ).join();
     }
 
-    public Stream<K1ColoringStreamResult> k1Coloring(String graphName, Map<String, Object> configuration) {
-        var config = configurationParser.parseConfiguration(configuration, K1ColoringStreamConfig::of);
-
-        var parameters = config.toParameters();
-        return businessFacade.k1Coloring(
-            GraphName.parse(graphName),
-            config.toGraphParameters(),
-            parameters,
-            config.jobId(),
-            config.logProgress(),
-            graphResources -> new K1ColoringCutStreamTransformer(graphResources.graph(),parameters.concurrency(),config.minCommunitySize())
-        ).join();
-    }
 
     public Stream<KCoreDecompositionStreamResult> kCore(String graphName, Map<String, Object> configuration) {
         var config = configurationParser.parseConfiguration(configuration, KCoreDecompositionStreamConfig::of);

@@ -19,34 +19,42 @@
  */
 package org.neo4j.gds.procedures.algorithms.community.stats;
 
-import org.neo4j.gds.cliqueCounting.CliqueCountingResult;
-import org.neo4j.gds.procedures.algorithms.community.CliqueCountingStatsResult;
+import org.neo4j.gds.k1coloring.K1ColoringResult;
+import org.neo4j.gds.procedures.algorithms.community.K1ColoringStatsResult;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.results.ResultTransformer;
 
-import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Stream;
 
-public class CliqueCountingStatsResultTransformer  implements ResultTransformer<TimedAlgorithmResult<CliqueCountingResult>, Stream<CliqueCountingStatsResult>> {
+public class K1ColoringStatsResultTransformer implements ResultTransformer<TimedAlgorithmResult<K1ColoringResult>, Stream<K1ColoringStatsResult>> {
 
     private final Map<String, Object> configuration;
+    private final boolean computeUsedColors;
 
-    public CliqueCountingStatsResultTransformer(Map<String, Object> configuration) {
+    public K1ColoringStatsResultTransformer(Map<String, Object> configuration, boolean computeUsedColors) {
         this.configuration = configuration;
+        this.computeUsedColors = computeUsedColors;
     }
 
     @Override
-    public Stream<CliqueCountingStatsResult> apply(TimedAlgorithmResult<CliqueCountingResult> timedAlgorithmResult) {
-        var cliqueCountingResult = timedAlgorithmResult.result();
+    public Stream<K1ColoringStatsResult> apply(TimedAlgorithmResult<K1ColoringResult> timedAlgorithmResult) {
 
-        var cliqueCountingStatsResult =  new CliqueCountingStatsResult(
+        var k1ColoringResult = timedAlgorithmResult.result();
+
+        var usedColors = (computeUsedColors) ? k1ColoringResult.usedColors().cardinality() : 0;
+
+        var k1ColoringStatsResult =  new K1ColoringStatsResult(
             0,
             timedAlgorithmResult.computeMillis(),
-            Arrays.stream(cliqueCountingResult.globalCount()).boxed().toList(),
+            k1ColoringResult.colors().size(),
+            usedColors,
+            k1ColoringResult.ranIterations(),
+            k1ColoringResult.didConverge(),
             configuration
         );
 
-        return Stream.of(cliqueCountingStatsResult);
+        return Stream.of(k1ColoringStatsResult);
+
     }
 }

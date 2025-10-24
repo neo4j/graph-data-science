@@ -195,14 +195,15 @@ class PushbackCommunityProcedureFacadeTest {
             verifyNoInteractions(streamFacadeMock);
         }
 
-        /*
-
         @Test
-        void conductance() {
-            facade.conductanceStream(graphName, config);
-            verify(statsFacadeMock).conductance(graphName, config);
+        void k1Coloring() {
+            facade.k1ColoringStats(graphName, config);
+            verify(statsFacadeMock).k1Coloring(graphName, config);
             verifyNoInteractions(streamFacadeMock);
         }
+
+        /*
+
 
         @Test
         void hdbscan() {
@@ -211,12 +212,7 @@ class PushbackCommunityProcedureFacadeTest {
             verifyNoInteractions(streamFacadeMock);
         }
 
-        @Test
-        void k1Coloring() {
-            facade.k1ColoringStream(graphName, config);
-            verify(statsFacadeMock).k1Coloring(graphName, config);
-            verifyNoInteractions(streamFacadeMock);
-        }
+
 
         @Test
         void kCore() {
