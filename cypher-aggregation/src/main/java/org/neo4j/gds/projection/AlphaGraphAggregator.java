@@ -71,7 +71,8 @@ public class AlphaGraphAggregator extends GraphAggregator {
                 NoValue.NO_VALUE
             );
         } catch (Exception e) {
-            throw ProcedureException.generalProcedureException(
+            throw ProcedureException.invocationFailed(
+                "function",
                 CypherAggregation.FUNCTION_NAME.name(),
                 e
             );
