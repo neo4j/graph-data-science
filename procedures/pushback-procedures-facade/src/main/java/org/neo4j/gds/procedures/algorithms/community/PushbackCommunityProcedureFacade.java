@@ -20,12 +20,20 @@
 package org.neo4j.gds.procedures.algorithms.community;
 
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
+import org.neo4j.gds.procedures.algorithms.community.stream.PushbackCommunityStreamProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.community.stubs.CommunityStubs;
 
 import java.util.Map;
 import java.util.stream.Stream;
 
 public class PushbackCommunityProcedureFacade implements  CommunityProcedureFacade{
+
+    private final PushbackCommunityStreamProcedureFacade streamProcedureFacade;
+
+    public PushbackCommunityProcedureFacade(PushbackCommunityStreamProcedureFacade streamProcedureFacade) {
+        this.streamProcedureFacade = streamProcedureFacade;
+    }
+
     @Override
     public CommunityStubs communityStubs() {
         return null;
@@ -49,7 +57,7 @@ public class PushbackCommunityProcedureFacade implements  CommunityProcedureFaca
 
     @Override
     public Stream<ApproxMaxKCutStreamResult> approxMaxKCutStream(String graphName, Map<String, Object> configuration) {
-        return Stream.empty();
+        return  streamProcedureFacade.approxMaxKCut(graphName, configuration);
     }
 
     @Override
