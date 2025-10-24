@@ -32,6 +32,7 @@ import org.neo4j.gds.kmeans.KmeansStreamConfig;
 import org.neo4j.gds.labelpropagation.LabelPropagationStreamConfig;
 import org.neo4j.gds.leiden.LeidenStreamConfig;
 import org.neo4j.gds.louvain.LouvainStreamConfig;
+import org.neo4j.gds.modularity.ModularityStreamConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationStreamConfig;
 import org.neo4j.gds.procedures.algorithms.community.ApproxMaxKCutStreamResult;
 import org.neo4j.gds.procedures.algorithms.community.CliqueCountingStreamResult;
@@ -45,6 +46,7 @@ import org.neo4j.gds.procedures.algorithms.community.LeidenStreamResult;
 import org.neo4j.gds.procedures.algorithms.community.LocalClusteringCoefficientStreamResult;
 import org.neo4j.gds.procedures.algorithms.community.LouvainStreamResult;
 import org.neo4j.gds.procedures.algorithms.community.ModularityOptimizationStreamResult;
+import org.neo4j.gds.procedures.algorithms.community.ModularityStreamResult;
 import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientStreamConfig;
 
@@ -234,5 +236,18 @@ public class PushbackCommunityStreamProcedureFacade {
         ).join();
     }
 
+    public Stream<ModularityStreamResult> modularity(String graphName, Map<String, Object> configuration) {
+        var config = configurationParser.parseConfiguration(configuration, ModularityStreamConfig::of);
+
+        var parameters = config.toParameters();
+        return businessFacade.modularity(
+            GraphName.parse(graphName),
+            config.toGraphParameters(),
+            config.relationshipWeightProperty(),
+            parameters,
+            config.jobId(),
+            graphResources -> new ModularityStreamTransformer()
+        ).join();
+    }
 
 }

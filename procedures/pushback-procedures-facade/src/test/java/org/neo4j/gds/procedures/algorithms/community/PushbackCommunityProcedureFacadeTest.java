@@ -134,6 +134,13 @@ class PushbackCommunityProcedureFacadeTest {
             verify(streamFacadeMock).modularityOptimization(graphName, config);
             //verifyNoInteractions(mutateFacadeMock, statsFacadeMock, writeFacadeMock);
         }
+
+        @Test
+        void modularity() {
+            facade.modularityStream(graphName, config);
+            verify(streamFacadeMock).modularity(graphName, config);
+            //verifyNoInteractions(mutateFacadeMock, statsFacadeMock, writeFacadeMock);
+        }
     }
 
 }
