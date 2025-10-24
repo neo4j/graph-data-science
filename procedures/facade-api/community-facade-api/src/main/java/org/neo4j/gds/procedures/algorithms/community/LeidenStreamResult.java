@@ -26,7 +26,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public record LeidenStreamResult(long nodeId, @Nullable List<Long> intermediateCommunityIds, long communityId) {
-    static LeidenStreamResult create(long nodeId, long @Nullable [] intermediateCommunityIdsArray, long communityId) {
+    public static LeidenStreamResult create(
+        long nodeId,
+        long @Nullable [] intermediateCommunityIdsArray,
+        long communityId
+    ) {
         List<Long> intermediateCommunityIdsList = intermediateCommunityIdsArray == null
             ? null
             : Arrays.stream(intermediateCommunityIdsArray).boxed().collect(Collectors.toList());
