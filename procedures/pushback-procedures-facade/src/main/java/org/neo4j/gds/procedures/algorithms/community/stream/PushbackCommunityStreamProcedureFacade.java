@@ -38,7 +38,9 @@ import org.neo4j.gds.procedures.algorithms.community.K1ColoringStreamResult;
 import org.neo4j.gds.procedures.algorithms.community.KCoreDecompositionStreamResult;
 import org.neo4j.gds.procedures.algorithms.community.KMeansStreamResult;
 import org.neo4j.gds.procedures.algorithms.community.LabelPropagationStreamResult;
+import org.neo4j.gds.procedures.algorithms.community.LocalClusteringCoefficientStreamResult;
 import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
+import org.neo4j.gds.triangle.LocalClusteringCoefficientStreamConfig;
 
 import java.util.Map;
 import java.util.stream.Stream;
@@ -165,6 +167,19 @@ public class PushbackCommunityStreamProcedureFacade {
             config.jobId(),
             config.logProgress(),
             graphResources -> new LabelPropagationStreamTransformer(graphResources.graph(), parameters.concurrency(),config.minCommunitySize(),config.consecutiveIds())
+        ).join();
+    }
+
+    public Stream<LocalClusteringCoefficientStreamResult> lcc(String graphName, Map<String, Object> configuration) {
+        var config = configurationParser.parseConfiguration(configuration, LocalClusteringCoefficientStreamConfig::of);
+
+        return businessFacade.lcc(
+            GraphName.parse(graphName),
+            config.toGraphParameters(),
+            config.toParameters(),
+            config.jobId(),
+            config.logProgress(),
+            graphResources -> new LccStreamTransformer(graphResources.graph())
         ).join();
     }
 

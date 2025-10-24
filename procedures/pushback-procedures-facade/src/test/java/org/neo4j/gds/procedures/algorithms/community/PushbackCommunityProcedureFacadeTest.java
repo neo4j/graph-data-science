@@ -106,6 +106,13 @@ class PushbackCommunityProcedureFacadeTest {
             verify(streamFacadeMock).labelPropagation(graphName, config);
             //verifyNoInteractions(mutateFacadeMock, statsFacadeMock, writeFacadeMock);
         }
+
+        @Test
+        void lcc() {
+            facade.localClusteringCoefficientStream(graphName, config);
+            verify(streamFacadeMock).lcc(graphName, config);
+            //verifyNoInteractions(mutateFacadeMock, statsFacadeMock, writeFacadeMock);
+        }
     }
 
 }
