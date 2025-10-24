@@ -141,6 +141,20 @@ class PushbackCommunityProcedureFacadeTest {
             verify(streamFacadeMock).modularity(graphName, config);
             //verifyNoInteractions(mutateFacadeMock, statsFacadeMock, writeFacadeMock);
         }
+
+        @Test
+        void scc() {
+            facade.sccStream(graphName, config);
+            verify(streamFacadeMock).scc(graphName, config);
+            //verifyNoInteractions(mutateFacadeMock, statsFacadeMock, writeFacadeMock);
+        }
+
+        @Test
+        void wcc() {
+            facade.wccStream(graphName, config);
+            verify(streamFacadeMock).wcc(graphName, config);
+            //verifyNoInteractions(mutateFacadeMock, statsFacadeMock, writeFacadeMock);
+        }
     }
 
 }

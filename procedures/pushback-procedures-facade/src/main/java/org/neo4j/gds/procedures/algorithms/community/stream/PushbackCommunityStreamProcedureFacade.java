@@ -47,8 +47,12 @@ import org.neo4j.gds.procedures.algorithms.community.LocalClusteringCoefficientS
 import org.neo4j.gds.procedures.algorithms.community.LouvainStreamResult;
 import org.neo4j.gds.procedures.algorithms.community.ModularityOptimizationStreamResult;
 import org.neo4j.gds.procedures.algorithms.community.ModularityStreamResult;
+import org.neo4j.gds.procedures.algorithms.community.SccStreamResult;
+import org.neo4j.gds.procedures.algorithms.community.WccStreamResult;
 import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
+import org.neo4j.gds.scc.SccStreamConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientStreamConfig;
+import org.neo4j.gds.wcc.WccStreamConfig;
 
 import java.util.Map;
 import java.util.stream.Stream;
@@ -239,14 +243,42 @@ public class PushbackCommunityStreamProcedureFacade {
     public Stream<ModularityStreamResult> modularity(String graphName, Map<String, Object> configuration) {
         var config = configurationParser.parseConfiguration(configuration, ModularityStreamConfig::of);
 
-        var parameters = config.toParameters();
         return businessFacade.modularity(
+            GraphName.parse(graphName),
+            config.toGraphParameters(),
+            config.relationshipWeightProperty(),
+            config.toParameters(),
+            config.jobId(),
+            graphResources -> new ModularityStreamTransformer()
+        ).join();
+    }
+
+    public Stream<SccStreamResult> scc(String graphName, Map<String, Object> configuration) {
+        var config = configurationParser.parseConfiguration(configuration, SccStreamConfig::of);
+
+        var parameters = config.toParameters();
+        return businessFacade.scc(
+            GraphName.parse(graphName),
+            config.toGraphParameters(),
+            parameters,
+            config.jobId(),
+            config.logProgress(),
+            (graphResources)-> new SccStreamTransformer(graphResources.graph(), parameters.concurrency(),config.consecutiveIds())
+        ).join();
+    }
+
+    public Stream<WccStreamResult> wcc(String graphName, Map<String, Object> configuration) {
+        var config = configurationParser.parseConfiguration(configuration, WccStreamConfig::of);
+
+        var parameters = config.toParameters();
+        return businessFacade.wcc(
             GraphName.parse(graphName),
             config.toGraphParameters(),
             config.relationshipWeightProperty(),
             parameters,
             config.jobId(),
-            graphResources -> new ModularityStreamTransformer()
+            config.logProgress(),
+            (graphResources)-> new WccStreamTransformer(graphResources.graph(), parameters.concurrency(),config.minCommunitySize(),config.consecutiveIds())
         ).join();
     }
 
