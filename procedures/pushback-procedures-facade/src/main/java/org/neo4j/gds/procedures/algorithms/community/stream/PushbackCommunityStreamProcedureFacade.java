@@ -25,9 +25,11 @@ import org.neo4j.gds.cliquecounting.CliqueCountingStreamConfig;
 import org.neo4j.gds.community.CommunityComputeBusinessFacade;
 import org.neo4j.gds.conductance.ConductanceConfigTransformer;
 import org.neo4j.gds.conductance.ConductanceStreamConfig;
+import org.neo4j.gds.hdbscan.HDBScanStreamConfig;
 import org.neo4j.gds.procedures.algorithms.community.ApproxMaxKCutStreamResult;
 import org.neo4j.gds.procedures.algorithms.community.CliqueCountingStreamResult;
 import org.neo4j.gds.procedures.algorithms.community.ConductanceStreamResult;
+import org.neo4j.gds.procedures.algorithms.community.HDBScanStreamResult;
 import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
 
 import java.util.Map;
@@ -86,6 +88,19 @@ public class PushbackCommunityStreamProcedureFacade {
             config.jobId(),
             config.logProgress(),
             graphResources -> new ConductanceStreamTransformer()
+        ).join();
+    }
+
+    public Stream<HDBScanStreamResult> hdbscan(String graphName, Map<String, Object> configuration) {
+        var config = configurationParser.parseConfiguration(configuration, HDBScanStreamConfig::of);
+
+        return businessFacade.hdbscan(
+            GraphName.parse(graphName),
+            config.toGraphParameters(),
+            config.toParameters(),
+            config.jobId(),
+            config.logProgress(),
+            graphResources -> new HDBScanStreamTransformer(graphResources.graph())
         ).join();
     }
 }

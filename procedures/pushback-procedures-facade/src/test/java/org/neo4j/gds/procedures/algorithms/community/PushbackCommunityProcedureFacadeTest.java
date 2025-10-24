@@ -71,6 +71,13 @@ class PushbackCommunityProcedureFacadeTest {
             verify(streamFacadeMock).conductance(graphName, config);
             //verifyNoInteractions(mutateFacadeMock, statsFacadeMock, writeFacadeMock);
         }
+
+        @Test
+        void hdbscan() {
+            facade.hdbscanStream(graphName, config);
+            verify(streamFacadeMock).hdbscan(graphName, config);
+            //verifyNoInteractions(mutateFacadeMock, statsFacadeMock, writeFacadeMock);
+        }
     }
 
 }
