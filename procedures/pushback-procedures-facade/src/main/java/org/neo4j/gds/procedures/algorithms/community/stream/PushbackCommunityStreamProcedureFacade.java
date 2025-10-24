@@ -30,6 +30,9 @@ import org.neo4j.gds.k1coloring.K1ColoringStreamConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionStreamConfig;
 import org.neo4j.gds.kmeans.KmeansStreamConfig;
 import org.neo4j.gds.labelpropagation.LabelPropagationStreamConfig;
+import org.neo4j.gds.leiden.LeidenStreamConfig;
+import org.neo4j.gds.louvain.LouvainStreamConfig;
+import org.neo4j.gds.modularityoptimization.ModularityOptimizationStreamConfig;
 import org.neo4j.gds.procedures.algorithms.community.ApproxMaxKCutStreamResult;
 import org.neo4j.gds.procedures.algorithms.community.CliqueCountingStreamResult;
 import org.neo4j.gds.procedures.algorithms.community.ConductanceStreamResult;
@@ -38,7 +41,10 @@ import org.neo4j.gds.procedures.algorithms.community.K1ColoringStreamResult;
 import org.neo4j.gds.procedures.algorithms.community.KCoreDecompositionStreamResult;
 import org.neo4j.gds.procedures.algorithms.community.KMeansStreamResult;
 import org.neo4j.gds.procedures.algorithms.community.LabelPropagationStreamResult;
+import org.neo4j.gds.procedures.algorithms.community.LeidenStreamResult;
 import org.neo4j.gds.procedures.algorithms.community.LocalClusteringCoefficientStreamResult;
+import org.neo4j.gds.procedures.algorithms.community.LouvainStreamResult;
+import org.neo4j.gds.procedures.algorithms.community.ModularityOptimizationStreamResult;
 import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientStreamConfig;
 
@@ -182,5 +188,51 @@ public class PushbackCommunityStreamProcedureFacade {
             graphResources -> new LccStreamTransformer(graphResources.graph())
         ).join();
     }
+
+    public Stream<LeidenStreamResult> leiden(String graphName, Map<String, Object> configuration) {
+        var config = configurationParser.parseConfiguration(configuration, LeidenStreamConfig::of);
+
+        var parameters = config.toParameters();
+        return businessFacade.leiden(
+            GraphName.parse(graphName),
+            config.toGraphParameters(),
+            config.relationshipWeightProperty(),
+            parameters,
+            config.jobId(),
+            config.logProgress(),
+            graphResources -> new LeidenStreamTransformer(graphResources.graph(), parameters.concurrency(),config.minCommunitySize(),config.consecutiveIds(),config.includeIntermediateCommunities())
+        ).join();
+    }
+
+    public Stream<LouvainStreamResult> louvain(String graphName, Map<String, Object> configuration) {
+        var config = configurationParser.parseConfiguration(configuration, LouvainStreamConfig::of);
+
+        var parameters = config.toParameters();
+        return businessFacade.louvain(
+            GraphName.parse(graphName),
+            config.toGraphParameters(),
+            config.relationshipWeightProperty(),
+            parameters,
+            config.jobId(),
+            config.logProgress(),
+            graphResources -> new LouvainStreamTransformer(graphResources.graph(), parameters.concurrency(),config.minCommunitySize(),config.consecutiveIds(),config.includeIntermediateCommunities())
+        ).join();
+    }
+
+    public Stream<ModularityOptimizationStreamResult> modularityOptimization(String graphName, Map<String, Object> configuration) {
+        var config = configurationParser.parseConfiguration(configuration, ModularityOptimizationStreamConfig::of);
+
+        var parameters = config.toParameters();
+        return businessFacade.modularityOptimization(
+            GraphName.parse(graphName),
+            config.toGraphParameters(),
+            config.relationshipWeightProperty(),
+            parameters,
+            config.jobId(),
+            config.logProgress(),
+            graphResources -> new ModularityOptimizationStreamTransformer(graphResources.graph(), parameters.concurrency(),config.minCommunitySize(),config.consecutiveIds())
+        ).join();
+    }
+
 
 }

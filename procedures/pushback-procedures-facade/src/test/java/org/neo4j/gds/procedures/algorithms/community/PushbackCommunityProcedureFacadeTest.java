@@ -113,6 +113,27 @@ class PushbackCommunityProcedureFacadeTest {
             verify(streamFacadeMock).lcc(graphName, config);
             //verifyNoInteractions(mutateFacadeMock, statsFacadeMock, writeFacadeMock);
         }
+
+        @Test
+        void leiden() {
+            facade.leidenStream(graphName, config);
+            verify(streamFacadeMock).leiden(graphName, config);
+            //verifyNoInteractions(mutateFacadeMock, statsFacadeMock, writeFacadeMock);
+        }
+
+        @Test
+        void louvain() {
+            facade.louvainStream(graphName, config);
+            verify(streamFacadeMock).louvain(graphName, config);
+            //verifyNoInteractions(mutateFacadeMock, statsFacadeMock, writeFacadeMock);
+        }
+
+        @Test
+        void modularityOptimization() {
+            facade.modularityOptimizationStream(graphName, config);
+            verify(streamFacadeMock).modularityOptimization(graphName, config);
+            //verifyNoInteractions(mutateFacadeMock, statsFacadeMock, writeFacadeMock);
+        }
     }
 
 }
