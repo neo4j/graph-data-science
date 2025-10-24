@@ -27,11 +27,17 @@ import org.neo4j.gds.k1coloring.K1ColoringStatsConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionStatsConfig;
 import org.neo4j.gds.kmeans.KmeansStatsConfig;
 import org.neo4j.gds.labelpropagation.LabelPropagationStatsConfig;
+import org.neo4j.gds.leiden.LeidenStatsConfig;
+import org.neo4j.gds.louvain.LouvainStatsConfig;
+import org.neo4j.gds.modularityoptimization.ModularityOptimizationStatsConfig;
 import org.neo4j.gds.procedures.algorithms.community.CliqueCountingStatsResult;
 import org.neo4j.gds.procedures.algorithms.community.K1ColoringStatsResult;
 import org.neo4j.gds.procedures.algorithms.community.KCoreDecompositionStatsResult;
 import org.neo4j.gds.procedures.algorithms.community.KmeansStatsResult;
 import org.neo4j.gds.procedures.algorithms.community.LabelPropagationStatsResult;
+import org.neo4j.gds.procedures.algorithms.community.LeidenStatsResult;
+import org.neo4j.gds.procedures.algorithms.community.LouvainStatsResult;
+import org.neo4j.gds.procedures.algorithms.community.ModularityOptimizationStatsResult;
 import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
 
 import java.util.Map;
@@ -128,6 +134,57 @@ public class PushbackCommunityStatsProcedureFacade {
         ).join();
     }
 
+    public Stream<LeidenStatsResult> leiden(String graphName, Map<String, Object> configuration) {
+        var config = configurationParser.parseConfiguration(configuration, LeidenStatsConfig::of);
+
+        var statisticsInstructions =  ProcedureStatisticsComputationInstructions.forCommunities(procedureReturnColumns);
+
+
+        var parameters = config.toParameters();
+        return businessFacade.leiden(
+            GraphName.parse(graphName),
+            config.toGraphParameters(),
+            config.relationshipWeightProperty(),
+            parameters,
+            config.jobId(),
+            config.logProgress(),
+            graphResources -> new LeidenStatsResultTransformer(config.toMap(),statisticsInstructions,parameters.concurrency())
+        ).join();
+    }
+
+    public Stream<LouvainStatsResult> louvain(String graphName, Map<String, Object> configuration) {
+        var config = configurationParser.parseConfiguration(configuration, LouvainStatsConfig::of);
+        var statisticsInstructions =  ProcedureStatisticsComputationInstructions.forCommunities(procedureReturnColumns);
+
+        var parameters = config.toParameters();
+        return businessFacade.louvain(
+            GraphName.parse(graphName),
+            config.toGraphParameters(),
+            config.relationshipWeightProperty(),
+            parameters,
+            config.jobId(),
+            config.logProgress(),
+            graphResources -> new LouvainStatsResultTransformer(config.toMap(),statisticsInstructions,parameters.concurrency())
+        ).join();
+    }
+
+    public Stream<ModularityOptimizationStatsResult> modularityOptimization(String graphName, Map<String, Object> configuration) {
+        var config = configurationParser.parseConfiguration(configuration, ModularityOptimizationStatsConfig::of);
+
+        var statisticsInstructions =  ProcedureStatisticsComputationInstructions.forCommunities(procedureReturnColumns);
+
+        var parameters = config.toParameters();
+        return businessFacade.modularityOptimization(
+            GraphName.parse(graphName),
+            config.toGraphParameters(),
+            config.relationshipWeightProperty(),
+            parameters,
+            config.jobId(),
+            config.logProgress(),
+            graphResources -> new ModularityOptimizationStatsResultTransformer(config.toMap(),statisticsInstructions,parameters.concurrency())
+        ).join();
+    }
+
 
     /*
 
@@ -157,50 +214,6 @@ public class PushbackCommunityStatsProcedureFacade {
         ).join();
     }
 
-    public Stream<LeidenStreamResult> leiden(String graphName, Map<String, Object> configuration) {
-        var config = configurationParser.parseConfiguration(configuration, LeidenStreamConfig::of);
-
-        var parameters = config.toParameters();
-        return businessFacade.leiden(
-            GraphName.parse(graphName),
-            config.toGraphParameters(),
-            config.relationshipWeightProperty(),
-            parameters,
-            config.jobId(),
-            config.logProgress(),
-            graphResources -> new LeidenStreamTransformer(graphResources.graph(), parameters.concurrency(),config.minCommunitySize(),config.consecutiveIds(),config.includeIntermediateCommunities())
-        ).join();
-    }
-
-    public Stream<LouvainStreamResult> louvain(String graphName, Map<String, Object> configuration) {
-        var config = configurationParser.parseConfiguration(configuration, LouvainStreamConfig::of);
-
-        var parameters = config.toParameters();
-        return businessFacade.louvain(
-            GraphName.parse(graphName),
-            config.toGraphParameters(),
-            config.relationshipWeightProperty(),
-            parameters,
-            config.jobId(),
-            config.logProgress(),
-            graphResources -> new LouvainStreamTransformer(graphResources.graph(), parameters.concurrency(),config.minCommunitySize(),config.consecutiveIds(),config.includeIntermediateCommunities())
-        ).join();
-    }
-
-    public Stream<ModularityOptimizationStreamResult> modularityOptimization(String graphName, Map<String, Object> configuration) {
-        var config = configurationParser.parseConfiguration(configuration, ModularityOptimizationStreamConfig::of);
-
-        var parameters = config.toParameters();
-        return businessFacade.modularityOptimization(
-            GraphName.parse(graphName),
-            config.toGraphParameters(),
-            config.relationshipWeightProperty(),
-            parameters,
-            config.jobId(),
-            config.logProgress(),
-            graphResources -> new ModularityOptimizationStreamTransformer(graphResources.graph(), parameters.concurrency(),config.minCommunitySize(),config.consecutiveIds())
-        ).join();
-    }
 
     public Stream<ModularityStreamResult> modularity(String graphName, Map<String, Object> configuration) {
         var config = configurationParser.parseConfiguration(configuration, ModularityStreamConfig::of);

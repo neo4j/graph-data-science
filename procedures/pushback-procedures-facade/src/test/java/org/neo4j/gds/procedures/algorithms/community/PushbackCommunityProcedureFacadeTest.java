@@ -223,6 +223,27 @@ class PushbackCommunityProcedureFacadeTest {
             verifyNoInteractions(streamFacadeMock);
         }
 
+        @Test
+        void leiden() {
+            facade.leidenStats(graphName, config);
+            verify(statsFacadeMock).leiden(graphName, config);
+            verifyNoInteractions(streamFacadeMock);
+        }
+
+        @Test
+        void louvain() {
+            facade.louvainStats(graphName, config);
+            verify(statsFacadeMock).louvain(graphName, config);
+            verifyNoInteractions(streamFacadeMock);
+        }
+
+        @Test
+        void modularityOptimization() {
+            facade.modularityOptimizationStats(graphName, config);
+            verify(statsFacadeMock).modularityOptimization(graphName, config);
+            verifyNoInteractions(streamFacadeMock);
+        }
+
         /*
 
         @Test
@@ -241,26 +262,6 @@ class PushbackCommunityProcedureFacadeTest {
             verifyNoInteractions(streamFacadeMock);
         }
 
-        @Test
-        void leiden() {
-            facade.leidenStream(graphName, config);
-            verify(statsFacadeMock).leiden(graphName, config);
-            verifyNoInteractions(streamFacadeMock);
-        }
-
-        @Test
-        void louvain() {
-            facade.louvainStream(graphName, config);
-            verify(statsFacadeMock).louvain(graphName, config);
-            verifyNoInteractions(streamFacadeMock);
-        }
-
-        @Test
-        void modularityOptimization() {
-            facade.modularityOptimizationStream(graphName, config);
-            verify(statsFacadeMock).modularityOptimization(graphName, config);
-            verifyNoInteractions(streamFacadeMock);
-        }
 
         @Test
         void modularity() {

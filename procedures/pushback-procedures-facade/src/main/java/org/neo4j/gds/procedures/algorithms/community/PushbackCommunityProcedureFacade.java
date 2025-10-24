@@ -440,7 +440,8 @@ public class PushbackCommunityProcedureFacade implements  CommunityProcedureFaca
 
     @Override
     public Stream<LeidenStatsResult> leidenStats(String graphName, Map<String, Object> configuration) {
-        return Stream.empty();
+        return statsProcedureFacade.leiden(graphName, configuration);
+
     }
 
     @Override
@@ -492,7 +493,8 @@ public class PushbackCommunityProcedureFacade implements  CommunityProcedureFaca
 
     @Override
     public Stream<LouvainStatsResult> louvainStats(String graphName, Map<String, Object> configuration) {
-        return Stream.empty();
+        return statsProcedureFacade.louvain(graphName, configuration);
+
     }
 
     @Override
@@ -576,7 +578,8 @@ public class PushbackCommunityProcedureFacade implements  CommunityProcedureFaca
         String graphName,
         Map<String, Object> configuration
     ) {
-        return Stream.empty();
+        return statsProcedureFacade.modularityOptimization(graphName, configuration);
+
     }
 
     @Override
