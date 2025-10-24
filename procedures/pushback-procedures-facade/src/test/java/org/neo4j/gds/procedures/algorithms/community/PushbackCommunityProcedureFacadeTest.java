@@ -85,6 +85,13 @@ class PushbackCommunityProcedureFacadeTest {
             verify(streamFacadeMock).k1Coloring(graphName, config);
             //verifyNoInteractions(mutateFacadeMock, statsFacadeMock, writeFacadeMock);
         }
+
+        @Test
+        void kCore() {
+            facade.kCoreStream(graphName, config);
+            verify(streamFacadeMock).kCore(graphName, config);
+            //verifyNoInteractions(mutateFacadeMock, statsFacadeMock, writeFacadeMock);
+        }
     }
 
 }

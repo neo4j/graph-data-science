@@ -27,11 +27,13 @@ import org.neo4j.gds.conductance.ConductanceConfigTransformer;
 import org.neo4j.gds.conductance.ConductanceStreamConfig;
 import org.neo4j.gds.hdbscan.HDBScanStreamConfig;
 import org.neo4j.gds.k1coloring.K1ColoringStreamConfig;
+import org.neo4j.gds.kcore.KCoreDecompositionStreamConfig;
 import org.neo4j.gds.procedures.algorithms.community.ApproxMaxKCutStreamResult;
 import org.neo4j.gds.procedures.algorithms.community.CliqueCountingStreamResult;
 import org.neo4j.gds.procedures.algorithms.community.ConductanceStreamResult;
 import org.neo4j.gds.procedures.algorithms.community.HDBScanStreamResult;
 import org.neo4j.gds.procedures.algorithms.community.K1ColoringStreamResult;
+import org.neo4j.gds.procedures.algorithms.community.KCoreDecompositionStreamResult;
 import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
 
 import java.util.Map;
@@ -117,6 +119,19 @@ public class PushbackCommunityStreamProcedureFacade {
             config.jobId(),
             config.logProgress(),
             graphResources -> new K1ColoringCutStreamTransformer(graphResources.graph(),parameters.concurrency(),config.minCommunitySize())
+        ).join();
+    }
+
+    public Stream<KCoreDecompositionStreamResult> kCore(String graphName, Map<String, Object> configuration) {
+        var config = configurationParser.parseConfiguration(configuration, KCoreDecompositionStreamConfig::of);
+
+        return businessFacade.kCoreDecomposition(
+            GraphName.parse(graphName),
+            config.toGraphParameters(),
+            config.toParameters(),
+            config.jobId(),
+            config.logProgress(),
+            graphResources -> new KCoreStreamTransformer(graphResources.graph())
         ).join();
     }
 
