@@ -21,8 +21,10 @@ package org.neo4j.gds.procedures.algorithms.community.stream;
 
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutStreamConfig;
+import org.neo4j.gds.cliquecounting.CliqueCountingStreamConfig;
 import org.neo4j.gds.community.CommunityComputeBusinessFacade;
 import org.neo4j.gds.procedures.algorithms.community.ApproxMaxKCutStreamResult;
+import org.neo4j.gds.procedures.algorithms.community.CliqueCountingStreamResult;
 import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
 
 import java.util.Map;
@@ -53,6 +55,20 @@ public class PushbackCommunityStreamProcedureFacade {
             config.jobId(),
             config.logProgress(),
             graphResources -> new ApproxMaxKCutStreamTransformer(graphResources.graph(), parameters.concurrency(),config.minCommunitySize())
+        ).join();
+    }
+
+    public Stream<CliqueCountingStreamResult> cliqueCounting(String graphName, Map<String, Object> configuration) {
+        var config = configurationParser.parseConfiguration(configuration, CliqueCountingStreamConfig::of);
+
+        var parameters = config.toParameters();
+        return businessFacade.cliqueCounting(
+            GraphName.parse(graphName),
+            config.toGraphParameters(),
+            parameters,
+            config.jobId(),
+            config.logProgress(),
+            graphResources -> new CliqueCountingStreamTransformer(graphResources.graph())
         ).join();
     }
 }

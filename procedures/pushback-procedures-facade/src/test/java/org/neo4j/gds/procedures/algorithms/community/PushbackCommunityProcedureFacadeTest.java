@@ -50,9 +50,17 @@ class PushbackCommunityProcedureFacadeTest {
     }
     @Nested
     class Stream {
+
         @Test
         void approxMaxKCut() {
             facade.approxMaxKCutStream(graphName, config);
+            verify(streamFacadeMock).approxMaxKCut(graphName, config);
+            //verifyNoInteractions(mutateFacadeMock, statsFacadeMock, writeFacadeMock);
+        }
+
+        @Test
+        void cliqueCounting() {
+            facade.cliqueCountingStream(graphName, config);
             verify(streamFacadeMock).approxMaxKCut(graphName, config);
             //verifyNoInteractions(mutateFacadeMock, statsFacadeMock, writeFacadeMock);
         }
