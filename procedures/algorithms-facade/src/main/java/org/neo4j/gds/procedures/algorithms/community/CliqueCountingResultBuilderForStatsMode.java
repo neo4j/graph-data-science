@@ -46,7 +46,6 @@ class CliqueCountingResultBuilderForStatsMode implements StatsResultBuilder<Cliq
 
         var cliqueCountingStatsResult =  CliqueCountingStatsResult.create(
             timings,
-            graph.nodeCount(),
             cliqueCountingResult.globalCount(),
             configuration.toMap()
         );

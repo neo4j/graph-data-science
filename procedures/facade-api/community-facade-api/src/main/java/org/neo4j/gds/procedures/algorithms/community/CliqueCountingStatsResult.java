@@ -37,7 +37,6 @@ public record CliqueCountingStatsResult(
 
     public static CliqueCountingStatsResult create(
         AlgorithmProcessingTimings timings,
-        long nodeCount,
         long[] globalCount,
         Map<String, Object> configurationMap
     ) {

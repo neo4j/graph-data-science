@@ -20,6 +20,7 @@
 package org.neo4j.gds.procedures.algorithms.community;
 
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
+import org.neo4j.gds.procedures.algorithms.community.stats.PushbackCommunityStatsProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.community.stream.PushbackCommunityStreamProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.community.stubs.CommunityStubs;
 
@@ -29,9 +30,13 @@ import java.util.stream.Stream;
 public class PushbackCommunityProcedureFacade implements  CommunityProcedureFacade{
 
     private final PushbackCommunityStreamProcedureFacade streamProcedureFacade;
+    private final PushbackCommunityStatsProcedureFacade statsProcedureFacade;
 
-    public PushbackCommunityProcedureFacade(PushbackCommunityStreamProcedureFacade streamProcedureFacade) {
+    public PushbackCommunityProcedureFacade(PushbackCommunityStreamProcedureFacade streamProcedureFacade,
+        PushbackCommunityStatsProcedureFacade statsProcedureFacade
+    ) {
         this.streamProcedureFacade = streamProcedureFacade;
+        this.statsProcedureFacade = statsProcedureFacade;
     }
 
     @Override
@@ -91,7 +96,7 @@ public class PushbackCommunityProcedureFacade implements  CommunityProcedureFaca
 
     @Override
     public Stream<CliqueCountingStatsResult> cliqueCountingStats(String graphName, Map<String, Object> configuration) {
-        return Stream.empty();
+        return statsProcedureFacade.cliqueCounting(graphName,configuration);
     }
 
     @Override
