@@ -702,7 +702,7 @@ public class PushbackCommunityProcedureFacade implements  CommunityProcedureFaca
 
     @Override
     public Stream<TriangleCountStreamResult> triangleCountStream(String graphName, Map<String, Object> configuration) {
-        return Stream.empty();
+        return streamProcedureFacade.triangleCount(graphName, configuration);
     }
 
     @Override
@@ -728,7 +728,7 @@ public class PushbackCommunityProcedureFacade implements  CommunityProcedureFaca
 
     @Override
     public Stream<TriangleStreamResult> trianglesStream(String graphName, Map<String, Object> configuration) {
-        return Stream.empty();
+        return streamProcedureFacade.triangles(graphName,configuration);
     }
 
     @Override

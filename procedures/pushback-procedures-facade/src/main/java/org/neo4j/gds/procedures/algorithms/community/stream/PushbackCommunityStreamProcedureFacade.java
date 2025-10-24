@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.procedures.algorithms.community.stream;
 
+import org.neo4j.gds.api.CloseableResourceRegistry;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutStreamConfig;
 import org.neo4j.gds.cliquecounting.CliqueCountingStreamConfig;
@@ -48,10 +49,13 @@ import org.neo4j.gds.procedures.algorithms.community.LouvainStreamResult;
 import org.neo4j.gds.procedures.algorithms.community.ModularityOptimizationStreamResult;
 import org.neo4j.gds.procedures.algorithms.community.ModularityStreamResult;
 import org.neo4j.gds.procedures.algorithms.community.SccStreamResult;
+import org.neo4j.gds.procedures.algorithms.community.TriangleCountStreamResult;
+import org.neo4j.gds.procedures.algorithms.community.TriangleStreamResult;
 import org.neo4j.gds.procedures.algorithms.community.WccStreamResult;
 import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
 import org.neo4j.gds.scc.SccStreamConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientStreamConfig;
+import org.neo4j.gds.triangle.TriangleCountStreamConfig;
 import org.neo4j.gds.wcc.WccStreamConfig;
 
 import java.util.Map;
@@ -61,13 +65,16 @@ public class PushbackCommunityStreamProcedureFacade {
 
     private final CommunityComputeBusinessFacade businessFacade;
     private final UserSpecificConfigurationParser configurationParser;
+    private final CloseableResourceRegistry closeableResourceRegistry;
 
     public PushbackCommunityStreamProcedureFacade(
         CommunityComputeBusinessFacade businessFacade,
-        UserSpecificConfigurationParser configurationParser
+        UserSpecificConfigurationParser configurationParser,
+        CloseableResourceRegistry closeableResourceRegistry
     ) {
         this.businessFacade = businessFacade;
         this.configurationParser = configurationParser;
+        this.closeableResourceRegistry = closeableResourceRegistry;
     }
 
     public Stream<ApproxMaxKCutStreamResult> approxMaxKCut(String graphName, Map<String, Object> configuration) {
@@ -279,6 +286,32 @@ public class PushbackCommunityStreamProcedureFacade {
             config.jobId(),
             config.logProgress(),
             (graphResources)-> new WccStreamTransformer(graphResources.graph(), parameters.concurrency(),config.minCommunitySize(),config.consecutiveIds())
+        ).join();
+    }
+
+    public Stream<TriangleCountStreamResult> triangleCount(String graphName, Map<String, Object> configuration) {
+        var config = configurationParser.parseConfiguration(configuration, TriangleCountStreamConfig::of);
+
+        return businessFacade.triangleCount(
+            GraphName.parse(graphName),
+            config.toGraphParameters(),
+            config.toParameters(),
+            config.jobId(),
+            config.logProgress(),
+            (graphResources)-> new TriangleCountStreamTransformer(graphResources.graph())
+        ).join();
+    }
+
+    public Stream<TriangleStreamResult> triangles(String graphName, Map<String, Object> configuration) {
+        var config = configurationParser.parseConfiguration(configuration, TriangleCountStreamConfig::of);
+
+        return businessFacade.triangles(
+            GraphName.parse(graphName),
+            config.toGraphParameters(),
+            config.toParameters(),
+            config.jobId(),
+            config.logProgress(),
+            (graphResources)-> new TrianglesStreamTransformer(closeableResourceRegistry)
         ).join();
     }
 

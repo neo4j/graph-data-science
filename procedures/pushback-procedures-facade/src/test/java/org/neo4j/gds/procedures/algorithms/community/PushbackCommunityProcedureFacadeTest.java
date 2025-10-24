@@ -155,6 +155,20 @@ class PushbackCommunityProcedureFacadeTest {
             verify(streamFacadeMock).wcc(graphName, config);
             //verifyNoInteractions(mutateFacadeMock, statsFacadeMock, writeFacadeMock);
         }
+
+        @Test
+        void triangleCount() {
+            facade.triangleCountStream(graphName, config);
+            verify(streamFacadeMock).triangleCount(graphName, config);
+            //verifyNoInteractions(mutateFacadeMock, statsFacadeMock, writeFacadeMock);
+        }
+
+        @Test
+        void trianglesStream() {
+            facade.trianglesStream(graphName, config);
+            verify(streamFacadeMock).triangles(graphName, config);
+            //verifyNoInteractions(mutateFacadeMock, statsFacadeMock, writeFacadeMock);
+        }
     }
 
 }
