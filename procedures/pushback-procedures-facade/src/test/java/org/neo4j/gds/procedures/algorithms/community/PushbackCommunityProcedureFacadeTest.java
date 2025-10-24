@@ -92,6 +92,13 @@ class PushbackCommunityProcedureFacadeTest {
             verify(streamFacadeMock).kCore(graphName, config);
             //verifyNoInteractions(mutateFacadeMock, statsFacadeMock, writeFacadeMock);
         }
+
+        @Test
+        void kMeans() {
+            facade.kmeansStream(graphName, config);
+            verify(streamFacadeMock).kMeans(graphName, config);
+            //verifyNoInteractions(mutateFacadeMock, statsFacadeMock, writeFacadeMock);
+        }
     }
 
 }

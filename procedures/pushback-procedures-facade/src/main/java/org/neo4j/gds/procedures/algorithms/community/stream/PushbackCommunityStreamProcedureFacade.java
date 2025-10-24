@@ -28,12 +28,14 @@ import org.neo4j.gds.conductance.ConductanceStreamConfig;
 import org.neo4j.gds.hdbscan.HDBScanStreamConfig;
 import org.neo4j.gds.k1coloring.K1ColoringStreamConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionStreamConfig;
+import org.neo4j.gds.kmeans.KmeansStreamConfig;
 import org.neo4j.gds.procedures.algorithms.community.ApproxMaxKCutStreamResult;
 import org.neo4j.gds.procedures.algorithms.community.CliqueCountingStreamResult;
 import org.neo4j.gds.procedures.algorithms.community.ConductanceStreamResult;
 import org.neo4j.gds.procedures.algorithms.community.HDBScanStreamResult;
 import org.neo4j.gds.procedures.algorithms.community.K1ColoringStreamResult;
 import org.neo4j.gds.procedures.algorithms.community.KCoreDecompositionStreamResult;
+import org.neo4j.gds.procedures.algorithms.community.KMeansStreamResult;
 import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
 
 import java.util.Map;
@@ -132,6 +134,20 @@ public class PushbackCommunityStreamProcedureFacade {
             config.jobId(),
             config.logProgress(),
             graphResources -> new KCoreStreamTransformer(graphResources.graph())
+        ).join();
+    }
+
+    public Stream<KMeansStreamResult> kMeans(String graphName, Map<String, Object> configuration) {
+        var config = configurationParser.parseConfiguration(configuration, KmeansStreamConfig::of);
+
+        var parameters = config.toParameters();
+        return businessFacade.kMeans(
+            GraphName.parse(graphName),
+            config.toGraphParameters(),
+            parameters,
+            config.jobId(),
+            config.logProgress(),
+            graphResources -> new KMeansStreamTransformer(graphResources.graph())
         ).join();
     }
 

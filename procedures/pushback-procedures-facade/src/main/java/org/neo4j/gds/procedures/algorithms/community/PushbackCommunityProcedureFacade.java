@@ -268,7 +268,7 @@ public class PushbackCommunityProcedureFacade implements  CommunityProcedureFaca
 
     @Override
     public Stream<KMeansStreamResult> kmeansStream(String graphName, Map<String, Object> configuration) {
-        return Stream.empty();
+        return streamProcedureFacade.kMeans(graphName,configuration);
     }
 
     @Override
