@@ -539,7 +539,7 @@ public class PushbackCommunityProcedureFacade implements  CommunityProcedureFaca
 
     @Override
     public Stream<ModularityStreamResult> modularityStream(String graphName, Map<String, Object> configuration) {
-        return Stream.empty();
+        return streamProcedureFacade.modularity(graphName,configuration);
     }
 
     @Override
@@ -793,7 +793,7 @@ public class PushbackCommunityProcedureFacade implements  CommunityProcedureFaca
 
     @Override
     public Stream<SpeakerListenerLPAStreamResult> sllpaStream(String graphName, Map<String, Object> configuration) {
-        return Stream.empty();
+        return streamProcedureFacade.sllpa(graphName,configuration);
     }
 
     @Override

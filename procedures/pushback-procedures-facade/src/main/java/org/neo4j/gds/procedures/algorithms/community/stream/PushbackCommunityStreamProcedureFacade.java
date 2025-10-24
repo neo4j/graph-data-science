@@ -49,11 +49,13 @@ import org.neo4j.gds.procedures.algorithms.community.LouvainStreamResult;
 import org.neo4j.gds.procedures.algorithms.community.ModularityOptimizationStreamResult;
 import org.neo4j.gds.procedures.algorithms.community.ModularityStreamResult;
 import org.neo4j.gds.procedures.algorithms.community.SccStreamResult;
+import org.neo4j.gds.procedures.algorithms.community.SpeakerListenerLPAStreamResult;
 import org.neo4j.gds.procedures.algorithms.community.TriangleCountStreamResult;
 import org.neo4j.gds.procedures.algorithms.community.TriangleStreamResult;
 import org.neo4j.gds.procedures.algorithms.community.WccStreamResult;
 import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
 import org.neo4j.gds.scc.SccStreamConfig;
+import org.neo4j.gds.sllpa.SpeakerListenerLPAConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientStreamConfig;
 import org.neo4j.gds.triangle.TriangleCountStreamConfig;
 import org.neo4j.gds.wcc.WccStreamConfig;
@@ -312,6 +314,19 @@ public class PushbackCommunityStreamProcedureFacade {
             config.jobId(),
             config.logProgress(),
             (graphResources)-> new TrianglesStreamTransformer(closeableResourceRegistry)
+        ).join();
+    }
+
+    public Stream<SpeakerListenerLPAStreamResult> sllpa(String graphName, Map<String, Object> configuration) {
+        var config = configurationParser.parseConfiguration(configuration, SpeakerListenerLPAConfig::of);
+
+        return businessFacade.sllpa(
+            GraphName.parse(graphName),
+            config.toGraphParameters(),
+            config,
+            config.jobId(),
+            config.logProgress(),
+            (graphResources)-> new SpeakerListenerLPAStreamTransformer(graphResources.graph())
         ).join();
     }
 
