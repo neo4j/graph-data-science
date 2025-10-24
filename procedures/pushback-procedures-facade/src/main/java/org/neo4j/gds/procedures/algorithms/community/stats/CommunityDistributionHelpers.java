@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.procedures.algorithms.community.stats;
 
-import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.result.CommunityStatistics;
@@ -33,14 +32,14 @@ import java.util.function.LongUnaryOperator;
     private CommunityDistributionHelpers() {}
 
     static CommunityDistribution compute(
-        NodePropertyValues nodePropertyValues,
+        long nodeCount,
         Concurrency concurrency,
         LongUnaryOperator communityFunction,
         StatisticsComputationInstructions statisticsComputationInstructions
     ) {
 
         var communityStatistics = CommunityStatistics.communityStats(
-            nodePropertyValues.nodeCount(),
+            nodeCount,
             communityFunction,
             DefaultPool.INSTANCE,
             concurrency,

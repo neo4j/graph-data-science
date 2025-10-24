@@ -216,9 +216,14 @@ class PushbackCommunityProcedureFacadeTest {
             verifyNoInteractions(streamFacadeMock);
         }
 
+        @Test
+        void labelPropagation() {
+            facade.labelPropagationStats(graphName, config);
+            verify(statsFacadeMock).labelPropagation(graphName, config);
+            verifyNoInteractions(streamFacadeMock);
+        }
 
         /*
-
 
         @Test
         void hdbscan() {
@@ -228,12 +233,6 @@ class PushbackCommunityProcedureFacadeTest {
         }
 
 
-        @Test
-        void labelPropagation() {
-            facade.labelPropagationStream(graphName, config);
-            verify(statsFacadeMock).labelPropagation(graphName, config);
-            verifyNoInteractions(streamFacadeMock);
-        }
 
         @Test
         void lcc() {

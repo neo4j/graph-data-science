@@ -26,10 +26,12 @@ import org.neo4j.gds.community.CommunityComputeBusinessFacade;
 import org.neo4j.gds.k1coloring.K1ColoringStatsConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionStatsConfig;
 import org.neo4j.gds.kmeans.KmeansStatsConfig;
+import org.neo4j.gds.labelpropagation.LabelPropagationStatsConfig;
 import org.neo4j.gds.procedures.algorithms.community.CliqueCountingStatsResult;
 import org.neo4j.gds.procedures.algorithms.community.K1ColoringStatsResult;
 import org.neo4j.gds.procedures.algorithms.community.KCoreDecompositionStatsResult;
 import org.neo4j.gds.procedures.algorithms.community.KmeansStatsResult;
+import org.neo4j.gds.procedures.algorithms.community.LabelPropagationStatsResult;
 import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
 
 import java.util.Map;
@@ -109,6 +111,23 @@ public class PushbackCommunityStatsProcedureFacade {
         ).join();
     }
 
+    public Stream<LabelPropagationStatsResult> labelPropagation(String graphName, Map<String, Object> configuration) {
+        var config = configurationParser.parseConfiguration(configuration, LabelPropagationStatsConfig::of);
+
+        var statisticsInstructions =  ProcedureStatisticsComputationInstructions.forCommunities(procedureReturnColumns);
+
+        var parameters = config.toParameters();
+        return businessFacade.labelPropagation(
+            GraphName.parse(graphName),
+            config.toGraphParameters(),
+            config.relationshipWeightProperty(),
+            parameters,
+            config.jobId(),
+            config.logProgress(),
+            graphResources -> new LabelPropagationStatsResultTransformer(config.toMap(),statisticsInstructions,parameters.concurrency())
+        ).join();
+    }
+
 
     /*
 
@@ -122,23 +141,6 @@ public class PushbackCommunityStatsProcedureFacade {
             config.jobId(),
             config.logProgress(),
             graphResources -> new HDBScanStreamTransformer(graphResources.graph())
-        ).join();
-    }
-
-
-
-    public Stream<LabelPropagationStreamResult> labelPropagation(String graphName, Map<String, Object> configuration) {
-        var config = configurationParser.parseConfiguration(configuration, LabelPropagationStreamConfig::of);
-
-        var parameters = config.toParameters();
-        return businessFacade.labelPropagation(
-            GraphName.parse(graphName),
-            config.toGraphParameters(),
-            config.relationshipWeightProperty(),
-            parameters,
-            config.jobId(),
-            config.logProgress(),
-            graphResources -> new LabelPropagationStreamTransformer(graphResources.graph(), parameters.concurrency(),config.minCommunitySize(),config.consecutiveIds())
         ).join();
     }
 

@@ -20,7 +20,6 @@
 package org.neo4j.gds.procedures.algorithms.community.stats;
 
 import org.neo4j.gds.api.ProcedureReturnColumns;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.kmeans.KmeansResult;
 import org.neo4j.gds.procedures.algorithms.community.KmeansStatsResult;
@@ -54,11 +53,10 @@ public class KMeansStatsResultTransformer implements ResultTransformer<TimedAlgo
 
         var kmeansResult = timedAlgorithmResult.result();
 
-        var nodePropertyValues = NodePropertyValuesAdapter.adapt(kmeansResult.communities());
-
+        var nodeCount = kmeansResult.communities().size();
 
         var  distribution = CommunityDistributionHelpers.compute(
-            nodePropertyValues,
+            nodeCount,
             concurrency,
             nodeId -> kmeansResult.communities().get(nodeId),
             statisticsComputationInstructions
