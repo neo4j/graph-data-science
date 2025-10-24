@@ -24,8 +24,10 @@ import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.cliquecounting.CliqueCountingStatsConfig;
 import org.neo4j.gds.community.CommunityComputeBusinessFacade;
 import org.neo4j.gds.k1coloring.K1ColoringStatsConfig;
+import org.neo4j.gds.kcore.KCoreDecompositionStatsConfig;
 import org.neo4j.gds.procedures.algorithms.community.CliqueCountingStatsResult;
 import org.neo4j.gds.procedures.algorithms.community.K1ColoringStatsResult;
+import org.neo4j.gds.procedures.algorithms.community.KCoreDecompositionStatsResult;
 import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
 
 import java.util.Map;
@@ -75,6 +77,20 @@ public class PushbackCommunityStatsProcedureFacade {
             graphResources -> new K1ColoringStatsResultTransformer(config.toMap(), procedureReturnColumns.contains("colorCount"))
         ).join();
     }
+
+    public Stream<KCoreDecompositionStatsResult> kCore(String graphName, Map<String, Object> configuration) {
+        var config = configurationParser.parseConfiguration(configuration, KCoreDecompositionStatsConfig::of);
+
+        return businessFacade.kCoreDecomposition(
+            GraphName.parse(graphName),
+            config.toGraphParameters(),
+            config.toParameters(),
+            config.jobId(),
+            config.logProgress(),
+            graphResources -> new KCoreStatsResultTransformer(config.toMap())
+        ).join();
+    }
+
     /*
 
      public Stream<HDBScanStreamResult> hdbscan(String graphName, Map<String, Object> configuration) {
@@ -91,18 +107,7 @@ public class PushbackCommunityStatsProcedureFacade {
     }
 
 
-    public Stream<KCoreDecompositionStreamResult> kCore(String graphName, Map<String, Object> configuration) {
-        var config = configurationParser.parseConfiguration(configuration, KCoreDecompositionStreamConfig::of);
 
-        return businessFacade.kCoreDecomposition(
-            GraphName.parse(graphName),
-            config.toGraphParameters(),
-            config.toParameters(),
-            config.jobId(),
-            config.logProgress(),
-            graphResources -> new KCoreStreamTransformer(graphResources.graph())
-        ).join();
-    }
 
     public Stream<KMeansStreamResult> kMeans(String graphName, Map<String, Object> configuration) {
         var config = configurationParser.parseConfiguration(configuration, KmeansStreamConfig::of);

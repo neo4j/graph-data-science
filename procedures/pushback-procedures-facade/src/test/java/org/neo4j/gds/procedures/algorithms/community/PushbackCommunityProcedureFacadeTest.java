@@ -212,8 +212,6 @@ class PushbackCommunityProcedureFacadeTest {
             verifyNoInteractions(streamFacadeMock);
         }
 
-
-
         @Test
         void kCore() {
             facade.kCoreStream(graphName, config);

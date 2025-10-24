@@ -156,7 +156,7 @@ public class PushbackCommunityProcedureFacade implements  CommunityProcedureFaca
 
     @Override
     public Stream<K1ColoringStatsResult> k1ColoringStats(String graphName, Map<String, Object> configuration) {
-        return Stream.empty();
+        return statsProcedureFacade.k1Coloring(graphName,configuration);
     }
 
     @Override
@@ -208,7 +208,7 @@ public class PushbackCommunityProcedureFacade implements  CommunityProcedureFaca
 
     @Override
     public Stream<KCoreDecompositionStatsResult> kCoreStats(String graphName, Map<String, Object> configuration) {
-        return Stream.empty();
+        return statsProcedureFacade.kCore(graphName,configuration);
     }
 
     @Override
