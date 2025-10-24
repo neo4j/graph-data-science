@@ -25,9 +25,11 @@ import org.neo4j.gds.cliquecounting.CliqueCountingStatsConfig;
 import org.neo4j.gds.community.CommunityComputeBusinessFacade;
 import org.neo4j.gds.k1coloring.K1ColoringStatsConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionStatsConfig;
+import org.neo4j.gds.kmeans.KmeansStatsConfig;
 import org.neo4j.gds.procedures.algorithms.community.CliqueCountingStatsResult;
 import org.neo4j.gds.procedures.algorithms.community.K1ColoringStatsResult;
 import org.neo4j.gds.procedures.algorithms.community.KCoreDecompositionStatsResult;
+import org.neo4j.gds.procedures.algorithms.community.KmeansStatsResult;
 import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
 
 import java.util.Map;
@@ -91,6 +93,23 @@ public class PushbackCommunityStatsProcedureFacade {
         ).join();
     }
 
+    public Stream<KmeansStatsResult> kMeans(String graphName, Map<String, Object> configuration) {
+        var config = configurationParser.parseConfiguration(configuration, KmeansStatsConfig::of);
+
+        var statisticsInstructions =  KMeansStatsResultTransformer.KmeansStatisticsComputationInstructions.create(procedureReturnColumns);
+
+        var parameters = config.toParameters();
+        return businessFacade.kMeans(
+            GraphName.parse(graphName),
+            config.toGraphParameters(),
+            parameters,
+            config.jobId(),
+            config.logProgress(),
+            graphResources -> new KMeansStatsResultTransformer(config.toMap(), statisticsInstructions, parameters.concurrency())
+        ).join();
+    }
+
+
     /*
 
      public Stream<HDBScanStreamResult> hdbscan(String graphName, Map<String, Object> configuration) {
@@ -107,21 +126,6 @@ public class PushbackCommunityStatsProcedureFacade {
     }
 
 
-
-
-    public Stream<KMeansStreamResult> kMeans(String graphName, Map<String, Object> configuration) {
-        var config = configurationParser.parseConfiguration(configuration, KmeansStreamConfig::of);
-
-        var parameters = config.toParameters();
-        return businessFacade.kMeans(
-            GraphName.parse(graphName),
-            config.toGraphParameters(),
-            parameters,
-            config.jobId(),
-            config.logProgress(),
-            graphResources -> new KMeansStreamTransformer(graphResources.graph())
-        ).join();
-    }
 
     public Stream<LabelPropagationStreamResult> labelPropagation(String graphName, Map<String, Object> configuration) {
         var config = configurationParser.parseConfiguration(configuration, LabelPropagationStreamConfig::of);

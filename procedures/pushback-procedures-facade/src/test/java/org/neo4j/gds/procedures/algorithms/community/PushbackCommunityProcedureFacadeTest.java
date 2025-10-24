@@ -202,6 +202,21 @@ class PushbackCommunityProcedureFacadeTest {
             verifyNoInteractions(streamFacadeMock);
         }
 
+        @Test
+        void kCore() {
+            facade.kCoreStats(graphName, config);
+            verify(statsFacadeMock).kCore(graphName, config);
+            verifyNoInteractions(streamFacadeMock);
+        }
+
+        @Test
+        void kMeans() {
+            facade.kmeansStats(graphName, config);
+            verify(statsFacadeMock).kMeans(graphName, config);
+            verifyNoInteractions(streamFacadeMock);
+        }
+
+
         /*
 
 
@@ -212,19 +227,6 @@ class PushbackCommunityProcedureFacadeTest {
             verifyNoInteractions(streamFacadeMock);
         }
 
-        @Test
-        void kCore() {
-            facade.kCoreStream(graphName, config);
-            verify(statsFacadeMock).kCore(graphName, config);
-            verifyNoInteractions(streamFacadeMock);
-        }
-
-        @Test
-        void kMeans() {
-            facade.kmeansStream(graphName, config);
-            verify(statsFacadeMock).kMeans(graphName, config);
-            verifyNoInteractions(streamFacadeMock);
-        }
 
         @Test
         void labelPropagation() {
