@@ -61,6 +61,7 @@ import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.core.GraphLoader;
 import org.neo4j.gds.core.GraphStoreFactorySupplier;
+import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
 import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
@@ -514,6 +515,7 @@ class ModularityOptimizationMutateProcTest extends BaseProcTest {
 
         final GraphStoreCatalogService graphStoreCatalogService = new GraphStoreCatalogService();
         var requestScopedDependencies = RequestScopedDependencies.builder()
+            .correlationId(PlainSimpleRequestCorrelationId.create())
             .databaseId(DatabaseId.of(db.databaseName()))
             .taskRegistryFactory(TaskRegistryFactory.empty())
             .terminationFlag(TerminationFlag.RUNNING_TRUE)

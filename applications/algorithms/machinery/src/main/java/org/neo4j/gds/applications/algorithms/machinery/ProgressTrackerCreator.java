@@ -20,7 +20,6 @@
 package org.neo4j.gds.applications.algorithms.machinery;
 
 import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.utils.progress.tasks.LoggerForProgressTracking;
@@ -62,12 +61,6 @@ public class ProgressTrackerCreator {
              * Because that would tie it up to the integrating system.
              */
             var requestCorrelationId = requestScopedDependencies.correlationId();
-            /*
-             * But when we do that, stuff breaks. Something something progress tracker finaliser breakage,
-             * that I have not yet mastered.
-             * Therefore, we _still_ use the shunt here for now,and we will get to the bottom of this eventually.
-             */
-            requestCorrelationId = PlainSimpleRequestCorrelationId.createShunt(jobId);
 
             return TaskProgressTracker.create(
                 task,
