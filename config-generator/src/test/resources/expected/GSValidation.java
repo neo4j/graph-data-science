@@ -30,7 +30,7 @@ import org.neo4j.gds.core.CypherMapWrapper;
 
 @Generated("org.neo4j.gds.proc.ConfigurationProcessor")
 public final class GSValidationConfig implements GSValidation {
-    public GraphStoreValidationConfig() {
+    public GSValidationConfig() {
 
     }
 

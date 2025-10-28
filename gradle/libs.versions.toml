@@ -1,48 +1,50 @@
 [versions]
-agrona = "1.23.0"
+agrona = "2.3.0"
 asciidoctorj = "3.0.0"
-assertj = "3.26.3"
-bouncycastle-prov = "1.78.1"
-caffeine = "3.1.8"
+assertj = "3.27.6"
+bouncycastle-prov = "1.82"
+caffeine = "3.2.2"
 checkStyle = "10.12.1"
-commons-io = "2.16.1"
-commons-lang3 = "3.18.0"
+commons-io = "2.20.0"
+commons-lang3 = "3.19.0"
 commons-math3 = "3.6.1"
-commons-text = "1.12.0"
-compile-testing = "0.21.0"
+commons-text = "1.14.0"
+compile-testing = "0.23.0"
 cypher-dsl = "2021.2.0"
-eclipse-collections = "11.1.0"
-ejml = "0.43.1"
-fastcsv = "3.2.0"
+eclipse-collections = "13.0.0"
+ejml = "0.44.0"
+fastcsv = "4.1.0"
 gdl = "0.3.9"
 google-auto-common = "1.2.2"
 google-auto-service = "1.1.1"
 hamcrest = "3.0"
 hdrhistogram = "2.2.2"
+# @pin - later versions have breaking changes
 hppc = "0.7.3"
-immutables = "2.10.1"
-ipaddress = "5.3.3"
-jackson = "2.19.1"
+immutables = "2.11.6"
+ipaddress = "5.5.1"
+jackson = "2.20.0"
 javapoet = "1.13.0"
-jetbrains-annotations = "24.1.0"
-jjwt = "0.12.6"
+jetbrains-annotations = "26.0.2-1"
+jjwt = "0.13.0"
 jol = "0.17"
-jqwik = "1.9.0"
+jqwik = "1.9.3"
 junit-pioneer = "2.3.0"
 junit5bom = "5.13.4"
-log4j = "2.20.0"
-memoryfilesystem = "2.8.0"
-mockito-junit-jupiter = "5.13.0"
+log4j = "2.25.2"
+memoryfilesystem = "2.8.2"
+mockito-junit-jupiter = "5.20.0"
 opencypher-front-end = "9.0.20210312"
-picocli = "4.7.6"
+picocli = "4.7.7"
 protobuf = "4.30.2"
 qala-datagen = "2.5.1"
+# @pin have to figure out what goes wrong when updated
 record-builder = "42"
 reflections = "0.10.2"
 sb-contrib = "7.6.3"
-# the scala version should be aligned with the one used by Neo4j?
+# @pin the scala version should be aligned with the one used by Neo4j?
 scala = "2.13.11"
-stormpot = "3.2"
+stormpot = "4.1"
 
 [libraries]
 agrona = { module = "org.agrona:agrona", version.ref = "agrona" }
@@ -70,7 +72,7 @@ immutables-builder = { module = "org.immutables:builder", version.ref = "immutab
 immutables-value = { module = "org.immutables:value", version.ref = "immutables" }
 immutables-value-annotations = { module = "org.immutables:value-annotations", version.ref = "immutables" }
 ipaddress = { module = "com.github.seancfoley:ipaddress", version.ref = "ipaddress" }
-jackson-annotations = { module = "com.fasterxml.jackson.core:jackson-annotations", version.ref = "jackson" }
+jackson-annotations = "com.fasterxml.jackson.core:jackson-annotations:2.20"
 jackson-core = { module = "com.fasterxml.jackson.core:jackson-core", version.ref = "jackson" }
 jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "jackson" }
 jackson-dataformat-csv = { module = "com.fasterxml.jackson.dataformat:jackson-dataformat-csv", version.ref = "jackson" }
@@ -106,19 +108,28 @@ stormpot = { module = "com.github.chrisvest:stormpot", version.ref = "stormpot" 
 
 [plugins]
 champeau-mrjar = "me.champeau.mrjar:0.1.1"
-forbiddenapis = "de.thetaphi.forbiddenapis:3.7"
-google-protobuf = "com.google.protobuf:0.9.4"
-nebula-dependencies = "nebula.info-dependencies:11.4.1"
-shadowjar = "com.gradleup.shadow:8.3.2"
+forbiddenapis = "de.thetaphi.forbiddenapis:3.10"
+google-protobuf = "com.google.protobuf:0.9.5"
+nebula-basic = "com.netflix.nebula.info-basic:14.0.0"
+nebula-broker = "com.netflix.nebula.info-broker:14.0.0"
+nebula-dependencies = "com.netflix.nebula.info-dependencies:14.0.0"
+nebula-java = "com.netflix.nebula.info-java:14.0.0"
+nebula-props = "com.netflix.nebula.info-props:14.0.0"
+nebula-scm = "com.netflix.nebula.info-scm:14.0.0"
+shadowjar = "com.gradleup.shadow:9.2.2"
 spawn = "ch.kk7.spawn:1.0.20180924200750"
 
 [bundles]
-test-basic = [ "junit5-jupiter", "assertj-core" ]
-test-mocking = [ "junit5-jupiter", "assertj-core", "mockito-junit-jupiter" ]
+test-basic = [
+    "assertj-core",
+    "junit5-jupiter",
+]
+test-mocking = [
+    "assertj-core",
+    "junit5-jupiter",
+    "mockito-junit-jupiter",
+]
 test-platforms = [
+    "jqwik",
     "junit5-platform",
-    # `jqwik` is declared as test engine in `defaults-java.gradle`
-    # and exposed as transitive dependency of `test-utils`
-    # we don't need to bring the whole `test-utils` module everywhere
-    "jqwik"
 ]

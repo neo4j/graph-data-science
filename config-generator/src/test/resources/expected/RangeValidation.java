@@ -45,7 +45,7 @@ public final class RangeValidationConfig implements RangeValidation {
     public RangeValidationConfig(@NotNull CypherMapAccess config) {
         ArrayList<IllegalArgumentException> errors = new ArrayList<>();
         try {
-            this.integerWithinRange = config.requireInt("integerWithinRange")
+            this.integerWithinRange = config.requireInt("integerWithinRange");
             CypherMapAccess.validateIntegerRange(
                 "integerWithinRange",
                 integerWithinRange,
@@ -58,7 +58,7 @@ public final class RangeValidationConfig implements RangeValidation {
             errors.add(e);
         }
         try {
-            this.longWithinRange = config.requireLong("longWithinRange")
+            this.longWithinRange = config.requireLong("longWithinRange");
             CypherMapAccess.validateLongRange(
                 "longWithinRange",
                 longWithinRange,
