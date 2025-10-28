@@ -20,6 +20,7 @@
 package org.neo4j.gds.projection;
 
 import org.neo4j.gds.api.DatabaseId;
+import org.neo4j.gds.core.RequestCorrelationId;
 import org.neo4j.gds.core.loading.Capabilities.WriteMode;
 import org.neo4j.gds.core.utils.progress.EmptyTaskStore;
 import org.neo4j.gds.logging.Log;
@@ -40,7 +41,8 @@ public class AlphaGraphAggregator extends GraphAggregator {
         WriteMode writeMode,
         ExecutingQueryProvider queryProvider,
         QueryEstimator queryEstimator,
-        ProjectionMetricsService projectionMetricsService
+        ProjectionMetricsService projectionMetricsService,
+        RequestCorrelationId requestCorrelationId
     ) {
         super(
             databaseId,
@@ -50,7 +52,8 @@ public class AlphaGraphAggregator extends GraphAggregator {
             queryProvider,
             projectionMetricsService,
             EmptyTaskStore.INSTANCE,
-            Log.noOpLog()
+            Log.noOpLog(),
+            requestCorrelationId
         );
     }
 

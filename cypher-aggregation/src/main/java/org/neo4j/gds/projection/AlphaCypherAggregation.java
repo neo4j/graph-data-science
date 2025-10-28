@@ -24,6 +24,7 @@ import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.UserFunctionSignatureBuilder;
 import org.neo4j.gds.core.loading.Capabilities.WriteMode;
+import org.neo4j.gds.integration.Neo4jPoweredRequestCorrelationId;
 import org.neo4j.gds.metrics.Metrics;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.internal.kernel.api.procs.Neo4jTypes;
@@ -102,13 +103,16 @@ public class AlphaCypherAggregation implements CallableUserAggregationFunction {
             ? WriteMode.NONE
             : WriteMode.LOCAL;
 
+        var transactionSequenceNumber = ctx.kernelTransaction().getTransactionSequenceNumber();
+        var requestCorrelationId = Neo4jPoweredRequestCorrelationId.create(transactionSequenceNumber);
         return new AlphaGraphAggregator(
             DatabaseId.of(databaseService.databaseName()),
             username,
             writeMode,
             queryProvider,
             QueryEstimator.empty(),
-            metrics.projectionMetrics()
+            metrics.projectionMetrics(),
+            requestCorrelationId
         );
     }
 }

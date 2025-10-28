@@ -25,6 +25,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.TestTaskStore;
 import org.neo4j.gds.api.DatabaseId;
+import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
 import org.neo4j.gds.core.loading.Capabilities.WriteMode;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.progress.EmptyTaskStore;
@@ -58,7 +59,8 @@ class ProductGraphAggregatorIT {
             ExecutingQueryProvider.empty(),
             ProjectionMetricsService.DISABLED,
             EmptyTaskStore.INSTANCE,
-            Log.noOpLog()
+            Log.noOpLog(),
+            PlainSimpleRequestCorrelationId.create()
         );
 
         long source = 1L << 50;
@@ -98,7 +100,8 @@ class ProductGraphAggregatorIT {
             ExecutingQueryProvider.empty(),
             ProjectionMetricsService.DISABLED,
             taskStore,
-            Log.noOpLog()
+            Log.noOpLog(),
+            PlainSimpleRequestCorrelationId.create()
         );
 
         assertThatIllegalArgumentException().isThrownBy(() ->
@@ -134,7 +137,8 @@ class ProductGraphAggregatorIT {
             ExecutingQueryProvider.empty(),
             ProjectionMetricsService.DISABLED,
             taskStore,
-            Log.noOpLog()
+            Log.noOpLog(),
+            PlainSimpleRequestCorrelationId.create()
         );
 
         assertThatThrownBy(() ->

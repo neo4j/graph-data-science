@@ -29,7 +29,7 @@ import org.neo4j.gds.api.ImmutableDatabaseInfo;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.core.ConfigKeyValidation;
 import org.neo4j.gds.core.CypherMapAccess;
-import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
+import org.neo4j.gds.core.RequestCorrelationId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.loading.Capabilities.WriteMode;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
@@ -93,6 +93,8 @@ abstract class GraphAggregator implements UserAggregationReducer, UserAggregatio
     private final ProgressTimer progressTimer;
     private final ConfigValidator configValidator;
 
+    private final RequestCorrelationId requestCorrelationId;
+
     // Used for initializing the data and rel importers
     private final Lock lock;
     private final ExtractNodeId extractNodeId;
@@ -111,7 +113,8 @@ abstract class GraphAggregator implements UserAggregationReducer, UserAggregatio
         ExecutingQueryProvider queryProvider,
         ProjectionMetricsService projectionMetricsService,
         TaskStore taskStore,
-        Log log
+        Log log,
+        RequestCorrelationId requestCorrelationId
     ) {
         this.databaseId = databaseId;
         this.username = username;
@@ -121,6 +124,7 @@ abstract class GraphAggregator implements UserAggregationReducer, UserAggregatio
         this.projectionMetricsService = projectionMetricsService;
         this.taskStore = taskStore;
         this.log = log;
+        this.requestCorrelationId = requestCorrelationId;
         this.progressTimer = ProgressTimer.start();
         this.lock = new ReentrantLock();
         this.configValidator = new ConfigValidator();
@@ -216,7 +220,7 @@ abstract class GraphAggregator implements UserAggregationReducer, UserAggregatio
             new LoggerForProgressTrackingAdapter(log),
             config.readConcurrency(),
             config.jobId(),
-            PlainSimpleRequestCorrelationId.createShunt(config.jobId()),
+            requestCorrelationId,
             TaskRegistryFactory.local(username, taskStore),
             EmptyUserLogRegistryFactory.INSTANCE
         );
