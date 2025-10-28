@@ -211,12 +211,17 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
             loggers,
             graphDatabaseService,
             procedureTransaction,
+            requestScopedDependencies.correlationId(),
             requestScopedDependencies.taskRegistryFactory(),
             requestScopedDependencies.userLogRegistryFactory()
         );
         var generateGraphApplication = new GenerateGraphApplication(loggers.log(), graphStoreCatalogService);
         var graphMemoryUsageApplication = new GraphMemoryUsageApplication(graphStoreCatalogService);
-        var graphSamplingApplication = new GraphSamplingApplication(loggers.loggerForProgressTracking(), graphStoreCatalogService);
+        var graphSamplingApplication = new GraphSamplingApplication(
+            loggers.loggerForProgressTracking(),
+            graphStoreCatalogService,
+            requestScopedDependencies.correlationId()
+        );
         var listGraphApplication = ListGraphApplication.create(graphStoreCatalogService);
         var nativeProjectApplication = new NativeProjectApplication(
             new GenericProjectApplication<>(
@@ -556,6 +561,7 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
         );
 
         var numberOfPropertiesRemoved = dropNodePropertiesApplication.compute(
+            requestScopedDependencies.correlationId(),
             taskRegistryFactory,
             userLogRegistryFactory,
             droppedProperties,
@@ -598,6 +604,7 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
         graphStoreValidationService.ensureRelationshipsMayBeDeleted(graphStore, relationshipType, graphName);
 
         var result = dropRelationshipsApplication.compute(
+            requestScopedDependencies.correlationId(),
             taskRegistryFactory,
             userLogRegistryFactory,
             graphStore,

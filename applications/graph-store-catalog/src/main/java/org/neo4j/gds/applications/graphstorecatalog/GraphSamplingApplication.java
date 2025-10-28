@@ -24,7 +24,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
+import org.neo4j.gds.core.RequestCorrelationId;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
@@ -40,10 +40,16 @@ import java.util.Map;
 public final class GraphSamplingApplication {
     private final LoggerForProgressTracking log;
     private final GraphStoreCatalogService graphStoreCatalogService;
+    private final RequestCorrelationId requestCorrelationId;
 
-    public GraphSamplingApplication(LoggerForProgressTracking log, GraphStoreCatalogService graphStoreCatalogService) {
+    public GraphSamplingApplication(
+        LoggerForProgressTracking log,
+        GraphStoreCatalogService graphStoreCatalogService,
+        RequestCorrelationId requestCorrelationId
+    ) {
         this.log = log;
         this.graphStoreCatalogService = graphStoreCatalogService;
+        this.requestCorrelationId = requestCorrelationId;
     }
 
     RandomWalkSamplingResult sample(
@@ -69,7 +75,7 @@ public final class GraphSamplingApplication {
                 log,
                 samplerConfig.concurrency(),
                 samplerConfig.jobId(),
-                PlainSimpleRequestCorrelationId.createShunt(samplerConfig.jobId()),
+                requestCorrelationId,
                 taskRegistryFactory,
                 userLogRegistryFactory
             );

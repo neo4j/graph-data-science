@@ -21,6 +21,7 @@ package org.neo4j.gds.applications.graphstorecatalog;
 
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.core.RequestCorrelationId;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.LoggerForProgressTracking;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -32,11 +33,12 @@ import java.util.List;
 public class DropNodePropertiesApplication {
     private final LoggerForProgressTracking log;
 
-    public DropNodePropertiesApplication(LoggerForProgressTracking log) {
+    DropNodePropertiesApplication(LoggerForProgressTracking log) {
         this.log = log;
     }
 
     public long compute(
+        RequestCorrelationId requestCorrelationId,
         TaskRegistryFactory taskRegistryFactory,
         UserLogRegistryFactory userLogRegistryFactory,
         List<String> nodeProperties,
@@ -44,6 +46,7 @@ public class DropNodePropertiesApplication {
     ) {
         var progressTrackerFactory = new ProgressTrackerFactory(
             log,
+            requestCorrelationId,
             taskRegistryFactory,
             userLogRegistryFactory
         );

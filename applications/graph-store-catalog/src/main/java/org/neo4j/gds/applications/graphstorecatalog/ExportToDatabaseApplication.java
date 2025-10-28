@@ -23,7 +23,7 @@ import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
+import org.neo4j.gds.core.RequestCorrelationId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.io.GraphStoreExporter;
 import org.neo4j.gds.core.io.NeoNodeProperties;
@@ -50,11 +50,13 @@ class ExportToDatabaseApplication {
 
     private final TaskRegistryFactory taskRegistryFactory;
     private final UserLogRegistryFactory userLogRegistryFactory;
+    private final RequestCorrelationId requestCorrelationId;
 
     ExportToDatabaseApplication(
         GdsLoggers loggers,
         GraphDatabaseService graphDatabaseService,
         Transaction procedureTransaction,
+        RequestCorrelationId requestCorrelationId,
         TaskRegistryFactory taskRegistryFactory,
         UserLogRegistryFactory userLogRegistryFactory
     ) {
@@ -63,6 +65,7 @@ class ExportToDatabaseApplication {
         this.procedureTransaction = procedureTransaction;
         this.taskRegistryFactory = taskRegistryFactory;
         this.userLogRegistryFactory = userLogRegistryFactory;
+        this.requestCorrelationId = requestCorrelationId;
     }
 
     DatabaseExportResult run(
@@ -75,7 +78,7 @@ class ExportToDatabaseApplication {
             loggers.loggerForProgressTracking(),
             configuration.typedWriteConcurrency(),
             configuration.jobId(),
-            PlainSimpleRequestCorrelationId.createShunt(configuration.jobId()),
+            requestCorrelationId,
             taskRegistryFactory,
             userLogRegistryFactory
         );

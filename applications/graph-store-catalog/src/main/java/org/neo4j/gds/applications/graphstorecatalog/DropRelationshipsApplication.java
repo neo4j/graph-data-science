@@ -21,6 +21,7 @@ package org.neo4j.gds.applications.graphstorecatalog;
 
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.core.RequestCorrelationId;
 import org.neo4j.gds.core.loading.DeletionResult;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.LoggerForProgressTracking;
@@ -36,6 +37,7 @@ public class DropRelationshipsApplication {
     }
 
     public DeletionResult compute(
+        RequestCorrelationId requestCorrelationId,
         TaskRegistryFactory taskRegistryFactory,
         UserLogRegistryFactory userLogRegistryFactory,
         GraphStore graphStore,
@@ -43,6 +45,7 @@ public class DropRelationshipsApplication {
     ) {
         var progressTrackerFactory = new ProgressTrackerFactory(
             log,
+            requestCorrelationId,
             taskRegistryFactory,
             userLogRegistryFactory
         );

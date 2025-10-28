@@ -29,6 +29,7 @@ import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.config.GraphProjectConfig;
+import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
@@ -109,7 +110,8 @@ class GraphSamplingApplicationTest {
     void shouldSampleRWR(Map<String, Object> mapConfiguration, long expectedNodeCount) {
         var graphSamplingApplication = new GraphSamplingApplication(
             LoggerForProgressTracking.noOpLog(),
-            new GraphStoreCatalogService()
+            new GraphStoreCatalogService(),
+            PlainSimpleRequestCorrelationId.create()
         );
 
         var user = new User("user", false);
@@ -149,7 +151,8 @@ class GraphSamplingApplicationTest {
     void shouldSampleCNARW(Map<String, Object> mapConfiguration, long expectedNodeCount) {
         var graphSamplingApplication = new GraphSamplingApplication(
             LoggerForProgressTracking.noOpLog(),
-            new GraphStoreCatalogService()
+            new GraphStoreCatalogService(),
+            PlainSimpleRequestCorrelationId.create()
         );
 
         var user = new User("user", false);
@@ -188,7 +191,8 @@ class GraphSamplingApplicationTest {
     void shouldUseSingleStartNodeRWR(double samplingRatio, long expectedStartNodeCount) {
         var graphSamplingApplication = new GraphSamplingApplication(
             LoggerForProgressTracking.noOpLog(),
-            new GraphStoreCatalogService()
+            new GraphStoreCatalogService(),
+            PlainSimpleRequestCorrelationId.create()
         );
 
         var user = new User("user", false);
@@ -232,7 +236,8 @@ class GraphSamplingApplicationTest {
     void shouldUseSingleStartNodeCNARW(double samplingRatio, long expectedStartNodeCount) {
         var graphSamplingApplication = new GraphSamplingApplication(
             LoggerForProgressTracking.noOpLog(),
-            new GraphStoreCatalogService()
+            new GraphStoreCatalogService(),
+            PlainSimpleRequestCorrelationId.create()
         );
 
         var user = new User("user", false);
