@@ -81,7 +81,7 @@ RETURN gds.graph.project('g',
   source,
   target,
   {},
-  { memory: '4GB' } // <2>
+  { memory: '2GB' } // <2>
 )
 ----
 <1> The Cypher `parallel` runtime is recommended but not mandatory.
@@ -137,18 +137,28 @@ The session management procedures allow to explicitly create new sessions withou
 Calling the `gds.session.getOrCreate` procedure triggers the creation of a GDS Session based on the specified procedure parameters.
 If a session with the given name and configuration already exists, that session is returned instead.
 
+[role=query-example]
+--
 .Create an empty GDS Session
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 WITH gds.aura.api.credentials($clientId, $clientSecret) AS credentials
 CALL gds.session.getOrCreate(
   'test-session',
-  '4GB',
+  '2GB',
   duration({minutes: 30})
 )
-YIELD id AS sessionId, name AS sessionName
-RETURN sessionId, sessionName
+YIELD name
+RETURN name
 ----
+
+.Results
+[opts="header"]
+|===
+| name
+| "test-session"
+|===
+--
 
 When you create a session explicitly with `gds.session.getOrCreate`, note down the `sessionId` and set it as a xref:management-ops/graph-creation/graph-project-cypher-projection.adoc#graph-project-cypher-projection-syntax-configuration[configuration parameter] for the `gds.graph.project` procedure when you project a new graph.
 
@@ -253,15 +263,25 @@ CALL gds.session.list(
 The `gds.session.delete` procedure deletes a GDS Session with the given ID.
 If the session is not found, an error is raised.
 
+[role=cleanup-query]
+--
 [source, cypher]
 ----
 WITH gds.aura.api.credentials($clientId, $clientSecret) AS credentials
 CALL gds.session.delete(
-  'test-session_00000000-1111-2222-3333-0123456789ab'
+  'test-session'
 )
 YIELD deleted
 RETURN deleted
 ----
+
+.Results
+[opts="header"]
+|===
+| deleted
+| true
+|===
+--
 
 ==== Syntax
 

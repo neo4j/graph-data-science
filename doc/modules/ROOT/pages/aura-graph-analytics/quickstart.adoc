@@ -65,7 +65,7 @@ WITH gds.graph.project('myGraph', source, target, {
   targetNodeProperties: target { .age },
   relationshipProperties: r { .weight }
 }, {
-  memory: '4GB', ttl: duration({minutes: 30}) // <3>
+  memory: '2GB', ttl: duration({minutes: 30}) // <3>
 }) AS g
 RETURN g.graphName, g.nodeCount, g.relationshipCount
 ----
