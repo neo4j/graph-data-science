@@ -23,6 +23,7 @@ import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 
 import java.util.List;
+import java.util.function.Function;
 import java.util.function.LongUnaryOperator;
 import java.util.stream.Stream;
 
@@ -57,6 +58,8 @@ public sealed interface ResultStoreEntry {
             LongUnaryOperator toOriginalId,
             long nodeCount
         );
+
+        T tableEntry(long rows, List<String> columns, List<ValueType> valueTypes, List<Function<Long, Object>> valueProducers);
     }
 
     record NodeLabel(String nodeLabel, long nodeCount, LongUnaryOperator toOriginalId) implements ResultStoreEntry {
@@ -132,6 +135,23 @@ public sealed interface ResultStoreEntry {
                 relationshipIterator,
                 toOriginalId,
                 nodeCount
+            );
+        }
+    }
+
+    record TableEntry(
+        long rows,
+        List<String> columns,
+        List<ValueType> valueTypes,
+        List<Function<Long, Object>> valueProducers
+    ) implements ResultStoreEntry {
+        @Override
+        public <T> T accept(Visitor<T> visitor) {
+            return visitor.tableEntry(
+                rows,
+                columns,
+                valueTypes,
+                valueProducers
             );
         }
     }
