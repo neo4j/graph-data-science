@@ -45,7 +45,6 @@ public interface ModularityBaseConfig extends AlgoBaseConfig, RelationshipWeight
     }
 
     @Configuration.GraphStoreValidationCheck
-    @Configuration.Ignore
     default void communityPropertyValidation(
         GraphStore graphStore,
         Collection<NodeLabel> selectedLabels,
