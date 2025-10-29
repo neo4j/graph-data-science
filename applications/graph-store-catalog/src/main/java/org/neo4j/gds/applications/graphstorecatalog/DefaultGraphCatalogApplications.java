@@ -506,6 +506,7 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
         try (subGraphMetric) {
             subGraphMetric.start();
             return subGraphProjectApplication.project(
+                requestScopedDependencies.correlationId(),
                 taskRegistryFactory,
                 userLogRegistryFactory,
                 configuration,
@@ -734,6 +735,7 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
         );
 
         return streamNodePropertiesApplication.compute(
+            requestScopedDependencies.correlationId(),
             taskRegistryFactory,
             userLogRegistryFactory,
             graphStore,
@@ -770,6 +772,7 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
         graphStoreValidationService.ensureRelationshipPropertiesMatchRelationshipTypes(graphStore, configuration);
 
         return streamRelationshipPropertiesApplication.compute(
+            requestScopedDependencies.correlationId(),
             taskRegistryFactory,
             userLogRegistryFactory,
             graphStore,
@@ -847,6 +850,7 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
             graphStore,
             resultStore,
             nodePropertyExporterBuilder,
+            requestScopedDependencies.correlationId(),
             taskRegistryFactory,
             terminationFlag,
             userLogRegistryFactory,
@@ -956,6 +960,7 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
         );
 
         return writeRelationshipsApplication.compute(
+            requestScopedDependencies.correlationId(),
             relationshipExporterBuilder,
             taskRegistryFactory,
             terminationFlag,

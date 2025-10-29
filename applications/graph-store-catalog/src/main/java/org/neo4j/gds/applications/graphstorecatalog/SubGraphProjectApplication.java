@@ -25,7 +25,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.beta.filter.GraphFilterResult;
 import org.neo4j.gds.beta.filter.GraphStoreFilterService;
 import org.neo4j.gds.config.GraphProjectFromGraphConfig;
-import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
+import org.neo4j.gds.core.RequestCorrelationId;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.utils.ProgressTimer;
@@ -43,7 +43,7 @@ public class SubGraphProjectApplication {
     private final GdsLoggers loggers;
     private final GraphStoreCatalogService graphStoreCatalogService;
 
-    public SubGraphProjectApplication(
+    SubGraphProjectApplication(
         GdsLoggers loggers,
         GraphStoreCatalogService graphStoreCatalogService
     ) {
@@ -52,15 +52,23 @@ public class SubGraphProjectApplication {
     }
 
     public GraphFilterResult project(
+        RequestCorrelationId requestCorrelationId,
         TaskRegistryFactory taskRegistryFactory,
         UserLogRegistryFactory userLogRegistryFactory,
         GraphProjectFromGraphConfig configuration,
         GraphStore originGraphStore
     ) {
-        return projectWithErrorsHandled(taskRegistryFactory, userLogRegistryFactory, configuration, originGraphStore);
+        return projectWithErrorsHandled(
+            requestCorrelationId,
+            taskRegistryFactory,
+            userLogRegistryFactory,
+            configuration,
+            originGraphStore
+        );
     }
 
     private GraphFilterResult projectWithErrorsHandled(
+        RequestCorrelationId requestCorrelationId,
         TaskRegistryFactory taskRegistryFactory,
         UserLogRegistryFactory userLogRegistryFactory,
         GraphProjectFromGraphConfig configuration,
@@ -68,6 +76,7 @@ public class SubGraphProjectApplication {
     ) {
         try {
             var countsAndTiming = projectTimed(
+                requestCorrelationId,
                 taskRegistryFactory,
                 userLogRegistryFactory,
                 configuration,
@@ -94,6 +103,7 @@ public class SubGraphProjectApplication {
      *     the summary result of the projection with timing
      */
     private Triple<Long, Long, Long> projectTimed(
+        RequestCorrelationId requestCorrelationId,
         TaskRegistryFactory taskRegistryFactory,
         UserLogRegistryFactory userLogRegistryFactory,
         GraphProjectFromGraphConfig configuration,
@@ -104,6 +114,7 @@ public class SubGraphProjectApplication {
 
         try (var ignored = ProgressTimer.start(durationInMilliSeconds::set)) {
             entityCounts = projectWithProgressTracker(
+                requestCorrelationId,
                 taskRegistryFactory,
                 userLogRegistryFactory,
                 configuration,
@@ -118,6 +129,7 @@ public class SubGraphProjectApplication {
      * @return pair of {nodeCount, relationshipCount}, the summary result of the projection
      */
     private Pair<Long, Long> projectWithProgressTracker(
+        RequestCorrelationId requestCorrelationId,
         TaskRegistryFactory taskRegistryFactory,
         UserLogRegistryFactory userLogRegistryFactory,
         GraphProjectFromGraphConfig configuration,
@@ -130,7 +142,7 @@ public class SubGraphProjectApplication {
             loggers.loggerForProgressTracking(),
             configuration.typedConcurrency(),
             configuration.jobId(),
-            PlainSimpleRequestCorrelationId.createShunt(configuration.jobId()),
+            requestCorrelationId,
             taskRegistryFactory,
             userLogRegistryFactory
         );

@@ -36,6 +36,7 @@ import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyRecord;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.logging.GdsLoggers;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
@@ -123,6 +124,7 @@ class WriteNodePropertiesApplicationTest {
             graphStore,
             ResultStore.EMPTY,
             exporterBuilderMock,
+            PlainSimpleRequestCorrelationId.create(),
             EmptyTaskRegistryFactory.INSTANCE,
             TerminationFlag.RUNNING_TRUE,
             EmptyUserLogRegistryFactory.INSTANCE,
@@ -150,7 +152,7 @@ class WriteNodePropertiesApplicationTest {
         );
     }
 
-    public static Stream<Arguments> nodeLabels() {
+    static Stream<Arguments> nodeLabels() {
         return Stream.of(
             Arguments.of("*", "Implicit `all labels`"),
             Arguments.of(List.of("A", "B"), "Explicit `all labels`")
@@ -169,6 +171,7 @@ class WriteNodePropertiesApplicationTest {
             propertiesSubsetGraphStore,
             ResultStore.EMPTY,
             exporterBuilderMock,
+            PlainSimpleRequestCorrelationId.create(),
             EmptyTaskRegistryFactory.INSTANCE,
             TerminationFlag.RUNNING_TRUE,
             EmptyUserLogRegistryFactory.INSTANCE,
@@ -208,6 +211,7 @@ class WriteNodePropertiesApplicationTest {
             graphStore,
             ResultStore.EMPTY,
             exporterBuilderMock,
+            PlainSimpleRequestCorrelationId.create(),
             EmptyTaskRegistryFactory.INSTANCE,
             TerminationFlag.RUNNING_TRUE,
             EmptyUserLogRegistryFactory.INSTANCE,
@@ -246,6 +250,7 @@ class WriteNodePropertiesApplicationTest {
             graphStore,
             ResultStore.EMPTY,
             exporterBuilderMock,
+            PlainSimpleRequestCorrelationId.create(),
             EmptyTaskRegistryFactory.INSTANCE,
             TerminationFlag.RUNNING_TRUE,
             EmptyUserLogRegistryFactory.INSTANCE,
@@ -281,6 +286,7 @@ class WriteNodePropertiesApplicationTest {
             graphStore,
             ResultStore.EMPTY,
             exporterBuilderMock,
+            PlainSimpleRequestCorrelationId.create(),
             EmptyTaskRegistryFactory.INSTANCE,
             TerminationFlag.RUNNING_TRUE,
             EmptyUserLogRegistryFactory.INSTANCE,

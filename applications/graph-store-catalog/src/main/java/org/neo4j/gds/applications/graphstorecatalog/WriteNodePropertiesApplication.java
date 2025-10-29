@@ -24,7 +24,7 @@ import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyRecord;
-import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
+import org.neo4j.gds.core.RequestCorrelationId;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.logging.GdsLoggers;
@@ -53,6 +53,7 @@ public class WriteNodePropertiesApplication {
         GraphStore graphStore,
         ResultStore resultStore,
         NodePropertyExporterBuilder nodePropertyExporterBuilder,
+        RequestCorrelationId requestCorrelationId,
         TaskRegistryFactory taskRegistryFactory,
         TerminationFlag terminationFlag,
         UserLogRegistryFactory userLogRegistryFactory,
@@ -80,7 +81,7 @@ public class WriteNodePropertiesApplication {
             loggers.loggerForProgressTracking(),
             configuration.writeConcurrency(),
             jobId,
-            PlainSimpleRequestCorrelationId.createShunt(jobId),
+            requestCorrelationId,
             taskRegistryFactory,
             userLogRegistryFactory
         );

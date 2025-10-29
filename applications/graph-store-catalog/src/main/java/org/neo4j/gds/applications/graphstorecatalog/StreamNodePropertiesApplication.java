@@ -25,7 +25,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.JobId;
-import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
+import org.neo4j.gds.core.RequestCorrelationId;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.LoggerForProgressTracking;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -54,6 +54,7 @@ public class StreamNodePropertiesApplication {
      * then call again to a more specific method. Complexity hiding.
      */
     <T> Stream<T> compute(
+        RequestCorrelationId requestCorrelationId,
         TaskRegistryFactory taskRegistryFactory,
         UserLogRegistryFactory userLogRegistryFactory,
         GraphStore graphStore,
@@ -70,6 +71,7 @@ public class StreamNodePropertiesApplication {
             .collect(Collectors.toList());
 
         return _compute(
+            requestCorrelationId,
             taskRegistryFactory,
             userLogRegistryFactory,
             configuration,
@@ -81,6 +83,7 @@ public class StreamNodePropertiesApplication {
     }
 
     private <T> Stream<T> _compute(
+        RequestCorrelationId requestCorrelationId,
         TaskRegistryFactory taskRegistryFactory,
         UserLogRegistryFactory userLogRegistryFactory,
         GraphExportNodePropertiesConfig configuration,
@@ -100,7 +103,7 @@ public class StreamNodePropertiesApplication {
             log,
             configuration.concurrency(),
             jobId,
-            PlainSimpleRequestCorrelationId.createShunt(jobId),
+            requestCorrelationId,
             taskRegistryFactory,
             userLogRegistryFactory
         );
