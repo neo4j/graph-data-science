@@ -220,7 +220,7 @@ public final class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCy
                 new LoggerForProgressTrackingAdapter(loadingContext.log()),
                 graphProjectConfig.readConcurrency(),
                 graphProjectConfig.jobId(),
-                PlainSimpleRequestCorrelationId.createShunt(graphProjectConfig.jobId()),
+                PlainSimpleRequestCorrelationId.create(graphProjectConfig.jobId().value()),
                 loadingContext.taskRegistryFactory(),
                 EmptyUserLogRegistryFactory.INSTANCE
             );
@@ -231,7 +231,7 @@ public final class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCy
             new LoggerForProgressTrackingAdapter(loadingContext.log()),
             graphProjectConfig.readConcurrency(),
             graphProjectConfig.jobId(),
-            PlainSimpleRequestCorrelationId.createShunt(graphProjectConfig.jobId()),
+            PlainSimpleRequestCorrelationId.create(graphProjectConfig.jobId().value()),
             loadingContext.taskRegistryFactory(),
             EmptyUserLogRegistryFactory.INSTANCE
         );
