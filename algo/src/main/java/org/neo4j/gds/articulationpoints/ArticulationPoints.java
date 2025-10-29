@@ -70,7 +70,7 @@ public final class ArticulationPoints extends Algorithm<ArticulationPointsResult
         low.setAll(__ -> -1);
         progressTracker.beginSubTask("ArticulationPoints");
         //each edge may have at most one event to the stack at the same time
-        var stack = HugeObjectArray.newArray(StackEvent.class, graph.relationshipCount());
+        var stack = HugeObjectArray.newArray(StackEvent.class, Math.max(5,graph.relationshipCount()));
 
         var n = graph.nodeCount();
         for (int i = 0; i < n; ++i) {
