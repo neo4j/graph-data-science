@@ -27,6 +27,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.compat.TestLog;
+import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
@@ -253,7 +254,13 @@ class BoruvkaMSTTest {
 
             var progressTask = HDBScanProgressTrackerCreator.boruvkaTask("boruvka",graph.nodeCount());
             var log = new GdsTestLog();
-            var progressTracker = TaskProgressTracker.create(progressTask, new LoggerForProgressTrackingAdapter(log), new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE);
+            var progressTracker = TaskProgressTracker.create(
+                progressTask,
+                new LoggerForProgressTrackingAdapter(log),
+                new Concurrency(1),
+                PlainSimpleRequestCorrelationId.create(),
+                EmptyTaskRegistryFactory.INSTANCE
+            );
 
             var nodePropertyValues = graph.nodeProperties("point");
 

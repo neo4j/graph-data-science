@@ -22,6 +22,7 @@ package org.neo4j.gds.core.io.file;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.core.RequestCorrelationId;
 import org.neo4j.gds.core.io.GraphStoreExporter;
 import org.neo4j.gds.core.io.NeoNodeProperties;
 import org.neo4j.gds.core.io.file.csv.GraphStoreToCsvExporter;
@@ -48,6 +49,7 @@ public final class GraphStoreExporterUtil {
         Path path,
         GraphStoreToFileExporterParameters parameters,
         Optional<NeoNodeProperties> neoNodeProperties,
+        RequestCorrelationId requestCorrelationId,
         TaskRegistryFactory taskRegistryFactory,
         GdsLoggers loggers,
         ExecutorService executorService
@@ -58,6 +60,7 @@ public final class GraphStoreExporterUtil {
                 parameters,
                 path,
                 neoNodeProperties,
+                requestCorrelationId,
                 taskRegistryFactory,
                 loggers.loggerForProgressTracking(),
                 executorService

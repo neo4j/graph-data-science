@@ -24,6 +24,7 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.MutableNodeSchema;
+import org.neo4j.gds.core.RequestCorrelationId;
 import org.neo4j.gds.core.io.IdentifierMapper;
 import org.neo4j.gds.core.io.NeoNodeProperties;
 import org.neo4j.gds.core.io.file.GraphStoreToFileExporter;
@@ -44,6 +45,7 @@ public final class GraphStoreToCsvExporter {
         GraphStoreToFileExporterParameters parameters,
         Path exportPath,
         Optional<NeoNodeProperties> neoNodeProperties,
+        RequestCorrelationId requestCorrelationId,
         TaskRegistryFactory taskRegistryFactory,
         LoggerForProgressTracking log,
         ExecutorService executorService
@@ -102,6 +104,7 @@ public final class GraphStoreToCsvExporter {
                 headerFiles,
                 index
             ),
+            requestCorrelationId,
             taskRegistryFactory,
             log,
             "Csv",

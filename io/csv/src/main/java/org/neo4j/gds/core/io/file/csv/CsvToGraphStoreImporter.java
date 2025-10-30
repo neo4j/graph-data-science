@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.io.file.csv;
 
+import org.neo4j.gds.core.RequestCorrelationId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.io.file.FileInput;
 import org.neo4j.gds.core.io.file.FileToGraphStoreImporter;
@@ -33,9 +34,10 @@ public class CsvToGraphStoreImporter extends FileToGraphStoreImporter {
         Concurrency concurrency,
         Path importPath,
         Log log,
+        RequestCorrelationId requestCorrelationId,
         TaskRegistryFactory taskRegistryFactory
     ) {
-        super(concurrency, importPath, log, taskRegistryFactory);
+        super(concurrency, importPath, log, requestCorrelationId, taskRegistryFactory);
     }
 
     @Override

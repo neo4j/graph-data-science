@@ -23,10 +23,9 @@ import org.neo4j.common.Validator;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.api.Topology;
-import org.neo4j.gds.api.properties.relationships.RelationshipPropertyStore;
 import org.neo4j.gds.api.schema.ImmutableMutableGraphSchema;
 import org.neo4j.gds.api.schema.MutableNodeSchema;
+import org.neo4j.gds.core.RequestCorrelationId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
@@ -67,6 +66,7 @@ public abstract class FileToGraphStoreImporter {
     private final ImmutableMutableGraphSchema.Builder graphSchemaBuilder;
     private final GraphStoreBuilder graphStoreBuilder;
     private final Log log;
+    private final RequestCorrelationId requestCorrelationId;
     private final TaskRegistryFactory taskRegistryFactory;
 
     private ProgressTracker progressTracker;
@@ -75,8 +75,10 @@ public abstract class FileToGraphStoreImporter {
         Concurrency concurrency,
         Path importPath,
         Log log,
+        RequestCorrelationId requestCorrelationId,
         TaskRegistryFactory taskRegistryFactory
     ) {
+        this.requestCorrelationId = requestCorrelationId;
         this.nodeVisitorBuilder = new GraphStoreNodeVisitor.Builder();
         this.relationshipVisitorBuilder = new GraphStoreRelationshipVisitor.Builder();
         this.graphPropertyVisitorBuilder = new GraphStoreGraphPropertyVisitor.Builder();
@@ -159,7 +161,13 @@ public abstract class FileToGraphStoreImporter {
             importTasks
         );
 
-        return TaskProgressTracker.create(task, new LoggerForProgressTrackingAdapter(log), concurrency, taskRegistryFactory);
+        return TaskProgressTracker.create(
+            task,
+            new LoggerForProgressTrackingAdapter(log),
+            concurrency,
+            requestCorrelationId,
+            taskRegistryFactory
+        );
     }
 
     private Nodes importNodes(FileInput fileInput) {
@@ -264,12 +272,6 @@ public abstract class FileToGraphStoreImporter {
             progressTracker.endSubTask();
         }
     }
-
-    public record RelationshipTopologyAndProperties(
-        Map<RelationshipType, Topology> topologies,
-        Map<RelationshipType, RelationshipPropertyStore> properties,
-        long importedRelationships
-    ) {}
 
     public static final Validator<Path> DIRECTORY_IS_READABLE = value -> {
         Files.exists(value);

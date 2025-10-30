@@ -43,6 +43,7 @@ import org.neo4j.gds.beta.pregel.context.MasterComputeContext;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
+import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
@@ -222,6 +223,7 @@ class PregelTest {
             task,
             new LoggerForProgressTrackingAdapter(Log.noOpLog()),
             config.concurrency(),
+            PlainSimpleRequestCorrelationId.create(),
             jobId -> new TaskRegistry("", taskStore, jobId)
         );
 

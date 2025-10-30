@@ -204,6 +204,7 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
             graphDatabaseService,
             procedureTransaction,
             exportLocation,
+            requestScopedDependencies.correlationId(),
             requestScopedDependencies.taskRegistryFactory()
         );
         var exportToCsvEstimateApplication = new ExportToCsvEstimateApplication();

@@ -22,6 +22,7 @@ package org.neo4j.gds;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
+import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.ClockService;
 import org.neo4j.gds.core.JobId;
@@ -154,7 +155,13 @@ class ListProgressDetailProcTest extends BaseProgressTest {
                 Tasks.leaf("leaf", 3)
             );
 
-            var taskProgressTracker = TaskProgressTracker.create(task, LoggerForProgressTracking.noOpLog(), new Concurrency(1), executionContext().taskRegistryFactory());
+            var taskProgressTracker = TaskProgressTracker.create(
+                task,
+                LoggerForProgressTracking.noOpLog(),
+                new Concurrency(1),
+                PlainSimpleRequestCorrelationId.create(),
+                executionContext().taskRegistryFactory()
+            );
 
             taskProgressTracker.beginSubTask("root");
             taskProgressTracker.beginSubTask("iterative");

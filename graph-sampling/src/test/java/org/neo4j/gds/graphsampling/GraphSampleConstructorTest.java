@@ -27,6 +27,7 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.compat.TestLog;
+import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
@@ -308,6 +309,7 @@ class GraphSampleConstructorTest {
             GraphSampleConstructor.progressTask(naturalGraphStore, rwr),
             new LoggerForProgressTrackingAdapter(log),
             new Concurrency(1),
+            PlainSimpleRequestCorrelationId.create(),
             EmptyTaskRegistryFactory.INSTANCE
         );
 

@@ -22,6 +22,7 @@ package org.neo4j.gds.hdbscan;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.compat.TestLog;
+import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
@@ -216,6 +217,7 @@ class KdTreeBuilderTest {
                 progressTask,
                 new LoggerForProgressTrackingAdapter(log),
                 new Concurrency(1),
+                PlainSimpleRequestCorrelationId.create(),
                 EmptyTaskRegistryFactory.INSTANCE
             );
 

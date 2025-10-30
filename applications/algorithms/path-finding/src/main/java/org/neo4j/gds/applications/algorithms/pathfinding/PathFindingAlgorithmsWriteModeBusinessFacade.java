@@ -159,6 +159,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
             configuration.jobId(),
             configuration.writeConcurrency(),
             log,
+            requestScopedDependencies.correlationId(),
             requestScopedDependencies.taskRegistryFactory(),
             requestScopedDependencies.terminationFlag()
         );

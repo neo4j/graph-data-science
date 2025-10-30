@@ -58,6 +58,7 @@ public class WriteRelationshipService {
         return Neo4jDatabaseRelationshipWriter.writeRelationshipsFromGraph(
             writeRelationshipType,
             writeProperty,
+            requestScopedDependencies.correlationId(),
             requestScopedDependencies.taskRegistryFactory(),
             writeContext.relationshipExporterBuilder(),
             writeGraph,
@@ -86,6 +87,7 @@ public class WriteRelationshipService {
             writeRelationshipType,
             properties,
             valueTypes,
+            requestScopedDependencies.correlationId(),
             requestScopedDependencies.taskRegistryFactory(),
             writeContext.relationshipStreamExporterBuilder(),
             relationshipStream,

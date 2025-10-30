@@ -22,6 +22,7 @@ package org.neo4j.gds.core.utils.progress.tasks;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.TestTaskStore;
 import org.neo4j.gds.compat.TestLog;
+import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
@@ -37,7 +38,13 @@ class TaskProgressTrackerFailMethodTest {
         var failingTask = Tasks.leaf("failingTask");
         var log = new GdsTestLog();
         var taskStore = new TestTaskStore();
-        var tracker = TaskProgressTracker.create(failingTask, new LoggerForProgressTrackingAdapter(log), new Concurrency(1), TaskRegistryFactory.local("", taskStore));
+        var tracker = TaskProgressTracker.create(
+            failingTask,
+            new LoggerForProgressTrackingAdapter(log),
+            new Concurrency(1),
+            PlainSimpleRequestCorrelationId.create(),
+            TaskRegistryFactory.local("", taskStore)
+        );
 
         tracker.beginSubTask();
         tracker.endSubTaskWithFailure();
@@ -62,7 +69,13 @@ class TaskProgressTrackerFailMethodTest {
         var rootTask = Tasks.task("rootTask", failingSubTask);
         var log = new GdsTestLog();
         var taskStore = new TestTaskStore();
-        var tracker = TaskProgressTracker.create(rootTask, new LoggerForProgressTrackingAdapter(log), new Concurrency(1), TaskRegistryFactory.local("", taskStore));
+        var tracker = TaskProgressTracker.create(
+            rootTask,
+            new LoggerForProgressTrackingAdapter(log),
+            new Concurrency(1),
+            PlainSimpleRequestCorrelationId.create(),
+            TaskRegistryFactory.local("", taskStore)
+        );
 
         tracker.beginSubTask("rootTask");
         tracker.beginSubTask("failingSubTask");

@@ -24,6 +24,7 @@ import org.neo4j.batchimport.api.input.Input;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.core.RequestCorrelationId;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.io.GraphStoreExporter;
@@ -67,6 +68,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter {
     private final Supplier<ElementSchemaVisitor> graphPropertySchemaVisitorSupplier;
     private final Supplier<SimpleWriter<Capabilities>> graphCapabilitiesWriterSupplier;
 
+    private final RequestCorrelationId requestCorrelationId;
     private final TaskRegistryFactory taskRegistryFactory;
     private final LoggerForProgressTracking log;
     private final String rootTaskName;
@@ -89,6 +91,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter {
         VisitorProducer<NodeVisitor> nodeVisitorSupplier,
         VisitorProducer<RelationshipVisitor> relationshipVisitorSupplier,
         VisitorProducer<GraphPropertyVisitor> graphPropertyVisitorSupplier,
+        RequestCorrelationId requestCorrelationId,
         TaskRegistryFactory taskRegistryFactory,
         LoggerForProgressTracking log,
         String rootTaskName,
@@ -115,6 +118,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter {
         this.relationshipSchemaVisitorSupplier = relationshipSchemaVisitorSupplier;
         this.graphPropertySchemaVisitorSupplier = graphPropertySchemaVisitorSupplier;
         this.graphCapabilitiesWriterSupplier = graphCapabilitiesWriterSupplier;
+        this.requestCorrelationId = requestCorrelationId;
         this.taskRegistryFactory = taskRegistryFactory;
         this.log = log;
         this.rootTaskName = rootTaskName;
@@ -166,7 +170,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter {
         }
 
         var task = Tasks.task(rootTaskName + " export", importTasks);
-        return TaskProgressTracker.create(task, log, concurrency, taskRegistryFactory);
+        return TaskProgressTracker.create(task, log, concurrency, requestCorrelationId, taskRegistryFactory);
     }
 
     private void exportNodes(

@@ -31,6 +31,7 @@ import org.neo4j.gds.api.ExportedRelationship;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
@@ -246,6 +247,7 @@ class NativeRelationshipStreamExporterTest extends BaseTest {
             RelationshipStreamExporter.baseTask("OpName"),
             new LoggerForProgressTrackingAdapter(log),
             new Concurrency(1),
+            PlainSimpleRequestCorrelationId.create(),
             EmptyTaskRegistryFactory.INSTANCE
         );
 

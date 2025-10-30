@@ -25,6 +25,7 @@ import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
 import org.neo4j.gds.applications.algorithms.machinery.WriteStep;
+import org.neo4j.gds.core.RequestCorrelationId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.JobId;
@@ -48,6 +49,7 @@ public class KSpanningTreeWriteStep implements WriteStep<SpanningTree, Void> {
     private final Function<ResultStore, Optional<ResultStore>> resultStoreResolver;
     private final JobId jobId;
     private final Concurrency writeConcurrency;
+    private final RequestCorrelationId requestCorrelationId;
     private final TaskRegistryFactory taskRegistryFactory;
     private final TerminationFlag terminationFlag;
 
@@ -58,6 +60,7 @@ public class KSpanningTreeWriteStep implements WriteStep<SpanningTree, Void> {
         JobId jobId,
         Concurrency writeConcurrency,
         Log log,
+        RequestCorrelationId requestCorrelationId,
         TaskRegistryFactory taskRegistryFactory,
         TerminationFlag terminationFlag
     ) {
@@ -67,6 +70,7 @@ public class KSpanningTreeWriteStep implements WriteStep<SpanningTree, Void> {
         this.resultStoreResolver = resultStoreResolver;
         this.jobId = jobId;
         this.writeConcurrency = writeConcurrency;
+        this.requestCorrelationId = requestCorrelationId;
         this.taskRegistryFactory = taskRegistryFactory;
         this.terminationFlag = terminationFlag;
     }
@@ -85,6 +89,7 @@ public class KSpanningTreeWriteStep implements WriteStep<SpanningTree, Void> {
             NodePropertyExporter.baseTask(AlgorithmLabel.KSpanningTree.asString(), graph.nodeCount()),
             new LoggerForProgressTrackingAdapter(log),
             writeConcurrency,
+            requestCorrelationId,
             taskRegistryFactory
         );
 

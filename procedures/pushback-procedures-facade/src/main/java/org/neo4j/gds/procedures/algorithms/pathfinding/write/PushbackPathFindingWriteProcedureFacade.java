@@ -154,6 +154,7 @@ public class PushbackPathFindingWriteProcedureFacade {
             config.jobId(),
             config.writeConcurrency(),
             log,
+            requestScopedDependencies.correlationId(),
             requestScopedDependencies.taskRegistryFactory(),
             requestScopedDependencies.terminationFlag()
         );

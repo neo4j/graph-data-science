@@ -22,6 +22,7 @@ package org.neo4j.gds.hits;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.compat.TestLog;
+import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
@@ -106,7 +107,13 @@ class HitsTest {
         var config = HitsConfigImpl.builder().concurrency(1).hitsIterations(5).build();
         var progressTask = HitsProgressTrackerCreator.progressTask(graph.nodeCount(),config.maxIterations(),"Hits");
         var log = new GdsTestLog();
-        var progressTracker = TaskProgressTracker.create(progressTask, new LoggerForProgressTrackingAdapter(log), new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE);
+        var progressTracker = TaskProgressTracker.create(
+            progressTask,
+            new LoggerForProgressTrackingAdapter(log),
+            new Concurrency(1),
+            PlainSimpleRequestCorrelationId.create(),
+            EmptyTaskRegistryFactory.INSTANCE
+        );
 
         var hitsp =new Hits(graph,config,DefaultPool.INSTANCE,progressTracker);
         hitsp.compute();

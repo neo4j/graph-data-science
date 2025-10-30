@@ -32,6 +32,7 @@ import org.neo4j.gds.api.GraphStoreAdapter;
 import org.neo4j.gds.api.ImmutableDatabaseInfo;
 import org.neo4j.gds.api.properties.graph.DoubleArrayGraphPropertyValues;
 import org.neo4j.gds.api.properties.graph.LongGraphPropertyValues;
+import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.io.file.GraphStoreToFileExporterParameters;
@@ -93,17 +94,26 @@ class CsvToGraphStoreImporterIntegrationTest {
     void shouldImportProperties(int concurrency) {
         var graphStore = GdlFactory.of(GRAPH_WITH_PROPERTIES).build();
 
+        var requestCorrelationId = PlainSimpleRequestCorrelationId.create();
+
         GraphStoreToCsvExporter.create(
             graphStore,
             exportParameters(concurrency),
             graphLocation,
             Optional.empty(),
+            requestCorrelationId,
             TaskRegistryFactory.empty(),
             LoggerForProgressTracking.noOpLog(),
             DefaultPool.INSTANCE
         ).run();
 
-        var importer = new CsvToGraphStoreImporter(new Concurrency(concurrency), graphLocation, Log.noOpLog(), EmptyTaskRegistryFactory.INSTANCE);
+        var importer = new CsvToGraphStoreImporter(
+            new Concurrency(concurrency),
+            graphLocation,
+            Log.noOpLog(),
+            requestCorrelationId,
+            EmptyTaskRegistryFactory.INSTANCE
+        );
         var userGraphStore = importer.run();
 
         var importedGraphStore = userGraphStore.graphStore();
@@ -120,16 +130,25 @@ class CsvToGraphStoreImporterIntegrationTest {
         addDoubleArrayGraphProperty(graphStore);
         addLongNamedGraphProperty(graphStore);
 
+        var requestCorrelationId = PlainSimpleRequestCorrelationId.create();
+
         GraphStoreToCsvExporter.create(
             graphStore,
             exportParameters(concurrency),
             graphLocation,
             Optional.empty(),
+            requestCorrelationId,
             TaskRegistryFactory.empty(),
             LoggerForProgressTracking.noOpLog(),
             DefaultPool.INSTANCE
         ).run();
-        var importer = new CsvToGraphStoreImporter(new Concurrency(concurrency), graphLocation, Log.noOpLog(), EmptyTaskRegistryFactory.INSTANCE);
+        var importer = new CsvToGraphStoreImporter(
+            new Concurrency(concurrency),
+            graphLocation,
+            Log.noOpLog(),
+            requestCorrelationId,
+            EmptyTaskRegistryFactory.INSTANCE
+        );
         var userGraphStore = importer.run().graphStore();
 
         assertThat(userGraphStore.graphPropertyKeys()).containsExactlyInAnyOrder(
@@ -156,17 +175,26 @@ class CsvToGraphStoreImporterIntegrationTest {
     void shouldImportGraphWithPropertiesAndUnderscoreLabels(int concurrency) {
         var graphStore = GdlFactory.of(GRAPH_WITH_UNDERSCORE_LABELS).build();
 
+        var requestCorrelationId = PlainSimpleRequestCorrelationId.create();
+
         GraphStoreToCsvExporter.create(
             graphStore,
             exportParameters(concurrency),
             graphLocation,
             Optional.empty(),
+            requestCorrelationId,
             TaskRegistryFactory.empty(),
             LoggerForProgressTracking.noOpLog(),
             DefaultPool.INSTANCE
         ).run();
 
-        var importer = new CsvToGraphStoreImporter(new Concurrency(concurrency), graphLocation, Log.noOpLog(), EmptyTaskRegistryFactory.INSTANCE);
+        var importer = new CsvToGraphStoreImporter(
+            new Concurrency(concurrency),
+            graphLocation,
+            Log.noOpLog(),
+            requestCorrelationId,
+            EmptyTaskRegistryFactory.INSTANCE
+        );
         var userGraphStore = importer.run();
 
         var importedGraphStore = userGraphStore.graphStore();
@@ -178,17 +206,26 @@ class CsvToGraphStoreImporterIntegrationTest {
     void shouldImportGraphWithNoLabels() {
         var graphStore = GdlFactory.of("()-[]->()").build();
 
+        var requestCorrelationId = PlainSimpleRequestCorrelationId.create();
+
         GraphStoreToCsvExporter.create(
             graphStore,
             exportParameters(4),
             graphLocation,
             Optional.empty(),
+            requestCorrelationId,
             TaskRegistryFactory.empty(),
             LoggerForProgressTracking.noOpLog(),
             DefaultPool.INSTANCE
         ).run();
 
-        var importer = new CsvToGraphStoreImporter(new Concurrency(4), graphLocation, Log.noOpLog(), EmptyTaskRegistryFactory.INSTANCE);
+        var importer = new CsvToGraphStoreImporter(
+            new Concurrency(4),
+            graphLocation,
+            Log.noOpLog(),
+            requestCorrelationId,
+            EmptyTaskRegistryFactory.INSTANCE
+        );
         var userGraphStore = importer.run();
 
         var importedGraphStore = userGraphStore.graphStore();
@@ -205,17 +242,26 @@ class CsvToGraphStoreImporterIntegrationTest {
             .build()
             .build();
 
+        var requestCorrelationId = PlainSimpleRequestCorrelationId.create();
+
         GraphStoreToCsvExporter.create(
             graphStoreWithCapabilities,
             exportParameters(1),
             graphLocation,
             Optional.empty(),
+            requestCorrelationId,
             TaskRegistryFactory.empty(),
             LoggerForProgressTracking.noOpLog(),
             DefaultPool.INSTANCE
         ).run();
 
-        var importer = new CsvToGraphStoreImporter(new Concurrency(1), graphLocation, Log.noOpLog(), EmptyTaskRegistryFactory.INSTANCE);
+        var importer = new CsvToGraphStoreImporter(
+            new Concurrency(1),
+            graphLocation,
+            Log.noOpLog(),
+            requestCorrelationId,
+            EmptyTaskRegistryFactory.INSTANCE
+        );
         var userGraphStore = importer.run();
 
         var importedGraphStore = userGraphStore.graphStore();
@@ -234,17 +280,26 @@ class CsvToGraphStoreImporterIntegrationTest {
             .build()
             .build();
 
+        var requestCorrelationId = PlainSimpleRequestCorrelationId.create();
+
         GraphStoreToCsvExporter.create(
             graphStore,
             exportParameters(1),
             graphLocation,
             Optional.empty(),
+            requestCorrelationId,
             TaskRegistryFactory.empty(),
             LoggerForProgressTracking.noOpLog(),
             DefaultPool.INSTANCE
         ).run();
 
-        var importer = new CsvToGraphStoreImporter(new Concurrency(1), graphLocation, Log.noOpLog(), EmptyTaskRegistryFactory.INSTANCE);
+        var importer = new CsvToGraphStoreImporter(
+            new Concurrency(1),
+            graphLocation,
+            Log.noOpLog(),
+            requestCorrelationId,
+            EmptyTaskRegistryFactory.INSTANCE
+        );
         var userGraphStore = importer.run();
 
         assertThat(userGraphStore.graphStore().nodes().typeId()).startsWith(idMapBuilderType);
@@ -257,17 +312,26 @@ class CsvToGraphStoreImporterIntegrationTest {
             .build()
             .build());
 
+        var requestCorrelationId = PlainSimpleRequestCorrelationId.create();
+
         GraphStoreToCsvExporter.create(
             graphStore,
             exportParameters(1),
             graphLocation,
             Optional.empty(),
+            requestCorrelationId,
             TaskRegistryFactory.empty(),
             LoggerForProgressTracking.noOpLog(),
             DefaultPool.INSTANCE
         ).run();
 
-        var importer = new CsvToGraphStoreImporter(new Concurrency(1), graphLocation, Log.noOpLog(), EmptyTaskRegistryFactory.INSTANCE);
+        var importer = new CsvToGraphStoreImporter(
+            new Concurrency(1),
+            graphLocation,
+            Log.noOpLog(),
+            requestCorrelationId,
+            EmptyTaskRegistryFactory.INSTANCE
+        );
         var userGraphStore = importer.run();
 
         assertThat(userGraphStore.graphStore().databaseInfo()).isEqualTo(graphStore.databaseInfo());

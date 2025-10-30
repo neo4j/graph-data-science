@@ -100,7 +100,13 @@ class TaskProgressTrackerTest {
         GdsFeatureToggles.FAIL_ON_PROGRESS_TRACKER_ERRORS.disableAndRun(() -> {
             var task = Tasks.leaf("leaf");
             var log = new GdsTestLog();
-            var progressTracker = TaskProgressTracker.create(task, new LoggerForProgressTrackingAdapter(log), new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE);
+            var progressTracker = TaskProgressTracker.create(
+                task,
+                new LoggerForProgressTrackingAdapter(log),
+                new Concurrency(1),
+                PlainSimpleRequestCorrelationId.create(),
+                EmptyTaskRegistryFactory.INSTANCE
+            );
             progressTracker.beginSubTask();
             progressTracker.endSubTask();
             assertThatNoException()
@@ -245,7 +251,13 @@ class TaskProgressTrackerTest {
 
         var taskStore = new PerDatabaseTaskStore(Duration.ZERO);
         var taskRegistry = new TaskRegistry("", taskStore);
-        var progressTracker = TaskProgressTracker.create(task, LoggerForProgressTracking.noOpLog(), new Concurrency(1), jobId -> taskRegistry);
+        var progressTracker = TaskProgressTracker.create(
+            task,
+            LoggerForProgressTracking.noOpLog(),
+            new Concurrency(1),
+            PlainSimpleRequestCorrelationId.create(),
+            jobId -> taskRegistry
+        );
 
         assertThat(taskStore.query("")).isEmpty();
 
@@ -297,7 +309,13 @@ class TaskProgressTrackerTest {
     }
 
     private TaskProgressTracker progressTracker(Task task, Log log) {
-        return TaskProgressTracker.create(task, new LoggerForProgressTrackingAdapter(log), new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE);
+        return TaskProgressTracker.create(
+            task,
+            new LoggerForProgressTrackingAdapter(log),
+            new Concurrency(1),
+            PlainSimpleRequestCorrelationId.create(),
+            EmptyTaskRegistryFactory.INSTANCE
+        );
     }
 
     private TaskProgressTracker progressTracker(Task task) {

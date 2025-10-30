@@ -27,6 +27,7 @@ import org.neo4j.gds.api.properties.nodes.NodePropertyRecord;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
+import org.neo4j.gds.core.RequestCorrelationId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.loading.Capabilities;
@@ -56,6 +57,7 @@ final class Neo4jDatabaseNodePropertyWriter {
     private Neo4jDatabaseNodePropertyWriter() {
     }
     static NodePropertiesWritten writeNodeProperty(
+        RequestCorrelationId requestCorrelationId,
         NodePropertyExporterBuilder nodePropertyExporterBuilder,
         TaskRegistryFactory taskRegistryFactory,
         Graph graph,
@@ -71,6 +73,7 @@ final class Neo4jDatabaseNodePropertyWriter {
     ) {
         var nodeProperties = List.of(new NodePropertyRecord(writeProperty, nodePropertyValues));
         return  writeNodeProperties(
+            requestCorrelationId,
             nodePropertyExporterBuilder,
             taskRegistryFactory,
             graph,
@@ -87,6 +90,7 @@ final class Neo4jDatabaseNodePropertyWriter {
     }
 
     static NodePropertiesWritten writeNodeProperties(
+        RequestCorrelationId requestCorrelationId,
         NodePropertyExporterBuilder nodePropertyExporterBuilder,
         TaskRegistryFactory taskRegistryFactory,
         Graph graph,
@@ -109,6 +113,7 @@ final class Neo4jDatabaseNodePropertyWriter {
         );
 
         var progressTracker = createProgressTracker(
+            requestCorrelationId,
             taskRegistryFactory,
             graph.nodeCount(),
             writeConcurrency,
@@ -137,6 +142,7 @@ final class Neo4jDatabaseNodePropertyWriter {
     }
 
     private static ProgressTracker createProgressTracker(
+        RequestCorrelationId requestCorrelationId,
         TaskRegistryFactory taskRegistryFactory,
         long taskVolume,
         Concurrency writeConcurrency,
@@ -147,6 +153,7 @@ final class Neo4jDatabaseNodePropertyWriter {
             NodePropertyExporter.baseTask(name, taskVolume),
             new LoggerForProgressTrackingAdapter(log),
             writeConcurrency,
+            requestCorrelationId,
             taskRegistryFactory
         );
     }

@@ -26,6 +26,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.compat.TestLog;
+import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
@@ -237,7 +238,13 @@ class LabellingTest {
 
         var progressTask = HDBScanProgressTrackerCreator.labellingTask("foo",nodeCount);
         var log = new GdsTestLog();
-        var progressTracker = TaskProgressTracker.create(progressTask, new LoggerForProgressTrackingAdapter(log), new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE);
+        var progressTracker = TaskProgressTracker.create(
+            progressTask,
+            new LoggerForProgressTrackingAdapter(log),
+            new Concurrency(1),
+            PlainSimpleRequestCorrelationId.create(),
+            EmptyTaskRegistryFactory.INSTANCE
+        );
 
         new LabellingStep(condensedTree, nodeCount, progressTracker).labels();
 

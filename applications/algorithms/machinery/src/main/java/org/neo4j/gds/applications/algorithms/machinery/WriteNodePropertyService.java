@@ -54,6 +54,7 @@ public class WriteNodePropertyService {
         NodePropertyValues nodePropertyValues
     ) {
         return Neo4jDatabaseNodePropertyWriter.writeNodeProperty(
+            requestScopedDependencies.correlationId(),
             writeContext.nodePropertyExporterBuilder(),
             requestScopedDependencies.taskRegistryFactory(),
             graph,
@@ -79,6 +80,7 @@ public class WriteNodePropertyService {
         List<NodePropertyRecord> nodeProperties
     ) {
         return Neo4jDatabaseNodePropertyWriter.writeNodeProperties(
+            requestScopedDependencies.correlationId(),
             writeContext.nodePropertyExporterBuilder(),
             requestScopedDependencies.taskRegistryFactory(),
             graph,

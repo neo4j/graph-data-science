@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.compat.TestLog;
+import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
@@ -88,7 +89,13 @@ class PCSTFastTest {
 
             var progressTask = PCSTProgressTrackerTaskCreator.progressTask(graph.nodeCount(),graph.relationshipCount());
             var log = new GdsTestLog();
-            var progressTracker = TaskProgressTracker.create(progressTask, new LoggerForProgressTrackingAdapter(log), new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE);
+            var progressTracker = TaskProgressTracker.create(
+                progressTask,
+                new LoggerForProgressTrackingAdapter(log),
+                new Concurrency(1),
+                PlainSimpleRequestCorrelationId.create(),
+                EmptyTaskRegistryFactory.INSTANCE
+            );
 
            new PCSTFast(graph, x->20, progressTracker).compute();
 
@@ -172,7 +179,7 @@ class PCSTFastTest {
                     .map(parents::get)
                     .filter(v -> v != PrizeSteinerTreeResult.PRUNED)
                     .count())
-                .isEqualTo(0l);
+                .isEqualTo(0L);
 
             assertThat(case1 ^ case2).isTrue();
 

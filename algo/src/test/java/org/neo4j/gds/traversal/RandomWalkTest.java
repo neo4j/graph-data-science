@@ -32,6 +32,7 @@ import org.neo4j.gds.beta.generator.PropertyProducer;
 import org.neo4j.gds.beta.generator.RandomGraphGeneratorBuilder;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
 import org.neo4j.gds.compat.TestLog;
+import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
@@ -611,6 +612,7 @@ class RandomWalkTest {
                 RandomWalkProgressTask.create(graph),
                 LoggerForProgressTracking.noOpLog(),
                 new Concurrency(4),
+                PlainSimpleRequestCorrelationId.create(),
                 TaskRegistryFactory.local("rw", taskStore)
             );
 

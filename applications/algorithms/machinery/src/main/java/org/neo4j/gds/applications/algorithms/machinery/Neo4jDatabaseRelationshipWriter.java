@@ -26,6 +26,7 @@ import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.relationships.RelationshipWithPropertyConsumer;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
+import org.neo4j.gds.core.RequestCorrelationId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.JobId;
@@ -47,13 +48,14 @@ final class Neo4jDatabaseRelationshipWriter {
     static RelationshipsWritten writeRelationshipsFromGraph(
         String writeRelationshipType,
         String writeProperty,
+        RequestCorrelationId requestCorrelationId,
         TaskRegistryFactory taskRegistryFactory,
         RelationshipExporterBuilder relationshipExporterBuilder,
         Graph graph,
         IdMap rootIdMap,
         Log log,
         String taskName,
-        TerminationFlag algorithmTerminationFlag,
+        TerminationFlag terminationFlag,
         Optional<ResultStore> resultStore,
         RelationshipWithPropertyConsumer relationshipConsumer,
         JobId jobId
@@ -63,13 +65,14 @@ final class Neo4jDatabaseRelationshipWriter {
             RelationshipExporter.baseTask(taskName, graph.relationshipCount()),
             new LoggerForProgressTrackingAdapter(log),
             RelationshipExporterBuilder.TYPED_DEFAULT_WRITE_CONCURRENCY,
+            requestCorrelationId,
             taskRegistryFactory
         );
 
         var exporter = relationshipExporterBuilder
             .withIdMappingOperator(rootIdMap::toOriginalNodeId)
             .withGraph(graph)
-            .withTerminationFlag(algorithmTerminationFlag)
+            .withTerminationFlag(terminationFlag)
             .withProgressTracker(progressTracker)
             .withResultStore(resultStore)
             .withJobId(jobId)
@@ -95,6 +98,7 @@ final class Neo4jDatabaseRelationshipWriter {
         String writeRelationshipType,
         List<String> properties,
         List<ValueType> valueTypes,
+        RequestCorrelationId requestCorrelationId,
         TaskRegistryFactory taskRegistryFactory,
         RelationshipStreamExporterBuilder relationshipStreamExporterBuilder,
         Stream<ExportedRelationship> relationshipStream,
@@ -110,6 +114,7 @@ final class Neo4jDatabaseRelationshipWriter {
             RelationshipStreamExporter.baseTask(taskName),
             new LoggerForProgressTrackingAdapter(log),
             new Concurrency(1),
+            requestCorrelationId,
             taskRegistryFactory
         );
 

@@ -70,6 +70,7 @@ class KgeWriteStep implements WriteStep<KGEPredictResult, RelationshipsWritten> 
             task,
             new LoggerForProgressTrackingAdapter(log),
             RelationshipExporterBuilder.TYPED_DEFAULT_WRITE_CONCURRENCY,
+            requestScopedDependencies.correlationId(),
             requestScopedDependencies.taskRegistryFactory()
         );
 

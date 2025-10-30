@@ -30,6 +30,7 @@ import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.properties.nodes.NodePropertyRecord;
 import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.huge.DirectIdMap;
@@ -168,6 +169,7 @@ class NativeNodePropertyExporterTest extends BaseTest {
             NodePropertyExporter.baseTask("AlgoNameGoesHere", graph.nodeCount()),
             new LoggerForProgressTrackingAdapter(log),
             writeConcurrency,
+            PlainSimpleRequestCorrelationId.create(),
             EmptyTaskRegistryFactory.INSTANCE
         );
         var exporterBuilder = NativeNodePropertyExporter

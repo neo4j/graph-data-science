@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds;
 
+import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.utils.progress.ProgressFeatureSettings;
@@ -77,7 +78,13 @@ public abstract class BaseProgressTest extends BaseTest {
                 task.setMaxConcurrency(new Concurrency(REQUESTED_CPU_CORES));
             }
 
-            var taskProgressTracker = TaskProgressTracker.create(task, LoggerForProgressTracking.noOpLog(), new Concurrency(1), taskRegistryFactory);
+            var taskProgressTracker = TaskProgressTracker.create(
+                task,
+                LoggerForProgressTracking.noOpLog(),
+                new Concurrency(1),
+                PlainSimpleRequestCorrelationId.create(),
+                taskRegistryFactory
+            );
             taskProgressTracker.beginSubTask();
             taskProgressTracker.beginSubTask();
             taskProgressTracker.logProgress(1);

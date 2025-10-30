@@ -23,6 +23,7 @@ import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.core.RequestCorrelationId;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.io.NeoNodeProperties;
 import org.neo4j.gds.core.io.file.GraphStoreExporterUtil;
@@ -47,6 +48,7 @@ class ExportToCsvApplication {
     private final Transaction procedureTransaction;
 
     private final ExportLocation exportLocation;
+    private final RequestCorrelationId requestCorrelationId;
     private final TaskRegistryFactory taskRegistryFactory;
 
     ExportToCsvApplication(
@@ -54,12 +56,14 @@ class ExportToCsvApplication {
         GraphDatabaseService graphDatabaseService,
         Transaction procedureTransaction,
         ExportLocation exportLocation,
+        RequestCorrelationId requestCorrelationId,
         TaskRegistryFactory taskRegistryFactory
     ) {
         this.loggers = loggers;
         this.graphDatabaseService = graphDatabaseService;
         this.procedureTransaction = procedureTransaction;
         this.exportLocation = exportLocation;
+        this.requestCorrelationId = requestCorrelationId;
         this.taskRegistryFactory = taskRegistryFactory;
     }
 
@@ -80,6 +84,7 @@ class ExportToCsvApplication {
             exportDirectory,
             exportParameters,
             neoNodeProperties(configuration.additionalNodeProperties(), graphStore),
+            requestCorrelationId,
             taskRegistryFactory,
             loggers,
             DefaultPool.INSTANCE

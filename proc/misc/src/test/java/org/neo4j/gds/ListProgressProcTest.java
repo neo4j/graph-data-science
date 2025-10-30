@@ -31,6 +31,7 @@ import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.extension.FakeClockExtension;
 import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.integration.Neo4jPoweredRequestCorrelationId;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 import org.neo4j.time.FakeClock;
@@ -162,6 +163,7 @@ class ListProgressProcTest extends BaseProgressTest {
                 task,
                 LoggerForProgressTracking.noOpLog(),
                 new Concurrency(1),
+                Neo4jPoweredRequestCorrelationId.create(transaction.getTransactionSequenceNumber()),
                 taskRegistryFactory
             );
             taskProgressTracker.beginSubTask(taskName);
