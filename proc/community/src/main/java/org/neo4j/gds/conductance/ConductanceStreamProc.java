@@ -30,7 +30,6 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public class ConductanceStreamProc {
@@ -52,7 +51,7 @@ public class ConductanceStreamProc {
     @Deprecated(forRemoval = true)
     @Internal
     @Procedure(value = "gds.alpha.conductance.stream", mode = READ, deprecatedBy = "gds.conductance.stream")
-    @Description(MEMORY_ESTIMATION_DESCRIPTION)
+    @Description(CONDUCTANCE_DESCRIPTION)
     public Stream<ConductanceStreamResult> streamAlpha(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration

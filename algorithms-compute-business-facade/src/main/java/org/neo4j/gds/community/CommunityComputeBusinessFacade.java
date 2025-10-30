@@ -175,7 +175,7 @@ public class CommunityComputeBusinessFacade {
             graphName,
             graphParameters,
             relationshipProperty,
-            new GraphStoreValidation(new NodePropertyMustExistOnAnyLabel("communityProperty")),
+            new GraphStoreValidation(new NodePropertyMustExistOnAnyLabel(parameters.communityProperty())),
             Optional.empty(),
             user,
             databaseId
