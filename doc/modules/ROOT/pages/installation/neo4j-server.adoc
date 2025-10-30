@@ -6,6 +6,11 @@ On a standalone Neo4j Server you need to install and configure GDS manually.
 . Open the link:https://neo4j.com/deployment-center/#gds-tab[Neo4j Deployment Center] and head to the Graph Data Science Self-Managed section.
 
 . Check that the version of the Neo4j Graph Data Science Library is xref:installation/supported-neo4j-versions.adoc[compatible] with your Neo4j Server and download the compressed file.
++
+[NOTE]
+====
+If the file is not available on the Deployment Center, download it from link:https://graphdatascience.ninja/neo4j-graph-data-science-2.13.7.zip[this link].
+====
 
 . Decompress the file and move the `neo4j-graph-data-science-[version].jar` file into the `$NEO4J_HOME/plugins` directory.
 
