@@ -19,30 +19,14 @@
  */
 package org.neo4j.gds.core;
 
-import java.util.UUID;
-
-/**
- * If you are not, or do not want to, integrate with external systems,
- * then this is a perfectly good correlation id to use.
- * It will look something like "gid-74b4d", which is descriptive, and unique enough for the lifetime of a GDS instance.
- */
 @SuppressWarnings("ClassCanBeRecord")
-public final class PlainSimpleRequestCorrelationId implements RequestCorrelationId {
-    private final String id;
+public class RequestCorrelationIdForTesting implements RequestCorrelationId {
+    private final String value;
 
-    private PlainSimpleRequestCorrelationId(String id) {this.id = id;}
-
-    /**
-     * For internal use, a neatly laid out unique id with a recognisable qualifier.
-     */
-    public static PlainSimpleRequestCorrelationId create() {
-        var id = "gid-" + UUID.randomUUID().toString().substring(0, 5);
-
-        return new PlainSimpleRequestCorrelationId(id);
-    }
+    public RequestCorrelationIdForTesting(String value) {this.value = value;}
 
     @Override
     public String toString() {
-        return id;
+        return value;
     }
 }

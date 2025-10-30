@@ -26,6 +26,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.neo4j.gds.assertj.Extractors;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
+import org.neo4j.gds.core.RequestCorrelationIdForTesting;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
@@ -65,7 +66,7 @@ class BatchingProgressLoggerTest {
         var concurrency = new Concurrency(1);
         var logger = new BatchingProgressLogger(
             new LoggerForProgressTrackingAdapter(log),
-            PlainSimpleRequestCorrelationId.create("some request correlation id"),
+            new RequestCorrelationIdForTesting("some request correlation id"),
             Tasks.leaf("foo", taskVolume),
             batchSize,
             concurrency
@@ -99,7 +100,7 @@ class BatchingProgressLoggerTest {
         var concurrency = new Concurrency(1);
         var logger = new BatchingProgressLogger(
             new LoggerForProgressTrackingAdapter(log),
-            PlainSimpleRequestCorrelationId.create("a request correlation id"),
+            new RequestCorrelationIdForTesting("a request correlation id"),
             Tasks.leaf("foo", taskVolume),
             batchSize,
             concurrency
@@ -238,7 +239,12 @@ class BatchingProgressLoggerTest {
 
     private static List<Integer> performLogging(long taskVolume, Concurrency concurrency) {
         var log = new GdsTestLog();
-        var logger = new BatchingProgressLogger(new LoggerForProgressTrackingAdapter(log), PlainSimpleRequestCorrelationId.create("the_request_correlation_id"), Tasks.leaf("Test", taskVolume), concurrency);
+        var logger = new BatchingProgressLogger(
+            new LoggerForProgressTrackingAdapter(log),
+            PlainSimpleRequestCorrelationId.create(),
+            Tasks.leaf("Test", taskVolume),
+            concurrency
+        );
         logger.reset(taskVolume);
 
         var batchSize = (int) BitUtil.ceilDiv(taskVolume, concurrency.value());
@@ -270,7 +276,7 @@ class BatchingProgressLoggerTest {
         var log = mock(Log.class);
         var batchingProgressLogger = new BatchingProgressLogger(
             new LoggerForProgressTrackingAdapter(log),
-            PlainSimpleRequestCorrelationId.create("my request correlation id"),
+            new RequestCorrelationIdForTesting("my request correlation id"),
             new LeafTask("Monsieur Alfonse", 42),
             new Concurrency(87)
         );
@@ -285,7 +291,7 @@ class BatchingProgressLoggerTest {
         var log = mock(Log.class);
         var batchingProgressLogger = new BatchingProgressLogger(
             new LoggerForProgressTrackingAdapter(log),
-            PlainSimpleRequestCorrelationId.create("my request correlation id"),
+            new RequestCorrelationIdForTesting("my request correlation id"),
             new LeafTask("Monsieur Alfonse", 42),
             new Concurrency(87)
         );
@@ -301,7 +307,7 @@ class BatchingProgressLoggerTest {
         var log = mock(Log.class);
         var batchingProgressLogger = new BatchingProgressLogger(
             new LoggerForProgressTrackingAdapter(log),
-            PlainSimpleRequestCorrelationId.create("my request correlation id"),
+            new RequestCorrelationIdForTesting("my request correlation id"),
             new LeafTask("Monsieur Alfonse", 42),
             new Concurrency(87)
         );
@@ -316,7 +322,7 @@ class BatchingProgressLoggerTest {
         var log = mock(Log.class);
         var batchingProgressLogger = new BatchingProgressLogger(
             new LoggerForProgressTrackingAdapter(log),
-            PlainSimpleRequestCorrelationId.create("my request correlation id"),
+            new RequestCorrelationIdForTesting("my request correlation id"),
             new LeafTask("Monsieur Alfonse", 42),
             new Concurrency(87)
         );

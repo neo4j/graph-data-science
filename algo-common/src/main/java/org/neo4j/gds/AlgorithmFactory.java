@@ -83,7 +83,7 @@ public interface AlgorithmFactory<G, ALGO extends Algorithm<?>, CONFIG extends A
          * And you do get the benefit of mostly having correlation, just using job id,
          * instead of something neat injected from the integration layer.
          */
-        var requestCorrelationId = PlainSimpleRequestCorrelationId.create(configuration.jobId().asString());
+        var requestCorrelationId = PlainSimpleRequestCorrelationId.create();
 
         if (configuration.logProgress()) {
             return TaskProgressTracker.create(

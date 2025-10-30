@@ -23,6 +23,7 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
+import org.neo4j.gds.core.RequestCorrelationIdForTesting;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.RenamesCurrentThread;
 import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
@@ -195,7 +196,7 @@ class TaskProgressTrackerTest {
                 new LoggerForProgressTrackingAdapter(log),
                 new Concurrency(1),
                 new JobId(),
-                PlainSimpleRequestCorrelationId.create("our request correlation id"),
+                new RequestCorrelationIdForTesting("our request correlation id"),
                 EmptyTaskRegistryFactory.INSTANCE,
                 EmptyUserLogRegistryFactory.INSTANCE
             );
@@ -223,7 +224,7 @@ class TaskProgressTrackerTest {
             var log = new GdsTestLog();
             var progressTracker = TaskProgressTracker.create(task, new LoggerForProgressTrackingAdapter(log), new Concurrency(1),
                 new JobId(),
-                PlainSimpleRequestCorrelationId.create("what request correlation id?"),
+                new RequestCorrelationIdForTesting("what request correlation id?"),
                 EmptyTaskRegistryFactory.INSTANCE,
                 EmptyUserLogRegistryFactory.INSTANCE
             );

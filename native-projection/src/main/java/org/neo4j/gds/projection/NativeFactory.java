@@ -121,7 +121,7 @@ final class NativeFactory extends CSRGraphStoreFactory<GraphProjectFromStoreConf
                 new LoggerForProgressTrackingAdapter(loadingContext.log()),
                 graphProjectConfig.readConcurrency(),
                 graphProjectConfig.jobId(),
-                PlainSimpleRequestCorrelationId.create(graphProjectConfig.jobId().value()),
+                PlainSimpleRequestCorrelationId.create(),
                 loadingContext.taskRegistryFactory(),
                 EmptyUserLogRegistryFactory.INSTANCE
             );
@@ -132,7 +132,7 @@ final class NativeFactory extends CSRGraphStoreFactory<GraphProjectFromStoreConf
             new LoggerForProgressTrackingAdapter(loadingContext.log()),
             graphProjectConfig.readConcurrency(),
             graphProjectConfig.jobId(),
-            PlainSimpleRequestCorrelationId.create(graphProjectConfig.jobId().value()),
+            PlainSimpleRequestCorrelationId.create(),
             loadingContext.taskRegistryFactory(),
             EmptyUserLogRegistryFactory.INSTANCE
         );
