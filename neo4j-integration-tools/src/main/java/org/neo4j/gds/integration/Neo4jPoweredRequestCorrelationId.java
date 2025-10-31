@@ -33,8 +33,8 @@ public final class Neo4jPoweredRequestCorrelationId implements RequestCorrelatio
         this.id = id;
     }
 
-    public static Neo4jPoweredRequestCorrelationId create(long transactionId) {
-        return new Neo4jPoweredRequestCorrelationId(String.valueOf(transactionId));
+    public static Neo4jPoweredRequestCorrelationId create(long id) {
+        return new Neo4jPoweredRequestCorrelationId("gid-n4j-" + id);
     }
 
     @Override
