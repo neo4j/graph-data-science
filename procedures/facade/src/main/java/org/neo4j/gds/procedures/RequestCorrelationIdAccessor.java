@@ -21,24 +21,17 @@ package org.neo4j.gds.procedures;
 
 import org.neo4j.gds.core.RequestCorrelationId;
 import org.neo4j.gds.integration.Neo4jPoweredRequestCorrelationId;
-import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
-import org.neo4j.kernel.api.procedure.Context;
+import org.neo4j.kernel.api.KernelTransaction;
 
 public class RequestCorrelationIdAccessor {
     /**
      * We use the transaction sequence number not because we particularly want to, but because Neo4j has limitations.
-     * The transaction id seems to not be available; and they do not offer a first class request id concept.
+     * The transaction id is not available, if you try to use it, you get this error:
+     * "Transaction id is not assigned yet. It will be assigned during transaction commit";
+     * and they do not offer a first class request id concept.
      * Here is to them improving that in future.
      */
-    public RequestCorrelationId getRequestCorrelationId(Context context) {
-        try {
-            @SuppressWarnings("resource")
-            var transactionSequenceNumber = context.kernelTransaction().getTransactionSequenceNumber();
-
-            return Neo4jPoweredRequestCorrelationId.create(transactionSequenceNumber);
-        } catch (ProcedureException e) {
-            // this must be a programmer error
-            throw new IllegalStateException("Unable to construct GDS", e);
-        }
+    public RequestCorrelationId getRequestCorrelationId(KernelTransaction kernelTransaction) {
+        return Neo4jPoweredRequestCorrelationId.create(kernelTransaction.getTransactionSequenceNumber());
     }
 }

@@ -37,7 +37,6 @@ import org.neo4j.gds.core.utils.logging.GdsLoggers;
 import org.neo4j.gds.core.utils.progress.TaskStoreService;
 import org.neo4j.gds.core.write.ExporterContext;
 import org.neo4j.gds.executor.MemoryEstimationContext;
-import org.neo4j.gds.integration.Neo4jPoweredRequestCorrelationId;
 import org.neo4j.gds.mem.MemoryTracker;
 import org.neo4j.gds.metrics.Metrics;
 import org.neo4j.gds.procedures.DatabaseIdAccessor;
@@ -48,6 +47,7 @@ import org.neo4j.gds.procedures.KernelTransactionAccessor;
 import org.neo4j.gds.procedures.LocalGraphDataScienceProcedures;
 import org.neo4j.gds.procedures.ProcedureCallContextReturnColumns;
 import org.neo4j.gds.procedures.ProcedureTransactionAccessor;
+import org.neo4j.gds.procedures.RequestCorrelationIdAccessor;
 import org.neo4j.gds.procedures.TaskRegistryFactoryService;
 import org.neo4j.gds.procedures.UserAccessor;
 import org.neo4j.gds.procedures.UserLogServices;
@@ -69,6 +69,7 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
     private final DatabaseIdAccessor databaseIdAccessor = new DatabaseIdAccessor();
     private final KernelTransactionAccessor kernelTransactionAccessor = new KernelTransactionAccessor();
     private final ProcedureTransactionAccessor procedureTransactionAccessor = new ProcedureTransactionAccessor();
+    private final RequestCorrelationIdAccessor requestCorrelationIdAccessor = new RequestCorrelationIdAccessor();
     private final UserAccessor userAccessor;
 
     private final GdsLoggers loggers;
@@ -156,9 +157,9 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
         var procedureCallContext = context.procedureCallContext();
         var procedureTransaction = procedureTransactionAccessor.getProcedureTransaction(context);
 
-        var correlationId = Neo4jPoweredRequestCorrelationId.create(kernelTransaction.getTransactionSequenceNumber());
         var databaseId = databaseIdAccessor.getDatabaseId(graphDatabaseService);
         var procedureReturnColumns = new ProcedureCallContextReturnColumns(procedureCallContext);
+        var requestCorrelationId = requestCorrelationIdAccessor.getRequestCorrelationId(kernelTransaction);
         var terminationMonitor = new TransactionTerminationMonitor(kernelTransaction);
         var terminationFlag = TerminationFlag.wrap(terminationMonitor);
         var user = userAccessor.getUser(context.securityContext());
@@ -181,7 +182,7 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
         );
 
         var requestScopedDependencies = RequestScopedDependencies.builder()
-            .correlationId(correlationId)
+            .correlationId(requestCorrelationId)
             .databaseId(databaseId)
             .graphLoaderContext(graphLoaderContext)
             .taskRegistryFactory(taskRegistryFactory)
