@@ -60,18 +60,6 @@ public class MaxFlowMemoryEstimateDefinition implements MemoryEstimateDefinition
             .build();
     }
 
-    private MemoryEstimation dischargeTask(){
-        return MemoryEstimations.builder(DischargeTask.class).build();
-    }
-
-    private MemoryEstimation discharging(){
-        return MemoryEstimations.builder(Discharging.class)
-            .perThread("Discharge task", dischargeTask())
-            .perNode("temp label", HugeLongArray::memoryEstimation)
-            .perNode("isDiscovered",HugeAtomicBitSet::memoryEstimation)
-            .build();
-    }
-
     private MemoryEstimation flowGraph(){
         BiFunction<GraphDimensions, Function<Long,Long>,MemoryRange> relConsumer =
             ((graphDimensions, longMemoryRangeFunction) -> {
@@ -107,6 +95,11 @@ public class MaxFlowMemoryEstimateDefinition implements MemoryEstimateDefinition
                     ));
                 })
             ).build();
+    }
+
+    private MemoryEstimation discharging(){
+        //todo
+        return MemoryEstimations.empty();
     }
 
     @Override

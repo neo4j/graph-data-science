@@ -30,14 +30,12 @@ import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.beta.generator.PropertyProducer;
 import org.neo4j.gds.beta.generator.RandomGraphGenerator;
+import org.neo4j.gds.beta.generator.RelationshipDistribution;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.extension.GdlExtension;
-import org.neo4j.gds.extension.GdlGraph;
-import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.termination.TerminationFlag;
@@ -49,39 +47,17 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.TestSupport.fromGdl;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.assertj.Extractors.replaceTimings;
+import static org.neo4j.gds.beta.generator.RelationshipDistribution.POWER_LAW;
 import static org.neo4j.gds.beta.generator.RelationshipDistribution.UNIFORM;
-import static org.neo4j.gds.maxflow.MaxFlow.ALPHA;
-import static org.neo4j.gds.maxflow.MaxFlow.BETA;
-import static org.neo4j.gds.maxflow.MaxFlow.FREQ;
 
-@GdlExtension
 class MaxFlowTest {
     private static final double TOLERANCE = 1e-6;
 
-    @GdlGraph
-    private static final String GRAPH =
-        """
-            CREATE
-                (a:Node {id: 0}),
-                (b:Node {id: 1}),
-                (c:Node {id: 2}),
-                (d:Node {id: 3}),
-                (e:Node {id: 4}),
-                (a)-[:R {w: 4.0}]->(d),
-                (b)-[:R {w: 3.0}]->(a),
-                (c)-[:R {w: 2.0}]->(a),
-                (c)-[:R {w: 0.0}]->(b),
-                (d)-[:R {w: 5.0}]->(e)
-            """;
-
-    @Inject
-    private TestGraph graph;
-
-    Graph generateUniform(long nodeCount, int avgDegree) {
+    Graph generate(long nodeCount, int avgDegree, RelationshipDistribution relDistr) {
         var graph = RandomGraphGenerator.builder()
             .nodeCount(nodeCount)
             .averageDegree(avgDegree)
-            .relationshipDistribution(UNIFORM)
+            .relationshipDistribution(relDistr)
             .relationshipPropertyProducer(PropertyProducer.randomDouble("capacity", 0, 100))
             .seed(0)
             .build()
@@ -90,9 +66,11 @@ class MaxFlowTest {
     }
 
     void testGraph(Graph graph, InputNodes sourceNodes, InputNodes targetNodes, double expectedFlow, int concurrency) {
-        var params = new MaxFlowParameters(sourceNodes, targetNodes, new Concurrency(concurrency), ALPHA, BETA, FREQ);
+        var params = new MaxFlowParameters(sourceNodes, targetNodes, new Concurrency(concurrency), 6, 12, .5);
         var x = new MaxFlow(graph, params, ProgressTracker.NULL_TRACKER, TerminationFlag.RUNNING_TRUE);
+        var start = System.nanoTime();
         var result = x.compute();
+        System.out.println("Compute time: " + (System.nanoTime() - start) / 1_000_000 + "ms");
         assertThat(result.totalFlow()).isCloseTo(expectedFlow, Offset.offset(TOLERANCE));
     }
 
@@ -108,8 +86,74 @@ class MaxFlowTest {
     }
 
     @Test
-    void test() {
+    void testA() {
+        var graph = fromGdl("""
+            CREATE
+                (a:Node {id: 0}),
+                (b:Node {id: 1}),
+                (c:Node {id: 2}),
+                (d:Node {id: 3}),
+                (e:Node {id: 4}),
+                (a)-[:R {w: 4.0}]->(d),
+                (b)-[:R {w: 3.0}]->(a),
+                (c)-[:R {w: 2.0}]->(a),
+                (c)-[:R {w: 0.0}]->(b),
+                (d)-[:R {w: 5.0}]->(e)
+            """);
+
         testGraph(graph, "a", "e", 4.0);
+    }
+
+    @Test
+    void testB() {
+        var graph = fromGdl("""
+            CREATE
+            (a0),(a1),(a3),(a4),(a5),(a6),
+              (a0)-[:R{w:5.0}]->(a2),
+              (a0)-[:R{w:6.0}]->(a5),
+              (a0)-[:R{w:7.0}]->(a6),
+              (a1)-[:R{w:9.0}]->(a2),
+              (a1)-[:R{w:7.0}]->(a3),
+              (a2)-[:R{w:9.0}]->(a0),
+              (a2)-[:R{w:12.0}]->(a6),
+              (a3)-[:R{w:11.0}]->(a2),
+              (a3)-[:R{w:4.0}]->(a4),
+              (a4)-[:R{w:7.0}]->(a0),
+              (a4)-[:R{w:8.0}]->(a3),
+              (a4)-[:R{w:6.0}]->(a6),
+              (a5)-[:R{w:1.0}]->(a0),
+              (a5)-[:R{w:1.0}]->(a1),
+              (a5)-[:R{w:8.0}]->(a6),
+              (a6)-[:R{w:3.0}]->(a1),
+              (a6)-[:R{w:8.0}]->(a5)
+            """);
+
+        testGraph(graph, "a2", "a0", 14.0);
+    }
+
+
+    @Test
+    void test1() {
+        var graph = fromGdl("""
+            CREATE
+            (a0),
+            (a1),
+            (a2),
+            (a3),
+            (a4),
+            (a0)-[:R {u: 1.0}]->(a2),
+            (a0)-[:R {u: 7.0}]->(a3),
+            (a1)-[:R {u: 7.0}]->(a2),
+            (a1)-[:R {u: 2.0}]->(a3),
+            (a2)-[:R {u: 10.0}]->(a3),
+            (a3)-[:R {u: 3.0}]->(a0),
+            (a3)-[:R {u: 9.0}]->(a4),
+            (a4)-[:R {u: 4.0}]->(a0),
+            (a4)-[:R {u: 8.0}]->(a1)
+            """, Orientation.NATURAL
+        );
+
+        testGraph(graph, "a3", "a2", 8.0);
     }
 
     @Test
@@ -329,20 +373,20 @@ class MaxFlowTest {
 
     @Test
     void test4() {
-        var graph = generateUniform(200L, 10);
-        testGraph(graph, 50, 100, 434.3606561583014, 4);
+        var graph = generate(200L, 10, UNIFORM);
+        testGraph(graph, 50, 100, 434.3606561583014, 1);
 
         testGraph(graph,
             new MapInputNodes(Map.of(1L, 103.1, 23L, 129.5, 101L, 242.2)),
             new MapInputNodes(Map.of(5L, 117.7, 199L, 199.0, 150L, 204.5)),
             474.8,
-            4);
+            1);
     }
 
     @Test
     void test5() {
-        var graph = generateUniform(1000L, 25);
-        testGraph(graph, 100, 200, 1091.5727039914948, 4);
+        var graph = generate(1000L, 25, UNIFORM);
+        testGraph(graph, 100, 200, 1091.5727039914948, 1);
 
 
         testGraph(graph,
@@ -353,8 +397,50 @@ class MaxFlowTest {
     }
 
     @Test
+    void test6a() {
+        var graph = generate(10_000L, 100, UNIFORM);
+        testGraph(graph, 1_234, 5_678, 4470.905417520765, 1);
+    }
+
+    @Test
+    void test6b() {
+        var graph = generate(500_000L, 50, UNIFORM);
+        testGraph(graph, 123_456, 234_567, 1810.4604332732595, 8);
+    }
+
+    @Test
+    void test6c() {
+        var graph = generate(1_000_000L, 100, UNIFORM);
+        testGraph(graph, 123_456, 234_567, 4862.678345610048, 8);
+    }
+
+    @Test
+    void test6d() {
+        var graph = generate(3_000_000L, 100, UNIFORM);
+        testGraph(graph, 1_234_567, 2_345_678, 4761.718858079709, 8);
+    }
+
+    @Test
+    void test7a() {
+        var graph = generate(10_000L, 25, POWER_LAW);
+        testGraph(graph, 100, 200, 349.99795684746823, 1);
+    }
+
+    @Test
+    void test7b() {
+        var graph = generate(100_000L, 10, POWER_LAW);
+        testGraph(graph, 100, 200, 394.0392308340888, 1);
+    }
+
+    @Test
+    void test7c() {
+        var graph = generate(1_000_000L, 50, POWER_LAW);
+        testGraph(graph, 100, 200, 887.1128713190556, 8);
+    }
+
+    @Test
     void shouldLogProgress() {
-        var graph = generateUniform(100L, 10);
+        var graph = generate(100L, 10, UNIFORM);
         var log = new GdsTestLog();
         var testTracker = TestProgressTracker.create(
             MaxFlowTask.create(),
@@ -384,12 +470,10 @@ class MaxFlowTest {
                 "MaxFlow :: Start",
                 "MaxFlow 7%",
                 "MaxFlow 40%",
-                "MaxFlow 61%",
-                "MaxFlow 68%",
-                "MaxFlow 81%",
-                "MaxFlow 88%",
-                "MaxFlow 89%",
-                "MaxFlow 94%",
+                "MaxFlow 74%",
+                "MaxFlow 87%",
+                "MaxFlow 91%",
+                "MaxFlow 99%",
                 "MaxFlow 100%",
                 "MaxFlow :: Finished"
             );

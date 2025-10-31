@@ -66,15 +66,6 @@ public class AtomicWorkingSet {
         }
     }
 
-    void batchPushAndConsume(HugeLongArrayQueue queue, Consumer<Long> consumer) {
-        long idx = size.getAndAdd(queue.size());
-        while (!queue.isEmpty()) {
-            var node = queue.remove();
-            workingSet.set(idx++, node);
-            consumer.accept(node);
-        }
-    }
-
     long getAndAdd(long batchSize) {
         return index.getAndAdd(batchSize);
     }
@@ -88,7 +79,6 @@ public class AtomicWorkingSet {
         if (idx < size.get()) {
             return workingSet.get(idx);
         } else {
-//            index.decrementAndGet(); //undo increment
             return -1L;
         }
     }

@@ -241,8 +241,15 @@ public final class FlowGraph {
     }
 
     long outDegree(long nodeId) {
-        var degreeFromReverseEdges = reverseIndPtr.get(nodeId) + reverseIndPtr.get(nodeId + 1);
-        return graph.degree(nodeId) + degreeFromReverseEdges;
+        return nodeId < originalNodeCount() ? graph.degree(nodeId) : (nodeId == originalNodeCount() ? supply.length : 0);
+    }
+
+    long inDegree(long nodeId) {
+        return reverseIndPtr.get(nodeId) + reverseIndPtr.get(nodeId + 1);
+    }
+
+    long degree(long nodeId) {
+        return inDegree(nodeId) + outDegree(nodeId);
     }
 
     double residualCapacity(long relIdx, boolean isReverse) {

@@ -23,20 +23,18 @@ import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
-import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
+import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.paged.HugeLongArrayQueue;
-import org.neo4j.gds.core.utils.paged.ParallelDoublePageCreator;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.termination.TerminationFlag;
 
-import java.util.concurrent.atomic.AtomicLong;
-
 public final class MaxFlow extends Algorithm<FlowResult> {
-    static final double FREQ = 0.5;
-    static final int ALPHA = 6;
-    static final int BETA = 12;
     private final Graph graph;
     private final MaxFlowParameters parameters;
+
+    private FlowGraph flowGraph;
+    private HugeDoubleArray excess;
+    private HugeLongArray label;
 
     public MaxFlow(
         Graph graph,
@@ -52,19 +50,17 @@ public final class MaxFlow extends Algorithm<FlowResult> {
 
     public FlowResult compute() {
         progressTracker.beginSubTask();
-        var preflow = initPreflow();
-        var superSource = preflow.flowGraph().superSource();
-        var superTarget = preflow.flowGraph().superTarget();
-        maximizeFlow(preflow, superSource, superTarget);
-        maximizeFlow(preflow, superTarget, superSource);
+        initPreflow();
+        maximizeFlowSequential(flowGraph.superSource(), flowGraph.superTarget());
+        maximizeFlowSequential(flowGraph.superTarget(), flowGraph.superSource());
         progressTracker.endSubTask();
-        return preflow.flowGraph().createFlowResult();
+        return flowGraph.createFlowResult();
     }
 
-    private Preflow initPreflow() {
+    private void initPreflow() {
         var supplyAndDemand = SupplyAndDemandFactory.create(graph, parameters.sourceNodes(), parameters.targetNodes());
-        var flowGraph = FlowGraph.create(graph, supplyAndDemand.getLeft(), supplyAndDemand.getRight(), terminationFlag);
-        var excess = HugeDoubleArray.newArray(flowGraph.nodeCount());
+        flowGraph = FlowGraph.create(graph, supplyAndDemand.getLeft(), supplyAndDemand.getRight(), terminationFlag);
+        excess = HugeDoubleArray.newArray(flowGraph.nodeCount());
         excess.setAll(x -> 0D);
         flowGraph.forEachRelationship(
             flowGraph.superSource(), (s, t, relIdx, residualCapacity, isReverse) -> {
@@ -73,36 +69,29 @@ public final class MaxFlow extends Algorithm<FlowResult> {
                 return true;
             }
         );
-        var label = HugeLongArray.newArray(flowGraph.nodeCount());
-        return new Preflow(flowGraph, excess, label);
+        label = HugeLongArray.newArray(flowGraph.nodeCount());
     }
 
-    private void maximizeFlow(Preflow preflow, long sourceNode, long targetNode) { //make non-static
-        var flowGraph = preflow.flowGraph();
-        var excess = preflow.excess();
-        var label = preflow.label();
-
+    private void maximizeFlowSequential(long sourceNode, long targetNode) {
         var nodeCount = flowGraph.nodeCount();
-        var edgeCount = flowGraph.edgeCount();
+        label.set(sourceNode, nodeCount);
 
-        var addedExcess = HugeAtomicDoubleArray.of(
-            nodeCount,
-            ParallelDoublePageCreator.passThrough(parameters.concurrency())
-        );
-        var workingSet = new AtomicWorkingSet(nodeCount);
-        var initialTotalExcess = 0D;
-        for (var nodeId = 0; nodeId < nodeCount; nodeId++) {
-            initialTotalExcess += excess.get(nodeId);
+        var workingQueue = HugeLongArrayQueue.newQueue(nodeCount);
+        var inWorkingQueue = HugeAtomicBitSet.create(nodeCount); //need not be atomic atm
+        var totalExcess = 0D;
+        for (var nodeId = 0; nodeId < flowGraph.originalNodeCount(); nodeId++) {
             if (excess.get(nodeId) > 0.0) {
-                workingSet.push(nodeId);
+                workingQueue.add(nodeId);
+                inWorkingQueue.set(nodeId);
+                totalExcess += excess.get(nodeId);
             }
         }
-
-        var workSinceLastGR = new AtomicLong(Long.MAX_VALUE);
+        var excessAtDestinations = excess.get(sourceNode) + excess.get(targetNode);
+        inWorkingQueue.set(targetNode); //it's not, but we don't want to add it
 
         HugeLongArrayQueue[] threadQueues = new HugeLongArrayQueue[parameters.concurrency().value()];
         for (int i = 0; i < threadQueues.length; i++) {
-            threadQueues[i] = HugeLongArrayQueue.newQueue(nodeCount);
+            threadQueues[i] = HugeLongArrayQueue.newQueue(flowGraph.nodeCount());
         }
 
         var globalRelabeling = GlobalRelabeling.createRelabeling(
@@ -112,34 +101,22 @@ public final class MaxFlow extends Algorithm<FlowResult> {
             targetNode,
             parameters.concurrency(),
             threadQueues,
-            terminationFlag
+            TerminationFlag.RUNNING_TRUE
         );
 
-        var discharging = Discharging.createDischarging(
+        var discharging = new SequentialDischarging(
             flowGraph,
             excess,
             label,
-            addedExcess,
-            workingSet,
-            targetNode,
-            parameters.beta(),
-            workSinceLastGR,
-            parameters.concurrency(),
-            threadQueues,
-            terminationFlag
+            workingQueue,
+            inWorkingQueue,
+            globalRelabeling,
+            parameters.freq(),
+            true,
+            excessAtDestinations,
+            totalExcess,
+            progressTracker
         );
-
-        var excessAtDestinations = excess.get(sourceNode) + excess.get(targetNode);
-        while (!workingSet.isEmpty()) {
-            if (parameters.freq() * workSinceLastGR.doubleValue() > parameters.alpha() * nodeCount + edgeCount) {
-                globalRelabeling.globalRelabeling();
-                workSinceLastGR.set(0L);
-            }
-            discharging.processWorkingSet();
-
-            var newExcessAtDestinations = excess.get(sourceNode) + excess.get(targetNode);
-            progressTracker.logProgress((long) ( Math.ceil(newExcessAtDestinations * progressTracker.currentVolume() / initialTotalExcess) - Math.ceil(excessAtDestinations * progressTracker.currentVolume() / initialTotalExcess) ));
-            excessAtDestinations = newExcessAtDestinations;
-        }
+        discharging.dischargeUntilDone();
     }
 }
