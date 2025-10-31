@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.maxflow;
 
+import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.commons.lang3.mutable.MutableDouble;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.api.Graph;
@@ -162,41 +163,52 @@ public final class FlowGraph {
         );
     }
 
-    private void forEachOriginalRelationship(long nodeId, ResidualEdgeConsumer consumer) {
+    private boolean forEachOriginalRelationship(long nodeId, ResidualEdgeConsumer consumer) {
+        var earlyTermination = new MutableBoolean(false);
         var relIdx = new MutableLong(indPtr.get(nodeId));
         RelationshipWithPropertyConsumer originalConsumer = (s, t, capacity) -> {
             var residualCapacity = capacity - flow.get(relIdx.longValue());
             var isReverse = false;
-            consumer.accept(s, t, relIdx.longValue(), residualCapacity, isReverse);
-            relIdx.increment();
+            if(!consumer.accept(s, t, relIdx.getAndIncrement(), residualCapacity, isReverse)) {
+                earlyTermination.setTrue();
+                return false;
+            }
             return true;
         };
         if (nodeId == superSource()) {
             for (var source : supply) {
-                originalConsumer.accept(superSource(), source.node(), source.value());
+                if(!originalConsumer.accept(superSource(), source.node(), source.value())){
+                    break;
+                }
             }
         } else if (nodeId == superTarget()) {
             for (var target : demand) {
-                originalConsumer.accept(superTarget(), target.node(), target.value());
+                if(!originalConsumer.accept(superTarget(), target.node(), target.value())){
+                    break;
+                }
             }
         } else {
             graph.forEachRelationship(nodeId, 0D, originalConsumer);
         }
+        return earlyTermination.get();
     }
 
-    private void forEachReverseRelationship(long nodeId, ResidualEdgeConsumer consumer) {
+    void forEachReverseRelationship(long nodeId, ResidualEdgeConsumer consumer) {
         for (long reverseRelIdx = reverseIndPtr.get(nodeId); reverseRelIdx < reverseIndPtr.get(nodeId + 1); reverseRelIdx++) {
             var t = reverseAdjacency.get(reverseRelIdx);
             var relIdx = reverseToRelIdx.get(reverseRelIdx);
             var residualCapacity = flow.get(relIdx);
             var isReverse = true;
-            consumer.accept(nodeId, t, relIdx, residualCapacity, isReverse);
+            if(!consumer.accept(nodeId, t, relIdx, residualCapacity, isReverse)) {
+                break;
+            }
         }
     }
 
     public void forEachRelationship(long nodeId, ResidualEdgeConsumer consumer) {
-        forEachOriginalRelationship(nodeId, consumer);
-        forEachReverseRelationship(nodeId, consumer);
+        if(!forEachOriginalRelationship(nodeId, consumer)){
+            forEachReverseRelationship(nodeId, consumer);
+        }
     }
 
     public double flow(long relIdx) {

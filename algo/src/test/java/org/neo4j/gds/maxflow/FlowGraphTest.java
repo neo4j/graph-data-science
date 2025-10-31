@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.maxflow;
 
+import org.apache.commons.lang3.mutable.MutableInt;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.properties.relationships.RelationshipCursor;
@@ -34,6 +35,7 @@ import java.util.Map;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.neo4j.gds.TestSupport.fromGdl;
 
 @GdlExtension
 class FlowGraphTest {
@@ -61,7 +63,12 @@ class FlowGraphTest {
             .map(RelationshipCursor::property)
             .reduce(0D, Double::sum);
         NodeWithValue[] supply = {new NodeWithValue(source, outgoingCapacityFromSource)};
-        NodeWithValue[] demand = {new NodeWithValue(target, outgoingCapacityFromSource)}; //more is useless since this is max in network
+        NodeWithValue[] demand = {
+            new NodeWithValue(
+                target,
+                outgoingCapacityFromSource
+            )
+        }; //more is useless since this is max in network
         return FlowGraph.create(graph, supply, demand, TerminationFlag.RUNNING_TRUE);
     }
 
@@ -155,5 +162,35 @@ class FlowGraphTest {
     }
 
     private record Arc(double residualCapacity, boolean isReverse) {
+    }
+
+    @Test
+    void testBreakIteration() {
+
+        var graph = fromGdl("""
+            CREATE
+                (a:Node {id: 0}),
+                (b:Node {id: 1}),
+          
+                (a)-[:R {w: 4.0}]->(b),
+                (a)-[:R {w: 4.0}]->(b),
+                (a)-[:R {w: 4.0}]->(b),
+                (a)-[:R {w: 4.0}]->(b),
+                (b)-[:R {w: 4.0}]->(a),
+                (b)-[:R {w: 4.0}]->(a)
+            """);
+
+        var flowGraph = createFlowGraph(graph, graph.toMappedNodeId("a"), graph.toMappedNodeId("b"));
+        var idx = new MutableInt(0);
+        flowGraph.forEachRelationship(
+            graph.toMappedNodeId("a"), (s, t, r, residualCapacity, isReverse) -> idx.getAndIncrement() < 1
+        );
+        assertThat(idx.intValue()).isEqualTo(2);
+
+
+        flowGraph.forEachReverseRelationship(
+            graph.toMappedNodeId("a"), (s, t, r, residualCapacity, isReverse) -> idx.getAndIncrement() < 1
+        );
+        assertThat(idx.intValue()).isEqualTo(3);
     }
 }
