@@ -1,6 +1,6 @@
 [versions]
 java-driver = "5.28.2"
-neo4j = "2025.10.0"
+neo4j = "2025.10.1"
 
 [libraries]
 annotations = { module = "org.neo4j:annotations", version.ref = "neo4j" }
