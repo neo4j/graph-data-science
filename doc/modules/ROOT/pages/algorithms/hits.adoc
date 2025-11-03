@@ -1,5 +1,4 @@
 [[algorithms-hits]]
-[.alpha]
 = HITS
 :description: This section describes the HITS algorithm in the Neo4j Graph Data Science library.
 :entity: pregel
@@ -7,8 +6,6 @@
 :algorithm: HITS
 
 include::partial$/product-limitations/not-in-serverless.adoc[]
-
-include::partial$/operations-reference/alpha-note.adoc[]
 
 
 :directed:

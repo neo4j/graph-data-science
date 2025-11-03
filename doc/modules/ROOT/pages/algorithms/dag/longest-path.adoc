@@ -1,5 +1,4 @@
 [[algorithms-dag-longeset-path]]
-[.alpha]
 = Longest Path for DAG
 :description: This section describes the Longest Path algorithm for DAGs in the Neo4j Graph Data Science library.
 :entity: node
@@ -13,7 +12,6 @@ include::partial$/product-limitations/not-in-serverless.adoc[]
 :undirected-unsupported:
 :weighted:
 include::partial$/algorithms/shared/algorithm-traits.adoc[]
-include::partial$/operations-reference/alpha-note.adoc[]
 
 
 == Introduction

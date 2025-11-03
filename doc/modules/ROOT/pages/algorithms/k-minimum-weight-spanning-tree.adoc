@@ -1,14 +1,11 @@
 :page-aliases: alpha-algorithms/k-minimum-weight-spanning-tree.adoc
-[[alpha-algorithms-k-spanning-tree]]
-[.alpha]
+[[algorithms-k-spanning-tree]]
 = Minimum Weight k-Spanning Tree
 :description: This section describes the Minimum Weight k-Spanning Tree algorithm in the Neo4j Graph Data Science library.
 :entity: node
 :result: spanning tree
 :algorithm: k-Spanning Tree heuristic
 :sequential: true
-
-include::partial$/operations-reference/alpha-note.adoc[]
 
 
 :no-directed:

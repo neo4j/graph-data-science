@@ -1,12 +1,9 @@
 [[algorithms-sllpa]]
-[.alpha]
 = Speaker-Listener Label Propagation
 :description: This section describes the Speaker-Listener Label Propagation algorithm in the Neo4j Graph Data Science library.
 :entity: pregel
 :result: community IDs
 :algorithm: SLLPA
-
-include::partial$/operations-reference/alpha-note.adoc[]
 
 
 :directed:
