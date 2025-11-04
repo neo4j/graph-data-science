@@ -155,9 +155,11 @@ public class SequentialDischarging {
     }
 
     private void updateGap() {
-        gapMap.setAll(_v -> new TreeSet<Long>());
-        for (long v = 0; v < flowGraph.nodeCount(); v++) {
-            gapMap.get(label.get(v)).add(v);
+        if (useGapRelabelling) {
+            gapMap.setAll(_v -> new TreeSet<Long>());
+            for (long v = 0; v < flowGraph.nodeCount(); v++) {
+                gapMap.get(label.get(v)).add(v);
+            }
         }
     }
 
@@ -167,6 +169,7 @@ public class SequentialDischarging {
             gapMap.get(d).forEach(v -> {
                 label.set((long)v, n);
             });
+            gapMap.get(d).clear();
         }
     }
 

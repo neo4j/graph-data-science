@@ -33,17 +33,12 @@ import java.util.Optional;
 public interface MaxFlowBaseConfig extends AlgoBaseConfig, RelationshipWeightConfig, SourceNodesWithPropertiesConfig,
     TargetNodesWithPropertiesConfig {
 
-    @Configuration.LongRange(min = 0, minInclusive = false)
-    @Configuration.Ignore
-    default long alpha() {return 6;}
-
-    @Configuration.LongRange(min = 0, minInclusive = false)
-    @Configuration.Ignore
-    default long beta() {return 12;}
-
     @Configuration.DoubleRange(min = 0.0, minInclusive = true)
     @Configuration.Ignore
     default double freq() {return 0.5;}
+
+    @Configuration.Ignore
+    default boolean useGapRelabelling() {return false;}
 
     @Override
     @Configuration.Key("capacityProperty")
@@ -92,9 +87,8 @@ public interface MaxFlowBaseConfig extends AlgoBaseConfig, RelationshipWeightCon
             sourceNodes(),
             targetNodes(),
             concurrency(),
-            alpha(),
-            beta(),
-            freq()
+            freq(),
+            useGapRelabelling()
         );
     }
 }

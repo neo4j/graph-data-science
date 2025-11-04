@@ -112,7 +112,7 @@ public final class MaxFlow extends Algorithm<FlowResult> {
             inWorkingQueue,
             globalRelabeling,
             parameters.freq(),
-            true,
+            parameters.useGapRelabelling(),
             excessAtDestinations,
             totalExcess,
             progressTracker

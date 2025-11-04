@@ -25,5 +25,5 @@ import org.neo4j.gds.annotation.Parameters;
 import org.neo4j.gds.core.concurrency.Concurrency;
 
 @Parameters
-public record MaxFlowParameters(InputNodes sourceNodes, InputNodes targetNodes, Concurrency concurrency, long alpha, long beta, double freq) {
+public record MaxFlowParameters(InputNodes sourceNodes, InputNodes targetNodes, Concurrency concurrency, double freq, boolean useGapRelabelling) {
 }

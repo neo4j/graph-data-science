@@ -112,9 +112,8 @@ class MaxFlow2Test {
                                 new ListInputNodes(List.of(s)),
                                 new ListInputNodes(List.of(t)),
                                 new Concurrency(1),
-                                6,
-                                12,
-                                0.5
+                                0.5,
+                                false
                             );
 
                             var maxFlow = new MaxFlow(
@@ -254,9 +253,8 @@ class MaxFlow2Test {
             new ListInputNodes(List.of(graph.toMappedNodeId("a3"))),
             new ListInputNodes(List.of(graph.toOriginalNodeId("a2"))),
             new Concurrency(1),
-            6,
-            12,
-            0.5
+            0.5D,
+            true
         );
 
         Map<Long,String> map =new HashMap<>();
@@ -306,9 +304,8 @@ class MaxFlow2Test {
             new ListInputNodes(List.of(graph.toMappedNodeId("a0"))),
             new ListInputNodes(List.of(graph.toOriginalNodeId("a1"))),
             new Concurrency(1),
-            6,
-            12,
-            0.5
+            0.5,
+            true
         );
 
         Map<Long,String> map =new HashMap<>();
@@ -325,12 +322,9 @@ class MaxFlow2Test {
         FlowResult result = maxFlow.compute();
         System.out.println(result.totalFlow());
 
-
         for (var flow : result.flow().toArray()){
             System.out.println(map.get(flow.sourceId())+"-"+flow.flow()+"->" + map.get(flow.targetId()));
         }
 
     }
-
-
 }

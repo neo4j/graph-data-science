@@ -66,7 +66,7 @@ class MaxFlowTest {
     }
 
     void testGraph(Graph graph, InputNodes sourceNodes, InputNodes targetNodes, double expectedFlow, int concurrency) {
-        var params = new MaxFlowParameters(sourceNodes, targetNodes, new Concurrency(concurrency), 6, 12, .5);
+        var params = new MaxFlowParameters(sourceNodes, targetNodes, new Concurrency(concurrency), .5, true);
         var x = new MaxFlow(graph, params, ProgressTracker.NULL_TRACKER, TerminationFlag.RUNNING_TRUE);
         var start = System.nanoTime();
         var result = x.compute();
@@ -455,9 +455,8 @@ class MaxFlowTest {
                 new ListInputNodes(List.of(0L)),
                 new ListInputNodes(List.of(2L)),
                 new Concurrency(4),
-                6L,
-                12L,
-                .5D
+                .5D,
+                true
             ),
             testTracker,
             TerminationFlag.RUNNING_TRUE
