@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.doc.syntax;
 
+import org.neo4j.gds.allshortestpaths.AllShortestPathsConfig;
+
 import java.util.List;
 
 import static org.neo4j.gds.doc.syntax.SyntaxMode.STREAM;
@@ -28,7 +30,7 @@ class AllPairsShortestPathSyntaxTest extends SyntaxTestBase {
     @Override
     protected Iterable<SyntaxModeMeta> syntaxModes() {
         return List.of(
-            SyntaxModeMeta.of(STREAM)
+            SyntaxModeMeta.of(STREAM, AllShortestPathsConfig.class)
         );
     }
 

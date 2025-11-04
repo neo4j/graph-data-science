@@ -19,6 +19,11 @@
  */
 package org.neo4j.gds.doc.syntax;
 
+import org.neo4j.gds.pcst.PCSTMutateConfig;
+import org.neo4j.gds.pcst.PCSTStatsConfig;
+import org.neo4j.gds.pcst.PCSTStreamConfig;
+import org.neo4j.gds.pcst.PCSTWriteConfig;
+
 import java.util.List;
 
 class PrizeSteinerTreeSyntaxTest extends SyntaxTestBase {
@@ -26,10 +31,10 @@ class PrizeSteinerTreeSyntaxTest extends SyntaxTestBase {
     @Override
     protected Iterable<SyntaxModeMeta> syntaxModes() {
         return List.of(
-            SyntaxModeMeta.of(SyntaxMode.MUTATE),
-            SyntaxModeMeta.of(SyntaxMode.STATS),
-            SyntaxModeMeta.of(SyntaxMode.STREAM),
-            SyntaxModeMeta.of(SyntaxMode.WRITE)
+            SyntaxModeMeta.of(SyntaxMode.MUTATE, PCSTMutateConfig.class),
+            SyntaxModeMeta.of(SyntaxMode.STATS, PCSTStatsConfig.class),
+            SyntaxModeMeta.of(SyntaxMode.STREAM, PCSTStreamConfig.class),
+            SyntaxModeMeta.of(SyntaxMode.WRITE, PCSTWriteConfig.class)
         );
     }
 

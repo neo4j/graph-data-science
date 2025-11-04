@@ -22,6 +22,12 @@ package org.neo4j.gds.doc.syntax;
 import java.util.List;
 
 class ModelCatalogExistsSyntaxTest extends SyntaxTestBase {
+
+    @Override
+    protected boolean compareWithGdsApiSpec() {
+        return false;
+    }
+
     @Override
     protected Iterable<SyntaxModeMeta> syntaxModes() {
         return List.of(SyntaxModeMeta.of(SyntaxMode.MODEL_EXISTS));

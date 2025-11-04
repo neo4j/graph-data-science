@@ -19,8 +19,29 @@
  */
 package org.neo4j.gds.doc.syntax;
 
+import org.neo4j.gds.leiden.LeidenMutateConfig;
+import org.neo4j.gds.leiden.LeidenStatsConfig;
+import org.neo4j.gds.leiden.LeidenStreamConfig;
+import org.neo4j.gds.leiden.LeidenWriteConfig;
+
+import java.util.List;
+
+import static org.neo4j.gds.doc.syntax.SyntaxMode.MUTATE;
+import static org.neo4j.gds.doc.syntax.SyntaxMode.STATS;
+import static org.neo4j.gds.doc.syntax.SyntaxMode.STREAM;
+import static org.neo4j.gds.doc.syntax.SyntaxMode.WRITE;
+
 class LeidenSyntaxTest extends SyntaxTestBase {
 
+
+    protected Iterable<SyntaxModeMeta> syntaxModes() {
+        return List.of(
+            SyntaxModeMeta.of(STATS, LeidenStatsConfig.class),
+            SyntaxModeMeta.of(STREAM, LeidenStreamConfig.class),
+            SyntaxModeMeta.of(MUTATE, LeidenMutateConfig.class),
+            SyntaxModeMeta.of(WRITE, LeidenWriteConfig.class)
+        );
+    }
     @Override
     protected String adocFile() {
         return "pages/algorithms/leiden.adoc";

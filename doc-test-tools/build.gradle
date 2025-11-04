@@ -30,6 +30,7 @@ dependencies {
     testImplementation project(':pregel-example')
     testImplementation project(':pipeline')
     testImplementation project(':proc-sysinfo')
+    testImplementation project(':community-configs')
 
     testImplementation openGds.reflections
 }

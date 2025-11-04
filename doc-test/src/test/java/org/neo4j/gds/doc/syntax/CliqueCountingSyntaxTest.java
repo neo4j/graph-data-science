@@ -19,7 +19,28 @@
  */
 package org.neo4j.gds.doc.syntax;
 
+import org.neo4j.gds.cliquecounting.CliqueCountingMutateConfig;
+import org.neo4j.gds.cliquecounting.CliqueCountingStatsConfig;
+import org.neo4j.gds.cliquecounting.CliqueCountingStreamConfig;
+import org.neo4j.gds.cliquecounting.CliqueCountingWriteConfig;
+
+import java.util.List;
+
+import static org.neo4j.gds.doc.syntax.SyntaxMode.MUTATE;
+import static org.neo4j.gds.doc.syntax.SyntaxMode.STATS;
+import static org.neo4j.gds.doc.syntax.SyntaxMode.STREAM;
+import static org.neo4j.gds.doc.syntax.SyntaxMode.WRITE;
+
 class CliqueCountingSyntaxTest extends SyntaxTestBase {
+
+    protected Iterable<SyntaxModeMeta> syntaxModes() {
+        return List.of(
+            SyntaxModeMeta.of(STATS, CliqueCountingStatsConfig.class),
+            SyntaxModeMeta.of(STREAM, CliqueCountingStreamConfig.class),
+            SyntaxModeMeta.of(MUTATE, CliqueCountingMutateConfig.class),
+            SyntaxModeMeta.of(WRITE, CliqueCountingWriteConfig.class)
+        );
+    }
 
     @Override
     protected String adocFile() {

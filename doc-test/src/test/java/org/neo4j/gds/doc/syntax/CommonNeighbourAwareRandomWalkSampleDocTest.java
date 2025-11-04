@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.doc.syntax;
 
+import org.neo4j.gds.graphsampling.config.CommonNeighbourAwareRandomWalkConfig;
+
 import java.util.List;
 
 import static org.neo4j.gds.doc.syntax.SyntaxMode.PROJECT_SAMPLE;
@@ -27,7 +29,7 @@ class CommonNeighbourAwareRandomWalkSampleDocTest extends SyntaxTestBase {
 
     @Override
     protected Iterable<SyntaxModeMeta> syntaxModes() {
-        return List.of(SyntaxModeMeta.of(PROJECT_SAMPLE));
+        return List.of(SyntaxModeMeta.of(PROJECT_SAMPLE, CommonNeighbourAwareRandomWalkConfig.class));
     }
 
     @Override

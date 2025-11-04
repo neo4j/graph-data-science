@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.doc.syntax;
 
+import org.neo4j.gds.dag.longestPath.DagLongestPathStreamConfig;
+
 import java.util.List;
 
 import static org.neo4j.gds.doc.syntax.SyntaxMode.STREAM;
@@ -27,7 +29,7 @@ import static org.neo4j.gds.doc.syntax.SyntaxMode.STREAM;
 
         protected Iterable<SyntaxModeMeta> syntaxModes() {
             return List.of(
-                SyntaxModeMeta.of(STREAM)
+                SyntaxModeMeta.of(STREAM, DagLongestPathStreamConfig.class)
             );
         }
 

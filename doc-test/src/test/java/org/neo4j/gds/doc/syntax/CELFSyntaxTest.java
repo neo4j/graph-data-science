@@ -19,6 +19,11 @@
  */
 package org.neo4j.gds.doc.syntax;
 
+import org.neo4j.gds.influenceMaximization.InfluenceMaximizationMutateConfig;
+import org.neo4j.gds.influenceMaximization.InfluenceMaximizationStatsConfig;
+import org.neo4j.gds.influenceMaximization.InfluenceMaximizationStreamConfig;
+import org.neo4j.gds.influenceMaximization.InfluenceMaximizationWriteConfig;
+
 import java.util.List;
 
 import static org.neo4j.gds.doc.syntax.SyntaxMode.MUTATE;
@@ -30,15 +35,15 @@ class CELFSyntaxTest extends SyntaxTestBase {
 
     protected Iterable<SyntaxModeMeta> syntaxModes() {
         return List.of(
-            SyntaxModeMeta.of(STATS),
-            SyntaxModeMeta.of(STREAM),
-            SyntaxModeMeta.of(MUTATE),
-            SyntaxModeMeta.of(WRITE)
+            SyntaxModeMeta.of(STATS, InfluenceMaximizationStatsConfig.class),
+            SyntaxModeMeta.of(STREAM, InfluenceMaximizationStreamConfig.class),
+            SyntaxModeMeta.of(MUTATE, InfluenceMaximizationMutateConfig.class),
+            SyntaxModeMeta.of(WRITE, InfluenceMaximizationWriteConfig.class)
         );
     }
 
     @Override
     protected String adocFile() {
-        return "pages/algorithms//celf.adoc";
+        return "pages/algorithms/celf.adoc";
     }
 }

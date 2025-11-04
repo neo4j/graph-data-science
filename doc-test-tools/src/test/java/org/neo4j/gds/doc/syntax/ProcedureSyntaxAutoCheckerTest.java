@@ -36,6 +36,7 @@ import java.io.File;
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -240,6 +241,7 @@ class ProcedureSyntaxAutoCheckerTest {
             .postprocessor(
                 new ProcedureSyntaxAutoChecker(
                     List.of(SyntaxModeMeta.of(STREAM)),
+                    Set.of(),
                     softAssertions,
                     ProcedureLookup.forPackages(List.of("org.neo4j.gds"))
                 ));

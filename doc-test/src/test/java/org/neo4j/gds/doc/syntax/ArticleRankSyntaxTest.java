@@ -19,7 +19,23 @@
  */
 package org.neo4j.gds.doc.syntax;
 
+import org.neo4j.gds.pagerank.ArticleRankMutateConfig;
+import org.neo4j.gds.pagerank.ArticleRankStatsConfig;
+import org.neo4j.gds.pagerank.ArticleRankStreamConfig;
+import org.neo4j.gds.pagerank.ArticleRankWriteConfig;
+
+import java.util.List;
+
 class ArticleRankSyntaxTest extends SyntaxTestBase {
+
+    protected Iterable<SyntaxModeMeta> syntaxModes() {
+        return List.of(
+            SyntaxModeMeta.of(SyntaxMode.STREAM, ArticleRankStreamConfig.class),
+            SyntaxModeMeta.of(SyntaxMode.STATS, ArticleRankStatsConfig.class),
+            SyntaxModeMeta.of(SyntaxMode.MUTATE, ArticleRankMutateConfig.class),
+            SyntaxModeMeta.of(SyntaxMode.WRITE, ArticleRankWriteConfig.class)
+        );
+    }
 
     @Override
     protected String adocFile() {

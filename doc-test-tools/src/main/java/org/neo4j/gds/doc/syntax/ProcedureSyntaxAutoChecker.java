@@ -33,7 +33,9 @@ import java.lang.reflect.Member;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -53,21 +55,26 @@ class ProcedureSyntaxAutoChecker extends Postprocessor {
     private static final String TABLE_CONTEXT_VALUE = ":table";
     private static final String RESULTS_TABLE_TITLE = "Results";
     private static final String PARAMETERS_TABLE_TITLE = "Parameters";
+    private static final String CONFIGURATIONS_TABLE_TITLE = "Configuration";
+
     private static final String YIELD_KEYWORD = "YIELD";
 
     private static final String ROLE_SELECTOR = "role";
 
 
     private final Iterable<SyntaxModeMeta> syntaxModesPerPage;
+    private final Set<String> parametersToIgnore;
     private final SoftAssertions syntaxAssertions;
     private final ProcedureLookup procedureLookup;
 
     public ProcedureSyntaxAutoChecker(
         Iterable<SyntaxModeMeta> syntaxModesPerPage,
+        Set<String> parametersToIgnore,
         SoftAssertions syntaxAssertions,
         ProcedureLookup procedureLookup
     ) {
         this.syntaxModesPerPage = syntaxModesPerPage;
+        this.parametersToIgnore = parametersToIgnore;
         this.syntaxAssertions = syntaxAssertions;
         this.procedureLookup = procedureLookup;
     }
@@ -76,14 +83,14 @@ class ProcedureSyntaxAutoChecker extends Postprocessor {
     public String process(Document document, String output) {
         syntaxModesPerPage.forEach(mode -> {
 
-            var allSyntaxSectionsForMode = document.findBy(Map.of(ROLE_SELECTOR,  mode.syntaxMode().mode()));
+            var allSyntaxSectionsForMode = document.findBy(Map.of(ROLE_SELECTOR, mode.syntaxMode().mode()));
 
             assertThat(allSyntaxSectionsForMode)
                 .as("There was an issue with `%s`", mode.syntaxMode().mode())
-                .hasSize( mode.sectionsOnPage());
+                .hasSize(mode.sectionsOnPage());
 
             var currentSyntaxSection = allSyntaxSectionsForMode.get(0);
-            var codeSnippet = extractSyntaxCodeSnippet(currentSyntaxSection,  mode.syntaxMode());
+            var codeSnippet = extractSyntaxCodeSnippet(currentSyntaxSection, mode.syntaxMode());
             var procedureName = ProcedureNameExtractor.findProcedureName(codeSnippet);
 
             var documentedArguments = ProcedureArgumentsExtractor.findArguments(codeSnippet);
@@ -95,7 +102,22 @@ class ProcedureSyntaxAutoChecker extends Postprocessor {
                     .containsExactlyInAnyOrderElementsOf(expectedArguments);
 
                 assertTableValues(currentSyntaxSection, mode.syntaxMode(), PARAMETERS_TABLE_TITLE, expectedArguments);
+
+                if (mode.configClass() != null) {
+                    var expectedParameters = new ConfigurationParser(mode.configClass()).parse()
+                        .stream()
+                        .map(ParameterSpec::name)
+                        .filter(name -> !parametersToIgnore.contains(name) && !mode.ignoredParameters().contains(name))
+                        .collect(Collectors.toSet());
+                    assertTableValues(
+                        currentSyntaxSection,
+                        mode.syntaxMode(),
+                        CONFIGURATIONS_TABLE_TITLE,
+                        expectedParameters
+                    );
+                }
             }
+
 
             // YIELD fields
             var resultClass = procedureLookup.findResultType(procedureName, mode.syntaxMode().namespace);
@@ -104,10 +126,15 @@ class ProcedureSyntaxAutoChecker extends Postprocessor {
             var yieldResultColumns = extractDocResultFields(codeSnippet);
 
             syntaxAssertions.assertThat(yieldResultColumns)
-                .as("Asserting YIELD result columns for `%s`",  mode.syntaxMode().mode())
+                .as("Asserting YIELD result columns for `%s`", mode.syntaxMode().mode())
                 .containsExactlyInAnyOrderElementsOf(expectedResultFieldsFromCode);
 
-            assertTableValues(currentSyntaxSection, mode.syntaxMode(), RESULTS_TABLE_TITLE, expectedResultFieldsFromCode);
+            assertTableValues(
+                currentSyntaxSection,
+                mode.syntaxMode(),
+                RESULTS_TABLE_TITLE,
+                expectedResultFieldsFromCode
+            );
         });
 
         return output;
@@ -118,9 +145,9 @@ class ProcedureSyntaxAutoChecker extends Postprocessor {
         SyntaxMode mode
     ) {
         var syntaxSectionContentStream = currentWorkingDocument.findBy(Map.of(
-            STYLE_SELECTOR, STYLE_SELECTOR_VALUE,
-            LANGUAGE_SELECTOR, LANGUAGE_SELECTOR_VALUE
-        )).stream()
+                STYLE_SELECTOR, STYLE_SELECTOR_VALUE,
+                LANGUAGE_SELECTOR, LANGUAGE_SELECTOR_VALUE
+            )).stream()
             .map(StructuralNode::getContent)
             .map(Object::toString)
             .collect(Collectors.toList());
@@ -161,15 +188,28 @@ class ProcedureSyntaxAutoChecker extends Postprocessor {
             var documentedValues = docTable
                 .getBody()
                 .stream()
+                .filter(row -> row.getCells().size() == docTable.getColumns().size()) // remove footnotes as these rows have only one column
                 .map(row -> row
                     .getCells()
                     .get(0)) // Get the first column in the row --> corresponds to the return column names
                 .map(Cell::getText)
+                // remove any potential supscripts
+                .map(name -> name.replaceAll("<sup.*</sup>", ""))
                 // remove any potential links in the names
                 .map(name -> name.replaceAll("<a.*\">|<\\/a>", ""))
                 // as java identifier cannot contain white spaces, remove anything after the first space such as footnote:
                 .map(name -> name.split("\\s+")[0])
                 .collect(Collectors.toList());
+
+            // Validate no row is duplicated
+            List<String> duplicatedRows = documentedValues.stream().collect(Collectors.groupingBy(
+                x -> x,
+                Collectors.counting()
+            )).entrySet().stream().filter(i -> i.getValue() > 1).map(Map.Entry::getKey).toList();
+
+            assertThat(duplicatedRows)
+                .as("Found duplicated rows in table `%s` for mode `%s`", tableTitle, mode.mode())
+                .isEmpty();
 
             syntaxAssertions.assertThat(documentedValues)
                 .as("Asserting `%s` table for `%s`", tableTitle, mode.mode())

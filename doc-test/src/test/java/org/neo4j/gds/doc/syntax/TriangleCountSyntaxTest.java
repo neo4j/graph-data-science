@@ -19,7 +19,28 @@
  */
 package org.neo4j.gds.doc.syntax;
 
+import org.neo4j.gds.triangle.TriangleCountMutateConfig;
+import org.neo4j.gds.triangle.TriangleCountStatsConfig;
+import org.neo4j.gds.triangle.TriangleCountStreamConfig;
+import org.neo4j.gds.triangle.TriangleCountWriteConfig;
+
+import java.util.List;
+
+import static org.neo4j.gds.doc.syntax.SyntaxMode.MUTATE;
+import static org.neo4j.gds.doc.syntax.SyntaxMode.STATS;
+import static org.neo4j.gds.doc.syntax.SyntaxMode.STREAM;
+import static org.neo4j.gds.doc.syntax.SyntaxMode.WRITE;
+
 class TriangleCountSyntaxTest extends SyntaxTestBase {
+
+    protected Iterable<SyntaxModeMeta> syntaxModes() {
+        return List.of(
+            SyntaxModeMeta.of(STATS, TriangleCountStatsConfig.class),
+            SyntaxModeMeta.of(STREAM, TriangleCountStreamConfig.class),
+            SyntaxModeMeta.of(MUTATE, TriangleCountMutateConfig.class),
+            SyntaxModeMeta.of(WRITE, TriangleCountWriteConfig.class)
+        );
+    }
 
     @Override
     protected String adocFile() {

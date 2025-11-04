@@ -19,6 +19,11 @@
  */
 package org.neo4j.gds.doc.syntax;
 
+import org.neo4j.gds.embeddings.fastrp.FastRPMutateConfig;
+import org.neo4j.gds.embeddings.fastrp.FastRPStatsConfig;
+import org.neo4j.gds.embeddings.fastrp.FastRPStreamConfig;
+import org.neo4j.gds.embeddings.fastrp.FastRPWriteConfig;
+
 import java.util.List;
 
 import static org.neo4j.gds.doc.syntax.SyntaxMode.MUTATE;
@@ -31,10 +36,10 @@ class FastRPSyntaxTest extends SyntaxTestBase {
     @Override
     protected List<SyntaxModeMeta> syntaxModes() {
         return List.of(
-            SyntaxModeMeta.of(STREAM),
-            SyntaxModeMeta.of(STATS),
-            SyntaxModeMeta.of(MUTATE),
-            SyntaxModeMeta.of(WRITE)
+            SyntaxModeMeta.of(STREAM, FastRPStreamConfig.class),
+            SyntaxModeMeta.of(STATS, FastRPStatsConfig.class),
+            SyntaxModeMeta.of(MUTATE, FastRPMutateConfig.class),
+            SyntaxModeMeta.of(WRITE, FastRPWriteConfig.class)
         );
     }
 

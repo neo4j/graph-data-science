@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.doc.syntax;
 
+import org.neo4j.gds.core.io.db.GraphStoreToDatabaseExporterConfig;
+
 import java.util.List;
 
 class GraphExportToDBSyntaxTest extends SyntaxTestBase {
@@ -26,7 +28,7 @@ class GraphExportToDBSyntaxTest extends SyntaxTestBase {
     @Override
     protected Iterable<SyntaxModeMeta> syntaxModes() {
         return List.of(
-            SyntaxModeMeta.of(SyntaxMode.GRAPH_EXPORT)
+            SyntaxModeMeta.of(SyntaxMode.GRAPH_EXPORT, GraphStoreToDatabaseExporterConfig.class)
         );
     }
 

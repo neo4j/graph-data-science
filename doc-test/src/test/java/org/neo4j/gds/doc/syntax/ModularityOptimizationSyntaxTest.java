@@ -19,7 +19,14 @@
  */
 package org.neo4j.gds.doc.syntax;
 
+import org.neo4j.gds.modularityoptimization.ModularityOptimizationMutateConfig;
+import org.neo4j.gds.modularityoptimization.ModularityOptimizationStatsConfig;
+import org.neo4j.gds.modularityoptimization.ModularityOptimizationStreamConfig;
+import org.neo4j.gds.modularityoptimization.ModularityOptimizationWriteConfig;
+
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static org.neo4j.gds.doc.syntax.SyntaxMode.MUTATE;
 import static org.neo4j.gds.doc.syntax.SyntaxMode.STATS;
@@ -31,11 +38,18 @@ class ModularityOptimizationSyntaxTest extends SyntaxTestBase {
     @Override
     protected Iterable<SyntaxModeMeta> syntaxModes() {
         return List.of(
-            SyntaxModeMeta.of(STREAM),
-            SyntaxModeMeta.of(MUTATE),
-            SyntaxModeMeta.of(WRITE),
-            SyntaxModeMeta.of(STATS)
+            SyntaxModeMeta.of(STREAM, ModularityOptimizationStreamConfig.class),
+            SyntaxModeMeta.of(MUTATE, ModularityOptimizationMutateConfig.class),
+            SyntaxModeMeta.of(WRITE,  ModularityOptimizationWriteConfig.class),
+            SyntaxModeMeta.of(STATS,  ModularityOptimizationStatsConfig.class)
         );
+    }
+
+    @Override
+    protected Set<String> ignoredParameters() {
+        var ignoredParams = new HashSet<>(super.ignoredParameters());
+        ignoredParams.add("batchSize");
+        return ignoredParams;
     }
 
     @Override

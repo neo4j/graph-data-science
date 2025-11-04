@@ -19,7 +19,10 @@
  */
 package org.neo4j.gds.doc.syntax;
 
+import org.neo4j.gds.config.RandomGraphGeneratorConfig;
+
 import java.util.List;
+import java.util.Set;
 
 import static org.neo4j.gds.doc.syntax.SyntaxMode.GRAPH_GENERATE;
 
@@ -27,7 +30,18 @@ class GraphGenerationSyntaxTest extends SyntaxTestBase {
 
     @Override
     protected Iterable<SyntaxModeMeta> syntaxModes() {
-        return List.of(SyntaxModeMeta.of(GRAPH_GENERATE));
+        return List.of(SyntaxModeMeta.of(GRAPH_GENERATE, RandomGraphGeneratorConfig.class));
+    }
+
+    @Override
+    protected Set<String> ignoredParameters() {
+        return Set.of(
+            "sudo",
+            "username",
+            "validateRelationships", // inherited param from ProjectConfg
+            "readConcurrency", // inherited param from ProjectConfg
+            "relationshipCount" // inherited param from ProjectConfg
+        );
     }
 
     @Override

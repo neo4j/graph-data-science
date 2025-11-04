@@ -92,6 +92,7 @@ public interface RandomGraphGeneratorConfig extends GraphProjectConfig {
         return Collections.emptyMap();
     }
 
+    @Configuration.Ignore
     @Configuration.ToMapValue("org.neo4j.gds.NodeProjections#toObject")
     default NodeProjections nodeProjections() {
         return ImmutableNodeProjections.builder()
@@ -106,6 +107,7 @@ public interface RandomGraphGeneratorConfig extends GraphProjectConfig {
         return RelationshipType.of("REL");
     }
 
+    @Configuration.Ignore
     @Configuration.ToMapValue("org.neo4j.gds.RelationshipProjections#toObject")
     default RelationshipProjections relationshipProjections() {
         return ImmutableRelationshipProjections.builder()

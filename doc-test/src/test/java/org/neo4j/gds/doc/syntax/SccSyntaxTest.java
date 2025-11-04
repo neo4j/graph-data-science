@@ -19,6 +19,11 @@
  */
 package org.neo4j.gds.doc.syntax;
 
+import org.neo4j.gds.scc.SccMutateConfig;
+import org.neo4j.gds.scc.SccStatsConfig;
+import org.neo4j.gds.scc.SccStreamConfig;
+import org.neo4j.gds.scc.SccWriteConfig;
+
 import java.util.List;
 
 class SccSyntaxTest extends SyntaxTestBase {
@@ -26,10 +31,10 @@ class SccSyntaxTest extends SyntaxTestBase {
     @Override
     protected Iterable<SyntaxModeMeta> syntaxModes() {
         return List.of(
-            SyntaxModeMeta.of(SyntaxMode.STREAM),
-            SyntaxModeMeta.of(SyntaxMode.STATS),
-            SyntaxModeMeta.of(SyntaxMode.MUTATE),
-            SyntaxModeMeta.of(SyntaxMode.WRITE)
+            SyntaxModeMeta.of(SyntaxMode.STREAM, SccStreamConfig.class),
+            SyntaxModeMeta.of(SyntaxMode.STATS, SccStatsConfig.class),
+            SyntaxModeMeta.of(SyntaxMode.MUTATE, SccMutateConfig.class),
+            SyntaxModeMeta.of(SyntaxMode.WRITE, SccWriteConfig.class)
         );
     }
 

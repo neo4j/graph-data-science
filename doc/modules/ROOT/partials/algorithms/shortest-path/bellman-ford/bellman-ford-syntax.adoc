@@ -82,9 +82,10 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 [opts="header",cols="3,2,3m,2,8"]
 |===
 | Name          | Type   | Default | Optional | Description
-include::partial$/algorithms/common-configuration/common-mutate-configuration-entries.adoc[]
-| mutateNegativeCycles | Boolean | false | yes      | If set to true, any discovered negative cycles will be added in the in-memory graph. Otherwise they will be skipped.
 | sourceNode        | Integer | n/a     | no       | The Neo4j source node or node id.
+include::partial$/algorithms/common-configuration/common-mutate-configuration-entries.adoc[]
+| xref:common-usage/running-algos.adoc#common-configuration-relationship-weight-property[relationshipWeightProperty] | String  | null    | yes      | Name of the relationship property to use as weights. If unspecified, the algorithm runs unweighted.
+| mutateNegativeCycles | Boolean | false | yes      | If set to true, any discovered negative cycles will be added in the in-memory graph. Otherwise they will be skipped.
 |===
 
 .Results
@@ -134,11 +135,12 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 [opts="header",cols="3,2,3m,2,8"]
 |===
 | Name          | Type   | Default | Optional | Description
+| sourceNode        | Integer | n/a     | no       | The Neo4j source node or node id.
 include::partial$/algorithms/common-configuration/common-write-configuration-entries.adoc[]
 | writeNegativeCycles | Boolean | false | yes      | If set to true, any discovered negative cycles will be written back to  the Neo4j graph. Otherwise they will be skipped.
 | writeNodeIds      | Boolean | false   | yes      | If true, the written relationship has a nodeIds list property.
 | writeCosts        | Boolean | false   | yes      | If true, the written relationship has a costs list property.
-| sourceNode        | Integer | n/a     | no       | The Neo4j source node or node id.
+| xref:common-usage/running-algos.adoc#common-configuration-relationship-weight-property[relationshipWeightProperty] | String  | null    | yes      | Name of the relationship property to use as weights. If unspecified, the algorithm runs unweighted.
 |===
 
 .Results
@@ -179,8 +181,9 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 [opts="header",cols="3,2,3m,2,8"]
 |===
 | Name          | Type   | Default | Optional | Description
-include::partial$/algorithms/common-configuration/common-stream-stats-configuration-entries.adoc[]
 | sourceNode        | Integer | n/a     | no       | The Neo4j source node or node id.
+include::partial$/algorithms/common-configuration/common-stream-stats-configuration-entries.adoc[]
+| xref:common-usage/running-algos.adoc#common-configuration-relationship-weight-property[relationshipWeightProperty] | String  | null    | yes      | Name of the relationship property to use as weights. If unspecified, the algorithm runs unweighted.
 |===
 
 .Results

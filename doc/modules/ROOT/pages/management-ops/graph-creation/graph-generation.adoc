@@ -61,6 +61,8 @@ YIELD name, nodes, relationships, generateMillis, relationshipSeed, averageDegre
 | aggregation               | String    | NONE     | yes      | The relationship aggregation method cf. xref:management-ops/graph-creation/graph-project.adoc#relationship-projection-syntax[Relationship Projection].
 | orientation               | String    | NATURAL  | yes      | The method of orienting edges. Allowed values are NATURAL, REVERSE and UNDIRECTED.
 | allowSelfLoops            | Boolean   | false    | yes      | Whether to allow relationships with identical source and target node.
+| xref:common-usage/running-algos.adoc#common-configuration-jobid[jobId]                         | String   | Generated internally | yes      | An ID that can be provided to more easily track the algorithm's progress.
+| xref:common-usage/running-algos.adoc#common-configuration-logProgress[logProgress] | Boolean | true | yes | If disabled the progress percentage will not be logged.
 |===
 
 .Results

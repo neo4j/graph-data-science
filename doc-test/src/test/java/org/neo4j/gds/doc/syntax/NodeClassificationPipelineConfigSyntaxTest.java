@@ -37,6 +37,11 @@ class NodeClassificationPipelineConfigSyntaxTest extends SyntaxTestBase {
     }
 
     @Override
+    protected boolean compareWithGdsApiSpec() {
+        return false;
+    }
+
+    @Override
     protected String adocFile() {
         return "pages/machine-learning/node-property-prediction/nodeclassification-pipelines/config.adoc";
     }

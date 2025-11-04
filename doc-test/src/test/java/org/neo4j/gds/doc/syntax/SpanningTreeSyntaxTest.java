@@ -19,6 +19,11 @@
  */
 package org.neo4j.gds.doc.syntax;
 
+import org.neo4j.gds.spanningtree.SpanningTreeMutateConfig;
+import org.neo4j.gds.spanningtree.SpanningTreeStatsConfig;
+import org.neo4j.gds.spanningtree.SpanningTreeStreamConfig;
+import org.neo4j.gds.spanningtree.SpanningTreeWriteConfig;
+
 import java.util.List;
 
 class SpanningTreeSyntaxTest extends SyntaxTestBase {
@@ -26,10 +31,10 @@ class SpanningTreeSyntaxTest extends SyntaxTestBase {
     @Override
     protected Iterable<SyntaxModeMeta> syntaxModes() {
         return List.of(
-            SyntaxModeMeta.of(SyntaxMode.STREAM),
-            SyntaxModeMeta.of(SyntaxMode.STATS),
-            SyntaxModeMeta.of(SyntaxMode.WRITE),
-            SyntaxModeMeta.of(SyntaxMode.MUTATE)
+            SyntaxModeMeta.of(SyntaxMode.STREAM, SpanningTreeStreamConfig.class),
+            SyntaxModeMeta.of(SyntaxMode.STATS, SpanningTreeStatsConfig.class),
+            SyntaxModeMeta.of(SyntaxMode.WRITE, SpanningTreeWriteConfig.class),
+            SyntaxModeMeta.of(SyntaxMode.MUTATE, SpanningTreeMutateConfig.class)
         );
     }
 

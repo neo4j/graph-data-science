@@ -19,7 +19,28 @@
  */
 package org.neo4j.gds.doc.syntax;
 
+import org.neo4j.gds.wcc.WccMutateConfig;
+import org.neo4j.gds.wcc.WccStatsConfig;
+import org.neo4j.gds.wcc.WccStreamConfig;
+import org.neo4j.gds.wcc.WccWriteConfig;
+
+import java.util.List;
+
+import static org.neo4j.gds.doc.syntax.SyntaxMode.MUTATE;
+import static org.neo4j.gds.doc.syntax.SyntaxMode.STATS;
+import static org.neo4j.gds.doc.syntax.SyntaxMode.STREAM;
+import static org.neo4j.gds.doc.syntax.SyntaxMode.WRITE;
+
 class WccSyntaxTest extends SyntaxTestBase {
+
+    protected Iterable<SyntaxModeMeta> syntaxModes() {
+        return List.of(
+            SyntaxModeMeta.of(STATS, WccStatsConfig.class),
+            SyntaxModeMeta.of(STREAM, WccStreamConfig.class),
+            SyntaxModeMeta.of(MUTATE, WccMutateConfig.class),
+            SyntaxModeMeta.of(WRITE, WccWriteConfig.class)
+        );
+    }
 
     @Override
     protected String adocFile() {

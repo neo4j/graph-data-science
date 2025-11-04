@@ -129,7 +129,11 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 [opts="header",cols="3,2,3m,2,8"]
 |===
 | Name          | Type   | Default | Optional | Description
-include::partial$/algorithms/common-configuration/common-stream-stats-configuration-entries.adoc[]
+| modelName                                                     | String            | n/a               | no       | The name of a Link Prediction model in the model catalog.
+| sourceNodeLabel                                               | String            | from trainConfig             | yes      | The name of the node label predicted links should start from.
+| targetNodeLabel                                               | String            | from trainConfig             | yes      | The name of the node label predicted links should end at.
+| relationshipTypes                                             | List of String    | from trainConfig      | yes      | The names of the existing relationships. As a default we use the `targetRelationshipType` from the training.
+include::partial$/algorithms/common-configuration/common-configuration-jobid-concurrency-entries.adoc[]
 include::partial$/machine-learning/linkprediction-pipeline/specific-predict-configuration.adoc[]
 |===
 

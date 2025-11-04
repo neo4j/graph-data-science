@@ -19,6 +19,9 @@
  */
 package org.neo4j.gds.doc.syntax;
 
+import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutMutateConfig;
+import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutStreamConfig;
+
 import java.util.List;
 
 import static org.neo4j.gds.doc.syntax.SyntaxMode.MUTATE;
@@ -29,8 +32,8 @@ class ApproxMaxKCutSyntaxTest extends SyntaxTestBase {
     @Override
     protected Iterable<SyntaxModeMeta> syntaxModes() {
         return List.of(
-            SyntaxModeMeta.of(STREAM),
-            SyntaxModeMeta.of(MUTATE)
+            SyntaxModeMeta.of(STREAM, ApproxMaxKCutStreamConfig.class),
+            SyntaxModeMeta.of(MUTATE, ApproxMaxKCutMutateConfig.class)
         );
     }
 

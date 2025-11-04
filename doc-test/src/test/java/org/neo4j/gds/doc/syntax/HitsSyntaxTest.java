@@ -19,14 +19,43 @@
  */
 package org.neo4j.gds.doc.syntax;
 
+import org.neo4j.gds.hits.HitsConfig;
+
 import java.util.List;
+import java.util.Set;
 
 public class HitsSyntaxTest extends SyntaxTestBase {
 
     @Override
     protected Iterable<SyntaxModeMeta> syntaxModes() {
         return List.of(
-            SyntaxModeMeta.of(SyntaxMode.STREAM)
+            SyntaxModeMeta.of(SyntaxMode.STREAM, HitsConfig.class, Set.of(
+                "writeConcurrency",
+                "writeProperty",
+                "mutateProperty"
+            )),
+            SyntaxModeMeta.of(SyntaxMode.STATS, HitsConfig.class, Set.of(
+                "writeConcurrency",
+                "writeProperty",
+                "mutateProperty"
+            )),
+            SyntaxModeMeta.of(SyntaxMode.MUTATE, HitsConfig.class, Set.of(
+                "writeConcurrency",
+                "writeProperty"
+            )),
+            SyntaxModeMeta.of(SyntaxMode.WRITE, HitsConfig.class, Set.of(
+                "mutateProperty"
+            ))
+        );
+    }
+
+    @Override
+    protected Set<String> ignoredParameters() {
+        return Set.of(
+            "sudo",
+            "username",
+            "writeToResultStore",
+            "relationshipWeightProperty"
         );
     }
 

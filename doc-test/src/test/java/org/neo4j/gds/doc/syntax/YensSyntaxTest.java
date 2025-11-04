@@ -19,6 +19,10 @@
  */
 package org.neo4j.gds.doc.syntax;
 
+import org.neo4j.gds.paths.yens.config.ShortestPathYensMutateConfig;
+import org.neo4j.gds.paths.yens.config.ShortestPathYensStreamConfig;
+import org.neo4j.gds.paths.yens.config.ShortestPathYensWriteConfig;
+
 import java.util.List;
 
 import static org.neo4j.gds.doc.syntax.SyntaxMode.MUTATE;
@@ -30,9 +34,9 @@ class YensSyntaxTest extends SyntaxTestBase {
     @Override
     protected Iterable<SyntaxModeMeta> syntaxModes() {
         return List.of(
-            SyntaxModeMeta.of(STREAM),
-            SyntaxModeMeta.of(MUTATE),
-            SyntaxModeMeta.of(WRITE)
+            SyntaxModeMeta.of(STREAM, ShortestPathYensStreamConfig.class),
+            SyntaxModeMeta.of(MUTATE, ShortestPathYensMutateConfig.class),
+            SyntaxModeMeta.of(WRITE, ShortestPathYensWriteConfig.class)
         );
     }
 

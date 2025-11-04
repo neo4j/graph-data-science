@@ -19,6 +19,10 @@
  */
 package org.neo4j.gds.doc.syntax;
 
+import org.neo4j.gds.paths.dijkstra.config.AllShortestPathsDijkstraMutateConfig;
+import org.neo4j.gds.paths.dijkstra.config.AllShortestPathsDijkstraStreamConfig;
+import org.neo4j.gds.paths.dijkstra.config.AllShortestPathsDijkstraWriteConfig;
+
 import java.util.List;
 
 import static org.neo4j.gds.doc.syntax.SyntaxMode.MUTATE;
@@ -30,9 +34,9 @@ class DijkstraSingleSourceSyntaxTest extends SyntaxTestBase {
     @Override
     protected Iterable<SyntaxModeMeta> syntaxModes() {
         return List.of(
-            SyntaxModeMeta.of(STREAM),
-            SyntaxModeMeta.of(MUTATE),
-            SyntaxModeMeta.of(WRITE)
+            SyntaxModeMeta.of(STREAM, AllShortestPathsDijkstraStreamConfig.class),
+            SyntaxModeMeta.of(MUTATE, AllShortestPathsDijkstraMutateConfig.class),
+            SyntaxModeMeta.of(WRITE, AllShortestPathsDijkstraWriteConfig.class)
         );
     }
 

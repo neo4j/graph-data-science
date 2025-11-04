@@ -19,7 +19,28 @@
  */
 package org.neo4j.gds.doc.syntax;
 
+import org.neo4j.gds.louvain.LouvainMutateConfig;
+import org.neo4j.gds.louvain.LouvainStatsConfig;
+import org.neo4j.gds.louvain.LouvainStreamConfig;
+import org.neo4j.gds.louvain.LouvainWriteConfig;
+
+import java.util.List;
+
+import static org.neo4j.gds.doc.syntax.SyntaxMode.MUTATE;
+import static org.neo4j.gds.doc.syntax.SyntaxMode.STATS;
+import static org.neo4j.gds.doc.syntax.SyntaxMode.STREAM;
+import static org.neo4j.gds.doc.syntax.SyntaxMode.WRITE;
+
 class LouvainSyntaxTest extends SyntaxTestBase {
+
+    protected Iterable<SyntaxModeMeta> syntaxModes() {
+        return List.of(
+            SyntaxModeMeta.of(STATS, LouvainStatsConfig.class),
+            SyntaxModeMeta.of(STREAM, LouvainStreamConfig.class),
+            SyntaxModeMeta.of(MUTATE, LouvainMutateConfig.class),
+            SyntaxModeMeta.of(WRITE, LouvainWriteConfig.class)
+        );
+    }
 
     @Override
     protected String adocFile() {

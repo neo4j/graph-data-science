@@ -23,7 +23,7 @@ YIELD
 
 // This table is only here to make sure we will really pick the `.Results` one
 [[configuration-table]]
-.Algorithm specific configuration
+.Configuration
 [opts="header",cols="1,1,1m,1,4"]
 |===
 | Name                       | Type     | Default | Optional | Description

@@ -19,14 +19,31 @@
  */
 package org.neo4j.gds.doc.syntax;
 
+import org.neo4j.gds.ml.pipeline.nodePipeline.regression.NodeRegressionPipelineTrainConfig;
+
 import java.util.List;
+import java.util.Set;
 
 class NodeRegressionPipelineTrainSyntaxTest extends SyntaxTestBase {
 
     @Override
+    protected boolean compareWithGdsApiSpec() {
+        return false;
+    }
+
+    @Override
     protected Iterable<SyntaxModeMeta> syntaxModes() {
         return List.of(
-            SyntaxModeMeta.of(SyntaxMode.TRAIN)
+            SyntaxModeMeta.of(SyntaxMode.TRAIN, NodeRegressionPipelineTrainConfig.class)
+        );
+    }
+
+    @Override
+    protected Set<String> ignoredParameters() {
+        return Set.of(
+            "sudo",
+            "username",
+            "graphName" // used to pass to pipeline feature steps
         );
     }
 

@@ -72,6 +72,7 @@ CALL gds.graph.project(
 | relationshipProperties | String, List or Map   | {}                   | yes | The relationship properties to load from relationships that match _any_ of the types specified in `relationshipProjection`.
 | validateRelationships  | Boolean               | false                | yes | Whether to throw an error if the `relationshipProjection` includes relationships between nodes not part of the `nodeProjection`.
 | jobId                  | String                | Generated internally | yes | An ID that can be provided to more easily track the projection's progress.
+| xref:common-usage/running-algos.adoc#common-configuration-logProgress[logProgress] | Boolean | true | yes | If disabled the progress percentage will not be logged.
 |===
 
 .Results

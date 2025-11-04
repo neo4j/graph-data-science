@@ -19,25 +19,5 @@
  */
 package org.neo4j.gds.doc.syntax;
 
-import org.neo4j.gds.traversal.RandomWalkMutateConfig;
-import org.neo4j.gds.traversal.RandomWalkStatsConfig;
-import org.neo4j.gds.traversal.RandomWalkStreamConfig;
+public record ParameterTypeSpec(String typeName, boolean optional) {}
 
-import java.util.List;
-
-class RandomWalkSyntaxTest extends SyntaxTestBase {
-
-    @Override
-    protected Iterable<SyntaxModeMeta> syntaxModes() {
-        return List.of(
-            SyntaxModeMeta.of(SyntaxMode.MUTATE, RandomWalkMutateConfig.class),
-            SyntaxModeMeta.of(SyntaxMode.STATS, RandomWalkStatsConfig.class),
-            SyntaxModeMeta.of(SyntaxMode.STREAM, RandomWalkStreamConfig.class)
-        );
-    }
-
-    @Override
-    protected String adocFile() {
-        return "pages/algorithms/random-walk.adoc";
-    }
-}

@@ -19,7 +19,28 @@
  */
 package org.neo4j.gds.doc.syntax;
 
+import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityMutateConfig;
+import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityStatsConfig;
+import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityStreamConfig;
+import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityWriteConfig;
+
+import java.util.List;
+
+import static org.neo4j.gds.doc.syntax.SyntaxMode.MUTATE;
+import static org.neo4j.gds.doc.syntax.SyntaxMode.STATS;
+import static org.neo4j.gds.doc.syntax.SyntaxMode.STREAM;
+import static org.neo4j.gds.doc.syntax.SyntaxMode.WRITE;
+
 class FilteredNodeSimilaritySyntaxTest extends SyntaxTestBase {
+
+    protected Iterable<SyntaxModeMeta> syntaxModes() {
+        return List.of(
+            SyntaxModeMeta.of(STATS, FilteredNodeSimilarityStatsConfig.class),
+            SyntaxModeMeta.of(STREAM, FilteredNodeSimilarityStreamConfig.class),
+            SyntaxModeMeta.of(MUTATE, FilteredNodeSimilarityMutateConfig.class),
+            SyntaxModeMeta.of(WRITE, FilteredNodeSimilarityWriteConfig.class)
+        );
+    }
 
     @Override
     protected String adocFile() {

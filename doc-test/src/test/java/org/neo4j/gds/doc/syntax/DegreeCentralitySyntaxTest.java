@@ -19,7 +19,28 @@
  */
 package org.neo4j.gds.doc.syntax;
 
+import org.neo4j.gds.degree.DegreeCentralityMutateConfig;
+import org.neo4j.gds.degree.DegreeCentralityStatsConfig;
+import org.neo4j.gds.degree.DegreeCentralityStreamConfig;
+import org.neo4j.gds.degree.DegreeCentralityWriteConfig;
+
+import java.util.List;
+
+import static org.neo4j.gds.doc.syntax.SyntaxMode.MUTATE;
+import static org.neo4j.gds.doc.syntax.SyntaxMode.STATS;
+import static org.neo4j.gds.doc.syntax.SyntaxMode.STREAM;
+import static org.neo4j.gds.doc.syntax.SyntaxMode.WRITE;
+
 class DegreeCentralitySyntaxTest extends SyntaxTestBase {
+
+    protected Iterable<SyntaxModeMeta> syntaxModes() {
+        return List.of(
+            SyntaxModeMeta.of(STATS, DegreeCentralityStatsConfig.class),
+            SyntaxModeMeta.of(STREAM, DegreeCentralityStreamConfig.class),
+            SyntaxModeMeta.of(MUTATE, DegreeCentralityMutateConfig.class),
+            SyntaxModeMeta.of(WRITE, DegreeCentralityWriteConfig.class)
+        );
+    }
 
     @Override
     protected String adocFile() {

@@ -19,6 +19,9 @@
  */
 package org.neo4j.gds.doc.syntax;
 
+import org.neo4j.gds.paths.traverse.DfsMutateConfig;
+import org.neo4j.gds.paths.traverse.DfsStreamConfig;
+
 import java.util.List;
 
 import static org.neo4j.gds.doc.syntax.SyntaxMode.MUTATE;
@@ -29,8 +32,8 @@ public class DfsSyntaxTest extends SyntaxTestBase {
     @Override
     protected Iterable<SyntaxModeMeta> syntaxModes() {
         return List.of(
-            SyntaxModeMeta.of(STREAM),
-            SyntaxModeMeta.of(MUTATE)
+            SyntaxModeMeta.of(STREAM, DfsStreamConfig.class),
+            SyntaxModeMeta.of(MUTATE, DfsMutateConfig.class)
         );
     }
     

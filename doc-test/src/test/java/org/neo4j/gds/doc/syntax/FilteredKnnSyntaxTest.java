@@ -19,7 +19,28 @@
  */
 package org.neo4j.gds.doc.syntax;
 
+import org.neo4j.gds.similarity.filteredknn.FilteredKnnMutateConfig;
+import org.neo4j.gds.similarity.filteredknn.FilteredKnnStatsConfig;
+import org.neo4j.gds.similarity.filteredknn.FilteredKnnStreamConfig;
+import org.neo4j.gds.similarity.filteredknn.FilteredKnnWriteConfig;
+
+import java.util.List;
+
+import static org.neo4j.gds.doc.syntax.SyntaxMode.MUTATE;
+import static org.neo4j.gds.doc.syntax.SyntaxMode.STATS;
+import static org.neo4j.gds.doc.syntax.SyntaxMode.STREAM;
+import static org.neo4j.gds.doc.syntax.SyntaxMode.WRITE;
+
 class FilteredKnnSyntaxTest extends SyntaxTestBase {
+
+    protected Iterable<SyntaxModeMeta> syntaxModes() {
+        return List.of(
+            SyntaxModeMeta.of(STATS, FilteredKnnStatsConfig.class),
+            SyntaxModeMeta.of(STREAM, FilteredKnnStreamConfig.class),
+            SyntaxModeMeta.of(MUTATE, FilteredKnnMutateConfig.class),
+            SyntaxModeMeta.of(WRITE, FilteredKnnWriteConfig.class)
+        );
+    }
 
     @Override
     protected String adocFile() {

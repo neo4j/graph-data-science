@@ -19,7 +19,23 @@
  */
 package org.neo4j.gds.doc.syntax;
 
+import org.neo4j.gds.articulationpoints.ArticulationPointsMutateConfig;
+import org.neo4j.gds.articulationpoints.ArticulationPointsStatsConfig;
+import org.neo4j.gds.articulationpoints.ArticulationPointsStreamConfig;
+import org.neo4j.gds.articulationpoints.ArticulationPointsWriteConfig;
+
+import java.util.List;
+
 class ArticulationPointsSyntaxTest extends SyntaxTestBase {
+
+    protected Iterable<SyntaxModeMeta> syntaxModes() {
+        return List.of(
+            SyntaxModeMeta.of(SyntaxMode.STREAM, ArticulationPointsStreamConfig.class),
+            SyntaxModeMeta.of(SyntaxMode.STATS, ArticulationPointsStatsConfig.class),
+            SyntaxModeMeta.of(SyntaxMode.MUTATE, ArticulationPointsMutateConfig.class),
+            SyntaxModeMeta.of(SyntaxMode.WRITE, ArticulationPointsWriteConfig.class)
+        );
+    }
 
     @Override
     protected String adocFile() {

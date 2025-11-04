@@ -27,12 +27,25 @@ dependencies {
     implementation     openGds.reflections
 
     testImplementation project(':cypher-aggregation')
+    testImplementation project(':graph-store-catalog-applications')
+    testImplementation project(':graph-sampling')
+    testImplementation project(':io-core')
     testImplementation project(':proc')
     testImplementation project(':pregel-example')
     testImplementation project(':progress-tracking')
     testImplementation project(':pipeline')
+    testImplementation project(':pipelines-procedure-facade')
     testImplementation project(':proc-sysinfo')
+    testImplementation project(':native-projection')
     testImplementation project(':ml-algo')
+
+    testImplementation     project(':centrality-configs')
+    testImplementation     project(':node-embeddings-configs')
+    testImplementation     project(':community-configs')
+    testImplementation     project(':ml-configs')
+    testImplementation     project(':miscellaneous-configs')
+    testImplementation     project(':path-finding-configs')
+    testImplementation     project(':similarity-configs')
 
     testImplementation openGds.reflections
 

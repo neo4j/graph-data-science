@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.doc.syntax;
 
+import org.neo4j.gds.config.GraphProjectFromGraphConfig;
+
 import java.util.List;
 
 import static org.neo4j.gds.doc.syntax.SyntaxMode.GRAPH_FILTER;
@@ -27,7 +29,7 @@ class GraphFilterSyntaxTest extends SyntaxTestBase {
 
     @Override
     protected Iterable<SyntaxModeMeta> syntaxModes() {
-        return List.of(SyntaxModeMeta.of(GRAPH_FILTER));
+        return List.of(SyntaxModeMeta.of(GRAPH_FILTER, GraphProjectFromGraphConfig.class));
     }
 
     @Override

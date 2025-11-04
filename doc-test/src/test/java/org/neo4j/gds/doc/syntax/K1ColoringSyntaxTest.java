@@ -19,7 +19,37 @@
  */
 package org.neo4j.gds.doc.syntax;
 
+import org.neo4j.gds.k1coloring.K1ColoringMutateConfig;
+import org.neo4j.gds.k1coloring.K1ColoringStatsConfig;
+import org.neo4j.gds.k1coloring.K1ColoringStreamConfig;
+import org.neo4j.gds.k1coloring.K1ColoringWriteConfig;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import static org.neo4j.gds.doc.syntax.SyntaxMode.MUTATE;
+import static org.neo4j.gds.doc.syntax.SyntaxMode.STATS;
+import static org.neo4j.gds.doc.syntax.SyntaxMode.STREAM;
+import static org.neo4j.gds.doc.syntax.SyntaxMode.WRITE;
+
 class K1ColoringSyntaxTest extends SyntaxTestBase {
+
+    protected Iterable<SyntaxModeMeta> syntaxModes() {
+        return List.of(
+            SyntaxModeMeta.of(STATS, K1ColoringStatsConfig.class),
+            SyntaxModeMeta.of(STREAM, K1ColoringStreamConfig.class),
+            SyntaxModeMeta.of(MUTATE, K1ColoringMutateConfig.class),
+            SyntaxModeMeta.of(WRITE, K1ColoringWriteConfig.class)
+        );
+    }
+
+    @Override
+    protected Set<String> ignoredParameters() {
+        var ignoredParameters = new HashSet<>(super.ignoredParameters());
+        ignoredParameters.add("batchSize");
+        return ignoredParameters;
+    }
 
     @Override
     protected String adocFile() {

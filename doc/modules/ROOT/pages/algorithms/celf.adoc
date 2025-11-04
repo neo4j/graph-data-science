@@ -4,7 +4,7 @@
 [[algorithms-celf]]
 = CELF
 :description: This section describes the Cost Effective Lazy Forward (CELF) influence maximization algorithm in the Neo4j Graph Data Science library.
-:entity: influenceMaximization
+:entity: node
 :result: spread
 :algorithm: CELF
 

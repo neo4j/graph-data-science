@@ -136,6 +136,11 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 |===
 | Name              | Type   | Default | Optional | Description
 | mutateProperty    | String | n/a     | no       | The node property in the GDS graph to which the count of random walk visits is written.
+| xref:common-usage/running-algos.adoc#common-configuration-node-labels[nodeLabels]               | List of String    | ['*']                  | yes      | Filter the named graph using the given node labels.
+| xref:common-usage/running-algos.adoc#common-configuration-relationship-types[relationshipTypes] | List of String    | ['*']                  | yes      | Filter the named graph using the given relationship types.
+include::partial$/algorithms/common-configuration/concurrency-entry.adoc[]
+| xref:common-usage/running-algos.adoc#common-configuration-jobid[jobId]                         | String   | Generated internally | yes      | An ID that can be provided to more easily track the algorithm's progress.
+| xref:common-usage/running-algos.adoc#common-configuration-logProgress[logProgress] | Boolean | true | yes | If disabled the progress percentage will not be logged.
 include::partial$/algorithms/randomWalk/specific-configuration.adoc[]
 |===
 

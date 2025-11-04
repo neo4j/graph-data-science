@@ -35,6 +35,7 @@ import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Set;
 
 import static org.asciidoctor.Asciidoctor.Factory.create;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -74,12 +75,17 @@ public abstract class SyntaxTestBase {
         asciidoctor.convertFile(docFile, options);
     }
 
-    protected Iterable<SyntaxModeMeta> syntaxModes() {
-        return List.of(
-            SyntaxModeMeta.of(SyntaxMode.STREAM),
-            SyntaxModeMeta.of(SyntaxMode.STATS),
-            SyntaxModeMeta.of(SyntaxMode.MUTATE),
-            SyntaxModeMeta.of(SyntaxMode.WRITE)
+    protected abstract Iterable<SyntaxModeMeta> syntaxModes();
+
+    protected boolean compareWithGdsApiSpec() {
+        return true;
+    }
+
+    protected Set<String> ignoredParameters() {
+        return Set.of(
+            "sudo",
+            "username",
+            "writeToResultStore"
         );
     }
 
@@ -95,6 +101,6 @@ public abstract class SyntaxTestBase {
 
     private ProcedureSyntaxAutoChecker syntaxPostProcessor(SoftAssertions syntaxAssertions) {
         var procedureLookup = ProcedureLookup.forPackages(procedurePackages());
-        return new ProcedureSyntaxAutoChecker(syntaxModes(), syntaxAssertions, procedureLookup);
+        return new ProcedureSyntaxAutoChecker(syntaxModes(), ignoredParameters(), syntaxAssertions, procedureLookup);
     }
 }

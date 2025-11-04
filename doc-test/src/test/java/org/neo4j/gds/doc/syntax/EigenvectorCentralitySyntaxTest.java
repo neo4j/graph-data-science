@@ -19,7 +19,28 @@
  */
 package org.neo4j.gds.doc.syntax;
 
+import org.neo4j.gds.pagerank.EigenvectorMutateConfig;
+import org.neo4j.gds.pagerank.EigenvectorStatsConfig;
+import org.neo4j.gds.pagerank.EigenvectorStreamConfig;
+import org.neo4j.gds.pagerank.EigenvectorWriteConfig;
+
+import java.util.List;
+
+import static org.neo4j.gds.doc.syntax.SyntaxMode.MUTATE;
+import static org.neo4j.gds.doc.syntax.SyntaxMode.STATS;
+import static org.neo4j.gds.doc.syntax.SyntaxMode.STREAM;
+import static org.neo4j.gds.doc.syntax.SyntaxMode.WRITE;
+
 class EigenvectorCentralitySyntaxTest extends SyntaxTestBase {
+
+    protected Iterable<SyntaxModeMeta> syntaxModes() {
+        return List.of(
+            SyntaxModeMeta.of(STATS, EigenvectorStatsConfig.class),
+            SyntaxModeMeta.of(STREAM, EigenvectorStreamConfig.class),
+            SyntaxModeMeta.of(MUTATE, EigenvectorMutateConfig.class),
+            SyntaxModeMeta.of(WRITE, EigenvectorWriteConfig.class)
+        );
+    }
 
     @Override
     protected String adocFile() {

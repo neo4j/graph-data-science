@@ -24,6 +24,11 @@ import java.util.List;
 class LoggingSyntaxTest extends SyntaxTestBase {
 
     @Override
+    protected boolean compareWithGdsApiSpec() {
+        return false;
+    }
+
+    @Override
     protected Iterable<SyntaxModeMeta> syntaxModes() {
         return List.of(
             SyntaxModeMeta.of(SyntaxMode.LIST_PROGRESS),

@@ -23,6 +23,10 @@ import java.util.List;
 
 class PipelineCatalogListSyntaxTest extends SyntaxTestBase {
     @Override
+    protected boolean compareWithGdsApiSpec() {
+        return false;
+    }
+    @Override
     protected Iterable<SyntaxModeMeta> syntaxModes() {
         return List.of(SyntaxModeMeta.of(SyntaxMode.PIPELINE_LIST));
     }

@@ -19,6 +19,11 @@
  */
 package org.neo4j.gds.doc.syntax;
 
+import org.neo4j.gds.paths.bellmanford.AllShortestPathsBellmanFordMutateConfig;
+import org.neo4j.gds.paths.bellmanford.AllShortestPathsBellmanFordStatsConfig;
+import org.neo4j.gds.paths.bellmanford.AllShortestPathsBellmanFordStreamConfig;
+import org.neo4j.gds.paths.bellmanford.AllShortestPathsBellmanFordWriteConfig;
+
 import java.util.List;
 
 import static org.neo4j.gds.doc.syntax.SyntaxMode.MUTATE;
@@ -30,10 +35,10 @@ class BellmanFordSyntaxTest extends SyntaxTestBase {
 
     protected Iterable<SyntaxModeMeta> syntaxModes() {
         return List.of(
-            SyntaxModeMeta.of(STATS),
-            SyntaxModeMeta.of(STREAM),
-            SyntaxModeMeta.of(MUTATE),
-            SyntaxModeMeta.of(WRITE)
+            SyntaxModeMeta.of(STATS, AllShortestPathsBellmanFordStatsConfig.class),
+            SyntaxModeMeta.of(STREAM, AllShortestPathsBellmanFordStreamConfig.class),
+            SyntaxModeMeta.of(MUTATE, AllShortestPathsBellmanFordMutateConfig.class),
+            SyntaxModeMeta.of(WRITE, AllShortestPathsBellmanFordWriteConfig.class)
         );
     }
 

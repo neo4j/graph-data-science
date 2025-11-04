@@ -19,20 +19,24 @@
  */
 package org.neo4j.gds.doc.syntax;
 
-import org.neo4j.gds.annotation.ValueClass;
+import java.util.Set;
 
-@ValueClass
-public interface SyntaxModeMeta {
+public record SyntaxModeMeta(SyntaxMode syntaxMode, int sectionsOnPage, Class<?> configClass,
+                             Set<String> ignoredParameters) {
 
-    SyntaxMode syntaxMode();
-
-    int sectionsOnPage();
-
-    static SyntaxModeMeta of(SyntaxMode mode) {
-        return ImmutableSyntaxModeMeta.of(mode, 1);
+    public static SyntaxModeMeta of(SyntaxMode mode) {
+        return new SyntaxModeMeta(mode, 1, null, Set.of());
     }
 
-    static SyntaxModeMeta of(SyntaxMode mode, int sectionsOnPage) {
-        return ImmutableSyntaxModeMeta.of(mode, sectionsOnPage);
+    public static SyntaxModeMeta of(SyntaxMode mode, int sectionsOnPage) {
+        return new SyntaxModeMeta(mode, sectionsOnPage, null, Set.of());
+    }
+
+    public static SyntaxModeMeta of(SyntaxMode mode, Class<?> configClass) {
+        return new SyntaxModeMeta(mode, 1, configClass, Set.of());
+    }
+
+    public static SyntaxModeMeta of(SyntaxMode mode, Class<?> configClass, Set<String> ignoredParameters) {
+        return new SyntaxModeMeta(mode, 1, configClass, ignoredParameters);
     }
 }

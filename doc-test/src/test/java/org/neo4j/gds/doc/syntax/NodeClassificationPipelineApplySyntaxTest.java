@@ -19,15 +19,33 @@
  */
 package org.neo4j.gds.doc.syntax;
 
+import org.neo4j.gds.procedures.pipelines.NodeClassificationPredictPipelineMutateConfig;
+import org.neo4j.gds.procedures.pipelines.NodeClassificationPredictPipelineStreamConfig;
+
 import java.util.List;
+import java.util.Set;
 
 class NodeClassificationPipelineApplySyntaxTest extends SyntaxTestBase {
 
     @Override
+    protected boolean compareWithGdsApiSpec() {
+        return false;
+    }
+
+    @Override
     protected Iterable<SyntaxModeMeta> syntaxModes() {
         return List.of(
-            SyntaxModeMeta.of(SyntaxMode.MUTATE),
-            SyntaxModeMeta.of(SyntaxMode.STREAM)
+            SyntaxModeMeta.of(SyntaxMode.MUTATE, NodeClassificationPredictPipelineMutateConfig.class),
+            SyntaxModeMeta.of(SyntaxMode.STREAM, NodeClassificationPredictPipelineStreamConfig.class)
+        );
+    }
+
+    @Override
+    protected Set<String> ignoredParameters() {
+        return Set.of(
+            "sudo",
+            "username",
+            "graphName" // used to pass to pipeline feature steps
         );
     }
 

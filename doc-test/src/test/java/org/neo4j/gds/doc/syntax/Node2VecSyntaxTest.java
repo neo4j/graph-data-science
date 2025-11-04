@@ -19,6 +19,10 @@
  */
 package org.neo4j.gds.doc.syntax;
 
+import org.neo4j.gds.embeddings.node2vec.Node2VecMutateConfig;
+import org.neo4j.gds.embeddings.node2vec.Node2VecStreamConfig;
+import org.neo4j.gds.embeddings.node2vec.Node2VecWriteConfig;
+
 import java.util.List;
 
 import static org.neo4j.gds.doc.syntax.SyntaxMode.MUTATE;
@@ -30,9 +34,9 @@ class Node2VecSyntaxTest extends SyntaxTestBase {
     @Override
     protected Iterable<SyntaxModeMeta> syntaxModes() {
         return List.of(
-            SyntaxModeMeta.of(STREAM),
-            SyntaxModeMeta.of(MUTATE),
-            SyntaxModeMeta.of(WRITE)
+            SyntaxModeMeta.of(STREAM, Node2VecStreamConfig.class),
+            SyntaxModeMeta.of(MUTATE, Node2VecMutateConfig.class),
+            SyntaxModeMeta.of(WRITE, Node2VecWriteConfig.class)
         );
     }
 

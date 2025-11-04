@@ -19,6 +19,11 @@
  */
 package org.neo4j.gds.doc.syntax;
 
+import org.neo4j.gds.kmeans.KmeansMutateConfig;
+import org.neo4j.gds.kmeans.KmeansStatsConfig;
+import org.neo4j.gds.kmeans.KmeansStreamConfig;
+import org.neo4j.gds.kmeans.KmeansWriteConfig;
+
 import java.util.List;
 
 import static org.neo4j.gds.doc.syntax.SyntaxMode.MUTATE;
@@ -31,10 +36,10 @@ class KMeansSyntaxTest extends SyntaxTestBase {
     @Override
     protected Iterable<SyntaxModeMeta> syntaxModes() {
         return List.of(
-            SyntaxModeMeta.of(STREAM),
-            SyntaxModeMeta.of(STATS),
-            SyntaxModeMeta.of(MUTATE),
-            SyntaxModeMeta.of(WRITE)
+            SyntaxModeMeta.of(STREAM, KmeansStreamConfig.class),
+            SyntaxModeMeta.of(STATS, KmeansStatsConfig.class),
+            SyntaxModeMeta.of(MUTATE, KmeansMutateConfig.class),
+            SyntaxModeMeta.of(WRITE, KmeansWriteConfig.class)
         );
     }
 

@@ -19,6 +19,9 @@
  */
 package org.neo4j.gds.doc.syntax;
 
+import org.neo4j.gds.embeddings.hashgnn.HashGNNMutateConfig;
+import org.neo4j.gds.embeddings.hashgnn.HashGNNStreamConfig;
+
 import java.util.List;
 
 import static org.neo4j.gds.doc.syntax.SyntaxMode.MUTATE;
@@ -29,8 +32,8 @@ class HashGNNSyntaxTest extends SyntaxTestBase {
     @Override
     protected List<SyntaxModeMeta> syntaxModes() {
         return List.of(
-            SyntaxModeMeta.of(STREAM),
-            SyntaxModeMeta.of(MUTATE)
+            SyntaxModeMeta.of(STREAM, HashGNNStreamConfig.class),
+            SyntaxModeMeta.of(MUTATE, HashGNNMutateConfig.class)
         );
     }
 

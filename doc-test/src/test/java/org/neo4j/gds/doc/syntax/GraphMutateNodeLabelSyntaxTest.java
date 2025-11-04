@@ -19,13 +19,15 @@
  */
 package org.neo4j.gds.doc.syntax;
 
+import org.neo4j.gds.applications.graphstorecatalog.MutateLabelConfig;
+
 import java.util.List;
 
 class GraphMutateNodeLabelSyntaxTest extends SyntaxTestBase {
 
     @Override
     protected Iterable<SyntaxModeMeta> syntaxModes() {
-        return List.of(SyntaxModeMeta.of(SyntaxMode.SINGLE_MODE));
+        return List.of(SyntaxModeMeta.of(SyntaxMode.SINGLE_MODE, MutateLabelConfig.class));
     }
 
     @Override

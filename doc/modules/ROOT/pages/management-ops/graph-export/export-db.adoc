@@ -45,7 +45,7 @@ YIELD
 | configuration         | Map                 | no       | Additional parameters to configure the database export.
 |===
 
-.Graph export configuration
+.Configuration
 [opts="header",cols="1,1,1m,1,4"]
 |===
 | Name                     | Type                | Default                   | Optional | Description
@@ -56,6 +56,8 @@ YIELD
 | batchSize                | Integer             | 10000                     | yes      | Number of entities processed by one single thread at a time.
 | defaultRelationshipType  | String              | +__ALL__+                 | yes      | Relationship type used for `*` relationship projections.
 | additionalNodeProperties | String, List or Map | {}                        | yes      | Allows for exporting additional node properties from the original graph backing the in-memory graph.
+| xref:common-usage/running-algos.adoc#common-configuration-jobid[jobId]                         | String   | Generated internally | yes      | An ID that can be provided to more easily track the algorithm's progress.
+| xref:common-usage/running-algos.adoc#common-configuration-logProgress[logProgress] | Boolean | true | yes | If disabled the progress percentage will not be logged.
 |===
 
 .Results

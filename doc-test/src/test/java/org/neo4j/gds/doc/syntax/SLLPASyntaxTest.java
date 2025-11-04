@@ -19,17 +19,33 @@
  */
 package org.neo4j.gds.doc.syntax;
 
-import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
+import org.neo4j.gds.sllpa.SpeakerListenerLPAConfig;
 
 import java.util.List;
 import java.util.Set;
 
-class GraphProjectSyntaxTest extends SyntaxTestBase {
+public class SLLPASyntaxTest extends SyntaxTestBase {
 
     @Override
     protected Iterable<SyntaxModeMeta> syntaxModes() {
         return List.of(
-            SyntaxModeMeta.of(SyntaxMode.GRAPH_PROJECT, GraphProjectFromStoreConfig.class)
+            SyntaxModeMeta.of(SyntaxMode.STREAM, SpeakerListenerLPAConfig.class, Set.of(
+                "writeConcurrency",
+                "writeProperty",
+                "mutateProperty"
+            )),
+            SyntaxModeMeta.of(SyntaxMode.STATS, SpeakerListenerLPAConfig.class, Set.of(
+                "writeConcurrency",
+                "writeProperty",
+                "mutateProperty"
+            )),
+            SyntaxModeMeta.of(SyntaxMode.MUTATE, SpeakerListenerLPAConfig.class, Set.of(
+                "writeConcurrency",
+                "writeProperty"
+            )),
+            SyntaxModeMeta.of(SyntaxMode.WRITE, SpeakerListenerLPAConfig.class, Set.of(
+                "mutateProperty"
+            ))
         );
     }
 
@@ -38,15 +54,14 @@ class GraphProjectSyntaxTest extends SyntaxTestBase {
         return Set.of(
             "sudo",
             "username",
-            "nodeProjection", // put into config map in impl
-            "relationshipProjection", // put into config map in impl
-            "nodeCount", // only for estimate mode
-            "relationshipCount" // only for estimate mode
+            "writeToResultStore",
+            "relationshipWeightProperty"
         );
     }
 
     @Override
     protected String adocFile() {
-        return "pages/management-ops/graph-creation/graph-project.adoc";
+        return "pages/algorithms/sllpa.adoc";
     }
+
 }

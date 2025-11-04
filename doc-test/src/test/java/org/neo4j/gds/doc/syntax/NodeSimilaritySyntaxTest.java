@@ -19,8 +19,29 @@
  */
 package org.neo4j.gds.doc.syntax;
 
+import org.neo4j.gds.similarity.nodesim.NodeSimilarityMutateConfig;
+import org.neo4j.gds.similarity.nodesim.NodeSimilarityStatsConfig;
+import org.neo4j.gds.similarity.nodesim.NodeSimilarityStreamConfig;
+import org.neo4j.gds.similarity.nodesim.NodeSimilarityWriteConfig;
+
+import java.util.List;
+
+import static org.neo4j.gds.doc.syntax.SyntaxMode.MUTATE;
+import static org.neo4j.gds.doc.syntax.SyntaxMode.STATS;
+import static org.neo4j.gds.doc.syntax.SyntaxMode.STREAM;
+import static org.neo4j.gds.doc.syntax.SyntaxMode.WRITE;
+
 class NodeSimilaritySyntaxTest extends SyntaxTestBase {
 
+    protected Iterable<SyntaxModeMeta> syntaxModes() {
+        return List.of(
+            SyntaxModeMeta.of(STATS, NodeSimilarityStatsConfig.class),
+            SyntaxModeMeta.of(STREAM, NodeSimilarityStreamConfig.class),
+            SyntaxModeMeta.of(MUTATE, NodeSimilarityMutateConfig.class),
+            SyntaxModeMeta.of(WRITE, NodeSimilarityWriteConfig.class)
+        );
+    }
+    
     @Override
     protected String adocFile() {
         return "pages/algorithms/node-similarity.adoc";

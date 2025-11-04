@@ -36,6 +36,7 @@ public interface GraphStoreExporterBaseConfig extends BaseConfig {
         return ConcurrencyConfig.DEFAULT_CONCURRENCY;
     }
 
+    @Configuration.Ignore
     default Concurrency typedWriteConcurrency() {
         return new Concurrency(writeConcurrency());
     }

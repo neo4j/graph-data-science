@@ -56,7 +56,7 @@ CALL gds.graph.filter(
 | configuration      | Map     | Additional parameters to configure subgraph creation.
 |===
 
-.Subgraph specific configuration
+.Configuration
 [opts="header",cols="2,1,2m,1,5"]
 |===
 | Name               | Type    | Default              | Optional | Description

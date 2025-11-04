@@ -19,7 +19,28 @@
  */
 package org.neo4j.gds.doc.syntax;
 
+import org.neo4j.gds.triangle.LocalClusteringCoefficientMutateConfig;
+import org.neo4j.gds.triangle.LocalClusteringCoefficientStatsConfig;
+import org.neo4j.gds.triangle.LocalClusteringCoefficientStreamConfig;
+import org.neo4j.gds.triangle.LocalClusteringCoefficientWriteConfig;
+
+import java.util.List;
+
+import static org.neo4j.gds.doc.syntax.SyntaxMode.MUTATE;
+import static org.neo4j.gds.doc.syntax.SyntaxMode.STATS;
+import static org.neo4j.gds.doc.syntax.SyntaxMode.STREAM;
+import static org.neo4j.gds.doc.syntax.SyntaxMode.WRITE;
+
 class LocalClusteringCoefficientSyntaxTest extends SyntaxTestBase {
+
+    protected Iterable<SyntaxModeMeta> syntaxModes() {
+        return List.of(
+            SyntaxModeMeta.of(STATS, LocalClusteringCoefficientStatsConfig.class),
+            SyntaxModeMeta.of(STREAM, LocalClusteringCoefficientStreamConfig.class),
+            SyntaxModeMeta.of(MUTATE, LocalClusteringCoefficientMutateConfig.class),
+            SyntaxModeMeta.of(WRITE, LocalClusteringCoefficientWriteConfig.class)
+        );
+    }
 
     @Override
     protected String adocFile() {

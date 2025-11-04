@@ -19,6 +19,10 @@
  */
 package org.neo4j.gds.doc.syntax;
 
+import org.neo4j.gds.paths.astar.config.ShortestPathAStarMutateConfig;
+import org.neo4j.gds.paths.astar.config.ShortestPathAStarStreamConfig;
+import org.neo4j.gds.paths.astar.config.ShortestPathAStarWriteConfig;
+
 import java.util.List;
 
 import static org.neo4j.gds.doc.syntax.SyntaxMode.MUTATE;
@@ -29,9 +33,9 @@ class AStarSyntaxTest extends SyntaxTestBase {
 
     protected Iterable<SyntaxModeMeta> syntaxModes() {
         return List.of(
-            SyntaxModeMeta.of(STREAM),
-            SyntaxModeMeta.of(MUTATE),
-            SyntaxModeMeta.of(WRITE)
+            SyntaxModeMeta.of(STREAM, ShortestPathAStarStreamConfig.class),
+            SyntaxModeMeta.of(MUTATE, ShortestPathAStarMutateConfig.class),
+            SyntaxModeMeta.of(WRITE, ShortestPathAStarWriteConfig.class)
         );
     }
 

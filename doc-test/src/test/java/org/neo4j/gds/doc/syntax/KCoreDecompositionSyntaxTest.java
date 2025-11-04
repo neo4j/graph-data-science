@@ -19,6 +19,11 @@
  */
 package org.neo4j.gds.doc.syntax;
 
+import org.neo4j.gds.kcore.KCoreDecompositionMutateConfig;
+import org.neo4j.gds.kcore.KCoreDecompositionStatsConfig;
+import org.neo4j.gds.kcore.KCoreDecompositionStreamConfig;
+import org.neo4j.gds.kcore.KCoreDecompositionWriteConfig;
+
 import java.util.List;
 
 import static org.neo4j.gds.doc.syntax.SyntaxMode.MUTATE;
@@ -30,10 +35,10 @@ class KCoreDecompositionSyntaxTest extends SyntaxTestBase {
 
     protected Iterable<SyntaxModeMeta> syntaxModes() {
         return List.of(
-            SyntaxModeMeta.of(STREAM),
-            SyntaxModeMeta.of(STATS),
-            SyntaxModeMeta.of(MUTATE),
-            SyntaxModeMeta.of(WRITE)
+            SyntaxModeMeta.of(STREAM, KCoreDecompositionStreamConfig.class),
+            SyntaxModeMeta.of(STATS, KCoreDecompositionStatsConfig.class),
+            SyntaxModeMeta.of(MUTATE, KCoreDecompositionMutateConfig.class),
+            SyntaxModeMeta.of(WRITE, KCoreDecompositionWriteConfig.class)
         );
     }
 

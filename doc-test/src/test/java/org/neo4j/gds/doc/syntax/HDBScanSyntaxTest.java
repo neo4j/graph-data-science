@@ -19,6 +19,11 @@
  */
 package org.neo4j.gds.doc.syntax;
 
+import org.neo4j.gds.hdbscan.HDBScanMutateConfig;
+import org.neo4j.gds.hdbscan.HDBScanStatsConfig;
+import org.neo4j.gds.hdbscan.HDBScanStreamConfig;
+import org.neo4j.gds.hdbscan.HDBScanWriteConfig;
+
 import java.util.List;
 
 import static org.neo4j.gds.doc.syntax.SyntaxMode.MUTATE;
@@ -31,10 +36,10 @@ class HDBScanSyntaxTest extends SyntaxTestBase {
     @Override
     protected Iterable<SyntaxModeMeta> syntaxModes() {
         return List.of(
-            SyntaxModeMeta.of(STREAM),
-            SyntaxModeMeta.of(STATS),
-            SyntaxModeMeta.of(MUTATE),
-            SyntaxModeMeta.of(WRITE)
+            SyntaxModeMeta.of(STREAM, HDBScanStreamConfig.class),
+            SyntaxModeMeta.of(STATS, HDBScanStatsConfig.class),
+            SyntaxModeMeta.of(MUTATE, HDBScanMutateConfig.class),
+            SyntaxModeMeta.of(WRITE, HDBScanWriteConfig.class)
         );
     }
 

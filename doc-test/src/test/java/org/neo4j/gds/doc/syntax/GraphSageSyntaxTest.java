@@ -19,6 +19,11 @@
  */
 package org.neo4j.gds.doc.syntax;
 
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageMutateConfig;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageStreamConfig;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageWriteConfig;
+
 import java.util.List;
 
 class GraphSageSyntaxTest extends SyntaxTestBase {
@@ -26,10 +31,10 @@ class GraphSageSyntaxTest extends SyntaxTestBase {
     @Override
     protected Iterable<SyntaxModeMeta> syntaxModes() {
         return List.of(
-            SyntaxModeMeta.of(SyntaxMode.STREAM),
-            SyntaxModeMeta.of(SyntaxMode.TRAIN),
-            SyntaxModeMeta.of(SyntaxMode.MUTATE),
-            SyntaxModeMeta.of(SyntaxMode.WRITE)
+            SyntaxModeMeta.of(SyntaxMode.STREAM, GraphSageStreamConfig.class),
+            SyntaxModeMeta.of(SyntaxMode.TRAIN, GraphSageTrainConfig.class),
+            SyntaxModeMeta.of(SyntaxMode.MUTATE, GraphSageMutateConfig.class),
+            SyntaxModeMeta.of(SyntaxMode.WRITE, GraphSageWriteConfig.class)
         );
     }
 

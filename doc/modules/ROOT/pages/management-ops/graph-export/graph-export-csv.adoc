@@ -47,7 +47,7 @@ YIELD
 | configuration         | Map                 | no       | Additional parameters to configure the database export.
 |===
 
-.Graph export configuration
+.Configuration
 [opts="header",cols="1,1,1m,1,4"]
 |===
 | Name                     | Type                | Default   | Optional | Description
@@ -106,14 +106,15 @@ YIELD
 | configuration         | Map                 | no       | Additional parameters to configure the database export.
 |===
 
-.Graph export estimate configuration
+.Configuration
 [opts="header",cols="1,1,1m,1,4"]
 |===
-| Name                    | Type    | Default    | Optional  | Description
-| exportName              | String  | none       | no        | Name of the folder the exported CSV files are saved at.
-| samplingFactor          | Double  | 0.001      | yes       | The fraction of nodes and relationships to sample for the estimation.
-| writeConcurrency        | Integer | 4          | yes       | The number of concurrent threads used for writing the database.
-| defaultRelationshipType | String  | +__ALL__+  | yes       | Relationship type used for `*` relationship projections.
+| Name                     | Type                | Default   | Optional | Description
+| exportName               | String              | none      | No       | The name of the directory where the graph is exported to. The absolute path of the exported CSV files depends on the configuration parameter `gds.export.location` in the `neo4j.conf`.
+| writeConcurrency         | Integer             | 4         | yes      | The number of concurrent threads used for writing the database.
+| defaultRelationshipType  | String              | +__ALL__+ | yes      | Relationship type used for `*` relationship projections.
+| additionalNodeProperties | String, List or Map | {}        | yes      | Allows for exporting additional node properties from the original graph backing the projected graph.
+| useLabelMapping          | Boolean             | false     | yes      | Flag to decide whether to use node label mapping when exporting the graph
 |===
 
 .Results

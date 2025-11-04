@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.doc.syntax;
 
+import org.neo4j.gds.kspanningtree.KSpanningTreeWriteConfig;
+
 import java.util.List;
 
 import static org.neo4j.gds.doc.syntax.SyntaxMode.WRITE;
@@ -27,7 +29,7 @@ class KSpanningTreeSyntaxTest extends SyntaxTestBase {
 
     protected Iterable<SyntaxModeMeta> syntaxModes() {
         return List.of(
-            SyntaxModeMeta.of(WRITE)
+            SyntaxModeMeta.of(WRITE, KSpanningTreeWriteConfig.class)
         );
     }
 

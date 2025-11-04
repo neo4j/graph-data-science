@@ -19,6 +19,9 @@
  */
 package org.neo4j.gds.doc.syntax;
 
+import org.neo4j.gds.modularity.ModularityStatsConfig;
+import org.neo4j.gds.modularity.ModularityStreamConfig;
+
 import java.util.List;
 
 import static org.neo4j.gds.doc.syntax.SyntaxMode.STATS;
@@ -29,8 +32,8 @@ class ModularitySyntaxTest extends SyntaxTestBase {
     @Override
     protected Iterable<SyntaxModeMeta> syntaxModes() {
         return List.of(
-            SyntaxModeMeta.of(STATS),
-            SyntaxModeMeta.of(STREAM)
+            SyntaxModeMeta.of(STATS, ModularityStatsConfig.class),
+            SyntaxModeMeta.of(STREAM, ModularityStreamConfig.class)
         );
     }
 

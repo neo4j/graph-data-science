@@ -19,7 +19,28 @@
  */
 package org.neo4j.gds.doc.syntax;
 
+import org.neo4j.gds.labelpropagation.LabelPropagationMutateConfig;
+import org.neo4j.gds.labelpropagation.LabelPropagationStatsConfig;
+import org.neo4j.gds.labelpropagation.LabelPropagationStreamConfig;
+import org.neo4j.gds.labelpropagation.LabelPropagationWriteConfig;
+
+import java.util.List;
+
+import static org.neo4j.gds.doc.syntax.SyntaxMode.MUTATE;
+import static org.neo4j.gds.doc.syntax.SyntaxMode.STATS;
+import static org.neo4j.gds.doc.syntax.SyntaxMode.STREAM;
+import static org.neo4j.gds.doc.syntax.SyntaxMode.WRITE;
+
 class LabelPropagationSyntaxTest extends SyntaxTestBase {
+
+    protected Iterable<SyntaxModeMeta> syntaxModes() {
+        return List.of(
+            SyntaxModeMeta.of(STATS, LabelPropagationStatsConfig.class),
+            SyntaxModeMeta.of(STREAM, LabelPropagationStreamConfig.class),
+            SyntaxModeMeta.of(MUTATE, LabelPropagationMutateConfig.class),
+            SyntaxModeMeta.of(WRITE, LabelPropagationWriteConfig.class)
+        );
+    }
 
     @Override
     protected String adocFile() {

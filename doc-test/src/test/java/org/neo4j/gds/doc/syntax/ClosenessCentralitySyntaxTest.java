@@ -19,7 +19,28 @@
  */
 package org.neo4j.gds.doc.syntax;
 
+import org.neo4j.gds.closeness.ClosenessCentralityMutateConfig;
+import org.neo4j.gds.closeness.ClosenessCentralityStatsConfig;
+import org.neo4j.gds.closeness.ClosenessCentralityStreamConfig;
+import org.neo4j.gds.closeness.ClosenessCentralityWriteConfig;
+
+import java.util.List;
+
+import static org.neo4j.gds.doc.syntax.SyntaxMode.MUTATE;
+import static org.neo4j.gds.doc.syntax.SyntaxMode.STATS;
+import static org.neo4j.gds.doc.syntax.SyntaxMode.STREAM;
+import static org.neo4j.gds.doc.syntax.SyntaxMode.WRITE;
+
 class ClosenessCentralitySyntaxTest extends SyntaxTestBase {
+
+    protected Iterable<SyntaxModeMeta> syntaxModes() {
+        return List.of(
+            SyntaxModeMeta.of(STATS, ClosenessCentralityStatsConfig.class),
+            SyntaxModeMeta.of(STREAM, ClosenessCentralityStreamConfig.class),
+            SyntaxModeMeta.of(MUTATE, ClosenessCentralityMutateConfig.class),
+            SyntaxModeMeta.of(WRITE, ClosenessCentralityWriteConfig.class)
+        );
+    }
 
     @Override
     protected String adocFile() {

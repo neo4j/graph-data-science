@@ -19,6 +19,11 @@
  */
 package org.neo4j.gds.doc.syntax;
 
+import org.neo4j.gds.maxflow.MaxFlowMutateConfig;
+import org.neo4j.gds.maxflow.MaxFlowStatsConfig;
+import org.neo4j.gds.maxflow.MaxFlowStreamConfig;
+import org.neo4j.gds.maxflow.MaxFlowWriteConfig;
+
 import java.util.List;
 
 class MaxFlowSyntaxTest extends SyntaxTestBase {
@@ -26,10 +31,10 @@ class MaxFlowSyntaxTest extends SyntaxTestBase {
     @Override
     protected Iterable<SyntaxModeMeta> syntaxModes() {
         return List.of(
-            SyntaxModeMeta.of(SyntaxMode.STREAM),
-            SyntaxModeMeta.of(SyntaxMode.STATS),
-            SyntaxModeMeta.of(SyntaxMode.WRITE),
-            SyntaxModeMeta.of(SyntaxMode.MUTATE)
+            SyntaxModeMeta.of(SyntaxMode.STREAM, MaxFlowStreamConfig.class),
+            SyntaxModeMeta.of(SyntaxMode.STATS, MaxFlowStatsConfig.class),
+            SyntaxModeMeta.of(SyntaxMode.WRITE, MaxFlowWriteConfig.class),
+            SyntaxModeMeta.of(SyntaxMode.MUTATE, MaxFlowMutateConfig.class)
         );
     }
 

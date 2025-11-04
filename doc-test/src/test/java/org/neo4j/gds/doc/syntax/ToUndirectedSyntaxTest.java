@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.doc.syntax;
 
+import org.neo4j.gds.undirected.ToUndirectedConfig;
+
 import java.util.List;
 
 class ToUndirectedSyntaxTest extends SyntaxTestBase {
@@ -26,7 +28,7 @@ class ToUndirectedSyntaxTest extends SyntaxTestBase {
     @Override
     protected Iterable<SyntaxModeMeta> syntaxModes() {
         return List.of(
-            SyntaxModeMeta.of(SyntaxMode.SINGLE_MODE)
+            SyntaxModeMeta.of(SyntaxMode.SINGLE_MODE, ToUndirectedConfig.class)
         );
     }
 

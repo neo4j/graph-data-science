@@ -19,6 +19,11 @@
  */
 package org.neo4j.gds.doc.syntax;
 
+import org.neo4j.gds.steiner.SteinerTreeMutateConfig;
+import org.neo4j.gds.steiner.SteinerTreeStatsConfig;
+import org.neo4j.gds.steiner.SteinerTreeStreamConfig;
+import org.neo4j.gds.steiner.SteinerTreeWriteConfig;
+
 import java.util.List;
 
 class SteinerTreeSyntaxTest extends SyntaxTestBase {
@@ -26,10 +31,10 @@ class SteinerTreeSyntaxTest extends SyntaxTestBase {
     @Override
     protected Iterable<SyntaxModeMeta> syntaxModes() {
         return List.of(
-            SyntaxModeMeta.of(SyntaxMode.STREAM),
-            SyntaxModeMeta.of(SyntaxMode.STATS),
-            SyntaxModeMeta.of(SyntaxMode.WRITE),
-            SyntaxModeMeta.of(SyntaxMode.MUTATE)
+            SyntaxModeMeta.of(SyntaxMode.STREAM, SteinerTreeStreamConfig.class),
+            SyntaxModeMeta.of(SyntaxMode.STATS, SteinerTreeStatsConfig.class),
+            SyntaxModeMeta.of(SyntaxMode.WRITE, SteinerTreeWriteConfig.class),
+            SyntaxModeMeta.of(SyntaxMode.MUTATE, SteinerTreeMutateConfig.class)
         );
     }
 

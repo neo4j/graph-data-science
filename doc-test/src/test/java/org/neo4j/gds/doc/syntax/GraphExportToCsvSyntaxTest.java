@@ -19,16 +19,31 @@
  */
 package org.neo4j.gds.doc.syntax;
 
+import org.neo4j.gds.core.io.file.GraphStoreToCsvEstimationConfig;
+import org.neo4j.gds.core.io.file.GraphStoreToFileExporterConfig;
+
 import java.util.List;
+import java.util.Set;
 
 class GraphExportToCsvSyntaxTest extends SyntaxTestBase {
 
     @Override
     protected Iterable<SyntaxModeMeta> syntaxModes() {
         return List.of(
-            SyntaxModeMeta.of(SyntaxMode.GRAPH_EXPORT),
-            SyntaxModeMeta.of(SyntaxMode.ESTIMATE)
+            SyntaxModeMeta.of(SyntaxMode.GRAPH_EXPORT, GraphStoreToFileExporterConfig.class),
+            SyntaxModeMeta.of(SyntaxMode.ESTIMATE, GraphStoreToCsvEstimationConfig.class)
         );
+    }
+
+    @Override
+    protected Set<String> ignoredParameters() {
+       return Set.of(
+           "sudo",
+           "username",
+           "writeToResultStore",
+           "samplingFactor",
+           "includeMetaData", "batchSize", "logProgress"
+       );
     }
 
     @Override

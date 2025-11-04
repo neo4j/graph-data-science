@@ -19,6 +19,9 @@
  */
 package org.neo4j.gds.doc.syntax;
 
+import org.neo4j.gds.paths.traverse.BfsMutateConfig;
+import org.neo4j.gds.paths.traverse.BfsStreamConfig;
+
 import java.util.List;
 
 import static org.neo4j.gds.doc.syntax.SyntaxMode.MUTATE;
@@ -29,8 +32,8 @@ public class BfsSyntaxTest extends SyntaxTestBase {
     @Override
     protected Iterable<SyntaxModeMeta> syntaxModes() {
         return List.of(
-            SyntaxModeMeta.of(STREAM),
-            SyntaxModeMeta.of(MUTATE)
+            SyntaxModeMeta.of(STREAM, BfsStreamConfig.class),
+            SyntaxModeMeta.of(MUTATE, BfsMutateConfig.class)
         );
     }
 
