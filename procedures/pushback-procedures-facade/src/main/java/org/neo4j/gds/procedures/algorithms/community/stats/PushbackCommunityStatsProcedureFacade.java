@@ -30,6 +30,7 @@ import org.neo4j.gds.kmeans.KmeansStatsConfig;
 import org.neo4j.gds.labelpropagation.LabelPropagationStatsConfig;
 import org.neo4j.gds.leiden.LeidenStatsConfig;
 import org.neo4j.gds.louvain.LouvainStatsConfig;
+import org.neo4j.gds.modularity.ModularityStatsConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationStatsConfig;
 import org.neo4j.gds.procedures.algorithms.community.CliqueCountingStatsResult;
 import org.neo4j.gds.procedures.algorithms.community.HDBScanStatsResult;
@@ -40,6 +41,7 @@ import org.neo4j.gds.procedures.algorithms.community.LabelPropagationStatsResult
 import org.neo4j.gds.procedures.algorithms.community.LeidenStatsResult;
 import org.neo4j.gds.procedures.algorithms.community.LouvainStatsResult;
 import org.neo4j.gds.procedures.algorithms.community.ModularityOptimizationStatsResult;
+import org.neo4j.gds.procedures.algorithms.community.ModularityStatsResult;
 import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
 
 import java.util.Map;
@@ -201,6 +203,20 @@ public class PushbackCommunityStatsProcedureFacade {
             graphResources -> new HDBScanStatsResultTransformer(config.toMap(),graphResources.graph().nodeCount())
         ).join();
     }
+
+    public Stream<ModularityStatsResult> modularity(String graphName, Map<String, Object> configuration) {
+        var config = configurationParser.parseConfiguration(configuration, ModularityStatsConfig::of);
+
+        return businessFacade.modularity(
+            GraphName.parse(graphName),
+            config.toGraphParameters(),
+            config.relationshipWeightProperty(),
+            config.toParameters(),
+            config.jobId(),
+            graphResources -> new ModularityStatsResultTransformer(config.toMap())
+        ).join();
+    }
+
     /*
     public Stream<LocalClusteringCoefficientStreamResult> lcc(String graphName, Map<String, Object> configuration) {
         var config = configurationParser.parseConfiguration(configuration, LocalClusteringCoefficientStreamConfig::of);
@@ -212,20 +228,6 @@ public class PushbackCommunityStatsProcedureFacade {
             config.jobId(),
             config.logProgress(),
             graphResources -> new LccStreamTransformer(graphResources.graph())
-        ).join();
-    }
-
-
-    public Stream<ModularityStreamResult> modularity(String graphName, Map<String, Object> configuration) {
-        var config = configurationParser.parseConfiguration(configuration, ModularityStreamConfig::of);
-
-        return businessFacade.modularity(
-            GraphName.parse(graphName),
-            config.toGraphParameters(),
-            config.relationshipWeightProperty(),
-            config.toParameters(),
-            config.jobId(),
-            graphResources -> new ModularityStreamTransformer()
         ).join();
     }
 

@@ -533,7 +533,7 @@ public class PushbackCommunityProcedureFacade implements  CommunityProcedureFaca
 
     @Override
     public Stream<ModularityStatsResult> modularityStats(String graphName, Map<String, Object> configuration) {
-        return Stream.empty();
+        return statsProcedureFacade.modularity(graphName,configuration);
     }
 
     @Override

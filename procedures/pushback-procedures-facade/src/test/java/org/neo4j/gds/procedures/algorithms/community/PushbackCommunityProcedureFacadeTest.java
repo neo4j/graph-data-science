@@ -252,6 +252,13 @@ class PushbackCommunityProcedureFacadeTest {
             verifyNoInteractions(streamFacadeMock);
         }
 
+        @Test
+        void modularity() {
+            facade.modularityStats(graphName, config);
+            verify(statsFacadeMock).modularity(graphName, config);
+            verifyNoInteractions(streamFacadeMock);
+        }
+
     /*
 
         @Test
@@ -261,11 +268,10 @@ class PushbackCommunityProcedureFacadeTest {
             verifyNoInteractions(streamFacadeMock);
         }
 
-
-        @Test
-        void modularity() {
-            facade.modularityStream(graphName, config);
-            verify(statsFacadeMock).modularity(graphName, config);
+         @Test
+        void triangleCount() {
+            facade.triangleCountStream(graphName, config);
+            verify(statsFacadeMock).triangleCount(graphName, config);
             verifyNoInteractions(streamFacadeMock);
         }
 
@@ -280,13 +286,6 @@ class PushbackCommunityProcedureFacadeTest {
         void wcc() {
             facade.wccStream(graphName, config);
             verify(statsFacadeMock).wcc(graphName, config);
-            verifyNoInteractions(streamFacadeMock);
-        }
-
-        @Test
-        void triangleCount() {
-            facade.triangleCountStream(graphName, config);
-            verify(statsFacadeMock).triangleCount(graphName, config);
             verifyNoInteractions(streamFacadeMock);
         }
 
