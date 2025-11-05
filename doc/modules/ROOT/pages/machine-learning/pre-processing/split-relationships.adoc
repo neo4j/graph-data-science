@@ -1,12 +1,9 @@
 [[algorithms-split-relationships]]
-[.alpha]
 = Split Relationships
 :description: This section describes the Split Relationships algorithm in the Neo4j Graph Data Science library.
 :page-aliases: alpha-algorithms/split-relationships
 
 :algorithm: Split Relationships
-
-include::partial$/operations-reference/alpha-note.adoc[]
 
 
 [[algorithms-split-relationships-intro]]
