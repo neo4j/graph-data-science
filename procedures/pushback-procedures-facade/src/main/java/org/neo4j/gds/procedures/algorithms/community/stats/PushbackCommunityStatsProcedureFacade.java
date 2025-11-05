@@ -43,10 +43,14 @@ import org.neo4j.gds.procedures.algorithms.community.LocalClusteringCoefficientS
 import org.neo4j.gds.procedures.algorithms.community.LouvainStatsResult;
 import org.neo4j.gds.procedures.algorithms.community.ModularityOptimizationStatsResult;
 import org.neo4j.gds.procedures.algorithms.community.ModularityStatsResult;
+import org.neo4j.gds.procedures.algorithms.community.SccStatsResult;
 import org.neo4j.gds.procedures.algorithms.community.TriangleCountStatsResult;
+import org.neo4j.gds.procedures.algorithms.community.WccStatsResult;
 import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
+import org.neo4j.gds.scc.SccStatsConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientStatsConfig;
 import org.neo4j.gds.triangle.TriangleCountStatsConfig;
+import org.neo4j.gds.wcc.WccStatsConfig;
 
 import java.util.Map;
 import java.util.stream.Stream;
@@ -247,10 +251,12 @@ public class PushbackCommunityStatsProcedureFacade {
             (graphResources)-> new TriangleCountStatsResultTransformer(config.toMap(),graphResources.graph().nodeCount())
         ).join();
     }
-    /*
 
-    public Stream<SccStreamResult> scc(String graphName, Map<String, Object> configuration) {
-        var config = configurationParser.parseConfiguration(configuration, SccStreamConfig::of);
+
+    public Stream<SccStatsResult> scc(String graphName, Map<String, Object> configuration) {
+        var config = configurationParser.parseConfiguration(configuration, SccStatsConfig::of);
+
+        var statisticsInstructions =  ProcedureStatisticsComputationInstructions.forComponents(procedureReturnColumns);
 
         var parameters = config.toParameters();
         return businessFacade.scc(
@@ -259,12 +265,14 @@ public class PushbackCommunityStatsProcedureFacade {
             parameters,
             config.jobId(),
             config.logProgress(),
-            (graphResources)-> new SccStreamTransformer(graphResources.graph(), parameters.concurrency(),config.consecutiveIds())
+            (graphResources)-> new SccStatsResultTransformer(config.toMap(),statisticsInstructions, parameters.concurrency())
         ).join();
     }
 
-    public Stream<WccStreamResult> wcc(String graphName, Map<String, Object> configuration) {
-        var config = configurationParser.parseConfiguration(configuration, WccStreamConfig::of);
+    public Stream<WccStatsResult> wcc(String graphName, Map<String, Object> configuration) {
+        var config = configurationParser.parseConfiguration(configuration, WccStatsConfig::of);
+
+        var statisticsInstructions =  ProcedureStatisticsComputationInstructions.forComponents(procedureReturnColumns);
 
         var parameters = config.toParameters();
         return businessFacade.wcc(
@@ -274,12 +282,11 @@ public class PushbackCommunityStatsProcedureFacade {
             parameters,
             config.jobId(),
             config.logProgress(),
-            (graphResources)-> new WccStreamTransformer(graphResources.graph(), parameters.concurrency(),config.minCommunitySize(),config.consecutiveIds())
+            (graphResources)-> new WccStatsResultTransformer(config.toMap(),statisticsInstructions, parameters.concurrency())
         ).join();
     }
 
-
-
+    /*
     public Stream<SpeakerListenerLPAStreamResult> sllpa(String graphName, Map<String, Object> configuration) {
         var config = configurationParser.parseConfiguration(configuration, SpeakerListenerLPAConfig::of);
 

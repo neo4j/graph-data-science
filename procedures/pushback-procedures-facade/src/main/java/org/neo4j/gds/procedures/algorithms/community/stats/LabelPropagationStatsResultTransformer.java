@@ -64,7 +64,7 @@ public class LabelPropagationStatsResultTransformer implements ResultTransformer
             labelPropagationResult.ranIterations(),
             labelPropagationResult.didConverge(),
             statistics.componentCount(),
-            communityStatisticsWithTiming.summary(),
+            communityStatisticsWithTiming.distribution(),
             0,
             timedAlgorithmResult.computeMillis(),
             statistics.computeMilliseconds(),

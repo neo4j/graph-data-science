@@ -272,22 +272,22 @@ class PushbackCommunityProcedureFacadeTest {
             verify(statsFacadeMock).triangleCount(graphName, config);
             verifyNoInteractions(streamFacadeMock);
         }
-        /*
+
 
         @Test
         void scc() {
-            facade.sccStream(graphName, config);
+            facade.sccStats(graphName, config);
             verify(statsFacadeMock).scc(graphName, config);
             verifyNoInteractions(streamFacadeMock);
         }
 
         @Test
         void wcc() {
-            facade.wccStream(graphName, config);
+            facade.wccStats(graphName, config);
             verify(statsFacadeMock).wcc(graphName, config);
             verifyNoInteractions(streamFacadeMock);
         }
-
+        /*
         @Test
         void sllpa() {
             facade.sllpaStream(graphName, config);

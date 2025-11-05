@@ -71,7 +71,7 @@ public class KMeansStatsResultTransformer implements ResultTransformer<TimedAlgo
             0,
             timedAlgorithmResult.computeMillis(),
             distribution.statistics().computeMilliseconds(),
-            distribution.summary(),
+            distribution.distribution(),
             centroids,
             kmeansResult.averageDistanceToCentroid(),
             kmeansResult.averageSilhouette(),

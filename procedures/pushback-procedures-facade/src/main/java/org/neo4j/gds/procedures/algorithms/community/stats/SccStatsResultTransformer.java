@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.procedures.algorithms.community.stats;
 
+import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.modularityoptimization.ModularityOptimizationResult;
-import org.neo4j.gds.procedures.algorithms.community.ModularityOptimizationStatsResult;
+import org.neo4j.gds.procedures.algorithms.community.SccStatsResult;
 import org.neo4j.gds.result.StatisticsComputationInstructions;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.results.ResultTransformer;
@@ -29,13 +29,14 @@ import org.neo4j.gds.results.ResultTransformer;
 import java.util.Map;
 import java.util.stream.Stream;
 
-public class ModularityOptimizationStatsResultTransformer implements ResultTransformer<TimedAlgorithmResult<ModularityOptimizationResult>, Stream<ModularityOptimizationStatsResult>> {
+public class SccStatsResultTransformer implements ResultTransformer<TimedAlgorithmResult<HugeLongArray>, Stream<SccStatsResult>> {
 
     private final Map<String, Object> configuration;
     private final StatisticsComputationInstructions statisticsComputationInstructions;
     private final Concurrency concurrency;
 
-    public ModularityOptimizationStatsResultTransformer(
+
+    public SccStatsResultTransformer(
         Map<String, Object> configuration,
         StatisticsComputationInstructions statisticsComputationInstructions,
         Concurrency concurrency
@@ -46,34 +47,31 @@ public class ModularityOptimizationStatsResultTransformer implements ResultTrans
     }
 
     @Override
-    public Stream<ModularityOptimizationStatsResult> apply(TimedAlgorithmResult<ModularityOptimizationResult> timedAlgorithmResult) {
+    public Stream<SccStatsResult> apply(TimedAlgorithmResult<HugeLongArray> timedAlgorithmResult) {
 
-        var modularityOptimizationResult = timedAlgorithmResult.result();
-        var nodeCount = modularityOptimizationResult.nodeCount();
+        var sccResult = timedAlgorithmResult.result();
+        var nodeCount =sccResult.size();
 
         var communityStatisticsWithTiming = CommunityDistributionHelpers.compute(
             nodeCount,
             concurrency,
-            modularityOptimizationResult.communityIdLookup(),
+            sccResult::get,
             statisticsComputationInstructions
         );
 
         var statistics = communityStatisticsWithTiming.statistics();
 
-        var modularityOptimizationStatsResult = new ModularityOptimizationStatsResult(
-            0,
-            timedAlgorithmResult.computeMillis(),
-            statistics.computeMilliseconds(),
-            nodeCount,
-            modularityOptimizationResult.didConverge(),
-            modularityOptimizationResult.ranIterations(),
-            modularityOptimizationResult.modularity(),
-            statistics.componentCount(),
-            communityStatisticsWithTiming.distribution(),
-            configuration
-        );
+        var sccStats =
+            new SccStatsResult(
+                statistics.componentCount(),
+                communityStatisticsWithTiming.distribution(),
+                0,
+                timedAlgorithmResult.computeMillis(),
+                statistics.computeMilliseconds(),
+                configuration
+            );
 
-        return Stream.of(modularityOptimizationStatsResult);
+        return Stream.of(sccStats);
 
     }
 

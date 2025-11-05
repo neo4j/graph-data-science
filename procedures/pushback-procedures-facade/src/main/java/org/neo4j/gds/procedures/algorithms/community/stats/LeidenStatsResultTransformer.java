@@ -68,7 +68,7 @@ public class LeidenStatsResultTransformer implements ResultTransformer<TimedAlgo
             leidenResult.didConverge(),
             leidenResult.communities().size(),
             statistics.componentCount(),
-            communityStatisticsWithTiming.summary(),
+            communityStatisticsWithTiming.distribution(),
             leidenResult.modularity(),
             Arrays.stream(leidenResult.modularities()).boxed().collect(Collectors.toList()),
             0,

@@ -68,7 +68,7 @@ public class LouvainStatsResultTransformer implements ResultTransformer<TimedAlg
             Arrays.stream(louvainResult.modularities()).boxed().collect(Collectors.toList()),
             louvainResult.ranLevels(),
             statistics.componentCount(),
-            communityStatisticsWithTiming.summary(),
+            communityStatisticsWithTiming.distribution(),
             0,
             timedAlgorithmResult.computeMillis(),
             statistics.computeMilliseconds(),

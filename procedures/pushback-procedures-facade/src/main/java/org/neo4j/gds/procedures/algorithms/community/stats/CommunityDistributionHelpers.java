@@ -27,7 +27,7 @@ import org.neo4j.gds.result.StatisticsComputationInstructions;
 import java.util.Map;
 import java.util.function.LongUnaryOperator;
 
- class CommunityDistributionHelpers {
+ final class CommunityDistributionHelpers {
 
     private CommunityDistributionHelpers() {}
 
@@ -54,7 +54,7 @@ import java.util.function.LongUnaryOperator;
         return new CommunityDistribution(communityStatistics,communitySummary);
     }
 
-    record CommunityDistribution(CommunityStatistics.CommunityStats statistics, Map<String,Object> summary){
+    record CommunityDistribution(CommunityStatistics.CommunityStats statistics, Map<String,Object> distribution){
 
     }
 }

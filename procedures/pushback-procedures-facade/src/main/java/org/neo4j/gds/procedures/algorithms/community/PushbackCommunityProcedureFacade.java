@@ -637,7 +637,7 @@ public class PushbackCommunityProcedureFacade implements  CommunityProcedureFaca
 
     @Override
     public Stream<SccStatsResult> sccStats(String graphName, Map<String, Object> configuration) {
-        return Stream.empty();
+        return statsProcedureFacade.scc(graphName,configuration);
     }
 
     @Override
@@ -754,7 +754,7 @@ public class PushbackCommunityProcedureFacade implements  CommunityProcedureFaca
 
     @Override
     public Stream<WccStatsResult> wccStats(String graphName, Map<String, Object> configuration) {
-        return Stream.empty();
+        return statsProcedureFacade.wcc(graphName,configuration);
     }
 
     @Override
