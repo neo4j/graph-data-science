@@ -44,10 +44,12 @@ import org.neo4j.gds.procedures.algorithms.community.LouvainStatsResult;
 import org.neo4j.gds.procedures.algorithms.community.ModularityOptimizationStatsResult;
 import org.neo4j.gds.procedures.algorithms.community.ModularityStatsResult;
 import org.neo4j.gds.procedures.algorithms.community.SccStatsResult;
+import org.neo4j.gds.procedures.algorithms.community.SpeakerListenerLPAStatsResult;
 import org.neo4j.gds.procedures.algorithms.community.TriangleCountStatsResult;
 import org.neo4j.gds.procedures.algorithms.community.WccStatsResult;
 import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
 import org.neo4j.gds.scc.SccStatsConfig;
+import org.neo4j.gds.sllpa.SpeakerListenerLPAConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientStatsConfig;
 import org.neo4j.gds.triangle.TriangleCountStatsConfig;
 import org.neo4j.gds.wcc.WccStatsConfig;
@@ -286,8 +288,8 @@ public class PushbackCommunityStatsProcedureFacade {
         ).join();
     }
 
-    /*
-    public Stream<SpeakerListenerLPAStreamResult> sllpa(String graphName, Map<String, Object> configuration) {
+
+    public Stream<SpeakerListenerLPAStatsResult> sllpa(String graphName, Map<String, Object> configuration) {
         var config = configurationParser.parseConfiguration(configuration, SpeakerListenerLPAConfig::of);
 
         return businessFacade.sllpa(
@@ -296,10 +298,10 @@ public class PushbackCommunityStatsProcedureFacade {
             config,
             config.jobId(),
             config.logProgress(),
-            (graphResources)-> new SpeakerListenerLPAStreamTransformer(graphResources.graph())
+            (graphResources)-> new SpeakerListenerLPAStatsResultTransformer(config.toMap())
         ).join();
     }
 
-     */
+
 
 }

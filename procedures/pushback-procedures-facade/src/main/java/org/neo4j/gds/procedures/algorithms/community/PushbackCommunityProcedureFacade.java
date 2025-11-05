@@ -814,7 +814,7 @@ public class PushbackCommunityProcedureFacade implements  CommunityProcedureFaca
 
     @Override
     public Stream<SpeakerListenerLPAStatsResult> sllpaStats(String graphName, Map<String, Object> configuration) {
-        return Stream.empty();
+        return statsProcedureFacade.sllpa(graphName,configuration);
     }
 
     @Override

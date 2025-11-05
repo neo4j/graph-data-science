@@ -287,13 +287,13 @@ class PushbackCommunityProcedureFacadeTest {
             verify(statsFacadeMock).wcc(graphName, config);
             verifyNoInteractions(streamFacadeMock);
         }
-        /*
+
         @Test
         void sllpa() {
-            facade.sllpaStream(graphName, config);
+            facade.sllpaStats(graphName, config);
             verify(statsFacadeMock).sllpa(graphName, config);
             verifyNoInteractions(streamFacadeMock);
-        } */
+        }
     }
 
 
