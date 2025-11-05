@@ -855,7 +855,7 @@ public class PushbackCommunityProcedureFacade implements  CommunityProcedureFaca
 
     @Override
     public Stream<HDBScanStatsResult> hdbscanStats(String graphName, Map<String, Object> configuration) {
-        return Stream.empty();
+        return statsProcedureFacade.hdbscan(graphName,configuration);
     }
 
     @Override

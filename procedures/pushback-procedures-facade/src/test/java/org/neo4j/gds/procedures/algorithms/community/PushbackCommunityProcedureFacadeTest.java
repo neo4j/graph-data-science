@@ -244,16 +244,15 @@ class PushbackCommunityProcedureFacadeTest {
             verifyNoInteractions(streamFacadeMock);
         }
 
-        /*
 
         @Test
         void hdbscan() {
-            facade.hdbscanStream(graphName, config);
+            facade.hdbscanStats(graphName, config);
             verify(statsFacadeMock).hdbscan(graphName, config);
             verifyNoInteractions(streamFacadeMock);
         }
 
-
+    /*
 
         @Test
         void lcc() {

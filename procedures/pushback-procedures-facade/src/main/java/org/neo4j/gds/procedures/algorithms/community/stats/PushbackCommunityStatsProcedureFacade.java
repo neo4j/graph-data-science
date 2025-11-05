@@ -23,6 +23,7 @@ import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.cliquecounting.CliqueCountingStatsConfig;
 import org.neo4j.gds.community.CommunityComputeBusinessFacade;
+import org.neo4j.gds.hdbscan.HDBScanStatsConfig;
 import org.neo4j.gds.k1coloring.K1ColoringStatsConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionStatsConfig;
 import org.neo4j.gds.kmeans.KmeansStatsConfig;
@@ -31,6 +32,7 @@ import org.neo4j.gds.leiden.LeidenStatsConfig;
 import org.neo4j.gds.louvain.LouvainStatsConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationStatsConfig;
 import org.neo4j.gds.procedures.algorithms.community.CliqueCountingStatsResult;
+import org.neo4j.gds.procedures.algorithms.community.HDBScanStatsResult;
 import org.neo4j.gds.procedures.algorithms.community.K1ColoringStatsResult;
 import org.neo4j.gds.procedures.algorithms.community.KCoreDecompositionStatsResult;
 import org.neo4j.gds.procedures.algorithms.community.KmeansStatsResult;
@@ -186,10 +188,9 @@ public class PushbackCommunityStatsProcedureFacade {
     }
 
 
-    /*
 
-     public Stream<HDBScanStreamResult> hdbscan(String graphName, Map<String, Object> configuration) {
-        var config = configurationParser.parseConfiguration(configuration, HDBScanStreamConfig::of);
+     public Stream<HDBScanStatsResult> hdbscan(String graphName, Map<String, Object> configuration) {
+        var config = configurationParser.parseConfiguration(configuration, HDBScanStatsConfig::of);
 
         return businessFacade.hdbscan(
             GraphName.parse(graphName),
@@ -197,10 +198,10 @@ public class PushbackCommunityStatsProcedureFacade {
             config.toParameters(),
             config.jobId(),
             config.logProgress(),
-            graphResources -> new HDBScanStreamTransformer(graphResources.graph())
+            graphResources -> new HDBScanStatsResultTransformer(config.toMap(),graphResources.graph().nodeCount())
         ).join();
     }
-
+    /*
     public Stream<LocalClusteringCoefficientStreamResult> lcc(String graphName, Map<String, Object> configuration) {
         var config = configurationParser.parseConfiguration(configuration, LocalClusteringCoefficientStreamConfig::of);
 
