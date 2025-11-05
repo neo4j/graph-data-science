@@ -21,7 +21,6 @@ package org.neo4j.gds.procedures.algorithms.community.stats;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.kcore.KCoreDecompositionResult;
-import org.neo4j.gds.procedures.algorithms.community.KCoreDecompositionStatsResult;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 
 import java.util.Map;

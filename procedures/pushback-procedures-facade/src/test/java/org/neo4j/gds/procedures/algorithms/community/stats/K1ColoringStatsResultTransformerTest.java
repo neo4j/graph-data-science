@@ -23,7 +23,6 @@ import com.carrotsearch.hppc.BitSet;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.k1coloring.K1ColoringResult;
-import org.neo4j.gds.procedures.algorithms.community.K1ColoringStatsResult;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 
 import java.util.Map;
