@@ -39,10 +39,14 @@ import org.neo4j.gds.procedures.algorithms.community.KCoreDecompositionStatsResu
 import org.neo4j.gds.procedures.algorithms.community.KmeansStatsResult;
 import org.neo4j.gds.procedures.algorithms.community.LabelPropagationStatsResult;
 import org.neo4j.gds.procedures.algorithms.community.LeidenStatsResult;
+import org.neo4j.gds.procedures.algorithms.community.LocalClusteringCoefficientStatsResult;
 import org.neo4j.gds.procedures.algorithms.community.LouvainStatsResult;
 import org.neo4j.gds.procedures.algorithms.community.ModularityOptimizationStatsResult;
 import org.neo4j.gds.procedures.algorithms.community.ModularityStatsResult;
+import org.neo4j.gds.procedures.algorithms.community.TriangleCountStatsResult;
 import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
+import org.neo4j.gds.triangle.LocalClusteringCoefficientStatsConfig;
+import org.neo4j.gds.triangle.TriangleCountStatsConfig;
 
 import java.util.Map;
 import java.util.stream.Stream;
@@ -217,9 +221,9 @@ public class PushbackCommunityStatsProcedureFacade {
         ).join();
     }
 
-    /*
-    public Stream<LocalClusteringCoefficientStreamResult> lcc(String graphName, Map<String, Object> configuration) {
-        var config = configurationParser.parseConfiguration(configuration, LocalClusteringCoefficientStreamConfig::of);
+
+    public Stream<LocalClusteringCoefficientStatsResult> lcc(String graphName, Map<String, Object> configuration) {
+        var config = configurationParser.parseConfiguration(configuration, LocalClusteringCoefficientStatsConfig::of);
 
         return businessFacade.lcc(
             GraphName.parse(graphName),
@@ -227,9 +231,23 @@ public class PushbackCommunityStatsProcedureFacade {
             config.toParameters(),
             config.jobId(),
             config.logProgress(),
-            graphResources -> new LccStreamTransformer(graphResources.graph())
+            graphResources -> new LccStatsResultTransformer(config.toMap(),graphResources.graph().nodeCount())
         ).join();
     }
+
+    public Stream<TriangleCountStatsResult> triangleCount(String graphName, Map<String, Object> configuration) {
+        var config = configurationParser.parseConfiguration(configuration, TriangleCountStatsConfig::of);
+
+        return businessFacade.triangleCount(
+            GraphName.parse(graphName),
+            config.toGraphParameters(),
+            config.toParameters(),
+            config.jobId(),
+            config.logProgress(),
+            (graphResources)-> new TriangleCountStatsResultTransformer(config.toMap(),graphResources.graph().nodeCount())
+        ).join();
+    }
+    /*
 
     public Stream<SccStreamResult> scc(String graphName, Map<String, Object> configuration) {
         var config = configurationParser.parseConfiguration(configuration, SccStreamConfig::of);
@@ -260,18 +278,7 @@ public class PushbackCommunityStatsProcedureFacade {
         ).join();
     }
 
-    public Stream<TriangleCountStreamResult> triangleCount(String graphName, Map<String, Object> configuration) {
-        var config = configurationParser.parseConfiguration(configuration, TriangleCountStreamConfig::of);
 
-        return businessFacade.triangleCount(
-            GraphName.parse(graphName),
-            config.toGraphParameters(),
-            config.toParameters(),
-            config.jobId(),
-            config.logProgress(),
-            (graphResources)-> new TriangleCountStreamTransformer(graphResources.graph())
-        ).join();
-    }
 
     public Stream<SpeakerListenerLPAStreamResult> sllpa(String graphName, Map<String, Object> configuration) {
         var config = configurationParser.parseConfiguration(configuration, SpeakerListenerLPAConfig::of);

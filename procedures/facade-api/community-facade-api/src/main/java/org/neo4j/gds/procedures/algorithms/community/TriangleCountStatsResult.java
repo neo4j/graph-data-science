@@ -32,6 +32,7 @@ public record TriangleCountStatsResult(
     Map<String, Object> configuration,
     long postProcessingMillis
 ) implements StatsResult {
+
     public TriangleCountStatsResult(
         long globalTriangleCount,
         long nodeCount,

@@ -259,21 +259,20 @@ class PushbackCommunityProcedureFacadeTest {
             verifyNoInteractions(streamFacadeMock);
         }
 
-    /*
-
         @Test
         void lcc() {
-            facade.localClusteringCoefficientStream(graphName, config);
+            facade.localClusteringCoefficientStats(graphName, config);
             verify(statsFacadeMock).lcc(graphName, config);
             verifyNoInteractions(streamFacadeMock);
         }
 
          @Test
         void triangleCount() {
-            facade.triangleCountStream(graphName, config);
+            facade.triangleCountStats(graphName, config);
             verify(statsFacadeMock).triangleCount(graphName, config);
             verifyNoInteractions(streamFacadeMock);
         }
+        /*
 
         @Test
         void scc() {
