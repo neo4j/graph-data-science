@@ -20,7 +20,6 @@
 package org.neo4j.gds.procedures.algorithms.community.stats;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.procedures.algorithms.community.LocalClusteringCoefficientStatsResult;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientResult;
 
@@ -44,13 +43,14 @@ class LccStatsResultTransformerTest {
         var statsResult = transformer.apply(new TimedAlgorithmResult<>(result, 10));
 
         assertThat(statsResult.findFirst().orElseThrow())
-            .isEqualTo(new LocalClusteringCoefficientStatsResult(
-                55d,
-                3,
-                0,
-                10,
-                config
-            ));
+            .satisfies(stats -> {
+                assertThat(stats.averageClusteringCoefficient()).isEqualTo(55d);
+                assertThat(stats.nodeCount()).isEqualTo(3);
+                assertThat(stats.preProcessingMillis()).isEqualTo(0);
+                assertThat(stats.computeMillis()).isEqualTo(10);
+                assertThat(stats.configuration()).isEqualTo(config);
+                assertThat(stats.postProcessingMillis()).isEqualTo(0);
+            });
     }
 
 }

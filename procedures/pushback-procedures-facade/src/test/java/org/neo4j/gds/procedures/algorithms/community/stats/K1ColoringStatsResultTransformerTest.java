@@ -53,15 +53,15 @@ class K1ColoringStatsResultTransformerTest {
         var statsResult = transformer.apply(new TimedAlgorithmResult<>(result, 10));
 
         assertThat(statsResult.findFirst().orElseThrow())
-            .isEqualTo(new K1ColoringStatsResult(
-                0,
-                10,
-                3,
-                0,
-                100,
-                true,
-                config
-            ));
+            .satisfies(stats -> {
+                assertThat(stats.preProcessingMillis()).isEqualTo(0);
+                assertThat(stats.computeMillis()).isEqualTo(10);
+                assertThat(stats.nodeCount()).isEqualTo(3);
+                assertThat(stats.colorCount()).isEqualTo(0);
+                assertThat(stats.ranIterations()).isEqualTo(100);
+                assertThat(stats.didConverge()).isTrue();
+                assertThat(stats.configuration()).isEqualTo(config);
+            });
 
     }
 
@@ -84,15 +84,15 @@ class K1ColoringStatsResultTransformerTest {
         var statsResult = transformer.apply(new TimedAlgorithmResult<>(result, 10));
 
         assertThat(statsResult.findFirst().orElseThrow())
-            .isEqualTo(new K1ColoringStatsResult(
-                0,
-                10,
-                3,
-                2,
-                100,
-                true,
-                config
-            ));
+            .satisfies(stats -> {
+                assertThat(stats.preProcessingMillis()).isEqualTo(0);
+                assertThat(stats.computeMillis()).isEqualTo(10);
+                assertThat(stats.nodeCount()).isEqualTo(3);
+                assertThat(stats.colorCount()).isEqualTo(2);
+                assertThat(stats.ranIterations()).isEqualTo(100);
+                assertThat(stats.didConverge()).isTrue();
+                assertThat(stats.configuration()).isEqualTo(config);
+            });
     }
 
 }

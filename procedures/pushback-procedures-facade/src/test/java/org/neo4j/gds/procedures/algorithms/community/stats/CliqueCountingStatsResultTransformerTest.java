@@ -45,12 +45,12 @@ class CliqueCountingStatsResultTransformerTest {
         var statsResult = transformer.apply(new TimedAlgorithmResult<>(result, 10));
 
         assertThat(statsResult.findFirst().orElseThrow())
-            .isEqualTo(new CliqueCountingStatsResult(
-                0,
-                10,
-                List.of(1L,2L,3L),
-                config
-            ));
+            .satisfies(stats -> {
+                assertThat(stats.preProcessingMillis()).isEqualTo(0);
+                assertThat(stats.computeMillis()).isEqualTo(10);
+                assertThat(stats.globalCount()).containsExactly(1L, 2L, 3L);
+                assertThat(stats.configuration()).isEqualTo(config);
+            });
 
     }
 

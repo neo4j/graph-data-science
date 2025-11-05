@@ -21,7 +21,6 @@ package org.neo4j.gds.procedures.algorithms.community.stats;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.modularity.ModularityResult;
-import org.neo4j.gds.procedures.algorithms.community.ModularityStatsResult;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 
 import java.util.Map;
@@ -47,16 +46,16 @@ class ModularityStatsResultTransformerTest {
         var statsResult = transformer.apply(new TimedAlgorithmResult<>(result, 10));
 
         assertThat(statsResult.findFirst().orElseThrow())
-            .isEqualTo(new ModularityStatsResult(
-                20,
-                30L,
-                100L,
-                55d,
-                0,
-                10,
-                0,
-                config
-            ));
+            .satisfies(stats -> {
+                assertThat(stats.nodeCount()).isEqualTo(20);
+                assertThat(stats.relationshipCount()).isEqualTo(30L);
+                assertThat(stats.communityCount()).isEqualTo(100L);
+                assertThat(stats.modularity()).isEqualTo(55d);
+                assertThat(stats.preProcessingMillis()).isEqualTo(0);
+                assertThat(stats.computeMillis()).isEqualTo(10);
+                assertThat(stats.postProcessingMillis()).isEqualTo(0);
+                assertThat(stats.configuration()).isEqualTo(config);
+            });
 
     }
 

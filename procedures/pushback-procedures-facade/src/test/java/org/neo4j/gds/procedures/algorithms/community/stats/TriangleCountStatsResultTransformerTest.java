@@ -20,7 +20,6 @@
 package org.neo4j.gds.procedures.algorithms.community.stats;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.procedures.algorithms.community.TriangleCountStatsResult;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.triangle.TriangleCountResult;
 
@@ -44,13 +43,14 @@ class TriangleCountStatsResultTransformerTest {
         var statsResult = transformer.apply(new TimedAlgorithmResult<>(result, 10));
 
         assertThat(statsResult.findFirst().orElseThrow())
-            .isEqualTo(new TriangleCountStatsResult(
-                55L,
-                3,
-                0,
-                10,
-                config
-            ));
+            .satisfies(stats -> {
+                assertThat(stats.globalTriangleCount()).isEqualTo(55L);
+                assertThat(stats.nodeCount()).isEqualTo(3);
+                assertThat(stats.preProcessingMillis()).isEqualTo(0);
+                assertThat(stats.computeMillis()).isEqualTo(10);
+                assertThat(stats.configuration()).isEqualTo(config);
+                assertThat(stats.postProcessingMillis()).isEqualTo(0);
+            });
     }
 
 }

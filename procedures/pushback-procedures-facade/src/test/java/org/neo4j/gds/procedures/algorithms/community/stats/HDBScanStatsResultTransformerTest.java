@@ -21,7 +21,6 @@ package org.neo4j.gds.procedures.algorithms.community.stats;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.hdbscan.Labels;
-import org.neo4j.gds.procedures.algorithms.community.HDBScanStatsResult;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 
 import java.util.Map;
@@ -45,15 +44,15 @@ class HDBScanStatsResultTransformerTest {
         var statsResult = transformer.apply(new TimedAlgorithmResult<>(result, 10));
 
         assertThat(statsResult.findFirst().orElseThrow())
-            .isEqualTo(new HDBScanStatsResult(
-                3L,
-                20L,
-                100L,
-                0,
-                10,
-                0,
-                config
-            ));
+            .satisfies(stats -> {
+                assertThat(stats.nodeCount()).isEqualTo(3L);
+                assertThat(stats.numberOfClusters()).isEqualTo(20L);
+                assertThat(stats.numberOfNoisePoints()).isEqualTo(100L);
+                assertThat(stats.preProcessingMillis()).isEqualTo(0);
+                assertThat(stats.computeMillis()).isEqualTo(10);
+                assertThat(stats.postProcessingMillis()).isEqualTo(0);
+                assertThat(stats.configuration()).isEqualTo(config);
+            });
     }
 
 }

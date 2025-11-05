@@ -44,13 +44,13 @@ class KCoreStatsResultTransformerTest {
         var statsResult = transformer.apply(new TimedAlgorithmResult<>(result, 10));
 
         assertThat(statsResult.findFirst().orElseThrow())
-            .isEqualTo(new KCoreDecompositionStatsResult(
-                20,
-                0,
-                10,
-                0,
-                config
-            ));
+            .satisfies(stats -> {
+                assertThat(stats.degeneracy()).isEqualTo(20);
+                assertThat(stats.preProcessingMillis()).isEqualTo(0);
+                assertThat(stats.computeMillis()).isEqualTo(10);
+                assertThat(stats.postProcessingMillis()).isEqualTo(0);
+                assertThat(stats.configuration()).isEqualTo(config);
+            });
 
     }
 

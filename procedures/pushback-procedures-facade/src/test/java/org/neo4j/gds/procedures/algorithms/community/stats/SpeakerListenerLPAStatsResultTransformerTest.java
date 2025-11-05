@@ -21,7 +21,6 @@ package org.neo4j.gds.procedures.algorithms.community.stats;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.beta.pregel.PregelResult;
-import org.neo4j.gds.procedures.algorithms.community.SpeakerListenerLPAStatsResult;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 
 import java.util.Map;
@@ -45,13 +44,13 @@ class SpeakerListenerLPAStatsResultTransformerTest {
         var statsResult = transformer.apply(new TimedAlgorithmResult<>(result, 10));
 
         assertThat(statsResult.findFirst().orElseThrow())
-            .isEqualTo(new SpeakerListenerLPAStatsResult(
-                100,
-                true,
-                0,
-                10,
-                config
-            ));
+            .satisfies(stats -> {
+                assertThat(stats.ranIterations()).isEqualTo(100);
+                assertThat(stats.didConverge()).isTrue();
+                assertThat(stats.preProcessingMillis()).isEqualTo(0);
+                assertThat(stats.computeMillis()).isEqualTo(10);
+                assertThat(stats.configuration()).isEqualTo(config);
+            });
     }
 
 }
