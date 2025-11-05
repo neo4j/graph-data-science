@@ -23,16 +23,14 @@ import org.apache.commons.lang3.LongRange;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
-import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.paged.HugeLongArrayQueue;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.TreeSet;
 
-public class SequentialDischarging {
+class SequentialDischarging {
     private final FlowGraph flowGraph;
     private final HugeDoubleArray excess;
     private final HugeLongArray label;
@@ -40,11 +38,10 @@ public class SequentialDischarging {
     private final HugeAtomicBitSet inWorkingQueue;
     private final GlobalRelabeling globalRelabeling;
     private final double freq;
-    private final boolean useGapRelabelling;
 
     private final Arc[] filteredNeighbors;
     private long workSinceLastGR;
-    private HugeObjectArray<TreeSet> gapMap;
+    private final GapDetector gapDetector;
     private double excessAtDestinations;
     private final double totalExcess;
     private final ProgressTracker progressTracker;
@@ -73,24 +70,23 @@ public class SequentialDischarging {
         this.inWorkingQueue = inWorkingQueue;
         this.globalRelabeling = globalRelabeling;
         this.freq = freq;
-        this.useGapRelabelling = useGapRelabelling;
         this.excessAtDestinations = excessAtDestinations;
         this.totalExcess = totalExcess;
         this.progressTracker = progressTracker;
         this.filteredNeighbors = new Arc[(int) LongRange.of(0L, flowGraph.nodeCount()-1).toLongStream().map(flowGraph::degree).max().getAsLong()]; //max (in+out)degree instead (theoretically IntMax + IntMax)
         this.workSinceLastGR = 0L;
-        this.gapMap = useGapRelabelling ? HugeObjectArray.newArray(TreeSet.class, flowGraph.nodeCount()+2) : null;
+        this.gapDetector = GapFactory.create(useGapRelabelling,flowGraph.nodeCount(),this.label);
     }
 
     void dischargeUntilDone() {
         final long relabelingNumber = freq > 0 ? (long) ((ALPHA * flowGraph.nodeCount() + flowGraph.edgeCount()) / freq) : Long.MAX_VALUE;
         globalRelabeling.globalRelabeling();
-        updateGap();
+        gapDetector.resetCounts();
 
         while (!workingQueue.isEmpty()) {
             if (workSinceLastGR > relabelingNumber) {
                 globalRelabeling.globalRelabeling();
-                updateGap();
+                gapDetector.resetCounts();
                 workSinceLastGR = 0;
             }
             var v = workingQueue.remove();
@@ -99,7 +95,7 @@ public class SequentialDischarging {
         }
     }
 
-    private void discharge(long v) {
+    void discharge(long v) {
         var oldLabel = label.get(v);
         if(oldLabel >= flowGraph.nodeCount()) { //last check only used by gap-heuristic
             return;
@@ -121,15 +117,11 @@ public class SequentialDischarging {
             var arc = filteredNeighbors[i];
             var t = arc.t();
 
-            var newLabel = arc.label()+1;
+            var newLabel = arc.label() + 1;
             if (newLabel > oldLabel) { //same as !=
-                if(useGapRelabelling) {
-                    gapMap.get(oldLabel).remove(v);
-                    gapMap.get(newLabel).add(v);
-                    if (gapMap.get(oldLabel).isEmpty()) {
-                        gapRelabel(oldLabel);
-                        break;
-                    }
+                boolean empty = gapDetector.moveFrom(v, oldLabel, newLabel);
+                if (empty) {
+                    gapDetector.relabel(oldLabel);
                 }
                 label.set(v, newLabel);
                 oldLabel = newLabel;
@@ -154,24 +146,8 @@ public class SequentialDischarging {
         workSinceLastGR += flowGraph.outDegree(v) + BETA;
     }
 
-    private void updateGap() {
-        if (useGapRelabelling) {
-            gapMap.setAll(_v -> new TreeSet<Long>());
-            for (long v = 0; v < flowGraph.nodeCount(); v++) {
-                gapMap.get(label.get(v)).add(v);
-            }
-        }
-    }
 
-    private void gapRelabel(long g) {
-        long n = flowGraph.nodeCount();
-        for(long d = g+1; d < n; d++) {
-            gapMap.get(d).forEach(v -> {
-                label.set((long)v, n);
-            });
-            gapMap.get(d).clear();
-        }
-    }
+
 
     private record Arc(long t, long relIdx, double residualCapacity, long label, boolean isReverse) {}
 }
