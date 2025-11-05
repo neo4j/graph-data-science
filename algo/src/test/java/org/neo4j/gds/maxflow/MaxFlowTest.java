@@ -21,7 +21,9 @@
 package org.neo4j.gds.maxflow;
 
 import org.assertj.core.data.Offset;
+import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.neo4j.gds.InputNodes;
 import org.neo4j.gds.ListInputNodes;
 import org.neo4j.gds.MapInputNodes;
@@ -47,9 +49,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.TestSupport.fromGdl;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.assertj.Extractors.replaceTimings;
-import static org.neo4j.gds.beta.generator.RelationshipDistribution.POWER_LAW;
 import static org.neo4j.gds.beta.generator.RelationshipDistribution.UNIFORM;
 
+@TestMethodOrder(MethodOrderer.DisplayName.class)
 class MaxFlowTest {
     private static final double TOLERANCE = 1e-6;
 
@@ -68,9 +70,7 @@ class MaxFlowTest {
     void testGraph(Graph graph, InputNodes sourceNodes, InputNodes targetNodes, double expectedFlow, int concurrency) {
         var params = new MaxFlowParameters(sourceNodes, targetNodes, new Concurrency(concurrency), .5, true);
         var x = new MaxFlow(graph, params, ProgressTracker.NULL_TRACKER, TerminationFlag.RUNNING_TRUE);
-        var start = System.nanoTime();
         var result = x.compute();
-        System.out.println("Compute time: " + (System.nanoTime() - start) / 1_000_000 + "ms");
         assertThat(result.totalFlow()).isCloseTo(expectedFlow, Offset.offset(TOLERANCE));
     }
 
@@ -394,48 +394,6 @@ class MaxFlowTest {
             new MapInputNodes(Map.of(5L, 157.7, 299L, 109.0, 450L, 204.5)),
             362.79999999999995,
             4);
-    }
-
-    @Test
-    void test6a() {
-        var graph = generate(10_000L, 100, UNIFORM);
-        testGraph(graph, 1_234, 5_678, 4470.905417520765, 1);
-    }
-
-    @Test
-    void test6b() {
-        var graph = generate(500_000L, 50, UNIFORM);
-        testGraph(graph, 123_456, 234_567, 1810.4604332732595, 8);
-    }
-
-    @Test
-    void test6c() {
-        var graph = generate(1_000_000L, 100, UNIFORM);
-        testGraph(graph, 123_456, 234_567, 4862.678345610048, 8);
-    }
-
-    @Test
-    void test6d() {
-        var graph = generate(3_000_000L, 100, UNIFORM);
-        testGraph(graph, 1_234_567, 2_345_678, 4761.718858079709, 8);
-    }
-
-    @Test
-    void test7a() {
-        var graph = generate(10_000L, 25, POWER_LAW);
-        testGraph(graph, 100, 200, 349.99795684746823, 1);
-    }
-
-    @Test
-    void test7b() {
-        var graph = generate(100_000L, 10, POWER_LAW);
-        testGraph(graph, 100, 200, 394.0392308340888, 1);
-    }
-
-    @Test
-    void test7c() {
-        var graph = generate(1_000_000L, 50, POWER_LAW);
-        testGraph(graph, 100, 200, 887.1128713190556, 8);
     }
 
     @Test

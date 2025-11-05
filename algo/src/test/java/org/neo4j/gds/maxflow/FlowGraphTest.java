@@ -23,6 +23,7 @@ import org.apache.commons.lang3.mutable.MutableInt;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.properties.relationships.RelationshipCursor;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
@@ -69,7 +70,7 @@ class FlowGraphTest {
                 outgoingCapacityFromSource
             )
         }; //more is useless since this is max in network
-        return FlowGraph.create(graph, supply, demand, TerminationFlag.RUNNING_TRUE);
+        return FlowGraph.create(graph, supply, demand, TerminationFlag.RUNNING_TRUE, new Concurrency(4));
     }
 
     @Test
