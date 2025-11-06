@@ -149,5 +149,5 @@ class SequentialDischarging {
 
 
 
-    private record Arc(long t, long relIdx, double residualCapacity, long label, boolean isReverse) {}
+    record Arc(long t, long relIdx, double residualCapacity, long label, boolean isReverse) {}
 }

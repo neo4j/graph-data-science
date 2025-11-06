@@ -29,15 +29,15 @@ class MaxFlowMemoryEstimateDefinitionTest {
     @ParameterizedTest
     @CsvSource(
         {
-            "1_000,     1_000,      110_312",
-            "1_000,     10_000,     794_312",
-            "1_000_000, 1_000_000,  109_252_272",
-            "1_000_000, 10_000_000, 793_263_256"
+            "1_000,     1_000,      214_336",
+            "1_000,     10_000,     898_336",
+            "1_000_000, 1_000_000,  213_254_736",
+            "1_000_000, 10_000_000, 897_265_720"
         }
     )
     void shouldEstimateMemoryWithChangingGraphDimensionsCorrectly(long nodeCount, long  relationshipCount, long expected){
 
-        var memoryEstimate  = new MaxFlowMemoryEstimateDefinition(1,1).memoryEstimation();
+        var memoryEstimate  = new MaxFlowMemoryEstimateDefinition(1,1,false).memoryEstimation();
 
         MemoryEstimationAssert.assertThat(memoryEstimate)
             .memoryRange(nodeCount, relationshipCount)
@@ -47,15 +47,15 @@ class MaxFlowMemoryEstimateDefinitionTest {
     @ParameterizedTest
     @CsvSource(
         {
-            "1_000,   1,  110_312",
-            "1_000,   4,  113_792",
-            "100_000, 1,  10_926_184",
-            "100_000, 4,  11_226_664"
+            "1_000,   1,  214_336",
+            "1_000,   4,  217_504",
+            "100_000, 1,  21_326_448",
+            "100_000, 4,  21_626_616"
         }
     )
     void shouldEstimateMemoryWithChangingConcurrencyCorrectly(long nodeAndRelCount, int  concurrency, long expected){
 
-        var memoryEstimate  = new MaxFlowMemoryEstimateDefinition(1,1).memoryEstimation();
+        var memoryEstimate  = new MaxFlowMemoryEstimateDefinition(1,1,false).memoryEstimation();
 
         MemoryEstimationAssert.assertThat(memoryEstimate)
             .memoryRange(nodeAndRelCount, nodeAndRelCount, new Concurrency(concurrency))
@@ -65,16 +65,34 @@ class MaxFlowMemoryEstimateDefinitionTest {
     @ParameterizedTest
     @CsvSource(
         {
-            "1_000,1,1,   110_312",
-            "1_000,10,1,  110_888",
-            "1_000,1,10,  110_888",
-            "1_000,10,10, 111_464"
+            "1_000,1,1,   214_336",
+            "1_000,10,1,  214_912",
+            "1_000,1,10,  214_912",
+            "1_000,10,10, 215_488"
 
         }
     )
     void shouldEstimateMemoryWithChangingSinksOrTerminalsCorrectly(long nodeAndRelCount, int  sinks,int terminals, long expected){
 
-        var memoryEstimate  = new MaxFlowMemoryEstimateDefinition(sinks,terminals).memoryEstimation();
+        var memoryEstimate  = new MaxFlowMemoryEstimateDefinition(sinks,terminals,false).memoryEstimation();
+
+        MemoryEstimationAssert.assertThat(memoryEstimate)
+            .memoryRange(nodeAndRelCount, nodeAndRelCount)
+            .hasSameMinAndMaxEqualTo(expected);
+    }
+
+    @ParameterizedTest
+    @CsvSource(
+        {
+            "1_000,false, 214_336",
+            "1_000,true,  242_488",
+            "10_000,false, 2_133_608",
+            "10_000,true,  2_413_760"
+        }
+    )
+    void shouldEstimateMemoryGap(long nodeAndRelCount, boolean useGap, long expected){
+
+        var memoryEstimate  = new MaxFlowMemoryEstimateDefinition(1,1,useGap).memoryEstimation();
 
         MemoryEstimationAssert.assertThat(memoryEstimate)
             .memoryRange(nodeAndRelCount, nodeAndRelCount)
