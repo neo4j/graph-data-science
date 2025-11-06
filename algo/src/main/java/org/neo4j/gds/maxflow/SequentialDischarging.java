@@ -19,11 +19,11 @@
  */
 package org.neo4j.gds.maxflow;
 
+import com.carrotsearch.hppc.BitSet;
 import org.apache.commons.lang3.LongRange;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
-import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.paged.HugeLongArrayQueue;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
@@ -35,7 +35,7 @@ class SequentialDischarging {
     private final HugeDoubleArray excess;
     private final HugeLongArray label;
     private final HugeLongArrayQueue workingQueue;
-    private final HugeAtomicBitSet inWorkingQueue;
+    private final BitSet inWorkingQueue;
     private final GlobalRelabeling globalRelabeling;
     private final double freq;
 
@@ -55,7 +55,7 @@ class SequentialDischarging {
         HugeDoubleArray excess,
         HugeLongArray label,
         HugeLongArrayQueue workingQueue,
-        HugeAtomicBitSet inWorkingQueue,
+        BitSet inWorkingQueue,
         GlobalRelabeling globalRelabeling,
         double freq,
         boolean useGapRelabelling,

@@ -19,11 +19,11 @@
  */
 package org.neo4j.gds.maxflow;
 
+import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
-import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.paged.HugeLongArrayQueue;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.termination.TerminationFlag;
@@ -77,7 +77,7 @@ public final class MaxFlow extends Algorithm<FlowResult> {
         label.set(sourceNode, nodeCount);
 
         var workingQueue = HugeLongArrayQueue.newQueue(nodeCount);
-        var inWorkingQueue = HugeAtomicBitSet.create(nodeCount); //need not be atomic atm
+        var inWorkingQueue = new BitSet(nodeCount); //need not be atomic atm
         var totalExcess = 0D;
         for (var nodeId = 0; nodeId < flowGraph.originalNodeCount(); nodeId++) {
             if (excess.get(nodeId) > 0.0) {
@@ -101,7 +101,7 @@ public final class MaxFlow extends Algorithm<FlowResult> {
             targetNode,
             parameters.concurrency(),
             threadQueues,
-            TerminationFlag.RUNNING_TRUE
+            terminationFlag
         );
 
         var discharging = new SequentialDischarging(

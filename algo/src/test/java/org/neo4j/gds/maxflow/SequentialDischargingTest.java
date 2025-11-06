@@ -19,11 +19,11 @@
  */
 package org.neo4j.gds.maxflow;
 
+import com.carrotsearch.hppc.BitSet;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.paged.HugeLongArrayQueue;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
@@ -74,7 +74,7 @@ class SequentialDischargingTest {
         var excess = HugeDoubleArray.newArray(flowGraph.nodeCount());
         var label = HugeLongArray.newArray(flowGraph.nodeCount());
         var workingQueue = HugeLongArrayQueue.newQueue(flowGraph.nodeCount());
-        var inWorkingQueue = HugeAtomicBitSet.create(flowGraph.nodeCount());
+        var inWorkingQueue = new BitSet(flowGraph.nodeCount());
         var seqDischarging = new SequentialDischarging(
             flowGraph,
             excess,
@@ -144,7 +144,7 @@ class SequentialDischargingTest {
         var excess = HugeDoubleArray.newArray(flowGraph.nodeCount());
         var label = HugeLongArray.newArray(flowGraph.nodeCount());
         var workingQueue = HugeLongArrayQueue.newQueue(flowGraph.nodeCount());
-        var inWorkingQueue = HugeAtomicBitSet.create(flowGraph.nodeCount());
+        var inWorkingQueue = new BitSet(flowGraph.nodeCount());
         var seqDischarging = new SequentialDischarging(
             flowGraph,
             excess,
