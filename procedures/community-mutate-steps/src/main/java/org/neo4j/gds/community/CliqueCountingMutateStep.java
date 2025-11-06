@@ -17,37 +17,38 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.applications.algorithms.community;
+package org.neo4j.gds.community;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
-import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
-import org.neo4j.gds.kmeans.KmeansMutateConfig;
-import org.neo4j.gds.kmeans.KmeansResult;
+import org.neo4j.gds.cliqueCounting.CliqueCountingResult;
 
-class KMeansMutateStep implements MutateStep<KmeansResult, NodePropertiesWritten> {
-    private final MutateNodePropertyService mutateNodePropertyService;
-    private final KmeansMutateConfig configuration;
+import java.util.Collection;
 
-    KMeansMutateStep(MutateNodePropertyService mutateNodePropertyService, KmeansMutateConfig configuration) {
-        this.mutateNodePropertyService = mutateNodePropertyService;
-        this.configuration = configuration;
+public class CliqueCountingMutateStep implements MutateStep<CliqueCountingResult, Void> {
+    private final SpecificCommunityMutateStep specificCommunityMutateStep;
+
+    public CliqueCountingMutateStep(
+        MutateNodePropertyService mutateNodePropertyService,
+        Collection<String> labelsToUpdate,
+        String mutateProperty
+    ) {
+        this.specificCommunityMutateStep = new SpecificCommunityMutateStep(mutateNodePropertyService,labelsToUpdate,mutateProperty);
     }
 
     @Override
-    public NodePropertiesWritten execute(
+    public Void execute(
         Graph graph,
         GraphStore graphStore,
-        KmeansResult result
+        CliqueCountingResult result
     ) {
-        return mutateNodePropertyService.mutateNodeProperties(
-            graph,
-            graphStore,
-            configuration,
-            NodePropertyValuesAdapter.adapt(result.communities())
-        );
+        var nodePropertyValues = NodePropertyValuesAdapter.adapt(result.perNodeCount());
+
+        specificCommunityMutateStep.apply(graph,graphStore,nodePropertyValues);
+
+        return null;
     }
 }

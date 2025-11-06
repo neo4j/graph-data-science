@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.applications.algorithms.community;
+package org.neo4j.gds.community;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.neo4j.gds.algorithms.community.CommunityCompanion;
@@ -28,18 +28,33 @@ import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
-import org.neo4j.gds.leiden.LeidenMutateConfig;
 import org.neo4j.gds.leiden.LeidenResult;
 
-class LeidenMutateStep implements MutateStep<LeidenResult, Pair<NodePropertiesWritten, NodePropertyValues>> {
-    private final MutateNodePropertyService mutateNodePropertyService;
-    private final LeidenMutateConfig configuration;
+import java.util.Collection;
 
-    LeidenMutateStep(MutateNodePropertyService mutateNodePropertyService, LeidenMutateConfig configuration) {
-        this.mutateNodePropertyService = mutateNodePropertyService;
-        this.configuration = configuration;
+public class LeidenMutateStep implements MutateStep<LeidenResult, Pair<NodePropertiesWritten, NodePropertyValues>> {
+    private final StandardCommunityProperties standardCommunityProperties;
+    private final boolean includeIntermediateCommunities;
+    private final SpecificCommunityMutateStep specificCommunityMutateStep;
+
+    public LeidenMutateStep(
+        MutateNodePropertyService mutateNodePropertyService,
+        Collection<String> labelsToUpdate,
+        String mutateProperty,
+        String seedProperty,
+        boolean isIncremental,
+        boolean consecutiveIds,
+        boolean includeIntermediateCommunities
+    ) {
+        this.specificCommunityMutateStep = new SpecificCommunityMutateStep(mutateNodePropertyService,labelsToUpdate,mutateProperty);
+        this.standardCommunityProperties = new StandardCommunityProperties(
+            isIncremental,
+            seedProperty,
+            consecutiveIds,
+            mutateProperty
+        );
+        this.includeIntermediateCommunities = includeIntermediateCommunities;
     }
-
     @Override
     public Pair<NodePropertiesWritten, NodePropertyValues> execute(
         Graph graph,
@@ -48,30 +63,21 @@ class LeidenMutateStep implements MutateStep<LeidenResult, Pair<NodePropertiesWr
     ) {
         var nodePropertyValues = calculateNodePropertyValues(graphStore, result);
 
-        var nodePropertiesWritten = mutateNodePropertyService.mutateNodeProperties(
-            graph,
-            graphStore,
-            configuration,
-            nodePropertyValues
-        );
+        var nodePropertiesWritten = specificCommunityMutateStep.apply(graph,graphStore,nodePropertyValues);
 
         return Pair.of(nodePropertiesWritten, nodePropertyValues);
     }
 
     private NodePropertyValues calculateNodePropertyValues(GraphStore graphStore, LeidenResult result) {
-        if (configuration.includeIntermediateCommunities())
+        if (includeIntermediateCommunities)
             return CommunityCompanion.createIntermediateCommunitiesNodePropertyValues(
                 result::intermediateCommunities,
                 result.communities().size()
             );
 
-        return CommunityCompanion.nodePropertyValues(
-            configuration.isIncremental(),
-            configuration.mutateProperty(),
-            configuration.seedProperty(),
-            configuration.consecutiveIds(),
-            NodePropertyValuesAdapter.adapt(result.dendrogramManager().getCurrent()),
-            () -> graphStore.nodeProperty(configuration.seedProperty())
+        return  standardCommunityProperties.compute(
+            graphStore,
+            NodePropertyValuesAdapter.adapt(result.dendrogramManager().getCurrent())
         );
     }
 }

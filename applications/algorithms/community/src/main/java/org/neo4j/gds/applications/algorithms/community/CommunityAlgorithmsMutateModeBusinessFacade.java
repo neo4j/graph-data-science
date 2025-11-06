@@ -32,6 +32,21 @@ import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.cliqueCounting.CliqueCountingResult;
 import org.neo4j.gds.cliquecounting.CliqueCountingMutateConfig;
 import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.community.ApproxMaxKCutMutateStep;
+import org.neo4j.gds.community.CliqueCountingMutateStep;
+import org.neo4j.gds.community.HDBScanMutateStep;
+import org.neo4j.gds.community.K1ColoringMutateStep;
+import org.neo4j.gds.community.KCoreMutateStep;
+import org.neo4j.gds.community.KMeansMutateStep;
+import org.neo4j.gds.community.LabelPropagationMutateStep;
+import org.neo4j.gds.community.LccMutateStep;
+import org.neo4j.gds.community.LeidenMutateStep;
+import org.neo4j.gds.community.LouvainMutateStep;
+import org.neo4j.gds.community.ModularityOptimizationMutateStep;
+import org.neo4j.gds.community.SccMutateStep;
+import org.neo4j.gds.community.SpeakerListenerLPAMutateStep;
+import org.neo4j.gds.community.TriangleCountMutateStep;
+import org.neo4j.gds.community.WccMutateStep;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.hdbscan.HDBScanMutateConfig;
 import org.neo4j.gds.hdbscan.Labels;
@@ -95,7 +110,7 @@ public class CommunityAlgorithmsMutateModeBusinessFacade {
         ApproxMaxKCutMutateConfig configuration,
         ResultBuilder<ApproxMaxKCutMutateConfig, ApproxMaxKCutResult, RESULT, NodePropertiesWritten> resultBuilder
     ) {
-        var mutateStep = new ApproxMaxKCutMutateStep(mutateNodePropertyService, configuration);
+        var mutateStep = new ApproxMaxKCutMutateStep(mutateNodePropertyService, configuration.nodeLabels(),configuration.mutateProperty());
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
             graphName,
@@ -113,7 +128,7 @@ public class CommunityAlgorithmsMutateModeBusinessFacade {
         CliqueCountingMutateConfig configuration,
         ResultBuilder<CliqueCountingMutateConfig, CliqueCountingResult, RESULT, Void> resultBuilder
     ) {
-        var mutateStep = new CliqueCountingMutateStep(mutateNodePropertyService, configuration);
+        var mutateStep = new CliqueCountingMutateStep(mutateNodePropertyService, configuration.nodeLabels(),configuration.mutateProperty());
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
             graphName,
@@ -131,7 +146,7 @@ public class CommunityAlgorithmsMutateModeBusinessFacade {
         K1ColoringMutateConfig configuration,
         ResultBuilder<K1ColoringMutateConfig, K1ColoringResult, RESULT, Void> resultBuilder
     ) {
-        var mutateStep = new K1ColoringMutateStep(mutateNodePropertyService, configuration);
+        var mutateStep = new K1ColoringMutateStep(mutateNodePropertyService, configuration.nodeLabels(),configuration.mutateProperty());
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
             graphName,
@@ -149,7 +164,7 @@ public class CommunityAlgorithmsMutateModeBusinessFacade {
         KCoreDecompositionMutateConfig configuration,
         ResultBuilder<KCoreDecompositionMutateConfig, KCoreDecompositionResult, RESULT, NodePropertiesWritten> resultBuilder
     ) {
-        var mutateStep = new KCoreMutateStep(mutateNodePropertyService, configuration);
+        var mutateStep = new KCoreMutateStep(mutateNodePropertyService, configuration.nodeLabels(),configuration.mutateProperty());
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
             graphName,
@@ -167,7 +182,7 @@ public class CommunityAlgorithmsMutateModeBusinessFacade {
         KmeansMutateConfig configuration,
         ResultBuilder<KmeansMutateConfig, KmeansResult, RESULT, NodePropertiesWritten> resultBuilder
     ) {
-        var mutateStep = new KMeansMutateStep(mutateNodePropertyService, configuration);
+        var mutateStep = new KMeansMutateStep(mutateNodePropertyService, configuration.nodeLabels(),configuration.mutateProperty());
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
             graphName,
@@ -185,7 +200,14 @@ public class CommunityAlgorithmsMutateModeBusinessFacade {
         LabelPropagationMutateConfig configuration,
         ResultBuilder<LabelPropagationMutateConfig, LabelPropagationResult, RESULT, NodePropertiesWritten> resultBuilder
     ) {
-        var mutateStep = new LabelPropagationMutateStep(mutateNodePropertyService, configuration);
+        var mutateStep = new LabelPropagationMutateStep(
+            mutateNodePropertyService,
+            configuration.nodeLabels(),
+            configuration.mutateProperty(),
+            configuration.seedProperty(),
+            configuration.isIncremental(),
+            configuration.consecutiveIds()
+        );
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
             graphName,
@@ -203,7 +225,7 @@ public class CommunityAlgorithmsMutateModeBusinessFacade {
         LocalClusteringCoefficientMutateConfig configuration,
         ResultBuilder<LocalClusteringCoefficientMutateConfig, LocalClusteringCoefficientResult, RESULT, NodePropertiesWritten> resultBuilder
     ) {
-        var mutateStep = new LccMutateStep(mutateNodePropertyService, configuration);
+        var mutateStep = new LccMutateStep(mutateNodePropertyService, configuration.nodeLabels(),configuration.mutateProperty());
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
             graphName,
@@ -221,7 +243,15 @@ public class CommunityAlgorithmsMutateModeBusinessFacade {
         LeidenMutateConfig configuration,
         ResultBuilder<LeidenMutateConfig, LeidenResult, RESULT, Pair<NodePropertiesWritten, NodePropertyValues>> resultBuilder
     ) {
-        var mutateStep = new LeidenMutateStep(mutateNodePropertyService, configuration);
+        var mutateStep = new LeidenMutateStep(
+            mutateNodePropertyService,
+            configuration.nodeLabels(),
+            configuration.mutateProperty(),
+            configuration.seedProperty(),
+            configuration.isIncremental(),
+            configuration.consecutiveIds(),
+            configuration.includeIntermediateCommunities()
+        );
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
             graphName,
@@ -239,7 +269,15 @@ public class CommunityAlgorithmsMutateModeBusinessFacade {
         LouvainMutateConfig configuration,
         ResultBuilder<LouvainMutateConfig, LouvainResult, RESULT, NodePropertiesWritten> resultBuilder
     ) {
-        var mutateStep = new LouvainMutateStep(mutateNodePropertyService, configuration);
+        var mutateStep = new LouvainMutateStep(
+            mutateNodePropertyService,
+            configuration.nodeLabels(),
+            configuration.mutateProperty(),
+            configuration.seedProperty(),
+            configuration.isIncremental(),
+            configuration.consecutiveIds(),
+            configuration.includeIntermediateCommunities()
+        );
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
             graphName,
@@ -257,7 +295,14 @@ public class CommunityAlgorithmsMutateModeBusinessFacade {
         ModularityOptimizationMutateConfig configuration,
         ResultBuilder<ModularityOptimizationMutateConfig, ModularityOptimizationResult, RESULT, NodePropertiesWritten> resultBuilder
     ) {
-        var mutateStep = new ModularityOptimizationMutateStep(mutateNodePropertyService, configuration);
+        var mutateStep = new ModularityOptimizationMutateStep(
+            mutateNodePropertyService,
+            configuration.nodeLabels(),
+            configuration.mutateProperty(),
+            configuration.seedProperty(),
+            configuration.isIncremental(),
+            configuration.consecutiveIds()
+        );
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
             graphName,
@@ -275,7 +320,12 @@ public class CommunityAlgorithmsMutateModeBusinessFacade {
         SccMutateConfig configuration,
         ResultBuilder<SccMutateConfig, HugeLongArray, RESULT, NodePropertiesWritten> resultBuilder
     ) {
-        var mutateStep = new SccMutateStep(mutateNodePropertyService, configuration);
+        var mutateStep = new SccMutateStep(
+            mutateNodePropertyService,
+            configuration.nodeLabels(),
+            configuration.mutateProperty(),
+            configuration.consecutiveIds()
+        );
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
             graphName,
@@ -293,7 +343,7 @@ public class CommunityAlgorithmsMutateModeBusinessFacade {
         TriangleCountMutateConfig configuration,
         ResultBuilder<TriangleCountMutateConfig, TriangleCountResult, RESULT, NodePropertiesWritten> resultBuilder
     ) {
-        var mutateStep = new TriangleCountMutateStep(mutateNodePropertyService, configuration);
+        var mutateStep = new TriangleCountMutateStep(mutateNodePropertyService, configuration.nodeLabels(),configuration.mutateProperty());
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
             graphName,
@@ -311,7 +361,13 @@ public class CommunityAlgorithmsMutateModeBusinessFacade {
         WccMutateConfig configuration,
         ResultBuilder<WccMutateConfig, DisjointSetStruct, RESULT, NodePropertiesWritten> resultBuilder
     ) {
-        var mutateStep = new WccMutateStep(mutateNodePropertyService, configuration);
+        var mutateStep = new WccMutateStep(
+            mutateNodePropertyService,
+            configuration.nodeLabels(),
+            configuration.mutateProperty(),
+            configuration.seedProperty(),
+            configuration.isIncremental(),
+            configuration.consecutiveIds());
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
             graphName,
@@ -329,7 +385,7 @@ public class CommunityAlgorithmsMutateModeBusinessFacade {
         SpeakerListenerLPAConfig configuration,
         ResultBuilder<SpeakerListenerLPAConfig, PregelResult, RESULT, NodePropertiesWritten> resultBuilder
     ) {
-        var mutateStep = new SpeakerListenerLPAMutateStep(mutateNodePropertyService, configuration);
+        var mutateStep = new SpeakerListenerLPAMutateStep(mutateNodePropertyService, configuration.nodeLabels(),configuration.mutateProperty());
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
             graphName,
@@ -347,7 +403,7 @@ public class CommunityAlgorithmsMutateModeBusinessFacade {
         HDBScanMutateConfig configuration,
         ResultBuilder<HDBScanMutateConfig, Labels, RESULT, NodePropertiesWritten> resultBuilder
     ) {
-        var mutateStep = new HDBScanMutateStep(mutateNodePropertyService, configuration);
+        var mutateStep = new HDBScanMutateStep(mutateNodePropertyService, configuration.nodeLabels(),configuration.mutateProperty());
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
             graphName,

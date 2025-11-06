@@ -17,46 +17,39 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.applications.algorithms.community;
+package org.neo4j.gds.community;
 
 import org.neo4j.gds.algorithms.community.CommunityCompanion;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
-import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
-import org.neo4j.gds.wcc.WccMutateConfig;
+import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutResult;
 
-class WccMutateStep implements MutateStep<DisjointSetStruct, NodePropertiesWritten> {
-    private final MutateNodePropertyService mutateNodePropertyService;
-    private final WccMutateConfig configuration;
+import java.util.Collection;
 
-    WccMutateStep(MutateNodePropertyService mutateNodePropertyService, WccMutateConfig configuration) {
-        this.mutateNodePropertyService = mutateNodePropertyService;
-        this.configuration = configuration;
+public class ApproxMaxKCutMutateStep implements MutateStep<ApproxMaxKCutResult, NodePropertiesWritten> {
+    private final SpecificCommunityMutateStep specificCommunityMutateStep;
+
+    public ApproxMaxKCutMutateStep(
+        MutateNodePropertyService mutateNodePropertyService,
+        Collection<String> labelsToUpdate,
+        String mutateProperty
+    ) {
+        this.specificCommunityMutateStep = new SpecificCommunityMutateStep(mutateNodePropertyService,labelsToUpdate,mutateProperty);
     }
 
     @Override
     public NodePropertiesWritten execute(
         Graph graph,
         GraphStore graphStore,
-        DisjointSetStruct result
+        ApproxMaxKCutResult result
     ) {
+        var longNodePropertyValues = NodePropertyValuesAdapter.adapt(result.candidateSolution());
+        var nodePropertyValues = CommunityCompanion.nodePropertyValues(false, longNodePropertyValues);
 
-        var  nodeProperties = CommunityCompanion.nodePropertyValues(
-            configuration.isIncremental(),
-            configuration.mutateProperty(),
-            configuration.seedProperty(),
-            configuration.consecutiveIds(),
-            result.asNodeProperties(),
-            () -> graphStore.nodeProperty(configuration.seedProperty()));
-
-        return mutateNodePropertyService.mutateNodeProperties(
-            graph,
-            graphStore,
-            configuration,
-            nodeProperties
-        );
+        return specificCommunityMutateStep.apply(graph,graphStore,nodePropertyValues);
     }
 }

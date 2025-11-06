@@ -17,39 +17,39 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.applications.algorithms.community;
+package org.neo4j.gds.community;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
-import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
-import org.neo4j.gds.triangle.LocalClusteringCoefficientMutateConfig;
-import org.neo4j.gds.triangle.LocalClusteringCoefficientResult;
+import org.neo4j.gds.k1coloring.K1ColoringResult;
 
-class LccMutateStep implements MutateStep<LocalClusteringCoefficientResult, NodePropertiesWritten> {
-    private final MutateNodePropertyService mutateNodePropertyService;
-    private final LocalClusteringCoefficientMutateConfig configuration;
+import java.util.Collection;
 
-    LccMutateStep(MutateNodePropertyService mutateNodePropertyService, LocalClusteringCoefficientMutateConfig configuration) {
-        this.mutateNodePropertyService = mutateNodePropertyService;
-        this.configuration = configuration;
+public class K1ColoringMutateStep implements MutateStep<K1ColoringResult, Void> {
+    private final SpecificCommunityMutateStep specificCommunityMutateStep;
+
+    public K1ColoringMutateStep(
+        MutateNodePropertyService mutateNodePropertyService,
+        Collection<String> labelsToUpdate,
+        String mutateProperty
+    ) {
+        this.specificCommunityMutateStep = new SpecificCommunityMutateStep(mutateNodePropertyService,labelsToUpdate,mutateProperty);
     }
 
+
     @Override
-    public NodePropertiesWritten execute(
+    public Void execute(
         Graph graph,
         GraphStore graphStore,
-        LocalClusteringCoefficientResult result
+        K1ColoringResult result
     ) {
-        var nodePropertyValues = NodePropertyValuesAdapter.adapt(result.localClusteringCoefficients());
+        var nodePropertyValues = NodePropertyValuesAdapter.adapt(result.colors());
 
-        return mutateNodePropertyService.mutateNodeProperties(
-            graph,
-            graphStore,
-            configuration,
-            nodePropertyValues
-        );
+        specificCommunityMutateStep.apply(graph,graphStore,nodePropertyValues);
+
+        return null;
     }
 }

@@ -17,27 +17,36 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.applications.algorithms.community;
+package org.neo4j.gds.community;
 
-import org.neo4j.gds.algorithms.community.CommunityCompanion;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
-import org.neo4j.gds.modularityoptimization.ModularityOptimizationMutateConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationResult;
 
-class ModularityOptimizationMutateStep implements MutateStep<ModularityOptimizationResult, NodePropertiesWritten> {
-    private final MutateNodePropertyService mutateNodePropertyService;
-    private final ModularityOptimizationMutateConfig configuration;
+import java.util.Collection;
 
-    ModularityOptimizationMutateStep(
+public class ModularityOptimizationMutateStep implements MutateStep<ModularityOptimizationResult, NodePropertiesWritten> {
+    private final SpecificCommunityMutateStep specificCommunityMutateStep;
+    private final StandardCommunityProperties standardCommunityProperties;
+
+    public ModularityOptimizationMutateStep(
         MutateNodePropertyService mutateNodePropertyService,
-        ModularityOptimizationMutateConfig configuration
+        Collection<String> labelsToUpdate,
+        String mutateProperty,
+        String seedProperty,
+        boolean isIncremental,
+        boolean consecutiveIds
     ) {
-        this.mutateNodePropertyService = mutateNodePropertyService;
-        this.configuration = configuration;
+        this.specificCommunityMutateStep = new SpecificCommunityMutateStep(mutateNodePropertyService,labelsToUpdate,mutateProperty);
+        this.standardCommunityProperties = new StandardCommunityProperties(
+            isIncremental,
+            seedProperty,
+            consecutiveIds,
+            mutateProperty
+        );
     }
 
     @Override
@@ -46,20 +55,12 @@ class ModularityOptimizationMutateStep implements MutateStep<ModularityOptimizat
         GraphStore graphStore,
         ModularityOptimizationResult result
     ) {
-        var nodePropertyValues = CommunityCompanion.nodePropertyValues(
-            configuration.isIncremental(),
-            configuration.mutateProperty(),
-            configuration.seedProperty(),
-            configuration.consecutiveIds(),
-            result.asNodeProperties(),
-            () -> graphStore.nodeProperty(configuration.seedProperty())
+        var nodePropertyValues = standardCommunityProperties.compute(
+            graphStore,
+            result.asNodeProperties()
         );
 
-        return mutateNodePropertyService.mutateNodeProperties(
-            graph,
-            graphStore,
-            configuration,
-            nodePropertyValues
-        );
+        return specificCommunityMutateStep.apply(graph,graphStore,nodePropertyValues);
+
     }
 }

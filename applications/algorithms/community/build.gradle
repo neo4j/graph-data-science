@@ -10,6 +10,7 @@ dependencies {
     implementation project(':algo-params-common')
     implementation project(":algorithms-machinery")
     implementation project(":community-configs")
+    implementation project(':community-mutate-steps')
     implementation project(":config-api")
     implementation project(":core")
     implementation project(":graph-schema-api")

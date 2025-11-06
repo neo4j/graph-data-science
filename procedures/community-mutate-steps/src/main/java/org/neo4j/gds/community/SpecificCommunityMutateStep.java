@@ -17,41 +17,49 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.applications.algorithms.community;
+package org.neo4j.gds.community;
 
-import org.neo4j.gds.algorithms.community.CommunityCompanion;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
+import org.neo4j.gds.api.properties.nodes.NodePropertyRecord;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
-import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
-import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutResult;
-import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutMutateConfig;
+import org.neo4j.gds.config.ElementTypeValidator;
 
-class ApproxMaxKCutMutateStep implements MutateStep<ApproxMaxKCutResult, NodePropertiesWritten> {
+import java.util.Collection;
+import java.util.List;
+
+ class SpecificCommunityMutateStep{
+
     private final MutateNodePropertyService mutateNodePropertyService;
-    private final ApproxMaxKCutMutateConfig configuration;
+    private final Collection<String> labelsToUpdate;
+    private final String mutateProperty;
 
-    ApproxMaxKCutMutateStep(MutateNodePropertyService mutateNodePropertyService, ApproxMaxKCutMutateConfig configuration) {
+    SpecificCommunityMutateStep(
+        MutateNodePropertyService mutateNodePropertyService,
+        Collection<String> labelsToUpdate,
+        String mutateProperty) {
+
         this.mutateNodePropertyService = mutateNodePropertyService;
-        this.configuration = configuration;
+        this.labelsToUpdate = labelsToUpdate;
+        this.mutateProperty = mutateProperty;
     }
 
-    @Override
-    public NodePropertiesWritten execute(
+     NodePropertiesWritten apply(
         Graph graph,
         GraphStore graphStore,
-        ApproxMaxKCutResult result
+         NodePropertyValues nodePropertyValues
     ) {
-        var longNodePropertyValues = NodePropertyValuesAdapter.adapt(result.candidateSolution());
-        var nodePropertyValues = CommunityCompanion.nodePropertyValues(false, longNodePropertyValues);
 
         return mutateNodePropertyService.mutateNodeProperties(
             graph,
             graphStore,
-            configuration,
-            nodePropertyValues
+            ElementTypeValidator.resolve(graphStore,labelsToUpdate),
+            List.of(NodePropertyRecord.of(mutateProperty,nodePropertyValues))
         );
     }
+
+
+
 }

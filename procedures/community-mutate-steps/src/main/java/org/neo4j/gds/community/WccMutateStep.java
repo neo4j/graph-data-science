@@ -17,43 +17,48 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.applications.algorithms.community;
+package org.neo4j.gds.community;
 
-import org.neo4j.gds.algorithms.community.CommunityCompanion;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
-import org.neo4j.gds.collections.ha.HugeLongArray;
-import org.neo4j.gds.scc.SccMutateConfig;
+import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 
-class SccMutateStep implements MutateStep<HugeLongArray, NodePropertiesWritten> {
-    private final MutateNodePropertyService mutateNodePropertyService;
-    private final SccMutateConfig configuration;
+import java.util.Collection;
 
-    SccMutateStep(MutateNodePropertyService mutateNodePropertyService, SccMutateConfig configuration) {
-        this.mutateNodePropertyService = mutateNodePropertyService;
-        this.configuration = configuration;
+public class WccMutateStep implements MutateStep<DisjointSetStruct, NodePropertiesWritten> {
+    private final SpecificCommunityMutateStep specificCommunityMutateStep;
+    private final StandardCommunityProperties standardCommunityProperties;
+
+    public WccMutateStep(
+        MutateNodePropertyService mutateNodePropertyService,
+        Collection<String> labelsToUpdate,
+        String mutateProperty,
+        String seedProperty,
+        boolean isIncremental,
+        boolean consecutiveIds
+    ) {
+        this.specificCommunityMutateStep = new SpecificCommunityMutateStep(mutateNodePropertyService,labelsToUpdate,mutateProperty);
+        this.standardCommunityProperties = new StandardCommunityProperties(
+            isIncremental,
+            seedProperty,
+            consecutiveIds,
+            mutateProperty
+        );
     }
 
     @Override
     public NodePropertiesWritten execute(
         Graph graph,
         GraphStore graphStore,
-        HugeLongArray result
+        DisjointSetStruct result
     ) {
-        var nodePropertyValues = CommunityCompanion.nodePropertyValues(
-            configuration.consecutiveIds(),
-            NodePropertyValuesAdapter.adapt(result)
-        );
-
-        return mutateNodePropertyService.mutateNodeProperties(
-            graph,
+        var nodePropertyValues = standardCommunityProperties.compute(
             graphStore,
-            configuration,
-            nodePropertyValues
+            result.asNodeProperties()
         );
+        return specificCommunityMutateStep.apply(graph,graphStore,nodePropertyValues);
     }
 }
