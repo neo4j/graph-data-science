@@ -21,10 +21,8 @@ package org.neo4j.gds.procedures.algorithms.community.stats;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.cliqueCounting.CliqueCountingResult;
-import org.neo4j.gds.procedures.algorithms.community.CliqueCountingStatsResult;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 
-import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;

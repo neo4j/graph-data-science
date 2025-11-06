@@ -242,7 +242,8 @@ public class Conductance extends Algorithm<ConductanceResult> {
 
         return new ConductanceResult(
             conductancesBuilder.build(),
-            globalConductanceSum.get() / globalValidCommunities.longValue()
+            globalConductanceSum.get() / globalValidCommunities.longValue(),
+            globalValidCommunities.longValue()
         );
     }
 
