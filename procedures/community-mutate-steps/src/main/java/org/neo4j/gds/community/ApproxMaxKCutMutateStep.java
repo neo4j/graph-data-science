@@ -32,7 +32,6 @@ import java.util.Collection;
 
 public class ApproxMaxKCutMutateStep implements MutateStep<ApproxMaxKCutResult, NodePropertiesWritten> {
     private final SpecificCommunityMutateStep specificCommunityMutateStep;
-
     public ApproxMaxKCutMutateStep(
         MutateNodePropertyService mutateNodePropertyService,
         Collection<String> labelsToUpdate,

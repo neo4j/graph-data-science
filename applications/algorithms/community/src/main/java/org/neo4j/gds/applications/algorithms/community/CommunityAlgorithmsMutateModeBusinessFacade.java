@@ -45,8 +45,12 @@ import org.neo4j.gds.community.LouvainMutateStep;
 import org.neo4j.gds.community.ModularityOptimizationMutateStep;
 import org.neo4j.gds.community.SccMutateStep;
 import org.neo4j.gds.community.SpeakerListenerLPAMutateStep;
+import org.neo4j.gds.community.StandardCommunityProperties;
 import org.neo4j.gds.community.TriangleCountMutateStep;
 import org.neo4j.gds.community.WccMutateStep;
+import org.neo4j.gds.config.ConsecutiveIdsConfig;
+import org.neo4j.gds.config.MutateNodePropertyConfig;
+import org.neo4j.gds.config.SeedConfig;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.hdbscan.HDBScanMutateConfig;
 import org.neo4j.gds.hdbscan.Labels;
@@ -200,13 +204,13 @@ public class CommunityAlgorithmsMutateModeBusinessFacade {
         LabelPropagationMutateConfig configuration,
         ResultBuilder<LabelPropagationMutateConfig, LabelPropagationResult, RESULT, NodePropertiesWritten> resultBuilder
     ) {
+        var standardCommunitiesProperties =  createNodePropertyCalculator(configuration);
+
         var mutateStep = new LabelPropagationMutateStep(
             mutateNodePropertyService,
             configuration.nodeLabels(),
             configuration.mutateProperty(),
-            configuration.seedProperty(),
-            configuration.isIncremental(),
-            configuration.consecutiveIds()
+            standardCommunitiesProperties
         );
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
@@ -243,13 +247,14 @@ public class CommunityAlgorithmsMutateModeBusinessFacade {
         LeidenMutateConfig configuration,
         ResultBuilder<LeidenMutateConfig, LeidenResult, RESULT, Pair<NodePropertiesWritten, NodePropertyValues>> resultBuilder
     ) {
+
+        var standardCommunitiesProperties =  createNodePropertyCalculator(configuration);
+
         var mutateStep = new LeidenMutateStep(
             mutateNodePropertyService,
             configuration.nodeLabels(),
             configuration.mutateProperty(),
-            configuration.seedProperty(),
-            configuration.isIncremental(),
-            configuration.consecutiveIds(),
+            standardCommunitiesProperties,
             configuration.includeIntermediateCommunities()
         );
 
@@ -269,13 +274,14 @@ public class CommunityAlgorithmsMutateModeBusinessFacade {
         LouvainMutateConfig configuration,
         ResultBuilder<LouvainMutateConfig, LouvainResult, RESULT, NodePropertiesWritten> resultBuilder
     ) {
+
+        var standardCommunitiesProperties =  createNodePropertyCalculator(configuration);
+
         var mutateStep = new LouvainMutateStep(
             mutateNodePropertyService,
             configuration.nodeLabels(),
             configuration.mutateProperty(),
-            configuration.seedProperty(),
-            configuration.isIncremental(),
-            configuration.consecutiveIds(),
+            standardCommunitiesProperties,
             configuration.includeIntermediateCommunities()
         );
 
@@ -295,13 +301,13 @@ public class CommunityAlgorithmsMutateModeBusinessFacade {
         ModularityOptimizationMutateConfig configuration,
         ResultBuilder<ModularityOptimizationMutateConfig, ModularityOptimizationResult, RESULT, NodePropertiesWritten> resultBuilder
     ) {
+        var standardCommunitiesProperties =  createNodePropertyCalculator(configuration);
+
         var mutateStep = new ModularityOptimizationMutateStep(
             mutateNodePropertyService,
             configuration.nodeLabels(),
             configuration.mutateProperty(),
-            configuration.seedProperty(),
-            configuration.isIncremental(),
-            configuration.consecutiveIds()
+            standardCommunitiesProperties
         );
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
@@ -361,13 +367,14 @@ public class CommunityAlgorithmsMutateModeBusinessFacade {
         WccMutateConfig configuration,
         ResultBuilder<WccMutateConfig, DisjointSetStruct, RESULT, NodePropertiesWritten> resultBuilder
     ) {
+        var standardCommunitiesProperties =  createNodePropertyCalculator(configuration);
+
         var mutateStep = new WccMutateStep(
             mutateNodePropertyService,
             configuration.nodeLabels(),
             configuration.mutateProperty(),
-            configuration.seedProperty(),
-            configuration.isIncremental(),
-            configuration.consecutiveIds());
+            standardCommunitiesProperties
+        );
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
             graphName,
@@ -413,6 +420,15 @@ public class CommunityAlgorithmsMutateModeBusinessFacade {
             (graph, __) -> algorithms.hdbscan(graph, configuration),
             mutateStep,
             resultBuilder
+        );
+    }
+
+    static <C extends MutateNodePropertyConfig & SeedConfig & ConsecutiveIdsConfig> StandardCommunityProperties createNodePropertyCalculator(C config){
+        return new StandardCommunityProperties(
+            config.isIncremental(),
+            config.seedProperty(),
+            config.consecutiveIds(),
+            config.mutateProperty()
         );
     }
 

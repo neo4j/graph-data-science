@@ -37,17 +37,10 @@ public class LabelPropagationMutateStep implements MutateStep<LabelPropagationRe
         MutateNodePropertyService mutateNodePropertyService,
         Collection<String> labelsToUpdate,
         String mutateProperty,
-        String seedProperty,
-        boolean isIncremental,
-        boolean consecutiveIds
+        StandardCommunityProperties standardCommunityProperties
     ) {
         this.specificCommunityMutateStep = new SpecificCommunityMutateStep(mutateNodePropertyService,labelsToUpdate,mutateProperty);
-        this.standardCommunityProperties = new StandardCommunityProperties(
-            isIncremental,
-            seedProperty,
-            consecutiveIds,
-            mutateProperty
-        );
+        this.standardCommunityProperties = standardCommunityProperties;
     }
 
     @Override

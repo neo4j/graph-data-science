@@ -36,18 +36,12 @@ public class ModularityOptimizationMutateStep implements MutateStep<ModularityOp
         MutateNodePropertyService mutateNodePropertyService,
         Collection<String> labelsToUpdate,
         String mutateProperty,
-        String seedProperty,
-        boolean isIncremental,
-        boolean consecutiveIds
+        StandardCommunityProperties standardCommunityProperties
     ) {
         this.specificCommunityMutateStep = new SpecificCommunityMutateStep(mutateNodePropertyService,labelsToUpdate,mutateProperty);
-        this.standardCommunityProperties = new StandardCommunityProperties(
-            isIncremental,
-            seedProperty,
-            consecutiveIds,
-            mutateProperty
-        );
+        this.standardCommunityProperties = standardCommunityProperties;
     }
+
 
     @Override
     public NodePropertiesWritten execute(

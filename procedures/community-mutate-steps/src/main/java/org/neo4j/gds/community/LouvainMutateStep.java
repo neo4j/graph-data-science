@@ -40,18 +40,11 @@ public class LouvainMutateStep implements MutateStep<LouvainResult, NodeProperti
         MutateNodePropertyService mutateNodePropertyService,
         Collection<String> labelsToUpdate,
         String mutateProperty,
-        String seedProperty,
-        boolean isIncremental,
-        boolean consecutiveIds,
+        StandardCommunityProperties standardCommunityProperties,
         boolean includeIntermediateCommunities
     ) {
         this.specificCommunityMutateStep = new SpecificCommunityMutateStep(mutateNodePropertyService,labelsToUpdate,mutateProperty);
-        this.standardCommunityProperties = new StandardCommunityProperties(
-            isIncremental,
-            seedProperty,
-            consecutiveIds,
-            mutateProperty
-        );
+        this.standardCommunityProperties = standardCommunityProperties;
         this.includeIntermediateCommunities = includeIntermediateCommunities;
     }
 

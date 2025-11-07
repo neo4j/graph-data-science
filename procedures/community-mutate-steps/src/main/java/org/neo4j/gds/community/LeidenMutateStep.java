@@ -41,18 +41,11 @@ public class LeidenMutateStep implements MutateStep<LeidenResult, Pair<NodePrope
         MutateNodePropertyService mutateNodePropertyService,
         Collection<String> labelsToUpdate,
         String mutateProperty,
-        String seedProperty,
-        boolean isIncremental,
-        boolean consecutiveIds,
+        StandardCommunityProperties standardCommunityProperties,
         boolean includeIntermediateCommunities
     ) {
         this.specificCommunityMutateStep = new SpecificCommunityMutateStep(mutateNodePropertyService,labelsToUpdate,mutateProperty);
-        this.standardCommunityProperties = new StandardCommunityProperties(
-            isIncremental,
-            seedProperty,
-            consecutiveIds,
-            mutateProperty
-        );
+        this.standardCommunityProperties = standardCommunityProperties;
         this.includeIntermediateCommunities = includeIntermediateCommunities;
     }
     @Override

@@ -24,14 +24,14 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 
- class StandardCommunityProperties {
+ public class StandardCommunityProperties {
 
     private final boolean isIncremental;
     private final String seedProperty;
     private final boolean consecutiveIds;
     private final String resultProperty;
 
-    StandardCommunityProperties(
+     public  StandardCommunityProperties(
         boolean isIncremental,
         String seedProperty,
         boolean consecutiveIds,

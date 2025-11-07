@@ -101,7 +101,6 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
     private final CloseableResourceRegistry closeableResourceRegistry;
     private final ProcedureReturnColumns procedureReturnColumns;
 
-
     private final CommunityAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade;
     private final CommunityAlgorithmsStatsModeBusinessFacade statsModeBusinessFacade;
     private final CommunityAlgorithmsStreamModeBusinessFacade streamModeBusinessFacade;
@@ -1586,4 +1585,5 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
 
         return Stream.of(estimationModeBusinessFacade.hdbscan(parsedConfig, graphNameOrConfiguration));
     }
+
 }
