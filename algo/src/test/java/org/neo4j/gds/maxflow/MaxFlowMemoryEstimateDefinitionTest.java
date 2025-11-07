@@ -85,9 +85,9 @@ class MaxFlowMemoryEstimateDefinitionTest {
     @CsvSource(
         {
             "1_000,false, 214_336",
-            "1_000,true,  242_488",
+            "1_000,true,  222_424",
             "10_000,false, 2_133_608",
-            "10_000,true,  2_413_760"
+            "10_000,true,  2_213_696"
         }
     )
     void shouldEstimateMemoryGap(long nodeAndRelCount, boolean useGap, long expected){

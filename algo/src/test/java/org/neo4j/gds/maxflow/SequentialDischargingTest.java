@@ -82,8 +82,8 @@ class SequentialDischargingTest {
             workingQueue,
             inWorkingQueue,
             null,
+            new GapDetector.Noop(),
             1000,
-            false,
             0,
             0,
             ProgressTracker.NULL_TRACKER
@@ -152,8 +152,8 @@ class SequentialDischargingTest {
             workingQueue,
             inWorkingQueue,
             null,
+            new GapDetector.Noop(),
             1000,
-            false,
             0,
             0,
             ProgressTracker.NULL_TRACKER
@@ -194,4 +194,3 @@ class SequentialDischargingTest {
     }
 
 }
-

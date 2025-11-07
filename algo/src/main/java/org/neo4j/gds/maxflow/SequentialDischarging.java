@@ -57,8 +57,8 @@ class SequentialDischarging {
         HugeLongArrayQueue workingQueue,
         BitSet inWorkingQueue,
         GlobalRelabeling globalRelabeling,
+        GapDetector gapDetector,
         double freq,
-        boolean useGapRelabelling,
         double excessAtDestinations,
         double totalExcess,
         ProgressTracker progressTracker
@@ -69,13 +69,13 @@ class SequentialDischarging {
         this.workingQueue = workingQueue;
         this.inWorkingQueue = inWorkingQueue;
         this.globalRelabeling = globalRelabeling;
+        this.gapDetector = gapDetector;
         this.freq = freq;
         this.excessAtDestinations = excessAtDestinations;
         this.totalExcess = totalExcess;
         this.progressTracker = progressTracker;
         this.filteredNeighbors = new Arc[(int) LongRange.of(0L, flowGraph.nodeCount()-1).toLongStream().map(flowGraph::degree).max().getAsLong()]; //max (in+out)degree instead (theoretically IntMax + IntMax)
         this.workSinceLastGR = 0L;
-        this.gapDetector = GapFactory.create(useGapRelabelling,flowGraph.nodeCount(),this.label);
     }
 
     void dischargeUntilDone() {
@@ -97,25 +97,35 @@ class SequentialDischarging {
 
     void discharge(long v) {
         var oldLabel = label.get(v);
-        if(oldLabel >= flowGraph.nodeCount()) { //last check only used by gap-heuristic
+        if(oldLabel >= flowGraph.nodeCount()) { //only used by gap-heuristic (if gap-relabeled after added to workingQueue)
             return;
         }
 
         var idx = new MutableInt(0);
+        var sLabel = oldLabel;
         flowGraph.forEachRelationship(
             v, (s, t, relIdx, residualCapacity, isReverse) -> {
-                if (residualCapacity > 0 && label.get(t) < flowGraph.nodeCount()) {
-                    filteredNeighbors[idx.getAndIncrement()] = new Arc(t, relIdx, residualCapacity, label.get(t), isReverse);
+                if (residualCapacity > 0) {
+                    var tLabel = label.get(t);
+                    if(tLabel == (sLabel - 1)) {
+                        return !pushAndCheckIfEmpty(s, t, relIdx, residualCapacity, isReverse);
+                    }
+                    else if (tLabel < flowGraph.nodeCount()) {
+                        filteredNeighbors[idx.getAndIncrement()] = new Arc(t, relIdx, residualCapacity, tLabel, isReverse);
+                    }
                 }
                 return true;
             }
         );
+        if(excess.get(v) < TOLERANCE) {
+            workSinceLastGR += flowGraph.outDegree(v) + BETA;
+            return;
+        }
+
         Arrays.sort(filteredNeighbors, 0, idx.intValue(), Comparator.comparing(Arc::label));
 
         for (var i = 0; i < idx.intValue(); i++) {
-
             var arc = filteredNeighbors[i];
-            var t = arc.t();
 
             var newLabel = arc.label() + 1;
             if (newLabel > oldLabel) { //same as !=
@@ -127,26 +137,28 @@ class SequentialDischarging {
                 oldLabel = newLabel;
             }
 
-            var delta = Math.min(excess.get(v), arc.residualCapacity());
-            flowGraph.push(arc.relIdx(), delta, arc.isReverse());
-            excess.addTo(v, -delta);
-            excess.addTo(t, delta);
-
-            if(arc.label() == 0) {
-                progressTracker.logProgress((long) ( Math.ceil((excessAtDestinations+delta) * progressTracker.currentVolume() / totalExcess) - Math.ceil(excessAtDestinations * progressTracker.currentVolume() / totalExcess) ));
-                excessAtDestinations += delta;
-            } else if(!inWorkingQueue.getAndSet(t)) {
-                workingQueue.add(t);
-            }
-
-            if(excess.get(v) < TOLERANCE) {
-                break;
+            if(pushAndCheckIfEmpty(v, arc.t(), arc.relIdx(), arc.residualCapacity(), arc.isReverse())) {
+                workSinceLastGR += flowGraph.outDegree(v) + BETA;
+                return;
             }
         }
-        workSinceLastGR += flowGraph.outDegree(v) + BETA;
     }
 
 
+    private boolean pushAndCheckIfEmpty(long s, long t, long relIdx, double residualCapacity, boolean isReverse) {
+        var delta = Math.min(excess.get(s), residualCapacity);
+        flowGraph.push(relIdx, delta, isReverse);
+        excess.addTo(s, -delta);
+        excess.addTo(t, delta);
+        if(label.get(t) == 0) {
+            progressTracker.logProgress((long) ( Math.ceil((excessAtDestinations+delta) * progressTracker.currentVolume() / totalExcess) - Math.ceil(excessAtDestinations * progressTracker.currentVolume() / totalExcess) ));
+            excessAtDestinations += delta;
+        } else if(!inWorkingQueue.getAndSet(t)) {
+            workingQueue.add(t);
+        }
+
+        return excess.get(s) < TOLERANCE; //empties
+    }
 
 
     record Arc(long t, long relIdx, double residualCapacity, long label, boolean isReverse) {}

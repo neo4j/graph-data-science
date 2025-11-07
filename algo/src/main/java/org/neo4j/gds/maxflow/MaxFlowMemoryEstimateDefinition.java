@@ -31,7 +31,6 @@ import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryEstimations;
 import org.neo4j.gds.mem.MemoryRange;
 
-import java.util.TreeSet;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -47,44 +46,64 @@ public class MaxFlowMemoryEstimateDefinition implements MemoryEstimateDefinition
         this.useGap = useGap;
     }
 
-    private MemoryEstimation atomicWorkingSet(){
+    private MemoryEstimation atomicWorkingSet() {
         return MemoryEstimations.builder(AtomicWorkingSet.class)
             .perNode("working set", HugeLongArray::memoryEstimation)
             .build();
 
     }
-    private MemoryEstimation globalRelabellingTask(){
+
+    private MemoryEstimation globalRelabellingTask() {
         return MemoryEstimations.builder(GlobalRelabellingBFSTask.class).build();
     }
-    private MemoryEstimation globalRelabelling(){
+
+    private MemoryEstimation globalRelabelling() {
         return MemoryEstimations.builder(GlobalRelabeling.class)
-            .perThread("Global Relabelling task",globalRelabellingTask())
-            .perGraphDimension("thread queues", (dimensions,concurrency)-> MemoryRange.of(dimensions.nodeCount() * concurrency.value()))
-            .add("frontier",atomicWorkingSet())
-            .perNode("isDiscovered",HugeAtomicBitSet::memoryEstimation)
+            .perThread("Global Relabelling task", globalRelabellingTask())
+            .perGraphDimension(
+                "thread queues",
+                (dimensions, concurrency) -> MemoryRange.of(dimensions.nodeCount() * concurrency.value())
+            )
+            .add("frontier", atomicWorkingSet())
+            .perNode("isDiscovered", HugeAtomicBitSet::memoryEstimation)
             .build();
     }
 
-    private MemoryEstimation flowGraph(){
-        BiFunction<GraphDimensions, Function<Long,Long>,MemoryRange> relConsumer =
+    private MemoryEstimation flowGraph() {
+        BiFunction<GraphDimensions, Function<Long, Long>, MemoryRange> relConsumer =
             ((graphDimensions, longMemoryRangeFunction) -> {
                 var newRel = graphDimensions.relCountUpperBound() + numberOfSinks + numberOfTerminals;
-                return  MemoryRange.of(longMemoryRangeFunction.apply(newRel));
+                return MemoryRange.of(longMemoryRangeFunction.apply(newRel));
             });
-        BiFunction<GraphDimensions, Function<Long,Long>,MemoryRange> nodeConsumer =
+        BiFunction<GraphDimensions, Function<Long, Long>, MemoryRange> nodeConsumer =
             ((graphDimensions, longMemoryRangeFunction) -> {
                 var newNodes = graphDimensions.nodeCount() + 2;
-                return  MemoryRange.of(longMemoryRangeFunction.apply(newNodes));
+                return MemoryRange.of(longMemoryRangeFunction.apply(newNodes));
             });
 
         //skip revDegree array during construction because it is used only during construction
         return MemoryEstimations.builder(FlowGraph.class)
             .perNode("index offset", HugeLongArray::memoryEstimation)
-            .perGraphDimension("flow",((dimensions, ___) -> relConsumer.apply(dimensions, HugeDoubleArray::memoryEstimation)))
-            .perGraphDimension("capacity",((dimensions, ___) -> relConsumer.apply(dimensions, HugeDoubleArray::memoryEstimation)))
-            .perGraphDimension("reverse adjacency",((dimensions, ___) -> relConsumer.apply(dimensions, HugeLongArray::memoryEstimation)))
-            .perGraphDimension("reverse index",((dimensions, ___) -> relConsumer.apply(dimensions, HugeLongArray::memoryEstimation)))
-            .perGraphDimension("reverse offset",((dimensions, ___) -> nodeConsumer.apply(dimensions, HugeLongArray::memoryEstimation)))
+            .perGraphDimension(
+                "flow",
+                ((dimensions, ___) -> relConsumer.apply(dimensions, HugeDoubleArray::memoryEstimation))
+            )
+            .perGraphDimension(
+                "capacity",
+                ((dimensions, ___) -> relConsumer.apply(dimensions, HugeDoubleArray::memoryEstimation))
+            )
+            .perGraphDimension(
+                "reverse adjacency",
+                ((dimensions, ___) -> relConsumer.apply(dimensions, HugeLongArray::memoryEstimation))
+            )
+            .perGraphDimension(
+                "reverse index",
+                ((dimensions, ___) -> relConsumer.apply(dimensions, HugeLongArray::memoryEstimation))
+            )
+            .perGraphDimension(
+                "reverse offset",
+                ((dimensions, ___) -> nodeConsumer.apply(dimensions, HugeLongArray::memoryEstimation))
+            )
 
             .build();
     }
@@ -101,37 +120,30 @@ public class MaxFlowMemoryEstimateDefinition implements MemoryEstimateDefinition
                 })
             ).build();
     }
+
     private MemoryEstimation gap() {
-        var treeSetSize = Estimate.sizeOfInstance(TreeSet.class);
-        return MemoryEstimations.builder(TreeSetGapDetector.class)
-            .rangePerGraphDimension("treesets", (dimensions, ___)->
-                {
-                    //this is a hacky approximation: amount the cost of each treeset and the overall cost of all nodes stored
-                    //should akin to full array
-                    long arrayCost = HugeObjectArray.memoryEstimation(
-                        dimensions.nodeCount() + 2,
-                        treeSetSize
-                    );
-                    long treeCost = Estimate.sizeOfLongArray(dimensions.nodeCount());
-                    return MemoryRange.of(
-                        arrayCost + treeCost
-                    );
-                }
-            ).build();
+        return MemoryEstimations.builder(ParallelGapDetector.class)
+            .rangePerGraphDimension(
+                "gapRelabeling",
+                (dimensions, ___) -> MemoryRange.of(HugeLongArray.memoryEstimation(dimensions.nodeCount() + 2))
+            )
+            .build();
     }
 
-    private MemoryEstimation discharging(){
-        var memoryBuilder= MemoryEstimations.builder(SequentialDischarging.class)
+    private MemoryEstimation discharging() {
+        var memoryBuilder = MemoryEstimations.builder(SequentialDischarging.class)
             .perNode("queue", HugeLongArrayQueue::memoryEstimation)
             .perNode("in queue", Estimate::sizeOfBitset)
-            .rangePerGraphDimension("filteredEdges",(dimensions, ___) ->{
-                //this is very loose: we consider a supernode where everyone is connected to a single node in both directions
-                var arcSize = Estimate.sizeOfInstance(SequentialDischarging.Arc.class);
-                var approximateMemory = HugeObjectArray.memoryEstimation(dimensions.nodeCount()*2, arcSize);
-                return  MemoryRange.of(approximateMemory);
-            });
+            .rangePerGraphDimension(
+                "filteredEdges", (dimensions, ___) -> {
+                    //this is very loose: we consider a supernode where everyone is connected to a single node in both directions
+                    var arcSize = Estimate.sizeOfInstance(SequentialDischarging.Arc.class);
+                    var approximateMemory = HugeObjectArray.memoryEstimation(dimensions.nodeCount() * 2, arcSize);
+                    return MemoryRange.of(approximateMemory);
+                }
+            );
 
-        if (useGap){
+        if (useGap) {
             memoryBuilder.add("gap heuristic", gap());
         }
 
@@ -144,7 +156,7 @@ public class MaxFlowMemoryEstimateDefinition implements MemoryEstimateDefinition
         return MemoryEstimations.builder(MaxFlow.class)
             .fixed("supply", Estimate.sizeOfInstance(NodeWithValue.class) * numberOfSinks)
             .fixed("demand", Estimate.sizeOfInstance(NodeWithValue.class) * numberOfTerminals)
-            .add("flowGraph",flowGraph())
+            .add("flowGraph", flowGraph())
             .add("Discharging", discharging())
             .add("Global relabelling", globalRelabelling())
             .add("result", flowResult())

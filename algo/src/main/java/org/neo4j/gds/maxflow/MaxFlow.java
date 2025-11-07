@@ -104,6 +104,8 @@ public final class MaxFlow extends Algorithm<FlowResult> {
             terminationFlag
         );
 
+        var gapDetector = GapFactory.create(parameters.useGapRelabelling(), nodeCount, label, parameters.concurrency());
+
         var discharging = new SequentialDischarging(
             flowGraph,
             excess,
@@ -111,8 +113,8 @@ public final class MaxFlow extends Algorithm<FlowResult> {
             workingQueue,
             inWorkingQueue,
             globalRelabeling,
+            gapDetector,
             parameters.freq(),
-            parameters.useGapRelabelling(),
             excessAtDestinations,
             totalExcess,
             progressTracker

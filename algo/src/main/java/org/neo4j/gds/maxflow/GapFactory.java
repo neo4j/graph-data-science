@@ -20,13 +20,14 @@
 package org.neo4j.gds.maxflow;
 
 import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.core.concurrency.Concurrency;
 
 public class GapFactory {
     
-    static GapDetector create(boolean useGap, long nodeCount, HugeLongArray labels){
+    static GapDetector create(boolean useGap, long nodeCount, HugeLongArray labels, Concurrency concurrency) {
         if (useGap){
-            return  new TreeSetGapDetector(labels,nodeCount);
-        }else{
+            return new ParallelGapDetector(labels, nodeCount, concurrency);
+        } else{
             return new GapDetector.Noop();
         }
     }
