@@ -37,7 +37,7 @@ public class CypherNodeLabelTokens {
     }
 
     public static NodeLabelToken of(TextArray textArray) {
-        return new Sequence<>(textArray, TextArray::stringValue);
+        return new Sequence<>(textArray, (textArray2,pos) -> textArray2.stringValue(pos).stringValue());
     }
 
     public static @NotNull NodeLabelToken of(SequenceValue nodeLabels) {
