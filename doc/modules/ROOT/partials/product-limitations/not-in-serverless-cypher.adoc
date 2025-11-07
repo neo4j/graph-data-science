@@ -1,0 +1,5 @@
+[CAUTION]
+====
+In Aura Graph Analytics, this feature is available only via the link:{gds-client-docs-base-uri}/current/graph-analytics-serverless/[Python client].
+It is xref:aura-graph-analytics/cypher.adoc#limitations[not currently available] as a Cypher procedure or function.
+====

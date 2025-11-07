@@ -5,7 +5,7 @@
 :result: path in traversal order
 :algorithm: Breadth First Search
 
-include::partial$/product-limitations/not-in-serverless.adoc[]
+include::partial$/product-limitations/not-in-serverless-cypher.adoc[]
 
 :directed:
 :undirected:

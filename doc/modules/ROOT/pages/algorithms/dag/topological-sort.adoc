@@ -5,7 +5,7 @@
 :result: topological sorting of the nodes
 :algorithm: Topological Sort
 
-include::partial$/product-limitations/not-in-serverless.adoc[]
+include::partial$/product-limitations/not-in-serverless-cypher.adoc[]
 
 :directed:
 :undirected-unsupported:

@@ -5,7 +5,7 @@
 :result: the distance of the longeset path
 :algorithm: DAG Longest Path
 
-include::partial$/product-limitations/not-in-serverless.adoc[]
+include::partial$/product-limitations/not-in-serverless-cypher.adoc[]
 
 
 :directed:

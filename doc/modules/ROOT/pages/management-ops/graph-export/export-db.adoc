@@ -3,7 +3,7 @@
 
 include::partial$/common-usage/not-on-aurads-note.adoc[]
 
-include::partial$/product-limitations/not-in-serverless.adoc[]
+include::partial$/product-limitations/not-in-serverless-cypher.adoc[]
 
 We can create new Neo4j databases from projected graphs stored in the graph catalog.
 All nodes, relationships and properties present in the projected graph are written to a new Neo4j database.

@@ -7,7 +7,7 @@
 :result: modularity
 :algorithm: Modularity Metric
 
-include::partial$/product-limitations/not-in-serverless.adoc[]
+include::partial$/product-limitations/not-in-serverless-cypher.adoc[]
 
 :directed:
 :undirected:

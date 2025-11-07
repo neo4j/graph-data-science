@@ -1,4 +1,4 @@
 [CAUTION]
 ====
-This feature is xref:aura-graph-analytics/cypher.adoc#limitations[not available] as a Cypher procedure or function in Aura Graph Analytics.
+This feature is not available in Aura Graph Analytics.
 ====
