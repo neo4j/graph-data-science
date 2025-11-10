@@ -25,8 +25,10 @@ import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService
 import org.neo4j.gds.cliquecounting.CliqueCountingMutateConfig;
 import org.neo4j.gds.community.CommunityComputeBusinessFacade;
 import org.neo4j.gds.k1coloring.K1ColoringMutateConfig;
+import org.neo4j.gds.kcore.KCoreDecompositionMutateConfig;
 import org.neo4j.gds.procedures.algorithms.community.CliqueCountingMutateResult;
 import org.neo4j.gds.procedures.algorithms.community.K1ColoringMutateResult;
+import org.neo4j.gds.procedures.algorithms.community.KCoreDecompositionMutateResult;
 import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
 
 import java.util.Map;
@@ -94,9 +96,9 @@ public class PushbackCommunityMutateProcedureFacade {
             )
         ).join();
     }
-    /*
-    public Stream<KCoreDecompositionStatsResult> kCore(String graphName, Map<String, Object> configuration) {
-        var config = configurationParser.parseConfiguration(configuration, KCoreDecompositionStatsConfig::of);
+
+    public Stream<KCoreDecompositionMutateResult> kCore(String graphName, Map<String, Object> configuration) {
+        var config = configurationParser.parseConfiguration(configuration, KCoreDecompositionMutateConfig::of);
 
         return businessFacade.kCoreDecomposition(
             GraphName.parse(graphName),
@@ -104,10 +106,16 @@ public class PushbackCommunityMutateProcedureFacade {
             config.toParameters(),
             config.jobId(),
             config.logProgress(),
-            graphResources -> new KCoreStatsResultTransformer(config.toMap())
+            graphResources -> new KCoreMutateResultTransformer(
+                config.toMap(),
+                mutateNodePropertyService,
+                config.nodeLabels(),
+                config.mutateProperty(),
+                graphResources.graph(),
+                graphResources.graphStore())
         ).join();
     }
-
+    /*
     public Stream<KmeansStatsResult> kMeans(String graphName, Map<String, Object> configuration) {
         var config = configurationParser.parseConfiguration(configuration, KmeansStatsConfig::of);
 

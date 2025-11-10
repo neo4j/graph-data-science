@@ -200,7 +200,7 @@ public class PushbackCommunityProcedureFacade implements  CommunityProcedureFaca
 
     @Override
     public Stream<KCoreDecompositionMutateResult> kCoreMutate(String graphName, Map<String, Object> rawConfiguration) {
-        return Stream.empty();
+        return mutateProcedureFacade.kCore(graphName,rawConfiguration);
     }
 
     @Override
