@@ -55,7 +55,6 @@ class WccStatsResultTransformerTest {
                     assertThat(stats.componentDistribution()).containsKey("p99");
                 }
             );
-
     }
 
 }

@@ -629,7 +629,7 @@ public class PushbackCommunityProcedureFacade implements  CommunityProcedureFaca
 
     @Override
     public Stream<SccMutateResult> sccMutate(String graphName, Map<String, Object> rawConfiguration) {
-        return Stream.empty();
+        return mutateProcedureFacade.scc(graphName,rawConfiguration);
     }
 
     @Override
@@ -746,7 +746,7 @@ public class PushbackCommunityProcedureFacade implements  CommunityProcedureFaca
 
     @Override
     public Stream<WccMutateResult> wccMutate(String graphName, Map<String, Object> rawConfiguration) {
-        return Stream.empty();
+        return mutateProcedureFacade.wcc(graphName,rawConfiguration);
     }
 
     @Override

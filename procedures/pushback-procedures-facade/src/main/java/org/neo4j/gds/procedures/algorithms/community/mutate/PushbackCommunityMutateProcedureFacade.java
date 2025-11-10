@@ -24,6 +24,10 @@ import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.cliquecounting.CliqueCountingMutateConfig;
 import org.neo4j.gds.community.CommunityComputeBusinessFacade;
+import org.neo4j.gds.community.StandardCommunityProperties;
+import org.neo4j.gds.config.ConsecutiveIdsConfig;
+import org.neo4j.gds.config.MutateNodePropertyConfig;
+import org.neo4j.gds.config.SeedConfig;
 import org.neo4j.gds.hdbscan.HDBScanMutateConfig;
 import org.neo4j.gds.k1coloring.K1ColoringMutateConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionMutateConfig;
@@ -35,12 +39,17 @@ import org.neo4j.gds.procedures.algorithms.community.KCoreDecompositionMutateRes
 import org.neo4j.gds.procedures.algorithms.community.KMeansMutateResult;
 import org.neo4j.gds.procedures.algorithms.community.KmeansStatisticsComputationInstructions;
 import org.neo4j.gds.procedures.algorithms.community.LocalClusteringCoefficientMutateResult;
+import org.neo4j.gds.procedures.algorithms.community.SccMutateResult;
 import org.neo4j.gds.procedures.algorithms.community.SpeakerListenerLPAMutateResult;
 import org.neo4j.gds.procedures.algorithms.community.TriangleCountMutateResult;
+import org.neo4j.gds.procedures.algorithms.community.WccMutateResult;
+import org.neo4j.gds.procedures.algorithms.community.stats.ProcedureStatisticsComputationInstructions;
 import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
+import org.neo4j.gds.scc.SccMutateConfig;
 import org.neo4j.gds.sllpa.SpeakerListenerLPAConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientMutateConfig;
 import org.neo4j.gds.triangle.TriangleCountMutateConfig;
+import org.neo4j.gds.wcc.WccMutateConfig;
 
 import java.util.Map;
 import java.util.stream.Stream;
@@ -230,9 +239,67 @@ public class PushbackCommunityMutateProcedureFacade {
                 config.nodeLabels(),
                 config.mutateProperty(),
                 graphResources.graph(),
-                graphResources.graphStore())
+                graphResources.graphStore()
+            )
         ).join();
     }
+
+    public Stream<SccMutateResult> scc(String graphName, Map<String, Object> configuration) {
+        var config = configurationParser.parseConfiguration(configuration, SccMutateConfig::of);
+
+        var statisticsInstructions =  ProcedureStatisticsComputationInstructions.forComponents(procedureReturnColumns);
+
+        var parameters = config.toParameters();
+        return businessFacade.scc(
+            GraphName.parse(graphName),
+            config.toGraphParameters(),
+            parameters,
+            config.jobId(),
+            config.logProgress(),
+            (graphResources)-> new SccMutateResultTransformer(
+                config.toMap(),
+                config.consecutiveIds(),
+                statisticsInstructions,
+                parameters.concurrency(),
+                mutateNodePropertyService,
+                config.nodeLabels(),
+                config.mutateProperty(),
+                graphResources.graph(),
+                graphResources.graphStore()
+            )
+        ).join();
+    }
+
+    public Stream<WccMutateResult> wcc(String graphName, Map<String, Object> configuration) {
+        var config = configurationParser.parseConfiguration(configuration, WccMutateConfig::of);
+
+        var statisticsInstructions =  ProcedureStatisticsComputationInstructions.forComponents(procedureReturnColumns);
+
+        var parameters = config.toParameters();
+
+        var standardCommunityProperties = createNodePropertyCalculator(config);
+
+        return businessFacade.wcc(
+            GraphName.parse(graphName),
+            config.toGraphParameters(),
+            config.relationshipWeightProperty(),
+            parameters,
+            config.jobId(),
+            config.logProgress(),
+            (graphResources)-> new WccMutateResultTransformer(
+                config.toMap(),
+                statisticsInstructions,
+                parameters.concurrency(),
+                mutateNodePropertyService,
+                config.nodeLabels(),
+                config.mutateProperty(),
+                graphResources.graph(),
+                graphResources.graphStore(),
+                standardCommunityProperties
+            )
+        ).join();
+    }
+
 
     /*
     public Stream<LabelPropagationMutateResult> labelPropagation(String graphName, Map<String, Object> configuration) {
@@ -302,41 +369,15 @@ public class PushbackCommunityMutateProcedureFacade {
             graphResources -> new ModularityOptimizationMutateResultTransformer(config.toMap(),statisticsInstructions,parameters.concurrency())
         ).join();
     }
-
-    public Stream<SccMutateResult> scc(String graphName, Map<String, Object> configuration) {
-        var config = configurationParser.parseConfiguration(configuration, SccMutateConfig::of);
-
-        var statisticsInstructions =  ProcedureStatisticsComputationInstructions.forComponents(procedureReturnColumns);
-
-        var parameters = config.toParameters();
-        return businessFacade.scc(
-            GraphName.parse(graphName),
-            config.toGraphParameters(),
-            parameters,
-            config.jobId(),
-            config.logProgress(),
-            (graphResources)-> new SccMutateResultTransformer(config.toMap(),statisticsInstructions, parameters.concurrency())
-        ).join();
-    }
-
-    public Stream<WccMutateResult> wcc(String graphName, Map<String, Object> configuration) {
-        var config = configurationParser.parseConfiguration(configuration, WccMutateConfig::of);
-
-        var statisticsInstructions =  ProcedureStatisticsComputationInstructions.forComponents(procedureReturnColumns);
-
-        var parameters = config.toParameters();
-        return businessFacade.wcc(
-            GraphName.parse(graphName),
-            config.toGraphParameters(),
-            config.relationshipWeightProperty(),
-            parameters,
-            config.jobId(),
-            config.logProgress(),
-            (graphResources)-> new WccMutateResultTransformer(config.toMap(),statisticsInstructions, parameters.concurrency())
-        ).join();
-    }
     */
 
-
+    static <C extends MutateNodePropertyConfig & SeedConfig & ConsecutiveIdsConfig> StandardCommunityProperties createNodePropertyCalculator(C config) {
+        return new StandardCommunityProperties(
+            config.isIncremental(),
+            config.seedProperty(),
+            config.consecutiveIds(),
+            config.mutateProperty()
+        );
+    }
 
 }
