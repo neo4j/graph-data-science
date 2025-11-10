@@ -1,0 +1,15 @@
+apply plugin: 'java-library'
+
+description = 'Neo4j Graph Data Science :: Functions Facade'
+
+group = 'org.neo4j.gds'
+
+dependencies {
+    compileOnly(neo4j.graphdb.api) { transitive = false }
+    compileOnly(neo4j.kernel) { transitive = false }
+    compileOnly(neo4j.kernel.api) { transitive = false }
+    compileOnly(neo4j.resource) { transitive = false }
+
+    implementation project(':functions-facade-api')
+    implementation project(':legacy-cypher-projection')
+}

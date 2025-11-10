@@ -15,6 +15,7 @@ dependencies {
         project(':pipelines-facade-api'),
         project(':algorithms-facade-api'),
         project(':metrics-api'),
+        project(':functions-facade-api'),
     )
 
     // `User` is here 🙈

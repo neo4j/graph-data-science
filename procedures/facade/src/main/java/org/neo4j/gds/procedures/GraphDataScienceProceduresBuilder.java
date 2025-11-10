@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.procedures;
 
+import org.neo4j.gds.functions.FunctionsFacade;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.metrics.procedures.DeprecatedProceduresMetricService;
 import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
@@ -36,6 +37,7 @@ import org.neo4j.gds.procedures.pipelines.PipelinesProcedureFacade;
 public class GraphDataScienceProceduresBuilder {
     private final Log log;
     private AlgorithmsProcedureFacade algorithmsProcedureFacade;
+    private FunctionsFacade functionsFacade;
     private GraphCatalogProcedureFacade graphCatalogProcedureFacade;
     private ModelCatalogProcedureFacade modelCatalogProcedureFacade;
     private OperationsProcedureFacade operationsProcedureFacade;
@@ -48,6 +50,11 @@ public class GraphDataScienceProceduresBuilder {
 
     public GraphDataScienceProceduresBuilder with(AlgorithmsProcedureFacade algorithmsProcedureFacade) {
         this.algorithmsProcedureFacade = algorithmsProcedureFacade;
+        return this;
+    }
+
+    public GraphDataScienceProceduresBuilder with(FunctionsFacade functionsFacade) {
+        this.functionsFacade = functionsFacade;
         return this;
     }
 
@@ -80,6 +87,7 @@ public class GraphDataScienceProceduresBuilder {
         return new LocalGraphDataScienceProcedures(
             log,
             algorithmsProcedureFacade,
+            functionsFacade,
             graphCatalogProcedureFacade,
             modelCatalogProcedureFacade,
             operationsProcedureFacade,

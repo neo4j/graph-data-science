@@ -439,3 +439,12 @@ project(':core-api').projectDir = file('core-api')
 
 include('memory-facade')
 project(':memory-facade').projectDir = file('procedures/memory-facade')
+
+include('functions-facade')
+project(':functions-facade').projectDir = file('procedures/functions-facade')
+
+include('functions-facade-api')
+project(':functions-facade-api').projectDir = file('procedures/functions-facade-api')
+
+include('proc-topological-link-prediction')
+project(':proc-topological-link-prediction').projectDir = file('proc/topological-link-prediction')

@@ -34,24 +34,6 @@ import static org.neo4j.gds.core.ProcedureConstants.DIRECTION_KEY;
 import static org.neo4j.gds.legacycypherprojection.GraphProjectFromCypherConfig.RELATIONSHIP_QUERY_KEY;
 
 public class LinkPredictionFunc {
-
-    @UserFunction("gds.alpha.linkprediction.adamicAdar")
-    @Description("Given two nodes, calculate Adamic Adar similarity")
-    public double adamicAdarSimilarity(@Name("node1") Node node1, @Name("node2") Node node2,
-                                       @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
-        // https://en.wikipedia.org/wiki/Adamic/Adar_index
-
-        if (node1 == null || node2 == null) {
-            throw new RuntimeException("Nodes must not be null");
-        }
-
-        RelationshipType relationshipType = getRelationshipType(config);
-        Direction direction = getDirection(config);
-
-        Set<Node> neighbors = new NeighborsFinder().findCommonNeighbors(node1, node2, relationshipType, direction);
-        return neighbors.stream().mapToDouble(nb -> 1.0 / Math.log(degree(nb, relationshipType, direction))).sum();
-    }
-
     @UserFunction("gds.alpha.linkprediction.resourceAllocation")
     @Description("Given two nodes, calculate Resource Allocation similarity")
     public double resourceAllocationSimilarity(@Name("node1") Node node1, @Name("node2") Node node2,
