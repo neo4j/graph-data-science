@@ -24,10 +24,11 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
+import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.community.StandardCommunityProperties;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.core.utils.paged.dss.HugeAtomicDisjointSetStruct;
-import org.neo4j.gds.result.StatisticsComputationInstructions;
+import org.neo4j.gds.labelpropagation.LabelPropagationResult;
+import org.neo4j.gds.procedures.algorithms.community.KmeansStatisticsComputationInstructions;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 
 import java.util.Map;
@@ -40,16 +41,17 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-class WccMutateResultTransformerTest {
+class LabelPropagationMutateResultTransformerTest {
 
     @Test
     void shouldTransformResult(){
 
         var config = Map.of("a",(Object)("foo"));
-        var result = new HugeAtomicDisjointSetStruct(10,new Concurrency(1));
-        result.union(0,1);
-        var instructions = mock(StatisticsComputationInstructions.class);
-        when(instructions.computeCountAndDistribution()).thenReturn(true);
+        var result = new LabelPropagationResult(
+            HugeLongArray.of(1,1,1,0,0),
+            true,
+            1000
+        );
 
         var  mutateService =  mock(MutateNodePropertyService.class);
         when(mutateService.mutateNodeProperties(
@@ -59,8 +61,12 @@ class WccMutateResultTransformerTest {
             anyList())
         ).thenReturn(new NodePropertiesWritten(42));
 
-        var transformer = new WccMutateResultTransformer(
-            config,instructions,
+        var instructions = mock(KmeansStatisticsComputationInstructions.class);
+        when(instructions.computeCountAndDistribution()).thenReturn(true);
+        when(instructions.shouldComputeListOfCentroids()).thenReturn(true);
+        var transformer = new LabelPropagationMutateResultTransformer(
+            config,
+            instructions,
             new Concurrency(1),
             mutateService,
             Set.of("bar"),
@@ -68,22 +74,23 @@ class WccMutateResultTransformerTest {
             mock(Graph.class),
             mock(GraphStore.class),
             new StandardCommunityProperties(true, null,false,"testtest")
-            );
+        );
 
         var mutateResult = transformer.apply(new TimedAlgorithmResult<>(result, 10));
 
         assertThat(mutateResult.findFirst().orElseThrow())
             .satisfies(
                 mutate ->{
-                    assertThat(mutate.componentCount()).isEqualTo(9);
+                    assertThat(mutate.didConverge()).isTrue();
+                    assertThat(mutate.ranIterations()).isEqualTo(1000);
                     assertThat(mutate.computeMillis()).isEqualTo(10);
+                    assertThat(mutate.communityCount()).isEqualTo(2);
                     assertThat(mutate.postProcessingMillis()).isNotNegative();
-                    assertThat(mutate.componentDistribution()).containsKey("p99");
+                    assertThat(mutate.communityDistribution()).containsKey("p99");
                     assertThat(mutate.mutateMillis()).isNotNegative();
                     assertThat((mutate.nodePropertiesWritten())).isEqualTo(42L);
                 }
             );
-
     }
 
 }

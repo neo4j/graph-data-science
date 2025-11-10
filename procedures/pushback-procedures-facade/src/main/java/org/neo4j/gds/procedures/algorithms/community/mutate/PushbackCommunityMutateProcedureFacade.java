@@ -32,12 +32,14 @@ import org.neo4j.gds.hdbscan.HDBScanMutateConfig;
 import org.neo4j.gds.k1coloring.K1ColoringMutateConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionMutateConfig;
 import org.neo4j.gds.kmeans.KmeansMutateConfig;
+import org.neo4j.gds.labelpropagation.LabelPropagationMutateConfig;
 import org.neo4j.gds.procedures.algorithms.community.CliqueCountingMutateResult;
 import org.neo4j.gds.procedures.algorithms.community.HDBScanMutateResult;
 import org.neo4j.gds.procedures.algorithms.community.K1ColoringMutateResult;
 import org.neo4j.gds.procedures.algorithms.community.KCoreDecompositionMutateResult;
 import org.neo4j.gds.procedures.algorithms.community.KMeansMutateResult;
 import org.neo4j.gds.procedures.algorithms.community.KmeansStatisticsComputationInstructions;
+import org.neo4j.gds.procedures.algorithms.community.LabelPropagationMutateResult;
 import org.neo4j.gds.procedures.algorithms.community.LocalClusteringCoefficientMutateResult;
 import org.neo4j.gds.procedures.algorithms.community.SccMutateResult;
 import org.neo4j.gds.procedures.algorithms.community.SpeakerListenerLPAMutateResult;
@@ -300,14 +302,14 @@ public class PushbackCommunityMutateProcedureFacade {
         ).join();
     }
 
-
-    /*
     public Stream<LabelPropagationMutateResult> labelPropagation(String graphName, Map<String, Object> configuration) {
         var config = configurationParser.parseConfiguration(configuration, LabelPropagationMutateConfig::of);
 
         var statisticsInstructions =  ProcedureStatisticsComputationInstructions.forCommunities(procedureReturnColumns);
 
         var parameters = config.toParameters();
+        var standardCommunityProperties = createNodePropertyCalculator(config);
+
         return businessFacade.labelPropagation(
             GraphName.parse(graphName),
             config.toGraphParameters(),
@@ -315,10 +317,20 @@ public class PushbackCommunityMutateProcedureFacade {
             parameters,
             config.jobId(),
             config.logProgress(),
-            graphResources -> new LabelPropagationMutateResultTransformer(config.toMap(),statisticsInstructions,parameters.concurrency())
+            graphResources -> new LabelPropagationMutateResultTransformer(
+                config.toMap(),
+                statisticsInstructions,
+                parameters.concurrency(),
+                mutateNodePropertyService,
+                config.nodeLabels(),
+                config.mutateProperty(),
+                graphResources.graph(),
+                graphResources.graphStore(),
+                standardCommunityProperties
+            )
         ).join();
     }
-
+    /*
     public Stream<LeidenMutateResult> leiden(String graphName, Map<String, Object> configuration) {
         var config = configurationParser.parseConfiguration(configuration, LeidenMutateConfig::of);
 

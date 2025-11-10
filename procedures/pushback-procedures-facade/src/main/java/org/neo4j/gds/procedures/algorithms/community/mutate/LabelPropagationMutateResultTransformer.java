@@ -22,13 +22,14 @@ package org.neo4j.gds.procedures.algorithms.community.mutate;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
-import org.neo4j.gds.community.KMeansMutateStep;
+import org.neo4j.gds.community.LabelPropagationMutateStep;
+import org.neo4j.gds.community.StandardCommunityProperties;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.kmeans.KmeansResult;
+import org.neo4j.gds.labelpropagation.LabelPropagationResult;
 import org.neo4j.gds.procedures.algorithms.MutateNodeStepExecute;
 import org.neo4j.gds.procedures.algorithms.community.CommunityDistributionHelpers;
-import org.neo4j.gds.procedures.algorithms.community.KMeansMutateResult;
-import org.neo4j.gds.procedures.algorithms.community.KmeansStatisticsComputationInstructions;
+import org.neo4j.gds.procedures.algorithms.community.LabelPropagationMutateResult;
+import org.neo4j.gds.result.StatisticsComputationInstructions;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.results.ResultTransformer;
 
@@ -36,28 +37,28 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.procedures.algorithms.community.KmeansConvenienceMethods.computeCentroids;
-
-public class KMeansMutateResultTransformer implements ResultTransformer<TimedAlgorithmResult<KmeansResult>, Stream<KMeansMutateResult>> {
+public class LabelPropagationMutateResultTransformer implements ResultTransformer<TimedAlgorithmResult<LabelPropagationResult>, Stream<LabelPropagationMutateResult>> {
 
     private final Map<String, Object> configuration;
-    private final KmeansStatisticsComputationInstructions statisticsComputationInstructions;
+    private final StatisticsComputationInstructions statisticsComputationInstructions;
     private final Concurrency concurrency;
     private final MutateNodePropertyService mutateNodePropertyService;
     private final Collection<String> labelsToUpdate;
     private final String mutateProperty;
     private final Graph graph;
     private final GraphStore graphStore;
+    private final StandardCommunityProperties standardCommunityProperties;
 
-    public KMeansMutateResultTransformer(
+    public LabelPropagationMutateResultTransformer(
         Map<String, Object> configuration,
-        KmeansStatisticsComputationInstructions statisticsComputationInstructions,
+        StatisticsComputationInstructions statisticsComputationInstructions,
         Concurrency concurrency,
         MutateNodePropertyService mutateNodePropertyService,
         Collection<String> labelsToUpdate,
         String mutateProperty,
         Graph graph,
-        GraphStore graphStore
+        GraphStore graphStore,
+        StandardCommunityProperties standardCommunityProperties
     ) {
         this.configuration = configuration;
         this.statisticsComputationInstructions = statisticsComputationInstructions;
@@ -67,51 +68,52 @@ public class KMeansMutateResultTransformer implements ResultTransformer<TimedAlg
         this.mutateProperty = mutateProperty;
         this.graph = graph;
         this.graphStore = graphStore;
+        this.standardCommunityProperties = standardCommunityProperties;
     }
 
     @Override
-    public Stream<KMeansMutateResult> apply(TimedAlgorithmResult<KmeansResult> timedAlgorithmResult) {
+    public Stream<LabelPropagationMutateResult> apply(TimedAlgorithmResult<LabelPropagationResult> timedAlgorithmResult) {
 
-        var kmeansResult = timedAlgorithmResult.result();
+        var labelPropagationResult = timedAlgorithmResult.result();
+        var nodeCount = labelPropagationResult.labels().size();
+        var labels =  labelPropagationResult.labels();
 
-        var mutateStep = new KMeansMutateStep(mutateNodePropertyService,labelsToUpdate,mutateProperty);
+        var mutateStep = new LabelPropagationMutateStep(
+            mutateNodePropertyService,
+            labelsToUpdate,
+            mutateProperty,
+            standardCommunityProperties
+        );
         var mutateMetadata = MutateNodeStepExecute.executeMutateNodePropertyStep(
             mutateStep,
             graph,
             graphStore,
-            kmeansResult
+            labelPropagationResult
         );
 
-        var nodeCount = kmeansResult.communities().size();
-        var distribution = CommunityDistributionHelpers.compute(
+        var communityStatisticsWithTiming = CommunityDistributionHelpers.compute(
             nodeCount,
             concurrency,
-            nodeId -> kmeansResult.communities().get(nodeId),
+            labels::get,
             statisticsComputationInstructions
         );
+        var statistics = communityStatisticsWithTiming.statistics();
 
-        var centroids = computeCentroids(
-            statisticsComputationInstructions.shouldComputeListOfCentroids(),
-            kmeansResult.centers()
-        );
-
-        var kmeansMutateResult = new KMeansMutateResult(
+        var labelPropagationMutateResult = new LabelPropagationMutateResult(
+            labelPropagationResult.ranIterations(),
+            labelPropagationResult.didConverge(),
+            statistics.componentCount(),
+            communityStatisticsWithTiming.distribution(),
             0,
             timedAlgorithmResult.computeMillis(),
-            distribution.statistics().computeMilliseconds(),
+            statistics.computeMilliseconds(),
             mutateMetadata.mutateMillis(),
             mutateMetadata.nodePropertiesWritten().value(),
-            distribution.distribution(),
-            centroids,
-            kmeansResult.averageDistanceToCentroid(),
-            kmeansResult.averageSilhouette(),
             configuration
         );
 
-        return Stream.of(kmeansMutateResult);
+        return Stream.of(labelPropagationMutateResult);
 
     }
-
-
 
 }

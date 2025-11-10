@@ -61,7 +61,6 @@ class LabelPropagationStatsResultTransformerTest {
                     assertThat(stats.communityDistribution()).containsKey("p99");
                 }
             );
-
     }
 
 }
