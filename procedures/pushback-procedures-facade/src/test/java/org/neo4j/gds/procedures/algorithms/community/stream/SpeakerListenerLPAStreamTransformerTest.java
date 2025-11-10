@@ -50,7 +50,6 @@ class SpeakerListenerLPAStreamTransformerTest {
         long[] value2 = {2, 1};
         schema.set("communityIds",1, value2);
 
-
         var result= ImmutablePregelResult.of(schema, 2, false);
 
         var graphMock = mock(Graph.class);

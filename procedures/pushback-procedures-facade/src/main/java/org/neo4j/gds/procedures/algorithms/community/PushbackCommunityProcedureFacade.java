@@ -832,7 +832,7 @@ public class PushbackCommunityProcedureFacade implements  CommunityProcedureFaca
 
     @Override
     public Stream<SpeakerListenerLPAMutateResult> sllpaMutate(String graphName, Map<String, Object> configuration) {
-        return Stream.empty();
+        return mutateProcedureFacade.sllpa(graphName,configuration);
     }
 
     @Override

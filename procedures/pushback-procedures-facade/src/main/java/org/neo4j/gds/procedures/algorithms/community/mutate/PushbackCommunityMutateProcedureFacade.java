@@ -35,8 +35,10 @@ import org.neo4j.gds.procedures.algorithms.community.KCoreDecompositionMutateRes
 import org.neo4j.gds.procedures.algorithms.community.KMeansMutateResult;
 import org.neo4j.gds.procedures.algorithms.community.KmeansStatisticsComputationInstructions;
 import org.neo4j.gds.procedures.algorithms.community.LocalClusteringCoefficientMutateResult;
+import org.neo4j.gds.procedures.algorithms.community.SpeakerListenerLPAMutateResult;
 import org.neo4j.gds.procedures.algorithms.community.TriangleCountMutateResult;
 import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
+import org.neo4j.gds.sllpa.SpeakerListenerLPAConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientMutateConfig;
 import org.neo4j.gds.triangle.TriangleCountMutateConfig;
 
@@ -212,6 +214,26 @@ public class PushbackCommunityMutateProcedureFacade {
             )
         ).join();
     }
+
+    public Stream<SpeakerListenerLPAMutateResult> sllpa(String graphName, Map<String, Object> configuration) {
+        var config = configurationParser.parseConfiguration(configuration, SpeakerListenerLPAConfig::of);
+
+        return businessFacade.sllpa(
+            GraphName.parse(graphName),
+            config.toGraphParameters(),
+            config,
+            config.jobId(),
+            config.logProgress(),
+            (graphResources)-> new SpeakerListenerLPAMutateResultTransformer(
+                config.toMap(),
+                mutateNodePropertyService,
+                config.nodeLabels(),
+                config.mutateProperty(),
+                graphResources.graph(),
+                graphResources.graphStore())
+        ).join();
+    }
+
     /*
     public Stream<LabelPropagationMutateResult> labelPropagation(String graphName, Map<String, Object> configuration) {
         var config = configurationParser.parseConfiguration(configuration, LabelPropagationMutateConfig::of);
@@ -281,9 +303,6 @@ public class PushbackCommunityMutateProcedureFacade {
         ).join();
     }
 
-
-
-
     public Stream<SccMutateResult> scc(String graphName, Map<String, Object> configuration) {
         var config = configurationParser.parseConfiguration(configuration, SccMutateConfig::of);
 
@@ -316,21 +335,6 @@ public class PushbackCommunityMutateProcedureFacade {
             (graphResources)-> new WccMutateResultTransformer(config.toMap(),statisticsInstructions, parameters.concurrency())
         ).join();
     }
-
-
-    public Stream<SpeakerListenerLPAMutateResult> sllpa(String graphName, Map<String, Object> configuration) {
-        var config = configurationParser.parseConfiguration(configuration, SpeakerListenerLPAConfig::of);
-
-        return businessFacade.sllpa(
-            GraphName.parse(graphName),
-            config.toGraphParameters(),
-            config,
-            config.jobId(),
-            config.logProgress(),
-            (graphResources)-> new SpeakerListenerLPAMutateResultTransformer(config.toMap())
-        ).join();
-    }
-
     */
 
 
