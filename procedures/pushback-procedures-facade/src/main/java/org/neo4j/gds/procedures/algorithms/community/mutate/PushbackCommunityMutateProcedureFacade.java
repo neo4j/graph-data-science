@@ -24,7 +24,9 @@ import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.cliquecounting.CliqueCountingMutateConfig;
 import org.neo4j.gds.community.CommunityComputeBusinessFacade;
+import org.neo4j.gds.k1coloring.K1ColoringMutateConfig;
 import org.neo4j.gds.procedures.algorithms.community.CliqueCountingMutateResult;
+import org.neo4j.gds.procedures.algorithms.community.K1ColoringMutateResult;
 import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
 
 import java.util.Map;
@@ -70,9 +72,9 @@ public class PushbackCommunityMutateProcedureFacade {
             )
         ).join();
     }
-    /*
-    public Stream<K1ColoringStatsResult> k1Coloring(String graphName, Map<String, Object> configuration) {
-        var config = configurationParser.parseConfiguration(configuration, K1ColoringStatsConfig::of);
+
+    public Stream<K1ColoringMutateResult> k1Coloring(String graphName, Map<String, Object> configuration) {
+        var config = configurationParser.parseConfiguration(configuration, K1ColoringMutateConfig::of);
 
         var parameters = config.toParameters();
         return businessFacade.k1Coloring(
@@ -81,10 +83,18 @@ public class PushbackCommunityMutateProcedureFacade {
             parameters,
             config.jobId(),
             config.logProgress(),
-            graphResources -> new K1ColoringStatsResultTransformer(config.toMap(), procedureReturnColumns.contains("colorCount"))
+            graphResources -> new K1ColoringMutateResultTransformer(
+                config.toMap(),
+                procedureReturnColumns.contains("colorCount"),
+                mutateNodePropertyService,
+                config.nodeLabels(),
+                config.mutateProperty(),
+                graphResources.graph(),
+                graphResources.graphStore()
+            )
         ).join();
     }
-
+    /*
     public Stream<KCoreDecompositionStatsResult> kCore(String graphName, Map<String, Object> configuration) {
         var config = configurationParser.parseConfiguration(configuration, KCoreDecompositionStatsConfig::of);
 

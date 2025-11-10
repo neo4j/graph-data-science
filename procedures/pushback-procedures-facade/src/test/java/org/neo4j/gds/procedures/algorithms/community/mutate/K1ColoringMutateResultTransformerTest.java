@@ -19,52 +19,47 @@
  */
 package org.neo4j.gds.procedures.algorithms.community.mutate;
 
+import com.carrotsearch.hppc.BitSet;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
-import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
-import org.neo4j.gds.cliqueCounting.CliqueCountingResult;
-import org.neo4j.gds.collections.ha.HugeObjectArray;
+import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.k1coloring.K1ColoringResult;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 
 import java.util.Map;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyCollection;
-import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-class CliqueCountingMutateResultTransformerTest {
+class K1ColoringMutateResultTransformerTest {
 
     @Test
-    void shouldTransformResult(){
+    void shouldTransformResultAndComputeUsedColors() {
 
-        var config = Map.of("a",(Object)("foo"));
-        var result = mock(CliqueCountingResult.class);
-        when(result.globalCount()).thenReturn(new long[]{1,2,3});
-        when(result.perNodeCount()).thenReturn(HugeObjectArray.of(new long[]{1},new long[]{2}));
+        var config = Map.of("a", (Object) ("foo"));
+        var result = mock(K1ColoringResult.class);
+        when(result.didConverge()).thenReturn(true);
+        when(result.ranIterations()).thenReturn(100L);
+
+        var bitset = new BitSet(10);
+        bitset.set(2);
+        bitset.set(4);
+        when(result.usedColors()).thenReturn(bitset);
+        when(result.colors()).thenReturn(HugeLongArray.of(1, 2, 3));
 
         var  mutateService =  mock(MutateNodePropertyService.class);
 
-        when(mutateService.mutateNodeProperties(
-            any(Graph.class),
-            any(GraphStore.class),
-            anyCollection(),
-            anyList())
-        ).thenReturn(new NodePropertiesWritten(42));
-
-        var transformer = new CliqueCountingMutateResultTransformer(
-            config,
+        var transformer = new K1ColoringMutateResultTransformer(config,
+            true,
             mutateService,
             Set.of("bar"),
             "foo",
-        mock(Graph.class),
-        mock(GraphStore.class)
-        );
+            mock(Graph.class),
+            mock(GraphStore.class));
 
         var mutateResult = transformer.apply(new TimedAlgorithmResult<>(result, 10));
 
@@ -72,12 +67,14 @@ class CliqueCountingMutateResultTransformerTest {
             .satisfies(mutate -> {
                 assertThat(mutate.preProcessingMillis()).isEqualTo(0);
                 assertThat(mutate.computeMillis()).isEqualTo(10);
-                assertThat(mutate.globalCount()).containsExactly(1L, 2L, 3L);
                 assertThat(mutate.mutateMillis()).isNotNegative();
-                assertThat(mutate.nodePropertiesWritten()).isEqualTo(42L);
+
+                assertThat(mutate.nodeCount()).isEqualTo(3);
+                assertThat(mutate.colorCount()).isEqualTo(2);
+                assertThat(mutate.ranIterations()).isEqualTo(100);
+                assertThat(mutate.didConverge()).isTrue();
                 assertThat(mutate.configuration()).isEqualTo(config);
             });
-
     }
 
 }

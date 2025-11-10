@@ -148,7 +148,7 @@ public class PushbackCommunityProcedureFacade implements  CommunityProcedureFaca
 
     @Override
     public Stream<K1ColoringMutateResult> k1ColoringMutate(String graphName, Map<String, Object> rawConfiguration) {
-        return Stream.empty();
+        return mutateProcedureFacade.k1Coloring(graphName,rawConfiguration);
     }
 
     @Override
