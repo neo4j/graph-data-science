@@ -69,12 +69,12 @@ public class K1ColoringMutateResultTransformer implements ResultTransformer<Time
 
         var k1ColoringResult = timedAlgorithmResult.result();
 
-        var mutateStep = new K1ColoringMutateStep(mutateNodePropertyService,labelsToUpdate,mutateProperty);
-        var  mutateMillis = mutate(k1ColoringResult,mutateStep);
+        var mutateStep = new K1ColoringMutateStep(mutateNodePropertyService, labelsToUpdate, mutateProperty);
+        var mutateMillis = mutate(k1ColoringResult, mutateStep);
 
         var usedColors = (computeUsedColors) ? k1ColoringResult.usedColors().cardinality() : 0;
 
-        var k1ColoringMutateResult =  new K1ColoringMutateResult(
+        var k1ColoringMutateResult = new K1ColoringMutateResult(
             0,
             timedAlgorithmResult.computeMillis(),
             mutateMillis,
@@ -89,13 +89,13 @@ public class K1ColoringMutateResultTransformer implements ResultTransformer<Time
 
     }
 
-    long mutate(K1ColoringResult k1ColoringResult,MutateStep<K1ColoringResult,Void> mutateStep){
+    long mutate(K1ColoringResult k1ColoringResult, MutateStep<K1ColoringResult, Void> mutateStep) {
         var mutateMillis = new AtomicLong();
         try (var ignored = ProgressTimer.start(mutateMillis::set)) {
-             mutateStep.execute(
+            mutateStep.execute(
                 graph,
                 graphStore,
-                 k1ColoringResult
+                k1ColoringResult
             );
         }
         return mutateMillis.get();

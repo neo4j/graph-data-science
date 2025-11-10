@@ -63,7 +63,7 @@ public class KCoreMutateResultTransformer implements ResultTransformer<TimedAlgo
 
         var kCoreDecompositionResult = timedAlgorithmResult.result();
 
-        var mutateStep = new KCoreMutateStep(mutateNodePropertyService,labelsToUpdate,mutateProperty);
+        var mutateStep = new KCoreMutateStep(mutateNodePropertyService, labelsToUpdate, mutateProperty);
         var mutateMetadata = MutateNodeStepExecute.executeMutateNodePropertyStep(
             mutateStep,
             graph,
@@ -71,7 +71,7 @@ public class KCoreMutateResultTransformer implements ResultTransformer<TimedAlgo
             kCoreDecompositionResult
         );
 
-        var k1ColoringMutateResult =  new KCoreDecompositionMutateResult(
+        var k1ColoringMutateResult = new KCoreDecompositionMutateResult(
             mutateMetadata.nodePropertiesWritten().value(),
             kCoreDecompositionResult.degeneracy(),
             0,

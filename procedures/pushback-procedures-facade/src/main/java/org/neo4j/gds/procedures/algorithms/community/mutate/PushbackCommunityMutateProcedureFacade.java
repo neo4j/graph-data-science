@@ -33,6 +33,9 @@ import org.neo4j.gds.k1coloring.K1ColoringMutateConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionMutateConfig;
 import org.neo4j.gds.kmeans.KmeansMutateConfig;
 import org.neo4j.gds.labelpropagation.LabelPropagationMutateConfig;
+import org.neo4j.gds.leiden.LeidenMutateConfig;
+import org.neo4j.gds.louvain.LouvainMutateConfig;
+import org.neo4j.gds.modularityoptimization.ModularityOptimizationMutateConfig;
 import org.neo4j.gds.procedures.algorithms.community.CliqueCountingMutateResult;
 import org.neo4j.gds.procedures.algorithms.community.HDBScanMutateResult;
 import org.neo4j.gds.procedures.algorithms.community.K1ColoringMutateResult;
@@ -40,7 +43,10 @@ import org.neo4j.gds.procedures.algorithms.community.KCoreDecompositionMutateRes
 import org.neo4j.gds.procedures.algorithms.community.KMeansMutateResult;
 import org.neo4j.gds.procedures.algorithms.community.KmeansStatisticsComputationInstructions;
 import org.neo4j.gds.procedures.algorithms.community.LabelPropagationMutateResult;
+import org.neo4j.gds.procedures.algorithms.community.LeidenMutateResult;
 import org.neo4j.gds.procedures.algorithms.community.LocalClusteringCoefficientMutateResult;
+import org.neo4j.gds.procedures.algorithms.community.LouvainMutateResult;
+import org.neo4j.gds.procedures.algorithms.community.ModularityOptimizationMutateResult;
 import org.neo4j.gds.procedures.algorithms.community.SccMutateResult;
 import org.neo4j.gds.procedures.algorithms.community.SpeakerListenerLPAMutateResult;
 import org.neo4j.gds.procedures.algorithms.community.TriangleCountMutateResult;
@@ -134,14 +140,15 @@ public class PushbackCommunityMutateProcedureFacade {
                 config.nodeLabels(),
                 config.mutateProperty(),
                 graphResources.graph(),
-                graphResources.graphStore())
+                graphResources.graphStore()
+            )
         ).join();
     }
 
     public Stream<KMeansMutateResult> kMeans(String graphName, Map<String, Object> configuration) {
         var config = configurationParser.parseConfiguration(configuration, KmeansMutateConfig::of);
 
-        var statisticsInstructions =  KmeansStatisticsComputationInstructions.create(procedureReturnColumns);
+        var statisticsInstructions = KmeansStatisticsComputationInstructions.create(procedureReturnColumns);
 
         var parameters = config.toParameters();
         return businessFacade.kMeans(
@@ -214,7 +221,7 @@ public class PushbackCommunityMutateProcedureFacade {
             config.toParameters(),
             config.jobId(),
             config.logProgress(),
-            (graphResources)-> new TriangleCountMutateResultTransformer(
+            (graphResources) -> new TriangleCountMutateResultTransformer(
                 config.toMap(),
                 graphResources.graph().nodeCount(),
                 mutateNodePropertyService,
@@ -235,7 +242,7 @@ public class PushbackCommunityMutateProcedureFacade {
             config,
             config.jobId(),
             config.logProgress(),
-            (graphResources)-> new SpeakerListenerLPAMutateResultTransformer(
+            (graphResources) -> new SpeakerListenerLPAMutateResultTransformer(
                 config.toMap(),
                 mutateNodePropertyService,
                 config.nodeLabels(),
@@ -249,7 +256,7 @@ public class PushbackCommunityMutateProcedureFacade {
     public Stream<SccMutateResult> scc(String graphName, Map<String, Object> configuration) {
         var config = configurationParser.parseConfiguration(configuration, SccMutateConfig::of);
 
-        var statisticsInstructions =  ProcedureStatisticsComputationInstructions.forComponents(procedureReturnColumns);
+        var statisticsInstructions = ProcedureStatisticsComputationInstructions.forComponents(procedureReturnColumns);
 
         var parameters = config.toParameters();
         return businessFacade.scc(
@@ -258,7 +265,7 @@ public class PushbackCommunityMutateProcedureFacade {
             parameters,
             config.jobId(),
             config.logProgress(),
-            (graphResources)-> new SccMutateResultTransformer(
+            (graphResources) -> new SccMutateResultTransformer(
                 config.toMap(),
                 config.consecutiveIds(),
                 statisticsInstructions,
@@ -275,7 +282,7 @@ public class PushbackCommunityMutateProcedureFacade {
     public Stream<WccMutateResult> wcc(String graphName, Map<String, Object> configuration) {
         var config = configurationParser.parseConfiguration(configuration, WccMutateConfig::of);
 
-        var statisticsInstructions =  ProcedureStatisticsComputationInstructions.forComponents(procedureReturnColumns);
+        var statisticsInstructions = ProcedureStatisticsComputationInstructions.forComponents(procedureReturnColumns);
 
         var parameters = config.toParameters();
 
@@ -288,7 +295,7 @@ public class PushbackCommunityMutateProcedureFacade {
             parameters,
             config.jobId(),
             config.logProgress(),
-            (graphResources)-> new WccMutateResultTransformer(
+            (graphResources) -> new WccMutateResultTransformer(
                 config.toMap(),
                 statisticsInstructions,
                 parameters.concurrency(),
@@ -305,7 +312,7 @@ public class PushbackCommunityMutateProcedureFacade {
     public Stream<LabelPropagationMutateResult> labelPropagation(String graphName, Map<String, Object> configuration) {
         var config = configurationParser.parseConfiguration(configuration, LabelPropagationMutateConfig::of);
 
-        var statisticsInstructions =  ProcedureStatisticsComputationInstructions.forCommunities(procedureReturnColumns);
+        var statisticsInstructions = ProcedureStatisticsComputationInstructions.forCommunities(procedureReturnColumns);
 
         var parameters = config.toParameters();
         var standardCommunityProperties = createNodePropertyCalculator(config);
@@ -330,12 +337,12 @@ public class PushbackCommunityMutateProcedureFacade {
             )
         ).join();
     }
-    /*
+
     public Stream<LeidenMutateResult> leiden(String graphName, Map<String, Object> configuration) {
         var config = configurationParser.parseConfiguration(configuration, LeidenMutateConfig::of);
 
-        var statisticsInstructions =  ProcedureStatisticsComputationInstructions.forCommunities(procedureReturnColumns);
-
+        var statisticsInstructions = ProcedureStatisticsComputationInstructions.forCommunities(procedureReturnColumns);
+        var standardCommunityProperties = createNodePropertyCalculator(config);
 
         var parameters = config.toParameters();
         return businessFacade.leiden(
@@ -345,13 +352,26 @@ public class PushbackCommunityMutateProcedureFacade {
             parameters,
             config.jobId(),
             config.logProgress(),
-            graphResources -> new LeidenMutateResultTransformer(config.toMap(),statisticsInstructions,parameters.concurrency())
+            graphResources -> new LeidenMutateResultTransformer(
+                config.toMap(),
+                statisticsInstructions,
+                parameters.concurrency(),
+                mutateNodePropertyService,
+                config.nodeLabels(),
+                config.mutateProperty(),
+                graphResources.graph(),
+                graphResources.graphStore(),
+                standardCommunityProperties,
+                config.includeIntermediateCommunities()
+            )
         ).join();
     }
 
     public Stream<LouvainMutateResult> louvain(String graphName, Map<String, Object> configuration) {
         var config = configurationParser.parseConfiguration(configuration, LouvainMutateConfig::of);
-        var statisticsInstructions =  ProcedureStatisticsComputationInstructions.forCommunities(procedureReturnColumns);
+
+        var statisticsInstructions = ProcedureStatisticsComputationInstructions.forCommunities(procedureReturnColumns);
+        var standardCommunityProperties = createNodePropertyCalculator(config);
 
         var parameters = config.toParameters();
         return businessFacade.louvain(
@@ -361,14 +381,28 @@ public class PushbackCommunityMutateProcedureFacade {
             parameters,
             config.jobId(),
             config.logProgress(),
-            graphResources -> new LouvainMutateResultTransformer(config.toMap(),statisticsInstructions,parameters.concurrency())
+            graphResources -> new LouvainMutateResultTransformer(
+                config.toMap(),
+                statisticsInstructions, parameters.concurrency(),
+                mutateNodePropertyService,
+                config.nodeLabels(),
+                config.mutateProperty(),
+                graphResources.graph(),
+                graphResources.graphStore(),
+                standardCommunityProperties,
+                config.includeIntermediateCommunities()
+            )
         ).join();
     }
 
-    public Stream<ModularityOptimizationMutateResult> modularityOptimization(String graphName, Map<String, Object> configuration) {
+    public Stream<ModularityOptimizationMutateResult> modularityOptimization(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
         var config = configurationParser.parseConfiguration(configuration, ModularityOptimizationMutateConfig::of);
 
-        var statisticsInstructions =  ProcedureStatisticsComputationInstructions.forCommunities(procedureReturnColumns);
+        var statisticsInstructions = ProcedureStatisticsComputationInstructions.forCommunities(procedureReturnColumns);
+        var standardCommunityProperties = createNodePropertyCalculator(config);
 
         var parameters = config.toParameters();
         return businessFacade.modularityOptimization(
@@ -378,12 +412,24 @@ public class PushbackCommunityMutateProcedureFacade {
             parameters,
             config.jobId(),
             config.logProgress(),
-            graphResources -> new ModularityOptimizationMutateResultTransformer(config.toMap(),statisticsInstructions,parameters.concurrency())
+            graphResources -> new ModularityOptimizationMutateResultTransformer(
+                config.toMap(),
+                statisticsInstructions,
+                parameters.concurrency(),
+                mutateNodePropertyService,
+                config.nodeLabels(),
+                config.mutateProperty(),
+                graphResources.graph(),
+                graphResources.graphStore(),
+                standardCommunityProperties
+            )
         ).join();
     }
-    */
 
-    static <C extends MutateNodePropertyConfig & SeedConfig & ConsecutiveIdsConfig> StandardCommunityProperties createNodePropertyCalculator(C config) {
+
+    static <C extends MutateNodePropertyConfig & SeedConfig & ConsecutiveIdsConfig> StandardCommunityProperties createNodePropertyCalculator(
+        C config
+    ) {
         return new StandardCommunityProperties(
             config.isIncremental(),
             config.seedProperty(),

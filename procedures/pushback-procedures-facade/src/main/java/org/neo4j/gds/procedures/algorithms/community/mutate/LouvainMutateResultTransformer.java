@@ -22,22 +22,24 @@ package org.neo4j.gds.procedures.algorithms.community.mutate;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
-import org.neo4j.gds.community.LabelPropagationMutateStep;
+import org.neo4j.gds.community.LouvainMutateStep;
 import org.neo4j.gds.community.StandardCommunityProperties;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.labelpropagation.LabelPropagationResult;
+import org.neo4j.gds.louvain.LouvainResult;
 import org.neo4j.gds.procedures.algorithms.MutateNodeStepExecute;
 import org.neo4j.gds.procedures.algorithms.community.CommunityDistributionHelpers;
-import org.neo4j.gds.procedures.algorithms.community.LabelPropagationMutateResult;
+import org.neo4j.gds.procedures.algorithms.community.LouvainMutateResult;
 import org.neo4j.gds.result.StatisticsComputationInstructions;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.results.ResultTransformer;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class LabelPropagationMutateResultTransformer implements ResultTransformer<TimedAlgorithmResult<LabelPropagationResult>, Stream<LabelPropagationMutateResult>> {
+public class LouvainMutateResultTransformer implements ResultTransformer<TimedAlgorithmResult<LouvainResult>, Stream<LouvainMutateResult>> {
 
     private final Map<String, Object> configuration;
     private final StatisticsComputationInstructions statisticsComputationInstructions;
@@ -48,8 +50,9 @@ public class LabelPropagationMutateResultTransformer implements ResultTransforme
     private final Graph graph;
     private final GraphStore graphStore;
     private final StandardCommunityProperties standardCommunityProperties;
+    private final boolean includeIntermediateCommunities;
 
-    public LabelPropagationMutateResultTransformer(
+    public LouvainMutateResultTransformer(
         Map<String, Object> configuration,
         StatisticsComputationInstructions statisticsComputationInstructions,
         Concurrency concurrency,
@@ -58,7 +61,7 @@ public class LabelPropagationMutateResultTransformer implements ResultTransforme
         String mutateProperty,
         Graph graph,
         GraphStore graphStore,
-        StandardCommunityProperties standardCommunityProperties
+        StandardCommunityProperties standardCommunityProperties, boolean includeIntermediateCommunities
     ) {
         this.configuration = configuration;
         this.statisticsComputationInstructions = statisticsComputationInstructions;
@@ -69,39 +72,43 @@ public class LabelPropagationMutateResultTransformer implements ResultTransforme
         this.graph = graph;
         this.graphStore = graphStore;
         this.standardCommunityProperties = standardCommunityProperties;
+        this.includeIntermediateCommunities = includeIntermediateCommunities;
     }
 
     @Override
-    public Stream<LabelPropagationMutateResult> apply(TimedAlgorithmResult<LabelPropagationResult> timedAlgorithmResult) {
+    public Stream<LouvainMutateResult> apply(TimedAlgorithmResult<LouvainResult> timedAlgorithmResult) {
 
-        var labelPropagationResult = timedAlgorithmResult.result();
-        var nodeCount = labelPropagationResult.labels().size();
-        var labels = labelPropagationResult.labels();
+        var louvainResult = timedAlgorithmResult.result();
+        var nodeCount = louvainResult.communities().size();
+        var communities = louvainResult.communities();
 
-        var mutateStep = new LabelPropagationMutateStep(
+        var mutateStep = new LouvainMutateStep(
             mutateNodePropertyService,
             labelsToUpdate,
             mutateProperty,
-            standardCommunityProperties
+            standardCommunityProperties,
+            includeIntermediateCommunities
         );
         var mutateMetadata = MutateNodeStepExecute.executeMutateNodePropertyStep(
             mutateStep,
             graph,
             graphStore,
-            labelPropagationResult
+            louvainResult
         );
 
         var communityStatisticsWithTiming = CommunityDistributionHelpers.compute(
             nodeCount,
             concurrency,
-            labels::get,
+            communities::get,
             statisticsComputationInstructions
         );
+
         var statistics = communityStatisticsWithTiming.statistics();
 
-        var labelPropagationMutateResult = new LabelPropagationMutateResult(
-            labelPropagationResult.ranIterations(),
-            labelPropagationResult.didConverge(),
+        var louvainMutateResult = new LouvainMutateResult(
+            louvainResult.modularity(),
+            Arrays.stream(louvainResult.modularities()).boxed().collect(Collectors.toList()),
+            louvainResult.ranLevels(),
             statistics.componentCount(),
             communityStatisticsWithTiming.distribution(),
             0,
@@ -112,7 +119,7 @@ public class LabelPropagationMutateResultTransformer implements ResultTransforme
             configuration
         );
 
-        return Stream.of(labelPropagationMutateResult);
+        return Stream.of(louvainMutateResult);
 
     }
 

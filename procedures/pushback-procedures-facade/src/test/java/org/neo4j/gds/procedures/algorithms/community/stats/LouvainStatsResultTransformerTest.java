@@ -63,7 +63,6 @@ class LouvainStatsResultTransformerTest {
                     assertThat(stats.modularity()).isEqualTo(55);
                 }
             );
-
     }
 
 }

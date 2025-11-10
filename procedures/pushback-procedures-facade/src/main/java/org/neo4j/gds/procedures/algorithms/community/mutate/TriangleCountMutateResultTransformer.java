@@ -66,7 +66,7 @@ public class TriangleCountMutateResultTransformer implements ResultTransformer<T
 
         var triangleCountResult = timedAlgorithmResult.result();
 
-        var mutateStep = new TriangleCountMutateStep(mutateNodePropertyService,labelsToUpdate,mutateProperty);
+        var mutateStep = new TriangleCountMutateStep(mutateNodePropertyService, labelsToUpdate, mutateProperty);
         var mutateMetadata = MutateNodeStepExecute.executeMutateNodePropertyStep(
             mutateStep,
             graph,
@@ -84,6 +84,6 @@ public class TriangleCountMutateResultTransformer implements ResultTransformer<T
             configuration
         );
 
-        return  Stream.of(triangleCountMutateResult);
+        return Stream.of(triangleCountMutateResult);
     }
 }

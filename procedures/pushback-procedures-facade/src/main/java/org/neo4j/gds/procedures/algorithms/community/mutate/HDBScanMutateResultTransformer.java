@@ -44,7 +44,8 @@ public class HDBScanMutateResultTransformer implements ResultTransformer<TimedAl
     private final GraphStore graphStore;
 
 
-    public HDBScanMutateResultTransformer(Map<String, Object> configuration, long nodeCount,
+    public HDBScanMutateResultTransformer(
+        Map<String, Object> configuration, long nodeCount,
         MutateNodePropertyService mutateNodePropertyService,
         Collection<String> labelsToUpdate,
         String mutateProperty,
@@ -65,7 +66,7 @@ public class HDBScanMutateResultTransformer implements ResultTransformer<TimedAl
 
         var labels = timedAlgorithmResult.result();
 
-        var mutateStep = new HDBScanMutateStep(mutateNodePropertyService,labelsToUpdate,mutateProperty);
+        var mutateStep = new HDBScanMutateStep(mutateNodePropertyService, labelsToUpdate, mutateProperty);
         var mutateMetadata = MutateNodeStepExecute.executeMutateNodePropertyStep(
             mutateStep,
             graph,

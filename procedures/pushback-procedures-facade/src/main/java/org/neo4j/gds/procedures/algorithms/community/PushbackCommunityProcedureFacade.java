@@ -432,7 +432,7 @@ public class PushbackCommunityProcedureFacade implements  CommunityProcedureFaca
 
     @Override
     public Stream<LeidenMutateResult> leidenMutate(String graphName, Map<String, Object> rawConfiguration) {
-        return Stream.empty();
+        return mutateProcedureFacade.leiden(graphName,rawConfiguration);
     }
 
     @Override
@@ -485,7 +485,7 @@ public class PushbackCommunityProcedureFacade implements  CommunityProcedureFaca
 
     @Override
     public Stream<LouvainMutateResult> louvainMutate(String graphName, Map<String, Object> rawConfiguration) {
-        return Stream.empty();
+        return mutateProcedureFacade.louvain(graphName,rawConfiguration);
     }
 
     @Override
@@ -567,7 +567,7 @@ public class PushbackCommunityProcedureFacade implements  CommunityProcedureFaca
         String graphName,
         Map<String, Object> rawConfiguration
     ) {
-        return Stream.empty();
+        return mutateProcedureFacade.modularityOptimization(graphName,rawConfiguration);
     }
 
     @Override

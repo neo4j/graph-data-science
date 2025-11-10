@@ -74,7 +74,7 @@ public class KMeansMutateResultTransformer implements ResultTransformer<TimedAlg
 
         var kmeansResult = timedAlgorithmResult.result();
 
-        var mutateStep = new KMeansMutateStep(mutateNodePropertyService,labelsToUpdate,mutateProperty);
+        var mutateStep = new KMeansMutateStep(mutateNodePropertyService, labelsToUpdate, mutateProperty);
         var mutateMetadata = MutateNodeStepExecute.executeMutateNodePropertyStep(
             mutateStep,
             graph,
@@ -111,7 +111,6 @@ public class KMeansMutateResultTransformer implements ResultTransformer<TimedAlg
         return Stream.of(kmeansMutateResult);
 
     }
-
 
 
 }

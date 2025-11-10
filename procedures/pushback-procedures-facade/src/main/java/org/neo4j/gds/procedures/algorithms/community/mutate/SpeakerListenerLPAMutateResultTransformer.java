@@ -63,7 +63,7 @@ public class SpeakerListenerLPAMutateResultTransformer implements ResultTransfor
 
         var pregelResult = timedAlgorithmResult.result();
 
-        var mutateStep = new SpeakerListenerLPAMutateStep(mutateNodePropertyService,labelsToUpdate,mutateProperty);
+        var mutateStep = new SpeakerListenerLPAMutateStep(mutateNodePropertyService, labelsToUpdate, mutateProperty);
         var mutateMetadata = MutateNodeStepExecute.executeMutateNodePropertyStep(
             mutateStep,
             graph,
@@ -81,6 +81,6 @@ public class SpeakerListenerLPAMutateResultTransformer implements ResultTransfor
             configuration
         );
 
-        return  Stream.of(speakerListenerLPAMutateResult);
+        return Stream.of(speakerListenerLPAMutateResult);
     }
 }

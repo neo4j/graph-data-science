@@ -19,25 +19,31 @@
  */
 package org.neo4j.gds.procedures.algorithms.community.mutate;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
-import org.neo4j.gds.community.LabelPropagationMutateStep;
+import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
+import org.neo4j.gds.community.LeidenMutateStep;
 import org.neo4j.gds.community.StandardCommunityProperties;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.labelpropagation.LabelPropagationResult;
-import org.neo4j.gds.procedures.algorithms.MutateNodeStepExecute;
+import org.neo4j.gds.core.utils.ProgressTimer;
+import org.neo4j.gds.leiden.LeidenResult;
 import org.neo4j.gds.procedures.algorithms.community.CommunityDistributionHelpers;
-import org.neo4j.gds.procedures.algorithms.community.LabelPropagationMutateResult;
+import org.neo4j.gds.procedures.algorithms.community.LeidenMutateResult;
 import org.neo4j.gds.result.StatisticsComputationInstructions;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.results.ResultTransformer;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class LabelPropagationMutateResultTransformer implements ResultTransformer<TimedAlgorithmResult<LabelPropagationResult>, Stream<LabelPropagationMutateResult>> {
+public class LeidenMutateResultTransformer implements ResultTransformer<TimedAlgorithmResult<LeidenResult>, Stream<LeidenMutateResult>> {
 
     private final Map<String, Object> configuration;
     private final StatisticsComputationInstructions statisticsComputationInstructions;
@@ -48,8 +54,9 @@ public class LabelPropagationMutateResultTransformer implements ResultTransforme
     private final Graph graph;
     private final GraphStore graphStore;
     private final StandardCommunityProperties standardCommunityProperties;
+    private final boolean includeIntermediateCommunities;
 
-    public LabelPropagationMutateResultTransformer(
+    public LeidenMutateResultTransformer(
         Map<String, Object> configuration,
         StatisticsComputationInstructions statisticsComputationInstructions,
         Concurrency concurrency,
@@ -58,7 +65,8 @@ public class LabelPropagationMutateResultTransformer implements ResultTransforme
         String mutateProperty,
         Graph graph,
         GraphStore graphStore,
-        StandardCommunityProperties standardCommunityProperties
+        StandardCommunityProperties standardCommunityProperties,
+        boolean includeIntermediateCommunities
     ) {
         this.configuration = configuration;
         this.statisticsComputationInstructions = statisticsComputationInstructions;
@@ -69,51 +77,72 @@ public class LabelPropagationMutateResultTransformer implements ResultTransforme
         this.graph = graph;
         this.graphStore = graphStore;
         this.standardCommunityProperties = standardCommunityProperties;
+        this.includeIntermediateCommunities = includeIntermediateCommunities;
     }
 
     @Override
-    public Stream<LabelPropagationMutateResult> apply(TimedAlgorithmResult<LabelPropagationResult> timedAlgorithmResult) {
+    public Stream<LeidenMutateResult> apply(TimedAlgorithmResult<LeidenResult> timedAlgorithmResult) {
 
-        var labelPropagationResult = timedAlgorithmResult.result();
-        var nodeCount = labelPropagationResult.labels().size();
-        var labels = labelPropagationResult.labels();
+        var leidenResult = timedAlgorithmResult.result();
+        var nodeCount = leidenResult.communities().size();
+        var communities = leidenResult.communities();
 
-        var mutateStep = new LabelPropagationMutateStep(
+        var mutateStep = new LeidenMutateStep(
             mutateNodePropertyService,
             labelsToUpdate,
             mutateProperty,
-            standardCommunityProperties
+            standardCommunityProperties,
+            includeIntermediateCommunities
         );
-        var mutateMetadata = MutateNodeStepExecute.executeMutateNodePropertyStep(
-            mutateStep,
-            graph,
-            graphStore,
-            labelPropagationResult
-        );
+        var mutateMetadata = mutate(mutateStep, leidenResult);
+        var nodePropertiesWrittenAndConvertedNodePropertyValues = mutateMetadata.mutateMetadata().getRight();
 
         var communityStatisticsWithTiming = CommunityDistributionHelpers.compute(
             nodeCount,
             concurrency,
-            labels::get,
+            nodePropertiesWrittenAndConvertedNodePropertyValues::longValue,
             statisticsComputationInstructions
         );
+
         var statistics = communityStatisticsWithTiming.statistics();
 
-        var labelPropagationMutateResult = new LabelPropagationMutateResult(
-            labelPropagationResult.ranIterations(),
-            labelPropagationResult.didConverge(),
+        var leidenMutateResult = new LeidenMutateResult(
+            leidenResult.ranLevels(),
+            leidenResult.didConverge(),
+            leidenResult.communities().size(),
             statistics.componentCount(),
-            communityStatisticsWithTiming.distribution(),
             0,
             timedAlgorithmResult.computeMillis(),
             statistics.computeMilliseconds(),
             mutateMetadata.mutateMillis(),
-            mutateMetadata.nodePropertiesWritten().value(),
+            mutateMetadata.mutateMetadata().getLeft().value(),
+            communityStatisticsWithTiming.distribution(),
+            Arrays.stream(leidenResult.modularities()).boxed().collect(Collectors.toList()),
+            leidenResult.modularity(),
             configuration
         );
 
-        return Stream.of(labelPropagationMutateResult);
+        return Stream.of(leidenMutateResult);
 
+    }
+
+    LeidenMutateMetadata mutate(LeidenMutateStep mutateStep, LeidenResult leidenResult) {
+
+        var mutateMillis = new AtomicLong();
+        Pair<NodePropertiesWritten, NodePropertyValues> normalMutateMetadata;
+        try (var ignored = ProgressTimer.start(mutateMillis::set)) {
+            normalMutateMetadata = mutateStep.execute(
+                graph,
+                graphStore,
+                leidenResult
+            );
+
+        }
+        return new LeidenMutateMetadata(normalMutateMetadata, mutateMillis.get());
+
+    }
+
+    record LeidenMutateMetadata(Pair<NodePropertiesWritten, NodePropertyValues> mutateMetadata, long mutateMillis) {
     }
 
 }

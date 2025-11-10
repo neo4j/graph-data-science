@@ -22,13 +22,13 @@ package org.neo4j.gds.procedures.algorithms.community.mutate;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
-import org.neo4j.gds.community.LabelPropagationMutateStep;
+import org.neo4j.gds.community.ModularityOptimizationMutateStep;
 import org.neo4j.gds.community.StandardCommunityProperties;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.labelpropagation.LabelPropagationResult;
+import org.neo4j.gds.modularityoptimization.ModularityOptimizationResult;
 import org.neo4j.gds.procedures.algorithms.MutateNodeStepExecute;
 import org.neo4j.gds.procedures.algorithms.community.CommunityDistributionHelpers;
-import org.neo4j.gds.procedures.algorithms.community.LabelPropagationMutateResult;
+import org.neo4j.gds.procedures.algorithms.community.ModularityOptimizationMutateResult;
 import org.neo4j.gds.result.StatisticsComputationInstructions;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.results.ResultTransformer;
@@ -37,7 +37,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.stream.Stream;
 
-public class LabelPropagationMutateResultTransformer implements ResultTransformer<TimedAlgorithmResult<LabelPropagationResult>, Stream<LabelPropagationMutateResult>> {
+public class ModularityOptimizationMutateResultTransformer implements ResultTransformer<TimedAlgorithmResult<ModularityOptimizationResult>, Stream<ModularityOptimizationMutateResult>> {
 
     private final Map<String, Object> configuration;
     private final StatisticsComputationInstructions statisticsComputationInstructions;
@@ -49,7 +49,7 @@ public class LabelPropagationMutateResultTransformer implements ResultTransforme
     private final GraphStore graphStore;
     private final StandardCommunityProperties standardCommunityProperties;
 
-    public LabelPropagationMutateResultTransformer(
+    public ModularityOptimizationMutateResultTransformer(
         Map<String, Object> configuration,
         StatisticsComputationInstructions statisticsComputationInstructions,
         Concurrency concurrency,
@@ -72,13 +72,19 @@ public class LabelPropagationMutateResultTransformer implements ResultTransforme
     }
 
     @Override
-    public Stream<LabelPropagationMutateResult> apply(TimedAlgorithmResult<LabelPropagationResult> timedAlgorithmResult) {
+    public Stream<ModularityOptimizationMutateResult> apply(TimedAlgorithmResult<ModularityOptimizationResult> timedAlgorithmResult) {
 
-        var labelPropagationResult = timedAlgorithmResult.result();
-        var nodeCount = labelPropagationResult.labels().size();
-        var labels = labelPropagationResult.labels();
+        var modularityOptimizationResult = timedAlgorithmResult.result();
+        var nodeCount = modularityOptimizationResult.nodeCount();
 
-        var mutateStep = new LabelPropagationMutateStep(
+        var communityStatisticsWithTiming = CommunityDistributionHelpers.compute(
+            nodeCount,
+            concurrency,
+            modularityOptimizationResult.communityIdLookup(),
+            statisticsComputationInstructions
+        );
+
+        var mutateStep = new ModularityOptimizationMutateStep(
             mutateNodePropertyService,
             labelsToUpdate,
             mutateProperty,
@@ -88,31 +94,26 @@ public class LabelPropagationMutateResultTransformer implements ResultTransforme
             mutateStep,
             graph,
             graphStore,
-            labelPropagationResult
+            modularityOptimizationResult
         );
 
-        var communityStatisticsWithTiming = CommunityDistributionHelpers.compute(
-            nodeCount,
-            concurrency,
-            labels::get,
-            statisticsComputationInstructions
-        );
         var statistics = communityStatisticsWithTiming.statistics();
 
-        var labelPropagationMutateResult = new LabelPropagationMutateResult(
-            labelPropagationResult.ranIterations(),
-            labelPropagationResult.didConverge(),
-            statistics.componentCount(),
-            communityStatisticsWithTiming.distribution(),
+        var modularityOptimizationMutaeResult = new ModularityOptimizationMutateResult(
             0,
             timedAlgorithmResult.computeMillis(),
             statistics.computeMilliseconds(),
             mutateMetadata.mutateMillis(),
-            mutateMetadata.nodePropertiesWritten().value(),
+            nodeCount,
+            modularityOptimizationResult.didConverge(),
+            modularityOptimizationResult.ranIterations(),
+            modularityOptimizationResult.modularity(),
+            statistics.componentCount(),
+            communityStatisticsWithTiming.distribution(),
             configuration
         );
 
-        return Stream.of(labelPropagationMutateResult);
+        return Stream.of(modularityOptimizationMutaeResult);
 
     }
 

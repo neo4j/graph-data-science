@@ -61,7 +61,7 @@ public class CliqueCountingMutateResultTransformer implements ResultTransformer<
     public Stream<CliqueCountingMutateResult> apply(TimedAlgorithmResult<CliqueCountingResult> timedAlgorithmResult) {
         var cliqueCountingResult = timedAlgorithmResult.result();
 
-        var mutateStep = new CliqueCountingMutateStep(mutateNodePropertyService,labelsToUpdate,mutateProperty);
+        var mutateStep = new CliqueCountingMutateStep(mutateNodePropertyService, labelsToUpdate, mutateProperty);
         var mutateMetadata = MutateNodeStepExecute.executeMutateNodePropertyStep(
             mutateStep,
             graph,
@@ -69,7 +69,7 @@ public class CliqueCountingMutateResultTransformer implements ResultTransformer<
             cliqueCountingResult
         );
 
-        var cliqueCountingMutateResult =  new CliqueCountingMutateResult(
+        var cliqueCountingMutateResult = new CliqueCountingMutateResult(
             0,
             timedAlgorithmResult.computeMillis(),
             mutateMetadata.mutateMillis(),

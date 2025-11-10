@@ -66,7 +66,7 @@ public class LccMutateResultTransformer implements ResultTransformer<TimedAlgori
 
         var localClusteringCoefficientResult = timedAlgorithmResult.result();
 
-        var mutateStep = new LccMutateStep(mutateNodePropertyService,labelsToUpdate,mutateProperty);
+        var mutateStep = new LccMutateStep(mutateNodePropertyService, labelsToUpdate, mutateProperty);
         var mutateMetadata = MutateNodeStepExecute.executeMutateNodePropertyStep(
             mutateStep,
             graph,
@@ -84,6 +84,6 @@ public class LccMutateResultTransformer implements ResultTransformer<TimedAlgori
             configuration
         );
 
-        return  Stream.of(localClusteringCoefficientMutateResult);
+        return Stream.of(localClusteringCoefficientMutateResult);
     }
 }

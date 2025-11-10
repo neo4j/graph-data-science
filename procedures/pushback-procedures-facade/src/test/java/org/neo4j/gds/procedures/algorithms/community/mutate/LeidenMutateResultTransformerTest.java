@@ -1,0 +1,101 @@
+/*
+ * Copyright (c) "Neo4j"
+ * Neo4j Sweden AB [http://neo4j.com]
+ *
+ * This file is part of Neo4j.
+ *
+ * Neo4j is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+package org.neo4j.gds.procedures.algorithms.community.mutate;
+
+import org.junit.jupiter.api.Test;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
+import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
+import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.community.StandardCommunityProperties;
+import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.leiden.LeidenDendrogramManager;
+import org.neo4j.gds.leiden.LeidenResult;
+import org.neo4j.gds.result.StatisticsComputationInstructions;
+import org.neo4j.gds.result.TimedAlgorithmResult;
+
+import java.util.Map;
+import java.util.Set;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyCollection;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+class LeidenMutateResultTransformerTest {
+
+    @Test
+    void shouldTransformResult(){
+
+        var config = Map.of("a",(Object)("foo"));
+        var current = HugeLongArray.of(0L,20L,10L,20L,10L,10L);
+        var dendrogramManager = mock(LeidenDendrogramManager.class);
+        when(dendrogramManager.getCurrent()).thenReturn(current);
+        when(dendrogramManager.getAllDendrograms()).thenReturn(new HugeLongArray[]{HugeLongArray.of(100), HugeLongArray.of(20)});
+        var result = new LeidenResult(current,1000,true,dendrogramManager,new double[]{42},55);
+
+        var  mutateService =  mock(MutateNodePropertyService.class);
+        when(mutateService.mutateNodeProperties(
+            any(Graph.class),
+            any(GraphStore.class),
+            anyCollection(),
+            anyList())
+        ).thenReturn(new NodePropertiesWritten(42));
+
+        var instructions = mock(StatisticsComputationInstructions.class);
+        when(instructions.computeCountAndDistribution()).thenReturn(true);
+        var transformer = new LeidenMutateResultTransformer(
+            config,
+            instructions,
+            new Concurrency(1),
+            mutateService,
+            Set.of("bar"),
+            "foo",
+            mock(Graph.class),
+            mock(GraphStore.class),
+            new StandardCommunityProperties(true, null,false,"testtest"),
+            false
+        );
+
+        var mutateResult = transformer.apply(new TimedAlgorithmResult<>(result, 10));
+
+        assertThat(mutateResult.findFirst().orElseThrow())
+            .satisfies(
+                mutate ->{
+                    assertThat(mutate.didConverge()).isTrue();
+                    assertThat(mutate.ranLevels()).isEqualTo(1000);
+                    assertThat(mutate.computeMillis()).isEqualTo(10);
+                    assertThat(mutate.communityCount()).isEqualTo(3);
+                    assertThat(mutate.modularities()).containsExactly(42d);
+                    assertThat(mutate.nodeCount()).isEqualTo(6L);
+                    assertThat(mutate.postProcessingMillis()).isNotNegative();
+                    assertThat(mutate.communityDistribution()).containsKey("p99");
+                    assertThat(mutate.modularity()).isEqualTo(55);
+                    assertThat(mutate.mutateMillis()).isNotNegative();
+                    assertThat((mutate.nodePropertiesWritten())).isEqualTo(42L);
+                }
+            );
+
+    }
+
+}

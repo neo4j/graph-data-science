@@ -90,7 +90,7 @@ public class SccMutateResultTransformer implements ResultTransformer<TimedAlgori
             sccResult
         );
 
-        var nodeCount =sccResult.size();
+        var nodeCount = sccResult.size();
         var communityStatisticsWithTiming = CommunityDistributionHelpers.compute(
             nodeCount,
             concurrency,
