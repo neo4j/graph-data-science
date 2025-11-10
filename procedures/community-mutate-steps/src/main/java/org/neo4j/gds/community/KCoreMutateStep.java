@@ -17,43 +17,38 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.applications.algorithms.community;
+package org.neo4j.gds.community;
 
-import org.neo4j.gds.algorithms.community.CommunityCompanion;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
-import org.neo4j.gds.collections.ha.HugeLongArray;
-import org.neo4j.gds.scc.SccMutateConfig;
+import org.neo4j.gds.kcore.KCoreDecompositionResult;
 
-class SccMutateStep implements MutateStep<HugeLongArray, NodePropertiesWritten> {
-    private final MutateNodePropertyService mutateNodePropertyService;
-    private final SccMutateConfig configuration;
+import java.util.Collection;
 
-    SccMutateStep(MutateNodePropertyService mutateNodePropertyService, SccMutateConfig configuration) {
-        this.mutateNodePropertyService = mutateNodePropertyService;
-        this.configuration = configuration;
+public class KCoreMutateStep implements MutateStep<KCoreDecompositionResult, NodePropertiesWritten> {
+    private final SpecificCommunityMutateStep specificCommunityMutateStep;
+
+    public KCoreMutateStep(
+        MutateNodePropertyService mutateNodePropertyService,
+        Collection<String> labelsToUpdate,
+        String mutateProperty
+    ) {
+        this.specificCommunityMutateStep = new SpecificCommunityMutateStep(mutateNodePropertyService,labelsToUpdate,mutateProperty);
     }
 
     @Override
     public NodePropertiesWritten execute(
         Graph graph,
         GraphStore graphStore,
-        HugeLongArray result
+        KCoreDecompositionResult result
     ) {
-        var nodePropertyValues = CommunityCompanion.nodePropertyValues(
-            configuration.consecutiveIds(),
-            NodePropertyValuesAdapter.adapt(result)
-        );
+        LongNodePropertyValues nodePropertyValues = NodePropertyValuesAdapter.adapt(result.coreValues());
+        return specificCommunityMutateStep.apply(graph,graphStore,nodePropertyValues);
 
-        return mutateNodePropertyService.mutateNodeProperties(
-            graph,
-            graphStore,
-            configuration,
-            nodePropertyValues
-        );
     }
 }

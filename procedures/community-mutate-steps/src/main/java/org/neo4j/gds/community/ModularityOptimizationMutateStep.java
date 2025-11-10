@@ -17,45 +17,44 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.applications.algorithms.community;
+package org.neo4j.gds.community;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
-import org.neo4j.gds.louvain.LouvainMutateConfig;
-import org.neo4j.gds.louvain.LouvainResult;
+import org.neo4j.gds.modularityoptimization.ModularityOptimizationResult;
 
-class LouvainMutateStep implements MutateStep<LouvainResult, NodePropertiesWritten> {
-    private final LouvainNodePropertyValuesComputer louvainNodePropertyValuesComputer = new LouvainNodePropertyValuesComputer();
+import java.util.Collection;
 
-    private final MutateNodePropertyService mutateNodePropertyService;
-    private final LouvainMutateConfig configuration;
+public class ModularityOptimizationMutateStep implements MutateStep<ModularityOptimizationResult, NodePropertiesWritten> {
+    private final SpecificCommunityMutateStep specificCommunityMutateStep;
+    private final StandardCommunityProperties standardCommunityProperties;
 
-    LouvainMutateStep(MutateNodePropertyService mutateNodePropertyService, LouvainMutateConfig configuration) {
-        this.mutateNodePropertyService = mutateNodePropertyService;
-        this.configuration = configuration;
+    public ModularityOptimizationMutateStep(
+        MutateNodePropertyService mutateNodePropertyService,
+        Collection<String> labelsToUpdate,
+        String mutateProperty,
+        StandardCommunityProperties standardCommunityProperties
+    ) {
+        this.specificCommunityMutateStep = new SpecificCommunityMutateStep(mutateNodePropertyService,labelsToUpdate,mutateProperty);
+        this.standardCommunityProperties = standardCommunityProperties;
     }
+
 
     @Override
     public NodePropertiesWritten execute(
         Graph graph,
         GraphStore graphStore,
-        LouvainResult result
+        ModularityOptimizationResult result
     ) {
-        var nodePropertyValues = louvainNodePropertyValuesComputer.compute(
+        var nodePropertyValues = standardCommunityProperties.compute(
             graphStore,
-            configuration,
-            configuration.mutateProperty(),
-            result
+            result.asNodeProperties()
         );
 
-        return mutateNodePropertyService.mutateNodeProperties(
-            graph,
-            graphStore,
-            configuration,
-            nodePropertyValues
-        );
+        return specificCommunityMutateStep.apply(graph,graphStore,nodePropertyValues);
+
     }
 }

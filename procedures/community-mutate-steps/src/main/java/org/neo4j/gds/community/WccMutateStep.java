@@ -17,24 +17,29 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.applications.algorithms.community;
+package org.neo4j.gds.community;
 
-import org.neo4j.gds.algorithms.community.CommunityCompanion;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
-import org.neo4j.gds.wcc.WccMutateConfig;
 
-class WccMutateStep implements MutateStep<DisjointSetStruct, NodePropertiesWritten> {
-    private final MutateNodePropertyService mutateNodePropertyService;
-    private final WccMutateConfig configuration;
+import java.util.Collection;
 
-    WccMutateStep(MutateNodePropertyService mutateNodePropertyService, WccMutateConfig configuration) {
-        this.mutateNodePropertyService = mutateNodePropertyService;
-        this.configuration = configuration;
+public class WccMutateStep implements MutateStep<DisjointSetStruct, NodePropertiesWritten> {
+    private final SpecificCommunityMutateStep specificCommunityMutateStep;
+    private final StandardCommunityProperties standardCommunityProperties;
+
+    public WccMutateStep(
+        MutateNodePropertyService mutateNodePropertyService,
+        Collection<String> labelsToUpdate,
+        String mutateProperty,
+        StandardCommunityProperties standardCommunityProperties
+    ) {
+        this.specificCommunityMutateStep = new SpecificCommunityMutateStep(mutateNodePropertyService,labelsToUpdate,mutateProperty);
+        this.standardCommunityProperties = standardCommunityProperties;
     }
 
     @Override
@@ -43,20 +48,10 @@ class WccMutateStep implements MutateStep<DisjointSetStruct, NodePropertiesWritt
         GraphStore graphStore,
         DisjointSetStruct result
     ) {
-
-        var  nodeProperties = CommunityCompanion.nodePropertyValues(
-            configuration.isIncremental(),
-            configuration.mutateProperty(),
-            configuration.seedProperty(),
-            configuration.consecutiveIds(),
-            result.asNodeProperties(),
-            () -> graphStore.nodeProperty(configuration.seedProperty()));
-
-        return mutateNodePropertyService.mutateNodeProperties(
-            graph,
+        var nodePropertyValues = standardCommunityProperties.compute(
             graphStore,
-            configuration,
-            nodeProperties
+            result.asNodeProperties()
         );
+        return specificCommunityMutateStep.apply(graph,graphStore,nodePropertyValues);
     }
 }

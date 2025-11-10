@@ -17,47 +17,49 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.applications.algorithms.community;
+package org.neo4j.gds.community;
 
-import org.neo4j.gds.algorithms.community.CommunityCompanion;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
+import org.neo4j.gds.api.properties.nodes.NodePropertyRecord;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
-import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
-import org.neo4j.gds.labelpropagation.LabelPropagationMutateConfig;
-import org.neo4j.gds.labelpropagation.LabelPropagationResult;
+import org.neo4j.gds.config.ElementTypeValidator;
 
-class LabelPropagationMutateStep implements MutateStep<LabelPropagationResult, NodePropertiesWritten> {
+import java.util.Collection;
+import java.util.List;
+
+ class SpecificCommunityMutateStep{
+
     private final MutateNodePropertyService mutateNodePropertyService;
-    private final LabelPropagationMutateConfig configuration;
+    private final Collection<String> labelsToUpdate;
+    private final String mutateProperty;
 
-    LabelPropagationMutateStep(MutateNodePropertyService mutateNodePropertyService, LabelPropagationMutateConfig configuration) {
+    SpecificCommunityMutateStep(
+        MutateNodePropertyService mutateNodePropertyService,
+        Collection<String> labelsToUpdate,
+        String mutateProperty) {
+
         this.mutateNodePropertyService = mutateNodePropertyService;
-        this.configuration = configuration;
+        this.labelsToUpdate = labelsToUpdate;
+        this.mutateProperty = mutateProperty;
     }
 
-    @Override
-    public NodePropertiesWritten execute(
+     NodePropertiesWritten apply(
         Graph graph,
         GraphStore graphStore,
-        LabelPropagationResult result
+         NodePropertyValues nodePropertyValues
     ) {
-        var nodePropertyValues = CommunityCompanion.nodePropertyValues(
-            configuration.isIncremental(),
-            configuration.mutateProperty(),
-            configuration.seedProperty(),
-            configuration.consecutiveIds(),
-            NodePropertyValuesAdapter.adapt(result.labels()),
-            () -> graphStore.nodeProperty(configuration.seedProperty())
-        );
 
         return mutateNodePropertyService.mutateNodeProperties(
             graph,
             graphStore,
-            configuration,
-            nodePropertyValues
+            ElementTypeValidator.resolve(graphStore,labelsToUpdate),
+            List.of(NodePropertyRecord.of(mutateProperty,nodePropertyValues))
         );
     }
+
+
+
 }

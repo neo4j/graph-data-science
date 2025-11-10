@@ -1,0 +1,19 @@
+apply plugin: 'java-library'
+
+description = 'Neo4j Graph Data Science :: Community Mutate Steps'
+
+group = 'org.neo4j.gds'
+
+dependencies {
+
+    implementation project(':algo')
+    implementation project(':pregel')
+
+    implementation project(':algorithms-machinery')
+
+    // Required for configuration-related types used by services/utilities
+    implementation project(':config-api')
+
+    implementation project(':core')
+    implementation project(':core-api')
+}

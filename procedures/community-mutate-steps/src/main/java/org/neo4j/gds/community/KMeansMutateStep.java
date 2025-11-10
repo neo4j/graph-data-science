@@ -17,39 +17,38 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.applications.algorithms.community;
+package org.neo4j.gds.community;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
-import org.neo4j.gds.hdbscan.HDBScanMutateConfig;
-import org.neo4j.gds.hdbscan.Labels;
+import org.neo4j.gds.kmeans.KmeansResult;
 
-class HDBScanMutateStep implements MutateStep<Labels, NodePropertiesWritten> {
-    private final MutateNodePropertyService mutateNodePropertyService;
-    private final HDBScanMutateConfig configuration;
+import java.util.Collection;
 
-    HDBScanMutateStep(MutateNodePropertyService mutateNodePropertyService, HDBScanMutateConfig configuration) {
-        this.mutateNodePropertyService = mutateNodePropertyService;
-        this.configuration = configuration;
+public class KMeansMutateStep implements MutateStep<KmeansResult, NodePropertiesWritten> {
+    private final SpecificCommunityMutateStep specificCommunityMutateStep;
+
+    public KMeansMutateStep(
+        MutateNodePropertyService mutateNodePropertyService,
+        Collection<String> labelsToUpdate,
+        String mutateProperty
+    ) {
+        this.specificCommunityMutateStep = new SpecificCommunityMutateStep(mutateNodePropertyService,labelsToUpdate,mutateProperty);
     }
 
     @Override
     public NodePropertiesWritten execute(
         Graph graph,
         GraphStore graphStore,
-        Labels result
+        KmeansResult result
     ) {
-        var nodeProperties = NodePropertyValuesAdapter.adapt(result.labels());
+        LongNodePropertyValues nodePropertyValues = NodePropertyValuesAdapter.adapt(result.communities());
+        return specificCommunityMutateStep.apply(graph,graphStore,nodePropertyValues);
 
-        return mutateNodePropertyService.mutateNodeProperties(
-            graph,
-            graphStore,
-            configuration,
-            nodeProperties
-        );
     }
 }

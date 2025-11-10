@@ -17,45 +17,38 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.applications.algorithms.community;
+package org.neo4j.gds.community;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
-import org.neo4j.gds.beta.pregel.PregelResult;
-import org.neo4j.gds.sllpa.SpeakerListenerLPA;
-import org.neo4j.gds.sllpa.SpeakerListenerLPAConfig;
+import org.neo4j.gds.hdbscan.Labels;
 
-class SpeakerListenerLPAMutateStep implements MutateStep<PregelResult, NodePropertiesWritten> {
-    private final MutateNodePropertyService mutateNodePropertyService;
-    private final SpeakerListenerLPAConfig configuration;
+import java.util.Collection;
 
-    SpeakerListenerLPAMutateStep(
+public class HDBScanMutateStep implements MutateStep<Labels, NodePropertiesWritten> {
+    private final SpecificCommunityMutateStep specificCommunityMutateStep;
+
+    public HDBScanMutateStep(
         MutateNodePropertyService mutateNodePropertyService,
-        SpeakerListenerLPAConfig configuration) {
-        this.mutateNodePropertyService = mutateNodePropertyService;
-        this.configuration = configuration;
+        Collection<String> labelsToUpdate,
+        String mutateProperty
+    ) {
+        this.specificCommunityMutateStep = new SpecificCommunityMutateStep(mutateNodePropertyService,labelsToUpdate,mutateProperty);
     }
 
     @Override
     public NodePropertiesWritten execute(
         Graph graph,
         GraphStore graphStore,
-        PregelResult result
+        Labels result
     ) {
-        return mutateNodePropertyService.mutateNodeProperties(
-            graph,
-            graphStore,
-            configuration,
-            nodePropertyValues(result)
-        );
-    }
+        var nodePropertyValues = NodePropertyValuesAdapter.adapt(result.labels());
 
-    NodePropertyValues nodePropertyValues(PregelResult pregelResult){
-        return NodePropertyValuesAdapter.adapt(pregelResult.nodeValues().longArrayProperties(SpeakerListenerLPA.LABELS_PROPERTY));
+        return specificCommunityMutateStep.apply(graph,graphStore,nodePropertyValues);
+
     }
 }

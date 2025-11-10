@@ -17,40 +17,39 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.applications.algorithms.community;
+package org.neo4j.gds.community;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
-import org.neo4j.gds.k1coloring.K1ColoringMutateConfig;
-import org.neo4j.gds.k1coloring.K1ColoringResult;
+import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
+import org.neo4j.gds.triangle.TriangleCountResult;
 
-class K1ColoringMutateStep implements MutateStep<K1ColoringResult, Void> {
-    private final MutateNodePropertyService mutateNodePropertyService;
-    private final K1ColoringMutateConfig configuration;
+import java.util.Collection;
 
-    K1ColoringMutateStep(MutateNodePropertyService mutateNodePropertyService, K1ColoringMutateConfig configuration) {
-        this.mutateNodePropertyService = mutateNodePropertyService;
-        this.configuration = configuration;
+public class TriangleCountMutateStep implements MutateStep<TriangleCountResult, NodePropertiesWritten> {
+
+    private final SpecificCommunityMutateStep specificCommunityMutateStep;
+
+    public TriangleCountMutateStep(
+        MutateNodePropertyService mutateNodePropertyService,
+        Collection<String> labelsToUpdate,
+        String mutateProperty
+    ) {
+        this.specificCommunityMutateStep = new SpecificCommunityMutateStep(mutateNodePropertyService,labelsToUpdate,mutateProperty);
     }
 
     @Override
-    public Void execute(
+    public NodePropertiesWritten execute(
         Graph graph,
         GraphStore graphStore,
-        K1ColoringResult result
+        TriangleCountResult result
     ) {
-        var nodePropertyValues = NodePropertyValuesAdapter.adapt(result.colors());
+        LongNodePropertyValues nodePropertyValues = NodePropertyValuesAdapter.adapt(result.localTriangles());
 
-        mutateNodePropertyService.mutateNodeProperties(
-            graph,
-            graphStore,
-            configuration,
-            nodePropertyValues
-        );
-
-        return null;
+        return specificCommunityMutateStep.apply(graph,graphStore,nodePropertyValues);
     }
 }

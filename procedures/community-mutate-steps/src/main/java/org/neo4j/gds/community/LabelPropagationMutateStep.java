@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.applications.algorithms.community;
+package org.neo4j.gds.community;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
@@ -25,31 +25,36 @@ import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
-import org.neo4j.gds.triangle.LocalClusteringCoefficientMutateConfig;
-import org.neo4j.gds.triangle.LocalClusteringCoefficientResult;
+import org.neo4j.gds.labelpropagation.LabelPropagationResult;
 
-class LccMutateStep implements MutateStep<LocalClusteringCoefficientResult, NodePropertiesWritten> {
-    private final MutateNodePropertyService mutateNodePropertyService;
-    private final LocalClusteringCoefficientMutateConfig configuration;
+import java.util.Collection;
 
-    LccMutateStep(MutateNodePropertyService mutateNodePropertyService, LocalClusteringCoefficientMutateConfig configuration) {
-        this.mutateNodePropertyService = mutateNodePropertyService;
-        this.configuration = configuration;
+public class LabelPropagationMutateStep implements MutateStep<LabelPropagationResult, NodePropertiesWritten> {
+    private final SpecificCommunityMutateStep specificCommunityMutateStep;
+    private final StandardCommunityProperties standardCommunityProperties;
+
+    public LabelPropagationMutateStep(
+        MutateNodePropertyService mutateNodePropertyService,
+        Collection<String> labelsToUpdate,
+        String mutateProperty,
+        StandardCommunityProperties standardCommunityProperties
+    ) {
+        this.specificCommunityMutateStep = new SpecificCommunityMutateStep(mutateNodePropertyService,labelsToUpdate,mutateProperty);
+        this.standardCommunityProperties = standardCommunityProperties;
     }
 
     @Override
     public NodePropertiesWritten execute(
         Graph graph,
         GraphStore graphStore,
-        LocalClusteringCoefficientResult result
+        LabelPropagationResult result
     ) {
-        var nodePropertyValues = NodePropertyValuesAdapter.adapt(result.localClusteringCoefficients());
 
-        return mutateNodePropertyService.mutateNodeProperties(
-            graph,
+        var nodePropertyValues = standardCommunityProperties.compute(
             graphStore,
-            configuration,
-            nodePropertyValues
+            NodePropertyValuesAdapter.adapt(result.labels())
         );
+
+        return specificCommunityMutateStep.apply(graph,graphStore,nodePropertyValues);
     }
 }

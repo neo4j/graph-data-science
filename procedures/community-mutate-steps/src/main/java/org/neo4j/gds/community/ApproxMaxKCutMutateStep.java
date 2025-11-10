@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.applications.algorithms.community;
+package org.neo4j.gds.community;
 
 import org.neo4j.gds.algorithms.community.CommunityCompanion;
 import org.neo4j.gds.api.Graph;
@@ -27,15 +27,17 @@ import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutResult;
-import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutMutateConfig;
 
-class ApproxMaxKCutMutateStep implements MutateStep<ApproxMaxKCutResult, NodePropertiesWritten> {
-    private final MutateNodePropertyService mutateNodePropertyService;
-    private final ApproxMaxKCutMutateConfig configuration;
+import java.util.Collection;
 
-    ApproxMaxKCutMutateStep(MutateNodePropertyService mutateNodePropertyService, ApproxMaxKCutMutateConfig configuration) {
-        this.mutateNodePropertyService = mutateNodePropertyService;
-        this.configuration = configuration;
+public class ApproxMaxKCutMutateStep implements MutateStep<ApproxMaxKCutResult, NodePropertiesWritten> {
+    private final SpecificCommunityMutateStep specificCommunityMutateStep;
+    public ApproxMaxKCutMutateStep(
+        MutateNodePropertyService mutateNodePropertyService,
+        Collection<String> labelsToUpdate,
+        String mutateProperty
+    ) {
+        this.specificCommunityMutateStep = new SpecificCommunityMutateStep(mutateNodePropertyService,labelsToUpdate,mutateProperty);
     }
 
     @Override
@@ -47,11 +49,6 @@ class ApproxMaxKCutMutateStep implements MutateStep<ApproxMaxKCutResult, NodePro
         var longNodePropertyValues = NodePropertyValuesAdapter.adapt(result.candidateSolution());
         var nodePropertyValues = CommunityCompanion.nodePropertyValues(false, longNodePropertyValues);
 
-        return mutateNodePropertyService.mutateNodeProperties(
-            graph,
-            graphStore,
-            configuration,
-            nodePropertyValues
-        );
+        return specificCommunityMutateStep.apply(graph,graphStore,nodePropertyValues);
     }
 }

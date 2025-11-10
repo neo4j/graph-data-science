@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.applications.algorithms.community;
+package org.neo4j.gds.community;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
@@ -25,29 +25,29 @@ import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
-import org.neo4j.gds.triangle.TriangleCountMutateConfig;
-import org.neo4j.gds.triangle.TriangleCountResult;
+import org.neo4j.gds.triangle.LocalClusteringCoefficientResult;
 
-class TriangleCountMutateStep implements MutateStep<TriangleCountResult, NodePropertiesWritten> {
-    private final MutateNodePropertyService mutateNodePropertyService;
-    private final TriangleCountMutateConfig configuration;
+import java.util.Collection;
 
-    TriangleCountMutateStep(MutateNodePropertyService mutateNodePropertyService, TriangleCountMutateConfig configuration) {
-        this.mutateNodePropertyService = mutateNodePropertyService;
-        this.configuration = configuration;
+public class LccMutateStep implements MutateStep<LocalClusteringCoefficientResult, NodePropertiesWritten> {
+    private final SpecificCommunityMutateStep specificCommunityMutateStep;
+
+    public LccMutateStep(
+        MutateNodePropertyService mutateNodePropertyService,
+        Collection<String> labelsToUpdate,
+        String mutateProperty
+    ) {
+        this.specificCommunityMutateStep = new SpecificCommunityMutateStep(mutateNodePropertyService,labelsToUpdate,mutateProperty);
     }
 
     @Override
     public NodePropertiesWritten execute(
         Graph graph,
         GraphStore graphStore,
-        TriangleCountResult result
+        LocalClusteringCoefficientResult result
     ) {
-        return mutateNodePropertyService.mutateNodeProperties(
-            graph,
-            graphStore,
-            configuration,
-            NodePropertyValuesAdapter.adapt(result.localTriangles())
-        );
+        var nodePropertyValues = NodePropertyValuesAdapter.adapt(result.localClusteringCoefficients());
+
+        return specificCommunityMutateStep.apply(graph,graphStore,nodePropertyValues);
     }
 }
