@@ -34,7 +34,11 @@ import org.neo4j.gds.procedures.algorithms.community.K1ColoringMutateResult;
 import org.neo4j.gds.procedures.algorithms.community.KCoreDecompositionMutateResult;
 import org.neo4j.gds.procedures.algorithms.community.KMeansMutateResult;
 import org.neo4j.gds.procedures.algorithms.community.KmeansStatisticsComputationInstructions;
+import org.neo4j.gds.procedures.algorithms.community.LocalClusteringCoefficientMutateResult;
+import org.neo4j.gds.procedures.algorithms.community.TriangleCountMutateResult;
 import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
+import org.neo4j.gds.triangle.LocalClusteringCoefficientMutateConfig;
+import org.neo4j.gds.triangle.TriangleCountMutateConfig;
 
 import java.util.Map;
 import java.util.stream.Stream;
@@ -166,9 +170,9 @@ public class PushbackCommunityMutateProcedureFacade {
             )
         ).join();
     }
-    /*
-    public Stream<LocalClusteringCoefficientStatsResult> lcc(String graphName, Map<String, Object> configuration) {
-        var config = configurationParser.parseConfiguration(configuration, LocalClusteringCoefficientStatsConfig::of);
+
+    public Stream<LocalClusteringCoefficientMutateResult> lcc(String graphName, Map<String, Object> configuration) {
+        var config = configurationParser.parseConfiguration(configuration, LocalClusteringCoefficientMutateConfig::of);
 
         return businessFacade.lcc(
             GraphName.parse(graphName),
@@ -176,12 +180,20 @@ public class PushbackCommunityMutateProcedureFacade {
             config.toParameters(),
             config.jobId(),
             config.logProgress(),
-            graphResources -> new LccStatsResultTransformer(config.toMap(),graphResources.graph().nodeCount())
+            graphResources -> new LccMutateResultTransformer(
+                config.toMap(),
+                graphResources.graph().nodeCount(),
+                mutateNodePropertyService,
+                config.nodeLabels(),
+                config.mutateProperty(),
+                graphResources.graph(),
+                graphResources.graphStore()
+            )
         ).join();
     }
 
-    public Stream<TriangleCountStatsResult> triangleCount(String graphName, Map<String, Object> configuration) {
-        var config = configurationParser.parseConfiguration(configuration, TriangleCountStatsConfig::of);
+    public Stream<TriangleCountMutateResult> triangleCount(String graphName, Map<String, Object> configuration) {
+        var config = configurationParser.parseConfiguration(configuration, TriangleCountMutateConfig::of);
 
         return businessFacade.triangleCount(
             GraphName.parse(graphName),
@@ -189,12 +201,20 @@ public class PushbackCommunityMutateProcedureFacade {
             config.toParameters(),
             config.jobId(),
             config.logProgress(),
-            (graphResources)-> new TriangleCountStatsResultTransformer(config.toMap(),graphResources.graph().nodeCount())
+            (graphResources)-> new TriangleCountMutateResultTransformer(
+                config.toMap(),
+                graphResources.graph().nodeCount(),
+                mutateNodePropertyService,
+                config.nodeLabels(),
+                config.mutateProperty(),
+                graphResources.graph(),
+                graphResources.graphStore()
+            )
         ).join();
     }
-
-    public Stream<LabelPropagationStatsResult> labelPropagation(String graphName, Map<String, Object> configuration) {
-        var config = configurationParser.parseConfiguration(configuration, LabelPropagationStatsConfig::of);
+    /*
+    public Stream<LabelPropagationMutateResult> labelPropagation(String graphName, Map<String, Object> configuration) {
+        var config = configurationParser.parseConfiguration(configuration, LabelPropagationMutateConfig::of);
 
         var statisticsInstructions =  ProcedureStatisticsComputationInstructions.forCommunities(procedureReturnColumns);
 
@@ -206,12 +226,12 @@ public class PushbackCommunityMutateProcedureFacade {
             parameters,
             config.jobId(),
             config.logProgress(),
-            graphResources -> new LabelPropagationStatsResultTransformer(config.toMap(),statisticsInstructions,parameters.concurrency())
+            graphResources -> new LabelPropagationMutateResultTransformer(config.toMap(),statisticsInstructions,parameters.concurrency())
         ).join();
     }
 
-    public Stream<LeidenStatsResult> leiden(String graphName, Map<String, Object> configuration) {
-        var config = configurationParser.parseConfiguration(configuration, LeidenStatsConfig::of);
+    public Stream<LeidenMutateResult> leiden(String graphName, Map<String, Object> configuration) {
+        var config = configurationParser.parseConfiguration(configuration, LeidenMutateConfig::of);
 
         var statisticsInstructions =  ProcedureStatisticsComputationInstructions.forCommunities(procedureReturnColumns);
 
@@ -224,12 +244,12 @@ public class PushbackCommunityMutateProcedureFacade {
             parameters,
             config.jobId(),
             config.logProgress(),
-            graphResources -> new LeidenStatsResultTransformer(config.toMap(),statisticsInstructions,parameters.concurrency())
+            graphResources -> new LeidenMutateResultTransformer(config.toMap(),statisticsInstructions,parameters.concurrency())
         ).join();
     }
 
-    public Stream<LouvainStatsResult> louvain(String graphName, Map<String, Object> configuration) {
-        var config = configurationParser.parseConfiguration(configuration, LouvainStatsConfig::of);
+    public Stream<LouvainMutateResult> louvain(String graphName, Map<String, Object> configuration) {
+        var config = configurationParser.parseConfiguration(configuration, LouvainMutateConfig::of);
         var statisticsInstructions =  ProcedureStatisticsComputationInstructions.forCommunities(procedureReturnColumns);
 
         var parameters = config.toParameters();
@@ -240,12 +260,12 @@ public class PushbackCommunityMutateProcedureFacade {
             parameters,
             config.jobId(),
             config.logProgress(),
-            graphResources -> new LouvainStatsResultTransformer(config.toMap(),statisticsInstructions,parameters.concurrency())
+            graphResources -> new LouvainMutateResultTransformer(config.toMap(),statisticsInstructions,parameters.concurrency())
         ).join();
     }
 
-    public Stream<ModularityOptimizationStatsResult> modularityOptimization(String graphName, Map<String, Object> configuration) {
-        var config = configurationParser.parseConfiguration(configuration, ModularityOptimizationStatsConfig::of);
+    public Stream<ModularityOptimizationMutateResult> modularityOptimization(String graphName, Map<String, Object> configuration) {
+        var config = configurationParser.parseConfiguration(configuration, ModularityOptimizationMutateConfig::of);
 
         var statisticsInstructions =  ProcedureStatisticsComputationInstructions.forCommunities(procedureReturnColumns);
 
@@ -257,15 +277,15 @@ public class PushbackCommunityMutateProcedureFacade {
             parameters,
             config.jobId(),
             config.logProgress(),
-            graphResources -> new ModularityOptimizationStatsResultTransformer(config.toMap(),statisticsInstructions,parameters.concurrency())
+            graphResources -> new ModularityOptimizationMutateResultTransformer(config.toMap(),statisticsInstructions,parameters.concurrency())
         ).join();
     }
 
 
 
 
-    public Stream<SccStatsResult> scc(String graphName, Map<String, Object> configuration) {
-        var config = configurationParser.parseConfiguration(configuration, SccStatsConfig::of);
+    public Stream<SccMutateResult> scc(String graphName, Map<String, Object> configuration) {
+        var config = configurationParser.parseConfiguration(configuration, SccMutateConfig::of);
 
         var statisticsInstructions =  ProcedureStatisticsComputationInstructions.forComponents(procedureReturnColumns);
 
@@ -276,12 +296,12 @@ public class PushbackCommunityMutateProcedureFacade {
             parameters,
             config.jobId(),
             config.logProgress(),
-            (graphResources)-> new SccStatsResultTransformer(config.toMap(),statisticsInstructions, parameters.concurrency())
+            (graphResources)-> new SccMutateResultTransformer(config.toMap(),statisticsInstructions, parameters.concurrency())
         ).join();
     }
 
-    public Stream<WccStatsResult> wcc(String graphName, Map<String, Object> configuration) {
-        var config = configurationParser.parseConfiguration(configuration, WccStatsConfig::of);
+    public Stream<WccMutateResult> wcc(String graphName, Map<String, Object> configuration) {
+        var config = configurationParser.parseConfiguration(configuration, WccMutateConfig::of);
 
         var statisticsInstructions =  ProcedureStatisticsComputationInstructions.forComponents(procedureReturnColumns);
 
@@ -293,12 +313,12 @@ public class PushbackCommunityMutateProcedureFacade {
             parameters,
             config.jobId(),
             config.logProgress(),
-            (graphResources)-> new WccStatsResultTransformer(config.toMap(),statisticsInstructions, parameters.concurrency())
+            (graphResources)-> new WccMutateResultTransformer(config.toMap(),statisticsInstructions, parameters.concurrency())
         ).join();
     }
 
 
-    public Stream<SpeakerListenerLPAStatsResult> sllpa(String graphName, Map<String, Object> configuration) {
+    public Stream<SpeakerListenerLPAMutateResult> sllpa(String graphName, Map<String, Object> configuration) {
         var config = configurationParser.parseConfiguration(configuration, SpeakerListenerLPAConfig::of);
 
         return businessFacade.sllpa(
@@ -307,7 +327,7 @@ public class PushbackCommunityMutateProcedureFacade {
             config,
             config.jobId(),
             config.logProgress(),
-            (graphResources)-> new SpeakerListenerLPAStatsResultTransformer(config.toMap())
+            (graphResources)-> new SpeakerListenerLPAMutateResultTransformer(config.toMap())
         ).join();
     }
 
