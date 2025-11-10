@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.neo4j.gds.procedures.algorithms.community.mutate.PushbackCommunityMutateProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.community.stats.PushbackCommunityStatsProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.community.stream.PushbackCommunityStreamProcedureFacade;
 
@@ -45,13 +46,17 @@ class PushbackCommunityProcedureFacadeTest {
     @Mock
     private PushbackCommunityStatsProcedureFacade statsFacadeMock;
 
+    @Mock
+    private PushbackCommunityMutateProcedureFacade mutateFacadeMock;
+
     private PushbackCommunityProcedureFacade facade;
 
     @BeforeEach
     void setUp() {
         facade = new PushbackCommunityProcedureFacade(
             streamFacadeMock,
-            statsFacadeMock
+            statsFacadeMock,
+            mutateFacadeMock
         );
     }
     @Nested
@@ -61,126 +66,126 @@ class PushbackCommunityProcedureFacadeTest {
         void approxMaxKCut() {
             facade.approxMaxKCutStream(graphName, config);
             verify(streamFacadeMock).approxMaxKCut(graphName, config);
-            verifyNoInteractions(statsFacadeMock);
+            verifyNoInteractions(statsFacadeMock,mutateFacadeMock);
         }
 
         @Test
         void cliqueCounting() {
             facade.cliqueCountingStream(graphName, config);
             verify(streamFacadeMock).cliqueCounting(graphName, config);
-            verifyNoInteractions(statsFacadeMock);
+            verifyNoInteractions(statsFacadeMock,mutateFacadeMock);
         }
 
         @Test
         void conductance() {
             facade.conductanceStream(graphName, config);
             verify(streamFacadeMock).conductance(graphName, config);
-            verifyNoInteractions(statsFacadeMock);
+            verifyNoInteractions(statsFacadeMock,mutateFacadeMock);
         }
 
         @Test
         void hdbscan() {
             facade.hdbscanStream(graphName, config);
             verify(streamFacadeMock).hdbscan(graphName, config);
-            verifyNoInteractions(statsFacadeMock);
+            verifyNoInteractions(statsFacadeMock,mutateFacadeMock);
         }
 
         @Test
         void k1Coloring() {
             facade.k1ColoringStream(graphName, config);
             verify(streamFacadeMock).k1Coloring(graphName, config);
-            verifyNoInteractions(statsFacadeMock);
+            verifyNoInteractions(statsFacadeMock,mutateFacadeMock);
         }
 
         @Test
         void kCore() {
             facade.kCoreStream(graphName, config);
             verify(streamFacadeMock).kCore(graphName, config);
-            verifyNoInteractions(statsFacadeMock);
+            verifyNoInteractions(statsFacadeMock,mutateFacadeMock);
         }
 
         @Test
         void kMeans() {
             facade.kmeansStream(graphName, config);
             verify(streamFacadeMock).kMeans(graphName, config);
-            verifyNoInteractions(statsFacadeMock);
+            verifyNoInteractions(statsFacadeMock,mutateFacadeMock);
         }
 
         @Test
         void labelPropagation() {
             facade.labelPropagationStream(graphName, config);
             verify(streamFacadeMock).labelPropagation(graphName, config);
-            verifyNoInteractions(statsFacadeMock);
+            verifyNoInteractions(statsFacadeMock,mutateFacadeMock);
         }
 
         @Test
         void lcc() {
             facade.localClusteringCoefficientStream(graphName, config);
             verify(streamFacadeMock).lcc(graphName, config);
-            verifyNoInteractions(statsFacadeMock);
+            verifyNoInteractions(statsFacadeMock,mutateFacadeMock);
         }
 
         @Test
         void leiden() {
             facade.leidenStream(graphName, config);
             verify(streamFacadeMock).leiden(graphName, config);
-            verifyNoInteractions(statsFacadeMock);
+            verifyNoInteractions(statsFacadeMock,mutateFacadeMock);
         }
 
         @Test
         void louvain() {
             facade.louvainStream(graphName, config);
             verify(streamFacadeMock).louvain(graphName, config);
-            verifyNoInteractions(statsFacadeMock);
+            verifyNoInteractions(statsFacadeMock,mutateFacadeMock);
         }
 
         @Test
         void modularityOptimization() {
             facade.modularityOptimizationStream(graphName, config);
             verify(streamFacadeMock).modularityOptimization(graphName, config);
-            verifyNoInteractions(statsFacadeMock);
+            verifyNoInteractions(statsFacadeMock,mutateFacadeMock);
         }
 
         @Test
         void modularity() {
             facade.modularityStream(graphName, config);
             verify(streamFacadeMock).modularity(graphName, config);
-            verifyNoInteractions(statsFacadeMock);
+            verifyNoInteractions(statsFacadeMock,mutateFacadeMock);
         }
 
         @Test
         void scc() {
             facade.sccStream(graphName, config);
             verify(streamFacadeMock).scc(graphName, config);
-            verifyNoInteractions(statsFacadeMock);
+            verifyNoInteractions(statsFacadeMock,mutateFacadeMock);
         }
 
         @Test
         void wcc() {
             facade.wccStream(graphName, config);
             verify(streamFacadeMock).wcc(graphName, config);
-            verifyNoInteractions(statsFacadeMock);
+            verifyNoInteractions(statsFacadeMock,mutateFacadeMock);
         }
 
         @Test
         void triangleCount() {
             facade.triangleCountStream(graphName, config);
             verify(streamFacadeMock).triangleCount(graphName, config);
-            verifyNoInteractions(statsFacadeMock);
+            verifyNoInteractions(statsFacadeMock,mutateFacadeMock);
         }
 
         @Test
         void trianglesStream() {
             facade.trianglesStream(graphName, config);
             verify(streamFacadeMock).triangles(graphName, config);
-            verifyNoInteractions(statsFacadeMock);
+            verifyNoInteractions(statsFacadeMock,mutateFacadeMock);
         }
 
         @Test
         void sllpa() {
             facade.sllpaStream(graphName, config);
             verify(streamFacadeMock).sllpa(graphName, config);
-            verifyNoInteractions(statsFacadeMock);
+            verifyNoInteractions(statsFacadeMock,mutateFacadeMock);
         }
     }
 
@@ -192,56 +197,56 @@ class PushbackCommunityProcedureFacadeTest {
         void cliqueCounting() {
             facade.cliqueCountingStats(graphName, config);
             verify(statsFacadeMock).cliqueCounting(graphName, config);
-            verifyNoInteractions(streamFacadeMock);
+            verifyNoInteractions(streamFacadeMock,mutateFacadeMock);
         }
 
         @Test
         void k1Coloring() {
             facade.k1ColoringStats(graphName, config);
             verify(statsFacadeMock).k1Coloring(graphName, config);
-            verifyNoInteractions(streamFacadeMock);
+            verifyNoInteractions(streamFacadeMock,mutateFacadeMock);
         }
 
         @Test
         void kCore() {
             facade.kCoreStats(graphName, config);
             verify(statsFacadeMock).kCore(graphName, config);
-            verifyNoInteractions(streamFacadeMock);
+            verifyNoInteractions(streamFacadeMock,mutateFacadeMock);
         }
 
         @Test
         void kMeans() {
             facade.kmeansStats(graphName, config);
             verify(statsFacadeMock).kMeans(graphName, config);
-            verifyNoInteractions(streamFacadeMock);
+            verifyNoInteractions(streamFacadeMock,mutateFacadeMock);
         }
 
         @Test
         void labelPropagation() {
             facade.labelPropagationStats(graphName, config);
             verify(statsFacadeMock).labelPropagation(graphName, config);
-            verifyNoInteractions(streamFacadeMock);
+            verifyNoInteractions(streamFacadeMock,mutateFacadeMock);
         }
 
         @Test
         void leiden() {
             facade.leidenStats(graphName, config);
             verify(statsFacadeMock).leiden(graphName, config);
-            verifyNoInteractions(streamFacadeMock);
+            verifyNoInteractions(streamFacadeMock,mutateFacadeMock);
         }
 
         @Test
         void louvain() {
             facade.louvainStats(graphName, config);
             verify(statsFacadeMock).louvain(graphName, config);
-            verifyNoInteractions(streamFacadeMock);
+            verifyNoInteractions(streamFacadeMock,mutateFacadeMock);
         }
 
         @Test
         void modularityOptimization() {
             facade.modularityOptimizationStats(graphName, config);
             verify(statsFacadeMock).modularityOptimization(graphName, config);
-            verifyNoInteractions(streamFacadeMock);
+            verifyNoInteractions(streamFacadeMock,mutateFacadeMock);
         }
 
 
@@ -249,28 +254,28 @@ class PushbackCommunityProcedureFacadeTest {
         void hdbscan() {
             facade.hdbscanStats(graphName, config);
             verify(statsFacadeMock).hdbscan(graphName, config);
-            verifyNoInteractions(streamFacadeMock);
+            verifyNoInteractions(streamFacadeMock,mutateFacadeMock);
         }
 
         @Test
         void modularity() {
             facade.modularityStats(graphName, config);
             verify(statsFacadeMock).modularity(graphName, config);
-            verifyNoInteractions(streamFacadeMock);
+            verifyNoInteractions(streamFacadeMock,mutateFacadeMock);
         }
 
         @Test
         void lcc() {
             facade.localClusteringCoefficientStats(graphName, config);
             verify(statsFacadeMock).lcc(graphName, config);
-            verifyNoInteractions(streamFacadeMock);
+            verifyNoInteractions(streamFacadeMock,mutateFacadeMock);
         }
 
          @Test
         void triangleCount() {
             facade.triangleCountStats(graphName, config);
             verify(statsFacadeMock).triangleCount(graphName, config);
-            verifyNoInteractions(streamFacadeMock);
+            verifyNoInteractions(streamFacadeMock,mutateFacadeMock);
         }
 
 
@@ -278,21 +283,21 @@ class PushbackCommunityProcedureFacadeTest {
         void scc() {
             facade.sccStats(graphName, config);
             verify(statsFacadeMock).scc(graphName, config);
-            verifyNoInteractions(streamFacadeMock);
+            verifyNoInteractions(streamFacadeMock,mutateFacadeMock);
         }
 
         @Test
         void wcc() {
             facade.wccStats(graphName, config);
             verify(statsFacadeMock).wcc(graphName, config);
-            verifyNoInteractions(streamFacadeMock);
+            verifyNoInteractions(streamFacadeMock,mutateFacadeMock);
         }
 
         @Test
         void sllpa() {
             facade.sllpaStats(graphName, config);
             verify(statsFacadeMock).sllpa(graphName, config);
-            verifyNoInteractions(streamFacadeMock);
+            verifyNoInteractions(streamFacadeMock,mutateFacadeMock);
         }
     }
 

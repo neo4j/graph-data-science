@@ -17,66 +17,41 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.algorithms.community.stats;
+package org.neo4j.gds.procedures.algorithms.community.mutate;
 
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.ProcedureReturnColumns;
-import org.neo4j.gds.cliquecounting.CliqueCountingStatsConfig;
+import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
+import org.neo4j.gds.cliquecounting.CliqueCountingMutateConfig;
 import org.neo4j.gds.community.CommunityComputeBusinessFacade;
-import org.neo4j.gds.hdbscan.HDBScanStatsConfig;
-import org.neo4j.gds.k1coloring.K1ColoringStatsConfig;
-import org.neo4j.gds.kcore.KCoreDecompositionStatsConfig;
-import org.neo4j.gds.kmeans.KmeansStatsConfig;
-import org.neo4j.gds.labelpropagation.LabelPropagationStatsConfig;
-import org.neo4j.gds.leiden.LeidenStatsConfig;
-import org.neo4j.gds.louvain.LouvainStatsConfig;
-import org.neo4j.gds.modularity.ModularityStatsConfig;
-import org.neo4j.gds.modularityoptimization.ModularityOptimizationStatsConfig;
-import org.neo4j.gds.procedures.algorithms.community.CliqueCountingStatsResult;
-import org.neo4j.gds.procedures.algorithms.community.HDBScanStatsResult;
-import org.neo4j.gds.procedures.algorithms.community.K1ColoringStatsResult;
-import org.neo4j.gds.procedures.algorithms.community.KCoreDecompositionStatsResult;
-import org.neo4j.gds.procedures.algorithms.community.KmeansStatisticsComputationInstructions;
-import org.neo4j.gds.procedures.algorithms.community.KmeansStatsResult;
-import org.neo4j.gds.procedures.algorithms.community.LabelPropagationStatsResult;
-import org.neo4j.gds.procedures.algorithms.community.LeidenStatsResult;
-import org.neo4j.gds.procedures.algorithms.community.LocalClusteringCoefficientStatsResult;
-import org.neo4j.gds.procedures.algorithms.community.LouvainStatsResult;
-import org.neo4j.gds.procedures.algorithms.community.ModularityOptimizationStatsResult;
-import org.neo4j.gds.procedures.algorithms.community.ModularityStatsResult;
-import org.neo4j.gds.procedures.algorithms.community.SccStatsResult;
-import org.neo4j.gds.procedures.algorithms.community.SpeakerListenerLPAStatsResult;
-import org.neo4j.gds.procedures.algorithms.community.TriangleCountStatsResult;
-import org.neo4j.gds.procedures.algorithms.community.WccStatsResult;
+import org.neo4j.gds.procedures.algorithms.community.CliqueCountingMutateResult;
 import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
-import org.neo4j.gds.scc.SccStatsConfig;
-import org.neo4j.gds.sllpa.SpeakerListenerLPAConfig;
-import org.neo4j.gds.triangle.LocalClusteringCoefficientStatsConfig;
-import org.neo4j.gds.triangle.TriangleCountStatsConfig;
-import org.neo4j.gds.wcc.WccStatsConfig;
 
 import java.util.Map;
 import java.util.stream.Stream;
 
-public class PushbackCommunityStatsProcedureFacade {
+public class PushbackCommunityMutateProcedureFacade {
 
     private final CommunityComputeBusinessFacade businessFacade;
     private final UserSpecificConfigurationParser configurationParser;
     private final ProcedureReturnColumns procedureReturnColumns;
+    private final MutateNodePropertyService mutateNodePropertyService;
 
 
-    public PushbackCommunityStatsProcedureFacade(
+    public PushbackCommunityMutateProcedureFacade(
         CommunityComputeBusinessFacade businessFacade,
         UserSpecificConfigurationParser configurationParser,
-        ProcedureReturnColumns procedureReturnColumns
+        ProcedureReturnColumns procedureReturnColumns,
+        MutateNodePropertyService mutateNodePropertyService
     ) {
         this.businessFacade = businessFacade;
         this.configurationParser = configurationParser;
         this.procedureReturnColumns = procedureReturnColumns;
+        this.mutateNodePropertyService = mutateNodePropertyService;
     }
 
-    public Stream<CliqueCountingStatsResult> cliqueCounting(String graphName, Map<String, Object> configuration) {
-        var config = configurationParser.parseConfiguration(configuration, CliqueCountingStatsConfig::of);
+    public Stream<CliqueCountingMutateResult> cliqueCounting(String graphName, Map<String, Object> configuration) {
+        var config = configurationParser.parseConfiguration(configuration, CliqueCountingMutateConfig::of);
 
         var parameters = config.toParameters();
         return businessFacade.cliqueCounting(
@@ -85,10 +60,17 @@ public class PushbackCommunityStatsProcedureFacade {
             parameters,
             config.jobId(),
             config.logProgress(),
-            graphResources -> new CliqueCountingStatsResultTransformer(config.toMap())
+            graphResources -> new CliqueCountingMutateResultTransformer(
+                config.toMap(),
+                mutateNodePropertyService,
+                config.nodeLabels(),
+                config.mutateProperty(),
+                graphResources.graph(),
+                graphResources.graphStore()
+            )
         ).join();
     }
-
+    /*
     public Stream<K1ColoringStatsResult> k1Coloring(String graphName, Map<String, Object> configuration) {
         var config = configurationParser.parseConfiguration(configuration, K1ColoringStatsConfig::of);
 
@@ -302,6 +284,8 @@ public class PushbackCommunityStatsProcedureFacade {
             (graphResources)-> new SpeakerListenerLPAStatsResultTransformer(config.toMap())
         ).join();
     }
+
+    */
 
 
 

@@ -21,6 +21,7 @@ package org.neo4j.gds.procedures.algorithms.community.stats;
 
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
+import org.neo4j.gds.procedures.algorithms.community.CommunityDistributionHelpers;
 import org.neo4j.gds.procedures.algorithms.community.WccStatsResult;
 import org.neo4j.gds.result.StatisticsComputationInstructions;
 import org.neo4j.gds.result.TimedAlgorithmResult;

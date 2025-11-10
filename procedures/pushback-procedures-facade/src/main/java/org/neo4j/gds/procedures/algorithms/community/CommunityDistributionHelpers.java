@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.algorithms.community.stats;
+package org.neo4j.gds.procedures.algorithms.community;
 
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
@@ -27,11 +27,11 @@ import org.neo4j.gds.result.StatisticsComputationInstructions;
 import java.util.Map;
 import java.util.function.LongUnaryOperator;
 
- final class CommunityDistributionHelpers {
+ public final class CommunityDistributionHelpers {
 
     private CommunityDistributionHelpers() {}
 
-    static CommunityDistribution compute(
+    public static CommunityDistribution compute(
         long nodeCount,
         Concurrency concurrency,
         LongUnaryOperator communityFunction,
@@ -54,7 +54,7 @@ import java.util.function.LongUnaryOperator;
         return new CommunityDistribution(communityStatistics,communitySummary);
     }
 
-    record CommunityDistribution(CommunityStatistics.CommunityStats statistics, Map<String,Object> distribution){
+     public record CommunityDistribution(CommunityStatistics.CommunityStats statistics, Map<String,Object> distribution){
 
     }
 }

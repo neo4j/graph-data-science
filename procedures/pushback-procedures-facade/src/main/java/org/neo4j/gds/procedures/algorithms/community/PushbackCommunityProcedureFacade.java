@@ -20,6 +20,7 @@
 package org.neo4j.gds.procedures.algorithms.community;
 
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
+import org.neo4j.gds.procedures.algorithms.community.mutate.PushbackCommunityMutateProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.community.stats.PushbackCommunityStatsProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.community.stream.PushbackCommunityStreamProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.community.stubs.CommunityStubs;
@@ -31,12 +32,16 @@ public class PushbackCommunityProcedureFacade implements  CommunityProcedureFaca
 
     private final PushbackCommunityStreamProcedureFacade streamProcedureFacade;
     private final PushbackCommunityStatsProcedureFacade statsProcedureFacade;
+    private final PushbackCommunityMutateProcedureFacade mutateProcedureFacade;
 
-    public PushbackCommunityProcedureFacade(PushbackCommunityStreamProcedureFacade streamProcedureFacade,
-        PushbackCommunityStatsProcedureFacade statsProcedureFacade
+    public PushbackCommunityProcedureFacade(
+        PushbackCommunityStreamProcedureFacade streamProcedureFacade,
+        PushbackCommunityStatsProcedureFacade statsProcedureFacade,
+        PushbackCommunityMutateProcedureFacade mutateProcedureFacade
     ) {
         this.streamProcedureFacade = streamProcedureFacade;
         this.statsProcedureFacade = statsProcedureFacade;
+        this.mutateProcedureFacade = mutateProcedureFacade;
     }
 
     @Override
@@ -83,7 +88,7 @@ public class PushbackCommunityProcedureFacade implements  CommunityProcedureFaca
         String graphName,
         Map<String, Object> configuration
     ) {
-        return Stream.empty();
+        return  mutateProcedureFacade.cliqueCounting(graphName,configuration);
     }
 
     @Override

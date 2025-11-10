@@ -29,6 +29,8 @@ dependencies {
     // `CypherMapWrapper` lives here
     implementation project(':annotations')
 
+    implementation project(':community-mutate-steps')
+
     // `BaseConfig` lives here
     implementation project(':config-api')
 
@@ -38,6 +40,7 @@ dependencies {
     implementation project(':graph-schema-api')
 
     implementation project(':logging')
+
 
     // this is needed because of `MemoryEstimation`
     implementation project(':memory-usage')

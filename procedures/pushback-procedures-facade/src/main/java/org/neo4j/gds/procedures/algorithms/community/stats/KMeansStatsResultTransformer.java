@@ -19,11 +19,11 @@
  */
 package org.neo4j.gds.procedures.algorithms.community.stats;
 
-import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.kmeans.KmeansResult;
+import org.neo4j.gds.procedures.algorithms.community.CommunityDistributionHelpers;
+import org.neo4j.gds.procedures.algorithms.community.KmeansStatisticsComputationInstructions;
 import org.neo4j.gds.procedures.algorithms.community.KmeansStatsResult;
-import org.neo4j.gds.result.StatisticsComputationInstructions;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.results.ResultTransformer;
 
@@ -97,14 +97,4 @@ public class KMeansStatsResultTransformer implements ResultTransformer<TimedAlgo
         return null;
     }
 
-    record KmeansStatisticsComputationInstructions(boolean computeCountOnly, boolean computeCountAndDistribution, boolean shouldComputeListOfCentroids) implements  StatisticsComputationInstructions{
-
-        static KmeansStatisticsComputationInstructions create(ProcedureReturnColumns procedureReturnColumns){
-                var intermediate = ProcedureStatisticsComputationInstructions.forCommunities(procedureReturnColumns);
-                return new KmeansStatisticsComputationInstructions(intermediate.computeCountOnly(),
-                    intermediate.computeCountAndDistribution(),
-                    procedureReturnColumns.contains("centroids")
-                );
-        }
-    }
 }

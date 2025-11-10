@@ -22,15 +22,16 @@ package org.neo4j.gds.procedures.algorithms.community.stubs;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
+import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.cliqueCounting.CliqueCountingResult;
 import org.neo4j.gds.cliquecounting.CliqueCountingMutateConfig;
 import org.neo4j.gds.procedures.algorithms.community.CliqueCountingMutateResult;
 
 import java.util.Optional;
 
-public class CliqueCountingResultBuilderForMutateMode implements ResultBuilder<CliqueCountingMutateConfig, CliqueCountingResult, CliqueCountingMutateResult, Void> {
+public class CliqueCountingResultBuilderForMutateMode implements ResultBuilder<CliqueCountingMutateConfig, CliqueCountingResult, CliqueCountingMutateResult, NodePropertiesWritten> {
 
-    public CliqueCountingResultBuilderForMutateMode() {}
+    CliqueCountingResultBuilderForMutateMode() {}
 
     @Override
     public CliqueCountingMutateResult build(
@@ -38,16 +39,15 @@ public class CliqueCountingResultBuilderForMutateMode implements ResultBuilder<C
         CliqueCountingMutateConfig configuration,
         Optional<CliqueCountingResult> result,
         AlgorithmProcessingTimings timings,
-        Optional<Void> metadata
+        Optional<NodePropertiesWritten> metadata
     ) {
         if (result.isEmpty()) return CliqueCountingMutateResult.emptyFrom(timings, configuration.toMap());
 
         var cliqueCountingGlobalCount = result.get();
 
-
         return CliqueCountingMutateResult.create(
             timings,
-            graph.nodeCount(),
+            metadata.get().value(),
             cliqueCountingGlobalCount.globalCount(),
             configuration.toMap()
         );

@@ -130,7 +130,7 @@ public class CommunityAlgorithmsMutateModeBusinessFacade {
     public <RESULT> RESULT cliqueCounting(
         GraphName graphName,
         CliqueCountingMutateConfig configuration,
-        ResultBuilder<CliqueCountingMutateConfig, CliqueCountingResult, RESULT, Void> resultBuilder
+        ResultBuilder<CliqueCountingMutateConfig, CliqueCountingResult, RESULT, NodePropertiesWritten> resultBuilder
     ) {
         var mutateStep = new CliqueCountingMutateStep(mutateNodePropertyService, configuration.nodeLabels(),configuration.mutateProperty());
 

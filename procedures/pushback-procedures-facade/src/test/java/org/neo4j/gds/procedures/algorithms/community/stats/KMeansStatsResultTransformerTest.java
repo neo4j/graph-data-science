@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.collections.ha.HugeIntArray;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.kmeans.KmeansResult;
+import org.neo4j.gds.procedures.algorithms.community.KmeansStatisticsComputationInstructions;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 
 import java.util.List;
@@ -47,7 +48,7 @@ class KMeansStatsResultTransformerTest {
             4.0
         );
 
-        var instructions = mock(KMeansStatsResultTransformer.KmeansStatisticsComputationInstructions.class);
+        var instructions = mock(KmeansStatisticsComputationInstructions.class);
         when(instructions.computeCountAndDistribution()).thenReturn(true);
         when(instructions.shouldComputeListOfCentroids()).thenReturn(true);
         var transformer = new KMeansStatsResultTransformer(config,instructions,new Concurrency(1));
