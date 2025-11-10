@@ -28,7 +28,7 @@ import org.neo4j.gds.MapInputNodes;
 
 import java.util.Arrays;
 
-final class SupplyAndDemandFactory {
+public final class SupplyAndDemandFactory {
 
     private SupplyAndDemandFactory() {}
 

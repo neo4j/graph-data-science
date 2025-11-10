@@ -121,4 +121,12 @@ public final class MaxFlow extends Algorithm<FlowResult> {
         );
         discharging.dischargeUntilDone();
     }
+
+    public void computeMaxFlow(FlowGraph flowGraph, HugeDoubleArray excess, HugeLongArray label) {
+        this.flowGraph = flowGraph;
+        this.excess = excess;
+        this.label = label;
+        maximizeFlowSequential(flowGraph.superSource(), flowGraph.superTarget());
+        maximizeFlowSequential(flowGraph.superTarget(), flowGraph.superSource());
+    }
 }

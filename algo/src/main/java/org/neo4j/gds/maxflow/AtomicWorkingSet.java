@@ -36,15 +36,15 @@ public class AtomicWorkingSet {
         size = new AtomicLong(0);
     }
 
-    boolean isEmpty() {
+    public boolean isEmpty() {
         return size.get() == index.get();
     }
 
-    void resetIdx() {
+    public void resetIdx() {
         index.set(0L);
     }
 
-    void reset() {
+    public void reset() {
         resetIdx();
         size.set(0L);
     }
@@ -74,7 +74,7 @@ public class AtomicWorkingSet {
         return workingSet.get(idx);
     }
 
-    long pop() {
+    public long pop() {
         var idx = index.getAndIncrement();
         if (idx < size.get()) {
             return workingSet.get(idx);

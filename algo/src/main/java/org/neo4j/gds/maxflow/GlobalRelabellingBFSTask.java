@@ -63,7 +63,7 @@ class GlobalRelabellingBFSTask implements Runnable {
         flowGraph.forEachRelationship(
             v, (s, t, relIdx, residualCapacity, isReverse) -> {
                 //(s)-->(t) //want t-->s to have free capacity. (can push from t to s)
-                if (flowGraph.residualCapacity(relIdx, isReverse) <= 0.0) {
+                if (flowGraph.reverseResidualCapacity(relIdx, isReverse) <= 0.0) {
                     return true;
                 }
                 if (!verticesIsDiscovered.getAndSet(t)) {
