@@ -24,10 +24,12 @@ import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.cliquecounting.CliqueCountingMutateConfig;
 import org.neo4j.gds.community.CommunityComputeBusinessFacade;
+import org.neo4j.gds.hdbscan.HDBScanMutateConfig;
 import org.neo4j.gds.k1coloring.K1ColoringMutateConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionMutateConfig;
 import org.neo4j.gds.kmeans.KmeansMutateConfig;
 import org.neo4j.gds.procedures.algorithms.community.CliqueCountingMutateResult;
+import org.neo4j.gds.procedures.algorithms.community.HDBScanMutateResult;
 import org.neo4j.gds.procedures.algorithms.community.K1ColoringMutateResult;
 import org.neo4j.gds.procedures.algorithms.community.KCoreDecompositionMutateResult;
 import org.neo4j.gds.procedures.algorithms.community.KMeansMutateResult;
@@ -143,7 +145,54 @@ public class PushbackCommunityMutateProcedureFacade {
             )
         ).join();
     }
+
+    public Stream<HDBScanMutateResult> hdbscan(String graphName, Map<String, Object> configuration) {
+        var config = configurationParser.parseConfiguration(configuration, HDBScanMutateConfig::of);
+
+        return businessFacade.hdbscan(
+            GraphName.parse(graphName),
+            config.toGraphParameters(),
+            config.toParameters(),
+            config.jobId(),
+            config.logProgress(),
+            graphResources -> new HDBScanMutateResultTransformer(
+                config.toMap(),
+                graphResources.graph().nodeCount(),
+                mutateNodePropertyService,
+                config.nodeLabels(),
+                config.mutateProperty(),
+                graphResources.graph(),
+                graphResources.graphStore()
+            )
+        ).join();
+    }
     /*
+    public Stream<LocalClusteringCoefficientStatsResult> lcc(String graphName, Map<String, Object> configuration) {
+        var config = configurationParser.parseConfiguration(configuration, LocalClusteringCoefficientStatsConfig::of);
+
+        return businessFacade.lcc(
+            GraphName.parse(graphName),
+            config.toGraphParameters(),
+            config.toParameters(),
+            config.jobId(),
+            config.logProgress(),
+            graphResources -> new LccStatsResultTransformer(config.toMap(),graphResources.graph().nodeCount())
+        ).join();
+    }
+
+    public Stream<TriangleCountStatsResult> triangleCount(String graphName, Map<String, Object> configuration) {
+        var config = configurationParser.parseConfiguration(configuration, TriangleCountStatsConfig::of);
+
+        return businessFacade.triangleCount(
+            GraphName.parse(graphName),
+            config.toGraphParameters(),
+            config.toParameters(),
+            config.jobId(),
+            config.logProgress(),
+            (graphResources)-> new TriangleCountStatsResultTransformer(config.toMap(),graphResources.graph().nodeCount())
+        ).join();
+    }
+
     public Stream<LabelPropagationStatsResult> labelPropagation(String graphName, Map<String, Object> configuration) {
         var config = configurationParser.parseConfiguration(configuration, LabelPropagationStatsConfig::of);
 
@@ -213,45 +262,6 @@ public class PushbackCommunityMutateProcedureFacade {
     }
 
 
-
-     public Stream<HDBScanStatsResult> hdbscan(String graphName, Map<String, Object> configuration) {
-        var config = configurationParser.parseConfiguration(configuration, HDBScanStatsConfig::of);
-
-        return businessFacade.hdbscan(
-            GraphName.parse(graphName),
-            config.toGraphParameters(),
-            config.toParameters(),
-            config.jobId(),
-            config.logProgress(),
-            graphResources -> new HDBScanStatsResultTransformer(config.toMap(),graphResources.graph().nodeCount())
-        ).join();
-    }
-
-    public Stream<LocalClusteringCoefficientStatsResult> lcc(String graphName, Map<String, Object> configuration) {
-        var config = configurationParser.parseConfiguration(configuration, LocalClusteringCoefficientStatsConfig::of);
-
-        return businessFacade.lcc(
-            GraphName.parse(graphName),
-            config.toGraphParameters(),
-            config.toParameters(),
-            config.jobId(),
-            config.logProgress(),
-            graphResources -> new LccStatsResultTransformer(config.toMap(),graphResources.graph().nodeCount())
-        ).join();
-    }
-
-    public Stream<TriangleCountStatsResult> triangleCount(String graphName, Map<String, Object> configuration) {
-        var config = configurationParser.parseConfiguration(configuration, TriangleCountStatsConfig::of);
-
-        return businessFacade.triangleCount(
-            GraphName.parse(graphName),
-            config.toGraphParameters(),
-            config.toParameters(),
-            config.jobId(),
-            config.logProgress(),
-            (graphResources)-> new TriangleCountStatsResultTransformer(config.toMap(),graphResources.graph().nodeCount())
-        ).join();
-    }
 
 
     public Stream<SccStatsResult> scc(String graphName, Map<String, Object> configuration) {

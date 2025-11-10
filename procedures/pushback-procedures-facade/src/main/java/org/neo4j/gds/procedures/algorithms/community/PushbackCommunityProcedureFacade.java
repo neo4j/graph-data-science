@@ -850,7 +850,7 @@ public class PushbackCommunityProcedureFacade implements  CommunityProcedureFaca
 
     @Override
     public Stream<HDBScanMutateResult> hdbscanMutate(String graphName, Map<String, Object> configuration) {
-        return Stream.empty();
+        return mutateProcedureFacade.hdbscan(graphName,configuration);
     }
 
     @Override
