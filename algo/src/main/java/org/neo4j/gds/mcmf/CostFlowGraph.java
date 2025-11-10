@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.maxflow;
+package org.neo4j.gds.mcmf;
 
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.commons.lang3.mutable.MutableDouble;
@@ -27,27 +27,16 @@ import org.neo4j.gds.api.properties.relationships.RelationshipWithPropertyConsum
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
-import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
-import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.core.concurrency.RunWithConcurrency;
-import org.neo4j.gds.core.utils.paged.ParalleLongPageCreator;
+import org.neo4j.gds.maxflow.FlowGraph;
+import org.neo4j.gds.maxflow.FlowRelationship;
+import org.neo4j.gds.maxflow.NodeWithValue;
 import org.neo4j.gds.termination.TerminationFlag;
 
-import java.util.concurrent.atomic.AtomicLong;
+public final class CostFlowGraph extends FlowGraph {
+    private final HugeDoubleArray cost;
+    private final double totalCost;
 
-public class FlowGraph {
-    protected final Graph graph;
-    protected final HugeLongArray indPtr;
-    protected final HugeDoubleArray originalCapacity;
-    protected final HugeDoubleArray flow;
-    protected final HugeLongArray reverseAdjacency;
-    protected final HugeLongArray reverseToRelIdx;
-    protected final HugeLongArray reverseIndPtr;
-    protected final NodeWithValue[] supply;
-    protected final NodeWithValue[] demand;
-
-    protected FlowGraph(
+    private CostFlowGraph(
         Graph graph,
         HugeLongArray indPtr,
         HugeDoubleArray originalCapacity,
@@ -56,31 +45,26 @@ public class FlowGraph {
         HugeLongArray reverseToRelIdx,
         HugeLongArray reverseIndPtr,
         NodeWithValue[] supply,
-        NodeWithValue[] demand
+        NodeWithValue[] demand,
+        HugeDoubleArray cost,
+        double totalCost
     ) {
-        this.graph = graph;
-        this.indPtr = indPtr;
-        this.originalCapacity = originalCapacity;
-        this.flow = flow;
-        this.reverseAdjacency = reverseAdjacency;
-        this.reverseToRelIdx = reverseToRelIdx;
-        this.reverseIndPtr = reverseIndPtr;
-        this.supply = supply;
-        this.demand = demand;
+        super(graph, indPtr, originalCapacity, flow, reverseAdjacency, reverseToRelIdx, reverseIndPtr, supply, demand);
+        this.cost = cost;
+        this.totalCost = totalCost;
     }
 
-    public static FlowGraph create(Graph graph, NodeWithValue[] supply, NodeWithValue[] demand, TerminationFlag terminationFlag, Concurrency concurrency) {
-        var superSource = graph.nodeCount();
-        var superTarget = graph.nodeCount() + 1;
-        var oldNodeCount = graph.nodeCount();
-        var newNodeCount = oldNodeCount + 2;
+    public static CostFlowGraph create(Graph graphFlow, Graph graphCost, NodeWithValue[] supply, NodeWithValue[] demand, TerminationFlag terminationFlag) {
+        var superSource = graphFlow.nodeCount();
+        var superTarget = graphFlow.nodeCount() + 1;
+        var newNodeCount = graphFlow.nodeCount() + 2;
 
         var reverseDegree = HugeLongArray.newArray(newNodeCount);
         reverseDegree.setAll(x -> 0L);
-
-        for (long nodeId = 0; nodeId < graph.nodeCount(); nodeId++) {
+        var totalCost = new MutableDouble();
+        for (long nodeId = 0; nodeId < graphFlow.nodeCount(); nodeId++) {
             terminationFlag.assertRunning();
-            graph.forEachRelationship(
+            graphFlow.forEachRelationship(
                 nodeId, 0D, (s, t, capacity) -> {
                     if(capacity < 0D){
                         throw new IllegalArgumentException("Negative capacity not allowed");
@@ -103,14 +87,14 @@ public class FlowGraph {
         var reverseIndPtr = HugeLongArray.newArray(newNodeCount + 1);
         reverseIndPtr.set(0, 0);
         for (long nodeId = 0; nodeId <= superTarget; nodeId++) {
-            var degree = nodeId < graph.nodeCount()
-                ? graph.degree(nodeId)
+            var degree = nodeId < graphFlow.nodeCount()
+                ? graphFlow.degree(nodeId)
                 : (nodeId == superSource ? supply.length : demand.length);
             indPtr.set(nodeId + 1, indPtr.get(nodeId) + degree);
             reverseIndPtr.set(nodeId + 1, reverseIndPtr.get(nodeId) + reverseDegree.get(nodeId));
         }
 
-        var newRelationshipCount = graph.relationshipCount() + supply.length + demand.length;
+        var newRelationshipCount = graphFlow.relationshipCount() + supply.length + demand.length;
         var originalCapacity = HugeDoubleArray.newArray(newRelationshipCount);
         var reverseToRelIdx = HugeLongArray.newArray(newRelationshipCount);
         var reverseAdjacency = HugeLongArray.newArray(newRelationshipCount);
@@ -119,49 +103,47 @@ public class FlowGraph {
         flow.setAll(x -> 0D);
 
         //Populate CSRs
-        var cursor = HugeLongArray.newArray(newNodeCount);
-        var reverseCursor = HugeAtomicLongArray.of(newNodeCount, ParalleLongPageCreator.of(concurrency, x -> 0));
+        reverseDegree.setAll(x -> 0L); //reuse
+        var relIdx = new MutableLong(0L);
         RelationshipWithPropertyConsumer consumer = (s, t, capacity) -> {
-            var relIdx = indPtr.get(s) + cursor.get(s);
-            cursor.addTo(s, 1);
-            var reverseRelIdx = reverseIndPtr.get(t) + reverseCursor.getAndAdd(t, 1);
+            var reverseRelIdx = reverseIndPtr.get(t) + reverseDegree.get(t);
             reverseAdjacency.set(reverseRelIdx, s);
-            reverseToRelIdx.set(reverseRelIdx, relIdx);
-            originalCapacity.set(relIdx, capacity);
+            reverseToRelIdx.set(reverseRelIdx, relIdx.longValue());
+            reverseDegree.addTo(t, 1);
+            originalCapacity.set(relIdx.longValue(), capacity);
+            relIdx.increment();
             return true;
         };
 
-        var nodeId = new AtomicLong(0);
+        var cost = HugeDoubleArray.newArray(newRelationshipCount);
+        cost.setAll(x -> 0D);
 
-        var tasks = ParallelUtil.tasks(concurrency,
-            ()->  () -> {
-                var graphCopy = graph.concurrentCopy();
-                long v;
-                while ((v = nodeId.getAndIncrement()) < oldNodeCount) {
-                    graphCopy.forEachRelationship(v, 0D, consumer);
-                }
-            }
-        );
+        //Populate CSRs
+        var relIdxCost = new MutableLong(0L);
+        RelationshipWithPropertyConsumer costConsumer = (s, t, relationshipCost) -> {
+            cost.set(relIdxCost.longValue(), relationshipCost);
+            relIdxCost.increment();
+            totalCost.setValue(Math.max(totalCost.doubleValue(), relationshipCost));
+            return true;
+        };
 
-        RunWithConcurrency.builder()
-            .tasks(tasks)
-            .concurrency(concurrency)
-            .run();
-
-
+        for (long nodeId = 0; nodeId < graphFlow.nodeCount(); nodeId++) {
+            terminationFlag.assertRunning();
+            graphFlow.forEachRelationship(nodeId, 0D, consumer);
+            graphCost.forEachRelationship(nodeId, 0D, costConsumer);
+        }
         for (var source : supply) {
             terminationFlag.assertRunning();
             consumer.accept(superSource, source.node(), source.value());
         }
-        var r = newRelationshipCount - demand.length;
         for (var target : demand) {
             //Fake a fully utilized (capacity) edge FROM superTarget. Flow TO superTarget can therefore be increased by capacity.
-            flow.set(r++, target.value());
+            flow.set(relIdx.longValue(), target.value());
             consumer.accept(superTarget, target.node(), target.value());
         }
 
-        return new FlowGraph(
-            graph,
+        return new CostFlowGraph(
+            graphFlow,
             indPtr,
             originalCapacity,
             flow,
@@ -169,12 +151,15 @@ public class FlowGraph {
             reverseToRelIdx,
             reverseIndPtr,
             supply,
-            demand
+            demand,
+            cost,
+            totalCost.doubleValue()
         );
     }
 
-    public FlowGraph concurrentCopy() {
-        return new FlowGraph(
+    @Override
+    public CostFlowGraph concurrentCopy() {
+        return new CostFlowGraph(
             graph.concurrentCopy(),
             indPtr,
             originalCapacity,
@@ -183,118 +168,77 @@ public class FlowGraph {
             reverseToRelIdx,
             reverseIndPtr,
             supply,
-            demand
+            demand,
+            cost,
+            totalCost
         );
     }
 
-    private boolean forEachOriginalRelationship(long nodeId, ResidualEdgeConsumer consumer) {
-        var earlyTermination = new MutableBoolean(false);
+    private boolean forEachOriginalRelationship(long nodeId, CostAndCapacityEdgeConsumer consumer) {
         var relIdx = new MutableLong(indPtr.get(nodeId));
-        RelationshipWithPropertyConsumer originalConsumer = (s, t, capacity) -> {
-            var residualCapacity = capacity - flow.get(relIdx.longValue());
+        var breakEarly = new MutableBoolean(false);
+        RelationshipWithPropertyConsumer consumer2 = (s, t, capacity) -> {
+            var residualCapcaity = capacity - flow.get(relIdx.longValue());
+            var relationshipCost = cost.get(relIdx.longValue());
+
             var isReverse = false;
-            if(!consumer.accept(s, t, relIdx.getAndIncrement(), residualCapacity, isReverse)) {
-                earlyTermination.setTrue();
+
+            if(!consumer.accept(s, t, relIdx.longValue(), residualCapcaity, relationshipCost, isReverse)){
+                breakEarly.setTrue();
                 return false;
             }
+            relIdx.increment();
             return true;
         };
+
         if (nodeId == superSource()) {
             for (var source : supply) {
-                if(!originalConsumer.accept(superSource(), source.node(), source.value())){
-                    break;
+                if (!consumer2.accept(superSource(), source.node(), source.value())){
+                    return false;
                 }
             }
         } else if (nodeId == superTarget()) {
             for (var target : demand) {
-                if(!originalConsumer.accept(superTarget(), target.node(), target.value())){
-                    break;
+                if (!consumer2.accept(superTarget(), target.node(), target.value())) {
+                    return false;
                 }
             }
         } else {
-            graph.forEachRelationship(nodeId, 0D, originalConsumer);
+            graph.forEachRelationship(nodeId, 0D, consumer2);
         }
-        return earlyTermination.get();
+
+        return breakEarly.isFalse();
     }
 
-    void forEachReverseRelationship(long nodeId, ResidualEdgeConsumer consumer) {
+    private boolean forEachReverseRelationship(long nodeId,  CostAndCapacityEdgeConsumer consumer) {
         for (long reverseRelIdx = reverseIndPtr.get(nodeId); reverseRelIdx < reverseIndPtr.get(nodeId + 1); reverseRelIdx++) {
             var t = reverseAdjacency.get(reverseRelIdx);
             var relIdx = reverseToRelIdx.get(reverseRelIdx);
             var residualCapacity = flow.get(relIdx);
             var isReverse = true;
-            if(!consumer.accept(nodeId, t, relIdx, residualCapacity, isReverse)) {
-                break;
+            if (!consumer.accept(nodeId, t, relIdx, residualCapacity, -cost.get(relIdx), isReverse)) {
+                return false;
             }
         }
+        return true;
     }
 
-    public void forEachRelationship(long nodeId, ResidualEdgeConsumer consumer) {
-        if(!forEachOriginalRelationship(nodeId, consumer)){
-            forEachReverseRelationship(nodeId, consumer);
+    public boolean forEachRelationship(long nodeId, CostAndCapacityEdgeConsumer consumer) {
+        if(forEachOriginalRelationship(nodeId, consumer)) {
+            return forEachReverseRelationship(nodeId,  consumer);
         }
+        return false;
     }
 
-    public double flow(long relIdx) {
-        return flow.get(relIdx);
+    double maxCost() {
+        return totalCost;
     }
 
-    public void push(long relIdx, double delta, boolean isReverse) {
-        //(s)-[rel]->(t)
-        if (isReverse) {
-            flow.addTo(relIdx, -delta);
-        } else {
-            flow.addTo(relIdx, delta);
-        }
-    }
-
-    protected long originalEdgeCount() {
-        return graph.relationshipCount();
-    }
-
-    public long edgeCount() {
-        return graph.relationshipCount() + supply.length + demand.length;
-    }
-
-    protected long originalNodeCount() {
-        return graph.nodeCount();
-    }
-
-    public long nodeCount() {
-        return graph.nodeCount() + 2;
-    }
-
-    public long outDegree(long nodeId) {
-        return nodeId < originalNodeCount() ? graph.degree(nodeId) : (nodeId == originalNodeCount() ? supply.length : 0);
-    }
-
-    long inDegree(long nodeId) {
-        return reverseIndPtr.get(nodeId) + reverseIndPtr.get(nodeId + 1);
-    }
-
-    long degree(long nodeId) {
-        return inDegree(nodeId) + outDegree(nodeId);
-    }
-
-    public double reverseResidualCapacity(long relIdx, boolean isReverse) {
-        if (!isReverse) {
-            return flow.get(relIdx);
-        }
-        return originalCapacity.get(relIdx) - flow.get(relIdx);
-    }
-
-    public long superSource() {
-        return graph.nodeCount();
-    }
-
-    protected long superTarget() {
-        return graph.nodeCount() + 1;
-    }
-
-    FlowResult createFlowResult() {
+    CostFlowResult createFlowResult() {
         var flow = HugeObjectArray.newArray(FlowRelationship.class, originalEdgeCount());
         var totalFlow = new MutableDouble(0D);
-
+        var totalCost = new MutableDouble(0D);
+//        System.out.println("CREATE RESULT");
         var idx = new MutableLong(0L);
         for (long nodeId = 0; nodeId < originalNodeCount(); nodeId++) {
             var relIdx = new MutableLong(indPtr.get(nodeId));
@@ -303,9 +247,17 @@ public class FlowGraph {
                 0D,
                 (s, t, _capacity) -> {
                     var flow_ = this.flow.get(relIdx.longValue());
+                    assert(flow_ >= 0.0);
+
                     if (flow_ > 0.0) {
+//                        System.out.println("FOO" + (cost.get(relIdx.longValue())>0));
                         var flowRelationship = new FlowRelationship(s, t, flow_);
                         flow.set(idx.getAndIncrement(), flowRelationship);
+                        double operand = flow_ * cost.get(relIdx.longValue());
+                  //      System.out.println("adding: " + flow_+" "+ cost.get(relIdx.longValue())+" "+operand);
+
+                        totalCost.add(operand);
+
                     }
                     relIdx.increment();
                     return true;
@@ -315,7 +267,7 @@ public class FlowGraph {
         }
         //compute flow to superTarget
         forEachOriginalRelationship(
-            superTarget(), (_s, _t, relIdx, _capacity, _isReverse) -> {
+            superTarget(), (_s, _t, relIdx, _capacity, _cost, _isReverse) -> {
                 //superTarget--[rel]-->target
                 var fakeFlowFromSuperTarget = this.flow.get(relIdx);
                 var actualFlowFromSuperTarget = fakeFlowFromSuperTarget - originalCapacity.get(relIdx);
@@ -324,6 +276,14 @@ public class FlowGraph {
                 return true;
             }
         );
-        return new FlowResult(flow.copyOf(idx.longValue()), totalFlow.doubleValue());
+        return new CostFlowResult(flow.copyOf(idx.longValue()), totalFlow.doubleValue(), totalCost.doubleValue());
+    }
+
+    double maximalUnitCost() {
+        var max = -200D; //fixme
+        for (long r = 0; r < cost.size(); r++) {
+            max = Math.max(max, cost.get(r));
+        }
+        return max;
     }
 }
