@@ -26,9 +26,12 @@ import org.neo4j.gds.cliquecounting.CliqueCountingMutateConfig;
 import org.neo4j.gds.community.CommunityComputeBusinessFacade;
 import org.neo4j.gds.k1coloring.K1ColoringMutateConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionMutateConfig;
+import org.neo4j.gds.kmeans.KmeansMutateConfig;
 import org.neo4j.gds.procedures.algorithms.community.CliqueCountingMutateResult;
 import org.neo4j.gds.procedures.algorithms.community.K1ColoringMutateResult;
 import org.neo4j.gds.procedures.algorithms.community.KCoreDecompositionMutateResult;
+import org.neo4j.gds.procedures.algorithms.community.KMeansMutateResult;
+import org.neo4j.gds.procedures.algorithms.community.KmeansStatisticsComputationInstructions;
 import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
 
 import java.util.Map;
@@ -115,9 +118,9 @@ public class PushbackCommunityMutateProcedureFacade {
                 graphResources.graphStore())
         ).join();
     }
-    /*
-    public Stream<KmeansStatsResult> kMeans(String graphName, Map<String, Object> configuration) {
-        var config = configurationParser.parseConfiguration(configuration, KmeansStatsConfig::of);
+
+    public Stream<KMeansMutateResult> kMeans(String graphName, Map<String, Object> configuration) {
+        var config = configurationParser.parseConfiguration(configuration, KmeansMutateConfig::of);
 
         var statisticsInstructions =  KmeansStatisticsComputationInstructions.create(procedureReturnColumns);
 
@@ -128,10 +131,19 @@ public class PushbackCommunityMutateProcedureFacade {
             parameters,
             config.jobId(),
             config.logProgress(),
-            graphResources -> new KMeansStatsResultTransformer(config.toMap(), statisticsInstructions, parameters.concurrency())
+            graphResources -> new KMeansMutateResultTransformer(
+                config.toMap(),
+                statisticsInstructions,
+                parameters.concurrency(),
+                mutateNodePropertyService,
+                config.nodeLabels(),
+                config.mutateProperty(),
+                graphResources.graph(),
+                graphResources.graphStore()
+            )
         ).join();
     }
-
+    /*
     public Stream<LabelPropagationStatsResult> labelPropagation(String graphName, Map<String, Object> configuration) {
         var config = configurationParser.parseConfiguration(configuration, LabelPropagationStatsConfig::of);
 
@@ -214,20 +226,6 @@ public class PushbackCommunityMutateProcedureFacade {
             graphResources -> new HDBScanStatsResultTransformer(config.toMap(),graphResources.graph().nodeCount())
         ).join();
     }
-
-    public Stream<ModularityStatsResult> modularity(String graphName, Map<String, Object> configuration) {
-        var config = configurationParser.parseConfiguration(configuration, ModularityStatsConfig::of);
-
-        return businessFacade.modularity(
-            GraphName.parse(graphName),
-            config.toGraphParameters(),
-            config.relationshipWeightProperty(),
-            config.toParameters(),
-            config.jobId(),
-            graphResources -> new ModularityStatsResultTransformer(config.toMap())
-        ).join();
-    }
-
 
     public Stream<LocalClusteringCoefficientStatsResult> lcc(String graphName, Map<String, Object> configuration) {
         var config = configurationParser.parseConfiguration(configuration, LocalClusteringCoefficientStatsConfig::of);

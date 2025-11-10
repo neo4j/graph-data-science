@@ -252,7 +252,7 @@ public class PushbackCommunityProcedureFacade implements  CommunityProcedureFaca
 
     @Override
     public Stream<KMeansMutateResult> kMeansMutate(String graphName, Map<String, Object> rawConfiguration) {
-        return Stream.empty();
+        return mutateProcedureFacade.kMeans(graphName,rawConfiguration);
     }
 
     @Override

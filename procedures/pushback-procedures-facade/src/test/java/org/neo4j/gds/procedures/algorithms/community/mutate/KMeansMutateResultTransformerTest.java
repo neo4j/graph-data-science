@@ -17,9 +17,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.algorithms.community.stats;
+package org.neo4j.gds.procedures.algorithms.community.mutate;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
+import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.collections.ha.HugeIntArray;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.kmeans.KmeansResult;
@@ -28,12 +32,16 @@ import org.neo4j.gds.result.TimedAlgorithmResult;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyCollection;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-class KMeansStatsResultTransformerTest {
+class KMeansMutateResultTransformerTest {
 
     @Test
     void shouldTransformResult(){
@@ -51,18 +59,38 @@ class KMeansStatsResultTransformerTest {
         var instructions = mock(KmeansStatisticsComputationInstructions.class);
         when(instructions.computeCountAndDistribution()).thenReturn(true);
         when(instructions.shouldComputeListOfCentroids()).thenReturn(true);
-        var transformer = new KMeansStatsResultTransformer(config,instructions,new Concurrency(1));
 
-        var statsResult = transformer.apply(new TimedAlgorithmResult<>(result, 10));
+        var  mutateService =  mock(MutateNodePropertyService.class);
 
-        assertThat(statsResult.findFirst().orElseThrow())
+        when(mutateService.mutateNodeProperties(
+            any(Graph.class),
+            any(GraphStore.class),
+            anyCollection(),
+            anyList())
+        ).thenReturn(new NodePropertiesWritten(42));
+
+        var transformer = new KMeansMutateResultTransformer(
+            config,instructions,
+            new Concurrency(1),
+            mutateService,
+            Set.of("bar"),
+            "foo",
+            mock(Graph.class),
+            mock(GraphStore.class)
+        );
+
+        var mutateResult = transformer.apply(new TimedAlgorithmResult<>(result, 10));
+
+        assertThat(mutateResult.findFirst().orElseThrow())
             .satisfies(
-                stats ->{
-                    assertThat(stats.averageDistanceToCentroid()).isEqualTo(2.0);
-                    assertThat(stats.centroids()).isEqualTo(List.of(List.of(1d), List.of(2d)));
-                    assertThat(stats.computeMillis()).isEqualTo(10);
-                    assertThat(stats.averageSilhouette()).isEqualTo(4.0);
-                    assertThat(stats.communityDistribution()).containsKey("p99");
+                mutate ->{
+                    assertThat(mutate.averageDistanceToCentroid()).isEqualTo(2.0);
+                    assertThat(mutate.centroids()).isEqualTo(List.of(List.of(1d), List.of(2d)));
+                    assertThat(mutate.computeMillis()).isEqualTo(10);
+                    assertThat(mutate.averageSilhouette()).isEqualTo(4.0);
+                    assertThat(mutate.mutateMillis()).isNotNegative();
+                    assertThat((mutate.nodePropertiesWritten())).isEqualTo(42L);
+                    assertThat(mutate.communityDistribution()).containsKey("p99");
                 }
             );
     }
