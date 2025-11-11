@@ -25,8 +25,6 @@ import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.core.utils.ProgressTimer;
 
-import java.util.concurrent.atomic.AtomicLong;
-
 public final class MutateNodeStepExecute {
 
     private MutateNodeStepExecute() {}
@@ -37,18 +35,17 @@ public final class MutateNodeStepExecute {
         GraphStore graphStore,
         RESULT_FROM_ALGORITHM algorithmResult
     ) {
-        NodePropertiesWritten nodePropertiesWritten;
-        var mutateMillis = new AtomicLong();
-        try (var ignored = ProgressTimer.start(mutateMillis::set)) {
-            nodePropertiesWritten = mutateStep.execute(
-                graph,
-                graphStore,
-                algorithmResult
+        var builder = new MutateNodePropertyMetadataBuilder();
+
+        try (var ignored = ProgressTimer.start(builder::mutateMillis)) {
+            builder.nodePropertiesWritten(
+                mutateStep.execute(
+                    graph,
+                    graphStore,
+                    algorithmResult
+                )
             );
         }
-        return new MutateNodePropertyMetadata(nodePropertiesWritten, mutateMillis.get());
+        return builder.build();
     }
-
-
-    public record MutateNodePropertyMetadata(NodePropertiesWritten nodePropertiesWritten, long mutateMillis){}
 }
