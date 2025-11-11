@@ -1,0 +1,20 @@
+apply plugin: 'java-library'
+
+description = 'Neo4j Graph Data Science :: Procedures :: Topological Link Prediction'
+
+group = 'org.neo4j.gds'
+
+dependencies {
+    annotationProcessor project(':procedure-collector')
+
+    compileOnly(neo4j.graphdb.api) { transitive = false }
+    compileOnly(neo4j.procedure.api) { transitive = false }
+
+    implementation project(':procedures-facade-api')
+
+    testImplementation platform(openGds.junit5bom)
+
+    testImplementation project(':opengds-extension')
+    testImplementation project(':opengds-procedure-facade')
+    testImplementation project(':test-utils')
+}

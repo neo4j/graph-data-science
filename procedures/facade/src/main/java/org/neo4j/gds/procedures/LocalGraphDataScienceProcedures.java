@@ -39,6 +39,8 @@ import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.logging.GdsLoggers;
 import org.neo4j.gds.executor.MemoryEstimationContext;
+import org.neo4j.gds.functions.FunctionsFacade;
+import org.neo4j.gds.functions.LocalFunctionsFacade;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.MemoryTracker;
 import org.neo4j.gds.memest.DatabaseGraphStoreEstimationService;
@@ -71,6 +73,7 @@ public class LocalGraphDataScienceProcedures implements GraphDataScienceProcedur
     private final Log log;
 
     private final AlgorithmsProcedureFacade algorithmsProcedureFacade;
+    private final FunctionsFacade functionsFacade;
     private final GraphCatalogProcedureFacade graphCatalogProcedureFacade;
     private final ModelCatalogProcedureFacade modelCatalogProcedureFacade;
     private final OperationsProcedureFacade operationsProcedureFacade;
@@ -84,6 +87,7 @@ public class LocalGraphDataScienceProcedures implements GraphDataScienceProcedur
     LocalGraphDataScienceProcedures(
         Log log,
         AlgorithmsProcedureFacade algorithmsProcedureFacade,
+        FunctionsFacade functionsFacade,
         GraphCatalogProcedureFacade graphCatalogProcedureFacade,
         ModelCatalogProcedureFacade modelCatalogProcedureFacade,
         OperationsProcedureFacade operationsProcedureFacade,
@@ -92,6 +96,7 @@ public class LocalGraphDataScienceProcedures implements GraphDataScienceProcedur
     ) {
         this.log = log;
         this.algorithmsProcedureFacade = algorithmsProcedureFacade;
+        this.functionsFacade = functionsFacade;
         this.graphCatalogProcedureFacade = graphCatalogProcedureFacade;
         this.modelCatalogProcedureFacade = modelCatalogProcedureFacade;
         this.operationsProcedureFacade = operationsProcedureFacade;
@@ -149,7 +154,10 @@ public class LocalGraphDataScienceProcedures implements GraphDataScienceProcedur
             requestScopedDependencies
         );
 
-        var progressTrackerCreator = new ProgressTrackerCreator(loggers.loggerForProgressTracking(), requestScopedDependencies);
+        var progressTrackerCreator = new ProgressTrackerCreator(
+            loggers.loggerForProgressTracking(),
+            requestScopedDependencies
+        );
 
         var applicationsFacade = ApplicationsFacade.create(
             loggers,
@@ -185,6 +193,8 @@ public class LocalGraphDataScienceProcedures implements GraphDataScienceProcedur
             procedureReturnColumns,
             algorithmEstimationTemplate
         );
+
+        var functionsFacade = new LocalFunctionsFacade();
 
         var graphCatalogProcedureFacade = graphCatalogProcedureFacadeFactory.createGraphCatalogProcedureFacade(
             applicationsFacade,
@@ -223,6 +233,7 @@ public class LocalGraphDataScienceProcedures implements GraphDataScienceProcedur
 
         return new GraphDataScienceProceduresBuilder(loggers.log())
             .with(algorithmsProcedureFacade)
+            .with(functionsFacade)
             .with(graphCatalogProcedureFacade)
             .with(modelCatalogProcedureFacade)
             .with(operationsProcedureFacade)
@@ -237,6 +248,11 @@ public class LocalGraphDataScienceProcedures implements GraphDataScienceProcedur
 
     public AlgorithmsProcedureFacade algorithms() {
         return algorithmsProcedureFacade;
+    }
+
+    @Override
+    public FunctionsFacade functions() {
+        return functionsFacade;
     }
 
     public GraphCatalogProcedureFacade graphCatalog() {

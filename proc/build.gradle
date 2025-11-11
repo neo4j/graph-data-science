@@ -20,18 +20,20 @@ dependencies {
     implementation project(':model-catalog-api')
     implementation project(':string-formatting')
 
-    api project(':proc-common')
-    api project(':alpha-proc')
+    api project(':alpha-proc') // kill this
+
     api project(':cypher-aggregation')
-    api project(':proc-embeddings')
-    api project(':proc-similarity')
-    api project(':proc-centrality')
-    api project(':proc-community')
-    api project(':proc-path-finding')
-    api project(':proc-machine-learning')
     api project(':proc-catalog')
-    api project(':proc-pipeline-catalog')
+    api project(':proc-centrality')
+    api project(':proc-common')
+    api project(':proc-community')
+    api project(':proc-embeddings')
+    api project(':proc-machine-learning')
     api project(':proc-misc')
+    api project(':proc-path-finding')
+    api project(':proc-pipeline-catalog')
+    api project(':proc-similarity')
+    api project(':proc-topological-link-prediction')
 
     // TEST DEPENDENCIES
 

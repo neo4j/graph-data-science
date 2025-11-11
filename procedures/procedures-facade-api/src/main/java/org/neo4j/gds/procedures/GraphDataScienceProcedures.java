@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.procedures;
 
+import org.neo4j.gds.functions.FunctionsFacade;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.metrics.procedures.DeprecatedProceduresMetricService;
 import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
@@ -31,6 +32,8 @@ public interface GraphDataScienceProcedures {
     Log log();
 
     AlgorithmsProcedureFacade algorithms();
+
+    FunctionsFacade functions();
 
     GraphCatalogProcedureFacade graphCatalog();
 

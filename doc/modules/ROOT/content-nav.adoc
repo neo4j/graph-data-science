@@ -117,7 +117,7 @@
 *** xref:machine-learning/node-embeddings/node2vec.adoc[]
 *** xref:machine-learning/node-embeddings/hashgnn.adoc[]
 ** xref:algorithms/linkprediction.adoc[]
-*** xref:alpha-algorithms/adamic-adar.adoc[]
+*** xref:algorithms/topological-link-prediction/adamic-adar.adoc[]
 *** xref:alpha-algorithms/common-neighbors.adoc[]
 *** xref:alpha-algorithms/preferential-attachment.adoc[]
 *** xref:alpha-algorithms/resource-allocation.adoc[]
