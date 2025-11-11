@@ -60,7 +60,7 @@ class AdamicAdarProcTest extends BaseProcTest {
         String controlQuery =
             "MATCH (p1:Person {name: 'Mark'}) " +
                 "MATCH (p2:Person {name: 'Praveena'}) " +
-                "RETURN gds.alpha.linkprediction.adamicAdar(p1, p2) AS score, " +
+                "RETURN gds.linkprediction.adamicAdar(p1, p2) AS score, " +
                 "       1/log(3) AS cypherScore";
 
         Map<String, Object> node = runQuery(controlQuery, Result::next);
@@ -72,7 +72,7 @@ class AdamicAdarProcTest extends BaseProcTest {
         String controlQuery =
             "MATCH (p1:Person {name: 'Mark'}) " +
                 "MATCH (p2:Person {name: 'Praveena'}) " +
-                "RETURN gds.alpha.linkprediction.adamicAdar(p1, p2, " +
+                "RETURN gds.linkprediction.adamicAdar(p1, p2, " +
                 "{relationshipQuery: 'FRIENDS', direction: 'BOTH'}) AS score," +
                 "1/log(2) AS cypherScore";
 
@@ -85,7 +85,7 @@ class AdamicAdarProcTest extends BaseProcTest {
         String controlQuery =
             "MATCH (p1:Person {name: 'Jennifer'}) " +
                 "MATCH (p2:Person {name: 'Elaine'}) " +
-                "RETURN gds.alpha.linkprediction.adamicAdar(p1, p2) AS score, " +
+                "RETURN gds.linkprediction.adamicAdar(p1, p2) AS score, " +
                 "       1/log(2) + 1/log(2) AS cypherScore";
 
         Map<String, Object> node = runQuery(controlQuery, Result::next);
@@ -97,7 +97,7 @@ class AdamicAdarProcTest extends BaseProcTest {
         String controlQuery =
             "MATCH (p1:Person {name: 'Jennifer'}) " +
                 "MATCH (p2:Person {name: 'Ryan'}) " +
-                "RETURN gds.alpha.linkprediction.adamicAdar(p1, p2) AS score, " +
+                "RETURN gds.linkprediction.adamicAdar(p1, p2) AS score, " +
                 "       0.0 AS cypherScore";
 
         Map<String, Object> node = runQuery(controlQuery, Result::next);
@@ -109,7 +109,7 @@ class AdamicAdarProcTest extends BaseProcTest {
         String controlQuery =
             "MATCH (p1:Person {name: 'Praveena'}) " +
                 "MATCH (p2:Person {name: 'Praveena'}) " +
-                "RETURN gds.alpha.linkprediction.adamicAdar(p1, p2) AS score, " +
+                "RETURN gds.linkprediction.adamicAdar(p1, p2) AS score, " +
                 "       0.0 AS cypherScore";
 
         Map<String, Object> node = runQuery(controlQuery, Result::next);

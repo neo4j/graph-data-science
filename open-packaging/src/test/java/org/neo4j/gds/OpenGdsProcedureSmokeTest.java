@@ -582,7 +582,8 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         "gds.version",
         "gds.isLicensed",
 
-        "gds.alpha.linkprediction.adamicAdar",
+        "gds.linkprediction.adamicAdar",
+
         "gds.alpha.linkprediction.resourceAllocation",
         "gds.alpha.linkprediction.commonNeighbors",
         "gds.alpha.linkprediction.preferentialAttachment",
@@ -599,7 +600,6 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         "gds.alpha.ml.oneHotEncoding",
 
         "gds.graph.exists"
-
     );
 
     private static final List<String> AGGREGATION_FUNCTIONS = List.of(
