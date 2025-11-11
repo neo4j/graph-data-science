@@ -51,6 +51,9 @@ dependencies {
     annotationProcessor "org.immutables:value:$immutablesVersion"
     annotationProcessor "org.neo4j.gds:config-generator:$gdsVersion"
     annotationProcessor "org.neo4j.gds:pregel-proc-generator:$gdsVersion"
+    annotationProcessor "org.neo4j:neo4j-procedure-api:$neo4jVersion"
+    annotationProcessor "org.neo4j:neo4j-logging:$neo4jVersion"
+
     compileOnly         "org.jetbrains:annotations:$jetbrainsAnnotations"
     compileOnly         "org.immutables:value-annotations:$immutablesVersion"
 
