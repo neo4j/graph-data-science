@@ -5,6 +5,8 @@ description = 'Neo4j Graph Data Science :: Procedures :: Topological Link Predic
 group = 'org.neo4j.gds'
 
 dependencies {
+    annotationProcessor project(':procedure-collector')
+
     compileOnly(neo4j.graphdb.api) { transitive = false }
     compileOnly(neo4j.procedure.api) { transitive = false }
 
