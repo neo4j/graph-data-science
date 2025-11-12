@@ -28,14 +28,13 @@ import java.util.List;
 import static java.util.Arrays.asList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class OneHotEncodingFuncTest {
-
+class OneHotEncodingApplicationTest {
     @Test
     void singleCategorySelected() {
         List<Object> values = asList("Italian", "Indian", "Chinese");
         List<Object> selectedValues = Collections.singletonList("Italian");
 
-        assertEquals(asList(1L, 0L, 0L), new OneHotEncodingFunc().oneHotEncoding(values, selectedValues));
+        assertEquals(asList(1L, 0L, 0L), new OneHotEncodingApplication().encode(values, selectedValues));
     }
 
     @Test
@@ -43,7 +42,7 @@ class OneHotEncodingFuncTest {
         List<Object> values = asList("Italian", "Indian", "Chinese");
         List<Object> selectedValues = Collections.emptyList();
 
-        assertEquals(asList(0L, 0L, 0L), new OneHotEncodingFunc().oneHotEncoding(values, selectedValues));
+        assertEquals(asList(0L, 0L, 0L), new OneHotEncodingApplication().encode(values, selectedValues));
     }
 
     @Test
@@ -51,7 +50,7 @@ class OneHotEncodingFuncTest {
         List<Object> values = asList("Italian", "Indian", "Chinese");
         List<Object> selectedValues = Arrays.asList("Italian", "Chinese");
 
-        assertEquals(asList(1L, 0L, 1L), new OneHotEncodingFunc().oneHotEncoding(values, selectedValues));
+        assertEquals(asList(1L, 0L, 1L), new OneHotEncodingApplication().encode(values, selectedValues));
     }
 
     @Test
@@ -59,7 +58,7 @@ class OneHotEncodingFuncTest {
         List<Object> values = asList("Italian", "Indian", "Chinese");
         List<Object> selectedValues = Arrays.asList("Italian", "Chinese", "Indian");
 
-        assertEquals(asList(1L, 1L, 1L), new OneHotEncodingFunc().oneHotEncoding(values, selectedValues));
+        assertEquals(asList(1L, 1L, 1L), new OneHotEncodingApplication().encode(values, selectedValues));
     }
 
     @Test
@@ -67,7 +66,7 @@ class OneHotEncodingFuncTest {
         List<Object> values = asList("Italian", "Indian", "Chinese");
         List<Object> selectedValues = Collections.singletonList("British");
 
-        assertEquals(asList(0L, 0L, 0L), new OneHotEncodingFunc().oneHotEncoding(values, selectedValues));
+        assertEquals(asList(0L, 0L, 0L), new OneHotEncodingApplication().encode(values, selectedValues));
     }
 
     @Test
@@ -75,19 +74,18 @@ class OneHotEncodingFuncTest {
         List<Object> values = asList("Italian", "Indian", "Chinese");
         List<Object> selectedValues = Arrays.asList("British", "Chinese");
 
-        assertEquals(asList(0L, 0L, 1L), new OneHotEncodingFunc().oneHotEncoding(values, selectedValues));
+        assertEquals(asList(0L, 0L, 1L), new OneHotEncodingApplication().encode(values, selectedValues));
     }
 
     @Test
     void nullSelectedMeansNoneSelected() {
         List<Object> values = asList("Italian", "Indian", "Chinese");
 
-        assertEquals(asList(0L, 0L, 0L), new OneHotEncodingFunc().oneHotEncoding(values, null));
+        assertEquals(asList(0L, 0L, 0L), new OneHotEncodingApplication().encode(values, null));
     }
 
     @Test
     void nullAvailableMeansEmptyArray() {
-        assertEquals(Collections.emptyList(), new OneHotEncodingFunc().oneHotEncoding(null, null));
+        assertEquals(Collections.emptyList(), new OneHotEncodingApplication().encode(null, null));
     }
-
 }

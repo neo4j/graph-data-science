@@ -19,13 +19,25 @@
  */
 package org.neo4j.gds.functions;
 
-import org.neo4j.graphdb.Node;
-
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.LongStream;
 
-public interface FunctionsFacade {
-    double adamicAdarIndex(Node node1, Node node2, Map<String, Object> configuration);
+class OneHotEncodingApplication {
+    List<Long> encode(List<Object> availableValues, List<Object> selectedValues) {
+        if (availableValues == null) return LongStream.empty().boxed().collect(Collectors.toList());
 
-    List<Long> oneHotEncoding(List<Object> availableValues, List<Object> selectedValues);
+        if (selectedValues == null) return LongStream.range(0, availableValues.size())
+            .map(index -> 0)
+            .boxed().toList();
+
+        var selectedValuesSet = new HashSet<>(selectedValues);
+        var availableValuesArray = availableValues.toArray();
+
+        return LongStream.range(0, availableValues.size())
+            .map(index -> selectedValuesSet.contains(availableValuesArray[(int) index]) ? 1L : 0L)
+            .boxed()
+            .toList();
+    }
 }

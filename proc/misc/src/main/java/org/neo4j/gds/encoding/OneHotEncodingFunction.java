@@ -17,49 +17,44 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.tlp;
+package org.neo4j.gds.encoding;
 
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
-import org.neo4j.graphdb.Node;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.UserFunction;
 
-import java.util.Map;
+import java.util.List;
 
-import static org.neo4j.gds.tlp.Constants.DESCRIPTION;
+import static org.neo4j.gds.encoding.Constants.DESCRIPTION;
 
-public class TopologicalLinkPredictionFunctions {
+public class OneHotEncodingFunction {
     @Context
     public GraphDataScienceProcedures facade;
 
-    /**
-     * <a href="https://en.wikipedia.org/wiki/Adamic/Adar_index">Adar index</a>
-     */
-    @UserFunction("gds.linkprediction.adamicAdar")
+    @UserFunction("gds.ml.oneHotEncoding")
     @Description(DESCRIPTION)
-    public double adamicAdarSimilarity(
-        @Name("node1") Node node1,
-        @Name("node2") Node node2,
-        @Name(value = "config", defaultValue = "{}") Map<String, Object> config
+    public List<Long> oneHotEncoding(
+        @Name(value = "availableValues") List<Object> availableValues,
+        @Name(value = "selectedValues") List<Object> selectedValues
     ) {
-        return facade.functions().adamicAdarIndex(node1, node2, config);
+        return facade.functions().oneHotEncoding(availableValues, selectedValues);
     }
 
-    @UserFunction(value = "gds.alpha.linkprediction.adamicAdar", deprecatedBy = "gds.linkprediction.adamicAdar")
+    @UserFunction(value = "gds.alpha.ml.oneHotEncoding", deprecatedBy = "gds.ml.oneHotEncoding")
     @Description(DESCRIPTION)
     @Internal
     @Deprecated
-    public double alphaAdamicAdarSimilarity(
-        @Name("node1") Node node1, @Name("node2") Node node2,
-        @Name(value = "config", defaultValue = "{}") Map<String, Object> config
+    public List<Long> alphaOneHotEncoding(
+        @Name(value = "availableValues") List<Object> availableValues,
+        @Name(value = "selectedValues") List<Object> selectedValues
     ) {
-        facade.deprecatedProcedures().called("gds.alpha.linkprediction.adamicAdar");
+        facade.deprecatedProcedures().called("gds.alpha.ml.oneHotEncoding");
         facade.log().warn(
-            "Function `gds.alpha.linkprediction.adamicAdar` has been deprecated, please use `gds.linkprediction.adamicAdar`.");
+            "Function `gds.alpha.ml.oneHotEncoding` has been deprecated, please use `gds.ml.oneHotEncoding`.");
 
-        return adamicAdarSimilarity(node1, node2, config);
+        return oneHotEncoding(availableValues, selectedValues);
     }
 }

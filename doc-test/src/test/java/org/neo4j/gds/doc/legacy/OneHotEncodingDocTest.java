@@ -24,7 +24,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.gds.functions.OneHotEncodingFunc;
+import org.neo4j.gds.encoding.OneHotEncodingFunction;
 import org.neo4j.graphdb.Result;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -49,7 +49,7 @@ class OneHotEncodingDocTest extends BaseProcTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        registerFunctions(OneHotEncodingFunc.class);
+        registerFunctions(OneHotEncodingFunction.class);
         runQuery(DB_CYPHER);
     }
 

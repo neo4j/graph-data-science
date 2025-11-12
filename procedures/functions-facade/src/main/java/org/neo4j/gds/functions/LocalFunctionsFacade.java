@@ -24,10 +24,12 @@ import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
 
+import java.util.List;
 import java.util.Map;
 
 public class LocalFunctionsFacade implements FunctionsFacade {
     private final NeighbourFinder neighbourFinder = new NeighbourFinder();
+    private final OneHotEncodingApplication oneHotEncodingApplication = new OneHotEncodingApplication();
 
     @Override
     public double adamicAdarIndex(Node node1, Node node2, Map<String, Object> configuration) {
@@ -41,6 +43,11 @@ public class LocalFunctionsFacade implements FunctionsFacade {
         return neighbors.stream()
             .mapToDouble(nb -> 1.0 / Math.log(degree(nb, relationshipType, direction)))
             .sum();
+    }
+
+    @Override
+    public List<Long> oneHotEncoding(List<Object> availableValues, List<Object> selectedValues) {
+        return oneHotEncodingApplication.encode(availableValues, selectedValues);
     }
 
     private int degree(Node node, RelationshipType relationshipType, Direction direction) {

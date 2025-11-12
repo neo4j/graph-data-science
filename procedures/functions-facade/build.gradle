@@ -12,4 +12,9 @@ dependencies {
 
     implementation project(':functions-facade-api')
     implementation project(':legacy-cypher-projection')
+
+    testImplementation platform(openGds.junit5bom)
+    testImplementation openGds.junit5.jupiter
+    testRuntimeOnly openGds.junit5.jupiter.engine
+    testRuntimeOnly openGds.bundles.test.platforms
 }

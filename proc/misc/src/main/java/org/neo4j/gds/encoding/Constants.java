@@ -17,15 +17,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.functions;
+package org.neo4j.gds.encoding;
 
-import org.neo4j.graphdb.Node;
-
-import java.util.List;
-import java.util.Map;
-
-public interface FunctionsFacade {
-    double adamicAdarIndex(Node node1, Node node2, Map<String, Object> configuration);
-
-    List<Long> oneHotEncoding(List<Object> availableValues, List<Object> selectedValues);
+class Constants {
+    static final String DESCRIPTION = "RETURN a list of selected values in a one hot encoding format.";
 }
