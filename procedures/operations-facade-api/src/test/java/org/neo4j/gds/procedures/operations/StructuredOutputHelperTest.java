@@ -22,7 +22,7 @@ package org.neo4j.gds.procedures.operations;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.neo4j.gds.core.utils.progress.tasks.ImmutableProgress;
+import org.neo4j.gds.core.utils.progress.tasks.Progress;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -36,12 +36,12 @@ class StructuredOutputHelperTest {
         "0, 0, 5, [#####]"
     })
     void shouldComputeProgressBar(long progress, long volume, int progressBarLength, String expected) {
-        assertThat(StructuredOutputHelper.progressBar(ImmutableProgress.of(progress, volume), progressBarLength)).isEqualTo(expected);
+        assertThat(StructuredOutputHelper.progressBar(new Progress(progress, volume), progressBarLength)).isEqualTo(expected);
     }
 
     @Test
     void shouldComputeUnknownProgressBar() {
-        assertThat(StructuredOutputHelper.progressBar(ImmutableProgress.of(1, -1), 10)).isEqualTo("[~~~~n/a~~~]");
+        assertThat(StructuredOutputHelper.progressBar(new Progress(1, -1), 10)).isEqualTo("[~~~~n/a~~~]");
     }
 
     @ParameterizedTest
@@ -53,7 +53,7 @@ class StructuredOutputHelperTest {
         "0, 0, 100%"
     })
     void shouldComputeProgress(long progress, long volume, String expectedPercentage) {
-        assertThat(StructuredOutputHelper.computeProgress(ImmutableProgress.of(progress, volume))).isEqualTo(expectedPercentage);
+        assertThat(StructuredOutputHelper.computeProgress(new Progress(progress, volume))).isEqualTo(expectedPercentage);
     }
 
     @ParameterizedTest

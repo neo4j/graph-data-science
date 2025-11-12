@@ -168,16 +168,16 @@ class TaskTest {
             a, b
         );
 
-        assertThat(root.getProgress()).isEqualTo(ImmutableProgress.of(0, 200));
+        assertThat(root.getProgress()).isEqualTo(new Progress(0, 200));
 
         a.logProgress(50);
 
-        assertThat(root.getProgress()).isEqualTo(ImmutableProgress.of(50, 200));
+        assertThat(root.getProgress()).isEqualTo(new Progress(50, 200));
 
         a.logProgress(50);
         a.logProgress(100);
 
-        assertThat(root.getProgress()).isEqualTo(ImmutableProgress.of(200, 200));
+        assertThat(root.getProgress()).isEqualTo(new Progress(200, 200));
     }
 
     @Test
@@ -190,11 +190,11 @@ class TaskTest {
             a, b
         );
 
-        assertThat(root.getProgress()).isEqualTo(ImmutableProgress.of(0, -1L));
+        assertThat(root.getProgress()).isEqualTo(new Progress(0, -1L));
 
         a.logProgress(50);
 
-        assertThat(root.getProgress()).isEqualTo(ImmutableProgress.of(50, -1));
+        assertThat(root.getProgress()).isEqualTo(new Progress(50, -1));
     }
 
     @Test

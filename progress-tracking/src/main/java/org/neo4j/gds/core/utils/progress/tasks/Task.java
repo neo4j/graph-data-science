@@ -109,7 +109,7 @@ public class Task {
         var progress = new MutableLong(0);
 
         subTasks().stream().map(Task::getProgress).forEach(childProgress -> {
-            if (childProgress.volume() == UNKNOWN_VOLUME || volume.getValue() == UNKNOWN_VOLUME) {
+            if (childProgress.volume() == UNKNOWN_VOLUME || volume.longValue() == UNKNOWN_VOLUME) {
                 volume.setValue(UNKNOWN_VOLUME);
             } else {
                 volume.add(childProgress.volume());
@@ -118,10 +118,7 @@ public class Task {
             progress.add(childProgress.progress());
         });
 
-        return ImmutableProgress.builder()
-            .volume(volume.getValue())
-            .progress(progress.getValue())
-            .build();
+        return new Progress(progress.longValue(), volume.longValue());
     }
 
     public void setVolume(long volume) {

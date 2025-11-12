@@ -19,17 +19,9 @@
  */
 package org.neo4j.gds.core.utils.progress.tasks;
 
-import org.immutables.value.Value;
-import org.neo4j.gds.annotation.ValueClass;
+public record Progress(long progress, long volume) {
 
-@ValueClass
-public interface Progress {
-    long progress();
-
-    long volume();
-
-    @Value.Lazy
-    default double relativeProgress() {
+    public double relativeProgress() {
         if (volume() == Task.UNKNOWN_VOLUME) {
             return Task.UNKNOWN_VOLUME;
         }

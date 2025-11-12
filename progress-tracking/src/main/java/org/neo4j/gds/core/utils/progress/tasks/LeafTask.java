@@ -56,7 +56,7 @@ public class LeafTask extends Task {
 
     @Override
     public Progress getProgress() {
-        return ImmutableProgress.of(currentProgress.longValue(), volume);
+        return new Progress(currentProgress.longValue(), volume);
     }
 
     @Override

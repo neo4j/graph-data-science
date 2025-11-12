@@ -21,9 +21,9 @@ package org.neo4j.gds.core.utils.progress.tasks;
 
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.TestOnly;
+import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.RequestCorrelationId;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
@@ -321,7 +321,8 @@ public final class TaskProgressTracker implements ProgressTracker {
 
     public void requireCurrentTask() {
         if (currentTask.isEmpty()) {
-            onError.accept(new IllegalStateException("Tried to log progress, but there are no running tasks being tracked"));
+            onError.accept(new IllegalStateException(
+                "Tried to log progress, but there are no running tasks being tracked"));
         }
     }
 
