@@ -19,12 +19,11 @@
  */
 package org.neo4j.gds.userlog;
 
-
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.core.utils.progress.tasks.LeafTask;
 import org.neo4j.gds.core.utils.warnings.UserLogEntry;
-import org.neo4j.gds.procedures.LocalGraphDataScienceProcedures;
-import org.neo4j.gds.procedures.operations.LocalOperationsProcedureFacade;
+import org.neo4j.gds.procedures.GraphDataScienceProcedures;
+import org.neo4j.gds.procedures.operations.OperationsProcedureFacade;
 
 import java.util.stream.Stream;
 
@@ -35,15 +34,16 @@ import static org.mockito.Mockito.when;
 class UserLogProcTest {
     @Test
     void shouldLogUserWarnings() {
-        var facade = mock(LocalGraphDataScienceProcedures.class);
-        var userLogProc = new UserLogProc(facade);
+        var facade = mock(GraphDataScienceProcedures.class);
+        var userLogProc = new UserLogProc();
+        userLogProc.facade = facade;
 
         var expectedWarnings = Stream.of(
             new UserLogEntry(new LeafTask("lt", 42), "going once"),
             new UserLogEntry(new LeafTask("lt", 87), "going twice..."),
             new UserLogEntry(new LeafTask("lt", 23), "gone!")
         );
-        var operationsProcedureFacade = mock(LocalOperationsProcedureFacade.class);
+        var operationsProcedureFacade = mock(OperationsProcedureFacade.class);
         when(facade.operations()).thenReturn(operationsProcedureFacade);
         when(operationsProcedureFacade.queryUserLog("unused")).thenReturn(expectedWarnings);
         var actualWarnings = userLogProc.queryUserLog("unused");

@@ -30,24 +30,10 @@ import org.neo4j.procedure.Procedure;
 import java.util.stream.Stream;
 
 public class UserLogProc {
-    /**
-     * For prod
-     */
-    @SuppressWarnings("unused")
-    public UserLogProc() {}
-
-    /**
-     * For tests
-     */
-    UserLogProc(GraphDataScienceProcedures facade) {
-        this.facade = facade;
-    }
-
     @SuppressWarnings("WeakerAccess")
     @Context
     public GraphDataScienceProcedures facade;
 
-    @SuppressWarnings("unused")
     @Procedure("gds.userLog")
     @Description("Log warnings and hints for currently running tasks.")
     public Stream<UserLogEntry> queryUserLog(@Name(value = "jobId", defaultValue = "") String jobId) {
