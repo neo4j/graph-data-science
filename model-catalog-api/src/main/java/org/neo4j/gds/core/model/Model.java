@@ -39,6 +39,8 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
+
 @ValueClass
 public interface Model<DATA, CONFIG extends ModelConfig & BaseConfig, INFO extends Model.CustomInfo> {
 
@@ -91,6 +93,43 @@ public interface Model<DATA, CONFIG extends ModelConfig & BaseConfig, INFO exten
     @Value.Derived
     default boolean isPublished() {
         return sharedWith().contains(ALL_USERS);
+    }
+
+    default <D, C extends ModelConfig & BaseConfig, I extends Model.CustomInfo> Model<D, C, I> cast(
+        Class<D> dataClass,
+        Class<C> configClass,
+        Class<I> infoClass
+    ) {
+        if (!dataClass.isInstance(data())) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "The model `%s` has data with different types than expected. " +
+                    "Expected data type: `%s`, invoked with model data type: `%s`.",
+                name(),
+                data().getClass().getName(),
+                dataClass.getName()
+            ));
+        }
+        if (!configClass.isInstance(trainConfig())) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "The model `%s` has a training config with different types than expected. " +
+                    "Expected train config type: `%s`, invoked with model config type: `%s`.",
+                name(),
+                trainConfig().getClass().getName(),
+                configClass.getName()
+            ));
+        }
+
+
+        if (!infoClass.isInstance(customInfo())) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "The model `%s` has a customInfo with different types than expected. " +
+                    "Expected customInfo type: `%s`, invoked with model info type: `%s`.",
+                name(),
+                customInfo().getClass().getName(),
+                infoClass.getName()
+            ));
+        }
+        return (Model<D, C, I>) this;
     }
 
     static <D, C extends ModelConfig & BaseConfig, INFO extends CustomInfo> Model<D, C, INFO> of(

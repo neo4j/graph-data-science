@@ -23,6 +23,7 @@ dependencies {
     implementation project(':graph-schema-api')
     implementation project(':licensing')
     implementation project(':ml-api')
+    implementation project(':string-formatting')
 
     implementation openGds.commons.lang3
 
