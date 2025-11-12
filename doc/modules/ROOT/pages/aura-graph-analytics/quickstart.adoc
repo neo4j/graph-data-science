@@ -4,6 +4,11 @@ Here is a full example of how to use the Cypher API to load data from an AuraDB 
 
 You can find more details on each step and procedure in the xref:aura-graph-analytics/cypher.adoc[] page.
 
+[NOTE]
+====
+You can now use the Cypher API inside an AuraDB without xref:aura-graph-analytics/cypher.adoc#aura-api-auth[Aura API credentials].
+====
+
 == Projecting a graph
 
 Start by adding some example data into the AuraDB database.
@@ -32,32 +37,10 @@ image::example-graphs/aura-graph-analytics-serverless.png[]
 The next step is to project the data into a graph within a remote session.
 The following example shows how to run a Cypher projection and xref:aura-graph-analytics/index.adoc#implicit-sessions[create a session] at the same time.
 
-To run the example, you must first set two query parameters called `clientId` and `clientSecret` to your link:https://neo4j.com/docs/aura/api/authentication/[Aura API keys].
-
-[NOTE]
-====
-It is good practice to use link:https://neo4j.com/docs/cypher-manual/current/syntax/parameters/[query parameters] for sensitive data such as credentials.
-This also removes the need to enter the same strings multiple times.
-
-In the Aura console, you can set query parameters within the link:https://neo4j.com/docs/aura/query/operations/#query-parameters[Query tool^].
-For other environments, see the link:https://neo4j.com/docs/cypher-manual/current/syntax/parameters[Cypher manual].
-====
-
-[IMPORTANT]
-====
-Make sure that the credentials you use here are the link:https://neo4j.com/docs/aura/api/authentication/[Aura API keys] (client ID and client secret), *not* your AuraDB credentials (username and password).
-
-Aura API keys examples:
-
-* Client ID: `n1lYYI2Zxxxxxxxxxxxxxxxxv1Cddvbp`
-* Client secret: `MduaDb4CxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxINtP_7Lt`
-====
-
 .Project a graph called 'myGraph' using a remote Cypher projection into a new GDS Session
 [source, cypher, role=noplay setup-query]
 ----
 CYPHER runtime=parallel // <1>
-WITH gds.aura.api.credentials($clientId, $clientSecret) AS credentials // <2>
 MATCH (source:User)
 OPTIONAL MATCH (source)-[r:LINK]->(target:User)
 WITH gds.graph.project('myGraph', source, target, {
@@ -65,14 +48,12 @@ WITH gds.graph.project('myGraph', source, target, {
   targetNodeProperties: target { .age },
   relationshipProperties: r { .weight }
 }, {
-  memory: '2GB', ttl: duration({minutes: 30}) // <3>
+  memory: '2GB', ttl: duration({minutes: 30}) // <2>
 }) AS g
 RETURN g.graphName, g.nodeCount, g.relationshipCount
 ----
 <1> The Cypher `parallel` runtime is recommended but not mandatory.
-<2> Add the `gds.aura.api.credentials` function before the actual query.
-You need to set the string values for `clientId` and `clientSecret` as query parameters first.
-<3> Set the `memory` (mandatory) and `ttl` (optional) parameters.
+<2> Set the `memory` (mandatory) and `ttl` (optional) parameters.
 
 .Results
 [opts="header"]
@@ -91,7 +72,6 @@ You can also get details on the projected graph using the `gds.graph.list()` pro
 .Get details of the projected graph
 [source, cypher, role=noplay]
 ----
-WITH gds.aura.api.credentials($clientId, $clientSecret) AS credentials
 CALL gds.graph.list()
 YIELD graphName, nodeCount, relationshipCount
 RETURN graphName, nodeCount, relationshipCount
@@ -115,7 +95,6 @@ Run the xref:algorithms/page-rank.adoc[] algorithm in `mutate` mode on the remot
 .Run the PageRank algorithm in `mutate` mode
 [source, cypher]
 ----
-WITH gds.aura.api.credentials($clientId, $clientSecret) AS credentials
 CALL gds.pageRank.mutate('myGraph', { mutateProperty: 'pageRank' })
 YIELD ranIterations, nodePropertiesWritten
 RETURN ranIterations, nodePropertiesWritten
@@ -136,7 +115,6 @@ Use the new `pageRank` node property as input to the xref:machine-learning/node-
 .Run the FastRP algorithm in `mutate` mode
 [source, cypher]
 ----
-WITH gds.aura.api.credentials($clientId, $clientSecret) AS credentials
 CALL gds.fastRP.mutate('myGraph', {
   featureProperties: ['pageRank'],
   relationshipWeightProperty: 'weight',
@@ -164,7 +142,6 @@ Inspect the values of the new node properties.
 .Stream node properties
 [source, cypher]
 ----
-WITH gds.aura.api.credentials($clientId, $clientSecret) AS credentials
 CALL gds.graph.nodeProperty.stream('myGraph', 'fastrp')
 YIELD nodeId, propertyValue
 RETURN nodeId, propertyValue
@@ -195,7 +172,6 @@ You can write new properties to the source AuraDB database in two ways:
 .Write the `fastrp` property
 [source, cypher]
 ----
-WITH gds.aura.api.credentials($clientId, $clientSecret) AS credentials
 CALL gds.graph.nodeProperties.write('myGraph', ['fastrp'])
 YIELD propertiesWritten
 RETURN propertiesWritten
@@ -216,7 +192,6 @@ RETURN propertiesWritten
 .Run the Louvain algorithm in `write` mode
 [source, cypher]
 ----
-WITH gds.aura.api.credentials($clientId, $clientSecret) AS credentials
 CALL gds.louvain.write('myGraph', { writeProperty: 'louvain' })
 YIELD communityCount, modularity
 RETURN communityCount, modularity
@@ -240,7 +215,6 @@ Since the session was created xref:aura-graph-analytics/index.adoc#implicit-sess
 .Drop the graph 'myGraph'
 [source, cypher]
 ----
-WITH gds.aura.api.credentials($clientId, $clientSecret) AS credentials
 CALL gds.graph.drop('myGraph')
 YIELD graphName
 RETURN graphName

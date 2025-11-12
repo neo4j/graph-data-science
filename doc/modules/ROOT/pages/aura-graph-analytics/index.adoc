@@ -6,7 +6,6 @@ Aura Graph Analytics is an on-demand ephemeral compute environment for running g
 
 Aura Graph Analytics is based on _sessions_.
 Each session is a standalone link:https://neo4j.com/docs/aura/graph-analytics/#aura-gds-serverless[Neo4j Aura compute environment] that is created when needed and deleted when no longer usefulfootnote:[Or when the <<max-lifetime, maximum session lifetime>> is reached.], all without any instance management operations.
-You only need to have link:https://neo4j.com/docs/aura/api/authentication/[Aura API credentials] ready before you can start using sessions.
 
 Depending on where your data is, you can use three types of session:
 
