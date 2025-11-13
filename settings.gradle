@@ -86,9 +86,6 @@ project(':triplet-graph-builder').projectDir = file('triplet-graph-builder')
 include('legacy-cypher-projection')
 project(':legacy-cypher-projection').projectDir = file('legacy-cypher-projection')
 
-include('cypher-core')
-project(':cypher-core').projectDir = file('cypher/cypher-core')
-
 include('doc')
 project(':doc').projectDir = file('doc')
 
