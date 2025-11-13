@@ -597,7 +597,7 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         "gds.similarity.overlap",
         "gds.similarity.pearson",
 
-        "gds.alpha.ml.oneHotEncoding",
+        "gds.ml.oneHotEncoding",
 
         "gds.graph.exists"
     );
