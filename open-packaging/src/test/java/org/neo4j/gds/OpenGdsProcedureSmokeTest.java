@@ -271,8 +271,8 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         "gds.steinerTree.write.estimate",
 
         "gds.triangles",
-        "gds.alpha.ml.splitRelationships.mutate",
-        "gds.alpha.ml.splitRelationships.mutate.estimate",
+        "gds.ml.splitRelationships.mutate",
+        "gds.ml.splitRelationships.mutate.estimate",
 
         "gds.influenceMaximization.celf.mutate",
         "gds.influenceMaximization.celf.mutate.estimate",

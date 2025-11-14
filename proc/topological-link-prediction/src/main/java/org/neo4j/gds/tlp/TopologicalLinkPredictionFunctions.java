@@ -53,7 +53,8 @@ public class TopologicalLinkPredictionFunctions {
     @Internal
     @Deprecated
     public double alphaAdamicAdarSimilarity(
-        @Name("node1") Node node1, @Name("node2") Node node2,
+        @Name("node1") Node node1,
+        @Name("node2") Node node2,
         @Name(value = "config", defaultValue = "{}") Map<String, Object> config
     ) {
         facade.deprecatedProcedures().called("gds.alpha.linkprediction.adamicAdar");

@@ -319,7 +319,7 @@ The following Machine Learning procedures are not supported:
 * `gds.alpha.linkprediction.resourceAllocation`
 * `gds.alpha.linkprediction.sameCommunity`
 * `gds.alpha.linkprediction.totalNeighbors`
-* `gds.alpha.ml.splitRelationships`
+* `gds.ml.splitRelationships`
 
 Additionally, all `pipeline` procedures are unsupported.
 
@@ -404,4 +404,3 @@ RETURN gds.aura.api.credentials(
 | Name | Type | Description
 | -    | -    | Always returns `null`.
 |===
-

@@ -111,7 +111,7 @@ final class MutateModeAlgorithmLibrary {
             case SingleSourceDijkstra -> CanonicalProcedureName.parse("gds.allShortestPaths.dijkstra");
             case SLLPA -> CanonicalProcedureName.parse("gds.allShortestPaths.sllpa");
             case SpanningTree -> CanonicalProcedureName.parse("gds.spanningTree");
-            case SplitRelationships -> CanonicalProcedureName.parse("gds.alpha.ml.splitRelationships");
+            case SplitRelationships -> CanonicalProcedureName.parse("gds.ml.splitRelationships");
             case SteinerTree -> CanonicalProcedureName.parse("gds.steinerTree");
             case TopologicalSort -> null;
             case ToUndirected -> CanonicalProcedureName.parse("gds.graph.relationships.toUndirected");

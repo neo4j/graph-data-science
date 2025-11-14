@@ -274,6 +274,9 @@
 | `gds.maxkcut.mutate.estimate` label:procedure[Procedure]
 | `gds.maxkcut.stream` label:procedure[Procedure]
 | `gds.maxkcut.stream.estimate` label:procedure[Procedure]
+.2+<.^| xref:machine-learning/pre-processing/split-relationships.adoc[Split Relationships]
+| `gds.ml.splitRelationships.mutate` label:procedure[Procedure]
+| `gds.ml.splitRelationships.mutate.estimate` label:procedure[Procedure]
 .4+<.^| xref:algorithms/modularity.adoc[Modularity Metric]
 | `gds.modularity.stats` label:procedure[Procedure]
 | `gds.modularity.stats.estimate` label:procedure[Procedure]
@@ -466,8 +469,5 @@
 | xref:alpha-algorithms/preferential-attachment.adoc[Preferential Attachment] | `gds.alpha.linkprediction.preferentialAttachment` label:function[Function]
 | xref:alpha-algorithms/resource-allocation.adoc[Resource Allocation] | `gds.alpha.linkprediction.resourceAllocation` label:function[Function]
 | xref:alpha-algorithms/same-community.adoc[Same Community] | `gds.alpha.linkprediction.sameCommunity` label:function[Function]
-.2+<.^| xref:machine-learning/pre-processing/split-relationships.adoc[Split Relationships]
-| `gds.alpha.ml.splitRelationships.mutate` label:procedure[Procedure]
-| `gds.alpha.ml.splitRelationships.mutate.estimate` label:procedure[Procedure]
 | xref:alpha-algorithms/total-neighbors.adoc[Total Neighbors] | `gds.alpha.linkprediction.totalNeighbors` label:function[Function]
 |===
