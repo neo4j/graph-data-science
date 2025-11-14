@@ -29,17 +29,15 @@ import org.neo4j.procedure.UserFunction;
 
 import java.util.Map;
 
-import static org.neo4j.gds.tlp.Constants.DESCRIPTION;
+import static org.neo4j.gds.tlp.Constants.ADAMIC_ADAR_INDEX_DESCRIPTION;
+import static org.neo4j.gds.tlp.Constants.RESOURCE_ALLOCATION_SIMILARITY_DESCRIPTION;
 
 public class TopologicalLinkPredictionFunctions {
     @Context
     public GraphDataScienceProcedures facade;
 
-    /**
-     * <a href="https://en.wikipedia.org/wiki/Adamic/Adar_index">Adar index</a>
-     */
     @UserFunction("gds.linkprediction.adamicAdar")
-    @Description(DESCRIPTION)
+    @Description(ADAMIC_ADAR_INDEX_DESCRIPTION)
     public double adamicAdarSimilarity(
         @Name("node1") Node node1,
         @Name("node2") Node node2,
@@ -49,7 +47,7 @@ public class TopologicalLinkPredictionFunctions {
     }
 
     @UserFunction(value = "gds.alpha.linkprediction.adamicAdar", deprecatedBy = "gds.linkprediction.adamicAdar")
-    @Description(DESCRIPTION)
+    @Description(ADAMIC_ADAR_INDEX_DESCRIPTION)
     @Internal
     @Deprecated
     public double alphaAdamicAdarSimilarity(
@@ -62,5 +60,31 @@ public class TopologicalLinkPredictionFunctions {
             "Function `gds.alpha.linkprediction.adamicAdar` has been deprecated, please use `gds.linkprediction.adamicAdar`.");
 
         return adamicAdarSimilarity(node1, node2, config);
+    }
+
+    @UserFunction("gds.linkprediction.resourceAllocation")
+    @Description(RESOURCE_ALLOCATION_SIMILARITY_DESCRIPTION)
+    public double resourceAllocationSimilarity(
+        @Name("node1") Node node1,
+        @Name("node2") Node node2,
+        @Name(value = "config", defaultValue = "{}") Map<String, Object> config
+    ) {
+        return facade.functions().resourceAllocationSimilarity(node1, node2, config);
+    }
+
+    @UserFunction(value = "gds.alpha.linkprediction.resourceAllocation", deprecatedBy = "gds.linkprediction.resourceAllocation")
+    @Description(RESOURCE_ALLOCATION_SIMILARITY_DESCRIPTION)
+    @Internal
+    @Deprecated
+    public double alphaResourceAllocationSimilarity(
+        @Name("node1") Node node1,
+        @Name("node2") Node node2,
+        @Name(value = "config", defaultValue = "{}") Map<String, Object> config
+    ) {
+        facade.deprecatedProcedures().called("gds.alpha.linkprediction.resourceAllocation");
+        facade.log().warn(
+            "Function `gds.alpha.linkprediction.resourceAllocation` has been deprecated, please use `gds.linkprediction.resourceAllocation`.");
+
+        return resourceAllocationSimilarity(node1, node2, config);
     }
 }

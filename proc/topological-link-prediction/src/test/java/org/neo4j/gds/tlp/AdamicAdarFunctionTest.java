@@ -28,7 +28,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class AdamicAdarProcTest extends BaseProcTest {
+class AdamicAdarFunctionTest extends BaseProcTest {
     private static final String DB_CYPHER =
         "CREATE " +
             " (mark:Person {name: 'Mark'}), " +

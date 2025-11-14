@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.linkprediction;
+package org.neo4j.gds.tlp;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,8 +28,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class ResourceAllocationSimilarityFuncTest extends BaseProcTest {
-
+class ResourceAllocationSimilarityFunctionTest extends BaseProcTest {
     private static final String DB_CYPHER =
             "CREATE (mark:Person {name: 'Mark'})\n" +
             "CREATE (michael:Person {name: 'Michael'})\n" +
@@ -51,7 +50,7 @@ class ResourceAllocationSimilarityFuncTest extends BaseProcTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        registerFunctions(LinkPredictionFunc.class);
+        registerFunctions(TopologicalLinkPredictionFunctions.class);
         runQuery(DB_CYPHER);
     }
 
@@ -60,7 +59,7 @@ class ResourceAllocationSimilarityFuncTest extends BaseProcTest {
         String controlQuery =
                 "MATCH (p1:Person {name: 'Mark'})\n" +
                 "MATCH (p2:Person {name: 'Praveena'})\n" +
-                "RETURN gds.alpha.linkprediction.resourceAllocation(p1, p2) AS score, " +
+                "RETURN gds.linkprediction.resourceAllocation(p1, p2) AS score, " +
                 "       1/3.0 AS cypherScore";
 
         Map<String, Object> node =  runQuery(controlQuery, Result::next);
@@ -72,7 +71,7 @@ class ResourceAllocationSimilarityFuncTest extends BaseProcTest {
         String controlQuery =
                 "MATCH (p1:Person {name: 'Mark'})\n" +
                         "MATCH (p2:Person {name: 'Praveena'})\n" +
-                        "RETURN gds.alpha.linkprediction.resourceAllocation(p1, p2, " +
+                        "RETURN gds.linkprediction.resourceAllocation(p1, p2, " +
                         "{relationshipQuery: 'FRIENDS', direction: 'BOTH'}) AS score," +
                         "1/2.0 AS cypherScore";
 
@@ -85,7 +84,7 @@ class ResourceAllocationSimilarityFuncTest extends BaseProcTest {
         String controlQuery =
                 "MATCH (p1:Person {name: 'Jennifer'})\n" +
                         "MATCH (p2:Person {name: 'Elaine'})\n" +
-                        "RETURN gds.alpha.linkprediction.resourceAllocation(p1, p2) AS score, " +
+                        "RETURN gds.linkprediction.resourceAllocation(p1, p2) AS score, " +
                         "       1/2.0 + 1/2.0 AS cypherScore";
 
         Map<String, Object> node =  runQuery(controlQuery, Result::next);
@@ -97,7 +96,7 @@ class ResourceAllocationSimilarityFuncTest extends BaseProcTest {
         String controlQuery =
                 "MATCH (p1:Person {name: 'Jennifer'})\n" +
                         "MATCH (p2:Person {name: 'Ryan'})\n" +
-                        "RETURN gds.alpha.linkprediction.resourceAllocation(p1, p2) AS score, " +
+                        "RETURN gds.linkprediction.resourceAllocation(p1, p2) AS score, " +
                         "       0.0 AS cypherScore";
 
         Map<String, Object> node =  runQuery(controlQuery, Result::next);
@@ -109,11 +108,10 @@ class ResourceAllocationSimilarityFuncTest extends BaseProcTest {
         String controlQuery =
                 "MATCH (p1:Person {name: 'Praveena'})\n" +
                         "MATCH (p2:Person {name: 'Praveena'})\n" +
-                        "RETURN gds.alpha.linkprediction.resourceAllocation(p1, p2) AS score, " +
+                        "RETURN gds.linkprediction.resourceAllocation(p1, p2) AS score, " +
                         "       0.0 AS cypherScore";
 
         Map<String, Object> node =  runQuery(controlQuery, Result::next);
         assertEquals((Double) node.get("cypherScore"), (double) node.get("score"), 0.01);
     }
-
 }

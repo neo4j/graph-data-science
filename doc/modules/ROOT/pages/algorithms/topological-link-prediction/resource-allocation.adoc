@@ -1,13 +1,10 @@
-[[alpha-algorithms-linkprediction-resource-allocation]]
-[.alpha]
+[[algorithms-linkprediction-resource-allocation]]
 = Resource Allocation
 :description: This section describes the Resource Allocation algorithm in the Neo4j Graph Data Science library.
 
 include::partial$/product-limitations/not-in-serverless.adoc[]
 
 link:https://arxiv.org/pdf/0901.0553.pdf[Resource Allocation] is a measure used to compute the closeness of nodes based on their shared neighbors.
-
-include::partial$/operations-reference/alpha-note.adoc[]
 
 
 [[algorithms-linkprediction-resource-allocation-context]]
@@ -32,7 +29,7 @@ The library contains a function to calculate closeness between two nodes.
 .The following will run the algorithm and return the result:
 [source, cypher, role=noplay]
 ----
-RETURN gds.alpha.linkprediction.resourceAllocation(node1:Node, node2:Node, {
+RETURN gds.linkprediction.resourceAllocation(node1:Node, node2:Node, {
     relationshipQuery:String,
     direction:String
 })
@@ -76,7 +73,7 @@ CREATE
 ----
  MATCH (p1:Person {name: 'Michael'})
  MATCH (p2:Person {name: 'Karin'})
- RETURN gds.alpha.linkprediction.resourceAllocation(p1, p2) AS score
+ RETURN gds.linkprediction.resourceAllocation(p1, p2) AS score
 ----
 
 .Results
@@ -94,7 +91,7 @@ We can also compute the score of a pair of nodes based on a specific relationshi
 ----
  MATCH (p1:Person {name: 'Michael'})
  MATCH (p2:Person {name: 'Karin'})
- RETURN gds.alpha.linkprediction.resourceAllocation(p1, p2, {relationshipQuery: "FRIENDS"}) AS score
+ RETURN gds.linkprediction.resourceAllocation(p1, p2, {relationshipQuery: "FRIENDS"}) AS score
 ----
 
 .Results

@@ -316,7 +316,7 @@ The following Machine Learning procedures are not supported:
 * `gds.linkprediction.adamicAdar`
 * `gds.alpha.linkprediction.commonNeighbors`
 * `gds.alpha.linkprediction.preferentialAttachment`
-* `gds.alpha.linkprediction.resourceAllocation`
+* `gds.linkprediction.resourceAllocation`
 * `gds.alpha.linkprediction.sameCommunity`
 * `gds.alpha.linkprediction.totalNeighbors`
 * `gds.ml.splitRelationships`

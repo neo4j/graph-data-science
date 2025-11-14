@@ -31,6 +31,9 @@ public class LocalFunctionsFacade implements FunctionsFacade {
     private final NeighbourFinder neighbourFinder = new NeighbourFinder();
     private final OneHotEncodingApplication oneHotEncodingApplication = new OneHotEncodingApplication();
 
+    /**
+     * @see <a href="https://en.wikipedia.org/wiki/Adamic/Adar_index">Adamic–Adar index</a>
+     */
     @Override
     public double adamicAdarIndex(Node node1, Node node2, Map<String, Object> configuration) {
         if (node1 == null || node2 == null) throw new RuntimeException("Nodes must not be null");
@@ -48,6 +51,23 @@ public class LocalFunctionsFacade implements FunctionsFacade {
     @Override
     public List<Long> oneHotEncoding(List<Object> availableValues, List<Object> selectedValues) {
         return oneHotEncodingApplication.encode(availableValues, selectedValues);
+    }
+
+    /**
+     * @see <a href="https://arxiv.org/pdf/0901.0553.pdf">Predicting Missing Links via Local Information</a>
+     */
+    @Override
+    public double resourceAllocationSimilarity(Node node1, Node node2, Map<String, Object> configuration) {
+        if (node1 == null || node2 == null) throw new RuntimeException("Nodes must not be null");
+
+        var relationshipType = getRelationshipType(configuration);
+        var direction = getDirection(configuration);
+
+        var neighbors = neighbourFinder.findCommonNeighbors(node1, node2, relationshipType, direction);
+
+        return neighbors.stream()
+            .mapToDouble(nb -> 1.0 / degree(nb, relationshipType, direction))
+            .sum();
     }
 
     private int degree(Node node, RelationshipType relationshipType, Direction direction) {

@@ -120,7 +120,7 @@
 *** xref:algorithms/topological-link-prediction/adamic-adar.adoc[]
 *** xref:alpha-algorithms/common-neighbors.adoc[]
 *** xref:alpha-algorithms/preferential-attachment.adoc[]
-*** xref:alpha-algorithms/resource-allocation.adoc[]
+*** xref:algorithms/topological-link-prediction/resource-allocation.adoc[]
 *** xref:alpha-algorithms/same-community.adoc[]
 *** xref:alpha-algorithms/total-neighbors.adoc[]
 ** xref:algorithms/pregel-api.adoc[]

@@ -19,6 +19,9 @@
  */
 package org.neo4j.gds.tlp;
 
-class Constants {
-    static final String DESCRIPTION = "Given two nodes, calculate Adamic Adar similarity";
+final class Constants {
+    static final String ADAMIC_ADAR_INDEX_DESCRIPTION = "Given two nodes, calculate Adamic Adar similarity";
+    static final String RESOURCE_ALLOCATION_SIMILARITY_DESCRIPTION = "Given two nodes, calculate Resource Allocation similarity";
+
+    private Constants() {}
 }
