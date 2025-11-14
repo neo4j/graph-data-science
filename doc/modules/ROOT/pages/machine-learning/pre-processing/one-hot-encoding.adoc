@@ -18,7 +18,7 @@ In the list, `selected values` are represented by `1`, and `unselected values` a
 .The following will run the algorithm on hardcoded lists:
 [source, cypher, role=noplay]
 ----
-RETURN gds.ml.oneHotEncoding(['Chinese', 'Indian', 'Italian'], ['Italian']) AS value
+RETURN gds.util.oneHotEncoding(['Chinese', 'Indian', 'Italian'], ['Italian']) AS value
 ----
 
 .Results
@@ -54,7 +54,7 @@ WITH cuisine
   ORDER BY cuisine.name
 WITH collect(cuisine) AS cuisines
 MATCH (p:Person)
-RETURN p.name AS name, gds.ml.oneHotEncoding(cuisines, [(p)-[:LIKES]->(cuisine) | cuisine]) AS value
+RETURN p.name AS name, gds.util.oneHotEncoding(cuisines, [(p)-[:LIKES]->(cuisine) | cuisine]) AS value
   ORDER BY name
 ----
 

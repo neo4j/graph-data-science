@@ -34,7 +34,7 @@ public class OneHotEncodingFunction {
     @Context
     public GraphDataScienceProcedures facade;
 
-    @UserFunction("gds.ml.oneHotEncoding")
+    @UserFunction("gds.util.oneHotEncoding")
     @Description(DESCRIPTION)
     public List<Long> oneHotEncoding(
         @Name(value = "availableValues") List<Object> availableValues,
@@ -43,7 +43,7 @@ public class OneHotEncodingFunction {
         return facade.functions().oneHotEncoding(availableValues, selectedValues);
     }
 
-    @UserFunction(value = "gds.alpha.ml.oneHotEncoding", deprecatedBy = "gds.ml.oneHotEncoding")
+    @UserFunction(value = "gds.alpha.ml.oneHotEncoding", deprecatedBy = "gds.util.oneHotEncoding")
     @Description(DESCRIPTION)
     @Internal
     @Deprecated
@@ -53,7 +53,7 @@ public class OneHotEncodingFunction {
     ) {
         facade.deprecatedProcedures().called("gds.alpha.ml.oneHotEncoding");
         facade.log().warn(
-            "Function `gds.alpha.ml.oneHotEncoding` has been deprecated, please use `gds.ml.oneHotEncoding`.");
+            "Function `gds.alpha.ml.oneHotEncoding` has been deprecated, please use `gds.util.oneHotEncoding`.");
 
         return oneHotEncoding(availableValues, selectedValues);
     }

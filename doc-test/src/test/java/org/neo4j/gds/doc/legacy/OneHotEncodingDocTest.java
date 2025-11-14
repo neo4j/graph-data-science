@@ -60,7 +60,7 @@ class OneHotEncodingDocTest extends BaseProcTest {
 
     @Test
     void should1() {
-        String query = "RETURN gds.ml.oneHotEncoding(['Chinese', 'Indian', 'Italian'], ['Italian']) AS embedding";
+        String query = "RETURN gds.util.oneHotEncoding(['Chinese', 'Indian', 'Italian'], ['Italian']) AS embedding";
 
         String expected = "+-----------+" + NL +
                           "| embedding |" + NL +
@@ -81,7 +81,7 @@ class OneHotEncodingDocTest extends BaseProcTest {
                        "   ORDER BY cuisine.name" +
                        " WITH collect(cuisine) AS cuisines" +
                        " MATCH (p:Person)" +
-                       " RETURN p.name AS name, gds.ml.oneHotEncoding(cuisines, [(p)-[:LIKES]->(cuisine) | cuisine]) AS embedding" +
+                       " RETURN p.name AS name, gds.util.oneHotEncoding(cuisines, [(p)-[:LIKES]->(cuisine) | cuisine]) AS embedding" +
                        "   ORDER BY name";
 
         String expected = "+------------------------+" + NL +
