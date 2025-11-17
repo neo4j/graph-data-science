@@ -1,0 +1,231 @@
+[[graph-scale-properties]]
+= Scaling node properties
+:description: This section describes the scaling node-properties to a projected graph.
+
+:entity: node
+:result: scaled properties
+
+
+[[graph-scale-properties-intro]]
+== Introduction
+
+Scaling properties can be used to pre-process node properties for model training or post-process algorithm results such as PageRank scores.
+It scales the node properties based on the specified scaler.
+Multiple properties can be scaled at once and are returned in a list property.
+
+The input properties must be numbers or lists of numbers.
+The lists must all have the same size.
+The output property will always be a list.
+The size of the output list is equal to the sum of length of the input properties.
+That is, if the input properties are two scalar numeric properties and one list property of length three, the output list will have a total length of five.
+
+If a node is missing a value for a property, the node will be omitted from scaling of that property.
+It will receive an output value of `NaN`.
+This includes list properties.
+
+There are a number of supported scalers for scaling properties.
+These can be configured using the `scaler` configuration parameter.
+
+List properties are scaled index-by-index.
+See xref:graph-scale-properties-examples-list[the list example] for more details.
+
+In the following equations, `p` denotes the vector containing all property values for a single property across all nodes in the graph.
+
+
+include::partial$/management-ops/scale-properties/scaler-descriptions.adoc[]
+
+
+[[graph-scale-properties-syntax]]
+== Syntax
+
+include::partial$/management-ops/scale-properties/mutate-syntax.adoc[]
+
+[[graph-scale-properties-syntax-scalerparams]]
+=== Scaler-specific configuration options
+
+include::partial$/management-ops/scale-properties/scaler-specific-options.adoc[]
+
+
+[[graph-scale-properties-examples]]
+== Examples
+
+include::partial$/algorithms/shared/examples-named-native-note.adoc[]
+
+In order to demonstrate the GDS capabilities over scaling node properties, we are going to create a small graph.
+
+image::example-graphs/scale-properties.svg[Visualization of the example graph,align="center"]
+
+.The following Cypher statement will create the example graph in the Neo4j database:
+[source, cypher, role=noplay setup-query]
+----
+CREATE
+  (:Hotel {avgReview: 4.2, buildYear: 1978, storyCapacity: [32, 32, 0], name: 'East'}),
+  (:Hotel {avgReview: 8.1, buildYear: 1958, storyCapacity: [18, 20, 0], name: 'Plaza'}),
+  (:Hotel {avgReview: 19.0, buildYear: 1999, storyCapacity: [100, 100, 70], name: 'Central'}),
+  (:Hotel {avgReview: -4.12, buildYear: 2005, storyCapacity: [250, 250, 250], name: 'West'}),
+  (:Hotel {avgReview: 0.01, buildYear: 2020, storyCapacity: [1250, 1250, 900], name: 'Polar'}),
+  (:Hotel {avgReview: 3.3, buildYear: 1981, storyCapacity: [240, 240, 0], name: 'Beach'}),
+  (:Hotel {avgReview: 6.7, buildYear: 1984, storyCapacity: [80, 0, 0], name: 'Mountain'}),
+  (:Hotel {avgReview: -1.2, buildYear: 2010, storyCapacity: [55, 20, 0], name: 'Forest'})
+----
+
+With the graph in Neo4j we can now project it into the graph catalog.
+We do this using a Cypher projection targeting the `Hotel` nodes, including their properties.
+Note that no relationships are necessary to scale the node properties.
+
+.The following statement will project a graph using a Cypher projection and store it in the graph catalog under the name 'myGraph'.
+[source, cypher, role=noplay graph-project-query]
+----
+MATCH (hotel:Hotel)
+RETURN gds.graph.project(
+  'myGraph',
+  hotel,
+  null,
+  {
+    sourceNodeProperties: hotel { .avgReview, .buildYear, .storyCapacity },
+    targetNodeProperties: {}
+  }
+)
+----
+
+In the following examples we will demonstrate how to scale the node properties of this graph.
+
+=== Scalar properties
+
+In this example we will scale the two hotel properties of `buildYear` and `avgReview` using the xref:machine-learning/pre-processing/scale-properties.adoc#algorithms-scale-properties-mean[Mean scaler].
+The output is a list property which we will call `hotelFeatures`.
+
+[role=query-example]
+--
+[source, cypher, role=noplay]
+----
+CALL gds.scaleProperties.mutate('myGraph', {
+  nodeProperties: ['buildYear', 'avgReview'],
+  scaler: 'Mean',
+  mutateProperty: 'hotelFeatures'
+}) YIELD nodePropertiesWritten, scalerStatistics
+----
+
+.Results
+[opts="header"]
+|===
+| nodePropertiesWritten | scalerStatistics
+| 8                     | {avgReview={avg=[4.49875], max=[19.0], min=[-4.12]}, buildYear={avg=[1991.875], max=[2020.0], min=[1958.0]}}
+|===
+--
+
+The result shows that there are now eight new node properties in the in-memory graph.
+These contain the scaled values from the input properties, where the scaled `buildYear` values are in the first list position and scaled `avgReview` values are in the second position.
+
+
+[[graph-scale-properties-examples-list]]
+=== List properties
+
+The `storyCapacity` property models the amount of rooms on each story of the hotel.
+The property is normalized so that hotels with fewer stories have a zero value.
+This is because the Scale Properties algorithm requires that all values for the same property have the same length.
+In this example we will show how to scale the values in these lists using the Scale Properties algorithm.
+We imagine using the output as feature vector to input in a machine learning algorithm.
+Additionally, we will include the `avgReview` property in our feature vector.
+
+[role=query-example]
+--
+[source, cypher, role=noplay]
+----
+CALL gds.scaleProperties.mutate('myGraph', {
+  nodeProperties: ['avgReview', 'storyCapacity'],
+  scaler: 'StdScore',
+  mutateProperty: 'features'
+})
+YIELD mutateMillis
+CALL gds.graph.nodeProperty.stream('myGraph', 'features')
+YIELD nodeId, propertyValue
+RETURN gds.util.asNode(nodeId).name AS name, propertyValue AS features
+  ORDER BY name ASC
+----
+
+.Results
+[opts="header"]
+|===
+| name       | features
+| "Beach"    | [-0.17956547594003253, -0.03401933556831381, 0.00254261210704973, -0.5187592498702616]
+| "Central"  | [2.172199255871029, -0.3968922482969945, -0.3534230828799124, -0.2806402499298136]
+| "East"     | [-0.0447509371737933, -0.5731448059080679, -0.526320706159294, -0.5187592498702616]
+| "Forest"   | [-0.8536381697712284, -0.513529970245499, -0.5568320514438908, -0.5187592498702616]
+| "Mountain" | [0.32973389273242665, -0.4487312358296632, -0.6076842935848854, -0.5187592498702616]
+| "Plaza"    | [0.5394453974799097, -0.609432097180936, -0.5568320514438908, -0.5187592498702616]
+| "Polar"    | [-0.672387512096618, 2.583849534831454, 2.5705808402272767, 2.542770749364069]
+| "West"     | [-1.2910364511016934, -0.00809984180197948, 0.027968733177547028, 0.3316657499170525]
+|===
+--
+
+The resulting feature vector contains the standard-score scaled value for the `avgReview` property in the first list position.
+We can see that some values are negative and that the maximum value sticks out for the `Central` hotel.
+
+The other three list positions are the scaled values for the `storyCapacity` list property.
+Note that each list item is scaled only with respect to the corresponding item in the other lists.
+Thus, the `Polar` hotel has the greatest scaled value in all list positions.
+
+
+[[graph-scale-properties-examples-log-offset]]
+=== Scale using Log with offset
+
+The `log` scaler supports a configurable offset parameter.
+In this example we illustrate how to configure that offset.
+
+We want to scale the `avgReview` property, but it contains negative numbers, for which the logarithm is not defined.
+First, we'll determine what the minimum value is, by using Cypher's `min()` aggregating function:
+
+[role=query-example]
+--
+----
+CALL gds.graph.nodeProperty.stream('myGraph', 'avgReview') YIELD propertyValue
+RETURN min(propertyValue) AS minimumAvgReview
+----
+
+.Results
+[opts="header"]
+|===
+| minimumAvgReview
+| -4.12
+|===
+--
+
+Learning this value, we can use a greater value, thus ensuring that the logarithm will be a finite value.
+We will use `5.12`, as this will make the smallest scaled value zero.
+
+[role=query-example]
+--
+.The following will run the algorithm with a custom offset for the log scaler:
+[source, cypher, role=noplay]
+----
+CALL gds.scaleProperties.mutate('myGraph', {
+  nodeProperties: ['avgReview'],
+  scaler: {type: 'Log', offset: 5.12},
+  mutateProperty: 'features_log'
+})
+YIELD mutateMillis
+CALL gds.graph.nodeProperty.stream('myGraph', 'features_log')
+YIELD nodeId, propertyValue
+RETURN gds.util.asNode(nodeId).name AS name, propertyValue AS scaledProperty
+  ORDER BY name ASC
+----
+
+.Results
+[opts="header"]
+|===
+| name       | scaledProperty
+| "Beach"    | [2.130609828254235]
+| "Central"  | [3.183041371858985]
+| "East"     | [2.2321626286975]
+| "Forest"   | [1.366091653802371]
+| "Mountain" | [2.469793011977952]
+| "Plaza"    | [2.581730834423540]
+| "Polar"    | [1.635105659182678]
+| "West"     | [0.0]
+|===
+--
+
+As we can see, all scaled values are finite numbers.
+In particular, the smallest scaled value is zero.
+Try this example with an offset lower than `4.12` if you are curious about the results.

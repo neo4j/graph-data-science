@@ -1,0 +1,65 @@
+[[algorithms-scale-properties-minmax]]
+=== Min-max scaler
+
+Scales all property values into the range `[0, 1]` where the minimum value(s) get the scaled value `0` and the maximum value(s) get the scaled value `1`, according to this formula:
+
+image::equations/scale-properties/minmax.svg[scaled p equals p minus minimum of p divided by maximum of p minus minimum of p,align="center"]
+
+The minimum and maximum values are reported as statistics when this scaler is used.
+
+
+[[algorithms-scale-properties-max]]
+=== Max scaler
+
+Scales all property values into the range `[-1, 1]` where the maximum absolute value(s) get the scaled value `1`, according to this formula:
+
+image::equations/scale-properties/max.svg[scaled p equals p divided by the maximum of absolute p,align="center"]
+
+The maximum absolute value is reported as statistic when this scaler is used.
+
+
+[[algorithms-scale-properties-mean]]
+=== Mean scaler
+
+Scales all property values into the range `[-1, 1]` where the average value(s) get the scaled value `0`.
+
+image::equations/scale-properties/mean.svg[scaled p equals p minus average of p divided by maximum of p minus minimum of p,align="center"]
+
+The minimum, maximum and average values are reported as statistics when this scaler is used.
+
+
+[[algorithms-scale-properties-log]]
+=== Log scaler
+
+Transforms all property values using the natural logarithm.
+`C` denotes a configurable constant offset, which can be used to avoid negative values or zeros in the value space, as their logarithms are not finite values.
+
+image::equations/scale-properties/log.svg[scaled p equals natural logarithm of p,align="center"]
+
+
+[[algorithms-scale-properties-standard]]
+=== Standard Score
+
+Scales all property values using the https://en.wikipedia.org/wiki/Standard_score[Standard Score (Wikipedia)].
+
+image::equations/scale-properties/standardScore.svg[scaled p equals p minus average of p divided by standard deviation of p,align="center"]
+
+The average value and standard deviation are reported as statistics when this scaler is used.
+
+
+[[algorithms--scale-properties-center]]
+=== Center
+
+Transforms all properties by subtracting the mean.
+
+image::equations/scale-properties/center.svg[p minus average value of p,align="center"]
+
+The average value is reported as statistic when this scaler is used.
+
+
+[NOTE]
+====
+Some scalers must do divisions as part of their computation.
+For example, computing the "Standard Score" requires dividing by the standard deviation.
+If computing a scaled property requires division by an illegal value, like 0 or NaN, the resulting scaled property value will be 0.
+====

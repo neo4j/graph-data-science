@@ -34,72 +34,7 @@ See xref:machine-learning/pre-processing/scale-properties.adoc#algorithms-scale-
 In the following equations, `p` denotes the vector containing all property values for a single property across all nodes in the graph.
 
 
-[[algorithms-scale-properties-minmax]]
-=== Min-max scaler
-
-Scales all property values into the range `[0, 1]` where the minimum value(s) get the scaled value `0` and the maximum value(s) get the scaled value `1`, according to this formula:
-
-image::equations/scale-properties/minmax.svg[scaled p equals p minus minimum of p divided by maximum of p minus minimum of p,align="center"]
-
-The minimum and maximum values are reported as statistics when this scaler is used.
-
-
-[[algorithms-scale-properties-max]]
-=== Max scaler
-
-Scales all property values into the range `[-1, 1]` where the maximum absolute value(s) get the scaled value `1`, according to this formula:
-
-image::equations/scale-properties/max.svg[scaled p equals p divided by the maximum of absolute p,align="center"]
-
-The maximum absolute value is reported as statistic when this scaler is used.
-
-
-[[algorithms-scale-properties-mean]]
-=== Mean scaler
-
-Scales all property values into the range `[-1, 1]` where the average value(s) get the scaled value `0`.
-
-image::equations/scale-properties/mean.svg[scaled p equals p minus average of p divided by maximum of p minus minimum of p,align="center"]
-
-The minimum, maximum and average values are reported as statistics when this scaler is used.
-
-
-[[algorithms-scale-properties-log]]
-=== Log scaler
-
-Transforms all property values using the natural logarithm.
-`C` denotes a configurable constant offset, which can be used to avoid negative values or zeros in the value space, as their logarithms are not finite values.
-
-image::equations/scale-properties/log.svg[scaled p equals natural logarithm of p,align="center"]
-
-
-[[algorithms-scale-properties-standard]]
-=== Standard Score
-
-Scales all property values using the https://en.wikipedia.org/wiki/Standard_score[Standard Score (Wikipedia)].
-
-image::equations/scale-properties/standardScore.svg[scaled p equals p minus average of p divided by standard deviation of p,align="center"]
-
-The average value and standard deviation are reported as statistics when this scaler is used.
-
-
-[[algorithms--scale-properties-center]]
-=== Center
-
-Transforms all properties by subtracting the mean.
-
-image::equations/scale-properties/center.svg[p minus average value of p,align="center"]
-
-The average value is reported as statistic when this scaler is used.
-
-
-[NOTE]
-====
-Some scalers must do divisions as part of their computation.
-For example, computing the "Standard Score" requires dividing by the standard deviation.
-If computing a scaled property requires division by an illegal value, like 0 or NaN, the resulting scaled property value will be 0.
-====
-
+include::partial$/management-ops/scale-properties/scaler-descriptions.adoc[]
 
 [[algorithms-scale-properties-syntax]]
 == Syntax
@@ -144,44 +79,7 @@ include::partial$/algorithms/scale-properties/specific-configuration.adoc[]
 
 [.include-with-mutate]
 ======
-.Run Scale Properties in mutate mode on a named graph.
-[source, cypher, role=noplay]
-----
-CALL gds.scaleProperties.mutate(
-  graphName: String,
-  configuration: Map
-) YIELD
-  scalerStatistics: Map,
-  preProcessingMillis: Integer,
-  computeMillis: Integer,
-  mutateMillis: Integer,
-  postProcessingMillis: Integer,
-  nodePropertiesWritten: Integer,
-  configuration: Map
-----
-
-include::partial$/algorithms/common-configuration/common-parameters.adoc[]
-
-.Configuration
-[opts="header",cols="3,2,3m,2,8"]
-|===
-| Name          | Type   | Default | Optional | Description
-include::partial$/algorithms/common-configuration/common-mutate-configuration-entries.adoc[]
-include::partial$/algorithms/scale-properties/specific-configuration.adoc[]
-|===
-
-.Results
-[opts="header",cols="1,1,6"]
-|===
-| Name                  | Type      | Description
-| scalerStatistics      | Map       | Statistics computed by the specified scaler, if any.
-| preProcessingMillis   | Integer   | Milliseconds for preprocessing the data.
-| computeMillis         | Integer   | Milliseconds for running the algorithm.
-| mutateMillis          | Integer   | Milliseconds for adding properties to the projected graph.
-| postProcessingMillis  | Integer   | Unused.
-| nodePropertiesWritten | Integer   | Number of node properties written.
-| configuration         | Map       | Configuration used for running the algorithm.
-|===
+include::partial$/management-ops/scale-properties/mutate-syntax.adoc[]
 ======
 
 [.include-with-stats]
@@ -267,22 +165,10 @@ include::partial$/algorithms/scale-properties/specific-configuration.adoc[]
 ======
 ====
 
-
 [[algorithms-scale-properties-syntax-scalerparams]]
 === Scaler-specific configuration options
 
-The log scaler supports specific configuration, which we document here.
-
-.Specific configuration for `log` scaler
-[opts="header",cols="1,1,1m,1,8"]
-|===
-| Name          | Type   | Default | Optional | Description
-| type          | String | n/a     | no       | Type of the scaler applied for the properties. Supported values are `MinMax`, `Max`, `Mean`, `Log`, `Center`, and `StdScore`, case insensitively.
-| offset        | Number | 0       | yes      | Constant additive term applied before computing the logarithm of the property value.
-|===
-
-
-All other scalers do not support additional, custom configuration.
+include::partial$/management-ops/scale-properties/scaler-specific-options.adoc[]
 
 
 [[algorithms-scale-properties-examples]]
@@ -312,7 +198,6 @@ CREATE
 With the graph in Neo4j we can now project it into the graph catalog to prepare it for algorithm execution.
 We do this using a Cypher projection targeting the `Hotel` nodes, including their properties.
 Note that no relationships are necessary to scale the node properties.
-Thus we use a star projection ('*') for relationships.
 
 .The following statement will project a graph using a Cypher projection and store it in the graph catalog under the name 'myGraph'.
 [source, cypher, role=noplay graph-project-query]
@@ -504,7 +389,7 @@ Additionally, we will include the `avgReview` property in our feature vector.
 
 [role=query-example]
 --
-.The following will run the algorithm in `mutate` mode:
+.The following will scale the list property `storyCapacity` and the scalar property `avgReview`:
 [source, cypher, role=noplay]
 ----
 CALL gds.scaleProperties.stream('myGraph', {
@@ -539,7 +424,7 @@ Thus, the `Polar` hotel has the greatest scaled value in all list positions.
 
 
 [[algorithms-scale-properties-examples-log-offset]]
-=== Scaler-specific configuration
+=== Scale using Log with offset
 
 The `log` scaler supports a configurable offset parameter.
 In this example we illustrate how to configure that offset.
