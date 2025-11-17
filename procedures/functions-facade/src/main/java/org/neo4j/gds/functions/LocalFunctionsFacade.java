@@ -49,6 +49,18 @@ public class LocalFunctionsFacade implements FunctionsFacade {
     }
 
     @Override
+    public double commonNeighbours(Node node1, Node node2, Map<String, Object> configuration) {
+        if (node1 == null || node2 == null) throw new RuntimeException("Nodes must not be null");
+
+        var relationshipType = getRelationshipType(configuration);
+        var direction = getDirection(configuration);
+
+        var neighbors = neighbourFinder.findCommonNeighbors(node1, node2, relationshipType, direction);
+
+        return neighbors.size();
+    }
+
+    @Override
     public List<Long> oneHotEncoding(List<Object> availableValues, List<Object> selectedValues) {
         return oneHotEncodingApplication.encode(availableValues, selectedValues);
     }

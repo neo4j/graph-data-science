@@ -21,6 +21,7 @@ package org.neo4j.gds.tlp;
 
 final class Constants {
     static final String ADAMIC_ADAR_INDEX_DESCRIPTION = "Given two nodes, calculate Adamic Adar similarity";
+    static final String COMMON_NEIGHBOURS_DESCRIPTION = "Given two nodes, returns the number of common neighbors";
     static final String RESOURCE_ALLOCATION_SIMILARITY_DESCRIPTION = "Given two nodes, calculate Resource Allocation similarity";
 
     private Constants() {}

@@ -30,6 +30,7 @@ import org.neo4j.procedure.UserFunction;
 import java.util.Map;
 
 import static org.neo4j.gds.tlp.Constants.ADAMIC_ADAR_INDEX_DESCRIPTION;
+import static org.neo4j.gds.tlp.Constants.COMMON_NEIGHBOURS_DESCRIPTION;
 import static org.neo4j.gds.tlp.Constants.RESOURCE_ALLOCATION_SIMILARITY_DESCRIPTION;
 
 public class TopologicalLinkPredictionFunctions {
@@ -41,9 +42,9 @@ public class TopologicalLinkPredictionFunctions {
     public double adamicAdarSimilarity(
         @Name("node1") Node node1,
         @Name("node2") Node node2,
-        @Name(value = "config", defaultValue = "{}") Map<String, Object> config
+        @Name(value = "config", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.functions().adamicAdarIndex(node1, node2, config);
+        return facade.functions().adamicAdarIndex(node1, node2, configuration);
     }
 
     @UserFunction(value = "gds.alpha.linkprediction.adamicAdar", deprecatedBy = "gds.linkprediction.adamicAdar")
@@ -53,13 +54,39 @@ public class TopologicalLinkPredictionFunctions {
     public double alphaAdamicAdarSimilarity(
         @Name("node1") Node node1,
         @Name("node2") Node node2,
-        @Name(value = "config", defaultValue = "{}") Map<String, Object> config
+        @Name(value = "config", defaultValue = "{}") Map<String, Object> configuration
     ) {
         facade.deprecatedProcedures().called("gds.alpha.linkprediction.adamicAdar");
         facade.log().warn(
             "Function `gds.alpha.linkprediction.adamicAdar` has been deprecated, please use `gds.linkprediction.adamicAdar`.");
 
-        return adamicAdarSimilarity(node1, node2, config);
+        return adamicAdarSimilarity(node1, node2, configuration);
+    }
+
+    @UserFunction("gds.linkprediction.commonNeighbors")
+    @Description(COMMON_NEIGHBOURS_DESCRIPTION)
+    public double commonNeighbors(
+        @Name("node1") Node node1,
+        @Name("node2") Node node2,
+        @Name(value = "config", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        return facade.functions().commonNeighbours(node1, node2, configuration);
+    }
+
+    @UserFunction(value = "gds.alpha.linkprediction.commonNeighbors", deprecatedBy = "gds.linkprediction.commonNeighbors")
+    @Description(COMMON_NEIGHBOURS_DESCRIPTION)
+    @Internal
+    @Deprecated
+    public double alphaCommonNeighbors(
+        @Name("node1") Node node1,
+        @Name("node2") Node node2,
+        @Name(value = "config", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        facade.deprecatedProcedures().called("gds.alpha.linkprediction.commonNeighbors");
+        facade.log().warn(
+            "Function `gds.alpha.linkprediction.commonNeighbors` has been deprecated, please use `gds.linkprediction.commonNeighbors`.");
+
+        return commonNeighbors(node1, node2, configuration);
     }
 
     @UserFunction("gds.linkprediction.resourceAllocation")
@@ -67,9 +94,9 @@ public class TopologicalLinkPredictionFunctions {
     public double resourceAllocationSimilarity(
         @Name("node1") Node node1,
         @Name("node2") Node node2,
-        @Name(value = "config", defaultValue = "{}") Map<String, Object> config
+        @Name(value = "config", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.functions().resourceAllocationSimilarity(node1, node2, config);
+        return facade.functions().resourceAllocationSimilarity(node1, node2, configuration);
     }
 
     @UserFunction(value = "gds.alpha.linkprediction.resourceAllocation", deprecatedBy = "gds.linkprediction.resourceAllocation")
@@ -79,12 +106,12 @@ public class TopologicalLinkPredictionFunctions {
     public double alphaResourceAllocationSimilarity(
         @Name("node1") Node node1,
         @Name("node2") Node node2,
-        @Name(value = "config", defaultValue = "{}") Map<String, Object> config
+        @Name(value = "config", defaultValue = "{}") Map<String, Object> configuration
     ) {
         facade.deprecatedProcedures().called("gds.alpha.linkprediction.resourceAllocation");
         facade.log().warn(
             "Function `gds.alpha.linkprediction.resourceAllocation` has been deprecated, please use `gds.linkprediction.resourceAllocation`.");
 
-        return resourceAllocationSimilarity(node1, node2, config);
+        return resourceAllocationSimilarity(node1, node2, configuration);
     }
 }

@@ -27,6 +27,8 @@ import java.util.Map;
 public interface FunctionsFacade {
     double adamicAdarIndex(Node node1, Node node2, Map<String, Object> configuration);
 
+    double commonNeighbours(Node node1, Node node2, Map<String, Object> configuration);
+
     List<Long> oneHotEncoding(List<Object> availableValues, List<Object> selectedValues);
 
     double resourceAllocationSimilarity(Node node1, Node node2, Map<String, Object> configuration);

@@ -56,7 +56,7 @@ class CommonNeighborsDocTest extends BaseProcTest {
         @Language("Cypher")
         String query = " MATCH (p1:Person {name: 'Michael'})" +
                        " MATCH (p2:Person {name: 'Karin'})" +
-                       " RETURN gds.alpha.linkprediction.commonNeighbors(p1, p2) AS score";
+                       " RETURN gds.linkprediction.commonNeighbors(p1, p2) AS score";
 
         String expectedString = "+-------+" + NL +
                                 "| score |" + NL +
@@ -73,7 +73,7 @@ class CommonNeighborsDocTest extends BaseProcTest {
         @Language("Cypher")
         String query = " MATCH (p1:Person {name: 'Michael'})" +
                        " MATCH (p2:Person {name: 'Karin'})" +
-                       " RETURN gds.alpha.linkprediction.commonNeighbors(p1, p2, {relationshipQuery: 'FRIENDS'}) AS score";
+                       " RETURN gds.linkprediction.commonNeighbors(p1, p2, {relationshipQuery: 'FRIENDS'}) AS score";
 
         String expectedString = "+-------+" + NL +
                                 "| score |" + NL +

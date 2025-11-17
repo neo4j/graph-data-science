@@ -62,7 +62,7 @@ class CommonNeighborsProcTest extends BaseProcTest {
         String controlQuery =
                 "MATCH (p1:Person {name: 'Mark'})\n" +
                 "MATCH (p2:Person {name: 'Praveena'})\n" +
-                "RETURN gds.alpha.linkprediction.commonNeighbors(p1, p2) AS score, " +
+                "RETURN gds.linkprediction.commonNeighbors(p1, p2) AS score, " +
                 "       1.0 AS cypherScore";
 
         Map<String, Object> node =  runQuery(controlQuery, Result::next);
@@ -74,7 +74,7 @@ class CommonNeighborsProcTest extends BaseProcTest {
         String controlQuery =
                 "MATCH (p1:Person {name: 'Mark'})\n" +
                         "MATCH (p2:Person {name: 'Praveena'})\n" +
-                        "RETURN gds.alpha.linkprediction.commonNeighbors(p1, p2, " +
+                        "RETURN gds.linkprediction.commonNeighbors(p1, p2, " +
                         "{relationshipQuery: 'FRIENDS', direction: 'BOTH'}) AS score," +
                         "1.0 AS cypherScore";
 
@@ -87,7 +87,7 @@ class CommonNeighborsProcTest extends BaseProcTest {
         String controlQuery =
                 "MATCH (p1:Person {name: 'Jennifer'})\n" +
                         "MATCH (p2:Person {name: 'Elaine'})\n" +
-                        "RETURN gds.alpha.linkprediction.commonNeighbors(p1, p2) AS score, " +
+                        "RETURN gds.linkprediction.commonNeighbors(p1, p2) AS score, " +
                         "       2.0 AS cypherScore";
 
         Map<String, Object> node =  runQuery(controlQuery, Result::next);
@@ -99,7 +99,7 @@ class CommonNeighborsProcTest extends BaseProcTest {
         String controlQuery =
                 "MATCH (p1:Person {name: 'Will'})\n" +
                         "MATCH (p2:Person {name: 'Ryan'})\n" +
-                        "RETURN gds.alpha.linkprediction.commonNeighbors(p1, p2) AS score, " +
+                        "RETURN gds.linkprediction.commonNeighbors(p1, p2) AS score, " +
                         "       0.0 AS cypherScore";
 
         Map<String, Object> node =  runQuery(controlQuery, Result::next);
@@ -111,7 +111,7 @@ class CommonNeighborsProcTest extends BaseProcTest {
         String controlQuery =
                 "MATCH (p1:Person {name: 'Praveena'})\n" +
                         "MATCH (p2:Person {name: 'Michael'})\n" +
-                        "RETURN gds.alpha.linkprediction.commonNeighbors(p1, p2) AS score, " +
+                        "RETURN gds.linkprediction.commonNeighbors(p1, p2) AS score, " +
                         "       0.0 AS cypherScore";
 
         Map<String, Object> node =  runQuery(controlQuery, Result::next);
@@ -123,7 +123,7 @@ class CommonNeighborsProcTest extends BaseProcTest {
         String controlQuery =
                 "MATCH (p1:Person {name: 'Praveena'})\n" +
                         "MATCH (p2:Person {name: 'Praveena'})\n" +
-                        "RETURN gds.alpha.linkprediction.commonNeighbors(p1, p2) AS score, " +
+                        "RETURN gds.linkprediction.commonNeighbors(p1, p2) AS score, " +
                         "       0.0 AS cypherScore";
 
         Map<String, Object> node =  runQuery(controlQuery, Result::next);

@@ -28,27 +28,11 @@ import org.neo4j.procedure.UserFunction;
 
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 
 import static org.neo4j.gds.core.ProcedureConstants.DIRECTION_KEY;
 import static org.neo4j.gds.legacycypherprojection.GraphProjectFromCypherConfig.RELATIONSHIP_QUERY_KEY;
 
 public class LinkPredictionFunc {
-    @UserFunction("gds.alpha.linkprediction.commonNeighbors")
-    @Description("Given two nodes, returns the number of common neighbors")
-    public double commonNeighbors(@Name("node1") Node node1, @Name("node2") Node node2,
-                                               @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
-        if (node1 == null || node2 == null) {
-            throw new RuntimeException("Nodes must not be null");
-        }
-
-        RelationshipType relationshipType = getRelationshipType(config);
-        Direction direction = getDirection(config);
-
-        Set<Node> neighbors = new NeighborsFinder().findCommonNeighbors(node1, node2, relationshipType, direction);
-        return neighbors.size();
-    }
-
     @UserFunction("gds.alpha.linkprediction.preferentialAttachment")
     @Description("Given two nodes, calculate Preferential Attachment")
     public double preferentialAttachment(@Name("node1") Node node1, @Name("node2") Node node2,
