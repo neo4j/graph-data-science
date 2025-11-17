@@ -23,14 +23,11 @@ import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
-import org.neo4j.gds.linkprediction.LinkPredictionFunc;
+import org.neo4j.gds.tlp.TopologicalLinkPredictionFunctions;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class CommonNeighborsDocTest extends BaseProcTest {
-
-    private static final String NL = System.lineSeparator();
-
     private static final String DB_CYPHER = "CREATE " +
         " (zhen:Person {name: 'Zhen'})," +
         " (praveena:Person {name: 'Praveena'})," +
@@ -48,22 +45,24 @@ class CommonNeighborsDocTest extends BaseProcTest {
     @BeforeEach
     void setup() throws Exception {
         runQuery(DB_CYPHER);
-        registerFunctions(LinkPredictionFunc.class);
+        registerFunctions(TopologicalLinkPredictionFunctions.class);
     }
 
     @Test
     void functionOnAllRels() {
         @Language("Cypher")
-        String query = " MATCH (p1:Person {name: 'Michael'})" +
-                       " MATCH (p2:Person {name: 'Karin'})" +
-                       " RETURN gds.linkprediction.commonNeighbors(p1, p2) AS score";
+        var query = " MATCH (p1:Person {name: 'Michael'})" +
+            " MATCH (p2:Person {name: 'Karin'})" +
+            " RETURN gds.linkprediction.commonNeighbors(p1, p2) AS score";
 
-        String expectedString = "+-------+" + NL +
-                                "| score |" + NL +
-                                "+-------+" + NL +
-                                "| 1.0   |" + NL +
-                                "+-------+" + NL +
-                                "1 row" + NL;
+        var expectedString = """
+            +-------+
+            | score |
+            +-------+
+            | 1.0   |
+            +-------+
+            1 row
+            """;
 
         runQueryWithResultConsumer(query, result -> assertEquals(expectedString, result.resultAsString()));
     }
@@ -71,16 +70,18 @@ class CommonNeighborsDocTest extends BaseProcTest {
     @Test
     void functionOnFriendRels() {
         @Language("Cypher")
-        String query = " MATCH (p1:Person {name: 'Michael'})" +
-                       " MATCH (p2:Person {name: 'Karin'})" +
-                       " RETURN gds.linkprediction.commonNeighbors(p1, p2, {relationshipQuery: 'FRIENDS'}) AS score";
+        var query = " MATCH (p1:Person {name: 'Michael'})" +
+            " MATCH (p2:Person {name: 'Karin'})" +
+            " RETURN gds.linkprediction.commonNeighbors(p1, p2, {relationshipQuery: 'FRIENDS'}) AS score";
 
-        String expectedString = "+-------+" + NL +
-                                "| score |" + NL +
-                                "+-------+" + NL +
-                                "| 0.0   |" + NL +
-                                "+-------+" + NL +
-                                "1 row" + NL;
+        var expectedString = """
+            +-------+
+            | score |
+            +-------+
+            | 0.0   |
+            +-------+
+            1 row
+            """;
 
         runQueryWithResultConsumer(query, result -> assertEquals(expectedString, result.resultAsString()));
     }

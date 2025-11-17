@@ -17,4 +17,7 @@ dependencies {
     testImplementation openGds.junit5.jupiter
     testRuntimeOnly openGds.junit5.jupiter.engine
     testRuntimeOnly openGds.bundles.test.platforms
+
+    testImplementation project(':neo4j-kernel-adapter-api')
+    testImplementation project(':test-utils')
 }

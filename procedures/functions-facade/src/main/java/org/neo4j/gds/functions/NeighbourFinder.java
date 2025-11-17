@@ -29,16 +29,23 @@ import java.util.HashSet;
 import java.util.Set;
 
 class NeighbourFinder {
-    Set<Node> findCommonNeighbors(Node node1, Node node2, RelationshipType relationshipType, Direction direction) {
-        if(node1.equals(node2)) return Collections.emptySet();
+    Set<Node> findCommonNeighbours(Node node1, Node node2, RelationshipType relationshipType, Direction direction) {
+        if (node1.equals(node2)) return Collections.emptySet();
 
-        var neighbors = findNeighbors(node1, relationshipType, direction);
+        var neighbors = findNeighbours(node1, relationshipType, direction);
         var reversedDirection = direction.reverse();
-        neighbors.removeIf(node -> noCommonNeighbors(node, relationshipType, reversedDirection, node2));
+        neighbors.removeIf(node -> noCommonNeighbours(node, relationshipType, reversedDirection, node2));
         return neighbors;
     }
 
-    private Set<Node> findNeighbors(Node node, RelationshipType relationshipType, Direction direction) {
+    Set<Node> findNeighbours(Node node1, Node node2, RelationshipType relationshipType, Direction direction) {
+        var node1Neighbors = findNeighbours(node1, relationshipType, direction);
+        var node2Neighbors = findNeighbours(node2, relationshipType, direction);
+        node1Neighbors.addAll(node2Neighbors);
+        return node1Neighbors;
+    }
+
+    Set<Node> findNeighbours(Node node, RelationshipType relationshipType, Direction direction) {
         var neighbors = new HashSet<Node>();
 
         for (var rel : loadRelationships(node, relationshipType, direction)) {
@@ -52,8 +59,8 @@ class NeighbourFinder {
         return neighbors;
     }
 
-    private boolean noCommonNeighbors(Node node, RelationshipType relationshipType, Direction direction, Node node2) {
-        for (var iter = loadRelationships(node, relationshipType, direction).iterator(); iter.hasNext();) {
+    private boolean noCommonNeighbours(Node node, RelationshipType relationshipType, Direction direction, Node node2) {
+        for (var iter = loadRelationships(node, relationshipType, direction).iterator(); iter.hasNext(); ) {
             if (iter.next().getOtherNode(node).equals(node2)) {
                 iter.forEachRemaining(__ -> {});
                 return false;
@@ -62,7 +69,11 @@ class NeighbourFinder {
         return true;
     }
 
-    private Iterable<Relationship> loadRelationships(Node node, RelationshipType relationshipType, Direction direction) {
+    private Iterable<Relationship> loadRelationships(
+        Node node,
+        RelationshipType relationshipType,
+        Direction direction
+    ) {
         return relationshipType == null
             ? node.getRelationships(direction)
             : node.getRelationships(direction, relationshipType);

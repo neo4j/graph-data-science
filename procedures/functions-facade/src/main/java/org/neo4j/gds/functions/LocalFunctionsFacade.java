@@ -41,7 +41,7 @@ public class LocalFunctionsFacade implements FunctionsFacade {
         var relationshipType = getRelationshipType(configuration);
         var direction = getDirection(configuration);
 
-        var neighbors = neighbourFinder.findCommonNeighbors(node1, node2, relationshipType, direction);
+        var neighbors = neighbourFinder.findCommonNeighbours(node1, node2, relationshipType, direction);
 
         return neighbors.stream()
             .mapToDouble(nb -> 1.0 / Math.log(degree(nb, relationshipType, direction)))
@@ -55,7 +55,7 @@ public class LocalFunctionsFacade implements FunctionsFacade {
         var relationshipType = getRelationshipType(configuration);
         var direction = getDirection(configuration);
 
-        var neighbors = neighbourFinder.findCommonNeighbors(node1, node2, relationshipType, direction);
+        var neighbors = neighbourFinder.findCommonNeighbours(node1, node2, relationshipType, direction);
 
         return neighbors.size();
     }
@@ -75,7 +75,7 @@ public class LocalFunctionsFacade implements FunctionsFacade {
         var relationshipType = getRelationshipType(configuration);
         var direction = getDirection(configuration);
 
-        var neighbors = neighbourFinder.findCommonNeighbors(node1, node2, relationshipType, direction);
+        var neighbors = neighbourFinder.findCommonNeighbours(node1, node2, relationshipType, direction);
 
         return neighbors.stream()
             .mapToDouble(nb -> 1.0 / degree(nb, relationshipType, direction))
