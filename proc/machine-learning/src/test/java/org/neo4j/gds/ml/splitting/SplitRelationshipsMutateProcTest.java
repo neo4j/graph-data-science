@@ -87,7 +87,7 @@ class SplitRelationshipsMutateProcTest extends BaseProcTest {
     @Test
     void shouldFailIfContainingIsMissing() {
         var query = GdsCypher.call("graph")
-            .algo("gds.ml.splitRelationships")
+            .algo("gds.splitRelationships")
             .mutateMode()
             .addParameter("nonNegativeRelationshipTypes", List.of("MISSING"))
             .addParameter("holdoutRelationshipType", "test")
@@ -108,7 +108,7 @@ class SplitRelationshipsMutateProcTest extends BaseProcTest {
     @Test
     void shouldFailIfRemainingExists() {
         var query = GdsCypher.call("graph")
-            .algo("gds.ml.splitRelationships")
+            .algo("gds.splitRelationships")
             .mutateMode()
             .addParameter("holdoutRelationshipType", "test")
             .addParameter("remainingRelationshipType", "T")
@@ -129,7 +129,7 @@ class SplitRelationshipsMutateProcTest extends BaseProcTest {
     void shouldFailIfHoldoutExists() {
 
         var query = GdsCypher.call("graph")
-            .algo("gds.ml.splitRelationships")
+            .algo("gds.splitRelationships")
             .mutateMode()
             .addParameter("holdoutRelationshipType", "T")
             .addParameter("remainingRelationshipType", "train")
@@ -183,7 +183,7 @@ class SplitRelationshipsMutateProcTest extends BaseProcTest {
                                ",(d)-[:train]->(e)" +
                                ",(d)-[:train]->(c)", nodeId0, nodeId1, nodeId2, nodeId3, nodeId4, nodeId5);
         var query = GdsCypher.call("graph")
-            .algo("gds.ml.splitRelationships")
+            .algo("gds.splitRelationships")
             .mutateMode()
             .addParameter("sourceNodeLabels", List.of(nodeLabel))
             .addParameter("targetNodeLabels", List.of(nodeLabel))
@@ -239,7 +239,7 @@ class SplitRelationshipsMutateProcTest extends BaseProcTest {
                                ",(c)-[:innerTrain]->(d)" +
                                ",(d)-[:innerTrain]->(c)", nodeId0, nodeId1, nodeId2, nodeId3, nodeId4, nodeId5);
         var outerSplitQuery = GdsCypher.call("graph")
-            .algo("gds.ml.splitRelationships")
+            .algo("gds.splitRelationships")
             .mutateMode()
             .addParameter("sourceNodeLabels", List.of(nodeLabel))
             .addParameter("targetNodeLabels", List.of(nodeLabel))
@@ -252,7 +252,7 @@ class SplitRelationshipsMutateProcTest extends BaseProcTest {
         runQuery(outerSplitQuery);
 
         var innerSplitQuery = GdsCypher.call("graph")
-            .algo("gds.ml.splitRelationships")
+            .algo("gds.splitRelationships")
             .mutateMode()
             .addParameter("sourceNodeLabels", List.of(nodeLabel))
             .addParameter("targetNodeLabels", List.of(nodeLabel))
@@ -281,7 +281,7 @@ class SplitRelationshipsMutateProcTest extends BaseProcTest {
     void shouldPreserveRelationshipWeights(String nodeLabel) {
 
         var query = GdsCypher.call("graph")
-            .algo("gds.ml.splitRelationships")
+            .algo("gds.splitRelationships")
             .mutateMode()
             .addParameter("sourceNodeLabels", List.of(nodeLabel))
             .addParameter("targetNodeLabels", List.of(nodeLabel))

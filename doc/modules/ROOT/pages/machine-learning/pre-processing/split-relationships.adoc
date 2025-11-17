@@ -33,7 +33,7 @@ include::partial$/algorithms/shared/syntax-intro-named-graph.adoc[]
 .Run Split Relationships in mutate mode on a named graph.
 [source, cypher, role=noplay]
 ----
-CALL gds.ml.splitRelationships.mutate(
+CALL gds.splitRelationships.mutate(
   graphName: String,
   configuration: Map
 )
@@ -137,7 +137,7 @@ We use a random seed value in order to produce deterministic results.
 --
 [source, cypher, role=noplay]
 ----
-CALL gds.ml.splitRelationships.mutate('graph', {
+CALL gds.splitRelationships.mutate('graph', {
     holdoutRelationshipType: 'TYPE_HOLDOUT',
     remainingRelationshipType: 'TYPE_REMAINING',
     holdoutFraction: 0.2,

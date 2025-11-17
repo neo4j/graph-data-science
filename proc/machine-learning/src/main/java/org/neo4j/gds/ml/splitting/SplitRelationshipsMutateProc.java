@@ -39,7 +39,7 @@ public class SplitRelationshipsMutateProc {
     @Context
     public GraphDataScienceProcedures facade;
 
-    @Procedure(name = "gds.ml.splitRelationships.mutate", mode = READ)
+    @Procedure(name = "gds.splitRelationships.mutate", mode = READ)
     @Description(DESCRIPTION)
     public Stream<SplitRelationshipsMutateResult> mutate(
         @Name(value = "graphName") String graphName,
@@ -48,7 +48,7 @@ public class SplitRelationshipsMutateProc {
         return facade.algorithms().machineLearning().splitRelationshipsMutateStub().execute(graphName, configuration);
     }
 
-    @Procedure(name = "gds.alpha.ml.splitRelationships.mutate", mode = READ, deprecatedBy = "gds.ml.splitRelationships.mutate")
+    @Procedure(name = "gds.alpha.ml.splitRelationships.mutate", mode = READ, deprecatedBy = "gds.splitRelationships.mutate")
     @Description(DESCRIPTION)
     @Internal
     @Deprecated
@@ -57,12 +57,12 @@ public class SplitRelationshipsMutateProc {
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         facade.deprecatedProcedures().called("gds.alpha.ml.splitRelationships.mutate");
-        facade.log().warn("Function `gds.alpha.ml.splitRelationships.mutate` has been deprecated, please use `gds.ml.splitRelationships.mutate`.");
+        facade.log().warn("Function `gds.alpha.ml.splitRelationships.mutate` has been deprecated, please use `gds.splitRelationships.mutate`.");
 
         return mutate(graphName, configuration);
     }
 
-    @Procedure(value = "gds.ml.splitRelationships.mutate.estimate", mode = READ)
+    @Procedure(value = "gds.splitRelationships.mutate.estimate", mode = READ)
     @Description(MEMORY_ESTIMATION_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
@@ -74,7 +74,7 @@ public class SplitRelationshipsMutateProc {
         );
     }
 
-    @Procedure(value = "gds.alpha.ml.splitRelationships.mutate.estimate", mode = READ, deprecatedBy = "gds.ml.splitRelationships.mutate.estimate")
+    @Procedure(value = "gds.alpha.ml.splitRelationships.mutate.estimate", mode = READ, deprecatedBy = "gds.splitRelationships.mutate.estimate")
     @Description(MEMORY_ESTIMATION_DESCRIPTION)
     @Internal
     @Deprecated
@@ -83,7 +83,7 @@ public class SplitRelationshipsMutateProc {
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
         facade.deprecatedProcedures().called("gds.alpha.ml.splitRelationships.mutate.estimate");
-        facade.log().warn("Function `gds.alpha.ml.splitRelationships.mutate.estimate` has been deprecated, please use `gds.ml.splitRelationships.mutate.estimate`.");
+        facade.log().warn("Function `gds.alpha.ml.splitRelationships.mutate.estimate` has been deprecated, please use `gds.splitRelationships.mutate.estimate`.");
 
         return estimate(graphNameOrConfiguration, algoConfiguration);
     }
