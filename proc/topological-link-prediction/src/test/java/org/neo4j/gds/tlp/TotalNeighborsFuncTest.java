@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.linkprediction;
+package org.neo4j.gds.tlp;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,7 +29,6 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class TotalNeighborsFuncTest extends BaseProcTest {
-
     private static final String DB_CYPHER =
             "CREATE (mark:Person {name: 'Mark'})\n" +
             "CREATE (michael:Person {name: 'Michael'})\n" +
@@ -43,7 +42,7 @@ class TotalNeighborsFuncTest extends BaseProcTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        registerFunctions(LinkPredictionFunc.class);
+        registerFunctions(TopologicalLinkPredictionFunctions.class);
         runQuery(DB_CYPHER);
     }
 
@@ -52,7 +51,7 @@ class TotalNeighborsFuncTest extends BaseProcTest {
         String controlQuery =
                 "MATCH (p1:Person {name: 'Jennifer'})\n" +
                 "MATCH (p2:Person {name: 'Jennifer'})\n" +
-                "RETURN gds.alpha.linkprediction.totalNeighbors(p1, p2) AS score, " +
+                "RETURN gds.linkprediction.totalNeighbors(p1, p2) AS score, " +
                 "       2.0 AS cypherScore";
 
         Map<String, Object> node = runQuery(controlQuery, Result::next);
@@ -64,7 +63,7 @@ class TotalNeighborsFuncTest extends BaseProcTest {
         String controlQuery =
             "MATCH (p1:Person {name: 'Jennifer'})\n" +
             "MATCH (p2:Person {name: 'Mark'})\n" +
-            "RETURN gds.alpha.linkprediction.totalNeighbors(p1, p2) AS score, " +
+            "RETURN gds.linkprediction.totalNeighbors(p1, p2) AS score, " +
             "       3.0 AS cypherScore";
 
         Map<String, Object> node = runQuery(controlQuery, Result::next);
@@ -76,7 +75,7 @@ class TotalNeighborsFuncTest extends BaseProcTest {
         String controlQuery =
                 "MATCH (p1:Person {name: 'Praveena'})\n" +
                 "MATCH (p2:Person {name: 'Michael'})\n" +
-                "RETURN gds.alpha.linkprediction.totalNeighbors(p1, p2) AS score, " +
+                "RETURN gds.linkprediction.totalNeighbors(p1, p2) AS score, " +
                 "       4.0 AS cypherScore";
 
         Map<String, Object> node = runQuery(controlQuery, Result::next);

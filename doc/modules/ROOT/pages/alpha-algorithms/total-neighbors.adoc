@@ -1,5 +1,4 @@
-[[alpha-algorithms-linkprediction-total-neighbors]]
-[.alpha]
+[[algorithms-linkprediction-total-neighbors]]
 = Total Neighbors
 :description: This section describes the Total Neighbors algorithm in the Neo4j Graph Data Science library.
 
@@ -7,8 +6,6 @@ include::partial$/product-limitations/not-in-serverless.adoc[]
 
 Total Neighbors computes the closeness of nodes, based on the number of unique neighbors that they have.
 It is based on the idea that the more connected a node is, the more likely it is to receive new links.
-
-include::partial$/operations-reference/alpha-note.adoc[]
 
 
 [[algorithms-linkprediction-total-neighbors-context]]
@@ -31,7 +28,7 @@ The library contains a function to calculate the closeness between two nodes.
 .The following will run the algorithm and return the result:
 [source, cypher, role=noplay]
 ----
-RETURN gds.alpha.linkprediction.totalNeighbors(node1:Node, node2:Node, {
+RETURN gds.linkprediction.totalNeighbors(node1:Node, node2:Node, {
     relationshipQuery: null,
     direction: "BOTH"
 })
@@ -74,7 +71,7 @@ CREATE (zhen:Person {name: 'Zhen'}),
 ----
 MATCH (p1:Person {name: 'Michael'})
 MATCH (p2:Person {name: 'Karin'})
-RETURN gds.alpha.linkprediction.totalNeighbors(p1, p2) AS score
+RETURN gds.linkprediction.totalNeighbors(p1, p2) AS score
 ----
 
 .Results
@@ -91,7 +88,7 @@ We can also compute the score of a pair of nodes, based on a specific relationsh
 ----
 MATCH (p1:Person {name: 'Michael'})
 MATCH (p2:Person {name: 'Karin'})
-RETURN gds.alpha.linkprediction.totalNeighbors(p1, p2, {relationshipQuery: "FRIENDS"}) AS score
+RETURN gds.linkprediction.totalNeighbors(p1, p2, {relationshipQuery: "FRIENDS"}) AS score
 ----
 
 .Results

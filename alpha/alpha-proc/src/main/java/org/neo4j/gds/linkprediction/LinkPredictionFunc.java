@@ -19,31 +19,12 @@
  */
 package org.neo4j.gds.linkprediction;
 
-import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.UserFunction;
 
-import java.util.Locale;
-import java.util.Map;
-
-import static org.neo4j.gds.core.ProcedureConstants.DIRECTION_KEY;
-import static org.neo4j.gds.legacycypherprojection.GraphProjectFromCypherConfig.RELATIONSHIP_QUERY_KEY;
-
 public class LinkPredictionFunc {
-    @UserFunction("gds.alpha.linkprediction.totalNeighbors")
-    @Description("Given two nodes, calculate Total Neighbors")
-    public double totalNeighbors(@Name("node1") Node node1, @Name("node2") Node node2,
-                                         @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
-        RelationshipType relationshipType = getRelationshipType(config);
-        Direction direction = getDirection(config);
-
-        NeighborsFinder neighborsFinder = new NeighborsFinder();
-        return neighborsFinder.findNeighbors(node1, node2, relationshipType, direction).size();
-    }
-
     @UserFunction("gds.alpha.linkprediction.sameCommunity")
     @Description("Given two nodes, indicates if they have the same community")
     public double sameCommunity(@Name("node1") Node node1, @Name("node2") Node node2,
@@ -53,78 +34,5 @@ public class LinkPredictionFunc {
         }
 
         return node1.getProperty(communityProperty).equals(node2.getProperty(communityProperty)) ? 1.0 : 0.0;
-    }
-
-    private int degree(Node node, RelationshipType relationshipType, Direction direction) {
-        return relationshipType == null ? node.getDegree(direction) : node.getDegree(relationshipType, direction);
-    }
-
-    private RelationshipType getRelationshipType(Map<String, Object> config) {
-        return config.getOrDefault(RELATIONSHIP_QUERY_KEY, null) == null
-            ? null
-            : RelationshipType.withName((String) config.get(RELATIONSHIP_QUERY_KEY));
-    }
-
-    private Direction getDirection(Map<String, Object> config) {
-        return Directions.fromString((String) config.getOrDefault(DIRECTION_KEY, Direction.BOTH.name()));
-    }
-
-    /**
-     * Utility class for converting string representation used in cypher queries
-     * to neo4j kernel api Direction type.
-     *
-     *
-     * <p>
-     *      String parsing is case insensitive!
-     * <div>
-     *     <strong>OUTGOING</strong>
-     *     <ul>
-     *         <li>&gt;</li>
-     *         <li>o</li>
-     *         <li>out</li>
-     *         <li>outgoing</li>
-     *     </ul>
-     *     <strong>INCOMING</strong>
-     *     <ul>
-     *         <li>&lt;</li>
-     *         <li>i</li>
-     *         <li>in</li>
-     *         <li>incoming</li>
-     *     </ul>
-     *     <strong>BOTH</strong>
-     *     <ul>
-     *         <li>&lt;&gt;</li>
-     *         <li>b</li>
-     *         <li>both</li>
-     *     </ul>
-     * </div>
-     */
-    static final class Directions {
-
-        static final Direction DEFAULT_DIRECTION = Direction.OUTGOING;
-
-        private Directions() {}
-
-        static Direction fromString(String directionString) {
-            return fromString(directionString, DEFAULT_DIRECTION);
-        }
-
-        static Direction fromString(String directionString, Direction defaultDirection) {
-
-            if (null == directionString) {
-                return defaultDirection;
-            }
-
-            return switch (directionString.toLowerCase(Locale.ENGLISH)) {
-                case "outgoing", "out", "o", ">" -> Direction.OUTGOING;
-                case "incoming", "in", "i", "<" -> Direction.INCOMING;
-                case "both", "b", "<>" -> Direction.BOTH;
-                default -> defaultDirection;
-            };
-        }
-
-        public static String toString(Direction direction) {
-            return direction.name();
-        }
     }
 }

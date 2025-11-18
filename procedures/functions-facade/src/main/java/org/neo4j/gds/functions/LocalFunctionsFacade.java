@@ -92,6 +92,14 @@ public class LocalFunctionsFacade implements FunctionsFacade {
             .sum();
     }
 
+    @Override
+    public double totalNeighbours(Node node1, Node node2, Map<String, Object> configuration) {
+        var relationshipType = getRelationshipType(configuration);
+        var direction = getDirection(configuration);
+
+        return neighbourFinder.findNeighbours(node1, node2, relationshipType, direction).size();
+    }
+
     private int degree(Node node, RelationshipType relationshipType, Direction direction) {
         return relationshipType == null ? node.getDegree(direction) : node.getDegree(relationshipType, direction);
     }

@@ -31,6 +31,7 @@ import java.util.Map;
 
 import static org.neo4j.gds.tlp.Constants.ADAMIC_ADAR_INDEX_DESCRIPTION;
 import static org.neo4j.gds.tlp.Constants.COMMON_NEIGHBOURS_DESCRIPTION;
+import static org.neo4j.gds.tlp.Constants.TOTAL_NEIGHBORS_DESCRIPTION;
 import static org.neo4j.gds.tlp.Constants.PREFERENTIAL_ATTACHMENT_DESCRIPTION;
 import static org.neo4j.gds.tlp.Constants.RESOURCE_ALLOCATION_SIMILARITY_DESCRIPTION;
 
@@ -140,5 +141,31 @@ public class TopologicalLinkPredictionFunctions {
             "Function `gds.alpha.linkprediction.resourceAllocation` has been deprecated, please use `gds.linkprediction.resourceAllocation`.");
 
         return resourceAllocationSimilarity(node1, node2, configuration);
+    }
+
+    @UserFunction("gds.linkprediction.totalNeighbors")
+    @Description(TOTAL_NEIGHBORS_DESCRIPTION)
+    public double totalNeighbours(
+        @Name("node1") Node node1,
+        @Name("node2") Node node2,
+        @Name(value = "config", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        return facade.functions().totalNeighbours(node1, node2, configuration);
+    }
+
+    @UserFunction(value = "gds.alpha.linkprediction.totalNeighbors", deprecatedBy = "gds.linkprediction.totalNeighbors")
+    @Description(TOTAL_NEIGHBORS_DESCRIPTION)
+    @Internal
+    @Deprecated
+    public double alphaTotalNeighbours(
+        @Name("node1") Node node1,
+        @Name("node2") Node node2,
+        @Name(value = "config", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        facade.deprecatedProcedures().called("gds.alpha.linkprediction.totalNeighbors");
+        facade.log().warn(
+            "Function `gds.alpha.linkprediction.totalNeighbors` has been deprecated, please use `gds.linkprediction.totalNeighbors`.");
+
+        return totalNeighbours(node1, node2, configuration);
     }
 }

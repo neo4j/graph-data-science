@@ -23,7 +23,7 @@ import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
-import org.neo4j.gds.linkprediction.LinkPredictionFunc;
+import org.neo4j.gds.tlp.TopologicalLinkPredictionFunctions;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -48,7 +48,7 @@ class TotalNeighborsDocTest extends BaseProcTest {
     @BeforeEach
     void setup() throws Exception {
         runQuery(DB_CYPHER);
-        registerFunctions(LinkPredictionFunc.class);
+        registerFunctions(TopologicalLinkPredictionFunctions.class);
     }
 
     @Test
@@ -56,7 +56,7 @@ class TotalNeighborsDocTest extends BaseProcTest {
         @Language("Cypher")
         String query = " MATCH (p1:Person {name: 'Michael'})" +
                        " MATCH (p2:Person {name: 'Karin'})" +
-                       " RETURN gds.alpha.linkprediction.totalNeighbors(p1, p2) AS score";
+                       " RETURN gds.linkprediction.totalNeighbors(p1, p2) AS score";
 
         String expectedString = "+-------+" + NL +
                                 "| score |" + NL +
@@ -73,7 +73,7 @@ class TotalNeighborsDocTest extends BaseProcTest {
         @Language("Cypher")
         String query = " MATCH (p1:Person {name: 'Michael'})" +
                        " MATCH (p2:Person {name: 'Karin'})" +
-                       " RETURN gds.alpha.linkprediction.totalNeighbors(p1, p2, {relationshipQuery: 'FRIENDS'}) AS score";
+                       " RETURN gds.linkprediction.totalNeighbors(p1, p2, {relationshipQuery: 'FRIENDS'}) AS score";
 
         String expectedString = "+-------+" + NL +
                                 "| score |" + NL +

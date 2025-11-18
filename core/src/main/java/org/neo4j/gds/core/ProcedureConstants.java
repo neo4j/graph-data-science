@@ -23,9 +23,6 @@ public final class ProcedureConstants {
     // algos specific
     public static final double TOLERANCE_DEFAULT = 0.0001D;
 
-    // graph type params
-    public static final String DIRECTION_KEY = "direction";
-
     public static final int HISTOGRAM_PRECISION_DEFAULT = 5;
 
     private ProcedureConstants() {}
