@@ -33,20 +33,6 @@ import static org.neo4j.gds.core.ProcedureConstants.DIRECTION_KEY;
 import static org.neo4j.gds.legacycypherprojection.GraphProjectFromCypherConfig.RELATIONSHIP_QUERY_KEY;
 
 public class LinkPredictionFunc {
-    @UserFunction("gds.alpha.linkprediction.preferentialAttachment")
-    @Description("Given two nodes, calculate Preferential Attachment")
-    public double preferentialAttachment(@Name("node1") Node node1, @Name("node2") Node node2,
-                                       @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
-        if (node1 == null || node2 == null) {
-            throw new RuntimeException("Nodes must not be null");
-        }
-
-        RelationshipType relationshipType = getRelationshipType(config);
-        Direction direction = getDirection(config);
-
-        return degree(node1, relationshipType, direction) * degree(node2, relationshipType, direction);
-    }
-
     @UserFunction("gds.alpha.linkprediction.totalNeighbors")
     @Description("Given two nodes, calculate Total Neighbors")
     public double totalNeighbors(@Name("node1") Node node1, @Name("node2") Node node2,

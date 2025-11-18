@@ -65,6 +65,16 @@ public class LocalFunctionsFacade implements FunctionsFacade {
         return oneHotEncodingApplication.encode(availableValues, selectedValues);
     }
 
+    @Override
+    public double preferentialAttachment(Node node1, Node node2, Map<String, Object> configuration) {
+        if (node1 == null || node2 == null) throw new RuntimeException("Nodes must not be null");
+
+        var relationshipType = getRelationshipType(configuration);
+        var direction = getDirection(configuration);
+
+        return degree(node1, relationshipType, direction) * degree(node2, relationshipType, direction);
+    }
+
     /**
      * @see <a href="https://arxiv.org/pdf/0901.0553.pdf">Predicting Missing Links via Local Information</a>
      */

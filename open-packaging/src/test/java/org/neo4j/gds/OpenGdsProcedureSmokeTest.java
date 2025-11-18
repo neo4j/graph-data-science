@@ -584,9 +584,9 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
 
         "gds.linkprediction.adamicAdar",
         "gds.linkprediction.commonNeighbors",
+        "gds.linkprediction.preferentialAttachment",
         "gds.linkprediction.resourceAllocation",
 
-        "gds.alpha.linkprediction.preferentialAttachment",
         "gds.alpha.linkprediction.totalNeighbors",
         "gds.alpha.linkprediction.sameCommunity",
 

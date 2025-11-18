@@ -31,5 +31,7 @@ public interface FunctionsFacade {
 
     List<Long> oneHotEncoding(List<Object> availableValues, List<Object> selectedValues);
 
+    double preferentialAttachment(Node node1, Node node2, Map<String, Object> configuration);
+
     double resourceAllocationSimilarity(Node node1, Node node2, Map<String, Object> configuration);
 }

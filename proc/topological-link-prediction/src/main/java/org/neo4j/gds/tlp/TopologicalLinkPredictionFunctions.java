@@ -31,6 +31,7 @@ import java.util.Map;
 
 import static org.neo4j.gds.tlp.Constants.ADAMIC_ADAR_INDEX_DESCRIPTION;
 import static org.neo4j.gds.tlp.Constants.COMMON_NEIGHBOURS_DESCRIPTION;
+import static org.neo4j.gds.tlp.Constants.PREFERENTIAL_ATTACHMENT_DESCRIPTION;
 import static org.neo4j.gds.tlp.Constants.RESOURCE_ALLOCATION_SIMILARITY_DESCRIPTION;
 
 public class TopologicalLinkPredictionFunctions {
@@ -87,6 +88,32 @@ public class TopologicalLinkPredictionFunctions {
             "Function `gds.alpha.linkprediction.commonNeighbors` has been deprecated, please use `gds.linkprediction.commonNeighbors`.");
 
         return commonNeighbors(node1, node2, configuration);
+    }
+
+    @UserFunction("gds.linkprediction.preferentialAttachment")
+    @Description(PREFERENTIAL_ATTACHMENT_DESCRIPTION)
+    public double preferentialAttachment(
+        @Name("node1") Node node1,
+        @Name("node2") Node node2,
+        @Name(value = "config", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        return facade.functions().preferentialAttachment(node1, node2, configuration);
+    }
+
+    @UserFunction(value = "gds.alpha.linkprediction.preferentialAttachment", deprecatedBy = "gds.linkprediction.preferentialAttachment")
+    @Description(PREFERENTIAL_ATTACHMENT_DESCRIPTION)
+    @Internal
+    @Deprecated
+    public double alphaPreferentialAttachment(
+        @Name("node1") Node node1,
+        @Name("node2") Node node2,
+        @Name(value = "config", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        facade.deprecatedProcedures().called("gds.alpha.linkprediction.preferentialAttachment");
+        facade.log().warn(
+            "Function `gds.alpha.linkprediction.preferentialAttachment` has been deprecated, please use `gds.linkprediction.preferentialAttachment`.");
+
+        return preferentialAttachment(node1, node2, configuration);
     }
 
     @UserFunction("gds.linkprediction.resourceAllocation")
