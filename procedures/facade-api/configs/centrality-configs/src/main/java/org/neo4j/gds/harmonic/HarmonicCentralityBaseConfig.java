@@ -19,9 +19,14 @@
  */
 package org.neo4j.gds.harmonic;
 
+import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.config.AlgoBaseConfig;
 
 
 public interface HarmonicCentralityBaseConfig  extends AlgoBaseConfig
 {
+    @Configuration.Ignore
+    default HarmonicCentralityParameters toParameters(){
+        return  new HarmonicCentralityParameters(concurrency());
+    }
 }

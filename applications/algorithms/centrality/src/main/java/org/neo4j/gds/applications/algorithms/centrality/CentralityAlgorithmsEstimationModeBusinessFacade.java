@@ -32,6 +32,8 @@ import org.neo4j.gds.closeness.ClosenessCentralityBaseConfig;
 import org.neo4j.gds.config.RelationshipWeightConfig;
 import org.neo4j.gds.degree.DegreeCentralityAlgorithmEstimateDefinition;
 import org.neo4j.gds.degree.DegreeCentralityConfig;
+import org.neo4j.gds.harmonic.HarmonicCentralityAlgorithmEstimateDefinition;
+import org.neo4j.gds.harmonic.HarmonicCentralityBaseConfig;
 import org.neo4j.gds.hits.HitsConfig;
 import org.neo4j.gds.hits.HitsMemoryEstimateDefinition;
 import org.neo4j.gds.indirectExposure.IndirectExposureMemoryEstimationDefinition;
@@ -40,8 +42,6 @@ import org.neo4j.gds.influenceMaximization.InfluenceMaximizationBaseConfig;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.pagerank.PageRankMemoryEstimateDefinition;
 import org.neo4j.gds.pagerank.RankConfig;
-import org.neo4j.gds.harmonic.HarmonicCentralityAlgorithmEstimateDefinition;
-import org.neo4j.gds.harmonic.HarmonicCentralityBaseConfig;
 
 public class CentralityAlgorithmsEstimationModeBusinessFacade {
     private final AlgorithmEstimationTemplate algorithmEstimationTemplate;
