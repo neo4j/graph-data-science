@@ -6,8 +6,6 @@
 :result: conductance
 :algorithm: Conductance
 
-include::partial$/product-limitations/not-in-serverless-cypher.adoc[]
-
 :directed:
 :undirected:
 :weighted:
