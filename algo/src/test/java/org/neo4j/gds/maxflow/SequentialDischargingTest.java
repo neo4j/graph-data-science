@@ -63,13 +63,13 @@ class SequentialDischargingTest {
         var  source  = new NodeWithValue(graph.toMappedNodeId("e"),100);
         var  target  = new NodeWithValue(targetNode,100);
 
-        var flowGraph = FlowGraph.create(
+        var flowGraph = new FlowGraphBuilder(
             graph,
             new NodeWithValue[]{source},
             new NodeWithValue[]{target},
             TerminationFlag.RUNNING_TRUE,
             new Concurrency(1)
-        );
+        ).build();
 
         var excess = HugeDoubleArray.newArray(flowGraph.nodeCount());
         var label = HugeLongArray.newArray(flowGraph.nodeCount());
@@ -133,13 +133,13 @@ class SequentialDischargingTest {
         var  source  = new NodeWithValue(graph.toMappedNodeId("e"),100);
         var  target  = new NodeWithValue(targetNode,100);
 
-        var flowGraph = FlowGraph.create(
+        var flowGraph = new FlowGraphBuilder(
             graph,
             new NodeWithValue[]{source},
             new NodeWithValue[]{target},
             TerminationFlag.RUNNING_TRUE,
             new Concurrency(1)
-        );
+        ).build();
 
         var excess = HugeDoubleArray.newArray(flowGraph.nodeCount());
         var label = HugeLongArray.newArray(flowGraph.nodeCount());

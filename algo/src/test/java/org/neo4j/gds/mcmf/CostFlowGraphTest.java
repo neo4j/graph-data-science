@@ -19,11 +19,13 @@
  */
 package org.neo4j.gds.mcmf;
 
+import org.apache.commons.lang3.mutable.MutableInt;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.properties.relationships.RelationshipCursor;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
@@ -68,7 +70,7 @@ class CostFlowGraphTest {
             .reduce(0D, Double::sum);
         NodeWithValue[] supply = {new NodeWithValue(source, outgoingCapacityFromSource)};
         NodeWithValue[] demand = {new NodeWithValue(target, outgoingCapacityFromSource)}; //more is useless since this is max in network
-        return CostFlowGraph.create(graphOfFlows, graphOfCosts, supply, demand, TerminationFlag.RUNNING_TRUE);
+        return new CostFlowGraphBuilder(graphOfFlows, graphOfCosts, supply, demand, TerminationFlag.RUNNING_TRUE, new Concurrency(1)).build();
     }
 
     @Test
@@ -104,13 +106,35 @@ class CostFlowGraphTest {
             }
         );
 
-
         assertThat(map.entrySet()).containsExactlyInAnyOrder(
             Map.entry(mappedId.of("d"), new CostArc(4D, 1D + (-1D) - (-5D), false)),
             Map.entry(mappedId.of("b"), new CostArc(0D, -4D + (-1D) - (-3D), true)),
             Map.entry(mappedId.of("c"), new CostArc(0D, -2D + (-1D) - (-2D), true)),
             Map.entry(costFlowGraph.superSource(), new CostArc(0D, -0 + (-1D) - (0D), true))
         );
+
+        assertThat(costFlowGraph.maximalUnitCost()).isEqualTo(10D);
+    }
+
+    @Test
+    void testBreakIteration() {
+
+        var graphOfFlows = graphStore.getGraph("w");
+        var graphOfCosts = graphStore.getGraph("c");
+        IdFunction mappedId = name -> graphStore.nodes().toMappedNodeId(idFunction.of(name));
+
+        var costFlowGraph = createCostFlowGraph(graphOfFlows, graphOfCosts, mappedId.of("a"), mappedId.of("b"));
+
+        var idx = new MutableInt(0);
+        costFlowGraph.forEachRelationship(
+            mappedId.of("a"), (s, t, r, residualCapacity, __,isReverse) -> idx.incrementAndGet() < 1
+        );
+        assertThat(idx.intValue()).isEqualTo(1);
+
+        costFlowGraph.forEachReverseRelationship(
+            mappedId.of("a"), (s, t, r, residualCapacity, __,isReverse) -> idx.incrementAndGet() < 2
+        );
+        assertThat(idx.intValue()).isEqualTo(2);
     }
 
     private record CostArc(double residualCapacity, double reducedCost, boolean isReverse) { }

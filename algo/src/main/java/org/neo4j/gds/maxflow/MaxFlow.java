@@ -59,7 +59,8 @@ public final class MaxFlow extends Algorithm<FlowResult> {
 
     private void initPreflow() {
         var supplyAndDemand = SupplyAndDemandFactory.create(graph, parameters.sourceNodes(), parameters.targetNodes());
-        flowGraph = FlowGraph.create(graph, supplyAndDemand.getLeft(), supplyAndDemand.getRight(), terminationFlag, parameters.concurrency());
+        flowGraph = new FlowGraphBuilder(graph,supplyAndDemand.getLeft(), supplyAndDemand.getRight(), terminationFlag, parameters.concurrency())
+            .build();
         excess = HugeDoubleArray.newArray(flowGraph.nodeCount());
         excess.setAll(x -> 0D);
         flowGraph.forEachRelationship(

@@ -27,14 +27,6 @@ import org.neo4j.gds.api.properties.relationships.RelationshipWithPropertyConsum
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
-import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
-import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.core.concurrency.RunWithConcurrency;
-import org.neo4j.gds.core.utils.paged.ParalleLongPageCreator;
-import org.neo4j.gds.termination.TerminationFlag;
-
-import java.util.concurrent.atomic.AtomicLong;
 
 public class FlowGraph {
     protected final Graph graph;
@@ -69,109 +61,8 @@ public class FlowGraph {
         this.demand = demand;
     }
 
-    public static FlowGraph create(Graph graph, NodeWithValue[] supply, NodeWithValue[] demand, TerminationFlag terminationFlag, Concurrency concurrency) {
-        var superSource = graph.nodeCount();
-        var superTarget = graph.nodeCount() + 1;
-        var oldNodeCount = graph.nodeCount();
-        var newNodeCount = oldNodeCount + 2;
-
-        var reverseDegree = HugeLongArray.newArray(newNodeCount);
-        reverseDegree.setAll(x -> 0L);
-
-        for (long nodeId = 0; nodeId < graph.nodeCount(); nodeId++) {
-            terminationFlag.assertRunning();
-            graph.forEachRelationship(
-                nodeId, 0D, (s, t, capacity) -> {
-                    if(capacity < 0D){
-                        throw new IllegalArgumentException("Negative capacity not allowed");
-                    }
-                    reverseDegree.addTo(t, 1);
-                    return true;
-                }
-            );
-        }
-        for (var source : supply) {
-            reverseDegree.addTo(source.node(), 1);
-        }
-        for (var target : demand) {
-            reverseDegree.addTo(target.node(), 1);
-        }
-
-        //Construct CSR ptrs.
-        var indPtr = HugeLongArray.newArray(newNodeCount + 1);
-        indPtr.set(0, 0);
-        var reverseIndPtr = HugeLongArray.newArray(newNodeCount + 1);
-        reverseIndPtr.set(0, 0);
-        for (long nodeId = 0; nodeId <= superTarget; nodeId++) {
-            var degree = nodeId < graph.nodeCount()
-                ? graph.degree(nodeId)
-                : (nodeId == superSource ? supply.length : demand.length);
-            indPtr.set(nodeId + 1, indPtr.get(nodeId) + degree);
-            reverseIndPtr.set(nodeId + 1, reverseIndPtr.get(nodeId) + reverseDegree.get(nodeId));
-        }
-
-        var newRelationshipCount = graph.relationshipCount() + supply.length + demand.length;
-        var originalCapacity = HugeDoubleArray.newArray(newRelationshipCount);
-        var reverseToRelIdx = HugeLongArray.newArray(newRelationshipCount);
-        var reverseAdjacency = HugeLongArray.newArray(newRelationshipCount);
-
-        var flow = HugeDoubleArray.newArray(newRelationshipCount);
-        flow.setAll(x -> 0D);
-
-        //Populate CSRs
-        var cursor = HugeLongArray.newArray(newNodeCount);
-        var reverseCursor = HugeAtomicLongArray.of(newNodeCount, ParalleLongPageCreator.of(concurrency, x -> 0));
-        RelationshipWithPropertyConsumer consumer = (s, t, capacity) -> {
-            var relIdx = indPtr.get(s) + cursor.get(s);
-            cursor.addTo(s, 1);
-            var reverseRelIdx = reverseIndPtr.get(t) + reverseCursor.getAndAdd(t, 1);
-            reverseAdjacency.set(reverseRelIdx, s);
-            reverseToRelIdx.set(reverseRelIdx, relIdx);
-            originalCapacity.set(relIdx, capacity);
-            return true;
-        };
-
-        var nodeId = new AtomicLong(0);
-
-        var tasks = ParallelUtil.tasks(concurrency,
-            ()->  () -> {
-                var graphCopy = graph.concurrentCopy();
-                long v;
-                while ((v = nodeId.getAndIncrement()) < oldNodeCount) {
-                    graphCopy.forEachRelationship(v, 0D, consumer);
-                }
-            }
-        );
-
-        RunWithConcurrency.builder()
-            .tasks(tasks)
-            .concurrency(concurrency)
-            .run();
 
 
-        for (var source : supply) {
-            terminationFlag.assertRunning();
-            consumer.accept(superSource, source.node(), source.value());
-        }
-        var r = newRelationshipCount - demand.length;
-        for (var target : demand) {
-            //Fake a fully utilized (capacity) edge FROM superTarget. Flow TO superTarget can therefore be increased by capacity.
-            flow.set(r++, target.value());
-            consumer.accept(superTarget, target.node(), target.value());
-        }
-
-        return new FlowGraph(
-            graph,
-            indPtr,
-            originalCapacity,
-            flow,
-            reverseAdjacency,
-            reverseToRelIdx,
-            reverseIndPtr,
-            supply,
-            demand
-        );
-    }
 
     public FlowGraph concurrentCopy() {
         return new FlowGraph(

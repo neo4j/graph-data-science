@@ -105,11 +105,9 @@ public class MinCostMaxFlow extends Algorithm<CostFlowResult> {
         do {
             var start = System.currentTimeMillis();
             epsilon = Math.max(epsilon / parameters.alpha(), SMALLEST_ALLOWED_EPSILON);
-            System.out.println("New epsilon: " + epsilon);
             discharging.updateEpsilon(epsilon);
             initRefine(prize, workingQueue, inWorkingQueue);
             discharging.dischargeUntilDone();
-            System.out.println("Iteration time: " + (System.currentTimeMillis() - start) + " ms");
 
         } while (epsilon > SMALLEST_ALLOWED_EPSILON);
 
@@ -141,7 +139,15 @@ public class MinCostMaxFlow extends Algorithm<CostFlowResult> {
 
     private void initPreflow() {
         var supplyAndDemand = SupplyAndDemandFactory.create(graphOfFlows, parameters.sourceNodes(), parameters.targetNodes());
-        costFlowGraph = CostFlowGraph.create(graphOfFlows, graphOfCosts, supplyAndDemand.getLeft(), supplyAndDemand.getRight(), terminationFlag);
+        costFlowGraph = new CostFlowGraphBuilder(
+            graphOfFlows,
+            graphOfCosts,
+            supplyAndDemand.getLeft(),
+            supplyAndDemand.getRight(),
+            terminationFlag,
+            parameters.concurrency()
+        ).build();
+
         excess = HugeDoubleArray.newArray(costFlowGraph.nodeCount());
         excess.setAll(x -> 0D);
         costFlowGraph.forEachRelationship(
