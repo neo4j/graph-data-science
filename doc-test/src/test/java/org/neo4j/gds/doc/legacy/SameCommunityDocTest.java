@@ -23,14 +23,11 @@ import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
-import org.neo4j.gds.linkprediction.LinkPredictionFunc;
+import org.neo4j.gds.tlp.TopologicalLinkPredictionFunctions;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class SameCommunityDocTest extends BaseProcTest {
-
-    private static final String NL = System.lineSeparator();
-
     private static final String DB_CYPHER = "CREATE" +
         "  (zhen:Person {name: 'Zhen', community: 1})" +
         ", (praveena:Person {name: 'Praveena', community: 2})" +
@@ -42,7 +39,7 @@ class SameCommunityDocTest extends BaseProcTest {
     @BeforeEach
     void setup() throws Exception {
         runQuery(DB_CYPHER);
-        registerFunctions(LinkPredictionFunc.class);
+        registerFunctions(TopologicalLinkPredictionFunctions.class);
     }
 
     @Test
@@ -50,14 +47,16 @@ class SameCommunityDocTest extends BaseProcTest {
         @Language("Cypher")
         String query = " MATCH (p1:Person {name: 'Michael'})" +
                        " MATCH (p2:Person {name: 'Zhen'})" +
-                       " RETURN gds.alpha.linkprediction.sameCommunity(p1, p2) AS score";
+                       " RETURN gds.linkprediction.sameCommunity(p1, p2) AS score";
 
-        String expectedString = "+-------+" + NL +
-                                "| score |" + NL +
-                                "+-------+" + NL +
-                                "| 1.0   |" + NL +
-                                "+-------+" + NL +
-                                "1 row" + NL;
+        var expectedString = """
+            +-------+
+            | score |
+            +-------+
+            | 1.0   |
+            +-------+
+            1 row
+            """;
 
         runQueryWithResultConsumer(query, result -> assertEquals(expectedString, result.resultAsString()));
     }
@@ -67,14 +66,16 @@ class SameCommunityDocTest extends BaseProcTest {
         @Language("Cypher")
         String query = " MATCH (p1:Person {name: 'Michael'})" +
                        " MATCH (p2:Person {name: 'Praveena'})" +
-                       " RETURN gds.alpha.linkprediction.sameCommunity(p1, p2) AS score";
+                       " RETURN gds.linkprediction.sameCommunity(p1, p2) AS score";
 
-        String expectedString = "+-------+" + NL +
-                                "| score |" + NL +
-                                "+-------+" + NL +
-                                "| 0.0   |" + NL +
-                                "+-------+" + NL +
-                                "1 row" + NL;
+        var expectedString = """
+            +-------+
+            | score |
+            +-------+
+            | 0.0   |
+            +-------+
+            1 row
+            """;
 
         runQueryWithResultConsumer(query, result -> assertEquals(expectedString, result.resultAsString()));
     }
@@ -84,14 +85,16 @@ class SameCommunityDocTest extends BaseProcTest {
         @Language("Cypher")
         String query = " MATCH (p1:Person {name: 'Michael'})" +
                        " MATCH (p2:Person {name: 'Jennifer'})" +
-                       " RETURN gds.alpha.linkprediction.sameCommunity(p1, p2) AS score";
+                       " RETURN gds.linkprediction.sameCommunity(p1, p2) AS score";
 
-        String expectedString = "+-------+" + NL +
-                                "| score |" + NL +
-                                "+-------+" + NL +
-                                "| 0.0   |" + NL +
-                                "+-------+" + NL +
-                                "1 row" + NL;
+        var expectedString = """
+            +-------+
+            | score |
+            +-------+
+            | 0.0   |
+            +-------+
+            1 row
+            """;
 
         runQueryWithResultConsumer(query, result -> assertEquals(expectedString, result.resultAsString()));
     }
@@ -101,14 +104,16 @@ class SameCommunityDocTest extends BaseProcTest {
         @Language("Cypher")
         String query = " MATCH (p1:Person {name: 'Arya'})" +
                        " MATCH (p2:Person {name: 'Karin'})" +
-                       " RETURN gds.alpha.linkprediction.sameCommunity(p1, p2, 'partition') AS score";
+                       " RETURN gds.linkprediction.sameCommunity(p1, p2, 'partition') AS score";
 
-        String expectedString = "+-------+" + NL +
-                                "| score |" + NL +
-                                "+-------+" + NL +
-                                "| 1.0   |" + NL +
-                                "+-------+" + NL +
-                                "1 row" + NL;
+        var expectedString = """
+            +-------+
+            | score |
+            +-------+
+            | 1.0   |
+            +-------+
+            1 row
+            """;
 
         runQueryWithResultConsumer(query, result -> assertEquals(expectedString, result.resultAsString()));
     }

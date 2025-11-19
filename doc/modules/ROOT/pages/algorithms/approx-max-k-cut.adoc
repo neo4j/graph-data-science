@@ -1,5 +1,4 @@
-:page-aliases: algorithms/alpha/approx-max-k-cut.adoc
-[[alpha-algorithms-approx-max-k-cut]]
+[[algorithms-approx-max-k-cut]]
 
 = Approximate Maximum k-cut
 :description: This section describes the Approximate Maximum k-cut algorithm in the Neo4j Graph Data Science library.
@@ -29,8 +28,6 @@ The 2-cut we outlined above would then not be a maximum 2-cut (with a cut cost o
 ====
 Maximum k-cut is the same as https://en.wikipedia.org/wiki/Maximum_cut[Maximum Cut] when `k = 2`.
 ====
-
-include::partial$/operations-reference/alpha-note.adoc[]
 
 
 === Applications

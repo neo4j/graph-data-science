@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.linkprediction;
+package org.neo4j.gds.tlp;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,7 +29,6 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class SameCommunityFuncTest extends BaseProcTest {
-
     private static final String DB_CYPHER =
             "CREATE (mark:Person {name: 'Mark'})\n" +
             "SET mark.community=1, mark.partition = 4\n" +
@@ -41,7 +40,7 @@ class SameCommunityFuncTest extends BaseProcTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        registerFunctions(LinkPredictionFunc.class);
+        registerFunctions(TopologicalLinkPredictionFunctions.class);
         runQuery(DB_CYPHER);
     }
 
@@ -50,7 +49,7 @@ class SameCommunityFuncTest extends BaseProcTest {
         String controlQuery =
                 "MATCH (p1:Person {name: 'Jennifer'})\n" +
                         "MATCH (p2:Person {name: 'Mark'})\n" +
-                        "RETURN gds.alpha.linkprediction.sameCommunity(p1, p2) AS score, " +
+                        "RETURN gds.linkprediction.sameCommunity(p1, p2) AS score, " +
                         "       0.0 AS cypherScore";
 
         Map<String, Object> node = runQuery(controlQuery, Result::next);
@@ -62,7 +61,7 @@ class SameCommunityFuncTest extends BaseProcTest {
         String controlQuery =
                 "MATCH (p1:Person {name: 'Praveena'})\n" +
                         "MATCH (p2:Person {name: 'Mark'})\n" +
-                        "RETURN gds.alpha.linkprediction.sameCommunity(p1, p2) AS score, " +
+                        "RETURN gds.linkprediction.sameCommunity(p1, p2) AS score, " +
                         "       1.0 AS cypherScore";
 
         Map<String, Object> node = runQuery(controlQuery, Result::next);
@@ -74,7 +73,7 @@ class SameCommunityFuncTest extends BaseProcTest {
         String controlQuery =
                 "MATCH (p1:Person {name: 'Michael'})\n" +
                         "MATCH (p2:Person {name: 'Mark'})\n" +
-                        "RETURN gds.alpha.linkprediction.sameCommunity(p1, p2) AS score, " +
+                        "RETURN gds.linkprediction.sameCommunity(p1, p2) AS score, " +
                         "       0.0 AS cypherScore";
 
         Map<String, Object> node = runQuery(controlQuery, Result::next);
@@ -86,7 +85,7 @@ class SameCommunityFuncTest extends BaseProcTest {
         String controlQuery =
                 "MATCH (p1:Person {name: 'Michael'})\n" +
                         "MATCH (p2:Person {name: 'Mark'})\n" +
-                        "RETURN gds.alpha.linkprediction.sameCommunity(p1, p2, 'partition') AS score, " +
+                        "RETURN gds.linkprediction.sameCommunity(p1, p2, 'partition') AS score, " +
                         "       1.0 AS cypherScore";
 
         Map<String, Object> node = runQuery(controlQuery, Result::next);

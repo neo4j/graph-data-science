@@ -112,7 +112,7 @@ For the most basic set of features, like graph loading and the graph representat
 </dependency>
 ----
 
-The algorithms are located in the `algo-common`, `algo` and `alpha-algo` modules:
+The algorithms are located in the `algo-common` and `algo` modules:
 
 [source]
 ----
@@ -129,16 +129,9 @@ The algorithms are located in the `algo-common`, `algo` and `alpha-algo` modules
   <artifactId>algo</artifactId>
   <version>2.23.0</version>
 </dependency>
-
-<!-- Contains some alpha algorithms -->
-<dependency>
-    <groupId>org.neo4j.gds</groupId>
-    <artifactId>alpha-algo</artifactId>
-    <version>2.23.0</version>
-</dependency>
 ----
 
-The procedures are located in the `proc-common`, `proc` and `alpha-proc` modules:
+The procedures are located in the `proc-common` and `proc` modules:
 
 [source]
 ----
@@ -154,13 +147,6 @@ The procedures are located in the `proc-common`, `proc` and `alpha-proc` modules
   <groupId>org.neo4j.gds</groupId>
   <artifactId>proc</artifactId>
   <version>2.23.0</version>
-</dependency>
-
-<!-- Contains some alpha algorithm procedures-->
-<dependency>
-    <groupId>org.neo4j.gds</groupId>
-    <artifactId>alpha-proc</artifactId>
-    <version>2.23.0</version>
 </dependency>
 
 <!-- Required by the write execution modes, this artifact is responsible for providing the various exporters -->

@@ -16,8 +16,8 @@ The Neo4j GDS library includes the following link prediction algorithms, grouped
 
 * Alpha
 ** xref:algorithms/topological-link-prediction/adamic-adar.adoc[Adamic Adar]
-** xref:alpha-algorithms/common-neighbors.adoc[Common Neighbors]
-** xref:alpha-algorithms/preferential-attachment.adoc[Preferential Attachment]
+** xref:algorithms/topological-link-prediction/common-neighbors.adoc[Common Neighbors]
+** xref:algorithms/topological-link-prediction/preferential-attachment.adoc[Preferential Attachment]
 ** xref:algorithms/topological-link-prediction/resource-allocation.adoc[Resource Allocation]
-** xref:alpha-algorithms/same-community.adoc[Same Community]
-** xref:alpha-algorithms/total-neighbors.adoc[Total Neighbors]
+** xref:algorithms/topological-link-prediction/same-community.adoc[Same Community]
+** xref:algorithms/topological-link-prediction/total-neighbors.adoc[Total Neighbors]

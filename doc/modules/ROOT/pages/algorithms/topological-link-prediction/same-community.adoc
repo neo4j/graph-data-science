@@ -1,5 +1,4 @@
-[[alpha-algorithms-linkprediction-same-community]]
-[.alpha]
+[[algorithms-linkprediction-same-community]]
 = Same Community
 :description: This section describes the Same Community algorithm in the Neo4j Graph Data Science library.
 
@@ -7,8 +6,6 @@ include::partial$/product-limitations/not-in-serverless.adoc[]
 
 Same Community is a way of determining whether two nodes belong to the same community.
 These communities could be computed by using one of the xref:algorithms/community.adoc[Community detection].
-
-include::partial$/operations-reference/alpha-note.adoc[]
 
 
 [[algorithms-linkprediction-same-community-context]]
@@ -28,7 +25,7 @@ The library contains a function to calculate closeness between two nodes.
 .The following will run the algorithm and return the result:
 [source, cypher, role=noplay]
 ----
-RETURN gds.alpha.linkprediction.sameCommunity(node1:Node, node2:Node, communityProperty:String)
+RETURN gds.linkprediction.sameCommunity(node1:Node, node2:Node, communityProperty:String)
 ----
 
 
@@ -61,7 +58,7 @@ CREATE (zhen:Person {name: 'Zhen', community: 1}),
 ----
 MATCH (p1:Person {name: 'Michael'})
 MATCH (p2:Person {name: 'Zhen'})
-RETURN gds.alpha.linkprediction.sameCommunity(p1, p2) AS score
+RETURN gds.linkprediction.sameCommunity(p1, p2) AS score
 ----
 
 .Results
@@ -76,7 +73,7 @@ RETURN gds.alpha.linkprediction.sameCommunity(p1, p2) AS score
 ----
 MATCH (p1:Person {name: 'Michael'})
 MATCH (p2:Person {name: 'Praveena'})
-RETURN gds.alpha.linkprediction.sameCommunity(p1, p2) AS score
+RETURN gds.linkprediction.sameCommunity(p1, p2) AS score
 ----
 
 .Results
@@ -93,7 +90,7 @@ If one of the nodes doesn't have a community, this means it doesn't belong to th
 ----
 MATCH (p1:Person {name: 'Michael'})
 MATCH (p2:Person {name: 'Jennifer'})
-RETURN gds.alpha.linkprediction.sameCommunity(p1, p2) AS score
+RETURN gds.linkprediction.sameCommunity(p1, p2) AS score
 ----
 
 .Results
@@ -111,7 +108,7 @@ By default, the community is read from the `community` property, but it is possi
 ----
 MATCH (p1:Person {name: 'Arya'})
 MATCH (p2:Person {name: 'Karin'})
-RETURN gds.alpha.linkprediction.sameCommunity(p1, p2, 'partition') AS score
+RETURN gds.linkprediction.sameCommunity(p1, p2, 'partition') AS score
 ----
 
 .Results

@@ -35,5 +35,7 @@ public interface FunctionsFacade {
 
     double resourceAllocationSimilarity(Node node1, Node node2, Map<String, Object> configuration);
 
+    double sameCommunity(Node node1, Node node2, String communityProperty);
+
     double totalNeighbours(Node node1, Node node2, Map<String, Object> configuration);
 }

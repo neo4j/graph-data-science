@@ -37,11 +37,11 @@ The implementation of the algorithm is based on the following paper:
 
 === Relationship weights
 
-Same as in the xref:management-ops/graph-creation/sampling/rwr.adoc#alpha-algorithms-rwr-syntax-configuration[`relationshipWeightProperty`] parameter in `RandomWalksWithRestarts` algorithm.
+Same as in the xref:management-ops/graph-creation/sampling/rwr.adoc#algorithms-rwr-syntax-configuration[`relationshipWeightProperty`] parameter in `RandomWalksWithRestarts` algorithm.
 
 === Node label stratification
 
-Same as in the xref:management-ops/graph-creation/sampling/rwr.adoc#alpha-algorithms-rwr-syntax-configuration[`nodeLabelStratification`] parameter in `RandomWalksWithRestarts` algorithm.
+Same as in the xref:management-ops/graph-creation/sampling/rwr.adoc#algorithms-rwr-syntax-configuration[`nodeLabelStratification`] parameter in `RandomWalksWithRestarts` algorithm.
 
 == Syntax
 

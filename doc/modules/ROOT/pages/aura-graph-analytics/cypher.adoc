@@ -317,7 +317,7 @@ The following Machine Learning procedures are not supported:
 * `gds.linkprediction.commonNeighbors`
 * `gds.linkprediction.preferentialAttachment`
 * `gds.linkprediction.resourceAllocation`
-* `gds.alpha.linkprediction.sameCommunity`
+* `gds.linkprediction.sameCommunity`
 * `gds.linkprediction.totalNeighbors`
 * `gds.splitRelationships`
 

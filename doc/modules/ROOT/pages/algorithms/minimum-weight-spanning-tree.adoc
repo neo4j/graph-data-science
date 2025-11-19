@@ -1,4 +1,3 @@
-:page-aliases: alpha-algorithms/minimum-weight-spanning-tree.adoc
 [[algorithms-minimum-weight-spanning-tree]]
 = Minimum Weight Spanning Tree
 :description: This section describes the Minimum Weight Spanning Tree algorithm in the Neo4j Graph Data Science library.

@@ -93,6 +93,15 @@ public class LocalFunctionsFacade implements FunctionsFacade {
     }
 
     @Override
+    public double sameCommunity(Node node1, Node node2, String communityProperty) {
+        if (!node1.hasProperty(communityProperty) || !node2.hasProperty(communityProperty)) return 0.0;
+
+        if (node1.getProperty(communityProperty).equals(node2.getProperty(communityProperty))) return 1.0;
+
+        return 0.0;
+    }
+
+    @Override
     public double totalNeighbours(Node node1, Node node2, Map<String, Object> configuration) {
         var relationshipType = getRelationshipType(configuration);
         var direction = getDirection(configuration);

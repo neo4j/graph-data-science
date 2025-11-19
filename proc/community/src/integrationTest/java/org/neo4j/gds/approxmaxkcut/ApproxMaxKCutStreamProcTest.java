@@ -175,7 +175,7 @@ class ApproxMaxKCutStreamProcTest extends BaseProcTest {
     @Test
     void testIllegalMinCommunitySizesSum() {
         String streamQuery = GdsCypher.call(GRAPH_NAME)
-            .algo("gds.alpha.maxkcut")
+            .algo("gds.maxkcut")
             .streamMode()
             .addParameter("minCommunitySizes", List.of(100, 100))
             .yields();

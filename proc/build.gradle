@@ -20,8 +20,6 @@ dependencies {
     implementation project(':model-catalog-api')
     implementation project(':string-formatting')
 
-    api project(':alpha-proc') // kill this
-
     api project(':cypher-aggregation')
     api project(':proc-catalog')
     api project(':proc-centrality')

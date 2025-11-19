@@ -238,11 +238,12 @@
 | `gds.leiden.stream.estimate` label:procedure[Procedure]
 | `gds.leiden.write` label:procedure[Procedure]
 | `gds.leiden.write.estimate` label:procedure[Procedure]
-.5+<.^| xref:algorithms/linkprediction.adoc[Topological Link Prediction]
+.6+<.^| xref:algorithms/linkprediction.adoc[Topological Link Prediction]
 | `gds.linkprediction.adamicAdar` label:function[Function]
 | `gds.linkprediction.commonNeighbors` label:function[Function]
 | `gds.linkprediction.preferentialAttachment` label:function[Function]
 | `gds.linkprediction.resourceAllocation` label:function[Function]
+| `gds.linkprediction.sameCommunity` label:function[Function]
 | `gds.linkprediction.totalNeighbors` label:function[Function]
 .8+<.^| xref:algorithms/local-clustering-coefficient.adoc#algorithms-local-clustering-coefficient-syntax[Local Clustering Coefficient]
 | `gds.localClusteringCoefficient.stream` label:procedure[Procedure]
@@ -458,16 +459,4 @@
 | `gds.beta.graphSage.write.estimate` label:procedure[Procedure]
 | `gds.beta.graphSage.train` label:procedure[Procedure]
 | `gds.beta.graphSage.train.estimate` label:procedure[Procedure]
-|===
-
-[[alpha-tier]]
-== Alpha tier
-
-.List of all alpha algorithms in the GDS library.
-[[table-alpha]]
-[role=procedure-listing]
-[opts=header,cols="1, 2"]
-|===
-|Algorithm name | Operation
-| xref:alpha-algorithms/same-community.adoc[Same Community] | `gds.alpha.linkprediction.sameCommunity` label:function[Function]
 |===

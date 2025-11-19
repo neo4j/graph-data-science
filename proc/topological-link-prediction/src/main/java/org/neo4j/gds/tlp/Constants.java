@@ -24,6 +24,7 @@ final class Constants {
     static final String COMMON_NEIGHBOURS_DESCRIPTION = "Given two nodes, returns the number of common neighbors";
     static final String PREFERENTIAL_ATTACHMENT_DESCRIPTION = "Given two nodes, calculate Preferential Attachment";
     static final String RESOURCE_ALLOCATION_SIMILARITY_DESCRIPTION = "Given two nodes, calculate Resource Allocation similarity";
+    static final String SAME_COMMUNITY_DESCRIPTION = "Given two nodes, indicates if they have the same community";
     static final String TOTAL_NEIGHBORS_DESCRIPTION = "Given two nodes, calculate Total Neighbors";
 
     private Constants() {}

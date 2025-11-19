@@ -34,10 +34,6 @@ project(':algo-params-common').projectDir = file('algo-params/common')
 include('algo-test')
 project(':algo-test').projectDir = file('algo-test')
 
-
-include('alpha-proc')
-project(':alpha-proc').projectDir = file('alpha/alpha-proc')
-
 include('annotations')
 project(':annotations').projectDir = file('annotations')
 

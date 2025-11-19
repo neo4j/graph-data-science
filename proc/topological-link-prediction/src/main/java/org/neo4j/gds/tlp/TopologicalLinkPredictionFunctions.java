@@ -31,9 +31,10 @@ import java.util.Map;
 
 import static org.neo4j.gds.tlp.Constants.ADAMIC_ADAR_INDEX_DESCRIPTION;
 import static org.neo4j.gds.tlp.Constants.COMMON_NEIGHBOURS_DESCRIPTION;
-import static org.neo4j.gds.tlp.Constants.TOTAL_NEIGHBORS_DESCRIPTION;
 import static org.neo4j.gds.tlp.Constants.PREFERENTIAL_ATTACHMENT_DESCRIPTION;
 import static org.neo4j.gds.tlp.Constants.RESOURCE_ALLOCATION_SIMILARITY_DESCRIPTION;
+import static org.neo4j.gds.tlp.Constants.SAME_COMMUNITY_DESCRIPTION;
+import static org.neo4j.gds.tlp.Constants.TOTAL_NEIGHBORS_DESCRIPTION;
 
 public class TopologicalLinkPredictionFunctions {
     @Context
@@ -141,6 +142,32 @@ public class TopologicalLinkPredictionFunctions {
             "Function `gds.alpha.linkprediction.resourceAllocation` has been deprecated, please use `gds.linkprediction.resourceAllocation`.");
 
         return resourceAllocationSimilarity(node1, node2, configuration);
+    }
+
+    @UserFunction("gds.linkprediction.sameCommunity")
+    @Description(SAME_COMMUNITY_DESCRIPTION)
+    public double sameCommunity(
+        @Name("node1") Node node1,
+        @Name("node2") Node node2,
+        @Name(value = "communityProperty", defaultValue = "community") String communityProperty
+    ) {
+        return facade.functions().sameCommunity(node1, node2, communityProperty);
+    }
+
+    @UserFunction(value = "gds.alpha.linkprediction.sameCommunity", deprecatedBy = "gds.linkprediction.sameCommunity")
+    @Description(SAME_COMMUNITY_DESCRIPTION)
+    @Internal
+    @Deprecated
+    public double alphaSameCommunity(
+        @Name("node1") Node node1,
+        @Name("node2") Node node2,
+        @Name(value = "communityProperty", defaultValue = "community") String communityProperty
+    ) {
+        facade.deprecatedProcedures().called("gds.alpha.linkprediction.sameCommunity");
+        facade.log().warn(
+            "Function `gds.alpha.linkprediction.sameCommunity` has been deprecated, please use `gds.linkprediction.sameCommunity`.");
+
+        return sameCommunity(node1, node2, communityProperty);
     }
 
     @UserFunction("gds.linkprediction.totalNeighbors")

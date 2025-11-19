@@ -13,7 +13,7 @@
 include::partial$/algorithms/shared/algorithm-traits.adoc[]
 
 
-[[alpha-algorithms-celf-intro]]
+[[algorithms-celf-intro]]
 == Introduction
 The  influence maximization problem asks for a set of `k` nodes that maximize the expected spread of influence in the network.
 The set of these initial `k` is called the `seed set`.
@@ -35,7 +35,7 @@ The CELF algorithm extends on Greedy by introducing a _lazy forwarding_ mechanis
 prunes a lot of nodes from being examined, thereby massively reducing the number of conducted simulations.
 This makes CELF much faster than Greedy on large networks.
 
-[[alpha-algorithms-celf-syntax]]
+[[algorithms-celf-syntax]]
 == Syntax
 
 
@@ -202,7 +202,7 @@ include::partial$/algorithms/alpha/influence-maximization/specific-configuration
 ====
 
 
-[[alpha-algorithms-celf-examples]]
+[[algorithms-celf-examples]]
 == Examples
 
 include::partial$/algorithms/shared/examples-named-native-note.adoc[]
@@ -285,10 +285,10 @@ YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
 --
 
 
-[[alpha-algorithms-celf-examples-stats]]
+[[algorithms-celf-examples-stats]]
 === Stats
 
-:stats-syntax: alpha-algorithms-celf-syntax
+:stats-syntax: algorithms-celf-syntax
 include::partial$/algorithms/shared/examples-stats-intro.adoc[]
 
 [role=query-example]
@@ -310,7 +310,7 @@ YIELD totalSpread
 
 Using `stats` mode is useful to inspect how different configuration options affect the `totalSpread` and choose ones that produce optimal spread.
 
-[[alpha-algorithms-celf-examples-stream]]
+[[algorithms-celf-examples-stream]]
 === Stream
 
 In the `stream` execution mode, the algorithm returns the {result} for nodes that are part of the seed set.
@@ -343,7 +343,7 @@ Note that in `stream` mode the result is only the seed set computed by the algor
 The other nodes are not considered influential and are not included in the result.
 
 
-[[alpha-algorithms-celf-examples-mutate]]
+[[algorithms-celf-examples-mutate]]
 === Mutate
 
 include::partial$/algorithms/shared/examples-mutate-intro.adoc[]
@@ -401,7 +401,7 @@ Note that in `mutate` all nodes in the in-memory graph get the `spread` property
 The nodes that are not considered influential by the algorithm receive value of zero.
 
 
-[[alpha-algorithms-celf-examples-write]]
+[[algorithms-celf-examples-write]]
 === Write
 
 include::partial$/algorithms/shared/examples-write-intro.adoc[]

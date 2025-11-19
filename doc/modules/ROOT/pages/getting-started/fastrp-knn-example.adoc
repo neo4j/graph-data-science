@@ -172,7 +172,7 @@ The two `write` properties are used to write a new `:SIMILAR` relationship with 
 The mean similarity between nodes is high.
 This is because the similarity distribution is computed after selecting the `topK`=2 most similar targets per source node. Moreover, the graph has two clusters of users with quite similar purchases: (Brie, Matt and Annie) and (Elsa, Dan and Jeff). Using a higher value for `topK` would yield a lower average similarity.
 
-If we were to examine Person-Product similariteies, this could be accomplished by using instead xref:alpha-algorithms/filtered-knn.adoc#algorithms-filtered-knn[Filtered K-Nearest Neighbors].
+If we were to examine Person-Product similariteies, this could be accomplished by using instead xref:algorithms/filtered-knn.adoc#algorithms-filtered-knn[Filtered K-Nearest Neighbors].
 
 
 == Find the most similar nodes
