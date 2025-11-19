@@ -214,24 +214,27 @@ public final class FlowGraph {
         } else {
             graph.forEachRelationship(nodeId, 0D, originalConsumer);
         }
-        return earlyTermination.get();
+        return !earlyTermination.get();
     }
 
-    void forEachReverseRelationship(long nodeId, ResidualEdgeConsumer consumer) {
+    boolean forEachReverseRelationship(long nodeId, ResidualEdgeConsumer consumer) {
         for (long reverseRelIdx = reverseIndPtr.get(nodeId); reverseRelIdx < reverseIndPtr.get(nodeId + 1); reverseRelIdx++) {
             var t = reverseAdjacency.get(reverseRelIdx);
             var relIdx = reverseToRelIdx.get(reverseRelIdx);
             var residualCapacity = flow.get(relIdx);
             var isReverse = true;
             if(!consumer.accept(nodeId, t, relIdx, residualCapacity, isReverse)) {
-                break;
+                return false;
             }
         }
+        return true;
     }
 
-    public void forEachRelationship(long nodeId, ResidualEdgeConsumer consumer) {
-        if(!forEachOriginalRelationship(nodeId, consumer)){
-            forEachReverseRelationship(nodeId, consumer);
+    public boolean forEachRelationship(long nodeId, ResidualEdgeConsumer consumer) {
+        if(forEachOriginalRelationship(nodeId, consumer)) {
+            return forEachReverseRelationship(nodeId, consumer);
+        } else {
+            return false;
         }
     }
 
