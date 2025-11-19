@@ -83,10 +83,10 @@ class CostDischarging {
     void dischargeUntilDone() {
         var relabelNumber = freq == 0 ? 0 : (ALPHA * costFlowGraph.nodeCount() + costFlowGraph.edgeCount() / freq);
         var dischargeCount = 0;
-        globalRelabelling.relabelGlobal2(epsilon);
+        globalRelabelling.relabellingWithPriorityQueue(epsilon);
         while (!workingQueue.isEmpty()) {
             if(workSinceLastGR > relabelNumber) {
-                globalRelabelling.relabelGlobal2(epsilon);
+                globalRelabelling.relabellingWithPriorityQueue(epsilon);
                 workSinceLastGR = 0;
             }
             var v = workingQueue.remove();

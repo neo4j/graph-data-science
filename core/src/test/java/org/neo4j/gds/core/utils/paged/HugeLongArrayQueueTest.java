@@ -38,6 +38,18 @@ class HugeLongArrayQueueTest {
     }
 
     @Test
+    void testClear() {
+        var q = HugeLongArrayQueue.newQueue(10);
+        q.add(42);
+        q.add(1337);
+        q.clear();
+        assertTrue(q.isEmpty());
+        q.add(123);
+        assertEquals(1, q.size());
+        assertEquals(123,q.peek());
+    }
+
+    @Test
     void testAddContinuously() {
         var capacity = 10;
         var q = HugeLongArrayQueue.newQueue(capacity);

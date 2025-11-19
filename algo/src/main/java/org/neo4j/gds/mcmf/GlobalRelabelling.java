@@ -19,107 +19,138 @@
  */
 package org.neo4j.gds.mcmf;
 
+import com.carrotsearch.hppc.BitSet;
+import org.apache.commons.lang3.mutable.MutableDouble;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
-import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.paged.HugeLongArrayQueue;
 import org.neo4j.gds.core.utils.queue.HugeLongPriorityQueue;
 
-import java.util.concurrent.atomic.AtomicLong;
-
 import static org.neo4j.gds.mcmf.MinCostMaxFlow.TOLERANCE;
 
-public class GlobalRelabelling {
-    final CostFlowGraph costFlowGraph;
-    final HugeDoubleArray excess;
-    final HugeDoubleArray prize;
+ class GlobalRelabelling {
+   private final CostFlowGraph costFlowGraph;
+   private final HugeDoubleArray excess;
+   private final HugeDoubleArray prize;
+   private final HugeLongArrayQueue frontier;
+   private final BitSet nodeInSet;
+   private final HugeLongPriorityQueue pq;
 
     GlobalRelabelling(CostFlowGraph costFlowGraph, HugeDoubleArray excess, HugeDoubleArray prize) {
         this.costFlowGraph = costFlowGraph;
         this.excess = excess;
         this.prize = prize;
+        this.frontier = HugeLongArrayQueue.newQueue(costFlowGraph.nodeCount());
+        this.nodeInSet = new BitSet(costFlowGraph.nodeCount());
+        this.pq = HugeLongPriorityQueue.min(costFlowGraph.nodeCount());
     }
 
-    void relabelGlobal2(double epsilon) {
-        var sSetFrontier = HugeLongArrayQueue.newQueue(costFlowGraph.nodeCount());
-        var nodeInSSet = HugeAtomicBitSet.create(costFlowGraph.nodeCount());
+    void relabellingWithPriorityQueue(double epsilon) {
+        nodeInSet.clear();
+        frontier.clear();
+
         var activeNodesNotFound = new MutableLong(0);
-        var pq = HugeLongPriorityQueue.min(costFlowGraph.nodeCount());
         for (long v = 0; v < costFlowGraph.nodeCount(); v++) {
             if (excess.get(v) < -TOLERANCE) {
-                nodeInSSet.set(v);
-                sSetFrontier.add(v);
+                addToFrontier(v);
             } else if (excess.get(v) > TOLERANCE) {
                 activeNodesNotFound.increment();
             }
         }
 
-        AtomicLong epsilonOffset = new AtomicLong();
+        MutableDouble epsilonOffset = new MutableDouble();
         while (activeNodesNotFound.longValue() > 0) { //while i do whatever this loop is supposed to do
-            while (!sSetFrontier.isEmpty()) {  //this triggers a round of adding nodes reachable by adding  offset * epsilon to every node not in SS
-                var v = sSetFrontier.remove();
-                costFlowGraph.forEachRelationship(
-                    v, (s, t, r, residualCapacity, cost, isReverse) -> {
-                        var reverseResidualCapacity = costFlowGraph.reverseResidualCapacity(r, isReverse);
-                        if (nodeInSSet.get(t) || reverseResidualCapacity <= TOLERANCE) return true;
-                        //let us consider the updated prize for t
-                        var actualPrize = prize.get(t) - epsilonOffset.longValue() * epsilon;
-                        var reverseReducedCost = (-cost) + actualPrize - prize.get(s);
-
-                        if (reverseReducedCost < 0) {
-                            if (!nodeInSSet.getAndSet(t)) {
-                                sSetFrontier.add(t); //add to frontier if new
-                                prize.set(t, actualPrize); //this guy is added NOW and will be processed NOW
-                                if (excess.get(t) > TOLERANCE) {
-                                    activeNodesNotFound.decrement();
-                                }
-                            }
-                        } else {
-                            //here we want to calculate the amount of epsilon updates t needs to make this hold true
-                            //essentially, we compute the time of the event as  "current epsilon updates" + whatever is needed
-                            //since s updated with  offset * epsilon itself, the time itself needs correction by summing the offset
-                            long diff = (long) (Math.ceil((actualPrize - prize.get(s) - cost) / epsilon) + epsilonOffset.longValue());
-                            diff = Math.max(
-                                1,
-                                diff
-                            ); //this is for some weird case where everything is zero :D we still need epsilon update to go <0
-                            if (!pq.containsElement(t)) {
-                                pq.add(t, diff);
-                            } else if (pq.cost(t) > diff) {
-                                pq.set(t, diff);
-                            }
-                        }
-                        return true;
-                    }
-                );
+            exhaustFrontier(epsilonOffset.doubleValue(),epsilon,activeNodesNotFound);
+            if (activeNodesNotFound.longValue() == 0) {
+                break;
             }
-
-            if (!pq.isEmpty()) { //wooho there are nodes to be added
-                while (nodeInSSet.get(pq.top())) {
-                    pq.pop(); //removing nods that are all ready in frontier from other operations, they're just noise
-                    if (pq.isEmpty()) break;
-                }
-                if (!pq.isEmpty()) { //if the pq still has elements!
-                    long top = pq.top();
-                    epsilonOffset.set((long) pq.cost(top)); //the offset becomes the earliest time
-                    sSetFrontier.add(top); //add to frontier
-                    nodeInSSet.set(top); //AND update bitset you moron
-
-                    //we can technically continue pushing all elements that have .cost == the current cost
-                    //but they will anyway be dealt with next iteration dunno
-                    var actualPrize = prize.get(top) - epsilonOffset.longValue() * epsilon;
-                    prize.set(top, actualPrize);
-                    if (excess.get(top) > TOLERANCE) {
-                        activeNodesNotFound.decrement();
-                    }
-
-                }
-            }
+            double newOffset = extractFromPriorityQueue(epsilon,activeNodesNotFound);
+            epsilonOffset.setValue(newOffset);
         }
         for (long i = 0; i < costFlowGraph.nodeCount(); ++i) {
-            if (!nodeInSSet.get(i)) {
+            if (!nodeInSet.get(i)) {
                 prize.addTo(i, -epsilon * epsilonOffset.longValue());
             }
+        }
+    }
+
+    double extractFromPriorityQueue(double epsilon,MutableLong activeNodesNotFound){
+        if (!pq.isEmpty()) { //there are nodes to be added
+            while (nodeInSet.get(pq.top())) {
+                pq.pop(); //removing nods that are all ready in frontier from other operations, they're just noise
+                if (pq.isEmpty()) break;
+            }
+            if (!pq.isEmpty()) { //if the pq still has elements!
+                long top = pq.top();
+                double epsilonOffset = pq.cost(top);
+                addToFrontier(top);
+
+                //we can technically continue pushing all elements that have .cost == the current cost
+                //but they will anyway be dealt with next iteration anyway
+                var actualPrize = prize.get(top) - epsilonOffset * epsilon;
+                prize.set(top, actualPrize);
+                if (excess.get(top) > TOLERANCE) {
+                    activeNodesNotFound.decrement();
+                }
+                return epsilonOffset;
+            }
+        }
+        throw new RuntimeException("Should never be empty");
+
+    }
+     void addToFrontier(long node){
+         frontier.add(node); //add to frontier
+         nodeInSet.set(node); //AND update bitset you
+     }
+     void exhaustFrontier(double offset, double epsilon, MutableLong activeNodesNotFound){
+        while (!frontier.isEmpty() & activeNodesNotFound.longValue()>0) {  //this triggers a round of adding nodes reachable by adding  offset * epsilon to every node not in SS
+            var v = frontier.remove();
+            traverseNode(v,offset,epsilon,activeNodesNotFound);
+        }
+    }
+
+    void traverseNode(long node,double offset, double epsilon, MutableLong activeNodesNotFound){
+        costFlowGraph.forEachRelationship(
+            node, (s, t, r, residualCapacity, cost, isReverse) -> {
+                var reverseResidualCapacity = costFlowGraph.reverseResidualCapacity(r, isReverse);
+                if (nodeInSet.get(t) || reverseResidualCapacity <= TOLERANCE) return true;
+                //let us consider the updated prize for t
+                var actualPrize = prize.get(t) - offset * epsilon;
+                var reverseReducedCost = (-cost) + actualPrize - prize.get(s);
+                if (reverseReducedCost < 0) {
+                    if (!nodeInSet.get(t)) {
+                        addToFrontier(t);
+                        prize.set(t, actualPrize); //this guy is added NOW and will be processed NOW
+                        if (excess.get(t) > TOLERANCE) {
+                            activeNodesNotFound.decrement();
+                        }
+                    }
+                } else {
+
+                    var diff = computeEventTime(actualPrize, prize.get(s), cost, epsilon, offset);
+                    queuePush(t,diff);
+                }
+                return true;
+            }
+        );
+    }
+
+    double computeEventTime(double tActualPrize, double selfPrize, double relCost, double epsilon, double offset){
+        //here we want to calculate the amount of epsilon updates t needs to make this hold true
+        //essentially, we compute the time of the event as  "current epsilon updates" + whatever is needed
+        //since s updated with  offset * epsilon itself, the time itself needs correction by summing the offset
+        //this is for some weird case where everything is zero :D we still need epsilon update to go <0
+        var diff = (long) (Math.ceil((tActualPrize - selfPrize - relCost) / epsilon) + offset);
+        return Math.max(
+            1,
+            diff
+        );
+    }
+    void queuePush(long node, double diff){
+        if (!pq.containsElement(node)) {
+            pq.add(node, diff);
+        } else if (pq.cost(node) > diff) {
+            pq.set(node, diff);
         }
     }
 
