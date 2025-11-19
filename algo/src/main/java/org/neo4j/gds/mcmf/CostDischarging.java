@@ -20,16 +20,11 @@
 package org.neo4j.gds.mcmf;
 
 import com.carrotsearch.hppc.BitSet;
-import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.commons.lang3.mutable.MutableDouble;
 import org.apache.commons.lang3.mutable.MutableInt;
-import org.apache.commons.lang3.mutable.MutableLong;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArrayQueue;
-
-import java.util.Arrays;
-import java.util.Comparator;
 
 import static org.neo4j.gds.mcmf.MinCostMaxFlow.TOLERANCE;
 
@@ -45,13 +40,10 @@ class CostDischarging {
 
     private final GlobalRelabelling globalRelabelling;
     private double workSinceLastGR;
-    public long totalRelabelingMillis;
 
     private final long ALPHA = 6;
     private final long BETA = 12;
 
-    public long sumOfLengths = 0;
-    public long countOfLengths = 0;
 
     CostDischarging(
         CostFlowGraph costFlowGraph,
@@ -71,7 +63,6 @@ class CostDischarging {
         this.epsilon = epsilon;
         this.filteredNeighbors = new Arc[(int)costFlowGraph.nodeCount()];
         this.globalRelabelling = globalRelabelling;
-        this.totalRelabelingMillis = 0L;
         this.workSinceLastGR = 0D;
         this.freq = freq;
     }
@@ -82,7 +73,6 @@ class CostDischarging {
 
     void dischargeUntilDone() {
         var relabelNumber = freq == 0 ? 0 : (ALPHA * costFlowGraph.nodeCount() + costFlowGraph.edgeCount() / freq);
-        var dischargeCount = 0;
         globalRelabelling.relabellingWithPriorityQueue(epsilon);
         while (!workingQueue.isEmpty()) {
             if(workSinceLastGR > relabelNumber) {
@@ -93,89 +83,22 @@ class CostDischarging {
             inWorkingQueue.clear(v);
             dischargeSorted(v);
             workSinceLastGR += costFlowGraph.outDegree(v) + BETA;
-            dischargeCount++;
         }
-        System.out.println("Discharge count: " + dischargeCount);
     }
 
-    private void dischargeWithoutSorting(long v) {
-        var topT = new MutableLong(-1);
-        var topR = new MutableLong(-1);
-        var topResidualCapacity = new MutableDouble(0);
-        var topAlmostReducedCost = new MutableDouble(Double.MAX_VALUE);
-        var topIsReverse = new MutableBoolean(false);
-        boolean wasEmptied;
-        do {
-            topAlmostReducedCost.setValue(Double.MAX_VALUE);
-            if (!costFlowGraph.forEachRelationship(
-                v, (s, t, relIdx, residualCapacity, cost, isReverse) -> {
-                    if (residualCapacity > TOLERANCE) {
-                        var almostReducedCost = cost - prize.get(t);
-                        if (almostReducedCost + prize.get(s) < 0) {
-                            return !pushAndCheckIfEmtpied(s, t, relIdx, residualCapacity, isReverse);
-                        }
-                        if (almostReducedCost < topAlmostReducedCost.doubleValue()) {
-                            topT.setValue(t);
-                            topR.setValue(relIdx);
-                            topResidualCapacity.setValue(residualCapacity);
-                            topAlmostReducedCost.setValue(almostReducedCost);
-                            topIsReverse.setValue(isReverse);
-                        }
-                    }
-                    return true;
-                }
-            )) {
-                break;
-            }
-            if (topAlmostReducedCost.doubleValue() + prize.get(v) >= 0) {
-                prize.set(v, -topAlmostReducedCost.doubleValue() - epsilon);
-            }
-            wasEmptied = pushAndCheckIfEmtpied(v, topT.longValue(), topR.longValue(), topResidualCapacity.doubleValue(), topIsReverse.booleanValue());
-        } while (!wasEmptied);
-    }
-
-    private void dischargeSorted(long v) {
+    void dischargeSorted(long v) {
 //        var k = sortNeighborhood(v);
         var k = sortNeighborhoodWithArray(v);
 
-        sumOfLengths += k;
-        countOfLengths++;
-
         for (var i = 0; i < k; i++) {
             var arc = filteredNeighbors[i];
-
             if(arc.almostReducedCost() + prize.get(v) >= 0) { //reduced cost is positive
                 prize.set(v, -arc.almostReducedCost() - epsilon);
             }
-
-            if (pushAndCheckIfEmtpied(v, arc.t, arc.relIdx, arc.residualCapacity, arc.isReverse)) {
+            if (pushAndCheckIfEmptied(v, arc.t, arc.relIdx, arc.residualCapacity, arc.isReverse)) {
                 break;
             }
         }
-    }
-
-    private int sortNeighborhood(long v) {
-        var idx = new MutableInt(0);
-        costFlowGraph.forEachRelationship(
-            v, (s, t, relIdx, residualCapacity, cost, isReverse) -> {
-                if (residualCapacity > 0) {
-                    var almostReducedCost = cost - prize.get(t); // + prize.get(s) (add later)
-                    var arc = new Arc(t, relIdx, residualCapacity, almostReducedCost, isReverse);
-                    if(almostReducedCost + prize.get(v) < 0) {
-                        if (pushAndCheckIfEmtpied(v, arc.t, arc.relIdx, arc.residualCapacity, arc.isReverse)) {
-                            idx.setValue(0);
-                            return false;
-                        }
-                        return true;
-                    } else {
-                        filteredNeighbors[idx.getAndIncrement()] = arc;
-                    }
-                }
-                return true;
-            }
-        );
-        Arrays.sort(filteredNeighbors, 0, idx.intValue(), Comparator.comparing(Arc::almostReducedCost));
-        return idx.intValue();
     }
 
     int sortNeighborhoodWithArray(long v) {
@@ -185,7 +108,7 @@ class CostDischarging {
             if (residualCapacity > 0) {
                 var almostReducedCost = cost - prize.get(t);
                 if(almostReducedCost + prize.get(v) < 0) {
-                    if (pushAndCheckIfEmtpied(v, t, relIdx, residualCapacity, isReverse)) {
+                    if (pushAndCheckIfEmptied(v, t, relIdx, residualCapacity, isReverse)) {
                         return false;
                     }
                     return true;
@@ -198,7 +121,7 @@ class CostDischarging {
                         prev = filteredNeighbors[i-1];
                         if (prev.almostReducedCost > almostReducedCost) {
 //                            filteredNeighbors[i] = prev; //shift down
-                            if (p.doubleValue() - prev.residualCapacity > excess.get(v)) {
+                            if (p.doubleValue() - prev.residualCapacity >= excess.get(v)) {
                                 p.subtract(prev.residualCapacity);
                             } else {
                                 break;
@@ -219,12 +142,13 @@ class CostDischarging {
                     }
                     filteredNeighbors[i] = new Arc(t, relIdx, residualCapacity, almostReducedCost, isReverse);
                 }
+
             }
             return true;
         }) ? k.intValue() : 0;
     }
 
-    private boolean pushAndCheckIfEmtpied(long s, long t, long r, double residualCapacity, boolean isReverse) {
+     boolean pushAndCheckIfEmptied(long s, long t, long r, double residualCapacity, boolean isReverse) {
         var delta = Math.min(excess.get(s), residualCapacity);
         costFlowGraph.push(r, delta, isReverse);
         excess.addTo(s, -delta);
@@ -238,7 +162,7 @@ class CostDischarging {
         return excess.get(s) < TOLERANCE;
     }
 
-    private record Arc(long t, long relIdx, double residualCapacity, double almostReducedCost, boolean isReverse) implements Comparable<Arc> {
+     record Arc(long t, long relIdx, double residualCapacity, double almostReducedCost, boolean isReverse) implements Comparable<Arc> {
 
         @Override
         public int compareTo(@NotNull CostDischarging.Arc o) {
