@@ -23,8 +23,8 @@ link:https://neo4j.com/cloud/platform/aura-graph-data-science/[Neo4j AuraDS] is 
 
 You can install the GDS library in different ways depending on your Neo4j deployment.
 
-* If you are new to Neo4j, a convenient option to get started is to install the https://neo4j.com/docs/desktop-manual/current/installation/[Neo4j Desktop] application first.
-On Neo4j Desktop you can install the GDS library directly xref:installation/neo4j-desktop.adoc[from the UI].
+* If you are new to Neo4j, a convenient option to get started is to install a version of the  https://neo4j.com/docs/desktop-manual/current/installation/[Neo4j Desktop] application first.
+You can then install the GDS library directly xref:installation/neo4j-desktop.adoc[from the UI]
 
 * If you use any edition of the Neo4j Server (Community or Enterprise), you need to install the GDS library manually as explained in the xref:installation/neo4j-server.adoc[Neo4j Server] section.
 

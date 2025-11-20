@@ -1,12 +1,13 @@
 [[neo4j-desktop]]
 = Neo4j Desktop
 
-After opening Neo4j Desktop, you can find the _Graph Data Science Library_ plugin in the *Plugins* tab of a database.
+After opening https://neo4j.com/docs/desktop/current/[Neo4j Desktop], you can find the _Graph Data Science Library_ plugin in the *Plugins* tab of a database.
 
-image::neo4j-desktop-gds.png[width=500]
+image::neo4j-desktop2-plugins-tab.png[width=500]
 
-The installer downloads the GDS library and installs it in the `plugins` directory of the database.
-
+Scroll down the list to find the entry titled `Graph Data Science` and press install.
+The installer then downloads the GDS library and installs it in the `plugins` directory of the database.
+This process should work for any version of Desktop.
 
 == Configuration
 
@@ -15,19 +16,17 @@ The installer downloads the GDS library and installs it in the `plugins` directo
 You can edit the configuration file for a database by clicking on the ellipsis (*...*) button and opening the *Settings...* menu item.
 ====
 
-The installer automatically adds the following entry to the configuration:
-
-----
-dbms.security.procedures.unrestricted=gds.*
-----
-
-This configuration entry is necessary because the GDS library accesses low-level components of Neo4j to maximise performance.
-
-If the procedure allowlist is configured, make sure to also include procedures from the GDS library:
+The installer automatically adds the following entries to the configuration:
 
 ----
 dbms.security.procedures.allowlist=gds.*
+dbms.security.procedures.unrestricted=gds.*
+
 ----
+
+The allowlist configuration entry is needed to allow executing the gds procedures.
+
+This unrestricted configuration entry is necessary because the GDS library accesses low-level components of Neo4j to maximise performance.
 
 If you are running MacOS (x86 or ARM), it is required to add the following configuration entry to the configuration:
 
