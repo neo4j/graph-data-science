@@ -151,11 +151,38 @@ public class MaxFlowMemoryEstimateDefinition implements MemoryEstimateDefinition
 
     }
 
+    private MemoryEstimation maxFlowPhase() {
+
+        BiFunction<GraphDimensions, Function<Long, Long>, MemoryRange> nodeConsumer =
+            ((graphDimensions, longMemoryRangeFunction) -> {
+                var newNodes = graphDimensions.nodeCount() + 2;
+                return MemoryRange.of(longMemoryRangeFunction.apply(newNodes));
+            });
+
+        var memoryBuilder = MemoryEstimations.builder(MaxFlowPhase.class)
+            .perNode("queue", HugeLongArrayQueue::memoryEstimation)
+            .perNode("in queue", Estimate::sizeOfBitset)
+            .rangePerGraphDimension(
+                "label", ((dimensions, ___) -> nodeConsumer.apply(dimensions, HugeLongArray::memoryEstimation))
+            )
+         .rangePerGraphDimension(
+            "excess", ((dimensions, ___) -> nodeConsumer.apply(dimensions, HugeDoubleArray::memoryEstimation))
+        );
+
+        if (useGap) {
+            memoryBuilder.add("gap heuristic", gap());
+        }
+
+        return memoryBuilder.build();
+
+    }
+
     @Override
     public MemoryEstimation memoryEstimation() {
         return MemoryEstimations.builder(MaxFlow.class)
             .fixed("supply", Estimate.sizeOfInstance(NodeWithValue.class) * numberOfSinks)
             .fixed("demand", Estimate.sizeOfInstance(NodeWithValue.class) * numberOfTerminals)
+            .add("MaxFlowPhase",maxFlowPhase())
             .add("flowGraph", flowGraph())
             .add("Discharging", discharging())
             .add("Global relabelling", globalRelabelling())

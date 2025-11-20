@@ -152,7 +152,7 @@ public class FlowGraphBuilder {
             consumer.accept(superTarget, target.node(), target.value());
         }
     }
-      FlowGraph build() {
+      public FlowGraph build() {
 
         setUpCapacities();
         return new FlowGraph(
@@ -167,4 +167,6 @@ public class FlowGraphBuilder {
               demand
           );
       }
+
+
 }

@@ -26,11 +26,10 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
-import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArrayQueue;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.maxflow.MaxFlow;
 import org.neo4j.gds.maxflow.MaxFlowParameters;
+import org.neo4j.gds.maxflow.MaxFlowPhase;
 import org.neo4j.gds.maxflow.SupplyAndDemandFactory;
 
 import java.util.List;
@@ -42,8 +41,6 @@ import static org.neo4j.gds.mcmf.MinCostFunctions.isAdmissible;
 public class MinCostMaxFlow extends Algorithm<CostFlowResult> {
     private final Graph graphOfFlows;
     private final Graph graphOfCosts;
-    private CostFlowGraph costFlowGraph;
-    private HugeDoubleArray excess;
     private final MCMFParameters parameters;
 
     public MinCostMaxFlow(MCMFParameters parameters, ProgressTracker progressTracker, Graph graphOfFlows, Graph graphOfCosts) {
@@ -69,21 +66,13 @@ public class MinCostMaxFlow extends Algorithm<CostFlowResult> {
 
     @Override
     public CostFlowResult compute() {
-        //compute a maximal flow
-        var maxFlow = new MaxFlow(graphOfFlows,
-            new MaxFlowParameters(
-                parameters.sourceNodes(),
-                parameters.targetNodes(),
-                parameters.concurrency(),
-                parameters.freq(),
-                true
-            ),
-            progressTracker,
-            terminationFlag
-        );
-        initPreflow();
-        maxFlow.computeMaxFlow(costFlowGraph, excess, HugeLongArray.newArray(costFlowGraph.nodeCount()));
-        excess.setAll(x -> 0D);
+
+        progressTracker.beginSubTask();
+        //create flowgraph
+        var costFlowGraph = createFlowGraph();
+        //
+        var  excess = HugeDoubleArray.newArray(costFlowGraph.nodeCount());
+        computeMaxFlow(costFlowGraph,excess);
 
         var prize = HugeDoubleArray.newArray(costFlowGraph.nodeCount());
         prize.setAll(x -> 0D);
@@ -103,19 +92,52 @@ public class MinCostMaxFlow extends Algorithm<CostFlowResult> {
             new GlobalRelabelling(costFlowGraph, excess, prize),
             parameters.freq()
         );
+        progressTracker.beginSubTask();;
         do {
+            progressTracker.beginSubTask();
             epsilon = Math.max(epsilon / parameters.alpha(), SMALLEST_ALLOWED_EPSILON);
             discharging.updateEpsilon(epsilon);
-            initRefine(prize, workingQueue, inWorkingQueue);
+            initRefine(costFlowGraph,excess,prize, workingQueue, inWorkingQueue);
             discharging.dischargeUntilDone();
+            progressTracker.endSubTask();
 
         } while (epsilon > SMALLEST_ALLOWED_EPSILON);
+        progressTracker.endSubTask();
+        progressTracker.endSubTask();
 
         return costFlowGraph.createFlowResult();
+
     }
 
-    private void initRefine(HugeDoubleArray prize, HugeLongArrayQueue workingQueue, BitSet inWorkingQueue) {
+    void computeMaxFlow(CostFlowGraph flowGraph,HugeDoubleArray excess){
+        progressTracker.beginSubTask();
+
+        var maxFlow = new MaxFlowPhase(
+            flowGraph,
+            excess,
+            new MaxFlowParameters(
+                parameters.sourceNodes(),
+                parameters.targetNodes(),
+                parameters.concurrency(),
+                parameters.freq(),
+                true
+            ),
+            progressTracker,
+            terminationFlag
+        );
+        maxFlow.computeMaxFlow();
+        progressTracker.endSubTask();
+    }
+
+    private void initRefine(
+        CostFlowGraph costFlowGraph,
+        HugeDoubleArray excess,
+        HugeDoubleArray prize,
+        HugeLongArrayQueue workingQueue,
+        BitSet inWorkingQueue
+    ) {
         assert(workingQueue.isEmpty());
+        excess.setAll( v->0);
         for(var node = 0; node < costFlowGraph.nodeCount(); node++) {
             costFlowGraph.forEachRelationship(node, (s, t, relIdx, residualCapacity, cost, isReverse) -> {
                 //if reduced cost is negative then saturate
@@ -136,10 +158,9 @@ public class MinCostMaxFlow extends Algorithm<CostFlowResult> {
             }
         }
     }
-
-    private void initPreflow() {
+    private CostFlowGraph createFlowGraph(){
         var supplyAndDemand = SupplyAndDemandFactory.create(graphOfFlows, parameters.sourceNodes(), parameters.targetNodes());
-        costFlowGraph = new CostFlowGraphBuilder(
+        return new CostFlowGraphBuilder(
             graphOfFlows,
             graphOfCosts,
             supplyAndDemand.getLeft(),
@@ -147,17 +168,6 @@ public class MinCostMaxFlow extends Algorithm<CostFlowResult> {
             terminationFlag,
             parameters.concurrency()
         ).build();
-
-        excess = HugeDoubleArray.newArray(costFlowGraph.nodeCount());
-        excess.setAll(x -> 0D);
-        costFlowGraph.forEachRelationship(
-            costFlowGraph.superSource(), (s, t, relIdx, residualCapacity, isReverse) -> {
-                costFlowGraph.push(relIdx, residualCapacity, isReverse);
-                excess.set(t, residualCapacity);
-                return true;
-            }
-        );
     }
-
 
 }

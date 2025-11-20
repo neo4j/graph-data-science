@@ -20,15 +20,25 @@
 package org.neo4j.gds.mcmf;
 
 import org.assertj.core.data.Offset;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.InputNodes;
 import org.neo4j.gds.ListInputNodes;
 import org.neo4j.gds.MapInputNodes;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
+import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.extension.GdlExtension;
+import org.neo4j.gds.extension.GdlGraph;
+import org.neo4j.gds.extension.IdFunction;
+import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.logging.GdsTestLog;
 
 import java.util.List;
 import java.util.Map;
@@ -36,10 +46,10 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.TestSupport.gdlGraphStore;
+import static org.neo4j.gds.assertj.Extractors.removingThreadId;
+import static org.neo4j.gds.assertj.Extractors.replaceTimings;
 
 class MinCostMaxFlowTest {
-
-
 
     void testGraph(
         GraphStore graphStore,
@@ -49,7 +59,7 @@ class MinCostMaxFlowTest {
         double expectedCost
     ) {
         var params = new MCMFParameters(sourceNodes, targetNodes, new Concurrency(1), 0.5, true, 6);
-        var x = MinCostMaxFlow.create(
+        var x =  MinCostMaxFlow.create(
             graphStore,
             List.of(NodeLabel.of("n")),
             List.of(RelationshipType.of("R")),
@@ -66,15 +76,16 @@ class MinCostMaxFlowTest {
 
     @Test
     void testGraphWithThreeNodes() {
-        var graphStore = gdlGraphStore("""
-            CREATE
-                (a0:n),
-                (a1:n),
-                (a2:n),
-                (a0)-[:R {u:1, c:10}]->(a1),
-                (a0)-[:R {u:1, c:100}]->(a1),
-                (a1)-[:R {u:1, c:1}]->(a2)
-            """,
+        var graphStore = gdlGraphStore(
+            """
+                CREATE
+                    (a0:n),
+                    (a1:n),
+                    (a2:n),
+                    (a0)-[:R {u:1, c:10}]->(a1),
+                    (a0)-[:R {u:1, c:100}]->(a1),
+                    (a1)-[:R {u:1, c:1}]->(a2)
+                """,
             Optional.empty(),
             Optional.empty(),
             Optional.empty(),
@@ -92,17 +103,18 @@ class MinCostMaxFlowTest {
 
     @Test
     void testGraphWithFourNodes() {
-        var graphStore = gdlGraphStore("""
-            CREATE
-                (a0:n),
-                (a1:n),
-                (a2:n),
-                (a3:n),
-                (a0)-[:R {u: 20, c:5}]->(a1),
-                (a0)-[:R {u: 15, c:10}]->(a2),
-                (a1)-[:R {u: 10, c:8}]->(a3),
-                (a2)-[:R {u: 12, c:6}]->(a3)
-            """,
+        var graphStore = gdlGraphStore(
+            """
+                CREATE
+                    (a0:n),
+                    (a1:n),
+                    (a2:n),
+                    (a3:n),
+                    (a0)-[:R {u: 20, c:5}]->(a1),
+                    (a0)-[:R {u: 15, c:10}]->(a2),
+                    (a1)-[:R {u: 10, c:8}]->(a3),
+                    (a2)-[:R {u: 12, c:6}]->(a3)
+                """,
             Optional.empty(),
             Optional.empty(),
             Optional.empty(),
@@ -120,24 +132,25 @@ class MinCostMaxFlowTest {
 
     @Test
     void testGraphWithFiveNodes() {
-        var graphStore = gdlGraphStore("""
-            CREATE
-                (a0:n),
-                (a1:n),
-                (a2:n),
-                (a3:n),
-                (a4:n),
-                (a0)-[:R {u: 30, c:10}]->(a1),
-                (a0)-[:R {u: 25, c:15}]->(a2),
-                (a1)-[:R {u: 20, c:20}]->(a3),
-                (a1)-[:R {u: 15, c:12}]->(a4),
-                (a2)-[:R {u: 18, c:8}]->(a3),
-                (a2)-[:R {u: 22, c:18}]->(a1),
-                (a3)-[:R {u: 25, c:5}]->(a4),
-                (a3)-[:R {u: 10, c:25}]->(a0),
-                (a4)-[:R {u: 12, c:30}]->(a2),
-                (a4)-[:R {u: 20, c:22}]->(a0)
-            """,
+        var graphStore = gdlGraphStore(
+            """
+                CREATE
+                    (a0:n),
+                    (a1:n),
+                    (a2:n),
+                    (a3:n),
+                    (a4:n),
+                    (a0)-[:R {u: 30, c:10}]->(a1),
+                    (a0)-[:R {u: 25, c:15}]->(a2),
+                    (a1)-[:R {u: 20, c:20}]->(a3),
+                    (a1)-[:R {u: 15, c:12}]->(a4),
+                    (a2)-[:R {u: 18, c:8}]->(a3),
+                    (a2)-[:R {u: 22, c:18}]->(a1),
+                    (a3)-[:R {u: 25, c:5}]->(a4),
+                    (a3)-[:R {u: 10, c:25}]->(a0),
+                    (a4)-[:R {u: 12, c:30}]->(a2),
+                    (a4)-[:R {u: 20, c:22}]->(a0)
+                """,
             Optional.empty(),
             Optional.empty(),
             Optional.empty(),
@@ -152,93 +165,154 @@ class MinCostMaxFlowTest {
 
         testGraph(graphStore, sourceNodes, targetNodes, 40.0, 1079.0);
     }
+    @Nested
+    @GdlExtension
+    class GraphWithTenNodes{
+        @GdlGraph
+        private static final String GRAPH =
+            """
+              CREATE
+                  (a0:n),
+                  (a1:n),
+                  (a2:n),
+                  (a3:n),
+                  (a4:n),
+                  (a5:n),
+                  (a6:n),
+                  (a7:n),
+                  (a8:n),
+                  (a9:n),
+                  (a0)-[:R {u: 50, c:98}]->(a8),
+                  (a0)-[:R {u: 54, c:6}]->(a1),
+                  (a0)-[:R {u: 34, c:66}]->(a7),
+                  (a0)-[:R {u: 63, c:52}]->(a3),
+                  (a0)-[:R {u: 39, c:62}]->(a6),
+                  (a1)-[:R {u: 46, c:75}]->(a9),
+                  (a1)-[:R {u: 28, c:65}]->(a0),
+                  (a1)-[:R {u: 18, c:37}]->(a2),
+                  (a1)-[:R {u: 18, c:97}]->(a5),
+                  (a1)-[:R {u: 13, c:80}]->(a7),
+                  (a2)-[:R {u: 33, c:69}]->(a5),
+                  (a2)-[:R {u: 91, c:78}]->(a8),
+                  (a2)-[:R {u: 19, c:40}]->(a4),
+                  (a2)-[:R {u: 13, c:94}]->(a1),
+                  (a2)-[:R {u: 10, c:88}]->(a6),
+                  (a3)-[:R {u: 43, c:61}]->(a4),
+                  (a3)-[:R {u: 72, c:13}]->(a7),
+                  (a3)-[:R {u: 46, c:56}]->(a6),
+                  (a3)-[:R {u: 41, c:79}]->(a5),
+                  (a3)-[:R {u: 82, c:27}]->(a0),
+                  (a4)-[:R {u: 71, c:62}]->(a3),
+                  (a4)-[:R {u: 57, c:67}]->(a9),
+                  (a4)-[:R {u: 34, c:8}]->(a6),
+                  (a4)-[:R {u: 71, c:2}]->(a2),
+                  (a4)-[:R {u: 12, c:93}]->(a7),
+                  (a5)-[:R {u: 52, c:91}]->(a2),
+                  (a5)-[:R {u: 86, c:81}]->(a9),
+                  (a5)-[:R {u: 1, c:79}]->(a1),
+                  (a5)-[:R {u: 64, c:43}]->(a3),
+                  (a5)-[:R {u: 32, c:94}]->(a8),
+                  (a6)-[:R {u: 42, c:91}]->(a4),
+                  (a6)-[:R {u: 9, c:25}]->(a3),
+                  (a6)-[:R {u: 73, c:29}]->(a0),
+                  (a6)-[:R {u: 31, c:19}]->(a2),
+                  (a6)-[:R {u: 70, c:58}]->(a9),
+                  (a7)-[:R {u: 12, c:11}]->(a3),
+                  (a7)-[:R {u: 41, c:66}]->(a0),
+                  (a7)-[:R {u: 63, c:14}]->(a4),
+                  (a7)-[:R {u: 39, c:71}]->(a1),
+                  (a7)-[:R {u: 38, c:91}]->(a8),
+                  (a8)-[:R {u: 16, c:71}]->(a9),
+                  (a8)-[:R {u: 43, c:70}]->(a0),
+                  (a8)-[:R {u: 27, c:78}]->(a2),
+                  (a8)-[:R {u: 71, c:76}]->(a5),
+                  (a8)-[:R {u: 37, c:57}]->(a7),
+                  (a9)-[:R {u: 12, c:77}]->(a4),
+                  (a9)-[:R {u: 50, c:41}]->(a8),
+                  (a9)-[:R {u: 74, c:31}]->(a1),
+                  (a9)-[:R {u: 38, c:24}]->(a5),
+                  (a9)-[:R {u: 25, c:24}]->(a6)
+              """;
+
+        @Inject
+        private GraphStore graphStore;
+
+        @Inject
+        private IdFunction idFunction;
 
     @Test
     void testGraphWithTenNodes() {
-        var graphStore = gdlGraphStore("""
-            CREATE
-                (a0:n),
-                (a1:n),
-                (a2:n),
-                (a3:n),
-                (a4:n),
-                (a5:n),
-                (a6:n),
-                (a7:n),
-                (a8:n),
-                (a9:n),
-                (a0)-[:R {u: 50, c:98}]->(a8),
-                (a0)-[:R {u: 54, c:6}]->(a1),
-                (a0)-[:R {u: 34, c:66}]->(a7),
-                (a0)-[:R {u: 63, c:52}]->(a3),
-                (a0)-[:R {u: 39, c:62}]->(a6),
-                (a1)-[:R {u: 46, c:75}]->(a9),
-                (a1)-[:R {u: 28, c:65}]->(a0),
-                (a1)-[:R {u: 18, c:37}]->(a2),
-                (a1)-[:R {u: 18, c:97}]->(a5),
-                (a1)-[:R {u: 13, c:80}]->(a7),
-                (a2)-[:R {u: 33, c:69}]->(a5),
-                (a2)-[:R {u: 91, c:78}]->(a8),
-                (a2)-[:R {u: 19, c:40}]->(a4),
-                (a2)-[:R {u: 13, c:94}]->(a1),
-                (a2)-[:R {u: 10, c:88}]->(a6),
-                (a3)-[:R {u: 43, c:61}]->(a4),
-                (a3)-[:R {u: 72, c:13}]->(a7),
-                (a3)-[:R {u: 46, c:56}]->(a6),
-                (a3)-[:R {u: 41, c:79}]->(a5),
-                (a3)-[:R {u: 82, c:27}]->(a0),
-                (a4)-[:R {u: 71, c:62}]->(a3),
-                (a4)-[:R {u: 57, c:67}]->(a9),
-                (a4)-[:R {u: 34, c:8}]->(a6),
-                (a4)-[:R {u: 71, c:2}]->(a2),
-                (a4)-[:R {u: 12, c:93}]->(a7),
-                (a5)-[:R {u: 52, c:91}]->(a2),
-                (a5)-[:R {u: 86, c:81}]->(a9),
-                (a5)-[:R {u: 1, c:79}]->(a1),
-                (a5)-[:R {u: 64, c:43}]->(a3),
-                (a5)-[:R {u: 32, c:94}]->(a8),
-                (a6)-[:R {u: 42, c:91}]->(a4),
-                (a6)-[:R {u: 9, c:25}]->(a3),
-                (a6)-[:R {u: 73, c:29}]->(a0),
-                (a6)-[:R {u: 31, c:19}]->(a2),
-                (a6)-[:R {u: 70, c:58}]->(a9),
-                (a7)-[:R {u: 12, c:11}]->(a3),
-                (a7)-[:R {u: 41, c:66}]->(a0),
-                (a7)-[:R {u: 63, c:14}]->(a4),
-                (a7)-[:R {u: 39, c:71}]->(a1),
-                (a7)-[:R {u: 38, c:91}]->(a8),
-                (a8)-[:R {u: 16, c:71}]->(a9),
-                (a8)-[:R {u: 43, c:70}]->(a0),
-                (a8)-[:R {u: 27, c:78}]->(a2),
-                (a8)-[:R {u: 71, c:76}]->(a5),
-                (a8)-[:R {u: 37, c:57}]->(a7),
-                (a9)-[:R {u: 12, c:77}]->(a4),
-                (a9)-[:R {u: 50, c:41}]->(a8),
-                (a9)-[:R {u: 74, c:31}]->(a1),
-                (a9)-[:R {u: 38, c:24}]->(a5),
-                (a9)-[:R {u: 25, c:24}]->(a6)
-            """,
-            Optional.empty(),
-            Optional.empty(),
-            Optional.empty(),
-            Optional.empty(),
-            Optional.empty(),
-            Optional.empty()
-        );
-        var idMap = graphStore.nodes();
 
-        InputNodes sourceNodes = new ListInputNodes(List.of(idMap.toMappedNodeId(1)));
-        InputNodes targetNodes = new ListInputNodes(List.of(idMap.toMappedNodeId(5)));
+
+        InputNodes sourceNodes = new ListInputNodes(List.of(idFunction.of("a1")));
+        InputNodes targetNodes = new ListInputNodes(List.of(idFunction.of("a5")));
 
         testGraph(graphStore, sourceNodes, targetNodes, 123.0, 16_575.0);
 
-        sourceNodes = new ListInputNodes(List.of(idMap.toMappedNodeId(1)));
-        targetNodes = new MapInputNodes(Map.of(idMap.toMappedNodeId(3), 53.0, idMap.toMappedNodeId(4), 78.0));
-
-        testGraph(graphStore, sourceNodes, targetNodes, 123.0, 15612.0);
-
     }
 
+    @Test
+    void shouldLogProgress() {
+
+            var log = new GdsTestLog();
+            var testTracker = TestProgressTracker.create(
+                MinCostMaxFlowTask.create(),
+                new LoggerForProgressTrackingAdapter(log),
+                new Concurrency(4),
+                EmptyTaskRegistryFactory.INSTANCE
+            );
+
+        InputNodes sourceNodes = new ListInputNodes(List.of(idFunction.of("a1")));
+        InputNodes targetNodes = new ListInputNodes(List.of(idFunction.of("a5")));
+
+            var params = new MCMFParameters(
+                sourceNodes,
+                targetNodes,
+                new Concurrency(1),
+                0.5,
+                true,
+                6
+            );
+
+            new MinCostMaxFlow(
+                params,
+                testTracker,
+                graphStore.getGraph("u"),
+                graphStore.getGraph("c")
+            ).compute();
+
+            assertThat(log.getMessages(TestLog.INFO))
+                .extracting(removingThreadId())
+                .extracting(replaceTimings())
+                .containsExactly(
+                "MinCostMaxFlow :: Start",
+                "MinCostMaxFlow :: MaxFlow :: Start",
+                "MinCostMaxFlow :: MaxFlow 15%",
+                "MinCostMaxFlow :: MaxFlow 61%",
+                "MinCostMaxFlow :: MaxFlow 100%",
+                "MinCostMaxFlow :: MaxFlow :: Finished",
+                "MinCostMaxFlow :: Cost refinement :: Start",
+                "MinCostMaxFlow :: Cost refinement :: Refine 1 :: Start",
+                "MinCostMaxFlow :: Cost refinement :: Refine 1 100%",
+                "MinCostMaxFlow :: Cost refinement :: Refine 1 :: Finished",
+                "MinCostMaxFlow :: Cost refinement :: Refine 2 :: Start",
+                "MinCostMaxFlow :: Cost refinement :: Refine 2 100%",
+                "MinCostMaxFlow :: Cost refinement :: Refine 2 :: Finished",
+                "MinCostMaxFlow :: Cost refinement :: Refine 3 :: Start",
+                "MinCostMaxFlow :: Cost refinement :: Refine 3 100%",
+                "MinCostMaxFlow :: Cost refinement :: Refine 3 :: Finished",
+                "MinCostMaxFlow :: Cost refinement :: Refine 4 :: Start",
+                "MinCostMaxFlow :: Cost refinement :: Refine 4 100%",
+                "MinCostMaxFlow :: Cost refinement :: Refine 4 :: Finished",
+                "MinCostMaxFlow :: Cost refinement :: Finished",
+                "MinCostMaxFlow :: Finished"
+                );
+        }
+
+
+
+
+}
     @Test
     void testGraphWithTwentyNodes() {
         var graphStore = gdlGraphStore("""
@@ -366,4 +440,5 @@ class MinCostMaxFlowTest {
 
         testGraph(graphStore, sourceNodes, targetNodes, 173, 16_740);
     }
+
 }

@@ -89,7 +89,7 @@ public class CostFlowGraphBuilder extends FlowGraphBuilder {
             .concurrency(concurrency)
             .run();
     }
-    CostFlowGraph build() {
+    public CostFlowGraph build() {
 
         setUpCapacities();
         setUpCosts();
