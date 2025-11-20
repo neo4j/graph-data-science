@@ -163,7 +163,7 @@ public class FlowGraph {
         return reverseIndPtr.get(nodeId) + reverseIndPtr.get(nodeId + 1);
     }
 
-    long degree(long nodeId) {
+    public long degree(long nodeId) {
         return inDegree(nodeId) + outDegree(nodeId);
     }
 

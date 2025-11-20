@@ -24,25 +24,26 @@ import org.apache.commons.lang3.mutable.MutableDouble;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
+import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArrayQueue;
 
-import static org.neo4j.gds.mcmf.MinCostMaxFlow.TOLERANCE;
+import static org.neo4j.gds.mcmf.MinCostFunctions.TOLERANCE;
+import static org.neo4j.gds.mcmf.MinCostFunctions.isAdmissible;
+import static org.neo4j.gds.mcmf.MinCostFunctions.isResidualEdge;
 
 class CostDischarging {
+    private static final long ALPHA = 6;
+    private static final long BETA = 12;
     private final CostFlowGraph costFlowGraph;
     private final HugeDoubleArray excess;
     private final HugeDoubleArray prize;
     private final HugeLongArrayQueue workingQueue;
     private final BitSet inWorkingQueue;
-    private final Arc[] filteredNeighbors;
+    private final HugeObjectArray<Arc> filteredNeighbors;
     private final double freq;
-    private double epsilon;
-
     private final GlobalRelabelling globalRelabelling;
+    private double epsilon;
     private double workSinceLastGR;
-
-    private final long ALPHA = 6;
-    private final long BETA = 12;
 
 
     CostDischarging(
@@ -61,7 +62,7 @@ class CostDischarging {
         this.workingQueue = workingQueue;
         this.inWorkingQueue = inWorkingQueue;
         this.epsilon = epsilon;
-        this.filteredNeighbors = new Arc[(int)costFlowGraph.nodeCount()];
+        this.filteredNeighbors = HugeObjectArray.newArray(Arc.class, costFlowGraph.maxInPlusOutDegree());
         this.globalRelabelling = globalRelabelling;
         this.workSinceLastGR = 0D;
         this.freq = freq;
@@ -75,7 +76,7 @@ class CostDischarging {
         var relabelNumber = freq == 0 ? 0 : (ALPHA * costFlowGraph.nodeCount() + costFlowGraph.edgeCount() / freq);
         globalRelabelling.relabellingWithPriorityQueue(epsilon);
         while (!workingQueue.isEmpty()) {
-            if(workSinceLastGR > relabelNumber) {
+            if (workSinceLastGR > relabelNumber) {
                 globalRelabelling.relabellingWithPriorityQueue(epsilon);
                 workSinceLastGR = 0;
             }
@@ -87,12 +88,11 @@ class CostDischarging {
     }
 
     void dischargeSorted(long v) {
-//        var k = sortNeighborhood(v);
-        var k = sortNeighborhoodWithArray(v);
+        var k = sortNeighborhood(v);
 
         for (var i = 0; i < k; i++) {
-            var arc = filteredNeighbors[i];
-            if(arc.almostReducedCost() + prize.get(v) >= 0) { //reduced cost is positive
+            var arc = filteredNeighbors.get(i);
+            if (!isAdmissible(arc.almostReducedCost() + prize.get(v))) { //reduced cost is positive
                 prize.set(v, -arc.almostReducedCost() - epsilon);
             }
             if (pushAndCheckIfEmptied(v, arc.t, arc.relIdx, arc.residualCapacity, arc.isReverse)) {
@@ -101,68 +101,67 @@ class CostDischarging {
         }
     }
 
-    int sortNeighborhoodWithArray(long v) {
+    int sortNeighborhood(long v) {
         var p = new MutableDouble(0);
         var k = new MutableInt(0);
-        return costFlowGraph.forEachRelationship(v, (s, t, relIdx, residualCapacity, cost, isReverse) -> {
-            if (residualCapacity > 0) {
-                var almostReducedCost = cost - prize.get(t);
-                if(almostReducedCost + prize.get(v) < 0) {
-                    if (pushAndCheckIfEmptied(v, t, relIdx, residualCapacity, isReverse)) {
-                        return false;
+        return costFlowGraph.forEachRelationship(
+            v, (s, t, relIdx, residualCapacity, cost, isReverse) -> {
+                if (isResidualEdge(residualCapacity)) {
+                    var almostReducedCost = cost - prize.get(t);
+                    if (isAdmissible(almostReducedCost + prize.get(v))) {
+                        return !pushAndCheckIfEmptied(v, t, relIdx, residualCapacity, isReverse);
                     }
-                    return true;
-                }
-                int i = k.intValue();
-                Arc prev;
-                if(p.doubleValue() < excess.get(v) || almostReducedCost < filteredNeighbors[i-1].almostReducedCost()) {
-                    p.add(residualCapacity);
-                    for(; i > 0; i--) {
-                        prev = filteredNeighbors[i-1];
-                        if (prev.almostReducedCost > almostReducedCost) {
-//                            filteredNeighbors[i] = prev; //shift down
-                            if (p.doubleValue() - prev.residualCapacity >= excess.get(v)) {
-                                p.subtract(prev.residualCapacity);
+                    int i = k.intValue();
+                    Arc prev;
+                    if (p.doubleValue() < excess.get(v) || almostReducedCost < filteredNeighbors.get(i - 1).almostReducedCost()) {
+                        p.add(residualCapacity);
+                        for (; i > 0; i--) {
+                            prev = filteredNeighbors.get(i - 1);
+                            if (prev.almostReducedCost > almostReducedCost) {
+                                if (p.doubleValue() - prev.residualCapacity >= excess.get(v)) {
+                                    p.subtract(prev.residualCapacity);
+                                } else {
+                                    break;
+                                }
                             } else {
                                 break;
                             }
-                        } else {
-                            break;
                         }
-                    }
-                    k.setValue(i+1); //cut-off the last elements that get pushed out
-                    for(; i > 0; i--){
-                        //shift the rest until free spot for prev
-                        prev = filteredNeighbors[i-1];
-                        if(prev.almostReducedCost > almostReducedCost){
-                            filteredNeighbors[i] = prev; //shift down
-                        } else {
-                            break;
+                        k.setValue(i + 1); //cut-off the last elements that get pushed out
+                        for (; i > 0; i--) {
+                            //shift the rest until free spot for prev
+                            prev = filteredNeighbors.get(i - 1);
+                            if (prev.almostReducedCost > almostReducedCost) {
+                                filteredNeighbors.set(i, prev); //shift down
+                            } else {
+                                break;
+                            }
                         }
+                        filteredNeighbors.set(i, new Arc(t, relIdx, residualCapacity, almostReducedCost, isReverse));
                     }
-                    filteredNeighbors[i] = new Arc(t, relIdx, residualCapacity, almostReducedCost, isReverse);
-                }
 
+                }
+                return true;
             }
-            return true;
-        }) ? k.intValue() : 0;
+        ) ? k.intValue() : 0;
     }
 
-     boolean pushAndCheckIfEmptied(long s, long t, long r, double residualCapacity, boolean isReverse) {
+    boolean pushAndCheckIfEmptied(long s, long t, long r, double residualCapacity, boolean isReverse) {
         var delta = Math.min(excess.get(s), residualCapacity);
         costFlowGraph.push(r, delta, isReverse);
         excess.addTo(s, -delta);
         excess.addTo(t, delta);
 
-        if(excess.get(t) > TOLERANCE) {
-            if(!inWorkingQueue.getAndSet(t)) {
+        if (excess.get(t) > TOLERANCE) {
+            if (!inWorkingQueue.getAndSet(t)) {
                 workingQueue.add(t);
             }
         }
         return excess.get(s) < TOLERANCE;
     }
 
-     record Arc(long t, long relIdx, double residualCapacity, double almostReducedCost, boolean isReverse) implements Comparable<Arc> {
+    record Arc(long t, long relIdx, double residualCapacity, double almostReducedCost, boolean isReverse) implements
+        Comparable<Arc> {
 
         @Override
         public int compareTo(@NotNull CostDischarging.Arc o) {

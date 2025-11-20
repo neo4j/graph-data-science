@@ -26,7 +26,10 @@ import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArrayQueue;
 import org.neo4j.gds.core.utils.queue.HugeLongPriorityQueue;
 
-import static org.neo4j.gds.mcmf.MinCostMaxFlow.TOLERANCE;
+import static org.neo4j.gds.mcmf.MinCostFunctions.TOLERANCE;
+import static org.neo4j.gds.mcmf.MinCostFunctions.isAdmissible;
+import static org.neo4j.gds.mcmf.MinCostFunctions.isResidualEdge;
+import static org.neo4j.gds.mcmf.MinCostFunctions.reducedCost;
 
  class GlobalRelabelling {
    private final CostFlowGraph costFlowGraph;
@@ -89,9 +92,7 @@ import static org.neo4j.gds.mcmf.MinCostMaxFlow.TOLERANCE;
                 //but they will anyway be dealt with next iteration anyway
                 var actualPrize = prize.get(top) - epsilonOffset * epsilon;
                 prize.set(top, actualPrize);
-                if (excess.get(top) > TOLERANCE) {
-                    activeNodesNotFound.decrement();
-                }
+                checkIfActiveNode(top,activeNodesNotFound);
                 return epsilonOffset;
             }
         }
@@ -103,9 +104,15 @@ import static org.neo4j.gds.mcmf.MinCostMaxFlow.TOLERANCE;
          nodeInSet.set(node); //AND update bitset you
      }
      void exhaustFrontier(double offset, double epsilon, MutableLong activeNodesNotFound){
-        while (!frontier.isEmpty() & activeNodesNotFound.longValue()>0) {  //this triggers a round of adding nodes reachable by adding  offset * epsilon to every node not in SS
+        while (!frontier.isEmpty() & activeNodesNotFound.longValue() > 0) {  //this triggers a round of adding nodes reachable by adding  offset * epsilon to every node not in SS
             var v = frontier.remove();
             traverseNode(v,offset,epsilon,activeNodesNotFound);
+        }
+    }
+
+    private void checkIfActiveNode(long node, MutableLong activeNodesNotFound){
+        if (excess.get(node) > TOLERANCE) {
+            activeNodesNotFound.decrement();
         }
     }
 
@@ -113,20 +120,17 @@ import static org.neo4j.gds.mcmf.MinCostMaxFlow.TOLERANCE;
         costFlowGraph.forEachRelationship(
             node, (s, t, r, residualCapacity, cost, isReverse) -> {
                 var reverseResidualCapacity = costFlowGraph.reverseResidualCapacity(r, isReverse);
-                if (nodeInSet.get(t) || reverseResidualCapacity <= TOLERANCE) return true;
+                if (nodeInSet.get(t) || !isResidualEdge(reverseResidualCapacity)) return true;
                 //let us consider the updated prize for t
                 var actualPrize = prize.get(t) - offset * epsilon;
-                var reverseReducedCost = (-cost) + actualPrize - prize.get(s);
-                if (reverseReducedCost < 0) {
+                var reverseReducedCost = reducedCost(-cost,actualPrize,prize.get(s));
+                if (isAdmissible(reverseReducedCost)) {
                     if (!nodeInSet.get(t)) {
                         addToFrontier(t);
                         prize.set(t, actualPrize); //this guy is added NOW and will be processed NOW
-                        if (excess.get(t) > TOLERANCE) {
-                            activeNodesNotFound.decrement();
-                        }
+                        checkIfActiveNode(t,activeNodesNotFound);
                     }
                 } else {
-
                     var diff = computeEventTime(actualPrize, prize.get(s), cost, epsilon, offset);
                     queuePush(t,diff);
                 }
@@ -146,7 +150,7 @@ import static org.neo4j.gds.mcmf.MinCostMaxFlow.TOLERANCE;
             diff
         );
     }
-    void queuePush(long node, double diff){
+    private void queuePush(long node, double diff){
         if (!pq.containsElement(node)) {
             pq.add(node, diff);
         } else if (pq.cost(node) > diff) {

@@ -20,6 +20,7 @@
 package org.neo4j.gds.mcmf;
 
 import org.apache.commons.lang3.mutable.MutableLong;
+import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.properties.relationships.RelationshipWithPropertyConsumer;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
@@ -37,6 +38,7 @@ public class CostFlowGraphBuilder extends FlowGraphBuilder {
 
     private HugeDoubleArray cost;
     private final Graph costGraph;
+    private  boolean allowNegativeCosts = false;
 
     public CostFlowGraphBuilder(
         Graph capacityGraph,
@@ -50,13 +52,19 @@ public class CostFlowGraphBuilder extends FlowGraphBuilder {
         this.costGraph = costGraph;
     }
 
+    @TestOnly
+    CostFlowGraphBuilder withNegativeCosts(){
+        allowNegativeCosts = true;
+        return this;
+    }
+
     private  void setUpCosts(){
         this.cost = HugeDoubleArray.newArray(flow.size());
         AtomicLong nodeId = new AtomicLong();
         long oldNodeCount = costGraph.nodeCount();
 
         Function<MutableLong, RelationshipWithPropertyConsumer> consumerProducer = (relIdx)-> (s, t, w) -> {
-            if (w < 0){
+            if (w < 0 && !allowNegativeCosts){
                 throw new IllegalArgumentException("Negative costs are not allowed");
             }
             cost.set(relIdx.getAndIncrement(), w);

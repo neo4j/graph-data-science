@@ -170,4 +170,12 @@ public final class CostFlowGraph extends FlowGraph {
         }
         return max;
     }
+
+    long maxInPlusOutDegree() {
+        var max = 0L;
+        for (long v = 0; v < nodeCount(); v++) {
+            max = Math.max(max, this.degree(v));
+        }
+        return max;
+    }
 }

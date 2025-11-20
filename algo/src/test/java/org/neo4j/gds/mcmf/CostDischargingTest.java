@@ -134,20 +134,20 @@ class CostDischargingTest {
 
         prize.set(mappedId.of("e1"),-20);
         prize.set(mappedId.of("e2"),-10);
-       var k= cost.sortNeighborhoodWithArray(mappedId.of("b"));
+       var k= cost.sortNeighborhood(mappedId.of("b"));
 
         assertThat(k).isEqualTo(4L);
         prize.set(mappedId.of("e1"),1);
-        k= cost.sortNeighborhoodWithArray(mappedId.of("b"));
+        k= cost.sortNeighborhood(mappedId.of("b"));
         assertThat(k).isEqualTo(1L);
 
         prize.setAll( v->0);
         excess.set(mappedId.of("b"),3L);
-        k= cost.sortNeighborhoodWithArray(mappedId.of("b"));
+        k= cost.sortNeighborhood(mappedId.of("b"));
         assertThat(k).isEqualTo(2L);
 
         prize.set(mappedId.of("f"),1);
-        k= cost.sortNeighborhoodWithArray(mappedId.of("b"));
+        k= cost.sortNeighborhood(mappedId.of("b"));
         assertThat(k).isEqualTo(1L);
 
     }

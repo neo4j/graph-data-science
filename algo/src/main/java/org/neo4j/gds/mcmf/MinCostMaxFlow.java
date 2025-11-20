@@ -36,14 +36,15 @@ import org.neo4j.gds.maxflow.SupplyAndDemandFactory;
 import java.util.List;
 import java.util.Optional;
 
+import static org.neo4j.gds.mcmf.MinCostFunctions.TOLERANCE;
+import static org.neo4j.gds.mcmf.MinCostFunctions.isAdmissible;
+
 public class MinCostMaxFlow extends Algorithm<CostFlowResult> {
     private final Graph graphOfFlows;
     private final Graph graphOfCosts;
     private CostFlowGraph costFlowGraph;
     private HugeDoubleArray excess;
     private final MCMFParameters parameters;
-
-    static final double TOLERANCE = 1e-10;
 
     public MinCostMaxFlow(MCMFParameters parameters, ProgressTracker progressTracker, Graph graphOfFlows, Graph graphOfCosts) {
         super(progressTracker);
@@ -74,7 +75,7 @@ public class MinCostMaxFlow extends Algorithm<CostFlowResult> {
                 parameters.sourceNodes(),
                 parameters.targetNodes(),
                 parameters.concurrency(),
-                0.5,
+                parameters.freq(),
                 true
             ),
             progressTracker,
@@ -103,7 +104,6 @@ public class MinCostMaxFlow extends Algorithm<CostFlowResult> {
             parameters.freq()
         );
         do {
-            var start = System.currentTimeMillis();
             epsilon = Math.max(epsilon / parameters.alpha(), SMALLEST_ALLOWED_EPSILON);
             discharging.updateEpsilon(epsilon);
             initRefine(prize, workingQueue, inWorkingQueue);
@@ -119,8 +119,8 @@ public class MinCostMaxFlow extends Algorithm<CostFlowResult> {
         for(var node = 0; node < costFlowGraph.nodeCount(); node++) {
             costFlowGraph.forEachRelationship(node, (s, t, relIdx, residualCapacity, cost, isReverse) -> {
                 //if reduced cost is negative then saturate
-                var reducedCost = (cost + prize.get(s) - prize.get(t)); //todo: check this
-                if (reducedCost < 0D) {
+                var reducedCost = MinCostFunctions.reducedCost(cost, prize.get(s), prize.get(t));
+                if (isAdmissible(reducedCost)) {
                     var delta = residualCapacity;
                     costFlowGraph.push(relIdx, delta, isReverse);
                     excess.addTo(s, -delta);
@@ -158,5 +158,6 @@ public class MinCostMaxFlow extends Algorithm<CostFlowResult> {
             }
         );
     }
+
 
 }

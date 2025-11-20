@@ -74,7 +74,13 @@ class GlobalRelabellingTest {
 
         NodeWithValue[] supply = {new NodeWithValue(mappedId.of("s"), 100)};
         NodeWithValue[] demand = {new NodeWithValue(mappedId.of("t"), 100)};
-        var flowGraph = new CostFlowGraphBuilder(graphOfFlows,graphOfCosts,supply,demand, TerminationFlag.RUNNING_TRUE,new Concurrency(1)).build();
+        var flowGraph = new CostFlowGraphBuilder(
+            graphOfFlows,
+            graphOfCosts,
+            supply,demand,
+            TerminationFlag.RUNNING_TRUE,
+            new Concurrency(1)
+        ).withNegativeCosts().build();
 
         var prize = HugeDoubleArray.newArray(20);
         prize.set(mappedId.of("a"),20);
@@ -124,11 +130,10 @@ class GlobalRelabellingTest {
         var flowGraph = new CostFlowGraphBuilder(
             graphOfFlows,
             graphOfCosts,
-            supply,
-            demand,
+            supply,demand,
             TerminationFlag.RUNNING_TRUE,
             new Concurrency(1)
-        ).build();
+        ).withNegativeCosts().build();
 
         var prize = HugeDoubleArray.newArray(20);
         prize.set(mappedId.of("a"), 20);
@@ -169,11 +174,10 @@ class GlobalRelabellingTest {
         var flowGraph = new CostFlowGraphBuilder(
             graphOfFlows,
             graphOfCosts,
-            supply,
-            demand,
+            supply,demand,
             TerminationFlag.RUNNING_TRUE,
             new Concurrency(1)
-        ).build();
+        ).withNegativeCosts().build();
 
         var prize = HugeDoubleArray.newArray(20);
         prize.set(mappedId.of("a"), 20);
@@ -205,11 +209,10 @@ class GlobalRelabellingTest {
             var flowGraph = new CostFlowGraphBuilder(
                 graphOfFlows,
                 graphOfCosts,
-                supply,
-                demand,
+                supply,demand,
                 TerminationFlag.RUNNING_TRUE,
                 new Concurrency(1)
-            ).build();
+            ).withNegativeCosts().build();
 
             var prize = HugeDoubleArray.newArray(20);
             prize.set(mappedId.of("a"), 20);
