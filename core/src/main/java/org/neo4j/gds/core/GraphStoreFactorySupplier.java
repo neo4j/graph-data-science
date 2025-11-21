@@ -29,6 +29,18 @@ import java.util.stream.Collectors;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
+/**
+ * This is a root of evil: static method accessing service loaded things.
+ * That's what you would ue in a world of, rando jars get dropped on classpath the world we are in,
+ * and we need to be able to use their functionality. Think JDBC drivers.
+ * But that is not the world we live in, ours is much simpler: for any given package,
+ * the sum total of functionality is already on the classpath, and thus we can use it directly.
+ * So instead of this complicated service-load-and-filter solution,
+ * we can just have a coded-up-list-and-filter one that is super easy to grok.
+ *
+ * @deprecated stop using this in favour of $unspecified dependency injected thing
+ */
+@Deprecated
 public final class GraphStoreFactorySupplier {
 
     private GraphStoreFactorySupplier() {}

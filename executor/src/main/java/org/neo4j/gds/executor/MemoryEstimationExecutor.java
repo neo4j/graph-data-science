@@ -30,6 +30,7 @@ import org.neo4j.gds.applications.graphstorecatalog.GraphStoreFromCatalogLoader;
 import org.neo4j.gds.applications.graphstorecatalog.GraphStoreFromDatabaseLoader;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.core.GraphStoreFactorySuppliers;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryEstimations;
 import org.neo4j.gds.mem.MemoryTree;
@@ -106,7 +107,7 @@ public class MemoryEstimationExecutor<
             var memoryEstimationGraphConfigParser = new MemoryEstimationGraphConfigParser(executionContext.username());
             var graphProjectConfig = memoryEstimationGraphConfigParser.parse(graphConfig);
             var graphStoreCreator = graphProjectConfig.isFictitiousLoading()
-                ? new FictitiousGraphStoreLoader(graphProjectConfig)
+                ? new FictitiousGraphStoreLoader(graphProjectConfig, new GraphStoreFactorySuppliers(/* used only in pregel things */))
                 : new GraphStoreFromDatabaseLoader(graphProjectConfig, executionContext.username(), graphLoaderContext);
 
             graphDims = graphStoreCreator.graphDimensions();

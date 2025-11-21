@@ -28,6 +28,7 @@ import org.neo4j.gds.applications.modelcatalog.ModelRepository;
 import org.neo4j.gds.applications.operations.FeatureTogglesRepository;
 import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
+import org.neo4j.gds.core.GraphStoreFactorySuppliers;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.logging.GdsLoggers;
@@ -63,6 +64,7 @@ final class GraphDataScienceProceduresProviderFactory {
     private final ExporterBuildersProviderService exporterBuildersProviderService;
     private final ExportLocation exportLocation;
     private final FeatureTogglesRepository featureTogglesRepository;
+    private final GraphStoreFactorySuppliers graphStoreFactorySuppliers;
     private final LimitsConfiguration limitsConfiguration;
     private final Metrics metrics;
     private final ModelCatalog modelCatalog;
@@ -79,6 +81,7 @@ final class GraphDataScienceProceduresProviderFactory {
         ExporterBuildersProviderService exporterBuildersProviderService,
         ExportLocation exportLocation,
         FeatureTogglesRepository featureTogglesRepository,
+        GraphStoreFactorySuppliers graphStoreFactorySuppliers,
         LimitsConfiguration limitsConfiguration,
         Metrics metrics,
         ModelCatalog modelCatalog,
@@ -94,6 +97,7 @@ final class GraphDataScienceProceduresProviderFactory {
         this.exporterBuildersProviderService = exporterBuildersProviderService;
         this.exportLocation = exportLocation;
         this.featureTogglesRepository = featureTogglesRepository;
+        this.graphStoreFactorySuppliers = graphStoreFactorySuppliers;
         this.limitsConfiguration = limitsConfiguration;
         this.metrics = metrics;
         this.modelCatalog = modelCatalog;
@@ -111,7 +115,10 @@ final class GraphDataScienceProceduresProviderFactory {
         UserLogServices userLogServices,
         UserAccessor userAccessor
     ) {
-        var catalogProcedureFacadeFactory = new GraphCatalogProcedureFacadeFactory(loggers.log());
+        var catalogProcedureFacadeFactory = new GraphCatalogProcedureFacadeFactory(
+            loggers.log(),
+            graphStoreFactorySuppliers
+        );
 
         var memoryGuard = DefaultMemoryGuard.create(loggers.log(), useMaxMemoryEstimation, memoryTracker);
 

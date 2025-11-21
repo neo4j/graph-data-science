@@ -25,7 +25,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.GraphDimensions;
-import org.neo4j.gds.core.GraphStoreFactorySupplier;
+import org.neo4j.gds.core.GraphStoreFactorySuppliers;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
@@ -38,11 +38,15 @@ import static org.neo4j.gds.RelationshipType.ALL_RELATIONSHIPS;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class FictitiousGraphStoreLoader implements GraphStoreCreator {
-
     private final GraphProjectConfig graphProjectConfig;
+    private final GraphStoreFactorySuppliers graphStoreFactorySuppliers;
 
-    public FictitiousGraphStoreLoader(GraphProjectConfig graphProjectConfig) {
+    public FictitiousGraphStoreLoader(
+        GraphProjectConfig graphProjectConfig,
+        GraphStoreFactorySuppliers graphStoreFactorySuppliers
+    ) {
         this.graphProjectConfig = graphProjectConfig;
+        this.graphStoreFactorySuppliers = graphStoreFactorySuppliers;
     }
 
     @Override
@@ -53,8 +57,8 @@ public class FictitiousGraphStoreLoader implements GraphStoreCreator {
     @Override
     public GraphDimensions graphDimensions() {
         var labelCount = 0;
-        if (graphProjectConfig() instanceof GraphProjectFromStoreConfig) {
-            var storeConfig = (GraphProjectFromStoreConfig) graphProjectConfig();
+
+        if (graphProjectConfig() instanceof GraphProjectFromStoreConfig storeConfig) {
             Set<NodeLabel> nodeLabels = storeConfig.nodeProjections().projections().keySet();
             labelCount = nodeLabels.stream().allMatch(isEqual(NodeLabel.ALL_NODES)) ? 0 : nodeLabels.size();
         }
@@ -70,16 +74,18 @@ public class FictitiousGraphStoreLoader implements GraphStoreCreator {
 
     @Override
     public MemoryEstimation estimateMemoryUsageDuringLoading() {
-        return GraphStoreFactorySupplier
-            .supplier(graphProjectConfig)
+        var supplier = graphStoreFactorySuppliers.find(graphProjectConfig);
+
+        return supplier
             .getWithDimension(GraphLoaderContext.NULL_CONTEXT, graphDimensions())
             .estimateMemoryUsageDuringLoading();
     }
 
     @Override
     public MemoryEstimation estimateMemoryUsageAfterLoading() {
-        return GraphStoreFactorySupplier
-            .supplier(graphProjectConfig)
+        var supplier = graphStoreFactorySuppliers.find(graphProjectConfig);
+
+        return supplier
             .getWithDimension(GraphLoaderContext.NULL_CONTEXT, graphDimensions())
             .estimateMemoryUsageAfterLoading();
     }

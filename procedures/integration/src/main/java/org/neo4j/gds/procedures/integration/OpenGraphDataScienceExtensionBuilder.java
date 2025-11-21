@@ -32,6 +32,7 @@ import org.neo4j.gds.concurrency.ConcurrencyValidator;
 import org.neo4j.gds.concurrency.PoolSizes;
 import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
+import org.neo4j.gds.core.GraphStoreFactorySuppliers;
 import org.neo4j.gds.core.IdMapBehavior;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.ModelCatalog;
@@ -192,15 +193,20 @@ public final class OpenGraphDataScienceExtensionBuilder {
         var componentRegistration = new ComponentRegistration(log, dependencySatisfier, globalProcedures);
         var userAccessor = UserAccessor.create();
 
-        componentRegistration.registerComponent("GDS Memory Facade", MemoryFacade.class, context -> {
-            var user  = userAccessor.getUser(context.securityContext());
-           return new MemoryFacade(user,memoryTracker);
-        });
+        componentRegistration.registerComponent(
+            "GDS Memory Facade", MemoryFacade.class, context -> {
+                var user = userAccessor.getUser(context.securityContext());
+                return new MemoryFacade(user, memoryTracker);
+            }
+        );
 
         registerCypherAggregation(globalProcedures, cypherAggregation, alphaCypherAggregation, log);
 
         // Neo4j Procedures do nothing special with progress logger, so we just use the adapter
         var loggers = new GdsLoggers(log, new LoggerForProgressTrackingAdapter(log));
+
+        // These are Neo4j specific, but not edition specific, so we create them here
+        var graphStoreFactorySuppliers = new GraphStoreFactorySuppliers();
 
         var graphDataScienceProviderFactory = new GraphDataScienceProceduresProviderFactory(
             loggers,
@@ -209,6 +215,7 @@ public final class OpenGraphDataScienceExtensionBuilder {
             exporterBuildersProviderService,
             exportLocation,
             featureTogglesRepository,
+            graphStoreFactorySuppliers,
             limitsConfiguration,
             metrics,
             modelCatalog,

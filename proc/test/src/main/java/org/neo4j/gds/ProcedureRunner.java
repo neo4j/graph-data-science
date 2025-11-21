@@ -27,6 +27,7 @@ import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
+import org.neo4j.gds.core.GraphStoreFactorySuppliers;
 import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
 import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
@@ -154,6 +155,7 @@ public final class ProcedureRunner {
         Username username
     ) {
         var gdsLog = new LogAdapter(log);
+        var graphStoreFactorySuppliers = new GraphStoreFactorySuppliers(/* probably make this long lived */);
 
         var procedureContext = WriteContext.builder().build();
 
@@ -169,7 +171,7 @@ public final class ProcedureRunner {
             .build();
         var graphStoreCatalogService = new GraphStoreCatalogService();
 
-        var catalogProcedureFacadeFactory = new GraphCatalogProcedureFacadeFactory(gdsLog);
+        var catalogProcedureFacadeFactory = new GraphCatalogProcedureFacadeFactory(gdsLog, graphStoreFactorySuppliers);
 
         var modelCatalog = new OpenModelCatalog();
 

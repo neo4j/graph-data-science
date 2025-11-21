@@ -25,6 +25,7 @@ import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.ImmutableGraphLoaderContext;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.config.GraphProjectConfig;
+import org.neo4j.gds.core.GraphStoreFactorySuppliers;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.logging.Log;
@@ -38,19 +39,25 @@ import org.neo4j.graphdb.GraphDatabaseService;
 public class GraphProjectMemoryUsageService {
     private final Log log;
     private final GraphDatabaseService graphDatabaseService;
+    private final GraphStoreFactorySuppliers graphStoreFactorySuppliers;
     private final MemoryTracker memoryTracker;
     private final String username;
 
-    public GraphProjectMemoryUsageService(String username,Log log, GraphDatabaseService graphDatabaseService,
-        MemoryTracker memoryTracker
+    public GraphProjectMemoryUsageService(
+        Log log,
+        GraphDatabaseService graphDatabaseService,
+        GraphStoreFactorySuppliers graphStoreFactorySuppliers,
+        MemoryTracker memoryTracker,
+        String username
     ) {
         this.log = log;
         this.graphDatabaseService = graphDatabaseService;
+        this.graphStoreFactorySuppliers = graphStoreFactorySuppliers;
         this.memoryTracker = memoryTracker;
         this.username = username;
     }
 
-    public void validateMemoryUsage(
+    void validateMemoryUsage(
         DatabaseId databaseId,
         TaskRegistryFactory taskRegistryFactory,
         TerminationFlag terminationFlag,
@@ -72,7 +79,7 @@ public class GraphProjectMemoryUsageService {
         );
     }
 
-    public MemoryTreeWithDimensions getEstimate(
+    MemoryTreeWithDimensions getEstimate(
         DatabaseId databaseId,
         TerminationFlag terminationFlag,
         TransactionContext transactionContext,
@@ -97,8 +104,8 @@ public class GraphProjectMemoryUsageService {
         return computeEstimate(configuration, graphStoreCreator);
     }
 
-    public MemoryTreeWithDimensions getFictitiousEstimate(GraphProjectConfig configuration) {
-        var graphStoreCreator = new FictitiousGraphStoreLoader(configuration);
+    MemoryTreeWithDimensions getFictitiousEstimate(GraphProjectConfig configuration) {
+        var graphStoreCreator = new FictitiousGraphStoreLoader(configuration, graphStoreFactorySuppliers);
 
         return computeEstimate(configuration, graphStoreCreator);
     }

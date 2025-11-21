@@ -24,6 +24,7 @@ import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
 import org.neo4j.gds.applications.graphstorecatalog.GraphProjectMemoryUsageService;
+import org.neo4j.gds.core.GraphStoreFactorySuppliers;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.MemoryTracker;
 import org.neo4j.gds.procedures.catalog.DatabaseModeRestriction;
@@ -47,6 +48,7 @@ public class GraphCatalogProcedureFacadeFactory {
 
     // Global scoped/ global state/ stateless things
     private final Log log;
+    private final GraphStoreFactorySuppliers graphStoreFactorySuppliers;
 
     /**
      * We inject services here so that we may control and isolate access to dependencies.
@@ -54,8 +56,9 @@ public class GraphCatalogProcedureFacadeFactory {
      * Without it, I would have to stub out Neo4j's {@link org.neo4j.kernel.api.procedure.Context}, in a non-trivial,
      * ugly way. Now instead I can inject the user by stubbing out GDS' own little POJO service.
      */
-    public GraphCatalogProcedureFacadeFactory(Log log) {
+    public GraphCatalogProcedureFacadeFactory(Log log, GraphStoreFactorySuppliers graphStoreFactorySuppliers) {
         this.log = log;
+        this.graphStoreFactorySuppliers = graphStoreFactorySuppliers;
     }
 
     /**
@@ -74,10 +77,11 @@ public class GraphCatalogProcedureFacadeFactory {
     ) {
         // Derived data and services
         var graphProjectMemoryUsageService = new GraphProjectMemoryUsageService(
-            requestScopedDependencies.user().getUsername(),
             log,
             graphDatabaseService,
-            memoryTracker
+            graphStoreFactorySuppliers,
+            memoryTracker,
+            requestScopedDependencies.user().getUsername()
         );
 
         var streamCloser = new Consumer<AutoCloseable>() {
