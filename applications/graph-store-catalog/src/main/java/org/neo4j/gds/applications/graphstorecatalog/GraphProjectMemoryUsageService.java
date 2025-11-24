@@ -95,17 +95,18 @@ public class GraphProjectMemoryUsageService {
             userLogRegistryFactory
         );
 
-        var graphStoreCreator = new GraphStoreFromDatabaseLoader(
-            configuration,
-            "unused", // again, too wide types
-            graphLoaderContext
-        );
+        var graphStoreFactorySupplier = graphStoreFactorySuppliers.find(configuration);
+        var graphStoreFactory = graphStoreFactorySupplier.get(graphLoaderContext);
+
+        var graphStoreCreator = new GraphStoreFromDatabaseLoader(configuration, graphStoreFactory);
 
         return computeEstimate(configuration, graphStoreCreator);
     }
 
     MemoryTreeWithDimensions getFictitiousEstimate(GraphProjectConfig configuration) {
-        var graphStoreCreator = new FictitiousGraphStoreLoader(configuration, graphStoreFactorySuppliers);
+        var graphStoreFactorySupplier = graphStoreFactorySuppliers.find(configuration);
+
+        var graphStoreCreator = new FictitiousGraphStoreLoader(configuration, graphStoreFactorySupplier);
 
         return computeEstimate(configuration, graphStoreCreator);
     }

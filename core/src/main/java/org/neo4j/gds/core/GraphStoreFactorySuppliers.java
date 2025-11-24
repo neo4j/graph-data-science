@@ -22,12 +22,17 @@ package org.neo4j.gds.core;
 import org.neo4j.gds.api.GraphStoreFactory;
 import org.neo4j.gds.config.GraphProjectConfig;
 
+import java.util.Map;
+import java.util.function.Function;
+
 /**
  * This is where you load up your GraphStoreFactorySuppliers. And you access them using a key.
  */
 public class GraphStoreFactorySuppliers {
-    public GraphStoreFactorySuppliers() {
+    private final Map<String, Function<GraphProjectConfig, GraphStoreFactory.Supplier>> suppliers;
 
+    public GraphStoreFactorySuppliers(Map<String, Function<GraphProjectConfig, GraphStoreFactory.Supplier>> suppliers) {
+        this.suppliers = suppliers;
     }
 
     /**
@@ -36,12 +41,12 @@ public class GraphStoreFactorySuppliers {
      * @throws java.lang.IllegalArgumentException if no supplier matches the given key
      */
     public GraphStoreFactory.Supplier find(GraphProjectConfig key) {
-        try {
-            // in the short term we just reuse the existing stuff,
-            // we can change it once dependency injection is in place
-            return GraphStoreFactorySupplier.supplier(key);
-        } catch (UnsupportedOperationException e) {
-            throw new IllegalArgumentException(e.getMessage());
-        }
+        var keyAsString = key.getClass().getSimpleName();
+
+        // not great perhaps, but the other one uses instanceof :shrug:
+        if (suppliers.containsKey(keyAsString)) return suppliers.get(keyAsString).apply(key);
+
+        // programmer error if we get here
+        throw new IllegalStateException("unable to supply graph store factory for " + keyAsString);
     }
 }

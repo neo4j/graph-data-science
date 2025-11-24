@@ -42,6 +42,7 @@ import org.neo4j.gds.applications.modelcatalog.ModelCatalogApplications;
 import org.neo4j.gds.applications.modelcatalog.ModelRepository;
 import org.neo4j.gds.applications.operations.FeatureTogglesRepository;
 import org.neo4j.gds.applications.operations.OperationsApplications;
+import org.neo4j.gds.core.GraphStoreFactorySuppliers;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.logging.GdsLoggers;
@@ -105,6 +106,7 @@ public final class ApplicationsFacade {
         Optional<Function<ModelCatalogApplications, ModelCatalogApplications>> modelCatalogApplicationsDecorator,
         FeatureTogglesRepository featureTogglesRepository,
         GraphStoreCatalogService graphStoreCatalogService,
+        GraphStoreFactorySuppliers graphStoreFactorySuppliers,
         ProjectionMetricsService projectionMetricsService,
         RequestScopedDependencies requestScopedDependencies,
         WriteContext writeContext,
@@ -145,6 +147,7 @@ public final class ApplicationsFacade {
             loggers,
             exportLocation,
             graphStoreCatalogService,
+            graphStoreFactorySuppliers,
             projectionMetricsService,
             requestScopedDependencies,
             graphDatabaseService,
@@ -233,6 +236,7 @@ public final class ApplicationsFacade {
         GdsLoggers loggers,
         ExportLocation exportLocation,
         GraphStoreCatalogService graphStoreCatalogService,
+        GraphStoreFactorySuppliers graphStoreFactorySuppliers,
         ProjectionMetricsService projectionMetricsService,
         RequestScopedDependencies requestScopedDependencies,
         GraphDatabaseService graphDatabaseService,
@@ -243,6 +247,7 @@ public final class ApplicationsFacade {
             loggers,
             exportLocation,
             graphStoreCatalogService,
+            graphStoreFactorySuppliers,
             projectionMetricsService,
             requestScopedDependencies,
             graphDatabaseService,

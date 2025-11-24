@@ -131,6 +131,7 @@ final class GraphDataScienceProceduresProviderFactory {
             catalogProcedureFacadeFactory,
             featureTogglesRepository,
             graphStoreCatalogService,
+            graphStoreFactorySuppliers,
             limitsConfiguration,
             memoryGuard,
             new MemoryEstimationContext(useMaxMemoryEstimation),

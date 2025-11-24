@@ -155,7 +155,7 @@ public final class ProcedureRunner {
         Username username
     ) {
         var gdsLog = new LogAdapter(log);
-        var graphStoreFactorySuppliers = new GraphStoreFactorySuppliers(/* probably make this long lived */);
+        GraphStoreFactorySuppliers graphStoreFactorySuppliers = null; // I wonder what will break new GraphStoreFactorySuppliers(/* probably make this long-lived */new HashMap<>());
 
         var procedureContext = WriteContext.builder().build();
 
@@ -184,6 +184,7 @@ public final class ProcedureRunner {
             catalogProcedureFacadeFactory,
             null,
             graphStoreCatalogService,
+            graphStoreFactorySuppliers,
             LimitsConfiguration.Instance,
             MemoryGuard.DISABLED,
             new MemoryEstimationContext(false),

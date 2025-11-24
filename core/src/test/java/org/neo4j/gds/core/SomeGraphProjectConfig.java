@@ -17,13 +17,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.api;
+package org.neo4j.gds.core;
 
-import org.neo4j.annotations.service.Service;
 import org.neo4j.gds.config.GraphProjectConfig;
 
-@Service
-public interface GraphStoreFactorySupplierProvider {
-    boolean canSupplyFactoryFor(GraphProjectConfig graphProjectConfig);
-    GraphStoreFactory.Supplier supplier(GraphProjectConfig graphProjectConfig);
+import java.util.Map;
+import java.util.Optional;
+
+class SomeGraphProjectConfig implements GraphProjectConfig {
+    @Override
+    public Map<String, Object> asProcedureResultConfigurationField() {
+        throw new UnsupportedOperationException("TODO");
+    }
+
+    @Override
+    public String graphName() {
+        throw new UnsupportedOperationException("TODO");
+    }
+
+    @Override
+    public Optional<String> usernameOverride() {
+        throw new UnsupportedOperationException("TODO");
+    }
 }

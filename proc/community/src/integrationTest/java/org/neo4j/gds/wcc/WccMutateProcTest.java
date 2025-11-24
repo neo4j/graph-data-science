@@ -61,7 +61,7 @@ import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.GraphLoader;
-import org.neo4j.gds.core.GraphStoreFactorySupplier;
+import org.neo4j.gds.core.GraphStoreFactorySuppliers;
 import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
 import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
@@ -141,7 +141,8 @@ class WccMutateProcTest extends BaseProcTest {
         // {H, I}
         ", (h)-[{w: 1.0d}]->(i)";
     @Neo4jGraph
-    static final @Language("Cypher") String DB_CYPHER =
+    @Language("Cypher")
+    static final String DB_CYPHER =
         "CREATE" +
             " (nA:Label {nodeId: 0, seedId: 42})" +
             ",(nB:Label {nodeId: 1, seedId: 42})" +
@@ -572,10 +573,10 @@ class WccMutateProcTest extends BaseProcTest {
             .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
             .log(Log.noOpLog())
             .build();
-        return new GraphLoader(
-            graphProjectConfig,
-            GraphStoreFactorySupplier.supplier(graphProjectConfig).get(graphLoaderContext)
-        );
+        GraphStoreFactorySuppliers graphStoreFactorySuppliers = null; // breaks innit
+        var graphStoreFactorySupplier = graphStoreFactorySuppliers.find(graphProjectConfig);
+        var graphStoreFactory = graphStoreFactorySupplier.get(graphLoaderContext);
+        return new GraphLoader(graphProjectConfig, graphStoreFactory);
     }
 
     /**
@@ -602,6 +603,7 @@ class WccMutateProcTest extends BaseProcTest {
             MemoryGuard.DISABLED,
             requestScopedDependencies
         );
+        GraphStoreFactorySuppliers graphStoreFactorySuppliers = null; // die please
         var applicationsFacade = ApplicationsFacade.create(
             new GdsLoggers(logMock, new LoggerForProgressTrackingAdapter(logMock)),
             null,
@@ -609,6 +611,7 @@ class WccMutateProcTest extends BaseProcTest {
             Optional.empty(),
             null,
             graphStoreCatalogService,
+            graphStoreFactorySuppliers,
             ProjectionMetricsService.DISABLED,
             requestScopedDependencies,
             WriteContext.builder().build(),

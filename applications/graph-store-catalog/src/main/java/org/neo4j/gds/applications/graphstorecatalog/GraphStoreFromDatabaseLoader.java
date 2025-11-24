@@ -19,31 +19,23 @@
  */
 package org.neo4j.gds.applications.graphstorecatalog;
 
-import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.GraphStoreFactory;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.GraphDimensions;
-import org.neo4j.gds.core.GraphStoreFactorySupplier;
 import org.neo4j.gds.mem.MemoryEstimation;
 
 public class GraphStoreFromDatabaseLoader implements GraphStoreCreator {
-
     private final GraphProjectConfig graphProjectConfig;
-    private final String username;
-    private final GraphLoaderContext graphLoaderContext;
     private final GraphStoreFactory<?, ?> graphStoreFactory;
 
     public GraphStoreFromDatabaseLoader(
         GraphProjectConfig graphProjectConfig,
-        String username,
-        GraphLoaderContext graphLoaderContext
+        GraphStoreFactory<?, ?> graphStoreFactory
     ) {
         this.graphProjectConfig = graphProjectConfig;
-        this.username = username;
-        this.graphLoaderContext = graphLoaderContext;
-        this.graphStoreFactory = graphStoreFactory();
+        this.graphStoreFactory = graphStoreFactory;
     }
 
     @Override
@@ -76,9 +68,5 @@ public class GraphStoreFromDatabaseLoader implements GraphStoreCreator {
     @Override
     public MemoryEstimation estimateMemoryUsageAfterLoading() {
         return this.graphStoreFactory.estimateMemoryUsageAfterLoading();
-    }
-
-    private GraphStoreFactory<?, ?> graphStoreFactory() {
-        return GraphStoreFactorySupplier.supplier(graphProjectConfig).get(graphLoaderContext);
     }
 }

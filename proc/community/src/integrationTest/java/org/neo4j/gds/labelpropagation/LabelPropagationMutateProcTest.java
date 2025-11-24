@@ -61,7 +61,7 @@ import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.GraphLoader;
-import org.neo4j.gds.core.GraphStoreFactorySupplier;
+import org.neo4j.gds.core.GraphStoreFactorySuppliers;
 import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
 import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
@@ -95,11 +95,11 @@ import java.util.Optional;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
 import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.neo4j.gds.ElementProjection.PROJECT_ALL;
@@ -442,10 +442,10 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
             .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
             .log(Log.noOpLog())
             .build();
-        return new GraphLoader(
-            graphProjectConfig,
-            GraphStoreFactorySupplier.supplier(graphProjectConfig).get(graphLoaderContext)
-        );
+        GraphStoreFactorySuppliers graphStoreFactorySuppliers = null;
+        var graphStoreFactorySupplier = graphStoreFactorySuppliers.find(graphProjectConfig);
+        var graphStoreFactory = graphStoreFactorySupplier.get(graphLoaderContext);
+        return new GraphLoader(graphProjectConfig, graphStoreFactory);
     }
 
     private GraphProjectFromStoreConfig allNodesAndRelationshipsProjectConfig(String graphName) {
@@ -525,6 +525,7 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
             MemoryGuard.DISABLED,
             requestScopedDependencies
         );
+        GraphStoreFactorySuppliers graphStoreFactorySuppliers = null; // break much?
         var applicationsFacade = ApplicationsFacade.create(
             new GdsLoggers(logMock, new LoggerForProgressTrackingAdapter(logMock)),
             null,
@@ -532,6 +533,7 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
             Optional.empty(),
             null,
             graphStoreCatalogService,
+            graphStoreFactorySuppliers,
             null,
             requestScopedDependencies,
             WriteContext.builder().build(),

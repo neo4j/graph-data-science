@@ -31,6 +31,7 @@ import org.neo4j.gds.applications.modelcatalog.ModelRepository;
 import org.neo4j.gds.applications.operations.FeatureTogglesRepository;
 import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
+import org.neo4j.gds.core.GraphStoreFactorySuppliers;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.logging.GdsLoggers;
@@ -79,6 +80,7 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
     private final ExporterBuildersProviderService exporterBuildersProviderService;
     private final ExportLocation exportLocation;
     private final GraphCatalogProcedureFacadeFactory graphCatalogProcedureFacadeFactory;
+    private final GraphStoreFactorySuppliers graphStoreFactorySuppliers;
     private final FeatureTogglesRepository featureTogglesRepository;
     private final GraphStoreCatalogService graphStoreCatalogService;
     private final LimitsConfiguration limitsConfiguration;
@@ -106,6 +108,7 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
         GraphCatalogProcedureFacadeFactory graphCatalogProcedureFacadeFactory,
         FeatureTogglesRepository featureTogglesRepository,
         GraphStoreCatalogService graphStoreCatalogService,
+        GraphStoreFactorySuppliers graphStoreFactorySuppliers,
         LimitsConfiguration limitsConfiguration,
         MemoryGuard memoryGuard,
         MemoryEstimationContext memoryEstimationContext,
@@ -129,6 +132,7 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
         this.exporterBuildersProviderService = exporterBuildersProviderService;
         this.exportLocation = exportLocation;
         this.graphCatalogProcedureFacadeFactory = graphCatalogProcedureFacadeFactory;
+        this.graphStoreFactorySuppliers = graphStoreFactorySuppliers;
         this.featureTogglesRepository = featureTogglesRepository;
         this.graphStoreCatalogService = graphStoreCatalogService;
         this.limitsConfiguration = limitsConfiguration;
@@ -200,6 +204,7 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
             graphCatalogProcedureFacadeFactory,
             featureTogglesRepository,
             graphStoreCatalogService,
+            graphStoreFactorySuppliers,
             limitsConfiguration,
             memoryGuard,
             memoryEstimationContext,

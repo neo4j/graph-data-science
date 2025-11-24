@@ -26,6 +26,7 @@ import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResultFactory;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.config.GraphProjectConfig;
+import org.neo4j.gds.core.GraphStoreFactorySuppliers;
 import org.neo4j.gds.core.loading.GraphProjectResult;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.utils.ProgressTimer;
@@ -46,15 +47,18 @@ import java.util.function.Function;
 public class GenericProjectApplication<RESULT extends GraphProjectResult, CONFIGURATION extends GraphProjectConfig, RESULT_BUILDER extends GraphProjectResult.Builder<RESULT>> {
     private final Log log;
     private final GraphStoreCatalogService graphStoreCatalogService;
+    private final GraphStoreFactorySuppliers graphStoreFactorySuppliers;
     private final Function<CONFIGURATION, RESULT_BUILDER> resultBuilderFactory;
 
     GenericProjectApplication(
         Log log,
         GraphStoreCatalogService graphStoreCatalogService,
+        GraphStoreFactorySuppliers graphStoreFactorySuppliers,
         Function<CONFIGURATION, RESULT_BUILDER> resultBuilderFactory
     ) {
         this.log = log;
         this.graphStoreCatalogService = graphStoreCatalogService;
+        this.graphStoreFactorySuppliers = graphStoreFactorySuppliers;
         this.resultBuilderFactory = resultBuilderFactory;
     }
 
@@ -141,10 +145,11 @@ public class GenericProjectApplication<RESULT extends GraphProjectResult, CONFIG
                 transactionContext,
                 userLogRegistryFactory
             );
+            var graphStoreFactorySupplier = graphStoreFactorySuppliers.find(configuration);
+            var graphStoreFactory = graphStoreFactorySupplier.get(graphLoaderContext);
             var graphStoreCreator = new GraphStoreFromDatabaseLoader(
                 configuration,
-                configuration.username(),
-                graphLoaderContext
+                graphStoreFactory
             );
             var graphStore = graphStoreCreator.graphStore();
 

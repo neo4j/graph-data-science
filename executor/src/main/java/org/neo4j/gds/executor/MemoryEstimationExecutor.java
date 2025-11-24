@@ -106,9 +106,11 @@ public class MemoryEstimationExecutor<
 
             var memoryEstimationGraphConfigParser = new MemoryEstimationGraphConfigParser(executionContext.username());
             var graphProjectConfig = memoryEstimationGraphConfigParser.parse(graphConfig);
+            GraphStoreFactorySuppliers graphStoreFactorySuppliers = null; // I wonder what will break new GraphStoreFactorySuppliers(/* used only in pregel things I think */new HashMap<>());
+            var graphStoreFactorySupplier = graphStoreFactorySuppliers.find(graphProjectConfig);
             var graphStoreCreator = graphProjectConfig.isFictitiousLoading()
-                ? new FictitiousGraphStoreLoader(graphProjectConfig, new GraphStoreFactorySuppliers(/* used only in pregel things */))
-                : new GraphStoreFromDatabaseLoader(graphProjectConfig, executionContext.username(), graphLoaderContext);
+                ? new FictitiousGraphStoreLoader(graphProjectConfig, graphStoreFactorySupplier)
+                : new GraphStoreFromDatabaseLoader(graphProjectConfig, graphStoreFactorySupplier.get(graphLoaderContext));
 
             graphDims = graphStoreCreator.graphDimensions();
             maybeGraphEstimation = Optional.of(graphStoreCreator.estimateMemoryUsageAfterLoading());

@@ -44,6 +44,8 @@ import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.TaskStore;
 import org.neo4j.gds.core.utils.progress.TaskStoreService;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
+import org.neo4j.gds.legacycypherprojection.CypherProjectionGraphStoreFactorySupplier;
+import org.neo4j.gds.legacycypherprojection.GraphProjectFromCypherConfig;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.MemoryTracker;
 import org.neo4j.gds.metrics.Metrics;
@@ -55,6 +57,8 @@ import org.neo4j.gds.procedures.UserLogServices;
 import org.neo4j.gds.procedures.memory.MemoryFacade;
 import org.neo4j.gds.projection.AlphaCypherAggregation;
 import org.neo4j.gds.projection.CypherAggregation;
+import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
+import org.neo4j.gds.projection.NativeProjectionGraphStoreFactorySupplier;
 import org.neo4j.gds.settings.GdsSettings;
 import org.neo4j.graphdb.config.Configuration;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
@@ -63,6 +67,7 @@ import org.neo4j.kernel.lifecycle.LifeSupport;
 import org.neo4j.kernel.lifecycle.Lifecycle;
 
 import java.lang.management.ManagementFactory;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
@@ -206,7 +211,12 @@ public final class OpenGraphDataScienceExtensionBuilder {
         var loggers = new GdsLoggers(log, new LoggerForProgressTrackingAdapter(log));
 
         // These are Neo4j specific, but not edition specific, so we create them here
-        var graphStoreFactorySuppliers = new GraphStoreFactorySuppliers();
+        var graphStoreFactorySuppliers = new GraphStoreFactorySuppliers(
+            Map.of(
+                GraphProjectFromStoreConfig.class.getSimpleName(), NativeProjectionGraphStoreFactorySupplier::create,
+                GraphProjectFromCypherConfig.class.getSimpleName(), CypherProjectionGraphStoreFactorySupplier::create
+            )
+        );
 
         var graphDataScienceProviderFactory = new GraphDataScienceProceduresProviderFactory(
             loggers,

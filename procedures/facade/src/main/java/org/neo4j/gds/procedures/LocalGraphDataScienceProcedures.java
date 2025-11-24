@@ -35,6 +35,7 @@ import org.neo4j.gds.applications.modelcatalog.ModelRepository;
 import org.neo4j.gds.applications.operations.FeatureTogglesRepository;
 import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
+import org.neo4j.gds.core.GraphStoreFactorySuppliers;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.logging.GdsLoggers;
@@ -44,6 +45,7 @@ import org.neo4j.gds.functions.LocalFunctionsFacade;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.MemoryTracker;
 import org.neo4j.gds.memest.DatabaseGraphStoreEstimationService;
+import org.neo4j.gds.memest.FictitiousGraphStoreEstimationService;
 import org.neo4j.gds.metrics.Metrics;
 import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
 import org.neo4j.gds.metrics.procedures.DeprecatedProceduresMetricService;
@@ -111,6 +113,7 @@ public class LocalGraphDataScienceProcedures implements GraphDataScienceProcedur
         GraphCatalogProcedureFacadeFactory graphCatalogProcedureFacadeFactory,
         FeatureTogglesRepository featureTogglesRepository,
         GraphStoreCatalogService graphStoreCatalogService,
+        GraphStoreFactorySuppliers graphStoreFactorySuppliers,
         LimitsConfiguration limitsConfiguration,
         MemoryGuard memoryGuard,
         MemoryEstimationContext memoryEstimationContext,
@@ -136,10 +139,11 @@ public class LocalGraphDataScienceProcedures implements GraphDataScienceProcedur
 
         var databaseGraphStoreEstimationService = new DatabaseGraphStoreEstimationService(
             requestScopedDependencies.graphLoaderContext(),
-            requestScopedDependencies.user()
+            graphStoreFactorySuppliers
         );
 
         var algorithmEstimationTemplate = new AlgorithmEstimationTemplate(
+            new FictitiousGraphStoreEstimationService(graphStoreFactorySuppliers),
             graphStoreCatalogService,
             databaseGraphStoreEstimationService,
             requestScopedDependencies
@@ -166,6 +170,7 @@ public class LocalGraphDataScienceProcedures implements GraphDataScienceProcedur
             modelCatalogApplicationsDecorator,
             featureTogglesRepository,
             graphStoreCatalogService,
+            graphStoreFactorySuppliers,
             metrics.projectionMetrics(),
             requestScopedDependencies,
             writeContext,

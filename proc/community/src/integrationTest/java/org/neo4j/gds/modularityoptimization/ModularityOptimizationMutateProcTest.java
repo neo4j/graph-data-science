@@ -60,7 +60,7 @@ import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.core.GraphLoader;
-import org.neo4j.gds.core.GraphStoreFactorySupplier;
+import org.neo4j.gds.core.GraphStoreFactorySuppliers;
 import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
 import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
@@ -94,12 +94,12 @@ import java.util.Optional;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
 import static org.assertj.core.api.InstanceOfAssertFactories.DOUBLE;
 import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.neo4j.gds.ElementProjection.PROJECT_ALL;
@@ -490,10 +490,10 @@ class ModularityOptimizationMutateProcTest extends BaseProcTest {
             .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
             .log(Log.noOpLog())
             .build();
-        return new GraphLoader(
-            graphProjectConfig,
-            GraphStoreFactorySupplier.supplier(graphProjectConfig).get(graphLoaderContext)
-        );
+        GraphStoreFactorySuppliers graphStoreFactorySuppliers = null; // breaks maybe?
+        var graphStoreFactorySupplier = graphStoreFactorySuppliers.find(graphProjectConfig);
+        var graphStoreFactory = graphStoreFactorySupplier.get(graphLoaderContext);
+        return new GraphLoader(graphProjectConfig, graphStoreFactory);
     }
 
     private GraphProjectFromStoreConfig withAllNodesAndRelationshipsProjectConfig(String graphName) {
@@ -544,6 +544,7 @@ class ModularityOptimizationMutateProcTest extends BaseProcTest {
             Optional.empty(),
             null,
             graphStoreCatalogService,
+            null, // break huh?
             ProjectionMetricsService.DISABLED,
             requestScopedDependencies,
             WriteContext.builder().build(),

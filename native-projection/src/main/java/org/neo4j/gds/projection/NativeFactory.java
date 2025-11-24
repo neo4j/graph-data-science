@@ -42,8 +42,7 @@ import org.neo4j.gds.mem.MemoryEstimation;
 
 import java.util.Optional;
 
-final class NativeFactory extends CSRGraphStoreFactory<GraphProjectFromStoreConfig> {
-
+public final class NativeFactory extends CSRGraphStoreFactory<GraphProjectFromStoreConfig> {
     private final GraphProjectFromStoreConfig storeConfig;
     private final ProgressTracker progressTracker;
 

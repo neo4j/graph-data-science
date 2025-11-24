@@ -22,10 +22,10 @@ package org.neo4j.gds.applications.graphstorecatalog;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.GraphStoreFactory;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.GraphDimensions;
-import org.neo4j.gds.core.GraphStoreFactorySuppliers;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
@@ -39,14 +39,14 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class FictitiousGraphStoreLoader implements GraphStoreCreator {
     private final GraphProjectConfig graphProjectConfig;
-    private final GraphStoreFactorySuppliers graphStoreFactorySuppliers;
+    private final GraphStoreFactory.Supplier graphStoreFactorySupplier;
 
     public FictitiousGraphStoreLoader(
         GraphProjectConfig graphProjectConfig,
-        GraphStoreFactorySuppliers graphStoreFactorySuppliers
+        GraphStoreFactory.Supplier graphStoreFactorySupplier
     ) {
         this.graphProjectConfig = graphProjectConfig;
-        this.graphStoreFactorySuppliers = graphStoreFactorySuppliers;
+        this.graphStoreFactorySupplier = graphStoreFactorySupplier;
     }
 
     @Override
@@ -74,18 +74,14 @@ public class FictitiousGraphStoreLoader implements GraphStoreCreator {
 
     @Override
     public MemoryEstimation estimateMemoryUsageDuringLoading() {
-        var supplier = graphStoreFactorySuppliers.find(graphProjectConfig);
-
-        return supplier
+        return graphStoreFactorySupplier
             .getWithDimension(GraphLoaderContext.NULL_CONTEXT, graphDimensions())
             .estimateMemoryUsageDuringLoading();
     }
 
     @Override
     public MemoryEstimation estimateMemoryUsageAfterLoading() {
-        var supplier = graphStoreFactorySuppliers.find(graphProjectConfig);
-
-        return supplier
+        return graphStoreFactorySupplier
             .getWithDimension(GraphLoaderContext.NULL_CONTEXT, graphDimensions())
             .estimateMemoryUsageAfterLoading();
     }

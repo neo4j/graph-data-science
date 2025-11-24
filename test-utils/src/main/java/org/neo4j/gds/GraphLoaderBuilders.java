@@ -28,7 +28,7 @@ import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.GraphLoader;
-import org.neo4j.gds.core.GraphStoreFactorySupplier;
+import org.neo4j.gds.core.GraphStoreFactorySuppliers;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
@@ -60,6 +60,7 @@ public final class GraphLoaderBuilders {
     static GraphLoader storeLoader(
         // GraphLoader parameters
         GraphDatabaseService databaseService,
+        GraphStoreFactorySuppliers graphStoreFactorySuppliers,
         Optional<TransactionContext> transactionContext,
         Optional<ExecutorService> executorService,
         Optional<TerminationFlag> terminationFlag,
@@ -104,11 +105,11 @@ public final class GraphLoaderBuilders {
 
         return createGraphLoader(
             databaseService,
+            graphStoreFactorySuppliers,
             transactionContext,
             executorService,
             terminationFlag,
             log,
-            userName,
             graphProjectConfig
         );
     }
@@ -117,20 +118,20 @@ public final class GraphLoaderBuilders {
     static GraphLoader storeLoaderWithConfig(
         // GraphLoader parameters
         GraphDatabaseService databaseService,
+        GraphStoreFactorySuppliers graphStoreFactorySuppliers,
         Optional<TransactionContext> transactionContext,
         Optional<ExecutorService> executorService,
         Optional<TerminationFlag> terminationFlag,
         Optional<Log> log,
-        Optional<String> userName,
         GraphProjectFromStoreConfig graphProjectConfig
     ) {
         return createGraphLoader(
             databaseService,
+            graphStoreFactorySuppliers,
             transactionContext,
             executorService,
             terminationFlag,
             log,
-            userName,
             graphProjectConfig
         );
     }
@@ -144,6 +145,7 @@ public final class GraphLoaderBuilders {
     static GraphLoader cypherLoader(
         // GraphLoader parameters
         GraphDatabaseService databaseService,
+        GraphStoreFactorySuppliers graphStoreFactorySuppliers,
         Optional<TransactionContext> transactionContext,
         Optional<TerminationFlag> terminationFlag,
         Optional<Log> log,
@@ -170,11 +172,11 @@ public final class GraphLoaderBuilders {
 
         return createGraphLoader(
             databaseService,
+            graphStoreFactorySuppliers,
             transactionContext,
             Optional.empty(),
             terminationFlag,
             log,
-            userName,
             graphProjectConfig
         );
     }
@@ -182,11 +184,11 @@ public final class GraphLoaderBuilders {
     @NotNull
     public static GraphLoader createGraphLoader(
         GraphDatabaseService databaseService,
+        GraphStoreFactorySuppliers graphStoreFactorySuppliers,
         Optional<TransactionContext> transactionContext,
         Optional<ExecutorService> executorService,
         Optional<TerminationFlag> terminationFlag,
         Optional<Log> log,
-        Optional<String> userName,
         GraphProjectConfig graphProjectConfig
     ) {
         var graphLoaderContext = ImmutableGraphLoaderContext.builder()
@@ -199,9 +201,11 @@ public final class GraphLoaderBuilders {
             .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
             .log(log.orElseGet(Log::noOpLog))
             .build();
+        var graphStoreFactorySupplier = graphStoreFactorySuppliers.find(graphProjectConfig);
+        var graphStoreFactory = graphStoreFactorySupplier.get(graphLoaderContext);
         return new GraphLoader(
             graphProjectConfig,
-            GraphStoreFactorySupplier.supplier(graphProjectConfig).get(graphLoaderContext)
+            graphStoreFactory
         );
     }
 }

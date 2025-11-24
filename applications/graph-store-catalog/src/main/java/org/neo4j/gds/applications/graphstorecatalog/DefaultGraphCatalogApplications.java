@@ -28,6 +28,7 @@ import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.beta.filter.GraphFilterResult;
 import org.neo4j.gds.config.BaseConfig;
+import org.neo4j.gds.core.GraphStoreFactorySuppliers;
 import org.neo4j.gds.core.io.GraphStoreExporterBaseConfig;
 import org.neo4j.gds.core.loading.CatalogRequest;
 import org.neo4j.gds.core.loading.GraphDropNodePropertiesResult;
@@ -181,6 +182,7 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
         GdsLoggers loggers,
         ExportLocation exportLocation,
         GraphStoreCatalogService graphStoreCatalogService,
+        GraphStoreFactorySuppliers graphStoreFactorySuppliers,
         ProjectionMetricsService projectionMetricsService,
         RequestScopedDependencies requestScopedDependencies,
         GraphDatabaseService graphDatabaseService,
@@ -192,6 +194,7 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
             new GenericProjectApplication<>(
                 loggers.log(),
                 graphStoreCatalogService,
+                graphStoreFactorySuppliers,
                 GraphProjectCypherResult.Builder::new
             )
         );
@@ -228,6 +231,7 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
             new GenericProjectApplication<>(
                 loggers.log(),
                 graphStoreCatalogService,
+                graphStoreFactorySuppliers,
                 GraphProjectNativeResult.Builder::new
             )
         );
