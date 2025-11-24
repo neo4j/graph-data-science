@@ -28,6 +28,7 @@ import org.neo4j.gds.core.utils.paged.HugeLongArrayQueue;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.maxflow.MaxFlowPhase;
 import org.neo4j.gds.maxflow.SupplyAndDemandFactory;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Optional;
 
@@ -43,22 +44,25 @@ public final class MinCostMaxFlow extends Algorithm<CostFlowResult> {
         MCMFParameters parameters,
         ProgressTracker progressTracker,
         Graph graphOfFlows,
-        Graph graphOfCosts
+        Graph graphOfCosts,
+        TerminationFlag terminationFlag
     ) {
         super(progressTracker);
         this.graphOfFlows = graphOfFlows;
         this.graphOfCosts = graphOfCosts;
         this.parameters = parameters;
+        this.terminationFlag = terminationFlag;
     }
 
     public static MinCostMaxFlow create(
         GraphStore graphStore,
         MCMFParameters parameters,
-        ProgressTracker progressTracker
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
     ) {
         var graphOfFlows = graphStore.getGraph(parameters.nodeLabels(), parameters.relTypes(), Optional.of(parameters.capacityProperty()));
         var graphOfCosts = graphStore.getGraph(parameters.nodeLabels(), parameters.relTypes(), Optional.of(parameters.costProperty()));
-        return new MinCostMaxFlow(parameters, progressTracker, graphOfFlows, graphOfCosts);
+        return new MinCostMaxFlow(parameters, progressTracker, graphOfFlows, graphOfCosts,terminationFlag);
     }
 
     @Override

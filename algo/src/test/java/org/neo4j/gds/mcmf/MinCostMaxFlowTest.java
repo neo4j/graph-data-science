@@ -40,6 +40,7 @@ import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.maxflow.MaxFlowParameters;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
 import java.util.Map;
@@ -78,7 +79,8 @@ class MinCostMaxFlowTest {
         var x =  MinCostMaxFlow.create(
             graphStore,
            params,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         );
 
         var result = x.compute();
@@ -296,7 +298,8 @@ class MinCostMaxFlowTest {
         MinCostMaxFlow.create(
                 graphStore,
                 params,
-                testTracker
+                testTracker,
+                TerminationFlag.RUNNING_TRUE
             ).compute();
 
             assertThat(log.getMessages(TestLog.INFO))

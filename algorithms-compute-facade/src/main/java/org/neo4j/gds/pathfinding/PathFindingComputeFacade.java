@@ -23,6 +23,7 @@ import org.neo4j.gds.ProgressTrackerFactory;
 import org.neo4j.gds.allshortestpaths.AllShortestPathsParameters;
 import org.neo4j.gds.allshortestpaths.AllShortestPathsStreamResult;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.applications.algorithms.pathfinding.MSBFSASPAlgorithmFactory;
 import org.neo4j.gds.async.AsyncAlgorithmCaller;
@@ -44,6 +45,10 @@ import org.neo4j.gds.kspanningtree.KSpanningTreeTask;
 import org.neo4j.gds.maxflow.FlowResult;
 import org.neo4j.gds.maxflow.MaxFlow;
 import org.neo4j.gds.maxflow.MaxFlowParameters;
+import org.neo4j.gds.mcmf.CostFlowResult;
+import org.neo4j.gds.mcmf.MCMFParameters;
+import org.neo4j.gds.mcmf.MinCostMaxFlow;
+import org.neo4j.gds.mcmf.MinCostMaxFlowTask;
 import org.neo4j.gds.paths.RelationshipCountProgressTaskFactory;
 import org.neo4j.gds.paths.astar.AStar;
 import org.neo4j.gds.paths.astar.AStarParameters;
@@ -382,6 +387,40 @@ public class PathFindingComputeFacade {
         // Create the algorithm
         var algo = new MaxFlow(
             graph,
+            parameters,
+            progressTracker,
+            terminationFlag
+        );
+
+        // Submit the algorithm for async computation
+        return algorithmCaller.run(
+            algo::compute,
+            jobId
+        );
+    }
+
+    public CompletableFuture<TimedAlgorithmResult<CostFlowResult>> mcmf(
+        GraphStore graphStore,
+        MCMFParameters parameters,
+        JobId jobId,
+        boolean logProgress
+    ) {
+        // If the input graph is empty return a completed future with empty result
+        if (graphStore.nodeCount()==0) { //WIP
+            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(CostFlowResult.EMPTY));
+        }
+
+        // Create ProgressTracker
+        var progressTracker = progressTrackerFactory.create(
+            MinCostMaxFlowTask.create(),
+            jobId,
+            parameters.concurrency(),
+            logProgress
+        );
+
+        // Create the algorithm
+        var algo = MinCostMaxFlow.create(
+            graphStore,
             parameters,
             progressTracker,
             terminationFlag

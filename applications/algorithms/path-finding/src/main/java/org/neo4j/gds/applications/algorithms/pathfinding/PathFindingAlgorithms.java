@@ -22,6 +22,7 @@ package org.neo4j.gds.applications.algorithms.pathfinding;
 import org.neo4j.gds.allshortestpaths.AllShortestPathsParameters;
 import org.neo4j.gds.allshortestpaths.AllShortestPathsStreamResult;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
 import org.neo4j.gds.core.concurrency.DefaultPool;
@@ -36,6 +37,9 @@ import org.neo4j.gds.kspanningtree.KSpanningTreeParameters;
 import org.neo4j.gds.maxflow.FlowResult;
 import org.neo4j.gds.maxflow.MaxFlow;
 import org.neo4j.gds.maxflow.MaxFlowParameters;
+import org.neo4j.gds.mcmf.CostFlowResult;
+import org.neo4j.gds.mcmf.MCMFParameters;
+import org.neo4j.gds.mcmf.MinCostMaxFlow;
 import org.neo4j.gds.paths.astar.AStar;
 import org.neo4j.gds.paths.astar.AStarParameters;
 import org.neo4j.gds.paths.bellmanford.BellmanFord;
@@ -215,6 +219,22 @@ public class PathFindingAlgorithms {
     ) {
         var algorithm = new MaxFlow(
             graph,
+            parameters,
+            progressTracker,
+            terminationFlag
+        );
+
+        return algorithm.compute();
+    }
+
+    public CostFlowResult maxFlow(
+        GraphStore graphStore,
+        MCMFParameters parameters,
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
+    ) {
+        var algorithm = MinCostMaxFlow.create(
+            graphStore,
             parameters,
             progressTracker,
             terminationFlag
