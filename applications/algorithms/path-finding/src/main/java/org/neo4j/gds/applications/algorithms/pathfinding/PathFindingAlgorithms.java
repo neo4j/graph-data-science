@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.applications.algorithms.pathfinding;
 
+import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.allshortestpaths.AllShortestPathsParameters;
 import org.neo4j.gds.allshortestpaths.AllShortestPathsStreamResult;
 import org.neo4j.gds.api.Graph;
@@ -70,6 +72,7 @@ import org.neo4j.gds.traversal.RandomWalkCountingNodeVisits;
 import org.neo4j.gds.traversal.RandomWalkParameters;
 import org.neo4j.gds.traversal.TraversalParameters;
 
+import java.util.Collection;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Stream;
@@ -227,14 +230,23 @@ public class PathFindingAlgorithms {
         return algorithm.compute();
     }
 
-    public CostFlowResult maxFlow(
+    public CostFlowResult mcmf(
         GraphStore graphStore,
+        Optional<String> capacityProperty,
+        Optional<String> costProperty,
+        Collection<NodeLabel> nodeLabels,
+        Collection<RelationshipType> relTypes,
         MCMFParameters parameters,
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
-        var algorithm = MinCostMaxFlow.create(
-            graphStore,
+
+        var graphOfFlows= graphStore.getGraph(nodeLabels,relTypes,capacityProperty);
+        var graphOfCosts = graphStore.getGraph(nodeLabels,relTypes,costProperty);
+
+        var algorithm = new MinCostMaxFlow(
+            graphOfFlows,
+            graphOfCosts,
             parameters,
             progressTracker,
             terminationFlag

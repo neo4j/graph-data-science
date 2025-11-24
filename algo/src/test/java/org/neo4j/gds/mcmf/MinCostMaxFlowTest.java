@@ -60,7 +60,16 @@ class MinCostMaxFlowTest {
         double expectedFlow,
         double expectedCost
     ) {
-
+        var capacityGraph = graphStore.getGraph(
+                List.of(NodeLabel.of("n")),
+                List.of(RelationshipType.of("R")),
+                Optional.of("u")
+        );
+        var costGraph = graphStore.getGraph(
+            List.of(NodeLabel.of("n")),
+            List.of(RelationshipType.of("R")),
+            Optional.of("c")
+        );
         var maxFlowParameters = new MaxFlowParameters(
             sourceNodes,
             targetNodes,
@@ -70,15 +79,12 @@ class MinCostMaxFlowTest {
         );
         var params = new MCMFParameters(
             maxFlowParameters,
-            6,
-            List.of(NodeLabel.of("n")),
-            List.of(RelationshipType.of("R")),
-            "u",
-            "c"
+            6
         );
-        var x =  MinCostMaxFlow.create(
-            graphStore,
-           params,
+        var x = new MinCostMaxFlow(
+            capacityGraph,
+            costGraph,
+            params,
             ProgressTracker.NULL_TRACKER,
             TerminationFlag.RUNNING_TRUE
         );
@@ -280,6 +286,16 @@ class MinCostMaxFlowTest {
         InputNodes sourceNodes = new ListInputNodes(List.of(idFunction.of("a1")));
         InputNodes targetNodes = new ListInputNodes(List.of(idFunction.of("a5")));
 
+        var capacityGraph = graphStore.getGraph(
+            List.of(NodeLabel.of("n")),
+            List.of(RelationshipType.of("R")),
+            Optional.of("u")
+        );
+        var costGraph = graphStore.getGraph(
+            List.of(NodeLabel.of("n")),
+            List.of(RelationshipType.of("R")),
+            Optional.of("c")
+        );
         var maxFlowParameters = new MaxFlowParameters(
             sourceNodes,
             targetNodes,
@@ -289,14 +305,12 @@ class MinCostMaxFlowTest {
         );
         var params = new MCMFParameters(
             maxFlowParameters,
-            6,
-            List.of(NodeLabel.of("n")),
-            List.of(RelationshipType.of("R")),
-            "u",
-            "c"
+            6
         );
-        MinCostMaxFlow.create(
-                graphStore,
+
+        new MinCostMaxFlow(
+                capacityGraph,
+                costGraph,
                 params,
                 testTracker,
                 TerminationFlag.RUNNING_TRUE

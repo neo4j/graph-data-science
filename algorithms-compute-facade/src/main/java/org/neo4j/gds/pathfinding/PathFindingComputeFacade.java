@@ -23,7 +23,6 @@ import org.neo4j.gds.ProgressTrackerFactory;
 import org.neo4j.gds.allshortestpaths.AllShortestPathsParameters;
 import org.neo4j.gds.allshortestpaths.AllShortestPathsStreamResult;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.applications.algorithms.pathfinding.MSBFSASPAlgorithmFactory;
 import org.neo4j.gds.async.AsyncAlgorithmCaller;
@@ -400,13 +399,14 @@ public class PathFindingComputeFacade {
     }
 
     public CompletableFuture<TimedAlgorithmResult<CostFlowResult>> mcmf(
-        GraphStore graphStore,
+        Graph capacityGraph,
+        Graph costGraph,
         MCMFParameters parameters,
         JobId jobId,
         boolean logProgress
     ) {
         // If the input graph is empty return a completed future with empty result
-        if (graphStore.nodeCount()==0) { //WIP
+        if (capacityGraph.isEmpty() || costGraph.isEmpty()) { //WIP
             return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(CostFlowResult.EMPTY));
         }
 
@@ -419,8 +419,9 @@ public class PathFindingComputeFacade {
         );
 
         // Create the algorithm
-        var algo = MinCostMaxFlow.create(
-            graphStore,
+        var algo = new MinCostMaxFlow(
+            capacityGraph,
+            costGraph,
             parameters,
             progressTracker,
             terminationFlag

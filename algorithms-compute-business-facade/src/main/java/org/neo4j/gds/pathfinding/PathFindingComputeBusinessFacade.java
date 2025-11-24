@@ -35,6 +35,7 @@ import org.neo4j.gds.core.loading.validation.GraphStoreValidation;
 import org.neo4j.gds.core.loading.validation.NoAlgorithmRequirements;
 import org.neo4j.gds.core.loading.validation.NodePropertyMustExistOnAllLabels;
 import org.neo4j.gds.core.loading.validation.NodePropertyTypeRequirement;
+import org.neo4j.gds.core.loading.validation.RelationshipPropertyGraphStoreValidation;
 import org.neo4j.gds.core.loading.validation.SourceNodeRequirement;
 import org.neo4j.gds.core.loading.validation.SourceNodeTargetNodeRequirement;
 import org.neo4j.gds.core.loading.validation.SourceNodeTargetNodesGraphStoreValidation;
@@ -47,6 +48,8 @@ import org.neo4j.gds.dag.topologicalsort.TopologicalSortResult;
 import org.neo4j.gds.kspanningtree.KSpanningTreeParameters;
 import org.neo4j.gds.maxflow.FlowResult;
 import org.neo4j.gds.maxflow.MaxFlowParameters;
+import org.neo4j.gds.mcmf.CostFlowResult;
+import org.neo4j.gds.mcmf.MCMFParameters;
 import org.neo4j.gds.pathfinding.validation.RandomWalkGraphValidation;
 import org.neo4j.gds.paths.astar.AStarParameters;
 import org.neo4j.gds.paths.bellmanford.BellmanFordParameters;
@@ -335,6 +338,49 @@ public class PathFindingComputeBusinessFacade {
             logProgress
         ).thenApply(resultTransformerBuilder.build(graphResources));
     }
+
+    public <TR> CompletableFuture<TR> mcmf(
+        GraphName graphName,
+        GraphParameters graphParameters,
+        Optional<String> capacityProperty,
+        Optional<String> costProperty,
+        MCMFParameters parameters,
+        JobId jobId,
+        boolean logProgress,
+        ResultTransformerBuilder<TimedAlgorithmResult<CostFlowResult>, TR> resultTransformerBuilder
+    ) {
+        var capacityGraphResources = graphStoreCatalogService.fetchGraphResources(
+            graphName,
+            graphParameters,
+            capacityProperty,
+            new GraphStoreValidation(new NoAlgorithmRequirements()),
+            Optional.empty(),
+            user,
+            databaseId
+        );
+
+        var costGraphResources = graphStoreCatalogService.fetchGraphResources(
+            graphName,
+            graphParameters,
+            costProperty,
+            new GraphStoreValidation(new RelationshipPropertyGraphStoreValidation(costProperty,"costProperty")),
+            Optional.empty(),
+            user,
+            databaseId
+        );
+
+        var capacityGraph = capacityGraphResources.graph();
+        var costGraph = costGraphResources.graph();
+
+        return computeFacade.mcmf(
+            capacityGraph,
+            costGraph,
+            parameters,
+            jobId,
+            logProgress
+        ).thenApply(resultTransformerBuilder.build(capacityGraphResources));
+    }
+
 
     public <TR> CompletableFuture<TR> randomWalk(
         GraphName graphName,

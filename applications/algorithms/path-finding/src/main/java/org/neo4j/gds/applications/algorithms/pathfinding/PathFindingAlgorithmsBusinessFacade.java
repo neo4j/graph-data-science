@@ -22,6 +22,7 @@ package org.neo4j.gds.applications.algorithms.pathfinding;
 import org.neo4j.gds.allshortestpaths.AllShortestPathsConfig;
 import org.neo4j.gds.allshortestpaths.AllShortestPathsStreamResult;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmMachinery;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
@@ -42,6 +43,9 @@ import org.neo4j.gds.kspanningtree.KSpanningTreeTask;
 import org.neo4j.gds.maxflow.FlowResult;
 import org.neo4j.gds.maxflow.MaxFlowBaseConfig;
 import org.neo4j.gds.maxflow.MaxFlowTask;
+import org.neo4j.gds.mcmf.CostFlowResult;
+import org.neo4j.gds.mcmf.MCMFBaseConfig;
+import org.neo4j.gds.mcmf.MinCostMaxFlowTask;
 import org.neo4j.gds.paths.RelationshipCountProgressTaskFactory;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarBaseConfig;
 import org.neo4j.gds.paths.bellmanford.AllShortestPathsBellmanFordBaseConfig;
@@ -225,6 +229,28 @@ public class PathFindingAlgorithmsBusinessFacade {
             () -> algorithms.maxFlow(
                 graph,
                 configuration.toParameters(),
+                progressTracker,
+                requestScopedDependencies.terminationFlag()
+            ),
+            progressTracker,
+            configuration.concurrency()
+        );
+    }
+
+    CostFlowResult mcmf(GraphStore graphStore, MCMFBaseConfig configuration) {
+        var progressTracker = createProgressTracker(
+            MinCostMaxFlowTask.create(),
+            configuration
+        );
+
+        return algorithmMachinery.getResult(
+            () -> algorithms.mcmf(
+                graphStore,
+                configuration.relationshipWeightProperty(),
+                configuration.costProperty(),
+                configuration.nodeLabelIdentifiers(graphStore),
+                configuration.internalRelationshipTypes(graphStore),
+                configuration.toMCMFParameters(),
                 progressTracker,
                 requestScopedDependencies.terminationFlag()
             ),

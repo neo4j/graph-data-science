@@ -21,22 +21,14 @@
 package org.neo4j.gds.mcmf;
 
 import org.neo4j.gds.AlgorithmParameters;
-import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Parameters;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.maxflow.MaxFlowParameters;
 
-import java.util.List;
-
 @Parameters
 public record MCMFParameters(
     MaxFlowParameters maxFlowParameters,
-    double alpha,
-    List<NodeLabel> nodeLabels,
-    List<RelationshipType> relTypes,
-    String capacityProperty,
-    String costProperty
+    int alpha
 )  implements AlgorithmParameters {
 
    public Concurrency concurrency() {

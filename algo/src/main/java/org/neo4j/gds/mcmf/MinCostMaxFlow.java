@@ -22,15 +22,12 @@ package org.neo4j.gds.mcmf;
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArrayQueue;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.maxflow.MaxFlowPhase;
 import org.neo4j.gds.maxflow.SupplyAndDemandFactory;
 import org.neo4j.gds.termination.TerminationFlag;
-
-import java.util.Optional;
 
 import static org.neo4j.gds.mcmf.MinCostFunctions.TOLERANCE;
 import static org.neo4j.gds.mcmf.MinCostFunctions.isAdmissible;
@@ -40,11 +37,12 @@ public final class MinCostMaxFlow extends Algorithm<CostFlowResult> {
     private final Graph graphOfCosts;
     private final MCMFParameters parameters;
 
-    private MinCostMaxFlow(
-        MCMFParameters parameters,
-        ProgressTracker progressTracker,
+
+    public MinCostMaxFlow(
         Graph graphOfFlows,
         Graph graphOfCosts,
+        MCMFParameters parameters,
+        ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
         super(progressTracker);
@@ -54,16 +52,6 @@ public final class MinCostMaxFlow extends Algorithm<CostFlowResult> {
         this.terminationFlag = terminationFlag;
     }
 
-    public static MinCostMaxFlow create(
-        GraphStore graphStore,
-        MCMFParameters parameters,
-        ProgressTracker progressTracker,
-        TerminationFlag terminationFlag
-    ) {
-        var graphOfFlows = graphStore.getGraph(parameters.nodeLabels(), parameters.relTypes(), Optional.of(parameters.capacityProperty()));
-        var graphOfCosts = graphStore.getGraph(parameters.nodeLabels(), parameters.relTypes(), Optional.of(parameters.costProperty()));
-        return new MinCostMaxFlow(parameters, progressTracker, graphOfFlows, graphOfCosts,terminationFlag);
-    }
 
     @Override
     public CostFlowResult compute() {
