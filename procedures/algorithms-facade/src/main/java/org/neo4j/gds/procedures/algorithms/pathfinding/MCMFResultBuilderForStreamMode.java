@@ -17,15 +17,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.mcmf;
+package org.neo4j.gds.procedures.algorithms.pathfinding;
 
-import org.neo4j.gds.maxflow.FlowResult;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
+import org.neo4j.gds.mcmf.CostFlowResult;
 
-public record CostFlowResult(FlowResult flowResult, double totalCost) {
+import java.util.Optional;
+import java.util.stream.Stream;
 
-    public static CostFlowResult EMPTY = new CostFlowResult(FlowResult.EMPTY, 0D);
+public class MCMFResultBuilderForStreamMode implements StreamResultBuilder<CostFlowResult, MaxFlowStreamResult> {
 
-    double totalFlow(){
-        return flowResult.totalFlow();
+    @Override
+    public Stream<MaxFlowStreamResult> build(Graph graph, GraphStore graphStore, Optional<CostFlowResult> flowResult) {
+        return flowResult.map(flowResult1 -> new MaxFlowResultBuilderForStreamMode().build(graph,graphStore,Optional.of(flowResult1.flowResult())))
+            .orElse(Stream.empty());
     }
 }

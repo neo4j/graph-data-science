@@ -31,6 +31,8 @@ import org.neo4j.gds.dag.topologicalsort.TopologicalSortResult;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortStreamConfig;
 import org.neo4j.gds.maxflow.FlowResult;
 import org.neo4j.gds.maxflow.MaxFlowStreamConfig;
+import org.neo4j.gds.mcmf.CostFlowResult;
+import org.neo4j.gds.mcmf.MCMFBaseConfig;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarStreamConfig;
 import org.neo4j.gds.paths.bellmanford.AllShortestPathsBellmanFordStreamConfig;
 import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
@@ -59,6 +61,7 @@ import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.DFS
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.DeltaStepping;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Dijkstra;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.LongestPath;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.MCMF;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.MaxFlow;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.PCST;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.RandomWalk;
@@ -188,6 +191,21 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
             MaxFlow,
             () -> estimation.maxFlow(configuration),
             (graph, __) -> algorithms.maxFlow(graph, configuration),
+            resultBuilder
+        );
+    }
+
+    public <RESULT> Stream<RESULT> mcmf(
+        GraphName graphName,
+        MCMFBaseConfig configuration,
+        StreamResultBuilder<CostFlowResult, RESULT> resultBuilder
+    ) {
+        return convenience.processRegularAlgorithmInStreamMode(
+            graphName,
+            configuration,
+            MCMF,
+            () -> estimation.mcmf(configuration),
+            (__, graphStore) -> algorithms.mcmf(graphStore, configuration),
             resultBuilder
         );
     }

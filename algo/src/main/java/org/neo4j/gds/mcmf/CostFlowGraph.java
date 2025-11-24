@@ -29,6 +29,7 @@ import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.maxflow.FlowGraph;
 import org.neo4j.gds.maxflow.FlowRelationship;
+import org.neo4j.gds.maxflow.FlowResult;
 import org.neo4j.gds.maxflow.NodeWithValue;
 
 public final class CostFlowGraph extends FlowGraph {
@@ -160,7 +161,7 @@ public final class CostFlowGraph extends FlowGraph {
                 return true;
             }
         );
-        return new CostFlowResult(flow.copyOf(idx.longValue()), totalFlow.doubleValue(), totalCost.doubleValue());
+        return new CostFlowResult(new FlowResult(flow.copyOf(idx.longValue()), totalFlow.doubleValue()), totalCost.doubleValue());
     }
 
     double maximalUnitCost() {

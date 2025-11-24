@@ -28,6 +28,7 @@ import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.dag.longestPath.DagLongestPathStreamConfig;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortStreamConfig;
 import org.neo4j.gds.maxflow.MaxFlowStreamConfig;
+import org.neo4j.gds.mcmf.MCMFStreamConfig;
 import org.neo4j.gds.pathfinding.PathFindingComputeBusinessFacade;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarStreamConfig;
 import org.neo4j.gds.paths.bellmanford.AllShortestPathsBellmanFordStreamConfig;
@@ -226,6 +227,24 @@ public final class PushbackPathFindingStreamProcedureFacade {
             config.jobId(),
             config.logProgress(),
             maxFlowResultTransformerBuilder
+        ).join();
+    }
+
+    public Stream<MaxFlowStreamResult> mcmf(String graphName, Map<String, Object> configuration) {
+        var config = configurationParser.parseConfiguration(
+            configuration,
+            MCMFStreamConfig::of
+        );
+
+        return businessFacade.mcmf(
+            GraphName.parse(graphName),
+            config.toGraphParameters(),
+            config.relationshipWeightProperty(),
+            config.costProperty(),
+            config.toMCMFParameters(),
+            config.jobId(),
+            config.logProgress(),
+            graphResources -> new MCMFStreamResultTransformer(graphResources.graphStore().nodes())
         ).join();
     }
 
