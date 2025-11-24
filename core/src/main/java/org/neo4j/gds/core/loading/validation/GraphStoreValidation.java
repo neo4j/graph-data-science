@@ -23,13 +23,10 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.ElementTypeValidator;
-import org.neo4j.gds.utils.StringJoining;
 
 import java.util.Collection;
 import java.util.Optional;
-import java.util.stream.Collectors;
-
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
+import java.util.Set;
 
 public class GraphStoreValidation {
 
@@ -70,19 +67,10 @@ public class GraphStoreValidation {
         Collection<RelationshipType> selectedRelationshipTypes,
         Optional<String> relationshipProperty
     ) {
-        relationshipProperty.ifPresent(weightProperty -> {
-            var relTypesWithoutProperty = selectedRelationshipTypes.stream()
-                .filter(relType -> !graphStore.hasRelationshipProperty(relType, weightProperty))
-                .collect(Collectors.toSet());
-            if (!relTypesWithoutProperty.isEmpty()) {
-                throw new IllegalArgumentException(formatWithLocale(
-                    "Relationship weight property `%s` not found in relationship types %s. Properties existing on all relationship types: %s",
-                    weightProperty,
-                    StringJoining.join(relTypesWithoutProperty.stream().map(RelationshipType::name)),
-                    StringJoining.join(graphStore.relationshipPropertyKeys(selectedRelationshipTypes))
-                ));
-            }
-        });
+        new RelationshipPropertyGraphStoreValidation(
+            relationshipProperty
+        ).validate(graphStore, Set.of(),selectedRelationshipTypes);
+
     }
 
     protected void validateAlgorithmRequirements(

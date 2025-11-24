@@ -46,8 +46,6 @@ class NodePropertyTypeGraphStoreValidationTest {
         assertThatNoException().isThrownBy(() -> validation.validatePropertyType(
             graphStore
         ));
-
-
     }
 
     @Test
