@@ -21,29 +21,30 @@ package org.neo4j.gds.mcmf;
 
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.Algorithm;
-import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArrayQueue;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.maxflow.MaxFlowParameters;
 import org.neo4j.gds.maxflow.MaxFlowPhase;
 import org.neo4j.gds.maxflow.SupplyAndDemandFactory;
 
-import java.util.List;
 import java.util.Optional;
 
 import static org.neo4j.gds.mcmf.MinCostFunctions.TOLERANCE;
 import static org.neo4j.gds.mcmf.MinCostFunctions.isAdmissible;
 
-public class MinCostMaxFlow extends Algorithm<CostFlowResult> {
+public final class MinCostMaxFlow extends Algorithm<CostFlowResult> {
     private final Graph graphOfFlows;
     private final Graph graphOfCosts;
     private final MCMFParameters parameters;
 
-    public MinCostMaxFlow(MCMFParameters parameters, ProgressTracker progressTracker, Graph graphOfFlows, Graph graphOfCosts) {
+    private MinCostMaxFlow(
+        MCMFParameters parameters,
+        ProgressTracker progressTracker,
+        Graph graphOfFlows,
+        Graph graphOfCosts
+    ) {
         super(progressTracker);
         this.graphOfFlows = graphOfFlows;
         this.graphOfCosts = graphOfCosts;
@@ -52,15 +53,11 @@ public class MinCostMaxFlow extends Algorithm<CostFlowResult> {
 
     public static MinCostMaxFlow create(
         GraphStore graphStore,
-        List<NodeLabel> nodeLabels,
-        List<RelationshipType> relTypes,
-        String flowProperty,
-        String costProperty,
         MCMFParameters parameters,
         ProgressTracker progressTracker
     ) {
-        var graphOfFlows = graphStore.getGraph(nodeLabels, relTypes, Optional.of(flowProperty));
-        var graphOfCosts = graphStore.getGraph(nodeLabels, relTypes, Optional.of(costProperty));
+        var graphOfFlows = graphStore.getGraph(parameters.nodeLabels(), parameters.relTypes(), Optional.of(parameters.capacityProperty()));
+        var graphOfCosts = graphStore.getGraph(parameters.nodeLabels(), parameters.relTypes(), Optional.of(parameters.costProperty()));
         return new MinCostMaxFlow(parameters, progressTracker, graphOfFlows, graphOfCosts);
     }
 
@@ -115,13 +112,7 @@ public class MinCostMaxFlow extends Algorithm<CostFlowResult> {
         var maxFlow = new MaxFlowPhase(
             flowGraph,
             excess,
-            new MaxFlowParameters(
-                parameters.sourceNodes(),
-                parameters.targetNodes(),
-                parameters.concurrency(),
-                parameters.freq(),
-                true
-            ),
+            parameters.maxFlowParameters(),
             progressTracker,
             terminationFlag
         );
@@ -159,7 +150,11 @@ public class MinCostMaxFlow extends Algorithm<CostFlowResult> {
         }
     }
     private CostFlowGraph createFlowGraph(){
-        var supplyAndDemand = SupplyAndDemandFactory.create(graphOfFlows, parameters.sourceNodes(), parameters.targetNodes());
+        var supplyAndDemand = SupplyAndDemandFactory.create(
+            graphOfFlows,
+            parameters.maxFlowParameters().sourceNodes(),
+            parameters.maxFlowParameters().targetNodes()
+        );
         return new CostFlowGraphBuilder(
             graphOfFlows,
             graphOfCosts,

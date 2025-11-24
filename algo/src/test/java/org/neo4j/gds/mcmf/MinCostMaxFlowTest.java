@@ -39,6 +39,7 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.logging.GdsTestLog;
+import org.neo4j.gds.maxflow.MaxFlowParameters;
 
 import java.util.List;
 import java.util.Map;
@@ -58,16 +59,28 @@ class MinCostMaxFlowTest {
         double expectedFlow,
         double expectedCost
     ) {
-        var params = new MCMFParameters(sourceNodes, targetNodes, new Concurrency(1), 0.5, true, 6);
-        var x =  MinCostMaxFlow.create(
-            graphStore,
+
+        var maxFlowParameters = new MaxFlowParameters(
+            sourceNodes,
+            targetNodes,
+            new Concurrency(1),
+            0.5,
+            true
+        );
+        var params = new MCMFParameters(
+            maxFlowParameters,
+            6,
             List.of(NodeLabel.of("n")),
             List.of(RelationshipType.of("R")),
             "u",
-            "c",
-            params,
+            "c"
+        );
+        var x =  MinCostMaxFlow.create(
+            graphStore,
+           params,
             ProgressTracker.NULL_TRACKER
         );
+
         var result = x.compute();
         double TOLERANCE = 1E-10;
         assertThat(result.totalFlow()).isCloseTo(expectedFlow, Offset.offset(TOLERANCE));
@@ -265,20 +278,25 @@ class MinCostMaxFlowTest {
         InputNodes sourceNodes = new ListInputNodes(List.of(idFunction.of("a1")));
         InputNodes targetNodes = new ListInputNodes(List.of(idFunction.of("a5")));
 
-            var params = new MCMFParameters(
-                sourceNodes,
-                targetNodes,
-                new Concurrency(1),
-                0.5,
-                true,
-                6
-            );
-
-            new MinCostMaxFlow(
+        var maxFlowParameters = new MaxFlowParameters(
+            sourceNodes,
+            targetNodes,
+            new Concurrency(1),
+            0.5,
+            true
+        );
+        var params = new MCMFParameters(
+            maxFlowParameters,
+            6,
+            List.of(NodeLabel.of("n")),
+            List.of(RelationshipType.of("R")),
+            "u",
+            "c"
+        );
+        MinCostMaxFlow.create(
+                graphStore,
                 params,
-                testTracker,
-                graphStore.getGraph("u"),
-                graphStore.getGraph("c")
+                testTracker
             ).compute();
 
             assertThat(log.getMessages(TestLog.INFO))
