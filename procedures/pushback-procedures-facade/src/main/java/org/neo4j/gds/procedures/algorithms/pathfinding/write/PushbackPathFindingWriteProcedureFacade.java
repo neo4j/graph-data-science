@@ -26,8 +26,10 @@ import org.neo4j.gds.applications.algorithms.machinery.WriteRelationshipService;
 import org.neo4j.gds.kspanningtree.KSpanningTreeWriteConfig;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.maxflow.MaxFlowWriteConfig;
+import org.neo4j.gds.mcmf.MCMFWriteConfig;
 import org.neo4j.gds.pathfinding.BellmanFordWriteStep;
 import org.neo4j.gds.pathfinding.KSpanningTreeWriteStep;
+import org.neo4j.gds.pathfinding.MCMFWriteStep;
 import org.neo4j.gds.pathfinding.MaxFlowWriteStep;
 import org.neo4j.gds.pathfinding.PathFindingComputeBusinessFacade;
 import org.neo4j.gds.pathfinding.PrizeCollectingSteinerTreeWriteStep;
@@ -44,6 +46,7 @@ import org.neo4j.gds.pcst.PCSTWriteConfig;
 import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
 import org.neo4j.gds.procedures.algorithms.pathfinding.BellmanFordWriteResult;
 import org.neo4j.gds.procedures.algorithms.pathfinding.KSpanningTreeWriteResult;
+import org.neo4j.gds.procedures.algorithms.pathfinding.MCMFWriteResult;
 import org.neo4j.gds.procedures.algorithms.pathfinding.MaxFlowWriteResult;
 import org.neo4j.gds.procedures.algorithms.pathfinding.PrizeCollectingSteinerTreeWriteResult;
 import org.neo4j.gds.procedures.algorithms.pathfinding.SpanningTreeWriteResult;
@@ -194,6 +197,40 @@ public class PushbackPathFindingWriteProcedureFacade {
             new MaxFlowWriteResultTransformerBuilder(writeStep, config)
         ).join();
     }
+
+    public Stream<MCMFWriteResult> mcmf(String graphName, Map<String, Object> configuration) {
+        var config = configurationParser.parseConfiguration(
+            configuration,
+            MCMFWriteConfig::of
+        );
+
+        var writeStep = new MCMFWriteStep(
+            writeRelationshipService,
+            config.writeRelationshipType(),
+            config.writeProperty(),
+            config::resolveResultStore,
+            config.jobId()
+        );
+
+        return businessFacade.mcmf(
+            GraphName.parse(graphName),
+            config.toGraphParameters(),
+            config.relationshipWeightProperty(),
+            config.costProperty(),
+            config.toMCMFParameters(),
+            config.jobId(),
+            config.logProgress(),
+            graphResources -> new MCMFWriteResultTransformer(
+                writeStep,
+                graphResources.graph(),
+                graphResources.graphStore(),
+                graphResources.resultStore(),
+                config.jobId(),
+                config.toMap()
+            )
+        ).join();
+    }
+
 
     public Stream<PrizeCollectingSteinerTreeWriteResult> pcst(
         String graphName,

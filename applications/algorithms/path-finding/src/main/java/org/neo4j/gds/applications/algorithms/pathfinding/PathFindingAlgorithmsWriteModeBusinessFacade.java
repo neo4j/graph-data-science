@@ -37,9 +37,12 @@ import org.neo4j.gds.kspanningtree.KSpanningTreeWriteConfig;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.maxflow.FlowResult;
 import org.neo4j.gds.maxflow.MaxFlowWriteConfig;
+import org.neo4j.gds.mcmf.CostFlowResult;
+import org.neo4j.gds.mcmf.MCMFWriteConfig;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.pathfinding.BellmanFordWriteStep;
 import org.neo4j.gds.pathfinding.KSpanningTreeWriteStep;
+import org.neo4j.gds.pathfinding.MCMFWriteStep;
 import org.neo4j.gds.pathfinding.MaxFlowWriteStep;
 import org.neo4j.gds.pathfinding.PrizeCollectingSteinerTreeWriteStep;
 import org.neo4j.gds.pathfinding.ShortestPathWriteStep;
@@ -68,6 +71,7 @@ import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Bel
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.DeltaStepping;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Dijkstra;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.KSpanningTree;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.MCMF;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.MaxFlow;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.PCST;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.SingleSourceDijkstra;
@@ -194,6 +198,30 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
             MaxFlow,
             () -> estimationFacade.maxFlow(configuration),
             (graph, __) -> pathFindingAlgorithms.maxFlow(graph, configuration),
+            writeStep,
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT mcmf(
+        GraphName graphName,
+        MCMFWriteConfig configuration,
+        ResultBuilder<MCMFWriteConfig, CostFlowResult, RESULT, RelationshipsWritten> resultBuilder
+    ) {
+        var writeStep = new MCMFWriteStep(
+            writeRelationshipService,
+            configuration.writeRelationshipType(),
+            configuration.writeProperty(),
+            configuration::resolveResultStore,
+            configuration.jobId()
+        );
+
+        return runAlgorithmAndWrite(
+            graphName,
+            configuration,
+            MCMF,
+            () -> estimationFacade.mcmf(configuration),
+            ( __, graphStore) -> pathFindingAlgorithms.mcmf(graphStore, configuration),
             writeStep,
             resultBuilder
         );
