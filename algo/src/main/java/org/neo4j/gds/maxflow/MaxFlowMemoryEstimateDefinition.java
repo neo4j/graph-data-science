@@ -57,7 +57,7 @@ public class MaxFlowMemoryEstimateDefinition implements MemoryEstimateDefinition
         return MemoryEstimations.builder(GlobalRelabellingBFSTask.class).build();
     }
 
-    private MemoryEstimation globalRelabelling() {
+    public MemoryEstimation globalRelabelling() {
         return MemoryEstimations.builder(GlobalRelabeling.class)
             .perThread("Global Relabelling task", globalRelabellingTask())
             .perGraphDimension(
@@ -69,7 +69,7 @@ public class MaxFlowMemoryEstimateDefinition implements MemoryEstimateDefinition
             .build();
     }
 
-    private MemoryEstimation flowGraph() {
+    public MemoryEstimation flowGraph() {
         BiFunction<GraphDimensions, Function<Long, Long>, MemoryRange> relConsumer =
             ((graphDimensions, longMemoryRangeFunction) -> {
                 var newRel = graphDimensions.relCountUpperBound() + numberOfSinks + numberOfTerminals;
@@ -108,7 +108,7 @@ public class MaxFlowMemoryEstimateDefinition implements MemoryEstimateDefinition
             .build();
     }
 
-    private MemoryEstimation flowResult() {
+    public MemoryEstimation flowResult() {
         return MemoryEstimations.builder(FlowResult.class)
             .perGraphDimension(
                 "output", ((dimensions, ___) -> {
@@ -151,7 +151,7 @@ public class MaxFlowMemoryEstimateDefinition implements MemoryEstimateDefinition
 
     }
 
-    private MemoryEstimation maxFlowPhase() {
+    public MemoryEstimation maxFlowPhase() {
 
         BiFunction<GraphDimensions, Function<Long, Long>, MemoryRange> nodeConsumer =
             ((graphDimensions, longMemoryRangeFunction) -> {

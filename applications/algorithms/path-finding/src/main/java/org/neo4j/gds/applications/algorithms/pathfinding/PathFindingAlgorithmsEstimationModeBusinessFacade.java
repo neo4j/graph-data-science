@@ -27,6 +27,8 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.gds.maxflow.MaxFlowBaseConfig;
 import org.neo4j.gds.maxflow.MaxFlowMemoryEstimateDefinition;
+import org.neo4j.gds.mcmf.MCMFBaseConfig;
+import org.neo4j.gds.mcmf.MinCostMaxFlowMemoryEstimateDefinition;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.paths.astar.AStarMemoryEstimateDefinition;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarBaseConfig;
@@ -145,6 +147,25 @@ public class PathFindingAlgorithmsEstimationModeBusinessFacade {
         Object graphNameOrConfiguration
     ) {
         var memoryEstimation= maxFlow(configuration);
+        return runEstimation(configuration, graphNameOrConfiguration, memoryEstimation);
+    }
+
+    public MemoryEstimation mcmf(MCMFBaseConfig configuration) {
+        var params = configuration.toMCMFParameters();
+
+        var estimateDefinition = new MinCostMaxFlowMemoryEstimateDefinition(
+            params.maxFlowParameters().sourceNodes().size(),
+            params.maxFlowParameters().targetNodes().size()
+        );
+
+        return  estimateDefinition.memoryEstimation();
+    }
+
+    public MemoryEstimateResult mcmf(
+        MCMFBaseConfig configuration,
+        Object graphNameOrConfiguration
+    ) {
+        var memoryEstimation= mcmf(configuration);
         return runEstimation(configuration, graphNameOrConfiguration, memoryEstimation);
     }
 

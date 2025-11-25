@@ -31,7 +31,7 @@ import static org.neo4j.gds.mcmf.MinCostFunctions.TOLERANCE;
 import static org.neo4j.gds.mcmf.MinCostFunctions.isAdmissible;
 import static org.neo4j.gds.mcmf.MinCostFunctions.isResidualEdge;
 
-class CostDischarging {
+public class CostDischarging {
     private static final long ALPHA = 6;
     private static final long BETA = 12;
     private final CostFlowGraph costFlowGraph;
@@ -160,7 +160,7 @@ class CostDischarging {
         return excess.get(s) < TOLERANCE;
     }
 
-    record Arc(long t, long relIdx, double residualCapacity, double almostReducedCost, boolean isReverse) implements
+    public record Arc(long t, long relIdx, double residualCapacity, double almostReducedCost, boolean isReverse) implements
         Comparable<Arc> {
 
         @Override
