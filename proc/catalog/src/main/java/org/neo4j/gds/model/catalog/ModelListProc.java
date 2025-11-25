@@ -41,7 +41,7 @@ public class ModelListProc {
     @Procedure(name = "gds.model.list", mode = READ)
     @Description(DESCRIPTION)
     public Stream<ModelCatalogResult> list(@Name(value = "modelName", defaultValue = NO_VALUE) String modelName) {
-        return facade.modelCatalog().list(null, modelName);
+        return facade.modelCatalog().list(modelName, null);
     }
 
     @Procedure(name = "gds.beta.model.list", mode = READ, deprecatedBy = "gds.model.list")
