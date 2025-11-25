@@ -8,4 +8,6 @@ dependencies {
     implementation project(':config-api')
     implementation project(':graph-schema-api')
     implementation project(':model-catalog-api')
+
+    compileOnly openGds.jetbrains.annotations
 }

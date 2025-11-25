@@ -43,7 +43,7 @@ public class ModelDropProc {
         @Name(value = "modelName") String modelName,
         @Name(value = "failIfMissing", defaultValue = "true") boolean failIfMissing
     ) {
-        return facade.modelCatalog().drop(modelName, failIfMissing);
+        return facade.modelCatalog().drop(null, modelName, failIfMissing);
     }
 
     @Procedure(name = "gds.beta.model.drop", mode = READ, deprecatedBy = "gds.model.drop")

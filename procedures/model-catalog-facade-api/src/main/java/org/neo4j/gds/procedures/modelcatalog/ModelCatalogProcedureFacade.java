@@ -19,14 +19,16 @@
  */
 package org.neo4j.gds.procedures.modelcatalog;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.util.stream.Stream;
 
 public interface ModelCatalogProcedureFacade {
     String NO_VALUE = "__NO_VALUE";
 
-    Stream<ModelCatalogResult> drop(String modelName, boolean failIfMissing);
+    Stream<ModelCatalogResult> drop(@Nullable String graphOrSessionName, String modelName, boolean failIfMissing);
 
-    Stream<ModelExistsResult> exists(String modelName);
+    Stream<ModelExistsResult> exists(@Nullable String graphOrSessionName, String modelName);
 
-    Stream<ModelCatalogResult> list(String modelName);
+    Stream<ModelCatalogResult> list(@Nullable String graphOrSessionName, String modelName);
 }

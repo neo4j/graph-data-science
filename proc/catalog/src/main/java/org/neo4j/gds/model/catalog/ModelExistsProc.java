@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.model.catalog;
 
-import org.neo4j.gds.procedures.modelcatalog.ModelExistsResult;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
+import org.neo4j.gds.procedures.modelcatalog.ModelExistsResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
@@ -40,7 +40,7 @@ public class ModelExistsProc {
     @Procedure(name = "gds.model.exists", mode = READ)
     @Description(DESCRIPTION)
     public Stream<ModelExistsResult> exists(@Name(value = "modelName") String modelName) {
-        return facade.modelCatalog().exists(modelName);
+        return facade.modelCatalog().exists(null, modelName);
     }
 
     @Procedure(name = "gds.beta.model.exists", mode = READ, deprecatedBy = "gds.model.exists")

@@ -12,4 +12,6 @@ dependencies {
     implementation project(':model-catalog-api')
     implementation project(':model-catalog-applications')
     implementation project(':model-catalog-facade-api')
+
+    compileOnly openGds.jetbrains.annotations
 }

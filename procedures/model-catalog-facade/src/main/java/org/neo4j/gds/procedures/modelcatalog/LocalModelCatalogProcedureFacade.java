@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.procedures.modelcatalog;
 
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.applications.ApplicationsFacade;
 
 import java.util.stream.Stream;
@@ -34,7 +35,7 @@ public class LocalModelCatalogProcedureFacade implements ModelCatalogProcedureFa
     }
 
     @Override
-    public Stream<ModelCatalogResult> drop(String modelNameAsString, boolean failIfMissing) {
+    public Stream<ModelCatalogResult> drop(@Nullable String graphOrSessionName, String modelNameAsString, boolean failIfMissing) {
         var modelName = modelNameValidationService.validate(modelNameAsString);
 
         var model = applicationsFacade.modelCatalog().drop(modelName, failIfMissing);
@@ -43,7 +44,7 @@ public class LocalModelCatalogProcedureFacade implements ModelCatalogProcedureFa
     }
 
     @Override
-    public Stream<ModelExistsResult> exists(String modelNameAsString) {
+    public Stream<ModelExistsResult> exists(@Nullable String graphOrSessionName, String modelNameAsString) {
         var modelName = modelNameValidationService.validate(modelNameAsString);
 
         var result = applicationsFacade.modelCatalog()
@@ -55,7 +56,7 @@ public class LocalModelCatalogProcedureFacade implements ModelCatalogProcedureFa
     }
 
     @Override
-    public Stream<ModelCatalogResult> list(String modelName) {
+    public Stream<ModelCatalogResult> list(@Nullable String graphOrSessionName, String modelName) {
         if (modelName == null || modelName.equals(NO_VALUE)) return list();
 
         return lookup(modelName);
