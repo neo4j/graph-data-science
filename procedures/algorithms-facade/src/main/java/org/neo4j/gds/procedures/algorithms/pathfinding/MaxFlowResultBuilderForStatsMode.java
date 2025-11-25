@@ -44,6 +44,7 @@ class MaxFlowResultBuilderForStatsMode implements StatsResultBuilder<FlowResult,
         return Stream.of(flowResult.map(flowResult1 -> new MaxFlowStatsResult(
             timings.preProcessingMillis,
             timings.computeMillis,
+            timings.sideEffectMillis,
             flowResult1.totalFlow(),
             configuration.toMap()
         )).orElse(MaxFlowStatsResult.emptyFrom(timings, configuration.toMap())));

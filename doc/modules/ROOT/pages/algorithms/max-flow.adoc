@@ -83,6 +83,7 @@ YIELD
   totalFlow: Float,
   preProcessingMillis: Integer,
   computeMillis: Integer,
+  postProcessingMillis: Integer,
   configuration: Map
 ----
 include::partial$/algorithms/common-configuration/common-parameters.adoc[]
@@ -102,6 +103,7 @@ include::partial$/algorithms/max-flow/specific-configuration.adoc[]
 | totalFlow                 | Float   | The net-flow to all target nodes.
 | preProcessingMillis       | Integer | Milliseconds for preprocessing the data.
 | computeMillis             | Integer | Milliseconds for running the algorithm.
+| postProcessingMillis      | Integer | Milliseconds for postprocessing the algorithm.
 | configuration             | Map     | The configuration used for running the algorithm.
 |===
 

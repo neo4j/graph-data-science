@@ -27,6 +27,7 @@ import java.util.Map;
 public record MaxFlowStatsResult(
         long preProcessingMillis,
         long computeMillis,
+        long postProcessingMillis,
         double totalFlow,
         Map<String, Object> configuration
     ) implements ModeResult {
@@ -37,6 +38,7 @@ public record MaxFlowStatsResult(
         return  new MaxFlowStatsResult(
             timings.preProcessingMillis,
             timings.computeMillis,
+            0L,
             0D,
             configuration
         );

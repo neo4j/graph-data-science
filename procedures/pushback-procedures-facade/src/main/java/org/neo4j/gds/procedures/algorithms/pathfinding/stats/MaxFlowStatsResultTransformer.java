@@ -41,6 +41,7 @@ class MaxFlowStatsResultTransformer implements ResultTransformer<TimedAlgorithmR
         var statsResult = new MaxFlowStatsResult(
             0,
             algorithmResult.computeMillis(),
+            0,
             spanningTree.totalFlow(),
             configuration
         );
