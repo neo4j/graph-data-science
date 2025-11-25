@@ -35,7 +35,7 @@ public class LocalModelCatalogProcedureFacade implements ModelCatalogProcedureFa
     }
 
     @Override
-    public Stream<ModelCatalogResult> drop(String modelNameAsString, @Nullable String sessionName, boolean failIfMissing) {
+    public Stream<ModelCatalogResult> drop(@Nullable String graphOrSessionName, String modelNameAsString, @Nullable String sessionName, boolean failIfMissing) {
         var modelName = modelNameValidationService.validate(modelNameAsString);
 
         var model = applicationsFacade.modelCatalog().drop(modelName, failIfMissing);
@@ -44,7 +44,7 @@ public class LocalModelCatalogProcedureFacade implements ModelCatalogProcedureFa
     }
 
     @Override
-    public Stream<ModelExistsResult> exists(String modelNameAsString, @Nullable String sessionName) {
+    public Stream<ModelExistsResult> exists(@Nullable String graphOrSessionName, String modelNameAsString, @Nullable String sessionName) {
         var modelName = modelNameValidationService.validate(modelNameAsString);
 
         var result = applicationsFacade.modelCatalog()
@@ -56,7 +56,7 @@ public class LocalModelCatalogProcedureFacade implements ModelCatalogProcedureFa
     }
 
     @Override
-    public Stream<ModelCatalogResult> list(String modelName, @Nullable String sessionName) {
+    public Stream<ModelCatalogResult> list(@Nullable String graphOrSessionName, String modelName, @Nullable String sessionName) {
         if (modelName == null || modelName.equals(NO_VALUE)) return list();
 
         return lookup(modelName);
