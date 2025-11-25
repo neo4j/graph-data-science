@@ -213,8 +213,8 @@ public final class OpenGraphDataScienceExtensionBuilder {
         // These are Neo4j specific, but not edition specific, so we create them here
         var graphStoreFactorySuppliers = new GraphStoreFactorySuppliers(
             Map.of(
-                GraphProjectFromStoreConfig.class.getSimpleName(), NativeProjectionGraphStoreFactorySupplier::create,
-                GraphProjectFromCypherConfig.class.getSimpleName(), CypherProjectionGraphStoreFactorySupplier::create
+                GraphProjectFromStoreConfig.class, NativeProjectionGraphStoreFactorySupplier::create,
+                GraphProjectFromCypherConfig.class, CypherProjectionGraphStoreFactorySupplier::create
             )
         );
 

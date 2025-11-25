@@ -21,6 +21,7 @@ package org.neo4j.gds.core;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.GraphStoreFactory;
+import org.neo4j.gds.config.GraphProjectConfig;
 
 import java.util.Collections;
 import java.util.Map;
@@ -33,7 +34,17 @@ class GraphStoreFactorySuppliersTest {
     @Test
     void shouldSupplyGraphStoreFactory() {
         var supplier = mock(GraphStoreFactory.Supplier.class);
-        var suppliers = new GraphStoreFactorySuppliers(Map.of("SomeGraphProjectConfig", cfg -> supplier));
+        var suppliers = new GraphStoreFactorySuppliers(Map.of(SomeGraphProjectConfig.class, cfg -> supplier));
+
+        var actual = suppliers.find(new SomeGraphProjectConfig());
+
+        assertEquals(supplier, actual);
+    }
+
+    @Test
+    void shouldSupplyGraphStoreFactoryEvenForSubClasses() {
+        var supplier = mock(GraphStoreFactory.Supplier.class);
+        var suppliers = new GraphStoreFactorySuppliers(Map.of(GraphProjectConfig.class, cfg -> supplier));
 
         var actual = suppliers.find(new SomeGraphProjectConfig());
 
