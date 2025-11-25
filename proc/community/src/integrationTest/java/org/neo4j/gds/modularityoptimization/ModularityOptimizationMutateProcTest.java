@@ -84,6 +84,7 @@ import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurati
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfigImpl;
+import org.neo4j.gds.projection.NativeProjectionGraphStoreFactorySupplier;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Arrays;
@@ -276,8 +277,15 @@ class ModularityOptimizationMutateProcTest extends BaseProcTest {
 
         runQuery("CREATE (a1: A), (a2: A), (b: B), (:B), (a1)-[:REL1]->(a2), (a2)-[:REL2]->(b)");
 
+        var graphStoreFactorySuppliers = new GraphStoreFactorySuppliers(
+            Map.of(
+                GraphProjectFromStoreConfig.class, NativeProjectionGraphStoreFactorySupplier::create
+            )
+        );
+
         StoreLoaderBuilder storeLoaderBuilder = new StoreLoaderBuilder()
             .databaseService(db)
+            .graphStoreFactorySuppliers(graphStoreFactorySuppliers)
             .graphName(TEST_GRAPH_NAME)
             .addNodeProjection(ImmutableNodeProjection.of("A", PropertyMappings.of()))
             .addNodeProjection(ImmutableNodeProjection.of("B", PropertyMappings.of()));
@@ -490,7 +498,13 @@ class ModularityOptimizationMutateProcTest extends BaseProcTest {
             .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
             .log(Log.noOpLog())
             .build();
-        GraphStoreFactorySuppliers graphStoreFactorySuppliers = null; // breaks maybe?
+
+        var graphStoreFactorySuppliers = new GraphStoreFactorySuppliers(
+            Map.of(
+                GraphProjectFromStoreConfig.class, NativeProjectionGraphStoreFactorySupplier::create
+            )
+        );
+
         var graphStoreFactorySupplier = graphStoreFactorySuppliers.find(graphProjectConfig);
         var graphStoreFactory = graphStoreFactorySupplier.get(graphLoaderContext);
         return new GraphLoader(graphProjectConfig, graphStoreFactory);

@@ -84,6 +84,7 @@ import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurati
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfigImpl;
+import org.neo4j.gds.projection.NativeProjectionGraphStoreFactorySupplier;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Arrays;
@@ -176,7 +177,13 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
     void testMutateAndWriteWithSeeding() throws Exception {
         registerProcedures(LabelPropagationWriteProc.class);
         var testGraphName = "lpaGraph";
+        var graphStoreFactorySuppliers = new GraphStoreFactorySuppliers(
+            Map.of(
+                GraphProjectFromStoreConfig.class, NativeProjectionGraphStoreFactorySupplier::create
+            )
+        );
         var initialGraphStore = new StoreLoaderBuilder().databaseService(db)
+            .graphStoreFactorySuppliers(graphStoreFactorySuppliers)
             .build()
             .graphStore();
 
@@ -205,6 +212,7 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
         runQuery(writeQuery);
 
         var updatedGraph = new StoreLoaderBuilder().databaseService(db)
+            .graphStoreFactorySuppliers(graphStoreFactorySuppliers)
             .addNodeProperty(MUTATE_PROPERTY, MUTATE_PROPERTY, DefaultValue.of(42.0), Aggregation.NONE)
             .build()
             .graph();
@@ -300,8 +308,14 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
 
         runQuery("CREATE (a1: A), (a2: A), (b: B), (:B), (a1)-[:REL1]->(a2), (a2)-[:REL2]->(b)");
 
+        var graphStoreFactorySuppliers = new GraphStoreFactorySuppliers(
+            Map.of(
+                GraphProjectFromStoreConfig.class, NativeProjectionGraphStoreFactorySupplier::create
+            )
+        );
         StoreLoaderBuilder storeLoaderBuilder = new StoreLoaderBuilder()
             .databaseService(db)
+            .graphStoreFactorySuppliers(graphStoreFactorySuppliers)
             .graphName(TEST_GRAPH_NAME)
             .addNodeProjection(ImmutableNodeProjection.of("A", PropertyMappings.of()))
             .addNodeProjection(ImmutableNodeProjection.of("B", PropertyMappings.of()));
@@ -442,7 +456,13 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
             .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
             .log(Log.noOpLog())
             .build();
-        GraphStoreFactorySuppliers graphStoreFactorySuppliers = null;
+
+        var graphStoreFactorySuppliers = new GraphStoreFactorySuppliers(
+            Map.of(
+                GraphProjectFromStoreConfig.class, NativeProjectionGraphStoreFactorySupplier::create
+            )
+        );
+
         var graphStoreFactorySupplier = graphStoreFactorySuppliers.find(graphProjectConfig);
         var graphStoreFactory = graphStoreFactorySupplier.get(graphLoaderContext);
         return new GraphLoader(graphProjectConfig, graphStoreFactory);

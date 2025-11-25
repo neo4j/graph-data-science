@@ -86,6 +86,7 @@ import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurati
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfigImpl;
+import org.neo4j.gds.projection.NativeProjectionGraphStoreFactorySupplier;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.ArrayList;
@@ -183,7 +184,15 @@ class WccMutateProcTest extends BaseProcTest {
     void testMutateAndWriteWithSeeding() throws Exception {
         registerProcedures(WccWriteProc.class);
         var testGraphName = "wccGraph";
+
+        var graphStoreFactorySuppliers = new GraphStoreFactorySuppliers(
+            Map.of(
+                GraphProjectFromStoreConfig.class, NativeProjectionGraphStoreFactorySupplier::create
+            )
+        );
+
         var initialGraphStore = new StoreLoaderBuilder().databaseService(db)
+            .graphStoreFactorySuppliers(graphStoreFactorySuppliers)
             .build()
             .graphStore();
 
@@ -212,6 +221,7 @@ class WccMutateProcTest extends BaseProcTest {
         runQuery(writeQuery);
 
         var updatedGraph = new StoreLoaderBuilder().databaseService(db)
+            .graphStoreFactorySuppliers(graphStoreFactorySuppliers)
             .addNodeProperty(MUTATE_PROPERTY, MUTATE_PROPERTY, DefaultValue.of(42.0), Aggregation.NONE)
             .build()
             .graph();
@@ -221,7 +231,14 @@ class WccMutateProcTest extends BaseProcTest {
 
     @Test
     void testMutateYields() {
+        var graphStoreFactorySuppliers = new GraphStoreFactorySuppliers(
+            Map.of(
+                GraphProjectFromStoreConfig.class, NativeProjectionGraphStoreFactorySupplier::create
+            )
+        );
+
         var initialGraphStore = new StoreLoaderBuilder().databaseService(db)
+            .graphStoreFactorySuppliers(graphStoreFactorySuppliers)
             .build()
             .graphStore();
 
@@ -331,8 +348,15 @@ class WccMutateProcTest extends BaseProcTest {
         runQuery("CREATE (a1: A), (a2: A), (b: B), (:B), (a1)-[:REL1]->(a2), (a2)-[:REL2]->(b)");
         String graphName = "myGraph";
 
+        var graphStoreFactorySuppliers = new GraphStoreFactorySuppliers(
+            Map.of(
+                GraphProjectFromStoreConfig.class, NativeProjectionGraphStoreFactorySupplier::create
+            )
+        );
+
         StoreLoaderBuilder storeLoaderBuilder = new StoreLoaderBuilder()
             .databaseService(db)
+            .graphStoreFactorySuppliers(graphStoreFactorySuppliers)
             .graphName(graphName)
             .addNodeProjection(ImmutableNodeProjection.of(
                 "A",
@@ -573,7 +597,13 @@ class WccMutateProcTest extends BaseProcTest {
             .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
             .log(Log.noOpLog())
             .build();
-        GraphStoreFactorySuppliers graphStoreFactorySuppliers = null; // breaks innit
+
+        var graphStoreFactorySuppliers = new GraphStoreFactorySuppliers(
+            Map.of(
+                GraphProjectFromStoreConfig.class, NativeProjectionGraphStoreFactorySupplier::create
+            )
+        );
+
         var graphStoreFactorySupplier = graphStoreFactorySuppliers.find(graphProjectConfig);
         var graphStoreFactory = graphStoreFactorySupplier.get(graphLoaderContext);
         return new GraphLoader(graphProjectConfig, graphStoreFactory);

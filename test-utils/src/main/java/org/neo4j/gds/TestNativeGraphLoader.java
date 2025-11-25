@@ -23,12 +23,16 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.GraphLoader;
+import org.neo4j.gds.core.GraphStoreFactorySuppliers;
+import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
+import org.neo4j.gds.projection.NativeProjectionGraphStoreFactorySupplier;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.gds.logging.Log;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -114,6 +118,14 @@ public final class TestNativeGraphLoader implements TestGraphLoader {
 
     private GraphLoader storeLoader() {
         StoreLoaderBuilder storeLoaderBuilder = new StoreLoaderBuilder().databaseService(db);
+
+        var graphStoreFactorySuppliers = new GraphStoreFactorySuppliers(
+            Map.of(
+                GraphProjectFromStoreConfig.class, NativeProjectionGraphStoreFactorySupplier::create
+            )
+        );
+        storeLoaderBuilder.graphStoreFactorySuppliers(graphStoreFactorySuppliers);
+
         nodeLabels.forEach(storeLoaderBuilder::addNodeLabel);
 
         var aggregation = maybeAggregation.orElse(DEFAULT);
