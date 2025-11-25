@@ -145,7 +145,7 @@ public class ComputeContext<CONFIG extends PregelConfig> extends NodeCentricCont
      * Returns the current superstep (0-based).
      */
     public int superstep() {
-        return iteration.getValue();
+        return iteration.intValue();
     }
 
     /**
@@ -181,7 +181,7 @@ public class ComputeContext<CONFIG extends PregelConfig> extends NodeCentricCont
     }
 
     public boolean hasSentMessage() {
-        return hasSendMessage.getValue();
+        return hasSendMessage.booleanValue();
     }
 
     @FunctionalInterface

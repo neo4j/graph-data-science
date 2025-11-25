@@ -85,7 +85,7 @@ public class StrongPruning {
             }
 
             while (currentPos < totalPos) {
-                terminationFlag.assertRunning();;
+                terminationFlag.assertRunning();
                 var nextLeaf = queue.get(currentPos++);
                 var parent = new MutableLong(-1);
                 var parentCost = new MutableDouble(-1);
@@ -115,7 +115,7 @@ public class StrongPruning {
                 if (actualParent == -1) {
                     continue;
                 }
-                var actualParentCost = parentCost.getValue();
+                var actualParentCost = parentCost.doubleValue();
 
                 if (Double.compare(actualParentCost, dp.get(nextLeaf)) < 0) {
                     dp.addTo(actualParent, dp.get(nextLeaf) - actualParentCost);
