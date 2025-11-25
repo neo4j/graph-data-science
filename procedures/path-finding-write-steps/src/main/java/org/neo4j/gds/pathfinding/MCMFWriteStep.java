@@ -32,11 +32,7 @@ import java.util.Optional;
 import java.util.function.Function;
 
 public class MCMFWriteStep implements WriteStep<CostFlowResult, RelationshipsWritten> {
-    private final WriteRelationshipService writeRelationshipService;
-    private final String writeRelationshipType;
-    private final String writeProperty;
-    private final Function<ResultStore, Optional<ResultStore>> resultStoreResolver;
-    private final JobId jobId;
+    private final MaxFlowWriteStep maxFlowWriteStep;
 
     public MCMFWriteStep(
         WriteRelationshipService writeRelationshipService,
@@ -45,11 +41,14 @@ public class MCMFWriteStep implements WriteStep<CostFlowResult, RelationshipsWri
         Function<ResultStore, Optional<ResultStore>> resultStoreResolver,
         JobId jobId
     ) {
-        this.writeRelationshipService = writeRelationshipService;
-        this.writeRelationshipType = writeRelationshipType;
-        this.writeProperty = writeProperty;
-        this.resultStoreResolver = resultStoreResolver;
-        this.jobId = jobId;
+        this.maxFlowWriteStep = new MaxFlowWriteStep(
+            writeRelationshipService,
+            writeRelationshipType,
+            writeProperty,
+            resultStoreResolver,
+            jobId
+        );
+
     }
 
     @Override
@@ -61,13 +60,7 @@ public class MCMFWriteStep implements WriteStep<CostFlowResult, RelationshipsWri
         JobId jobId
     ) {
 
-        return new MaxFlowWriteStep(
-            writeRelationshipService,
-            writeRelationshipType,
-            writeProperty,
-            resultStoreResolver,
-            this.jobId
-        ).execute(
+       return maxFlowWriteStep.execute(
             graph,
             graphStore,
             resultStore,

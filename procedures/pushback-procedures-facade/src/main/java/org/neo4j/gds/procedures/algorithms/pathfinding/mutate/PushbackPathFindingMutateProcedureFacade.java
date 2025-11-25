@@ -23,6 +23,8 @@ import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.MutateRelationshipService;
 import org.neo4j.gds.maxflow.MaxFlowMutateConfig;
+import org.neo4j.gds.mcmf.MCMFMutateConfig;
+import org.neo4j.gds.pathfinding.MCMFMutateStep;
 import org.neo4j.gds.pathfinding.PathFindingComputeBusinessFacade;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarMutateConfig;
 import org.neo4j.gds.paths.bellmanford.AllShortestPathsBellmanFordMutateConfig;
@@ -35,6 +37,7 @@ import org.neo4j.gds.paths.yens.config.ShortestPathYensMutateConfig;
 import org.neo4j.gds.pcst.PCSTMutateConfig;
 import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
 import org.neo4j.gds.procedures.algorithms.pathfinding.BellmanFordMutateResult;
+import org.neo4j.gds.procedures.algorithms.pathfinding.MCMFMutateResult;
 import org.neo4j.gds.procedures.algorithms.pathfinding.MaxFlowMutateResult;
 import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingMutateResult;
 import org.neo4j.gds.procedures.algorithms.pathfinding.PrizeCollectingSteinerTreeMutateResult;
@@ -156,6 +159,38 @@ public final class PushbackPathFindingMutateProcedureFacade {
             config.jobId(),
             config.logProgress(),
             new MaxFlowMutateResultTransformerBuilder(mutateRelationshipService, config)
+        ).join();
+    }
+
+    public Stream<MCMFMutateResult> mcmf(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var config = configurationParser.parseConfiguration(
+            configuration,
+            MCMFMutateConfig::of
+        );
+
+        var mutateStep =new MCMFMutateStep(
+            config.mutateRelationshipType(),
+            config.mutateProperty(),
+            mutateRelationshipService
+        );
+
+        return businessFacade.mcmf(
+            GraphName.parse(graphName),
+            config.toGraphParameters(),
+            config.relationshipWeightProperty(),
+            config.costProperty(),
+            config.toMCMFParameters(),
+            config.jobId(),
+            config.logProgress(),
+            graphResources -> new MCMFMutateResultTransformer(
+                mutateStep,
+                graphResources.graph(),
+                graphResources.graphStore(),
+                config.toMap()
+            )
         ).join();
     }
 

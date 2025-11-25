@@ -61,7 +61,8 @@ public class LouvainMutateResultTransformer implements ResultTransformer<TimedAl
         String mutateProperty,
         Graph graph,
         GraphStore graphStore,
-        StandardCommunityProperties standardCommunityProperties, boolean includeIntermediateCommunities
+        StandardCommunityProperties standardCommunityProperties,
+        boolean includeIntermediateCommunities
     ) {
         this.configuration = configuration;
         this.statisticsComputationInstructions = statisticsComputationInstructions;

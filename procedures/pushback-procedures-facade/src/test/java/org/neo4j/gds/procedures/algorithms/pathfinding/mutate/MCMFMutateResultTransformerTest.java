@@ -25,8 +25,8 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.MutateRelationshipService;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 import org.neo4j.gds.logging.Log;
-import org.neo4j.gds.maxflow.FlowResult;
-import org.neo4j.gds.pathfinding.MaxFlowMutateStep;
+import org.neo4j.gds.mcmf.CostFlowResult;
+import org.neo4j.gds.pathfinding.MCMFMutateStep;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 
 import java.util.Map;
@@ -39,25 +39,25 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-class MaxFlowMutateResultTransformerTest {
+class MCMFMutateResultTransformerTest {
 
     @Test
     void shouldTransformToMutateResult() {
         var config = Map.<String, Object>of("foo", "bar");
         var graph = mock(Graph.class);
         var graphStore = mock(GraphStore.class);
-        var mutateStep = mock(MaxFlowMutateStep.class);
+        var mutateStep = mock(MCMFMutateStep.class);
 
-        var algoResult = mock(FlowResult.class);
+        var algoResult = mock(CostFlowResult.class);
         when(algoResult.totalFlow()).thenReturn(3D);
-
+        when(algoResult.totalCost()).thenReturn(6D);
 
         var relationshipsWritten = new RelationshipsWritten(5L);
         when(mutateStep.execute(any(), any(), any())).thenReturn(relationshipsWritten);
 
         var timedResult = new TimedAlgorithmResult<>(algoResult, 123L);
 
-        var transformer = new MaxFlowMutateResultTransformer(mutateStep, graph, graphStore, config);
+        var transformer = new MCMFMutateResultTransformer(mutateStep, graph, graphStore, config);
 
         var resultStream = transformer.apply(timedResult);
         var result = resultStream.findFirst().orElseThrow();
@@ -67,6 +67,7 @@ class MaxFlowMutateResultTransformerTest {
         assertThat(result.mutateMillis()).isNotNegative();
         assertThat(result.configuration()).isEqualTo(config);
         assertThat(result.totalFlow()).isEqualTo(3D);
+        assertThat(result.totalCost()).isEqualTo(6D);
 
         assertThat(result.relationshipsWritten()).isEqualTo(5L);
 
@@ -80,17 +81,18 @@ class MaxFlowMutateResultTransformerTest {
         var graph = mock(Graph.class);
         var graphStore = mock(GraphStore.class);
         var mutateRelationshipService = new MutateRelationshipService(Log.noOpLog());
-        var mutateStep = new MaxFlowMutateStep(
+        var mutateStep = new MCMFMutateStep(
             "r",
             "foo",
             mutateRelationshipService
         );
 
-        var algoResult = FlowResult.EMPTY;
+
+        var algoResult = CostFlowResult.EMPTY;
 
         var timedResult = new TimedAlgorithmResult<>(algoResult, 123L);
 
-        var transformer = new MaxFlowMutateResultTransformer(mutateStep, graph, graphStore, config);
+        var transformer = new MCMFMutateResultTransformer(mutateStep, graph, graphStore, config);
 
         var resultStream = transformer.apply(timedResult);
         var result = resultStream.findFirst().orElseThrow();
@@ -100,6 +102,7 @@ class MaxFlowMutateResultTransformerTest {
         assertThat(result.mutateMillis()).isNotNegative();
         assertThat(result.configuration()).isEqualTo(config);
         assertThat(result.totalFlow()).isEqualTo(0D);
+        assertThat(result.totalCost()).isEqualTo(0D);
         assertThat(result.relationshipsWritten()).isEqualTo(0);
 
     }

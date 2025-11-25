@@ -34,7 +34,10 @@ import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
 import org.neo4j.gds.maxflow.FlowResult;
 import org.neo4j.gds.maxflow.MaxFlowMutateConfig;
+import org.neo4j.gds.mcmf.CostFlowResult;
+import org.neo4j.gds.mcmf.MCMFMutateConfig;
 import org.neo4j.gds.pathfinding.BellmanFordMutateStep;
+import org.neo4j.gds.pathfinding.MCMFMutateStep;
 import org.neo4j.gds.pathfinding.MaxFlowMutateStep;
 import org.neo4j.gds.pathfinding.PrizeCollectingSteinerTreeMutateStep;
 import org.neo4j.gds.pathfinding.RandomWalkCountingNodeVisitsMutateStep;
@@ -70,6 +73,7 @@ import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Bel
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.DFS;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.DeltaStepping;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Dijkstra;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.MCMF;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.MaxFlow;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.RandomWalk;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.SingleSourceDijkstra;
@@ -203,6 +207,28 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
             MaxFlow,
             () -> estimationFacade.maxFlow(configuration),
             (graph, __) -> pathFindingAlgorithms.maxFlow(graph, configuration),
+            mutateStep,
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT mcmf(
+        GraphName graphName,
+        MCMFMutateConfig configuration,
+        ResultBuilder<MCMFMutateConfig, CostFlowResult, RESULT, RelationshipsWritten> resultBuilder
+    ) {
+        var mutateStep = new MCMFMutateStep(
+            configuration.mutateRelationshipType(),
+            configuration.mutateProperty(),
+            mutateRelationshipService
+        );
+
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
+            graphName,
+            configuration,
+            MCMF,
+            () -> estimationFacade.mcmf(configuration),
+            (__, graphStore) -> pathFindingAlgorithms.mcmf(graphStore, configuration),
             mutateStep,
             resultBuilder
         );
