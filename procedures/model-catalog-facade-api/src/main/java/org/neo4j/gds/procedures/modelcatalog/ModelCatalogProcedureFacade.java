@@ -26,9 +26,9 @@ import java.util.stream.Stream;
 public interface ModelCatalogProcedureFacade {
     String NO_VALUE = "__NO_VALUE";
 
-    Stream<ModelCatalogResult> drop(@Nullable String graphOrSessionName, String modelName, @Nullable String sessionName, boolean failIfMissing);
+    Stream<ModelCatalogResult> drop(String modelName, @Nullable String sessionName, boolean failIfMissing);
 
-    Stream<ModelExistsResult> exists(@Nullable String graphOrSessionName, String modelName, @Nullable String sessionName);
+    Stream<ModelExistsResult> exists(String modelName, @Nullable String sessionName);
 
-    Stream<ModelCatalogResult> list(@Nullable String graphOrSessionName, String modelName, @Nullable String sessionName);
+    Stream<ModelCatalogResult> list(String modelName, @Nullable String sessionName);
 }
