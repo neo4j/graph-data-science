@@ -21,6 +21,7 @@ package org.neo4j.gds.procedures.algorithms.pathfinding.stats;
 
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.maxflow.MaxFlowStatsConfig;
+import org.neo4j.gds.mcmf.MCMFStatsConfig;
 import org.neo4j.gds.pathfinding.PathFindingComputeBusinessFacade;
 import org.neo4j.gds.paths.bellmanford.AllShortestPathsBellmanFordStatsConfig;
 import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaStatsConfig;
@@ -28,6 +29,7 @@ import org.neo4j.gds.paths.traverse.BfsStatsConfig;
 import org.neo4j.gds.pcst.PCSTStatsConfig;
 import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
 import org.neo4j.gds.procedures.algorithms.pathfinding.BellmanFordStatsResult;
+import org.neo4j.gds.procedures.algorithms.pathfinding.MCMFStatsResult;
 import org.neo4j.gds.procedures.algorithms.pathfinding.MaxFlowStatsResult;
 import org.neo4j.gds.procedures.algorithms.pathfinding.PrizeCollectingSteinerTreeStatsResult;
 import org.neo4j.gds.procedures.algorithms.pathfinding.SpanningTreeStatsResult;
@@ -127,6 +129,25 @@ public class PushbackPathFindingStatsProcedureFacade {
             new MaxFlowStatsResultTransformerBuilder(config)
         ).join();
     }
+
+    public Stream<MCMFStatsResult> mcmf(String graphName, Map<String, Object> configuration) {
+        var config = configurationParser.parseConfiguration(
+            configuration,
+            MCMFStatsConfig::of
+        );
+
+        return businessFacade.mcmf(
+            GraphName.parse(graphName),
+            config.toGraphParameters(),
+            config.relationshipWeightProperty(),
+            config.costProperty(),
+            config.toMCMFParameters(),
+            config.jobId(),
+            config.logProgress(),
+            graphResources -> new MCMFStatsResultTransformer(configuration)
+        ).join();
+    }
+
 
     public Stream<PrizeCollectingSteinerTreeStatsResult> prizeCollectingSteinerTree(
         String graphName,

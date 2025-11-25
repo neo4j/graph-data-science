@@ -17,15 +17,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.mcmf;
+package org.neo4j.gds.procedures.algorithms.pathfinding;
 
-import org.neo4j.gds.maxflow.FlowResult;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
+import org.neo4j.gds.procedures.algorithms.results.ModeResult;
 
-public record CostFlowResult(FlowResult flowResult, double totalCost) {
+import java.util.Map;
 
-    public static CostFlowResult EMPTY = new CostFlowResult(FlowResult.EMPTY, 0D);
+public record MCMFStatsResult(
+    long preProcessingMillis,
+    long computeMillis,
+    double totalFlow,
+    double totalCost,
+    Map<String, Object> configuration
+) implements ModeResult {
 
-    public double totalFlow(){
-        return flowResult.totalFlow();
+    static MCMFStatsResult emptyFrom(AlgorithmProcessingTimings timings, Map<String, Object> configuration) {
+        return new MCMFStatsResult(
+            timings.preProcessingMillis,
+            timings.computeMillis,
+            0D,
+            0D,
+            configuration
+        );
     }
 }

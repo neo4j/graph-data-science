@@ -19,13 +19,14 @@
  */
 package org.neo4j.gds.mcmf;
 
-import org.neo4j.gds.maxflow.FlowResult;
+import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.core.CypherMapWrapper;
 
-public record CostFlowResult(FlowResult flowResult, double totalCost) {
+@Configuration
+public interface MCMFStatsConfig extends MCMFBaseConfig {
 
-    public static CostFlowResult EMPTY = new CostFlowResult(FlowResult.EMPTY, 0D);
-
-    public double totalFlow(){
-        return flowResult.totalFlow();
+    static MCMFStatsConfig of(CypherMapWrapper userInput) {
+        return new MCMFStatsConfigImpl(userInput);
     }
+
 }

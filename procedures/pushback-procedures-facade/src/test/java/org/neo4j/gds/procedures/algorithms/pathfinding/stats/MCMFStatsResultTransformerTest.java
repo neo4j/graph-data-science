@@ -22,7 +22,6 @@ package org.neo4j.gds.procedures.algorithms.pathfinding.stats;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.maxflow.FlowResult;
-import org.neo4j.gds.mcmf.CostFlowResult;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 
 import java.util.Map;
@@ -32,19 +31,19 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-class MaxFlowStatsResultTransformerTest {
+class MCMFStatsResultTransformerTest {
 
     @Test
     void shouldReturnEmptyStreamOnEmptyResult() {
         var configuration = Map.<String, Object>of("foo", "bar");
 
-        var transformer = new MCMFStatsResultTransformer(configuration);
 
-        var statsResult = transformer.apply(TimedAlgorithmResult.empty(CostFlowResult.EMPTY)).findFirst().orElseThrow();
+        var transformer = new MaxFlowStatsResultTransformer(configuration);
+
+        var statsResult = transformer.apply(TimedAlgorithmResult.empty(FlowResult.EMPTY)).findFirst().orElseThrow();
         assertThat(statsResult.preProcessingMillis()).isZero();
         assertThat(statsResult.computeMillis()).isZero();
         assertThat(statsResult.totalFlow()).isZero();
-        assertThat(statsResult.totalCost()).isZero();
         assertThat(statsResult.configuration()).isEqualTo(configuration);
     }
 
@@ -54,15 +53,15 @@ class MaxFlowStatsResultTransformerTest {
         var graphMock = mock(Graph.class);
         when(graphMock.toOriginalNodeId(anyLong())).thenAnswer(invocation -> invocation.getArgument(0));
 
-        var transformer = new MCMFStatsResultTransformer(configuration);
+        var transformer = new MaxFlowStatsResultTransformer(configuration);
 
-        var flowResult = new CostFlowResult(new FlowResult(null, 4D),8D);
+        var flowResult = new FlowResult(null, 4D);
 
         var statsResult = transformer.apply(new TimedAlgorithmResult<>(flowResult, 1L)).findFirst().orElseThrow();
         assertThat(statsResult.preProcessingMillis()).isZero();
         assertThat(statsResult.computeMillis()).isEqualTo(1L);
         assertThat(statsResult.totalFlow()).isEqualTo(4D);
-        assertThat(statsResult.totalCost()).isEqualTo(8D);
         assertThat(statsResult.configuration()).isEqualTo(configuration);
     }
+
 }

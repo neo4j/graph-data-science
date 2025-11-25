@@ -19,30 +19,30 @@
  */
 package org.neo4j.gds.procedures.algorithms.pathfinding.stats;
 
-import org.neo4j.gds.maxflow.FlowResult;
-import org.neo4j.gds.procedures.algorithms.pathfinding.MaxFlowStatsResult;
+import org.neo4j.gds.mcmf.CostFlowResult;
+import org.neo4j.gds.procedures.algorithms.pathfinding.MCMFStatsResult;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.results.ResultTransformer;
 
 import java.util.Map;
 import java.util.stream.Stream;
 
-class MaxFlowStatsResultTransformer implements ResultTransformer<TimedAlgorithmResult<FlowResult>, Stream<MaxFlowStatsResult>> {
+class MCMFStatsResultTransformer implements ResultTransformer<TimedAlgorithmResult<CostFlowResult>, Stream<MCMFStatsResult>> {
 
     private final Map<String, Object> configuration;
 
-    MaxFlowStatsResultTransformer(Map<String, Object> configuration) {
+    MCMFStatsResultTransformer(Map<String, Object> configuration) {
         this.configuration = configuration;
     }
 
     @Override
-    public Stream<MaxFlowStatsResult> apply(TimedAlgorithmResult<FlowResult> algorithmResult) {
+    public Stream<MCMFStatsResult> apply(TimedAlgorithmResult<CostFlowResult> algorithmResult) {
         var flowResult = algorithmResult.result();
-        var statsResult = new MaxFlowStatsResult(
+        var statsResult = new MCMFStatsResult(
             0,
             algorithmResult.computeMillis(),
-            0,
             flowResult.totalFlow(),
+            flowResult.totalCost(),
             configuration
         );
         return Stream.of(statsResult);
