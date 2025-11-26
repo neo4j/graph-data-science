@@ -1,0 +1,449 @@
+[[algorithms-mcmf]]
+= Minimum cost maximum flow
+:description: This section describes the Minimum cost maximum flow algorithm in the Neo4j Graph Data Science library.
+:entity: relationship
+:result: flow
+:algorithm: Minimum cost maximum flow algorithm
+
+:directed:
+:weighted:
+include::partial$/algorithms/shared/algorithm-traits.adoc[]
+
+== Introduction
+
+The min-cost max flow (MCMF) algorithm solves the problem of finding the maximum flow between a source node and a target node, with the lowest cost.
+
+For solving only maximum flow, without looking at costs, see xref:algorithms/max-flow.adoc[maximum flow]
+
+The flow is a non-negative scalar for every relationship, restricted by capacity value of the relationship. For a node in the graph, the sum of incoming flow matches the sum of outgoing flow, with two exceptions:
+
+- Net-outflow of source nodes is either unbounded, or bounded by the supply parameter, if given.
+- Net-inflow of target nodes (sinks) is either unbounded, or bounded by the demand parameter, if given.
+
+Whereas the regular maximum flow problem is to simply assign flows to relationships to maximize the total transport from sources to targets, MCMF deals with a second problem: finding the _cheapest_ such assignment without lowering the total flow.
+
+In MCMF, each relationship is also equipped with a _cost value_. This represents the unit-cost per flow, so that the cost per relationship is its flow times its cost. Summing this for all relationships in the graph gives the cost for the entire flow assignment. By redirecting the flow, the total cost is to be minimized while keeping the total flow maximal.
+
+To run the algorithm the user needs to provide, source and target node(s), optionally with supply and demand values, and also to specify which relationship property that corresponds to capacity and cost respectively.
+
+The Neo4j GDS Library implementation is a cost-scaling push-relabel based on https://doi.org/10.1006/jagm.1995.0805[this paper]. The algorithm is guaranteed to produce an optimal solution for integer costs and capacities, using a fixed number of iterations. We allow running the algorithm also for double values using the same bounds.
+
+
+[[algorithms-mcmf-syntax]]
+== Syntax
+
+include::partial$/algorithms/shared/syntax-intro-named-graph.adoc[]
+
+.Max flow syntax per mode
+[.tabbed-example, caption = ]
+====
+
+[.include-with-stream]
+======
+.Run the algorithm in stream mode on a named graph.
+[source, cypher, role=noplay]
+----
+CALL gds.maxFlow.minCost.stream(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  source: Integer,
+  target: Integer,
+  flow: Float
+----
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name | Type | Default | Optional | Description
+include::partial$/algorithms/common-configuration/common-stream-stats-configuration-entries.adoc[]
+include::partial$/algorithms/min-cost-max-flow/specific-configuration.adoc[]
+|===
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name     | Type    | Description
+| source | Integer | The first node of the returned relationship.
+| target | Integer | The second node of the returned relationship.
+| flow   | Float   | The flow over the returned relationship.
+|===
+
+======
+
+[.include-with-stats]
+======
+.Run the algorithm in stats mode on a named graph.
+[source, cypher, role=noplay]
+----
+CALL gds.maxFlow.minCost.stats(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  totalFlow: Float,
+  totalCost: Float,
+  preProcessingMillis: Integer,
+  computeMillis: Integer,
+  configuration: Map
+----
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name | Type | Default | Optional | Description
+include::partial$/algorithms/common-configuration/common-stream-stats-configuration-entries.adoc[]
+include::partial$/algorithms/min-cost-max-flow/specific-configuration.adoc[]
+|===
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                      | Type    | Description
+| totalFlow                 | Float   | The net-flow to all target nodes.
+| totalCost                 | Float   | The cost associated with the returned flow
+| preProcessingMillis       | Integer | Milliseconds for preprocessing the data.
+| computeMillis             | Integer | Milliseconds for running the algorithm.
+| configuration             | Map     | The configuration used for running the algorithm.
+|===
+
+======
+
+[.include-with-mutate]
+======
+.Run the algorithm in mutate mode on a named graph.
+[source, cypher, role=noplay]
+----
+CALL gds.maxFlow.minCost.mutate(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  totalFlow: Float,
+  totalCost: Float,
+  preProcessingMillis: Integer,
+  computeMillis: Integer,
+  mutateMillis: Integer,
+  relationshipsWritten: Integer,
+  configuration: Map
+----
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name | Type | Default | Optional | Description
+include::partial$/algorithms/common-configuration/common-mutate-configuration-entries.adoc[]
+include::partial$/algorithms/min-cost-max-flow/specific-configuration.adoc[]
+|===
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                      | Type    | Description
+| totalFlow                 | Float   | The net-flow to all target nodes.
+| totalCost                 | Float   | The cost associated with the returned flow
+| preProcessingMillis       | Integer | Milliseconds for preprocessing the data.
+| computeMillis             | Integer | Milliseconds for running the algorithm.
+| mutateMillis              | Integer | Milliseconds for writing result data back.
+| relationshipsWritten      | Integer | The number of relationships added to the in-memory graph.
+| configuration             | Map     | The configuration used for running the algorithm.
+|===
+
+======
+
+[.include-with-write]
+======
+.Run the algorithm in write mode on a named graph.
+[source, cypher, role=noplay]
+----
+CALL gds.maxFlow.minCost.write(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  totalFlow: Float,
+  totalCost: Float,
+  preProcessingMillis: Integer,
+  computeMillis: Integer,
+  writeMillis: Integer,
+  relationshipsWritten: Integer,
+  configuration: Map
+----
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name | Type | Default | Optional | Description
+include::partial$/algorithms/common-configuration/common-write-configuration-entries.adoc[]
+include::partial$/algorithms/min-cost-max-flow/specific-configuration.adoc[]
+|===
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                      | Type    | Description
+| totalFlow                 | Float   | The net-flow to all target nodes.
+| totalCost                 | Float   | The cost associated with the returned flow
+| preProcessingMillis       | Integer | Milliseconds for preprocessing the data.
+| computeMillis             | Integer | Milliseconds for running the algorithm.
+| writeMillis               | Integer | Milliseconds for writing result data back.
+| relationshipsWritten      | Integer | The number of relationships written to the graph.
+| configuration             | Map     | The configuration used for running the algorithm.
+|===
+
+======
+
+====
+
+
+[[algorithms-mcmf-example]]
+== Examples
+
+include::partial$/algorithms/shared/examples-named-native-note.adoc[]
+
+:algorithm-name: {algorithm}
+:graph-description: graph
+:image-file: mcmf-graph.svg
+include::partial$/algorithms/shared/examples-intro.adoc[]
+
+
+.The following will create the sample graph depicted in the figure:
+[source, cypher, role=noplay setup-query]
+----
+CREATE (a:Place {id: 'A'}),
+       (b:Place {id: 'B'}),
+       (c:Place {id: 'C'}),
+       (d:Place {id: 'D'}),
+       (e:Place {id: 'E'}),
+       (a)-[:LINK {capacity: 7, cost: 100}]->(b),
+       (b)-[:LINK {capacity: 10, cost: 250}]->(c),
+       (b)-[:LINK {capacity: 5, cost: 150}]->(d),
+       (c)-[:LINK {capacity: 15, cost: 200}]->(e),
+       (d)-[:LINK {capacity: 15, cost: 200}]->(e);
+----
+
+.The following will project and store a named graph:
+[source, cypher, role=noplay graph-project-query]
+----
+MATCH (source:Place)-[r:LINK]->(target:Place)
+RETURN gds.graph.project(
+  'graph',
+  source,
+  target,
+{
+    relationshipProperties: r { .capacity, .cost }
+  }
+)
+----
+[[algorithms-mcmf-examples-mem]]
+=== Memory estimation
+
+:mode: stream
+include::partial$/algorithms/shared/examples-estimate-intro.adoc[]
+
+[role=query-example]
+--
+.The following will estimate the memory requirements for running the algorithm in stream mode:
+[source, cypher, role=noplay]
+----
+MATCH (a:Place {id: 'A'}), (e:Place {id: 'E'})
+CALL gds.maxFlow.minCost.stream.estimate('graph', {
+  sourceNodes: [a],
+  targetNodes: [e],
+  capacityProperty: 'capacity',
+  costProperty: 'cost'
+})
+YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
+RETURN nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
+----
+.Results
+[opts="header"]
+|===
+| nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
+| 5         | 5                 | 3604     | 3604     | "3604 Bytes"
+|===
+--
+
+
+[[algorithms-mcmf-stream]]
+=== Stream
+:!stream-details:
+
+include::partial$/algorithms/shared/examples-stream-intro.adoc[]
+
+[role=query-example]
+--
+.The following will run the MCMF algorithm in stream mode and return results for each valid node.
+[source,cypher,role=noplay]
+----
+MATCH (a:Place {id: 'A'}), (e:Place {id: 'E'})
+CALL gds.maxFlow.minCost.stream('graph', {
+  sourceNodes: [a],
+  targetNodes: [e],
+  capacityProperty: 'capacity',
+  costProperty: 'cost'
+})
+YIELD source, target, flow
+RETURN gds.util.asNode(source).id AS src, gds.util.asNode(target).id AS tgt, flow
+ORDER BY src, tgt
+----
+
+.Results
+[opts="header"]
+|===
+| src  | tgt  | flow
+| "A"  | "B"  | 7.0
+| "B"  | "C"  | 2.0
+| "B"  | "D"  | 5.0
+| "C"  | "E"  | 2.0
+| "D"  | "E"  | 5.0
+|===
+--
+
+The algorithm leads the flow from source (A) to target (E) through B-D and B-C respectively. There's a bottleneck at A-B blocking more flow to E, so it is clear that the maximum flow is 7. From B there are two paths to the target, B->D->E (cost 350) and B->C->E (cost 450). Since the former is cheaper it is fully utilized, and what's left is sent along the latter more expensive route.
+
+=== Stats
+:stats-syntax: algorithms-min-cost-max-flow-syntax
+include::partial$/algorithms/shared/examples-stats-intro.adoc[]
+
+[role=query-example]
+--
+.The following will run the MCMF algorithm in stats mode and return its statistics.
+[source,cypher,role=noplay]
+----
+MATCH (a:Place {id: 'A'}), (e:Place {id: 'E'})
+CALL gds.maxFlow.minCost.stats('graph', {
+  sourceNodes: [a],
+  targetNodes: [e],
+  capacityProperty: 'capacity',
+  costProperty: 'cost'
+})
+YIELD totalFlow, totalCost
+RETURN totalFlow, totalCost
+----
+
+.Results
+[opts="header"]
+|===
+| totalFlow | totalCost
+| 7.0       | 3350.0
+|===
+--
+
+The stats mode provides us with information about the total net-flow to the target nodes (E), which is `7.0` and its cost `3350`. The total cost can be compared to the per-relationship unit cost and flow value, see results above.
+
+=== Mutate
+
+include::partial$/algorithms/shared/examples-mutate-intro.adoc[]
+
+[role=query-example]
+--
+.The following will run the MCMF algorithm in mutate mode and return its statistics.
+[source,cypher,role=noplay]
+----
+MATCH (a:Place {id: 'A'}), (e:Place {id: 'E'})
+CALL gds.maxFlow.minCost.mutate('graph', {
+  sourceNodes: [a],
+  targetNodes: [e],
+  capacityProperty: 'capacity',
+  costProperty: 'cost',
+  mutateProperty: 'flow',
+  mutateRelationshipType: 'FLOW_REL'
+})
+YIELD totalFlow, totalCost, relationshipsWritten
+RETURN totalFlow, totalCost, relationshipsWritten
+----
+
+.Results
+[opts="header"]
+|===
+| totalFlow | totalCost | relationshipsWritten
+| 7.0       | 3350.0    | 5
+|===
+--
+
+The mutate mode updates the in-memory graph `graph` with  new relationship type
+called `FLOW_REL` with a single property `flow`.
+From the `relationshipsWritten` column, we can see that exactly five such relationships were added.
+They connect the nodes of the flow graph, and their property is the flow over each relationship.
+
+[NOTE]
+====
+The relationships added back to the graph are always directed, even if the input graph is undirected. They point in the order of the flow.
+====
+
+=== Write
+
+include::partial$/algorithms/shared/examples-write-intro.adoc[]
+
+[role=query-example]
+--
+.The following will run the MCMF algorithm in write mode and return its statistics.
+[source,cypher,role=noplay]
+----
+MATCH (a:Place {id: 'A'}), (e:Place {id: 'E'})
+CALL gds.maxFlow.minCost.write('graph', {
+  sourceNodes: [a],
+  targetNodes: [e],
+  capacityProperty: 'capacity',
+  costProperty: 'cost',
+  writeProperty: 'flow',
+  writeRelationshipType: 'FLOW_REL'
+})
+YIELD totalFlow, totalCost, relationshipsWritten
+RETURN totalFlow, totalCost, relationshipsWritten
+----
+
+.Results
+[opts="header"]
+|===
+| totalFlow | totalCost | relationshipsWritten
+| 7.0       | 3350.0    | 5
+|===
+--
+
+This query writes back to the database five new relationships
+each of type `FLOW_REL` with a single property `flow`.
+
+[NOTE]
+====
+The relationships added back  are always directed, even if the input graph is undirected. They point in the order of the flow.
+====
+
+=== Supply and demand example
+
+If there is a restriction on how much a source/target node can output/receive, this can be modeled using supply and demand. For example, how much produce can be transported from a set of production facilities (with a given supply/production per entity) to a set of destinations (each with a specific demand) to the lowest possible cost?
+
+[role=query-example]
+--
+.The following will run the MCMF algorithm in stream mode with supply and demand.
+[source,cypher,role=noplay]
+----
+MATCH (a:Place {id: 'A'}), (b:Place {id: 'B'}), (c:Place {id: 'C'}), (e:Place {id: 'E'})
+CALL gds.maxFlow.minCost.stream('graph', {
+  sourceNodes: [[a, 10.0], [b, 4.0]],
+  targetNodes: [[e, 20.0]],
+  capacityProperty: 'capacity',
+  costProperty: 'cost'
+})
+YIELD source, target, flow
+RETURN gds.util.asNode(source).id AS src, gds.util.asNode(target).id AS tgt, flow
+ORDER BY src, tgt
+----
+
+.Results
+[opts="header"]
+|===
+| src  | tgt  | flow
+| "A"  | "B"  | 7.0
+| "B"  | "C"  | 6.0
+| "B"  | "D"  | 5.0
+| "C"  | "E"  | 6.0
+| "D"  | "E"  | 5.0
+|===
+--
