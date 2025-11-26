@@ -49,7 +49,8 @@ class MaxFlowBaseConfigTest {
         when(configMock.sourceNodes()).thenReturn(new ListInputNodes(List.of(0L, 1L)));
         when(configMock.targetNodes()).thenReturn(new ListInputNodes(List.of(3L, 1L)));
         doCallRealMethod().when(configMock).assertNoDuplicateInputNodes();
-        assertThatThrownBy(configMock::assertNoDuplicateInputNodes).hasMessageContaining("Source and target nodes must be disjoint.");
+        assertThatThrownBy(configMock::assertNoDuplicateInputNodes).hasMessageContaining(
+            "Source and target nodes must be disjoint.");
     }
 
     @Test
@@ -58,11 +59,27 @@ class MaxFlowBaseConfigTest {
         when(configMock.sourceNodes()).thenReturn(new MapInputNodes(Map.of(0L, 0.5D, 1L, -0.1D)));
         when(configMock.targetNodes()).thenReturn(new ListInputNodes(List.of(2L, 3L)));
         doCallRealMethod().when(configMock).assertNodeValuesArePositive();
-        assertThatThrownBy(configMock::assertNodeValuesArePositive).hasMessageContaining("Source node values must be positive, but found a negative value");
+        assertThatThrownBy(configMock::assertNodeValuesArePositive).hasMessageContaining(
+            "Source node values must be positive, but found a negative value");
 
         when(configMock.sourceNodes()).thenReturn(new MapInputNodes(Map.of(0L, 0.5D, 1L, 0.1D)));
         when(configMock.targetNodes()).thenReturn(new MapInputNodes(Map.of(0L, 32.2D, 1L, -100D)));
         doCallRealMethod().when(configMock).assertNodeValuesArePositive();
-        assertThatThrownBy(configMock::assertNodeValuesArePositive).hasMessageContaining("Target node values must be positive, but found a negative value");
+        assertThatThrownBy(configMock::assertNodeValuesArePositive).hasMessageContaining(
+            "Target node values must be positive, but found a negative value");
+    }
+
+    @Test
+    void shouldThrowOnEmptyInputNodes() {
+        var configMock = mock(MaxFlowBaseConfig.class);
+        when(configMock.sourceNodes()).thenReturn(new MapInputNodes(Map.of()));
+        when(configMock.targetNodes()).thenReturn(new ListInputNodes(List.of(2L, 3L)));
+        doCallRealMethod().when(configMock).assertSourcesAndTargetsExist();
+        assertThatThrownBy(configMock::assertSourcesAndTargetsExist).hasMessageContaining("Source nodes cannot be empty");
+
+        when(configMock.sourceNodes()).thenReturn(new MapInputNodes(Map.of(2L, 0.5D, 0L, 10D)));
+        when(configMock.targetNodes()).thenReturn(new ListInputNodes(List.of()));
+        doCallRealMethod().when(configMock).assertSourcesAndTargetsExist();
+        assertThatThrownBy(configMock::assertSourcesAndTargetsExist).hasMessageContaining("Target nodes cannot be empty");
     }
 }

@@ -58,10 +58,9 @@ public interface MaxFlowBaseConfig extends AlgoBaseConfig, RelationshipWeightCon
         for (var node : targetNodes().inputNodes()) {
             if (targetSet.contains(node)) {
                 throw new IllegalArgumentException("Target nodes must be unique.");
-            } else if(sourceSet.contains(node)) {
+            } else if (sourceSet.contains(node)) {
                 throw new IllegalArgumentException("Source and target nodes must be disjoint.");
-            }
-            else {
+            } else {
                 targetSet.add(node);
             }
         }
@@ -71,13 +70,23 @@ public interface MaxFlowBaseConfig extends AlgoBaseConfig, RelationshipWeightCon
     default void assertNodeValuesArePositive() {
         if (sourceNodes() instanceof MapInputNodes) {
             if (((MapInputNodes) sourceNodes()).map().values().stream().anyMatch(value -> value < 0.0)) {
-                throw new IllegalArgumentException("Source node values must be positive, but found a negative value");
+                throw new IllegalArgumentException("Source node values must be positive, but found a negative value.");
             }
         }
         if (targetNodes() instanceof MapInputNodes) {
             if (((MapInputNodes) targetNodes()).map().values().stream().anyMatch(value -> value < 0.0)) {
-                throw new IllegalArgumentException("Target node values must be positive, but found a negative value");
+                throw new IllegalArgumentException("Target node values must be positive, but found a negative value.");
             }
+        }
+    }
+
+    @Configuration.Check()
+    default void assertSourcesAndTargetsExist() {
+        if (sourceNodes().size() == 0) {
+            throw new IllegalArgumentException("Source nodes cannot be empty.");
+        }
+        if (targetNodes().size() == 0) {
+            throw new IllegalArgumentException("Target nodes cannot be empty.");
         }
     }
 
