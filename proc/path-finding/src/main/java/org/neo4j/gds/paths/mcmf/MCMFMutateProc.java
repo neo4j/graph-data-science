@@ -21,7 +21,7 @@ package org.neo4j.gds.paths.mcmf;
 
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
-import org.neo4j.gds.procedures.algorithms.pathfinding.MaxFlowMutateResult;
+import org.neo4j.gds.procedures.algorithms.pathfinding.MCMFMutateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -30,23 +30,23 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.paths.maxflow.MaxFlowConstants.MAXFLOW_DESCRIPTION;
+import static org.neo4j.gds.paths.mcmf.MCMFConstants.MCMF_DESCRIPTION;
 import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class MaxFlowMutateProc {
-    private static final String proc = "gds.maxFlow.mutate";
+public class MCMFMutateProc {
+    private static final String proc = "gds.maxFlow.minCost.mutate";
 
     @Context
     public GraphDataScienceProcedures facade;
 
     @Procedure(value = proc, mode = READ)
-    @Description(MAXFLOW_DESCRIPTION)
-    public Stream<MaxFlowMutateResult> maxFlow(
+    @Description(MCMF_DESCRIPTION)
+    public Stream<MCMFMutateResult> maxFlow(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.algorithms().pathFinding().maxFlowMutate(graphName, configuration);
+        return facade.algorithms().pathFinding().mcmfMutate(graphName, configuration);
     }
 
     @Procedure(value = proc + ".estimate", mode = READ)
@@ -55,6 +55,6 @@ public class MaxFlowMutateProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.algorithms().pathFinding().maxFlowMutateEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.algorithms().pathFinding().mcmfMutateEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 }
