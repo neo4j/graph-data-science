@@ -37,11 +37,9 @@ import org.neo4j.gds.TestGraphLoaderFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.Aggregation;
-import org.neo4j.gds.core.GraphLoader;
+import org.neo4j.gds.core.GraphStoreFactorySuppliers;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.mem.MemoryEstimation;
-import org.neo4j.gds.mem.MemoryTree;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -64,10 +62,13 @@ import static org.neo4j.gds.compat.GraphDatabaseApiProxy.applyInFullAccessTransa
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class CypherFactoryTest extends BaseTest {
-
+    private static final GraphStoreFactorySuppliers GRAPH_STORE_FACTORY_SUPPLIERS = new GraphStoreFactorySuppliers(
+        Map.of(
+            GraphProjectFromCypherConfig.class, CypherProjectionGraphStoreFactorySupplier::create
+        )
+    );
     private static final int COUNT = 10_000;
-    private static final String DB_CYPHER = "UNWIND range(1, $count) AS id " +
-        "CREATE (n {id: id})-[:REL {prop: id % 10}]->(n)";
+    private static final String DB_CYPHER = "UNWIND range(1, $count) AS id CREATE (n {id: id})-[:REL {prop: id % 10}]->(n)";
 
     @BeforeEach
     void setUp() {
@@ -77,23 +78,17 @@ class CypherFactoryTest extends BaseTest {
     @Test
     void testLoadCypher() {
         clearDb();
-        String query = " CREATE (n1 {partition: 6})-[:REL {prop: 1}]->(n2 {foo: 4.0})-[:REL {prop: 2}]->(n3)" +
+        var query = " CREATE (n1 {partition: 6})-[:REL {prop: 1}]->(n2 {foo: 4.0})-[:REL {prop: 2}]->(n3)" +
             " CREATE (n1)-[:REL {prop: 3}]->(n3)" +
             " RETURN id(n1) AS id1, id(n2) AS id2, id(n3) AS id3";
         runQuery(query);
 
-        String nodes = "MATCH (n) RETURN id(n) AS id, COALESCE(n.partition, 0) AS partition, COALESCE(n.foo, 5.0) AS foo";
-        String rels = "MATCH (n)-[r]->(m) WHERE type(r) = 'REL' " +
-            "RETURN id(n) AS source, id(m) AS target, coalesce(head(collect(r.prop)), 0)";
-
-        Graph graph = applyInFullAccessTransaction(
-            db,
-            tx -> new CypherLoaderBuilder().databaseService(db)
-                .nodeQuery(nodes)
-                .relationshipQuery(rels)
-                .build()
-                .graph()
+        var builder = createBuilder(
+            "MATCH (n) RETURN id(n) AS id, COALESCE(n.partition, 0) AS partition, COALESCE(n.foo, 5.0) AS foo",
+            "MATCH (n)-[r]->(m) WHERE type(r) = 'REL' RETURN id(n) AS source, id(m) AS target, coalesce(head(collect(r.prop)), 0)"
         );
+
+        var graph = applyInFullAccessTransaction(db, __ -> builder.build().graph());
 
         assertGraphEquals(
             fromGdl(
@@ -110,44 +105,32 @@ class CypherFactoryTest extends BaseTest {
 
     @Test
     void testReadOnly() {
-        String nodes = "MATCH (n) SET n.name='foo' RETURN id(n) AS id";
-        String relationships = "MATCH (n)-[r]->(m) WHERE type(r) = 'REL' RETURN id(n) AS source, id(m) AS target, r.prop AS weight ORDER BY id(r) DESC ";
-
-        IllegalArgumentException readOnlyException = assertThrows(
-            IllegalArgumentException.class,
-            () -> {
-                GraphLoader build = new CypherLoaderBuilder()
-                    .databaseService(db)
-                    .nodeQuery(nodes)
-                    .relationshipQuery(relationships)
-                    .build();
-                build
-                    .graph();
-            }
+        var builder = createBuilder(
+            "MATCH (n) SET n.name='foo' RETURN id(n) AS id",
+            "MATCH (n)-[r]->(m) WHERE type(r) = 'REL' RETURN id(n) AS source, id(m) AS target, r.prop AS weight ORDER BY id(r) DESC "
         );
+
+        var readOnlyException = assertThrows(IllegalArgumentException.class, () -> builder.build().graph());
 
         assertTrue(readOnlyException.getMessage().contains("Query must be read only"));
     }
 
     @Test
     void testLoadRelationshipsCypher() {
-        String nodeStatement = "MATCH (n) RETURN id(n) AS id";
-        String relStatement = "MATCH (n)-[r:REL]->(m) RETURN id(n) AS source, id(m) AS target, r.prop AS weight";
-
-        loadAndTestGraph(nodeStatement, relStatement);
+        loadAndTestGraph(
+            "MATCH (n) RETURN id(n) AS id",
+            "MATCH (n)-[r:REL]->(m) RETURN id(n) AS source, id(m) AS target, r.prop AS weight"
+        );
     }
 
     @Test
     void testLoadZeroRelationshipsCypher() {
-        String nodeStatement = "MATCH (n) RETURN id(n) AS id";
-        String relStatement = "MATCH (n)-[r:DOES_NOT_EXIST]->(m) RETURN id(n) AS source, id(m) AS target";
+        var builder = createBuilder(
+            "MATCH (n) RETURN id(n) AS id",
+            "MATCH (n)-[r:DOES_NOT_EXIST]->(m) RETURN id(n) AS source, id(m) AS target"
+        );
 
-        CypherLoaderBuilder builder = new CypherLoaderBuilder()
-            .databaseService(db)
-            .nodeQuery(nodeStatement)
-            .relationshipQuery(relStatement);
-
-        Graph graph = applyInFullAccessTransaction(db, tx -> builder.build().graph());
+        var graph = applyInFullAccessTransaction(db, __ -> builder.build().graph());
 
         assertThat(graph.nodeCount()).isEqualTo(COUNT);
         assertThat(graph.relationshipCount()).isEqualTo(0);
@@ -155,85 +138,69 @@ class CypherFactoryTest extends BaseTest {
 
     @Test
     void doubleListNodeProperty() {
-        var nodeQuery = "RETURN 0 AS id, [1.3, 3.7] AS list";
+        var builder = createBuilder(
+            "RETURN 0 AS id, [1.3, 3.7] AS list",
+            "RETURN 0 AS source, 0 AS target LIMIT 0"
+        );
 
-        var builder = new CypherLoaderBuilder()
-            .databaseService(db)
-            .nodeQuery(nodeQuery)
-            .relationshipQuery("RETURN 0 AS source, 0 AS target LIMIT 0");
-
-        var graph = applyInFullAccessTransaction(db, tx -> builder.build().graph());
+        var graph = applyInFullAccessTransaction(db, __ -> builder.build().graph());
         assertThat(graph.nodeProperties("list").doubleArrayValue(0)).containsExactly(1.3, 3.7);
     }
 
     @Test
     void doubleListWithEmptyList() {
-        var nodeQuery = "WITH [0, 1] AS ids, [[1.3, 3.7], []] AS properties " +
-            "UNWIND ids AS id " +
-            "RETURN id, properties[id] AS list";
+        var builder = createBuilder(
+            "WITH [0, 1] AS ids, [[1.3, 3.7], []] AS properties UNWIND ids AS id RETURN id, properties[id] AS list",
+            "RETURN 0 AS source, 0 AS target LIMIT 0"
+        );
 
-        var builder = new CypherLoaderBuilder()
-            .databaseService(db)
-            .nodeQuery(nodeQuery)
-            .relationshipQuery("RETURN 0 AS source, 0 AS target LIMIT 0");
-
-        var graph = applyInFullAccessTransaction(db, tx -> builder.build().graph());
+        var graph = applyInFullAccessTransaction(db, __ -> builder.build().graph());
         assertThat(graph.nodeProperties("list").doubleArrayValue(0)).containsExactly(1.3, 3.7);
         assertThat(graph.nodeProperties("list").doubleArrayValue(1)).isEmpty();
     }
 
     @Test
     void longListWithEmptyList() {
-        var nodeQuery = "WITH [0, 1] AS ids, [[1, 3, 3, 7], []] AS properties " +
-            "UNWIND ids AS id " +
-            "RETURN id, properties[id] AS list";
+        var builder = createBuilder(
+            "WITH [0, 1] AS ids, [[1, 3, 3, 7], []] AS properties UNWIND ids AS id RETURN id, properties[id] AS list",
+            "RETURN 0 AS source, 0 AS target LIMIT 0"
+        );
 
-        var builder = new CypherLoaderBuilder()
-            .databaseService(db)
-            .nodeQuery(nodeQuery)
-            .relationshipQuery("RETURN 0 AS source, 0 AS target LIMIT 0");
-
-        var graph = applyInFullAccessTransaction(db, tx -> builder.build().graph());
+        var graph = applyInFullAccessTransaction(db, __ -> builder.build().graph());
         assertThat(graph.nodeProperties("list").longArrayValue(0)).containsExactly(1, 3, 3, 7);
         assertThat(graph.nodeProperties("list").longArrayValue(1)).isEmpty();
     }
 
     @Test
     void longListNodeProperty() {
-        var nodeQuery = "RETURN 0 AS id, [1, 2] AS list";
+        var builder = createBuilder(
+            "RETURN 0 AS id, [1, 2] AS list",
+            "RETURN 0 AS source, 0 AS target LIMIT 0"
+        );
 
-        var builder = new CypherLoaderBuilder()
-            .databaseService(db)
-            .nodeQuery(nodeQuery)
-            .relationshipQuery("RETURN 0 AS source, 0 AS target LIMIT 0");
-
-        var graph = applyInFullAccessTransaction(db, tx -> builder.build().graph());
+        var graph = applyInFullAccessTransaction(db, __ -> builder.build().graph());
         assertThat(graph.nodeProperties("list").longArrayValue(0)).containsExactly(1L, 2L);
     }
 
     @Test
     void emptyList() {
-        var nodeQuery = "RETURN 0 AS id, [] AS list";
+        var builder = createBuilder(
+            "RETURN 0 AS id, [] AS list",
+            "RETURN 0 AS source, 0 AS target LIMIT 0"
+        );
 
-        var builder = new CypherLoaderBuilder()
-            .databaseService(db)
-            .nodeQuery(nodeQuery)
-            .relationshipQuery("RETURN 0 AS source, 0 AS target LIMIT 0");
-
-        var graph = applyInFullAccessTransaction(db, tx -> builder.build().graph());
+        var graph = applyInFullAccessTransaction(db, __ -> builder.build().graph());
         assertThat(graph.nodeProperties("list").longArrayValue(0)).isEmpty();
     }
 
     @Test
     void failsOnBadMixedList() {
-        var nodeQuery = "RETURN 0 AS id, [1, 2, true] AS list";
+        var builder = createBuilder(
+            "RETURN 0 AS id, [1, 2, true] AS list",
+            "RETURN 0 AS source, 0 AS target LIMIT 0"
+        );
 
-        var builder = new CypherLoaderBuilder()
-            .databaseService(db)
-            .nodeQuery(nodeQuery)
-            .relationshipQuery("RETURN 0 AS source, 0 AS target LIMIT 0");
-
-        assertThatThrownBy(() -> applyInFullAccessTransaction(db, tx -> builder.build().graph()))
+        assertThatThrownBy(() -> applyInFullAccessTransaction(db, __ -> builder.build().graph()))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("Unsupported conversion to GDS Value from Neo4j Value")
             .hasMessageContaining("List{Long(1), Long(2), Boolean('true')}");
@@ -241,28 +208,24 @@ class CypherFactoryTest extends BaseTest {
 
     @Test
     void mixedNumbersListNodeProperty() {
-        var nodeQuery = "RETURN 0 AS id, [1, 2, 1.23] AS list";
+        var builder = createBuilder(
+            "RETURN 0 AS id, [1, 2, 1.23] AS list",
+            "RETURN 0 AS source, 0 AS target LIMIT 0"
+        );
 
-        var builder = new CypherLoaderBuilder()
-            .databaseService(db)
-            .nodeQuery(nodeQuery)
-            .relationshipQuery("RETURN 0 AS source, 0 AS target LIMIT 0");
-
-        var graph = applyInFullAccessTransaction(db, tx -> builder.build().graph());
+        var graph = applyInFullAccessTransaction(db, __ -> builder.build().graph());
         var value = graph.nodeProperties("list").doubleArrayValue(0);
         assertThat(value).isEqualTo(new double[]{1.0, 2.0, 1.23});
     }
 
     @Test
     void failsOnBadUniformList() {
-        var nodeQuery = "RETURN 0 AS id, ['forty', 'two'] AS list";
+        var builder = createBuilder(
+            "RETURN 0 AS id, ['forty', 'two'] AS list",
+            "RETURN 0 AS source, 0 AS target LIMIT 0"
+        );
 
-        var builder = new CypherLoaderBuilder()
-            .databaseService(db)
-            .nodeQuery(nodeQuery)
-            .relationshipQuery("RETURN 0 AS source, 0 AS target LIMIT 0");
-
-        assertThatThrownBy(() -> applyInFullAccessTransaction(db, tx -> builder.build().graph()))
+        assertThatThrownBy(() -> applyInFullAccessTransaction(db, __ -> builder.build().graph()))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("Unsupported conversion to GDS Value from Neo4j Value")
             .hasMessageContaining("List{String(\"forty\"), String(\"two\")}");
@@ -355,16 +318,14 @@ class CypherFactoryTest extends BaseTest {
 
     @Test
     void loadGraphWithParameterizedCypherQuery() {
-        GraphLoader loader = new CypherLoaderBuilder()
-            .databaseService(db)
-            .nodeQuery("MATCH (n) WHERE n.id = $nodeProp RETURN id(n) AS id, n.id as nodeProp")
-            .relationshipQuery(
-                "MATCH (n)-[]->(m) WHERE n.id = $nodeProp and m.id = $nodeProp RETURN id(n) AS source, id(m) AS target, $relProp as relProp"
-            )
-            .parameters(Map.of("nodeProp", 42, "relProp", 21))
-            .build();
+        var builder = createBuilder(
+            "MATCH (n) WHERE n.id = $nodeProp RETURN id(n) AS id, n.id as nodeProp",
+            "MATCH (n)-[]->(m) WHERE n.id = $nodeProp and m.id = $nodeProp RETURN id(n) AS source, id(m) AS target, $relProp as relProp"
+        );
 
-        Graph graph = applyInFullAccessTransaction(db, tx -> loader.graph());
+        var loader = builder.parameters(Map.of("nodeProp", 42, "relProp", 21)).build();
+
+        var graph = applyInFullAccessTransaction(db, __ -> loader.graph());
 
         assertGraphEquals(fromGdl("(a { nodeProp: 42 })-[{ w: 21 }]->(a)"), graph);
     }
@@ -372,7 +333,7 @@ class CypherFactoryTest extends BaseTest {
     @Test
     void testLoadingGraphWithLabelInformation() {
         clearDb();
-        String query = "CREATE" +
+        var query = "CREATE" +
             "  (a:A)" +
             ", (b:B)" +
             ", (c:C)" +
@@ -386,14 +347,14 @@ class CypherFactoryTest extends BaseTest {
 
         runQuery(query);
 
-        GraphLoader loader = new CypherLoaderBuilder()
-            .databaseService(db)
-            .nodeQuery("MATCH (n) RETURN id(n) AS id, labels(n) as labels")
-            .relationshipQuery("MATCH (n)-[]->(m) RETURN id(n) AS source, id(m) AS target")
-            .validateRelationships(false)
-            .build();
+        var builder = createBuilder(
+            "MATCH (n) RETURN id(n) AS id, labels(n) as labels",
+            "MATCH (n)-[]->(m) RETURN id(n) AS source, id(m) AS target"
+        );
 
-        GraphStore graphStore = applyInFullAccessTransaction(db, tx -> loader.graphStore());
+        var loader = builder.validateRelationships(false).build();
+
+        var graphStore = applyInFullAccessTransaction(db, __ -> loader.graphStore());
 
         Function<List<String>, Graph> getGraph = (List<String> labels) -> graphStore.getGraph(
             labels.stream().map(NodeLabel::of).collect(Collectors.toList()),
@@ -414,10 +375,12 @@ class CypherFactoryTest extends BaseTest {
 
         var actual = new ArrayList<Pair<List<NodeLabel>, List<NodeLabel>>>();
         abGraph.forEachNode(nodeId -> {
-            abGraph.forEachRelationship(nodeId, (source, target) -> {
-                actual.add(Pair.of(abGraph.nodeLabels(source), abGraph.nodeLabels(target)));
-                return true;
-            });
+            abGraph.forEachRelationship(
+                nodeId, (source, target) -> {
+                    actual.add(Pair.of(abGraph.nodeLabels(source), abGraph.nodeLabels(target)));
+                    return true;
+                }
+            );
             return true;
         });
 
@@ -426,15 +389,14 @@ class CypherFactoryTest extends BaseTest {
 
     @Test
     void testFailIfLabelColumnIsEmpty() {
-        GraphLoader loader = new CypherLoaderBuilder()
-            .databaseService(db)
-            .nodeQuery("RETURN 1 AS id, [] as labels")
-            .relationshipQuery("MATCH (n)-[]->(m) RETURN id(n) AS source, id(m) AS target")
-            .build();
+        var loader = createBuilder(
+            "RETURN 1 AS id, [] as labels",
+            "MATCH (n)-[]->(m) RETURN id(n) AS source, id(m) AS target"
+        ).build();
 
-        IllegalArgumentException ex = assertThrows(
+        var ex = assertThrows(
             IllegalArgumentException.class,
-            () -> applyInFullAccessTransaction(db, tx -> loader.graphStore())
+            () -> applyInFullAccessTransaction(db, __ -> loader.graphStore())
         );
 
         assertTrue(ex.getMessage().contains("does not specify a label"));
@@ -442,15 +404,14 @@ class CypherFactoryTest extends BaseTest {
 
     @Test
     void testFailIfLabelColumnIsOfWrongType() {
-        GraphLoader loader = new CypherLoaderBuilder()
-            .databaseService(db)
-            .nodeQuery("RETURN 1 AS id, 42 as labels")
-            .relationshipQuery("MATCH (n)-[]->(m) RETURN id(n) AS source, id(m) AS target")
-            .build();
+        var loader = createBuilder(
+            "RETURN 1 AS id, 42 as labels",
+            "MATCH (n)-[]->(m) RETURN id(n) AS source, id(m) AS target"
+        ).build();
 
-        IllegalArgumentException ex = assertThrows(
+        var ex = assertThrows(
             IllegalArgumentException.class,
-            () -> applyInFullAccessTransaction(db, tx -> loader.graphStore())
+            () -> applyInFullAccessTransaction(db, __ -> loader.graphStore())
         );
 
         assertTrue(ex.getMessage().contains("should be of type List"));
@@ -459,21 +420,15 @@ class CypherFactoryTest extends BaseTest {
     @Test
     void canLoadArrayNodeProperties() {
         clearDb();
-        String query = "Create (:A {longArray: [42], doubleArray: [42.0]})";
+        var query = "Create (:A {longArray: [42], doubleArray: [42.0]})";
         runQuery(query);
 
-        String nodes = "MATCH (n) RETURN id(n) AS id, n.longArray as longArray, n.doubleArray as doubleArray";
-        String rels = "MATCH (n)" +
-            "RETURN id(n) AS source, id(n) AS target";
+        var nodes = "MATCH (n) RETURN id(n) AS id, n.longArray as longArray, n.doubleArray as doubleArray";
+        var rels = "MATCH (n) RETURN id(n) AS source, id(n) AS target";
 
-        Graph graph = applyInFullAccessTransaction(
-            db,
-            tx -> new CypherLoaderBuilder().databaseService(db)
-                .nodeQuery(nodes)
-                .relationshipQuery(rels)
-                .build()
-                .graph()
-        );
+        var builder = createBuilder(nodes, rels);
+
+        var graph = applyInFullAccessTransaction(db, __ -> builder.build().graph());
 
         assertGraphEquals(fromGdl("(a {longArray: [42L], doubleArray: [42.0D]}), (a)-->(a)"), graph);
     }
@@ -481,15 +436,14 @@ class CypherFactoryTest extends BaseTest {
     @Test
     @Disabled("Why did we need this? https://github.com/neo-technology/graph-analytics/pull/1079")
     void failOnDuplicateNodeIds() {
-        GraphLoader loader = new CypherLoaderBuilder()
-            .databaseService(db)
-            .nodeQuery("UNWIND [42, 42] AS id RETURN id")
-            .relationshipQuery("UNWIND [42, 42] AS id RETURN id AS source, id AS target")
-            .build();
+        var loader = createBuilder(
+            "UNWIND [42, 42] AS id RETURN id",
+            "UNWIND [42, 42] AS id RETURN id AS source, id AS target"
+        ).build();
 
-        IllegalArgumentException ex = assertThrows(
+        var ex = assertThrows(
             IllegalArgumentException.class,
-            () -> applyInFullAccessTransaction(db, tx -> loader.graphStore())
+            () -> applyInFullAccessTransaction(db, __ -> loader.graphStore())
         );
 
         assertEquals(
@@ -512,14 +466,10 @@ class CypherFactoryTest extends BaseTest {
         // create more nodes with `prop`
         runQuery("UNWIND range(1, $count) AS id CREATE (n {id: id, prop: 0.1337})", Map.of("count", nodeCount));
 
-        GraphLoader loader = new CypherLoaderBuilder()
-            .databaseService(db)
-            // The `42` in coalesce will signal to the NodesBuilder that the type is `long`.
-            // However, all subsequent values will be floats, a conversion will fail for the
-            // second record, and we should see this immediately during construction.
-            .nodeQuery("MATCH (n) RETURN id(n) AS id, COALESCE(n.prop, 42) AS prop ORDER BY n.id ASC")
-            .relationshipQuery("MATCH (n)-[]->(m) RETURN id(n) AS source, id(m) AS target")
-            .build();
+        var loader = createBuilder(
+            "MATCH (n) RETURN id(n) AS id, COALESCE(n.prop, 42) AS prop ORDER BY n.id ASC",
+            "MATCH (n)-[]->(m) RETURN id(n) AS source, id(m) AS target"
+        ).build();
 
         var ex = assertThrows(
             UnsupportedOperationException.class,
@@ -532,15 +482,11 @@ class CypherFactoryTest extends BaseTest {
     @ParameterizedTest(name = "{0}")
     @MethodSource("memoryEstimationVariants")
     void testMemoryEstimation(String description, String nodeQuery, String relQuery, long min, long max) {
-        GraphLoader loader = new CypherLoaderBuilder()
-            .databaseService(db)
-            .nodeQuery(nodeQuery)
-            .relationshipQuery(relQuery)
-            .build();
+        var loader = createBuilder(nodeQuery, relQuery).build();
 
-        CypherFactory factory = (CypherFactory) loader.graphStoreFactory();
-        MemoryEstimation memoryEstimation = factory.estimateMemoryUsageDuringLoading();
-        MemoryTree estimate = memoryEstimation.estimate(factory.estimationDimensions(), new Concurrency(4));
+        var factory = (CypherFactory) loader.graphStoreFactory();
+        var memoryEstimation = factory.estimateMemoryUsageDuringLoading();
+        var estimate = memoryEstimation.estimate(factory.estimationDimensions(), new Concurrency(4));
 
         assertEquals(min, estimate.memoryUsage().min);
         assertEquals(max, estimate.memoryUsage().max);
@@ -578,28 +524,35 @@ class CypherFactoryTest extends BaseTest {
         String nodeStatement,
         String relStatement
     ) {
-        CypherLoaderBuilder builder = new CypherLoaderBuilder()
-            .databaseService(db)
-            .nodeQuery(nodeStatement)
-            .relationshipQuery(relStatement);
+        var builder = createBuilder(nodeStatement, relStatement);
 
-        Graph graph = applyInFullAccessTransaction(db, tx -> builder.build().graph());
+        var graph = applyInFullAccessTransaction(db, __ -> builder.build().graph());
 
         assertEquals(COUNT, graph.nodeCount());
-        AtomicInteger relCount = new AtomicInteger();
+        var relCount = new AtomicInteger();
         graph.forEachNode(node -> {
             relCount.addAndGet(graph.degree(node));
             return true;
         });
         assertEquals(COUNT, relCount.get());
-        AtomicInteger total = new AtomicInteger();
+        var total = new AtomicInteger();
         graph.forEachNode(n -> {
-            graph.forEachRelationship(n, Double.NaN, (s, t, w) -> {
-                total.addAndGet((int) w);
-                return true;
-            });
+            graph.forEachRelationship(
+                n, Double.NaN, (s, t, w) -> {
+                    total.addAndGet((int) w);
+                    return true;
+                }
+            );
             return true;
         });
         assertEquals(9 * COUNT / 2, total.get());
+    }
+
+    private CypherLoaderBuilder createBuilder(String nodeQuery, String relationshipQuery) {
+        return new CypherLoaderBuilder()
+            .databaseService(db)
+            .graphStoreFactorySuppliers(GRAPH_STORE_FACTORY_SUPPLIERS)
+            .nodeQuery(nodeQuery)
+            .relationshipQuery(relationshipQuery);
     }
 }

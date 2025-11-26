@@ -24,12 +24,16 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.GraphLoader;
+import org.neo4j.gds.core.GraphStoreFactorySuppliers;
+import org.neo4j.gds.legacycypherprojection.CypherProjectionGraphStoreFactorySupplier;
+import org.neo4j.gds.legacycypherprojection.GraphProjectFromCypherConfig;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.gds.logging.Log;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -107,7 +111,15 @@ public final class TestCypherGraphLoader implements TestGraphLoader {
     }
 
     private GraphLoader cypherLoader() {
-        CypherLoaderBuilder cypherLoaderBuilder = new CypherLoaderBuilder().databaseService(db);
+        var graphStoreFactorySuppliers = new GraphStoreFactorySuppliers(
+            Map.of(
+                GraphProjectFromCypherConfig.class, CypherProjectionGraphStoreFactorySupplier::create
+            )
+        );
+
+        var cypherLoaderBuilder = new CypherLoaderBuilder()
+            .databaseService(db)
+            .graphStoreFactorySuppliers(graphStoreFactorySuppliers);
 
         String nodeQueryTemplate = "MATCH (n) %s RETURN id(n) AS id%s%s";
 
