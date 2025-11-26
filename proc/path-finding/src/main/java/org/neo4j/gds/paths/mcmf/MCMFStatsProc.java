@@ -21,7 +21,7 @@ package org.neo4j.gds.paths.mcmf;
 
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
-import org.neo4j.gds.procedures.algorithms.pathfinding.MaxFlowStatsResult;
+import org.neo4j.gds.procedures.algorithms.pathfinding.MCMFStatsResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -34,19 +34,19 @@ import static org.neo4j.gds.paths.maxflow.MaxFlowConstants.MAXFLOW_DESCRIPTION;
 import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class MaxFlowStatsProc {
-    private static final String proc = "gds.maxFlow.stats";
+public class MCMFStatsProc {
+    private static final String proc = "gds.maxFlow.minCost.stats";
 
     @Context
     public GraphDataScienceProcedures facade;
 
     @Procedure(name = proc, mode = READ)
     @Description(MAXFLOW_DESCRIPTION)
-    public Stream<MaxFlowStatsResult> stream(
+    public Stream<MCMFStatsResult> stream(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.algorithms().pathFinding().maxFlowStats(graphName, configuration);
+        return facade.algorithms().pathFinding().mcmfStats(graphName, configuration);
     }
 
     @Procedure(value = proc + ".estimate", mode = READ)
@@ -55,7 +55,7 @@ public class MaxFlowStatsProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.algorithms().pathFinding().maxFlowStatsEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.algorithms().pathFinding().mcmfStatsEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
 }
