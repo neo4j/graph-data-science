@@ -32,5 +32,6 @@ public record PathFindingStubs(
     SingleSourceShortestPathDijkstraMutateStub singleSourceDijktra,
     SpanningTreeMutateStub spanningTree,
     SteinerTreeMutateStub steinerTree,
-    MaxFlowMutateStub maxFlow
+    MaxFlowMutateStub maxFlow,
+    MCMFMutateStub mcmf
 ) {}

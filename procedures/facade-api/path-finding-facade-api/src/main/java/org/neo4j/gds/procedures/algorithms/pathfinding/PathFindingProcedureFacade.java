@@ -162,6 +162,24 @@ public interface PathFindingProcedureFacade {
 
     Stream<MemoryEstimateResult> maxFlowWriteEstimate( Object graphNameOrConfiguration, Map<String, Object> algorithmConfiguration);
 
+    Stream<MCMFMutateResult> mcmfMutate(String graphName, Map<String, Object> configuration);
+
+    Stream<MemoryEstimateResult> mcmfMutateEstimate( Object graphNameOrConfiguration, Map<String, Object> algorithmConfiguration);
+
+    Stream<MaxFlowStreamResult> mcmfStream(String graphName, Map<String, Object> configuration);
+
+    Stream<MemoryEstimateResult> mcmfStreamEstimate( Object graphNameOrConfiguration, Map<String, Object> algorithmConfiguration);
+
+
+    Stream<MCMFStatsResult> mcmfStats(String graphName, Map<String, Object> configuration);
+
+    Stream<MemoryEstimateResult> mcmfStatsEstimate( Object graphNameOrConfiguration, Map<String, Object> algorithmConfiguration);
+
+
+    Stream<MCMFWriteResult> mcmfWrite(String graphName, Map<String, Object> configuration);
+
+    Stream<MemoryEstimateResult> mcmfWriteEstimate( Object graphNameOrConfiguration, Map<String, Object> algorithmConfiguration);
+
     Stream<SpanningTreeStreamResult> prizeCollectingSteinerTreeStream(String graphName, Map<String, Object> configuration);
 
     Stream<PrizeCollectingSteinerTreeMutateResult> prizeCollectingSteinerTreeMutate(String graphName, Map<String, Object> configuration);

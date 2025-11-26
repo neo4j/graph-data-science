@@ -317,6 +317,59 @@ public final class PushbackPathFindingProcedureFacade implements PathFindingProc
     }
 
     @Override
+    public Stream<MCMFMutateResult> mcmfMutate(String graphName, Map<String, Object> configuration) {
+        return mutateProcedureFacade.mcmf(graphName,configuration);
+    }
+
+    @Override
+    public Stream<MemoryEstimateResult> mcmfMutateEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        return Stream.empty();
+    }
+
+    @Override
+    public Stream<MaxFlowStreamResult> mcmfStream(String graphName, Map<String, Object> configuration) {
+        return streamProcedureFacade.mcmf(graphName,configuration);
+    }
+
+    @Override
+    public Stream<MemoryEstimateResult> mcmfStreamEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        return Stream.empty();
+    }
+
+    @Override
+    public Stream<MCMFStatsResult> mcmfStats(String graphName, Map<String, Object> configuration) {
+        return statsProcedureFacade.mcmf(graphName,configuration);
+
+    }
+
+    @Override
+    public Stream<MemoryEstimateResult> mcmfStatsEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        return Stream.empty();
+    }
+
+    @Override
+    public Stream<MCMFWriteResult> mcmfWrite(String graphName, Map<String, Object> configuration) {
+        return writeProcedureFacade.mcmf(graphName,configuration);
+    }
+
+    @Override
+    public Stream<MemoryEstimateResult> mcmfWriteEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        return Stream.empty();
+    }
+
+    @Override
     public Stream<SpanningTreeStreamResult> prizeCollectingSteinerTreeStream(
         String graphName,
         Map<String, Object> configuration

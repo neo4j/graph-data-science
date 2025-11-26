@@ -100,6 +100,13 @@ class PushbackPathFindingProcedureFacadeTest {
         }
 
         @Test
+        void mcmfMutate() {
+            facade.mcmfMutate(graphName, config);
+            verify(mutateFacadeMock).mcmf(graphName, config);
+            verifyNoInteractions(streamFacadeMock, statsFacadeMock, writeFacadeMock);
+        }
+
+        @Test
         void prizeCollectingSteinerTreeMutate() {
             facade.prizeCollectingSteinerTreeMutate(graphName, config);
             verify(mutateFacadeMock).prizeCollectingSteinerTree(graphName, config);
@@ -187,6 +194,13 @@ class PushbackPathFindingProcedureFacadeTest {
         }
 
         @Test
+        void mcmfStats() {
+            facade.mcmfStats(graphName, config);
+            verify(statsFacadeMock).mcmf(graphName, config);
+            verifyNoInteractions(mutateFacadeMock,streamFacadeMock, writeFacadeMock);
+        }
+
+        @Test
         void prizeCollectingSteinerTreeStats() {
             facade.prizeCollectingSteinerTreeStats(graphName, config);
             verify(statsFacadeMock).prizeCollectingSteinerTree(graphName, config);
@@ -263,6 +277,13 @@ class PushbackPathFindingProcedureFacadeTest {
         void maxFlowStream() {
             facade.maxFlowStream(graphName, config);
             verify(streamFacadeMock).maxFlow(graphName, config);
+            verifyNoInteractions(mutateFacadeMock, statsFacadeMock, writeFacadeMock);
+        }
+
+        @Test
+        void mcmfStream() {
+            facade.mcmfStream(graphName, config);
+            verify(streamFacadeMock).mcmf(graphName, config);
             verifyNoInteractions(mutateFacadeMock, statsFacadeMock, writeFacadeMock);
         }
 
@@ -358,6 +379,13 @@ class PushbackPathFindingProcedureFacadeTest {
             facade.maxFlowWrite(graphName, config);
             verify(writeFacadeMock).maxFlow(graphName, config);
             verifyNoInteractions(mutateFacadeMock, statsFacadeMock, streamFacadeMock);
+        }
+
+        @Test
+        void mcmfWrite() {
+            facade.mcmfWrite(graphName, config);
+            verify(writeFacadeMock).mcmf(graphName, config);
+            verifyNoInteractions(mutateFacadeMock,statsFacadeMock,streamFacadeMock);
         }
 
         @Test
