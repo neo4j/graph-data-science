@@ -39,6 +39,7 @@ import org.neo4j.gds.core.loading.validation.SourceNodeRequirement;
 import org.neo4j.gds.core.loading.validation.SourceNodeTargetNodeRequirement;
 import org.neo4j.gds.core.loading.validation.SourceNodeTargetNodesGraphStoreValidation;
 import org.neo4j.gds.core.loading.validation.SourceNodesRequirement;
+import org.neo4j.gds.core.loading.validation.TargetNodesRequirement;
 import org.neo4j.gds.core.loading.validation.UndirectedOnlyRequirement;
 import org.neo4j.gds.dag.longestPath.DagLongestPathParameters;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortParameters;
@@ -317,7 +318,10 @@ public class PathFindingComputeBusinessFacade {
             graphName,
             graphParameters,
             relationshipProperty,
-            new GraphStoreValidation(new NoAlgorithmRequirements()),
+            new AlgorithmGraphStoreRequirementsBuilder()
+                .withAlgorithmRequirement(new SourceNodesRequirement(parameters.sourceNodes().inputNodes()))
+                .withAlgorithmRequirement(new TargetNodesRequirement(parameters.targetNodes().inputNodes()))
+                .build(),
             Optional.empty(),
             user,
             databaseId
