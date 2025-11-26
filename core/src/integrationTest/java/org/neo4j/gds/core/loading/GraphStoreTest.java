@@ -41,10 +41,13 @@ import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.api.schema.RelationshipSchema;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.GraphLoader;
+import org.neo4j.gds.core.GraphStoreFactorySuppliers;
 import org.neo4j.gds.core.compression.varlong.CompressedAdjacencyList;
 import org.neo4j.gds.core.huge.UnionGraph;
 import org.neo4j.gds.core.loading.NullPropertyMap.DoubleNullPropertyMap;
 import org.neo4j.gds.extension.Neo4jGraph;
+import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
+import org.neo4j.gds.projection.NativeProjectionGraphStoreFactorySupplier;
 
 import java.time.ZonedDateTime;
 import java.util.Arrays;
@@ -66,38 +69,38 @@ import static org.neo4j.gds.TestSupport.assertGraphEquals;
 import static org.neo4j.gds.TestSupport.fromGdl;
 
 class GraphStoreTest extends BaseTest {
+    private static final GraphStoreFactorySuppliers GRAPH_STORE_FACTORY_SUPPLIERS = new GraphStoreFactorySuppliers(
+        Map.of(
+            GraphProjectFromStoreConfig.class,
+            NativeProjectionGraphStoreFactorySupplier::create
+        )
+    );
 
     @Neo4jGraph
     private static final String DB_CYPHER =
         "CREATE" +
-        "  (i1:Ignore)" +
-        ", (a:A {nodeProperty: 33, a: 33})" +
-        ", (b:B {nodeProperty: 42, b: 42})" +
-        ", (i2:Ignore)" +
-        ", (a)-[:T1 {property1: 42, property2: 1337}]->(b)" +
-        ", (a)-[:T2 {property1: 43}]->(b)" +
-        ", (a)-[:T3 {property2: 1338}]->(b)" +
-        ", (a)-[:T1 {property1: 33}]->(c)" +
-        ", (c)-[:T1 {property1: 33}]->(a)" +
-        ", (b)-[:T1 {property1: 33}]->(c)" +
-        ", (c)-[:T1 {property1: 33}]->(b)";
+            "  (i1:Ignore)" +
+            ", (a:A {nodeProperty: 33, a: 33})" +
+            ", (b:B {nodeProperty: 42, b: 42})" +
+            ", (i2:Ignore)" +
+            ", (a)-[:T1 {property1: 42, property2: 1337}]->(b)" +
+            ", (a)-[:T2 {property1: 43}]->(b)" +
+            ", (a)-[:T3 {property2: 1338}]->(b)" +
+            ", (a)-[:T1 {property1: 33}]->(c)" +
+            ", (c)-[:T1 {property1: 33}]->(a)" +
+            ", (b)-[:T1 {property1: 33}]->(c)" +
+            ", (c)-[:T1 {property1: 33}]->(b)";
 
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("graphsForNodeFilterChecking")
     void testAsNodeFilteredGraph(
-       String desc,
-       List<RelationshipType> relTypes,
-       List<NodeLabel> nodeLabels,
-       boolean expectedIsPresent
+        String desc,
+        List<RelationshipType> relTypes,
+        List<NodeLabel> nodeLabels,
+        boolean expectedIsPresent
     ) {
-        GraphLoader graphLoader = new StoreLoaderBuilder()
-            .databaseService(db)
-            .graphName("myGraph")
-            .addNodeProjection(NodeProjection.of("A"))
-            .addNodeProjection(NodeProjection.of("B"))
-            .relationshipProjections(relationshipProjections())
-            .build();
+        var graphLoader = createGraphLoader();
 
         GraphStore graphStore = graphLoader.graphStore();
         var graph = graphStore.getGraph(nodeLabels, relTypes, Optional.empty());
@@ -113,13 +116,7 @@ class GraphStoreTest extends BaseTest {
         Optional<String> relProperty,
         String expectedGraph
     ) {
-        GraphLoader graphLoader = new StoreLoaderBuilder()
-            .databaseService(db)
-            .graphName("myGraph")
-            .addNodeProjection(NodeProjection.of("A"))
-            .addNodeProjection(NodeProjection.of("B"))
-            .relationshipProjections(relationshipProjections())
-            .build();
+        var graphLoader = createGraphLoader();
 
         GraphStore graphStore = graphLoader.graphStore();
 
@@ -140,8 +137,7 @@ class GraphStoreTest extends BaseTest {
     @ParameterizedTest(name = "{0}")
     @MethodSource("validNodeFilterParameters")
     void testFilteringGraphsByNodeLabels(String desc, List<NodeLabel> labels, String expectedGraph) {
-        GraphLoader graphLoader = new StoreLoaderBuilder()
-            .databaseService(db)
+        var graphLoader = initialiseStoreLoaderBuilder()
             .graphName("myGraph")
             .nodeProjections(nodeProjections())
             .addRelationshipProjection(RelationshipProjection.of("T1", Orientation.NATURAL))
@@ -158,10 +154,7 @@ class GraphStoreTest extends BaseTest {
 
     @Test
     void testModificationDate() throws InterruptedException {
-        GraphStore graphStore = new StoreLoaderBuilder()
-            .databaseService(db)
-            .build()
-            .graphStore();
+        var graphStore = initialiseStoreLoaderBuilder().build().graphStore();
 
         // add node properties
         ZonedDateTime initialTime = graphStore.modificationTime();
@@ -191,8 +184,7 @@ class GraphStoreTest extends BaseTest {
     void testRemoveNodeProperty() {
         runQuery("CREATE (a {nodeProp: 42})-[:REL]->(b {nodeProp: 23})");
 
-        GraphStore graphStore = new StoreLoaderBuilder()
-            .databaseService(db)
+        var graphStore = initialiseStoreLoaderBuilder()
             .addNodeProperty(PropertyMapping.of("nodeProp", 0D))
             .build()
             .graphStore();
@@ -206,8 +198,7 @@ class GraphStoreTest extends BaseTest {
     void deleteRelationshipsAndProperties() {
         runQuery("CREATE ()-[:REL {p: 2}]->(), ()-[:LER {p: 1}]->(), ()-[:LER {p: 2}]->(), ()-[:LER {q: 2}]->()");
 
-        GraphStore graphStore = new StoreLoaderBuilder()
-            .databaseService(db)
+        var graphStore = initialiseStoreLoaderBuilder()
             .addRelationshipProjection(RelationshipProjection
                 .builder()
                 .type("REL")
@@ -225,8 +216,7 @@ class GraphStoreTest extends BaseTest {
                         )
                     ).build()
             )
-            .build()
-            .graphStore();
+            .build().graphStore();
 
         assertThat(graphStore.relationshipCount()).isEqualTo(4L);
 
@@ -243,12 +233,10 @@ class GraphStoreTest extends BaseTest {
 
     @Test
     void unionGraphPrecedesNodeFilteredGraph() {
-        var graphStore = new StoreLoaderBuilder()
-            .databaseService(db)
+        var graphStore = initialiseStoreLoaderBuilder()
             .addNodeLabels("A", "B")
             .addRelationshipTypes("T1", "T3")
-            .build()
-            .graphStore();
+            .build().graphStore();
 
         Graph graph = graphStore.getGraph(
             List.of(NodeLabel.of("A")),
@@ -261,13 +249,11 @@ class GraphStoreTest extends BaseTest {
 
     @Test
     void nodeOnlyGraph() {
-        var graphStore = new StoreLoaderBuilder()
-            .databaseService(db)
+        var graphStore = initialiseStoreLoaderBuilder()
             .addNodeLabels("A", "B")
             .addNodeProperty(PropertyMapping.of("nodeProperty"))
             .addRelationshipTypes("T1", "T3")
-            .build()
-            .graphStore();
+            .build().graphStore();
 
         var labelAGraph = graphStore.getGraph(NodeLabel.of("A"));
         var labelABGraph = graphStore.getGraph(List.of(NodeLabel.of("A"), NodeLabel.of("B")));
@@ -412,5 +398,20 @@ class GraphStoreTest extends BaseTest {
                 "(b:B {nodeProperty: 42, b: 42})"
             )
         );
+    }
+
+    private GraphLoader createGraphLoader() {
+        return initialiseStoreLoaderBuilder()
+            .graphName("myGraph")
+            .addNodeProjection(NodeProjection.of("A"))
+            .addNodeProjection(NodeProjection.of("B"))
+            .relationshipProjections(relationshipProjections())
+            .build();
+    }
+
+    private StoreLoaderBuilder initialiseStoreLoaderBuilder() {
+        return new StoreLoaderBuilder()
+            .databaseService(db)
+            .graphStoreFactorySuppliers(GRAPH_STORE_FACTORY_SUPPLIERS);
     }
 }

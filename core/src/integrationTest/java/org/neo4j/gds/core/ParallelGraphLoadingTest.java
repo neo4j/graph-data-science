@@ -27,6 +27,8 @@ import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.collections.PageUtil;
+import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
+import org.neo4j.gds.projection.NativeProjectionGraphStoreFactorySupplier;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Label;
@@ -63,6 +65,12 @@ import static org.neo4j.gds.core.utils.RawValues.combineIntInt;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class ParallelGraphLoadingTest extends RandomGraphTestCase {
+    private static final GraphStoreFactorySuppliers GRAPH_STORE_FACTORY_SUPPLIERS = new GraphStoreFactorySuppliers(
+        Map.of(
+            GraphProjectFromStoreConfig.class,
+            NativeProjectionGraphStoreFactorySupplier::create
+        )
+    );
 
     @Test
     void shouldLoadAllNodes() {
@@ -100,8 +108,7 @@ class ParallelGraphLoadingTest extends RandomGraphTestCase {
         String message = "oh noes";
         ThrowingThreadPool pool = new ThrowingThreadPool(3, message);
         try {
-            new StoreLoaderBuilder()
-                .databaseService(db)
+            initialiseStoreLoaderBuilder(db)
                 .executorService(pool)
                 .build()
                 .graph();
@@ -189,9 +196,7 @@ class ParallelGraphLoadingTest extends RandomGraphTestCase {
 
     private GraphStore load(GraphDatabaseService db, Consumer<StoreLoaderBuilder> block) {
         ExecutorService pool = Executors.newFixedThreadPool(3);
-        StoreLoaderBuilder loader = new StoreLoaderBuilder()
-            .databaseService(db)
-            .executorService(pool);
+        StoreLoaderBuilder loader = initialiseStoreLoaderBuilder(db).executorService(pool);
         block.accept(loader);
         try {
             return loader.build().graphStore();
@@ -237,4 +242,9 @@ class ParallelGraphLoadingTest extends RandomGraphTestCase {
         }
     }
 
+    private StoreLoaderBuilder initialiseStoreLoaderBuilder(GraphDatabaseService db) {
+        return new StoreLoaderBuilder()
+            .databaseService(db)
+            .graphStoreFactorySuppliers(GRAPH_STORE_FACTORY_SUPPLIERS);
+    }
 }

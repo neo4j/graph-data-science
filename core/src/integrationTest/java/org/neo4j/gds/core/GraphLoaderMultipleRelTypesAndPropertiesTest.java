@@ -37,10 +37,13 @@ import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
+import org.neo4j.gds.projection.NativeProjectionGraphStoreFactorySupplier;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.LongStream;
@@ -70,6 +73,12 @@ import static org.neo4j.gds.core.Aggregation.SUM;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class GraphLoaderMultipleRelTypesAndPropertiesTest extends BaseTest {
+    private static final GraphStoreFactorySuppliers GRAPH_STORE_FACTORY_SUPPLIERS = new GraphStoreFactorySuppliers(
+        Map.of(
+            GraphProjectFromStoreConfig.class,
+            NativeProjectionGraphStoreFactorySupplier::create
+        )
+    );
 
     private static final String DB_CYPHER =
         "CREATE" +
@@ -88,7 +97,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest extends BaseTest {
 
     @Test
     void nodeProjectionsWithExclusiveProperties() {
-        GraphStore graphStore = new StoreLoaderBuilder()
+        GraphStore graphStore = initialiseStoreLoaderBuilder()
             .putNodeProjectionsWithIdentifier("N1",
                 NodeProjection.builder().label("Node1").addProperty(PropertyMapping.of("prop1", 0.0D)).build()
             )
@@ -97,7 +106,6 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest extends BaseTest {
                 NodeProjection.builder().label("Node2").addProperty(PropertyMapping.of("prop2", 1.0D)).build()
             )
             .graphName("myGraph")
-            .databaseService(db)
             .build()
             .graphStore();
 
@@ -120,7 +128,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest extends BaseTest {
         NodeLabel node2Identifier = NodeLabel.of("Node2");
 
 
-        GraphStore graphStore = new StoreLoaderBuilder()
+        GraphStore graphStore = initialiseStoreLoaderBuilder()
             .putNodeProjectionsWithIdentifier(
                 allIdentifier.name(),
                 NodeProjection
@@ -132,7 +140,6 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest extends BaseTest {
                 node2Identifier.name(),
                 NodeProjection.builder().label("Node2").addProperty(PropertyMapping.of("prop2", 8.0D)).build()
             ).graphName("myGraph")
-            .databaseService(db)
             .build()
             .graphStore();
 
@@ -304,8 +311,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest extends BaseTest {
         String prop1 = "prop1";
         String prop2 = "prop2";
 
-        var graphStore = new StoreLoaderBuilder()
-            .databaseService(db)
+        var graphStore = initialiseStoreLoaderBuilder()
             .addRelationshipProjections(
                 RelationshipProjection
                     .builder()
@@ -706,5 +712,11 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest extends BaseTest {
         assertEquals(unionGraphExpectedRelCount, unionGraph.relationshipCount());
         assertEquals(rel1GraphExpectedNodeCount, rel1Graph.nodeCount());
         assertEquals(rel1GraphExpectedRelCount, rel1Graph.relationshipCount());
+    }
+
+    private StoreLoaderBuilder initialiseStoreLoaderBuilder() {
+        return new StoreLoaderBuilder()
+            .databaseService(db)
+            .graphStoreFactorySuppliers(GRAPH_STORE_FACTORY_SUPPLIERS);
     }
 }

@@ -83,4 +83,6 @@ dependencies {
     testImplementation openGds.jqwik
     testImplementation openGds.qaladatagen
     testImplementation openGds.junit.pioneer
+
+    integrationTestImplementation project(':native-projection')
 }

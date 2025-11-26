@@ -40,7 +40,11 @@ import org.neo4j.gds.TestGraphLoaderFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.legacycypherprojection.CypherProjectionGraphStoreFactorySupplier;
+import org.neo4j.gds.legacycypherprojection.GraphProjectFromCypherConfig;
 import org.neo4j.gds.logging.GdsTestLog;
+import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
+import org.neo4j.gds.projection.NativeProjectionGraphStoreFactorySupplier;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
@@ -59,6 +63,19 @@ import static org.neo4j.gds.TestSupport.fromGdl;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 
 class GraphLoaderTest extends BaseTest {
+    private static final GraphStoreFactorySuppliers CYPHER_SUPPLIERS = new GraphStoreFactorySuppliers(
+        Map.of(
+            GraphProjectFromCypherConfig.class,
+            CypherProjectionGraphStoreFactorySupplier::create
+        )
+    );
+
+    private static final GraphStoreFactorySuppliers NATIVE_SUPPLIERS = new GraphStoreFactorySuppliers(
+        Map.of(
+            GraphProjectFromStoreConfig.class,
+            NativeProjectionGraphStoreFactorySupplier::create
+        )
+    );
 
     public static final String DB_CYPHER =
         "CREATE" +
@@ -117,8 +134,7 @@ class GraphLoaderTest extends BaseTest {
     @Test
     void shouldLogProgressWithNativeLoading() {
         var log = new GdsTestLog();
-        new StoreLoaderBuilder()
-            .databaseService(db)
+        initialiseStoreLoaderBuilder()
             .graphName("graph")
             .nodeProjectionsWithIdentifier(Map.of("AllNodes", NodeProjection.all()))
             .relationshipProjectionsWithIdentifier(Map.of("AllRels", RelationshipProjection.ALL))
@@ -135,8 +151,7 @@ class GraphLoaderTest extends BaseTest {
     void shouldTrackProgressWithNativeLoading() {
         var log = new GdsTestLog();
 
-        new StoreLoaderBuilder()
-            .databaseService(db)
+        initialiseStoreLoaderBuilder()
             .graphName("graph")
             .nodeProjectionsWithIdentifier(Map.of("AllNodes", NodeProjection.all()))
             .relationshipProjectionsWithIdentifier(Map.of("AllRels", RelationshipProjection.ALL))
@@ -176,8 +191,7 @@ class GraphLoaderTest extends BaseTest {
     void shouldLogProgressWithCypherLoading() {
         var progressRegex = Pattern.compile("(\\d+)%$");
         var log = new GdsTestLog();
-        new CypherLoaderBuilder()
-            .databaseService(db)
+        initialiseCypherLoaderBuilder()
             .graphName("graph")
             .nodeQuery("MATCH (n) RETURN id(n) AS id, coalesce(n.prop1, 42) AS prop1")
             .relationshipQuery("MATCH (n)-[:REL1|REL2]-(m) RETURN id(n) AS source, id(m) AS target")
@@ -321,8 +335,7 @@ class GraphLoaderTest extends BaseTest {
     void stopsImportingWhenTransactionHasBeenTerminated() {
         TerminationFlag terminationFlag = () -> false;
         assertTransactionTermination(
-            () -> new StoreLoaderBuilder()
-                .databaseService(db)
+            () -> initialiseStoreLoaderBuilder()
                 .terminationFlag(terminationFlag)
                 .build()
                 .graph()
@@ -391,8 +404,7 @@ class GraphLoaderTest extends BaseTest {
 
     @Test
     void shouldLoadSingleNodeLabelViaNativeLoader() {
-        var graphStore = new StoreLoaderBuilder()
-            .databaseService(db)
+        var graphStore = initialiseStoreLoaderBuilder()
             .graphName("graph")
             .nodeProjectionsWithIdentifier(Map.of("AllNodes", NodeProjection.all()))
             .relationshipProjectionsWithIdentifier(Map.of("AllRels", RelationshipProjection.ALL))
@@ -406,8 +418,7 @@ class GraphLoaderTest extends BaseTest {
     @Test
     void shouldInverseIndexRelationships() {
         var relationshipType = RelationshipType.of("Rel");
-        var graphStore = new StoreLoaderBuilder()
-            .databaseService(db)
+        var graphStore = initialiseStoreLoaderBuilder()
             .graphName("graph")
             .putNodeProjectionsWithIdentifier("Node", NodeProjection.all())
             .putRelationshipProjectionsWithIdentifier(
@@ -433,8 +444,7 @@ class GraphLoaderTest extends BaseTest {
     @ParameterizedTest
     @MethodSource("orientationCombinations")
     void nativeOrientations(Orientation orientation1, Orientation orientation2, boolean undirectedExpectation) {
-        var graphStore = new StoreLoaderBuilder()
-            .databaseService(db)
+        var graphStore = initialiseStoreLoaderBuilder()
             .graphName("graph")
             .addNodeLabel("Node1")
             .addRelationshipProjection(RelationshipProjection.of("REL1", orientation1))
@@ -447,8 +457,7 @@ class GraphLoaderTest extends BaseTest {
 
     @Test
     void cypherProjectionsAreNeverUndirected() {
-        var graphStore = new CypherLoaderBuilder()
-            .databaseService(db)
+        var graphStore = initialiseCypherLoaderBuilder()
             .graphName("graph")
             .nodeQuery("UNWIND [0, 1] AS id RETURN id")
             .relationshipQuery("RETURN 0 AS source, 1 AS target, 'TEST' AS type")
@@ -456,5 +465,17 @@ class GraphLoaderTest extends BaseTest {
             .graphStore();
 
         assertFalse(graphStore.schema().relationshipSchema().isUndirected());
+    }
+
+    private CypherLoaderBuilder initialiseCypherLoaderBuilder() {
+        return new CypherLoaderBuilder()
+            .databaseService(db)
+            .graphStoreFactorySuppliers(CYPHER_SUPPLIERS);
+    }
+
+    private StoreLoaderBuilder initialiseStoreLoaderBuilder() {
+        return new StoreLoaderBuilder()
+            .databaseService(db)
+            .graphStoreFactorySuppliers(NATIVE_SUPPLIERS);
     }
 }
