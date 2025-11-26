@@ -42,7 +42,7 @@ public class MCMFStatsProc {
 
     @Procedure(name = proc, mode = READ)
     @Description(MAXFLOW_DESCRIPTION)
-    public Stream<MCMFStatsResult> stream(
+    public Stream<MCMFStatsResult> stats(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
