@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.pricesteiner;
 
-import com.carrotsearch.hppc.BitSet;
 import org.agrona.collections.MutableLong;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
@@ -299,9 +298,3 @@ class GrowthPhase {
         return clusterStructure;
     }
 }
-
-record GrowthResult(HugeLongArray treeEdges,
-                    long numberOfTreeEdges,
-                    HugeLongArray edgeParts,
-                    HugeDoubleArray edgeCosts,
-                    BitSet activeOriginalNodes) {}
