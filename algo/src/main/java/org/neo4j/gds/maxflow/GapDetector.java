@@ -27,7 +27,6 @@ public interface GapDetector {
 
     boolean moveFrom(long node, long from, long to);
 
-
     class Noop implements GapDetector {
 
         @Override

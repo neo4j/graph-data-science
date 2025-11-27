@@ -17,18 +17,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.maxflow;
+package org.neo4j.gds.mcmf;
 
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
-import org.neo4j.gds.core.utils.progress.tasks.Task;
-import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.collections.ha.HugeObjectArray;
+import org.neo4j.gds.maxflow.FlowRelationship;
 
-public final class MaxFlowTask {
+public record CostFlowResult(HugeObjectArray<FlowRelationship> flow, double totalFlow, double totalCost) {
 
-    private MaxFlowTask() {}
-
-    public static Task create() {
-
-        return Tasks.leaf(AlgorithmLabel.MaxFlow.asString(), 100);
-    }
+    public static CostFlowResult EMPTY = new CostFlowResult(HugeObjectArray.newArray(FlowRelationship.class, 0), 0D,0D);
 }

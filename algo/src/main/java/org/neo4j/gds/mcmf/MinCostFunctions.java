@@ -17,18 +17,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.maxflow;
+package org.neo4j.gds.mcmf;
 
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
-import org.neo4j.gds.core.utils.progress.tasks.Task;
-import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+class MinCostFunctions {
+    public final static double TOLERANCE = 1e-10;
 
-public final class MaxFlowTask {
-
-    private MaxFlowTask() {}
-
-    public static Task create() {
-
-        return Tasks.leaf(AlgorithmLabel.MaxFlow.asString(), 100);
+    static  double reducedCost(double cost, double sPrize, double tPrize){
+        return  cost + sPrize - tPrize;
     }
+
+    static boolean isAdmissible(double reducedCost){
+        return  reducedCost < -TOLERANCE;
+    }
+
+    static boolean isResidualEdge(double residualCapacity){
+        return residualCapacity > TOLERANCE;
+    }
+
 }

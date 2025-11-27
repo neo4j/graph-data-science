@@ -70,7 +70,8 @@ class FlowGraphTest {
                 outgoingCapacityFromSource
             )
         }; //more is useless since this is max in network
-        return FlowGraph.create(graph, supply, demand, TerminationFlag.RUNNING_TRUE, new Concurrency(4));
+        return new FlowGraphBuilder(graph,supply, demand, TerminationFlag.RUNNING_TRUE, new Concurrency(4))
+            .build();
     }
 
     @Test

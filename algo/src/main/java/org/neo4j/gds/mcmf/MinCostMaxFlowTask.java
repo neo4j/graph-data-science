@@ -17,18 +17,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.maxflow;
+package org.neo4j.gds.mcmf;
 
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.maxflow.MaxFlowTask;
 
-public final class MaxFlowTask {
+import java.util.List;
 
-    private MaxFlowTask() {}
+public final class MinCostMaxFlowTask {
+
+    private MinCostMaxFlowTask() {}
 
     public static Task create() {
+            var  maxFlowTask = MaxFlowTask.create();
+            var flowTask =Tasks.iterativeOpen("Cost refinement",()->List.of(Tasks.leaf("Refine",1)));
+            return Tasks.task(AlgorithmLabel.MCMF.asString(), List.of(maxFlowTask, flowTask));
+        }
 
-        return Tasks.leaf(AlgorithmLabel.MaxFlow.asString(), 100);
-    }
 }

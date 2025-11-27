@@ -68,7 +68,7 @@ class MaxFlowTest {
 
     void testGraph(Graph graph, InputNodes sourceNodes, InputNodes targetNodes, double expectedFlow, int concurrency) {
         var params = new MaxFlowParameters(sourceNodes, targetNodes, new Concurrency(concurrency), .5, true);
-        var x = new MaxFlow(graph, params, ProgressTracker.NULL_TRACKER, TerminationFlag.RUNNING_TRUE);
+        var x =  new MaxFlow(graph, params, ProgressTracker.NULL_TRACKER, TerminationFlag.RUNNING_TRUE);
         var result = x.compute();
         assertThat(result.totalFlow()).isCloseTo(expectedFlow, Offset.offset(TOLERANCE));
     }
@@ -406,7 +406,7 @@ class MaxFlowTest {
             EmptyTaskRegistryFactory.INSTANCE
         );
 
-        new MaxFlow(
+         new MaxFlow(
             graph,
             new MaxFlowParameters(
                 new ListInputNodes(List.of(0L)),

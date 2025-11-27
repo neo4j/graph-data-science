@@ -1,3 +1,4 @@
+
 /*
  * Copyright (c) "Neo4j"
  * Neo4j Sweden AB [http://neo4j.com]
@@ -17,18 +18,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.maxflow;
+package org.neo4j.gds.mcmf;
 
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
-import org.neo4j.gds.core.utils.progress.tasks.Task;
-import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.InputNodes;
+import org.neo4j.gds.annotation.Parameters;
+import org.neo4j.gds.core.concurrency.Concurrency;
 
-public final class MaxFlowTask {
-
-    private MaxFlowTask() {}
-
-    public static Task create() {
-
-        return Tasks.leaf(AlgorithmLabel.MaxFlow.asString(), 100);
-    }
+@Parameters
+public record MCMFParameters(InputNodes sourceNodes, InputNodes targetNodes, Concurrency concurrency, double freq, boolean useGapRelabelling, double alpha) {
 }

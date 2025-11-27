@@ -19,22 +19,15 @@
  */
 package org.neo4j.gds.maxflow;
 
-import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
-import org.neo4j.gds.collections.ha.HugeLongArray;
-import org.neo4j.gds.core.utils.paged.HugeLongArrayQueue;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.termination.TerminationFlag;
 
 public final class MaxFlow extends Algorithm<FlowResult> {
     private final Graph graph;
     private final MaxFlowParameters parameters;
-
-    private FlowGraph flowGraph;
-    private HugeDoubleArray excess;
-    private HugeLongArray label;
 
     public MaxFlow(
         Graph graph,
@@ -50,75 +43,28 @@ public final class MaxFlow extends Algorithm<FlowResult> {
 
     public FlowResult compute() {
         progressTracker.beginSubTask();
-        initPreflow();
-        maximizeFlowSequential(flowGraph.superSource(), flowGraph.superTarget());
-        maximizeFlowSequential(flowGraph.superTarget(), flowGraph.superSource());
+        var flowGraph= createFlowGraph();
+        var excess = HugeDoubleArray.newArray(flowGraph.nodeCount());
+        var maxFlowPhase  = new MaxFlowPhase(flowGraph,excess,parameters,progressTracker,terminationFlag);
+        maxFlowPhase.computeMaxFlow();
         progressTracker.endSubTask();
         return flowGraph.createFlowResult();
     }
 
-    private void initPreflow() {
+    private FlowGraph createFlowGraph(){
         var supplyAndDemand = SupplyAndDemandFactory.create(graph, parameters.sourceNodes(), parameters.targetNodes());
-        flowGraph = FlowGraph.create(graph, supplyAndDemand.getLeft(), supplyAndDemand.getRight(), terminationFlag, parameters.concurrency());
-        excess = HugeDoubleArray.newArray(flowGraph.nodeCount());
-        excess.setAll(x -> 0D);
-        flowGraph.forEachRelationship(
-            flowGraph.superSource(), (s, t, relIdx, residualCapacity, isReverse) -> {
-                flowGraph.push(relIdx, residualCapacity, isReverse);
-                excess.set(t, residualCapacity);
-                return true;
-            }
-        );
-        label = HugeLongArray.newArray(flowGraph.nodeCount());
+        return new FlowGraphBuilder(
+            graph,
+            supplyAndDemand.getLeft(),
+            supplyAndDemand.getRight(),
+            terminationFlag,
+            parameters.concurrency()
+        ).build();
     }
 
-    private void maximizeFlowSequential(long sourceNode, long targetNode) {
-        var nodeCount = flowGraph.nodeCount();
-        label.set(sourceNode, nodeCount);
 
-        var workingQueue = HugeLongArrayQueue.newQueue(nodeCount);
-        var inWorkingQueue = new BitSet(nodeCount); //need not be atomic atm
-        var totalExcess = 0D;
-        for (var nodeId = 0; nodeId < flowGraph.originalNodeCount(); nodeId++) {
-            if (excess.get(nodeId) > 0.0) {
-                workingQueue.add(nodeId);
-                inWorkingQueue.set(nodeId);
-                totalExcess += excess.get(nodeId);
-            }
-        }
-        var excessAtDestinations = excess.get(sourceNode) + excess.get(targetNode);
-        inWorkingQueue.set(targetNode); //it's not, but we don't want to add it
 
-        HugeLongArrayQueue[] threadQueues = new HugeLongArrayQueue[parameters.concurrency().value()];
-        for (int i = 0; i < threadQueues.length; i++) {
-            threadQueues[i] = HugeLongArrayQueue.newQueue(flowGraph.nodeCount());
-        }
 
-        var globalRelabeling = GlobalRelabeling.createRelabeling(
-            flowGraph,
-            label,
-            sourceNode,
-            targetNode,
-            parameters.concurrency(),
-            threadQueues,
-            terminationFlag
-        );
 
-        var gapDetector = GapFactory.create(parameters.useGapRelabelling(), nodeCount, label, parameters.concurrency());
 
-        var discharging = new SequentialDischarging(
-            flowGraph,
-            excess,
-            label,
-            workingQueue,
-            inWorkingQueue,
-            globalRelabeling,
-            gapDetector,
-            parameters.freq(),
-            excessAtDestinations,
-            totalExcess,
-            progressTracker
-        );
-        discharging.dischargeUntilDone();
-    }
 }

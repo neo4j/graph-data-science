@@ -17,18 +17,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.maxflow;
+package org.neo4j.gds.mcmf;
 
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
-import org.neo4j.gds.core.utils.progress.tasks.Task;
-import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+public interface CostAndCapacityEdgeConsumer {
+    boolean accept(long s, long t, long relIdx, double residualCapacity, double cost, boolean isReverse);
 
-public final class MaxFlowTask {
-
-    private MaxFlowTask() {}
-
-    public static Task create() {
-
-        return Tasks.leaf(AlgorithmLabel.MaxFlow.asString(), 100);
+    default CostAndCapacityEdgeConsumer andThen(CostAndCapacityEdgeConsumer after) {
+        return (s, t, relIdx, residualCapacity, cost, isReverse) -> {
+            this.accept(s, t, relIdx, residualCapacity, cost, isReverse);
+            return after.accept(s, t, relIdx, residualCapacity, cost, isReverse);
+        };
     }
+
 }

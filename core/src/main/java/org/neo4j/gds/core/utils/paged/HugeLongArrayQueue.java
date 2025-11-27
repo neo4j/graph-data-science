@@ -20,9 +20,9 @@
 package org.neo4j.gds.core.utils.paged;
 
 import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.mem.Estimate;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryEstimations;
-import org.neo4j.gds.mem.Estimate;
 
 public final class HugeLongArrayQueue {
 
@@ -86,5 +86,10 @@ public final class HugeLongArrayQueue {
 
     public boolean isEmpty() {
         return head == tail;
+    }
+
+    public void clear(){
+        head = 0;
+        tail = 0;
     }
 }

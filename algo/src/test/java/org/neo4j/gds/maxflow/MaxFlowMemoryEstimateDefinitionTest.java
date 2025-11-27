@@ -29,10 +29,10 @@ class MaxFlowMemoryEstimateDefinitionTest {
     @ParameterizedTest
     @CsvSource(
         {
-            "1_000,     1_000,      214_336",
-            "1_000,     10_000,     898_336",
-            "1_000_000, 1_000_000,  213_254_736",
-            "1_000_000, 10_000_000, 897_265_720"
+            "1_000,     1_000,      238_728",
+            "1_000,     10_000,     922_728",
+            "1_000_000, 1_000_000,  237_380_000",
+            "1_000_000, 10_000_000, 921_390_984"
         }
     )
     void shouldEstimateMemoryWithChangingGraphDimensionsCorrectly(long nodeCount, long  relationshipCount, long expected){
@@ -47,10 +47,10 @@ class MaxFlowMemoryEstimateDefinitionTest {
     @ParameterizedTest
     @CsvSource(
         {
-            "1_000,   1,  214_336",
-            "1_000,   4,  217_504",
-            "100_000, 1,  21_326_448",
-            "100_000, 4,  21_626_616"
+            "1_000,   1,  238_728",
+            "1_000,   4,  241_896",
+            "100_000, 1,  23_739_216",
+            "100_000, 4,  24_039_384"
         }
     )
     void shouldEstimateMemoryWithChangingConcurrencyCorrectly(long nodeAndRelCount, int  concurrency, long expected){
@@ -65,10 +65,10 @@ class MaxFlowMemoryEstimateDefinitionTest {
     @ParameterizedTest
     @CsvSource(
         {
-            "1_000,1,1,   214_336",
-            "1_000,10,1,  214_912",
-            "1_000,1,10,  214_912",
-            "1_000,10,10, 215_488"
+            "1_000,1,1,   238_728",
+            "1_000,10,1,  239_304",
+            "1_000,1,10,  239_304",
+            "1_000,10,10, 239_880"
 
         }
     )
@@ -84,10 +84,10 @@ class MaxFlowMemoryEstimateDefinitionTest {
     @ParameterizedTest
     @CsvSource(
         {
-            "1_000,false, 214_336",
-            "1_000,true,  222_424",
-            "10_000,false, 2_133_608",
-            "10_000,true,  2_213_696"
+            "1_000,false, 238_728",
+            "1_000,true,  254_904",
+            "10_000,false, 2_375_128",
+            "10_000,true,  2_535_304"
         }
     )
     void shouldEstimateMemoryGap(long nodeAndRelCount, boolean useGap, long expected){
