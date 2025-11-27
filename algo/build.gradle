@@ -50,7 +50,6 @@ dependencies {
     implementation project(':ml-core')
     implementation project(':ml-algo')
     implementation project(':ml-api')
-    implementation project(':ml-core')
     implementation project(':model-catalog-api')
     implementation project(':pregel')
     implementation project(':progress-tracking')
