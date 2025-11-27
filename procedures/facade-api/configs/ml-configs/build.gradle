@@ -10,6 +10,9 @@ dependencies {
     annotationProcessor project(':config-generator')
     // This is needed for the generated configuration classes
     compileOnly openGds.jetbrains.annotations
+
+    api project(':ml-params')
+
     // Configuration annotations
     implementation project(':annotations')
 

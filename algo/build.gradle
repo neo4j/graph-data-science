@@ -31,10 +31,10 @@ dependencies {
     implementation project(':path-finding-params')
     implementation project(':similarity-params')
     implementation project(':miscellaneous-params')
+    implementation project(':ml-params')
 
     implementation project(':centrality-configs')
     implementation project(':community-configs')
-    implementation project(':ml-configs')
     implementation project(':node-embeddings-configs')
 
     implementation project(':collections-memory-estimation')
