@@ -26,11 +26,22 @@ import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.GraphStoreFactorySuppliers;
+import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
+import org.neo4j.gds.projection.NativeProjectionGraphStoreFactorySupplier;
 import org.neo4j.graphdb.GraphDatabaseService;
+
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 final class HugeGraphNoPropertiesTest extends BaseTest {
+    private static final GraphStoreFactorySuppliers GRAPH_STORE_FACTORY_SUPPLIERS = new GraphStoreFactorySuppliers(
+        Map.of(
+            GraphProjectFromStoreConfig.class,
+            NativeProjectionGraphStoreFactorySupplier::create
+        )
+    );
 
     private static final String DB_CYPHER =
             "CREATE " +
@@ -86,6 +97,7 @@ final class HugeGraphNoPropertiesTest extends BaseTest {
     private Graph loadGraph(final GraphDatabaseService db, Orientation orientation) {
         return new StoreLoaderBuilder()
             .databaseService(db)
+            .graphStoreFactorySuppliers(GRAPH_STORE_FACTORY_SUPPLIERS)
             .globalOrientation(orientation)
             .build()
             .graph();
