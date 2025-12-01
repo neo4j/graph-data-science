@@ -27,9 +27,12 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
+import org.neo4j.gds.projection.NativeProjectionGraphStoreFactorySupplier;
 import org.neo4j.graphdb.Label;
 
 import java.util.Arrays;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -46,6 +49,12 @@ import static org.neo4j.gds.compat.GraphDatabaseApiProxy.applyInFullAccessTransa
  * C:     0      2      2
  */
 class DegreesTest extends BaseTest {
+    private static final GraphStoreFactorySuppliers GRAPH_STORE_FACTORY_SUPPLIERS = new GraphStoreFactorySuppliers(
+        Map.of(
+            GraphProjectFromStoreConfig.class,
+            NativeProjectionGraphStoreFactorySupplier::create
+        )
+    );
 
     private static final String UNI_DIRECTIONAL =
         "CREATE" +
@@ -212,6 +221,7 @@ class DegreesTest extends BaseTest {
         runQuery(cypher);
         GraphStore graphStore = new StoreLoaderBuilder()
             .databaseService(db)
+            .graphStoreFactorySuppliers(GRAPH_STORE_FACTORY_SUPPLIERS)
             .putRelationshipProjectionsWithIdentifier(
                 "TYPE_OUT",
                 RelationshipProjection
