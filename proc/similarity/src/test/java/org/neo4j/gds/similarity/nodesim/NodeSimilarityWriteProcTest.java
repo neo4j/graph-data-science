@@ -37,8 +37,11 @@ import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.core.GraphStoreFactorySuppliers;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
+import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
+import org.neo4j.gds.projection.NativeProjectionGraphStoreFactorySupplier;
 
 import java.util.List;
 import java.util.Map;
@@ -55,7 +58,11 @@ import static org.neo4j.gds.TestSupport.fromGdl;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class NodeSimilarityWriteProcTest extends BaseProcTest {
-
+    private static final GraphStoreFactorySuppliers GRAPH_STORE_FACTORY_SUPPLIERS = new GraphStoreFactorySuppliers(
+        Map.of(
+            GraphProjectFromStoreConfig.class, NativeProjectionGraphStoreFactorySupplier::create
+        )
+    );
 
     @Neo4jGraph
     public static final String DB_CYPHER =
@@ -291,6 +298,7 @@ class NodeSimilarityWriteProcTest extends BaseProcTest {
 
         Graph knnGraph = new StoreLoaderBuilder()
             .databaseService(db)
+            .graphStoreFactorySuppliers(GRAPH_STORE_FACTORY_SUPPLIERS)
             .addNodeLabel("Person")
             .addNodeLabel("Foo")
             .addRelationshipType(relationshipType)

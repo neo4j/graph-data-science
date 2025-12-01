@@ -22,8 +22,10 @@ dependencies {
 
     testAnnotationProcessor project(':annotations')
 
+    testImplementation project(':config-api')
     testImplementation project(':core')
     testImplementation project(':graph-projection-api')
+    testImplementation project(':native-projection')
     testImplementation project(':string-formatting')
 
     testImplementation project(':proc-test')

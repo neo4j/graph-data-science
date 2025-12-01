@@ -30,6 +30,7 @@ import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.properties.nodes.NodePropertyRecord;
 import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.core.GraphStoreFactorySuppliers;
 import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
@@ -40,10 +41,13 @@ import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.nodeproperties.DoubleTestPropertyValues;
 import org.neo4j.gds.nodeproperties.LongTestPropertyValues;
+import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
+import org.neo4j.gds.projection.NativeProjectionGraphStoreFactorySupplier;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -55,6 +59,11 @@ import static org.neo4j.gds.TestSupport.fromGdl;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 
 class NativeNodePropertyExporterTest extends BaseTest {
+    private static final GraphStoreFactorySuppliers GRAPH_STORE_FACTORY_SUPPLIERS = new GraphStoreFactorySuppliers(
+        Map.of(
+            GraphProjectFromStoreConfig.class, NativeProjectionGraphStoreFactorySupplier::create
+        )
+    );
 
     @BeforeEach
     void setup() {
@@ -72,7 +81,7 @@ class NativeNodePropertyExporterTest extends BaseTest {
 
     @Test
     void exportSingleNodeProperty() {
-        Graph graph = new StoreLoaderBuilder().databaseService(db)
+        Graph graph = createStoreLoaderBuilder()
             .addNodeProperty("newProp1", "prop1", DefaultValue.of(42.0), Aggregation.NONE)
             .build()
             .graph();
@@ -84,7 +93,7 @@ class NativeNodePropertyExporterTest extends BaseTest {
         int[] intData = {23, 42, 84};
         exporter.write("newProp1",  new LongTestPropertyValues(nodeId -> intData[(int) nodeId]));
 
-        Graph updatedGraph = new StoreLoaderBuilder().databaseService(db)
+        Graph updatedGraph = createStoreLoaderBuilder()
             .addNodeProperty("prop1", "prop1", DefaultValue.of(42.0), Aggregation.NONE)
             .addNodeProperty("newProp1", "newProp1", DefaultValue.of(42), Aggregation.NONE)
             .build()
@@ -105,7 +114,7 @@ class NativeNodePropertyExporterTest extends BaseTest {
 
     @Test
     void exportMultipleNodeProperties() {
-        Graph graph = new StoreLoaderBuilder().databaseService(db)
+        Graph graph = createStoreLoaderBuilder()
             .addNodeProperty("newProp1", "prop1", DefaultValue.of(42.0), Aggregation.NONE)
             .addNodeProperty("newProp2", "prop2", DefaultValue.of(42.0), Aggregation.NONE)
             .build()
@@ -125,7 +134,7 @@ class NativeNodePropertyExporterTest extends BaseTest {
 
         exporter.write(nodeProperties);
 
-        Graph updatedGraph = new StoreLoaderBuilder().databaseService(db)
+        Graph updatedGraph = createStoreLoaderBuilder()
             .addNodeProperty("prop1", "prop1", DefaultValue.of(42.0), Aggregation.NONE)
             .addNodeProperty("newProp1", "newProp1", DefaultValue.of(42), Aggregation.NONE)
             .addNodeProperty("newProp2", "newProp2", DefaultValue.of(42.0), Aggregation.NONE)
@@ -160,7 +169,7 @@ class NativeNodePropertyExporterTest extends BaseTest {
     void progressLogging(boolean parallel) {
         // given a graph of 20 nodes
         runQuery("UNWIND range(1, 20) AS i CREATE (:A)");
-        Graph graph = new StoreLoaderBuilder().databaseService(db).addNodeLabel("A").build().graph();
+        Graph graph = createStoreLoaderBuilder().addNodeLabel("A").build().graph();
 
         // with a node exporter
         var log = new GdsTestLog();
@@ -226,5 +235,11 @@ class NativeNodePropertyExporterTest extends BaseTest {
             assertNotNull(count);
             assertEquals(0, count.intValue());
         });
+    }
+
+    private StoreLoaderBuilder createStoreLoaderBuilder() {
+        return new StoreLoaderBuilder()
+            .databaseService(db)
+            .graphStoreFactorySuppliers(GRAPH_STORE_FACTORY_SUPPLIERS);
     }
 }
