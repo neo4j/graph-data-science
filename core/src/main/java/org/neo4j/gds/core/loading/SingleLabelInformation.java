@@ -68,6 +68,11 @@ final class SingleLabelInformation implements LabelInformation {
     }
 
     @Override
+    public BitSet bitSetForLabel(NodeLabel nodeLabel) {
+        return new StaticBitSet(nodeCount);
+    }
+
+    @Override
     public long nodeCountForLabel(NodeLabel nodeLabel) {
         if (nodeLabel.equals(this.label)) {
             return this.nodeCount;
@@ -159,6 +164,30 @@ final class SingleLabelInformation implements LabelInformation {
         @Override
         public LabelInformation build(long nodeCount, LongUnaryOperator mappedIdFn) {
             return new SingleLabelInformation(nodeCount, label);
+        }
+    }
+
+    static class StaticBitSet extends BitSet {
+
+        private final long nodeCount;
+
+        StaticBitSet(long nodeCount) {
+            this.nodeCount = nodeCount;
+        }
+
+        @Override
+        public long size() {
+            return nodeCount;
+        }
+
+        @Override
+        public boolean get(int index) {
+            return true;
+        }
+
+        @Override
+        public boolean get(long index) {
+            return true;
         }
     }
 }

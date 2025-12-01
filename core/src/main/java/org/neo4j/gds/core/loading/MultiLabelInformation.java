@@ -76,6 +76,11 @@ public final class MultiLabelInformation implements LabelInformation {
     }
 
     @Override
+    public BitSet bitSetForLabel(NodeLabel nodeLabel) {
+        return labelInformation.get(nodeLabel);
+    }
+
+    @Override
     public long nodeCountForLabel(NodeLabel nodeLabel) {
         if (availableNodeLabels().contains(nodeLabel)) {
             return labelInformation.get(nodeLabel).cardinality();

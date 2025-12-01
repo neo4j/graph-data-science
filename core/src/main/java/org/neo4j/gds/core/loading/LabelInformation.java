@@ -39,6 +39,8 @@ public interface LabelInformation {
 
     BitSet unionBitSet(Collection<NodeLabel> nodeLabels, long nodeCount);
 
+    BitSet bitSetForLabel(NodeLabel nodeLabel);
+
     long nodeCountForLabel(NodeLabel nodeLabel);
 
     boolean hasLabel(long nodeId, NodeLabel nodeLabel);
