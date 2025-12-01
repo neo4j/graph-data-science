@@ -25,7 +25,11 @@ import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
+import org.neo4j.gds.projection.NativeProjectionGraphStoreFactorySupplier;
 import org.neo4j.graphdb.Label;
+
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -38,6 +42,11 @@ import static org.neo4j.gds.compat.GraphDatabaseApiProxy.runInFullAccessTransact
  *       °-----------°
  */
 class RelationshipPredicateTest extends BaseTest {
+    private static final GraphStoreFactorySuppliers GRAPH_STORE_FACTORY_SUPPLIERS = new GraphStoreFactorySuppliers(
+        Map.of(
+            GraphProjectFromStoreConfig.class, NativeProjectionGraphStoreFactorySupplier::create
+        )
+    );
 
     private static final String DB_CYPHER =
             "CREATE" +
@@ -66,8 +75,7 @@ class RelationshipPredicateTest extends BaseTest {
 
     @Test
     void testOutgoing() {
-        final Graph graph = new StoreLoaderBuilder()
-            .databaseService(db)
+        final Graph graph = loader()
             .build()
             .graph();
 
@@ -203,6 +211,8 @@ class RelationshipPredicateTest extends BaseTest {
     }
 
     private StoreLoaderBuilder loader() {
-        return new StoreLoaderBuilder().databaseService(db);
+        return new StoreLoaderBuilder()
+            .databaseService(db)
+            .graphStoreFactorySuppliers(GRAPH_STORE_FACTORY_SUPPLIERS);
     }
 }

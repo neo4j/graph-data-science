@@ -38,13 +38,17 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.core.GraphStoreFactorySuppliers;
 import org.neo4j.gds.core.compression.common.BumpAllocator;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
+import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
+import org.neo4j.gds.projection.NativeProjectionGraphStoreFactorySupplier;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 
 import java.util.Arrays;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -59,6 +63,11 @@ import static org.neo4j.gds.compat.GraphDatabaseApiProxy.runInFullAccessTransact
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 final class HugeGraphLoadingTest extends BaseTest {
+    private static final GraphStoreFactorySuppliers GRAPH_STORE_FACTORY_SUPPLIERS = new GraphStoreFactorySuppliers(
+        Map.of(
+            GraphProjectFromStoreConfig.class, NativeProjectionGraphStoreFactorySupplier::create
+        )
+    );
 
     @Test
     void testDefaultPropertyLoading() {
@@ -99,8 +108,7 @@ final class HugeGraphLoadingTest extends BaseTest {
             }
         });
 
-        Graph graph = new StoreLoaderBuilder()
-            .databaseService(db)
+        Graph graph = createStoreLoaderBuilder()
             .addNodeLabel(label.name())
             .addNodeProperty(PropertyMapping.of("bar", -1.0))
             .build()
@@ -141,8 +149,7 @@ final class HugeGraphLoadingTest extends BaseTest {
             }
         });
 
-        final Graph graph = new StoreLoaderBuilder()
-            .databaseService(db)
+        final Graph graph = createStoreLoaderBuilder()
             .build()
             .graph();
 
@@ -170,8 +177,7 @@ final class HugeGraphLoadingTest extends BaseTest {
             }
         });
 
-        final Graph graph = new StoreLoaderBuilder()
-            .databaseService(db)
+        final Graph graph = createStoreLoaderBuilder()
             .addRelationshipProperty(PropertyMapping.of("weight", 1.0))
             .build()
             .graph();
@@ -186,8 +192,7 @@ final class HugeGraphLoadingTest extends BaseTest {
                  ", (b:Node {id: 1})" +
                  ", (a)-[:TYPE]->(b)");
 
-        GraphStore graphStore = new StoreLoaderBuilder()
-            .databaseService(db)
+        GraphStore graphStore = createStoreLoaderBuilder()
             .putRelationshipProjectionsWithIdentifier(
                 "TYPE_NATURAL",
                 RelationshipProjection.of("TYPE", Orientation.NATURAL)
@@ -227,8 +232,7 @@ final class HugeGraphLoadingTest extends BaseTest {
     void canIdentifyMultigraph() {
         runQuery("CREATE (a)-[:TYPE {t: 1}]->(b), (a)-[:TYPE {t: 2}]->(b), (a)-[:TYPE2]->(b)");
 
-        GraphStore graphStore = new StoreLoaderBuilder()
-            .databaseService(db)
+        GraphStore graphStore = createStoreLoaderBuilder()
             .putRelationshipProjectionsWithIdentifier(
                 "TYPE_NONE",
                 RelationshipProjection.of("TYPE", Aggregation.NONE)
@@ -303,11 +307,10 @@ final class HugeGraphLoadingTest extends BaseTest {
             }
         });
 
-        var graphStore = new StoreLoaderBuilder()
+        var graphStore = createStoreLoaderBuilder()
             .addNodeLabel(labelA.name())
             .addNodeLabel(labelB.name())
             .concurrency(new Concurrency(concurrency))
-            .databaseService(db)
             .build()
             .graphStore();
 
@@ -361,8 +364,7 @@ final class HugeGraphLoadingTest extends BaseTest {
             }
         });
 
-        var graph = new StoreLoaderBuilder()
-            .databaseService(db)
+        var graph = createStoreLoaderBuilder()
             .addRelationshipProperty(PropertyMapping.of("p1", "weight", 1.0))
             .addRelationshipProperty(PropertyMapping.of("p2", "weight", 1.0))
             .concurrency(new Concurrency(4))
@@ -396,8 +398,7 @@ final class HugeGraphLoadingTest extends BaseTest {
             }
         });
 
-        var graph = new StoreLoaderBuilder()
-            .databaseService(db)
+        var graph = createStoreLoaderBuilder()
             .addNodeLabel(label.name())
             .concurrency(new Concurrency(concurrency))
             .build()
@@ -430,8 +431,7 @@ final class HugeGraphLoadingTest extends BaseTest {
             }
         });
 
-        var graph = new StoreLoaderBuilder()
-            .databaseService(db)
+        var graph = createStoreLoaderBuilder()
             .addNodeLabel(labelA.name())
             .addNodeLabel(labelB.name())
             .concurrency(new Concurrency(concurrency))
@@ -453,8 +453,7 @@ final class HugeGraphLoadingTest extends BaseTest {
             return null;
         });
 
-        var graph = new StoreLoaderBuilder()
-            .databaseService(db)
+        var graph = createStoreLoaderBuilder()
             .addNodeProjection(NodeProjection.builder().label("A").addProperty(PropertyMapping.of("prop1")).build())
             .addNodeProjection(NodeProjection.builder().label("B").addProperty(PropertyMapping.of("prop2")).build())
             .build()
@@ -468,5 +467,11 @@ final class HugeGraphLoadingTest extends BaseTest {
 
         assertThat(graph.nodeProperties("prop1").longValue(idA)).isEqualTo(42);
         assertThat(graph.nodeProperties("prop2").longValue(idB)).isEqualTo(1337);
+    }
+
+    private StoreLoaderBuilder createStoreLoaderBuilder() {
+        return new StoreLoaderBuilder()
+            .databaseService(db)
+            .graphStoreFactorySuppliers(GRAPH_STORE_FACTORY_SUPPLIERS);
     }
 }

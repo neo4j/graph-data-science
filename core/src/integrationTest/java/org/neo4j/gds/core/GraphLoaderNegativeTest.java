@@ -22,17 +22,27 @@ package org.neo4j.gds.core;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.StoreLoaderBuilder;
+import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
+import org.neo4j.gds.projection.NativeProjectionGraphStoreFactorySupplier;
+
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 final class GraphLoaderNegativeTest extends RandomGraphTestCase {
+    private static final GraphStoreFactorySuppliers GRAPH_STORE_FACTORY_SUPPLIERS = new GraphStoreFactorySuppliers(
+        Map.of(
+            GraphProjectFromStoreConfig.class, NativeProjectionGraphStoreFactorySupplier::create
+        )
+    );
 
     @Test
     void shouldThrowForNonExistingStringLabel() {
+        var loader = createStoreLoaderBuilder();
+
         assertThrows(
             IllegalArgumentException.class,
-            () -> new StoreLoaderBuilder()
-                .databaseService(db)
+            () -> loader
                 .addNodeLabel("foo")
                 .build()
                 .graph(),
@@ -42,10 +52,11 @@ final class GraphLoaderNegativeTest extends RandomGraphTestCase {
 
     @Test
     void shouldThrowForNonExistingStringRelType() {
+        var loader = createStoreLoaderBuilder();
+
         assertThrows(
             IllegalArgumentException.class,
-            () -> new StoreLoaderBuilder()
-                .databaseService(db)
+            () -> loader
                 .addRelationshipType("foo")
                 .build()
                 .graph(),
@@ -55,12 +66,20 @@ final class GraphLoaderNegativeTest extends RandomGraphTestCase {
 
     @Test
     void shouldThrowForNonExistingNodeProperty() {
+        var loader = createStoreLoaderBuilder();
+
         assertThrows(
             IllegalArgumentException.class,
-            () -> new StoreLoaderBuilder().databaseService(db)
+            () -> loader
                 .addNodeProperty(PropertyMapping.of("foo", 0.0))
                 .build().graph(),
             "Node properties not found: 'foo'"
         );
+    }
+
+    private StoreLoaderBuilder createStoreLoaderBuilder() {
+        return new StoreLoaderBuilder()
+            .databaseService(db)
+            .graphStoreFactorySuppliers(GRAPH_STORE_FACTORY_SUPPLIERS);
     }
 }

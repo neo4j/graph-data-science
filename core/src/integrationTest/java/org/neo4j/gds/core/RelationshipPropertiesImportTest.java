@@ -27,9 +27,12 @@ import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.properties.relationships.RelationshipWithPropertyConsumer;
+import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
+import org.neo4j.gds.projection.NativeProjectionGraphStoreFactorySupplier;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -38,6 +41,11 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class RelationshipPropertiesImportTest extends BaseTest {
+    private static final GraphStoreFactorySuppliers GRAPH_STORE_FACTORY_SUPPLIERS = new GraphStoreFactorySuppliers(
+        Map.of(
+            GraphProjectFromStoreConfig.class, NativeProjectionGraphStoreFactorySupplier::create
+        )
+    );
 
     private Graph graph;
 
@@ -97,6 +105,7 @@ class RelationshipPropertiesImportTest extends BaseTest {
 
         graph = new StoreLoaderBuilder()
             .databaseService(db)
+            .graphStoreFactorySuppliers(GRAPH_STORE_FACTORY_SUPPLIERS)
             .globalOrientation(orientation)
             .addRelationshipProperty(PropertyMapping.of("w", 0.0))
             .build()
