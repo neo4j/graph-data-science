@@ -44,4 +44,5 @@ dependencies {
     testImplementation project(':test-utils')
 
     integrationTestImplementation project(':logging')
+    integrationTestImplementation project(':native-projection')
 }

@@ -24,7 +24,12 @@ import org.neo4j.gds.CypherLoaderBuilder;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.legacycypherprojection.CypherProjectionGraphStoreFactorySupplier;
 import org.neo4j.gds.legacycypherprojection.GraphProjectFromCypherConfig;
+import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
+import org.neo4j.gds.projection.NativeProjectionGraphStoreFactorySupplier;
+
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.gds.GraphFactoryTestSupport.AllGraphStoreFactoryTypesTest;
@@ -34,6 +39,12 @@ import static org.neo4j.gds.GraphHelper.assertRelationships;
 import static org.neo4j.gds.compat.GraphDatabaseApiProxy.applyInFullAccessTransaction;
 
 class GraphLoaderDirectionalityTest extends BaseTest {
+    private static final GraphStoreFactorySuppliers GRAPH_STORE_FACTORY_SUPPLIERS = new GraphStoreFactorySuppliers(
+        Map.of(
+            GraphProjectFromCypherConfig.class, CypherProjectionGraphStoreFactorySupplier::create,
+            GraphProjectFromStoreConfig.class, NativeProjectionGraphStoreFactorySupplier::create
+        )
+    );
 
     private static final String DB_CYPHER =
         "CREATE" +
@@ -247,15 +258,16 @@ class GraphLoaderDirectionalityTest extends BaseTest {
         GraphLoader graphLoader;
 
         if (factoryType == CYPHER) {
-
             graphLoader = new CypherLoaderBuilder()
                 .databaseService(db)
+                .graphStoreFactorySuppliers(GRAPH_STORE_FACTORY_SUPPLIERS)
                 .nodeQuery(GraphProjectFromCypherConfig.ALL_NODES_QUERY)
                 .relationshipQuery(relationshipQuery)
                 .build();
         } else {
             graphLoader = new StoreLoaderBuilder()
                 .databaseService(db)
+                .graphStoreFactorySuppliers(GRAPH_STORE_FACTORY_SUPPLIERS)
                 .globalOrientation(orientation)
                 .globalAggregation(aggregation)
                 .build();

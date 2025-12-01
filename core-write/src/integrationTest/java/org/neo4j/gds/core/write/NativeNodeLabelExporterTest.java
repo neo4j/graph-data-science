@@ -25,17 +25,28 @@ import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.GraphStoreFactorySuppliers;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.extension.Neo4jGraphExtension;
+import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
+import org.neo4j.gds.projection.NativeProjectionGraphStoreFactorySupplier;
 import org.neo4j.gds.termination.TerminationFlag;
+
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Neo4jGraphExtension
 class NativeNodeLabelExporterTest extends BaseTest {
+    private static final GraphStoreFactorySuppliers GRAPH_STORE_FACTORY_SUPPLIERS = new GraphStoreFactorySuppliers(
+        Map.of(
+            GraphProjectFromStoreConfig.class,
+            NativeProjectionGraphStoreFactorySupplier::create
+        )
+    );
 
     @Neo4jGraph
     private static final String DB_QUERY =
@@ -48,7 +59,9 @@ class NativeNodeLabelExporterTest extends BaseTest {
     @ParameterizedTest
     @ValueSource(ints = {1, 2, 4})
     void exportLabel(int concurrency) {
-        Graph graph = new StoreLoaderBuilder().databaseService(db)
+        Graph graph = new StoreLoaderBuilder()
+            .databaseService(db)
+            .graphStoreFactorySuppliers(GRAPH_STORE_FACTORY_SUPPLIERS)
             .build()
             .graph();
 
