@@ -35,12 +35,21 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.core.GraphStoreFactorySuppliers;
+import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
+import org.neo4j.gds.projection.NativeProjectionGraphStoreFactorySupplier;
 
+import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class GraphSchemaIntegrationTest extends BaseTest {
+    private static final GraphStoreFactorySuppliers GRAPH_STORE_FACTORY_SUPPLIERS = new GraphStoreFactorySuppliers(
+        Map.of(
+            GraphProjectFromStoreConfig.class, NativeProjectionGraphStoreFactorySupplier::create
+        )
+    );
 
     private static final String DB_CYPHER = "CREATE" +
                                             "  (a:Node {prop: 1})" +
@@ -57,8 +66,7 @@ class GraphSchemaIntegrationTest extends BaseTest {
     @ParameterizedTest
     @MethodSource(value = "nodePropertyMappingsAndExpectedResults")
     void computesCorrectNodeSchema(PropertySchema expectedSchema, PropertyMapping propertyMapping) {
-        Graph graph = new StoreLoaderBuilder()
-            .databaseService(db)
+        Graph graph = createStoreLoaderBuilder()
             .addNodeProjection(
                 NodeProjection.builder()
                     .label("Node")
@@ -74,8 +82,7 @@ class GraphSchemaIntegrationTest extends BaseTest {
     @ParameterizedTest
     @MethodSource(value = "relationshipPropertyMappingsAndExpectedResults")
     void computesCorrectRelationshipSchema(RelationshipPropertySchema expectedSchema, PropertyMapping propertyMapping) {
-        Graph graph = new StoreLoaderBuilder()
-            .databaseService(db)
+        Graph graph = createStoreLoaderBuilder()
             .addRelationshipProjection(
                 RelationshipProjection.builder()
                     .type("REL")
@@ -118,5 +125,11 @@ class GraphSchemaIntegrationTest extends BaseTest {
                 PropertyMapping.of("relProp", DefaultValue.of(1337.0D), Aggregation.MAX)
             )
         );
+    }
+
+    private StoreLoaderBuilder createStoreLoaderBuilder() {
+        return new StoreLoaderBuilder()
+            .databaseService(db)
+            .graphStoreFactorySuppliers(GRAPH_STORE_FACTORY_SUPPLIERS);
     }
 }

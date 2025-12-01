@@ -33,6 +33,7 @@ import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.core.GraphStoreFactorySuppliers;
 import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
 import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
@@ -40,12 +41,15 @@ import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.gds.logging.GdsTestLog;
+import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
+import org.neo4j.gds.projection.NativeProjectionGraphStoreFactorySupplier;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.graphdb.security.AuthorizationViolationException;
 import org.neo4j.internal.kernel.api.security.StaticAccessMode;
 import org.neo4j.values.storable.Values;
 
 import java.util.Collections;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -57,6 +61,11 @@ import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.termination.TerminationFlag.RUNNING_TRUE;
 
 class NativeRelationshipExporterTest extends BaseTest {
+    private static final GraphStoreFactorySuppliers GRAPH_STORE_FACTORY_SUPPLIERS = new GraphStoreFactorySuppliers(
+        Map.of(
+            GraphProjectFromStoreConfig.class, NativeProjectionGraphStoreFactorySupplier::create
+        )
+    );
 
     private static final String NODE_QUERY_PART =
         "CREATE" +
@@ -83,8 +92,7 @@ class NativeRelationshipExporterTest extends BaseTest {
 
     @Test
     void doesNotExportWhenNotAllowed() {
-        Graph graph = new StoreLoaderBuilder()
-            .databaseService(db)
+        Graph graph = createStoreLoaderBuilder()
             .graphName("foo")
             .build()
             .graph();
@@ -95,6 +103,7 @@ class NativeRelationshipExporterTest extends BaseTest {
         assertThatExceptionOfType(AuthorizationViolationException.class)
             .isThrownBy(() -> exporter.write("OUT_TYPE"));
     }
+
     @Test
     void exportRelationships() {
         var exporter = setupExportTest( /* includeProperties */ true);
@@ -107,7 +116,7 @@ class NativeRelationshipExporterTest extends BaseTest {
         clearDb();
         runQuery(NODE_QUERY_PART + RELS_QUERY_PART);
 
-        GraphStore graphStore = new StoreLoaderBuilder().databaseService(db)
+        GraphStore graphStore = createStoreLoaderBuilder()
             .putRelationshipProjectionsWithIdentifier(
                 "NEW_REL",
                 RelationshipProjection.of("BARFOO", Orientation.NATURAL)
@@ -242,8 +251,7 @@ class NativeRelationshipExporterTest extends BaseTest {
         clearDb();
         runQuery(NODE_QUERY_PART + RELS_QUERY_PART);
 
-        StoreLoaderBuilder storeLoaderBuilder = new StoreLoaderBuilder()
-            .databaseService(db)
+        StoreLoaderBuilder storeLoaderBuilder = createStoreLoaderBuilder()
             .addRelationshipType("BARFOO");
         if (includeProperties) {
             storeLoaderBuilder.addRelationshipProperty(PropertyMapping.of("weight", PROPERTY_VALUE_IF_MISSING));
@@ -288,12 +296,17 @@ class NativeRelationshipExporterTest extends BaseTest {
     }
 
     private Graph loadWrittenGraph(boolean loadRelProperty) {
-        StoreLoaderBuilder loader = new StoreLoaderBuilder()
-            .databaseService(db)
+        StoreLoaderBuilder loader = createStoreLoaderBuilder()
             .addRelationshipType("FOOBAR");
         if (loadRelProperty) {
             loader.addRelationshipProperty(PropertyMapping.of("weight", PROPERTY_VALUE_IF_NOT_WRITTEN));
         }
         return loader.build().graph();
+    }
+
+    private StoreLoaderBuilder createStoreLoaderBuilder() {
+        return new StoreLoaderBuilder()
+            .databaseService(db)
+            .graphStoreFactorySuppliers(GRAPH_STORE_FACTORY_SUPPLIERS);
     }
 }
