@@ -36,6 +36,8 @@ import org.neo4j.gds.mem.MemoryEstimations;
 import org.neo4j.gds.mem.MemoryTree;
 import org.neo4j.gds.mem.MemoryTreeWithDimensions;
 import org.neo4j.gds.memest.MemoryEstimationGraphConfigParser;
+import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
+import org.neo4j.gds.projection.NativeProjectionGraphStoreFactorySupplier;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.termination.TerminationMonitor;
 import org.neo4j.gds.transaction.EmptyTransactionContext;
@@ -106,7 +108,7 @@ public class MemoryEstimationExecutor<
 
             var memoryEstimationGraphConfigParser = new MemoryEstimationGraphConfigParser(executionContext.username());
             var graphProjectConfig = memoryEstimationGraphConfigParser.parse(graphConfig);
-            GraphStoreFactorySuppliers graphStoreFactorySuppliers = null; // I wonder what will break new GraphStoreFactorySuppliers(/* used only in pregel things I think */new HashMap<>());
+            var graphStoreFactorySuppliers = new GraphStoreFactorySuppliers(Map.of(GraphProjectFromStoreConfig.class, NativeProjectionGraphStoreFactorySupplier::create));
             var graphStoreFactorySupplier = graphStoreFactorySuppliers.find(graphProjectConfig);
             var graphStoreCreator = graphProjectConfig.isFictitiousLoading()
                 ? new FictitiousGraphStoreLoader(graphProjectConfig, graphStoreFactorySupplier)
