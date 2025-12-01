@@ -76,7 +76,12 @@ class FlowGraphTest {
 
     @Test
     void test() {
-        var flowGraph = createFlowGraph(graph, graph.toMappedNodeId("a"), graph.toMappedNodeId("b"));
+        var a = graph.toMappedNodeId("a");
+        var flowGraph = createFlowGraph(graph, a, graph.toMappedNodeId("b"));
+
+        assertThat(flowGraph.outDegree(a)).isEqualTo(1);
+        assertThat(flowGraph.inDegree(a)).isEqualTo(3);
+        assertThat(flowGraph.degree(a)).isEqualTo(4);
 
         Map<Long, Arc> map = new HashMap<>();
         Set<Long> set = new HashSet<>();
