@@ -26,14 +26,16 @@ import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.DefaultPool;
+import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
+import org.neo4j.gds.projection.NativeProjectionGraphStoreFactorySupplier;
 
 import java.util.Arrays;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 final class LoadingTest extends BaseTest {
-
     public static final String DB_CYPHER =
         "CREATE " +
         "  (a:Node {name:'a'})" +
@@ -59,6 +61,7 @@ final class LoadingTest extends BaseTest {
     void testBasicLoading() {
         Graph graph = new StoreLoaderBuilder()
                 .databaseService(db)
+                .graphStoreFactorySuppliers(new GraphStoreFactorySuppliers(Map.of(GraphProjectFromStoreConfig.class, NativeProjectionGraphStoreFactorySupplier::create)))
                 .executorService(DefaultPool.INSTANCE)
                 .addNodeLabel("Node")
                 .addRelationshipType("TYPE")

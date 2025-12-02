@@ -26,13 +26,16 @@ import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.GraphStoreFactorySuppliers;
+import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
+import org.neo4j.gds.projection.NativeProjectionGraphStoreFactorySupplier;
 
 import java.util.Arrays;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 final class UndirectedLoopsTest extends BaseTest {
-
     private static final String DB_CYPHER =
             "CREATE" +
             "  (a:Label1 {name: 'a'})" +
@@ -59,6 +62,7 @@ final class UndirectedLoopsTest extends BaseTest {
     void undirectedWithMultipleLoopsShouldSucceed() {
         Graph graph = new StoreLoaderBuilder()
                 .databaseService(db)
+                .graphStoreFactorySuppliers(new GraphStoreFactorySuppliers(Map.of(GraphProjectFromStoreConfig.class, NativeProjectionGraphStoreFactorySupplier::create)))
                 .addRelationshipProperty(PropertyMapping.of("cost", Double.MAX_VALUE))
                 .build()
                 .graph();

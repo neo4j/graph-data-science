@@ -25,17 +25,21 @@ import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.PageUtil;
+import org.neo4j.gds.core.GraphStoreFactorySuppliers;
 import org.neo4j.gds.mem.Estimate;
+import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
+import org.neo4j.gds.projection.NativeProjectionGraphStoreFactorySupplier;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
+
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.gds.compat.GraphDatabaseApiProxy.getNodeById;
 import static org.neo4j.gds.compat.GraphDatabaseApiProxy.runInFullAccessTransaction;
 
 final class HugeGraphWeightTest extends BaseTest {
-
     private static final RelationshipType TYPE = RelationshipType.withName("TYPE");
 
     @Test
@@ -98,6 +102,7 @@ final class HugeGraphWeightTest extends BaseTest {
     private Graph loadGraph(final GraphDatabaseService db) {
         return new StoreLoaderBuilder()
             .databaseService(db)
+            .graphStoreFactorySuppliers(new GraphStoreFactorySuppliers(Map.of(GraphProjectFromStoreConfig.class, NativeProjectionGraphStoreFactorySupplier::create)))
             .addRelationshipProperty(PropertyMapping.of("weight", 0))
             .build()
             .graph();
