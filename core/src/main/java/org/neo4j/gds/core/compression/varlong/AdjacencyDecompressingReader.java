@@ -26,9 +26,9 @@ import java.util.Arrays;
 import static org.neo4j.gds.api.AdjacencyCursor.NOT_FOUND;
 import static org.neo4j.gds.core.compression.common.VarLongDecoding.decodeDeltaVLongs;
 
-final class AdjacencyDecompressingReader {
+public final class AdjacencyDecompressingReader {
 
-    static final int CHUNK_SIZE = 64;
+    public static final int CHUNK_SIZE = 64;
 
     private final long[] block;
     private int pos;
