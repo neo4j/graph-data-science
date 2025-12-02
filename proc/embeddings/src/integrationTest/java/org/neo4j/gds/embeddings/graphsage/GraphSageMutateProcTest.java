@@ -35,11 +35,13 @@ import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.StoreLoaderWithConfigBuilder;
 import org.neo4j.gds.catalog.GraphProjectProc;
+import org.neo4j.gds.core.GraphStoreFactorySuppliers;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfigImpl;
+import org.neo4j.gds.projection.NativeProjectionGraphStoreFactorySupplier;
 import org.neo4j.gds.utils.StringJoining;
 import org.neo4j.graphdb.QueryExecutionException;
 import org.neo4j.graphdb.Result;
@@ -55,7 +57,6 @@ import static org.neo4j.gds.ElementProjection.PROJECT_ALL;
 
 @Neo4jModelCatalogExtension
 class GraphSageMutateProcTest extends BaseProcTest {
-
     @Neo4jGraph
     private static final String DB_CYPHER =
         "CREATE" +
@@ -189,6 +190,7 @@ class GraphSageMutateProcTest extends BaseProcTest {
 
         var graphStore = new StoreLoaderWithConfigBuilder()
             .databaseService(db)
+            .graphStoreFactorySuppliers(new GraphStoreFactorySuppliers(Map.of(GraphProjectFromStoreConfig.class, NativeProjectionGraphStoreFactorySupplier::create)))
             .graphProjectConfig(config)
             .build()
             .graphStore();

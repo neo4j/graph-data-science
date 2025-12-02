@@ -22,12 +22,16 @@ package org.neo4j.gds.core.loading;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.StoreLoaderBuilder;
+import org.neo4j.gds.core.GraphStoreFactorySuppliers;
 import org.neo4j.gds.gdl.GdlFactory;
+import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
+import org.neo4j.gds.projection.NativeProjectionGraphStoreFactorySupplier;
+
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class GraphStoreCapabilitiesTest extends BaseProcTest {
-
     @Test
     void gdlGraphIsBackedByDatabase() {
         var graphStore = GdlFactory
@@ -44,6 +48,7 @@ class GraphStoreCapabilitiesTest extends BaseProcTest {
         runQuery("CREATE (a)-[:T]->(b);");
         var graphStore = new StoreLoaderBuilder()
             .databaseService(db)
+            .graphStoreFactorySuppliers(new GraphStoreFactorySuppliers(Map.of(GraphProjectFromStoreConfig.class, NativeProjectionGraphStoreFactorySupplier::create)))
             .build()
             .graphStore();
 

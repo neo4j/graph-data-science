@@ -25,12 +25,15 @@ import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
+import org.neo4j.gds.projection.NativeProjectionGraphStoreFactorySupplier;
+
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class PropertyLoadingTest extends BaseTest {
-
     public static final String DB_CYPHER =
         "CREATE" +
         "  (a:Node { longProp: 42, doubleProp: 13.37, longListProp: [0, 1], doubleListProp: [0.1, 1.2] })" +
@@ -43,6 +46,7 @@ public class PropertyLoadingTest extends BaseTest {
         db.executeTransactionally(DB_CYPHER);
         graph = new StoreLoaderBuilder()
             .databaseService(db)
+            .graphStoreFactorySuppliers(new GraphStoreFactorySuppliers(Map.of(GraphProjectFromStoreConfig.class, NativeProjectionGraphStoreFactorySupplier::create)))
             .addNodeProperty(PropertyMapping.of("longProp", 24L))
             .addNodeProperty(PropertyMapping.of("doubleProp", 73.31D))
             .addNodeProperty(PropertyMapping.of("longListProp", new long[]{ 0L }))

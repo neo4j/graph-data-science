@@ -29,7 +29,10 @@ import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.core.GraphStoreFactorySuppliers;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
+import org.neo4j.gds.projection.NativeProjectionGraphStoreFactorySupplier;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.values.storable.Values;
 
@@ -37,7 +40,6 @@ import java.util.List;
 import java.util.Map;
 
 class NativeRelationshipPropertiesExporterTest  extends BaseTest {
-
     private static final String DB_CYPHER =
         "CREATE " +
         "  (p:Person), " +
@@ -63,7 +65,9 @@ class NativeRelationshipPropertiesExporterTest  extends BaseTest {
 
     @Test
     void shouldWriteRelationshipsWithMultipleProperties() {
-        GraphStore graphStore = new StoreLoaderBuilder().databaseService(db)
+        GraphStore graphStore = new StoreLoaderBuilder()
+            .databaseService(db)
+            .graphStoreFactorySuppliers(new GraphStoreFactorySuppliers(Map.of(GraphProjectFromStoreConfig.class, NativeProjectionGraphStoreFactorySupplier::create)))
             .putRelationshipProjectionsWithIdentifier(
                 "PAID",
                 RelationshipProjection.of("PAYS", Orientation.NATURAL)
