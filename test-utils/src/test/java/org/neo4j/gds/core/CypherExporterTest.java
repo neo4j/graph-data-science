@@ -26,14 +26,16 @@ import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
+import org.neo4j.gds.projection.NativeProjectionGraphStoreFactorySupplier;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 final class CypherExporterTest extends BaseTest {
-
     private static final String newLine = System.lineSeparator();
 
     @BeforeEach
@@ -93,6 +95,7 @@ final class CypherExporterTest extends BaseTest {
     private String dumpGraph() {
         Graph graph = new StoreLoaderBuilder()
             .databaseService(db)
+            .graphStoreFactorySuppliers(new GraphStoreFactorySuppliers(Map.of(GraphProjectFromStoreConfig.class, NativeProjectionGraphStoreFactorySupplier::create)))
             .addNodeProperty(PropertyMapping.of("property", DefaultValue.of(42)))
             .addRelationshipProperty(PropertyMapping.of("property", DefaultValue.of(42)))
             .build()

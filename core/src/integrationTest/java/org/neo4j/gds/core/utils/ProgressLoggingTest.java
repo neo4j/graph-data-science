@@ -24,13 +24,17 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.StoreLoaderBuilder;
+import org.neo4j.gds.core.GraphStoreFactorySuppliers;
 import org.neo4j.gds.graphbuilder.GraphBuilder;
 import org.neo4j.gds.logging.GdsTestLog;
+import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
+import org.neo4j.gds.projection.NativeProjectionGraphStoreFactorySupplier;
+
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class ProgressLoggingTest extends BaseTest {
-
     private static final String PROPERTY = "property";
     private static final String LABEL = "Node";
     private static final String RELATIONSHIP = "REL";
@@ -54,6 +58,7 @@ class ProgressLoggingTest extends BaseTest {
 
         new StoreLoaderBuilder()
             .databaseService(db)
+            .graphStoreFactorySuppliers(new GraphStoreFactorySuppliers(Map.of(GraphProjectFromStoreConfig.class, NativeProjectionGraphStoreFactorySupplier::create)))
             .log(log)
             .addNodeLabel(LABEL)
             .addRelationshipType(RELATIONSHIP)
