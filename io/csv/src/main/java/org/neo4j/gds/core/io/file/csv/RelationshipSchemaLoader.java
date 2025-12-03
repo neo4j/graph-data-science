@@ -44,7 +44,7 @@ public class RelationshipSchemaLoader {
     private final ObjectReader objectReader;
     private final Path relationshipSchemaPath;
 
-    RelationshipSchemaLoader(Path csvDirectory) {
+    public RelationshipSchemaLoader(Path csvDirectory) {
         this.relationshipSchemaPath = csvDirectory.resolve(CsvRelationshipSchemaVisitor.RELATIONSHIP_SCHEMA_FILE_NAME);
         CsvMapper csvMapper = new CsvMapper();
         csvMapper.enable(CsvParser.Feature.TRIM_SPACES);
@@ -52,7 +52,7 @@ public class RelationshipSchemaLoader {
         objectReader = csvMapper.readerFor(SchemaLine.class).with(schema);
     }
 
-    MutableRelationshipSchema load() {
+    public MutableRelationshipSchema load() {
         var schemaBuilder = new RelationshipSchemaBuilderVisitor();
 
         try (var reader = new BufferedReader(new FileReader(relationshipSchemaPath.toFile(), StandardCharsets.UTF_8))) {

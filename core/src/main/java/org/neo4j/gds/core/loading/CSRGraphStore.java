@@ -474,6 +474,10 @@ public final class CSRGraphStore implements GraphStore {
         }));
     }
 
+    public Topology getTopology(RelationshipType relationshipType) {
+        return relationships.get(relationshipType).topology();
+    }
+
     @Override
     public CSRGraph getGraph(Collection<NodeLabel> nodeLabels) {
         return getGraph(nodeLabels, List.of(), Optional.empty());

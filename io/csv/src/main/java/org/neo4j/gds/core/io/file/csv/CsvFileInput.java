@@ -55,7 +55,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-final class CsvFileInput implements FileInput {
+public final class CsvFileInput implements FileInput {
 
     private static final char COLUMN_SEPARATOR = ',';
     private static final String ARRAY_ELEMENT_SEPARATOR = ";";
@@ -86,7 +86,7 @@ final class CsvFileInput implements FileInput {
     private final Capabilities capabilities;
     private final Optional<Map<String, String>> typeMapping;
 
-    CsvFileInput(Path importPath) {
+    public CsvFileInput(Path importPath) {
         this.importPath = importPath;
         this.userName = new UserInfoLoader(importPath).load();
         this.graphInfo = new GraphInfoLoader(importPath, CSV_MAPPER).load();

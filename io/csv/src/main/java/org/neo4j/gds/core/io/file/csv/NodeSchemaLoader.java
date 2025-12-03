@@ -42,7 +42,7 @@ public class NodeSchemaLoader {
     private final ObjectReader objectReader;
     private final Path nodeSchemaPath;
 
-    NodeSchemaLoader(Path csvDirectory) {
+    public NodeSchemaLoader(Path csvDirectory) {
         this.nodeSchemaPath = csvDirectory.resolve(CsvNodeSchemaVisitor.NODE_SCHEMA_FILE_NAME);
         CsvMapper csvMapper = new CsvMapper();
         csvMapper.enable(CsvParser.Feature.TRIM_SPACES);
@@ -50,7 +50,7 @@ public class NodeSchemaLoader {
         objectReader = csvMapper.readerFor(SchemaLine.class).with(schema);
     }
 
-    MutableNodeSchema load() {
+    public MutableNodeSchema load() {
         NodeSchemaBuilderVisitor schemaBuilder = new NodeSchemaBuilderVisitor();
 
         try(var reader = new BufferedReader(new FileReader(nodeSchemaPath.toFile(), StandardCharsets.UTF_8))) {

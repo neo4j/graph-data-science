@@ -37,7 +37,7 @@ public record MetaDataStore(
     RelationshipSchema relationshipSchema,
     Map<String, PropertySchema> graphPropertySchema
 ) {
-    static MetaDataStore of(GraphStore graphStore) {
+    public static MetaDataStore of(GraphStore graphStore) {
         var relTypeCounts = graphStore.relationshipTypes()
             .stream()
             .collect(

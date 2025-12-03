@@ -32,12 +32,12 @@ import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-class GraphCapabilitiesLoader {
+public class GraphCapabilitiesLoader {
 
     private final Path capabilitiesPath;
     private final ObjectReader objectReader;
 
-    GraphCapabilitiesLoader(Path csvDirectory, CsvMapper csvMapper) {
+    public GraphCapabilitiesLoader(Path csvDirectory, CsvMapper csvMapper) {
         this.capabilitiesPath = csvDirectory.resolve(CsvGraphCapabilitiesWriter.GRAPH_CAPABILITIES_FILE_NAME);
 
         csvMapper.enable(CsvParser.Feature.TRIM_SPACES);
@@ -46,7 +46,7 @@ class GraphCapabilitiesLoader {
         this.objectReader = csvMapper.readerFor(CapabilitiesDTO.class).with(schema);
     }
 
-    Capabilities load() {
+    public Capabilities load() {
         try {
             if (!Files.exists(capabilitiesPath)) {
                 return ImmutableStaticCapabilities.builder().build();
