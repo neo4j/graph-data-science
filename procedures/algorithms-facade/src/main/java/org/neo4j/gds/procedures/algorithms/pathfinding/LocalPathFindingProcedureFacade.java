@@ -37,6 +37,10 @@ import org.neo4j.gds.kspanningtree.KSpanningTreeWriteConfig;
 import org.neo4j.gds.maxflow.MaxFlowStatsConfig;
 import org.neo4j.gds.maxflow.MaxFlowStreamConfig;
 import org.neo4j.gds.maxflow.MaxFlowWriteConfig;
+import org.neo4j.gds.mcmf.MCMFMutateConfig;
+import org.neo4j.gds.mcmf.MCMFStatsConfig;
+import org.neo4j.gds.mcmf.MCMFStreamConfig;
+import org.neo4j.gds.mcmf.MCMFWriteConfig;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarStreamConfig;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarWriteConfig;
 import org.neo4j.gds.paths.bellmanford.AllShortestPathsBellmanFordStatsConfig;
@@ -62,6 +66,7 @@ import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.LocalBFSMutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.LocalBellmanFordMutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.LocalDFSMutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.LocalDeltaSteppingMutateStub;
+import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.LocalMCMFMutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.LocalMaxFlowMutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.LocalPrizeCollectingSteinerTreeMutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.LocalRandomWalkMutateStub;
@@ -187,6 +192,12 @@ public final class LocalPathFindingProcedureFacade implements PathFindingProcedu
             estimationModeBusinessFacade
         );
 
+        var mcmfMutateStub = new LocalMCMFMutateStub(
+            genericStub,
+            mutateModeBusinessFacade,
+            estimationModeBusinessFacade
+        );
+
         var prizeCollectingSteinerTreeMutateStub = new LocalPrizeCollectingSteinerTreeMutateStub(
             genericStub,
             mutateModeBusinessFacade,
@@ -243,7 +254,8 @@ public final class LocalPathFindingProcedureFacade implements PathFindingProcedu
             singleSourceDijkstraStub,
             spanningTreeMutateStub,
             steinerTreeMutateStub,
-            maxFlowMutateStub
+            maxFlowMutateStub,
+            mcmfMutateStub
         );
 
         return new LocalPathFindingProcedureFacade(
@@ -702,6 +714,98 @@ public final class LocalPathFindingProcedureFacade implements PathFindingProcedu
         return Stream.of(
             estimationModeBusinessFacade.maxFlow(
                 configurationParser.parseConfiguration(algorithmConfiguration, MaxFlowWriteConfig::of),
+                graphNameOrConfiguration
+            )
+        );
+    }
+
+    @Override
+    public Stream<MCMFMutateResult> mcmfMutate(String graphName, Map<String, Object> configuration) {
+        return stubs.mcmf().execute(graphName, configuration);
+
+    }
+
+    @Override
+    public Stream<MemoryEstimateResult> mcmfMutateEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        return Stream.of(
+            estimationModeBusinessFacade.mcmf(
+                configurationParser.parseConfiguration(algorithmConfiguration, MCMFMutateConfig::of),
+                graphNameOrConfiguration
+            )
+        );
+    }
+
+    @Override
+    public Stream<MaxFlowStreamResult> mcmfStream(String graphName, Map<String, Object> configuration) {
+        return streamModeBusinessFacade.mcmf(
+                GraphName.parse(graphName),
+                configurationParser.parseConfiguration(configuration, MCMFStreamConfig::of),
+                new MCMFResultBuilderForStreamMode()
+        );
+    }
+
+    @Override
+    public Stream<MemoryEstimateResult> mcmfStreamEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        return Stream.of(
+            estimationModeBusinessFacade.mcmf(
+                configurationParser.parseConfiguration(algorithmConfiguration, MCMFStreamConfig::of),
+                graphNameOrConfiguration
+            )
+        );
+    }
+
+    @Override
+    public Stream<MCMFStatsResult> mcmfStats(String graphName, Map<String, Object> rawConfiguration) {
+
+        var configuration = configurationParser.parseConfiguration(
+            rawConfiguration,
+            MCMFStatsConfig::of
+        );
+        return statsModeBusinessFacade.mcmf(
+                GraphName.parse(graphName),
+                configuration,
+                new MCMFResultBuilderForStatsMode(configuration)
+            );
+    }
+
+    @Override
+    public Stream<MemoryEstimateResult> mcmfStatsEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        return Stream.of(
+            estimationModeBusinessFacade.mcmf(
+                configurationParser.parseConfiguration(algorithmConfiguration, MCMFStatsConfig::of),
+                graphNameOrConfiguration
+            )
+        );
+    }
+
+    @Override
+    public Stream<MCMFWriteResult> mcmfWrite(String graphName, Map<String, Object> configuration) {
+        return Stream.of(
+            writeModeBusinessFacade.mcmf(
+                GraphName.parse(graphName),
+                configurationParser.parseConfiguration(configuration, MCMFWriteConfig::of),
+                new MCMFResultBuilderForWriteMode()
+            )
+        );
+    }
+
+    @Override
+    public Stream<MemoryEstimateResult> mcmfWriteEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        return Stream.of(
+            estimationModeBusinessFacade.mcmf(
+                configurationParser.parseConfiguration(algorithmConfiguration, MCMFWriteConfig::of),
                 graphNameOrConfiguration
             )
         );

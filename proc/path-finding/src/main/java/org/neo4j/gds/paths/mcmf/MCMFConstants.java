@@ -17,21 +17,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.algorithms.pathfinding.stubs;
+package org.neo4j.gds.paths.mcmf;
 
-public record PathFindingStubs(
-    BellmanFordMutateStub bellmanFord,
-    BFSMutateStub bfs,
-    DeltaSteppingMutateStub deltaStepping,
-    DFSMutateStub dfs,
-    PrizeCollectingSteinerTreeMutateStub pcst,
-    RandomWalkMutateStub randomWalk,
-    SinglePairShortestPathAStarMutateStub aStar,
-    SinglePairShortestPathDijkstraMutateStub singlePairDijkstra,
-    SinglePairShortestPathYensMutateStub yens,
-    SingleSourceShortestPathDijkstraMutateStub singleSourceDijktra,
-    SpanningTreeMutateStub spanningTree,
-    SteinerTreeMutateStub steinerTree,
-    MaxFlowMutateStub maxFlow,
-    MCMFMutateStub mcmf
-) {}
+public interface MCMFConstants {
+    String MCMF_DESCRIPTION = "The min cost max-flow algorithm computes the maximal flow over the relationships from the source nodes to the target nodes with the minimum cost";
+}

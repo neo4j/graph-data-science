@@ -17,21 +17,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.algorithms.pathfinding.stubs;
+package org.neo4j.gds.ml.pipeline.stubs;
 
-public record PathFindingStubs(
-    BellmanFordMutateStub bellmanFord,
-    BFSMutateStub bfs,
-    DeltaSteppingMutateStub deltaStepping,
-    DFSMutateStub dfs,
-    PrizeCollectingSteinerTreeMutateStub pcst,
-    RandomWalkMutateStub randomWalk,
-    SinglePairShortestPathAStarMutateStub aStar,
-    SinglePairShortestPathDijkstraMutateStub singlePairDijkstra,
-    SinglePairShortestPathYensMutateStub yens,
-    SingleSourceShortestPathDijkstraMutateStub singleSourceDijktra,
-    SpanningTreeMutateStub spanningTree,
-    SteinerTreeMutateStub steinerTree,
-    MaxFlowMutateStub maxFlow,
-    MCMFMutateStub mcmf
-) {}
+import org.neo4j.gds.mcmf.MCMFMutateConfig;
+import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
+import org.neo4j.gds.procedures.algorithms.pathfinding.MCMFMutateResult;
+import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
+
+public class MCMFStub extends AbstractStub<MCMFMutateConfig, MCMFMutateResult> {
+    protected MutateStub<MCMFMutateConfig, MCMFMutateResult> stub(AlgorithmsProcedureFacade facade) {
+        return facade.pathFinding().stubs().mcmf();
+    }
+}

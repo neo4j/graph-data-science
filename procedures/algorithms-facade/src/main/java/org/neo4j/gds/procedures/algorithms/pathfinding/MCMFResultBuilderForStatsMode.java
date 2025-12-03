@@ -22,16 +22,16 @@ package org.neo4j.gds.procedures.algorithms.pathfinding;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.applications.algorithms.machinery.StatsResultBuilder;
-import org.neo4j.gds.maxflow.MaxFlowStatsConfig;
 import org.neo4j.gds.mcmf.CostFlowResult;
+import org.neo4j.gds.mcmf.MCMFStatsConfig;
 
 import java.util.Optional;
 import java.util.stream.Stream;
 
 class MCMFResultBuilderForStatsMode implements StatsResultBuilder<CostFlowResult, Stream<MCMFStatsResult>> {
-    private final MaxFlowStatsConfig configuration;
+    private final MCMFStatsConfig configuration;
 
-    MCMFResultBuilderForStatsMode(MaxFlowStatsConfig configuration) {
+    MCMFResultBuilderForStatsMode(MCMFStatsConfig configuration) {
         this.configuration = configuration;
     }
 
