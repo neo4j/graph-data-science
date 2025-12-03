@@ -20,7 +20,6 @@
 package org.neo4j.gds.core.loading.construction;
 
 import org.neo4j.gds.values.GdsValue;
-import org.neo4j.values.virtual.MapValue;
 
 import java.util.Map;
 import java.util.function.BiConsumer;
@@ -36,10 +35,6 @@ public abstract class PropertyValues {
     public abstract Iterable<String> propertyKeys();
 
     public abstract GdsValue get(String key);
-
-    public static PropertyValues of(MapValue mapValue) {
-        return new CypherPropertyValues(mapValue);
-    }
 
     public static PropertyValues of(Map<String, GdsValue> map) {
         return new NativePropertyValues(map);

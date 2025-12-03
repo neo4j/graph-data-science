@@ -351,12 +351,10 @@ abstract class GraphAggregator implements UserAggregationReducer, UserAggregatio
     @Nullable
     static PropertyValues propertiesConfig(String key, @NotNull MapValue container) {
         var properties = container.get(key);
-        if (properties instanceof MapValue) {
-            var mapProperties = (MapValue) properties;
-            if (mapProperties.isEmpty()) {
-                return null;
-            }
-            return PropertyValues.of(mapProperties);
+        if (properties instanceof MapValue mapProperties) {
+            if (mapProperties.isEmpty()) return null;
+
+            return new CypherPropertyValues(mapProperties);
         }
 
         if (properties == NoValue.NO_VALUE) {
