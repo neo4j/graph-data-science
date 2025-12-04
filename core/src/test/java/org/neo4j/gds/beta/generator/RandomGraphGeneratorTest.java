@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.beta.generator;
 
+import org.apache.commons.lang3.mutable.MutableInt;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -26,6 +27,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
@@ -727,4 +729,54 @@ class RandomGraphGeneratorTest {
 
         assertThat(adjacencyMatrixOne).isEqualTo(adjacencyMatrixTwo);
     }
+
+    @Test
+    void shouldThrowWhenGeneratingGraphWithMultipleProps(){
+        assertThatThrownBy(() -> RandomGraphGenerator.builder()
+            .nodeCount(10)
+            .averageDegree(2)
+            .relationshipDistribution(RelationshipDistribution.UNIFORM)
+            .seed(0)
+            .relationshipPropertyProducer(PropertyProducer.randomDouble("foo", 1.0, 10.0))
+            .relationshipPropertyProducer(PropertyProducer.randomDouble("bar", 11.0, 20.0))
+            .build()
+            .generate()).hasMessageContaining("Cannot generate a graph object if multiple relationship properties have been specified");
+    }
+    @Test
+    void shouldGenerateGraphStoreWithMultipleProps(){
+
+      var graphStore=  RandomGraphGenerator.builder()
+            .nodeCount(10)
+            .averageDegree(2)
+            .aggregation(Aggregation.SINGLE)
+            .relationshipDistribution(RelationshipDistribution.UNIFORM)
+            .seed(0)
+            .relationshipPropertyProducer(PropertyProducer.randomDouble("foo", 1.0, 10.0))
+          .relationshipPropertyProducer(PropertyProducer.randomDouble("bar", 100.0, 200.0))
+          .build()
+            .generateGraphstore(DatabaseId.EMPTY,new Concurrency(1));
+
+      var fooGraph= graphStore.getGraph("foo");
+      var barGraph= graphStore.getGraph("bar");
+      HashSet<Edge> fooEdges =new HashSet<>();
+      for ( int i=0;i<fooGraph.nodeCount();++i){
+          fooGraph.forEachRelationship(i,-1.0,(s,t,w)->{
+                fooEdges.add(new Edge(s,t));
+                assertThat(w).isBetween(1.0,10.0);
+                return true;
+          });
+      }
+        MutableInt mutableInt=new MutableInt();
+        for ( int i=0;i<barGraph.nodeCount();++i){
+            barGraph.forEachRelationship(i,-1.0,(s,t,w)->{
+                assertThat(new Edge(s,t)).isIn(fooEdges);
+                assertThat(w).isBetween(100.0,200.0);
+                mutableInt.increment();
+                return true;
+            });
+        }
+        assertThat(mutableInt.intValue()).isEqualTo(fooEdges.size());
+    }
+
+    record Edge(long a,long b){}
 }
