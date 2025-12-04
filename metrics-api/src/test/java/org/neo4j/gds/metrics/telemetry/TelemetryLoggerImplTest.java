@@ -41,11 +41,12 @@ class TelemetryLoggerImplTest {
         var telemetryLogger = new TelemetryLoggerImpl(testLog);
         var testConfig = new TelemetryConfigImpl(CypherMapWrapper.empty());
 
-        telemetryLogger.log_algorithm("pageRank", testConfig, 1500L);
+        telemetryLogger.logAlgorithm(42, "pageRank", testConfig, 1500L);
 
         TelemetryLoggerImpl.AlgorithmLogEntry entry = extractLog(testLog);
 
         assertThat(entry).isEqualTo(new TelemetryLoggerImpl.AlgorithmLogEntry(
+            42,
             "pageRank",
             1500L,
             List.of()
@@ -63,11 +64,12 @@ class TelemetryLoggerImplTest {
             ))
         );
 
-        telemetryLogger.log_algorithm("louvain", configWithParams, 2500L);
+        telemetryLogger.logAlgorithm(1337, "louvain", configWithParams, 2500L);
 
         TelemetryLoggerImpl.AlgorithmLogEntry entry = extractLog(testLog);
 
         assertThat(entry).isEqualTo(new TelemetryLoggerImpl.AlgorithmLogEntry(
+            1337,
             "louvain",
             2500L,
             List.of("optionalParam")

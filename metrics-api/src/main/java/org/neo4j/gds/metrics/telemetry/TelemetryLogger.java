@@ -22,9 +22,9 @@ package org.neo4j.gds.metrics.telemetry;
 import org.neo4j.gds.config.AlgoBaseConfig;
 
 public interface TelemetryLogger {
-    void log_algorithm(String algorithm, AlgoBaseConfig config, long computeMillis);
+    void logAlgorithm(int graphName, String algorithm, AlgoBaseConfig config, long computeMillis);
 
-    TelemetryLogger DISABLED = (algorithm, config, computeMillis) -> {
+    TelemetryLogger DISABLED = (graphName, algorithm, config, computeMillis) -> {
 
     };
 }

@@ -36,11 +36,11 @@ public class TelemetryLoggerImpl implements TelemetryLogger {
     }
 
     @Override
-    public void log_algorithm(String algorithm, AlgoBaseConfig config, long computeMillis) {
+    public void logAlgorithm(int graphIdentifier, String algorithm, AlgoBaseConfig config, long computeMillis) {
         try {
             var configuredParameters = ConfigAnalyzer.nonDefaultParameters(config, log);
 
-            var logEntry = new AlgorithmLogEntry(algorithm, computeMillis, configuredParameters);
+            var logEntry = new AlgorithmLogEntry(graphIdentifier, algorithm, computeMillis, configuredParameters);
 
             var jsonEntry = OBJECT_MAPPER.writeValueAsString(logEntry);
             log.info("Algorithm Telemetry: %s", jsonEntry);
@@ -50,6 +50,7 @@ public class TelemetryLoggerImpl implements TelemetryLogger {
     }
 
     public static record AlgorithmLogEntry(
+        int graph,
         String algorithm,
         long computeMillis,
         List<String> configuredParameters

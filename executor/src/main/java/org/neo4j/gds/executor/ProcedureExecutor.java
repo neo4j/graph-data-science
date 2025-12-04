@@ -115,7 +115,7 @@ public class ProcedureExecutor<
         algo.getProgressTracker().setEstimatedResourceFootprint(memoryEstimationInBytes);
         algo.getProgressTracker().requestedConcurrency(config.concurrency());
 
-        ALGO_RESULT result = executeAlgorithm(builder, algo, executionContext.metrics().algorithmMetrics(), config);
+        ALGO_RESULT result = executeAlgorithm(builder, algo, executionContext.metrics().algorithmMetrics(), graphStore, config);
 
         var computationResult = builder
             .graph(graph)
@@ -133,6 +133,7 @@ public class ProcedureExecutor<
         ImmutableComputationResult.Builder<ALGO, ALGO_RESULT, CONFIG> builder,
         ALGO algo,
         AlgorithmMetricsService algorithmMetricsService,
+        GraphStore graphStore,
         CONFIG config
     ) {
         return runWithExceptionLogging(
@@ -155,7 +156,9 @@ public class ProcedureExecutor<
                     var result = algo.compute();
 
                     timer.stop();
-                    telemetryLogger.log_algorithm(algoSpec.name(), config, timer.getDuration());
+
+                    int graphIdentifier = System.identityHashCode(graphStore);
+                    telemetryLogger.logAlgorithm(graphIdentifier, algoSpec.name(), config, timer.getDuration());
 
                     return result;
                 } catch (Exception e) {
