@@ -22,6 +22,7 @@ package org.neo4j.gds.metrics.telemetry;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.GdlGraphStoreBuilder;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -43,7 +44,7 @@ class TelemetryLoggerImplTest {
 
         telemetryLogger.logAlgorithm(42, "pageRank", testConfig, 1500L);
 
-        TelemetryLoggerImpl.AlgorithmLogEntry entry = extractLog(testLog);
+        var entry = extractLog(testLog, "Algorithm Telemetry:", TelemetryLoggerImpl.AlgorithmLogEntry.class);
 
         assertThat(entry).isEqualTo(new TelemetryLoggerImpl.AlgorithmLogEntry(
             42,
@@ -66,7 +67,7 @@ class TelemetryLoggerImplTest {
 
         telemetryLogger.logAlgorithm(1337, "louvain", configWithParams, 2500L);
 
-        TelemetryLoggerImpl.AlgorithmLogEntry entry = extractLog(testLog);
+        var entry = extractLog(testLog, "Algorithm Telemetry:", TelemetryLoggerImpl.AlgorithmLogEntry.class);
 
         assertThat(entry).isEqualTo(new TelemetryLoggerImpl.AlgorithmLogEntry(
             1337,
@@ -76,15 +77,41 @@ class TelemetryLoggerImplTest {
         ));
     }
 
-    TelemetryLoggerImpl.AlgorithmLogEntry extractLog(GdsTestLog log) throws JsonProcessingException {
+    @Test
+    void shouldLogGraphTelemetry() throws JsonProcessingException {
+        var testLog = new GdsTestLog();
+        var telemetryLogger = new TelemetryLoggerImpl(testLog);
+
+        var graphStore = new GdlGraphStoreBuilder()
+            .gdl("(a:A), (b:A), (c:B), (a)-[:REL]->(b)-[:REL]->(c)")
+            .name("test")
+            .build();
+
+        telemetryLogger.logGraph(graphStore);
+
+        var entry = extractLog(testLog, "Graph Telemetry: ", TelemetryLoggerImpl.GraphLogEntry.class);
+
+        assertThat(entry).isEqualTo(new TelemetryLoggerImpl.GraphLogEntry(
+            System.identityHashCode(graphStore),
+            3,
+            2,
+            2L,
+            1L,
+            false,
+            false,
+            false
+        ));
+    }
+
+    <T> T extractLog(GdsTestLog log, String prefix, Class<T> type) throws JsonProcessingException {
         var messages = log.getMessages(GdsTestLog.INFO);
         assertThat(messages).hasSize(1);
 
         var message = messages.getFirst();
 
         return new ObjectMapper().readValue(
-            message.replace("Algorithm Telemetry:", ""),
-            TelemetryLoggerImpl.AlgorithmLogEntry.class
+            message.replace(prefix, ""),
+            type
         );
     }
 
