@@ -17,26 +17,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.loading.construction;
+package org.neo4j.gds.projection;
 
-import org.neo4j.gds.core.loading.GdsNeo4jValueConverter;
+import org.neo4j.gds.values.GdsNeo4jValueConverter;
+import org.neo4j.gds.core.loading.construction.PropertyValues;
 import org.neo4j.gds.values.GdsValue;
 import org.neo4j.values.virtual.MapValue;
 
 import java.util.function.BiConsumer;
 
-final class CypherPropertyValues extends PropertyValues {
+public final class CypherPropertyValues extends PropertyValues {
     private final MapValue properties;
 
-    CypherPropertyValues(MapValue properties) {
+    public CypherPropertyValues(MapValue properties) {
         this.properties = properties;
     }
 
     @Override
     public void forEach(BiConsumer<String, GdsValue> consumer) {
-        this.properties.foreach((k, v) -> {
-            consumer.accept(k, GdsNeo4jValueConverter.toValue(v));
-        });
+        this.properties.foreach((k, v) -> consumer.accept(k, GdsNeo4jValueConverter.toValue(v)));
     }
 
     @Override

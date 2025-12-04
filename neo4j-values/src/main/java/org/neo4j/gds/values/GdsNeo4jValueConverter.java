@@ -17,12 +17,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.loading;
+package org.neo4j.gds.values;
 
 import org.jetbrains.annotations.NotNull;
-import org.neo4j.gds.values.Array;
-import org.neo4j.gds.values.GdsNoValue;
-import org.neo4j.gds.values.GdsValue;
 import org.neo4j.gds.values.primitive.PrimitiveValues;
 import org.neo4j.values.AnyValue;
 import org.neo4j.values.SequenceValue;
