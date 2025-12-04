@@ -53,8 +53,7 @@ import java.util.function.Function;
  * PS: _Best_ class name ever, bar none.
  */
 final class GraphDataScienceProceduresProviderFactory {
-    // Graph catalog and pipeline repository state initialised here, currently just fronts for big shared singletons
-    private final GraphStoreCatalogService graphStoreCatalogService = new GraphStoreCatalogService();
+    // Pipeline repository state initialised here, currently just a front for a big shared singleton
     private final PipelineRepository pipelineRepository = new PipelineRepository();
 
     private final GdsLoggers loggers;
@@ -64,6 +63,7 @@ final class GraphDataScienceProceduresProviderFactory {
     private final ExporterBuildersProviderService exporterBuildersProviderService;
     private final ExportLocation exportLocation;
     private final FeatureTogglesRepository featureTogglesRepository;
+    private final GraphStoreCatalogService graphStoreCatalogService;
     private final GraphStoreFactorySuppliers graphStoreFactorySuppliers;
     private final LimitsConfiguration limitsConfiguration;
     private final Metrics metrics;
@@ -81,6 +81,7 @@ final class GraphDataScienceProceduresProviderFactory {
         ExporterBuildersProviderService exporterBuildersProviderService,
         ExportLocation exportLocation,
         FeatureTogglesRepository featureTogglesRepository,
+        GraphStoreCatalogService graphStoreCatalogService,
         GraphStoreFactorySuppliers graphStoreFactorySuppliers,
         LimitsConfiguration limitsConfiguration,
         Metrics metrics,
@@ -97,6 +98,7 @@ final class GraphDataScienceProceduresProviderFactory {
         this.exporterBuildersProviderService = exporterBuildersProviderService;
         this.exportLocation = exportLocation;
         this.featureTogglesRepository = featureTogglesRepository;
+        this.graphStoreCatalogService = graphStoreCatalogService;
         this.graphStoreFactorySuppliers = graphStoreFactorySuppliers;
         this.limitsConfiguration = limitsConfiguration;
         this.metrics = metrics;

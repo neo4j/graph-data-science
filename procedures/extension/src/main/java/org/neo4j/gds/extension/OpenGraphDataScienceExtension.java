@@ -21,6 +21,7 @@ package org.neo4j.gds.extension;
 
 import org.neo4j.annotations.service.ServiceProvider;
 import org.neo4j.configuration.Config;
+import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.gds.OpenGdsLicenseState;
 import org.neo4j.gds.applications.operations.FeatureTogglesRepository;
 import org.neo4j.gds.concurrency.OpenGdsConcurrencyValidator;
@@ -61,6 +62,7 @@ public class OpenGraphDataScienceExtension extends ExtensionFactory<OpenGraphDat
     public Lifecycle newInstance(ExtensionContext extensionContext, Dependencies dependencies) {
         var log = new LogAccessor().getLog(dependencies.logService(), getClass());
 
+        var databaseManagementService = dependencies.databaseManagementService();
         var dependencySatisfier = extensionContext.dependencySatisfier();
         var globalProcedures = dependencies.globalProcedures();
         var neo4jConfiguration = dependencies.config();
@@ -85,6 +87,7 @@ public class OpenGraphDataScienceExtension extends ExtensionFactory<OpenGraphDat
 
         var graphDataScienceExtensionBuilderAndAssociatedProducts = OpenGraphDataScienceExtensionBuilder.create(
             log,
+            databaseManagementService,
             dependencySatisfier,
             globalProcedures,
             neo4jConfiguration,
@@ -114,6 +117,8 @@ public class OpenGraphDataScienceExtension extends ExtensionFactory<OpenGraphDat
 
     public interface Dependencies {
         Config config();
+
+        DatabaseManagementService databaseManagementService();
 
         GlobalProcedures globalProcedures();
 

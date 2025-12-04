@@ -19,20 +19,25 @@
  */
 package org.neo4j.gds.procedures.integration;
 
-import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.kernel.lifecycle.LifecycleAdapter;
 
 /**
  * On plugin init, we need to initialize the log on {@link org.neo4j.gds.core.loading.GraphStoreCatalog}.
+ * But not before, I think. Unsure. This was how it was originally :shrug:
  */
 class GraphStoreCatalogLogInitializer extends LifecycleAdapter {
     private final Log log;
+    private final GraphStoreCatalogService graphStoreCatalogService;
 
-    GraphStoreCatalogLogInitializer(Log log) {this.log = log;}
+    GraphStoreCatalogLogInitializer(Log log, GraphStoreCatalogService graphStoreCatalogService) {
+        this.log = log;
+        this.graphStoreCatalogService = graphStoreCatalogService;
+    }
 
     @Override
     public void init() {
-        GraphStoreCatalog.setLog(log);
+        graphStoreCatalogService.setLog(log);
     }
 }

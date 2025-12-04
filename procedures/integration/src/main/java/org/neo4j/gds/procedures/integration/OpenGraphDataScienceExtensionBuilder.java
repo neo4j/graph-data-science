@@ -21,6 +21,7 @@ package org.neo4j.gds.procedures.integration;
 
 import org.apache.commons.lang3.tuple.Triple;
 import org.neo4j.common.DependencySatisfier;
+import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.gds.LicenseState;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.graphstorecatalog.ExportLocation;
@@ -34,7 +35,7 @@ import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.core.GraphStoreFactorySuppliers;
 import org.neo4j.gds.core.IdMapBehavior;
-import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.logging.GdsLoggers;
 import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
@@ -85,6 +86,7 @@ public final class OpenGraphDataScienceExtensionBuilder {
     // fundamentals
     private final Log log;
     private final ComponentRegistration componentRegistration;
+    private final DatabaseManagementService databaseManagementService;
 
     // structural
     private final GraphDataScienceProceduresProviderFactory graphDataScienceProceduresProviderFactory;
@@ -95,6 +97,7 @@ public final class OpenGraphDataScienceExtensionBuilder {
     private final ModelCatalog modelCatalog;
 
     // services
+    private final GraphStoreCatalogService graphStoreCatalogService;
     private final TaskStoreService taskStoreService;
     private final TaskRegistryFactoryService taskRegistryFactoryService;
     private final boolean useMaxMemoryEstimation;
@@ -105,7 +108,9 @@ public final class OpenGraphDataScienceExtensionBuilder {
     private OpenGraphDataScienceExtensionBuilder(
         Log log,
         ComponentRegistration componentRegistration,
+        DatabaseManagementService databaseManagementService,
         GraphDataScienceProceduresProviderFactory graphDataScienceProceduresProviderFactory,
+        GraphStoreCatalogService graphStoreCatalogService,
         LicenseState licenseState,
         Metrics metrics,
         ModelCatalog modelCatalog,
@@ -118,10 +123,12 @@ public final class OpenGraphDataScienceExtensionBuilder {
     ) {
         this.log = log;
         this.componentRegistration = componentRegistration;
+        this.databaseManagementService = databaseManagementService;
         this.graphDataScienceProceduresProviderFactory = graphDataScienceProceduresProviderFactory;
         this.licenseState = licenseState;
         this.metrics = metrics;
         this.modelCatalog = modelCatalog;
+        this.graphStoreCatalogService = graphStoreCatalogService;
         this.taskStoreService = taskStoreService;
         this.taskRegistryFactoryService = taskRegistryFactoryService;
         this.useMaxMemoryEstimation = useMaxMemoryEstimation;
@@ -136,6 +143,7 @@ public final class OpenGraphDataScienceExtensionBuilder {
      */
     public static Triple<OpenGraphDataScienceExtensionBuilder, TaskRegistryFactoryService, TaskStoreService> create(
         Log log,
+        DatabaseManagementService databaseManagementService,
         DependencySatisfier dependencySatisfier,
         GlobalProcedures globalProcedures,
         Configuration neo4jConfiguration,
@@ -157,6 +165,9 @@ public final class OpenGraphDataScienceExtensionBuilder {
         Optional<Function<GraphCatalogApplications, GraphCatalogApplications>> graphCatalogApplicationsDecorator,
         Optional<Function<ModelCatalogApplications, ModelCatalogApplications>> modelCatalogApplicationsDecorator
     ) {
+        // GraphStoreCatalog will one day not be a singleton
+        var graphStoreCatalogService = new GraphStoreCatalogService();
+
         singletonConfigurer.configureSingletons(concurrencyValidator, idMapBehavior, poolSizes);
 
         // Read some configuration used to select behaviour
@@ -183,8 +194,9 @@ public final class OpenGraphDataScienceExtensionBuilder {
         var freeMemoryAfterLastGc = new AtomicLong(availableMemory);
         // We make it available in a neat service
         var memoryTracker = new MemoryTracker(availableMemory, log);
-        GraphStoreCatalog.registerGraphStoreAddedListener(memoryTracker);
-        GraphStoreCatalog.registerGraphStoreRemovedListener(memoryTracker);
+
+        graphStoreCatalogService.registerGraphStoreAddedListener(memoryTracker);
+        graphStoreCatalogService.registerGraphStoreRemovedListener(memoryTracker);
 
         // in the short term, until we eradicate old usages, we also install the shared state in its old place
         GcListenerExtension.setMemoryGauge(freeMemoryAfterLastGc);
@@ -225,6 +237,7 @@ public final class OpenGraphDataScienceExtensionBuilder {
             exporterBuildersProviderService,
             exportLocation,
             featureTogglesRepository,
+            graphStoreCatalogService,
             graphStoreFactorySuppliers,
             limitsConfiguration,
             metrics,
@@ -239,7 +252,9 @@ public final class OpenGraphDataScienceExtensionBuilder {
         var graphDataScienceExtensionBuilder = new OpenGraphDataScienceExtensionBuilder(
             log,
             componentRegistration,
+            databaseManagementService,
             graphDataScienceProviderFactory,
+            graphStoreCatalogService,
             licenseState,
             metrics,
             modelCatalog,
@@ -281,7 +296,9 @@ public final class OpenGraphDataScienceExtensionBuilder {
 
         var lifeSupport = new LifeSupport();
         lifeSupport.add(gcListener);
-        lifeSupport.add(new GraphStoreCatalogLogInitializer(log));
+        lifeSupport.add(new GraphStoreCatalogLogInitializer(log, graphStoreCatalogService));
+        lifeSupport.add(InMemoryGraphTracker.create(databaseManagementService, graphStoreCatalogService));
+
         return lifeSupport;
     }
 

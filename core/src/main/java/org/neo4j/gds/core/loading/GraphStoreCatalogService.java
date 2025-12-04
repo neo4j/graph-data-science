@@ -27,11 +27,14 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.User;
+import org.neo4j.gds.api.graph.store.catalog.GraphStoreAddedEventListener;
+import org.neo4j.gds.api.graph.store.catalog.GraphStoreRemovedEventListener;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.loading.GraphStoreCatalog.GraphStoreCatalogEntryWithUsername;
 import org.neo4j.gds.core.loading.validation.GraphStoreValidation;
 import org.neo4j.gds.core.loading.validation.GraphValidation;
+import org.neo4j.gds.logging.Log;
 
 import java.util.Collection;
 import java.util.Map;
@@ -284,5 +287,21 @@ public class GraphStoreCatalogService {
 
     public void set(GraphProjectConfig configuration, GraphStore graphStore) {
         GraphStoreCatalog.set(configuration, graphStore);
+    }
+
+    public void removeAllLoadedGraphs(DatabaseId databaseId) {
+        GraphStoreCatalog.removeAllLoadedGraphs(databaseId);
+    }
+
+    public void registerGraphStoreAddedListener(GraphStoreAddedEventListener graphStoreAddedEventListener) {
+        GraphStoreCatalog.registerGraphStoreAddedListener(graphStoreAddedEventListener);
+    }
+
+    public void registerGraphStoreRemovedListener(GraphStoreRemovedEventListener graphStoreRemovedEventListener) {
+        GraphStoreCatalog.registerGraphStoreRemovedListener(graphStoreRemovedEventListener);
+    }
+
+    public void setLog(Log log) {
+        GraphStoreCatalog.setLog(log);
     }
 }
