@@ -110,7 +110,8 @@ public class MaxFlowPhase {
             parameters.freq(),
             excessAtDestinations,
             totalExcess,
-            progressTracker
+            progressTracker,
+            terminationFlag
         );
         discharging.dischargeUntilDone();
     }

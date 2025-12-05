@@ -86,7 +86,8 @@ class SequentialDischargingTest {
             1000,
             0,
             0,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         );
 
 
@@ -156,7 +157,8 @@ class SequentialDischargingTest {
             1000,
             0,
             0,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         );
 
 
