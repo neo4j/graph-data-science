@@ -25,9 +25,11 @@ import org.neo4j.internal.kernel.api.security.AuthSubject;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class UsernameTest {
-
     @Test
     void emptyUsernameShouldAgreeWithAnonymousAuthSubject() {
         assertThat(Username.EMPTY_USERNAME.username()).isEqualTo(AuthSubject.ANONYMOUS.executingUser());
+
+        // I don't know what to think of this. Seems unfortunate.
+        assertThat(Username.EMPTY_USERNAME.username()).isEqualTo(AuthSubject.AUTH_DISABLED.executingUser());
     }
 }

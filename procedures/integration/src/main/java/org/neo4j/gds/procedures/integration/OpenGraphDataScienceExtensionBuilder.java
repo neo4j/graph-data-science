@@ -35,6 +35,7 @@ import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.core.GraphStoreFactorySuppliers;
 import org.neo4j.gds.core.IdMapBehavior;
+import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.logging.GdsLoggers;
@@ -333,6 +334,7 @@ public final class OpenGraphDataScienceExtensionBuilder {
         registerTaskRegistryFactoryComponent(taskRegistryFactoryService);
         registerTaskStoreComponent(taskStoreService);
         registerUserLogRegistryFactoryComponent(userLogServices);
+        registerUsernameComponent();
     }
 
     private void registerMetricsComponent(Metrics metrics) {
@@ -383,5 +385,13 @@ public final class OpenGraphDataScienceExtensionBuilder {
         componentRegistration.registerComponent("Model Catalog", ModelCatalog.class, __ -> modelCatalog);
 
         componentRegistration.setUpDependency(modelCatalog);
+    }
+
+    /**
+     * @deprecated Legacy stuff, will go away one day
+     */
+    @Deprecated
+    private void registerUsernameComponent() {
+        componentRegistration.registerComponent("Username", Username.class, UsernameCapturer::capture);
     }
 }

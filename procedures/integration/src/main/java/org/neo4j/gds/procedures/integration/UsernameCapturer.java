@@ -17,29 +17,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core;
+package org.neo4j.gds.procedures.integration;
+
+import org.neo4j.gds.core.Username;
+import org.neo4j.kernel.api.procedure.Context;
 
 /**
- * This username microtype is very much tied to Neo4j.
- * It is the type we inject in Pregel and places.
+ * Capture the username of the Neo4j user executing the procedure.
  */
-public final class Username {
-    /**
-     * In Neo4j, the anonymous user has the username <blank>.
-     */
-    public static final Username EMPTY_USERNAME = new Username("");
+final class UsernameCapturer {
+    private UsernameCapturer() {}
 
-    private final String value;
+    static Username capture(Context context) {
+        var username = context.securityContext().subject().executingUser();
 
-    public static Username of(String username) {
-        return new Username(username);
-    }
-
-    private Username(String value) {
-        this.value = value;
-    }
-
-    public String username() {
-        return value;
+        return Username.of(username);
     }
 }
