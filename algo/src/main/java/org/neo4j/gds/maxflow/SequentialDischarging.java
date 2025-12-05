@@ -21,16 +21,17 @@ package org.neo4j.gds.maxflow;
 
 import com.carrotsearch.hppc.BitSet;
 import org.apache.commons.lang3.LongRange;
+import org.apache.commons.lang3.mutable.MutableDouble;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArrayQueue;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
-import java.util.Arrays;
-import java.util.Comparator;
-
 class SequentialDischarging {
+    private static final long ALPHA = 6;
+    private static final long BETA = 12;
+    private static final double TOLERANCE = 1e-10;
     private final FlowGraph flowGraph;
     private final HugeDoubleArray excess;
     private final HugeLongArray label;
@@ -38,17 +39,12 @@ class SequentialDischarging {
     private final BitSet inWorkingQueue;
     private final GlobalRelabeling globalRelabeling;
     private final double freq;
-
     private final Arc[] filteredNeighbors;
-    private long workSinceLastGR;
     private final GapDetector gapDetector;
-    private double excessAtDestinations;
     private final double totalExcess;
     private final ProgressTracker progressTracker;
-
-    private static final long ALPHA = 6;
-    private static final long BETA = 12;
-    private static final double TOLERANCE = 1e-10;
+    private long workSinceLastGR;
+    private double excessAtDestinations;
 
     SequentialDischarging(
         FlowGraph flowGraph,
@@ -74,12 +70,18 @@ class SequentialDischarging {
         this.excessAtDestinations = excessAtDestinations;
         this.totalExcess = totalExcess;
         this.progressTracker = progressTracker;
-        this.filteredNeighbors = new Arc[(int) LongRange.of(0L, flowGraph.nodeCount()-1).toLongStream().map(flowGraph::degree).max().getAsLong()]; //max (in+out)degree instead (theoretically IntMax + IntMax)
+        this.filteredNeighbors = new Arc[(int) LongRange.of(0L, flowGraph.nodeCount() - 1)
+            .toLongStream()
+            .map(flowGraph::degree)
+            .max()
+            .getAsLong()]; //max (in+out)degree instead (theoretically IntMax + IntMax)
         this.workSinceLastGR = 0L;
     }
 
     void dischargeUntilDone() {
-        final long relabelingNumber = freq > 0 ? (long) ((ALPHA * flowGraph.nodeCount() + flowGraph.edgeCount()) / freq) : Long.MAX_VALUE;
+        final long relabelingNumber = freq > 0
+            ? (long) ((ALPHA * flowGraph.nodeCount() + flowGraph.edgeCount()) / freq)
+            : Long.MAX_VALUE;
         globalRelabeling.globalRelabeling();
         gapDetector.resetCounts();
 
@@ -95,36 +97,66 @@ class SequentialDischarging {
         }
     }
 
-    void discharge(long v) {
-        var oldLabel = label.get(v);
-        if(oldLabel >= flowGraph.nodeCount()) { //only used by gap-heuristic (if gap-relabeled after added to workingQueue)
-            return;
-        }
-
-        var idx = new MutableInt(0);
-        var sLabel = oldLabel;
-        flowGraph.forEachRelationship(
+    int sortAndPush(long v, long vLabel) {
+        var p = new MutableDouble(0);
+        var k = new MutableInt(0);
+        return flowGraph.forEachRelationship(
             v, (s, t, relIdx, residualCapacity, isReverse) -> {
                 if (residualCapacity > 0) {
                     var tLabel = label.get(t);
-                    if(tLabel == (sLabel - 1)) {
+                    if (tLabel == (vLabel - 1)) {
                         return !pushAndCheckIfEmpty(s, t, relIdx, residualCapacity, isReverse);
-                    }
-                    else if (tLabel < flowGraph.nodeCount()) {
-                        filteredNeighbors[idx.getAndIncrement()] = new Arc(t, relIdx, residualCapacity, tLabel, isReverse);
+                    } else if (tLabel < flowGraph.nodeCount()) {
+                        int i = k.intValue();
+                        Arc prev;
+                        if (p.doubleValue() < excess.get(v) || tLabel < filteredNeighbors[i - 1].label) {
+                            p.add(residualCapacity);
+                            for (; i > 0; i--) {
+                                prev = filteredNeighbors[i - 1];
+                                if (prev.label > tLabel) {
+                                    if (p.doubleValue() - prev.residualCapacity > excess.get(v)) {
+                                        p.subtract(prev.residualCapacity);
+                                    } else {
+                                        break;
+                                    }
+                                } else {
+                                    break;
+                                }
+                            }
+                            k.setValue(i + 1); //cut-off the last elements that get pushed out
+                            for (; i > 0; i--) {
+                                //shift the rest until free spot for prev
+                                prev = filteredNeighbors[i - 1];
+                                if (prev.label > tLabel) {
+                                    filteredNeighbors[i] = prev; //shift down
+                                } else {
+                                    break;
+                                }
+                            }
+                            filteredNeighbors[i] = new Arc(t, relIdx, residualCapacity, tLabel, isReverse);
+                        }
                     }
                 }
                 return true;
             }
-        );
-        if(excess.get(v) < TOLERANCE) {
+        ) ? k.intValue() : 0;
+    }
+
+    void discharge(long v) {
+        var oldLabel = label.get(v);
+        if (oldLabel >= flowGraph.nodeCount()) { //only used by gap-heuristic (if gap-relabeled after added to workingQueue)
+            return;
+        }
+
+        var k = sortAndPush(v, oldLabel);
+
+        if (excess.get(v) < TOLERANCE) {
             workSinceLastGR += flowGraph.outDegree(v) + BETA;
             return;
         }
 
-        Arrays.sort(filteredNeighbors, 0, idx.intValue(), Comparator.comparing(Arc::label));
 
-        for (var i = 0; i < idx.intValue(); i++) {
+        for (var i = 0; i < k; i++) {
             var arc = filteredNeighbors[i];
 
             var newLabel = arc.label() + 1;
@@ -137,7 +169,7 @@ class SequentialDischarging {
                 oldLabel = newLabel;
             }
 
-            if(pushAndCheckIfEmpty(v, arc.t(), arc.relIdx(), arc.residualCapacity(), arc.isReverse())) {
+            if (pushAndCheckIfEmpty(v, arc.t(), arc.relIdx(), arc.residualCapacity(), arc.isReverse())) {
                 workSinceLastGR += flowGraph.outDegree(v) + BETA;
                 return;
             }
@@ -150,10 +182,11 @@ class SequentialDischarging {
         flowGraph.push(relIdx, delta, isReverse);
         excess.addTo(s, -delta);
         excess.addTo(t, delta);
-        if(label.get(t) == 0) {
-            progressTracker.logProgress((long) ( Math.ceil((excessAtDestinations+delta) * progressTracker.currentVolume() / totalExcess) - Math.ceil(excessAtDestinations * progressTracker.currentVolume() / totalExcess) ));
+        if (label.get(t) == 0) {
+            progressTracker.logProgress((long) (Math.ceil((excessAtDestinations + delta) * progressTracker.currentVolume() / totalExcess) - Math.ceil(
+                excessAtDestinations * progressTracker.currentVolume() / totalExcess)));
             excessAtDestinations += delta;
-        } else if(!inWorkingQueue.getAndSet(t)) {
+        } else if (!inWorkingQueue.getAndSet(t)) {
             workingQueue.add(t);
         }
 
@@ -161,5 +194,6 @@ class SequentialDischarging {
     }
 
 
-    record Arc(long t, long relIdx, double residualCapacity, long label, boolean isReverse) {}
+    record Arc(long t, long relIdx, double residualCapacity, long label, boolean isReverse) {
+    }
 }
