@@ -26,7 +26,9 @@ import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArrayQueue;
+import org.neo4j.gds.termination.TerminationFlag;
 
+import static org.neo4j.gds.mcmf.MinCostFunctions.TERMINATION_BOUND;
 import static org.neo4j.gds.mcmf.MinCostFunctions.TOLERANCE;
 import static org.neo4j.gds.mcmf.MinCostFunctions.isAdmissible;
 import static org.neo4j.gds.mcmf.MinCostFunctions.isResidualEdge;
@@ -44,6 +46,7 @@ public class CostDischarging {
     private final GlobalRelabelling globalRelabelling;
     private double epsilon;
     private double workSinceLastGR;
+    private final TerminationFlag terminationFlag;
 
 
     CostDischarging(
@@ -54,7 +57,8 @@ public class CostDischarging {
         BitSet inWorkingQueue,
         double epsilon,
         GlobalRelabelling globalRelabelling,
-        double freq
+        double freq,
+        TerminationFlag terminationFlag
     ) {
         this.costFlowGraph = costFlowGraph;
         this.excess = excess;
@@ -64,6 +68,7 @@ public class CostDischarging {
         this.epsilon = epsilon;
         this.filteredNeighbors = HugeObjectArray.newArray(Arc.class, costFlowGraph.maxInPlusOutDegree());
         this.globalRelabelling = globalRelabelling;
+        this.terminationFlag = terminationFlag;
         this.workSinceLastGR = 0D;
         this.freq = freq;
     }
@@ -75,7 +80,12 @@ public class CostDischarging {
     void dischargeUntilDone() {
         var relabelNumber = freq == 0 ? 0 : (ALPHA * costFlowGraph.nodeCount() + costFlowGraph.edgeCount() / freq);
         globalRelabelling.relabellingWithPriorityQueue(epsilon);
+        int terminationCheckingSteps=0;
         while (!workingQueue.isEmpty()) {
+            if (++terminationCheckingSteps == TERMINATION_BOUND){
+                terminationCheckingSteps=0;
+                terminationFlag.assertRunning();
+            }
             if (workSinceLastGR > relabelNumber) {
                 globalRelabelling.relabellingWithPriorityQueue(epsilon);
                 workSinceLastGR = 0;

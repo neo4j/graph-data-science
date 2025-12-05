@@ -78,11 +78,14 @@ public final class MinCostMaxFlow extends Algorithm<CostFlowResult> {
             workingQueue,
             inWorkingQueue,
             epsilon,
-            new GlobalRelabelling(costFlowGraph, excess, prize),
-            parameters.freq()
+            new GlobalRelabelling(costFlowGraph, excess, prize,terminationFlag),
+            parameters.freq(),
+            terminationFlag
         );
+
         progressTracker.beginSubTask();;
         do {
+            terminationFlag.assertRunning();
             progressTracker.beginSubTask();
             epsilon = Math.max(epsilon / parameters.alpha(), SMALLEST_ALLOWED_EPSILON);
             discharging.updateEpsilon(epsilon);
@@ -98,7 +101,7 @@ public final class MinCostMaxFlow extends Algorithm<CostFlowResult> {
 
     }
 
-    void computeMaxFlow(CostFlowGraph flowGraph,HugeDoubleArray excess){
+    private void computeMaxFlow(CostFlowGraph flowGraph, HugeDoubleArray excess){
         progressTracker.beginSubTask();
 
         var maxFlow = new MaxFlowPhase(

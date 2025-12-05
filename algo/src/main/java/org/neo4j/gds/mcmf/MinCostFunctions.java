@@ -34,4 +34,6 @@ class MinCostFunctions {
         return residualCapacity > TOLERANCE;
     }
 
+    static int TERMINATION_BOUND=10_000;
+
 }

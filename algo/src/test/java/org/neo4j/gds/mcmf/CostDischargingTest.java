@@ -80,7 +80,8 @@ class CostDischargingTest {
             bitSet,
             2,
             mock(GlobalRelabelling.class),
-            0
+            0,
+            TerminationFlag.RUNNING_TRUE
         );
         bitSet.set(2L);
 
@@ -125,7 +126,9 @@ class CostDischargingTest {
             mock(BitSet.class),
             2,
             mock(GlobalRelabelling.class),
-            0
+            0,
+            TerminationFlag.RUNNING_TRUE
+
         );
 
         //all edges are non-reverse:
@@ -183,7 +186,8 @@ class CostDischargingTest {
             bitset,
             2,
             mock(GlobalRelabelling.class),
-            0
+            0,
+            TerminationFlag.RUNNING_TRUE
         );
 
         excess.set(mappedId.of("b"),3L);
