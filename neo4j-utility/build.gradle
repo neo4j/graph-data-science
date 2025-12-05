@@ -1,0 +1,14 @@
+apply plugin: 'java-library'
+
+description = 'Neo4j Graph Data Science :: Neo4j Utility'
+group = 'org.neo4j.gds'
+
+dependencies {
+    compileOnly(neo4j.common) { transitive = false }
+    compileOnly(neo4j.gql.status) { transitive = false }
+    compileOnly(neo4j.graphdb.api) { transitive = false }
+    compileOnly(neo4j.kernel.api) { transitive = false }
+
+    implementation project(':core-utils')
+    implementation project(':transaction')
+}

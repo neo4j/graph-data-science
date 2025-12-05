@@ -33,8 +33,8 @@ import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.transaction.TransactionContext;
+import org.neo4j.gds.utility.StatementApi;
 import org.neo4j.gds.utils.ExceptionUtil;
-import org.neo4j.gds.utils.StatementApi;
 import org.neo4j.internal.kernel.api.Write;
 
 import java.util.concurrent.TimeUnit;

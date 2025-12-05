@@ -17,27 +17,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.utils;
+package org.neo4j.gds.projection;
 
 import org.neo4j.gds.core.concurrency.RenamesCurrentThread;
 import org.neo4j.gds.transaction.TransactionContext;
-import org.neo4j.gds.utils.StatementApi;
+import org.neo4j.gds.utility.StatementApi;
 
-import static org.neo4j.gds.utils.ExceptionUtil.throwIfUnchecked;
+import java.util.concurrent.Callable;
 
-public abstract class StatementAction extends StatementApi implements RenamesCurrentThread, Runnable, StatementApi.TxConsumer {
-
-    protected StatementAction(TransactionContext tx) {
+abstract class StatementFunction<T> extends StatementApi implements RenamesCurrentThread, Callable<T>, StatementApi.TxFunction<T> {
+    StatementFunction(TransactionContext tx) {
         super(tx);
     }
 
     @Override
-    public void run() {
+    public T call() {
         try (Revert ignored = RenamesCurrentThread.renameThread(threadName())) {
-            acceptInTransaction(this);
-        } catch (Exception e) {
-            throwIfUnchecked(e);
-            throw new RuntimeException(e);
+            return applyInTransaction(this);
         }
     }
 }

@@ -17,13 +17,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.utils;
+package org.neo4j.gds.utility;
 
 import org.neo4j.gds.transaction.TransactionContext;
+import org.neo4j.gds.utils.ExceptionUtil;
 import org.neo4j.kernel.api.KernelTransaction;
 
 public abstract class StatementApi {
-
     public interface TxConsumer {
         void accept(KernelTransaction transaction) throws Exception;
     }

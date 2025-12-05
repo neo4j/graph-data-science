@@ -24,7 +24,6 @@ import com.carrotsearch.hppc.IntObjectMap;
 import com.carrotsearch.hppc.LongHashSet;
 import com.carrotsearch.hppc.LongSet;
 import org.immutables.builder.Builder;
-import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.ElementIdentifier;
 import org.neo4j.gds.ElementProjection;
 import org.neo4j.gds.NodeLabel;
@@ -36,7 +35,6 @@ import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.compat.InternalReadOps;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
-import org.neo4j.gds.core.utils.StatementFunction;
 import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.internal.id.IdGeneratorFactory;
 import org.neo4j.internal.kernel.api.Read;
@@ -60,9 +58,8 @@ import static org.neo4j.gds.core.GraphDimensions.NO_SUCH_LABEL;
 import static org.neo4j.gds.core.GraphDimensions.NO_SUCH_RELATIONSHIP_TYPE;
 
 final class GraphDimensionsReader extends StatementFunction<GraphDimensions> {
-
     private final IdGeneratorFactory idGeneratorFactory;
-    protected GraphProjectFromStoreConfig graphProjectConfig;
+    private final GraphProjectFromStoreConfig graphProjectConfig;
 
     @Builder.Factory
     static GraphDimensionsReader graphDimensionsReader(
@@ -99,7 +96,7 @@ final class GraphDimensionsReader extends StatementFunction<GraphDimensions> {
         Map<String, Integer> relationshipPropertyTokens = loadPropertyTokens(getRelationshipProjections().projections(), tokenRead);
 
         long nodeCount = labelTokenNodeLabelMappings.keyStream()
-            .mapToLong(label -> dataRead.estimateCountsForNode(label))
+            .mapToLong(dataRead::estimateCountsForNode)
             .sum();
         final long allNodesCount = InternalReadOps.getHighestPossibleNodeCount(idGeneratorFactory);
         long finalNodeCount = labelTokenNodeLabelMappings.keys().contains(ANY_LABEL)
@@ -130,7 +127,7 @@ final class GraphDimensionsReader extends StatementFunction<GraphDimensions> {
             .build();
     }
 
-    protected TokenElementIdentifierMappings<NodeLabel> getNodeLabelTokens(TokenRead tokenRead) {
+    private TokenElementIdentifierMappings<NodeLabel> getNodeLabelTokens(TokenRead tokenRead) {
         var labelTokenNodeLabelMappings = new TokenElementIdentifierMappings<NodeLabel>(
             ANY_LABEL);
         graphProjectConfig.nodeProjections()
@@ -142,7 +139,7 @@ final class GraphDimensionsReader extends StatementFunction<GraphDimensions> {
         return labelTokenNodeLabelMappings;
     }
 
-    protected TokenElementIdentifierMappings<RelationshipType> getRelationshipTypeTokens(TokenRead tokenRead) {
+    private TokenElementIdentifierMappings<RelationshipType> getRelationshipTypeTokens(TokenRead tokenRead) {
         var typeTokenRelTypeMappings = new TokenElementIdentifierMappings<RelationshipType>(
             ANY_RELATIONSHIP_TYPE);
         graphProjectConfig.relationshipProjections()
@@ -157,15 +154,18 @@ final class GraphDimensionsReader extends StatementFunction<GraphDimensions> {
         return typeTokenRelTypeMappings;
     }
 
-    protected NodeProjections getNodeProjections() {
+    private NodeProjections getNodeProjections() {
         return graphProjectConfig.nodeProjections();
     }
 
-    protected RelationshipProjections getRelationshipProjections() {
+    private RelationshipProjections getRelationshipProjections() {
         return graphProjectConfig.relationshipProjections();
     }
 
-    protected Map<String, Integer> loadPropertyTokens(Map<? extends ElementIdentifier, ? extends ElementProjection> projectionMapping, TokenRead tokenRead) {
+    private Map<String, Integer> loadPropertyTokens(
+        Map<? extends ElementIdentifier, ? extends ElementProjection> projectionMapping,
+        TokenRead tokenRead
+    ) {
         return projectionMapping
             .values()
             .stream()
@@ -177,8 +177,7 @@ final class GraphDimensionsReader extends StatementFunction<GraphDimensions> {
             ));
     }
 
-    @NotNull
-    protected Map<RelationshipType, Long> getRelationshipCountsByType(
+    private Map<RelationshipType, Long> getRelationshipCountsByType(
         Read dataRead,
         TokenElementIdentifierMappings<NodeLabel> labelTokenNodeLabelMappings,
         TokenElementIdentifierMappings<RelationshipType> typeTokenRelTypeMappings
@@ -228,7 +227,7 @@ final class GraphDimensionsReader extends StatementFunction<GraphDimensions> {
         private final IntObjectMap<List<T>> mappings;
         private final int allToken;
 
-         public TokenElementIdentifierMappings(int allToken) {
+        TokenElementIdentifierMappings(int allToken) {
             this.allToken = allToken;
             this.mappings = new IntObjectHashMap<>();
         }
