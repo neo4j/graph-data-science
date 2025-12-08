@@ -12,7 +12,7 @@ dependencies {
 
     implementation project(':procedures-facade-api')
 
-    testImplementation platform(openGds.junit5bom)
+    testImplementation platform(openGds.junit.bom)
 
     testImplementation project(':opengds-extension')
     testImplementation project(':opengds-procedure-facade')

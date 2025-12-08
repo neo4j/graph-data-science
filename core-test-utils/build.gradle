@@ -6,8 +6,8 @@ group = 'org.neo4j.gds'
 
 dependencies {
     api (
-        platform(openGds.junit5bom),
-        openGds.junit5.jupiter,
+        platform(openGds.junit.bom),
+        openGds.junit.jupiter,
         openGds.assertj.core,
         openGds.hamcrest,
 

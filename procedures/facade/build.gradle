@@ -53,7 +53,7 @@ dependencies {
     // test infrastructure
     testCompileOnly openGds.immutables.value
 
-    testImplementation platform(openGds.junit5bom)
+    testImplementation platform(openGds.junit.bom)
     testImplementation openGds.bundles.test.mocking
 
     testRuntimeOnly openGds.bundles.test.platforms

@@ -17,7 +17,7 @@ dependencies {
     implementation project(':string-formatting')
 
 
-    testImplementation platform(openGds.junit5bom)
+    testImplementation platform(openGds.junit.bom)
     testImplementation openGds.bundles.test.basic
 
     testRuntimeOnly openGds.bundles.test.platforms

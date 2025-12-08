@@ -22,7 +22,7 @@ dependencies {
 
     testCompileOnly openGds.google.auto.service
 
-    testImplementation platform(openGds.junit5bom)
+    testImplementation platform(openGds.junit.bom)
     testImplementation project(':core-test-utils')
     testImplementation openGds.google.testing.compile
     testImplementation openGds.bundles.test.basic

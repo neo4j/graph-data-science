@@ -56,10 +56,10 @@ dependencies {
 
     // Test dependencies
     testImplementation openGds.assertj.core
-    testImplementation platform(openGds.junit5bom)
-    testImplementation openGds.junit5.jupiter.api
-    testImplementation openGds.junit5.jupiter.engine
-    testImplementation openGds.junit5.jupiter.params
+    testImplementation platform(openGds.junit.bom)
+    testImplementation openGds.junit.jupiter.api
+    testImplementation openGds.junit.jupiter.engine
+    testImplementation openGds.junit.jupiter.params
     testImplementation openGds.mockito.junit.jupiter
 
     testImplementation project(":core-utils")

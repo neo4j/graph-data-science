@@ -11,7 +11,7 @@ dependencies {
     implementation project(':memory-usage')
     implementation openGds.hppc
 
-    testImplementation platform(openGds.junit5bom)
+    testImplementation platform(openGds.junit.bom)
     testImplementation openGds.bundles.test.basic
 
     testImplementation openGds.qaladatagen

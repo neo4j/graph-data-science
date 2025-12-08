@@ -85,14 +85,14 @@ jjwt-impl = { module = "io.jsonwebtoken:jjwt-impl", version.ref = "jjwt" }
 jjwt-jackson = { module = "io.jsonwebtoken:jjwt-jackson", version.ref = "jjwt" }
 jol-core = { module = "org.openjdk.jol:jol-core", version.ref = "jol" }
 jqwik = { module = "net.jqwik:jqwik", version.ref = "jqwik" }
+junit-bom = { module = "org.junit:junit-bom", version.ref = "junit5bom" }
+junit-jupiter = { module = "org.junit.jupiter:junit-jupiter" }
+junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api" }
+junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine" }
+junit-jupiter-params = { module = "org.junit.jupiter:junit-jupiter-params" }
+junit-migration = { module = "org.junit.jupiter:junit-jupiter-migrationsupport" }
 junit-pioneer = { module = "org.junit-pioneer:junit-pioneer", version.ref = "junit-pioneer" }
-junit5-jupiter = { module = "org.junit.jupiter:junit-jupiter" }
-junit5-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api" }
-junit5-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine" }
-junit5-jupiter-params = { module = "org.junit.jupiter:junit-jupiter-params" }
-junit5-migration = { module = "org.junit.jupiter:junit-jupiter-migrationsupport" }
-junit5-platform = { module = "org.junit.platform:junit-platform-launcher" }
-junit5bom = { module = "org.junit:junit-bom", version.ref = "junit5bom" }
+junit-platform = { module = "org.junit.platform:junit-platform-launcher" }
 log4j-api = { module = "org.apache.logging.log4j:log4j-api", version.ref = "log4j" }
 memoryfilesystem = { module = "com.github.marschall:memoryfilesystem", version.ref = "memoryfilesystem" }
 mockito-junit-jupiter = { module = "org.mockito:mockito-junit-jupiter", version.ref = "mockito-junit-jupiter" }
@@ -124,14 +124,14 @@ spawn = "ch.kk7.spawn:1.0.20180924200750"
 [bundles]
 test-basic = [
     "assertj-core",
-    "junit5-jupiter",
+    "junit-jupiter",
 ]
 test-mocking = [
     "assertj-core",
-    "junit5-jupiter",
+    "junit-jupiter",
     "mockito-junit-jupiter",
 ]
 test-platforms = [
     "jqwik",
-    "junit5-platform",
+    "junit-platform",
 ]

@@ -24,7 +24,7 @@ dependencies {
     testCompileOnly         openGds.immutables.builder
     testCompileOnly         openGds.immutables.value.annotations
 
-    testImplementation platform(openGds.junit5bom)
+    testImplementation platform(openGds.junit.bom)
     testImplementation openGds.bundles.test.basic
     testImplementation openGds.hamcrest
 

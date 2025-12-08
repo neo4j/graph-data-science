@@ -45,8 +45,8 @@ dependencies {
     )
 
     testImplementation  project(':test-utils')
-    testImplementation  platform(openGds.junit5bom)
+    testImplementation  platform(openGds.junit.bom)
     testImplementation  openGds.junit.pioneer
-    testImplementation  openGds.junit5.jupiter
+    testImplementation  openGds.junit.jupiter
     testImplementation  openGds.assertj.core
 }

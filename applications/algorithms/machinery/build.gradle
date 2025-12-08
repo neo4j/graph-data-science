@@ -30,7 +30,7 @@ dependencies {
     implementation project(':string-formatting')
     implementation project(':termination')
 
-    testImplementation platform(openGds.junit5bom)
+    testImplementation platform(openGds.junit.bom)
     testImplementation openGds.bundles.test.mocking
 
     testRuntimeOnly openGds.bundles.test.platforms

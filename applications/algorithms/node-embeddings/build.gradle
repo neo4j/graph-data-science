@@ -25,13 +25,13 @@ dependencies {
     implementation project(":string-formatting")
     implementation project(":termination")
 
-    testImplementation platform(openGds.junit5bom)
-    testImplementation openGds.junit5.jupiter.api
-    testImplementation openGds.junit5.jupiter.params
+    testImplementation platform(openGds.junit.bom)
+    testImplementation openGds.junit.jupiter.api
+    testImplementation openGds.junit.jupiter.params
     testImplementation openGds.mockito.junit.jupiter
     testImplementation openGds.assertj.core
 
-    testRuntimeOnly openGds.junit5.jupiter.engine
+    testRuntimeOnly openGds.junit.jupiter.engine
 
     testImplementation project(':annotations')
     testImplementation project(':test-utils')

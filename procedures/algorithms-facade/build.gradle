@@ -39,8 +39,8 @@ dependencies {
     // test infrastructure
     testCompileOnly openGds.jetbrains.annotations
 
-    testImplementation platform(openGds.junit5bom)
-    testImplementation openGds.junit5.jupiter
+    testImplementation platform(openGds.junit.bom)
+    testImplementation openGds.junit.jupiter
     testImplementation openGds.mockito.junit.jupiter
     testImplementation openGds.assertj.core
 
@@ -49,7 +49,7 @@ dependencies {
     testImplementation neo4j.graphdb.api
     testImplementation neo4j.kernel.api
 
-    testRuntimeOnly openGds.junit5.jupiter.engine
+    testRuntimeOnly openGds.junit.jupiter.engine
 
 
     testAnnotationProcessor project(':config-generator')

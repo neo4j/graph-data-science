@@ -46,11 +46,11 @@ dependencies {
     )
 
     api(
-        platform(openGds.junit5bom),
+        platform(openGds.junit.bom),
         project(':core-test-utils'),
         openGds.jqwik,
         openGds.junit.pioneer,
-        openGds.junit5.jupiter.engine,
+        openGds.junit.jupiter.engine,
     )
 
     api(neo4j.it.test.support) {
