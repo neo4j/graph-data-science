@@ -36,7 +36,8 @@ memoryfilesystem = "2.8.2"
 mockito-junit-jupiter = "5.20.0"
 opencypher-front-end = "9.0.20210312"
 picocli = "4.7.7"
-protobuf = "4.30.2"
+# @pin - should match the one defined by Neo4j core-db
+protobuf = "4.32.1"
 qala-datagen = "2.5.1"
 # @pin have to figure out what goes wrong when updated
 record-builder = "42"
