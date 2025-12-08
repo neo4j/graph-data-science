@@ -1,6 +1,6 @@
 [versions]
 agrona = "2.3.0"
-asciidoctorj = "3.0.0"
+asciidoctorj = "3.0.1"
 assertj = "3.27.6"
 bouncycastle-prov = "1.83"
 caffeine = "3.2.3"
