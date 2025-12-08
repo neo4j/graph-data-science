@@ -11,7 +11,7 @@ pluginManagement {
 dependencyResolutionManagement {
     versionCatalogs {
         openGds {
-            from(files("gradle/libs.versions.toml"))
+            from(files("gradle/opengds.versions.toml"))
         }
         neo4j {
             from(files("gradle/neo4j.dependencies.toml"))
