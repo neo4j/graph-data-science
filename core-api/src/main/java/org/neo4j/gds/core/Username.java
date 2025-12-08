@@ -25,7 +25,7 @@ package org.neo4j.gds.core;
  */
 public final class Username {
     /**
-     * In Neo4j, the anonymous user has the username <blank>.
+     * In Neo4j, the anonymous user has <i>blank</i> username.
      */
     public static final Username EMPTY_USERNAME = new Username("");
 
