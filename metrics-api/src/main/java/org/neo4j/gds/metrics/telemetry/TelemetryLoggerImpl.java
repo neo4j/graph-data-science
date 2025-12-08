@@ -73,7 +73,7 @@ public class TelemetryLoggerImpl implements TelemetryLogger {
     }
 
     public record GraphLogEntry(
-        int graph,
+        int graphId,
         long nodeCount,
         long relationshipCount,
         long labelCount,
@@ -86,7 +86,7 @@ public class TelemetryLoggerImpl implements TelemetryLogger {
     }
 
     public record AlgorithmLogEntry(
-        int graph,
+        int graphId,
         String algorithm,
         long computeMillis,
         List<String> configuredParameters
