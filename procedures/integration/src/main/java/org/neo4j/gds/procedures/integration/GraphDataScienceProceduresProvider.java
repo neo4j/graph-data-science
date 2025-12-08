@@ -40,6 +40,8 @@ import org.neo4j.gds.core.write.ExporterContext;
 import org.neo4j.gds.executor.MemoryEstimationContext;
 import org.neo4j.gds.mem.MemoryTracker;
 import org.neo4j.gds.metrics.Metrics;
+import org.neo4j.gds.metrics.telemetry.TelemetryLogger;
+import org.neo4j.gds.metrics.telemetry.TelemetryLoggerImpl;
 import org.neo4j.gds.procedures.DatabaseIdAccessor;
 import org.neo4j.gds.procedures.ExporterBuildersProviderService;
 import org.neo4j.gds.procedures.GraphCatalogProcedureFacadeFactory;
@@ -53,6 +55,7 @@ import org.neo4j.gds.procedures.TaskRegistryFactoryService;
 import org.neo4j.gds.procedures.UserAccessor;
 import org.neo4j.gds.procedures.UserLogServices;
 import org.neo4j.gds.procedures.pipelines.PipelineRepository;
+import org.neo4j.gds.settings.GdsSettings;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.termination.TransactionTerminationMonitor;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -197,8 +200,11 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
             .userLogStore(userLogStore)
             .build();
 
+        var telemetryLogger = neo4jConfiguration.get(GdsSettings.enableTelemetryLogging()) ? new TelemetryLoggerImpl(loggers.log()) : TelemetryLogger.DISABLED;
+
         return LocalGraphDataScienceProcedures.create(
             loggers,
+            telemetryLogger,
             defaultsConfiguration,
             exportLocation,
             graphCatalogProcedureFacadeFactory,

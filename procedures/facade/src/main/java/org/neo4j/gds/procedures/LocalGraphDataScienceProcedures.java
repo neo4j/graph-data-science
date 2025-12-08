@@ -108,6 +108,7 @@ public class LocalGraphDataScienceProcedures implements GraphDataScienceProcedur
 
     public static GraphDataScienceProcedures create(
         GdsLoggers loggers,
+        TelemetryLogger telemetryLogger,
         DefaultsConfiguration defaultsConfiguration,
         ExportLocation exportLocation,
         GraphCatalogProcedureFacadeFactory graphCatalogProcedureFacadeFactory,
@@ -151,6 +152,7 @@ public class LocalGraphDataScienceProcedures implements GraphDataScienceProcedur
 
         var algorithmProcessingTemplate = createAlgorithmProcessingTemplate(
             loggers.log(),
+            telemetryLogger,
             algorithmProcessingTemplateDecorator,
             graphStoreCatalogService,
             memoryGuard,
@@ -282,6 +284,7 @@ public class LocalGraphDataScienceProcedures implements GraphDataScienceProcedur
 
     private static AlgorithmProcessingTemplate createAlgorithmProcessingTemplate(
         Log log,
+        TelemetryLogger telemetryLogger,
         Optional<Function<AlgorithmProcessingTemplate, AlgorithmProcessingTemplate>> algorithmProcessingTemplateDecorator,
         GraphStoreCatalogService graphStoreCatalogService,
         MemoryGuard memoryGuard,
@@ -291,7 +294,7 @@ public class LocalGraphDataScienceProcedures implements GraphDataScienceProcedur
         var algorithmProcessingTemplate = DefaultAlgorithmProcessingTemplate.create(
             log,
             algorithmMetricsService,
-            TelemetryLogger.DISABLED,
+            telemetryLogger,
             graphStoreCatalogService,
             memoryGuard,
             requestScopedDependencies

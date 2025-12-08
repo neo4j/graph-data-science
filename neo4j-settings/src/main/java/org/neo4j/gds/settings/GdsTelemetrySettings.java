@@ -19,27 +19,23 @@
  */
 package org.neo4j.gds.settings;
 
+import org.neo4j.annotations.service.ServiceProvider;
+import org.neo4j.configuration.Description;
+import org.neo4j.configuration.SettingImpl;
+import org.neo4j.configuration.SettingsDeclaration;
 import org.neo4j.graphdb.config.Setting;
 
-import java.nio.file.Path;
+import static org.neo4j.configuration.SettingValueParsers.BOOL;
 
-public final class GdsSettings {
+@ServiceProvider
+public class GdsTelemetrySettings implements SettingsDeclaration {
 
-    private GdsSettings() {}
+    // Enabled for Aura Graph Analytics
+    @Description("Log telemetry regarding GDS usage")
+    public static final Setting<Boolean> gds_telemetry_logging_enabled = SettingImpl.newBuilder(
+            "internal.gds.logging.telemetry", BOOL, Boolean.FALSE)
+        .immutable()
+        .internal()
+        .build();
 
-    public static Setting<Path> exportLocation() {
-        return GraphStoreExportSettings.export_location_setting;
-    }
-
-    public static Setting<Boolean> validateUsingMaxMemoryEstimation() {
-        return MemoryEstimationSettings.validate_using_max_memory_estimation;
-    }
-
-    public static Setting<Boolean> useGdsMetricsServer() {
-        return GdsMetricsSettings.gds_metrics_server_enabled;
-    }
-
-    public static Setting<Boolean> enableTelemetryLogging() {
-        return GdsTelemetrySettings.gds_telemetry_logging_enabled;
-    }
 }

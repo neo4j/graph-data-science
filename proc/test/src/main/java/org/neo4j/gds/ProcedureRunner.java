@@ -43,6 +43,7 @@ import org.neo4j.gds.executor.MemoryEstimationContext;
 import org.neo4j.gds.logging.LogAdapter;
 import org.neo4j.gds.mem.MemoryTracker;
 import org.neo4j.gds.metrics.Metrics;
+import org.neo4j.gds.metrics.telemetry.TelemetryLoggerImpl;
 import org.neo4j.gds.procedures.DatabaseIdAccessor;
 import org.neo4j.gds.procedures.GraphCatalogProcedureFacadeFactory;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
@@ -179,6 +180,7 @@ public final class ProcedureRunner {
 
         return LocalGraphDataScienceProcedures.create(
             loggers,
+            new TelemetryLoggerImpl(loggers.log()),
             DefaultsConfiguration.Instance,
             null,
             catalogProcedureFacadeFactory,
