@@ -21,7 +21,7 @@ hamcrest = "3.0"
 hdrhistogram = "2.2.2"
 # @pin - later versions have breaking changes
 hppc = "0.7.3"
-immutables = "2.11.6"
+immutables = "2.11.7"
 ipaddress = "5.5.1"
 jackson = "2.20.0"
 javapoet = "1.13.0"
