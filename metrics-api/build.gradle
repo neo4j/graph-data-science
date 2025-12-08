@@ -8,6 +8,7 @@ dependencies {
 
     implementation project(":annotations")
     implementation project(":config-api")
+    implementation project(":core-api")
     implementation project(":core-utils")
     implementation project(":logging")
 

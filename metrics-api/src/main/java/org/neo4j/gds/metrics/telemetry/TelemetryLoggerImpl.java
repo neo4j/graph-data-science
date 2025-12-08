@@ -20,6 +20,7 @@
 package org.neo4j.gds.metrics.telemetry;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.logging.Log;
 
@@ -36,11 +37,33 @@ public class TelemetryLoggerImpl implements TelemetryLogger {
     }
 
     @Override
-    public void log_algorithm(String algorithm, AlgoBaseConfig config, long computeMillis) {
+    public void logGraph(
+        GraphStore graphStore
+    ) {
+        try {
+            var logEntry = new GraphLogEntry(
+                System.identityHashCode(graphStore),
+                graphStore.nodeCount(),
+                graphStore.relationshipCount(),
+                graphStore.nodeLabels().size(),
+                graphStore.relationshipTypes().size(),
+                !graphStore.nodePropertyKeys().isEmpty(),
+                !graphStore.relationshipPropertyKeys().isEmpty(),
+                !graphStore.inverseIndexedRelationshipTypes().isEmpty()
+            );
+            var jsonEntry = OBJECT_MAPPER.writeValueAsString(logEntry);
+            log.info("Graph Telemetry: %s", jsonEntry);
+        } catch (Exception e) {
+            log.warn("Failed to log telemetry: %s", e.getMessage());
+        }
+    }
+
+    @Override
+    public void logAlgorithm(int graphIdentifier, String algorithm, AlgoBaseConfig config, long computeMillis) {
         try {
             var configuredParameters = ConfigAnalyzer.nonDefaultParameters(config, log);
 
-            var logEntry = new AlgorithmLogEntry(algorithm, computeMillis, configuredParameters);
+            var logEntry = new AlgorithmLogEntry(graphIdentifier, algorithm, computeMillis, configuredParameters);
 
             var jsonEntry = OBJECT_MAPPER.writeValueAsString(logEntry);
             log.info("Algorithm Telemetry: %s", jsonEntry);
@@ -49,7 +72,21 @@ public class TelemetryLoggerImpl implements TelemetryLogger {
         }
     }
 
-    public static record AlgorithmLogEntry(
+    public record GraphLogEntry(
+        int graphId,
+        long nodeCount,
+        long relationshipCount,
+        long labelCount,
+        long typeCount,
+        boolean hasNodeProperties,
+        boolean hasRelationshipProperties,
+        boolean hasInverseIndexedRelationships
+    ) {
+
+    }
+
+    public record AlgorithmLogEntry(
+        int graphId,
         String algorithm,
         long computeMillis,
         List<String> configuredParameters

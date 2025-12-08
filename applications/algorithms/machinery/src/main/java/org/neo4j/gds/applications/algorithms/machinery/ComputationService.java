@@ -91,7 +91,10 @@ class ComputationService {
             var result = computation.compute(graphResources.graph(), graphResources.graphStore());
 
             timer.stop();
-            telemetryLogger.log_algorithm(label.asString(), configuration, timer.getDuration());
+
+            var graphIdentifier = System.identityHashCode(graphResources.graphStore().hashCode());
+
+            telemetryLogger.logAlgorithm(graphIdentifier, label.asString(), configuration, timer.getDuration());
 
             return result;
         } catch (RuntimeException e) {

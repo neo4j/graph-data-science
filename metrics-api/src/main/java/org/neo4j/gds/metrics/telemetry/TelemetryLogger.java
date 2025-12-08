@@ -19,12 +19,26 @@
  */
 package org.neo4j.gds.metrics.telemetry;
 
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
 
 public interface TelemetryLogger {
-    void log_algorithm(String algorithm, AlgoBaseConfig config, long computeMillis);
 
-    TelemetryLogger DISABLED = (algorithm, config, computeMillis) -> {
+    void logGraph(GraphStore graphStore);
 
+    void logAlgorithm(int graphIdentifier, String algorithm, AlgoBaseConfig config, long computeMillis);
+
+    TelemetryLogger DISABLED = new TelemetryLogger() {
+        @Override
+        public void logGraph(
+            GraphStore graphStore
+        ) {
+
+        }
+
+        @Override
+        public void logAlgorithm(int graphIdentifier, String algorithm, AlgoBaseConfig config, long computeMillis) {
+
+        }
     };
 }
