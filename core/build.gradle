@@ -19,7 +19,6 @@ dependencies {
     // Neo4j dependencies
     compileOnly(neo4j.annotations) { transitive = false }
     compileOnly(neo4j.common) { transitive = false }
-    compileOnly(neo4j.graphdb.api) { transitive = false }
     compileOnly(neo4j.kernel.api) { transitive = false }
     compileOnly(neo4j.unsafe) { transitive = false }
 

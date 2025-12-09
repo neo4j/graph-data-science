@@ -19,8 +19,6 @@
  */
 package org.neo4j.gds.core.utils;
 
-import org.neo4j.graphdb.Direction;
-
 public final class RawValues {
 
     private RawValues() {}
@@ -35,13 +33,6 @@ public final class RawValues {
      */
     public static long combineIntInt(int head, int tail) {
         return ((long) head << 32) | (long) tail & 0xFFFFFFFFL;
-    }
-
-    public static long combineIntInt(Direction direction, int head, int tail) {
-        if (direction == Direction.INCOMING) {
-            return combineIntInt(tail, head);
-        }
-        return combineIntInt(head, tail);
     }
 
     /**
