@@ -22,25 +22,29 @@ package org.neo4j.gds.core.loading;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DatabaseId;
-import org.neo4j.gds.api.DatabaseInfo.DatabaseLocation;
+import org.neo4j.gds.api.DatabaseInfo;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.ImmutableDatabaseInfo;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.graph.GraphPropertyStore;
 import org.neo4j.gds.api.properties.nodes.NodeProperty;
 import org.neo4j.gds.api.properties.nodes.NodePropertyStore;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.properties.relationships.Properties;
 import org.neo4j.gds.api.properties.relationships.RelationshipProperty;
 import org.neo4j.gds.api.properties.relationships.RelationshipPropertyStore;
 import org.neo4j.gds.api.schema.MutableGraphSchema;
+import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
+import org.neo4j.gds.api.schema.RelationshipSchema;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.huge.HugeGraph;
-import org.neo4j.gds.core.loading.Capabilities.WriteMode;
 import org.neo4j.gds.utils.StringJoining;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -79,7 +83,31 @@ public final class CSRGraphStoreUtil {
             );
         }
 
-        var nodeProperties = constructNodePropertiesFromGraph(graph);
+        return createFromSchema(
+            databaseId,
+            schema,
+            graph.idMap(),
+            graph::nodeProperties,
+            (relType)-> singleTypeRelationshipsFromGraph(graph,relationshipSchema,relType,relationshipPropertyKey),
+            concurrency
+        );
+
+    }
+
+    public static  CSRGraphStore createFromSchema(
+        DatabaseId databaseId,
+        MutableGraphSchema mutableGraphSchema,
+        IdMap idMap,
+        Function<String, NodePropertyValues> valuesFunction,
+        Function<RelationshipType,SingleTypeRelationships> singleTypeRelationshipsSupplier,
+        Concurrency concurrency
+    ) {
+
+        var nodeProperties = constructNodePropertiesFromSchemaAndProperties(
+            mutableGraphSchema.nodeSchema(),
+            valuesFunction
+        );
+        var relationshipSchema = mutableGraphSchema.relationshipSchema();
 
         RelationshipImportResult relationshipImportResult;
         if (relationshipSchema.availableTypes().isEmpty()) {
@@ -87,6 +115,35 @@ public final class CSRGraphStoreUtil {
         } else {
             var relationshipType = relationshipSchema.availableTypes().iterator().next();
 
+            relationshipImportResult = RelationshipImportResult.builder()
+                .putImportResult(relationshipType, singleTypeRelationshipsSupplier.apply(relationshipType))
+                .build();
+        }
+
+            var databaseInfo = ImmutableDatabaseInfo.builder()
+                .databaseId(databaseId)
+                .databaseLocation(DatabaseInfo.DatabaseLocation.LOCAL)
+                .build();
+            return new GraphStoreBuilder()
+                .databaseInfo(databaseInfo)
+                // TODO: is it correct that we only use this for generated graphs?
+                .capabilities(ImmutableStaticCapabilities.of(Capabilities.WriteMode.NONE))
+                .schema(mutableGraphSchema)
+                .nodes(ImmutableNodes.of(mutableGraphSchema.nodeSchema(), idMap, nodeProperties))
+                .relationshipImportResult(relationshipImportResult)
+                .graphProperties(GraphPropertyStore.empty())
+                .concurrency(concurrency)
+                .build();
+
+
+    }
+
+        private static SingleTypeRelationships singleTypeRelationshipsFromGraph(
+            HugeGraph graph,
+            RelationshipSchema relationshipSchema,
+            RelationshipType relationshipType,
+            Optional<String> relationshipPropertyKey
+        ){
             var relationshipProperties = constructRelationshipPropertiesFromGraph(
                 graph,
                 relationshipType,
@@ -94,41 +151,19 @@ public final class CSRGraphStoreUtil {
                 graph.relationshipProperties()
             );
 
-            relationshipImportResult = RelationshipImportResult.builder()
-                .putImportResult(
-                    relationshipType,
-                    SingleTypeRelationships.builder()
+           return SingleTypeRelationships.builder()
                         .relationshipSchemaEntry(relationshipSchema.get(relationshipType))
                         .topology(graph.relationshipTopology())
                         .properties(relationshipProperties)
-                        .build()
-                )
-                .build();
+                        .build();
         }
-
-        var databaseInfo = ImmutableDatabaseInfo.builder()
-            .databaseId(databaseId)
-            .databaseLocation(DatabaseLocation.LOCAL)
-            .build();
-        return new GraphStoreBuilder()
-            .databaseInfo(databaseInfo)
-            // TODO: is it correct that we only use this for generated graphs?
-            .capabilities(ImmutableStaticCapabilities.of(WriteMode.NONE))
-            .schema(schema)
-            .nodes(ImmutableNodes.of(schema.nodeSchema(), graph.idMap(), nodeProperties))
-            .relationshipImportResult(relationshipImportResult)
-            .graphProperties(GraphPropertyStore.empty())
-            .concurrency(concurrency)
-            .build();
-    }
-
-    @NotNull
-    private static NodePropertyStore constructNodePropertiesFromGraph(HugeGraph graph) {
+    private static  NodePropertyStore constructNodePropertiesFromSchemaAndProperties(
+        NodeSchema nodeSchema,
+        Function<String, NodePropertyValues> valuesFunction
+    ){
         var nodePropertyStoreBuilder = NodePropertyStore.builder();
 
-        graph
-            .schema()
-            .nodeSchema()
+        nodeSchema
             .unionProperties()
             .forEach(
                 (propertyKey, propertySchema) -> nodePropertyStoreBuilder.putIfAbsent(
@@ -136,13 +171,13 @@ public final class CSRGraphStoreUtil {
                     NodeProperty.of(
                         propertyKey,
                         propertySchema.state(),
-                        graph.nodeProperties(propertyKey),
+                        valuesFunction.apply(propertyKey),
                         propertySchema.defaultValue()
                     )
                 )
             );
-
         return nodePropertyStoreBuilder.build();
+
     }
 
     @NotNull

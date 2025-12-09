@@ -25,8 +25,10 @@ import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.config.RandomGraphGeneratorConfig;
 import org.neo4j.gds.core.Aggregation;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -38,7 +40,7 @@ public class RandomGraphGeneratorBuilder {
     private long seed = System.currentTimeMillis();
     private Optional<NodeLabelProducer> maybeNodeLabelProducer = Optional.empty();
     private final Map<NodeLabel, Set<PropertyProducer<?>>> nodePropertyProducers = new HashMap<>();
-    private Optional<PropertyProducer<double[]>> maybeRelationshipPropertyProducer = Optional.empty();
+    private final List<PropertyProducer<double[]>> listRelationshipPropertyProducers = new ArrayList<>();
     private Aggregation aggregation = Aggregation.NONE;
     private Direction direction = Direction.DIRECTED;
     private RandomGraphGeneratorConfig.AllowSelfLoops allowSelfLoops = RandomGraphGeneratorConfig.AllowSelfLoops.NO;
@@ -90,7 +92,7 @@ public class RandomGraphGeneratorBuilder {
     }
 
     public RandomGraphGeneratorBuilder relationshipPropertyProducer(PropertyProducer<double[]> relationshipPropertyProducer) {
-        this.maybeRelationshipPropertyProducer = Optional.of(relationshipPropertyProducer);
+        this.listRelationshipPropertyProducers.add(relationshipPropertyProducer);
         return this;
     }
 
@@ -129,7 +131,7 @@ public class RandomGraphGeneratorBuilder {
             seed,
             maybeNodeLabelProducer,
             nodePropertyProducers,
-            maybeRelationshipPropertyProducer,
+            listRelationshipPropertyProducers,
             aggregation,
             direction,
             allowSelfLoops,

@@ -21,15 +21,12 @@ package org.neo4j.gds.applications.graphstorecatalog;
 
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.api.DatabaseId;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.beta.generator.PropertyProducer;
 import org.neo4j.gds.beta.generator.RandomGraphGenerator;
 import org.neo4j.gds.beta.generator.RandomGraphGeneratorBuilder;
 import org.neo4j.gds.config.RandomGraphGeneratorConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.huge.HugeGraph;
-import org.neo4j.gds.core.loading.CSRGraphStoreUtil;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.logging.Log;
@@ -80,19 +77,10 @@ public class GenerateGraphApplication {
         try (ProgressTimer ignored = ProgressTimer.start(generateMillis::setValue)) {
             RandomGraphGenerator generator = initializeGraphGenerator(config);
 
-            HugeGraph graph = generator.generate();
-
-            Optional<String> relationshipProperty = generator
-                .getMaybeRelationshipPropertyProducer()
-                .map(PropertyProducer::getPropertyName);
-
-            GraphStore graphStore = CSRGraphStoreUtil.createFromGraph(
+            var graphStore = generator.generateGraphstore(
                 databaseId,
-                graph,
-                relationshipProperty,
                 config.readConcurrency()
             );
-
             log.info(StringFormatting.formatWithLocale(
                 "Generated Graph: {nodes: {count: %d, propertyCount: %d, labelCount: %d}, relationships: {count: %d, typeCount: %d, propertyCount: %d}}'",
                 graphStore.nodeCount(),

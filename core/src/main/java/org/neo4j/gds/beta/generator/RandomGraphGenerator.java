@@ -23,7 +23,9 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.DefaultValue;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
@@ -38,7 +40,9 @@ import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.config.RandomGraphGeneratorConfig.AllowSelfLoops;
 import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.huge.HugeGraph;
+import org.neo4j.gds.core.loading.CSRGraphStoreUtil;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.NodesBuilder;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
@@ -75,7 +79,7 @@ public final class RandomGraphGenerator {
     private final boolean inverseIndex;
 
     private final Optional<NodeLabelProducer> maybeNodeLabelProducer;
-    private final Optional<PropertyProducer<double[]>> maybeRelationshipPropertyProducer;
+    private final List<PropertyProducer<double[]>> relationshipPropertyProducers;
     private final Map<NodeLabel, Set<PropertyProducer<?>>> nodePropertyProducers;
     private final boolean forceDag;
     private final HugeLongArray randomDagMapping;
@@ -88,7 +92,7 @@ public final class RandomGraphGenerator {
         long seed,
         Optional<NodeLabelProducer> maybeNodeLabelProducer,
         Map<NodeLabel, Set<PropertyProducer<?>>> nodePropertyProducers,
-        Optional<PropertyProducer<double[]>> maybeRelationshipPropertyProducer,
+        List<PropertyProducer<double[]>> relationshipPropertyProducers,
         Aggregation aggregation,
         Direction direction,
         AllowSelfLoops allowSelfLoops,
@@ -99,7 +103,7 @@ public final class RandomGraphGenerator {
         this.relationshipDistribution = relationshipDistribution;
         this.maybeNodeLabelProducer = maybeNodeLabelProducer;
         this.nodePropertyProducers = nodePropertyProducers;
-        this.maybeRelationshipPropertyProducer = maybeRelationshipPropertyProducer;
+        this.relationshipPropertyProducers = relationshipPropertyProducers;
         this.nodeCount = nodeCount;
         this.averageDegree = averageDegree;
         this.aggregation = aggregation;
@@ -117,6 +121,34 @@ public final class RandomGraphGenerator {
     }
 
     public HugeGraph generate() {
+
+        if (listRelationshipPropertyProducers().size() > 1) {
+            throw new IllegalArgumentException(
+                "Cannot generate a graph object if multiple relationship properties have been specified");
+        }
+        var specs = generateSpecs();
+        return GraphFactory.create(
+            specs.graphSchema(),
+            specs.idMap(),
+            specs.nodePropertyValues(),
+            specs.relationships()
+        );
+    }
+
+    public GraphStore generateGraphstore(DatabaseId databaseId, Concurrency concurrency) {
+        var specs = generateSpecs();
+        return CSRGraphStoreUtil.createFromSchema(
+            databaseId,
+            specs.graphSchema(),
+            specs.idMap(),
+            specs.nodePropertyValues()::get,
+            (relationshipType) -> specs.relationships(),
+            concurrency
+        );
+
+    }
+
+    private RandomGraphSpecs generateSpecs() {
         var nodesBuilder = GraphFactory.initNodesBuilder()
             .maxOriginalId(nodeCount)
             .hasLabelInformation(maybeNodeLabelProducer.isPresent())
@@ -135,13 +167,12 @@ public final class RandomGraphGenerator {
             .nodes(idMap)
             .relationshipType(relationshipType)
             .orientation(direction.toOrientation())
-            .addAllPropertyConfigs(maybeRelationshipPropertyProducer
-                .map(propertyProducer -> List.of(GraphFactory.PropertyConfig.of(
+            .addAllPropertyConfigs(
+                relationshipPropertyProducers.stream().map(propertyProducer -> GraphFactory.PropertyConfig.of(
                     propertyProducer.getPropertyName(),
                     aggregation,
                     DefaultValue.forDouble()
-                )))
-                .orElseGet(List::of)
+                )).toList()
             ).indexInverse(inverseIndex)
             .aggregation(aggregation)
             .build();
@@ -159,15 +190,20 @@ public final class RandomGraphGenerator {
             Map.of()
         );
 
-        return GraphFactory.create(graphSchema, idMap, nodePropertiesAndSchema.nodeProperties(), relationships);
+        return new RandomGraphSpecs(
+            graphSchema,
+            idMap,
+            nodePropertiesAndSchema.nodeProperties(),
+            relationships
+        );
     }
 
     public RelationshipDistribution getRelationshipDistribution() {
         return relationshipDistribution;
     }
 
-    public Optional<PropertyProducer<double[]>> getMaybeRelationshipPropertyProducer() {
-        return maybeRelationshipPropertyProducer;
+    public List<PropertyProducer<double[]>> listRelationshipPropertyProducers() {
+        return relationshipPropertyProducers;
     }
 
     private void generateNodes(NodesBuilder nodesBuilder, NodeLabelProducer nodeLabelProducer) {
@@ -182,6 +218,13 @@ public final class RandomGraphGenerator {
         }
     }
 
+    private void fillRelationshipProperty(long nodeId, double[] property) {
+        for (var index = 0; index < relationshipPropertyProducers.size(); ++index) {
+            var propertyProducer = relationshipPropertyProducers.get(index);
+            propertyProducer.setProperty(nodeId, property, index, propertyValueRandom);
+        }
+    }
+
     private void generateRelationships(RelationshipsBuilder relationshipsImporter) {
         LongUnaryOperator degreeProducer = relationshipDistribution.degreeProducer(nodeCount, averageDegree, random);
         LongUnaryOperator relationshipProducer = relationshipDistribution.relationshipProducer(
@@ -189,11 +232,10 @@ public final class RandomGraphGenerator {
             averageDegree,
             random
         );
-        PropertyProducer<double[]> relationshipPropertyProducer =
-            maybeRelationshipPropertyProducer.orElseGet(PropertyProducer.EmptyPropertyProducer::new);
 
         long degree, targetId;
-        double[] property = new double[1];
+
+        double[] property = new double[Math.max(1, relationshipPropertyProducers.size())];
 
         for (long nodeId = 0; nodeId < nodeCount; nodeId++) {
             degree = degreeProducer.applyAsLong(nodeId);
@@ -206,7 +248,8 @@ public final class RandomGraphGenerator {
                     }
                 }
                 assert (targetId < nodeCount);
-                relationshipPropertyProducer.setProperty(nodeId, property, 0, propertyValueRandom);
+
+                fillRelationshipProperty(nodeId, property);
                 if (forceDag) {
                     addDagRelationship(relationshipsImporter, nodeId, targetId, property);
                 }
@@ -215,22 +258,55 @@ public final class RandomGraphGenerator {
                 // In order to have the out degree follow a power-law distribution,
                 // we have to swap the relationship.
                 else if (relationshipDistribution == RelationshipDistribution.POWER_LAW) {
-                    relationshipsImporter.addFromInternal(targetId, nodeId, property[0]);
+                    addRelationship(relationshipsImporter, targetId, nodeId, property);
                 } else {
-                    relationshipsImporter.addFromInternal(nodeId, targetId, property[0]);
+                    addRelationship(relationshipsImporter, nodeId, targetId, property);
                 }
             }
         }
     }
 
-    private void addDagRelationship(RelationshipsBuilder relationshipsImporter,
-                                    long nodeId,
-                                    long targetId,
-                                    double[] property) {
-        if (targetId > nodeId) {
-            relationshipsImporter.addFromInternal(randomDagMapping.get(nodeId), randomDagMapping.get(targetId), property[0]);
+    public boolean hasSingleRelationshipProperty() {
+        return listRelationshipPropertyProducers().size() == 1;
+    }
+
+    public String getSingleRelationshipProperty() {
+        return listRelationshipPropertyProducers().getFirst().getPropertyName();
+    }
+
+    private void addRelationship(
+        RelationshipsBuilder relationshipsImporter,
+        long nodeId,
+        long targetId,
+        double[] property
+    ) {
+        if (property.length == 1) {
+            relationshipsImporter.addFromInternal(nodeId, targetId, property[0]);
         } else {
-            relationshipsImporter.addFromInternal(randomDagMapping.get(targetId), randomDagMapping.get(nodeId), property[0]);
+            relationshipsImporter.addFromInternal(nodeId, targetId, property);
+        }
+    }
+
+    private void addDagRelationship(
+        RelationshipsBuilder relationshipsImporter,
+        long nodeId,
+        long targetId,
+        double[] property
+    ) {
+        if (targetId > nodeId) {
+            addRelationship(
+                relationshipsImporter,
+                randomDagMapping.get(nodeId),
+                randomDagMapping.get(targetId),
+                property
+            );
+        } else {
+            addRelationship(
+                relationshipsImporter,
+                randomDagMapping.get(targetId),
+                randomDagMapping.get(nodeId),
+                property
+            );
         }
     }
 
@@ -255,31 +331,31 @@ public final class RandomGraphGenerator {
         var propertyNameToProducers = new HashMap<String, PropertyProducer<?>>();
 
         this.nodePropertyProducers.forEach((nodeLabel, propertyProducers) -> {
-            if (nodeLabel != NodeLabel.ALL_NODES && !idMap.availableNodeLabels().contains(nodeLabel)) {
-                return;
-            }
+                if (nodeLabel != NodeLabel.ALL_NODES && !idMap.availableNodeLabels().contains(nodeLabel)) {
+                    return;
+                }
 
-            propertyProducers.forEach(propertyProducer -> {
-                // map property names to all labels for that property
-                propertyNameToLabels
-                    .computeIfAbsent(propertyProducer.getPropertyName(), ignore -> new ArrayList<>())
-                    .add(nodeLabel);
-                // group producers by property name
-                propertyNameToProducers.merge(
-                    propertyProducer.getPropertyName(),
-                    propertyProducer,
-                    (first, second) -> {
-                        if (!first.equals(second)) {
-                            throw new IllegalArgumentException(formatWithLocale(
-                                "Duplicate node properties with name [%s]. The first property producer is [%s], the second one is [%s].",
-                                first.getPropertyName(),
-                                first,
-                                second
-                            ));
+                propertyProducers.forEach(propertyProducer -> {
+                    // map property names to all labels for that property
+                    propertyNameToLabels
+                        .computeIfAbsent(propertyProducer.getPropertyName(), ignore -> new ArrayList<>())
+                        .add(nodeLabel);
+                    // group producers by property name
+                    propertyNameToProducers.merge(
+                        propertyProducer.getPropertyName(),
+                        propertyProducer,
+                        (first, second) -> {
+                            if (!first.equals(second)) {
+                                throw new IllegalArgumentException(formatWithLocale(
+                                    "Duplicate node properties with name [%s]. The first property producer is [%s], the second one is [%s].",
+                                    first.getPropertyName(),
+                                    first,
+                                    second
+                                ));
+                            }
+                            return first;
                         }
-                        return first;
-                    }
-                );
+                    );
                 });
             }
         );
