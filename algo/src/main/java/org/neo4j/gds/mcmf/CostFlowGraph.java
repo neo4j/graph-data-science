@@ -19,11 +19,9 @@
  */
 package org.neo4j.gds.mcmf;
 
-import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.commons.lang3.mutable.MutableDouble;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.properties.relationships.RelationshipWithPropertyConsumer;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
@@ -31,6 +29,7 @@ import org.neo4j.gds.maxflow.FlowGraph;
 import org.neo4j.gds.maxflow.FlowRelationship;
 import org.neo4j.gds.maxflow.FlowResult;
 import org.neo4j.gds.maxflow.NodeWithValue;
+import org.neo4j.gds.maxflow.ResidualEdgeConsumer;
 
 public final class CostFlowGraph extends FlowGraph {
     private final HugeDoubleArray cost;
@@ -68,52 +67,30 @@ public final class CostFlowGraph extends FlowGraph {
     }
 
     private boolean forEachOriginalRelationship(long nodeId, CostAndCapacityEdgeConsumer consumer) {
-        var relIdx = new MutableLong(indPtr.get(nodeId));
-        var breakEarly = new MutableBoolean(false);
-        RelationshipWithPropertyConsumer consumer2 = (s, t, capacity) -> {
-            var residualCapcaity = capacity - flow.get(relIdx.longValue());
-            var relationshipCost = cost.get(relIdx.longValue());
+        ResidualEdgeConsumer adaptedConsumer = (s,t,relIdx,residualCapacity,isReverse)-> consumer.accept(
+            s,
+            t,
+            relIdx,
+            residualCapacity,
+            cost.get(relIdx),
+            isReverse
+        );
+        return  forEachOriginalRelationship(nodeId,adaptedConsumer);
 
-            var isReverse = false;
-
-            if(!consumer.accept(s, t, relIdx.longValue(), residualCapcaity, relationshipCost, isReverse)){
-                breakEarly.setTrue();
-                return false;
-            }
-            relIdx.increment();
-            return true;
-        };
-
-        if (nodeId == superSource()) {
-            for (var source : supply) {
-                if (!consumer2.accept(superSource(), source.node(), source.value())){
-                    return false;
-                }
-            }
-        } else if (nodeId == superTarget()) {
-            for (var target : demand) {
-                if (!consumer2.accept(superTarget(), target.node(), target.value())) {
-                    return false;
-                }
-            }
-        } else {
-            graph.forEachRelationship(nodeId, 0D, consumer2);
-        }
-
-        return breakEarly.isFalse();
     }
 
     boolean forEachReverseRelationship(long nodeId, CostAndCapacityEdgeConsumer consumer) {
-        for (long reverseRelIdx = reverseIndPtr.get(nodeId); reverseRelIdx < reverseIndPtr.get(nodeId + 1); reverseRelIdx++) {
-            var t = reverseAdjacency.get(reverseRelIdx);
-            var relIdx = reverseToRelIdx.get(reverseRelIdx);
-            var residualCapacity = flow.get(relIdx);
-            var isReverse = true;
-            if (!consumer.accept(nodeId, t, relIdx, residualCapacity, -cost.get(relIdx), isReverse)) {
-                return false;
-            }
-        }
-        return true;
+       ResidualEdgeConsumer adaptedConsumer = (s,t,relIdx,residualCapacity,isReverse)-> consumer.accept(
+            s,
+            t,
+            relIdx,
+            residualCapacity,
+            -cost.get(relIdx),
+            isReverse
+       );
+
+       return forEachReverseRelationship(nodeId,adaptedConsumer);
+
     }
 
     public boolean forEachRelationship(long nodeId, CostAndCapacityEdgeConsumer consumer) {
@@ -127,7 +104,6 @@ public final class CostFlowGraph extends FlowGraph {
         var flow = HugeObjectArray.newArray(FlowRelationship.class, originalEdgeCount());
         var totalFlow = new MutableDouble(0D);
         var totalCost = new MutableDouble(0D);
-//        System.out.println("CREATE RESULT");
         var idx = new MutableLong(0L);
         for (long nodeId = 0; nodeId < originalNodeCount(); nodeId++) {
             var relIdx = new MutableLong(indPtr.get(nodeId));

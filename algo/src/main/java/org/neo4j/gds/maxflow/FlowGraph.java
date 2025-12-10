@@ -78,7 +78,7 @@ public class FlowGraph {
         );
     }
 
-    private boolean forEachOriginalRelationship(long nodeId, ResidualEdgeConsumer consumer) {
+    protected boolean forEachOriginalRelationship(long nodeId, ResidualEdgeConsumer consumer) {
         var earlyTermination = new MutableBoolean(false);
         var relIdx = new MutableLong(indPtr.get(nodeId));
         RelationshipWithPropertyConsumer originalConsumer = (s, t, capacity) -> {
@@ -108,7 +108,7 @@ public class FlowGraph {
         return !earlyTermination.get();
     }
 
-    boolean forEachReverseRelationship(long nodeId, ResidualEdgeConsumer consumer) {
+   protected boolean forEachReverseRelationship(long nodeId, ResidualEdgeConsumer consumer) {
         for (long reverseRelIdx = reverseIndPtr.get(nodeId); reverseRelIdx < reverseIndPtr.get(nodeId + 1); reverseRelIdx++) {
             var t = reverseAdjacency.get(reverseRelIdx);
             var relIdx = reverseToRelIdx.get(reverseRelIdx);
