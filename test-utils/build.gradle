@@ -33,6 +33,7 @@ dependencies {
     implementation project(':opengds-procedure-facade')
     implementation project(':open-model-catalog')
     implementation project(':proc-common')
+    implementation project(':procedure-integration')
     implementation project(':procedures-facade-api')
     implementation project(':progress-tracking')
     implementation project(':string-formatting')
