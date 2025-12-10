@@ -17,8 +17,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.termination;
+package org.neo4j.gds.procedures.integration;
 
+import org.neo4j.gds.termination.TerminationMonitor;
 import org.neo4j.kernel.api.KernelTransaction;
 
 public class TransactionTerminationMonitor implements TerminationMonitor {

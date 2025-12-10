@@ -57,7 +57,6 @@ import org.neo4j.gds.procedures.UserLogServices;
 import org.neo4j.gds.procedures.pipelines.PipelineRepository;
 import org.neo4j.gds.settings.GdsSettings;
 import org.neo4j.gds.termination.TerminationFlag;
-import org.neo4j.gds.termination.TransactionTerminationMonitor;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.config.Configuration;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
