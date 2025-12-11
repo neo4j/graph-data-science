@@ -58,7 +58,7 @@ class GlobalRelabellingTest {
     private IdFunction idFunction;
     @Test
     void shouldComputeCorrectlyTimestamps(){
-        var globalRelabelling = new GlobalRelabelling(mock(CostFlowGraph.class),null,null);
+        var globalRelabelling = new GlobalRelabelling(mock(CostFlowGraph.class),null,null,TerminationFlag.RUNNING_TRUE);
         //40 / 10 = 4 + 5 = 9
         assertThat(globalRelabelling.computeEventTime(100,10,50,10,5)).isEqualTo(9);
         //40 / 12 = 3.something = 4 + 5 = 9
@@ -91,7 +91,7 @@ class GlobalRelabellingTest {
         excess.set(mappedId.of("g"),10);
         excess.set(mappedId.of("h"),10);
 
-        var globalRelabelling =new GlobalRelabelling(flowGraph,excess,prize);
+        var globalRelabelling =new GlobalRelabelling(flowGraph,excess,prize,TerminationFlag.RUNNING_TRUE);
         //at this moment, prize(a) = 20 - 2*5 = 10 , prize(g) = 100-2*5 = 90
         //and reverse(b->a) = -(-1) + prize(a) - prize(b) = +1 + 10 -0 = 11
         //and reverse(b->g) = -(-1) + prize(g) - prize(b) = +1 + 90 = 91
@@ -144,7 +144,7 @@ class GlobalRelabellingTest {
         excess.set(mappedId.of("g"), 10);
         excess.set(mappedId.of("h"), 10);
 
-        var globalRelabelling = new GlobalRelabelling(flowGraph, excess, prize);
+        var globalRelabelling = new GlobalRelabelling(flowGraph, excess, prize,TerminationFlag.RUNNING_TRUE);
 
         globalRelabelling.addToFrontier(mappedId.of("b"));
         MutableLong activeNodesNotFound = new MutableLong(100);
@@ -187,7 +187,7 @@ class GlobalRelabellingTest {
 
         excess.set(mappedId.of("g"), 10);
         excess.set(mappedId.of("b"),-100);
-        var globalRelabelling = new GlobalRelabelling(flowGraph, excess, prize);
+        var globalRelabelling = new GlobalRelabelling(flowGraph, excess, prize,TerminationFlag.RUNNING_TRUE);
 
         globalRelabelling.relabellingWithPriorityQueue(2);
 
@@ -222,7 +222,7 @@ class GlobalRelabellingTest {
 
             excess.set(mappedId.of("a"), 10);
 
-            var globalRelabelling = new GlobalRelabelling(flowGraph, excess, prize);
+            var globalRelabelling = new GlobalRelabelling(flowGraph, excess, prize,TerminationFlag.RUNNING_TRUE);
 
             globalRelabelling.addToFrontier(mappedId.of("b"));
             MutableLong activeNodesNotFound = new MutableLong(1);

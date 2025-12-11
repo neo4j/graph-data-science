@@ -25,6 +25,7 @@ import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArrayQueue;
 import org.neo4j.gds.core.utils.queue.HugeLongPriorityQueue;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import static org.neo4j.gds.mcmf.MinCostFunctions.TOLERANCE;
 import static org.neo4j.gds.mcmf.MinCostFunctions.isAdmissible;
@@ -38,14 +39,21 @@ import static org.neo4j.gds.mcmf.MinCostFunctions.reducedCost;
    private final HugeLongArrayQueue frontier;
    private final BitSet nodeInSet;
    private final HugeLongPriorityQueue pq;
+   private final TerminationFlag terminationFlag;
 
-    GlobalRelabelling(CostFlowGraph costFlowGraph, HugeDoubleArray excess, HugeDoubleArray prize) {
+    GlobalRelabelling(
+        CostFlowGraph costFlowGraph,
+        HugeDoubleArray excess,
+        HugeDoubleArray prize,
+        TerminationFlag terminationFlag
+    ) {
         this.costFlowGraph = costFlowGraph;
         this.excess = excess;
         this.prize = prize;
         this.frontier = HugeLongArrayQueue.newQueue(costFlowGraph.nodeCount());
         this.nodeInSet = new BitSet(costFlowGraph.nodeCount());
         this.pq = HugeLongPriorityQueue.min(costFlowGraph.nodeCount());
+        this.terminationFlag = terminationFlag;
     }
 
     void relabellingWithPriorityQueue(double epsilon) {
@@ -63,6 +71,7 @@ import static org.neo4j.gds.mcmf.MinCostFunctions.reducedCost;
 
         MutableDouble epsilonOffset = new MutableDouble();
         while (activeNodesNotFound.longValue() > 0) { //while i do whatever this loop is supposed to do
+            terminationFlag.assertRunning();
             exhaustFrontier(epsilonOffset.doubleValue(),epsilon,activeNodesNotFound);
             if (activeNodesNotFound.longValue() == 0) {
                 break;

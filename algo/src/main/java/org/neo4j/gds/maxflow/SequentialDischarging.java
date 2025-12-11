@@ -27,6 +27,7 @@ import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArrayQueue;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.termination.TerminationFlag;
 
 class SequentialDischarging {
     private static final long ALPHA = 6;
@@ -45,6 +46,7 @@ class SequentialDischarging {
     private final ProgressTracker progressTracker;
     private long workSinceLastGR;
     private double excessAtDestinations;
+    private final TerminationFlag terminationFlag;
 
     SequentialDischarging(
         FlowGraph flowGraph,
@@ -57,7 +59,8 @@ class SequentialDischarging {
         double freq,
         double excessAtDestinations,
         double totalExcess,
-        ProgressTracker progressTracker
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
     ) {
         this.flowGraph = flowGraph;
         this.excess = excess;
@@ -76,6 +79,7 @@ class SequentialDischarging {
             .max()
             .getAsLong()]; //max (in+out)degree instead (theoretically IntMax + IntMax)
         this.workSinceLastGR = 0L;
+        this.terminationFlag = terminationFlag;
     }
 
     void dischargeUntilDone() {
@@ -84,8 +88,12 @@ class SequentialDischarging {
             : Long.MAX_VALUE;
         globalRelabeling.globalRelabeling();
         gapDetector.resetCounts();
-
+        int terminationCheckingSteps=0;
         while (!workingQueue.isEmpty()) {
+            if (++terminationCheckingSteps == 5_000){
+                terminationCheckingSteps=0;
+                terminationFlag.assertRunning();
+            }
             if (workSinceLastGR > relabelingNumber) {
                 globalRelabeling.globalRelabeling();
                 gapDetector.resetCounts();
