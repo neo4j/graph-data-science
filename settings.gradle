@@ -8,12 +8,20 @@ pluginManagement {
     }
 }
 
+ext {
+    neo4jVersionOverride = providers.gradleProperty('neo4jVersion').get()
+}
+
 dependencyResolutionManagement {
     versionCatalogs {
         openGds {
             from(files("gradle/opengds.versions.toml"))
         }
         neo4j {
+            if(neo4jVersionOverride != null && !neo4jVersionOverride.isEmpty()) {
+                println("Using Neo4j Version: $neo4jVersionOverride")
+                version('neo4j', neo4jVersionOverride)
+            }
             from(files("gradle/neo4j.dependencies.toml"))
         }
     }
