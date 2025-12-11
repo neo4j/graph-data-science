@@ -46,7 +46,6 @@ import java.util.function.LongConsumer;
 import static org.neo4j.gds.core.loading.AdjacencyPreAggregation.preAggregate;
 import static org.neo4j.gds.mem.BitUtil.ceilDiv;
 import static org.neo4j.gds.mem.Estimate.sizeOfObjectArray;
-import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_PROPERTY_KEY;
 
 /**
  * Wraps a paged representation of {@link org.neo4j.gds.core.loading.ChunkedAdjacencyLists}s
@@ -63,6 +62,7 @@ import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_PROPERTY_KEY;
  */
 @Value.Style(typeBuilder = "AdjacencyBufferBuilder")
 public final class AdjacencyBuffer {
+    private static final double NO_SUCH_PROPERTY_KEY = -1;
 
     private final AdjacencyCompressorFactory adjacencyCompressorFactory;
     private final ReentrantLock[] chunkLocks;

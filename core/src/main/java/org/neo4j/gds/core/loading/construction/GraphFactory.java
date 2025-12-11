@@ -59,14 +59,13 @@ import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.IntStream;
 
-import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_RELATIONSHIP_TYPE;
-
 @Value.Style(
     builderVisibility = Value.Style.BuilderVisibility.PUBLIC,
     depluralize = true,
     deepImmutablesDetection = true
 )
 public final class GraphFactory {
+    private static final int NO_SUCH_RELATIONSHIP_TYPE = -1;
 
     private GraphFactory() {}
 
