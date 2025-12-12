@@ -103,7 +103,7 @@ public final class InternalReadOps {
                         }
                     }
                 } else {
-                    blockIdType = Class.forName("com.neo4j.internal.blockformat.BareBoneSingleFileStoreIdType");
+                    blockIdType = Class.forName("com.neo4j.internal.blockformat.BlockStoreIdType");
                     var blockTypes = Objects.requireNonNull(blockIdType.getEnumConstants());
                     for (Object blockType : blockTypes) {
                         var type = (Enum<?>) blockType;

@@ -31,7 +31,7 @@ import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
 import org.neo4j.gds.metrics.telemetry.TelemetryLoggerImpl;
 import org.neo4j.gds.termination.TerminationFlag;
-import org.neo4j.graphdb.TransactionTerminatedException;
+import org.neo4j.graphdb.TransactionTerminatedHelper;
 import org.neo4j.kernel.api.exceptions.Status;
 
 import java.util.Map;
@@ -182,7 +182,7 @@ public class ProcedureExecutor<
     ) {
         TerminationFlag terminationFlag = TerminationFlag.wrap(
             executionContext.terminationMonitor(),
-            () -> new TransactionTerminatedException(Status.Transaction.Terminated)
+            () -> TransactionTerminatedHelper.transactionTerminated(Status.Transaction.Terminated)
         );
         ALGO algorithm = algoSpec.algorithmFactory(executionContext)
             .accept(new AlgorithmFactory.Visitor<>() {
