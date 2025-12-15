@@ -30,6 +30,7 @@ import org.neo4j.internal.kernel.api.connectioninfo.ClientConnectionInfo;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
 import org.neo4j.internal.kernel.api.security.AuthenticationResult;
 import org.neo4j.internal.kernel.api.security.SecurityContext;
+import org.neo4j.internal.kernel.api.security.StaticAccessMode;
 
 import java.util.Map;
 import java.util.function.BiConsumer;
@@ -55,12 +56,34 @@ public final class QueryRunner {
         GraphDatabaseService db,
         String username,
         @Language("Cypher") String query,
+        Consumer<Result.ResultRow> rowConsumer
+    ) {
+        return runQueryWithRowConsumer(db, username, query, Map.of(), StaticAccessMode.FULL, (__, row) -> rowConsumer.accept(row));
+    }
+
+    @TestOnly
+    public static long runQueryWithRowConsumer(
+        GraphDatabaseService db,
+        String username,
+        @Language("Cypher") String query,
         Map<String, Object> params,
+        BiConsumer<Transaction, Result.ResultRow> rowConsumer
+    ) {
+        return runQueryWithRowConsumer(db, username, query, params, READ, rowConsumer);
+    }
+
+    @TestOnly
+    public static long runQueryWithRowConsumer(
+        GraphDatabaseService db,
+        String username,
+        @Language("Cypher") String query,
+        Map<String, Object> params,
+        StaticAccessMode staticAccessMode,
         BiConsumer<Transaction, Result.ResultRow> rowConsumer
     ) {
         var rowCounter = new MutableLong();
 
-        runWithUsername(username, db, tx -> {
+        runWithUsername(username, db, staticAccessMode, tx -> {
             try (
                 Result result = runQueryWithoutClosingTheResult(tx, query, params)
             ) {
@@ -130,6 +153,23 @@ public final class QueryRunner {
     }
 
     @TestOnly
+    public static <T> T runWriteQuery(
+        GraphDatabaseService db,
+        String username,
+        @Language("Cypher") String query,
+        Map<String, Object> params,
+        Function<Result, T> resultFunction
+    ) {
+        return applyWithUsername(username, db, StaticAccessMode.TOKEN_WRITE, tx -> {
+            try (
+                Result result = runQueryWithoutClosingTheResult(tx, query, params)
+            ) {
+                return resultFunction.apply(result);
+            }
+        });
+    }
+
+    @TestOnly
     public static <T> T runQuery(
         GraphDatabaseService db,
         String username,
@@ -137,7 +177,7 @@ public final class QueryRunner {
         Map<String, Object> params,
         Function<Result, T> resultFunction
     ) {
-        return applyWithUsername(username, db, tx -> {
+        return applyWithUsername(username, db, READ, tx -> {
             try (
                 Result result = runQueryWithoutClosingTheResult(tx, query, params)
             ) {
@@ -231,6 +271,16 @@ public final class QueryRunner {
         GraphDatabaseService db,
         Consumer<Transaction> block
     ) {
+        runWithUsername(username, db, READ, block);
+    }
+
+    @TestOnly
+    private static void runWithUsername(
+        String username,
+        GraphDatabaseService db,
+        StaticAccessMode staticAccessMode,
+        Consumer<Transaction> block
+    ) {
         String databaseName = db.databaseName();
         var securityContext = new SecurityContext(
             new AuthSubject() {
@@ -249,7 +299,7 @@ public final class QueryRunner {
                     return username;
                 }
             },
-            READ,
+            staticAccessMode,
             // GDS is always operating from an embedded context
             ClientConnectionInfo.EMBEDDED_CONNECTION,
             databaseName
@@ -261,6 +311,16 @@ public final class QueryRunner {
     private static <T> T applyWithUsername(
         String username,
         GraphDatabaseService db,
+        Function<Transaction, T> block
+    ) {
+        return applyWithUsername(username, db, READ, block);
+    }
+
+    @TestOnly
+    private static <T> T applyWithUsername(
+        String username,
+        GraphDatabaseService db,
+        StaticAccessMode staticAccessMode,
         Function<Transaction, T> block
     ) {
         String databaseName = db.databaseName();
@@ -281,7 +341,7 @@ public final class QueryRunner {
                     return username;
                 }
             },
-            READ,
+            staticAccessMode,
             // GDS is always operating from an embedded context
             ClientConnectionInfo.EMBEDDED_CONNECTION,
             databaseName
