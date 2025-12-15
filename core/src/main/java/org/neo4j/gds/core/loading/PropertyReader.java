@@ -45,7 +45,7 @@ public interface PropertyReader<PROPERTY_REF> {
      * @param propertyKeyIds           property key ids to load
      * @param defaultValues            default weight for each property key
      * @param aggregations             the aggregation for each property
-     * @param atLeastOnePropertyToLoad true iff there is at least one value in {@code propertyKeyIds} that is not {@link org.neo4j.kernel.api.StatementConstants#NO_SUCH_PROPERTY_KEY} (-1).
+     * @param atLeastOnePropertyToLoad true iff there is at least one value in {@code propertyKeyIds} that is not -1.
      * @return list of property values per relationship property id
      */
     long[][] readProperties(
