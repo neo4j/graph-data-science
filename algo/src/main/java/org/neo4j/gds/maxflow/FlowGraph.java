@@ -38,6 +38,7 @@ public class FlowGraph {
     protected final HugeLongArray reverseIndPtr;
     protected final NodeWithValue[] supply;
     protected final NodeWithValue[] demand;
+    protected final NodeConstraintsIdMap nodeCapacities;
 
     protected FlowGraph(
         Graph graph,
@@ -59,10 +60,8 @@ public class FlowGraph {
         this.reverseIndPtr = reverseIndPtr;
         this.supply = supply;
         this.demand = demand;
+        this.nodeCapacities = new NodeConstraintsIdMap.IgnoreNodeConstraints();
     }
-
-
-
 
     public FlowGraph concurrentCopy() {
         return new FlowGraph(
@@ -84,7 +83,7 @@ public class FlowGraph {
         RelationshipWithPropertyConsumer originalConsumer = (s, t, capacity) -> {
             var residualCapacity = capacity - flow.get(relIdx.longValue());
             var isReverse = false;
-            if(!consumer.accept(s, t, relIdx.getAndIncrement(), residualCapacity, isReverse)) {
+            if(!consumer.accept(s, nodeCapacities.mapNode(t), relIdx.getAndIncrement(), residualCapacity, isReverse)) {
                 earlyTermination.setTrue();
                 return false;
             }
@@ -103,19 +102,31 @@ public class FlowGraph {
                 }
             }
         } else {
-            graph.forEachRelationship(nodeId, 0D, originalConsumer);
+            if (nodeCapacities.isFakeNode(nodeId)) {
+                var realNode = nodeCapacities.realNodeOf(nodeId);
+                var relId = nodeCapacities.capacityRelId(realNode);
+                var capacity = nodeCapacities.capacityOf(realNode);
+               return consumer.accept(nodeId,realNode,relId,capacity-flow.get(relId),false);
+            }else {
+                graph.forEachRelationship(nodeId, 0D, originalConsumer);
+            }
         }
         return !earlyTermination.get();
     }
 
    protected boolean forEachReverseRelationship(long nodeId, ResidualEdgeConsumer consumer) {
-        for (long reverseRelIdx = reverseIndPtr.get(nodeId); reverseRelIdx < reverseIndPtr.get(nodeId + 1); reverseRelIdx++) {
-            var t = reverseAdjacency.get(reverseRelIdx);
-            var relIdx = reverseToRelIdx.get(reverseRelIdx);
-            var residualCapacity = flow.get(relIdx);
-            var isReverse = true;
-            if(!consumer.accept(nodeId, t, relIdx, residualCapacity, isReverse)) {
-                return false;
+       if (nodeCapacities.hasCapacityConstraint(nodeId)){
+            long capacityNode = nodeCapacities.toFakeNodeOf(nodeId);
+            long relIdx = nodeCapacities.capacityRelId(nodeId);
+            return consumer.accept(nodeId,capacityNode,relIdx,flow.get(relIdx),true);
+        }else {
+            for (long reverseRelIdx = reverseIndPtr.get(nodeId); reverseRelIdx < reverseIndPtr.get(nodeId + 1); reverseRelIdx++) {
+                var t = reverseAdjacency.get(reverseRelIdx);
+                var relIdx = reverseToRelIdx.get(reverseRelIdx);
+                var residualCapacity = flow.get(relIdx);
+                if (!consumer.accept(nodeId,t,relIdx,residualCapacity,true)) {
+                    return false;
+                }
             }
         }
         return true;
