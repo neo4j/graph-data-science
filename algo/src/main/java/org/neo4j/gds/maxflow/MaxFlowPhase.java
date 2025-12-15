@@ -72,7 +72,8 @@ public class MaxFlowPhase {
         var workingQueue = HugeLongArrayQueue.newQueue(nodeCount);
         var inWorkingQueue = new BitSet(nodeCount); //need not be atomic atm
         var totalExcess = 0D;
-        for (var nodeId = 0; nodeId < flowGraph.originalNodeCount(); nodeId++) {
+        for (var nodeId = 0; nodeId < flowGraph.nodeCount(); nodeId++) {
+            if (nodeId == flowGraph.superSource() || nodeId == flowGraph.superTarget()) continue;
             if (excess.get(nodeId) > 0.0) {
                 workingQueue.add(nodeId);
                 inWorkingQueue.set(nodeId);

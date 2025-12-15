@@ -39,12 +39,29 @@ public class FlowGraphBuilder {
     protected final NodeWithValue[] demand;
     protected final TerminationFlag terminationFlag;
     protected final Concurrency concurrency;
-    protected  HugeLongArray indPtr;
+    protected  HugeLongArray outRelationshipIndexOffset;
     protected  HugeDoubleArray originalCapacity;
     protected  HugeDoubleArray flow;
-    protected  HugeLongArray reverseIndPtr;
-    protected  HugeLongArray reverseToRelIdx;
+    protected  HugeLongArray reverseRelationshipIndexOffset;
+    protected  HugeLongArray reverseRelationshipMap;
     protected  HugeLongArray reverseAdjacency;
+    private final NodeConstraintsIdMap nodeConstraintsIdMap;
+
+    public FlowGraphBuilder(
+        Graph capacityGraph,
+        NodeWithValue[] supply,
+        NodeWithValue[] demand,
+        TerminationFlag terminationFlag,
+        Concurrency concurrency,
+        NodeConstraintsIdMap nodeConstraintsIdMap
+    ) {
+        this.capacityGraph = capacityGraph;
+        this.supply = supply;
+        this.demand = demand;
+        this.terminationFlag = terminationFlag;
+        this.concurrency = concurrency;
+        this.nodeConstraintsIdMap = nodeConstraintsIdMap;
+    }
 
     public FlowGraphBuilder(
         Graph capacityGraph,
@@ -53,18 +70,21 @@ public class FlowGraphBuilder {
         TerminationFlag terminationFlag,
         Concurrency concurrency
     ) {
-        this.capacityGraph = capacityGraph;
-        this.supply = supply;
-        this.demand = demand;
-        this.terminationFlag = terminationFlag;
-        this.concurrency = concurrency;
+         this(
+            capacityGraph,
+            supply,
+            demand,
+            terminationFlag,
+            concurrency,
+            new NodeConstraintsIdMap.IgnoreNodeConstraints()
+        );
     }
 
     protected void setUpCapacities(){
         var superSource = capacityGraph.nodeCount();
         var superTarget = capacityGraph.nodeCount() + 1;
         var oldNodeCount = capacityGraph.nodeCount();
-        var newNodeCount = oldNodeCount + 2;
+        var newNodeCount = oldNodeCount + 2 + nodeConstraintsIdMap.numberOfCapacityNodes();
 
         var reverseDegree = HugeLongArray.newArray(newNodeCount);
         reverseDegree.setAll(x -> 0L);
@@ -76,34 +96,45 @@ public class FlowGraphBuilder {
                     if (capacity < 0D) {
                         throw new IllegalArgumentException("Negative capacity not allowed");
                     }
-                    reverseDegree.addTo(t, 1);
+                    reverseDegree.addTo(nodeConstraintsIdMap.mapNode(t), 1);
                     return true;
                 }
             );
         }
         for (var source : supply) {
-            reverseDegree.addTo(source.node(), 1);
+            reverseDegree.addTo(nodeConstraintsIdMap.mapNode(source.node()), 1);
         }
         for (var target : demand) {
-            reverseDegree.addTo(target.node(), 1);
+            reverseDegree.addTo(nodeConstraintsIdMap.mapNode(target.node()), 1);
         }
 
         //Construct CSR ptrs.
-        indPtr = HugeLongArray.newArray(newNodeCount + 1);
-        indPtr.set(0, 0);
-        reverseIndPtr = HugeLongArray.newArray(newNodeCount + 1);
-        reverseIndPtr.set(0, 0);
-        for (long nodeId = 0; nodeId <= superTarget; nodeId++) {
-            var degree = nodeId < capacityGraph.nodeCount()
-                ? capacityGraph.degree(nodeId)
-                : (nodeId == superSource ? supply.length : demand.length);
-            indPtr.set(nodeId + 1, indPtr.get(nodeId) + degree);
-            reverseIndPtr.set(nodeId + 1, reverseIndPtr.get(nodeId) + reverseDegree.get(nodeId));
+        outRelationshipIndexOffset = HugeLongArray.newArray(newNodeCount + 1);
+        outRelationshipIndexOffset.set(0, 0);
+        reverseRelationshipIndexOffset = HugeLongArray.newArray(newNodeCount + 1);
+        reverseRelationshipIndexOffset.set(0, 0);
+        for (long nodeId = 0; nodeId < newNodeCount; nodeId++) {
+            int outDegree;
+            if (nodeId < capacityGraph.nodeCount()) { //handling normal nodes
+                outDegree = capacityGraph.degree(nodeId);
+            }else if (nodeId <=superTarget){
+                //handling superSource, and superTarget nodes
+                outDegree = (nodeId == superSource ? supply.length : demand.length);
+            }else{
+                outDegree = 0; //we handle the fake nodes outside of arrays, and get their value externally
+                //(at least for the moment)
+            }
+            outRelationshipIndexOffset.set(nodeId + 1, outRelationshipIndexOffset.get(nodeId) + outDegree);
+            reverseRelationshipIndexOffset.set(nodeId + 1, reverseRelationshipIndexOffset.get(nodeId) + reverseDegree.get(nodeId));
         }
 
-        var newRelationshipCount = capacityGraph.relationshipCount() + supply.length + demand.length;
+        var newRelationshipCount = capacityGraph.relationshipCount()
+            + supply.length
+            + demand.length
+            + nodeConstraintsIdMap.numberOfCapacityNodes();
+
         originalCapacity = HugeDoubleArray.newArray(newRelationshipCount);
-        reverseToRelIdx = HugeLongArray.newArray(newRelationshipCount);
+        reverseRelationshipMap = HugeLongArray.newArray(newRelationshipCount);
         reverseAdjacency = HugeLongArray.newArray(newRelationshipCount);
 
         flow = HugeDoubleArray.newArray(newRelationshipCount);
@@ -112,12 +143,15 @@ public class FlowGraphBuilder {
         //Populate CSRs
         var cursor = HugeLongArray.newArray(newNodeCount);
         var reverseCursor = HugeAtomicLongArray.of(newNodeCount, ParalleLongPageCreator.of(concurrency, x -> 0));
+
         RelationshipWithPropertyConsumer consumer = (s, t, capacity) -> {
-            var relIdx = indPtr.get(s) + cursor.get(s);
+            var relIdx = outRelationshipIndexOffset.get(s) + cursor.get(s);
             cursor.addTo(s, 1);
-            var reverseRelIdx = reverseIndPtr.get(t) + reverseCursor.getAndAdd(t, 1);
+
+            var tMapped = nodeConstraintsIdMap.mapNode(t);
+            var reverseRelIdx = reverseRelationshipIndexOffset.get(tMapped) + reverseCursor.getAndAdd(tMapped, 1);
             reverseAdjacency.set(reverseRelIdx, s);
-            reverseToRelIdx.set(reverseRelIdx, relIdx);
+            reverseRelationshipMap.set(reverseRelIdx, relIdx);
             originalCapacity.set(relIdx, capacity);
             return true;
         };
@@ -129,7 +163,13 @@ public class FlowGraphBuilder {
             () -> () -> {
                 var capacityGraphCopy = capacityGraph.concurrentCopy();
                 long v;
+
                 while ((v = nodeId.getAndIncrement()) < oldNodeCount) {
+                    if (nodeConstraintsIdMap.hasCapacityConstraint(v)){
+                        var relId = nodeConstraintsIdMap.capacityRelId(v);
+                        //here we just want to store the original capacity so it is accessible
+                        originalCapacity.set(relId,nodeConstraintsIdMap.capacityOf(v));
+                    }
                     capacityGraphCopy.forEachRelationship(v, 0D, consumer);
                 }
             }
@@ -140,12 +180,12 @@ public class FlowGraphBuilder {
             .concurrency(concurrency)
             .run();
 
-
         for (var source : supply) {
             terminationFlag.assertRunning();
             consumer.accept(superSource, source.node(), source.value());
         }
-        var r = newRelationshipCount - demand.length;
+
+        var r = newRelationshipCount - demand.length - nodeConstraintsIdMap.numberOfCapacityNodes();
         for (var target : demand) {
             //Fake a fully utilized (capacity) edge FROM superTarget. Flow TO superTarget can therefore be increased by capacity.
             flow.set(r++, target.value());
@@ -157,16 +197,16 @@ public class FlowGraphBuilder {
         setUpCapacities();
         return new FlowGraph(
               capacityGraph,
-              indPtr,
+            outRelationshipIndexOffset,
               originalCapacity,
               flow,
               reverseAdjacency,
-              reverseToRelIdx,
-              reverseIndPtr,
+            reverseRelationshipMap,
+            reverseRelationshipIndexOffset,
               supply,
-              demand
+              demand,
+              nodeConstraintsIdMap
           );
       }
-
 
 }

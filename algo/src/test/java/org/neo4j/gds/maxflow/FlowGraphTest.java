@@ -20,6 +20,7 @@
 package org.neo4j.gds.maxflow;
 
 import org.apache.commons.lang3.mutable.MutableInt;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.properties.relationships.RelationshipCursor;
@@ -69,9 +70,33 @@ class FlowGraphTest {
                 target,
                 outgoingCapacityFromSource
             )
-        }; //more is useless since this is max in network
+        };
+
+        //more is useless since this is max in network
         return new FlowGraphBuilder(graph,supply, demand, TerminationFlag.RUNNING_TRUE, new Concurrency(4))
             .build();
+    }
+    static FlowGraph createFlowGraph(Graph graph, long source, long target, NodeConstraintsIdMap nodeConstraints) {
+        double outgoingCapacityFromSource = graph.streamRelationships(source, 0D)
+            .map(RelationshipCursor::property)
+            .reduce(0D, Double::sum);
+        NodeWithValue[] supply = {new NodeWithValue(source, outgoingCapacityFromSource)};
+        NodeWithValue[] demand = {
+            new NodeWithValue(
+                target,
+                outgoingCapacityFromSource
+            )
+        };
+
+        //more is useless since this is max in network
+        return new FlowGraphBuilder(
+            graph,
+            supply,
+            demand,
+            TerminationFlag.RUNNING_TRUE,
+            new Concurrency(4),
+            nodeConstraints
+        ).build();
     }
 
     @Test
@@ -200,4 +225,110 @@ class FlowGraphTest {
         );
         assertThat(idx.intValue()).isEqualTo(3);
     }
+
+    @Test
+    void testIterationWithNodeConstraints() {
+        var a = graph.toMappedNodeId("a");
+
+        var nodeConstraints = new NodeConstraintsIdMap(){
+
+            @Override
+            public boolean isFakeNode(long nodeId) {
+                return nodeId==7;
+            }
+
+            @Override
+            public boolean hasCapacityConstraint(long nodeId) {
+                return nodeId == a;
+            }
+
+            @Override
+            public double capacityOf(long nodeId) {
+                if (nodeId==a) return 30;
+                throw new RuntimeException();
+            }
+
+            @Override
+            public long toFakeNodeOf(long nodeId) {
+                if (nodeId==a) return 7;
+                throw new RuntimeException();
+            }
+
+            @Override
+            public long realNodeOf(long nodeId) {
+                if (nodeId==7) return a;
+                throw new RuntimeException();
+            }
+
+            @Override
+            public long numberOfCapacityNodes() {
+                return 1L;
+            }
+
+            @Override
+            public long capacityRelId(long nodeId) {
+                return 7;
+            }
+        };
+
+        var flowGraph = createFlowGraph(graph,a,graph.toMappedNodeId("d"),nodeConstraints);
+        assertThat(flowGraph.nodeCount()).isEqualTo(graph.nodeCount() + 2 + 1);
+        assertThat(flowGraph.outDegree(a)).isEqualTo(1);
+        assertThat(flowGraph.inDegree(a)).isEqualTo(1);
+        assertThat(flowGraph.degree(a)).isEqualTo(2);
+
+        assertThat(flowGraph.outDegree(7)).isEqualTo(1);
+        assertThat(flowGraph.inDegree(7)).isEqualTo(3);
+        assertThat(flowGraph.degree(7)).isEqualTo(4);
+
+
+        Map<Long, Arc> map = new HashMap<>();
+        //test a
+        flowGraph.forEachRelationship(
+            graph.toMappedNodeId("a"), (s, t, relIdx, residualCapacity, isReverse) -> {
+                map.put(
+                    t,
+                    new Arc(residualCapacity, isReverse)
+                );
+                return true;
+            }
+        );
+        assertThat(map.entrySet()).containsExactlyInAnyOrder(
+            Map.entry(graph.toMappedNodeId("d"), new Arc(4D, false)),
+            Map.entry(7L, new Arc(0D, true))
+        );
+        //test a'
+        map.clear();
+        flowGraph.forEachRelationship(
+            7L, (s, t, relIdx, residualCapacity, isReverse) -> {
+                map.put(
+                    t,
+                    new Arc(residualCapacity, isReverse)
+                );
+                return true;
+            }
+        );
+        assertThat(map.entrySet()).containsExactlyInAnyOrder(
+            Map.entry(a, new Arc(30, false)),
+            Map.entry(graph.toMappedNodeId("b"), new Arc(0D, true)),
+            Map.entry(graph.toMappedNodeId("c"), new Arc(0D, true)),
+            Map.entry(flowGraph.superSource(), new Arc(0D, true))
+        );
+        map.clear();
+        //test b
+        flowGraph.forEachRelationship(
+            graph.toMappedNodeId("b"), (s, t, relIdx, residualCapacity, isReverse) -> {
+                map.put(
+                    t,
+                    new Arc(residualCapacity, isReverse)
+                );
+                return true;
+            }
+        );
+        assertThat(map.entrySet()).contains(
+            Map.entry(7L, new Arc(3D, false))
+        );
+
+    }
+
 }

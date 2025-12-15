@@ -54,12 +54,12 @@ public final class CostFlowGraph extends FlowGraph {
     public CostFlowGraph concurrentCopy() {
         return new CostFlowGraph(
             graph.concurrentCopy(),
-            indPtr,
+            outRelationshipIndexOffset,
             originalCapacity,
             flow,
             reverseAdjacency,
-            reverseToRelIdx,
-            reverseIndPtr,
+            reverseRelationshipMap,
+            reverseRelationshipIndexOffset,
             supply,
             demand,
             cost
@@ -106,7 +106,7 @@ public final class CostFlowGraph extends FlowGraph {
         var totalCost = new MutableDouble(0D);
         var idx = new MutableLong(0L);
         for (long nodeId = 0; nodeId < originalNodeCount(); nodeId++) {
-            var relIdx = new MutableLong(indPtr.get(nodeId));
+            var relIdx = new MutableLong(outRelationshipIndexOffset.get(nodeId));
             graph.forEachRelationship(
                 nodeId,
                 0D,

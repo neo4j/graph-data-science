@@ -77,7 +77,7 @@ public class CostFlowGraphBuilder extends FlowGraphBuilder {
                 var costGraphCopy = costGraph.concurrentCopy();
                 long v;
                 while ((v = nodeId.getAndIncrement()) < oldNodeCount) {
-                    var relIdx = new MutableLong(indPtr.get(v));
+                    var relIdx = new MutableLong(outRelationshipIndexOffset.get(v));
                     var consumer = consumerProducer.apply(relIdx);
                     costGraphCopy.forEachRelationship(v, 0D, consumer);
                 }
@@ -95,12 +95,12 @@ public class CostFlowGraphBuilder extends FlowGraphBuilder {
         setUpCosts();
         return new CostFlowGraph(
             capacityGraph,
-            indPtr,
+            outRelationshipIndexOffset,
             originalCapacity,
             flow,
             reverseAdjacency,
-            reverseToRelIdx,
-            reverseIndPtr,
+            reverseRelationshipMap,
+            reverseRelationshipIndexOffset,
             supply,
             demand,
             cost
