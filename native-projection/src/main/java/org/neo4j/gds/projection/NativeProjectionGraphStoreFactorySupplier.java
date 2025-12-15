@@ -46,6 +46,7 @@ public final class NativeProjectionGraphStoreFactorySupplier implements GraphSto
         return new NativeFactoryBuilder()
             .graphProjectFromStoreConfig(graphProjectFromStoreConfig)
             .loadingContext(loaderContext)
+            .dependencyResolver(dependencyResolver)
             .build();
     }
 
