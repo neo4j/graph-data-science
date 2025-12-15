@@ -24,6 +24,7 @@ import com.carrotsearch.hppc.IntObjectMap;
 import com.carrotsearch.hppc.LongHashSet;
 import com.carrotsearch.hppc.LongSet;
 import org.immutables.builder.Builder;
+import org.neo4j.common.DependencyResolver;
 import org.neo4j.gds.ElementIdentifier;
 import org.neo4j.gds.ElementProjection;
 import org.neo4j.gds.NodeLabel;
@@ -64,12 +65,13 @@ final class GraphDimensionsReader extends StatementFunction<GraphDimensions> {
     @Builder.Factory
     static GraphDimensionsReader graphDimensionsReader(
         GraphLoaderContext graphLoaderContext,
-        GraphProjectFromStoreConfig graphProjectConfig
+        GraphProjectFromStoreConfig graphProjectConfig,
+        DependencyResolver dependencyResolver
     ) {
         return new GraphDimensionsReader(
             graphLoaderContext.transactionContext(),
             graphProjectConfig,
-            graphLoaderContext.dependencyResolver().resolveDependency(IdGeneratorFactory.class)
+            dependencyResolver.resolveDependency(IdGeneratorFactory.class)
         );
     }
 

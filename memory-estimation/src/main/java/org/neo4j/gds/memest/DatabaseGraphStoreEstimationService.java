@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.memest;
 
+import org.neo4j.common.DependencyResolver;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.GraphStoreFactorySuppliers;
@@ -26,17 +27,20 @@ import org.neo4j.gds.core.GraphStoreFactorySuppliers;
 public class DatabaseGraphStoreEstimationService {
     private final GraphLoaderContext graphLoaderContext;
     private final GraphStoreFactorySuppliers graphStoreFactorySuppliers;
+    private final DependencyResolver dependencyResolver;
 
     public DatabaseGraphStoreEstimationService(
         GraphLoaderContext graphLoaderContext,
-        GraphStoreFactorySuppliers graphStoreFactorySuppliers
+        GraphStoreFactorySuppliers graphStoreFactorySuppliers,
+        DependencyResolver dependencyResolver
     ) {
         this.graphLoaderContext = graphLoaderContext;
         this.graphStoreFactorySuppliers = graphStoreFactorySuppliers;
+        this.dependencyResolver = dependencyResolver;
     }
 
     public GraphMemoryEstimation estimate(GraphProjectConfig graphProjectConfig) {
-        var graphStoreFactory = graphStoreFactorySuppliers.find(graphProjectConfig).get(graphLoaderContext);
+        var graphStoreFactory = graphStoreFactorySuppliers.find(graphProjectConfig).get(graphLoaderContext, dependencyResolver);
 
         return new GraphMemoryEstimation(
             graphStoreFactory.dimensions(),

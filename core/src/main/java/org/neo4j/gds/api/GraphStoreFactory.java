@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.api;
 
+import org.neo4j.common.DependencyResolver;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.loading.Capabilities;
@@ -30,13 +31,14 @@ import org.neo4j.gds.mem.MemoryEstimation;
 public abstract class GraphStoreFactory<STORE extends GraphStore, CONFIG extends GraphProjectConfig> {
 
     public interface Supplier {
-        GraphStoreFactory<? extends GraphStore, ? extends GraphProjectConfig> get(GraphLoaderContext loaderContext);
+        GraphStoreFactory<? extends GraphStore, ? extends GraphProjectConfig> get(GraphLoaderContext loaderContext, DependencyResolver dependencyResolver);
 
         default GraphStoreFactory<? extends GraphStore, ? extends GraphProjectConfig> getWithDimension(
             GraphLoaderContext loaderContext,
-            GraphDimensions graphDimensions
+            GraphDimensions graphDimensions,
+            DependencyResolver dependencyResolver
         ) {
-            return get(loaderContext);
+            return get(loaderContext, dependencyResolver);
         }
     }
 
@@ -45,7 +47,7 @@ public abstract class GraphStoreFactory<STORE extends GraphStore, CONFIG extends
     protected final GraphLoaderContext loadingContext;
     protected final GraphDimensions dimensions;
 
-    public GraphStoreFactory(
+    GraphStoreFactory(
         CONFIG graphProjectConfig,
         Capabilities capabilities,
         GraphLoaderContext loadingContext,

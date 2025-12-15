@@ -45,7 +45,6 @@ final class GraphLoaderContextProvider {
         return ImmutableGraphLoaderContext
             .builder()
             .databaseId(databaseId)
-            .dependencyResolver(context.dependencyResolver())
             .log(log)
             .taskRegistryFactory(taskRegistryFactory)
             .userLogRegistryFactory(userLogRegistryFactory)

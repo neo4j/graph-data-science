@@ -20,6 +20,7 @@
 package org.neo4j.gds.projection;
 
 import org.immutables.builder.Builder;
+import org.neo4j.common.DependencyResolver;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.CSRGraphStoreFactory;
 import org.neo4j.gds.api.GraphLoaderContext;
@@ -50,11 +51,13 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphProjectFromSt
     static NativeFactory nativeFactory(
         GraphProjectFromStoreConfig graphProjectFromStoreConfig,
         GraphLoaderContext loadingContext,
-        Optional<GraphDimensions> graphDimensions
+        Optional<GraphDimensions> graphDimensions,
+        DependencyResolver dependencyResolver
     ) {
         var dimensions = graphDimensions.orElseGet(() -> new GraphDimensionsReaderBuilder()
             .graphLoaderContext(loadingContext)
             .graphProjectConfig(graphProjectFromStoreConfig)
+            .dependencyResolver(dependencyResolver)
             .build()
             .call()
         );

@@ -191,9 +191,10 @@ public final class GraphLoaderBuilders {
         Optional<Log> log,
         GraphProjectConfig graphProjectConfig
     ) {
+        var dependencyResolver = GraphDatabaseApiProxy.dependencyResolver(databaseService);
+
         var graphLoaderContext = ImmutableGraphLoaderContext.builder()
             .databaseId(DatabaseId.of(databaseService.databaseName()))
-            .dependencyResolver(GraphDatabaseApiProxy.dependencyResolver(databaseService))
             .transactionContext(transactionContext.orElseGet(() -> TestSupport.fullAccessTransaction(databaseService)))
             .executor(executorService.orElse(DefaultPool.INSTANCE))
             .terminationFlag(terminationFlag.orElse(TerminationFlag.RUNNING_TRUE))
@@ -202,7 +203,7 @@ public final class GraphLoaderBuilders {
             .log(log.orElseGet(Log::noOpLog))
             .build();
         var graphStoreFactorySupplier = graphStoreFactorySuppliers.find(graphProjectConfig);
-        var graphStoreFactory = graphStoreFactorySupplier.get(graphLoaderContext);
+        var graphStoreFactory = graphStoreFactorySupplier.get(graphLoaderContext, dependencyResolver);
         return new GraphLoader(
             graphProjectConfig,
             graphStoreFactory

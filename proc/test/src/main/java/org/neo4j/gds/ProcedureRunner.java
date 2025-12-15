@@ -199,6 +199,7 @@ public final class ProcedureRunner {
             new ProcedureCallContextReturnColumns(procedureCallContext),
             requestScopedDependencies,
             null,
+            null,
             procedureTransaction,
             procedureContext,
             Optional.empty(),

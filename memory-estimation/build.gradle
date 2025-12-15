@@ -12,6 +12,14 @@ dependencies {
     compileOnly openGds.immutables.value.annotations
     compileOnly openGds.jetbrains.annotations
 
+    /*
+     * So this is "interesting". We cannot memory estimate without compiling against Neo4j common,
+     * because the structure of our code is such that certain bits of code _somewhere else_ needs access to DependencyResolver.
+     * The Neo4j code is not used, of course, because why would you dependency-resolve just to memory-estimate innit.
+     * And when you phrase it like that it sounds terrible, damning even, doesn't it.
+     */
+    compileOnly(neo4j.common) { transitive = false }
+
     implementation project(':annotations')
     implementation project(':config-api')
     implementation project(':core')

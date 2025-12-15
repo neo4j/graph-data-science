@@ -137,16 +137,17 @@ public class GenericProjectApplication<RESULT extends GraphProjectResult, CONFIG
         RESULT_BUILDER resultBuilder = resultBuilderFactory.apply(configuration);
 
         try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withProjectMillis)) {
+            var dependencyResolver = GraphDatabaseApiProxy.dependencyResolver(graphDatabaseService);
+
             var graphLoaderContext = graphLoaderContext(
                 databaseId,
-                graphDatabaseService,
                 taskRegistryFactory,
                 terminationFlag,
                 transactionContext,
                 userLogRegistryFactory
             );
             var graphStoreFactorySupplier = graphStoreFactorySuppliers.find(configuration);
-            var graphStoreFactory = graphStoreFactorySupplier.get(graphLoaderContext);
+            var graphStoreFactory = graphStoreFactorySupplier.get(graphLoaderContext, dependencyResolver);
             var graphStoreCreator = new GraphStoreFromDatabaseLoader(
                 configuration,
                 graphStoreFactory
@@ -177,7 +178,6 @@ public class GenericProjectApplication<RESULT extends GraphProjectResult, CONFIG
 
     private GraphLoaderContext graphLoaderContext(
         DatabaseId databaseId,
-        GraphDatabaseService graphDatabaseService,
         TaskRegistryFactory taskRegistryFactory,
         TerminationFlag terminationFlag,
         TransactionContext transactionContext,
@@ -185,7 +185,6 @@ public class GenericProjectApplication<RESULT extends GraphProjectResult, CONFIG
     ) {
         return ImmutableGraphLoaderContext.builder()
             .databaseId(databaseId)
-            .dependencyResolver(GraphDatabaseApiProxy.dependencyResolver(graphDatabaseService))
             .log(log)
             .taskRegistryFactory(taskRegistryFactory)
             .terminationFlag(terminationFlag)

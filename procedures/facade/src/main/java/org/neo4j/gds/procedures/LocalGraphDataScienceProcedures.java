@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.procedures;
 
+import org.neo4j.common.DependencyResolver;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTemplate;
@@ -126,6 +127,7 @@ public class LocalGraphDataScienceProcedures implements GraphDataScienceProcedur
         KernelTransaction kernelTransaction,
         ProcedureReturnColumns procedureReturnColumns,
         RequestScopedDependencies requestScopedDependencies,
+        DependencyResolver dependencyResolver,
         TerminationMonitor terminationMonitor,
         Transaction procedureTransaction,
         WriteContext writeContext,
@@ -140,7 +142,8 @@ public class LocalGraphDataScienceProcedures implements GraphDataScienceProcedur
 
         var databaseGraphStoreEstimationService = new DatabaseGraphStoreEstimationService(
             requestScopedDependencies.graphLoaderContext(),
-            graphStoreFactorySuppliers
+            graphStoreFactorySuppliers,
+            dependencyResolver
         );
 
         var algorithmEstimationTemplate = new AlgorithmEstimationTemplate(

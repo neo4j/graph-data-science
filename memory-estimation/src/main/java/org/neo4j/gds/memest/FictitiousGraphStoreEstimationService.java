@@ -67,7 +67,7 @@ public class FictitiousGraphStoreEstimationService {
         GraphDimensions graphDimensions
     ) {
         return graphStoreFactorySuppliers.find(graphProjectConfig)
-            .getWithDimension(GraphLoaderContext.NULL_CONTEXT, graphDimensions)
+            .getWithDimension(GraphLoaderContext.NULL_CONTEXT, graphDimensions, null)
             .estimateMemoryUsageAfterLoading();
     }
 }

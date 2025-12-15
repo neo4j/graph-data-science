@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.legacycypherprojection;
 
-import org.neo4j.gds.api.GraphLoaderContext;
+import org.neo4j.common.DependencyResolver;
 import org.neo4j.graphdb.security.AuthorizationViolationException;
 import org.neo4j.kernel.impl.coreapi.InternalTransaction;
 
@@ -36,9 +36,9 @@ class CountingCypherRecordLoader extends CypherRecordLoader<BatchLoadResult> {
         String cypherQuery,
         QueryType queryType,
         GraphProjectFromCypherConfig cypherConfig,
-        GraphLoaderContext loadingContext
+        DependencyResolver dependencyResolver
     ) {
-        super(cypherQuery, NO_COUNT, cypherConfig, loadingContext);
+        super(cypherQuery, NO_COUNT, cypherConfig, dependencyResolver);
         this.queryType = queryType;
     }
 

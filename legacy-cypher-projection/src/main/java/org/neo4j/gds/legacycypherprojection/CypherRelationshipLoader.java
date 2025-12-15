@@ -21,13 +21,13 @@ package org.neo4j.gds.legacycypherprojection;
 
 import org.eclipse.collections.impl.map.mutable.primitive.ObjectDoubleHashMap;
 import org.immutables.value.Value;
+import org.neo4j.common.DependencyResolver;
 import org.neo4j.gds.ImmutablePropertyMappings;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DefaultValue;
-import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.loading.RelationshipImportResult;
@@ -57,10 +57,10 @@ class CypherRelationshipLoader extends CypherRecordLoader<RelationshipImportResu
         String relationshipQuery,
         IdMap idMap,
         GraphProjectFromCypherConfig config,
-        GraphLoaderContext loadingContext,
+        DependencyResolver dependencyResolver,
         ProgressTracker progressTracker
     ) {
-        super(relationshipQuery, idMap.nodeCount(), config, loadingContext);
+        super(relationshipQuery, idMap.nodeCount(), config, dependencyResolver);
         this.idMap = idMap;
         this.progressTracker = progressTracker;
         this.loaderContext = new Context();

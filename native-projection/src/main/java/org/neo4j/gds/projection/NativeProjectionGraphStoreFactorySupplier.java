@@ -19,12 +19,13 @@
  */
 package org.neo4j.gds.projection;
 
+import org.neo4j.common.DependencyResolver;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.GraphStoreFactory;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.GraphDimensions;
 
-public class NativeProjectionGraphStoreFactorySupplier implements GraphStoreFactory.Supplier {
+public final class NativeProjectionGraphStoreFactorySupplier implements GraphStoreFactory.Supplier {
     private final GraphProjectFromStoreConfig graphProjectFromStoreConfig;
 
     private NativeProjectionGraphStoreFactorySupplier(GraphProjectFromStoreConfig graphProjectFromStoreConfig) {
@@ -41,7 +42,7 @@ public class NativeProjectionGraphStoreFactorySupplier implements GraphStoreFact
     }
 
     @Override
-    public NativeFactory get(GraphLoaderContext loaderContext) {
+    public NativeFactory get(GraphLoaderContext loaderContext, DependencyResolver dependencyResolver) {
         return new NativeFactoryBuilder()
             .graphProjectFromStoreConfig(graphProjectFromStoreConfig)
             .loadingContext(loaderContext)
@@ -49,7 +50,11 @@ public class NativeProjectionGraphStoreFactorySupplier implements GraphStoreFact
     }
 
     @Override
-    public NativeFactory getWithDimension(GraphLoaderContext loaderContext, GraphDimensions graphDimensions) {
+    public NativeFactory getWithDimension(
+        GraphLoaderContext loaderContext,
+        GraphDimensions graphDimensions,
+        DependencyResolver dependencyResolver
+    ) {
         return new NativeFactoryBuilder()
             .graphProjectFromStoreConfig(graphProjectFromStoreConfig)
             .loadingContext(loaderContext)

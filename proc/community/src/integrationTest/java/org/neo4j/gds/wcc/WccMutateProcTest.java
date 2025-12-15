@@ -589,9 +589,10 @@ class WccMutateProcTest extends BaseProcTest {
 
     @NotNull
     private GraphLoader graphLoader(GraphProjectConfig graphProjectConfig) {
+        var dependencyResolver = GraphDatabaseApiProxy.dependencyResolver(db);
+
         var graphLoaderContext = ImmutableGraphLoaderContext.builder()
             .databaseId(DatabaseId.of(db.databaseName()))
-            .dependencyResolver(GraphDatabaseApiProxy.dependencyResolver(db))
             .transactionContext(TestSupport.fullAccessTransaction(db))
             .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
             .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
@@ -605,7 +606,7 @@ class WccMutateProcTest extends BaseProcTest {
         );
 
         var graphStoreFactorySupplier = graphStoreFactorySuppliers.find(graphProjectConfig);
-        var graphStoreFactory = graphStoreFactorySupplier.get(graphLoaderContext);
+        var graphStoreFactory = graphStoreFactorySupplier.get(graphLoaderContext, dependencyResolver);
         return new GraphLoader(graphProjectConfig, graphStoreFactory);
     }
 

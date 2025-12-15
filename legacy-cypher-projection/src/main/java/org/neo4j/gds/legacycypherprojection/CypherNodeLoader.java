@@ -20,7 +20,7 @@
 package org.neo4j.gds.legacycypherprojection;
 
 import org.immutables.value.Value;
-import org.neo4j.gds.api.GraphLoaderContext;
+import org.neo4j.common.DependencyResolver;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.core.loading.Nodes;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
@@ -43,10 +43,10 @@ class CypherNodeLoader extends CypherRecordLoader<Nodes> {
         String nodeQuery,
         long nodeCount,
         GraphProjectFromCypherConfig config,
-        GraphLoaderContext loadingContext,
+        DependencyResolver dependencyResolver,
         ProgressTracker progressTracker
     ) {
-        super(nodeQuery, nodeCount, config, loadingContext);
+        super(nodeQuery, nodeCount, config, dependencyResolver);
         this.nodeCount = nodeCount;
         this.progressTracker = progressTracker;
         this.highestNodeId = 0L;

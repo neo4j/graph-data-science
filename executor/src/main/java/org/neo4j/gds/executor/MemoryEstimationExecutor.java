@@ -94,12 +94,15 @@ public class MemoryEstimationExecutor<
 
         if (graphNameOrConfiguration instanceof Map graphConfig) {
             // if the transaction context is empty, we are probably using EstimationCli
+            var dependencyResolver = transactionContext == EmptyTransactionContext.INSTANCE
+                ? null
+                : executionContext.dependencyResolver();
+
             var graphLoaderContext = transactionContext == EmptyTransactionContext.INSTANCE
                 ? GraphLoaderContext.NULL_CONTEXT
                 : ImmutableGraphLoaderContext
                     .builder()
                     .databaseId(executionContext.databaseId())
-                    .dependencyResolver(executionContext.dependencyResolver())
                     .log(executionContext.log())
                     .taskRegistryFactory(executionContext.taskRegistryFactory())
                     .userLogRegistryFactory(executionContext.userLogRegistryFactory())
@@ -112,7 +115,7 @@ public class MemoryEstimationExecutor<
             var graphStoreFactorySupplier = graphStoreFactorySuppliers.find(graphProjectConfig);
             var graphStoreCreator = graphProjectConfig.isFictitiousLoading()
                 ? new FictitiousGraphStoreLoader(graphProjectConfig, graphStoreFactorySupplier)
-                : new GraphStoreFromDatabaseLoader(graphProjectConfig, graphStoreFactorySupplier.get(graphLoaderContext));
+                : new GraphStoreFromDatabaseLoader(graphProjectConfig, graphStoreFactorySupplier.get(graphLoaderContext, dependencyResolver));
 
             graphDims = graphStoreCreator.graphDimensions();
             maybeGraphEstimation = Optional.of(graphStoreCreator.estimateMemoryUsageAfterLoading());

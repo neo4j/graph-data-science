@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.legacycypherprojection;
 
+import org.neo4j.common.DependencyResolver;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.GraphStoreFactory;
 import org.neo4j.gds.config.GraphProjectConfig;
@@ -32,13 +33,13 @@ public class CypherProjectionGraphStoreFactorySupplier implements GraphStoreFact
     }
 
     @Override
-    public CypherFactory get(GraphLoaderContext loaderContext) {
-        return CypherFactory.createWithDerivedDimensions(graphProjectFromCypherConfig, loaderContext);
+    public CypherFactory get(GraphLoaderContext loaderContext, DependencyResolver dependencyResolver) {
+        return CypherFactory.createWithDerivedDimensions(graphProjectFromCypherConfig, loaderContext, dependencyResolver);
     }
 
     @Override
-    public CypherFactory getWithDimension(GraphLoaderContext loaderContext, GraphDimensions graphDimensions) {
-        return CypherFactory.createWithBaseDimensions(graphProjectFromCypherConfig, loaderContext, graphDimensions);
+    public CypherFactory getWithDimension(GraphLoaderContext loaderContext, GraphDimensions graphDimensions, DependencyResolver dependencyResolver) {
+        return CypherFactory.createWithBaseDimensions(graphProjectFromCypherConfig, loaderContext, graphDimensions, dependencyResolver);
     }
 
     public static CypherProjectionGraphStoreFactorySupplier create(GraphProjectConfig graphProjectConfig) {

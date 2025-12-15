@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.legacycypherprojection;
 
-import org.neo4j.gds.api.GraphLoaderContext;
+import org.neo4j.common.DependencyResolver;
 import org.neo4j.gds.core.loading.RecordsBatchBuffer;
 import org.neo4j.gds.utils.StringJoining;
 import org.neo4j.graphdb.security.AuthorizationViolationException;
@@ -69,12 +69,11 @@ abstract class CypherRecordLoader<R> {
         String loadQuery,
         long recordCount,
         GraphProjectFromCypherConfig cypherConfig,
-        GraphLoaderContext loadingContext
+        DependencyResolver dependencyResolver
     ) {
         this.loadQuery = loadQuery;
         this.recordCount = recordCount;
         this.cypherConfig = cypherConfig;
-        var dependencyResolver = loadingContext.dependencyResolver();
         this.executionEngine = dependencyResolver.resolveDependency(QueryExecutionEngine.class);
         this.contextFactory = Neo4jTransactionalContextFactory.create(dependencyResolver.resolveDependency(GraphDatabaseQueryService.class));
     }

@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.legacycypherprojection;
 
+import org.neo4j.common.DependencyResolver;
 import org.neo4j.gds.ElementProjection;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.NodeProjection;
@@ -59,19 +60,30 @@ public final class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCy
     private final long numberOfNodeProperties;
     private final long numberOfRelationshipProperties;
     private final ProgressTracker progressTracker;
+    private final DependencyResolver dependencyResolver;
 
-    public static CypherFactory createWithBaseDimensions(GraphProjectFromCypherConfig graphProjectConfig, GraphLoaderContext loadingContext, GraphDimensions graphDimensions) {
-        return create(graphProjectConfig, loadingContext, Optional.of(graphDimensions));
+    static CypherFactory createWithBaseDimensions(
+        GraphProjectFromCypherConfig graphProjectConfig,
+        GraphLoaderContext loadingContext,
+        GraphDimensions graphDimensions,
+        DependencyResolver dependencyResolver
+    ) {
+        return create(graphProjectConfig, loadingContext, Optional.of(graphDimensions), dependencyResolver);
     }
 
-    public static CypherFactory createWithDerivedDimensions(GraphProjectFromCypherConfig graphProjectConfig, GraphLoaderContext loadingContext) {
-        return create(graphProjectConfig, loadingContext, Optional.empty());
+    static CypherFactory createWithDerivedDimensions(
+        GraphProjectFromCypherConfig graphProjectConfig,
+        GraphLoaderContext loadingContext,
+        DependencyResolver dependencyResolver
+    ) {
+        return create(graphProjectConfig, loadingContext, Optional.empty(), dependencyResolver);
     }
 
     private static CypherFactory create(
         GraphProjectFromCypherConfig graphProjectConfig,
         GraphLoaderContext loadingContext,
-        Optional<GraphDimensions> baseDimensions
+        Optional<GraphDimensions> baseDimensions,
+        DependencyResolver dependencyResolver
     ) {
 
         EstimationResult nodeEstimation;
@@ -113,7 +125,8 @@ public final class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCy
             loadingContext,
             dim,
             nodeEstimation.propertyCount(),
-            relationEstimation.propertyCount()
+            relationEstimation.propertyCount(),
+            dependencyResolver
         );
     }
 
@@ -122,7 +135,8 @@ public final class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCy
         GraphLoaderContext loadingContext,
         GraphDimensions graphDimensions,
         long estimatedNumberOfNodeProperties,
-        long estimatedNumberOfRelProperties
+        long estimatedNumberOfRelProperties,
+        DependencyResolver dependencyResolver
     ) {
         // TODO: need to pass capabilities from outside?
         super(graphProjectConfig, ImmutableStaticCapabilities.of(Capabilities.WriteMode.LOCAL), loadingContext, graphDimensions);
@@ -131,6 +145,7 @@ public final class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCy
         this.numberOfNodeProperties = estimatedNumberOfNodeProperties;
         this.numberOfRelationshipProperties = estimatedNumberOfRelProperties;
         this.progressTracker = initProgressTracker();
+        this.dependencyResolver = dependencyResolver;
     }
 
     @Override
@@ -157,11 +172,6 @@ public final class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCy
     }
 
     @Override
-    public GraphDimensions estimationDimensions() {
-        return dimensions;
-    }
-
-    @Override
     public CSRGraphStore build() {
         // Temporarily override the security context to enforce read-only access during load
         try {
@@ -171,14 +181,14 @@ public final class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCy
                     cypherConfig.nodeQuery(),
                     CypherRecordLoader.QueryType.NODE,
                     cypherConfig,
-                    loadingContext
+                    dependencyResolver
                 ).load(ktx.internalTransaction());
 
                 var nodes = new CypherNodeLoader(
                     cypherConfig.nodeQuery(),
                     nodeCount.rows(),
                     cypherConfig,
-                    loadingContext,
+                    dependencyResolver,
                     progressTracker
                 ).load(ktx.internalTransaction());
 
@@ -186,7 +196,7 @@ public final class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCy
                     cypherConfig.relationshipQuery(),
                     nodes.idMap(),
                     cypherConfig,
-                    loadingContext,
+                    dependencyResolver,
                     progressTracker
                 ).load(ktx.internalTransaction());
 

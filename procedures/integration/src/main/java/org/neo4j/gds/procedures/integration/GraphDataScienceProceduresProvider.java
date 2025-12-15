@@ -157,6 +157,7 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
 
     @Override
     public GraphDataScienceProcedures apply(Context context) throws ProcedureException {
+        var dependencyResolver = context.dependencyResolver();
         var graphDatabaseService = context.graphDatabaseAPI();
         var exporterContext = new ExporterContext.ProcedureContextWrapper(context);
         var kernelTransaction = kernelTransactionAccessor.getKernelTransaction(context);
@@ -221,6 +222,7 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
             kernelTransaction,
             procedureReturnColumns,
             requestScopedDependencies,
+            dependencyResolver,
             terminationMonitor,
             procedureTransaction,
             writeContext,

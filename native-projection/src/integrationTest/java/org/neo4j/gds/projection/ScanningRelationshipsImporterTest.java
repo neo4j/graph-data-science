@@ -20,6 +20,7 @@
 package org.neo4j.gds.projection;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.common.DependencyResolver;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.PropertyMapping;
@@ -84,8 +85,9 @@ class ScanningRelationshipsImporterTest extends BaseTest {
                 ))
             .build();
 
+        var dependencyResolver = GraphDatabaseApiProxy.dependencyResolver(db);
         var graphLoaderContext = graphLoaderContext();
-        var graphDimensions = graphDimensions(graphProjectConfig, graphLoaderContext);
+        var graphDimensions = graphDimensions(graphProjectConfig, graphLoaderContext, dependencyResolver);
         var importer = new ScanningRelationshipsImporterBuilder()
             .idMap(new DirectIdMap(graphDimensions.nodeCount()))
             .loadingContext(graphLoaderContext)
@@ -151,17 +153,18 @@ class ScanningRelationshipsImporterTest extends BaseTest {
             .taskRegistryFactory(TaskRegistryFactory.empty())
             .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
             .databaseId(DatabaseId.of(db.databaseName()))
-            .dependencyResolver(GraphDatabaseApiProxy.dependencyResolver(db))
             .build();
     }
 
     private GraphDimensions graphDimensions(
         GraphProjectFromStoreConfig graphProjectConfig,
-        GraphLoaderContext graphLoaderContext
+        GraphLoaderContext graphLoaderContext,
+        DependencyResolver dependencyResolver
     ) {
         return new GraphDimensionsReaderBuilder()
             .graphProjectConfig(graphProjectConfig)
             .graphLoaderContext(graphLoaderContext)
+            .dependencyResolver(dependencyResolver)
             .build()
             .call();
     }

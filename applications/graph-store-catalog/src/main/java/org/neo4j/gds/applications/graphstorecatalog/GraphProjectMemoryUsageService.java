@@ -87,6 +87,8 @@ public class GraphProjectMemoryUsageService {
         UserLogRegistryFactory userLogRegistryFactory,
         GraphProjectConfig configuration
     ) {
+        var dependencyResolver = GraphDatabaseApiProxy.dependencyResolver(graphDatabaseService);
+
         var graphLoaderContext = graphLoaderContext(
             databaseId,
             taskRegistryFactory,
@@ -96,7 +98,7 @@ public class GraphProjectMemoryUsageService {
         );
 
         var graphStoreFactorySupplier = graphStoreFactorySuppliers.find(configuration);
-        var graphStoreFactory = graphStoreFactorySupplier.get(graphLoaderContext);
+        var graphStoreFactory = graphStoreFactorySupplier.get(graphLoaderContext, dependencyResolver);
 
         var graphStoreCreator = new GraphStoreFromDatabaseLoader(configuration, graphStoreFactory);
 
@@ -128,7 +130,6 @@ public class GraphProjectMemoryUsageService {
     ) {
         return ImmutableGraphLoaderContext.builder()
             .databaseId(databaseId)
-            .dependencyResolver(GraphDatabaseApiProxy.dependencyResolver(graphDatabaseService))
             .log(log)
             .taskRegistryFactory(taskRegistryFactory)
             .terminationFlag(terminationFlag)
