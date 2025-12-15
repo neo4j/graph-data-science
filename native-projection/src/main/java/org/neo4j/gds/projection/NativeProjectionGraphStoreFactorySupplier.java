@@ -60,6 +60,7 @@ public final class NativeProjectionGraphStoreFactorySupplier implements GraphSto
             .graphProjectFromStoreConfig(graphProjectFromStoreConfig)
             .loadingContext(loaderContext)
             .graphDimensions(graphDimensions)
+            .dependencyResolver(dependencyResolver)
             .build();
     }
 }
