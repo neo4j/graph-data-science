@@ -21,6 +21,9 @@ package org.neo4j.gds.maxflow;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.InputNodes;
+import org.neo4j.gds.MapInputNodes;
+import org.neo4j.gds.api.properties.nodes.DoubleNodePropertyValues;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -67,62 +70,40 @@ class MaxFlowWithNodeConstraintsTest {
         @Test
         void shouldFindTheCorrectFlow(){
             //b has capacity 10 //c has capacity 6 //d has capacity 2// e has capacity 4
-            int startingFakeNodes=(int)graph.nodeCount() + 2;
-            int startingFakeRels=(int)graph.relationshipCount() + 2;
-            var nodes = Map.of(
-                graph.toMappedNodeId("b"),startingFakeNodes,
-                graph.toMappedNodeId("c"),startingFakeNodes+1,
-                graph.toMappedNodeId("d"),startingFakeNodes+2,
-                graph.toMappedNodeId("e"),startingFakeNodes+3
-            );
+
             var capacities = Map.of(
-                graph.toMappedNodeId("b"),10,
-                graph.toMappedNodeId("c"),6,
-                graph.toMappedNodeId("d"),2,
-                graph.toMappedNodeId("e"),4
+                graph.toMappedNodeId("b"),10d,
+                graph.toMappedNodeId("c"),6d,
+                graph.toMappedNodeId("d"),2d,
+                graph.toMappedNodeId("e"),4d
             );
-            var nodeConstraints = new NodeConstraintsIdMap(){
+
+            var nodeProps = new DoubleNodePropertyValues(){
                 @Override
-                public boolean isFakeNode(long nodeId) {
-                    return nodeId>=startingFakeNodes;
+                public double doubleValue(long nodeId) {
+                    return capacities.getOrDefault(nodeId,Double.NaN);
                 }
 
                 @Override
-                public boolean hasCapacityConstraint(long nodeId) {
-                   return nodes.containsKey(nodeId);
-                }
-
-                @Override
-                public double capacityOf(long nodeId) {
-                    return capacities.get(nodeId);
-                }
-
-                @Override
-                public long toFakeNodeOf(long nodeId) {
-                    if (!nodes.containsKey(nodeId)) throw  new RuntimeException();
-                    return  nodes.get(nodeId);
-                }
-
-                @Override
-                public long realNodeOf(long nodeId) {
-                    for (var entry : nodes.entrySet()){
-                        if (entry.getValue()==nodeId) return entry.getKey();
-                    }
-                    throw new RuntimeException();
-                }
-
-                @Override
-                public long numberOfCapacityNodes() {
-                    return nodes.size();
-                }
-
-                @Override
-                public long capacityRelId(long nodeId) {
-                    return nodes.get(nodeId) -startingFakeNodes + startingFakeRels;
+                public long nodeCount() {
+                    return graph.nodeCount();
                 }
             };
+
+            InputNodes sources = new MapInputNodes(Map.of(graph.toMappedNodeId("a"),100d));
+            InputNodes sinks = new MapInputNodes(Map.of(graph.toMappedNodeId("f"),100d));
+
             NodeWithValue[] supply =new NodeWithValue[]{new NodeWithValue(graph.toMappedNodeId("a"),100)};
             NodeWithValue[] demand =new NodeWithValue[]{new NodeWithValue(graph.toMappedNodeId("f"),100)};
+
+
+            var nodeConstraints = NodeConstraintsFromPropertyIdMap.create(
+                graph,
+                graph.relationshipCount(),
+                nodeProps,
+                sources,
+                sinks
+            );
 
             var flowGraph = new FlowGraphBuilder(
                 graph,
@@ -163,10 +144,10 @@ class MaxFlowWithNodeConstraintsTest {
             """
                 CREATE
                     (a:Node {id: 0}),
-                    (b:Node {id: 1}),
+                    (b:Node {id: 1, cap:5}),
                     (c:Node {id: 2}),
                     (d:Node {id: 3}),
-                    (e:Node {id: 4}),
+                    (e:Node {id: 4, cap:2}),
                     (f:Node {id: 5}),
                     (a)-[:R {w: 100.0}]->(b),
                     (a)-[:R {w: 8.0}]->(c),
@@ -183,59 +164,22 @@ class MaxFlowWithNodeConstraintsTest {
 
         @Test
         void shouldFindTheCorrectFlow(){
-            //b has capacity 5 //e has capacity 2
-            int startingFakeNodes=(int)graph.nodeCount() + 2;
-            int startingFakeRels=(int)graph.relationshipCount() + 2;
-            var nodes = Map.of(
-                graph.toMappedNodeId("b"),startingFakeNodes,
-                graph.toMappedNodeId("e"),startingFakeNodes+1
-            );
-            var capacities = Map.of(
-                graph.toMappedNodeId("b"),5,
-                graph.toMappedNodeId("e"),2
-            );
-            var nodeConstraints = new NodeConstraintsIdMap(){
-                @Override
-                public boolean isFakeNode(long nodeId) {
-                    return nodeId>=startingFakeNodes;
-                }
 
-                @Override
-                public boolean hasCapacityConstraint(long nodeId) {
-                    return nodes.containsKey(nodeId);
-                }
+            var nodeProps = graph.nodeProperties("cap");
 
-                @Override
-                public double capacityOf(long nodeId) {
-                    return capacities.get(nodeId);
-                }
-
-                @Override
-                public long toFakeNodeOf(long nodeId) {
-                    if (!nodes.containsKey(nodeId)) throw  new RuntimeException();
-                    return  nodes.get(nodeId);
-                }
-
-                @Override
-                public long realNodeOf(long nodeId) {
-                    for (var entry : nodes.entrySet()){
-                        if (entry.getValue()==nodeId) return entry.getKey();
-                    }
-                    throw new RuntimeException();
-                }
-
-                @Override
-                public long numberOfCapacityNodes() {
-                    return nodes.size();
-                }
-
-                @Override
-                public long capacityRelId(long nodeId) {
-                    return nodes.get(nodeId) -startingFakeNodes + startingFakeRels;
-                }
-            };
             NodeWithValue[] supply =new NodeWithValue[]{new NodeWithValue(graph.toMappedNodeId("a"),100)};
             NodeWithValue[] demand =new NodeWithValue[]{new NodeWithValue(graph.toMappedNodeId("f"),100)};
+
+            InputNodes sources = new MapInputNodes(Map.of(graph.toMappedNodeId("a"),100d));
+            InputNodes sinks = new MapInputNodes(Map.of(graph.toMappedNodeId("f"),100d));
+
+            var nodeConstraints = NodeConstraintsFromPropertyIdMap.create(
+                graph,
+                graph.relationshipCount(),
+                nodeProps,
+                sources,
+                sinks
+            );
 
             var flowGraph = new FlowGraphBuilder(
                 graph,
