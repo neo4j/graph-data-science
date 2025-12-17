@@ -191,7 +191,7 @@ public class PushbackPathFindingWriteProcedureFacade {
             GraphName.parse(graphName),
             config.toGraphParameters(),
             config.relationshipWeightProperty(),
-            config.toParameters(),
+            config.toMaxFlowParameters(),
             config.jobId(),
             config.logProgress(),
             new MaxFlowWriteResultTransformerBuilder(writeStep, config)

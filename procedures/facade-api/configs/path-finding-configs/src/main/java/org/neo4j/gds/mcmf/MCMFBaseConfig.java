@@ -24,7 +24,6 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.maxflow.MaxFlowBaseConfig;
-import org.neo4j.gds.maxflow.MaxFlowParameters;
 import org.neo4j.gds.utils.StringJoining;
 
 import java.util.Collection;
@@ -52,13 +51,8 @@ public interface MCMFBaseConfig extends MaxFlowBaseConfig {
     @Configuration.Ignore
     default MCMFParameters toMCMFParameters() {
         return new MCMFParameters(
-            new MaxFlowParameters(
-            sourceNodes(),
-            targetNodes(),
-            concurrency(),
-            freq(),
-            useGapRelabelling()
-            ),alpha()
+            toMaxFlowParameters(),
+            alpha()
         );
     }
 

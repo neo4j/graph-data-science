@@ -123,7 +123,7 @@ public class PushbackPathFindingStatsProcedureFacade {
             GraphName.parse(graphName),
             config.toGraphParameters(),
             config.relationshipWeightProperty(),
-            config.toParameters(),
+            config.toMaxFlowParameters(),
             config.jobId(),
             config.logProgress(),
             new MaxFlowStatsResultTransformerBuilder(config)

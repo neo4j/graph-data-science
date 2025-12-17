@@ -155,7 +155,7 @@ public final class PushbackPathFindingMutateProcedureFacade {
             GraphName.parse(graphName),
             config.toGraphParameters(),
             config.relationshipWeightProperty(),
-            config.toParameters(),
+            config.toMaxFlowParameters(),
             config.jobId(),
             config.logProgress(),
             new MaxFlowMutateResultTransformerBuilder(mutateRelationshipService, config)

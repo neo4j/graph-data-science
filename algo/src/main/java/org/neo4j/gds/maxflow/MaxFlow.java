@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.maxflow;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
@@ -29,32 +30,58 @@ public final class MaxFlow extends Algorithm<FlowResult> {
     private final Graph graph;
     private final MaxFlowParameters parameters;
     private final NodeConstraintsIdMap constraints;
+    private final Pair<NodeWithValue[],NodeWithValue[]> supplyAndDemand;
+
+    public static MaxFlow create(
+        Graph graph,
+        MaxFlowParameters parameters,
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
+    ){
+        NodeConstraintsIdMap nodeConstraints;
+        Pair<NodeWithValue[],NodeWithValue[]> supplyAndDemand;
+        if (parameters.nodeCapacityProperty().isEmpty()){
+            nodeConstraints = new NodeConstraintsIdMap.IgnoreNodeConstraints();
+            supplyAndDemand = SupplyAndDemandFactory.create(graph,parameters.sourceNodes(),parameters.targetNodes());
+        }else{
+            var nodePropertyValues = graph.nodeProperties(parameters.nodeCapacityProperty().get());
+            nodeConstraints = NodeConstraintsFromPropertyIdMap.create(
+                graph,
+                graph.relationshipCount(),
+                nodePropertyValues,
+                parameters.sourceNodes(),
+                parameters.targetNodes()
+            );
+            supplyAndDemand = SupplyAndDemandFactory.create(
+                graph,
+                nodePropertyValues,
+                parameters.sourceNodes(),
+                parameters.targetNodes()
+            );
+        }
+        return new MaxFlow(
+            graph,
+            parameters,
+            progressTracker,
+            terminationFlag,
+            nodeConstraints,
+            supplyAndDemand
+        );
+    }
 
     public MaxFlow(
         Graph graph,
         MaxFlowParameters parameters,
         ProgressTracker progressTracker,
-        TerminationFlag terminationFlag)
-    {
-        this(
-            graph,
-            parameters,
-            progressTracker,
-            terminationFlag,
-            new NodeConstraintsIdMap.IgnoreNodeConstraints()
-        );
-    }
-    public MaxFlow(
-        Graph graph,
-        MaxFlowParameters parameters,
-        ProgressTracker progressTracker,
         TerminationFlag terminationFlag,
-        NodeConstraintsIdMap constraints
+        NodeConstraintsIdMap constraints,
+        Pair<NodeWithValue[],NodeWithValue[]> supplyAndDemand
     ) {
         super(progressTracker);
         this.graph = graph;
         this.parameters = parameters;
         this.constraints = constraints;
+        this.supplyAndDemand = supplyAndDemand;
         this.terminationFlag = terminationFlag;
     }
 
@@ -69,7 +96,6 @@ public final class MaxFlow extends Algorithm<FlowResult> {
     }
 
     private FlowGraph createFlowGraph(){
-        var supplyAndDemand = SupplyAndDemandFactory.create(graph, parameters.sourceNodes(), parameters.targetNodes());
         return new FlowGraphBuilder(
             graph,
             supplyAndDemand.getLeft(),

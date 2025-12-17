@@ -228,7 +228,7 @@ public class PathFindingAlgorithmsBusinessFacade {
         return algorithmMachinery.getResult(
             () -> algorithms.maxFlow(
                 graph,
-                configuration.toParameters(),
+                configuration.toMaxFlowParameters(),
                 progressTracker,
                 requestScopedDependencies.terminationFlag()
             ),

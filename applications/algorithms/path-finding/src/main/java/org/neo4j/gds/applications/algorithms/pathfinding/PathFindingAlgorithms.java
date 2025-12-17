@@ -220,7 +220,7 @@ public class PathFindingAlgorithms {
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
-        var algorithm = new MaxFlow(
+        var algorithm =  MaxFlow.create(
             graph,
             parameters,
             progressTracker,
@@ -241,10 +241,10 @@ public class PathFindingAlgorithms {
         TerminationFlag terminationFlag
     ) {
 
-        var graphOfFlows= graphStore.getGraph(nodeLabels,relTypes,capacityProperty);
+        var graphOfFlows = graphStore.getGraph(nodeLabels,relTypes,capacityProperty);
         var graphOfCosts = graphStore.getGraph(nodeLabels,relTypes,costProperty);
 
-        var algorithm = new MinCostMaxFlow(
+        var algorithm =  MinCostMaxFlow.create(
             graphOfFlows,
             graphOfCosts,
             parameters,

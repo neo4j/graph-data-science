@@ -40,7 +40,6 @@ import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.maxflow.MaxFlowParameters;
-import org.neo4j.gds.maxflow.NodeConstraintsFromPropertyIdMap;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
@@ -71,45 +70,35 @@ class MinCostMaxFlowTest {
             List.of(RelationshipType.of("R")),
             Optional.of("c")
         );
+
+        Optional<String> prop= Optional.empty();
+
+        MinCostMaxFlow x=null;
+
+        if (graphStore.hasNodeProperty("cap")){
+           prop=Optional.of("cap");
+        }
+
         var maxFlowParameters = new MaxFlowParameters(
             sourceNodes,
             targetNodes,
             new Concurrency(1),
             0.5,
-            true
+            true,
+            prop
         );
         var params = new MCMFParameters(
             maxFlowParameters,
             6
         );
-        MinCostMaxFlow x=null;
 
-        if (graphStore.hasNodeProperty("cap")){
-            var constraintsIdMap = NodeConstraintsFromPropertyIdMap.create(
-                capacityGraph,
-                costGraph.relationshipCount(),
-                graphStore.nodeProperty("cap").values(),
-                maxFlowParameters.sourceNodes(),
-                maxFlowParameters.targetNodes()
-            );
-           x=  new MinCostMaxFlow(
-                capacityGraph,
-                costGraph,
-                params,
-                ProgressTracker.NULL_TRACKER,
-                TerminationFlag.RUNNING_TRUE,
-                constraintsIdMap
-            );
-
-        }else {
-            x = new MinCostMaxFlow(
-                capacityGraph,
-                costGraph,
-                params,
-                ProgressTracker.NULL_TRACKER,
-                TerminationFlag.RUNNING_TRUE
-            );
-        }
+        x =  MinCostMaxFlow.create(
+            capacityGraph,
+            costGraph,
+            params,
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
+        );
 
         var result = x.compute();
         double TOLERANCE = 1E-10;
@@ -323,14 +312,15 @@ class MinCostMaxFlowTest {
             targetNodes,
             new Concurrency(1),
             0.5,
-            true
+            true,
+            Optional.empty()
         );
         var params = new MCMFParameters(
             maxFlowParameters,
             6
         );
 
-        new MinCostMaxFlow(
+         MinCostMaxFlow.create(
                 capacityGraph,
                 costGraph,
                 params,

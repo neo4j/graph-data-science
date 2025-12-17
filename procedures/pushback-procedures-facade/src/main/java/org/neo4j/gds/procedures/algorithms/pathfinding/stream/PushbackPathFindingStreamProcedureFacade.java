@@ -223,7 +223,7 @@ public final class PushbackPathFindingStreamProcedureFacade {
             GraphName.parse(graphName),
             config.toGraphParameters(),
             config.relationshipWeightProperty(),
-            config.toParameters(),
+            config.toMaxFlowParameters(),
             config.jobId(),
             config.logProgress(),
             maxFlowResultTransformerBuilder

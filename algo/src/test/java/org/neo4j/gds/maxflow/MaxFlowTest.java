@@ -43,6 +43,7 @@ import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.TestSupport.fromGdl;
@@ -67,8 +68,8 @@ class MaxFlowTest {
     }
 
     void testGraph(Graph graph, InputNodes sourceNodes, InputNodes targetNodes, double expectedFlow, int concurrency) {
-        var params = new MaxFlowParameters(sourceNodes, targetNodes, new Concurrency(concurrency), .5, true);
-        var x =  new MaxFlow(graph, params, ProgressTracker.NULL_TRACKER, TerminationFlag.RUNNING_TRUE);
+        var params = new MaxFlowParameters(sourceNodes, targetNodes, new Concurrency(concurrency), .5, true, Optional.empty());
+        var x =   MaxFlow.create(graph, params, ProgressTracker.NULL_TRACKER, TerminationFlag.RUNNING_TRUE);
         var result = x.compute();
         assertThat(result.totalFlow()).isCloseTo(expectedFlow, Offset.offset(TOLERANCE));
     }
@@ -406,14 +407,15 @@ class MaxFlowTest {
             EmptyTaskRegistryFactory.INSTANCE
         );
 
-         new MaxFlow(
+          MaxFlow.create(
             graph,
             new MaxFlowParameters(
                 new ListInputNodes(List.of(0L)),
                 new ListInputNodes(List.of(2L)),
                 new Concurrency(4),
                 .5D,
-                true
+                true,
+                Optional.empty()
             ),
             testTracker,
             TerminationFlag.RUNNING_TRUE

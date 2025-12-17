@@ -384,7 +384,7 @@ public class PathFindingComputeFacade {
         var progressTracker = ProgressTracker.NULL_TRACKER;
 
         // Create the algorithm
-        var algo = new MaxFlow(
+        var algo =  MaxFlow.create(
             graph,
             parameters,
             progressTracker,
@@ -419,7 +419,7 @@ public class PathFindingComputeFacade {
         );
 
         // Create the algorithm
-        var algo = new MinCostMaxFlow(
+        var algo = MinCostMaxFlow.create(
             capacityGraph,
             costGraph,
             parameters,

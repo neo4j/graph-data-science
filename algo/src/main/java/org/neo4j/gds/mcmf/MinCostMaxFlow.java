@@ -20,13 +20,16 @@
 package org.neo4j.gds.mcmf;
 
 import com.carrotsearch.hppc.BitSet;
+import org.apache.commons.lang3.tuple.Pair;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArrayQueue;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.maxflow.MaxFlowPhase;
+import org.neo4j.gds.maxflow.NodeConstraintsFromPropertyIdMap;
 import org.neo4j.gds.maxflow.NodeConstraintsIdMap;
+import org.neo4j.gds.maxflow.NodeWithValue;
 import org.neo4j.gds.maxflow.SupplyAndDemandFactory;
 import org.neo4j.gds.termination.TerminationFlag;
 
@@ -37,8 +40,49 @@ public final class MinCostMaxFlow extends Algorithm<CostFlowResult> {
     private final Graph graphOfFlows;
     private final Graph graphOfCosts;
     private final MCMFParameters parameters;
-    private final NodeConstraintsIdMap nodeConstraintsIdMap;
 
+    private final NodeConstraintsIdMap constraints;
+    private final Pair<NodeWithValue[],NodeWithValue[]> supplyAndDemand;
+
+    public static MinCostMaxFlow create(
+        Graph graphOfFlows,
+        Graph graphOfCosts,
+        MCMFParameters parameters,
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
+    ) {
+        NodeConstraintsIdMap nodeConstraints;
+        var maxFlowParams = parameters.maxFlowParameters();
+        Pair<NodeWithValue[], NodeWithValue[]> supplyAndDemand;
+        if (maxFlowParams.nodeCapacityProperty().isEmpty()) {
+            nodeConstraints = new NodeConstraintsIdMap.IgnoreNodeConstraints();
+            supplyAndDemand = SupplyAndDemandFactory.create(graphOfFlows, maxFlowParams.sourceNodes(), maxFlowParams.targetNodes());
+        } else {
+            var nodePropertyValues = graphOfFlows.nodeProperties(maxFlowParams.nodeCapacityProperty().get());
+            nodeConstraints = NodeConstraintsFromPropertyIdMap.create(
+                graphOfFlows,
+                graphOfFlows.relationshipCount(),
+                nodePropertyValues,
+                maxFlowParams.sourceNodes(),
+                maxFlowParams.targetNodes()
+            );
+            supplyAndDemand = SupplyAndDemandFactory.create(
+                graphOfFlows,
+                nodePropertyValues,
+                maxFlowParams.sourceNodes(),
+                maxFlowParams.targetNodes()
+            );
+        }
+            return new MinCostMaxFlow(
+                graphOfFlows,
+                graphOfCosts,
+                parameters,
+                progressTracker,
+                terminationFlag,
+                nodeConstraints,
+                supplyAndDemand
+            );
+    }
 
     public MinCostMaxFlow(
         Graph graphOfFlows,
@@ -46,32 +90,17 @@ public final class MinCostMaxFlow extends Algorithm<CostFlowResult> {
         MCMFParameters parameters,
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag,
-        NodeConstraintsIdMap nodeConstraintsIdMap
+        NodeConstraintsIdMap nodeConstraintsIdMap,
+        Pair<NodeWithValue[],NodeWithValue[]> supplyAndDemand
     ) {
         super(progressTracker);
         this.graphOfFlows = graphOfFlows;
         this.graphOfCosts = graphOfCosts;
         this.parameters = parameters;
-        this.nodeConstraintsIdMap = nodeConstraintsIdMap;
+        this.constraints = nodeConstraintsIdMap;
         this.terminationFlag = terminationFlag;
+        this.supplyAndDemand = supplyAndDemand;
     }
-    public MinCostMaxFlow(
-        Graph graphOfFlows,
-        Graph graphOfCosts,
-        MCMFParameters parameters,
-        ProgressTracker progressTracker,
-        TerminationFlag terminationFlag
-    ) {
-        this(
-            graphOfFlows,
-            graphOfCosts,
-            parameters,
-            progressTracker,
-            terminationFlag,
-            new NodeConstraintsIdMap.IgnoreNodeConstraints()
-        );
-    }
-
 
     @Override
     public CostFlowResult compute() {
@@ -165,11 +194,7 @@ public final class MinCostMaxFlow extends Algorithm<CostFlowResult> {
         }
     }
     private CostFlowGraph createFlowGraph(){
-        var supplyAndDemand = SupplyAndDemandFactory.create(
-            graphOfFlows,
-            parameters.maxFlowParameters().sourceNodes(),
-            parameters.maxFlowParameters().targetNodes()
-        );
+
         return new CostFlowGraphBuilder(
             graphOfFlows,
             graphOfCosts,
@@ -177,7 +202,7 @@ public final class MinCostMaxFlow extends Algorithm<CostFlowResult> {
             supplyAndDemand.getRight(),
             terminationFlag,
             parameters.concurrency(),
-            nodeConstraintsIdMap
+            constraints
         ).build();
     }
 

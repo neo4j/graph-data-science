@@ -20,12 +20,17 @@
 package org.neo4j.gds.maxflow;
 
 import org.neo4j.gds.MapInputNodes;
+import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.config.ConfigNodesValidations;
 import org.neo4j.gds.config.RelationshipWeightConfig;
 import org.neo4j.gds.config.SourceNodesWithPropertiesConfig;
 import org.neo4j.gds.config.TargetNodesWithPropertiesConfig;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Optional;
 
@@ -43,6 +48,8 @@ public interface MaxFlowBaseConfig extends AlgoBaseConfig, RelationshipWeightCon
     @Override
     @Configuration.Key("capacityProperty")
     Optional<String> relationshipWeightProperty();
+
+    Optional<String> nodeCapacityProperty();
 
     @Configuration.Check()
     default void assertNoDuplicateInputNodes() {
@@ -90,14 +97,32 @@ public interface MaxFlowBaseConfig extends AlgoBaseConfig, RelationshipWeightCon
         }
     }
 
+    @Configuration.GraphStoreValidationCheck
+    default void validateNodeCapacityProperty(
+        GraphStore graphStore,
+        Collection<NodeLabel> selectedLabels,
+        Collection<RelationshipType> selectedRelationshipTypes
+    ) {
+
+        if (nodeCapacityProperty().isPresent()) {
+            ConfigNodesValidations.validateNodePropertyExists(
+                graphStore,
+                selectedLabels,
+                "Node capacity property",
+                nodeCapacityProperty().get()
+            );
+        }
+    }
+
     @Configuration.Ignore
-    default MaxFlowParameters toParameters() {
+    default MaxFlowParameters toMaxFlowParameters() {
         return new MaxFlowParameters(
             sourceNodes(),
             targetNodes(),
             concurrency(),
             freq(),
-            useGapRelabelling()
+            useGapRelabelling(),
+            nodeCapacityProperty()
         );
     }
 }

@@ -353,7 +353,7 @@ public class PathFindingComputeBusinessFacade {
             graphName,
             graphParameters,
             capacityProperty,
-            new GraphStoreValidation(new NoAlgorithmRequirements()),
+            new GraphStoreValidation(new NodePropertyMustExistOnAllLabels("nodeCapacityProperty")),
             Optional.empty(),
             user,
             databaseId

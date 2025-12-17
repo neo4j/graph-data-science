@@ -135,7 +135,7 @@ public class PathFindingAlgorithmsEstimationModeBusinessFacade {
     }
 
     public MemoryEstimation maxFlow(MaxFlowBaseConfig configuration) {
-        var params = configuration.toParameters();
+        var params = configuration.toMaxFlowParameters();
 
         var estimateDefinition = new MaxFlowMemoryEstimateDefinition(params.sourceNodes().size(),params.targetNodes().size(),params.useGapRelabelling());
 
