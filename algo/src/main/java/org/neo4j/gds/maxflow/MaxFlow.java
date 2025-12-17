@@ -28,16 +28,33 @@ import org.neo4j.gds.termination.TerminationFlag;
 public final class MaxFlow extends Algorithm<FlowResult> {
     private final Graph graph;
     private final MaxFlowParameters parameters;
+    private final NodeConstraintsIdMap constraints;
 
     public MaxFlow(
         Graph graph,
         MaxFlowParameters parameters,
         ProgressTracker progressTracker,
-        TerminationFlag terminationFlag
+        TerminationFlag terminationFlag)
+    {
+        this(
+            graph,
+            parameters,
+            progressTracker,
+            terminationFlag,
+            new NodeConstraintsIdMap.IgnoreNodeConstraints()
+        );
+    }
+    public MaxFlow(
+        Graph graph,
+        MaxFlowParameters parameters,
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag,
+        NodeConstraintsIdMap constraints
     ) {
         super(progressTracker);
         this.graph = graph;
         this.parameters = parameters;
+        this.constraints = constraints;
         this.terminationFlag = terminationFlag;
     }
 
@@ -58,13 +75,8 @@ public final class MaxFlow extends Algorithm<FlowResult> {
             supplyAndDemand.getLeft(),
             supplyAndDemand.getRight(),
             terminationFlag,
-            parameters.concurrency()
+            parameters.concurrency(),
+            constraints
         ).build();
     }
-
-
-
-
-
-
 }

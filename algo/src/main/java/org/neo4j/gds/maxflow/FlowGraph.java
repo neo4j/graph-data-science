@@ -36,7 +36,7 @@ public class FlowGraph {
     protected final HugeLongArray reverseRelationshipIndexOffset;
     protected final NodeWithValue[] supply;
     protected final NodeWithValue[] demand;
-    private final NodeConstraintsIdMap nodeCapacities;
+    protected final NodeConstraintsIdMap nodeCapacities;
 
     protected FlowGraph(
         Graph graph,

@@ -51,7 +51,7 @@ public final class NodeConstraintsFromPropertyIdMap  implements NodeConstraintsI
         this.nodePropertyValues = nodePropertyValues;
     }
 
-    static NodeConstraintsIdMap create(
+    public static NodeConstraintsIdMap create(
         IdMap idMap,
         long relationshipCount,
         NodePropertyValues nodePropertyValues,

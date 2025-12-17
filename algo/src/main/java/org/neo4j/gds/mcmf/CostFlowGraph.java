@@ -27,6 +27,7 @@ import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.maxflow.FlowGraph;
 import org.neo4j.gds.maxflow.FlowRelationship;
 import org.neo4j.gds.maxflow.FlowResult;
+import org.neo4j.gds.maxflow.NodeConstraintsIdMap;
 import org.neo4j.gds.maxflow.NodeWithValue;
 import org.neo4j.gds.maxflow.ResidualEdgeConsumer;
 
@@ -41,9 +42,10 @@ public final class CostFlowGraph extends FlowGraph {
         HugeLongArray reverseToRelIdx,
         HugeLongArray reverseIndPtr,
         NodeWithValue[] supply,
-        NodeWithValue[] demand
+        NodeWithValue[] demand,
+        NodeConstraintsIdMap constraintsIdMap
     ) {
-        super(graph, indPtr, costRelationships, reverseAdjacency, reverseToRelIdx, reverseIndPtr, supply, demand);
+        super(graph, indPtr, costRelationships, reverseAdjacency, reverseToRelIdx, reverseIndPtr, supply, demand,constraintsIdMap);
         this.costRelationships = costRelationships;
     }
 
@@ -57,7 +59,8 @@ public final class CostFlowGraph extends FlowGraph {
             reverseRelationshipMap,
             reverseRelationshipIndexOffset,
             supply,
-            demand
+            demand,
+            nodeCapacities
         );
     }
 

@@ -40,6 +40,7 @@ import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.maxflow.MaxFlowParameters;
+import org.neo4j.gds.maxflow.NodeConstraintsFromPropertyIdMap;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
@@ -81,13 +82,34 @@ class MinCostMaxFlowTest {
             maxFlowParameters,
             6
         );
-        var x = new MinCostMaxFlow(
-            capacityGraph,
-            costGraph,
-            params,
-            ProgressTracker.NULL_TRACKER,
-            TerminationFlag.RUNNING_TRUE
-        );
+        MinCostMaxFlow x=null;
+
+        if (graphStore.hasNodeProperty("cap")){
+            var constraintsIdMap = NodeConstraintsFromPropertyIdMap.create(
+                capacityGraph,
+                costGraph.relationshipCount(),
+                graphStore.nodeProperty("cap").values(),
+                maxFlowParameters.sourceNodes(),
+                maxFlowParameters.targetNodes()
+            );
+           x=  new MinCostMaxFlow(
+                capacityGraph,
+                costGraph,
+                params,
+                ProgressTracker.NULL_TRACKER,
+                TerminationFlag.RUNNING_TRUE,
+                constraintsIdMap
+            );
+
+        }else {
+            x = new MinCostMaxFlow(
+                capacityGraph,
+                costGraph,
+                params,
+                ProgressTracker.NULL_TRACKER,
+                TerminationFlag.RUNNING_TRUE
+            );
+        }
 
         var result = x.compute();
         double TOLERANCE = 1E-10;
@@ -100,9 +122,9 @@ class MinCostMaxFlowTest {
         var graphStore = gdlGraphStore(
             """
                 CREATE
-                    (a0:n),
-                    (a1:n),
-                    (a2:n),
+                    (a0:n{cap: 10}),
+                    (a1:n{cap: 10}),
+                    (a2:n{cap: 10}),
                     (a0)-[:R {u:1, c:10}]->(a1),
                     (a0)-[:R {u:1, c:100}]->(a1),
                     (a1)-[:R {u:1, c:1}]->(a2)
@@ -127,10 +149,10 @@ class MinCostMaxFlowTest {
         var graphStore = gdlGraphStore(
             """
                 CREATE
-                    (a0:n),
-                    (a1:n),
-                    (a2:n),
-                    (a3:n),
+                    (a0:n{cap:100}),
+                    (a1:n{cap:100}),
+                    (a2:n{cap:100}),
+                    (a3:n{cap:100}),
                     (a0)-[:R {u: 20, c:5}]->(a1),
                     (a0)-[:R {u: 15, c:10}]->(a2),
                     (a1)-[:R {u: 10, c:8}]->(a3),

@@ -29,6 +29,7 @@ import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.maxflow.DefaultRelationships;
 import org.neo4j.gds.maxflow.FlowGraphBuilder;
+import org.neo4j.gds.maxflow.NodeConstraintsIdMap;
 import org.neo4j.gds.maxflow.NodeWithValue;
 import org.neo4j.gds.termination.TerminationFlag;
 
@@ -41,6 +42,7 @@ public class CostFlowGraphBuilder extends FlowGraphBuilder {
     private final Graph costGraph;
     private  boolean allowNegativeCosts = false;
 
+
     public CostFlowGraphBuilder(
         Graph capacityGraph,
         Graph costGraph,
@@ -49,7 +51,27 @@ public class CostFlowGraphBuilder extends FlowGraphBuilder {
         TerminationFlag terminationFlag,
         Concurrency concurrency
     ) {
-        super(capacityGraph,supply, demand, terminationFlag, concurrency);
+        this(
+            capacityGraph,
+            costGraph,
+            supply,
+            demand,
+            terminationFlag,
+            concurrency,
+            new NodeConstraintsIdMap.IgnoreNodeConstraints()
+        );
+    }
+
+    public CostFlowGraphBuilder(
+        Graph capacityGraph,
+        Graph costGraph,
+        NodeWithValue[] supply,
+        NodeWithValue[] demand,
+        TerminationFlag terminationFlag,
+        Concurrency concurrency,
+        NodeConstraintsIdMap nodeConstraintsIdMap
+    ) {
+        super(capacityGraph,supply, demand, terminationFlag, concurrency,nodeConstraintsIdMap);
         this.costGraph = costGraph;
     }
 
@@ -60,7 +82,7 @@ public class CostFlowGraphBuilder extends FlowGraphBuilder {
     }
 
     private  void setUpCosts(){
-        this.cost = HugeDoubleArray.newArray(flow.size());
+        this.cost = HugeDoubleArray.newArray(originalCapacity.size());
         AtomicLong nodeId = new AtomicLong();
         long oldNodeCount = costGraph.nodeCount();
 
@@ -102,7 +124,8 @@ public class CostFlowGraphBuilder extends FlowGraphBuilder {
             reverseRelationshipMap,
             reverseRelationshipIndexOffset,
             supply,
-            demand
+            demand,
+            nodeConstraintsIdMap
         );
     }
 }

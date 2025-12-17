@@ -26,6 +26,7 @@ import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArrayQueue;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.maxflow.MaxFlowPhase;
+import org.neo4j.gds.maxflow.NodeConstraintsIdMap;
 import org.neo4j.gds.maxflow.SupplyAndDemandFactory;
 import org.neo4j.gds.termination.TerminationFlag;
 
@@ -36,6 +37,7 @@ public final class MinCostMaxFlow extends Algorithm<CostFlowResult> {
     private final Graph graphOfFlows;
     private final Graph graphOfCosts;
     private final MCMFParameters parameters;
+    private final NodeConstraintsIdMap nodeConstraintsIdMap;
 
 
     public MinCostMaxFlow(
@@ -43,13 +45,31 @@ public final class MinCostMaxFlow extends Algorithm<CostFlowResult> {
         Graph graphOfCosts,
         MCMFParameters parameters,
         ProgressTracker progressTracker,
-        TerminationFlag terminationFlag
+        TerminationFlag terminationFlag,
+        NodeConstraintsIdMap nodeConstraintsIdMap
     ) {
         super(progressTracker);
         this.graphOfFlows = graphOfFlows;
         this.graphOfCosts = graphOfCosts;
         this.parameters = parameters;
+        this.nodeConstraintsIdMap = nodeConstraintsIdMap;
         this.terminationFlag = terminationFlag;
+    }
+    public MinCostMaxFlow(
+        Graph graphOfFlows,
+        Graph graphOfCosts,
+        MCMFParameters parameters,
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
+    ) {
+        this(
+            graphOfFlows,
+            graphOfCosts,
+            parameters,
+            progressTracker,
+            terminationFlag,
+            new NodeConstraintsIdMap.IgnoreNodeConstraints()
+        );
     }
 
 
@@ -156,7 +176,8 @@ public final class MinCostMaxFlow extends Algorithm<CostFlowResult> {
             supplyAndDemand.getLeft(),
             supplyAndDemand.getRight(),
             terminationFlag,
-            parameters.concurrency()
+            parameters.concurrency(),
+            nodeConstraintsIdMap
         ).build();
     }
 
