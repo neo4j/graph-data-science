@@ -20,7 +20,6 @@
 package org.neo4j.gds.maxflow;
 
 import org.apache.commons.lang3.mutable.MutableInt;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.properties.relationships.RelationshipCursor;
@@ -243,9 +242,16 @@ class FlowGraphTest {
             }
 
             @Override
-            public double capacityOf(long nodeId) {
+            public double nodeCapacity(long nodeId) {
                 if (nodeId==a) return 30;
                 throw new RuntimeException();
+            }
+
+            @Override
+            public double relationshipCapacity(long relationshipId) {
+                if (relationshipId==7) return 30;
+                throw new RuntimeException();
+
             }
 
             @Override

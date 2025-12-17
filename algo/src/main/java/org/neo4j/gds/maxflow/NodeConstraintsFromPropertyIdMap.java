@@ -26,7 +26,7 @@ import org.neo4j.gds.collections.ha.HugeLongArray;
 
 import java.util.function.LongPredicate;
 
-public final class NodeConstraintsFromPropertyIdMap  implements  NodeConstraintsIdMap{
+public final class NodeConstraintsFromPropertyIdMap  implements NodeConstraintsIdMap{
 
     private final HugeLongArray toMappedNode;
     private final HugeLongArray realIndices;
@@ -36,7 +36,9 @@ public final class NodeConstraintsFromPropertyIdMap  implements  NodeConstraints
     private final NodePropertyValues nodePropertyValues;
 
     private NodeConstraintsFromPropertyIdMap(
-        HugeLongArray toMappedNode, HugeLongArray realIndices, long originalNodeCount,
+        HugeLongArray toMappedNode,
+        HugeLongArray realIndices,
+        long originalNodeCount,
         long firstMappedId,
         long firstRelationshipId,
         NodePropertyValues nodePropertyValues
@@ -111,13 +113,20 @@ public final class NodeConstraintsFromPropertyIdMap  implements  NodeConstraints
 
     @Override
     public boolean hasCapacityConstraint(long nodeId) {
-        return (nodeId< originalNodeCount && toMappedNode.get(nodeId)!=-1);
+        return (nodeId < originalNodeCount && toMappedNode.get(nodeId)!=-1);
     }
 
     @Override
-    public double capacityOf(long nodeId) {
+    public double nodeCapacity(long nodeId) {
         if (!hasCapacityConstraint(nodeId)) throw new RuntimeException();
         return nodePropertyValues.doubleValue(nodeId);
+    }
+
+    @Override
+    public double relationshipCapacity(long relationshipId) {
+        if (relationshipId < firstRelationshipId) throw  new RuntimeException();
+        var index = relationshipId-firstRelationshipId;
+        return  nodePropertyValues.doubleValue(realIndices.get(index));
     }
 
     @Override

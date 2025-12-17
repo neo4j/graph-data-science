@@ -22,7 +22,6 @@ package org.neo4j.gds.mcmf;
 import org.apache.commons.lang3.mutable.MutableDouble;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.maxflow.FlowGraph;
@@ -32,22 +31,20 @@ import org.neo4j.gds.maxflow.NodeWithValue;
 import org.neo4j.gds.maxflow.ResidualEdgeConsumer;
 
 public final class CostFlowGraph extends FlowGraph {
-    private final HugeDoubleArray cost;
+    private final CostRelationships costRelationships;
 
     CostFlowGraph(
         Graph graph,
         HugeLongArray indPtr,
-        HugeDoubleArray originalCapacity,
-        HugeDoubleArray flow,
+        CostRelationships costRelationships,
         HugeLongArray reverseAdjacency,
         HugeLongArray reverseToRelIdx,
         HugeLongArray reverseIndPtr,
         NodeWithValue[] supply,
-        NodeWithValue[] demand,
-        HugeDoubleArray cost
+        NodeWithValue[] demand
     ) {
-        super(graph, indPtr, originalCapacity, flow, reverseAdjacency, reverseToRelIdx, reverseIndPtr, supply, demand);
-        this.cost = cost;
+        super(graph, indPtr, costRelationships, reverseAdjacency, reverseToRelIdx, reverseIndPtr, supply, demand);
+        this.costRelationships = costRelationships;
     }
 
     @Override
@@ -55,14 +52,12 @@ public final class CostFlowGraph extends FlowGraph {
         return new CostFlowGraph(
             graph.concurrentCopy(),
             outRelationshipIndexOffset,
-            originalCapacity,
-            flow,
+            costRelationships,
             reverseAdjacency,
             reverseRelationshipMap,
             reverseRelationshipIndexOffset,
             supply,
-            demand,
-            cost
+            demand
         );
     }
 
@@ -72,7 +67,7 @@ public final class CostFlowGraph extends FlowGraph {
             t,
             relIdx,
             residualCapacity,
-            cost.get(relIdx),
+            costRelationships.originalCost(relIdx),
             isReverse
         );
         return  forEachOriginalRelationship(nodeId,adaptedConsumer);
@@ -85,7 +80,7 @@ public final class CostFlowGraph extends FlowGraph {
             t,
             relIdx,
             residualCapacity,
-            -cost.get(relIdx),
+            -costRelationships.originalCost(relIdx),
             isReverse
        );
 
@@ -111,13 +106,13 @@ public final class CostFlowGraph extends FlowGraph {
                 nodeId,
                 0D,
                 (s, t, _capacity) -> {
-                    var flow_ = this.flow.get(relIdx.longValue());
+                    var flow_ = relationships.flow(relIdx.longValue());
                     assert(flow_ >= 0.0);
 
                     if (flow_ > 0.0) {
                         var flowRelationship = new FlowRelationship(s, t, flow_);
                         flow.set(idx.getAndIncrement(), flowRelationship);
-                        double operand = flow_ * cost.get(relIdx.longValue());
+                        double operand = flow_ * costRelationships.originalCost(relIdx.longValue());
                         totalCost.add(operand);
 
                     }
@@ -130,8 +125,8 @@ public final class CostFlowGraph extends FlowGraph {
         //compute flow to superTarget
         forEachOriginalRelationship(
             superTarget(), (_s, _t, relIdx, _capacity, _cost, _isReverse) -> {
-                var fakeFlowFromSuperTarget = this.flow.get(relIdx);
-                var actualFlowFromSuperTarget = fakeFlowFromSuperTarget - originalCapacity.get(relIdx);
+                var fakeFlowFromSuperTarget = relationships.flow(relIdx);
+                var actualFlowFromSuperTarget = fakeFlowFromSuperTarget - costRelationships.originalCapacity(relIdx);
                 var actualFlowToSuperTarget = -actualFlowFromSuperTarget;
                 totalFlow.add(actualFlowToSuperTarget);
                 return true;
@@ -141,11 +136,7 @@ public final class CostFlowGraph extends FlowGraph {
     }
 
     double maximalUnitCost() {
-        var max = Double.NEGATIVE_INFINITY; //fixme
-        for (long r = 0; r < cost.size(); r++) {
-            max = Math.max(max, cost.get(r));
-        }
-        return max;
+        return costRelationships.maximalUnitCost();
     }
 
     long maxInPlusOutDegree() {

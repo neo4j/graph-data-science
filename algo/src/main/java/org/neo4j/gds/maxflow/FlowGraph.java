@@ -24,15 +24,13 @@ import org.apache.commons.lang3.mutable.MutableDouble;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.properties.relationships.RelationshipWithPropertyConsumer;
-import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 
 public class FlowGraph {
     protected final Graph graph;
     protected final HugeLongArray outRelationshipIndexOffset;
-    protected final HugeDoubleArray originalCapacity;
-    protected final HugeDoubleArray flow;
+    protected final Relationships relationships;
     protected final HugeLongArray reverseAdjacency;
     protected final HugeLongArray reverseRelationshipMap;
     protected final HugeLongArray reverseRelationshipIndexOffset;
@@ -43,8 +41,7 @@ public class FlowGraph {
     protected FlowGraph(
         Graph graph,
         HugeLongArray outRelationshipIndexOffset,
-        HugeDoubleArray originalCapacity,
-        HugeDoubleArray flow,
+        Relationships relationships,
         HugeLongArray reverseAdjacency,
         HugeLongArray reverseRelationshipMap,
         HugeLongArray reverseRelationshipIndexOffset,
@@ -54,8 +51,7 @@ public class FlowGraph {
     ) {
         this.graph = graph;
         this.outRelationshipIndexOffset = outRelationshipIndexOffset;
-        this.originalCapacity = originalCapacity;
-        this.flow = flow;
+        this.relationships = relationships;
         this.reverseAdjacency = reverseAdjacency;
         this.reverseRelationshipMap = reverseRelationshipMap;
         this.reverseRelationshipIndexOffset = reverseRelationshipIndexOffset;
@@ -68,8 +64,7 @@ public class FlowGraph {
     protected FlowGraph(
         Graph graph,
         HugeLongArray outRelationshipIndexOffset,
-        HugeDoubleArray originalCapacity,
-        HugeDoubleArray flow,
+        Relationships relationships,
         HugeLongArray reverseAdjacency,
         HugeLongArray reverseRelationshipMap,
         HugeLongArray reverseRelationshipIndexOffset,
@@ -79,8 +74,7 @@ public class FlowGraph {
         this(
             graph,
             outRelationshipIndexOffset,
-            originalCapacity,
-            flow,
+            relationships,
             reverseAdjacency,
             reverseRelationshipMap,
             reverseRelationshipIndexOffset,
@@ -94,8 +88,7 @@ public class FlowGraph {
         return new FlowGraph(
             graph.concurrentCopy(),
             outRelationshipIndexOffset,
-            originalCapacity,
-            flow,
+            relationships,
             reverseAdjacency,
             reverseRelationshipMap,
             reverseRelationshipIndexOffset,
@@ -109,7 +102,7 @@ public class FlowGraph {
         var earlyTermination = new MutableBoolean(false);
         var relIdx = new MutableLong(outRelationshipIndexOffset.get(nodeId));
         RelationshipWithPropertyConsumer originalConsumer = (s, t, capacity) -> {
-            var residualCapacity = capacity - flow.get(relIdx.longValue());
+            var residualCapacity = capacity - relationships.flow(relIdx.longValue());
             var isReverse = false;
             if(!consumer.accept(s, nodeCapacities.mapNode(t), relIdx.getAndIncrement(), residualCapacity, isReverse)) {
                 earlyTermination.setTrue();
@@ -133,8 +126,8 @@ public class FlowGraph {
             if (nodeCapacities.isFakeNode(nodeId)) {
                 var realNode = nodeCapacities.realNodeOf(nodeId);
                 var relId = nodeCapacities.capacityRelId(realNode);
-                var capacity = originalCapacity.get(relId);
-               return consumer.accept(nodeId,realNode,relId,capacity-flow.get(relId),false);
+                var capacity = relationships.originalCapacity(relId);
+               return consumer.accept(nodeId,realNode,relId,capacity-relationships.flow(relId),false);
             }else {
                 graph.forEachRelationship(nodeId, 0D, originalConsumer);
             }
@@ -146,12 +139,12 @@ public class FlowGraph {
        if (nodeCapacities.hasCapacityConstraint(nodeId)){
             long capacityNode = nodeCapacities.toFakeNodeOf(nodeId);
             long relIdx = nodeCapacities.capacityRelId(nodeId);
-            return consumer.accept(nodeId,capacityNode,relIdx,flow.get(relIdx),true);
+            return consumer.accept(nodeId,capacityNode,relIdx,relationships.flow(relIdx),true);
         }else {
             for (long reverseRelIdx = reverseRelationshipIndexOffset.get(nodeId); reverseRelIdx < reverseRelationshipIndexOffset.get(nodeId + 1); reverseRelIdx++) {
                 var t = reverseAdjacency.get(reverseRelIdx);
                 var relIdx = reverseRelationshipMap.get(reverseRelIdx);
-                var residualCapacity = flow.get(relIdx);
+                var residualCapacity = relationships.flow(relIdx);
                 if (!consumer.accept(nodeId,t,relIdx,residualCapacity,true)) {
                     return false;
                 }
@@ -169,16 +162,12 @@ public class FlowGraph {
     }
 
     public double flow(long relIdx) {
-        return flow.get(relIdx);
+        return relationships.flow(relIdx);
     }
 
     public void push(long relIdx, double delta, boolean isReverse) {
-        //(s)-[rel]->(t)
-        if (isReverse) {
-            flow.addTo(relIdx, -delta);
-        } else {
-            flow.addTo(relIdx, delta);
-        }
+        var actualDelta = isReverse? -delta : delta;         //(s)-[rel]->(t)
+        relationships.push(relIdx,actualDelta);
     }
 
     protected long originalEdgeCount() {
@@ -216,10 +205,11 @@ public class FlowGraph {
     }
 
     public double reverseResidualCapacity(long relIdx, boolean isReverse) {
+       var flow = relationships.flow(relIdx);
         if (!isReverse) {
-            return flow.get(relIdx);
+            return flow;
         }
-        return originalCapacity.get(relIdx) - flow.get(relIdx);
+        return relationships.originalCapacity(relIdx) - flow;
     }
 
     public long superSource() {
@@ -241,7 +231,7 @@ public class FlowGraph {
                 nodeId,
                 0D,
                 (s, t, _capacity) -> {
-                    var flow_ = this.flow.get(relIdx.longValue());
+                    var flow_ = relationships.flow(relIdx.longValue());
                     if (flow_ > 0.0) {
                         var flowRelationship = new FlowRelationship(s, t, flow_);
                         flow.set(idx.getAndIncrement(), flowRelationship);
@@ -256,8 +246,8 @@ public class FlowGraph {
         forEachOriginalRelationship(
             superTarget(), (_s, _t, relIdx, _capacity, _isReverse) -> {
                 //superTarget--[rel]-->target
-                var fakeFlowFromSuperTarget = this.flow.get(relIdx);
-                var actualFlowFromSuperTarget = fakeFlowFromSuperTarget - originalCapacity.get(relIdx);
+                var fakeFlowFromSuperTarget = relationships.flow(relIdx);
+                var actualFlowFromSuperTarget = fakeFlowFromSuperTarget - relationships.originalCapacity(relIdx);
                 var actualFlowToSuperTarget = -actualFlowFromSuperTarget;
                 totalFlow.add(actualFlowToSuperTarget);
                 return true;

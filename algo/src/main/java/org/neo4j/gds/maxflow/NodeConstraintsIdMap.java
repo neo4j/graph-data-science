@@ -23,7 +23,8 @@ public interface NodeConstraintsIdMap {
 
     boolean isFakeNode(long nodeId);
     boolean hasCapacityConstraint(long nodeId);
-    double capacityOf(long nodeId);
+    double nodeCapacity(long nodeId);
+    double relationshipCapacity(long relationshipId);
     long toFakeNodeOf(long nodeId);
     long realNodeOf(long nodeId);
     long numberOfCapacityNodes();
@@ -53,9 +54,12 @@ public interface NodeConstraintsIdMap {
         }
 
         @Override
-        public double capacityOf(long nodeId) {
+        public double nodeCapacity(long nodeId) {
             return 0;
         }
+
+        @Override
+        public double relationshipCapacity(long relationshipId) {return 0;}
 
         @Override
         public long toFakeNodeOf(long nodeId) {

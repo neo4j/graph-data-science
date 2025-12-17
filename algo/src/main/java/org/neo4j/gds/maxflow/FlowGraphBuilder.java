@@ -45,7 +45,7 @@ public class FlowGraphBuilder {
     protected  HugeLongArray reverseRelationshipIndexOffset;
     protected  HugeLongArray reverseRelationshipMap;
     protected  HugeLongArray reverseAdjacency;
-    private final NodeConstraintsIdMap nodeConstraintsIdMap;
+    protected final NodeConstraintsIdMap nodeConstraintsIdMap;
 
     public FlowGraphBuilder(
         Graph capacityGraph,
@@ -133,7 +133,7 @@ public class FlowGraphBuilder {
             + demand.length
             + nodeConstraintsIdMap.numberOfCapacityNodes();
 
-        originalCapacity = HugeDoubleArray.newArray(newRelationshipCount);
+        originalCapacity = HugeDoubleArray.newArray(newRelationshipCount- nodeConstraintsIdMap.numberOfCapacityNodes());
         reverseRelationshipMap = HugeLongArray.newArray(newRelationshipCount);
         reverseAdjacency = HugeLongArray.newArray(newRelationshipCount);
 
@@ -165,11 +165,6 @@ public class FlowGraphBuilder {
                 long v;
 
                 while ((v = nodeId.getAndIncrement()) < oldNodeCount) {
-                    if (nodeConstraintsIdMap.hasCapacityConstraint(v)){
-                        var relId = nodeConstraintsIdMap.capacityRelId(v);
-                        //here we just want to store the original capacity so it is accessible
-                        originalCapacity.set(relId,nodeConstraintsIdMap.capacityOf(v));
-                    }
                     capacityGraphCopy.forEachRelationship(v, 0D, consumer);
                 }
             }
@@ -197,12 +192,11 @@ public class FlowGraphBuilder {
         setUpCapacities();
         return new FlowGraph(
               capacityGraph,
-            outRelationshipIndexOffset,
-              originalCapacity,
-              flow,
+              outRelationshipIndexOffset,
+              new DefaultRelationships(originalCapacity,flow,nodeConstraintsIdMap),
               reverseAdjacency,
-            reverseRelationshipMap,
-            reverseRelationshipIndexOffset,
+              reverseRelationshipMap,
+              reverseRelationshipIndexOffset,
               supply,
               demand,
               nodeConstraintsIdMap

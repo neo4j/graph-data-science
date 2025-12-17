@@ -27,6 +27,7 @@ import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
+import org.neo4j.gds.maxflow.DefaultRelationships;
 import org.neo4j.gds.maxflow.FlowGraphBuilder;
 import org.neo4j.gds.maxflow.NodeWithValue;
 import org.neo4j.gds.termination.TerminationFlag;
@@ -96,14 +97,12 @@ public class CostFlowGraphBuilder extends FlowGraphBuilder {
         return new CostFlowGraph(
             capacityGraph,
             outRelationshipIndexOffset,
-            originalCapacity,
-            flow,
+            new CostRelationships(new DefaultRelationships(originalCapacity,flow,nodeConstraintsIdMap),cost,capacityGraph.relationshipCount()),
             reverseAdjacency,
             reverseRelationshipMap,
             reverseRelationshipIndexOffset,
             supply,
-            demand,
-            cost
+            demand
         );
     }
 }
