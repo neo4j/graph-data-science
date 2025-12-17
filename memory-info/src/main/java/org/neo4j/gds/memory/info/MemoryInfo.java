@@ -17,10 +17,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.compression;
+package org.neo4j.gds.memory.info;
 
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.core.compression.common.ImmutableHistogram;
+import org.neo4j.gds.histogram.ImmutableHistogram;
 
 import java.util.Optional;
 import java.util.OptionalLong;

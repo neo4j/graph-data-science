@@ -31,7 +31,6 @@ import org.neo4j.gds.collections.PageUtil;
 import org.neo4j.gds.collections.ha.HugeIntArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.GraphDimensions;
-import org.neo4j.gds.core.compression.MemoryInfo;
 import org.neo4j.gds.core.compression.common.BumpAllocator;
 import org.neo4j.gds.core.loading.MutableIntValue;
 import org.neo4j.gds.mem.BitUtil;
@@ -39,6 +38,7 @@ import org.neo4j.gds.mem.Estimate;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryEstimations;
 import org.neo4j.gds.mem.MemoryRange;
+import org.neo4j.gds.memory.info.MemoryInfo;
 
 import static org.neo4j.gds.RelationshipType.ALL_RELATIONSHIPS;
 import static org.neo4j.gds.collections.PageUtil.indexInPage;

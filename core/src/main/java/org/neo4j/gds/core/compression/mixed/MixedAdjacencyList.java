@@ -22,7 +22,7 @@ package org.neo4j.gds.core.compression.mixed;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.AdjacencyCursor;
 import org.neo4j.gds.api.AdjacencyList;
-import org.neo4j.gds.core.compression.MemoryInfo;
+import org.neo4j.gds.memory.info.MemoryInfo;
 
 public class MixedAdjacencyList implements AdjacencyList {
 
@@ -68,4 +68,3 @@ public class MixedAdjacencyList implements AdjacencyList {
         return this.memoryInfo;
     }
 }
-

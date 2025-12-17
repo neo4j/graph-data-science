@@ -21,6 +21,7 @@ package org.neo4j.gds.core.compression;
 
 import org.neo4j.gds.core.compression.common.BlockStatistics;
 import org.neo4j.gds.core.compression.common.MemoryTracker;
+import org.neo4j.gds.memory.info.ImmutableMemoryInfo;
 
 import java.util.Optional;
 

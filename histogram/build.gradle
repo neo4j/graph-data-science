@@ -1,0 +1,35 @@
+/*
+ * Copyright (c) "Neo4j"
+ * Neo4j Sweden AB [http://neo4j.com]
+ *
+ * This file is part of Neo4j.
+ *
+ * Neo4j is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+apply plugin: 'java-library'
+
+description = 'Neo4j Graph Data Science :: Histogram'
+
+group = 'org.neo4j.gds'
+
+dependencies {
+    implementation openGds.hdrhistogram
+
+    testImplementation openGds.assertj.core
+    testImplementation openGds.junit5.jupiter.api
+    testImplementation openGds.junit5.jupiter.engine
+    testImplementation openGds.junit5.jupiter.params
+    testImplementation platform(openGds.junit5bom)
+}

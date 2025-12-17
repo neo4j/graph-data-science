@@ -18,6 +18,8 @@ dependencies {
 
     implementation openGds.jol.core
 
+    implementation project(':histogram')
+    implementation project(':memory-info')
     implementation project(':memory-usage')
 
     // Because, why not 🤷

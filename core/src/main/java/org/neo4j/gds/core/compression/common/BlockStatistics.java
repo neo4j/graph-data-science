@@ -19,8 +19,9 @@
  */
 package org.neo4j.gds.core.compression.common;
 
-import org.neo4j.gds.core.compression.BoundedHistogram;
 import org.neo4j.gds.core.compression.packed.AdjacencyPacking;
+import org.neo4j.gds.histogram.BoundedHistogram;
+import org.neo4j.gds.histogram.ImmutableHistogram;
 import org.neo4j.gds.mem.BitUtil;
 
 public final class BlockStatistics implements AutoCloseable {

@@ -23,10 +23,10 @@ import org.apache.commons.lang3.mutable.MutableInt;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.compress.ModifiableSlice;
 import org.neo4j.gds.core.Aggregation;
-import org.neo4j.gds.core.compression.MemoryInfo;
 import org.neo4j.gds.core.compression.common.MemoryTracker;
 import org.neo4j.gds.collections.ha.HugeIntArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.memory.info.MemoryInfo;
 
 import java.util.stream.LongStream;
 

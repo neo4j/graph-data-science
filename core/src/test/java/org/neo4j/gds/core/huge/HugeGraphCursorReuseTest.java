@@ -24,10 +24,10 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.AdjacencyCursor;
 import org.neo4j.gds.api.AdjacencyList;
 import org.neo4j.gds.api.ImmutableTopology;
-import org.neo4j.gds.core.compression.MemoryInfo;
 import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.beta.generator.RandomGraphGenerator;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
+import org.neo4j.gds.memory.info.MemoryInfo;
 
 import java.util.concurrent.atomic.LongAdder;
 

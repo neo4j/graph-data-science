@@ -20,7 +20,7 @@
 package org.neo4j.gds.api;
 
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.core.compression.MemoryInfo;
+import org.neo4j.gds.memory.info.MemoryInfo;
 
 /**
  * The adjacency list for a mono-partite graph with an optional single relationship property.

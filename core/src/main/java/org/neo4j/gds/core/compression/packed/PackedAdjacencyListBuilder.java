@@ -24,11 +24,11 @@ import org.neo4j.gds.api.compress.AdjacencyListBuilder;
 import org.neo4j.gds.api.compress.ModifiableSlice;
 import org.neo4j.gds.collections.ha.HugeIntArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
-import org.neo4j.gds.core.compression.MemoryInfo;
 import org.neo4j.gds.core.compression.MemoryInfoUtil;
 import org.neo4j.gds.core.compression.common.BumpAllocator;
 import org.neo4j.gds.core.compression.common.MemoryTracker;
 import org.neo4j.gds.mem.MemoryUsage;
+import org.neo4j.gds.memory.info.MemoryInfo;
 import org.neo4j.internal.unsafe.UnsafeUtil;
 import org.neo4j.memory.EmptyMemoryTracker;
 
@@ -106,7 +106,7 @@ public final class PackedAdjacencyListBuilder implements AdjacencyListBuilder<Ad
         }
     }
 
-    static final class Allocator implements AdjacencyListBuilder.Allocator<Address> {
+    public static final class Allocator implements AdjacencyListBuilder.Allocator<Address> {
 
         private final BumpAllocator.LocalAllocator<Address> allocator;
         private final MemoryTracker memoryTracker;

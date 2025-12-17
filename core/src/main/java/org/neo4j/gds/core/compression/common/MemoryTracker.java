@@ -20,6 +20,7 @@
 package org.neo4j.gds.core.compression.common;
 
 import org.HdrHistogram.ConcurrentHistogram;
+import org.neo4j.gds.histogram.ImmutableHistogram;
 import org.neo4j.gds.utils.AutoCloseableThreadLocal;
 import org.neo4j.gds.utils.GdsFeatureToggles;
 

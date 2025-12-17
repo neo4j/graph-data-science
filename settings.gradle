@@ -162,6 +162,9 @@ project(':graph-projection-api').projectDir = file('graph-projection-api')
 include('graph-schema-api')
 project(':graph-schema-api').projectDir = file('graph-schema-api')
 
+include('histogram')
+project(':histogram').projectDir = file('histogram')
+
 include 'io-core'
 project(':io-core').projectDir = file('io/core')
 
@@ -182,6 +185,9 @@ project(':proc-machine-learning').projectDir = file('proc/machine-learning')
 
 include('memory-estimation')
 project(':memory-estimation').projectDir = file('memory-estimation')
+
+include('memory-info')
+project(':memory-info').projectDir = file('memory-info')
 
 include('memory-usage')
 project(':memory-usage').projectDir = file('memory-usage')
