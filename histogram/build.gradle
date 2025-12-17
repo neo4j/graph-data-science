@@ -32,4 +32,6 @@ dependencies {
     testImplementation openGds.junit5.jupiter.engine
     testImplementation openGds.junit5.jupiter.params
     testImplementation platform(openGds.junit5bom)
+
+    testRuntimeOnly openGds.bundles.test.platforms
 }
