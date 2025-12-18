@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.compression.packed;
+package org.neo4j.gds.memory.access;
 
 import org.neo4j.internal.unsafe.UnsafeUtil;
 import org.neo4j.memory.EmptyMemoryTracker;
@@ -79,7 +79,7 @@ public final class Address {
         return address;
     }
 
-    long bytes() {
+    public long bytes() {
         return this.bytes;
     }
 

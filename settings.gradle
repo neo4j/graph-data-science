@@ -183,6 +183,9 @@ project(':neo4j-integration-tools').projectDir = file('neo4j-integration-tools')
 include('proc-machine-learning')
 project(':proc-machine-learning').projectDir = file('proc/machine-learning')
 
+include('memory-access')
+project(':memory-access').projectDir = file('memory-access')
+
 include('memory-estimation')
 project(':memory-estimation').projectDir = file('memory-estimation')
 

@@ -28,6 +28,7 @@ import org.neo4j.gds.core.compression.MemoryInfoUtil;
 import org.neo4j.gds.core.compression.common.BumpAllocator;
 import org.neo4j.gds.core.compression.common.MemoryTracker;
 import org.neo4j.gds.mem.MemoryUsage;
+import org.neo4j.gds.memory.access.Address;
 import org.neo4j.gds.memory.info.MemoryInfo;
 import org.neo4j.internal.unsafe.UnsafeUtil;
 import org.neo4j.memory.EmptyMemoryTracker;

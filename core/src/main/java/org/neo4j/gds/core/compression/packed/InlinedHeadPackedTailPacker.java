@@ -26,6 +26,7 @@ import org.neo4j.gds.core.compression.common.AdjacencyCompression;
 import org.neo4j.gds.core.compression.common.MemoryTracker;
 import org.neo4j.gds.core.compression.common.VarLongEncoding;
 import org.neo4j.gds.mem.BitUtil;
+import org.neo4j.gds.memory.access.Address;
 import org.neo4j.internal.unsafe.UnsafeUtil;
 
 import java.util.Arrays;

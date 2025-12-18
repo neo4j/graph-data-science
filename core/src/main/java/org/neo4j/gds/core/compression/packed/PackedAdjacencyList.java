@@ -25,6 +25,7 @@ import org.neo4j.gds.api.AdjacencyCursor;
 import org.neo4j.gds.api.AdjacencyList;
 import org.neo4j.gds.collections.ha.HugeIntArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.memory.access.Address;
 import org.neo4j.gds.memory.info.MemoryInfo;
 import org.neo4j.gds.utils.GdsFeatureToggles;
 

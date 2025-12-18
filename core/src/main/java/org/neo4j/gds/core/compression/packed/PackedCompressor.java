@@ -35,6 +35,7 @@ import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.compression.common.AbstractAdjacencyCompressorFactory;
 import org.neo4j.gds.core.compression.common.AdjacencyCompression;
 import org.neo4j.gds.core.compression.common.MemoryTracker;
+import org.neo4j.gds.memory.access.Address;
 import org.neo4j.gds.utils.GdsFeatureToggles;
 
 import java.util.Arrays;

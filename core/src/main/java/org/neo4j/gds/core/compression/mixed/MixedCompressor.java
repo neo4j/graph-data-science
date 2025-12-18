@@ -31,7 +31,7 @@ import org.neo4j.gds.collections.ha.HugeIntArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.compression.common.MemoryTracker;
-import org.neo4j.gds.core.compression.packed.Address;
+import org.neo4j.gds.memory.access.Address;
 import org.neo4j.gds.core.compression.packed.AdjacencyPacking;
 import org.neo4j.gds.core.compression.packed.PackedCompressor;
 import org.neo4j.gds.core.compression.varlong.DeltaVarLongCompressor;

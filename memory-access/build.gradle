@@ -17,13 +17,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.compression.mixed;
 
-import org.neo4j.gds.core.compression.packed.Address;
+apply plugin: 'java-library'
 
-public interface MixedPageVisitor<R, P> {
+description = 'Neo4j Graph Data Science :: Memory Access'
 
-    R visitAddress(Address address, P param);
+group = 'org.neo4j.gds'
 
-    R visitBytes(byte[] bytes, P param);
+dependencies {
+    compileOnly(neo4j.common) { transitive = false }
+    compileOnly(neo4j.unsafe) { transitive = false }
 }

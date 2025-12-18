@@ -25,6 +25,7 @@ import org.neo4j.gds.api.compress.AdjacencyListBuilder;
 import org.neo4j.gds.api.compress.ModifiableSlice;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.compression.common.MemoryTracker;
+import org.neo4j.gds.memory.access.Address;
 import org.neo4j.gds.utils.GdsFeatureToggles;
 import org.neo4j.internal.unsafe.UnsafeUtil;
 import org.neo4j.memory.EmptyMemoryTracker;

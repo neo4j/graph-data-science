@@ -23,6 +23,7 @@ import org.neo4j.gds.api.compress.AdjacencyListBuilderFactory;
 import org.neo4j.gds.core.compression.common.MemoryTracker;
 import org.neo4j.gds.core.compression.uncompressed.UncompressedAdjacencyList;
 import org.neo4j.gds.core.compression.uncompressed.UncompressedAdjacencyListBuilder;
+import org.neo4j.gds.memory.access.Address;
 
 public final class PackedAdjacencyListBuilderFactory implements AdjacencyListBuilderFactory<Address, PackedAdjacencyList, long[], UncompressedAdjacencyList> {
 
