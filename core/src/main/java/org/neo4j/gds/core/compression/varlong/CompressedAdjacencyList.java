@@ -27,7 +27,6 @@ import org.neo4j.gds.api.AdjacencyList;
 import org.neo4j.gds.collections.PageUtil;
 import org.neo4j.gds.collections.ha.HugeIntArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
-import org.neo4j.gds.core.compression.MemoryInfo;
 import org.neo4j.gds.core.compression.common.BumpAllocator;
 import org.neo4j.gds.core.loading.MutableIntValue;
 import org.neo4j.gds.mem.Estimate;
