@@ -22,7 +22,7 @@ package org.neo4j.gds.maxflow;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.concurrency.Concurrency;
 
-class GapFactory {
+final class GapFactory {
 
     private GapFactory() {}
 
