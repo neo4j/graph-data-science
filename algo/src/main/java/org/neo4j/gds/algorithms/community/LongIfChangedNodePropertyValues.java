@@ -35,7 +35,7 @@ public final class LongIfChangedNodePropertyValues implements LongNodePropertyVa
 
     public static LongNodePropertyValues of(NodeProperty seedProperty, LongNodePropertyValues newProperties) {
         var propertyState = seedProperty.propertyState();
-        if (propertyState == PropertyState.PERSISTENT) {
+        if (propertyState == PropertyState.PERSISTENT || propertyState == PropertyState.REMOTE) {
             NodePropertyValues seedProperties = seedProperty.values();
             // TODO forbid doubles once we load properties with their correct type
             if (seedProperties.valueType() == ValueType.LONG || seedProperties.valueType() == ValueType.DOUBLE) {
