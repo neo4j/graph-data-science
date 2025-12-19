@@ -25,16 +25,17 @@ import org.neo4j.gds.maxflow.Relationships;
 public class CostRelationships implements Relationships {
 
     private final Relationships defaultRelationships;
-    private final HugeDoubleArray originalCost;
+    private final HugeDoubleArray cost;
     private final long originalGraphRelationshipCount;
+    private long maxIndex = -1;
 
     CostRelationships(
         Relationships defaultRelationships,
-        HugeDoubleArray originalCost,
+        HugeDoubleArray cost,
         long originalGraphRelationshipCount
     ) {
         this.defaultRelationships = defaultRelationships;
-        this.originalCost = originalCost;
+        this.cost = cost;
         this.originalGraphRelationshipCount = originalGraphRelationshipCount;
     }
 
@@ -53,14 +54,19 @@ public class CostRelationships implements Relationships {
          defaultRelationships.push(index,delta);
     }
 
-    double originalCost(long index){
-        return  index < originalGraphRelationshipCount ? originalCost.get(index) : 0;
+    double cost(long index){
+        return  index < originalGraphRelationshipCount ? cost.get(index) : 0;
     }
 
     double maximalUnitCost() {
+        if (maxIndex!=-1) return cost.get(maxIndex);
         var max = Double.NEGATIVE_INFINITY; //fixme
-        for (long r = 0; r < originalCost.size(); r++) {
-            max = Math.max(max, originalCost.get(r));
+        for (long r = 0; r < cost.size(); r++) {
+            double rCost = cost.get(r);
+            if (max < rCost){
+                maxIndex=r;
+                max = rCost;
+            }
         }
         return max;
     }

@@ -17,34 +17,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.mcmf;
+package org.neo4j.gds.maxflow;
 
-import org.neo4j.gds.maxflow.MaxFlowFunctions;
+public final class MaxFlowFunctions {
 
-public final class MinCostFunctions {
+    public static final double TOLERANCE = 1e-6;
 
-    private MinCostFunctions() {}
-
-    static  double reducedCost(double cost, double sPrize, double tPrize){
-        return  cost + sPrize - tPrize;
-    }
-
-    static boolean isAdmissible(double reducedCost){
-        return treatAsNegative(reducedCost);
-    }
+    private MaxFlowFunctions() {}
 
     public  static boolean isResidualEdge(double residualCapacity){
-        return  MaxFlowFunctions.isResidualEdge(residualCapacity);
+        return residualCapacity > TOLERANCE;
     }
 
-    static boolean treatAsPositive(double value){
-        return MaxFlowFunctions.treatAsPositive(value);
+    public static final int TERMINATION_BOUND = 10_000;
+
+    public static boolean treatAsPositive(double value){
+        return value > TOLERANCE;
     }
-    static boolean treatAsZero(double value){
-        return MaxFlowFunctions.treatAsNonPositive(value);
-    }
-    static  boolean treatAsNegative(double value){
-        return value < -MaxFlowFunctions.TOLERANCE;
+    public static boolean treatAsNonPositive(double value){
+        return value < TOLERANCE;
     }
 
 }

@@ -27,7 +27,6 @@ import org.neo4j.gds.core.utils.paged.HugeLongArrayQueue;
 import org.neo4j.gds.core.utils.queue.HugeLongPriorityQueue;
 import org.neo4j.gds.termination.TerminationFlag;
 
-import static org.neo4j.gds.mcmf.MinCostFunctions.TOLERANCE;
 import static org.neo4j.gds.mcmf.MinCostFunctions.isAdmissible;
 import static org.neo4j.gds.mcmf.MinCostFunctions.isResidualEdge;
 import static org.neo4j.gds.mcmf.MinCostFunctions.reducedCost;
@@ -62,9 +61,10 @@ import static org.neo4j.gds.mcmf.MinCostFunctions.reducedCost;
 
         var activeNodesNotFound = new MutableLong(0);
         for (long v = 0; v < costFlowGraph.nodeCount(); v++) {
-            if (excess.get(v) < -TOLERANCE) {
+            var vExcess = excess.get(v);
+            if (MinCostFunctions.treatAsNegative(vExcess)) {
                 addToFrontier(v);
-            } else if (excess.get(v) > TOLERANCE) {
+            } else if (MinCostFunctions.treatAsPositive(vExcess)) {
                 activeNodesNotFound.increment();
             }
         }
@@ -105,7 +105,7 @@ import static org.neo4j.gds.mcmf.MinCostFunctions.reducedCost;
                 return epsilonOffset;
             }
         }
-        throw new RuntimeException("Should never be empty");
+        throw new RuntimeException("Priority queue of active nodes should never be empty");
 
     }
      void addToFrontier(long node){
@@ -120,7 +120,7 @@ import static org.neo4j.gds.mcmf.MinCostFunctions.reducedCost;
     }
 
     private void checkIfActiveNode(long node, MutableLong activeNodesNotFound){
-        if (excess.get(node) > TOLERANCE) {
+        if (MinCostFunctions.treatAsPositive(excess.get(node))) {
             activeNodesNotFound.decrement();
         }
     }
@@ -132,7 +132,7 @@ import static org.neo4j.gds.mcmf.MinCostFunctions.reducedCost;
                 if (nodeInSet.get(t) || !isResidualEdge(reverseResidualCapacity)) return true;
                 //let us consider the updated prize for t
                 var actualPrize = prize.get(t) - offset * epsilon;
-                var reverseReducedCost = reducedCost(-cost,actualPrize,prize.get(s));
+                var reverseReducedCost = reducedCost(-cost, actualPrize,prize.get(s));
                 if (isAdmissible(reverseReducedCost)) {
                     if (!nodeInSet.get(t)) {
                         addToFrontier(t);

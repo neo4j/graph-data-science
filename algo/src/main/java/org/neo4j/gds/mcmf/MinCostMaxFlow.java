@@ -33,8 +33,9 @@ import org.neo4j.gds.maxflow.NodeWithValue;
 import org.neo4j.gds.maxflow.SupplyAndDemandFactory;
 import org.neo4j.gds.termination.TerminationFlag;
 
-import static org.neo4j.gds.mcmf.MinCostFunctions.TOLERANCE;
+import static org.neo4j.gds.maxflow.MaxFlowFunctions.TOLERANCE;
 import static org.neo4j.gds.mcmf.MinCostFunctions.isAdmissible;
+import static org.neo4j.gds.mcmf.MinCostFunctions.isResidualEdge;
 
 public final class MinCostMaxFlow extends Algorithm<CostFlowResult> {
     private final Graph graphOfFlows;
@@ -111,14 +112,12 @@ public final class MinCostMaxFlow extends Algorithm<CostFlowResult> {
         //
         var  excess = HugeDoubleArray.newArray(costFlowGraph.nodeCount());
         computeMaxFlow(costFlowGraph,excess);
-
         var prize = HugeDoubleArray.newArray(costFlowGraph.nodeCount());
         prize.setAll(x -> 0D);
         var workingQueue = HugeLongArrayQueue.newQueue(costFlowGraph.nodeCount());
         var inWorkingQueue = new BitSet(costFlowGraph.nodeCount());
-
-        var SMALLEST_ALLOWED_EPSILON = 1D/costFlowGraph.nodeCount();
-
+       // costFlowGraph.scaleCosts();
+        var SMALLEST_ALLOWED_EPSILON = Math.max(TOLERANCE,1.0/costFlowGraph.nodeCount());
         var epsilon = costFlowGraph.maximalUnitCost();
         var discharging = new CostDischarging(
             costFlowGraph,
@@ -132,7 +131,7 @@ public final class MinCostMaxFlow extends Algorithm<CostFlowResult> {
             terminationFlag
         );
 
-        progressTracker.beginSubTask();;
+        progressTracker.beginSubTask();
         do {
             terminationFlag.assertRunning();
             progressTracker.beginSubTask();
@@ -177,7 +176,7 @@ public final class MinCostMaxFlow extends Algorithm<CostFlowResult> {
             costFlowGraph.forEachRelationship(node, (s, t, relIdx, residualCapacity, cost, isReverse) -> {
                 //if reduced cost is negative then saturate
                 var reducedCost = MinCostFunctions.reducedCost(cost, prize.get(s), prize.get(t));
-                if (isAdmissible(reducedCost)) {
+                if (isAdmissible(reducedCost) && isResidualEdge(residualCapacity)) {
                     var delta = residualCapacity;
                     costFlowGraph.push(relIdx, delta, isReverse);
                     excess.addTo(s, -delta);
@@ -187,7 +186,7 @@ public final class MinCostMaxFlow extends Algorithm<CostFlowResult> {
             });
         }
         for(var node = 0; node < costFlowGraph.nodeCount(); node++){
-            if (excess.get(node) > TOLERANCE) {
+            if (MinCostFunctions.treatAsPositive(excess.get(node))) {
                 workingQueue.add(node);
                 inWorkingQueue.set(node);
             }

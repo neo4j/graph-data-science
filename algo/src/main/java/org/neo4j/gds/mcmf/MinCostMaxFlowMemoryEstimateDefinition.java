@@ -46,7 +46,6 @@ public class MinCostMaxFlowMemoryEstimateDefinition implements MemoryEstimateDef
         this.maxFlowMemoryEstimateDefinition = new MaxFlowMemoryEstimateDefinition(numberOfSinks, numberOfTerminals, true);
     }
 
-
     private MemoryEstimation globalRelabelling() {
         return MemoryEstimations.builder(GlobalRelabeling.class)
             .perNode("frontier", HugeLongArrayQueue::memoryEstimation)

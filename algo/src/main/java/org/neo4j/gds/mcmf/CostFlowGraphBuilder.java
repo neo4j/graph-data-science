@@ -116,6 +116,7 @@ public class CostFlowGraphBuilder extends FlowGraphBuilder {
 
         setUpCapacities();
         setUpCosts();
+        var newNodeCount = costGraph.nodeCount() + nodeConstraintsIdMap.numberOfCapacityNodes() + 2;
         return new CostFlowGraph(
             capacityGraph,
             outRelationshipIndexOffset,

@@ -28,10 +28,10 @@ import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArrayQueue;
 import org.neo4j.gds.termination.TerminationFlag;
 
-import static org.neo4j.gds.mcmf.MinCostFunctions.TERMINATION_BOUND;
-import static org.neo4j.gds.mcmf.MinCostFunctions.TOLERANCE;
+import static org.neo4j.gds.maxflow.MaxFlowFunctions.TERMINATION_BOUND;
 import static org.neo4j.gds.mcmf.MinCostFunctions.isAdmissible;
 import static org.neo4j.gds.mcmf.MinCostFunctions.isResidualEdge;
+import static org.neo4j.gds.mcmf.MinCostFunctions.treatAsPositive;
 
 public class CostDischarging {
     private static final long ALPHA = 6;
@@ -86,6 +86,7 @@ public class CostDischarging {
                 terminationCheckingSteps=0;
                 terminationFlag.assertRunning();
             }
+
             if (workSinceLastGR > relabelNumber) {
                 globalRelabelling.relabellingWithPriorityQueue(epsilon);
                 workSinceLastGR = 0;
@@ -98,6 +99,9 @@ public class CostDischarging {
     }
 
     void dischargeSorted(long v) {
+        if (MinCostFunctions.treatAsZero(excess.get(v))) {
+            return;
+        }
         var k = sortNeighborhood(v);
 
         for (var i = 0; i < k; i++) {
@@ -159,15 +163,17 @@ public class CostDischarging {
     boolean pushAndCheckIfEmptied(long s, long t, long r, double residualCapacity, boolean isReverse) {
         var delta = Math.min(excess.get(s), residualCapacity);
         costFlowGraph.push(r, delta, isReverse);
-        excess.addTo(s, -delta);
-        excess.addTo(t, delta);
-
-        if (excess.get(t) > TOLERANCE) {
-            if (!inWorkingQueue.getAndSet(t)) {
-                workingQueue.add(t);
+        if (treatAsPositive(delta)) {
+            excess.addTo(s, -delta);
+            excess.addTo(t, delta);
+            var tExcess = excess.get(t);
+            if (MinCostFunctions.treatAsPositive(tExcess) && !inWorkingQueue.getAndSet(t)) {
+                    workingQueue.add(t);
             }
+            return MinCostFunctions.treatAsZero(excess.get(s));
+        }else{
+            return false;
         }
-        return excess.get(s) < TOLERANCE;
     }
 
     public record Arc(long t, long relIdx, double residualCapacity, double almostReducedCost, boolean isReverse) implements

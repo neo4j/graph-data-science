@@ -30,7 +30,6 @@ class GlobalRelabellingBFSTask implements Runnable {
     private final HugeAtomicBitSet verticesIsDiscovered;
     private final HugeLongArray label;
     private final long batchSize;
-    private final long LOCAL_QUEUE_BOUND = 128L;
     private Phase phase;
 
     GlobalRelabellingBFSTask(
@@ -63,7 +62,7 @@ class GlobalRelabellingBFSTask implements Runnable {
         flowGraph.forEachRelationship(
             v, (s, t, relIdx, residualCapacity, isReverse) -> {
                 //(s)-->(t) //want t-->s to have free capacity. (can push from t to s)
-                if (flowGraph.reverseResidualCapacity(relIdx, isReverse) <= 0.0) {
+                if (MaxFlowFunctions.treatAsNonPositive(flowGraph.reverseResidualCapacity(relIdx, isReverse))) {
                     return true;
                 }
                 if (!verticesIsDiscovered.getAndSet(t)) {
@@ -83,6 +82,7 @@ class GlobalRelabellingBFSTask implements Runnable {
         }
 
         //do some local processing if the localQueue is small enough
+        long LOCAL_QUEUE_BOUND = 128L;
         while (!localDiscoveredVertices.isEmpty() && localDiscoveredVertices.size() < LOCAL_QUEUE_BOUND) {
             long nodeId = localDiscoveredVertices.remove();
             singleTraverse(nodeId);

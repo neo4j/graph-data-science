@@ -27,7 +27,10 @@ import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArrayQueue;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.mcmf.MinCostFunctions;
 import org.neo4j.gds.termination.TerminationFlag;
+
+import static org.neo4j.gds.maxflow.MaxFlowFunctions.TERMINATION_BOUND;
 
 class SequentialDischarging {
     private static final long ALPHA = 6;
@@ -90,7 +93,7 @@ class SequentialDischarging {
         gapDetector.resetCounts();
         int terminationCheckingSteps=0;
         while (!workingQueue.isEmpty()) {
-            if (++terminationCheckingSteps == 5_000){
+            if (++terminationCheckingSteps == TERMINATION_BOUND){
                 terminationCheckingSteps=0;
                 terminationFlag.assertRunning();
             }
@@ -105,12 +108,12 @@ class SequentialDischarging {
         }
     }
 
-    int sortAndPush(long v, long vLabel) {
+    private int sortAndPush(long v, long vLabel) {
         var p = new MutableDouble(0);
         var k = new MutableInt(0);
         return flowGraph.forEachRelationship(
             v, (s, t, relIdx, residualCapacity, isReverse) -> {
-                if (residualCapacity > 0) {
+                if (MinCostFunctions.isResidualEdge(residualCapacity)) {
                     var tLabel = label.get(t);
                     if (tLabel == (vLabel - 1)) {
                         return !pushAndCheckIfEmpty(s, t, relIdx, residualCapacity, isReverse);
@@ -188,17 +191,21 @@ class SequentialDischarging {
     private boolean pushAndCheckIfEmpty(long s, long t, long relIdx, double residualCapacity, boolean isReverse) {
         var delta = Math.min(excess.get(s), residualCapacity);
         flowGraph.push(relIdx, delta, isReverse);
-        excess.addTo(s, -delta);
-        excess.addTo(t, delta);
-        if (label.get(t) == 0) {
-            progressTracker.logProgress((long) (Math.ceil((excessAtDestinations + delta) * progressTracker.currentVolume() / totalExcess) - Math.ceil(
-                excessAtDestinations * progressTracker.currentVolume() / totalExcess)));
-            excessAtDestinations += delta;
-        } else if (!inWorkingQueue.getAndSet(t)) {
-            workingQueue.add(t);
-        }
+        if (delta > TOLERANCE) {
+            excess.addTo(s, -delta);
+            excess.addTo(t, delta);
+            if (label.get(t) == 0) {
+                progressTracker.logProgress((long) (Math.ceil((excessAtDestinations + delta) * progressTracker.currentVolume() / totalExcess) - Math.ceil(
+                    excessAtDestinations * progressTracker.currentVolume() / totalExcess)));
+                excessAtDestinations += delta;
+            } else if (!inWorkingQueue.getAndSet(t)) {
+                workingQueue.add(t);
+            }
 
-        return excess.get(s) < TOLERANCE; //empties
+            return excess.get(s) < TOLERANCE; //empties
+        }{
+            return false;
+        }
     }
 
 

@@ -24,6 +24,7 @@ import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArrayQueue;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.mcmf.MinCostFunctions;
 import org.neo4j.gds.termination.TerminationFlag;
 
 public class MaxFlowPhase {
@@ -51,8 +52,10 @@ public class MaxFlowPhase {
     private void initPreflow() {
         flowGraph.forEachRelationship(
             flowGraph.superSource(), (s, t, relIdx, residualCapacity, isReverse) -> {
-                flowGraph.push(relIdx, residualCapacity, isReverse);
-                excess.set(t, residualCapacity);
+                if (MinCostFunctions.isResidualEdge(residualCapacity)) {
+                    flowGraph.push(relIdx, residualCapacity, isReverse);
+                    excess.set(t, residualCapacity);
+                }
                 return true;
             }
         );
@@ -74,7 +77,7 @@ public class MaxFlowPhase {
         var totalExcess = 0D;
         for (var nodeId = 0; nodeId < flowGraph.nodeCount(); nodeId++) {
             if (nodeId == flowGraph.superSource() || nodeId == flowGraph.superTarget()) continue;
-            if (excess.get(nodeId) > 0.0) {
+            if (MaxFlowFunctions.treatAsPositive(excess.get(nodeId))) {
                 workingQueue.add(nodeId);
                 inWorkingQueue.set(nodeId);
                 totalExcess += excess.get(nodeId);

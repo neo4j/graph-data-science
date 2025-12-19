@@ -232,7 +232,7 @@ public class FlowGraph {
                 0D,
                 (s, t, _capacity) -> {
                     var flow_ = relationships.flow(relIdx.longValue());
-                    if (flow_ > 0.0) {
+                    if (MaxFlowFunctions.treatAsPositive(flow_) ) {
                         var flowRelationship = new FlowRelationship(s, t, flow_);
                         flow.set(idx.getAndIncrement(), flowRelationship);
                     }
@@ -249,7 +249,9 @@ public class FlowGraph {
                 var fakeFlowFromSuperTarget = relationships.flow(relIdx);
                 var actualFlowFromSuperTarget = fakeFlowFromSuperTarget - relationships.originalCapacity(relIdx);
                 var actualFlowToSuperTarget = -actualFlowFromSuperTarget;
-                totalFlow.add(actualFlowToSuperTarget);
+                if (MaxFlowFunctions.treatAsPositive(actualFlowToSuperTarget) ) {
+                    totalFlow.add(actualFlowToSuperTarget);
+                }
                 return true;
             }
         );

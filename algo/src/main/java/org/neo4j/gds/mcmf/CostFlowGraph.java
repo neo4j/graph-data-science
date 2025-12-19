@@ -70,7 +70,7 @@ public final class CostFlowGraph extends FlowGraph {
             t,
             relIdx,
             residualCapacity,
-            costRelationships.originalCost(relIdx),
+            costRelationships.cost(relIdx),
             isReverse
         );
         return  forEachOriginalRelationship(nodeId,adaptedConsumer);
@@ -83,7 +83,7 @@ public final class CostFlowGraph extends FlowGraph {
             t,
             relIdx,
             residualCapacity,
-            -costRelationships.originalCost(relIdx),
+            -costRelationships.cost(relIdx),
             isReverse
        );
 
@@ -112,10 +112,10 @@ public final class CostFlowGraph extends FlowGraph {
                     var flow_ = relationships.flow(relIdx.longValue());
                     assert(flow_ >= 0.0);
 
-                    if (flow_ > 0.0) {
+                    if (MinCostFunctions.treatAsPositive(flow_)) {
                         var flowRelationship = new FlowRelationship(s, t, flow_);
                         flow.set(idx.getAndIncrement(), flowRelationship);
-                        double operand = flow_ * costRelationships.originalCost(relIdx.longValue());
+                        double operand = flow_ * costRelationships.cost(relIdx.longValue());
                         totalCost.add(operand);
 
                     }
@@ -131,7 +131,9 @@ public final class CostFlowGraph extends FlowGraph {
                 var fakeFlowFromSuperTarget = relationships.flow(relIdx);
                 var actualFlowFromSuperTarget = fakeFlowFromSuperTarget - costRelationships.originalCapacity(relIdx);
                 var actualFlowToSuperTarget = -actualFlowFromSuperTarget;
-                totalFlow.add(actualFlowToSuperTarget);
+                if (MinCostFunctions.treatAsPositive(actualFlowToSuperTarget)) {
+                    totalFlow.add(actualFlowToSuperTarget);
+                }
                 return true;
             }
         );
@@ -149,4 +151,5 @@ public final class CostFlowGraph extends FlowGraph {
         }
         return max;
     }
+
 }
