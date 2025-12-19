@@ -21,11 +21,11 @@ package org.neo4j.gds.legacycypherprojection;
 
 import org.neo4j.common.DependencyResolver;
 import org.neo4j.gds.api.GraphLoaderContext;
-import org.neo4j.gds.api.GraphStoreFactory;
+import org.neo4j.gds.api.GraphStoreFactorySupplier;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.GraphDimensions;
 
-public class CypherProjectionGraphStoreFactorySupplier implements GraphStoreFactory.Supplier {
+public class CypherProjectionGraphStoreFactorySupplier implements GraphStoreFactorySupplier {
     private final GraphProjectFromCypherConfig graphProjectFromCypherConfig;
 
     private CypherProjectionGraphStoreFactorySupplier(GraphProjectFromCypherConfig graphProjectFromCypherConfig) {

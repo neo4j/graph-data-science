@@ -21,18 +21,18 @@ package org.neo4j.gds.projection;
 
 import org.neo4j.common.DependencyResolver;
 import org.neo4j.gds.api.GraphLoaderContext;
-import org.neo4j.gds.api.GraphStoreFactory;
+import org.neo4j.gds.api.GraphStoreFactorySupplier;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.GraphDimensions;
 
-public final class NativeProjectionGraphStoreFactorySupplier implements GraphStoreFactory.Supplier {
+public final class NativeProjectionGraphStoreFactorySupplier implements GraphStoreFactorySupplier {
     private final GraphProjectFromStoreConfig graphProjectFromStoreConfig;
 
     private NativeProjectionGraphStoreFactorySupplier(GraphProjectFromStoreConfig graphProjectFromStoreConfig) {
         this.graphProjectFromStoreConfig = graphProjectFromStoreConfig;
     }
 
-    public static GraphStoreFactory.Supplier create(GraphProjectConfig graphProjectConfig) {
+    public static GraphStoreFactorySupplier create(GraphProjectConfig graphProjectConfig) {
         if (graphProjectConfig instanceof GraphProjectFromStoreConfig graphProjectFromStoreConfig)
             return new NativeProjectionGraphStoreFactorySupplier(graphProjectFromStoreConfig);
 

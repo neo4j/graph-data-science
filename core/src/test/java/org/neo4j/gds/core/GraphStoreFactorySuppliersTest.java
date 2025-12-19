@@ -20,7 +20,7 @@
 package org.neo4j.gds.core;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.api.GraphStoreFactory;
+import org.neo4j.gds.api.GraphStoreFactorySupplier;
 import org.neo4j.gds.config.GraphProjectConfig;
 
 import java.util.Collections;
@@ -33,7 +33,7 @@ import static org.mockito.Mockito.mock;
 class GraphStoreFactorySuppliersTest {
     @Test
     void shouldSupplyGraphStoreFactory() {
-        var supplier = mock(GraphStoreFactory.Supplier.class);
+        var supplier = mock(GraphStoreFactorySupplier.class);
         var suppliers = new GraphStoreFactorySuppliers(Map.of(SomeGraphProjectConfig.class, cfg -> supplier));
 
         var actual = suppliers.find(new SomeGraphProjectConfig());
@@ -43,7 +43,7 @@ class GraphStoreFactorySuppliersTest {
 
     @Test
     void shouldSupplyGraphStoreFactoryEvenForSubClasses() {
-        var supplier = mock(GraphStoreFactory.Supplier.class);
+        var supplier = mock(GraphStoreFactorySupplier.class);
         var suppliers = new GraphStoreFactorySuppliers(Map.of(GraphProjectConfig.class, cfg -> supplier));
 
         var actual = suppliers.find(new SomeGraphProjectConfig());

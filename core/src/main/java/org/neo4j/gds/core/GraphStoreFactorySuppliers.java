@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.core;
 
-import org.neo4j.gds.api.GraphStoreFactory;
+import org.neo4j.gds.api.GraphStoreFactorySupplier;
 import org.neo4j.gds.config.GraphProjectConfig;
 
 import java.util.Map;
@@ -29,9 +29,9 @@ import java.util.function.Function;
  * This is where you load up your GraphStoreFactorySuppliers. And you access them using a key.
  */
 public class GraphStoreFactorySuppliers {
-    private final Map<Class<?>, Function<GraphProjectConfig, GraphStoreFactory.Supplier>> suppliers;
+    private final Map<Class<?>, Function<GraphProjectConfig, GraphStoreFactorySupplier>> suppliers;
 
-    public GraphStoreFactorySuppliers(Map<Class<?>, Function<GraphProjectConfig, GraphStoreFactory.Supplier>> suppliers) {
+    public GraphStoreFactorySuppliers(Map<Class<?>, Function<GraphProjectConfig, GraphStoreFactorySupplier>> suppliers) {
         this.suppliers = suppliers;
     }
 
@@ -40,7 +40,7 @@ public class GraphStoreFactorySuppliers {
      * @return the stub needed to obtain a {@link org.neo4j.gds.api.GraphStoreFactory}
      * @throws java.lang.IllegalArgumentException if no supplier matches the given key
      */
-    public GraphStoreFactory.Supplier find(GraphProjectConfig configuration) {
+    public GraphStoreFactorySupplier find(GraphProjectConfig configuration) {
         var first = suppliers.entrySet().stream()
             .filter(e -> e.getKey().isAssignableFrom(configuration.getClass()))
             .findFirst();

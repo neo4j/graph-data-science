@@ -22,7 +22,7 @@ package org.neo4j.gds.applications.graphstorecatalog;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.GraphStoreFactory;
+import org.neo4j.gds.api.GraphStoreFactorySupplier;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.GraphDimensions;
@@ -39,11 +39,11 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class FictitiousGraphStoreLoader implements GraphStoreCreator {
     private final GraphProjectConfig graphProjectConfig;
-    private final GraphStoreFactory.Supplier graphStoreFactorySupplier;
+    private final GraphStoreFactorySupplier graphStoreFactorySupplier;
 
     public FictitiousGraphStoreLoader(
         GraphProjectConfig graphProjectConfig,
-        GraphStoreFactory.Supplier graphStoreFactorySupplier
+        GraphStoreFactorySupplier graphStoreFactorySupplier
     ) {
         this.graphProjectConfig = graphProjectConfig;
         this.graphStoreFactorySupplier = graphStoreFactorySupplier;
