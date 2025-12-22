@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.maxflow;
 
+import org.apache.commons.lang3.function.TriFunction;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
@@ -36,14 +37,16 @@ import java.util.function.Function;
 
 public class MaxFlowMemoryEstimateDefinition implements MemoryEstimateDefinition {
 
+    private final  boolean useNodeCapacityProperty;
     private final long numberOfSinks;
     private final long numberOfTerminals;
     private final boolean useGap;
 
-    public MaxFlowMemoryEstimateDefinition(long numberOfSinks, long numberOfTerminals, boolean useGap) {
+    public MaxFlowMemoryEstimateDefinition(long numberOfSinks, long numberOfTerminals, boolean useGap, boolean useNodeCapacityProperty) {
         this.numberOfSinks = numberOfSinks;
         this.numberOfTerminals = numberOfTerminals;
         this.useGap = useGap;
+        this.useNodeCapacityProperty = useNodeCapacityProperty;
     }
 
     private MemoryEstimation atomicWorkingSet() {
@@ -70,9 +73,11 @@ public class MaxFlowMemoryEstimateDefinition implements MemoryEstimateDefinition
     }
 
     public MemoryEstimation flowGraph() {
+
+        var considerNodeConstraints = (useNodeCapacityProperty) ? 1 : 0;
         BiFunction<GraphDimensions, Function<Long, Long>, MemoryRange> relConsumer =
             ((graphDimensions, longMemoryRangeFunction) -> {
-                var newRel = graphDimensions.relCountUpperBound() + numberOfSinks + numberOfTerminals;
+                var newRel = graphDimensions.relCountUpperBound() + numberOfSinks + numberOfTerminals + considerNodeConstraints*graphDimensions.nodeCount();
                 return MemoryRange.of(longMemoryRangeFunction.apply(newRel));
             });
         BiFunction<GraphDimensions, Function<Long, Long>, MemoryRange> nodeConsumer =
@@ -85,14 +90,6 @@ public class MaxFlowMemoryEstimateDefinition implements MemoryEstimateDefinition
         return MemoryEstimations.builder(FlowGraph.class)
             .perNode("index offset", HugeLongArray::memoryEstimation)
             .perGraphDimension(
-                "flow",
-                ((dimensions, ___) -> relConsumer.apply(dimensions, HugeDoubleArray::memoryEstimation))
-            )
-            .perGraphDimension(
-                "capacity",
-                ((dimensions, ___) -> relConsumer.apply(dimensions, HugeDoubleArray::memoryEstimation))
-            )
-            .perGraphDimension(
                 "reverse adjacency",
                 ((dimensions, ___) -> relConsumer.apply(dimensions, HugeLongArray::memoryEstimation))
             )
@@ -104,7 +101,35 @@ public class MaxFlowMemoryEstimateDefinition implements MemoryEstimateDefinition
                 "reverse offset",
                 ((dimensions, ___) -> nodeConsumer.apply(dimensions, HugeLongArray::memoryEstimation))
             )
+            .add("relationships",relationships())
+            .add("node constraints",nodeConstraints())
+            .build();
+    }
 
+    public MemoryEstimation relationships(){
+        TriFunction<Boolean,GraphDimensions, Function<Long, Long>, MemoryRange> relConsumer =
+            ((useNodeConstraints,graphDimensions, longMemoryRangeFunction) -> {
+                var newRel = graphDimensions.relCountUpperBound() + numberOfSinks + numberOfTerminals;
+                return MemoryRange.of(longMemoryRangeFunction.apply(newRel));
+            });
+        return MemoryEstimations.builder(Relationships.class)
+             .perGraphDimension(
+                "flow",
+                ((dimensions, ___) -> relConsumer.apply(useNodeCapacityProperty,dimensions, HugeDoubleArray::memoryEstimation))
+            )
+            .perGraphDimension(
+                "capacity",
+                ((dimensions, ___) -> relConsumer.apply(false,dimensions, HugeDoubleArray::memoryEstimation))
+            )
+            .build();
+    }
+
+    public MemoryEstimation nodeConstraints(){
+        if (!useNodeCapacityProperty) return MemoryEstimations.builder(IgnoreNodeConstraints.class).build();
+
+        return MemoryEstimations.builder(NodeConstraintsFromPropertyIdMap.class)
+            .perNode("node map index",HugeLongArray::memoryEstimation)
+            .perNode("reverse map index",HugeLongArray::memoryEstimation)
             .build();
     }
 

@@ -26,6 +26,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArrayQueue;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.maxflow.IgnoreNodeConstraints;
 import org.neo4j.gds.maxflow.MaxFlowPhase;
 import org.neo4j.gds.maxflow.NodeConstraintsFromPropertyIdMap;
 import org.neo4j.gds.maxflow.NodeConstraintsIdMap;
@@ -56,7 +57,7 @@ public final class MinCostMaxFlow extends Algorithm<CostFlowResult> {
         var maxFlowParams = parameters.maxFlowParameters();
         Pair<NodeWithValue[], NodeWithValue[]> supplyAndDemand;
         if (maxFlowParams.nodeCapacityProperty().isEmpty()) {
-            nodeConstraints = new NodeConstraintsIdMap.IgnoreNodeConstraints();
+            nodeConstraints = new IgnoreNodeConstraints();
             supplyAndDemand = SupplyAndDemandFactory.create(graphOfFlows, maxFlowParams.sourceNodes(), maxFlowParams.targetNodes());
         } else {
             var nodePropertyValues = graphOfFlows.nodeProperties(maxFlowParams.nodeCapacityProperty().get());

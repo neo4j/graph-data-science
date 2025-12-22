@@ -40,10 +40,10 @@ public class MinCostMaxFlowMemoryEstimateDefinition implements MemoryEstimateDef
     private final long numberOfTerminals;
     private final MaxFlowMemoryEstimateDefinition maxFlowMemoryEstimateDefinition;
 
-    public MinCostMaxFlowMemoryEstimateDefinition(long numberOfSinks, long numberOfTerminals) {
+    public MinCostMaxFlowMemoryEstimateDefinition(long numberOfSinks, long numberOfTerminals,boolean useNodeConstraints) {
         this.numberOfSinks = numberOfSinks;
         this.numberOfTerminals = numberOfTerminals;
-        this.maxFlowMemoryEstimateDefinition = new MaxFlowMemoryEstimateDefinition(numberOfSinks, numberOfTerminals, true);
+        this.maxFlowMemoryEstimateDefinition = new MaxFlowMemoryEstimateDefinition(numberOfSinks, numberOfTerminals, true,useNodeConstraints);
     }
 
     private MemoryEstimation globalRelabelling() {

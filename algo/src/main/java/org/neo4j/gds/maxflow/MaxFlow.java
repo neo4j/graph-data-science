@@ -41,7 +41,7 @@ public final class MaxFlow extends Algorithm<FlowResult> {
         NodeConstraintsIdMap nodeConstraints;
         Pair<NodeWithValue[],NodeWithValue[]> supplyAndDemand;
         if (parameters.nodeCapacityProperty().isEmpty()){
-            nodeConstraints = new NodeConstraintsIdMap.IgnoreNodeConstraints();
+            nodeConstraints = new IgnoreNodeConstraints();
             supplyAndDemand = SupplyAndDemandFactory.create(graph,parameters.sourceNodes(),parameters.targetNodes());
         }else{
             var nodePropertyValues = graph.nodeProperties(parameters.nodeCapacityProperty().get());

@@ -29,10 +29,10 @@ class MinCostMaxFlowMemoryEstimateDefinitionTest {
     @ParameterizedTest
     @CsvSource(
         {
-            "1_000,     1_000,      295_440",
-            "1_000,     10_000,     1_051_440",
-            "1_000_000, 1_000_000,  293_505_584",
-            "1_000_000, 10_000_000, 1_049_516_568"
+            "1_000,     1_000,      295_472",
+            "1_000,     10_000,     1_051_472",
+            "1_000_000, 1_000_000,  293_505_616",
+            "1_000_000, 10_000_000, 1_049_516_600"
         }
     )
     void shouldEstimateMemoryWithChangingGraphDimensionsCorrectly(
@@ -41,7 +41,7 @@ class MinCostMaxFlowMemoryEstimateDefinitionTest {
         long expected
     ) {
 
-        var memoryEstimate = new MinCostMaxFlowMemoryEstimateDefinition(1, 1).memoryEstimation();
+        var memoryEstimate = new MinCostMaxFlowMemoryEstimateDefinition(1, 1,false).memoryEstimation();
 
         MemoryEstimationAssert.assertThat(memoryEstimate)
             .memoryRange(nodeCount, relationshipCount)
@@ -51,15 +51,15 @@ class MinCostMaxFlowMemoryEstimateDefinitionTest {
     @ParameterizedTest
     @CsvSource(
         {
-            "1_000,   1,  295_440",
-            "1_000,   4,  298_608",
-            "100_000, 1,  29_352_304",
-            "100_000, 4,  29_652_472"
+            "1_000,   1,  295_472",
+            "1_000,   4,  298_616",
+            "100_000, 1,  29_352_336",
+            "100_000, 4,  29_652_480"
         }
     )
     void shouldEstimateMemoryWithChangingConcurrencyCorrectly(long nodeAndRelCount, int concurrency, long expected) {
 
-        var memoryEstimate = new MinCostMaxFlowMemoryEstimateDefinition(1, 1).memoryEstimation();
+        var memoryEstimate = new MinCostMaxFlowMemoryEstimateDefinition(1, 1,false).memoryEstimation();
 
         MemoryEstimationAssert.assertThat(memoryEstimate)
             .memoryRange(nodeAndRelCount, nodeAndRelCount, new Concurrency(concurrency))
@@ -69,10 +69,10 @@ class MinCostMaxFlowMemoryEstimateDefinitionTest {
     @ParameterizedTest
     @CsvSource(
         {
-            "1_000,  1,   1,   295_440",
-            "1_000,  10,  1,   296_016",
-            "1_000,  1,   10,  296_016",
-            "1_000,  10,  10,  296_592"
+            "1_000,  1,   1,   295_472",
+            "1_000,  10,  1,   296_048",
+            "1_000,  1,   10,  296_048",
+            "1_000,  10,  10,  296_624"
 
         }
     )
@@ -83,7 +83,29 @@ class MinCostMaxFlowMemoryEstimateDefinitionTest {
         long expected
     ) {
 
-        var memoryEstimate = new MinCostMaxFlowMemoryEstimateDefinition(sinks, terminals).memoryEstimation();
+        var memoryEstimate = new MinCostMaxFlowMemoryEstimateDefinition(sinks, terminals,false).memoryEstimation();
+
+        MemoryEstimationAssert.assertThat(memoryEstimate)
+            .memoryRange(nodeAndRelCount, nodeAndRelCount)
+            .hasSameMinAndMaxEqualTo(expected);
+    }
+
+    @ParameterizedTest
+    @CsvSource(
+        {
+            "1_000,false, 295_472",
+            "1_000,true,  327_584",
+            "10_000,false, 2_937_000",
+            "10_000,true,  3_257_112"
+        }
+    )
+    void shouldEstimateWithNodeConstraints(
+        long nodeAndRelCount,
+        boolean useNodeProperty,
+        long expected
+    ) {
+
+        var memoryEstimate = new MinCostMaxFlowMemoryEstimateDefinition(1, 1,useNodeProperty).memoryEstimation();
 
         MemoryEstimationAssert.assertThat(memoryEstimate)
             .memoryRange(nodeAndRelCount, nodeAndRelCount)

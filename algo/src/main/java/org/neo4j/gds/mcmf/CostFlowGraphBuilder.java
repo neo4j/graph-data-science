@@ -29,6 +29,7 @@ import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.maxflow.DefaultRelationships;
 import org.neo4j.gds.maxflow.FlowGraphBuilder;
+import org.neo4j.gds.maxflow.IgnoreNodeConstraints;
 import org.neo4j.gds.maxflow.NodeConstraintsIdMap;
 import org.neo4j.gds.maxflow.NodeWithValue;
 import org.neo4j.gds.termination.TerminationFlag;
@@ -58,7 +59,7 @@ public class CostFlowGraphBuilder extends FlowGraphBuilder {
             demand,
             terminationFlag,
             concurrency,
-            new NodeConstraintsIdMap.IgnoreNodeConstraints()
+            new IgnoreNodeConstraints()
         );
     }
 

@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) "Neo4j"
  * Neo4j Sweden AB [http://neo4j.com]
@@ -20,24 +19,44 @@
  */
 package org.neo4j.gds.maxflow;
 
-import org.neo4j.gds.InputNodes;
-import org.neo4j.gds.annotation.Parameters;
-import org.neo4j.gds.core.concurrency.Concurrency;
+public class IgnoreNodeConstraints implements NodeConstraintsIdMap {
 
-import java.util.Optional;
+    @Override
+    public long mapNode(long nodeId) {
+        return nodeId;
+    }
 
-@Parameters
-public record MaxFlowParameters(
-    InputNodes sourceNodes,
-    InputNodes targetNodes,
-    Concurrency concurrency,
-    double freq,
-    boolean useGapRelabelling,
-    Optional<String> nodeCapacityProperty
-) {
+    @Override
+    public boolean isFakeNode(long nodeId) {
+        return false;
+    }
+
+    @Override
+    public boolean hasCapacityConstraint(long nodeId) {
+        return false;
+    }
+
+    @Override
+    public double relationshipCapacity(long relationshipId) {return 0;}
+
+    @Override
+    public long toFakeNodeOf(long nodeId) {
+        return 0;
+    }
+
+    @Override
+    public long realNodeOf(long nodeId) {
+        return 0;
+    }
 
 
-   public boolean hasNodeCapacityProperty(){
-        return  nodeCapacityProperty.isPresent();
+    @Override
+    public long numberOfCapacityNodes() {
+        return 0;
+    }
+
+    @Override
+    public long capacityRelId(long nodeId) {
+        return 0;
     }
 }

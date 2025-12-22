@@ -117,12 +117,6 @@ public final class NodeConstraintsFromPropertyIdMap  implements NodeConstraintsI
     }
 
     @Override
-    public double nodeCapacity(long nodeId) {
-        if (!hasCapacityConstraint(nodeId)) throw new RuntimeException();
-        return nodePropertyValues.doubleValue(nodeId);
-    }
-
-    @Override
     public double relationshipCapacity(long relationshipId) {
         if (relationshipId < firstRelationshipId) throw  new RuntimeException();
         var index = relationshipId-firstRelationshipId;

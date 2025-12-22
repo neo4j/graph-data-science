@@ -76,7 +76,7 @@ public class FlowGraphBuilder {
             demand,
             terminationFlag,
             concurrency,
-            new NodeConstraintsIdMap.IgnoreNodeConstraints()
+            new IgnoreNodeConstraints()
         );
     }
 

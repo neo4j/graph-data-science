@@ -137,7 +137,12 @@ public class PathFindingAlgorithmsEstimationModeBusinessFacade {
     public MemoryEstimation maxFlow(MaxFlowBaseConfig configuration) {
         var params = configuration.toMaxFlowParameters();
 
-        var estimateDefinition = new MaxFlowMemoryEstimateDefinition(params.sourceNodes().size(),params.targetNodes().size(),params.useGapRelabelling());
+        var estimateDefinition = new MaxFlowMemoryEstimateDefinition(
+            params.sourceNodes().size(),
+            params.targetNodes().size(),
+            params.useGapRelabelling(),
+            params.hasNodeCapacityProperty()
+        );
 
         return  estimateDefinition.memoryEstimation();
     }
@@ -155,7 +160,8 @@ public class PathFindingAlgorithmsEstimationModeBusinessFacade {
 
         var estimateDefinition = new MinCostMaxFlowMemoryEstimateDefinition(
             params.maxFlowParameters().sourceNodes().size(),
-            params.maxFlowParameters().targetNodes().size()
+            params.maxFlowParameters().targetNodes().size(),
+            params.maxFlowParameters().hasNodeCapacityProperty()
         );
 
         return  estimateDefinition.memoryEstimation();

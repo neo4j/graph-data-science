@@ -260,7 +260,7 @@ RETURN nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
 [opts="header"]
 |===
 | nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
-| 6         | 7                 | 3064     | 3064     | "3064 Bytes"
+| 6         | 7                 | 3072     | 3072     | "3072 Bytes"
 |===
 --
 

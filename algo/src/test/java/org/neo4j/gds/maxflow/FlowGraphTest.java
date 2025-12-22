@@ -242,12 +242,6 @@ class FlowGraphTest {
             }
 
             @Override
-            public double nodeCapacity(long nodeId) {
-                if (nodeId==a) return 30;
-                throw new RuntimeException();
-            }
-
-            @Override
             public double relationshipCapacity(long relationshipId) {
                 if (relationshipId==7) return 30;
                 throw new RuntimeException();

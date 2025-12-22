@@ -23,7 +23,6 @@ public interface NodeConstraintsIdMap {
 
     boolean isFakeNode(long nodeId);
     boolean hasCapacityConstraint(long nodeId);
-    double nodeCapacity(long nodeId);
     double relationshipCapacity(long relationshipId);
     long toFakeNodeOf(long nodeId);
     long realNodeOf(long nodeId);
@@ -35,51 +34,5 @@ public interface NodeConstraintsIdMap {
             return toFakeNodeOf(nodeId);
         }
         return nodeId;
-    }
-    class IgnoreNodeConstraints implements NodeConstraintsIdMap {
-
-        @Override
-        public long mapNode(long nodeId) {
-            return nodeId;
-        }
-
-        @Override
-        public boolean isFakeNode(long nodeId) {
-            return false;
-        }
-
-        @Override
-        public boolean hasCapacityConstraint(long nodeId) {
-            return false;
-        }
-
-        @Override
-        public double nodeCapacity(long nodeId) {
-            return 0;
-        }
-
-        @Override
-        public double relationshipCapacity(long relationshipId) {return 0;}
-
-        @Override
-        public long toFakeNodeOf(long nodeId) {
-            return 0;
-        }
-
-        @Override
-        public long realNodeOf(long nodeId) {
-            return 0;
-        }
-
-
-        @Override
-        public long numberOfCapacityNodes() {
-            return 0;
-        }
-
-        @Override
-        public long capacityRelId(long nodeId) {
-            return 0;
-        }
     }
 }

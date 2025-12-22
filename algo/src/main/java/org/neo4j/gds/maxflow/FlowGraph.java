@@ -80,7 +80,7 @@ public class FlowGraph {
             reverseRelationshipIndexOffset,
             supply,
             demand,
-            new NodeConstraintsIdMap.IgnoreNodeConstraints()
+            new IgnoreNodeConstraints()
         );
     }
 
