@@ -215,11 +215,11 @@ include::partial$/algorithms/shared/examples-intro.adoc[]
 .The following will create the sample graph depicted in the figure:
 [source, cypher, role=noplay setup-query]
 ----
-CREATE (a:Place {id: 'A'}),
-       (b:Place {id: 'B'}),
+CREATE (a:Place {id: 'A', constraint: 10.0}),
+       (b:Place {id: 'B', constraint: 4.0}),
        (c:Place {id: 'C'}),
        (d:Place {id: 'D'}),
-       (e:Place {id: 'E'}),
+       (e:Place {id: 'E', constriant: 20.0}),
        (a)-[:LINK {capacity: 7, cost: 100}]->(b),
        (b)-[:LINK {capacity: 10, cost: 250}]->(c),
        (b)-[:LINK {capacity: 5, cost: 150}]->(d),
@@ -236,7 +236,9 @@ RETURN gds.graph.project(
   source,
   target,
 {
-    relationshipProperties: r { .capacity, .cost }
+    relationshipProperties: r { .capacity, .cost },
+    sourceNodeProperties: source { .constraint },
+    targetNodeProperties: target { .constraint }
   }
 )
 ----
@@ -415,9 +417,12 @@ each of type `FLOW_REL` with a single property `flow`.
 The relationships added back  are always directed, even if the input graph is undirected. They point in the order of the flow.
 ====
 
-=== Supply and demand example
+=== Node capacity requirements
 
-If there is a restriction on how much a source/target node can output/receive, this can be modeled using supply and demand. For example, how much produce can be transported from a set of production facilities (with a given supply/production per entity) to a set of destinations (each with a specific demand) to the lowest possible cost?
+If there is a restriction on how much specific nodes can output/receive, this can be modeled using the `nodeCapacity` parameter property.
+For example, source facilities might have a cap on the amount of products they can produce.
+Target facilities might also have constraints on the amount of products they can store.
+In the example below, we pass the  `constraint` node property as the value of the `nodeCapacity` parameter to model these additional requirements.
 
 [role=query-example]
 --
@@ -426,9 +431,10 @@ If there is a restriction on how much a source/target node can output/receive, t
 ----
 MATCH (a:Place {id: 'A'}), (b:Place {id: 'B'}), (c:Place {id: 'C'}), (e:Place {id: 'E'})
 CALL gds.maxFlow.minCost.stream('graph', {
-  sourceNodes: [[a, 10.0], [b, 4.0]],
-  targetNodes: [[e, 20.0]],
+  sourceNodes: [a, b],
+  targetNodes: e,
   capacityProperty: 'capacity',
+  nodeCapacityProperty: 'constraint',
   costProperty: 'cost'
 })
 YIELD source, target, flow

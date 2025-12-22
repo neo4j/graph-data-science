@@ -1,5 +1,7 @@
 | xref:common-usage/running-algos.adoc#common-configuration-relationship-weight-property[capacityProperty] | String          | n/a | no | Name of the relationship property to use as capacity.
 
-| sourceNodes | List of Nodes or Integers or List of pairs Node or Integer and Scalar | n/a | no | Source nodes given as nodes or node ids. Can be paired with a scalar limiting the out-flow/supply per node like [ [src1, supply1], [src2, supply2],... ].
+| sourceNodes | List of Nodes or Integers or Integer | n/a | no| Source nodes given as nodes or node ids from which flow comes to the network.
 
-| targetNodes | List of Nodes or Integers or List of pairs Node or Integer and Scalar | n/a | no | Target nodes given as nodes or node ids. Can be paired with a scalar limiting the in-flow/demand per node like [ [tgt1, demand1], [tgt2, demand2],... ].
+| targetNodes | List of Nodes or Integers or Integer | n/a | no | Target nodes given as nodes or node ids to which the flow is deposited.
+
+| nodeCapacityProperty | String | n/a | yes |  If defined, nodes with the given property are restricted  on the total flow it can process based on their property value. Leave undefined for nodes without restrictions.

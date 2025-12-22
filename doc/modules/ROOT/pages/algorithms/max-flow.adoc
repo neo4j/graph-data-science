@@ -208,11 +208,11 @@ include::partial$/algorithms/shared/examples-intro.adoc[]
 .The following will create the sample graph depicted in the figure:
 [source, cypher, role=noplay setup-query]
 ----
-CREATE (a:Place {id: 'A'}),
-       (b:Place {id: 'B'}),
+CREATE (a:Place {id: 'A', constraint: 9.0}),
+       (b:Place {id: 'B', constraint: 5.0}),
        (c:Place {id: 'C'}),
-       (d:Place {id: 'D'}),
-       (e:Place {id: 'E'}),
+       (d:Place {id: 'D', constraint: 50.0}),
+       (e:Place {id: 'E', constraint: 10.0}),
        (f:Place {id: 'F'}),
        (a)-[:LINK {capacity: 10}]->(f),
        (a)-[:LINK {capacity: 3}]->(b),
@@ -232,7 +232,9 @@ RETURN gds.graph.project(
   source,
   target,
 {
-    relationshipProperties: r { .capacity }
+    relationshipProperties: r { .capacity },
+    sourceNodeProperties: source { .constraint},
+    targetNodeProperties: target { .constraint}
   }
 )
 ----
@@ -406,9 +408,12 @@ each of type `FLOW_REL` with a single property `flow`.
 The relationships added back  are always directed, even if the input graph is undirected. They point in the order of the flow.
 ====
 
-=== Supply and demand example
+=== Node capacity requirements
 
-If there is a restriction on how much a source/target node can output/receive, this can be modeled using supply and demand. For example, how much produce can be transported from a set of production facilities (with a given supply/production per entity) to a set of destinations (each with a specific demand)?
+If there is a restriction on how much specific nodes can output/receive, this can be modeled using the `nodeCapacity` parameter property.
+For example, source facilities might have a cap on the amount of products they can produce, and similarly
+target facilities might have constraints on the amount of products they can store.
+In the example below, we pass the  `constraint` node property as the value of the `nodeCapacity` parameter to model these additional requirements.
 
 [role=query-example]
 --
@@ -417,9 +422,10 @@ If there is a restriction on how much a source/target node can output/receive, t
 ----
 MATCH (a:Place {id: 'A'}), (b:Place {id: 'B'}), (d:Place {id: 'D'}), (e:Place {id: 'E'})
 CALL gds.maxFlow.stream('graph', {
-  sourceNodes: [[a, 9.0], [b, 5.0]],
-  targetNodes: [[d, 50.0], [e, 10.0]],
-  capacityProperty: 'capacity'
+  sourceNodes: [a,b],
+  targetNodes: [d,e],
+  capacityProperty: 'capacity',
+  nodeCapacityProperty: 'constraint'
 })
 YIELD source, target, flow
 RETURN gds.util.asNode(source).id AS src, gds.util.asNode(target).id AS tgt, flow
