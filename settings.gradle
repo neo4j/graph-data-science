@@ -9,7 +9,7 @@ pluginManagement {
 }
 
 ext {
-    neo4jVersionOverride = providers.gradleProperty('neo4jVersion').get()
+    neo4jVersionOverride = providers.gradleProperty('neo4jVersion')
 }
 
 dependencyResolutionManagement {
@@ -18,9 +18,9 @@ dependencyResolutionManagement {
             from(files("gradle/opengds.versions.toml"))
         }
         neo4j {
-            if(neo4jVersionOverride != null && !neo4jVersionOverride.isEmpty()) {
-                println("Using Neo4j Version: $neo4jVersionOverride")
-                version('neo4j', neo4jVersionOverride)
+            if (neo4jVersionOverride.isPresent()) {
+                println("Using Neo4j Version: ${neo4jVersionOverride.get()}")
+                version('neo4j', neo4jVersionOverride.get())
             }
             from(files("gradle/neo4j.dependencies.toml"))
         }
