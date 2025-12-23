@@ -4,12 +4,14 @@ tasks.register("assembleDocs", Tar) {
     from(projectDir) {
         include 'modules/'
     }
- }
+}
 
-tasks.register("copyAssembledDocs", Copy) {
-    dependsOn assembleDocs
-    from(assembleDocs.archiveFile)
-    into(docsDir)
+if (project.hasProperty('docsDir')) {
+    tasks.register("copyAssembledDocs", Copy) {
+        dependsOn assembleDocs
+        from(assembleDocs.archiveFile)
+        into(docsDir)
+    }
 }
 
 assemble.dependsOn(assembleDocs)
