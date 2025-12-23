@@ -42,8 +42,41 @@ project(':algo-params-common').projectDir = file('algo-params/common')
 include('algo-test')
 project(':algo-test').projectDir = file('algo-test')
 
+include('algorithm-specifications')
+project(':algorithm-specifications').projectDir = file('algorithm-specifications')
+
+include('algorithms-facade-api')
+project(':algorithms-facade-api').projectDir = file('procedures/algorithms-facade-api')
+
+include('algorithms-facade-common')
+project(':algorithms-facade-common').projectDir = file('procedures/facade-api/algorithms-facade-common')
+
+include('algorithms-machinery')
+project(':algorithms-machinery').projectDir = file('applications/algorithms/machinery')
+
+include('algorithms-procedure-facade')
+project(':algorithms-procedure-facade').projectDir = file('procedures/algorithms-facade')
+
 include('annotations')
 project(':annotations').projectDir = file('annotations')
+
+include('application-services')
+project(':application-services').projectDir = file('applications/services')
+
+include('applications-facade')
+project(':applications-facade').projectDir = file('applications/facade')
+
+include('centrality-algorithms')
+project(':centrality-algorithms').projectDir = file('applications/algorithms/centrality')
+
+include('centrality-configs')
+project(':centrality-configs').projectDir = file('procedures/facade-api/configs/centrality-configs')
+
+include('centrality-facade-api')
+project(':centrality-facade-api').projectDir = file('procedures/facade-api/centrality-facade-api')
+
+include('centrality-params')
+project(':centrality-params').projectDir = file('algo-params/centrality-params')
 
 include('collections')
 project(':collections').projectDir = file('collections')
@@ -53,6 +86,21 @@ project(':collections-generator').projectDir = file('collections-generator')
 
 include('collections-memory-estimation')
 project(':collections-memory-estimation').projectDir = file('collections-memory-estimation')
+
+include('community-algorithms')
+project(':community-algorithms').projectDir = file('applications/algorithms/community')
+
+include('community-configs')
+project(':community-configs').projectDir = file('procedures/facade-api/configs/community-configs')
+
+include('community-facade-api')
+project(':community-facade-api').projectDir = file('procedures/facade-api/community-facade-api')
+
+include('community-mutate-steps')
+project(':community-mutate-steps').projectDir = file('procedures/community-mutate-steps')
+
+include('community-params')
+project(':community-params').projectDir = file('algo-params/community-params')
 
 include('concurrency')
 project(':concurrency').projectDir = file('concurrency')
@@ -69,14 +117,17 @@ project(':config-generator').projectDir = file('config-generator')
 include('core')
 project(':core').projectDir = file('core')
 
-include('core-write')
-project(':core-write').projectDir = file('core-write')
+include('core-api')
+project(':core-api').projectDir = file('core-api')
+
+include('core-test-utils')
+project(':core-test-utils').projectDir = file('core-test-utils')
 
 include('core-utils')
 project(':core-utils').projectDir = file('core-utils')
 
-include('core-test-utils')
-project(':core-test-utils').projectDir = file('core-test-utils')
+include('core-write')
+project(':core-write').projectDir = file('core-write')
 
 include('csv')
 project(':csv').projectDir = file('io/csv')
@@ -84,20 +135,17 @@ project(':csv').projectDir = file('io/csv')
 include('cypher-aggregation')
 project(':cypher-aggregation').projectDir = file('cypher-aggregation')
 
-include('triplet-graph-builder')
-project(':triplet-graph-builder').projectDir = file('triplet-graph-builder')
-
-include('legacy-cypher-projection')
-project(':legacy-cypher-projection').projectDir = file('legacy-cypher-projection')
+include('defaults-and-limits-configuration')
+project(':defaults-and-limits-configuration').projectDir = file('defaults-and-limits-configuration')
 
 include('doc')
 project(':doc').projectDir = file('doc')
 
-include('doc-test-tools')
-project(':doc-test-tools').projectDir = file('doc-test-tools')
-
 include('doc-test')
 project(':doc-test').projectDir = file('doc-test')
+
+include('doc-test-tools')
+project(':doc-test-tools').projectDir = file('doc-test-tools')
 
 include('edition-api')
 project(':edition-api').projectDir = file('edition-api')
@@ -105,53 +153,23 @@ project(':edition-api').projectDir = file('edition-api')
 include('executor')
 project(':executor').projectDir = file('executor')
 
-include('graph-store-catalog-applications')
-project(':graph-store-catalog-applications').projectDir = file('applications/graph-store-catalog')
+include('functions-facade')
+project(':functions-facade').projectDir = file('procedures/functions-facade')
 
-include('model-catalog-applications')
-project(':model-catalog-applications').projectDir = file('applications/model-catalog')
-
-include('operations-applications')
-project(':operations-applications').projectDir = file('applications/operations')
-
-include('centrality-algorithms')
-project(':centrality-algorithms').projectDir = file('applications/algorithms/centrality')
-
-include('community-algorithms')
-project(':community-algorithms').projectDir = file('applications/algorithms/community')
-
-include('machine-learning-algorithms')
-project(':machine-learning-algorithms').projectDir = file('applications/algorithms/machine-learning')
-
-include('miscellaneous-algorithms')
-project(':miscellaneous-algorithms').projectDir = file('applications/algorithms/miscellaneous-algorithms')
-
-include('node-embedding-algorithms')
-project(':node-embedding-algorithms').projectDir = file('applications/algorithms/node-embeddings')
-
-include('path-finding-algorithms')
-project(':path-finding-algorithms').projectDir = file('applications/algorithms/path-finding')
-
-include('scaling-utils')
-project(':scaling-utils').projectDir = file('scaling-utils')
-
-include('similarity-algorithms')
-project(':similarity-algorithms').projectDir = file('applications/algorithms/similarity')
-
-include('application-services')
-project(':application-services').projectDir = file('applications/services')
-
-include('applications-facade')
-project(':applications-facade').projectDir = file('applications/facade')
-
-include('algorithms-machinery')
-project(':algorithms-machinery').projectDir = file('applications/algorithms/machinery')
-
-include 'procedure-collector'
-project(':procedure-collector').projectDir = file('procedure-collector')
+include('functions-facade-api')
+project(':functions-facade-api').projectDir = file('procedures/functions-facade-api')
 
 include('gdl-graph')
 project(':gdl-graph').projectDir = file('gdl-graph')
+
+include('gds-values')
+project(':gds-values').projectDir = file('gds-values')
+
+include('graph-catalog-facade-api')
+project(':graph-catalog-facade-api').projectDir = file('procedures/graph-catalog-facade-api')
+
+include('graph-catalog-procedure-facade')
+project(':graph-catalog-procedure-facade').projectDir = file('procedures/graph-catalog-facade')
 
 include('graph-dimensions')
 project(':graph-dimensions').projectDir = file('graph-dimensions')
@@ -159,14 +177,26 @@ project(':graph-dimensions').projectDir = file('graph-dimensions')
 include('graph-projection-api')
 project(':graph-projection-api').projectDir = file('graph-projection-api')
 
+include('graph-sampling')
+project(':graph-sampling').projectDir = file('graph-sampling')
+
 include('graph-schema-api')
 project(':graph-schema-api').projectDir = file('graph-schema-api')
+
+include('graph-store-catalog-applications')
+project(':graph-store-catalog-applications').projectDir = file('applications/graph-store-catalog')
+
+include('graph-store-catalog-results')
+project(':graph-store-catalog-results').projectDir = file('applications/graph-store-catalog-results')
 
 include('histogram')
 project(':histogram').projectDir = file('histogram')
 
-include 'io-core'
+include('io-core')
 project(':io-core').projectDir = file('io/core')
+
+include('legacy-cypher-projection')
+project(':legacy-cypher-projection').projectDir = file('legacy-cypher-projection')
 
 include('licensing')
 project(':licensing').projectDir = file('licensing')
@@ -174,20 +204,17 @@ project(':licensing').projectDir = file('licensing')
 include('logging')
 project(':logging').projectDir = file('logging')
 
-include 'neo4j-log-adapter'
-project(':neo4j-log-adapter').projectDir = file('neo4j-log-adapter')
-
-include 'neo4j-integration-tools'
-project(':neo4j-integration-tools').projectDir = file('neo4j-integration-tools')
-
-include('proc-machine-learning')
-project(':proc-machine-learning').projectDir = file('proc/machine-learning')
+include('machine-learning-algorithms')
+project(':machine-learning-algorithms').projectDir = file('applications/algorithms/machine-learning')
 
 include('memory-access')
 project(':memory-access').projectDir = file('memory-access')
 
 include('memory-estimation')
 project(':memory-estimation').projectDir = file('memory-estimation')
+
+include('memory-facade')
+project(':memory-facade').projectDir = file('procedures/memory-facade')
 
 include('memory-info')
 project(':memory-info').projectDir = file('memory-info')
@@ -198,20 +225,50 @@ project(':memory-usage').projectDir = file('memory-usage')
 include('metrics-api')
 project(':metrics-api').projectDir = file('metrics-api')
 
-include('ml-core')
-project(':ml-core').projectDir = file('ml/ml-core')
+include('miscellaneous-algorithms')
+project(':miscellaneous-algorithms').projectDir = file('applications/algorithms/miscellaneous-algorithms')
+
+include('miscellaneous-configs')
+project(':miscellaneous-configs').projectDir = file('procedures/facade-api/configs/miscellaneous-configs')
+
+include('miscellaneous-facade-api')
+project(':miscellaneous-facade-api').projectDir = file('procedures/facade-api/miscellaneous-facade-api')
+
+include('miscellaneous-params')
+project(':miscellaneous-params').projectDir = file('algo-params/miscellaneous-params')
 
 include('ml-algo')
 project(':ml-algo').projectDir = file('ml/ml-algo')
 
-include('ml-test-utils')
-project(':ml-test-utils').projectDir = file('ml/ml-test-utils')
-
 include('ml-api')
 project(':ml-api').projectDir = file('ml/ml-api')
 
+include('ml-configs')
+project(':ml-configs').projectDir = file('procedures/facade-api/configs/ml-configs')
+
+include('ml-core')
+project(':ml-core').projectDir = file('ml/ml-core')
+
+include('ml-facade-api')
+project(':ml-facade-api').projectDir = file('procedures/facade-api/ml-facade-api')
+
+include('ml-params')
+project(':ml-params').projectDir = file('algo-params/ml-params')
+
+include('ml-test-utils')
+project(':ml-test-utils').projectDir = file('ml/ml-test-utils')
+
 include('model-catalog-api')
 project(':model-catalog-api').projectDir = file('model-catalog-api')
+
+include('model-catalog-applications')
+project(':model-catalog-applications').projectDir = file('applications/model-catalog')
+
+include('model-catalog-facade-api')
+project(':model-catalog-facade-api').projectDir = file('procedures/model-catalog-facade-api')
+
+include('model-catalog-procedure-facade')
+project(':model-catalog-procedure-facade').projectDir = file('procedures/model-catalog-facade')
 
 include('native-projection')
 project(':native-projection').projectDir = file('native-projection')
@@ -219,14 +276,38 @@ project(':native-projection').projectDir = file('native-projection')
 include('neo4j-adapter')
 project(':neo4j-adapter').projectDir = file('neo4j-adapter')
 
-include('neo4j-kernel-adapter-api')
-project(':neo4j-kernel-adapter-api').projectDir = file('compatibility/api/neo4j-kernel-adapter')
-
 include('neo4j-api')
 project(':neo4j-api').projectDir = file('neo4j-api')
 
+include('neo4j-integration-tools')
+project(':neo4j-integration-tools').projectDir = file('neo4j-integration-tools')
+
+include('neo4j-kernel-adapter-api')
+project(':neo4j-kernel-adapter-api').projectDir = file('compatibility/api/neo4j-kernel-adapter')
+
+include('neo4j-log-adapter')
+project(':neo4j-log-adapter').projectDir = file('neo4j-log-adapter')
+
 include('neo4j-settings')
 project(':neo4j-settings').projectDir = file('neo4j-settings')
+
+include('neo4j-utility')
+project(':neo4j-utility').projectDir = file('neo4j-utility')
+
+include('neo4j-values')
+project(':neo4j-values').projectDir = file('neo4j-values')
+
+include('node-embedding-algorithms')
+project(':node-embedding-algorithms').projectDir = file('applications/algorithms/node-embeddings')
+
+include('node-embeddings-configs')
+project(':node-embeddings-configs').projectDir = file('procedures/facade-api/configs/node-embeddings-configs')
+
+include('node-embeddings-facade-api')
+project(':node-embeddings-facade-api').projectDir = file('procedures/facade-api/node-embeddings-facade-api')
+
+include('node-embeddings-params')
+project(':node-embeddings-params').projectDir = file('algo-params/node-embeddings-params')
 
 include('open-licensing')
 project(':open-licensing').projectDir = file('open-licensing')
@@ -237,8 +318,47 @@ project(':open-model-catalog').projectDir = file('open-model-catalog')
 include('open-packaging')
 project(':open-packaging').projectDir = file('open-packaging')
 
+include('opengds-extension')
+project(':opengds-extension').projectDir = file('procedures/extension')
+
+include('opengds-procedure-facade')
+project(':opengds-procedure-facade').projectDir = file('procedures/facade')
+
+include('operations-applications')
+project(':operations-applications').projectDir = file('applications/operations')
+
+include('operations-facade-api')
+project(':operations-facade-api').projectDir = file('procedures/operations-facade-api')
+
+include('operations-procedure-facade')
+project(':operations-procedure-facade').projectDir = file('procedures/operations-facade')
+
+include('path-finding-algorithms')
+project(':path-finding-algorithms').projectDir = file('applications/algorithms/path-finding')
+
+include('path-finding-configs')
+project(':path-finding-configs').projectDir = file('procedures/facade-api/configs/path-finding-configs')
+
+include('path-finding-facade-api')
+project(':path-finding-facade-api').projectDir = file('procedures/facade-api/path-finding-facade-api')
+
+include('path-finding-mutate-steps')
+project(':path-finding-mutate-steps').projectDir = file('procedures/path-finding-mutate-steps')
+
+include('path-finding-params')
+project(':path-finding-params').projectDir = file('algo-params/path-finding-params')
+
+include('path-finding-write-steps')
+project(':path-finding-write-steps').projectDir = file("procedures/path-finding-write-steps")
+
 include('pipeline')
 project(':pipeline').projectDir = file('pipeline')
+
+include('pipelines-facade-api')
+project(':pipelines-facade-api').projectDir = file('procedures/pipelines-facade-api')
+
+include('pipelines-procedure-facade')
+project(':pipelines-procedure-facade').projectDir = file('procedures/pipelines-facade')
 
 include('pregel')
 project(':pregel').projectDir = file('pregel')
@@ -267,11 +387,17 @@ project(':proc-community').projectDir = file('proc/community')
 include('proc-embeddings')
 project(':proc-embeddings').projectDir = file('proc/embeddings')
 
+include('proc-machine-learning')
+project(':proc-machine-learning').projectDir = file('proc/machine-learning')
+
 include('proc-misc')
 project(':proc-misc').projectDir = file('proc/misc')
 
 include('proc-path-finding')
 project(':proc-path-finding').projectDir = file('proc/path-finding')
+
+include('proc-pipeline-catalog')
+project(':proc-pipeline-catalog').projectDir = file('proc/pipeline-catalog')
 
 include('proc-pregel')
 project(':proc-pregel').projectDir = file('proc/pregel')
@@ -285,35 +411,35 @@ project(':proc-sysinfo').projectDir = file('proc/sysinfo')
 include('proc-test')
 project(':proc-test').projectDir = file('proc/test')
 
-include('proc-pipeline-catalog')
-project(':proc-pipeline-catalog').projectDir = file('proc/pipeline-catalog')
+include('proc-topological-link-prediction')
+project(':proc-topological-link-prediction').projectDir = file('proc/topological-link-prediction')
 
-include('opengds-extension')
-project(':opengds-extension').projectDir = file('procedures/extension')
+include('procedure-collector')
+project(':procedure-collector').projectDir = file('procedure-collector')
 
 include('procedure-integration')
 project(':procedure-integration').projectDir = file('procedures/integration')
 
-include('opengds-procedure-facade')
-project(':opengds-procedure-facade').projectDir = file('procedures/facade')
-
-include('algorithms-procedure-facade')
-project(':algorithms-procedure-facade').projectDir = file('procedures/algorithms-facade')
-
-include('operations-procedure-facade')
-project(':operations-procedure-facade').projectDir = file('procedures/operations-facade')
-
-include 'graph-catalog-procedure-facade'
-project(':graph-catalog-procedure-facade').projectDir = file('procedures/graph-catalog-facade')
-
-include 'model-catalog-procedure-facade'
-project(':model-catalog-procedure-facade').projectDir = file('procedures/model-catalog-facade')
-
-include 'pipelines-procedure-facade'
-project(':pipelines-procedure-facade').projectDir = file('procedures/pipelines-facade')
+include('procedures-facade-api')
+project(':procedures-facade-api').projectDir = file('procedures/procedures-facade-api')
 
 include('progress-tracking')
 project(':progress-tracking').projectDir = file('progress-tracking')
+
+include('scaling-utils')
+project(':scaling-utils').projectDir = file('scaling-utils')
+
+include('similarity-algorithms')
+project(':similarity-algorithms').projectDir = file('applications/algorithms/similarity')
+
+include('similarity-configs')
+project(':similarity-configs').projectDir = file('procedures/facade-api/configs/similarity-configs')
+
+include('similarity-facade-api')
+project(':similarity-facade-api').projectDir = file('procedures/facade-api/similarity-facade-api')
+
+include('similarity-params')
+project(':similarity-params').projectDir = file('algo-params/similarity-params')
 
 include('string-formatting')
 project(':string-formatting').projectDir = file('string-formatting')
@@ -321,11 +447,8 @@ project(':string-formatting').projectDir = file('string-formatting')
 include('subgraph-filtering')
 project(':subgraph-filtering').projectDir = file('subgraph-filtering')
 
-include 'termination'
+include('termination')
 project(':termination').projectDir = file('termination')
-
-include('graph-sampling')
-project(':graph-sampling').projectDir = file('graph-sampling')
 
 include('test-graph-loaders')
 project(':test-graph-loaders').projectDir = file('test-graph-loaders')
@@ -336,131 +459,5 @@ project(':test-utils').projectDir = file('test-utils')
 include('transaction')
 project(':transaction').projectDir = file('transaction')
 
-include('defaults-and-limits-configuration')
-project(':defaults-and-limits-configuration').projectDir = file('defaults-and-limits-configuration')
-
-include('neo4j-utility')
-project(':neo4j-utility').projectDir = file('neo4j-utility')
-
-include('neo4j-values')
-project(':neo4j-values').projectDir = file('neo4j-values')
-
-include('gds-values')
-project(':gds-values').projectDir = file('gds-values')
-
-
-// Facade API modules
-include('algorithms-facade-common')
-project(':algorithms-facade-common').projectDir = file('procedures/facade-api/algorithms-facade-common')
-
-include('centrality-facade-api')
-project(':centrality-facade-api').projectDir = file('procedures/facade-api/centrality-facade-api')
-
-include('centrality-configs')
-project(':centrality-configs').projectDir = file('procedures/facade-api/configs/centrality-configs')
-
-include('centrality-params')
-project(':centrality-params').projectDir = file('algo-params/centrality-params')
-
-include('community-facade-api')
-project(':community-facade-api').projectDir = file('procedures/facade-api/community-facade-api')
-
-include('community-configs')
-project(':community-configs').projectDir = file('procedures/facade-api/configs/community-configs')
-
-include('community-mutate-steps')
-project(':community-mutate-steps').projectDir = file('procedures/community-mutate-steps')
-
-include('community-params')
-project(':community-params').projectDir = file('algo-params/community-params')
-
-include('similarity-facade-api')
-project(':similarity-facade-api').projectDir = file('procedures/facade-api/similarity-facade-api')
-
-include('similarity-configs')
-project(':similarity-configs').projectDir = file('procedures/facade-api/configs/similarity-configs')
-
-include('similarity-params')
-project(':similarity-params').projectDir = file('algo-params/similarity-params')
-
-include('path-finding-facade-api')
-project(':path-finding-facade-api').projectDir = file('procedures/facade-api/path-finding-facade-api')
-
-include('path-finding-configs')
-project(':path-finding-configs').projectDir = file('procedures/facade-api/configs/path-finding-configs')
-
-include('path-finding-mutate-steps')
-project(':path-finding-mutate-steps').projectDir = file('procedures/path-finding-mutate-steps')
-
-
-include('path-finding-params')
-project(':path-finding-params').projectDir = file('algo-params/path-finding-params')
-
-include 'path-finding-write-steps'
-project(':path-finding-write-steps').projectDir = file("procedures/path-finding-write-steps")
-
-include('node-embeddings-facade-api')
-project(':node-embeddings-facade-api').projectDir = file('procedures/facade-api/node-embeddings-facade-api')
-
-include('node-embeddings-configs')
-project(':node-embeddings-configs').projectDir = file('procedures/facade-api/configs/node-embeddings-configs')
-
-include('node-embeddings-params')
-project(':node-embeddings-params').projectDir = file('algo-params/node-embeddings-params')
-
-include('ml-facade-api')
-project(':ml-facade-api').projectDir = file('procedures/facade-api/ml-facade-api')
-
-include('ml-configs')
-project(':ml-configs').projectDir = file('procedures/facade-api/configs/ml-configs')
-
-include('ml-params')
-project(':ml-params').projectDir = file('algo-params/ml-params')
-
-include('miscellaneous-params')
-project(':miscellaneous-params').projectDir = file('algo-params/miscellaneous-params')
-
-include('miscellaneous-facade-api')
-project(':miscellaneous-facade-api').projectDir = file('procedures/facade-api/miscellaneous-facade-api')
-
-include('miscellaneous-configs')
-project(':miscellaneous-configs').projectDir = file('procedures/facade-api/configs/miscellaneous-configs')
-
-include('algorithms-facade-api')
-project(':algorithms-facade-api').projectDir = file('procedures/algorithms-facade-api')
-
-include('graph-catalog-facade-api')
-project(':graph-catalog-facade-api').projectDir = file('procedures/graph-catalog-facade-api')
-
-include('graph-store-catalog-results')
-project(':graph-store-catalog-results').projectDir = file('applications/graph-store-catalog-results')
-
-include('model-catalog-facade-api')
-project(':model-catalog-facade-api').projectDir = file('procedures/model-catalog-facade-api')
-
-include('operations-facade-api')
-project(':operations-facade-api').projectDir = file('procedures/operations-facade-api')
-
-include('pipelines-facade-api')
-project(':pipelines-facade-api').projectDir = file('procedures/pipelines-facade-api')
-
-include('procedures-facade-api')
-project(':procedures-facade-api').projectDir = file('procedures/procedures-facade-api')
-
-include('algorithm-specifications')
-project(':algorithm-specifications').projectDir = file('algorithm-specifications')
-
-include('core-api')
-project(':core-api').projectDir = file('core-api')
-
-include('memory-facade')
-project(':memory-facade').projectDir = file('procedures/memory-facade')
-
-include('functions-facade')
-project(':functions-facade').projectDir = file('procedures/functions-facade')
-
-include('functions-facade-api')
-project(':functions-facade-api').projectDir = file('procedures/functions-facade-api')
-
-include('proc-topological-link-prediction')
-project(':proc-topological-link-prediction').projectDir = file('proc/topological-link-prediction')
+include('triplet-graph-builder')
+project(':triplet-graph-builder').projectDir = file('triplet-graph-builder')
