@@ -9,6 +9,8 @@ dependencies {
     implementation project(':algo')
     implementation project(':algo-common')
     implementation project(':collections')
+    implementation project(":centrality-configs")
+    implementation project(':centrality-params')
     implementation project(":community-configs")
     implementation project(':community-params')
     implementation project(":config-api")

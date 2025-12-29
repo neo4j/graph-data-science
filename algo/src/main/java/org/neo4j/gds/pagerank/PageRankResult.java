@@ -33,7 +33,6 @@ public record PageRankResult(
     boolean didConverge
 ) implements CentralityAlgorithmResult {
 
-
     @Override
     public NodePropertyValues nodePropertyValues() {
         return NodePropertyValuesAdapter.adapt(scores);
@@ -47,4 +46,6 @@ public record PageRankResult(
     public long nodeCount() {
         return scores.size();
     }
+
+    public static  PageRankResult EMPTY  =new PageRankResult(HugeDoubleArray.newArray(0),0,false);
 }
