@@ -48,6 +48,7 @@ import org.neo4j.gds.influenceMaximization.CELFParameters;
 import org.neo4j.gds.influenceMaximization.CELFResult;
 import org.neo4j.gds.pagerank.ArticleRankConfig;
 import org.neo4j.gds.pagerank.EigenvectorConfig;
+import org.neo4j.gds.pagerank.PageRankConfig;
 import org.neo4j.gds.pagerank.PageRankResult;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.results.ResultTransformerBuilder;
@@ -354,6 +355,7 @@ public class CentralityComputeBusinessFacade {
     public <TR> CompletableFuture<TR> indirectExposure(
         GraphName graphName,
         GraphParameters graphParameters,
+        Optional<String> relationshipProperty,
         IndirectExposureConfig config,
         JobId jobId,
         boolean logProgress,
@@ -363,7 +365,7 @@ public class CentralityComputeBusinessFacade {
         var graphResources = graphStoreCatalogService.fetchGraphResources(
             graphName,
             graphParameters,
-            Optional.empty(),
+            relationshipProperty,
             new GraphStoreValidation(
                 new UndirectedOnlyRequirement("Indirect exposure")
             ),
@@ -380,6 +382,38 @@ public class CentralityComputeBusinessFacade {
             logProgress
         ).thenApply(resultTransformerBuilder.build(graphResources));
     }
+
+    public <TR> CompletableFuture<TR> pageRank(
+        GraphName graphName,
+        GraphParameters graphParameters,
+        Optional<String> relationshipProperty,
+        PageRankConfig config,
+        JobId jobId,
+        boolean logProgress,
+        ResultTransformerBuilder<TimedAlgorithmResult<PageRankResult>, TR> resultTransformerBuilder
+    ) {
+        // Fetch the Graph the algorithm will operate on
+        var graphResources = graphStoreCatalogService.fetchGraphResources(
+            graphName,
+            graphParameters,
+            relationshipProperty,
+            new GraphStoreValidation(
+                new SourceNodesRequirement(config.sourceNodes().inputNodes())
+            ),
+            Optional.empty(),
+            user,
+            databaseId
+        );
+        var graph = graphResources.graph();
+
+        return computeFacade.pageRank(
+            graph,
+            config,
+            jobId,
+            logProgress
+        ).thenApply(resultTransformerBuilder.build(graphResources));
+    }
+
 
 
 }
