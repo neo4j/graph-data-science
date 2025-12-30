@@ -23,6 +23,7 @@ import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmResult;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
+import org.neo4j.gds.collections.haa.PageCreator;
 
 import java.util.function.LongToDoubleFunction;
 
@@ -37,4 +38,15 @@ public record HarmonicResult(HugeAtomicDoubleArray centralities) implements Cent
     public LongToDoubleFunction centralityScoreProvider() {
         return centralities::get;
     }
+
+    public static HarmonicResult EMPTY =new HarmonicResult(HugeAtomicDoubleArray.of(0,
+        new  PageCreator.DoublePageCreator(){
+            @Override
+            public void fill(double[][] pages, int lastPageSize, int pageShift) {
+            }
+            @Override
+            public void fillPage(double[] page, long base) {
+            }
+        }
+    ));
 }
