@@ -41,6 +41,7 @@ import org.neo4j.gds.degree.DegreeCentralityResult;
 import org.neo4j.gds.influenceMaximization.CELFParameters;
 import org.neo4j.gds.influenceMaximization.CELFResult;
 import org.neo4j.gds.pagerank.ArticleRankConfig;
+import org.neo4j.gds.pagerank.EigenvectorConfig;
 import org.neo4j.gds.pagerank.PageRankResult;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.results.ResultTransformerBuilder;
@@ -135,6 +136,7 @@ public class CentralityComputeBusinessFacade {
         GraphName graphName,
         GraphParameters graphParameters,
         BetweennessCentralityParameters parameters,
+        Optional<String> relationshipProperty,
         JobId jobId,
         boolean logProgress,
         ResultTransformerBuilder<TimedAlgorithmResult<BetwennessCentralityResult>, TR> resultTransformerBuilder
@@ -143,7 +145,7 @@ public class CentralityComputeBusinessFacade {
         var graphResources = graphStoreCatalogService.fetchGraphResources(
             graphName,
             graphParameters,
-            Optional.empty(),
+            relationshipProperty,
             new GraphStoreValidation(
                 new BetweennessCentralityGraphStoreValidation()
             ),
@@ -224,6 +226,7 @@ public class CentralityComputeBusinessFacade {
     public <TR> CompletableFuture<TR> degree(
         GraphName graphName,
         GraphParameters graphParameters,
+        Optional<String> relationshipProperty,
         DegreeCentralityParameters parameters,
         JobId jobId,
         boolean logProgress,
@@ -233,7 +236,7 @@ public class CentralityComputeBusinessFacade {
         var graphResources = graphStoreCatalogService.fetchGraphResources(
             graphName,
             graphParameters,
-            Optional.empty(),
+            relationshipProperty,
             new GraphStoreValidation(
                 new NoAlgorithmRequirements()
             ),
@@ -251,5 +254,35 @@ public class CentralityComputeBusinessFacade {
         ).thenApply(resultTransformerBuilder.build(graphResources));
     }
 
+    public <TR> CompletableFuture<TR> eigenVector(
+        GraphName graphName,
+        GraphParameters graphParameters,
+        Optional<String> relationshipProperty,
+        EigenvectorConfig config,
+        JobId jobId,
+        boolean logProgress,
+        ResultTransformerBuilder<TimedAlgorithmResult<PageRankResult>, TR> resultTransformerBuilder
+    ) {
+        // Fetch the Graph the algorithm will operate on
+        var graphResources = graphStoreCatalogService.fetchGraphResources(
+            graphName,
+            graphParameters,
+            relationshipProperty,
+            new GraphStoreValidation(
+                new SourceNodesRequirement(config.sourceNodes().inputNodes())
+            ),
+            Optional.empty(),
+            user,
+            databaseId
+        );
+        var graph = graphResources.graph();
+
+        return computeFacade.eigenVector(
+            graph,
+            config,
+            jobId,
+            logProgress
+        ).thenApply(resultTransformerBuilder.build(graphResources));
+    }
 
 }
