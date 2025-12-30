@@ -32,6 +32,7 @@ import org.neo4j.gds.harmonic.HarmonicCentralityProgressTask;
 import org.neo4j.gds.influenceMaximization.CELFParameters;
 import org.neo4j.gds.influenceMaximization.CELFProgressTask;
 import org.neo4j.gds.pagerank.ArticleRankConfig;
+import org.neo4j.gds.pagerank.EigenvectorConfig;
 
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ArticleRank;
 
@@ -63,7 +64,11 @@ public final class CentralityAlgorithmTasks {
 
     public Task harmonicCentrality(){ return HarmonicCentralityProgressTask.create(); }
 
-    public  Task ArticleRank(Graph graph, ArticleRankConfig configuration){
+    public  Task articleRank(Graph graph, ArticleRankConfig configuration){
+        return Pregel.progressTask(graph, configuration, ArticleRank.asString());
+    }
+
+    public  Task eigenVector(Graph graph, EigenvectorConfig configuration){
         return Pregel.progressTask(graph, configuration, ArticleRank.asString());
     }
 

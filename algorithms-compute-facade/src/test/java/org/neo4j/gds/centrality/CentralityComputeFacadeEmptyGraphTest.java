@@ -39,6 +39,7 @@ import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.influenceMaximization.CELFParameters;
 import org.neo4j.gds.influenceMaximization.CELFResult;
 import org.neo4j.gds.pagerank.ArticleRankStatsConfigImpl;
+import org.neo4j.gds.pagerank.EigenvectorStatsConfigImpl;
 import org.neo4j.gds.pagerank.PageRankResult;
 import org.neo4j.gds.termination.TerminationFlag;
 
@@ -175,4 +176,23 @@ class CentralityComputeFacadeEmptyGraphTest {
         verifyNoInteractions(progressTrackerFactoryMock);
         verifyNoInteractions(algorithmCallerMock);
     }
+
+    @Test
+    void eigenVector() {
+        var config =  EigenvectorStatsConfigImpl.builder().maxIterations(3).build();
+
+        var future = facade.eigenVector(
+            graph,
+            config,
+            jobIdMock,
+            true
+        );
+
+        var result = future.join();
+        assertThat(result.result()).isEqualTo(PageRankResult.EMPTY);
+
+        verifyNoInteractions(progressTrackerFactoryMock);
+        verifyNoInteractions(algorithmCallerMock);
+    }
+
 }

@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.centrality;
 
+import com.carrotsearch.hppc.LongScatterSet;
 import org.neo4j.gds.CentralityAlgorithmTasks;
 import org.neo4j.gds.ProgressTrackerFactory;
 import org.neo4j.gds.api.Graph;
@@ -36,6 +37,7 @@ import org.neo4j.gds.closeness.ClosenessCentrality;
 import org.neo4j.gds.closeness.ClosenessCentralityParameters;
 import org.neo4j.gds.closeness.ClosenessCentralityResult;
 import org.neo4j.gds.core.JobId;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.degree.DegreeCentrality;
 import org.neo4j.gds.degree.DegreeCentralityParameters;
@@ -46,6 +48,8 @@ import org.neo4j.gds.influenceMaximization.CELFResult;
 import org.neo4j.gds.pagerank.ArticleRankComputation;
 import org.neo4j.gds.pagerank.ArticleRankConfig;
 import org.neo4j.gds.pagerank.DegreeFunctions;
+import org.neo4j.gds.pagerank.EigenvectorComputation;
+import org.neo4j.gds.pagerank.EigenvectorConfig;
 import org.neo4j.gds.pagerank.InitialProbabilityFactory;
 import org.neo4j.gds.pagerank.InitialProbabilityProvider;
 import org.neo4j.gds.pagerank.PageRankAlgorithm;
@@ -56,6 +60,7 @@ import org.neo4j.gds.termination.TerminationFlag;
 import java.util.concurrent.CompletableFuture;
 
 import static org.neo4j.gds.pagerank.PageRankVariant.ARTICLE_RANK;
+import static org.neo4j.gds.pagerank.PageRankVariant.EIGENVECTOR;
 
 public class CentralityComputeFacade {
     // Global dependencies
@@ -94,7 +99,7 @@ public class CentralityComputeFacade {
         var articleRankComputation = articleRankComputation(graph, configuration);
 
         var progressTracker = progressTrackerFactory.create(
-            tasks.ArticleRank(graph,configuration),
+            tasks.articleRank(graph,configuration),
             jobId,
             configuration.concurrency(),
             logProgress
@@ -302,5 +307,69 @@ public class CentralityComputeFacade {
             jobId
         );
     }
+
+    public CompletableFuture<TimedAlgorithmResult<PageRankResult>> eigenVector(
+        Graph graph,
+        EigenvectorConfig configuration,
+        JobId jobId,
+        boolean logProgress
+    ) {
+
+        if (graph.isEmpty()){
+            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(PageRankResult.EMPTY));
+        }
+
+        var eigenvectorComputation = eigenvectorComputation(graph, configuration);
+
+        var progressTracker = progressTrackerFactory.create(
+            tasks.eigenVector(graph,configuration),
+            jobId,
+            configuration.concurrency(),
+            logProgress
+        );
+
+        var eigenvector = new PageRankAlgorithm<>(
+            graph,
+            configuration,
+            eigenvectorComputation,
+            EIGENVECTOR,
+            DefaultPool.INSTANCE,
+            progressTracker,
+            terminationFlag
+        );
+
+        return algorithmCaller.run(
+            eigenvector::compute,
+            jobId
+        );
+    }
+
+    private EigenvectorComputation<EigenvectorConfig> eigenvectorComputation(
+        Graph graph,
+        EigenvectorConfig configuration
+    ) {
+        var mappedSourceNodes = new LongScatterSet(configuration.sourceNodes().inputNodes().size());
+        configuration.sourceNodes().inputNodes().stream()
+            .mapToLong(graph::toMappedNodeId)
+            .forEach(mappedSourceNodes::add);
+
+        boolean hasRelationshipWeightProperty = configuration.hasRelationshipWeightProperty();
+        Concurrency concurrency = configuration.concurrency();
+        var degreeFunction = DegreeFunctions.eigenvectorDegreeFunction(
+            graph,
+            hasRelationshipWeightProperty,
+            concurrency
+        );
+
+        return new EigenvectorComputation<>(
+            graph.nodeCount(),
+            configuration,
+            mappedSourceNodes,
+            degreeFunction
+        );
+    }
+
+
+
 
 }
