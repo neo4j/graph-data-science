@@ -27,6 +27,10 @@ import org.neo4j.gds.articulationPoints.ArticulationPointsParameters;
 import org.neo4j.gds.articulationpoints.ArticulationPoints;
 import org.neo4j.gds.articulationpoints.ArticulationPointsResult;
 import org.neo4j.gds.async.AsyncAlgorithmCaller;
+import org.neo4j.gds.beta.pregel.ImmutablePregelResult;
+import org.neo4j.gds.beta.pregel.NodeValue;
+import org.neo4j.gds.beta.pregel.PregelResult;
+import org.neo4j.gds.beta.pregel.PregelSchema;
 import org.neo4j.gds.betweenness.BetweennessCentrality;
 import org.neo4j.gds.betweenness.BetweennessCentralityParameters;
 import org.neo4j.gds.betweenness.BetwennessCentralityResult;
@@ -45,6 +49,8 @@ import org.neo4j.gds.degree.DegreeCentralityResult;
 import org.neo4j.gds.harmonic.HarmonicCentrality;
 import org.neo4j.gds.harmonic.HarmonicCentralityParameters;
 import org.neo4j.gds.harmonic.HarmonicResult;
+import org.neo4j.gds.hits.Hits;
+import org.neo4j.gds.hits.HitsConfig;
 import org.neo4j.gds.influenceMaximization.CELF;
 import org.neo4j.gds.influenceMaximization.CELFParameters;
 import org.neo4j.gds.influenceMaximization.CELFResult;
@@ -123,7 +129,6 @@ public class CentralityComputeFacade {
             jobId
         );
     }
-
 
     private ArticleRankComputation<ArticleRankConfig> articleRankComputation(
         Graph graph,
@@ -399,6 +404,38 @@ public class CentralityComputeFacade {
 
         return algorithmCaller.run(
             harmonic::compute,
+            jobId
+        );
+    }
+
+    public CompletableFuture<TimedAlgorithmResult<PregelResult>> hits(
+        Graph graph,
+        HitsConfig configuration,
+        JobId jobId,
+        boolean logProgress
+    ) {
+
+        if (graph.isEmpty()) {
+            var empty = NodeValue.of(new PregelSchema.Builder().build(),0,configuration.concurrency());
+            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(ImmutablePregelResult.of(empty, 0, false)));
+        }
+
+        var progressTracker = progressTrackerFactory.create(
+            tasks.hits(graph,configuration),
+            jobId,
+            configuration.concurrency(),
+            logProgress
+        );
+
+        var hits = new Hits(
+            graph,
+            configuration,
+            DefaultPool.INSTANCE,
+            progressTracker
+        );
+
+        return algorithmCaller.run(
+            hits::compute,
             jobId
         );
     }

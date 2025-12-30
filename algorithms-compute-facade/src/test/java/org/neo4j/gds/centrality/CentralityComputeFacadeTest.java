@@ -41,10 +41,11 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.harmonic.HarmonicCentralityParameters;
+import org.neo4j.gds.hits.HitsConfigImpl;
 import org.neo4j.gds.influenceMaximization.CELFParameters;
 import org.neo4j.gds.logging.Log;
-import org.neo4j.gds.pagerank.ArticleRankStatsConfigImpl;
-import org.neo4j.gds.pagerank.EigenvectorStatsConfigImpl;
+import org.neo4j.gds.pagerank.ArticleRankConfigImpl;
+import org.neo4j.gds.pagerank.EigenvectorConfigImpl;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Optional;
@@ -59,66 +60,73 @@ import static org.mockito.Mockito.when;
 @GdlExtension
 class CentralityComputeFacadeTest {
 
-        @Mock(strictness = Mock.Strictness.LENIENT)
-        private ProgressTrackerFactory progressTrackerFactoryMock;
-        @Mock
-        private ProgressTracker progressTrackerMock;
+    @Mock(strictness = Mock.Strictness.LENIENT)
+    private ProgressTrackerFactory progressTrackerFactoryMock;
+    @Mock
+    private ProgressTracker progressTrackerMock;
 
-        @Mock
-        private JobId jobIdMock;
+    @Mock
+    private JobId jobIdMock;
 
-        @Mock
-        private Log logMock;
+    @Mock
+    private Log logMock;
 
-        @GdlGraph(orientation = Orientation.UNDIRECTED)
-        private static final String GDL = """
+    @GdlGraph(orientation = Orientation.UNDIRECTED)
+    private static final String GDL = """
         (a:Node { prop: 1, prop2: [1.0] })-[:REL]->(b:Node { prop: 1,prop2: [2.0] }),
         (b)-[:REL]->(c:Node { prop: 3 ,prop2: [3.0]}),
         (a)-[:REL]->(c), (d:Node)-[:REL]->(e:Node), (e)-[:REL]->(f:Node)
         """;
 
-        @Inject
-        private Graph graph;
+    @Inject
+    private Graph graph;
 
-        @Inject
-        private IdFunction idFunction;
-        private CentralityComputeFacade facade;
+    @Inject
+    private IdFunction idFunction;
 
-        @BeforeEach
-        void setUp() {
-            when(progressTrackerFactoryMock.nullTracker())
-                .thenReturn(ProgressTracker.NULL_TRACKER);
-            when(progressTrackerFactoryMock.create(any(), any(), any(), anyBoolean()))
-                .thenReturn(progressTrackerMock);
+    @GdlGraph(indexInverse = true, graphNamePrefix = "inverse")
+    private static final String inverseGDL =GDL;
 
-            facade = new CentralityComputeFacade(
-                new AsyncAlgorithmCaller(Executors.newSingleThreadExecutor(), logMock),
-                progressTrackerFactoryMock,
-                TerminationFlag.RUNNING_TRUE
-            );
-        }
+    @Inject
+    private Graph inverseGraph;
 
-        @Test
-        void articleRank() {
+    private CentralityComputeFacade facade;
 
-            var config =  ArticleRankStatsConfigImpl.builder().maxIterations(3).build();
-            var future = facade.articleRank(
-                graph,
-                config,
-                jobIdMock,
-                true
-            );
+    @BeforeEach
+    void setUp() {
+        when(progressTrackerFactoryMock.nullTracker())
+            .thenReturn(ProgressTracker.NULL_TRACKER);
+        when(progressTrackerFactoryMock.create(any(), any(), any(), anyBoolean()))
+            .thenReturn(progressTrackerMock);
 
-            var results = future.join();
+        facade = new CentralityComputeFacade(
+            new AsyncAlgorithmCaller(Executors.newSingleThreadExecutor(), logMock),
+            progressTrackerFactoryMock,
+            TerminationFlag.RUNNING_TRUE
+        );
+    }
 
-            assertThat(results.result().iterations()).isBetween(1,3);
-            assertThat(results.computeMillis()).isNotNegative();
-        }
+    @Test
+    void articleRank() {
+
+        var config = ArticleRankConfigImpl.builder().maxIterations(3).build();
+        var future = facade.articleRank(
+            graph,
+            config,
+            jobIdMock,
+            true
+        );
+
+        var results = future.join();
+
+        assertThat(results.result().iterations()).isBetween(1, 3);
+        assertThat(results.computeMillis()).isNotNegative();
+    }
 
     @Test
     void articulationPoints() {
 
-        var params = new ArticulationPointsParameters(new Concurrency(1),false);
+        var params = new ArticulationPointsParameters(new Concurrency(1), false);
         var future = facade.articulationPoints(
             graph,
             params,
@@ -135,7 +143,7 @@ class CentralityComputeFacadeTest {
     @Test
     void betweennessCentrality() {
 
-        var params = new BetweennessCentralityParameters(new Concurrency(1), Optional.empty(),false);
+        var params = new BetweennessCentralityParameters(new Concurrency(1), Optional.empty(), false);
         var future = facade.betweennessCentrality(
             graph,
             params,
@@ -169,7 +177,7 @@ class CentralityComputeFacadeTest {
     @Test
     void celf() {
 
-        var params = new CELFParameters(2,0.1,10,new Concurrency(1),10,10);
+        var params = new CELFParameters(2, 0.1, 10, new Concurrency(1), 10, 10);
         var future = facade.celf(
             graph,
             params,
@@ -203,7 +211,7 @@ class CentralityComputeFacadeTest {
     @Test
     void degree() {
 
-        var params = new DegreeCentralityParameters(new Concurrency(1), Orientation.NATURAL,false,10);
+        var params = new DegreeCentralityParameters(new Concurrency(1), Orientation.NATURAL, false, 10);
         var future = facade.degree(
             graph,
             params,
@@ -220,7 +228,7 @@ class CentralityComputeFacadeTest {
     @Test
     void eigenVector() {
 
-        var config =  EigenvectorStatsConfigImpl.builder().maxIterations(3).build();
+        var config = EigenvectorConfigImpl.builder().maxIterations(3).build();
         var future = facade.eigenVector(
             graph,
             config,
@@ -230,7 +238,7 @@ class CentralityComputeFacadeTest {
 
         var results = future.join();
 
-        assertThat(results.result().iterations()).isBetween(1,3);
+        assertThat(results.result().iterations()).isBetween(1, 3);
         assertThat(results.computeMillis()).isNotNegative();
     }
 
@@ -248,6 +256,24 @@ class CentralityComputeFacadeTest {
         var results = future.join();
 
         assertThat(results.result().centralities().size()).isEqualTo(6L);
+        assertThat(results.computeMillis()).isNotNegative();
+    }
+
+    @Test
+    void hits() {
+
+        var config = HitsConfigImpl.builder().concurrency(4).build();
+
+        var future = facade.hits(
+            inverseGraph,
+            config,
+            jobIdMock,
+            false
+        );
+
+        var results = future.join();
+
+        assertThat(results.result().ranIterations()).isGreaterThan(0);
         assertThat(results.computeMillis()).isNotNegative();
     }
 

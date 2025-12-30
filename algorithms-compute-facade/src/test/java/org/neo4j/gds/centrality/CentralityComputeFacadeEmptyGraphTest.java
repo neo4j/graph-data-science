@@ -38,10 +38,11 @@ import org.neo4j.gds.closeness.ClosenessCentralityResult;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.harmonic.HarmonicCentralityParameters;
 import org.neo4j.gds.harmonic.HarmonicResult;
+import org.neo4j.gds.hits.HitsConfig;
 import org.neo4j.gds.influenceMaximization.CELFParameters;
 import org.neo4j.gds.influenceMaximization.CELFResult;
-import org.neo4j.gds.pagerank.ArticleRankStatsConfigImpl;
-import org.neo4j.gds.pagerank.EigenvectorStatsConfigImpl;
+import org.neo4j.gds.pagerank.ArticleRankConfigImpl;
+import org.neo4j.gds.pagerank.EigenvectorConfigImpl;
 import org.neo4j.gds.pagerank.PageRankResult;
 import org.neo4j.gds.termination.TerminationFlag;
 
@@ -78,7 +79,7 @@ class CentralityComputeFacadeEmptyGraphTest {
 
     @Test
     void articleRank() {
-        var config =  ArticleRankStatsConfigImpl.builder().maxIterations(3).build();
+        var config =  ArticleRankConfigImpl.builder().maxIterations(3).build();
 
         var future = facade.articleRank(
             graph,
@@ -181,7 +182,7 @@ class CentralityComputeFacadeEmptyGraphTest {
 
     @Test
     void eigenVector() {
-        var config =  EigenvectorStatsConfigImpl.builder().maxIterations(3).build();
+        var config =  EigenvectorConfigImpl.builder().maxIterations(3).build();
 
         var future = facade.eigenVector(
             graph,
@@ -210,6 +211,23 @@ class CentralityComputeFacadeEmptyGraphTest {
         var result = future.join();
         assertThat(result.result()).isEqualTo(HarmonicResult.EMPTY);
 
+        verifyNoInteractions(progressTrackerFactoryMock);
+        verifyNoInteractions(algorithmCallerMock);
+    }
+
+    @Test
+    void hits(){
+
+        var future = facade.hits(
+            graph,
+            mock(HitsConfig.class),
+            jobIdMock,
+            false
+        );
+
+        var results = future.join();
+
+        assertThat(results.result().ranIterations()).isEqualTo(0L);
         verifyNoInteractions(progressTrackerFactoryMock);
         verifyNoInteractions(algorithmCallerMock);
     }

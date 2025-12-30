@@ -573,7 +573,7 @@ public class CommunityComputeFacade {
     ) {
 
         if (graph.isEmpty()) {
-            var empty = NodeValue.of(new PregelSchema.Builder().build(),0,new Concurrency(1));
+            var empty = NodeValue.of(new PregelSchema.Builder().build(),0,configuration.concurrency());
             return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(ImmutablePregelResult.of(empty, 0, false)));
         }
 

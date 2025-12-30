@@ -20,6 +20,7 @@
 package org.neo4j.gds;
 
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.articulationpoints.ArticulationPointsProgressTaskCreator;
 import org.neo4j.gds.beta.pregel.Pregel;
 import org.neo4j.gds.betweenness.BetweennessCentralityParameters;
@@ -29,6 +30,8 @@ import org.neo4j.gds.closeness.ClosenessCentralityTask;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.degree.DegreeCentralityProgressTask;
 import org.neo4j.gds.harmonic.HarmonicCentralityProgressTask;
+import org.neo4j.gds.hits.HitsConfig;
+import org.neo4j.gds.hits.HitsProgressTrackerCreator;
 import org.neo4j.gds.influenceMaximization.CELFParameters;
 import org.neo4j.gds.influenceMaximization.CELFProgressTask;
 import org.neo4j.gds.pagerank.ArticleRankConfig;
@@ -70,6 +73,14 @@ public final class CentralityAlgorithmTasks {
 
     public  Task eigenVector(Graph graph, EigenvectorConfig configuration){
         return Pregel.progressTask(graph, configuration, ArticleRank.asString());
+    }
+
+    public Task hits(Graph graph, HitsConfig configuration){
+        return HitsProgressTrackerCreator.progressTask(
+            graph.nodeCount(),
+            configuration.maxIterations(),
+            AlgorithmLabel.HITS.asString()
+        );
     }
 
 }

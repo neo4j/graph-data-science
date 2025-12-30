@@ -42,7 +42,6 @@ import org.neo4j.gds.degree.DegreeCentralityResult;
 import org.neo4j.gds.harmonic.HarmonicCentralityBaseConfig;
 import org.neo4j.gds.harmonic.HarmonicResult;
 import org.neo4j.gds.hits.HitsConfig;
-import org.neo4j.gds.hits.HitsProgressTrackerCreator;
 import org.neo4j.gds.indirectExposure.IndirectExposureConfig;
 import org.neo4j.gds.indirectExposure.IndirectExposureResult;
 import org.neo4j.gds.influenceMaximization.CELFResult;
@@ -52,8 +51,6 @@ import org.neo4j.gds.pagerank.EigenvectorConfig;
 import org.neo4j.gds.pagerank.PageRankConfig;
 import org.neo4j.gds.pagerank.PageRankResult;
 
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ArticleRank;
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.EigenVector;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.PageRank;
 
 public class CentralityBusinessAlgorithms {
@@ -71,7 +68,7 @@ public class CentralityBusinessAlgorithms {
     }
 
     PageRankResult articleRank(Graph graph, ArticleRankConfig configuration) {
-        var task = Pregel.progressTask(graph, configuration, ArticleRank.asString());
+        var task = tasks.articleRank(graph,configuration);
         var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
 
         return algorithmMachinery.getResult(
@@ -174,7 +171,7 @@ public class CentralityBusinessAlgorithms {
 
     PageRankResult eigenVector(Graph graph, EigenvectorConfig configuration) {
 
-        var task = Pregel.progressTask(graph, configuration, EigenVector.asString());
+        var task = tasks.eigenVector(graph,configuration);
         var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
 
         return algorithmMachinery.getResult(
@@ -184,7 +181,6 @@ public class CentralityBusinessAlgorithms {
         );
 
     }
-
 
     HarmonicResult harmonicCentrality(Graph graph, HarmonicCentralityBaseConfig configuration) {
         var params = configuration.toParameters();
@@ -201,11 +197,7 @@ public class CentralityBusinessAlgorithms {
 
     PregelResult hits(Graph graph, HitsConfig configuration) {
 
-        var task = HitsProgressTrackerCreator.progressTask(
-            graph.nodeCount(),
-            configuration.maxIterations(),
-            AlgorithmLabel.HITS.asString()
-        );
+        var task = tasks.hits(graph,configuration);
         var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
 
         return algorithmMachinery.getResult(
