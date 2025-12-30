@@ -26,7 +26,7 @@ import java.util.function.LongToDoubleFunction;
 
 public record DegreeCentralityResult(long nodeCount, DegreeFunction degreeFunction)  implements CentralityAlgorithmResult {
 
-    static DegreeCentralityResult EMPTY = new DegreeCentralityResult(0, v -> 0);
+    public static DegreeCentralityResult EMPTY = new DegreeCentralityResult(0, v -> 0);
 
     @Override
     public NodePropertyValues nodePropertyValues() {

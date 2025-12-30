@@ -35,6 +35,7 @@ import org.neo4j.gds.closeness.ClosenessCentralityParameters;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.degree.DegreeCentralityParameters;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
@@ -103,7 +104,7 @@ class CentralityComputeFacadeTest {
                 graph,
                 config,
                 jobIdMock,
-                false
+                true
             );
 
             var results = future.join();
@@ -120,7 +121,7 @@ class CentralityComputeFacadeTest {
             graph,
             params,
             jobIdMock,
-            false
+            true
         );
 
         var results = future.join();
@@ -138,7 +139,7 @@ class CentralityComputeFacadeTest {
             graph,
             params,
             jobIdMock,
-            false
+            true
         );
 
         var results = future.join();
@@ -155,7 +156,7 @@ class CentralityComputeFacadeTest {
             graph,
             params,
             jobIdMock,
-            false
+            true
         );
 
         var results = future.join();
@@ -172,7 +173,7 @@ class CentralityComputeFacadeTest {
             graph,
             params,
             jobIdMock,
-            false
+            true
         );
 
         var results = future.join();
@@ -189,12 +190,29 @@ class CentralityComputeFacadeTest {
             graph,
             params,
             jobIdMock,
-            false
+            true
         );
 
         var results = future.join();
 
         assertThat(results.result().centralities().size()).isEqualTo(6L);
+        assertThat(results.computeMillis()).isNotNegative();
+    }
+
+    @Test
+    void degree() {
+
+        var params = new DegreeCentralityParameters(new Concurrency(1), Orientation.NATURAL,false,10);
+        var future = facade.degree(
+            graph,
+            params,
+            jobIdMock,
+            true
+        );
+
+        var results = future.join();
+
+        assertThat(results.result().nodeCount()).isEqualTo(6L);
         assertThat(results.computeMillis()).isNotNegative();
     }
 

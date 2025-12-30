@@ -37,6 +37,9 @@ import org.neo4j.gds.closeness.ClosenessCentralityParameters;
 import org.neo4j.gds.closeness.ClosenessCentralityResult;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.concurrency.DefaultPool;
+import org.neo4j.gds.degree.DegreeCentrality;
+import org.neo4j.gds.degree.DegreeCentralityParameters;
+import org.neo4j.gds.degree.DegreeCentralityResult;
 import org.neo4j.gds.influenceMaximization.CELF;
 import org.neo4j.gds.influenceMaximization.CELFParameters;
 import org.neo4j.gds.influenceMaximization.CELFResult;
@@ -263,6 +266,39 @@ public class CentralityComputeFacade {
 
         return algorithmCaller.run(
             closeness::compute,
+            jobId
+        );
+    }
+
+    public CompletableFuture<TimedAlgorithmResult<DegreeCentralityResult>> degree(
+        Graph graph,
+        DegreeCentralityParameters parameters,
+        JobId jobId,
+        boolean logProgress
+    ) {
+        if (graph.isEmpty()){
+            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(DegreeCentralityResult.EMPTY));
+        }
+
+        var progressTracker = progressTrackerFactory.create(
+            tasks.degreeCentrality(graph),
+            jobId,
+            parameters.concurrency(),
+            logProgress
+        );
+
+        var degree  = new DegreeCentrality(
+            graph,
+            DefaultPool.INSTANCE,
+            parameters.concurrency(),
+            parameters.orientation(),
+            parameters.hasRelationshipWeightProperty(),
+            parameters.minBatchSize(),
+            progressTracker
+        );
+
+        return algorithmCaller.run(
+            degree::compute,
             jobId
         );
     }
