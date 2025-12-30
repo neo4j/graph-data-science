@@ -33,6 +33,8 @@ import org.neo4j.gds.betweenness.BetweennessCentralityParameters;
 import org.neo4j.gds.betweenness.BetwennessCentralityResult;
 import org.neo4j.gds.bridges.BridgeResult;
 import org.neo4j.gds.bridges.BridgesParameters;
+import org.neo4j.gds.closeness.ClosenessCentralityParameters;
+import org.neo4j.gds.closeness.ClosenessCentralityResult;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.influenceMaximization.CELFParameters;
 import org.neo4j.gds.influenceMaximization.CELFResult;
@@ -152,6 +154,23 @@ class CentralityComputeFacadeEmptyGraphTest {
 
         var result = future.join();
         assertThat(result.result()).isEqualTo(CELFResult.EMPTY);
+
+        verifyNoInteractions(progressTrackerFactoryMock);
+        verifyNoInteractions(algorithmCallerMock);
+    }
+
+    @Test
+    void closenessCentrality() {
+
+        var future = facade.closeness(
+            graph,
+            mock(ClosenessCentralityParameters.class),
+            jobIdMock,
+            true
+        );
+
+        var result = future.join();
+        assertThat(result.result()).isEqualTo(ClosenessCentralityResult.EMPTY);
 
         verifyNoInteractions(progressTrackerFactoryMock);
         verifyNoInteractions(algorithmCallerMock);

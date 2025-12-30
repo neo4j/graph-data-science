@@ -32,6 +32,9 @@ import org.neo4j.gds.betweenness.BetwennessCentralityResult;
 import org.neo4j.gds.bridges.BridgeResult;
 import org.neo4j.gds.bridges.Bridges;
 import org.neo4j.gds.bridges.BridgesParameters;
+import org.neo4j.gds.closeness.ClosenessCentrality;
+import org.neo4j.gds.closeness.ClosenessCentralityParameters;
+import org.neo4j.gds.closeness.ClosenessCentralityResult;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.influenceMaximization.CELF;
@@ -229,6 +232,37 @@ public class CentralityComputeFacade {
 
         return algorithmCaller.run(
             celf::compute,
+            jobId
+        );
+    }
+
+    public CompletableFuture<TimedAlgorithmResult<ClosenessCentralityResult>> closeness(
+        Graph graph,
+        ClosenessCentralityParameters parameters,
+        JobId jobId,
+        boolean logProgress
+    ) {
+        if (graph.isEmpty()){
+            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(ClosenessCentralityResult.EMPTY));
+        }
+
+        var progressTracker = progressTrackerFactory.create(
+            tasks.closenessCentrality(graph),
+            jobId,
+            parameters.concurrency(),
+            logProgress
+        );
+
+        var closeness = ClosenessCentrality.create(
+            graph,
+            parameters,
+            DefaultPool.INSTANCE,
+            progressTracker,
+            terminationFlag
+        );
+
+        return algorithmCaller.run(
+            closeness::compute,
             jobId
         );
     }

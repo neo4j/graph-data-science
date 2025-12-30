@@ -31,6 +31,7 @@ import org.neo4j.gds.articulationPoints.ArticulationPointsParameters;
 import org.neo4j.gds.async.AsyncAlgorithmCaller;
 import org.neo4j.gds.betweenness.BetweennessCentralityParameters;
 import org.neo4j.gds.bridges.BridgesParameters;
+import org.neo4j.gds.closeness.ClosenessCentralityParameters;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -177,6 +178,23 @@ class CentralityComputeFacadeTest {
         var results = future.join();
 
         assertThat(results.result().totalSpread()).isGreaterThan(0);
+        assertThat(results.computeMillis()).isNotNegative();
+    }
+
+    @Test
+    void closenessCentrality() {
+
+        var params = new ClosenessCentralityParameters(new Concurrency(1), false);
+        var future = facade.closeness(
+            graph,
+            params,
+            jobIdMock,
+            false
+        );
+
+        var results = future.join();
+
+        assertThat(results.result().centralities().size()).isEqualTo(6L);
         assertThat(results.computeMillis()).isNotNegative();
     }
 

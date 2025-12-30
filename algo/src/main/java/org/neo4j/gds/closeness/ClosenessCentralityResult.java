@@ -38,4 +38,6 @@ public record ClosenessCentralityResult(HugeDoubleArray centralities) implements
     public LongToDoubleFunction centralityScoreProvider() {
         return centralities::get;
     }
+
+    public static ClosenessCentralityResult EMPTY = new ClosenessCentralityResult(HugeDoubleArray.newArray(0));
 }
