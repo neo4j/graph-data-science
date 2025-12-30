@@ -26,6 +26,9 @@ import org.neo4j.gds.articulationPoints.ArticulationPointsParameters;
 import org.neo4j.gds.articulationpoints.ArticulationPoints;
 import org.neo4j.gds.articulationpoints.ArticulationPointsResult;
 import org.neo4j.gds.async.AsyncAlgorithmCaller;
+import org.neo4j.gds.betweenness.BetweennessCentrality;
+import org.neo4j.gds.betweenness.BetweennessCentralityParameters;
+import org.neo4j.gds.betweenness.BetwennessCentralityResult;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.pagerank.ArticleRankComputation;
@@ -143,6 +146,32 @@ public class CentralityComputeFacade {
 
         return algorithmCaller.run(
             articulationPoints::compute,
+            jobId
+        );
+    }
+
+    public CompletableFuture<TimedAlgorithmResult<BetwennessCentralityResult>> betweennessCentrality(
+        Graph graph,
+        BetweennessCentralityParameters parameters,
+        JobId jobId,
+        boolean logProgress
+    ) {
+        if (graph.isEmpty()){
+            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(BetwennessCentralityResult.EMPTY));
+        }
+
+        var progressTracker = progressTrackerFactory.create(
+            tasks.articulationPoints(graph),
+            jobId,
+            parameters.concurrency(),
+            logProgress
+        );
+
+        var betweennessCentrality =  BetweennessCentrality
+            .create(graph, parameters, progressTracker, terminationFlag);
+
+        return algorithmCaller.run(
+            betweennessCentrality::compute,
             jobId
         );
     }

@@ -23,6 +23,7 @@ import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmResult;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
+import org.neo4j.gds.collections.haa.PageCreator;
 
 import java.util.function.LongToDoubleFunction;
 
@@ -38,5 +39,16 @@ public record BetwennessCentralityResult(HugeAtomicDoubleArray centralities) imp
     public LongToDoubleFunction centralityScoreProvider() {
         return centralities::get;
     }
+
+    public static BetwennessCentralityResult EMPTY = new BetwennessCentralityResult(HugeAtomicDoubleArray.of(0,
+       new  PageCreator.DoublePageCreator(){
+           @Override
+           public void fill(double[][] pages, int lastPageSize, int pageShift) {
+           }
+           @Override
+           public void fillPage(double[] page, long base) {
+           }
+       }
+    ));
 
 }

@@ -29,6 +29,7 @@ import org.neo4j.gds.ProgressTrackerFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.articulationPoints.ArticulationPointsParameters;
 import org.neo4j.gds.async.AsyncAlgorithmCaller;
+import org.neo4j.gds.betweenness.BetweennessCentralityParameters;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -40,6 +41,7 @@ import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.pagerank.ArticleRankStatsConfigImpl;
 import org.neo4j.gds.termination.TerminationFlag;
 
+import java.util.Optional;
 import java.util.concurrent.Executors;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -123,5 +125,24 @@ class CentralityComputeFacadeTest {
         assertThat(results.result().articulationPoints().cardinality()).isEqualTo(1L); //e is the art. point
         assertThat(results.computeMillis()).isNotNegative();
     }
+
+
+    @Test
+    void betweennessCentrality() {
+
+        var params = new BetweennessCentralityParameters(new Concurrency(1), Optional.empty(),false);
+        var future = facade.betweennessCentrality(
+            graph,
+            params,
+            jobIdMock,
+            false
+        );
+
+        var results = future.join();
+
+        assertThat(results.result().centralities().size()).isEqualTo(6L); //e is the art. point
+        assertThat(results.computeMillis()).isNotNegative();
+    }
+
 
 }

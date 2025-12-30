@@ -29,6 +29,8 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.articulationPoints.ArticulationPointsParameters;
 import org.neo4j.gds.articulationpoints.ArticulationPointsResult;
 import org.neo4j.gds.async.AsyncAlgorithmCaller;
+import org.neo4j.gds.betweenness.BetweennessCentralityParameters;
+import org.neo4j.gds.betweenness.BetwennessCentralityResult;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.pagerank.ArticleRankStatsConfigImpl;
 import org.neo4j.gds.pagerank.PageRankResult;
@@ -86,7 +88,6 @@ class CentralityComputeFacadeEmptyGraphTest {
     @Test
     void articulationPoints() {
 
-
         var future = facade.articulationPoints(
             graph,
             mock(ArticulationPointsParameters.class),
@@ -96,6 +97,23 @@ class CentralityComputeFacadeEmptyGraphTest {
 
         var result = future.join();
         assertThat(result.result()).isEqualTo(ArticulationPointsResult.EMPTY);
+
+        verifyNoInteractions(progressTrackerFactoryMock);
+        verifyNoInteractions(algorithmCallerMock);
+    }
+
+    @Test
+    void betweennessCentrality() {
+
+        var future = facade.betweennessCentrality(
+            graph,
+            mock(BetweennessCentralityParameters.class),
+            jobIdMock,
+            true
+        );
+
+        var result = future.join();
+        assertThat(result.result()).isEqualTo(BetwennessCentralityResult.EMPTY);
 
         verifyNoInteractions(progressTrackerFactoryMock);
         verifyNoInteractions(algorithmCallerMock);
