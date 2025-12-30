@@ -34,6 +34,8 @@ import org.neo4j.gds.betweenness.BetwennessCentralityResult;
 import org.neo4j.gds.bridges.BridgeResult;
 import org.neo4j.gds.bridges.BridgesParameters;
 import org.neo4j.gds.core.JobId;
+import org.neo4j.gds.influenceMaximization.CELFParameters;
+import org.neo4j.gds.influenceMaximization.CELFResult;
 import org.neo4j.gds.pagerank.ArticleRankStatsConfigImpl;
 import org.neo4j.gds.pagerank.PageRankResult;
 import org.neo4j.gds.termination.TerminationFlag;
@@ -133,6 +135,23 @@ class CentralityComputeFacadeEmptyGraphTest {
 
         var result = future.join();
         assertThat(result.result()).isEqualTo(BridgeResult.EMPTY);
+
+        verifyNoInteractions(progressTrackerFactoryMock);
+        verifyNoInteractions(algorithmCallerMock);
+    }
+
+    @Test
+    void celf() {
+
+        var future = facade.celf(
+            graph,
+            mock(CELFParameters.class),
+            jobIdMock,
+            true
+        );
+
+        var result = future.join();
+        assertThat(result.result()).isEqualTo(CELFResult.EMPTY);
 
         verifyNoInteractions(progressTrackerFactoryMock);
         verifyNoInteractions(algorithmCallerMock);

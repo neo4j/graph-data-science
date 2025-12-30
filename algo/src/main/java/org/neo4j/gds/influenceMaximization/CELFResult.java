@@ -28,4 +28,6 @@ public record CELFResult(LongDoubleScatterMap seedSetNodes){
     public double totalSpread() {
         return Arrays.stream(seedSetNodes.values).sum();
     }
+
+    public static CELFResult EMPTY = new CELFResult(new LongDoubleScatterMap(0));
 }

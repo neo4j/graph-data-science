@@ -34,6 +34,9 @@ import org.neo4j.gds.bridges.Bridges;
 import org.neo4j.gds.bridges.BridgesParameters;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.concurrency.DefaultPool;
+import org.neo4j.gds.influenceMaximization.CELF;
+import org.neo4j.gds.influenceMaximization.CELFParameters;
+import org.neo4j.gds.influenceMaximization.CELFResult;
 import org.neo4j.gds.pagerank.ArticleRankComputation;
 import org.neo4j.gds.pagerank.ArticleRankConfig;
 import org.neo4j.gds.pagerank.DegreeFunctions;
@@ -164,7 +167,7 @@ public class CentralityComputeFacade {
         }
 
         var progressTracker = progressTrackerFactory.create(
-            tasks.articulationPoints(graph),
+            tasks.betweennessCentrality(graph,parameters),
             jobId,
             parameters.concurrency(),
             logProgress
@@ -190,7 +193,7 @@ public class CentralityComputeFacade {
         }
 
         var progressTracker = progressTrackerFactory.create(
-            tasks.articulationPoints(graph),
+            tasks.bridges(graph),
             jobId,
             parameters.concurrency(),
             logProgress
@@ -201,6 +204,31 @@ public class CentralityComputeFacade {
 
         return algorithmCaller.run(
             bridges::compute,
+            jobId
+        );
+    }
+
+    public CompletableFuture<TimedAlgorithmResult<CELFResult>> celf(
+        Graph graph,
+        CELFParameters parameters,
+        JobId jobId,
+        boolean logProgress
+    ) {
+        if (graph.isEmpty()){
+            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(CELFResult.EMPTY));
+        }
+
+        var progressTracker = progressTrackerFactory.create(
+            tasks.CELF(graph,parameters),
+            jobId,
+            parameters.concurrency(),
+            logProgress
+        );
+
+        var celf =  new CELF(graph, parameters, DefaultPool.INSTANCE, progressTracker);
+
+        return algorithmCaller.run(
+            celf::compute,
             jobId
         );
     }

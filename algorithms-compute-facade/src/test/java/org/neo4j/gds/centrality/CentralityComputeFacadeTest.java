@@ -38,6 +38,7 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.influenceMaximization.CELFParameters;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.pagerank.ArticleRankStatsConfigImpl;
 import org.neo4j.gds.termination.TerminationFlag;
@@ -141,7 +142,7 @@ class CentralityComputeFacadeTest {
 
         var results = future.join();
 
-        assertThat(results.result().centralities().size()).isEqualTo(6L); //e is the art. point
+        assertThat(results.result().centralities().size()).isEqualTo(6L);
         assertThat(results.computeMillis()).isNotNegative();
     }
 
@@ -158,7 +159,24 @@ class CentralityComputeFacadeTest {
 
         var results = future.join();
 
-        assertThat(results.result().bridges()).hasSize(2); //e is the art. point
+        assertThat(results.result().bridges()).hasSize(2); //d-e, e-f are bridges
+        assertThat(results.computeMillis()).isNotNegative();
+    }
+
+    @Test
+    void celf() {
+
+        var params = new CELFParameters(2,0.1,10,new Concurrency(1),10,10);
+        var future = facade.celf(
+            graph,
+            params,
+            jobIdMock,
+            false
+        );
+
+        var results = future.join();
+
+        assertThat(results.result().totalSpread()).isGreaterThan(0);
         assertThat(results.computeMillis()).isNotNegative();
     }
 
