@@ -30,6 +30,8 @@ import org.neo4j.gds.betweenness.BetwennessCentralityResult;
 import org.neo4j.gds.bridges.BridgeResult;
 import org.neo4j.gds.bridges.BridgesParameters;
 import org.neo4j.gds.centrality.validation.BetweennessCentralityGraphStoreValidation;
+import org.neo4j.gds.closeness.ClosenessCentralityParameters;
+import org.neo4j.gds.closeness.ClosenessCentralityResult;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.loading.validation.GraphStoreValidation;
@@ -216,6 +218,36 @@ public class CentralityComputeBusinessFacade {
         var graph = graphResources.graph();
 
         return computeFacade.celf(
+            graph,
+            parameters,
+            jobId,
+            logProgress
+        ).thenApply(resultTransformerBuilder.build(graphResources));
+    }
+
+    public <TR> CompletableFuture<TR> closeness(
+        GraphName graphName,
+        GraphParameters graphParameters,
+        ClosenessCentralityParameters parameters,
+        JobId jobId,
+        boolean logProgress,
+        ResultTransformerBuilder<TimedAlgorithmResult<ClosenessCentralityResult>, TR> resultTransformerBuilder
+    ) {
+        // Fetch the Graph the algorithm will operate on
+        var graphResources = graphStoreCatalogService.fetchGraphResources(
+            graphName,
+            graphParameters,
+            Optional.empty(),
+            new GraphStoreValidation(
+                new NoAlgorithmRequirements()
+            ),
+            Optional.empty(),
+            user,
+            databaseId
+        );
+        var graph = graphResources.graph();
+
+        return computeFacade.closeness(
             graph,
             parameters,
             jobId,
