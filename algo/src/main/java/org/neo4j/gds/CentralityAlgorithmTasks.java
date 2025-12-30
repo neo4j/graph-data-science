@@ -38,8 +38,11 @@ import org.neo4j.gds.influenceMaximization.CELFParameters;
 import org.neo4j.gds.influenceMaximization.CELFProgressTask;
 import org.neo4j.gds.pagerank.ArticleRankConfig;
 import org.neo4j.gds.pagerank.EigenvectorConfig;
+import org.neo4j.gds.pagerank.PageRankConfig;
 
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ArticleRank;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.EigenVector;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.PageRank;
 
 public final class CentralityAlgorithmTasks {
 
@@ -69,12 +72,16 @@ public final class CentralityAlgorithmTasks {
 
     public Task harmonicCentrality(){ return HarmonicCentralityProgressTask.create(); }
 
-    public  Task articleRank(Graph graph, ArticleRankConfig configuration){
+    public Task articleRank(Graph graph, ArticleRankConfig configuration){
         return Pregel.progressTask(graph, configuration, ArticleRank.asString());
     }
 
-    public  Task eigenVector(Graph graph, EigenvectorConfig configuration){
-        return Pregel.progressTask(graph, configuration, ArticleRank.asString());
+    public Task eigenVector(Graph graph, EigenvectorConfig configuration){
+        return Pregel.progressTask(graph, configuration, EigenVector.asString());
+    }
+
+    public Task pageRank(Graph graph, PageRankConfig configuration){
+       return Pregel.progressTask(graph, configuration, PageRank.asString());
     }
 
     public Task hits(Graph graph, HitsConfig configuration){

@@ -65,6 +65,8 @@ import org.neo4j.gds.pagerank.EigenvectorConfig;
 import org.neo4j.gds.pagerank.InitialProbabilityFactory;
 import org.neo4j.gds.pagerank.InitialProbabilityProvider;
 import org.neo4j.gds.pagerank.PageRankAlgorithm;
+import org.neo4j.gds.pagerank.PageRankComputation;
+import org.neo4j.gds.pagerank.PageRankConfig;
 import org.neo4j.gds.pagerank.PageRankResult;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.termination.TerminationFlag;
@@ -73,6 +75,7 @@ import java.util.concurrent.CompletableFuture;
 
 import static org.neo4j.gds.pagerank.PageRankVariant.ARTICLE_RANK;
 import static org.neo4j.gds.pagerank.PageRankVariant.EIGENVECTOR;
+import static org.neo4j.gds.pagerank.PageRankVariant.PAGE_RANK;
 
 public class CentralityComputeFacade {
     // Global dependencies
@@ -472,5 +475,60 @@ public class CentralityComputeFacade {
             jobId
         );
     }
+
+    public CompletableFuture<TimedAlgorithmResult<PageRankResult>> pageRank(
+        Graph graph,
+        PageRankConfig configuration,
+        JobId jobId,
+        boolean logProgress
+    ) {
+
+        if (graph.isEmpty()){
+            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(PageRankResult.EMPTY));
+        }
+
+        var pageRankComputation = pagerankComputation(graph, configuration);
+
+        var progressTracker = progressTrackerFactory.create(
+            tasks.pageRank(graph,configuration),
+            jobId,
+            configuration.concurrency(),
+            logProgress
+        );
+
+        var pageRank = new PageRankAlgorithm<>(
+            graph,
+            configuration,
+            pageRankComputation,
+            PAGE_RANK,
+            DefaultPool.INSTANCE,
+            progressTracker,
+            terminationFlag
+        );
+
+        return algorithmCaller.run(
+            pageRank::compute,
+            jobId
+        );
+    }
+
+    private PageRankComputation<PageRankConfig> pagerankComputation(
+        Graph graph,
+        PageRankConfig configuration
+    ) {
+        var degreeFunction = DegreeFunctions.pageRankDegreeFunction(
+            graph,
+            configuration.hasRelationshipWeightProperty(), configuration.concurrency()
+        );
+
+        var alpha = 1 - configuration.dampingFactor();
+        InitialProbabilityProvider probabilityProvider = InitialProbabilityFactory.create(
+            graph::toMappedNodeId,
+            alpha,
+            configuration.sourceNodes()
+        );
+        return new PageRankComputation<>(configuration, probabilityProvider, degreeFunction);
+    }
+
 
 }

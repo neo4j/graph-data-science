@@ -26,7 +26,6 @@ import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.articulationpoints.ArticulationPointsBaseConfig;
 import org.neo4j.gds.articulationpoints.ArticulationPointsResult;
 import org.neo4j.gds.articulationpoints.ArticulationPointsToParameters;
-import org.neo4j.gds.beta.pregel.Pregel;
 import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.betweenness.BetweennessCentralityBaseConfig;
 import org.neo4j.gds.betweenness.BetwennessCentralityResult;
@@ -48,8 +47,6 @@ import org.neo4j.gds.pagerank.ArticleRankConfig;
 import org.neo4j.gds.pagerank.EigenvectorConfig;
 import org.neo4j.gds.pagerank.PageRankConfig;
 import org.neo4j.gds.pagerank.PageRankResult;
-
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.PageRank;
 
 public class CentralityBusinessAlgorithms {
     private final AlgorithmMachinery algorithmMachinery = new AlgorithmMachinery();
@@ -218,7 +215,7 @@ public class CentralityBusinessAlgorithms {
 
     public PageRankResult pageRank(Graph graph, PageRankConfig configuration) {
 
-        var task = Pregel.progressTask(graph, configuration, PageRank.asString());
+        var task = tasks.pageRank(graph,configuration);
         var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
 
         return algorithmMachinery.getResult(
