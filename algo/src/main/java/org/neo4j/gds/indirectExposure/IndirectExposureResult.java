@@ -47,4 +47,13 @@ public record IndirectExposureResult(
     public NodePropertyValues rootValues() {
         return NodePropertyValuesAdapter.adapt(roots);
     }
+
+    public static IndirectExposureResult EMPTY = new IndirectExposureResult(
+        HugeDoubleArray.newArray(0),
+        HugeLongArray.newArray(0),
+        HugeLongArray.newArray(0),
+        HugeLongArray.newArray(0),
+        0,
+        false
+    );
 }

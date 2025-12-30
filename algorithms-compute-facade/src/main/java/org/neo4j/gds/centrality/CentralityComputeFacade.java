@@ -51,6 +51,9 @@ import org.neo4j.gds.harmonic.HarmonicCentralityParameters;
 import org.neo4j.gds.harmonic.HarmonicResult;
 import org.neo4j.gds.hits.Hits;
 import org.neo4j.gds.hits.HitsConfig;
+import org.neo4j.gds.indirectExposure.IndirectExposure;
+import org.neo4j.gds.indirectExposure.IndirectExposureConfig;
+import org.neo4j.gds.indirectExposure.IndirectExposureResult;
 import org.neo4j.gds.influenceMaximization.CELF;
 import org.neo4j.gds.influenceMaximization.CELFParameters;
 import org.neo4j.gds.influenceMaximization.CELFResult;
@@ -436,6 +439,36 @@ public class CentralityComputeFacade {
 
         return algorithmCaller.run(
             hits::compute,
+            jobId
+        );
+    }
+
+    public CompletableFuture<TimedAlgorithmResult<IndirectExposureResult>> indirectExposure(
+        Graph graph,
+        IndirectExposureConfig configuration,
+        JobId jobId,
+        boolean logProgress
+    ) {
+        if (graph.isEmpty()){
+            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(IndirectExposureResult.EMPTY));
+        }
+
+        var progressTracker = progressTrackerFactory.create(
+            tasks.indirectExposure(graph,configuration),
+            jobId,
+            configuration.concurrency(),
+            logProgress
+        );
+
+        var indirectExposure = new IndirectExposure(
+            graph,
+            configuration,
+            DefaultPool.INSTANCE,
+            progressTracker
+        );
+
+        return algorithmCaller.run(
+            indirectExposure::compute,
             jobId
         );
     }

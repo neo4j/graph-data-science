@@ -42,6 +42,7 @@ import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.harmonic.HarmonicCentralityParameters;
 import org.neo4j.gds.hits.HitsConfigImpl;
+import org.neo4j.gds.indirectExposure.IndirectExposureConfigImpl;
 import org.neo4j.gds.influenceMaximization.CELFParameters;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.pagerank.ArticleRankConfigImpl;
@@ -73,9 +74,9 @@ class CentralityComputeFacadeTest {
 
     @GdlGraph(orientation = Orientation.UNDIRECTED)
     private static final String GDL = """
-        (a:Node { prop: 1, prop2: [1.0] })-[:REL]->(b:Node { prop: 1,prop2: [2.0] }),
+        (a:Node { prop: 1, prop2: [1.0] })-[:REL{ w:10}]->(b:Node { prop: 1,prop2: [2.0] }),
         (b)-[:REL]->(c:Node { prop: 3 ,prop2: [3.0]}),
-        (a)-[:REL]->(c), (d:Node)-[:REL]->(e:Node), (e)-[:REL]->(f:Node)
+        (a)-[:REL]->(c), (d:Node {prop: 4})-[:REL]->(e:Node {prop: 5}), (e)-[:REL]->(f:Node)
         """;
 
     @Inject
@@ -274,6 +275,29 @@ class CentralityComputeFacadeTest {
         var results = future.join();
 
         assertThat(results.result().ranIterations()).isGreaterThan(0);
+        assertThat(results.computeMillis()).isNotNegative();
+    }
+
+    @Test
+    void indirectExposure() {
+
+        var config = IndirectExposureConfigImpl.builder()
+            .sanctionedProperty("prop")
+            .relationshipWeightProperty("w")
+            .maxIterations(3)
+            .concurrency(4)
+            .build();
+
+        var future = facade.indirectExposure(
+            inverseGraph,
+            config,
+            jobIdMock,
+            false
+        );
+
+        var results = future.join();
+
+        assertThat(results.result().iterations()).isBetween(1,3);
         assertThat(results.computeMillis()).isNotNegative();
     }
 

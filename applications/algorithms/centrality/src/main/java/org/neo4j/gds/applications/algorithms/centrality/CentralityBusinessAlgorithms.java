@@ -21,7 +21,6 @@ package org.neo4j.gds.applications.algorithms.centrality;
 
 import org.neo4j.gds.CentralityAlgorithmTasks;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmMachinery;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.articulationpoints.ArticulationPointsBaseConfig;
@@ -36,7 +35,6 @@ import org.neo4j.gds.bridges.BridgesBaseConfig;
 import org.neo4j.gds.bridges.BridgesToParameters;
 import org.neo4j.gds.closeness.ClosenessCentralityBaseConfig;
 import org.neo4j.gds.closeness.ClosenessCentralityResult;
-import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.degree.DegreeCentralityConfig;
 import org.neo4j.gds.degree.DegreeCentralityResult;
 import org.neo4j.gds.harmonic.HarmonicCentralityBaseConfig;
@@ -208,11 +206,7 @@ public class CentralityBusinessAlgorithms {
     }
 
     IndirectExposureResult indirectExposure(Graph graph, IndirectExposureConfig configuration) {
-        var task = Tasks.task(
-            AlgorithmLabel.IndirectExposure.asString(),
-            Tasks.leaf("TotalTransfers", graph.nodeCount()),
-            Pregel.progressTask(graph, configuration, "ExposurePropagation")
-        );
+        var task = tasks.indirectExposure(graph,configuration);
         var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
 
         return algorithmMachinery.getResult(

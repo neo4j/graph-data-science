@@ -28,10 +28,12 @@ import org.neo4j.gds.betweenness.BetweennessCentralityProgressTask;
 import org.neo4j.gds.bridges.BridgeProgressTaskCreator;
 import org.neo4j.gds.closeness.ClosenessCentralityTask;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.degree.DegreeCentralityProgressTask;
 import org.neo4j.gds.harmonic.HarmonicCentralityProgressTask;
 import org.neo4j.gds.hits.HitsConfig;
 import org.neo4j.gds.hits.HitsProgressTrackerCreator;
+import org.neo4j.gds.indirectExposure.IndirectExposureConfig;
 import org.neo4j.gds.influenceMaximization.CELFParameters;
 import org.neo4j.gds.influenceMaximization.CELFProgressTask;
 import org.neo4j.gds.pagerank.ArticleRankConfig;
@@ -80,6 +82,14 @@ public final class CentralityAlgorithmTasks {
             graph.nodeCount(),
             configuration.maxIterations(),
             AlgorithmLabel.HITS.asString()
+        );
+    }
+
+    public  Task indirectExposure(Graph graph, IndirectExposureConfig configuration){
+       return Tasks.task(
+            AlgorithmLabel.IndirectExposure.asString(),
+            Tasks.leaf("TotalTransfers", graph.nodeCount()),
+            Pregel.progressTask(graph, configuration, "ExposurePropagation")
         );
     }
 
