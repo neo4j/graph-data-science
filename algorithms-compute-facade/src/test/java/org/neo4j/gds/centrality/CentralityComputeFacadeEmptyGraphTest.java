@@ -26,6 +26,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.neo4j.gds.ProgressTrackerFactory;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.articulationPoints.ArticulationPointsParameters;
+import org.neo4j.gds.articulationpoints.ArticulationPointsResult;
 import org.neo4j.gds.async.AsyncAlgorithmCaller;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.pagerank.ArticleRankStatsConfigImpl;
@@ -33,6 +35,7 @@ import org.neo4j.gds.pagerank.PageRankResult;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
@@ -75,6 +78,24 @@ class CentralityComputeFacadeEmptyGraphTest {
 
         var result = future.join();
         assertThat(result.result()).isEqualTo(PageRankResult.EMPTY);
+
+        verifyNoInteractions(progressTrackerFactoryMock);
+        verifyNoInteractions(algorithmCallerMock);
+    }
+
+    @Test
+    void articulationPoints() {
+
+
+        var future = facade.articulationPoints(
+            graph,
+            mock(ArticulationPointsParameters.class),
+            jobIdMock,
+            true
+        );
+
+        var result = future.join();
+        assertThat(result.result()).isEqualTo(ArticulationPointsResult.EMPTY);
 
         verifyNoInteractions(progressTrackerFactoryMock);
         verifyNoInteractions(algorithmCallerMock);

@@ -22,8 +22,10 @@ package org.neo4j.gds.centrality;
 import org.neo4j.gds.CentralityAlgorithmTasks;
 import org.neo4j.gds.ProgressTrackerFactory;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.articulationPoints.ArticulationPointsParameters;
+import org.neo4j.gds.articulationpoints.ArticulationPoints;
+import org.neo4j.gds.articulationpoints.ArticulationPointsResult;
 import org.neo4j.gds.async.AsyncAlgorithmCaller;
-import org.neo4j.gds.beta.pregel.Pregel;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.pagerank.ArticleRankComputation;
@@ -38,7 +40,6 @@ import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.concurrent.CompletableFuture;
 
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ArticleRank;
 import static org.neo4j.gds.pagerank.PageRankVariant.ARTICLE_RANK;
 
 public class CentralityComputeFacade {
@@ -78,7 +79,7 @@ public class CentralityComputeFacade {
         var articleRankComputation = articleRankComputation(graph, configuration);
 
         var progressTracker = progressTrackerFactory.create(
-            Pregel.progressTask(graph, configuration, ArticleRank.asString()),
+            tasks.ArticleRank(graph,configuration),
             jobId,
             configuration.concurrency(),
             logProgress
@@ -120,6 +121,30 @@ public class CentralityComputeFacade {
 
         double avgDegree = DegreeFunctions.averageDegree(graph, configuration.concurrency());
         return new ArticleRankComputation<>(configuration, probabilityProvider, degreeFunction, avgDegree);
+    }
+
+    public CompletableFuture<TimedAlgorithmResult<ArticulationPointsResult>> articulationPoints(
+        Graph graph,
+        ArticulationPointsParameters parameters,
+        JobId jobId,
+        boolean logProgress
+    ) {
+        if (graph.isEmpty()){
+            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(ArticulationPointsResult.EMPTY));
+        }
+
+        var progressTracker = progressTrackerFactory.create(
+            tasks.articulationPoints(graph),
+            jobId,
+            parameters.concurrency(),
+            logProgress
+        );
+        var articulationPoints = ArticulationPoints.create(graph, parameters, progressTracker);
+
+        return algorithmCaller.run(
+            articulationPoints::compute,
+            jobId
+        );
     }
 
 }

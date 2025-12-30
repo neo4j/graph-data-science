@@ -27,8 +27,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.ProgressTrackerFactory;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.articulationPoints.ArticulationPointsParameters;
 import org.neo4j.gds.async.AsyncAlgorithmCaller;
 import org.neo4j.gds.core.JobId;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -64,7 +66,7 @@ class CentralityComputeFacadeTest {
         private static final String GDL = """
         (a:Node { prop: 1, prop2: [1.0] })-[:REL]->(b:Node { prop: 1,prop2: [2.0] }),
         (b)-[:REL]->(c:Node { prop: 3 ,prop2: [3.0]}),
-        (a)-[:REL]->(c)
+        (a)-[:REL]->(c), (d:Node)-[:REL]->(e:Node), (e)-[:REL]->(f:Node)
         """;
 
         @Inject
@@ -104,5 +106,22 @@ class CentralityComputeFacadeTest {
             assertThat(results.result().iterations()).isBetween(1,3);
             assertThat(results.computeMillis()).isNotNegative();
         }
+
+    @Test
+    void articulationPoints() {
+
+        var params = new ArticulationPointsParameters(new Concurrency(1),false);
+        var future = facade.articulationPoints(
+            graph,
+            params,
+            jobIdMock,
+            false
+        );
+
+        var results = future.join();
+
+        assertThat(results.result().articulationPoints().cardinality()).isEqualTo(1L); //e is the art. point
+        assertThat(results.computeMillis()).isNotNegative();
+    }
 
 }

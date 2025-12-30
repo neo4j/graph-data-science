@@ -21,6 +21,7 @@ package org.neo4j.gds;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.articulationpoints.ArticulationPointsProgressTaskCreator;
+import org.neo4j.gds.beta.pregel.Pregel;
 import org.neo4j.gds.betweenness.BetweennessCentralityParameters;
 import org.neo4j.gds.betweenness.BetweennessCentralityProgressTask;
 import org.neo4j.gds.bridges.BridgeProgressTaskCreator;
@@ -30,6 +31,9 @@ import org.neo4j.gds.degree.DegreeCentralityProgressTask;
 import org.neo4j.gds.harmonic.HarmonicCentralityProgressTask;
 import org.neo4j.gds.influenceMaximization.CELFParameters;
 import org.neo4j.gds.influenceMaximization.CELFProgressTask;
+import org.neo4j.gds.pagerank.ArticleRankConfig;
+
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ArticleRank;
 
 public final class CentralityAlgorithmTasks {
 
@@ -58,5 +62,9 @@ public final class CentralityAlgorithmTasks {
     }
 
     public Task harmonicCentrality(){ return HarmonicCentralityProgressTask.create(); }
+
+    public  Task ArticleRank(Graph graph, ArticleRankConfig configuration){
+        return Pregel.progressTask(graph, configuration, ArticleRank.asString());
+    }
 
 }

@@ -23,4 +23,9 @@ import com.carrotsearch.hppc.BitSet;
 
 import java.util.Optional;
 
-public record ArticulationPointsResult(BitSet articulationPoints, Optional<SubtreeTracker> subtreeTracker) {}
+public record ArticulationPointsResult(BitSet articulationPoints, Optional<SubtreeTracker> subtreeTracker) {
+
+    public static ArticulationPointsResult EMPTY = new ArticulationPointsResult(
+        new BitSet(0),Optional.empty()
+    );
+}
