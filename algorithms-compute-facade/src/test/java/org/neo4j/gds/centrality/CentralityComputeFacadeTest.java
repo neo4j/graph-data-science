@@ -30,6 +30,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.articulationPoints.ArticulationPointsParameters;
 import org.neo4j.gds.async.AsyncAlgorithmCaller;
 import org.neo4j.gds.betweenness.BetweennessCentralityParameters;
+import org.neo4j.gds.bridges.BridgesParameters;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -144,5 +145,21 @@ class CentralityComputeFacadeTest {
         assertThat(results.computeMillis()).isNotNegative();
     }
 
+    @Test
+    void bridges() {
+
+        var params = new BridgesParameters(new Concurrency(1), false);
+        var future = facade.bridges(
+            graph,
+            params,
+            jobIdMock,
+            false
+        );
+
+        var results = future.join();
+
+        assertThat(results.result().bridges()).hasSize(2); //e is the art. point
+        assertThat(results.computeMillis()).isNotNegative();
+    }
 
 }

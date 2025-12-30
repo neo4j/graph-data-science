@@ -29,6 +29,9 @@ import org.neo4j.gds.async.AsyncAlgorithmCaller;
 import org.neo4j.gds.betweenness.BetweennessCentrality;
 import org.neo4j.gds.betweenness.BetweennessCentralityParameters;
 import org.neo4j.gds.betweenness.BetwennessCentralityResult;
+import org.neo4j.gds.bridges.BridgeResult;
+import org.neo4j.gds.bridges.Bridges;
+import org.neo4j.gds.bridges.BridgesParameters;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.pagerank.ArticleRankComputation;
@@ -172,6 +175,32 @@ public class CentralityComputeFacade {
 
         return algorithmCaller.run(
             betweennessCentrality::compute,
+            jobId
+        );
+    }
+
+    public CompletableFuture<TimedAlgorithmResult<BridgeResult>> bridges(
+        Graph graph,
+        BridgesParameters parameters,
+        JobId jobId,
+        boolean logProgress
+    ) {
+        if (graph.isEmpty()){
+            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(BridgeResult.EMPTY));
+        }
+
+        var progressTracker = progressTrackerFactory.create(
+            tasks.articulationPoints(graph),
+            jobId,
+            parameters.concurrency(),
+            logProgress
+        );
+
+        var bridges =  Bridges
+            .create(graph, progressTracker, parameters.computeComponents());
+
+        return algorithmCaller.run(
+            bridges::compute,
             jobId
         );
     }

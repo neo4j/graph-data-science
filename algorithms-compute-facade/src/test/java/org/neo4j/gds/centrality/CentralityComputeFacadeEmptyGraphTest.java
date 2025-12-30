@@ -31,6 +31,8 @@ import org.neo4j.gds.articulationpoints.ArticulationPointsResult;
 import org.neo4j.gds.async.AsyncAlgorithmCaller;
 import org.neo4j.gds.betweenness.BetweennessCentralityParameters;
 import org.neo4j.gds.betweenness.BetwennessCentralityResult;
+import org.neo4j.gds.bridges.BridgeResult;
+import org.neo4j.gds.bridges.BridgesParameters;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.pagerank.ArticleRankStatsConfigImpl;
 import org.neo4j.gds.pagerank.PageRankResult;
@@ -114,6 +116,23 @@ class CentralityComputeFacadeEmptyGraphTest {
 
         var result = future.join();
         assertThat(result.result()).isEqualTo(BetwennessCentralityResult.EMPTY);
+
+        verifyNoInteractions(progressTrackerFactoryMock);
+        verifyNoInteractions(algorithmCallerMock);
+    }
+
+    @Test
+    void bridges() {
+
+        var future = facade.bridges(
+            graph,
+            mock(BridgesParameters.class),
+            jobIdMock,
+            true
+        );
+
+        var result = future.join();
+        assertThat(result.result()).isEqualTo(BridgeResult.EMPTY);
 
         verifyNoInteractions(progressTrackerFactoryMock);
         verifyNoInteractions(algorithmCallerMock);

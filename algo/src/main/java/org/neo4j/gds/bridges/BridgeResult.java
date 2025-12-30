@@ -22,4 +22,6 @@ package org.neo4j.gds.bridges;
 import java.util.List;
 
 public record BridgeResult(List<Bridge> bridges){
+
+    public static BridgeResult EMPTY = new BridgeResult(List.of());
 }
