@@ -33,8 +33,11 @@ import org.neo4j.gds.centrality.validation.BetweennessCentralityGraphStoreValida
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.loading.validation.GraphStoreValidation;
+import org.neo4j.gds.core.loading.validation.NoAlgorithmRequirements;
 import org.neo4j.gds.core.loading.validation.SourceNodesRequirement;
 import org.neo4j.gds.core.loading.validation.UndirectedOnlyRequirement;
+import org.neo4j.gds.influenceMaximization.CELFParameters;
+import org.neo4j.gds.influenceMaximization.CELFResult;
 import org.neo4j.gds.pagerank.ArticleRankConfig;
 import org.neo4j.gds.pagerank.PageRankResult;
 import org.neo4j.gds.result.TimedAlgorithmResult;
@@ -93,7 +96,6 @@ public class CentralityComputeBusinessFacade {
             config,
             jobId,
             logProgress
-
         ).thenApply(resultTransformerBuilder.build(graphResources));
     }
 
@@ -124,7 +126,6 @@ public class CentralityComputeBusinessFacade {
             parameters,
             jobId,
             logProgress
-
         ).thenApply(resultTransformerBuilder.build(graphResources));
     }
 
@@ -155,7 +156,6 @@ public class CentralityComputeBusinessFacade {
             parameters,
             jobId,
             logProgress
-
         ).thenApply(resultTransformerBuilder.build(graphResources));
     }
 
@@ -186,7 +186,36 @@ public class CentralityComputeBusinessFacade {
             parameters,
             jobId,
             logProgress
+        ).thenApply(resultTransformerBuilder.build(graphResources));
+    }
 
+    public <TR> CompletableFuture<TR> celf(
+        GraphName graphName,
+        GraphParameters graphParameters,
+        CELFParameters parameters,
+        JobId jobId,
+        boolean logProgress,
+        ResultTransformerBuilder<TimedAlgorithmResult<CELFResult>, TR> resultTransformerBuilder
+    ) {
+        // Fetch the Graph the algorithm will operate on
+        var graphResources = graphStoreCatalogService.fetchGraphResources(
+            graphName,
+            graphParameters,
+            Optional.empty(),
+            new GraphStoreValidation(
+                new NoAlgorithmRequirements()
+            ),
+            Optional.empty(),
+            user,
+            databaseId
+        );
+        var graph = graphResources.graph();
+
+        return computeFacade.celf(
+            graph,
+            parameters,
+            jobId,
+            logProgress
         ).thenApply(resultTransformerBuilder.build(graphResources));
     }
 
