@@ -33,6 +33,7 @@ import org.neo4j.gds.harmonic.HarmonicCentralityStreamConfig;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationStreamConfig;
 import org.neo4j.gds.pagerank.ArticleRankStreamConfig;
 import org.neo4j.gds.pagerank.EigenvectorStreamConfig;
+import org.neo4j.gds.pagerank.PageRankStreamConfig;
 import org.neo4j.gds.procedures.algorithms.centrality.AlphaHarmonicStreamResult;
 import org.neo4j.gds.procedures.algorithms.centrality.ArticulationPointStreamResult;
 import org.neo4j.gds.procedures.algorithms.centrality.BridgesStreamResult;
@@ -205,6 +206,20 @@ public class PushbackCentralityStreamProcedureFacade {
             GraphName.parse(graphName),
             config.toGraphParameters(),
             parameters,
+            config.jobId(),
+            config.logProgress(),
+            graphResources -> new CentralityResultStreamTransformer<>(graphResources.graph())
+        ).join();
+    }
+
+    public Stream<CentralityStreamResult> pageRank(String graphName, Map<String, Object> configuration) {
+        var config = configurationParser.parseConfiguration(configuration, PageRankStreamConfig::of);
+
+        return businessFacade.pageRank(
+            GraphName.parse(graphName),
+            config.toGraphParameters(),
+            config.relationshipWeightProperty(),
+            config,
             config.jobId(),
             config.logProgress(),
             graphResources -> new CentralityResultStreamTransformer<>(graphResources.graph())

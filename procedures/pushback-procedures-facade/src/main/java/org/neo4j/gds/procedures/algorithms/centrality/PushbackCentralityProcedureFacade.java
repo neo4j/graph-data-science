@@ -564,7 +564,7 @@ public class PushbackCentralityProcedureFacade implements CentralityProcedureFac
 
     @Override
     public Stream<CentralityStreamResult> pageRankStream(String graphName, Map<String, Object> configuration) {
-        return Stream.empty();
+        return streamProcedureFacade.pageRank(graphName,configuration);
     }
 
     @Override
