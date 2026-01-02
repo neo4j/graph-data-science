@@ -20,6 +20,7 @@
 package org.neo4j.gds.procedures.algorithms.centrality.stream;
 
 import org.neo4j.gds.api.GraphName;
+import org.neo4j.gds.betweenness.BetweennessCentralityStreamConfig;
 import org.neo4j.gds.centrality.CentralityComputeBusinessFacade;
 import org.neo4j.gds.harmonic.HarmonicCentralityStreamConfig;
 import org.neo4j.gds.pagerank.ArticleRankStreamConfig;
@@ -65,6 +66,21 @@ public class PushbackCentralityStreamProcedureFacade {
             config.toGraphParameters(),
             config.relationshipWeightProperty(),
             config,
+            config.jobId(),
+            config.logProgress(),
+            graphResources -> new CentralityResultStreamTransformer<>(graphResources.graph())
+        ).join();
+    }
+
+    public Stream<CentralityStreamResult> betweenness(String graphName, Map<String, Object> configuration) {
+        var config = configurationParser.parseConfiguration(configuration, BetweennessCentralityStreamConfig::of);
+
+        var parameters = config.toParameters();
+        return businessFacade.betweennessCentrality(
+            GraphName.parse(graphName),
+            config.toGraphParameters(),
+            parameters,
+            config.relationshipWeightProperty(),
             config.jobId(),
             config.logProgress(),
             graphResources -> new CentralityResultStreamTransformer<>(graphResources.graph())
