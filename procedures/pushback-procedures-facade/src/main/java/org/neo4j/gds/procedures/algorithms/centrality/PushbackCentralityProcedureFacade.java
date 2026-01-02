@@ -512,7 +512,7 @@ public class PushbackCentralityProcedureFacade implements CentralityProcedureFac
         String graphName,
         Map<String, Object> configuration
     ) {
-        return Stream.empty();
+        return streamProcedureFacade.harmonic(graphName,configuration);
     }
 
     @Override

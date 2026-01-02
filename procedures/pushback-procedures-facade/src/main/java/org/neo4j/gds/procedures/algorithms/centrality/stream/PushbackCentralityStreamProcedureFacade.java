@@ -197,5 +197,19 @@ public class PushbackCentralityStreamProcedureFacade {
         ).join();
     }
 
+    public Stream<CentralityStreamResult> harmonic(String graphName, Map<String, Object> configuration) {
+        var config = configurationParser.parseConfiguration(configuration, HarmonicCentralityStreamConfig::of);
+
+        var parameters = config.toParameters();
+        return businessFacade.harmonic(
+            GraphName.parse(graphName),
+            config.toGraphParameters(),
+            parameters,
+            config.jobId(),
+            config.logProgress(),
+            graphResources -> new CentralityResultStreamTransformer<>(graphResources.graph())
+        ).join();
+    }
+
 
 }
