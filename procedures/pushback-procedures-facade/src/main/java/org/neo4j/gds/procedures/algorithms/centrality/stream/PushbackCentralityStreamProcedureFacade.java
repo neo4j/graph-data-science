@@ -20,14 +20,18 @@
 package org.neo4j.gds.procedures.algorithms.centrality.stream;
 
 import org.neo4j.gds.api.GraphName;
+import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.articulationpoints.ArticulationPointsStreamConfig;
 import org.neo4j.gds.articulationpoints.ArticulationPointsToParameters;
 import org.neo4j.gds.betweenness.BetweennessCentralityStreamConfig;
+import org.neo4j.gds.bridges.BridgesStreamConfig;
+import org.neo4j.gds.bridges.BridgesToParameters;
 import org.neo4j.gds.centrality.CentralityComputeBusinessFacade;
 import org.neo4j.gds.harmonic.HarmonicCentralityStreamConfig;
 import org.neo4j.gds.pagerank.ArticleRankStreamConfig;
 import org.neo4j.gds.procedures.algorithms.centrality.AlphaHarmonicStreamResult;
 import org.neo4j.gds.procedures.algorithms.centrality.ArticulationPointStreamResult;
+import org.neo4j.gds.procedures.algorithms.centrality.BridgesStreamResult;
 import org.neo4j.gds.procedures.algorithms.centrality.CentralityStreamResult;
 import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
 
@@ -38,13 +42,17 @@ public class PushbackCentralityStreamProcedureFacade {
 
     private final CentralityComputeBusinessFacade businessFacade;
     private final UserSpecificConfigurationParser configurationParser;
+    private final ProcedureReturnColumns procedureReturnColumns;
+
 
     public PushbackCentralityStreamProcedureFacade(
         CentralityComputeBusinessFacade businessFacade,
-        UserSpecificConfigurationParser configurationParser
+        UserSpecificConfigurationParser configurationParser,
+        ProcedureReturnColumns procedureReturnColumns
     ) {
         this.businessFacade = businessFacade;
         this.configurationParser = configurationParser;
+        this.procedureReturnColumns = procedureReturnColumns;
     }
 
     public Stream<AlphaHarmonicStreamResult> alphaHarmonic(String graphName, Map<String, Object> configuration) {
@@ -77,12 +85,12 @@ public class PushbackCentralityStreamProcedureFacade {
 
     public Stream<ArticulationPointStreamResult> articulationPoints(
         String graphName,
-        Map<String, Object> configuration,
-        boolean shouldComputeParameters
+        Map<String, Object> configuration
     ) {
         var config = configurationParser.parseConfiguration(configuration, ArticulationPointsStreamConfig::of);
+        var shouldComputeComponents = procedureReturnColumns.contains("resultingComponents");
 
-        var parameters = ArticulationPointsToParameters.toParameters(config,shouldComputeParameters);
+        var parameters = ArticulationPointsToParameters.toParameters(config,shouldComputeComponents);
         return businessFacade.articulationPoints(
             GraphName.parse(graphName),
             config.toGraphParameters(),
@@ -108,6 +116,23 @@ public class PushbackCentralityStreamProcedureFacade {
         ).join();
     }
 
+    public Stream<BridgesStreamResult> bridges(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var config = configurationParser.parseConfiguration(configuration, BridgesStreamConfig::of);
 
+        var shouldComputeComponents = procedureReturnColumns.contains("remainingSizes");
+
+        var parameters = BridgesToParameters.toParameters(config,shouldComputeComponents);
+        return businessFacade.bridges(
+            GraphName.parse(graphName),
+            config.toGraphParameters(),
+            parameters,
+            config.jobId(),
+            config.logProgress(),
+            graphResources -> new BridgesStreamResultTransformer(graphResources.graph(),shouldComputeComponents)
+        ).join();
+    }
 
 }

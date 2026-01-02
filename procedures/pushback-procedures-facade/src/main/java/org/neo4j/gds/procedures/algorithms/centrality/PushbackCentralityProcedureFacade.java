@@ -192,7 +192,7 @@ public class PushbackCentralityProcedureFacade implements CentralityProcedureFac
         String graphName,
         Map<String, Object> configuration
     ) {
-        return Stream.empty();
+        return streamProcedureFacade.articulationPoints(graphName,configuration);
     }
 
     @Override
@@ -253,7 +253,7 @@ public class PushbackCentralityProcedureFacade implements CentralityProcedureFac
 
     @Override
     public Stream<BridgesStreamResult> bridgesStream(String graphName, Map<String, Object> configuration) {
-        return Stream.empty();
+        return streamProcedureFacade.bridges(graphName,configuration);
     }
 
     @Override

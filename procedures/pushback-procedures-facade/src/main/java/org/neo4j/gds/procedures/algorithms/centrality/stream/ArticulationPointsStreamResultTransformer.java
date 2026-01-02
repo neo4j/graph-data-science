@@ -34,7 +34,9 @@ import java.util.stream.Stream;
 public class ArticulationPointsStreamResultTransformer implements ResultTransformer<TimedAlgorithmResult<ArticulationPointsResult>, Stream<ArticulationPointStreamResult>> {
     private final Graph graph;
 
-    public ArticulationPointsStreamResultTransformer(Graph graph) {this.graph = graph;}
+    public ArticulationPointsStreamResultTransformer(Graph graph) {
+        this.graph = graph;
+    }
 
     @Override
     public Stream<ArticulationPointStreamResult> apply(TimedAlgorithmResult<ArticulationPointsResult> timedAlgorithmResult) {
