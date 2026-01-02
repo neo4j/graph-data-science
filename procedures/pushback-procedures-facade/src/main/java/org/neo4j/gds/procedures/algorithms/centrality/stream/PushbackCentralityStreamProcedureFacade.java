@@ -27,6 +27,7 @@ import org.neo4j.gds.betweenness.BetweennessCentralityStreamConfig;
 import org.neo4j.gds.bridges.BridgesStreamConfig;
 import org.neo4j.gds.bridges.BridgesToParameters;
 import org.neo4j.gds.centrality.CentralityComputeBusinessFacade;
+import org.neo4j.gds.closeness.ClosenessCentralityStreamConfig;
 import org.neo4j.gds.harmonic.HarmonicCentralityStreamConfig;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationStreamConfig;
 import org.neo4j.gds.pagerank.ArticleRankStreamConfig;
@@ -148,6 +149,20 @@ public class PushbackCentralityStreamProcedureFacade {
             config.jobId(),
             config.logProgress(),
             graphResources -> new CelfStreamResultTransformer(graphResources.graph())
+        ).join();
+    }
+
+    public Stream<CentralityStreamResult> closeness(String graphName, Map<String, Object> configuration) {
+        var config = configurationParser.parseConfiguration(configuration, ClosenessCentralityStreamConfig::of);
+
+        var parameters = config.toParameters();
+        return businessFacade.closeness(
+            GraphName.parse(graphName),
+            config.toGraphParameters(),
+            parameters,
+            config.jobId(),
+            config.logProgress(),
+            graphResources -> new CentralityResultStreamTransformer<>(graphResources.graph())
         ).join();
     }
 
