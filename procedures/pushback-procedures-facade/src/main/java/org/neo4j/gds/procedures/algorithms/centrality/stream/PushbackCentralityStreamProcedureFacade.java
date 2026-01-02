@@ -32,6 +32,7 @@ import org.neo4j.gds.degree.DegreeCentralityStreamConfig;
 import org.neo4j.gds.harmonic.HarmonicCentralityStreamConfig;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationStreamConfig;
 import org.neo4j.gds.pagerank.ArticleRankStreamConfig;
+import org.neo4j.gds.pagerank.EigenvectorStreamConfig;
 import org.neo4j.gds.procedures.algorithms.centrality.AlphaHarmonicStreamResult;
 import org.neo4j.gds.procedures.algorithms.centrality.ArticulationPointStreamResult;
 import org.neo4j.gds.procedures.algorithms.centrality.BridgesStreamResult;
@@ -176,6 +177,20 @@ public class PushbackCentralityStreamProcedureFacade {
             config.toGraphParameters(),
             config.relationshipWeightProperty(),
             parameters,
+            config.jobId(),
+            config.logProgress(),
+            graphResources -> new CentralityResultStreamTransformer<>(graphResources.graph())
+        ).join();
+    }
+
+    public Stream<CentralityStreamResult> eigenVector(String graphName, Map<String, Object> configuration) {
+        var config = configurationParser.parseConfiguration(configuration, EigenvectorStreamConfig::of);
+
+        return businessFacade.eigenVector(
+            GraphName.parse(graphName),
+            config.toGraphParameters(),
+            config.relationshipWeightProperty(),
+            config,
             config.jobId(),
             config.logProgress(),
             graphResources -> new CentralityResultStreamTransformer<>(graphResources.graph())

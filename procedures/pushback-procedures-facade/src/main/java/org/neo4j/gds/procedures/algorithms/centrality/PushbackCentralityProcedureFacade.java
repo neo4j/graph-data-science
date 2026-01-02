@@ -454,7 +454,7 @@ public class PushbackCentralityProcedureFacade implements CentralityProcedureFac
 
     @Override
     public Stream<CentralityStreamResult> eigenvectorStream(String graphName, Map<String, Object> configuration) {
-        return Stream.empty();
+        return streamProcedureFacade.eigenVector(graphName,configuration);
     }
 
     @Override
