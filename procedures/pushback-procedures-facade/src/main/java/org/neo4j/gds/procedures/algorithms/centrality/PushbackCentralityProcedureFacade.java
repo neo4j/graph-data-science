@@ -83,7 +83,7 @@ public class PushbackCentralityProcedureFacade implements CentralityProcedureFac
 
     @Override
     public Stream<CentralityStreamResult> articleRankStream(String graphName, Map<String, Object> configuration) {
-        return Stream.empty();
+        return streamProcedureFacade.articleRank(graphName,configuration);
     }
 
     @Override

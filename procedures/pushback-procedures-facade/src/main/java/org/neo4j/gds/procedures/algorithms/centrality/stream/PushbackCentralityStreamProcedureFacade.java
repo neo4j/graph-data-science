@@ -22,7 +22,9 @@ package org.neo4j.gds.procedures.algorithms.centrality.stream;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.centrality.CentralityComputeBusinessFacade;
 import org.neo4j.gds.harmonic.HarmonicCentralityStreamConfig;
+import org.neo4j.gds.pagerank.ArticleRankStreamConfig;
 import org.neo4j.gds.procedures.algorithms.centrality.AlphaHarmonicStreamResult;
+import org.neo4j.gds.procedures.algorithms.centrality.CentralityStreamResult;
 import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
 
 import java.util.Map;
@@ -52,6 +54,20 @@ public class PushbackCentralityStreamProcedureFacade {
             config.jobId(),
             config.logProgress(),
             graphResources -> new AlphaHarmonicStreamResultTransformer(graphResources.graph())
+        ).join();
+    }
+
+    public Stream<CentralityStreamResult> articleRank(String graphName, Map<String, Object> configuration) {
+        var config = configurationParser.parseConfiguration(configuration, ArticleRankStreamConfig::of);
+
+        return businessFacade.articleRank(
+            GraphName.parse(graphName),
+            config.toGraphParameters(),
+            config.relationshipWeightProperty(),
+            config,
+            config.jobId(),
+            config.logProgress(),
+            graphResources -> new CentralityResultStreamTransformer<>(graphResources.graph())
         ).join();
     }
 
