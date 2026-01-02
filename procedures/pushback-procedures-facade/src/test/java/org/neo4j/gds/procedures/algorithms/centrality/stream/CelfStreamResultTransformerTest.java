@@ -19,12 +19,11 @@
  */
 package org.neo4j.gds.procedures.algorithms.centrality.stream;
 
+import com.carrotsearch.hppc.LongDoubleScatterMap;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
-import org.neo4j.gds.collections.ha.HugeDoubleArray;
-import org.neo4j.gds.harmonic.HarmonicResult;
-import org.neo4j.gds.procedures.algorithms.centrality.AlphaHarmonicStreamResult;
+import org.neo4j.gds.influenceMaximization.CELFResult;
+import org.neo4j.gds.procedures.algorithms.centrality.CELFStreamResult;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -35,29 +34,27 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-class AlphaHarmonicStreamResultTransformerTest {
+class CelfStreamResultTransformerTest {
 
     @Test
     void shouldTransformResult(){
-
-        var result = mock(HarmonicResult.class);
-        when(result.nodePropertyValues()).thenReturn(NodePropertyValuesAdapter.adapt(HugeDoubleArray.of(10,9,8)));
         var graphMock = mock(Graph.class);
-        when(graphMock.nodeCount()).thenReturn(3L);
         when(graphMock.toOriginalNodeId(anyLong())).thenAnswer(invocation -> invocation.getArgument(0));
 
-        var transformer = new AlphaHarmonicStreamResultTransformer(graphMock);
+        var map = new LongDoubleScatterMap(10);
+        map.put(2,33.0);
+        map.put(4,45.0);
+        var result = new CELFResult(map);
+        var transformer = new CelfStreamResultTransformer(graphMock);
 
         var stream = transformer.apply(new TimedAlgorithmResult<>(result, -1));
         assertThat(stream).containsExactlyInAnyOrder(
-            new AlphaHarmonicStreamResult(0,10.0),
-            new AlphaHarmonicStreamResult(1,9.0),
-            new AlphaHarmonicStreamResult(2,8.0)
+            new CELFStreamResult(2,33.0),
+            new CELFStreamResult(4,45.0)
         );
 
-        verify(graphMock, times(1)).toOriginalNodeId(0L);
-        verify(graphMock, times(1)).toOriginalNodeId(1L);
         verify(graphMock, times(1)).toOriginalNodeId(2L);
+        verify(graphMock, times(1)).toOriginalNodeId(4L);
         verifyNoMoreInteractions(graphMock);
 
     }
@@ -66,11 +63,10 @@ class AlphaHarmonicStreamResultTransformerTest {
     void shouldTransformEmptyResult(){
 
         var graphMock = mock(Graph.class);
-        when(graphMock.nodeCount()).thenReturn(6L);
 
-        var transformer = new AlphaHarmonicStreamResultTransformer(graphMock);
+        var transformer = new CelfStreamResultTransformer(graphMock);
 
-        var stream = transformer.apply(new TimedAlgorithmResult<>(HarmonicResult.EMPTY, -1));
+        var stream = transformer.apply(new TimedAlgorithmResult<>(CELFResult.EMPTY, -1));
         assertThat(stream).isEmpty();
 
         verifyNoMoreInteractions(graphMock);

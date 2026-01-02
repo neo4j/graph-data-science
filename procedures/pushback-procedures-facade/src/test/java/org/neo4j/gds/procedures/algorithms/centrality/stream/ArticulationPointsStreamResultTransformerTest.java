@@ -98,7 +98,6 @@ class ArticulationPointsStreamResultTransformerTest {
 
         var graphMock = mock(Graph.class);
         when(graphMock.nodeCount()).thenReturn(0L);
-        when(graphMock.toOriginalNodeId(anyLong())).thenAnswer(invocation -> invocation.getArgument(0));
 
         var transformer = new ArticulationPointsStreamResultTransformer(graphMock);
 

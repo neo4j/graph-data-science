@@ -160,7 +160,7 @@ public class PushbackCentralityProcedureFacade implements CentralityProcedureFac
         String graphName,
         Map<String, Object> configuration
     ) {
-        return Stream.empty();
+        return streamProcedureFacade.betweenness(graphName,configuration);
     }
 
     @Override
@@ -292,7 +292,7 @@ public class PushbackCentralityProcedureFacade implements CentralityProcedureFac
 
     @Override
     public Stream<CELFStreamResult> celfStream(String graphName, Map<String, Object> configuration) {
-        return Stream.empty();
+        return streamProcedureFacade.celf(graphName,configuration);
     }
 
     @Override

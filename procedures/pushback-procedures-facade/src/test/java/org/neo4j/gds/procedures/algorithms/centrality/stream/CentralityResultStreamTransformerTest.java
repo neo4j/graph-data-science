@@ -67,7 +67,6 @@ class CentralityResultStreamTransformerTest {
 
         var graphMock = mock(Graph.class);
         when(graphMock.nodeCount()).thenReturn(6L);
-        when(graphMock.toOriginalNodeId(anyLong())).thenAnswer(invocation -> invocation.getArgument(0));
 
         var transformer = new CentralityResultStreamTransformer<>(graphMock);
 

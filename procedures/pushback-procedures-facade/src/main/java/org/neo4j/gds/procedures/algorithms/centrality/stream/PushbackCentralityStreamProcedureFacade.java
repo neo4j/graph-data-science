@@ -28,10 +28,12 @@ import org.neo4j.gds.bridges.BridgesStreamConfig;
 import org.neo4j.gds.bridges.BridgesToParameters;
 import org.neo4j.gds.centrality.CentralityComputeBusinessFacade;
 import org.neo4j.gds.harmonic.HarmonicCentralityStreamConfig;
+import org.neo4j.gds.influenceMaximization.InfluenceMaximizationStreamConfig;
 import org.neo4j.gds.pagerank.ArticleRankStreamConfig;
 import org.neo4j.gds.procedures.algorithms.centrality.AlphaHarmonicStreamResult;
 import org.neo4j.gds.procedures.algorithms.centrality.ArticulationPointStreamResult;
 import org.neo4j.gds.procedures.algorithms.centrality.BridgesStreamResult;
+import org.neo4j.gds.procedures.algorithms.centrality.CELFStreamResult;
 import org.neo4j.gds.procedures.algorithms.centrality.CentralityStreamResult;
 import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
 
@@ -134,5 +136,20 @@ public class PushbackCentralityStreamProcedureFacade {
             graphResources -> new BridgesStreamResultTransformer(graphResources.graph(),shouldComputeComponents)
         ).join();
     }
+
+    public Stream<CELFStreamResult> celf(String graphName, Map<String, Object> configuration) {
+        var config = configurationParser.parseConfiguration(configuration, InfluenceMaximizationStreamConfig::of);
+
+        var parameters = config.toParameters();
+        return businessFacade.celf(
+            GraphName.parse(graphName),
+            config.toGraphParameters(),
+            parameters,
+            config.jobId(),
+            config.logProgress(),
+            graphResources -> new CelfStreamResultTransformer(graphResources.graph())
+        ).join();
+    }
+
 
 }
