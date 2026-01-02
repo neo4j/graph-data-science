@@ -6,12 +6,4 @@ tasks.register("assembleDocs", Tar) {
     }
 }
 
-if (project.hasProperty('docsDir')) {
-    tasks.register("copyAssembledDocs", Copy) {
-        dependsOn assembleDocs
-        from(assembleDocs.archiveFile)
-        into(docsDir)
-    }
-}
-
 assemble.dependsOn(assembleDocs)
