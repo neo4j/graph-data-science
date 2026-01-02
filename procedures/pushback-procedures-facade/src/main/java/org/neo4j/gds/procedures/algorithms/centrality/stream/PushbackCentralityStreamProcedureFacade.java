@@ -28,6 +28,7 @@ import org.neo4j.gds.bridges.BridgesStreamConfig;
 import org.neo4j.gds.bridges.BridgesToParameters;
 import org.neo4j.gds.centrality.CentralityComputeBusinessFacade;
 import org.neo4j.gds.closeness.ClosenessCentralityStreamConfig;
+import org.neo4j.gds.degree.DegreeCentralityStreamConfig;
 import org.neo4j.gds.harmonic.HarmonicCentralityStreamConfig;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationStreamConfig;
 import org.neo4j.gds.pagerank.ArticleRankStreamConfig;
@@ -159,6 +160,21 @@ public class PushbackCentralityStreamProcedureFacade {
         return businessFacade.closeness(
             GraphName.parse(graphName),
             config.toGraphParameters(),
+            parameters,
+            config.jobId(),
+            config.logProgress(),
+            graphResources -> new CentralityResultStreamTransformer<>(graphResources.graph())
+        ).join();
+    }
+
+    public Stream<CentralityStreamResult> degree(String graphName, Map<String, Object> configuration) {
+        var config = configurationParser.parseConfiguration(configuration, DegreeCentralityStreamConfig::of);
+
+        var parameters = config.toParameters();
+        return businessFacade.degree(
+            GraphName.parse(graphName),
+            config.toGraphParameters(),
+            config.relationshipWeightProperty(),
             parameters,
             config.jobId(),
             config.logProgress(),
