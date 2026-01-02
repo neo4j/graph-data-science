@@ -20,11 +20,14 @@
 package org.neo4j.gds.procedures.algorithms.centrality.stream;
 
 import org.neo4j.gds.api.GraphName;
+import org.neo4j.gds.articulationpoints.ArticulationPointsStreamConfig;
+import org.neo4j.gds.articulationpoints.ArticulationPointsToParameters;
 import org.neo4j.gds.betweenness.BetweennessCentralityStreamConfig;
 import org.neo4j.gds.centrality.CentralityComputeBusinessFacade;
 import org.neo4j.gds.harmonic.HarmonicCentralityStreamConfig;
 import org.neo4j.gds.pagerank.ArticleRankStreamConfig;
 import org.neo4j.gds.procedures.algorithms.centrality.AlphaHarmonicStreamResult;
+import org.neo4j.gds.procedures.algorithms.centrality.ArticulationPointStreamResult;
 import org.neo4j.gds.procedures.algorithms.centrality.CentralityStreamResult;
 import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
 
@@ -72,6 +75,24 @@ public class PushbackCentralityStreamProcedureFacade {
         ).join();
     }
 
+    public Stream<ArticulationPointStreamResult> articulationPoints(
+        String graphName,
+        Map<String, Object> configuration,
+        boolean shouldComputeParameters
+    ) {
+        var config = configurationParser.parseConfiguration(configuration, ArticulationPointsStreamConfig::of);
+
+        var parameters = ArticulationPointsToParameters.toParameters(config,shouldComputeParameters);
+        return businessFacade.articulationPoints(
+            GraphName.parse(graphName),
+            config.toGraphParameters(),
+            parameters,
+            config.jobId(),
+            config.logProgress(),
+            graphResources -> new ArticulationPointsStreamResultTransformer(graphResources.graph())
+        ).join();
+    }
+
     public Stream<CentralityStreamResult> betweenness(String graphName, Map<String, Object> configuration) {
         var config = configurationParser.parseConfiguration(configuration, BetweennessCentralityStreamConfig::of);
 
@@ -86,5 +107,7 @@ public class PushbackCentralityStreamProcedureFacade {
             graphResources -> new CentralityResultStreamTransformer<>(graphResources.graph())
         ).join();
     }
+
+
 
 }
