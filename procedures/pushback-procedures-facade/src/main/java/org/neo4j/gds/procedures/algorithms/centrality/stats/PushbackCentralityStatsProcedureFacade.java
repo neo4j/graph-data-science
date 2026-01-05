@@ -23,10 +23,12 @@ import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.articulationpoints.ArticulationPointsStatsConfig;
 import org.neo4j.gds.articulationpoints.ArticulationPointsToParameters;
+import org.neo4j.gds.betweenness.BetweennessCentralityStatsConfig;
 import org.neo4j.gds.centrality.CentralityComputeBusinessFacade;
 import org.neo4j.gds.pagerank.ArticleRankStatsConfig;
 import org.neo4j.gds.procedures.algorithms.CentralityDistributionInstructions;
 import org.neo4j.gds.procedures.algorithms.centrality.ArticulationPointsStatsResult;
+import org.neo4j.gds.procedures.algorithms.centrality.CentralityStatsResult;
 import org.neo4j.gds.procedures.algorithms.centrality.PageRankStatsResult;
 import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
 
@@ -83,6 +85,25 @@ public class PushbackCentralityStatsProcedureFacade {
             config.jobId(),
             config.logProgress(),
             __ -> new ArticulationPointsStatsResultTransformer(config.toMap())
+        ).join();
+    }
+
+    public Stream<CentralityStatsResult> betweenness(String graphName, Map<String, Object> configuration) {
+        var config = configurationParser.parseConfiguration(configuration, BetweennessCentralityStatsConfig::of);
+
+        var parameters = config.toParameters();
+        return businessFacade.betweennessCentrality(
+            GraphName.parse(graphName),
+            config.toGraphParameters(),
+            parameters,
+            config.relationshipWeightProperty(),
+            config.jobId(),
+            config.logProgress(),
+            graphResources -> new CentralityStatsResultTransformer<>(
+                graphResources.graph(),
+                config.toMap(),
+                centralityDistributionInstructions.shouldComputeDistribution(),
+                parameters.concurrency())
         ).join();
     }
 
