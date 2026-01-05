@@ -29,6 +29,7 @@ import org.neo4j.gds.closeness.ClosenessCentralityStatsConfig;
 import org.neo4j.gds.degree.DegreeCentralityStatsConfig;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationStatsConfig;
 import org.neo4j.gds.pagerank.ArticleRankStatsConfig;
+import org.neo4j.gds.pagerank.EigenvectorStatsConfig;
 import org.neo4j.gds.procedures.algorithms.CentralityDistributionInstructions;
 import org.neo4j.gds.procedures.algorithms.centrality.ArticulationPointsStatsResult;
 import org.neo4j.gds.procedures.algorithms.centrality.CELFStatsResult;
@@ -163,6 +164,26 @@ public class PushbackCentralityStatsProcedureFacade {
                 config.toMap(),
                 centralityDistributionInstructions.shouldComputeDistribution(),
                 parameters.concurrency()
+            )
+        ).join();
+    }
+
+    public Stream<PageRankStatsResult> eigenVector(String graphName, Map<String, Object> configuration) {
+        var config = configurationParser.parseConfiguration(configuration, EigenvectorStatsConfig::of);
+        var scalerFactory = config.scaler();
+        return businessFacade.eigenVector(
+            GraphName.parse(graphName),
+            config.toGraphParameters(),
+            config.relationshipWeightProperty(),
+            config,
+            config.jobId(),
+            config.logProgress(),
+            graphResources -> new GenericRankStatsResultTransformer(
+                graphResources.graph(),
+                config.toMap(),
+                scalerFactory,
+                centralityDistributionInstructions.shouldComputeDistribution(),
+                config.concurrency()
             )
         ).join();
     }

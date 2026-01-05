@@ -448,7 +448,7 @@ public class PushbackCentralityProcedureFacade implements CentralityProcedureFac
 
     @Override
     public Stream<PageRankStatsResult> eigenvectorStats(String graphName, Map<String, Object> configuration) {
-        return Stream.empty();
+        return statsProcedureFacade.eigenVector(graphName,configuration);
     }
 
     @Override
