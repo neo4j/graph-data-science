@@ -231,7 +231,7 @@ public class PushbackCentralityProcedureFacade implements CentralityProcedureFac
         String graphName,
         Map<String, Object> configuration
     ) {
-        return Stream.empty();
+        return statsProcedureFacade.articulationPoints(graphName,configuration);
     }
 
     @Override

@@ -21,9 +21,12 @@ package org.neo4j.gds.procedures.algorithms.centrality.stats;
 
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.ProcedureReturnColumns;
+import org.neo4j.gds.articulationpoints.ArticulationPointsStatsConfig;
+import org.neo4j.gds.articulationpoints.ArticulationPointsToParameters;
 import org.neo4j.gds.centrality.CentralityComputeBusinessFacade;
 import org.neo4j.gds.pagerank.ArticleRankStatsConfig;
 import org.neo4j.gds.procedures.algorithms.CentralityDistributionInstructions;
+import org.neo4j.gds.procedures.algorithms.centrality.ArticulationPointsStatsResult;
 import org.neo4j.gds.procedures.algorithms.centrality.PageRankStatsResult;
 import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
 
@@ -63,6 +66,23 @@ public class PushbackCentralityStatsProcedureFacade {
                 centralityDistributionInstructions.shouldComputeDistribution(),
                 config.concurrency()
             )
+        ).join();
+    }
+
+    public Stream<ArticulationPointsStatsResult> articulationPoints(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var config = configurationParser.parseConfiguration(configuration, ArticulationPointsStatsConfig::of);
+
+        var parameters = ArticulationPointsToParameters.toParameters(config,false);
+        return businessFacade.articulationPoints(
+            GraphName.parse(graphName),
+            config.toGraphParameters(),
+            parameters,
+            config.jobId(),
+            config.logProgress(),
+            __ -> new ArticulationPointsStatsResultTransformer(config.toMap())
         ).join();
     }
 
