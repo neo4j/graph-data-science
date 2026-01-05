@@ -22,6 +22,7 @@ package org.neo4j.gds.algorithms.community;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.PropertyState;
+import org.neo4j.gds.api.properties.nodes.LongIfChangedNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodeProperty;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;

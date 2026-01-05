@@ -17,14 +17,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.algorithms.community;
+package org.neo4j.gds.api.properties.nodes;
 
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.gds.api.properties.nodes.FilteredNodePropertyValuesMarker;
-import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
-import org.neo4j.gds.api.properties.nodes.NodeProperty;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -36,16 +32,16 @@ public final class LongIfChangedNodePropertyValues implements LongNodePropertyVa
     public static LongNodePropertyValues of(NodeProperty seedProperty, LongNodePropertyValues newProperties) {
         var propertyState = seedProperty.propertyState();
         if (propertyState == PropertyState.PERSISTENT || propertyState == PropertyState.REMOTE) {
-            NodePropertyValues seedProperties = seedProperty.values();
+            var seedPropertyValueType = seedProperty.valueType();
             // TODO forbid doubles once we load properties with their correct type
-            if (seedProperties.valueType() == ValueType.LONG || seedProperties.valueType() == ValueType.DOUBLE) {
-                return new LongIfChangedNodePropertyValues(seedProperties, newProperties);
+            if (seedPropertyValueType == ValueType.LONG || seedPropertyValueType == ValueType.DOUBLE) {
+                return new LongIfChangedNodePropertyValues(seedProperty.values(), newProperties);
             } else {
                 throw new IllegalStateException(formatWithLocale(
                     "Expected seedProperty `%s` to be of type %s, but was %s",
-                    seedProperty,
+                    seedProperty.values(),
                     ValueType.LONG,
-                    seedProperties.valueType()
+                    seedPropertyValueType
                 ));
             }
         } else {
@@ -87,6 +83,9 @@ public final class LongIfChangedNodePropertyValues implements LongNodePropertyVa
         long seedValue = seedProperties.longValue(nodeId);
         long writeValue = newProperties.longValue(nodeId);
         return seedValue == Long.MIN_VALUE || (seedValue != writeValue);
+    }
 
+    public NodePropertyValues unfilteredProperties() {
+        return newProperties;
     }
 }

@@ -23,6 +23,7 @@ import org.eclipse.collections.api.block.function.primitive.LongToObjectFunction
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.nodes.FilteredNodePropertyValuesMarker;
 import org.neo4j.gds.api.properties.nodes.LongArrayNodePropertyValues;
+import org.neo4j.gds.api.properties.nodes.LongIfChangedNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodeProperty;
 import org.neo4j.gds.api.properties.nodes.NodePropertyContainer;
