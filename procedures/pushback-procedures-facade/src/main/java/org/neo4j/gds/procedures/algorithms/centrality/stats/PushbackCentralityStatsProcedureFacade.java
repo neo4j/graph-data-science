@@ -25,9 +25,13 @@ import org.neo4j.gds.articulationpoints.ArticulationPointsStatsConfig;
 import org.neo4j.gds.articulationpoints.ArticulationPointsToParameters;
 import org.neo4j.gds.betweenness.BetweennessCentralityStatsConfig;
 import org.neo4j.gds.centrality.CentralityComputeBusinessFacade;
+import org.neo4j.gds.closeness.ClosenessCentralityStatsConfig;
+import org.neo4j.gds.degree.DegreeCentralityStatsConfig;
+import org.neo4j.gds.influenceMaximization.InfluenceMaximizationStatsConfig;
 import org.neo4j.gds.pagerank.ArticleRankStatsConfig;
 import org.neo4j.gds.procedures.algorithms.CentralityDistributionInstructions;
 import org.neo4j.gds.procedures.algorithms.centrality.ArticulationPointsStatsResult;
+import org.neo4j.gds.procedures.algorithms.centrality.CELFStatsResult;
 import org.neo4j.gds.procedures.algorithms.centrality.CentralityStatsResult;
 import org.neo4j.gds.procedures.algorithms.centrality.PageRankStatsResult;
 import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
@@ -104,6 +108,62 @@ public class PushbackCentralityStatsProcedureFacade {
                 config.toMap(),
                 centralityDistributionInstructions.shouldComputeDistribution(),
                 parameters.concurrency())
+        ).join();
+    }
+
+    public Stream<CELFStatsResult> celf(String graphName, Map<String, Object> configuration) {
+        var config = configurationParser.parseConfiguration(configuration, InfluenceMaximizationStatsConfig::of);
+
+        var parameters = config.toParameters();
+        return businessFacade.celf(
+            GraphName.parse(graphName),
+            config.toGraphParameters(),
+            parameters,
+            config.jobId(),
+            config.logProgress(),
+            graphResources -> new CelfStatsResultTransformer(
+                graphResources.graph().nodeCount(),
+                config.toMap()
+            )
+        ).join();
+    }
+
+    public Stream<CentralityStatsResult> closeness(String graphName, Map<String, Object> configuration) {
+        var config = configurationParser.parseConfiguration(configuration, ClosenessCentralityStatsConfig::of);
+
+        var parameters = config.toParameters();
+        return businessFacade.closeness(
+            GraphName.parse(graphName),
+            config.toGraphParameters(),
+            parameters,
+            config.jobId(),
+            config.logProgress(),
+            graphResources -> new CentralityStatsResultTransformer<>(
+                graphResources.graph(),
+                config.toMap(),
+                centralityDistributionInstructions.shouldComputeDistribution(),
+                parameters.concurrency()
+            )
+        ).join();
+    }
+
+    public Stream<CentralityStatsResult> degree(String graphName, Map<String, Object> configuration) {
+        var config = configurationParser.parseConfiguration(configuration, DegreeCentralityStatsConfig::of);
+
+        var parameters = config.toParameters();
+        return businessFacade.degree(
+            GraphName.parse(graphName),
+            config.toGraphParameters(),
+            config.relationshipWeightProperty(),
+            parameters,
+            config.jobId(),
+            config.logProgress(),
+            graphResources -> new CentralityStatsResultTransformer<>(
+                graphResources.graph(),
+                config.toMap(),
+                centralityDistributionInstructions.shouldComputeDistribution(),
+                parameters.concurrency()
+            )
         ).join();
     }
 

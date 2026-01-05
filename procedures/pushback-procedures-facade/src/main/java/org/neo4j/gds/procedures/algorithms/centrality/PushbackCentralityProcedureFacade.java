@@ -286,7 +286,7 @@ public class PushbackCentralityProcedureFacade implements CentralityProcedureFac
 
     @Override
     public Stream<CELFStatsResult> celfStats(String graphName, Map<String, Object> configuration) {
-        return Stream.empty();
+        return statsProcedureFacade.celf(graphName,configuration);
     }
 
     @Override
@@ -341,7 +341,7 @@ public class PushbackCentralityProcedureFacade implements CentralityProcedureFac
 
     @Override
     public Stream<CentralityStatsResult> closenessCentralityStats(String graphName, Map<String, Object> configuration) {
-        return Stream.empty();
+        return statsProcedureFacade.closeness(graphName,configuration);
     }
 
     @Override
@@ -396,7 +396,7 @@ public class PushbackCentralityProcedureFacade implements CentralityProcedureFac
 
     @Override
     public Stream<CentralityStatsResult> degreeCentralityStats(String graphName, Map<String, Object> configuration) {
-        return Stream.empty();
+        return statsProcedureFacade.degree(graphName,configuration);
     }
 
     @Override

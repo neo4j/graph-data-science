@@ -59,8 +59,6 @@ class ArticulationPointsStatsResultTransformerTest {
     @Test
     void shouldTransformEmptyResult(){
 
-
-
         var config = Map.of("a",(Object)("foo"));
 
         var transformer = new ArticulationPointsStatsResultTransformer(
@@ -79,8 +77,5 @@ class ArticulationPointsStatsResultTransformerTest {
                 assertThat(stats.articulationPointCount()).isEqualTo(0);
             });
     }
-
-
-
 
 }
