@@ -42,8 +42,8 @@ class PageRankDistributionComputerTest {
         );
 
         assertThat(pageRankDistribution).isNotNull();
-        assertThat(pageRankDistribution.postProcessingMillis).isEqualTo(0);
-        assertThat(pageRankDistribution.centralitySummary)
+        assertThat(pageRankDistribution.computeMillis()).isEqualTo(0);
+        assertThat(pageRankDistribution.centralitySummary())
             .hasSize(1)
             .containsEntry("Error", "Unable to create histogram when using scaler of type LOG");
     }
@@ -64,8 +64,8 @@ class PageRankDistributionComputerTest {
         );
 
         assertThat(pageRankDistribution).isNotNull();
-        assertThat(pageRankDistribution.postProcessingMillis).isPositive();
-        assertThat(pageRankDistribution.centralitySummary)
+        assertThat(pageRankDistribution.computeMillis()).isPositive();
+        assertThat(pageRankDistribution.centralitySummary())
             .hasSize(9)
             .containsKeys("max", "mean", "min", "p50", "p75", "p90", "p95", "p99", "p999")
             .doesNotContainKey("Error");

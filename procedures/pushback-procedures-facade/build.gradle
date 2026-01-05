@@ -58,6 +58,7 @@ dependencies {
     // only `JobIdConfig` is what we need from this module
     implementation project(':progress-tracking')
 
+    implementation project(':scaling-utils')
     implementation project(':string-formatting')
 
     implementation project(':termination')

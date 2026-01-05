@@ -22,6 +22,7 @@ package org.neo4j.gds.algorithms.centrality;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.pagerank.PageRankResult;
 import org.neo4j.gds.pagerank.RankConfig;
+import org.neo4j.gds.result.CentralityDistribution;
 import org.neo4j.gds.result.CentralityStatistics;
 import org.neo4j.gds.scaling.LogScaler;
 
@@ -35,7 +36,7 @@ public final class PageRankDistributionComputer {
 
     private PageRankDistributionComputer() {}
 
-    public static PageRankDistribution computeDistribution(
+    public static CentralityDistribution computeDistribution(
         PageRankResult result,
         RankConfig configuration,
         boolean shouldComputeCentralityDistribution
@@ -63,7 +64,7 @@ public final class PageRankDistributionComputer {
                 postProcessingMillis = centralityStatistics.computeMilliseconds();
             }
         }
-        return new PageRankDistribution(centralitySummary, postProcessingMillis);
+        return new CentralityDistribution(centralitySummary, postProcessingMillis);
     }
 
 }

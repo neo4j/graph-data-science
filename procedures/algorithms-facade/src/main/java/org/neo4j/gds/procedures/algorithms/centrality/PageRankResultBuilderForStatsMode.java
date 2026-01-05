@@ -60,10 +60,10 @@ class PageRankResultBuilderForStatsMode<CONFIGURATION extends RankConfig> implem
             new PageRankStatsResult(
                 pageRankResult.iterations(),
                 pageRankResult.didConverge(),
-                pageRankDistribution.centralitySummary,
+                pageRankDistribution.centralitySummary(),
                 timings.preProcessingMillis,
                 timings.computeMillis,
-                pageRankDistribution.postProcessingMillis,
+                pageRankDistribution.computeMillis(),
                 configurationMap
             )
         );

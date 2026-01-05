@@ -61,10 +61,10 @@ class PageRankResultBuilderForWriteMode<C extends RankConfig & WritePropertyConf
         var pageRankWriteResult = new PageRankWriteResult(
             pageRankResult.iterations(),
             pageRankResult.didConverge(),
-            pageRankDistribution.centralitySummary,
+            pageRankDistribution.centralitySummary(),
             timings.preProcessingMillis,
             timings.computeMillis,
-            pageRankDistribution.postProcessingMillis,
+            pageRankDistribution.computeMillis(),
             timings.sideEffectMillis,
             metadata.orElseThrow().value(),
             configurationMap

@@ -17,17 +17,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.algorithms.centrality;
+package org.neo4j.gds.procedures.algorithms;
 
-import java.util.Collections;
-import java.util.Map;
+import org.neo4j.gds.api.ProcedureReturnColumns;
 
-public class PageRankDistribution {
-    public final Map<String, Object> centralitySummary;
-    public final long postProcessingMillis;
+ public class CentralityDistributionInstructions {
 
-    PageRankDistribution(Map<String, Object> centralitySummary, long postProcessingMillis) {
-        this.centralitySummary = Collections.unmodifiableMap(centralitySummary);
-        this.postProcessingMillis = postProcessingMillis;
+    private final ProcedureReturnColumns procedureReturnColumns;
+
+     public CentralityDistributionInstructions(ProcedureReturnColumns procedureReturnColumns) {
+        this.procedureReturnColumns = procedureReturnColumns;
     }
+
+     public boolean shouldComputeDistribution(){
+         return procedureReturnColumns.contains("centralityDistribution");
+    }
+
 }

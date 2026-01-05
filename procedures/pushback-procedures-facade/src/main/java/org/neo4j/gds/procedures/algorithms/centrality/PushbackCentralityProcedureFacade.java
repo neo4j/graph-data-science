@@ -20,6 +20,7 @@
 package org.neo4j.gds.procedures.algorithms.centrality;
 
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
+import org.neo4j.gds.procedures.algorithms.centrality.stats.PushbackCentralityStatsProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.centrality.stream.PushbackCentralityStreamProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.CentralityStubs;
 
@@ -29,9 +30,15 @@ import java.util.stream.Stream;
 public class PushbackCentralityProcedureFacade implements CentralityProcedureFacade{
 
     private final PushbackCentralityStreamProcedureFacade streamProcedureFacade;
+    private final PushbackCentralityStatsProcedureFacade statsProcedureFacade;
 
-    public PushbackCentralityProcedureFacade(PushbackCentralityStreamProcedureFacade streamProcedureFacade) {
+
+    public PushbackCentralityProcedureFacade(
+        PushbackCentralityStreamProcedureFacade streamProcedureFacade,
+        PushbackCentralityStatsProcedureFacade statsProcedureFacade
+    ) {
         this.streamProcedureFacade = streamProcedureFacade;
+        this.statsProcedureFacade = statsProcedureFacade;
     }
 
     @Override
@@ -70,7 +77,7 @@ public class PushbackCentralityProcedureFacade implements CentralityProcedureFac
 
     @Override
     public Stream<PageRankStatsResult> articleRankStats(String graphName, Map<String, Object> configuration) {
-        return Stream.empty();
+        return statsProcedureFacade.articleRank(graphName,configuration);
     }
 
     @Override

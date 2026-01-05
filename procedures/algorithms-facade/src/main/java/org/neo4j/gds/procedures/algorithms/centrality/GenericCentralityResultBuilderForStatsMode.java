@@ -51,10 +51,10 @@ class GenericCentralityResultBuilderForStatsMode {
         );
 
         return new CentralityStatsResult(
-            centralityDistributionAndTiming.getLeft(),
+            centralityDistributionAndTiming.centralitySummary(),
             timings.preProcessingMillis,
             timings.computeMillis,
-            centralityDistributionAndTiming.getRight(),
+            centralityDistributionAndTiming.computeMillis(),
             configuration.toMap()
         );
     }

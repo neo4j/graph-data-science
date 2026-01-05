@@ -61,10 +61,10 @@ public class PageRankResultBuilderForMutateMode<C extends RankConfig & MutateNod
         return new PageRankMutateResult(
             pageRankResult.iterations(),
             pageRankResult.didConverge(),
-            pageRankDistribution.centralitySummary,
+            pageRankDistribution.centralitySummary(),
             timings.preProcessingMillis,
             timings.computeMillis,
-            pageRankDistribution.postProcessingMillis,
+            pageRankDistribution.computeMillis(),
             timings.sideEffectMillis,
             metadata.orElseThrow().value(),
             configurationMap

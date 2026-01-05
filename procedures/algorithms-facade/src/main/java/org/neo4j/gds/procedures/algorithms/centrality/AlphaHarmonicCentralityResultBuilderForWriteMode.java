@@ -58,7 +58,7 @@ class AlphaHarmonicCentralityResultBuilderForWriteMode implements ResultBuilder<
         var alphaHarmonicWriteResult =  AlphaHarmonicWriteResult.create(
             timings,
             graph.nodeCount(),
-            centralityDistributionAndTiming.getLeft(),
+            centralityDistributionAndTiming.centralitySummary(),
             configuration
         );
 

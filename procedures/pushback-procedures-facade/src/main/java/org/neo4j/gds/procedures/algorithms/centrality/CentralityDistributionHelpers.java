@@ -20,36 +20,40 @@
 package org.neo4j.gds.procedures.algorithms.centrality;
 
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.config.ConcurrencyConfig;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.result.CentralityDistribution;
 import org.neo4j.gds.result.CentralityStatistics;
 
 import java.util.function.LongToDoubleFunction;
 
-public class CentralityDistributionComputer {
-    /**
-     * @return centrality distribution and the time it took to compute it
-     */
-    public CentralityDistribution compute(
+public final class CentralityDistributionHelpers {
+
+    private CentralityDistributionHelpers() {}
+
+    public static CentralityDistribution compute(
         IdMap graph,
         LongToDoubleFunction centralityFunction,
-        ConcurrencyConfig configuration,
+        Concurrency concurrency,
         boolean shouldComputeCentralityDistribution
     ) {
         var centralityStatistics = CentralityStatistics.centralityStatistics(
             graph.nodeCount(),
             centralityFunction,
             DefaultPool.INSTANCE,
-            configuration.concurrency(),
+            concurrency,
             shouldComputeCentralityDistribution
         );
 
-        var centralityDistribution = CentralityStatistics.centralitySummary(centralityStatistics.histogram(), centralityStatistics.success());
+        var centralityDistribution = CentralityStatistics.centralitySummary(
+            centralityStatistics.histogram(),
+            centralityStatistics.success()
+        );
 
         return new CentralityDistribution(
             centralityDistribution,
             centralityStatistics.computeMilliseconds()
         );
+
     }
 }
