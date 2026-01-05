@@ -27,6 +27,7 @@ import org.neo4j.gds.betweenness.BetweennessCentralityStatsConfig;
 import org.neo4j.gds.centrality.CentralityComputeBusinessFacade;
 import org.neo4j.gds.closeness.ClosenessCentralityStatsConfig;
 import org.neo4j.gds.degree.DegreeCentralityStatsConfig;
+import org.neo4j.gds.harmonic.HarmonicCentralityStatsConfig;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationStatsConfig;
 import org.neo4j.gds.pagerank.ArticleRankStatsConfig;
 import org.neo4j.gds.pagerank.EigenvectorStatsConfig;
@@ -184,6 +185,25 @@ public class PushbackCentralityStatsProcedureFacade {
                 scalerFactory,
                 centralityDistributionInstructions.shouldComputeDistribution(),
                 config.concurrency()
+            )
+        ).join();
+    }
+
+    public Stream<CentralityStatsResult> harmonic(String graphName, Map<String, Object> configuration) {
+        var config = configurationParser.parseConfiguration(configuration, HarmonicCentralityStatsConfig::of);
+
+        var parameters = config.toParameters();
+        return businessFacade.harmonic(
+            GraphName.parse(graphName),
+            config.toGraphParameters(),
+            parameters,
+            config.jobId(),
+            config.logProgress(),
+            graphResources -> new CentralityStatsResultTransformer<>(
+                graphResources.graph(),
+                config.toMap(),
+                centralityDistributionInstructions.shouldComputeDistribution(),
+                parameters.concurrency()
             )
         ).join();
     }
