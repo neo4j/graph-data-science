@@ -44,7 +44,7 @@ record-builder = "42"
 reflections = "0.10.2"
 sb-contrib = "7.6.3"
 # @pin the scala version should be aligned with the one used by Neo4j?
-scala = "2.13.11"
+scala = "2.13.17"
 stormpot = "4.1"
 
 [libraries]
