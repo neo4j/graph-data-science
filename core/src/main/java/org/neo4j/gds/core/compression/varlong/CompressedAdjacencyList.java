@@ -153,6 +153,10 @@ public final class CompressedAdjacencyList implements AdjacencyList {
         return this.memoryInfo;
     }
 
+    public static int decompressingReaderChunkSize() {
+        return AdjacencyDecompressingReader.CHUNK_SIZE;
+    }
+
     public byte[][] pages() {
         return pages;
     }
