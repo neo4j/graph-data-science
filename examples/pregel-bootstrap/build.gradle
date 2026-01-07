@@ -17,7 +17,7 @@ ext {
     jetbrainsAnnotations = '24.1.0'
 
     // Test dependency versions
-    junit5Version = '5.10.3'
+    junitVersion = '6.0.1'
 }
 
 description = 'Graph Data Science :: Pregel Bootstrap'
@@ -74,10 +74,10 @@ dependencies {
     testImplementation "org.neo4j.gds:opengds-extension:$gdsVersion"
 
     // Use JUnit Jupiter API for testing.
-    testImplementation "org.junit.jupiter:junit-jupiter-api:$junit5Version"
+    testImplementation "org.junit.jupiter:junit-jupiter-api:$junitVersion"
 
     // Use JUnit Jupiter Engine for testing.
-    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junit5Version"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
 }
 
 test {
