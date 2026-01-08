@@ -184,8 +184,8 @@ class DefaultGraphCatalogApplicationsTest {
             null,
             null,
             null
-        )).withMessage("Multiple errors in configuration arguments:\n" +
-            "\t\t\t\tNo value specified for the mandatory configuration parameter `nodeProjection`\n" +
+        )).withMessage("Multiple errors in configuration arguments:" + System.lineSeparator() +
+            "\t\t\t\tNo value specified for the mandatory configuration parameter `nodeProjection`" + System.lineSeparator() +
             "\t\t\t\tNo value specified for the mandatory configuration parameter `relationshipProjection`");
 
         assertThatIllegalArgumentException().isThrownBy(() -> facade.nativeProject(
@@ -259,8 +259,8 @@ class DefaultGraphCatalogApplicationsTest {
             null,
             null,
             null
-        )).withMessage("Multiple errors in configuration arguments:\n" +
-            "\t\t\t\tNo value specified for the mandatory configuration parameter `nodeQuery`\n" +
+        )).withMessage("Multiple errors in configuration arguments:" + System.lineSeparator() +
+            "\t\t\t\tNo value specified for the mandatory configuration parameter `nodeQuery`" + System.lineSeparator() +
             "\t\t\t\tNo value specified for the mandatory configuration parameter `relationshipQuery`");
 
         assertThatIllegalArgumentException().isThrownBy(() -> facade.cypherProject(
