@@ -17,9 +17,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core;
+package org.neo4j.gds.projection;
 
-import org.neo4j.gds.api.GraphStoreFactorySupplier;
 import org.neo4j.gds.config.GraphProjectConfig;
 
 import java.util.Map;

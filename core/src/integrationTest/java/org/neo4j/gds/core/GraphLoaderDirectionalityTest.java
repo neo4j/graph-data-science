@@ -27,6 +27,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.legacycypherprojection.CypherProjectionGraphStoreFactorySupplier;
 import org.neo4j.gds.legacycypherprojection.GraphProjectFromCypherConfig;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
+import org.neo4j.gds.projection.GraphStoreFactorySuppliers;
 import org.neo4j.gds.projection.NativeProjectionGraphStoreFactorySupplier;
 
 import java.util.Map;

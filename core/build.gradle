@@ -74,6 +74,7 @@ dependencies {
     testImplementation project(':gdl-graph')
     testImplementation project(':legacy-cypher-projection')
     testImplementation project(':progress-tracking')
+    testImplementation project(':projection')
     testImplementation project(':test-graph-loaders')
     testImplementation project(':test-utils')
 
@@ -81,5 +82,6 @@ dependencies {
     testImplementation openGds.qaladatagen
     testImplementation openGds.junit.pioneer
 
+    integrationTestImplementation project(':projection')
     integrationTestImplementation project(':native-projection')
 }

@@ -30,7 +30,6 @@ import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.properties.nodes.NodePropertyRecord;
 import org.neo4j.gds.core.Aggregation;
-import org.neo4j.gds.core.GraphStoreFactorySuppliers;
 import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
@@ -42,6 +41,7 @@ import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.nodeproperties.DoubleTestPropertyValues;
 import org.neo4j.gds.nodeproperties.LongTestPropertyValues;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
+import org.neo4j.gds.projection.GraphStoreFactorySuppliers;
 import org.neo4j.gds.projection.NativeProjectionGraphStoreFactorySupplier;
 import org.neo4j.gds.termination.TerminationFlag;
 

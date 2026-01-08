@@ -21,7 +21,6 @@ package org.neo4j.gds.projection;
 
 import org.neo4j.common.DependencyResolver;
 import org.neo4j.gds.api.GraphLoaderContext;
-import org.neo4j.gds.api.GraphStoreFactorySupplier;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.GraphDimensions;
 

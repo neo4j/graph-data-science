@@ -42,11 +42,11 @@ import org.neo4j.gds.applications.modelcatalog.ModelCatalogApplications;
 import org.neo4j.gds.applications.modelcatalog.ModelRepository;
 import org.neo4j.gds.applications.operations.FeatureTogglesRepository;
 import org.neo4j.gds.applications.operations.OperationsApplications;
-import org.neo4j.gds.core.GraphStoreFactorySuppliers;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.logging.GdsLoggers;
 import org.neo4j.gds.metrics.projections.ProjectionMetricsService;
+import org.neo4j.gds.projection.GraphStoreFactorySuppliers;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 

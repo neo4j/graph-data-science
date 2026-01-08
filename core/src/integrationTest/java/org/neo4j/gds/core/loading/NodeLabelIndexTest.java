@@ -23,11 +23,11 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.compat.TestLog;
-import org.neo4j.gds.core.GraphStoreFactorySuppliers;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.extension.Neo4jGraphExtension;
 import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
+import org.neo4j.gds.projection.GraphStoreFactorySuppliers;
 import org.neo4j.gds.projection.NativeProjectionGraphStoreFactorySupplier;
 
 import java.util.ArrayList;

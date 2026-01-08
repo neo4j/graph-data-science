@@ -28,7 +28,6 @@ import org.neo4j.gds.applications.modelcatalog.ModelRepository;
 import org.neo4j.gds.applications.operations.FeatureTogglesRepository;
 import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
-import org.neo4j.gds.core.GraphStoreFactorySuppliers;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.logging.GdsLoggers;
@@ -42,6 +41,7 @@ import org.neo4j.gds.procedures.TaskRegistryFactoryService;
 import org.neo4j.gds.procedures.UserAccessor;
 import org.neo4j.gds.procedures.UserLogServices;
 import org.neo4j.gds.procedures.pipelines.PipelineRepository;
+import org.neo4j.gds.projection.GraphStoreFactorySuppliers;
 import org.neo4j.graphdb.config.Configuration;
 
 import java.util.Optional;

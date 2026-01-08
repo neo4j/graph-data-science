@@ -26,13 +26,13 @@ import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResultFactory;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.config.GraphProjectConfig;
-import org.neo4j.gds.core.GraphStoreFactorySuppliers;
 import org.neo4j.gds.core.loading.GraphProjectResult;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.projection.GraphStoreFactorySuppliers;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -167,7 +167,7 @@ public class GenericProjectApplication<RESULT extends GraphProjectResult, CONFIG
     /**
      * Public because EstimationCLI tests needs it. Should redesign something here I think
      */
-    public MemoryEstimateResult estimateButFictitiously(
+    private MemoryEstimateResult estimateButFictitiously(
         GraphProjectMemoryUsageService graphProjectMemoryUsageService,
         GraphProjectConfig configuration
     ) {

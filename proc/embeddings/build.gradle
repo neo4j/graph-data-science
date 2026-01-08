@@ -32,6 +32,7 @@ dependencies {
     integrationTestImplementation project(':open-licensing')
     integrationTestImplementation project(':proc-test')
     integrationTestImplementation project(':progress-tracking')
+    integrationTestImplementation project(':projection')
     integrationTestImplementation project(':string-formatting')
     integrationTestImplementation project(':test-utils')
 

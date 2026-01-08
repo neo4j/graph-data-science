@@ -36,6 +36,7 @@ dependencies {
     implementation project(':neo4j-api')
     implementation project(':neo4j-settings')
     implementation project(':progress-tracking')
+    implementation project(':projection')
     implementation project(':transaction')
     implementation project(':string-formatting')
     implementation project(':defaults-and-limits-configuration')

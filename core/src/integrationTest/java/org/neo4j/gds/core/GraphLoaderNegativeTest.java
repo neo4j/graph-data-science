@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
+import org.neo4j.gds.projection.GraphStoreFactorySuppliers;
 import org.neo4j.gds.projection.NativeProjectionGraphStoreFactorySupplier;
 
 import java.util.Map;

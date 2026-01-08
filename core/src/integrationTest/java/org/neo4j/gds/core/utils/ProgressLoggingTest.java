@@ -24,10 +24,10 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.StoreLoaderBuilder;
-import org.neo4j.gds.core.GraphStoreFactorySuppliers;
 import org.neo4j.gds.graphbuilder.GraphBuilder;
 import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
+import org.neo4j.gds.projection.GraphStoreFactorySuppliers;
 import org.neo4j.gds.projection.NativeProjectionGraphStoreFactorySupplier;
 
 import java.util.Map;

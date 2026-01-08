@@ -41,12 +41,12 @@ import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.api.schema.RelationshipSchema;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.GraphLoader;
-import org.neo4j.gds.core.GraphStoreFactorySuppliers;
 import org.neo4j.gds.core.compression.varlong.CompressedAdjacencyList;
 import org.neo4j.gds.core.huge.UnionGraph;
 import org.neo4j.gds.core.loading.NullPropertyMap.DoubleNullPropertyMap;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
+import org.neo4j.gds.projection.GraphStoreFactorySuppliers;
 import org.neo4j.gds.projection.NativeProjectionGraphStoreFactorySupplier;
 
 import java.time.ZonedDateTime;

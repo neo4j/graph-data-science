@@ -44,6 +44,7 @@ import org.neo4j.gds.legacycypherprojection.CypherProjectionGraphStoreFactorySup
 import org.neo4j.gds.legacycypherprojection.GraphProjectFromCypherConfig;
 import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
+import org.neo4j.gds.projection.GraphStoreFactorySuppliers;
 import org.neo4j.gds.projection.NativeProjectionGraphStoreFactorySupplier;
 import org.neo4j.gds.termination.TerminationFlag;
 

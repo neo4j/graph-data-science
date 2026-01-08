@@ -426,6 +426,9 @@ project(':procedures-facade-api').projectDir = file('procedures/procedures-facad
 include('progress-tracking')
 project(':progress-tracking').projectDir = file('progress-tracking')
 
+include('projection')
+project(':projection').projectDir = file('projection')
+
 include('scaling-utils')
 project(':scaling-utils').projectDir = file('scaling-utils')
 

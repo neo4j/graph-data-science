@@ -28,7 +28,6 @@ import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.GraphLoader;
-import org.neo4j.gds.core.GraphStoreFactorySuppliers;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
@@ -37,6 +36,7 @@ import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.legacycypherprojection.GraphProjectFromCypherConfig;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
+import org.neo4j.gds.projection.GraphStoreFactorySuppliers;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -53,8 +53,7 @@ public final class GraphLoaderBuilders {
 
     /**
      * Factory method that defines the generation of a {@link GraphLoader}
-     * using a {@link org.neo4j.gds.projection.GraphProjectFromStoreConfig}. Use {@link StoreLoaderBuilder}
-     * to create the input for that method in a convenient way.
+     * using a {@link org.neo4j.gds.projection.GraphProjectFromStoreConfig}.
      */
     @Builder.Factory
     static GraphLoader storeLoader(
@@ -138,8 +137,7 @@ public final class GraphLoaderBuilders {
 
     /**
      * Factory method that defines the generation of a {@link GraphLoader}
-     * using a {@link org.neo4j.gds.legacycypherprojection.GraphProjectFromCypherConfig}. Use {@link CypherLoaderBuilder}
-     * to create the input for that method in a convenient way.
+     * using a {@link org.neo4j.gds.legacycypherprojection.GraphProjectFromCypherConfig}.
      */
     @Builder.Factory
     static GraphLoader cypherLoader(

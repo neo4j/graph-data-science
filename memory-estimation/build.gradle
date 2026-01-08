@@ -27,6 +27,7 @@ dependencies {
     implementation project(':native-projection')
     implementation project(':memory-usage')
     implementation project(':progress-tracking')
+    implementation project(':projection')
     implementation project(':string-formatting')
 
     // Test dependencies

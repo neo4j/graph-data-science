@@ -22,7 +22,7 @@ package org.neo4j.gds.memest;
 import org.neo4j.common.DependencyResolver;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.config.GraphProjectConfig;
-import org.neo4j.gds.core.GraphStoreFactorySuppliers;
+import org.neo4j.gds.projection.GraphStoreFactorySuppliers;
 
 public class DatabaseGraphStoreEstimationService {
     private final GraphLoaderContext graphLoaderContext;

@@ -44,6 +44,7 @@ dependencies {
     implementation project(':procedure-integration')
     implementation project(':procedures-facade-api')
     implementation project(':progress-tracking')
+    implementation project(':projection')
     implementation project(':string-formatting')
     implementation project(':termination')
     implementation project(':transaction')

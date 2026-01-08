@@ -22,9 +22,9 @@ package org.neo4j.gds.core.loading;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.StoreLoaderBuilder;
-import org.neo4j.gds.core.GraphStoreFactorySuppliers;
 import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
+import org.neo4j.gds.projection.GraphStoreFactorySuppliers;
 import org.neo4j.gds.projection.NativeProjectionGraphStoreFactorySupplier;
 
 import java.util.Map;

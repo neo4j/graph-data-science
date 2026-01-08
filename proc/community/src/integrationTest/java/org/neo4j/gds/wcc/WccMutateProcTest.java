@@ -61,7 +61,6 @@ import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.GraphLoader;
-import org.neo4j.gds.core.GraphStoreFactorySuppliers;
 import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
 import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
@@ -86,6 +85,7 @@ import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurati
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfigImpl;
+import org.neo4j.gds.projection.GraphStoreFactorySuppliers;
 import org.neo4j.gds.projection.NativeProjectionGraphStoreFactorySupplier;
 import org.neo4j.gds.termination.TerminationFlag;
 

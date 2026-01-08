@@ -25,13 +25,13 @@ import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.GraphStoreFactorySuppliers;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.extension.Neo4jGraphExtension;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
+import org.neo4j.gds.projection.GraphStoreFactorySuppliers;
 import org.neo4j.gds.projection.NativeProjectionGraphStoreFactorySupplier;
 import org.neo4j.gds.termination.TerminationFlag;
 

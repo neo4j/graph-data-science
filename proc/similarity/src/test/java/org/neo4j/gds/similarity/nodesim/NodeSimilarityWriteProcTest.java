@@ -37,10 +37,10 @@ import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.Aggregation;
-import org.neo4j.gds.core.GraphStoreFactorySuppliers;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
+import org.neo4j.gds.projection.GraphStoreFactorySuppliers;
 import org.neo4j.gds.projection.NativeProjectionGraphStoreFactorySupplier;
 
 import java.util.List;

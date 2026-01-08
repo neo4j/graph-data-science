@@ -20,8 +20,9 @@
 package org.neo4j.gds.core;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.api.GraphStoreFactorySupplier;
 import org.neo4j.gds.config.GraphProjectConfig;
+import org.neo4j.gds.projection.GraphStoreFactorySupplier;
+import org.neo4j.gds.projection.GraphStoreFactorySuppliers;
 
 import java.util.Collections;
 import java.util.Map;

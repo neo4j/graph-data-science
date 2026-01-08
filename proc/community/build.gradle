@@ -41,4 +41,5 @@ dependencies {
     integrationTestImplementation project(':model-catalog-applications')
     integrationTestImplementation project(':transaction')
     integrationTestImplementation project(':config-api')
+    integrationTestImplementation project(':projection')
 }

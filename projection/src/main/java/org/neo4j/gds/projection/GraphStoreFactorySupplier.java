@@ -17,9 +17,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.api;
+package org.neo4j.gds.projection;
 
 import org.neo4j.common.DependencyResolver;
+import org.neo4j.gds.api.GraphLoaderContext;
+import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.GraphStoreFactory;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.GraphDimensions;
 

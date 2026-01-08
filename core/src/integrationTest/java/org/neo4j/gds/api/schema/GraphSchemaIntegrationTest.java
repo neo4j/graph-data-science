@@ -35,8 +35,8 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.core.Aggregation;
-import org.neo4j.gds.core.GraphStoreFactorySuppliers;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
+import org.neo4j.gds.projection.GraphStoreFactorySuppliers;
 import org.neo4j.gds.projection.NativeProjectionGraphStoreFactorySupplier;
 
 import java.util.Map;

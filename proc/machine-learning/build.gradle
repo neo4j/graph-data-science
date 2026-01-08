@@ -80,6 +80,7 @@ dependencies {
     testImplementation project(':proc-community')
     testImplementation project(':proc-centrality')
     testImplementation project(':proc-embeddings')
+    testImplementation project(':projection')
 
     testImplementation project(':opengds-extension')
 }
