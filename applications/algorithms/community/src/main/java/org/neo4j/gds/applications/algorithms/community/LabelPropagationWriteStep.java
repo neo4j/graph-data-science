@@ -60,7 +60,8 @@ class LabelPropagationWriteStep implements WriteStep<LabelPropagationResult, Pai
             NodePropertyValuesAdapter.adapt(result.labels()),
             configuration.minCommunitySize(),
             configuration.concurrency(),
-            () -> graphStore.nodeProperty(configuration.seedProperty())
+            () -> graphStore.nodeProperty(configuration.seedProperty()),
+            configuration.forceSeedOptimization()
         );
 
         var nodePropertiesWritten = writeNodePropertyService.perform(

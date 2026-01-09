@@ -54,7 +54,8 @@ import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
             seedProperty,
             consecutiveIds,
             algorithmNodePropertyValues,
-            () -> graphStore.nodeProperty(seedProperty)
+            () -> graphStore.nodeProperty(seedProperty),
+            false
         );
     }
 }

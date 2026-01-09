@@ -53,13 +53,14 @@ class WccWriteStep implements WriteStep<DisjointSetStruct, Pair<NodePropertiesWr
     ) {
         var nodePropertyValues = CommunityCompanion.nodePropertyValues(
             configuration.isIncremental(),
-            configuration.seedProperty(),
             configuration.writeProperty(),
+            configuration.seedProperty(),
             configuration.consecutiveIds(),
             result.asNodeProperties(),
             configuration.minCommunitySize(),
             configuration.concurrency(),
-            () -> graphStore.nodeProperty(configuration.seedProperty())
+            () -> graphStore.nodeProperty(configuration.seedProperty()),
+            configuration.forceSeedOptimization()
         );
 
         var nodePropertiesWritten = writeNodePropertyService.perform(

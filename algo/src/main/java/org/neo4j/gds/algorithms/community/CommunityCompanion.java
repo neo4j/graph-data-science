@@ -60,16 +60,15 @@ public final class CommunityCompanion {
         String seedProperty,
         boolean consecutiveIds,
         LongNodePropertyValues nodeProperties,
-        Supplier<NodeProperty> seedPropertySupplier
+        Supplier<NodeProperty> seedPropertySupplier,
+        boolean forceSeedOptimization
     ) {
-
         if (consecutiveIds) {
             return new ConsecutiveLongNodePropertyValues(nodeProperties);
         }
-        if (isIncremental && resultProperty.equals(seedProperty)) {
+        if (isIncremental && (resultProperty.equals(seedProperty) || forceSeedOptimization)) {
             nodeProperties = LongIfChangedNodePropertyValues.of(seedPropertySupplier.get(), nodeProperties);
         }
-
 
         return nodeProperties;
     }
@@ -82,7 +81,8 @@ public final class CommunityCompanion {
         LongNodePropertyValues nodeProperties,
         Optional<Long> minCommunitySize,
         Concurrency concurrency,
-        Supplier<NodeProperty> seedPropertySupplier
+        Supplier<NodeProperty> seedPropertySupplier,
+        boolean forceSeedOptimization
     ) {
         var resultAfterMinFilter = minCommunitySize
             .map(size -> applySizeFilter(nodeProperties, size, concurrency))
@@ -94,7 +94,8 @@ public final class CommunityCompanion {
             seedProperty,
             consecutiveIds,
             resultAfterMinFilter,
-            seedPropertySupplier
+            seedPropertySupplier,
+            forceSeedOptimization
         );
     }
 
