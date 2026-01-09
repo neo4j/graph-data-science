@@ -19,15 +19,13 @@
  */
 package org.neo4j.gds.pathfinding;
 
-import org.neo4j.gds.Orientation;
-import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.MutateRelationshipService;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 import org.neo4j.gds.collections.ha.HugeLongArray;
-import org.neo4j.gds.core.loading.construction.GraphFactory;
+import org.neo4j.gds.paths.TraversalRelationshipTransformer;
 
 public class SearchMutateStep implements MutateStep<HugeLongArray, RelationshipsWritten> {
     private final String  mutateRelationshipType;
@@ -46,21 +44,7 @@ public class SearchMutateStep implements MutateStep<HugeLongArray, Relationships
     ) {
         if (result.size() == 0) return  new RelationshipsWritten(0);
 
-        var relationshipsBuilder = GraphFactory
-            .initRelationshipsBuilder()
-            .nodes(graph)
-            .relationshipType(RelationshipType.of(mutateRelationshipType))
-            .orientation(Orientation.NATURAL)
-            .build();
-
-        var source = result.get(0);
-        for (long i = 1; i < result.size(); i++) {
-            var target = result.get(i);
-            relationshipsBuilder.addFromInternal(source, target);
-            source = target;
-        }
-
-        var relationships = relationshipsBuilder.build();
+        var relationships = TraversalRelationshipTransformer.buildRelationships(graph, mutateRelationshipType, result);
 
         return  mutateRelationshipService.mutate(graphStore,relationships);
     }
