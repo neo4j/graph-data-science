@@ -38,7 +38,7 @@ include::partial$/algorithms/shared/syntax-intro-named-graph.adoc[]
 .Run Bridges in stream mode on a named graph.
 [source, cypher, role=noplay]
 ----
-CALL #gds.bridges.stream#(
+CALL gds.bridges.stream(
   graphName: String,
   configuration: Map
 )
