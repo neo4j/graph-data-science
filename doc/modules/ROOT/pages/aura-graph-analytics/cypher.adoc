@@ -266,7 +266,6 @@ The following algorithms are not supported:
 
 - xref:algorithms/random-walk.adoc[]
 - xref:algorithms/dfs.adoc[]
-- xref:algorithms/bridges.adoc[]
 - xref:algorithms/hits.adoc[]
 - xref:algorithms/dag/topological-sort.adoc[]
 - xref:algorithms/triangle-count.adoc#algorithms-triangle-count-examples-triangles-listing[Triangles listing]
