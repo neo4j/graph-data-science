@@ -28,7 +28,6 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.TestProgressTrackerHelper;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.loading.SingleTypeRelationships;
@@ -37,6 +36,7 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.gdl.GdlFactory;
+import org.neo4j.gds.numbers.Aggregation;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Map;

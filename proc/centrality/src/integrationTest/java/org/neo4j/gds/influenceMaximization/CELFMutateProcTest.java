@@ -30,9 +30,9 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
-import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
+import org.neo4j.gds.numbers.Aggregation;
 
 import java.util.concurrent.atomic.LongAdder;
 

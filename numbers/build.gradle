@@ -1,0 +1,8 @@
+apply plugin: 'java-library'
+
+description = 'Neo4j Graph Data Science :: Numbers'
+group = 'org.neo4j.gds'
+
+dependencies {
+    implementation project(':string-formatting')
+}

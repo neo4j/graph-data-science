@@ -22,9 +22,9 @@ package org.neo4j.gds.core.loading;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.neo4j.gds.api.compress.AdjacencyCompressor.ValueMapper.Identity;
-import org.neo4j.gds.core.compression.common.AdjacencyCompression;
-import org.neo4j.gds.core.compression.common.ZigZagLongDecoding;
+import org.neo4j.gds.compression.api.AdjacencyCompressor.ValueMapper.Identity;
+import org.neo4j.gds.compression.common.AdjacencyCompression;
+import org.neo4j.gds.compression.common.ZigZagLongDecoding;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatNoException;

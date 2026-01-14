@@ -26,10 +26,10 @@ import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.catalog.GraphProjectProc;
-import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
+import org.neo4j.gds.numbers.Aggregation;
 
 import java.util.HashMap;
 import java.util.Map;

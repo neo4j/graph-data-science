@@ -30,7 +30,6 @@ import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.beta.generator.RandomGraphGenerator;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
 import org.neo4j.gds.config.RandomGraphGeneratorConfig;
-import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.huge.HugeGraph;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
@@ -38,6 +37,7 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.numbers.Aggregation;
 
 import java.util.Collection;
 import java.util.List;

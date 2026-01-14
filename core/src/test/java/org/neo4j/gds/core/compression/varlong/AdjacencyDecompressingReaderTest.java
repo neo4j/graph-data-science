@@ -21,9 +21,9 @@ package org.neo4j.gds.core.compression.varlong;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.AdjacencyCursor;
-import org.neo4j.gds.core.Aggregation;
-import org.neo4j.gds.core.compression.common.AdjacencyCompression;
+import org.neo4j.gds.compression.common.AdjacencyCompression;
 import org.neo4j.gds.core.loading.MutableIntValue;
+import org.neo4j.gds.numbers.Aggregation;
 
 import java.util.Arrays;
 import java.util.stream.LongStream;

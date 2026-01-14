@@ -29,10 +29,10 @@ import org.neo4j.gds.beta.generator.RandomGraphGenerator;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.config.RandomGraphGeneratorConfig.AllowSelfLoops;
-import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.numbers.Aggregation;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.stream.LongStream;

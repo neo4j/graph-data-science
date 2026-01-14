@@ -20,7 +20,7 @@
 package org.neo4j.gds.core.compression.uncompressed;
 
 import org.neo4j.gds.api.compress.AdjacencyListBuilderFactory;
-import org.neo4j.gds.core.compression.common.MemoryTracker;
+import org.neo4j.gds.compression.common.MemoryTracker;
 
 public final class UncompressedAdjacencyListBuilderFactory implements AdjacencyListBuilderFactory<long[], UncompressedAdjacencyList, long[], UncompressedAdjacencyList> {
 

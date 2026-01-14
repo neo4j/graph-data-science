@@ -22,8 +22,7 @@ package org.neo4j.gds.core.loading;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.compress.AdjacencyCompressorFactory;
-import org.neo4j.gds.core.Aggregation;
-import org.neo4j.gds.core.compression.common.MemoryTracker;
+import org.neo4j.gds.compression.common.MemoryTracker;
 import org.neo4j.gds.core.compression.mixed.MixedCompressor;
 import org.neo4j.gds.core.compression.packed.PackedAdjacencyListBuilderFactory;
 import org.neo4j.gds.core.compression.packed.PackedCompressor;
@@ -35,6 +34,7 @@ import org.neo4j.gds.core.compression.varlong.CompressedAdjacencyListBuilderFact
 import org.neo4j.gds.core.compression.varlong.DeltaVarLongCompressor;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryEstimations;
+import org.neo4j.gds.numbers.Aggregation;
 import org.neo4j.gds.utils.GdsFeatureToggles;
 
 import java.util.Arrays;

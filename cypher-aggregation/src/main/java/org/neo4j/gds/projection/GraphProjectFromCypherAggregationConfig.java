@@ -23,8 +23,8 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.config.GraphProjectConfig;
-import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.numbers.Aggregation;
 import org.neo4j.values.virtual.MapValue;
 
 import java.util.List;

@@ -24,7 +24,7 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.ImmutableTopology;
 import org.neo4j.gds.api.PartialIdMap;
-import org.neo4j.gds.api.compress.AdjacencyCompressor;
+import org.neo4j.gds.compression.api.AdjacencyCompressor;
 import org.neo4j.gds.api.compress.AdjacencyListsWithProperties;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.relationships.ImmutableProperties;

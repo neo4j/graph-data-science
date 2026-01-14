@@ -16,6 +16,7 @@ dependencies {
 
     implementation project(':algo-common')
     implementation project(':annotations')
+    implementation project(':compression')
     implementation project(':config-api')
     implementation project(':core')
     implementation project(':core-utils')
@@ -30,6 +31,7 @@ dependencies {
     implementation project(':neo4j-api')
     implementation project(':neo4j-log-adapter')
     implementation project(':neo4j-settings')
+    implementation project(':numbers')
     implementation project(':opengds-procedure-facade')
     implementation project(':open-model-catalog')
     implementation project(':proc-common')

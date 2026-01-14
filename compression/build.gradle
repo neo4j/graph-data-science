@@ -1,0 +1,30 @@
+apply plugin: 'java-library'
+
+description = 'Neo4j Graph Data Science :: Compression'
+
+group = 'org.neo4j.gds'
+
+dependencies {
+    annotationProcessor project(':annotations')
+
+    annotationProcessor openGds.immutables.value
+
+    compileOnly(neo4j.common) { transitive = false }
+    compileOnly(neo4j.unsafe) { transitive = false }
+
+    compileOnly openGds.immutables.value.annotations
+
+    implementation openGds.commons.lang3
+    implementation openGds.hdrhistogram
+    implementation openGds.hppc
+
+    implementation project(':annotations')
+    implementation project(':collections')
+    implementation project(':core-api')
+    implementation project(':core-utils')
+    implementation project(':histogram')
+    implementation project(':memory-access')
+    implementation project(':memory-info')
+    implementation project(':memory-usage')
+    implementation project(':numbers')
+}

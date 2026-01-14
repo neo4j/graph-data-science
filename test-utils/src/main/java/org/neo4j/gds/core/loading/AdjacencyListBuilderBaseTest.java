@@ -28,10 +28,10 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.AdjacencyList;
 import org.neo4j.gds.api.AdjacencyProperties;
 import org.neo4j.gds.api.DefaultValue;
-import org.neo4j.gds.api.compress.AdjacencyCompressor.ValueMapper;
 import org.neo4j.gds.api.compress.AdjacencyListsWithProperties;
-import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.compression.api.AdjacencyCompressor;
 import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.numbers.Aggregation;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -132,7 +132,7 @@ public abstract class AdjacencyListBuilderBaseTest {
         assert parallelDegree >= 1;
 
         var originalNodeCount = idOffset.map(o -> nodeCount + o).orElse(nodeCount);
-        var mapper = idOffset.map(offset -> (ValueMapper) value -> value + offset);
+        var mapper = idOffset.map(offset -> (AdjacencyCompressor.ValueMapper) value -> value + offset);
         var toOriginal = mapper.orElseGet(() -> id -> id);
 
         int relationshipCount = (int) (nodeCount * parallelDegree);
@@ -293,7 +293,7 @@ public abstract class AdjacencyListBuilderBaseTest {
 
         long nodeCount();
 
-        ValueMapper toOriginalMapper();
+        AdjacencyCompressor.ValueMapper toOriginalMapper();
 
         Map<Long, Long> sourceNodeToTargetNode();
 

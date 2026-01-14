@@ -21,6 +21,7 @@ package org.neo4j.gds.api.compress;
 
 import org.neo4j.gds.collections.ha.HugeIntArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.compression.api.AdjacencyCompressor;
 
 import java.util.concurrent.atomic.LongAdder;
 

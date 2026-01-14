@@ -21,8 +21,8 @@ package org.neo4j.gds;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.GraphLoader;
+import org.neo4j.gds.numbers.Aggregation;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
 import org.neo4j.gds.projection.GraphStoreFactorySuppliers;
 import org.neo4j.gds.projection.NativeProjectionGraphStoreFactorySupplier;
@@ -36,9 +36,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import static org.neo4j.gds.Orientation.NATURAL;
 import static org.neo4j.gds.RelationshipType.ALL_RELATIONSHIPS;
-import static org.neo4j.gds.core.Aggregation.DEFAULT;
 
 public final class TestNativeGraphLoader implements TestGraphLoader {
 
@@ -128,8 +126,8 @@ public final class TestNativeGraphLoader implements TestGraphLoader {
 
         nodeLabels.forEach(storeLoaderBuilder::addNodeLabel);
 
-        var aggregation = maybeAggregation.orElse(DEFAULT);
-        var orientation = maybeOrientation.orElse(NATURAL);
+        var aggregation = maybeAggregation.orElse(Aggregation.DEFAULT);
+        var orientation = maybeOrientation.orElse(Orientation.NATURAL);
         if (relTypes.isEmpty()) {
             storeLoaderBuilder.putRelationshipProjectionsWithIdentifier(
                 ALL_RELATIONSHIPS.name,

@@ -68,7 +68,7 @@ public final class GraphMemoryUsage {
 
         static {
             try {
-                PAL_CLASS = Class.forName("org.neo4j.gds.core.compression.packed.PackedAdjacencyList");
+                PAL_CLASS = Class.forName("org.neo4j.gds.compression.packed.PackedAdjacencyList");
             } catch (ClassNotFoundException e) {
                 throw new LinkageError("Location of the PackedAdjacencyList has changed, adapt this code.");
             }

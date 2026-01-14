@@ -22,8 +22,8 @@ package org.neo4j.gds;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.numbers.Aggregation;
 
 public interface TestGraphLoader {
 

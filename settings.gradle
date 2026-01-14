@@ -102,6 +102,9 @@ project(':community-mutate-steps').projectDir = file('procedures/community-mutat
 include('community-params')
 project(':community-params').projectDir = file('algo-params/community-params')
 
+include('compression')
+project(':compression').projectDir = file('compression')
+
 include('concurrency')
 project(':concurrency').projectDir = file('concurrency')
 
@@ -308,6 +311,9 @@ project(':node-embeddings-facade-api').projectDir = file('procedures/facade-api/
 
 include('node-embeddings-params')
 project(':node-embeddings-params').projectDir = file('algo-params/node-embeddings-params')
+
+include('numbers')
+project(':numbers').projectDir = file('numbers')
 
 include('open-licensing')
 project(':open-licensing').projectDir = file('open-licensing')

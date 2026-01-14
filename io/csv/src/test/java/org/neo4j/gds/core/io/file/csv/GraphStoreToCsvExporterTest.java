@@ -29,7 +29,6 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.graph.LongGraphPropertyValues;
-import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
@@ -42,6 +41,7 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.gdl.GdlFactory;
+import org.neo4j.gds.numbers.Aggregation;
 
 import java.io.File;
 import java.io.IOException;

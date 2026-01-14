@@ -30,8 +30,8 @@ import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.api.schema.MutableRelationshipSchema;
-import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.io.schema.RelationshipSchemaBuilderVisitor;
+import org.neo4j.gds.numbers.Aggregation;
 
 import java.io.BufferedReader;
 import java.io.FileReader;

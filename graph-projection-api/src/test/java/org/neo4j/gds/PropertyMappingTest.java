@@ -21,7 +21,7 @@ package org.neo4j.gds;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.DefaultValue;
-import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.numbers.Aggregation;
 
 import java.util.Map;
 

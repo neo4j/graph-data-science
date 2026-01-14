@@ -28,10 +28,10 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.MutateRelationshipService;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
-import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
+import org.neo4j.gds.numbers.Aggregation;
 import org.neo4j.gds.termination.TerminationFlag;
 
 class KgeMutateStep implements MutateStep<KGEPredictResult, RelationshipsWritten> {

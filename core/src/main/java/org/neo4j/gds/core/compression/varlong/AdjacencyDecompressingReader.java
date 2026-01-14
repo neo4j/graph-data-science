@@ -24,7 +24,7 @@ import org.neo4j.gds.core.loading.MutableIntValue;
 import java.util.Arrays;
 
 import static org.neo4j.gds.api.AdjacencyCursor.NOT_FOUND;
-import static org.neo4j.gds.core.compression.common.VarLongDecoding.decodeDeltaVLongs;
+import static org.neo4j.gds.compression.common.VarLongDecoding.decodeDeltaVLongs;
 
 final class AdjacencyDecompressingReader {
 

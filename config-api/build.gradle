@@ -32,6 +32,7 @@ dependencies {
         project(':core-api'),
         project(':graph-projection-api'),
         project(':graph-schema-api'),
+        project(':numbers'),
         // `JobIdConfig` 🙈
         project(':progress-tracking'),
         project(':string-formatting'),

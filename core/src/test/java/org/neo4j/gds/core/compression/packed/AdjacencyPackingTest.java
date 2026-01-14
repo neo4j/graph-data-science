@@ -22,6 +22,8 @@ package org.neo4j.gds.core.compression.packed;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junitpioneer.jupiter.params.IntRangeSource;
+import org.neo4j.gds.compression.packed.AdjacencyPacking;
+import org.neo4j.gds.compression.packed.AdjacencyUnpacking;
 import org.neo4j.gds.mem.BitUtil;
 import org.neo4j.internal.unsafe.UnsafeUtil;
 import org.neo4j.memory.EmptyMemoryTracker;

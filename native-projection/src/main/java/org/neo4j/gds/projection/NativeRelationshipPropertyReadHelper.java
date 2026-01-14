@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.projection;
 
-import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.numbers.Aggregation;
 import org.neo4j.internal.kernel.api.PropertyCursor;
 import org.neo4j.values.storable.NumberValue;
 import org.neo4j.values.storable.Value;
@@ -36,7 +36,7 @@ public final class NativeRelationshipPropertyReadHelper {
         throw new UnsupportedOperationException("No instances");
     }
 
-    public static void readProperties(
+    static void readProperties(
         PropertyCursor pc,
         int[] propertyIds,
         double[] defaultValues,

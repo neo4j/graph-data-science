@@ -30,6 +30,7 @@ dependencies {
     compileOnly(neo4j.values) { transitive = false }
 
     implementation project(':annotations')
+    implementation project(':compression')
     implementation project(':config-api')
     implementation project(':core')
     implementation project(':core-utils')
@@ -37,6 +38,7 @@ dependencies {
     implementation project(':gds-values')
     implementation project(':logging')
     implementation project(':memory-usage')
+    implementation project(':numbers')
     implementation project(':neo4j-kernel-adapter-api')
     implementation project(':neo4j-utility')
     implementation project(':neo4j-values')

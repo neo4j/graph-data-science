@@ -23,7 +23,7 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.config.RandomGraphGeneratorConfig;
-import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.numbers.Aggregation;
 
 import java.util.ArrayList;
 import java.util.HashMap;

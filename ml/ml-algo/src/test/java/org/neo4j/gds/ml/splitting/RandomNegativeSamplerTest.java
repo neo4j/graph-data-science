@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilderBuilder;
@@ -31,6 +30,7 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.ml.negativeSampling.RandomNegativeSampler;
+import org.neo4j.gds.numbers.Aggregation;
 
 import java.util.Optional;
 

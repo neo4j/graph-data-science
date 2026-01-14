@@ -22,7 +22,7 @@ package org.neo4j.gds.graphsampling.samplers.rw.cnarw;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.compress.DoubleArrayBuffer;
-import org.neo4j.gds.api.compress.LongArrayBuffer;
+import org.neo4j.gds.compression.utilities.LongArrayBuffer;
 import org.neo4j.gds.core.utils.TwoArraysSort;
 import org.neo4j.gds.functions.similarity.OverlapSimilarity;
 import org.neo4j.gds.graphsampling.samplers.rw.NextNodeStrategy;

@@ -14,6 +14,7 @@ dependencies {
     compileOnly openGds.jetbrains.annotations
 
     implementation project(':annotations')
+    implementation project(':compression')
     implementation project(':config-api')
     implementation project(':core')
     implementation project(':graph-schema-api')

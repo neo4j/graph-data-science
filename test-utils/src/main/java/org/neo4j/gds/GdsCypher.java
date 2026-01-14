@@ -31,8 +31,8 @@ import org.neo4j.cypherdsl.core.renderer.Configuration;
 import org.neo4j.cypherdsl.core.renderer.Renderer;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.DefaultValue;
-import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.Username;
+import org.neo4j.gds.numbers.Aggregation;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfigImpl;
 
@@ -62,7 +62,6 @@ import static org.neo4j.gds.RelationshipProjection.INDEX_INVERSE_KEY;
 import static org.neo4j.gds.RelationshipProjection.ORIENTATION_KEY;
 import static org.neo4j.gds.RelationshipProjection.TYPE_KEY;
 import static org.neo4j.gds.RelationshipType.ALL_RELATIONSHIPS;
-import static org.neo4j.gds.core.Aggregation.DEFAULT;
 
 @Value.Style(builderVisibility = Value.Style.BuilderVisibility.PACKAGE, depluralize = true, deepImmutablesDetection = true)
 public abstract class GdsCypher {
@@ -808,7 +807,7 @@ public abstract class GdsCypher {
     private static boolean isAllDefault(ElementProjection projection) {
         if (projection instanceof RelationshipProjection) {
             RelationshipProjection rel = (RelationshipProjection) projection;
-            if (rel.orientation() != NATURAL || rel.aggregation() != DEFAULT) {
+            if (rel.orientation() != NATURAL || rel.aggregation() != Aggregation.DEFAULT) {
                 return false;
             }
         }
@@ -862,7 +861,7 @@ public abstract class GdsCypher {
         if (projection.orientation() != NATURAL) {
             value.put(ORIENTATION_KEY, projection.orientation().name());
         }
-        if (projection.aggregation() != DEFAULT) {
+        if (projection.aggregation() != Aggregation.DEFAULT) {
             value.put(AGGREGATION_KEY, projection.aggregation().name());
         }
         if (projection.indexInverse()) {
@@ -873,12 +872,12 @@ public abstract class GdsCypher {
     }
 
     private static boolean allDefaults(RelationshipProjection projection) {
-        return projection.orientation() == NATURAL && projection.aggregation() == DEFAULT && !projection.indexInverse();
+        return projection.orientation() == NATURAL && projection.aggregation() == Aggregation.DEFAULT && !projection.indexInverse();
     }
 
     private static boolean matchesType(String type, RelationshipProjection projection) {
         return projection.orientation() == NATURAL
-               && projection.aggregation() == DEFAULT
+               && projection.aggregation() == Aggregation.DEFAULT
                && projection.type().equals(type);
     }
 
@@ -919,7 +918,7 @@ public abstract class GdsCypher {
             value.put(DEFAULT_VALUE_KEY, defaultValue);
         }
         Aggregation aggregation = propertyMapping.aggregation();
-        if (includeAggregation && aggregation != DEFAULT) {
+        if (includeAggregation && aggregation != Aggregation.DEFAULT) {
             value.put(AGGREGATION_KEY, aggregation.name());
         }
         if (allowStringShortcut && value.size() == 1 && propertyKey.equals(propertyMapping.neoPropertyKey())) {

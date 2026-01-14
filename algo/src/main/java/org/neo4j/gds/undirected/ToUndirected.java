@@ -29,7 +29,6 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.properties.relationships.RelationshipIterator;
 import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
-import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.loading.SingleTypeRelationships;
@@ -39,6 +38,7 @@ import org.neo4j.gds.core.loading.construction.RelationshipsBuilderBuilder;
 import org.neo4j.gds.core.utils.partition.DegreePartition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.numbers.Aggregation;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;

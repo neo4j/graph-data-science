@@ -18,9 +18,9 @@ dependencies {
 
     // Neo4j dependencies
     compileOnly(neo4j.common) { transitive = false }
-    compileOnly(neo4j.unsafe) { transitive = false }
 
     implementation project(':annotations')
+    implementation project(':compression')
     implementation project(':config-api')
     implementation project(':core-utils')
     implementation project(':gds-values')
@@ -31,6 +31,7 @@ dependencies {
     implementation project(':memory-access')
     implementation project(':memory-info')
     implementation project(':memory-usage')
+    implementation project(':numbers')
     implementation project(':open-licensing')
     implementation project(':string-formatting')
     implementation project(':collections')

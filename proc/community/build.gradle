@@ -39,6 +39,7 @@ dependencies {
     integrationTestImplementation project(':graph-store-catalog-applications')
     integrationTestImplementation project(':operations-applications')
     integrationTestImplementation project(':model-catalog-applications')
+    integrationTestImplementation project(':numbers')
     integrationTestImplementation project(':transaction')
     integrationTestImplementation project(':config-api')
     integrationTestImplementation project(':projection')

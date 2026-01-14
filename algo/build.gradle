@@ -38,6 +38,7 @@ dependencies {
     implementation project(':node-embeddings-configs')
 
     implementation project(':collections-memory-estimation')
+    implementation project(':compression')
     implementation project(':config-api')
     implementation project(':core')
     implementation project(':core-utils')
@@ -51,6 +52,7 @@ dependencies {
     implementation project(':ml-algo')
     implementation project(':ml-api')
     implementation project(':model-catalog-api')
+    implementation project(':numbers')
     implementation project(':pregel')
     implementation project(':progress-tracking')
     implementation project(':scaling-utils')

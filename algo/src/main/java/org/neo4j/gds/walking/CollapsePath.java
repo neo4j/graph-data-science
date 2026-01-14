@@ -25,7 +25,6 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.collapsepath.CollapsePathParameters;
-import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
@@ -33,6 +32,7 @@ import org.neo4j.gds.core.loading.SingleTypeRelationships;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.numbers.Aggregation;
 
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -40,7 +40,6 @@ import java.util.function.Supplier;
 
 /**
  * A path template is a list of relationship types.
- *
  * In this implementation, the list of relationship types is encoded as a list of graphs with each one having only a single relationship type.
  */
 public class CollapsePath extends Algorithm<SingleTypeRelationships> {

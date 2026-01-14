@@ -21,11 +21,15 @@ package org.neo4j.gds.core.compression.packed;
 
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.neo4j.gds.api.AdjacencyCursor;
-import org.neo4j.gds.api.compress.AdjacencyListBuilder;
-import org.neo4j.gds.api.compress.ModifiableSlice;
-import org.neo4j.gds.core.Aggregation;
-import org.neo4j.gds.core.compression.common.MemoryTracker;
+import org.neo4j.gds.compression.api.AdjacencyListBuilder;
+import org.neo4j.gds.compression.api.ModifiableSlice;
+import org.neo4j.gds.compression.packed.BlockAlignedTailPacker;
+import org.neo4j.gds.compression.packed.InlinedHeadPackedTailPacker;
+import org.neo4j.gds.compression.common.MemoryTracker;
+import org.neo4j.gds.compression.packed.PackedTailPacker;
+import org.neo4j.gds.compression.packed.VarLongTailPacker;
 import org.neo4j.gds.memory.access.Address;
+import org.neo4j.gds.numbers.Aggregation;
 import org.neo4j.gds.utils.GdsFeatureToggles;
 import org.neo4j.internal.unsafe.UnsafeUtil;
 import org.neo4j.memory.EmptyMemoryTracker;
@@ -74,7 +78,7 @@ class TestAllocator implements AdjacencyListBuilder.Allocator<Address> {
                         degree,
                         MemoryTracker.empty()
                     );
-                    cursor = new VarLongTailCursor(new long[]{slice.slice().address()});
+                    cursor = new org.neo4j.gds.compression.packed.VarLongTailCursor(new long[]{slice.slice().address()});
                     break;
                 case PACKED_TAIL:
                     offset = PackedTailPacker.compress(
@@ -86,7 +90,7 @@ class TestAllocator implements AdjacencyListBuilder.Allocator<Address> {
                         degree,
                         MemoryTracker.empty()
                     );
-                    cursor = new PackedTailCursor(new long[]{slice.slice().address()});
+                    cursor = new org.neo4j.gds.compression.packed.PackedTailCursor(new long[]{slice.slice().address()});
                     break;
                 case BLOCK_ALIGNED_TAIL:
                     offset = BlockAlignedTailPacker.compress(allocator,
@@ -96,7 +100,7 @@ class TestAllocator implements AdjacencyListBuilder.Allocator<Address> {
                         aggregation,
                         degree
                     );
-                    cursor = new BlockAlignedTailCursor(new long[]{slice.slice().address()});
+                    cursor = new org.neo4j.gds.compression.packed.BlockAlignedTailCursor(new long[]{slice.slice().address()});
                     break;
                 case INLINED_HEAD_PACKED_TAIL:
                     offset = InlinedHeadPackedTailPacker.compress(
@@ -108,7 +112,7 @@ class TestAllocator implements AdjacencyListBuilder.Allocator<Address> {
                         degree,
                         MemoryTracker.empty()
                     );
-                    cursor = new InlinedHeadPackedTailCursor(new long[]{slice.slice().address()});
+                    cursor = new org.neo4j.gds.compression.packed.InlinedHeadPackedTailCursor(new long[]{slice.slice().address()});
                     break;
                 default:
                     throw new IllegalArgumentException("Unknown compression type" + adjacencyPackingStrategy);

@@ -15,6 +15,7 @@ dependencies {
     compileOnly openGds.jetbrains.annotations
 
     implementation project(':annotations')
+    implementation project(':compression')
     implementation project(':config-api')
     implementation project(':core')
     implementation project(':gds-values')
@@ -22,6 +23,7 @@ dependencies {
     implementation project(':logging')
     implementation project(':memory-usage')
     implementation project(':neo4j-log-adapter')
+    implementation project(':numbers')
     implementation project(':progress-tracking')
     implementation project(':string-formatting')
 

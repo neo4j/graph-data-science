@@ -22,7 +22,7 @@ package org.neo4j.gds.core.io.schema;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
-import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.numbers.Aggregation;
 
 public interface InputRelationshipSchemaVisitor extends InputSchemaVisitor, RelationshipPropertySchema {
 

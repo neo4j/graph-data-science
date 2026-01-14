@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.core.loading;
 
-import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.numbers.Aggregation;
 
 public interface PropertyReader<PROPERTY_REF> {
 

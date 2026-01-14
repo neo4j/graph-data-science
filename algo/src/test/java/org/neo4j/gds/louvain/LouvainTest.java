@@ -34,7 +34,6 @@ import org.neo4j.gds.beta.generator.RandomGraphGenerator;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.config.RandomGraphGeneratorConfig;
-import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.huge.HugeGraph;
@@ -45,6 +44,7 @@ import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.modularity.ModularityCalculator;
+import org.neo4j.gds.numbers.Aggregation;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Map;

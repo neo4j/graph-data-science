@@ -38,7 +38,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.neo4j.gds.core.compression.common.VarLongEncoding.zigZag;
+import static org.neo4j.gds.compression.common.VarLongEncoding.zigZag;
 
 @GdlExtension
 class Node2VecRandomWalkTaskTest {

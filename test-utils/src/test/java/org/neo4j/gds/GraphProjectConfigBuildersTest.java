@@ -24,10 +24,10 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.api.DefaultValue;
-import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.legacycypherprojection.GraphProjectFromCypherConfig;
 import org.neo4j.gds.legacycypherprojection.GraphProjectFromCypherConfigImpl;
+import org.neo4j.gds.numbers.Aggregation;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfigImpl;
 

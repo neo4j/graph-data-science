@@ -25,15 +25,15 @@ import org.immutables.builder.Builder;
 import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.api.compress.AdjacencyCompressor;
-import org.neo4j.gds.api.compress.AdjacencyCompressor.ValueMapper.Identity;
+import org.neo4j.gds.compression.api.AdjacencyCompressor;
+import org.neo4j.gds.compression.api.AdjacencyCompressor.ValueMapper.Identity;
 import org.neo4j.gds.api.compress.AdjacencyCompressorFactory;
-import org.neo4j.gds.api.compress.LongArrayBuffer;
-import org.neo4j.gds.core.Aggregation;
-import org.neo4j.gds.core.compression.common.AdjacencyCompression;
+import org.neo4j.gds.compression.common.AdjacencyCompression;
+import org.neo4j.gds.compression.utilities.LongArrayBuffer;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryEstimations;
+import org.neo4j.gds.numbers.Aggregation;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -50,7 +50,6 @@ import static org.neo4j.gds.mem.Estimate.sizeOfObjectArray;
 /**
  * Wraps a paged representation of {@link org.neo4j.gds.core.loading.ChunkedAdjacencyLists}s
  * which store the target ids for each node during import.
- *
  * An instance of this class exists exactly once per relationship type and has the following
  * responsibilities:
  *
@@ -326,7 +325,7 @@ public final class AdjacencyBuffer {
 
                     if (buffer.length == 0) {
                         // special case: we skipped a relationship because it pointed to or from a node that we didn't load
-                        // this can result in some nodes that should not get an adjacencylist at all
+                        // this can result in some nodes that should not get an adjacency list at all
                         return;
                     }
 

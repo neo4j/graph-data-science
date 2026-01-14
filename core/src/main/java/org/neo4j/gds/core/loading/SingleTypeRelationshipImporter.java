@@ -24,10 +24,10 @@ import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.api.compress.AdjacencyCompressor;
+import org.neo4j.gds.compression.api.AdjacencyCompressor;
 import org.neo4j.gds.api.compress.AdjacencyCompressorFactory;
 import org.neo4j.gds.api.compress.AdjacencyListsWithProperties;
-import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.numbers.Aggregation;
 
 import java.util.Collection;
 import java.util.Map;

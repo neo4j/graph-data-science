@@ -35,7 +35,6 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.canonization.CanonicalAdjacencyMatrix;
-import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
@@ -46,6 +45,7 @@ import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.gds.gdl.ImmutableGraphProjectFromGdlConfig;
+import org.neo4j.gds.numbers.Aggregation;
 import org.neo4j.gds.termination.TerminatedException;
 import org.neo4j.gds.transaction.DatabaseTransactionContext;
 import org.neo4j.gds.transaction.TransactionContext;
@@ -72,7 +72,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.neo4j.gds.Orientation.NATURAL;
 import static org.neo4j.gds.Orientation.REVERSE;
 import static org.neo4j.gds.QueryRunner.runQueryWithResultConsumer;
 import static org.neo4j.gds.compat.GraphDatabaseApiProxy.runInFullAccessTransaction;
@@ -87,7 +86,7 @@ public final class TestSupport {
     private TestSupport() {}
 
     public static Stream<Orientation> allDirectedProjections() {
-        return Stream.of(NATURAL, REVERSE);
+        return Stream.of(Orientation.NATURAL, REVERSE);
     }
 
     public static <T> Supplier<Stream<Arguments>> toArguments(Supplier<Stream<T>> fn) {
@@ -169,7 +168,7 @@ public final class TestSupport {
         var config = ImmutableGraphProjectFromGdlConfig.builder()
             .gdlGraph(gdl)
             .graphName(graphName)
-            .orientation(orientation.orElse(NATURAL))
+            .orientation(orientation.orElse(Orientation.NATURAL))
             .aggregation(aggregation.orElse(Aggregation.DEFAULT))
             .indexInverse(indexInverse.orElse(false))
             .build();
@@ -207,7 +206,7 @@ public final class TestSupport {
         var config = ImmutableGraphProjectFromGdlConfig.builder()
             .gdlGraph(gdl)
             .graphName(graphName)
-            .orientation(orientation.orElse(NATURAL))
+            .orientation(orientation.orElse(Orientation.NATURAL))
             .aggregation(aggregation.orElse(Aggregation.DEFAULT))
             .indexInverse(indexInverse.orElse(false))
             .build();

@@ -24,14 +24,14 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipProjection;
-import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
-import org.neo4j.gds.core.compression.common.MemoryTracker;
+import org.neo4j.gds.compression.common.MemoryTracker;
 import org.neo4j.gds.core.compression.varlong.CompressedAdjacencyListBuilderFactory;
 import org.neo4j.gds.core.compression.varlong.DeltaVarLongCompressor;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.RawValues;
 import org.neo4j.gds.mem.MemoryTree;
+import org.neo4j.gds.numbers.Aggregation;
 
 import java.util.Map;
 import java.util.Optional;

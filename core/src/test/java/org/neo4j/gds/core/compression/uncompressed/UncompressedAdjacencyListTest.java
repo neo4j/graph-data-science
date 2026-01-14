@@ -31,8 +31,8 @@ import org.neo4j.gds.mem.MemoryTree;
 import org.neo4j.gds.mem.BitUtil;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.neo4j.gds.core.compression.common.BumpAllocator.PAGE_MASK;
-import static org.neo4j.gds.core.compression.common.BumpAllocator.PAGE_SHIFT;
+import static org.neo4j.gds.compression.common.BumpAllocator.PAGE_MASK;
+import static org.neo4j.gds.compression.common.BumpAllocator.PAGE_SHIFT;
 
 class UncompressedAdjacencyListTest {
 

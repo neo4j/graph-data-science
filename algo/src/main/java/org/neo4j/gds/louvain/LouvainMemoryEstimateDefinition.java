@@ -29,13 +29,13 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.CSRGraphStoreFactory;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.collections.ha.HugeLongArray;
-import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryEstimations;
 import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationMemoryEstimateDefinition;
+import org.neo4j.gds.numbers.Aggregation;
 
 public class LouvainMemoryEstimateDefinition implements MemoryEstimateDefinition {
 

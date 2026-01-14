@@ -29,7 +29,7 @@ import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.api.schema.MutableRelationshipSchemaEntry;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
-import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.numbers.Aggregation;
 
 import java.io.IOException;
 import java.nio.file.Path;

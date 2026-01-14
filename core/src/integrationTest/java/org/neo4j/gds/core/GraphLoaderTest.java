@@ -43,6 +43,7 @@ import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.legacycypherprojection.CypherProjectionGraphStoreFactorySupplier;
 import org.neo4j.gds.legacycypherprojection.GraphProjectFromCypherConfig;
 import org.neo4j.gds.logging.GdsTestLog;
+import org.neo4j.gds.numbers.Aggregation;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
 import org.neo4j.gds.projection.GraphStoreFactorySuppliers;
 import org.neo4j.gds.projection.NativeProjectionGraphStoreFactorySupplier;

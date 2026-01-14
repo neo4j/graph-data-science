@@ -15,6 +15,7 @@ dependencies {
     implementation project(":memory-usage")
     implementation project(":ml-algo")
     implementation project(":ml-configs")
+    implementation project(":numbers")
     implementation project(":progress-tracking")
     implementation project(":similarity-configs")
     implementation project(":termination")

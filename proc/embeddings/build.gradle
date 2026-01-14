@@ -28,6 +28,7 @@ dependencies {
     integrationTestImplementation project(':ml-algo')
     integrationTestImplementation project(':ml-core')
     integrationTestImplementation project(':native-projection')
+    integrationTestImplementation project(':numbers')
     integrationTestImplementation project(':open-model-catalog')
     integrationTestImplementation project(':open-licensing')
     integrationTestImplementation project(':proc-test')

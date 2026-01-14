@@ -22,7 +22,7 @@ package org.neo4j.gds;
 import org.immutables.builder.Builder.AccessibleFields;
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.numbers.Aggregation;
 
 import java.util.Arrays;
 import java.util.Iterator;

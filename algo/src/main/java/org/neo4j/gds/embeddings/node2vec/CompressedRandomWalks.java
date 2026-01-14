@@ -23,14 +23,14 @@ import com.carrotsearch.hppc.AbstractIterator;
 import org.neo4j.gds.collections.cursor.HugeCursor;
 import org.neo4j.gds.collections.ha.HugeIntArray;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
-import org.neo4j.gds.core.compression.common.ZigZagLongDecoding;
+import org.neo4j.gds.compression.common.ZigZagLongDecoding;
 
 import java.util.Arrays;
 import java.util.Iterator;
 
-import static org.neo4j.gds.core.compression.common.VarLongEncoding.encodeVLongs;
-import static org.neo4j.gds.core.compression.common.VarLongEncoding.encodedVLongSize;
-import static org.neo4j.gds.core.compression.common.VarLongEncoding.zigZag;
+import static org.neo4j.gds.compression.common.VarLongEncoding.encodeVLongs;
+import static org.neo4j.gds.compression.common.VarLongEncoding.encodedVLongSize;
+import static org.neo4j.gds.compression.common.VarLongEncoding.zigZag;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class CompressedRandomWalks {

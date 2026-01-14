@@ -20,6 +20,7 @@
 package org.neo4j.gds.core.compression.common;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.compression.common.BlockStatistics;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -46,7 +47,7 @@ class BlockStatisticsTest {
             0b1
         };
 
-        try (BlockStatistics blockStatistics = new BlockStatistics()) {
+        try (var blockStatistics = new BlockStatistics()) {
             blockStatistics.record(values, 0, values.length);
 
             var maxBits = blockStatistics.maxBits();

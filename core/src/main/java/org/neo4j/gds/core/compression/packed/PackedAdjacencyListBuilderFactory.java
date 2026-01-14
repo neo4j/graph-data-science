@@ -20,7 +20,9 @@
 package org.neo4j.gds.core.compression.packed;
 
 import org.neo4j.gds.api.compress.AdjacencyListBuilderFactory;
-import org.neo4j.gds.core.compression.common.MemoryTracker;
+import org.neo4j.gds.compression.common.MemoryTracker;
+import org.neo4j.gds.compression.packed.PackedAdjacencyList;
+import org.neo4j.gds.compression.packed.PackedAdjacencyListBuilder;
 import org.neo4j.gds.core.compression.uncompressed.UncompressedAdjacencyList;
 import org.neo4j.gds.core.compression.uncompressed.UncompressedAdjacencyListBuilder;
 import org.neo4j.gds.memory.access.Address;

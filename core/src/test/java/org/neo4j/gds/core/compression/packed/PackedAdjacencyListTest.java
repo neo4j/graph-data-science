@@ -21,13 +21,16 @@ package org.neo4j.gds.core.compression.packed;
 
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.api.compress.ModifiableSlice;
-import org.neo4j.gds.core.Aggregation;
-import org.neo4j.gds.core.compression.common.MemoryTracker;
+import org.neo4j.gds.compression.api.ModifiableSlice;
+import org.neo4j.gds.compression.common.MemoryTracker;
 import org.neo4j.gds.collections.ha.HugeIntArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.compression.packed.AdjacencyPacking;
+import org.neo4j.gds.compression.packed.PackedAdjacencyList;
+import org.neo4j.gds.compression.packed.VarLongTailPacker;
 import org.neo4j.gds.memory.access.Address;
 import org.neo4j.gds.memory.info.MemoryInfo;
+import org.neo4j.gds.numbers.Aggregation;
 
 import java.util.stream.LongStream;
 
@@ -46,7 +49,7 @@ class PackedAdjacencyListTest {
             .hasMessage("This page has already been freed.");
     }
 
-    private static PackedAdjacencyList adjacencyList(long[] data) {
+    private static org.neo4j.gds.compression.packed.PackedAdjacencyList adjacencyList(long[] data) {
         var allocator = new TestAllocator();
         var slice = ModifiableSlice.<Address>create();
         var degree = new MutableInt(0);

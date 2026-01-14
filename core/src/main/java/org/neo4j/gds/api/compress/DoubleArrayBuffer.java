@@ -20,7 +20,7 @@
 package org.neo4j.gds.api.compress;
 
 import org.jetbrains.annotations.TestOnly;
-import org.neo4j.gds.core.compression.packed.AdjacencyPacking;
+import org.neo4j.gds.compression.packed.AdjacencyPacking;
 import org.neo4j.gds.mem.BitUtil;
 
 public final class DoubleArrayBuffer {

@@ -39,7 +39,6 @@ import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.config.RandomGraphGeneratorConfig.AllowSelfLoops;
-import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.huge.HugeGraph;
 import org.neo4j.gds.core.loading.CSRGraphStoreUtil;
@@ -47,6 +46,7 @@ import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.NodesBuilder;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.core.utils.shuffle.ShuffleUtil;
+import org.neo4j.gds.numbers.Aggregation;
 
 import java.util.ArrayList;
 import java.util.HashMap;

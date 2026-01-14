@@ -32,13 +32,13 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.ResultStore;
-import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.loading.CSRGraphStore;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.loading.ImmutableCatalogRequest;
 import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.gds.gdl.ImmutableGraphProjectFromGdlConfig;
+import org.neo4j.gds.numbers.Aggregation;
 
 import java.lang.reflect.Field;
 import java.util.Collection;

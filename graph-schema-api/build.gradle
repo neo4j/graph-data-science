@@ -10,16 +10,15 @@ dependencies {
     annotationProcessor openGds.immutables.value
 
     compileOnly project(':annotations')
-    compileOnly         openGds.immutables.builder
-    compileOnly         openGds.immutables.value.annotations
+    compileOnly openGds.immutables.builder
+    compileOnly openGds.immutables.value.annotations
 
     implementation project(':graph-projection-api')
+    implementation project(':numbers')
     implementation project(':string-formatting')
-
 
     testImplementation platform(openGds.junit.bom)
     testImplementation openGds.bundles.test.basic
 
     testRuntimeOnly openGds.bundles.test.platforms
-
 }

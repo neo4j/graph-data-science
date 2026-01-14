@@ -25,7 +25,6 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilderBuilder;
@@ -34,6 +33,7 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.ml.negativeSampling.UserInputNegativeSampler;
+import org.neo4j.gds.numbers.Aggregation;
 
 import java.util.List;
 import java.util.Optional;

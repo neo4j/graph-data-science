@@ -22,10 +22,10 @@ package org.neo4j.gds;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.GraphLoader;
 import org.neo4j.gds.legacycypherprojection.CypherProjectionGraphStoreFactorySupplier;
 import org.neo4j.gds.legacycypherprojection.GraphProjectFromCypherConfig;
+import org.neo4j.gds.numbers.Aggregation;
 import org.neo4j.gds.projection.GraphStoreFactorySuppliers;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
@@ -38,8 +38,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.neo4j.gds.core.Aggregation.DEFAULT;
-import static org.neo4j.gds.core.Aggregation.NONE;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.gds.utils.StringJoining.join;
 
@@ -138,7 +136,7 @@ public final class TestCypherGraphLoader implements TestGraphLoader {
             nodePropertiesString));
 
         String relationshipQueryTemplate = "MATCH (n)-[r%s]->(m) RETURN ";
-        if (!Arrays.asList(DEFAULT, NONE).contains(maybeAggregation.orElse(NONE))) {
+        if (!Arrays.asList(Aggregation.DEFAULT, Aggregation.NONE).contains(maybeAggregation.orElse(Aggregation.NONE))) {
             relationshipQueryTemplate += "DISTINCT ";
         }
 
@@ -173,7 +171,7 @@ public final class TestCypherGraphLoader implements TestGraphLoader {
                 mapping.propertyKey(),
                 addSuffix(mapping.neoPropertyKey(), mutableInt.getAndIncrement()),
                 mapping.defaultValue(),
-                mapping.aggregation() == DEFAULT ? maybeAggregation.orElse(NONE) : mapping.aggregation()
+                mapping.aggregation() == Aggregation.DEFAULT ? maybeAggregation.orElse(Aggregation.NONE) : mapping.aggregation()
             ))
             .toArray(PropertyMapping[]::new)
         );

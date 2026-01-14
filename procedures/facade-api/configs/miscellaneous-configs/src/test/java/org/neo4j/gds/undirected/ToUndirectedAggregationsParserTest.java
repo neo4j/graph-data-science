@@ -19,8 +19,9 @@
  */
 package org.neo4j.gds.undirected;
 
+import org.neo4j.gds.numbers.Aggregation;
+
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.core.Aggregation;
 
 import java.util.Map;
 

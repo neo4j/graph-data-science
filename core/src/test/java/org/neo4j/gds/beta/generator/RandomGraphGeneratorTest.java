@@ -37,10 +37,10 @@ import org.neo4j.gds.api.schema.MutableRelationshipSchema;
 import org.neo4j.gds.canonization.CanonicalAdjacencyMatrix;
 import org.neo4j.gds.config.RandomGraphGeneratorConfig;
 import org.neo4j.gds.config.RandomGraphGeneratorConfig.AllowSelfLoops;
-import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.huge.HugeGraph;
 import org.neo4j.gds.core.loading.construction.NodeLabelTokens;
+import org.neo4j.gds.numbers.Aggregation;
 
 import java.util.HashMap;
 import java.util.HashSet;

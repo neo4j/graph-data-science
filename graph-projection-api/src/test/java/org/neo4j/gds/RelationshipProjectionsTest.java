@@ -25,7 +25,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.api.DefaultValue;
-import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.numbers.Aggregation;
 
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -49,7 +49,6 @@ import static org.neo4j.gds.RelationshipProjection.INDEX_INVERSE_KEY;
 import static org.neo4j.gds.RelationshipProjection.ORIENTATION_KEY;
 import static org.neo4j.gds.RelationshipProjection.TYPE_KEY;
 import static org.neo4j.gds.RelationshipType.ALL_RELATIONSHIPS;
-import static org.neo4j.gds.core.Aggregation.SINGLE;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class RelationshipProjectionsTest {
@@ -80,7 +79,7 @@ class RelationshipProjectionsTest {
             equalTo(RelationshipProjection
                 .builder()
                 .type("T")
-                .aggregation(SINGLE)
+                .aggregation(Aggregation.SINGLE)
                 .orientation(Orientation.NATURAL)
                 .indexInverse(true)
                 .build()
@@ -171,9 +170,9 @@ class RelationshipProjectionsTest {
                 RelationshipProjection
                     .builder()
                     .type("T")
-                    .aggregation(SINGLE)
+                    .aggregation(Aggregation.SINGLE)
                     .properties(PropertyMappings.of(
-                        PropertyMapping.of("weight", SINGLE)
+                        PropertyMapping.of("weight", Aggregation.SINGLE)
                     ))
                     .build()
             )).build();
@@ -239,7 +238,7 @@ class RelationshipProjectionsTest {
         assertThat(projections.allProjections(), hasSize(2));
         assertThat(
             projections.getFilter(RelationshipType.of("MY_TYPE")),
-            equalTo(RelationshipProjection.of("T", Orientation.UNDIRECTED, SINGLE))
+            equalTo(RelationshipProjection.of("T", Orientation.UNDIRECTED, Aggregation.SINGLE))
         );
         assertThat(
             projections.getFilter(RelationshipType.of("ANOTHER")),
