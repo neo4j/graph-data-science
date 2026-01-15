@@ -58,10 +58,10 @@ public final class InputNodesFactory {
     }
 
     public static List toMapOutput(InputNodes inputNodes, String parameterName) {
-        if ( inputNodes instanceof ListInputNodes) {
+        if (inputNodes instanceof ListInputNodes) {
             return new ArrayList<>(inputNodes.inputNodes());
-        } else if ( inputNodes instanceof MapInputNodes) {
-            return ((MapInputNodes) inputNodes).map()
+        } else if (inputNodes instanceof MapInputNodes mapInputNodes) {
+            return mapInputNodes.map()
                 .entrySet()
                 .stream()
                 .map(entry -> List.of(entry.getKey(), entry.getValue()))
