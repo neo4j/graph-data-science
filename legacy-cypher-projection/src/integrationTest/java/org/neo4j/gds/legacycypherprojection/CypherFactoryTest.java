@@ -38,7 +38,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.numbers.Aggregation;
+import org.neo4j.gds.Aggregation;
 import org.neo4j.gds.projection.GraphStoreFactorySuppliers;
 
 import java.util.ArrayList;

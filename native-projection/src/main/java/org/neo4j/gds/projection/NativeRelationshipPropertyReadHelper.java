@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.projection;
 
-import org.neo4j.gds.numbers.Aggregation;
+import org.neo4j.gds.Aggregation;
 import org.neo4j.internal.kernel.api.PropertyCursor;
 import org.neo4j.values.storable.NumberValue;
 import org.neo4j.values.storable.Value;

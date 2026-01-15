@@ -30,7 +30,6 @@ dependencies {
     implementation project(':neo4j-api')
     implementation project(':neo4j-log-adapter')
     implementation project(':neo4j-settings')
-    implementation project(':numbers')
     implementation project(':opengds-procedure-facade')
     implementation project(':open-model-catalog')
     implementation project(':proc-common')

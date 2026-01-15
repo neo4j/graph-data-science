@@ -32,7 +32,7 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.numbers.Aggregation;
+import org.neo4j.gds.Aggregation;
 
 import java.util.Collections;
 import java.util.Map;
@@ -61,8 +61,8 @@ public interface RandomGraphGeneratorConfig extends GraphProjectConfig {
     @Configuration.Parameter
     long averageDegree();
 
-    @Configuration.ConvertWith(method = "org.neo4j.gds.numbers.Aggregation#parse")
-    @Configuration.ToMapValue("org.neo4j.gds.numbers.Aggregation#toString")
+    @Configuration.ConvertWith(method = "org.neo4j.gds.Aggregation#parse")
+    @Configuration.ToMapValue("org.neo4j.gds.Aggregation#toString")
     default Aggregation aggregation() {
         return Aggregation.NONE;
     }

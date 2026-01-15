@@ -31,7 +31,7 @@ import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DefaultValue;
-import org.neo4j.gds.numbers.Aggregation;
+import org.neo4j.gds.Aggregation;
 
 import java.util.Set;
 

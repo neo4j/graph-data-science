@@ -46,7 +46,7 @@ import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.NodesBuilder;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.core.utils.shuffle.ShuffleUtil;
-import org.neo4j.gds.numbers.Aggregation;
+import org.neo4j.gds.Aggregation;
 
 import java.util.ArrayList;
 import java.util.HashMap;

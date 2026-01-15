@@ -50,7 +50,7 @@ import org.neo4j.gds.core.loading.ImportSizing;
 import org.neo4j.gds.core.loading.RecordsBatchBuffer;
 import org.neo4j.gds.core.loading.SingleTypeRelationshipImporterBuilder;
 import org.neo4j.gds.core.loading.SingleTypeRelationships;
-import org.neo4j.gds.numbers.Aggregation;
+import org.neo4j.gds.Aggregation;
 
 import java.util.Arrays;
 import java.util.List;

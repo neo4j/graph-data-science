@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.AdjacencyCursor;
 import org.neo4j.gds.compression.common.AdjacencyCompression;
 import org.neo4j.gds.core.loading.MutableIntValue;
-import org.neo4j.gds.numbers.Aggregation;
+import org.neo4j.gds.Aggregation;
 
 import java.util.Arrays;
 import java.util.stream.LongStream;

@@ -23,7 +23,7 @@ import com.carrotsearch.hppc.sorting.IndirectSort;
 import org.neo4j.gds.compression.api.AdjacencyCompressor;
 import org.neo4j.gds.compression.utilities.AscendingLongComparator;
 import org.neo4j.gds.compression.utilities.LongArrayBuffer;
-import org.neo4j.gds.numbers.Aggregation;
+import org.neo4j.gds.Aggregation;
 
 import java.util.Arrays;
 

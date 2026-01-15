@@ -31,7 +31,6 @@ dependencies {
     implementation project(':gds-values')
     implementation project(':memory-usage')
     implementation project(':neo4j-values')
-    implementation project(':numbers')
     implementation project(':progress-tracking')
     implementation project(':projection')
     implementation project(':string-formatting')

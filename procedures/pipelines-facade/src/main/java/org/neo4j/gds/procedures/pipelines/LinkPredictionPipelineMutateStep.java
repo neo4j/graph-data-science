@@ -30,7 +30,7 @@ import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.ml.linkmodels.LinkPredictionResult;
-import org.neo4j.gds.numbers.Aggregation;
+import org.neo4j.gds.Aggregation;
 import org.neo4j.gds.termination.TerminationFlag;
 
 class LinkPredictionPipelineMutateStep implements MutateStep<LinkPredictionResult, LinkPredictionMutateMetadata> {

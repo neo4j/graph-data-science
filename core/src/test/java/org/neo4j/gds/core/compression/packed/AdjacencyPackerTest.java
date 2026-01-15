@@ -29,7 +29,7 @@ import org.neo4j.gds.compression.common.AdjacencyCompression;
 import org.neo4j.gds.compression.packed.AdjacencyPackerUtil;
 import org.neo4j.gds.compression.packed.AdjacencyPacking;
 import org.neo4j.gds.core.compression.common.CursorUtil;
-import org.neo4j.gds.numbers.Aggregation;
+import org.neo4j.gds.Aggregation;
 import org.neo4j.gds.utils.GdsFeatureToggles;
 
 import java.util.Arrays;

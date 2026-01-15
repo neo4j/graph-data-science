@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.undirected;
 
-import org.neo4j.gds.numbers.Aggregation;
+import org.neo4j.gds.Aggregation;
 
 import org.junit.jupiter.api.Test;
 

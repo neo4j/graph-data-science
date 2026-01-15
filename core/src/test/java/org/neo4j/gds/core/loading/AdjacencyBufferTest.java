@@ -31,7 +31,7 @@ import org.neo4j.gds.core.compression.varlong.DeltaVarLongCompressor;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.RawValues;
 import org.neo4j.gds.mem.MemoryTree;
-import org.neo4j.gds.numbers.Aggregation;
+import org.neo4j.gds.Aggregation;
 
 import java.util.Map;
 import java.util.Optional;

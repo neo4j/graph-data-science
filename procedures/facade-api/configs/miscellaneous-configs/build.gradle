@@ -31,7 +31,6 @@ dependencies {
     // this is needed because of `MemoryEstimation`
     implementation project(':memory-usage')
 
-    implementation project(':numbers')
 
     // we bring this in only to use `PregelConfig` and `Partitioning` enum
     implementation project(':pregel')

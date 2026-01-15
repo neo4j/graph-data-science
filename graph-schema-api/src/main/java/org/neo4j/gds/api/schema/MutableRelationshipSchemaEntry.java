@@ -22,7 +22,7 @@ package org.neo4j.gds.api.schema;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.gds.numbers.Aggregation;
+import org.neo4j.gds.Aggregation;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;

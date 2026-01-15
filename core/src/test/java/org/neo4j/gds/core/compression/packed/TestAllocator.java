@@ -29,7 +29,7 @@ import org.neo4j.gds.compression.common.MemoryTracker;
 import org.neo4j.gds.compression.packed.PackedTailPacker;
 import org.neo4j.gds.compression.packed.VarLongTailPacker;
 import org.neo4j.gds.memory.access.Address;
-import org.neo4j.gds.numbers.Aggregation;
+import org.neo4j.gds.Aggregation;
 import org.neo4j.gds.utils.GdsFeatureToggles;
 import org.neo4j.internal.unsafe.UnsafeUtil;
 import org.neo4j.memory.EmptyMemoryTracker;

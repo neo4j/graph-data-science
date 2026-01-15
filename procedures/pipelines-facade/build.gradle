@@ -33,7 +33,6 @@ dependencies {
     implementation project(':model-catalog-api')
     implementation project(':model-catalog-applications')
     implementation project(':neo4j-api')
-    implementation project(':numbers')
     implementation project(':open-model-catalog')
     implementation project(':pipeline')
     implementation project(':pipelines-facade-api')

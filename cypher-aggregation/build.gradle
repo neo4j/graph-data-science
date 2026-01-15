@@ -36,7 +36,6 @@ dependencies {
     implementation project(':neo4j-integration-tools')
     implementation project(':neo4j-log-adapter')
     implementation project(':neo4j-values')
-    implementation project(':numbers')
     implementation project(':progress-tracking')
     implementation project(':string-formatting')
     implementation project(':transaction')

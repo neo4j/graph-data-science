@@ -33,7 +33,7 @@ import org.neo4j.gds.compression.utilities.LongArrayBuffer;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryEstimations;
-import org.neo4j.gds.numbers.Aggregation;
+import org.neo4j.gds.Aggregation;
 
 import java.util.ArrayList;
 import java.util.Arrays;

@@ -21,7 +21,7 @@ package org.neo4j.gds.core.io.schema;
 
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.schema.Direction;
-import org.neo4j.gds.numbers.Aggregation;
+import org.neo4j.gds.Aggregation;
 
 public abstract class RelationshipSchemaVisitor extends InputRelationshipSchemaVisitor.Adapter {
 

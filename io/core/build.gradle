@@ -40,7 +40,6 @@ dependencies {
     implementation project(':memory-usage')
     implementation project(':neo4j-kernel-adapter-api')
     implementation project(':neo4j-settings')
-    implementation project(':numbers')
     implementation project(':progress-tracking')
     implementation project(':string-formatting')
     implementation project(':subgraph-filtering')

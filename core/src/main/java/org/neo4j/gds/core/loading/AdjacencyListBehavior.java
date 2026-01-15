@@ -34,7 +34,7 @@ import org.neo4j.gds.core.compression.varlong.CompressedAdjacencyListBuilderFact
 import org.neo4j.gds.core.compression.varlong.DeltaVarLongCompressor;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryEstimations;
-import org.neo4j.gds.numbers.Aggregation;
+import org.neo4j.gds.Aggregation;
 import org.neo4j.gds.utils.GdsFeatureToggles;
 
 import java.util.Arrays;

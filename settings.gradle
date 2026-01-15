@@ -312,9 +312,6 @@ project(':node-embeddings-facade-api').projectDir = file('procedures/facade-api/
 include('node-embeddings-params')
 project(':node-embeddings-params').projectDir = file('algo-params/node-embeddings-params')
 
-include('numbers')
-project(':numbers').projectDir = file('numbers')
-
 include('open-licensing')
 project(':open-licensing').projectDir = file('open-licensing')
 

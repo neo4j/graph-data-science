@@ -36,7 +36,7 @@ import org.neo4j.gds.core.compression.packed.PackedCompressor;
 import org.neo4j.gds.core.compression.varlong.DeltaVarLongCompressor;
 import org.neo4j.gds.memory.info.ImmutableMemoryInfo;
 import org.neo4j.gds.memory.info.MemoryInfo;
-import org.neo4j.gds.numbers.Aggregation;
+import org.neo4j.gds.Aggregation;
 
 import java.util.ArrayList;
 import java.util.concurrent.atomic.LongAdder;

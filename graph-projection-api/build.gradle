@@ -15,7 +15,6 @@ dependencies {
 
     implementation(
             project(':annotations'),
-            project(':numbers'),
             project(':string-formatting'),
     )
 

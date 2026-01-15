@@ -20,7 +20,7 @@
 package org.neo4j.gds.projection;
 
 import org.neo4j.gds.api.ValueConversion;
-import org.neo4j.gds.numbers.Aggregation;
+import org.neo4j.gds.Aggregation;
 import org.neo4j.gds.values.FloatingPointValue;
 import org.neo4j.gds.values.GdsNoValue;
 import org.neo4j.gds.values.GdsValue;

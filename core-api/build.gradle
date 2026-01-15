@@ -27,7 +27,6 @@ dependencies {
     implementation project(':graph-projection-api')
     implementation project(':graph-schema-api')
     implementation project(':memory-info')
-    implementation project(':numbers')
     implementation project(':string-formatting')
 
     implementation openGds.commons.lang3

@@ -31,7 +31,6 @@ dependencies {
     implementation project(':memory-access')
     implementation project(':memory-info')
     implementation project(':memory-usage')
-    implementation project(':numbers')
     implementation project(':open-licensing')
     implementation project(':string-formatting')
     implementation project(':collections')

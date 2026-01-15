@@ -21,7 +21,7 @@ package org.neo4j.gds.compression.packed;
 
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.neo4j.gds.compression.api.AdjacencyListBuilder;
-import org.neo4j.gds.numbers.Aggregation;
+import org.neo4j.gds.Aggregation;
 import org.neo4j.gds.compression.common.AdjacencyCompression;
 import org.neo4j.gds.mem.BitUtil;
 import org.neo4j.gds.memory.access.Address;

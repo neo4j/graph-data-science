@@ -48,7 +48,7 @@ import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.utils.progress.TaskStore;
 import org.neo4j.gds.core.utils.progress.UserTask;
 import org.neo4j.gds.core.utils.progress.tasks.Status;
-import org.neo4j.gds.numbers.Aggregation;
+import org.neo4j.gds.Aggregation;
 import org.neo4j.gds.test.TestProc;
 import org.neo4j.gds.utils.StringJoining;
 

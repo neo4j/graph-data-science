@@ -34,7 +34,7 @@ import org.neo4j.gds.compression.common.AdjacencyCompression;
 import org.neo4j.gds.compression.common.VarLongEncoding;
 import org.neo4j.gds.core.compression.common.AbstractAdjacencyCompressorFactory;
 import org.neo4j.gds.compression.common.MemoryTracker;
-import org.neo4j.gds.numbers.Aggregation;
+import org.neo4j.gds.Aggregation;
 
 import java.util.Arrays;
 import java.util.function.LongSupplier;

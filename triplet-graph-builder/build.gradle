@@ -23,7 +23,6 @@ dependencies {
     implementation project(':logging')
     implementation project(':memory-usage')
     implementation project(':neo4j-log-adapter')
-    implementation project(':numbers')
     implementation project(':progress-tracking')
     implementation project(':string-formatting')
 

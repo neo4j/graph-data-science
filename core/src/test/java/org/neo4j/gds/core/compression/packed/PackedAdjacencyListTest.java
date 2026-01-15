@@ -30,7 +30,7 @@ import org.neo4j.gds.compression.packed.PackedAdjacencyList;
 import org.neo4j.gds.compression.packed.VarLongTailPacker;
 import org.neo4j.gds.memory.access.Address;
 import org.neo4j.gds.memory.info.MemoryInfo;
-import org.neo4j.gds.numbers.Aggregation;
+import org.neo4j.gds.Aggregation;
 
 import java.util.stream.LongStream;
 

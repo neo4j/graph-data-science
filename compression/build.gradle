@@ -22,9 +22,9 @@ dependencies {
     implementation project(':collections')
     implementation project(':core-api')
     implementation project(':core-utils')
+    implementation project(':graph-projection-api')
     implementation project(':histogram')
     implementation project(':memory-access')
     implementation project(':memory-info')
     implementation project(':memory-usage')
-    implementation project(':numbers')
 }

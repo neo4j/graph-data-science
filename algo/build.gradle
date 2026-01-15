@@ -52,7 +52,6 @@ dependencies {
     implementation project(':ml-algo')
     implementation project(':ml-api')
     implementation project(':model-catalog-api')
-    implementation project(':numbers')
     implementation project(':pregel')
     implementation project(':progress-tracking')
     implementation project(':scaling-utils')

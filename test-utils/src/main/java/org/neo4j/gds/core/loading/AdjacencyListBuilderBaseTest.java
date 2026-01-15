@@ -31,7 +31,7 @@ import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.compress.AdjacencyListsWithProperties;
 import org.neo4j.gds.compression.api.AdjacencyCompressor;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.numbers.Aggregation;
+import org.neo4j.gds.Aggregation;
 
 import java.util.ArrayList;
 import java.util.Arrays;

@@ -23,7 +23,6 @@ import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.ConfigKeyValidation;
-import org.neo4j.gds.numbers.Aggregation;
 
 import java.util.List;
 import java.util.Map;

@@ -20,7 +20,6 @@
 package org.neo4j.gds;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.numbers.Aggregation;
 
 import java.util.Collections;
 import java.util.Iterator;

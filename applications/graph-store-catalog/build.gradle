@@ -47,7 +47,6 @@ dependencies {
     implementation project(':native-projection')
     implementation project(':neo4j-api')
     implementation project(':neo4j-settings')
-    implementation project(':numbers')
     implementation project(':progress-tracking')
     implementation project(':projection')
     implementation project(':graph-store-catalog-results')

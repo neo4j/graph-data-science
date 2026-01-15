@@ -31,7 +31,6 @@ dependencies {
     testImplementation project(':proc-test')
     testImplementation project(':proc-common')
     testImplementation project(':ml-core')
-    testImplementation project(':numbers')
     testImplementation project(':progress-tracking')
     testImplementation project(':projection')
     testCompileOnly openGds.immutables.value.annotations
