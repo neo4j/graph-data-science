@@ -16,9 +16,6 @@ dependencies {
     compileOnly openGds.jetbrains.annotations
     compileOnly project(':progress-tracking')
 
-    // Neo4j dependencies
-    compileOnly(neo4j.common) { transitive = false }
-
     implementation project(':annotations')
     implementation project(':compression')
     implementation project(':config-api')
