@@ -6,8 +6,6 @@
 :algorithm: Depth First Search
 :sequential: true
 
-include::partial$/product-limitations/not-in-serverless-cypher.adoc[]
-
 :directed:
 :undirected:
 include::partial$/algorithms/shared/algorithm-traits.adoc[]
