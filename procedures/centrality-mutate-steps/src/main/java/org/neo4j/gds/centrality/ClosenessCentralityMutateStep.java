@@ -22,7 +22,6 @@ package org.neo4j.gds.centrality;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
-import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService.MutateNodePropertySpec;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.closeness.ClosenessCentralityResult;
@@ -30,16 +29,15 @@ import org.neo4j.gds.closeness.ClosenessCentralityResult;
 import java.util.Collection;
 
 public class ClosenessCentralityMutateStep implements MutateStep<ClosenessCentralityResult, NodePropertiesWritten> {
-    private final MutateNodePropertyService mutateNodePropertyService;
-    private final MutateNodePropertySpec mutateParameters;
+    private final GenericCentralityMutateStep<ClosenessCentralityResult> centralityMutateStep;
 
     public ClosenessCentralityMutateStep(
         MutateNodePropertyService mutateNodePropertyService,
         String mutateProperty,
         Collection<String> nodeLabels
     ) {
-        this.mutateNodePropertyService = mutateNodePropertyService;
-        this.mutateParameters = new MutateNodePropertyService.MutateNodePropertySpec(
+        this.centralityMutateStep =new GenericCentralityMutateStep<>(
+            mutateNodePropertyService,
             mutateProperty,
             nodeLabels
         );
@@ -51,11 +49,10 @@ public class ClosenessCentralityMutateStep implements MutateStep<ClosenessCentra
         GraphStore graphStore,
         ClosenessCentralityResult result
     ) {
-        return mutateNodePropertyService.mutateNodeProperties(
+        return centralityMutateStep.execute(
             graph,
             graphStore,
-            mutateParameters,
-            result.nodePropertyValues()
+            result
         );
     }
 }

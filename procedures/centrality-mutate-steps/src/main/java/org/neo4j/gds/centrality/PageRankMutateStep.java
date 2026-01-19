@@ -18,10 +18,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package org.neo4j.gds.centrality;
+
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
-import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService.MutateNodePropertySpec;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.pagerank.PageRankResult;
@@ -29,19 +29,16 @@ import org.neo4j.gds.pagerank.PageRankResult;
 import java.util.Collection;
 
 public class PageRankMutateStep implements MutateStep<PageRankResult, NodePropertiesWritten> {
-    private final MutateNodePropertyService mutateNodePropertyService;
-    private final MutateNodePropertySpec mutateParameters;
+    private final GenericCentralityMutateStep<PageRankResult> centralityMutateStep;
+
 
     public PageRankMutateStep(
         MutateNodePropertyService mutateNodePropertyService,
         String mutateProperty,
         Collection<String> nodeLabels
     ) {
-        this.mutateNodePropertyService = mutateNodePropertyService;
-        this.mutateParameters = new MutateNodePropertySpec(
-            mutateProperty,
-            nodeLabels
-        );
+        this.centralityMutateStep = new GenericCentralityMutateStep<>(mutateNodePropertyService,mutateProperty,nodeLabels);
+
     }
 
     @Override
@@ -50,11 +47,10 @@ public class PageRankMutateStep implements MutateStep<PageRankResult, NodeProper
         GraphStore graphStore,
         PageRankResult result
     ) {
-        return mutateNodePropertyService.mutateNodeProperties(
+        return centralityMutateStep.execute(
             graph,
             graphStore,
-            mutateParameters,
-            result.nodePropertyValues()
+            result
         );
     }
 }

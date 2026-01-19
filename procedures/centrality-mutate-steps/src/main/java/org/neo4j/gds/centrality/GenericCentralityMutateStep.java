@@ -19,38 +19,42 @@
  */
 package org.neo4j.gds.centrality;
 
+import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmResult;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
-import org.neo4j.gds.degree.DegreeCentralityResult;
 
 import java.util.Collection;
 
-public class DegreeCentralityMutateStep implements MutateStep<DegreeCentralityResult, NodePropertiesWritten> {
-    private final GenericCentralityMutateStep<DegreeCentralityResult> centralityMutateStep;
+public class GenericCentralityMutateStep<R extends CentralityAlgorithmResult> implements MutateStep<R,NodePropertiesWritten> {
+    private final MutateNodePropertyService mutateNodePropertyService;
+    private final MutateNodePropertyService.MutateNodePropertySpec mutateParameters;
 
-
-    public DegreeCentralityMutateStep(
+    public GenericCentralityMutateStep(
         MutateNodePropertyService mutateNodePropertyService,
         String mutateProperty,
         Collection<String> nodeLabels
     ) {
-        this.centralityMutateStep = new GenericCentralityMutateStep<>(mutateNodePropertyService,mutateProperty,nodeLabels);
-
+        this.mutateNodePropertyService = mutateNodePropertyService;
+        this.mutateParameters = new MutateNodePropertyService.MutateNodePropertySpec(
+            mutateProperty,
+            nodeLabels
+        );
     }
 
     @Override
     public NodePropertiesWritten execute(
         Graph graph,
         GraphStore graphStore,
-        DegreeCentralityResult result
+        R result
     ) {
-        return centralityMutateStep.execute(
+        return mutateNodePropertyService.mutateNodeProperties(
             graph,
             graphStore,
-            result
+            mutateParameters,
+            result.nodePropertyValues()
         );
     }
 }
