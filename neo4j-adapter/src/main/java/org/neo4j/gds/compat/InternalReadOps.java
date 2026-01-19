@@ -57,7 +57,7 @@ public final class InternalReadOps {
             )
             .findFirst().orElseThrow(InternalReadOps::unsupportedStoreFormatException);
 
-        idGenerator.nextConsecutiveIdRange(size, false, cursorContext);
+        idGenerator.nextConsecutiveIdRange(size, 0x0, cursorContext);
     }
 
     public static Stream<IdGenerator> findValidIdGeneratorsStream(
