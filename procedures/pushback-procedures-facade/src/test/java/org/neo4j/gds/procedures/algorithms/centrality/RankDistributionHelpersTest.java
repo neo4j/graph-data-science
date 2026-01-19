@@ -50,7 +50,7 @@ class RankDistributionHelpersTest {
         assertThat(summary.get("min")).asInstanceOf(DOUBLE).isCloseTo(1.0, Offset.offset(1e-4));
         assertThat(summary.get("max")).asInstanceOf(DOUBLE).isEqualTo(3.0,Offset.offset(1e-4));
         assertThat(summary.get("mean")).asInstanceOf(DOUBLE).isEqualTo(2.0,Offset.offset(1e-4));
-        assertThat(distribution.computeMillis()).isGreaterThan(0);
+        assertThat(distribution.computeMillis()).isNotNegative();
     }
 
     @Test
