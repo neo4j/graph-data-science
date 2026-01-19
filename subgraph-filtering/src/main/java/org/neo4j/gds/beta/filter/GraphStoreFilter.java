@@ -121,8 +121,10 @@ public final class GraphStoreFilter {
                 validationContext.availableProperties()
             );
             relationshipExpression.validate(validationContext).validate();
-        } catch (ParseException | SemanticErrors e) {
+        } catch (ParseException e) {
             throw new IllegalArgumentException("Invalid `relationshipFilter` expression.", e);
+        } catch (SemanticErrors e) {
+            throw new IllegalArgumentException("Invalid `relationshipFilter` expression. " + e.getMessage(), e);
         }
 
         return ImmutableExpressions.of(nodeExpression, relationshipExpression);
