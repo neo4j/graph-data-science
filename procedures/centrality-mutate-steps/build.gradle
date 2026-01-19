@@ -10,9 +10,6 @@ dependencies {
     implementation project(':pregel')
 
     implementation project(':algorithms-machinery')
-    implementation project(':centrality-configs')
-    implementation project(':centrality-params')
-
 
     // Required for configuration-related types used by services/utilities
     implementation project(':config-api')

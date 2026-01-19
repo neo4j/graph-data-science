@@ -96,7 +96,7 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
         ArticleRankMutateConfig configuration,
         ResultBuilder<ArticleRankMutateConfig, PageRankResult, RESULT, NodePropertiesWritten> resultBuilder
     ) {
-        var mutateStep = new PageRankMutateStep<>(mutateNodePropertyService, configuration);
+        var mutateStep = new PageRankMutateStep(mutateNodePropertyService, configuration.mutateProperty(), configuration.nodeLabels());
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
             graphName,
@@ -114,7 +114,7 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
         ArticulationPointsMutateConfig configuration,
         ResultBuilder<ArticulationPointsMutateConfig, ArticulationPointsResult, RESULT, NodePropertiesWritten> resultBuilder
     ) {
-        var mutateStep = new ArticulationPointsMutateStep(mutateNodePropertyService, configuration);
+        var mutateStep = new ArticulationPointsMutateStep(mutateNodePropertyService, configuration.mutateProperty(), configuration.nodeLabels());
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
             graphName,
@@ -133,7 +133,7 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
         BetweennessCentralityMutateConfig configuration,
         ResultBuilder<BetweennessCentralityMutateConfig, BetwennessCentralityResult, RESULT, NodePropertiesWritten> resultBuilder
     ) {
-        var mutateStep = new BetweennessCentralityMutateStep(mutateNodePropertyService, configuration);
+        var mutateStep = new BetweennessCentralityMutateStep(mutateNodePropertyService, configuration.mutateProperty(), configuration.nodeLabels());
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
             graphName,
@@ -151,7 +151,7 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
         InfluenceMaximizationMutateConfig configuration,
         ResultBuilder<InfluenceMaximizationMutateConfig, CELFResult, RESULT, NodePropertiesWritten> resultBuilder
     ) {
-        var mutateStep = new CelfMutateStep(mutateNodePropertyService, configuration);
+        var mutateStep = new CelfMutateStep(mutateNodePropertyService, configuration.mutateProperty(), configuration.nodeLabels());
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
             graphName,
@@ -169,7 +169,7 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
         ClosenessCentralityMutateConfig configuration,
         ResultBuilder<ClosenessCentralityMutateConfig, ClosenessCentralityResult, RESULT, NodePropertiesWritten> resultBuilder
     ) {
-        var mutateStep = new ClosenessCentralityMutateStep(mutateNodePropertyService, configuration);
+        var mutateStep = new ClosenessCentralityMutateStep(mutateNodePropertyService, configuration.mutateProperty(), configuration.nodeLabels());
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
             graphName,
@@ -187,7 +187,7 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
         DegreeCentralityMutateConfig configuration,
         ResultBuilder<DegreeCentralityMutateConfig, DegreeCentralityResult, RESULT, NodePropertiesWritten> resultBuilder
     ) {
-        var mutateStep = new DegreeCentralityMutateStep(mutateNodePropertyService, configuration);
+        var mutateStep = new DegreeCentralityMutateStep(mutateNodePropertyService, configuration.mutateProperty(), configuration.nodeLabels());
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
             graphName,
@@ -205,7 +205,7 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
         EigenvectorMutateConfig configuration,
         ResultBuilder<EigenvectorMutateConfig, PageRankResult, RESULT, NodePropertiesWritten> resultBuilder
     ) {
-        var mutateStep = new PageRankMutateStep<>(mutateNodePropertyService, configuration);
+        var mutateStep = new PageRankMutateStep(mutateNodePropertyService, configuration.mutateProperty(), configuration.nodeLabels());
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
             graphName,
@@ -223,7 +223,7 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
         HarmonicCentralityMutateConfig configuration,
         ResultBuilder<HarmonicCentralityMutateConfig, HarmonicResult, RESULT, NodePropertiesWritten> resultBuilder
     ) {
-        var mutateStep = new HarmonicCentralityMutateStep(mutateNodePropertyService, configuration);
+        var mutateStep = new HarmonicCentralityMutateStep(mutateNodePropertyService, configuration.mutateProperty(), configuration.nodeLabels());
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
             graphName,
@@ -241,7 +241,7 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
         PageRankMutateConfig configuration,
         ResultBuilder<PageRankMutateConfig, PageRankResult, RESULT, NodePropertiesWritten> resultBuilder
     ) {
-        var mutateStep = new PageRankMutateStep<>(mutateNodePropertyService, configuration);
+        var mutateStep = new PageRankMutateStep(mutateNodePropertyService, configuration.mutateProperty(), configuration.nodeLabels());
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
             graphName,
@@ -259,7 +259,12 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
         IndirectExposureMutateConfig configuration,
         ResultBuilder<IndirectExposureMutateConfig, IndirectExposureResult, RESULT, NodePropertiesWritten> resultBuilder
     ) {
-        var mutateStep = new IndirectExposureMutateStep(mutateNodePropertyService, configuration);
+        var mutateStep = new IndirectExposureMutateStep(mutateNodePropertyService,
+            configuration.nodeLabels(),
+            configuration.mutateProperties().exposures(),
+            configuration.mutateProperties().hops(),
+            configuration.mutateProperties().parents(),
+            configuration.mutateProperties().roots());
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
             graphName,
@@ -277,7 +282,13 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
         HitsConfig configuration,
         ResultBuilder<HitsConfig, PregelResult, RESULT, NodePropertiesWritten> resultBuilder
     ) {
-        var mutateStep = new HitsMutateStep(mutateNodePropertyService, configuration);
+        var mutateStep = new HitsMutateStep(
+            mutateNodePropertyService,
+            configuration.authProperty(),
+            configuration.hubProperty(),
+            configuration.mutateProperty(),
+            configuration.nodeLabels()
+        );
         var hook = hitsHookGenerator.createETLHook(configuration);
         return algorithmProcessingTemplateConvenience.processAlgorithmInMutateMode(
             graphName,

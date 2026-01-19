@@ -24,26 +24,32 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyRecord;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
-import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService.MutateNodePropertiesSpec;
+import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService.MutateNodePropertySpec;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.beta.pregel.PregelResult;
-import org.neo4j.gds.hits.HitsConfig;
 
+import java.util.Collection;
 import java.util.List;
 
 public class HitsMutateStep implements MutateStep<PregelResult, NodePropertiesWritten> {
     private final MutateNodePropertyService mutateNodePropertyService;
-    private final MutateNodePropertiesSpec mutateParameters;
-    private final HitsConfig configuration;
+    private final MutateNodePropertySpec mutateParameters;
+    private final String authProperty;
+    private final String hubProperty;
 
 
-    HitsMutateStep(
+    public HitsMutateStep(
         MutateNodePropertyService mutateNodePropertyService,
-        HitsConfig configuration) {
+        String authProperty,
+        String hubProperty,
+        String mutateProperty,
+        Collection<String> nodeLabels
+    ) {
         this.mutateNodePropertyService = mutateNodePropertyService;
-        this.configuration = configuration;
-        this.mutateParameters = new MutateNodePropertiesSpec(configuration.nodeLabels());
+        this.mutateParameters = new MutateNodePropertySpec(mutateProperty, nodeLabels);
+        this.authProperty = authProperty;
+        this.hubProperty = hubProperty;
     }
 
     @Override
@@ -52,10 +58,10 @@ public class HitsMutateStep implements MutateStep<PregelResult, NodePropertiesWr
         GraphStore graphStore,
         PregelResult result
     ) {
-        var authValues = NodePropertyValuesAdapter.adapt(result.nodeValues().doubleProperties(configuration.authProperty()));
-        var hubValues = NodePropertyValuesAdapter.adapt(result.nodeValues().doubleProperties(configuration.hubProperty()));
-        var authProperty = configuration.authProperty().concat(configuration.mutateProperty());
-        var hubProperty = configuration.hubProperty().concat(configuration.mutateProperty());
+        var authValues = NodePropertyValuesAdapter.adapt(result.nodeValues().doubleProperties(authProperty));
+        var hubValues = NodePropertyValuesAdapter.adapt(result.nodeValues().doubleProperties(hubProperty));
+        var authProperty = property(this.authProperty);
+        var hubProperty = property(this.hubProperty);
         
         var authRecord = NodePropertyRecord.of(authProperty, authValues);
         var hubRecord = NodePropertyRecord.of(hubProperty, hubValues);
@@ -67,6 +73,9 @@ public class HitsMutateStep implements MutateStep<PregelResult, NodePropertiesWr
             List.of(authRecord,hubRecord)
         );
 
+    }
+    private String property(String property){
+        return property.concat(mutateParameters.mutateProperty());
     }
 
 }

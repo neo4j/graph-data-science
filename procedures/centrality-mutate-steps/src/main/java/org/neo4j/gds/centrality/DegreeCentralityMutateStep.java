@@ -25,8 +25,9 @@ import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService.MutateNodePropertySpec;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
-import org.neo4j.gds.degree.DegreeCentralityMutateConfig;
 import org.neo4j.gds.degree.DegreeCentralityResult;
+
+import java.util.Collection;
 
 public class DegreeCentralityMutateStep implements MutateStep<DegreeCentralityResult, NodePropertiesWritten> {
     private final MutateNodePropertyService mutateNodePropertyService;
@@ -34,12 +35,13 @@ public class DegreeCentralityMutateStep implements MutateStep<DegreeCentralityRe
 
     public DegreeCentralityMutateStep(
         MutateNodePropertyService mutateNodePropertyService,
-        DegreeCentralityMutateConfig configuration
+        String mutateProperty,
+        Collection<String> nodeLabels
     ) {
         this.mutateNodePropertyService = mutateNodePropertyService;
         this.mutateParameters = new MutateNodePropertyService.MutateNodePropertySpec(
-            configuration.mutateProperty(),
-            configuration.nodeLabels()
+            mutateProperty,
+            nodeLabels
         );
     }
 

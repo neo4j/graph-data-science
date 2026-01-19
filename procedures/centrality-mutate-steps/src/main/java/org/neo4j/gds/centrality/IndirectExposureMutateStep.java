@@ -18,6 +18,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package org.neo4j.gds.centrality;
+
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyRecord;
@@ -25,23 +26,33 @@ import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService.MutateNodePropertiesSpec;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
-import org.neo4j.gds.indirectExposure.IndirectExposureMutateConfig;
 import org.neo4j.gds.indirectExposure.IndirectExposureResult;
 
+import java.util.Collection;
 import java.util.List;
 
 public class IndirectExposureMutateStep implements MutateStep<IndirectExposureResult, NodePropertiesWritten> {
     private final MutateNodePropertyService mutateNodePropertyService;
-    private final IndirectExposureMutateConfig config;
     private final MutateNodePropertiesSpec mutateParameters;
+    private final String exposures;
+    private final String hops;
+    private final String parents;
+    private final String roots;
 
     public IndirectExposureMutateStep(
         MutateNodePropertyService mutateNodePropertyService,
-        IndirectExposureMutateConfig configuration
+        Collection<String> nodeLabels,
+        String exposures,
+        String hops,
+        String parents,
+        String roots
     ) {
         this.mutateNodePropertyService = mutateNodePropertyService;
-        this.config = configuration;
-        this.mutateParameters = new MutateNodePropertiesSpec(configuration.nodeLabels());
+        this.exposures = exposures;
+        this.hops = hops;
+        this.parents = parents;
+        this.roots = roots;
+        this.mutateParameters = new MutateNodePropertiesSpec(nodeLabels);
     }
 
     @Override
@@ -50,12 +61,11 @@ public class IndirectExposureMutateStep implements MutateStep<IndirectExposureRe
         GraphStore graphStore,
         IndirectExposureResult result
     ) {
-        var mutateProperties = this.config.mutateProperties();
 
-        var exposure = NodePropertyRecord.of(mutateProperties.exposures(), result.exposureValues());
-        var hops =  NodePropertyRecord.of( mutateProperties.hops(), result.hopValues());
-        var parents = NodePropertyRecord.of( mutateProperties.parents(), result.parentValues());
-        var roots = NodePropertyRecord.of( mutateProperties.roots(), result.rootValues());
+        var exposure = NodePropertyRecord.of(exposures, result.exposureValues());
+        var hops =  NodePropertyRecord.of(this.hops, result.hopValues());
+        var parents = NodePropertyRecord.of(this.parents, result.parentValues());
+        var roots = NodePropertyRecord.of(this.roots, result.rootValues());
 
         return mutateNodePropertyService.mutateNodeProperties(
             graph,

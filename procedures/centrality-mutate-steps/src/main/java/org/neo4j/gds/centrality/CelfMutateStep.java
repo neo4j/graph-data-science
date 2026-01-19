@@ -27,7 +27,8 @@ import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.influenceMaximization.CELFNodeProperties;
 import org.neo4j.gds.influenceMaximization.CELFResult;
-import org.neo4j.gds.influenceMaximization.InfluenceMaximizationMutateConfig;
+
+import java.util.Collection;
 
 public class CelfMutateStep implements MutateStep<CELFResult, NodePropertiesWritten> {
     private final MutateNodePropertyService mutateNodePropertyService;
@@ -35,12 +36,13 @@ public class CelfMutateStep implements MutateStep<CELFResult, NodePropertiesWrit
 
     public CelfMutateStep(
         MutateNodePropertyService mutateNodePropertyService,
-        InfluenceMaximizationMutateConfig configuration
+        String mutateProperty,
+        Collection<String> nodeLabels
     ) {
         this.mutateNodePropertyService = mutateNodePropertyService;
         this.mutateParameters = new MutateNodePropertyService.MutateNodePropertySpec(
-            configuration.mutateProperty(),
-            configuration.nodeLabels()
+            mutateProperty,
+            nodeLabels
         );
     }
 

@@ -24,22 +24,23 @@ import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService.MutateNodePropertySpec;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
-import org.neo4j.gds.config.MutateNodePropertyConfig;
 import org.neo4j.gds.pagerank.PageRankResult;
-import org.neo4j.gds.pagerank.RankConfig;
 
-public class PageRankMutateStep<C extends RankConfig & MutateNodePropertyConfig> implements MutateStep<PageRankResult, NodePropertiesWritten> {
+import java.util.Collection;
+
+public class PageRankMutateStep implements MutateStep<PageRankResult, NodePropertiesWritten> {
     private final MutateNodePropertyService mutateNodePropertyService;
     private final MutateNodePropertySpec mutateParameters;
 
     public PageRankMutateStep(
         MutateNodePropertyService mutateNodePropertyService,
-        C configuration
+        String mutateProperty,
+        Collection<String> nodeLabels
     ) {
         this.mutateNodePropertyService = mutateNodePropertyService;
         this.mutateParameters = new MutateNodePropertySpec(
-            configuration.mutateProperty(),
-            configuration.nodeLabels()
+            mutateProperty,
+            nodeLabels
         );
     }
 
