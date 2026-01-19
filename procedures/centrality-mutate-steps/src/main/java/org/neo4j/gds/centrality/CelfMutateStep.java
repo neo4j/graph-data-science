@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.applications.algorithms.centrality;
+package org.neo4j.gds.centrality;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
@@ -29,11 +29,14 @@ import org.neo4j.gds.influenceMaximization.CELFNodeProperties;
 import org.neo4j.gds.influenceMaximization.CELFResult;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationMutateConfig;
 
-class CelfMutateStep implements MutateStep<CELFResult, NodePropertiesWritten> {
+public class CelfMutateStep implements MutateStep<CELFResult, NodePropertiesWritten> {
     private final MutateNodePropertyService mutateNodePropertyService;
     private final MutateNodePropertySpec mutateParameters;
 
-    CelfMutateStep(MutateNodePropertyService mutateNodePropertyService, InfluenceMaximizationMutateConfig configuration) {
+    public CelfMutateStep(
+        MutateNodePropertyService mutateNodePropertyService,
+        InfluenceMaximizationMutateConfig configuration
+    ) {
         this.mutateNodePropertyService = mutateNodePropertyService;
         this.mutateParameters = new MutateNodePropertyService.MutateNodePropertySpec(
             configuration.mutateProperty(),

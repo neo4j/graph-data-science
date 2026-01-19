@@ -17,43 +17,56 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.applications.algorithms.centrality;
+package org.neo4j.gds.centrality;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.properties.nodes.NodePropertyRecord;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
-import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService.MutateNodePropertySpec;
+import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService.MutateNodePropertiesSpec;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
-import org.neo4j.gds.degree.DegreeCentralityMutateConfig;
-import org.neo4j.gds.degree.DegreeCentralityResult;
+import org.neo4j.gds.beta.pregel.PregelResult;
+import org.neo4j.gds.hits.HitsConfig;
 
-class DegreeCentralityMutateStep implements MutateStep<DegreeCentralityResult, NodePropertiesWritten> {
+import java.util.List;
+
+public class HitsMutateStep implements MutateStep<PregelResult, NodePropertiesWritten> {
     private final MutateNodePropertyService mutateNodePropertyService;
-    private final MutateNodePropertySpec mutateParameters;
+    private final MutateNodePropertiesSpec mutateParameters;
+    private final HitsConfig configuration;
 
-    DegreeCentralityMutateStep(
+
+    HitsMutateStep(
         MutateNodePropertyService mutateNodePropertyService,
-        DegreeCentralityMutateConfig configuration
-    ) {
+        HitsConfig configuration) {
         this.mutateNodePropertyService = mutateNodePropertyService;
-        this.mutateParameters = new MutateNodePropertyService.MutateNodePropertySpec(
-            configuration.mutateProperty(),
-            configuration.nodeLabels()
-        );
+        this.configuration = configuration;
+        this.mutateParameters = new MutateNodePropertiesSpec(configuration.nodeLabels());
     }
 
     @Override
     public NodePropertiesWritten execute(
         Graph graph,
         GraphStore graphStore,
-        DegreeCentralityResult result
+        PregelResult result
     ) {
+        var authValues = NodePropertyValuesAdapter.adapt(result.nodeValues().doubleProperties(configuration.authProperty()));
+        var hubValues = NodePropertyValuesAdapter.adapt(result.nodeValues().doubleProperties(configuration.hubProperty()));
+        var authProperty = configuration.authProperty().concat(configuration.mutateProperty());
+        var hubProperty = configuration.hubProperty().concat(configuration.mutateProperty());
+        
+        var authRecord = NodePropertyRecord.of(authProperty, authValues);
+        var hubRecord = NodePropertyRecord.of(hubProperty, hubValues);
+
         return mutateNodePropertyService.mutateNodeProperties(
             graph,
             graphStore,
             mutateParameters,
-            result.nodePropertyValues()
+            List.of(authRecord,hubRecord)
         );
+
     }
+
 }

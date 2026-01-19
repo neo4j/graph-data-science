@@ -17,54 +17,43 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.applications.algorithms.centrality;
+package org.neo4j.gds.centrality;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.properties.nodes.NodePropertyRecord;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
-import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService.MutateNodePropertiesSpec;
+import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService.MutateNodePropertySpec;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
-import org.neo4j.gds.indirectExposure.IndirectExposureMutateConfig;
-import org.neo4j.gds.indirectExposure.IndirectExposureResult;
+import org.neo4j.gds.harmonic.HarmonicCentralityMutateConfig;
+import org.neo4j.gds.harmonic.HarmonicResult;
 
-import java.util.List;
-
-class IndirectExposureMutateStep implements MutateStep<IndirectExposureResult, NodePropertiesWritten> {
+public class HarmonicCentralityMutateStep implements MutateStep<HarmonicResult, NodePropertiesWritten> {
     private final MutateNodePropertyService mutateNodePropertyService;
-    private final IndirectExposureMutateConfig config;
-    private final MutateNodePropertiesSpec mutateParameters;
+    private final MutateNodePropertySpec mutateParameters;
 
-    IndirectExposureMutateStep(
+    public HarmonicCentralityMutateStep(
         MutateNodePropertyService mutateNodePropertyService,
-        IndirectExposureMutateConfig configuration
+        HarmonicCentralityMutateConfig configuration
     ) {
         this.mutateNodePropertyService = mutateNodePropertyService;
-        this.config = configuration;
-        this.mutateParameters = new MutateNodePropertiesSpec(configuration.nodeLabels());
+        this.mutateParameters = new MutateNodePropertyService.MutateNodePropertySpec(
+            configuration.mutateProperty(),
+            configuration.nodeLabels()
+        );
     }
 
     @Override
     public NodePropertiesWritten execute(
         Graph graph,
         GraphStore graphStore,
-        IndirectExposureResult result
+        HarmonicResult result
     ) {
-        var mutateProperties = this.config.mutateProperties();
-
-        var exposure = NodePropertyRecord.of(mutateProperties.exposures(), result.exposureValues());
-        var hops =  NodePropertyRecord.of( mutateProperties.hops(), result.hopValues());
-        var parents = NodePropertyRecord.of( mutateProperties.parents(), result.parentValues());
-        var roots = NodePropertyRecord.of( mutateProperties.roots(), result.rootValues());
-
         return mutateNodePropertyService.mutateNodeProperties(
             graph,
             graphStore,
             mutateParameters,
-            List.of(exposure, hops, parents, roots)
+            result.nodePropertyValues()
         );
-
     }
-
 }

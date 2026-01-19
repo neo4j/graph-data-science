@@ -17,27 +17,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.applications.algorithms.centrality;
+package org.neo4j.gds.centrality;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService.MutateNodePropertySpec;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
-import org.neo4j.gds.closeness.ClosenessCentralityMutateConfig;
-import org.neo4j.gds.closeness.ClosenessCentralityResult;
+import org.neo4j.gds.articulationpoints.ArticulationPointsMutateConfig;
+import org.neo4j.gds.articulationpoints.ArticulationPointsResult;
 
-class ClosenessCentralityMutateStep implements MutateStep<ClosenessCentralityResult, NodePropertiesWritten> {
+public class ArticulationPointsMutateStep implements MutateStep<ArticulationPointsResult, NodePropertiesWritten> {
     private final MutateNodePropertyService mutateNodePropertyService;
     private final MutateNodePropertySpec mutateParameters;
 
-    ClosenessCentralityMutateStep(
+    public ArticulationPointsMutateStep(
         MutateNodePropertyService mutateNodePropertyService,
-        ClosenessCentralityMutateConfig configuration
+        ArticulationPointsMutateConfig configuration
     ) {
         this.mutateNodePropertyService = mutateNodePropertyService;
-        this.mutateParameters = new MutateNodePropertyService.MutateNodePropertySpec(
+        this.mutateParameters = new MutateNodePropertySpec(
             configuration.mutateProperty(),
             configuration.nodeLabels()
         );
@@ -47,13 +48,26 @@ class ClosenessCentralityMutateStep implements MutateStep<ClosenessCentralityRes
     public NodePropertiesWritten execute(
         Graph graph,
         GraphStore graphStore,
-        ClosenessCentralityResult result
+        ArticulationPointsResult result
     ) {
+        var bitset = result.articulationPoints();
+        var nodeProperties =  new LongNodePropertyValues() {
+            @Override
+            public long longValue(long nodeId) {
+                return bitset.get(nodeId) ? 1 : 0;
+            }
+
+            @Override
+            public long nodeCount() {
+                return graph.nodeCount();
+            }
+        };
+
         return mutateNodePropertyService.mutateNodeProperties(
             graph,
             graphStore,
             mutateParameters,
-            result.nodePropertyValues()
+            nodeProperties
         );
     }
 }

@@ -17,8 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.applications.algorithms.centrality;
-
+package org.neo4j.gds.centrality;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
@@ -29,11 +28,11 @@ import org.neo4j.gds.config.MutateNodePropertyConfig;
 import org.neo4j.gds.pagerank.PageRankResult;
 import org.neo4j.gds.pagerank.RankConfig;
 
-class PageRankMutateStep<C extends RankConfig & MutateNodePropertyConfig> implements MutateStep<PageRankResult, NodePropertiesWritten> {
+public class PageRankMutateStep<C extends RankConfig & MutateNodePropertyConfig> implements MutateStep<PageRankResult, NodePropertiesWritten> {
     private final MutateNodePropertyService mutateNodePropertyService;
     private final MutateNodePropertySpec mutateParameters;
 
-    PageRankMutateStep(
+    public PageRankMutateStep(
         MutateNodePropertyService mutateNodePropertyService,
         C configuration
     ) {

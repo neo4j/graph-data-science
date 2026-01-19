@@ -17,43 +17,53 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.applications.algorithms.centrality;
-
+package org.neo4j.gds.centrality;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.properties.nodes.NodePropertyRecord;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
-import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService.MutateNodePropertySpec;
+import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService.MutateNodePropertiesSpec;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
-import org.neo4j.gds.betweenness.BetweennessCentralityMutateConfig;
-import org.neo4j.gds.betweenness.BetwennessCentralityResult;
+import org.neo4j.gds.indirectExposure.IndirectExposureMutateConfig;
+import org.neo4j.gds.indirectExposure.IndirectExposureResult;
 
-class BetweennessCentralityMutateStep implements MutateStep<BetwennessCentralityResult, NodePropertiesWritten> {
+import java.util.List;
+
+public class IndirectExposureMutateStep implements MutateStep<IndirectExposureResult, NodePropertiesWritten> {
     private final MutateNodePropertyService mutateNodePropertyService;
-    private final MutateNodePropertySpec mutateParameters;
+    private final IndirectExposureMutateConfig config;
+    private final MutateNodePropertiesSpec mutateParameters;
 
-    BetweennessCentralityMutateStep(
+    public IndirectExposureMutateStep(
         MutateNodePropertyService mutateNodePropertyService,
-        BetweennessCentralityMutateConfig configuration
+        IndirectExposureMutateConfig configuration
     ) {
         this.mutateNodePropertyService = mutateNodePropertyService;
-        this.mutateParameters = new MutateNodePropertyService.MutateNodePropertySpec(
-            configuration.mutateProperty(),
-            configuration.nodeLabels()
-        );
+        this.config = configuration;
+        this.mutateParameters = new MutateNodePropertiesSpec(configuration.nodeLabels());
     }
 
     @Override
     public NodePropertiesWritten execute(
         Graph graph,
         GraphStore graphStore,
-        BetwennessCentralityResult result
+        IndirectExposureResult result
     ) {
+        var mutateProperties = this.config.mutateProperties();
+
+        var exposure = NodePropertyRecord.of(mutateProperties.exposures(), result.exposureValues());
+        var hops =  NodePropertyRecord.of( mutateProperties.hops(), result.hopValues());
+        var parents = NodePropertyRecord.of( mutateProperties.parents(), result.parentValues());
+        var roots = NodePropertyRecord.of( mutateProperties.roots(), result.rootValues());
+
         return mutateNodePropertyService.mutateNodeProperties(
             graph,
             graphStore,
             mutateParameters,
-            result.nodePropertyValues()
+            List.of(exposure, hops, parents, roots)
         );
+
     }
+
 }
