@@ -49,7 +49,7 @@ class HitsMutateStep implements MutateStep<PregelResult, NodePropertiesWritten> 
         PregelResult result
     ) {
         var authValues = NodePropertyValuesAdapter.adapt(result.nodeValues().doubleProperties(configuration.authProperty()));
-        var hubValues = NodePropertyValuesAdapter.adapt(result.nodeValues().doubleProperties(configuration.authProperty()));
+        var hubValues = NodePropertyValuesAdapter.adapt(result.nodeValues().doubleProperties(configuration.hubProperty()));
         var authProperty = configuration.authProperty().concat(configuration.mutateProperty());
         var hubProperty = configuration.hubProperty().concat(configuration.mutateProperty());
         
