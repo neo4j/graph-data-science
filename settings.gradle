@@ -75,6 +75,9 @@ project(':centrality-configs').projectDir = file('procedures/facade-api/configs/
 include('centrality-facade-api')
 project(':centrality-facade-api').projectDir = file('procedures/facade-api/centrality-facade-api')
 
+include('centrality-mutate-steps')
+project(':centrality-mutate-steps').projectDir = file('procedures/centrality-mutate-steps')
+
 include('centrality-params')
 project(':centrality-params').projectDir = file('algo-params/centrality-params')
 
