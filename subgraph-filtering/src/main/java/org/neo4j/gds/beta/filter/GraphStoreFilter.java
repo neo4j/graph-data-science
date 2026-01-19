@@ -94,7 +94,7 @@ public final class GraphStoreFilter {
         Expression relationshipExpression();
     }
 
-    private static Expressions parseAndValidate(
+    public static Expressions parseAndValidate(
         GraphStore graphStore,
         String nodeFilter,
         String relationshipFilter
@@ -107,8 +107,10 @@ public final class GraphStoreFilter {
                 validationContext.availableProperties()
             );
             nodeExpression.validate(validationContext).validate();
-        } catch (ParseException | SemanticErrors e) {
+        } catch (ParseException e) {
             throw new IllegalArgumentException("Invalid `nodeFilter` expression.", e);
+        } catch (SemanticErrors e) {
+            throw new IllegalArgumentException("Invalid `nodeFilter` expression. " + e.getMessage(), e);
         }
 
         Expression relationshipExpression;
