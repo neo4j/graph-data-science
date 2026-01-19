@@ -20,21 +20,22 @@
 package org.neo4j.gds.algorithms.community;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.ElementProjection;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.collections.ha.HugeLongArray;
-import org.neo4j.gds.config.MutateNodePropertyConfig;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.logging.Log;
 
-import java.util.Optional;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @GdlExtension
 class MutateNodePropertyTest {
@@ -66,20 +67,14 @@ class MutateNodePropertyTest {
         var nodePropertyValuesToMutate = NodePropertyValuesAdapter.adapt(values);
 
         var mutateNodeProperty = new MutateNodePropertyService(mock(Log.class));
+
+        var params = mock(MutateNodePropertyService.MutateNodePropertySpec.class);
+        when(params.mutateProperty()).thenReturn("bugger-off");
+        when(params.nodeLabels()).thenReturn(List.of(ElementProjection.PROJECT_ALL));
         var result = mutateNodeProperty.mutateNodeProperties(
             graph,
             graphStore,
-            new MutateNodePropertyConfig() {
-                @Override
-                public String mutateProperty() {
-                    return "bugger-off";
-                }
-
-                @Override
-                public Optional<String> usernameOverride() {
-                    throw new UnsupportedOperationException("TODO");
-                }
-            },
+             params,
             nodePropertyValuesToMutate
         );
 

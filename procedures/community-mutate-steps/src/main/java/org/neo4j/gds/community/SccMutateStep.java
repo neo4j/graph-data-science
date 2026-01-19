@@ -24,6 +24,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
+import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService.MutateNodePropertySpec;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.collections.ha.HugeLongArray;
@@ -31,7 +32,8 @@ import org.neo4j.gds.collections.ha.HugeLongArray;
 import java.util.Collection;
 
 public class SccMutateStep implements MutateStep<HugeLongArray, NodePropertiesWritten> {
-    private final SpecificCommunityMutateStep specificCommunityMutateStep;
+    private final MutateNodePropertyService mutateNodePropertyService;
+    private final MutateNodePropertySpec mutateParameters;
     private final boolean consecutiveIds;
 
     public SccMutateStep(
@@ -40,7 +42,8 @@ public class SccMutateStep implements MutateStep<HugeLongArray, NodePropertiesWr
         String mutateProperty,
         boolean consecutiveIds
     ) {
-        this.specificCommunityMutateStep = new SpecificCommunityMutateStep(mutateNodePropertyService,labelsToUpdate,mutateProperty);
+        this.mutateParameters = new MutateNodePropertySpec(mutateProperty,labelsToUpdate);
+        this.mutateNodePropertyService = mutateNodePropertyService;
         this.consecutiveIds = consecutiveIds;
     }
 
@@ -55,6 +58,11 @@ public class SccMutateStep implements MutateStep<HugeLongArray, NodePropertiesWr
             NodePropertyValuesAdapter.adapt(result)
         );
 
-        return specificCommunityMutateStep.apply(graph,graphStore,nodePropertyValues);
+        return mutateNodePropertyService.mutateNodeProperties(
+            graph,
+            graphStore,
+            mutateParameters,
+            nodePropertyValues
+        );
     }
 }

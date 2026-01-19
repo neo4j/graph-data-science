@@ -24,6 +24,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
+import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService.MutateNodePropertySpec;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.triangle.TriangleCountResult;
@@ -32,14 +33,16 @@ import java.util.Collection;
 
 public class TriangleCountMutateStep implements MutateStep<TriangleCountResult, NodePropertiesWritten> {
 
-    private final SpecificCommunityMutateStep specificCommunityMutateStep;
+    private final MutateNodePropertyService mutateNodePropertyService;
+    private final MutateNodePropertySpec mutateParameters;
 
     public TriangleCountMutateStep(
         MutateNodePropertyService mutateNodePropertyService,
         Collection<String> labelsToUpdate,
         String mutateProperty
     ) {
-        this.specificCommunityMutateStep = new SpecificCommunityMutateStep(mutateNodePropertyService,labelsToUpdate,mutateProperty);
+        this.mutateParameters = new MutateNodePropertySpec(mutateProperty,labelsToUpdate);
+        this.mutateNodePropertyService = mutateNodePropertyService;
     }
 
     @Override
@@ -50,6 +53,11 @@ public class TriangleCountMutateStep implements MutateStep<TriangleCountResult, 
     ) {
         LongNodePropertyValues nodePropertyValues = NodePropertyValuesAdapter.adapt(result.localTriangles());
 
-        return specificCommunityMutateStep.apply(graph,graphStore,nodePropertyValues);
+        return mutateNodePropertyService.mutateNodeProperties(
+            graph,
+            graphStore,
+            mutateParameters,
+            nodePropertyValues
+        );
     }
 }

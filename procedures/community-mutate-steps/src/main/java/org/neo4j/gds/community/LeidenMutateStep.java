@@ -26,6 +26,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
+import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService.MutateNodePropertySpec;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.leiden.LeidenResult;
@@ -35,7 +36,8 @@ import java.util.Collection;
 public class LeidenMutateStep implements MutateStep<LeidenResult, Pair<NodePropertiesWritten, NodePropertyValues>> {
     private final StandardCommunityProperties standardCommunityProperties;
     private final boolean includeIntermediateCommunities;
-    private final SpecificCommunityMutateStep specificCommunityMutateStep;
+    private final MutateNodePropertyService mutateNodePropertyService;
+    private final MutateNodePropertySpec mutateParameters;
 
     public LeidenMutateStep(
         MutateNodePropertyService mutateNodePropertyService,
@@ -44,7 +46,8 @@ public class LeidenMutateStep implements MutateStep<LeidenResult, Pair<NodePrope
         StandardCommunityProperties standardCommunityProperties,
         boolean includeIntermediateCommunities
     ) {
-        this.specificCommunityMutateStep = new SpecificCommunityMutateStep(mutateNodePropertyService,labelsToUpdate,mutateProperty);
+        this.mutateParameters = new MutateNodePropertySpec(mutateProperty,labelsToUpdate);
+        this.mutateNodePropertyService = mutateNodePropertyService;
         this.standardCommunityProperties = standardCommunityProperties;
         this.includeIntermediateCommunities = includeIntermediateCommunities;
     }
@@ -56,7 +59,12 @@ public class LeidenMutateStep implements MutateStep<LeidenResult, Pair<NodePrope
     ) {
         var nodePropertyValues = calculateNodePropertyValues(graphStore, result);
 
-        var nodePropertiesWritten = specificCommunityMutateStep.apply(graph,graphStore,nodePropertyValues);
+        var nodePropertiesWritten= mutateNodePropertyService.mutateNodeProperties(
+            graph,
+            graphStore,
+            mutateParameters,
+            nodePropertyValues
+        );
 
         return Pair.of(nodePropertiesWritten, nodePropertyValues);
     }

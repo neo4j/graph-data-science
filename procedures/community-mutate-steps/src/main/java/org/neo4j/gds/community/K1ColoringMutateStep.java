@@ -23,22 +23,24 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
+import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService.MutateNodePropertySpec;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.k1coloring.K1ColoringResult;
 
 import java.util.Collection;
 
 public class K1ColoringMutateStep implements MutateStep<K1ColoringResult, Void> {
-    private final SpecificCommunityMutateStep specificCommunityMutateStep;
+    private final MutateNodePropertyService mutateNodePropertyService;
+    private final MutateNodePropertySpec mutateParameters;
 
     public K1ColoringMutateStep(
         MutateNodePropertyService mutateNodePropertyService,
         Collection<String> labelsToUpdate,
         String mutateProperty
     ) {
-        this.specificCommunityMutateStep = new SpecificCommunityMutateStep(mutateNodePropertyService,labelsToUpdate,mutateProperty);
+        this.mutateParameters = new MutateNodePropertySpec(mutateProperty,labelsToUpdate);
+        this.mutateNodePropertyService = mutateNodePropertyService;
     }
-
 
     @Override
     public Void execute(
@@ -48,8 +50,12 @@ public class K1ColoringMutateStep implements MutateStep<K1ColoringResult, Void> 
     ) {
         var nodePropertyValues = NodePropertyValuesAdapter.adapt(result.colors());
 
-        specificCommunityMutateStep.apply(graph,graphStore,nodePropertyValues);
-
+        mutateNodePropertyService.mutateNodeProperties(
+            graph,
+            graphStore,
+            mutateParameters,
+            nodePropertyValues
+        );
         return null;
     }
 }

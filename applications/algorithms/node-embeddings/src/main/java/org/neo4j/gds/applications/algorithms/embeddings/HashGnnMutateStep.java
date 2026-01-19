@@ -22,6 +22,7 @@ package org.neo4j.gds.applications.algorithms.embeddings;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
+import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService.MutateNodePropertySpec;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.embeddings.hashgnn.HashGNNMutateConfig;
@@ -29,11 +30,14 @@ import org.neo4j.gds.embeddings.hashgnn.HashGNNResult;
 
 class HashGnnMutateStep implements MutateStep<HashGNNResult, NodePropertiesWritten> {
     private final MutateNodePropertyService mutateNodePropertyService;
-    private final HashGNNMutateConfig configuration;
+    private MutateNodePropertySpec mutateParameters;
 
     HashGnnMutateStep(MutateNodePropertyService mutateNodePropertyService, HashGNNMutateConfig configuration) {
         this.mutateNodePropertyService = mutateNodePropertyService;
-        this.configuration = configuration;
+        this.mutateParameters = new MutateNodePropertySpec(
+            configuration.mutateProperty(),
+            configuration.nodeLabels()
+        );
     }
 
     @Override
@@ -47,7 +51,7 @@ class HashGnnMutateStep implements MutateStep<HashGNNResult, NodePropertiesWritt
         return mutateNodePropertyService.mutateNodeProperties(
             graph,
             graphStore,
-            configuration,
+            mutateParameters,
             nodePropertyValues
         );
     }

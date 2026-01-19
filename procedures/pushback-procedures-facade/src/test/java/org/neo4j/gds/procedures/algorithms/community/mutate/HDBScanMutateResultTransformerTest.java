@@ -22,6 +22,7 @@ package org.neo4j.gds.procedures.algorithms.community.mutate;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.hdbscan.Labels;
@@ -32,8 +33,6 @@ import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyCollection;
-import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -51,8 +50,8 @@ class HDBScanMutateResultTransformerTest {
         when(mutateService.mutateNodeProperties(
             any(Graph.class),
             any(GraphStore.class),
-            anyCollection(),
-            anyList())
+            any(MutateNodePropertyService.MutateNodePropertySpec.class),
+            any(NodePropertyValues.class))
         ).thenReturn(new NodePropertiesWritten(42));
 
         var transformer = new HDBScanMutateResultTransformer(

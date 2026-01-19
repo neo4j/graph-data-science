@@ -21,20 +21,17 @@ package org.neo4j.gds.pathfinding;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.properties.nodes.NodePropertyRecord;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
+import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService.MutateNodePropertySpec;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
-import org.neo4j.gds.config.ElementTypeValidator;
 
 import java.util.Collection;
-import java.util.List;
 
 public class RandomWalkCountingNodeVisitsMutateStep implements MutateStep<HugeAtomicLongArray, NodePropertiesWritten> {
-    private final Collection<String> labelsToUpdate;
-    private final String mutateProperty;
+    private final MutateNodePropertySpec mutateParameters;
     private final MutateNodePropertyService mutateNodePropertyService;
 
     public RandomWalkCountingNodeVisitsMutateStep(
@@ -42,8 +39,7 @@ public class RandomWalkCountingNodeVisitsMutateStep implements MutateStep<HugeAt
         String mutateProperty,
         MutateNodePropertyService mutateNodePropertyService
     ) {
-        this.labelsToUpdate = labelsToUpdate;
-        this.mutateProperty = mutateProperty;
+        this.mutateParameters = new MutateNodePropertySpec(mutateProperty,labelsToUpdate);
         this.mutateNodePropertyService = mutateNodePropertyService;
     }
 
@@ -58,8 +54,8 @@ public class RandomWalkCountingNodeVisitsMutateStep implements MutateStep<HugeAt
         return mutateNodePropertyService.mutateNodeProperties(
             graph,
             graphStore,
-            ElementTypeValidator.resolve(graphStore, labelsToUpdate),
-            List.of(NodePropertyRecord.of(mutateProperty, nodePropertyValues))
+            mutateParameters,
+            nodePropertyValues
         );
     }
 }

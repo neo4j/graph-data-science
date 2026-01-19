@@ -23,6 +23,7 @@ import org.neo4j.gds.algorithms.embeddings.FloatEmbeddingNodePropertyValues;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
+import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService.MutateNodePropertySpec;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.embeddings.node2vec.Node2VecMutateConfig;
@@ -30,11 +31,14 @@ import org.neo4j.gds.embeddings.node2vec.Node2VecResult;
 
 class Node2VecMutateStep implements MutateStep<Node2VecResult, NodePropertiesWritten> {
     private final MutateNodePropertyService mutateNodePropertyService;
-    private final Node2VecMutateConfig configuration;
+    private final MutateNodePropertySpec mutateParameters;
 
     Node2VecMutateStep(MutateNodePropertyService mutateNodePropertyService, Node2VecMutateConfig configuration) {
         this.mutateNodePropertyService = mutateNodePropertyService;
-        this.configuration = configuration;
+        this.mutateParameters = new MutateNodePropertySpec(
+            configuration.mutateProperty(),
+            configuration.nodeLabels()
+        );
     }
 
     @Override
@@ -48,7 +52,7 @@ class Node2VecMutateStep implements MutateStep<Node2VecResult, NodePropertiesWri
         return mutateNodePropertyService.mutateNodeProperties(
             graph,
             graphStore,
-            configuration,
+            mutateParameters,
             nodePropertyValues
         );
     }

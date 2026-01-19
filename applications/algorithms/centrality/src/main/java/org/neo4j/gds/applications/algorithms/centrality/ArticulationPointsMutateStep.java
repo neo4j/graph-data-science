@@ -23,6 +23,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
+import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService.MutateNodePropertySpec;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.articulationpoints.ArticulationPointsMutateConfig;
@@ -30,11 +31,14 @@ import org.neo4j.gds.articulationpoints.ArticulationPointsResult;
 
 class ArticulationPointsMutateStep implements MutateStep<ArticulationPointsResult, NodePropertiesWritten> {
     private final MutateNodePropertyService mutateNodePropertyService;
-    private final ArticulationPointsMutateConfig configuration;
+    private final MutateNodePropertySpec mutateParameters;
 
     ArticulationPointsMutateStep(MutateNodePropertyService mutateNodePropertyService, ArticulationPointsMutateConfig configuration) {
         this.mutateNodePropertyService = mutateNodePropertyService;
-        this.configuration = configuration;
+        this.mutateParameters = new MutateNodePropertySpec(
+            configuration.mutateProperty(),
+            configuration.nodeLabels()
+        );
     }
 
     @Override
@@ -59,7 +63,7 @@ class ArticulationPointsMutateStep implements MutateStep<ArticulationPointsResul
         return mutateNodePropertyService.mutateNodeProperties(
             graph,
             graphStore,
-            configuration,
+            mutateParameters,
             nodeProperties
         );
     }

@@ -24,6 +24,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
+import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService.MutateNodePropertySpec;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.beta.pregel.PregelResult;
@@ -32,14 +33,16 @@ import org.neo4j.gds.sllpa.SpeakerListenerLPA;
 import java.util.Collection;
 
 public class SpeakerListenerLPAMutateStep implements MutateStep<PregelResult, NodePropertiesWritten> {
-    private final SpecificCommunityMutateStep specificCommunityMutateStep;
+    private final MutateNodePropertyService mutateNodePropertyService;
+    private final MutateNodePropertySpec mutateParameters;
 
     public SpeakerListenerLPAMutateStep(
         MutateNodePropertyService mutateNodePropertyService,
         Collection<String> labelsToUpdate,
         String mutateProperty
     ) {
-        this.specificCommunityMutateStep = new SpecificCommunityMutateStep(mutateNodePropertyService,labelsToUpdate,mutateProperty);
+        this.mutateNodePropertyService = mutateNodePropertyService;
+        this.mutateParameters = new MutateNodePropertySpec(mutateProperty,labelsToUpdate);
     }
 
     @Override
@@ -48,7 +51,12 @@ public class SpeakerListenerLPAMutateStep implements MutateStep<PregelResult, No
         GraphStore graphStore,
         PregelResult result
     ) {
-        return specificCommunityMutateStep.apply(graph,graphStore,nodePropertyValues(result));
+        return mutateNodePropertyService.mutateNodeProperties(
+            graph,
+            graphStore,
+            mutateParameters,
+            nodePropertyValues(result)
+        );
     }
 
     NodePropertyValues nodePropertyValues(PregelResult pregelResult){

@@ -23,6 +23,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
+import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService.MutateNodePropertySpec;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.embeddings.fastrp.FastRPMutateConfig;
@@ -30,12 +31,14 @@ import org.neo4j.gds.embeddings.fastrp.FastRPResult;
 
 class FastRPMutateStep implements MutateStep<FastRPResult, NodePropertiesWritten> {
     private final MutateNodePropertyService mutateNodePropertyService;
-    private final FastRPMutateConfig configuration;
+    private final MutateNodePropertySpec mutateParameters;
 
     FastRPMutateStep(MutateNodePropertyService mutateNodePropertyService, FastRPMutateConfig configuration) {
         this.mutateNodePropertyService = mutateNodePropertyService;
-        this.configuration = configuration;
-    }
+        this.mutateParameters = new MutateNodePropertySpec(
+            configuration.mutateProperty(),
+            configuration.nodeLabels()
+        );    }
 
     @Override
     public NodePropertiesWritten execute(
@@ -48,7 +51,7 @@ class FastRPMutateStep implements MutateStep<FastRPResult, NodePropertiesWritten
         return mutateNodePropertyService.mutateNodeProperties(
             graph,
             graphStore,
-            configuration,
+            mutateParameters,
             nodePropertyValues
         );
     }

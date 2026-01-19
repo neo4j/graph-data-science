@@ -24,6 +24,7 @@ import org.mockito.ArgumentMatcher;
 import org.mockito.internal.progress.ThreadSafeMockingProgress;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
 import org.neo4j.gds.core.loading.PostLoadValidationHook;
+import org.neo4j.gds.embeddings.node2vec.Node2VecMutateConfig;
 
 import java.util.Optional;
 
@@ -38,7 +39,7 @@ class NodeEmbeddingAlgorithmsProcedureFacadeTest {
         var processingTemplate = mock(AlgorithmProcessingTemplateConvenience.class);
         var facade = new NodeEmbeddingAlgorithmsMutateModeBusinessFacade(null, null, processingTemplate, null, null);
 
-        facade.node2Vec(null, null, null);
+        facade.node2Vec(null, mock(Node2VecMutateConfig.class), null);
 
         verify(processingTemplate).processAlgorithmInMutateMode(
             any(), any(), any(), any(), any(), any(), any(), any(),

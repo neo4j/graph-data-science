@@ -23,6 +23,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
+import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService.MutateNodePropertySpec;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.cliqueCounting.CliqueCountingResult;
@@ -30,14 +31,16 @@ import org.neo4j.gds.cliqueCounting.CliqueCountingResult;
 import java.util.Collection;
 
 public class CliqueCountingMutateStep implements MutateStep<CliqueCountingResult, NodePropertiesWritten> {
-    private final SpecificCommunityMutateStep specificCommunityMutateStep;
+    private final MutateNodePropertyService mutateNodePropertyService;
+    private final MutateNodePropertySpec mutateParameters;
 
     public CliqueCountingMutateStep(
         MutateNodePropertyService mutateNodePropertyService,
         Collection<String> labelsToUpdate,
         String mutateProperty
     ) {
-        this.specificCommunityMutateStep = new SpecificCommunityMutateStep(mutateNodePropertyService,labelsToUpdate,mutateProperty);
+        this.mutateParameters = new MutateNodePropertySpec(mutateProperty,labelsToUpdate);
+        this.mutateNodePropertyService = mutateNodePropertyService;
     }
 
     @Override
@@ -48,6 +51,11 @@ public class CliqueCountingMutateStep implements MutateStep<CliqueCountingResult
     ) {
         var nodePropertyValues = NodePropertyValuesAdapter.adapt(result.perNodeCount());
 
-        return specificCommunityMutateStep.apply(graph,graphStore,nodePropertyValues);
+        return mutateNodePropertyService.mutateNodeProperties(
+            graph,
+            graphStore,
+            mutateParameters,
+            nodePropertyValues
+        );
     }
 }

@@ -23,6 +23,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
+import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService.MutateNodePropertySpec;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageMutateConfig;
@@ -30,11 +31,14 @@ import org.neo4j.gds.embeddings.graphsage.algo.GraphSageResult;
 
 class GraphSageMutateStep implements MutateStep<GraphSageResult, NodePropertiesWritten> {
     private final MutateNodePropertyService mutateNodePropertyService;
-    private final GraphSageMutateConfig configuration;
+    private final MutateNodePropertySpec mutateParameters;
 
     GraphSageMutateStep(MutateNodePropertyService mutateNodePropertyService, GraphSageMutateConfig configuration) {
         this.mutateNodePropertyService = mutateNodePropertyService;
-        this.configuration = configuration;
+        this.mutateParameters = new MutateNodePropertySpec(
+            configuration.mutateProperty(),
+            configuration.nodeLabels()
+        );
     }
 
     @Override
@@ -48,7 +52,7 @@ class GraphSageMutateStep implements MutateStep<GraphSageResult, NodePropertiesW
         return mutateNodePropertyService.mutateNodeProperties(
             graph,
             graphStore,
-            configuration,
+            mutateParameters,
             nodePropertyValues
         );
     }

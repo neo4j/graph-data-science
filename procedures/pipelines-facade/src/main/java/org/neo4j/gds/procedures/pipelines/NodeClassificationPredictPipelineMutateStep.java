@@ -54,7 +54,7 @@ class NodeClassificationPredictPipelineMutateStep implements MutateStep<NodeClas
         return mutateNodePropertyService.mutateNodeProperties(
             graph,
             graphStore,
-            configuration,
+            new MutateNodePropertyService.MutateNodePropertiesSpec(configuration.nodeLabels()),
             nodeProperties
         );
     }

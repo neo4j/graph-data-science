@@ -23,6 +23,7 @@ import org.neo4j.gds.algorithms.misc.ScaledPropertiesNodePropertyValues;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
+import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService.MutateNodePropertySpec;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.scaleproperties.ScalePropertiesMutateConfig;
@@ -30,11 +31,14 @@ import org.neo4j.gds.scaleproperties.ScalePropertiesResult;
 
 class ScalePropertiesMutateStep implements MutateStep<ScalePropertiesResult, NodePropertiesWritten> {
     private final MutateNodePropertyService mutateNodePropertyService;
-    private final ScalePropertiesMutateConfig configuration;
+    private final MutateNodePropertySpec  mutateParameters;
 
     ScalePropertiesMutateStep(MutateNodePropertyService mutateNodePropertyService, ScalePropertiesMutateConfig configuration) {
         this.mutateNodePropertyService = mutateNodePropertyService;
-        this.configuration = configuration;
+        this.mutateParameters = new MutateNodePropertySpec(
+            configuration.mutateProperty(),
+            configuration.nodeLabels()
+        );
     }
 
     @Override
@@ -48,7 +52,7 @@ class ScalePropertiesMutateStep implements MutateStep<ScalePropertiesResult, Nod
         return mutateNodePropertyService.mutateNodeProperties(
             graph,
             graphStore,
-            configuration,
+            mutateParameters,
             nodePropertyValues
         );
     }

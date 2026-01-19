@@ -111,7 +111,7 @@ public class TestMutateSpec implements AlgorithmSpec<TestAlgorithm, TestAlgorith
                         mutateNodeProperty.mutateNodeProperties(
                             computationResult.graph(),
                             computationResult.graphStore(),
-                            computationResult.config().nodeLabelIdentifiers(computationResult.graphStore()),
+                            new MutateNodePropertyService.MutateNodePropertiesSpec(config.nodeLabels()),
                             nodePropertyList
                         );
                     }

@@ -21,9 +21,9 @@ package org.neo4j.gds.community;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
+import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService.MutateNodePropertySpec;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.kmeans.KmeansResult;
@@ -31,14 +31,16 @@ import org.neo4j.gds.kmeans.KmeansResult;
 import java.util.Collection;
 
 public class KMeansMutateStep implements MutateStep<KmeansResult, NodePropertiesWritten> {
-    private final SpecificCommunityMutateStep specificCommunityMutateStep;
+    private final MutateNodePropertyService mutateNodePropertyService;
+    private final MutateNodePropertySpec mutateParameters;
 
     public KMeansMutateStep(
         MutateNodePropertyService mutateNodePropertyService,
         Collection<String> labelsToUpdate,
         String mutateProperty
     ) {
-        this.specificCommunityMutateStep = new SpecificCommunityMutateStep(mutateNodePropertyService,labelsToUpdate,mutateProperty);
+        this.mutateParameters = new MutateNodePropertySpec(mutateProperty,labelsToUpdate);
+        this.mutateNodePropertyService = mutateNodePropertyService;
     }
 
     @Override
@@ -47,8 +49,12 @@ public class KMeansMutateStep implements MutateStep<KmeansResult, NodeProperties
         GraphStore graphStore,
         KmeansResult result
     ) {
-        LongNodePropertyValues nodePropertyValues = NodePropertyValuesAdapter.adapt(result.communities());
-        return specificCommunityMutateStep.apply(graph,graphStore,nodePropertyValues);
-
+        var nodePropertyValues = NodePropertyValuesAdapter.adapt(result.communities());
+        return mutateNodePropertyService.mutateNodeProperties(
+            graph,
+            graphStore,
+            mutateParameters,
+            nodePropertyValues
+        );
     }
 }

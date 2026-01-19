@@ -62,7 +62,7 @@ public class PregelMutateComputationResultConsumer<
                         var nodePropsWritten = mutateNodeProperty.mutateNodeProperties(
                             computationResult.graph(),
                             computationResult.graphStore(),
-                            config.nodeLabelIdentifiers(computationResult.graphStore()),
+                            new MutateNodePropertyService.MutateNodePropertiesSpec(config.nodeLabels()),
                             nodePropertyList
                         );
                         nodePropertiesWritten.set(nodePropsWritten.value());

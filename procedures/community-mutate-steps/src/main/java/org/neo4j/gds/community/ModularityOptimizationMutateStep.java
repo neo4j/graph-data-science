@@ -22,6 +22,7 @@ package org.neo4j.gds.community;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
+import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService.MutateNodePropertySpec;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationResult;
@@ -29,7 +30,8 @@ import org.neo4j.gds.modularityoptimization.ModularityOptimizationResult;
 import java.util.Collection;
 
 public class ModularityOptimizationMutateStep implements MutateStep<ModularityOptimizationResult, NodePropertiesWritten> {
-    private final SpecificCommunityMutateStep specificCommunityMutateStep;
+    private final MutateNodePropertyService mutateNodePropertyService;
+    private final MutateNodePropertySpec mutateParameters;
     private final StandardCommunityProperties standardCommunityProperties;
 
     public ModularityOptimizationMutateStep(
@@ -38,7 +40,8 @@ public class ModularityOptimizationMutateStep implements MutateStep<ModularityOp
         String mutateProperty,
         StandardCommunityProperties standardCommunityProperties
     ) {
-        this.specificCommunityMutateStep = new SpecificCommunityMutateStep(mutateNodePropertyService,labelsToUpdate,mutateProperty);
+        this.mutateParameters = new MutateNodePropertySpec(mutateProperty,labelsToUpdate);
+        this.mutateNodePropertyService = mutateNodePropertyService;
         this.standardCommunityProperties = standardCommunityProperties;
     }
 
@@ -54,7 +57,11 @@ public class ModularityOptimizationMutateStep implements MutateStep<ModularityOp
             result.asNodeProperties()
         );
 
-        return specificCommunityMutateStep.apply(graph,graphStore,nodePropertyValues);
-
+        return mutateNodePropertyService.mutateNodeProperties(
+            graph,
+            graphStore,
+            mutateParameters,
+            nodePropertyValues
+        );
     }
 }

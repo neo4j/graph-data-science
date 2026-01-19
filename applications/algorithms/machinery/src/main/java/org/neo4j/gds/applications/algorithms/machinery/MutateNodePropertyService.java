@@ -27,7 +27,7 @@ import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.properties.nodes.NodePropertyRecord;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
-import org.neo4j.gds.config.MutateNodePropertyConfig;
+import org.neo4j.gds.config.ElementTypeValidator;
 import org.neo4j.gds.core.huge.FilteredNodePropertyValues;
 import org.neo4j.gds.logging.Log;
 
@@ -46,34 +46,34 @@ public class MutateNodePropertyService {
     public NodePropertiesWritten mutateNodeProperties(
         Graph graph,
         GraphStore graphStore,
-        MutateNodePropertyConfig configuration,
+        MutateNodePropertySpec spec,
         NodePropertyValues nodePropertyValues
     )
     {
        return mutateNodeProperties(
            graph,
            graphStore,
-           configuration.nodeLabelIdentifiers(graphStore),
-           List.of(NodePropertyRecord.of(configuration.mutateProperty(),nodePropertyValues))
+           spec,
+           List.of(NodePropertyRecord.of(spec.mutateProperty(), nodePropertyValues))
        );
     }
 
     public NodePropertiesWritten mutateNodeProperties(
         Graph graph,
         GraphStore graphStore,
-        MutateNodePropertyConfig configuration,
+        MutateParameters parameters,
         List<NodePropertyRecord> nodeProperties
     )
     {
         return mutateNodeProperties(
             graph,
             graphStore,
-            configuration.nodeLabelIdentifiers(graphStore),
+            resolveNodeLabels(graphStore, parameters.nodeLabels()),
             nodeProperties
         );
     }
 
-    public NodePropertiesWritten mutateNodeProperties(
+    private NodePropertiesWritten mutateNodeProperties(
         Graph graph,
         GraphStore graphStore,
         Collection<NodeLabel> labelsToUpdate,
@@ -123,4 +123,15 @@ public class MutateNodePropertyService {
                 .collect(Collectors.toList()))
             .orElse(nodeProperties);
     }
+
+    private Collection<NodeLabel> resolveNodeLabels(GraphStore graphStore,Collection<String> nodeLabels){
+        return ElementTypeValidator.resolve(graphStore,nodeLabels);
+    }
+
+    public record MutateNodePropertySpec(String mutateProperty, Collection<String> nodeLabels) implements MutateParameters{}
+    public record MutateNodePropertiesSpec(Collection<String> nodeLabels) implements MutateParameters{}
+    public interface MutateParameters {
+        Collection<String> nodeLabels();
+    }
+
 }

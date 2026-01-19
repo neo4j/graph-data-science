@@ -25,6 +25,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
+import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService.MutateNodePropertySpec;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.louvain.LouvainResult;
@@ -34,7 +35,8 @@ import java.util.Collection;
 public class LouvainMutateStep implements MutateStep<LouvainResult, NodePropertiesWritten> {
     private final StandardCommunityProperties standardCommunityProperties;
     private final boolean includeIntermediateCommunities;
-    private final SpecificCommunityMutateStep specificCommunityMutateStep;
+    private final MutateNodePropertyService mutateNodePropertyService;
+    private final MutateNodePropertySpec mutateParameters;
 
     public LouvainMutateStep(
         MutateNodePropertyService mutateNodePropertyService,
@@ -43,7 +45,8 @@ public class LouvainMutateStep implements MutateStep<LouvainResult, NodeProperti
         StandardCommunityProperties standardCommunityProperties,
         boolean includeIntermediateCommunities
     ) {
-        this.specificCommunityMutateStep = new SpecificCommunityMutateStep(mutateNodePropertyService,labelsToUpdate,mutateProperty);
+        this.mutateParameters = new MutateNodePropertySpec(mutateProperty,labelsToUpdate);
+        this.mutateNodePropertyService = mutateNodePropertyService;
         this.standardCommunityProperties = standardCommunityProperties;
         this.includeIntermediateCommunities = includeIntermediateCommunities;
     }
@@ -54,8 +57,14 @@ public class LouvainMutateStep implements MutateStep<LouvainResult, NodeProperti
         GraphStore graphStore,
         LouvainResult result
     ) {
+        var nodePropertyValues = nodePropertyValues(graphStore,result);
 
-        return specificCommunityMutateStep.apply(graph,graphStore,nodePropertyValues(graphStore,result));
+        return mutateNodePropertyService.mutateNodeProperties(
+            graph,
+            graphStore,
+            mutateParameters,
+            nodePropertyValues
+        );
     }
 
     private NodePropertyValues nodePropertyValues(GraphStore graphStore, LouvainResult louvainResult){
