@@ -30,8 +30,10 @@ import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.InstanceOfAssertFactories.DOUBLE;
 import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
 
 class HitsWriteProcTest extends BaseProcTest {
@@ -84,27 +86,32 @@ class HitsWriteProcTest extends BaseProcTest {
            });
            assertThat(rowCount).isEqualTo(1);
 
-           var authQuery = runQueryWithRowConsumer(
-               "MATCH (n) RETURN n.authfoo AS foo",
-               resultRow -> assertThat(resultRow.get("foo"))
-                   .asInstanceOf(DOUBLE)
-                   .satisfiesAnyOf(
-                        v -> assertThat(v).isCloseTo(0, Offset.offset(1e-6)),
-                        v -> assertThat(v).isCloseTo(authValue, Offset.offset(1e-6))
-                       )
+           List<double[]> expectedResults = List.of(
+                new double[]{0.0, hubValue},
+                new double[]{authValue, hubValue},
+                new double[]{authValue, 0.0}
            );
-           assertThat(authQuery).isEqualTo(3);
 
-           var hubQuery = runQueryWithRowConsumer(
-               "MATCH (n) RETURN n.hubfoo AS foo",
-               resultRow -> assertThat(resultRow.get("foo"))
-                   .asInstanceOf(DOUBLE)
-                   .satisfiesAnyOf(
-                       v -> assertThat(v).isCloseTo(0, Offset.offset(1e-6)),
-                       v -> assertThat(v).isCloseTo(hubValue, Offset.offset(1e-6))
-                   )
+
+           var actualResults = new ArrayList<double[]>();
+           var validationQueryCount = runQueryWithRowConsumer(
+               "MATCH (n) RETURN n.authfoo AS authfoo, n.hubfoo as hubfoo",
+               resultRow -> {
+                   var hubOfu = resultRow.getNumber("hubfoo").doubleValue();
+                   var authOfu = resultRow.getNumber("authfoo").doubleValue();
+                   actualResults.add(new double[]{authOfu, hubOfu});
+               }
            );
-           assertThat(authQuery).isEqualTo(3);
+           assertThat(validationQueryCount).isEqualTo(3);
+
+           assertThat(actualResults).hasSameSizeAs(expectedResults);
+           for (var expected : expectedResults) {
+               assertThat(actualResults).anySatisfy(actual -> {
+                   assertThat(actual[0]).isCloseTo(expected[0], Offset.offset(1e-6));
+                   assertThat(actual[1]).isCloseTo(expected[1], Offset.offset(1e-6));
+               });
+           }
+
        }
 
 }

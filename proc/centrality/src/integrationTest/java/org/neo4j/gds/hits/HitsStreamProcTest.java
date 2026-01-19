@@ -71,8 +71,8 @@ import static org.assertj.core.api.Assertions.assertThat;
             .addParameter("hitsIterations",1)
             .yields();
 
-        double authValue =0.7071067811865475;
-        double hubValue = 0.7071067811865476;
+        double authValue = 0.7071067811865475;
+        double hubValue  = 0.7071067811865476;
 
         var expectedResultMap = Map.of(
             idFunction.of("a"), new double[]{0.0,hubValue},

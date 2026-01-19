@@ -32,6 +32,8 @@ import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 
+import java.util.Map;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
 
@@ -90,22 +92,21 @@ class HitsMutateProcTest extends BaseProcTest {
                .graphStore()
                .getUnion();
 
-           var hubValues= actualGraph.nodeProperties("hubfoo");
+           var hubValues = actualGraph.nodeProperties("hubfoo");
            var authValues= actualGraph.nodeProperties("authfoo");
 
+           var expectedResultMap = Map.of(
+               idFunction.of("a"), new double[]{0.0,hubValue},
+               idFunction.of("b"),new double[]{authValue,hubValue},
+               idFunction.of("c"),new double[]{authValue,0.0}
+           );
+
            for (long u=0;u<3;++u){
+               var uReal = actualGraph.toOriginalNodeId(u);
                double hubOfu = hubValues.doubleValue(u);
                double authOfu = authValues.doubleValue(u);
-
-              assertThat(hubOfu)
-                  .satisfiesAnyOf(
-                      v -> assertThat(v).isCloseTo(0, Offset.offset(1e-6)),
-                      v -> assertThat(v).isCloseTo(hubValue, Offset.offset(1e-6)));
-
-               assertThat(authOfu)
-                   .satisfiesAnyOf(
-                       v -> assertThat(v).isCloseTo(0, Offset.offset(1e-6)),
-                       v -> assertThat(v).isCloseTo(authValue, Offset.offset(1e-6)));
+              assertThat(hubOfu).isCloseTo(expectedResultMap.get(uReal)[1], Offset.offset(1e-6));
+              assertThat(authOfu).isCloseTo(expectedResultMap.get(uReal)[0], Offset.offset(1e-6));
            }
        }
 

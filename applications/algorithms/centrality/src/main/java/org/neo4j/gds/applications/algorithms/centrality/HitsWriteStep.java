@@ -70,7 +70,7 @@ class HitsWriteStep implements WriteStep<PregelResult, NodePropertiesWritten> {
 
     private List<NodePropertyRecord> nodeProperties(PregelResult pregelResult, HitsConfig config){
         var authValues = NodePropertyValuesAdapter.adapt(pregelResult.nodeValues().doubleProperties(config.authProperty()));
-        var hubValues = NodePropertyValuesAdapter.adapt(pregelResult.nodeValues().doubleProperties(config.authProperty()));
+        var hubValues = NodePropertyValuesAdapter.adapt(pregelResult.nodeValues().doubleProperties(config.hubProperty()));
         var authProperty = config.authProperty().concat(config.writeProperty());
         var hubProperty = config.hubProperty().concat(config.writeProperty());
 

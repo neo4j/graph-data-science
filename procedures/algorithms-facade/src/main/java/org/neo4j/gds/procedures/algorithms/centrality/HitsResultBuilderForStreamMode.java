@@ -50,7 +50,10 @@ class HitsResultBuilderForStreamMode implements StreamResultBuilder<PregelResult
                 // for every schema element
                 var authValue = auth.get(nodeId);
                 var hubValue = hub.get(nodeId);
-                return new HitsStreamResult(graph.toOriginalNodeId(nodeId), Map.of(configuration.authProperty(),authValue,configuration.hubProperty(),hubValue));
+                return new HitsStreamResult(graph.toOriginalNodeId(nodeId), Map.of(
+                    configuration.authProperty(),authValue,
+                    configuration.hubProperty(),hubValue)
+                );
             });
     }
 }
