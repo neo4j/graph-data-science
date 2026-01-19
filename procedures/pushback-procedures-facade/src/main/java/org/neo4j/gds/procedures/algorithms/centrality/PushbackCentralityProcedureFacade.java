@@ -31,14 +31,17 @@ public class PushbackCentralityProcedureFacade implements CentralityProcedureFac
 
     private final PushbackCentralityStreamProcedureFacade streamProcedureFacade;
     private final PushbackCentralityStatsProcedureFacade statsProcedureFacade;
+    private final PushbackCentralityProcedureFacade mutateProcedureFacade;
 
 
     public PushbackCentralityProcedureFacade(
         PushbackCentralityStreamProcedureFacade streamProcedureFacade,
-        PushbackCentralityStatsProcedureFacade statsProcedureFacade
+        PushbackCentralityStatsProcedureFacade statsProcedureFacade,
+        PushbackCentralityProcedureFacade mutateProcedureFacade
     ) {
         this.streamProcedureFacade = streamProcedureFacade;
         this.statsProcedureFacade = statsProcedureFacade;
+        this.mutateProcedureFacade = mutateProcedureFacade;
     }
 
     @Override
@@ -64,7 +67,10 @@ public class PushbackCentralityProcedureFacade implements CentralityProcedureFac
 
     @Override
     public Stream<PageRankMutateResult> articleRankMutate(String graphName, Map<String, Object> configuration) {
-        return Stream.empty();
+        return mutateProcedureFacade.articleRankMutate(
+            graphName,
+            configuration
+        );
     }
 
     @Override

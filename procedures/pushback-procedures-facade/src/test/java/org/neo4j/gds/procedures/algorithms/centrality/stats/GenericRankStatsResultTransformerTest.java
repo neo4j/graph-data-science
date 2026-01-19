@@ -42,6 +42,7 @@ class GenericRankStatsResultTransformerTest {
         var result = mock(PageRankResult.class);
         when(result.didConverge()).thenReturn(true);
         when(result.centralityScoreProvider()).thenReturn(HugeDoubleArray.of(10,9,8)::get);
+        when(result.centralityScoreProvider()).thenReturn(HugeDoubleArray.of(10,9,8)::get);
         var graphMock = mock(Graph.class);
         when(graphMock.nodeCount()).thenReturn(3L);
 
@@ -66,6 +67,7 @@ class GenericRankStatsResultTransformerTest {
                 assertThat(stats.configuration()).isEqualTo(config);
                 assertThat(stats.centralityDistribution()).containsKey("p99");
                 assertThat(stats.centralityDistribution().containsValue(8));
+                assertThat(stats.ranIterations()).isEqualTo(30);
             });
 
     }
