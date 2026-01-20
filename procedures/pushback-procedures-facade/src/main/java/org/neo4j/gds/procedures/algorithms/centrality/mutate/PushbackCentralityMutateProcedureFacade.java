@@ -22,10 +22,13 @@ package org.neo4j.gds.procedures.algorithms.centrality.mutate;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
+import org.neo4j.gds.articulationpoints.ArticulationPointsMutateConfig;
+import org.neo4j.gds.articulationpoints.ArticulationPointsToParameters;
 import org.neo4j.gds.centrality.CentralityComputeBusinessFacade;
 import org.neo4j.gds.closeness.ClosenessCentralityMutateConfig;
 import org.neo4j.gds.pagerank.ArticleRankMutateConfig;
 import org.neo4j.gds.procedures.algorithms.CentralityDistributionInstructions;
+import org.neo4j.gds.procedures.algorithms.centrality.ArticulationPointsMutateResult;
 import org.neo4j.gds.procedures.algorithms.centrality.BetaClosenessCentralityMutateResult;
 import org.neo4j.gds.procedures.algorithms.centrality.CentralityMutateResult;
 import org.neo4j.gds.procedures.algorithms.centrality.PageRankMutateResult;
@@ -122,12 +125,12 @@ public class PushbackCentralityMutateProcedureFacade {
         ).join();
     }
 
-    /*
-    public Stream<ArticulationPointsStatsResult> articulationPoints(
+
+    public Stream<ArticulationPointsMutateResult> articulationPoints(
         String graphName,
         Map<String, Object> configuration
     ) {
-        var config = configurationParser.parseConfiguration(configuration, ArticulationPointsStatsConfig::of);
+        var config = configurationParser.parseConfiguration(configuration, ArticulationPointsMutateConfig::of);
 
         var parameters = ArticulationPointsToParameters.toParameters(config,false);
         return businessFacade.articulationPoints(
@@ -136,10 +139,17 @@ public class PushbackCentralityMutateProcedureFacade {
             parameters,
             config.jobId(),
             config.logProgress(),
-            __ -> new ArticulationPointsStatsResultTransformer(config.toMap())
+            graphResources -> new ArticulationPointsMutateResultTransformer
+                (graphResources.graph(),
+                    graphResources.graphStore(),
+                    config.toMap(),
+                    mutateNodePropertyService,
+                    config.nodeLabels(),
+                    config.mutateProperty()
+                )
         ).join();
     }
-
+    /*
     public Stream<CentralityStatsResult> betweenness(String graphName, Map<String, Object> configuration) {
         var config = configurationParser.parseConfiguration(configuration, BetweennessCentralityStatsConfig::of);
 
