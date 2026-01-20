@@ -33,7 +33,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-class CentralityStatsResultTransformerTest {
+class GenericCentralityStatsResultTransformerTest {
 
     @Test
     void shouldTransformResult(){
@@ -45,7 +45,7 @@ class CentralityStatsResultTransformerTest {
 
         var config = Map.of("a",(Object)("foo"));
 
-        var transformer = new CentralityStatsResultTransformer<>(
+        var transformer = new GenericCentralityStatsResultTransformer<>(
             graphMock,
             config,
             true,
@@ -73,7 +73,7 @@ class CentralityStatsResultTransformerTest {
         when(graphMock.nodeCount()).thenReturn(0L);
         var config = Map.of("a",(Object)("foo"));
 
-        var transformer = new CentralityStatsResultTransformer<BetwennessCentralityResult>(
+        var transformer = new GenericCentralityStatsResultTransformer<BetwennessCentralityResult>(
             graphMock,
             config,
             true,

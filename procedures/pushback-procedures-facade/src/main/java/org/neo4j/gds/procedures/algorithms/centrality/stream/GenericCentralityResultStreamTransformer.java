@@ -29,10 +29,10 @@ import org.neo4j.gds.results.ResultTransformer;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-public class CentralityResultStreamTransformer<R extends CentralityAlgorithmResult> implements ResultTransformer<TimedAlgorithmResult<R>,Stream<CentralityStreamResult>> {
+public class GenericCentralityResultStreamTransformer<R extends CentralityAlgorithmResult> implements ResultTransformer<TimedAlgorithmResult<R>,Stream<CentralityStreamResult>> {
     private final Graph graph;
 
-    public CentralityResultStreamTransformer(Graph graph) {
+    public GenericCentralityResultStreamTransformer(Graph graph) {
         this.graph = graph;
     }
 

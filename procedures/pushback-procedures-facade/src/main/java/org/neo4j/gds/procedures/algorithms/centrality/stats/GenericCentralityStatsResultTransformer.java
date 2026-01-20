@@ -30,14 +30,14 @@ import org.neo4j.gds.results.ResultTransformer;
 import java.util.Map;
 import java.util.stream.Stream;
 
-public class CentralityStatsResultTransformer<R extends CentralityAlgorithmResult> implements ResultTransformer<TimedAlgorithmResult<R>, Stream<CentralityStatsResult>> {
+public class GenericCentralityStatsResultTransformer<R extends CentralityAlgorithmResult> implements ResultTransformer<TimedAlgorithmResult<R>, Stream<CentralityStatsResult>> {
 
     private final Graph graph;
     private final Map<String, Object> configuration;
     private final boolean shouldComputeDistribution;
     private final Concurrency concurrency;
 
-    public CentralityStatsResultTransformer(
+    public GenericCentralityStatsResultTransformer(
         Graph graph,
         Map<String, Object> configuration,
         boolean shouldComputeDistribution,

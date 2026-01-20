@@ -42,7 +42,7 @@ class GenericRankStatsResultTransformerTest {
         var result = mock(PageRankResult.class);
         when(result.didConverge()).thenReturn(true);
         when(result.centralityScoreProvider()).thenReturn(HugeDoubleArray.of(10,9,8)::get);
-        when(result.centralityScoreProvider()).thenReturn(HugeDoubleArray.of(10,9,8)::get);
+        when(result.iterations()).thenReturn(30);
         var graphMock = mock(Graph.class);
         when(graphMock.nodeCount()).thenReturn(3L);
 

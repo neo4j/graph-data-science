@@ -170,8 +170,8 @@ public class PushbackCentralityMutateProcedureFacade {
             parameters,
             config.jobId(),
             config.logProgress(),
-            graphResources -> new ArticulationPointsMutateResultTransformer
-                (graphResources.graph(),
+            graphResources -> new ArticulationPointsMutateResultTransformer(
+                    graphResources.graph(),
                     graphResources.graphStore(),
                     config.toMap(),
                     mutateNodePropertyService,
