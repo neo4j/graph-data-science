@@ -32,6 +32,7 @@ import org.neo4j.gds.harmonic.HarmonicCentralityMutateConfig;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationMutateConfig;
 import org.neo4j.gds.pagerank.ArticleRankMutateConfig;
 import org.neo4j.gds.pagerank.EigenvectorMutateConfig;
+import org.neo4j.gds.pagerank.PageRankMutateConfig;
 import org.neo4j.gds.procedures.algorithms.CentralityDistributionInstructions;
 import org.neo4j.gds.procedures.algorithms.centrality.ArticulationPointsMutateResult;
 import org.neo4j.gds.procedures.algorithms.centrality.BetaClosenessCentralityMutateResult;
@@ -273,9 +274,9 @@ public class PushbackCentralityMutateProcedureFacade {
             )
         ).join();
     }
-    /*
-    public Stream<PageRankStatsResult> pageRank(String graphName, Map<String, Object> configuration) {
-        var config = configurationParser.parseConfiguration(configuration, PageRankStatsConfig::of);
+
+    public Stream<PageRankMutateResult> pageRank(String graphName, Map<String, Object> configuration) {
+        var config = configurationParser.parseConfiguration(configuration, PageRankMutateConfig::of);
         var scalerFactory = config.scaler();
         return businessFacade.pageRank(
             GraphName.parse(graphName),
@@ -284,14 +285,18 @@ public class PushbackCentralityMutateProcedureFacade {
             config,
             config.jobId(),
             config.logProgress(),
-            graphResources -> new GenericRankStatsResultTransformer(
+            graphResources -> new GenericRankMutateResultTransformer(
                 graphResources.graph(),
+                graphResources.graphStore(),
                 config.toMap(),
                 scalerFactory,
                 centralityDistributionInstructions.shouldComputeDistribution(),
-                config.concurrency()
+                config.concurrency(),
+                mutateNodePropertyService,
+                config.nodeLabels(),
+                config.mutateProperty()
             )
         ).join();
     }
-    */
+
 }

@@ -68,10 +68,7 @@ public class PushbackCentralityProcedureFacade implements CentralityProcedureFac
 
     @Override
     public Stream<PageRankMutateResult> articleRankMutate(String graphName, Map<String, Object> configuration) {
-        return mutateProcedureFacade.articleRank(
-            graphName,
-            configuration
-        );
+        return mutateProcedureFacade.articleRank(graphName, configuration);
     }
 
     @Override
@@ -552,7 +549,7 @@ public class PushbackCentralityProcedureFacade implements CentralityProcedureFac
 
     @Override
     public Stream<PageRankMutateResult> pageRankMutate(String graphName, Map<String, Object> configuration) {
-        return Stream.empty();
+        return mutateProcedureFacade.pageRank(graphName,configuration);
     }
 
     @Override
