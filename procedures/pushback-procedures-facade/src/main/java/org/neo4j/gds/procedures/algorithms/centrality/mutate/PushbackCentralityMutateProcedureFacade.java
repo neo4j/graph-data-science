@@ -23,8 +23,11 @@ import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.centrality.CentralityComputeBusinessFacade;
+import org.neo4j.gds.closeness.ClosenessCentralityMutateConfig;
 import org.neo4j.gds.pagerank.ArticleRankMutateConfig;
 import org.neo4j.gds.procedures.algorithms.CentralityDistributionInstructions;
+import org.neo4j.gds.procedures.algorithms.centrality.BetaClosenessCentralityMutateResult;
+import org.neo4j.gds.procedures.algorithms.centrality.CentralityMutateResult;
 import org.neo4j.gds.procedures.algorithms.centrality.PageRankMutateResult;
 import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
 
@@ -72,6 +75,53 @@ public class PushbackCentralityMutateProcedureFacade {
             )
         ).join();
     }
+
+    public Stream<BetaClosenessCentralityMutateResult> betaCloseness(String graphName, Map<String, Object> configuration) {
+        var config = configurationParser.parseConfiguration(configuration, ClosenessCentralityMutateConfig::of);
+
+        var parameters = config.toParameters();
+        return businessFacade.closeness(
+            GraphName.parse(graphName),
+            config.toGraphParameters(),
+            parameters,
+            config.jobId(),
+            config.logProgress(),
+            graphResources -> new BetaClosenessCentralityMutateResultTransformer(
+                graphResources.graph(),
+                graphResources.graphStore(),
+                config.toMap(),
+                centralityDistributionInstructions.shouldComputeDistribution(),
+                parameters.concurrency(),
+                mutateNodePropertyService,
+                config.nodeLabels(),
+                config.mutateProperty()
+            )
+        ).join();
+    }
+
+    public Stream<CentralityMutateResult> closeness(String graphName, Map<String, Object> configuration) {
+        var config = configurationParser.parseConfiguration(configuration, ClosenessCentralityMutateConfig::of);
+
+        var parameters = config.toParameters();
+        return businessFacade.closeness(
+            GraphName.parse(graphName),
+            config.toGraphParameters(),
+            parameters,
+            config.jobId(),
+            config.logProgress(),
+            graphResources -> new GenericCentralityMutateResultTransformer<>(
+                graphResources.graph(),
+                graphResources.graphStore(),
+                config.toMap(),
+                centralityDistributionInstructions.shouldComputeDistribution(),
+                parameters.concurrency(),
+                mutateNodePropertyService,
+                config.nodeLabels(),
+                config.mutateProperty()
+            )
+        ).join();
+    }
+
     /*
     public Stream<ArticulationPointsStatsResult> articulationPoints(
         String graphName,
@@ -126,24 +176,6 @@ public class PushbackCentralityMutateProcedureFacade {
         ).join();
     }
 
-    public Stream<CentralityStatsResult> closeness(String graphName, Map<String, Object> configuration) {
-        var config = configurationParser.parseConfiguration(configuration, ClosenessCentralityStatsConfig::of);
-
-        var parameters = config.toParameters();
-        return businessFacade.closeness(
-            GraphName.parse(graphName),
-            config.toGraphParameters(),
-            parameters,
-            config.jobId(),
-            config.logProgress(),
-            graphResources -> new CentralityStatsResultTransformer<>(
-                graphResources.graph(),
-                config.toMap(),
-                centralityDistributionInstructions.shouldComputeDistribution(),
-                parameters.concurrency()
-            )
-        ).join();
-    }
 
     public Stream<CentralityStatsResult> degree(String graphName, Map<String, Object> configuration) {
         var config = configurationParser.parseConfiguration(configuration, DegreeCentralityStatsConfig::of);

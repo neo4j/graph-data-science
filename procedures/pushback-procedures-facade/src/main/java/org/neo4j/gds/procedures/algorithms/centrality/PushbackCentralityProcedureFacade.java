@@ -20,6 +20,7 @@
 package org.neo4j.gds.procedures.algorithms.centrality;
 
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
+import org.neo4j.gds.procedures.algorithms.centrality.mutate.PushbackCentralityMutateProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.centrality.stats.PushbackCentralityStatsProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.centrality.stream.PushbackCentralityStreamProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.CentralityStubs;
@@ -31,13 +32,13 @@ public class PushbackCentralityProcedureFacade implements CentralityProcedureFac
 
     private final PushbackCentralityStreamProcedureFacade streamProcedureFacade;
     private final PushbackCentralityStatsProcedureFacade statsProcedureFacade;
-    private final PushbackCentralityProcedureFacade mutateProcedureFacade;
+    private final PushbackCentralityMutateProcedureFacade mutateProcedureFacade;
 
 
     public PushbackCentralityProcedureFacade(
         PushbackCentralityStreamProcedureFacade streamProcedureFacade,
         PushbackCentralityStatsProcedureFacade statsProcedureFacade,
-        PushbackCentralityProcedureFacade mutateProcedureFacade
+        PushbackCentralityMutateProcedureFacade mutateProcedureFacade
     ) {
         this.streamProcedureFacade = streamProcedureFacade;
         this.statsProcedureFacade = statsProcedureFacade;
@@ -67,7 +68,7 @@ public class PushbackCentralityProcedureFacade implements CentralityProcedureFac
 
     @Override
     public Stream<PageRankMutateResult> articleRankMutate(String graphName, Map<String, Object> configuration) {
-        return mutateProcedureFacade.articleRankMutate(
+        return mutateProcedureFacade.articleRank(
             graphName,
             configuration
         );
@@ -125,7 +126,7 @@ public class PushbackCentralityProcedureFacade implements CentralityProcedureFac
         String graphName,
         Map<String, Object> configuration
     ) {
-        return Stream.empty();
+        return mutateProcedureFacade.betaCloseness(graphName,configuration);
     }
 
     @Override
@@ -334,7 +335,7 @@ public class PushbackCentralityProcedureFacade implements CentralityProcedureFac
         String graphName,
         Map<String, Object> configuration
     ) {
-        return Stream.empty();
+        return mutateProcedureFacade.closeness(graphName,configuration);
     }
 
     @Override
