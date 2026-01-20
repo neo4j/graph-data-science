@@ -28,6 +28,7 @@ import org.neo4j.gds.betweenness.BetweennessCentralityMutateConfig;
 import org.neo4j.gds.centrality.CentralityComputeBusinessFacade;
 import org.neo4j.gds.closeness.ClosenessCentralityMutateConfig;
 import org.neo4j.gds.degree.DegreeCentralityMutateConfig;
+import org.neo4j.gds.harmonic.HarmonicCentralityMutateConfig;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationMutateConfig;
 import org.neo4j.gds.pagerank.ArticleRankMutateConfig;
 import org.neo4j.gds.pagerank.EigenvectorMutateConfig;
@@ -249,9 +250,9 @@ public class PushbackCentralityMutateProcedureFacade {
         ).join();
     }
 
-    /*
-    public Stream<CentralityStatsResult> harmonic(String graphName, Map<String, Object> configuration) {
-        var config = configurationParser.parseConfiguration(configuration, HarmonicCentralityStatsConfig::of);
+
+    public Stream<CentralityMutateResult> harmonic(String graphName, Map<String, Object> configuration) {
+        var config = configurationParser.parseConfiguration(configuration, HarmonicCentralityMutateConfig::of);
 
         var parameters = config.toParameters();
         return businessFacade.harmonic(
@@ -260,15 +261,19 @@ public class PushbackCentralityMutateProcedureFacade {
             parameters,
             config.jobId(),
             config.logProgress(),
-            graphResources -> new CentralityStatsResultTransformer<>(
+            graphResources -> new GenericCentralityMutateResultTransformer<>(
                 graphResources.graph(),
+                graphResources.graphStore(),
                 config.toMap(),
                 centralityDistributionInstructions.shouldComputeDistribution(),
-                parameters.concurrency()
+                parameters.concurrency(),
+                mutateNodePropertyService,
+                config.nodeLabels(),
+                config.mutateProperty()
             )
         ).join();
     }
-
+    /*
     public Stream<PageRankStatsResult> pageRank(String graphName, Map<String, Object> configuration) {
         var config = configurationParser.parseConfiguration(configuration, PageRankStatsConfig::of);
         var scalerFactory = config.scaler();
