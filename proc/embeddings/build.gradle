@@ -30,7 +30,7 @@ dependencies {
     integrationTestImplementation project(':native-projection')
     integrationTestImplementation project(':open-model-catalog')
     integrationTestImplementation project(':open-licensing')
-    integrationTestImplementation project(':proc-test')
+    integrationTestImplementation project(':proc-test-utilities')
     integrationTestImplementation project(':progress-tracking')
     integrationTestImplementation project(':projection')
     integrationTestImplementation project(':string-formatting')

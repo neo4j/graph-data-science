@@ -63,7 +63,7 @@ dependencies {
 
     testImplementation project(':gdl-graph')
     testImplementation project(':open-model-catalog')
-    testImplementation project(':proc-test')
+    testImplementation project(':proc-test-utilities')
     testImplementation project(':proc-common')
     testImplementation project(':proc')
     testCompileOnly openGds.immutables.value.annotations

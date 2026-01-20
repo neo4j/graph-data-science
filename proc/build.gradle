@@ -46,7 +46,7 @@ dependencies {
     testImplementation project(':executor')
     testImplementation project(':legacy-cypher-projection')
     testImplementation project(':open-model-catalog')
-    testImplementation project(':proc-test')
+    testImplementation project(':proc-test-utilities')
 
     testImplementation project(':opengds-extension')
 }

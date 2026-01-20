@@ -28,7 +28,7 @@ dependencies {
     testImplementation project(':native-projection')
     testImplementation project(':string-formatting')
 
-    testImplementation project(':proc-test')
+    testImplementation project(':proc-test-utilities')
     testImplementation project(':proc-common')
     testImplementation project(':ml-core')
     testImplementation project(':progress-tracking')

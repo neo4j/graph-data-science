@@ -31,7 +31,7 @@ dependencies {
     // Test dependencies
     testAnnotationProcessor project(':annotations')
 
-    testImplementation project(':proc-test')
+    testImplementation project(':proc-test-utilities')
     testImplementation project(':proc-common')
     testImplementation project(':proc')
     testCompileOnly openGds.immutables.value.annotations

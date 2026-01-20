@@ -31,7 +31,7 @@ dependencies {
     testImplementation project(':executor')
     testImplementation project(':graph-schema-api')
     testImplementation project(':ml-core')
-    testImplementation project(':proc-test')
+    testImplementation project(':proc-test-utilities')
     testImplementation project(':string-formatting')
 
     testImplementation project(':opengds-extension')

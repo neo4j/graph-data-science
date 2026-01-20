@@ -414,8 +414,8 @@ project(':proc-similarity').projectDir = file('proc/similarity')
 include('proc-sysinfo')
 project(':proc-sysinfo').projectDir = file('proc/sysinfo')
 
-include('proc-test')
-project(':proc-test').projectDir = file('proc/test')
+include('proc-test-utilities')
+project(':proc-test-utilities').projectDir = file('proc/test-utilities')
 
 include('proc-topological-link-prediction')
 project(':proc-topological-link-prediction').projectDir = file('proc/topological-link-prediction')

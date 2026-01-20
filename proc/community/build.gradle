@@ -18,7 +18,7 @@ dependencies {
     integrationTestImplementation project(':metrics-api')
     integrationTestImplementation project(':memory-usage')
     integrationTestImplementation project(':native-projection')
-    integrationTestImplementation project(':proc-test')
+    integrationTestImplementation project(':proc-test-utilities')
 
     integrationTestCompileOnly openGds.immutables.builder
 

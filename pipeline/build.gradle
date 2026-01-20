@@ -71,7 +71,7 @@ dependencies {
     testImplementation project(':gdl-graph')
     testImplementation project(':test-utils')
     testImplementation project(':algo-test')
-    testImplementation project(':proc-test')
+    testImplementation project(':proc-test-utilities')
 
     testImplementation project(':opengds-extension')
 }

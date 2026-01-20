@@ -14,7 +14,7 @@ dependencies {
 
     testImplementation project(':opengds-extension')
 
-    testImplementation project(':proc-test')
+    testImplementation project(':proc-test-utilities')
 }
 
 tasks.register("licenseFile") {
