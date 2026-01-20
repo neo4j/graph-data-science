@@ -27,6 +27,7 @@ import org.neo4j.gds.articulationpoints.ArticulationPointsToParameters;
 import org.neo4j.gds.betweenness.BetweennessCentralityMutateConfig;
 import org.neo4j.gds.centrality.CentralityComputeBusinessFacade;
 import org.neo4j.gds.closeness.ClosenessCentralityMutateConfig;
+import org.neo4j.gds.degree.DegreeCentralityMutateConfig;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationMutateConfig;
 import org.neo4j.gds.pagerank.ArticleRankMutateConfig;
 import org.neo4j.gds.procedures.algorithms.CentralityDistributionInstructions;
@@ -198,9 +199,8 @@ public class PushbackCentralityMutateProcedureFacade {
         ).join();
     }
 
-    /*
-    public Stream<CentralityStatsResult> degree(String graphName, Map<String, Object> configuration) {
-        var config = configurationParser.parseConfiguration(configuration, DegreeCentralityStatsConfig::of);
+    public Stream<CentralityMutateResult> degree(String graphName, Map<String, Object> configuration) {
+        var config = configurationParser.parseConfiguration(configuration, DegreeCentralityMutateConfig::of);
 
         var parameters = config.toParameters();
         return businessFacade.degree(
@@ -210,14 +210,20 @@ public class PushbackCentralityMutateProcedureFacade {
             parameters,
             config.jobId(),
             config.logProgress(),
-            graphResources -> new CentralityStatsResultTransformer<>(
+            graphResources -> new GenericCentralityMutateResultTransformer<>(
                 graphResources.graph(),
+                graphResources.graphStore(),
                 config.toMap(),
                 centralityDistributionInstructions.shouldComputeDistribution(),
-                parameters.concurrency()
+                parameters.concurrency(),
+                mutateNodePropertyService,
+                config.nodeLabels(),
+                config.mutateProperty()
             )
         ).join();
     }
+
+    /*
 
     public Stream<PageRankStatsResult> eigenVector(String graphName, Map<String, Object> configuration) {
         var config = configurationParser.parseConfiguration(configuration, EigenvectorStatsConfig::of);
