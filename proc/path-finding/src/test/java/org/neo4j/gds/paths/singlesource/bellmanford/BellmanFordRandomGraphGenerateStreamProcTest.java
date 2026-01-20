@@ -22,7 +22,7 @@ package org.neo4j.gds.paths.singlesource.bellmanford;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
-import org.neo4j.gds.beta.generator.GraphGenerateProc;
+import org.neo4j.gds.generator.GraphGenerateProc;
 
 import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;

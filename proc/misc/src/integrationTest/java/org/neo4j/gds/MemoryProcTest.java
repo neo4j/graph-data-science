@@ -21,7 +21,7 @@ package org.neo4j.gds;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.beta.generator.GraphGenerateProc;
+import org.neo4j.gds.generator.GraphGenerateProc;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.memory.MemoryProc;
 

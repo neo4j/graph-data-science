@@ -24,7 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
-import org.neo4j.gds.beta.generator.GraphGenerateProc;
+import org.neo4j.gds.generator.GraphGenerateProc;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;

@@ -23,7 +23,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.BaseProcTest;
-import org.neo4j.gds.beta.generator.GraphGenerateProc;
+import org.neo4j.gds.generator.GraphGenerateProc;
 
 import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;

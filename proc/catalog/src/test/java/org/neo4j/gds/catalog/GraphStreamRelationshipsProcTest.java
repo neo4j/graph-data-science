@@ -30,7 +30,7 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.applications.graphstorecatalog.TopologyResult;
-import org.neo4j.gds.beta.generator.GraphGenerateProc;
+import org.neo4j.gds.generator.GraphGenerateProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;

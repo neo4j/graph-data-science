@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.doc;
 
-import org.neo4j.gds.beta.generator.GraphGenerateProc;
+import org.neo4j.gds.generator.GraphGenerateProc;
 import org.neo4j.gds.catalog.GraphStreamRelationshipPropertiesProc;
 import org.neo4j.gds.catalog.GraphStreamRelationshipsProc;
 import org.neo4j.gds.functions.AsNodeFunc;
