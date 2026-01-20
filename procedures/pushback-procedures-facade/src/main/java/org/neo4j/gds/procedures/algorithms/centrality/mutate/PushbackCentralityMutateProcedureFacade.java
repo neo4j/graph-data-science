@@ -24,6 +24,7 @@ import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.articulationpoints.ArticulationPointsMutateConfig;
 import org.neo4j.gds.articulationpoints.ArticulationPointsToParameters;
+import org.neo4j.gds.betweenness.BetweennessCentralityMutateConfig;
 import org.neo4j.gds.centrality.CentralityComputeBusinessFacade;
 import org.neo4j.gds.closeness.ClosenessCentralityMutateConfig;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationMutateConfig;
@@ -92,6 +93,30 @@ public class PushbackCentralityMutateProcedureFacade {
             config.jobId(),
             config.logProgress(),
             graphResources -> new BetaClosenessCentralityMutateResultTransformer(
+                graphResources.graph(),
+                graphResources.graphStore(),
+                config.toMap(),
+                centralityDistributionInstructions.shouldComputeDistribution(),
+                parameters.concurrency(),
+                mutateNodePropertyService,
+                config.nodeLabels(),
+                config.mutateProperty()
+            )
+        ).join();
+    }
+
+    public Stream<CentralityMutateResult> betweenness(String graphName, Map<String, Object> configuration) {
+        var config = configurationParser.parseConfiguration(configuration, BetweennessCentralityMutateConfig::of);
+
+        var parameters = config.toParameters();
+        return businessFacade.betweennessCentrality(
+            GraphName.parse(graphName),
+            config.toGraphParameters(),
+            parameters,
+            config.relationshipWeightProperty(),
+            config.jobId(),
+            config.logProgress(),
+            graphResources -> new GenericCentralityMutateResultTransformer<>(
                 graphResources.graph(),
                 graphResources.graphStore(),
                 config.toMap(),
@@ -173,29 +198,7 @@ public class PushbackCentralityMutateProcedureFacade {
         ).join();
     }
 
-
     /*
-    public Stream<CentralityStatsResult> betweenness(String graphName, Map<String, Object> configuration) {
-        var config = configurationParser.parseConfiguration(configuration, BetweennessCentralityStatsConfig::of);
-
-        var parameters = config.toParameters();
-        return businessFacade.betweennessCentrality(
-            GraphName.parse(graphName),
-            config.toGraphParameters(),
-            parameters,
-            config.relationshipWeightProperty(),
-            config.jobId(),
-            config.logProgress(),
-            graphResources -> new CentralityStatsResultTransformer<>(
-                graphResources.graph(),
-                config.toMap(),
-                centralityDistributionInstructions.shouldComputeDistribution(),
-                parameters.concurrency())
-        ).join();
-    }
-
-
-
     public Stream<CentralityStatsResult> degree(String graphName, Map<String, Object> configuration) {
         var config = configurationParser.parseConfiguration(configuration, DegreeCentralityStatsConfig::of);
 
