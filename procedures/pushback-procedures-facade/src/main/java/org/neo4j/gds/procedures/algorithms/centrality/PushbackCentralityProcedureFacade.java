@@ -442,7 +442,7 @@ public class PushbackCentralityProcedureFacade implements CentralityProcedureFac
 
     @Override
     public Stream<PageRankMutateResult> eigenvectorMutate(String graphName, Map<String, Object> configuration) {
-        return Stream.empty();
+        return mutateProcedureFacade.eigenVector(graphName,configuration);
     }
 
     @Override
