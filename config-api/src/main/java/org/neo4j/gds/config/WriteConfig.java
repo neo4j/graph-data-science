@@ -48,6 +48,7 @@ public interface WriteConfig extends ConcurrencyConfig {
             .validate(writeConcurrency().value(), WRITE_CONCURRENCY_KEY, ConcurrencyConfig.CONCURRENCY_LIMITATION);
     }
 
+    @Configuration.Internal
     default boolean writeToResultStore() {
         return false;
     }

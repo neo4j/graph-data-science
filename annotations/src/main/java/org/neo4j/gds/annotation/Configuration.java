@@ -240,4 +240,10 @@ public @interface Configuration {
         boolean minInclusive() default true;
         boolean maxInclusive() default true;
     }
+
+    /**
+     * Marks the annotated configuration field as internal, not to be used by end-users.
+     */
+    @Retention(RetentionPolicy.RUNTIME)
+    @interface Internal {}
 }
