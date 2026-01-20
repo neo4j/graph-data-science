@@ -280,7 +280,7 @@ public class PushbackCentralityProcedureFacade implements CentralityProcedureFac
 
     @Override
     public Stream<CELFMutateResult> celfMutate(String graphName, Map<String, Object> configuration) {
-        return Stream.empty();
+        return mutateProcedureFacade.celf(graphName,configuration);
     }
 
     @Override

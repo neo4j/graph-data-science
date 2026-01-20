@@ -26,10 +26,12 @@ import org.neo4j.gds.articulationpoints.ArticulationPointsMutateConfig;
 import org.neo4j.gds.articulationpoints.ArticulationPointsToParameters;
 import org.neo4j.gds.centrality.CentralityComputeBusinessFacade;
 import org.neo4j.gds.closeness.ClosenessCentralityMutateConfig;
+import org.neo4j.gds.influenceMaximization.InfluenceMaximizationMutateConfig;
 import org.neo4j.gds.pagerank.ArticleRankMutateConfig;
 import org.neo4j.gds.procedures.algorithms.CentralityDistributionInstructions;
 import org.neo4j.gds.procedures.algorithms.centrality.ArticulationPointsMutateResult;
 import org.neo4j.gds.procedures.algorithms.centrality.BetaClosenessCentralityMutateResult;
+import org.neo4j.gds.procedures.algorithms.centrality.CELFMutateResult;
 import org.neo4j.gds.procedures.algorithms.centrality.CentralityMutateResult;
 import org.neo4j.gds.procedures.algorithms.centrality.PageRankMutateResult;
 import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
@@ -149,6 +151,29 @@ public class PushbackCentralityMutateProcedureFacade {
                 )
         ).join();
     }
+
+    public Stream<CELFMutateResult> celf(String graphName, Map<String, Object> configuration) {
+        var config = configurationParser.parseConfiguration(configuration, InfluenceMaximizationMutateConfig::of);
+
+        var parameters = config.toParameters();
+        return businessFacade.celf(
+            GraphName.parse(graphName),
+            config.toGraphParameters(),
+            parameters,
+            config.jobId(),
+            config.logProgress(),
+            graphResources -> new CelfMutateResultTransformer(
+                graphResources.graph(),
+                graphResources.graphStore(),
+                config.toMap(),
+                mutateNodePropertyService,
+                config.nodeLabels(),
+                config.mutateProperty()
+            )
+        ).join();
+    }
+
+
     /*
     public Stream<CentralityStatsResult> betweenness(String graphName, Map<String, Object> configuration) {
         var config = configurationParser.parseConfiguration(configuration, BetweennessCentralityStatsConfig::of);
@@ -169,22 +194,6 @@ public class PushbackCentralityMutateProcedureFacade {
         ).join();
     }
 
-    public Stream<CELFStatsResult> celf(String graphName, Map<String, Object> configuration) {
-        var config = configurationParser.parseConfiguration(configuration, InfluenceMaximizationStatsConfig::of);
-
-        var parameters = config.toParameters();
-        return businessFacade.celf(
-            GraphName.parse(graphName),
-            config.toGraphParameters(),
-            parameters,
-            config.jobId(),
-            config.logProgress(),
-            graphResources -> new CelfStatsResultTransformer(
-                graphResources.graph().nodeCount(),
-                config.toMap()
-            )
-        ).join();
-    }
 
 
     public Stream<CentralityStatsResult> degree(String graphName, Map<String, Object> configuration) {
