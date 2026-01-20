@@ -92,7 +92,7 @@ class ComputationService {
 
             timer.stop();
 
-            var graphIdentifier = System.identityHashCode(graphResources.graphStore().hashCode());
+            var graphIdentifier = System.identityHashCode(graphResources.graphStore());
 
             telemetryLogger.logAlgorithm(graphIdentifier, label.asString(), configuration, timer.getDuration());
 
