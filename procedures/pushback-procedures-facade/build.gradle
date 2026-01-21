@@ -29,6 +29,7 @@ dependencies {
     // `CypherMapWrapper` lives here
     implementation project(':annotations')
 
+    implementation project(':centrality-mutate-steps')
     implementation project(':community-mutate-steps')
 
     // `BaseConfig` lives here

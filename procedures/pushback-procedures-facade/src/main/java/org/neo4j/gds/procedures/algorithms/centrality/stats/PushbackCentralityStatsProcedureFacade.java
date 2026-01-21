@@ -106,7 +106,7 @@ public class PushbackCentralityStatsProcedureFacade {
             config.relationshipWeightProperty(),
             config.jobId(),
             config.logProgress(),
-            graphResources -> new CentralityStatsResultTransformer<>(
+            graphResources -> new GenericCentralityStatsResultTransformer<>(
                 graphResources.graph(),
                 config.toMap(),
                 centralityDistributionInstructions.shouldComputeDistribution(),
@@ -141,7 +141,7 @@ public class PushbackCentralityStatsProcedureFacade {
             parameters,
             config.jobId(),
             config.logProgress(),
-            graphResources -> new CentralityStatsResultTransformer<>(
+            graphResources -> new GenericCentralityStatsResultTransformer<>(
                 graphResources.graph(),
                 config.toMap(),
                 centralityDistributionInstructions.shouldComputeDistribution(),
@@ -161,7 +161,7 @@ public class PushbackCentralityStatsProcedureFacade {
             parameters,
             config.jobId(),
             config.logProgress(),
-            graphResources -> new CentralityStatsResultTransformer<>(
+            graphResources -> new GenericCentralityStatsResultTransformer<>(
                 graphResources.graph(),
                 config.toMap(),
                 centralityDistributionInstructions.shouldComputeDistribution(),
@@ -200,7 +200,7 @@ public class PushbackCentralityStatsProcedureFacade {
             parameters,
             config.jobId(),
             config.logProgress(),
-            graphResources -> new CentralityStatsResultTransformer<>(
+            graphResources -> new GenericCentralityStatsResultTransformer<>(
                 graphResources.graph(),
                 config.toMap(),
                 centralityDistributionInstructions.shouldComputeDistribution(),

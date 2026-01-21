@@ -85,7 +85,7 @@ public class PushbackCentralityStreamProcedureFacade {
             config,
             config.jobId(),
             config.logProgress(),
-            graphResources -> new CentralityResultStreamTransformer<>(graphResources.graph())
+            graphResources -> new GenericCentralityResultStreamTransformer<>(graphResources.graph())
         ).join();
     }
 
@@ -118,7 +118,7 @@ public class PushbackCentralityStreamProcedureFacade {
             config.relationshipWeightProperty(),
             config.jobId(),
             config.logProgress(),
-            graphResources -> new CentralityResultStreamTransformer<>(graphResources.graph())
+            graphResources -> new GenericCentralityResultStreamTransformer<>(graphResources.graph())
         ).join();
     }
 
@@ -165,7 +165,7 @@ public class PushbackCentralityStreamProcedureFacade {
             parameters,
             config.jobId(),
             config.logProgress(),
-            graphResources -> new CentralityResultStreamTransformer<>(graphResources.graph())
+            graphResources -> new GenericCentralityResultStreamTransformer<>(graphResources.graph())
         ).join();
     }
 
@@ -180,7 +180,7 @@ public class PushbackCentralityStreamProcedureFacade {
             parameters,
             config.jobId(),
             config.logProgress(),
-            graphResources -> new CentralityResultStreamTransformer<>(graphResources.graph())
+            graphResources -> new GenericCentralityResultStreamTransformer<>(graphResources.graph())
         ).join();
     }
 
@@ -194,7 +194,7 @@ public class PushbackCentralityStreamProcedureFacade {
             config,
             config.jobId(),
             config.logProgress(),
-            graphResources -> new CentralityResultStreamTransformer<>(graphResources.graph())
+            graphResources -> new GenericCentralityResultStreamTransformer<>(graphResources.graph())
         ).join();
     }
 
@@ -208,7 +208,7 @@ public class PushbackCentralityStreamProcedureFacade {
             parameters,
             config.jobId(),
             config.logProgress(),
-            graphResources -> new CentralityResultStreamTransformer<>(graphResources.graph())
+            graphResources -> new GenericCentralityResultStreamTransformer<>(graphResources.graph())
         ).join();
     }
 
@@ -222,7 +222,7 @@ public class PushbackCentralityStreamProcedureFacade {
             config,
             config.jobId(),
             config.logProgress(),
-            graphResources -> new CentralityResultStreamTransformer<>(graphResources.graph())
+            graphResources -> new GenericCentralityResultStreamTransformer<>(graphResources.graph())
         ).join();
     }
 

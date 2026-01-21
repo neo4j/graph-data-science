@@ -35,7 +35,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-class CentralityResultStreamTransformerTest {
+class GenericCentralityResultStreamTransformerTest {
 
     @Test
     void shouldTransformResult(){
@@ -46,7 +46,7 @@ class CentralityResultStreamTransformerTest {
         when(graphMock.nodeCount()).thenReturn(3L);
         when(graphMock.toOriginalNodeId(anyLong())).thenAnswer(invocation -> invocation.getArgument(0));
 
-        var transformer = new CentralityResultStreamTransformer<>(graphMock);
+        var transformer = new GenericCentralityResultStreamTransformer<>(graphMock);
 
         var stream = transformer.apply(new TimedAlgorithmResult<>(result, -1));
         assertThat(stream).containsExactlyInAnyOrder(
@@ -68,7 +68,7 @@ class CentralityResultStreamTransformerTest {
         var graphMock = mock(Graph.class);
         when(graphMock.nodeCount()).thenReturn(6L);
 
-        var transformer = new CentralityResultStreamTransformer<>(graphMock);
+        var transformer = new GenericCentralityResultStreamTransformer<>(graphMock);
 
         var stream = transformer.apply(new TimedAlgorithmResult<>(HarmonicResult.EMPTY, -1));
         assertThat(stream).isEmpty();
