@@ -9,6 +9,7 @@ dependencies {
     implementation project(":algo-common")
     implementation project(":algorithms-machinery")
     implementation project(":centrality-configs")
+    implementation project(":centrality-mutate-steps")
     implementation project(":miscellaneous-configs")
     implementation project(":config-api")
     implementation project(":core")

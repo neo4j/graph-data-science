@@ -17,44 +17,38 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.applications.algorithms.centrality;
+package org.neo4j.gds.centrality;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
-import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService.MutateNodePropertySpec;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
-import org.neo4j.gds.config.MutateNodePropertyConfig;
-import org.neo4j.gds.pagerank.PageRankResult;
-import org.neo4j.gds.pagerank.RankConfig;
+import org.neo4j.gds.harmonic.HarmonicResult;
 
-class PageRankMutateStep<C extends RankConfig & MutateNodePropertyConfig> implements MutateStep<PageRankResult, NodePropertiesWritten> {
-    private final MutateNodePropertyService mutateNodePropertyService;
-    private final MutateNodePropertySpec mutateParameters;
+import java.util.Collection;
 
-    PageRankMutateStep(
+public class HarmonicCentralityMutateStep implements MutateStep<HarmonicResult, NodePropertiesWritten> {
+    private final GenericCentralityMutateStep<HarmonicResult> centralityMutateStep;
+
+    public HarmonicCentralityMutateStep(
         MutateNodePropertyService mutateNodePropertyService,
-        C configuration
+        String mutateProperty,
+        Collection<String> nodeLabels
     ) {
-        this.mutateNodePropertyService = mutateNodePropertyService;
-        this.mutateParameters = new MutateNodePropertySpec(
-            configuration.mutateProperty(),
-            configuration.nodeLabels()
-        );
+        this.centralityMutateStep = new GenericCentralityMutateStep<>(mutateNodePropertyService,mutateProperty,nodeLabels);
     }
 
     @Override
     public NodePropertiesWritten execute(
         Graph graph,
         GraphStore graphStore,
-        PageRankResult result
+        HarmonicResult result
     ) {
-        return mutateNodePropertyService.mutateNodeProperties(
+        return centralityMutateStep.execute(
             graph,
             graphStore,
-            mutateParameters,
-            result.nodePropertyValues()
+            result
         );
     }
 }

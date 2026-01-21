@@ -17,29 +17,29 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.applications.algorithms.centrality;
+package org.neo4j.gds.centrality;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
-import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService.MutateNodePropertySpec;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
-import org.neo4j.gds.harmonic.HarmonicCentralityMutateConfig;
-import org.neo4j.gds.harmonic.HarmonicResult;
+import org.neo4j.gds.closeness.ClosenessCentralityResult;
 
-class HarmonicCentralityMutateStep implements MutateStep<HarmonicResult, NodePropertiesWritten> {
-    private final MutateNodePropertyService mutateNodePropertyService;
-    private final MutateNodePropertySpec mutateParameters;
+import java.util.Collection;
 
-    HarmonicCentralityMutateStep(
+public class ClosenessCentralityMutateStep implements MutateStep<ClosenessCentralityResult, NodePropertiesWritten> {
+    private final GenericCentralityMutateStep<ClosenessCentralityResult> centralityMutateStep;
+
+    public ClosenessCentralityMutateStep(
         MutateNodePropertyService mutateNodePropertyService,
-        HarmonicCentralityMutateConfig configuration
+        String mutateProperty,
+        Collection<String> nodeLabels
     ) {
-        this.mutateNodePropertyService = mutateNodePropertyService;
-        this.mutateParameters = new MutateNodePropertyService.MutateNodePropertySpec(
-            configuration.mutateProperty(),
-            configuration.nodeLabels()
+        this.centralityMutateStep =new GenericCentralityMutateStep<>(
+            mutateNodePropertyService,
+            mutateProperty,
+            nodeLabels
         );
     }
 
@@ -47,13 +47,12 @@ class HarmonicCentralityMutateStep implements MutateStep<HarmonicResult, NodePro
     public NodePropertiesWritten execute(
         Graph graph,
         GraphStore graphStore,
-        HarmonicResult result
+        ClosenessCentralityResult result
     ) {
-        return mutateNodePropertyService.mutateNodeProperties(
+        return centralityMutateStep.execute(
             graph,
             graphStore,
-            mutateParameters,
-            result.nodePropertyValues()
+            result
         );
     }
 }

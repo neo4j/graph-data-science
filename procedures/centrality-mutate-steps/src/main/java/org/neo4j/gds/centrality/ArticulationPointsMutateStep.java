@@ -17,27 +17,32 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.applications.algorithms.centrality;
+package org.neo4j.gds.centrality;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService.MutateNodePropertySpec;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
-import org.neo4j.gds.influenceMaximization.CELFNodeProperties;
-import org.neo4j.gds.influenceMaximization.CELFResult;
-import org.neo4j.gds.influenceMaximization.InfluenceMaximizationMutateConfig;
+import org.neo4j.gds.articulationpoints.ArticulationPointsResult;
 
-class CelfMutateStep implements MutateStep<CELFResult, NodePropertiesWritten> {
+import java.util.Collection;
+
+public class ArticulationPointsMutateStep implements MutateStep<ArticulationPointsResult, NodePropertiesWritten> {
     private final MutateNodePropertyService mutateNodePropertyService;
     private final MutateNodePropertySpec mutateParameters;
 
-    CelfMutateStep(MutateNodePropertyService mutateNodePropertyService, InfluenceMaximizationMutateConfig configuration) {
+    public ArticulationPointsMutateStep(
+        MutateNodePropertyService mutateNodePropertyService,
+        String mutateProperty,
+        Collection<String> nodeLabels
+    ) {
         this.mutateNodePropertyService = mutateNodePropertyService;
-        this.mutateParameters = new MutateNodePropertyService.MutateNodePropertySpec(
-            configuration.mutateProperty(),
-            configuration.nodeLabels()
+        this.mutateParameters = new MutateNodePropertySpec(
+            mutateProperty,
+            nodeLabels
         );
     }
 
@@ -45,9 +50,20 @@ class CelfMutateStep implements MutateStep<CELFResult, NodePropertiesWritten> {
     public NodePropertiesWritten execute(
         Graph graph,
         GraphStore graphStore,
-        CELFResult result
+        ArticulationPointsResult result
     ) {
-        var nodeProperties = new CELFNodeProperties(result.seedSetNodes(), graph.nodeCount());
+        var bitset = result.articulationPoints();
+        var nodeProperties =  new LongNodePropertyValues() {
+            @Override
+            public long longValue(long nodeId) {
+                return bitset.get(nodeId) ? 1 : 0;
+            }
+
+            @Override
+            public long nodeCount() {
+                return graph.nodeCount();
+            }
+        };
 
         return mutateNodePropertyService.mutateNodeProperties(
             graph,

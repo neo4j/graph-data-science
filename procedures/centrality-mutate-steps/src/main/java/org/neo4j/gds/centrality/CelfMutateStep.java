@@ -17,56 +17,48 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.applications.algorithms.centrality;
+package org.neo4j.gds.centrality;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.properties.nodes.NodePropertyRecord;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
-import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService.MutateNodePropertiesSpec;
+import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService.MutateNodePropertySpec;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
-import org.neo4j.gds.beta.pregel.PregelResult;
-import org.neo4j.gds.hits.HitsConfig;
+import org.neo4j.gds.influenceMaximization.CELFNodeProperties;
+import org.neo4j.gds.influenceMaximization.CELFResult;
 
-import java.util.List;
+import java.util.Collection;
 
-class HitsMutateStep implements MutateStep<PregelResult, NodePropertiesWritten> {
+public class CelfMutateStep implements MutateStep<CELFResult, NodePropertiesWritten> {
     private final MutateNodePropertyService mutateNodePropertyService;
-    private final MutateNodePropertiesSpec mutateParameters;
-    private final HitsConfig configuration;
+    private final MutateNodePropertySpec mutateParameters;
 
-
-    HitsMutateStep(
+    public CelfMutateStep(
         MutateNodePropertyService mutateNodePropertyService,
-        HitsConfig configuration) {
+        String mutateProperty,
+        Collection<String> nodeLabels
+    ) {
         this.mutateNodePropertyService = mutateNodePropertyService;
-        this.configuration = configuration;
-        this.mutateParameters = new MutateNodePropertiesSpec(configuration.nodeLabels());
+        this.mutateParameters = new MutateNodePropertyService.MutateNodePropertySpec(
+            mutateProperty,
+            nodeLabels
+        );
     }
 
     @Override
     public NodePropertiesWritten execute(
         Graph graph,
         GraphStore graphStore,
-        PregelResult result
+        CELFResult result
     ) {
-        var authValues = NodePropertyValuesAdapter.adapt(result.nodeValues().doubleProperties(configuration.authProperty()));
-        var hubValues = NodePropertyValuesAdapter.adapt(result.nodeValues().doubleProperties(configuration.hubProperty()));
-        var authProperty = configuration.authProperty().concat(configuration.mutateProperty());
-        var hubProperty = configuration.hubProperty().concat(configuration.mutateProperty());
-        
-        var authRecord = NodePropertyRecord.of(authProperty, authValues);
-        var hubRecord = NodePropertyRecord.of(hubProperty, hubValues);
+        var nodeProperties = new CELFNodeProperties(result.seedSetNodes(), graph.nodeCount());
 
         return mutateNodePropertyService.mutateNodeProperties(
             graph,
             graphStore,
             mutateParameters,
-            List.of(authRecord,hubRecord)
+            nodeProperties
         );
-
     }
-
 }

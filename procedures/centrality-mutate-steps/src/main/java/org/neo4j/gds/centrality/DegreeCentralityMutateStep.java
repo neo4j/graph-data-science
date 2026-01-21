@@ -17,43 +17,40 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.applications.algorithms.centrality;
+package org.neo4j.gds.centrality;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
-import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService.MutateNodePropertySpec;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
-import org.neo4j.gds.betweenness.BetweennessCentralityMutateConfig;
-import org.neo4j.gds.betweenness.BetwennessCentralityResult;
+import org.neo4j.gds.degree.DegreeCentralityResult;
 
-class BetweennessCentralityMutateStep implements MutateStep<BetwennessCentralityResult, NodePropertiesWritten> {
-    private final MutateNodePropertyService mutateNodePropertyService;
-    private final MutateNodePropertySpec mutateParameters;
+import java.util.Collection;
 
-    BetweennessCentralityMutateStep(
+public class DegreeCentralityMutateStep implements MutateStep<DegreeCentralityResult, NodePropertiesWritten> {
+    private final GenericCentralityMutateStep<DegreeCentralityResult> centralityMutateStep;
+
+
+    public DegreeCentralityMutateStep(
         MutateNodePropertyService mutateNodePropertyService,
-        BetweennessCentralityMutateConfig configuration
+        String mutateProperty,
+        Collection<String> nodeLabels
     ) {
-        this.mutateNodePropertyService = mutateNodePropertyService;
-        this.mutateParameters = new MutateNodePropertyService.MutateNodePropertySpec(
-            configuration.mutateProperty(),
-            configuration.nodeLabels()
-        );
+        this.centralityMutateStep = new GenericCentralityMutateStep<>(mutateNodePropertyService,mutateProperty,nodeLabels);
+
     }
 
     @Override
     public NodePropertiesWritten execute(
         Graph graph,
         GraphStore graphStore,
-        BetwennessCentralityResult result
+        DegreeCentralityResult result
     ) {
-        return mutateNodePropertyService.mutateNodeProperties(
+        return centralityMutateStep.execute(
             graph,
             graphStore,
-            mutateParameters,
-            result.nodePropertyValues()
+            result
         );
     }
 }
