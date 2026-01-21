@@ -1,0 +1,18 @@
+apply plugin: 'java-library'
+
+description = 'Neo4j Graph Data Science :: Procedures :: Testing'
+
+group = 'org.neo4j.gds'
+
+dependencies {
+    testImplementation project(':core')
+    testImplementation project(':legacy-cypher-projection')
+    testImplementation project(':opengds-extension')
+    testImplementation project(':proc-centrality')
+    testImplementation project(':proc-community')
+    testImplementation project(':proc-embeddings')
+    testImplementation project(':proc-similarity')
+    testImplementation project(':proc-test-utilities')
+    testImplementation project(':procedures-facade-api')
+    testImplementation project(':string-formatting')
+}

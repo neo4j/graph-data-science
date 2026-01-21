@@ -17,16 +17,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.catalog;
+package org.neo4j.gds.testing;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
+import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.catalog.GraphDropProc;
+import org.neo4j.gds.catalog.GraphProjectProc;
+import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
+import org.neo4j.gds.catalog.GraphWriteRelationshipProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.embeddings.graphsage.GraphSageStreamProc;
@@ -35,8 +41,10 @@ import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
 import org.neo4j.gds.labelpropagation.LabelPropagationMutateProc;
 import org.neo4j.gds.louvain.LouvainMutateProc;
+import org.neo4j.gds.math.L2Norm;
 import org.neo4j.gds.pagerank.PageRankMutateProc;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityMutateProc;
+import org.neo4j.gds.utils.StringFormatting;
 import org.neo4j.gds.wcc.WccMutateProc;
 
 import java.util.Collection;
@@ -44,10 +52,6 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.neo4j.gds.TestSupport.assertGraphEquals;
-import static org.neo4j.gds.TestSupport.fromGdl;
-import static org.neo4j.gds.math.L2Norm.l2Norm;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @Neo4jModelCatalogExtension
 class GraphMutateProcIntegrationTest extends BaseProcTest {
@@ -79,7 +83,7 @@ class GraphMutateProcIntegrationTest extends BaseProcTest {
         ", (i)-[:TYPE]->(l)" +
         ", (j)-[:TYPE]->(k)";
 
-    private static final Graph EXPECTED_GRAPH = fromGdl(
+    private static final Graph EXPECTED_GRAPH = TestSupport.fromGdl(
         "(a {nodeId: 0.0,  labelPropagation: 6,  louvain: 6,  pageRank: 0.150000, wcc: 0})" +
         "(b {nodeId: 1.0,  labelPropagation: 6,  louvain: 6,  pageRank: 0.277500, wcc: 0})" +
         "(c {nodeId: 2.0,  labelPropagation: 6,  louvain: 6,  pageRank: 0.385875, wcc: 0})" +
@@ -183,7 +187,7 @@ class GraphMutateProcIntegrationTest extends BaseProcTest {
         runQuery(louvainQuery);
         runQuery(nodeSimilarityQuery);
 
-        assertGraphEquals(EXPECTED_GRAPH, GraphStoreCatalog.get(getUsername(), DatabaseId.of(db.databaseName()), TEST_GRAPH).graphStore().getUnion());
+        TestSupport.assertGraphEquals(EXPECTED_GRAPH, GraphStoreCatalog.get(getUsername(), DatabaseId.of(db.databaseName()), TEST_GRAPH).graphStore().getUnion());
 
         int embeddingDimension = 64;
         String graphSageModel = "graphSageModel";
@@ -207,27 +211,28 @@ class GraphMutateProcIntegrationTest extends BaseProcTest {
 
         runQueryWithRowConsumer(graphSageStreamQuery, row -> {
             Collection<Double> embedding = (Collection<Double>) row.get("embedding");
-            assertEquals(embedding.size(), embeddingDimension);
+            assertEquals(embeddingDimension, embedding.size());
 
             double[] values = embedding.stream()
                 .mapToDouble(Double::doubleValue)
                 .toArray();
-            assertNotEquals(0D, l2Norm(values));
+            assertNotEquals(0D, L2Norm.l2Norm(values));
         });
 
         // write new properties and relationships to Neo
-        String writeNodePropertiesQuery = formatWithLocale(
+        String writeNodePropertiesQuery = StringFormatting.formatWithLocale(
             "CALL gds.graph.nodeProperties.write(" +
             "   '%s', " +
             "   ['pageRank', 'louvain', 'labelPropagation', 'wcc']" +
             ")",
             TEST_GRAPH
         );
-        runQueryWithRowConsumer(writeNodePropertiesQuery, row -> {
-            assertEquals(row.getNumber("propertiesWritten").longValue(), 48L);
-        });
+        runQueryWithRowConsumer(
+            writeNodePropertiesQuery,
+            row -> assertEquals(48L, row.getNumber("propertiesWritten").longValue())
+        );
 
-        String writeRelationshipTypeQuery = formatWithLocale(
+        String writeRelationshipTypeQuery = StringFormatting.formatWithLocale(
             "CALL gds.graph.relationship.write(" +
             "   '%s', " +
             "   'SIMILAR_TO', " +
@@ -238,7 +243,7 @@ class GraphMutateProcIntegrationTest extends BaseProcTest {
         runQuery(writeRelationshipTypeQuery);
 
         // re-create named graph from written node and relationship properties
-        runQuery(formatWithLocale("CALL gds.graph.drop('%s')", TEST_GRAPH));
+        runQuery(StringFormatting.formatWithLocale("CALL gds.graph.drop('%s')", TEST_GRAPH));
         runQuery(GdsCypher.call(TEST_GRAPH)
             .graphProject()
             .withAnyLabel()
@@ -253,6 +258,6 @@ class GraphMutateProcIntegrationTest extends BaseProcTest {
             .yields()
         );
 
-        assertGraphEquals(EXPECTED_GRAPH, GraphStoreCatalog.get(getUsername(), DatabaseId.of(db.databaseName()), TEST_GRAPH).graphStore().getUnion());
+        TestSupport.assertGraphEquals(EXPECTED_GRAPH, GraphStoreCatalog.get(getUsername(), DatabaseId.of(db.databaseName()), TEST_GRAPH).graphStore().getUnion());
     }
 }

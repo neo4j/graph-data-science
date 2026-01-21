@@ -17,21 +17,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.catalog;
+package org.neo4j.gds.testing;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
+import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.labelpropagation.LabelPropagationStatsProc;
+import org.neo4j.gds.legacycypherprojection.GraphProjectFromCypherConfig;
 
 import java.util.Arrays;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.neo4j.gds.legacycypherprojection.GraphProjectFromCypherConfig.ALL_RELATIONSHIPS_QUERY;
 
 class FilterOnCypherGraphIntegrationTest extends BaseProcTest {
 
@@ -75,7 +76,7 @@ class FilterOnCypherGraphIntegrationTest extends BaseProcTest {
                 "nodeQuery",
                 "MATCH (n) RETURN id(n) AS id, labels(n) AS labels",
                 "relQuery",
-                ALL_RELATIONSHIPS_QUERY
+                GraphProjectFromCypherConfig.ALL_RELATIONSHIPS_QUERY
             )
         );
     }
@@ -98,9 +99,7 @@ class FilterOnCypherGraphIntegrationTest extends BaseProcTest {
         runQueryWithResultConsumer(filteredQuery,
             result -> runQueryWithResultConsumer(
                 unfilteredQuery,
-                unfilteredResult -> {
-                    assertNotEquals(result.resultAsString(), unfilteredResult.resultAsString());
-                }
+                unfilteredResult -> assertNotEquals(result.resultAsString(), unfilteredResult.resultAsString())
             ));
     }
 }
