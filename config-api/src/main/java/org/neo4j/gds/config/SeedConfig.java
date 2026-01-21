@@ -32,11 +32,18 @@ import static org.neo4j.gds.core.StringIdentifierValidations.validateNoWhiteChar
 
 public interface SeedConfig {
     String SEED_PROPERTY_KEY = "seedProperty";
+    String FORCE_SEED_PROPERTY_OPTIMIZATION_KEY = "forceSeedOptimization";
 
     @Configuration.ConvertWith(method = "validatePropertyName")
     @Configuration.Key(SEED_PROPERTY_KEY)
     default @Nullable String seedProperty() {
         return null;
+    }
+
+    @Configuration.Key(FORCE_SEED_PROPERTY_OPTIMIZATION_KEY)
+    @Configuration.Internal
+    default boolean forceSeedOptimization() {
+        return false;
     }
 
     @Configuration.Ignore
