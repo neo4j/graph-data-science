@@ -1,6 +1,6 @@
 = Model Catalog
 
-Aura Graph Analytics can be used to create, store and reuse machine learning models created by one of the xref:machine-learning/machine-learning.adox[available machine learning algorithms].
+Aura Graph Analytics can be used to create, store and reuse machine learning models created by one of the xref:machine-learning/machine-learning.adoc[available machine learning algorithms].
 
 The Model Catalog is a persistent store for trained machine learning models.
 Once stored, a model can be reused in later sessions, even after the original GDS Session has ended.
