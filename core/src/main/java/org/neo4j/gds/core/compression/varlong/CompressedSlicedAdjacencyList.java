@@ -22,7 +22,7 @@ package org.neo4j.gds.core.compression.varlong;
 import org.neo4j.gds.collections.cursor.HugeCursorSupport;
 import org.neo4j.gds.collections.ha.HugeIntArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
-import org.neo4j.gds.core.compression.common.BumpAllocator;
+import org.neo4j.gds.compression.common.BumpAllocator;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.paged.HugeMergeSort;
 import org.neo4j.gds.core.utils.paged.HugeSerialIndirectMergeSort;
@@ -31,9 +31,9 @@ import java.util.Arrays;
 
 import static org.neo4j.gds.collections.PageUtil.indexInPage;
 import static org.neo4j.gds.collections.PageUtil.pageIndex;
-import static org.neo4j.gds.core.compression.common.BumpAllocator.PAGE_MASK;
-import static org.neo4j.gds.core.compression.common.BumpAllocator.PAGE_SHIFT;
-import static org.neo4j.gds.core.compression.common.BumpAllocator.PAGE_SIZE;
+import static org.neo4j.gds.compression.common.BumpAllocator.PAGE_MASK;
+import static org.neo4j.gds.compression.common.BumpAllocator.PAGE_SHIFT;
+import static org.neo4j.gds.compression.common.BumpAllocator.PAGE_SIZE;
 
 /**
  * A representation of a {@link org.neo4j.gds.core.compression.varlong.CompressedAdjacencyList} that allows

@@ -24,7 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.core.compression.common.VarLongDecoding;
+import org.neo4j.gds.compression.common.VarLongDecoding;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -34,7 +34,7 @@ import org.neo4j.gds.extension.TestGraph;
 import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.neo4j.gds.core.compression.common.BumpAllocator.PAGE_SIZE;
+import static org.neo4j.gds.compression.common.BumpAllocator.PAGE_SIZE;
 import static org.neo4j.gds.core.compression.varlong.CompressedSlicedAdjacencyList.ZERO_DEGREE;
 
 @GdlExtension
