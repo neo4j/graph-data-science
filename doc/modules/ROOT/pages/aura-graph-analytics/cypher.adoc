@@ -249,6 +249,36 @@ CALL gds.session.delete(
 | deleted    | Boolean   | True, if the GDS Session was successfully deleted, false otherwise.
 |===
 
+=== Retrieving session information for a graph
+
+The `gds.graph.sessionInfo` function returns information about the GDS Session that is associated with a projected graph.
+It can be used to retrieve information required for the `sessionInfo` parameter of most `gds.model` procedures.
+
+==== Syntax
+
+[source, cypher]
+----
+RETURN gds.graph.sessionInfo(graphName: String): Map
+----
+
+.Parameters
+[opts="header",cols="1,1,1,1,4"]
+|===
+| Name               | Type      | Optional | Default | Description
+| graphName          | String    | no       | n/a     | The name of the graph for which the GDS Session information will be returned.
+|===
+
+Returns a Map value with two entries:
+
+.Results
+[opts="header",cols="3m,1,6"]
+|===
+| Name                   | Type     | Description
+| sessionName            | String   | The name of the GDS Session the graph is projected in.
+| sessionId              | String   | The id of the GDS Session the graph is projected in.
+|===
+
+
 [[limitations]]
 == Limitations
 
