@@ -19,13 +19,12 @@
  */
 package org.neo4j.gds.beta.generator;
 
+import org.neo4j.gds.Aggregation;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.config.RandomGraphGeneratorConfig;
-import org.neo4j.gds.Aggregation;
 import org.neo4j.gds.core.loading.AdjacencyListBehavior;
-import org.neo4j.gds.core.loading.construction.RelationshipsBuilderBuilder;
 
 import java.util.ArrayList;
 import java.util.HashMap;
