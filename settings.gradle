@@ -376,49 +376,49 @@ include('pregel-proc-generator')
 project(':pregel-proc-generator').projectDir = file('pregel-proc-generator')
 
 include('proc-catalog')
-project(':proc-catalog').projectDir = file('proc/catalog')
+project(':proc-catalog').projectDir = file('procedures/catalog')
 
 include('proc-centrality')
-project(':proc-centrality').projectDir = file('proc/centrality')
+project(':proc-centrality').projectDir = file('procedures/centrality')
 
 include('proc-common')
-project(':proc-common').projectDir = file('proc/common')
+project(':proc-common').projectDir = file('procedures/common')
 
 include('proc-community')
-project(':proc-community').projectDir = file('proc/community')
+project(':proc-community').projectDir = file('procedures/community')
 
 include('proc-embeddings')
-project(':proc-embeddings').projectDir = file('proc/embeddings')
+project(':proc-embeddings').projectDir = file('procedures/embeddings')
 
 include('proc-machine-learning')
-project(':proc-machine-learning').projectDir = file('proc/machine-learning')
+project(':proc-machine-learning').projectDir = file('procedures/machine-learning')
 
 include('proc-misc')
-project(':proc-misc').projectDir = file('proc/misc')
+project(':proc-misc').projectDir = file('procedures/misc')
 
 include('proc-path-finding')
-project(':proc-path-finding').projectDir = file('proc/path-finding')
+project(':proc-path-finding').projectDir = file('procedures/path-finding')
 
 include('proc-pipeline-catalog')
-project(':proc-pipeline-catalog').projectDir = file('proc/pipeline-catalog')
+project(':proc-pipeline-catalog').projectDir = file('procedures/pipeline-catalog')
 
 include('proc-pregel')
-project(':proc-pregel').projectDir = file('proc/pregel')
+project(':proc-pregel').projectDir = file('procedures/pregel')
 
 include('proc-similarity')
-project(':proc-similarity').projectDir = file('proc/similarity')
+project(':proc-similarity').projectDir = file('procedures/similarity')
 
 include('proc-sysinfo')
-project(':proc-sysinfo').projectDir = file('proc/sysinfo')
+project(':proc-sysinfo').projectDir = file('procedures/sysinfo')
 
 include('proc-test-utilities')
-project(':proc-test-utilities').projectDir = file('proc/test-utilities')
+project(':proc-test-utilities').projectDir = file('procedures/test-utilities')
 
 include('proc-testing')
-project(':proc-testing').projectDir = file('proc/testing')
+project(':proc-testing').projectDir = file('procedures/testing')
 
 include('proc-topological-link-prediction')
-project(':proc-topological-link-prediction').projectDir = file('proc/topological-link-prediction')
+project(':proc-topological-link-prediction').projectDir = file('procedures/topological-link-prediction')
 
 include('procedure-collector')
 project(':procedure-collector').projectDir = file('procedure-collector')
