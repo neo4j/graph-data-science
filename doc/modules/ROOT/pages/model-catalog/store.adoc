@@ -2,8 +2,6 @@
 [[model-catalog-store-ops]]
 = Storing models on disk
 
-include::partial$/product-limitations/not-in-serverless.adoc[]
-
 The model catalog exists as long as the Neo4j instance is running.
 When Neo4j is restarted, models are no longer available in the catalog and need to be trained again.
 This can be prevented by storing a model on disk.
@@ -33,6 +31,7 @@ The `gds.model.store_location` parameter must be configured for this feature.
 [source, cypher, role=noplay]
 ----
 CALL gds.model.store(
+    [ sessionInfo: String or Map, ]
     modelName: String,
     failIfUnsupported: Boolean
 )
@@ -42,11 +41,12 @@ YIELD
 ----
 
 .Parameters
-[opts="header",cols="1,1,1m,1,4"]
+[opts="header",cols="3,1,1m,1,4"]
 |===
-| Name                      | Type    | Default | Optional | Description
-| modelName                 | String  | n/a     | no       | The name of a model.
-| failIfUnsupported         | Boolean | true    | yes      | By default, the library will raise an error when trying to store a non-supported model. When set to `false`, the procedure returns an empty result.
+| Name                                                  | Type              | Default | Optional | Description
+| sessionInfo label:serverless[Aura Graph Analytics]    | String or Map     | n/a     | no       | The name of the xref:aura-graph-analytics/index.adoc[GDS Session] which holds the model. Accepts the output of the helper function `sessionInfo`.
+| modelName                                             | String            | n/a     | no       | The name of a model.
+| failIfUnsupported                                     | Boolean           | true    | yes      | By default, the library will raise an error when trying to store a non-supported model. When set to `false`, the procedure returns an empty result.
 |===
 
 .Results
