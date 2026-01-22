@@ -63,9 +63,11 @@ dependencies {
 
     testImplementation project(':gdl-graph')
     testImplementation project(':open-model-catalog')
-    testImplementation project(':proc-test-utilities')
+    testImplementation project(':proc-centrality')
     testImplementation project(':proc-common')
-    testImplementation project(':proc')
+    testImplementation project(':proc-community')
+    testImplementation project(':proc-similarity')
+    testImplementation project(':proc-test-utilities')
     testCompileOnly openGds.immutables.value.annotations
     testCompileOnly openGds.immutables.builder
     testCompileOnly openGds.jetbrains.annotations

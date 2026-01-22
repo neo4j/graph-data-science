@@ -25,12 +25,22 @@ dependencies {
     implementation     openGds.asciidoctorj
     implementation     openGds.reflections
 
-    testImplementation project(':cypher-aggregation')
-    testImplementation project(':proc')
-    testImplementation project(':pregel-example')
-    testImplementation project(':pipeline')
-    testImplementation project(':proc-sysinfo')
     testImplementation project(':community-configs')
+    testImplementation project(':cypher-aggregation')
+    testImplementation project(':pipeline')
+    testImplementation project(':pregel-example')
+    testImplementation project(':proc-catalog')
+    testImplementation project(':proc-centrality')
+    testImplementation project(':proc-common')
+    testImplementation project(':proc-community')
+    testImplementation project(':proc-embeddings')
+    testImplementation project(':proc-machine-learning')
+    testImplementation project(':proc-misc')
+    testImplementation project(':proc-path-finding')
+    testImplementation project(':proc-pipeline-catalog')
+    testImplementation project(':proc-similarity')
+    testImplementation project(':proc-sysinfo')
+    testImplementation project(':proc-topological-link-prediction')
 
     testImplementation openGds.reflections
 }

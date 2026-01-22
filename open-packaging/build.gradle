@@ -7,7 +7,6 @@ group = 'org.neo4j.gds'
 apply from: '../gradle/licensing.gradle'
 
 dependencies {
-    implementation project(':proc')
     implementation project(':proc-sysinfo')
     implementation project(':opengds-extension')
     implementation project(':open-model-catalog')

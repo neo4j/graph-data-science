@@ -375,9 +375,6 @@ project(':pregel-example').projectDir = file('examples/pregel-example')
 include('pregel-proc-generator')
 project(':pregel-proc-generator').projectDir = file('pregel-proc-generator')
 
-include('proc')
-project(':proc').projectDir = file('proc')
-
 include('proc-catalog')
 project(':proc-catalog').projectDir = file('proc/catalog')
 

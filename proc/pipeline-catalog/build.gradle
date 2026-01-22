@@ -33,7 +33,6 @@ dependencies {
 
     testImplementation project(':proc-test-utilities')
     testImplementation project(':proc-common')
-    testImplementation project(':proc')
     testCompileOnly openGds.immutables.value.annotations
     testCompileOnly openGds.immutables.builder
     testCompileOnly openGds.jetbrains.annotations

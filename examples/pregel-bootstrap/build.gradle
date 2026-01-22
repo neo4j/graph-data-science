@@ -37,7 +37,8 @@ dependencies {
     compileOnly "org.neo4j.gds:gds-values:$gdsVersion"
     compileOnly "org.neo4j.gds:memory-usage:$gdsVersion"
     compileOnly "org.neo4j.gds:proc-pregel:$gdsVersion"
-    compileOnly "org.neo4j.gds:proc:$gdsVersion"
+    compileOnly "org.neo4j.gds:proc-catalog:$gdsVersion"
+    compileOnly "org.neo4j.gds:proc-common:$gdsVersion"
     compileOnly "org.neo4j.gds:progress-tracking:$gdsVersion"
     compileOnly "org.neo4j.gds:termination:$gdsVersion"
     compileOnly "org.neo4j.gds:transaction:$gdsVersion"
@@ -64,7 +65,7 @@ dependencies {
 
     // We need to provide GDS for the test as well, along with some test helpers
     testImplementation "org.neo4j.gds:test-utils:$gdsVersion"
-    testImplementation "org.neo4j.gds:proc:$gdsVersion"
+    testImplementation "org.neo4j.gds:proc-catalog:$gdsVersion"
     testImplementation "org.neo4j.gds:core:$gdsVersion"
     testImplementation "org.neo4j.gds:proc-pregel:$gdsVersion"
     testImplementation "org.neo4j.gds:config-api:$gdsVersion"
