@@ -19,11 +19,12 @@
  */
 package org.neo4j.gds.beta.generator;
 
+import org.neo4j.gds.Aggregation;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.config.RandomGraphGeneratorConfig;
-import org.neo4j.gds.Aggregation;
+import org.neo4j.gds.core.loading.AdjacencyListBehavior;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -45,9 +46,9 @@ public class RandomGraphGeneratorBuilder {
     private Direction direction = Direction.DIRECTED;
     private RandomGraphGeneratorConfig.AllowSelfLoops allowSelfLoops = RandomGraphGeneratorConfig.AllowSelfLoops.NO;
     private RelationshipType relationshipType = RelationshipType.of("REL");
+    private AdjacencyListBehavior.Factory adjacencyCompressorFactory = null;
     private boolean forceDag = false;
     private boolean inverseIndex = false;
-
 
     public RandomGraphGeneratorBuilder nodeCount(long nodeCount) {
         this.nodeCount = nodeCount;
@@ -121,6 +122,11 @@ public class RandomGraphGeneratorBuilder {
         return this;
     }
 
+    public RandomGraphGeneratorBuilder adjacencyCompressorFactory(AdjacencyListBehavior.Factory adjacencyCompressorFactory) {
+        this.adjacencyCompressorFactory = adjacencyCompressorFactory;
+        return this;
+    }
+
     public RandomGraphGenerator build() {
         validate();
         return new RandomGraphGenerator(
@@ -135,6 +141,7 @@ public class RandomGraphGeneratorBuilder {
             aggregation,
             direction,
             allowSelfLoops,
+            adjacencyCompressorFactory,
             forceDag,
             inverseIndex
         );

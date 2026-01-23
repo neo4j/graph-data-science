@@ -49,6 +49,15 @@ import static org.neo4j.gds.RelationshipType.ALL_RELATIONSHIPS;
  */
 public interface AdjacencyListBehavior {
 
+    @FunctionalInterface
+    interface Factory {
+        AdjacencyCompressorFactory create(
+            LongSupplier nodeCountSupplier,
+            PropertyMappings propertyMappings,
+            Aggregation[] aggregations
+        );
+    }
+
     static AdjacencyCompressorFactory asConfigured(
         LongSupplier nodeCountSupplier,
         PropertyMappings propertyMappings,

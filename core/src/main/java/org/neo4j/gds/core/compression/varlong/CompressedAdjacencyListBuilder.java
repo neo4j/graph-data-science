@@ -37,7 +37,7 @@ public final class CompressedAdjacencyListBuilder implements AdjacencyListBuilde
     private final BumpAllocator<byte[]> builder;
     private final MemoryTracker memoryTracker;
 
-    CompressedAdjacencyListBuilder(MemoryTracker memoryTracker) {
+    public CompressedAdjacencyListBuilder(MemoryTracker memoryTracker) {
         this.builder = new BumpAllocator<>(Factory.INSTANCE);
         this.memoryTracker = memoryTracker;
     }

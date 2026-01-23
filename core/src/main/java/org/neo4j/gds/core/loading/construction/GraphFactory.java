@@ -21,6 +21,7 @@ package org.neo4j.gds.core.loading.construction;
 
 import org.immutables.builder.Builder;
 import org.immutables.value.Value;
+import org.neo4j.gds.Aggregation;
 import org.neo4j.gds.ImmutableRelationshipProjection;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipProjection;
@@ -43,6 +44,7 @@ import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.huge.HugeGraph;
 import org.neo4j.gds.core.huge.HugeGraphBuilder;
+import org.neo4j.gds.core.loading.AdjacencyListBehavior;
 import org.neo4j.gds.core.loading.HighLimitIdMap;
 import org.neo4j.gds.core.loading.IdMapBuilder;
 import org.neo4j.gds.core.loading.ImmutableImportMetaData;
@@ -50,7 +52,6 @@ import org.neo4j.gds.core.loading.ImportSizing;
 import org.neo4j.gds.core.loading.RecordsBatchBuffer;
 import org.neo4j.gds.core.loading.SingleTypeRelationshipImporterBuilder;
 import org.neo4j.gds.core.loading.SingleTypeRelationships;
-import org.neo4j.gds.Aggregation;
 
 import java.util.Arrays;
 import java.util.List;
@@ -231,7 +232,8 @@ public final class GraphFactory {
         Optional<Concurrency> concurrency,
         Optional<Boolean> indexInverse,
         Optional<ExecutorService> executorService,
-        Optional<Boolean> usePooledBuilderProvider
+        Optional<Boolean> usePooledBuilderProvider,
+        Optional<AdjacencyListBehavior.Factory> adjacencyCompressorFactory
     ) {
         var loadRelationshipProperties = !propertyConfigs.isEmpty();
 
@@ -294,6 +296,7 @@ public final class GraphFactory {
             .importMetaData(importMetaData)
             .nodeCountSupplier(() -> nodes.rootNodeCount().orElse(0L))
             .importSizing(importSizing)
+            .adjacencyCompressorFactory(adjacencyCompressorFactory)
             .build();
 
         var singleTypeRelationshipsBuilderBuilder = new SingleTypeRelationshipsBuilderBuilder()

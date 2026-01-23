@@ -48,22 +48,31 @@ public final class SingleTypeRelationshipImporter {
     public static SingleTypeRelationshipImporter of(
         ImportMetaData importMetaData,
         LongSupplier nodeCountSupplier,
-        ImportSizing importSizing
+        ImportSizing importSizing,
+        Optional<AdjacencyListBehavior.Factory> adjacencyCompressorFactory
     ) {
-        var adjacencyCompressorFactory = AdjacencyListBehavior.asConfigured(
-            nodeCountSupplier,
-            importMetaData.projection().properties(),
-            importMetaData.aggregations()
-        );
+        var compressorFactory = adjacencyCompressorFactory
+            .map(factory -> factory.create(
+                nodeCountSupplier,
+                importMetaData.projection().properties(),
+                importMetaData.aggregations()
+            ))
+            .orElseGet(
+                () -> AdjacencyListBehavior.asConfigured(
+                    nodeCountSupplier,
+                    importMetaData.projection().properties(),
+                    importMetaData.aggregations()
+                )
+            );
 
         var adjacencyBuffer = new AdjacencyBufferBuilder()
             .importMetaData(importMetaData)
             .importSizing(importSizing)
-            .adjacencyCompressorFactory(adjacencyCompressorFactory)
+            .adjacencyCompressorFactory(compressorFactory)
             .build();
 
         return new SingleTypeRelationshipImporter(
-            adjacencyCompressorFactory,
+            compressorFactory,
             adjacencyBuffer,
             importMetaData,
             importMetaData.typeTokenId()
