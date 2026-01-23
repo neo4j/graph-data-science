@@ -20,6 +20,7 @@
 package org.neo4j.gds.extension;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.neo4j.configuration.GraphDatabaseSettings;
@@ -32,6 +33,7 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Result;
 import org.neo4j.internal.id.IdGeneratorFactory;
+import org.neo4j.io.pagecache.context.CursorContext;
 import org.neo4j.kernel.impl.core.NodeEntity;
 
 import java.util.HashMap;
@@ -141,7 +143,7 @@ public class Neo4jSupportExtension implements BeforeEachCallback {
         // try to convince the db that `idOffset` number of nodes have already been allocated
         var idGeneratorFactory = GraphDatabaseApiProxy.resolveDependency(db, IdGeneratorFactory.class);
         TestSupport.fullAccessTransaction(db)
-            .accept((tx, ktx) -> InternalReadOps.reserveNeo4jIds(idGeneratorFactory, 42, ktx.cursorContext()));
+            .accept((tx, ktx) -> reserveNeo4jIds(idGeneratorFactory, 42, ktx.cursorContext()));
     }
 
     private void injectFields(ExtensionContext context, GraphDatabaseService db, IdFunctions idFunctions) {
@@ -166,5 +168,18 @@ public class Neo4jSupportExtension implements BeforeEachCallback {
             this.idToVariable = idToVariable;
             this.variableToId = variableToId;
         }
+    }
+
+    private static void reserveNeo4jIds(
+        @Nullable IdGeneratorFactory generatorFactory,
+        int size,
+        CursorContext cursorContext
+    ) {
+        var idGenerator = InternalReadOps.findValidIdGeneratorsStreamWithDefaultIdTypes(
+                generatorFactory
+            )
+            .findFirst().orElseThrow(InternalReadOps::unsupportedStoreFormatException);
+
+        idGenerator.nextConsecutiveIdRange(size, 0x0, cursorContext);
     }
 }
