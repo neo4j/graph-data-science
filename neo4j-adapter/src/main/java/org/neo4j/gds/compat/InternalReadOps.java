@@ -24,7 +24,6 @@ import org.neo4j.internal.id.IdGenerator;
 import org.neo4j.internal.id.IdGeneratorFactory;
 import org.neo4j.internal.id.IdType;
 import org.neo4j.internal.recordstorage.RecordIdType;
-import org.neo4j.io.pagecache.context.CursorContext;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -33,31 +32,24 @@ import java.util.stream.Stream;
 public final class InternalReadOps {
 
     public static long getHighestPossibleNodeCount(@Nullable IdGeneratorFactory idGeneratorFactory) {
-        return InternalReadOps.findValidIdGeneratorsStream(
-                idGeneratorFactory,
-                RecordIdType.NODE,
-                BlockFormat.INSTANCE.nodeType,
-                BlockFormat.INSTANCE.dynamicNodeType
+        return InternalReadOps.findValidIdGeneratorsStreamWithDefaultIdTypes(
+                idGeneratorFactory
             )
             .mapToLong(IdGenerator::getHighId)
             .max()
             .orElseThrow(InternalReadOps::unsupportedStoreFormatException);
     }
 
-    public static void reserveNeo4jIds(
-        @Nullable IdGeneratorFactory generatorFactory,
-        int size,
-        CursorContext cursorContext
-    ) {
-        var idGenerator = InternalReadOps.findValidIdGeneratorsStream(
-                generatorFactory,
-                RecordIdType.NODE,
-                BlockFormat.INSTANCE.nodeType,
-                BlockFormat.INSTANCE.dynamicNodeType
-            )
-            .findFirst().orElseThrow(InternalReadOps::unsupportedStoreFormatException);
 
-        idGenerator.nextConsecutiveIdRange(size, 0x0, cursorContext);
+    public static Stream<IdGenerator> findValidIdGeneratorsStreamWithDefaultIdTypes(
+        @Nullable IdGeneratorFactory idGeneratorFactory
+    ) {
+       return findValidIdGeneratorsStream(
+           idGeneratorFactory,
+           RecordIdType.NODE,
+           BlockFormat.INSTANCE.nodeType,
+           BlockFormat.INSTANCE.dynamicNodeType
+       );
     }
 
     public static Stream<IdGenerator> findValidIdGeneratorsStream(
