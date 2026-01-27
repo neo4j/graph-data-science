@@ -27,25 +27,31 @@ import org.neo4j.gds.applications.algorithms.machinery.Label;
 import org.neo4j.gds.applications.algorithms.machinery.WriteNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.WriteStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
-import org.neo4j.gds.config.WritePropertyConfig;
 import org.neo4j.gds.core.JobId;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.pagerank.PageRankResult;
-import org.neo4j.gds.pagerank.RankConfig;
 
-public class PageRankWriteStep<C extends RankConfig & WritePropertyConfig> implements WriteStep<PageRankResult, NodePropertiesWritten> {
+import java.util.Optional;
+import java.util.function.Function;
+
+public class GenericRankWriteStep implements WriteStep<PageRankResult, NodePropertiesWritten> {
 
     private final GenericCentralityWriteStep<CentralityAlgorithmResult> writeStep;
 
-
-    public PageRankWriteStep(
+    public GenericRankWriteStep(
         WriteNodePropertyService writeNodePropertyService,
-        C configuration,
+        String writeProperty,
+        Concurrency writeConcurrency,
+        Function<ResultStore, Optional<ResultStore>> resultStoreResolver,
         Label label
+
     ) {
         this.writeStep = new GenericCentralityWriteStep<>(
             writeNodePropertyService,
-            configuration,
-            label
+            label,
+            resultStoreResolver,
+            writeConcurrency,
+            writeProperty
         );
     }
 

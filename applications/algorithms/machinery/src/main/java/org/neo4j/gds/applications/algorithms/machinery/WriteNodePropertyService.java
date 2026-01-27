@@ -28,9 +28,11 @@ import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.config.WriteConfig;
 import org.neo4j.gds.config.WritePropertyConfig;
 import org.neo4j.gds.core.JobId;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.logging.Log;
 
 import java.util.List;
+import java.util.Optional;
 
 public class WriteNodePropertyService {
     private final Log log;
@@ -89,6 +91,57 @@ public class WriteNodePropertyService {
             log
         );
     }
+
+    public NodePropertiesWritten perform(
+        Graph graph,
+        GraphStore graphStore,
+        Optional<ResultStore> resolvedResultStore,
+        Concurrency writeConcurrency,
+        Label label,
+        JobId jobId,
+        String writeProperty,
+        NodePropertyValues nodePropertyValues
+    ) {
+
+        var nodePropertyRecord = NodePropertyRecord.of(writeProperty, nodePropertyValues);
+
+        return perform(
+                graph,
+                graphStore,
+                resolvedResultStore,
+                writeConcurrency,
+                label,
+                jobId,
+                List.of(nodePropertyRecord)
+            );
+    }
+
+    public NodePropertiesWritten perform(
+        Graph graph,
+        GraphStore graphStore,
+        Optional<ResultStore> resolvedResultStore,
+        Concurrency writeConcurrency,
+        Label label,
+        JobId jobId,
+        List<NodePropertyRecord> nodeProperties
+    ) {
+        return Neo4jDatabaseNodePropertyWriter.writeNodeProperties(
+            requestScopedDependencies.correlationId(),
+            writeContext.nodePropertyExporterBuilder(),
+            requestScopedDependencies.taskRegistryFactory(),
+            graph,
+            graphStore,
+            writeConcurrency,
+            nodeProperties,
+            label.asString(),
+            resolvedResultStore,
+            jobId,
+            requestScopedDependencies.terminationFlag(),
+            log
+        );
+    }
+
+
 
 
 

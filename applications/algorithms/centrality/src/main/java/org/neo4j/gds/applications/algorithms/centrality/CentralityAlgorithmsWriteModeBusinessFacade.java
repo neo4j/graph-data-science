@@ -36,9 +36,9 @@ import org.neo4j.gds.centrality.BetweennessCentralityWriteStep;
 import org.neo4j.gds.centrality.CelfWriteStep;
 import org.neo4j.gds.centrality.ClosenessCentralityWriteStep;
 import org.neo4j.gds.centrality.DegreeCentralityWriteStep;
+import org.neo4j.gds.centrality.GenericRankWriteStep;
 import org.neo4j.gds.centrality.HarmonicCentralityWriteStep;
 import org.neo4j.gds.centrality.HitsWriteStep;
-import org.neo4j.gds.centrality.PageRankWriteStep;
 import org.neo4j.gds.closeness.ClosenessCentralityWriteConfig;
 import org.neo4j.gds.degree.DegreeCentralityWriteConfig;
 import org.neo4j.gds.harmonic.HarmonicCentralityWriteConfig;
@@ -112,7 +112,13 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
         ArticleRankWriteConfig configuration,
         ResultBuilder<ArticleRankWriteConfig, PageRankResult, RESULT, NodePropertiesWritten> resultBuilder
     ) {
-        var writeStep = new PageRankWriteStep<>(writeNodePropertyService, configuration, ArticleRank);
+        var writeStep = new GenericRankWriteStep(
+            writeNodePropertyService,
+            configuration.writeProperty(),
+            configuration.writeConcurrency(),
+            configuration::resolveResultStore,
+            ArticleRank
+        );
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInWriteMode(
             graphName,
@@ -218,7 +224,13 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
         EigenvectorWriteConfig configuration,
         ResultBuilder<EigenvectorWriteConfig, PageRankResult, RESULT, NodePropertiesWritten> resultBuilder
     ) {
-        var writeStep = new PageRankWriteStep<>(writeNodePropertyService, configuration, EigenVector);
+        var writeStep = new GenericRankWriteStep(
+            writeNodePropertyService,
+            configuration.writeProperty(),
+            configuration.writeConcurrency(),
+            configuration::resolveResultStore,
+            EigenVector
+        );
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInWriteMode(
             graphName,
@@ -254,7 +266,13 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
         PageRankWriteConfig configuration,
         ResultBuilder<PageRankWriteConfig, PageRankResult, RESULT, NodePropertiesWritten> resultBuilder
     ) {
-        var writeStep = new PageRankWriteStep<>(writeNodePropertyService, configuration, ArticleRank);
+        var writeStep = new GenericRankWriteStep(
+            writeNodePropertyService,
+            configuration.writeProperty(),
+            configuration.writeConcurrency(),
+            configuration::resolveResultStore,
+            ArticleRank
+        );
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInWriteMode(
             graphName,

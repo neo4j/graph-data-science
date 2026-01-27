@@ -36,8 +36,10 @@ public class ClosenessCentralityWriteStep implements WriteStep<CentralityAlgorit
     public ClosenessCentralityWriteStep(WriteNodePropertyService writeNodePropertyService, ClosenessCentralityWriteConfig configuration) {
         this.writeStep = new GenericCentralityWriteStep<>(
             writeNodePropertyService,
-            configuration,
-            AlgorithmLabel.ClosenessCentrality
+            AlgorithmLabel.ClosenessCentrality,
+            configuration::resolveResultStore,
+            configuration.writeConcurrency(),
+            configuration.writeProperty()
         );
     }
 

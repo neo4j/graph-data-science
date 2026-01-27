@@ -30,6 +30,8 @@ dependencies {
     implementation project(':annotations')
 
     implementation project(':centrality-mutate-steps')
+    implementation project(':centrality-write-steps')
+
     implementation project(':community-mutate-steps')
 
     // `BaseConfig` lives here

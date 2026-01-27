@@ -25,6 +25,7 @@ import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.maxflow.FlowResult;
 import org.neo4j.gds.pathfinding.MaxFlowWriteStep;
+import org.neo4j.gds.procedures.algorithms.WriteStepExecute;
 import org.neo4j.gds.procedures.algorithms.pathfinding.MaxFlowWriteResult;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.results.ResultTransformer;

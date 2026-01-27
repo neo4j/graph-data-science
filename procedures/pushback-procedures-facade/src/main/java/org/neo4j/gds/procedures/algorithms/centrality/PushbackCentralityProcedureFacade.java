@@ -24,6 +24,7 @@ import org.neo4j.gds.procedures.algorithms.centrality.mutate.PushbackCentralityM
 import org.neo4j.gds.procedures.algorithms.centrality.stats.PushbackCentralityStatsProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.centrality.stream.PushbackCentralityStreamProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.CentralityStubs;
+import org.neo4j.gds.procedures.algorithms.centrality.write.PushbackCentralityWriteProcedureFacade;
 
 import java.util.Map;
 import java.util.stream.Stream;
@@ -33,16 +34,19 @@ public class PushbackCentralityProcedureFacade implements CentralityProcedureFac
     private final PushbackCentralityStreamProcedureFacade streamProcedureFacade;
     private final PushbackCentralityStatsProcedureFacade statsProcedureFacade;
     private final PushbackCentralityMutateProcedureFacade mutateProcedureFacade;
+    private final PushbackCentralityWriteProcedureFacade writeProcedureFacade;
 
 
     public PushbackCentralityProcedureFacade(
         PushbackCentralityStreamProcedureFacade streamProcedureFacade,
         PushbackCentralityStatsProcedureFacade statsProcedureFacade,
-        PushbackCentralityMutateProcedureFacade mutateProcedureFacade
+        PushbackCentralityMutateProcedureFacade mutateProcedureFacade,
+        PushbackCentralityWriteProcedureFacade writeProcedureFacade
     ) {
         this.streamProcedureFacade = streamProcedureFacade;
         this.statsProcedureFacade = statsProcedureFacade;
         this.mutateProcedureFacade = mutateProcedureFacade;
+        this.writeProcedureFacade = writeProcedureFacade;
     }
 
     @Override
@@ -107,7 +111,7 @@ public class PushbackCentralityProcedureFacade implements CentralityProcedureFac
 
     @Override
     public Stream<PageRankWriteResult> articleRankWrite(String graphName, Map<String, Object> configuration) {
-        return Stream.empty();
+        return writeProcedureFacade.articleRank(graphName,configuration);
     }
 
     @Override
