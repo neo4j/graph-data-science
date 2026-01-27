@@ -36,9 +36,7 @@ public interface SourceNodesWithPropertiesConfig {
 
     @Configuration.ConvertWith(method = "org.neo4j.gds.config.SourceNodesWithPropertiesConfig.SourceNodesFactory#parse")
     @Configuration.ToMapValue("org.neo4j.gds.config.SourceNodesWithPropertiesConfig.SourceNodesFactory#toMapOutput")
-    default InputNodes sourceNodes() {
-        return InputNodes.EMPTY_INPUT_NODES;
-    }
+    InputNodes sourceNodes();
 
     @Configuration.GraphStoreValidationCheck
     default void validateSourceLabels(
