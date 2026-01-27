@@ -20,7 +20,6 @@
 package org.neo4j.gds;
 
 import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
 import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
@@ -116,7 +115,7 @@ public interface AlgorithmFactory<G, ALGO extends Algorithm<?>, CONFIG extends A
     }
 
     /**
-     * The name of the task. Typically the name of the algorithm, but Java type params are not good enough.
+     * The name of the task. Typically, the name of the algorithm, but Java type params are not good enough.
      * Used for progress logging.
      *
      * @return the name of the task that logs progress
@@ -133,14 +132,6 @@ public interface AlgorithmFactory<G, ALGO extends Algorithm<?>, CONFIG extends A
      */
     default MemoryEstimation memoryEstimation(CONFIG configuration) {
         throw new MemoryEstimationNotImplementedException();
-    }
-
-    /**
-     * For memory estimation, this allows us to inject expected counts for relationship types and labels.
-     * These types and labels would be created during the algorithm execution.
-     */
-    default GraphDimensions estimatedGraphDimensionTransformer(GraphDimensions graphDimensions, CONFIG config) {
-        return graphDimensions;
     }
 
     ALGO accept(Visitor<ALGO, CONFIG> visitor);
