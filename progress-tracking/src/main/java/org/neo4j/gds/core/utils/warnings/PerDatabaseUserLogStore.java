@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.utils.warnings;
 
+import org.neo4j.gds.api.User;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 
 import java.util.Map;
@@ -27,24 +28,24 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
 public class PerDatabaseUserLogStore implements UserLogStore {
-    private final ConcurrentHashMap<String, LogStore> logStores = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<User, LogStore> logStores = new ConcurrentHashMap<>();
 
     @Override
-    public void addUserLogMessage(String username, Task task, String message) {
-        var logStore = getUserLogStore(username);
+    public void addUserLogMessage(User user, Task task, String message) {
+        var logStore = getUserLogStore(user);
 
         logStore.addLogMessage(task, message);
     }
 
     @Override
-    public Stream<UserLogEntry> query(String username) {
-        var logStore = getUserLogStore(username);
+    public Stream<UserLogEntry> query(User user) {
+        var logStore = getUserLogStore(user);
 
         return logStore.stream().flatMap(PerDatabaseUserLogStore::taskWithMessagesToUserLogEntryStream);
     }
 
-    private LogStore getUserLogStore(String username) {
-        return logStores.computeIfAbsent(username, __ -> new LogStore());
+    private LogStore getUserLogStore(User user) {
+        return logStores.computeIfAbsent(user, _ -> new LogStore());
     }
 
     /**

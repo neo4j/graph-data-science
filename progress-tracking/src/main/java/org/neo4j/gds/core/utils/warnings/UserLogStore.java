@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.utils.warnings;
 
+import org.neo4j.gds.api.User;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 
 import java.util.stream.Stream;
@@ -28,7 +29,7 @@ import java.util.stream.Stream;
  * That is handled up stream.
  */
 public interface UserLogStore {
-    void addUserLogMessage(String username, Task taskId, String message);
+    void addUserLogMessage(User user, Task taskId, String message);
 
-    Stream<UserLogEntry> query(String username);
+    Stream<UserLogEntry> query(User user);
 }

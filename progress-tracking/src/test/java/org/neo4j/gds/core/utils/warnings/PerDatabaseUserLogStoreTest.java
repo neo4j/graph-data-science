@@ -22,6 +22,7 @@ package org.neo4j.gds.core.utils.warnings;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.api.User;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 
 import java.util.function.Function;
@@ -33,16 +34,16 @@ class PerDatabaseUserLogStoreTest {
     void shouldDealWithNoEntries() {
         var userLogStore = new PerDatabaseUserLogStore();
 
-        assertThat(userLogStore.query("user 1")).isEmpty();
+        assertThat(userLogStore.query(new User("user 1", false))).isEmpty();
     }
 
     @Test
     void shouldStoreAndRetrieveUserLogEntry() {
         var userLogStore = new PerDatabaseUserLogStore();
 
-        userLogStore.addUserLogMessage("user 1", new Task("task description 1", null), "log message 1");
+        userLogStore.addUserLogMessage(new User("user 1", false), new Task("task description 1", null), "log message 1");
 
-        assertThat(userLogStore.query("user 1")).map(mapToSomethingUseful()).containsExactly(
+        assertThat(userLogStore.query(new User("user 1", false))).map(mapToSomethingUseful()).containsExactly(
             Pair.of("log message 1", "task description 1")
         );
     }
@@ -51,36 +52,36 @@ class PerDatabaseUserLogStoreTest {
     void shouldStoreAndRetrieveUserLogEntries() {
         var userLogStore = new PerDatabaseUserLogStore();
 
-        userLogStore.addUserLogMessage("user 1", new Task("task description 1", null), "log message 01");
-        userLogStore.addUserLogMessage("user 1", new Task("task description 2", null), "log message 02");
-        userLogStore.addUserLogMessage("user 1", new Task("task description 2", null), "log message 03");
-        userLogStore.addUserLogMessage("user 2", new Task("task description 1", null), "log message 04");
-        userLogStore.addUserLogMessage("user 3", new Task("task description 1", null), "log message 05");
-        userLogStore.addUserLogMessage("user 3", new Task("task description 1", null), "log message 06");
+        userLogStore.addUserLogMessage(new User("user 1", false), new Task("task description 1", null), "log message 01");
+        userLogStore.addUserLogMessage(new User("user 1", false), new Task("task description 2", null), "log message 02");
+        userLogStore.addUserLogMessage(new User("user 1", false), new Task("task description 2", null), "log message 03");
+        userLogStore.addUserLogMessage(new User("user 2", false), new Task("task description 1", null), "log message 04");
+        userLogStore.addUserLogMessage(new User("user 3", false), new Task("task description 1", null), "log message 05");
+        userLogStore.addUserLogMessage(new User("user 3", false), new Task("task description 1", null), "log message 06");
 
-        assertThat(userLogStore.query("user 1")).map(mapToSomethingUseful()).containsExactly(
+        assertThat(userLogStore.query(new User("user 1", false))).map(mapToSomethingUseful()).containsExactly(
             Pair.of("log message 01", "task description 1"),
             Pair.of("log message 02", "task description 2"),
             Pair.of("log message 03", "task description 2")
         );
 
-        assertThat(userLogStore.query("user 2")).map(mapToSomethingUseful()).containsExactly(
+        assertThat(userLogStore.query(new User("user 2", false))).map(mapToSomethingUseful()).containsExactly(
             Pair.of("log message 04", "task description 1")
         );
 
-        assertThat(userLogStore.query("user 3")).map(mapToSomethingUseful()).containsExactly(
+        assertThat(userLogStore.query(new User("user 3", false))).map(mapToSomethingUseful()).containsExactly(
             Pair.of("log message 05", "task description 1"),
             Pair.of("log message 06", "task description 1")
         );
 
-        userLogStore.addUserLogMessage("user 1", new Task("task description 1", null), "log message 07");
-        userLogStore.addUserLogMessage("user 1", new Task("task description 2", null), "log message 08");
-        userLogStore.addUserLogMessage("user 2", new Task("task description 3", null), "log message 09");
-        userLogStore.addUserLogMessage("user 3", new Task("task description 1", null), "log message 10");
-        userLogStore.addUserLogMessage("user 3", new Task("task description 3", null), "log message 11");
-        userLogStore.addUserLogMessage("user 3", new Task("task description 3", null), "log message 12");
+        userLogStore.addUserLogMessage(new User("user 1", false), new Task("task description 1", null), "log message 07");
+        userLogStore.addUserLogMessage(new User("user 1", false), new Task("task description 2", null), "log message 08");
+        userLogStore.addUserLogMessage(new User("user 2", false), new Task("task description 3", null), "log message 09");
+        userLogStore.addUserLogMessage(new User("user 3", false), new Task("task description 1", null), "log message 10");
+        userLogStore.addUserLogMessage(new User("user 3", false), new Task("task description 3", null), "log message 11");
+        userLogStore.addUserLogMessage(new User("user 3", false), new Task("task description 3", null), "log message 12");
 
-        assertThat(userLogStore.query("user 1")).map(mapToSomethingUseful()).containsExactly(
+        assertThat(userLogStore.query(new User("user 1", false))).map(mapToSomethingUseful()).containsExactly(
             Pair.of("log message 01", "task description 1"),
             Pair.of("log message 07", "task description 1"),
             Pair.of("log message 02", "task description 2"),
@@ -88,12 +89,12 @@ class PerDatabaseUserLogStoreTest {
             Pair.of("log message 08", "task description 2")
         );
 
-        assertThat(userLogStore.query("user 2")).map(mapToSomethingUseful()).containsExactly(
+        assertThat(userLogStore.query(new User("user 2", false))).map(mapToSomethingUseful()).containsExactly(
             Pair.of("log message 04", "task description 1"),
             Pair.of("log message 09", "task description 3")
         );
 
-        assertThat(userLogStore.query("user 3")).map(mapToSomethingUseful()).containsExactly(
+        assertThat(userLogStore.query(new User("user 3", false))).map(mapToSomethingUseful()).containsExactly(
             Pair.of("log message 05", "task description 1"),
             Pair.of("log message 06", "task description 1"),
             Pair.of("log message 10", "task description 1"),

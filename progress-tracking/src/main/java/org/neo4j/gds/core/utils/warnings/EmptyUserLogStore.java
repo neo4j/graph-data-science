@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.utils.warnings;
 
+import org.neo4j.gds.api.User;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 
 import java.util.stream.Stream;
@@ -26,16 +27,11 @@ import java.util.stream.Stream;
 public enum EmptyUserLogStore implements UserLogStore {
     INSTANCE;
 
+    @Override
+    public void addUserLogMessage(User user, Task taskId, String message) {}
 
     @Override
-    public void addUserLogMessage(
-        String username, Task taskId, String message
-    ) {
-
-    }
-
-    @Override
-    public Stream<UserLogEntry> query(String username) {
+    public Stream<UserLogEntry> query(User user) {
         return Stream.empty();
     }
 }

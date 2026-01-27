@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.utils.warnings;
 
+import org.neo4j.gds.api.User;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 
 /**
@@ -27,17 +28,17 @@ import org.neo4j.gds.core.utils.progress.tasks.Task;
  * Scope is one of these per ~~database~~ data source.
  */
 public class UserLogRegistry {
-    public static final UserLogRegistry EMPTY = new UserLogRegistry("", EmptyUserLogStore.INSTANCE);
+    public static final UserLogRegistry EMPTY = new UserLogRegistry(User.DEFAULT, EmptyUserLogStore.INSTANCE);
 
-    private final String username;
+    private final User user;
     private final UserLogStore userLogStore;
 
-    public UserLogRegistry(String username, UserLogStore userLogStore) {
-        this.username = username;
+    public UserLogRegistry(User user, UserLogStore userLogStore) {
+        this.user = user;
         this.userLogStore = userLogStore;
     }
 
     public void addWarningToLog(Task task, String message) {
-        userLogStore.addUserLogMessage(username, task, message);
+        userLogStore.addUserLogMessage(user, task, message);
     }
 }
