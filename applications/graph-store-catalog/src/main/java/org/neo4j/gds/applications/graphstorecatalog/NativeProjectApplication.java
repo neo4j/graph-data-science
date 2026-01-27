@@ -24,7 +24,7 @@ import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResultFactory;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
-import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
+import org.neo4j.gds.core.utils.warnings.UserLogRegistry;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
 import org.neo4j.gds.projection.GraphProjectNativeResult;
 import org.neo4j.gds.termination.TerminationFlag;
@@ -53,7 +53,7 @@ public class NativeProjectApplication {
         TaskRegistryFactory taskRegistryFactory,
         TerminationFlag terminationFlag,
         TransactionContext transactionContext,
-        UserLogRegistryFactory userLogRegistryFactory,
+        UserLogRegistry userLogRegistry,
         GraphProjectFromStoreConfig configuration
     ) {
         return genericProjectApplication.project(
@@ -63,7 +63,7 @@ public class NativeProjectApplication {
             taskRegistryFactory,
             terminationFlag,
             transactionContext,
-            userLogRegistryFactory,
+            userLogRegistry,
             configuration
         );
     }
@@ -74,7 +74,7 @@ public class NativeProjectApplication {
         TaskRegistryFactory taskRegistryFactory,
         TerminationFlag terminationFlag,
         TransactionContext transactionContext,
-        UserLogRegistryFactory userLogRegistryFactory,
+        UserLogRegistry userLogRegistry,
         GraphProjectConfig configuration
     ) {
         if (configuration.isFictitiousLoading()) return estimateButFictitiously(
@@ -87,7 +87,7 @@ public class NativeProjectApplication {
             terminationFlag,
             transactionContext,
             taskRegistryFactory,
-            userLogRegistryFactory,
+            userLogRegistry,
             configuration
         );
 

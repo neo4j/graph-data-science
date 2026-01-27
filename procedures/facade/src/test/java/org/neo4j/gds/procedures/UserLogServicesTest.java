@@ -47,15 +47,15 @@ class UserLogServicesTest {
         var databaseId2 = DatabaseId.of("some other database");
         var username1 = new User("some user", false);
         var username2 = new User("some other user", false);
-        var factory1 = service.getUserLogRegistryFactory(databaseId1, username1);
-        var factory2 = service.getUserLogRegistryFactory(databaseId1, username1);
-        var factory3 = service.getUserLogRegistryFactory(databaseId2, username1);
-        var factory4 = service.getUserLogRegistryFactory(databaseId1, username2);
+        var registry1 = service.getUserLogRegistry(databaseId1, username1);
+        var registry2 = service.getUserLogRegistry(databaseId1, username1);
+        var registry3 = service.getUserLogRegistry(databaseId2, username1);
+        var registry4 = service.getUserLogRegistry(databaseId1, username2);
 
-        assertSame(factory1, factory2);
-        assertNotSame(factory1, factory3);
-        assertNotSame(factory1, factory4);
-        assertNotSame(factory3, factory4); // duh
+        assertSame(registry1, registry2);
+        assertNotSame(registry1, registry3);
+        assertNotSame(registry1, registry4);
+        assertNotSame(registry3, registry4); // duh
     }
 
     @Test
@@ -65,9 +65,9 @@ class UserLogServicesTest {
         var databaseId = DatabaseId.of("some database");
         var username1 = new User("some user", false);
         var username2 = new User("some user", true);
-        var factory1 = service.getUserLogRegistryFactory(databaseId, username1);
-        var factory2 = service.getUserLogRegistryFactory(databaseId, username2);
+        var registry1 = service.getUserLogRegistry(databaseId, username1);
+        var registry2 = service.getUserLogRegistry(databaseId, username2);
 
-        assertSame(factory1, factory2);
+        assertSame(registry1, registry2);
     }
 }

@@ -27,7 +27,7 @@ import org.neo4j.gds.applications.algorithms.machinery.Computation;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
-import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
+import org.neo4j.gds.core.utils.warnings.UserLogRegistry;
 import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.core.write.RelationshipExporterBuilder;
 import org.neo4j.gds.executor.MemoryEstimationContext;
@@ -55,7 +55,7 @@ class NodeRegressionTrainComputationFactory {
     private final TaskRegistryFactory taskRegistryFactory;
     private final TerminationFlag terminationFlag;
     private final TerminationMonitor terminationMonitor;
-    private final UserLogRegistryFactory userLogRegistryFactory;
+    private final UserLogRegistry userLogRegistry;
 
     private final ProgressTrackerCreator progressTrackerCreator;
 
@@ -76,7 +76,7 @@ class NodeRegressionTrainComputationFactory {
         TaskRegistryFactory taskRegistryFactory,
         TerminationFlag terminationFlag,
         TerminationMonitor terminationMonitor,
-        UserLogRegistryFactory userLogRegistryFactory,
+        UserLogRegistry userLogRegistry,
         ProgressTrackerCreator progressTrackerCreator,
         AlgorithmsProcedureFacade algorithmsProcedureFacade
     ) {
@@ -93,7 +93,7 @@ class NodeRegressionTrainComputationFactory {
         this.relationshipExporterBuilder = relationshipExporterBuilder;
         this.taskRegistryFactory = taskRegistryFactory;
         this.terminationMonitor = terminationMonitor;
-        this.userLogRegistryFactory = userLogRegistryFactory;
+        this.userLogRegistry = userLogRegistry;
         this.progressTrackerCreator = progressTrackerCreator;
         this.algorithmsProcedureFacade = algorithmsProcedureFacade;
         this.terminationFlag = terminationFlag;
@@ -115,7 +115,7 @@ class NodeRegressionTrainComputationFactory {
             taskRegistryFactory,
             terminationFlag,
             terminationMonitor,
-            userLogRegistryFactory,
+            userLogRegistry,
             progressTrackerCreator,
             algorithmsProcedureFacade,
             configuration

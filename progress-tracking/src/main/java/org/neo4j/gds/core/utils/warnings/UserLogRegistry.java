@@ -21,7 +21,14 @@ package org.neo4j.gds.core.utils.warnings;
 
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 
+/**
+ * This a great and Neo4j-agnostic class.
+ * It listens to log events and stores them.
+ * Scope is one of these per ~~database~~ data source.
+ */
 public class UserLogRegistry {
+    public static final UserLogRegistry EMPTY = new UserLogRegistry("", EmptyUserLogStore.INSTANCE);
+
     private final String username;
     private final UserLogStore userLogStore;
 
@@ -33,5 +40,4 @@ public class UserLogRegistry {
     public void addWarningToLog(Task task, String message) {
         userLogStore.addUserLogMessage(username, task, message);
     }
-
 }

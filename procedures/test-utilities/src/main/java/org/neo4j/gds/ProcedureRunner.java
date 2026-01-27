@@ -35,9 +35,8 @@ import org.neo4j.gds.core.utils.logging.GdsLoggers;
 import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.utils.progress.EmptyTaskStore;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
-import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogStore;
-import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
+import org.neo4j.gds.core.utils.warnings.UserLogRegistry;
 import org.neo4j.gds.executor.MemoryEstimationContext;
 import org.neo4j.gds.logging.LogAdapter;
 import org.neo4j.gds.mem.MemoryTracker;
@@ -68,7 +67,7 @@ public final class ProcedureRunner {
         ProcedureCallContext procedureCallContext,
         Log log,
         TaskRegistryFactory taskRegistryFactory,
-        UserLogRegistryFactory userLogRegistryFactory,
+        UserLogRegistry userLogRegistry,
         Transaction tx,
         KernelTransaction kernelTransaction,
         Username username,
@@ -88,7 +87,7 @@ public final class ProcedureRunner {
         proc.callContext = procedureCallContext;
         proc.log = log;
         proc.taskRegistryFactory = taskRegistryFactory;
-        proc.userLogRegistryFactory = userLogRegistryFactory;
+        proc.userLogRegistry = userLogRegistry;
         proc.username = username;
 
         proc.metrics = metrics;
@@ -125,7 +124,7 @@ public final class ProcedureRunner {
             procedureCallContext,
             log,
             taskRegistryFactory,
-            EmptyUserLogRegistryFactory.INSTANCE,
+            UserLogRegistry.EMPTY,
             tx,
             kernelTransaction,
             username,
@@ -167,7 +166,7 @@ public final class ProcedureRunner {
             .taskRegistryFactory(taskRegistryFactory)
             .taskStore(EmptyTaskStore.INSTANCE)
             .user(new User(username.username(), false))
-            .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
+            .userLogRegistry(UserLogRegistry.EMPTY)
             .userLogStore(EmptyUserLogStore.INSTANCE)
             .build();
         var graphStoreCatalogService = new GraphStoreCatalogService();

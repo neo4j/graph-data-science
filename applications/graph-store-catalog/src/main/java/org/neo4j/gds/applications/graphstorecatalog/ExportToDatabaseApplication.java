@@ -35,7 +35,7 @@ import org.neo4j.gds.core.utils.logging.GdsLoggers;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
-import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
+import org.neo4j.gds.core.utils.warnings.UserLogRegistry;
 import org.neo4j.gds.transaction.DatabaseTransactionContext;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
@@ -49,7 +49,7 @@ class ExportToDatabaseApplication {
     private final Transaction procedureTransaction;
 
     private final TaskRegistryFactory taskRegistryFactory;
-    private final UserLogRegistryFactory userLogRegistryFactory;
+    private final UserLogRegistry userLogRegistry;
     private final RequestCorrelationId requestCorrelationId;
 
     ExportToDatabaseApplication(
@@ -58,13 +58,13 @@ class ExportToDatabaseApplication {
         Transaction procedureTransaction,
         RequestCorrelationId requestCorrelationId,
         TaskRegistryFactory taskRegistryFactory,
-        UserLogRegistryFactory userLogRegistryFactory
+        UserLogRegistry userLogRegistry
     ) {
         this.loggers = loggers;
         this.graphDatabaseService = graphDatabaseService;
         this.procedureTransaction = procedureTransaction;
         this.taskRegistryFactory = taskRegistryFactory;
-        this.userLogRegistryFactory = userLogRegistryFactory;
+        this.userLogRegistry = userLogRegistry;
         this.requestCorrelationId = requestCorrelationId;
     }
 
@@ -80,7 +80,7 @@ class ExportToDatabaseApplication {
             configuration.jobId(),
             requestCorrelationId,
             taskRegistryFactory,
-            userLogRegistryFactory
+            userLogRegistry
         );
 
         @SuppressWarnings("removal") var parameters = new GraphStoreToDatabaseExporterParameters(

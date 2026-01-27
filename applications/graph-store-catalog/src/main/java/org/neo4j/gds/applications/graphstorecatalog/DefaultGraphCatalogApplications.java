@@ -36,7 +36,7 @@ import org.neo4j.gds.core.loading.GraphStoreCatalogEntry;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.utils.logging.GdsLoggers;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
-import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
+import org.neo4j.gds.core.utils.warnings.UserLogRegistry;
 import org.neo4j.gds.core.write.NodeLabelExporterBuilder;
 import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.core.write.RelationshipExporterBuilder;
@@ -217,7 +217,7 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
             procedureTransaction,
             requestScopedDependencies.correlationId(),
             requestScopedDependencies.taskRegistryFactory(),
-            requestScopedDependencies.userLogRegistryFactory()
+            requestScopedDependencies.userLogRegistry()
         );
         var generateGraphApplication = new GenerateGraphApplication(loggers.log(), graphStoreCatalogService);
         var graphMemoryUsageApplication = new GraphMemoryUsageApplication(graphStoreCatalogService);
@@ -338,7 +338,7 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
         TaskRegistryFactory taskRegistryFactory,
         TerminationFlag terminationFlag,
         TransactionContext transactionContext,
-        UserLogRegistryFactory userLogRegistryFactory,
+        UserLogRegistry userLogRegistry,
         String graphNameAsString,
         Object nodeProjection,
         Object relationshipProjection,
@@ -364,7 +364,7 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
                 taskRegistryFactory,
                 terminationFlag,
                 transactionContext,
-                userLogRegistryFactory,
+                userLogRegistry,
                 configuration
             );
         } catch (Exception e) {
@@ -380,7 +380,7 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
         TaskRegistryFactory taskRegistryFactory,
         TerminationFlag terminationFlag,
         TransactionContext transactionContext,
-        UserLogRegistryFactory userLogRegistryFactory,
+        UserLogRegistry userLogRegistry,
         Object nodeProjection,
         Object relationshipProjection,
         Map<String, Object> rawConfiguration
@@ -397,7 +397,7 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
             taskRegistryFactory,
             terminationFlag,
             transactionContext,
-            userLogRegistryFactory,
+            userLogRegistry,
             configuration
         );
     }
@@ -411,7 +411,7 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
         TaskRegistryFactory taskRegistryFactory,
         TerminationFlag terminationFlag,
         TransactionContext transactionContext,
-        UserLogRegistryFactory userLogRegistryFactory,
+        UserLogRegistry userLogRegistry,
         String graphNameAsString,
         String nodeQuery,
         String relationshipQuery,
@@ -437,7 +437,7 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
                 taskRegistryFactory,
                 terminationFlag,
                 transactionContext,
-                userLogRegistryFactory,
+                userLogRegistry,
                 configuration
             );
         } catch (Exception e) {
@@ -453,7 +453,7 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
         TaskRegistryFactory taskRegistryFactory,
         TerminationFlag terminationFlag,
         TransactionContext transactionContext,
-        UserLogRegistryFactory userLogRegistryFactory,
+        UserLogRegistry userLogRegistry,
         String nodeQuery,
         String relationshipQuery,
         Map<String, Object> rawConfiguration
@@ -470,7 +470,7 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
             taskRegistryFactory,
             terminationFlag,
             transactionContext,
-            userLogRegistryFactory,
+            userLogRegistry,
             configuration
         );
     }
@@ -480,7 +480,7 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
         User user,
         DatabaseId databaseId,
         TaskRegistryFactory taskRegistryFactory,
-        UserLogRegistryFactory userLogRegistryFactory,
+        UserLogRegistry userLogRegistry,
         String graphNameAsString,
         String originGraphNameAsString,
         String nodeFilter,
@@ -513,7 +513,7 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
             return subGraphProjectApplication.project(
                 requestScopedDependencies.correlationId(),
                 taskRegistryFactory,
-                userLogRegistryFactory,
+                userLogRegistry,
                 configuration,
                 originGraphConfiguration.graphStore()
             );
@@ -543,7 +543,7 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
         User user,
         DatabaseId databaseId,
         TaskRegistryFactory taskRegistryFactory,
-        UserLogRegistryFactory userLogRegistryFactory,
+        UserLogRegistry userLogRegistry,
         String graphNameAsString,
         Object nodeProperties,
         Map<String, Object> rawConfiguration
@@ -569,7 +569,7 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
         var numberOfPropertiesRemoved = dropNodePropertiesApplication.compute(
             requestScopedDependencies.correlationId(),
             taskRegistryFactory,
-            userLogRegistryFactory,
+            userLogRegistry,
             droppedProperties,
             graphStore
         );
@@ -599,7 +599,7 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
         User user,
         DatabaseId databaseId,
         TaskRegistryFactory taskRegistryFactory,
-        UserLogRegistryFactory userLogRegistryFactory,
+        UserLogRegistry userLogRegistry,
         String graphNameAsString,
         String relationshipType
     ) {
@@ -612,7 +612,7 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
         var result = dropRelationshipsApplication.compute(
             requestScopedDependencies.correlationId(),
             taskRegistryFactory,
-            userLogRegistryFactory,
+            userLogRegistry,
             graphStore,
             relationshipType
         );
@@ -709,7 +709,7 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
         User user,
         DatabaseId databaseId,
         TaskRegistryFactory taskRegistryFactory,
-        UserLogRegistryFactory userLogRegistryFactory,
+        UserLogRegistry userLogRegistry,
         String graphNameAsString,
         Object nodePropertiesAsObject,
         Object nodeLabelsAsObject,
@@ -742,7 +742,7 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
         return streamNodePropertiesApplication.compute(
             requestScopedDependencies.correlationId(),
             taskRegistryFactory,
-            userLogRegistryFactory,
+            userLogRegistry,
             graphStore,
             configuration,
             usesPropertyNameColumn,
@@ -755,7 +755,7 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
         User user,
         DatabaseId databaseId,
         TaskRegistryFactory taskRegistryFactory,
-        UserLogRegistryFactory userLogRegistryFactory,
+        UserLogRegistry userLogRegistry,
         String graphNameAsString,
         List<String> relationshipProperties,
         Object relationshipTypes,
@@ -779,7 +779,7 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
         return streamRelationshipPropertiesApplication.compute(
             requestScopedDependencies.correlationId(),
             taskRegistryFactory,
-            userLogRegistryFactory,
+            userLogRegistry,
             graphStore,
             configuration,
             usesPropertyNameColumn,
@@ -820,7 +820,7 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
         NodePropertyExporterBuilder nodePropertyExporterBuilder,
         TaskRegistryFactory taskRegistryFactory,
         TerminationFlag terminationFlag,
-        UserLogRegistryFactory userLogRegistryFactory,
+        UserLogRegistry userLogRegistry,
         String graphNameAsString,
         Object nodePropertiesAsObject,
         Object nodeLabelsAsObject,
@@ -858,7 +858,7 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
             requestScopedDependencies.correlationId(),
             taskRegistryFactory,
             terminationFlag,
-            userLogRegistryFactory,
+            userLogRegistry,
             graphName,
             configuration
         );
@@ -941,7 +941,7 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
         RelationshipExporterBuilder relationshipExporterBuilder,
         TaskRegistryFactory taskRegistryFactory,
         TerminationFlag terminationFlag,
-        UserLogRegistryFactory userLogRegistryFactory,
+        UserLogRegistry userLogRegistry,
         String graphNameAsString,
         String relationshipType,
         String relationshipProperty,
@@ -969,7 +969,7 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
             relationshipExporterBuilder,
             taskRegistryFactory,
             terminationFlag,
-            userLogRegistryFactory,
+            userLogRegistry,
             graphStore,
             resultStore,
             graphName,
@@ -982,7 +982,7 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
         User user,
         DatabaseId databaseId,
         TaskRegistryFactory taskRegistryFactory,
-        UserLogRegistryFactory userLogRegistryFactory,
+        UserLogRegistry userLogRegistry,
         TerminationFlag terminationFlag,
         String graphName,
         String originGraphName,
@@ -992,7 +992,7 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
             user,
             databaseId,
             taskRegistryFactory,
-            userLogRegistryFactory,
+            userLogRegistry,
             terminationFlag,
             graphName,
             originGraphName,
@@ -1006,7 +1006,7 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
         User user,
         DatabaseId databaseId,
         TaskRegistryFactory taskRegistryFactory,
-        UserLogRegistryFactory userLogRegistryFactory,
+        UserLogRegistry userLogRegistry,
         TerminationFlag terminationFlag,
         String graphNameAsString,
         String originGraphName,
@@ -1016,7 +1016,7 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
             user,
             databaseId,
             taskRegistryFactory,
-            userLogRegistryFactory,
+            userLogRegistry,
             terminationFlag,
             graphNameAsString,
             originGraphName,
@@ -1127,7 +1127,7 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
         User user,
         DatabaseId databaseId,
         TaskRegistryFactory taskRegistryFactory,
-        UserLogRegistryFactory userLogRegistryFactory,
+        UserLogRegistry userLogRegistry,
         TerminationFlag terminationFlag,
         String graphNameAsString,
         String originGraphNameAsString,
@@ -1147,7 +1147,7 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
             return graphSamplingApplication.sample(
                 user,
                 taskRegistryFactory,
-                userLogRegistryFactory,
+                userLogRegistry,
                 graphStore,
                 graphProjectConfig,
                 terminationFlag,

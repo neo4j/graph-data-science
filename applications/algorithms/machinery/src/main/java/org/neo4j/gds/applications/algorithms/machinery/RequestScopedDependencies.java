@@ -26,7 +26,7 @@ import org.neo4j.gds.api.User;
 import org.neo4j.gds.core.RequestCorrelationId;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.TaskStore;
-import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
+import org.neo4j.gds.core.utils.warnings.UserLogRegistry;
 import org.neo4j.gds.core.utils.warnings.UserLogStore;
 import org.neo4j.gds.termination.TerminationFlag;
 
@@ -43,7 +43,7 @@ public record RequestScopedDependencies(
     TaskStore taskStore,
     TerminationFlag terminationFlag,
     User user,
-    UserLogRegistryFactory userLogRegistryFactory,
+    UserLogRegistry userLogRegistry,
     UserLogStore userLogStore
 ) {
     public static RequestScopedDependenciesBuilder builder() {

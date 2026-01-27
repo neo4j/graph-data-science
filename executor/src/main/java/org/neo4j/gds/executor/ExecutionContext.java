@@ -29,8 +29,7 @@ import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
-import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
-import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
+import org.neo4j.gds.core.utils.warnings.UserLogRegistry;
 import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.core.write.RelationshipExporterBuilder;
 import org.neo4j.gds.logging.Log;
@@ -65,7 +64,7 @@ public interface ExecutionContext {
 
     TaskRegistryFactory taskRegistryFactory();
 
-    UserLogRegistryFactory userLogRegistryFactory();
+    UserLogRegistry userLogRegistry();
 
     String username();
 
@@ -170,8 +169,8 @@ public interface ExecutionContext {
         }
 
         @Override
-        public UserLogRegistryFactory userLogRegistryFactory() {
-            return EmptyUserLogRegistryFactory.INSTANCE;
+        public UserLogRegistry userLogRegistry() {
+            return UserLogRegistry.EMPTY;
         }
 
         @Override

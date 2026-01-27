@@ -23,10 +23,12 @@ import org.neo4j.gds.core.utils.progress.tasks.Task;
 
 import java.util.stream.Stream;
 
+/**
+ * In a deployed system, there will exist one of these per ~~database~~ data source, or namespace.
+ * That is handled up stream.
+ */
 public interface UserLogStore {
     void addUserLogMessage(String username, Task taskId, String message);
 
     Stream<UserLogEntry> query(String username);
-
-
 }

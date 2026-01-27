@@ -33,7 +33,7 @@ import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
-import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
+import org.neo4j.gds.core.utils.warnings.UserLogRegistry;
 import org.neo4j.gds.core.write.NodePropertyExporter;
 import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.termination.TerminationFlag;
@@ -56,7 +56,7 @@ public class WriteNodePropertiesApplication {
         RequestCorrelationId requestCorrelationId,
         TaskRegistryFactory taskRegistryFactory,
         TerminationFlag terminationFlag,
-        UserLogRegistryFactory userLogRegistryFactory,
+        UserLogRegistry userLogRegistry,
         GraphName graphName,
         GraphWriteNodePropertiesConfig configuration
     ) {
@@ -83,7 +83,7 @@ public class WriteNodePropertiesApplication {
             jobId,
             requestCorrelationId,
             taskRegistryFactory,
-            userLogRegistryFactory
+            userLogRegistry
         );
 
         var allNodeProperties = configuration

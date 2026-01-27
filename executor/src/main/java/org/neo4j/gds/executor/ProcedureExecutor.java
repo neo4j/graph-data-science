@@ -193,7 +193,7 @@ public class ProcedureExecutor<
                         config,
                         executionContext.log(),
                         executionContext.taskRegistryFactory(),
-                        executionContext.userLogRegistryFactory()
+                        executionContext.userLogRegistry()
                     );
                 }
 
@@ -204,7 +204,7 @@ public class ProcedureExecutor<
                         config,
                         executionContext.log(),
                         executionContext.taskRegistryFactory(),
-                        executionContext.userLogRegistryFactory()
+                        executionContext.userLogRegistry()
                     );
                 }
             });

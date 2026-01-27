@@ -35,7 +35,7 @@ import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.core.model.TestCustomInfo;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
-import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
+import org.neo4j.gds.core.utils.warnings.UserLogRegistry;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallableFinder;
 import org.neo4j.gds.executor.ImmutableExecutionContext;
@@ -195,7 +195,7 @@ class LinkPredictionTrainingPipelineTest {
             .isGdsAdmin(false)
             .log(Log.noOpLog())
             .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
-            .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
+            .userLogRegistry(UserLogRegistry.EMPTY)
             .isGdsAdmin(false)
             .metrics(Metrics.DISABLED)
             .build();
@@ -240,7 +240,7 @@ class LinkPredictionTrainingPipelineTest {
             .isGdsAdmin(false)
             .log(Log.noOpLog())
             .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
-            .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
+            .userLogRegistry(UserLogRegistry.EMPTY)
             .isGdsAdmin(false)
             .metrics(Metrics.DISABLED)
             .build();
@@ -285,7 +285,7 @@ class LinkPredictionTrainingPipelineTest {
             .isGdsAdmin(false)
             .log(Log.noOpLog())
             .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
-            .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
+            .userLogRegistry(UserLogRegistry.EMPTY)
             .isGdsAdmin(false)
             .metrics(Metrics.DISABLED)
             .build();

@@ -35,7 +35,7 @@ import org.neo4j.gds.core.utils.progress.TaskStore;
 import org.neo4j.gds.core.utils.progress.TaskStoreListener;
 import org.neo4j.gds.core.utils.progress.UserTask;
 import org.neo4j.gds.core.utils.progress.tasks.Status;
-import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
+import org.neo4j.gds.core.utils.warnings.UserLogRegistry;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
@@ -138,7 +138,7 @@ class ProcedureExecutorTest {
             .isGdsAdmin(true)
             .closeableResourceRegistry(CloseableResourceRegistry.EMPTY)
             .nodeLookup(NodeLookup.EMPTY)
-            .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
+            .userLogRegistry(UserLogRegistry.EMPTY)
             .metrics(Metrics.DISABLED)
             .memoryEstimationContext(new MemoryEstimationContext(true))
             .build();

@@ -28,24 +28,24 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskTreeProgressTracker;
-import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
+import org.neo4j.gds.core.utils.warnings.UserLogRegistry;
 
 public class ProgressTrackerFactory {
     private final LoggerForProgressTracking log;
     private final RequestCorrelationId requestCorrelationId;
     private final TaskRegistryFactory taskRegistryFactory;
-    private final UserLogRegistryFactory userLogRegistryFactory;
+    private final UserLogRegistry userLogRegistry;
 
     public ProgressTrackerFactory(
         LoggerForProgressTracking log,
         RequestCorrelationId requestCorrelationId,
         TaskRegistryFactory taskRegistryFactory,
-        UserLogRegistryFactory userLogRegistryFactory
+        UserLogRegistry userLogRegistry
     ) {
         this.log = log;
         this.requestCorrelationId = requestCorrelationId;
         this.taskRegistryFactory = taskRegistryFactory;
-        this.userLogRegistryFactory = userLogRegistryFactory;
+        this.userLogRegistry = userLogRegistry;
     }
 
     public ProgressTracker create(
@@ -63,7 +63,7 @@ public class ProgressTrackerFactory {
                 jobId,
                 requestCorrelationId,
                 taskRegistryFactory,
-                userLogRegistryFactory
+                userLogRegistry
             );
         } else {
             progressTracker = TaskTreeProgressTracker.create(
@@ -73,7 +73,7 @@ public class ProgressTrackerFactory {
                 jobId,
                 requestCorrelationId,
                 taskRegistryFactory,
-                userLogRegistryFactory
+                userLogRegistry
             );
         }
 

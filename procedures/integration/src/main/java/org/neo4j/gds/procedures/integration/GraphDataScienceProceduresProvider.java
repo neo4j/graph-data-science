@@ -176,7 +176,7 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
         var taskStore = taskStoreService.getTaskStore(databaseId);
         taskStore.addListener(memoryTracker);
 
-        var userLogRegistryFactory = userLogServices.getUserLogRegistryFactory(databaseId, user);
+        var userLogRegistry = userLogServices.getUserLogRegistry(databaseId, user);
         var userLogStore = userLogServices.getUserLogStore(databaseId);
 
         var graphLoaderContext = GraphLoaderContextProvider.buildGraphLoaderContext(
@@ -184,7 +184,7 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
             databaseId,
             taskRegistryFactory,
             terminationFlag,
-            userLogRegistryFactory,
+            userLogRegistry,
             loggers.log()
         );
 
@@ -196,7 +196,7 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
             .taskStore(taskStore)
             .terminationFlag(terminationFlag)
             .user(user)
-            .userLogRegistryFactory(userLogRegistryFactory)
+            .userLogRegistry(userLogRegistry)
             .userLogStore(userLogStore)
             .build();
 

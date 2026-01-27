@@ -26,7 +26,7 @@ import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.LoggerForProgressTracking;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
-import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
+import org.neo4j.gds.core.utils.warnings.UserLogRegistry;
 
 import java.util.List;
 
@@ -40,7 +40,7 @@ public class DropNodePropertiesApplication {
     public long compute(
         RequestCorrelationId requestCorrelationId,
         TaskRegistryFactory taskRegistryFactory,
-        UserLogRegistryFactory userLogRegistryFactory,
+        UserLogRegistry userLogRegistry,
         List<String> nodeProperties,
         GraphStore graphStore
     ) {
@@ -48,7 +48,7 @@ public class DropNodePropertiesApplication {
             log,
             requestCorrelationId,
             taskRegistryFactory,
-            userLogRegistryFactory
+            userLogRegistry
         );
 
         return computeWithProgressTracking(

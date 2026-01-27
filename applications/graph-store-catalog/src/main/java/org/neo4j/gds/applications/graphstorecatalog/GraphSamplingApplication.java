@@ -30,7 +30,7 @@ import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.LoggerForProgressTracking;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
-import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
+import org.neo4j.gds.core.utils.warnings.UserLogRegistry;
 import org.neo4j.gds.graphsampling.GraphSampleConstructor;
 import org.neo4j.gds.graphsampling.RandomWalkSamplerType;
 import org.neo4j.gds.termination.TerminationFlag;
@@ -55,7 +55,7 @@ public final class GraphSamplingApplication {
     RandomWalkSamplingResult sample(
         User user,
         TaskRegistryFactory taskRegistryFactory,
-        UserLogRegistryFactory userLogRegistryFactory,
+        UserLogRegistry userLogRegistry,
         GraphStore graphStore,
         GraphProjectConfig graphProjectConfig,
         TerminationFlag terminationFlag,
@@ -77,7 +77,7 @@ public final class GraphSamplingApplication {
                 samplerConfig.jobId(),
                 requestCorrelationId,
                 taskRegistryFactory,
-                userLogRegistryFactory
+                userLogRegistry
             );
             var graphSampleConstructor = new GraphSampleConstructor(
                 samplerConfig,

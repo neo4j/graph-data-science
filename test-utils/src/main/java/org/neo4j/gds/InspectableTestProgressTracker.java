@@ -30,7 +30,7 @@ import org.neo4j.gds.core.utils.progress.tasks.Progress;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
-import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
+import org.neo4j.gds.core.utils.warnings.UserLogRegistry;
 import org.neo4j.gds.mem.MemoryRange;
 
 import java.util.ArrayList;
@@ -75,7 +75,7 @@ public final class InspectableTestProgressTracker implements ProgressTracker {
             jobId,
             PlainSimpleRequestCorrelationId.create(),
             TaskRegistryFactory.local(userName, taskStore),
-            EmptyUserLogRegistryFactory.INSTANCE
+            UserLogRegistry.EMPTY
         );
 
         return new InspectableTestProgressTracker(delegate, taskStore, jobId, userName);
@@ -180,8 +180,8 @@ public final class InspectableTestProgressTracker implements ProgressTracker {
 
     public void assertValidProgressEvolution() {
         assertThat(progressHistory).isNotEmpty();
-        assertThat(progressHistory.get(0)).isPresent();
-        var previousProgress = progressHistory.get(0).get();
+        assertThat(progressHistory.getFirst()).isPresent();
+        var previousProgress = progressHistory.getFirst().get();
         var initialVolume = previousProgress.volume();
         assertThat(initialVolume).isNotEqualTo(UNKNOWN_VOLUME);
         assertThat(previousProgress.progress()).isEqualTo(0);

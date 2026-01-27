@@ -68,7 +68,7 @@ import org.neo4j.gds.core.utils.logging.GdsLoggers;
 import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
-import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
+import org.neo4j.gds.core.utils.warnings.UserLogRegistry;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
@@ -595,7 +595,7 @@ class WccMutateProcTest extends BaseProcTest {
             .databaseId(DatabaseId.of(db.databaseName()))
             .transactionContext(TestSupport.fullAccessTransaction(db))
             .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
-            .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
+            .userLogRegistry(UserLogRegistry.EMPTY)
             .log(Log.noOpLog())
             .build();
 
@@ -624,7 +624,7 @@ class WccMutateProcTest extends BaseProcTest {
             .taskRegistryFactory(TaskRegistryFactory.empty())
             .terminationFlag(TerminationFlag.RUNNING_TRUE)
             .user(new User(getUsername(), false))
-            .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
+            .userLogRegistry(UserLogRegistry.EMPTY)
             .build();
         var algorithmProcessingTemplate = DefaultAlgorithmProcessingTemplate.create(
             logMock,

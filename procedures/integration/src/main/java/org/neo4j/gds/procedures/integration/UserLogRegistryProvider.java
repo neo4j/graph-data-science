@@ -20,7 +20,7 @@
 package org.neo4j.gds.procedures.integration;
 
 import org.neo4j.function.ThrowingFunction;
-import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
+import org.neo4j.gds.core.utils.warnings.UserLogRegistry;
 import org.neo4j.gds.procedures.DatabaseIdAccessor;
 import org.neo4j.gds.procedures.UserAccessor;
 import org.neo4j.gds.procedures.UserLogServices;
@@ -28,25 +28,24 @@ import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.kernel.api.procedure.Context;
 
 /**
- * @deprecated Needed until we strangle the last context-injected usages of {@link org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory}
+ * This exists to support injectable user log registries in Pregel
  */
-@Deprecated
-public class UserLogRegistryFactoryProvider implements ThrowingFunction<Context, UserLogRegistryFactory, ProcedureException> {
+class UserLogRegistryProvider implements ThrowingFunction<Context, UserLogRegistry, ProcedureException> {
     private final DatabaseIdAccessor databaseIdAccessor = new DatabaseIdAccessor();
-    private final UserAccessor userAccessor;
 
+    private final UserAccessor userAccessor;
     private final UserLogServices userLogServices;
 
-    UserLogRegistryFactoryProvider(UserAccessor userAccessor, UserLogServices userLogServices) {
+    UserLogRegistryProvider(UserAccessor userAccessor, UserLogServices userLogServices) {
         this.userAccessor = userAccessor;
         this.userLogServices = userLogServices;
     }
 
     @Override
-    public UserLogRegistryFactory apply(Context context) {
+    public UserLogRegistry apply(Context context) throws ProcedureException {
         var databaseId = databaseIdAccessor.getDatabaseId(context.graphDatabaseAPI());
         var user = userAccessor.getUser(context.securityContext());
 
-        return userLogServices.getUserLogRegistryFactory(databaseId, user);
+        return userLogServices.getUserLogRegistry(databaseId, user);
     }
 }

@@ -26,9 +26,7 @@ import org.neo4j.gds.core.RequestCorrelationId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
-import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistry;
-import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.utils.GdsFeatureToggles;
 
@@ -65,7 +63,7 @@ public final class TaskProgressTracker implements ProgressTracker {
         TaskRegistryFactory taskRegistryFactory
     ) {
         var jobId = new JobId();
-        return create(baseTask, log, concurrency, jobId, requestCorrelationId, taskRegistryFactory, EmptyUserLogRegistryFactory.INSTANCE);
+        return create(baseTask, log, concurrency, jobId, requestCorrelationId, taskRegistryFactory, UserLogRegistry.EMPTY);
     }
 
     public static TaskProgressTracker create(
@@ -75,11 +73,11 @@ public final class TaskProgressTracker implements ProgressTracker {
         JobId jobId,
         RequestCorrelationId requestCorrelationId,
         TaskRegistryFactory taskRegistryFactory,
-        UserLogRegistryFactory userLogRegistryFactory
+        UserLogRegistry userLogRegistry
     ) {
         var taskProgressLogger = TaskProgressLogger.create(log, requestCorrelationId, baseTask, concurrency);
 
-        return create(baseTask, jobId, taskRegistryFactory, taskProgressLogger, userLogRegistryFactory);
+        return create(baseTask, jobId, taskRegistryFactory, taskProgressLogger, userLogRegistry);
     }
 
     private TaskProgressTracker(
@@ -101,7 +99,7 @@ public final class TaskProgressTracker implements ProgressTracker {
         JobId jobId,
         TaskRegistryFactory taskRegistryFactory,
         TaskProgressLogger taskProgressLogger,
-        UserLogRegistryFactory userLogRegistryFactory
+        UserLogRegistry userLogRegistry
     ) {
         Consumer<RuntimeException>  onError;
 
@@ -119,7 +117,7 @@ public final class TaskProgressTracker implements ProgressTracker {
             };
         }
 
-        return new TaskProgressTracker(baseTask, taskRegistryFactory.newInstance(jobId), userLogRegistryFactory.newInstance(), taskProgressLogger, onError);
+        return new TaskProgressTracker(baseTask, taskRegistryFactory.newInstance(jobId), userLogRegistry, taskProgressLogger, onError);
     }
 
     @Override

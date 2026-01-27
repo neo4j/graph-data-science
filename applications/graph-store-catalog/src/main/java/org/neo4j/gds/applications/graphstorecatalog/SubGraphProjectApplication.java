@@ -33,7 +33,7 @@ import org.neo4j.gds.core.utils.logging.GdsLoggers;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
-import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
+import org.neo4j.gds.core.utils.warnings.UserLogRegistry;
 
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -54,14 +54,14 @@ public class SubGraphProjectApplication {
     public GraphFilterResult project(
         RequestCorrelationId requestCorrelationId,
         TaskRegistryFactory taskRegistryFactory,
-        UserLogRegistryFactory userLogRegistryFactory,
+        UserLogRegistry userLogRegistry,
         GraphProjectFromGraphConfig configuration,
         GraphStore originGraphStore
     ) {
         return projectWithErrorsHandled(
             requestCorrelationId,
             taskRegistryFactory,
-            userLogRegistryFactory,
+            userLogRegistry,
             configuration,
             originGraphStore
         );
@@ -70,7 +70,7 @@ public class SubGraphProjectApplication {
     private GraphFilterResult projectWithErrorsHandled(
         RequestCorrelationId requestCorrelationId,
         TaskRegistryFactory taskRegistryFactory,
-        UserLogRegistryFactory userLogRegistryFactory,
+        UserLogRegistry userLogRegistry,
         GraphProjectFromGraphConfig configuration,
         GraphStore originGraphStore
     ) {
@@ -78,7 +78,7 @@ public class SubGraphProjectApplication {
             var countsAndTiming = projectTimed(
                 requestCorrelationId,
                 taskRegistryFactory,
-                userLogRegistryFactory,
+                userLogRegistry,
                 configuration,
                 originGraphStore
             );
@@ -105,7 +105,7 @@ public class SubGraphProjectApplication {
     private Triple<Long, Long, Long> projectTimed(
         RequestCorrelationId requestCorrelationId,
         TaskRegistryFactory taskRegistryFactory,
-        UserLogRegistryFactory userLogRegistryFactory,
+        UserLogRegistry userLogRegistry,
         GraphProjectFromGraphConfig configuration,
         GraphStore originGraphStore
     ) {
@@ -116,7 +116,7 @@ public class SubGraphProjectApplication {
             entityCounts = projectWithProgressTracker(
                 requestCorrelationId,
                 taskRegistryFactory,
-                userLogRegistryFactory,
+                userLogRegistry,
                 configuration,
                 originGraphStore
             );
@@ -131,7 +131,7 @@ public class SubGraphProjectApplication {
     private Pair<Long, Long> projectWithProgressTracker(
         RequestCorrelationId requestCorrelationId,
         TaskRegistryFactory taskRegistryFactory,
-        UserLogRegistryFactory userLogRegistryFactory,
+        UserLogRegistry userLogRegistry,
         GraphProjectFromGraphConfig configuration,
         GraphStore originGraphStore
     ) {
@@ -144,7 +144,7 @@ public class SubGraphProjectApplication {
             configuration.jobId(),
             requestCorrelationId,
             taskRegistryFactory,
-            userLogRegistryFactory
+            userLogRegistry
         );
 
         return projectAndStore(configuration, originGraphStore, progressTracker);

@@ -27,7 +27,7 @@ import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.LoggerForProgressTracking;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
-import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
+import org.neo4j.gds.core.utils.warnings.UserLogRegistry;
 
 public class DropRelationshipsApplication {
     private final LoggerForProgressTracking log;
@@ -39,7 +39,7 @@ public class DropRelationshipsApplication {
     public DeletionResult compute(
         RequestCorrelationId requestCorrelationId,
         TaskRegistryFactory taskRegistryFactory,
-        UserLogRegistryFactory userLogRegistryFactory,
+        UserLogRegistry userLogRegistry,
         GraphStore graphStore,
         String relationshipType
     ) {
@@ -47,7 +47,7 @@ public class DropRelationshipsApplication {
             log,
             requestCorrelationId,
             taskRegistryFactory,
-            userLogRegistryFactory
+            userLogRegistry
         );
         var task = Tasks.leaf("Graph :: Relationships :: Drop", 1);
         var progressTracker = progressTrackerFactory.create(task);

@@ -31,7 +31,7 @@ import org.neo4j.gds.applications.algorithms.machinery.Computation;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
-import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
+import org.neo4j.gds.core.utils.warnings.UserLogRegistry;
 import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.core.write.RelationshipExporterBuilder;
 import org.neo4j.gds.executor.ImmutableExecutionContext;
@@ -64,7 +64,7 @@ final class NodeRegressionTrainComputation implements Computation<NodeRegression
     private final RelationshipExporterBuilder relationshipExporterBuilder;
     private final TaskRegistryFactory taskRegistryFactory;
     private final TerminationMonitor terminationMonitor;
-    private final UserLogRegistryFactory userLogRegistryFactory;
+    private final UserLogRegistry userLogRegistry;
     private final ProgressTrackerCreator progressTrackerCreator;
     private final AlgorithmsProcedureFacade algorithmsProcedureFacade;
     private final NodeRegressionPipelineTrainConfig configuration;
@@ -85,7 +85,7 @@ final class NodeRegressionTrainComputation implements Computation<NodeRegression
         TaskRegistryFactory taskRegistryFactory,
         TerminationFlag terminationFlag,
         TerminationMonitor terminationMonitor,
-        UserLogRegistryFactory userLogRegistryFactory,
+        UserLogRegistry userLogRegistry,
         ProgressTrackerCreator progressTrackerCreator,
         AlgorithmsProcedureFacade algorithmsProcedureFacade,
         NodeRegressionPipelineTrainConfig configuration
@@ -104,7 +104,7 @@ final class NodeRegressionTrainComputation implements Computation<NodeRegression
         this.taskRegistryFactory = taskRegistryFactory;
         this.terminationFlag = terminationFlag;
         this.terminationMonitor = terminationMonitor;
-        this.userLogRegistryFactory = userLogRegistryFactory;
+        this.userLogRegistry = userLogRegistry;
         this.progressTrackerCreator = progressTrackerCreator;
         this.algorithmsProcedureFacade = algorithmsProcedureFacade;
         this.configuration = configuration;
@@ -125,7 +125,7 @@ final class NodeRegressionTrainComputation implements Computation<NodeRegression
         TaskRegistryFactory taskRegistryFactory,
         TerminationFlag terminationFlag,
         TerminationMonitor terminationMonitor,
-        UserLogRegistryFactory userLogRegistryFactory,
+        UserLogRegistry userLogRegistry,
         ProgressTrackerCreator progressTrackerCreator,
         AlgorithmsProcedureFacade algorithmsProcedureFacade,
         NodeRegressionPipelineTrainConfig configuration
@@ -145,7 +145,7 @@ final class NodeRegressionTrainComputation implements Computation<NodeRegression
             taskRegistryFactory,
             terminationFlag,
             terminationMonitor,
-            userLogRegistryFactory,
+            userLogRegistry,
             progressTrackerCreator,
             algorithmsProcedureFacade,
             configuration
@@ -161,7 +161,7 @@ final class NodeRegressionTrainComputation implements Computation<NodeRegression
             pipelineName
         );
 
-        PipelineCompanion.validateMainMetric(pipeline, configuration.metrics().get(0).toString());
+        PipelineCompanion.validateMainMetric(pipeline, configuration.metrics().getFirst().toString());
 
         var executionContext = ImmutableExecutionContext.builder()
             .algorithmsProcedureFacade(algorithmsProcedureFacade)
@@ -178,7 +178,7 @@ final class NodeRegressionTrainComputation implements Computation<NodeRegression
             .returnColumns(procedureReturnColumns)
             .taskRegistryFactory(taskRegistryFactory)
             .terminationMonitor(terminationMonitor)
-            .userLogRegistryFactory(userLogRegistryFactory)
+            .userLogRegistry(userLogRegistry)
             .username(user.getUsername())
             .build();
 

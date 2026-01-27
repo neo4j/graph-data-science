@@ -30,7 +30,7 @@ import org.neo4j.gds.core.loading.GraphProjectResult;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
-import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
+import org.neo4j.gds.core.utils.warnings.UserLogRegistry;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.projection.GraphStoreFactorySuppliers;
 import org.neo4j.gds.termination.TerminationFlag;
@@ -69,7 +69,7 @@ public class GenericProjectApplication<RESULT extends GraphProjectResult, CONFIG
         TaskRegistryFactory taskRegistryFactory,
         TerminationFlag terminationFlag,
         TransactionContext transactionContext,
-        UserLogRegistryFactory userLogRegistryFactory,
+        UserLogRegistry userLogRegistry,
         CONFIGURATION configuration
     ) {
         try {
@@ -80,7 +80,7 @@ public class GenericProjectApplication<RESULT extends GraphProjectResult, CONFIG
                 taskRegistryFactory,
                 terminationFlag,
                 transactionContext,
-                userLogRegistryFactory,
+                userLogRegistry,
                 configuration
             );
         } catch (RuntimeException e) {
@@ -95,7 +95,7 @@ public class GenericProjectApplication<RESULT extends GraphProjectResult, CONFIG
         TaskRegistryFactory taskRegistryFactory,
         TerminationFlag terminationFlag,
         TransactionContext transactionContext,
-        UserLogRegistryFactory userLogRegistryFactory,
+        UserLogRegistry userLogRegistry,
         GraphProjectConfig configuration
     ) {
         if (configuration.isFictitiousLoading()) return estimateButFictitiously(
@@ -108,7 +108,7 @@ public class GenericProjectApplication<RESULT extends GraphProjectResult, CONFIG
             terminationFlag,
             transactionContext,
             taskRegistryFactory,
-            userLogRegistryFactory,
+            userLogRegistry,
             configuration
         );
 
@@ -122,7 +122,7 @@ public class GenericProjectApplication<RESULT extends GraphProjectResult, CONFIG
         TaskRegistryFactory taskRegistryFactory,
         TerminationFlag terminationFlag,
         TransactionContext transactionContext,
-        UserLogRegistryFactory userLogRegistryFactory,
+        UserLogRegistry userLogRegistry,
         CONFIGURATION configuration
     ) {
         graphProjectMemoryUsageService.validateMemoryUsage(
@@ -130,7 +130,7 @@ public class GenericProjectApplication<RESULT extends GraphProjectResult, CONFIG
             taskRegistryFactory,
             terminationFlag,
             transactionContext,
-            userLogRegistryFactory,
+            userLogRegistry,
             configuration
         );
 
@@ -144,7 +144,7 @@ public class GenericProjectApplication<RESULT extends GraphProjectResult, CONFIG
                 taskRegistryFactory,
                 terminationFlag,
                 transactionContext,
-                userLogRegistryFactory
+                userLogRegistry
             );
             var graphStoreFactorySupplier = graphStoreFactorySuppliers.find(configuration);
             var graphStoreFactory = graphStoreFactorySupplier.get(graphLoaderContext, dependencyResolver);
@@ -181,7 +181,7 @@ public class GenericProjectApplication<RESULT extends GraphProjectResult, CONFIG
         TaskRegistryFactory taskRegistryFactory,
         TerminationFlag terminationFlag,
         TransactionContext transactionContext,
-        UserLogRegistryFactory userLogRegistryFactory
+        UserLogRegistry userLogRegistry
     ) {
         return ImmutableGraphLoaderContext.builder()
             .databaseId(databaseId)
@@ -189,7 +189,7 @@ public class GenericProjectApplication<RESULT extends GraphProjectResult, CONFIG
             .taskRegistryFactory(taskRegistryFactory)
             .terminationFlag(terminationFlag)
             .transactionContext(transactionContext)
-            .userLogRegistryFactory(userLogRegistryFactory)
+            .userLogRegistry(userLogRegistry)
             .build();
     }
 }

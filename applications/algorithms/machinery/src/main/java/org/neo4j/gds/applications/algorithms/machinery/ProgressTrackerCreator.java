@@ -69,7 +69,7 @@ public class ProgressTrackerCreator {
                 jobId,
                 requestCorrelationId,
                 requestScopedDependencies.taskRegistryFactory(),
-                requestScopedDependencies.userLogRegistryFactory()
+                requestScopedDependencies.userLogRegistry()
             );
         }
 
@@ -80,7 +80,7 @@ public class ProgressTrackerCreator {
             jobId,
             requestScopedDependencies.correlationId(),
             requestScopedDependencies.taskRegistryFactory(),
-            requestScopedDependencies.userLogRegistryFactory()
+            requestScopedDependencies.userLogRegistry()
         );
     }
 }

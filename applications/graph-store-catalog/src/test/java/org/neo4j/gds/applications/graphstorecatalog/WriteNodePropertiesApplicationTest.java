@@ -41,7 +41,7 @@ import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.logging.GdsLoggers;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.LoggerForProgressTracking;
-import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
+import org.neo4j.gds.core.utils.warnings.UserLogRegistry;
 import org.neo4j.gds.core.write.NodePropertyExporter;
 import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.extension.GdlExtension;
@@ -127,7 +127,7 @@ class WriteNodePropertiesApplicationTest {
             PlainSimpleRequestCorrelationId.create(),
             EmptyTaskRegistryFactory.INSTANCE,
             TerminationFlag.RUNNING_TRUE,
-            EmptyUserLogRegistryFactory.INSTANCE,
+            UserLogRegistry.EMPTY,
             GraphName.parse("g"),
             GraphWriteNodePropertiesConfig.of(
                 "g",
@@ -174,7 +174,7 @@ class WriteNodePropertiesApplicationTest {
             PlainSimpleRequestCorrelationId.create(),
             EmptyTaskRegistryFactory.INSTANCE,
             TerminationFlag.RUNNING_TRUE,
-            EmptyUserLogRegistryFactory.INSTANCE,
+            UserLogRegistry.EMPTY,
             GraphName.parse("propertiesSubsetGraph"),
             GraphWriteNodePropertiesConfig.of(
                 "propertiesSubsetGraph",
@@ -214,7 +214,7 @@ class WriteNodePropertiesApplicationTest {
             PlainSimpleRequestCorrelationId.create(),
             EmptyTaskRegistryFactory.INSTANCE,
             TerminationFlag.RUNNING_TRUE,
-            EmptyUserLogRegistryFactory.INSTANCE,
+            UserLogRegistry.EMPTY,
             GraphName.parse("g"),
             GraphWriteNodePropertiesConfig.of(
                 "g",
@@ -253,7 +253,7 @@ class WriteNodePropertiesApplicationTest {
             PlainSimpleRequestCorrelationId.create(),
             EmptyTaskRegistryFactory.INSTANCE,
             TerminationFlag.RUNNING_TRUE,
-            EmptyUserLogRegistryFactory.INSTANCE,
+            UserLogRegistry.EMPTY,
             GraphName.parse("g"),
             GraphWriteNodePropertiesConfig.of(
                 "g",
@@ -289,7 +289,7 @@ class WriteNodePropertiesApplicationTest {
             PlainSimpleRequestCorrelationId.create(),
             EmptyTaskRegistryFactory.INSTANCE,
             TerminationFlag.RUNNING_TRUE,
-            EmptyUserLogRegistryFactory.INSTANCE,
+            UserLogRegistry.EMPTY,
             GraphName.parse("g"),
             GraphWriteNodePropertiesConfig.of(
                 "g",

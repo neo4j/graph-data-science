@@ -43,7 +43,7 @@ import org.neo4j.gds.core.utils.progress.LocalTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Status;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
-import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
+import org.neo4j.gds.core.utils.warnings.UserLogRegistry;
 import org.neo4j.gds.logging.LogAdapter;
 import org.neo4j.gds.values.primitive.PrimitiveValues;
 
@@ -402,7 +402,7 @@ class GraphImporterTest {
             new JobId(),
             PlainSimpleRequestCorrelationId.create(),
             new LocalTaskRegistryFactory("", taskStore),
-            EmptyUserLogRegistryFactory.INSTANCE
+            UserLogRegistry.EMPTY
         );
         var importer = new GraphImporter(
             GraphProjectConfig.emptyWithName("", "g"),

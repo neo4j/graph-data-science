@@ -32,7 +32,7 @@ import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.utils.progress.PerDatabaseTaskStore;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.core.utils.progress.UserTask;
-import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
+import org.neo4j.gds.core.utils.warnings.UserLogRegistry;
 import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.utils.GdsFeatureToggles;
@@ -198,7 +198,7 @@ class TaskProgressTrackerTest {
                 new JobId(),
                 new RequestCorrelationIdForTesting("our request correlation id"),
                 EmptyTaskRegistryFactory.INSTANCE,
-                EmptyUserLogRegistryFactory.INSTANCE
+                UserLogRegistry.EMPTY
             );
             progressTracker.beginSubTask();
             progressTracker.logProgress(1);
@@ -226,7 +226,7 @@ class TaskProgressTrackerTest {
                 new JobId(),
                 new RequestCorrelationIdForTesting("what request correlation id?"),
                 EmptyTaskRegistryFactory.INSTANCE,
-                EmptyUserLogRegistryFactory.INSTANCE
+                UserLogRegistry.EMPTY
             );
 
             progressTracker.beginSubTask("root");

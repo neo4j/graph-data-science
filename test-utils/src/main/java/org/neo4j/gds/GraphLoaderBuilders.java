@@ -31,7 +31,7 @@ import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.JobId;
-import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
+import org.neo4j.gds.core.utils.warnings.UserLogRegistry;
 import org.neo4j.gds.legacycypherprojection.GraphProjectFromCypherConfig;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
@@ -196,7 +196,7 @@ public final class GraphLoaderBuilders {
             .executor(executorService.orElse(DefaultPool.INSTANCE))
             .terminationFlag(terminationFlag.orElse(TerminationFlag.RUNNING_TRUE))
             .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
-            .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
+            .userLogRegistry(UserLogRegistry.EMPTY)
             .log(log.orElseGet(Log::noOpLog))
             .build();
         var graphStoreFactorySupplier = graphStoreFactorySuppliers.find(graphProjectConfig);

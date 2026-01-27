@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds;
 
-import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
@@ -30,8 +29,7 @@ import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskTreeProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
-import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
-import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
+import org.neo4j.gds.core.utils.warnings.UserLogRegistry;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.MemoryEstimation;
@@ -48,7 +46,7 @@ public interface AlgorithmFactory<G, ALGO extends Algorithm<?>, CONFIG extends A
             configuration,
             log,
             taskRegistryFactory,
-            EmptyUserLogRegistryFactory.INSTANCE
+            UserLogRegistry.EMPTY
         );
     }
 
@@ -57,24 +55,23 @@ public interface AlgorithmFactory<G, ALGO extends Algorithm<?>, CONFIG extends A
         CONFIG configuration,
         Log log,
         TaskRegistryFactory taskRegistryFactory,
-        UserLogRegistryFactory userLogRegistryFactory
+        UserLogRegistry userLogRegistry
     ) {
         var progressTracker = createProgressTracker(
             configuration,
             log,
             taskRegistryFactory,
-            userLogRegistryFactory,
+            userLogRegistry,
             progressTask(graphOrGraphStore, configuration)
         );
         return build(graphOrGraphStore, configuration, progressTracker);
     }
 
-    @NotNull
     private ProgressTracker createProgressTracker(
         CONFIG configuration,
         Log log,
         TaskRegistryFactory taskRegistryFactory,
-        UserLogRegistryFactory userLogRegistryFactory,
+        UserLogRegistry userLogRegistry,
         Task progressTask
     ) {
         /*
@@ -93,7 +90,7 @@ public interface AlgorithmFactory<G, ALGO extends Algorithm<?>, CONFIG extends A
                 configuration.jobId(),
                 requestCorrelationId,
                 taskRegistryFactory,
-                userLogRegistryFactory
+                userLogRegistry
             );
         }
 
@@ -104,7 +101,7 @@ public interface AlgorithmFactory<G, ALGO extends Algorithm<?>, CONFIG extends A
             configuration.jobId(),
             requestCorrelationId,
             taskRegistryFactory,
-            userLogRegistryFactory
+            userLogRegistry
         );
     }
 

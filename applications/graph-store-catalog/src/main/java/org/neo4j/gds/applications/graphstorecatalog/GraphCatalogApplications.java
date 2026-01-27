@@ -28,7 +28,7 @@ import org.neo4j.gds.core.loading.GraphDropNodePropertiesResult;
 import org.neo4j.gds.core.loading.GraphDropRelationshipResult;
 import org.neo4j.gds.core.loading.GraphStoreCatalogEntry;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
-import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
+import org.neo4j.gds.core.utils.warnings.UserLogRegistry;
 import org.neo4j.gds.core.write.NodeLabelExporterBuilder;
 import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.core.write.RelationshipExporterBuilder;
@@ -70,7 +70,7 @@ public interface GraphCatalogApplications {
         TaskRegistryFactory taskRegistryFactory,
         TerminationFlag terminationFlag,
         TransactionContext transactionContext,
-        UserLogRegistryFactory userLogRegistryFactory,
+        UserLogRegistry userLogRegistry,
         String graphNameAsString,
         Object nodeProjection,
         Object relationshipProjection,
@@ -83,7 +83,7 @@ public interface GraphCatalogApplications {
         TaskRegistryFactory taskRegistryFactory,
         TerminationFlag terminationFlag,
         TransactionContext transactionContext,
-        UserLogRegistryFactory userLogRegistryFactory,
+        UserLogRegistry userLogRegistry,
         Object nodeProjection,
         Object relationshipProjection,
         Map<String, Object> rawConfiguration
@@ -97,7 +97,7 @@ public interface GraphCatalogApplications {
         TaskRegistryFactory taskRegistryFactory,
         TerminationFlag terminationFlag,
         TransactionContext transactionContext,
-        UserLogRegistryFactory userLogRegistryFactory,
+        UserLogRegistry userLogRegistry,
         String graphNameAsString,
         String nodeQuery,
         String relationshipQuery,
@@ -110,7 +110,7 @@ public interface GraphCatalogApplications {
         TaskRegistryFactory taskRegistryFactory,
         TerminationFlag terminationFlag,
         TransactionContext transactionContext,
-        UserLogRegistryFactory userLogRegistryFactory,
+        UserLogRegistry userLogRegistry,
         String nodeQuery,
         String relationshipQuery,
         Map<String, Object> rawConfiguration
@@ -120,7 +120,7 @@ public interface GraphCatalogApplications {
         User user,
         DatabaseId databaseId,
         TaskRegistryFactory taskRegistryFactory,
-        UserLogRegistryFactory userLogRegistryFactory,
+        UserLogRegistry userLogRegistry,
         String graphNameAsString,
         String originGraphNameAsString,
         String nodeFilter,
@@ -134,7 +134,7 @@ public interface GraphCatalogApplications {
         User user,
         DatabaseId databaseId,
         TaskRegistryFactory taskRegistryFactory,
-        UserLogRegistryFactory userLogRegistryFactory,
+        UserLogRegistry userLogRegistry,
         String graphName,
         Object nodeProperties,
         Map<String, Object> configuration
@@ -142,7 +142,7 @@ public interface GraphCatalogApplications {
 
     GraphDropRelationshipResult dropRelationships(
         User user, DatabaseId databaseId, TaskRegistryFactory taskRegistryFactory,
-        UserLogRegistryFactory userLogRegistryFactory,
+        UserLogRegistry userLogRegistry,
         String graphName,
         String relationshipType
     );
@@ -173,7 +173,7 @@ public interface GraphCatalogApplications {
         User user,
         DatabaseId databaseId,
         TaskRegistryFactory taskRegistryFactory,
-        UserLogRegistryFactory userLogRegistryFactory,
+        UserLogRegistry userLogRegistry,
         String graphName,
         Object nodeProperties,
         Object nodeLabels,
@@ -186,7 +186,7 @@ public interface GraphCatalogApplications {
         User user,
         DatabaseId databaseId,
         TaskRegistryFactory taskRegistryFactory,
-        UserLogRegistryFactory userLogRegistryFactory,
+        UserLogRegistry userLogRegistry,
         String graphName,
         List<String> relationshipProperties,
         Object relationshipTypes,
@@ -209,7 +209,7 @@ public interface GraphCatalogApplications {
         NodePropertyExporterBuilder nodePropertyExporterBuilder,
         TaskRegistryFactory taskRegistryFactory,
         TerminationFlag terminationFlag,
-        UserLogRegistryFactory userLogRegistryFactory,
+        UserLogRegistry userLogRegistry,
         String graphName,
         Object nodeProperties,
         Object nodeLabels,
@@ -243,7 +243,7 @@ public interface GraphCatalogApplications {
         RelationshipExporterBuilder relationshipExporterBuilder,
         TaskRegistryFactory taskRegistryFactory,
         TerminationFlag terminationFlag,
-        UserLogRegistryFactory userLogRegistryFactory,
+        UserLogRegistry userLogRegistry,
         String graphName,
         String relationshipType,
         String relationshipProperty,
@@ -254,7 +254,7 @@ public interface GraphCatalogApplications {
         User user,
         DatabaseId databaseId,
         TaskRegistryFactory taskRegistryFactory,
-        UserLogRegistryFactory userLogRegistryFactory,
+        UserLogRegistry userLogRegistry,
         TerminationFlag terminationFlag,
         String graphName,
         String originGraphName,
@@ -265,7 +265,7 @@ public interface GraphCatalogApplications {
         User user,
         DatabaseId databaseId,
         TaskRegistryFactory taskRegistryFactory,
-        UserLogRegistryFactory userLogRegistryFactory,
+        UserLogRegistry userLogRegistry,
         TerminationFlag terminationFlag,
         String graphName,
         String originGraphName,

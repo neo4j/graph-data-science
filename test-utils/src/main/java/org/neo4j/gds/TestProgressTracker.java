@@ -28,7 +28,7 @@ import org.neo4j.gds.core.utils.progress.tasks.LoggerForProgressTracking;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
-import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
+import org.neo4j.gds.core.utils.warnings.UserLogRegistry;
 import org.neo4j.gds.mem.MemoryRange;
 
 import java.util.ArrayList;
@@ -54,7 +54,7 @@ public final class TestProgressTracker implements ProgressTracker {
             new JobId(),
             PlainSimpleRequestCorrelationId.create(),
             taskRegistryFactory,
-            EmptyUserLogRegistryFactory.INSTANCE
+            UserLogRegistry.EMPTY
         );
 
         return new TestProgressTracker(delegate);

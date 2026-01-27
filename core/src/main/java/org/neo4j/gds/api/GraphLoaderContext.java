@@ -24,8 +24,7 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
-import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
-import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
+import org.neo4j.gds.core.utils.warnings.UserLogRegistry;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.transaction.TransactionContext;
@@ -34,7 +33,6 @@ import java.util.concurrent.ExecutorService;
 
 @ValueClass
 public interface GraphLoaderContext {
-
     TransactionContext transactionContext();
 
     DatabaseId databaseId();
@@ -53,8 +51,7 @@ public interface GraphLoaderContext {
 
     TaskRegistryFactory taskRegistryFactory();
 
-    UserLogRegistryFactory userLogRegistryFactory();
-
+    UserLogRegistry userLogRegistry();
 
     GraphLoaderContext NULL_CONTEXT = new GraphLoaderContext() {
         @Override
@@ -78,8 +75,8 @@ public interface GraphLoaderContext {
         }
 
         @Override
-        public UserLogRegistryFactory userLogRegistryFactory() {
-            return EmptyUserLogRegistryFactory.INSTANCE;
+        public UserLogRegistry userLogRegistry() {
+            return UserLogRegistry.EMPTY;
         }
     };
 }

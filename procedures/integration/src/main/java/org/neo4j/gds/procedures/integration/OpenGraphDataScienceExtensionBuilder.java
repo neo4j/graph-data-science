@@ -44,7 +44,7 @@ import org.neo4j.gds.core.utils.progress.ProgressFeatureSettings;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.TaskStore;
 import org.neo4j.gds.core.utils.progress.TaskStoreService;
-import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
+import org.neo4j.gds.core.utils.warnings.UserLogRegistry;
 import org.neo4j.gds.legacycypherprojection.CypherProjectionGraphStoreFactorySupplier;
 import org.neo4j.gds.legacycypherprojection.GraphProjectFromCypherConfig;
 import org.neo4j.gds.logging.Log;
@@ -281,18 +281,17 @@ public final class OpenGraphDataScienceExtensionBuilder {
 
     /**
      * At this point we have all the bits ready, so we assemble and register them with Neo4j.
-     * There are some legacy bits that are still part of the contract, they will disappear gradually,
-     * and we will be left with just the one component.
+     * There are some legacy bits that are still part of the contract (with Pregel), they sit here.
      */
     public Lifecycle build() {
         log.info("Building Graph Data Science extension...");
         registerGraphDataScienceComponent();
 
-        registerComponentsNeededByBaseProc(metrics, taskRegistryFactoryService, taskStoreService, userLogServices);
+        registerComponentsNeededByBaseProc();
 
         // register legacy bits, as I remember it these are used internally. I lose track tho. Awful design.
-        registerLicenseStateComponent(licenseState);
-        registerModelCatalogComponent(modelCatalog);
+        registerLicenseStateComponent();
+        registerModelCatalogComponent();
         log.info("Graph Data Science extension built.");
 
         var lifeSupport = new LifeSupport();
@@ -324,30 +323,25 @@ public final class OpenGraphDataScienceExtensionBuilder {
      * Therefore, we need to pass these ideally internal things to Neo4j's component registry,
      * so that BaseProc can look them up later.
      */
-    private void registerComponentsNeededByBaseProc(
-        Metrics metrics,
-        TaskRegistryFactoryService taskRegistryFactoryService,
-        TaskStoreService taskStoreService,
-        UserLogServices userLogServices
-    ) {
-        registerMetricsComponent(metrics);
-        registerTaskRegistryFactoryComponent(taskRegistryFactoryService);
-        registerTaskStoreComponent(taskStoreService);
-        registerUserLogRegistryFactoryComponent(userLogServices);
+    private void registerComponentsNeededByBaseProc() {
+        registerMetricsComponent();
+        registerTaskRegistryFactoryComponent();
+        registerTaskStoreComponent();
+        registerUserLogRegistryComponent();
         registerUsernameComponent();
     }
 
-    private void registerMetricsComponent(Metrics metrics) {
+    private void registerMetricsComponent() {
         componentRegistration.registerComponent("Metrics", Metrics.class, __ -> metrics);
     }
 
-    private void registerTaskStoreComponent(TaskStoreService taskStoreService) {
+    private void registerTaskStoreComponent() {
         var taskStoreProvider = new TaskStoreProvider(taskStoreService);
 
         componentRegistration.registerComponent("Task Store", TaskStore.class, taskStoreProvider);
     }
 
-    private void registerTaskRegistryFactoryComponent(TaskRegistryFactoryService taskRegistryFactoryService) {
+    private void registerTaskRegistryFactoryComponent() {
         var taskRegistryFactoryProvider = new TaskRegistryFactoryProvider(taskRegistryFactoryService, userAccessor);
 
         componentRegistration.registerComponent(
@@ -357,40 +351,28 @@ public final class OpenGraphDataScienceExtensionBuilder {
         );
     }
 
-    private void registerUserLogRegistryFactoryComponent(UserLogServices userLogServices) {
-        var userLogRegistryFactoryProvider = new UserLogRegistryFactoryProvider(userAccessor, userLogServices);
+    private void registerUserLogRegistryComponent() {
+        var userLogRegistryProvider = new UserLogRegistryProvider(userAccessor, userLogServices);
 
         componentRegistration.registerComponent(
-            "User Log Registry Factory",
-            UserLogRegistryFactory.class,
-            userLogRegistryFactoryProvider
+            "User Log Registry",
+            UserLogRegistry.class,
+            userLogRegistryProvider
         );
     }
 
-    /**
-     * @deprecated Legacy stuff, will go away one day
-     */
-    @Deprecated
-    private void registerLicenseStateComponent(LicenseState licenseState) {
+    private void registerLicenseStateComponent() {
         componentRegistration.registerComponent("License State", LicenseState.class, __ -> licenseState);
 
         componentRegistration.setUpDependency(licenseState);
     }
 
-    /**
-     * @deprecated Legacy stuff, will go away one day
-     */
-    @Deprecated
-    private void registerModelCatalogComponent(ModelCatalog modelCatalog) {
+    private void registerModelCatalogComponent() {
         componentRegistration.registerComponent("Model Catalog", ModelCatalog.class, __ -> modelCatalog);
 
         componentRegistration.setUpDependency(modelCatalog);
     }
 
-    /**
-     * @deprecated Legacy stuff, will go away one day
-     */
-    @Deprecated
     private void registerUsernameComponent() {
         componentRegistration.registerComponent("Username", Username.class, UsernameCapturer::capture);
     }

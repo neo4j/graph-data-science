@@ -43,7 +43,7 @@ import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.logging.GdsLoggers;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
-import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
+import org.neo4j.gds.core.utils.warnings.UserLogRegistry;
 import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.core.write.RelationshipExporterBuilder;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
@@ -99,7 +99,7 @@ public class PipelineApplications {
     private final TerminationMonitor terminationMonitor;
     private final TerminationFlag terminationFlag;
     private final User user;
-    private final UserLogRegistryFactory userLogRegistryFactory;
+    private final UserLogRegistry userLogRegistry;
 
     private final PipelineConfigurationParser pipelineConfigurationParser;
     private final ProgressTrackerCreator progressTrackerCreator;
@@ -137,7 +137,7 @@ public class PipelineApplications {
         TerminationMonitor terminationMonitor,
         TerminationFlag terminationFlag,
         User user,
-        UserLogRegistryFactory userLogRegistryFactory,
+        UserLogRegistry userLogRegistry,
         PipelineConfigurationParser pipelineConfigurationParser,
         ProgressTrackerCreator progressTrackerCreator,
         ModelPersister modelPersister,
@@ -168,7 +168,7 @@ public class PipelineApplications {
         this.terminationMonitor = terminationMonitor;
         this.terminationFlag = terminationFlag;
         this.user = user;
-        this.userLogRegistryFactory = userLogRegistryFactory;
+        this.userLogRegistry = userLogRegistry;
         this.pipelineConfigurationParser = pipelineConfigurationParser;
         this.progressTrackerCreator = progressTrackerCreator;
         this.modelPersister = modelPersister;
@@ -238,7 +238,7 @@ public class PipelineApplications {
             requestScopedDependencies.taskRegistryFactory(),
             requestScopedDependencies.terminationFlag(),
             terminationMonitor,
-            requestScopedDependencies.userLogRegistryFactory(),
+            requestScopedDependencies.userLogRegistry(),
             progressTrackerCreator,
             algorithmsProcedureFacade
         );
@@ -262,7 +262,7 @@ public class PipelineApplications {
             terminationMonitor,
             requestScopedDependencies.terminationFlag(),
             requestScopedDependencies.user(),
-            requestScopedDependencies.userLogRegistryFactory(),
+            requestScopedDependencies.userLogRegistry(),
             pipelineConfigurationParser,
             progressTrackerCreator,
             modelPersister,
@@ -738,7 +738,7 @@ public class PipelineApplications {
             taskRegistryFactory,
             terminationMonitor,
             user,
-            userLogRegistryFactory,
+            userLogRegistry,
             progressTrackerCreator,
             algorithmsProcedureFacade,
             configuration,
@@ -765,7 +765,7 @@ public class PipelineApplications {
             taskRegistryFactory,
             terminationMonitor,
             user,
-            userLogRegistryFactory,
+            userLogRegistry,
             progressTrackerCreator,
             algorithmsProcedureFacade,
             configuration,
@@ -791,7 +791,7 @@ public class PipelineApplications {
             taskRegistryFactory,
             terminationMonitor,
             user,
-            userLogRegistryFactory,
+            userLogRegistry,
             progressTrackerCreator,
             algorithmsProcedureFacade,
             configuration,
@@ -817,7 +817,7 @@ public class PipelineApplications {
             taskRegistryFactory,
             terminationFlag,
             terminationMonitor,
-            userLogRegistryFactory,
+            userLogRegistry,
             progressTrackerCreator,
             algorithmsProcedureFacade,
             configuration
@@ -844,7 +844,7 @@ public class PipelineApplications {
             taskRegistryFactory,
             terminationMonitor,
             user,
-            userLogRegistryFactory,
+            userLogRegistry,
             progressTrackerCreator,
             algorithmsProcedureFacade,
             configuration,

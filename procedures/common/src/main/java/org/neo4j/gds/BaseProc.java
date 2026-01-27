@@ -23,7 +23,7 @@ import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
-import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
+import org.neo4j.gds.core.utils.warnings.UserLogRegistry;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.ImmutableExecutionContext;
 import org.neo4j.gds.executor.MemoryEstimationContext;
@@ -67,7 +67,7 @@ public abstract class BaseProc {
     public TaskRegistryFactory taskRegistryFactory;
 
     @Context
-    public UserLogRegistryFactory userLogRegistryFactory;
+    public UserLogRegistry userLogRegistry;
 
     @Context
     public Username username = Username.EMPTY_USERNAME;
@@ -94,7 +94,7 @@ public abstract class BaseProc {
                 .memoryEstimationContext(new MemoryEstimationContext(true))
                 .log(new LogAdapter(log))
                 .returnColumns(new ProcedureCallContextReturnColumns(callContext))
-                .userLogRegistryFactory(userLogRegistryFactory)
+                .userLogRegistry(userLogRegistry)
                 .taskRegistryFactory(taskRegistryFactory)
                 .username(username())
                 .terminationMonitor(new TransactionTerminationMonitor(transaction))

@@ -21,8 +21,7 @@ package org.neo4j.gds.procedures;
 
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.User;
-import org.neo4j.gds.core.utils.warnings.LocalUserLogRegistryFactory;
-import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
+import org.neo4j.gds.core.utils.warnings.UserLogRegistry;
 import org.neo4j.gds.core.utils.warnings.UserLogStore;
 import org.neo4j.gds.core.utils.warnings.UserLogStoreHolder;
 
@@ -35,17 +34,10 @@ import java.util.concurrent.ConcurrentSkipListMap;
  * We have a user log store per database, and registry factories per database and user.
  * This allows us to easily do things like getting user log entries for just the database they are working on,
  * or all log entries pertaining to a database.
- * <p>
- * Question for later: would we lose anything if we just had factory per database+user,
- * i.e. using a single map with composite keys?
- * <p>
- * Beware we have a temporary workaround in place here where we share state between Procedure Facade and the old
- * {@link org.neo4j.gds.core.utils.warnings.UserLogRegistryExtension},
- * using {@link org.neo4j.gds.core.utils.warnings.UserLogStoreHolder} as a singleton state keeper.
  */
 public class UserLogServices {
     // private final Map<DatabaseId, UserLogStore> stores = new ConcurrentHashMap<>();
-    private final Map<DatabaseId, Map<User, UserLogRegistryFactory>> factories = new ConcurrentHashMap<>();
+    private final Map<DatabaseId, Map<User, UserLogRegistry>> registries = new ConcurrentHashMap<>();
 
     public UserLogStore getUserLogStore(DatabaseId databaseId) {
         String databaseName = databaseId.databaseName();
@@ -54,18 +46,18 @@ public class UserLogServices {
         // return stores.computeIfAbsent(databaseId, __ -> new BetterUserLogStore());
     }
 
-    public UserLogRegistryFactory getUserLogRegistryFactory(DatabaseId databaseId, User user) {
-        var factoryByUser = getFactoriesForDatabase(databaseId);
+    public UserLogRegistry getUserLogRegistry(DatabaseId databaseId, User user) {
+        var registryByUser = getRegistryForDatabase(databaseId);
 
-        return factoryByUser.computeIfAbsent(user, u -> {
+        return registryByUser.computeIfAbsent(user, u -> {
             var userLogStoreForDatabase = getUserLogStore(databaseId);
 
-            return new LocalUserLogRegistryFactory(u.getUsername(), userLogStoreForDatabase);
+            return new UserLogRegistry(u.getUsername(), userLogStoreForDatabase);
         });
     }
 
-    private Map<User, UserLogRegistryFactory> getFactoriesForDatabase(DatabaseId databaseId) {
-        return factories.computeIfAbsent(
+    private Map<User, UserLogRegistry> getRegistryForDatabase(DatabaseId databaseId) {
+        return registries.computeIfAbsent(
             databaseId,
             __ -> new ConcurrentSkipListMap<>(Comparator.comparing(User::getUsername))
         );

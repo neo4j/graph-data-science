@@ -31,7 +31,7 @@ import org.neo4j.gds.core.utils.progress.tasks.LoggerForProgressTracking;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
-import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
+import org.neo4j.gds.core.utils.warnings.UserLogRegistry;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -56,7 +56,7 @@ public class StreamNodePropertiesApplication {
     <T> Stream<T> compute(
         RequestCorrelationId requestCorrelationId,
         TaskRegistryFactory taskRegistryFactory,
-        UserLogRegistryFactory userLogRegistryFactory,
+        UserLogRegistry userLogRegistry,
         GraphStore graphStore,
         GraphExportNodePropertiesConfig configuration,
         boolean usesPropertyNameColumn,
@@ -73,7 +73,7 @@ public class StreamNodePropertiesApplication {
         return _compute(
             requestCorrelationId,
             taskRegistryFactory,
-            userLogRegistryFactory,
+            userLogRegistry,
             configuration,
             subGraph,
             nodePropertyKeysAndValues,
@@ -85,7 +85,7 @@ public class StreamNodePropertiesApplication {
     private <T> Stream<T> _compute(
         RequestCorrelationId requestCorrelationId,
         TaskRegistryFactory taskRegistryFactory,
-        UserLogRegistryFactory userLogRegistryFactory,
+        UserLogRegistry userLogRegistry,
         GraphExportNodePropertiesConfig configuration,
         IdMap idMap,
         Collection<Pair<String, NodePropertyValues>> nodePropertyKeysAndValues,
@@ -105,7 +105,7 @@ public class StreamNodePropertiesApplication {
             jobId,
             requestCorrelationId,
             taskRegistryFactory,
-            userLogRegistryFactory
+            userLogRegistry
         );
 
         return computeWithProgressTracking(

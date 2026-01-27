@@ -105,7 +105,7 @@ public class MemoryEstimationExecutor<
                     .databaseId(executionContext.databaseId())
                     .log(executionContext.log())
                     .taskRegistryFactory(executionContext.taskRegistryFactory())
-                    .userLogRegistryFactory(executionContext.userLogRegistryFactory())
+                    .userLogRegistry(executionContext.userLogRegistry())
                     .terminationFlag(TerminationFlag.wrap(TerminationMonitor.EMPTY))
                     .transactionContext(transactionContext).build();
 

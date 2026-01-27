@@ -26,7 +26,7 @@ import org.neo4j.gds.api.ImmutableGraphLoaderContext;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
-import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
+import org.neo4j.gds.core.utils.warnings.UserLogRegistry;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.MemoryTracker;
 import org.neo4j.gds.mem.MemoryTreeWithDimensions;
@@ -62,7 +62,7 @@ public class GraphProjectMemoryUsageService {
         TaskRegistryFactory taskRegistryFactory,
         TerminationFlag terminationFlag,
         TransactionContext transactionContext,
-        UserLogRegistryFactory userLogRegistryFactory,
+        UserLogRegistry userLogRegistry,
         GraphProjectConfig configuration
     ) {
         memoryUsageValidator().tryValidateMemoryUsage(
@@ -73,7 +73,7 @@ public class GraphProjectMemoryUsageService {
                 terminationFlag,
                 transactionContext,
                 taskRegistryFactory,
-                userLogRegistryFactory,
+                userLogRegistry,
                 graphProjectConfig
             )
         );
@@ -84,7 +84,7 @@ public class GraphProjectMemoryUsageService {
         TerminationFlag terminationFlag,
         TransactionContext transactionContext,
         TaskRegistryFactory taskRegistryFactory,
-        UserLogRegistryFactory userLogRegistryFactory,
+        UserLogRegistry userLogRegistry,
         GraphProjectConfig configuration
     ) {
         var dependencyResolver = GraphDatabaseApiProxy.dependencyResolver(graphDatabaseService);
@@ -94,7 +94,7 @@ public class GraphProjectMemoryUsageService {
             taskRegistryFactory,
             terminationFlag,
             transactionContext,
-            userLogRegistryFactory
+            userLogRegistry
         );
 
         var graphStoreFactorySupplier = graphStoreFactorySuppliers.find(configuration);
@@ -126,7 +126,7 @@ public class GraphProjectMemoryUsageService {
         TaskRegistryFactory taskRegistryFactory,
         TerminationFlag terminationFlag,
         TransactionContext transactionContext,
-        UserLogRegistryFactory userLogRegistryFactory
+        UserLogRegistry userLogRegistry
     ) {
         return ImmutableGraphLoaderContext.builder()
             .databaseId(databaseId)
@@ -134,7 +134,7 @@ public class GraphProjectMemoryUsageService {
             .taskRegistryFactory(taskRegistryFactory)
             .terminationFlag(terminationFlag)
             .transactionContext(transactionContext)
-            .userLogRegistryFactory(userLogRegistryFactory)
+            .userLogRegistry(userLogRegistry)
             .build();
     }
 

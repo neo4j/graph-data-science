@@ -41,7 +41,7 @@ import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
 import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
+import org.neo4j.gds.core.utils.warnings.UserLogRegistry;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
@@ -213,7 +213,7 @@ class PageRankTest {
             var requestScopedDependencies = RequestScopedDependencies.builder()
                 .correlationId(PlainSimpleRequestCorrelationId.create())
                 .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
-                .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
+                .userLogRegistry(UserLogRegistry.EMPTY)
                 .build();
             var progressTrackerCreator = new ProgressTrackerCreator(new LoggerForProgressTrackingAdapter(log), requestScopedDependencies);
             var centralityAlgorithms = new CentralityAlgorithms(TerminationFlag.RUNNING_TRUE);

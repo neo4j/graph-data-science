@@ -34,7 +34,7 @@ import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.LoggerForProgressTracking;
-import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
+import org.neo4j.gds.core.utils.warnings.UserLogRegistry;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
@@ -118,7 +118,7 @@ class GraphSamplingApplicationTest {
         var result = graphSamplingApplication.sample(
             user,
             EmptyTaskRegistryFactory.INSTANCE,
-            EmptyUserLogRegistryFactory.INSTANCE,
+            UserLogRegistry.EMPTY,
             graphStore,
             GraphProjectConfig.emptyWithName("user", "graph"),
             TerminationFlag.RUNNING_TRUE,
@@ -159,7 +159,7 @@ class GraphSamplingApplicationTest {
         var result = graphSamplingApplication.sample(
             user,
             EmptyTaskRegistryFactory.INSTANCE,
-            EmptyUserLogRegistryFactory.INSTANCE,
+            UserLogRegistry.EMPTY,
             graphStore,
             GraphProjectConfig.emptyWithName("user", "graph"),
             TerminationFlag.RUNNING_TRUE,
@@ -200,7 +200,7 @@ class GraphSamplingApplicationTest {
         var result = graphSamplingApplication.sample(
             user,
             EmptyTaskRegistryFactory.INSTANCE,
-            EmptyUserLogRegistryFactory.INSTANCE,
+            UserLogRegistry.EMPTY,
             graphStore,
             GraphProjectConfig.emptyWithName("user", "graph"),
             TerminationFlag.RUNNING_TRUE,
@@ -245,7 +245,7 @@ class GraphSamplingApplicationTest {
         var result = graphSamplingApplication.sample(
             user,
             EmptyTaskRegistryFactory.INSTANCE,
-            EmptyUserLogRegistryFactory.INSTANCE,
+            UserLogRegistry.EMPTY,
             graphStore,
             GraphProjectConfig.emptyWithName("user", "graph"),
             TerminationFlag.RUNNING_TRUE,
