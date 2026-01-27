@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.pagerank;
 
+import org.neo4j.gds.InputNodes;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.beta.pregel.Partitioning;
 import org.neo4j.gds.beta.pregel.PregelConfig;
@@ -34,6 +35,12 @@ public interface RankConfig extends
     ToleranceConfig,
     SourceNodesWithPropertiesConfig
 {
+    @Configuration.ConvertWith(method = "org.neo4j.gds.config.SourceNodesWithPropertiesConfig.SourceNodesFactory#parse")
+    @Configuration.ToMapValue("org.neo4j.gds.config.SourceNodesWithPropertiesConfig.SourceNodesFactory#toMapOutput")
+    default InputNodes sourceNodes() {
+        return InputNodes.EMPTY_INPUT_NODES;
+    }
+
     @Override
     @Configuration.DoubleRange(min = 0D)
     default double tolerance() {

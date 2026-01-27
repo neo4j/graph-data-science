@@ -36,9 +36,7 @@ public interface TargetNodesWithPropertiesConfig {
 
     @Configuration.ConvertWith(method = "org.neo4j.gds.config.TargetNodesWithPropertiesConfig.TargetNodesFactory#parse")
     @Configuration.ToMapValue("org.neo4j.gds.config.TargetNodesWithPropertiesConfig.TargetNodesFactory#toMapOutput")
-    default InputNodes targetNodes() {
-        return InputNodes.EMPTY_INPUT_NODES;
-    }
+    InputNodes targetNodes();
 
     @Configuration.GraphStoreValidationCheck
     default void validateTargetLabels(
