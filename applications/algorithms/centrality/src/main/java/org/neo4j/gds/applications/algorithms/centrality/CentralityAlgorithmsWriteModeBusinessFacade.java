@@ -73,7 +73,6 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
     private final WriteNodePropertyService writeNodePropertyService;
     private final HitsHookGenerator hitsHookGenerator;
 
-
     private CentralityAlgorithmsWriteModeBusinessFacade(
         CentralityAlgorithmsEstimationModeBusinessFacade estimationFacade,
         CentralityBusinessAlgorithms centralityAlgorithms,

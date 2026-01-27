@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.centrality;
 
+import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmResult;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
@@ -32,15 +33,14 @@ import org.neo4j.gds.harmonic.HarmonicResult;
 
 
 public class HarmonicCentralityWriteStep implements WriteStep<HarmonicResult, NodePropertiesWritten> {
-    private final WriteNodePropertyService writeNodePropertyService;
-    private final HarmonicCentralityWriteConfig configuration;
+    private final GenericCentralityWriteStep<CentralityAlgorithmResult> writeStep;
 
-    public HarmonicCentralityWriteStep(
-        WriteNodePropertyService writeNodePropertyService,
-        HarmonicCentralityWriteConfig configuration
-    ) {
-        this.writeNodePropertyService = writeNodePropertyService;
-        this.configuration = configuration;
+    public HarmonicCentralityWriteStep(WriteNodePropertyService writeNodePropertyService, HarmonicCentralityWriteConfig configuration) {
+        this.writeStep = new GenericCentralityWriteStep<>(
+            writeNodePropertyService,
+            configuration,
+            AlgorithmLabel.HarmonicCentrality
+        );
     }
 
     @Override
@@ -51,14 +51,6 @@ public class HarmonicCentralityWriteStep implements WriteStep<HarmonicResult, No
         HarmonicResult result,
         JobId jobId
     ) {
-        return writeNodePropertyService.perform(
-            graph,
-            graphStore,
-            resultStore,
-            configuration,
-            AlgorithmLabel.HarmonicCentrality,
-            jobId,
-            result.nodePropertyValues()
-        );
+        return writeStep.execute(graph,graphStore,resultStore,result,jobId);
     }
 }

@@ -31,12 +31,14 @@ import org.neo4j.gds.closeness.ClosenessCentralityWriteConfig;
 import org.neo4j.gds.core.JobId;
 
 public class ClosenessCentralityWriteStep implements WriteStep<CentralityAlgorithmResult, NodePropertiesWritten> {
-    private final WriteNodePropertyService writeNodePropertyService;
-    private final ClosenessCentralityWriteConfig configuration;
+    private final GenericCentralityWriteStep<CentralityAlgorithmResult> writeStep;
 
     public ClosenessCentralityWriteStep(WriteNodePropertyService writeNodePropertyService, ClosenessCentralityWriteConfig configuration) {
-        this.writeNodePropertyService = writeNodePropertyService;
-        this.configuration = configuration;
+        this.writeStep = new GenericCentralityWriteStep<>(
+            writeNodePropertyService,
+            configuration,
+            AlgorithmLabel.ClosenessCentrality
+        );
     }
 
     @Override
@@ -47,14 +49,6 @@ public class ClosenessCentralityWriteStep implements WriteStep<CentralityAlgorit
         CentralityAlgorithmResult result,
         JobId jobId
     ) {
-        return writeNodePropertyService.perform(
-            graph,
-            graphStore,
-            resultStore,
-            configuration,
-            AlgorithmLabel.ClosenessCentrality,
-            jobId,
-            result.nodePropertyValues()
-        );
+        return writeStep.execute(graph,graphStore,resultStore,result,jobId);
     }
 }

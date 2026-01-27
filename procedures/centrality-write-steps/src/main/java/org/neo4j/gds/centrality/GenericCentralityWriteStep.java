@@ -29,24 +29,20 @@ import org.neo4j.gds.applications.algorithms.machinery.WriteStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.config.WritePropertyConfig;
 import org.neo4j.gds.core.JobId;
-import org.neo4j.gds.pagerank.PageRankResult;
-import org.neo4j.gds.pagerank.RankConfig;
 
-public class PageRankWriteStep<C extends RankConfig & WritePropertyConfig> implements WriteStep<PageRankResult, NodePropertiesWritten> {
+public class GenericCentralityWriteStep<R extends CentralityAlgorithmResult> implements WriteStep<R, NodePropertiesWritten> {
+    private final WriteNodePropertyService writeNodePropertyService;
+    private final WritePropertyConfig configuration;
+    private final Label algorithmLabel;
 
-    private final GenericCentralityWriteStep<CentralityAlgorithmResult> writeStep;
-
-
-    public PageRankWriteStep(
+    public GenericCentralityWriteStep(
         WriteNodePropertyService writeNodePropertyService,
-        C configuration,
-        Label label
+        WritePropertyConfig configuration,
+        Label algorithmLabel
     ) {
-        this.writeStep = new GenericCentralityWriteStep<>(
-            writeNodePropertyService,
-            configuration,
-            label
-        );
+        this.writeNodePropertyService = writeNodePropertyService;
+        this.configuration = configuration;
+        this.algorithmLabel = algorithmLabel;
     }
 
     @Override
@@ -54,10 +50,17 @@ public class PageRankWriteStep<C extends RankConfig & WritePropertyConfig> imple
         Graph graph,
         GraphStore graphStore,
         ResultStore resultStore,
-        PageRankResult result,
+        R result,
         JobId jobId
     ) {
-        return writeStep.execute(graph,graphStore,resultStore,result,jobId);
-
+        return writeNodePropertyService.perform(
+            graph,
+            graphStore,
+            resultStore,
+            configuration,
+            algorithmLabel,
+            jobId,
+            result.nodePropertyValues()
+        );
     }
 }
