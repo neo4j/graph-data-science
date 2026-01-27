@@ -40,7 +40,7 @@ public class UserLogServices {
     private final Map<DatabaseId, Map<User, UserLogRegistry>> registries = new ConcurrentHashMap<>();
 
     public UserLogStore getUserLogStore(DatabaseId databaseId) {
-        return stores.computeIfAbsent(databaseId, _ -> new PerDatabaseUserLogStore());
+        return stores.computeIfAbsent(databaseId, __ -> new PerDatabaseUserLogStore());
     }
 
     public UserLogRegistry getUserLogRegistry(DatabaseId databaseId, User user) {
@@ -66,7 +66,7 @@ public class UserLogServices {
     private Map<User, UserLogRegistry> getRegistryForDatabase(DatabaseId databaseId) {
         return registries.computeIfAbsent(
             databaseId,
-            _ -> new ConcurrentSkipListMap<>(Comparator.comparing(User::getUsername))
+            __ -> new ConcurrentSkipListMap<>(Comparator.comparing(User::getUsername))
         );
     }
 }

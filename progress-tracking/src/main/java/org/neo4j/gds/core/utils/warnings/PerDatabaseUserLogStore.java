@@ -45,7 +45,7 @@ public class PerDatabaseUserLogStore implements UserLogStore {
     }
 
     private LogStore getUserLogStore(User user) {
-        return logStores.computeIfAbsent(user, _ -> new LogStore());
+        return logStores.computeIfAbsent(user, __ -> new LogStore());
     }
 
     /**
