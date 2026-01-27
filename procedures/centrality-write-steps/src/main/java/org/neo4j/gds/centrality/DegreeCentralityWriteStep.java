@@ -17,33 +17,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.applications.algorithms.centrality;
+package org.neo4j.gds.centrality;
 
+import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmResult;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
-import org.neo4j.gds.applications.algorithms.machinery.Label;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.applications.algorithms.machinery.WriteNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.WriteStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
-import org.neo4j.gds.config.WritePropertyConfig;
 import org.neo4j.gds.core.JobId;
-import org.neo4j.gds.pagerank.PageRankResult;
-import org.neo4j.gds.pagerank.RankConfig;
+import org.neo4j.gds.degree.DegreeCentralityWriteConfig;
 
-class PageRankWriteStep<C extends RankConfig & WritePropertyConfig> implements WriteStep<PageRankResult, NodePropertiesWritten> {
+public class DegreeCentralityWriteStep implements WriteStep<CentralityAlgorithmResult, NodePropertiesWritten> {
     private final WriteNodePropertyService writeNodePropertyService;
-    private final C configuration;
-    private final Label label;
+    private final DegreeCentralityWriteConfig configuration;
 
-    PageRankWriteStep(
-        WriteNodePropertyService writeNodePropertyService,
-        C configuration,
-        Label label
-    ) {
+    public DegreeCentralityWriteStep(WriteNodePropertyService writeNodePropertyService, DegreeCentralityWriteConfig configuration) {
         this.writeNodePropertyService = writeNodePropertyService;
         this.configuration = configuration;
-        this.label = label;
     }
 
     @Override
@@ -51,7 +44,7 @@ class PageRankWriteStep<C extends RankConfig & WritePropertyConfig> implements W
         Graph graph,
         GraphStore graphStore,
         ResultStore resultStore,
-        PageRankResult result,
+        CentralityAlgorithmResult result,
         JobId jobId
     ) {
         return writeNodePropertyService.perform(
@@ -59,7 +52,7 @@ class PageRankWriteStep<C extends RankConfig & WritePropertyConfig> implements W
             graphStore,
             resultStore,
             configuration,
-            label,
+            AlgorithmLabel.DegreeCentrality,
             jobId,
             result.nodePropertyValues()
         );

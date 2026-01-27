@@ -17,28 +17,29 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.applications.algorithms.centrality;
+package org.neo4j.gds.centrality;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
+import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.applications.algorithms.machinery.WriteNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.WriteStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
+import org.neo4j.gds.articulationpoints.ArticulationPointsResult;
+import org.neo4j.gds.articulationpoints.ArticulationPointsWriteConfig;
 import org.neo4j.gds.core.JobId;
-import org.neo4j.gds.influenceMaximization.CELFNodeProperties;
-import org.neo4j.gds.influenceMaximization.CELFResult;
-import org.neo4j.gds.influenceMaximization.InfluenceMaximizationWriteConfig;
 
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.CELF;
-
-class CelfWriteStep implements WriteStep<CELFResult, NodePropertiesWritten> {
+public class ArticulationPointsWriteStep implements WriteStep<ArticulationPointsResult, NodePropertiesWritten> {
+    private final ArticulationPointsWriteConfig configuration;
     private final WriteNodePropertyService writeNodePropertyService;
-    private final InfluenceMaximizationWriteConfig configuration;
 
-    CelfWriteStep(WriteNodePropertyService writeNodePropertyService, InfluenceMaximizationWriteConfig configuration) {
-        this.writeNodePropertyService = writeNodePropertyService;
+    public ArticulationPointsWriteStep(
+        ArticulationPointsWriteConfig configuration, WriteNodePropertyService writeNodePropertyService
+    ) {
         this.configuration = configuration;
+        this.writeNodePropertyService = writeNodePropertyService;
     }
 
     @Override
@@ -46,17 +47,28 @@ class CelfWriteStep implements WriteStep<CELFResult, NodePropertiesWritten> {
         Graph graph,
         GraphStore graphStore,
         ResultStore resultStore,
-        CELFResult result,
+        ArticulationPointsResult articulationPoints,
         JobId jobId
     ) {
-        var nodePropertyValues = new CELFNodeProperties(result.seedSetNodes(), graph.nodeCount());
+        var bitSet = articulationPoints.articulationPoints();
+        var nodePropertyValues = new LongNodePropertyValues() {
+            @Override
+            public long longValue(long nodeId) {
+                return bitSet.get(nodeId) ? 1 : 0;
+            }
+
+            @Override
+            public long nodeCount() {
+                return graph.nodeCount();
+            }
+        };
 
         return writeNodePropertyService.perform(
             graph,
             graphStore,
             resultStore,
             configuration,
-            CELF,
+            AlgorithmLabel.ArticulationPoints,
             jobId,
             nodePropertyValues
         );

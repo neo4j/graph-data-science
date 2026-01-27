@@ -17,30 +17,30 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.applications.algorithms.centrality;
+package org.neo4j.gds.centrality;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
-import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.applications.algorithms.machinery.WriteNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.WriteStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
-import org.neo4j.gds.articulationpoints.ArticulationPointsResult;
-import org.neo4j.gds.articulationpoints.ArticulationPointsWriteConfig;
 import org.neo4j.gds.core.JobId;
+import org.neo4j.gds.harmonic.HarmonicCentralityWriteConfig;
+import org.neo4j.gds.harmonic.HarmonicResult;
 
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ArticulationPoints;
 
-class ArticulationPointsWriteStep implements WriteStep<ArticulationPointsResult, NodePropertiesWritten> {
-    private final ArticulationPointsWriteConfig configuration;
+public class HarmonicCentralityWriteStep implements WriteStep<HarmonicResult, NodePropertiesWritten> {
     private final WriteNodePropertyService writeNodePropertyService;
+    private final HarmonicCentralityWriteConfig configuration;
 
-    public ArticulationPointsWriteStep(
-        ArticulationPointsWriteConfig configuration, WriteNodePropertyService writeNodePropertyService
+    public HarmonicCentralityWriteStep(
+        WriteNodePropertyService writeNodePropertyService,
+        HarmonicCentralityWriteConfig configuration
     ) {
-        this.configuration = configuration;
         this.writeNodePropertyService = writeNodePropertyService;
+        this.configuration = configuration;
     }
 
     @Override
@@ -48,30 +48,17 @@ class ArticulationPointsWriteStep implements WriteStep<ArticulationPointsResult,
         Graph graph,
         GraphStore graphStore,
         ResultStore resultStore,
-        ArticulationPointsResult articulationPoints,
+        HarmonicResult result,
         JobId jobId
     ) {
-        var bitSet = articulationPoints.articulationPoints();
-        var nodePropertyValues = new LongNodePropertyValues() {
-            @Override
-            public long longValue(long nodeId) {
-                return bitSet.get(nodeId) ? 1 : 0;
-            }
-
-            @Override
-            public long nodeCount() {
-                return graph.nodeCount();
-            }
-        };
-
         return writeNodePropertyService.perform(
             graph,
             graphStore,
             resultStore,
             configuration,
-            ArticulationPoints,
+            AlgorithmLabel.HarmonicCentrality,
             jobId,
-            nodePropertyValues
+            result.nodePropertyValues()
         );
     }
 }

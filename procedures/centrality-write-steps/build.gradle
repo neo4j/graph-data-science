@@ -1,0 +1,25 @@
+apply plugin: 'java-library'
+
+description = 'Neo4j Graph Data Science :: Centrality Write Steps'
+
+group = 'org.neo4j.gds'
+
+dependencies {
+
+    // Neo4j dependencies
+    compileOnly(neo4j.common) { transitive = false }
+
+    implementation project(':algo')
+    implementation project(':algo-common')
+    implementation project(':algorithms-machinery')
+    implementation project(':centrality-configs')
+    implementation project(':config-api')
+    implementation project(':core')
+    implementation project(':core-api')
+    implementation project(':core-write')
+    implementation project(':logging')
+    implementation project(':string-formatting')
+    implementation project(':pregel')
+    implementation project(':progress-tracking')
+    implementation project(':termination')
+}

@@ -17,31 +17,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.applications.algorithms.centrality;
+package org.neo4j.gds.centrality;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
-import org.neo4j.gds.api.properties.nodes.NodePropertyRecord;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.applications.algorithms.machinery.Label;
 import org.neo4j.gds.applications.algorithms.machinery.WriteNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.WriteStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
-import org.neo4j.gds.beta.pregel.PregelResult;
+import org.neo4j.gds.config.WritePropertyConfig;
 import org.neo4j.gds.core.JobId;
-import org.neo4j.gds.hits.HitsConfig;
+import org.neo4j.gds.pagerank.PageRankResult;
+import org.neo4j.gds.pagerank.RankConfig;
 
-import java.util.List;
-
-class HitsWriteStep implements WriteStep<PregelResult, NodePropertiesWritten> {
+public class PageRankWriteStep<C extends RankConfig & WritePropertyConfig> implements WriteStep<PageRankResult, NodePropertiesWritten> {
     private final WriteNodePropertyService writeNodePropertyService;
-    private final HitsConfig configuration;
+    private final C configuration;
     private final Label label;
 
-    HitsWriteStep(
+    public  PageRankWriteStep(
         WriteNodePropertyService writeNodePropertyService,
-        HitsConfig configuration,
+        C configuration,
         Label label
     ) {
         this.writeNodePropertyService = writeNodePropertyService;
@@ -54,7 +51,7 @@ class HitsWriteStep implements WriteStep<PregelResult, NodePropertiesWritten> {
         Graph graph,
         GraphStore graphStore,
         ResultStore resultStore,
-        PregelResult result,
+        PageRankResult result,
         JobId jobId
     ) {
         return writeNodePropertyService.perform(
@@ -64,19 +61,7 @@ class HitsWriteStep implements WriteStep<PregelResult, NodePropertiesWritten> {
             configuration,
             label,
             jobId,
-            nodeProperties(result,configuration)
+            result.nodePropertyValues()
         );
-    }
-
-    private List<NodePropertyRecord> nodeProperties(PregelResult pregelResult, HitsConfig config){
-        var authValues = NodePropertyValuesAdapter.adapt(pregelResult.nodeValues().doubleProperties(config.authProperty()));
-        var hubValues = NodePropertyValuesAdapter.adapt(pregelResult.nodeValues().doubleProperties(config.hubProperty()));
-        var authProperty = config.authProperty().concat(config.writeProperty());
-        var hubProperty = config.hubProperty().concat(config.writeProperty());
-
-        var authRecord = NodePropertyRecord.of(authProperty, authValues);
-        var hubRecord = NodePropertyRecord.of(hubProperty, hubValues);
-
-        return List.of(authRecord,hubRecord);
     }
 }

@@ -17,27 +17,36 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.applications.algorithms.centrality;
+package org.neo4j.gds.centrality;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
+import org.neo4j.gds.api.properties.nodes.NodePropertyRecord;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
+import org.neo4j.gds.applications.algorithms.machinery.Label;
 import org.neo4j.gds.applications.algorithms.machinery.WriteNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.WriteStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
+import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.core.JobId;
-import org.neo4j.gds.harmonic.HarmonicCentralityWriteConfig;
-import org.neo4j.gds.harmonic.HarmonicResult;
+import org.neo4j.gds.hits.HitsConfig;
 
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.HarmonicCentrality;
+import java.util.List;
 
-class HarmonicCentralityWriteStep implements WriteStep<HarmonicResult, NodePropertiesWritten> {
+public class HitsWriteStep implements WriteStep<PregelResult, NodePropertiesWritten> {
     private final WriteNodePropertyService writeNodePropertyService;
-    private final HarmonicCentralityWriteConfig configuration;
+    private final HitsConfig configuration;
+    private final Label label;
 
-    HarmonicCentralityWriteStep(WriteNodePropertyService writeNodePropertyService, HarmonicCentralityWriteConfig configuration) {
+    public   HitsWriteStep(
+        WriteNodePropertyService writeNodePropertyService,
+        HitsConfig configuration,
+        Label label
+    ) {
         this.writeNodePropertyService = writeNodePropertyService;
         this.configuration = configuration;
+        this.label = label;
     }
 
     @Override
@@ -45,7 +54,7 @@ class HarmonicCentralityWriteStep implements WriteStep<HarmonicResult, NodePrope
         Graph graph,
         GraphStore graphStore,
         ResultStore resultStore,
-        HarmonicResult result,
+        PregelResult result,
         JobId jobId
     ) {
         return writeNodePropertyService.perform(
@@ -53,9 +62,21 @@ class HarmonicCentralityWriteStep implements WriteStep<HarmonicResult, NodePrope
             graphStore,
             resultStore,
             configuration,
-            HarmonicCentrality,
+            label,
             jobId,
-            result.nodePropertyValues()
+            nodeProperties(result,configuration)
         );
+    }
+
+    private List<NodePropertyRecord> nodeProperties(PregelResult pregelResult, HitsConfig config){
+        var authValues = NodePropertyValuesAdapter.adapt(pregelResult.nodeValues().doubleProperties(config.authProperty()));
+        var hubValues = NodePropertyValuesAdapter.adapt(pregelResult.nodeValues().doubleProperties(config.hubProperty()));
+        var authProperty = config.authProperty().concat(config.writeProperty());
+        var hubProperty = config.hubProperty().concat(config.writeProperty());
+
+        var authRecord = NodePropertyRecord.of(authProperty, authValues);
+        var hubRecord = NodePropertyRecord.of(hubProperty, hubValues);
+
+        return List.of(authRecord,hubRecord);
     }
 }

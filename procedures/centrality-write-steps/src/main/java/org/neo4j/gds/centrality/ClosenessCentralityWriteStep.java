@@ -17,25 +17,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.applications.algorithms.centrality;
+package org.neo4j.gds.centrality;
 
 import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmResult;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.applications.algorithms.machinery.WriteNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.WriteStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
+import org.neo4j.gds.closeness.ClosenessCentralityWriteConfig;
 import org.neo4j.gds.core.JobId;
-import org.neo4j.gds.degree.DegreeCentralityWriteConfig;
 
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.DegreeCentrality;
-
-class DegreeCentralityWriteStep implements WriteStep<CentralityAlgorithmResult, NodePropertiesWritten> {
+public class ClosenessCentralityWriteStep implements WriteStep<CentralityAlgorithmResult, NodePropertiesWritten> {
     private final WriteNodePropertyService writeNodePropertyService;
-    private final DegreeCentralityWriteConfig configuration;
+    private final ClosenessCentralityWriteConfig configuration;
 
-    DegreeCentralityWriteStep(WriteNodePropertyService writeNodePropertyService, DegreeCentralityWriteConfig configuration) {
+    public ClosenessCentralityWriteStep(WriteNodePropertyService writeNodePropertyService, ClosenessCentralityWriteConfig configuration) {
         this.writeNodePropertyService = writeNodePropertyService;
         this.configuration = configuration;
     }
@@ -53,7 +52,7 @@ class DegreeCentralityWriteStep implements WriteStep<CentralityAlgorithmResult, 
             graphStore,
             resultStore,
             configuration,
-            DegreeCentrality,
+            AlgorithmLabel.ClosenessCentrality,
             jobId,
             result.nodePropertyValues()
         );
