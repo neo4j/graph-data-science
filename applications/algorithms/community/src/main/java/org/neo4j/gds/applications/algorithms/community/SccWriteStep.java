@@ -64,7 +64,6 @@ class SccWriteStep implements WriteStep<HugeLongArray, NodePropertiesWritten> {
             graphStore,
             resultStore,
             configuration,
-            configuration,
             SCC,
             jobId,
             nodePropertyValues

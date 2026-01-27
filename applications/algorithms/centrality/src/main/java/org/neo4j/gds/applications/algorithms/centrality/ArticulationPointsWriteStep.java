@@ -69,7 +69,6 @@ class ArticulationPointsWriteStep implements WriteStep<ArticulationPointsResult,
             graphStore,
             resultStore,
             configuration,
-            configuration,
             ArticulationPoints,
             jobId,
             nodePropertyValues

@@ -56,7 +56,6 @@ class FastRPWriteStep implements WriteStep<FastRPResult, NodePropertiesWritten> 
             graphStore,
             resultStore,
             configuration,
-            configuration,
             FastRP,
             jobId,
             nodePropertyValues

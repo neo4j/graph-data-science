@@ -56,7 +56,6 @@ class Node2VecWriteStep implements WriteStep<Node2VecResult, NodePropertiesWritt
             graphStore,
             resultStore,
             configuration,
-            configuration,
             GraphSage,
             jobId,
             nodePropertyValues

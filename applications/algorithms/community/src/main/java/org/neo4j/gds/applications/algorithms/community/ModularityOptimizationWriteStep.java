@@ -65,7 +65,6 @@ class ModularityOptimizationWriteStep implements WriteStep<ModularityOptimizatio
             graphStore,
             resultStore,
             configuration,
-            configuration,
             ModularityOptimization,
             jobId,
             nodePropertyValues

@@ -53,7 +53,6 @@ class DegreeCentralityWriteStep implements WriteStep<CentralityAlgorithmResult, 
             graphStore,
             resultStore,
             configuration,
-            configuration,
             DegreeCentrality,
             jobId,
             result.nodePropertyValues()

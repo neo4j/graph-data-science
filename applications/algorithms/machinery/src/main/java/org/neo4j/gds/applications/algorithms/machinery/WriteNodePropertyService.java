@@ -47,26 +47,21 @@ public class WriteNodePropertyService {
         Graph graph,
         GraphStore graphStore,
         ResultStore resultStore,
-        WriteConfig writeConfiguration,
         WritePropertyConfig writePropertyConfiguration,
         Label label,
         JobId jobId,
         NodePropertyValues nodePropertyValues
     ) {
-        return Neo4jDatabaseNodePropertyWriter.writeNodeProperty(
-            requestScopedDependencies.correlationId(),
-            writeContext.nodePropertyExporterBuilder(),
-            requestScopedDependencies.taskRegistryFactory(),
+
+        var nodePropertyRecord = NodePropertyRecord.of(writePropertyConfiguration.writeProperty(), nodePropertyValues);
+        return perform(
             graph,
             graphStore,
-            nodePropertyValues,
-            writeConfiguration.writeConcurrency(),
-            writePropertyConfiguration.writeProperty(),
-            label.asString(),
-            writeConfiguration.resolveResultStore(resultStore),
+            resultStore,
+            writePropertyConfiguration,
+            label,
             jobId,
-            requestScopedDependencies.terminationFlag(),
-            log
+            List.of(nodePropertyRecord)
         );
     }
 

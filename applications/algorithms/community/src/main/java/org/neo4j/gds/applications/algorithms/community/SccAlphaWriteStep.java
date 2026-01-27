@@ -56,7 +56,6 @@ class SccAlphaWriteStep implements WriteStep<HugeLongArray, NodePropertiesWritte
             graphStore,
             resultStore,
             configuration,
-            configuration,
             SCC,
             jobId,
             nodePropertyValues

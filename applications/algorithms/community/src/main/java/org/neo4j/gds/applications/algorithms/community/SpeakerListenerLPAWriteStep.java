@@ -61,7 +61,6 @@ class SpeakerListenerLPAWriteStep implements WriteStep<PregelResult, NodePropert
             graphStore,
             resultStore,
             configuration,
-            configuration,
             label,
             jobId,
             nodePropertyValues(result)

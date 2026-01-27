@@ -56,7 +56,6 @@ class CliqueCountingWriteStep implements WriteStep<CliqueCountingResult, Void> {
             graphStore,
             resultStore,
             configuration,
-            configuration,
             CliqueCounting,
             jobId,
             nodePropertyValues

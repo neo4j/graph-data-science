@@ -54,7 +54,6 @@ class HDBScanWriteStep implements WriteStep<Labels, NodePropertiesWritten> {
             graphStore,
             resultStore,
             configuration,
-            configuration,
             WCC,
             jobId,
             NodePropertyValuesAdapter.adapt(result.labels())

@@ -53,7 +53,6 @@ class ClosenessCentralityWriteStep implements WriteStep<CentralityAlgorithmResul
             graphStore,
             resultStore,
             configuration,
-            configuration,
             ClosenessCentrality,
             jobId,
             result.nodePropertyValues()

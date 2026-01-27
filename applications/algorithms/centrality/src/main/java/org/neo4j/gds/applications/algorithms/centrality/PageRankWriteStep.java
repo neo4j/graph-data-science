@@ -59,7 +59,6 @@ class PageRankWriteStep<C extends RankConfig & WritePropertyConfig> implements W
             graphStore,
             resultStore,
             configuration,
-            configuration,
             label,
             jobId,
             result.nodePropertyValues()

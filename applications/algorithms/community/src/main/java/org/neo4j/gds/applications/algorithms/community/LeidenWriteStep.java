@@ -59,7 +59,6 @@ class LeidenWriteStep implements WriteStep<LeidenResult, Pair<NodePropertiesWrit
             graphStore,
             resultStore,
             configuration,
-            configuration,
             Leiden,
             jobId,
             nodePropertyValues

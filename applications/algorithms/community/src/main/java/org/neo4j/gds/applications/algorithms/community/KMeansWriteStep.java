@@ -54,7 +54,6 @@ class KMeansWriteStep implements WriteStep<KmeansResult, NodePropertiesWritten> 
             graphStore,
             resultStore,
             configuration,
-            configuration,
             KCore,
             jobId,
             NodePropertyValuesAdapter.adapt(result.communities())

@@ -68,7 +68,6 @@ class LabelPropagationWriteStep implements WriteStep<LabelPropagationResult, Pai
             graphStore,
             resultStore,
             configuration,
-            configuration,
             WCC,
             jobId,
             nodePropertyValues

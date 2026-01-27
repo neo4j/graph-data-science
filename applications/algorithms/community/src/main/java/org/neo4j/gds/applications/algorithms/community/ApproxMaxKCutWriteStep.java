@@ -58,7 +58,6 @@ class ApproxMaxKCutWriteStep implements WriteStep<ApproxMaxKCutResult, NodePrope
             graphStore,
             resultStore,
             configuration,
-            configuration,
             ApproximateMaximumKCut,
             jobId,
             nodePropertyValues

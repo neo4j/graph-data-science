@@ -61,7 +61,6 @@ class K1ColoringWriteStep implements WriteStep<K1ColoringResult, Void> {
             graphStore,
             resultStore,
             configuration,
-            configuration,
             K1Coloring,
             jobId,
             nodePropertyValues
