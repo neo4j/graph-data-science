@@ -55,7 +55,6 @@ class HashGnnWriteStep implements WriteStep<HashGNNResult, NodePropertiesWritten
             graphStore,
             resultStore,
             configuration,
-            configuration,
             GraphSage,
             jobId,
             nodePropertyValues

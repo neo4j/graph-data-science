@@ -56,7 +56,6 @@ class TriangleCountWriteStep implements WriteStep<TriangleCountResult, NodePrope
             graphStore,
             resultStore,
             configuration,
-            configuration,
             TriangleCount,
             jobId,
             nodePropertyValues

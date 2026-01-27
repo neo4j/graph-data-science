@@ -56,7 +56,6 @@ class ScalePropertiesWriteStep implements WriteStep<ScalePropertiesResult, NodeP
             graphStore,
             resultStore,
             configuration,
-            configuration,
             ScaleProperties,
             jobId,
             nodePropertyValues

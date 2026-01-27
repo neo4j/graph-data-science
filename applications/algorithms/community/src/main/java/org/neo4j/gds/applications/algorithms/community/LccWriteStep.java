@@ -54,7 +54,6 @@ class LccWriteStep implements WriteStep<LocalClusteringCoefficientResult, NodePr
             graphStore,
             resultStore,
             configuration,
-            configuration,
             Leiden,
             jobId,
             NodePropertyValuesAdapter.adapt(result.localClusteringCoefficients())

@@ -54,7 +54,6 @@ class KCoreWriteStep implements WriteStep<KCoreDecompositionResult, NodeProperti
             graphStore,
             resultStore,
             configuration,
-            configuration,
             KCore,
             jobId,
             NodePropertyValuesAdapter.adapt(result.coreValues())

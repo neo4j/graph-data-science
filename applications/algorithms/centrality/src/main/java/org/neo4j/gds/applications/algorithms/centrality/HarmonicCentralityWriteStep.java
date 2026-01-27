@@ -53,7 +53,6 @@ class HarmonicCentralityWriteStep implements WriteStep<HarmonicResult, NodePrope
             graphStore,
             resultStore,
             configuration,
-            configuration,
             HarmonicCentrality,
             jobId,
             result.nodePropertyValues()

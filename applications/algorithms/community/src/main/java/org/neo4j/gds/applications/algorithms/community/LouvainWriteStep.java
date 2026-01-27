@@ -58,7 +58,6 @@ class LouvainWriteStep implements WriteStep<LouvainResult, NodePropertiesWritten
             graphStore,
             resultStore,
             configuration,
-            configuration,
             Louvain,
             jobId,
             nodePropertyValues

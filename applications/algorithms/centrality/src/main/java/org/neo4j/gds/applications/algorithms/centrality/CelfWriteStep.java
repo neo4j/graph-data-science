@@ -56,7 +56,6 @@ class CelfWriteStep implements WriteStep<CELFResult, NodePropertiesWritten> {
             graphStore,
             resultStore,
             configuration,
-            configuration,
             CELF,
             jobId,
             nodePropertyValues

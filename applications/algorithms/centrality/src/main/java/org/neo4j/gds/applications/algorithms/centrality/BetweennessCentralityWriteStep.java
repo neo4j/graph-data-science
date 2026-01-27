@@ -53,7 +53,6 @@ class BetweennessCentralityWriteStep implements WriteStep<CentralityAlgorithmRes
             graphStore,
             resultStore,
             configuration,
-            configuration,
             BetweennessCentrality,
             jobId,
             result.nodePropertyValues()

@@ -56,7 +56,6 @@ class GraphSageWriteStep implements WriteStep<GraphSageResult, NodePropertiesWri
             graphStore,
             resultStore,
             configuration,
-            configuration,
             GraphSage,
             jobId,
             nodePropertyValues
