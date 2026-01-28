@@ -23,8 +23,11 @@ import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.applications.algorithms.machinery.WriteNodePropertyService;
+import org.neo4j.gds.articulationpoints.ArticulationPointsToParameters;
+import org.neo4j.gds.articulationpoints.ArticulationPointsWriteConfig;
 import org.neo4j.gds.betweenness.BetweennessCentralityWriteConfig;
 import org.neo4j.gds.betweenness.BetwennessCentralityResult;
+import org.neo4j.gds.centrality.ArticulationPointsWriteStep;
 import org.neo4j.gds.centrality.CentralityComputeBusinessFacade;
 import org.neo4j.gds.centrality.GenericCentralityWriteStep;
 import org.neo4j.gds.centrality.GenericRankWriteStep;
@@ -32,6 +35,7 @@ import org.neo4j.gds.closeness.ClosenessCentralityResult;
 import org.neo4j.gds.closeness.ClosenessCentralityWriteConfig;
 import org.neo4j.gds.pagerank.ArticleRankWriteConfig;
 import org.neo4j.gds.procedures.algorithms.CentralityDistributionInstructions;
+import org.neo4j.gds.procedures.algorithms.centrality.ArticulationPointsWriteResult;
 import org.neo4j.gds.procedures.algorithms.centrality.BetaClosenessCentralityWriteResult;
 import org.neo4j.gds.procedures.algorithms.centrality.CentralityWriteResult;
 import org.neo4j.gds.procedures.algorithms.centrality.PageRankWriteResult;
@@ -89,6 +93,38 @@ public class PushbackCentralityWriteProcedureFacade {
                 config.jobId(),
                 graphResources.resultStore()
 
+            )
+        ).join();
+    }
+
+    public Stream<ArticulationPointsWriteResult> articulationPoints(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var config = configurationParser.parseConfiguration(configuration, ArticulationPointsWriteConfig::of);
+
+        var parameters = ArticulationPointsToParameters.toParameters(config,false);
+
+        var writeStep = new ArticulationPointsWriteStep(
+            writeNodePropertyService,
+            config::resolveResultStore,
+            config.writeConcurrency(),
+            config.writeProperty()
+        );
+
+        return businessFacade.articulationPoints(
+            GraphName.parse(graphName),
+            config.toGraphParameters(),
+            parameters,
+            config.jobId(),
+            config.logProgress(),
+            graphResources -> new ArticulationPointsWriteResultTransformer(
+                graphResources.graph(),
+                graphResources.graphStore(),
+                config.toMap(),
+                writeStep,
+                config.jobId(),
+                graphResources.resultStore()
             )
         ).join();
     }
@@ -189,30 +225,6 @@ public class PushbackCentralityWriteProcedureFacade {
     }
 
     /*
-    public Stream<ArticulationPointsMutateResult> articulationPoints(
-        String graphName,
-        Map<String, Object> configuration
-    ) {
-        var config = configurationParser.parseConfiguration(configuration, ArticulationPointsMutateConfig::of);
-
-        var parameters = ArticulationPointsToParameters.toParameters(config,false);
-        return businessFacade.articulationPoints(
-            GraphName.parse(graphName),
-            config.toGraphParameters(),
-            parameters,
-            config.jobId(),
-            config.logProgress(),
-            graphResources -> new ArticulationPointsMutateResultTransformer(
-                    graphResources.graph(),
-                    graphResources.graphStore(),
-                    config.toMap(),
-                    mutateNodePropertyService,
-                    config.nodeLabels(),
-                    config.mutateProperty()
-                )
-        ).join();
-    }
-
     public Stream<CELFMutateResult> celf(String graphName, Map<String, Object> configuration) {
         var config = configurationParser.parseConfiguration(configuration, InfluenceMaximizationMutateConfig::of);
 

@@ -160,7 +160,12 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
             ArticulationPoints,
             ()-> estimationFacade.articulationPoints(false),
             (graph, __) -> centralityAlgorithms.articulationPoints(graph, configuration,false),
-            new ArticulationPointsWriteStep(configuration, writeNodePropertyService),
+            new ArticulationPointsWriteStep(
+                writeNodePropertyService,
+                configuration::resolveResultStore,
+                configuration.writeConcurrency(),
+                configuration.writeProperty()
+            ),
             resultBuilder
         );
     }
