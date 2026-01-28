@@ -191,7 +191,7 @@ public class PushbackCentralityProcedureFacade implements CentralityProcedureFac
         String graphName,
         Map<String, Object> configuration
     ) {
-        return Stream.empty();
+        return writeProcedureFacade.betweenness(graphName,configuration);
     }
 
     @Override

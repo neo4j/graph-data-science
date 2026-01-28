@@ -23,6 +23,8 @@ import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.applications.algorithms.machinery.WriteNodePropertyService;
+import org.neo4j.gds.betweenness.BetweennessCentralityWriteConfig;
+import org.neo4j.gds.betweenness.BetwennessCentralityResult;
 import org.neo4j.gds.centrality.CentralityComputeBusinessFacade;
 import org.neo4j.gds.centrality.GenericCentralityWriteStep;
 import org.neo4j.gds.centrality.GenericRankWriteStep;
@@ -123,6 +125,38 @@ public class PushbackCentralityWriteProcedureFacade {
         ).join();
     }
 
+    public Stream<CentralityWriteResult> betweenness(String graphName, Map<String, Object> configuration) {
+        var config = configurationParser.parseConfiguration(configuration, BetweennessCentralityWriteConfig::of);
+
+        var writeStep = new GenericCentralityWriteStep<BetwennessCentralityResult>(
+            writeNodePropertyService,
+            AlgorithmLabel.BetweennessCentrality,
+            config::resolveResultStore,
+            config.writeConcurrency(),
+            config.writeProperty()
+        );
+
+        var parameters = config.toParameters();
+        return businessFacade.betweennessCentrality(
+            GraphName.parse(graphName),
+            config.toGraphParameters(),
+            parameters,
+            config.relationshipWeightProperty(),
+            config.jobId(),
+            config.logProgress(),
+            graphResources -> new GenericCentralityWriteResultTransformer<>(
+                graphResources.graph(),
+                graphResources.graphStore(),
+                config.toMap(),
+                centralityDistributionInstructions.shouldComputeDistribution(),
+                parameters.concurrency(),
+                writeStep,
+                config.jobId(),
+                graphResources.resultStore()
+            )
+        ).join();
+    }
+
     public Stream<CentralityWriteResult> closeness(String graphName, Map<String, Object> configuration) {
         var config = configurationParser.parseConfiguration(configuration, ClosenessCentralityWriteConfig::of);
 
@@ -155,31 +189,6 @@ public class PushbackCentralityWriteProcedureFacade {
     }
 
     /*
-    public Stream<CentralityMutateResult> betweenness(String graphName, Map<String, Object> configuration) {
-        var config = configurationParser.parseConfiguration(configuration, BetweennessCentralityMutateConfig::of);
-
-        var parameters = config.toParameters();
-        return businessFacade.betweennessCentrality(
-            GraphName.parse(graphName),
-            config.toGraphParameters(),
-            parameters,
-            config.relationshipWeightProperty(),
-            config.jobId(),
-            config.logProgress(),
-            graphResources -> new GenericCentralityMutateResultTransformer<>(
-                graphResources.graph(),
-                graphResources.graphStore(),
-                config.toMap(),
-                centralityDistributionInstructions.shouldComputeDistribution(),
-                parameters.concurrency(),
-                mutateNodePropertyService,
-                config.nodeLabels(),
-                config.mutateProperty()
-            )
-        ).join();
-    }
-
-
     public Stream<ArticulationPointsMutateResult> articulationPoints(
         String graphName,
         Map<String, Object> configuration
