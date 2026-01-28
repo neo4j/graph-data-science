@@ -482,7 +482,7 @@ public class PushbackCentralityProcedureFacade implements CentralityProcedureFac
 
     @Override
     public Stream<PageRankWriteResult> eigenvectorWrite(String graphName, Map<String, Object> configuration) {
-        return Stream.empty();
+        return writeProcedureFacade.eigenVector(graphName,configuration);
     }
 
     @Override

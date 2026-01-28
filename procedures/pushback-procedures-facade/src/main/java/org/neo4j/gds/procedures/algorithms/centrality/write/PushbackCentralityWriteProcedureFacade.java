@@ -38,6 +38,7 @@ import org.neo4j.gds.degree.DegreeCentralityResult;
 import org.neo4j.gds.degree.DegreeCentralityWriteConfig;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationWriteConfig;
 import org.neo4j.gds.pagerank.ArticleRankWriteConfig;
+import org.neo4j.gds.pagerank.EigenvectorWriteConfig;
 import org.neo4j.gds.procedures.algorithms.CentralityDistributionInstructions;
 import org.neo4j.gds.procedures.algorithms.centrality.ArticulationPointsWriteResult;
 import org.neo4j.gds.procedures.algorithms.centrality.BetaClosenessCentralityWriteResult;
@@ -289,10 +290,18 @@ public class PushbackCentralityWriteProcedureFacade {
         ).join();
     }
 
-    /*
-    public Stream<PageRankMutateResult> eigenVector(String graphName, Map<String, Object> configuration) {
-        var config = configurationParser.parseConfiguration(configuration, EigenvectorMutateConfig::of);
+    public Stream<PageRankWriteResult> eigenVector(String graphName, Map<String, Object> configuration) {
+        var config = configurationParser.parseConfiguration(configuration, EigenvectorWriteConfig::of);
         var scalerFactory = config.scaler();
+
+        var writeStep = new GenericRankWriteStep(
+            writeNodePropertyService,
+            config.writeProperty(),
+            config.writeConcurrency(),
+            config::resolveResultStore,
+            AlgorithmLabel.EigenVector
+        );
+
         return businessFacade.eigenVector(
             GraphName.parse(graphName),
             config.toGraphParameters(),
@@ -300,19 +309,20 @@ public class PushbackCentralityWriteProcedureFacade {
             config,
             config.jobId(),
             config.logProgress(),
-            graphResources -> new GenericRankMutateResultTransformer(
+            graphResources -> new GenericRankWriteResultTransformer(
                 graphResources.graph(),
                 graphResources.graphStore(),
                 config.toMap(),
                 scalerFactory,
                 centralityDistributionInstructions.shouldComputeDistribution(),
                 config.concurrency(),
-                mutateNodePropertyService,
-                config.nodeLabels(),
-                config.mutateProperty()
+                writeStep,
+                config.jobId(),
+                graphResources.resultStore()
             )
         ).join();
     }
+    /*
 
 
     public Stream<CentralityMutateResult> harmonic(String graphName, Map<String, Object> configuration) {
