@@ -34,6 +34,8 @@ import org.neo4j.gds.centrality.GenericCentralityWriteStep;
 import org.neo4j.gds.centrality.GenericRankWriteStep;
 import org.neo4j.gds.closeness.ClosenessCentralityResult;
 import org.neo4j.gds.closeness.ClosenessCentralityWriteConfig;
+import org.neo4j.gds.degree.DegreeCentralityResult;
+import org.neo4j.gds.degree.DegreeCentralityWriteConfig;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationWriteConfig;
 import org.neo4j.gds.pagerank.ArticleRankWriteConfig;
 import org.neo4j.gds.procedures.algorithms.CentralityDistributionInstructions;
@@ -254,9 +256,17 @@ public class PushbackCentralityWriteProcedureFacade {
             )
         ).join();
     }
-    /*
-    public Stream<CentralityMutateResult> degree(String graphName, Map<String, Object> configuration) {
-        var config = configurationParser.parseConfiguration(configuration, DegreeCentralityMutateConfig::of);
+
+    public Stream<CentralityWriteResult> degree(String graphName, Map<String, Object> configuration) {
+        var config = configurationParser.parseConfiguration(configuration, DegreeCentralityWriteConfig::of);
+
+        var writeStep = new GenericCentralityWriteStep<DegreeCentralityResult>(
+            writeNodePropertyService,
+            AlgorithmLabel.DegreeCentrality,
+            config::resolveResultStore,
+            config.writeConcurrency(),
+            config.writeProperty()
+        );
 
         var parameters = config.toParameters();
         return businessFacade.degree(
@@ -266,20 +276,20 @@ public class PushbackCentralityWriteProcedureFacade {
             parameters,
             config.jobId(),
             config.logProgress(),
-            graphResources -> new GenericCentralityMutateResultTransformer<>(
+            graphResources -> new GenericCentralityWriteResultTransformer<>(
                 graphResources.graph(),
                 graphResources.graphStore(),
                 config.toMap(),
                 centralityDistributionInstructions.shouldComputeDistribution(),
                 parameters.concurrency(),
-                mutateNodePropertyService,
-                config.nodeLabels(),
-                config.mutateProperty()
+                writeStep,
+                config.jobId(),
+                graphResources.resultStore()
             )
         ).join();
     }
 
-
+    /*
     public Stream<PageRankMutateResult> eigenVector(String graphName, Map<String, Object> configuration) {
         var config = configurationParser.parseConfiguration(configuration, EigenvectorMutateConfig::of);
         var scalerFactory = config.scaler();
