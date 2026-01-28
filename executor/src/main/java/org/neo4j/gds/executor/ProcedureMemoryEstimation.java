@@ -24,33 +24,23 @@ import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.mem.MemoryEstimations;
-import org.neo4j.gds.mem.MemoryTree;
 import org.neo4j.gds.mem.MemoryTreeWithDimensions;
 
-public class ProcedureMemoryEstimation<
-    ALGO extends Algorithm<?>,
-    CONFIG extends AlgoBaseConfig
-> {
-
+class ProcedureMemoryEstimation<ALGO extends Algorithm<?>, CONFIG extends AlgoBaseConfig> {
     private final AlgorithmFactory<?, ALGO, CONFIG> algorithmFactory;
     private final GraphDimensions graphDimensions;
 
-    public ProcedureMemoryEstimation(
-        GraphDimensions graphDimensions,
-        AlgorithmFactory<?, ALGO, CONFIG> algorithmFactory
-    ) {
+    ProcedureMemoryEstimation(GraphDimensions graphDimensions, AlgorithmFactory<?, ALGO, CONFIG> algorithmFactory) {
         this.graphDimensions = graphDimensions;
         this.algorithmFactory = algorithmFactory;
     }
 
     public MemoryTreeWithDimensions memoryEstimation(CONFIG config) {
-        MemoryEstimations.Builder estimationBuilder = MemoryEstimations.builder("Memory Estimation");
+        var estimationBuilder = MemoryEstimations.builder("Memory Estimation");
 
         estimationBuilder.add("algorithm", algorithmFactory.memoryEstimation(config));
 
-        GraphDimensions extendedDimension = algorithmFactory.estimatedGraphDimensionTransformer(graphDimensions, config);
-
-        MemoryTree memoryTree = estimationBuilder.build().estimate(extendedDimension, config.concurrency());
+        var memoryTree = estimationBuilder.build().estimate(graphDimensions, config.concurrency());
         return new MemoryTreeWithDimensions(memoryTree, graphDimensions);
     }
 }

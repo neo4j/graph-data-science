@@ -32,7 +32,6 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryEstimations;
-import org.neo4j.gds.mem.MemoryTree;
 import org.neo4j.gds.mem.MemoryTreeWithDimensions;
 import org.neo4j.gds.memest.MemoryEstimationGraphConfigParser;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
@@ -49,12 +48,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public class MemoryEstimationExecutor<
-    ALGO extends Algorithm<ALGO_RESULT>,
-    ALGO_RESULT,
-    CONFIG extends AlgoBaseConfig
-    > {
-
+public class MemoryEstimationExecutor<ALGO extends Algorithm<ALGO_RESULT>, ALGO_RESULT, CONFIG extends AlgoBaseConfig> {
     private final AlgorithmSpec<ALGO, ALGO_RESULT, CONFIG, ?, ?> algoSpec;
     private final ExecutorSpec<ALGO, ALGO_RESULT, CONFIG> executorSpec;
     private final ExecutionContext executionContext;
@@ -144,20 +138,18 @@ public class MemoryEstimationExecutor<
         return Stream.of(MemoryEstimateResultFactory.from(memoryTreeWithDimensions));
     }
 
-    protected MemoryTreeWithDimensions procedureMemoryEstimation(
+    private MemoryTreeWithDimensions procedureMemoryEstimation(
         GraphDimensions dimensions,
         Optional<MemoryEstimation> maybeGraphEstimation,
         AlgorithmFactory<?, ALGO, CONFIG> algorithmFactory,
         CONFIG config
     ) {
-        MemoryEstimations.Builder estimationBuilder = MemoryEstimations.builder("Memory Estimation");
-
-        GraphDimensions extendedDimension = algorithmFactory.estimatedGraphDimensionTransformer(dimensions, config);
+        var estimationBuilder = MemoryEstimations.builder("Memory Estimation");
 
         maybeGraphEstimation.ifPresent(graphMemoryEstimation -> estimationBuilder.add("graph", graphMemoryEstimation));
         estimationBuilder.add("algorithm", algorithmFactory.memoryEstimation(config));
 
-        MemoryTree memoryTree = estimationBuilder.build().estimate(extendedDimension, config.concurrency());
+        var memoryTree = estimationBuilder.build().estimate(dimensions, config.concurrency());
 
         return new MemoryTreeWithDimensions(memoryTree, dimensions);
     }
