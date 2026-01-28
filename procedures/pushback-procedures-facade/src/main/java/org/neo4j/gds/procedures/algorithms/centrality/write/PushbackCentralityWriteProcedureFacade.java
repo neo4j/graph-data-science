@@ -42,6 +42,7 @@ import org.neo4j.gds.harmonic.HarmonicResult;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationWriteConfig;
 import org.neo4j.gds.pagerank.ArticleRankWriteConfig;
 import org.neo4j.gds.pagerank.EigenvectorWriteConfig;
+import org.neo4j.gds.pagerank.PageRankWriteConfig;
 import org.neo4j.gds.procedures.algorithms.CentralityDistributionInstructions;
 import org.neo4j.gds.procedures.algorithms.centrality.AlphaHarmonicWriteResult;
 import org.neo4j.gds.procedures.algorithms.centrality.ArticulationPointsWriteResult;
@@ -358,6 +359,7 @@ public class PushbackCentralityWriteProcedureFacade {
             )
         ).join();
     }
+
     public Stream<CentralityWriteResult> harmonic(String graphName, Map<String, Object> configuration) {
         var config = configurationParser.parseConfiguration(configuration, HarmonicCentralityWriteConfig::of);
 
@@ -389,11 +391,18 @@ public class PushbackCentralityWriteProcedureFacade {
         ).join();
     }
 
-    /*
-
-    public Stream<PageRankMutateResult> pageRank(String graphName, Map<String, Object> configuration) {
-        var config = configurationParser.parseConfiguration(configuration, PageRankMutateConfig::of);
+    public Stream<PageRankWriteResult> pageRank(String graphName, Map<String, Object> configuration) {
+        var config = configurationParser.parseConfiguration(configuration, PageRankWriteConfig::of);
         var scalerFactory = config.scaler();
+
+        var writeStep = new GenericRankWriteStep(
+            writeNodePropertyService,
+            config.writeProperty(),
+            config.writeConcurrency(),
+            config::resolveResultStore,
+            AlgorithmLabel.PageRank
+        );
+
         return businessFacade.pageRank(
             GraphName.parse(graphName),
             config.toGraphParameters(),
@@ -401,19 +410,18 @@ public class PushbackCentralityWriteProcedureFacade {
             config,
             config.jobId(),
             config.logProgress(),
-            graphResources -> new GenericRankMutateResultTransformer(
+            graphResources -> new GenericRankWriteResultTransformer(
                 graphResources.graph(),
                 graphResources.graphStore(),
                 config.toMap(),
                 scalerFactory,
                 centralityDistributionInstructions.shouldComputeDistribution(),
                 config.concurrency(),
-                mutateNodePropertyService,
-                config.nodeLabels(),
-                config.mutateProperty()
+                writeStep,
+                config.jobId(),
+                graphResources.resultStore()
             )
         ).join();
     }
-    */
 
 }
