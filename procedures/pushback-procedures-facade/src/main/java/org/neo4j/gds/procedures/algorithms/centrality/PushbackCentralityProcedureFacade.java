@@ -320,7 +320,7 @@ public class PushbackCentralityProcedureFacade implements CentralityProcedureFac
 
     @Override
     public Stream<CELFWriteResult> celfWrite(String graphName, Map<String, Object> configuration) {
-        return Stream.empty();
+        return writeProcedureFacade.celf(graphName,configuration);
     }
 
     @Override

@@ -27,17 +27,28 @@ import org.neo4j.gds.applications.algorithms.machinery.WriteNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.WriteStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.core.JobId;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.influenceMaximization.CELFNodeProperties;
 import org.neo4j.gds.influenceMaximization.CELFResult;
-import org.neo4j.gds.influenceMaximization.InfluenceMaximizationWriteConfig;
+
+import java.util.Optional;
+import java.util.function.Function;
 
 public class CelfWriteStep implements WriteStep<CELFResult, NodePropertiesWritten> {
     private final WriteNodePropertyService writeNodePropertyService;
-    private final InfluenceMaximizationWriteConfig configuration;
+    private final Function<ResultStore, Optional<ResultStore>> resultStoreResolver;
+    private final Concurrency writeConcurrency;
+    private final String writeProperty;
 
-    public CelfWriteStep(WriteNodePropertyService writeNodePropertyService, InfluenceMaximizationWriteConfig configuration) {
+    public CelfWriteStep(WriteNodePropertyService writeNodePropertyService,
+        Function<ResultStore, Optional<ResultStore>> resultStoreResolver,
+        Concurrency writeConcurrency,
+        String writeProperty
+    ) {
         this.writeNodePropertyService = writeNodePropertyService;
-        this.configuration = configuration;
+        this.resultStoreResolver = resultStoreResolver;
+        this.writeConcurrency = writeConcurrency;
+        this.writeProperty = writeProperty;
     }
 
     @Override
@@ -53,10 +64,11 @@ public class CelfWriteStep implements WriteStep<CELFResult, NodePropertiesWritte
         return writeNodePropertyService.perform(
             graph,
             graphStore,
-            resultStore,
-            configuration,
+            resultStoreResolver.apply(resultStore),
+            writeConcurrency,
             AlgorithmLabel.CELF,
             jobId,
+            writeProperty,
             nodePropertyValues
         );
     }

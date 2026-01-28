@@ -175,7 +175,12 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
         CONFIGURATION configuration,
         ResultBuilder<CONFIGURATION, CELFResult, RESULT, NodePropertiesWritten> resultBuilder
     ) {
-        var writeStep = new CelfWriteStep(writeNodePropertyService, configuration);
+        var writeStep = new CelfWriteStep(
+            writeNodePropertyService,
+            configuration::resolveResultStore,
+            configuration.writeConcurrency(),
+            configuration.writeProperty()
+        );
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInWriteMode(
             graphName,

@@ -28,15 +28,18 @@ import org.neo4j.gds.articulationpoints.ArticulationPointsWriteConfig;
 import org.neo4j.gds.betweenness.BetweennessCentralityWriteConfig;
 import org.neo4j.gds.betweenness.BetwennessCentralityResult;
 import org.neo4j.gds.centrality.ArticulationPointsWriteStep;
+import org.neo4j.gds.centrality.CelfWriteStep;
 import org.neo4j.gds.centrality.CentralityComputeBusinessFacade;
 import org.neo4j.gds.centrality.GenericCentralityWriteStep;
 import org.neo4j.gds.centrality.GenericRankWriteStep;
 import org.neo4j.gds.closeness.ClosenessCentralityResult;
 import org.neo4j.gds.closeness.ClosenessCentralityWriteConfig;
+import org.neo4j.gds.influenceMaximization.InfluenceMaximizationWriteConfig;
 import org.neo4j.gds.pagerank.ArticleRankWriteConfig;
 import org.neo4j.gds.procedures.algorithms.CentralityDistributionInstructions;
 import org.neo4j.gds.procedures.algorithms.centrality.ArticulationPointsWriteResult;
 import org.neo4j.gds.procedures.algorithms.centrality.BetaClosenessCentralityWriteResult;
+import org.neo4j.gds.procedures.algorithms.centrality.CELFWriteResult;
 import org.neo4j.gds.procedures.algorithms.centrality.CentralityWriteResult;
 import org.neo4j.gds.procedures.algorithms.centrality.PageRankWriteResult;
 import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
@@ -224,9 +227,15 @@ public class PushbackCentralityWriteProcedureFacade {
         ).join();
     }
 
-    /*
-    public Stream<CELFMutateResult> celf(String graphName, Map<String, Object> configuration) {
-        var config = configurationParser.parseConfiguration(configuration, InfluenceMaximizationMutateConfig::of);
+    public Stream<CELFWriteResult> celf(String graphName, Map<String, Object> configuration) {
+        var config = configurationParser.parseConfiguration(configuration, InfluenceMaximizationWriteConfig::of);
+
+        var writeStep = new CelfWriteStep(
+            writeNodePropertyService,
+            config::resolveResultStore,
+            config.writeConcurrency(),
+            config.writeProperty()
+        );
 
         var parameters = config.toParameters();
         return businessFacade.celf(
@@ -235,17 +244,17 @@ public class PushbackCentralityWriteProcedureFacade {
             parameters,
             config.jobId(),
             config.logProgress(),
-            graphResources -> new CelfMutateResultTransformer(
+            graphResources -> new CELFWriteResultTransformer(
                 graphResources.graph(),
                 graphResources.graphStore(),
                 config.toMap(),
-                mutateNodePropertyService,
-                config.nodeLabels(),
-                config.mutateProperty()
+                writeStep,
+                config.jobId(),
+                graphResources.resultStore()
             )
         ).join();
     }
-
+    /*
     public Stream<CentralityMutateResult> degree(String graphName, Map<String, Object> configuration) {
         var config = configurationParser.parseConfiguration(configuration, DegreeCentralityMutateConfig::of);
 
