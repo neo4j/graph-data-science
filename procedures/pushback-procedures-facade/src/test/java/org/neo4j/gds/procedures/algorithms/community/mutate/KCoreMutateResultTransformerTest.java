@@ -34,6 +34,8 @@ import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyCollection;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -52,7 +54,8 @@ class KCoreMutateResultTransformerTest {
         when(mutateService.mutateNodeProperties(
             any(Graph.class),
             any(GraphStore.class),
-            any(MutateNodePropertyService.MutateNodePropertySpec.class),
+            anyString(),
+            anyCollection(),
             any(NodePropertyValues.class))
         ).thenReturn(new NodePropertiesWritten(42));
 

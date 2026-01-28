@@ -24,7 +24,6 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
-import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService.MutateNodePropertySpec;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutResult;
@@ -33,14 +32,16 @@ import java.util.Collection;
 
 public class ApproxMaxKCutMutateStep implements MutateStep<ApproxMaxKCutResult, NodePropertiesWritten> {
     private final MutateNodePropertyService mutateNodePropertyService;
-    private final MutateNodePropertySpec mutateParameters;
+    private final String mutateProperty;
+    private final Collection<String> nodeLabels;
 
     public ApproxMaxKCutMutateStep(
         MutateNodePropertyService mutateNodePropertyService,
         Collection<String> labelsToUpdate,
         String mutateProperty
     ) {
-        this.mutateParameters = new MutateNodePropertySpec(mutateProperty,labelsToUpdate);
+        this.mutateProperty = mutateProperty;
+        this.nodeLabels = labelsToUpdate;
         this.mutateNodePropertyService = mutateNodePropertyService;
     }
 
@@ -56,7 +57,8 @@ public class ApproxMaxKCutMutateStep implements MutateStep<ApproxMaxKCutResult, 
         return mutateNodePropertyService.mutateNodeProperties(
                 graph,
                 graphStore,
-                mutateParameters,
+                mutateProperty,
+                nodeLabels,
                 nodePropertyValues
         );
     }

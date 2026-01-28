@@ -35,7 +35,6 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 @GdlExtension
 class MutateNodePropertyTest {
@@ -68,13 +67,11 @@ class MutateNodePropertyTest {
 
         var mutateNodeProperty = new MutateNodePropertyService(mock(Log.class));
 
-        var params = mock(MutateNodePropertyService.MutateNodePropertySpec.class);
-        when(params.mutateProperty()).thenReturn("bugger-off");
-        when(params.nodeLabels()).thenReturn(List.of(ElementProjection.PROJECT_ALL));
         var result = mutateNodeProperty.mutateNodeProperties(
             graph,
             graphStore,
-             params,
+            "bugger-off",
+            List.of(ElementProjection.PROJECT_ALL),
             nodePropertyValuesToMutate
         );
 

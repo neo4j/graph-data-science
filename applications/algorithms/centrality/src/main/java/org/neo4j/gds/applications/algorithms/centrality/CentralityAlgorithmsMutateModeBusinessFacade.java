@@ -34,10 +34,10 @@ import org.neo4j.gds.centrality.BetweennessCentralityMutateStep;
 import org.neo4j.gds.centrality.CelfMutateStep;
 import org.neo4j.gds.centrality.ClosenessCentralityMutateStep;
 import org.neo4j.gds.centrality.DegreeCentralityMutateStep;
+import org.neo4j.gds.centrality.GenericRankMutateStep;
 import org.neo4j.gds.centrality.HarmonicCentralityMutateStep;
 import org.neo4j.gds.centrality.HitsMutateStep;
 import org.neo4j.gds.centrality.IndirectExposureMutateStep;
-import org.neo4j.gds.centrality.PageRankMutateStep;
 import org.neo4j.gds.closeness.ClosenessCentralityMutateConfig;
 import org.neo4j.gds.closeness.ClosenessCentralityResult;
 import org.neo4j.gds.degree.DegreeCentralityMutateConfig;
@@ -96,7 +96,7 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
         ArticleRankMutateConfig configuration,
         ResultBuilder<ArticleRankMutateConfig, PageRankResult, RESULT, NodePropertiesWritten> resultBuilder
     ) {
-        var mutateStep = new PageRankMutateStep(mutateNodePropertyService, configuration.mutateProperty(), configuration.nodeLabels());
+        var mutateStep = new GenericRankMutateStep(mutateNodePropertyService, configuration.mutateProperty(), configuration.nodeLabels());
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
             graphName,
@@ -205,7 +205,7 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
         EigenvectorMutateConfig configuration,
         ResultBuilder<EigenvectorMutateConfig, PageRankResult, RESULT, NodePropertiesWritten> resultBuilder
     ) {
-        var mutateStep = new PageRankMutateStep(mutateNodePropertyService, configuration.mutateProperty(), configuration.nodeLabels());
+        var mutateStep = new GenericRankMutateStep(mutateNodePropertyService, configuration.mutateProperty(), configuration.nodeLabels());
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
             graphName,
@@ -241,7 +241,7 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
         PageRankMutateConfig configuration,
         ResultBuilder<PageRankMutateConfig, PageRankResult, RESULT, NodePropertiesWritten> resultBuilder
     ) {
-        var mutateStep = new PageRankMutateStep(mutateNodePropertyService, configuration.mutateProperty(), configuration.nodeLabels());
+        var mutateStep = new GenericRankMutateStep(mutateNodePropertyService, configuration.mutateProperty(), configuration.nodeLabels());
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
             graphName,

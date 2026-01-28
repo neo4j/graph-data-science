@@ -37,6 +37,8 @@ import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyCollection;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -53,14 +55,15 @@ class SpeakerListenerLPAMutateResultTransformerTest {
         long[] value2 = {2, 1};
         schema.set("communityIds",1, value2);
 
-        var result= ImmutablePregelResult.of(schema, 100, true);
+        var result = ImmutablePregelResult.of(schema, 100, true);
 
         var mutateService =  mock(MutateNodePropertyService.class);
 
         when(mutateService.mutateNodeProperties(
             any(Graph.class),
             any(GraphStore.class),
-            any(MutateNodePropertyService.MutateNodePropertySpec.class),
+            anyString(),
+            anyCollection(),
             any(NodePropertyValues.class))
         ).thenReturn(new NodePropertiesWritten(42));
 

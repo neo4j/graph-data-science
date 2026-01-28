@@ -23,7 +23,6 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
-import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService.MutateNodePropertySpec;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.articulationpoints.ArticulationPointsResult;
@@ -32,7 +31,8 @@ import java.util.Collection;
 
 public class ArticulationPointsMutateStep implements MutateStep<ArticulationPointsResult, NodePropertiesWritten> {
     private final MutateNodePropertyService mutateNodePropertyService;
-    private final MutateNodePropertySpec mutateParameters;
+    private final String mutateProperty;
+    private final Collection<String> nodeLabels;
 
     public ArticulationPointsMutateStep(
         MutateNodePropertyService mutateNodePropertyService,
@@ -40,10 +40,8 @@ public class ArticulationPointsMutateStep implements MutateStep<ArticulationPoin
         Collection<String> nodeLabels
     ) {
         this.mutateNodePropertyService = mutateNodePropertyService;
-        this.mutateParameters = new MutateNodePropertySpec(
-            mutateProperty,
-            nodeLabels
-        );
+        this.mutateProperty = mutateProperty;
+        this.nodeLabels = nodeLabels;
     }
 
     @Override
@@ -68,7 +66,8 @@ public class ArticulationPointsMutateStep implements MutateStep<ArticulationPoin
         return mutateNodePropertyService.mutateNodeProperties(
             graph,
             graphStore,
-            mutateParameters,
+            mutateProperty,
+            nodeLabels,
             nodeProperties
         );
     }

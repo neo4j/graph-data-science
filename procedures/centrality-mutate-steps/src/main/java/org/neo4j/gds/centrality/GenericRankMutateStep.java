@@ -28,11 +28,11 @@ import org.neo4j.gds.pagerank.PageRankResult;
 
 import java.util.Collection;
 
-public class PageRankMutateStep implements MutateStep<PageRankResult, NodePropertiesWritten> {
+public class GenericRankMutateStep implements MutateStep<PageRankResult, NodePropertiesWritten> {
     private final GenericCentralityMutateStep<PageRankResult> centralityMutateStep;
 
 
-    public PageRankMutateStep(
+    public GenericRankMutateStep(
         MutateNodePropertyService mutateNodePropertyService,
         String mutateProperty,
         Collection<String> nodeLabels
