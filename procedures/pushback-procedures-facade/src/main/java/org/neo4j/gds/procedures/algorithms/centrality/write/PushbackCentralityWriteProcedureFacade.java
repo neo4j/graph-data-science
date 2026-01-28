@@ -24,9 +24,14 @@ import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.applications.algorithms.machinery.WriteNodePropertyService;
 import org.neo4j.gds.centrality.CentralityComputeBusinessFacade;
+import org.neo4j.gds.centrality.GenericCentralityWriteStep;
 import org.neo4j.gds.centrality.GenericRankWriteStep;
+import org.neo4j.gds.closeness.ClosenessCentralityResult;
+import org.neo4j.gds.closeness.ClosenessCentralityWriteConfig;
 import org.neo4j.gds.pagerank.ArticleRankWriteConfig;
 import org.neo4j.gds.procedures.algorithms.CentralityDistributionInstructions;
+import org.neo4j.gds.procedures.algorithms.centrality.BetaClosenessCentralityWriteResult;
+import org.neo4j.gds.procedures.algorithms.centrality.CentralityWriteResult;
 import org.neo4j.gds.procedures.algorithms.centrality.PageRankWriteResult;
 import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
 
@@ -85,9 +90,17 @@ public class PushbackCentralityWriteProcedureFacade {
             )
         ).join();
     }
-    /*
-    public Stream<BetaClosenessCentralityMutateResult> betaCloseness(String graphName, Map<String, Object> configuration) {
-        var config = configurationParser.parseConfiguration(configuration, ClosenessCentralityMutateConfig::of);
+
+    public Stream<BetaClosenessCentralityWriteResult> betaCloseness(String graphName, Map<String, Object> configuration) {
+        var config = configurationParser.parseConfiguration(configuration, ClosenessCentralityWriteConfig::of);
+
+        var writeStep = new GenericCentralityWriteStep<ClosenessCentralityResult>(
+            writeNodePropertyService,
+            AlgorithmLabel.ClosenessCentrality,
+            config::resolveResultStore,
+            config.writeConcurrency(),
+            config.writeProperty()
+        );
 
         var parameters = config.toParameters();
         return businessFacade.closeness(
@@ -96,19 +109,52 @@ public class PushbackCentralityWriteProcedureFacade {
             parameters,
             config.jobId(),
             config.logProgress(),
-            graphResources -> new BetaClosenessCentralityMutateResultTransformer(
+            graphResources -> new BetaClosenessCentralityWriteResultTransformer(
                 graphResources.graph(),
                 graphResources.graphStore(),
                 config.toMap(),
                 centralityDistributionInstructions.shouldComputeDistribution(),
                 parameters.concurrency(),
-                mutateNodePropertyService,
-                config.nodeLabels(),
-                config.mutateProperty()
+                writeStep,
+                config.jobId(),
+                graphResources.resultStore(),
+                config.writeProperty()
             )
         ).join();
     }
 
+    public Stream<CentralityWriteResult> closeness(String graphName, Map<String, Object> configuration) {
+        var config = configurationParser.parseConfiguration(configuration, ClosenessCentralityWriteConfig::of);
+
+        var writeStep = new GenericCentralityWriteStep<ClosenessCentralityResult>(
+            writeNodePropertyService,
+            AlgorithmLabel.ClosenessCentrality,
+            config::resolveResultStore,
+            config.writeConcurrency(),
+            config.writeProperty()
+        );
+
+        var parameters = config.toParameters();
+        return businessFacade.closeness(
+            GraphName.parse(graphName),
+            config.toGraphParameters(),
+            parameters,
+            config.jobId(),
+            config.logProgress(),
+            graphResources -> new GenericCentralityWriteResultTransformer<>(
+                graphResources.graph(),
+                graphResources.graphStore(),
+                config.toMap(),
+                centralityDistributionInstructions.shouldComputeDistribution(),
+                parameters.concurrency(),
+                writeStep,
+                config.jobId(),
+                graphResources.resultStore()
+            )
+        ).join();
+    }
+
+    /*
     public Stream<CentralityMutateResult> betweenness(String graphName, Map<String, Object> configuration) {
         var config = configurationParser.parseConfiguration(configuration, BetweennessCentralityMutateConfig::of);
 
@@ -118,29 +164,6 @@ public class PushbackCentralityWriteProcedureFacade {
             config.toGraphParameters(),
             parameters,
             config.relationshipWeightProperty(),
-            config.jobId(),
-            config.logProgress(),
-            graphResources -> new GenericCentralityMutateResultTransformer<>(
-                graphResources.graph(),
-                graphResources.graphStore(),
-                config.toMap(),
-                centralityDistributionInstructions.shouldComputeDistribution(),
-                parameters.concurrency(),
-                mutateNodePropertyService,
-                config.nodeLabels(),
-                config.mutateProperty()
-            )
-        ).join();
-    }
-
-    public Stream<CentralityMutateResult> closeness(String graphName, Map<String, Object> configuration) {
-        var config = configurationParser.parseConfiguration(configuration, ClosenessCentralityMutateConfig::of);
-
-        var parameters = config.toParameters();
-        return businessFacade.closeness(
-            GraphName.parse(graphName),
-            config.toGraphParameters(),
-            parameters,
             config.jobId(),
             config.logProgress(),
             graphResources -> new GenericCentralityMutateResultTransformer<>(

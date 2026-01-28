@@ -19,48 +19,46 @@
  */
 package org.neo4j.gds.procedures.algorithms.centrality.write;
 
+import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmResult;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
-import org.neo4j.gds.centrality.GenericRankWriteStep;
+import org.neo4j.gds.centrality.GenericCentralityWriteStep;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.pagerank.PageRankResult;
 import org.neo4j.gds.procedures.algorithms.WriteStepExecute;
-import org.neo4j.gds.procedures.algorithms.centrality.PageRankWriteResult;
-import org.neo4j.gds.procedures.algorithms.centrality.RankDistributionHelpers;
+import org.neo4j.gds.procedures.algorithms.centrality.CentralityDistributionHelpers;
+import org.neo4j.gds.procedures.algorithms.centrality.CentralityWriteResult;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.results.ResultTransformer;
-import org.neo4j.gds.scaling.ScalerFactory;
 
 import java.util.Map;
 import java.util.stream.Stream;
 
-public class GenericRankWriteResultTransformer implements ResultTransformer<TimedAlgorithmResult<PageRankResult>, Stream<PageRankWriteResult>> {
+public class GenericCentralityWriteResultTransformer<R extends CentralityAlgorithmResult> implements ResultTransformer<TimedAlgorithmResult<R>, Stream<CentralityWriteResult>> {
+
     private final Graph graph;
     private final GraphStore graphStore;
-    private final ScalerFactory scalerFactory;
     private final Map<String, Object> configuration;
     private final boolean shouldComputeDistribution;
     private final Concurrency concurrency;
-    private final GenericRankWriteStep writeStep;
+    private final GenericCentralityWriteStep<R> writeStep;
     private final JobId jobId;
     private final ResultStore resultStore;
 
-    public GenericRankWriteResultTransformer(
+    public GenericCentralityWriteResultTransformer(
         Graph graph,
         GraphStore graphStore,
         Map<String, Object> configuration,
-        ScalerFactory scalerFactory,
         boolean shouldComputeDistribution,
         Concurrency concurrency,
-        GenericRankWriteStep writeStep,
-        JobId jobId, ResultStore resultStore
+        GenericCentralityWriteStep<R> writeStep,
+        JobId jobId,
+        ResultStore resultStore
     ) {
         this.graph = graph;
         this.graphStore = graphStore;
         this.configuration = configuration;
-        this.scalerFactory = scalerFactory;
         this.shouldComputeDistribution = shouldComputeDistribution;
         this.concurrency = concurrency;
         this.writeStep = writeStep;
@@ -69,38 +67,35 @@ public class GenericRankWriteResultTransformer implements ResultTransformer<Time
     }
 
     @Override
-    public Stream<PageRankWriteResult> apply(TimedAlgorithmResult<PageRankResult> timedAlgorithmResult) {
-        var result = timedAlgorithmResult.result();
+    public Stream<CentralityWriteResult> apply(TimedAlgorithmResult<R> timedAlgorithmResult) {
+        var centralityAlgorithmResult = timedAlgorithmResult.result();
+
+        var centralityDistribution = CentralityDistributionHelpers.compute(
+            graph,
+            centralityAlgorithmResult.centralityScoreProvider(),
+            concurrency,
+            shouldComputeDistribution
+        );
 
         var writeMetadata = WriteStepExecute.executeWriteNodePropertyStep(
             writeStep,
             graph,
             graphStore,
             jobId,
-            result,
+            centralityAlgorithmResult,
             resultStore
         );
 
-        var centralityDistribution = RankDistributionHelpers.compute(
-            graph,
-            scalerFactory,
-            result.centralityScoreProvider(),
-            concurrency,
-            shouldComputeDistribution
-        );
-
         return Stream.of(
-            new PageRankWriteResult(
-                result.iterations(),
-                result.didConverge(),
-                centralityDistribution.centralitySummary(),
-                0,
-                timedAlgorithmResult.computeMillis(),
-                centralityDistribution.computeMillis(),
-                writeMetadata.writeMillis(),
-                writeMetadata.nodePropertiesWritten().value(),
-                configuration
-            )
-        );
+                new CentralityWriteResult(
+                    writeMetadata.nodePropertiesWritten().value(),
+                    0,
+                    timedAlgorithmResult.computeMillis(),
+                    centralityDistribution.computeMillis(),
+                    writeMetadata.writeMillis(),
+                    centralityDistribution.centralitySummary(),
+                    configuration
+                )
+            );
     }
 }

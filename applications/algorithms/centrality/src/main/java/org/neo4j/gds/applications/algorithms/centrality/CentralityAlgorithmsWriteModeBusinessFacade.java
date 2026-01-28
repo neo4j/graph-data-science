@@ -188,7 +188,12 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
         ClosenessCentralityWriteConfig configuration,
         ResultBuilder<ClosenessCentralityWriteConfig, CentralityAlgorithmResult, RESULT, NodePropertiesWritten> resultBuilder
     ) {
-        var writeStep = new ClosenessCentralityWriteStep(writeNodePropertyService, configuration);
+        var writeStep = new ClosenessCentralityWriteStep(
+            writeNodePropertyService,
+            configuration.writeProperty(),
+            configuration.writeConcurrency(),
+            configuration::resolveResultStore
+        );
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInWriteMode(
             graphName,

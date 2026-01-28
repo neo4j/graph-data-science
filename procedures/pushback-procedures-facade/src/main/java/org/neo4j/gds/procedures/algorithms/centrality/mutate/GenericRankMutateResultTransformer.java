@@ -72,13 +72,7 @@ public class GenericRankMutateResultTransformer implements ResultTransformer<Tim
     @Override
     public Stream<PageRankMutateResult> apply(TimedAlgorithmResult<PageRankResult> timedAlgorithmResult) {
         var result = timedAlgorithmResult.result();
-        var centralityDistribution = RankDistributionHelpers.compute(
-            graph,
-            scalerFactory,
-            result.centralityScoreProvider(),
-            concurrency,
-            shouldComputeDistribution
-        );
+
 
         var mutateStep  = new GenericCentralityMutateStep<>(
             mutateNodePropertyService,
@@ -90,6 +84,14 @@ public class GenericRankMutateResultTransformer implements ResultTransformer<Tim
             graph,
             graphStore,
             result
+        );
+
+        var centralityDistribution = RankDistributionHelpers.compute(
+            graph,
+            scalerFactory,
+            result.centralityScoreProvider(),
+            concurrency,
+            shouldComputeDistribution
         );
 
         return Stream.of(
