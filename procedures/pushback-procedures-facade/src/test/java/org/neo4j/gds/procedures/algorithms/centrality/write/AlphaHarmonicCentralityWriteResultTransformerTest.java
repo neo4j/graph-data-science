@@ -20,15 +20,16 @@
 package org.neo4j.gds.procedures.algorithms.centrality.write;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmResult;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.centrality.GenericCentralityWriteStep;
+import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.harmonic.HarmonicResult;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 
 import java.util.Map;
@@ -39,12 +40,15 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-class GenericCentralityWriteResultTransformerTest {
+class AlphaHarmonicCentralityWriteResultTransformerTest {
 
     @Test
     void shouldTransform() {
-        var result = mock(CentralityAlgorithmResult.class);
+        var result = mock(HarmonicResult.class);
         when(result.nodePropertyValues()).thenReturn(mock(NodePropertyValues.class));
+        var graphMock = mock(Graph.class);
+        when(graphMock.nodeCount()).thenReturn(3L);
+        when(result.centralityScoreProvider()).thenReturn(HugeDoubleArray.of(10,9,8)::get);
 
         var config = Map.of("a",(Object)("foo"));
 
@@ -52,15 +56,16 @@ class GenericCentralityWriteResultTransformerTest {
         when(writeStep.execute(any(Graph.class),any(GraphStore.class),any(ResultStore.class),eq(result),any(JobId.class)))
             .thenReturn(new NodePropertiesWritten(42));
 
-        var transformer = new GenericCentralityWriteResultTransformer<CentralityAlgorithmResult>(
-            mock(Graph.class),
+        var transformer = new AlphaHarmonicCentralityWriteResultTransformer(
+            graphMock,
             mock(GraphStore.class),
             config,
             true,
             new Concurrency(1),
             writeStep,
             mock(JobId.class),
-            mock(ResultStore.class)
+            mock(ResultStore.class),
+            "foo"
         );
 
         var writeResult = transformer.apply(new TimedAlgorithmResult<>(result, 10));
@@ -68,48 +73,10 @@ class GenericCentralityWriteResultTransformerTest {
             .satisfies(write -> {
                 assertThat(write.preProcessingMillis()).isEqualTo(0);
                 assertThat(write.computeMillis()).isEqualTo(10);
-                assertThat(write.postProcessingMillis()).isGreaterThanOrEqualTo(0);
-                assertThat(write.configuration()).isEqualTo(config);
                 assertThat(write.writeMillis()).isGreaterThanOrEqualTo(0L);
                 assertThat(write.centralityDistribution()).containsKey("p99");
-                assertThat(write.nodePropertiesWritten()).isEqualTo(42L);
-            });
-    }
-
-    @Test
-    void shouldTransformButNotComputeHistogram() {
-        var result = mock(CentralityAlgorithmResult.class);
-        when(result.nodePropertyValues()).thenReturn(mock(NodePropertyValues.class));
-        var graphMock = mock(Graph.class);
-        when(graphMock.nodeCount()).thenReturn(3L);
-
-        var config = Map.of("a",(Object)("foo"));
-
-        var writeStep = mock(GenericCentralityWriteStep.class);
-        when(writeStep.execute(any(Graph.class),any(GraphStore.class),any(ResultStore.class),eq(result),any(JobId.class)))
-            .thenReturn(new NodePropertiesWritten(42));
-
-        var transformer = new GenericCentralityWriteResultTransformer<CentralityAlgorithmResult>(
-            mock(Graph.class),
-            mock(GraphStore.class),
-            config,
-            false,
-            new Concurrency(1),
-            writeStep,
-            mock(JobId.class),
-            mock(ResultStore.class)
-        );
-
-        var writeResult = transformer.apply(new TimedAlgorithmResult<>(result, 10));
-        assertThat(writeResult.findFirst().orElseThrow())
-            .satisfies(write -> {
-                assertThat(write.preProcessingMillis()).isEqualTo(0);
-                assertThat(write.computeMillis()).isEqualTo(10);
-                assertThat(write.postProcessingMillis()).isGreaterThanOrEqualTo(0);
-                assertThat(write.configuration()).isEqualTo(config);
-                assertThat(write.writeMillis()).isGreaterThanOrEqualTo(0L);
-                assertThat(write.centralityDistribution()).doesNotContainKey("p99");
-                assertThat(write.nodePropertiesWritten()).isEqualTo(42L);
+                assertThat(write.writeProperty()).isEqualTo("foo");
+                assertThat(write.nodes()).isEqualTo(3L);
             });
     }
 

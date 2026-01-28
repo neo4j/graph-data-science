@@ -67,7 +67,7 @@ public class PushbackCentralityProcedureFacade implements CentralityProcedureFac
         String graphName,
         Map<String, Object> configuration
     ) {
-        return Stream.empty();
+        return writeProcedureFacade.alphaHarmonic(graphName,configuration);
     }
 
     @Override
@@ -540,7 +540,7 @@ public class PushbackCentralityProcedureFacade implements CentralityProcedureFac
 
     @Override
     public Stream<CentralityWriteResult> harmonicCentralityWrite(String graphName, Map<String, Object> configuration) {
-        return Stream.empty();
+        return writeProcedureFacade.harmonic(graphName,configuration);
     }
 
     @Override

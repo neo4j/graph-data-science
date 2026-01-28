@@ -36,10 +36,14 @@ import org.neo4j.gds.closeness.ClosenessCentralityResult;
 import org.neo4j.gds.closeness.ClosenessCentralityWriteConfig;
 import org.neo4j.gds.degree.DegreeCentralityResult;
 import org.neo4j.gds.degree.DegreeCentralityWriteConfig;
+import org.neo4j.gds.harmonic.DeprecatedTieredHarmonicCentralityWriteConfig;
+import org.neo4j.gds.harmonic.HarmonicCentralityWriteConfig;
+import org.neo4j.gds.harmonic.HarmonicResult;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationWriteConfig;
 import org.neo4j.gds.pagerank.ArticleRankWriteConfig;
 import org.neo4j.gds.pagerank.EigenvectorWriteConfig;
 import org.neo4j.gds.procedures.algorithms.CentralityDistributionInstructions;
+import org.neo4j.gds.procedures.algorithms.centrality.AlphaHarmonicWriteResult;
 import org.neo4j.gds.procedures.algorithms.centrality.ArticulationPointsWriteResult;
 import org.neo4j.gds.procedures.algorithms.centrality.BetaClosenessCentralityWriteResult;
 import org.neo4j.gds.procedures.algorithms.centrality.CELFWriteResult;
@@ -67,6 +71,38 @@ public class PushbackCentralityWriteProcedureFacade {
         this.configurationParser = configurationParser;
         this.centralityDistributionInstructions = new CentralityDistributionInstructions(procedureReturnColumns);
         this.writeNodePropertyService = writeNodePropertyService;
+    }
+
+    public Stream<AlphaHarmonicWriteResult> alphaHarmonic(String graphName, Map<String, Object> configuration) {
+        var config = configurationParser.parseConfiguration(configuration, DeprecatedTieredHarmonicCentralityWriteConfig::of);
+
+        var writeStep = new GenericCentralityWriteStep<HarmonicResult>(
+            writeNodePropertyService,
+            AlgorithmLabel.HarmonicCentrality,
+            config::resolveResultStore,
+            config.writeConcurrency(),
+            config.writeProperty()
+        );
+
+        var parameters = config.toParameters();
+        return businessFacade.harmonic(
+            GraphName.parse(graphName),
+            config.toGraphParameters(),
+            parameters,
+            config.jobId(),
+            config.logProgress(),
+            graphResources -> new AlphaHarmonicCentralityWriteResultTransformer(
+                graphResources.graph(),
+                graphResources.graphStore(),
+                config.toMap(),
+                centralityDistributionInstructions.shouldComputeDistribution(),
+                parameters.concurrency(),
+                writeStep,
+                config.jobId(),
+                graphResources.resultStore(),
+                config.writeProperty()
+            )
+        ).join();
     }
 
     public Stream<PageRankWriteResult> articleRank(String graphName, Map<String, Object> configuration) {
@@ -322,11 +358,16 @@ public class PushbackCentralityWriteProcedureFacade {
             )
         ).join();
     }
-    /*
+    public Stream<CentralityWriteResult> harmonic(String graphName, Map<String, Object> configuration) {
+        var config = configurationParser.parseConfiguration(configuration, HarmonicCentralityWriteConfig::of);
 
-
-    public Stream<CentralityMutateResult> harmonic(String graphName, Map<String, Object> configuration) {
-        var config = configurationParser.parseConfiguration(configuration, HarmonicCentralityMutateConfig::of);
+        var writeStep = new GenericCentralityWriteStep<HarmonicResult>(
+            writeNodePropertyService,
+            AlgorithmLabel.HarmonicCentrality,
+            config::resolveResultStore,
+            config.writeConcurrency(),
+            config.writeProperty()
+        );
 
         var parameters = config.toParameters();
         return businessFacade.harmonic(
@@ -335,18 +376,20 @@ public class PushbackCentralityWriteProcedureFacade {
             parameters,
             config.jobId(),
             config.logProgress(),
-            graphResources -> new GenericCentralityMutateResultTransformer<>(
+            graphResources -> new GenericCentralityWriteResultTransformer<>(
                 graphResources.graph(),
                 graphResources.graphStore(),
                 config.toMap(),
                 centralityDistributionInstructions.shouldComputeDistribution(),
                 parameters.concurrency(),
-                mutateNodePropertyService,
-                config.nodeLabels(),
-                config.mutateProperty()
+                writeStep,
+                config.jobId(),
+                graphResources.resultStore()
             )
         ).join();
     }
+
+    /*
 
     public Stream<PageRankMutateResult> pageRank(String graphName, Map<String, Object> configuration) {
         var config = configurationParser.parseConfiguration(configuration, PageRankMutateConfig::of);

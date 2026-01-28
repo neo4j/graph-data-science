@@ -20,13 +20,13 @@
 package org.neo4j.gds.procedures.algorithms.centrality.write;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmResult;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.centrality.GenericCentralityWriteStep;
+import org.neo4j.gds.closeness.ClosenessCentralityResult;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.result.TimedAlgorithmResult;
@@ -43,10 +43,8 @@ class BetaClosenessCentralityWriteResultTransformerTest {
 
     @Test
     void shouldTransform() {
-        var result = mock(CentralityAlgorithmResult.class);
+        var result = mock(ClosenessCentralityResult.class);
         when(result.nodePropertyValues()).thenReturn(mock(NodePropertyValues.class));
-        var graphMock = mock(Graph.class);
-        when(graphMock.nodeCount()).thenReturn(3L);
 
         var config = Map.of("a",(Object)("foo"));
 
@@ -54,7 +52,7 @@ class BetaClosenessCentralityWriteResultTransformerTest {
         when(writeStep.execute(any(Graph.class),any(GraphStore.class),any(ResultStore.class),eq(result),any(JobId.class)))
             .thenReturn(new NodePropertiesWritten(42));
 
-        var transformer = new GenericCentralityWriteResultTransformer<CentralityAlgorithmResult>(
+        var transformer = new  BetaClosenessCentralityWriteResultTransformer(
             mock(Graph.class),
             mock(GraphStore.class),
             config,
@@ -62,7 +60,8 @@ class BetaClosenessCentralityWriteResultTransformerTest {
             new Concurrency(1),
             writeStep,
             mock(JobId.class),
-            mock(ResultStore.class)
+            mock(ResultStore.class),
+            "foo"
         );
 
         var writeResult = transformer.apply(new TimedAlgorithmResult<>(result, 10));
@@ -75,6 +74,8 @@ class BetaClosenessCentralityWriteResultTransformerTest {
                 assertThat(write.writeMillis()).isGreaterThanOrEqualTo(0L);
                 assertThat(write.centralityDistribution()).containsKey("p99");
                 assertThat(write.nodePropertiesWritten()).isEqualTo(42L);
+                assertThat(write.writeProperty()).isEqualTo("foo");
+
             });
     }
 
