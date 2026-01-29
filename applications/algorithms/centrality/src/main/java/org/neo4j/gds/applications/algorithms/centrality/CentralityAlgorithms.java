@@ -117,7 +117,7 @@ public class CentralityAlgorithms {
     BridgeResult bridges(Graph graph, BridgesParameters parameters, ProgressTracker progressTracker) {
 
         return Bridges
-            .create(graph, progressTracker, parameters.computeComponents())
+            .create(graph, progressTracker, parameters.computeComponents(),terminationFlag)
             .compute();
 
     }

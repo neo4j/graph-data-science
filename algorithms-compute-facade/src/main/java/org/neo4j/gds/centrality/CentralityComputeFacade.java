@@ -225,7 +225,7 @@ public class CentralityComputeFacade {
         );
 
         var bridges =  Bridges
-            .create(graph, progressTracker, parameters.computeComponents());
+            .create(graph, progressTracker, parameters.computeComponents(),terminationFlag);
 
         return algorithmCaller.run(
             bridges::compute,
