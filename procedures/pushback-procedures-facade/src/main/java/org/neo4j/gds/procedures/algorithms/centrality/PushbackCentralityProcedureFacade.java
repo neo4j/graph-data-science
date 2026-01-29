@@ -24,6 +24,7 @@ import org.neo4j.gds.procedures.algorithms.centrality.mutate.PushbackCentralityM
 import org.neo4j.gds.procedures.algorithms.centrality.stats.PushbackCentralityStatsProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.centrality.stream.PushbackCentralityStreamProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.CentralityStubs;
+import org.neo4j.gds.procedures.algorithms.centrality.write.PushbackCentralityWriteProcedureFacade;
 
 import java.util.Map;
 import java.util.stream.Stream;
@@ -33,16 +34,19 @@ public class PushbackCentralityProcedureFacade implements CentralityProcedureFac
     private final PushbackCentralityStreamProcedureFacade streamProcedureFacade;
     private final PushbackCentralityStatsProcedureFacade statsProcedureFacade;
     private final PushbackCentralityMutateProcedureFacade mutateProcedureFacade;
+    private final PushbackCentralityWriteProcedureFacade writeProcedureFacade;
 
 
     public PushbackCentralityProcedureFacade(
         PushbackCentralityStreamProcedureFacade streamProcedureFacade,
         PushbackCentralityStatsProcedureFacade statsProcedureFacade,
-        PushbackCentralityMutateProcedureFacade mutateProcedureFacade
+        PushbackCentralityMutateProcedureFacade mutateProcedureFacade,
+        PushbackCentralityWriteProcedureFacade writeProcedureFacade
     ) {
         this.streamProcedureFacade = streamProcedureFacade;
         this.statsProcedureFacade = statsProcedureFacade;
         this.mutateProcedureFacade = mutateProcedureFacade;
+        this.writeProcedureFacade = writeProcedureFacade;
     }
 
     @Override
@@ -63,7 +67,7 @@ public class PushbackCentralityProcedureFacade implements CentralityProcedureFac
         String graphName,
         Map<String, Object> configuration
     ) {
-        return Stream.empty();
+        return writeProcedureFacade.alphaHarmonic(graphName,configuration);
     }
 
     @Override
@@ -107,7 +111,7 @@ public class PushbackCentralityProcedureFacade implements CentralityProcedureFac
 
     @Override
     public Stream<PageRankWriteResult> articleRankWrite(String graphName, Map<String, Object> configuration) {
-        return Stream.empty();
+        return writeProcedureFacade.articleRank(graphName,configuration);
     }
 
     @Override
@@ -131,7 +135,7 @@ public class PushbackCentralityProcedureFacade implements CentralityProcedureFac
         String graphName,
         Map<String, Object> configuration
     ) {
-        return Stream.empty();
+        return writeProcedureFacade.betaCloseness(graphName,configuration);
     }
 
     @Override
@@ -187,7 +191,7 @@ public class PushbackCentralityProcedureFacade implements CentralityProcedureFac
         String graphName,
         Map<String, Object> configuration
     ) {
-        return Stream.empty();
+        return writeProcedureFacade.betweenness(graphName,configuration);
     }
 
     @Override
@@ -251,7 +255,7 @@ public class PushbackCentralityProcedureFacade implements CentralityProcedureFac
         String graphName,
         Map<String, Object> configuration
     ) {
-        return Stream.empty();
+        return writeProcedureFacade.articulationPoints(graphName,configuration);
     }
 
     @Override
@@ -316,7 +320,7 @@ public class PushbackCentralityProcedureFacade implements CentralityProcedureFac
 
     @Override
     public Stream<CELFWriteResult> celfWrite(String graphName, Map<String, Object> configuration) {
-        return Stream.empty();
+        return writeProcedureFacade.celf(graphName,configuration);
     }
 
     @Override
@@ -374,7 +378,7 @@ public class PushbackCentralityProcedureFacade implements CentralityProcedureFac
 
     @Override
     public Stream<CentralityWriteResult> closenessCentralityWrite(String graphName, Map<String, Object> configuration) {
-        return Stream.empty();
+        return writeProcedureFacade.closeness(graphName,configuration);
     }
 
     @Override
@@ -426,7 +430,7 @@ public class PushbackCentralityProcedureFacade implements CentralityProcedureFac
 
     @Override
     public Stream<CentralityWriteResult> degreeCentralityWrite(String graphName, Map<String, Object> configuration) {
-        return Stream.empty();
+        return writeProcedureFacade.degree(graphName,configuration);
     }
 
     @Override
@@ -478,7 +482,7 @@ public class PushbackCentralityProcedureFacade implements CentralityProcedureFac
 
     @Override
     public Stream<PageRankWriteResult> eigenvectorWrite(String graphName, Map<String, Object> configuration) {
-        return Stream.empty();
+        return writeProcedureFacade.eigenVector(graphName,configuration);
     }
 
     @Override
@@ -536,7 +540,7 @@ public class PushbackCentralityProcedureFacade implements CentralityProcedureFac
 
     @Override
     public Stream<CentralityWriteResult> harmonicCentralityWrite(String graphName, Map<String, Object> configuration) {
-        return Stream.empty();
+        return writeProcedureFacade.harmonic(graphName,configuration);
     }
 
     @Override
@@ -588,7 +592,7 @@ public class PushbackCentralityProcedureFacade implements CentralityProcedureFac
 
     @Override
     public Stream<PageRankWriteResult> pageRankWrite(String graphName, Map<String, Object> configuration) {
-        return Stream.empty();
+        return writeProcedureFacade.pageRank(graphName,configuration);
     }
 
     @Override

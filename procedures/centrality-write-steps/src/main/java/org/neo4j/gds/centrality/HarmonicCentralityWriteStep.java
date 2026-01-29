@@ -38,8 +38,10 @@ public class HarmonicCentralityWriteStep implements WriteStep<HarmonicResult, No
     public HarmonicCentralityWriteStep(WriteNodePropertyService writeNodePropertyService, HarmonicCentralityWriteConfig configuration) {
         this.writeStep = new GenericCentralityWriteStep<>(
             writeNodePropertyService,
-            configuration,
-            AlgorithmLabel.HarmonicCentrality
+            AlgorithmLabel.HarmonicCentrality,
+            configuration::resolveResultStore,
+            configuration.writeConcurrency(),
+            configuration.writeProperty()
         );
     }
 

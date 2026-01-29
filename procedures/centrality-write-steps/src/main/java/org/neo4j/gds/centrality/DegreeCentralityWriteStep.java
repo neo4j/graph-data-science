@@ -36,8 +36,10 @@ public class DegreeCentralityWriteStep implements WriteStep<CentralityAlgorithmR
     public DegreeCentralityWriteStep(WriteNodePropertyService writeNodePropertyService, DegreeCentralityWriteConfig configuration) {
         this.writeStep = new GenericCentralityWriteStep<>(
             writeNodePropertyService,
-            configuration,
-            AlgorithmLabel.DegreeCentrality
+            AlgorithmLabel.DegreeCentrality,
+            configuration::resolveResultStore,
+            configuration.writeConcurrency(),
+            configuration.writeProperty()
         );
     }
 

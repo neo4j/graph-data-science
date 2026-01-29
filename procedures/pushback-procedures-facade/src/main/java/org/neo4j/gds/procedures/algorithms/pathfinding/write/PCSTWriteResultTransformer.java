@@ -25,6 +25,7 @@ import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.pathfinding.PrizeCollectingSteinerTreeWriteStep;
 import org.neo4j.gds.pricesteiner.PrizeSteinerTreeResult;
+import org.neo4j.gds.procedures.algorithms.WriteStepExecute;
 import org.neo4j.gds.procedures.algorithms.pathfinding.PrizeCollectingSteinerTreeWriteResult;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.results.ResultTransformer;

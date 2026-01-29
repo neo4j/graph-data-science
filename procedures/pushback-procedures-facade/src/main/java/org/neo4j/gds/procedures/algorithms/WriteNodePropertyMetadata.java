@@ -17,7 +17,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.algorithms.pathfinding.write;
+package org.neo4j.gds.procedures.algorithms;
 
-record WriteRelationshipMetadata(long relationshipsWritten, long writeMillis) {
+import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
+
+public record WriteNodePropertyMetadata(NodePropertiesWritten nodePropertiesWritten, long writeMillis) {
 }

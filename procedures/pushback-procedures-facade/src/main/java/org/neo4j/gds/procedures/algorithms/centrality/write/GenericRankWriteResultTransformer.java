@@ -17,46 +17,45 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.algorithms.centrality.mutate;
+package org.neo4j.gds.procedures.algorithms.centrality.write;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
-import org.neo4j.gds.centrality.GenericCentralityMutateStep;
+import org.neo4j.gds.api.ResultStore;
+import org.neo4j.gds.centrality.GenericRankWriteStep;
+import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.pagerank.PageRankResult;
-import org.neo4j.gds.procedures.algorithms.MutateNodeStepExecute;
-import org.neo4j.gds.procedures.algorithms.centrality.PageRankMutateResult;
+import org.neo4j.gds.procedures.algorithms.WriteStepExecute;
+import org.neo4j.gds.procedures.algorithms.centrality.PageRankWriteResult;
 import org.neo4j.gds.procedures.algorithms.centrality.RankDistributionHelpers;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.results.ResultTransformer;
 import org.neo4j.gds.scaling.ScalerFactory;
 
-import java.util.Collection;
 import java.util.Map;
 import java.util.stream.Stream;
 
-public class GenericRankMutateResultTransformer implements ResultTransformer<TimedAlgorithmResult<PageRankResult>, Stream<PageRankMutateResult>> {
+public class GenericRankWriteResultTransformer implements ResultTransformer<TimedAlgorithmResult<PageRankResult>, Stream<PageRankWriteResult>> {
     private final Graph graph;
     private final GraphStore graphStore;
     private final ScalerFactory scalerFactory;
     private final Map<String, Object> configuration;
     private final boolean shouldComputeDistribution;
     private final Concurrency concurrency;
-    private final MutateNodePropertyService mutateNodePropertyService;
-    private final Collection<String> labelsToUpdate;
-    private final String mutateProperty;
+    private final GenericRankWriteStep writeStep;
+    private final JobId jobId;
+    private final ResultStore resultStore;
 
-    public GenericRankMutateResultTransformer(
+    public GenericRankWriteResultTransformer(
         Graph graph,
         GraphStore graphStore,
         Map<String, Object> configuration,
         ScalerFactory scalerFactory,
         boolean shouldComputeDistribution,
         Concurrency concurrency,
-        MutateNodePropertyService mutateNodePropertyService,
-        Collection<String> labelsToUpdate,
-        String mutateProperty
+        GenericRankWriteStep writeStep,
+        JobId jobId, ResultStore resultStore
     ) {
         this.graph = graph;
         this.graphStore = graphStore;
@@ -64,26 +63,22 @@ public class GenericRankMutateResultTransformer implements ResultTransformer<Tim
         this.scalerFactory = scalerFactory;
         this.shouldComputeDistribution = shouldComputeDistribution;
         this.concurrency = concurrency;
-        this.mutateNodePropertyService = mutateNodePropertyService;
-        this.labelsToUpdate = labelsToUpdate;
-        this.mutateProperty = mutateProperty;
+        this.writeStep = writeStep;
+        this.jobId = jobId;
+        this.resultStore = resultStore;
     }
 
     @Override
-    public Stream<PageRankMutateResult> apply(TimedAlgorithmResult<PageRankResult> timedAlgorithmResult) {
+    public Stream<PageRankWriteResult> apply(TimedAlgorithmResult<PageRankResult> timedAlgorithmResult) {
         var result = timedAlgorithmResult.result();
 
-
-        var mutateStep  = new GenericCentralityMutateStep<>(
-            mutateNodePropertyService,
-            mutateProperty,
-            labelsToUpdate
-        );
-        var mutateMetadata = MutateNodeStepExecute.executeMutateNodePropertyStep(
-            mutateStep,
+        var writeMetadata = WriteStepExecute.executeWriteNodePropertyStep(
+            writeStep,
             graph,
             graphStore,
-            result
+            jobId,
+            result,
+            resultStore
         );
 
         var centralityDistribution = RankDistributionHelpers.compute(
@@ -95,15 +90,15 @@ public class GenericRankMutateResultTransformer implements ResultTransformer<Tim
         );
 
         return Stream.of(
-            new PageRankMutateResult(
+            new PageRankWriteResult(
                 result.iterations(),
                 result.didConverge(),
                 centralityDistribution.centralitySummary(),
                 0,
                 timedAlgorithmResult.computeMillis(),
                 centralityDistribution.computeMillis(),
-                mutateMetadata.mutateMillis(),
-                mutateMetadata.nodePropertiesWritten().value(),
+                writeMetadata.writeMillis(),
+                writeMetadata.nodePropertiesWritten().value(),
                 configuration
             )
         );

@@ -27,22 +27,30 @@ import org.neo4j.gds.applications.algorithms.machinery.Label;
 import org.neo4j.gds.applications.algorithms.machinery.WriteNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.WriteStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
-import org.neo4j.gds.config.WritePropertyConfig;
 import org.neo4j.gds.core.JobId;
+import org.neo4j.gds.core.concurrency.Concurrency;
+
+import java.util.Optional;
+import java.util.function.Function;
 
 public class GenericCentralityWriteStep<R extends CentralityAlgorithmResult> implements WriteStep<R, NodePropertiesWritten> {
     private final WriteNodePropertyService writeNodePropertyService;
-    private final WritePropertyConfig configuration;
     private final Label algorithmLabel;
+    private final Function<ResultStore, Optional<ResultStore>> resultStoreResolver;
+    private final Concurrency writeConcurrency;
+    private final String writeProperty;
 
     public GenericCentralityWriteStep(
         WriteNodePropertyService writeNodePropertyService,
-        WritePropertyConfig configuration,
-        Label algorithmLabel
+        Label algorithmLabel, Function<ResultStore, Optional<ResultStore>> resultStoreResolver,
+        Concurrency writeConcurrency,
+        String writeProperty
     ) {
         this.writeNodePropertyService = writeNodePropertyService;
-        this.configuration = configuration;
         this.algorithmLabel = algorithmLabel;
+        this.resultStoreResolver = resultStoreResolver;
+        this.writeConcurrency = writeConcurrency;
+        this.writeProperty = writeProperty;
     }
 
     @Override
@@ -56,10 +64,11 @@ public class GenericCentralityWriteStep<R extends CentralityAlgorithmResult> imp
         return writeNodePropertyService.perform(
             graph,
             graphStore,
-            resultStore,
-            configuration,
+            resultStoreResolver.apply(resultStore),
+            writeConcurrency,
             algorithmLabel,
             jobId,
+            writeProperty,
             result.nodePropertyValues()
         );
     }

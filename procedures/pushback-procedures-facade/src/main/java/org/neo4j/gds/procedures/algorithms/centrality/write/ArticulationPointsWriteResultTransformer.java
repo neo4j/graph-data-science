@@ -17,53 +17,53 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.algorithms.pathfinding.write;
+package org.neo4j.gds.procedures.algorithms.centrality.write;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
+import org.neo4j.gds.articulationpoints.ArticulationPointsResult;
+import org.neo4j.gds.centrality.ArticulationPointsWriteStep;
 import org.neo4j.gds.core.JobId;
-import org.neo4j.gds.mcmf.CostFlowResult;
-import org.neo4j.gds.pathfinding.MCMFWriteStep;
 import org.neo4j.gds.procedures.algorithms.WriteStepExecute;
-import org.neo4j.gds.procedures.algorithms.pathfinding.MCMFWriteResult;
+import org.neo4j.gds.procedures.algorithms.centrality.ArticulationPointsWriteResult;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.results.ResultTransformer;
 
 import java.util.Map;
 import java.util.stream.Stream;
 
-public class MCMFWriteResultTransformer implements ResultTransformer<TimedAlgorithmResult<CostFlowResult>, Stream<MCMFWriteResult>> {
+public class ArticulationPointsWriteResultTransformer implements ResultTransformer<TimedAlgorithmResult<ArticulationPointsResult>, Stream<ArticulationPointsWriteResult>> {
 
-    private final MCMFWriteStep writeStep;
     private final Graph graph;
     private final GraphStore graphStore;
-    @Deprecated(forRemoval = true)
-    private final ResultStore resultStore;
-    private final JobId jobId;
     private final Map<String, Object> configuration;
+    private final ArticulationPointsWriteStep writeStep;
+    private final JobId jobId;
+    private final ResultStore resultStore;
 
-    public MCMFWriteResultTransformer(
-        MCMFWriteStep writeStep,
+    public ArticulationPointsWriteResultTransformer(
         Graph graph,
         GraphStore graphStore,
-        ResultStore resultStore,
+        Map<String, Object> configuration,
+        ArticulationPointsWriteStep writeStep,
         JobId jobId,
-        Map<String, Object> configuration
+        ResultStore resultStore
     ) {
-        this.writeStep = writeStep;
         this.graph = graph;
         this.graphStore = graphStore;
-        this.resultStore = resultStore;
-        this.jobId = jobId;
         this.configuration = configuration;
+        this.writeStep = writeStep;
+        this.jobId = jobId;
+        this.resultStore = resultStore;
     }
 
-    @Override
-    public Stream<MCMFWriteResult> apply(TimedAlgorithmResult<CostFlowResult> algorithmResult) {
 
-        var result = algorithmResult.result();
-        var writeRelationshipsMetadata = WriteStepExecute.executeWriteRelationshipStep(
+    @Override
+    public Stream<ArticulationPointsWriteResult> apply(TimedAlgorithmResult<ArticulationPointsResult> timedAlgorithmResult) {
+        var result = timedAlgorithmResult.result();
+
+        var writeMetadata = WriteStepExecute.executeWriteNodePropertyStep(
             writeStep,
             graph,
             graphStore,
@@ -73,16 +73,13 @@ public class MCMFWriteResultTransformer implements ResultTransformer<TimedAlgori
         );
 
         return Stream.of(
-            new MCMFWriteResult(
-                0,
-                algorithmResult.computeMillis(),
-                writeRelationshipsMetadata.writeMillis(),
-                writeRelationshipsMetadata.relationshipsWritten(),
-                result.totalFlow(),
-                result.totalCost(),
+            new ArticulationPointsWriteResult(
+                result.articulationPoints().cardinality(),
+                writeMetadata.nodePropertiesWritten().value(),
+                writeMetadata.writeMillis(),
+                timedAlgorithmResult.computeMillis(),
                 configuration
             )
         );
     }
-
 }

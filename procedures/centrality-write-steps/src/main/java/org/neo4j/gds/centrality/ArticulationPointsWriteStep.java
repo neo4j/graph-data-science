@@ -28,17 +28,28 @@ import org.neo4j.gds.applications.algorithms.machinery.WriteNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.WriteStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.articulationpoints.ArticulationPointsResult;
-import org.neo4j.gds.articulationpoints.ArticulationPointsWriteConfig;
 import org.neo4j.gds.core.JobId;
+import org.neo4j.gds.core.concurrency.Concurrency;
+
+import java.util.Optional;
+import java.util.function.Function;
 
 public class ArticulationPointsWriteStep implements WriteStep<ArticulationPointsResult, NodePropertiesWritten> {
-    private final ArticulationPointsWriteConfig configuration;
     private final WriteNodePropertyService writeNodePropertyService;
+    private final Function<ResultStore, Optional<ResultStore>> resultStoreResolver;
+    private final Concurrency writeConcurrency;
+    private final String writeProperty;
+
 
     public ArticulationPointsWriteStep(
-        ArticulationPointsWriteConfig configuration, WriteNodePropertyService writeNodePropertyService
+        WriteNodePropertyService writeNodePropertyService,
+        Function<ResultStore, Optional<ResultStore>> resultStoreResolver,
+        Concurrency writeConcurrency,
+        String writeProperty
     ) {
-        this.configuration = configuration;
+        this.resultStoreResolver = resultStoreResolver;
+        this.writeConcurrency = writeConcurrency;
+        this.writeProperty = writeProperty;
         this.writeNodePropertyService = writeNodePropertyService;
     }
 
@@ -66,10 +77,11 @@ public class ArticulationPointsWriteStep implements WriteStep<ArticulationPoints
         return writeNodePropertyService.perform(
             graph,
             graphStore,
-            resultStore,
-            configuration,
+            resultStoreResolver.apply(resultStore),
+            writeConcurrency,
             AlgorithmLabel.ArticulationPoints,
             jobId,
+            writeProperty,
             nodePropertyValues
         );
     }

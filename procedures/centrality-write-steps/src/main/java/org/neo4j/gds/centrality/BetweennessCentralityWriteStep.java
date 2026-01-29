@@ -36,8 +36,10 @@ public class BetweennessCentralityWriteStep implements WriteStep<CentralityAlgor
     public BetweennessCentralityWriteStep(WriteNodePropertyService writeNodePropertyService, BetweennessCentralityWriteConfig configuration) {
         this.writeStep = new GenericCentralityWriteStep<>(
             writeNodePropertyService,
-            configuration,
-            AlgorithmLabel.BetweennessCentrality
+            AlgorithmLabel.BetweennessCentrality,
+            configuration::resolveResultStore,
+            configuration.writeConcurrency(),
+            configuration.writeProperty()
         );
     }
 

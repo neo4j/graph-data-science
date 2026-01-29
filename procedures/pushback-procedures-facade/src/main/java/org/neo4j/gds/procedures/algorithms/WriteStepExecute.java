@@ -17,23 +17,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.algorithms.pathfinding.write;
+package org.neo4j.gds.procedures.algorithms;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.applications.algorithms.machinery.WriteStep;
+import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.utils.ProgressTimer;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-final class WriteStepExecute {
+public final class WriteStepExecute {
 
     private WriteStepExecute() {}
 
-    static <RESULT_FROM_ALGORITHM> WriteRelationshipMetadata executeWriteRelationshipStep(
+    public static <RESULT_FROM_ALGORITHM> WriteRelationshipMetadata executeWriteRelationshipStep(
         WriteStep<RESULT_FROM_ALGORITHM,RelationshipsWritten> writeStep,
         Graph graph,
         GraphStore graphStore,
@@ -53,5 +54,31 @@ final class WriteStepExecute {
             );
         }
         return new WriteRelationshipMetadata(relationshipsWritten.value(), writeMillis.get());
+    }
+
+    public static <RESULT_FROM_ALGORITHM> WriteNodePropertyMetadata executeWriteNodePropertyStep(
+        WriteStep<RESULT_FROM_ALGORITHM, NodePropertiesWritten> writeStep,
+        Graph graph,
+        GraphStore graphStore,
+        JobId jobId,
+        RESULT_FROM_ALGORITHM algorithmResult,
+        ResultStore  resultStore
+    ) {
+
+        var builder = new WriteNodePropertyMetadataBuilder();
+
+        try (var ignored = ProgressTimer.start(builder::writeMillis)) {
+            builder.nodePropertiesWritten(
+                writeStep.execute(
+                    graph,
+                    graphStore,
+                    resultStore,
+                    algorithmResult,
+                    jobId
+                )
+            );
+        }
+        return builder.build();
+
     }
 }

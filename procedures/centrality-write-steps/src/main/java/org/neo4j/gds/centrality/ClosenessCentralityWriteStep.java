@@ -27,17 +27,27 @@ import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.applications.algorithms.machinery.WriteNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.WriteStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
-import org.neo4j.gds.closeness.ClosenessCentralityWriteConfig;
 import org.neo4j.gds.core.JobId;
+import org.neo4j.gds.core.concurrency.Concurrency;
+
+import java.util.Optional;
+import java.util.function.Function;
 
 public class ClosenessCentralityWriteStep implements WriteStep<CentralityAlgorithmResult, NodePropertiesWritten> {
     private final GenericCentralityWriteStep<CentralityAlgorithmResult> writeStep;
 
-    public ClosenessCentralityWriteStep(WriteNodePropertyService writeNodePropertyService, ClosenessCentralityWriteConfig configuration) {
+    public ClosenessCentralityWriteStep(
+        WriteNodePropertyService writeNodePropertyService,
+        String writeProperty,
+        Concurrency writeConcurrency,
+        Function<ResultStore, Optional<ResultStore>> resultStoreResolver
+    ) {
         this.writeStep = new GenericCentralityWriteStep<>(
             writeNodePropertyService,
-            configuration,
-            AlgorithmLabel.ClosenessCentrality
+            AlgorithmLabel.ClosenessCentrality,
+            resultStoreResolver,
+            writeConcurrency,
+            writeProperty
         );
     }
 
