@@ -160,7 +160,7 @@ class LocalOperationsProcedureFacadeTest {
             new UserLogEntry(new LeafTask("lt", 87), "going twice..."),
             new UserLogEntry(new LeafTask("lt", 23), "gone!")
         );
-        when(userLogStore.query("current user")).thenReturn(expectedWarnings);
+        when(userLogStore.query(new User("current user", false))).thenReturn(expectedWarnings);
         var actualWarnings = operationsProcedureFacade.queryUserLog(null);
 
         assertThat(actualWarnings).isSameAs(expectedWarnings);
