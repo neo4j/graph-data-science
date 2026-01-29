@@ -54,8 +54,8 @@ class NodeRegressionPredictPipelineMutateStep implements MutateStep<HugeDoubleAr
         return mutateNodePropertyService.mutateNodeProperties(
             graph,
             graphStore,
-            new MutateNodePropertyService.MutateNodePropertiesSpec(configuration.nodeLabels()),
-            nodeProperties
-        );
+            nodeProperties,
+            configuration.nodeLabels()
+            );
     }
 }

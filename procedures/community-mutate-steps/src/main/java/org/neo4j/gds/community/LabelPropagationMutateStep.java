@@ -23,7 +23,6 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
-import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService.MutateNodePropertySpec;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.labelpropagation.LabelPropagationResult;
@@ -32,8 +31,9 @@ import java.util.Collection;
 
 public class LabelPropagationMutateStep implements MutateStep<LabelPropagationResult, NodePropertiesWritten> {
     private final MutateNodePropertyService mutateNodePropertyService;
-    private final MutateNodePropertySpec mutateParameters;
     private final StandardCommunityProperties standardCommunityProperties;
+    private final String mutateProperty;
+    private final Collection<String> nodeLabels;
 
     public LabelPropagationMutateStep(
         MutateNodePropertyService mutateNodePropertyService,
@@ -41,7 +41,8 @@ public class LabelPropagationMutateStep implements MutateStep<LabelPropagationRe
         String mutateProperty,
         StandardCommunityProperties standardCommunityProperties
     ) {
-        this.mutateParameters = new MutateNodePropertySpec(mutateProperty,labelsToUpdate);
+        this.mutateProperty = mutateProperty;
+        this.nodeLabels = labelsToUpdate;
         this.mutateNodePropertyService = mutateNodePropertyService;
         this.standardCommunityProperties = standardCommunityProperties;
     }
@@ -61,7 +62,8 @@ public class LabelPropagationMutateStep implements MutateStep<LabelPropagationRe
         return mutateNodePropertyService.mutateNodeProperties(
             graph,
             graphStore,
-            mutateParameters,
+            mutateProperty,
+            nodeLabels,
             nodePropertyValues
         );
     }

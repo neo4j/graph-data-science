@@ -46,29 +46,30 @@ public class MutateNodePropertyService {
     public NodePropertiesWritten mutateNodeProperties(
         Graph graph,
         GraphStore graphStore,
-        MutateNodePropertySpec spec,
+        String mutateProperty,
+        Collection<String> nodeLabels,
         NodePropertyValues nodePropertyValues
     )
     {
        return mutateNodeProperties(
            graph,
            graphStore,
-           spec,
-           List.of(NodePropertyRecord.of(spec.mutateProperty(), nodePropertyValues))
+           resolveNodeLabels(graphStore, nodeLabels),
+           List.of(NodePropertyRecord.of(mutateProperty, nodePropertyValues))
        );
     }
 
     public NodePropertiesWritten mutateNodeProperties(
         Graph graph,
         GraphStore graphStore,
-        MutateParameters parameters,
-        List<NodePropertyRecord> nodeProperties
-    )
+        List<NodePropertyRecord> nodeProperties,
+        Collection<String> nodeLabels
+        )
     {
         return mutateNodeProperties(
             graph,
             graphStore,
-            resolveNodeLabels(graphStore, parameters.nodeLabels()),
+            resolveNodeLabels(graphStore, nodeLabels),
             nodeProperties
         );
     }
@@ -128,10 +129,6 @@ public class MutateNodePropertyService {
         return ElementTypeValidator.resolve(graphStore,nodeLabels);
     }
 
-    public record MutateNodePropertySpec(String mutateProperty, Collection<String> nodeLabels) implements MutateParameters{}
-    public record MutateNodePropertiesSpec(Collection<String> nodeLabels) implements MutateParameters{}
-    public interface MutateParameters {
-        Collection<String> nodeLabels();
-    }
+
 
 }

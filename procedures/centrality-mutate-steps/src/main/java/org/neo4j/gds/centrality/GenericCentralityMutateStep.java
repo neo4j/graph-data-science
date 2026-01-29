@@ -30,7 +30,8 @@ import java.util.Collection;
 
 public class GenericCentralityMutateStep<R extends CentralityAlgorithmResult> implements MutateStep<R,NodePropertiesWritten> {
     private final MutateNodePropertyService mutateNodePropertyService;
-    private final MutateNodePropertyService.MutateNodePropertySpec mutateParameters;
+    private final String mutateProperty;
+    private final Collection<String> nodeLabels;
 
     public GenericCentralityMutateStep(
         MutateNodePropertyService mutateNodePropertyService,
@@ -38,10 +39,8 @@ public class GenericCentralityMutateStep<R extends CentralityAlgorithmResult> im
         Collection<String> nodeLabels
     ) {
         this.mutateNodePropertyService = mutateNodePropertyService;
-        this.mutateParameters = new MutateNodePropertyService.MutateNodePropertySpec(
-            mutateProperty,
-            nodeLabels
-        );
+        this.mutateProperty = mutateProperty;
+        this.nodeLabels = nodeLabels;
     }
 
     @Override
@@ -53,7 +52,8 @@ public class GenericCentralityMutateStep<R extends CentralityAlgorithmResult> im
         return mutateNodePropertyService.mutateNodeProperties(
             graph,
             graphStore,
-            mutateParameters,
+            mutateProperty,
+            nodeLabels,
             result.nodePropertyValues()
         );
     }

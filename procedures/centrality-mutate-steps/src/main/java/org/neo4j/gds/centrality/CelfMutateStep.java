@@ -22,7 +22,6 @@ package org.neo4j.gds.centrality;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
-import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService.MutateNodePropertySpec;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.influenceMaximization.CELFNodeProperties;
@@ -32,7 +31,8 @@ import java.util.Collection;
 
 public class CelfMutateStep implements MutateStep<CELFResult, NodePropertiesWritten> {
     private final MutateNodePropertyService mutateNodePropertyService;
-    private final MutateNodePropertySpec mutateParameters;
+    private final String mutateProperty;
+    private final Collection<String> nodeLabels;
 
     public CelfMutateStep(
         MutateNodePropertyService mutateNodePropertyService,
@@ -40,10 +40,8 @@ public class CelfMutateStep implements MutateStep<CELFResult, NodePropertiesWrit
         Collection<String> nodeLabels
     ) {
         this.mutateNodePropertyService = mutateNodePropertyService;
-        this.mutateParameters = new MutateNodePropertyService.MutateNodePropertySpec(
-            mutateProperty,
-            nodeLabels
-        );
+        this.mutateProperty = mutateProperty;
+        this.nodeLabels = nodeLabels;
     }
 
     @Override
@@ -57,7 +55,8 @@ public class CelfMutateStep implements MutateStep<CELFResult, NodePropertiesWrit
         return mutateNodePropertyService.mutateNodeProperties(
             graph,
             graphStore,
-            mutateParameters,
+            mutateProperty,
+            nodeLabels,
             nodeProperties
         );
     }

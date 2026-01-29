@@ -99,7 +99,6 @@ public class TestMutateSpec implements AlgorithmSpec<TestAlgorithm, TestAlgorith
             return runWithExceptionLogging("Graph mutation failed", executionContext.log(), () -> {
                 var config = computationResult.config();
 
-
                 AtomicLong mutateMillis =new AtomicLong();
                 try (ProgressTimer ignored = ProgressTimer.start(mutateMillis::set)) {
                     if (!computationResult.isGraphEmpty()) {
@@ -111,8 +110,8 @@ public class TestMutateSpec implements AlgorithmSpec<TestAlgorithm, TestAlgorith
                         mutateNodeProperty.mutateNodeProperties(
                             computationResult.graph(),
                             computationResult.graphStore(),
-                            new MutateNodePropertyService.MutateNodePropertiesSpec(config.nodeLabels()),
-                            nodePropertyList
+                            nodePropertyList,
+                            config.nodeLabels()
                         );
                     }
                 }

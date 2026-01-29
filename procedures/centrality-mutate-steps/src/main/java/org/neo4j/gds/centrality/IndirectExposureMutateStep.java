@@ -23,7 +23,6 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyRecord;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
-import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService.MutateNodePropertiesSpec;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.indirectExposure.IndirectExposureResult;
@@ -33,7 +32,7 @@ import java.util.List;
 
 public class IndirectExposureMutateStep implements MutateStep<IndirectExposureResult, NodePropertiesWritten> {
     private final MutateNodePropertyService mutateNodePropertyService;
-    private final MutateNodePropertiesSpec mutateParameters;
+    private final Collection<String> nodeLabels;
     private final String exposures;
     private final String hops;
     private final String parents;
@@ -52,7 +51,7 @@ public class IndirectExposureMutateStep implements MutateStep<IndirectExposureRe
         this.hops = hops;
         this.parents = parents;
         this.roots = roots;
-        this.mutateParameters = new MutateNodePropertiesSpec(nodeLabels);
+        this.nodeLabels = nodeLabels;
     }
 
     @Override
@@ -70,8 +69,8 @@ public class IndirectExposureMutateStep implements MutateStep<IndirectExposureRe
         return mutateNodePropertyService.mutateNodeProperties(
             graph,
             graphStore,
-            mutateParameters,
-            List.of(exposure, hops, parents, roots)
+            List.of(exposure, hops, parents, roots),
+            nodeLabels
         );
 
     }

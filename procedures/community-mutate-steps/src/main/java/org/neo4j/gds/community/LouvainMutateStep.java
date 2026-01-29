@@ -25,7 +25,6 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
-import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService.MutateNodePropertySpec;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.louvain.LouvainResult;
@@ -36,7 +35,8 @@ public class LouvainMutateStep implements MutateStep<LouvainResult, NodeProperti
     private final StandardCommunityProperties standardCommunityProperties;
     private final boolean includeIntermediateCommunities;
     private final MutateNodePropertyService mutateNodePropertyService;
-    private final MutateNodePropertySpec mutateParameters;
+    private final String mutateProperty;
+    private final Collection<String> nodeLabels;
 
     public LouvainMutateStep(
         MutateNodePropertyService mutateNodePropertyService,
@@ -45,7 +45,8 @@ public class LouvainMutateStep implements MutateStep<LouvainResult, NodeProperti
         StandardCommunityProperties standardCommunityProperties,
         boolean includeIntermediateCommunities
     ) {
-        this.mutateParameters = new MutateNodePropertySpec(mutateProperty,labelsToUpdate);
+        this.mutateProperty = mutateProperty;
+        this.nodeLabels = labelsToUpdate;
         this.mutateNodePropertyService = mutateNodePropertyService;
         this.standardCommunityProperties = standardCommunityProperties;
         this.includeIntermediateCommunities = includeIntermediateCommunities;
@@ -62,7 +63,8 @@ public class LouvainMutateStep implements MutateStep<LouvainResult, NodeProperti
         return mutateNodePropertyService.mutateNodeProperties(
             graph,
             graphStore,
-            mutateParameters,
+            mutateProperty,
+            nodeLabels,
             nodePropertyValues
         );
     }
