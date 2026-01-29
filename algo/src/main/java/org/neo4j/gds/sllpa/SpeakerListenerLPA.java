@@ -25,6 +25,7 @@ import org.neo4j.gds.beta.pregel.ImmutablePregelResult;
 import org.neo4j.gds.beta.pregel.Pregel;
 import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
@@ -43,13 +44,15 @@ public class SpeakerListenerLPA extends Algorithm<PregelResult> {
         SpeakerListenerLPAConfig config,
         ExecutorService executorService,
         ProgressTracker progressTracker,
-        Optional<Long> seed
+        Optional<Long> seed,
+        TerminationFlag terminationFlag
     ) {
         super(progressTracker);
         this.graph = graph;
         this.config = config;
         this.executorService = executorService;
         this.seed = seed;
+        this.terminationFlag = terminationFlag;
 
     }
 

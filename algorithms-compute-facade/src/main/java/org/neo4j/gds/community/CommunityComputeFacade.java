@@ -591,7 +591,8 @@ public class CommunityComputeFacade {
             configuration,
             DefaultPool.INSTANCE,
             progressTracker,
-            Optional.empty()
+            Optional.empty(),
+            terminationFlag
         );
 
         return algorithmCaller.run(

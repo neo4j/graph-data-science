@@ -298,7 +298,8 @@ public class CommunityAlgorithms {
             configuration,
             DefaultPool.INSTANCE,
             progressTracker,
-            Optional.empty()
+            Optional.empty(),
+            terminationFlag
         ).compute();
     }
 }
