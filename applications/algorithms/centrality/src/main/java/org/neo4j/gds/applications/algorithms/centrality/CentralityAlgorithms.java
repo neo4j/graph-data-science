@@ -119,13 +119,17 @@ public class CentralityAlgorithms {
         return Bridges
             .create(graph, progressTracker, parameters.computeComponents(),terminationFlag)
             .compute();
-
     }
 
     public CELFResult celf(Graph graph, CELFParameters parameters, ProgressTracker progressTracker) {
-        return new CELF(graph, parameters, DefaultPool.INSTANCE, progressTracker).compute();
+        return new CELF(
+            graph,
+            parameters,
+            DefaultPool.INSTANCE,
+            progressTracker,
+            terminationFlag
+        ).compute();
     }
-
 
     public ClosenessCentralityResult closenessCentrality(
         Graph graph,

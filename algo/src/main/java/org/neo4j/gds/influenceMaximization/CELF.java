@@ -29,6 +29,7 @@ import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.queue.HugeLongPriorityQueue;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
@@ -55,7 +56,8 @@ public class CELF extends Algorithm<CELFResult> {
         Graph graph,
         CELFParameters parameters,
         ExecutorService executorService,
-        ProgressTracker progressTracker
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
     ) {
         super(progressTracker);
 
@@ -75,6 +77,7 @@ public class CELF extends Algorithm<CELFResult> {
                     : costValues.get(a) > costValues.get(b);                       // otherwise compare the costs
             }
         };
+        this.terminationFlag = terminationFlag;
 
     }
 
@@ -113,7 +116,9 @@ public class CELF extends Algorithm<CELFResult> {
             .concurrency(this.concurrency)
             .tasks(tasks)
             .executor(executorService)
+            .terminationFlag(terminationFlag)
             .run();
+
         progressTracker.endSubTask();
 
         graph.forEachNode(nodeId -> {

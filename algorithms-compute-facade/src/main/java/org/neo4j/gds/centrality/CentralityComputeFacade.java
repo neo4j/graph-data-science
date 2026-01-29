@@ -250,7 +250,13 @@ public class CentralityComputeFacade {
             logProgress
         );
 
-        var celf =  new CELF(graph, parameters, DefaultPool.INSTANCE, progressTracker);
+        var celf =  new CELF(
+            graph,
+            parameters,
+            DefaultPool.INSTANCE,
+            progressTracker,
+            terminationFlag
+        );
 
         return algorithmCaller.run(
             celf::compute,
