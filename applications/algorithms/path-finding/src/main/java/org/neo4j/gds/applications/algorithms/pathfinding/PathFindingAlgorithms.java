@@ -277,12 +277,17 @@ public class PathFindingAlgorithms {
         return algorithm.compute();
     }
 
-    PrizeSteinerTreeResult pcst(Graph graph, PCSTParameters parameters, ProgressTracker progressTracker) {
+    PrizeSteinerTreeResult pcst(
+        Graph graph,
+        PCSTParameters parameters,
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag) {
         var prizeProperty = graph.nodeProperties(parameters.prizeProperty());
         var algorithm = new PCSTFast(
             graph,
             (v) -> Math.max(prizeProperty.doubleValue(v), 0),
-            progressTracker
+            progressTracker,
+            terminationFlag
         );
 
         return algorithm.compute();
@@ -428,7 +433,8 @@ public class PathFindingAlgorithms {
     public TopologicalSortResult topologicalSort(
         Graph graph,
         TopologicalSortParameters parameters,
-        ProgressTracker progressTracker, TerminationFlag terminationFlag
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
     ) {
         var algorithm = new TopologicalSort(
             graph,

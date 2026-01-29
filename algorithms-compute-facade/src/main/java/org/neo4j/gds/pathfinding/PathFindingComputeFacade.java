@@ -532,7 +532,8 @@ public class PathFindingComputeFacade {
         var pcstFast = new PCSTFast(
             graph,
             (v) -> Math.max(prizeProperty.doubleValue(v), 0),
-            progressTracker
+            progressTracker,
+            terminationFlag
         );
 
         // Submit the algorithm for async computation

@@ -35,6 +35,7 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.logging.GdsTestLog;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.function.LongToDoubleFunction;
 import java.util.stream.LongStream;
@@ -67,7 +68,7 @@ class PCSTFastTest {
         void shouldFindOptimalSolution() {
             LongToDoubleFunction prizes = (x) -> 20.0;
 
-            var pcst = new PCSTFast(graph, prizes, ProgressTracker.NULL_TRACKER);
+            var pcst = new PCSTFast(graph, prizes, ProgressTracker.NULL_TRACKER,TerminationFlag.RUNNING_TRUE);
             var result = pcst.compute();
 
             var parentArray = result.parentArray();
@@ -97,7 +98,7 @@ class PCSTFastTest {
                 EmptyTaskRegistryFactory.INSTANCE
             );
 
-           new PCSTFast(graph, x->20, progressTracker).compute();
+           new PCSTFast(graph, x->20, progressTracker,TerminationFlag.RUNNING_TRUE).compute();
 
             Assertions.assertThat(log.getMessages(TestLog.INFO))
                 .extracting(removingThreadId())
@@ -161,7 +162,7 @@ class PCSTFastTest {
         void shouldFindCorrectAnswer() {
             LongToDoubleFunction prizes = (x) -> 20.0;
 
-            var pcst =new PCSTFast(graph,prizes,ProgressTracker.NULL_TRACKER);
+            var pcst =new PCSTFast(graph,prizes,ProgressTracker.NULL_TRACKER,TerminationFlag.RUNNING_TRUE);
             var result =pcst.compute();
 
             var a0 = graph.toMappedNodeId("a0");
@@ -209,7 +210,7 @@ class PCSTFastTest {
         void shouldFindCorrectAnswer() {
 
             var prizes = graph.nodeProperties("prize");
-            var pcst = new PCSTFast(graph, prizes::doubleValue, ProgressTracker.NULL_TRACKER);
+            var pcst = new PCSTFast(graph, prizes::doubleValue, ProgressTracker.NULL_TRACKER,TerminationFlag.RUNNING_TRUE);
             var result = pcst.compute();
 
             var a0 = graph.toMappedNodeId("a0");
@@ -258,7 +259,12 @@ class PCSTFastTest {
         void shouldWorkProperly(){
 
             var prizes = graph.nodeProperties("prize");
-            var pcst = new PCSTFast(graph, prizes::doubleValue, ProgressTracker.NULL_TRACKER);
+            var pcst = new PCSTFast(
+                graph,
+                prizes::doubleValue,
+                ProgressTracker.NULL_TRACKER,
+                TerminationFlag.RUNNING_TRUE
+            );
             var result = pcst.compute();
 
             var  a6 =graph.toMappedNodeId("a6");

@@ -303,7 +303,12 @@ public class PathFindingAlgorithmsBusinessFacade {
         );
 
         return algorithmMachinery.getResult(
-            () -> algorithms.pcst(graph, configuration.toParameters(), progressTracker),
+            () -> algorithms.pcst(
+                graph,
+                configuration.toParameters(),
+                progressTracker,
+                requestScopedDependencies.terminationFlag()
+            ),
             progressTracker,
             configuration.concurrency()
         );

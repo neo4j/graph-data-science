@@ -22,6 +22,7 @@ package org.neo4j.gds.pricesteiner;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.function.LongToDoubleFunction;
 
@@ -30,10 +31,11 @@ public class PCSTFast extends Algorithm<PrizeSteinerTreeResult> {
     private final Graph graph;
     private final LongToDoubleFunction prizes; //figure out how to expose to user
 
-    public PCSTFast(Graph graph, LongToDoubleFunction prizes, ProgressTracker progressTracker) {
+    public PCSTFast(Graph graph, LongToDoubleFunction prizes, ProgressTracker progressTracker, TerminationFlag terminationFlag) {
         super(progressTracker);
         this.graph = graph;
         this.prizes = prizes;
+        this.terminationFlag = terminationFlag;
     }
 
     @Override
