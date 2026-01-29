@@ -477,7 +477,8 @@ public class CentralityComputeFacade {
             graph,
             configuration,
             DefaultPool.INSTANCE,
-            progressTracker
+            progressTracker,
+            terminationFlag
         );
 
         return algorithmCaller.run(

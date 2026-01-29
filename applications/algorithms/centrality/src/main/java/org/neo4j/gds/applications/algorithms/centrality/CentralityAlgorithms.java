@@ -221,7 +221,8 @@ public class CentralityAlgorithms {
             graph,
             configuration,
             DefaultPool.INSTANCE,
-            progressTracker
+            progressTracker,
+            terminationFlag
         );
 
         return algorithm.compute();
