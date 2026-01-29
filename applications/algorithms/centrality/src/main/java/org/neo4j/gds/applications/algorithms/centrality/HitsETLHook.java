@@ -73,7 +73,6 @@ class HitsETLHook implements PostLoadETLHook {
             .filter(relType -> !graphStore.inverseIndexedRelationshipTypes().contains(relType))
             .map(RelationshipType::name)
             .toList();
-
     }
 
     InverseRelationships createInverseRelationshipsAlgorithm(GraphStore graphStore, List<String> relationshipTypesWithoutIndex){

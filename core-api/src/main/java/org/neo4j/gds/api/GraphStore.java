@@ -129,7 +129,7 @@ public interface GraphStore {
 
     long relationshipCount(RelationshipType relationshipType);
 
-    Set<RelationshipType> relationshipTypes();
+    Set<RelationshipType>  relationshipTypes();
 
     boolean hasRelationshipType(RelationshipType relationshipType);
 

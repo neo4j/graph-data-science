@@ -155,7 +155,12 @@ public class CentralityComputeFacade {
         );
 
         double avgDegree = DegreeFunctions.averageDegree(graph, configuration.concurrency());
-        return new ArticleRankComputation<>(configuration, probabilityProvider, degreeFunction, avgDegree);
+        return new ArticleRankComputation<>(
+            configuration,
+            probabilityProvider,
+            degreeFunction,
+            avgDegree
+        );
     }
 
     public CompletableFuture<TimedAlgorithmResult<ArticulationPointsResult>> articulationPoints(

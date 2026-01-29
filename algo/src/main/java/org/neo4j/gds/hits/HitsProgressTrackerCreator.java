@@ -19,21 +19,33 @@
  */
 package org.neo4j.gds.hits;
 
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.indexInverse.InverseRelationshipsTask;
+import org.neo4j.gds.indexinverse.InverseRelationshipsParameters;
 
 import java.util.List;
 
-public class HitsProgressTrackerCreator {
+public final class HitsProgressTrackerCreator {
 
-    public static Task progressTask(long nodeCount, int maxIterations,String taskName) {
+    private HitsProgressTrackerCreator() {}
+
+    public static Task progressTask(long nodeCount, int maxIterations) {
         return Tasks.iterativeDynamic(
-            taskName,
+            AlgorithmLabel.HITS.asString(),
             () -> List.of(
                 Tasks.leaf("Compute iteration", nodeCount),
                 Tasks.leaf("Master compute iteration", nodeCount)
             ),
             maxIterations
         );
-}
+    }
+
+    public  static Task progressTaskWithInvertedIndex(long nodeCount, int maxIterations, InverseRelationshipsParameters inverseParams){
+            var  hitsTask = progressTask(nodeCount,maxIterations);
+            var invTask = InverseRelationshipsTask.progressTask(nodeCount,inverseParams);
+            return Tasks.task(AlgorithmLabel.HITS.asString(), invTask,hitsTask);
+
+    }
 }
