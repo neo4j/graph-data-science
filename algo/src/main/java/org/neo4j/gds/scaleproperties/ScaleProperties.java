@@ -32,6 +32,7 @@ import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.scaling.ScalarScaler;
 import org.neo4j.gds.scaling.Scaler;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
 import java.util.Optional;
@@ -61,13 +62,15 @@ public class ScaleProperties extends Algorithm<ScalePropertiesResult> {
         Graph graph,
         ScalePropertiesParameters params,
         ProgressTracker progressTracker,
-        ExecutorService executor
+        ExecutorService executor,
+        TerminationFlag terminationFlag
     ) {
         super(progressTracker);
         this.graph = graph;
         this.params = params;
         this.executor = executor;
         this.concurrency = params.concurrency();
+        this.terminationFlag = terminationFlag;
     }
 
     @Override
@@ -118,6 +121,7 @@ public class ScaleProperties extends Algorithm<ScalePropertiesResult> {
             .concurrency(concurrency)
             .tasks(tasks)
             .executor(executor)
+            .terminationFlag(terminationFlag)
             .run();
     }
 
@@ -136,6 +140,7 @@ public class ScaleProperties extends Algorithm<ScalePropertiesResult> {
             .concurrency(concurrency)
             .tasks(tasks)
             .executor(executor)
+            .terminationFlag(terminationFlag)
             .run();
     }
 

@@ -84,7 +84,8 @@ public class MiscellaneousAlgorithms {
             graph,
             params,
             progressTracker,
-            DefaultPool.INSTANCE
+            DefaultPool.INSTANCE,
+            terminationFlag
         );
 
         return algorithm.compute();
