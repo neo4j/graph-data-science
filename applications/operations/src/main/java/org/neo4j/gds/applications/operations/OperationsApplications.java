@@ -94,7 +94,7 @@ public final class OperationsApplications {
         var user = requestScopedDependencies.user();
         var userLogStore = requestScopedDependencies.userLogStore();
 
-        return userLogStore.query(user.getUsername());
+        return userLogStore.query(user);
     }
 
     public String resetAdjacencyPackingStrategy() {
