@@ -487,7 +487,8 @@ public class CommunityComputeFacade {
         var algorithm = ModularityCalculator.create(
             graph,
             graph.nodeProperties(parameters.communityProperty())::longValue,
-            parameters.concurrency()
+            parameters.concurrency(),
+            terminationFlag
         );
 
         return algorithmCaller.run(

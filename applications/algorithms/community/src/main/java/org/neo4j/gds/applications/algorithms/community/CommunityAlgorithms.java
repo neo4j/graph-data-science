@@ -222,7 +222,8 @@ public class CommunityAlgorithms {
         return ModularityCalculator.create(
             graph,
             graph.nodeProperties(parameters.communityProperty())::longValue,
-            parameters.concurrency()
+            parameters.concurrency(),
+            terminationFlag
         ).compute();
     }
 

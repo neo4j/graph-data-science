@@ -22,6 +22,7 @@ package org.neo4j.gds.louvain;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.Aggregation;
 import org.neo4j.gds.CommunityAlgorithmTasks;
 import org.neo4j.gds.CommunityHelper;
 import org.neo4j.gds.NodeLabel;
@@ -44,7 +45,6 @@ import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.modularity.ModularityCalculator;
-import org.neo4j.gds.Aggregation;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Map;
@@ -397,7 +397,7 @@ class LouvainTest {
         var result = louvain.compute();
         assertThat(result.ranLevels()).isGreaterThan(1);
         LongUnaryOperator vToCommunity = result::community;
-        var modularityCalculator = ModularityCalculator.create(myGraph, vToCommunity, new Concurrency(4));
+        var modularityCalculator = ModularityCalculator.create(myGraph, vToCommunity, new Concurrency(4),TerminationFlag.RUNNING_TRUE);
         double calculatedModularity = modularityCalculator.compute().totalModularity();
         assertThat(result.modularity()).isCloseTo(calculatedModularity, Offset.offset(1e-5));
     }
