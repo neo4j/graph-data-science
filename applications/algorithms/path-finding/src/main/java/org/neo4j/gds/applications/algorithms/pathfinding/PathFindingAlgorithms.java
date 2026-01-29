@@ -108,7 +108,8 @@ public class PathFindingAlgorithms {
         Graph graph,
         BellmanFordParameters parameters,
         ProgressTracker progressTracker,
-        ExecutorService executorService
+        ExecutorService executorService,
+        TerminationFlag terminationFlag
     ) {
         var algorithm = new BellmanFord(
             graph,
@@ -117,7 +118,9 @@ public class PathFindingAlgorithms {
             parameters.trackNegativeCycles(),
             parameters.trackPaths(),
             parameters.concurrency(),
-            executorService
+            executorService,
+            terminationFlag
+
         );
 
         return algorithm.compute();

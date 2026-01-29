@@ -36,6 +36,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.paths.ImmutablePathResult;
 import org.neo4j.gds.paths.PathResult;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.ArrayList;
 import java.util.Optional;
@@ -61,7 +62,8 @@ public class BellmanFord extends Algorithm<BellmanFordResult> {
         boolean trackNegativeCycles,
         boolean trackPaths,
         Concurrency concurrency,
-        ExecutorService executorService
+        ExecutorService executorService,
+        TerminationFlag terminationFlag
     ) {
         super(progressTracker);
         this.graph = graph;
@@ -70,13 +72,15 @@ public class BellmanFord extends Algorithm<BellmanFordResult> {
         this.trackPaths = trackPaths;
         this.concurrency = concurrency;
         this.executorService = executorService;
+        this.terminationFlag = terminationFlag;
     }
 
     BellmanFord(
         Graph graph,
         ProgressTracker progressTracker,
         BellmanFordParameters parameters,
-        ExecutorService executorService
+        ExecutorService executorService,
+        TerminationFlag terminationFlag
     ) {
         this(
             graph,
@@ -85,7 +89,8 @@ public class BellmanFord extends Algorithm<BellmanFordResult> {
             parameters.trackNegativeCycles(),
             parameters.trackPaths(),
             parameters.concurrency(),
-            executorService
+            executorService,
+            terminationFlag
         );
     }
 
@@ -128,7 +133,9 @@ public class BellmanFord extends Algorithm<BellmanFordResult> {
                 .tasks(tasks)
                 .concurrency(concurrency)
                 .executor(executorService)
+                .terminationFlag(terminationFlag)
                 .run();
+
             progressTracker.endSubTask();
             progressTracker.beginSubTask();
             frontierSize.set(0); // fill global queue again
@@ -136,6 +143,7 @@ public class BellmanFord extends Algorithm<BellmanFordResult> {
                 .tasks(tasks)
                 .concurrency(concurrency)
                 .executor(executorService)
+                .terminationFlag(terminationFlag)
                 .run();
             progressTracker.endSubTask();
         }

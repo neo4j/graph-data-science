@@ -33,6 +33,7 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Set;
 
@@ -91,7 +92,8 @@ final class BellmanFordCopiedDeltaSteppingTests {
                 true,
                 true,
                 new Concurrency(concurrency),
-                DefaultPool.INSTANCE
+                DefaultPool.INSTANCE,
+                TerminationFlag.RUNNING_TRUE
             )
                 .compute()
                 .shortestPaths()
@@ -123,7 +125,8 @@ final class BellmanFordCopiedDeltaSteppingTests {
                 true,
                 true,
                 new Concurrency(concurrency),
-                DefaultPool.INSTANCE
+                DefaultPool.INSTANCE,
+                TerminationFlag.RUNNING_TRUE
             )
                 .compute()
                 .shortestPaths()
@@ -186,7 +189,8 @@ final class BellmanFordCopiedDeltaSteppingTests {
                 true,
                 true,
                 new Concurrency(concurrency),
-                DefaultPool.INSTANCE
+                DefaultPool.INSTANCE,
+                TerminationFlag.RUNNING_TRUE
             )
                 .compute()
                 .shortestPaths()
@@ -242,7 +246,8 @@ final class BellmanFordCopiedDeltaSteppingTests {
                 true,
                 true,
                 new Concurrency(concurrency),
-                DefaultPool.INSTANCE
+                DefaultPool.INSTANCE,
+                TerminationFlag.RUNNING_TRUE
             )
                 .compute()
                 .shortestPaths()

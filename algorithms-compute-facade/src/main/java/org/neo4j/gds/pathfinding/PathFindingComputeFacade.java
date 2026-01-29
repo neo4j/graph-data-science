@@ -177,7 +177,8 @@ public class PathFindingComputeFacade {
             parameters.trackNegativeCycles(),
             parameters.trackPaths(),
             parameters.concurrency(),
-            executorService
+            executorService,
+            terminationFlag
         );
 
         // Submit the algorithm for async computation

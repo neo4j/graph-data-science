@@ -29,6 +29,7 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.paths.PathResult;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -79,7 +80,8 @@ class BellmanFordMultipleNegativeCyclesTest {
                 true,
                 true,
                 new Concurrency(4),
-                DefaultPool.INSTANCE
+                DefaultPool.INSTANCE,
+                TerminationFlag.RUNNING_TRUE
             ).compute();
 
             assertThat(result.containsNegativeCycle()).isTrue();
@@ -138,7 +140,8 @@ class BellmanFordMultipleNegativeCyclesTest {
                 true,
                 true,
                 new Concurrency(4),
-                DefaultPool.INSTANCE
+                DefaultPool.INSTANCE,
+                TerminationFlag.RUNNING_TRUE
             ).compute();
 
             assertThat(result.negativeCycles().pathSet())
