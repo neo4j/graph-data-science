@@ -152,7 +152,8 @@ public class CommunityAlgorithms {
         return new KCoreDecomposition(
             graph, 
             parameters.concurrency(),
-            progressTracker
+            progressTracker,
+            terminationFlag
         ).compute();
     }
 

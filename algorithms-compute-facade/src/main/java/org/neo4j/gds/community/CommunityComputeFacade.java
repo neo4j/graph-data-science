@@ -301,7 +301,8 @@ public class CommunityComputeFacade {
         var algorithm = new KCoreDecomposition(
             graph,
             parameters.concurrency(),
-            progressTracker
+            progressTracker,
+            terminationFlag
         );
 
         return algorithmCaller.run(
