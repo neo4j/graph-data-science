@@ -154,9 +154,10 @@ public class PathFindingAlgorithms {
         Graph graph,
         DeltaSteppingParameters parameters,
         ProgressTracker progressTracker,
-        ExecutorService executorService
+        ExecutorService executorService,
+        TerminationFlag terminationFlag
     ) {
-        var algorithm = DeltaStepping.of(graph, parameters, executorService, progressTracker);
+        var algorithm = DeltaStepping.of(graph, parameters, executorService, progressTracker,terminationFlag);
 
         return algorithm.compute();
     }
@@ -284,7 +285,9 @@ public class PathFindingAlgorithms {
         Graph graph,
         PCSTParameters parameters,
         ProgressTracker progressTracker,
-        TerminationFlag terminationFlag) {
+        TerminationFlag terminationFlag
+    ) {
+
         var prizeProperty = graph.nodeProperties(parameters.prizeProperty());
         var algorithm = new PCSTFast(
             graph,

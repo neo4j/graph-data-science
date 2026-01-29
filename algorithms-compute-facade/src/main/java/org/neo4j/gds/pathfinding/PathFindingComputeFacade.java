@@ -250,7 +250,7 @@ public class PathFindingComputeFacade {
         );
 
         // Create the algorithm
-        var deltaStepping = DeltaStepping.of(graph, parameters, executorService, progressTracker);
+        var deltaStepping = DeltaStepping.of(graph, parameters, executorService, progressTracker,terminationFlag);
 
         // Submit the algorithm for async computation
 

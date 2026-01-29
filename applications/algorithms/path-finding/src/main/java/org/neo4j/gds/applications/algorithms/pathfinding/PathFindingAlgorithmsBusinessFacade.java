@@ -120,7 +120,8 @@ public class PathFindingAlgorithmsBusinessFacade {
                 graph,
                 configuration.toParameters(),
                 progressTracker,
-                DefaultPool.INSTANCE
+                DefaultPool.INSTANCE,
+                requestScopedDependencies.terminationFlag()
             ),
             progressTracker,
             configuration.concurrency()
@@ -156,7 +157,8 @@ public class PathFindingAlgorithmsBusinessFacade {
                 graph,
                 configuration.toParameters(),
                 progressTracker,
-                DefaultPool.INSTANCE
+                DefaultPool.INSTANCE,
+                requestScopedDependencies.terminationFlag()
             ),
             progressTracker,
             configuration.concurrency()
