@@ -98,7 +98,7 @@ public class CentralityAlgorithms {
         ProgressTracker progressTracker
     ) {
         return ArticulationPoints
-            .create(graph, parameters, progressTracker)
+            .create(graph, parameters, progressTracker,terminationFlag)
             .compute();
     }
 

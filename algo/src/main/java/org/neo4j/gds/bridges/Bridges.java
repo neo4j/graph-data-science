@@ -94,7 +94,8 @@ public class Bridges extends Algorithm<BridgeResult> {
         BiConsumer<Long,Long> onLastChildVisit = treeSizeTracker.isPresent() ? treeSizeTracker.get()::recordTreeChild : (a,b)->{};
         int listIndex=0;
         var n = graph.nodeCount();
-        for (long i = 0; (i < n && terminationFlag.running()); ++i) {
+        for (long i = 0; i < n; ++i) {
+            terminationFlag.assertRunning();
             if (!visited.get(i)) {
                 dfs(i, stack,onLastChildVisit);
 

@@ -174,7 +174,7 @@ public class CentralityComputeFacade {
             parameters.concurrency(),
             logProgress
         );
-        var articulationPoints = ArticulationPoints.create(graph, parameters, progressTracker);
+        var articulationPoints = ArticulationPoints.create(graph, parameters, progressTracker,terminationFlag);
 
         return algorithmCaller.run(
             articulationPoints::compute,

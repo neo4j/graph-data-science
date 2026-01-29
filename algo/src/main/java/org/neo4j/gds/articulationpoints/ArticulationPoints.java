@@ -27,6 +27,7 @@ import org.neo4j.gds.articulationPoints.ArticulationPointsParameters;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Optional;
 
@@ -42,7 +43,12 @@ public final class ArticulationPoints extends Algorithm<ArticulationPointsResult
     private final BitSet articulationPoints;
     private final Optional<SubtreeTracker> subtreeTracker;
 
-    private ArticulationPoints(Graph graph, ProgressTracker progressTracker,Optional<SubtreeTracker> subtreeTracker) {
+    private ArticulationPoints(
+        Graph graph,
+        ProgressTracker progressTracker,
+        Optional<SubtreeTracker> subtreeTracker,
+        TerminationFlag terminationFlag
+    ){
         super(progressTracker);
 
         this.graph = graph;
@@ -52,14 +58,30 @@ public final class ArticulationPoints extends Algorithm<ArticulationPointsResult
         this.low = HugeLongArray.newArray(graph.nodeCount());
         this.subtreeTracker =  subtreeTracker;
         this.articulationPoints = new BitSet(graph.nodeCount());
+        this.terminationFlag = terminationFlag;
     }
 
-    public static  ArticulationPoints create(Graph graph, ArticulationPointsParameters parameters, ProgressTracker progressTracker){
+    public static  ArticulationPoints create(
+        Graph graph,
+        ArticulationPointsParameters parameters,
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
+    ){
         if (parameters.computeComponents()){
             var tracker = new SubtreeTracker(graph.nodeCount());
-            return new ArticulationPoints(graph,progressTracker,Optional.of(tracker));
+            return new ArticulationPoints(
+                graph,
+                progressTracker,
+                Optional.of(tracker),
+                terminationFlag
+            );
         }
-        return  new ArticulationPoints(graph,progressTracker,Optional.empty());
+        return new ArticulationPoints(
+            graph,
+            progressTracker,
+            Optional.empty(),
+            terminationFlag
+        );
     }
 
     @Override
@@ -74,6 +96,7 @@ public final class ArticulationPoints extends Algorithm<ArticulationPointsResult
 
         var n = graph.nodeCount();
         for (int i = 0; i < n; ++i) {
+            terminationFlag.assertRunning();
             if (!visited.get(i)) {
                 dfs(i, stack);
             }
