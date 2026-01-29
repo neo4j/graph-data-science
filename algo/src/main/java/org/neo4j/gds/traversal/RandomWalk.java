@@ -152,7 +152,8 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
             graph,
             concurrency,
             executorService,
-            progressTracker
+            progressTracker,
+            terminationFlag
         );
         return new RandomWalkTaskSupplier(
             graph::concurrentCopy,

@@ -153,7 +153,8 @@ public final class RandomWalkCountingNodeVisits extends Algorithm<HugeAtomicLong
             graph,
             concurrency,
             executorService,
-            progressTracker
+            progressTracker,
+            terminationFlag
         );
         return new RandomWalkTaskSupplier(
             graph::concurrentCopy,

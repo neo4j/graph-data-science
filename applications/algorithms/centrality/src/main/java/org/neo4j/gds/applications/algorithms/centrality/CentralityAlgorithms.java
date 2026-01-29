@@ -154,7 +154,8 @@ public class CentralityAlgorithms {
             parameters.orientation(),
             parameters.hasRelationshipWeightProperty(),
             parameters.minBatchSize(),
-            progressTracker
+            progressTracker,
+            terminationFlag
         );
 
         return algorithm.compute();
@@ -249,7 +250,8 @@ public class CentralityAlgorithms {
         var degreeFunction = DegreeFunctions.pageRankDegreeFunction(
             graph,
             configuration.hasRelationshipWeightProperty(),
-            configuration.concurrency()
+            configuration.concurrency(),
+            terminationFlag
         );
 
         var alpha = 1 - configuration.dampingFactor();
@@ -277,7 +279,8 @@ public class CentralityAlgorithms {
         var degreeFunction = DegreeFunctions.eigenvectorDegreeFunction(
             graph,
             hasRelationshipWeightProperty,
-            concurrency
+            concurrency,
+            terminationFlag
         );
 
         return new EigenvectorComputation<>(
@@ -291,7 +294,9 @@ public class CentralityAlgorithms {
     private PageRankComputation<PageRankConfig> pageRankComputation(Graph graph, PageRankConfig configuration) {
         var degreeFunction = DegreeFunctions.pageRankDegreeFunction(
             graph,
-            configuration.hasRelationshipWeightProperty(), configuration.concurrency()
+            configuration.hasRelationshipWeightProperty(),
+            configuration.concurrency(),
+            terminationFlag
         );
 
         var alpha = 1 - configuration.dampingFactor();

@@ -39,7 +39,8 @@ public final class DegreeFunctions {
     public static @NotNull LongToDoubleFunction pageRankDegreeFunction(
         Graph graph,
         boolean hasRelationshipWeightProperty,
-        Concurrency concurrency
+        Concurrency concurrency,
+        TerminationFlag terminationFlag
     ) {
         var degreeCentrality = new DegreeCentrality(
             graph,
@@ -48,7 +49,8 @@ public final class DegreeFunctions {
             Orientation.NATURAL,
             hasRelationshipWeightProperty,
             10_000,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            terminationFlag
         );
 
         var degrees = degreeCentrality.compute().degreeFunction();
@@ -58,7 +60,8 @@ public final class DegreeFunctions {
     public static @NotNull LongToDoubleFunction eigenvectorDegreeFunction(
         Graph graph,
         boolean hasRelationshipWeightProperty,
-        Concurrency concurrency
+        Concurrency concurrency,
+        TerminationFlag terminationFlag
     ) {
         if (hasRelationshipWeightProperty) {
             var degreeCentrality = new DegreeCentrality(
@@ -68,7 +71,8 @@ public final class DegreeFunctions {
                 Orientation.NATURAL,
                 true,
                 10_000,
-                ProgressTracker.NULL_TRACKER
+                ProgressTracker.NULL_TRACKER,
+                terminationFlag
             );
 
             var degrees = degreeCentrality.compute().degreeFunction();

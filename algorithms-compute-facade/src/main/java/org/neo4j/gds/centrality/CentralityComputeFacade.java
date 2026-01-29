@@ -143,7 +143,8 @@ public class CentralityComputeFacade {
         var degreeFunction = DegreeFunctions.pageRankDegreeFunction(
             graph,
             configuration.hasRelationshipWeightProperty(),
-            configuration.concurrency()
+            configuration.concurrency(),
+            terminationFlag
         );
 
         var alpha = 1 - configuration.dampingFactor();
@@ -319,7 +320,8 @@ public class CentralityComputeFacade {
             parameters.orientation(),
             parameters.hasRelationshipWeightProperty(),
             parameters.minBatchSize(),
-            progressTracker
+            progressTracker,
+            terminationFlag
         );
 
         return algorithmCaller.run(
@@ -378,7 +380,8 @@ public class CentralityComputeFacade {
         var degreeFunction = DegreeFunctions.eigenvectorDegreeFunction(
             graph,
             hasRelationshipWeightProperty,
-            concurrency
+            concurrency,
+            terminationFlag
         );
 
         return new EigenvectorComputation<>(
@@ -524,7 +527,9 @@ public class CentralityComputeFacade {
     ) {
         var degreeFunction = DegreeFunctions.pageRankDegreeFunction(
             graph,
-            configuration.hasRelationshipWeightProperty(), configuration.concurrency()
+            configuration.hasRelationshipWeightProperty(),
+            configuration.concurrency(),
+            terminationFlag
         );
 
         var alpha = 1 - configuration.dampingFactor();

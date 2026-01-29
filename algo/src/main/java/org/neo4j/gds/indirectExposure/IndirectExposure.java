@@ -94,7 +94,8 @@ public class IndirectExposure extends Algorithm<IndirectExposureResult> {
             Orientation.NATURAL,
             this.config.hasRelationshipWeightProperty(),
             DegreeCentralityParameters.DEFAULT_MIN_BATCH_SIZE,
-            this.progressTracker
+            this.progressTracker,
+            this.terminationFlag
         ).compute().degreeFunction();
     }
 }
