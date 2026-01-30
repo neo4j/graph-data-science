@@ -17,20 +17,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.community.validation;
+package org.neo4j.gds.core.loading.validation;
 
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.core.loading.validation.AlgorithmGraphStoreRequirements;
 
 import java.util.Collection;
 
-public class SpeakerListenerLPAGraphStoreRequirements implements AlgorithmGraphStoreRequirements {
+public class PregelPropertiesRequirement implements AlgorithmGraphStoreRequirements {
+   private final String writeProperty;
 
-    private final String writeProperty;
-
-    public SpeakerListenerLPAGraphStoreRequirements(String writeProperty) {
+    public PregelPropertiesRequirement(String writeProperty) {
         this.writeProperty = writeProperty;
     }
 

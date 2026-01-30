@@ -31,7 +31,6 @@ import org.neo4j.gds.cliqueCounting.CliqueCountingResult;
 import org.neo4j.gds.cliquecounting.CliqueCountingParameters;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.community.validation.MinCommunitySizeSumRequirement;
-import org.neo4j.gds.community.validation.SpeakerListenerLPAGraphStoreRequirements;
 import org.neo4j.gds.community.validation.TriangleCountGraphStoreRequirements;
 import org.neo4j.gds.conductance.ConductanceParameters;
 import org.neo4j.gds.conductance.ConductanceResult;
@@ -43,6 +42,7 @@ import org.neo4j.gds.core.loading.validation.NoAlgorithmRequirements;
 import org.neo4j.gds.core.loading.validation.NodePropertyMustExistOnAllLabels;
 import org.neo4j.gds.core.loading.validation.NodePropertyMustExistOnAnyLabel;
 import org.neo4j.gds.core.loading.validation.NodePropertyTypeRequirement;
+import org.neo4j.gds.core.loading.validation.PregelPropertiesRequirement;
 import org.neo4j.gds.core.loading.validation.SeedPropertyGraphStoreRequirement;
 import org.neo4j.gds.core.loading.validation.UndirectedOnlyRequirement;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
@@ -538,7 +538,7 @@ public class CommunityComputeBusinessFacade {
             graphName,
             graphParameters,
             Optional.empty(),
-            new GraphStoreValidation(new SpeakerListenerLPAGraphStoreRequirements(config.writeProperty())),
+            new GraphStoreValidation(new PregelPropertiesRequirement(config.writeProperty())),
             Optional.empty(),
             user,
             databaseId
