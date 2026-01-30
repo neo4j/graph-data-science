@@ -301,7 +301,8 @@ public class CommunityComputeFacade {
         var algorithm = new KCoreDecomposition(
             graph,
             parameters.concurrency(),
-            progressTracker
+            progressTracker,
+            terminationFlag
         );
 
         return algorithmCaller.run(
@@ -486,7 +487,8 @@ public class CommunityComputeFacade {
         var algorithm = ModularityCalculator.create(
             graph,
             graph.nodeProperties(parameters.communityProperty())::longValue,
-            parameters.concurrency()
+            parameters.concurrency(),
+            terminationFlag
         );
 
         return algorithmCaller.run(
@@ -589,7 +591,8 @@ public class CommunityComputeFacade {
             configuration,
             DefaultPool.INSTANCE,
             progressTracker,
-            Optional.empty()
+            Optional.empty(),
+            terminationFlag
         );
 
         return algorithmCaller.run(

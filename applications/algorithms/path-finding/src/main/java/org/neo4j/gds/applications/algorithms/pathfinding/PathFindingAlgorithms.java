@@ -108,7 +108,8 @@ public class PathFindingAlgorithms {
         Graph graph,
         BellmanFordParameters parameters,
         ProgressTracker progressTracker,
-        ExecutorService executorService
+        ExecutorService executorService,
+        TerminationFlag terminationFlag
     ) {
         var algorithm = new BellmanFord(
             graph,
@@ -117,7 +118,9 @@ public class PathFindingAlgorithms {
             parameters.trackNegativeCycles(),
             parameters.trackPaths(),
             parameters.concurrency(),
-            executorService
+            executorService,
+            terminationFlag
+
         );
 
         return algorithm.compute();
@@ -151,9 +154,10 @@ public class PathFindingAlgorithms {
         Graph graph,
         DeltaSteppingParameters parameters,
         ProgressTracker progressTracker,
-        ExecutorService executorService
+        ExecutorService executorService,
+        TerminationFlag terminationFlag
     ) {
-        var algorithm = DeltaStepping.of(graph, parameters, executorService, progressTracker);
+        var algorithm = DeltaStepping.of(graph, parameters, executorService, progressTracker,terminationFlag);
 
         return algorithm.compute();
     }
@@ -277,12 +281,19 @@ public class PathFindingAlgorithms {
         return algorithm.compute();
     }
 
-    PrizeSteinerTreeResult pcst(Graph graph, PCSTParameters parameters, ProgressTracker progressTracker) {
+    PrizeSteinerTreeResult pcst(
+        Graph graph,
+        PCSTParameters parameters,
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
+    ) {
+
         var prizeProperty = graph.nodeProperties(parameters.prizeProperty());
         var algorithm = new PCSTFast(
             graph,
             (v) -> Math.max(prizeProperty.doubleValue(v), 0),
-            progressTracker
+            progressTracker,
+            terminationFlag
         );
 
         return algorithm.compute();
@@ -428,7 +439,8 @@ public class PathFindingAlgorithms {
     public TopologicalSortResult topologicalSort(
         Graph graph,
         TopologicalSortParameters parameters,
-        ProgressTracker progressTracker, TerminationFlag terminationFlag
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
     ) {
         var algorithm = new TopologicalSort(
             graph,

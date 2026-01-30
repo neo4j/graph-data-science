@@ -27,6 +27,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.degree.DegreeCentrality;
 import org.neo4j.gds.degree.DegreeFunction;
 import org.neo4j.gds.ml.core.samplers.RandomWalkSampler;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -37,10 +38,11 @@ public final class RandomWalkCompanion {
         Graph graph,
         Concurrency concurrency,
         ExecutorService executorsService,
-        ProgressTracker progressTracker
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
     ) {
         return graph.hasRelationshipProperty()
-            ? cumulativeWeightsFromProperty(graph, concurrency, executorsService, progressTracker)::get
+            ? cumulativeWeightsFromProperty(graph, concurrency, executorsService, progressTracker,terminationFlag)::get
             : graph::degree;
     }
 
@@ -48,7 +50,8 @@ public final class RandomWalkCompanion {
         Graph graph,
         Concurrency concurrency,
         ExecutorService executorService,
-        ProgressTracker progressTracker
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
     ) {
         return new DegreeCentrality(
             graph,
@@ -57,7 +60,8 @@ public final class RandomWalkCompanion {
             Orientation.NATURAL,
             true,
             ParallelUtil.DEFAULT_BATCH_SIZE,
-            progressTracker
+            progressTracker,
+            terminationFlag
         ).compute().degreeFunction();
 
     }

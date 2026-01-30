@@ -28,6 +28,7 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -64,7 +65,8 @@ class ModularityCalculatorTest {
         var modularityCalculator = ModularityCalculator.create(
             graph,
             graphStore.nodeProperty(communityId).values()::longValue,
-            new Concurrency(4)
+            new Concurrency(4),
+            TerminationFlag.RUNNING_TRUE
         );
 
         var result = modularityCalculator.compute();

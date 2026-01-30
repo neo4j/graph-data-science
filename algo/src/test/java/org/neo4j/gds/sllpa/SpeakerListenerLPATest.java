@@ -32,6 +32,7 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -73,7 +74,15 @@ class SpeakerListenerLPATest {
     void testWithoutPruning() {
         var config = SpeakerListenerLPAConfigImpl.builder().concurrency(1).minAssociationStrength(0.00).maxIterations(10).build();
 
-        var sllp =new SpeakerListenerLPA(graph,config,DefaultPool.INSTANCE,ProgressTracker.NULL_TRACKER, Optional.of(42L));
+        var sllp =new SpeakerListenerLPA(
+            graph,
+            config,
+            DefaultPool.INSTANCE,
+            ProgressTracker.NULL_TRACKER,
+            Optional.of(42L),
+            TerminationFlag.RUNNING_TRUE
+        );
+
         var resultCommunities = sllp.compute().nodeValues().longArrayProperties(LABELS_PROPERTY);
 
         Map<Long, Set<Long>> communities = new HashMap<>();
@@ -113,7 +122,14 @@ class SpeakerListenerLPATest {
     void prunesAwayAfterManyIterations() {
         var config = SpeakerListenerLPAConfigImpl.builder().concurrency(1).maxIterations(30).build();
 
-        var sllp =new SpeakerListenerLPA(graph,config,DefaultPool.INSTANCE,ProgressTracker.NULL_TRACKER, Optional.of(42L));
+        var sllp =new SpeakerListenerLPA(
+            graph,
+            config,
+            DefaultPool.INSTANCE,
+            ProgressTracker.NULL_TRACKER,
+            Optional.of(42L),
+            TerminationFlag.RUNNING_TRUE
+        );
         var resultCommunities = sllp.compute().nodeValues().longArrayProperties(LABELS_PROPERTY);
 
         Map<Long, Set<Long>> communities = new HashMap<>();
@@ -156,7 +172,14 @@ class SpeakerListenerLPATest {
         var progressTracker = progressTrackerWithLog.progressTracker();
         var log = progressTrackerWithLog.log();
 
-        var sllpa =new SpeakerListenerLPA(graph,config,DefaultPool.INSTANCE,progressTracker,Optional.empty());
+        var sllpa =new SpeakerListenerLPA(
+            graph,
+            config,
+            DefaultPool.INSTANCE,
+            progressTracker,
+            Optional.empty(),
+            TerminationFlag.RUNNING_TRUE
+        );
         sllpa.compute();
 
         Assertions.assertThat(log.getMessages(TestLog.INFO))

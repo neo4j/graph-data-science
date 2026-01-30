@@ -31,6 +31,7 @@ import org.neo4j.gds.core.utils.paged.HugeLongLongMap;
 import org.neo4j.gds.core.utils.paged.ParallelDoublePageCreator;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Optional;
 import java.util.concurrent.atomic.DoubleAdder;
@@ -46,27 +47,30 @@ public final class ModularityCalculator extends Algorithm<ModularityResult> {
     public static ModularityCalculator create(
         Graph graph,
         LongUnaryOperator seedCommunityIdProvider,
-        Concurrency concurrency
+        Concurrency concurrency,
+        TerminationFlag terminationFlag
     ) {
         var communityMapper = createMapping(graph.nodeCount(), seedCommunityIdProvider);
         LongUnaryOperator communityIdProvider = nodeId -> communityMapper.getOrDefault(
             seedCommunityIdProvider.applyAsLong(nodeId),
             -1
         );
-        return new ModularityCalculator(graph, communityIdProvider, communityMapper, concurrency);
+        return new ModularityCalculator(graph, communityIdProvider, communityMapper, concurrency,terminationFlag);
     }
 
     private ModularityCalculator(
         Graph graph,
         LongUnaryOperator communityIdProvider,
         HugeLongLongMap communityMapper,
-        Concurrency concurrency
+        Concurrency concurrency,
+        TerminationFlag terminationFlag
     ) {
         super(ProgressTracker.NULL_TRACKER);
         this.graph = graph;
         this.communityIdProvider = communityIdProvider;
         this.communityMapper = communityMapper;
         this.concurrency = concurrency;
+        this.terminationFlag = terminationFlag;
     }
 
     @Override
@@ -95,6 +99,7 @@ public final class ModularityCalculator extends Algorithm<ModularityResult> {
         RunWithConcurrency.builder()
             .concurrency(concurrency)
             .tasks(tasks)
+            .terminationFlag(terminationFlag)
             .run();
 
         var communityModularities = HugeObjectArray.newArray(

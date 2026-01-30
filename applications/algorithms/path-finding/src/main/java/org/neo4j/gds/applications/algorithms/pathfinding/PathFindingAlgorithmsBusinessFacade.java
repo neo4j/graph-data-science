@@ -120,7 +120,8 @@ public class PathFindingAlgorithmsBusinessFacade {
                 graph,
                 configuration.toParameters(),
                 progressTracker,
-                DefaultPool.INSTANCE
+                DefaultPool.INSTANCE,
+                requestScopedDependencies.terminationFlag()
             ),
             progressTracker,
             configuration.concurrency()
@@ -156,7 +157,8 @@ public class PathFindingAlgorithmsBusinessFacade {
                 graph,
                 configuration.toParameters(),
                 progressTracker,
-                DefaultPool.INSTANCE
+                DefaultPool.INSTANCE,
+                requestScopedDependencies.terminationFlag()
             ),
             progressTracker,
             configuration.concurrency()
@@ -303,7 +305,12 @@ public class PathFindingAlgorithmsBusinessFacade {
         );
 
         return algorithmMachinery.getResult(
-            () -> algorithms.pcst(graph, configuration.toParameters(), progressTracker),
+            () -> algorithms.pcst(
+                graph,
+                configuration.toParameters(),
+                progressTracker,
+                requestScopedDependencies.terminationFlag()
+            ),
             progressTracker,
             configuration.concurrency()
         );

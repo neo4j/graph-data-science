@@ -33,6 +33,7 @@ import org.neo4j.gds.core.utils.paged.ParallelDoublePageCreator;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
@@ -58,7 +59,8 @@ public class DegreeCentrality extends Algorithm<DegreeCentralityResult> {
         Orientation orientation,
         boolean hasRelationshipWeightProperty,
         int minBatchSize,
-        ProgressTracker progressTracker
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
     ) {
         super(progressTracker);
         this.graph = graph;
@@ -67,6 +69,7 @@ public class DegreeCentrality extends Algorithm<DegreeCentralityResult> {
         this.orientation = orientation;
         this.hasRelationshipWeightProperty = hasRelationshipWeightProperty;
         this.minBatchSize = minBatchSize;
+        this.terminationFlag = terminationFlag;
     }
 
     @Override
@@ -173,7 +176,9 @@ public class DegreeCentrality extends Algorithm<DegreeCentralityResult> {
             .concurrency(concurrency)
             .tasks(tasks)
             .executor(executor)
+            .terminationFlag(terminationFlag)
             .run();
+
         return degrees::get;
     }
 
@@ -189,7 +194,9 @@ public class DegreeCentrality extends Algorithm<DegreeCentralityResult> {
             .concurrency(concurrency)
             .tasks(tasks)
             .executor(executor)
+            .terminationFlag(terminationFlag)
             .run();
+
         return degrees::get;
     }
 

@@ -126,7 +126,7 @@ final class DeltaSteppingTest {
             var config = new DeltaSteppingParameters(sourceNode, delta, new Concurrency(concurrency));
 
             var paths = DeltaStepping
-                .of(graph, config, DefaultPool.INSTANCE, ProgressTracker.NULL_TRACKER)
+                .of(graph, config, DefaultPool.INSTANCE, ProgressTracker.NULL_TRACKER, TerminationFlag.RUNNING_TRUE)
                 .compute()
                 .pathSet();
 
@@ -158,7 +158,8 @@ final class DeltaSteppingTest {
                     graph,
                     new DeltaSteppingParameters(sourceNode, delta, new Concurrency(concurrency)),
                     DefaultPool.INSTANCE,
-                    ProgressTracker.NULL_TRACKER
+                    ProgressTracker.NULL_TRACKER,
+                    TerminationFlag.RUNNING_TRUE
                 )
                 .compute()
                 .pathSet();
@@ -189,8 +190,8 @@ final class DeltaSteppingTest {
                         new Concurrency(4)
                     ),
                     DefaultPool.INSTANCE,
-                    testTracker
-
+                    testTracker,
+                    TerminationFlag.RUNNING_TRUE
                 ).compute()
                 .pathSet();
 
@@ -270,7 +271,8 @@ final class DeltaSteppingTest {
                     graph,
                     new DeltaSteppingParameters(sourceNode, delta, new Concurrency(concurrency)),
                     DefaultPool.INSTANCE,
-                    ProgressTracker.NULL_TRACKER
+                    ProgressTracker.NULL_TRACKER,
+                    TerminationFlag.RUNNING_TRUE
                 )
                 .compute()
                 .pathSet();
@@ -329,7 +331,8 @@ final class DeltaSteppingTest {
                     graph,
                     new DeltaSteppingParameters(sourceNode, delta, new Concurrency(concurrency)),
                     DefaultPool.INSTANCE,
-                    ProgressTracker.NULL_TRACKER
+                    ProgressTracker.NULL_TRACKER,
+                    TerminationFlag.RUNNING_TRUE
                 )
                 .compute()
                 .pathSet();
@@ -364,7 +367,8 @@ final class DeltaSteppingTest {
             newGraph,
             DeltaSteppingParameters.withDefaultDelta(start, new Concurrency(concurrency)),
             DefaultPool.INSTANCE,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         ).compute();
 
         var dijkstraAlgo = DijkstraFactory
@@ -409,7 +413,8 @@ final class DeltaSteppingTest {
             graph,
             DeltaSteppingParameters.withDefaultDelta(0, new Concurrency(1)),
             DefaultPool.INSTANCE,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         );
 
         assertThatThrownBy(() -> deltaStepping.compute().pathSet().stream().toList()).hasMessageContaining("negative");

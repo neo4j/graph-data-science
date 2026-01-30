@@ -124,7 +124,8 @@ class BellmanFordTest {
             true,
             true,
             new Concurrency(1),
-            DefaultPool.INSTANCE
+            DefaultPool.INSTANCE,
+            TerminationFlag.RUNNING_TRUE
         ).compute();
         long[][] EXPECTED_PATHS = new long[5][];
         EXPECTED_PATHS[(int) a[0]] = new long[]{a[0]};
@@ -160,7 +161,8 @@ class BellmanFordTest {
             true,
             true,
             new Concurrency(1),
-            DefaultPool.INSTANCE
+            DefaultPool.INSTANCE,
+            TerminationFlag.RUNNING_TRUE
         ).compute();
 
         assertThat(result.containsNegativeCycle()).isTrue();
@@ -178,7 +180,8 @@ class BellmanFordTest {
             false,
             true,
             new Concurrency(1),
-            DefaultPool.INSTANCE
+            DefaultPool.INSTANCE,
+            TerminationFlag.RUNNING_TRUE
         ).compute();
 
         assertThat(result.containsNegativeCycle()).isTrue();
@@ -206,8 +209,10 @@ class BellmanFordTest {
             true,
             true,
             new Concurrency(1),
-            DefaultPool.INSTANCE
+            DefaultPool.INSTANCE,
+            TerminationFlag.RUNNING_TRUE
         ).compute();
+
         long[][] EXPECTED_PATHS = new long[6][];
         EXPECTED_PATHS[(int) nodes[0]] = new long[]{nodes[0]};
         EXPECTED_PATHS[(int) nodes[1]] = new long[]{nodes[0], nodes[3], nodes[2], nodes[1]};
@@ -256,7 +261,8 @@ class BellmanFordTest {
             graph,
             testTracker,
             parameters,
-            DefaultPool.INSTANCE
+            DefaultPool.INSTANCE,
+            TerminationFlag.RUNNING_TRUE
         ).compute();
 
         assertThat(log.getMessages(INFO))
@@ -298,7 +304,8 @@ class BellmanFordTest {
             true,
             true,
             new Concurrency(4),
-            DefaultPool.INSTANCE
+            DefaultPool.INSTANCE,
+            TerminationFlag.RUNNING_TRUE
         )
             .compute()
             .shortestPaths();

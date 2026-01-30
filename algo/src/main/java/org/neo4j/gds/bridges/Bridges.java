@@ -25,6 +25,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,17 +44,33 @@ public class Bridges extends Algorithm<BridgeResult> {
     private List<Bridge> result = new ArrayList<>();
     private final Optional<TreeSizeTracker> treeSizeTracker;
 
-    public static  Bridges create(Graph graph, ProgressTracker progressTracker, boolean shouldComputeComponents){
-
+    public static  Bridges create(
+        Graph graph,
+        ProgressTracker progressTracker,
+        boolean shouldComputeComponents,
+        TerminationFlag terminationFlag
+    ){
         if (shouldComputeComponents) {
             var treeSizeTracker = new TreeSizeTracker(graph.nodeCount());
-            return new Bridges(graph, progressTracker, Optional.of(treeSizeTracker));
+            return new Bridges(
+                graph,
+                progressTracker,
+                Optional.of(treeSizeTracker),
+                terminationFlag
+            );
         }else{
-            return new Bridges(graph,progressTracker,Optional.empty());
+            return new Bridges(
+                graph,
+                progressTracker,
+                Optional.empty(),
+                terminationFlag
+            );
         }
     }
 
-    private Bridges(Graph graph, ProgressTracker progressTracker, Optional<TreeSizeTracker> treeSizeTracker){
+    private Bridges(Graph graph, ProgressTracker progressTracker, Optional<TreeSizeTracker> treeSizeTracker,
+        TerminationFlag terminationFlag
+    ){
         super(progressTracker);
 
         this.graph = graph;
@@ -61,6 +78,7 @@ public class Bridges extends Algorithm<BridgeResult> {
         this.tin = HugeLongArray.newArray(graph.nodeCount());
         this.low = HugeLongArray.newArray(graph.nodeCount());
         this.treeSizeTracker = treeSizeTracker;
+        this.terminationFlag = terminationFlag;
     }
 
     @Override
@@ -77,6 +95,7 @@ public class Bridges extends Algorithm<BridgeResult> {
         int listIndex=0;
         var n = graph.nodeCount();
         for (long i = 0; i < n; ++i) {
+            terminationFlag.assertRunning();
             if (!visited.get(i)) {
                 dfs(i, stack,onLastChildVisit);
 

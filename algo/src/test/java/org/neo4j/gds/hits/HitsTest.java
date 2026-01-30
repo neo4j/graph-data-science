@@ -34,6 +34,7 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.logging.GdsTestLog;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.HashMap;
 import java.util.List;
@@ -70,7 +71,7 @@ class HitsTest {
     void testHits() {
         var config = HitsConfigImpl.builder().concurrency(1).hitsIterations(30).build();
 
-        var  hits =new Hits(graph,config,DefaultPool.INSTANCE,ProgressTracker.NULL_TRACKER);
+        var  hits =new Hits(graph,config,DefaultPool.INSTANCE,ProgressTracker.NULL_TRACKER, TerminationFlag.RUNNING_TRUE);
 
         var result = hits.compute();
 
@@ -115,7 +116,7 @@ class HitsTest {
             EmptyTaskRegistryFactory.INSTANCE
         );
 
-        var hitsp =new Hits(graph,config,DefaultPool.INSTANCE,progressTracker);
+        var hitsp =new Hits(graph,config,DefaultPool.INSTANCE,progressTracker,TerminationFlag.RUNNING_TRUE);
         hitsp.compute();
         Assertions.assertThat(log.getMessages(TestLog.INFO))
             .extracting(removingThreadId())

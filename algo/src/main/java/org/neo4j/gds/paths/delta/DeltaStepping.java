@@ -36,6 +36,7 @@ import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.paths.PathResult;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Arrays;
 import java.util.Optional;
@@ -68,7 +69,8 @@ public final class DeltaStepping extends Algorithm<PathFindingResult> {
         Graph graph,
         DeltaSteppingParameters parameters,
         ExecutorService executorService,
-        ProgressTracker progressTracker
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
     ) {
         return new DeltaStepping(
             graph,
@@ -77,7 +79,8 @@ public final class DeltaStepping extends Algorithm<PathFindingResult> {
             parameters.concurrency(),
             true,
             executorService,
-            progressTracker
+            progressTracker,
+            terminationFlag
         );
     }
 
@@ -89,7 +92,8 @@ public final class DeltaStepping extends Algorithm<PathFindingResult> {
         Concurrency concurrency,
         boolean storePredecessors,
         ExecutorService executorService,
-        ProgressTracker progressTracker
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
     ) {
         super(progressTracker);
         this.graph = graph;
@@ -97,7 +101,7 @@ public final class DeltaStepping extends Algorithm<PathFindingResult> {
         this.delta = delta;
         this.concurrency = concurrency;
         this.executorService = executorService;
-
+        this.terminationFlag = terminationFlag;
         this.frontier = HugeLongArray.newArray(graph.relationshipCount());
         if (storePredecessors) {
             this.distances = TentativeDistances.distanceAndPredecessors(
@@ -130,6 +134,7 @@ public final class DeltaStepping extends Algorithm<PathFindingResult> {
 
         while (currentBin != NO_BIN) {
             // Phase 1
+            terminationFlag.assertRunning();
             progressTracker.beginSubTask();
             for (var task : relaxTasks) {
                 task.setPhase(Phase.RELAX);

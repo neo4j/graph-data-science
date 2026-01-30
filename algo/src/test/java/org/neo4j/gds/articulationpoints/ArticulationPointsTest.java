@@ -32,6 +32,7 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
@@ -70,7 +71,8 @@ class ArticulationPointsTest {
         var articulationPoints =  ArticulationPoints.create(
             graph,
             new ArticulationPointsParameters(null, false),
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         );
 
         var result = articulationPoints.compute().articulationPoints();
@@ -98,10 +100,11 @@ class ArticulationPointsTest {
         var progressTracker = progressTrackerWithLog.progressTracker();
         var log = progressTrackerWithLog.log();
 
-        var articulationPoints =  ArticulationPoints.create(
+        var articulationPoints = ArticulationPoints.create(
             graph,
             new ArticulationPointsParameters(null, false),
-            progressTracker
+            progressTracker,
+            TerminationFlag.RUNNING_TRUE
         );
 
         articulationPoints.compute();

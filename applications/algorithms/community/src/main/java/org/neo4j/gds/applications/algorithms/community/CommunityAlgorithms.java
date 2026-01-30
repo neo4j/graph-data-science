@@ -152,7 +152,8 @@ public class CommunityAlgorithms {
         return new KCoreDecomposition(
             graph, 
             parameters.concurrency(),
-            progressTracker
+            progressTracker,
+            terminationFlag
         ).compute();
     }
 
@@ -221,7 +222,8 @@ public class CommunityAlgorithms {
         return ModularityCalculator.create(
             graph,
             graph.nodeProperties(parameters.communityProperty())::longValue,
-            parameters.concurrency()
+            parameters.concurrency(),
+            terminationFlag
         ).compute();
     }
 
@@ -296,7 +298,8 @@ public class CommunityAlgorithms {
             configuration,
             DefaultPool.INSTANCE,
             progressTracker,
-            Optional.empty()
+            Optional.empty(),
+            terminationFlag
         ).compute();
     }
 }

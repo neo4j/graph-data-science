@@ -25,6 +25,7 @@ import org.neo4j.gds.beta.pregel.ImmutablePregelResult;
 import org.neo4j.gds.beta.pregel.Pregel;
 import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.concurrent.ExecutorService;
 
@@ -39,11 +40,14 @@ public class Hits extends Algorithm<PregelResult> {
         Graph graph,
         HitsConfig config,
         ExecutorService executorService,
-        ProgressTracker progressTracker) {
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
+        ) {
         super(progressTracker);
         this.graph = graph;
         this.config = config;
         this.executorService = executorService;
+        this.terminationFlag = terminationFlag;
 
     }
 

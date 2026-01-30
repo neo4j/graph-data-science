@@ -48,15 +48,27 @@ public class KCoreDecomposition extends Algorithm<KCoreDecompositionResult> {
     //When only 2% nodes remain in the graph, we can create a smaller array to loop over these ones only
     static double REBUILD_CONSTANT = 0.02;
 
-    public KCoreDecomposition(Graph graph, Concurrency concurrency, ProgressTracker progressTracker) {
-        this(graph, concurrency, progressTracker, CHUNK_SIZE);
+    public KCoreDecomposition(
+        Graph graph,
+        Concurrency concurrency,
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
+    ) {
+        this(graph, concurrency, progressTracker, CHUNK_SIZE,terminationFlag);
     }
 
-    public KCoreDecomposition(Graph graph, Concurrency concurrency, ProgressTracker progressTracker, int chunkSize) {
+    public KCoreDecomposition(
+        Graph graph,
+        Concurrency concurrency,
+        ProgressTracker progressTracker,
+        int chunkSize,
+        TerminationFlag terminationFlag
+    ) {
         super(progressTracker);
         this.graph = graph;
         this.concurrency = concurrency;
         this.chunkSize = chunkSize;
+        this.terminationFlag = terminationFlag;
     }
 
     @Override
@@ -114,7 +126,12 @@ public class KCoreDecomposition extends Algorithm<KCoreDecompositionResult> {
                 task.setPhase(KCoreDecompositionTask.KCoreDecompositionPhase.SCAN);
             }
 
-            RunWithConcurrency.builder().tasks(tasks).concurrency(concurrency).run();
+            RunWithConcurrency
+                .builder()
+                .tasks(tasks)
+                .concurrency(concurrency)
+                .terminationFlag(terminationFlag)
+                .run();
 
             int nextScanningDegree = tasks
                 .stream()
@@ -130,7 +147,13 @@ public class KCoreDecomposition extends Algorithm<KCoreDecompositionResult> {
                     task.setPhase(KCoreDecompositionTask.KCoreDecompositionPhase.ACT);
                 }
 
-                RunWithConcurrency.builder().tasks(tasks).concurrency(concurrency).run();
+                RunWithConcurrency
+                    .builder()
+                    .tasks(tasks)
+                    .concurrency(concurrency)
+                    .terminationFlag(terminationFlag)
+                    .run();
+
                 scanningDegree++;
 
             } else {

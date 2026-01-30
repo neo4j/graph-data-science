@@ -30,6 +30,7 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -68,7 +69,8 @@ class BellmanFordNegativeCyclesTest {
                 true,
                 true,
                 new Concurrency(1),
-                DefaultPool.INSTANCE
+                DefaultPool.INSTANCE,
+                TerminationFlag.RUNNING_TRUE
             ).compute();
 
             assertThat(bellmanFord.containsNegativeCycle()).isTrue();
@@ -119,7 +121,8 @@ class BellmanFordNegativeCyclesTest {
                 true,
                 true,
                 new Concurrency(1),
-                DefaultPool.INSTANCE
+                DefaultPool.INSTANCE,
+                TerminationFlag.RUNNING_TRUE
             ).compute();
 
             assertThat(bellmanFord.containsNegativeCycle()).isTrue();
@@ -175,7 +178,8 @@ class BellmanFordNegativeCyclesTest {
                 true,
                 true,
                 new Concurrency(1),
-                DefaultPool.INSTANCE
+                DefaultPool.INSTANCE,
+                TerminationFlag.RUNNING_TRUE
             ).compute();
 
             assertThat(bellmanFord.containsNegativeCycle()).isTrue();
@@ -224,7 +228,8 @@ class BellmanFordNegativeCyclesTest {
                 true,
                 true,
                 new Concurrency(1),
-                DefaultPool.INSTANCE
+                DefaultPool.INSTANCE,
+                TerminationFlag.RUNNING_TRUE
             ).compute();
 
             assertThat(bellmanFord.containsNegativeCycle()).isTrue();
@@ -268,7 +273,8 @@ class BellmanFordNegativeCyclesTest {
                 true,
                 true,
                 new Concurrency(1),
-                DefaultPool.INSTANCE
+                DefaultPool.INSTANCE,
+                TerminationFlag.RUNNING_TRUE
             ).compute();
 
             assertThat(bellmanFord.containsNegativeCycle()).isTrue();

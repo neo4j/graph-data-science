@@ -177,7 +177,8 @@ public class PathFindingComputeFacade {
             parameters.trackNegativeCycles(),
             parameters.trackPaths(),
             parameters.concurrency(),
-            executorService
+            executorService,
+            terminationFlag
         );
 
         // Submit the algorithm for async computation
@@ -249,7 +250,7 @@ public class PathFindingComputeFacade {
         );
 
         // Create the algorithm
-        var deltaStepping = DeltaStepping.of(graph, parameters, executorService, progressTracker);
+        var deltaStepping = DeltaStepping.of(graph, parameters, executorService, progressTracker,terminationFlag);
 
         // Submit the algorithm for async computation
 
@@ -532,7 +533,8 @@ public class PathFindingComputeFacade {
         var pcstFast = new PCSTFast(
             graph,
             (v) -> Math.max(prizeProperty.doubleValue(v), 0),
-            progressTracker
+            progressTracker,
+            terminationFlag
         );
 
         // Submit the algorithm for async computation

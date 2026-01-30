@@ -30,6 +30,7 @@ import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.scaling.Max;
 import org.neo4j.gds.scaling.StdScore;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
 
@@ -59,7 +60,13 @@ class ScalePropertiesMissingPropsTest {
             Max.buildFrom(CypherMapWrapper.empty())
         );
 
-        var algo = new ScaleProperties(graph, params, ProgressTracker.NULL_TRACKER, DefaultPool.INSTANCE);
+        var algo = new ScaleProperties(
+            graph,
+            params,
+            ProgressTracker.NULL_TRACKER,
+            DefaultPool.INSTANCE,
+            TerminationFlag.RUNNING_TRUE
+        );
 
         var result = algo.compute();
         var resultProperties = result.scaledProperties().toArray();
@@ -79,7 +86,13 @@ class ScalePropertiesMissingPropsTest {
             List.of("a","b","c"),
             StdScore.buildFrom(CypherMapWrapper.empty())
         );
-        var algo = new ScaleProperties(graph, params, ProgressTracker.NULL_TRACKER, DefaultPool.INSTANCE);
+        var algo = new ScaleProperties(
+            graph,
+            params,
+            ProgressTracker.NULL_TRACKER,
+            DefaultPool.INSTANCE,
+            TerminationFlag.RUNNING_TRUE
+        );
 
         var result = algo.compute();
         var resultProperties = result.scaledProperties().toArray();

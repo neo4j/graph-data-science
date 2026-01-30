@@ -140,7 +140,8 @@ public final class Node2Vec extends Algorithm<Node2VecResult> {
             graph,
             concurrency,
             executorService,
-            progressTracker
+            progressTracker,
+            terminationFlag
         );
 
         var index = new AtomicLong();

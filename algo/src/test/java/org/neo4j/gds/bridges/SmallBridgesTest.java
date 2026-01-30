@@ -32,6 +32,7 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
@@ -65,7 +66,12 @@ class SmallBridgesTest {
 
         @Test
         void shouldFindJustBridges() {
-            var bridges = Bridges.create(graph, ProgressTracker.NULL_TRACKER,false);
+            var bridges = Bridges.create(
+                graph,
+                ProgressTracker.NULL_TRACKER,
+                false,
+                TerminationFlag.RUNNING_TRUE
+            );
             var result = bridges.compute().bridges();
 
             assertThat(result)
@@ -81,7 +87,13 @@ class SmallBridgesTest {
 
         @Test
         void shouldFindBridgesAndComponentSizes() {
-            var bridges = Bridges.create(graph, ProgressTracker.NULL_TRACKER,true);
+            var bridges = Bridges.create(
+                graph,
+                ProgressTracker.NULL_TRACKER,
+                true,
+                TerminationFlag.RUNNING_TRUE
+            );
+
             var result = bridges.compute().bridges();
 
             assertThat(result)
@@ -104,7 +116,13 @@ class SmallBridgesTest {
             var progressTracker = progressTrackerWithLog.progressTracker();
             var log = progressTrackerWithLog.log();
 
-            var bridges = Bridges.create(graph, progressTracker,false);
+            var bridges = Bridges.create(
+                graph,
+                progressTracker,
+                false,
+                TerminationFlag.RUNNING_TRUE
+            );
+
             bridges.compute();
 
             Assertions.assertThat(log.getMessages(TestLog.INFO))
@@ -150,7 +168,13 @@ class SmallBridgesTest {
 
         @Test
         void shouldFindBridges() {
-            var bridges = Bridges.create(graph,ProgressTracker.NULL_TRACKER,false);
+            var bridges = Bridges.create(
+                graph,
+                ProgressTracker.NULL_TRACKER,
+                false,
+                TerminationFlag.RUNNING_TRUE
+            );
+
             var result = bridges.compute().bridges();
 
             assertThat(result)

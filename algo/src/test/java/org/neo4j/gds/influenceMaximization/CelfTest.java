@@ -27,6 +27,7 @@ import org.neo4j.gds.beta.generator.RelationshipDistribution;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -58,7 +59,8 @@ import static org.assertj.core.api.Assertions.assertThat;
              graph,
              parameters,
              DefaultPool.INSTANCE,
-             ProgressTracker.NULL_TRACKER
+             ProgressTracker.NULL_TRACKER,
+             TerminationFlag.RUNNING_TRUE
          ).compute().seedSetNodes();
 
          for (var a : celf) {

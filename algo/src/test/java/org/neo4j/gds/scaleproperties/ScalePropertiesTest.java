@@ -42,6 +42,7 @@ import org.neo4j.gds.scaling.L1Norm;
 import org.neo4j.gds.scaling.L2Norm;
 import org.neo4j.gds.scaling.MinMax;
 import org.neo4j.gds.scaling.ScalerFactory;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
 import java.util.function.Function;
@@ -63,10 +64,10 @@ class ScalePropertiesTest {
     @GdlGraph
     static String GDL =
         "(a:A {a: 1.1D, b: 20, c: 50, bAndC: [20.0, 50.0], longArrayB: [20L], floatArrayB: [20.0], doubleArray: [1.000000001d],  mixedSizeArray: [1.0, 1.0], missingArray: [1.0,2.0]}), " +
-        "(b:A {a: 2.8D, b: 21, c: 51, bAndC: [21.0, 51.0], longArrayB: [21L], floatArrayB: [21.0], doubleArray: [1.000000002d], mixedSizeArray: [1.0]}), " +
-        "(c:A {a: 3, b: 22, c: 52, bAndC: [22.0, 52.0], longArrayB: [22L], floatArrayB: [22.0], doubleArray: [1.000000003d], mixedSizeArray: [1.0]}), " +
-        "(d:A {a: -1, b: 23, c: 60, bAndC: [23.0, 60.0], longArrayB: [23L], floatArrayB: [23.0], doubleArray: [1.000000004d], mixedSizeArray: [1.0]}), " +
-        "(e:A {a: -10, b: 24, c: 100, bAndC: [24.0, 100.0], longArrayB: [24L], floatArrayB: [24.0], doubleArray: [1.000000005d], mixedSizeArray: [1.0, 2.0, 3.0]})";
+            "(b:A {a: 2.8D, b: 21, c: 51, bAndC: [21.0, 51.0], longArrayB: [21L], floatArrayB: [21.0], doubleArray: [1.000000002d], mixedSizeArray: [1.0]}), " +
+            "(c:A {a: 3, b: 22, c: 52, bAndC: [22.0, 52.0], longArrayB: [22L], floatArrayB: [22.0], doubleArray: [1.000000003d], mixedSizeArray: [1.0]}), " +
+            "(d:A {a: -1, b: 23, c: 60, bAndC: [23.0, 60.0], longArrayB: [23L], floatArrayB: [23.0], doubleArray: [1.000000004d], mixedSizeArray: [1.0]}), " +
+            "(e:A {a: -10, b: 24, c: 100, bAndC: [24.0, 100.0], longArrayB: [24L], floatArrayB: [24.0], doubleArray: [1.000000005d], mixedSizeArray: [1.0, 2.0, 3.0]})";
 
     @Inject
     private TestGraph graph;
@@ -83,7 +84,13 @@ class ScalePropertiesTest {
             MinMax.buildFrom(CypherMapWrapper.empty())
         );
 
-        var algo = new ScaleProperties(graph, params, ProgressTracker.NULL_TRACKER, DefaultPool.INSTANCE);
+        var algo = new ScaleProperties(
+            graph,
+            params,
+            ProgressTracker.NULL_TRACKER,
+            DefaultPool.INSTANCE,
+            TerminationFlag.RUNNING_TRUE
+        );
 
         var result = algo.compute();
         var resultProperties = result.scaledProperties().toArray();
@@ -100,11 +107,17 @@ class ScalePropertiesTest {
 
         var params = new ScalePropertiesParameters(
             new Concurrency(1),
-            List.of("a","b","c"),
+            List.of("a", "b", "c"),
             MinMax.buildFrom(CypherMapWrapper.empty())
         );
 
-        var algo = new ScaleProperties(graph, params, ProgressTracker.NULL_TRACKER, DefaultPool.INSTANCE);
+        var algo = new ScaleProperties(
+            graph,
+            params,
+            ProgressTracker.NULL_TRACKER,
+            DefaultPool.INSTANCE,
+            TerminationFlag.RUNNING_TRUE
+        );
 
         var result = algo.compute();
         var resultProperties = result.scaledProperties().toArray();
@@ -145,14 +158,16 @@ class ScalePropertiesTest {
             bigGraph,
             paramsParallel,
             ProgressTracker.NULL_TRACKER,
-            DefaultPool.INSTANCE
+            DefaultPool.INSTANCE,
+            TerminationFlag.RUNNING_TRUE
         ).compute().scaledProperties();
 
         var expected = new ScaleProperties(
             bigGraph,
             paramsSingle,
             ProgressTracker.NULL_TRACKER,
-            DefaultPool.INSTANCE
+            DefaultPool.INSTANCE,
+            TerminationFlag.RUNNING_TRUE
         ).compute().scaledProperties();
 
         IntStream.range(0, nodeCount).forEach(id -> assertEquals(expected.get(id)[0], parallelResult.get(id)[0]));
@@ -163,11 +178,17 @@ class ScalePropertiesTest {
 
         var params = new ScalePropertiesParameters(
             new Concurrency(4),
-           List.of("a", "bAndC", "longArrayB"),
+            List.of("a", "bAndC", "longArrayB"),
             MinMax.buildFrom(CypherMapWrapper.empty())
         );
 
-        var actual = new ScaleProperties(graph, params, ProgressTracker.NULL_TRACKER, DefaultPool.INSTANCE)
+        var actual = new ScaleProperties(
+            graph,
+            params,
+            ProgressTracker.NULL_TRACKER,
+            DefaultPool.INSTANCE,
+            TerminationFlag.RUNNING_TRUE
+        )
             .compute()
             .scaledProperties();
 
@@ -176,7 +197,13 @@ class ScalePropertiesTest {
             List.of("a", "b", "c", "longArrayB"),
             MinMax.buildFrom(CypherMapWrapper.empty())
         );
-        var expected = new ScaleProperties(graph, paramsSingleProp, ProgressTracker.NULL_TRACKER, DefaultPool.INSTANCE)
+        var expected = new ScaleProperties(
+            graph,
+            paramsSingleProp,
+            ProgressTracker.NULL_TRACKER,
+            DefaultPool.INSTANCE,
+            TerminationFlag.RUNNING_TRUE
+        )
             .compute()
             .scaledProperties();
 
@@ -187,7 +214,7 @@ class ScalePropertiesTest {
     @MethodSource("scalers")
     void supportLongAndFloatArrays(String scaler) {
 
-        Function<List<String>,ScalePropertiesParameters>  paramBuilder  = (nodeProps ) ->  new ScalePropertiesParameters(
+        Function<List<String>, ScalePropertiesParameters> paramBuilder = (nodeProps) -> new ScalePropertiesParameters(
             new Concurrency(4),
             nodeProps,
             ScalerFactory.ALL_SCALERS.get(scaler).apply(CypherMapWrapper.empty())
@@ -197,13 +224,33 @@ class ScalePropertiesTest {
         var longArrayBParams = paramBuilder.apply(List.of("longArrayB"));
         var doubleArrayBParams = paramBuilder.apply(List.of("floatArrayB"));
 
-        var expected = new ScaleProperties(graph, bParams, ProgressTracker.NULL_TRACKER, DefaultPool.INSTANCE)
+        var expected = new ScaleProperties(
+            graph,
+            bParams,
+            ProgressTracker.NULL_TRACKER,
+            DefaultPool.INSTANCE,
+            TerminationFlag.RUNNING_TRUE
+        )
             .compute()
             .scaledProperties();
-        var actualLong = new ScaleProperties(graph, longArrayBParams, ProgressTracker.NULL_TRACKER, DefaultPool.INSTANCE)
+
+        var actualLong = new ScaleProperties(
+            graph,
+            longArrayBParams,
+            ProgressTracker.NULL_TRACKER,
+            DefaultPool.INSTANCE,
+            TerminationFlag.RUNNING_TRUE
+        )
             .compute()
             .scaledProperties();
-        var actualDouble = new ScaleProperties(graph, doubleArrayBParams, ProgressTracker.NULL_TRACKER, DefaultPool.INSTANCE)
+
+        var actualDouble = new ScaleProperties(
+            graph,
+            doubleArrayBParams,
+            ProgressTracker.NULL_TRACKER,
+            DefaultPool.INSTANCE,
+            TerminationFlag.RUNNING_TRUE
+        )
             .compute()
             .scaledProperties();
 
@@ -215,7 +262,7 @@ class ScalePropertiesTest {
     @MethodSource("scalersL1L2")
     void supportLongAndFloatArraysForL1L2(String scaler) {
 
-        Function<List<String>,ScalePropertiesParameters>  paramBuilder  = (nodeProps ) ->  new ScalePropertiesParameters(
+        Function<List<String>, ScalePropertiesParameters> paramBuilder = (nodeProps) -> new ScalePropertiesParameters(
             new Concurrency(4),
             nodeProps,
             ScalerFactory.ALL_SCALERS.get(scaler).apply(CypherMapWrapper.empty())
@@ -225,13 +272,31 @@ class ScalePropertiesTest {
         var longArrayBParams = paramBuilder.apply(List.of("longArrayB"));
         var doubleArrayBParams = paramBuilder.apply(List.of("floatArrayB"));
 
-        var expected = new ScaleProperties(graph, bParams, ProgressTracker.NULL_TRACKER, DefaultPool.INSTANCE)
+        var expected = new ScaleProperties(
+            graph,
+            bParams,
+            ProgressTracker.NULL_TRACKER,
+            DefaultPool.INSTANCE,
+            TerminationFlag.RUNNING_TRUE
+        )
             .compute()
             .scaledProperties();
-        var actualLong = new ScaleProperties(graph, longArrayBParams, ProgressTracker.NULL_TRACKER, DefaultPool.INSTANCE)
+        var actualLong = new ScaleProperties(
+            graph,
+            longArrayBParams,
+            ProgressTracker.NULL_TRACKER,
+            DefaultPool.INSTANCE,
+            TerminationFlag.RUNNING_TRUE
+        )
             .compute()
             .scaledProperties();
-        var actualDouble = new ScaleProperties(graph, doubleArrayBParams, ProgressTracker.NULL_TRACKER, DefaultPool.INSTANCE)
+        var actualDouble = new ScaleProperties(
+            graph,
+            doubleArrayBParams,
+            ProgressTracker.NULL_TRACKER,
+            DefaultPool.INSTANCE,
+            TerminationFlag.RUNNING_TRUE
+        )
             .compute()
             .scaledProperties();
 
@@ -248,8 +313,20 @@ class ScalePropertiesTest {
             MinMax.buildFrom(CypherMapWrapper.empty())
         );
 
-        var expected = new double[][]{new double[]{0.0}, new double[]{0.2499999722444236}, new double[]{.5}, new double[]{0.7500000277555764}, new double[]{1.0}};
-        var actual = new ScaleProperties(graph, params, ProgressTracker.NULL_TRACKER, DefaultPool.INSTANCE)
+        var expected = new double[][]{
+            new double[]{0.0},
+            new double[]{0.2499999722444236},
+            new double[]{.5},
+            new double[]{0.7500000277555764},
+            new double[]{1.0}
+        };
+        var actual = new ScaleProperties(
+            graph,
+            params,
+            ProgressTracker.NULL_TRACKER,
+            DefaultPool.INSTANCE,
+            TerminationFlag.RUNNING_TRUE
+        )
             .compute()
             .scaledProperties();
 
@@ -265,12 +342,20 @@ class ScalePropertiesTest {
             MinMax.buildFrom(CypherMapWrapper.empty())
         );
 
-        var algo = new ScaleProperties(graph, params, ProgressTracker.NULL_TRACKER, DefaultPool.INSTANCE);
+        var algo = new ScaleProperties(
+            graph,
+            params,
+            ProgressTracker.NULL_TRACKER,
+            DefaultPool.INSTANCE,
+            TerminationFlag.RUNNING_TRUE
+        );
         var error = assertThrows(IllegalArgumentException.class, algo::compute);
 
-        assertThat(error.getMessage(), containsString(
-            "For scaling property `mixedSizeArray` expected array of length 2 but got length 1 for node 1"
-        ));
+        assertThat(
+            error.getMessage(), containsString(
+                "For scaling property `mixedSizeArray` expected array of length 2 but got length 1 for node 1"
+            )
+        );
     }
 
     @Test
@@ -282,7 +367,13 @@ class ScalePropertiesTest {
             MinMax.buildFrom(CypherMapWrapper.empty())
         );
 
-        var algo = new ScaleProperties(graph, params, ProgressTracker.NULL_TRACKER, DefaultPool.INSTANCE);
+        var algo = new ScaleProperties(
+            graph,
+            params,
+            ProgressTracker.NULL_TRACKER,
+            DefaultPool.INSTANCE,
+            TerminationFlag.RUNNING_TRUE
+        );
         var error = assertThrows(IllegalArgumentException.class, algo::compute);
 
         assertThat(error.getMessage(), containsString("Node property `IMAGINARY_PROP` not found in graph"));
@@ -321,7 +412,8 @@ class ScalePropertiesTest {
             graph,
             params,
             progressTracker,
-            DefaultPool.INSTANCE
+            DefaultPool.INSTANCE,
+            TerminationFlag.RUNNING_TRUE
         );
 
         scaleProperties.compute();
@@ -361,7 +453,8 @@ class ScalePropertiesTest {
             .filter(s -> !(s.equals(L1Norm.TYPE) || s.equals(L2Norm.TYPE)))
             .map(Arguments::of);
     }
-    public static Stream<Arguments> scalersL1L2(){
+
+    public static Stream<Arguments> scalersL1L2() {
         return ScalerFactory.ALL_SCALERS.keySet()
             .stream()
             .filter(s -> (s.equals(L1Norm.TYPE) || s.equals(L2Norm.TYPE)))

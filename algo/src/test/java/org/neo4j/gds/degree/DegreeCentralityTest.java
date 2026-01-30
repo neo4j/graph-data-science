@@ -36,6 +36,7 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
 import java.util.Map;
@@ -138,7 +139,8 @@ final class DegreeCentralityTest {
             orientation,
             weighted,
             minBatchSize,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         );
 
         var degreeFunction = degreeCentrality.compute().degreeFunction();
@@ -172,7 +174,8 @@ final class DegreeCentralityTest {
             orientation,
             weighted,
             ParallelUtil.DEFAULT_BATCH_SIZE,
-            progressTracker
+            progressTracker,
+            TerminationFlag.RUNNING_TRUE
         );
 
         degreeCentrality.compute();
@@ -197,7 +200,8 @@ final class DegreeCentralityTest {
             orientation,
             hasRelationshipProperty,
             ParallelUtil.DEFAULT_BATCH_SIZE,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         );
 
         // should not throw

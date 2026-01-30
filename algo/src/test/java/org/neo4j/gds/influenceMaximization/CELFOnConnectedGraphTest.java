@@ -34,6 +34,7 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
@@ -112,7 +113,8 @@ class CELFOnConnectedGraphTest {
             graph,
             parameters,
             DefaultPool.INSTANCE,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         );
 
         var celfResult = celf.compute().seedSetNodes();
@@ -161,7 +163,7 @@ class CELFOnConnectedGraphTest {
 
         var progressTracker = progressTrackerWithLog.progressTracker();
         var log = progressTrackerWithLog.log();
-        var algorithm = new CELF(graph,params,DefaultPool.INSTANCE, progressTracker);
+        var algorithm = new CELF(graph,params,DefaultPool.INSTANCE, progressTracker,TerminationFlag.RUNNING_TRUE);
 
         algorithm.compute();
 
