@@ -85,7 +85,8 @@ public abstract class SyntaxTestBase {
         return Set.of(
             "sudo",
             "username",
-            "writeToResultStore"
+            "writeToResultStore",
+            "forceSeedOptimization"
         );
     }
 
