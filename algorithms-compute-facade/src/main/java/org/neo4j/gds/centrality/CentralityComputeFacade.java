@@ -22,15 +22,14 @@ package org.neo4j.gds.centrality;
 import com.carrotsearch.hppc.LongScatterSet;
 import org.neo4j.gds.CentralityAlgorithmTasks;
 import org.neo4j.gds.ProgressTrackerFactory;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.articulationPoints.ArticulationPointsParameters;
 import org.neo4j.gds.articulationpoints.ArticulationPoints;
 import org.neo4j.gds.articulationpoints.ArticulationPointsResult;
 import org.neo4j.gds.async.AsyncAlgorithmCaller;
-import org.neo4j.gds.beta.pregel.ImmutablePregelResult;
-import org.neo4j.gds.beta.pregel.NodeValue;
 import org.neo4j.gds.beta.pregel.PregelResult;
-import org.neo4j.gds.beta.pregel.PregelSchema;
 import org.neo4j.gds.betweenness.BetweennessCentrality;
 import org.neo4j.gds.betweenness.BetweennessCentralityParameters;
 import org.neo4j.gds.betweenness.BetwennessCentralityResult;
@@ -51,6 +50,8 @@ import org.neo4j.gds.harmonic.HarmonicCentralityParameters;
 import org.neo4j.gds.harmonic.HarmonicResult;
 import org.neo4j.gds.hits.Hits;
 import org.neo4j.gds.hits.HitsConfig;
+import org.neo4j.gds.hits.HitsWithInvertedIndexValidation;
+import org.neo4j.gds.indexinverse.InverseRelationshipsParameters;
 import org.neo4j.gds.indirectExposure.IndirectExposure;
 import org.neo4j.gds.indirectExposure.IndirectExposureConfig;
 import org.neo4j.gds.indirectExposure.IndirectExposureResult;
@@ -71,6 +72,7 @@ import org.neo4j.gds.pagerank.PageRankResult;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.termination.TerminationFlag;
 
+import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 
 import static org.neo4j.gds.pagerank.PageRankVariant.ARTICLE_RANK;
@@ -429,30 +431,37 @@ public class CentralityComputeFacade {
     }
 
     public CompletableFuture<TimedAlgorithmResult<PregelResult>> hits(
-        Graph graph,
+        GraphStore graphStore,
         HitsConfig configuration,
+        Collection<RelationshipType> relationshipTypesWithoutIndex,
         JobId jobId,
         boolean logProgress
     ) {
 
-        if (graph.isEmpty()) {
-            var empty = NodeValue.of(new PregelSchema.Builder().build(),0,configuration.concurrency());
-            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(ImmutablePregelResult.of(empty, 0, false)));
-        }
+        var inverseRelationshipsParameters = new InverseRelationshipsParameters(
+            configuration.concurrency(),
+            relationshipTypesWithoutIndex
+        );
 
         var progressTracker = progressTrackerFactory.create(
-            tasks.hits(graph,configuration),
+            tasks.hits(graphStore,configuration,inverseRelationshipsParameters),
             jobId,
             configuration.concurrency(),
             logProgress
         );
 
-        var hits = new Hits(
-            graph,
-            configuration,
-            DefaultPool.INSTANCE,
+        var hits = new HitsWithInvertedIndexValidation(
             progressTracker,
-            terminationFlag
+            inverseRelationshipsParameters,
+            graphStore,
+            configuration.internalRelationshipTypes(graphStore),
+            (graph -> new Hits(
+                graph,
+                configuration,
+                DefaultPool.INSTANCE,
+                progressTracker,
+                terminationFlag
+            ))
         );
 
         return algorithmCaller.run(

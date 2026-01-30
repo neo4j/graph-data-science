@@ -25,6 +25,7 @@ import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.articulationPoints.ArticulationPointsParameters;
 import org.neo4j.gds.articulationpoints.ArticulationPointsResult;
+import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.betweenness.BetweennessCentralityParameters;
 import org.neo4j.gds.betweenness.BetwennessCentralityResult;
 import org.neo4j.gds.bridges.BridgeResult;
@@ -34,14 +35,19 @@ import org.neo4j.gds.closeness.ClosenessCentralityParameters;
 import org.neo4j.gds.closeness.ClosenessCentralityResult;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
+import org.neo4j.gds.core.loading.validation.AlgorithmGraphStoreRequirementsBuilder;
+import org.neo4j.gds.core.loading.validation.DirectedOnlyRequirement;
 import org.neo4j.gds.core.loading.validation.GraphStoreValidation;
 import org.neo4j.gds.core.loading.validation.NoAlgorithmRequirements;
+import org.neo4j.gds.core.loading.validation.PregelPropertiesRequirement;
 import org.neo4j.gds.core.loading.validation.SourceNodesRequirement;
 import org.neo4j.gds.core.loading.validation.UndirectedOnlyRequirement;
 import org.neo4j.gds.degree.DegreeCentralityParameters;
 import org.neo4j.gds.degree.DegreeCentralityResult;
 import org.neo4j.gds.harmonic.HarmonicCentralityParameters;
 import org.neo4j.gds.harmonic.HarmonicResult;
+import org.neo4j.gds.hits.HitsCompanion;
+import org.neo4j.gds.hits.HitsConfig;
 import org.neo4j.gds.indirectExposure.IndirectExposureConfig;
 import org.neo4j.gds.indirectExposure.IndirectExposureResult;
 import org.neo4j.gds.influenceMaximization.CELFParameters;
@@ -409,6 +415,41 @@ public class CentralityComputeBusinessFacade {
         return computeFacade.pageRank(
             graph,
             config,
+            jobId,
+            logProgress
+        ).thenApply(resultTransformerBuilder.build(graphResources));
+    }
+
+    public <TR> CompletableFuture<TR> hits(
+        GraphName graphName,
+        GraphParameters graphParameters,
+        HitsConfig hitsConfig,
+        JobId jobId,
+        boolean logProgress,
+        ResultTransformerBuilder<TimedAlgorithmResult<PregelResult>, TR> resultTransformerBuilder
+    ) {
+        // Fetch the Graph the algorithm will operate on
+        var graphResources = graphStoreCatalogService.fetchGraphStoreOnlyResources(
+            graphName,
+            graphParameters,
+            Optional.empty(),
+            new AlgorithmGraphStoreRequirementsBuilder()
+                .withAlgorithmRequirement(new PregelPropertiesRequirement(hitsConfig.writeProperty()))
+                .withAlgorithmRequirement(new DirectedOnlyRequirement("Hits"))
+                .build(),
+            user,
+            databaseId
+        );
+        var graphStore = graphResources.graphStore();
+        var relTypes = HitsCompanion.relationshipsWithoutIndices(
+            graphStore,
+            hitsConfig.internalRelationshipTypes(graphStore)
+        );
+
+        return computeFacade.hits(
+            graphStore,
+            hitsConfig,
+            relTypes,
             jobId,
             logProgress
         ).thenApply(resultTransformerBuilder.build(graphResources));

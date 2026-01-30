@@ -27,6 +27,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.ProgressTrackerFactory;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.articulationPoints.ArticulationPointsParameters;
 import org.neo4j.gds.async.AsyncAlgorithmCaller;
 import org.neo4j.gds.betweenness.BetweennessCentralityParameters;
@@ -51,6 +52,7 @@ import org.neo4j.gds.pagerank.PageRankConfigImpl;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.Executors;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -91,6 +93,9 @@ class CentralityComputeFacadeTest {
 
     @Inject
     private Graph inverseGraph;
+
+    @Inject
+    private GraphStore inverseGraphStore;
 
     private CentralityComputeFacade facade;
 
@@ -265,8 +270,9 @@ class CentralityComputeFacadeTest {
         var config = HitsConfigImpl.builder().concurrency(4).build();
 
         var future = facade.hits(
-            inverseGraph,
+            inverseGraphStore,
             config,
+            Set.of(),
             jobIdMock,
             false
         );

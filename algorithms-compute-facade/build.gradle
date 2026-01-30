@@ -17,6 +17,7 @@ dependencies {
     implementation project(':core')
     implementation project(':core-api')
     implementation project(':logging')
+    implementation project(":miscellaneous-params")
     implementation project(':ml-core')
     implementation project(':node-embeddings-params')
     implementation project(':path-finding-algorithms')

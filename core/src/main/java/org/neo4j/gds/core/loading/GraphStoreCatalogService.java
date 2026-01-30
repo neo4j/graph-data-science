@@ -180,7 +180,7 @@ public class GraphStoreCatalogService {
         return new GraphResources(graphStore, graph, graphStoreCatalogEntry.resultStore());
     }
 
-    public GraphResources fetchGraphStoreOnlyResource(
+    public GraphResources fetchGraphStoreOnlyResources(
         GraphName graphName,
         GraphParameters graphParameters,
         Optional<String> relationshipProperty,
