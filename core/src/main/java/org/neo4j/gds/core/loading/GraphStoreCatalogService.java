@@ -180,6 +180,34 @@ public class GraphStoreCatalogService {
         return new GraphResources(graphStore, graph, graphStoreCatalogEntry.resultStore());
     }
 
+    public GraphResources fetchGraphStoreOnlyResource(
+        GraphName graphName,
+        GraphParameters graphParameters,
+        Optional<String> relationshipProperty,
+        GraphStoreValidation graphStoreValidation,
+        User user,
+        DatabaseId databaseId
+    ) {
+        var graphStoreCatalogEntry = getGraphStoreCatalogEntry(
+            graphName,
+            user, graphParameters.usernameOverride(), databaseId
+        );
+
+        var graphStore = graphStoreCatalogEntry.graphStore();
+
+        var nodeLabels = graphParameters.nodeLabelsFilter().isEmpty()
+            ? graphStore.nodeLabels()
+            : graphParameters.nodeLabelsFilter();
+        var relationshipTypes = graphParameters.loadAllRelationshipTypes()
+            ? graphStore.relationshipTypes()
+            : graphParameters.relationshipTypesFilter();
+
+        // Validate the graph store before going any further
+        graphStoreValidation.validate(graphStore, nodeLabels, relationshipTypes, relationshipProperty);
+
+        return new GraphResources(graphStore, null, graphStoreCatalogEntry.resultStore());
+    }
+
     /**
      * Some use cases need special validation. We do this right after loading.
      *
