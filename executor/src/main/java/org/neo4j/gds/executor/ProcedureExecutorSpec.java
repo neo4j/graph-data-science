@@ -20,6 +20,8 @@
 package org.neo4j.gds.executor;
 
 import org.neo4j.gds.Algorithm;
+import org.neo4j.gds.api.User;
+import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.graphstorecatalog.GraphStoreFromCatalogLoader;
 import org.neo4j.gds.applications.graphstorecatalog.MemoryUsageValidator;
 import org.neo4j.gds.config.AlgoBaseConfig;
@@ -59,11 +61,12 @@ public class ProcedureExecutorSpec<
 
         return new ProcedureGraphCreationFactory<>(
             (config, graphName) -> new GraphStoreFromCatalogLoader(
+                RequestScopedDependencies.builder()
+                    .databaseId(executionContext.databaseId())
+                    .user(new User(executionContext.username(), executionContext.isGdsAdmin()))
+                    .build(),
                 graphName,
-                config,
-                executionContext.username(),
-                executionContext.databaseId(),
-                executionContext.isGdsAdmin()
+                config
             ),
             new MemoryUsageValidator(executionContext.username(), new MemoryTracker(Long.MAX_VALUE, executionContext.log()), useMaxMemoryEstimation, executionContext.log())
         );

@@ -23,14 +23,13 @@ import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.core.RequestCorrelationId;
+import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.io.NeoNodeProperties;
 import org.neo4j.gds.core.io.file.GraphStoreExporterUtil;
 import org.neo4j.gds.core.io.file.GraphStoreToFileExporterConfig;
 import org.neo4j.gds.core.io.file.GraphStoreToFileExporterParameters;
 import org.neo4j.gds.core.utils.logging.GdsLoggers;
-import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.transaction.DatabaseTransactionContext;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
@@ -48,26 +47,25 @@ class ExportToCsvApplication {
     private final Transaction procedureTransaction;
 
     private final ExportLocation exportLocation;
-    private final RequestCorrelationId requestCorrelationId;
-    private final TaskRegistryFactory taskRegistryFactory;
 
     ExportToCsvApplication(
         GdsLoggers loggers,
         GraphDatabaseService graphDatabaseService,
         Transaction procedureTransaction,
-        ExportLocation exportLocation,
-        RequestCorrelationId requestCorrelationId,
-        TaskRegistryFactory taskRegistryFactory
+        ExportLocation exportLocation
     ) {
         this.loggers = loggers;
         this.graphDatabaseService = graphDatabaseService;
         this.procedureTransaction = procedureTransaction;
         this.exportLocation = exportLocation;
-        this.requestCorrelationId = requestCorrelationId;
-        this.taskRegistryFactory = taskRegistryFactory;
     }
 
-    FileExportResult run(GraphName graphName, GraphStoreToFileExporterConfig configuration, GraphStore graphStore) {
+    FileExportResult run(
+        RequestScopedDependencies requestScopedDependencies,
+        GraphName graphName,
+        GraphStoreToFileExporterConfig configuration,
+        GraphStore graphStore
+    ) {
         var exportParameters = new GraphStoreToFileExporterParameters(
             configuration.exportName(),
             configuration.username(),
@@ -84,8 +82,8 @@ class ExportToCsvApplication {
             exportDirectory,
             exportParameters,
             neoNodeProperties(configuration.additionalNodeProperties(), graphStore),
-            requestCorrelationId,
-            taskRegistryFactory,
+            requestScopedDependencies.correlationId(),
+            requestScopedDependencies.taskRegistryFactory(),
             loggers,
             DefaultPool.INSTANCE
         );

@@ -21,10 +21,9 @@ package org.neo4j.gds.applications.graphstorecatalog;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.neo4j.gds.api.GraphName;
-import org.neo4j.gds.api.User;
+import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.core.loading.GraphStoreCatalogEntry;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
-import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
 import java.util.Map;
@@ -42,7 +41,8 @@ public final class ListGraphApplication {
 
     public static ListGraphApplication create(GraphStoreCatalogService graphStoreCatalogService) {
         var graphListingService = new GraphListingService(graphStoreCatalogService);
-        var degreeDistributionApplier = new DegreeDistributionApplier(graphStoreCatalogService,
+        var degreeDistributionApplier = new DegreeDistributionApplier(
+            graphStoreCatalogService,
             new DegreeDistributionService()
         );
 
@@ -50,20 +50,23 @@ public final class ListGraphApplication {
     }
 
     public List<Pair<GraphStoreCatalogEntry, Map<String, Object>>> list(
-        User user,
+        RequestScopedDependencies requestScopedDependencies,
         Optional<GraphName> graphName,
-        boolean includeDegreeDistribution,
-        TerminationFlag terminationFlag
+        boolean includeDegreeDistribution
     ) {
         Predicate<String> graphNameFilter = graphName
-            .map(graphName1 -> graphName1.value())
+            .map(GraphName::value)
             .map(name -> (Predicate<String>) name::equals)
             .orElseGet(() -> __ -> true);
-        var graphEntries = graphListingService.listGraphs(user)
+        var graphEntries = graphListingService.listGraphs(requestScopedDependencies.user())
             .stream()
             .filter(catalogEntry -> graphNameFilter.test(catalogEntry.config().graphName()))
             .toList();
 
-        return degreeDistributionApplier.process(graphEntries, includeDegreeDistribution, terminationFlag);
+        return degreeDistributionApplier.process(
+            graphEntries,
+            includeDegreeDistribution,
+            requestScopedDependencies.terminationFlag()
+        );
     }
 }

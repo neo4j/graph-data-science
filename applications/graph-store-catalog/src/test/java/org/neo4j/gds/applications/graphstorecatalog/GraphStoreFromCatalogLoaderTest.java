@@ -20,6 +20,8 @@
 package org.neo4j.gds.applications.graphstorecatalog;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.api.User;
+import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -39,11 +41,12 @@ class GraphStoreFromCatalogLoaderTest {
     @Test
     void testGraphDimensions() {
         var loader = new GraphStoreFromCatalogLoader(
+            RequestScopedDependencies.builder()
+                .databaseId(DATABASE_ID)
+                .user(new User("", false))
+                .build(),
             "graph",
-            new TestAlgoBaseConfig(),
-            "",
-            DATABASE_ID,
-            false
+            new TestAlgoBaseConfig()
         );
 
         assertThat(loader.graphDimensions().nodePropertyDimensions().get("p")).contains(1);

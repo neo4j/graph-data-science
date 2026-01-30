@@ -23,7 +23,7 @@ import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.core.RequestCorrelationId;
+import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.io.GraphStoreExporter;
 import org.neo4j.gds.core.io.NeoNodeProperties;
@@ -32,10 +32,8 @@ import org.neo4j.gds.core.io.db.GraphStoreToDatabaseExporterConfig;
 import org.neo4j.gds.core.io.db.GraphStoreToDatabaseExporterParameters;
 import org.neo4j.gds.core.io.db.ProgressTrackerExecutionMonitor;
 import org.neo4j.gds.core.utils.logging.GdsLoggers;
-import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
-import org.neo4j.gds.core.utils.warnings.UserLogRegistry;
 import org.neo4j.gds.transaction.DatabaseTransactionContext;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
@@ -48,27 +46,18 @@ class ExportToDatabaseApplication {
     private final GraphDatabaseService graphDatabaseService;
     private final Transaction procedureTransaction;
 
-    private final TaskRegistryFactory taskRegistryFactory;
-    private final UserLogRegistry userLogRegistry;
-    private final RequestCorrelationId requestCorrelationId;
-
     ExportToDatabaseApplication(
         GdsLoggers loggers,
         GraphDatabaseService graphDatabaseService,
-        Transaction procedureTransaction,
-        RequestCorrelationId requestCorrelationId,
-        TaskRegistryFactory taskRegistryFactory,
-        UserLogRegistry userLogRegistry
+        Transaction procedureTransaction
     ) {
         this.loggers = loggers;
         this.graphDatabaseService = graphDatabaseService;
         this.procedureTransaction = procedureTransaction;
-        this.taskRegistryFactory = taskRegistryFactory;
-        this.userLogRegistry = userLogRegistry;
-        this.requestCorrelationId = requestCorrelationId;
     }
 
     DatabaseExportResult run(
+        RequestScopedDependencies requestScopedDependencies,
         GraphName graphName,
         GraphStoreToDatabaseExporterConfig configuration,
         GraphStore graphStore
@@ -78,9 +67,9 @@ class ExportToDatabaseApplication {
             loggers.loggerForProgressTracking(),
             configuration.typedWriteConcurrency(),
             configuration.jobId(),
-            requestCorrelationId,
-            taskRegistryFactory,
-            userLogRegistry
+            requestScopedDependencies.correlationId(),
+            requestScopedDependencies.taskRegistryFactory(),
+            requestScopedDependencies.userLogRegistry()
         );
 
         @SuppressWarnings("removal") var parameters = new GraphStoreToDatabaseExporterParameters(

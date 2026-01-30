@@ -28,6 +28,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.User;
+import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
@@ -110,18 +111,20 @@ class GraphSamplingApplicationTest {
     void shouldSampleRWR(Map<String, Object> mapConfiguration, long expectedNodeCount) {
         var graphSamplingApplication = new GraphSamplingApplication(
             LoggerForProgressTracking.noOpLog(),
-            new GraphStoreCatalogService(),
-            PlainSimpleRequestCorrelationId.create()
+            new GraphStoreCatalogService()
         );
 
         var user = new User("user", false);
         var result = graphSamplingApplication.sample(
-            user,
-            EmptyTaskRegistryFactory.INSTANCE,
-            UserLogRegistry.EMPTY,
+            RequestScopedDependencies.builder()
+                .correlationId(PlainSimpleRequestCorrelationId.create())
+                .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
+                .terminationFlag(TerminationFlag.RUNNING_TRUE)
+                .user(user)
+                .userLogRegistry(UserLogRegistry.EMPTY)
+                .build(),
             graphStore,
             GraphProjectConfig.emptyWithName("user", "graph"),
-            TerminationFlag.RUNNING_TRUE,
             GraphName.parse("graph"),
             GraphName.parse("sample"),
             mapConfiguration,
@@ -151,18 +154,20 @@ class GraphSamplingApplicationTest {
     void shouldSampleCNARW(Map<String, Object> mapConfiguration, long expectedNodeCount) {
         var graphSamplingApplication = new GraphSamplingApplication(
             LoggerForProgressTracking.noOpLog(),
-            new GraphStoreCatalogService(),
-            PlainSimpleRequestCorrelationId.create()
+            new GraphStoreCatalogService()
         );
 
         var user = new User("user", false);
         var result = graphSamplingApplication.sample(
-            user,
-            EmptyTaskRegistryFactory.INSTANCE,
-            UserLogRegistry.EMPTY,
+            RequestScopedDependencies.builder()
+                .correlationId(PlainSimpleRequestCorrelationId.create())
+                .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
+                .terminationFlag(TerminationFlag.RUNNING_TRUE)
+                .user(user)
+                .userLogRegistry(UserLogRegistry.EMPTY)
+                .build(),
             graphStore,
             GraphProjectConfig.emptyWithName("user", "graph"),
-            TerminationFlag.RUNNING_TRUE,
             GraphName.parse("graph"),
             GraphName.parse("sample"),
             mapConfiguration,
@@ -191,19 +196,21 @@ class GraphSamplingApplicationTest {
     void shouldUseSingleStartNodeRWR(double samplingRatio, long expectedStartNodeCount) {
         var graphSamplingApplication = new GraphSamplingApplication(
             LoggerForProgressTracking.noOpLog(),
-            new GraphStoreCatalogService(),
-            PlainSimpleRequestCorrelationId.create()
+            new GraphStoreCatalogService()
         );
 
         var user = new User("user", false);
         var x = idFunction.of("x");
         var result = graphSamplingApplication.sample(
-            user,
-            EmptyTaskRegistryFactory.INSTANCE,
-            UserLogRegistry.EMPTY,
+            RequestScopedDependencies.builder()
+                .correlationId(PlainSimpleRequestCorrelationId.create())
+                .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
+                .terminationFlag(TerminationFlag.RUNNING_TRUE)
+                .user(user)
+                .userLogRegistry(UserLogRegistry.EMPTY)
+                .build(),
             graphStore,
             GraphProjectConfig.emptyWithName("user", "graph"),
-            TerminationFlag.RUNNING_TRUE,
             GraphName.parse("graph"),
             GraphName.parse("sample"),
             Map.of(
@@ -236,19 +243,21 @@ class GraphSamplingApplicationTest {
     void shouldUseSingleStartNodeCNARW(double samplingRatio, long expectedStartNodeCount) {
         var graphSamplingApplication = new GraphSamplingApplication(
             LoggerForProgressTracking.noOpLog(),
-            new GraphStoreCatalogService(),
-            PlainSimpleRequestCorrelationId.create()
+            new GraphStoreCatalogService()
         );
 
         var user = new User("user", false);
         var x = idFunction.of("x");
         var result = graphSamplingApplication.sample(
-            user,
-            EmptyTaskRegistryFactory.INSTANCE,
-            UserLogRegistry.EMPTY,
+            RequestScopedDependencies.builder()
+                .correlationId(PlainSimpleRequestCorrelationId.create())
+                .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
+                .terminationFlag(TerminationFlag.RUNNING_TRUE)
+                .user(user)
+                .userLogRegistry(UserLogRegistry.EMPTY)
+                .build(),
             graphStore,
             GraphProjectConfig.emptyWithName("user", "graph"),
-            TerminationFlag.RUNNING_TRUE,
             GraphName.parse("graph"),
             GraphName.parse("sample"),
             Map.of(

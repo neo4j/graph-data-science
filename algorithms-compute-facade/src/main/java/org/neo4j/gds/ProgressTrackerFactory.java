@@ -19,33 +19,22 @@
  */
 package org.neo4j.gds;
 
-import org.neo4j.gds.core.RequestCorrelationId;
-import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.core.JobId;
-import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.LoggerForProgressTracking;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskTreeProgressTracker;
-import org.neo4j.gds.core.utils.warnings.UserLogRegistry;
 
 public class ProgressTrackerFactory {
     private final LoggerForProgressTracking log;
-    private final RequestCorrelationId requestCorrelationId;
-    private final TaskRegistryFactory taskRegistryFactory;
-    private final UserLogRegistry userLogRegistry;
+    private final RequestScopedDependencies requestScopedDependencies;
 
-    public ProgressTrackerFactory(
-        LoggerForProgressTracking log,
-        RequestCorrelationId requestCorrelationId,
-        TaskRegistryFactory taskRegistryFactory,
-        UserLogRegistry userLogRegistry
-    ) {
+    public ProgressTrackerFactory(LoggerForProgressTracking log, RequestScopedDependencies requestScopedDependencies) {
         this.log = log;
-        this.requestCorrelationId = requestCorrelationId;
-        this.taskRegistryFactory = taskRegistryFactory;
-        this.userLogRegistry = userLogRegistry;
+        this.requestScopedDependencies = requestScopedDependencies;
     }
 
     public ProgressTracker create(
@@ -61,9 +50,9 @@ public class ProgressTrackerFactory {
                 log,
                 concurrency,
                 jobId,
-                requestCorrelationId,
-                taskRegistryFactory,
-                userLogRegistry
+                requestScopedDependencies.correlationId(),
+                requestScopedDependencies.taskRegistryFactory(),
+                requestScopedDependencies.userLogRegistry()
             );
         } else {
             progressTracker = TaskTreeProgressTracker.create(
@@ -71,18 +60,13 @@ public class ProgressTrackerFactory {
                 log,
                 concurrency,
                 jobId,
-                requestCorrelationId,
-                taskRegistryFactory,
-                userLogRegistry
+                requestScopedDependencies.correlationId(),
+                requestScopedDependencies.taskRegistryFactory(),
+                requestScopedDependencies.userLogRegistry()
             );
         }
 
         progressTracker.requestedConcurrency(concurrency);
         return progressTracker;
     }
-
-    public ProgressTracker nullTracker() {
-        return ProgressTracker.NULL_TRACKER;
-    }
-
 }

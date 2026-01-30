@@ -5,8 +5,8 @@ description = 'Neo4j Graph Data Science :: Algorithms Compute Facade'
 group = 'org.neo4j.gds'
 
 dependencies {
-
     implementation project(':algo')
+    implementation project(':algorithms-machinery')
     implementation project(':algo-common')
     implementation project(':collections')
     implementation project(":centrality-configs")

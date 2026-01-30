@@ -24,14 +24,12 @@ import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.gds.core.RequestCorrelationId;
+import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.logging.GdsLoggers;
 import org.neo4j.gds.core.JobId;
-import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
-import org.neo4j.gds.core.utils.warnings.UserLogRegistry;
 import org.neo4j.gds.core.write.RelationshipExporter;
 import org.neo4j.gds.core.write.RelationshipExporterBuilder;
 import org.neo4j.gds.termination.TerminationFlag;
@@ -47,11 +45,8 @@ class WriteRelationshipsApplication {
     }
 
     WriteRelationshipResult compute(
-        RequestCorrelationId requestCorrelationId,
+        RequestScopedDependencies requestScopedDependencies,
         RelationshipExporterBuilder relationshipExporterBuilder,
-        TaskRegistryFactory taskRegistryFactory,
-        TerminationFlag terminationFlag,
-        UserLogRegistry userLogRegistry,
         GraphStore graphStore,
         ResultStore resultStore,
         GraphName graphName,
@@ -65,9 +60,9 @@ class WriteRelationshipsApplication {
             loggers.loggerForProgressTracking(),
             RelationshipExporterBuilder.TYPED_DEFAULT_WRITE_CONCURRENCY,
             configuration.jobId(),
-            requestCorrelationId,
-            taskRegistryFactory,
-            userLogRegistry
+            requestScopedDependencies.correlationId(),
+            requestScopedDependencies.taskRegistryFactory(),
+            requestScopedDependencies.userLogRegistry()
         );
 
         // writing
@@ -81,7 +76,7 @@ class WriteRelationshipsApplication {
             try {
                 long relationshipsWritten = writeRelationshipType(
                     relationshipExporterBuilder,
-                    terminationFlag,
+                    requestScopedDependencies.terminationFlag(),
                     progressTracker,
                     configuration.resolveResultStore(resultStore),
                     graphStore,

@@ -34,6 +34,7 @@ import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyRecord;
+import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
@@ -121,13 +122,15 @@ class WriteNodePropertiesApplicationTest {
         when(exporterBuilderMock.build()).thenReturn(nodePropertyExporterMock);
         when(nodePropertyExporterMock.propertiesWritten()).thenReturn(8L, 11L);
         var writeResult = nodePropertiesWriter.write(
+            RequestScopedDependencies.builder()
+                .correlationId(PlainSimpleRequestCorrelationId.create())
+                .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
+                .terminationFlag(TerminationFlag.RUNNING_TRUE)
+                .userLogRegistry(UserLogRegistry.EMPTY)
+                .build(),
             graphStore,
             ResultStore.EMPTY,
             exporterBuilderMock,
-            PlainSimpleRequestCorrelationId.create(),
-            EmptyTaskRegistryFactory.INSTANCE,
-            TerminationFlag.RUNNING_TRUE,
-            UserLogRegistry.EMPTY,
             GraphName.parse("g"),
             GraphWriteNodePropertiesConfig.of(
                 "g",
@@ -168,13 +171,15 @@ class WriteNodePropertiesApplicationTest {
         when(exporterBuilderMock.build()).thenReturn(nodePropertyExporterMock);
         when(nodePropertyExporterMock.propertiesWritten()).thenReturn(11L);
         var writeResult = nodePropertiesWriter.write(
+            RequestScopedDependencies.builder()
+                .correlationId(PlainSimpleRequestCorrelationId.create())
+                .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
+                .terminationFlag(TerminationFlag.RUNNING_TRUE)
+                .userLogRegistry(UserLogRegistry.EMPTY)
+                .build(),
             propertiesSubsetGraphStore,
             ResultStore.EMPTY,
             exporterBuilderMock,
-            PlainSimpleRequestCorrelationId.create(),
-            EmptyTaskRegistryFactory.INSTANCE,
-            TerminationFlag.RUNNING_TRUE,
-            UserLogRegistry.EMPTY,
             GraphName.parse("propertiesSubsetGraph"),
             GraphWriteNodePropertiesConfig.of(
                 "propertiesSubsetGraph",
@@ -208,13 +213,15 @@ class WriteNodePropertiesApplicationTest {
         var nodePropertyExporterMock = mock(NodePropertyExporter.class);
         when(exporterBuilderMock.build()).thenReturn(nodePropertyExporterMock);
         var writeResult = nodePropertiesWriter.write(
+            RequestScopedDependencies.builder()
+                .correlationId(PlainSimpleRequestCorrelationId.create())
+                .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
+                .terminationFlag(TerminationFlag.RUNNING_TRUE)
+                .userLogRegistry(UserLogRegistry.EMPTY)
+                .build(),
             graphStore,
             ResultStore.EMPTY,
             exporterBuilderMock,
-            PlainSimpleRequestCorrelationId.create(),
-            EmptyTaskRegistryFactory.INSTANCE,
-            TerminationFlag.RUNNING_TRUE,
-            UserLogRegistry.EMPTY,
             GraphName.parse("g"),
             GraphWriteNodePropertiesConfig.of(
                 "g",
@@ -247,13 +254,15 @@ class WriteNodePropertiesApplicationTest {
         var nodePropertyExporterMock = mock(NodePropertyExporter.class);
         when(exporterBuilderMock.build()).thenReturn(nodePropertyExporterMock);
         var writeResult = nodePropertiesWriter.write(
+            RequestScopedDependencies.builder()
+                .correlationId(PlainSimpleRequestCorrelationId.create())
+                .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
+                .terminationFlag(TerminationFlag.RUNNING_TRUE)
+                .userLogRegistry(UserLogRegistry.EMPTY)
+                .build(),
             graphStore,
             ResultStore.EMPTY,
             exporterBuilderMock,
-            PlainSimpleRequestCorrelationId.create(),
-            EmptyTaskRegistryFactory.INSTANCE,
-            TerminationFlag.RUNNING_TRUE,
-            UserLogRegistry.EMPTY,
             GraphName.parse("g"),
             GraphWriteNodePropertiesConfig.of(
                 "g",
@@ -283,13 +292,15 @@ class WriteNodePropertiesApplicationTest {
         var nodePropertyExporterMock = mock(NodePropertyExporter.class);
         when(exporterBuilderMock.build()).thenReturn(nodePropertyExporterMock);
         var writeResult = nodePropertiesWriter.write(
+            RequestScopedDependencies.builder()
+                .correlationId(PlainSimpleRequestCorrelationId.create())
+                .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
+                .terminationFlag(TerminationFlag.RUNNING_TRUE)
+                .userLogRegistry(UserLogRegistry.EMPTY)
+                .build(),
             graphStore,
             ResultStore.EMPTY,
             exporterBuilderMock,
-            PlainSimpleRequestCorrelationId.create(),
-            EmptyTaskRegistryFactory.INSTANCE,
-            TerminationFlag.RUNNING_TRUE,
-            UserLogRegistry.EMPTY,
             GraphName.parse("g"),
             GraphWriteNodePropertiesConfig.of(
                 "g",

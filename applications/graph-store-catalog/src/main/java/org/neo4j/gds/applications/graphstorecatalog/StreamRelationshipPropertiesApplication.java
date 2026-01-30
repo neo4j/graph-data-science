@@ -24,14 +24,12 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.core.JobId;
-import org.neo4j.gds.core.RequestCorrelationId;
-import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.LoggerForProgressTracking;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
-import org.neo4j.gds.core.utils.warnings.UserLogRegistry;
 
 import java.util.Collection;
 import java.util.List;
@@ -50,9 +48,7 @@ public class StreamRelationshipPropertiesApplication {
     }
 
     <T> Stream<T> compute(
-        RequestCorrelationId requestCorrelationId,
-        TaskRegistryFactory taskRegistryFactory,
-        UserLogRegistry userLogRegistry,
+        RequestScopedDependencies requestScopedDependencies,
         GraphStore graphStore,
         GraphStreamRelationshipPropertiesConfig configuration,
         boolean usesPropertyNameColumn,
@@ -84,9 +80,9 @@ public class StreamRelationshipPropertiesApplication {
             log,
             configuration.concurrency(),
             jobId,
-            requestCorrelationId,
-            taskRegistryFactory,
-            userLogRegistry
+            requestScopedDependencies.correlationId(),
+            requestScopedDependencies.taskRegistryFactory(),
+            requestScopedDependencies.userLogRegistry()
         );
 
         return computeWithProgressTracking(

@@ -42,8 +42,7 @@ class DefaultGraphCatalogApplicationsTest {
         var facade = new DefaultGraphCatalogApplicationsBuilder(
             Log.noOpLog(),
             graphStoreCatalogService,
-            null,
-            RequestScopedDependencies.builder().build()
+            null
         ).build();
 
         when(graphStoreCatalogService.graphExists(
@@ -51,7 +50,11 @@ class DefaultGraphCatalogApplicationsTest {
             DatabaseId.of("someDatabase"),
             GraphName.parse("someGraph")
         )).thenReturn(true);
-        var graphExists = facade.graphExists(new User("someUser", false), DatabaseId.of("someDatabase"), "someGraph");
+        var requestScopedDependencies = RequestScopedDependencies.builder()
+            .databaseId(DatabaseId.of("someDatabase"))
+            .user(new User("someUser", false))
+            .build();
+        var graphExists = facade.graphExists(requestScopedDependencies, "someGraph");
 
         assertTrue(graphExists);
     }
@@ -62,8 +65,7 @@ class DefaultGraphCatalogApplicationsTest {
         var facade = new DefaultGraphCatalogApplicationsBuilder(
             Log.noOpLog(),
             graphStoreCatalogService,
-            null,
-            RequestScopedDependencies.builder().build()
+        null
         ).build();
 
         when(graphStoreCatalogService.graphExists(
@@ -71,9 +73,12 @@ class DefaultGraphCatalogApplicationsTest {
             DatabaseId.of("someDatabase"),
             GraphName.parse("someGraph")
         )).thenReturn(false);
+        var requestScopedDependencies = RequestScopedDependencies.builder()
+            .databaseId(DatabaseId.of("someDatabase"))
+            .user(new User("someUser", false))
+            .build();
         boolean graphExists = facade.graphExists(
-            new User("someUser", false),
-            DatabaseId.of("someDatabase"),
+            requestScopedDependencies,
             "someGraph"
         );
 
@@ -86,12 +91,16 @@ class DefaultGraphCatalogApplicationsTest {
         var facade = new DefaultGraphCatalogApplicationsBuilder(
             Log.noOpLog(),
             graphStoreCatalogService,
-            null,
-            RequestScopedDependencies.builder().build()
+            null
         ).build();
 
         assertThatThrownBy(
-            () -> facade.graphExists(new User("someUser", false), DatabaseId.of("someDatabase"), "   ")
+            () -> facade.graphExists(
+                RequestScopedDependencies.builder()
+                    .databaseId(DatabaseId.of("someDatabase"))
+                    .user(new User("someUser", false))
+                    .build(), "   "
+            )
         ).hasMessage("`graphName` can not be null or blank, but it was `   `");
     }
 
@@ -102,7 +111,6 @@ class DefaultGraphCatalogApplicationsTest {
             Log.noOpLog(),
             null,
             null,
-            RequestScopedDependencies.builder().build(),
             graphNameValidationService
         ).build();
 
@@ -111,10 +119,6 @@ class DefaultGraphCatalogApplicationsTest {
 
         assertThatIllegalArgumentException().isThrownBy(
             () -> facade.nativeProject(
-                null,
-                null,
-                null,
-                null,
                 null,
                 null,
                 null,
@@ -128,10 +132,6 @@ class DefaultGraphCatalogApplicationsTest {
 
         assertThatIllegalArgumentException().isThrownBy(
             () -> facade.cypherProject(
-                null,
-                null,
-                null,
-                null,
                 null,
                 null,
                 null,
@@ -152,15 +152,10 @@ class DefaultGraphCatalogApplicationsTest {
         var facade = new DefaultGraphCatalogApplicationsBuilder(
             Log.noOpLog(),
             mock(GraphStoreCatalogService.class),
-            null,
-            RequestScopedDependencies.builder().build()
+            null
         ).build();
 
         assertThatIllegalArgumentException().isThrownBy(() -> facade.nativeProject(
-            null,
-            null,
-            null,
-            null,
             null,
             null,
             null,
@@ -172,11 +167,9 @@ class DefaultGraphCatalogApplicationsTest {
         )).withMessage("`graphName` can not be null or blank, but it was `null`");
 
         assertThatIllegalArgumentException().isThrownBy(() -> facade.nativeProject(
-            new User("some user", false),
-            null,
-            null,
-            null,
-            null,
+            RequestScopedDependencies.builder()
+                .user(new User("some user", false))
+                .build(),
             null,
             null,
             null,
@@ -184,16 +177,15 @@ class DefaultGraphCatalogApplicationsTest {
             null,
             null,
             null
-        )).withMessage("Multiple errors in configuration arguments:\n" +
-            "\t\t\t\tNo value specified for the mandatory configuration parameter `nodeProjection`\n" +
-            "\t\t\t\tNo value specified for the mandatory configuration parameter `relationshipProjection`");
+        )).withMessage("""
+            Multiple errors in configuration arguments:
+            \t\t\t\tNo value specified for the mandatory configuration parameter `nodeProjection`
+            \t\t\t\tNo value specified for the mandatory configuration parameter `relationshipProjection`""");
 
         assertThatIllegalArgumentException().isThrownBy(() -> facade.nativeProject(
-            new User("some user", false),
-            null,
-            null,
-            null,
-            null,
+            RequestScopedDependencies.builder()
+                .user(new User("some user", false))
+                .build(),
             null,
             null,
             null,
@@ -204,11 +196,9 @@ class DefaultGraphCatalogApplicationsTest {
         )).withMessage("No value specified for the mandatory configuration parameter `relationshipProjection`");
 
         assertThatIllegalArgumentException().isThrownBy(() -> facade.nativeProject(
-            new User("some user", false),
-            null,
-            null,
-            null,
-            null,
+            RequestScopedDependencies.builder()
+                .user(new User("some user", false))
+                .build(),
             null,
             null,
             null,
@@ -227,15 +217,10 @@ class DefaultGraphCatalogApplicationsTest {
         var facade = new DefaultGraphCatalogApplicationsBuilder(
             Log.noOpLog(),
             mock(GraphStoreCatalogService.class),
-            null,
-            RequestScopedDependencies.builder().build()
+            null
         ).build();
 
         assertThatIllegalArgumentException().isThrownBy(() -> facade.cypherProject(
-            null,
-            null,
-            null,
-            null,
             null,
             null,
             null,
@@ -247,11 +232,9 @@ class DefaultGraphCatalogApplicationsTest {
         )).withMessage("`graphName` can not be null or blank, but it was `null`");
 
         assertThatIllegalArgumentException().isThrownBy(() -> facade.cypherProject(
-            new User("some user", false),
-            null,
-            null,
-            null,
-            null,
+            RequestScopedDependencies.builder()
+                .user(new User("some user", false))
+                .build(),
             null,
             null,
             null,
@@ -259,16 +242,15 @@ class DefaultGraphCatalogApplicationsTest {
             null,
             null,
             null
-        )).withMessage("Multiple errors in configuration arguments:\n" +
-            "\t\t\t\tNo value specified for the mandatory configuration parameter `nodeQuery`\n" +
-            "\t\t\t\tNo value specified for the mandatory configuration parameter `relationshipQuery`");
+        )).withMessage("""
+            Multiple errors in configuration arguments:
+            \t\t\t\tNo value specified for the mandatory configuration parameter `nodeQuery`
+            \t\t\t\tNo value specified for the mandatory configuration parameter `relationshipQuery`""");
 
         assertThatIllegalArgumentException().isThrownBy(() -> facade.cypherProject(
-            new User("some user", false),
-            null,
-            null,
-            null,
-            null,
+            RequestScopedDependencies.builder()
+                .user(new User("some user", false))
+                .build(),
             null,
             null,
             null,
@@ -279,11 +261,9 @@ class DefaultGraphCatalogApplicationsTest {
         )).withMessage("No value specified for the mandatory configuration parameter `relationshipQuery`");
 
         assertThatIllegalArgumentException().isThrownBy(() -> facade.cypherProject(
-            new User("some user", false),
-            null,
-            null,
-            null,
-            null,
+            RequestScopedDependencies.builder()
+                .user(new User("some user", false))
+                .build(),
             null,
             null,
             null,
@@ -300,12 +280,15 @@ class DefaultGraphCatalogApplicationsTest {
         var facade = new DefaultGraphCatalogApplicationsBuilder(
             Log.noOpLog(),
             graphStoreCatalogService,
-            null,
-            RequestScopedDependencies.builder().build()
+            null
         ).build();
 
         var user = new User("some user", false);
         var databaseId = DatabaseId.of("some database name");
+        var requestScopedDependencies = RequestScopedDependencies.builder()
+            .databaseId(databaseId)
+            .user(user)
+            .build();
         doThrow(new IllegalArgumentException("it's alive?!")).when(graphStoreCatalogService).ensureGraphDoesNotExist(
             user,
             databaseId,
@@ -313,11 +296,7 @@ class DefaultGraphCatalogApplicationsTest {
         );
 
         assertThatIllegalArgumentException().isThrownBy(() -> facade.nativeProject(
-            user,
-            databaseId,
-            null,
-            null,
-            null,
+            requestScopedDependencies,
             null,
             null,
             null,
@@ -328,11 +307,7 @@ class DefaultGraphCatalogApplicationsTest {
         )).withMessage("it's alive?!");
 
         assertThatIllegalArgumentException().isThrownBy(() -> facade.cypherProject(
-            user,
-            databaseId,
-            null,
-            null,
-            null,
+            requestScopedDependencies,
             null,
             null,
             null,
@@ -343,10 +318,7 @@ class DefaultGraphCatalogApplicationsTest {
         )).withMessage("it's alive?!");
 
         assertThatIllegalArgumentException().isThrownBy(() -> facade.subGraphProject(
-            user,
-            databaseId,
-            null,
-            null,
+            requestScopedDependencies,
             "some existing graph",
             null,
             null,
@@ -361,8 +333,7 @@ class DefaultGraphCatalogApplicationsTest {
         var facade = new DefaultGraphCatalogApplicationsBuilder(
             Log.noOpLog(),
             graphStoreCatalogService,
-            null,
-            RequestScopedDependencies.builder().build()
+            null
         ).build();
 
         var user = new User("some user", false);
@@ -375,10 +346,10 @@ class DefaultGraphCatalogApplicationsTest {
             );
 
         assertThatIllegalArgumentException().isThrownBy(() -> facade.subGraphProject(
-            user,
-            databaseId,
-            null,
-            null,
+            RequestScopedDependencies.builder()
+                .databaseId(databaseId)
+                .user(user)
+                .build(),
             "some existing graph",
             "some non-existing graph",
             null,

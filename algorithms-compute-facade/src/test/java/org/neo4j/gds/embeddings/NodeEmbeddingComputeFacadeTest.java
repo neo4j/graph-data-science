@@ -74,8 +74,6 @@ class NodeEmbeddingComputeFacadeTest {
 
     @BeforeEach
     void setUp() {
-        when(progressTrackerFactoryMock.nullTracker())
-            .thenReturn(ProgressTracker.NULL_TRACKER);
         when(progressTrackerFactoryMock.create(any(), any(), any(), anyBoolean()))
             .thenReturn(progressTrackerMock);
 

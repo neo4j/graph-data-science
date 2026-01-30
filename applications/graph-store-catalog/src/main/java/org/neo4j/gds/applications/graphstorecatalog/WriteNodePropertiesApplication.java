@@ -24,16 +24,14 @@ import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyRecord;
-import org.neo4j.gds.core.RequestCorrelationId;
+import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.logging.GdsLoggers;
 import org.neo4j.gds.core.JobId;
-import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
-import org.neo4j.gds.core.utils.warnings.UserLogRegistry;
 import org.neo4j.gds.core.write.NodePropertyExporter;
 import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.termination.TerminationFlag;
@@ -50,13 +48,10 @@ public class WriteNodePropertiesApplication {
     }
 
     NodePropertiesWriteResult write(
+        RequestScopedDependencies requestScopedDependencies,
         GraphStore graphStore,
         ResultStore resultStore,
         NodePropertyExporterBuilder nodePropertyExporterBuilder,
-        RequestCorrelationId requestCorrelationId,
-        TaskRegistryFactory taskRegistryFactory,
-        TerminationFlag terminationFlag,
-        UserLogRegistry userLogRegistry,
         GraphName graphName,
         GraphWriteNodePropertiesConfig configuration
     ) {
@@ -81,9 +76,9 @@ public class WriteNodePropertiesApplication {
             loggers.loggerForProgressTracking(),
             configuration.writeConcurrency(),
             jobId,
-            requestCorrelationId,
-            taskRegistryFactory,
-            userLogRegistry
+            requestScopedDependencies.correlationId(),
+            requestScopedDependencies.taskRegistryFactory(),
+            requestScopedDependencies.userLogRegistry()
         );
 
         var allNodeProperties = configuration
@@ -104,7 +99,7 @@ public class WriteNodePropertiesApplication {
                     configuration,
                     subGraph,
                     nodePropertyExporterBuilder,
-                    terminationFlag,
+                    requestScopedDependencies.terminationFlag(),
                     progressTracker
                 );
 

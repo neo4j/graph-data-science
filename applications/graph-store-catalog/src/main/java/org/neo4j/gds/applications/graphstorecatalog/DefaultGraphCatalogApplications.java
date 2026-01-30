@@ -20,7 +20,6 @@
 package org.neo4j.gds.applications.graphstorecatalog;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.User;
@@ -35,8 +34,6 @@ import org.neo4j.gds.core.loading.GraphDropRelationshipResult;
 import org.neo4j.gds.core.loading.GraphStoreCatalogEntry;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.utils.logging.GdsLoggers;
-import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
-import org.neo4j.gds.core.utils.warnings.UserLogRegistry;
 import org.neo4j.gds.core.write.NodeLabelExporterBuilder;
 import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.core.write.RelationshipExporterBuilder;
@@ -47,7 +44,6 @@ import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.metrics.projections.ProjectionMetricsService;
 import org.neo4j.gds.projection.GraphProjectNativeResult;
 import org.neo4j.gds.projection.GraphStoreFactorySuppliers;
-import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
@@ -67,7 +63,7 @@ import static org.neo4j.gds.graphsampling.RandomWalkSamplerType.RWR;
  * Here we have just business logic: no Neo4j bits or other integration bits, just Java POJO things.
  * <p>
  * By nature business logic is going to be bespoke, so one method per logical thing.
- * Take {@link DefaultGraphCatalogApplications#graphExists(User, DatabaseId, String)} for example:
+ * Take {@link GraphCatalogApplications#graphExists(org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies, String)} for example:
  * pure expressed business logic that layers above will use in multiple places, but!
  * Any marshalling happens in those layers, not here.
  * <p>
@@ -90,8 +86,6 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
 
     // services
     private final GraphNameValidationService graphNameValidationService;
-
-    private final RequestScopedDependencies requestScopedDependencies;
 
     // applications
     private final DropGraphApplication dropGraphApplication;
@@ -122,7 +116,6 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
         GraphStoreCatalogService graphStoreCatalogService,
         ProjectionMetricsService projectionMetricsService,
         GraphNameValidationService graphNameValidationService,
-        RequestScopedDependencies requestScopedDependencies,
         CypherProjectApplication cypherProjectApplication,
         DropGraphApplication dropGraphApplication,
         DropNodePropertiesApplication dropNodePropertiesApplication,
@@ -151,8 +144,6 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
         this.projectionMetricsService = projectionMetricsService;
 
         this.graphNameValidationService = graphNameValidationService;
-
-        this.requestScopedDependencies = requestScopedDependencies;
 
         this.dropGraphApplication = dropGraphApplication;
         this.listGraphApplication = listGraphApplication;
@@ -184,7 +175,6 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
         GraphStoreCatalogService graphStoreCatalogService,
         GraphStoreFactorySuppliers graphStoreFactorySuppliers,
         ProjectionMetricsService projectionMetricsService,
-        RequestScopedDependencies requestScopedDependencies,
         GraphDatabaseService graphDatabaseService,
         Transaction procedureTransaction
     ) {
@@ -206,25 +196,19 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
             loggers,
             graphDatabaseService,
             procedureTransaction,
-            exportLocation,
-            requestScopedDependencies.correlationId(),
-            requestScopedDependencies.taskRegistryFactory()
+            exportLocation
         );
         var exportToCsvEstimateApplication = new ExportToCsvEstimateApplication();
         var exportToDatabaseApplication = new ExportToDatabaseApplication(
             loggers,
             graphDatabaseService,
-            procedureTransaction,
-            requestScopedDependencies.correlationId(),
-            requestScopedDependencies.taskRegistryFactory(),
-            requestScopedDependencies.userLogRegistry()
+            procedureTransaction
         );
         var generateGraphApplication = new GenerateGraphApplication(loggers.log(), graphStoreCatalogService);
         var graphMemoryUsageApplication = new GraphMemoryUsageApplication(graphStoreCatalogService);
         var graphSamplingApplication = new GraphSamplingApplication(
             loggers.loggerForProgressTracking(),
-            graphStoreCatalogService,
-            requestScopedDependencies.correlationId()
+            graphStoreCatalogService
         );
         var listGraphApplication = ListGraphApplication.create(graphStoreCatalogService);
         var nativeProjectApplication = new NativeProjectApplication(
@@ -252,7 +236,6 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
             loggers.log(),
             graphStoreCatalogService,
             projectionMetricsService,
-            requestScopedDependencies,
             graphNameValidationService
         )
             .withCypherProjectApplication(cypherProjectApplication)
@@ -281,73 +264,75 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
     }
 
     @Override
-    public boolean graphExists(User user, DatabaseId databaseId, String graphNameAsString) {
+    public boolean graphExists(RequestScopedDependencies requestScopedDependencies, String graphNameAsString) {
         var graphName = graphNameValidationService.validate(graphNameAsString);
 
-        return graphStoreCatalogService.graphExists(user, databaseId, graphName);
+        return graphStoreCatalogService.graphExists(
+            requestScopedDependencies.user(),
+            requestScopedDependencies.databaseId(),
+            graphName
+        );
     }
 
     /**
-     * @param failIfMissing        enable validation that graphs exist before dropping them
-     * @param databaseNameOverride optional override
-     * @param usernameOverride     optional override
+     * @param failIfMissing             enable validation that graphs exist before dropping them
+     * @param databaseNameOverride      optional override
+     * @param usernameOverride          optional override
      * @throws IllegalArgumentException if a database name was null or blank or not a String
      */
     @Override
     public List<GraphStoreCatalogEntry> dropGraph(
+        RequestScopedDependencies requestScopedDependencies,
         Object graphNameOrListOfGraphNames,
         boolean failIfMissing,
         String databaseNameOverride,
-        String usernameOverride,
-        DatabaseId currentDatabase,
-        User operator
+        String usernameOverride
     ) {
         // general parameter consolidation
         // we imagine any new endpoints will follow the exact same parameter lists I guess, for now
         var validatedGraphNames = parseGraphNameOrListOfGraphNames(graphNameOrListOfGraphNames);
-        var databaseId = currentDatabase.orOverride(databaseNameOverride);
+        var databaseId = requestScopedDependencies.databaseId().orOverride(databaseNameOverride);
         var parsedUsernameOverride = User.parseUsernameOverride(usernameOverride);
 
         return dropGraphApplication.compute(
             validatedGraphNames,
             failIfMissing,
             databaseId,
-            operator,
+            requestScopedDependencies.user(),
             parsedUsernameOverride
         );
     }
 
     @Override
     public List<Pair<GraphStoreCatalogEntry, Map<String, Object>>> listGraphs(
-        User user,
+        RequestScopedDependencies requestScopedDependencies,
         String graphName,
-        boolean includeDegreeDistribution,
-        TerminationFlag terminationFlag
+        boolean includeDegreeDistribution
     ) {
         var validatedGraphName = graphNameValidationService.validatePossibleNull(graphName);
 
-        return listGraphApplication.list(user, validatedGraphName, includeDegreeDistribution, terminationFlag);
+        return listGraphApplication.list(
+            requestScopedDependencies,
+            validatedGraphName,
+            includeDegreeDistribution
+        );
     }
 
     @Override
     public GraphProjectNativeResult nativeProject(
-        User user,
-        DatabaseId databaseId,
+        RequestScopedDependencies requestScopedDependencies,
         GraphDatabaseService graphDatabaseService,
         GraphProjectMemoryUsageService graphProjectMemoryUsageService,
-        TaskRegistryFactory taskRegistryFactory,
-        TerminationFlag terminationFlag,
         TransactionContext transactionContext,
-        UserLogRegistry userLogRegistry,
         String graphNameAsString,
         Object nodeProjection,
         Object relationshipProjection,
         Map<String, Object> rawConfiguration
     ) {
-        var graphName = ensureGraphNameValidAndUnknown(user, databaseId, graphNameAsString);
+        var graphName = ensureGraphNameValidAndUnknown(requestScopedDependencies, graphNameAsString);
 
         var configuration = catalogConfigurationService.parseNativeProjectConfiguration(
-            user,
+            requestScopedDependencies.user(),
             graphName,
             nodeProjection,
             relationshipProjection,
@@ -358,13 +343,10 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
         try (projectMetric) {
             projectMetric.start();
             return nativeProjectApplication.project(
-                databaseId,
+                requestScopedDependencies,
                 graphDatabaseService,
                 graphProjectMemoryUsageService,
-                taskRegistryFactory,
-                terminationFlag,
                 transactionContext,
-                userLogRegistry,
                 configuration
             );
         } catch (Exception e) {
@@ -375,12 +357,9 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
 
     @Override
     public MemoryEstimateResult estimateNativeProject(
-        DatabaseId databaseId,
+        RequestScopedDependencies requestScopedDependencies,
         GraphProjectMemoryUsageService graphProjectMemoryUsageService,
-        TaskRegistryFactory taskRegistryFactory,
-        TerminationFlag terminationFlag,
         TransactionContext transactionContext,
-        UserLogRegistry userLogRegistry,
         Object nodeProjection,
         Object relationshipProjection,
         Map<String, Object> rawConfiguration
@@ -392,35 +371,28 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
         );
 
         return nativeProjectApplication.estimate(
-            databaseId,
+            requestScopedDependencies,
             graphProjectMemoryUsageService,
-            taskRegistryFactory,
-            terminationFlag,
             transactionContext,
-            userLogRegistry,
             configuration
         );
     }
 
     @Override
     public GraphProjectCypherResult cypherProject(
-        User user,
-        DatabaseId databaseId,
+        RequestScopedDependencies requestScopedDependencies,
         GraphDatabaseService graphDatabaseService,
         GraphProjectMemoryUsageService graphProjectMemoryUsageService,
-        TaskRegistryFactory taskRegistryFactory,
-        TerminationFlag terminationFlag,
         TransactionContext transactionContext,
-        UserLogRegistry userLogRegistry,
         String graphNameAsString,
         String nodeQuery,
         String relationshipQuery,
         Map<String, Object> rawConfiguration
     ) {
-        var graphName = ensureGraphNameValidAndUnknown(user, databaseId, graphNameAsString);
+        var graphName = ensureGraphNameValidAndUnknown(requestScopedDependencies, graphNameAsString);
 
         var configuration = catalogConfigurationService.parseCypherProjectConfiguration(
-            user,
+            requestScopedDependencies.user(),
             graphName,
             nodeQuery,
             relationshipQuery,
@@ -431,13 +403,10 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
         try (projectMetric) {
             projectMetric.start();
             return cypherProjectApplication.project(
-                databaseId,
+                requestScopedDependencies,
                 graphDatabaseService,
                 graphProjectMemoryUsageService,
-                taskRegistryFactory,
-                terminationFlag,
                 transactionContext,
-                userLogRegistry,
                 configuration
             );
         } catch (Exception e) {
@@ -448,12 +417,9 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
 
     @Override
     public MemoryEstimateResult estimateCypherProject(
-        DatabaseId databaseId,
+        RequestScopedDependencies requestScopedDependencies,
         GraphProjectMemoryUsageService graphProjectMemoryUsageService,
-        TaskRegistryFactory taskRegistryFactory,
-        TerminationFlag terminationFlag,
         TransactionContext transactionContext,
-        UserLogRegistry userLogRegistry,
         String nodeQuery,
         String relationshipQuery,
         Map<String, Object> rawConfiguration
@@ -465,45 +431,40 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
         );
 
         return cypherProjectApplication.estimate(
-            databaseId,
+            requestScopedDependencies,
             graphProjectMemoryUsageService,
-            taskRegistryFactory,
-            terminationFlag,
             transactionContext,
-            userLogRegistry,
             configuration
         );
     }
 
     @Override
     public GraphFilterResult subGraphProject(
-        User user,
-        DatabaseId databaseId,
-        TaskRegistryFactory taskRegistryFactory,
-        UserLogRegistry userLogRegistry,
+        RequestScopedDependencies requestScopedDependencies,
         String graphNameAsString,
         String originGraphNameAsString,
         String nodeFilter,
         String relationshipFilter,
         Map<String, Object> rawConfiguration
     ) {
-        var graphName = ensureGraphNameValidAndUnknown(user, databaseId, graphNameAsString);
+        var graphName = ensureGraphNameValidAndUnknown(requestScopedDependencies, graphNameAsString);
         var originGraphName = graphNameValidationService.validate(originGraphNameAsString);
 
-        graphStoreCatalogService.ensureGraphExists(user, databaseId, originGraphName);
-
-        var originGraphConfiguration = graphStoreCatalogService.get(
-            CatalogRequest.of(user.getUsername(), databaseId),
+        graphStoreCatalogService.ensureGraphExists(
+            requestScopedDependencies.user(),
+            requestScopedDependencies.databaseId(),
             originGraphName
         );
 
+        var graphStoreWithConfig = getGraphStoreWithConfig(requestScopedDependencies, originGraphName);
+
         var configuration = catalogConfigurationService.parseSubGraphProjectConfiguration(
-            user,
+            requestScopedDependencies.user(),
             graphName,
             originGraphName,
             nodeFilter,
             relationshipFilter,
-            originGraphConfiguration,
+            graphStoreWithConfig,
             rawConfiguration
         );
 
@@ -511,11 +472,9 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
         try (subGraphMetric) {
             subGraphMetric.start();
             return subGraphProjectApplication.project(
-                requestScopedDependencies.correlationId(),
-                taskRegistryFactory,
-                userLogRegistry,
+                requestScopedDependencies,
                 configuration,
-                originGraphConfiguration.graphStore()
+                graphStoreWithConfig.graphStore()
             );
         } catch (Exception e) {
             subGraphMetric.failed(e);
@@ -524,26 +483,26 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
     }
 
     @Override
-    public GraphMemoryUsage sizeOf(User user, DatabaseId databaseId, String graphNameAsString) {
+    public GraphMemoryUsage sizeOf(RequestScopedDependencies requestScopedDependencies, String graphNameAsString) {
         var graphName = graphNameValidationService.validate(graphNameAsString);
 
-        if (!graphStoreCatalogService.graphExists(user, databaseId, graphName)) {
+        if (!graphStoreCatalogService.graphExists(
+            requestScopedDependencies.user(),
+            requestScopedDependencies.databaseId(),
+            graphName
+        )) {
             throw new IllegalArgumentException("Graph '" + graphNameAsString + "' does not exist");
         }
 
         return graphMemoryUsageApplication.sizeOf(
-            user,
-            databaseId,
+            requestScopedDependencies,
             graphName
         );
     }
 
     @Override
     public GraphDropNodePropertiesResult dropNodeProperties(
-        User user,
-        DatabaseId databaseId,
-        TaskRegistryFactory taskRegistryFactory,
-        UserLogRegistry userLogRegistry,
+        RequestScopedDependencies requestScopedDependencies,
         String graphNameAsString,
         Object nodeProperties,
         Map<String, Object> rawConfiguration
@@ -557,7 +516,7 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
         );
 
         // melt this together, so you only obtain the graph store if it is valid? think it over
-        var graphStoreWithConfig = graphStoreCatalogService.get(CatalogRequest.of(user, databaseId), graphName);
+        var graphStoreWithConfig = getGraphStoreWithConfig(requestScopedDependencies, graphName);
         var graphStore = graphStoreWithConfig.graphStore();
 
         var droppedProperties = gatherDroppedProperties(
@@ -567,9 +526,7 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
         );
 
         var numberOfPropertiesRemoved = dropNodePropertiesApplication.compute(
-            requestScopedDependencies.correlationId(),
-            taskRegistryFactory,
-            userLogRegistry,
+            requestScopedDependencies,
             droppedProperties,
             graphStore
         );
@@ -596,23 +553,18 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
 
     @Override
     public GraphDropRelationshipResult dropRelationships(
-        User user,
-        DatabaseId databaseId,
-        TaskRegistryFactory taskRegistryFactory,
-        UserLogRegistry userLogRegistry,
+        RequestScopedDependencies requestScopedDependencies,
         String graphNameAsString,
         String relationshipType
     ) {
         var graphName = graphNameValidationService.validate(graphNameAsString);
 
-        var graphStoreWithConfig = graphStoreCatalogService.get(CatalogRequest.of(user, databaseId), graphName);
+        var graphStoreWithConfig = getGraphStoreWithConfig(requestScopedDependencies, graphName);
         var graphStore = graphStoreWithConfig.graphStore();
         graphStoreValidationService.ensureRelationshipsMayBeDeleted(graphStore, relationshipType, graphName);
 
         var result = dropRelationshipsApplication.compute(
-            requestScopedDependencies.correlationId(),
-            taskRegistryFactory,
-            userLogRegistry,
+            requestScopedDependencies,
             graphStore,
             relationshipType
         );
@@ -624,8 +576,7 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
 
     @Override
     public long dropGraphProperty(
-        User user,
-        DatabaseId databaseId,
+        RequestScopedDependencies requestScopedDependencies,
         String graphNameAsString,
         String graphProperty,
         Map<String, Object> rawConfiguration
@@ -639,7 +590,7 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
             rawConfiguration
         );
 
-        var graphStoreWithConfig = graphStoreCatalogService.get(CatalogRequest.of(user, databaseId), graphName);
+        var graphStoreWithConfig = getGraphStoreWithConfig(requestScopedDependencies, graphName);
         var graphStore = graphStoreWithConfig.graphStore();
         graphStoreValidationService.ensureGraphPropertyExists(graphStore, graphProperty);
 
@@ -657,15 +608,14 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
 
     @Override
     public MutateLabelResult mutateNodeLabel(
-        User user,
-        DatabaseId databaseId,
+        RequestScopedDependencies requestScopedDependencies,
         String graphNameAsString,
         String nodeLabel,
         Map<String, Object> rawConfiguration
     ) {
         var graphName = graphNameValidationService.validate(graphNameAsString);
 
-        var graphStoreWithConfig = graphStoreCatalogService.get(CatalogRequest.of(user, databaseId), graphName);
+        var graphStoreWithConfig = getGraphStoreWithConfig(requestScopedDependencies, graphName);
         var graphStore = graphStoreWithConfig.graphStore();
 
         // stick in configuration service returning a pair?
@@ -683,8 +633,7 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
 
     @Override
     public Stream<?> streamGraphProperty(
-        User user,
-        DatabaseId databaseId,
+        RequestScopedDependencies requestScopedDependencies,
         String graphNameAsString,
         String graphProperty,
         Map<String, Object> rawConfiguration
@@ -697,7 +646,7 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
             rawConfiguration
         );
 
-        var graphStoreWithConfig = graphStoreCatalogService.get(CatalogRequest.of(user, databaseId), graphName);
+        var graphStoreWithConfig = getGraphStoreWithConfig(requestScopedDependencies, graphName);
         var graphStore = graphStoreWithConfig.graphStore();
         graphStoreValidationService.ensureGraphPropertyExists(graphStore, graphProperty);
 
@@ -706,10 +655,7 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
 
     @Override
     public <T> Stream<T> streamNodeProperties(
-        User user,
-        DatabaseId databaseId,
-        TaskRegistryFactory taskRegistryFactory,
-        UserLogRegistry userLogRegistry,
+        RequestScopedDependencies requestScopedDependencies,
         String graphNameAsString,
         Object nodePropertiesAsObject,
         Object nodeLabelsAsObject,
@@ -727,7 +673,7 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
         );
 
         // melt this together, so you only obtain the graph store if it is valid? think it over
-        var graphStoreWithConfig = graphStoreCatalogService.get(CatalogRequest.of(user, databaseId), graphName);
+        var graphStoreWithConfig = getGraphStoreWithConfig(requestScopedDependencies, graphName);
         var graphStore = graphStoreWithConfig.graphStore();
         var nodeLabels = configuration.nodeLabels();
         var nodeLabelIdentifiers = configuration.nodeLabelIdentifiers(graphStore);
@@ -740,9 +686,7 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
         );
 
         return streamNodePropertiesApplication.compute(
-            requestScopedDependencies.correlationId(),
-            taskRegistryFactory,
-            userLogRegistry,
+            requestScopedDependencies,
             graphStore,
             configuration,
             usesPropertyNameColumn,
@@ -752,10 +696,7 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
 
     @Override
     public <T> Stream<T> streamRelationshipProperties(
-        User user,
-        DatabaseId databaseId,
-        TaskRegistryFactory taskRegistryFactory,
-        UserLogRegistry userLogRegistry,
+        RequestScopedDependencies requestScopedDependencies,
         String graphNameAsString,
         List<String> relationshipProperties,
         Object relationshipTypes,
@@ -772,14 +713,12 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
             rawConfiguration
         );
 
-        var graphStoreWithConfig = graphStoreCatalogService.get(CatalogRequest.of(user, databaseId), graphName);
+        var graphStoreWithConfig = getGraphStoreWithConfig(requestScopedDependencies, graphName);
         var graphStore = graphStoreWithConfig.graphStore();
         graphStoreValidationService.ensureRelationshipPropertiesMatchRelationshipTypes(graphStore, configuration);
 
         return streamRelationshipPropertiesApplication.compute(
-            requestScopedDependencies.correlationId(),
-            taskRegistryFactory,
-            userLogRegistry,
+            requestScopedDependencies,
             graphStore,
             configuration,
             usesPropertyNameColumn,
@@ -789,8 +728,7 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
 
     @Override
     public Stream<TopologyResult> streamRelationships(
-        User user,
-        DatabaseId databaseId,
+        RequestScopedDependencies requestScopedDependencies,
         String graphNameAsString,
         Object relationshipTypes,
         Map<String, Object> rawConfiguration
@@ -803,7 +741,7 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
             rawConfiguration
         );
 
-        var graphStoreWithConfig = graphStoreCatalogService.get(CatalogRequest.of(user, databaseId), graphName);
+        var graphStoreWithConfig = getGraphStoreWithConfig(requestScopedDependencies, graphName);
         var graphStore = graphStoreWithConfig.graphStore();
         graphStoreValidationService.ensureRelationshipTypesPresent(
             graphStore,
@@ -815,12 +753,8 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
 
     @Override
     public NodePropertiesWriteResult writeNodeProperties(
-        User user,
-        DatabaseId databaseId,
+        RequestScopedDependencies requestScopedDependencies,
         NodePropertyExporterBuilder nodePropertyExporterBuilder,
-        TaskRegistryFactory taskRegistryFactory,
-        TerminationFlag terminationFlag,
-        UserLogRegistry userLogRegistry,
         String graphNameAsString,
         Object nodePropertiesAsObject,
         Object nodeLabelsAsObject,
@@ -835,9 +769,9 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
             rawConfiguration
         );
 
-        var catalogEntry = graphStoreCatalogService.get(CatalogRequest.of(user, databaseId), graphName);
-        var graphStore = catalogEntry.graphStore();
-        var resultStore = catalogEntry.resultStore();
+        var graphStoreWithConfig = getGraphStoreWithConfig(requestScopedDependencies, graphName);
+        var graphStore = graphStoreWithConfig.graphStore();
+        var resultStore = graphStoreWithConfig.resultStore();
         var nodeLabels = configuration.nodeLabels();
         var nodeLabelIdentifiers = configuration.nodeLabelIdentifiers(graphStore);
         var nodeProperties = configuration.nodeProperties().stream()
@@ -852,13 +786,10 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
         );
 
         return writeNodePropertiesApplication.write(
+            requestScopedDependencies,
             graphStore,
             resultStore,
             nodePropertyExporterBuilder,
-            requestScopedDependencies.correlationId(),
-            taskRegistryFactory,
-            terminationFlag,
-            userLogRegistry,
             graphName,
             configuration
         );
@@ -866,10 +797,8 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
 
     @Override
     public WriteRelationshipPropertiesResult writeRelationshipProperties(
-        User user,
-        DatabaseId databaseId,
+        RequestScopedDependencies requestScopedDependencies,
         RelationshipPropertiesExporterBuilder relationshipPropertiesExporterBuilder,
-        TerminationFlag terminationFlag,
         String graphNameAsString,
         String relationshipType,
         List<String> relationshipProperties,
@@ -878,9 +807,9 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
         var graphName = graphNameValidationService.validate(graphNameAsString);
 
         // why graphstore first here?
-        var catalogEntry = graphStoreCatalogService.get(CatalogRequest.of(user, databaseId), graphName);
-        var graphStore = catalogEntry.graphStore();
-        var resultStore = catalogEntry.resultStore();
+        var graphStoreWithConfig = getGraphStoreWithConfig(requestScopedDependencies, graphName);
+        var graphStore = graphStoreWithConfig.graphStore();
+        var resultStore = graphStoreWithConfig.resultStore();
         graphStoreValidationService.ensureRelationshipPropertiesMatchRelationshipType(
             graphStore,
             relationshipType,
@@ -892,7 +821,7 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
 
         return writeRelationshipPropertiesApplication.compute(
             relationshipPropertiesExporterBuilder,
-            terminationFlag,
+            requestScopedDependencies.terminationFlag(),
             graphStore,
             resultStore,
             graphName,
@@ -904,10 +833,8 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
 
     @Override
     public WriteLabelResult writeNodeLabel(
-        User user,
-        DatabaseId databaseId,
+        RequestScopedDependencies requestScopedDependencies,
         NodeLabelExporterBuilder nodeLabelExporterBuilder,
-        TerminationFlag terminationFlag,
         String graphNameAsString,
         String nodeLabel,
         Map<String, Object> rawConfiguration
@@ -916,15 +843,15 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
 
         var configuration = WriteLabelConfig.of(rawConfiguration);
 
-        var catalogEntry = graphStoreCatalogService.get(CatalogRequest.of(user, databaseId), graphName);
-        var graphStore = catalogEntry.graphStore();
-        var resultStore = catalogEntry.resultStore();
+        var graphStoreWithConfig = getGraphStoreWithConfig(requestScopedDependencies, graphName);
+        var graphStore = graphStoreWithConfig.graphStore();
+        var resultStore = graphStoreWithConfig.resultStore();
 
         var nodeFilter = NodeFilterParser.parseAndValidate(graphStore, configuration.nodeFilter());
 
         return writeNodeLabelApplication.compute(
             nodeLabelExporterBuilder,
-            terminationFlag,
+            requestScopedDependencies.terminationFlag(),
             graphStore,
             resultStore,
             graphName,
@@ -936,12 +863,8 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
 
     @Override
     public WriteRelationshipResult writeRelationships(
-        User user,
-        DatabaseId databaseId,
+        RequestScopedDependencies requestScopedDependencies,
         RelationshipExporterBuilder relationshipExporterBuilder,
-        TaskRegistryFactory taskRegistryFactory,
-        TerminationFlag terminationFlag,
-        UserLogRegistry userLogRegistry,
         String graphNameAsString,
         String relationshipType,
         String relationshipProperty,
@@ -955,9 +878,10 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
             rawConfiguration
         );
 
-        var catalogEntry = graphStoreCatalogService.get(CatalogRequest.of(user, databaseId), graphName);
-        var graphStore = catalogEntry.graphStore();
-        var resultStore = catalogEntry.resultStore();
+        var graphStoreWithConfig = getGraphStoreWithConfig(requestScopedDependencies, graphName);
+        var graphStore = graphStoreWithConfig.graphStore();
+        var resultStore = graphStoreWithConfig.resultStore();
+
         graphStoreValidationService.ensurePossibleRelationshipPropertyMatchesRelationshipType(
             graphStore,
             configuration.relationshipType(),
@@ -965,11 +889,8 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
         );
 
         return writeRelationshipsApplication.compute(
-            requestScopedDependencies.correlationId(),
+            requestScopedDependencies,
             relationshipExporterBuilder,
-            taskRegistryFactory,
-            terminationFlag,
-            userLogRegistry,
             graphStore,
             resultStore,
             graphName,
@@ -979,21 +900,13 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
 
     @Override
     public RandomWalkSamplingResult sampleRandomWalkWithRestarts(
-        User user,
-        DatabaseId databaseId,
-        TaskRegistryFactory taskRegistryFactory,
-        UserLogRegistry userLogRegistry,
-        TerminationFlag terminationFlag,
+        RequestScopedDependencies requestScopedDependencies,
         String graphName,
         String originGraphName,
         Map<String, Object> configuration
     ) {
         return sampleRandomWalk(
-            user,
-            databaseId,
-            taskRegistryFactory,
-            userLogRegistry,
-            terminationFlag,
+            requestScopedDependencies,
             graphName,
             originGraphName,
             configuration,
@@ -1003,21 +916,13 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
 
     @Override
     public RandomWalkSamplingResult sampleCommonNeighbourAwareRandomWalk(
-        User user,
-        DatabaseId databaseId,
-        TaskRegistryFactory taskRegistryFactory,
-        UserLogRegistry userLogRegistry,
-        TerminationFlag terminationFlag,
+        RequestScopedDependencies requestScopedDependencies,
         String graphNameAsString,
         String originGraphName,
         Map<String, Object> configuration
     ) {
         return sampleRandomWalk(
-            user,
-            databaseId,
-            taskRegistryFactory,
-            userLogRegistry,
-            terminationFlag,
+            requestScopedDependencies,
             graphNameAsString,
             originGraphName,
             configuration,
@@ -1027,40 +932,42 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
 
     @Override
     public MemoryEstimateResult estimateCommonNeighbourAwareRandomWalk(
-        User user,
-        DatabaseId databaseId,
+        RequestScopedDependencies requestScopedDependencies,
         String graphName,
         Map<String, Object> rawConfiguration
     ) {
         var configuration = catalogConfigurationService.parseCommonNeighbourAwareRandomWalkConfig(rawConfiguration);
 
-        return estimateCommonNeighbourAwareRandomWalkApplication.estimate(user, databaseId, graphName, configuration);
+        return estimateCommonNeighbourAwareRandomWalkApplication.estimate(requestScopedDependencies, graphName, configuration);
     }
 
     @Override
     public GraphGenerationStats generateGraph(
-        User user,
-        DatabaseId databaseId,
+        RequestScopedDependencies requestScopedDependencies,
         String graphNameAsString,
         long nodeCount,
         long averageDegree,
         Map<String, Object> rawConfiguration
     ) {
-        var graphName = ensureGraphNameValidAndUnknown(user, databaseId, graphNameAsString);
+        var graphName = ensureGraphNameValidAndUnknown(requestScopedDependencies, graphNameAsString);
 
         var configuration = catalogConfigurationService.parseRandomGraphGeneratorConfig(
-            user,
+            requestScopedDependencies.user(),
             graphName,
             nodeCount,
             averageDegree,
             rawConfiguration
         );
 
-        return generateGraphApplication.compute(databaseId, averageDegree, configuration);
+        return generateGraphApplication.compute(requestScopedDependencies.databaseId(), averageDegree, configuration);
     }
 
     @Override
-    public FileExportResult exportToCsv(String graphNameAsString, Map<String, Object> rawConfiguration) {
+    public FileExportResult exportToCsv(
+        RequestScopedDependencies requestScopedDependencies,
+        String graphNameAsString,
+        Map<String, Object> rawConfiguration
+    ) {
         var graphName = graphNameValidationService.validate(graphNameAsString);
 
         var configuration = catalogConfigurationService.parseGraphStoreToFileExporterConfiguration(
@@ -1068,13 +975,16 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
             rawConfiguration
         );
 
-        var graphStore = getGraphStoreAndValidateForExport(graphName, configuration);
+        var graphStore = getGraphStoreAndValidateForExport(requestScopedDependencies, graphName, configuration);
 
-        return exportToCsvApplication.run(graphName, configuration, graphStore);
+        return exportToCsvApplication.run(requestScopedDependencies, graphName, configuration, graphStore);
     }
 
     @Override
-    public MemoryEstimateResult exportToCsvEstimate(String graphNameAsString, Map<String, Object> rawConfiguration) {
+    public MemoryEstimateResult exportToCsvEstimate(
+        RequestScopedDependencies requestScopedDependencies,
+        String graphNameAsString,
+        Map<String, Object> rawConfiguration) {
         var graphName = graphNameValidationService.validate(graphNameAsString);
 
         var configuration = catalogConfigurationService.parseGraphStoreToCsvEstimationConfiguration(
@@ -1082,27 +992,32 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
             rawConfiguration
         );
 
-        var graphStore = getGraphStore(graphName, configuration);
+        var graphStore = getGraphStore(requestScopedDependencies, graphName, configuration);
 
         return exportToCsvEstimateApplication.run(configuration, graphStore);
     }
 
     @Override
-    public DatabaseExportResult exportToDatabase(String graphNameAsString, Map<String, Object> rawConfiguration) {
+    public DatabaseExportResult exportToDatabase(
+        RequestScopedDependencies requestScopedDependencies,
+        String graphNameAsString,
+        Map<String, Object> rawConfiguration
+    ) {
         var graphName = graphNameValidationService.validate(graphNameAsString);
 
         var configuration = catalogConfigurationService.parseGraphStoreToDatabaseExporterConfig(rawConfiguration);
 
-        var graphStore = getGraphStoreAndValidateForExport(graphName, configuration);
+        var graphStore = getGraphStoreAndValidateForExport(requestScopedDependencies, graphName, configuration);
 
-        return exportToDatabaseApplication.run(graphName, configuration, graphStore);
+        return exportToDatabaseApplication.run(requestScopedDependencies, graphName, configuration, graphStore);
     }
 
     private GraphStore getGraphStoreAndValidateForExport(
+        RequestScopedDependencies requestScopedDependencies,
         GraphName graphName,
         GraphStoreExporterBaseConfig configuration
     ) {
-        var graphStore = getGraphStore(graphName, configuration);
+        var graphStore = getGraphStore(requestScopedDependencies, graphName, configuration);
 
         var shouldExportAdditionalNodeProperties = !configuration.additionalNodeProperties().mappings().isEmpty();
 
@@ -1112,7 +1027,7 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
         return graphStore;
     }
 
-    private GraphStore getGraphStore(GraphName graphName, BaseConfig configuration) {
+    private GraphStore getGraphStore(RequestScopedDependencies requestScopedDependencies, GraphName graphName, BaseConfig configuration) {
         var graphStoreCatalogEntry = graphStoreCatalogService.getGraphStoreCatalogEntry(
             graphName,
             requestScopedDependencies.user(),
@@ -1124,33 +1039,26 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
     }
 
     private RandomWalkSamplingResult sampleRandomWalk(
-        User user,
-        DatabaseId databaseId,
-        TaskRegistryFactory taskRegistryFactory,
-        UserLogRegistry userLogRegistry,
-        TerminationFlag terminationFlag,
+        RequestScopedDependencies requestScopedDependencies,
         String graphNameAsString,
         String originGraphNameAsString,
         Map<String, Object> configuration,
         RandomWalkSamplerType samplerType
     ) {
-        var graphName = ensureGraphNameValidAndUnknown(user, databaseId, graphNameAsString);
+        var graphName = ensureGraphNameValidAndUnknown(requestScopedDependencies, graphNameAsString);
         var originGraphName = GraphName.parse(originGraphNameAsString);
 
-        var catalogEntry = graphStoreCatalogService.get(CatalogRequest.of(user, databaseId), originGraphName);
-        var graphStore = catalogEntry.graphStore();
-        var graphProjectConfig = catalogEntry.config();
+        var graphStoreWithConfig = getGraphStoreWithConfig(requestScopedDependencies, originGraphName);
+        var graphStore = graphStoreWithConfig.graphStore();
+        var graphProjectConfig = graphStoreWithConfig.config();
 
         var samplingMetric = projectionMetricsService.createRandomWakSampling(samplerType.name());
         try (samplingMetric) {
             samplingMetric.start();
             return graphSamplingApplication.sample(
-                user,
-                taskRegistryFactory,
-                userLogRegistry,
+                requestScopedDependencies,
                 graphStore,
                 graphProjectConfig,
-                terminationFlag,
                 originGraphName,
                 graphName,
                 configuration,
@@ -1163,10 +1071,10 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
 
     }
 
-    private GraphName ensureGraphNameValidAndUnknown(User user, DatabaseId databaseId, String graphNameAsString) {
+    private GraphName ensureGraphNameValidAndUnknown(RequestScopedDependencies requestScopedDependencies, String graphNameAsString) {
         var graphName = graphNameValidationService.validateStrictly(graphNameAsString);
 
-        graphStoreCatalogService.ensureGraphDoesNotExist(user, databaseId, graphName);
+        graphStoreCatalogService.ensureGraphDoesNotExist(requestScopedDependencies.user(), requestScopedDependencies.databaseId(), graphName);
 
         return graphName;
     }
@@ -1176,5 +1084,17 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
      */
     private List<GraphName> parseGraphNameOrListOfGraphNames(Object graphNameOrListOfGraphNames) {
         return graphNameValidationService.validateSingleOrList(graphNameOrListOfGraphNames);
+    }
+
+    private GraphStoreCatalogEntry getGraphStoreWithConfig(
+        RequestScopedDependencies requestScopedDependencies,
+        GraphName graphName
+    ) {
+        return graphStoreCatalogService.get(
+            CatalogRequest.of(
+                requestScopedDependencies.user(),
+                requestScopedDependencies.databaseId()
+            ), graphName
+        );
     }
 }

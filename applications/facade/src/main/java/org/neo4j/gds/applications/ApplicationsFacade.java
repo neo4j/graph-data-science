@@ -149,7 +149,6 @@ public final class ApplicationsFacade {
             graphStoreCatalogService,
             graphStoreFactorySuppliers,
             projectionMetricsService,
-            requestScopedDependencies,
             graphDatabaseService,
             procedureTransaction,
             graphCatalogApplicationsDecorator
@@ -238,7 +237,6 @@ public final class ApplicationsFacade {
         GraphStoreCatalogService graphStoreCatalogService,
         GraphStoreFactorySuppliers graphStoreFactorySuppliers,
         ProjectionMetricsService projectionMetricsService,
-        RequestScopedDependencies requestScopedDependencies,
         GraphDatabaseService graphDatabaseService,
         Transaction procedureTransaction,
         Optional<Function<GraphCatalogApplications, GraphCatalogApplications>> graphCatalogApplicationsDecorator
@@ -249,7 +247,6 @@ public final class ApplicationsFacade {
             graphStoreCatalogService,
             graphStoreFactorySuppliers,
             projectionMetricsService,
-            requestScopedDependencies,
             graphDatabaseService,
             procedureTransaction
         );

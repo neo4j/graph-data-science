@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.User;
+import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.core.loading.GraphStoreCatalogEntry;
 
 import java.util.List;
@@ -64,10 +65,11 @@ class ListGraphApplicationTest {
         when(degreeDistributionApplier.process(listOfConfigsWithStores, false, null)).thenReturn(
             listOfGraphStoresWithConfigsSansDegreeDistributions);
         var result = application.list(
-            new User("foo", false),
+            RequestScopedDependencies.builder()
+                .user(new User("foo", false))
+                .build(),
             Optional.empty(),
-            false,
-            null
+            false
         );
 
         assertThat(result).isEqualTo(listOfGraphStoresWithConfigsSansDegreeDistributions);
@@ -103,10 +105,11 @@ class ListGraphApplicationTest {
         ), false, null)).thenReturn(
             listOfGraphStoresWithConfigsSansDegreeDistributions);
         var result = application.list(
-            new User("foo", false),
+            RequestScopedDependencies.builder()
+                .user(new User("foo", false))
+                .build(),
             Optional.of(GraphName.parse("bar")),
-            false,
-            null
+            false
         );
 
         assertThat(result).isEqualTo(listOfGraphStoresWithConfigsSansDegreeDistributions);

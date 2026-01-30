@@ -23,18 +23,16 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
+import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
 import org.neo4j.gds.applications.algorithms.machinery.WriteStep;
-import org.neo4j.gds.core.RequestCorrelationId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.JobId;
-import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.write.NodePropertyExporter;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.spanningtree.SpanningTree;
-import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Optional;
 import java.util.function.Function;
@@ -42,37 +40,30 @@ import java.util.function.Function;
 // FIXME: This implementation is not what we would like it to be.
 //  We need to abstract the write operation to a write service and not create the individual exporters here.
 public class KSpanningTreeWriteStep implements WriteStep<SpanningTree, Void> {
-
-    private final String writeProperty;
     private final Log log;
+    private final RequestScopedDependencies requestScopedDependencies;
+    private final String writeProperty;
     private final WriteContext writeContext;
     private final Function<ResultStore, Optional<ResultStore>> resultStoreResolver;
     private final JobId jobId;
     private final Concurrency writeConcurrency;
-    private final RequestCorrelationId requestCorrelationId;
-    private final TaskRegistryFactory taskRegistryFactory;
-    private final TerminationFlag terminationFlag;
 
     public KSpanningTreeWriteStep(
+        Log log,
+        RequestScopedDependencies requestScopedDependencies,
         String writeProperty,
         WriteContext writeContext,
         Function<ResultStore, Optional<ResultStore>> resultStoreResolver,
         JobId jobId,
-        Concurrency writeConcurrency,
-        Log log,
-        RequestCorrelationId requestCorrelationId,
-        TaskRegistryFactory taskRegistryFactory,
-        TerminationFlag terminationFlag
+        Concurrency writeConcurrency
     ) {
-        this.writeProperty = writeProperty;
         this.log = log;
+        this.requestScopedDependencies = requestScopedDependencies;
+        this.writeProperty = writeProperty;
         this.writeContext = writeContext;
         this.resultStoreResolver = resultStoreResolver;
         this.jobId = jobId;
         this.writeConcurrency = writeConcurrency;
-        this.requestCorrelationId = requestCorrelationId;
-        this.taskRegistryFactory = taskRegistryFactory;
-        this.terminationFlag = terminationFlag;
     }
 
     @Override
@@ -89,13 +80,13 @@ public class KSpanningTreeWriteStep implements WriteStep<SpanningTree, Void> {
             NodePropertyExporter.baseTask(AlgorithmLabel.KSpanningTree.asString(), graph.nodeCount()),
             new LoggerForProgressTrackingAdapter(log),
             writeConcurrency,
-            requestCorrelationId,
-            taskRegistryFactory
+            requestScopedDependencies.correlationId(),
+            requestScopedDependencies.taskRegistryFactory()
         );
 
         var nodePropertyExporter = writeContext.nodePropertyExporterBuilder()
             .withIdMap(graph)
-            .withTerminationFlag(terminationFlag)
+            .withTerminationFlag(requestScopedDependencies.terminationFlag())
             .withProgressTracker(progressTracker)
             .withResultStore(resultStoreResolver.apply(resultStore))
             .withJobId(this.jobId)

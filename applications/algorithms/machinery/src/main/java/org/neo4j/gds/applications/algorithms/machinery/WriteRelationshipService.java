@@ -58,14 +58,12 @@ public class WriteRelationshipService {
         return Neo4jDatabaseRelationshipWriter.writeRelationshipsFromGraph(
             writeRelationshipType,
             writeProperty,
-            requestScopedDependencies.correlationId(),
-            requestScopedDependencies.taskRegistryFactory(),
+            requestScopedDependencies,
             writeContext.relationshipExporterBuilder(),
             writeGraph,
             rootIdMap,
             log,
             taskName,
-            requestScopedDependencies.terminationFlag(),
             resultStore,
             relationshipWithPropertyConsumer,
             jobId
@@ -87,14 +85,12 @@ public class WriteRelationshipService {
             writeRelationshipType,
             properties,
             valueTypes,
-            requestScopedDependencies.correlationId(),
-            requestScopedDependencies.taskRegistryFactory(),
+            requestScopedDependencies,
             writeContext.relationshipStreamExporterBuilder(),
             relationshipStream,
             rootIdMap,
             log,
             taskName,
-            requestScopedDependencies.terminationFlag(),
             resultStore,
             jobId
         );

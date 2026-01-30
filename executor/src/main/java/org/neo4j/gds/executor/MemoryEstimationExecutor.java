@@ -23,8 +23,10 @@ import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.ImmutableGraphLoaderContext;
+import org.neo4j.gds.api.User;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResultFactory;
+import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.graphstorecatalog.FictitiousGraphStoreLoader;
 import org.neo4j.gds.applications.graphstorecatalog.GraphStoreFromCatalogLoader;
 import org.neo4j.gds.applications.graphstorecatalog.GraphStoreFromDatabaseLoader;
@@ -115,11 +117,12 @@ public class MemoryEstimationExecutor<ALGO extends Algorithm<ALGO_RESULT>, ALGO_
             maybeGraphEstimation = Optional.of(graphStoreCreator.estimateMemoryUsageAfterLoading());
         } else if (graphNameOrConfiguration instanceof String) {
             graphDims = new GraphStoreFromCatalogLoader(
+                RequestScopedDependencies.builder()
+                    .databaseId(executionContext.databaseId())
+                    .user(new User(executionContext.username(), executionContext.isGdsAdmin()))
+                    .build(),
                 (String) graphNameOrConfiguration,
-                algoConfig,
-                executionContext.username(),
-                executionContext.databaseId(),
-                executionContext.isGdsAdmin()
+                algoConfig
             ).graphDimensions();
             maybeGraphEstimation = Optional.empty();
         } else {

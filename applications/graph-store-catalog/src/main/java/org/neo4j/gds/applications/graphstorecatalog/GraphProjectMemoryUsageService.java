@@ -20,19 +20,17 @@
 package org.neo4j.gds.applications.graphstorecatalog;
 
 import org.neo4j.configuration.Config;
-import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.ImmutableGraphLoaderContext;
+import org.neo4j.gds.api.User;
+import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.config.GraphProjectConfig;
-import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
-import org.neo4j.gds.core.utils.warnings.UserLogRegistry;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.MemoryTracker;
 import org.neo4j.gds.mem.MemoryTreeWithDimensions;
 import org.neo4j.gds.projection.GraphStoreFactorySuppliers;
 import org.neo4j.gds.settings.GdsSettings;
-import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.graphdb.GraphDatabaseService;
 
@@ -41,61 +39,39 @@ public class GraphProjectMemoryUsageService {
     private final GraphDatabaseService graphDatabaseService;
     private final GraphStoreFactorySuppliers graphStoreFactorySuppliers;
     private final MemoryTracker memoryTracker;
-    private final String username;
 
     public GraphProjectMemoryUsageService(
         Log log,
         GraphDatabaseService graphDatabaseService,
         GraphStoreFactorySuppliers graphStoreFactorySuppliers,
-        MemoryTracker memoryTracker,
-        String username
+        MemoryTracker memoryTracker
     ) {
         this.log = log;
         this.graphDatabaseService = graphDatabaseService;
         this.graphStoreFactorySuppliers = graphStoreFactorySuppliers;
         this.memoryTracker = memoryTracker;
-        this.username = username;
     }
 
     void validateMemoryUsage(
-        DatabaseId databaseId,
-        TaskRegistryFactory taskRegistryFactory,
-        TerminationFlag terminationFlag,
+        RequestScopedDependencies requestScopedDependencies,
         TransactionContext transactionContext,
-        UserLogRegistry userLogRegistry,
         GraphProjectConfig configuration
     ) {
-        memoryUsageValidator().tryValidateMemoryUsage(
+        memoryUsageValidator(requestScopedDependencies.user()).tryValidateMemoryUsage(
             "Loading",
             configuration,
-            graphProjectConfig -> getEstimate(
-                databaseId,
-                terminationFlag,
-                transactionContext,
-                taskRegistryFactory,
-                userLogRegistry,
-                graphProjectConfig
-            )
+            graphProjectConfig -> getEstimate(requestScopedDependencies, transactionContext, graphProjectConfig)
         );
     }
 
     MemoryTreeWithDimensions getEstimate(
-        DatabaseId databaseId,
-        TerminationFlag terminationFlag,
+        RequestScopedDependencies requestScopedDependencies,
         TransactionContext transactionContext,
-        TaskRegistryFactory taskRegistryFactory,
-        UserLogRegistry userLogRegistry,
         GraphProjectConfig configuration
     ) {
         var dependencyResolver = GraphDatabaseApiProxy.dependencyResolver(graphDatabaseService);
 
-        var graphLoaderContext = graphLoaderContext(
-            databaseId,
-            taskRegistryFactory,
-            terminationFlag,
-            transactionContext,
-            userLogRegistry
-        );
+        var graphLoaderContext = graphLoaderContext(requestScopedDependencies, transactionContext);
 
         var graphStoreFactorySupplier = graphStoreFactorySuppliers.find(configuration);
         var graphStoreFactory = graphStoreFactorySupplier.get(graphLoaderContext, dependencyResolver);
@@ -113,28 +89,25 @@ public class GraphProjectMemoryUsageService {
         return computeEstimate(configuration, graphStoreCreator);
     }
 
-    private MemoryUsageValidator memoryUsageValidator() {
+    private MemoryUsageValidator memoryUsageValidator(User user) {
         var neo4jConfig = GraphDatabaseApiProxy.dependencyResolver(graphDatabaseService)
             .resolveDependency(Config.class);
         var useMaxMemoryEstimation = neo4jConfig.get(GdsSettings.validateUsingMaxMemoryEstimation());
 
-        return new MemoryUsageValidator(username,memoryTracker, useMaxMemoryEstimation, log);
+        return new MemoryUsageValidator(user.getUsername(), memoryTracker, useMaxMemoryEstimation, log);
     }
 
     private GraphLoaderContext graphLoaderContext(
-        DatabaseId databaseId,
-        TaskRegistryFactory taskRegistryFactory,
-        TerminationFlag terminationFlag,
-        TransactionContext transactionContext,
-        UserLogRegistry userLogRegistry
+        RequestScopedDependencies requestScopedDependencies,
+        TransactionContext transactionContext
     ) {
         return ImmutableGraphLoaderContext.builder()
-            .databaseId(databaseId)
+            .databaseId(requestScopedDependencies.databaseId())
             .log(log)
-            .taskRegistryFactory(taskRegistryFactory)
-            .terminationFlag(terminationFlag)
+            .taskRegistryFactory(requestScopedDependencies.taskRegistryFactory())
+            .terminationFlag(requestScopedDependencies.terminationFlag())
             .transactionContext(transactionContext)
-            .userLogRegistry(userLogRegistry)
+            .userLogRegistry(requestScopedDependencies.userLogRegistry())
             .build();
     }
 

@@ -21,44 +21,34 @@ package org.neo4j.gds.applications.graphstorecatalog;
 
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.User;
+import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.RequestCorrelationId;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.utils.ProgressTimer;
-import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.LoggerForProgressTracking;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
-import org.neo4j.gds.core.utils.warnings.UserLogRegistry;
 import org.neo4j.gds.graphsampling.GraphSampleConstructor;
 import org.neo4j.gds.graphsampling.RandomWalkSamplerType;
-import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Map;
 
 public final class GraphSamplingApplication {
     private final LoggerForProgressTracking log;
     private final GraphStoreCatalogService graphStoreCatalogService;
-    private final RequestCorrelationId requestCorrelationId;
 
     public GraphSamplingApplication(
         LoggerForProgressTracking log,
-        GraphStoreCatalogService graphStoreCatalogService,
-        RequestCorrelationId requestCorrelationId
+        GraphStoreCatalogService graphStoreCatalogService
     ) {
         this.log = log;
         this.graphStoreCatalogService = graphStoreCatalogService;
-        this.requestCorrelationId = requestCorrelationId;
     }
 
     RandomWalkSamplingResult sample(
-        User user,
-        TaskRegistryFactory taskRegistryFactory,
-        UserLogRegistry userLogRegistry,
+        RequestScopedDependencies requestScopedDependencies,
         GraphStore graphStore,
         GraphProjectConfig graphProjectConfig,
-        TerminationFlag terminationFlag,
         GraphName originGraphName,
         GraphName graphName,
         Map<String, Object> configuration,
@@ -75,21 +65,21 @@ public final class GraphSamplingApplication {
                 log,
                 samplerConfig.concurrency(),
                 samplerConfig.jobId(),
-                requestCorrelationId,
-                taskRegistryFactory,
-                userLogRegistry
+                requestScopedDependencies.correlationId(),
+                requestScopedDependencies.taskRegistryFactory(),
+                requestScopedDependencies.userLogRegistry()
             );
             var graphSampleConstructor = new GraphSampleConstructor(
                 samplerConfig,
                 graphStore,
                 samplerAlgorithm,
                 progressTracker,
-                terminationFlag
+                requestScopedDependencies.terminationFlag()
             );
             var sampledGraphStore = graphSampleConstructor.compute();
 
             var rwrProcConfig = RandomWalkWithRestartsConfiguration.of(
-                user.getUsername(),
+                requestScopedDependencies.user().getUsername(),
                 graphName.value(),
                 originGraphName.value(),
                 graphProjectConfig,

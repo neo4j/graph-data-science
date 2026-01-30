@@ -87,8 +87,10 @@ class GraphCatalogProcedureFacadeTest {
         catalogFacade.graphExists("some graph");
 
         verify(businessFacade).graphExists(
-            new User("current user", false),
-            DatabaseId.of("current database"),
+            RequestScopedDependencies.builder()
+                .databaseId(DatabaseId.of("current database"))
+                .user(new User("current user", false))
+                .build(),
             "some graph"
         );
     }
@@ -99,10 +101,11 @@ class GraphCatalogProcedureFacadeTest {
         var businessFacade = mock(GraphCatalogApplications.class);
 
         var procedureContext = WriteContext.builder().build();
+        var requestScopedDependencies = RequestScopedDependencies.builder()
+            .user(new User("Bob", false))
+            .build();
         var catalogFacade = new LocalGraphCatalogProcedureFacade(
-            RequestScopedDependencies.builder()
-                .user(new User("Bob", false))
-                .build(),
+            requestScopedDependencies,
             null,
             null,
             null,
@@ -114,7 +117,7 @@ class GraphCatalogProcedureFacadeTest {
         );
 
         // the return columns mock returns false by default (all simple types get defaults btw) - should I code that explicitly?
-        when(businessFacade.listGraphs(new User("Bob", false), "foo", false, null))
+        when(businessFacade.listGraphs(requestScopedDependencies, "foo", false))
             .thenReturn(
                 List.of(
                     Pair.of(new GraphStoreCatalogEntry(
@@ -136,10 +139,11 @@ class GraphCatalogProcedureFacadeTest {
         var businessFacade = mock(GraphCatalogApplications.class);
         var procedureContext = WriteContext.builder().build();
 
+        var requestScopedDependencies = RequestScopedDependencies.builder()
+            .user(new User("Bob", false))
+            .build();
         var catalogFacade = new LocalGraphCatalogProcedureFacade(
-            RequestScopedDependencies.builder()
-                .user(new User("Bob", false))
-                .build(),
+            requestScopedDependencies,
             null,
             null,
             null,
@@ -151,7 +155,7 @@ class GraphCatalogProcedureFacadeTest {
         );
 
         when(procedureReturnColumns.contains("degreeDistribution")).thenReturn(true);
-        when(businessFacade.listGraphs(new User("Bob", false), "foo", true, null))
+        when(businessFacade.listGraphs(requestScopedDependencies, "foo", true))
             .thenReturn(
                 List.of(
                     Pair.of(
@@ -185,10 +189,11 @@ class GraphCatalogProcedureFacadeTest {
         var businessFacade = mock(GraphCatalogApplications.class);
         var procedureContext = WriteContext.builder().build();
 
+        var requestScopedDependencies = RequestScopedDependencies.builder()
+            .user(new User("Bob", false))
+            .build();
         var catalogFacade = new LocalGraphCatalogProcedureFacade(
-            RequestScopedDependencies.builder()
-                .user(new User("Bob", false))
-                .build(),
+            requestScopedDependencies,
             null,
             null,
             null,
@@ -200,7 +205,7 @@ class GraphCatalogProcedureFacadeTest {
         );
 
         // the return columns mock returns false by default (all simple types get defaults btw) - should I code that explicitly?
-        when(businessFacade.listGraphs(new User("Bob", false), "foo", false, null))
+        when(businessFacade.listGraphs(requestScopedDependencies, "foo", false))
             .thenReturn(
                 List.of(
                     Pair.of(new GraphStoreCatalogEntry(
@@ -225,10 +230,11 @@ class GraphCatalogProcedureFacadeTest {
         var businessFacade = mock(GraphCatalogApplications.class);
         var procedureContext = WriteContext.builder().build();
 
+        var requestScopedDependencies = RequestScopedDependencies.builder()
+            .user(new User("Bob", false))
+            .build();
         var catalogFacade = new LocalGraphCatalogProcedureFacade(
-            RequestScopedDependencies.builder()
-                .user(new User("Bob", false))
-                .build(),
+            requestScopedDependencies,
             null,
             null,
             null,
@@ -240,7 +246,7 @@ class GraphCatalogProcedureFacadeTest {
         );
 
         when(procedureReturnColumns.contains(returnColumn)).thenReturn(true);
-        when(businessFacade.listGraphs(new User("Bob", false), "foo", false, null))
+        when(businessFacade.listGraphs(requestScopedDependencies, "foo", false))
             .thenReturn(
                 List.of(
                     Pair.of(new GraphStoreCatalogEntry(

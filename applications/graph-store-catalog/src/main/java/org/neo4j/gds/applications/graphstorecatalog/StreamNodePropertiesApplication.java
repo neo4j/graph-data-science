@@ -24,14 +24,12 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.core.JobId;
-import org.neo4j.gds.core.RequestCorrelationId;
-import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.LoggerForProgressTracking;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
-import org.neo4j.gds.core.utils.warnings.UserLogRegistry;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -54,9 +52,7 @@ public class StreamNodePropertiesApplication {
      * then call again to a more specific method. Complexity hiding.
      */
     <T> Stream<T> compute(
-        RequestCorrelationId requestCorrelationId,
-        TaskRegistryFactory taskRegistryFactory,
-        UserLogRegistry userLogRegistry,
+        RequestScopedDependencies requestScopedDependencies,
         GraphStore graphStore,
         GraphExportNodePropertiesConfig configuration,
         boolean usesPropertyNameColumn,
@@ -71,9 +67,7 @@ public class StreamNodePropertiesApplication {
             .collect(Collectors.toList());
 
         return _compute(
-            requestCorrelationId,
-            taskRegistryFactory,
-            userLogRegistry,
+            requestScopedDependencies,
             configuration,
             subGraph,
             nodePropertyKeysAndValues,
@@ -83,9 +77,7 @@ public class StreamNodePropertiesApplication {
     }
 
     private <T> Stream<T> _compute(
-        RequestCorrelationId requestCorrelationId,
-        TaskRegistryFactory taskRegistryFactory,
-        UserLogRegistry userLogRegistry,
+        RequestScopedDependencies requestScopedDependencies,
         GraphExportNodePropertiesConfig configuration,
         IdMap idMap,
         Collection<Pair<String, NodePropertyValues>> nodePropertyKeysAndValues,
@@ -103,9 +95,9 @@ public class StreamNodePropertiesApplication {
             log,
             configuration.concurrency(),
             jobId,
-            requestCorrelationId,
-            taskRegistryFactory,
-            userLogRegistry
+            requestScopedDependencies.correlationId(),
+            requestScopedDependencies.taskRegistryFactory(),
+            requestScopedDependencies.userLogRegistry()
         );
 
         return computeWithProgressTracking(
@@ -150,7 +142,7 @@ public class StreamNodePropertiesApplication {
     ) {
         Function<Long, List<String>> nodeLabelsFn = configuration.listNodeLabels()
             ? nodeId -> idMap.nodeLabels(nodeId).stream().map(NodeLabel::name).collect(Collectors.toList())
-            : nodeId -> Collections.emptyList();
+            : __ -> Collections.emptyList();
 
         return LongStream.range(0, idMap.nodeCount())
             .boxed()

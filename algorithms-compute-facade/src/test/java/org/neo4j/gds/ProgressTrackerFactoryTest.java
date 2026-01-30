@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.RequestCorrelationId;
 import org.neo4j.gds.core.concurrency.Concurrency;
@@ -59,9 +60,11 @@ class ProgressTrackerFactoryTest {
 
         var factory = new ProgressTrackerFactory(
             log,
-            requestCorrelationId,
-            taskRegistryFactory,
-            userLogRegistry
+            RequestScopedDependencies.builder()
+                .correlationId(requestCorrelationId)
+                .taskRegistryFactory(taskRegistryFactory)
+                .userLogRegistry(userLogRegistry)
+                .build()
         );
 
         var tracker = factory.create(task, new JobId("jid-test"), concurrency, true);
@@ -77,9 +80,11 @@ class ProgressTrackerFactoryTest {
 
         var factory = new ProgressTrackerFactory(
             log,
-            requestCorrelationId,
-            taskRegistryFactory,
-            userLogRegistry
+            RequestScopedDependencies.builder()
+                .correlationId(requestCorrelationId)
+                .taskRegistryFactory(taskRegistryFactory)
+                .userLogRegistry(userLogRegistry)
+                .build()
         );
 
         var tracker = factory.create(task, new JobId("jid-test"), concurrency, false);
@@ -89,14 +94,7 @@ class ProgressTrackerFactoryTest {
 
     @Test
     void shouldReturnNullTracker() {
-        var factory = new ProgressTrackerFactory(
-            log,
-            requestCorrelationId,
-            taskRegistryFactory,
-            userLogRegistry
-        );
-
-        var tracker = factory.nullTracker();
+        var tracker = ProgressTracker.NULL_TRACKER;
         assertThat(tracker).isSameAs(ProgressTracker.NULL_TRACKER);
     }
 }

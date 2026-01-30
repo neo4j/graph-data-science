@@ -157,15 +157,13 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
         ResultBuilder<KSpanningTreeWriteConfig, SpanningTree, RESULT, Void> resultBuilder
     ) {
         var writeStep = new KSpanningTreeWriteStep(
+            log,
+            requestScopedDependencies,
             configuration.writeProperty(),
             writeContext,
             configuration::resolveResultStore,
             configuration.jobId(),
-            configuration.writeConcurrency(),
-            log,
-            requestScopedDependencies.correlationId(),
-            requestScopedDependencies.taskRegistryFactory(),
-            requestScopedDependencies.terminationFlag()
+            configuration.writeConcurrency()
         );
 
         return runAlgorithmAndWrite(

@@ -26,18 +26,15 @@ import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.relationships.RelationshipWithPropertyConsumer;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
-import org.neo4j.gds.core.RequestCorrelationId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.JobId;
-import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.write.RelationshipExporter;
 import org.neo4j.gds.core.write.RelationshipExporterBuilder;
 import org.neo4j.gds.core.write.RelationshipStreamExporter;
 import org.neo4j.gds.core.write.RelationshipStreamExporterBuilder;
 import org.neo4j.gds.logging.Log;
-import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
 import java.util.Optional;
@@ -48,14 +45,12 @@ final class Neo4jDatabaseRelationshipWriter {
     static RelationshipsWritten writeRelationshipsFromGraph(
         String writeRelationshipType,
         String writeProperty,
-        RequestCorrelationId requestCorrelationId,
-        TaskRegistryFactory taskRegistryFactory,
+        RequestScopedDependencies requestScopedDependencies,
         RelationshipExporterBuilder relationshipExporterBuilder,
         Graph graph,
         IdMap rootIdMap,
         Log log,
         String taskName,
-        TerminationFlag terminationFlag,
         Optional<ResultStore> resultStore,
         RelationshipWithPropertyConsumer relationshipConsumer,
         JobId jobId
@@ -65,14 +60,14 @@ final class Neo4jDatabaseRelationshipWriter {
             RelationshipExporter.baseTask(taskName, graph.relationshipCount()),
             new LoggerForProgressTrackingAdapter(log),
             RelationshipExporterBuilder.TYPED_DEFAULT_WRITE_CONCURRENCY,
-            requestCorrelationId,
-            taskRegistryFactory
+            requestScopedDependencies.correlationId(),
+            requestScopedDependencies.taskRegistryFactory()
         );
 
         var exporter = relationshipExporterBuilder
             .withIdMappingOperator(rootIdMap::toOriginalNodeId)
             .withGraph(graph)
-            .withTerminationFlag(terminationFlag)
+            .withTerminationFlag(requestScopedDependencies.terminationFlag())
             .withProgressTracker(progressTracker)
             .withResultStore(resultStore)
             .withJobId(jobId)
@@ -98,14 +93,12 @@ final class Neo4jDatabaseRelationshipWriter {
         String writeRelationshipType,
         List<String> properties,
         List<ValueType> valueTypes,
-        RequestCorrelationId requestCorrelationId,
-        TaskRegistryFactory taskRegistryFactory,
+        RequestScopedDependencies requestScopedDependencies,
         RelationshipStreamExporterBuilder relationshipStreamExporterBuilder,
         Stream<ExportedRelationship> relationshipStream,
         IdMap rootIdMap,
         Log log,
         String taskName,
-        TerminationFlag algorithmTerminationFlag,
         Optional<ResultStore> maybeResultStore,
         JobId jobId
     ) {
@@ -114,8 +107,8 @@ final class Neo4jDatabaseRelationshipWriter {
             RelationshipStreamExporter.baseTask(taskName),
             new LoggerForProgressTrackingAdapter(log),
             new Concurrency(1),
-            requestCorrelationId,
-            taskRegistryFactory
+            requestScopedDependencies.correlationId(),
+            requestScopedDependencies.taskRegistryFactory()
         );
 
         // When we are writing to the result store, the result stream might not be consumed
@@ -132,7 +125,7 @@ final class Neo4jDatabaseRelationshipWriter {
             .withIdMappingOperator(rootIdMap::toOriginalNodeId)
             .withProgressTracker(progressTracker)
             .withRelationships(maybeCollectedStream)
-            .withTerminationFlag(algorithmTerminationFlag)
+            .withTerminationFlag(requestScopedDependencies.terminationFlag())
             .withJobId(jobId)
             .build();
 

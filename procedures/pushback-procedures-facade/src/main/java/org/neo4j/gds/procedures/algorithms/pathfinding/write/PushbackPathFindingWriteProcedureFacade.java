@@ -151,15 +151,13 @@ public class PushbackPathFindingWriteProcedureFacade {
         );
 
         var writeStep = new KSpanningTreeWriteStep(
+            log,
+            requestScopedDependencies,
             config.writeProperty(),
             writeContext,
             config::resolveResultStore,
             config.jobId(),
-            config.writeConcurrency(),
-            log,
-            requestScopedDependencies.correlationId(),
-            requestScopedDependencies.taskRegistryFactory(),
-            requestScopedDependencies.terminationFlag()
+            config.writeConcurrency()
         );
 
         return businessFacade.kSpanningTree(

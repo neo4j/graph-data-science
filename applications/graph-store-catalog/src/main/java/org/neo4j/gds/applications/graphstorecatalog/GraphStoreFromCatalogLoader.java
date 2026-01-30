@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.applications.graphstorecatalog;
 
-import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
+import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.services.GraphDimensionFactory;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.BaseConfig;
@@ -32,21 +32,18 @@ import org.neo4j.gds.core.loading.GraphStoreCatalogEntry;
 import org.neo4j.gds.core.loading.ImmutableCatalogRequest;
 
 public final class GraphStoreFromCatalogLoader implements GraphStoreLoader {
-
     private final AlgoBaseConfig config;
     private final GraphStore graphStore;
     private final ResultStore resultStore;
     private final GraphProjectConfig graphProjectConfig;
 
     public GraphStoreFromCatalogLoader(
+        RequestScopedDependencies requestScopedDependencies,
         String graphName,
-        AlgoBaseConfig config,
-        String username,
-        DatabaseId databaseId,
-        boolean isGdsAdmin
+        AlgoBaseConfig config
     ) {
         this.config = config;
-        var catalogEntry = graphStoreFromCatalog(graphName, config, username, databaseId, isGdsAdmin);
+        var catalogEntry = graphStoreFromCatalog(requestScopedDependencies, graphName, config);
         this.graphStore = catalogEntry.graphStore();
         this.resultStore = catalogEntry.resultStore();
         this.graphProjectConfig = catalogEntry.config();
@@ -73,17 +70,15 @@ public final class GraphStoreFromCatalogLoader implements GraphStoreLoader {
     }
 
     private static GraphStoreCatalogEntry graphStoreFromCatalog(
+        RequestScopedDependencies requestScopedDependencies,
         String graphName,
-        BaseConfig config,
-        String username,
-        DatabaseId databaseId,
-        boolean isGdsAdmin
+        BaseConfig config
     ) {
         var request = ImmutableCatalogRequest.of(
-            databaseId.databaseName(),
-            username,
+            requestScopedDependencies.databaseId().databaseName(),
+            requestScopedDependencies.user().getUsername(),
             config.usernameOverride(),
-            isGdsAdmin
+            requestScopedDependencies.user().isAdmin()
         );
         return GraphStoreCatalog.get(request, graphName);
     }

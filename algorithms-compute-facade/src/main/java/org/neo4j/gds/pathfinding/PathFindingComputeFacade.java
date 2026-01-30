@@ -131,7 +131,7 @@ public class PathFindingComputeFacade {
 
         // Create ProgressTracker
         // `allShortestPaths` doesn't use progress tracker (yet 🤔)
-        var progressTracker = progressTrackerFactory.nullTracker();
+        var progressTracker = ProgressTracker.NULL_TRACKER;
 
         // Create the algorithm
         var allShortestPaths = MSBFSASPAlgorithmFactory.create(

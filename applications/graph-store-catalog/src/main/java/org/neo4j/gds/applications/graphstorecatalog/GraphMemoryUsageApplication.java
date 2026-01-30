@@ -19,21 +19,23 @@
  */
 package org.neo4j.gds.applications.graphstorecatalog;
 
-import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphName;
-import org.neo4j.gds.api.User;
+import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.core.loading.CatalogRequest;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 
-public class GraphMemoryUsageApplication {
+class GraphMemoryUsageApplication {
     private final GraphStoreCatalogService graphStoreCatalogService;
 
-    public GraphMemoryUsageApplication(GraphStoreCatalogService graphStoreCatalogService) {
+    GraphMemoryUsageApplication(GraphStoreCatalogService graphStoreCatalogService) {
         this.graphStoreCatalogService = graphStoreCatalogService;
     }
 
-    public GraphMemoryUsage sizeOf(User user, DatabaseId databaseId, GraphName graphName) {
-        var catalogRequest = CatalogRequest.of(user.getUsername(), databaseId.databaseName());
+    public GraphMemoryUsage sizeOf(RequestScopedDependencies requestScopedDependencies, GraphName graphName) {
+        var catalogRequest = CatalogRequest.of(
+            requestScopedDependencies.user().getUsername(),
+            requestScopedDependencies.databaseId().databaseName()
+        );
 
         var graphStoreWithConfig = graphStoreCatalogService.get(catalogRequest, graphName);
 

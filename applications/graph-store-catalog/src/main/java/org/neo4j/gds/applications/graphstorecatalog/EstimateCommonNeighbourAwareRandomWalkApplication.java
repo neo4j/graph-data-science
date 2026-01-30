@@ -19,26 +19,22 @@
  */
 package org.neo4j.gds.applications.graphstorecatalog;
 
-import org.neo4j.gds.api.DatabaseId;
-import org.neo4j.gds.api.User;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResultFactory;
+import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.graphsampling.config.CommonNeighbourAwareRandomWalkConfig;
 import org.neo4j.gds.graphsampling.samplers.rw.cnarw.CommonNeighbourAwareRandomWalk;
 
 class EstimateCommonNeighbourAwareRandomWalkApplication {
     MemoryEstimateResult estimate(
-        User user,
-        DatabaseId databaseId,
+        RequestScopedDependencies requestScopedDependencies,
         String graphName,
         CommonNeighbourAwareRandomWalkConfig configuration
     ) {
         var loader = new GraphStoreFromCatalogLoader(
+            requestScopedDependencies,
             graphName,
-            configuration,
-            user.getUsername(),
-            databaseId,
-            user.isAdmin()
+            configuration
         );
 
         var memoryTree = CommonNeighbourAwareRandomWalk

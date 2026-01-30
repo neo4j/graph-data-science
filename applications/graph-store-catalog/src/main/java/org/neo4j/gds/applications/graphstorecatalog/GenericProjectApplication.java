@@ -19,21 +19,18 @@
  */
 package org.neo4j.gds.applications.graphstorecatalog;
 
-import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.ImmutableGraphLoaderContext;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResultFactory;
+import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.loading.GraphProjectResult;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.utils.ProgressTimer;
-import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
-import org.neo4j.gds.core.utils.warnings.UserLogRegistry;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.projection.GraphStoreFactorySuppliers;
-import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.graphdb.GraphDatabaseService;
 
@@ -63,24 +60,18 @@ public class GenericProjectApplication<RESULT extends GraphProjectResult, CONFIG
     }
 
     public RESULT project(
-        DatabaseId databaseId,
+        RequestScopedDependencies requestScopedDependencies,
         GraphDatabaseService graphDatabaseService,
         GraphProjectMemoryUsageService graphProjectMemoryUsageService,
-        TaskRegistryFactory taskRegistryFactory,
-        TerminationFlag terminationFlag,
         TransactionContext transactionContext,
-        UserLogRegistry userLogRegistry,
         CONFIGURATION configuration
     ) {
         try {
             return projectGraph(
-                databaseId,
+                requestScopedDependencies,
                 graphDatabaseService,
                 graphProjectMemoryUsageService,
-                taskRegistryFactory,
-                terminationFlag,
                 transactionContext,
-                userLogRegistry,
                 configuration
             );
         } catch (RuntimeException e) {
@@ -90,12 +81,9 @@ public class GenericProjectApplication<RESULT extends GraphProjectResult, CONFIG
     }
 
     public MemoryEstimateResult estimate(
-        DatabaseId databaseId,
+        RequestScopedDependencies requestScopedDependencies,
         GraphProjectMemoryUsageService graphProjectMemoryUsageService,
-        TaskRegistryFactory taskRegistryFactory,
-        TerminationFlag terminationFlag,
         TransactionContext transactionContext,
-        UserLogRegistry userLogRegistry,
         GraphProjectConfig configuration
     ) {
         if (configuration.isFictitiousLoading()) return estimateButFictitiously(
@@ -104,11 +92,8 @@ public class GenericProjectApplication<RESULT extends GraphProjectResult, CONFIG
         );
 
         var memoryTreeWithDimensions = graphProjectMemoryUsageService.getEstimate(
-            databaseId,
-            terminationFlag,
+            requestScopedDependencies,
             transactionContext,
-            taskRegistryFactory,
-            userLogRegistry,
             configuration
         );
 
@@ -116,21 +101,15 @@ public class GenericProjectApplication<RESULT extends GraphProjectResult, CONFIG
     }
 
     private RESULT projectGraph(
-        DatabaseId databaseId,
+        RequestScopedDependencies requestScopedDependencies,
         GraphDatabaseService graphDatabaseService,
         GraphProjectMemoryUsageService graphProjectMemoryUsageService,
-        TaskRegistryFactory taskRegistryFactory,
-        TerminationFlag terminationFlag,
         TransactionContext transactionContext,
-        UserLogRegistry userLogRegistry,
         CONFIGURATION configuration
     ) {
         graphProjectMemoryUsageService.validateMemoryUsage(
-            databaseId,
-            taskRegistryFactory,
-            terminationFlag,
+            requestScopedDependencies,
             transactionContext,
-            userLogRegistry,
             configuration
         );
 
@@ -140,11 +119,8 @@ public class GenericProjectApplication<RESULT extends GraphProjectResult, CONFIG
             var dependencyResolver = GraphDatabaseApiProxy.dependencyResolver(graphDatabaseService);
 
             var graphLoaderContext = graphLoaderContext(
-                databaseId,
-                taskRegistryFactory,
-                terminationFlag,
-                transactionContext,
-                userLogRegistry
+                requestScopedDependencies,
+                transactionContext
             );
             var graphStoreFactorySupplier = graphStoreFactorySuppliers.find(configuration);
             var graphStoreFactory = graphStoreFactorySupplier.get(graphLoaderContext, dependencyResolver);
@@ -177,19 +153,16 @@ public class GenericProjectApplication<RESULT extends GraphProjectResult, CONFIG
     }
 
     private GraphLoaderContext graphLoaderContext(
-        DatabaseId databaseId,
-        TaskRegistryFactory taskRegistryFactory,
-        TerminationFlag terminationFlag,
-        TransactionContext transactionContext,
-        UserLogRegistry userLogRegistry
+        RequestScopedDependencies requestScopedDependencies,
+        TransactionContext transactionContext
     ) {
         return ImmutableGraphLoaderContext.builder()
-            .databaseId(databaseId)
+            .databaseId(requestScopedDependencies.databaseId())
             .log(log)
-            .taskRegistryFactory(taskRegistryFactory)
-            .terminationFlag(terminationFlag)
+            .taskRegistryFactory(requestScopedDependencies.taskRegistryFactory())
+            .terminationFlag(requestScopedDependencies.terminationFlag())
             .transactionContext(transactionContext)
-            .userLogRegistry(userLogRegistry)
+            .userLogRegistry(requestScopedDependencies.userLogRegistry())
             .build();
     }
 }

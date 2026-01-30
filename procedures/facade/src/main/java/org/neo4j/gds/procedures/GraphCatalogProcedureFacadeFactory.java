@@ -80,8 +80,7 @@ public class GraphCatalogProcedureFacadeFactory {
             log,
             graphDatabaseService,
             graphStoreFactorySuppliers,
-            memoryTracker,
-            requestScopedDependencies.user().getUsername()
+            memoryTracker
         );
 
         var streamCloser = new Consumer<AutoCloseable>() {

@@ -22,18 +22,16 @@ package org.neo4j.gds.applications.graphstorecatalog;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.beta.filter.GraphFilterResult;
 import org.neo4j.gds.beta.filter.GraphStoreFilterService;
 import org.neo4j.gds.config.GraphProjectFromGraphConfig;
-import org.neo4j.gds.core.RequestCorrelationId;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.logging.GdsLoggers;
-import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
-import org.neo4j.gds.core.utils.warnings.UserLogRegistry;
 
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -52,33 +50,25 @@ public class SubGraphProjectApplication {
     }
 
     public GraphFilterResult project(
-        RequestCorrelationId requestCorrelationId,
-        TaskRegistryFactory taskRegistryFactory,
-        UserLogRegistry userLogRegistry,
+        RequestScopedDependencies requestScopedDependencies,
         GraphProjectFromGraphConfig configuration,
         GraphStore originGraphStore
     ) {
         return projectWithErrorsHandled(
-            requestCorrelationId,
-            taskRegistryFactory,
-            userLogRegistry,
+            requestScopedDependencies,
             configuration,
             originGraphStore
         );
     }
 
     private GraphFilterResult projectWithErrorsHandled(
-        RequestCorrelationId requestCorrelationId,
-        TaskRegistryFactory taskRegistryFactory,
-        UserLogRegistry userLogRegistry,
+        RequestScopedDependencies requestScopedDependencies,
         GraphProjectFromGraphConfig configuration,
         GraphStore originGraphStore
     ) {
         try {
             var countsAndTiming = projectTimed(
-                requestCorrelationId,
-                taskRegistryFactory,
-                userLogRegistry,
+                requestScopedDependencies,
                 configuration,
                 originGraphStore
             );
@@ -103,9 +93,7 @@ public class SubGraphProjectApplication {
      *     the summary result of the projection with timing
      */
     private Triple<Long, Long, Long> projectTimed(
-        RequestCorrelationId requestCorrelationId,
-        TaskRegistryFactory taskRegistryFactory,
-        UserLogRegistry userLogRegistry,
+        RequestScopedDependencies requestScopedDependencies,
         GraphProjectFromGraphConfig configuration,
         GraphStore originGraphStore
     ) {
@@ -114,9 +102,7 @@ public class SubGraphProjectApplication {
 
         try (var ignored = ProgressTimer.start(durationInMilliSeconds::set)) {
             entityCounts = projectWithProgressTracker(
-                requestCorrelationId,
-                taskRegistryFactory,
-                userLogRegistry,
+                requestScopedDependencies,
                 configuration,
                 originGraphStore
             );
@@ -129,9 +115,7 @@ public class SubGraphProjectApplication {
      * @return pair of {nodeCount, relationshipCount}, the summary result of the projection
      */
     private Pair<Long, Long> projectWithProgressTracker(
-        RequestCorrelationId requestCorrelationId,
-        TaskRegistryFactory taskRegistryFactory,
-        UserLogRegistry userLogRegistry,
+        RequestScopedDependencies requestScopedDependencies,
         GraphProjectFromGraphConfig configuration,
         GraphStore originGraphStore
     ) {
@@ -142,9 +126,9 @@ public class SubGraphProjectApplication {
             loggers.loggerForProgressTracking(),
             configuration.typedConcurrency(),
             configuration.jobId(),
-            requestCorrelationId,
-            taskRegistryFactory,
-            userLogRegistry
+            requestScopedDependencies.correlationId(),
+            requestScopedDependencies.taskRegistryFactory(),
+            requestScopedDependencies.userLogRegistry()
         );
 
         return projectAndStore(configuration, originGraphStore, progressTracker);

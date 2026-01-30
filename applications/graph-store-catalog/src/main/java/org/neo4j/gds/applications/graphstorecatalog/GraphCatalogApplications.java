@@ -20,22 +20,18 @@
 package org.neo4j.gds.applications.graphstorecatalog;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.neo4j.gds.api.DatabaseId;
-import org.neo4j.gds.api.User;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
+import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.beta.filter.GraphFilterResult;
 import org.neo4j.gds.core.loading.GraphDropNodePropertiesResult;
 import org.neo4j.gds.core.loading.GraphDropRelationshipResult;
 import org.neo4j.gds.core.loading.GraphStoreCatalogEntry;
-import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
-import org.neo4j.gds.core.utils.warnings.UserLogRegistry;
 import org.neo4j.gds.core.write.NodeLabelExporterBuilder;
 import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.core.write.RelationshipExporterBuilder;
 import org.neo4j.gds.core.write.RelationshipPropertiesExporterBuilder;
 import org.neo4j.gds.legacycypherprojection.GraphProjectCypherResult;
 import org.neo4j.gds.projection.GraphProjectNativeResult;
-import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.graphdb.GraphDatabaseService;
 
@@ -44,33 +40,27 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 public interface GraphCatalogApplications {
-    boolean graphExists(User user, DatabaseId databaseId, String graphNameAsString);
+    boolean graphExists(RequestScopedDependencies requestScopedDependencies, String graphNameAsString);
 
     List<GraphStoreCatalogEntry> dropGraph(
+        RequestScopedDependencies requestScopedDependencies,
         Object graphNameOrListOfGraphNames,
         boolean failIfMissing,
         String databaseNameOverride,
-        String usernameOverride,
-        DatabaseId currentDatabase,
-        User operator
+        String usernameOverride
     );
 
     List<Pair<GraphStoreCatalogEntry, Map<String, Object>>> listGraphs(
-        User user,
+        RequestScopedDependencies requestScopedDependencies,
         String graphName,
-        boolean includeDegreeDistribution,
-        TerminationFlag terminationFlag
+        boolean includeDegreeDistribution
     );
 
     GraphProjectNativeResult nativeProject(
-        User user,
-        DatabaseId databaseId,
+        RequestScopedDependencies requestScopedDependencies,
         GraphDatabaseService graphDatabaseService,
         GraphProjectMemoryUsageService graphProjectMemoryUsageService,
-        TaskRegistryFactory taskRegistryFactory,
-        TerminationFlag terminationFlag,
         TransactionContext transactionContext,
-        UserLogRegistry userLogRegistry,
         String graphNameAsString,
         Object nodeProjection,
         Object relationshipProjection,
@@ -78,26 +68,19 @@ public interface GraphCatalogApplications {
     );
 
     MemoryEstimateResult estimateNativeProject(
-        DatabaseId databaseId,
+        RequestScopedDependencies requestScopedDependencies,
         GraphProjectMemoryUsageService graphProjectMemoryUsageService,
-        TaskRegistryFactory taskRegistryFactory,
-        TerminationFlag terminationFlag,
         TransactionContext transactionContext,
-        UserLogRegistry userLogRegistry,
         Object nodeProjection,
         Object relationshipProjection,
         Map<String, Object> rawConfiguration
     );
 
     GraphProjectCypherResult cypherProject(
-        User user,
-        DatabaseId databaseId,
+        RequestScopedDependencies requestScopedDependencies,
         GraphDatabaseService graphDatabaseService,
         GraphProjectMemoryUsageService graphProjectMemoryUsageService,
-        TaskRegistryFactory taskRegistryFactory,
-        TerminationFlag terminationFlag,
         TransactionContext transactionContext,
-        UserLogRegistry userLogRegistry,
         String graphNameAsString,
         String nodeQuery,
         String relationshipQuery,
@@ -105,22 +88,16 @@ public interface GraphCatalogApplications {
     );
 
     MemoryEstimateResult estimateCypherProject(
-        DatabaseId databaseId,
+        RequestScopedDependencies requestScopedDependencies,
         GraphProjectMemoryUsageService graphProjectMemoryUsageService,
-        TaskRegistryFactory taskRegistryFactory,
-        TerminationFlag terminationFlag,
         TransactionContext transactionContext,
-        UserLogRegistry userLogRegistry,
         String nodeQuery,
         String relationshipQuery,
         Map<String, Object> rawConfiguration
     );
 
     GraphFilterResult subGraphProject(
-        User user,
-        DatabaseId databaseId,
-        TaskRegistryFactory taskRegistryFactory,
-        UserLogRegistry userLogRegistry,
+        RequestScopedDependencies requestScopedDependencies,
         String graphNameAsString,
         String originGraphNameAsString,
         String nodeFilter,
@@ -128,52 +105,44 @@ public interface GraphCatalogApplications {
         Map<String, Object> configuration
     );
 
-    GraphMemoryUsage sizeOf(User user, DatabaseId databaseId, String graphName);
+    GraphMemoryUsage sizeOf(RequestScopedDependencies requestScopedDependencies, String graphName);
 
     GraphDropNodePropertiesResult dropNodeProperties(
-        User user,
-        DatabaseId databaseId,
-        TaskRegistryFactory taskRegistryFactory,
-        UserLogRegistry userLogRegistry,
+        RequestScopedDependencies requestScopedDependencies,
         String graphName,
         Object nodeProperties,
         Map<String, Object> configuration
     );
 
     GraphDropRelationshipResult dropRelationships(
-        User user, DatabaseId databaseId, TaskRegistryFactory taskRegistryFactory,
-        UserLogRegistry userLogRegistry,
+        RequestScopedDependencies requestScopedDependencies,
         String graphName,
         String relationshipType
     );
 
     long dropGraphProperty(
-        User user, DatabaseId databaseId, String graphName,
+        RequestScopedDependencies requestScopedDependencies,
+        String graphName,
         String graphProperty,
         Map<String, Object> configuration
     );
 
     MutateLabelResult mutateNodeLabel(
-        User user,
-        DatabaseId databaseId,
+        RequestScopedDependencies requestScopedDependencies,
         String graphName,
         String nodeLabel,
         Map<String, Object> configuration
     );
 
     Stream<?> streamGraphProperty(
-        User user,
-        DatabaseId databaseId,
+        RequestScopedDependencies requestScopedDependencies,
         String graphName,
         String graphProperty,
         Map<String, Object> configuration
     );
 
     <T> Stream<T> streamNodeProperties(
-        User user,
-        DatabaseId databaseId,
-        TaskRegistryFactory taskRegistryFactory,
-        UserLogRegistry userLogRegistry,
+        RequestScopedDependencies requestScopedDependencies,
         String graphName,
         Object nodeProperties,
         Object nodeLabels,
@@ -183,10 +152,7 @@ public interface GraphCatalogApplications {
     );
 
     <T> Stream<T> streamRelationshipProperties(
-        User user,
-        DatabaseId databaseId,
-        TaskRegistryFactory taskRegistryFactory,
-        UserLogRegistry userLogRegistry,
+        RequestScopedDependencies requestScopedDependencies,
         String graphName,
         List<String> relationshipProperties,
         Object relationshipTypes,
@@ -196,20 +162,15 @@ public interface GraphCatalogApplications {
     );
 
     Stream<TopologyResult> streamRelationships(
-        User user,
-        DatabaseId databaseId,
+        RequestScopedDependencies requestScopedDependencies,
         String graphName,
         Object relationshipTypes,
         Map<String, Object> configuration
     );
 
     NodePropertiesWriteResult writeNodeProperties(
-        User user,
-        DatabaseId databaseId,
+        RequestScopedDependencies requestScopedDependencies,
         NodePropertyExporterBuilder nodePropertyExporterBuilder,
-        TaskRegistryFactory taskRegistryFactory,
-        TerminationFlag terminationFlag,
-        UserLogRegistry userLogRegistry,
         String graphName,
         Object nodeProperties,
         Object nodeLabels,
@@ -217,10 +178,8 @@ public interface GraphCatalogApplications {
     );
 
     WriteRelationshipPropertiesResult writeRelationshipProperties(
-        User user,
-        DatabaseId databaseId,
+        RequestScopedDependencies requestScopedDependencies,
         RelationshipPropertiesExporterBuilder relationshipPropertiesExporterBuilder,
-        TerminationFlag terminationFlag,
         String graphName,
         String relationshipType,
         List<String> relationshipProperties,
@@ -228,22 +187,16 @@ public interface GraphCatalogApplications {
     );
 
     WriteLabelResult writeNodeLabel(
-        User user,
-        DatabaseId databaseId,
+        RequestScopedDependencies requestScopedDependencies,
         NodeLabelExporterBuilder nodeLabelExporterBuilder,
-        TerminationFlag terminationFlag,
         String graphName,
         String nodeLabel,
         Map<String, Object> configuration
     );
 
     WriteRelationshipResult writeRelationships(
-        User user,
-        DatabaseId databaseId,
+        RequestScopedDependencies requestScopedDependencies,
         RelationshipExporterBuilder relationshipExporterBuilder,
-        TaskRegistryFactory taskRegistryFactory,
-        TerminationFlag terminationFlag,
-        UserLogRegistry userLogRegistry,
         String graphName,
         String relationshipType,
         String relationshipProperty,
@@ -251,46 +204,48 @@ public interface GraphCatalogApplications {
     );
 
     RandomWalkSamplingResult sampleRandomWalkWithRestarts(
-        User user,
-        DatabaseId databaseId,
-        TaskRegistryFactory taskRegistryFactory,
-        UserLogRegistry userLogRegistry,
-        TerminationFlag terminationFlag,
+        RequestScopedDependencies requestScopedDependencies,
         String graphName,
         String originGraphName,
         Map<String, Object> configuration
     );
 
     RandomWalkSamplingResult sampleCommonNeighbourAwareRandomWalk(
-        User user,
-        DatabaseId databaseId,
-        TaskRegistryFactory taskRegistryFactory,
-        UserLogRegistry userLogRegistry,
-        TerminationFlag terminationFlag,
+        RequestScopedDependencies requestScopedDependencies,
         String graphName,
         String originGraphName,
         Map<String, Object> configuration
     );
 
     MemoryEstimateResult estimateCommonNeighbourAwareRandomWalk(
-        User user,
-        DatabaseId databaseId,
+        RequestScopedDependencies requestScopedDependencies,
         String graphName,
         Map<String, Object> configuration
     );
 
     GraphGenerationStats generateGraph(
-        User user,
-        DatabaseId databaseId,
+        RequestScopedDependencies requestScopedDependencies,
         String graphName,
         long nodeCount,
         long averageDegree,
         Map<String, Object> configuration
     );
 
-    FileExportResult exportToCsv(String graphName, Map<String, Object> configuration);
+    FileExportResult exportToCsv(
+        RequestScopedDependencies requestScopedDependencies,
+        String graphName,
+        Map<String, Object> configuration
+    );
 
-    MemoryEstimateResult exportToCsvEstimate(String graphName, Map<String, Object> configuration);
+    MemoryEstimateResult exportToCsvEstimate(
+        RequestScopedDependencies requestScopedDependencies,
+        String graphName,
+        Map<String, Object> configuration
+    );
 
-    DatabaseExportResult exportToDatabase(String graphName, Map<String, Object> configuration);
+    DatabaseExportResult exportToDatabase(
+        RequestScopedDependencies requestScopedDependencies,
+        String graphName,
+        Map<String, Object> configuration
+    );
 }
