@@ -605,7 +605,7 @@ public class PushbackCentralityProcedureFacade implements CentralityProcedureFac
 
     @Override
     public Stream<HitsStreamResult> hitsStream(String graphName, Map<String, Object> configuration) {
-        return Stream.empty();
+        return streamProcedureFacade.hits(graphName,configuration);
     }
 
     @Override
