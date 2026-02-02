@@ -5,6 +5,7 @@
 :entity: node
 :result: cluster
 :algorithm: K-Means
+:node-properties:
 
 include::partial$/algorithms/shared/algorithm-traits.adoc[]
 

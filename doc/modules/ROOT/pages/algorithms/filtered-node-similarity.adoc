@@ -12,6 +12,7 @@
 :undirected:
 :heterogeneous-nodes:
 :weighted:
+:node-properties:
 include::partial$/algorithms/shared/algorithm-traits.adoc[]
 
 

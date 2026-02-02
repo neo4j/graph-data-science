@@ -80,6 +80,11 @@ The algorithm supports configuration to set relationship properties to use as we
 These values can represent _cost_, _time_, _capacity_ or some other domain-specific properties, specified via the xref:common-usage/running-algos.adoc#common-configuration-relationship-weight-property[relationshipWeightProperty] configuration parameter.
 The algorithm will by default consider each relationship as equally important.
 
+[[introduction-algorithms-node-properties]]
+Node properties::
+The algorithm supports configuration to set node properties to use.
+These values can represent _features_, _weight_, _capacity_ or some other domain-specific properties, specified via different parameters such as the xref:common-usage/running-algos.adoc#common-configuration-node-weight-property[nodeWeightProperty] or the xref:common-usage/running-algos.adoc#common-configuration-seed-property[seedProperty] configuration parameter.
+
 
 [[introduction-catalog]]
 == Graph Catalog

@@ -9,6 +9,7 @@
 :directed:
 :undirected:
 :weighted:
+:node-properties:
 include::partial$/algorithms/shared/algorithm-traits.adoc[]
 
 

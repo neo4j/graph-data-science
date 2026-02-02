@@ -5,6 +5,7 @@
 :result: cluster
 :algorithm: HDBSCAN
 
+:node-properties:
 include::partial$/algorithms/shared/algorithm-traits.adoc[]
 
 

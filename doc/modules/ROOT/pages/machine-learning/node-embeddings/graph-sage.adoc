@@ -13,6 +13,7 @@ include::partial$/operations-reference/beta-note.adoc[]
 :undirected:
 :heterogeneous-nodes:
 :weighted:
+:node-properties:
 include::partial$/algorithms/shared/algorithm-traits.adoc[]
 
 

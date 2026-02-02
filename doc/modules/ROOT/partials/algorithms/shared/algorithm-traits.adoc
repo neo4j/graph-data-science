@@ -51,6 +51,11 @@ ifndef::weighted[]
 [.allowed]
 <<weighted-allowed>>
 endif::[]
+
+ifdef::node-properties[]
+[.supported]
+<<node-properties>>
+endif::[]
 --
 
 [discrete.glossary]
@@ -78,3 +83,5 @@ endif::[]
 [[weighted]]Weighted relationships:: xref:introduction.adoc#introduction-algorithms-weighted[Weighted trait]. The algorithm supports a relationship property to be used as weight, specified via the xref:common-usage/running-algos.adoc#common-configuration-relationship-weight-property[_relationshipWeightProperty_] configuration parameter.
 
 [[weighted-allowed]]Weighted relationships:: xref:introduction.adoc#introduction-algorithms-weighted[Weighted trait]. The algorithm treats each relationship as equally important, discarding the value of any relationship weight.
+
+[[node-properties]]Node properties:: xref:introduction.adoc#introduction-algorithms-node-properties[Node properties trait]. The algorithm makes use of node properties.
