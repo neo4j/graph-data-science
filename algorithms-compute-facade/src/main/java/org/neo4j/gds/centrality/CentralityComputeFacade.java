@@ -454,6 +454,7 @@ public class CentralityComputeFacade {
             progressTracker,
             inverseRelationshipsParameters,
             graphStore,
+            configuration.nodeLabelsFilter(),
             configuration.internalRelationshipTypes(graphStore),
             (graph -> new Hits(
                 graph,
