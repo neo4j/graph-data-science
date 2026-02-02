@@ -23,6 +23,7 @@ import org.assertj.core.api.Assertions;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.TestProgressTrackerHelper;
 import org.neo4j.gds.api.GraphStore;
@@ -82,6 +83,7 @@ class HitsWithInvertedIndexValidationTest {
                 ProgressTracker.NULL_TRACKER,
                 invertedParameters,
                 graphStore,
+                Set.of(NodeLabel.of("Node")),
                 Set.of(RelationshipType.of("R")),
                 (graph) -> new Hits(
                     graph,
@@ -152,6 +154,7 @@ class HitsWithInvertedIndexValidationTest {
                 progressTracker,
                 invertedParameters,
                 graphStore,
+                Set.of(NodeLabel.of("Node")),
                 Set.of(RelationshipType.of("R")),
                 (graph) -> new Hits(
                     graph,
@@ -232,6 +235,7 @@ class HitsWithInvertedIndexValidationTest {
                     ProgressTracker.NULL_TRACKER,
                     invertedParameters,
                     graphStore,
+                    Set.of(NodeLabel.of("Node")),
                     Set.of(RelationshipType.of("R")),
                     (graph) -> new Hits(
                         graph,
@@ -302,6 +306,7 @@ class HitsWithInvertedIndexValidationTest {
                     progressTracker,
                     invertedParameters,
                     graphStore,
+                    Set.of(NodeLabel.of("Node")),
                     Set.of(RelationshipType.of("R")),
                     (graph) -> new Hits(
                         graph,

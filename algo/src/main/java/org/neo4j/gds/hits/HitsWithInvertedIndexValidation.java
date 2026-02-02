@@ -20,6 +20,7 @@
 package org.neo4j.gds.hits;
 
 import org.neo4j.gds.Algorithm;
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
@@ -37,6 +38,7 @@ import java.util.function.Function;
 public class HitsWithInvertedIndexValidation extends Algorithm<PregelResult> {
     private final InverseRelationshipsParameters inverseRelationshipsParameters;
     private final GraphStore graphStore;
+    private final Collection<NodeLabel> nodeLabels;
     private final Collection<RelationshipType> relationshipTypesFilter;
     private final Function<Graph, Hits> hitsFunction;
 
@@ -44,12 +46,14 @@ public class HitsWithInvertedIndexValidation extends Algorithm<PregelResult> {
         ProgressTracker progressTracker,
         InverseRelationshipsParameters inverseRelationshipsParameters,
         GraphStore graphStore,
+        Collection<NodeLabel> nodeLabels,
         Collection<RelationshipType> relationshipTypesFilter,
         Function<Graph, Hits> hitsFunction
     ) {
         super(progressTracker);
         this.inverseRelationshipsParameters = inverseRelationshipsParameters;
         this.graphStore = graphStore;
+        this.nodeLabels = nodeLabels;
         this.relationshipTypesFilter = relationshipTypesFilter;
         this.hitsFunction = hitsFunction;
     }
@@ -68,6 +72,7 @@ public class HitsWithInvertedIndexValidation extends Algorithm<PregelResult> {
 
     private Graph getGraph(){
         return graphStore.getGraph(
+            nodeLabels,
             relationshipTypesFilter,
             Optional.empty()
         );
