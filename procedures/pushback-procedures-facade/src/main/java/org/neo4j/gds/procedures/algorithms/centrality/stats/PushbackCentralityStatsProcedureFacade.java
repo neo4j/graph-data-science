@@ -28,6 +28,7 @@ import org.neo4j.gds.centrality.CentralityComputeBusinessFacade;
 import org.neo4j.gds.closeness.ClosenessCentralityStatsConfig;
 import org.neo4j.gds.degree.DegreeCentralityStatsConfig;
 import org.neo4j.gds.harmonic.HarmonicCentralityStatsConfig;
+import org.neo4j.gds.hits.HitsConfig;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationStatsConfig;
 import org.neo4j.gds.pagerank.ArticleRankStatsConfig;
 import org.neo4j.gds.pagerank.EigenvectorStatsConfig;
@@ -36,6 +37,7 @@ import org.neo4j.gds.procedures.algorithms.CentralityDistributionInstructions;
 import org.neo4j.gds.procedures.algorithms.centrality.ArticulationPointsStatsResult;
 import org.neo4j.gds.procedures.algorithms.centrality.CELFStatsResult;
 import org.neo4j.gds.procedures.algorithms.centrality.CentralityStatsResult;
+import org.neo4j.gds.procedures.algorithms.centrality.HitsStatsResult;
 import org.neo4j.gds.procedures.algorithms.centrality.PageRankStatsResult;
 import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
 
@@ -205,6 +207,20 @@ public class PushbackCentralityStatsProcedureFacade {
                 config.toMap(),
                 centralityDistributionInstructions.shouldComputeDistribution(),
                 parameters.concurrency()
+            )
+        ).join();
+    }
+
+    public Stream<HitsStatsResult> hits(String graphName, Map<String, Object> configuration) {
+        var config = configurationParser.parseConfiguration(configuration, HitsConfig::of);
+        return businessFacade.hits(
+            GraphName.parse(graphName),
+            config.toGraphParameters(),
+            config,
+            config.jobId(),
+            config.logProgress(),
+            graphResources -> new HitsStatResultTransformer(
+                config.toMap()
             )
         ).join();
     }
