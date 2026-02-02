@@ -305,7 +305,15 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
         HitsConfig configuration,
         ResultBuilder<HitsConfig, PregelResult, RESULT, NodePropertiesWritten> resultBuilder
     ) {
-        var writeStep = new HitsWriteStep(writeNodePropertyService, configuration, HITS);
+        var writeStep = new HitsWriteStep(
+            writeNodePropertyService,
+            configuration::resolveResultStore,
+            configuration.writeConcurrency(),
+            configuration.authProperty(),
+            configuration.hubProperty(),
+            configuration.writeProperty()
+        );
+
         var hitsETLHook = hitsHookGenerator.createETLHook(configuration);
 
         return algorithmProcessingTemplateConvenience.processAlgorithmInWriteMode(

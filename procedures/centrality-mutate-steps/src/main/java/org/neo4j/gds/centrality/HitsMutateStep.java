@@ -33,10 +33,11 @@ import java.util.List;
 
 public class HitsMutateStep implements MutateStep<PregelResult, NodePropertiesWritten> {
     private final MutateNodePropertyService mutateNodePropertyService;
-    private final String mutateProperty;
     private final Collection<String> nodeLabels;
     private final String authProperty;
     private final String hubProperty;
+    private final String mutateProperty;
+
 
 
     public HitsMutateStep(
