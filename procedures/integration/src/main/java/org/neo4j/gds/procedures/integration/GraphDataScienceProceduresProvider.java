@@ -20,6 +20,7 @@
 package org.neo4j.gds.procedures.integration;
 
 import org.neo4j.function.ThrowingFunction;
+import org.neo4j.gds.LicenseDetails;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryGuard;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
@@ -85,6 +86,7 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
     private final GraphStoreFactorySuppliers graphStoreFactorySuppliers;
     private final FeatureTogglesRepository featureTogglesRepository;
     private final GraphStoreCatalogService graphStoreCatalogService;
+    private final LicenseDetails licenseDetails;
     private final LimitsConfiguration limitsConfiguration;
     private final MemoryGuard memoryGuard;
     private final MemoryEstimationContext memoryEstimationContext;
@@ -111,6 +113,7 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
         FeatureTogglesRepository featureTogglesRepository,
         GraphStoreCatalogService graphStoreCatalogService,
         GraphStoreFactorySuppliers graphStoreFactorySuppliers,
+        LicenseDetails licenseDetails,
         LimitsConfiguration limitsConfiguration,
         MemoryGuard memoryGuard,
         MemoryEstimationContext memoryEstimationContext,
@@ -137,6 +140,7 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
         this.graphStoreFactorySuppliers = graphStoreFactorySuppliers;
         this.featureTogglesRepository = featureTogglesRepository;
         this.graphStoreCatalogService = graphStoreCatalogService;
+        this.licenseDetails = licenseDetails;
         this.limitsConfiguration = limitsConfiguration;
         this.memoryGuard = memoryGuard;
         this.memoryEstimationContext = memoryEstimationContext;
@@ -200,7 +204,9 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
             .userLogStore(userLogStore)
             .build();
 
-        var telemetryLogger = neo4jConfiguration.get(GdsSettings.enableTelemetryLogging()) ? new TelemetryLoggerImpl(loggers.log()) : TelemetryLogger.DISABLED;
+        var telemetryLogger = neo4jConfiguration.get(GdsSettings.enableTelemetryLogging()) ?
+            new TelemetryLoggerImpl(loggers.log()) :
+            TelemetryLogger.DISABLED;
 
         return LocalGraphDataScienceProcedures.create(
             loggers,
@@ -211,6 +217,7 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
             featureTogglesRepository,
             graphStoreCatalogService,
             graphStoreFactorySuppliers,
+            licenseDetails,
             limitsConfiguration,
             memoryGuard,
             memoryEstimationContext,

@@ -22,6 +22,7 @@ package org.neo4j.gds.procedures.integration;
 import org.apache.commons.lang3.tuple.Triple;
 import org.neo4j.common.DependencySatisfier;
 import org.neo4j.dbms.api.DatabaseManagementService;
+import org.neo4j.gds.LicenseDetails;
 import org.neo4j.gds.LicenseState;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.graphstorecatalog.ExportLocation;
@@ -240,6 +241,7 @@ public final class OpenGraphDataScienceExtensionBuilder {
             featureTogglesRepository,
             graphStoreCatalogService,
             graphStoreFactorySuppliers,
+            LicenseDetails.from(licenseState),
             limitsConfiguration,
             metrics,
             modelCatalog,

@@ -17,19 +17,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds;
+package org.neo4j.gds.procedures.operations;
 
-public final class SysInfoProcFacade {
+import org.neo4j.gds.LicenseDetails;
 
-    private final LicensingBusinessFacade businessFacade;
+/**
+ * A place to put things to do with just Neo4j integration.
+ * So living in procedures layer, not further down.
+ */
+public class Neo4jIntegration {
+    private final LicenseDetails licenseDetails;
 
-    public SysInfoProcFacade(LicensingBusinessFacade businessFacade) {
-        this.businessFacade = businessFacade;
+    public Neo4jIntegration(LicenseDetails licenseDetails) {
+        this.licenseDetails = licenseDetails;
     }
 
-    LicenseStateResult licenseStateResult() {
-        LicenseDetails licenseDetails = businessFacade.licenseDetails();
+    LicenseStateResult licenseState() {
         return new LicenseStateResult(licenseDetails.isLicensed(), licenseDetails.details());
     }
-
 }

@@ -29,12 +29,12 @@ public final class LicenseDetails {
     private final boolean isLicensed;
     private final String details;
 
-    private LicenseDetails(boolean isLicensed, String details) {
+    public LicenseDetails(boolean isLicensed, String details) {
         this.isLicensed = isLicensed;
         this.details = details;
     }
 
-    static LicenseDetails from(LicenseState licenseState) {
+    public static LicenseDetails from(LicenseState licenseState) {
         String details = licenseState.visit(StateDetailsExtractor.INSTANCE);
         return new LicenseDetails(licenseState.isLicensed(), details);
     }
@@ -44,11 +44,11 @@ public final class LicenseDetails {
         return new LicenseDetails(isLicensed, details);
     }
 
-    String details() {
+    public String details() {
         return details;
     }
 
-    boolean isLicensed() {
+    public boolean isLicensed() {
         return isLicensed;
     }
 

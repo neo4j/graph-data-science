@@ -28,6 +28,8 @@ public interface OperationsProcedureFacade {
 
     void enableArrowDatabaseImport(boolean value);
 
+    LicenseStateResult licenceStateResult();
+
     Stream<ProgressResult> listProgress(String jobIdAsString, boolean showCompleted);
 
     Stream<UserLogEntry> queryUserLog(String jobId);
@@ -59,5 +61,4 @@ public interface OperationsProcedureFacade {
     void setUseReorderedAdjacencyList(boolean value);
 
     void setUseUncompressedAdjacencyList(boolean value);
-
 }

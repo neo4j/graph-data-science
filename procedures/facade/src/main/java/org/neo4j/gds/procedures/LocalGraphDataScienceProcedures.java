@@ -20,6 +20,7 @@
 package org.neo4j.gds.procedures;
 
 import org.neo4j.common.DependencyResolver;
+import org.neo4j.gds.LicenseDetails;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTemplate;
@@ -57,6 +58,7 @@ import org.neo4j.gds.procedures.catalog.GraphCatalogProcedureFacade;
 import org.neo4j.gds.procedures.modelcatalog.LocalModelCatalogProcedureFacade;
 import org.neo4j.gds.procedures.modelcatalog.ModelCatalogProcedureFacade;
 import org.neo4j.gds.procedures.operations.LocalOperationsProcedureFacade;
+import org.neo4j.gds.procedures.operations.Neo4jIntegration;
 import org.neo4j.gds.procedures.operations.OperationsProcedureFacade;
 import org.neo4j.gds.procedures.pipelines.LocalPipelinesProcedureFacade;
 import org.neo4j.gds.procedures.pipelines.PipelineRepository;
@@ -116,6 +118,7 @@ public class LocalGraphDataScienceProcedures implements GraphDataScienceProcedur
         FeatureTogglesRepository featureTogglesRepository,
         GraphStoreCatalogService graphStoreCatalogService,
         GraphStoreFactorySuppliers graphStoreFactorySuppliers,
+        LicenseDetails licenseDetails,
         LimitsConfiguration limitsConfiguration,
         MemoryGuard memoryGuard,
         MemoryEstimationContext memoryEstimationContext,
@@ -219,7 +222,8 @@ public class LocalGraphDataScienceProcedures implements GraphDataScienceProcedur
 
         var modelCatalogProcedureFacade = new LocalModelCatalogProcedureFacade(applicationsFacade);
 
-        var operationsProcedureFacade = new LocalOperationsProcedureFacade(applicationsFacade);
+        var neo4jIntegration = new Neo4jIntegration(licenseDetails);
+        var operationsProcedureFacade = new LocalOperationsProcedureFacade(applicationsFacade, neo4jIntegration);
 
         var pipelinesProcedureFacade = LocalPipelinesProcedureFacade.create(
             loggers,

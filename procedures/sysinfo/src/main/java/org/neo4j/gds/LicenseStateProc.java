@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds;
 
+import org.neo4j.gds.procedures.GraphDataScienceProcedures;
+import org.neo4j.gds.procedures.operations.LicenseStateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Procedure;
@@ -27,20 +29,18 @@ import org.neo4j.procedure.UserFunction;
 import java.util.stream.Stream;
 
 public class LicenseStateProc {
-
     @Context
-    public SysInfoProcFacade facade;
+    public GraphDataScienceProcedures facade;
 
     @Procedure("gds.license.state")
     @Description("Returns details about the license state")
     public Stream<LicenseStateResult> licenseState() {
-        return Stream.of(facade.licenseStateResult());
+        return Stream.of(facade.operations().licenceStateResult());
     }
 
     @UserFunction("gds.isLicensed")
     @Description("RETURN gds.isLicensed - Return if GDS is licensed. For more details use the procedure gds.license.state.")
     public boolean isLicensed() {
-        return facade.licenseStateResult().isLicensed;
+        return facade.operations().licenceStateResult().isLicensed;
     }
-
 }

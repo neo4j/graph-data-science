@@ -24,10 +24,11 @@ dependencies {
 
     implementation project(':core')
     implementation project(':core-utils')
+    implementation project(':licensing')
     implementation project(':memory-usage')
     implementation project(':neo4j-settings')
-    implementation project(':licensing')
     implementation project(':proc-common')
+    implementation project(':procedures-facade-api')
 
     testCompileOnly project(':annotations')
 

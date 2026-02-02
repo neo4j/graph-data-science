@@ -29,6 +29,7 @@ dependencies {
     implementation project(':graph-catalog-procedure-facade')
     implementation project(':graph-schema-api')
     implementation project(':graph-store-catalog-applications')
+    implementation project(':licensing')
     implementation project(':logging')
     implementation project(':memory-estimation')
     implementation project(':memory-usage')

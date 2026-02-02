@@ -22,9 +22,14 @@ package org.neo4j.gds;
 import org.neo4j.annotations.service.Service;
 import org.neo4j.graphdb.config.Configuration;
 
+/**
+ * This exists to support service loading licence state.
+ * Service loading licence state is something we do because poor, old design.
+ * The poor aspects of the designs are that while we know the product we build,
+ * our code not reflect that, and thus we load licence state in several extensions.
+ */
 @Service
 public interface LicensingServiceBuilder {
-
     LicensingService build(Configuration config);
 
     /**

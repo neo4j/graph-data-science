@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.procedures.integration;
 
+import org.neo4j.gds.LicenseDetails;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.DefaultMemoryGuard;
 import org.neo4j.gds.applications.graphstorecatalog.ExportLocation;
@@ -65,6 +66,7 @@ final class GraphDataScienceProceduresProviderFactory {
     private final FeatureTogglesRepository featureTogglesRepository;
     private final GraphStoreCatalogService graphStoreCatalogService;
     private final GraphStoreFactorySuppliers graphStoreFactorySuppliers;
+    private final LicenseDetails licenseDetails;
     private final LimitsConfiguration limitsConfiguration;
     private final Metrics metrics;
     private final ModelCatalog modelCatalog;
@@ -83,6 +85,7 @@ final class GraphDataScienceProceduresProviderFactory {
         FeatureTogglesRepository featureTogglesRepository,
         GraphStoreCatalogService graphStoreCatalogService,
         GraphStoreFactorySuppliers graphStoreFactorySuppliers,
+        LicenseDetails licenseDetails,
         LimitsConfiguration limitsConfiguration,
         Metrics metrics,
         ModelCatalog modelCatalog,
@@ -100,6 +103,7 @@ final class GraphDataScienceProceduresProviderFactory {
         this.featureTogglesRepository = featureTogglesRepository;
         this.graphStoreCatalogService = graphStoreCatalogService;
         this.graphStoreFactorySuppliers = graphStoreFactorySuppliers;
+        this.licenseDetails = licenseDetails;
         this.limitsConfiguration = limitsConfiguration;
         this.metrics = metrics;
         this.modelCatalog = modelCatalog;
@@ -134,6 +138,7 @@ final class GraphDataScienceProceduresProviderFactory {
             featureTogglesRepository,
             graphStoreCatalogService,
             graphStoreFactorySuppliers,
+            licenseDetails,
             limitsConfiguration,
             memoryGuard,
             new MemoryEstimationContext(useMaxMemoryEstimation),

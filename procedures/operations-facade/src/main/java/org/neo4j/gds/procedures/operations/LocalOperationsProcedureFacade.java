@@ -28,9 +28,11 @@ import java.util.stream.Stream;
 
 public class LocalOperationsProcedureFacade implements OperationsProcedureFacade {
     private final ApplicationsFacade applicationsFacade;
+    private final Neo4jIntegration neo4jIntegration;
 
-    public LocalOperationsProcedureFacade(ApplicationsFacade applicationsFacade) {
+    public LocalOperationsProcedureFacade(ApplicationsFacade applicationsFacade, Neo4jIntegration neo4jIntegration) {
         this.applicationsFacade = applicationsFacade;
+        this.neo4jIntegration = neo4jIntegration;
     }
 
     @Override
@@ -41,6 +43,11 @@ public class LocalOperationsProcedureFacade implements OperationsProcedureFacade
     @Override
     public void enableArrowDatabaseImport(boolean value) {
         applicationsFacade.operations().enableArrowDatabaseImport(value);
+    }
+
+    @Override
+    public LicenseStateResult licenceStateResult() {
+        return neo4jIntegration.licenseState();
     }
 
     @Override

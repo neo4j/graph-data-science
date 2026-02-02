@@ -186,6 +186,7 @@ public final class ProcedureRunner {
             null,
             graphStoreCatalogService,
             graphStoreFactorySuppliers,
+            null,
             LimitsConfiguration.Instance,
             MemoryGuard.DISABLED,
             new MemoryEstimationContext(false),

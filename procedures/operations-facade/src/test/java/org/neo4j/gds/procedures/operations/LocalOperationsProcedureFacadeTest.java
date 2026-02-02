@@ -53,7 +53,7 @@ class LocalOperationsProcedureFacadeTest {
         var applicationsFacade = mock(ApplicationsFacade.class);
         when(applicationsFacade.operations()).thenReturn(operationsApplications);
 
-        var operationsProcedureFacade = new LocalOperationsProcedureFacade(applicationsFacade);
+        var operationsProcedureFacade = new LocalOperationsProcedureFacade(applicationsFacade, null);
 
         var finished = new LeafTask("t1", 1);
         finished.start();
@@ -102,7 +102,7 @@ class LocalOperationsProcedureFacadeTest {
         var applicationsFacade = mock(ApplicationsFacade.class);
         when(applicationsFacade.operations()).thenReturn(operationsApplications);
 
-        var operationsProcedureFacade = new LocalOperationsProcedureFacade(applicationsFacade);
+        var operationsProcedureFacade = new LocalOperationsProcedureFacade(applicationsFacade, null);
 
         var finished = new LeafTask("t1", 1);
         finished.start();
@@ -153,7 +153,7 @@ class LocalOperationsProcedureFacadeTest {
         var applicationsFacade = mock(ApplicationsFacade.class);
         when(applicationsFacade.operations()).thenReturn(operationsApplications);
 
-        var operationsProcedureFacade = new LocalOperationsProcedureFacade(applicationsFacade);
+        var operationsProcedureFacade = new LocalOperationsProcedureFacade(applicationsFacade, null);
 
         var expectedWarnings = Stream.of(
             new UserLogEntry(new LeafTask("lt", 42), "going once"),
