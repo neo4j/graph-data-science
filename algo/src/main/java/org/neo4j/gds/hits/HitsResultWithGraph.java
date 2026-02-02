@@ -22,4 +22,7 @@ package org.neo4j.gds.hits;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.beta.pregel.PregelResult;
 
+//we need the graph object for mutate/write steps, can probably replicate one from graphstore
+// inside the steps,
+// but doing it as is for the moment
 public record HitsResultWithGraph(PregelResult pregelResult, Graph graph) {}

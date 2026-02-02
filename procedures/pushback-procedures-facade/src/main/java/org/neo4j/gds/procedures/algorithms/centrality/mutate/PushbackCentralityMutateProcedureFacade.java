@@ -29,6 +29,7 @@ import org.neo4j.gds.centrality.CentralityComputeBusinessFacade;
 import org.neo4j.gds.closeness.ClosenessCentralityMutateConfig;
 import org.neo4j.gds.degree.DegreeCentralityMutateConfig;
 import org.neo4j.gds.harmonic.HarmonicCentralityMutateConfig;
+import org.neo4j.gds.hits.HitsConfig;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationMutateConfig;
 import org.neo4j.gds.pagerank.ArticleRankMutateConfig;
 import org.neo4j.gds.pagerank.EigenvectorMutateConfig;
@@ -38,6 +39,7 @@ import org.neo4j.gds.procedures.algorithms.centrality.ArticulationPointsMutateRe
 import org.neo4j.gds.procedures.algorithms.centrality.BetaClosenessCentralityMutateResult;
 import org.neo4j.gds.procedures.algorithms.centrality.CELFMutateResult;
 import org.neo4j.gds.procedures.algorithms.centrality.CentralityMutateResult;
+import org.neo4j.gds.procedures.algorithms.centrality.HitsMutateResult;
 import org.neo4j.gds.procedures.algorithms.centrality.PageRankMutateResult;
 import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
 
@@ -270,6 +272,27 @@ public class PushbackCentralityMutateProcedureFacade {
                 parameters.concurrency(),
                 mutateNodePropertyService,
                 config.nodeLabels(),
+                config.mutateProperty()
+            )
+        ).join();
+    }
+
+    public Stream<HitsMutateResult> hits(String graphName, Map<String, Object> configuration) {
+        var config = configurationParser.parseConfiguration(configuration, HitsConfig::of);
+
+        return businessFacade.hits(
+            GraphName.parse(graphName),
+            config.toGraphParameters(),
+            config,
+            config.jobId(),
+            config.logProgress(),
+            graphResources -> new HitsMutateResultTransformer(
+                graphResources.graphStore(),
+                config.toMap(),
+                mutateNodePropertyService,
+                config.nodeLabels(),
+                config.authProperty(),
+                config.hubProperty(),
                 config.mutateProperty()
             )
         ).join();
