@@ -27,7 +27,13 @@ import java.util.Map;
 public interface FunctionsFacade {
     double adamicAdarIndex(Node node1, Node node2, Map<String, Object> configuration);
 
+    Node asNode(Number nodeId);
+
+    List<Node> asNodes(List<Number> nodeIds);
+
     double commonNeighbours(Node node1, Node node2, Map<String, Object> configuration);
+
+    Object nodeProperty(String graphName, Object nodeId, String propertyKey, String nodeLabel);
 
     List<Long> oneHotEncoding(List<Object> availableValues, List<Object> selectedValues);
 

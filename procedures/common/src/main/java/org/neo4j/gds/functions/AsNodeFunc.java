@@ -20,38 +20,29 @@
 package org.neo4j.gds.functions;
 
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.graphdb.Node;
-import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.UserFunction;
 
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
-
-import static org.neo4j.gds.compat.GraphDatabaseApiProxy.getNodeById;
 
 public class AsNodeFunc {
-
     @Context
-    public KernelTransaction tx;
+    public GraphDataScienceProcedures facade;
 
     @Nullable
     @UserFunction("gds.util.asNode")
     @Description("RETURN gds.util.asNode(nodeId) - Return the node objects for the given node id or null if none exists.")
     public Node asNode(@Name(value = "nodeId") Number nodeId) {
-        return getNodeById(tx, nodeId.longValue());
+        return facade.functions().asNode(nodeId);
     }
 
     @UserFunction("gds.util.asNodes")
     @Description("RETURN gds.util.asNodes(nodeIds) - Return the node objects for the given node ids or an empty list if none exists.")
     public List<Node> asNodes(@Name(value = "nodeIds") List<Number> nodeIds) {
-        return nodeIds.stream()
-            .map(nodeId -> getNodeById(tx, nodeId.longValue()))
-            .filter(Objects::nonNull)
-            .collect(Collectors.toList());
+        return facade.functions().asNodes(nodeIds);
     }
-
 }

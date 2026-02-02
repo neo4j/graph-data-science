@@ -204,7 +204,7 @@ public class LocalGraphDataScienceProcedures implements GraphDataScienceProcedur
             algorithmEstimationTemplate
         );
 
-        var functionsFacade = new LocalFunctionsFacade();
+        var functionsFacade = new LocalFunctionsFacade(kernelTransaction, requestScopedDependencies);
 
         var graphCatalogProcedureFacade = graphCatalogProcedureFacadeFactory.createGraphCatalogProcedureFacade(
             applicationsFacade,

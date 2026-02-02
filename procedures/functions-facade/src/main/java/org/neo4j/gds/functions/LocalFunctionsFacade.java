@@ -19,17 +19,35 @@
  */
 package org.neo4j.gds.functions;
 
+import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.legacycypherprojection.GraphProjectFromCypherConfig;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
+import org.neo4j.kernel.api.KernelTransaction;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
+import static org.neo4j.gds.compat.GraphDatabaseApiProxy.getNodeById;
 
 public class LocalFunctionsFacade implements FunctionsFacade {
     private final NeighbourFinder neighbourFinder = new NeighbourFinder();
+    private final NodePropertyApplication nodePropertyApplication = new NodePropertyApplication();
     private final OneHotEncodingApplication oneHotEncodingApplication = new OneHotEncodingApplication();
+
+    private final KernelTransaction kernelTransaction;
+    private final RequestScopedDependencies requestScopedDependencies;
+
+    public LocalFunctionsFacade(
+        KernelTransaction kernelTransaction,
+        RequestScopedDependencies requestScopedDependencies
+    ) {
+        this.kernelTransaction = kernelTransaction;
+        this.requestScopedDependencies = requestScopedDependencies;
+    }
 
     /**
      * @see <a href="https://en.wikipedia.org/wiki/Adamic/Adar_index">Adamic–Adar index</a>
@@ -49,6 +67,19 @@ public class LocalFunctionsFacade implements FunctionsFacade {
     }
 
     @Override
+    public Node asNode(Number nodeId) {
+        return getNodeById(kernelTransaction, nodeId.longValue());
+    }
+
+    @Override
+    public List<Node> asNodes(List<Number> nodeIds) {
+        return nodeIds.stream()
+            .map(nodeId -> getNodeById(kernelTransaction, nodeId.longValue()))
+            .filter(Objects::nonNull)
+            .collect(Collectors.toList());
+    }
+
+    @Override
     public double commonNeighbours(Node node1, Node node2, Map<String, Object> configuration) {
         if (node1 == null || node2 == null) throw new RuntimeException("Nodes must not be null");
 
@@ -58,6 +89,17 @@ public class LocalFunctionsFacade implements FunctionsFacade {
         var neighbors = neighbourFinder.findCommonNeighbours(node1, node2, relationshipType, direction);
 
         return neighbors.size();
+    }
+
+    @Override
+    public Object nodeProperty(String graphName, Object nodeId, String propertyKey, String nodeLabel) {
+        return nodePropertyApplication.nodeProperty(
+            requestScopedDependencies,
+            graphName,
+            nodeId,
+            propertyKey,
+            nodeLabel
+        );
     }
 
     @Override

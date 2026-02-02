@@ -10,8 +10,13 @@ dependencies {
     compileOnly(neo4j.kernel.api) { transitive = false }
     compileOnly(neo4j.resource) { transitive = false }
 
+    implementation project(':algorithms-machinery')
+    implementation project(':config-api')
+    implementation project(':core')
+    implementation project(':core-api')
     implementation project(':functions-facade-api')
     implementation project(':legacy-cypher-projection')
+    implementation project(':string-formatting')
 
     testImplementation platform(openGds.junit.bom)
     testImplementation openGds.junit.jupiter
