@@ -21,7 +21,7 @@ package org.neo4j.gds.procedures.algorithms.centrality.stream;
 
 
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.beta.pregel.PregelResult;
+import org.neo4j.gds.hits.HitsResultWithGraph;
 import org.neo4j.gds.procedures.algorithms.centrality.HitsStreamResult;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.results.ResultTransformer;
@@ -30,7 +30,7 @@ import java.util.Map;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-public class HitsStreamResultTransformer implements ResultTransformer<TimedAlgorithmResult<PregelResult>, Stream<HitsStreamResult>> {
+public class HitsStreamResultTransformer implements ResultTransformer<TimedAlgorithmResult<HitsResultWithGraph>, Stream<HitsStreamResult>> {
 
     private String authProperty;
     private String hubProperty;
@@ -43,8 +43,8 @@ public class HitsStreamResultTransformer implements ResultTransformer<TimedAlgor
     }
 
     @Override
-    public Stream<HitsStreamResult> apply(TimedAlgorithmResult<PregelResult> timedAlgorithmResult) {
-        var result = timedAlgorithmResult.result();
+    public Stream<HitsStreamResult> apply(TimedAlgorithmResult<HitsResultWithGraph> timedAlgorithmResult) {
+        var result = timedAlgorithmResult.result().pregelResult();
         var auth = result.nodeValues().doubleProperties(authProperty);
         var hub = result.nodeValues().doubleProperties(hubProperty);
 

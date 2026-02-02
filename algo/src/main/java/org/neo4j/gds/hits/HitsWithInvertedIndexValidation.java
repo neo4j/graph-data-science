@@ -24,7 +24,6 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.loading.SingleTypeRelationships;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -35,7 +34,7 @@ import java.util.Collection;
 import java.util.Optional;
 import java.util.function.Function;
 
-public class HitsWithInvertedIndexValidation extends Algorithm<PregelResult> {
+public class HitsWithInvertedIndexValidation extends Algorithm<HitsResultWithGraph> {
     private final InverseRelationshipsParameters inverseRelationshipsParameters;
     private final GraphStore graphStore;
     private final Collection<NodeLabel> nodeLabels;
@@ -59,7 +58,7 @@ public class HitsWithInvertedIndexValidation extends Algorithm<PregelResult> {
     }
 
     @Override
-    public PregelResult compute() {
+    public HitsResultWithGraph compute() {
         progressTracker.beginSubTask();
         invertedIndex();
         var graphWithInvertedIndex = getGraph();
@@ -67,7 +66,7 @@ public class HitsWithInvertedIndexValidation extends Algorithm<PregelResult> {
         var internalAlgorithm = hitsFunction.apply(graphWithInvertedIndex);
         var result = internalAlgorithm.compute();
         progressTracker.endSubTask();
-        return result;
+        return new HitsResultWithGraph(result,graphWithInvertedIndex);
     }
 
     private Graph getGraph(){

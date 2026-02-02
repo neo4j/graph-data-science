@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.procedures.algorithms.centrality.stats;
 
-import org.neo4j.gds.beta.pregel.PregelResult;
+import org.neo4j.gds.hits.HitsResultWithGraph;
 import org.neo4j.gds.procedures.algorithms.centrality.HitsStatsResult;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.results.ResultTransformer;
@@ -27,7 +27,7 @@ import org.neo4j.gds.results.ResultTransformer;
 import java.util.Map;
 import java.util.stream.Stream;
 
-public class HitsStatResultTransformer implements ResultTransformer<TimedAlgorithmResult<PregelResult>, Stream<HitsStatsResult>>{
+public class HitsStatResultTransformer implements ResultTransformer<TimedAlgorithmResult<HitsResultWithGraph>, Stream<HitsStatsResult>> {
 
     private final Map<String, Object> configuration;
 
@@ -36,8 +36,8 @@ public class HitsStatResultTransformer implements ResultTransformer<TimedAlgorit
     }
 
     @Override
-    public Stream<HitsStatsResult> apply(TimedAlgorithmResult<PregelResult> timedAlgorithmResult) {
-        var result = timedAlgorithmResult.result();
+    public Stream<HitsStatsResult> apply(TimedAlgorithmResult<HitsResultWithGraph> timedAlgorithmResult) {
+        var result = timedAlgorithmResult.result().pregelResult();
         return Stream.of(
            new HitsStatsResult(
                result.ranIterations(),

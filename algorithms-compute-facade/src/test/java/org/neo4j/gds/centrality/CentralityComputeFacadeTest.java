@@ -279,7 +279,7 @@ class CentralityComputeFacadeTest {
 
         var results = future.join();
 
-        assertThat(results.result().ranIterations()).isGreaterThan(0);
+        assertThat(results.result().pregelResult().ranIterations()).isGreaterThan(0);
         assertThat(results.computeMillis()).isNotNegative();
     }
 

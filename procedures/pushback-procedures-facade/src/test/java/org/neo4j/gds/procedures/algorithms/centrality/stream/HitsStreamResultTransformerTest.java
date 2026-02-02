@@ -24,6 +24,7 @@ import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.beta.pregel.NodeValue;
 import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
+import org.neo4j.gds.hits.HitsResultWithGraph;
 import org.neo4j.gds.procedures.algorithms.centrality.HitsStreamResult;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 
@@ -48,8 +49,10 @@ class HitsStreamResultTransformerTest {
         var nodeValues = mock(NodeValue.class);
         when(nodeValues.doubleProperties(eq("auth"))).thenReturn(auth);
         when(nodeValues.doubleProperties(eq("hub"))).thenReturn(hub);
-        var result = mock(PregelResult.class);
-        when(result.nodeValues()).thenReturn(nodeValues);
+        var pregelResult = mock(PregelResult.class);
+        when(pregelResult.nodeValues()).thenReturn(nodeValues);
+        var result = mock(HitsResultWithGraph.class);
+        when(result.pregelResult()).thenReturn(pregelResult);
 
         var idMap = mock(IdMap.class);
         when(idMap.toOriginalNodeId(anyLong())).thenAnswer(invocation -> invocation.getArgument(0));

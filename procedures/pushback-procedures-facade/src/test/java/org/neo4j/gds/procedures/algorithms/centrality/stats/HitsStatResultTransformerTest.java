@@ -21,6 +21,7 @@ package org.neo4j.gds.procedures.algorithms.centrality.stats;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.beta.pregel.PregelResult;
+import org.neo4j.gds.hits.HitsResultWithGraph;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 
 import java.util.Map;
@@ -34,11 +35,14 @@ class HitsStatResultTransformerTest {
     @Test
     void shouldTransformResult(){
 
-        var result = mock(PregelResult.class);
-        when(result.ranIterations()).thenReturn(1234);
-        when(result.didConverge()).thenReturn(true);
+        var pregelResult = mock(PregelResult.class);
+        when(pregelResult.ranIterations()).thenReturn(1234);
+        when(pregelResult.didConverge()).thenReturn(true);
 ;
         var config = Map.of("a",(Object)("foo"));
+
+        var result = mock(HitsResultWithGraph.class);
+        when(result.pregelResult()).thenReturn(pregelResult);
 
         var transformer = new HitsStatResultTransformer(
             config

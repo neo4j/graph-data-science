@@ -29,7 +29,6 @@ import org.neo4j.gds.articulationPoints.ArticulationPointsParameters;
 import org.neo4j.gds.articulationpoints.ArticulationPoints;
 import org.neo4j.gds.articulationpoints.ArticulationPointsResult;
 import org.neo4j.gds.async.AsyncAlgorithmCaller;
-import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.betweenness.BetweennessCentrality;
 import org.neo4j.gds.betweenness.BetweennessCentralityParameters;
 import org.neo4j.gds.betweenness.BetwennessCentralityResult;
@@ -50,6 +49,7 @@ import org.neo4j.gds.harmonic.HarmonicCentralityParameters;
 import org.neo4j.gds.harmonic.HarmonicResult;
 import org.neo4j.gds.hits.Hits;
 import org.neo4j.gds.hits.HitsConfig;
+import org.neo4j.gds.hits.HitsResultWithGraph;
 import org.neo4j.gds.hits.HitsWithInvertedIndexValidation;
 import org.neo4j.gds.indexinverse.InverseRelationshipsParameters;
 import org.neo4j.gds.indirectExposure.IndirectExposure;
@@ -430,7 +430,7 @@ public class CentralityComputeFacade {
         );
     }
 
-    public CompletableFuture<TimedAlgorithmResult<PregelResult>> hits(
+    public CompletableFuture<TimedAlgorithmResult<HitsResultWithGraph>> hits(
         GraphStore graphStore,
         HitsConfig configuration,
         Collection<RelationshipType> relationshipTypesWithoutIndex,
