@@ -94,11 +94,11 @@ class HitsWithInvertedIndexValidationTest {
                 )
             );
 
-
             //result-check
             var result = hitsWithInvertedIndex.compute();
-            var auth = result.nodeValues().doubleProperties("auth");
-            var hub = result.nodeValues().doubleProperties("hub");
+
+            var auth = result.pregelResult().nodeValues().doubleProperties("auth");
+            var hub = result.pregelResult().nodeValues().doubleProperties("hub");
 
             double authValue = 0.7071067811865475;
             double hubValue = 0.7071067811865476;
@@ -249,8 +249,8 @@ class HitsWithInvertedIndexValidationTest {
 
                 //result-check
                 var result = hitsWithInvertedIndex.compute();
-                var auth = result.nodeValues().doubleProperties("auth");
-                var hub = result.nodeValues().doubleProperties("hub");
+                var auth = result.pregelResult().nodeValues().doubleProperties("auth");
+                var hub = result.pregelResult().nodeValues().doubleProperties("hub");
 
                 double authValue = 0.7071067811865475;
                 double hubValue = 0.7071067811865476;

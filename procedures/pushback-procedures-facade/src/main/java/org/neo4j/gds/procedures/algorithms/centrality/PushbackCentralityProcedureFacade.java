@@ -605,7 +605,7 @@ public class PushbackCentralityProcedureFacade implements CentralityProcedureFac
 
     @Override
     public Stream<HitsStreamResult> hitsStream(String graphName, Map<String, Object> configuration) {
-        return Stream.empty();
+        return streamProcedureFacade.hits(graphName,configuration);
     }
 
     @Override
@@ -618,7 +618,7 @@ public class PushbackCentralityProcedureFacade implements CentralityProcedureFac
 
     @Override
     public Stream<HitsStatsResult> hitsStats(String graphName, Map<String, Object> configuration) {
-        return Stream.empty();
+        return statsProcedureFacade.hits(graphName,configuration);
     }
 
     @Override
@@ -631,7 +631,7 @@ public class PushbackCentralityProcedureFacade implements CentralityProcedureFac
 
     @Override
     public Stream<HitsWriteResult> hitsWrite(String graphName, Map<String, Object> configuration) {
-        return Stream.empty();
+        return writeProcedureFacade.hits(graphName,configuration);
     }
 
     @Override
@@ -644,7 +644,7 @@ public class PushbackCentralityProcedureFacade implements CentralityProcedureFac
 
     @Override
     public Stream<HitsMutateResult> hitsMutate(String graphName, Map<String, Object> configuration) {
-        return Stream.empty();
+        return mutateProcedureFacade.hits(graphName,configuration);
     }
 
     @Override

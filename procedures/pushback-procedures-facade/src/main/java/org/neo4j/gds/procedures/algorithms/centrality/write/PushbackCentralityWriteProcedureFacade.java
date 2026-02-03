@@ -32,6 +32,7 @@ import org.neo4j.gds.centrality.CelfWriteStep;
 import org.neo4j.gds.centrality.CentralityComputeBusinessFacade;
 import org.neo4j.gds.centrality.GenericCentralityWriteStep;
 import org.neo4j.gds.centrality.GenericRankWriteStep;
+import org.neo4j.gds.centrality.HitsWriteStep;
 import org.neo4j.gds.closeness.ClosenessCentralityResult;
 import org.neo4j.gds.closeness.ClosenessCentralityWriteConfig;
 import org.neo4j.gds.degree.DegreeCentralityResult;
@@ -39,6 +40,7 @@ import org.neo4j.gds.degree.DegreeCentralityWriteConfig;
 import org.neo4j.gds.harmonic.DeprecatedTieredHarmonicCentralityWriteConfig;
 import org.neo4j.gds.harmonic.HarmonicCentralityWriteConfig;
 import org.neo4j.gds.harmonic.HarmonicResult;
+import org.neo4j.gds.hits.HitsConfig;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationWriteConfig;
 import org.neo4j.gds.pagerank.ArticleRankWriteConfig;
 import org.neo4j.gds.pagerank.EigenvectorWriteConfig;
@@ -49,6 +51,7 @@ import org.neo4j.gds.procedures.algorithms.centrality.ArticulationPointsWriteRes
 import org.neo4j.gds.procedures.algorithms.centrality.BetaClosenessCentralityWriteResult;
 import org.neo4j.gds.procedures.algorithms.centrality.CELFWriteResult;
 import org.neo4j.gds.procedures.algorithms.centrality.CentralityWriteResult;
+import org.neo4j.gds.procedures.algorithms.centrality.HitsWriteResult;
 import org.neo4j.gds.procedures.algorithms.centrality.PageRankWriteResult;
 import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
 
@@ -390,6 +393,35 @@ public class PushbackCentralityWriteProcedureFacade {
             )
         ).join();
     }
+
+    public Stream<HitsWriteResult> hits(String graphName, Map<String, Object> configuration) {
+        var config = configurationParser.parseConfiguration(configuration, HitsConfig::of);
+
+        var writeStep = new HitsWriteStep(
+            writeNodePropertyService,
+            config::resolveResultStore,
+            config.writeConcurrency(),
+            config.authProperty(),
+            config.hubProperty(),
+            config.writeProperty()
+        );
+
+        return businessFacade.hits(
+            GraphName.parse(graphName),
+            config.toGraphParameters(),
+            config,
+            config.jobId(),
+            config.logProgress(),
+            graphResources -> new HitsWriteResultTransformer(
+                graphResources.graphStore(),
+                configuration,
+                writeStep,
+                config.jobId(),
+                graphResources.resultStore()
+            )
+        ).join();
+    }
+
 
     public Stream<PageRankWriteResult> pageRank(String graphName, Map<String, Object> configuration) {
         var config = configurationParser.parseConfiguration(configuration, PageRankWriteConfig::of);

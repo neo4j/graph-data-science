@@ -24,29 +24,41 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyRecord;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
-import org.neo4j.gds.applications.algorithms.machinery.Label;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.applications.algorithms.machinery.WriteNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.WriteStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.core.JobId;
-import org.neo4j.gds.hits.HitsConfig;
+import org.neo4j.gds.core.concurrency.Concurrency;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Function;
 
 public class HitsWriteStep implements WriteStep<PregelResult, NodePropertiesWritten> {
     private final WriteNodePropertyService writeNodePropertyService;
-    private final HitsConfig configuration;
-    private final Label label;
+    private final Function<ResultStore, Optional<ResultStore>> resultStoreResolver;
+    private final Concurrency writeConcurrency;
+    private final String authProperty;
+    private final String hubProperty;
+    private final String writeProperty;
 
-    public   HitsWriteStep(
+
+    public HitsWriteStep(
         WriteNodePropertyService writeNodePropertyService,
-        HitsConfig configuration,
-        Label label
+        Function<ResultStore, Optional<ResultStore>> resultStoreResolver,
+        Concurrency writeConcurrency,
+        String authProperty,
+        String hubProperty,
+        String writeProperty
     ) {
         this.writeNodePropertyService = writeNodePropertyService;
-        this.configuration = configuration;
-        this.label = label;
+        this.resultStoreResolver = resultStoreResolver;
+        this.writeConcurrency = writeConcurrency;
+        this.authProperty = authProperty;
+        this.hubProperty = hubProperty;
+        this.writeProperty = writeProperty;
     }
 
     @Override
@@ -57,26 +69,29 @@ public class HitsWriteStep implements WriteStep<PregelResult, NodePropertiesWrit
         PregelResult result,
         JobId jobId
     ) {
-        return writeNodePropertyService.perform(
-            graph,
-            graphStore,
-            resultStore,
-            configuration,
-            label,
-            jobId,
-            nodeProperties(result,configuration)
-        );
-    }
 
-    private List<NodePropertyRecord> nodeProperties(PregelResult pregelResult, HitsConfig config){
-        var authValues = NodePropertyValuesAdapter.adapt(pregelResult.nodeValues().doubleProperties(config.authProperty()));
-        var hubValues = NodePropertyValuesAdapter.adapt(pregelResult.nodeValues().doubleProperties(config.hubProperty()));
-        var authProperty = config.authProperty().concat(config.writeProperty());
-        var hubProperty = config.hubProperty().concat(config.writeProperty());
+        var authValues = NodePropertyValuesAdapter.adapt(result.nodeValues().doubleProperties(authProperty));
+        var hubValues = NodePropertyValuesAdapter.adapt(result.nodeValues().doubleProperties(hubProperty));
+        var authProperty = property(this.authProperty);
+        var hubProperty = property(this.hubProperty);
 
         var authRecord = NodePropertyRecord.of(authProperty, authValues);
         var hubRecord = NodePropertyRecord.of(hubProperty, hubValues);
 
-        return List.of(authRecord,hubRecord);
+        return writeNodePropertyService.perform(
+            graph,
+            graphStore,
+            resultStoreResolver.apply(resultStore),
+            writeConcurrency,
+            AlgorithmLabel.HITS,
+            jobId,
+            List.of(authRecord,hubRecord)
+        );
     }
+
+
+    private String property(String property){
+        return property.concat(writeProperty);
+    }
+
 }
