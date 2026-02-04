@@ -20,8 +20,12 @@
 package org.neo4j.gds.algorithms.community;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.PropertyState;
+import org.neo4j.gds.api.properties.nodes.LongIfChangedNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodeProperty;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
@@ -29,6 +33,7 @@ import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.concurrency.Concurrency;
 
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -83,8 +88,17 @@ class CommunityCompanionTest {
         }
     }
 
-    @Test
-    void shouldReturnOnlyChangedProperties() {
+    static Stream<Arguments> resultPropertyAndForceFlag() {
+        return Stream.of(
+            Arguments.of("seed", false),
+            Arguments.of("seed", true),
+            Arguments.of("notSeed", true)
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("resultPropertyAndForceFlag")
+    void shouldReturnOnlyChangedProperties(String resultProperty, boolean forceSeedOptimization) {
         var array = HugeLongArray.newArray(10);
         array.setAll(id -> id);
         var inputProperties = NodePropertyValuesAdapter.adapt(array);
@@ -93,11 +107,12 @@ class CommunityCompanionTest {
 
         var result = CommunityCompanion.nodePropertyValues(
             true,
-            "seed",
-            "seed",
+            resultProperty,
+            seedProperty.key(),
             false,
             inputProperties,
-            () -> seedProperty
+            () -> seedProperty,
+            forceSeedOptimization
         );
 
         assertThat(result).isInstanceOf(LongIfChangedNodePropertyValues.class);

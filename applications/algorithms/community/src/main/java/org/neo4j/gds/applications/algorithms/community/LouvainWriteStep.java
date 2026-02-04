@@ -79,7 +79,8 @@ class LouvainWriteStep implements WriteStep<LouvainResult, NodePropertiesWritten
             NodePropertyValuesAdapter.adapt(result.dendrogramManager().getCurrent()),
             configuration.minCommunitySize(),
             configuration.concurrency(),
-            () -> graphStore.nodeProperty(configuration.seedProperty())
+            () -> graphStore.nodeProperty(configuration.seedProperty()),
+            configuration.forceSeedOptimization()
         );
     }
 }

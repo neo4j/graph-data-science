@@ -27,12 +27,12 @@ import org.neo4j.gds.api.properties.nodes.NodePropertyRecord;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
+import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.RequestCorrelationId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.loading.Capabilities;
 import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
-import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
@@ -72,7 +72,7 @@ final class Neo4jDatabaseNodePropertyWriter {
         Log log
     ) {
         var nodeProperties = List.of(new NodePropertyRecord(writeProperty, nodePropertyValues));
-        return  writeNodeProperties(
+        return writeNodeProperties(
             requestCorrelationId,
             nodePropertyExporterBuilder,
             taskRegistryFactory,
@@ -103,8 +103,6 @@ final class Neo4jDatabaseNodePropertyWriter {
         TerminationFlag terminationFlag,
         Log log
     ) {
-
-
         validatePropertiesCanBeWritten(
             graphStore.capabilities().writeMode(),
             graph.schema().nodeSchema().unionProperties(),

@@ -57,7 +57,8 @@ class ModularityOptimizationWriteStep implements WriteStep<ModularityOptimizatio
             result.asNodeProperties(),
             configuration.minCommunitySize(),
             configuration.concurrency(),
-            () -> graphStore.nodeProperty(configuration.seedProperty())
+            () -> graphStore.nodeProperty(configuration.seedProperty()),
+            configuration.forceSeedOptimization()
         );
 
         return writeNodePropertyService.perform(
