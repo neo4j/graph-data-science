@@ -71,7 +71,7 @@ public final class DeltaStepping extends Algorithm<DeltaSteppingResult> {
     }
 
 
-    private DeltaStepping(
+    public DeltaStepping(
         Graph graph,
         long startNode,
         double delta,
