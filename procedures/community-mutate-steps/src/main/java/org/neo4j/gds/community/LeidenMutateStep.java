@@ -80,7 +80,7 @@ public class LeidenMutateStep implements MutateStep<LeidenResult, Pair<NodePrope
 
         return  standardCommunityProperties.compute(
             graphStore,
-            NodePropertyValuesAdapter.adapt(result.dendrogramManager().getCurrent())
+            NodePropertyValuesAdapter.adapt(result.communities())
         );
     }
 }

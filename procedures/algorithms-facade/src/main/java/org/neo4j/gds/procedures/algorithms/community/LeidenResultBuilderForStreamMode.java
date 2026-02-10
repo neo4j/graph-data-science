@@ -51,7 +51,7 @@ class LeidenResultBuilderForStreamMode implements StreamResultBuilder<LeidenResu
 
         var nodePropertyValues = CommunityCompanion.nodePropertyValues(
             configuration.consecutiveIds(),
-            NodePropertyValuesAdapter.adapt(leidenResult.dendrogramManager().getCurrent()),
+            NodePropertyValuesAdapter.adapt(leidenResult.communities()),
             configuration.minCommunitySize(),
             configuration.concurrency()
         );

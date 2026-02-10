@@ -78,6 +78,6 @@ public class LouvainMutateStep implements MutateStep<LouvainResult, NodeProperti
         }
         return standardCommunityProperties.compute(
             graphStore,
-            NodePropertyValuesAdapter.adapt(louvainResult.dendrogramManager().getCurrent()));
+            NodePropertyValuesAdapter.adapt(louvainResult.communities()));
     }
 }

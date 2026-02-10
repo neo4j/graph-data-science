@@ -19,40 +19,71 @@
  */
 package org.neo4j.gds.leiden;
 
-import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.collections.ha.HugeLongArray;
+
+import java.util.function.Function;
 
 public record LeidenResult(
     HugeLongArray communities,
     int ranLevels,
     boolean didConverge,
-    @Nullable LeidenDendrogramManager dendrogramManager,
+    Function<Long,long[]> dendrograms,
     double[] modularities,
     double modularity
 ){
 
     public long[] intermediateCommunities(long nodeId) {
+        return dendrograms.apply(nodeId);
+    }
 
-        if (dendrogramManager != null) {
-            var dendrograms = dendrogramManager.getAllDendrograms();
-            int levels = ranLevels();
-            long[] communities = new long[levels];
-            for (int i = 0; i < levels; i++) {
-                communities[i] = dendrograms[i].get(nodeId);
-            }
-            return communities;
-
-        } else {
-            return new long[]{communities.get(nodeId)};
-        }
+    public static LeidenResult createWithDendrograms(
+        HugeLongArray communities,
+        int ranLevels,
+        boolean didConverge,
+        LeidenDendrogramManager dendrogramManager,
+        double[] modularities,
+        double modularity
+    ){
+        return new LeidenResult(
+            communities,
+            ranLevels,
+            didConverge,
+            (nodeId)->{
+                var dendrograms = dendrogramManager.getAllDendrograms();
+                long[] comms = new long[ranLevels];
+                for (int i = 0; i < ranLevels; i++) {
+                    comms[i] = dendrograms[i].get(nodeId);
+                }
+                return comms;
+            },
+            modularities,
+            modularity
+        );
 
     }
 
-    public static LeidenResult EMPTY = new LeidenResult(
+    public static LeidenResult createWithoutDendrograms(
+        HugeLongArray communities,
+        int ranLevels,
+        boolean didConverge,
+        double[] modularities,
+        double modularity
+    ){
+        return new LeidenResult(
+            communities,
+            ranLevels,
+            didConverge,
+            (nodeId)-> new long[]{communities.get(nodeId)},
+            modularities,
+            modularity
+        );
+
+    }
+
+    public static LeidenResult EMPTY =  LeidenResult.createWithoutDendrograms(
         HugeLongArray.newArray(0),
         0,
         false,
-        null,
         new double[0],
         0
     );
