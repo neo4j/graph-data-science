@@ -53,7 +53,7 @@ class LeidenMutateResultTransformerTest {
         var dendrogramManager = mock(LeidenDendrogramManager.class);
         when(dendrogramManager.getCurrent()).thenReturn(current);
         when(dendrogramManager.getAllDendrograms()).thenReturn(new HugeLongArray[]{HugeLongArray.of(100), HugeLongArray.of(20)});
-        var result = new LeidenResult(current,1000,true,dendrogramManager,new double[]{42},55);
+        var result = LeidenResult.createWithDendrograms(current,1000,true,dendrogramManager,new double[]{42},55);
 
         var  mutateService =  mock(MutateNodePropertyService.class);
         when(mutateService.mutateNodeProperties(

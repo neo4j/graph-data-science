@@ -279,16 +279,15 @@ public class Leiden extends Algorithm<LeidenResult> {
         boolean stoppedAtFirstIteration = didConverge && iteration == 0;
         if (stoppedAtFirstIteration) {
             var modularity = modularities[0];
-            return new LeidenResult(
+            return  LeidenResult.createWithoutDendrograms(
                 LeidenUtils.createStartingCommunities(rootGraph.nodeCount(), seedValues.orElse(null)),
                 1,
                 true,
-                null,
                 new double[]{modularity},
                 modularity
             );
         } else {
-            return new LeidenResult(
+            return LeidenResult.createWithDendrograms(
                 dendrogramManager.getCurrent(),
                 iteration,
                 didConverge,

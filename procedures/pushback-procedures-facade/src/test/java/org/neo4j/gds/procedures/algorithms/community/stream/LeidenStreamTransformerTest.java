@@ -47,7 +47,7 @@ class LeidenStreamTransformerTest {
         var dendrogramManager = mock(LeidenDendrogramManager.class);
         when(dendrogramManager.getCurrent()).thenReturn(current);
         when(dendrogramManager.getAllDendrograms()).thenReturn(new HugeLongArray[]{HugeLongArray.of(100), HugeLongArray.of(20)});
-        var result = new LeidenResult(current,10,false,dendrogramManager,null,0);
+        var result =  LeidenResult.createWithDendrograms(current,10,false,dendrogramManager,null,0);
         var graphMock = mock(Graph.class);
         when(graphMock.nodeCount()).thenReturn(6L);
         when(graphMock.toOriginalNodeId(anyLong())).thenAnswer(invocation -> invocation.getArgument(0));
@@ -79,7 +79,7 @@ class LeidenStreamTransformerTest {
         when(dendrogramManager.getCurrent()).thenReturn(current);
         when(dendrogramManager.getAllDendrograms()).thenReturn(new HugeLongArray[]{HugeLongArray.of(100), HugeLongArray.of(20)});
 
-        var result = new LeidenResult(current,2,false,dendrogramManager,null,0);
+        var result =  LeidenResult.createWithDendrograms(current,2,false,dendrogramManager,null,0);
 
         var graphMock = mock(Graph.class);
         when(graphMock.nodeCount()).thenReturn(1L);
