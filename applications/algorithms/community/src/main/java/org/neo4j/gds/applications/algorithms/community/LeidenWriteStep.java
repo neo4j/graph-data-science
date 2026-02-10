@@ -79,7 +79,7 @@ class LeidenWriteStep implements WriteStep<LeidenResult, Pair<NodePropertiesWrit
             configuration.writeProperty(),
             configuration.seedProperty(),
             configuration.consecutiveIds(),
-            NodePropertyValuesAdapter.adapt(result.dendrogramManager().getCurrent()),
+            NodePropertyValuesAdapter.adapt(result.communities()),
             configuration.minCommunitySize(),
             configuration.concurrency(),
             () -> graphStore.nodeProperty(configuration.seedProperty()),
