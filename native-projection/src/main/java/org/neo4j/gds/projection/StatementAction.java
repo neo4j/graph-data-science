@@ -25,8 +25,8 @@ import org.neo4j.gds.utility.StatementApi;
 
 import static org.neo4j.gds.utils.ExceptionUtil.throwIfUnchecked;
 
-abstract class StatementAction extends StatementApi implements RenamesCurrentThread, Runnable, StatementApi.TxConsumer {
-    StatementAction(TransactionContext tx) {
+public abstract class StatementAction extends StatementApi implements RenamesCurrentThread, Runnable, StatementApi.TxConsumer {
+    public StatementAction(TransactionContext tx) {
         super(tx);
     }
 
