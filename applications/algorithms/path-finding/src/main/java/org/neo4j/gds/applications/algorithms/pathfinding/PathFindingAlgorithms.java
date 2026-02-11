@@ -159,7 +159,7 @@ public class PathFindingAlgorithms {
     ) {
         var algorithm = DeltaStepping.of(graph, parameters, executorService, progressTracker,terminationFlag);
 
-        return algorithm.compute();
+        return algorithm.compute().pathFindingResult();
     }
 
     HugeLongArray depthFirstSearch(
