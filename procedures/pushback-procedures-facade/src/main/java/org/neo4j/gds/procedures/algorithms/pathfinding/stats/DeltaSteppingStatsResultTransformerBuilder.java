@@ -20,15 +20,15 @@
 package org.neo4j.gds.procedures.algorithms.pathfinding.stats;
 
 import org.neo4j.gds.core.loading.GraphResources;
+import org.neo4j.gds.paths.delta.DeltaSteppingResult;
 import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaStatsConfig;
-import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.procedures.algorithms.results.StandardStatsResult;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.results.ResultTransformerBuilder;
 
 import java.util.stream.Stream;
 
-class DeltaSteppingStatsResultTransformerBuilder implements ResultTransformerBuilder<TimedAlgorithmResult<PathFindingResult>, Stream<StandardStatsResult>> {
+class DeltaSteppingStatsResultTransformerBuilder implements ResultTransformerBuilder<TimedAlgorithmResult<DeltaSteppingResult>, Stream<StandardStatsResult>> {
 
     private final AllShortestPathsDeltaStatsConfig configuration;
 

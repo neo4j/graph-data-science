@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.procedures.algorithms.pathfinding.stats;
 
-import org.neo4j.gds.paths.dijkstra.PathFindingResult;
+import org.neo4j.gds.paths.delta.DeltaSteppingResult;
 import org.neo4j.gds.procedures.algorithms.results.StandardStatsResult;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.results.ResultTransformer;
@@ -27,7 +27,7 @@ import org.neo4j.gds.results.ResultTransformer;
 import java.util.Map;
 import java.util.stream.Stream;
 
-class DeltaSteppingStatsResultTransformer implements ResultTransformer<TimedAlgorithmResult<PathFindingResult>, Stream<StandardStatsResult>> {
+class DeltaSteppingStatsResultTransformer implements ResultTransformer<TimedAlgorithmResult<DeltaSteppingResult>, Stream<StandardStatsResult>> {
 
     private final Map<String, Object> configuration;
 
@@ -36,7 +36,7 @@ class DeltaSteppingStatsResultTransformer implements ResultTransformer<TimedAlgo
     }
 
     @Override
-    public Stream<StandardStatsResult> apply(TimedAlgorithmResult<PathFindingResult> algorithmResult) {
+    public Stream<StandardStatsResult> apply(TimedAlgorithmResult<DeltaSteppingResult> algorithmResult) {
         return Stream.of(
             new StandardStatsResult(
                 0,

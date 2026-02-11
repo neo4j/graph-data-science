@@ -122,7 +122,7 @@ public final class PushbackPathFindingMutateProcedureFacade {
             config.toParameters(),
             config.jobId(),
             config.logProgress(),
-            new PathFindingMutateResultTransformerBuilder(mutateRelationshipService,config)
+            new DeltaSteppingMutateResultTransformerBuilder(mutateRelationshipService,config)
         ).join();
     }
 

@@ -20,23 +20,21 @@
 package org.neo4j.gds.procedures.algorithms.pathfinding.stream;
 
 import org.neo4j.gds.api.CloseableResourceRegistry;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.NodeLookup;
 import org.neo4j.gds.core.loading.GraphResources;
-import org.neo4j.gds.paths.dijkstra.PathFindingResult;
-import org.neo4j.gds.procedures.algorithms.pathfinding.PathFactoryFacade;
+import org.neo4j.gds.paths.delta.DeltaSteppingResult;
 import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingStreamResult;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.results.ResultTransformerBuilder;
 
 import java.util.stream.Stream;
 
-class PathFindingStreamResultTransformerBuilder implements ResultTransformerBuilder<TimedAlgorithmResult<PathFindingResult>, Stream<PathFindingStreamResult>> {
+class DeltasteppingStreamResultTransformerBuilder implements ResultTransformerBuilder<TimedAlgorithmResult<DeltaSteppingResult>, Stream<PathFindingStreamResult>> {
     private final CloseableResourceRegistry closeableResourceRegistry;
     private final NodeLookup nodeLookup;
     private final boolean pathRequested;
 
-    PathFindingStreamResultTransformerBuilder(
+    DeltasteppingStreamResultTransformerBuilder(
         CloseableResourceRegistry closeableResourceRegistry,
         NodeLookup nodeLookup,
         boolean pathRequested
@@ -47,25 +45,16 @@ class PathFindingStreamResultTransformerBuilder implements ResultTransformerBuil
     }
 
     @Override
-    public PathFindingStreamResultTransformer build(GraphResources graphResources) {
+    public DeltaSteppingStreamResultTransformer build(GraphResources graphResources) {
         var graph = graphResources.graph();
         var graphStore = graphResources.graphStore();
 
-        var pathFactoryFacade = createPathFactoryFacade(graphStore,pathRequested,nodeLookup);
+        var pathFactoryFacade = PathFindingStreamResultTransformerBuilder.createPathFactoryFacade(graphStore,pathRequested,nodeLookup);
 
-        return new PathFindingStreamResultTransformer(
+        return new DeltaSteppingStreamResultTransformer(
             graph,
             closeableResourceRegistry,
             pathFactoryFacade
-        );
-    }
-
-    static PathFactoryFacade createPathFactoryFacade(GraphStore graphStore,boolean pathRequested, NodeLookup nodeLookup){
-        // this is us handling the case of generated graphs and such
-        return PathFactoryFacade.create(
-            pathRequested,
-            nodeLookup,
-            graphStore.capabilities().canWriteToLocalDatabase()
         );
     }
 }

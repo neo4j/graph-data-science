@@ -137,7 +137,7 @@ public class PushbackPathFindingWriteProcedureFacade {
             config.toParameters(),
             config.jobId(),
             config.logProgress(),
-            new ShortestPathWriteResultTransformerBuilder(writeStep, config.jobId(), config.toMap())
+            new DeltaSteppingWriteResultTransformerBuilder(writeStep, config.jobId(), config.toMap())
         ).join();
     }
 

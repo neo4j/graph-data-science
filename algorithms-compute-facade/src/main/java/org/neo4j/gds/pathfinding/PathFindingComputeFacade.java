@@ -58,6 +58,7 @@ import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
 import org.neo4j.gds.paths.delta.DeltaStepping;
 import org.neo4j.gds.paths.delta.DeltaSteppingParameters;
 import org.neo4j.gds.paths.delta.DeltaSteppingProgressTask;
+import org.neo4j.gds.paths.delta.DeltaSteppingResult;
 import org.neo4j.gds.paths.dijkstra.DijkstraFactory;
 import org.neo4j.gds.paths.dijkstra.DijkstraSingleSourceParameters;
 import org.neo4j.gds.paths.dijkstra.DijkstraSourceTargetParameters;
@@ -230,7 +231,7 @@ public class PathFindingComputeFacade {
         );
     }
 
-    public CompletableFuture<TimedAlgorithmResult<PathFindingResult>> deltaStepping(
+    public CompletableFuture<TimedAlgorithmResult<DeltaSteppingResult>> deltaStepping(
         Graph graph,
         DeltaSteppingParameters parameters,
         JobId jobId,
@@ -238,7 +239,7 @@ public class PathFindingComputeFacade {
     ) {
         // If the input graph is empty return a completed future with empty result
         if (graph.isEmpty()) {
-            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(PathFindingResult.empty()));
+            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(DeltaSteppingResult.empty()));
         }
 
         // Create ProgressTracker
