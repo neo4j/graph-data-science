@@ -25,12 +25,16 @@ import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
+import org.neo4j.gds.core.loading.validation.AlgorithmGraphStoreRequirementsBuilder;
 import org.neo4j.gds.core.loading.validation.GraphStoreValidation;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.results.ResultTransformerBuilder;
+import org.neo4j.gds.similarity.filteredknn.FilteredKnnParametersSansNodeCount;
+import org.neo4j.gds.similarity.filteredknn.FilteredKnnResult;
 import org.neo4j.gds.similarity.knn.KnnParametersSansNodeCount;
 import org.neo4j.gds.similarity.knn.KnnResult;
 import org.neo4j.gds.similarity.validation.KnnAlgorithmRequirements;
+import org.neo4j.gds.similarity.validation.NodeFilterValidation;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -80,6 +84,45 @@ public class SimilarityComputeBusinessFacade {
         var parameters = parametersSansNodeCount.finalize(graphResources.graph().nodeCount());
 
         return computeFacade.knn(
+            graphResources.graph(),
+            parameters,
+            jobId,
+            logProgress
+        ).thenApply(resultTransformerBuilder.build(graphResources));
+    }
+
+    public <TR> CompletableFuture<TR> filteredKnn(
+        GraphName graphName,
+        GraphParameters graphParameters,
+        Optional<String> relationshipProperty,
+        FilteredKnnParametersSansNodeCount parametersSansNodeCount,
+        JobId jobId,
+        boolean logProgress,
+        ResultTransformerBuilder<TimedAlgorithmResult<FilteredKnnResult>, TR> resultTransformerBuilder
+    ) {
+
+        // Fetch the Graph the algorithm will operate on
+        var graphResources = graphStoreCatalogService.fetchGraphResources(
+            graphName,
+            graphParameters,
+            relationshipProperty,
+            new AlgorithmGraphStoreRequirementsBuilder()
+                .withAlgorithmRequirement(
+                    new KnnAlgorithmRequirements(parametersSansNodeCount.knnParametersSansNodeCount().nodePropertiesNames())
+                )
+                .withAlgorithmRequirement(
+                    new NodeFilterValidation(
+                        parametersSansNodeCount.filteringParameters().sourceFilter(),
+                        parametersSansNodeCount.filteringParameters().targetFilter()
+                    )
+                ).build(),
+            Optional.empty(),
+            user,
+            databaseId
+        );
+        var parameters = parametersSansNodeCount.finalize(graphResources.graph().nodeCount());
+
+        return computeFacade.filteredKnn(
             graphResources.graph(),
             parameters,
             jobId,
