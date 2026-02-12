@@ -26,7 +26,7 @@ import com.carrotsearch.hppc.procedures.LongProcedure;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.utils.queue.HugeLongPriorityQueue;
-import org.neo4j.gds.paths.delta.TentativeDistances;
+import org.neo4j.gds.paths.delta.DistanceAndPredecessors;
 
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicLong;
@@ -37,7 +37,7 @@ import static org.neo4j.gds.steiner.SteinerBasedDeltaStepping.NO_BIN;
 class SteinerBasedDeltaTask implements Runnable {
     private final Graph graph;
     private final HugeLongArray frontier;
-    private final TentativeDistances distances;
+    private final DistanceAndPredecessors distances;
     private final double delta;
     private int binIndex;
     private final AtomicLong frontierIndex;
@@ -54,7 +54,7 @@ class SteinerBasedDeltaTask implements Runnable {
     SteinerBasedDeltaTask(
         Graph graph,
         HugeLongArray frontier,
-        TentativeDistances distances,
+        DistanceAndPredecessors distances,
         double delta,
         AtomicLong frontierIndex,
         BitSet mergedToSource,

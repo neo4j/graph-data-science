@@ -37,7 +37,7 @@ import org.neo4j.gds.mem.MemoryEstimations;
 import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.paths.ImmutablePathResult;
 import org.neo4j.gds.paths.PathResult;
-import org.neo4j.gds.paths.delta.TentativeDistances;
+import org.neo4j.gds.paths.delta.DistanceAndPredecessors;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 
 import java.util.ArrayList;
@@ -70,7 +70,7 @@ public final class SteinerBasedDeltaStepping extends Algorithm<PathFindingResult
     private final double delta;
     private final Concurrency concurrency;
     private final HugeLongArray frontier;
-    private final TentativeDistances distances;
+    private final DistanceAndPredecessors distances;
     private final ExecutorService executorService;
     private long pathIndex;
     private final long numOfTerminals;
@@ -96,7 +96,7 @@ public final class SteinerBasedDeltaStepping extends Algorithm<PathFindingResult
         this.concurrency = concurrency;
         this.executorService = executorService;
         this.frontier = HugeLongArray.newArray(graph.relationshipCount());
-        this.distances = TentativeDistances.distanceAndPredecessors(
+        this.distances = new DistanceAndPredecessors(
             graph.nodeCount(),
             concurrency
         );
@@ -191,7 +191,7 @@ public final class SteinerBasedDeltaStepping extends Algorithm<PathFindingResult
             pathIndex++,
             terminalId,
             distances.distances(),
-            distances.predecessors().get(),
+            distances.predecessors(),
             mergedWithSource
         ));
         frontierIndex.set(0);

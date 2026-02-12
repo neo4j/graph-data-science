@@ -48,7 +48,7 @@ public final class DeltaStepping extends Algorithm<DeltaSteppingResult> {
     private final Concurrency concurrency;
 
     private final HugeLongArray frontier;
-    private final TentativeDistances distances;
+    private final DistanceAndPredecessors distances;
 
     private final ExecutorService executorService;
 
@@ -64,7 +64,6 @@ public final class DeltaStepping extends Algorithm<DeltaSteppingResult> {
             graph.toMappedNodeId(parameters.sourceNode()),
             parameters.delta(),
             parameters.concurrency(),
-            true,
             executorService,
             progressTracker,
             terminationFlag
@@ -77,7 +76,6 @@ public final class DeltaStepping extends Algorithm<DeltaSteppingResult> {
         long startNode,
         double delta,
         Concurrency concurrency,
-        boolean storePredecessors,
         ExecutorService executorService,
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
@@ -90,17 +88,10 @@ public final class DeltaStepping extends Algorithm<DeltaSteppingResult> {
         this.executorService = executorService;
         this.terminationFlag = terminationFlag;
         this.frontier = HugeLongArray.newArray(graph.relationshipCount());
-        if (storePredecessors) {
-            this.distances = TentativeDistances.distanceAndPredecessors(
-                graph.nodeCount(),
-                concurrency
-            );
-        } else {
-            this.distances = TentativeDistances.distanceOnly(
-                graph.nodeCount(),
-                concurrency
-            );
-        }
+        this.distances = new DistanceAndPredecessors(
+            graph.nodeCount(),
+            concurrency
+        );
     }
 
     @Override
@@ -163,7 +154,7 @@ public final class DeltaStepping extends Algorithm<DeltaSteppingResult> {
     private static class DeltaSteppingTask implements Runnable {
         private final Graph graph;
         private final HugeLongArray frontier;
-        private final TentativeDistances distances;
+        private final DistanceAndPredecessors distances;
         private final double delta;
         private int binIndex;
         private final AtomicLong frontierIndex;
@@ -180,7 +171,7 @@ public final class DeltaStepping extends Algorithm<DeltaSteppingResult> {
         DeltaSteppingTask(
             Graph graph,
             HugeLongArray frontier,
-            TentativeDistances distances,
+            DistanceAndPredecessors distances,
             double delta,
             AtomicLong frontierIndex
         ) {

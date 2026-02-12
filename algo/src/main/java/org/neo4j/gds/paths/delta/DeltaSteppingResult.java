@@ -36,18 +36,18 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.paths.delta.TentativeDistances.NO_PREDECESSOR;
+import static org.neo4j.gds.paths.delta.DistanceAndPredecessors.NO_PREDECESSOR;
 
-public record DeltaSteppingResult(TentativeDistances tentativeDistances,PathFindingResult pathFindingResult) {
+public record DeltaSteppingResult(DistanceAndPredecessors tentativeDistances, PathFindingResult pathFindingResult) {
 
     public static DeltaSteppingResult empty() {
         return new DeltaSteppingResult(
-            TentativeDistances.distanceAndPredecessors(0,new Concurrency(1)),
+            new DistanceAndPredecessors(0,new Concurrency(1)),
             PathFindingResult.empty()
         );
     }
     static DeltaSteppingResult create(
-        TentativeDistances tentativeDistances,
+        DistanceAndPredecessors tentativeDistances,
         Concurrency concurrency,
         long sourceNode
     ){
@@ -58,12 +58,12 @@ public record DeltaSteppingResult(TentativeDistances tentativeDistances,PathFind
     }
 
     private static Stream<PathResult> pathResults(
-        TentativeDistances tentativeDistances,
+        DistanceAndPredecessors tentativeDistances,
         long sourceNode,
         Concurrency concurrency
     ) {
         var distances = tentativeDistances.distances();
-        var predecessors = tentativeDistances.predecessors().orElseThrow();
+        var predecessors = tentativeDistances.predecessors();
 
         var pathIndex = new AtomicLong(0L);
 
