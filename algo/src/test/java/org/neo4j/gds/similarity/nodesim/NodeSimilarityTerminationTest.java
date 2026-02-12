@@ -27,7 +27,6 @@ import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.similarity.filtering.NodeFilter;
 import org.neo4j.gds.termination.TerminationFlag;
-import org.neo4j.gds.wcc.WccStub;
 
 import static org.neo4j.gds.graphbuilder.TransactionTerminationTestUtils.assertTerminates;
 
@@ -64,8 +63,7 @@ class NodeSimilarityTerminationTest {
                     ProgressTracker.NULL_TRACKER,
                     NodeFilter.ALLOW_EVERYTHING,
                     NodeFilter.ALLOW_EVERYTHING,
-                    TerminationFlag.RUNNING_TRUE,
-                    new WccStub(TerminationFlag.RUNNING_TRUE)
+                    TerminationFlag.RUNNING_TRUE
                 );
                 nodeSimilarity.setTerminationFlag(terminationFlag);
                 nodeSimilarity.compute();

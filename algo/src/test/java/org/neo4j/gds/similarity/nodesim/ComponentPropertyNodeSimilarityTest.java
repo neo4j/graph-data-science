@@ -34,7 +34,6 @@ import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.similarity.SimilarityResult;
 import org.neo4j.gds.similarity.filtering.NodeFilter;
 import org.neo4j.gds.termination.TerminationFlag;
-import org.neo4j.gds.wcc.WccStub;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -159,8 +158,7 @@ public class ComponentPropertyNodeSimilarityTest {
             ProgressTracker.NULL_TRACKER,
             NodeFilter.ALLOW_EVERYTHING,
             NodeFilter.ALLOW_EVERYTHING,
-            TerminationFlag.RUNNING_TRUE,
-            new WccStub(TerminationFlag.RUNNING_TRUE)
+            TerminationFlag.RUNNING_TRUE
         );
 
         Set<String> result = nodeSimilarity

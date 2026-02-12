@@ -40,7 +40,6 @@ import org.neo4j.gds.similarity.nodesim.NodeSimilarity;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityMetric;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityParameters;
 import org.neo4j.gds.termination.TerminationFlag;
-import org.neo4j.gds.wcc.WccStub;
 
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -251,8 +250,7 @@ class FilteredNodeSimilarityTest {
             progressTracker,
             params.filteringParameters().sourceFilter().toNodeFilter(graph),
             NodeFilter.ALLOW_EVERYTHING,
-            TerminationFlag.RUNNING_TRUE,
-            new WccStub(TerminationFlag.RUNNING_TRUE)
+            TerminationFlag.RUNNING_TRUE
         );
 
         filteredNodeSimilarity.compute();

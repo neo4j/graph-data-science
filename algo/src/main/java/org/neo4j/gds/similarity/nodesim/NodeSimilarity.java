@@ -76,28 +76,6 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
     private Function<Long, LongStream> sourceNodesStream;
     private BiFunction<Long, Long, LongStream> targetNodesStream;
 
-    private final WccStub wccStub;
-
-    public static NodeSimilarity create(
-        Graph graph,
-        NodeSimilarityParameters parameters,
-        ExecutorService executorService,
-        ProgressTracker progressTracker,
-        NodeFilter sourceNodeFilter,
-        NodeFilter targetNodeFilter,
-        TerminationFlag terminationFlag
-    ) {
-        return new NodeSimilarity(
-            graph,
-            parameters,
-            executorService,
-            progressTracker,
-            sourceNodeFilter,
-            targetNodeFilter,
-            terminationFlag,
-            new WccStub(terminationFlag)
-        );
-    }
     public NodeSimilarity(
         Graph graph,
         NodeSimilarityParameters parameters,
@@ -105,8 +83,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
         ProgressTracker progressTracker,
         NodeFilter sourceNodeFilter,
         NodeFilter targetNodeFilter,
-        TerminationFlag terminationFlag,
-        WccStub wccStub
+        TerminationFlag terminationFlag
     ) {
         super(progressTracker);
         this.graph = graph;
@@ -119,7 +96,6 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
         this.executorService = executorService;
         this.sourceNodes = new BitSet(graph.nodeCount());
         this.targetNodes = new BitSet(graph.nodeCount());
-        this.wccStub = wccStub;
         this.weighted = this.parameters.hasRelationshipWeightProperty();
         this.terminationFlag = terminationFlag;
     }
@@ -249,7 +225,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
             NodePropertyValues nodeProperties = graph.nodeProperties(parameters.componentProperty());
             return initComponentIdMapping(graph, nodeProperties::longValue);
         }
-
+        var wccStub = new WccStub(terminationFlag);
         // run WCC to determine components
         var wccParameters = new WccParameters(0D, concurrency);
         var disjointSets = wccStub.wcc(graph, wccParameters, progressTracker);

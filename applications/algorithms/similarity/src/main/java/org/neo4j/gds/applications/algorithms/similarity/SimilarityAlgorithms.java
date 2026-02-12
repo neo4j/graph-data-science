@@ -38,7 +38,6 @@ import org.neo4j.gds.similarity.nodesim.NodeSimilarity;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityParameters;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
 import org.neo4j.gds.termination.TerminationFlag;
-import org.neo4j.gds.wcc.WccStub;
 
 import java.util.Optional;
 
@@ -70,8 +69,6 @@ public class SimilarityAlgorithms {
         var sourceNodeFilter = params.filteringParameters().sourceFilter().toNodeFilter(graph);
         var targetNodeFilter = params.filteringParameters().targetFilter().toNodeFilter(graph);
 
-        var wccStub = new WccStub(terminationFlag);
-
         var algorithm = new NodeSimilarity(
             graph,
             params.nodeSimilarityParameters(),
@@ -79,8 +76,7 @@ public class SimilarityAlgorithms {
             progressTracker,
             sourceNodeFilter,
             targetNodeFilter,
-            terminationFlag,
-            wccStub
+            terminationFlag
         );
 
         return algorithm.compute();
@@ -108,7 +104,6 @@ public class SimilarityAlgorithms {
         NodeSimilarityParameters  parameters,
         ProgressTracker progressTracker
     ) {
-        var wccStub = new WccStub(terminationFlag);
 
         var algorithm = new NodeSimilarity(
             graph,
@@ -117,8 +112,7 @@ public class SimilarityAlgorithms {
             progressTracker,
             NodeFilter.ALLOW_EVERYTHING,
             NodeFilter.ALLOW_EVERYTHING,
-            terminationFlag,
-            wccStub
+            terminationFlag
         );
 
         return algorithm.compute();

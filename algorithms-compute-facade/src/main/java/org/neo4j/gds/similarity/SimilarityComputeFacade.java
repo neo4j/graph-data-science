@@ -156,7 +156,7 @@ public class SimilarityComputeFacade {
         );
 
 
-        var nodeSimilarity = NodeSimilarity.create(
+        var nodeSimilarity = new NodeSimilarity(
             graph,
             parameters,
             DefaultPool.INSTANCE,
@@ -195,7 +195,7 @@ public class SimilarityComputeFacade {
         var sourceNodeFilter = parameters.filteringParameters().sourceFilter().toNodeFilter(graph);
         var targetNodeFilter = parameters.filteringParameters().targetFilter().toNodeFilter(graph);
 
-        var nodeSimilarity = NodeSimilarity.create(
+        var nodeSimilarity = new NodeSimilarity(
             graph,
             parameters.nodeSimilarityParameters(),
             DefaultPool.INSTANCE,

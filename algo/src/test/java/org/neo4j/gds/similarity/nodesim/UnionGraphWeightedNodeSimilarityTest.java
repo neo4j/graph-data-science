@@ -30,7 +30,6 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.similarity.filtering.NodeFilter;
 import org.neo4j.gds.termination.TerminationFlag;
-import org.neo4j.gds.wcc.WccStub;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -76,8 +75,7 @@ import static org.assertj.core.api.Assertions.assertThat;
             ProgressTracker.NULL_TRACKER,
             NodeFilter.ALLOW_EVERYTHING,
             NodeFilter.ALLOW_EVERYTHING,
-            TerminationFlag.RUNNING_TRUE,
-            new WccStub(TerminationFlag.RUNNING_TRUE)
+            TerminationFlag.RUNNING_TRUE
         );
         var result = nodeSimilarity.compute().streamResult().findFirst().get();
 

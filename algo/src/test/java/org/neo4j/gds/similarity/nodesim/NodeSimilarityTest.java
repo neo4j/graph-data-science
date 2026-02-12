@@ -40,7 +40,6 @@ import org.neo4j.gds.similarity.SimilarityGraphResult;
 import org.neo4j.gds.similarity.SimilarityResult;
 import org.neo4j.gds.similarity.filtering.NodeFilter;
 import org.neo4j.gds.termination.TerminationFlag;
-import org.neo4j.gds.wcc.WccStub;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -821,8 +820,7 @@ final class NodeSimilarityTest {
             progressTracker,
             NodeFilter.ALLOW_EVERYTHING,
             NodeFilter.ALLOW_EVERYTHING,
-            TerminationFlag.RUNNING_TRUE,
-            new WccStub(TerminationFlag.RUNNING_TRUE)
+            TerminationFlag.RUNNING_TRUE
         );
 
         nodeSimilarity.compute();
@@ -871,8 +869,7 @@ final class NodeSimilarityTest {
             progressTracker,
             NodeFilter.ALLOW_EVERYTHING,
             NodeFilter.ALLOW_EVERYTHING,
-            TerminationFlag.RUNNING_TRUE,
-            new WccStub(TerminationFlag.RUNNING_TRUE)
+            TerminationFlag.RUNNING_TRUE
         );
 
         nodeSimilarity.compute();
@@ -925,8 +922,7 @@ final class NodeSimilarityTest {
             progressTracker,
             NodeFilter.ALLOW_EVERYTHING,
             NodeFilter.ALLOW_EVERYTHING,
-            TerminationFlag.RUNNING_TRUE,
-            new WccStub(TerminationFlag.RUNNING_TRUE)
+            TerminationFlag.RUNNING_TRUE
         );
 
         nodeSimilarity.compute();
@@ -1082,7 +1078,6 @@ final class NodeSimilarityTest {
         Graph graph,
         NodeSimilarityParameters parameters
     ) {
-        var wccStub = new WccStub(TerminationFlag.RUNNING_TRUE);
 
         return new NodeSimilarity(
             graph,
@@ -1091,8 +1086,7 @@ final class NodeSimilarityTest {
             ProgressTracker.NULL_TRACKER,
             NodeFilter.ALLOW_EVERYTHING,
             NodeFilter.ALLOW_EVERYTHING,
-            TerminationFlag.RUNNING_TRUE,
-            wccStub
+            TerminationFlag.RUNNING_TRUE
         );
     }
 }
