@@ -99,13 +99,12 @@ public record KnnResult(
         return neighborList().size();
     }
 
-    static KnnResult empty() {
-        return new KnnResult(
+    public static final KnnResult EMPTY= new KnnResult(
             HugeObjectArray.of(),
             0,
             false,
             0L,
             0L
         );
-    }
+
 }

@@ -24,6 +24,7 @@ dependencies {
     implementation project(':path-finding-params')
     implementation project(":pregel")
     implementation project(':progress-tracking')
+    implementation project(':similarity-params')
     implementation project(':termination')
 
     // Test dependencies
