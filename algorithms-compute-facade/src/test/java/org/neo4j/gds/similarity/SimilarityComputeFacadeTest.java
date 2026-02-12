@@ -35,6 +35,7 @@ import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnParameters;
+import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityParameters;
 import org.neo4j.gds.similarity.filtering.NodeIdNodeFilterSpec;
 import org.neo4j.gds.similarity.knn.K;
 import org.neo4j.gds.similarity.knn.KnnNodePropertySpec;
@@ -222,9 +223,58 @@ class SimilarityComputeFacadeTest {
                 2/3.0
             )
         );
-
         assertThat(results.computeMillis()).isNotNegative();
-
     }
+
+    @Test
+    void filteredNodeSimilarity() {
+
+        var nodeSimilarityParameters = new NodeSimilarityParameters(
+            new Concurrency(1),
+            NodeSimilarityMetric.JACCARD,
+            1,
+            Integer.MAX_VALUE,
+            0,
+            1,
+            0,
+            true,
+            true,
+            false,
+            null
+        );
+
+        var parameters = new FilteredNodeSimilarityParameters(
+            nodeSimilarityParameters,
+            new FilteringParameters(
+                new NodeIdNodeFilterSpec(
+                    Set.of(
+                        graph.toOriginalNodeId("a")
+                    )
+                ),
+                new NodeIdNodeFilterSpec(Set.of(
+                    graph.toOriginalNodeId("e")
+                ))
+            )
+        );
+
+        var future = facade.filteredNodeSimilarity(
+            graph,
+            parameters,
+            jobIdMock,
+            false
+        );
+
+        var results = future.join();
+
+        assertThat(results.result().streamResult()).containsExactly(
+            new SimilarityResult(
+                graph.toMappedNodeId("a"),
+                graph.toMappedNodeId("e"),
+                1/3.0
+            )
+        );
+        assertThat(results.computeMillis()).isNotNegative();
+    }
+
 
 }
