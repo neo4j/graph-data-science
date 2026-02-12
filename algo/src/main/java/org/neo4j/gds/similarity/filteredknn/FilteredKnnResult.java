@@ -34,6 +34,11 @@ public class FilteredKnnResult {
     private final NodeFilter sourceNodeFilter;
     private final KnnResult knnResult;
 
+    public static final FilteredKnnResult EMPTY = new FilteredKnnResult(
+        EmptyTargetNodeFiltering.EMPTY_TARGET_FILTERING,
+        KnnResult.EMPTY,
+        NodeFilter.ALLOW_EVERYTHING
+    );
 
     public FilteredKnnResult(
         StreamProducingTargetNodeFiltering targetNodeFiltering,

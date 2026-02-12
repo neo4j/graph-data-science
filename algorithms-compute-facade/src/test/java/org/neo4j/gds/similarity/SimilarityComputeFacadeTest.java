@@ -35,6 +35,8 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.similarity.filteredknn.FilteredKnnParameters;
+import org.neo4j.gds.similarity.filtering.NodeIdNodeFilterSpec;
 import org.neo4j.gds.similarity.knn.K;
 import org.neo4j.gds.similarity.knn.KnnNodePropertySpec;
 import org.neo4j.gds.similarity.knn.KnnParameters;
@@ -43,6 +45,7 @@ import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.Executors;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -121,6 +124,59 @@ class SimilarityComputeFacadeTest {
         assertThat(results.result().nodePairsConsidered()).isGreaterThan(0);
         assertThat(results.result().neighborsOf(graph.toMappedNodeId("a"))).containsExactly(
             graph.toMappedNodeId("b")
+        );
+        assertThat(results.computeMillis()).isNotNegative();
+
+    }
+
+    @Test
+    void filteredKnn() {
+        var k = K.create(1, graph.nodeCount(), 0.5, 0.001);
+
+        var knnParameters = new KnnParameters(
+            new Concurrency(1),
+            100,
+            0.0,
+            k,
+            0.0,
+            10,
+            1000,
+            KnnSampler.SamplerType.UNIFORM,
+            Optional.of(19L),
+            List.of(new KnnNodePropertySpec("prop"))
+        );
+
+        var filteredKnnParameters = new FilteredKnnParameters(
+            knnParameters,
+            new FilteringParameters(
+                new NodeIdNodeFilterSpec(
+                    Set.of(
+                        graph.toOriginalNodeId("a")
+                    )
+                ),
+                new NodeIdNodeFilterSpec(Set.of(
+                    graph.toOriginalNodeId("c"),
+                    graph.toOriginalNodeId("d")
+                ))),
+            true
+        );
+
+        var future = facade.filteredKnn(
+            graph,
+            filteredKnnParameters,
+            jobIdMock,
+            false
+        );
+
+        var results = future.join();
+
+        assertThat(results.result().nodePairsConsidered()).isGreaterThan(0);
+        assertThat(results.result().similarityResultStream()).containsExactly(
+            new SimilarityResult(
+                graph.toMappedNodeId("a"),
+                graph.toMappedNodeId("c"),
+                1/3.0
+            )
         );
         assertThat(results.computeMillis()).isNotNegative();
 
