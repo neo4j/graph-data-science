@@ -19,12 +19,14 @@
  */
 package org.neo4j.gds.beta.generator;
 
+import org.agrona.collections.MutableLong;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.gds.Aggregation;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DatabaseId;
@@ -40,7 +42,6 @@ import org.neo4j.gds.config.RandomGraphGeneratorConfig.AllowSelfLoops;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.huge.HugeGraph;
 import org.neo4j.gds.core.loading.construction.NodeLabelTokens;
-import org.neo4j.gds.Aggregation;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -461,6 +462,51 @@ class RandomGraphGeneratorTest {
             .generate();
 
         AtomicLong actualRelCount = new AtomicLong();
+
+        graph.forEachNode(node -> {
+            actualRelCount.addAndGet(graph.degree(node));
+            return true;
+        });
+
+        assertEquals(actualRelCount.get(), graph.relationshipCount());
+    }
+    @Test
+    void shouldProduceGraphWithManyParallelRelationships() {
+        var graph = RandomGraphGenerator
+            .builder()
+            .nodeCount(2)
+            .averageDegree(20)
+            .seed(42L)
+            .aggregation(Aggregation.NONE)
+            .allowSelfLoops(RandomGraphGeneratorConfig.AllowSelfLoops.NO)
+            .relationshipDistribution(RelationshipDistribution.UNIFORM)
+            .build()
+            .generate();
+
+        MutableLong actualRelCount = new MutableLong();
+
+        graph.forEachNode(node -> {
+            actualRelCount.addAndGet(graph.degree(node));
+            return true;
+        });
+
+        assertEquals(actualRelCount.get(), graph.relationshipCount());
+    }
+
+    @Test
+    void shouldProduceSingleNodeGraphWithManyParallelRelationships() {
+        var graph = RandomGraphGenerator
+            .builder()
+            .nodeCount(1)
+            .averageDegree(20)
+            .seed(42L)
+            .aggregation(Aggregation.NONE)
+            .allowSelfLoops(AllowSelfLoops.YES)
+            .relationshipDistribution(RelationshipDistribution.UNIFORM)
+            .build()
+            .generate();
+
+        MutableLong actualRelCount = new MutableLong();
 
         graph.forEachNode(node -> {
             actualRelCount.addAndGet(graph.degree(node));

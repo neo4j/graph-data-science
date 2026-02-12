@@ -20,6 +20,7 @@
 package org.neo4j.gds.config;
 
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.gds.Aggregation;
 import org.neo4j.gds.ImmutableNodeProjections;
 import org.neo4j.gds.ImmutableRelationshipProjections;
 import org.neo4j.gds.NodeLabel;
@@ -32,7 +33,7 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.Aggregation;
+import org.neo4j.gds.utils.StringFormatting;
 
 import java.util.Collections;
 import java.util.Map;
@@ -98,7 +99,8 @@ public interface RandomGraphGeneratorConfig extends GraphProjectConfig {
         return ImmutableNodeProjections.builder()
             .putProjection(
                 NodeLabel.of(nodeCount() + "_Nodes"),
-                NodeProjection.of(nodeCount() + "_Nodes"))
+                NodeProjection.of(nodeCount() + "_Nodes")
+            )
             .build();
     }
 
@@ -120,7 +122,18 @@ public interface RandomGraphGeneratorConfig extends GraphProjectConfig {
 
     @Configuration.Ignore
     default Set<String> outputFieldDenylist() {
-        return Set.of(READ_CONCURRENCY_KEY,  NODE_COUNT_KEY, RELATIONSHIP_COUNT_KEY, "validateRelationships");
+        return Set.of(READ_CONCURRENCY_KEY, NODE_COUNT_KEY, RELATIONSHIP_COUNT_KEY, "validateRelationships");
+    }
+
+    @Configuration.Check
+    default void validateRelationshipSpace() {
+        // parallel relationship are allowing every other value combination
+        if (!allowSelfLoops() && averageDegree() > 0 && nodeCount() < 2) {
+            throw new IllegalArgumentException(
+                StringFormatting.formatWithLocale(
+                    "Cannot create any relationships if self-loops are not allowed and node-count is `%d`.", nodeCount()
+                ));
+        }
     }
 
     static RandomGraphGeneratorConfig of(
