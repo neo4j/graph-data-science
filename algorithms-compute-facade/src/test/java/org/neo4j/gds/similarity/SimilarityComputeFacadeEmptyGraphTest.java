@@ -32,6 +32,8 @@ import org.neo4j.gds.similarity.filteredknn.FilteredKnnParameters;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnResult;
 import org.neo4j.gds.similarity.knn.KnnParameters;
 import org.neo4j.gds.similarity.knn.KnnResult;
+import org.neo4j.gds.similarity.nodesim.NodeSimilarityParameters;
+import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -81,7 +83,7 @@ class SimilarityComputeFacadeEmptyGraphTest {
     }
 
     @Test
-    void filtered() {
+    void filteredKnn() {
         var future = facade.filteredKnn(
             graph,
             mock(FilteredKnnParameters.class),
@@ -90,6 +92,21 @@ class SimilarityComputeFacadeEmptyGraphTest {
         );
         var result = future.join();
         assertThat(result.result()).isEqualTo(FilteredKnnResult.EMPTY);
+
+        verifyNoInteractions(progressTrackerFactoryMock);
+        verifyNoInteractions(algorithmCallerMock);
+    }
+
+    @Test
+    void nodeSimilarity() {
+        var future = facade.nodeSimilarity(
+            graph,
+            mock(NodeSimilarityParameters.class),
+            jobIdMock,
+            true
+        );
+        var result = future.join();
+        assertThat(result.result()).isEqualTo(NodeSimilarityResult.EMPTY);
 
         verifyNoInteractions(progressTrackerFactoryMock);
         verifyNoInteractions(algorithmCallerMock);

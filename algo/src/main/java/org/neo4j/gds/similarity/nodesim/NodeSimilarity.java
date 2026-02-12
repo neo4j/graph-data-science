@@ -78,6 +78,26 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
 
     private final WccStub wccStub;
 
+    public static NodeSimilarity create(
+        Graph graph,
+        NodeSimilarityParameters parameters,
+        ExecutorService executorService,
+        ProgressTracker progressTracker,
+        NodeFilter sourceNodeFilter,
+        NodeFilter targetNodeFilter,
+        TerminationFlag terminationFlag
+    ) {
+        return new NodeSimilarity(
+            graph,
+            parameters,
+            executorService,
+            progressTracker,
+            sourceNodeFilter,
+            targetNodeFilter,
+            terminationFlag,
+            new WccStub(terminationFlag)
+        );
+    }
     public NodeSimilarity(
         Graph graph,
         NodeSimilarityParameters parameters,

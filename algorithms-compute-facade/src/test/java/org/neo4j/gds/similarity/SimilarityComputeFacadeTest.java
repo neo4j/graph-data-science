@@ -24,7 +24,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.neo4j.gds.Orientation;
 import org.neo4j.gds.ProgressTrackerFactory;
 import org.neo4j.gds.async.AsyncAlgorithmCaller;
 import org.neo4j.gds.core.JobId;
@@ -41,6 +40,8 @@ import org.neo4j.gds.similarity.knn.K;
 import org.neo4j.gds.similarity.knn.KnnNodePropertySpec;
 import org.neo4j.gds.similarity.knn.KnnParameters;
 import org.neo4j.gds.similarity.knn.KnnSampler;
+import org.neo4j.gds.similarity.nodesim.NodeSimilarityMetric;
+import org.neo4j.gds.similarity.nodesim.NodeSimilarityParameters;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
@@ -69,13 +70,14 @@ class SimilarityComputeFacadeTest {
     @Mock
     private Log logMock;
 
-    @GdlGraph(orientation = Orientation.UNDIRECTED)
+    @GdlGraph
     private static final String GDL = """
         (a:Node { prop: 1.0 })-[:REL]->(b:Node { prop: 2.0 }),
         (b)-[:REL]->(c:Node { prop: 3.0}),
         (b)-[:REL]->(d:Node { prop: 4.0}),
         (a)-[:REL]->(c),
-        (a)-[:REL]->(d)
+        (a)-[:REL]->(d),
+        (e:Node {prop: 100.0})-[:REL]->(d)
         """;
 
     @Inject
@@ -104,7 +106,7 @@ class SimilarityComputeFacadeTest {
             100,
             0.0,
             k,
-            0.0,
+            0.2,
             10,
             1000,
             KnnSampler.SamplerType.UNIFORM,
@@ -122,8 +124,14 @@ class SimilarityComputeFacadeTest {
         var results = future.join();
 
         assertThat(results.result().nodePairsConsidered()).isGreaterThan(0);
-        assertThat(results.result().neighborsOf(graph.toMappedNodeId("a"))).containsExactly(
-            graph.toMappedNodeId("b")
+        assertThat(results.result().streamSimilarityResult())
+            .filteredOn( f -> f.node1 == graph.toMappedNodeId("a"))
+            .containsExactly(
+            new SimilarityResult(
+                graph.toMappedNodeId("a"),
+                graph.toMappedNodeId("b"),
+               1/2.0
+            )
         );
         assertThat(results.computeMillis()).isNotNegative();
 
@@ -138,7 +146,7 @@ class SimilarityComputeFacadeTest {
             100,
             0.0,
             k,
-            0.0,
+            0.2,
             10,
             1000,
             KnnSampler.SamplerType.UNIFORM,
@@ -178,6 +186,43 @@ class SimilarityComputeFacadeTest {
                 1/3.0
             )
         );
+        assertThat(results.computeMillis()).isNotNegative();
+    }
+
+    @Test
+    void nodeSimilarity() {
+
+        var parameters = new NodeSimilarityParameters(
+            new Concurrency(1),
+            NodeSimilarityMetric.JACCARD,
+            1,
+            Integer.MAX_VALUE,
+            0,
+            1,
+            0,
+            true,
+            true,
+            false,
+            null
+        );
+
+        var future = facade.nodeSimilarity(
+            graph,
+            parameters,
+            jobIdMock,
+            false
+        );
+
+        var results = future.join();
+
+        assertThat(results.result().streamResult()).containsExactly(
+            new SimilarityResult(
+                graph.toMappedNodeId("a"),
+                graph.toMappedNodeId("b"),
+                2/3.0
+            )
+        );
+
         assertThat(results.computeMillis()).isNotNegative();
 
     }

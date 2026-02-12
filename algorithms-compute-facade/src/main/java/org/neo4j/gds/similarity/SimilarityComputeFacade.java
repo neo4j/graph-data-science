@@ -24,10 +24,12 @@ import org.neo4j.gds.SimilarityAlgorithmTasks;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.async.AsyncAlgorithmCaller;
 import org.neo4j.gds.core.JobId;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.similarity.filteredknn.FilteredKNNFactory;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnParameters;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnResult;
+import org.neo4j.gds.similarity.filtering.NodeFilter;
 import org.neo4j.gds.similarity.knn.Knn;
 import org.neo4j.gds.similarity.knn.KnnContext;
 import org.neo4j.gds.similarity.knn.KnnNeighborFilterFactory;
@@ -35,6 +37,9 @@ import org.neo4j.gds.similarity.knn.KnnParameters;
 import org.neo4j.gds.similarity.knn.KnnResult;
 import org.neo4j.gds.similarity.knn.SimilarityFunction;
 import org.neo4j.gds.similarity.knn.metrics.SimilarityComputer;
+import org.neo4j.gds.similarity.nodesim.NodeSimilarity;
+import org.neo4j.gds.similarity.nodesim.NodeSimilarityParameters;
+import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Optional;
@@ -126,6 +131,43 @@ public class SimilarityComputeFacade {
         // Submit the algorithm for async computation
         return algorithmCaller.run(
             filteredKnn::compute,
+            jobId
+        );
+    }
+
+    public CompletableFuture<TimedAlgorithmResult<NodeSimilarityResult>> nodeSimilarity(
+        Graph graph,
+        NodeSimilarityParameters parameters,
+        JobId jobId,
+        boolean logProgress
+    ) {
+        // If the input graph is empty return a completed future with empty result
+        if (graph.isEmpty()) {
+            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(NodeSimilarityResult.EMPTY));
+        }
+
+        // Create ProgressTracker
+        var progressTracker = progressTrackerFactory.create(
+            tasks.nodeSimilarity(graph,parameters),
+            jobId,
+            parameters.concurrency(),
+            logProgress
+        );
+
+
+        var nodeSimilarity = NodeSimilarity.create(
+            graph,
+            parameters,
+            DefaultPool.INSTANCE,
+            progressTracker,
+            NodeFilter.ALLOW_EVERYTHING,
+            NodeFilter.ALLOW_EVERYTHING,
+            terminationFlag
+        );
+
+        // Submit the algorithm for async computation
+        return algorithmCaller.run(
+            nodeSimilarity::compute,
             jobId
         );
     }

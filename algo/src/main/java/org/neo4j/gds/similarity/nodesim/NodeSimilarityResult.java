@@ -37,4 +37,9 @@ public record NodeSimilarityResult(
     public SimilarityGraphResult graphResult() {
         return maybeGraphResult().orElseThrow();
     }
+
+   public static final NodeSimilarityResult EMPTY = new NodeSimilarityResult(
+       Optional.of(Stream.empty()),
+       Optional.empty()
+   );
 }

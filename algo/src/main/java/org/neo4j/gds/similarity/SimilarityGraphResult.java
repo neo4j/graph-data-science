@@ -50,4 +50,5 @@ public class SimilarityGraphResult {
     public boolean isTopKGraph() {
         return isTopKGraph;
     }
+
 }
