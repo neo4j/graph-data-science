@@ -21,8 +21,10 @@ package org.neo4j.gds.similarity.knn;
 
 import org.neo4j.gds.core.concurrency.Concurrency;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public record KnnParametersSansNodeCount(
         Concurrency concurrency,
@@ -87,6 +89,10 @@ public record KnnParametersSansNodeCount(
             randomSeed,
             nodePropertySpecs
         );
+    }
+
+    public Collection<String> nodePropertiesNames(){
+        return  nodePropertySpecs.stream().map( KnnNodePropertySpec::name).collect(Collectors.toCollection());
     }
 
     public KnnParameters finalize(long nodeCount) {
