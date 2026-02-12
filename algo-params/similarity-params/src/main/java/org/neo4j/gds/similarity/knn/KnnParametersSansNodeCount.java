@@ -24,7 +24,6 @@ import org.neo4j.gds.core.concurrency.Concurrency;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 public record KnnParametersSansNodeCount(
         Concurrency concurrency,
@@ -92,7 +91,7 @@ public record KnnParametersSansNodeCount(
     }
 
     public Collection<String> nodePropertiesNames(){
-        return  nodePropertySpecs.stream().map( KnnNodePropertySpec::name).collect(Collectors.toCollection());
+        return  nodePropertySpecs.stream().map( KnnNodePropertySpec::name).toList();
     }
 
     public KnnParameters finalize(long nodeCount) {
