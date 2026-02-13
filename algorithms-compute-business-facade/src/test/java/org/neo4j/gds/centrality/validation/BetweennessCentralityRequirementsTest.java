@@ -34,7 +34,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-class BetweennessCentralityGraphStoreValidationTest {
+class BetweennessCentralityRequirementsTest {
 
     @Test
     void shouldNotThrow(){
@@ -50,7 +50,7 @@ class BetweennessCentralityGraphStoreValidationTest {
         var graphStore = mock(GraphStore.class);
         when(graphStore.schema()).thenReturn(schema);
 
-        var validation = new BetweennessCentralityGraphStoreValidation();
+        var validation = new BetweennessCentralityRequirements();
 
         assertThatNoException().isThrownBy(()->
             validation.validate(
@@ -76,7 +76,7 @@ class BetweennessCentralityGraphStoreValidationTest {
         var graphStore = mock(GraphStore.class);
         when(graphStore.schema()).thenReturn(schema);
 
-        var validation = new BetweennessCentralityGraphStoreValidation();
+        var validation = new BetweennessCentralityRequirements();
         assertThatThrownBy(()->{
             validation.validate(graphStore,List.of(), directions.keySet());
         }).hasMessageContaining("['bar (UNDIRECTED)', 'buzz (NATURAL)', 'foo (UNDIRECTED)']");

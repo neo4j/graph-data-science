@@ -31,7 +31,7 @@ import java.util.Collection;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public class BetweennessCentralityGraphStoreValidation implements AlgorithmGraphStoreRequirements {
+public class BetweennessCentralityRequirements implements AlgorithmGraphStoreRequirements {
     @Override
     public void validate(
         GraphStore graphStore,

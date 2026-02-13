@@ -29,7 +29,7 @@ import org.neo4j.gds.betweenness.BetweennessCentralityParameters;
 import org.neo4j.gds.betweenness.BetwennessCentralityResult;
 import org.neo4j.gds.bridges.BridgeResult;
 import org.neo4j.gds.bridges.BridgesParameters;
-import org.neo4j.gds.centrality.validation.BetweennessCentralityGraphStoreValidation;
+import org.neo4j.gds.centrality.validation.BetweennessCentralityRequirements;
 import org.neo4j.gds.closeness.ClosenessCentralityParameters;
 import org.neo4j.gds.closeness.ClosenessCentralityResult;
 import org.neo4j.gds.core.JobId;
@@ -160,7 +160,7 @@ public class CentralityComputeBusinessFacade {
             graphParameters,
             relationshipProperty,
             new GraphStoreValidation(
-                new BetweennessCentralityGraphStoreValidation()
+                new BetweennessCentralityRequirements()
             ),
             Optional.empty(),
             user,
