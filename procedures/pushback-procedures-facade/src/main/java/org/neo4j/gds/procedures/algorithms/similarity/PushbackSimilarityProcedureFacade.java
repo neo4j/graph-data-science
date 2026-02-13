@@ -112,7 +112,7 @@ public class PushbackSimilarityProcedureFacade implements SimilarityProcedureFac
         String graphName,
         Map<String, Object> configuration
     ) {
-        return Stream.empty();
+        return streamProcedureFacade.filteredNodeSimilarity(graphName,configuration);
     }
 
     @Override
