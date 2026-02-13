@@ -24,7 +24,6 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyRecord;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.core.JobId;
@@ -55,38 +54,6 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 final class Neo4jDatabaseNodePropertyWriter {
 
     private Neo4jDatabaseNodePropertyWriter() {
-    }
-    static NodePropertiesWritten writeNodeProperty(
-        RequestCorrelationId requestCorrelationId,
-        NodePropertyExporterBuilder nodePropertyExporterBuilder,
-        TaskRegistryFactory taskRegistryFactory,
-        Graph graph,
-        GraphStore graphStore,
-        NodePropertyValues nodePropertyValues,
-        Concurrency writeConcurrency,
-        String writeProperty,
-        String procedureName,
-        Optional<ResultStore> resultStore,
-        JobId jobId,
-        TerminationFlag terminationFlag,
-        Log log
-    ) {
-        var nodeProperties = List.of(new NodePropertyRecord(writeProperty, nodePropertyValues));
-        return writeNodeProperties(
-            requestCorrelationId,
-            nodePropertyExporterBuilder,
-            taskRegistryFactory,
-            graph,
-            graphStore,
-            writeConcurrency,
-            nodeProperties,
-            procedureName,
-            resultStore,
-            jobId,
-            terminationFlag,
-            log
-        );
-
     }
 
     static NodePropertiesWritten writeNodeProperties(
