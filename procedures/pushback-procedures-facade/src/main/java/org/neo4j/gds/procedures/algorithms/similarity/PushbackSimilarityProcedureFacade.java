@@ -54,7 +54,7 @@ public class PushbackSimilarityProcedureFacade implements SimilarityProcedureFac
 
     @Override
     public Stream<SimilarityStreamResult> filteredKnnStream(String graphName, Map<String, Object> configuration) {
-        return Stream.empty();
+        return streamProcedureFacade.filteredKnn(graphName,configuration);
     }
 
     @Override
