@@ -25,6 +25,7 @@ import org.neo4j.gds.procedures.algorithms.similarity.SimilarityStreamResult;
 import org.neo4j.gds.similarity.SimilarityComputeBusinessFacade;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnStreamConfig;
 import org.neo4j.gds.similarity.knn.KnnStreamConfig;
+import org.neo4j.gds.similarity.nodesim.NodeSimilarityStreamConfig;
 
 import java.util.Map;
 import java.util.stream.Stream;
@@ -69,4 +70,20 @@ public class PushbackSimilarityStreamProcedureFacade {
             graphResources -> new FilteredKnnStreamResultTransformer(graphResources.graph())
         ).join();
     }
+
+    public Stream<SimilarityStreamResult> nodeSimilarity(String graphName, Map<String, Object> configuration) {
+        var config = configurationParser.parseConfiguration(configuration, NodeSimilarityStreamConfig::of);
+
+        var parameters = config.toParameters();
+        return businessFacade.nodeSimilarity(
+            GraphName.parse(graphName),
+            config.toGraphParameters(),
+            config.relationshipWeightProperty(),
+            parameters,
+            config.jobId(),
+            config.logProgress(),
+            graphResources -> new NodeSimilarityStreamResultTransformer(graphResources.graph())
+        ).join();
+    }
+
 }
