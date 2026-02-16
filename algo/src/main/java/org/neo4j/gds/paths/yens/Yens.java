@@ -73,7 +73,7 @@ public final class Yens extends Algorithm<PathFindingResult> {
         );
     }
 
-    public Yens(
+    private Yens(
         Graph graph,
         boolean trackRelationships,
         long sourceNode,

@@ -55,7 +55,7 @@ import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.paths.traverse.BFS;
 import org.neo4j.gds.paths.traverse.DFS;
 import org.neo4j.gds.paths.traverse.ExitAndAggregation;
-import org.neo4j.gds.paths.yens.Yens;
+import org.neo4j.gds.paths.yens.YensFactory;
 import org.neo4j.gds.paths.yens.YensParameters;
 import org.neo4j.gds.pcst.PCSTParameters;
 import org.neo4j.gds.pricesteiner.PCSTFast;
@@ -363,9 +363,10 @@ public class PathFindingAlgorithms {
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
-        var algorithm = Yens.sourceTarget(
+        var algorithm = YensFactory.create(
             graph,
             parameters,
+            DefaultPool.INSTANCE,
             progressTracker,
             terminationFlag
         );
