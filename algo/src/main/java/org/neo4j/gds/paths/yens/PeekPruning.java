@@ -116,11 +116,10 @@ public final class PeekPruning {
         }
     }
 
-    ;
-
-    public static BitSet nodeFilter(long nodeCount, FoundPathCosts found, double cutoff) {
+    public static BitSet nodeFilter(ProgressTracker progressTracker, long nodeCount, FoundPathCosts found, double cutoff) {
         BitSet nodeIncluded = new BitSet(nodeCount);
         for (long n = 0; n < found.count; n++) {
+            progressTracker.logProgress(1);
             var cd = found.paths.get(n);
             if (cd.value <= cutoff) {
                 nodeIncluded.set(cd.index);
@@ -197,7 +196,8 @@ public final class PeekPruning {
         LongToDoubleFunction sourceCost,
         LongToDoubleFunction targetCost,
         LongPredicate nodeIncluded,
-        Concurrency concurrency
+        Concurrency concurrency,
+        ProgressTracker progressTracker
     ) {
         var nodesBuilder = GraphFactory.initNodesBuilder()
             .maxOriginalId(graph.nodeCount())
@@ -237,7 +237,8 @@ public final class PeekPruning {
                     nodeIncluded,
                     cutoff,
                     partition,
-                    relationshipsBuilder
+                    relationshipsBuilder,
+                    progressTracker
                 ),
             Optional.empty()
         );
@@ -262,6 +263,7 @@ public final class PeekPruning {
     public static BiFunction<Graph, Long, DistanceAndPredecessors> deltaStep(
         Concurrency concurrency,
         ExecutorService executorService,
+        ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
         double delta = 2.0;
@@ -272,7 +274,7 @@ public final class PeekPruning {
                 delta,
                 concurrency,
                 executorService,
-                ProgressTracker.NULL_TRACKER,
+                progressTracker,
                 terminationFlag
             ).compute().tentativeDistances();
     }

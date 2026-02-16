@@ -22,6 +22,7 @@ package org.neo4j.gds.paths.yens;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.core.utils.partition.Partition;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.function.LongPredicate;
 import java.util.function.LongToDoubleFunction;
@@ -35,6 +36,7 @@ public final class RelationshipPruningTask implements Runnable {
     private final double cutoff;
     private final Partition partition;
     private final RelationshipsBuilder relationshipsBuilder;
+    private final ProgressTracker progressTracker;
 
     RelationshipPruningTask(
         Graph graph,
@@ -44,7 +46,8 @@ public final class RelationshipPruningTask implements Runnable {
         LongPredicate nodeIncluded,
         double cutoff,
         Partition partition,
-        RelationshipsBuilder relationshipsBuilder)
+        RelationshipsBuilder relationshipsBuilder,
+        ProgressTracker progressTracker)
     {
         this.graph = graph;
         this.sourceNode = sourceNode;
@@ -54,6 +57,7 @@ public final class RelationshipPruningTask implements Runnable {
         this.nodeIncluded = nodeIncluded;
         this.partition = partition;
         this.relationshipsBuilder = relationshipsBuilder;
+        this.progressTracker = progressTracker;
     }
 
     @Override
@@ -64,6 +68,7 @@ public final class RelationshipPruningTask implements Runnable {
             if (nodeIncluded.test(n)) {
                 double sCost = sourceCost.applyAsDouble(n);
                 graph.forEachRelationship(n, 1.0, (source, target, weight) -> {
+                    progressTracker.logProgress(1);
                     if (nodeIncluded.test(target) && (target != sourceNode) && (cutoff >= weight + sCost + targetCost.applyAsDouble(target))) {
                         relationshipsBuilder.add(source, target, weight);
                     }

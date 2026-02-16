@@ -29,13 +29,17 @@ public final class DeltaSteppingProgressTask {
 
     private DeltaSteppingProgressTask() {}
 
-    public static Task create() {
+    public static Task create(String name) {
         return Tasks.iterativeOpen(
-            AlgorithmLabel.DeltaStepping.asString(),
+            name,
             () -> List.of(
                 Tasks.leaf(DeltaStepping.Phase.RELAX.name()),
                 Tasks.leaf(DeltaStepping.Phase.SYNC.name())
             )
         );
+    }
+
+    public static Task create() {
+        return create(AlgorithmLabel.DeltaStepping.asString());
     }
 }

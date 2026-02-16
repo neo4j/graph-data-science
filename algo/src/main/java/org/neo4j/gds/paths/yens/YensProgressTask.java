@@ -19,17 +19,35 @@
  */
 package org.neo4j.gds.paths.yens;
 
+import org.neo4j.gds.api.GraphCharacteristics;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.paths.delta.DeltaSteppingProgressTask;
 
 public final class YensProgressTask {
 
     private YensProgressTask() {}
 
-    public static Task create(long relationshipCount,  int k) {
+    public static Task createBasicYens(long relationshipCount, int k) {
         var initialTask = Tasks.leaf(AlgorithmLabel.Dijkstra.asString(), relationshipCount);
         var pathGrowingTask = Tasks.leaf("Path growing", k - 1);
         return Tasks.task(AlgorithmLabel.Yens.asString(), initialTask, pathGrowingTask);
+    }
+
+    public static Task createYensWithPruning(long nodeCount, long relationshipCount, int k) {
+        var deltaForward = DeltaSteppingProgressTask.create("Shortest path from source");
+        var deltaBack = DeltaSteppingProgressTask.create("Shortest path to target");
+        var filterNodes = Tasks.leaf("Filter nodes", nodeCount);
+        var graphCreate = Tasks.leaf("Create pruned graph", relationshipCount);
+        var yensTask = createBasicYens(relationshipCount, k);
+        var pruningTask = Tasks.task("Peek pruning", deltaForward, deltaBack, filterNodes, graphCreate);
+        return Tasks.task(AlgorithmLabel.Yens.asString(), pruningTask, yensTask);
+    }
+
+    public static Task create(GraphCharacteristics characteristics, long nodeCount, long relationshipCount, int k) {
+        return YensFactory.isPeekPruningAppropriate(characteristics) ?
+            createYensWithPruning(nodeCount, relationshipCount, k) :
+            createBasicYens(relationshipCount, k);
     }
 }

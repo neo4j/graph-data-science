@@ -78,31 +78,39 @@ public final class PeekPruningYens extends Algorithm<PathFindingResult> {
 
     @Override
     public PathFindingResult compute() {
-        progressTracker.beginSubTask("Peek pruning");
+        progressTracker.beginSubTask("Yens");
         var nodeCount = graph.nodeCount();
-        var paths = PeekPruning.pathsAndReachability(graph, sourceNode, targetNode, PeekPruning.deltaStep(concurrency, executorService, terminationFlag));
+        progressTracker.beginSubTask("Peek pruning");
+        var paths = PeekPruning.pathsAndReachability(graph, sourceNode, targetNode, PeekPruning.deltaStep(concurrency, executorService, progressTracker, terminationFlag));
         if (paths.reachable().cardinality() == 0) {
             progressTracker.endSubTask("Peek pruning");
+            progressTracker.endSubTask("Yens");
             return new PathFindingResult(Stream.empty());
         }
+        progressTracker.beginSubTask("Filter nodes");
         var combinedPaths = PeekPruning.sortedCombinedPathCosts(nodeCount, paths.reachable().cardinality(), paths.reachable()::get, paths.forward()::distance, paths.backward()::distance);
         var validCosts = PeekPruning.validPathCosts(k, nodeCount, sourceNode, targetNode, combinedPaths, paths.forward()::predecessor, paths.backward()::predecessor);
         // make the cutoff just slightly larger than computed, to avoid floating point errors
         double cutoff = 1.000001 * validCosts[validCosts.length-1];
-        var nodeIncluded = PeekPruning.nodeFilter(nodeCount, combinedPaths, cutoff);
-        var pruned = PeekPruning.createPrunedGraph(graph, sourceNode, cutoff, paths.forward()::distance, paths.backward()::distance, nodeIncluded::get, concurrency);
+        var nodeIncluded = PeekPruning.nodeFilter(progressTracker, nodeCount, combinedPaths, cutoff);
+        progressTracker.endSubTask("Filter nodes");
+        progressTracker.beginSubTask("Create pruned graph");
+        var pruned = PeekPruning.createPrunedGraph(graph, sourceNode, cutoff, paths.forward()::distance, paths.backward()::distance, nodeIncluded::get, concurrency, progressTracker);
+        progressTracker.endSubTask("Create pruned graph");
         progressTracker.endSubTask("Peek pruning");
+        var yensPaths = Yens.sourceTarget(
+            pruned,
+            new YensParameters(
+                sourceNode,
+                targetNode,
+                k,
+                concurrency),
+            progressTracker,
+            terminationFlag).compute();
+        progressTracker.endSubTask("Yens");
 
         return PeekPruning.mapToOriginalGraph(
             pruned,
-            Yens.sourceTarget(
-                pruned,
-                new YensParameters(
-                    sourceNode,
-                    targetNode,
-                    k,
-                    concurrency),
-                progressTracker,
-                terminationFlag).compute());
+            yensPaths);
     }
 }

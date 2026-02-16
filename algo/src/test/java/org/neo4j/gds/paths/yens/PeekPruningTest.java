@@ -20,17 +20,22 @@
 package org.neo4j.gds.paths.yens;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.beta.generator.PropertyProducer;
 import org.neo4j.gds.beta.generator.RandomGraphGeneratorBuilder;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
+import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
+import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
+import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.paths.PathResult;
 import org.neo4j.gds.termination.TerminationFlag;
 
@@ -44,6 +49,8 @@ import java.util.stream.DoubleStream;
 import java.util.stream.LongStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.neo4j.gds.assertj.Extractors.removingThreadId;
+import static org.neo4j.gds.assertj.Extractors.replaceTimings;
 
 @GdlExtension
 public class PeekPruningTest {
@@ -93,7 +100,8 @@ public class PeekPruningTest {
             n -> forwardDistance[(int)n],
             n-> backwardDistance[(int)n],
             n -> nodeIncluded[(int)n],
-            new Concurrency(1));
+            new Concurrency(1),
+            ProgressTracker.NULL_TRACKER);
         assertThat(filtered.nodeCount()).isEqualTo(5);
         assertThat(filtered.toMappedNodeId(graph.toMappedNodeId("i"))).isEqualTo(IdMap.NOT_FOUND);
         assertThat(filtered.toMappedNodeId(graph.toMappedNodeId("c"))).isNotEqualTo(IdMap.NOT_FOUND);
@@ -125,7 +133,12 @@ public class PeekPruningTest {
         var terminationFlag = TerminationFlag.RUNNING_TRUE;
 
         BiFunction<String, String, Long> reachableFrom = (source, target) ->
-            PeekPruning.pathsAndReachability(graph, graph.toMappedNodeId(source), graph.toMappedNodeId(target), PeekPruning.deltaStep(concurrency, executorService, terminationFlag))
+            PeekPruning.pathsAndReachability(
+                    graph,
+                    graph.toMappedNodeId(source),
+                    graph.toMappedNodeId(target),
+                    PeekPruning.deltaStep(concurrency, executorService, ProgressTracker.NULL_TRACKER, terminationFlag)
+                )
                 .reachable().cardinality();
 
         assertThat(reachableFrom.apply("c", "z")).isEqualTo(0);
@@ -197,5 +210,197 @@ public class PeekPruningTest {
         assertThat(Arrays.stream(yenPaths).mapToDouble(PathResult::totalCost).toArray()).containsExactly(Arrays.stream(prunedPaths).mapToDouble(PathResult::totalCost).toArray());
         assertThat(Arrays.stream(yenPaths).map(PathResult::nodeIds).toArray(long[][]::new)).isEqualTo(Arrays.stream(prunedPaths).map(PathResult::nodeIds).toArray(long[][]::new));
         assertThat(Arrays.stream(yenPaths).map(PathResult::costs).toArray(double[][]::new)).isEqualTo(Arrays.stream(prunedPaths).map(PathResult::costs).toArray(double[][]::new));
+    }
+
+    @Test
+    void progressWithUnreachable() {
+        var parameters = new YensParameters(
+            graph.toOriginalNodeId("c"),
+            graph.toOriginalNodeId("z"),
+            3,
+            new Concurrency(1)
+        );
+
+        var log = new GdsTestLog();
+        var testTracker = TestProgressTracker.create(
+            YensProgressTask.createYensWithPruning(graph.nodeCount(), graph.relationshipCount(), 3),
+            new LoggerForProgressTrackingAdapter(log),
+            new Concurrency(4),
+            EmptyTaskRegistryFactory.INSTANCE
+        );
+
+        PeekPruningYens.sourceTarget(graph, parameters, DefaultPool.INSTANCE, testTracker, TerminationFlag.RUNNING_TRUE)
+            .compute()
+            .pathSet();
+
+        assertThat(log.getMessages(TestLog.INFO))
+            .extracting(removingThreadId())
+            .extracting(replaceTimings())
+            .containsExactly(
+                "Yens :: Start",
+                "Yens :: Peek pruning :: Start",
+                "Yens :: Peek pruning :: Shortest path from source :: Start",
+                "Yens :: Peek pruning :: Shortest path from source :: RELAX 1 :: Start",
+                "Yens :: Peek pruning :: Shortest path from source :: RELAX 1 100%",
+                "Yens :: Peek pruning :: Shortest path from source :: RELAX 1 :: Finished",
+                "Yens :: Peek pruning :: Shortest path from source :: SYNC 1 :: Start",
+                "Yens :: Peek pruning :: Shortest path from source :: SYNC 1 100%",
+                "Yens :: Peek pruning :: Shortest path from source :: SYNC 1 :: Finished",
+                "Yens :: Peek pruning :: Shortest path from source :: RELAX 2 :: Start",
+                "Yens :: Peek pruning :: Shortest path from source :: RELAX 2 100%",
+                "Yens :: Peek pruning :: Shortest path from source :: RELAX 2 :: Finished",
+                "Yens :: Peek pruning :: Shortest path from source :: SYNC 2 :: Start",
+                "Yens :: Peek pruning :: Shortest path from source :: SYNC 2 100%",
+                "Yens :: Peek pruning :: Shortest path from source :: SYNC 2 :: Finished",
+                "Yens :: Peek pruning :: Shortest path from source :: RELAX 3 :: Start",
+                "Yens :: Peek pruning :: Shortest path from source :: RELAX 3 100%",
+                "Yens :: Peek pruning :: Shortest path from source :: RELAX 3 :: Finished",
+                "Yens :: Peek pruning :: Shortest path from source :: SYNC 3 :: Start",
+                "Yens :: Peek pruning :: Shortest path from source :: SYNC 3 100%",
+                "Yens :: Peek pruning :: Shortest path from source :: SYNC 3 :: Finished",
+                "Yens :: Peek pruning :: Shortest path from source :: RELAX 4 :: Start",
+                "Yens :: Peek pruning :: Shortest path from source :: RELAX 4 100%",
+                "Yens :: Peek pruning :: Shortest path from source :: RELAX 4 :: Finished",
+                "Yens :: Peek pruning :: Shortest path from source :: SYNC 4 :: Start",
+                "Yens :: Peek pruning :: Shortest path from source :: SYNC 4 100%",
+                "Yens :: Peek pruning :: Shortest path from source :: SYNC 4 :: Finished",
+                "Yens :: Peek pruning :: Shortest path from source :: RELAX 5 :: Start",
+                "Yens :: Peek pruning :: Shortest path from source :: RELAX 5 100%",
+                "Yens :: Peek pruning :: Shortest path from source :: RELAX 5 :: Finished",
+                "Yens :: Peek pruning :: Shortest path from source :: SYNC 5 :: Start",
+                "Yens :: Peek pruning :: Shortest path from source :: SYNC 5 100%",
+                "Yens :: Peek pruning :: Shortest path from source :: SYNC 5 :: Finished",
+                "Yens :: Peek pruning :: Shortest path from source :: Finished",
+                "Yens :: Peek pruning :: Shortest path to target :: Start",
+                "Yens :: Peek pruning :: Shortest path to target :: RELAX 1 :: Start",
+                "Yens :: Peek pruning :: Shortest path to target :: RELAX 1 100%",
+                "Yens :: Peek pruning :: Shortest path to target :: RELAX 1 :: Finished",
+                "Yens :: Peek pruning :: Shortest path to target :: SYNC 1 :: Start",
+                "Yens :: Peek pruning :: Shortest path to target :: SYNC 1 100%",
+                "Yens :: Peek pruning :: Shortest path to target :: SYNC 1 :: Finished",
+                "Yens :: Peek pruning :: Shortest path to target :: Finished",
+                "Yens :: Peek pruning :: Finished",
+                "Yens :: Finished");
+    }
+
+    @Test
+    void shouldLogProgress() {
+        var parameters = new YensParameters(
+            graph.toOriginalNodeId("c"),
+            graph.toOriginalNodeId("h"),
+            3,
+            new Concurrency(1)
+        );
+
+        var log = new GdsTestLog();
+        var testTracker = TestProgressTracker.create(
+            YensProgressTask.createYensWithPruning(graph.nodeCount(), graph.relationshipCount(), 3),
+            new LoggerForProgressTrackingAdapter(log),
+            new Concurrency(4),
+            EmptyTaskRegistryFactory.INSTANCE
+        );
+
+        PeekPruningYens.sourceTarget(graph, parameters, DefaultPool.INSTANCE, testTracker, TerminationFlag.RUNNING_TRUE)
+            .compute()
+            .pathSet();
+
+        assertThat(log.getMessages(TestLog.INFO))
+            .extracting(removingThreadId())
+            .extracting(replaceTimings())
+            .containsExactly(
+                "Yens :: Start",
+                "Yens :: Peek pruning :: Start",
+                "Yens :: Peek pruning :: Shortest path from source :: Start",
+                "Yens :: Peek pruning :: Shortest path from source :: RELAX 1 :: Start",
+                "Yens :: Peek pruning :: Shortest path from source :: RELAX 1 100%",
+                "Yens :: Peek pruning :: Shortest path from source :: RELAX 1 :: Finished",
+                "Yens :: Peek pruning :: Shortest path from source :: SYNC 1 :: Start",
+                "Yens :: Peek pruning :: Shortest path from source :: SYNC 1 100%",
+                "Yens :: Peek pruning :: Shortest path from source :: SYNC 1 :: Finished",
+                "Yens :: Peek pruning :: Shortest path from source :: RELAX 2 :: Start",
+                "Yens :: Peek pruning :: Shortest path from source :: RELAX 2 100%",
+                "Yens :: Peek pruning :: Shortest path from source :: RELAX 2 :: Finished",
+                "Yens :: Peek pruning :: Shortest path from source :: SYNC 2 :: Start",
+                "Yens :: Peek pruning :: Shortest path from source :: SYNC 2 100%",
+                "Yens :: Peek pruning :: Shortest path from source :: SYNC 2 :: Finished",
+                "Yens :: Peek pruning :: Shortest path from source :: RELAX 3 :: Start",
+                "Yens :: Peek pruning :: Shortest path from source :: RELAX 3 100%",
+                "Yens :: Peek pruning :: Shortest path from source :: RELAX 3 :: Finished",
+                "Yens :: Peek pruning :: Shortest path from source :: SYNC 3 :: Start",
+                "Yens :: Peek pruning :: Shortest path from source :: SYNC 3 100%",
+                "Yens :: Peek pruning :: Shortest path from source :: SYNC 3 :: Finished",
+                "Yens :: Peek pruning :: Shortest path from source :: RELAX 4 :: Start",
+                "Yens :: Peek pruning :: Shortest path from source :: RELAX 4 100%",
+                "Yens :: Peek pruning :: Shortest path from source :: RELAX 4 :: Finished",
+                "Yens :: Peek pruning :: Shortest path from source :: SYNC 4 :: Start",
+                "Yens :: Peek pruning :: Shortest path from source :: SYNC 4 100%",
+                "Yens :: Peek pruning :: Shortest path from source :: SYNC 4 :: Finished",
+                "Yens :: Peek pruning :: Shortest path from source :: RELAX 5 :: Start",
+                "Yens :: Peek pruning :: Shortest path from source :: RELAX 5 100%",
+                "Yens :: Peek pruning :: Shortest path from source :: RELAX 5 :: Finished",
+                "Yens :: Peek pruning :: Shortest path from source :: SYNC 5 :: Start",
+                "Yens :: Peek pruning :: Shortest path from source :: SYNC 5 100%",
+                "Yens :: Peek pruning :: Shortest path from source :: SYNC 5 :: Finished",
+                "Yens :: Peek pruning :: Shortest path from source :: Finished",
+                "Yens :: Peek pruning :: Shortest path to target :: Start",
+                "Yens :: Peek pruning :: Shortest path to target :: RELAX 1 :: Start",
+                "Yens :: Peek pruning :: Shortest path to target :: RELAX 1 100%",
+                "Yens :: Peek pruning :: Shortest path to target :: RELAX 1 :: Finished",
+                "Yens :: Peek pruning :: Shortest path to target :: SYNC 1 :: Start",
+                "Yens :: Peek pruning :: Shortest path to target :: SYNC 1 100%",
+                "Yens :: Peek pruning :: Shortest path to target :: SYNC 1 :: Finished",
+                "Yens :: Peek pruning :: Shortest path to target :: RELAX 2 :: Start",
+                "Yens :: Peek pruning :: Shortest path to target :: RELAX 2 100%",
+                "Yens :: Peek pruning :: Shortest path to target :: RELAX 2 :: Finished",
+                "Yens :: Peek pruning :: Shortest path to target :: SYNC 2 :: Start",
+                "Yens :: Peek pruning :: Shortest path to target :: SYNC 2 100%",
+                "Yens :: Peek pruning :: Shortest path to target :: SYNC 2 :: Finished",
+                "Yens :: Peek pruning :: Shortest path to target :: RELAX 3 :: Start",
+                "Yens :: Peek pruning :: Shortest path to target :: RELAX 3 100%",
+                "Yens :: Peek pruning :: Shortest path to target :: RELAX 3 :: Finished",
+                "Yens :: Peek pruning :: Shortest path to target :: SYNC 3 :: Start",
+                "Yens :: Peek pruning :: Shortest path to target :: SYNC 3 100%",
+                "Yens :: Peek pruning :: Shortest path to target :: SYNC 3 :: Finished",
+                "Yens :: Peek pruning :: Shortest path to target :: Finished",
+                "Yens :: Peek pruning :: Filter nodes :: Start",
+                "Yens :: Peek pruning :: Filter nodes 12%",
+                "Yens :: Peek pruning :: Filter nodes 25%",
+                "Yens :: Peek pruning :: Filter nodes 37%",
+                "Yens :: Peek pruning :: Filter nodes 50%",
+                "Yens :: Peek pruning :: Filter nodes 62%",
+                "Yens :: Peek pruning :: Filter nodes 75%",
+                "Yens :: Peek pruning :: Filter nodes 87%",
+                "Yens :: Peek pruning :: Filter nodes 100%",
+                "Yens :: Peek pruning :: Filter nodes :: Finished",
+                "Yens :: Peek pruning :: Create pruned graph :: Start",
+                "Yens :: Peek pruning :: Create pruned graph 9%",
+                "Yens :: Peek pruning :: Create pruned graph 18%",
+                "Yens :: Peek pruning :: Create pruned graph 27%",
+                "Yens :: Peek pruning :: Create pruned graph 36%",
+                "Yens :: Peek pruning :: Create pruned graph 45%",
+                "Yens :: Peek pruning :: Create pruned graph 54%",
+                "Yens :: Peek pruning :: Create pruned graph 63%",
+                "Yens :: Peek pruning :: Create pruned graph 72%",
+                "Yens :: Peek pruning :: Create pruned graph 81%",
+                "Yens :: Peek pruning :: Create pruned graph 90%",
+                "Yens :: Peek pruning :: Create pruned graph 100%",
+                "Yens :: Peek pruning :: Create pruned graph :: Finished",
+                "Yens :: Peek pruning :: Finished",
+                "Yens :: Yens :: Start",
+                "Yens :: Yens :: Dijkstra :: Start",
+                "Yens :: Yens :: Dijkstra 27%",
+                "Yens :: Yens :: Dijkstra 54%",
+                "Yens :: Yens :: Dijkstra 63%",
+                "Yens :: Yens :: Dijkstra 72%",
+                "Yens :: Yens :: Dijkstra 90%",
+                "Yens :: Yens :: Dijkstra 100%",
+                "Yens :: Yens :: Dijkstra :: Finished",
+                "Yens :: Yens :: Path growing :: Start",
+                "Yens :: Yens :: Path growing 50%",
+                "Yens :: Yens :: Path growing 100%",
+                "Yens :: Yens :: Path growing :: Finished",
+                "Yens :: Yens :: Finished",
+                "Yens :: Finished"
+            );
     }
 }
