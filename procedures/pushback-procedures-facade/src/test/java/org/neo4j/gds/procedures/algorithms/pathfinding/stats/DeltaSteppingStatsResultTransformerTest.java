@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.neo4j.gds.paths.dijkstra.PathFindingResult;
+import org.neo4j.gds.paths.delta.DeltaSteppingResult;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 
 import java.util.Collections;
@@ -36,7 +36,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class DeltaSteppingStatsResultTransformerTest {
 
     @Mock
-    private PathFindingResult pathFindingResultMock;
+    private DeltaSteppingResult pathFindingResultMock;
 
     @Test
     void shouldTransformToStatsResultWithNonEmptyConfig() {

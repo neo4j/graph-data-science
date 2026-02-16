@@ -128,6 +128,7 @@ final class DeltaSteppingTest {
             var paths = DeltaStepping
                 .of(graph, config, DefaultPool.INSTANCE, ProgressTracker.NULL_TRACKER, TerminationFlag.RUNNING_TRUE)
                 .compute()
+                .pathFindingResult()
                 .pathSet();
 
             assertThat(paths)
@@ -162,6 +163,7 @@ final class DeltaSteppingTest {
                     TerminationFlag.RUNNING_TRUE
                 )
                 .compute()
+                .pathFindingResult()
                 .pathSet();
 
             assertThat(paths)
@@ -193,6 +195,7 @@ final class DeltaSteppingTest {
                     testTracker,
                     TerminationFlag.RUNNING_TRUE
                 ).compute()
+                .pathFindingResult()
                 .pathSet();
 
             assertThat(log.getMessages(INFO))
@@ -275,6 +278,7 @@ final class DeltaSteppingTest {
                     TerminationFlag.RUNNING_TRUE
                 )
                 .compute()
+                .pathFindingResult()
                 .pathSet();
 
             assertThat(paths)
@@ -335,6 +339,7 @@ final class DeltaSteppingTest {
                     TerminationFlag.RUNNING_TRUE
                 )
                 .compute()
+                .pathFindingResult()
                 .pathSet();
 
             assertThat(paths)
@@ -388,7 +393,7 @@ final class DeltaSteppingTest {
         double deltaSum = 0;
         double dijkstraSum = 0;
 
-        for (var path : deltaStepping.pathSet()) {
+        for (var path : deltaStepping.pathFindingResult().pathSet()) {
             delta[(int) path.targetNode()] = path.totalCost();
         }
 
@@ -417,7 +422,7 @@ final class DeltaSteppingTest {
             TerminationFlag.RUNNING_TRUE
         );
 
-        assertThatThrownBy(() -> deltaStepping.compute().pathSet().stream().toList()).hasMessageContaining("negative");
+        assertThatThrownBy(() -> deltaStepping.compute().pathFindingResult().pathSet().stream().toList()).hasMessageContaining("negative");
     }
 
 }

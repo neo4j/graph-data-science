@@ -55,6 +55,7 @@ import org.neo4j.gds.paths.astar.AStarParameters;
 import org.neo4j.gds.paths.bellmanford.BellmanFordParameters;
 import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
 import org.neo4j.gds.paths.delta.DeltaSteppingParameters;
+import org.neo4j.gds.paths.delta.DeltaSteppingResult;
 import org.neo4j.gds.paths.dijkstra.DijkstraSingleSourceParameters;
 import org.neo4j.gds.paths.dijkstra.DijkstraSourceTargetParameters;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
@@ -195,7 +196,7 @@ public class PathFindingComputeBusinessFacade {
         DeltaSteppingParameters parameters,
         JobId jobId,
         boolean logProgress,
-        ResultTransformerBuilder<TimedAlgorithmResult<PathFindingResult>, TR> resultTransformerBuilder
+        ResultTransformerBuilder<TimedAlgorithmResult<DeltaSteppingResult>, TR> resultTransformerBuilder
     ) {
         // Fetch the Graph the algorithm will operate on
         var graphResources = graphStoreCatalogService.fetchGraphResources(

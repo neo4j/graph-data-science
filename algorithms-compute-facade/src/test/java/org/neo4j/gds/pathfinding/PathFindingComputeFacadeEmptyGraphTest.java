@@ -28,8 +28,8 @@ import org.neo4j.gds.ProgressTrackerFactory;
 import org.neo4j.gds.allshortestpaths.AllShortestPathsParameters;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.async.AsyncAlgorithmCaller;
-import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.JobId;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.dag.longestPath.DagLongestPathParameters;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortParameters;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortResult;
@@ -153,7 +153,7 @@ class PathFindingComputeFacadeEmptyGraphTest {
 
         assertThat(result.result())
             .isNotNull()
-            .extracting(PathFindingResult::pathSet)
+            .extracting((deltaSteppingResult -> deltaSteppingResult.pathFindingResult().pathSet()))
             .asInstanceOf(SET)
             .isEmpty();
 

@@ -150,7 +150,7 @@ public final class PushbackPathFindingStreamProcedureFacade {
         );
         var routeRequested = procedureReturnColumns.contains("path");
 
-        var pathFindingResultTransformerBuilder = new PathFindingStreamResultTransformerBuilder(
+        var pathFindingResultTransformerBuilder = new DeltasteppingStreamResultTransformerBuilder(
             closeableResourceRegistry,
             nodeLookup,
             routeRequested

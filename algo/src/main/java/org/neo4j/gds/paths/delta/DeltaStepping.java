@@ -19,37 +19,24 @@
  */
 package org.neo4j.gds.paths.delta;
 
-import com.carrotsearch.hppc.DoubleArrayList;
 import com.carrotsearch.hppc.LongArrayList;
 import com.carrotsearch.hppc.cursors.LongCursor;
 import com.carrotsearch.hppc.procedures.LongProcedure;
-import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.ha.HugeLongArray;
-import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
-import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.paths.PathResult;
-import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Arrays;
-import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import java.util.stream.LongStream;
-import java.util.stream.Stream;
 
-import static org.neo4j.gds.paths.delta.TentativeDistances.NO_PREDECESSOR;
-
-public final class DeltaStepping extends Algorithm<PathFindingResult> {
+public final class DeltaStepping extends Algorithm<DeltaSteppingResult> {
     private static final int NO_BIN = Integer.MAX_VALUE;
     private static final int BIN_SIZE_THRESHOLD = 1000;
     private static final int BATCH_SIZE = 64;
@@ -117,7 +104,7 @@ public final class DeltaStepping extends Algorithm<PathFindingResult> {
     }
 
     @Override
-    public PathFindingResult compute() {
+    public DeltaSteppingResult compute() {
         progressTracker.beginSubTask();
         int currentBin = 0;
 
@@ -165,7 +152,7 @@ public final class DeltaStepping extends Algorithm<PathFindingResult> {
         }
         progressTracker.endSubTask();
 
-        return new PathFindingResult(pathResults(distances, startNode, concurrency));
+        return DeltaSteppingResult.create(distances,concurrency,startNode);
     }
 
     public enum Phase {
@@ -310,78 +297,5 @@ public final class DeltaStepping extends Algorithm<PathFindingResult> {
         }
     }
 
-    private static Stream<PathResult> pathResults(
-        TentativeDistances tentativeDistances,
-        long sourceNode,
-        Concurrency concurrency
-    ) {
-        var distances = tentativeDistances.distances();
-        var predecessors = tentativeDistances.predecessors().orElseThrow();
 
-        var pathIndex = new AtomicLong(0L);
-
-        var partitions = PartitionUtils.rangePartition(
-            concurrency,
-            predecessors.size(),
-            partition -> partition,
-            Optional.empty()
-        );
-
-        return ParallelUtil.parallelStream(
-            partitions.stream(),
-            concurrency,
-            parallelStream -> parallelStream.flatMap(partition -> {
-                var localPathIndex = new MutableLong(pathIndex.getAndAdd(partition.nodeCount()));
-
-                var pathNodeIds = new LongArrayList();
-                var costs = new DoubleArrayList();
-
-                return LongStream
-                    .range(partition.startNode(), partition.startNode() + partition.nodeCount())
-                    .filter(target -> predecessors.get(target) != NO_PREDECESSOR)
-                    .mapToObj(targetNode -> pathResult(
-                        localPathIndex.getAndIncrement(),
-                        sourceNode,
-                        targetNode,
-                        distances,
-                        predecessors,
-                        pathNodeIds,
-                        costs
-                    ));
-            })
-        );
-    }
-
-    private static PathResult pathResult(
-        long pathIndex,
-        long sourceNode,
-        long targetNode,
-        HugeAtomicDoubleArray distances,
-        HugeAtomicLongArray predecessors,
-        LongArrayList pathNodeIds,
-        DoubleArrayList costs
-    ) {
-        // We backtrack until we reach the source node.
-        var lastNode = targetNode;
-
-        while (true) {
-            pathNodeIds.add(lastNode);
-            costs.add(distances.get(lastNode));
-
-            // Break if we reach the end by hitting the source node.
-            if (lastNode == sourceNode) {
-                break;
-            }
-
-            lastNode = predecessors.get(lastNode);
-        }
-
-        var pathNodeIdsArray = pathNodeIds.toArray();
-        ArrayUtils.reverse(pathNodeIdsArray);
-        pathNodeIds.elementsCount = 0;
-        var costsArray = costs.toArray();
-        ArrayUtils.reverse(costsArray);
-        costs.elementsCount = 0;
-        return new DeltaSteppingPathResult(pathIndex, sourceNode, targetNode, pathNodeIdsArray, costsArray);
-    }
 }
