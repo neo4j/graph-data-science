@@ -21,14 +21,20 @@ package org.neo4j.gds.paths.yens;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.beta.generator.PropertyProducer;
+import org.neo4j.gds.beta.generator.RandomGraphGeneratorBuilder;
+import org.neo4j.gds.beta.generator.RelationshipDistribution;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.paths.PathResult;
 import org.neo4j.gds.termination.TerminationFlag;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -143,5 +149,53 @@ public class PeekPruningTest {
         }
         assertThat(costs.build().toArray()).isEqualTo(new double[]{4.0, 4.5, 5.0, 5.5, 7.0});
         assertThat(indices.build().toArray()).isEqualTo(new long[]{1, 6, 4, 3, 5});
+    }
+
+    @Test
+    void testEndToEnd() {
+        var nodeCount = 10000L;
+        var randomGraph = new RandomGraphGeneratorBuilder()
+            .seed(6)
+            .nodeCount(nodeCount)
+            .averageDegree(10)
+            .inverseIndex(true)
+            .relationshipDistribution(RelationshipDistribution.POWER_LAW)
+            .relationshipPropertyProducer(PropertyProducer.randomDouble("weight", 1.0, 20.0))
+            .build().generate();
+
+        int k = 5;
+        long sourceNode = 1;
+        long targetNode = nodeCount-1;
+        var concurrency = new Concurrency(1);
+        var executorService = DefaultPool.INSTANCE;
+        var terminationFlag = TerminationFlag.RUNNING_TRUE;
+
+        var yen = Yens.sourceTarget(
+            randomGraph,
+            new YensParameters(
+                sourceNode,
+                targetNode,
+                k,
+                concurrency),
+            ProgressTracker.NULL_TRACKER,
+            terminationFlag).compute();
+
+        var prunedYen = new PeekPruningYens(
+            randomGraph,
+            sourceNode,
+            targetNode,
+            k,
+            concurrency,
+            executorService,
+            ProgressTracker.NULL_TRACKER,
+            terminationFlag).compute();
+
+        var yenPaths = yen.paths().toArray(PathResult[]::new);
+        var prunedPaths = prunedYen.paths().toArray(PathResult[]::new);
+        assertThat(Arrays.stream(yenPaths).mapToLong(PathResult::sourceNode).toArray()).containsExactly(Arrays.stream(prunedPaths).mapToLong(PathResult::sourceNode).toArray());
+        assertThat(Arrays.stream(yenPaths).mapToLong(PathResult::targetNode).toArray()).containsExactly(Arrays.stream(prunedPaths).mapToLong(PathResult::targetNode).toArray());
+        assertThat(Arrays.stream(yenPaths).mapToDouble(PathResult::totalCost).toArray()).containsExactly(Arrays.stream(prunedPaths).mapToDouble(PathResult::totalCost).toArray());
+        assertThat(Arrays.stream(yenPaths).map(PathResult::nodeIds).toArray(long[][]::new)).isEqualTo(Arrays.stream(prunedPaths).map(PathResult::nodeIds).toArray(long[][]::new));
+        assertThat(Arrays.stream(yenPaths).map(PathResult::costs).toArray(double[][]::new)).isEqualTo(Arrays.stream(prunedPaths).map(PathResult::costs).toArray(double[][]::new));
     }
 }
