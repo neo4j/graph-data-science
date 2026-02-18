@@ -350,11 +350,15 @@ public class PathFindingComputeBusinessFacade {
         boolean logProgress,
         ResultTransformerBuilder<TimedAlgorithmResult<CostFlowResult>, TR> resultTransformerBuilder
     ) {
+        var capacityGraphValidation = capacityProperty.
+            map(p -> new GraphStoreValidation(new NodePropertyMustExistOnAllLabels(p))).
+            orElse(new GraphStoreValidation(new NoAlgorithmRequirements()));
+
         var capacityGraphResources = graphStoreCatalogService.fetchGraphResources(
             graphName,
             graphParameters,
             capacityProperty,
-            new GraphStoreValidation(new NodePropertyMustExistOnAllLabels("nodeCapacityProperty")),
+            capacityGraphValidation,
             Optional.empty(),
             user,
             databaseId
@@ -364,7 +368,7 @@ public class PathFindingComputeBusinessFacade {
             graphName,
             graphParameters,
             costProperty,
-            new GraphStoreValidation(new RelationshipPropertyGraphStoreValidation(costProperty,"costProperty")),
+            new GraphStoreValidation(new RelationshipPropertyGraphStoreValidation(costProperty, "costProperty")),
             Optional.empty(),
             user,
             databaseId
@@ -455,11 +459,14 @@ public class PathFindingComputeBusinessFacade {
             graphName,
             graphParameters,
             Optional.empty(),
-             new AlgorithmGraphStoreRequirementsBuilder()
-                 .withAlgorithmRequirement(new UndirectedOnlyRequirement("Prize-collecting Steiner Tree"))
-                 .withAlgorithmRequirement(new NodePropertyMustExistOnAllLabels(parameters.prizeProperty()))
-                 .withAlgorithmRequirement(new NodePropertyTypeRequirement(parameters.prizeProperty(), List.of(ValueType.DOUBLE)))
-                 .build(),
+            new AlgorithmGraphStoreRequirementsBuilder()
+                .withAlgorithmRequirement(new UndirectedOnlyRequirement("Prize-collecting Steiner Tree"))
+                .withAlgorithmRequirement(new NodePropertyMustExistOnAllLabels(parameters.prizeProperty()))
+                .withAlgorithmRequirement(new NodePropertyTypeRequirement(
+                    parameters.prizeProperty(),
+                    List.of(ValueType.DOUBLE)
+                ))
+                .build(),
             Optional.empty(),
             user,
             databaseId
@@ -489,7 +496,10 @@ public class PathFindingComputeBusinessFacade {
             graphName,
             graphParameters,
             relationshipProperty,
-            new GraphStoreValidation(new SourceNodeTargetNodeRequirement(parameters.sourceNode(), parameters.targetNode())),
+            new GraphStoreValidation(new SourceNodeTargetNodeRequirement(
+                parameters.sourceNode(),
+                parameters.targetNode()
+            )),
             Optional.of(new RandomWalkGraphValidation(parameters.concurrency(), executorService)),
             user,
             databaseId
@@ -518,7 +528,10 @@ public class PathFindingComputeBusinessFacade {
             graphName,
             graphParameters,
             relationshipProperty,
-            new GraphStoreValidation(new SourceNodeTargetNodesGraphStoreValidation(parameters.sourceNode(), parameters.targetsList())),
+            new GraphStoreValidation(new SourceNodeTargetNodesGraphStoreValidation(
+                parameters.sourceNode(),
+                parameters.targetsList()
+            )),
             Optional.of(new RandomWalkGraphValidation(parameters.concurrency(), executorService)),
             user,
             databaseId
@@ -547,7 +560,10 @@ public class PathFindingComputeBusinessFacade {
             graphName,
             graphParameters,
             relationshipProperty,
-            new GraphStoreValidation(new SourceNodeTargetNodeRequirement(parameters.sourceNode(), parameters.targetNode())),
+            new GraphStoreValidation(new SourceNodeTargetNodeRequirement(
+                parameters.sourceNode(),
+                parameters.targetNode()
+            )),
             Optional.empty(),
             user,
             databaseId
@@ -637,7 +653,10 @@ public class PathFindingComputeBusinessFacade {
             graphName,
             graphParameters,
             relationshipProperty,
-            new GraphStoreValidation(new SourceNodeTargetNodesGraphStoreValidation(parameters.sourceNode(), parameters.targetNodes())),
+            new GraphStoreValidation(new SourceNodeTargetNodesGraphStoreValidation(
+                parameters.sourceNode(),
+                parameters.targetNodes()
+            )),
             Optional.empty(),
             user,
             databaseId
