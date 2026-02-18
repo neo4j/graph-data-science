@@ -31,6 +31,10 @@ import static org.neo4j.configuration.SettingValueParsers.BOOL;
 import static org.neo4j.configuration.SettingValueParsers.DURATION;
 import static org.neo4j.gds.compat.SettingProxy.newBuilder;
 
+/**
+ * @deprecated move up to settings module, this is Neo4j integration
+ */
+@Deprecated
 @ServiceProvider
 public final class ProgressFeatureSettings implements SettingsDeclaration {
 

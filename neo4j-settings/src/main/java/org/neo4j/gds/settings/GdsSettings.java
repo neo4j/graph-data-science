@@ -19,27 +19,39 @@
  */
 package org.neo4j.gds.settings;
 
+import org.neo4j.gds.core.utils.progress.ProgressFeatureSettings;
 import org.neo4j.graphdb.config.Setting;
 
 import java.nio.file.Path;
+import java.time.Duration;
 
+/**
+ * The facade to GDS settings in Neo4j.
+ */
 public final class GdsSettings {
-
     private GdsSettings() {}
 
     public static Setting<Path> exportLocation() {
         return GraphStoreExportSettings.export_location_setting;
     }
 
-    public static Setting<Boolean> validateUsingMaxMemoryEstimation() {
-        return MemoryEstimationSettings.validate_using_max_memory_estimation;
-    }
-
-    public static Setting<Boolean> useGdsMetricsServer() {
+    public static Setting<Boolean> metricsServerEnabled() {
         return GdsMetricsSettings.gds_metrics_server_enabled;
     }
 
-    public static Setting<Boolean> enableTelemetryLogging() {
+    public static Setting<Boolean> progressTrackingEnabled() {
+        return ProgressFeatureSettings.progress_tracking_enabled;
+    }
+
+    public static Setting<Duration> taskRetentionPeriod() {
+        return ProgressFeatureSettings.task_retention_period;
+    }
+
+    public static Setting<Boolean> telemetryLoggingEnabled() {
         return GdsTelemetrySettings.gds_telemetry_logging_enabled;
+    }
+
+    public static Setting<Boolean> validateUsingMaxMemoryEstimation() {
+        return MemoryEstimationSettings.validate_using_max_memory_estimation;
     }
 }

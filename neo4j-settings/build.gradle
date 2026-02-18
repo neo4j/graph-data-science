@@ -18,4 +18,6 @@ dependencies {
     compileOnly(neo4j.graphdb.api) { transitive = false }
 
     implementation project(':annotations')
+
+    implementation project(':progress-tracking')
 }
