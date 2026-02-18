@@ -19,11 +19,11 @@
  */
 package org.neo4j.gds.pathfinding;
 
+import org.neo4j.gds.PathFindingAlgorithmTasks;
 import org.neo4j.gds.ProgressTrackerFactory;
 import org.neo4j.gds.allshortestpaths.AllShortestPathsParameters;
 import org.neo4j.gds.allshortestpaths.AllShortestPathsStreamResult;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.applications.algorithms.pathfinding.MSBFSASPAlgorithmFactory;
 import org.neo4j.gds.async.AsyncAlgorithmCaller;
 import org.neo4j.gds.collections.ha.HugeLongArray;
@@ -33,47 +33,36 @@ import org.neo4j.gds.core.utils.paged.ParalleLongPageCreator;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.dag.longestPath.DagLongestPath;
 import org.neo4j.gds.dag.longestPath.DagLongestPathParameters;
-import org.neo4j.gds.dag.longestPath.LongestPathTask;
-import org.neo4j.gds.dag.topologicalsort.TopSortTask;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSort;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortParameters;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortResult;
 import org.neo4j.gds.kspanningtree.KSpanningTree;
 import org.neo4j.gds.kspanningtree.KSpanningTreeParameters;
-import org.neo4j.gds.kspanningtree.KSpanningTreeTask;
 import org.neo4j.gds.maxflow.FlowResult;
 import org.neo4j.gds.maxflow.MaxFlow;
 import org.neo4j.gds.maxflow.MaxFlowParameters;
 import org.neo4j.gds.mcmf.CostFlowResult;
 import org.neo4j.gds.mcmf.MCMFParameters;
 import org.neo4j.gds.mcmf.MinCostMaxFlow;
-import org.neo4j.gds.mcmf.MinCostMaxFlowTask;
-import org.neo4j.gds.paths.RelationshipCountProgressTaskFactory;
 import org.neo4j.gds.paths.astar.AStar;
 import org.neo4j.gds.paths.astar.AStarParameters;
 import org.neo4j.gds.paths.bellmanford.BellmanFord;
 import org.neo4j.gds.paths.bellmanford.BellmanFordParameters;
-import org.neo4j.gds.paths.bellmanford.BellmanFordProgressTask;
 import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
 import org.neo4j.gds.paths.delta.DeltaStepping;
 import org.neo4j.gds.paths.delta.DeltaSteppingParameters;
-import org.neo4j.gds.paths.delta.DeltaSteppingProgressTask;
 import org.neo4j.gds.paths.delta.DeltaSteppingResult;
 import org.neo4j.gds.paths.dijkstra.DijkstraFactory;
 import org.neo4j.gds.paths.dijkstra.DijkstraSingleSourceParameters;
 import org.neo4j.gds.paths.dijkstra.DijkstraSourceTargetParameters;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.paths.traverse.BFS;
-import org.neo4j.gds.paths.traverse.BFSProgressTask;
 import org.neo4j.gds.paths.traverse.DFS;
-import org.neo4j.gds.paths.traverse.DFSProgressTask;
 import org.neo4j.gds.paths.traverse.ExitAndAggregation;
 import org.neo4j.gds.paths.yens.Yens;
 import org.neo4j.gds.paths.yens.YensParameters;
-import org.neo4j.gds.paths.yens.YensProgressTask;
 import org.neo4j.gds.pcst.PCSTParameters;
 import org.neo4j.gds.pricesteiner.PCSTFast;
-import org.neo4j.gds.pricesteiner.PCSTProgressTrackerTaskCreator;
 import org.neo4j.gds.pricesteiner.PrizeSteinerTreeResult;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.spanningtree.Prim;
@@ -81,14 +70,11 @@ import org.neo4j.gds.spanningtree.SpanningTree;
 import org.neo4j.gds.spanningtree.SpanningTreeParameters;
 import org.neo4j.gds.steiner.ShortestPathsSteinerAlgorithm;
 import org.neo4j.gds.steiner.SteinerTreeParameters;
-import org.neo4j.gds.steiner.SteinerTreeProgressTask;
 import org.neo4j.gds.steiner.SteinerTreeResult;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.traversal.RandomWalk;
 import org.neo4j.gds.traversal.RandomWalkCountingNodeVisits;
-import org.neo4j.gds.traversal.RandomWalkCountingNodeVisitsProgressTaskFactory;
 import org.neo4j.gds.traversal.RandomWalkParameters;
-import org.neo4j.gds.traversal.RandomWalkProgressTask;
 import org.neo4j.gds.traversal.TraversalParameters;
 
 import java.util.Optional;
@@ -108,6 +94,8 @@ public class PathFindingComputeFacade {
 
     // Request scope dependencies -- can we move these as method parameters?! 🤔
     private final TerminationFlag terminationFlag;
+
+    private final PathFindingAlgorithmTasks  tasks = new PathFindingAlgorithmTasks();
 
     public PathFindingComputeFacade(
         AsyncAlgorithmCaller algorithmCaller,
@@ -164,7 +152,7 @@ public class PathFindingComputeFacade {
 
         // Create ProgressTracker
         var progressTracker = progressTrackerFactory.create(
-            BellmanFordProgressTask.create(),
+            tasks.bellmanFord(),
             jobId,
             parameters.concurrency(),
             logProgress
@@ -202,7 +190,7 @@ public class PathFindingComputeFacade {
 
         // Create ProgressTracker
         var progressTracker = progressTrackerFactory.create(
-            BFSProgressTask.create(),
+            tasks.bfs(),
             jobId,
             parameters.concurrency(),
             logProgress
@@ -244,7 +232,7 @@ public class PathFindingComputeFacade {
 
         // Create ProgressTracker
         var progressTracker = progressTrackerFactory.create(
-            DeltaSteppingProgressTask.create(),
+            tasks.deltaStepping(),
             jobId,
             parameters.concurrency(),
             logProgress
@@ -274,7 +262,7 @@ public class PathFindingComputeFacade {
 
         // Create ProgressTracker
         var progressTracker = progressTrackerFactory.create(
-            DFSProgressTask.create(),
+            tasks.dfs(),
             jobId,
             parameters.concurrency(),
             logProgress
@@ -314,7 +302,7 @@ public class PathFindingComputeFacade {
 
         // Create ProgressTracker
         var progressTracker = progressTrackerFactory.create(
-            KSpanningTreeTask.create(graph.relationshipCount()),
+            tasks.kSpanningTree(graph),
             jobId,
             parameters.concurrency(),
             logProgress
@@ -350,7 +338,7 @@ public class PathFindingComputeFacade {
 
         // Create ProgressTracker
         var progressTracker = progressTrackerFactory.create(
-            LongestPathTask.create(graph.nodeCount()),
+            tasks.longestPath(graph),
             jobId,
             parameters.concurrency(),
             logProgress
@@ -383,7 +371,12 @@ public class PathFindingComputeFacade {
         }
 
         // Create ProgressTracker
-        var progressTracker = ProgressTracker.NULL_TRACKER;
+        var progressTracker = progressTrackerFactory.create(
+            tasks.maxFlow(),
+            jobId,
+            parameters.concurrency(),
+            logProgress
+        );
 
         // Create the algorithm
         var algo =  MaxFlow.create(
@@ -414,7 +407,7 @@ public class PathFindingComputeFacade {
 
         // Create ProgressTracker
         var progressTracker = progressTrackerFactory.create(
-            MinCostMaxFlowTask.create(),
+            tasks.minCostMaxFlow(),
             jobId,
             parameters.concurrency(),
             logProgress
@@ -449,7 +442,7 @@ public class PathFindingComputeFacade {
 
         // Create ProgressTracker
         var progressTracker = progressTrackerFactory.create(
-            RandomWalkProgressTask.create(graph),
+            tasks.randomWalk(graph),
             jobId,
             parameters.concurrency(),
             logProgress
@@ -488,7 +481,7 @@ public class PathFindingComputeFacade {
 
         // Create ProgressTracker
         var progressTracker = progressTrackerFactory.create(
-            RandomWalkCountingNodeVisitsProgressTaskFactory.create(graph),
+            tasks.randomWalkCountingVisits(graph),
             jobId,
             parameters.concurrency(),
             logProgress
@@ -523,7 +516,7 @@ public class PathFindingComputeFacade {
 
         // Create ProgressTracker
         var progressTracker = progressTrackerFactory.create(
-            PCSTProgressTrackerTaskCreator.progressTask(graph.nodeCount(), graph.relationshipCount()),
+            tasks.pcst(graph),
             jobId,
             parameters.concurrency(),
             logProgress
@@ -558,7 +551,7 @@ public class PathFindingComputeFacade {
 
         // Create ProgressTracker
         var progressTracker = progressTrackerFactory.create(
-            RelationshipCountProgressTaskFactory.create(AlgorithmLabel.AStar, graph.relationshipCount()),
+            tasks.aStar(graph),
             jobId,
             parameters.concurrency(),
             logProgress
@@ -592,7 +585,7 @@ public class PathFindingComputeFacade {
 
         // Create ProgressTracker
         var progressTracker = progressTrackerFactory.create(
-            RelationshipCountProgressTaskFactory.create(AlgorithmLabel.Dijkstra, graph.relationshipCount()),
+            tasks.dijkstra(graph),
             jobId,
             parameters.concurrency(),
             logProgress
@@ -629,10 +622,7 @@ public class PathFindingComputeFacade {
 
         // Create ProgressTracker
         var progressTracker = progressTrackerFactory.create(
-            YensProgressTask.create(
-                graph.relationshipCount(),
-                parameters.k()
-            ),
+            tasks.yens(graph,parameters.k()),
             jobId,
             parameters.concurrency(),
             logProgress
@@ -666,7 +656,7 @@ public class PathFindingComputeFacade {
 
         // Create ProgressTracker
         var progressTracker = progressTrackerFactory.create(
-            RelationshipCountProgressTaskFactory.create(AlgorithmLabel.SingleSourceDijkstra, graph.relationshipCount()),
+            tasks.singleSourceDijkstra(graph),
             jobId,
             parameters.concurrency(),
             logProgress
@@ -702,7 +692,7 @@ public class PathFindingComputeFacade {
 
         // Create ProgressTracker
         var progressTracker = progressTrackerFactory.create(
-            RelationshipCountProgressTaskFactory.create(AlgorithmLabel.SpanningTree, graph.relationshipCount()),
+            tasks.spanningTree(graph),
             jobId,
             parameters.concurrency(),
             logProgress
@@ -737,7 +727,7 @@ public class PathFindingComputeFacade {
 
         // Create ProgressTracker
         var progressTracker = progressTrackerFactory.create(
-            SteinerTreeProgressTask.create(parameters, graph.nodeCount()),
+            tasks.steinerTree(parameters,graph),
             jobId,
             parameters.concurrency(),
             logProgress
@@ -782,7 +772,7 @@ public class PathFindingComputeFacade {
 
         // Create ProgressTracker
         var progressTracker = progressTrackerFactory.create(
-            TopSortTask.create(graph),
+            tasks.topologicalSort(graph),
             jobId,
             parameters.concurrency(),
             logProgress

@@ -19,11 +19,11 @@
  */
 package org.neo4j.gds.traversal;
 
+import org.neo4j.gds.CentralityAlgorithmTasks;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
-import org.neo4j.gds.degree.DegreeCentralityTask;
 
 import java.util.ArrayList;
 
@@ -33,7 +33,7 @@ public final class RandomWalkProgressTask {
     public static Task create(Graph graph) {
         var tasks = new ArrayList<Task>();
         if (graph.hasRelationshipProperty()) {
-            tasks.add(DegreeCentralityTask.create(graph));
+            tasks.add(new CentralityAlgorithmTasks().degreeCentrality(graph));
         }
         tasks.add(Tasks.leaf("create walks", graph.nodeCount()));
         return Tasks.task(AlgorithmLabel.RandomWalk.asString(), tasks);
