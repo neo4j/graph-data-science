@@ -20,6 +20,7 @@
 package org.neo4j.gds.procedures.algorithms.similarity;
 
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
+import org.neo4j.gds.result.SimilarityStatistics;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
 
 import java.util.Map;
@@ -43,20 +44,20 @@ class GenericNodeSimilarityResultBuilderForStatsMode {
         var nodeSimilarityResult = result.get();
         var graphResult = nodeSimilarityResult.graphResult();
 
-        var communityStatistics = similarityStatsProcessor.computeSimilarityStatistics(
+        var similarityStats = similarityStatsProcessor.computeSimilarityStatistics(
             graphResult,
             shouldComputeSimilarityDistribution
         );
-        var similarityDistribution = similarityStatsProcessor.computeSimilarityDistribution(
-            shouldComputeSimilarityDistribution,
-            graphResult
+        var similarityDistribution = SimilarityStatistics.similaritySummary(
+            similarityStats.histogram(),
+            similarityStats.success()
         );
 
         return Stream.of(
             new SimilarityStatsResult(
                 timings.preProcessingMillis,
                 timings.computeMillis,
-                communityStatistics.computeMilliseconds(),
+                similarityStats.computeMilliseconds(),
                 graphResult.comparedNodes(),
                 graphResult.similarityGraph().relationshipCount(),
                 similarityDistribution,
