@@ -17,29 +17,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.similarity.nodesim;
+package org.neo4j.gds.procedures.algorithms.similarity;
 
-import org.neo4j.gds.similarity.SimilarityGraphResult;
-import org.neo4j.gds.similarity.SimilarityResult;
+import org.neo4j.gds.api.ProcedureReturnColumns;
 
-import java.util.Optional;
-import java.util.stream.Stream;
+public class SimilarityDistributionInstructions {
 
-public record NodeSimilarityResult(
-    Optional<Stream<SimilarityResult>> maybeStreamResult,
-    Optional<SimilarityGraphResult> maybeGraphResult
-) {
+    private final ProcedureReturnColumns procedureReturnColumns;
 
-    public Stream<SimilarityResult> streamResult() {
-        return maybeStreamResult().orElseThrow();
+    public SimilarityDistributionInstructions(ProcedureReturnColumns procedureReturnColumns) {
+        this.procedureReturnColumns = procedureReturnColumns;
     }
 
-    public SimilarityGraphResult graphResult() {
-        return maybeGraphResult().orElseThrow();
+    public boolean shouldComputeDistribution(){
+        return procedureReturnColumns.contains("similarityDistribution");
     }
-
-   public static final NodeSimilarityResult EMPTY = new NodeSimilarityResult(
-       Optional.of(Stream.empty()),
-       Optional.of(SimilarityGraphResult.empty())
-   );
 }

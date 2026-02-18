@@ -20,6 +20,7 @@
 package org.neo4j.gds.procedures.algorithms.similarity;
 
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
+import org.neo4j.gds.procedures.algorithms.similarity.stats.PushbackSimilarityStatsProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.similarity.stream.PushbackSimilarityStreamProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.similarity.stubs.SimilarityStubs;
 
@@ -29,9 +30,14 @@ import java.util.stream.Stream;
 public class PushbackSimilarityProcedureFacade implements SimilarityProcedureFacade {
 
     private final PushbackSimilarityStreamProcedureFacade streamProcedureFacade;
+    private final PushbackSimilarityStatsProcedureFacade statsProcedureFacade;
 
-    public PushbackSimilarityProcedureFacade(PushbackSimilarityStreamProcedureFacade streamProcedureFacade) {
+    public PushbackSimilarityProcedureFacade(
+        PushbackSimilarityStreamProcedureFacade streamProcedureFacade,
+        PushbackSimilarityStatsProcedureFacade statsProcedureFacade
+    ) {
         this.streamProcedureFacade = streamProcedureFacade;
+        this.statsProcedureFacade = statsProcedureFacade;
     }
 
     @Override
@@ -41,7 +47,8 @@ public class PushbackSimilarityProcedureFacade implements SimilarityProcedureFac
 
     @Override
     public Stream<KnnStatsResult> filteredKnnStats(String graphName, Map<String, Object> configuration) {
-        return Stream.empty();
+        return statsProcedureFacade.filteredKnn(graphName,configuration);
+
     }
 
     @Override
@@ -96,7 +103,7 @@ public class PushbackSimilarityProcedureFacade implements SimilarityProcedureFac
         String graphName,
         Map<String, Object> configuration
     ) {
-        return Stream.empty();
+        return statsProcedureFacade.filteredNodeSimilarity(graphName,configuration);
     }
 
     @Override
@@ -157,7 +164,7 @@ public class PushbackSimilarityProcedureFacade implements SimilarityProcedureFac
 
     @Override
     public Stream<KnnStatsResult> knnStats(String graphName, Map<String, Object> configuration) {
-        return Stream.empty();
+        return statsProcedureFacade.knn(graphName,configuration);
     }
 
     @Override
@@ -222,7 +229,7 @@ public class PushbackSimilarityProcedureFacade implements SimilarityProcedureFac
 
     @Override
     public Stream<SimilarityStatsResult> nodeSimilarityStats(String graphName, Map<String, Object> configuration) {
-        return Stream.empty();
+        return statsProcedureFacade.nodeSimilarity(graphName,configuration);
     }
 
     @Override

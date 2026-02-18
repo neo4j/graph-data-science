@@ -38,11 +38,20 @@ public record KnnStatsResult(
         Map<String, Object> configuration
     ) implements StatsResult {
 
-    static KnnStatsResult emptyFrom(AlgorithmProcessingTimings timings, Map<String, Object> configurationMap) {
-        return new KnnStatsResult(
+    public static KnnStatsResult emptyFrom(AlgorithmProcessingTimings timings, Map<String, Object> configurationMap) {
+        return emptyFrom(
             timings.preProcessingMillis,
             timings.computeMillis,
             timings.sideEffectMillis,
+            configurationMap
+        );
+    }
+
+    public static KnnStatsResult emptyFrom(long preProcessingMillis, long computeMillis, long postProcessingMillis, Map<String, Object> configurationMap) {
+        return new KnnStatsResult(
+            preProcessingMillis,
+            computeMillis,
+            postProcessingMillis,
             0,
             0,
             Collections.emptyMap(),

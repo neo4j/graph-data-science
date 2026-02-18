@@ -37,10 +37,10 @@ public final class SimilarityStatistics {
         Supplier<Graph> maybeSimilarityGraph,
         boolean shouldComputeDistribution
     ) {
-        return  similarityStats(
+        return similarityStats(
             maybeSimilarityGraph,
             shouldComputeDistribution,
-            () ->new DoubleHistogram(ProcedureConstants.HISTOGRAM_PRECISION_DEFAULT)
+            () -> new DoubleHistogram(ProcedureConstants.HISTOGRAM_PRECISION_DEFAULT)
         );
     }
 
@@ -49,7 +49,7 @@ public final class SimilarityStatistics {
         Supplier<Graph> maybeSimilarityGraph,
         boolean shouldComputeDistribution,
         Supplier<DoubleHistogram> histogramSupplier
-        ) {
+        ){
 
         if (!shouldComputeDistribution) {
             return new SimilarityStats(Optional.empty(), 0,true);
@@ -61,6 +61,10 @@ public final class SimilarityStatistics {
         }
         return new SimilarityStats( histogram.histogram(), computeMilliseconds.get(), histogram.success());
 
+    }
+
+    public static Map<String, Object> similaritySummary(SimilarityStats stats) {
+        return  similaritySummary(stats.histogram(),stats.success());
     }
 
     public static Map<String, Object> similaritySummary(Optional<DoubleHistogram> histogram, boolean success) {
@@ -96,6 +100,9 @@ public final class SimilarityStatistics {
         return new Histogram(Optional.of(histogram),true);
 
     }
+
+
+
 
     private SimilarityStatistics() {}
     public record  Histogram(Optional<DoubleHistogram> histogram,  boolean success) {}
