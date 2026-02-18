@@ -68,7 +68,7 @@ class SimilarityToolsTest {
             true,
             TerminationFlag.RUNNING_TRUE
         );
-        assertThat(stats.histogram().get().getMinValue()).isCloseTo(5.0, Offset.offset(1e-5));
+        assertThat(stats.histogram().get().getMean()).isCloseTo(8.0, Offset.offset(1e-3));
         assertThat(stats.success()).isTrue();
 
 

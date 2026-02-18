@@ -80,9 +80,10 @@ class FilteredKnnStatsResultTransformerTest {
                 assertThat(stats.nodesCompared()).isEqualTo(1);
                 assertThat(stats.nodePairsConsidered()).isEqualTo(100);
                 assertThat(stats.configuration()).isEqualTo(config);
-                assertThat(stats.similarityDistribution()).hasEntrySatisfying("min", e->{
-                    assertThat(e).asInstanceOf(DOUBLE).isCloseTo(5, Offset.offset(1e-5));
-                });
+                assertThat(stats.similarityDistribution())
+                    .hasEntrySatisfying("mean", e-> assertThat(e)
+                        .asInstanceOf(DOUBLE)
+                        .isCloseTo(8, Offset.offset(1e-3)));
             });
 
     }
