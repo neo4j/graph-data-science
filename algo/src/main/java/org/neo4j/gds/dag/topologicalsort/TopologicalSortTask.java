@@ -26,8 +26,8 @@ import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
 import java.util.List;
 
-public final class TopSortTask {
-    private TopSortTask() {}
+public final class TopologicalSortTask {
+    private TopologicalSortTask() {}
 
     public static Task create(IdMap idMap) {
         var initializationTask = Tasks.leaf("Initialization", idMap.nodeCount());
