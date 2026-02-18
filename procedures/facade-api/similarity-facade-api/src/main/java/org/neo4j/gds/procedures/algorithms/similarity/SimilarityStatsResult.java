@@ -36,10 +36,24 @@ public record SimilarityStatsResult(
     ) implements StatsResult {
 
     static SimilarityStatsResult emptyFrom(AlgorithmProcessingTimings timings, Map<String, Object> configurationMap) {
-        return new SimilarityStatsResult(
+        return  emptyFrom(
             timings.preProcessingMillis,
             timings.computeMillis,
             timings.sideEffectMillis,
+            configurationMap
+        );
+    }
+
+    public static SimilarityStatsResult emptyFrom(
+        long preProcessingMillis,
+        long computeMillis,
+        long postProcessingMillis,
+        Map<String, Object> configurationMap
+    ) {
+        return new SimilarityStatsResult(
+            preProcessingMillis,
+            computeMillis,
+            postProcessingMillis,
             0,
             0,
             Collections.emptyMap(),

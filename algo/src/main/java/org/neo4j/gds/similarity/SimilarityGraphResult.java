@@ -51,4 +51,9 @@ public class SimilarityGraphResult {
         return isTopKGraph;
     }
 
+
+    public static SimilarityGraphResult empty(){
+        return  new SimilarityGraphResult(null,0,false);
+    }
+
 }
