@@ -41,7 +41,6 @@ import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.logging.GdsLoggers;
 import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.utils.mem.GcListenerExtension;
-import org.neo4j.gds.core.utils.progress.ProgressFeatureSettings;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.TaskStore;
 import org.neo4j.gds.core.utils.progress.TaskStoreService;
@@ -173,8 +172,8 @@ public final class OpenGraphDataScienceExtensionBuilder {
         singletonConfigurer.configureSingletons(concurrencyValidator, idMapBehavior, poolSizes);
 
         // Read some configuration used to select behaviour
-        var progressTrackingEnabled = neo4jConfiguration.get(ProgressFeatureSettings.progress_tracking_enabled);
-        var retentionPeriod = neo4jConfiguration.get(ProgressFeatureSettings.task_retention_period);
+        var progressTrackingEnabled = neo4jConfiguration.get(GdsSettings.progressTrackingEnabled());
+        var retentionPeriod = neo4jConfiguration.get(GdsSettings.taskRetentionPeriod());
         log.info("Progress tracking: " + (progressTrackingEnabled ? "enabled" : "disabled" + ", retentionPeriod: " + retentionPeriod.toString()));
         var useMaxMemoryEstimation = neo4jConfiguration.get(GdsSettings.validateUsingMaxMemoryEstimation());
         log.info("Memory usage guard: " + (useMaxMemoryEstimation ? "maximum" : "minimum") + " estimate");

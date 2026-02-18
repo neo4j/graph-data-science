@@ -204,7 +204,7 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
             .userLogStore(userLogStore)
             .build();
 
-        var telemetryLogger = neo4jConfiguration.get(GdsSettings.enableTelemetryLogging()) ?
+        var telemetryLogger = neo4jConfiguration.get(GdsSettings.telemetryLoggingEnabled()) ?
             new TelemetryLoggerImpl(loggers.log()) :
             TelemetryLogger.DISABLED;
 
