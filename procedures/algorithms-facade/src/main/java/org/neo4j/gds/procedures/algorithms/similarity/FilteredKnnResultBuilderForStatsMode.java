@@ -23,6 +23,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.applications.algorithms.machinery.StatsResultBuilder;
 import org.neo4j.gds.applications.algorithms.similarity.SimilarityResultStreamDelegate;
+import org.neo4j.gds.result.SimilarityStatistics;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnResult;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnStatsConfig;
 
@@ -64,20 +65,20 @@ class FilteredKnnResultBuilderForStatsMode implements StatsResultBuilder<Filtere
             configuration.concurrency(),
             filteredKnnResult.similarityResultStream()
         );
-        var communityStatistics = similarityStatsProcessor.computeSimilarityStatistics(
+        var similarityStats = similarityStatsProcessor.computeSimilarityStatistics(
             similarityGraphResult,
             shouldComputeSimilarityDistribution
         );
-        var similarityDistribution = similarityStatsProcessor.computeSimilarityDistribution(
-            shouldComputeSimilarityDistribution,
-            similarityGraphResult
+        var similarityDistribution = SimilarityStatistics.similaritySummary(
+            similarityStats.histogram(),
+            similarityStats.success()
         );
 
         return Stream.of(
             new KnnStatsResult(
                 timings.preProcessingMillis,
                 timings.computeMillis,
-                communityStatistics.computeMilliseconds(),
+                similarityStats.computeMilliseconds(),
                 filteredKnnResult.nodesCompared(),
                 filteredKnnResult.numberOfSimilarityPairs(),
                 similarityDistribution,
