@@ -22,11 +22,15 @@ package org.neo4j.gds.procedures.algorithms.similarity.stats;
 
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
+import org.neo4j.gds.procedures.algorithms.similarity.KnnStatsResult;
 import org.neo4j.gds.procedures.algorithms.similarity.SimilarityDistributionInstructions;
 import org.neo4j.gds.procedures.algorithms.similarity.SimilarityStatsResult;
 import org.neo4j.gds.similarity.SimilarityComputeBusinessFacade;
+import org.neo4j.gds.similarity.filteredknn.FilteredKnnStatsConfig;
 import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityStatsConfig;
+import org.neo4j.gds.similarity.knn.KnnStatsConfig;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityStatsConfig;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Map;
 import java.util.stream.Stream;
@@ -36,20 +40,22 @@ public class PushbackSimilarityStatsProcedureFacade {
     private final SimilarityComputeBusinessFacade businessFacade;
     private final UserSpecificConfigurationParser configurationParser;
     private final SimilarityDistributionInstructions similarityDistributionInstructions;
+    private final TerminationFlag terminationFlag; //meh
 
 
     public PushbackSimilarityStatsProcedureFacade(
         SimilarityComputeBusinessFacade businessFacade,
         UserSpecificConfigurationParser configurationParser,
-        SimilarityDistributionInstructions similarityDistributionInstructions
+        SimilarityDistributionInstructions similarityDistributionInstructions, TerminationFlag terminationFlag
     ) {
         this.businessFacade = businessFacade;
         this.configurationParser = configurationParser;
         this.similarityDistributionInstructions = similarityDistributionInstructions;
+        this.terminationFlag = terminationFlag;
     }
-    /*
-    public Stream<SimilarityStreamResult> knn(String graphName, Map<String, Object> configuration) {
-        var config = configurationParser.parseConfiguration(configuration, KnnStreamConfig::of);
+
+    public Stream<KnnStatsResult> knn(String graphName, Map<String, Object> configuration) {
+        var config = configurationParser.parseConfiguration(configuration, KnnStatsConfig::of);
 
         var parameters = config.toParameters();
         return businessFacade.knn(
@@ -58,12 +64,18 @@ public class PushbackSimilarityStatsProcedureFacade {
             parameters,
             config.jobId(),
             config.logProgress(),
-            graphResources -> new KnnStreamResultTransformer(graphResources.graph())
+            graphResources -> new KnnStatsResultTransformer(
+                graphResources.graph(),
+                similarityDistributionInstructions.shouldComputeDistribution(),
+                config.toMap(),
+                terminationFlag,
+                parameters.concurrency()
+            )
         ).join();
     }
 
-    public Stream<SimilarityStreamResult> filteredKnn(String graphName, Map<String, Object> configuration) {
-        var config = configurationParser.parseConfiguration(configuration, FilteredKnnStreamConfig::of);
+    public Stream<KnnStatsResult> filteredKnn(String graphName, Map<String, Object> configuration) {
+        var config = configurationParser.parseConfiguration(configuration, FilteredKnnStatsConfig::of);
 
         var parameters = config.toFilteredKnnParameters();
         return businessFacade.filteredKnn(
@@ -72,9 +84,15 @@ public class PushbackSimilarityStatsProcedureFacade {
             parameters,
             config.jobId(),
             config.logProgress(),
-            graphResources -> new FilteredKnnStreamResultTransformer(graphResources.graph())
+            graphResources -> new FilteredKnnStatsResultTransformer(
+                graphResources.graph(),
+                similarityDistributionInstructions.shouldComputeDistribution(),
+                config.toMap(),
+                terminationFlag,
+                parameters.knnParametersSansNodeCount().concurrency()
+            )
         ).join();
-    } */
+    }
 
     public Stream<SimilarityStatsResult> nodeSimilarity(
         String graphName,
