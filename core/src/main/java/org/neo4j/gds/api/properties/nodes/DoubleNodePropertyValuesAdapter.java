@@ -19,8 +19,10 @@
  */
 package org.neo4j.gds.api.properties.nodes;
 
-import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
+import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
+
+import java.util.function.LongPredicate;
 
 final class DoubleNodePropertyValuesAdapter {
 
@@ -50,6 +52,25 @@ final class DoubleNodePropertyValuesAdapter {
             @Override
             public long nodeCount() {
                 return array.size();
+            }
+        };
+    }
+
+    static DoubleNodePropertyValues adapt(HugeDoubleArray array, LongPredicate seenValues) {
+        return new DoubleNodePropertyValues() {
+            @Override
+            public double doubleValue(long nodeId) {
+                return array.get(nodeId);
+            }
+
+            @Override
+            public long nodeCount() {
+                return array.size();
+            }
+
+            @Override
+            public boolean hasValue(long nodeId) {
+                return seenValues.test(nodeId);
             }
         };
     }

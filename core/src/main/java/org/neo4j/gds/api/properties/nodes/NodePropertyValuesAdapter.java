@@ -19,19 +19,25 @@
  */
 package org.neo4j.gds.api.properties.nodes;
 
-import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
-import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
 import org.neo4j.gds.collections.ha.HugeByteArray;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeIntArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
+import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
+import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
+
+import java.util.function.LongPredicate;
 
 public final class NodePropertyValuesAdapter {
     private NodePropertyValuesAdapter() {}
 
     public static LongNodePropertyValues adapt(HugeLongArray hugeLongArray) {
         return LongNodePropertyValuesAdapter.adapt(hugeLongArray);
+    }
+
+    public static LongNodePropertyValues adapt(HugeLongArray hugeLongArray, LongPredicate seenValues) {
+        return LongNodePropertyValuesAdapter.adapt(hugeLongArray, seenValues);
     }
 
     public static LongNodePropertyValues adapt(HugeIntArray hugeIntArray) {
@@ -46,8 +52,16 @@ public final class NodePropertyValuesAdapter {
         return DoubleNodePropertyValuesAdapter.adapt(hugeDoubleArray);
     }
 
+    public static DoubleNodePropertyValues adapt(HugeDoubleArray hugeDoubleArray, LongPredicate seenValues) {
+        return DoubleNodePropertyValuesAdapter.adapt(hugeDoubleArray, seenValues);
+    }
+
     public static NodePropertyValues adapt(HugeObjectArray<?> hugeObjectArray) {
         return ObjectNodePropertyValuesAdapter.adapt(hugeObjectArray);
+    }
+
+    public static NodePropertyValues adapt(HugeObjectArray<?> hugeObjectArray, LongPredicate seenValues) {
+        return ObjectNodePropertyValuesAdapter.adapt(hugeObjectArray, seenValues);
     }
 
     public static LongNodePropertyValues adapt(HugeAtomicLongArray hugeAtomicLongArray) {

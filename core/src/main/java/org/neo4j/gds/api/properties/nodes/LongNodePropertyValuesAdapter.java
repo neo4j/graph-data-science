@@ -19,10 +19,12 @@
  */
 package org.neo4j.gds.api.properties.nodes;
 
-import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
 import org.neo4j.gds.collections.ha.HugeByteArray;
 import org.neo4j.gds.collections.ha.HugeIntArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
+
+import java.util.function.LongPredicate;
 
 public final class LongNodePropertyValuesAdapter {
 
@@ -39,6 +41,26 @@ public final class LongNodePropertyValuesAdapter {
             @Override
             public long nodeCount() {
                 return array.size();
+            }
+        };
+    }
+
+    static LongNodePropertyValues adapt(HugeLongArray array, LongPredicate seenValues) {
+        return new LongNodePropertyValues() {
+
+            @Override
+            public long longValue(long nodeId) {
+                return array.get(nodeId);
+            }
+
+            @Override
+            public long nodeCount() {
+                return array.size();
+            }
+
+            @Override
+            public boolean hasValue(long nodeId) {
+                return seenValues.test(nodeId);
             }
         };
     }

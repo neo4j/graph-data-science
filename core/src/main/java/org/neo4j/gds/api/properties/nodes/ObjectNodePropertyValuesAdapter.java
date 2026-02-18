@@ -21,6 +21,8 @@ package org.neo4j.gds.api.properties.nodes;
 
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 
+import java.util.function.LongPredicate;
+
 final class ObjectNodePropertyValuesAdapter {
 
     private ObjectNodePropertyValuesAdapter() {}
@@ -63,6 +65,65 @@ final class ObjectNodePropertyValuesAdapter {
                 @Override
                 public long nodeCount() {
                     return objectArray.size();
+                }
+            };
+        }
+        throw new UnsupportedOperationException("This HugeObjectArray can not be converted to node properties.");
+    }
+
+    public static NodePropertyValues adapt(HugeObjectArray<?> objectArray, LongPredicate seenValues) {
+        var cls = objectArray.elementClass();
+        if (cls == float[].class) {
+            return new FloatArrayNodePropertyValues() {
+                @Override
+                public float[] floatArrayValue(long nodeId) {
+                    return (float[]) objectArray.get(nodeId);
+                }
+
+                @Override
+                public long nodeCount() {
+                    return objectArray.size();
+                }
+
+                @Override
+                public boolean hasValue(long nodeId) {
+                    return seenValues.test(nodeId);
+                }
+            };
+        }
+        if (cls == double[].class) {
+            return new DoubleArrayNodePropertyValues() {
+                @Override
+                public double[] doubleArrayValue(long nodeId) {
+                    return (double[]) objectArray.get(nodeId);
+                }
+
+                @Override
+                public long nodeCount() {
+                    return objectArray.size();
+                }
+
+                @Override
+                public boolean hasValue(long nodeId) {
+                    return seenValues.test(nodeId);
+                }
+            };
+        }
+        if (cls == long[].class) {
+            return new LongArrayNodePropertyValues() {
+                @Override
+                public long[] longArrayValue(long nodeId) {
+                    return (long[]) objectArray.get(nodeId);
+                }
+
+                @Override
+                public long nodeCount() {
+                    return objectArray.size();
+                }
+
+                @Override
+                public boolean hasValue(long nodeId) {
+                    return seenValues.test(nodeId);
                 }
             };
         }
