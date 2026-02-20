@@ -369,7 +369,7 @@ The action body is a JSON document containing the configuration for the import p
 
 The following table contains all settings for the database import.
 
-[[arrow-database-import-settings]]
+[[arrow-import-database-settings]]
 [opts=header,cols="1m,1,1,1,1"]
 |===
 | Name              | Type              | Optional  | Default value         | Description
