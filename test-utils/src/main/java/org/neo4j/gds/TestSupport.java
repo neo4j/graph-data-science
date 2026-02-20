@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.assertj.core.api.Condition;
 import org.assertj.core.api.HamcrestCondition;
 import org.assertj.core.api.ObjectAssert;
@@ -34,17 +35,18 @@ import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.properties.nodes.NodeProperty;
 import org.neo4j.gds.canonization.CanonicalAdjacencyMatrix;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
-import org.neo4j.gds.mem.MemoryEstimation;
-import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.extension.GdlSupportPerMethodExtension;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.gds.gdl.ImmutableGraphProjectFromGdlConfig;
+import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.termination.TerminatedException;
 import org.neo4j.gds.transaction.DatabaseTransactionContext;
 import org.neo4j.gds.transaction.TransactionContext;
@@ -63,21 +65,66 @@ import java.util.function.Function;
 import java.util.function.LongSupplier;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static java.util.Collections.emptyMap;
+import static java.util.stream.Collectors.joining;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.neo4j.gds.NodeLabel.ALL_NODES;
 import static org.neo4j.gds.Orientation.REVERSE;
 import static org.neo4j.gds.QueryRunner.runQueryWithResultConsumer;
+import static org.neo4j.gds.RelationshipType.ALL_RELATIONSHIPS;
 import static org.neo4j.gds.compat.GraphDatabaseApiProxy.runInFullAccessTransaction;
 import static org.neo4j.gds.utils.StringFormatting.formatNumber;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class TestSupport {
+    private record NodeLabelsAndProperties(
+        long nodeId,
+        List<String> labels,
+        List<Pair<String, NodeProperty>> properties
+    ) {
+        private String toGdl() {
+            Function<String, String> propertiesString = properties ->
+                properties.isEmpty() ? "" : String.format(" {%s}", properties);
+            Function<Pair<String, NodeProperty>, String> propertyToString = p ->
+                String.format("%s : %s", p.getLeft(), gdlNodePropertyString(p.getRight(), nodeId));
+
+            return String.format(
+                "(a%d%s%s)",
+                nodeId,
+                labels.stream().map(label -> String.format(":%s", label)).collect(joining()),
+                propertiesString.apply(properties.stream().map(propertyToString).collect(joining(", ")))
+            );
+        }
+    }
+
+    private record RelationshipLabelsAndProperties(
+        long sourceId,
+        long targetId,
+        String label,
+        List<Pair<String, Double>> properties
+    ) {
+        private String toGdl() {
+            var labelAndProperties = String.format(
+                "[:%s%s]",
+                label,
+                properties.isEmpty()
+                    ? "" :
+                    String.format(
+                        " {%s}", properties.stream()
+                            .map(p -> String.format("%s : %s", p.getLeft(), p.getRight()))
+                            .collect(joining(", "))
+                    )
+            );
+            return String.format("(a%d)-%s->(a%d)", sourceId, labelAndProperties, targetId);
+        }
+    }
 
     public static final boolean CI =
         System.getenv("TEAMCITY_VERSION") != null || System.getenv("CI") != null || System.getenv("BUILD_ID") != null;
@@ -186,6 +233,106 @@ public final class TestSupport {
         Objects.requireNonNull(gdl);
 
         return GdlFactory.of(gdl).build();
+    }
+
+    private static String gdlNodePropertyString(NodeProperty nodeProperty, long nodeId) {
+        return switch (nodeProperty.valueType()) {
+            case LONG -> String.format("%dL", nodeProperty.values().longValue(nodeId));
+            case DOUBLE -> String.format("%fd", nodeProperty.values().doubleValue(nodeId));
+            case LONG_ARRAY -> String.format(
+                "[%s]", Arrays.stream(nodeProperty.values().longArrayValue(nodeId))
+                    .mapToObj(l -> String.format("%dL", l))
+                    .collect(joining(", "))
+            );
+            case DOUBLE_ARRAY -> String.format(
+                "[%s]", Arrays.stream(nodeProperty.values().doubleArrayValue(nodeId))
+                    .mapToObj(d -> String.format("%fd", d))
+                    .collect(joining(", "))
+            );
+            case FLOAT_ARRAY -> {
+                float[] floatArrayValue = nodeProperty.values().floatArrayValue(nodeId);
+                yield IntStream.range(0, floatArrayValue.length)
+                    .mapToObj(i -> String.format("%ff", floatArrayValue[i]))
+                    .collect(joining(", "));
+            }
+            default -> throw new IllegalStateException("Unexpected value: " + nodeProperty.valueType());
+        };
+    }
+
+    private static Map<Pair<Long, Long>, List<Pair<String, Double>>> propertiesOfRelationshipType(
+        GraphStore graphStore,
+        RelationshipType relationshipType
+    ) {
+        Map<Pair<Long, Long>, List<Pair<String, Double>>> relationships = new HashMap<>();
+        graphStore.relationshipPropertyKeys(relationshipType).forEach(propertyKey -> {
+            var graph = graphStore.getGraph(relationshipType, Optional.of(propertyKey));
+            graph.forEachNode(nodeId -> {
+                graph.forEachRelationship(
+                    nodeId, 0.0, (s, t, v) -> {
+                        var key = Pair.of(s, t);
+                        relationships.computeIfAbsent(key, k -> new ArrayList<>()).add(Pair.of(propertyKey, v));
+                        return true;
+                    }
+                );
+                return true;
+            });
+        });
+        return relationships;
+    }
+
+    public static String gdlFromGraphStore(GraphStore graphStore) {
+        Objects.requireNonNull(graphStore);
+        StringBuilder sb = new StringBuilder();
+        var graph = graphStore.getUnion();
+
+        List<NodeLabelsAndProperties> nodes = new ArrayList<>();
+
+        graph.forEachNode(nodeId -> {
+            List<NodeLabel> nodeLabels = graph.nodeLabels(nodeId);
+
+            List<String> labels = nodeLabels.stream()
+                .filter(label -> !label.equals(ALL_NODES))
+                .map(NodeLabel::name).toList();
+
+            List<Pair<String, NodeProperty>> properties = graphStore.nodePropertyKeys().stream()
+                .filter(key -> graphStore.hasNodeProperty(nodeLabels, key))
+                .map(key -> Pair.of(key, graphStore.nodeProperty(key))).toList();
+
+            nodes.add(new NodeLabelsAndProperties(nodeId, labels, properties));
+            return true;
+        });
+
+        nodes.forEach(record -> {
+            sb.append(record.toGdl());
+            sb.append("\n");
+        });
+
+        List<RelationshipLabelsAndProperties> relationships = new ArrayList<>();
+        graphStore.relationshipTypes().stream()
+            .filter(t -> !ALL_RELATIONSHIPS.equals(t)) // TODO discuss if we want to silently filter out or use the default label
+            .forEach(relationshipType -> {
+                var properties = propertiesOfRelationshipType(graphStore, relationshipType);
+                var relTypeGraph = graphStore.getGraph(relationshipType);
+                relTypeGraph.forEachNode(nodeId -> {
+                    relTypeGraph.forEachRelationship(
+                        nodeId, (s, t) -> {
+                            var propertyList = properties.getOrDefault(Pair.of(s, t), List.of());
+                            relationships.add(
+                                new RelationshipLabelsAndProperties(s, t, relationshipType.name(), propertyList)
+                            );
+                            return true;
+                        }
+                    );
+                    return true;
+                });
+            });
+
+        relationships.forEach(record -> {
+            sb.append(record.toGdl());
+            sb.append("\n");
+        });
+
+        return sb.toString();
     }
 
     @Builder.Factory

@@ -22,6 +22,7 @@ package org.neo4j.gds;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.provider.Arguments;
+import org.neo4j.gds.gdl.GdlFactory;
 
 import java.util.Arrays;
 import java.util.List;
@@ -87,4 +88,26 @@ class TestSupportTest {
         return arguments.map(Arguments::get).map(Arrays::asList).collect(Collectors.toSet());
     }
 
+    @Test
+    void gdlFromGraphStoreTest() {
+        String gdlInput = """
+            (a0:foo:high {height : 1.97d})
+            (a1:bar:baz {fibo : [0L, 1L, 1L, 2L, 3L, 5L, 8L]})
+            (a2)
+            (a3:heavy {weight : 66L})
+            (a4)
+            //(a0)-->(a0) // TODO discuss if we want this as valid input
+            (a0)-[:likes {intensity : 0.3, validity: 0.1}]->(a1)
+            (a1)-[:dislikes]->(a0)
+            """;
+
+        var gs1 = GdlFactory.of(gdlInput).build();
+
+        String gdlActual = TestSupport.gdlFromGraphStore(gs1);
+
+        // assertThat(gdlActual).isEqualTo(gdlInput); TODO remove me
+        System.out.println(gdlActual); // TODO remove me
+        var gs2 = GdlFactory.of(gdlActual).build();
+        TestSupport.assertGraphEquals(gs1.getUnion(), gs2.getUnion());
+    }
 }
