@@ -53,6 +53,10 @@ public class PathFindingResult {
         return first;
     }
 
+    public Stream<PathResult> paths() {
+        return paths;
+    }
+
     public void forEachPath(Consumer<PathResult> resultConsumer) {
         paths.forEach(resultConsumer);
         runConsumptionAction();

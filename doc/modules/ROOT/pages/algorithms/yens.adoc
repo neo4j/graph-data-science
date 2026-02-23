@@ -30,7 +30,7 @@ For the actual path computation, Yen's algorithm uses xref:algorithms/dijkstra-s
 The algorithm makes sure that an already discovered shortest path will not be traversed again.
 
 The algorithm implementation is parallelized, but limited by the number of nodes in source-target paths.
-If these paths are expected to have small length (i.e., a few new nodes) setting a high value for concurrency is discouraged as some of the cores might be left unitilized.
+If these paths are expected to have small length (i.e., a few new nodes) setting a high value for concurrency is discouraged as some of the cores might be left unutilized.
 
 [[algorithms-yens-syntax]]
 == Syntax
@@ -245,3 +245,67 @@ The relationship stores three properties describing the path: `totalCost`, `node
 ====
 The relationships written are always directed, even if the input graph is undirected.
 ====
+
+
+[[algorithms-yens-inverse-index]]
+=== Graph pruning optimization
+
+On undirected and inverse-indexed graphs, GDS applies a graph pruning optimization in a pre-processing step as described in https://yuede.github.io/files/23_SC_PeeK.pdf[PeeK: A Prune-Centric Approach for K Shortest Path
+Computation].
+
+This allows Yen's algorithm to run on a smaller graph, which results in significant performance improvements in most cases. Especially for high values of k.
+
+The graph pruning is applied by default on undirected graphs.
+
+In order to apply on directed graphs, the `indexInverse` parameter has to be used in the relationship projection.
+An inverse index allows the algorithm to traverse the relationships of a node according to the opposite orientation.
+
+.The following statement will project a graph using a Cypher projection and store it in the graph catalog under the name 'myIndexedGraph'.
+[source, cypher, role=noplay graph-project-query]
+----
+MATCH (source:Location)-[r:ROAD]->(target:Location)
+RETURN gds.graph.project(
+  'myIndexedGraph',
+  source,
+  target,
+  { relationshipProperties: r { .cost } },
+  { inverseIndexedRelationshipTypes: ['*'] }
+)
+----
+
+The following query is identical to the xref:algorithms/yens.adoc#algorithms-yens-examples-stream[stream example].
+This time, we execute Yen's algorithm on `myIndexedGraph` which will allow Peek pruning.
+
+[role=query-example, no-result=true]
+--
+.The following will run the algorithm with PeeK pruning and stream results:
+[source, cypher, role=noplay]
+----
+MATCH (source:Location {name: 'A'}), (target:Location {name: 'F'})
+CALL gds.shortestPath.yens.stream('myIndexedGraph', {
+    sourceNode: source,
+    targetNode: target,
+    k: 3,
+    relationshipWeightProperty: 'cost'
+})
+YIELD index, sourceNode, targetNode, totalCost, nodeIds, costs, path
+RETURN
+    index,
+    gds.util.asNode(sourceNode).name AS sourceNodeName,
+    gds.util.asNode(targetNode).name AS targetNodeName,
+    totalCost,
+    [nodeId IN nodeIds | gds.util.asNode(nodeId).name] AS nodeNames,
+    costs,
+    nodes(path) as path
+ORDER BY index
+----
+
+.Results
+[opts="header"]
+|===
+| index | sourceNodeName | targetNodeName | totalCost | nodeNames         | costs                           | path
+| 0     | "A"            | "F"            | 160.0     | ["A", "B", "D", "E", "F"]   | [0.0, 50.0, 90.0, 120.0, 160.0] | [Node[0], Node[1], Node[3], Node[4], Node[5]]
+| 1     | "A"            | "F"            | 160.0     | ["A", "C", "D", "E", "F"]   | [0.0, 50.0, 90.0, 120.0, 160.0] | [Node[0], Node[2], Node[3], Node[4], Node[5]]
+| 2     | "A"            | "F"            | 170.0     | ["A", "B", "D", "F"]      | [0.0, 50.0, 90.0, 170.0]        | [Node[0], Node[1], Node[3], Node[5]]
+|===
+--

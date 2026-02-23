@@ -28,8 +28,12 @@ public final class HugeSerialObjectMergeSort {
     private HugeSerialObjectMergeSort() {}
 
     public static <T> void sort(Class<T> componentClass, HugeObjectArray<T> array, ToDoubleFunction<T> toSortValue) {
-        HugeObjectArray<T> temp = HugeObjectArray.newArray(componentClass, array.size());
-        sort(array, array.size(), toSortValue, temp);
+        sort(componentClass, array, array.size(), toSortValue);
+    }
+
+    public static <T> void sort(Class<T> componentClass, HugeObjectArray<T> array, long size, ToDoubleFunction<T> toSortValue) {
+        HugeObjectArray<T> temp = HugeObjectArray.newArray(componentClass, size);
+        sort(array, size, toSortValue, temp);
     }
 
     public static <T> void sort(

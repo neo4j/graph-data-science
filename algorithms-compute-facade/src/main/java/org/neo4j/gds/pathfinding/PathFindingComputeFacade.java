@@ -29,6 +29,7 @@ import org.neo4j.gds.async.AsyncAlgorithmCaller;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
 import org.neo4j.gds.core.JobId;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.paged.ParalleLongPageCreator;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.dag.longestPath.DagLongestPath;
@@ -59,7 +60,7 @@ import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.paths.traverse.BFS;
 import org.neo4j.gds.paths.traverse.DFS;
 import org.neo4j.gds.paths.traverse.ExitAndAggregation;
-import org.neo4j.gds.paths.yens.Yens;
+import org.neo4j.gds.paths.yens.YensFactory;
 import org.neo4j.gds.paths.yens.YensParameters;
 import org.neo4j.gds.pcst.PCSTParameters;
 import org.neo4j.gds.pricesteiner.PCSTFast;
@@ -629,9 +630,10 @@ public class PathFindingComputeFacade {
         );
 
         // Create the algorithm
-        var yens = Yens.sourceTarget(
+        var yens = YensFactory.create(
             graph,
             parameters,
+            DefaultPool.INSTANCE,
             progressTracker,
             terminationFlag
         );

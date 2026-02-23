@@ -45,7 +45,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.paths.delta.TentativeDistances.NO_PREDECESSOR;
+import static org.neo4j.gds.paths.delta.DistanceAndPredecessors.NO_PREDECESSOR;
 
 public class BellmanFord extends Algorithm<BellmanFordResult> {
     private final long sourceNode;

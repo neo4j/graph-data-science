@@ -36,7 +36,7 @@ import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.paths.ImmutablePathResult;
 import org.neo4j.gds.paths.PathResult;
-import org.neo4j.gds.paths.delta.TentativeDistances;
+import org.neo4j.gds.paths.delta.DistanceAndPredecessors;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.termination.TerminationFlag;
 
@@ -49,7 +49,7 @@ import java.util.function.LongFunction;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.paths.delta.TentativeDistances.NO_PREDECESSOR;
+import static org.neo4j.gds.paths.delta.DistanceAndPredecessors.NO_PREDECESSOR;
 
 /*
  * Longest Path algorithm implemented using topological sort
@@ -62,7 +62,7 @@ public class DagLongestPath extends Algorithm<PathFindingResult> {
     private final Graph graph;
     private final long nodeCount;
     private final Concurrency concurrency;
-    private final TentativeDistances parentsAndDistances;
+    private final DistanceAndPredecessors parentsAndDistances;
 
     public DagLongestPath(
         Graph graph,
@@ -75,7 +75,7 @@ public class DagLongestPath extends Algorithm<PathFindingResult> {
         this.nodeCount = graph.nodeCount();
         this.concurrency = concurrency;
         this.inDegrees = HugeAtomicLongArray.of(nodeCount, ParalleLongPageCreator.passThrough(this.concurrency));
-        this.parentsAndDistances = TentativeDistances.distanceAndPredecessors(nodeCount, concurrency, -Double.MIN_VALUE, (a, b) -> Double.compare(a, b) < 0);
+        this.parentsAndDistances = new DistanceAndPredecessors(nodeCount, concurrency, -Double.MIN_VALUE, (a, b) -> Double.compare(a, b) < 0);
         this.terminationFlag = terminationFlag;
     }
 
@@ -151,14 +151,14 @@ public class DagLongestPath extends Algorithm<PathFindingResult> {
         private final long sourceId;
         private final Graph graph;
         private final HugeAtomicLongArray inDegrees;
-        private final TentativeDistances parentsAndDistances;
+        private final DistanceAndPredecessors parentsAndDistances;
 
         LongestPathTask(
             @Nullable DagLongestPath.LongestPathTask parent,
             long sourceId,
             Graph graph,
             HugeAtomicLongArray inDegrees,
-            TentativeDistances parentsAndDistances
+            DistanceAndPredecessors parentsAndDistances
         ) {
             super(parent);
             this.sourceId = sourceId;
@@ -207,11 +207,11 @@ public class DagLongestPath extends Algorithm<PathFindingResult> {
     }
 
     private static Stream<PathResult> pathResults(
-        TentativeDistances tentativeDistances,
+        DistanceAndPredecessors tentativeDistances,
         Concurrency concurrency
     ) {
         var distances = tentativeDistances.distances();
-        var predecessors = tentativeDistances.predecessors().orElseThrow();
+        var predecessors = tentativeDistances.predecessors();
 
         var pathIndex = new AtomicLong(0L);
 

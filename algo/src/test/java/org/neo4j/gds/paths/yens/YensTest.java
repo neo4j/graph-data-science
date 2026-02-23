@@ -152,7 +152,7 @@ class YensTest {
 
         var log = new GdsTestLog();
         var testTracker = TestProgressTracker.create(
-            YensProgressTask.create(graph.relationshipCount(), 3),
+            YensProgressTask.createBasicYens(graph.relationshipCount(), 3),
             new LoggerForProgressTrackingAdapter(log),
             new Concurrency(4),
             EmptyTaskRegistryFactory.INSTANCE
@@ -193,7 +193,7 @@ class YensTest {
 
         var log = new GdsTestLog();
         var testTracker = TestProgressTracker.create(
-            YensProgressTask.create(graph.relationshipCount(), 3),
+            YensProgressTask.createBasicYens(graph.relationshipCount(), 3),
             new LoggerForProgressTrackingAdapter(log),
             new Concurrency(4),
             EmptyTaskRegistryFactory.INSTANCE

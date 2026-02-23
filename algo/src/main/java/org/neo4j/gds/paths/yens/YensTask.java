@@ -159,9 +159,7 @@ public class YensTask implements Runnable {
             Optional.empty(),
             ProgressTracker.NULL_TRACKER,
             terminationFlag
-            );
-
-        localDijkstra.withRelationshipFilter(relationshipFilterer::validRelationship);
+            ).withRelationshipFilter(relationshipFilterer::validRelationship);
     }
 
 }

@@ -108,6 +108,8 @@ public final class PathFindingAlgorithmTasks {
 
     public Task yens(Graph graph,int k){
        return YensProgressTask.create(
+            graph.characteristics(),
+            graph.nodeCount(),
             graph.relationshipCount(),
             k
         );
