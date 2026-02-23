@@ -49,6 +49,8 @@ This option does not require any installation and gives access to the enterprise
 
 == Verifying the installation
 
+NOTE: Skip this section if you use Aura Graph Analytics.
+
 To verify your installation, run the `gds.version()` function in the Neo4j Browser:
 
 [source, cypher, role=noplay]
