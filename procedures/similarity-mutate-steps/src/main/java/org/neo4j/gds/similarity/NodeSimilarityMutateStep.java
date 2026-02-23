@@ -69,8 +69,8 @@ public final class NodeSimilarityMutateStep implements MutateStep<NodeSimilarity
         return similarityMutation.execute(
             graph,
             graphStore,
-            configuration,
-            configuration,
+            configuration.mutateRelationshipType(),
+            configuration.mutateProperty(),
             result.graphResult(),
             shouldComputeSimilarityDistribution
         );

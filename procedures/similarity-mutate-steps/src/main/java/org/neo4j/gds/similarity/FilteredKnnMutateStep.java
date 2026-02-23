@@ -68,8 +68,9 @@ public final class FilteredKnnMutateStep implements MutateStep<FilteredKnnResult
         return similarityMutation.execute(
             graph,
             graphStore,
-            configuration,
-            configuration,
+            configuration.mutateRelationshipType(),
+            configuration.mutateProperty(),
+            configuration.concurrency(),
             result.similarityResultStream(),
             shouldComputeSimilarityDistribution
         );

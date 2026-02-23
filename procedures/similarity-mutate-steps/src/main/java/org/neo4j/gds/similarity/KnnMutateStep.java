@@ -69,8 +69,9 @@ public final class KnnMutateStep implements MutateStep<KnnResult, Pair<Relations
         return similarityMutation.execute(
             graph,
             graphStore,
-            configuration,
-            configuration,
+            configuration.mutateRelationshipType(),
+            configuration.mutateProperty(),
+            configuration.concurrency(),
             result.streamSimilarityResult(),
             shouldComputeSimilarityDistribution
         );

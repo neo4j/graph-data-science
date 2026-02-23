@@ -25,8 +25,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.MutateRelationshipService;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
-import org.neo4j.gds.config.MutateRelationshipConfig;
-import org.neo4j.gds.config.MutateRelationshipPropertyConfig;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Map;
@@ -48,14 +47,15 @@ class SimilarityMutation {
     Pair<RelationshipsWritten, Map<String, Object>> execute(
         Graph graph,
         GraphStore graphStore,
-        MutateRelationshipPropertyConfig mutateRelationshipPropertyConfiguration,
-        MutateRelationshipConfig mutateRelationshipConfiguration,
+        String mutateRelationshipType,
+        String mutateRelationshipProperty,
+        Concurrency concurrency,
         Stream<SimilarityResult> similarityResultStream,
         boolean shouldComputeSimilarityDistribution
     ) {
         var similarityGraphResult = SimilarityGraphResult.fromStream(
             graph,
-            mutateRelationshipPropertyConfiguration.concurrency(),
+            concurrency,
             similarityResultStream,
             terminationFlag
         );
@@ -63,8 +63,7 @@ class SimilarityMutation {
         return execute(
             graph,
             graphStore,
-            mutateRelationshipPropertyConfiguration,
-            mutateRelationshipConfiguration,
+            mutateRelationshipType, mutateRelationshipProperty,
             similarityGraphResult,
             shouldComputeSimilarityDistribution
         );
@@ -73,8 +72,8 @@ class SimilarityMutation {
     Pair<RelationshipsWritten, Map<String, Object>> execute(
         Graph graph,
         GraphStore graphStore,
-        MutateRelationshipPropertyConfig mutateRelationshipPropertyConfiguration,
-        MutateRelationshipConfig mutateRelationshipConfiguration,
+        String mutateRelationshipType,
+        String mutateRelationshipProperty,
         SimilarityGraphResult similarityGraphResult,
         boolean shouldComputeSimilarityDistribution
     ) {
@@ -86,8 +85,8 @@ class SimilarityMutation {
 
         var relationshipsWritten = mutateRelationshipService.mutate(
             graphStore,
-            mutateRelationshipConfiguration.mutateRelationshipType(),
-            mutateRelationshipPropertyConfiguration.mutateProperty(),
+            mutateRelationshipType,
+            mutateRelationshipProperty,
             similaritySingleTypeRelationshipsHandler
         );
 
