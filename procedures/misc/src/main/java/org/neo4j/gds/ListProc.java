@@ -39,7 +39,7 @@ public class ListProc {
     private static final String PROCEDURE_QUERY =
         " SHOW PROCEDURES " +
         " YIELD name, signature, description " +
-        " WHERE (name STARTS WITH 'algo.' OR name STARTS WITH 'gds.')" +
+        " WHERE name STARTS WITH 'gds.'" +
         " AND name <> 'gds.list'" +
         " AND ($name IS NULL OR name CONTAINS $name) " +
         " RETURN name, signature, description, 'procedure' AS type " +
@@ -48,7 +48,7 @@ public class ListProc {
     private static final String FUNCTION_QUERY =
         " SHOW FUNCTIONS " +
         " YIELD name, signature, description " +
-        " WHERE (name STARTS WITH 'algo.' OR name STARTS WITH 'gds.') AND ($name IS NULL OR name CONTAINS $name) " +
+        " WHERE name STARTS WITH 'gds.' AND ($name IS NULL OR name CONTAINS $name) " +
         " RETURN name, signature, description, 'function' AS type " +
         " ORDER BY name";
 
