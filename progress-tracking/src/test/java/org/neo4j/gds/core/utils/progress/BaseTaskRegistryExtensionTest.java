@@ -25,6 +25,8 @@ import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.procedures.integration.TaskStoreAndRegistryExtension;
+import org.neo4j.gds.settings.GdsSettings;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Procedure;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
@@ -42,10 +44,10 @@ abstract class BaseTaskRegistryExtensionTest extends BaseTest {
     @ExtensionCallback
     protected void configuration(TestDatabaseManagementServiceBuilder builder) {
         super.configuration(builder);
-        builder.setConfig(ProgressFeatureSettings.progress_tracking_enabled, featureEnabled());
+        builder.setConfig(GdsSettings.progressTrackingEnabled(), featureEnabled());
         // make sure that we 1) have our extension under test and 2) have it only once
-        builder.removeExtensions(ex -> ex instanceof TaskRegistryExtension);
-        builder.addExtension(new TaskRegistryExtension());
+        builder.removeExtensions(ex -> ex instanceof TaskStoreAndRegistryExtension);
+        builder.addExtension(new TaskStoreAndRegistryExtension());
     }
 
     abstract void assertResult(List<String> result);

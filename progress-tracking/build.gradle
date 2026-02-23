@@ -47,5 +47,7 @@ dependencies {
     testCompileOnly openGds.immutables.builder
 
     testImplementation project(':core')
+    testImplementation project(':neo4j-settings')
+    testImplementation project(':procedure-integration')
     testImplementation project(':test-utils')
 }
