@@ -1,10 +1,7 @@
 [[algorithms-collapse-path]]
-[.beta]
 = Collapse Path
 :description: This section describes the Collapse Path algorithm in the Neo4j Graph Data Science library.
 :page-aliases: beta-algorithms/collapse-path
-
-include::partial$/operations-reference/beta-note.adoc[]
 
 
 [[algorithms-collapse-path-intro]]

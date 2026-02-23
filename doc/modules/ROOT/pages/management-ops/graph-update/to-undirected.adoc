@@ -2,7 +2,6 @@
 = Converting directed relationships to undirected
 :description: This section details the converting directed relationships to undirected in the Neo4j Graph Data Science library.
 
-include::partial$/operations-reference/beta-note.adoc[]
 
 == Introduction
 
