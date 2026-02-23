@@ -159,7 +159,7 @@ public class PeekPruningTest {
         for (int n = 0; n < combinedPaths.paths().size(); n++) {
             var path = combinedPaths.paths().get(n);
             costs.add(path.value());
-            indices.add(path.index());
+            indices.add(path.nodeId());
         }
         assertThat(costs.build().toArray()).isEqualTo(new double[]{4.0, 4.5, 5.0, 5.5, 7.0});
         assertThat(indices.build().toArray()).isEqualTo(new long[]{1, 6, 4, 3, 5});

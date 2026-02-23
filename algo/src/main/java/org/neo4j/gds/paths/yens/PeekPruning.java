@@ -52,9 +52,9 @@ import java.util.function.LongToDoubleFunction;
 public final class PeekPruning {
     private PeekPruning() {}
 
-    public record DoubleIndexPair(double value, long index) {}
+    public record NodePathCost(double value, long nodeId) {}
 
-    public record FoundPathCosts(long count, HugeObjectArray<DoubleIndexPair> paths) {}
+    public record FoundPathCosts(long count, HugeObjectArray<NodePathCost> paths) {}
 
     public record PathsAndReachability(
         BitSet reachable,
@@ -68,12 +68,12 @@ public final class PeekPruning {
         LongToDoubleFunction forwardCost,
         LongToDoubleFunction backwardCost
     ) {
-        var result = HugeObjectArray.newArray(DoubleIndexPair.class, reachableCount);
+        var result = HugeObjectArray.newArray(NodePathCost.class, reachableCount);
         long next = 0;
         for (long n = 0; n < nodeCount; n++) {
             if (reachable.valueOf(n)) {
                 double cost = forwardCost.applyAsDouble(n) + backwardCost.applyAsDouble(n);
-                result.set(next, new DoubleIndexPair(cost, n));
+                result.set(next, new NodePathCost(cost, n));
                 next++;
             }
         }
@@ -81,8 +81,8 @@ public final class PeekPruning {
         return new FoundPathCosts(reachableCount, result);
     }
 
-    private static void sortPathCosts(HugeObjectArray<DoubleIndexPair> pathCosts, long size) {
-        HugeSerialObjectMergeSort.sort(DoubleIndexPair.class, pathCosts, size, DoubleIndexPair::value);
+    private static void sortPathCosts(HugeObjectArray<NodePathCost> pathCosts, long size) {
+        HugeSerialObjectMergeSort.sort(NodePathCost.class, pathCosts, size, NodePathCost::value);
     }
 
     public static PathsAndReachability pathsAndReachability(
@@ -121,7 +121,7 @@ public final class PeekPruning {
             progressTracker.logProgress(1);
             var cd = found.paths.get(n);
             if (cd.value <= cutoff) {
-                nodeIncluded.set(cd.index);
+                nodeIncluded.set(cd.nodeId);
             }
         }
         return nodeIncluded;
@@ -134,13 +134,11 @@ public final class PeekPruning {
         long target
     ) {
         long node = target;
-        while (true) {
+        while (node != source) {
             func.accept(node);
-            if (node == source) {
-                break;
-            }
             node = predecessor.apply(node);
         }
+        func.accept(node);
     }
 
     public static double validPathCostCutoff(
@@ -152,32 +150,31 @@ public final class PeekPruning {
         ValueTransformers.LongToLongFunction forwardPredecessor,
         ValueTransformers.LongToLongFunction backwardPredecessor
     ) {
-        var result = 0.0;
-
         BitSet partOfValidPath = new BitSet(nodeCount);
         BitSet visited = new BitSet(nodeCount);
+        AtomicBoolean falsePath = new AtomicBoolean(false);
+        Consumer<Long> visitNodes = (id) -> {
+            if (visited.get(id)) {
+                falsePath.set(true);
+            }
+            visited.set(id);
+        };
 
+        double result = 0.0;
         long added = 0;
         long j = 0;
         while (added < k && j < found.count) {
-            var costIndex = found.paths.get(j);
-            var node = costIndex.index;
-            if (!partOfValidPath.get(node)) {
+            var nodePathCost = found.paths.get(j);
+            var node = nodePathCost.nodeId;
+            if (!partOfValidPath.get(node) && node != target) {
                 visited.clear();
-                AtomicBoolean falsePath = new AtomicBoolean(false);
-                Consumer<Long> visitNodes = (id) -> {
-                    if (visited.get(id)) {
-                        falsePath.set(true);
-                    }
-                    visited.set(id);
-                };
+                falsePath.set(false);
                 forEachNodeInPath(visitNodes, forwardPredecessor, source, node);
-                if (node != target) {
-                    // we've already visited the first node, so skip it
-                    forEachNodeInPath(visitNodes, backwardPredecessor, target, backwardPredecessor.apply(node));
-                }
+                // we've already visited the first node, so skip it
+                // backward predecessor only valid when node != target
+                forEachNodeInPath(visitNodes, backwardPredecessor, target, backwardPredecessor.apply(node));
                 if (!falsePath.get()) {
-                    result = costIndex.value;
+                    result = nodePathCost.value;
                     added++;
                     forEachNodeInPath(partOfValidPath::set, forwardPredecessor, source, node);
                     forEachNodeInPath(partOfValidPath::set, backwardPredecessor, target, node);
