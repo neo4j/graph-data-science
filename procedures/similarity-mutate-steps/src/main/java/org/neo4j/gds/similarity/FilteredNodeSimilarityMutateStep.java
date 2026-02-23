@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.applications.algorithms.similarity;
+package org.neo4j.gds.similarity;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.neo4j.gds.api.Graph;
@@ -27,10 +27,11 @@ import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityMutateConfig;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Map;
 
-final class FilteredNodeSimilarityMutateStep implements MutateStep<NodeSimilarityResult, Pair<RelationshipsWritten, Map<String, Object>>> {
+public final class FilteredNodeSimilarityMutateStep implements MutateStep<NodeSimilarityResult, Pair<RelationshipsWritten, Map<String, Object>>> {
     private final SimilarityMutation similarityMutation;
     private final NodeSimilarityMutateConfig configuration;
     private final boolean shouldComputeSimilarityDistribution;
@@ -45,12 +46,16 @@ final class FilteredNodeSimilarityMutateStep implements MutateStep<NodeSimilarit
         this.shouldComputeSimilarityDistribution = shouldComputeSimilarityDistribution;
     }
 
-    static FilteredNodeSimilarityMutateStep create(
-        MutateRelationshipService  mutateRelationshipService,
+    public static FilteredNodeSimilarityMutateStep create(
+        MutateRelationshipService mutateRelationshipService,
         NodeSimilarityMutateConfig configuration,
-        boolean shouldComputeSimilarityDistribution
+        boolean shouldComputeSimilarityDistribution,
+        TerminationFlag terminationFlag
     ) {
-        var similarityMutation = new SimilarityMutation(mutateRelationshipService);
+        var similarityMutation = new SimilarityMutation(
+            mutateRelationshipService,
+            terminationFlag
+        );
 
         return new FilteredNodeSimilarityMutateStep(
             similarityMutation,

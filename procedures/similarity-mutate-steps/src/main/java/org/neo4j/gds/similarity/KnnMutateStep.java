@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.applications.algorithms.similarity;
+package org.neo4j.gds.similarity;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.neo4j.gds.api.Graph;
@@ -27,10 +27,11 @@ import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 import org.neo4j.gds.similarity.knn.KnnMutateConfig;
 import org.neo4j.gds.similarity.knn.KnnResult;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Map;
 
-final class KnnMutateStep implements MutateStep<KnnResult, Pair<RelationshipsWritten, Map<String, Object>>> {
+public final class KnnMutateStep implements MutateStep<KnnResult, Pair<RelationshipsWritten, Map<String, Object>>> {
     private final SimilarityMutation similarityMutation;
     private final KnnMutateConfig configuration;
     private final boolean shouldComputeSimilarityDistribution;
@@ -45,8 +46,16 @@ final class KnnMutateStep implements MutateStep<KnnResult, Pair<RelationshipsWri
         this.similarityMutation = similarityMutation;
     }
 
-    static KnnMutateStep create(MutateRelationshipService mutateRelationshipService, KnnMutateConfig configuration, boolean shouldComputeSimilarityDistribution) {
-        var similarityMutation = new SimilarityMutation(mutateRelationshipService);
+    public static KnnMutateStep create(
+        MutateRelationshipService mutateRelationshipService,
+        KnnMutateConfig configuration,
+        boolean shouldComputeSimilarityDistribution,
+        TerminationFlag terminationFlag
+    ) {
+        var similarityMutation = new SimilarityMutation(
+            mutateRelationshipService,
+            terminationFlag
+        );
 
         return new KnnMutateStep(similarityMutation, configuration, shouldComputeSimilarityDistribution);
     }

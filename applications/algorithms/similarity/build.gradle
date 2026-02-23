@@ -20,6 +20,8 @@ dependencies {
     implementation project(':community-algorithms')
     implementation project(":community-configs")
 
+    implementation project(':similarity-mutate-steps')
+
     testImplementation project(':test-utils')
 
 }

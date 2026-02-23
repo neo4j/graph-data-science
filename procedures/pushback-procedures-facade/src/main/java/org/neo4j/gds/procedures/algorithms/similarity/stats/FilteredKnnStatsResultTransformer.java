@@ -65,7 +65,7 @@ public class FilteredKnnStatsResultTransformer implements ResultTransformer<Time
                 configuration
             ));
         }
-        var similarityStats = SimilarityTools.computeSimilarityStatistics(
+        var similarityStats = SimilarityStatsTools.computeSimilarityStatistics(
             idMap,
             concurrency,
             knnResult.similarityResultStream(),

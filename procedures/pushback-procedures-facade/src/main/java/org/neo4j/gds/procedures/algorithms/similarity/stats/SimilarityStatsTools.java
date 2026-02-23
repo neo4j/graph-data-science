@@ -21,35 +21,16 @@ package org.neo4j.gds.procedures.algorithms.similarity.stats;
 
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.result.SimilarityStatistics;
-import org.neo4j.gds.similarity.SimilarityGraphBuilder;
 import org.neo4j.gds.similarity.SimilarityGraphResult;
 import org.neo4j.gds.similarity.SimilarityResult;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.stream.Stream;
 
-final class SimilarityTools {
+final class SimilarityStatsTools {
 
-    private SimilarityTools() {}
-
-   private static SimilarityGraphResult computeGraphFromStream(
-        IdMap idMap,
-        Concurrency concurrency,
-        Stream<SimilarityResult> similarityResultStream,
-        TerminationFlag terminationFlag
-    ) {
-        var similarityGraph =  new SimilarityGraphBuilder(
-            idMap,
-            concurrency,
-            DefaultPool.INSTANCE,
-            terminationFlag
-        ).build(similarityResultStream);
-
-
-        return new SimilarityGraphResult(similarityGraph, idMap.nodeCount(), false);
-    }
+    private SimilarityStatsTools() {}
 
      static SimilarityStatistics.SimilarityStats computeSimilarityStatistics(
         IdMap graph,
@@ -58,18 +39,17 @@ final class SimilarityTools {
         boolean shouldComputeSimilarityDistribution,
         TerminationFlag terminationFlag
     ) {
-        if (shouldComputeSimilarityDistribution) {
-            var similarityGraph = computeGraphFromStream(
+        if (!shouldComputeSimilarityDistribution) {
+            return computeSimilarityStatistics(SimilarityGraphResult.empty(), false);
+        }
+        var similarityGraph = SimilarityGraphResult.fromStream(
                 graph,
                 concurrency,
                 similarityResultStream,
                 terminationFlag
-            );
+        );
+        return computeSimilarityStatistics(similarityGraph,true);
 
-            return computeSimilarityStatistics(similarityGraph,true);
-        }else{
-            return computeSimilarityStatistics(SimilarityGraphResult.empty(),false);
-        }
     }
 
     static SimilarityStatistics.SimilarityStats computeSimilarityStatistics(

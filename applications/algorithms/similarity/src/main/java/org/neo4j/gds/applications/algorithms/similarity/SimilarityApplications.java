@@ -70,7 +70,8 @@ public final class SimilarityApplications {
             estimationModeFacade,
             businessFacade,
             algorithmProcessingTemplateConvenience,
-            mutateRelationshipService
+            mutateRelationshipService,
+            requestScopedDependencies.terminationFlag()
         );
 
         var statsModeFacade = new SimilarityAlgorithmsStatsModeBusinessFacade(

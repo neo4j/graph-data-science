@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.applications.algorithms.similarity;
+package org.neo4j.gds.similarity;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.neo4j.gds.api.Graph;
@@ -25,19 +25,20 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.MutateRelationshipService;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
-import org.neo4j.gds.similarity.filteredknn.FilteredKnnMutateConfig;
-import org.neo4j.gds.similarity.filteredknn.FilteredKnnResult;
+import org.neo4j.gds.similarity.nodesim.NodeSimilarityMutateConfig;
+import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Map;
 
-final class FilteredKnnMutateStep implements MutateStep<FilteredKnnResult, Pair<RelationshipsWritten, Map<String, Object>>> {
+public final class NodeSimilarityMutateStep implements MutateStep<NodeSimilarityResult, Pair<RelationshipsWritten, Map<String, Object>>> {
     private final SimilarityMutation similarityMutation;
-    private final FilteredKnnMutateConfig configuration;
+    private final NodeSimilarityMutateConfig configuration;
     private final boolean shouldComputeSimilarityDistribution;
 
-    private FilteredKnnMutateStep(
+    private NodeSimilarityMutateStep(
         SimilarityMutation similarityMutation,
-        FilteredKnnMutateConfig configuration,
+        NodeSimilarityMutateConfig configuration,
         boolean shouldComputeSimilarityDistribution
     ) {
         this.similarityMutation = similarityMutation;
@@ -45,27 +46,32 @@ final class FilteredKnnMutateStep implements MutateStep<FilteredKnnResult, Pair<
         this.shouldComputeSimilarityDistribution = shouldComputeSimilarityDistribution;
     }
 
-    static FilteredKnnMutateStep create(
+    public static NodeSimilarityMutateStep create(
         MutateRelationshipService mutateRelationshipService,
-        FilteredKnnMutateConfig configuration,
-        boolean shouldComputeSimilarityDistribution
+        NodeSimilarityMutateConfig configuration,
+        boolean shouldComputeSimilarityDistribution,
+        TerminationFlag terminationFlag
     ) {
-        var similarityMutation = new SimilarityMutation(mutateRelationshipService);
-        return new FilteredKnnMutateStep(similarityMutation, configuration, shouldComputeSimilarityDistribution);
+        var similarityMutation = new SimilarityMutation(
+            mutateRelationshipService,
+            terminationFlag
+        );
+
+        return new NodeSimilarityMutateStep(similarityMutation, configuration, shouldComputeSimilarityDistribution);
     }
 
     @Override
     public Pair<RelationshipsWritten, Map<String, Object>> execute(
         Graph graph,
         GraphStore graphStore,
-        FilteredKnnResult result
+        NodeSimilarityResult result
     ) {
         return similarityMutation.execute(
             graph,
             graphStore,
             configuration,
             configuration,
-            result.similarityResultStream(),
+            result.graphResult(),
             shouldComputeSimilarityDistribution
         );
     }

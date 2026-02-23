@@ -56,7 +56,7 @@ public class NodeSimilarityStatsResultTransformer implements ResultTransformer<T
                 )
             );
         }
-        var similarityStats = SimilarityTools.computeSimilarityStatistics(
+        var similarityStats = SimilarityStatsTools.computeSimilarityStatistics(
             similarityGraphResult,
             shouldComputeSimilarityDistribution
         );

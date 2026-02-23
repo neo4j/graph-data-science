@@ -25,6 +25,10 @@ import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTempla
 import org.neo4j.gds.applications.algorithms.machinery.MutateRelationshipService;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
+import org.neo4j.gds.similarity.FilteredKnnMutateStep;
+import org.neo4j.gds.similarity.FilteredNodeSimilarityMutateStep;
+import org.neo4j.gds.similarity.KnnMutateStep;
+import org.neo4j.gds.similarity.NodeSimilarityMutateStep;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnMutateConfig;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnResult;
 import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityMutateConfig;
@@ -32,6 +36,7 @@ import org.neo4j.gds.similarity.knn.KnnMutateConfig;
 import org.neo4j.gds.similarity.knn.KnnResult;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityMutateConfig;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Map;
 
@@ -45,17 +50,19 @@ public class SimilarityAlgorithmsMutateModeBusinessFacade {
     private final SimilarityAlgorithmsBusinessFacade similarityAlgorithms;
     private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
     private final MutateRelationshipService mutateRelationshipService;
+    private final TerminationFlag terminationFlag;
 
     public SimilarityAlgorithmsMutateModeBusinessFacade(
         SimilarityAlgorithmsEstimationModeBusinessFacade estimationFacade,
         SimilarityAlgorithmsBusinessFacade similarityAlgorithms,
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
-        MutateRelationshipService mutateRelationshipService
+        MutateRelationshipService mutateRelationshipService, TerminationFlag terminationFlag
     ) {
         this.estimationFacade = estimationFacade;
         this.similarityAlgorithms = similarityAlgorithms;
         this.algorithmProcessingTemplateConvenience = algorithmProcessingTemplateConvenience;
         this.mutateRelationshipService = mutateRelationshipService;
+        this.terminationFlag = terminationFlag;
     }
 
     public <RESULT> RESULT filteredKnn(
@@ -67,7 +74,8 @@ public class SimilarityAlgorithmsMutateModeBusinessFacade {
         var mutateStep = FilteredKnnMutateStep.create(
             mutateRelationshipService,
             configuration,
-            shouldComputeSimilarityDistribution
+            shouldComputeSimilarityDistribution,
+            terminationFlag
         );
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
@@ -91,7 +99,8 @@ public class SimilarityAlgorithmsMutateModeBusinessFacade {
         var mutateStep = FilteredNodeSimilarityMutateStep.create(
             mutateRelationshipService,
             configuration,
-            shouldComputeSimilarityDistribution
+            shouldComputeSimilarityDistribution,
+            terminationFlag
         );
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
@@ -113,7 +122,8 @@ public class SimilarityAlgorithmsMutateModeBusinessFacade {
     ) {
         var mutateStep = KnnMutateStep.create(mutateRelationshipService,
             configuration,
-            shouldComputeSimilarityDistribution
+            shouldComputeSimilarityDistribution,
+            terminationFlag
         );
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
@@ -135,7 +145,8 @@ public class SimilarityAlgorithmsMutateModeBusinessFacade {
     ) {
         var mutateStep = NodeSimilarityMutateStep.create(mutateRelationshipService,
             configuration,
-            shouldComputeSimilarityDistribution
+            shouldComputeSimilarityDistribution,
+            terminationFlag
         );
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(

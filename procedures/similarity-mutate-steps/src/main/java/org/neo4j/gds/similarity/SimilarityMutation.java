@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.applications.algorithms.similarity;
+package org.neo4j.gds.similarity;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.neo4j.gds.algorithms.similarity.SimilaritySingleTypeRelationshipsHandler;
@@ -27,8 +27,7 @@ import org.neo4j.gds.applications.algorithms.machinery.MutateRelationshipService
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 import org.neo4j.gds.config.MutateRelationshipConfig;
 import org.neo4j.gds.config.MutateRelationshipPropertyConfig;
-import org.neo4j.gds.similarity.SimilarityGraphResult;
-import org.neo4j.gds.similarity.SimilarityResult;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Map;
 import java.util.stream.Stream;
@@ -37,12 +36,13 @@ import java.util.stream.Stream;
  * Similarity mutations are all the same
  */
 class SimilarityMutation {
-    private final SimilarityResultStreamDelegate similarityResultStreamDelegate = new SimilarityResultStreamDelegate();
 
     private final MutateRelationshipService mutateRelationshipService;
+    private final TerminationFlag terminationFlag;
 
-    SimilarityMutation(MutateRelationshipService mutateRelationshipService) {
+    SimilarityMutation(MutateRelationshipService mutateRelationshipService, TerminationFlag terminationFlag) {
         this.mutateRelationshipService = mutateRelationshipService;
+        this.terminationFlag = terminationFlag;
     }
 
     Pair<RelationshipsWritten, Map<String, Object>> execute(
@@ -53,10 +53,11 @@ class SimilarityMutation {
         Stream<SimilarityResult> similarityResultStream,
         boolean shouldComputeSimilarityDistribution
     ) {
-        var similarityGraphResult = similarityResultStreamDelegate.computeSimilarityGraph(
+        var similarityGraphResult = SimilarityGraphResult.fromStream(
             graph,
             mutateRelationshipPropertyConfiguration.concurrency(),
-            similarityResultStream
+            similarityResultStream,
+            terminationFlag
         );
 
         return execute(

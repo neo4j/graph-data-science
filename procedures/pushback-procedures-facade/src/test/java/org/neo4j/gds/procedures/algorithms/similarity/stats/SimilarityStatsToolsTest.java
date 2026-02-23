@@ -32,12 +32,12 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
-class SimilarityToolsTest {
+class SimilarityStatsToolsTest {
 
     @Test
     void shouldReturnEmptyDistributionIfNotSpecified() {
 
-        var stats = SimilarityTools.computeSimilarityStatistics(
+        var stats = SimilarityStatsTools.computeSimilarityStatistics(
             mock(IdMap.class),
             new Concurrency(1),
             Stream.of(new SimilarityResult(0, 1, 10)),
@@ -57,7 +57,7 @@ class SimilarityToolsTest {
         nodesBuilder.addNode(2);
         nodesBuilder.addNode(3);
         var idMap = nodesBuilder.build().idMap();
-        var stats = SimilarityTools.computeSimilarityStatistics(
+        var stats = SimilarityStatsTools.computeSimilarityStatistics(
             idMap,
             new Concurrency(1),
             Stream.of(

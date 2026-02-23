@@ -20,7 +20,13 @@
 package org.neo4j.gds.similarity;
 
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.schema.Direction;
+import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.core.concurrency.DefaultPool;
+import org.neo4j.gds.termination.TerminationFlag;
+
+import java.util.stream.Stream;
 
 public class SimilarityGraphResult {
     private final Graph similarityGraph;
@@ -54,6 +60,22 @@ public class SimilarityGraphResult {
 
     public static SimilarityGraphResult empty(){
         return  new SimilarityGraphResult(null,0,false);
+    }
+
+    public static SimilarityGraphResult fromStream(
+        IdMap idMap,
+        Concurrency concurrency,
+        Stream<SimilarityResult> similarityResultStream,
+        TerminationFlag terminationFlag
+    ) {
+        var similarityGraph =  new SimilarityGraphBuilder(
+            idMap,
+            concurrency,
+            DefaultPool.INSTANCE,
+            terminationFlag
+        ).build(similarityResultStream);
+
+        return new SimilarityGraphResult(similarityGraph, idMap.nodeCount(), false);
     }
 
 }

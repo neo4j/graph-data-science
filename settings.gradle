@@ -450,6 +450,9 @@ project(':similarity-configs').projectDir = file('procedures/facade-api/configs/
 include('similarity-facade-api')
 project(':similarity-facade-api').projectDir = file('procedures/facade-api/similarity-facade-api')
 
+include('similarity-mutate-steps')
+project(':similarity-mutate-steps').projectDir = file('procedures/similarity-mutate-steps')
+
 include('similarity-params')
 project(':similarity-params').projectDir = file('algo-params/similarity-params')
 
