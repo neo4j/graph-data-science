@@ -101,7 +101,8 @@ public class PeekPruningTest {
             n-> backwardDistance[(int)n],
             n -> nodeIncluded[(int)n],
             new Concurrency(1),
-            ProgressTracker.NULL_TRACKER);
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE);
         assertThat(filtered.nodeCount()).isEqualTo(5);
         assertThat(filtered.toMappedNodeId(graph.toMappedNodeId("i"))).isEqualTo(IdMap.NOT_FOUND);
         assertThat(filtered.toMappedNodeId(graph.toMappedNodeId("c"))).isNotEqualTo(IdMap.NOT_FOUND);

@@ -95,7 +95,16 @@ public final class PeekPruningYens extends Algorithm<PathFindingResult> {
         var nodeIncluded = PeekPruning.nodeFilter(progressTracker, nodeCount, combinedPaths, cutoff);
         progressTracker.endSubTask("Filter nodes");
         progressTracker.beginSubTask("Create pruned graph");
-        var pruned = PeekPruning.createPrunedGraph(graph, sourceNode, cutoff, paths.forward()::distance, paths.backward()::distance, nodeIncluded::get, concurrency, progressTracker);
+        var pruned = PeekPruning.createPrunedGraph(
+            graph,
+            sourceNode,
+            cutoff,
+            paths.forward()::distance,
+            paths.backward()::distance,
+            nodeIncluded::get,
+            concurrency,
+            progressTracker,
+            terminationFlag);
         progressTracker.endSubTask("Create pruned graph");
         progressTracker.endSubTask("Peek pruning");
         var yensPaths = Yens.sourceTarget(

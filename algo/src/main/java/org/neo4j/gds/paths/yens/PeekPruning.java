@@ -197,7 +197,8 @@ public final class PeekPruning {
         LongToDoubleFunction targetCost,
         LongPredicate nodeIncluded,
         Concurrency concurrency,
-        ProgressTracker progressTracker
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
     ) {
         var nodesBuilder = GraphFactory.initNodesBuilder()
             .maxOriginalId(graph.nodeCount())
@@ -207,7 +208,7 @@ public final class PeekPruning {
         ParallelUtil.parallelForEachNode(
             graph.nodeCount(),
             concurrency,
-            TerminationFlag.RUNNING_TRUE,
+            terminationFlag,
             nodeId -> {
                 if (nodeIncluded.test(nodeId)) {
                     nodesBuilder.addNode(nodeId);
