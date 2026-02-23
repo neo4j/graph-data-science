@@ -89,9 +89,9 @@ public final class PeekPruningYens extends Algorithm<PathFindingResult> {
         }
         progressTracker.beginSubTask("Filter nodes");
         var combinedPaths = PeekPruning.sortedCombinedPathCosts(nodeCount, paths.reachable().cardinality(), paths.reachable()::get, paths.forward()::distance, paths.backward()::distance);
-        var validCosts = PeekPruning.validPathCosts(k, nodeCount, sourceNode, targetNode, combinedPaths, paths.forward()::predecessor, paths.backward()::predecessor);
+        var validCostCutoff = PeekPruning.validPathCostCutoff(k, nodeCount, sourceNode, targetNode, combinedPaths, paths.forward()::predecessor, paths.backward()::predecessor);
         // make the cutoff just slightly larger than computed, to avoid floating point errors
-        double cutoff = 1.000001 * validCosts[validCosts.length-1];
+        double cutoff = 1.000001 * validCostCutoff;
         var nodeIncluded = PeekPruning.nodeFilter(progressTracker, nodeCount, combinedPaths, cutoff);
         progressTracker.endSubTask("Filter nodes");
         progressTracker.beginSubTask("Create pruned graph");

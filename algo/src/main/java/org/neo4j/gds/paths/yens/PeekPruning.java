@@ -48,7 +48,6 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.LongPredicate;
 import java.util.function.LongToDoubleFunction;
-import java.util.stream.DoubleStream;
 
 public final class PeekPruning {
     private PeekPruning() {}
@@ -144,7 +143,7 @@ public final class PeekPruning {
         }
     }
 
-    public static double[] validPathCosts(
+    public static double validPathCostCutoff(
         int k,
         long nodeCount,
         long source,
@@ -153,7 +152,7 @@ public final class PeekPruning {
         ValueTransformers.LongToLongFunction forwardPredecessor,
         ValueTransformers.LongToLongFunction backwardPredecessor
     ) {
-        var result = DoubleStream.builder();
+        var result = 0.0;
 
         BitSet partOfValidPath = new BitSet(nodeCount);
         BitSet visited = new BitSet(nodeCount);
@@ -178,7 +177,7 @@ public final class PeekPruning {
                     forEachNodeInPath(visitNodes, backwardPredecessor, target, backwardPredecessor.apply(node));
                 }
                 if (!falsePath.get()) {
-                    result.add(costIndex.value);
+                    result = costIndex.value;
                     added++;
                     forEachNodeInPath(partOfValidPath::set, forwardPredecessor, source, node);
                     forEachNodeInPath(partOfValidPath::set, backwardPredecessor, target, node);
@@ -186,7 +185,7 @@ public final class PeekPruning {
             }
             j++;
         }
-        return result.build().toArray();
+        return result;
     }
 
     public static Graph createPrunedGraph(
