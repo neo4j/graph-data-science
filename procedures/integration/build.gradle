@@ -5,12 +5,15 @@ description = 'Neo4j Graph Data Science :: OpenGDS Extension'
 group = 'org.neo4j.gds'
 
 dependencies {
+    annotationProcessor neo4j.annotations
 
     compileOnly project(':annotations')
     compileOnly openGds.immutables.value
 
     // Neo4j dependencies
+    compileOnly(neo4j.annotations) { transitive = false }
     compileOnly(neo4j.common) { transitive = false }
+    compileOnly(neo4j.configuration) { transitive = false }
     compileOnly(neo4j.gql.status) { transitive = false }
     compileOnly(neo4j.graphdb.api) { transitive = false }
     compileOnly(neo4j.kernel) { transitive = false }

@@ -17,10 +17,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.utils.progress;
+package org.neo4j.gds.procedures.integration;
 
 import org.neo4j.annotations.service.ServiceProvider;
 import org.neo4j.configuration.Config;
+import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
+import org.neo4j.gds.core.utils.progress.EmptyTaskStore;
+import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
+import org.neo4j.gds.core.utils.progress.TaskStore;
+import org.neo4j.gds.core.utils.progress.TaskStoreHolder;
+import org.neo4j.gds.settings.GdsSettings;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
 import org.neo4j.kernel.extension.ExtensionFactory;
@@ -31,44 +37,36 @@ import org.neo4j.kernel.lifecycle.LifecycleAdapter;
 import org.neo4j.logging.internal.LogService;
 
 /**
- * We need to make sure that state here is shared with Procedure Facade.
- * Procedure Facade needs the ability to be new'ed up with clean state.
- * Therefore, it needs to be able to drive the shared state.
- * At the same time, for tests, this extension can exist without Procedure Facade,
- * and in that situation needs to be able to drive state.
- * Given this analysis: we must keep the shared state somewhere where it is accessible from both this extension,
- * and from Procedure Facade.
- *
- * @deprecated remove this when usages have been strangled in favour of Procedure Facade
+ * @deprecated We need this to _not_ rely on a static singleton for state sharing
  */
 @Deprecated
+@SuppressWarnings("unused")
 @ServiceProvider
-public final class TaskRegistryExtension extends ExtensionFactory<TaskRegistryExtension.Dependencies> {
-
-    public TaskRegistryExtension() {
-        super(ExtensionType.DATABASE, "gds.task.registry");
+public final class TaskStoreAndRegistryExtension extends ExtensionFactory<TaskStoreAndRegistryExtension.Dependencies> {
+    public TaskStoreAndRegistryExtension() {
+        super(ExtensionType.DATABASE, "gds.task.store_and_registry");
     }
 
     @Override
-    public Lifecycle newInstance(ExtensionContext context, TaskRegistryExtension.Dependencies dependencies) {
+    public Lifecycle newInstance(ExtensionContext extensionContext, Dependencies dependencies) {
         var registry = dependencies.globalProceduresRegistry();
-        var enabled = dependencies.config().get(ProgressFeatureSettings.progress_tracking_enabled);
-        var retentionPeriod = dependencies.config().get(ProgressFeatureSettings.task_retention_period);
-        String databaseName = dependencies.graphDatabaseService().databaseName();
+        var enabled = dependencies.config().get(GdsSettings.progressTrackingEnabled());
+        var retentionPeriod = dependencies.config().get(GdsSettings.taskRetentionPeriod());
+        var databaseName = dependencies.graphDatabaseService().databaseName();
 
         if (enabled) {
-            var taskStoreProvider = new TaskStoreProvider(retentionPeriod);
+            var taskStoreProvider = new OldTaskStoreProvider(retentionPeriod);
             // Use the centrally managed task stores
             registry.registerComponent(TaskStore.class, taskStoreProvider, true);
-            registry.registerComponent(TaskRegistryFactory.class, new TaskRegistryFactoryProvider(taskStoreProvider), true);
+            registry.registerComponent(TaskRegistryFactory.class, new OldTaskRegistryFactoryProvider(taskStoreProvider), true);
 
             // hey this is just for tests? TaskRegistryExtensionMultiDBTest breaks if it is missing
-            context.dependencySatisfier().satisfyDependency(TaskStoreHolder.getTaskStore(databaseName, retentionPeriod));
+            extensionContext.dependencySatisfier().satisfyDependency(TaskStoreHolder.getTaskStore(databaseName, retentionPeriod));
         } else {
             registry.registerComponent(TaskRegistryFactory.class, ctx -> EmptyTaskRegistryFactory.INSTANCE, true);
             registry.registerComponent(TaskStore.class, ctx -> EmptyTaskStore.INSTANCE, true);
-            context.dependencySatisfier().satisfyDependency(EmptyTaskRegistryFactory.INSTANCE);
-            context.dependencySatisfier().satisfyDependency(EmptyTaskStore.INSTANCE);
+
+            extensionContext.dependencySatisfier().satisfyDependency(EmptyTaskStore.INSTANCE);
         }
 
         /*

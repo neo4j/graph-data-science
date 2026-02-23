@@ -17,26 +17,29 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.utils.progress;
+package org.neo4j.gds.procedures.integration;
 
 import org.neo4j.function.ThrowingFunction;
+import org.neo4j.gds.core.utils.progress.TaskStore;
+import org.neo4j.gds.core.utils.progress.TaskStoreHolder;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
-import org.neo4j.internal.kernel.api.security.AuthSubject;
 import org.neo4j.kernel.api.procedure.Context;
 
-class TaskRegistryFactoryProvider implements ThrowingFunction<Context, TaskRegistryFactory, ProcedureException> {
+import java.time.Duration;
 
-    private final TaskStoreProvider taskStoreProvider;
+/**
+ * @deprecated This should probably go
+ */
+@Deprecated
+class OldTaskStoreProvider implements ThrowingFunction<Context, TaskStore, ProcedureException> {
+    private final Duration finishedTaskTTL;
 
-    TaskRegistryFactoryProvider(TaskStoreProvider taskStoreProvider) {
-
-        this.taskStoreProvider = taskStoreProvider;
+    OldTaskStoreProvider(Duration finishedTaskTTL) {
+        this.finishedTaskTTL = finishedTaskTTL;
     }
 
     @Override
-    public TaskRegistryFactory apply(Context context) throws ProcedureException {
-        AuthSubject subject = context.securityContext().subject();
-        var username = subject.executingUser();
-        return new LocalTaskRegistryFactory(username, taskStoreProvider.apply(context));
+    public TaskStore apply(Context context) throws ProcedureException {
+        return TaskStoreHolder.getTaskStore(context.graphDatabaseAPI().databaseName(), finishedTaskTTL);
     }
 }

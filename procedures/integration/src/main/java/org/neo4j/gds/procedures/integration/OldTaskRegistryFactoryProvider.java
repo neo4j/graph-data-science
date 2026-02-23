@@ -17,24 +17,30 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.utils.progress;
+package org.neo4j.gds.procedures.integration;
 
 import org.neo4j.function.ThrowingFunction;
+import org.neo4j.gds.core.utils.progress.LocalTaskRegistryFactory;
+import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
+import org.neo4j.internal.kernel.api.security.AuthSubject;
 import org.neo4j.kernel.api.procedure.Context;
 
-import java.time.Duration;
+/**
+ * @deprecated This should probably go
+ */
+@Deprecated
+class OldTaskRegistryFactoryProvider implements ThrowingFunction<Context, TaskRegistryFactory, ProcedureException> {
+    private final OldTaskStoreProvider oldTaskStoreProvider;
 
-class TaskStoreProvider implements ThrowingFunction<Context, TaskStore, ProcedureException> {
-
-    private final Duration finishedTaskTTL;
-
-    public TaskStoreProvider(Duration finishedTaskTTL) {
-        this.finishedTaskTTL = finishedTaskTTL;
+    OldTaskRegistryFactoryProvider(OldTaskStoreProvider oldTaskStoreProvider) {
+        this.oldTaskStoreProvider = oldTaskStoreProvider;
     }
 
     @Override
-    public TaskStore apply(Context context) throws ProcedureException {
-        return TaskStoreHolder.getTaskStore(context.graphDatabaseAPI().databaseName(), finishedTaskTTL);
+    public TaskRegistryFactory apply(Context context) throws ProcedureException {
+        AuthSubject subject = context.securityContext().subject();
+        var username = subject.executingUser();
+        return new LocalTaskRegistryFactory(username, oldTaskStoreProvider.apply(context));
     }
 }

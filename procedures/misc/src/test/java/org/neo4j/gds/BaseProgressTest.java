@@ -22,14 +22,14 @@ package org.neo4j.gds;
 import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.JobId;
-import org.neo4j.gds.core.utils.progress.ProgressFeatureSettings;
-import org.neo4j.gds.core.utils.progress.TaskRegistryExtension;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.LoggerForProgressTracking;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.mem.MemoryRange;
+import org.neo4j.gds.procedures.integration.TaskStoreAndRegistryExtension;
 import org.neo4j.gds.procedures.memory.MemoryFacade;
+import org.neo4j.gds.settings.GdsSettings;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -47,10 +47,10 @@ public abstract class BaseProgressTest extends BaseTest {
     @ExtensionCallback
     protected void configuration(TestDatabaseManagementServiceBuilder builder) {
         super.configuration(builder);
-        builder.setConfig(ProgressFeatureSettings.progress_tracking_enabled, true);
+        builder.setConfig(GdsSettings.progressTrackingEnabled(), true);
         // make sure that we 1) have our extension under test and 2) have it only once
-        builder.removeExtensions(ex -> ex instanceof TaskRegistryExtension);
-        builder.addExtension(new TaskRegistryExtension());
+        builder.removeExtensions(ex -> ex instanceof TaskStoreAndRegistryExtension);
+        builder.addExtension(new TaskStoreAndRegistryExtension());
     }
 
     public static class BaseProgressTestProc {
