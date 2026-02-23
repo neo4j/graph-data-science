@@ -25,7 +25,6 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.MutateRelationshipService;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
-import org.neo4j.gds.similarity.nodesim.NodeSimilarityMutateConfig;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
 import org.neo4j.gds.termination.TerminationFlag;
 
@@ -33,22 +32,26 @@ import java.util.Map;
 
 public final class FilteredNodeSimilarityMutateStep implements MutateStep<NodeSimilarityResult, Pair<RelationshipsWritten, Map<String, Object>>> {
     private final SimilarityMutation similarityMutation;
-    private final NodeSimilarityMutateConfig configuration;
+    private final String mutateRelationshipType;
+    private final String mutateProperty;
     private final boolean shouldComputeSimilarityDistribution;
 
     private FilteredNodeSimilarityMutateStep(
         SimilarityMutation similarityMutation,
-        NodeSimilarityMutateConfig configuration,
+        String mutateRelationshipType,
+        String mutateProperty,
         boolean shouldComputeSimilarityDistribution
     ) {
         this.similarityMutation = similarityMutation;
-        this.configuration = configuration;
+        this.mutateRelationshipType = mutateRelationshipType;
+        this.mutateProperty = mutateProperty;
         this.shouldComputeSimilarityDistribution = shouldComputeSimilarityDistribution;
     }
 
     public static FilteredNodeSimilarityMutateStep create(
         MutateRelationshipService mutateRelationshipService,
-        NodeSimilarityMutateConfig configuration,
+        String mutateRelationshipType,
+        String mutateProperty,
         boolean shouldComputeSimilarityDistribution,
         TerminationFlag terminationFlag
     ) {
@@ -59,7 +62,8 @@ public final class FilteredNodeSimilarityMutateStep implements MutateStep<NodeSi
 
         return new FilteredNodeSimilarityMutateStep(
             similarityMutation,
-            configuration,
+            mutateRelationshipType,
+            mutateProperty,
             shouldComputeSimilarityDistribution
         );
     }
@@ -73,8 +77,8 @@ public final class FilteredNodeSimilarityMutateStep implements MutateStep<NodeSi
         return similarityMutation.execute(
             graph,
             graphStore,
-            configuration.mutateRelationshipType(),
-            configuration.mutateProperty(),
+            mutateRelationshipType,
+            mutateProperty,
             result.graphResult(),
             shouldComputeSimilarityDistribution
         );

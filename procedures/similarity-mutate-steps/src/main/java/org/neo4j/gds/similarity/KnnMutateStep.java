@@ -25,7 +25,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.MutateRelationshipService;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
-import org.neo4j.gds.similarity.knn.KnnMutateConfig;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.similarity.knn.KnnResult;
 import org.neo4j.gds.termination.TerminationFlag;
 
@@ -33,22 +33,31 @@ import java.util.Map;
 
 public final class KnnMutateStep implements MutateStep<KnnResult, Pair<RelationshipsWritten, Map<String, Object>>> {
     private final SimilarityMutation similarityMutation;
-    private final KnnMutateConfig configuration;
+    private final String mutateRelationshipType;
+    private final String mutateProperty;
+    private final Concurrency concurrency;
     private final boolean shouldComputeSimilarityDistribution;
 
     private KnnMutateStep(
         SimilarityMutation similarityMutation,
-        KnnMutateConfig configuration,
+        String mutateRelationshipType,
+        String mutateProperty,
+        Concurrency concurrency,
+
         boolean shouldComputeSimilarityDistribution
     ) {
-        this.configuration = configuration;
+        this.mutateRelationshipType = mutateRelationshipType;
+        this.mutateProperty = mutateProperty;
+        this.concurrency = concurrency;
         this.shouldComputeSimilarityDistribution = shouldComputeSimilarityDistribution;
         this.similarityMutation = similarityMutation;
     }
 
     public static KnnMutateStep create(
         MutateRelationshipService mutateRelationshipService,
-        KnnMutateConfig configuration,
+        String mutateRelationshipType,
+        String mutateProperty,
+        Concurrency concurrency,
         boolean shouldComputeSimilarityDistribution,
         TerminationFlag terminationFlag
     ) {
@@ -57,7 +66,13 @@ public final class KnnMutateStep implements MutateStep<KnnResult, Pair<Relations
             terminationFlag
         );
 
-        return new KnnMutateStep(similarityMutation, configuration, shouldComputeSimilarityDistribution);
+        return new KnnMutateStep(
+            similarityMutation,
+            mutateRelationshipType,
+            mutateProperty,
+            concurrency,
+            shouldComputeSimilarityDistribution
+        );
     }
 
     @Override
@@ -69,9 +84,9 @@ public final class KnnMutateStep implements MutateStep<KnnResult, Pair<Relations
         return similarityMutation.execute(
             graph,
             graphStore,
-            configuration.mutateRelationshipType(),
-            configuration.mutateProperty(),
-            configuration.concurrency(),
+            mutateRelationshipType,
+            mutateProperty,
+            concurrency,
             result.streamSimilarityResult(),
             shouldComputeSimilarityDistribution
         );

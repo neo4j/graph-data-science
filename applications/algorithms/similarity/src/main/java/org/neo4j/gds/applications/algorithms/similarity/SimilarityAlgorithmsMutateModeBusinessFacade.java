@@ -73,7 +73,9 @@ public class SimilarityAlgorithmsMutateModeBusinessFacade {
     ) {
         var mutateStep = FilteredKnnMutateStep.create(
             mutateRelationshipService,
-            configuration,
+            configuration.mutateRelationshipType(),
+            configuration.mutateProperty(),
+            configuration.concurrency(),
             shouldComputeSimilarityDistribution,
             terminationFlag
         );
@@ -98,7 +100,8 @@ public class SimilarityAlgorithmsMutateModeBusinessFacade {
     ) {
         var mutateStep = FilteredNodeSimilarityMutateStep.create(
             mutateRelationshipService,
-            configuration,
+            configuration.mutateRelationshipType(),
+            configuration.mutateProperty(),
             shouldComputeSimilarityDistribution,
             terminationFlag
         );
@@ -121,7 +124,9 @@ public class SimilarityAlgorithmsMutateModeBusinessFacade {
         boolean shouldComputeSimilarityDistribution
     ) {
         var mutateStep = KnnMutateStep.create(mutateRelationshipService,
-            configuration,
+            configuration.mutateRelationshipType(),
+            configuration.mutateProperty(),
+            configuration.concurrency(),
             shouldComputeSimilarityDistribution,
             terminationFlag
         );
@@ -143,8 +148,10 @@ public class SimilarityAlgorithmsMutateModeBusinessFacade {
         ResultBuilder<NodeSimilarityMutateConfig, NodeSimilarityResult, RESULT, Pair<RelationshipsWritten, Map<String, Object>>> resultBuilder,
         boolean shouldComputeSimilarityDistribution
     ) {
-        var mutateStep = NodeSimilarityMutateStep.create(mutateRelationshipService,
-            configuration,
+        var mutateStep = NodeSimilarityMutateStep.create(
+            mutateRelationshipService,
+            configuration.mutateRelationshipType(),
+            configuration.mutateProperty(),
             shouldComputeSimilarityDistribution,
             terminationFlag
         );
