@@ -165,7 +165,7 @@ ORDER BY nodeId
 
 You can write new properties to the source AuraDB database in two ways:
 
-* Using the `gds.graph.nodeProperty.write()` procedure (see xref:management-ops/graph-write-to-neo4j/write-back-to-nodes.adoc[] for more details).
+* Using the `gds.graph.nodeProperties.write()` procedure (see xref:management-ops/graph-write-to-neo4j/write-back-to-nodes.adoc[] for more details).
 +
 [role=query-example]
 --
