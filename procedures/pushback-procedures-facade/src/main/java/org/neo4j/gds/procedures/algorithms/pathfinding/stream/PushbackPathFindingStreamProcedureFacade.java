@@ -207,6 +207,7 @@ public final class PushbackPathFindingStreamProcedureFacade {
             config.toGraphParameters(),
             config.toParameters(),
             config.jobId(),
+            config.relationshipWeightProperty(),
             config.logProgress(),
             pathFindingResultTransformerBuilder
         ).join();
