@@ -286,6 +286,7 @@ public class PathFindingComputeBusinessFacade {
         GraphParameters graphParameters,
         DagLongestPathParameters parameters,
         JobId jobId,
+        Optional<String> relationshipProperty,
         boolean logProgress,
         ResultTransformerBuilder<TimedAlgorithmResult<PathFindingResult>, TR> resultTransformerBuilder
     ) {
@@ -293,7 +294,7 @@ public class PathFindingComputeBusinessFacade {
         var graphResources = graphStoreCatalogService.fetchGraphResources(
             graphName,
             graphParameters,
-            Optional.empty(),
+            relationshipProperty,
             new GraphStoreValidation(new NoAlgorithmRequirements()),
             Optional.empty(),
             user,

@@ -356,7 +356,7 @@ public class PathFindingComputeFacade {
         // Submit the algorithm for async computation
         return algorithmCaller.run(
             dagLongestPath::compute,
-            null
+            jobId
         );
     }
 
