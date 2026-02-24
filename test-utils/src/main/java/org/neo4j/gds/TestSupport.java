@@ -104,25 +104,66 @@ public final class TestSupport {
         }
     }
 
-    private record RelationshipLabelsAndProperties(
-        long sourceId,
-        long targetId,
-        String label,
-        List<Pair<String, Double>> properties
+    private record RelationshipTypeProperties(
+        List<Pair<Long, Long>> edges,
+        List<String> propertyKeys,
+        List<List<Double>> propertyValues
     ) {
-        private String toGdl() {
+        private static RelationshipTypeProperties of(GraphStore graphStore, RelationshipType relationshipType) {
+            var edges = new ArrayList<Pair<Long, Long>>();
+
+            var propertyKeys = graphStore.relationshipPropertyKeys(relationshipType).stream().toList();
+            var propertyValues = new ArrayList<List<Double>>();
+
+            var graph = graphStore.getGraph(relationshipType);
+            graph.forEachNode(nodeId -> {
+                graph.forEachRelationship(
+                    nodeId, (s, t) -> {
+                        edges.add(Pair.of(s, t));
+                        return true;
+                    }
+                );
+                return true;
+            });
+
+            propertyKeys.forEach(propertyKey -> {
+                var values = new ArrayList<Double>();
+                var aGraph = graphStore.getGraph(relationshipType, Optional.of(propertyKey));
+                aGraph.forEachNode(nodeId -> {
+                    aGraph.forEachRelationship(
+                        nodeId, Float.NaN, (s, t, v) -> {
+                            values.add(v);
+                            return true;
+                        }
+                    );
+                    return true;
+                });
+                propertyValues.add(values);
+            });
+
+            int dim = edges.size();
+            propertyValues.forEach(p -> assertThat(p.size())
+                .withFailMessage(() -> String.format("propertyValues don't have the same length as the edges %d", dim))
+                .isEqualTo(dim));
+
+            return new RelationshipTypeProperties(edges, propertyKeys, propertyValues);
+        }
+
+        private List<String> toGdl(String label) {
+            return IntStream.range(0, edges.size()).mapToObj(i -> toGdl(label, i)).toList();
+        }
+
+        private String toGdl(String label, int i) {
+            int propertyCount = propertyKeys.size();
+            String properties = IntStream.range(0, propertyCount)
+                .mapToObj(index -> String.format("%s : %s", propertyKeys.get(index), propertyValues.get(index).get(i)))
+                .collect(joining(", "));
             var labelAndProperties = String.format(
                 "[:%s%s]",
                 label,
-                properties.isEmpty()
-                    ? "" :
-                    String.format(
-                        " {%s}", properties.stream()
-                            .map(p -> String.format("%s : %s", p.getLeft(), p.getRight()))
-                            .collect(joining(", "))
-                    )
+                properties.isEmpty() ? "" : String.format("{%s}", properties)
             );
-            return String.format("(a%d)-%s->(a%d)", sourceId, labelAndProperties, targetId);
+            return String.format("(a%d)-%s->(a%d)", edges.get(i).getLeft(), labelAndProperties, edges.get(i).getRight());
         }
     }
 
@@ -259,28 +300,11 @@ public final class TestSupport {
         };
     }
 
-    private static Map<Pair<Long, Long>, List<Pair<String, Double>>> propertiesOfRelationshipType(
-        GraphStore graphStore,
-        RelationshipType relationshipType
-    ) {
-        Map<Pair<Long, Long>, List<Pair<String, Double>>> relationships = new HashMap<>();
-        graphStore.relationshipPropertyKeys(relationshipType).forEach(propertyKey -> {
-            var graph = graphStore.getGraph(relationshipType, Optional.of(propertyKey));
-            graph.forEachNode(nodeId -> {
-                graph.forEachRelationship(
-                    nodeId, 0.0, (s, t, v) -> {
-                        var key = Pair.of(s, t);
-                        relationships.computeIfAbsent(key, k -> new ArrayList<>()).add(Pair.of(propertyKey, v));
-                        return true;
-                    }
-                );
-                return true;
-            });
-        });
-        return relationships;
+    public static String gdlFromGraphStore(GraphStore graphStore) {
+        return gdlFromGraphStore(graphStore, true);
     }
 
-    public static String gdlFromGraphStore(GraphStore graphStore) {
+    public static String gdlFromGraphStore(GraphStore graphStore, boolean skipEmptyLabels) {
         Objects.requireNonNull(graphStore);
         StringBuilder sb = new StringBuilder();
         var graph = graphStore.getUnion();
@@ -307,30 +331,20 @@ public final class TestSupport {
             sb.append("\n");
         });
 
-        List<RelationshipLabelsAndProperties> relationships = new ArrayList<>();
+        Map<RelationshipType, RelationshipTypeProperties> relationshipsByType = new HashMap<>();
         graphStore.relationshipTypes().stream()
-            .filter(t -> !ALL_RELATIONSHIPS.equals(t)) // TODO discuss if we want to silently filter out or use the default label
+            .filter(t -> skipEmptyLabels && !ALL_RELATIONSHIPS.equals(t))
             .forEach(relationshipType -> {
-                var properties = propertiesOfRelationshipType(graphStore, relationshipType);
-                var relTypeGraph = graphStore.getGraph(relationshipType);
-                relTypeGraph.forEachNode(nodeId -> {
-                    relTypeGraph.forEachRelationship(
-                        nodeId, (s, t) -> {
-                            var propertyList = properties.getOrDefault(Pair.of(s, t), List.of());
-                            relationships.add(
-                                new RelationshipLabelsAndProperties(s, t, relationshipType.name(), propertyList)
-                            );
-                            return true;
-                        }
-                    );
-                    return true;
-                });
+                var properties = RelationshipTypeProperties.of(graphStore, relationshipType);
+                relationshipsByType.put(relationshipType, properties);
             });
 
-        relationships.forEach(record -> {
-            sb.append(record.toGdl());
-            sb.append("\n");
-        });
+        relationshipsByType
+            .forEach((key, value) -> value.toGdl(key.name())
+                .forEach(str -> {
+                    sb.append(str);
+                    sb.append("\n");
+                }));
 
         return sb.toString();
     }

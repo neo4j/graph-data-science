@@ -96,8 +96,10 @@ class TestSupportTest {
             (a2)
             (a3:heavy {weight : 66L})
             (a4)
-            //(a0)-->(a0) // TODO discuss if we want this as valid input
+            (a0)-[:foo]->(a0)
+            (a0)-[:foo]->(a0)
             (a0)-[:likes {intensity : 0.3, validity: 0.1}]->(a1)
+            (a1)-[:likes {intensity : 0.1, validity: 0.9}]->(a0)
             (a1)-[:dislikes]->(a0)
             """;
 
@@ -105,7 +107,6 @@ class TestSupportTest {
 
         String gdlActual = TestSupport.gdlFromGraphStore(gs1);
 
-        // assertThat(gdlActual).isEqualTo(gdlInput); TODO remove me
         System.out.println(gdlActual); // TODO remove me
         var gs2 = GdlFactory.of(gdlActual).build();
         TestSupport.assertGraphEquals(gs1.getUnion(), gs2.getUnion());
