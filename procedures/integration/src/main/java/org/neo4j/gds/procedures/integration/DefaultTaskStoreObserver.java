@@ -19,27 +19,26 @@
  */
 package org.neo4j.gds.procedures.integration;
 
-import org.neo4j.function.ThrowingFunction;
+import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.core.utils.progress.TaskStore;
-import org.neo4j.gds.core.utils.progress.TaskStoreHolder;
-import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
-import org.neo4j.kernel.api.procedure.Context;
+import org.neo4j.gds.core.utils.progress.TaskStoreService;
 
-import java.time.Duration;
+class DefaultTaskStoreObserver implements TaskStoreObserver {
+    private final TaskStoreRepository taskStoreRepository;
+    private final TaskStoreService taskStoreService;
 
-/**
- * @deprecated This should probably go
- */
-@Deprecated
-class OldTaskStoreProvider implements ThrowingFunction<Context, TaskStore, ProcedureException> {
-    private final Duration finishedTaskTTL;
-
-    OldTaskStoreProvider(Duration finishedTaskTTL) {
-        this.finishedTaskTTL = finishedTaskTTL;
+    DefaultTaskStoreObserver(TaskStoreRepository taskStoreRepository, TaskStoreService taskStoreService) {
+        this.taskStoreRepository = taskStoreRepository;
+        this.taskStoreService = taskStoreService;
     }
 
     @Override
-    public TaskStore apply(Context context) throws ProcedureException {
-        return TaskStoreHolder.getTaskStore(context.graphDatabaseAPI().databaseName(), finishedTaskTTL);
+    public TaskStore onBootstrap(DatabaseId databaseId) {
+        return taskStoreService.getOrCreateTaskStore(databaseId);
+    }
+
+    @Override
+    public void onShutdown(DatabaseId databaseId) {
+        taskStoreRepository.remove(databaseId);
     }
 }

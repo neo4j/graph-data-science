@@ -61,6 +61,7 @@ dependencies {
 
     testImplementation project(':edition-api')
     testImplementation project(':graph-schema-api')
+    testImplementation project(':opengds-extension')
 
     testCompileOnly openGds.immutables.builder
 

@@ -49,7 +49,7 @@ public class TaskRegistryFactoryService {
     public TaskRegistryFactory getTaskRegistryFactory(DatabaseId databaseId, User user) {
         if (!progressTrackingEnabled) return TaskRegistryFactory.empty();
 
-        var taskStoreForDatabase = taskStoreService.getTaskStore(databaseId);
+        var taskStoreForDatabase = taskStoreService.getOrCreateTaskStore(databaseId);
 
         return new LocalTaskRegistryFactory(user.getUsername(), taskStoreForDatabase);
     }

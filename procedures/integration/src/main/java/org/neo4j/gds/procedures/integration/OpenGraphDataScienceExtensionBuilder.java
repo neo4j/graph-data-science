@@ -101,6 +101,7 @@ public final class OpenGraphDataScienceExtensionBuilder {
     private final GraphStoreCatalogService graphStoreCatalogService;
     private final TaskStoreService taskStoreService;
     private final TaskRegistryFactoryService taskRegistryFactoryService;
+    private final TaskStoreObserver taskStoreObserver;
     private final boolean useMaxMemoryEstimation;
     private final UserLogServices userLogServices;
     private final Lifecycle gcListener;
@@ -117,6 +118,7 @@ public final class OpenGraphDataScienceExtensionBuilder {
         ModelCatalog modelCatalog,
         TaskStoreService taskStoreService,
         TaskRegistryFactoryService taskRegistryFactoryService,
+        TaskStoreObserver taskStoreObserver,
         boolean useMaxMemoryEstimation,
         UserLogServices userLogServices,
         Lifecycle gcListener,
@@ -132,6 +134,7 @@ public final class OpenGraphDataScienceExtensionBuilder {
         this.graphStoreCatalogService = graphStoreCatalogService;
         this.taskStoreService = taskStoreService;
         this.taskRegistryFactoryService = taskRegistryFactoryService;
+        this.taskStoreObserver = taskStoreObserver;
         this.useMaxMemoryEstimation = useMaxMemoryEstimation;
         this.userLogServices = userLogServices;
         this.gcListener = gcListener;
@@ -179,7 +182,10 @@ public final class OpenGraphDataScienceExtensionBuilder {
         log.info("Memory usage guard: " + (useMaxMemoryEstimation ? "maximum" : "minimum") + " estimate");
 
         // Task business is initialised from Neo4j configuration
-        var taskStoreService = new TaskStoreService(progressTrackingEnabled, retentionPeriod);
+        var taskStoreFactory = TaskStoreFactory.create(progressTrackingEnabled, retentionPeriod);
+        var taskStoreRepository = new TaskStoreRepository(); // only one! an instance-singleton
+        var taskStoreService = new DefaultTaskStoreService(taskStoreFactory, taskStoreRepository);
+        var taskStoreObserver = new DefaultTaskStoreObserver(taskStoreRepository, taskStoreService);
         var taskRegistryFactoryService = new TaskRegistryFactoryService(progressTrackingEnabled, taskStoreService);
 
         // User log state will eventually be created here, instead of referencing a big shared singleton
@@ -262,6 +268,7 @@ public final class OpenGraphDataScienceExtensionBuilder {
             modelCatalog,
             taskStoreService,
             taskRegistryFactoryService,
+            taskStoreObserver,
             useMaxMemoryEstimation,
             userLogServices,
             gcListener,
@@ -328,6 +335,7 @@ public final class OpenGraphDataScienceExtensionBuilder {
         registerMetricsComponent();
         registerTaskRegistryFactoryComponent();
         registerTaskStoreComponent();
+        registerTaskStoreObserverComponent();
         registerUserLogRegistryComponent();
         registerUsernameComponent();
     }
@@ -340,6 +348,13 @@ public final class OpenGraphDataScienceExtensionBuilder {
         var taskStoreProvider = new TaskStoreProvider(taskStoreService);
 
         componentRegistration.registerComponent("Task Store", TaskStore.class, taskStoreProvider);
+    }
+
+    /**
+     * This makes the observer available for database-level extensions
+     */
+    private void registerTaskStoreObserverComponent() {
+        componentRegistration.setUpDependency(taskStoreObserver);
     }
 
     private void registerTaskRegistryFactoryComponent() {

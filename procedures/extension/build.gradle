@@ -50,5 +50,6 @@ dependencies {
     implementation project(':procedures-facade-api')
     implementation project(':procedure-integration')
     implementation project(':progress-tracking')
+    implementation project(':shared-extensions')
     implementation project(':subgraph-filtering')
 }

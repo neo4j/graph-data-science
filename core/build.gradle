@@ -79,6 +79,7 @@ dependencies {
     testImplementation openGds.qaladatagen
     testImplementation openGds.junit.pioneer
 
-    integrationTestImplementation project(':projection')
     integrationTestImplementation project(':native-projection')
+    integrationTestImplementation project(':opengds-extension')
+    integrationTestImplementation project(':projection')
 }

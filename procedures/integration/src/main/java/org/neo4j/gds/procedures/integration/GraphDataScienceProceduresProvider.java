@@ -177,7 +177,7 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
         var writeContext = createWriteContext(exporterContext, graphDatabaseService);
 
         var taskRegistryFactory = taskRegistryFactoryService.getTaskRegistryFactory(databaseId, user);
-        var taskStore = taskStoreService.getTaskStore(databaseId);
+        var taskStore = taskStoreService.getOrCreateTaskStore(databaseId);
         taskStore.addListener(memoryTracker);
 
         var userLogRegistry = userLogServices.getUserLogRegistry(databaseId, user);

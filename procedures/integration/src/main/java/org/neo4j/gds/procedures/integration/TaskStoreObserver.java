@@ -19,26 +19,25 @@
  */
 package org.neo4j.gds.procedures.integration;
 
-import org.neo4j.function.ThrowingFunction;
+import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.core.utils.progress.TaskStore;
-import org.neo4j.gds.core.utils.progress.TaskStoreService;
-import org.neo4j.gds.procedures.DatabaseIdAccessor;
-import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
-import org.neo4j.kernel.api.procedure.Context;
 
-public class TaskStoreProvider implements ThrowingFunction<Context, TaskStore, ProcedureException> {
-    private final DatabaseIdAccessor databaseIdAccessor = new DatabaseIdAccessor();
+/**
+ * This is responsible for bridging the gap between the global GDS extension,
+ * and the many database-level extensions.
+ * It is where we keep shared state - a map of database name to task store.
+ * This is created once, in the global extension, and lives for the lifetime of the system.
+ */
+public interface TaskStoreObserver {
+    /**
+     * When a database bootstraps, we create state for it
+     */
+    TaskStore onBootstrap(DatabaseId databaseId);
 
-    private final TaskStoreService taskStoreService;
-
-    TaskStoreProvider(TaskStoreService taskStoreService) {
-        this.taskStoreService = taskStoreService;
-    }
-
-    @Override
-    public TaskStore apply(Context context) {
-        var databaseId = databaseIdAccessor.getDatabaseId(context.graphDatabaseAPI());
-
-        return taskStoreService.getOrCreateTaskStore(databaseId);
-    }
+    /**
+     * When a database shuts down, we remove residual state
+     * NB: this is best-effort only, because for composite databases,
+     * the database id from the extension is not the same as what gets resolved for use. Just too bad.
+     */
+    void onShutdown(DatabaseId databaseId);
 }

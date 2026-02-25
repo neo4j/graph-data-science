@@ -51,7 +51,7 @@ class TaskRegistryFactoryServiceTest {
 
         var databaseId = DatabaseId.of("some database");
         var user = new User("some user", false);
-        when(taskStoreService.getTaskStore(databaseId)).thenReturn(mock(TaskStore.class));
+        when(taskStoreService.getOrCreateTaskStore(databaseId)).thenReturn(mock(TaskStore.class));
         var factory = service.getTaskRegistryFactory(databaseId, user);
 
         assertNotNull(factory);
@@ -66,8 +66,8 @@ class TaskRegistryFactoryServiceTest {
         var databaseId2 = DatabaseId.of("some other database");
         var user1 = new User("some user", false);
         var user2 = new User("some other user", false);
-        when(taskStoreService.getTaskStore(databaseId1)).thenReturn(mock(TaskStore.class));
-        when(taskStoreService.getTaskStore(databaseId2)).thenReturn(mock(TaskStore.class));
+        when(taskStoreService.getOrCreateTaskStore(databaseId1)).thenReturn(mock(TaskStore.class));
+        when(taskStoreService.getOrCreateTaskStore(databaseId2)).thenReturn(mock(TaskStore.class));
         var factory1 = service.getTaskRegistryFactory(databaseId1, user1);
         var factory2 = service.getTaskRegistryFactory(databaseId1, user1);
 

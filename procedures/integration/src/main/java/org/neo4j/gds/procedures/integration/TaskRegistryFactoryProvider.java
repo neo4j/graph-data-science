@@ -27,10 +27,6 @@ import org.neo4j.gds.procedures.UserAccessor;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.kernel.api.procedure.Context;
 
-/**
- * @deprecated Needed until we strangle the last context-injected usages of {@link org.neo4j.gds.core.utils.progress.TaskRegistryFactory}
- */
-@Deprecated
 public class TaskRegistryFactoryProvider implements ThrowingFunction<Context, TaskRegistryFactory, ProcedureException> {
     private final DatabaseIdAccessor databaseIdAccessor = new DatabaseIdAccessor();
     private final UserAccessor userAccessor;

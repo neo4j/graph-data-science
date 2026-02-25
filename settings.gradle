@@ -441,6 +441,9 @@ project(':projection').projectDir = file('projection')
 include('scaling-utils')
 project(':scaling-utils').projectDir = file('scaling-utils')
 
+include('shared-extensions')
+project(':shared-extensions').projectDir = file('procedures/shared-extensions')
+
 include('similarity-algorithms')
 project(':similarity-algorithms').projectDir = file('applications/algorithms/similarity')
 

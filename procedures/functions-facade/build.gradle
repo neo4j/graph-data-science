@@ -24,5 +24,6 @@ dependencies {
     testRuntimeOnly openGds.bundles.test.platforms
 
     testImplementation project(':neo4j-kernel-adapter-api')
+    testImplementation project(':opengds-extension')
     testImplementation project(':test-utils')
 }

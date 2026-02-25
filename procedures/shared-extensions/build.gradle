@@ -1,0 +1,23 @@
+apply plugin: 'java-library'
+
+description = 'Neo4j Graph Data Science :: Shared Extensions'
+
+group = 'org.neo4j.gds'
+
+dependencies {
+    // necessary in order to activate the extensions
+    annotationProcessor neo4j.annotations
+
+    // Neo4j dependencies
+    compileOnly(neo4j.annotations) { transitive = false }
+    compileOnly(neo4j.common) { transitive = false }
+    compileOnly(neo4j.graphdb.api) { transitive = false }
+    compileOnly(neo4j.kernel) { transitive = false }
+    compileOnly(neo4j.logging) { transitive = false }
+
+    implementation project(':core-api')
+    implementation project(':logging')
+    implementation project(':opengds-procedure-facade')
+    implementation project(':procedure-integration')
+    implementation project(':progress-tracking')
+}

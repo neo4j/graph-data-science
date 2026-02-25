@@ -33,6 +33,7 @@ dependencies {
     testImplementation project(':graph-schema-api')
     testImplementation project(':ml-core')
     testImplementation project(':proc-test-utilities')
+    testImplementation project(':shared-extensions')
     testImplementation project(':string-formatting')
 
     testImplementation project(':opengds-extension')

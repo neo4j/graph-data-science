@@ -21,34 +21,9 @@ package org.neo4j.gds.core.utils.progress;
 
 import org.neo4j.gds.api.DatabaseId;
 
-import java.time.Duration;
-
 /**
- * This class should hold all {@link org.neo4j.gds.core.utils.progress.TaskStore}s for the application.
- * Therefore, it should be a singleton. You instantiate it up once as part of assembling the application.
- * TaskStores are tied to databases and live for the lifetime of a database.
+ * Your one-stop shop for task stores given a data source
  */
-public class TaskStoreService {
-    /**
-     * This is a temporary hack where we allow Procedure Facade to control application state,
-     * but also retain the old functionality of TaskStores being made available for context injection.
-     * We do this so that we may slice our software vertically while migrating it;
-     * this hack should go away when TaskStores are no longer needed for context injection.
-     */
-    // private final Map<DatabaseId, TaskStore> taskStores = new ConcurrentHashMap();
-
-    private final boolean progressTrackingEnabled;
-    private final Duration retentionPeriod;
-
-    public TaskStoreService(boolean progressTrackingEnabled, Duration retentionPeriod) {
-        this.progressTrackingEnabled = progressTrackingEnabled;
-        this.retentionPeriod = retentionPeriod;
-    }
-
-    public TaskStore getTaskStore(DatabaseId databaseId) {
-        if (!progressTrackingEnabled) return EmptyTaskStore.INSTANCE;
-
-        return TaskStoreHolder.getTaskStore(databaseId.databaseName(), retentionPeriod);
-        // return taskStores.computeIfAbsent(databaseId.databaseName(), __ -> new PerDatabaseTaskStore());
-    }
+public interface TaskStoreService {
+    TaskStore getOrCreateTaskStore(DatabaseId databaseId);
 }

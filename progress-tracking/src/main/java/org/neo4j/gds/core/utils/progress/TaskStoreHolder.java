@@ -25,44 +25,13 @@ import java.time.Duration;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-/**
- * @deprecated this is a temporary workaround
- */
-@Deprecated
 public final class TaskStoreHolder {
-    /**
-     * We need to satisfy each procedure facade having its own task stores, so that we can new them up in a known,
-     * good, isolated state.
-     * Plus for the time being we have to ensure each test using a task store sees unique task stores.
-     * We assume database ids are unique to a JVM.
-     * Therefore, we can have this JVM-wide singleton holding a map of database id to task store.
-     * <p>
-     * This is of course abominable and should be gotten rid of.
-     * And we can get rid of it once all tests are not using context-injected task stores anymore.
-     * We want to do that migration in vertical slices, so we can have this solution in place temporarily.
-     * Procedure facade will use this service class and be oblivious to the underlying abomination.
-     * And TaskRegistryExtension will be made to hand out references using database id.
-     * We rely on database ids being unique for the lifetime of a JVM.
-     * <p>
-     * Note that TaskRegistryExtension will thus serve both tests and prod,
-     * until we can eliminate usages of its products, and in turn eliminate it completely.
-     * <p>
-     * Oh, and string type because this module doesn't know the GDS DatabaseId type.
-     *
-     * @deprecated we eliminate this as soon as possible
-     */
-    @Deprecated
     private static final Map<String, TaskStore> TASK_STORES = new ConcurrentHashMap<>();
 
     private TaskStoreHolder() {}
 
-    /**
-     * Normalize so that we match things from the GDS DatabaseId, and fingers crossed it doesn't change.
-     * Not using DatabaseId directly, because that would mead to some awful dependencies.
-     * And we will eliminate this in due course.
-     */
-    public static TaskStore getTaskStore(String databaseName, Duration retentionPeriod) {
-        String normalizedDatabaseName = StringFormatting.toLowerCaseWithLocale(databaseName);
+    public static TaskStore getOrCreateTaskStore(String databaseName, Duration retentionPeriod) {
+        var normalizedDatabaseName = StringFormatting.toLowerCaseWithLocale(databaseName);
 
         return TASK_STORES.computeIfAbsent(normalizedDatabaseName, __ -> new PerDatabaseTaskStore(retentionPeriod));
     }
