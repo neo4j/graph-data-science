@@ -107,7 +107,6 @@ class TestSupportTest {
 
         String gdlActual = TestSupport.gdlFromGraphStore(gs1);
 
-        System.out.println(gdlActual); // TODO remove me
         var gs2 = GdlFactory.of(gdlActual).build();
         TestSupport.assertGraphEquals(gs1.getUnion(), gs2.getUnion());
     }

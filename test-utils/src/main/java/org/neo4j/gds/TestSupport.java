@@ -69,6 +69,8 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static java.util.Collections.emptyMap;
+import static java.util.Locale.ENGLISH;
+import static java.util.Locale.getDefault;
 import static java.util.stream.Collectors.joining;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -91,14 +93,15 @@ public final class TestSupport {
     ) {
         private String toGdl() {
             Function<String, String> propertiesString = properties ->
-                properties.isEmpty() ? "" : String.format(" {%s}", properties);
+                properties.isEmpty() ? "" : String.format(getDefault(), " {%s}", properties);
             Function<Pair<String, NodeProperty>, String> propertyToString = p ->
-                String.format("%s : %s", p.getLeft(), gdlNodePropertyString(p.getRight(), nodeId));
+                String.format(getDefault(), "%s : %s", p.getLeft(), gdlNodePropertyString(p.getRight(), nodeId));
 
             return String.format(
+                getDefault(),
                 "(a%d%s%s)",
                 nodeId,
-                labels.stream().map(label -> String.format(":%s", label)).collect(joining()),
+                labels.stream().map(label -> String.format(getDefault(), ":%s", label)).collect(joining()),
                 propertiesString.apply(properties.stream().map(propertyToString).collect(joining(", ")))
             );
         }
@@ -143,7 +146,7 @@ public final class TestSupport {
 
             int dim = edges.size();
             propertyValues.forEach(p -> assertThat(p.size())
-                .withFailMessage(() -> String.format("propertyValues don't have the same length as the edges %d", dim))
+                .withFailMessage(() -> String.format(ENGLISH, "propertyValues don't have the same length as the edges %d", dim))
                 .isEqualTo(dim));
 
             return new RelationshipTypeProperties(edges, propertyKeys, propertyValues);
@@ -156,14 +159,15 @@ public final class TestSupport {
         private String toGdl(String label, int i) {
             int propertyCount = propertyKeys.size();
             String properties = IntStream.range(0, propertyCount)
-                .mapToObj(index -> String.format("%s : %s", propertyKeys.get(index), propertyValues.get(index).get(i)))
+                .mapToObj(index -> String.format(getDefault(), "%s : %s", propertyKeys.get(index), propertyValues.get(index).get(i)))
                 .collect(joining(", "));
             var labelAndProperties = String.format(
+                getDefault(),
                 "[:%s%s]",
                 label,
-                properties.isEmpty() ? "" : String.format("{%s}", properties)
+                properties.isEmpty() ? "" : String.format(getDefault(), "{%s}", properties)
             );
-            return String.format("(a%d)-%s->(a%d)", edges.get(i).getLeft(), labelAndProperties, edges.get(i).getRight());
+            return String.format(ENGLISH, "(a%d)-%s->(a%d)", edges.get(i).getLeft(), labelAndProperties, edges.get(i).getRight());
         }
     }
 
@@ -278,22 +282,24 @@ public final class TestSupport {
 
     private static String gdlNodePropertyString(NodeProperty nodeProperty, long nodeId) {
         return switch (nodeProperty.valueType()) {
-            case LONG -> String.format("%dL", nodeProperty.values().longValue(nodeId));
-            case DOUBLE -> String.format("%fd", nodeProperty.values().doubleValue(nodeId));
+            case LONG -> String.format(getDefault(), "%dL", nodeProperty.values().longValue(nodeId));
+            case DOUBLE -> String.format(getDefault(), "%fd", nodeProperty.values().doubleValue(nodeId));
             case LONG_ARRAY -> String.format(
+                getDefault(),
                 "[%s]", Arrays.stream(nodeProperty.values().longArrayValue(nodeId))
-                    .mapToObj(l -> String.format("%dL", l))
+                    .mapToObj(l -> String.format(getDefault(), "%dL", l))
                     .collect(joining(", "))
             );
             case DOUBLE_ARRAY -> String.format(
+                getDefault(),
                 "[%s]", Arrays.stream(nodeProperty.values().doubleArrayValue(nodeId))
-                    .mapToObj(d -> String.format("%fd", d))
+                    .mapToObj(d -> String.format(getDefault(), "%fd", d))
                     .collect(joining(", "))
             );
             case FLOAT_ARRAY -> {
                 float[] floatArrayValue = nodeProperty.values().floatArrayValue(nodeId);
                 yield IntStream.range(0, floatArrayValue.length)
-                    .mapToObj(i -> String.format("%ff", floatArrayValue[i]))
+                    .mapToObj(i -> String.format(getDefault(), "%ff", floatArrayValue[i]))
                     .collect(joining(", "));
             }
             default -> throw new IllegalStateException("Unexpected value: " + nodeProperty.valueType());
