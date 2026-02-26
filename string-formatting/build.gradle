@@ -6,7 +6,6 @@ group = 'org.neo4j.gds'
 
 dependencies {
 
-    implementation openGds.commons.text
     compileOnly openGds.jetbrains.annotations
 
     testImplementation platform(openGds.junit.bom)
