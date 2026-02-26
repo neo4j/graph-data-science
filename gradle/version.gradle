@@ -1,3 +1,3 @@
 ext {
-    gdsVersion = '2.27.0'
+    gdsVersion = '2026.03.0'
 }
