@@ -96,6 +96,8 @@ class TestSupportTest {
             (a2)
             (a3:heavy {weight : 66L})
             (a4)
+            (a0)-->(a0)
+            (a0)-[{greatness : 0.001}]->(a1)
             (a0)-[:foo]->(a0)
             (a0)-[:foo]->(a0)
             (a0)-[:likes {intensity : 0.3, validity: 0.1}]->(a1)

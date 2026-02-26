@@ -78,7 +78,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.gds.NodeLabel.ALL_NODES;
 import static org.neo4j.gds.Orientation.REVERSE;
 import static org.neo4j.gds.QueryRunner.runQueryWithResultConsumer;
-import static org.neo4j.gds.RelationshipType.ALL_RELATIONSHIPS;
 import static org.neo4j.gds.compat.GraphDatabaseApiProxy.runInFullAccessTransaction;
 import static org.neo4j.gds.utils.StringFormatting.formatNumber;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -194,10 +193,6 @@ public final class TestSupport {
     }
 
     public static String gdlFromGraphStore(GraphStore graphStore) {
-        return gdlFromGraphStore(graphStore, true);
-    }
-
-    public static String gdlFromGraphStore(GraphStore graphStore, boolean skipEmptyLabels) {
         Objects.requireNonNull(graphStore);
         StringBuilder sb = new StringBuilder();
         var graph = graphStore.getUnion();
@@ -215,16 +210,17 @@ public final class TestSupport {
 
             NodeLabelsAndProperties node = new NodeLabelsAndProperties(nodeId, labels, properties);
             sb.append(node.toGdl());
-            sb.append("\n");
+            sb.append(System.lineSeparator());
             return true;
         });
 
-        graphStore.relationshipTypes().stream()
-            .filter(t -> skipEmptyLabels && !ALL_RELATIONSHIPS.equals(t))
+        graphStore.relationshipTypes()
             .forEach(relationshipType -> {
                 var relationTypeProperties = RelationshipTypeProperties.of(graphStore, relationshipType);
-                sb.append(relationTypeProperties.toGdl(relationshipType.name));
-                sb.append("\n");
+                relationTypeProperties.toGdl(relationshipType).forEach(relationship -> {
+                    sb.append(relationship);
+                    sb.append(System.lineSeparator());
+                });
             });
 
         return sb.toString();
