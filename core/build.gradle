@@ -46,7 +46,7 @@ dependencies {
             project(':concurrency'),
 
             openGds.agrona,
-            openGds.commons.text,
+            openGds.commons.lang3,
             openGds.eclipse.collections.api,
             openGds.eclipse.collections,
             openGds.hppc,
