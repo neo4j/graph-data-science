@@ -29,3 +29,7 @@ sourceSets {
         }
     }
 }
+
+afterEvaluate {
+    tasks.named('explodeCodeSourceTest').configure {mustRunAfter tasks.named('compileTestJava')}
+}
