@@ -9,7 +9,9 @@ dependencies {
     compileOnly         openGds.immutables.value.annotations
     compileOnly         openGds.jetbrains.annotations
 
-    implementation openGds.commons.text
+    implementation(openGds.commons.text) {
+        transitive = false
+    }
 
     // TEST DEPENDENCIES
     testImplementation project(':test-utils')
