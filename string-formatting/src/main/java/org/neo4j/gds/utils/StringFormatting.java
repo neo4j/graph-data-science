@@ -19,12 +19,13 @@
  */
 package org.neo4j.gds.utils;
 
-import org.apache.commons.lang3.StringUtils;
 import org.intellij.lang.annotations.PrintFormat;
+import org.jetbrains.annotations.Nullable;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Locale;
+import java.util.Optional;
 
 public final class StringFormatting {
 
@@ -54,7 +55,9 @@ public final class StringFormatting {
         return string.toUpperCase(Locale.ENGLISH);
     }
 
-    public static boolean isEmpty(String string) {
-        return StringUtils.isEmpty(string);
+    public static boolean isEmpty(@Nullable String string) {
+        return Optional.ofNullable(string)
+            .map(String::isBlank)
+            .orElse(Boolean.TRUE);
     }
 }
