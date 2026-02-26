@@ -5,6 +5,7 @@ description = 'Neo4j Graph Data Science :: Graph Catalog Procedure Facade API'
 group = 'org.neo4j.gds'
 
 dependencies {
+    compileOnly openGds.jetbrains.annotations
 
     api project(':graph-store-catalog-results')
 

@@ -20,6 +20,7 @@
 package org.neo4j.gds.procedures.catalog;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.loading.DegreeDistribution;
@@ -35,7 +36,7 @@ public class GraphInfo {
     public final String graphName;
     public final String database;
     public final String databaseLocation;
-    public final String memoryUsage;
+    public final @Nullable String memoryUsage;
     public final long sizeInBytes;
     public final long nodeCount;
     public final long relationshipCount;
@@ -53,7 +54,7 @@ public class GraphInfo {
         @JsonProperty("database") String database,
         @JsonProperty("databaseLocation") String databaseLocation,
         @JsonProperty("configuration") Map<String, Object> configuration,
-        @JsonProperty("memoryUsage") String memoryUsage,
+        @JsonProperty("memoryUsage") @Nullable String memoryUsage,
         @JsonProperty("sizeInBytes") long sizeInBytes,
         @JsonProperty("nodeCount") long nodeCount,
         @JsonProperty("relationshipCount") long relationshipCount,
@@ -110,7 +111,7 @@ public class GraphInfo {
     private static GraphInfo create(
         GraphProjectConfig graphProjectConfig,
         GraphStore graphStore,
-        String memoryUsage,
+        @Nullable String memoryUsage,
         long sizeInBytes
     ) {
         var configurationMap = graphProjectConfig.asProcedureResultConfigurationField();
