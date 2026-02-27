@@ -330,11 +330,15 @@ The following additional operations are not supported:
 
 
 [[aura-api-auth]]
-== Authentication to the Aura API
+== Explicit authentication to the Aura API
 
-By default, within an AuraDB, you are authorized to use Aura Graph Analytics.
-However, you can only manage Aura Graph Analytics sessions within for the logged-in database user.
-To manage all sessions within the Aura Console Project, you have to authenticate to the link:https://neo4j.com/docs/aura/api/authentication/[Aura API] using the `gds.aura.api.credentials()` function **in each Cypher query**.
+When executing Cypher queries directly within an AuraDB instance, you are automatically authorized to create and manage your own Aura Graph Analytics sessions, and you do not need to provide explicit API credentials.
+
+Explicit authentication via link:https://neo4j.com/docs/aura/api/authentication/[Aura API] credentials is required in only two specific scenarios:
+
+- **Project-wide administration (Cypher)**: You are using Cypher and need to manage lifecycle operations (such as listing or deleting) for all sessions within the broader Aura Console Project, rather than just the sessions created by your specific logged-in database user. In this case, you must use the `gds.aura.api.credentials()` function **in each Cypher query**.
+
+- **Using the Python client**: If you are orchestrating sessions using the dedicated GDS Python library, the client requires Aura API credentials to authenticate with the control plane. For instructions, see link:{gds-client-docs-base-uri}/current/graph-analytics-serverless/#_gds_session_management[the Neo4j Graph Data Science Client documentation].
 
 [NOTE]
 ====
@@ -364,7 +368,7 @@ RETURN gds.graph.project('g',
 The function does not return any value, but registers the credentials in the query context.
 The credentials are not persisted anywhere and are immediately discarded after the query has completed.
 
-Once you have created a graph within a session, a query like the following will fail with an error indicating the missing call to `gds.aura.api.credentials()`.
+If you are operating in this admin context, you must include the credentials function in every query that interacts with the session. For example, if you created a graph using explicit credentials, attempting to run an algorithm in a new query without passing them again will fail.
 
 .Call an algorithm procedure without Aura API credentials
 [source, cypher]
