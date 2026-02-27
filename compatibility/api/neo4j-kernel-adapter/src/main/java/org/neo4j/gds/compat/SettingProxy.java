@@ -50,6 +50,8 @@ public final class SettingProxy {
             case REPLICA -> DatabaseMode.READ_REPLICA;
             case SINGLE -> DatabaseMode.SINGLE;
             case VIRTUAL -> DatabaseMode.VIRTUAL;
+            case PRIMARY_MIRROR -> DatabaseMode.PRIMARY_MIRROR;
+            case SECONDARY_MIRROR -> DatabaseMode.SECONDARY_MIRROR;
         };
     }
 
@@ -68,6 +70,8 @@ public final class SettingProxy {
                 case READ_REPLICA -> TopologyGraphDbmsModel.HostedOnMode.REPLICA;
                 case SINGLE -> TopologyGraphDbmsModel.HostedOnMode.SINGLE;
                 case VIRTUAL -> TopologyGraphDbmsModel.HostedOnMode.VIRTUAL;
+                case PRIMARY_MIRROR -> TopologyGraphDbmsModel.HostedOnMode.PRIMARY_MIRROR;
+                case SECONDARY_MIRROR -> TopologyGraphDbmsModel.HostedOnMode.SECONDARY_MIRROR;
             });
         } catch (NoSuchFieldException e) {
             throw new RuntimeException(
