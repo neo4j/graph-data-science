@@ -23,7 +23,7 @@ hdrhistogram = "2.2.2"
 hppc = "0.7.3"
 immutables = "2.12.0"
 ipaddress = "5.5.1"
-jackson = "2.20.1"
+jackson = "2.21.1"
 javapoet = "1.13.0"
 jetbrains-annotations = "26.0.2-1"
 jjwt = "0.13.0"
@@ -73,7 +73,7 @@ immutables-builder = { module = "org.immutables:builder", version.ref = "immutab
 immutables-value = { module = "org.immutables:value", version.ref = "immutables" }
 immutables-value-annotations = { module = "org.immutables:value-annotations", version.ref = "immutables" }
 ipaddress = { module = "com.github.seancfoley:ipaddress", version.ref = "ipaddress" }
-jackson-annotations = "com.fasterxml.jackson.core:jackson-annotations:2.20"
+jackson-annotations = "com.fasterxml.jackson.core:jackson-annotations:2.21"
 jackson-core = { module = "com.fasterxml.jackson.core:jackson-core", version.ref = "jackson" }
 jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "jackson" }
 jackson-dataformat-csv = { module = "com.fasterxml.jackson.dataformat:jackson-dataformat-csv", version.ref = "jackson" }
