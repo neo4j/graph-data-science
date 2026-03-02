@@ -5,28 +5,7 @@ description = 'Neo4j Graph Data Science :: Progress Tracking'
 group = 'org.neo4j.gds'
 
 dependencies {
-    annotationProcessor project(':annotations')
-    annotationProcessor project(':config-generator')
-    annotationProcessor openGds.immutables.builder
-    annotationProcessor openGds.immutables.value
-    annotationProcessor neo4j.annotations
-
-    // `JobId` and `JobIdConfig`
     api project(':core-api')
-
-    compileOnly openGds.immutables.builder
-    compileOnly openGds.immutables.value.annotations
-    compileOnly openGds.jetbrains.annotations
-
-    // Neo4j dependencies
-    compileOnly(neo4j.annotations) { transitive = false }
-    compileOnly(neo4j.common) { transitive = false }
-    compileOnly(neo4j.configuration) { transitive = false }
-    compileOnly(neo4j.gql.status) { transitive = false }
-    compileOnly(neo4j.graphdb.api) { transitive = false }
-    compileOnly(neo4j.kernel) { transitive = false }
-    compileOnly(neo4j.kernel.api) { transitive = false }
-    compileOnly(neo4j.logging) { transitive = false }
 
     implementation project(':annotations')
     implementation project(':concurrency')

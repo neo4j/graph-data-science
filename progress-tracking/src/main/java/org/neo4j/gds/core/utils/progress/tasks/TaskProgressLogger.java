@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.core.utils.progress.tasks;
 
-import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.core.RequestCorrelationId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.BatchingProgressLogger;
@@ -74,7 +73,7 @@ public final class TaskProgressLogger implements ProgressLogger {
         }
     }
 
-    void logEndSubTaskWithFailure(Task task, @Nullable Task parentTask) {
+    void logEndSubTaskWithFailure(Task task, Task parentTask) {
         var taskName = taskDescription(task, parentTask);
 
         log100OnLeafTaskFinish(task);

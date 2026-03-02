@@ -19,8 +19,6 @@
  */
 package org.neo4j.gds.core.utils.progress.tasks;
 
-import org.jetbrains.annotations.Nullable;
-import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.RequestCorrelationId;
 import org.neo4j.gds.core.concurrency.Concurrency;
@@ -300,13 +298,11 @@ public final class TaskProgressTracker implements ProgressTracker {
         endSubTaskWithFailure();
     }
 
-    @TestOnly
     Task currentSubTask() {
         requireCurrentTask();
         return currentTask.orElseThrow();
     }
 
-    @Nullable
     private Task parentTask() {
         return nestedTasks.isEmpty() ? null : nestedTasks.peek();
     }

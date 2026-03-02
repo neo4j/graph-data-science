@@ -19,17 +19,14 @@
  */
 package org.neo4j.gds.core.utils.progress;
 
-import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 
 public class TaskRegistry {
-
     private final String username;
     private final TaskStore taskStore;
     private final JobId jobId;
 
-    @TestOnly
     public TaskRegistry(TaskRegistry taskRegistry) {
         this(taskRegistry.username, taskRegistry.taskStore);
     }

@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.utils.progress;
+package org.neo4j.gds.settings;
 
 import org.neo4j.annotations.service.ServiceProvider;
 import org.neo4j.configuration.Description;
@@ -31,13 +31,9 @@ import static org.neo4j.configuration.SettingValueParsers.BOOL;
 import static org.neo4j.configuration.SettingValueParsers.DURATION;
 import static org.neo4j.gds.compat.SettingProxy.newBuilder;
 
-/**
- * @deprecated move up to settings module, this is Neo4j integration
- */
-@Deprecated
+@SuppressWarnings("WeakerAccess")
 @ServiceProvider
 public final class ProgressFeatureSettings implements SettingsDeclaration {
-
     @Description("Enable progress logging tracking.")
     public static final Setting<Boolean> progress_tracking_enabled = newBuilder(
         "gds.progress_tracking_enabled",

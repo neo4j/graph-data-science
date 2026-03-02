@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.settings;
 
-import org.neo4j.gds.core.utils.progress.ProgressFeatureSettings;
 import org.neo4j.graphdb.config.Setting;
 
 import java.nio.file.Path;
