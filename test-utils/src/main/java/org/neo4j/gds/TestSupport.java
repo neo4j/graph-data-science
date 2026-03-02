@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.assertj.core.api.Condition;
 import org.assertj.core.api.HamcrestCondition;
 import org.assertj.core.api.ObjectAssert;
@@ -30,21 +31,24 @@ import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.function.Executable;
 import org.junit.jupiter.params.provider.Arguments;
+import org.neo4j.gds.TestSupportGdlRecords.NodeLabelsAndProperties;
+import org.neo4j.gds.TestSupportGdlRecords.RelationshipTypeProperties;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.properties.nodes.NodeProperty;
 import org.neo4j.gds.canonization.CanonicalAdjacencyMatrix;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
-import org.neo4j.gds.mem.MemoryEstimation;
-import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.extension.GdlSupportPerMethodExtension;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.gds.gdl.ImmutableGraphProjectFromGdlConfig;
+import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.termination.TerminatedException;
 import org.neo4j.gds.transaction.DatabaseTransactionContext;
 import org.neo4j.gds.transaction.TransactionContext;
@@ -71,6 +75,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.neo4j.gds.NodeLabel.ALL_NODES;
 import static org.neo4j.gds.Orientation.REVERSE;
 import static org.neo4j.gds.QueryRunner.runQueryWithResultConsumer;
 import static org.neo4j.gds.compat.GraphDatabaseApiProxy.runInFullAccessTransaction;
@@ -78,7 +83,6 @@ import static org.neo4j.gds.utils.StringFormatting.formatNumber;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class TestSupport {
-
     public static final boolean CI =
         System.getenv("TEAMCITY_VERSION") != null || System.getenv("CI") != null || System.getenv("BUILD_ID") != null;
 
@@ -186,6 +190,40 @@ public final class TestSupport {
         Objects.requireNonNull(gdl);
 
         return GdlFactory.of(gdl).build();
+    }
+
+    public static String gdlFromGraphStore(GraphStore graphStore) {
+        Objects.requireNonNull(graphStore);
+        StringBuilder sb = new StringBuilder();
+        var graph = graphStore.getUnion();
+
+        graph.forEachNode(nodeId -> {
+            List<NodeLabel> nodeLabels = graph.nodeLabels(nodeId);
+
+            List<String> labels = nodeLabels.stream()
+                .filter(label -> !label.equals(ALL_NODES))
+                .map(NodeLabel::name).toList();
+
+            List<Pair<String, NodeProperty>> properties = graphStore.nodePropertyKeys().stream()
+                .filter(key -> graphStore.hasNodeProperty(nodeLabels, key))
+                .map(key -> Pair.of(key, graphStore.nodeProperty(key))).toList();
+
+            NodeLabelsAndProperties node = new NodeLabelsAndProperties(nodeId, labels, properties);
+            sb.append(node.toGdl());
+            sb.append(System.lineSeparator());
+            return true;
+        });
+
+        graphStore.relationshipTypes()
+            .forEach(relationshipType -> {
+                var relationTypeProperties = RelationshipTypeProperties.of(graphStore, relationshipType);
+                relationTypeProperties.toGdl(relationshipType).forEach(relationship -> {
+                    sb.append(relationship);
+                    sb.append(System.lineSeparator());
+                });
+            });
+
+        return sb.toString();
     }
 
     @Builder.Factory
