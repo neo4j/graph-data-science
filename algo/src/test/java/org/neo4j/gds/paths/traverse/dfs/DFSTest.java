@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.paths.traverse;
+package org.neo4j.gds.paths.traverse.dfs;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Orientation;
@@ -26,7 +26,9 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.paths.traverse.Aggregator;
 import org.neo4j.gds.paths.traverse.ExitPredicate.Result;
+import org.neo4j.gds.paths.traverse.OneHopAggregator;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.traversal.TraversalParameters;
 

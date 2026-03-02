@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.paths.traverse;
+package org.neo4j.gds.paths.traverse.bfs;
 
 
 import org.neo4j.gds.Algorithm;
@@ -30,6 +30,8 @@ import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.paged.ParalleLongPageCreator;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.paths.traverse.Aggregator;
+import org.neo4j.gds.paths.traverse.ExitPredicate;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.ArrayList;
