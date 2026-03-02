@@ -23,7 +23,5 @@ public enum DatabaseMode {
     SINGLE,
     CORE,
     READ_REPLICA,
-    VIRTUAL,
-    PRIMARY_MIRROR,
-    SECONDARY_MIRROR
+    VIRTUAL
 }
