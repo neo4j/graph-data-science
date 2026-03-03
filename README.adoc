@@ -26,9 +26,13 @@ When installing GDS manually, please refer to the below compatibility matrix:
 .Compatibility matrix (italicized version is in development)
 |===
 |GDS version | Neo4j version | Java Version
+.1+<.^|_GDS 2026.03_
+|_Neo4j 2026.03_
+.14+.^|Java 21
+.1+<.^|_GDS 2.27_
+|_Neo4j 2026.02_
 .1+<.^|_GDS 2.26_
 |_Neo4j 2026.01.3_
-.12+.^|Java 21
 .1+<.^|_GDS 2.25_
 |_Neo4j 2025.12.1_
 .1+<.^|_GDS 2.23_
@@ -112,7 +116,7 @@ For the most basic set of features, like graph loading and the graph representat
 <dependency>
   <groupId>org.neo4j.gds</groupId>
   <artifactId>core</artifactId>
-  <version>2.25.0</version>
+  <version>2026.03.0</version>
 </dependency>
 ----
 
@@ -124,14 +128,14 @@ The algorithms are located in the `algo-common` and `algo` modules:
 <dependency>
   <groupId>org.neo4j.gds</groupId>
   <artifactId>algo-common</artifactId>
-  <version>2.25.0</version>
+  <version>2026.03.0</version>
 </dependency>
 
 <!-- Contains the productized algorithms -->
 <dependency>
   <groupId>org.neo4j.gds</groupId>
   <artifactId>algo</artifactId>
-  <version>2.25.0</version>
+  <version>2026.03.0</version>
 </dependency>
 ----
 
@@ -143,21 +147,21 @@ The procedures are located in the `proc-common` and `proc` modules:
 <dependency>
   <groupId>org.neo4j.gds</groupId>
   <artifactId>proc-common</artifactId>
-  <version>2.25.0</version>
+  <version>2026.03.0</version>
 </dependency>
 
 <!-- Contains the productized algorithm procedures -->
 <dependency>
   <groupId>org.neo4j.gds</groupId>
   <artifactId>proc</artifactId>
-  <version>2.25.0</version>
+  <version>2026.03.0</version>
 </dependency>
 
 <!-- Required by the write execution modes, this artifact is responsible for providing the various exporters -->
 <dependency>
   <groupId>org.neo4j.gds</groupId>
   <artifactId>open-write-services</artifactId>
-  <version>2.25.0</version>
+  <version>2026.03.0</version>
 </dependency>
 ----
 
