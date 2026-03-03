@@ -25,7 +25,7 @@ import org.neo4j.gds.utility.StatementApi;
 
 import java.util.concurrent.Callable;
 
-abstract class StatementFunction<T> extends StatementApi implements RenamesCurrentThread, Callable<T>, StatementApi.TxFunction<T> {
+public abstract class StatementFunction<T> extends StatementApi implements RenamesCurrentThread, Callable<T>, StatementApi.TxFunction<T> {
     StatementFunction(TransactionContext tx) {
         super(tx);
     }

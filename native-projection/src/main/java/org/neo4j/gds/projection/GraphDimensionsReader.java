@@ -58,7 +58,7 @@ import static org.neo4j.gds.core.GraphDimensions.ANY_RELATIONSHIP_TYPE;
 import static org.neo4j.gds.core.GraphDimensions.NO_SUCH_LABEL;
 import static org.neo4j.gds.core.GraphDimensions.NO_SUCH_RELATIONSHIP_TYPE;
 
-final class GraphDimensionsReader extends StatementFunction<GraphDimensions> {
+public final class GraphDimensionsReader extends StatementFunction<GraphDimensions> {
     private final IdGeneratorFactory idGeneratorFactory;
     private final GraphProjectFromStoreConfig graphProjectConfig;
 
