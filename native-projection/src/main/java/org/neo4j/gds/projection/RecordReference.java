@@ -19,5 +19,8 @@
  */
 package org.neo4j.gds.projection;
 
+import org.neo4j.storageengine.api.Reference;
+
 public interface RecordReference {
+    Reference propertiesReference();
 }

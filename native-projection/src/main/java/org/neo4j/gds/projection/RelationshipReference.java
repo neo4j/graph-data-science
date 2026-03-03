@@ -19,8 +19,6 @@
  */
 package org.neo4j.gds.projection;
 
-import org.neo4j.storageengine.api.Reference;
-
 public interface RelationshipReference extends RecordReference {
 
     long relationshipId();
@@ -30,6 +28,4 @@ public interface RelationshipReference extends RecordReference {
     long sourceNodeReference();
 
     long targetNodeReference();
-
-    Reference propertiesReference();
 }
