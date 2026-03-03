@@ -297,9 +297,9 @@ public final class OpenGraphDataScienceExtensionBuilder {
 
         registerComponentsNeededByBaseProc();
 
-        // register legacy bits, as I remember it these are used internally. I lose track tho. Awful design.
         registerLicenseStateComponent();
         registerModelCatalogComponent();
+
         log.info("Graph Data Science extension built.");
 
         var lifeSupport = new LifeSupport();
@@ -378,14 +378,18 @@ public final class OpenGraphDataScienceExtensionBuilder {
     }
 
     private void registerLicenseStateComponent() {
+        // needed by SysInfo procedure
         componentRegistration.registerComponent("License State", LicenseState.class, __ -> licenseState);
 
+        // needed by export builders extension
         componentRegistration.setUpDependency(licenseState);
     }
 
     private void registerModelCatalogComponent() {
+        // needed by tests :facepalm:
         componentRegistration.registerComponent("Model Catalog", ModelCatalog.class, __ -> modelCatalog);
 
+        // needed by tests
         componentRegistration.setUpDependency(modelCatalog);
     }
 
