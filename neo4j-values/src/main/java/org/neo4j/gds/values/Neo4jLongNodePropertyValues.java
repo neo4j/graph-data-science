@@ -27,11 +27,11 @@ import org.neo4j.values.storable.Values;
 public class Neo4jLongNodePropertyValues implements LongNodePropertyValues, Neo4jNodePropertyValues {
 
     private final NodePropertyValues internal;
-    private final boolean deafultIsNull;
+    private final boolean defaultIsNull;
 
-    public Neo4jLongNodePropertyValues(NodePropertyValues internal, boolean deafultIsNull) {
+    public Neo4jLongNodePropertyValues(NodePropertyValues internal, boolean defaultIsNull) {
         this.internal = internal;
-        this.deafultIsNull = deafultIsNull;
+        this.defaultIsNull = defaultIsNull;
     }
 
     public Neo4jLongNodePropertyValues(NodePropertyValues internal) {
@@ -46,7 +46,7 @@ public class Neo4jLongNodePropertyValues implements LongNodePropertyValues, Neo4
     @Override
     public Value neo4jValue(long nodeId) {
         long value = longValue(nodeId);
-        if (deafultIsNull && value == Long.MIN_VALUE) {
+        if (defaultIsNull && value == Long.MIN_VALUE) {
             return null;
         }
         return Values.longValue(value);

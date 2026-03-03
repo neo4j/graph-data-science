@@ -129,15 +129,13 @@ public final class PartitionUtils {
         Function<DegreePartition, TASK> taskCreator,
         Optional<Integer> minBatchSize
     ) {
-        if (concurrency.value() == 1) {
-            return List.of(taskCreator.apply(new DegreePartition(0, graph.nodeCount(), graph.relationshipCount())));
-        }
-
-        var batchSize = Math.max(
-            minBatchSize.orElse(ParallelUtil.DEFAULT_BATCH_SIZE),
-            BitUtil.ceilDiv(graph.relationshipCount(), concurrency.value())
-        );
-        return degreePartitionWithBatchSize(graph.nodeCount(), graph::degree, batchSize, taskCreator);
+        return degreePartition(
+            graph.nodeCount(),
+            graph.relationshipCount(),
+            graph::degree,
+            concurrency,
+            taskCreator,
+            minBatchSize);
     }
 
     public static <TASK> List<TASK> degreePartition(
@@ -239,9 +237,9 @@ public final class PartitionUtils {
         // the above loop only merge partition i with i+1 to avoid i being too small
         // thus we need to check the last partition manually
         var minLastPartitionSize = Math.round(0.2 * batchSize);
-        if (partitions.size() > 1 && partitions.get(partitions.size() - 1).relationshipCount() < minLastPartitionSize) {
-            var lastPartition = partitions.remove(partitions.size() - 1);
-            var partitionToMerge = partitions.remove(partitions.size() - 1);
+        if (partitions.size() > 1 && partitions.getLast().relationshipCount() < minLastPartitionSize) {
+            var lastPartition = partitions.removeLast();
+            var partitionToMerge = partitions.removeLast();
 
             DegreePartition mergedPartition = DegreePartition.of(
                 partitionToMerge.startNode(),
