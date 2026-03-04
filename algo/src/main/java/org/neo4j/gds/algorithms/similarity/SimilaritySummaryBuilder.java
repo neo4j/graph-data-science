@@ -20,16 +20,17 @@
 package org.neo4j.gds.algorithms.similarity;
 
 import org.neo4j.gds.api.properties.relationships.RelationshipWithPropertyConsumer;
+import org.neo4j.gds.core.concurrency.Concurrency;
 
 import java.util.Map;
 
 public interface SimilaritySummaryBuilder extends  RelationshipWithPropertyConsumer {
 
     Map<String,Object> similaritySummary();
-
-    static SimilaritySummaryBuilder of(boolean shouldCompute){
+    
+    static SimilaritySummaryBuilder of(Concurrency concurrency,boolean shouldCompute){
         if (shouldCompute){
-            return  new ActualSimilaritySummaryBuilder();
+            return  ActualSimilaritySummaryBuilder.create(concurrency);
         }else{
             return  new EmptySimilaritySummaryBuilder();
         }

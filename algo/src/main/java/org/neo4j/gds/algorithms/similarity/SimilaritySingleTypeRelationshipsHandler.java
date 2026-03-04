@@ -92,7 +92,7 @@ public class SimilaritySingleTypeRelationshipsHandler implements SingleTypeRelat
 
             IdMap idMap = graph;
 
-            var similarityDistributionBuilder = SimilaritySummaryBuilder.of(shouldComputeStatistics);
+            var similarityDistributionBuilder = SimilaritySummaryBuilder.of(new Concurrency(1),shouldComputeStatistics);
                 topKGraph.forEachNode(nodeId -> {
                         topKGraph.forEachRelationship(nodeId, Double.NaN, (sourceNodeId, targetNodeId, property) -> {
                             relationshipsBuilder.addFromInternal(

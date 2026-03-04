@@ -19,7 +19,9 @@
  */
 package org.neo4j.gds.algorithms.similarity;
 
+import org.HdrHistogram.ConcurrentDoubleHistogram;
 import org.HdrHistogram.DoubleHistogram;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.result.SimilarityStatistics;
 
 import java.util.Map;
@@ -30,6 +32,7 @@ import static org.neo4j.gds.core.ProcedureConstants.HISTOGRAM_PRECISION_DEFAULT;
 
 public class ActualSimilaritySummaryBuilder implements SimilaritySummaryBuilder {
 
+
     private final DoubleHistogram histogram;
     private final AtomicBoolean crashed = new AtomicBoolean(false);
 
@@ -39,6 +42,13 @@ public class ActualSimilaritySummaryBuilder implements SimilaritySummaryBuilder 
 
     ActualSimilaritySummaryBuilder(DoubleHistogram histogram ) {
         this.histogram = histogram;
+    }
+
+    static ActualSimilaritySummaryBuilder create(Concurrency concurrency){
+        if (concurrency.value() > 1){
+            return new ActualSimilaritySummaryBuilder(new ConcurrentDoubleHistogram(HISTOGRAM_PRECISION_DEFAULT));
+        }
+        return new ActualSimilaritySummaryBuilder(new DoubleHistogram(HISTOGRAM_PRECISION_DEFAULT));
     }
 
     @Override

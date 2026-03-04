@@ -31,6 +31,7 @@ import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.config.WritePropertyConfig;
 import org.neo4j.gds.config.WriteRelationshipConfig;
 import org.neo4j.gds.core.JobId;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.similarity.SimilarityGraphResult;
 import org.neo4j.gds.similarity.SimilarityResult;
 
@@ -93,7 +94,9 @@ class SimilarityWrite {
             ? similarityGraph
             : graphStore.nodes();
 
-        var similarityDistributionBuilder = SimilaritySummaryBuilder.of(shouldComputeSimilarityDistribution);
+        var similarityDistributionBuilder = SimilaritySummaryBuilder.of(
+            new Concurrency(1),
+            shouldComputeSimilarityDistribution);
 
         var relationshipsWritten = writeRelationshipService.writeFromGraph(
             writeRelationshipConfiguration.writeRelationshipType(),
