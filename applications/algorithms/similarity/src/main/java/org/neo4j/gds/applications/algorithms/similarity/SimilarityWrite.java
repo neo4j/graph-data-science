@@ -102,7 +102,7 @@ class SimilarityWrite {
             rootIdMap,
             label.asString(),
             resultStore,
-            similarityDistributionBuilder.similarityConsumer(),
+            similarityDistributionBuilder,
             jobId
         );
 

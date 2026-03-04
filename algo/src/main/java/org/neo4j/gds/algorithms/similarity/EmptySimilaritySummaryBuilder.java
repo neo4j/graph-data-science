@@ -19,20 +19,17 @@
  */
 package org.neo4j.gds.algorithms.similarity;
 
-import org.neo4j.gds.api.properties.relationships.RelationshipWithPropertyConsumer;
-
 import java.util.Map;
 
 public class EmptySimilaritySummaryBuilder implements SimilaritySummaryBuilder {
 
-
-    @Override
-    public RelationshipWithPropertyConsumer similarityConsumer() {
-          return (node1, node2, similarity) -> true;
-    }
-
     @Override
     public Map<String, Object> similaritySummary() {
         return Map.of();
+    }
+
+    @Override
+    public boolean accept(long sourceNodeId, long targetNodeId, double property) {
+        return true;
     }
 }

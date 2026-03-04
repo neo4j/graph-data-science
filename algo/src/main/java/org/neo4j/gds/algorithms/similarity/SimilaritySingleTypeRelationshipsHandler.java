@@ -100,7 +100,7 @@ public class SimilaritySingleTypeRelationshipsHandler implements SingleTypeRelat
                                 idMap.toRootNodeId(targetNodeId),
                                 property
                             );
-                            similarityDistributionBuilder.similarityConsumer().accept(sourceNodeId,targetNodeId,property);
+                            similarityDistributionBuilder.accept(sourceNodeId,targetNodeId,property);
                             return true;
                         });
                         return true;

@@ -23,10 +23,7 @@ import org.neo4j.gds.api.properties.relationships.RelationshipWithPropertyConsum
 
 import java.util.Map;
 
-public interface SimilaritySummaryBuilder {
-
-
-    RelationshipWithPropertyConsumer similarityConsumer();
+public interface SimilaritySummaryBuilder extends  RelationshipWithPropertyConsumer {
 
     Map<String,Object> similaritySummary();
 

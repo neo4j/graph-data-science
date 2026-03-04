@@ -20,7 +20,6 @@
 package org.neo4j.gds.algorithms.similarity;
 
 import org.HdrHistogram.DoubleHistogram;
-import org.neo4j.gds.api.properties.relationships.RelationshipWithPropertyConsumer;
 import org.neo4j.gds.result.SimilarityStatistics;
 
 import java.util.Map;
@@ -43,20 +42,10 @@ public class ActualSimilaritySummaryBuilder implements SimilaritySummaryBuilder 
     }
 
     @Override
-    public RelationshipWithPropertyConsumer similarityConsumer() {
-            return  (node1,node2, similarity) -> {
-                similarityConsume(similarity);
-                return true;
-            };
-
-}
-
-    @Override
     public Map<String,Object> similaritySummary(){
 
      return  SimilarityStatistics.similaritySummary(Optional.of(histogram), !crashed.get());
     }
-
 
     private  void similarityConsume(double similarity){
         try {
@@ -73,4 +62,9 @@ public class ActualSimilaritySummaryBuilder implements SimilaritySummaryBuilder 
         }
     }
 
+    @Override
+    public boolean accept(long sourceNodeId, long targetNodeId, double property) {
+        similarityConsume(property);
+        return true;
+    }
 }

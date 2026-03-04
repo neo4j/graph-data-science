@@ -40,9 +40,9 @@ class ActualSimilaritySummaryBuilderTest {
 
         var actualSimilaritySummaryBuilder = new ActualSimilaritySummaryBuilder(mockHistogram);
 
-        actualSimilaritySummaryBuilder.similarityConsumer().accept( 0,0,1.0);
-        actualSimilaritySummaryBuilder.similarityConsumer().accept( 0,0,1.0);
-        actualSimilaritySummaryBuilder.similarityConsumer().accept( 0,0,1.0);
+        actualSimilaritySummaryBuilder.accept( 0,0,1.0);
+        actualSimilaritySummaryBuilder.accept( 0,0,1.0);
+        actualSimilaritySummaryBuilder.accept( 0,0,1.0);
 
 
         var map =  actualSimilaritySummaryBuilder.similaritySummary();
