@@ -17,21 +17,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.paths.traverse;
+package org.neo4j.gds.paths.traverse.dfs;
 
-import org.junit.jupiter.api.Test;
-import org.neo4j.gds.assertions.MemoryEstimationAssert;
-import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
+import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
-class DFSMemoryEstimateDefinitionTest {
+public final class DFSProgressTask {
 
-    @Test
-    void testMemoryEstimation(){
+    private DFSProgressTask() {}
 
-        var memoryEstimation = new DfsMemoryEstimateDefinition();
-
-        MemoryEstimationAssert.assertThat(memoryEstimation.memoryEstimation())
-            .memoryRange(10_000, new Concurrency(1))
-            .hasSameMinAndMaxEqualTo(321440);
+    public static Task create() {
+        return Tasks.leaf(AlgorithmLabel.DFS.asString());
     }
 }

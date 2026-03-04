@@ -17,8 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.paths.traverse;
-
+package org.neo4j.gds.paths.traverse.bfs;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -30,10 +29,10 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.paths.traverse.ExitPredicate;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.traversal.TraversalParameters;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -41,8 +40,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.TestSupport.crossArguments;
 
 @GdlExtension
-class BFSTridentGraphTest {
-    @GdlGraph
+class BFSComplexTreeTest {
+
+    @GdlGraph(idOffset = 0)
     private static final String CYPHER =
         "CREATE " +
         "  (a:Node)" +
@@ -50,15 +50,13 @@ class BFSTridentGraphTest {
         ", (b:Node)" +
         ", (c:Node)" +
         ", (d:Node)" +
-
         ", (e:Node)" +
         ", (f:Node)" +
-        ", (g:Node)" +
 
+        ", (g:Node)" +
         ", (h:Node)" +
         ", (i:Node)" +
         ", (j:Node)" +
-
         ", (k:Node)" +
         ", (l:Node)" +
         ", (m:Node)" +
@@ -66,18 +64,38 @@ class BFSTridentGraphTest {
         ", (a)-[:REL]->(b)" +
         ", (a)-[:REL]->(c)" +
         ", (a)-[:REL]->(d)" +
+        ", (a)-[:REL]->(e)" +
+        ", (a)-[:REL]->(f)" +
 
-        ", (b)-[:REL]->(e)" +
-        ", (b)-[:REL]->(f)" +
         ", (b)-[:REL]->(g)" +
+        ", (b)-[:REL]->(h)" +
+        ", (b)-[:REL]->(i)" +
+        ", (b)-[:REL]->(j)" +
+        ", (b)-[:REL]->(k)" +
+        ", (b)-[:REL]->(l)" +
 
+        ", (c)-[:REL]->(g)" +
         ", (c)-[:REL]->(h)" +
         ", (c)-[:REL]->(i)" +
         ", (c)-[:REL]->(j)" +
+        ", (c)-[:REL]->(k)" +
+        ", (c)-[:REL]->(l)" +
 
+        ", (d)-[:REL]->(g)" +
+        ", (d)-[:REL]->(h)" +
+        ", (d)-[:REL]->(i)" +
+        ", (d)-[:REL]->(j)" +
         ", (d)-[:REL]->(k)" +
         ", (d)-[:REL]->(l)" +
-        ", (d)-[:REL]->(m)";
+
+        ", (e)-[:REL]->(g)" +
+        ", (e)-[:REL]->(h)" +
+        ", (e)-[:REL]->(i)" +
+        ", (e)-[:REL]->(j)" +
+        ", (e)-[:REL]->(k)" +
+        ", (e)-[:REL]->(l)" +
+
+        ", (f)-[:REL]->(m)";
 
     @Inject
     private static TestGraph graph;
@@ -87,9 +105,9 @@ class BFSTridentGraphTest {
     void testBfsToTargetOut(int concurrency, int delta) {
         long source = graph.toMappedNodeId("a");
         List<Long> targets = List.of(
-            graph.toMappedNodeId("e"),
+            graph.toMappedNodeId("h"),
             graph.toMappedNodeId("j"),
-            graph.toMappedNodeId("m")
+            graph.toMappedNodeId("l")
         );
         long[] nodes = BFS.create(
             graph,
@@ -105,11 +123,11 @@ class BFSTridentGraphTest {
         ).compute().toArray();
 
         assertThat(nodes)
-            .isEqualTo(Arrays.stream(new String[]{
+            .isEqualTo(Stream.of(
                 "a",
-                "b", "c", "d",
-                "e"
-            }).mapToLong(graph::toMappedNodeId).toArray());
+                "b", "c", "d", "e", "f",
+                "g", "h"
+            ).mapToLong(graph::toMappedNodeId).toArray());
     }
 
     private static Stream<Arguments> bfsParameters() {
@@ -118,4 +136,5 @@ class BFSTridentGraphTest {
             () -> Stream.of(Arguments.of(1), Arguments.of(3), Arguments.of(5), Arguments.of(64))  // deltas
         );
     }
+
 }

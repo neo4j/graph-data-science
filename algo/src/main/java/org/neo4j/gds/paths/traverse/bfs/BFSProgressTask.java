@@ -17,17 +17,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.paths.traverse;
+package org.neo4j.gds.paths.traverse.bfs;
 
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
-public final class DFSProgressTask {
+public final class BFSProgressTask {
 
-    private DFSProgressTask() {}
+    private BFSProgressTask() {}
 
     public static Task create() {
-        return Tasks.leaf(AlgorithmLabel.DFS.asString());
+        return Tasks.leaf(AlgorithmLabel.BFS.asString());
     }
 }
