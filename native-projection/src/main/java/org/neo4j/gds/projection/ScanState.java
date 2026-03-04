@@ -21,7 +21,7 @@ package org.neo4j.gds.projection;
 
 import org.jetbrains.annotations.Contract;
 
-final class ScanState {
+public final class ScanState {
     private boolean batchConsumed;
 
     public static ScanState of() {

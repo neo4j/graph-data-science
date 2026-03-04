@@ -23,7 +23,7 @@ import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.kernel.api.KernelTransaction;
 
-interface StoreScanner<Reference> extends AutoCloseable {
+public interface StoreScanner<Reference> extends AutoCloseable {
 
     int DEFAULT_PREFETCH_SIZE = 100;
 
