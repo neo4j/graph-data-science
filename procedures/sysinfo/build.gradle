@@ -30,6 +30,10 @@ dependencies {
     implementation project(':proc-common')
     implementation project(':procedures-facade-api')
 
+    implementation(openGds.commons.text) {
+        transitive = false
+    }
+
     testCompileOnly project(':annotations')
 
     testImplementation project(':edition-api')
