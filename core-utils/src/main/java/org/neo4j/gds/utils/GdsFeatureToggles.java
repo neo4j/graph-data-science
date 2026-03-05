@@ -33,6 +33,7 @@ public enum GdsFeatureToggles {
     USE_PACKED_ADJACENCY_LIST(false),
     USE_MIXED_ADJACENCY_LIST(false),
     USE_REORDERED_ADJACENCY_LIST(false),
+    STORE_COMPRESSED_TARGETS_LENGTH(false),
     ENABLE_ARROW_DATABASE_IMPORT(true),
     // Makes sure end users algorithms don't fail due to errors in log tracking,
     // but keeps the option to find these failures when running tests.

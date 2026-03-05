@@ -100,11 +100,10 @@ public final class CompressedAdjacencyList implements AdjacencyList {
         return (firstAdjacencyIdAvgByteSize + compressedAdjacencyByteSize) * nodeCount;
     }
 
-    // TODO: expose in a nicer way
-    byte[][] pages;
-    HugeIntArray degrees;
-    HugeLongArray offsets;
-    HugeIntArray lengths;
+    private final byte[][] pages;
+    private final HugeIntArray degrees;
+    private final HugeLongArray offsets;
+    private final HugeIntArray lengths;
 
     private final MemoryInfo memoryInfo;
 
@@ -181,7 +180,7 @@ public final class CompressedAdjacencyList implements AdjacencyList {
     }
 
     public Optional<HugeIntArray> lengths() {
-        return Optional.ofNullable(lengths);
+        return Optional.ofNullable(this.lengths);
     }
 
     public static final class DecompressingCursor extends MutableIntValue implements AdjacencyCursor {

@@ -29,6 +29,7 @@ import org.neo4j.gds.collections.ha.HugeIntArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.compression.api.AdjacencyListBuilder;
 import org.neo4j.gds.Aggregation;
+import org.neo4j.gds.utils.GdsFeatureToggles;
 
 import java.util.concurrent.atomic.LongAdder;
 import java.util.function.LongSupplier;
@@ -71,7 +72,9 @@ public abstract class AbstractAdjacencyCompressorFactory<TARGET_PAGE, PROPERTY_P
         var nodeCount = this.nodeCountSupplier.getAsLong();
         this.adjacencyDegrees = HugeIntArray.newArray(nodeCount);
         this.adjacencyOffsets = HugeLongArray.newArray(nodeCount);
-        this.adjacencyLengths = HugeIntArray.newArray(nodeCount);
+        if (GdsFeatureToggles.STORE_COMPRESSED_TARGETS_LENGTH.isEnabled()) {
+            this.adjacencyLengths = HugeIntArray.newArray(nodeCount);
+        }
         this.propertyOffsets = HugeLongArray.newArray(nodeCount);
         this.nodeCount = nodeCount;
     }

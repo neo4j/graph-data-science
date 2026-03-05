@@ -35,6 +35,7 @@ import org.neo4j.gds.compression.common.VarLongEncoding;
 import org.neo4j.gds.core.compression.common.AbstractAdjacencyCompressorFactory;
 import org.neo4j.gds.compression.common.MemoryTracker;
 import org.neo4j.gds.Aggregation;
+import org.neo4j.gds.utils.GdsFeatureToggles;
 
 import java.util.Arrays;
 import java.util.function.LongSupplier;
@@ -210,7 +211,9 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
 
         this.adjacencyDegrees.set(nodeId, degree);
         this.adjacencyOffsets.set(nodeId, address);
-        this.adjacencyLengths.set(nodeId, requiredBytes);
+        if (GdsFeatureToggles.STORE_COMPRESSED_TARGETS_LENGTH.isEnabled()) {
+            this.adjacencyLengths.set(nodeId, requiredBytes);
+        }
 
         return degree;
     }
@@ -249,7 +252,9 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
 
         this.adjacencyDegrees.set(nodeId, degree);
         this.adjacencyOffsets.set(nodeId, address);
-        this.adjacencyLengths.set(nodeId, requiredBytes);
+        if (GdsFeatureToggles.STORE_COMPRESSED_TARGETS_LENGTH.isEnabled()) {
+            this.adjacencyLengths.set(nodeId, requiredBytes);
+        }
 
         return degree;
     }
