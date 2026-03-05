@@ -32,6 +32,7 @@ import org.neo4j.gds.similarity.knn.KnnResult;
 import org.neo4j.gds.similarity.knn.KnnWriteConfig;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityWriteConfig;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Map;
 
@@ -45,17 +46,19 @@ public class SimilarityAlgorithmsWriteModeBusinessFacade {
     private final SimilarityAlgorithmsBusinessFacade similarityAlgorithms;
     private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
     private final WriteRelationshipService writeRelationshipService;
+    private final TerminationFlag terminationFlag;
 
     SimilarityAlgorithmsWriteModeBusinessFacade(
         SimilarityAlgorithmsEstimationModeBusinessFacade estimationFacade,
         SimilarityAlgorithmsBusinessFacade similarityAlgorithms,
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
-        WriteRelationshipService writeRelationshipService
+        WriteRelationshipService writeRelationshipService, TerminationFlag terminationFlag
     ) {
         this.estimationFacade = estimationFacade;
         this.similarityAlgorithms = similarityAlgorithms;
         this.algorithmProcessingTemplateConvenience = algorithmProcessingTemplateConvenience;
         this.writeRelationshipService = writeRelationshipService;
+        this.terminationFlag = terminationFlag;
     }
 
     public <RESULT> RESULT filteredKnn(
@@ -67,7 +70,8 @@ public class SimilarityAlgorithmsWriteModeBusinessFacade {
         var writeStep = FilteredKnnWriteStep.create(
             configuration,
             shouldComputeSimilarityDistribution,
-            writeRelationshipService
+            writeRelationshipService,
+            terminationFlag
         );
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInWriteMode(
@@ -114,7 +118,8 @@ public class SimilarityAlgorithmsWriteModeBusinessFacade {
         var writeStep = KnnWriteStep.create(
             configuration,
             shouldComputeSimilarityDistribution,
-            writeRelationshipService
+            writeRelationshipService,
+            terminationFlag
         );
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInWriteMode(
@@ -136,8 +141,7 @@ public class SimilarityAlgorithmsWriteModeBusinessFacade {
     ) {
         var writeStep = NodeSimilarityWriteStep.create(
             writeRelationshipService,
-            configuration,
-            shouldComputeSimilarityDistribution
+            configuration
         );
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInWriteMode(

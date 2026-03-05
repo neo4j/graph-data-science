@@ -29,6 +29,7 @@ import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.similarity.knn.KnnResult;
 import org.neo4j.gds.similarity.knn.KnnWriteConfig;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Map;
 
@@ -38,28 +39,32 @@ final class KnnWriteStep implements WriteStep<KnnResult, Pair<RelationshipsWritt
     private final KnnWriteConfig configuration;
     private final boolean shouldComputeSimilarityDistribution;
     private final SimilarityWrite similarityWrite;
+    private final TerminationFlag terminationFlag;
 
     private KnnWriteStep(
         KnnWriteConfig configuration,
         boolean shouldComputeSimilarityDistribution,
-        SimilarityWrite similarityWrite
+        SimilarityWrite similarityWrite, TerminationFlag terminationFlag
     ) {
         this.configuration = configuration;
         this.shouldComputeSimilarityDistribution = shouldComputeSimilarityDistribution;
         this.similarityWrite = similarityWrite;
+        this.terminationFlag = terminationFlag;
     }
 
     static KnnWriteStep create(
         KnnWriteConfig configuration,
         boolean shouldComputeSimilarityDistribution,
-        WriteRelationshipService writeRelationshipService
+        WriteRelationshipService writeRelationshipService,
+        TerminationFlag terminationFlag
     ) {
         var similarityWrite = new SimilarityWrite(writeRelationshipService);
 
         return new KnnWriteStep(
             configuration,
             shouldComputeSimilarityDistribution,
-            similarityWrite
+            similarityWrite,
+            terminationFlag
         );
     }
 
@@ -77,11 +82,12 @@ final class KnnWriteStep implements WriteStep<KnnResult, Pair<RelationshipsWritt
             configuration,
             configuration,
             configuration,
-            shouldComputeSimilarityDistribution,
             configuration.resolveResultStore(resultStore),
             result.streamSimilarityResult(),
             KNN,
-            jobId
+            jobId,
+            shouldComputeSimilarityDistribution,
+            terminationFlag
         );
     }
 }

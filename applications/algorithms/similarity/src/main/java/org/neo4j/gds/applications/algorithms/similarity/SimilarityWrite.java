@@ -20,7 +20,6 @@
 package org.neo4j.gds.applications.algorithms.similarity;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.neo4j.gds.algorithms.similarity.SimilaritySummaryBuilder;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
@@ -31,9 +30,10 @@ import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.config.WritePropertyConfig;
 import org.neo4j.gds.config.WriteRelationshipConfig;
 import org.neo4j.gds.core.JobId;
-import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.similarity.SimilarityGraphResult;
+import org.neo4j.gds.similarity.SimilarityGraph;
 import org.neo4j.gds.similarity.SimilarityResult;
+import org.neo4j.gds.similarity.TopKSimilarityGraph;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Map;
 import java.util.Optional;
@@ -54,23 +54,25 @@ class SimilarityWrite {
         ConcurrencyConfig concurrencyConfiguration,
         WritePropertyConfig writePropertyConfiguration,
         WriteRelationshipConfig writeRelationshipConfiguration,
-        boolean shouldComputeSimilarityDistribution,
         Optional<ResultStore> resultStore,
         Stream<SimilarityResult> similarityResultStream,
         Label label,
-        JobId jobId
+        JobId jobId,
+        boolean shouldComputeDistribution,
+        TerminationFlag terminationFlag
     ) {
         var similarityGraphResult = similarityResultStreamDelegate.computeSimilarityGraph(
             graph,
             concurrencyConfiguration.concurrency(),
-            similarityResultStream
+            similarityResultStream,
+            shouldComputeDistribution,
+            terminationFlag
         );
 
         return execute(
             graphStore,
             writePropertyConfiguration,
             writeRelationshipConfiguration,
-            shouldComputeSimilarityDistribution,
             resultStore,
             label,
             similarityGraphResult,
@@ -82,21 +84,16 @@ class SimilarityWrite {
         GraphStore graphStore,
         WritePropertyConfig writePropertyConfiguration,
         WriteRelationshipConfig writeRelationshipConfiguration,
-        boolean shouldComputeSimilarityDistribution,
         Optional<ResultStore> resultStore,
         Label label,
-        SimilarityGraphResult similarityGraphResult,
+        SimilarityGraph similarityGraph,
         JobId jobId
     ) {
-        var similarityGraph = similarityGraphResult.similarityGraph();
 
-        var rootIdMap = similarityGraphResult.isTopKGraph()
+        var rootIdMap = similarityGraph instanceof TopKSimilarityGraph
             ? similarityGraph
             : graphStore.nodes();
 
-        var similarityDistributionBuilder = SimilaritySummaryBuilder.of(
-            new Concurrency(1),
-            shouldComputeSimilarityDistribution);
 
         var relationshipsWritten = writeRelationshipService.writeFromGraph(
             writeRelationshipConfiguration.writeRelationshipType(),
@@ -105,12 +102,10 @@ class SimilarityWrite {
             rootIdMap,
             label.asString(),
             resultStore,
-            similarityDistributionBuilder,
             jobId
         );
 
-        var similaritySummary = similarityDistributionBuilder.similaritySummary();
 
-        return Pair.of(relationshipsWritten, similaritySummary);
+        return Pair.of(relationshipsWritten, similarityGraph.similarityDistribution());
     }
 }

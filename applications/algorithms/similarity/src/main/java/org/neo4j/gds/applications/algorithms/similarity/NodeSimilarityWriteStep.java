@@ -37,29 +37,24 @@ import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Nod
 final class NodeSimilarityWriteStep implements WriteStep<NodeSimilarityResult, Pair<RelationshipsWritten, Map<String, Object>>> {
     private final SimilarityWrite similarityWrite;
     private final NodeSimilarityWriteConfig configuration;
-    private final boolean shouldComputeSimilarityDistribution;
 
     private NodeSimilarityWriteStep(
         SimilarityWrite similarityWrite,
-        NodeSimilarityWriteConfig configuration,
-        boolean shouldComputeSimilarityDistribution
+        NodeSimilarityWriteConfig configuration
     ) {
         this.similarityWrite = similarityWrite;
         this.configuration = configuration;
-        this.shouldComputeSimilarityDistribution = shouldComputeSimilarityDistribution;
     }
 
     static NodeSimilarityWriteStep create(
         WriteRelationshipService writeRelationshipService,
-        NodeSimilarityWriteConfig configuration,
-        boolean shouldComputeSimilarityDistribution
+        NodeSimilarityWriteConfig configuration
     ) {
         var similarityWrite = new SimilarityWrite(writeRelationshipService);
 
         return new NodeSimilarityWriteStep(
             similarityWrite,
-            configuration,
-            shouldComputeSimilarityDistribution
+            configuration
         );
     }
 
@@ -75,7 +70,6 @@ final class NodeSimilarityWriteStep implements WriteStep<NodeSimilarityResult, P
             graphStore,
             configuration,
             configuration,
-            shouldComputeSimilarityDistribution,
             configuration.resolveResultStore(resultStore),
             NodeSimilarity,
             result.graphResult(),

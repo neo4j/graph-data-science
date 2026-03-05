@@ -22,8 +22,8 @@ package org.neo4j.gds.applications.algorithms.similarity;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.similarity.SimilarityGraphBuilder;
-import org.neo4j.gds.similarity.SimilarityGraphResult;
+import org.neo4j.gds.similarity.SimilarityGraph;
+import org.neo4j.gds.similarity.SimilarityGraphNewBuilder;
 import org.neo4j.gds.similarity.SimilarityResult;
 import org.neo4j.gds.termination.TerminationFlag;
 
@@ -33,18 +33,21 @@ import java.util.stream.Stream;
  * "Delegate" because really we should mint a microtype and place this behaviour in it
  */
 public class SimilarityResultStreamDelegate {
-    public SimilarityGraphResult computeSimilarityGraph(
+    public SimilarityGraph computeSimilarityGraph(
         Graph graph,
         Concurrency concurrency,
-        Stream<SimilarityResult> similarityResultStream
+        Stream<SimilarityResult> similarityResultStream,
+        boolean shouldComputeStatistics,
+        TerminationFlag terminationFlag
     ) {
-        var similarityGraph = new SimilarityGraphBuilder(
+
+        return SimilarityGraphNewBuilder.build(
+            shouldComputeStatistics,
+            similarityResultStream,
             graph,
             concurrency,
             DefaultPool.INSTANCE,
-            TerminationFlag.RUNNING_TRUE
-        ).build(similarityResultStream);
-
-        return new SimilarityGraphResult(similarityGraph,  false);
+            terminationFlag
+        );
     }
 }

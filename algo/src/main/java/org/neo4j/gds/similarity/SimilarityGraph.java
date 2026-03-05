@@ -33,6 +33,6 @@ public abstract class SimilarityGraph extends GraphAdapter {
 
     abstract SingleTypeRelationships relationships(String relationshipType, String similarityPropertyName);
 
-    abstract Map<String,Object> similarityDistribution();
+    public abstract Map<String,Object> similarityDistribution();
 
 }

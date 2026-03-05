@@ -29,6 +29,7 @@ import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnResult;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnWriteConfig;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Map;
 
@@ -38,28 +39,33 @@ final class FilteredKnnWriteStep implements WriteStep<FilteredKnnResult, Pair<Re
     private final FilteredKnnWriteConfig configuration;
     private final boolean shouldComputeSimilarityDistribution;
     private final SimilarityWrite similarityWrite;
+    private final TerminationFlag terminationFlag;
 
     private FilteredKnnWriteStep(
         FilteredKnnWriteConfig configuration,
         boolean shouldComputeSimilarityDistribution,
-        SimilarityWrite similarityWrite
+        SimilarityWrite similarityWrite,
+        TerminationFlag terminationFlag
     ) {
         this.configuration = configuration;
         this.shouldComputeSimilarityDistribution = shouldComputeSimilarityDistribution;
         this.similarityWrite = similarityWrite;
+        this.terminationFlag = terminationFlag;
     }
 
     static FilteredKnnWriteStep create(
         FilteredKnnWriteConfig configuration,
         boolean shouldComputeSimilarityDistribution,
-        WriteRelationshipService writeRelationshipService
+        WriteRelationshipService writeRelationshipService,
+        TerminationFlag terminationFlag
     ) {
         var similarityWrite = new SimilarityWrite(writeRelationshipService);
 
         return new FilteredKnnWriteStep(
             configuration,
             shouldComputeSimilarityDistribution,
-            similarityWrite
+            similarityWrite,
+            terminationFlag
         );
     }
 
@@ -77,11 +83,12 @@ final class FilteredKnnWriteStep implements WriteStep<FilteredKnnResult, Pair<Re
             configuration,
             configuration,
             configuration,
-            shouldComputeSimilarityDistribution,
             configuration.resolveResultStore(resultStore),
             result.similarityResultStream(),
             FilteredKNN,
-            jobId
+            jobId,
+            shouldComputeSimilarityDistribution,
+            terminationFlag
         );
     }
 }

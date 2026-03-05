@@ -46,7 +46,7 @@ public final class SimilarityGraphNewBuilder {
         );
     }
 
-    static HugeSimilarityGraph build(
+    public static HugeSimilarityGraph build(
         boolean shouldComputeDistribution,
         Stream<SimilarityResult> stream,
         IdMap idMap,

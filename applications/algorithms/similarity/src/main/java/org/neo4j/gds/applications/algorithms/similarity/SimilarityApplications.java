@@ -92,7 +92,8 @@ public final class SimilarityApplications {
             estimationModeFacade,
             businessFacade,
             algorithmProcessingTemplateConvenience,
-            writeRelationshipService
+            writeRelationshipService,
+            requestScopedDependencies.terminationFlag()
         );
 
         return new SimilarityApplications(

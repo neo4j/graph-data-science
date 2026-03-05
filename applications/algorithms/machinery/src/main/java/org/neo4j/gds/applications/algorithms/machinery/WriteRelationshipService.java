@@ -51,6 +51,27 @@ public class WriteRelationshipService {
         IdMap rootIdMap,
         String taskName,
         Optional<ResultStore> resultStore,
+        JobId jobId
+    ) {
+        return writeFromGraph(
+            writeRelationshipType,
+            writeProperty,
+            writeGraph,
+            rootIdMap,
+            taskName,
+            resultStore,
+            (s,t,w)->true,
+            jobId
+        );
+    }
+
+    public RelationshipsWritten writeFromGraph(
+        String writeRelationshipType,
+        String writeProperty,
+        Graph writeGraph,
+        IdMap rootIdMap,
+        String taskName,
+        Optional<ResultStore> resultStore,
         RelationshipWithPropertyConsumer relationshipWithPropertyConsumer,
         JobId jobId
     ) {
