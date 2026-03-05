@@ -46,7 +46,7 @@ public class FilteredNodeSimilarityResultBuilderForMutateMode implements ResultB
             timings.computeMillis,
             timings.sideEffectMillis,
             0,
-            nodeSimilarityResult.graphResult().comparedNodes(),
+            nodeSimilarityResult.comparedNodes(),
             metadata.orElseThrow().getLeft().value(),
             metadata.orElseThrow().getRight(),
             configurationMap

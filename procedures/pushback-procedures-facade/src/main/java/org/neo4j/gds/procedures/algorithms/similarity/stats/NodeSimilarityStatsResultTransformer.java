@@ -67,7 +67,7 @@ public class NodeSimilarityStatsResultTransformer implements ResultTransformer<T
                 0,
                 timedAlgorithmResult.computeMillis(),
                 similarityStats.computeMilliseconds(),
-                similarityGraphResult.comparedNodes(),
+                result.comparedNodes(),
                 similarityGraphResult.similarityGraph().relationshipCount(),
                 similaritySummary,
                 configuration

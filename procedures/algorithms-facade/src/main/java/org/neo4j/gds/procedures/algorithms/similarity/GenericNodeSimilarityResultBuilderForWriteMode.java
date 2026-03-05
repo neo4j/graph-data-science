@@ -48,7 +48,7 @@ class GenericNodeSimilarityResultBuilderForWriteMode {
             timings,
             metadata.orElseThrow().getLeft(),
             metadata.orElseThrow().getRight(),
-            nodeSimilarityResult.graphResult().comparedNodes(),
+            nodeSimilarityResult.comparedNodes(),
             configurationMap
         );
 

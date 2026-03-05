@@ -27,7 +27,8 @@ import java.util.stream.Stream;
 
 public record NodeSimilarityResult(
     Optional<Stream<SimilarityResult>> maybeStreamResult,
-    Optional<SimilarityGraphResult> maybeGraphResult
+    Optional<SimilarityGraphResult> maybeGraphResult,
+    long comparedNodes
 ) {
 
     public Stream<SimilarityResult> streamResult() {
@@ -40,6 +41,7 @@ public record NodeSimilarityResult(
 
    public static final NodeSimilarityResult EMPTY = new NodeSimilarityResult(
        Optional.of(Stream.empty()),
-       Optional.of(SimilarityGraphResult.empty())
+       Optional.of(SimilarityGraphResult.empty()),
+       0
    );
 }

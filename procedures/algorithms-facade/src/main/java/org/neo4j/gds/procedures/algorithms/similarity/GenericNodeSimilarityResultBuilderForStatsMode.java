@@ -58,7 +58,7 @@ class GenericNodeSimilarityResultBuilderForStatsMode {
                 timings.preProcessingMillis,
                 timings.computeMillis,
                 similarityStats.computeMilliseconds(),
-                graphResult.comparedNodes(),
+                nodeSimilarityResult.comparedNodes(),
                 graphResult.similarityGraph().relationshipCount(),
                 similarityDistribution,
                 configurationMap

@@ -630,10 +630,11 @@ final class NodeSimilarityTest {
             parameters
         );
 
-        SimilarityGraphResult similarityGraphResult = nodeSimilarity.compute().graphResult();
+        var nodeSimilarityResult = nodeSimilarity.compute();
+        SimilarityGraphResult similarityGraphResult = nodeSimilarityResult.graphResult();
         assertEquals(
             orientation == REVERSE ? COMPARED_ITEMS : COMPARED_PERSONS,
-            similarityGraphResult.comparedNodes()
+            nodeSimilarityResult.comparedNodes()
         );
         Graph resultGraph = similarityGraphResult.similarityGraph();
         assertGraphEquals(
@@ -688,11 +689,11 @@ final class NodeSimilarityTest {
             graph,
             parameters
         );
-
-        SimilarityGraphResult similarityGraphResult = nodeSimilarity.compute().graphResult();
+        var nodeSimilarityResult = nodeSimilarity.compute();
+        SimilarityGraphResult similarityGraphResult = nodeSimilarityResult.graphResult();
         assertEquals(
             orientation == REVERSE ? COMPARED_ITEMS : COMPARED_PERSONS,
-            similarityGraphResult.comparedNodes()
+            nodeSimilarityResult.comparedNodes()
         );
 
         Graph resultGraph = similarityGraphResult.similarityGraph();

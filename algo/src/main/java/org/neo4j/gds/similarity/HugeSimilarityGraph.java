@@ -40,6 +40,9 @@ public class HugeSimilarityGraph extends SimilarityGraph{
 
     @Override
     SingleTypeRelationships relationships(String relationshipType, String similarityPropertyName) {
+        if (graph==null) {
+            return SingleTypeRelationships.EMPTY;
+        }
         HugeGraph similarityGraph = (HugeGraph) graph;
 
         return SingleTypeRelationships.of(
@@ -58,6 +61,9 @@ public class HugeSimilarityGraph extends SimilarityGraph{
 
     @Override
     public Graph concurrentCopy() {
+        if (graph==null) {
+            return null;
+        }
         return graph.concurrentCopy();
     }
 }

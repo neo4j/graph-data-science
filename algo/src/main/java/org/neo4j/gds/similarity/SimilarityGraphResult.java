@@ -30,12 +30,10 @@ import java.util.stream.Stream;
 
 public class SimilarityGraphResult {
     private final Graph similarityGraph;
-    private final long comparedNodes;
     private final boolean isTopKGraph;
 
-    public SimilarityGraphResult(Graph similarityGraph, long comparedNodes, boolean isTopKGraph) {
+    public SimilarityGraphResult(Graph similarityGraph,  boolean isTopKGraph) {
         this.similarityGraph = similarityGraph;
-        this.comparedNodes = comparedNodes;
         this.isTopKGraph = isTopKGraph;
     }
 
@@ -49,17 +47,13 @@ public class SimilarityGraphResult {
             .direction();
     }
 
-    public long comparedNodes() {
-        return comparedNodes;
-    }
-
     public boolean isTopKGraph() {
         return isTopKGraph;
     }
 
 
     public static SimilarityGraphResult empty(){
-        return  new SimilarityGraphResult(null,0,false);
+        return  new SimilarityGraphResult(null,false);
     }
 
     public static SimilarityGraphResult fromStream(
@@ -75,7 +69,7 @@ public class SimilarityGraphResult {
             terminationFlag
         ).build(similarityResultStream);
 
-        return new SimilarityGraphResult(similarityGraph, idMap.nodeCount(), false);
+        return new SimilarityGraphResult(similarityGraph,  false);
     }
 
 }

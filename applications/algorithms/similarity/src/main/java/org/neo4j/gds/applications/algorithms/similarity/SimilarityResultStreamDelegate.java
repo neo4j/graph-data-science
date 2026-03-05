@@ -45,6 +45,6 @@ public class SimilarityResultStreamDelegate {
             TerminationFlag.RUNNING_TRUE
         ).build(similarityResultStream);
 
-        return new SimilarityGraphResult(similarityGraph, graph.nodeCount(), false);
+        return new SimilarityGraphResult(similarityGraph,  false);
     }
 }

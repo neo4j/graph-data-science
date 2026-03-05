@@ -111,14 +111,16 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
             progressTracker.endSubTask();
             return new NodeSimilarityResult(
                 Optional.of(computeToStream),
-                Optional.empty()
+                Optional.empty(),
+                sourceNodes.cardinality()
             );
         } else {
             var computeToGraph = computeToGraph();
             progressTracker.endSubTask();
             return new NodeSimilarityResult(
                 Optional.empty(),
-                Optional.of(computeToGraph)
+                Optional.of(computeToGraph),
+                sourceNodes.cardinality()
             );
         }
     }
@@ -163,7 +165,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
                 terminationFlag
             ).build(similarities);
         }
-        return new SimilarityGraphResult(similarityGraph, sourceNodes.cardinality(), isTopKGraph);
+        return new SimilarityGraphResult(similarityGraph,  isTopKGraph);
     }
 
     private void prepare() {
