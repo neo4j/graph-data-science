@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.similarity.nodesim;
 
+import org.neo4j.gds.Aggregation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
@@ -33,7 +34,6 @@ import org.neo4j.gds.api.schema.ImmutableMutableGraphSchema;
 import org.neo4j.gds.api.schema.ImmutableRelationshipPropertySchema;
 import org.neo4j.gds.api.schema.MutableRelationshipSchema;
 import org.neo4j.gds.api.schema.MutableRelationshipSchemaEntry;
-import org.neo4j.gds.Aggregation;
 
 import java.util.Map;
 

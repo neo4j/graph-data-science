@@ -36,15 +36,15 @@ public class ActualSimilaritySummaryBuilder implements SimilaritySummaryBuilder 
     private final DoubleHistogram histogram;
     private final AtomicBoolean crashed = new AtomicBoolean(false);
 
-    ActualSimilaritySummaryBuilder() {
+    public ActualSimilaritySummaryBuilder() {
         this.histogram = new DoubleHistogram(HISTOGRAM_PRECISION_DEFAULT);
     }
 
-    ActualSimilaritySummaryBuilder(DoubleHistogram histogram ) {
+    public ActualSimilaritySummaryBuilder(DoubleHistogram histogram) {
         this.histogram = histogram;
     }
 
-    static ActualSimilaritySummaryBuilder create(Concurrency concurrency){
+    public static ActualSimilaritySummaryBuilder create(Concurrency concurrency){
         if (concurrency.value() > 1){
             return new ActualSimilaritySummaryBuilder(new ConcurrentDoubleHistogram(HISTOGRAM_PRECISION_DEFAULT));
         }

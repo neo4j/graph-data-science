@@ -28,13 +28,13 @@ import org.neo4j.gds.core.huge.HugeGraph;
 import org.neo4j.gds.core.huge.UnionGraph;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.NodesBuilder;
-import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.similarity.SimilarityGraphBuilder;
 import org.neo4j.gds.similarity.SimilarityResult;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.stream.Stream;
 
@@ -142,7 +142,6 @@ class SimilarityGraphBuilderTest {
 
         assertGraphEquals(fromGdl("(a:A), (b:A), (c:B), (d:B), (c)-[:REL {similarity: 0.42}]->(d)"), simGraph);
     }
-
 
 
 }
