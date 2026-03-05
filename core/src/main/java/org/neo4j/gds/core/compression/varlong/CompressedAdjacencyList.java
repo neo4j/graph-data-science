@@ -34,9 +34,6 @@ import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryEstimations;
 import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.memory.info.MemoryInfo;
-import org.neo4j.gds.utils.GdsFeatureToggles;
-
-import java.util.Optional;
 
 import static org.neo4j.gds.RelationshipType.ALL_RELATIONSHIPS;
 import static org.neo4j.gds.collections.PageUtil.indexInPage;
@@ -47,15 +44,17 @@ import static org.neo4j.gds.mem.BitUtil.ceilDiv;
 public final class CompressedAdjacencyList implements AdjacencyList {
 
     public static MemoryEstimation adjacencyListEstimation(RelationshipType relationshipType, boolean undirected) {
-        return MemoryEstimations.setup("", dimensions -> {
-            long nodeCount = dimensions.nodeCount();
-            long relCountForType = dimensions
-                .relationshipCounts()
-                .getOrDefault(relationshipType, dimensions.relCountUpperBound());
-            long relCount = undirected ? relCountForType * 2 : relCountForType;
-            long avgDegree = (nodeCount > 0) ? ceilDiv(relCount, nodeCount) : 0L;
-            return CompressedAdjacencyList.adjacencyListEstimation(avgDegree, nodeCount);
-        });
+        return MemoryEstimations.setup(
+            "", dimensions -> {
+                long nodeCount = dimensions.nodeCount();
+                long relCountForType = dimensions
+                    .relationshipCounts()
+                    .getOrDefault(relationshipType, dimensions.relCountUpperBound());
+                long relCount = undirected ? relCountForType * 2 : relCountForType;
+                long avgDegree = (nodeCount > 0) ? ceilDiv(relCount, nodeCount) : 0L;
+                return CompressedAdjacencyList.adjacencyListEstimation(avgDegree, nodeCount);
+            }
+        );
     }
 
     public static MemoryEstimation adjacencyListEstimation(long avgDegree, long nodeCount) {
@@ -81,17 +80,12 @@ public final class CompressedAdjacencyList implements AdjacencyList {
 
         MemoryRange pagesMemoryRange = MemoryRange.of(minMemoryReqs, maxMemoryReqs);
 
-        var builder = MemoryEstimations
+        return MemoryEstimations
             .builder(CompressedAdjacencyList.class)
             .fixed("pages", pagesMemoryRange)
             .perNode("degrees", HugeIntArray::memoryEstimation)
-            .perNode("offsets", HugeLongArray::memoryEstimation);
-
-        if (GdsFeatureToggles.STORE_COMPRESSED_TARGETS_LENGTH.isEnabled()) {
-            builder.perNode("lengths", HugeIntArray::memoryEstimation);
-        }
-
-        return builder.build();
+            .perNode("offsets", HugeLongArray::memoryEstimation)
+            .build();
     }
 
     @TestOnly
@@ -109,7 +103,6 @@ public final class CompressedAdjacencyList implements AdjacencyList {
     private final byte[][] pages;
     private final HugeIntArray degrees;
     private final HugeLongArray offsets;
-    private final HugeIntArray lengths;
 
     private final MemoryInfo memoryInfo;
 
@@ -117,13 +110,11 @@ public final class CompressedAdjacencyList implements AdjacencyList {
         byte[][] pages,
         HugeIntArray degrees,
         HugeLongArray offsets,
-        HugeIntArray lengths,
         MemoryInfo memoryInfo
     ) {
         this.pages = pages;
         this.degrees = degrees;
         this.offsets = offsets;
-        this.lengths = lengths;
         this.memoryInfo = memoryInfo;
     }
 
@@ -183,10 +174,6 @@ public final class CompressedAdjacencyList implements AdjacencyList {
 
     public HugeLongArray offsets() {
         return offsets;
-    }
-
-    public Optional<HugeIntArray> lengths() {
-        return Optional.ofNullable(this.lengths);
     }
 
     public static final class DecompressingCursor extends MutableIntValue implements AdjacencyCursor {

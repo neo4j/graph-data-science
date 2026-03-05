@@ -25,13 +25,9 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.compression.common.VarLongDecoding;
-import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.extension.TestGraph;
-import org.neo4j.gds.utils.GdsFeatureToggles;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.IntStream;
@@ -53,7 +49,7 @@ class CompressedSlicedAdjacencyListTest {
             var cal = (CompressedAdjacencyList) testGraph.relationshipTopologies()
                 .get(RelationshipType.ALL_RELATIONSHIPS)
                 .adjacencyList();
-            return CompressedSlicedAdjacencyList.of(cal, new Concurrency(1));
+            return CompressedSlicedAdjacencyList.of(cal);
         }
     }
 
@@ -105,33 +101,32 @@ class CompressedSlicedAdjacencyListTest {
     );
 
     private static Stream<Arguments> graphs() {
-        List<Graph> graphs = new ArrayList<>();
-
-        GdsFeatureToggles.STORE_COMPRESSED_TARGETS_LENGTH.disableAndRun(() -> graphs.add(new Graph(
-            TestSupport.fromGdl(GRAPH),
-            GRAPH_DEGREES,
-            GRAPH_ADJACENCIES,
-            GRAPH_SLICES
-        )));
-        GdsFeatureToggles.STORE_COMPRESSED_TARGETS_LENGTH.disableAndRun(() -> graphs.add(new Graph(
-            TestSupport.fromGdl(GRAPH),
-            GRAPH_DEGREES,
-            GRAPH_ADJACENCIES,
-            GRAPH_SLICES
-        )));
-        GdsFeatureToggles.STORE_COMPRESSED_TARGETS_LENGTH.enableAndRun(() -> graphs.add(new Graph(
-            TestSupport.fromGdl(GAP_GRAPH),
-            GAP_GRAPH_DEGREES,
-            GAP_GRAPH_ADJACENCIES,
-            GAP_GRAPH_SLICES
-        )));
-        GdsFeatureToggles.STORE_COMPRESSED_TARGETS_LENGTH.enableAndRun(() -> graphs.add(new Graph(
-            TestSupport.fromGdl(GAP_GRAPH),
-            GAP_GRAPH_DEGREES,
-            GAP_GRAPH_ADJACENCIES,
-            GAP_GRAPH_SLICES
-        )));
-        return graphs.stream().map(Arguments::of);
+        return Stream.of(
+            new Graph(
+                TestSupport.fromGdl(GRAPH),
+                GRAPH_DEGREES,
+                GRAPH_ADJACENCIES,
+                GRAPH_SLICES
+            ),
+            new Graph(
+                TestSupport.fromGdl(GRAPH),
+                GRAPH_DEGREES,
+                GRAPH_ADJACENCIES,
+                GRAPH_SLICES
+            ),
+            new Graph(
+                TestSupport.fromGdl(GAP_GRAPH),
+                GAP_GRAPH_DEGREES,
+                GAP_GRAPH_ADJACENCIES,
+                GAP_GRAPH_SLICES
+            ),
+            new Graph(
+                TestSupport.fromGdl(GAP_GRAPH),
+                GAP_GRAPH_DEGREES,
+                GAP_GRAPH_ADJACENCIES,
+                GAP_GRAPH_SLICES
+            )
+        ).map(Arguments::of);
     }
 
     @ParameterizedTest

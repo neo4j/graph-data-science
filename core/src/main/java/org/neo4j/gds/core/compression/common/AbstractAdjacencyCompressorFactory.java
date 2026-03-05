@@ -19,22 +19,22 @@
  */
 package org.neo4j.gds.core.compression.common;
 
+import org.neo4j.gds.Aggregation;
 import org.neo4j.gds.api.AdjacencyList;
 import org.neo4j.gds.api.AdjacencyProperties;
-import org.neo4j.gds.compression.api.AdjacencyCompressor;
 import org.neo4j.gds.api.compress.AdjacencyCompressorFactory;
 import org.neo4j.gds.api.compress.AdjacencyListsWithProperties;
 import org.neo4j.gds.api.compress.ImmutableAdjacencyListsWithProperties;
 import org.neo4j.gds.collections.ha.HugeIntArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.compression.api.AdjacencyCompressor;
 import org.neo4j.gds.compression.api.AdjacencyListBuilder;
-import org.neo4j.gds.Aggregation;
-import org.neo4j.gds.utils.GdsFeatureToggles;
 
 import java.util.concurrent.atomic.LongAdder;
 import java.util.function.LongSupplier;
 
-public abstract class AbstractAdjacencyCompressorFactory<TARGET_PAGE, PROPERTY_PAGE> implements AdjacencyCompressorFactory {
+public abstract class AbstractAdjacencyCompressorFactory<TARGET_PAGE, PROPERTY_PAGE> implements
+    AdjacencyCompressorFactory {
 
     private final LongSupplier nodeCountSupplier;
     private final AdjacencyListBuilder<TARGET_PAGE, ? extends AdjacencyList> adjacencyBuilder;
@@ -49,7 +49,6 @@ public abstract class AbstractAdjacencyCompressorFactory<TARGET_PAGE, PROPERTY_P
 
     private HugeIntArray adjacencyDegrees;
     private HugeLongArray adjacencyOffsets;
-    private HugeIntArray adjacencyLengths;
     private HugeLongArray propertyOffsets;
 
     public AbstractAdjacencyCompressorFactory(
@@ -72,9 +71,6 @@ public abstract class AbstractAdjacencyCompressorFactory<TARGET_PAGE, PROPERTY_P
         var nodeCount = this.nodeCountSupplier.getAsLong();
         this.adjacencyDegrees = HugeIntArray.newArray(nodeCount);
         this.adjacencyOffsets = HugeLongArray.newArray(nodeCount);
-        if (GdsFeatureToggles.STORE_COMPRESSED_TARGETS_LENGTH.isEnabled()) {
-            this.adjacencyLengths = HugeIntArray.newArray(nodeCount);
-        }
         this.propertyOffsets = HugeLongArray.newArray(nodeCount);
         this.nodeCount = nodeCount;
     }
@@ -101,12 +97,12 @@ public abstract class AbstractAdjacencyCompressorFactory<TARGET_PAGE, PROPERTY_P
     public AdjacencyListsWithProperties build(boolean allowReordering) {
         var builder = ImmutableAdjacencyListsWithProperties
             .builder()
-            .adjacency(adjacencyBuilder.build(this.adjacencyDegrees, this.adjacencyOffsets, this.adjacencyLengths, allowReordering));
+            .adjacency(adjacencyBuilder.build(this.adjacencyDegrees, this.adjacencyOffsets, allowReordering));
 
         var propertyBuilders = this.propertyBuilders;
         var propertyOffsets = this.propertyOffsets;
         for (var propertyBuilder : propertyBuilders) {
-            var properties = propertyBuilder.build(this.adjacencyDegrees, propertyOffsets, this.adjacencyDegrees, allowReordering);
+            var properties = propertyBuilder.build(this.adjacencyDegrees, propertyOffsets, allowReordering);
             builder.addProperty(properties);
         }
 
@@ -120,7 +116,6 @@ public abstract class AbstractAdjacencyCompressorFactory<TARGET_PAGE, PROPERTY_P
         Aggregation[] aggregations,
         HugeIntArray adjacencyDegrees,
         HugeLongArray adjacencyOffsets,
-        HugeIntArray adjacencyLengths,
         HugeLongArray propertyOffsets
     );
 
@@ -133,7 +128,6 @@ public abstract class AbstractAdjacencyCompressorFactory<TARGET_PAGE, PROPERTY_P
             this.aggregations,
             this.adjacencyDegrees,
             this.adjacencyOffsets,
-            this.adjacencyLengths,
             this.propertyOffsets
         );
     }

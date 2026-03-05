@@ -21,10 +21,8 @@ package org.neo4j.gds.core.compression.varlong;
 
 import org.neo4j.gds.collections.ha.HugeIntArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
-import org.neo4j.gds.core.concurrency.Concurrency;
 
 import java.util.Arrays;
-import java.util.Optional;
 
 import static org.neo4j.gds.collections.PageUtil.indexInPage;
 import static org.neo4j.gds.collections.PageUtil.pageIndex;
@@ -45,18 +43,11 @@ public abstract class CompressedSlicedAdjacencyList {
     // The degree of a node
     final HugeIntArray degrees;
 
-    public static CompressedSlicedAdjacencyList of(
-        CompressedAdjacencyList compressedAdjacencyList,
-        Concurrency concurrency
-    ) {
+    public static CompressedSlicedAdjacencyList of(CompressedAdjacencyList compressedAdjacencyList) {
         byte[][] compressedPages = compressedAdjacencyList.pages();
         HugeLongArray offsets = compressedAdjacencyList.offsets();
         HugeIntArray degrees = compressedAdjacencyList.degrees();
-        Optional<HugeIntArray> lengths = compressedAdjacencyList.lengths();
 
-        if (lengths.isPresent()) {
-            return new WithLengths(compressedPages, degrees, offsets, lengths.get());
-        }
         return new WithByteCounting(compressedPages, degrees, offsets);
 
     }
@@ -144,38 +135,4 @@ public abstract class CompressedSlicedAdjacencyList {
             return indexInPage - offset;
         }
     }
-
-    static final class WithLengths extends CompressedSlicedAdjacencyList {
-
-        private final HugeIntArray lengths;
-
-        private WithLengths(
-            byte[][] compressedPages,
-            HugeIntArray degrees,
-            HugeLongArray offsets,
-            HugeIntArray lengths
-        ) {
-            super(compressedPages, degrees, offsets);
-            this.lengths = lengths;
-        }
-
-        @Override
-        public boolean initPageSlice(long nodeId, PageSlice slice) {
-            if (this.degrees.get(nodeId) == 0) {
-                return false;
-            }
-            long offset = this.offsets.get(nodeId);
-            int pageIndex = pageIndex(offset, PAGE_SHIFT);
-            byte[] page = this.compressedPages[pageIndex];
-            int indexInPage = indexInPage(offset, PAGE_MASK);
-            int length = this.lengths.get(nodeId);
-
-            slice.page = page;
-            slice.offset = indexInPage;
-            slice.length = length;
-
-            return true;
-        }
-    }
-
 }

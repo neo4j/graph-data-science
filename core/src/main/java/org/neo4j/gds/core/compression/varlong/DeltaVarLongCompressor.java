@@ -20,22 +20,21 @@
 package org.neo4j.gds.core.compression.varlong;
 
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.gds.Aggregation;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.api.AdjacencyList;
 import org.neo4j.gds.api.AdjacencyProperties;
-import org.neo4j.gds.compression.api.AdjacencyCompressor;
 import org.neo4j.gds.api.compress.AdjacencyCompressorFactory;
 import org.neo4j.gds.api.compress.AdjacencyListBuilderFactory;
 import org.neo4j.gds.collections.ha.HugeIntArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.compression.api.AdjacencyCompressor;
 import org.neo4j.gds.compression.api.AdjacencyListBuilder;
 import org.neo4j.gds.compression.api.ModifiableSlice;
 import org.neo4j.gds.compression.common.AdjacencyCompression;
+import org.neo4j.gds.compression.common.MemoryTracker;
 import org.neo4j.gds.compression.common.VarLongEncoding;
 import org.neo4j.gds.core.compression.common.AbstractAdjacencyCompressorFactory;
-import org.neo4j.gds.compression.common.MemoryTracker;
-import org.neo4j.gds.Aggregation;
-import org.neo4j.gds.utils.GdsFeatureToggles;
 
 import java.util.Arrays;
 import java.util.function.LongSupplier;
@@ -93,7 +92,6 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
             Aggregation[] aggregations,
             HugeIntArray adjacencyDegrees,
             HugeLongArray adjacencyOffsets,
-            HugeIntArray adjacencyLengths,
             HugeLongArray propertyOffsets
         ) {
             AdjacencyListBuilder.Allocator<long[]> firstAllocator;
@@ -118,7 +116,6 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
                 otherAllocators,
                 adjacencyDegrees,
                 adjacencyOffsets,
-                adjacencyLengths,
                 propertyOffsets,
                 noAggregation,
                 aggregations
@@ -131,7 +128,6 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
     private final AdjacencyListBuilder.PositionalAllocator<long[]> @Nullable [] otherPropertyAllocators;
     private final HugeIntArray adjacencyDegrees;
     private final HugeLongArray adjacencyOffsets;
-    private final HugeIntArray adjacencyLengths;
     private final HugeLongArray propertyOffsets;
     private final boolean noAggregation;
     private final Aggregation[] aggregations;
@@ -145,7 +141,6 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
         AdjacencyListBuilder.PositionalAllocator<long[]> @Nullable [] otherPropertyAllocators,
         HugeIntArray adjacencyDegrees,
         HugeLongArray adjacencyOffsets,
-        HugeIntArray adjacencyLengths,
         HugeLongArray propertyOffsets,
         boolean noAggregation,
         Aggregation[] aggregations
@@ -155,7 +150,6 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
         this.otherPropertyAllocators = otherPropertyAllocators;
         this.adjacencyDegrees = adjacencyDegrees;
         this.adjacencyOffsets = adjacencyOffsets;
-        this.adjacencyLengths = adjacencyLengths;
         this.propertyOffsets = propertyOffsets;
         this.noAggregation = noAggregation;
         this.aggregations = aggregations;
@@ -211,9 +205,6 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
 
         this.adjacencyDegrees.set(nodeId, degree);
         this.adjacencyOffsets.set(nodeId, address);
-        if (GdsFeatureToggles.STORE_COMPRESSED_TARGETS_LENGTH.isEnabled()) {
-            this.adjacencyLengths.set(nodeId, requiredBytes);
-        }
 
         return degree;
     }
@@ -252,9 +243,6 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
 
         this.adjacencyDegrees.set(nodeId, degree);
         this.adjacencyOffsets.set(nodeId, address);
-        if (GdsFeatureToggles.STORE_COMPRESSED_TARGETS_LENGTH.isEnabled()) {
-            this.adjacencyLengths.set(nodeId, requiredBytes);
-        }
 
         return degree;
     }

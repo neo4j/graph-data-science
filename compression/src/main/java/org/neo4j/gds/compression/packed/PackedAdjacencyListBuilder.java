@@ -57,7 +57,7 @@ public final class PackedAdjacencyListBuilder implements AdjacencyListBuilder<Ad
     }
 
     @Override
-    public PackedAdjacencyList build(HugeIntArray degrees, HugeLongArray offsets, HugeIntArray lengths, boolean allowReordering) {
+    public PackedAdjacencyList build(HugeIntArray degrees, HugeLongArray offsets, boolean allowReordering) {
         Address[] intoPages = this.builder.intoPages();
         if (allowReordering) {
             reorder(intoPages, offsets, degrees);
