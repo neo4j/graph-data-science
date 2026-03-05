@@ -21,7 +21,6 @@ package org.neo4j.gds.core.utils.progress.tasks;
 
 import org.neo4j.gds.core.utils.progress.ProgressLogger;
 
-@SuppressWarnings("ClassCanBeRecord")
 final class LoggingLeafTaskVisitor implements TaskVisitor {
     private final ProgressLogger progressLogger;
 

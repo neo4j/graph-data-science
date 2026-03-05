@@ -73,21 +73,19 @@ public interface ProgressLogger {
         logFinish("");
     }
 
-    default ProgressLogger logFinish(String message) {
+    default void logFinish(String message) {
         logMessage((message + TASK_SEPARATOR + "Finished").trim());
-        return this;
     }
 
-    default ProgressLogger logFinishWithFailure() {
-        return logFinishWithFailure("");
+    default void logFinishWithFailure() {
+        logFinishWithFailure("");
     }
 
-    default ProgressLogger logFinishWithFailure(String message) {
+    default void logFinishWithFailure(String message) {
         logMessage((message + TASK_SEPARATOR + "Failed").trim());
-        return this;
     }
 
-    default ProgressLogger logFinishSubtaskWithFailure(String subTaskName) {
+    default void logFinishSubtaskWithFailure(String subTaskName) {
         logFinishWithFailure();
         var endIndex = getTask().indexOf(TASK_SEPARATOR + subTaskName);
         if (endIndex == -1) {
@@ -95,16 +93,14 @@ public interface ProgressLogger {
         }
         var task = getTask().substring(0, endIndex);
         setTask(task);
-        return this;
     }
 
-    default ProgressLogger startSubTask(String subTaskName) {
+    default void startSubTask(String subTaskName) {
         setTask(getTask() + TASK_SEPARATOR + subTaskName);
         logStart();
-        return this;
     }
 
-    default ProgressLogger finishSubTask(String subTaskName) {
+    default void finishSubTask(String subTaskName) {
         logFinish();
         var endIndex = getTask().lastIndexOf(TASK_SEPARATOR + subTaskName);
         if (endIndex == -1) {
@@ -112,7 +108,6 @@ public interface ProgressLogger {
         }
         var task = getTask().substring(0, endIndex);
         setTask(task);
-        return this;
     }
 
     long reset(long newTaskVolume);

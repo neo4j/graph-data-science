@@ -28,7 +28,6 @@ import org.neo4j.gds.mem.MemoryRange;
 
 import java.util.function.Supplier;
 
-@SuppressWarnings("ClassCanBeRecord")
 public final class TaskTreeProgressTracker implements ProgressTracker {
     private final TaskProgressTracker delegate;
 

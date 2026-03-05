@@ -28,7 +28,6 @@ import org.neo4j.gds.core.utils.progress.TaskStoreListener;
 import org.neo4j.gds.core.utils.progress.UserTask;
 import org.neo4j.gds.logging.Log;
 
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -83,9 +82,8 @@ public class MemoryTracker implements TaskStoreListener, GraphStoreAddedEventLis
     }
 
     public Stream<UserMemorySummary> memorySummary(){
-
-        var  users = graphStoreMemoryContainer.graphUsers(Optional.empty());
-        users = taskMemoryContainer.taskUsers(Optional.of(users));
+        var  users = graphStoreMemoryContainer.graphUsers();
+        users = taskMemoryContainer.taskUsers(users);
 
         return  users.stream()
             .map(user -> new UserMemorySummary(

@@ -197,7 +197,7 @@ public class K1Coloring extends Algorithm<K1ColoringResult> {
                 graph.concurrentCopy(),
                 colors,
                 partition,
-                getProgressTracker()
+                progressTracker
             )
         );
 
