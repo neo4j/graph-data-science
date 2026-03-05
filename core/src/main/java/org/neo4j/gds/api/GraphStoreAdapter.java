@@ -38,7 +38,7 @@ import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
 
-public abstract class GraphStoreAdapter implements GraphStore {
+public abstract class GraphStoreAdapter implements GraphStoreWithTopology {
 
     private final GraphStore graphStore;
 
@@ -317,5 +317,15 @@ public abstract class GraphStoreAdapter implements GraphStore {
         Collection<String> propertyKeys
     ) {
         return graphStore.getCompositeRelationshipIterator(relationshipType, propertyKeys);
+    }
+
+    @Override
+    public Topology getTopology(RelationshipType relationshipType) {
+        if (graphStore instanceof GraphStoreWithTopology gWT) {
+            return gWT.getTopology(relationshipType);
+        }
+        throw new UnsupportedOperationException(
+            "GraphStore does not support getting topology for relationship type: " + relationshipType
+        );
     }
 }
