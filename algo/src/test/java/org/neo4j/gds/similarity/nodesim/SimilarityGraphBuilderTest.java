@@ -25,9 +25,8 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.huge.HugeGraph;
+import org.neo4j.gds.core.huge.NodeFilteredGraph;
 import org.neo4j.gds.core.huge.UnionGraph;
-import org.neo4j.gds.core.loading.construction.GraphFactory;
-import org.neo4j.gds.core.loading.construction.NodesBuilder;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
@@ -117,22 +116,13 @@ class SimilarityGraphBuilderTest {
 
     @Test
     void testConstructFromFilteredGraph() {
-        NodesBuilder nodesBuilder = GraphFactory.initNodesBuilder()
-            .concurrency(new Concurrency(4))
-            .hasLabelInformation(true)
-            .maxOriginalId(3)
-            .build();
 
-        nodesBuilder.addNode(0, NodeLabel.of("A"));
-        nodesBuilder.addNode(1, NodeLabel.of("A"));
-        nodesBuilder.addNode(2, NodeLabel.of("B"));
-        nodesBuilder.addNode(3, NodeLabel.of("B"));
+        var origGraph =  fromGdl("CREATE (a:A),(b:A),(c:B),(d:B)"); //we need that
+        var filteredIdMap = origGraph.withFilteredLabels(NodeLabel.listOf("B"), new Concurrency(4)).get();
 
-        var inputMapping = nodesBuilder.build().idMap();
-        var filteredIdMap = inputMapping.withFilteredLabels(NodeLabel.listOf("B"), new Concurrency(4)).get();
-
+        NodeFilteredGraph filteredGraph = new NodeFilteredGraph(origGraph,filteredIdMap);
         SimilarityGraphBuilder similarityGraphBuilder = new SimilarityGraphBuilder(
-            filteredIdMap,
+            filteredGraph,
             new Concurrency(1),
             DefaultPool.INSTANCE,
             TerminationFlag.RUNNING_TRUE,

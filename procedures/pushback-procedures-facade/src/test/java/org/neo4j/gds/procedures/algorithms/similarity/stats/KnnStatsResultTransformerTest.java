@@ -22,7 +22,6 @@ package org.neo4j.gds.procedures.algorithms.similarity.stats;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.core.loading.construction.NodesBuilderBuilder;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.similarity.SimilarityResult;
 import org.neo4j.gds.similarity.knn.KnnResult;
@@ -35,6 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.InstanceOfAssertFactories.DOUBLE;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.neo4j.gds.TestSupport.fromGdl;
 
 class KnnStatsResultTransformerTest {
 
@@ -43,12 +43,7 @@ class KnnStatsResultTransformerTest {
 
         var config = Map.of("a",(Object)("foo"));
 
-        var nodesBuilder = new NodesBuilderBuilder().maxOriginalId(3).build();
-        nodesBuilder.addNode(0);
-        nodesBuilder.addNode(1);
-        nodesBuilder.addNode(2);
-        nodesBuilder.addNode(3);
-        var idMap = nodesBuilder.build().idMap();
+        var graph = fromGdl("CREATE (a),(b),(c),(d)"); //we need that
 
         var knnResult = mock(KnnResult.class);
         when(knnResult.nodesCompared()).thenReturn(1L);
@@ -64,7 +59,7 @@ class KnnStatsResultTransformerTest {
         );
 
         var transformer = new KnnStatsResultTransformer(
-            idMap,
+            graph,
             true,
             config,
             TerminationFlag.RUNNING_TRUE,
@@ -93,12 +88,7 @@ class KnnStatsResultTransformerTest {
 
         var config = Map.of("a",(Object)("foo"));
 
-        var nodesBuilder = new NodesBuilderBuilder().maxOriginalId(3).build();
-        nodesBuilder.addNode(0);
-        nodesBuilder.addNode(1);
-        nodesBuilder.addNode(2);
-        nodesBuilder.addNode(3);
-        var idMap = nodesBuilder.build().idMap();
+        var graph = fromGdl("CREATE (a),(b),(c),(d)"); //we need that
 
         var knnResult = mock(KnnResult.class);
         when(knnResult.nodesCompared()).thenReturn(1L);
@@ -114,7 +104,7 @@ class KnnStatsResultTransformerTest {
         );
 
         var transformer = new KnnStatsResultTransformer(
-            idMap,
+            graph,
             false,
             config,
             TerminationFlag.RUNNING_TRUE,

@@ -33,7 +33,7 @@ import java.util.stream.Stream;
 class SimilarityStatsProcessor {
     private final SimilarityResultStreamDelegate similarityResultStreamDelegate = new SimilarityResultStreamDelegate();
 
-    static SimilarityStatistics.SimilarityDistributionResults EMPTY = new SimilarityStatistics.SimilarityDistributionResults(
+    private static SimilarityStatistics.SimilarityDistributionResults EMPTY = new SimilarityStatistics.SimilarityDistributionResults(
         Map.of(),
         0
     );

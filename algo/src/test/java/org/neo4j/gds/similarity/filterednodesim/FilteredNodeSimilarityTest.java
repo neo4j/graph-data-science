@@ -26,7 +26,6 @@ import org.neo4j.gds.SimilarityAlgorithmTasks;
 import org.neo4j.gds.TestProgressTrackerHelper;
 import org.neo4j.gds.applications.algorithms.similarity.SimilarityAlgorithms;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -250,7 +249,6 @@ class FilteredNodeSimilarityTest {
         var filteredNodeSimilarity = new NodeSimilarity(
             graph,
             params.nodeSimilarityParameters(),
-            DefaultPool.INSTANCE,
             progressTracker,
             params.filteringParameters().sourceFilter().toNodeFilter(graph),
             NodeFilter.ALLOW_EVERYTHING,

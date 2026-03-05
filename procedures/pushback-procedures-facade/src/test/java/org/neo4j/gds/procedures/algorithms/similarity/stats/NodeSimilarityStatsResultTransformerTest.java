@@ -23,9 +23,7 @@ import com.carrotsearch.hppc.BitSet;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.result.TimedAlgorithmResult;
-import org.neo4j.gds.similarity.TopKSimilarityGraph;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
-import org.neo4j.gds.similarity.nodesim.TopKGraph;
 import org.neo4j.gds.similarity.nodesim.TopKMap;
 
 import java.util.Map;
@@ -58,17 +56,11 @@ class NodeSimilarityStatsResultTransformerTest {
         topKMap.put(1, 2, 5);
         topKMap.put(1, 3, 9);
 
-        var topGraph = new TopKGraph(graph, topKMap);
-        var similarityGraph = new TopKSimilarityGraph(
-            topGraph,
-            true
-        );
-
         var transformer = new NodeSimilarityStatsResultTransformer(true,config);
 
         var nodeSimResult = new NodeSimilarityResult(
             Optional.empty(),
-            Optional.of(similarityGraph),
+            Optional.of(topKMap),
             100
         );
 
@@ -109,15 +101,9 @@ class NodeSimilarityStatsResultTransformerTest {
         topKMap.put(1, 2, 5);
         topKMap.put(1, 3, 9);
 
-        var topGraph = new TopKGraph(graph, topKMap);
-        var similarityGraph = new TopKSimilarityGraph(
-            topGraph,
-            false
-        );
-
         var nodeSimResult = new NodeSimilarityResult(
             Optional.empty(),
-            Optional.of(similarityGraph),
+            Optional.of(topKMap),
             100
         );
 

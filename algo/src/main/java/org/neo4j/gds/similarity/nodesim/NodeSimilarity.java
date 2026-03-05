@@ -33,10 +33,7 @@ import org.neo4j.gds.core.utils.SetBitsIterable;
 import org.neo4j.gds.core.utils.paged.HugeLongLongMap;
 import org.neo4j.gds.core.utils.progress.BatchingProgressLogger;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.similarity.SimilarityGraph;
-import org.neo4j.gds.similarity.SimilarityGraphBuilder;
 import org.neo4j.gds.similarity.SimilarityResult;
-import org.neo4j.gds.similarity.TopKSimilarityGraph;
 import org.neo4j.gds.similarity.filtering.NodeFilter;
 import org.neo4j.gds.similarity.nodesim.metrics.MetricSimilarityComputer;
 import org.neo4j.gds.similarity.nodesim.metrics.MetricSimilarityComputerFactory;
@@ -45,8 +42,6 @@ import org.neo4j.gds.wcc.WccParameters;
 import org.neo4j.gds.wcc.WccStub;
 
 import java.util.Objects;
-import java.util.Optional;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -67,7 +62,6 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
     private final NodeFilter sourceNodeFilter;
     private final NodeFilter targetNodeFilter;
 
-    private final ExecutorService executorService;
     private final Concurrency concurrency;
     private final MetricSimilarityComputer similarityComputer;
 
@@ -81,7 +75,6 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
     public NodeSimilarity(
         Graph graph,
         NodeSimilarityParameters parameters,
-        ExecutorService executorService,
         ProgressTracker progressTracker,
         NodeFilter sourceNodeFilter,
         NodeFilter targetNodeFilter,
@@ -95,7 +88,6 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
         this.concurrency = parameters.concurrency();
         this.parameters = parameters;
         this.similarityComputer = MetricSimilarityComputerFactory.create(parameters.metric(),parameters.similarityCutoff());
-        this.executorService = executorService;
         this.sourceNodes = new BitSet(graph.nodeCount());
         this.targetNodes = new BitSet(graph.nodeCount());
         this.weighted = this.parameters.hasRelationshipWeightProperty();
@@ -111,23 +103,15 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
         if (parameters.computeToStream()) {
             var computeToStream = computeToStream();
             progressTracker.endSubTask();
-            return new NodeSimilarityResult(
-                Optional.of(computeToStream),
-                Optional.empty(),
-                sourceNodes.cardinality()
-            );
+            return computeToStream;
         } else {
             var computeToGraph = computeToGraph();
             progressTracker.endSubTask();
-            return new NodeSimilarityResult(
-                Optional.empty(),
-                Optional.of(computeToGraph),
-                sourceNodes.cardinality()
-            );
+            return computeToGraph;
         }
     }
 
-    private Stream<SimilarityResult> computeToStream() {
+    private NodeSimilarityResult computeToStream() {
         // Create a filter for which nodes to compare and calculate the neighborhood for each node
         terminationFlag.assertRunning();
 
@@ -137,15 +121,18 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
             // This can not happen when algo is called from proc.
             // Ignore parallelism, always run single threaded,
             // but run on primitives.
-            return computeTopN();
+            var stream = computeTopN();
+            return NodeSimilarityResult.create(stream,sourceNodes.cardinality());
         } else {
-            return concurrency.value() > 1
+            var stream= concurrency.value() > 1
                 ? computeParallel()
                 : computeSimilarityResultStream();
+            return NodeSimilarityResult.create(stream,sourceNodes.cardinality());
+
         }
     }
 
-    private SimilarityGraph computeToGraph() {
+    NodeSimilarityResult computeToGraph() {
 
         if (parameters.hasTopK() && !parameters.hasTopN()) {
             terminationFlag.assertRunning();
@@ -154,18 +141,9 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
                 ? computeTopKMapParallel()
                 : computeTopKMap();
 
-            var similarityGraph = new TopKGraph(graph, topKMap);
-            return new TopKSimilarityGraph(similarityGraph,parameters.computeDistribution());
+            return NodeSimilarityResult.create(topKMap,sourceNodes.cardinality());
         }
-        Stream<SimilarityResult> similarities = computeToStream();
-
-        return new SimilarityGraphBuilder(
-            graph,
-            concurrency,
-            executorService,
-            terminationFlag,
-            parameters.computeDistribution()
-        ).build(similarities);
+        return computeToStream();
 
     }
 

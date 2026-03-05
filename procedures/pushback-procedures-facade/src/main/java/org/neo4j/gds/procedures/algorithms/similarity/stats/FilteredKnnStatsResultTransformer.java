@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.procedures.algorithms.similarity.stats;
 
-import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.procedures.algorithms.similarity.KnnStatsResult;
 import org.neo4j.gds.result.TimedAlgorithmResult;
@@ -32,20 +32,20 @@ import java.util.stream.Stream;
 
 public class FilteredKnnStatsResultTransformer implements ResultTransformer<TimedAlgorithmResult<FilteredKnnResult>, Stream<KnnStatsResult>> {
 
-    private final IdMap idMap;
+    private final Graph graph;
     private final boolean shouldComputeSimilarityDistribution;
     private final Map<String, Object> configuration;
     private final TerminationFlag terminationFlag;
     private final Concurrency concurrency;
 
     public FilteredKnnStatsResultTransformer(
-        IdMap idMap,
+        Graph graph,
         boolean shouldComputeSimilarityDistribution,
         Map<String, Object> configuration,
         TerminationFlag terminationFlag,
         Concurrency concurrency
     ) {
-        this.idMap = idMap;
+        this.graph = graph;
         this.shouldComputeSimilarityDistribution = shouldComputeSimilarityDistribution;
         this.configuration = configuration;
         this.terminationFlag = terminationFlag;
@@ -65,7 +65,7 @@ public class FilteredKnnStatsResultTransformer implements ResultTransformer<Time
             ));
         }
         var similarityStats = SimilarityStatsTools.computeSimilarityDistribution(
-            idMap,
+            graph,
             concurrency,
             knnResult.similarityResultStream(),
             shouldComputeSimilarityDistribution,

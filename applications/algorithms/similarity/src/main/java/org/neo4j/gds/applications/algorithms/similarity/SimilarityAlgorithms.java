@@ -20,7 +20,6 @@
 package org.neo4j.gds.applications.algorithms.similarity;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.similarity.filteredknn.FilteredKNNFactory;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnParameters;
@@ -72,7 +71,6 @@ public class SimilarityAlgorithms {
         var algorithm = new NodeSimilarity(
             graph,
             params.nodeSimilarityParameters(),
-            DefaultPool.INSTANCE,
             progressTracker,
             sourceNodeFilter,
             targetNodeFilter,
@@ -108,7 +106,6 @@ public class SimilarityAlgorithms {
         var algorithm = new NodeSimilarity(
             graph,
             parameters,
-            DefaultPool.INSTANCE,
             progressTracker,
             NodeFilter.ALLOW_EVERYTHING,
             NodeFilter.ALLOW_EVERYTHING,

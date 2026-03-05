@@ -21,9 +21,8 @@ package org.neo4j.gds.procedures.algorithms.similarity.stats;
 
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.core.loading.construction.NodesBuilderBuilder;
 import org.neo4j.gds.similarity.SimilarityResult;
 import org.neo4j.gds.termination.TerminationFlag;
 
@@ -32,6 +31,7 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.InstanceOfAssertFactories.DOUBLE;
 import static org.mockito.Mockito.mock;
+import static org.neo4j.gds.TestSupport.fromGdl;
 
 class SimilarityStatsToolsTest {
 
@@ -39,7 +39,7 @@ class SimilarityStatsToolsTest {
     void shouldReturnEmptyDistributionIfNotSpecified() {
 
         var stats = SimilarityStatsTools.computeSimilarityDistribution(
-            mock(IdMap.class),
+            mock(Graph.class),
             new Concurrency(1),
             Stream.of(new SimilarityResult(0, 1, 10)),
             false,
@@ -51,14 +51,10 @@ class SimilarityStatsToolsTest {
     @Test
     void shouldReturnValidDistributionIfTrue(){
 
-        var nodesBuilder = new NodesBuilderBuilder().maxOriginalId(3).build();
-        nodesBuilder.addNode(0);
-        nodesBuilder.addNode(1);
-        nodesBuilder.addNode(2);
-        nodesBuilder.addNode(3);
-        var idMap = nodesBuilder.build().idMap();
+        var graph = fromGdl("CREATE (a),(b),(c),(d)"); //we need that
+
         var stats = SimilarityStatsTools.computeSimilarityDistribution(
-            idMap,
+            graph,
             new Concurrency(1),
             Stream.of(
                 new SimilarityResult(0, 1, 10),

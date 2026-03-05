@@ -25,7 +25,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -155,7 +154,6 @@ public class ComponentPropertyNodeSimilarityTest {
         var nodeSimilarity = new NodeSimilarity(
             graph,
             parameters,
-            DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER,
             NodeFilter.ALLOW_EVERYTHING,
             NodeFilter.ALLOW_EVERYTHING,

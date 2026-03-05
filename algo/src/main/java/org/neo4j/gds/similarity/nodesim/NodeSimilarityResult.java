@@ -19,31 +19,40 @@
  */
 package org.neo4j.gds.similarity.nodesim;
 
-import org.neo4j.gds.similarity.HugeSimilarityGraph;
 import org.neo4j.gds.similarity.SimilarityGraph;
 import org.neo4j.gds.similarity.SimilarityResult;
 
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
 public record NodeSimilarityResult(
     Optional<Stream<SimilarityResult>> maybeStreamResult,
-    Optional<SimilarityGraph> maybeGraphResult,
+    Optional<TopKMap> maybeTopKMap,
     long comparedNodes
 ) {
-
     public Stream<SimilarityResult> streamResult() {
         return maybeStreamResult().orElseThrow();
     }
 
+    public TopKMap topKMap() {
+        return maybeTopKMap().orElseThrow();
+    }
+
+    static NodeSimilarityResult create(TopKMap topKMap, long comparedNodes){
+        return  new NodeSimilarityResult(Optional.empty(),Optional.of(topKMap),comparedNodes);
+    }
+
+    static NodeSimilarityResult create(Stream<SimilarityResult> stream, long comparedNodes){
+        return  new NodeSimilarityResult(Optional.of(stream),Optional.empty(),comparedNodes);
+    }
+
     public SimilarityGraph graphResult() {
-        return maybeGraphResult().orElseThrow();
+        return null; //temp
     }
 
    public static final NodeSimilarityResult EMPTY = new NodeSimilarityResult(
-       Optional.of(Stream.empty()),
-       Optional.of(new HugeSimilarityGraph(null, Map.of())),
+       Optional.empty(),
+       Optional.empty(),
        0
    );
 }

@@ -36,6 +36,7 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.similarity.SimilarityGraphBuilder;
 import org.neo4j.gds.similarity.SimilarityResult;
 import org.neo4j.gds.similarity.filtering.NodeFilter;
 import org.neo4j.gds.termination.TerminationFlag;
@@ -392,7 +393,15 @@ final class NodeSimilarityTest {
             parameters
         );
 
-        Graph similarityGraph = nodeSimilarity.compute().graphResult();
+        var nodeSimilarityResult = nodeSimilarity.compute();
+        var graphBuilder = new SimilarityGraphBuilder(
+            graph,
+            new Concurrency(1),
+            DefaultPool.INSTANCE,
+            TerminationFlag.RUNNING_TRUE,
+            false
+        );
+        Graph similarityGraph = graphBuilder.build(nodeSimilarityResult);
 
         assertGraphEquals(
             orientation == REVERSE
@@ -463,7 +472,15 @@ final class NodeSimilarityTest {
             parameters
         );
 
-        Graph similarityGraph = nodeSimilarity.compute().graphResult();
+        var nodeSimilarityResult = nodeSimilarity.compute();
+        var graphBuilder = new SimilarityGraphBuilder(
+            graph,
+            parameters.concurrency(),
+            null,
+            TerminationFlag.RUNNING_TRUE,
+            parameters.computeDistribution()
+        );
+        Graph similarityGraph = graphBuilder.build(nodeSimilarityResult);
 
         assertGraphEquals(
             orientation == REVERSE
@@ -641,11 +658,15 @@ final class NodeSimilarityTest {
         );
 
         var nodeSimilarityResult = nodeSimilarity.compute();
-        assertEquals(
-            orientation == REVERSE ? COMPARED_ITEMS : COMPARED_PERSONS,
-            nodeSimilarityResult.comparedNodes()
+        var graphBuilder = new SimilarityGraphBuilder(
+            graph,
+            new Concurrency(1),
+            DefaultPool.INSTANCE,
+            TerminationFlag.RUNNING_TRUE,
+            false
         );
-        Graph resultGraph = nodeSimilarityResult.graphResult();
+        Graph resultGraph = graphBuilder.build(nodeSimilarityResult);
+
         assertGraphEquals(
             orientation == REVERSE
                 ? fromGdl("  (:Person), (:Person), (:Person), (:Person)" +
@@ -700,7 +721,14 @@ final class NodeSimilarityTest {
             parameters
         );
         var nodeSimilarityResult = nodeSimilarity.compute();
-        var resultGraph = nodeSimilarityResult.graphResult();
+        var graphBuilder = new SimilarityGraphBuilder(
+            graph,
+            new Concurrency(1),
+            DefaultPool.INSTANCE,
+            TerminationFlag.RUNNING_TRUE,
+            false
+        );
+        var resultGraph = graphBuilder.build(nodeSimilarityResult);
         assertEquals(
             orientation == REVERSE ? COMPARED_ITEMS : COMPARED_PERSONS,
             nodeSimilarityResult.comparedNodes()
@@ -829,7 +857,6 @@ final class NodeSimilarityTest {
         var nodeSimilarity = new NodeSimilarity(
             naturalGraph,
             params,
-            DefaultPool.INSTANCE,
             progressTracker,
             NodeFilter.ALLOW_EVERYTHING,
             NodeFilter.ALLOW_EVERYTHING,
@@ -858,8 +885,8 @@ final class NodeSimilarityTest {
             NodeSimilarityMetric.JACCARD,
             1,
             Integer.MAX_VALUE,
-            10,
             0,
+            10,
             0,
             true,
             true,
@@ -879,7 +906,6 @@ final class NodeSimilarityTest {
         var nodeSimilarity = new NodeSimilarity(
             naturalGraph,
             params,
-            DefaultPool.INSTANCE,
             progressTracker,
             NodeFilter.ALLOW_EVERYTHING,
             NodeFilter.ALLOW_EVERYTHING,
@@ -933,7 +959,6 @@ final class NodeSimilarityTest {
         var nodeSimilarity = new NodeSimilarity(
             naturalGraph,
             params,
-            DefaultPool.INSTANCE,
             progressTracker,
             NodeFilter.ALLOW_EVERYTHING,
             NodeFilter.ALLOW_EVERYTHING,
@@ -1100,7 +1125,6 @@ final class NodeSimilarityTest {
         return new NodeSimilarity(
             graph,
             parameters,
-            DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER,
             NodeFilter.ALLOW_EVERYTHING,
             NodeFilter.ALLOW_EVERYTHING,

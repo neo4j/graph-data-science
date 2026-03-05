@@ -24,7 +24,6 @@ import org.neo4j.gds.SimilarityAlgorithmTasks;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.async.AsyncAlgorithmCaller;
 import org.neo4j.gds.core.JobId;
-import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.similarity.filteredknn.FilteredKNNFactory;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnParameters;
@@ -159,7 +158,6 @@ public class SimilarityComputeFacade {
         var nodeSimilarity = new NodeSimilarity(
             graph,
             parameters,
-            DefaultPool.INSTANCE,
             progressTracker,
             NodeFilter.ALLOW_EVERYTHING,
             NodeFilter.ALLOW_EVERYTHING,
@@ -198,7 +196,6 @@ public class SimilarityComputeFacade {
         var nodeSimilarity = new NodeSimilarity(
             graph,
             parameters.nodeSimilarityParameters(),
-            DefaultPool.INSTANCE,
             progressTracker,
             sourceNodeFilter,
             targetNodeFilter,

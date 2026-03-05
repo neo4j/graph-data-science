@@ -24,7 +24,6 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.AdjacencyCursor;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.core.loading.construction.NodesBuilderBuilder;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.HashSet;
@@ -32,19 +31,16 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.InstanceOfAssertFactories.DOUBLE;
+import static org.neo4j.gds.TestSupport.fromGdl;
 
 class HugeSimilarityGraphTest {
 
     @Test
     void shouldReturnΑll() {
-        var nodesBuilder = new NodesBuilderBuilder().maxOriginalId(3).build();
-        nodesBuilder.addNode(0);
-        nodesBuilder.addNode(1);
-        nodesBuilder.addNode(2);
-        nodesBuilder.addNode(3);
-        var idMap = nodesBuilder.build().idMap();
+        var graph = fromGdl("CREATE (a),(b),(c),(d)"); //we need that
+
         var similarityGraph =  new SimilarityGraphBuilder(
-            idMap,
+            graph,
             new Concurrency(1),
             DefaultPool.INSTANCE,
             TerminationFlag.RUNNING_TRUE,
@@ -74,14 +70,10 @@ class HugeSimilarityGraphTest {
 
         @Test
     void shouldReturnEmptyDistributionIfUnset() {
-        var nodesBuilder = new NodesBuilderBuilder().maxOriginalId(3).build();
-        nodesBuilder.addNode(0);
-        nodesBuilder.addNode(1);
-        nodesBuilder.addNode(2);
-        nodesBuilder.addNode(3);
-        var idMap = nodesBuilder.build().idMap();
+            var graph = fromGdl("CREATE (a),(b),(c),(d)"); //we need that
+
             var histogram =  new SimilarityGraphBuilder(
-                idMap,
+                graph,
                 new Concurrency(1),
                 DefaultPool.INSTANCE,
                 TerminationFlag.RUNNING_TRUE,

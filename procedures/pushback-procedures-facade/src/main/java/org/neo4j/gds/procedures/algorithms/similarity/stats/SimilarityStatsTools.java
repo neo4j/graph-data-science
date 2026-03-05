@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.procedures.algorithms.similarity.stats;
 
-import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.result.SimilarityStatistics;
@@ -35,13 +35,13 @@ final class SimilarityStatsTools {
 
     private SimilarityStatsTools() {}
 
-    static SimilarityStatistics.SimilarityDistributionResults EMPTY = new SimilarityStatistics.SimilarityDistributionResults(
+    private static final SimilarityStatistics.SimilarityDistributionResults EMPTY = new SimilarityStatistics.SimilarityDistributionResults(
         Map.of(),
         0
     );
 
     static SimilarityStatistics.SimilarityDistributionResults computeSimilarityDistribution(
-        IdMap idMap,
+        Graph graph,
         Concurrency concurrency,
         Stream<SimilarityResult> similarityResultStream,
         boolean shouldComputeSimilarityDistribution,
@@ -50,7 +50,7 @@ final class SimilarityStatsTools {
         if (!shouldComputeSimilarityDistribution) return EMPTY;
         var tStart = System.currentTimeMillis();
         var similarityGraphResult = new SimilarityGraphBuilder(
-            idMap,
+            graph,
             concurrency,
             DefaultPool.INSTANCE,
             terminationFlag,
