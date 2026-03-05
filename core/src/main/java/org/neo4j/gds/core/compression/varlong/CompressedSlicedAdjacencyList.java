@@ -19,14 +19,9 @@
  */
 package org.neo4j.gds.core.compression.varlong;
 
-import org.jspecify.annotations.NonNull;
-import org.neo4j.gds.collections.cursor.HugeCursorSupport;
 import org.neo4j.gds.collections.ha.HugeIntArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
-import org.neo4j.gds.compression.common.BumpAllocator;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.core.utils.paged.HugeMergeSort;
-import org.neo4j.gds.core.utils.paged.HugeSerialIndirectMergeSort;
 
 import java.util.Arrays;
 import java.util.Optional;
@@ -44,15 +39,11 @@ import static org.neo4j.gds.compression.common.BumpAllocator.PAGE_SIZE;
  */
 public abstract class CompressedSlicedAdjacencyList {
 
-    static final long ZERO_DEGREE = -1;
-
     final byte[][] compressedPages;
     // The offset in `compressedPages` where the compressed target list for a node starts.
     final HugeLongArray offsets;
     // The degree of a node
     final HugeIntArray degrees;
-    // well ..
-    final long nodeCount;
 
     public static CompressedSlicedAdjacencyList of(
         CompressedAdjacencyList compressedAdjacencyList,
@@ -78,7 +69,6 @@ public abstract class CompressedSlicedAdjacencyList {
         this.compressedPages = compressedPages;
         this.degrees = degrees;
         this.offsets = offsets;
-        this.nodeCount = offsets.size();
     }
 
     /**
@@ -96,7 +86,7 @@ public abstract class CompressedSlicedAdjacencyList {
         return this.degrees.get(nodeId);
     }
 
-    public WithForwardIndex.PageSlice newPageSlice() {
+    public PageSlice newPageSlice() {
         return new PageSlice();
     }
 
@@ -188,184 +178,4 @@ public abstract class CompressedSlicedAdjacencyList {
         }
     }
 
-    /**
-     * A sliced adjacency list that maintains an additional index to allow for efficient access to the compressed target lists of nodes.
-     * This allows for faster access to the compressed data at the cost of additional memory usage and a more expensive construction process.
-     * <p>
-     * This implementation is used if the compressed adjacency list has no length information stored.
-     *
-     * <pre>
-     * offsets          = [42,  0, 31, 22]
-     * forward_indexes  = [ 3,  0,  2,  1]
-     * sorted_offsets   = [ 0, 22, 31, 42]
-     *
-     * node id 0:   offsets[0] = 42
-     * forward_indexes[0]      =  3
-     * sorted_offsets[3 + 1]   =  -1 (3 + 1 >= len)
-     * to_offset               = 42 + page.len - index_in_page(page)
-     *
-     * node id 1:   offsets[1] =  0
-     * forward_indexes[1]      =  0
-     * sorted_offsets[0 + 1]   = 22
-     *
-     * node id 2:   offsets[2] = 31
-     * forward_indexes[2]      =  2
-     * sorted_offsets[2 + 1]   = 42
-     *
-     * node id 3:   offsets[3] = 22
-     * forward_indexes[3]      =  1
-     * sorted_offsets[1 + 1]   = 31
-     * </pre>
-     */
-    static final class WithForwardIndex extends CompressedSlicedAdjacencyList {
-
-        // Offsets sorted in ascending order.
-        private final HugeLongArray sortedOffsets;
-        // Maps node id to its index in sortedOffsets
-        private final HugeLongArray forwardIndexes;
-
-        private static @NonNull WithForwardIndex of(
-            Concurrency concurrency,
-            HugeLongArray offsets,
-            HugeIntArray degrees,
-            byte[][] compressedPages
-        ) {
-            // O(3*n) space
-            HugeLongArray sortedOffsets = offsets.copyOf(offsets.size());
-            HugeLongArray sortedIndexes = HugeLongArray.newArray(offsets.size());
-            HugeLongArray forwardIndexes = HugeLongArray.newArray(offsets.size());
-
-            // 1. sort the offsets ascending O(nlog(n)); use sortedIndexes as a temporary array
-            HugeMergeSort.sort(sortedOffsets, concurrency, sortedIndexes);
-            // 2. sort the indexes (node ids) according to offset order O(nlog(n))
-            fillWithIndex(sortedIndexes);
-            HugeSerialIndirectMergeSort.sort(
-                sortedIndexes, sortedIndexes.size(), node -> {
-                    long offset = offsets.get(node);
-                    // 0-degree nodes have offset set to 0.
-                    // We need to make sure that if node id 0 has a degree > 0, it ends
-                    // up at the end of all 0-degree nodes in the sort order. This allows
-                    // for less complexity in the endOffset computation.
-                    return offset + (degrees.get(node) > 0 ? 1 : 0);
-                }, forwardIndexes
-            );
-            // 3. map each node id to its index in the offset order
-            forwardIndexes = buildForwardIndex(sortedIndexes, forwardIndexes);
-
-            return new WithForwardIndex(
-                compressedPages,
-                degrees,
-                offsets,
-                sortedOffsets,
-                forwardIndexes
-            );
-        }
-
-        private WithForwardIndex(
-            byte[][] compressedPages,
-            HugeIntArray degrees,
-            HugeLongArray offsets,
-            HugeLongArray sortedOffsets,
-            HugeLongArray forwardIndexes
-        ) {
-            super(compressedPages, degrees, offsets);
-            this.sortedOffsets = sortedOffsets;
-            this.forwardIndexes = forwardIndexes;
-        }
-
-        @Override
-        public boolean initPageSlice(long nodeId, PageSlice slice) {
-            if (this.degrees.get(nodeId) == 0) {
-                return false;
-            }
-            long offset = this.offsets.get(nodeId);
-            int pageIndex = pageIndex(offset, PAGE_SHIFT);
-            byte[] page = this.compressedPages[pageIndex];
-            int indexInPage = indexInPage(offset, PAGE_MASK);
-            long endOffset = endOffset(nodeId);
-            int endIndexInPage = indexInPage(endOffset, PAGE_MASK);
-
-            if (endIndexInPage == 0) {
-                // We are at a node that is the last node on the page.
-                if (page.length == PAGE_SIZE) {
-                    // a regular page
-                    endIndexInPage = findEndIndexInPage(page, indexInPage);
-                } else {
-                    // an oversize page
-                    endIndexInPage = page.length;
-                }
-            }
-
-            slice.page = page;
-            slice.offset = indexInPage;
-            slice.length = endIndexInPage - indexInPage;
-
-            return true;
-        }
-
-        private long endOffset(long nodeId) {
-            if (this.degrees.get(nodeId) == 0) {
-                return ZERO_DEGREE;
-            }
-            // position of node id in sorted offsets
-            long fromIndex = this.forwardIndexes.get(nodeId);
-            long toIndex = fromIndex + 1;
-
-            if (toIndex >= this.nodeCount) {
-                // indicate that we reached the last page
-                return BumpAllocator.PAGE_SIZE;
-            }
-
-            return this.sortedOffsets.get(toIndex);
-        }
-
-        private int findEndIndexInPage(byte[] page, int indexInPage) {
-            for (; indexInPage < page.length - 2; indexInPage++) {
-                // During compression, we mark the last byte of a var long by
-                // setting the HSB to 1 and end up with a negative value.
-                // If that value is followed by 0, we know that we have reached
-                // the end of the slice.
-                if (page[indexInPage] < 0 && page[indexInPage + 1] == 0 && page[indexInPage + 2] == 0) {
-                    return indexInPage + 1;
-                }
-            }
-            return indexInPage + 2;
-        }
-
-        /**
-         * Initialize the array with identity values.
-         */
-        private static void fillWithIndex(HugeLongArray array) {
-            var cursor = array.initCursor(array.newCursor());
-            while (cursor.next()) {
-                long[] offsetArray = cursor.array;
-                int limit = cursor.limit;
-                long base = cursor.base;
-
-                for (int i = cursor.offset; i < limit; i++) {
-                    offsetArray[i] = base + i;
-                }
-            }
-        }
-
-        /**
-         * Maps node ids to their index in offset sort order.
-         */
-        private static HugeLongArray buildForwardIndex(
-            HugeCursorSupport<long[]> sortedIndexes,
-            HugeLongArray forwardIndexes
-        ) {
-            var cursor = sortedIndexes.initCursor(sortedIndexes.newCursor());
-            while (cursor.next()) {
-                long[] offsetArray = cursor.array;
-                int limit = cursor.limit;
-                long base = cursor.base;
-
-                for (int i = cursor.offset; i < limit; i++) {
-                    forwardIndexes.set(offsetArray[i], base + i);
-                }
-            }
-            return forwardIndexes;
-        }
-    }
 }
