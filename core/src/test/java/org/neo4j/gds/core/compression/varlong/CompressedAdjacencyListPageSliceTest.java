@@ -36,7 +36,7 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
-class CompressedSlicedAdjacencyListTest {
+class CompressedAdjacencyListPageSliceTest {
 
     private record Graph(
         TestGraph testGraph,
@@ -44,12 +44,10 @@ class CompressedSlicedAdjacencyListTest {
         String[] adjacencies,
         Map<String, Optional<Slice>> slices
     ) {
-
-        CompressedSlicedAdjacencyList compressedSlicedAdjacencyList() {
-            var cal = (CompressedAdjacencyList) testGraph.relationshipTopologies()
+        CompressedAdjacencyList compressedAdjacencyList() {
+            return (CompressedAdjacencyList) testGraph.relationshipTopologies()
                 .get(RelationshipType.ALL_RELATIONSHIPS)
                 .adjacencyList();
-            return CompressedSlicedAdjacencyList.of(cal);
         }
     }
 
@@ -109,18 +107,6 @@ class CompressedSlicedAdjacencyListTest {
                 GRAPH_SLICES
             ),
             new Graph(
-                TestSupport.fromGdl(GRAPH),
-                GRAPH_DEGREES,
-                GRAPH_ADJACENCIES,
-                GRAPH_SLICES
-            ),
-            new Graph(
-                TestSupport.fromGdl(GAP_GRAPH),
-                GAP_GRAPH_DEGREES,
-                GAP_GRAPH_ADJACENCIES,
-                GAP_GRAPH_SLICES
-            ),
-            new Graph(
                 TestSupport.fromGdl(GAP_GRAPH),
                 GAP_GRAPH_DEGREES,
                 GAP_GRAPH_ADJACENCIES,
@@ -133,7 +119,7 @@ class CompressedSlicedAdjacencyListTest {
     @MethodSource("graphs")
     void degrees(Graph graph) {
         var g = graph.testGraph();
-        var csal = graph.compressedSlicedAdjacencyList();
+        var csal = graph.compressedAdjacencyList();
 
         graph.degrees().forEach((node, degree) -> {
             assertThat(csal.degree(g.toMappedNodeId(node))).isEqualTo(degree);
@@ -144,7 +130,7 @@ class CompressedSlicedAdjacencyListTest {
     @MethodSource("graphs")
     void slices(Graph graph) {
         var g = graph.testGraph();
-        var csal = graph.compressedSlicedAdjacencyList();
+        var csal = graph.compressedAdjacencyList();
         var pageSlice = csal.newPageSlice();
         graph.slices().forEach((node, expectedSlice) -> {
             if (expectedSlice.isEmpty()) {
@@ -163,19 +149,19 @@ class CompressedSlicedAdjacencyListTest {
     @MethodSource("graphs")
     void decode(Graph graph) {
         var g = graph.testGraph();
-        var csal = graph.compressedSlicedAdjacencyList();
-        Arrays.stream(graph.adjacencies()).forEach(expected -> assertDecoded(g, csal, expected));
+        var cal = graph.compressedAdjacencyList();
+        Arrays.stream(graph.adjacencies()).forEach(expected -> assertDecoded(g, cal, expected));
     }
 
-    static void assertDecoded(TestGraph graph, CompressedSlicedAdjacencyList csal, String expected) {
+    static void assertDecoded(TestGraph graph, CompressedAdjacencyList cal, String expected) {
         String[] vars = expected.split(",");
         long sourceNode = graph.toMappedNodeId(vars[0]);
         long[] expectedTargets = IntStream.range(1, vars.length)
             .mapToLong(i -> graph.toMappedNodeId(vars[i]))
             .toArray();
 
-        var pageSlice = new CompressedSlicedAdjacencyList.PageSlice();
-        var success = csal.initPageSlice(sourceNode, pageSlice);
+        var pageSlice = cal.newPageSlice();
+        var success = cal.initPageSlice(sourceNode, pageSlice);
         assertThat(success).isTrue();
         long[] out = new long[expectedTargets.length];
         // decompress

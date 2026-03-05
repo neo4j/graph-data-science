@@ -52,6 +52,20 @@ public final class VarLongEncoding {
         return size;
     }
 
+    public static int encodedVLongsByteSize(byte[] page, int offset, int limit) {
+        int indexInPage = offset;
+        for (int i = 0; i < limit; i++) {
+            // during compression, we mark the last byte of a var long by
+            // setting the MSB (sign bit) to 1 and end up with a negative value.
+            while (page[indexInPage] >= 0) {
+                indexInPage++;
+            }
+            // account for the last byte of the var long
+            indexInPage++;
+        }
+        return indexInPage - offset;
+    }
+
     public static int encodeVLongs(long[] values, int offset, int end, byte[] out, int into) {
         for (int i = offset; i < end; ++i) {
             if (values[i] == Long.MIN_VALUE) {

@@ -28,6 +28,7 @@ import org.neo4j.gds.collections.PageUtil;
 import org.neo4j.gds.collections.ha.HugeIntArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.compression.common.BumpAllocator;
+import org.neo4j.gds.compression.common.VarLongEncoding;
 import org.neo4j.gds.core.loading.MutableIntValue;
 import org.neo4j.gds.mem.Estimate;
 import org.neo4j.gds.mem.MemoryEstimation;
@@ -268,5 +269,39 @@ public final class CompressedAdjacencyList implements AdjacencyList {
             this.currentPosition += this.value;
             return value;
         }
+    }
+
+    public static final class PageSlice {
+        public byte[] page;
+        public int offset;
+        public int length;
+    }
+
+    public PageSlice newPageSlice() {
+        return new PageSlice();
+    }
+
+    public boolean initPageSlice(long nodeId, PageSlice slice) {
+        int degree = this.degrees.get(nodeId);
+        if (degree == 0) {
+            return false;
+        }
+        long offset = this.offsets.get(nodeId);
+        int pageIndex = pageIndex(offset, BumpAllocator.PAGE_SHIFT);
+        byte[] page = this.pages[pageIndex];
+        int indexInPage = indexInPage(offset, BumpAllocator.PAGE_MASK);
+
+        if (page.length > BumpAllocator.PAGE_SIZE) {
+            // oversize page
+            slice.page = page;
+            slice.offset = indexInPage;
+            slice.length = page.length;
+            return true;
+        }
+        slice.page = page;
+        slice.offset = indexInPage;
+        slice.length = VarLongEncoding.encodedVLongsByteSize(page, indexInPage, degree);
+
+        return true;
     }
 }
