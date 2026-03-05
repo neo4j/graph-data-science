@@ -204,8 +204,7 @@ class SimilarityComputeFacadeTest {
             true,
             true,
             false,
-            null,
-            false
+            null
         );
 
         var future = facade.nodeSimilarity(
@@ -241,8 +240,7 @@ class SimilarityComputeFacadeTest {
             true,
             true,
             false,
-            null,
-            false
+            null
         );
 
         var parameters = new FilteredNodeSimilarityParameters(

@@ -53,7 +53,7 @@ public class SimilarityAlgorithmsEstimationModeBusinessFacade {
     }
 
     public MemoryEstimation filteredNodeSimilarity(NodeSimilarityBaseConfig configuration) {
-        return new FilteredNodeSimilarityMemoryEstimateDefinition(configuration.toParameters(false)).memoryEstimation();
+        return new FilteredNodeSimilarityMemoryEstimateDefinition(configuration.toParameters()).memoryEstimation();
     }
 
     public MemoryEstimateResult filteredNodeSimilarity(

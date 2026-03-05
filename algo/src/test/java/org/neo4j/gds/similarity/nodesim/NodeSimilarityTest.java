@@ -283,8 +283,7 @@ final class NodeSimilarityTest {
             true,
             true,
             false,
-            null,
-            false
+            null
         );
 
         var nodeSimilarity = constructNodeSimilarity(
@@ -317,8 +316,7 @@ final class NodeSimilarityTest {
             true,
             false,
             false,
-            null,
-            false
+            null
         );
         NodeSimilarity nodeSimilarity = constructNodeSimilarity(
             graph,
@@ -350,8 +348,7 @@ final class NodeSimilarityTest {
             true,
             false,
             false,
-            null,
-            false
+            null
         );
 
         NodeSimilarity nodeSimilarity = constructNodeSimilarity(
@@ -384,8 +381,7 @@ final class NodeSimilarityTest {
             false,
             false,
             false,
-            null,
-            false
+            null
         );
 
         NodeSimilarity nodeSimilarity = constructNodeSimilarity(
@@ -429,8 +425,7 @@ final class NodeSimilarityTest {
             true,
             false,
             false,
-            null,
-            false
+            null
         );
 
         NodeSimilarity nodeSimilarity = constructNodeSimilarity(
@@ -463,8 +458,7 @@ final class NodeSimilarityTest {
             false,
             false,
             false,
-            null,
-            false
+            null
         );
 
         NodeSimilarity nodeSimilarity = constructNodeSimilarity(
@@ -478,7 +472,7 @@ final class NodeSimilarityTest {
             parameters.concurrency(),
             null,
             TerminationFlag.RUNNING_TRUE,
-            parameters.computeDistribution()
+            false
         );
         Graph similarityGraph = graphBuilder.build(nodeSimilarityResult);
 
@@ -514,8 +508,7 @@ final class NodeSimilarityTest {
             true,
             false,
             false,
-            null,
-            false
+            null
         );
 
         NodeSimilarity nodeSimilarity = constructNodeSimilarity(
@@ -551,8 +544,7 @@ final class NodeSimilarityTest {
             true,
             false,
             false,
-            null,
-            false
+            null
         );
 
         NodeSimilarity nodeSimilarity = constructNodeSimilarity(
@@ -586,8 +578,7 @@ final class NodeSimilarityTest {
             true,
             false,
             false,
-            null,
-            false
+            null
         );
 
         NodeSimilarity nodeSimilarity = constructNodeSimilarity(
@@ -612,8 +603,7 @@ final class NodeSimilarityTest {
             true,
             false,
             false,
-            null,
-            false
+            null
         );
         NodeSimilarity nodeSimilarity = constructNodeSimilarity(
             naturalGraph,
@@ -648,8 +638,7 @@ final class NodeSimilarityTest {
             false,
             false,
             false,
-            null,
-            false
+            null
         );
 
         NodeSimilarity nodeSimilarity = constructNodeSimilarity(
@@ -712,8 +701,7 @@ final class NodeSimilarityTest {
             false,
             false,
             false,
-            null,
-            false
+            null
         );
 
         NodeSimilarity nodeSimilarity = constructNodeSimilarity(
@@ -769,8 +757,7 @@ final class NodeSimilarityTest {
             true,
             false,
             false,
-            null,
-            false
+            null
         );
 
         NodeSimilarity nodeSimilarity = constructNodeSimilarity(
@@ -810,8 +797,7 @@ final class NodeSimilarityTest {
             true,
             false,
             false,
-            null,
-            false
+            null
         );
 
         NodeSimilarity nodeSimilarity = constructNodeSimilarity(
@@ -842,8 +828,7 @@ final class NodeSimilarityTest {
             true,
             true,
             false,
-            null,
-            false
+            null
         );
 
         var progressTrackerWithLog = TestProgressTrackerHelper.create(
@@ -891,8 +876,7 @@ final class NodeSimilarityTest {
             true,
             true,
             false,
-            null,
-            false
+            null
         );
 
         var progressTrackerWithLog = TestProgressTrackerHelper.create(
@@ -944,8 +928,7 @@ final class NodeSimilarityTest {
             true,
             true,
             true,
-            null,
-            false
+            null
         );
 
         var progressTrackerWithLog = TestProgressTrackerHelper.create(
@@ -1020,8 +1003,7 @@ final class NodeSimilarityTest {
             true,
             false,
             false,
-            null,
-            false
+            null
         );
 
         NodeSimilarity nodeSimilarity = constructNodeSimilarity(
@@ -1048,8 +1030,7 @@ final class NodeSimilarityTest {
             true,
             true,
             false,
-            null,
-            false
+            null
         );
         nodeSimilarity = constructNodeSimilarity(graph, parameters2);
 
@@ -1099,8 +1080,7 @@ final class NodeSimilarityTest {
             true,
             false,
             false,
-            null,
-            false
+            null
         );
 
         NodeSimilarity nodeSimilarity = constructNodeSimilarity(

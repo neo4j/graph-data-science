@@ -73,7 +73,8 @@ public final class LocalSimilarityProcedureFacade implements SimilarityProcedure
         SimilarityAlgorithmsStreamModeBusinessFacade streamModeBusinessFacade,
         SimilarityAlgorithmsWriteModeBusinessFacade writeModeBusinessFacade,
         SimilarityStubs stubs,
-        UserSpecificConfigurationParser configurationParser, TerminationFlag terminationFlag
+        UserSpecificConfigurationParser configurationParser,
+        TerminationFlag terminationFlag
     ) {
         this.procedureReturnColumns = procedureReturnColumns;
         this.estimationModeBusinessFacade = estimationModeBusinessFacade;

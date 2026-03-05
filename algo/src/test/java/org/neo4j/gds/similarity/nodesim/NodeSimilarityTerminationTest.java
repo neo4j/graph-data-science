@@ -53,8 +53,7 @@ class NodeSimilarityTerminationTest {
                     true,
                     false,
                     false,
-                    null,
-                    false
+                    null
                 );
                 var nodeSimilarity = new NodeSimilarity(
                     graph,
