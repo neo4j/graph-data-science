@@ -20,6 +20,9 @@
 package org.neo4j.gds.core.compression.varlong;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.locationtech.jts.util.Memory;
 import org.neo4j.gds.collections.PageUtil;
 import org.neo4j.gds.collections.ha.HugeIntArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
@@ -29,6 +32,7 @@ import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.mem.MemoryTree;
 import org.neo4j.gds.mem.BitUtil;
+import org.neo4j.gds.utils.GdsFeatureToggles;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -39,8 +43,11 @@ import static org.neo4j.gds.mem.BitUtil.ceilDiv;
 
 class CompressedAdjacencyListTest {
 
-    @Test
-    void shouldComputeCompressedMemoryEstimationForSinglePage() {
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void shouldComputeCompressedMemoryEstimationForSinglePage(boolean storeTargetLengths) {
+        GdsFeatureToggles.STORE_COMPRESSED_TARGETS_LENGTH.toggle(storeTargetLengths);
+
         var nodeCount = 100;
         GraphDimensions dimensions = ImmutableGraphDimensions.builder()
             .nodeCount(nodeCount)
@@ -61,8 +68,12 @@ class CompressedAdjacencyListTest {
 
         long degrees = HugeIntArray.memoryEstimation(nodeCount);
         long offsets = HugeLongArray.memoryEstimation(nodeCount);
+        long lengths = HugeIntArray.memoryEstimation(nodeCount);
 
-        MemoryRange expected = MemoryRange.of(
+        MemoryRange expected = (GdsFeatureToggles.STORE_COMPRESSED_TARGETS_LENGTH.isEnabled()) ? MemoryRange.of(
+            classSize + minAdjacencyPages + degrees + offsets + lengths,
+            classSize + maxAdjacencyPages + degrees + offsets + lengths
+        ) : MemoryRange.of(
             classSize + minAdjacencyPages + degrees + offsets,
             classSize + maxAdjacencyPages + degrees + offsets
         );
@@ -70,6 +81,8 @@ class CompressedAdjacencyListTest {
         var actual = memRec.memoryUsage();
         assertThat(actual.min).isEqualTo(expected.min);
         assertThat(actual.max).isEqualTo(expected.max);
+
+        GdsFeatureToggles.STORE_COMPRESSED_TARGETS_LENGTH.reset();
     }
 
     @Test

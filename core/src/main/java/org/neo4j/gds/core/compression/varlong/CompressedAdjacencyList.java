@@ -34,6 +34,7 @@ import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryEstimations;
 import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.memory.info.MemoryInfo;
+import org.neo4j.gds.utils.GdsFeatureToggles;
 
 import java.util.Optional;
 
@@ -80,12 +81,17 @@ public final class CompressedAdjacencyList implements AdjacencyList {
 
         MemoryRange pagesMemoryRange = MemoryRange.of(minMemoryReqs, maxMemoryReqs);
 
-        return MemoryEstimations
+        var builder = MemoryEstimations
             .builder(CompressedAdjacencyList.class)
             .fixed("pages", pagesMemoryRange)
             .perNode("degrees", HugeIntArray::memoryEstimation)
-            .perNode("offsets", HugeLongArray::memoryEstimation)
-            .build();
+            .perNode("offsets", HugeLongArray::memoryEstimation);
+
+        if (GdsFeatureToggles.STORE_COMPRESSED_TARGETS_LENGTH.isEnabled()) {
+            builder.perNode("lengths", HugeIntArray::memoryEstimation);
+        }
+
+        return builder.build();
     }
 
     @TestOnly
