@@ -19,21 +19,22 @@
  */
 package org.neo4j.gds.core.compression.common;
 
+import org.neo4j.gds.Aggregation;
 import org.neo4j.gds.api.AdjacencyList;
 import org.neo4j.gds.api.AdjacencyProperties;
-import org.neo4j.gds.compression.api.AdjacencyCompressor;
 import org.neo4j.gds.api.compress.AdjacencyCompressorFactory;
 import org.neo4j.gds.api.compress.AdjacencyListsWithProperties;
 import org.neo4j.gds.api.compress.ImmutableAdjacencyListsWithProperties;
 import org.neo4j.gds.collections.ha.HugeIntArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.compression.api.AdjacencyCompressor;
 import org.neo4j.gds.compression.api.AdjacencyListBuilder;
-import org.neo4j.gds.Aggregation;
 
 import java.util.concurrent.atomic.LongAdder;
 import java.util.function.LongSupplier;
 
-public abstract class AbstractAdjacencyCompressorFactory<TARGET_PAGE, PROPERTY_PAGE> implements AdjacencyCompressorFactory {
+public abstract class AbstractAdjacencyCompressorFactory<TARGET_PAGE, PROPERTY_PAGE> implements
+    AdjacencyCompressorFactory {
 
     private final LongSupplier nodeCountSupplier;
     private final AdjacencyListBuilder<TARGET_PAGE, ? extends AdjacencyList> adjacencyBuilder;

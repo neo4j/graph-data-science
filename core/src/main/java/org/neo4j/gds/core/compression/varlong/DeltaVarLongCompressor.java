@@ -20,21 +20,21 @@
 package org.neo4j.gds.core.compression.varlong;
 
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.gds.Aggregation;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.api.AdjacencyList;
 import org.neo4j.gds.api.AdjacencyProperties;
-import org.neo4j.gds.compression.api.AdjacencyCompressor;
 import org.neo4j.gds.api.compress.AdjacencyCompressorFactory;
 import org.neo4j.gds.api.compress.AdjacencyListBuilderFactory;
 import org.neo4j.gds.collections.ha.HugeIntArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.compression.api.AdjacencyCompressor;
 import org.neo4j.gds.compression.api.AdjacencyListBuilder;
 import org.neo4j.gds.compression.api.ModifiableSlice;
 import org.neo4j.gds.compression.common.AdjacencyCompression;
+import org.neo4j.gds.compression.common.MemoryTracker;
 import org.neo4j.gds.compression.common.VarLongEncoding;
 import org.neo4j.gds.core.compression.common.AbstractAdjacencyCompressorFactory;
-import org.neo4j.gds.compression.common.MemoryTracker;
-import org.neo4j.gds.Aggregation;
 
 import java.util.Arrays;
 import java.util.function.LongSupplier;

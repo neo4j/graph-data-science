@@ -28,12 +28,15 @@ import org.neo4j.gds.collections.PageUtil;
 import org.neo4j.gds.collections.ha.HugeIntArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.compression.common.BumpAllocator;
+import org.neo4j.gds.compression.common.VarLongEncoding;
 import org.neo4j.gds.core.loading.MutableIntValue;
 import org.neo4j.gds.mem.Estimate;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryEstimations;
 import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.memory.info.MemoryInfo;
+
+import java.util.Arrays;
 
 import static org.neo4j.gds.RelationshipType.ALL_RELATIONSHIPS;
 import static org.neo4j.gds.collections.PageUtil.indexInPage;
@@ -44,15 +47,17 @@ import static org.neo4j.gds.mem.BitUtil.ceilDiv;
 public final class CompressedAdjacencyList implements AdjacencyList {
 
     public static MemoryEstimation adjacencyListEstimation(RelationshipType relationshipType, boolean undirected) {
-        return MemoryEstimations.setup("", dimensions -> {
-            long nodeCount = dimensions.nodeCount();
-            long relCountForType = dimensions
-                .relationshipCounts()
-                .getOrDefault(relationshipType, dimensions.relCountUpperBound());
-            long relCount = undirected ? relCountForType * 2 : relCountForType;
-            long avgDegree = (nodeCount > 0) ? ceilDiv(relCount, nodeCount) : 0L;
-            return CompressedAdjacencyList.adjacencyListEstimation(avgDegree, nodeCount);
-        });
+        return MemoryEstimations.setup(
+            "", dimensions -> {
+                long nodeCount = dimensions.nodeCount();
+                long relCountForType = dimensions
+                    .relationshipCounts()
+                    .getOrDefault(relationshipType, dimensions.relCountUpperBound());
+                long relCount = undirected ? relCountForType * 2 : relCountForType;
+                long avgDegree = (nodeCount > 0) ? ceilDiv(relCount, nodeCount) : 0L;
+                return CompressedAdjacencyList.adjacencyListEstimation(avgDegree, nodeCount);
+            }
+        );
     }
 
     public static MemoryEstimation adjacencyListEstimation(long avgDegree, long nodeCount) {
@@ -98,14 +103,18 @@ public final class CompressedAdjacencyList implements AdjacencyList {
         return (firstAdjacencyIdAvgByteSize + compressedAdjacencyByteSize) * nodeCount;
     }
 
-    // TODO: expose in a nicer way
-    byte[][] pages;
-    HugeIntArray degrees;
-    HugeLongArray offsets;
+    private final byte[][] pages;
+    private final HugeIntArray degrees;
+    private final HugeLongArray offsets;
 
     private final MemoryInfo memoryInfo;
 
-    public CompressedAdjacencyList(byte[][] pages, HugeIntArray degrees, HugeLongArray offsets, MemoryInfo memoryInfo) {
+    public CompressedAdjacencyList(
+        byte[][] pages,
+        HugeIntArray degrees,
+        HugeLongArray offsets,
+        MemoryInfo memoryInfo
+    ) {
         this.pages = pages;
         this.degrees = degrees;
         this.offsets = offsets;
@@ -156,6 +165,13 @@ public final class CompressedAdjacencyList implements AdjacencyList {
 
     public static int decompressingReaderChunkSize() {
         return AdjacencyDecompressingReader.CHUNK_SIZE;
+    }
+
+    /**
+     * An overestimate of the total number of bytes used by the compressed pages.
+     */
+    public long totalPageBytes() {
+        return Arrays.stream(this.pages).mapToLong(page -> page.length).sum();
     }
 
     public byte[][] pages() {
@@ -262,5 +278,40 @@ public final class CompressedAdjacencyList implements AdjacencyList {
             this.currentPosition += this.value;
             return value;
         }
+    }
+
+    public static final class PageSlice {
+        public byte[] page;
+        public int offset;
+        public int length;
+    }
+
+    public PageSlice newPageSlice() {
+        return new PageSlice();
+    }
+
+    public boolean initPageSlice(long nodeId, PageSlice slice) {
+        int degree = this.degrees.get(nodeId);
+        if (degree == 0) {
+            return false;
+        }
+        long offset = this.offsets.get(nodeId);
+        int pageIndex = pageIndex(offset, BumpAllocator.PAGE_SHIFT);
+        byte[] page = this.pages[pageIndex];
+        int indexInPage = indexInPage(offset, BumpAllocator.PAGE_MASK);
+
+        if (page.length > BumpAllocator.PAGE_SIZE) {
+            // oversize page
+            slice.page = page;
+            slice.offset = 0;
+            slice.length = page.length;
+        } else {
+            // regular page
+            slice.page = page;
+            slice.offset = indexInPage;
+            slice.length = VarLongEncoding.encodedVLongsByteSize(page, indexInPage, degree);
+        }
+
+        return true;
     }
 }

@@ -28,4 +28,6 @@ dependencies {
     implementation project(':memory-access')
     implementation project(':memory-info')
     implementation project(':memory-usage')
+
+    testImplementation project(':test-utils')
 }
