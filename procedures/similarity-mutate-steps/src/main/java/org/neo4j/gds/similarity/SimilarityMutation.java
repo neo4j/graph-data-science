@@ -20,12 +20,12 @@
 package org.neo4j.gds.similarity;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.neo4j.gds.algorithms.similarity.SimilaritySingleTypeRelationshipsHandler;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.MutateRelationshipService;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Map;
@@ -39,7 +39,7 @@ class SimilarityMutation {
     private final MutateRelationshipService mutateRelationshipService;
     private final TerminationFlag terminationFlag;
 
-    SimilarityMutation(MutateRelationshipService mutateRelationshipService, TerminationFlag terminationFlag) {
+    SimilarityMutation(MutateRelationshipService mutateRelationshipService,TerminationFlag terminationFlag) {
         this.mutateRelationshipService = mutateRelationshipService;
         this.terminationFlag = terminationFlag;
     }
@@ -53,44 +53,37 @@ class SimilarityMutation {
         Stream<SimilarityResult> similarityResultStream,
         boolean shouldComputeSimilarityDistribution
     ) {
-        var similarityGraphResult = SimilarityGraphResult.fromStream(
+        var similarityGraph = SimilarityGraphNewBuilder.build(
+            shouldComputeSimilarityDistribution,
+            similarityResultStream,
             graph,
             concurrency,
-            similarityResultStream,
+            DefaultPool.INSTANCE,
             terminationFlag
         );
 
         return execute(
-            graph,
-            graphStore,
-            mutateRelationshipType, mutateRelationshipProperty,
-            similarityGraphResult,
-            shouldComputeSimilarityDistribution
+                graphStore,
+                mutateRelationshipType, mutateRelationshipProperty,
+                similarityGraph
         );
     }
 
     Pair<RelationshipsWritten, Map<String, Object>> execute(
-        Graph graph,
         GraphStore graphStore,
         String mutateRelationshipType,
         String mutateRelationshipProperty,
-        SimilarityGraphResult similarityGraphResult,
-        boolean shouldComputeSimilarityDistribution
+        SimilarityGraph similarityGraph
     ) {
-        var similaritySingleTypeRelationshipsHandler = new SimilaritySingleTypeRelationshipsHandler(
-            graph,
-            () -> similarityGraphResult,
-            shouldComputeSimilarityDistribution
-        );
+
+        var relationships = similarityGraph.relationships(mutateRelationshipType,mutateRelationshipProperty);
 
         var relationshipsWritten = mutateRelationshipService.mutate(
             graphStore,
-            mutateRelationshipType,
-            mutateRelationshipProperty,
-            similaritySingleTypeRelationshipsHandler
+            relationships
         );
 
-        var similaritySummary = similaritySingleTypeRelationshipsHandler.similaritySummary();
+        var similaritySummary = similarityGraph.similarityDistribution();
 
         return Pair.of(relationshipsWritten, similaritySummary);
     }

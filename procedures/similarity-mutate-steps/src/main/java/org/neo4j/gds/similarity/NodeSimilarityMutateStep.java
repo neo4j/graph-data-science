@@ -34,7 +34,6 @@ public final class NodeSimilarityMutateStep implements MutateStep<NodeSimilarity
     private final SimilarityMutation similarityMutation;
     private final String mutateRelationshipType;
     private final String mutateProperty;
-    private final boolean shouldComputeSimilarityDistribution;
 
     private NodeSimilarityMutateStep(
         SimilarityMutation similarityMutation,
@@ -45,7 +44,6 @@ public final class NodeSimilarityMutateStep implements MutateStep<NodeSimilarity
         this.similarityMutation = similarityMutation;
         this.mutateRelationshipType = mutateRelationshipType;
         this.mutateProperty = mutateProperty;
-        this.shouldComputeSimilarityDistribution = shouldComputeSimilarityDistribution;
     }
 
     public static NodeSimilarityMutateStep create(
@@ -75,12 +73,10 @@ public final class NodeSimilarityMutateStep implements MutateStep<NodeSimilarity
         NodeSimilarityResult result
     ) {
         return similarityMutation.execute(
-            graph,
             graphStore,
             mutateRelationshipType,
             mutateProperty,
-            result.graphResult(),
-            shouldComputeSimilarityDistribution
+            result.graphResult()
         );
     }
 }
