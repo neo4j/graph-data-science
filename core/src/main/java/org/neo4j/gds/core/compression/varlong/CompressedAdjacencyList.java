@@ -36,6 +36,8 @@ import org.neo4j.gds.mem.MemoryEstimations;
 import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.memory.info.MemoryInfo;
 
+import java.util.Arrays;
+
 import static org.neo4j.gds.RelationshipType.ALL_RELATIONSHIPS;
 import static org.neo4j.gds.collections.PageUtil.indexInPage;
 import static org.neo4j.gds.collections.PageUtil.pageIndex;
@@ -163,6 +165,13 @@ public final class CompressedAdjacencyList implements AdjacencyList {
 
     public static int decompressingReaderChunkSize() {
         return AdjacencyDecompressingReader.CHUNK_SIZE;
+    }
+
+    /**
+     * An overestimate of the total number of bytes used by the compressed pages.
+     */
+    public long totalPageBytes() {
+        return Arrays.stream(this.pages).mapToLong(page -> page.length).sum();
     }
 
     public byte[][] pages() {
