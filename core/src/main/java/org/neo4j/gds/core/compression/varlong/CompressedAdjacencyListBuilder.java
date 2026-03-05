@@ -53,14 +53,19 @@ public final class CompressedAdjacencyListBuilder implements AdjacencyListBuilde
     }
 
     @Override
-    public CompressedAdjacencyList build(HugeIntArray degrees, HugeLongArray offsets, boolean allowReordering) {
+    public CompressedAdjacencyList build(
+        HugeIntArray degrees,
+        HugeLongArray offsets,
+        HugeIntArray lengths,
+        boolean allowReordering
+    ) {
         byte[][] intoPages = builder.intoPages();
         if (allowReordering) {
             reorder(intoPages, offsets, degrees);
         }
         var memoryInfo = memoryInfo(intoPages, degrees, offsets);
 
-        return new CompressedAdjacencyList(intoPages, degrees, offsets, memoryInfo);
+        return new CompressedAdjacencyList(intoPages, degrees, offsets, lengths, memoryInfo);
     }
 
     private MemoryInfo memoryInfo(byte[][] pages, HugeIntArray degrees, HugeLongArray offsets) {

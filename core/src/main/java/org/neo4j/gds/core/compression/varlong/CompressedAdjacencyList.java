@@ -35,6 +35,8 @@ import org.neo4j.gds.mem.MemoryEstimations;
 import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.memory.info.MemoryInfo;
 
+import java.util.Optional;
+
 import static org.neo4j.gds.RelationshipType.ALL_RELATIONSHIPS;
 import static org.neo4j.gds.collections.PageUtil.indexInPage;
 import static org.neo4j.gds.collections.PageUtil.pageIndex;
@@ -102,13 +104,21 @@ public final class CompressedAdjacencyList implements AdjacencyList {
     byte[][] pages;
     HugeIntArray degrees;
     HugeLongArray offsets;
+    HugeIntArray lengths;
 
     private final MemoryInfo memoryInfo;
 
-    public CompressedAdjacencyList(byte[][] pages, HugeIntArray degrees, HugeLongArray offsets, MemoryInfo memoryInfo) {
+    public CompressedAdjacencyList(
+        byte[][] pages,
+        HugeIntArray degrees,
+        HugeLongArray offsets,
+        HugeIntArray lengths,
+        MemoryInfo memoryInfo
+    ) {
         this.pages = pages;
         this.degrees = degrees;
         this.offsets = offsets;
+        this.lengths = lengths;
         this.memoryInfo = memoryInfo;
     }
 
@@ -168,6 +178,10 @@ public final class CompressedAdjacencyList implements AdjacencyList {
 
     public HugeLongArray offsets() {
         return offsets;
+    }
+
+    public Optional<HugeIntArray> lengths() {
+        return Optional.ofNullable(lengths);
     }
 
     public static final class DecompressingCursor extends MutableIntValue implements AdjacencyCursor {

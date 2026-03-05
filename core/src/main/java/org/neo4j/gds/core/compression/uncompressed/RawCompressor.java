@@ -92,6 +92,7 @@ public final class RawCompressor implements AdjacencyCompressor {
             Aggregation[] aggregations,
             HugeIntArray adjacencyDegrees,
             HugeLongArray adjacencyOffsets,
+            HugeIntArray adjacencyLengths,
             HugeLongArray propertyOffsets
         ) {
             AdjacencyListBuilder.Allocator<long[]> firstAllocator;

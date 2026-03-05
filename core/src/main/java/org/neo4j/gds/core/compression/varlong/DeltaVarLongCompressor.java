@@ -92,6 +92,7 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
             Aggregation[] aggregations,
             HugeIntArray adjacencyDegrees,
             HugeLongArray adjacencyOffsets,
+            HugeIntArray adjacencyLengths,
             HugeLongArray propertyOffsets
         ) {
             AdjacencyListBuilder.Allocator<long[]> firstAllocator;
@@ -116,6 +117,7 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
                 otherAllocators,
                 adjacencyDegrees,
                 adjacencyOffsets,
+                adjacencyLengths,
                 propertyOffsets,
                 noAggregation,
                 aggregations
@@ -128,6 +130,7 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
     private final AdjacencyListBuilder.PositionalAllocator<long[]> @Nullable [] otherPropertyAllocators;
     private final HugeIntArray adjacencyDegrees;
     private final HugeLongArray adjacencyOffsets;
+    private final HugeIntArray adjacencyLengths;
     private final HugeLongArray propertyOffsets;
     private final boolean noAggregation;
     private final Aggregation[] aggregations;
@@ -141,6 +144,7 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
         AdjacencyListBuilder.PositionalAllocator<long[]> @Nullable [] otherPropertyAllocators,
         HugeIntArray adjacencyDegrees,
         HugeLongArray adjacencyOffsets,
+        HugeIntArray adjacencyLengths,
         HugeLongArray propertyOffsets,
         boolean noAggregation,
         Aggregation[] aggregations
@@ -150,6 +154,7 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
         this.otherPropertyAllocators = otherPropertyAllocators;
         this.adjacencyDegrees = adjacencyDegrees;
         this.adjacencyOffsets = adjacencyOffsets;
+        this.adjacencyLengths = adjacencyLengths;
         this.propertyOffsets = propertyOffsets;
         this.noAggregation = noAggregation;
         this.aggregations = aggregations;
@@ -205,6 +210,7 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
 
         this.adjacencyDegrees.set(nodeId, degree);
         this.adjacencyOffsets.set(nodeId, address);
+        this.adjacencyLengths.set(nodeId, requiredBytes);
 
         return degree;
     }
@@ -243,6 +249,7 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
 
         this.adjacencyDegrees.set(nodeId, degree);
         this.adjacencyOffsets.set(nodeId, address);
+        this.adjacencyLengths.set(nodeId, requiredBytes);
 
         return degree;
     }

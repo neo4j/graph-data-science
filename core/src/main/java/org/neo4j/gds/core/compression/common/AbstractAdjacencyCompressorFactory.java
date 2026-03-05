@@ -48,6 +48,7 @@ public abstract class AbstractAdjacencyCompressorFactory<TARGET_PAGE, PROPERTY_P
 
     private HugeIntArray adjacencyDegrees;
     private HugeLongArray adjacencyOffsets;
+    private HugeIntArray adjacencyLengths;
     private HugeLongArray propertyOffsets;
 
     public AbstractAdjacencyCompressorFactory(
@@ -70,6 +71,7 @@ public abstract class AbstractAdjacencyCompressorFactory<TARGET_PAGE, PROPERTY_P
         var nodeCount = this.nodeCountSupplier.getAsLong();
         this.adjacencyDegrees = HugeIntArray.newArray(nodeCount);
         this.adjacencyOffsets = HugeLongArray.newArray(nodeCount);
+        this.adjacencyLengths = HugeIntArray.newArray(nodeCount);
         this.propertyOffsets = HugeLongArray.newArray(nodeCount);
         this.nodeCount = nodeCount;
     }
@@ -96,12 +98,12 @@ public abstract class AbstractAdjacencyCompressorFactory<TARGET_PAGE, PROPERTY_P
     public AdjacencyListsWithProperties build(boolean allowReordering) {
         var builder = ImmutableAdjacencyListsWithProperties
             .builder()
-            .adjacency(adjacencyBuilder.build(this.adjacencyDegrees, this.adjacencyOffsets, allowReordering));
+            .adjacency(adjacencyBuilder.build(this.adjacencyDegrees, this.adjacencyOffsets, this.adjacencyLengths, allowReordering));
 
         var propertyBuilders = this.propertyBuilders;
         var propertyOffsets = this.propertyOffsets;
         for (var propertyBuilder : propertyBuilders) {
-            var properties = propertyBuilder.build(this.adjacencyDegrees, propertyOffsets, allowReordering);
+            var properties = propertyBuilder.build(this.adjacencyDegrees, propertyOffsets, this.adjacencyDegrees, allowReordering);
             builder.addProperty(properties);
         }
 
@@ -115,6 +117,7 @@ public abstract class AbstractAdjacencyCompressorFactory<TARGET_PAGE, PROPERTY_P
         Aggregation[] aggregations,
         HugeIntArray adjacencyDegrees,
         HugeLongArray adjacencyOffsets,
+        HugeIntArray adjacencyLengths,
         HugeLongArray propertyOffsets
     );
 
@@ -127,6 +130,7 @@ public abstract class AbstractAdjacencyCompressorFactory<TARGET_PAGE, PROPERTY_P
             this.aggregations,
             this.adjacencyDegrees,
             this.adjacencyOffsets,
+            this.adjacencyLengths,
             this.propertyOffsets
         );
     }

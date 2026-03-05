@@ -54,7 +54,7 @@ public final class UncompressedAdjacencyListBuilder implements AdjacencyListBuil
     }
 
     @Override
-    public UncompressedAdjacencyList build(HugeIntArray degrees, HugeLongArray offsets, boolean allowReordering) {
+    public UncompressedAdjacencyList build(HugeIntArray degrees, HugeLongArray offsets, HugeIntArray lengths, boolean allowReordering) {
         long[][] intoPages = builder.intoPages();
         if (allowReordering) {
             reorder(intoPages, offsets, degrees);
