@@ -60,6 +60,10 @@ public class HugeSimilarityGraph extends SimilarityGraph{
     }
 
     @Override
+    public long relationshipCount(){
+        return  graph==null ? 0 : graph.relationshipCount();
+    }
+    @Override
     public Graph concurrentCopy() {
         if (graph==null) {
             return null;

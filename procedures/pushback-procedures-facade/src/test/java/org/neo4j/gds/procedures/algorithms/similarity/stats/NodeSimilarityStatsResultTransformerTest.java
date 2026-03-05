@@ -19,11 +19,14 @@
  */
 package org.neo4j.gds.procedures.algorithms.similarity.stats;
 
+import com.carrotsearch.hppc.BitSet;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.result.TimedAlgorithmResult;
-import org.neo4j.gds.similarity.SimilarityGraphResult;
+import org.neo4j.gds.similarity.TopKSimilarityGraph;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
+import org.neo4j.gds.similarity.nodesim.TopKGraph;
+import org.neo4j.gds.similarity.nodesim.TopKMap;
 
 import java.util.Map;
 import java.util.Optional;
@@ -46,12 +49,27 @@ class NodeSimilarityStatsResultTransformerTest {
             """).graph();
 
         var config = Map.of("a",(Object)("foo"));
-        var similarityGraphResult = new SimilarityGraphResult(graph,100,false);
+
+        var bitset = new BitSet(4);
+        bitset.set(0, 2);
+        var topKMap = new TopKMap(4, bitset, 2, true);
+
+        topKMap.put(0, 1, 10);
+        topKMap.put(1, 2, 5);
+        topKMap.put(1, 3, 9);
+
+        var topGraph = new TopKGraph(graph, topKMap);
+        var similarityGraph = new TopKSimilarityGraph(
+            topGraph,
+            true
+        );
+
         var transformer = new NodeSimilarityStatsResultTransformer(true,config);
 
         var nodeSimResult = new NodeSimilarityResult(
             Optional.empty(),
-            Optional.of(similarityGraphResult)
+            Optional.of(similarityGraph),
+            100
         );
 
         var statsResult = transformer.apply(new TimedAlgorithmResult<>(nodeSimResult,10));
@@ -82,13 +100,29 @@ class NodeSimilarityStatsResultTransformerTest {
             """).graph();
 
         var config = Map.of("a",(Object)("foo"));
-        var similarityGraphResult = new SimilarityGraphResult(graph,100,false);
-        var transformer = new NodeSimilarityStatsResultTransformer(false,config);
+
+        var bitset = new BitSet(4);
+        bitset.set(0, 2);
+        var topKMap = new TopKMap(4, bitset, 2, true);
+
+        topKMap.put(0, 1, 10);
+        topKMap.put(1, 2, 5);
+        topKMap.put(1, 3, 9);
+
+        var topGraph = new TopKGraph(graph, topKMap);
+        var similarityGraph = new TopKSimilarityGraph(
+            topGraph,
+            false
+        );
 
         var nodeSimResult = new NodeSimilarityResult(
             Optional.empty(),
-            Optional.of(similarityGraphResult)
+            Optional.of(similarityGraph),
+            100
         );
+
+        var transformer = new NodeSimilarityStatsResultTransformer(false,config);
+
 
         var statsResult = transformer.apply(new TimedAlgorithmResult<>(nodeSimResult,10));
         assertThat(statsResult.findFirst().orElseThrow())

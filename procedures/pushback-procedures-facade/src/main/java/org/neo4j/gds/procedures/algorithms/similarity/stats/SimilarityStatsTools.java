@@ -24,7 +24,7 @@ import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.result.SimilarityStatistics;
 import org.neo4j.gds.similarity.SimilarityGraph;
-import org.neo4j.gds.similarity.SimilarityGraphNewBuilder;
+import org.neo4j.gds.similarity.SimilarityGraphBuilder;
 import org.neo4j.gds.similarity.SimilarityResult;
 import org.neo4j.gds.termination.TerminationFlag;
 
@@ -49,14 +49,13 @@ final class SimilarityStatsTools {
     ) {
         if (!shouldComputeSimilarityDistribution) return EMPTY;
         var tStart = System.currentTimeMillis();
-        var similarityGraphResult = SimilarityGraphNewBuilder.build(
-            shouldComputeSimilarityDistribution,
-            similarityResultStream,
+        var similarityGraphResult = new SimilarityGraphBuilder(
             idMap,
             concurrency,
             DefaultPool.INSTANCE,
-            terminationFlag
-        );
+            terminationFlag,
+            shouldComputeSimilarityDistribution
+        ).build( similarityResultStream);
         var tEnd = System.currentTimeMillis();
         var result = computeSimilarityDistribution(shouldComputeSimilarityDistribution, similarityGraphResult);
         return new SimilarityStatistics.SimilarityDistributionResults(

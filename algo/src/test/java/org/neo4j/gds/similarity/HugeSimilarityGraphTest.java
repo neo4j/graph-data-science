@@ -43,18 +43,17 @@ class HugeSimilarityGraphTest {
         nodesBuilder.addNode(2);
         nodesBuilder.addNode(3);
         var idMap = nodesBuilder.build().idMap();
-        var similarityGraph = SimilarityGraphNewBuilder.build(
-            true,
-            Stream.of(
-                new SimilarityResult(0, 1, 10),
-                new SimilarityResult(1, 2, 5),
-                new SimilarityResult(1, 3, 9)
-            ),
+        var similarityGraph =  new SimilarityGraphBuilder(
             idMap,
             new Concurrency(1),
             DefaultPool.INSTANCE,
-            TerminationFlag.RUNNING_TRUE
-        );
+            TerminationFlag.RUNNING_TRUE,
+            true
+        ).build(Stream.of(
+            new SimilarityResult(0, 1, 10),
+            new SimilarityResult(1, 2, 5),
+            new SimilarityResult(1, 3, 9)
+        ));
         var histogram = similarityGraph.similarityDistribution();
         assertThat(histogram.get("mean")).asInstanceOf(DOUBLE).isCloseTo(8.0, Offset.offset(1e-3));
 
@@ -81,19 +80,18 @@ class HugeSimilarityGraphTest {
         nodesBuilder.addNode(2);
         nodesBuilder.addNode(3);
         var idMap = nodesBuilder.build().idMap();
-        var stats = SimilarityGraphNewBuilder.build(
-            false,
-            Stream.of(
+            var histogram =  new SimilarityGraphBuilder(
+                idMap,
+                new Concurrency(1),
+                DefaultPool.INSTANCE,
+                TerminationFlag.RUNNING_TRUE,
+                false
+            ).build(Stream.of(
                 new SimilarityResult(0, 1, 10),
                 new SimilarityResult(1, 2, 5),
                 new SimilarityResult(1, 3, 9)
-            ),
-            idMap,
-            new Concurrency(1),
-            DefaultPool.INSTANCE,
-            TerminationFlag.RUNNING_TRUE
-        );
-        var histogram = stats.similarityDistribution();
+            )).similarityDistribution();
+
         assertThat(histogram).isEmpty();
     }
 

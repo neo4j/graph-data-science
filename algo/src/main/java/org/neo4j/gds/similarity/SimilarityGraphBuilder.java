@@ -21,7 +21,7 @@ package org.neo4j.gds.similarity;
 
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.algorithms.similarity.SimilaritySummaryBuilder;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
@@ -74,20 +74,23 @@ public class SimilarityGraphBuilder {
     private final TerminationFlag terminationFlag;
     private final Concurrency concurrency;
     private final ExecutorService executorService;
+    private final boolean shouldConstructDistribution;
 
     public SimilarityGraphBuilder(
         IdMap idMap,
         Concurrency concurrency,
         ExecutorService executorService,
-        TerminationFlag terminationFlag
+        TerminationFlag terminationFlag,
+        boolean shouldConstructDistribution
     ) {
         this.concurrency = concurrency;
         this.executorService = executorService;
         this.idMap = idMap;
         this.terminationFlag = terminationFlag;
+        this.shouldConstructDistribution = shouldConstructDistribution;
     }
 
-    public Graph build(Stream<SimilarityResult> stream) {
+    public SimilarityGraph build(Stream<SimilarityResult> stream) {
         var relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
             .nodes(idMap.rootIdMap())
             .relationshipType(RelationshipType.of("REL"))
@@ -97,20 +100,34 @@ public class SimilarityGraphBuilder {
             .executorService(executorService)
             .build();
 
+        var similaritySummaryBuilder = SimilaritySummaryBuilder.of(concurrency,shouldConstructDistribution);
+
         ParallelUtil.parallelStreamConsume(
             stream,
             concurrency,
             terminationFlag,
-            similarityStream -> similarityStream.forEach(similarityResult -> relationshipsBuilder.addFromInternal(
-                idMap.toRootNodeId(similarityResult.sourceNodeId()),
-                idMap.toRootNodeId(similarityResult.targetNodeId()),
-                similarityResult.similarity
-            ))
+            similarityStream -> similarityStream.forEach(similarityResult -> {
+                relationshipsBuilder.addFromInternal(
+                    idMap.toRootNodeId(similarityResult.sourceNodeId()),
+                    idMap.toRootNodeId(similarityResult.targetNodeId()),
+                    similarityResult.similarity
+                );
+                similaritySummaryBuilder.accept(
+                    similarityResult.sourceNodeId(),
+                    similarityResult.targetNodeId(),
+                    similarityResult.similarity
+                );
+
+            })
         );
 
-        return GraphFactory.create(
+        var similarityGraph= GraphFactory.create(
             idMap.rootIdMap(),
             relationshipsBuilder.build()
+        );
+        return new HugeSimilarityGraph(
+            similarityGraph,
+            similaritySummaryBuilder.similaritySummary()
         );
     }
 }

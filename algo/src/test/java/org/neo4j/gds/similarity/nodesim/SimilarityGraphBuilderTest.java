@@ -75,7 +75,8 @@ class SimilarityGraphBuilderTest {
             unlabelledGraph,
             new Concurrency(1),
             DefaultPool.INSTANCE,
-            TerminationFlag.RUNNING_TRUE
+            TerminationFlag.RUNNING_TRUE,
+            false
         );
 
         Graph simGraph = similarityGraphBuilder.build(Stream.of(new SimilarityResult(
@@ -98,7 +99,8 @@ class SimilarityGraphBuilderTest {
             graph,
             new Concurrency(1),
             DefaultPool.INSTANCE,
-            TerminationFlag.RUNNING_TRUE
+            TerminationFlag.RUNNING_TRUE,
+            false
         );
 
         Graph simGraph = similarityGraphBuilder.build(Stream.of(new SimilarityResult(
@@ -133,7 +135,8 @@ class SimilarityGraphBuilderTest {
             filteredIdMap,
             new Concurrency(1),
             DefaultPool.INSTANCE,
-            TerminationFlag.RUNNING_TRUE
+            TerminationFlag.RUNNING_TRUE,
+            false
         );
 
         Graph simGraph = similarityGraphBuilder.build(Stream.of(new SimilarityResult(

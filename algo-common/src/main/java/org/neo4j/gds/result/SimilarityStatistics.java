@@ -88,11 +88,6 @@ public final class SimilarityStatistics {
 
     }
 
-
-
-
-
-
     private SimilarityStatistics() {}
     public record  Histogram(Optional<DoubleHistogram> histogram,  boolean success) {}
 

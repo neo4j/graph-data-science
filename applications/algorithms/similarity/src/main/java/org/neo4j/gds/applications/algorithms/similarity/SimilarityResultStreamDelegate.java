@@ -23,7 +23,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.similarity.SimilarityGraph;
-import org.neo4j.gds.similarity.SimilarityGraphNewBuilder;
+import org.neo4j.gds.similarity.SimilarityGraphBuilder;
 import org.neo4j.gds.similarity.SimilarityResult;
 import org.neo4j.gds.termination.TerminationFlag;
 
@@ -41,13 +41,12 @@ public class SimilarityResultStreamDelegate {
         TerminationFlag terminationFlag
     ) {
 
-        return SimilarityGraphNewBuilder.build(
-            shouldComputeStatistics,
-            similarityResultStream,
+        return new SimilarityGraphBuilder(
             graph,
             concurrency,
             DefaultPool.INSTANCE,
-            terminationFlag
-        );
+            terminationFlag,
+            shouldComputeStatistics
+        ).build(similarityResultStream);
     }
 }

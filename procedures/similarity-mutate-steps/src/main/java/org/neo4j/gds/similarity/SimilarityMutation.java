@@ -53,14 +53,13 @@ class SimilarityMutation {
         Stream<SimilarityResult> similarityResultStream,
         boolean shouldComputeSimilarityDistribution
     ) {
-        var similarityGraph = SimilarityGraphNewBuilder.build(
-            shouldComputeSimilarityDistribution,
-            similarityResultStream,
+        var similarityGraph =  new SimilarityGraphBuilder(
             graph,
             concurrency,
             DefaultPool.INSTANCE,
-            terminationFlag
-        );
+            terminationFlag,
+            shouldComputeSimilarityDistribution
+        ).build(similarityResultStream);
 
         return execute(
                 graphStore,

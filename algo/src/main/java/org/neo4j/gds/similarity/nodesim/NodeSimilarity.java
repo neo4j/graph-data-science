@@ -34,7 +34,7 @@ import org.neo4j.gds.core.utils.paged.HugeLongLongMap;
 import org.neo4j.gds.core.utils.progress.BatchingProgressLogger;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.similarity.SimilarityGraph;
-import org.neo4j.gds.similarity.SimilarityGraphNewBuilder;
+import org.neo4j.gds.similarity.SimilarityGraphBuilder;
 import org.neo4j.gds.similarity.SimilarityResult;
 import org.neo4j.gds.similarity.TopKSimilarityGraph;
 import org.neo4j.gds.similarity.filtering.NodeFilter;
@@ -158,14 +158,14 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
             return new TopKSimilarityGraph(similarityGraph,parameters.computeDistribution());
         }
         Stream<SimilarityResult> similarities = computeToStream();
-        return SimilarityGraphNewBuilder.build(
-            parameters.computeDistribution(),
-            similarities,
+
+        return new SimilarityGraphBuilder(
             graph,
             concurrency,
             executorService,
-            terminationFlag
-        );
+            terminationFlag,
+            parameters.computeDistribution()
+        ).build(similarities);
 
     }
 
