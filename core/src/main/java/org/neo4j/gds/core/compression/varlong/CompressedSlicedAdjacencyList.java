@@ -66,7 +66,8 @@ public abstract class CompressedSlicedAdjacencyList {
         if (lengths.isPresent()) {
             return new WithLengths(compressedPages, degrees, offsets, lengths.get());
         }
-        return WithForwardIndex.of(concurrency, offsets, degrees, compressedPages);
+        return new WithByteCounting(compressedPages, degrees, offsets);
+
     }
 
     private CompressedSlicedAdjacencyList(
@@ -106,6 +107,53 @@ public abstract class CompressedSlicedAdjacencyList {
     }
 
     public abstract boolean initPageSlice(long nodeId, PageSlice slice);
+
+    static final class WithByteCounting extends CompressedSlicedAdjacencyList {
+
+        private WithByteCounting(byte[][] compressedPages, HugeIntArray degrees, HugeLongArray offsets) {
+            super(compressedPages, degrees, offsets);
+        }
+
+        @Override
+        public boolean initPageSlice(long nodeId, PageSlice slice) {
+            int degree = this.degrees.get(nodeId);
+            if (degree == 0) {
+                return false;
+            }
+            long offset = this.offsets.get(nodeId);
+            int pageIndex = pageIndex(offset, PAGE_SHIFT);
+            byte[] page = this.compressedPages[pageIndex];
+            int indexInPage = indexInPage(offset, PAGE_MASK);
+
+            if (page.length > PAGE_SIZE) {
+                // oversize page, we can directly compute the length without looking for the end byte
+                slice.page = page;
+                slice.offset = indexInPage;
+                slice.length = page.length;
+                return true;
+            }
+
+            slice.page = page;
+            slice.offset = indexInPage;
+            slice.length = computeCompressedLength(page, indexInPage, degree);
+
+            return true;
+        }
+
+        private int computeCompressedLength(byte[] page, int offset, int degree) {
+            int indexInPage = offset;
+            for (int i = 0; i < degree; i++) {
+                // during compression, we mark the last byte of a var long by
+                // setting the MSB (sign bit) to 1 and end up with a negative value.
+                while (page[indexInPage] >= 0) {
+                    indexInPage++;
+                }
+                // account for the last byte of the var long
+                indexInPage++;
+            }
+            return indexInPage - offset;
+        }
+    }
 
     static final class WithLengths extends CompressedSlicedAdjacencyList {
 
