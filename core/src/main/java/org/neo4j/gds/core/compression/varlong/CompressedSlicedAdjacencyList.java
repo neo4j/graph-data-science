@@ -29,6 +29,7 @@ import org.neo4j.gds.core.utils.paged.HugeMergeSort;
 import org.neo4j.gds.core.utils.paged.HugeSerialIndirectMergeSort;
 
 import java.util.Arrays;
+import java.util.Optional;
 
 import static org.neo4j.gds.collections.PageUtil.indexInPage;
 import static org.neo4j.gds.collections.PageUtil.pageIndex;
@@ -57,10 +58,14 @@ public abstract class CompressedSlicedAdjacencyList {
         CompressedAdjacencyList compressedAdjacencyList,
         Concurrency concurrency
     ) {
-        byte[][] compressedPages = compressedAdjacencyList.pages;
-        HugeLongArray offsets = compressedAdjacencyList.offsets;
-        HugeIntArray degrees = compressedAdjacencyList.degrees;
+        byte[][] compressedPages = compressedAdjacencyList.pages();
+        HugeLongArray offsets = compressedAdjacencyList.offsets();
+        HugeIntArray degrees = compressedAdjacencyList.degrees();
+        Optional<HugeIntArray> lengths = compressedAdjacencyList.lengths();
 
+        if (lengths.isPresent()) {
+            return new WithLengths(compressedPages, degrees, offsets, lengths.get());
+        }
         return WithForwardIndex.of(concurrency, offsets, degrees, compressedPages);
     }
 
@@ -102,9 +107,38 @@ public abstract class CompressedSlicedAdjacencyList {
 
     public abstract boolean initPageSlice(long nodeId, PageSlice slice);
 
-    public abstract long startOffset(long nodeId);
+    static final class WithLengths extends CompressedSlicedAdjacencyList {
 
-    public abstract long endOffset(long nodeId);
+        private final HugeIntArray lengths;
+
+        private WithLengths(
+            byte[][] compressedPages,
+            HugeIntArray degrees,
+            HugeLongArray offsets,
+            HugeIntArray lengths
+        ) {
+            super(compressedPages, degrees, offsets);
+            this.lengths = lengths;
+        }
+
+        @Override
+        public boolean initPageSlice(long nodeId, PageSlice slice) {
+            if (this.degrees.get(nodeId) == 0) {
+                return false;
+            }
+            long offset = this.offsets.get(nodeId);
+            int pageIndex = pageIndex(offset, PAGE_SHIFT);
+            byte[] page = this.compressedPages[pageIndex];
+            int indexInPage = indexInPage(offset, PAGE_MASK);
+            int length = this.lengths.get(nodeId);
+
+            slice.page = page;
+            slice.offset = indexInPage;
+            slice.length = length;
+
+            return true;
+        }
+    }
 
     /**
      * A sliced adjacency list that maintains an additional index to allow for efficient access to the compressed target lists of nodes.
@@ -193,13 +227,13 @@ public abstract class CompressedSlicedAdjacencyList {
 
         @Override
         public boolean initPageSlice(long nodeId, PageSlice slice) {
-            long startOffset = startOffset(nodeId);
-            if (startOffset == ZERO_DEGREE) {
+            if (this.degrees.get(nodeId) == 0) {
                 return false;
             }
-            int startPageIndex = pageIndex(startOffset, PAGE_SHIFT);
-            byte[] page = this.compressedPages[startPageIndex];
-            int startIndexInPage = indexInPage(startOffset, PAGE_MASK);
+            long offset = this.offsets.get(nodeId);
+            int pageIndex = pageIndex(offset, PAGE_SHIFT);
+            byte[] page = this.compressedPages[pageIndex];
+            int indexInPage = indexInPage(offset, PAGE_MASK);
             long endOffset = endOffset(nodeId);
             int endIndexInPage = indexInPage(endOffset, PAGE_MASK);
 
@@ -207,7 +241,7 @@ public abstract class CompressedSlicedAdjacencyList {
                 // We are at a node that is the last node on the page.
                 if (page.length == PAGE_SIZE) {
                     // a regular page
-                    endIndexInPage = findEndIndexInPage(page, startIndexInPage);
+                    endIndexInPage = findEndIndexInPage(page, indexInPage);
                 } else {
                     // an oversize page
                     endIndexInPage = page.length;
@@ -215,22 +249,13 @@ public abstract class CompressedSlicedAdjacencyList {
             }
 
             slice.page = page;
-            slice.offset = startIndexInPage;
-            slice.length = endIndexInPage - startIndexInPage;
+            slice.offset = indexInPage;
+            slice.length = endIndexInPage - indexInPage;
 
             return true;
         }
 
-        @Override
-        public long startOffset(long nodeId) {
-            if (this.degrees.get(nodeId) == 0) {
-                return ZERO_DEGREE;
-            }
-            return this.offsets.get(nodeId);
-        }
-
-        @Override
-        public long endOffset(long nodeId) {
+        private long endOffset(long nodeId) {
             if (this.degrees.get(nodeId) == 0) {
                 return ZERO_DEGREE;
             }

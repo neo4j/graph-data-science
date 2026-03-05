@@ -19,37 +19,68 @@
  */
 package org.neo4j.gds.core.compression.varlong;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.compression.common.VarLongDecoding;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.extension.GdlExtension;
-import org.neo4j.gds.extension.GdlGraph;
-import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.utils.GdsFeatureToggles;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.neo4j.gds.compression.common.BumpAllocator.PAGE_SIZE;
-import static org.neo4j.gds.core.compression.varlong.CompressedSlicedAdjacencyList.ZERO_DEGREE;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
-@GdlExtension
 class CompressedSlicedAdjacencyListTest {
 
-    @GdlGraph
-    public static final String GRAPH = "(a)" +
+    private record Graph(
+        TestGraph testGraph,
+        Map<String, Integer> degrees,
+        String[] adjacencies,
+        Map<String, Optional<Slice>> slices
+    ) {
+
+        CompressedSlicedAdjacencyList compressedSlicedAdjacencyList() {
+            var cal = (CompressedAdjacencyList) testGraph.relationshipTopologies()
+                .get(RelationshipType.ALL_RELATIONSHIPS)
+                .adjacencyList();
+            return CompressedSlicedAdjacencyList.of(cal, new Concurrency(1));
+        }
+    }
+
+    private record Slice(int offset, int length) {
+    }
+
+    private static final String GRAPH = "(a)" +
         "(b)-->(a)" +
         "(b)-->(c)" +
         "(c)-->(a)" +
         "(c)-->(d)" +
         "(d)-->(a)";
+    private static final Map<String, Integer> GRAPH_DEGREES = Map.of(
+        "a", 0,
+        "b", 2,
+        "c", 2,
+        "d", 1
+    );
+    private static final String[] GRAPH_ADJACENCIES = {"b,a,c", "c,a,d", "d,a"};
+    private static final Map<String, Optional<Slice>> GRAPH_SLICES = Map.of(
+        "a", Optional.empty(),
+        "b", Optional.of(new Slice(0, 2)),
+        "c", Optional.of(new Slice(2, 2)),
+        "d", Optional.of(new Slice(4, 1))
+    );
 
-    @GdlGraph(graphNamePrefix = "gap")
-    public static final String GAP_GRAPH = "(a)" +
+    private static final String GAP_GRAPH = "(a)" +
         "(b)" +
         "(c)" +
         "(d)" +
@@ -57,82 +88,91 @@ class CompressedSlicedAdjacencyListTest {
         "(a)-->(c)" +
         "(a)-->(d)" +
         "(d)-->(e)";
+    private static final Map<String, Integer> GAP_GRAPH_DEGREES = Map.of(
+        "a", 2,
+        "b", 0,
+        "c", 0,
+        "d", 1,
+        "e", 0
+    );
+    private static final String[] GAP_GRAPH_ADJACENCIES = {"a,c,d", "d,e"};
+    private static final Map<String, Optional<Slice>> GAP_GRAPH_SLICES = Map.of(
+        "a", Optional.of(new Slice(0, 2)),
+        "b", Optional.empty(),
+        "c", Optional.empty(),
+        "d", Optional.of(new Slice(2, 1)),
+        "e", Optional.empty()
+    );
 
-    @Inject
-    private TestGraph graph;
+    private static Stream<Arguments> graphs() {
+        List<Graph> graphs = new ArrayList<>();
 
-    @Inject
-    private TestGraph gapGraph;
-
-    private CompressedSlicedAdjacencyList csal;
-
-    private CompressedSlicedAdjacencyList gapCsal;
-
-    @BeforeEach
-    void setup() {
-        var cal = (CompressedAdjacencyList) this.graph.relationshipTopologies()
-            .get(RelationshipType.ALL_RELATIONSHIPS)
-            .adjacencyList();
-        this.csal = CompressedSlicedAdjacencyList.of(cal, new Concurrency(1));
-        var gapCal = (CompressedAdjacencyList) this.gapGraph.relationshipTopologies()
-            .get(RelationshipType.ALL_RELATIONSHIPS)
-            .adjacencyList();
-        this.gapCsal = CompressedSlicedAdjacencyList.of(gapCal, new Concurrency(1));
-    }
-
-    @Test
-    void gapDegrees() {
-        assertThat(gapCsal.degree(gapGraph.toMappedNodeId("a"))).isEqualTo(2);
-        assertThat(gapCsal.degree(gapGraph.toMappedNodeId("b"))).isEqualTo(0);
-        assertThat(gapCsal.degree(gapGraph.toMappedNodeId("c"))).isEqualTo(0);
-        assertThat(gapCsal.degree(gapGraph.toMappedNodeId("d"))).isEqualTo(1);
-        assertThat(gapCsal.degree(gapGraph.toMappedNodeId("e"))).isEqualTo(0);
-    }
-
-    @Test
-    void gapOffsets() {
-        assertThat(gapCsal.startOffset(gapGraph.toMappedNodeId("a"))).isEqualTo(0);
-        assertThat(gapCsal.endOffset(gapGraph.toMappedNodeId("a"))).isEqualTo(2);
-        assertThat(gapCsal.startOffset(gapGraph.toMappedNodeId("b"))).isEqualTo(ZERO_DEGREE);
-        assertThat(gapCsal.endOffset(gapGraph.toMappedNodeId("b"))).isEqualTo(ZERO_DEGREE);
-        assertThat(gapCsal.startOffset(gapGraph.toMappedNodeId("c"))).isEqualTo(ZERO_DEGREE);
-        assertThat(gapCsal.endOffset(gapGraph.toMappedNodeId("c"))).isEqualTo(ZERO_DEGREE);
-        assertThat(gapCsal.startOffset(gapGraph.toMappedNodeId("d"))).isEqualTo(2);
-        assertThat(gapCsal.endOffset(gapGraph.toMappedNodeId("d"))).isEqualTo(PAGE_SIZE);
-        assertThat(gapCsal.startOffset(gapGraph.toMappedNodeId("e"))).isEqualTo(ZERO_DEGREE);
-        assertThat(gapCsal.endOffset(gapGraph.toMappedNodeId("e"))).isEqualTo(ZERO_DEGREE);
-    }
-
-    @Test
-    void degrees() {
-        assertThat(csal.degree(graph.toMappedNodeId("a"))).isEqualTo(0);
-        assertThat(csal.degree(graph.toMappedNodeId("b"))).isEqualTo(2);
-        assertThat(csal.degree(graph.toMappedNodeId("c"))).isEqualTo(2);
-        assertThat(csal.degree(graph.toMappedNodeId("d"))).isEqualTo(1);
-    }
-
-    @Test
-    void offsets() {
-        assertThat(csal.startOffset(graph.toMappedNodeId("a"))).isEqualTo(ZERO_DEGREE);
-        assertThat(csal.endOffset(graph.toMappedNodeId("a"))).isEqualTo(ZERO_DEGREE);
-        assertThat(csal.startOffset(graph.toMappedNodeId("b"))).isEqualTo(0);
-        assertThat(csal.endOffset(graph.toMappedNodeId("b"))).isEqualTo(2);
-        assertThat(csal.startOffset(graph.toMappedNodeId("c"))).isEqualTo(2);
-        assertThat(csal.endOffset(graph.toMappedNodeId("c"))).isEqualTo(4);
-        assertThat(csal.startOffset(graph.toMappedNodeId("d"))).isEqualTo(4);
-        assertThat(csal.endOffset(graph.toMappedNodeId("d"))).isEqualTo(PAGE_SIZE);
-    }
-
-    @Test
-    void initPageSliceZeroDegree() {
-        var pageSlice = new CompressedSlicedAdjacencyList.PageSlice();
-        var success = csal.initPageSlice(graph.toMappedNodeId("a"), pageSlice);
-        assertThat(success).isFalse();
+        GdsFeatureToggles.STORE_COMPRESSED_TARGETS_LENGTH.disableAndRun(() -> graphs.add(new Graph(
+            TestSupport.fromGdl(GRAPH),
+            GRAPH_DEGREES,
+            GRAPH_ADJACENCIES,
+            GRAPH_SLICES
+        )));
+        GdsFeatureToggles.STORE_COMPRESSED_TARGETS_LENGTH.disableAndRun(() -> graphs.add(new Graph(
+            TestSupport.fromGdl(GRAPH),
+            GRAPH_DEGREES,
+            GRAPH_ADJACENCIES,
+            GRAPH_SLICES
+        )));
+        GdsFeatureToggles.STORE_COMPRESSED_TARGETS_LENGTH.enableAndRun(() -> graphs.add(new Graph(
+            TestSupport.fromGdl(GAP_GRAPH),
+            GAP_GRAPH_DEGREES,
+            GAP_GRAPH_ADJACENCIES,
+            GAP_GRAPH_SLICES
+        )));
+        GdsFeatureToggles.STORE_COMPRESSED_TARGETS_LENGTH.enableAndRun(() -> graphs.add(new Graph(
+            TestSupport.fromGdl(GAP_GRAPH),
+            GAP_GRAPH_DEGREES,
+            GAP_GRAPH_ADJACENCIES,
+            GAP_GRAPH_SLICES
+        )));
+        return graphs.stream().map(Arguments::of);
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"b,a,c", "c,a,d", "d,a"})
-    void initPageSlice(String expected) {
+    @MethodSource("graphs")
+    void degrees(Graph graph) {
+        var g = graph.testGraph();
+        var csal = graph.compressedSlicedAdjacencyList();
+
+        graph.degrees().forEach((node, degree) -> {
+            assertThat(csal.degree(g.toMappedNodeId(node))).isEqualTo(degree);
+        });
+    }
+
+    @ParameterizedTest
+    @MethodSource("graphs")
+    void slices(Graph graph) {
+        var g = graph.testGraph();
+        var csal = graph.compressedSlicedAdjacencyList();
+        var pageSlice = csal.newPageSlice();
+        graph.slices().forEach((node, expectedSlice) -> {
+            if (expectedSlice.isEmpty()) {
+                assertFalse(csal.initPageSlice(g.toMappedNodeId(node), pageSlice));
+            } else {
+                var success = csal.initPageSlice(g.toMappedNodeId(node), pageSlice);
+                assertThat(success).isTrue();
+                assertThat(pageSlice.page).isNotNull();
+                assertThat(pageSlice.offset).isEqualTo(expectedSlice.get().offset());
+                assertThat(pageSlice.length).isEqualTo(expectedSlice.get().length());
+            }
+        });
+    }
+
+    @ParameterizedTest
+    @MethodSource("graphs")
+    void decode(Graph graph) {
+        var g = graph.testGraph();
+        var csal = graph.compressedSlicedAdjacencyList();
+        Arrays.stream(graph.adjacencies()).forEach(expected -> assertDecoded(g, csal, expected));
+    }
+
+    static void assertDecoded(TestGraph graph, CompressedSlicedAdjacencyList csal, String expected) {
         String[] vars = expected.split(",");
         long sourceNode = graph.toMappedNodeId(vars[0]);
         long[] expectedTargets = IntStream.range(1, vars.length)
