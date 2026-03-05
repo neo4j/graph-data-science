@@ -29,10 +29,5 @@ dependencies {
     implementation project(':memory-info')
     implementation project(':memory-usage')
 
-    testImplementation platform(openGds.junit.bom)
-    testImplementation openGds.junit.jupiter.api
-    testImplementation openGds.junit.jupiter.params
-    testImplementation openGds.assertj.core
-
-    testRuntimeOnly openGds.junit.jupiter.engine
+    testImplementation project(':test-utils')
 }
