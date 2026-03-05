@@ -21,44 +21,58 @@ package org.neo4j.gds.procedures.algorithms.similarity.stats;
 
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.result.SimilarityStatistics;
-import org.neo4j.gds.similarity.SimilarityGraphResult;
+import org.neo4j.gds.similarity.SimilarityGraph;
+import org.neo4j.gds.similarity.SimilarityGraphNewBuilder;
 import org.neo4j.gds.similarity.SimilarityResult;
 import org.neo4j.gds.termination.TerminationFlag;
 
+import java.util.Map;
 import java.util.stream.Stream;
 
 final class SimilarityStatsTools {
 
     private SimilarityStatsTools() {}
 
-     static SimilarityStatistics.SimilarityStats computeSimilarityStatistics(
-        IdMap graph,
+    static SimilarityStatistics.SimilarityDistributionResults EMPTY = new SimilarityStatistics.SimilarityDistributionResults(
+        Map.of(),
+        0
+    );
+
+    static SimilarityStatistics.SimilarityDistributionResults computeSimilarityDistribution(
+        IdMap idMap,
         Concurrency concurrency,
         Stream<SimilarityResult> similarityResultStream,
         boolean shouldComputeSimilarityDistribution,
         TerminationFlag terminationFlag
     ) {
-        if (!shouldComputeSimilarityDistribution) {
-            return computeSimilarityStatistics(SimilarityGraphResult.empty(), false);
-        }
-        var similarityGraph = SimilarityGraphResult.fromStream(
-                graph,
-                concurrency,
-                similarityResultStream,
-                terminationFlag
+        if (!shouldComputeSimilarityDistribution) return EMPTY;
+        var tStart = System.currentTimeMillis();
+        var similarityGraphResult = SimilarityGraphNewBuilder.build(
+            shouldComputeSimilarityDistribution,
+            similarityResultStream,
+            idMap,
+            concurrency,
+            DefaultPool.INSTANCE,
+            terminationFlag
         );
-        return computeSimilarityStatistics(similarityGraph,true);
-
+        var tEnd = System.currentTimeMillis();
+        var result = computeSimilarityDistribution(shouldComputeSimilarityDistribution, similarityGraphResult);
+        return new SimilarityStatistics.SimilarityDistributionResults(
+            result.distribution(),
+            result.computeMilliseconds() + (tEnd - tStart)
+        );
     }
 
-    static SimilarityStatistics.SimilarityStats computeSimilarityStatistics(
-        SimilarityGraphResult similarityGraphResult,
-        boolean shouldComputeSimilarityDistribution
+    static SimilarityStatistics.SimilarityDistributionResults computeSimilarityDistribution(
+        boolean shouldComputeSimilarityDistribution,
+        SimilarityGraph similarityGraphResult
     ) {
-        return SimilarityStatistics.similarityStats(
-            similarityGraphResult::similarityGraph,
-            shouldComputeSimilarityDistribution
-        );
+        if (!shouldComputeSimilarityDistribution) return EMPTY;
+        var tStart = System.currentTimeMillis();
+        var result = similarityGraphResult.similarityDistribution();
+        var tEnd = System.currentTimeMillis();
+        return new SimilarityStatistics.SimilarityDistributionResults(result, tEnd - tStart);
     }
 }

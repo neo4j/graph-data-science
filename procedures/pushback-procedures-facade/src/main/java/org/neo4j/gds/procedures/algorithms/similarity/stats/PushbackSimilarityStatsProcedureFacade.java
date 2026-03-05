@@ -101,7 +101,7 @@ public class PushbackSimilarityStatsProcedureFacade {
     ) {
         var config = configurationParser.parseConfiguration(configuration, NodeSimilarityStatsConfig::of);
 
-        var parameters = config.toParameters();
+        var parameters = config.toParameters(similarityDistributionInstructions.shouldComputeDistribution());
         return businessFacade.nodeSimilarity(
             GraphName.parse(graphName),
             config.toGraphParameters(),
@@ -123,7 +123,7 @@ public class PushbackSimilarityStatsProcedureFacade {
     ) {
         var config = configurationParser.parseConfiguration(configuration, FilteredNodeSimilarityStatsConfig::of);
 
-        var parameters = config.toFilteredParameters();
+        var parameters = config.toFilteredParameters(similarityDistributionInstructions.shouldComputeDistribution());
         return businessFacade.filteredNodeSimilarity(
             GraphName.parse(graphName),
             config.toGraphParameters(),

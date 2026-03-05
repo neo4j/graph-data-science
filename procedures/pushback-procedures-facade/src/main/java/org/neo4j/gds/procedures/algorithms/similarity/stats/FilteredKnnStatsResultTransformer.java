@@ -22,7 +22,6 @@ package org.neo4j.gds.procedures.algorithms.similarity.stats;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.procedures.algorithms.similarity.KnnStatsResult;
-import org.neo4j.gds.result.SimilarityStatistics;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.results.ResultTransformer;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnResult;
@@ -65,7 +64,7 @@ public class FilteredKnnStatsResultTransformer implements ResultTransformer<Time
                 configuration
             ));
         }
-        var similarityStats = SimilarityStatsTools.computeSimilarityStatistics(
+        var similarityStats = SimilarityStatsTools.computeSimilarityDistribution(
             idMap,
             concurrency,
             knnResult.similarityResultStream(),
@@ -73,7 +72,6 @@ public class FilteredKnnStatsResultTransformer implements ResultTransformer<Time
             terminationFlag
         );
 
-        var similaritySummary = SimilarityStatistics.similaritySummary(similarityStats);
 
         return Stream.of(
             new KnnStatsResult(
@@ -82,7 +80,7 @@ public class FilteredKnnStatsResultTransformer implements ResultTransformer<Time
                 similarityStats.computeMilliseconds(),
                 knnResult.nodesCompared(),
                 knnResult.numberOfSimilarityPairs(),
-                similaritySummary,
+                similarityStats.distribution(),
                 knnResult.didConverge(),
                 knnResult.ranIterations(),
                 knnResult.nodePairsConsidered(),

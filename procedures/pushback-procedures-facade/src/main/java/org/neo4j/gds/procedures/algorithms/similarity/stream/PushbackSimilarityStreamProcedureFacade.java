@@ -75,7 +75,7 @@ public class PushbackSimilarityStreamProcedureFacade {
     public Stream<SimilarityStreamResult> nodeSimilarity(String graphName, Map<String, Object> configuration) {
         var config = configurationParser.parseConfiguration(configuration, NodeSimilarityStreamConfig::of);
 
-        var parameters = config.toParameters();
+        var parameters = config.toParameters(false);
         return businessFacade.nodeSimilarity(
             GraphName.parse(graphName),
             config.toGraphParameters(),
@@ -90,7 +90,7 @@ public class PushbackSimilarityStreamProcedureFacade {
     public Stream<SimilarityStreamResult> filteredNodeSimilarity(String graphName, Map<String, Object> configuration) {
         var config = configurationParser.parseConfiguration(configuration, FilteredNodeSimilarityStreamConfig::of);
 
-        var parameters = config.toFilteredParameters();
+        var parameters = config.toFilteredParameters(false);
         return businessFacade.filteredNodeSimilarity(
             GraphName.parse(graphName),
             config.toGraphParameters(),

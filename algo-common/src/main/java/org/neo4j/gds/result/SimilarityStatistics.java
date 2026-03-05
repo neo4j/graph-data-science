@@ -21,7 +21,6 @@ package org.neo4j.gds.result;
 
 import org.HdrHistogram.DoubleHistogram;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.ProcedureConstants;
 import org.neo4j.gds.core.utils.ProgressTimer;
 
 import java.util.Collections;
@@ -31,18 +30,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
 
 public final class SimilarityStatistics {
-
-
-    public static SimilarityStats similarityStats(
-        Supplier<Graph> maybeSimilarityGraph,
-        boolean shouldComputeDistribution
-    ) {
-        return similarityStats(
-            maybeSimilarityGraph,
-            shouldComputeDistribution,
-            () -> new DoubleHistogram(ProcedureConstants.HISTOGRAM_PRECISION_DEFAULT)
-        );
-    }
 
 
     public static SimilarityStats similarityStats(
@@ -100,6 +87,8 @@ public final class SimilarityStatistics {
         return new Histogram(Optional.of(histogram),true);
 
     }
+
+
 
 
 

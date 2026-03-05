@@ -30,6 +30,7 @@ import org.neo4j.gds.termination.TerminationFlag;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.InstanceOfAssertFactories.DOUBLE;
 import static org.mockito.Mockito.mock;
 
 class SimilarityStatsToolsTest {
@@ -37,15 +38,14 @@ class SimilarityStatsToolsTest {
     @Test
     void shouldReturnEmptyDistributionIfNotSpecified() {
 
-        var stats = SimilarityStatsTools.computeSimilarityStatistics(
+        var stats = SimilarityStatsTools.computeSimilarityDistribution(
             mock(IdMap.class),
             new Concurrency(1),
             Stream.of(new SimilarityResult(0, 1, 10)),
             false,
             TerminationFlag.RUNNING_TRUE
         );
-        assertThat(stats.histogram()).isEmpty();
-        assertThat(stats.success()).isTrue();
+        assertThat(stats.distribution()).isEmpty();
     }
 
     @Test
@@ -57,7 +57,7 @@ class SimilarityStatsToolsTest {
         nodesBuilder.addNode(2);
         nodesBuilder.addNode(3);
         var idMap = nodesBuilder.build().idMap();
-        var stats = SimilarityStatsTools.computeSimilarityStatistics(
+        var stats = SimilarityStatsTools.computeSimilarityDistribution(
             idMap,
             new Concurrency(1),
             Stream.of(
@@ -68,8 +68,8 @@ class SimilarityStatsToolsTest {
             true,
             TerminationFlag.RUNNING_TRUE
         );
-        assertThat(stats.histogram().get().getMean()).isCloseTo(8.0, Offset.offset(1e-3));
-        assertThat(stats.success()).isTrue();
+        assertThat(stats.distribution().get("mean")).asInstanceOf(DOUBLE).isCloseTo(8.0, Offset.offset(1e-3));
+        assertThat(stats.computeMilliseconds()).isGreaterThanOrEqualTo(0L);
 
 
     }

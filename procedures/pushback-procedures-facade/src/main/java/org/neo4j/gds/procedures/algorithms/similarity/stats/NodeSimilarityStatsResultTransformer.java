@@ -20,7 +20,6 @@
 package org.neo4j.gds.procedures.algorithms.similarity.stats;
 
 import org.neo4j.gds.procedures.algorithms.similarity.SimilarityStatsResult;
-import org.neo4j.gds.result.SimilarityStatistics;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.results.ResultTransformer;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
@@ -45,22 +44,10 @@ public class NodeSimilarityStatsResultTransformer implements ResultTransformer<T
     public Stream<SimilarityStatsResult> apply(TimedAlgorithmResult<NodeSimilarityResult> timedAlgorithmResult) {
         var result = timedAlgorithmResult.result();
 
-        var similarityGraphResult = result.graphResult();
-        if (similarityGraphResult.similarityGraph() == null) {
-            return Stream.of(
-                SimilarityStatsResult.emptyFrom(
-                    0,
-                    timedAlgorithmResult.computeMillis(),
-                    0,
-                    configuration
-                )
-            );
-        }
-        var similarityStats = SimilarityStatsTools.computeSimilarityStatistics(
-            similarityGraphResult,
-            shouldComputeSimilarityDistribution
+        var similarityStats = SimilarityStatsTools.computeSimilarityDistribution(
+            shouldComputeSimilarityDistribution,
+            result.graphResult()
         );
-        var similaritySummary = SimilarityStatistics.similaritySummary(similarityStats);
 
         return Stream.of(
             new SimilarityStatsResult(
@@ -68,8 +55,8 @@ public class NodeSimilarityStatsResultTransformer implements ResultTransformer<T
                 timedAlgorithmResult.computeMillis(),
                 similarityStats.computeMilliseconds(),
                 result.comparedNodes(),
-                similarityGraphResult.similarityGraph().relationshipCount(),
-                similaritySummary,
+                result.comparedNodes(),
+                similarityStats.distribution(),
                 configuration
             )
         );
