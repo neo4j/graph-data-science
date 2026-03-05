@@ -52,9 +52,9 @@ public final class VarLongEncoding {
         return size;
     }
 
-    public static int encodedVLongsByteSize(byte[] page, int offset, int limit) {
+    public static int encodedVLongsByteSize(byte[] page, int offset, int count) {
         int indexInPage = offset;
-        for (int i = 0; i < limit; i++) {
+        for (int i = 0; i < count; i++) {
             // during compression, we mark the last byte of a var long by
             // setting the MSB (sign bit) to 1 and end up with a negative value.
             while (page[indexInPage] >= 0) {

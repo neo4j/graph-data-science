@@ -303,13 +303,14 @@ public final class CompressedAdjacencyList implements AdjacencyList {
         if (page.length > BumpAllocator.PAGE_SIZE) {
             // oversize page
             slice.page = page;
-            slice.offset = indexInPage;
+            slice.offset = 0;
             slice.length = page.length;
-            return true;
+        } else {
+            // regular page
+            slice.page = page;
+            slice.offset = indexInPage;
+            slice.length = VarLongEncoding.encodedVLongsByteSize(page, indexInPage, degree);
         }
-        slice.page = page;
-        slice.offset = indexInPage;
-        slice.length = VarLongEncoding.encodedVLongsByteSize(page, indexInPage, degree);
 
         return true;
     }
