@@ -93,7 +93,7 @@ public class TopKSimilarityGraph extends SimilarityGraph{
         return  shouldComputeStatistics && similarityDistribution.isEmpty();
     }
     @Override
-    Map<String, Object> similarityDistribution() {
+   public Map<String, Object> similarityDistribution() {
 
         if (shouldComputeDistribution()){
             var similaritySummaryBuilder = ActualSimilaritySummaryBuilder.create(new Concurrency(1));

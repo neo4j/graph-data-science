@@ -148,7 +148,8 @@ public class ComponentPropertyNodeSimilarityTest {
             true,
             false,
             true,
-            "compid"
+            "compid",
+            false
         );
 
         var nodeSimilarity = new NodeSimilarity(

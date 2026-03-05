@@ -99,7 +99,7 @@ public class SimilarityAlgorithmsWriteModeBusinessFacade {
             configuration,
             FilteredNodeSimilarity,
             () -> estimationFacade.filteredNodeSimilarity(configuration),
-            (graph, __) -> similarityAlgorithms.filteredNodeSimilarity(graph, configuration),
+            (graph, __) -> similarityAlgorithms.filteredNodeSimilarity(graph, configuration,shouldComputeSimilarityDistribution),
             writeStep,
             resultBuilder
         );
@@ -145,7 +145,7 @@ public class SimilarityAlgorithmsWriteModeBusinessFacade {
             configuration,
             NodeSimilarity,
             () -> estimationFacade.nodeSimilarity(configuration),
-            (graph, __) -> similarityAlgorithms.nodeSimilarity(graph, configuration),
+            (graph, __) -> similarityAlgorithms.nodeSimilarity(graph, configuration,shouldComputeSimilarityDistribution),
             writeStep,
             resultBuilder
         );

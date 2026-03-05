@@ -36,7 +36,6 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
-import org.neo4j.gds.similarity.SimilarityGraphResult;
 import org.neo4j.gds.similarity.SimilarityResult;
 import org.neo4j.gds.similarity.filtering.NodeFilter;
 import org.neo4j.gds.termination.TerminationFlag;
@@ -283,7 +282,8 @@ final class NodeSimilarityTest {
             true,
             true,
             false,
-            null
+            null,
+            false
         );
 
         var nodeSimilarity = constructNodeSimilarity(
@@ -316,7 +316,8 @@ final class NodeSimilarityTest {
             true,
             false,
             false,
-            null
+            null,
+            false
         );
         NodeSimilarity nodeSimilarity = constructNodeSimilarity(
             graph,
@@ -348,7 +349,8 @@ final class NodeSimilarityTest {
             true,
             false,
             false,
-            null
+            null,
+            false
         );
 
         NodeSimilarity nodeSimilarity = constructNodeSimilarity(
@@ -381,7 +383,8 @@ final class NodeSimilarityTest {
             false,
             false,
             false,
-            null
+            null,
+            false
         );
 
         NodeSimilarity nodeSimilarity = constructNodeSimilarity(
@@ -389,7 +392,7 @@ final class NodeSimilarityTest {
             parameters
         );
 
-        Graph similarityGraph = nodeSimilarity.compute().graphResult().similarityGraph();
+        Graph similarityGraph = nodeSimilarity.compute().graphResult();
 
         assertGraphEquals(
             orientation == REVERSE
@@ -417,7 +420,8 @@ final class NodeSimilarityTest {
             true,
             false,
             false,
-            null
+            null,
+            false
         );
 
         NodeSimilarity nodeSimilarity = constructNodeSimilarity(
@@ -450,7 +454,8 @@ final class NodeSimilarityTest {
             false,
             false,
             false,
-            null
+            null,
+            false
         );
 
         NodeSimilarity nodeSimilarity = constructNodeSimilarity(
@@ -458,7 +463,7 @@ final class NodeSimilarityTest {
             parameters
         );
 
-        Graph similarityGraph = nodeSimilarity.compute().graphResult().similarityGraph();
+        Graph similarityGraph = nodeSimilarity.compute().graphResult();
 
         assertGraphEquals(
             orientation == REVERSE
@@ -492,7 +497,8 @@ final class NodeSimilarityTest {
             true,
             false,
             false,
-            null
+            null,
+            false
         );
 
         NodeSimilarity nodeSimilarity = constructNodeSimilarity(
@@ -528,7 +534,8 @@ final class NodeSimilarityTest {
             true,
             false,
             false,
-            null
+            null,
+            false
         );
 
         NodeSimilarity nodeSimilarity = constructNodeSimilarity(
@@ -562,7 +569,8 @@ final class NodeSimilarityTest {
             true,
             false,
             false,
-            null
+            null,
+            false
         );
 
         NodeSimilarity nodeSimilarity = constructNodeSimilarity(
@@ -587,7 +595,8 @@ final class NodeSimilarityTest {
             true,
             false,
             false,
-            null
+            null,
+            false
         );
         NodeSimilarity nodeSimilarity = constructNodeSimilarity(
             naturalGraph,
@@ -622,7 +631,8 @@ final class NodeSimilarityTest {
             false,
             false,
             false,
-            null
+            null,
+            false
         );
 
         NodeSimilarity nodeSimilarity = constructNodeSimilarity(
@@ -631,12 +641,11 @@ final class NodeSimilarityTest {
         );
 
         var nodeSimilarityResult = nodeSimilarity.compute();
-        SimilarityGraphResult similarityGraphResult = nodeSimilarityResult.graphResult();
         assertEquals(
             orientation == REVERSE ? COMPARED_ITEMS : COMPARED_PERSONS,
             nodeSimilarityResult.comparedNodes()
         );
-        Graph resultGraph = similarityGraphResult.similarityGraph();
+        Graph resultGraph = nodeSimilarityResult.graphResult();
         assertGraphEquals(
             orientation == REVERSE
                 ? fromGdl("  (:Person), (:Person), (:Person), (:Person)" +
@@ -682,7 +691,8 @@ final class NodeSimilarityTest {
             false,
             false,
             false,
-            null
+            null,
+            false
         );
 
         NodeSimilarity nodeSimilarity = constructNodeSimilarity(
@@ -690,13 +700,12 @@ final class NodeSimilarityTest {
             parameters
         );
         var nodeSimilarityResult = nodeSimilarity.compute();
-        SimilarityGraphResult similarityGraphResult = nodeSimilarityResult.graphResult();
+        var resultGraph = nodeSimilarityResult.graphResult();
         assertEquals(
             orientation == REVERSE ? COMPARED_ITEMS : COMPARED_PERSONS,
             nodeSimilarityResult.comparedNodes()
         );
 
-        Graph resultGraph = similarityGraphResult.similarityGraph();
         String expected = orientation == REVERSE ? resultString(4, 5, 1.00000) : resultString(
             0,
             3,
@@ -732,7 +741,8 @@ final class NodeSimilarityTest {
             true,
             false,
             false,
-            null
+            null,
+            false
         );
 
         NodeSimilarity nodeSimilarity = constructNodeSimilarity(
@@ -772,7 +782,8 @@ final class NodeSimilarityTest {
             true,
             false,
             false,
-            null
+            null,
+            false
         );
 
         NodeSimilarity nodeSimilarity = constructNodeSimilarity(
@@ -803,7 +814,8 @@ final class NodeSimilarityTest {
             true,
             true,
             false,
-            null
+            null,
+            false
         );
 
         var progressTrackerWithLog = TestProgressTrackerHelper.create(
@@ -852,7 +864,8 @@ final class NodeSimilarityTest {
             true,
             true,
             false,
-            null
+            null,
+            false
         );
 
         var progressTrackerWithLog = TestProgressTrackerHelper.create(
@@ -905,7 +918,8 @@ final class NodeSimilarityTest {
             true,
             true,
             true,
-            null
+            null,
+            false
         );
 
         var progressTrackerWithLog = TestProgressTrackerHelper.create(
@@ -981,7 +995,8 @@ final class NodeSimilarityTest {
             true,
             false,
             false,
-            null
+            null,
+            false
         );
 
         NodeSimilarity nodeSimilarity = constructNodeSimilarity(
@@ -1008,7 +1023,8 @@ final class NodeSimilarityTest {
             true,
             true,
             false,
-            null
+            null,
+            false
         );
         nodeSimilarity = constructNodeSimilarity(graph, parameters2);
 
@@ -1058,7 +1074,8 @@ final class NodeSimilarityTest {
             true,
             false,
             false,
-            null
+            null,
+            false
         );
 
         NodeSimilarity nodeSimilarity = constructNodeSimilarity(

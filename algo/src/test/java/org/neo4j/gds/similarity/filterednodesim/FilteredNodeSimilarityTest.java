@@ -93,7 +93,8 @@ class FilteredNodeSimilarityTest {
             true,
             false,
             false,
-            null
+            null,
+            false
         );
 
         var params = new FilteredNodeSimilarityParameters(
@@ -136,7 +137,8 @@ class FilteredNodeSimilarityTest {
             true,
             false,
             false,
-            null
+            null,
+            false
         );
 
         var params = new FilteredNodeSimilarityParameters(
@@ -180,7 +182,8 @@ class FilteredNodeSimilarityTest {
             true,
             false,
             enableWcc,
-            null
+            null,
+            false
         );
 
         var params = new FilteredNodeSimilarityParameters(
@@ -224,7 +227,8 @@ class FilteredNodeSimilarityTest {
             true,
             false,
             false,
-            null
+            null,
+            false
         );
 
         var params = new FilteredNodeSimilarityParameters(

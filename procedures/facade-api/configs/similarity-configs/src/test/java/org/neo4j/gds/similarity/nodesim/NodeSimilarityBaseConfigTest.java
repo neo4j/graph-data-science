@@ -30,7 +30,7 @@ class NodeSimilarityBaseConfigTest {
     void shouldGenerateParamsCorrectly() {
 
         var config = NodeSimilarityStreamConfigImpl.builder().useComponents("foo").build();
-        var parameters = config.toParameters();
+        var parameters = config.toParameters(false);
 
         assertThat(parameters.useComponents()).isTrue();
         assertThat(parameters.componentProperty()).isNotNull();
@@ -41,7 +41,7 @@ class NodeSimilarityBaseConfigTest {
     void shouldGenerateParamsCorrectlyWithWcc() {
 
         var config = NodeSimilarityStreamConfigImpl.builder().useComponents(true).build();
-        var parameters = config.toParameters();
+        var parameters = config.toParameters(false);
 
         assertThat(parameters.useComponents()).isTrue();
         assertThat(parameters.componentProperty()).isNull();
@@ -52,7 +52,7 @@ class NodeSimilarityBaseConfigTest {
     void shouldGenerateParamsCorrectlyWithoutComponents() {
 
         var config = NodeSimilarityStreamConfigImpl.builder().useComponents(false).build();
-        var parameters = config.toParameters();
+        var parameters = config.toParameters(false);
 
         assertThat(parameters.useComponents()).isFalse();
     }

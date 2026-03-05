@@ -255,7 +255,8 @@ public final class LocalSimilarityProcedureFacade implements SimilarityProcedure
         return statsModeBusinessFacade.filteredNodeSimilarity(
             GraphName.parse(graphName),
             configuration,
-            resultBuilder
+            resultBuilder,
+            shouldComputeSimilarityDistribution
         );
     }
 
@@ -474,7 +475,8 @@ public final class LocalSimilarityProcedureFacade implements SimilarityProcedure
         return statsModeBusinessFacade.nodeSimilarity(
             GraphName.parse(graphName),
             configuration,
-            resultBuilder
+            resultBuilder,
+            shouldComputeSimilarityDistribution
         );
     }
 

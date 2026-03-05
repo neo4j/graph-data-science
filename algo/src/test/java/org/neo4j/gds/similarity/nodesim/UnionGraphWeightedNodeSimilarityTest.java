@@ -65,7 +65,8 @@ import static org.assertj.core.api.Assertions.assertThat;
             true,
             true,
             false,
-            null
+            null,
+            false
         );
 
         var nodeSimilarity = new NodeSimilarity(

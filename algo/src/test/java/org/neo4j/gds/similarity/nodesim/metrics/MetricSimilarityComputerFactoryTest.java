@@ -23,14 +23,11 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityMetric;
-import org.neo4j.gds.similarity.nodesim.NodeSimilarityParameters;
 
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 class MetricSimilarityComputerFactoryTest {
 
@@ -46,11 +43,10 @@ class MetricSimilarityComputerFactoryTest {
     @MethodSource("metrics")
     void shouldCreateCorrectly(NodeSimilarityMetric metric,Class<?> expected) {
 
-        var params = mock(NodeSimilarityParameters.class);
-        when(params.metric()).thenReturn(metric);
-        when(params.similarityCutoff()).thenReturn(0d);
+
         var computer = MetricSimilarityComputerFactory.create(
-            params
+            metric,
+            5
         );
 
         assertThat(computer).isInstanceOf(expected);

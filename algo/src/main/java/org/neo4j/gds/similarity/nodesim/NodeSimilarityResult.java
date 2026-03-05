@@ -19,15 +19,17 @@
  */
 package org.neo4j.gds.similarity.nodesim;
 
-import org.neo4j.gds.similarity.SimilarityGraphResult;
+import org.neo4j.gds.similarity.HugeSimilarityGraph;
+import org.neo4j.gds.similarity.SimilarityGraph;
 import org.neo4j.gds.similarity.SimilarityResult;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
 public record NodeSimilarityResult(
     Optional<Stream<SimilarityResult>> maybeStreamResult,
-    Optional<SimilarityGraphResult> maybeGraphResult,
+    Optional<SimilarityGraph> maybeGraphResult,
     long comparedNodes
 ) {
 
@@ -35,13 +37,13 @@ public record NodeSimilarityResult(
         return maybeStreamResult().orElseThrow();
     }
 
-    public SimilarityGraphResult graphResult() {
+    public SimilarityGraph graphResult() {
         return maybeGraphResult().orElseThrow();
     }
 
    public static final NodeSimilarityResult EMPTY = new NodeSimilarityResult(
        Optional.of(Stream.empty()),
-       Optional.of(SimilarityGraphResult.empty()),
+       Optional.of(new HugeSimilarityGraph(null, Map.of())),
        0
    );
 }

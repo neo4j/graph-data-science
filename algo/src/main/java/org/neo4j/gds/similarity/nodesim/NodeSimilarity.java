@@ -33,9 +33,10 @@ import org.neo4j.gds.core.utils.SetBitsIterable;
 import org.neo4j.gds.core.utils.paged.HugeLongLongMap;
 import org.neo4j.gds.core.utils.progress.BatchingProgressLogger;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.similarity.SimilarityGraphBuilder;
-import org.neo4j.gds.similarity.SimilarityGraphResult;
+import org.neo4j.gds.similarity.SimilarityGraph;
+import org.neo4j.gds.similarity.SimilarityGraphNewBuilder;
 import org.neo4j.gds.similarity.SimilarityResult;
+import org.neo4j.gds.similarity.TopKSimilarityGraph;
 import org.neo4j.gds.similarity.filtering.NodeFilter;
 import org.neo4j.gds.similarity.nodesim.metrics.MetricSimilarityComputer;
 import org.neo4j.gds.similarity.nodesim.metrics.MetricSimilarityComputerFactory;
@@ -76,6 +77,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
     private Function<Long, LongStream> sourceNodesStream;
     private BiFunction<Long, Long, LongStream> targetNodesStream;
 
+
     public NodeSimilarity(
         Graph graph,
         NodeSimilarityParameters parameters,
@@ -92,7 +94,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
         this.targetNodeFilter = targetNodeFilter;
         this.concurrency = parameters.concurrency();
         this.parameters = parameters;
-        this.similarityComputer = MetricSimilarityComputerFactory.create(parameters);
+        this.similarityComputer = MetricSimilarityComputerFactory.create(parameters.metric(),parameters.similarityCutoff());
         this.executorService = executorService;
         this.sourceNodes = new BitSet(graph.nodeCount());
         this.targetNodes = new BitSet(graph.nodeCount());
@@ -143,9 +145,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
         }
     }
 
-    private SimilarityGraphResult computeToGraph() {
-        Graph similarityGraph;
-        boolean isTopKGraph = false;
+    private SimilarityGraph computeToGraph() {
 
         if (parameters.hasTopK() && !parameters.hasTopN()) {
             terminationFlag.assertRunning();
@@ -154,18 +154,19 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
                 ? computeTopKMapParallel()
                 : computeTopKMap();
 
-            isTopKGraph = true;
-            similarityGraph = new TopKGraph(graph, topKMap);
-        } else {
-            Stream<SimilarityResult> similarities = computeToStream();
-            similarityGraph = new SimilarityGraphBuilder(
-                graph,
-                concurrency,
-                executorService,
-                terminationFlag
-            ).build(similarities);
+            var similarityGraph = new TopKGraph(graph, topKMap);
+            return new TopKSimilarityGraph(similarityGraph,parameters.computeDistribution());
         }
-        return new SimilarityGraphResult(similarityGraph,  isTopKGraph);
+        Stream<SimilarityResult> similarities = computeToStream();
+        return SimilarityGraphNewBuilder.build(
+            parameters.computeDistribution(),
+            similarities,
+            graph,
+            concurrency,
+            executorService,
+            terminationFlag
+        );
+
     }
 
     private void prepare() {

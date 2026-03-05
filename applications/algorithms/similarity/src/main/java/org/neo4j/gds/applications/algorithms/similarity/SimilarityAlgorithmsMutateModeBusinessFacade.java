@@ -111,7 +111,7 @@ public class SimilarityAlgorithmsMutateModeBusinessFacade {
             configuration,
             FilteredNodeSimilarity,
             () -> estimationFacade.filteredNodeSimilarity(configuration),
-            (graph, __) -> similarityAlgorithms.filteredNodeSimilarity(graph, configuration),
+            (graph, __) -> similarityAlgorithms.filteredNodeSimilarity(graph, configuration,shouldComputeSimilarityDistribution),
             mutateStep,
             resultBuilder
         );
@@ -161,7 +161,7 @@ public class SimilarityAlgorithmsMutateModeBusinessFacade {
             configuration,
             NodeSimilarity,
             () -> estimationFacade.nodeSimilarity(configuration),
-            (graph, __) -> similarityAlgorithms.nodeSimilarity(graph, configuration),
+            (graph, __) -> similarityAlgorithms.nodeSimilarity(graph, configuration,shouldComputeSimilarityDistribution),
             mutateStep,
             resultBuilder
         );

@@ -36,7 +36,8 @@ public record NodeSimilarityParameters(
     boolean computeToStream,
     boolean hasRelationshipWeightProperty,
     boolean useComponents,
-    @Nullable String componentProperty
+    @Nullable String componentProperty,
+    boolean computeDistribution
 )  implements AlgorithmParameters {
     boolean hasTopK() {
         return normalizedK != 0;

@@ -55,7 +55,7 @@ public class HugeSimilarityGraph extends SimilarityGraph{
     }
 
     @Override
-    Map<String, Object> similarityDistribution() {
+    public Map<String, Object> similarityDistribution() {
         return similarityDistribution;
     }
 

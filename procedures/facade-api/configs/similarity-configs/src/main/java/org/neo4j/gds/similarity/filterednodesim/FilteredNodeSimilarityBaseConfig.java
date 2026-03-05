@@ -62,8 +62,8 @@ public interface FilteredNodeSimilarityBaseConfig extends NodeSimilarityBaseConf
     }
 
     @Configuration.Ignore
-    default FilteredNodeSimilarityParameters toFilteredParameters() {
-        var nodeSimilarityParameters =  toParameters();
+    default FilteredNodeSimilarityParameters toFilteredParameters(boolean computeDistribution) {
+        var nodeSimilarityParameters = toParameters(computeDistribution);
         var filters = new FilteringParameters(
             sourceNodeFilter(),
             targetNodeFilter()

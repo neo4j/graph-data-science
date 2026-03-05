@@ -142,7 +142,7 @@ public interface NodeSimilarityBaseConfig extends AlgoBaseConfig, RelationshipWe
 
 
     @Configuration.Ignore
-    default NodeSimilarityParameters toParameters() {
+    default NodeSimilarityParameters toParameters(boolean computeDistribution) {
         // topK and bottomK are exclusive, user cannot set both.
         // Any K value, top or bottom, is specified as a positive integer by user.
         // Internally we represent top/bottom by sign, so the normalized K value is either topK unchanged or bottomK but with sign flipped.
@@ -167,13 +167,14 @@ public interface NodeSimilarityBaseConfig extends AlgoBaseConfig, RelationshipWe
             computeToStream(),
             hasRelationshipWeightProperty(),
             componentUsage.useComponents(),
-            componentUsage.componentProperty()
+            componentUsage.componentProperty(),
+            computeDistribution
         );
     }
 
     @Configuration.Ignore
     default NodeSimilarityEstimateParameters toMemoryEstimateParameters() {
-        return toParameters().memoryParameters();
+        return toParameters(false).memoryParameters();
     }
 
 }

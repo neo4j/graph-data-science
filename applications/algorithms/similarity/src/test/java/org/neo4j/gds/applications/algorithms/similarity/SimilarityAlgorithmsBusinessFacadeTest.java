@@ -68,7 +68,7 @@ class SimilarityAlgorithmsBusinessFacadeTest {
 
         var similarityBusiness = new SimilarityAlgorithmsBusinessFacade(similarityAlgorithms,progressTrackerCreator);
 
-        similarityBusiness.nodeSimilarity(graph, NodeSimilarityBaseConfigImpl.builder().logProgress(false).build());
+        similarityBusiness.nodeSimilarity(graph, NodeSimilarityBaseConfigImpl.builder().logProgress(false).build(),false);
 
         assertThat(log.getMessages(INFO))
             .as("When progress logging is disabled we only log `start` and `finished`.")

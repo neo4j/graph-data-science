@@ -68,14 +68,15 @@ public class SimilarityAlgorithmsStatsModeBusinessFacade {
     public <RESULT> RESULT filteredNodeSimilarity(
         GraphName graphName,
         FilteredNodeSimilarityStatsConfig configuration,
-        StatsResultBuilder<NodeSimilarityResult, RESULT> resultBuilder
+        StatsResultBuilder<NodeSimilarityResult, RESULT> resultBuilder,
+        boolean shouldComputeSimilarityDistribution
     ) {
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
             graphName,
             configuration,
             FilteredNodeSimilarity,
             () -> estimationFacade.filteredNodeSimilarity(configuration),
-            (graph, __) -> similarityAlgorithms.filteredNodeSimilarity(graph, configuration),
+            (graph, __) -> similarityAlgorithms.filteredNodeSimilarity(graph, configuration,shouldComputeSimilarityDistribution),
             resultBuilder
         );
     }
@@ -98,14 +99,15 @@ public class SimilarityAlgorithmsStatsModeBusinessFacade {
     public <RESULT> RESULT nodeSimilarity(
         GraphName graphName,
         NodeSimilarityStatsConfig configuration,
-        StatsResultBuilder<NodeSimilarityResult, RESULT> resultBuilder
+        StatsResultBuilder<NodeSimilarityResult, RESULT> resultBuilder,
+        boolean shouldComputeSimilarityDistribution
     ) {
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
             graphName,
             configuration,
             NodeSimilarity,
             () -> estimationFacade.nodeSimilarity(configuration),
-            (graph, __) -> similarityAlgorithms.nodeSimilarity(graph, configuration),
+            (graph, __) -> similarityAlgorithms.nodeSimilarity(graph, configuration,shouldComputeSimilarityDistribution),
             resultBuilder
         );
     }

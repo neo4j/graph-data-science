@@ -20,15 +20,12 @@
 package org.neo4j.gds.similarity.nodesim.metrics;
 
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityMetric;
-import org.neo4j.gds.similarity.nodesim.NodeSimilarityParameters;
 
 public final class MetricSimilarityComputerFactory {
 
     private MetricSimilarityComputerFactory() {}
 
-    public static MetricSimilarityComputer create(NodeSimilarityParameters parameters){
-        var metric = parameters.metric();
-        var cutoff = parameters.similarityCutoff();
+    public static MetricSimilarityComputer create(NodeSimilarityMetric metric, double cutoff){
 
         if (metric == NodeSimilarityMetric.OVERLAP){
             return new OverlapSimilarityComputer(cutoff);
