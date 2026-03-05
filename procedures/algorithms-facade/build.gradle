@@ -35,6 +35,7 @@ dependencies {
     implementation project(':progress-tracking')
     implementation project(':similarity-algorithms')
     implementation project(':string-formatting')
+    implementation project(':termination')
 
     // test infrastructure
     testCompileOnly openGds.jetbrains.annotations

@@ -46,6 +46,7 @@ import org.neo4j.gds.similarity.knn.KnnWriteConfig;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityStatsConfig;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityStreamConfig;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityWriteConfig;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Map;
 import java.util.stream.Stream;
@@ -63,6 +64,8 @@ public final class LocalSimilarityProcedureFacade implements SimilarityProcedure
 
     private final UserSpecificConfigurationParser configurationParser;
 
+    private final TerminationFlag terminationFlag;
+
     private LocalSimilarityProcedureFacade(
         ProcedureReturnColumns procedureReturnColumns,
         SimilarityAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade,
@@ -70,7 +73,7 @@ public final class LocalSimilarityProcedureFacade implements SimilarityProcedure
         SimilarityAlgorithmsStreamModeBusinessFacade streamModeBusinessFacade,
         SimilarityAlgorithmsWriteModeBusinessFacade writeModeBusinessFacade,
         SimilarityStubs stubs,
-        UserSpecificConfigurationParser configurationParser
+        UserSpecificConfigurationParser configurationParser, TerminationFlag terminationFlag
     ) {
         this.procedureReturnColumns = procedureReturnColumns;
         this.estimationModeBusinessFacade = estimationModeBusinessFacade;
@@ -79,13 +82,15 @@ public final class LocalSimilarityProcedureFacade implements SimilarityProcedure
         this.writeModeBusinessFacade = writeModeBusinessFacade;
         this.stubs = stubs;
         this.configurationParser = configurationParser;
+        this.terminationFlag = terminationFlag;
     }
 
     public static SimilarityProcedureFacade create(
         ApplicationsFacade applicationsFacade,
         GenericStub genericStub,
         ProcedureReturnColumns procedureReturnColumns,
-        UserSpecificConfigurationParser configurationParser
+        UserSpecificConfigurationParser configurationParser,
+        TerminationFlag terminationFlag
     ) {
         var filteredKnnMutateStub = new LocalFilteredKnnMutateStub(
             genericStub,
@@ -129,7 +134,8 @@ public final class LocalSimilarityProcedureFacade implements SimilarityProcedure
             applicationsFacade.similarity().stream(),
             applicationsFacade.similarity().write(),
             stubs,
-            configurationParser
+            configurationParser,
+            terminationFlag
         );
     }
 
@@ -148,6 +154,7 @@ public final class LocalSimilarityProcedureFacade implements SimilarityProcedure
             FilteredKnnStatsConfig::of
         );
         var resultBuilder = new FilteredKnnResultBuilderForStatsMode(
+            terminationFlag,
             configuration,
             shouldComputeSimilarityDistribution
         );
@@ -353,7 +360,11 @@ public final class LocalSimilarityProcedureFacade implements SimilarityProcedure
     ) {
         var shouldComputeSimilarityDistribution = procedureReturnColumns.contains("similarityDistribution");
         var configuration = configurationParser.parseConfiguration(rawConfiguration, KnnStatsConfig::of);
-        var resultBuilder = new KnnResultBuilderForStatsMode(configuration, shouldComputeSimilarityDistribution);
+        var resultBuilder = new KnnResultBuilderForStatsMode(
+            terminationFlag,
+            configuration,
+            shouldComputeSimilarityDistribution
+        );
 
         return statsModeBusinessFacade.knn(
             GraphName.parse(graphName),

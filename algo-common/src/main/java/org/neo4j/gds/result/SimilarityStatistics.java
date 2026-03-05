@@ -108,4 +108,7 @@ public final class SimilarityStatistics {
     public record  Histogram(Optional<DoubleHistogram> histogram,  boolean success) {}
 
     public record  SimilarityStats(Optional<DoubleHistogram> histogram, long computeMilliseconds, boolean success) {}
+
+    public record  SimilarityDistributionResults(Map<String,Object> distribution, long computeMilliseconds) {}
+
 }

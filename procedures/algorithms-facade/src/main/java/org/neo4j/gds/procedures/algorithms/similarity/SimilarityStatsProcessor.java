@@ -23,49 +23,55 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.applications.algorithms.similarity.SimilarityResultStreamDelegate;
 import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.result.SimilarityStatistics;
-import org.neo4j.gds.similarity.SimilarityGraphResult;
+import org.neo4j.gds.similarity.SimilarityGraph;
 import org.neo4j.gds.similarity.SimilarityResult;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Map;
 import java.util.stream.Stream;
 
 class SimilarityStatsProcessor {
-    final SimilarityResultStreamDelegate similarityResultStreamDelegate = new SimilarityResultStreamDelegate();
+    private final SimilarityResultStreamDelegate similarityResultStreamDelegate = new SimilarityResultStreamDelegate();
 
-    Map<String, Object> computeSimilarityDistribution(
+    static SimilarityStatistics.SimilarityDistributionResults EMPTY = new SimilarityStatistics.SimilarityDistributionResults(
+        Map.of(),
+        0
+    );
+
+    SimilarityStatistics.SimilarityDistributionResults computeSimilarityDistribution(
         Graph graph,
         ConcurrencyConfig concurrencyConfiguration,
         Stream<SimilarityResult> similarityResultStream,
-        boolean shouldComputeSimilarityDistribution
+        boolean shouldComputeSimilarityDistribution,
+        TerminationFlag terminationFlag
     ) {
+        if (!shouldComputeSimilarityDistribution) return EMPTY;
+        var tStart = System.currentTimeMillis();
         var similarityGraphResult = similarityResultStreamDelegate.computeSimilarityGraph(
             graph,
             concurrencyConfiguration.concurrency(),
-            similarityResultStream
+            similarityResultStream,
+            shouldComputeSimilarityDistribution,
+            terminationFlag
         );
-
-        return computeSimilarityDistribution(shouldComputeSimilarityDistribution, similarityGraphResult);
+        var tEnd = System.currentTimeMillis();
+        var result = computeSimilarityDistribution(shouldComputeSimilarityDistribution, similarityGraphResult);
+        return new SimilarityStatistics.SimilarityDistributionResults(
+            result.distribution(),
+            result.computeMilliseconds() + (tEnd - tStart)
+        );
     }
 
-    Map<String, Object> computeSimilarityDistribution(
+    SimilarityStatistics.SimilarityDistributionResults computeSimilarityDistribution(
         boolean shouldComputeSimilarityDistribution,
-        SimilarityGraphResult similarityGraphResult
+        SimilarityGraph similarityGraphResult
     ) {
-        var similarityStatistics = computeSimilarityStatistics(
-            similarityGraphResult,
-            shouldComputeSimilarityDistribution
-        );
-
-        return SimilarityStatistics.similaritySummary(similarityStatistics.histogram(),similarityStatistics.success());
+        if (!shouldComputeSimilarityDistribution) return EMPTY;
+        var tStart = System.currentTimeMillis();
+        var result = similarityGraphResult.similarityDistribution();
+        var tEnd = System.currentTimeMillis();
+        return new SimilarityStatistics.SimilarityDistributionResults(result, tEnd - tStart);
     }
 
-    SimilarityStatistics.SimilarityStats computeSimilarityStatistics(
-        SimilarityGraphResult graphResult,
-        boolean shouldComputeSimilarityDistribution
-    ) {
-        return SimilarityStatistics.similarityStats(
-            graphResult::similarityGraph,
-            shouldComputeSimilarityDistribution
-        );
-    }
+
 }

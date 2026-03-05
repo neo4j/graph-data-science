@@ -109,7 +109,8 @@ final class AlgorithmsProcedureFacadeFactory {
             applicationsFacade,
             genericStub,
             procedureReturnColumns,
-            configurationParser
+            configurationParser,
+            requestScopedDependencies.terminationFlag()
         );
 
         return new AlgorithmsProcedureFacade(

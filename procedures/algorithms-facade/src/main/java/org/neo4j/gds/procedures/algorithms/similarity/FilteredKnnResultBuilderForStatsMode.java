@@ -23,9 +23,9 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.applications.algorithms.machinery.StatsResultBuilder;
 import org.neo4j.gds.applications.algorithms.similarity.SimilarityResultStreamDelegate;
-import org.neo4j.gds.result.SimilarityStatistics;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnResult;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnStatsConfig;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -33,14 +33,16 @@ import java.util.stream.Stream;
 class FilteredKnnResultBuilderForStatsMode implements StatsResultBuilder<FilteredKnnResult, Stream<KnnStatsResult>> {
     private final SimilarityResultStreamDelegate similarityResultStreamDelegate = new SimilarityResultStreamDelegate();
     private final SimilarityStatsProcessor similarityStatsProcessor = new SimilarityStatsProcessor();
+    private final TerminationFlag terminationFlag;
 
     private final FilteredKnnStatsConfig configuration;
     private final boolean shouldComputeSimilarityDistribution;
 
     FilteredKnnResultBuilderForStatsMode(
-        FilteredKnnStatsConfig configuration,
+        TerminationFlag terminationFlag, FilteredKnnStatsConfig configuration,
         boolean shouldComputeSimilarityDistribution
     ) {
+        this.terminationFlag = terminationFlag;
         this.configuration = configuration;
         this.shouldComputeSimilarityDistribution = shouldComputeSimilarityDistribution;
     }
@@ -60,18 +62,12 @@ class FilteredKnnResultBuilderForStatsMode implements StatsResultBuilder<Filtere
 
         var filteredKnnResult = result.get();
 
-        var similarityGraphResult = similarityResultStreamDelegate.computeSimilarityGraph(
+        var similarityStats = similarityStatsProcessor.computeSimilarityDistribution(
             graph,
-            configuration.concurrency(),
-            filteredKnnResult.similarityResultStream()
-        );
-        var similarityStats = similarityStatsProcessor.computeSimilarityStatistics(
-            similarityGraphResult,
-            shouldComputeSimilarityDistribution
-        );
-        var similarityDistribution = SimilarityStatistics.similaritySummary(
-            similarityStats.histogram(),
-            similarityStats.success()
+            configuration,
+            filteredKnnResult.similarityResultStream(),
+            shouldComputeSimilarityDistribution,
+            terminationFlag
         );
 
         return Stream.of(
@@ -81,7 +77,7 @@ class FilteredKnnResultBuilderForStatsMode implements StatsResultBuilder<Filtere
                 similarityStats.computeMilliseconds(),
                 filteredKnnResult.nodesCompared(),
                 filteredKnnResult.numberOfSimilarityPairs(),
-                similarityDistribution,
+                similarityStats.distribution(),
                 filteredKnnResult.didConverge(),
                 filteredKnnResult.ranIterations(),
                 filteredKnnResult.nodePairsConsidered(),
