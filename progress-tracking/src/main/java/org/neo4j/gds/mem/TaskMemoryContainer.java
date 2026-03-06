@@ -24,7 +24,6 @@ import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.utils.progress.UserTask;
 
 import java.util.HashSet;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
@@ -81,10 +80,9 @@ class TaskMemoryContainer {
 
     }
 
-    Set<String> taskUsers(Optional<Set<String>> inputUsers){
-        Set<String> users = inputUsers.orElseGet(HashSet::new);
+    Set<String> taskUsers(Set<String> inputUsers) {
+        var users = new HashSet<>(inputUsers);
         users.addAll(memoryInUse.keySet());
-        return  users;
+        return users;
     }
-
 }

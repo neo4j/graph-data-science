@@ -40,8 +40,7 @@ class TaskTraversalTest {
     }
 
     static class DepthCollectingVisitorVisitor extends DepthAwareTaskVisitor {
-
-        List<Integer> depthInformation = new ArrayList<>();
+        final List<Integer> depthInformation = new ArrayList<>();
 
         @Override
         public void visit(Task task) {

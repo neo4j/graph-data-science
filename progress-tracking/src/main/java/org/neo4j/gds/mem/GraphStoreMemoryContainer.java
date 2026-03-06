@@ -22,8 +22,6 @@ package org.neo4j.gds.mem;
 import org.neo4j.gds.api.graph.store.catalog.GraphStoreAddedEvent;
 import org.neo4j.gds.api.graph.store.catalog.GraphStoreRemovedEvent;
 
-import java.util.HashSet;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
@@ -77,10 +75,7 @@ class GraphStoreMemoryContainer {
             .reduce(0L, Long::sum);
     }
 
-    Set<String> graphUsers(Optional<Set<String>> inputUsers){
-            Set<String> users = inputUsers.orElseGet(HashSet::new);
-            users.addAll(graphStoresMemory.keySet());
-            return  users;
+    Set<String> graphUsers(){
+        return graphStoresMemory.keySet();
     }
-
 }

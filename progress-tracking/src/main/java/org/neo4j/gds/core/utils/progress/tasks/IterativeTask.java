@@ -82,7 +82,7 @@ public class IterativeTask extends Task {
         } else if (mode == Mode.OPEN) {
             var newIterationTasks = subTasksSupplier.get();
             subTasks().addAll(newIterationTasks);
-            return newIterationTasks.get(0);
+            return newIterationTasks.getFirst();
         } else {
             throw new IllegalStateException("No more pending subtasks");
         }

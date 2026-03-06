@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.core;
 
-@SuppressWarnings("ClassCanBeRecord")
 public class RequestCorrelationIdForTesting implements RequestCorrelationId {
     private final String value;
 

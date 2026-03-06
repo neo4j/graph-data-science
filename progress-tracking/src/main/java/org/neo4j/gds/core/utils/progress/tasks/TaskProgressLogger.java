@@ -28,7 +28,6 @@ import java.util.function.Supplier;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-@SuppressWarnings("ClassCanBeRecord")
 public final class TaskProgressLogger implements ProgressLogger {
     private final BatchingProgressLogger batchingProgressLogger;
     private final Task baseTask;
