@@ -33,6 +33,7 @@ import org.neo4j.values.storable.NumberValue;
 import org.neo4j.values.storable.PointValue;
 import org.neo4j.values.storable.TextValue;
 import org.neo4j.values.storable.TimeValue;
+import org.neo4j.values.storable.UUIDValue;
 import org.neo4j.values.virtual.MapValue;
 import org.neo4j.values.virtual.VirtualNodeValue;
 import org.neo4j.values.virtual.VirtualPathValue;
@@ -116,6 +117,11 @@ interface PartialValueMapper<R> extends ValueMapper<R> {
 
     @Override
     default R mapPoint(PointValue value) {
+        return unsupported(value);
+    }
+
+    @Override
+    default R mapUUID(UUIDValue value) {
         return unsupported(value);
     }
 }
