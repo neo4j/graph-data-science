@@ -30,7 +30,7 @@ import org.neo4j.gds.api.CompositeRelationshipIterator;
 import org.neo4j.gds.api.DatabaseInfo;
 import org.neo4j.gds.api.FilteredIdMap;
 import org.neo4j.gds.api.GraphCharacteristics;
-import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.GraphStoreWithTopology;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.Topology;
@@ -77,7 +77,7 @@ import static org.neo4j.gds.core.StringSimilarity.prettySuggestions;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @Value.Style(typeBuilder = "GraphStoreBuilder")
-public final class CSRGraphStore implements GraphStore {
+public final class CSRGraphStore implements GraphStoreWithTopology {
 
     private final Concurrency concurrency;
 
@@ -474,6 +474,7 @@ public final class CSRGraphStore implements GraphStore {
         }));
     }
 
+    @Override
     public Topology getTopology(RelationshipType relationshipType) {
         return relationships.get(relationshipType).topology();
     }
