@@ -1198,6 +1198,27 @@ class CypherAggregationIT extends BaseProcTest {
     }
 
     @Test
+    void shouldFailOnUnexpectedConfigKey() {
+        var query =
+            """
+                 MATCH (s)-[r]->(t)
+                 RETURN gds.graph.project(
+                    'g',
+                    s,
+                    t,
+                    {relationshipType: type(r)},
+                    {undirectedRelationships: ['REL', 'invalidRel']}
+                )
+                """;
+
+        assertThatException()
+            .isThrownBy(() -> runQuery(query))
+            .withMessageContaining(
+                "Unexpected configuration key: undirectedRelationships (Did you mean [undirectedRelationshipTypes]?)"
+            );
+    }
+
+    @Test
     void shouldFailOnInvalidInverseRelationshipTypes() {
         var query =
             """

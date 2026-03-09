@@ -205,12 +205,14 @@ abstract class GraphAggregator implements UserAggregationReducer, UserAggregatio
         var query = this.queryProvider.executingQuery().orElse("");
 
         validateGraphName(graphName, this.username, this.databaseId);
+        var configMapValue = (configMap instanceof MapValue) ? (MapValue) configMap : MapValue.EMPTY;
         var config = GraphProjectFromCypherAggregationConfig.of(
             this.username,
             graphName,
             query,
-            (configMap instanceof MapValue) ? (MapValue) configMap : MapValue.EMPTY
+            configMapValue
         );
+        ConfigKeyValidation.requireOnlyKeysFrom(config.configKeys(), configMapValue.keySet());
 
         var idMapBuilder = idMapBuilder(config.readConcurrency());
 
