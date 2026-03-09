@@ -19,11 +19,9 @@
  */
 package org.neo4j.gds.core.write.resultstore;
 
-import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.ResultStoreEntry;
-import org.neo4j.gds.api.properties.relationships.RelationshipWithPropertyConsumer;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.write.RelationshipExporter;
 
@@ -54,15 +52,9 @@ public class ResultStoreRelationshipExporter implements RelationshipExporter {
     }
 
     @Override
-    public void write(String relationshipType, String propertyKey) {
-        write(relationshipType, propertyKey, null);
-    }
-
-    @Override
     public void write(
         String relationshipType,
-        String propertyKey,
-        @Nullable RelationshipWithPropertyConsumer afterWriteConsumer
+        String propertyKey
     ) {
         resultStore.add(jobId, new ResultStoreEntry.RelationshipsFromGraph(relationshipType, propertyKey, graph, toOriginalId));
     }

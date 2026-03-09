@@ -24,7 +24,6 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.gds.api.properties.relationships.RelationshipWithPropertyConsumer;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.logging.Log;
@@ -53,29 +52,6 @@ public class WriteRelationshipService {
         Optional<ResultStore> resultStore,
         JobId jobId
     ) {
-        return writeFromGraph(
-            writeRelationshipType,
-            writeProperty,
-            writeGraph,
-            rootIdMap,
-            taskName,
-            resultStore,
-            (s,t,w)->true,
-            jobId
-        );
-    }
-
-    public RelationshipsWritten writeFromGraph(
-        String writeRelationshipType,
-        String writeProperty,
-        Graph writeGraph,
-        IdMap rootIdMap,
-        String taskName,
-        Optional<ResultStore> resultStore,
-        RelationshipWithPropertyConsumer relationshipWithPropertyConsumer,
-        JobId jobId
-    ) {
-
         return Neo4jDatabaseRelationshipWriter.writeRelationshipsFromGraph(
             writeRelationshipType,
             writeProperty,
@@ -86,7 +62,6 @@ public class WriteRelationshipService {
             log,
             taskName,
             resultStore,
-            relationshipWithPropertyConsumer,
             jobId
         );
     }

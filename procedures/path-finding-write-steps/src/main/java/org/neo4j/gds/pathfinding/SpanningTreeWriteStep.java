@@ -71,7 +71,6 @@ public class SpanningTreeWriteStep implements WriteStep<SpanningTree, Relationsh
             graph,
             AlgorithmLabel.SpanningTree.asString(),
             resultStoreResolver.apply(resultStore),
-            (a,b,c)-> true,
             this.jobId
         );
     }

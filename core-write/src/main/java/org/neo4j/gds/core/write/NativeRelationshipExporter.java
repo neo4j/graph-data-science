@@ -20,7 +20,6 @@
 package org.neo4j.gds.core.write;
 
 
-import org.jetbrains.annotations.Nullable;
 import org.neo4j.exceptions.KernelException;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IdMap;
@@ -97,36 +96,25 @@ public final class NativeRelationshipExporter extends StatementApi implements Re
     @Override
     public void write(String relationshipType) {
         var relationshipToken = getOrCreateRelationshipToken(relationshipType);
-        write(relationshipToken, NO_SUCH_PROPERTY_KEY, null);
+        write(relationshipToken, NO_SUCH_PROPERTY_KEY);
     }
 
     @Override
     public void write(String relationshipType, String propertyKey) {
         var relationshipTypeToken = getOrCreateRelationshipToken(relationshipType);
         var propertyKeyToken = getOrCreatePropertyToken(propertyKey);
-        write(relationshipTypeToken, propertyKeyToken, null);
+        write(relationshipTypeToken, propertyKeyToken);
     }
 
-    @Override
-    public void write(
-        String relationshipType,
-        String propertyKey,
-        @Nullable RelationshipWithPropertyConsumer afterWriteConsumer
-    ) {
-        var relationshipTypeToken = getOrCreateRelationshipToken(relationshipType);
-        var propertyKeyToken = getOrCreatePropertyToken(propertyKey);
-        write(relationshipTypeToken, propertyKeyToken, afterWriteConsumer);
-    }
 
-    private void write(int relationshipTypeToken, int propertyKeyToken, @Nullable RelationshipWithPropertyConsumer afterWriteConsumer) {
+    private void write(int relationshipTypeToken, int propertyKeyToken) {
         var tasks = PartitionUtils.degreePartitionWithBatchSize(
             graph,
             batchSize,
             partition -> createBatchRunnable(
                 relationshipTypeToken,
                 propertyKeyToken,
-                partition,
-                afterWriteConsumer
+                partition
             )
         );
 
@@ -152,8 +140,7 @@ public final class NativeRelationshipExporter extends StatementApi implements Re
     private Runnable createBatchRunnable(
         int relationshipToken,
         int propertyToken,
-        Partition partition,
-        @Nullable RelationshipWithPropertyConsumer afterWrite
+        Partition partition
     ) {
         return () -> acceptInTransaction(stmt -> {
             terminationFlag.assertRunning();
@@ -167,14 +154,11 @@ public final class NativeRelationshipExporter extends StatementApi implements Re
                 propertyToken,
                 progressTracker
             );
-            if (afterWrite != null) {
-                writeConsumer = writeConsumer.andThen(afterWrite);
-            }
+
             RelationshipIterator relationshipIterator = graph.concurrentCopy();
-            RelationshipWithPropertyConsumer finalWriteConsumer = writeConsumer;
             var startNode = partition.startNode();
             partition.consume(nodeId -> {
-                relationshipIterator.forEachRelationship(nodeId, Double.NaN, finalWriteConsumer);
+                relationshipIterator.forEachRelationship(nodeId, Double.NaN, writeConsumer);
 
                 if ((nodeId - startNode) % TerminationFlag.RUN_CHECK_NODE_COUNT == 0) {
                     terminationFlag.assertRunning();

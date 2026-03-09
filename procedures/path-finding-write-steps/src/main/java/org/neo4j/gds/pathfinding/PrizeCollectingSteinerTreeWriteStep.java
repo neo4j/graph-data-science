@@ -81,7 +81,6 @@ public class PrizeCollectingSteinerTreeWriteStep implements WriteStep<PrizeStein
             spanningGraph,
             "PrizeCollectingSteinerWrite",
             resultStoreResolver.apply(resultStore),
-            (a, b, c) -> true,
             this.jobId
         );
     }

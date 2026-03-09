@@ -81,8 +81,7 @@ public class SteinerTreeWriteStep implements WriteStep<SteinerTreeResult, Relati
              graph,
              "SteinerWrite",
              resultStoreResolver.apply(resultStore),
-             (a,b,c)-> true,
-             this.jobId
+            this.jobId
          );
     }
 }

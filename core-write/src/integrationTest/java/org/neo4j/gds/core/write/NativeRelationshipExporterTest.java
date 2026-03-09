@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.core.write;
 
-import org.apache.commons.lang3.mutable.MutableInt;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.Aggregation;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.PropertyMapping;
@@ -39,7 +39,6 @@ import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.gds.logging.GdsTestLog;
-import org.neo4j.gds.Aggregation;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
 import org.neo4j.gds.projection.GraphStoreFactorySuppliers;
 import org.neo4j.gds.projection.NativeProjectionGraphStoreFactorySupplier;
@@ -168,29 +167,6 @@ class NativeRelationshipExporterTest extends BaseTest {
         );
     }
 
-    @Test
-    void exportRelationshipsWithAfterWriteConsumer() {
-        var exporter = setupExportTest(/* includeProperties */ true);
-        MutableInt count = new MutableInt();
-        exporter.write("FOOBAR", "weight", (sourceNodeId, targetNodeId, property) -> {
-            count.increment();
-            return true;
-        });
-        assertEquals(4, count.getValue());
-        validateWrittenGraph();
-    }
-
-    @Test
-    void exportRelationshipsWithAfterWriteConsumerAndNoProperties() {
-        var exporter = setupExportTest(true);
-        MutableInt count = new MutableInt();
-        exporter.write("FOOBAR", "weight", (sourceNodeId, targetNodeId, property) -> {
-            count.increment();
-            return true;
-        });
-        assertEquals(4, count.getValue());
-        validateWrittenGraphWithoutProperties();
-    }
 
     @Test
     void progressLogging() {
