@@ -43,7 +43,7 @@ public final class FilteredKnnMutateStep implements MutateStep<FilteredKnnResult
         String mutateRelationshipType,
         String mutateProperty,
         Concurrency concurrency,
-        boolean shouldComputeSimilarityDistribution, TerminationFlag terminationFlag
+        boolean shouldComputeSimilarityDistribution
     ) {
         this.similarityMutation = similarityMutation;
         this.mutateRelationshipType = mutateRelationshipType;
@@ -69,8 +69,7 @@ public final class FilteredKnnMutateStep implements MutateStep<FilteredKnnResult
             mutateRelationshipType,
             mutateProperty,
             concurrency,
-            shouldComputeSimilarityDistribution,
-            terminationFlag
+            shouldComputeSimilarityDistribution
         );
     }
 

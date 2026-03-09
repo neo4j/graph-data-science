@@ -93,7 +93,7 @@ public final class FilteredNodeSimilarityMutateStep implements MutateStep<NodeSi
             DefaultPool.INSTANCE,
             terminationFlag,
             shouldComputeSimilarityDistribution
-        ).build(result);
+        ).build(result).graph();
 
         return similarityMutation.execute(
             graphStore,

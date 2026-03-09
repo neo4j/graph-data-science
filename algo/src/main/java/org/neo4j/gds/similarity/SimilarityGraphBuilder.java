@@ -28,6 +28,7 @@ import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.huge.HugeGraph;
 import org.neo4j.gds.core.loading.AdjacencyListBehavior;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
+import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryEstimations;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
@@ -36,6 +37,7 @@ import org.neo4j.gds.similarity.nodesim.TopKMap;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 
 public class SimilarityGraphBuilder {
@@ -95,58 +97,69 @@ public class SimilarityGraphBuilder {
         this.shouldConstructDistribution = shouldConstructDistribution;
     }
 
-    public SimilarityGraph build(Stream<SimilarityResult> stream) {
-        var relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
-            .nodes(graph.rootIdMap())
-            .relationshipType(RelationshipType.of("REL"))
-            .orientation(Orientation.NATURAL)
-            .addPropertyConfig(GraphFactory.PropertyConfig.of("property"))
-            .concurrency(concurrency)
-            .executorService(executorService)
-            .build();
+    public SimilarityGraphBuildResult build(Stream<SimilarityResult> stream) {
+        HugeSimilarityGraph hugeSimilarityGraph;
+        var buildMillis = new AtomicLong();
 
-        var similaritySummaryBuilder = SimilaritySummaryBuilderFactory.create(concurrency, shouldConstructDistribution);
+        try (var ignored = ProgressTimer.start(buildMillis::set)) {
+            var relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
+                .nodes(graph.rootIdMap())
+                .relationshipType(RelationshipType.of("REL"))
+                .orientation(Orientation.NATURAL)
+                .addPropertyConfig(GraphFactory.PropertyConfig.of("property"))
+                .concurrency(concurrency)
+                .executorService(executorService)
+                .build();
 
-        ParallelUtil.parallelStreamConsume(
-            stream,
-            concurrency,
-            terminationFlag,
-            similarityStream -> similarityStream.forEach(similarityResult -> {
-                relationshipsBuilder.addFromInternal(
-                    graph.toRootNodeId(similarityResult.sourceNodeId()),
-                    graph.toRootNodeId(similarityResult.targetNodeId()),
-                    similarityResult.similarity
-                );
-                similaritySummaryBuilder.accept(
-                    similarityResult.sourceNodeId(),
-                    similarityResult.targetNodeId(),
-                    similarityResult.similarity
-                );
+            var similaritySummaryBuilder = SimilaritySummaryBuilderFactory.create(concurrency, shouldConstructDistribution);
 
-            })
-        );
+            ParallelUtil.parallelStreamConsume(
+                stream,
+                concurrency,
+                terminationFlag,
+                similarityStream -> similarityStream.forEach(similarityResult -> {
+                    relationshipsBuilder.addFromInternal(
+                        graph.toRootNodeId(similarityResult.sourceNodeId()),
+                        graph.toRootNodeId(similarityResult.targetNodeId()),
+                        similarityResult.similarity
+                    );
+                    similaritySummaryBuilder.accept(
+                        similarityResult.sourceNodeId(),
+                        similarityResult.targetNodeId(),
+                        similarityResult.similarity
+                    );
 
-        var similarityGraph = GraphFactory.create(
-            graph.rootIdMap(),
-            relationshipsBuilder.build()
-        );
-        return new HugeSimilarityGraph(
-            similarityGraph,
-            similaritySummaryBuilder.similaritySummary()
-        );
+                })
+            );
+
+            var similarityGraph = GraphFactory.create(
+                graph.rootIdMap(),
+                relationshipsBuilder.build()
+            );
+            hugeSimilarityGraph = new HugeSimilarityGraph(
+                similarityGraph,
+                similaritySummaryBuilder.similaritySummary()
+            );
+        }
+
+
+        return new SimilarityGraphBuildResult(hugeSimilarityGraph,buildMillis.get());
+
     }
 
-    public SimilarityGraph build(TopKMap topKMap) {
-        return new TopKSimilarityGraph(
+    public SimilarityGraphBuildResult build(TopKMap topKMap) {
+        var similarityGraph = new TopKSimilarityGraph(
             new TopKGraph(graph, topKMap),
             shouldConstructDistribution
         );
+        return new SimilarityGraphBuildResult(similarityGraph,0);
     }
 
-    public SimilarityGraph build(NodeSimilarityResult nodeSimilarityResult){
+    public SimilarityGraphBuildResult build(NodeSimilarityResult nodeSimilarityResult){
         if (nodeSimilarityResult.maybeStreamResult().isPresent()) {
             return build(nodeSimilarityResult.streamResult());
         }
-        return  build(nodeSimilarityResult.topKMap());
+        return build(nodeSimilarityResult.topKMap());
     }
+
 }

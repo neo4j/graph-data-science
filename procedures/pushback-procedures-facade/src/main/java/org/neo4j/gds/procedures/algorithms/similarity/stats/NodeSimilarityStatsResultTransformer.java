@@ -25,6 +25,7 @@ import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.procedures.algorithms.similarity.SimilarityStatsResult;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.results.ResultTransformer;
+import org.neo4j.gds.similarity.SimilarityGraph;
 import org.neo4j.gds.similarity.SimilarityGraphBuilder;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
 import org.neo4j.gds.termination.TerminationFlag;
@@ -67,7 +68,7 @@ public class NodeSimilarityStatsResultTransformer implements ResultTransformer<T
             )
             );
         }
-        var similarityGraphResult = new SimilarityGraphBuilder(
+        var similarityGraphBuildResult = new SimilarityGraphBuilder(
             graph,
             concurrency,
             DefaultPool.INSTANCE,
@@ -75,18 +76,19 @@ public class NodeSimilarityStatsResultTransformer implements ResultTransformer<T
             shouldComputeSimilarityDistribution
         ).build(result);
 
+        SimilarityGraph similarityGraph = similarityGraphBuildResult.graph();
         var similarityStats = SimilarityStatsTools.computeSimilarityDistribution(
             shouldComputeSimilarityDistribution,
-            similarityGraphResult
+            similarityGraph
         );
 
         return Stream.of(
             new SimilarityStatsResult(
                 0,
                 timedAlgorithmResult.computeMillis(),
-                similarityStats.computeMilliseconds(),
+                similarityStats.computeMilliseconds() + similarityGraphBuildResult.buildTime(),
                 result.comparedNodes(),
-                similarityGraphResult.relationshipCount(),
+                similarityGraph.relationshipCount(),
                 similarityStats.distribution(),
                 configuration
             )

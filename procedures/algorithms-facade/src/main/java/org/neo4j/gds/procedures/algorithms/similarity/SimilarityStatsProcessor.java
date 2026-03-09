@@ -22,18 +22,20 @@ package org.neo4j.gds.procedures.algorithms.similarity;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.applications.algorithms.similarity.SimilarityResultStreamDelegate;
 import org.neo4j.gds.config.ConcurrencyConfig;
+import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.result.SimilarityStatistics;
 import org.neo4j.gds.similarity.SimilarityGraph;
 import org.neo4j.gds.similarity.SimilarityResult;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 
 class SimilarityStatsProcessor {
     private final SimilarityResultStreamDelegate similarityResultStreamDelegate = new SimilarityResultStreamDelegate();
 
-    private static SimilarityStatistics.SimilarityDistributionResults EMPTY = new SimilarityStatistics.SimilarityDistributionResults(
+    private static final SimilarityStatistics.SimilarityDistributionResults EMPTY = new SimilarityStatistics.SimilarityDistributionResults(
         Map.of(),
         0
     );
@@ -46,19 +48,23 @@ class SimilarityStatsProcessor {
         TerminationFlag terminationFlag
     ) {
         if (!shouldComputeSimilarityDistribution) return EMPTY;
-        var tStart = System.currentTimeMillis();
-        var similarityGraphResult = similarityResultStreamDelegate.computeSimilarityGraph(
-            graph,
-            concurrencyConfiguration.concurrency(),
-            similarityResultStream,
-            shouldComputeSimilarityDistribution,
-            terminationFlag
+
+        var similarityGraphBuildResult = similarityResultStreamDelegate.computeSimilarityGraphBuildResult(
+                graph,
+                concurrencyConfiguration.concurrency(),
+                similarityResultStream,
+            true,
+                terminationFlag
         );
-        var tEnd = System.currentTimeMillis();
-        var result = computeSimilarityDistribution(shouldComputeSimilarityDistribution, similarityGraphResult);
+        var buildMillis = similarityGraphBuildResult.buildTime();
+
+        var result = computeSimilarityDistribution(
+            true,
+            similarityGraphBuildResult.graph()
+        );
         return new SimilarityStatistics.SimilarityDistributionResults(
             result.distribution(),
-            result.computeMilliseconds() + (tEnd - tStart)
+            result.computeMilliseconds() + buildMillis
         );
     }
 
@@ -67,10 +73,12 @@ class SimilarityStatsProcessor {
         SimilarityGraph similarityGraphResult
     ) {
         if (!shouldComputeSimilarityDistribution) return EMPTY;
-        var tStart = System.currentTimeMillis();
-        var result = similarityGraphResult.similarityDistribution();
-        var tEnd = System.currentTimeMillis();
-        return new SimilarityStatistics.SimilarityDistributionResults(result, tEnd - tStart);
+        var statsMillis = new AtomicLong();
+        Map<String,Object> distribution;
+        try (var ignored = ProgressTimer.start(statsMillis::set)) {
+             distribution = similarityGraphResult.similarityDistribution();
+        }
+        return new SimilarityStatistics.SimilarityDistributionResults(distribution, statsMillis.get());
     }
 
 

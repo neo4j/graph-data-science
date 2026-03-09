@@ -82,7 +82,7 @@ class SimilarityGraphBuilderTest {
             graph.toMappedNodeId("a"),
             graph.toMappedNodeId("b"),
             0.42
-        )));
+        ))).graph();
 
         assertEquals(graph.nodeCount(), simGraph.nodeCount());
         assertEquals(1, simGraph.relationshipCount());
@@ -106,7 +106,7 @@ class SimilarityGraphBuilderTest {
             graph.toMappedNodeId("a"),
             graph.toMappedNodeId("b"),
             0.42
-        )));
+        ))).graph();
 
         assertEquals(graph.nodeCount(), simGraph.nodeCount());
         assertEquals(1, simGraph.relationshipCount());
@@ -131,7 +131,7 @@ class SimilarityGraphBuilderTest {
 
         Graph simGraph = similarityGraphBuilder.build(Stream.of(new SimilarityResult(
             0, 1, 0.42
-        )));
+        ))).graph();
 
         assertGraphEquals(fromGdl("(a:A), (b:A), (c:B), (d:B), (c)-[:REL {similarity: 0.42}]->(d)"), simGraph);
     }

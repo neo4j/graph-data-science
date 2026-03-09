@@ -22,7 +22,7 @@ package org.neo4j.gds.applications.algorithms.similarity;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.similarity.SimilarityGraph;
+import org.neo4j.gds.similarity.SimilarityGraphBuildResult;
 import org.neo4j.gds.similarity.SimilarityGraphBuilder;
 import org.neo4j.gds.similarity.SimilarityResult;
 import org.neo4j.gds.termination.TerminationFlag;
@@ -33,7 +33,7 @@ import java.util.stream.Stream;
  * "Delegate" because really we should mint a microtype and place this behaviour in it
  */
 public class SimilarityResultStreamDelegate {
-    public SimilarityGraph computeSimilarityGraph(
+    public SimilarityGraphBuildResult computeSimilarityGraphBuildResult(
         Graph graph,
         Concurrency concurrency,
         Stream<SimilarityResult> similarityResultStream,

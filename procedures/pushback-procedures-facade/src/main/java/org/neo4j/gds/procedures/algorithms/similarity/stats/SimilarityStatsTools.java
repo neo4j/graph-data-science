@@ -22,6 +22,7 @@ package org.neo4j.gds.procedures.algorithms.similarity.stats;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
+import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.result.SimilarityStatistics;
 import org.neo4j.gds.similarity.SimilarityGraph;
 import org.neo4j.gds.similarity.SimilarityGraphBuilder;
@@ -29,6 +30,7 @@ import org.neo4j.gds.similarity.SimilarityResult;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 
 final class SimilarityStatsTools {
@@ -48,19 +50,17 @@ final class SimilarityStatsTools {
         TerminationFlag terminationFlag
     ) {
         if (!shouldComputeSimilarityDistribution) return EMPTY;
-        var tStart = System.currentTimeMillis();
-        var similarityGraphResult = new SimilarityGraphBuilder(
+        var similarityGraphBuildResult = new SimilarityGraphBuilder(
             graph,
             concurrency,
             DefaultPool.INSTANCE,
             terminationFlag,
-            shouldComputeSimilarityDistribution
+            true
         ).build( similarityResultStream);
-        var tEnd = System.currentTimeMillis();
-        var result = computeSimilarityDistribution(shouldComputeSimilarityDistribution, similarityGraphResult);
+        var result = computeSimilarityDistribution(true, similarityGraphBuildResult.graph());
         return new SimilarityStatistics.SimilarityDistributionResults(
             result.distribution(),
-            result.computeMilliseconds() + (tEnd - tStart)
+            result.computeMilliseconds() + similarityGraphBuildResult.buildTime()
         );
     }
 
@@ -69,9 +69,11 @@ final class SimilarityStatsTools {
         SimilarityGraph similarityGraphResult
     ) {
         if (!shouldComputeSimilarityDistribution) return EMPTY;
-        var tStart = System.currentTimeMillis();
-        var result = similarityGraphResult.similarityDistribution();
-        var tEnd = System.currentTimeMillis();
-        return new SimilarityStatistics.SimilarityDistributionResults(result, tEnd - tStart);
+        var statsMillis = new AtomicLong();
+        Map<String,Object> distribution;
+        try (var ignored = ProgressTimer.start(statsMillis::set)) {
+            distribution = similarityGraphResult.similarityDistribution();
+        }
+        return new SimilarityStatistics.SimilarityDistributionResults(distribution, statsMillis.get());
     }
 }

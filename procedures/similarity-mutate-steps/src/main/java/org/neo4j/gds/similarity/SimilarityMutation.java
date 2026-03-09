@@ -53,7 +53,7 @@ class SimilarityMutation {
         Stream<SimilarityResult> similarityResultStream,
         boolean shouldComputeSimilarityDistribution
     ) {
-        var similarityGraph =  new SimilarityGraphBuilder(
+        var similarityGraphBuildResult =  new SimilarityGraphBuilder(
             graph,
             concurrency,
             DefaultPool.INSTANCE,
@@ -64,7 +64,7 @@ class SimilarityMutation {
         return execute(
                 graphStore,
                 mutateRelationshipType, mutateRelationshipProperty,
-                similarityGraph
+                similarityGraphBuildResult.graph()
         );
     }
 

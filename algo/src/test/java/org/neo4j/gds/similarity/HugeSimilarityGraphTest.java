@@ -49,7 +49,7 @@ class HugeSimilarityGraphTest {
             new SimilarityResult(0, 1, 10),
             new SimilarityResult(1, 2, 5),
             new SimilarityResult(1, 3, 9)
-        ));
+        )).graph();
         var histogram = similarityGraph.similarityDistribution();
         assertThat(histogram.get("mean")).asInstanceOf(DOUBLE).isCloseTo(8.0, Offset.offset(1e-3));
 
@@ -82,7 +82,7 @@ class HugeSimilarityGraphTest {
                 new SimilarityResult(0, 1, 10),
                 new SimilarityResult(1, 2, 5),
                 new SimilarityResult(1, 3, 9)
-            )).similarityDistribution();
+            )).graph().similarityDistribution();
 
         assertThat(histogram).isEmpty();
     }

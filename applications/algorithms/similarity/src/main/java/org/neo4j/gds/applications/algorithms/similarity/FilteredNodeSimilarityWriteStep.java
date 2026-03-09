@@ -94,7 +94,7 @@ final class FilteredNodeSimilarityWriteStep implements WriteStep<NodeSimilarityR
             configuration,
             configuration.resolveResultStore(resultStore),
             FilteredNodeSimilarity,
-            graphResult,
+            graphResult.graph(),
             configuration.jobId()
         );
     }

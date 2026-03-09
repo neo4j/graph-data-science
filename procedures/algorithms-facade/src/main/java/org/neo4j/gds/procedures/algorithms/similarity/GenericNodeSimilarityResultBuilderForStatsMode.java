@@ -50,7 +50,7 @@ class GenericNodeSimilarityResultBuilderForStatsMode {
         ));
 
         var nodeSimilarityResult = result.get();
-        var graphResult = new SimilarityGraphBuilder(
+        var similarityGraphBuildResult = new SimilarityGraphBuilder(
             graph,
             concurrency,
             DefaultPool.INSTANCE,
@@ -58,6 +58,7 @@ class GenericNodeSimilarityResultBuilderForStatsMode {
             shouldComputeSimilarityDistribution
         ).build(nodeSimilarityResult);
 
+        var graphResult = similarityGraphBuildResult.graph();
         var similarityStats = similarityStatsProcessor.computeSimilarityDistribution(
             shouldComputeSimilarityDistribution,
             graphResult
@@ -67,7 +68,7 @@ class GenericNodeSimilarityResultBuilderForStatsMode {
             new SimilarityStatsResult(
                 timings.preProcessingMillis,
                 timings.computeMillis,
-                similarityStats.computeMilliseconds(),
+                similarityGraphBuildResult.buildTime()+similarityStats.computeMilliseconds(),
                 nodeSimilarityResult.comparedNodes(),
                 graphResult.relationshipCount(),
                 similarityStats.distribution(),

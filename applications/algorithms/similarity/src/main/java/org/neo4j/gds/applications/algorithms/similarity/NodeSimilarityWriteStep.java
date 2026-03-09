@@ -94,7 +94,7 @@ final class NodeSimilarityWriteStep implements WriteStep<NodeSimilarityResult, P
             configuration,
             configuration.resolveResultStore(resultStore),
             NodeSimilarity,
-            graphResult,
+            graphResult.graph(),
             jobId
         );
     }

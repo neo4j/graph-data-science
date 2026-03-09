@@ -127,7 +127,6 @@ public final class CentralityStatistics {
             } else {
                 throw e;
             }
-
         }
 
         return new CentralityStats(maybeHistogram, computeMilliseconds.get(), true);

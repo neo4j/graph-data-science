@@ -397,7 +397,7 @@ final class NodeSimilarityTest {
             TerminationFlag.RUNNING_TRUE,
             false
         );
-        Graph similarityGraph = graphBuilder.build(nodeSimilarityResult);
+        Graph similarityGraph = graphBuilder.build(nodeSimilarityResult).graph();
 
         assertGraphEquals(
             orientation == REVERSE
@@ -474,7 +474,7 @@ final class NodeSimilarityTest {
             TerminationFlag.RUNNING_TRUE,
             false
         );
-        Graph similarityGraph = graphBuilder.build(nodeSimilarityResult);
+        Graph similarityGraph = graphBuilder.build(nodeSimilarityResult).graph();
 
         assertGraphEquals(
             orientation == REVERSE
@@ -654,7 +654,7 @@ final class NodeSimilarityTest {
             TerminationFlag.RUNNING_TRUE,
             false
         );
-        Graph resultGraph = graphBuilder.build(nodeSimilarityResult);
+        Graph resultGraph = graphBuilder.build(nodeSimilarityResult).graph();
 
         assertGraphEquals(
             orientation == REVERSE
@@ -716,7 +716,7 @@ final class NodeSimilarityTest {
             TerminationFlag.RUNNING_TRUE,
             false
         );
-        var resultGraph = graphBuilder.build(nodeSimilarityResult);
+        var resultGraph = graphBuilder.build(nodeSimilarityResult).graph();
         assertEquals(
             orientation == REVERSE ? COMPARED_ITEMS : COMPARED_PERSONS,
             nodeSimilarityResult.comparedNodes()

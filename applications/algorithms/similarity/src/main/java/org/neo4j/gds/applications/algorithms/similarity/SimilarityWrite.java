@@ -61,7 +61,7 @@ class SimilarityWrite {
         boolean shouldComputeDistribution,
         TerminationFlag terminationFlag
     ) {
-        var similarityGraphResult = similarityResultStreamDelegate.computeSimilarityGraph(
+        var similarityGraphResult = similarityResultStreamDelegate.computeSimilarityGraphBuildResult(
             graph,
             concurrencyConfiguration.concurrency(),
             similarityResultStream,
@@ -75,7 +75,7 @@ class SimilarityWrite {
             writeRelationshipConfiguration,
             resultStore,
             label,
-            similarityGraphResult,
+            similarityGraphResult.graph(),
             jobId
         );
     }
