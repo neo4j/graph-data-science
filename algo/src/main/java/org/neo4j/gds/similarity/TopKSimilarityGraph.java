@@ -22,7 +22,7 @@ package org.neo4j.gds.similarity;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.algorithms.similarity.ActualSimilaritySummaryBuilder;
-import org.neo4j.gds.algorithms.similarity.SimilaritySummaryBuilder;
+import org.neo4j.gds.algorithms.similarity.SimilaritySummaryBuilderFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.properties.relationships.RelationshipWithPropertyConsumer;
@@ -60,7 +60,7 @@ public class TopKSimilarityGraph extends SimilarityGraph{
 
         IdMap idMap = graph;
         boolean shouldCompute = shouldComputeDistribution();
-        var similarityDistributionBuilder = SimilaritySummaryBuilder.of(new Concurrency(1),shouldCompute);
+        var similarityDistributionBuilder = SimilaritySummaryBuilderFactory.create(new Concurrency(1),shouldCompute);
         RelationshipWithPropertyConsumer consumer = (s,t,w)->{
             relationshipsBuilder.addFromInternal(
                 idMap.toRootNodeId(s),

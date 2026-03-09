@@ -21,7 +21,7 @@ package org.neo4j.gds.similarity;
 
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.algorithms.similarity.SimilaritySummaryBuilder;
+import org.neo4j.gds.algorithms.similarity.SimilaritySummaryBuilderFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
@@ -105,7 +105,7 @@ public class SimilarityGraphBuilder {
             .executorService(executorService)
             .build();
 
-        var similaritySummaryBuilder = SimilaritySummaryBuilder.of(concurrency, shouldConstructDistribution);
+        var similaritySummaryBuilder = SimilaritySummaryBuilderFactory.create(concurrency, shouldConstructDistribution);
 
         ParallelUtil.parallelStreamConsume(
             stream,

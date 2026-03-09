@@ -19,12 +19,17 @@
  */
 package org.neo4j.gds.algorithms.similarity;
 
-import org.neo4j.gds.api.properties.relationships.RelationshipWithPropertyConsumer;
+import org.neo4j.gds.core.concurrency.Concurrency;
 
-import java.util.Map;
+public final class SimilaritySummaryBuilderFactory {
 
-public interface SimilaritySummaryBuilder extends  RelationshipWithPropertyConsumer {
+    private SimilaritySummaryBuilderFactory() {}
 
-    Map<String,Object> similaritySummary();
-
+    public static SimilaritySummaryBuilder create(Concurrency concurrency, boolean shouldCompute){
+        if (shouldCompute){
+            return ActualSimilaritySummaryBuilder.create(concurrency);
+        }else{
+            return new EmptySimilaritySummaryBuilder();
+        }
+    }
 }
