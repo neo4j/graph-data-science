@@ -101,7 +101,7 @@ public class PushbackSimilarityStatsProcedureFacade {
     ) {
         var config = configurationParser.parseConfiguration(configuration, NodeSimilarityStatsConfig::of);
 
-        var parameters = config.toParameters(similarityDistributionInstructions.shouldComputeDistribution());
+        var parameters = config.toParameters();
         return businessFacade.nodeSimilarity(
             GraphName.parse(graphName),
             config.toGraphParameters(),
@@ -111,7 +111,10 @@ public class PushbackSimilarityStatsProcedureFacade {
             config.logProgress(),
             graphResources -> new NodeSimilarityStatsResultTransformer(
                 similarityDistributionInstructions.shouldComputeDistribution(),
-                config.toMap()
+                config.toMap(),
+                parameters.concurrency(),
+                terminationFlag,
+                graphResources.graph()
             )
         ).join();
     }
@@ -123,7 +126,7 @@ public class PushbackSimilarityStatsProcedureFacade {
     ) {
         var config = configurationParser.parseConfiguration(configuration, FilteredNodeSimilarityStatsConfig::of);
 
-        var parameters = config.toFilteredParameters(similarityDistributionInstructions.shouldComputeDistribution());
+        var parameters = config.toFilteredParameters();
         return businessFacade.filteredNodeSimilarity(
             GraphName.parse(graphName),
             config.toGraphParameters(),
@@ -133,7 +136,10 @@ public class PushbackSimilarityStatsProcedureFacade {
             config.logProgress(),
             graphResources -> new NodeSimilarityStatsResultTransformer(
                 similarityDistributionInstructions.shouldComputeDistribution(),
-                config.toMap()
+                config.toMap(),
+                parameters.concurrency(),
+                terminationFlag,
+                graphResources.graph()
             )
         ).join();
     }

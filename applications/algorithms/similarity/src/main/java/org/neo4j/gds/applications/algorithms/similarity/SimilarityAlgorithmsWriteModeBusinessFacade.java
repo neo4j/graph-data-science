@@ -95,6 +95,7 @@ public class SimilarityAlgorithmsWriteModeBusinessFacade {
         var writeStep = FilteredNodeSimilarityWriteStep.create(
             writeRelationshipService,
             configuration,
+            terminationFlag,
             shouldComputeSimilarityDistribution
         );
 
@@ -103,7 +104,7 @@ public class SimilarityAlgorithmsWriteModeBusinessFacade {
             configuration,
             FilteredNodeSimilarity,
             () -> estimationFacade.filteredNodeSimilarity(configuration),
-            (graph, __) -> similarityAlgorithms.filteredNodeSimilarity(graph, configuration,shouldComputeSimilarityDistribution),
+            (graph, __) -> similarityAlgorithms.filteredNodeSimilarity(graph, configuration),
             writeStep,
             resultBuilder
         );
@@ -141,7 +142,9 @@ public class SimilarityAlgorithmsWriteModeBusinessFacade {
     ) {
         var writeStep = NodeSimilarityWriteStep.create(
             writeRelationshipService,
-            configuration
+            configuration,
+            terminationFlag,
+            shouldComputeSimilarityDistribution
         );
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInWriteMode(
@@ -149,7 +152,7 @@ public class SimilarityAlgorithmsWriteModeBusinessFacade {
             configuration,
             NodeSimilarity,
             () -> estimationFacade.nodeSimilarity(configuration),
-            (graph, __) -> similarityAlgorithms.nodeSimilarity(graph, configuration,shouldComputeSimilarityDistribution),
+            (graph, __) -> similarityAlgorithms.nodeSimilarity(graph, configuration),
             writeStep,
             resultBuilder
         );

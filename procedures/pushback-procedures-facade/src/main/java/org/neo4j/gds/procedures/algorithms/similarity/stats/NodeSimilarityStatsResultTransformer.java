@@ -19,11 +19,15 @@
  */
 package org.neo4j.gds.procedures.algorithms.similarity.stats;
 
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.procedures.algorithms.similarity.SimilarityStatsResult;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.results.ResultTransformer;
-import org.neo4j.gds.similarity.SimilarityGraph;
+import org.neo4j.gds.similarity.SimilarityGraphBuilder;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Map;
 import java.util.stream.Stream;
@@ -32,20 +36,45 @@ public class NodeSimilarityStatsResultTransformer implements ResultTransformer<T
 
     private final boolean shouldComputeSimilarityDistribution;
     private final Map<String, Object> configuration;
+    private final Concurrency concurrency;
+    private final TerminationFlag terminationFlag;
+    private final Graph graph;
 
     public NodeSimilarityStatsResultTransformer(
         boolean shouldComputeSimilarityDistribution,
-        Map<String, Object> configuration
+        Map<String, Object> configuration,
+        Concurrency concurrency,
+        TerminationFlag terminationFlag,
+        Graph graph
     ) {
         this.shouldComputeSimilarityDistribution = shouldComputeSimilarityDistribution;
         this.configuration = configuration;
+        this.concurrency = concurrency;
+        this.terminationFlag = terminationFlag;
+        this.graph = graph;
     }
 
     @Override
     public Stream<SimilarityStatsResult> apply(TimedAlgorithmResult<NodeSimilarityResult> timedAlgorithmResult) {
         var result = timedAlgorithmResult.result();
+        if (result == NodeSimilarityResult.EMPTY){
+            return Stream.of(
+                SimilarityStatsResult.emptyFrom(
+                0,
+                timedAlgorithmResult.computeMillis(),
+                0,
+                configuration
+            )
+            );
+        }
+        var similarityGraphResult = new SimilarityGraphBuilder(
+            graph,
+            concurrency,
+            DefaultPool.INSTANCE,
+            terminationFlag,
+            shouldComputeSimilarityDistribution
+        ).build(result);
 
-        SimilarityGraph similarityGraphResult = result.graphResult();
         var similarityStats = SimilarityStatsTools.computeSimilarityDistribution(
             shouldComputeSimilarityDistribution,
             similarityGraphResult

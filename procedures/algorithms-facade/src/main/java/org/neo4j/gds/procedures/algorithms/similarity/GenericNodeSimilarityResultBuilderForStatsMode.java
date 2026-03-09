@@ -19,8 +19,13 @@
  */
 package org.neo4j.gds.procedures.algorithms.similarity;
 
+import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
+import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.core.concurrency.DefaultPool;
+import org.neo4j.gds.similarity.SimilarityGraphBuilder;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Map;
 import java.util.Optional;
@@ -33,7 +38,11 @@ class GenericNodeSimilarityResultBuilderForStatsMode {
         Map<String, Object> configurationMap,
         Optional<NodeSimilarityResult> result,
         AlgorithmProcessingTimings timings,
-        boolean shouldComputeSimilarityDistribution
+        boolean shouldComputeSimilarityDistribution,
+        Graph graph,
+        Concurrency concurrency,
+        TerminationFlag terminationFlag
+
     ) {
         if (result.isEmpty()) return Stream.of(SimilarityStatsResult.emptyFrom(
             timings,
@@ -41,7 +50,13 @@ class GenericNodeSimilarityResultBuilderForStatsMode {
         ));
 
         var nodeSimilarityResult = result.get();
-        var graphResult = nodeSimilarityResult.graphResult();
+        var graphResult = new SimilarityGraphBuilder(
+            graph,
+            concurrency,
+            DefaultPool.INSTANCE,
+            terminationFlag,
+            shouldComputeSimilarityDistribution
+        ).build(nodeSimilarityResult);
 
         var similarityStats = similarityStatsProcessor.computeSimilarityDistribution(
             shouldComputeSimilarityDistribution,

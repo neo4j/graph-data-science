@@ -25,6 +25,8 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.MutateRelationshipService;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
+import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
 import org.neo4j.gds.termination.TerminationFlag;
 
@@ -34,16 +36,25 @@ public final class FilteredNodeSimilarityMutateStep implements MutateStep<NodeSi
     private final SimilarityMutation similarityMutation;
     private final String mutateRelationshipType;
     private final String mutateProperty;
+    private final TerminationFlag terminationFlag;
+    private final Concurrency concurrency;
+    private final boolean shouldComputeSimilarityDistribution;
 
     private FilteredNodeSimilarityMutateStep(
         SimilarityMutation similarityMutation,
         String mutateRelationshipType,
         String mutateProperty,
-        boolean shouldComputeSimilarityDistribution
+        boolean shouldComputeSimilarityDistribution,
+        Concurrency concurrency,
+        TerminationFlag terminationFlag
     ) {
         this.similarityMutation = similarityMutation;
         this.mutateRelationshipType = mutateRelationshipType;
         this.mutateProperty = mutateProperty;
+        this.terminationFlag = terminationFlag;
+        this.concurrency = concurrency;
+        this.shouldComputeSimilarityDistribution = shouldComputeSimilarityDistribution;
+
     }
 
     public static FilteredNodeSimilarityMutateStep create(
@@ -51,6 +62,7 @@ public final class FilteredNodeSimilarityMutateStep implements MutateStep<NodeSi
         String mutateRelationshipType,
         String mutateProperty,
         boolean shouldComputeSimilarityDistribution,
+        Concurrency concurrency,
         TerminationFlag terminationFlag
     ) {
         var similarityMutation = new SimilarityMutation(
@@ -62,7 +74,9 @@ public final class FilteredNodeSimilarityMutateStep implements MutateStep<NodeSi
             similarityMutation,
             mutateRelationshipType,
             mutateProperty,
-            shouldComputeSimilarityDistribution
+            shouldComputeSimilarityDistribution,
+            concurrency,
+            terminationFlag
         );
     }
 
@@ -72,11 +86,20 @@ public final class FilteredNodeSimilarityMutateStep implements MutateStep<NodeSi
         GraphStore graphStore,
         NodeSimilarityResult result
     ) {
+
+        var graphResult = new SimilarityGraphBuilder(
+            graph,
+            concurrency,
+            DefaultPool.INSTANCE,
+            terminationFlag,
+            shouldComputeSimilarityDistribution
+        ).build(result);
+
         return similarityMutation.execute(
             graphStore,
             mutateRelationshipType,
             mutateProperty,
-            result.graphResult()
+            graphResult
         );
     }
 }

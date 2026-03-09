@@ -58,7 +58,7 @@ public class SimilarityAlgorithmsBusinessFacade {
         );
     }
 
-    public NodeSimilarityResult filteredNodeSimilarity(Graph graph, FilteredNodeSimilarityBaseConfig configuration,boolean computeDistribution) {
+    public NodeSimilarityResult filteredNodeSimilarity(Graph graph, FilteredNodeSimilarityBaseConfig configuration) {
         var parameters = configuration.toFilteredParameters();
         var task = tasks.filteredNodeSimilarity(graph, parameters);
         var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
@@ -84,7 +84,7 @@ public class SimilarityAlgorithmsBusinessFacade {
 
     }
 
-    public NodeSimilarityResult nodeSimilarity(Graph graph, NodeSimilarityBaseConfig configuration, boolean computeDistribution) {
+    public NodeSimilarityResult nodeSimilarity(Graph graph, NodeSimilarityBaseConfig configuration) {
         var parameters = configuration.toParameters();
         var task = tasks.nodeSimilarity(graph, parameters);
         var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);

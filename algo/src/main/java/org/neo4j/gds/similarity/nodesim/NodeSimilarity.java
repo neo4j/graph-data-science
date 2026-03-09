@@ -124,7 +124,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
             var stream = computeTopN();
             return NodeSimilarityResult.create(stream,sourceNodes.cardinality());
         } else {
-            var stream= concurrency.value() > 1
+            var stream = concurrency.value() > 1
                 ? computeParallel()
                 : computeSimilarityResultStream();
             return NodeSimilarityResult.create(stream,sourceNodes.cardinality());

@@ -77,7 +77,7 @@ public class SimilarityAlgorithmsStreamModeBusinessFacade {
             configuration,
             FilteredNodeSimilarity,
             () -> estimationFacade.filteredNodeSimilarity(configuration),
-            (graph, __) -> similarityAlgorithms.filteredNodeSimilarity(graph, configuration,false),
+            (graph, __) -> similarityAlgorithms.filteredNodeSimilarity(graph, configuration),
             resultBuilder
         );
     }
@@ -107,7 +107,7 @@ public class SimilarityAlgorithmsStreamModeBusinessFacade {
             configuration,
             NodeSimilarity,
             () -> estimationFacade.nodeSimilarity(configuration),
-            (graph, __) -> similarityAlgorithms.nodeSimilarity(graph, configuration,false),
+            (graph, __) -> similarityAlgorithms.nodeSimilarity(graph, configuration),
             resultBuilder
         );
     }

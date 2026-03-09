@@ -24,20 +24,23 @@ import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTiming
 import org.neo4j.gds.applications.algorithms.machinery.StatsResultBuilder;
 import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityStatsConfig;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Optional;
 import java.util.stream.Stream;
 
 class FilteredNodeSimilarityResultBuilderForStatsMode implements StatsResultBuilder<NodeSimilarityResult, Stream<SimilarityStatsResult>> {
     private final GenericNodeSimilarityResultBuilderForStatsMode genericResultBuilder = new GenericNodeSimilarityResultBuilderForStatsMode();
-
+    private final TerminationFlag terminationFlag;
     private final FilteredNodeSimilarityStatsConfig configuration;
     private final boolean shouldComputeSimilarityDistribution;
 
     FilteredNodeSimilarityResultBuilderForStatsMode(
+        TerminationFlag terminationFlag,
         FilteredNodeSimilarityStatsConfig configuration,
         boolean shouldComputeSimilarityDistribution
     ) {
+        this.terminationFlag = terminationFlag;
         this.configuration = configuration;
         this.shouldComputeSimilarityDistribution = shouldComputeSimilarityDistribution;
     }
@@ -52,7 +55,10 @@ class FilteredNodeSimilarityResultBuilderForStatsMode implements StatsResultBuil
             configuration.toMap(),
             result,
             timings,
-            shouldComputeSimilarityDistribution
+            shouldComputeSimilarityDistribution,
+            graph,
+            configuration.concurrency(),
+            terminationFlag
         );
     }
 }

@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.similarity.nodesim;
 
-import org.neo4j.gds.similarity.SimilarityGraph;
 import org.neo4j.gds.similarity.SimilarityResult;
 
 import java.util.Optional;
@@ -46,9 +45,6 @@ public record NodeSimilarityResult(
         return  new NodeSimilarityResult(Optional.of(stream),Optional.empty(),comparedNodes);
     }
 
-    public SimilarityGraph graphResult() {
-        return null; //temp
-    }
 
    public static final NodeSimilarityResult EMPTY = new NodeSimilarityResult(
        Optional.empty(),

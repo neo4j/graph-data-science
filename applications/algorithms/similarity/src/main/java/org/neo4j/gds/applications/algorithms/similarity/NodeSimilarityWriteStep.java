@@ -27,8 +27,11 @@ import org.neo4j.gds.applications.algorithms.machinery.WriteRelationshipService;
 import org.neo4j.gds.applications.algorithms.machinery.WriteStep;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 import org.neo4j.gds.core.JobId;
+import org.neo4j.gds.core.concurrency.DefaultPool;
+import org.neo4j.gds.similarity.SimilarityGraphBuilder;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityWriteConfig;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Map;
 
@@ -37,24 +40,34 @@ import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Nod
 final class NodeSimilarityWriteStep implements WriteStep<NodeSimilarityResult, Pair<RelationshipsWritten, Map<String, Object>>> {
     private final SimilarityWrite similarityWrite;
     private final NodeSimilarityWriteConfig configuration;
+    private final TerminationFlag terminationFlag;
+    private final boolean shouldComputeSimilarityDistribution;
 
     private NodeSimilarityWriteStep(
         SimilarityWrite similarityWrite,
-        NodeSimilarityWriteConfig configuration
+        NodeSimilarityWriteConfig configuration,
+        TerminationFlag terminationFlag,
+        boolean shouldComputeSimilarityDistribution
     ) {
         this.similarityWrite = similarityWrite;
         this.configuration = configuration;
+        this.terminationFlag = terminationFlag;
+        this.shouldComputeSimilarityDistribution = shouldComputeSimilarityDistribution;
     }
 
     static NodeSimilarityWriteStep create(
         WriteRelationshipService writeRelationshipService,
-        NodeSimilarityWriteConfig configuration
+        NodeSimilarityWriteConfig configuration,
+        TerminationFlag terminationFlag,
+        boolean shouldComputeSimilarityDistribution
     ) {
         var similarityWrite = new SimilarityWrite(writeRelationshipService);
 
         return new NodeSimilarityWriteStep(
             similarityWrite,
-            configuration
+            configuration,
+            terminationFlag,
+            shouldComputeSimilarityDistribution
         );
     }
 
@@ -66,13 +79,22 @@ final class NodeSimilarityWriteStep implements WriteStep<NodeSimilarityResult, P
         NodeSimilarityResult result,
         JobId jobId
     ) {
+
+        var graphResult = new SimilarityGraphBuilder(
+            graph,
+            configuration.concurrency(),
+            DefaultPool.INSTANCE,
+            terminationFlag,
+            shouldComputeSimilarityDistribution
+        ).build(result);
+
         return similarityWrite.execute(
             graphStore,
             configuration,
             configuration,
             configuration.resolveResultStore(resultStore),
             NodeSimilarity,
-            result.graphResult(),
+            graphResult,
             jobId
         );
     }

@@ -36,7 +36,7 @@ import static org.neo4j.gds.TestSupport.fromGdl;
 class HugeSimilarityGraphTest {
 
     @Test
-    void shouldReturnΑll() {
+    void shouldReturnAll() {
         var graph = fromGdl("CREATE (a),(b),(c),(d)"); //we need that
 
         var similarityGraph =  new SimilarityGraphBuilder(

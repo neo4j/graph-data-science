@@ -256,6 +256,7 @@ public final class LocalSimilarityProcedureFacade implements SimilarityProcedure
             FilteredNodeSimilarityStatsConfig::of
         );
         var resultBuilder = new FilteredNodeSimilarityResultBuilderForStatsMode(
+            terminationFlag,
             configuration,
             shouldComputeSimilarityDistribution
         );
@@ -263,8 +264,7 @@ public final class LocalSimilarityProcedureFacade implements SimilarityProcedure
         return statsModeBusinessFacade.filteredNodeSimilarity(
             GraphName.parse(graphName),
             configuration,
-            resultBuilder,
-            shouldComputeSimilarityDistribution
+            resultBuilder
         );
     }
 
@@ -481,14 +481,14 @@ public final class LocalSimilarityProcedureFacade implements SimilarityProcedure
         );
         var resultBuilder = new NodeSimilarityResultBuilderForStatsMode(
             configuration,
-            shouldComputeSimilarityDistribution
+            shouldComputeSimilarityDistribution,
+            terminationFlag
         );
 
         return statsModeBusinessFacade.nodeSimilarity(
             GraphName.parse(graphName),
             configuration,
-            resultBuilder,
-            shouldComputeSimilarityDistribution
+            resultBuilder
         );
     }
 

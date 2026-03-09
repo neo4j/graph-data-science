@@ -22,9 +22,11 @@ package org.neo4j.gds.procedures.algorithms.similarity.stats;
 import com.carrotsearch.hppc.BitSet;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
 import org.neo4j.gds.similarity.nodesim.TopKMap;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Map;
 import java.util.Optional;
@@ -56,7 +58,13 @@ class NodeSimilarityStatsResultTransformerTest {
         topKMap.put(1, 2, 5);
         topKMap.put(1, 3, 9);
 
-        var transformer = new NodeSimilarityStatsResultTransformer(true,config);
+        var transformer = new NodeSimilarityStatsResultTransformer(
+            true,
+            config,
+            new Concurrency(1),
+            TerminationFlag.RUNNING_TRUE,
+            graph
+        );
 
         var nodeSimResult = new NodeSimilarityResult(
             Optional.empty(),
@@ -107,7 +115,13 @@ class NodeSimilarityStatsResultTransformerTest {
             100
         );
 
-        var transformer = new NodeSimilarityStatsResultTransformer(false,config);
+        var transformer = new NodeSimilarityStatsResultTransformer(
+            false,
+            config,
+            new Concurrency(1),
+            TerminationFlag.RUNNING_TRUE,
+            graph
+        );
 
 
         var statsResult = transformer.apply(new TimedAlgorithmResult<>(nodeSimResult,10));
@@ -127,7 +141,14 @@ class NodeSimilarityStatsResultTransformerTest {
     void shouldComputeResultForEmpty(){
 
         var config = Map.of("a",(Object)("foo"));
-        var transformer = new NodeSimilarityStatsResultTransformer(true,config);
+        var transformer = new NodeSimilarityStatsResultTransformer(
+            true,
+            config,
+            new Concurrency(1),
+            TerminationFlag.RUNNING_TRUE,
+            fromGdl("")
+        );
+
         var statsResult = transformer.apply(new TimedAlgorithmResult<>(NodeSimilarityResult.EMPTY,10));
         assertThat(statsResult.findFirst().orElseThrow())
             .satisfies(stats -> {
