@@ -1,4 +1,4 @@
-= Model Catalog
+= Machine Learning1
 
 Aura Graph Analytics can be used to create, store and reuse machine learning models created by one of the xref:machine-learning/machine-learning.adoc[available machine learning algorithms].
 
@@ -28,7 +28,7 @@ Access to the model catalog via the xref:aura-graph-analytics/cypher.adoc[Cypher
 
 == Limitations
 
-Currently model storage in Aura Graph Analytics has the following limitations
+Model storage in Aura Graph Analytics has some limitations.
 
-* `gds.model.publish` is not supported, models cannot be shared between users
+* The `gds.model.publish` procedure is currently not supported, so models **cannot be shared** with other users.
 * Models cannot be accessed across regions or cloud providers.
