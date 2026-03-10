@@ -1,0 +1,4 @@
+plugins {
+    id 'buildlogic-gds-java'
+    id 'buildlogic-gds-java-integration-tests'
+}

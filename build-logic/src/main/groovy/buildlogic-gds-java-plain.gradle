@@ -1,0 +1,64 @@
+plugins {
+    // the logic is only applied to projects having the java-library plugin applied - take it here instead
+    id 'java-library'
+}
+
+repositories {
+    mavenCentral()
+    if (project.hasProperty('pipelineRepository')) {
+        maven {
+            url = "file://${project.getProperty('pipelineRepository')}"
+        }
+    }
+    maven {
+        name = 'teamcity-artifacts'
+        url = "file://${rootProject.projectDir}/neo4j-repo"
+    }
+}
+
+tasks.register("sourcesJar", Jar) {
+    archiveClassifier = 'sources'
+    from(sourceSets.main.allJava)
+}
+
+javadoc {
+    StandardJavadocDocletOptions opts = (options as StandardJavadocDocletOptions)
+    opts.addBooleanOption('Xdoclint:all,-missing', true)
+}
+
+tasks.register("javadocJar", Jar) {
+    archiveClassifier = 'javadoc'
+    from javadoc
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.warnings = true
+    options.encoding = 'UTF-8'
+
+    // Since JDK 17 the default access to the following
+    // packages is "deny". We need to open them in order
+    // to gain access in GDS / Neo4j.
+    options.forkOptions.jvmArgs += '--add-opens=java.base/java.lang.invoke=ALL-UNNAMED'
+    options.forkOptions.jvmArgs += '--add-opens=java.base/java.nio=ALL-UNNAMED'
+    options.forkOptions.jvmArgs += '--add-opens=java.base/java.util.stream=ALL-UNNAMED'
+    options.forkOptions.jvmArgs += '--add-opens=java.base/sun.net.www.protocol.http=ALL-UNNAMED'
+    options.forkOptions.jvmArgs += '--add-opens=java.base/java.lang=ALL-UNNAMED'
+
+    options.compilerArgs += [
+        '-parameters',
+        '-Xlint:all,-cast,-deprecation,-processing,-serial,-try,-unchecked,-varargs,-rawtypes,-removal',
+        '-Xmaxerrs', '1337'
+    ]
+}
+
+tasks.withType(Jar).configureEach {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+afterEvaluate {
+    if (group.startsWith('com.neo4j.gds')) {
+        javadoc {
+            enabled = false
+        }
+    }
+}

@@ -1,0 +1,94 @@
+import org.gradle.api.tasks.testing.logging.TestExceptionFormat
+import org.gradle.api.tasks.testing.logging.TestLogEvent
+
+test {
+    debugOptions {
+        enabled = project.hasProperty('test-debug')
+        port = 5425
+        server = true
+        suspend = true
+    }
+
+    // Since JDK 17 the default access to the following
+    // packages is "deny". We need to open them in order
+    // to gain access in GDS / Neo4j.
+    jvmArgs += '--add-opens=java.base/java.lang=ALL-UNNAMED'
+    jvmArgs += '--add-opens=java.base/java.lang.invoke=ALL-UNNAMED'
+    jvmArgs += '--add-opens=java.base/java.nio=ALL-UNNAMED'
+    jvmArgs += '--add-opens=java.base/java.util.stream=ALL-UNNAMED'
+    jvmArgs += '--add-opens=java.base/sun.net.www.protocol.http=ALL-UNNAMED'
+    jvmArgs += '--add-opens=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED'
+    jvmArgs += '--add-opens=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED'
+    jvmArgs += '--add-opens=jdk.compiler/com.sun.tools.javac.main=ALL-UNNAMED'
+    jvmArgs += '--add-opens=jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED'
+    jvmArgs += '--add-opens=jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED'
+    jvmArgs += '--add-opens=jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED'
+
+    // enable this to check for unintended use of boxed primitive iterators
+    // note that this flag might cause OOMs on CI
+
+    // systemProperty "org.openjdk.java.util.stream.tripwire", "true"
+    // testLogging { events "standardError" }
+
+    systemProperty "org.neo4j.gds.utils.GdsFeatureToggles.throwWhenUsingProgressTrackerWithoutTasks", "true"
+
+    maxHeapSize = "4G"
+    useJUnitPlatform {
+        includeEngines 'junit-jupiter'
+        includeEngines 'jqwik'
+    }
+
+    systemProperty("junit.jupiter.execution.timeout.default", "20m")
+
+    reports.junitXml.required = !project.hasProperty('disableTestXMLReports')
+
+    // enable verbose test logging
+    testLogging {
+        // set options for log level LIFECYCLE (the default)
+        lifecycle {
+            if (project.hasProperty('showTestResults')) {
+                events TestLogEvent.FAILED,
+                    TestLogEvent.PASSED,
+                    TestLogEvent.SKIPPED,
+                    TestLogEvent.STANDARD_ERROR,
+                    TestLogEvent.STANDARD_OUT
+                showCauses true
+                showStackTraces true
+            } else {
+                events TestLogEvent.FAILED
+            }
+            exceptionFormat = TestExceptionFormat.FULL
+            showExceptions = true
+        }
+
+        // set options for log level INFO
+        info {
+            events TestLogEvent.FAILED,
+                TestLogEvent.SKIPPED,
+                TestLogEvent.STANDARD_ERROR,
+                TestLogEvent.STANDARD_OUT
+            exceptionFormat = TestExceptionFormat.FULL
+            showExceptions = true
+        }
+
+        // set options for log level DEBUG
+        debug {
+            events TestLogEvent.STARTED,
+                TestLogEvent.FAILED,
+                TestLogEvent.PASSED,
+                TestLogEvent.SKIPPED,
+                TestLogEvent.STANDARD_ERROR,
+                TestLogEvent.STANDARD_OUT
+            exceptionFormat = TestExceptionFormat.FULL
+            showExceptions = true
+            showCauses = true
+            showStackTraces = true
+        }
+
+        afterSuite { desc, result ->
+            if (!desc.parent) { // will match the outermost suite
+                println "Results: ${result.resultType} (${result.testCount} tests, ${result.successfulTestCount} successes, ${result.failedTestCount} failures, ${result.skippedTestCount} skipped)"
+            }
+        }
+    }
+}

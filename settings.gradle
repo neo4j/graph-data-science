@@ -30,6 +30,8 @@ dependencyResolutionManagement {
 
 rootProject.name = 'open-gds'
 
+includeBuild 'build-logic'
+
 include('algo')
 project(':algo').projectDir = file('algo')
 

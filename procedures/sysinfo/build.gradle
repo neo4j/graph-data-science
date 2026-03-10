@@ -1,4 +1,7 @@
-apply plugin: 'java-library'
+plugins {
+    id 'buildlogic-gds-java'
+}
+
 apply plugin: 'com.netflix.nebula.info-broker'
 apply plugin: 'com.netflix.nebula.info-props'
 apply plugin: 'com.netflix.nebula.info-basic'

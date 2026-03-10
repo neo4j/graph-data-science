@@ -18,7 +18,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-apply plugin: 'java-library'
+plugins {
+    id 'buildlogic-gds-java'
+}
 
 description = 'Neo4j Graph Data Science :: Histogram'
 

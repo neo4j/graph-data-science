@@ -1,4 +1,7 @@
-apply plugin: 'java-library'
+plugins {
+    // FIXME: see https://linear.app/neo4j/issue/GDS-186/replace-defaults-javagradle-with-gradle-build-logic-conventions
+    id 'buildlogic-gds-java-with-it'
+}
 
 description = 'Neo4j Graph Data Science :: Algorithm Specifications'
 

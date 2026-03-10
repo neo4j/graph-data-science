@@ -1,4 +1,7 @@
-apply plugin: 'java-library'
+plugins {
+    id 'buildlogic-gds-java-plain'
+}
+
 
 description = 'Neo4j Graph Data Science :: Algorithms'
 
