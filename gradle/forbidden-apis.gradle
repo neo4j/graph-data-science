@@ -14,6 +14,7 @@ if (shouldForbiddenApis) {
                 bundledSignatures = ['jdk-system-out']
             }
             proj.tasks.matching { it.name.startsWith('forbiddenApis') }.each {
+                it.notCompatibleWithConfigurationCache("${it.name} break when configuration cache is enabled. Disable until we figure it out.")
                 tasks.check.dependsOn it
             }
             proj.forbiddenApisMain {
