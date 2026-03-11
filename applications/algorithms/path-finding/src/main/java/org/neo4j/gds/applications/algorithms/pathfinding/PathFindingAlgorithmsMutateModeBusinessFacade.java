@@ -356,6 +356,30 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
         );
     }
 
+    public <RESULT> RESULT singlePairShortestPathYensWithPaths(
+        GraphName graphName,
+        ShortestPathYensMutateConfig configuration,
+        Map<String, Stream<PathUsingInternalNodeIds>> pathStore,
+        ResultBuilder<ShortestPathYensMutateConfig, PathFindingResult, RESULT, Void> resultBuilder
+    ) {
+        var sideEffect = new StorePathsSideEffect(pathStore, configuration.mutateRelationshipType());
+
+        return algorithmProcessingTemplate.processAlgorithmAndAnySideEffects(
+            Optional.empty(),
+            graphName,
+            configuration,
+            Optional.empty(),
+            Optional.empty(),
+            Yens,
+            DimensionTransformer.DISABLED,
+            () -> estimationFacade.singlePairShortestPathYens(configuration),
+            (graph, __) -> pathFindingAlgorithms.singlePairShortestPathYens(graph, configuration),
+            Optional.of(sideEffect),
+            new MutateResultRenderer<>(configuration, resultBuilder)
+        );
+    }
+
+
     public <RESULT> RESULT singleSourceShortestPathDijkstra(
         GraphName graphName,
         AllShortestPathsDijkstraMutateConfig configuration,
