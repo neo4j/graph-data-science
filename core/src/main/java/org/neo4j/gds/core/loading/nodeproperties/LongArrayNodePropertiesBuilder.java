@@ -119,5 +119,10 @@ public class LongArrayNodePropertiesBuilder implements InnerNodePropertiesBuilde
         public long nodeCount() {
             return size;
         }
+
+        @Override
+        public boolean hasValue(long nodeId) {
+            return propertyValues.contains(nodeId);
+        }
     }
 }

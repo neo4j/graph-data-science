@@ -120,5 +120,10 @@ public class DoubleArrayNodePropertiesBuilder implements InnerNodePropertiesBuil
         public long nodeCount() {
             return size;
         }
+
+        @Override
+        public boolean hasValue(long nodeId) {
+            return propertyValues.contains(nodeId);
+        }
     }
 }
