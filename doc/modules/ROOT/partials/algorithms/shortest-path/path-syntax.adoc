@@ -44,7 +44,7 @@ ifeval::["{algorithm}" == "A*"]
 | longitudeProperty                                                                | Float   | n/a     | no       | The node property that stores the longitude value.
 endif::[]
 ifeval::["{algorithm}" == "Yen's"]
-| k                                                                                | Integer | 1       | yes      | The number of shortest paths to compute between source and target node.
+| k                                                                                | Integer | 1       | no      | The number of shortest paths to compute between source and target node.
 endif::[]
 ifeval::["{algorithm}" == "Delta-Stepping"]
 | delta                                                                            | Float   | 2.0       | yes      | The bucket width for grouping nodes with the same tentative distance to the source node.
