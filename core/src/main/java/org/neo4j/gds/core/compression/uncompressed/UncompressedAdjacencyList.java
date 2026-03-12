@@ -324,4 +324,26 @@ public final class UncompressedAdjacencyList implements AdjacencyList, Adjacency
             currentPage = null;
         }
     }
+
+    public static final class PageSlice {
+        public long[] page;
+        public int offset;
+        public int length;
+    }
+
+    public PageSlice newPageSlice() {
+        return new PageSlice();
+    }
+
+    public boolean initPageSlice(long node, PageSlice reuse) {
+        var degree = degrees.get(node);
+        if (degree == 0) {
+            return false;
+        }
+        var offset = offsets.get(node);
+        reuse.page = pages[pageIndex(offset, BumpAllocator.PAGE_SHIFT)];
+        reuse.offset = indexInPage(offset, BumpAllocator.PAGE_MASK);
+        reuse.length = degree;
+        return true;
+    }
 }
