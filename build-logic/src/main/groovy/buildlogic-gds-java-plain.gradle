@@ -5,30 +5,6 @@ plugins {
 
 repositories {
     mavenCentral()
-    if (project.hasProperty('pipelineRepository')) {
-        maven {
-            url = "file://${project.getProperty('pipelineRepository')}"
-        }
-    }
-    maven {
-        name = 'teamcity-artifacts'
-        url = "file://${rootProject.projectDir}/neo4j-repo"
-    }
-}
-
-tasks.register("sourcesJar", Jar) {
-    archiveClassifier = 'sources'
-    from(sourceSets.main.allJava)
-}
-
-javadoc {
-    StandardJavadocDocletOptions opts = (options as StandardJavadocDocletOptions)
-    opts.addBooleanOption('Xdoclint:all,-missing', true)
-}
-
-tasks.register("javadocJar", Jar) {
-    archiveClassifier = 'javadoc'
-    from javadoc
 }
 
 tasks.withType(JavaCompile).configureEach {
@@ -53,12 +29,4 @@ tasks.withType(JavaCompile).configureEach {
 
 tasks.withType(Jar).configureEach {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-}
-
-afterEvaluate {
-    if (group.startsWith('com.neo4j.gds')) {
-        javadoc {
-            enabled = false
-        }
-    }
 }
