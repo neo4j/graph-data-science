@@ -23,9 +23,7 @@ tasks.register('integrationTest', Test) {
 
     testClassesDirs = sourceSets.integrationTest.output.classesDirs
     classpath = sourceSets.integrationTest.runtimeClasspath
-}
 
-tasks.named('integrationTest').configure {
     maxHeapSize = "4G"
 
     // Since JDK 17 the default access to the following
