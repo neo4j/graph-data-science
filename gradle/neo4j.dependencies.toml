@@ -5,6 +5,7 @@ neo4j = "2026.02.2"
 [libraries]
 annotations = { module = "org.neo4j:annotations", version.ref = "neo4j" }
 bolt = { module = "org.neo4j:neo4j-bolt", version.ref = "neo4j" }
+bolt-messages = { module = "org.neo4j:neo4j-bolt-messages", version.ref = "neo4j" }
 collections = { module = "org.neo4j:neo4j-collections", version.ref = "neo4j" }
 command-line = { module = "org.neo4j:neo4j-command-line", version.ref = "neo4j" }
 common = { module = "org.neo4j:neo4j-common", version.ref = "neo4j" }

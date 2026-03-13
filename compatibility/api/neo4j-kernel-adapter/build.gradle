@@ -23,6 +23,7 @@ dependencies {
     // Neo4j dependencies
     compileOnly neo4j.annotations
     compileOnly(neo4j.bolt) { transitive = false }
+    compileOnly(neo4j.bolt.messages) { transitive = false }
     compileOnly(neo4j.common) { transitive = false }
     compileOnly(neo4j.configuration) { transitive = false }
     compileOnly(neo4j.gql.status) { transitive = false }
