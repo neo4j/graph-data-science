@@ -35,7 +35,7 @@ import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.settings.Neo4jSettings;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.internal.batchimport.DefaultAdditionalIds;
-import org.neo4j.internal.batchimport.input.Collectors;
+import org.neo4j.internal.batchimport.input.BadCollector;
 import org.neo4j.io.fs.FileSystemAbstraction;
 import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.io.layout.Neo4jLayout;
@@ -223,7 +223,7 @@ public final class GdsParallelBatchImporter {
 
     private Collector getCollector() {
         return config.useBadCollector()
-            ? Collectors.badCollector(new LoggingOutputStream(log), 0)
+            ? BadCollector.create(new LoggingOutputStream(log), 0)
             : Collector.EMPTY;
     }
 
