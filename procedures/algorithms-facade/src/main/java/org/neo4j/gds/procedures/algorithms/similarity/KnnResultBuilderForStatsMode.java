@@ -62,8 +62,7 @@ class KnnResultBuilderForStatsMode implements StatsResultBuilder<KnnResult, Stre
 
 
         var similarityStats = similarityStatsProcessor.computeSimilarityDistribution(
-            graph,
-            configuration,
+            configuration.concurrency(),
             knnResult.streamSimilarityResult(),
             shouldComputeSimilarityDistribution,
             terminationFlag

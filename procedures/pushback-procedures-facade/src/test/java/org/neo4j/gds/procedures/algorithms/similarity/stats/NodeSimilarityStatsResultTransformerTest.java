@@ -33,20 +33,11 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.InstanceOfAssertFactories.DOUBLE;
-import static org.neo4j.gds.TestSupport.fromGdl;
 
 class NodeSimilarityStatsResultTransformerTest {
 
     @Test
     void shouldComputeResultWithDistribution(){
-
-        var graph = fromGdl(
-            """
-            CREATE (a),(b),(c)
-            (a)-[:R{w:5]]->(b),
-            (b)-[:R{w:10]]->(c),
-            (a)-[:R{w:9]]->(c)
-            """).graph();
 
         var config = Map.of("a",(Object)("foo"));
 
@@ -62,8 +53,7 @@ class NodeSimilarityStatsResultTransformerTest {
             true,
             config,
             new Concurrency(1),
-            TerminationFlag.RUNNING_TRUE,
-            graph
+            TerminationFlag.RUNNING_TRUE
         );
 
         var nodeSimResult = new NodeSimilarityResult(
@@ -91,14 +81,6 @@ class NodeSimilarityStatsResultTransformerTest {
     @Test
     void shouldComputeResultWithoutDistribution(){
 
-        var graph = fromGdl(
-            """
-            CREATE (a),(b),(c)
-            (a)-[:R{w:5]]->(b),
-            (b)-[:R{w:10]]->(c),
-            (a)-[:R{w:9]]->(c)
-            """).graph();
-
         var config = Map.of("a",(Object)("foo"));
 
         var bitset = new BitSet(4);
@@ -119,8 +101,7 @@ class NodeSimilarityStatsResultTransformerTest {
             false,
             config,
             new Concurrency(1),
-            TerminationFlag.RUNNING_TRUE,
-            graph
+            TerminationFlag.RUNNING_TRUE
         );
 
 
@@ -145,8 +126,7 @@ class NodeSimilarityStatsResultTransformerTest {
             true,
             config,
             new Concurrency(1),
-            TerminationFlag.RUNNING_TRUE,
-            fromGdl("")
+            TerminationFlag.RUNNING_TRUE
         );
 
         var statsResult = transformer.apply(new TimedAlgorithmResult<>(NodeSimilarityResult.EMPTY,10));

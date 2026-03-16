@@ -19,14 +19,10 @@
  */
 package org.neo4j.gds.procedures.algorithms.similarity.stats;
 
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.procedures.algorithms.similarity.SimilarityStatsResult;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.results.ResultTransformer;
-import org.neo4j.gds.similarity.SimilarityGraph;
-import org.neo4j.gds.similarity.SimilarityGraphBuilder;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
 import org.neo4j.gds.termination.TerminationFlag;
 
@@ -39,20 +35,17 @@ public class NodeSimilarityStatsResultTransformer implements ResultTransformer<T
     private final Map<String, Object> configuration;
     private final Concurrency concurrency;
     private final TerminationFlag terminationFlag;
-    private final Graph graph;
 
     public NodeSimilarityStatsResultTransformer(
         boolean shouldComputeSimilarityDistribution,
         Map<String, Object> configuration,
         Concurrency concurrency,
-        TerminationFlag terminationFlag,
-        Graph graph
+        TerminationFlag terminationFlag
     ) {
         this.shouldComputeSimilarityDistribution = shouldComputeSimilarityDistribution;
         this.configuration = configuration;
         this.concurrency = concurrency;
         this.terminationFlag = terminationFlag;
-        this.graph = graph;
     }
 
     @Override
@@ -68,27 +61,20 @@ public class NodeSimilarityStatsResultTransformer implements ResultTransformer<T
             )
             );
         }
-        var similarityGraphBuildResult = new SimilarityGraphBuilder(
-            graph,
-            concurrency,
-            DefaultPool.INSTANCE,
-            terminationFlag,
-            shouldComputeSimilarityDistribution
-        ).build(result);
-
-        SimilarityGraph similarityGraph = similarityGraphBuildResult.graph();
         var similarityStats = SimilarityStatsTools.computeSimilarityDistribution(
+            result.isStream() ? concurrency : new Concurrency(1),
+            result.isStream()? result.streamResult() : result.topKMap().stream(),
             shouldComputeSimilarityDistribution,
-            similarityGraph
+            terminationFlag
         );
 
         return Stream.of(
             new SimilarityStatsResult(
                 0,
                 timedAlgorithmResult.computeMillis(),
-                similarityStats.computeMilliseconds() + similarityGraphBuildResult.buildTime(),
+                similarityStats.computeMilliseconds(),
                 result.comparedNodes(),
-                similarityGraph.relationshipCount(),
+                similarityStats.numberOfEntries(),
                 similarityStats.distribution(),
                 configuration
             )

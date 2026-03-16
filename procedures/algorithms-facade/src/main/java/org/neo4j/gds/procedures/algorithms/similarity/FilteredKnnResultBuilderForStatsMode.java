@@ -22,7 +22,6 @@ package org.neo4j.gds.procedures.algorithms.similarity;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.applications.algorithms.machinery.StatsResultBuilder;
-import org.neo4j.gds.applications.algorithms.similarity.SimilarityResultStreamDelegate;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnResult;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnStatsConfig;
 import org.neo4j.gds.termination.TerminationFlag;
@@ -31,7 +30,6 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 class FilteredKnnResultBuilderForStatsMode implements StatsResultBuilder<FilteredKnnResult, Stream<KnnStatsResult>> {
-    private final SimilarityResultStreamDelegate similarityResultStreamDelegate = new SimilarityResultStreamDelegate();
     private final SimilarityStatsProcessor similarityStatsProcessor = new SimilarityStatsProcessor();
     private final TerminationFlag terminationFlag;
 
@@ -63,8 +61,7 @@ class FilteredKnnResultBuilderForStatsMode implements StatsResultBuilder<Filtere
         var filteredKnnResult = result.get();
 
         var similarityStats = similarityStatsProcessor.computeSimilarityDistribution(
-            graph,
-            configuration,
+            configuration.concurrency(),
             filteredKnnResult.similarityResultStream(),
             shouldComputeSimilarityDistribution,
             terminationFlag

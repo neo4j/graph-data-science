@@ -17,36 +17,46 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.applications.algorithms.similarity;
+package org.neo4j.gds.algorithms.similarity;
 
-import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.properties.relationships.RelationshipWithPropertyConsumer;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.similarity.SimilarityGraphBuildResult;
-import org.neo4j.gds.similarity.SimilarityGraphBuilder;
+import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.similarity.SimilarityResult;
 import org.neo4j.gds.termination.TerminationFlag;
 
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 /**
  * "Delegate" because really we should mint a microtype and place this behaviour in it
  */
 public class SimilarityResultStreamDelegate {
-    public SimilarityGraphBuildResult computeSimilarityGraphBuildResult(
-        Graph graph,
+
+    public void consumeStream(
         Concurrency concurrency,
         Stream<SimilarityResult> similarityResultStream,
-        boolean shouldComputeStatistics,
-        TerminationFlag terminationFlag
-    ) {
+        TerminationFlag terminationFlag,
+        RelationshipWithPropertyConsumer consumer
+    ){
+        Consumer<SimilarityResult> consumableAction = (similarityResult ->
+            consumer.accept(
+                similarityResult.sourceNodeId(),
+                similarityResult.targetNodeId(),
+                similarityResult.similarity
+            )
+        );
+        if (concurrency.sequential()){
+            similarityResultStream.forEach(consumableAction);
+        }else {
+            ParallelUtil.parallelStreamConsume(
+                similarityResultStream,
+                concurrency,
+                terminationFlag,
+                similarityStream -> similarityStream.forEach(consumableAction)
+                );
 
-        return new SimilarityGraphBuilder(
-            graph,
-            concurrency,
-            DefaultPool.INSTANCE,
-            terminationFlag,
-            shouldComputeStatistics
-        ).build(similarityResultStream);
+        }
     }
+
 }

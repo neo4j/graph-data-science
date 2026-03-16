@@ -113,8 +113,7 @@ public class PushbackSimilarityStatsProcedureFacade {
                 similarityDistributionInstructions.shouldComputeDistribution(),
                 config.toMap(),
                 parameters.concurrency(),
-                terminationFlag,
-                graphResources.graph()
+                terminationFlag
             )
         ).join();
     }
@@ -138,8 +137,7 @@ public class PushbackSimilarityStatsProcedureFacade {
                 similarityDistributionInstructions.shouldComputeDistribution(),
                 config.toMap(),
                 parameters.concurrency(),
-                terminationFlag,
-                graphResources.graph()
+                terminationFlag
             )
         ).join();
     }

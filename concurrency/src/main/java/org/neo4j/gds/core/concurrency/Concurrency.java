@@ -51,4 +51,8 @@ public class Concurrency {
     public int hashCode() {
         return Objects.hashCode(value);
     }
+
+    public boolean sequential() {
+        return  value == 1;
+    }
 }

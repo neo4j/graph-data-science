@@ -56,7 +56,6 @@ class FilteredNodeSimilarityResultBuilderForStatsMode implements StatsResultBuil
             result,
             timings,
             shouldComputeSimilarityDistribution,
-            graph,
             configuration.concurrency(),
             terminationFlag
         );

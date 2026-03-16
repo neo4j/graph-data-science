@@ -93,6 +93,6 @@ public final class SimilarityStatistics {
 
     public record  SimilarityStats(Optional<DoubleHistogram> histogram, long computeMilliseconds, boolean success) {}
 
-    public record  SimilarityDistributionResults(Map<String,Object> distribution, long computeMilliseconds) {}
+    public record  SimilarityDistributionResults(long numberOfEntries, Map<String,Object> distribution, long computeMilliseconds) {}
 
 }

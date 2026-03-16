@@ -30,7 +30,9 @@ import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.config.WritePropertyConfig;
 import org.neo4j.gds.config.WriteRelationshipConfig;
 import org.neo4j.gds.core.JobId;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.similarity.SimilarityGraph;
+import org.neo4j.gds.similarity.SimilarityGraphBuilder;
 import org.neo4j.gds.similarity.SimilarityResult;
 import org.neo4j.gds.similarity.TopKSimilarityGraph;
 import org.neo4j.gds.termination.TerminationFlag;
@@ -40,7 +42,6 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 class SimilarityWrite {
-    private final SimilarityResultStreamDelegate similarityResultStreamDelegate = new SimilarityResultStreamDelegate();
 
     private final WriteRelationshipService writeRelationshipService;
 
@@ -61,13 +62,13 @@ class SimilarityWrite {
         boolean shouldComputeDistribution,
         TerminationFlag terminationFlag
     ) {
-        var similarityGraphResult = similarityResultStreamDelegate.computeSimilarityGraphBuildResult(
+        var similarityGraphResult =  new SimilarityGraphBuilder(
             graph,
             concurrencyConfiguration.concurrency(),
-            similarityResultStream,
-            shouldComputeDistribution,
-            terminationFlag
-        );
+            DefaultPool.INSTANCE,
+            terminationFlag,
+            shouldComputeDistribution
+        ).build(similarityResultStream);
 
         return execute(
             graphStore,

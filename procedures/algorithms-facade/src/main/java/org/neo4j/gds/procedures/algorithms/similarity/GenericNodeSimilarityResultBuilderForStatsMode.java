@@ -19,11 +19,8 @@
  */
 package org.neo4j.gds.procedures.algorithms.similarity;
 
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.similarity.SimilarityGraphBuilder;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
 import org.neo4j.gds.termination.TerminationFlag;
 
@@ -39,7 +36,6 @@ class GenericNodeSimilarityResultBuilderForStatsMode {
         Optional<NodeSimilarityResult> result,
         AlgorithmProcessingTimings timings,
         boolean shouldComputeSimilarityDistribution,
-        Graph graph,
         Concurrency concurrency,
         TerminationFlag terminationFlag
 
@@ -50,27 +46,21 @@ class GenericNodeSimilarityResultBuilderForStatsMode {
         ));
 
         var nodeSimilarityResult = result.get();
-        var similarityGraphBuildResult = new SimilarityGraphBuilder(
-            graph,
-            concurrency,
-            DefaultPool.INSTANCE,
-            terminationFlag,
-            shouldComputeSimilarityDistribution
-        ).build(nodeSimilarityResult);
 
-        var graphResult = similarityGraphBuildResult.graph();
         var similarityStats = similarityStatsProcessor.computeSimilarityDistribution(
+            nodeSimilarityResult.isStream() ? concurrency : new Concurrency(1),
+            nodeSimilarityResult.isStream()? nodeSimilarityResult.streamResult() : nodeSimilarityResult.topKMap().stream(),
             shouldComputeSimilarityDistribution,
-            graphResult
+            terminationFlag
         );
 
         return Stream.of(
             new SimilarityStatsResult(
                 timings.preProcessingMillis,
                 timings.computeMillis,
-                similarityGraphBuildResult.buildTime()+similarityStats.computeMilliseconds(),
+                similarityStats.computeMilliseconds(),
                 nodeSimilarityResult.comparedNodes(),
-                graphResult.relationshipCount(),
+                similarityStats.numberOfEntries(),
                 similarityStats.distribution(),
                 configurationMap
             )

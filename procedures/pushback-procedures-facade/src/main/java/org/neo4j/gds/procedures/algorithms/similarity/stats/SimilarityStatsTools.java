@@ -19,18 +19,18 @@
  */
 package org.neo4j.gds.procedures.algorithms.similarity.stats;
 
-import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.algorithms.similarity.ActualSimilaritySummaryBuilder;
+import org.neo4j.gds.algorithms.similarity.SimilarityResultStreamDelegate;
+import org.neo4j.gds.api.properties.relationships.RelationshipWithPropertyConsumer;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.result.SimilarityStatistics;
-import org.neo4j.gds.similarity.SimilarityGraph;
-import org.neo4j.gds.similarity.SimilarityGraphBuilder;
 import org.neo4j.gds.similarity.SimilarityResult;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.LongAdder;
 import java.util.stream.Stream;
 
 final class SimilarityStatsTools {
@@ -38,42 +38,47 @@ final class SimilarityStatsTools {
     private SimilarityStatsTools() {}
 
     private static final SimilarityStatistics.SimilarityDistributionResults EMPTY = new SimilarityStatistics.SimilarityDistributionResults(
+        0,
         Map.of(),
         0
     );
 
     static SimilarityStatistics.SimilarityDistributionResults computeSimilarityDistribution(
-        Graph graph,
         Concurrency concurrency,
         Stream<SimilarityResult> similarityResultStream,
         boolean shouldComputeSimilarityDistribution,
         TerminationFlag terminationFlag
     ) {
         if (!shouldComputeSimilarityDistribution) return EMPTY;
-        var similarityGraphBuildResult = new SimilarityGraphBuilder(
-            graph,
-            concurrency,
-            DefaultPool.INSTANCE,
-            terminationFlag,
-            true
-        ).build( similarityResultStream);
-        var result = computeSimilarityDistribution(true, similarityGraphBuildResult.graph());
+
+        var statsMillis = new AtomicLong();
+        Map<String,Object> distribution;
+        var similaritySummaryBuilder  =  ActualSimilaritySummaryBuilder.create(concurrency);
+        LongAdder adder = new LongAdder();
+
+        RelationshipWithPropertyConsumer relationshipWithPropertyConsumer= (s,t,w)->{
+            adder.increment();
+            similaritySummaryBuilder.accept(s,t,w);
+            return true;
+        };
+        var similarityResultStreamDelegate = new SimilarityResultStreamDelegate();
+        try (var ignored = ProgressTimer.start(statsMillis::set)) {
+            similarityResultStreamDelegate.consumeStream(
+                concurrency,
+                similarityResultStream,
+                terminationFlag,
+                relationshipWithPropertyConsumer
+            );
+
+            distribution = similaritySummaryBuilder.similaritySummary();
+        }
+
         return new SimilarityStatistics.SimilarityDistributionResults(
-            result.distribution(),
-            result.computeMilliseconds() + similarityGraphBuildResult.buildTime()
+            adder.longValue(),
+            distribution,
+            statsMillis.get()
         );
     }
 
-    static SimilarityStatistics.SimilarityDistributionResults computeSimilarityDistribution(
-        boolean shouldComputeSimilarityDistribution,
-        SimilarityGraph similarityGraphResult
-    ) {
-        if (!shouldComputeSimilarityDistribution) return EMPTY;
-        var statsMillis = new AtomicLong();
-        Map<String,Object> distribution;
-        try (var ignored = ProgressTimer.start(statsMillis::set)) {
-            distribution = similarityGraphResult.similarityDistribution();
-        }
-        return new SimilarityStatistics.SimilarityDistributionResults(distribution, statsMillis.get());
-    }
+
 }

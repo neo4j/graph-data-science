@@ -65,7 +65,6 @@ public class KnnStatsResultTransformer implements ResultTransformer<TimedAlgorit
             ));
         }
         var similarityStats = SimilarityStatsTools.computeSimilarityDistribution(
-            graph,
             concurrency,
             knnResult.streamSimilarityResult(),
             shouldComputeSimilarityDistribution,

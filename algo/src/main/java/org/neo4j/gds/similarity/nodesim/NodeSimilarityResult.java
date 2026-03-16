@@ -37,15 +37,17 @@ public record NodeSimilarityResult(
         return maybeTopKMap().orElseThrow();
     }
 
-    static NodeSimilarityResult create(TopKMap topKMap, long comparedNodes){
+    static NodeSimilarityResult create(TopKMap topKMap, long comparedNodes) {
         return  new NodeSimilarityResult(Optional.empty(),Optional.of(topKMap),comparedNodes);
     }
 
-    static NodeSimilarityResult create(Stream<SimilarityResult> stream, long comparedNodes){
+    static NodeSimilarityResult create(Stream<SimilarityResult> stream, long comparedNodes) {
         return  new NodeSimilarityResult(Optional.of(stream),Optional.empty(),comparedNodes);
     }
 
-
+    public boolean isStream() {
+        return maybeStreamResult.isPresent();
+    }
    public static final NodeSimilarityResult EMPTY = new NodeSimilarityResult(
        Optional.empty(),
        Optional.empty(),
