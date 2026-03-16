@@ -27,6 +27,7 @@ import org.neo4j.gds.similarity.knn.KnnStatsConfig;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Optional;
+import java.util.OptionalLong;
 import java.util.stream.Stream;
 
 class KnnResultBuilderForStatsMode implements StatsResultBuilder<KnnResult, Stream<KnnStatsResult>> {
@@ -65,7 +66,8 @@ class KnnResultBuilderForStatsMode implements StatsResultBuilder<KnnResult, Stre
             configuration.concurrency(),
             knnResult.streamSimilarityResult(),
             shouldComputeSimilarityDistribution,
-            terminationFlag
+            terminationFlag,
+            OptionalLong.of(knnResult.totalSimilarityPairs())
         );
 
         return Stream.of(
@@ -74,7 +76,7 @@ class KnnResultBuilderForStatsMode implements StatsResultBuilder<KnnResult, Stre
                 timings.computeMillis,
                 similarityStats.computeMilliseconds(),
                 knnResult.nodesCompared(),
-                knnResult.totalSimilarityPairs(),
+                similarityStats.numberOfSimilarityPairs(),
                 similarityStats.distribution(),
                 knnResult.didConverge(),
                 knnResult.ranIterations(),

@@ -25,6 +25,7 @@ import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.similarity.SimilarityResult;
 import org.neo4j.gds.termination.TerminationFlag;
 
+import java.util.OptionalLong;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -39,9 +40,25 @@ class SimilarityStatsToolsTest {
             new Concurrency(1),
             Stream.of(new SimilarityResult(0, 1, 10)),
             false,
-            TerminationFlag.RUNNING_TRUE
+            TerminationFlag.RUNNING_TRUE,
+            OptionalLong.empty()
         );
         assertThat(stats.distribution()).isEmpty();
+        assertThat(stats.numberOfSimilarityPairs()).isEqualTo(1);
+    }
+
+    @Test
+    void shouldReturnEmptyDistributionIfNotSpecifiedButPairsProvided() {
+
+        var stats = SimilarityStatsTools.computeSimilarityDistribution(
+            new Concurrency(1),
+            Stream.of(new SimilarityResult(0, 1, 10)),
+            false,
+            TerminationFlag.RUNNING_TRUE,
+            OptionalLong.of(100)
+        );
+        assertThat(stats.distribution()).isEmpty();
+        assertThat(stats.numberOfSimilarityPairs()).isEqualTo(100);
     }
 
     @Test
@@ -55,11 +72,32 @@ class SimilarityStatsToolsTest {
                 new SimilarityResult(1,3,9)
             ),
             true,
-            TerminationFlag.RUNNING_TRUE
+            TerminationFlag.RUNNING_TRUE,
+            OptionalLong.empty()
         );
         assertThat(stats.distribution().get("mean")).asInstanceOf(DOUBLE).isCloseTo(8.0, Offset.offset(1e-3));
         assertThat(stats.computeMilliseconds()).isGreaterThanOrEqualTo(0L);
-        assertThat(stats.numberOfEntries()).isEqualTo(3L);
+        assertThat(stats.numberOfSimilarityPairs()).isEqualTo(3L);
+
+    }
+
+    @Test
+    void shouldReturnValueBasedOnProvided(){
+
+        var stats = SimilarityStatsTools.computeSimilarityDistribution(
+            new Concurrency(1),
+            Stream.of(
+                new SimilarityResult(0, 1, 10),
+                new SimilarityResult(1,2,5),
+                new SimilarityResult(1,3,9)
+            ),
+            true,
+            TerminationFlag.RUNNING_TRUE,
+            OptionalLong.of(100L)
+        );
+        assertThat(stats.distribution().get("mean")).asInstanceOf(DOUBLE).isCloseTo(8.0, Offset.offset(1e-3));
+        assertThat(stats.computeMilliseconds()).isGreaterThanOrEqualTo(0L);
+        assertThat(stats.numberOfSimilarityPairs()).isEqualTo(100L);
 
     }
 

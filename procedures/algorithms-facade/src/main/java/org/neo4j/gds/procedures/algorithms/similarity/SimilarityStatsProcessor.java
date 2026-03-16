@@ -29,6 +29,7 @@ import org.neo4j.gds.similarity.SimilarityResult;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Map;
+import java.util.OptionalLong;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.stream.Stream;
@@ -46,9 +47,16 @@ class SimilarityStatsProcessor {
         Concurrency concurrency,
         Stream<SimilarityResult> similarityResultStream,
         boolean shouldComputeSimilarityDistribution,
-        TerminationFlag terminationFlag
+        TerminationFlag terminationFlag,
+        OptionalLong numberOfEntries
     ) {
-        if (!shouldComputeSimilarityDistribution) return EMPTY;
+        if (!shouldComputeSimilarityDistribution && numberOfEntries.isPresent()){
+            return new SimilarityStatistics.SimilarityDistributionResults(
+                numberOfEntries.getAsLong(),
+                Map.of(),
+                0
+            );
+        }
 
         var statsMillis = new AtomicLong();
         Map<String,Object> distribution;
@@ -71,7 +79,7 @@ class SimilarityStatsProcessor {
         }
 
         return new SimilarityStatistics.SimilarityDistributionResults(
-            adder.longValue(),
+            numberOfEntries.orElse(adder.longValue()),
             distribution,
             statsMillis.get()
         );

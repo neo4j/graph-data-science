@@ -27,6 +27,7 @@ import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Map;
+import java.util.OptionalLong;
 import java.util.stream.Stream;
 
 public class NodeSimilarityStatsResultTransformer implements ResultTransformer<TimedAlgorithmResult<NodeSimilarityResult>, Stream<SimilarityStatsResult>> {
@@ -65,7 +66,8 @@ public class NodeSimilarityStatsResultTransformer implements ResultTransformer<T
             result.isStream() ? concurrency : new Concurrency(1),
             result.isStream()? result.streamResult() : result.topKMap().stream(),
             shouldComputeSimilarityDistribution,
-            terminationFlag
+            terminationFlag,
+            OptionalLong.empty()
         );
 
         return Stream.of(
@@ -74,7 +76,7 @@ public class NodeSimilarityStatsResultTransformer implements ResultTransformer<T
                 timedAlgorithmResult.computeMillis(),
                 similarityStats.computeMilliseconds(),
                 result.comparedNodes(),
-                similarityStats.numberOfEntries(),
+                similarityStats.numberOfSimilarityPairs(),
                 similarityStats.distribution(),
                 configuration
             )

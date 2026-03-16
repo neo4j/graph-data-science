@@ -26,6 +26,7 @@ import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.OptionalLong;
 import java.util.stream.Stream;
 
 class GenericNodeSimilarityResultBuilderForStatsMode {
@@ -51,7 +52,8 @@ class GenericNodeSimilarityResultBuilderForStatsMode {
             nodeSimilarityResult.isStream() ? concurrency : new Concurrency(1),
             nodeSimilarityResult.isStream()? nodeSimilarityResult.streamResult() : nodeSimilarityResult.topKMap().stream(),
             shouldComputeSimilarityDistribution,
-            terminationFlag
+            terminationFlag,
+            OptionalLong.empty()
         );
 
         return Stream.of(
@@ -60,7 +62,7 @@ class GenericNodeSimilarityResultBuilderForStatsMode {
                 timings.computeMillis,
                 similarityStats.computeMilliseconds(),
                 nodeSimilarityResult.comparedNodes(),
-                similarityStats.numberOfEntries(),
+                similarityStats.numberOfSimilarityPairs(),
                 similarityStats.distribution(),
                 configurationMap
             )

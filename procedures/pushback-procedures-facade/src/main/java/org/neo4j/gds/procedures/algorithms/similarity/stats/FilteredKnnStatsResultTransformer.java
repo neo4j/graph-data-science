@@ -28,6 +28,7 @@ import org.neo4j.gds.similarity.filteredknn.FilteredKnnResult;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Map;
+import java.util.OptionalLong;
 import java.util.stream.Stream;
 
 public class FilteredKnnStatsResultTransformer implements ResultTransformer<TimedAlgorithmResult<FilteredKnnResult>, Stream<KnnStatsResult>> {
@@ -68,7 +69,8 @@ public class FilteredKnnStatsResultTransformer implements ResultTransformer<Time
             concurrency,
             knnResult.similarityResultStream(),
             shouldComputeSimilarityDistribution,
-            terminationFlag
+            terminationFlag,
+            OptionalLong.of(knnResult.numberOfSimilarityPairs())
         );
 
 
@@ -78,7 +80,7 @@ public class FilteredKnnStatsResultTransformer implements ResultTransformer<Time
                 timedAlgorithmResult.computeMillis(),
                 similarityStats.computeMilliseconds(),
                 knnResult.nodesCompared(),
-                knnResult.numberOfSimilarityPairs(),
+                similarityStats.numberOfSimilarityPairs(),
                 similarityStats.distribution(),
                 knnResult.didConverge(),
                 knnResult.ranIterations(),

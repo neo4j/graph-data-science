@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.procedures.algorithms.similarity.stats;
 
-import org.neo4j.gds.algorithms.similarity.ActualSimilaritySummaryBuilder;
 import org.neo4j.gds.algorithms.similarity.SimilarityResultStreamDelegate;
+import org.neo4j.gds.algorithms.similarity.SimilaritySummaryBuilderFactory;
 import org.neo4j.gds.api.properties.relationships.RelationshipWithPropertyConsumer;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.ProgressTimer;
@@ -29,6 +29,7 @@ import org.neo4j.gds.similarity.SimilarityResult;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Map;
+import java.util.OptionalLong;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.stream.Stream;
@@ -47,13 +48,20 @@ final class SimilarityStatsTools {
         Concurrency concurrency,
         Stream<SimilarityResult> similarityResultStream,
         boolean shouldComputeSimilarityDistribution,
-        TerminationFlag terminationFlag
+        TerminationFlag terminationFlag,
+        OptionalLong numberOfEntries
     ) {
-        if (!shouldComputeSimilarityDistribution) return EMPTY;
 
+        if (!shouldComputeSimilarityDistribution && numberOfEntries.isPresent()){
+            return new SimilarityStatistics.SimilarityDistributionResults(
+                numberOfEntries.getAsLong(),
+                Map.of(),
+                0
+            );
+        }
         var statsMillis = new AtomicLong();
         Map<String,Object> distribution;
-        var similaritySummaryBuilder  =  ActualSimilaritySummaryBuilder.create(concurrency);
+        var similaritySummaryBuilder  =  SimilaritySummaryBuilderFactory.create(concurrency,shouldComputeSimilarityDistribution);
         LongAdder adder = new LongAdder();
 
         RelationshipWithPropertyConsumer relationshipWithPropertyConsumer= (s,t,w)->{
@@ -61,6 +69,7 @@ final class SimilarityStatsTools {
             similaritySummaryBuilder.accept(s,t,w);
             return true;
         };
+
         var similarityResultStreamDelegate = new SimilarityResultStreamDelegate();
         try (var ignored = ProgressTimer.start(statsMillis::set)) {
             similarityResultStreamDelegate.consumeStream(
@@ -74,7 +83,7 @@ final class SimilarityStatsTools {
         }
 
         return new SimilarityStatistics.SimilarityDistributionResults(
-            adder.longValue(),
+            numberOfEntries.orElse(adder.longValue()),
             distribution,
             statsMillis.get()
         );
