@@ -33,7 +33,7 @@ import org.neo4j.gds.extension.Neo4jGraph;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
 import static org.assertj.core.api.InstanceOfAssertFactories.MAP;
-import static org.neo4j.gds.TestSupport.fromGdl;
+import static org.neo4j.gds.GdlTestSupport.fromGdl;
 
 
 class KCoreDecompositionMutateProcTest extends BaseProcTest {

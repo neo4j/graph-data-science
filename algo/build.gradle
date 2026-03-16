@@ -65,6 +65,7 @@ dependencies {
 
     testImplementation project(':edition-api')
     testImplementation project(':gdl-graph')
+    testImplementation project(':gdl-junit-extension')
     testImplementation project(':test-utils')
     testImplementation project(':ml-test-utils')
     testImplementation project(':ml-algo')

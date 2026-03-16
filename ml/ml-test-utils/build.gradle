@@ -11,4 +11,5 @@ dependencies {
     implementation project(':ml-core')
     implementation project(':ml-algo')
     implementation project(':test-utils')
+    implementation project(':gdl-junit-extension')
 }

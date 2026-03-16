@@ -35,6 +35,7 @@ dependencies {
     testAnnotationProcessor openGds.immutables.value
 
     testImplementation project(':algo-common')
+    testImplementation project(':gdl-junit-extension')
     testImplementation project(':logging')
     testImplementation project(':ml-test-utils')
     testImplementation project(':test-utils')

@@ -36,6 +36,7 @@ dependencies {
     testCompileOnly openGds.immutables.builder
 
     testImplementation project(':algorithms-machinery')
+    testImplementation project(':gdl-junit-extension')
     testImplementation project(':gds-values')
     testImplementation project(':memory-usage')
     testImplementation project(':licensing')

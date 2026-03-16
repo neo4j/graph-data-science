@@ -35,7 +35,7 @@ import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.neo4j.gds.TestSupport.fromGdl;
+import static org.neo4j.gds.GdlTestSupport.fromGdl;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class IncrementalWccTest {

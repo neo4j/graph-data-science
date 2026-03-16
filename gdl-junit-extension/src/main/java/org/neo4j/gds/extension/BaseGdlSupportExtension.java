@@ -22,8 +22,9 @@ package org.neo4j.gds.extension;
 import org.immutables.value.Value;
 import org.junit.jupiter.api.extension.ExtensionConfigurationException;
 import org.junit.jupiter.api.extension.ExtensionContext;
+import org.neo4j.gds.Aggregation;
+import org.neo4j.gds.OffsetIdSupplier;
 import org.neo4j.gds.Orientation;
-import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.CSRGraph;
 import org.neo4j.gds.api.DatabaseId;
@@ -38,7 +39,6 @@ import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.loading.ImmutableCatalogRequest;
 import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.gds.gdl.ImmutableGraphProjectFromGdlConfig;
-import org.neo4j.gds.Aggregation;
 
 import java.lang.reflect.Field;
 import java.util.Collection;
@@ -47,8 +47,6 @@ import java.util.Locale;
 import java.util.stream.Stream;
 
 import static java.util.Arrays.stream;
-import static org.neo4j.gds.extension.ExtensionUtil.getStringValueOfField;
-import static org.neo4j.gds.extension.ExtensionUtil.injectInstance;
 
 public abstract class BaseGdlSupportExtension {
 
@@ -97,7 +95,7 @@ public abstract class BaseGdlSupportExtension {
     }
 
     private static Stream<GdlGraphSetup> gdlGraphsForField(Field field) {
-        String gdl = getStringValueOfField(field);
+        String gdl = ExtensionUtil.getStringValueOfField(field);
 
         var annotations = field.isAnnotationPresent(GdlGraph.class)
             ? Stream.of(field.getAnnotation(GdlGraph.class))
@@ -133,7 +131,7 @@ public abstract class BaseGdlSupportExtension {
             .propertyState(gdlGraphSetup.propertyState())
             .build();
 
-        var nodeIdFunction = new TestSupport.OffsetIdSupplier(gdlGraphSetup.idOffset());
+        var nodeIdFunction = new OffsetIdSupplier(gdlGraphSetup.idOffset());
 
         GdlFactory gdlFactory = GdlFactory
             .builder()
@@ -160,13 +158,13 @@ public abstract class BaseGdlSupportExtension {
         }
 
         context.getRequiredTestInstances().getAllInstances().forEach(testInstance -> {
-            injectInstance(testInstance, graphNamePrefix, graph, Graph.class, "Graph");
-            injectInstance(testInstance, graphNamePrefix, graph, CSRGraph.class, "Graph");
-            injectInstance(testInstance, graphNamePrefix, testGraph, TestGraph.class, "Graph");
-            injectInstance(testInstance, graphNamePrefix, graphStore, GraphStore.class, "GraphStore");
-            injectInstance(testInstance, graphNamePrefix, resultStore, ResultStore.class, "ResultStore");
-            injectInstance(testInstance, graphNamePrefix, idFunction, IdFunction.class, "IdFunction");
-            injectInstance(testInstance, graphNamePrefix, dimensions, GraphDimensions.class, "GraphDimensions");
+            ExtensionUtil.injectInstance(testInstance, graphNamePrefix, graph, Graph.class, "Graph");
+            ExtensionUtil.injectInstance(testInstance, graphNamePrefix, graph, CSRGraph.class, "Graph");
+            ExtensionUtil.injectInstance(testInstance, graphNamePrefix, testGraph, TestGraph.class, "Graph");
+            ExtensionUtil.injectInstance(testInstance, graphNamePrefix, graphStore, GraphStore.class, "GraphStore");
+            ExtensionUtil.injectInstance(testInstance, graphNamePrefix, resultStore, ResultStore.class, "ResultStore");
+            ExtensionUtil.injectInstance(testInstance, graphNamePrefix, idFunction, IdFunction.class, "IdFunction");
+            ExtensionUtil.injectInstance(testInstance, graphNamePrefix, dimensions, GraphDimensions.class, "GraphDimensions");
         });
     }
 
@@ -204,4 +202,6 @@ public abstract class BaseGdlSupportExtension {
         @Value.Auxiliary
         DatabaseId databaseId();
     }
+
+
 }

@@ -48,6 +48,7 @@ dependencies {
 
     // Test dependencies
     integrationTestCompileOnly openGds.immutables.builder
+    integrationTestImplementation project(':gdl-junit-extension')
     integrationTestCompileOnly project(':graph-schema-api')
 
     integrationTestImplementation project(':algo-test')

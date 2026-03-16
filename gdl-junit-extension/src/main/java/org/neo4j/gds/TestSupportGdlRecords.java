@@ -22,6 +22,7 @@ package org.neo4j.gds;
 import org.apache.commons.lang3.tuple.Pair;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.properties.nodes.NodeProperty;
+import org.neo4j.gds.utils.StringFormatting;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -33,7 +34,6 @@ import java.util.stream.IntStream;
 import static java.util.stream.Collectors.joining;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.RelationshipType.ALL_RELATIONSHIPS;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class TestSupportGdlRecords {
     public record NodeLabelsAndProperties(
@@ -43,36 +43,36 @@ public final class TestSupportGdlRecords {
     ) {
         public String toGdl() {
             Function<String, String> propertiesString = properties ->
-                properties.isEmpty() ? "" : formatWithLocale(" {%s}", properties);
+                properties.isEmpty() ? "" : StringFormatting.formatWithLocale(" {%s}", properties);
             Function<Pair<String, NodeProperty>, String> propertyToString = p ->
-                formatWithLocale("%s : %s", p.getLeft(), formattedValue(p.getRight()));
+                StringFormatting.formatWithLocale("%s : %s", p.getLeft(), formattedValue(p.getRight()));
 
-            return formatWithLocale(
+            return StringFormatting.formatWithLocale(
                 "(a%d%s%s)",
                 nodeId,
-                labels.stream().map(label -> formatWithLocale(":%s", label)).collect(joining()),
+                labels.stream().map(label -> StringFormatting.formatWithLocale(":%s", label)).collect(joining()),
                 propertiesString.apply(properties.stream().map(propertyToString).collect(joining(", ")))
             );
         }
 
         private String formattedValue(NodeProperty nodeProperty) {
             return switch (nodeProperty.valueType()) {
-                case LONG -> formatWithLocale("%dL", nodeProperty.values().longValue(nodeId));
-                case DOUBLE -> formatWithLocale("%fd", nodeProperty.values().doubleValue(nodeId));
-                case LONG_ARRAY -> formatWithLocale(
+                case LONG -> StringFormatting.formatWithLocale("%dL", nodeProperty.values().longValue(nodeId));
+                case DOUBLE -> StringFormatting.formatWithLocale("%fd", nodeProperty.values().doubleValue(nodeId));
+                case LONG_ARRAY -> StringFormatting.formatWithLocale(
                     "[%s]", Arrays.stream(nodeProperty.values().longArrayValue(nodeId))
-                        .mapToObj(l -> formatWithLocale("%dL", l))
+                        .mapToObj(l -> StringFormatting.formatWithLocale("%dL", l))
                         .collect(joining(", "))
                 );
-                case DOUBLE_ARRAY -> formatWithLocale(
+                case DOUBLE_ARRAY -> StringFormatting.formatWithLocale(
                     "[%s]", Arrays.stream(nodeProperty.values().doubleArrayValue(nodeId))
-                        .mapToObj(d -> formatWithLocale("%fd", d))
+                        .mapToObj(d -> StringFormatting.formatWithLocale("%fd", d))
                         .collect(joining(", "))
                 );
                 case FLOAT_ARRAY -> {
                     float[] floatArrayValue = nodeProperty.values().floatArrayValue(nodeId);
                     yield IntStream.range(0, floatArrayValue.length)
-                        .mapToObj(i -> formatWithLocale("%ff", floatArrayValue[i]))
+                        .mapToObj(i -> StringFormatting.formatWithLocale("%ff", floatArrayValue[i]))
                         .collect(joining(", "));
                 }
                 default -> throw new IllegalStateException("Unexpected value: " + nodeProperty.valueType());
@@ -119,7 +119,7 @@ public final class TestSupportGdlRecords {
 
             int dim = relationships.size();
             propertyValues.forEach(p -> assertThat(p.size())
-                .withFailMessage(() -> formatWithLocale("propertyValues don't have the same length as the relationships %d", dim))
+                .withFailMessage(() -> StringFormatting.formatWithLocale("propertyValues don't have the same length as the relationships %d", dim))
                 .isEqualTo(dim));
 
             return new RelationshipTypeProperties(relationships, propertyKeys, propertyValues);
@@ -133,12 +133,12 @@ public final class TestSupportGdlRecords {
             int propertyCount = propertyKeys.size();
             String properties = IntStream.range(0, propertyCount)
                 .filter(index -> !Double.isNaN(propertyValues.get(index).get(i)))
-                .mapToObj(index -> formatWithLocale("%s : %s", propertyKeys.get(index), propertyValues.get(index).get(i)))
+                .mapToObj(index -> StringFormatting.formatWithLocale("%s : %s", propertyKeys.get(index), propertyValues.get(index).get(i)))
                 .collect(joining(", "));
-            var label = relationshipType.equals(ALL_RELATIONSHIPS) ? "" : formatWithLocale(":%s", relationshipType.name());
-            String propertiesString = properties.isEmpty() ? "" : formatWithLocale("{%s}", properties);
-            var labelAndProperties = formatWithLocale("[%s%s]", label, propertiesString);
-            return formatWithLocale("(a%d)-%s->(a%d)", relationships.get(i).getLeft(), labelAndProperties, relationships.get(i).getRight());
+            var label = relationshipType.equals(ALL_RELATIONSHIPS) ? "" : StringFormatting.formatWithLocale(":%s", relationshipType.name());
+            String propertiesString = properties.isEmpty() ? "" : StringFormatting.formatWithLocale("{%s}", properties);
+            var labelAndProperties = StringFormatting.formatWithLocale("[%s%s]", label, propertiesString);
+            return StringFormatting.formatWithLocale("(a%d)-%s->(a%d)", relationships.get(i).getLeft(), labelAndProperties, relationships.get(i).getRight());
         }
     }
 }

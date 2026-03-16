@@ -29,6 +29,7 @@ dependencies {
     testCompileOnly openGds.jetbrains.annotations
 
     testImplementation project(':gdl-graph')
+    testImplementation project(':gdl-junit-extension')
     testImplementation project(':test-utils')
     testImplementation project(':graph-schema-api')
     testImplementation project(':ml-test-utils')

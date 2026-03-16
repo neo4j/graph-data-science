@@ -22,10 +22,10 @@ package org.neo4j.gds.paths.traverse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
+import org.neo4j.gds.GdlTestSupport;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
@@ -111,7 +111,7 @@ class DfsMutateProcTest extends BaseProcTest {
             .graphStore()
             .getGraph(RelationshipType.of("DFS"));
 
-        var expected = TestSupport.fromGdl(
+        var expected = GdlTestSupport.fromGdl(
             "  (a:Node)-[:DFS]->(b:Node)-[:DFS]->(c:Node)-[:DFS]->(d:Node)" +
             ", (e:Node)" +
             ", (f:Node)" +
@@ -156,13 +156,13 @@ class DfsMutateProcTest extends BaseProcTest {
         // We can't predict the traversal order deterministically => check the possible combinations
         assertThat(canonicalize(actual))
             .isIn(
-                canonicalize(TestSupport.fromGdl(
+                canonicalize(GdlTestSupport.fromGdl(
                     "(g:Node)-[:DFS]->(e:Node)-[:DFS]->(d:Node)-[:DFS]->(b:Node)-[:DFS]->(a:Node)-[:DFS]->(c:Node)-[:DFS]->(f:Node)")),
-                canonicalize(TestSupport.fromGdl(
+                canonicalize(GdlTestSupport.fromGdl(
                     "(g:Node)-[:DFS]->(e:Node)-[:DFS]->(d:Node)-[:DFS]->(c:Node)-[:DFS]->(a:Node)-[:DFS]->(b:Node)-[:DFS]->(f:Node)")),
-                canonicalize(TestSupport.fromGdl(
+                canonicalize(GdlTestSupport.fromGdl(
                     "(g:Node)-[:DFS]->(f:Node)-[:DFS]->(d:Node)-[:DFS]->(b:Node)-[:DFS]->(a:Node)-[:DFS]->(c:Node)-[:DFS]->(e:Node)")),
-                canonicalize(TestSupport.fromGdl(
+                canonicalize(GdlTestSupport.fromGdl(
                     "(g:Node)-[:DFS]->(f:Node)-[:DFS]->(d:Node)-[:DFS]->(c:Node)-[:DFS]->(a:Node)-[:DFS]->(b:Node)-[:DFS]->(e:Node)"))
             );
     }

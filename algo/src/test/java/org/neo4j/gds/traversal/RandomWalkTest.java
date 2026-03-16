@@ -26,8 +26,8 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.neo4j.gds.GdlTestSupport;
 import org.neo4j.gds.TestProgressTracker;
-import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.beta.generator.PropertyProducer;
 import org.neo4j.gds.beta.generator.RandomGraphGeneratorBuilder;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
@@ -60,7 +60,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.neo4j.gds.TestSupport.fromGdl;
+import static org.neo4j.gds.GdlTestSupport.fromGdl;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.assertj.Extractors.replaceTimings;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -390,7 +390,7 @@ class RandomWalkTest {
 
     @Test
     void testWithConfiguredOffsetStartNodes() {
-        var graph = TestSupport.fromGdl(GDL, 42);
+        var graph = GdlTestSupport.fromGdl(GDL, 42);
 
         var aOriginalId = graph.toOriginalNodeId("a");
         var bOriginalId = graph.toOriginalNodeId("b");

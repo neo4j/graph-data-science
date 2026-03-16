@@ -27,6 +27,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.gds.Aggregation;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.CypherLoaderBuilder;
 import org.neo4j.gds.GraphFactoryTestSupport.FactoryType;
@@ -38,7 +39,6 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.Aggregation;
 import org.neo4j.gds.projection.GraphStoreFactorySuppliers;
 
 import java.util.ArrayList;
@@ -55,9 +55,9 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.neo4j.gds.GdlTestSupport.fromGdl;
 import static org.neo4j.gds.RelationshipType.ALL_RELATIONSHIPS;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
-import static org.neo4j.gds.TestSupport.fromGdl;
 import static org.neo4j.gds.compat.GraphDatabaseApiProxy.applyInFullAccessTransaction;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 

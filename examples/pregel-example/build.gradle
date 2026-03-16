@@ -38,6 +38,7 @@ dependencies {
     // Test dependencies
     testAnnotationProcessor project(':annotations')
 
+    testImplementation project(':gdl-junit-extension')
     testImplementation project(':proc-test-utilities')
     testImplementation project(':proc-common')
     testImplementation project(':graph-schema-api')

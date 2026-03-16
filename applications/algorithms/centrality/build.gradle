@@ -23,4 +23,6 @@ dependencies {
     implementation project(":termination")
     testImplementation project(':test-utils')
 
+    testImplementation project(':gdl-junit-extension')
+
 }

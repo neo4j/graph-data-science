@@ -16,6 +16,7 @@ dependencies {
 
     // Test dependencies
     // TODO: trim this as much as possible
+    integrationTestImplementation project(':gdl-junit-extension')
     integrationTestImplementation project(':logging')
     integrationTestImplementation project(':metrics-api')
     integrationTestImplementation project(':memory-usage')

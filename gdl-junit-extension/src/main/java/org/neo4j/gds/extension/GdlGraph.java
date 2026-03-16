@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.extension;
 
+import org.neo4j.gds.Aggregation;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.PropertyState;
-import org.neo4j.gds.Aggregation;
 
 import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;

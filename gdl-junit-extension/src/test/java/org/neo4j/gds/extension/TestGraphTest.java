@@ -20,6 +20,7 @@
 package org.neo4j.gds.extension;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.GdlTestSupport;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.CSRGraph;
@@ -33,13 +34,12 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.neo4j.gds.TestSupport.fromGdl;
 
 class TestGraphTest {
 
     @Test
     void exposeInner() {
-        assertTrue(fromGdl("()").innerGraph() instanceof HugeGraph);
+        assertTrue(GdlTestSupport.fromGdl("()").innerGraph() instanceof HugeGraph);
 
         TestGraph g = new TestGraph(
             GdlFactory
@@ -54,13 +54,13 @@ class TestGraphTest {
 
     @Test
     void shouldCopyForConcurrentAccess() {
-        TestGraph g = fromGdl("()");
+        TestGraph g = GdlTestSupport.fromGdl("()");
         assertNotEquals(g.concurrentCopy(), g);
     }
 
     @Test
     void shouldHaveAName() {
-        TestGraph g = fromGdl("()", "GG");
+        TestGraph g = GdlTestSupport.fromGdl("()", "GG");
         assertEquals("GG", g.toString());
     }
 

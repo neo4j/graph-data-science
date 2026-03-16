@@ -23,8 +23,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.gds.GdlTestSupport;
 import org.neo4j.gds.Orientation;
-import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.cliquecounting.CliqueCountingParameters;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -45,7 +45,7 @@ class CliqueCountingFunctionsTest {
         var inputQuery = "CREATE (a0),(a1),(a2),(a3),(a4),(a5),(a6)" +
             "(a0)-->(a1),(a0)-->(a4),(a1)-->(a4),(a2)-->(a3),(a2)-->(a5),(a2)-->(a6),(a3)-->(a5),(a3)-->(a6),(a5)-->(a6)";
 
-        var graph = TestSupport.fromGdl(inputQuery, Orientation.UNDIRECTED).graph();
+        var graph = GdlTestSupport.fromGdl(inputQuery, Orientation.UNDIRECTED).graph();
 
         var subset = new long[]{0,1,2,3,4,5,6};
         var params  = mock(CliqueCountingParameters.class);
@@ -122,7 +122,7 @@ class CliqueCountingFunctionsTest {
         var inputQuery = "CREATE (a0),(a1),(a2),(a3),(a4)" +
             "(a2)-->(a0),  (a2)-->(a0),(a2)-->(a1), (a2)-->(a3),  (a2)-->(a3), (a2)-->(a3), (a2)-->(a4)";
 
-        var graph = TestSupport.fromGdl(inputQuery, Orientation.UNDIRECTED).graph();
+        var graph = GdlTestSupport.fromGdl(inputQuery, Orientation.UNDIRECTED).graph();
 
         var params  = mock(CliqueCountingParameters.class);
         when(params.subcliques()).thenReturn(List.of());

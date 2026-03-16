@@ -37,5 +37,6 @@ dependencies {
     testImplementation openGds.jqwik
     testImplementation openGds.qaladatagen
 
+    testImplementation project(':gdl-junit-extension')
     testImplementation project(':test-utils')
 }

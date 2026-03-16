@@ -40,8 +40,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.InstanceOfAssertFactories.DOUBLE;
 import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
 import static org.assertj.core.api.InstanceOfAssertFactories.MAP;
+import static org.neo4j.gds.GdlTestSupport.fromGdl;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
-import static org.neo4j.gds.TestSupport.fromGdl;
 
 class FilteredKnnMutateProcTest extends BaseProcTest {
 

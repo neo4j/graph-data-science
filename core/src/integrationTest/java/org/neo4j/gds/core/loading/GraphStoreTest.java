@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.gds.Aggregation;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.NodeProjection;
@@ -44,7 +45,6 @@ import org.neo4j.gds.core.compression.varlong.CompressedAdjacencyList;
 import org.neo4j.gds.core.huge.UnionGraph;
 import org.neo4j.gds.core.loading.NullPropertyMap.DoubleNullPropertyMap;
 import org.neo4j.gds.extension.Neo4jGraph;
-import org.neo4j.gds.Aggregation;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
 import org.neo4j.gds.projection.GraphStoreFactorySuppliers;
 import org.neo4j.gds.projection.NativeProjectionGraphStoreFactorySupplier;
@@ -64,9 +64,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.neo4j.gds.GdlTestSupport.fromGdl;
 import static org.neo4j.gds.NodeLabel.ALL_NODES;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
-import static org.neo4j.gds.TestSupport.fromGdl;
 
 class GraphStoreTest extends BaseTest {
     private static final GraphStoreFactorySuppliers GRAPH_STORE_FACTORY_SUPPLIERS = new GraphStoreFactorySuppliers(

@@ -29,4 +29,6 @@ dependencies {
     testImplementation openGds.assertj.core
     testImplementation project(':test-utils')
     testImplementation project(':graph-schema-api')
+
+    testImplementation project(':gdl-junit-extension')
 }

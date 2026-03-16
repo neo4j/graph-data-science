@@ -27,6 +27,7 @@ import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.gds.GdlTestSupport;
 import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.Graph;
@@ -108,7 +109,7 @@ final class DeltaSteppingTest {
         @ParameterizedTest
         @MethodSource("org.neo4j.gds.paths.delta.DeltaSteppingTest#testParameters")
         void singleSource(double delta, int concurrency, long idOffset) {
-            var graph = TestSupport.fromGdl(DB_CYPHER, idOffset);
+            var graph = GdlTestSupport.fromGdl(DB_CYPHER, idOffset);
 
             IdFunction idFunction = (String variable) -> graph.toMappedNodeId(graph.toOriginalNodeId(variable));
 
@@ -141,7 +142,7 @@ final class DeltaSteppingTest {
         @ParameterizedTest
         @MethodSource("org.neo4j.gds.paths.delta.DeltaSteppingTest#testParameters")
         void singleSourceFromDisconnectedNode(double delta, int concurrency, long idOffset) {
-            var graph = TestSupport.fromGdl(DB_CYPHER, idOffset);
+            var graph = GdlTestSupport.fromGdl(DB_CYPHER, idOffset);
 
             IdFunction idFunction = (String variable) -> graph.toMappedNodeId(graph.toOriginalNodeId(variable));
 
@@ -253,7 +254,7 @@ final class DeltaSteppingTest {
         @ParameterizedTest
         @MethodSource("org.neo4j.gds.paths.delta.DeltaSteppingTest#testParameters")
         void singleSource(double delta, int concurrency, long idOffset) {
-            var graph = TestSupport.fromGdl(DB_CYPHER2, idOffset);
+            var graph = GdlTestSupport.fromGdl(DB_CYPHER2, idOffset);
 
             IdFunction idFunction = (String variable) -> graph.toMappedNodeId(graph.toOriginalNodeId(variable));
 

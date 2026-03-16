@@ -24,7 +24,7 @@ import org.neo4j.gds.api.Graph;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.neo4j.gds.TestSupport.fromGdl;
+import static org.neo4j.gds.GdlTestSupport.fromGdl;
 import static org.neo4j.gds.canonization.CanonicalAdjacencyMatrix.canonicalize;
 import static org.neo4j.gds.canonization.CanonicalAdjacencyMatrix.canonicalizeWithoutWeights;
 

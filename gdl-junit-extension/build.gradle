@@ -1,0 +1,36 @@
+plugins {
+    id 'buildlogic-gds-java'
+}
+
+description = 'Neo4j Graph Data Science :: GDS GDL JUnit Extension'
+group = 'org.neo4j.gds'
+
+dependencies {
+    annotationProcessor project(':annotations')
+    annotationProcessor openGds.immutables.builder
+    annotationProcessor openGds.immutables.value
+
+    compileOnly openGds.immutables.builder
+    compileOnly openGds.immutables.value
+    compileOnly project(':annotations')
+
+    implementation openGds.junit.jupiter.api
+
+    implementation project(':config-api')
+
+    implementation project(':core-api')
+    implementation project(':core')
+
+    // We need this because of `org.neo4j.gds.extension.ExtensionUtil`
+    implementation project(':core-test-utils')
+
+    implementation project(':gdl-graph')
+    implementation project(':graph-projection-api')
+    implementation project(':graph-schema-api')
+
+    implementation project(':string-formatting')
+
+    testImplementation platform(openGds.junit.bom)
+    testImplementation openGds.bundles.test.basic
+    testRuntimeOnly openGds.bundles.test.platforms
+}

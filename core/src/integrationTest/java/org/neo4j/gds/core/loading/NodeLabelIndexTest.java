@@ -35,8 +35,8 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.neo4j.gds.GdlTestSupport.fromGdl;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
-import static org.neo4j.gds.TestSupport.fromGdl;
 
 @Neo4jGraphExtension
 public class NodeLabelIndexTest extends BaseTest {

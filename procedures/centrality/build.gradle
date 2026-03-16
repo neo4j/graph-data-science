@@ -20,6 +20,7 @@ dependencies {
 
     integrationTestImplementation project(':algo-common')
     integrationTestImplementation project(':core')
+    integrationTestImplementation project(':gdl-junit-extension')
     integrationTestImplementation project(':neo4j-kernel-adapter-api')
     integrationTestImplementation project(':proc-test-utilities')
     integrationTestImplementation project(':proc-common')

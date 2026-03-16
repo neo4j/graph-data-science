@@ -58,5 +58,6 @@ dependencies {
     testRuntimeOnly openGds.junit.jupiter.engine
 
     testImplementation project(':gdl-graph')
+    testImplementation project(':gdl-junit-extension')
     testImplementation project(':test-utils')
 }

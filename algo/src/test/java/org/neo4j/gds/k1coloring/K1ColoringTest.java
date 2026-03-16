@@ -22,6 +22,7 @@ package org.neo4j.gds.k1coloring;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.Aggregation;
 import org.neo4j.gds.TestProgressTrackerHelper;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.schema.Direction;
@@ -32,14 +33,13 @@ import org.neo4j.gds.config.RandomGraphGeneratorConfig.AllowSelfLoops;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.Aggregation;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.stream.LongStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.neo4j.gds.TestSupport.fromGdl;
+import static org.neo4j.gds.GdlTestSupport.fromGdl;
 import static org.neo4j.gds.core.concurrency.ParallelUtil.DEFAULT_BATCH_SIZE;
 
 class K1ColoringTest {

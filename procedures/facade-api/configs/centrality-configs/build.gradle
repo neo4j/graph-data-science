@@ -45,6 +45,7 @@ dependencies {
     implementation project(':string-formatting')
     implementation project(':scaling-utils')
 
+    testImplementation project(':gdl-junit-extension')
     testImplementation project(':test-utils')
     testImplementation openGds.gdl
 

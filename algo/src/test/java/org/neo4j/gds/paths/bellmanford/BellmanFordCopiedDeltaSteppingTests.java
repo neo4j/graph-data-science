@@ -24,7 +24,7 @@ import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.junitpioneer.jupiter.cartesian.CartesianTest;
-import org.neo4j.gds.TestSupport;
+import org.neo4j.gds.GdlTestSupport;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -71,7 +71,7 @@ final class BellmanFordCopiedDeltaSteppingTests {
             @CartesianTest.Values(ints = {1, 4}) int concurrency,
             @CartesianTest.Values(longs = {0L, 42L}) long idOffset
         ) {
-            var graph = TestSupport.fromGdl(DB_CYPHER, idOffset);
+            var graph = GdlTestSupport.fromGdl(DB_CYPHER, idOffset);
 
             IdFunction idFunction = (String variable) -> graph.toMappedNodeId(graph.toOriginalNodeId(variable));
 
@@ -106,7 +106,7 @@ final class BellmanFordCopiedDeltaSteppingTests {
             @CartesianTest.Values(ints = {1, 4}) int concurrency,
             @CartesianTest.Values(longs = {0L, 42L}) long idOffset
         ) {
-            var graph = TestSupport.fromGdl(DB_CYPHER, idOffset);
+            var graph = GdlTestSupport.fromGdl(DB_CYPHER, idOffset);
 
             IdFunction idFunction = (String variable) -> graph.toMappedNodeId(graph.toOriginalNodeId(variable));
 
@@ -167,7 +167,7 @@ final class BellmanFordCopiedDeltaSteppingTests {
             @CartesianTest.Values(ints = {1, 4}) int concurrency,
             @CartesianTest.Values(longs = {0L, 42L}) long idOffset
         ) {
-            var graph = TestSupport.fromGdl(DB_CYPHER2, idOffset);
+            var graph = GdlTestSupport.fromGdl(DB_CYPHER2, idOffset);
 
             IdFunction idFunction = (String variable) -> graph.toMappedNodeId(graph.toOriginalNodeId(variable));
 

@@ -173,6 +173,9 @@ project(':functions-facade-api').projectDir = file('procedures/functions-facade-
 include('gdl-graph')
 project(':gdl-graph').projectDir = file('gdl-graph')
 
+include('gdl-junit-extension')
+project(':gdl-junit-extension').projectDir = file('gdl-junit-extension')
+
 include('gds-values')
 project(':gds-values').projectDir = file('gds-values')
 

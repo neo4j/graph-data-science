@@ -36,8 +36,8 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatRuntimeException;
 import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
+import static org.neo4j.gds.GdlTestSupport.fromGdl;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
-import static org.neo4j.gds.TestSupport.fromGdl;
 
 class TriangleCountMutateProcTest extends BaseProcTest {
 
@@ -231,5 +231,3 @@ class TriangleCountMutateProcTest extends BaseProcTest {
                 "Failed to invoke procedure `gds.triangleCount.mutate`: Caused by: java.lang.IllegalArgumentException: TriangleCount requires the provided 'labelFilter' node label 'X' to be present in the graph.");
     }
 }
-
-

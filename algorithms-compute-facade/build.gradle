@@ -35,5 +35,6 @@ dependencies {
     testImplementation libs.awaitility
     testImplementation openGds.junit.jupiter
     testImplementation openGds.mockito.junit.jupiter
+    testImplementation project(':gdl-junit-extension')
     testImplementation project(':test-utils')
 }

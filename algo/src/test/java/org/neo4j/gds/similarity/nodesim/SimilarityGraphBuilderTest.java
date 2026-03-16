@@ -38,8 +38,8 @@ import org.neo4j.gds.termination.TerminationFlag;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.neo4j.gds.GdlTestSupport.fromGdl;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
-import static org.neo4j.gds.TestSupport.fromGdl;
 
 @GdlExtension
 class SimilarityGraphBuilderTest {

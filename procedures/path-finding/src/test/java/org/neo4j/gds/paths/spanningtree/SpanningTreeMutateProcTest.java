@@ -23,11 +23,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.BaseProcTest;
+import org.neo4j.gds.GdlTestSupport;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
@@ -128,7 +128,7 @@ class SpanningTreeMutateProcTest extends BaseProcTest {
             .graphStore()
             .getGraph(NodeLabel.of("Node"), RelationshipType.of("MST"), Optional.of("foo"));
 
-        var expected = TestSupport.fromGdl(
+        var expected = GdlTestSupport.fromGdl(
             "CREATE" +
                 "(a:Node)" +
                 ",(b:Node)" +

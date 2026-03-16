@@ -47,6 +47,7 @@ dependencies {
     implementation(
         openGds.neo4j.cypher.dsl,
         openGds.gdl,
+        project(':gdl-junit-extension')
     )
 
     api(

@@ -74,6 +74,7 @@ dependencies {
     testCompileOnly openGds.jetbrains.annotations
 
     testImplementation project(':algorithms-procedure-facade')
+    testImplementation project(':gdl-junit-extension')
     testImplementation project(':logging')
     testImplementation project(':opengds-procedure-facade')
     testImplementation project(':open-model-catalog')

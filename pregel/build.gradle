@@ -33,6 +33,7 @@ dependencies {
 
     testCompileOnly project(':annotations')
 
+    testImplementation project(':gdl-junit-extension')
     testImplementation project(':graph-schema-api')
     testImplementation project(':logging')
     testImplementation project(':test-utils')

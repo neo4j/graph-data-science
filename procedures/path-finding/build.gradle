@@ -23,6 +23,7 @@ dependencies {
     testImplementation project(':algo-common')
     testImplementation project(':config-api')
     testImplementation project(':core')
+    testImplementation project(':gdl-junit-extension')
     testImplementation project(':neo4j-api')
     testImplementation project(':neo4j-kernel-adapter-api')
     testImplementation project(':proc-test-utilities')

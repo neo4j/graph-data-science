@@ -25,6 +25,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.Aggregation;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.GdsCypher;
@@ -74,7 +75,6 @@ import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
 import org.neo4j.gds.metrics.procedures.DeprecatedProceduresMetricService;
 import org.neo4j.gds.metrics.telemetry.TelemetryLogger;
-import org.neo4j.gds.Aggregation;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.community.LocalCommunityProcedureFacade;
@@ -104,9 +104,9 @@ import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.neo4j.gds.ElementProjection.PROJECT_ALL;
+import static org.neo4j.gds.GdlTestSupport.fromGdl;
 import static org.neo4j.gds.NodeLabel.ALL_NODES;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
-import static org.neo4j.gds.TestSupport.fromGdl;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class LabelPropagationMutateProcTest extends BaseProcTest {

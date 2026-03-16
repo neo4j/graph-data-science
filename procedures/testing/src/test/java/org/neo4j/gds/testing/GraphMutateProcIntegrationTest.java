@@ -23,6 +23,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
+import org.neo4j.gds.GdlTestSupport;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.DatabaseId;
@@ -82,7 +83,7 @@ class GraphMutateProcIntegrationTest extends BaseProcTest {
         ", (i)-[:TYPE]->(l)" +
         ", (j)-[:TYPE]->(k)";
 
-    private static final Graph EXPECTED_GRAPH = TestSupport.fromGdl(
+    private static final Graph EXPECTED_GRAPH = GdlTestSupport.fromGdl(
         "(a {nodeId: 0.0,  labelPropagation: 6,  louvain: 6,  pageRank: 0.150000, wcc: 0})" +
         "(b {nodeId: 1.0,  labelPropagation: 6,  louvain: 6,  pageRank: 0.277500, wcc: 0})" +
         "(c {nodeId: 2.0,  labelPropagation: 6,  louvain: 6,  pageRank: 0.385875, wcc: 0})" +

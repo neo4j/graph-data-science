@@ -42,6 +42,7 @@ dependencies {
 
     // TEST DEPENDENCIES
     testImplementation project(':gdl-graph')
+    testImplementation project(':gdl-junit-extension')
     testImplementation project(':test-graph-loaders')
     testImplementation project(':test-utils')
 
