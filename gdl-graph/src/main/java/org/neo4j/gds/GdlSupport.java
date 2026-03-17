@@ -21,13 +21,12 @@ package org.neo4j.gds;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.immutables.builder.Builder;
+import org.jspecify.annotations.NonNull;
 import org.neo4j.gds.TestSupportGdlRecords.NodeLabelsAndProperties;
 import org.neo4j.gds.TestSupportGdlRecords.RelationshipTypeProperties;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.properties.nodes.NodeProperty;
-import org.neo4j.gds.extension.GdlSupportPerMethodExtension;
-import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.gds.gdl.ImmutableGraphProjectFromGdlConfig;
 
@@ -38,9 +37,11 @@ import java.util.function.LongSupplier;
 
 import static org.neo4j.gds.NodeLabel.ALL_NODES;
 
-public final class GdlTestSupport {
+public final class GdlSupport {
+    public static final String DATABASE_NAME = "GDL";
+    public static final DatabaseId DATABASE_ID = DatabaseId.of(DATABASE_NAME);
 
-    private GdlTestSupport() {}
+    private GdlSupport() {}
 
     public static TestGraph fromGdl(String gdl) {
         return new GdlBuilder().gdl(gdl).build();
@@ -60,38 +61,6 @@ public final class GdlTestSupport {
 
     public static TestGraph fromGdl(String gdl, Orientation orientation, String name) {
         return new GdlBuilder().gdl(gdl).orientation(orientation).name(name).build();
-    }
-
-    @Builder.Factory
-    public static TestGraph gdl(
-        String gdl,
-        Optional<String> name,
-        Optional<Orientation> orientation,
-        Optional<Aggregation> aggregation,
-        Optional<LongSupplier> idSupplier,
-        Optional<DatabaseId> databaseId,
-        Optional<Boolean> indexInverse
-    ) {
-        Objects.requireNonNull(gdl);
-
-        var graphName = name.orElse("graph");
-
-        var config = ImmutableGraphProjectFromGdlConfig.builder()
-            .gdlGraph(gdl)
-            .graphName(graphName)
-            .orientation(orientation.orElse(Orientation.NATURAL))
-            .aggregation(aggregation.orElse(Aggregation.DEFAULT))
-            .indexInverse(indexInverse.orElse(false))
-            .build();
-
-        var gdlFactory = GdlFactory
-            .builder()
-            .nodeIdFunction(idSupplier.orElse(new OffsetIdSupplier(0L)))
-            .graphProjectConfig(config)
-            .databaseId(databaseId.orElse(GdlSupportPerMethodExtension.DATABASE_ID))
-            .build();
-
-        return new TestGraph(gdlFactory.build().getUnion(), gdlFactory::nodeId, graphName);
     }
 
     public static GraphStore graphStoreFromGDL(String gdl) {
@@ -135,6 +104,31 @@ public final class GdlTestSupport {
     }
 
     @Builder.Factory
+    public static TestGraph gdl(
+        String gdl,
+        Optional<String> name,
+        Optional<Orientation> orientation,
+        Optional<Aggregation> aggregation,
+        Optional<LongSupplier> idSupplier,
+        Optional<DatabaseId> databaseId,
+        Optional<Boolean> indexInverse
+    ) {
+        var graphName = graphName(name);
+
+        var gdlFactory = gdlFactory(
+            gdl,
+            graphName,
+            orientation,
+            aggregation,
+            idSupplier,
+            databaseId,
+            indexInverse
+        );
+
+        return new TestGraph(gdlFactory.build().getUnion(), gdlFactory::nodeId, graphName);
+    }
+
+    @Builder.Factory
     public static GraphStore gdlGraphStore(
         String gdl,
         Optional<String> name,
@@ -144,9 +138,31 @@ public final class GdlTestSupport {
         Optional<DatabaseId> databaseId,
         Optional<Boolean> indexInverse
     ) {
-        Objects.requireNonNull(gdl);
+        return gdlFactory(
+            gdl,
+            graphName(name),
+            orientation,
+            aggregation,
+            idSupplier,
+            databaseId,
+            indexInverse
+        ).build();
+    }
 
-        var graphName = name.orElse("graph");
+    private static @NonNull String graphName(Optional<String> name) {
+        return name.orElse("graph");
+    }
+
+    private static @NonNull GdlFactory gdlFactory(
+        String gdl,
+        String graphName,
+        Optional<Orientation> orientation,
+        Optional<Aggregation> aggregation,
+        Optional<LongSupplier> idSupplier,
+        Optional<DatabaseId> databaseId,
+        Optional<Boolean> indexInverse
+    ) {
+        Objects.requireNonNull(gdl);
 
         var config = ImmutableGraphProjectFromGdlConfig.builder()
             .gdlGraph(gdl)
@@ -156,15 +172,12 @@ public final class GdlTestSupport {
             .indexInverse(indexInverse.orElse(false))
             .build();
 
-        var gdlFactory = GdlFactory
+        return GdlFactory
             .builder()
             .nodeIdFunction(idSupplier.orElse(new OffsetIdSupplier(0L)))
             .graphProjectConfig(config)
-            .databaseId(databaseId.orElse(GdlSupportPerMethodExtension.DATABASE_ID))
+            .databaseId(databaseId.orElse(DATABASE_ID))
             .build();
-
-        return gdlFactory.build();
     }
-
 
 }

@@ -28,6 +28,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.CommunityAlgorithmTasks;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.TestGraph;
 import org.neo4j.gds.TestProgressTrackerHelper;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.compat.TestLog;
@@ -37,7 +38,6 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
-import org.neo4j.gds.extension.TestGraph;
 
 import java.util.Map;
 import java.util.stream.Stream;

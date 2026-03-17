@@ -21,13 +21,13 @@ package org.neo4j.gds.similarity.knn;
 
 import com.carrotsearch.hppc.LongArrayList;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.TestGraph;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
-import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.similarity.knn.metrics.SimilarityComputer;
 
 import java.util.SplittableRandom;

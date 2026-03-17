@@ -25,6 +25,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.junitpioneer.jupiter.cartesian.ArgumentSets;
 import org.junitpioneer.jupiter.cartesian.CartesianTest;
 import org.neo4j.gds.CommunityAlgorithmTasks;
+import org.neo4j.gds.TestGraph;
 import org.neo4j.gds.TestProgressTrackerHelper;
 import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutBaseConfigImpl;
 import org.neo4j.gds.compat.TestLog;
@@ -35,7 +36,6 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
-import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Collections;

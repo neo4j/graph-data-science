@@ -36,7 +36,6 @@ import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.extension.IdFunction;
-import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.termination.TerminatedException;

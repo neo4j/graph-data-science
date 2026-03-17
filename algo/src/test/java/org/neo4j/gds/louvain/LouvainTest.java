@@ -28,6 +28,7 @@ import org.neo4j.gds.CommunityHelper;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.TestGraph;
 import org.neo4j.gds.TestProgressTrackerHelper;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.schema.Direction;
@@ -43,7 +44,6 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
-import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.modularity.ModularityCalculator;
 import org.neo4j.gds.termination.TerminationFlag;
 

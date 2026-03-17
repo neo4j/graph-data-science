@@ -78,7 +78,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.gds.ElementProjection.PROPERTIES_KEY;
-import static org.neo4j.gds.GdlTestSupport.fromGdl;
+import static org.neo4j.gds.GdlSupport.fromGdl;
 import static org.neo4j.gds.NodeProjection.LABEL_KEY;
 import static org.neo4j.gds.RelationshipProjection.AGGREGATION_KEY;
 import static org.neo4j.gds.RelationshipProjection.INDEX_INVERSE_KEY;

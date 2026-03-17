@@ -21,12 +21,12 @@ package org.neo4j.gds.similarity.filteredknn;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.TestGraph;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
-import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.similarity.FilteringParameters;
 import org.neo4j.gds.similarity.NodeFilterSpec;
 import org.neo4j.gds.similarity.SimilarityResult;

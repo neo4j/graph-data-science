@@ -20,7 +20,7 @@
 package org.neo4j.gds.extension;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.GdlTestSupport;
+import org.neo4j.gds.GdlSupport;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.CSRGraph;
@@ -39,9 +39,9 @@ class TestGraphTest {
 
     @Test
     void exposeInner() {
-        assertTrue(GdlTestSupport.fromGdl("()").innerGraph() instanceof HugeGraph);
+        assertTrue(GdlSupport.fromGdl("()").innerGraph() instanceof HugeGraph);
 
-        TestGraph g = new TestGraph(
+        org.neo4j.gds.TestGraph g = new org.neo4j.gds.TestGraph(
             GdlFactory
                 .of("(:A)-[:T1]->(:B)-[:T2]->(:A)")
                 .build()
@@ -54,13 +54,13 @@ class TestGraphTest {
 
     @Test
     void shouldCopyForConcurrentAccess() {
-        TestGraph g = GdlTestSupport.fromGdl("()");
+        org.neo4j.gds.TestGraph g = GdlSupport.fromGdl("()");
         assertNotEquals(g.concurrentCopy(), g);
     }
 
     @Test
     void shouldHaveAName() {
-        TestGraph g = GdlTestSupport.fromGdl("()", "GG");
+        org.neo4j.gds.TestGraph g = GdlSupport.fromGdl("()", "GG");
         assertEquals("GG", g.toString());
     }
 
@@ -70,7 +70,7 @@ class TestGraphTest {
             .of("(:A), (b:B), (:B)")
             .build()
             .getGraph(List.of(NodeLabel.of("B")), List.of(), Optional.empty());
-        TestGraph g = new TestGraph(bGraph, (a) -> a.equals("b") ? 1 : 2, "foo");
+        org.neo4j.gds.TestGraph g = new org.neo4j.gds.TestGraph(bGraph, (a) -> a.equals("b") ? 1 : 2, "foo");
         assertEquals(1, g.toOriginalNodeId("b"));
         assertEquals(2, g.toOriginalNodeId("notB"));
     }
@@ -81,7 +81,7 @@ class TestGraphTest {
             .of("(:A), (b:B), (:B)")
             .build()
             .getGraph(List.of(NodeLabel.of("B")), List.of(), Optional.empty());
-        TestGraph g = new TestGraph(bGraph, (a) -> a.equals("b") ? 1 : 2, "foo");
+        org.neo4j.gds.TestGraph g = new org.neo4j.gds.TestGraph(bGraph, (a) -> a.equals("b") ? 1 : 2, "foo");
         assertEquals(0, g.toMappedNodeId("b"));
         assertEquals(1, g.toMappedNodeId("notB"));
     }

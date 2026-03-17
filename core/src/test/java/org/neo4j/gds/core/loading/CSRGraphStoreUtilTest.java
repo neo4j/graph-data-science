@@ -20,7 +20,7 @@
 package org.neo4j.gds.core.loading;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.GdlTestSupport;
+import org.neo4j.gds.GdlSupport;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DatabaseId;
@@ -46,7 +46,7 @@ class CSRGraphStoreUtilTest {
             // to ensure that the graph is a HugeGraph.
             ", (a)-[:REL1 { prop1: 42 }]->(b)";
 
-        var graphStore = GdlTestSupport.graphStoreFromGDL(GDL);
+        var graphStore = GdlSupport.graphStoreFromGDL(GDL);
         var graph = graphStore.getUnion();
         assertThat(graph).isInstanceOf(HugeGraph.class);
         assertThat(graph.availableNodeLabels()).contains(NodeLabel.of("A"), NodeLabel.of("B"));
@@ -73,7 +73,7 @@ class CSRGraphStoreUtilTest {
             ", (b:A { foo: 84, bar: 1234 })" +
             ", (c:B { foo: 23 })";
 
-        var gdlGraphStore = GdlTestSupport.graphStoreFromGDL(GDL);
+        var gdlGraphStore = GdlSupport.graphStoreFromGDL(GDL);
         var gdlGraph = gdlGraphStore.getUnion();
 
         var convertedGraphStore = CSRGraphStoreUtil.createFromGraph(
@@ -89,7 +89,7 @@ class CSRGraphStoreUtilTest {
 
     @Test
     void shouldValidateRelationshipPropertyKey() {
-        var graph = GdlTestSupport.fromGdl("()-[:REL]->()");
+        var graph = GdlSupport.fromGdl("()-[:REL]->()");
 
         assertThatThrownBy(() -> {
             CSRGraphStoreUtil.createFromGraph(

@@ -22,7 +22,7 @@ package org.neo4j.gds.paths.traverse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
-import org.neo4j.gds.GdlTestSupport;
+import org.neo4j.gds.GdlSupport;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
@@ -112,7 +112,7 @@ class BfsMutateProcTest extends BaseProcTest {
             .graphStore()
             .getGraph(RelationshipType.of("BFS"));
 
-        var expected = GdlTestSupport.fromGdl(
+        var expected = GdlSupport.fromGdl(
             "  (a:Node)-[:BFS]->(b:Node)-[:BFS]->(c:Node)-[:BFS]->(d:Node)-[:BFS]->(e:Node)" +
             ", (f:Node)" +
             ", (g:Node)"
@@ -152,7 +152,7 @@ class BfsMutateProcTest extends BaseProcTest {
             .graphStore()
             .getGraph(RelationshipType.of("BFS"));
 
-        var expected = GdlTestSupport.fromGdl(
+        var expected = GdlSupport.fromGdl(
             "  (a:Node)-[:BFS]->(b:Node)-[:BFS]->(c:Node)-[:BFS]->(d:Node)" +
             ", (e:Node)" +
             ", (f:Node)" +
@@ -196,13 +196,13 @@ class BfsMutateProcTest extends BaseProcTest {
         // We can't predict the traversal order deterministically => check the possible combinations
         assertThat(canonicalize(actual))
             .isIn(
-                canonicalize(GdlTestSupport.fromGdl(
+                canonicalize(GdlSupport.fromGdl(
                     "(g:Node)-[:BFS]->(e:Node)-[:BFS]->(f:Node)-[:BFS]->(d:Node)-[:BFS]->(b:Node)-[:BFS]->(c:Node)-[:BFS]->(a:Node)")),
-                canonicalize(GdlTestSupport.fromGdl(
+                canonicalize(GdlSupport.fromGdl(
                     "(g:Node)-[:BFS]->(e:Node)-[:BFS]->(f:Node)-[:BFS]->(d:Node)-[:BFS]->(c:Node)-[:BFS]->(b:Node)-[:BFS]->(a:Node)")),
-                canonicalize(GdlTestSupport.fromGdl(
+                canonicalize(GdlSupport.fromGdl(
                     "(g:Node)-[:BFS]->(f:Node)-[:BFS]->(e:Node)-[:BFS]->(d:Node)-[:BFS]->(b:Node)-[:BFS]->(c:Node)-[:BFS]->(a:Node)")),
-                canonicalize(GdlTestSupport.fromGdl(
+                canonicalize(GdlSupport.fromGdl(
                     "(g:Node)-[:BFS]->(f:Node)-[:BFS]->(e:Node)-[:BFS]->(d:Node)-[:BFS]->(c:Node)-[:BFS]->(b:Node)-[:BFS]->(a:Node)"))
             );
     }

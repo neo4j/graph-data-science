@@ -52,7 +52,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.lessThan;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
-import static org.neo4j.gds.GdlTestSupport.fromGdl;
+import static org.neo4j.gds.GdlSupport.fromGdl;
 import static org.neo4j.gds.Orientation.REVERSE;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;

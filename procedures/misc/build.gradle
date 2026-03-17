@@ -32,6 +32,7 @@ dependencies {
     testImplementation project(':core')
     testImplementation project(':core-utils')
     testImplementation project(':executor')
+    testImplementation project(':gdl-graph')
     testImplementation project(':gdl-junit-extension')
     testImplementation project(':graph-schema-api')
     testImplementation project(':ml-core')

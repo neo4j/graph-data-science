@@ -31,7 +31,7 @@ class GdlSupportPerMethodExtensionTest {
     @GdlGraph(idOffset = 42, graphNamePrefix = "idOffset")
     public static final String ID_OFFSET_GRAPH = "(a)-[:REL]->(b)";
     @Inject
-    private TestGraph idOffsetGraph;
+    private org.neo4j.gds.TestGraph idOffsetGraph;
     @Inject
     private IdFunction idOffsetIdFunction;
 

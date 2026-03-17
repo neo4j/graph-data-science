@@ -24,7 +24,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.neo4j.gds.GdlTestSupport;
+import org.neo4j.gds.GdlSupport;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.Concurrency;
@@ -653,7 +653,7 @@ class IntersectingTriangleCountTest {
         // (b) is connected to (x) and (y), both have smaller ids than (c)
         // TC tries to find (b)-(c) und the union graph has to exhaust all cursors during advance
         // to learn that there are only nodes that are smaller than (c)
-        var testGraph = GdlTestSupport.fromGdl(
+        var testGraph = GdlSupport.fromGdl(
             "CREATE" +
                 "  (a)-[:T]->(b)" +
                 " ,(b)-[:X]->(x)" +
@@ -707,6 +707,6 @@ class IntersectingTriangleCountTest {
     }
 
     private static Graph fromGdl(String gdl) {
-        return GdlTestSupport.fromGdl(gdl, Orientation.UNDIRECTED).graph();
+        return GdlSupport.fromGdl(gdl, Orientation.UNDIRECTED).graph();
     }
 }

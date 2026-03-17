@@ -22,7 +22,7 @@ package org.neo4j.gds.paths.sourcetarget;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
-import org.neo4j.gds.GdlTestSupport;
+import org.neo4j.gds.GdlSupport;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.catalog.GraphProjectProc;
@@ -127,7 +127,7 @@ class ShortestPathAStarMutateProcTest extends BaseProcTest {
         var actualGraph = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db.databaseName()), "graph")
             .graphStore()
             .getUnion();
-        var expected = GdlTestSupport.fromGdl(DB_CYPHER + ", (nA)-[:PATH {w: 2979.0D}]->(nX)");
+        var expected = GdlSupport.fromGdl(DB_CYPHER + ", (nA)-[:PATH {w: 2979.0D}]->(nX)");
 
         assertGraphEquals(expected, actualGraph);
 

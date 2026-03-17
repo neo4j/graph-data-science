@@ -20,6 +20,7 @@
 package org.neo4j.gds.extension;
 
 import org.neo4j.gds.Aggregation;
+import org.neo4j.gds.GdlSupport;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.PropertyState;
 
@@ -66,5 +67,5 @@ public @interface GdlGraph {
     /**
      * If set, the graph will be created using the specified database.
      */
-    String databaseName() default BaseGdlSupportExtension.DATABASE_NAME;
+    String databaseName() default GdlSupport.DATABASE_NAME;
 }

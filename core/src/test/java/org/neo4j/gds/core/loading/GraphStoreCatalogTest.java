@@ -42,7 +42,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.neo4j.gds.extension.GdlSupportPerMethodExtension.DATABASE_ID;
+import static org.neo4j.gds.GdlSupport.DATABASE_ID;
 
 @GdlExtension
 class GraphStoreCatalogTest {

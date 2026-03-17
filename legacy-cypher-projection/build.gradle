@@ -53,7 +53,7 @@ dependencies {
     testCompileOnly openGds.jetbrains.annotations
 
     testImplementation project(':executor')
-    testImplementation project(':gdl-junit-extension')
+    testImplementation project(':gdl-graph')
     testImplementation project(':test-utils')
     testImplementation project(':proc-catalog')
     testImplementation project(':proc-community')

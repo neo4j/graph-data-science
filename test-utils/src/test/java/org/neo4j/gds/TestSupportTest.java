@@ -74,13 +74,13 @@ class TestSupportTest {
 
     @Test
     void fromGdlTest() {
-        var g = GdlTestSupport.fromGdl("(a)");
+        var g = GdlSupport.fromGdl("(a)");
         assertThat(g.toOriginalNodeId("a")).isEqualTo(0L);
     }
 
     @Test
     void fromGdlWithIdOffsetTest() {
-        var g = GdlTestSupport.fromGdl("(a)", 42L);
+        var g = GdlSupport.fromGdl("(a)", 42L);
         assertThat(g.toOriginalNodeId("a")).isEqualTo(42L);
     }
 
@@ -107,7 +107,7 @@ class TestSupportTest {
 
         var gs1 = GdlFactory.of(gdlInput).build();
 
-        String gdlActual = GdlTestSupport.gdlFromGraphStore(gs1);
+        String gdlActual = GdlSupport.gdlFromGraphStore(gs1);
 
         var gs2 = GdlFactory.of(gdlActual).build();
         TestSupport.assertGraphEquals(gs1.getUnion(), gs2.getUnion());

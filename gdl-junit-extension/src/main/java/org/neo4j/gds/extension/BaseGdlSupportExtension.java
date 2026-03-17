@@ -50,9 +50,6 @@ import static java.util.Arrays.stream;
 
 public abstract class BaseGdlSupportExtension {
 
-    public static final String DATABASE_NAME = "GDL";
-    public static final DatabaseId DATABASE_ID = DatabaseId.of(DATABASE_NAME);
-
     void beforeAction(ExtensionContext context) {
         Class<?> requiredTestClass = context.getRequiredTestClass();
         gdlGraphs(requiredTestClass).forEach(setup -> injectGraphStore(setup, context));
@@ -144,7 +141,7 @@ public abstract class BaseGdlSupportExtension {
         CSRGraphStore graphStore = gdlFactory.build();
         CSRGraph graph = graphStore.getUnion();
         IdFunction idFunction = gdlFactory::nodeId;
-        TestGraph testGraph = new TestGraph(graph, idFunction, graphName);
+        org.neo4j.gds.TestGraph testGraph = new org.neo4j.gds.TestGraph(graph, idFunction, graphName);
 
         ResultStore resultStore;
         if (gdlGraphSetup.addToCatalog()) {
@@ -160,7 +157,7 @@ public abstract class BaseGdlSupportExtension {
         context.getRequiredTestInstances().getAllInstances().forEach(testInstance -> {
             ExtensionUtil.injectInstance(testInstance, graphNamePrefix, graph, Graph.class, "Graph");
             ExtensionUtil.injectInstance(testInstance, graphNamePrefix, graph, CSRGraph.class, "Graph");
-            ExtensionUtil.injectInstance(testInstance, graphNamePrefix, testGraph, TestGraph.class, "Graph");
+            ExtensionUtil.injectInstance(testInstance, graphNamePrefix, testGraph, org.neo4j.gds.TestGraph.class, "Graph");
             ExtensionUtil.injectInstance(testInstance, graphNamePrefix, graphStore, GraphStore.class, "GraphStore");
             ExtensionUtil.injectInstance(testInstance, graphNamePrefix, resultStore, ResultStore.class, "ResultStore");
             ExtensionUtil.injectInstance(testInstance, graphNamePrefix, idFunction, IdFunction.class, "IdFunction");

@@ -69,7 +69,7 @@ dependencies {
     implementation project(':termination')
 
     // Test Dependencies
-    testImplementation project(':gdl-junit-extension')
+    testImplementation project(':gdl-graph')
     testImplementation project(':test-utils')
     testImplementation openGds.mockito.junit.jupiter
 }

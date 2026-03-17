@@ -21,6 +21,7 @@ package org.neo4j.gds.similarity.nodesim;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.TestGraph;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
@@ -30,7 +31,6 @@ import org.neo4j.gds.core.huge.UnionGraph;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
-import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.similarity.SimilarityGraphBuilder;
 import org.neo4j.gds.similarity.SimilarityResult;
 import org.neo4j.gds.termination.TerminationFlag;
@@ -38,7 +38,7 @@ import org.neo4j.gds.termination.TerminationFlag;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.neo4j.gds.GdlTestSupport.fromGdl;
+import static org.neo4j.gds.GdlSupport.fromGdl;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
 
 @GdlExtension

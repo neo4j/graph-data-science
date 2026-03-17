@@ -29,7 +29,7 @@ import org.neo4j.gds.extension.GdlGraph;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.neo4j.gds.extension.BaseGdlSupportExtension.DATABASE_ID;
+import static org.neo4j.gds.GdlSupport.DATABASE_ID;
 
 @GdlExtension
 class GraphStoreFromCatalogLoaderTest {

@@ -22,7 +22,7 @@ package org.neo4j.gds.core.io.file.csv;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.neo4j.gds.GdlTestSupport;
+import org.neo4j.gds.GdlSupport;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
 import org.neo4j.gds.core.concurrency.Concurrency;
@@ -58,7 +58,7 @@ class CsvToGraphStoreImporterTest {
 
         assertThat(userGraphStore.userName()).isEqualTo("UserA");
 
-        var expectedGraph = GdlTestSupport.fromGdl(
+        var expectedGraph = GdlSupport.fromGdl(
             "  (n0:A {thisisaverylongnameintentionallytotriggerquoting: 21, prop2: [0.1, 0.00002]})" +
             ", (n1:A {thisisaverylongnameintentionallytotriggerquoting: 42, prop2: [0.3, -0.4]})" +
             ", (n2:A {thisisaverylongnameintentionallytotriggerquoting: 23, prop2: [0.5]})" +

@@ -55,7 +55,7 @@ import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.neo4j.gds.GdlTestSupport.graphStoreFromGDL;
+import static org.neo4j.gds.GdlSupport.graphStoreFromGDL;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
 
 @GdlExtension

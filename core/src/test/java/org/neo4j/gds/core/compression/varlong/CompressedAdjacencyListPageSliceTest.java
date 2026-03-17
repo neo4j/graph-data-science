@@ -22,10 +22,10 @@ package org.neo4j.gds.core.compression.varlong;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.gds.GdlTestSupport;
+import org.neo4j.gds.GdlSupport;
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.TestGraph;
 import org.neo4j.gds.compression.common.VarLongDecoding;
-import org.neo4j.gds.extension.TestGraph;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -101,13 +101,13 @@ class CompressedAdjacencyListPageSliceTest {
     private static Stream<Arguments> graphs() {
         return Stream.of(
             new Graph(
-                GdlTestSupport.fromGdl(GRAPH),
+                GdlSupport.fromGdl(GRAPH),
                 GRAPH_DEGREES,
                 GRAPH_ADJACENCIES,
                 GRAPH_SLICES
             ),
             new Graph(
-                GdlTestSupport.fromGdl(GAP_GRAPH),
+                GdlSupport.fromGdl(GAP_GRAPH),
                 GAP_GRAPH_DEGREES,
                 GAP_GRAPH_ADJACENCIES,
                 GAP_GRAPH_SLICES

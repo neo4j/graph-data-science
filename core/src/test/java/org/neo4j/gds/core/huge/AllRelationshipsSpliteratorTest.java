@@ -25,7 +25,7 @@ import net.jqwik.api.constraints.IntRange;
 import net.jqwik.api.constraints.LongRange;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.GdlTestSupport;
+import org.neo4j.gds.GdlSupport;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
@@ -49,7 +49,7 @@ class AllRelationshipsSpliteratorTest {
 
     @Test
     void tryAdvance() {
-        var graph = GdlTestSupport.fromGdl("(a)-->(b), (b)-->(c), (c)-->(d)");
+        var graph = GdlSupport.fromGdl("(a)-->(b), (b)-->(c), (c)-->(d)");
 
         var spliterator = new AllRelationshipsSpliterator(graph, 1.0);
 
@@ -115,7 +115,7 @@ class AllRelationshipsSpliteratorTest {
 
     @Test
     void filteredGraph() {
-        var graphStore = GdlTestSupport.graphStoreFromGDL("(a:A)-->(b:A)-->(c:B)-->(d:A)-->(e:A)-->(f:B)");
+        var graphStore = GdlSupport.graphStoreFromGDL("(a:A)-->(b:A)-->(c:B)-->(d:A)-->(e:A)-->(f:B)");
         var graph = graphStore.getGraph(
             NodeLabel.of("A"),
             RelationshipType.ALL_RELATIONSHIPS,

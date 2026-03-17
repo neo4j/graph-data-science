@@ -27,7 +27,8 @@ import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.gds.GdlTestSupport;
+import org.neo4j.gds.GdlSupport;
+import org.neo4j.gds.TestGraph;
 import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.Graph;
@@ -44,7 +45,6 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
-import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.paths.dijkstra.DijkstraFactory;
@@ -109,7 +109,7 @@ final class DeltaSteppingTest {
         @ParameterizedTest
         @MethodSource("org.neo4j.gds.paths.delta.DeltaSteppingTest#testParameters")
         void singleSource(double delta, int concurrency, long idOffset) {
-            var graph = GdlTestSupport.fromGdl(DB_CYPHER, idOffset);
+            var graph = GdlSupport.fromGdl(DB_CYPHER, idOffset);
 
             IdFunction idFunction = (String variable) -> graph.toMappedNodeId(graph.toOriginalNodeId(variable));
 
@@ -142,7 +142,7 @@ final class DeltaSteppingTest {
         @ParameterizedTest
         @MethodSource("org.neo4j.gds.paths.delta.DeltaSteppingTest#testParameters")
         void singleSourceFromDisconnectedNode(double delta, int concurrency, long idOffset) {
-            var graph = GdlTestSupport.fromGdl(DB_CYPHER, idOffset);
+            var graph = GdlSupport.fromGdl(DB_CYPHER, idOffset);
 
             IdFunction idFunction = (String variable) -> graph.toMappedNodeId(graph.toOriginalNodeId(variable));
 
@@ -254,7 +254,7 @@ final class DeltaSteppingTest {
         @ParameterizedTest
         @MethodSource("org.neo4j.gds.paths.delta.DeltaSteppingTest#testParameters")
         void singleSource(double delta, int concurrency, long idOffset) {
-            var graph = GdlTestSupport.fromGdl(DB_CYPHER2, idOffset);
+            var graph = GdlSupport.fromGdl(DB_CYPHER2, idOffset);
 
             IdFunction idFunction = (String variable) -> graph.toMappedNodeId(graph.toOriginalNodeId(variable));
 

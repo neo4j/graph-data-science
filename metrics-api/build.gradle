@@ -19,7 +19,7 @@ dependencies {
     testAnnotationProcessor project(':config-generator')
     testImplementation project(":concurrency")
     testImplementation project(":core-api")
-    testImplementation project(':gdl-junit-extension')
+    testImplementation project(':gdl-graph')
     testImplementation project(":graph-projection-api")
     testImplementation project(":test-utils")
 

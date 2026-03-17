@@ -20,6 +20,7 @@
 package org.neo4j.gds.applications.algorithms.similarity;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.TestGraph;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
@@ -29,7 +30,6 @@ import org.neo4j.gds.core.utils.warnings.UserLogRegistry;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
-import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityBaseConfigImpl;
 import org.neo4j.gds.termination.TerminationFlag;

@@ -20,7 +20,7 @@
 package org.neo4j.gds.paths.singlesource;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.GdlTestSupport;
+import org.neo4j.gds.GdlSupport;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
@@ -76,7 +76,7 @@ public abstract class AllShortestPathsMutateProcTest extends AllShortestPathsPro
             .get(Username.EMPTY_USERNAME.username(), db.databaseName(), "graph")
             .graphStore()
             .getUnion();
-        var expected = GdlTestSupport.fromGdl(
+        var expected = GdlSupport.fromGdl(
             EXISTING_GRAPH +
             // new relationship as a result from mutate
             ", (a)-[{w: 0.0D}]->(a)" +
@@ -113,7 +113,7 @@ public abstract class AllShortestPathsMutateProcTest extends AllShortestPathsPro
             .get(Username.EMPTY_USERNAME.username(), db.databaseName(), "graph")
             .graphStore()
             .getUnion();
-        var expected = GdlTestSupport.fromGdl(
+        var expected = GdlSupport.fromGdl(
             EXISTING_GRAPH +
             // new relationship as a result from mutate
             ", (a)-[{w: 0.0D}]->(a)" +

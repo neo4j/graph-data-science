@@ -26,7 +26,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.CommunityAlgorithmTasks;
-import org.neo4j.gds.GdlTestSupport;
+import org.neo4j.gds.GdlSupport;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.TestProgressTrackerHelper;
 import org.neo4j.gds.api.Graph;
@@ -53,10 +53,10 @@ class LocalClusteringCoefficientTest {
 
     private static Stream<Arguments> noTriangleQueries() {
         return Stream.of(
-            Arguments.of(GdlTestSupport.fromGdl("CREATE ()-[:T]->()-[:T]->()", Orientation.UNDIRECTED).graph(), "line"),
-            Arguments.of(GdlTestSupport.fromGdl("CREATE (), (), ()", Orientation.UNDIRECTED).graph(), "no rels"),
-            Arguments.of(GdlTestSupport.fromGdl("CREATE ()-[:T]->(), ()", Orientation.UNDIRECTED).graph(), "one rel"),
-            Arguments.of(GdlTestSupport.fromGdl("CREATE (a1)-[:T]->()-[:T]->(a1), ()", Orientation.UNDIRECTED).graph(), "back and forth")
+            Arguments.of(GdlSupport.fromGdl("CREATE ()-[:T]->()-[:T]->()", Orientation.UNDIRECTED).graph(), "line"),
+            Arguments.of(GdlSupport.fromGdl("CREATE (), (), ()", Orientation.UNDIRECTED).graph(), "no rels"),
+            Arguments.of(GdlSupport.fromGdl("CREATE ()-[:T]->(), ()", Orientation.UNDIRECTED).graph(), "one rel"),
+            Arguments.of(GdlSupport.fromGdl("CREATE (a1)-[:T]->()-[:T]->(a1), ()", Orientation.UNDIRECTED).graph(), "back and forth")
         );
     }
 
@@ -79,7 +79,7 @@ class LocalClusteringCoefficientTest {
         for (int i = 0; i < nbrOfTriangles; ++i) {
             gdl.append(formatWithLocale("(a%d)-[:T]->()-[:T]->()-[:T]->(a%d) ", i, i));
         }
-        var graph = GdlTestSupport.fromGdl(gdl.toString(), Orientation.UNDIRECTED).graph();
+        var graph = GdlSupport.fromGdl(gdl.toString(), Orientation.UNDIRECTED).graph();
         LocalClusteringCoefficientResult result = compute(graph);
 
         assertEquals(1, result.averageClusteringCoefficient());
@@ -91,7 +91,7 @@ class LocalClusteringCoefficientTest {
 
     @Test
     void clique5() {
-        var graph = GdlTestSupport.fromGdl("CREATE " +
+        var graph = GdlSupport.fromGdl("CREATE " +
             " (a1)-[:T]->(a2), " +
             " (a1)-[:T]->(a3), " +
             " (a1)-[:T]->(a4), " +
@@ -114,7 +114,7 @@ class LocalClusteringCoefficientTest {
 
     @Test
     void twoAdjacentTriangles() {
-        var graph = GdlTestSupport.fromGdl("CREATE " +
+        var graph = GdlSupport.fromGdl("CREATE " +
             "  (a)-[:T]->()-[:T]->()-[:T]->(a) " +
             ", (a)-[:T]->()-[:T]->()-[:T]->(a)", Orientation.UNDIRECTED).graph();
 
@@ -138,7 +138,7 @@ class LocalClusteringCoefficientTest {
 
     @Test
     void twoTrianglesWithLine() {
-        var graph = GdlTestSupport.fromGdl("CREATE " +
+        var graph = GdlSupport.fromGdl("CREATE " +
             "  (a)-[:T]->(b)-[:T]->(c)-[:T]->(a) " +
             ", (q)-[:T]->(r)-[:T]->(t)-[:T]->(q) " +
             ", (a)-[:T]->(q)", Orientation.UNDIRECTED).graph();
@@ -162,7 +162,7 @@ class LocalClusteringCoefficientTest {
 
     @Test
     void selfLoop() {
-        var graph = GdlTestSupport.fromGdl("CREATE (a)-[:T]->(a)-[:T]->(a)-[:T]->(a)", Orientation.UNDIRECTED).graph();
+        var graph = GdlSupport.fromGdl("CREATE (a)-[:T]->(a)-[:T]->(a)-[:T]->(a)", Orientation.UNDIRECTED).graph();
 
         LocalClusteringCoefficientResult result = compute(graph);
 
@@ -174,7 +174,7 @@ class LocalClusteringCoefficientTest {
     @Test
     void triangleWithSelfLoop() {
         // a self loop adds one to the degree
-        var graph = GdlTestSupport.fromGdl("CREATE (a)-[:T]->(b)-[:T]->(c)-[:T]->(a)-[:T]->(a)", Orientation.UNDIRECTED)
+        var graph = GdlSupport.fromGdl("CREATE (a)-[:T]->(b)-[:T]->(c)-[:T]->(a)-[:T]->(a)", Orientation.UNDIRECTED)
             .graph();
 
         LocalClusteringCoefficientResult result = compute(graph);
@@ -188,7 +188,7 @@ class LocalClusteringCoefficientTest {
 
     @Test
     void triangleWithParallelRelationship() {
-        var graph = GdlTestSupport.fromGdl("CREATE" +
+        var graph = GdlSupport.fromGdl("CREATE" +
             " (a)-[:T]->(b)-[:T]->(c)-[:T]->(a)" +
             ",(a)-[:T]->(b)", Orientation.UNDIRECTED).graph();
 
@@ -203,7 +203,7 @@ class LocalClusteringCoefficientTest {
 
     @Test
     void triangleWithTwoParallelRelationships() {
-        var graph = GdlTestSupport.fromGdl("CREATE" +
+        var graph = GdlSupport.fromGdl("CREATE" +
             " (a)-[:T]->(b)-[:T]->(c)-[:T]->(a)" +
             ",(a)-[:T]->(b)-[:T]->(c)", Orientation.UNDIRECTED).graph();
 
@@ -218,7 +218,7 @@ class LocalClusteringCoefficientTest {
 
     @Test
     void parallelTriangles() {
-        var graph = GdlTestSupport.fromGdl("CREATE" +
+        var graph = GdlSupport.fromGdl("CREATE" +
             " (a)-[:T]->(b)-[:T]->(c)-[:T]->(a)" +
             ",(a)-[:T]->(b)-[:T]->(c)-[:T]->(a)", Orientation.UNDIRECTED).graph();
 
@@ -233,7 +233,7 @@ class LocalClusteringCoefficientTest {
 
     @Test
     void parallelTrianglesWithExtraParallelRelationship() {
-        var graph = GdlTestSupport.fromGdl("CREATE" +
+        var graph = GdlSupport.fromGdl("CREATE" +
             " (a)-[:T]->(b)-[:T]->(c)-[:T]->(a)" +
             ",(a)-[:T]->(b)-[:T]->(c)-[:T]->(a)" +
             ",(a)-[:T]->(b)", Orientation.UNDIRECTED).graph();
@@ -249,7 +249,7 @@ class LocalClusteringCoefficientTest {
 
     @Test
     void triangleWithParallelRelationshipAndExtraNode() {
-        var graph = GdlTestSupport.fromGdl("CREATE" +
+        var graph = GdlSupport.fromGdl("CREATE" +
             " (a)-[:T]->(b)-[:T]->(c)-[:T]->(a)" +
             ",(a)-[:T]->(b)" +
             ",(d)-[:T]->(a)", Orientation.UNDIRECTED).graph();
@@ -268,7 +268,7 @@ class LocalClusteringCoefficientTest {
 
     @Test
     void manyTrianglesAndOtherThings() {
-        var graph = GdlTestSupport.fromGdl("CREATE" +
+        var graph = GdlSupport.fromGdl("CREATE" +
             " (a)-[:T]->(b)-[:T]->(b)-[:T]->(c)-[:T]->(a)" +
             ", (c)-[:T]->(d)-[:T]->(e)-[:T]->(f)-[:T]->(d)" +
             ", (f)-[:T]->(g)-[:T]->(h)-[:T]->(f)" +

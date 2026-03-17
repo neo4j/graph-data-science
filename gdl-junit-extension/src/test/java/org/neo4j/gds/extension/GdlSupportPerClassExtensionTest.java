@@ -21,6 +21,7 @@ package org.neo4j.gds.extension;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.GdlSupport;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
@@ -44,11 +45,11 @@ class GdlSupportPerClassExtensionTest {
 
     @Test
     void testHasGraph() {
-        assertThat(GraphStoreCatalog.get("", BaseGdlSupportExtension.DATABASE_ID, "graph")).isNotNull();
+        assertThat(GraphStoreCatalog.get("", GdlSupport.DATABASE_ID, "graph")).isNotNull();
     }
 
     @Test
     void testStillHasGraph() {
-        assertThat(GraphStoreCatalog.get("", BaseGdlSupportExtension.DATABASE_ID, "graph")).isNotNull();
+        assertThat(GraphStoreCatalog.get("", GdlSupport.DATABASE_ID, "graph")).isNotNull();
     }
 }

@@ -17,12 +17,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.extension;
+package org.neo4j.gds;
 
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.api.CSRGraph;
 import org.neo4j.gds.api.CSRGraphAdapter;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.extension.IdFunction;
 
 public class TestGraph extends CSRGraphAdapter {
 

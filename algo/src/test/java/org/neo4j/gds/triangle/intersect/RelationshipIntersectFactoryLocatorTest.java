@@ -20,7 +20,7 @@
 package org.neo4j.gds.triangle.intersect;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.GdlTestSupport;
+import org.neo4j.gds.GdlSupport;
 import org.neo4j.gds.core.huge.HugeGraph;
 import org.neo4j.gds.core.huge.NodeFilteredGraph;
 import org.neo4j.gds.core.huge.UnionGraph;
@@ -34,7 +34,7 @@ class RelationshipIntersectFactoryLocatorTest {
 
     @Test
     void supportsHugeGraph() {
-        var graph = GdlTestSupport.fromGdl("()-->()").graph();
+        var graph = GdlSupport.fromGdl("()-->()").graph();
         assertThat(graph).isInstanceOf(HugeGraph.class);
         var  intersect = RelationshipIntersectFactoryLocator.lookup(graph);
         assertThat(intersect).isPresent()
@@ -44,7 +44,7 @@ class RelationshipIntersectFactoryLocatorTest {
 
     @Test
     void supportsUnionGraph() {
-        var graph = GdlTestSupport.fromGdl("()-[:A]->()-[:B]->()").graph();
+        var graph = GdlSupport.fromGdl("()-[:A]->()-[:B]->()").graph();
         assertThat(graph).isInstanceOf(UnionGraph.class);
         var  intersect = RelationshipIntersectFactoryLocator.lookup(graph);
         assertThat(intersect).isPresent()

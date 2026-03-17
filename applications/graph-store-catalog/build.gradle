@@ -65,6 +65,7 @@ dependencies {
     testImplementation openGds.mockito.junit.jupiter
 
     testImplementation project(":core-utils")
+    testImplementation project(':gdl-graph')
     testImplementation project(':gdl-junit-extension')
     testImplementation project(":neo4j-api")
     testImplementation project(":test-utils")

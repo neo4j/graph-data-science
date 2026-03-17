@@ -25,5 +25,6 @@ dependencies {
     implementation project(':similarity-mutate-steps')
 
     testImplementation project(':test-utils')
+    testImplementation project(':gdl-graph')
     testImplementation project(':gdl-junit-extension')
 }

@@ -20,9 +20,11 @@
 package org.neo4j.gds.ml.splitting;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.Aggregation;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.TestGraph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.properties.relationships.PropertyCursor;
@@ -37,8 +39,6 @@ import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
-import org.neo4j.gds.extension.TestGraph;
-import org.neo4j.gds.Aggregation;
 
 import java.util.Collection;
 import java.util.List;

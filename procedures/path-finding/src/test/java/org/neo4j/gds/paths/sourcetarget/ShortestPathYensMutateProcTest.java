@@ -23,7 +23,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
-import org.neo4j.gds.GdlTestSupport;
+import org.neo4j.gds.GdlSupport;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.catalog.GraphProjectProc;
@@ -143,7 +143,7 @@ class ShortestPathYensMutateProcTest extends BaseProcTest {
         )));
 
         var actual = GraphStoreCatalog.get(getUsername(), databaseId(), "graph").graphStore().getUnion();
-        var expected = GdlTestSupport.fromGdl(expectedMutatedGraph());
+        var expected = GdlSupport.fromGdl(expectedMutatedGraph());
 
         assertGraphEquals(expected, actual);
     }
@@ -172,7 +172,7 @@ class ShortestPathYensMutateProcTest extends BaseProcTest {
         )));
 
         var actual = GraphStoreCatalog.get(getUsername(), databaseId(), "graph").graphStore().getUnion();
-        var expected = GdlTestSupport.fromGdl(
+        var expected = GdlSupport.fromGdl(
             EXISTING_GRAPH +
                 // new relationship as a result from mutate
                 ", (c)-[:PATH {w: 5.0}]->(h)" +

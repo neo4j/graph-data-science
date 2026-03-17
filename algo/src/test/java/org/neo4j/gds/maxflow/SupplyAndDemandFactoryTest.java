@@ -23,11 +23,11 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.neo4j.gds.ListInputNodes;
 import org.neo4j.gds.MapInputNodes;
+import org.neo4j.gds.TestGraph;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
-import org.neo4j.gds.extension.TestGraph;
 
 import java.util.List;
 import java.util.Map;

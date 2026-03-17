@@ -25,7 +25,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.CommunityAlgorithmTasks;
-import org.neo4j.gds.GdlTestSupport;
+import org.neo4j.gds.GdlSupport;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.TestProgressTrackerHelper;
 import org.neo4j.gds.api.Graph;
@@ -52,7 +52,7 @@ import static org.neo4j.gds.assertj.Extractors.replaceTimings;
 class CliqueCountingTest {
 
     private static Graph fromGdl(String gdl) {
-        return GdlTestSupport.fromGdl(gdl, Orientation.UNDIRECTED).graph();
+        return GdlSupport.fromGdl(gdl, Orientation.UNDIRECTED).graph();
     }
 
     private static Stream<Arguments> cliqueOfFourQuery() {

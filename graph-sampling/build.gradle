@@ -30,6 +30,7 @@ dependencies {
     testAnnotationProcessor project(':annotations')
 
     testImplementation project(':core-test-utils')
+    testImplementation project(':gdl-graph')
     testImplementation project(':gdl-junit-extension')
     testImplementation project(':logging')
     testImplementation project(':test-utils')

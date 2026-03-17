@@ -26,7 +26,7 @@ dependencies {
 
     testImplementation project(':config-api')
     testImplementation project(':core')
-    testImplementation project(':gdl-junit-extension')
+    testImplementation project(':gdl-graph')
     testImplementation project(':graph-projection-api')
     testImplementation project(':native-projection')
     testImplementation project(':string-formatting')
