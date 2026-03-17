@@ -36,7 +36,7 @@ public class TestGraph extends CSRGraphAdapter {
         this.idFunction = idFunction;
     }
 
-    public Graph innerGraph() {
+    public CSRGraph innerGraph() {
         return csrGraph;
     }
 

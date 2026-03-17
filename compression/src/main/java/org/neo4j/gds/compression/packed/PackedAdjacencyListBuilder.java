@@ -24,6 +24,7 @@ import org.neo4j.gds.collections.ha.HugeIntArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.compression.api.AdjacencyListBuilder;
 import org.neo4j.gds.compression.api.ModifiableSlice;
+import org.neo4j.gds.compression.api.Slice;
 import org.neo4j.gds.compression.common.BumpAllocator;
 import org.neo4j.gds.compression.common.MemoryTracker;
 import org.neo4j.gds.compression.utilities.MemoryInfoUtil;

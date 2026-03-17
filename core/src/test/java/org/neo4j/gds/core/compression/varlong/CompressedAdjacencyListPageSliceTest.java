@@ -138,9 +138,9 @@ class CompressedAdjacencyListPageSliceTest {
             } else {
                 var success = csal.initPageSlice(g.toMappedNodeId(node), pageSlice);
                 assertThat(success).isTrue();
-                assertThat(pageSlice.page).isNotNull();
-                assertThat(pageSlice.offset).isEqualTo(expectedSlice.get().offset());
-                assertThat(pageSlice.length).isEqualTo(expectedSlice.get().length());
+                assertThat(pageSlice.slice()).isNotNull();
+                assertThat(pageSlice.offset()).isEqualTo(expectedSlice.get().offset());
+                assertThat(pageSlice.length()).isEqualTo(expectedSlice.get().length());
             }
         });
     }
@@ -165,7 +165,7 @@ class CompressedAdjacencyListPageSliceTest {
         assertThat(success).isTrue();
         long[] out = new long[expectedTargets.length];
         // decompress
-        VarLongDecoding.decodeDeltaVLongs(0L, pageSlice.page, pageSlice.offset, pageSlice.length, out);
+        VarLongDecoding.decodeDeltaVLongs(0L, pageSlice.slice(), pageSlice.offset(), pageSlice.length(), out);
         assertThat(out).isEqualTo(expectedTargets);
     }
 }

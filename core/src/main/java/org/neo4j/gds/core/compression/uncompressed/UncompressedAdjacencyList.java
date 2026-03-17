@@ -30,6 +30,7 @@ import org.neo4j.gds.collections.ArrayUtil;
 import org.neo4j.gds.collections.PageUtil;
 import org.neo4j.gds.collections.ha.HugeIntArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.compression.api.ModifiableSlice;
 import org.neo4j.gds.compression.common.BumpAllocator;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.loading.MutableIntValue;
@@ -76,8 +77,9 @@ public final class UncompressedAdjacencyList implements AdjacencyList, Adjacency
     ) {
         return MemoryEstimations
             .builder(UncompressedAdjacencyList.class)
-            .perGraphDimension("pages", (dimensions, concurrency) ->
-                listSize(averageDegree(dimensions, relationshipType, undirected), dimensions.nodeCount())
+            .perGraphDimension(
+                "pages", (dimensions, concurrency) ->
+                    listSize(averageDegree(dimensions, relationshipType, undirected), dimensions.nodeCount())
             )
             /*
              NOTE: one might think to follow this with something like
@@ -97,7 +99,10 @@ public final class UncompressedAdjacencyList implements AdjacencyList, Adjacency
         boolean undirected
     ) {
         long nodeCount = dimensions.nodeCount();
-        long relCountForType = dimensions.relationshipCounts().getOrDefault(relationshipType, dimensions.relCountUpperBound());
+        long relCountForType = dimensions.relationshipCounts().getOrDefault(
+            relationshipType,
+            dimensions.relCountUpperBound()
+        );
         long relCount = undirected ? relCountForType * 2 : relCountForType;
         return (nodeCount > 0) ? BitUtil.ceilDiv(relCount, nodeCount) : 0L;
     }
@@ -325,25 +330,19 @@ public final class UncompressedAdjacencyList implements AdjacencyList, Adjacency
         }
     }
 
-    public static final class PageSlice {
-        public long[] page;
-        public int offset;
-        public int length;
+    public ModifiableSlice<long[]> newPageSlice() {
+        return ModifiableSlice.create();
     }
 
-    public PageSlice newPageSlice() {
-        return new PageSlice();
-    }
-
-    public boolean initPageSlice(long node, PageSlice reuse) {
+    public boolean initPageSlice(long node, ModifiableSlice<long[]> reuse) {
         var degree = degrees.get(node);
         if (degree == 0) {
             return false;
         }
         var offset = offsets.get(node);
-        reuse.page = pages[pageIndex(offset, BumpAllocator.PAGE_SHIFT)];
-        reuse.offset = indexInPage(offset, BumpAllocator.PAGE_MASK);
-        reuse.length = degree;
+        reuse.setSlice(pages[pageIndex(offset, BumpAllocator.PAGE_SHIFT)]);
+        reuse.setOffset(indexInPage(offset, BumpAllocator.PAGE_MASK));
+        reuse.setLength(degree);
         return true;
     }
 }

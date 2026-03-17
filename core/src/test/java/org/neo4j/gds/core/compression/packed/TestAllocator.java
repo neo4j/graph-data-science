@@ -23,6 +23,7 @@ import org.apache.commons.lang3.mutable.MutableInt;
 import org.neo4j.gds.api.AdjacencyCursor;
 import org.neo4j.gds.compression.api.AdjacencyListBuilder;
 import org.neo4j.gds.compression.api.ModifiableSlice;
+import org.neo4j.gds.compression.api.Slice;
 import org.neo4j.gds.compression.packed.BlockAlignedTailPacker;
 import org.neo4j.gds.compression.packed.InlinedHeadPackedTailPacker;
 import org.neo4j.gds.compression.common.MemoryTracker;
@@ -39,7 +40,7 @@ import java.util.function.BiConsumer;
 class TestAllocator implements AdjacencyListBuilder.Allocator<Address> {
     private Address address;
 
-    public static void test(BiConsumer<AdjacencyListBuilder.Allocator<Address>, AdjacencyListBuilder.Slice<Address>> code) {
+    public static void test(BiConsumer<AdjacencyListBuilder.Allocator<Address>, Slice<Address>> code) {
         try (var allocator = new TestAllocator()) {
             var slice = ModifiableSlice.<Address>create();
             code.accept(allocator, slice);
@@ -50,7 +51,7 @@ class TestAllocator implements AdjacencyListBuilder.Allocator<Address> {
         long[] values,
         int length,
         Aggregation aggregation,
-        BiConsumer<AdjacencyCursor, AdjacencyListBuilder.Slice<Address>> code
+        BiConsumer<AdjacencyCursor, Slice<Address>> code
     ) {
         testCursor(GdsFeatureToggles.ADJACENCY_PACKING_STRATEGY.get(), values, length, aggregation, code);
     }
@@ -60,7 +61,7 @@ class TestAllocator implements AdjacencyListBuilder.Allocator<Address> {
         long[] values,
         int length,
         Aggregation aggregation,
-        BiConsumer<AdjacencyCursor, AdjacencyListBuilder.Slice<Address>> code
+        BiConsumer<AdjacencyCursor, Slice<Address>> code
     ) {
         test((allocator, slice) -> {
             var degree = new MutableInt();
@@ -123,7 +124,7 @@ class TestAllocator implements AdjacencyListBuilder.Allocator<Address> {
     }
 
     @Override
-    public long allocate(int allocationSize, AdjacencyListBuilder.Slice<Address> into) {
+    public long allocate(int allocationSize, Slice<Address> into) {
         var slice = (ModifiableSlice<Address>) into;
         long ptr = UnsafeUtil.allocateMemory(allocationSize, EmptyMemoryTracker.INSTANCE);
         this.address = Address.createAddress(ptr, allocationSize);
