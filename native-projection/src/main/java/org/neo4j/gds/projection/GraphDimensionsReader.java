@@ -41,6 +41,7 @@ import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.api.StatementConstants;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -61,8 +62,8 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
     private final IdGeneratorFactory idGeneratorFactory;
     private final Map<NodeLabel, String> nodeLabelMappings;
     private final Map<RelationshipType, String> relationshipTypeMappings;
-    private final List<String> nodeProperties;
-    private final List<String> relationshipProperties;
+    private final Collection<String> nodeProperties;
+    private final Collection<String> relationshipProperties;
 
     @Builder.Factory
     static GraphDimensionsReader graphDimensionsReader(
@@ -113,13 +114,13 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
         );
     }
 
-    GraphDimensionsReader(
+    public GraphDimensionsReader(
         TransactionContext tx,
         IdGeneratorFactory idGeneratorFactory,
         Map<NodeLabel, String> nodeLabelMappings,
         Map<RelationshipType, String> relationshipTypeMappings,
-        List<String> nodeProperties,
-        List<String> relationshipProperties
+        Collection<String> nodeProperties,
+        Collection<String> relationshipProperties
     ) {
         super(tx);
         this.idGeneratorFactory = idGeneratorFactory;
@@ -200,7 +201,7 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
     }
 
     private Map<String, Integer> loadPropertyTokens(
-        List<String> properties,
+        Collection<String> properties,
         TokenRead tokenRead
     ) {
         return properties
