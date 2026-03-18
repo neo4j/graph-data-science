@@ -19,43 +19,8 @@
  */
 package org.neo4j.gds.config;
 
-import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.api.GraphStore;
+// base config for algos mutating a node property as a result
+public interface MutateNodePropertyConfig extends MutateConfig, MutateNodePropertyFieldConfig {
 
-import java.util.Collection;
-
-import static org.neo4j.gds.core.StringIdentifierValidations.emptyToNull;
-import static org.neo4j.gds.core.StringIdentifierValidations.validateNoWhiteCharacter;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
-
-public interface MutateNodePropertyConfig extends MutateConfig {
-
-    String MUTATE_PROPERTY_KEY = "mutateProperty";
-
-    @Configuration.ConvertWith(method = "validateProperty")
-    @Configuration.Key(MUTATE_PROPERTY_KEY)
-    String mutateProperty();
-
-    static @Nullable String validateProperty(String input) {
-        return validateNoWhiteCharacter(emptyToNull(input), "mutateProperty");
-    }
-
-    @Configuration.GraphStoreValidationCheck
-    default void validateMutateProperty(
-        GraphStore graphStore,
-        Collection<NodeLabel> selectedLabels,
-        Collection<RelationshipType> selectedRelationshipTypes
-    ) {
-        if (mutateProperty() != null && graphStore.hasNodeProperty(selectedLabels, mutateProperty())) {
-            throw new IllegalArgumentException(formatWithLocale(
-                "Node property `%s` already exists in the in-memory graph.",
-                mutateProperty()
-            ));
-        }
-    }
-
-
+    String MUTATE_PROPERTY_KEY = MutateNodePropertyFieldConfig.MUTATE_PROPERTY_KEY;
 }
