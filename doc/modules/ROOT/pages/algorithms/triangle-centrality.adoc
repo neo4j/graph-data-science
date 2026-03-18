@@ -1,0 +1,861 @@
+[[algorithms-triangle-centrality]]
+= Triangle Centrality
+:description: This section describes the Triangle Centrality algorithm in the Neo4j Graph Data Science library.
+:entity: node
+:result: triangle centrality
+:algorithm: Triangle Centrality
+
+:no-directed:
+:undirected:
+include::partial$/algorithms/shared/algorithm-traits.adoc[]
+
+
+[[algorithms-triangle-centrality-intro]]
+== Introduction
+
+Triangle Centrality measures a node's importance based on the concentration of triangles in its neighborhood.
+A triangle is a set of three nodes where each node has a relationship to the other two.
+Unlike xref:algorithms/triangle-count.adoc[Triangle Count], this metric also considers triangles incident to a node's neighbors.
+The Triangle Centrality algorithm in the GDS library only finds triangles in undirected graphs.
+
+Triangle Centrality can identify a coordinator connected to cohesive groups even when the coordinator has few direct contacts and belongs to no triangles.
+The <<algorithms-triangle-centrality-comparison,Centrality Comparison>> section compares Triangle Centrality's ranking with those produced by several other node centrality measures.
+
+Let △(_v_) denote the number of triangles containing node _v_, and let △(_G_) denote the total number of triangles in the graph.
+The neighborhood _N_(_v_) contains every neighbor of _v_.
+The triangle neighborhood _N_~△~(_v_) contains every neighbor that shares at least one triangle with _v_; its closed form _N_~△~[_v_] additionally contains _v_ itself.
+
+The triangle centrality of _v_ is:
+
+image::equations/triangle_centrality_formula.svg["Triangle centrality: the closed triangle-neighbor triangle sum divided by three, plus the non-triangle-neighbor triangle sum, divided by the global triangle count", align="center"]
+
+The first term includes the node's own triangle count and the triangle counts of its triangle neighbors.
+The second term sums the triangle counts of its non-triangle neighbors.
+Dividing by the global triangle count normalizes the score to the range `0.0` to `1.0`.
+When the graph contains no triangles, or filtering accepts no triangles, every included node has centrality `0.0`.
+Self-loops and parallel relationships do not create additional neighbors or triangles.
+
+The implementation is based on Paul Burkhardt's paper, https://doi.org/10.1145/3685677[_Triangle Centrality_].
+
+
+[[algorithms-triangle-centrality-comparison]]
+== Centrality Comparison
+
+[[algorithms-triangle-centrality-examples-comparison]]
+The comparison uses Zachary's Karate Club network, a social network of friendships between 34 club members.
+We use the standard undirected, unweighted version with 78 relationships and 45 triangles.
+The dataset is built into the link:++https://neo4j.com/docs/graph-data-science-client/current/common-datasets/#_karate_club++[GDS Python client].
+The Cypher statements below create it explicitly in Neo4j.
+The network comes from Wayne W. Zachary's study, https://doi.org/10.1086/jar.33.4.3629752[_An Information Flow Model for Conflict and Fission in Small Groups_].
+
+Member numbers follow the original study's numbering from `1` to `34`.
+Member 1 is the instructor, known by the pseudonym Mr. Hi; member 34 is the club president, John A.
+Members 14 and 32 remain identified by number.
+Following a dispute, the club split into groups around the instructor and president.
+
+The following comparison uses four familiar centrality measures: xref:algorithms/betweenness-centrality.adoc[Betweenness Centrality], xref:algorithms/closeness-centrality.adoc[Closeness Centrality], xref:algorithms/degree-centrality.adoc[Degree Centrality], and xref:algorithms/page-rank.adoc[PageRank].
+
+--
+.Cypher for the Karate Club graph
+[%collapsible]
+======
+include::partial$/algorithms/shared/examples-named-native-note.adoc[]
+
+.Create the Karate Club members and their friendships:
+[source, cypher, role=noplay setup-query]
+----
+UNWIND range(1, 34) AS member
+CREATE (:KarateMember {member: member})
+WITH count(*) AS nodeCount
+UNWIND [
+  [1, 2], [1, 3], [2, 3], [1, 4], [2, 4], [3, 4],
+  [1, 5], [1, 6], [1, 7], [5, 7], [6, 7], [1, 8],
+  [2, 8], [3, 8], [4, 8], [1, 9], [3, 9], [3, 10],
+  [1, 11], [5, 11], [6, 11], [1, 12], [1, 13], [4, 13],
+  [1, 14], [2, 14], [3, 14], [4, 14], [6, 17], [7, 17],
+  [1, 18], [2, 18], [1, 20], [2, 20], [1, 22], [2, 22],
+  [24, 26], [25, 26], [3, 28], [24, 28], [25, 28], [3, 29],
+  [24, 30], [27, 30], [2, 31], [9, 31], [1, 32], [25, 32],
+  [26, 32], [29, 32], [3, 33], [9, 33], [15, 33], [16, 33],
+  [19, 33], [21, 33], [23, 33], [24, 33], [30, 33], [31, 33],
+  [32, 33], [9, 34], [10, 34], [14, 34], [15, 34], [16, 34],
+  [19, 34], [20, 34], [21, 34], [23, 34], [24, 34], [27, 34],
+  [28, 34], [29, 34], [30, 34], [31, 34], [32, 34], [33, 34]
+] AS friendship
+MATCH (source:KarateMember {member: friendship[0]})
+MATCH (target:KarateMember {member: friendship[1]})
+CREATE (source)-[:KARATE_KNOWS]->(target)
+----
+
+With the graph in Neo4j we can now project it into the graph catalog to prepare it for algorithm execution.
+We do this using a Cypher projection targeting the `KarateMember` nodes and the `KARATE_KNOWS` relationships.
+For the relationships we must use the `UNDIRECTED` orientation.
+This is because the Triangle Centrality algorithm is defined only for undirected graphs.
+
+.Project the comparison graph using undirected relationships:
+[source, cypher, role=noplay graph-project-query]
+----
+MATCH (source:KarateMember)-[:KARATE_KNOWS]->(target:KarateMember)
+RETURN gds.graph.project(
+  'comparisonGraph',
+  source,
+  target,
+  {},
+  { undirectedRelationshipTypes: ['*'] }
+)
+----
+
+include::partial$/algorithms/shared/undirected-req-note.adoc[]
+======
+--
+
+The diagram follows the presentation of Figure 4 in Paul Burkhardt's paper, https://doi.org/10.1145/3685677[_Triangle Centrality_].
+It highlights members 14, 1, 32, and 34, which appear in the results below, and displays their Triangle Centrality scores.
+The cyan relationships show member 14's five friendships.
+
+image::example-graphs/triangle-centrality-karate-club.svg["Zachary's Karate Club network with members 14, 1, 32, and 34 highlighted; member 14 has the highest Triangle Centrality", width=1000,role=popup]
+
+[role=query-example]
+--
+.Cypher for the centrality comparison
+[%collapsible]
+====
+The following query runs each algorithm on the full graph and ranks its scores.
+It returns the three highest-scoring members for Triangle Centrality and the highest-scoring member for each other measure, removing duplicates.
+For this graph, the selection produces four rows: members 14, 1, 32, and 34.
+Betweenness Centrality uses all nodes, without sampling.
+PageRank uses a damping factor of `0.85`.
+It uses up to `100` iterations with `tolerance: 1.0e-9`.
+
+.Compare centrality scores:
+[source, cypher, role=noplay]
+----
+CALL () {
+  CALL gds.triangleCentrality.stream('comparisonGraph')
+  YIELD nodeId, triangleCentrality
+  RETURN nodeId, 'triangleCentrality' AS metric, triangleCentrality AS score
+  UNION ALL
+  CALL gds.betweenness.stream('comparisonGraph')
+  YIELD nodeId, score
+  RETURN nodeId, 'betweenness' AS metric, score
+  UNION ALL
+  CALL gds.closeness.stream('comparisonGraph')
+  YIELD nodeId, score
+  RETURN nodeId, 'closeness' AS metric, score
+  UNION ALL
+  CALL gds.degree.stream('comparisonGraph')
+  YIELD nodeId, score
+  RETURN nodeId, 'degree' AS metric, score
+  UNION ALL
+  CALL gds.pageRank.stream('comparisonGraph', {
+    dampingFactor: 0.85, maxIterations: 100, tolerance: 1.0e-9
+  })
+  YIELD nodeId, score
+  RETURN nodeId, 'pageRank' AS metric, score
+}
+WITH metric, gds.util.asNode(nodeId).member AS member, score
+ORDER BY score DESC, member
+WITH metric, collect({member: member, score: score}) AS ranked
+UNWIND ranked AS node
+WITH metric, node,
+     1 + size([other IN ranked WHERE other.score > node.score]) AS rank,
+     node IN CASE metric WHEN 'triangleCentrality' THEN ranked[0..3] ELSE ranked[0..1] END AS selected
+WITH node.member AS member, collect({
+  metric: metric,
+  score: node.score,
+  value: toString(round(node.score, 3)) + ' (' + toString(rank) + ')',
+  selected: selected
+}) AS results
+WHERE any(result IN results WHERE result.selected)
+RETURN member,
+       head([r IN results WHERE r.metric = 'triangleCentrality' | r.value]) AS triangleCentrality,
+       head([r IN results WHERE r.metric = 'betweenness' | r.value]) AS betweenness,
+       head([r IN results WHERE r.metric = 'closeness' | r.value]) AS closeness,
+       head([r IN results WHERE r.metric = 'degree' | r.value]) AS degree,
+       head([r IN results WHERE r.metric = 'pageRank' | r.value]) AS pageRank
+ORDER BY head([r IN results WHERE r.metric = 'triangleCentrality' | r.score]) DESC, member
+----
+====
+
+The table shows centrality scores as `score (rank)`, with scores rounded to three decimal places.
+The measures use different score scales.
+
+.Results
+[opts="header",cols="2,3,2,2,2,2"]
+|===
+| member | triangleCentrality | betweenness | closeness | degree | pageRank
+| 14 | "0.756 (1)" | "24.216 (8)" | "0.516 (5)" | "5.0 (8)" | "1.004 (10)"
+| 1 | "0.674 (2)" | "231.071 (1)" | "0.569 (1)" | "16.0 (2)" | "3.298 (2)"
+| 32 | "0.652 (3)" | "73.01 (5)" | "0.541 (4)" | "6.0 (6)" | "1.263 (6)"
+| 34 | "0.563 (6)" | "160.552 (2)" | "0.55 (3)" | "17.0 (1)" | "3.431 (1)"
+|===
+
+Triangle Centrality ranks member 14 highest, despite having only five neighbors.
+Betweenness and Closeness Centrality rank the instructor, member 1, highest.
+Degree Centrality and PageRank rank the president, member 34, highest.
+Member 32 is included as the third-highest member for Triangle Centrality.
+
+Triangle Centrality highlights member 14's position within a cohesive group around the instructor, combined with a direct connection to the president's triangle-rich neighborhood.
+--
+
+
+[[algorithms-triangle-centrality-syntax]]
+== Syntax
+
+include::partial$/algorithms/shared/syntax-intro-named-graph.adoc[]
+
+.Triangle Centrality syntax per mode
+[.tabbed-example, caption = ]
+====
+
+[.include-with-stream]
+======
+.Run Triangle Centrality in stream mode on a named graph:
+[source, cypher, role=noplay]
+----
+CALL gds.triangleCentrality.stream(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  nodeId: Integer,
+  triangleCentrality: Float,
+  triangleCount: Integer,
+  triangleNeighbors: Integer,
+  nonTriangleNeighbors: Integer,
+  triangleNeighborsTriangleSum: Integer,
+  nonTriangleNeighborsTriangleSum: Integer
+----
+
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name | Type | Default | Optional | Description
+include::partial$/algorithms/common-configuration/common-stream-stats-configuration-entries.adoc[]
+include::partial$/algorithms/triangle-centrality/specific-configuration.adoc[]
+|===
+
+.Results
+[opts="header",cols="2,1,6"]
+|===
+| Name | Type | Description
+| nodeId | Integer | Node ID.
+| triangleCentrality | Float | Triangle Centrality score. Is `NaN` when the node is excluded using `maxDegree`.
+| triangleCount | Integer | Number of triangles containing the node. Is `-1` when the node is excluded using `maxDegree`.
+| triangleNeighbors | Integer | Number of distinct neighbors that share at least one triangle with the node.
+| nonTriangleNeighbors | Integer | Number of distinct neighbors that do not share a triangle with the node.
+| triangleNeighborsTriangleSum | Integer | Sum of triangle counts over the node's triangle neighbors.
+| nonTriangleNeighborsTriangleSum | Integer | Sum of triangle counts over the node's non-triangle neighbors.
+|===
+======
+
+[.include-with-stats]
+======
+.Run Triangle Centrality in stats mode on a named graph:
+[source, cypher, role=noplay]
+----
+CALL gds.triangleCentrality.stats(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  globalTriangleCount: Integer,
+  nodeCount: Integer,
+  centralityDistribution: Map,
+  preProcessingMillis: Integer,
+  computeMillis: Integer,
+  postProcessingMillis: Integer,
+  configuration: Map
+----
+
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name | Type | Default | Optional | Description
+include::partial$/algorithms/common-configuration/common-stream-stats-configuration-entries.adoc[]
+include::partial$/algorithms/triangle-centrality/specific-configuration.adoc[]
+|===
+
+.Results
+[opts="header",cols="2,1,6"]
+|===
+| Name | Type | Description
+| globalTriangleCount | Integer | Total number of included triangles in the graph.
+| nodeCount | Integer | Number of nodes in the graph.
+| centralityDistribution | Map | Minimum, maximum, mean, and p50, p75, p90, p95, p99, and p999 percentiles of included nodes' centrality scores.
+| preProcessingMillis | Integer | Milliseconds for preprocessing the graph.
+| computeMillis | Integer | Milliseconds for running the algorithm.
+| postProcessingMillis | Integer | Milliseconds for computing the `centralityDistribution`.
+| configuration | Map | Configuration used for running the algorithm.
+|===
+======
+
+[.include-with-mutate]
+======
+.Run Triangle Centrality in mutate mode on a named graph:
+[source, cypher, role=noplay]
+----
+CALL gds.triangleCentrality.mutate(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  globalTriangleCount: Integer,
+  nodeCount: Integer,
+  centralityDistribution: Map,
+  nodePropertiesWritten: Integer,
+  preProcessingMillis: Integer,
+  computeMillis: Integer,
+  postProcessingMillis: Integer,
+  mutateMillis: Integer,
+  configuration: Map
+----
+
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name | Type | Default | Optional | Description
+include::partial$/algorithms/common-configuration/common-mutate-configuration-entries.adoc[]
+include::partial$/algorithms/triangle-centrality/specific-configuration.adoc[]
+|===
+
+.Results
+[opts="header",cols="2,1,6"]
+|===
+| Name | Type | Description
+| globalTriangleCount | Integer | Total number of included triangles in the graph.
+| nodeCount | Integer | Number of nodes in the graph.
+| centralityDistribution | Map | Minimum, maximum, mean, and p50, p75, p90, p95, p99, and p999 percentiles of included nodes' centrality scores.
+| nodePropertiesWritten | Integer | Number of properties added to the projected graph.
+| preProcessingMillis | Integer | Milliseconds for preprocessing the graph.
+| computeMillis | Integer | Milliseconds for running the algorithm.
+| postProcessingMillis | Integer | Milliseconds for computing the `centralityDistribution`.
+| mutateMillis | Integer | Milliseconds for adding properties to the projected graph.
+| configuration | Map | Configuration used for running the algorithm.
+|===
+======
+
+[.include-with-write]
+======
+.Run Triangle Centrality in write mode on a named graph:
+[source, cypher, role=noplay]
+----
+CALL gds.triangleCentrality.write(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  globalTriangleCount: Integer,
+  nodeCount: Integer,
+  centralityDistribution: Map,
+  nodePropertiesWritten: Integer,
+  preProcessingMillis: Integer,
+  computeMillis: Integer,
+  postProcessingMillis: Integer,
+  writeMillis: Integer,
+  configuration: Map
+----
+
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name | Type | Default | Optional | Description
+include::partial$/algorithms/common-configuration/common-write-configuration-entries.adoc[]
+include::partial$/algorithms/triangle-centrality/specific-configuration.adoc[]
+|===
+
+.Results
+[opts="header",cols="2,1,6"]
+|===
+| Name | Type | Description
+| globalTriangleCount | Integer | Total number of included triangles in the graph.
+| nodeCount | Integer | Number of nodes in the graph.
+| centralityDistribution | Map | Minimum, maximum, mean, and p50, p75, p90, p95, p99, and p999 percentiles of included nodes' centrality scores.
+| nodePropertiesWritten | Integer | Number of properties written to Neo4j.
+| preProcessingMillis | Integer | Milliseconds for preprocessing the graph.
+| computeMillis | Integer | Milliseconds for running the algorithm.
+| postProcessingMillis | Integer | Milliseconds for computing the `centralityDistribution`.
+| writeMillis | Integer | Milliseconds for writing results to Neo4j.
+| configuration | Map | Configuration used for running the algorithm.
+|===
+======
+====
+
+
+[[algorithms-triangle-centrality-examples]]
+== Examples
+
+include::partial$/algorithms/shared/examples-named-native-note.adoc[]
+
+The following examples use a small collaboration graph adapted from Figure 1(b) in Paul Burkhardt's paper, https://doi.org/10.1145/3685677[_Triangle Centrality_].
+The adaptation uses two teams of four people instead of the original four teams of six people.
+Every member is connected to every other member of the same team.
+The coordinator connects the teams through A1 and B1.
+The graph has nine nodes and eight triangles.
+
+image::example-graphs/triangle-centrality.svg["Two four-person teams linked by a coordinator whose Triangle Centrality exceeds that of every team member", width=750,role=popup]
+
+.The following statement creates the two teams and their coordinator:
+[source, cypher, role=noplay setup-query]
+----
+CREATE
+  (coordinator:Person {name: 'Coordinator'}),
+  (a1:Person {name: 'A1'}), (a2:Person {name: 'A2'}),
+  (a3:Person {name: 'A3'}), (a4:Person {name: 'A4'}),
+  (b1:Person {name: 'B1'}), (b2:Person {name: 'B2'}),
+  (b3:Person {name: 'B3'}), (b4:Person {name: 'B4'}),
+  (a1)-[:KNOWS]->(a2), (a1)-[:KNOWS]->(a3), (a1)-[:KNOWS]->(a4),
+  (a2)-[:KNOWS]->(a3), (a2)-[:KNOWS]->(a4), (a3)-[:KNOWS]->(a4),
+  (b1)-[:KNOWS]->(b2), (b1)-[:KNOWS]->(b3), (b1)-[:KNOWS]->(b4),
+  (b2)-[:KNOWS]->(b3), (b2)-[:KNOWS]->(b4), (b3)-[:KNOWS]->(b4),
+  (coordinator)-[:KNOWS]->(a1), (coordinator)-[:KNOWS]->(b1)
+----
+
+With the graph in Neo4j we can now project it into the graph catalog to prepare it for algorithm execution.
+We do this using a Cypher projection targeting the `Person` nodes and the `KNOWS` relationships.
+For the relationships we must use the `UNDIRECTED` orientation.
+This is because the Triangle Centrality algorithm is defined only for undirected graphs.
+
+.The following statement projects the graph using undirected relationships:
+[source, cypher, role=noplay graph-project-query]
+----
+MATCH (source:Person)-[:KNOWS]->(target:Person)
+RETURN gds.graph.project(
+  'myGraph',
+  source,
+  target,
+  {},
+  { undirectedRelationshipTypes: ['*'] }
+)
+----
+
+include::partial$/algorithms/shared/undirected-req-note.adoc[]
+
+
+[[algorithms-triangle-centrality-examples-memory-estimation]]
+=== Memory Estimation
+
+:mode: write
+include::partial$/algorithms/shared/examples-estimate-intro.adoc[]
+
+[role=query-example]
+--
+.The following will estimate the memory requirements for running the algorithm in write mode:
+[source, cypher, role=noplay]
+----
+CALL gds.triangleCentrality.write.estimate('myGraph', {
+  writeProperty: 'triangleCentrality',
+  concurrency: 1
+})
+YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
+----
+
+.Results
+[opts="header"]
+|===
+| nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
+| 9 | 28 | 13320 | 13320 | "13320 Bytes"
+|===
+--
+
+The relationship count is `28` because the undirected projection stores both directions of the fourteen relationships.
+This example uses `concurrency: 1`; increasing concurrency requires additional memory for per-thread buffers.
+
+
+[[algorithms-triangle-centrality-examples-stream]]
+=== Stream
+
+include::partial$/algorithms/shared/examples-stream-intro.adoc[]
+
+[role=query-example]
+--
+.The following returns the Triangle Centrality score and supporting triangle statistics:
+[source, cypher, role=noplay]
+----
+CALL gds.triangleCentrality.stream('myGraph')
+YIELD nodeId, triangleCentrality, triangleCount,
+      triangleNeighbors, nonTriangleNeighbors
+RETURN gds.util.asNode(nodeId).name AS name,
+       triangleCentrality, triangleCount,
+       triangleNeighbors, nonTriangleNeighbors
+ORDER BY triangleCentrality DESC, name
+----
+
+.Results
+[opts="header"]
+|===
+| name | triangleCentrality | triangleCount | triangleNeighbors | nonTriangleNeighbors
+| "Coordinator" | 0.75 | 0 | 0 | 2
+| "A1" | 0.5 | 3 | 3 | 1
+| "A2" | 0.5 | 3 | 3 | 0
+| "A3" | 0.5 | 3 | 3 | 0
+| "A4" | 0.5 | 3 | 3 | 0
+| "B1" | 0.5 | 3 | 3 | 1
+| "B2" | 0.5 | 3 | 3 | 0
+| "B3" | 0.5 | 3 | 3 | 0
+| "B4" | 0.5 | 3 | 3 | 0
+|===
+--
+
+Each team contains four triangles, giving a global triangle count of `8`.
+The coordinator's two neighbors, A1 and B1, each belong to three triangles.
+Because neither neighbor shares a triangle with the coordinator, their counts contribute to the non-triangle-neighbor term.
+The coordinator therefore scores `(3 + 3) / 8 = 0.75`, while every team member scores `0.5`.
+Triangle Centrality ranks the coordinator highest even though its own triangle count is zero.
+
+
+[[algorithms-triangle-centrality-examples-stats]]
+=== Stats
+
+:stats-details: The summary result includes the global triangle count and the number of nodes.
+:stats-syntax: algorithms-triangle-centrality-syntax
+include::partial$/algorithms/shared/examples-stats-intro.adoc[]
+
+[role=query-example]
+--
+[source, cypher, role=noplay]
+----
+CALL gds.triangleCentrality.stats('myGraph')
+YIELD globalTriangleCount, nodeCount
+----
+
+.Results
+[opts="header"]
+|===
+| globalTriangleCount | nodeCount
+| 8 | 9
+|===
+--
+
+The graph has nine nodes and eight triangles, with four triangles in each team.
+Unlike the <<algorithms-triangle-centrality-examples-stream,Stream>> example, Stats returns a graph summary rather than individual node scores.
+
+Stats, mutate, and write modes also return `centralityDistribution` when requested in `YIELD`.
+The distribution summarizes included nodes' scores using the same histogram-based statistics as other centrality algorithms.
+It contains `min`, `max`, `mean`, `p50`, `p75`, `p90`, `p95`, `p99`, and `p999`.
+Histogram values are approximate.
+Nodes excluded by `maxDegree` do not contribute to the distribution.
+The distribution is empty when no nodes are included.
+The time spent computing it is reported as `postProcessingMillis`.
+
+[role=query-example]
+--
+.Return selected distribution statistics:
+[source, cypher, role=noplay]
+----
+CALL gds.triangleCentrality.stats('myGraph')
+YIELD centralityDistribution
+RETURN round(centralityDistribution.min, 3) AS min,
+       round(centralityDistribution.max, 3) AS max,
+       round(centralityDistribution.mean, 3) AS mean,
+       round(centralityDistribution.p50, 3) AS p50
+----
+
+.Results
+[opts="header"]
+|===
+| min | max | mean | p50
+| 0.5 | 0.75 | 0.528 | 0.5
+|===
+--
+
+
+[[algorithms-triangle-centrality-examples-mutate]]
+=== Mutate
+
+include::partial$/algorithms/shared/examples-mutate-intro.adoc[]
+
+[role=query-example, group=triangle-centrality-mutate]
+--
+[source, cypher, role=noplay]
+----
+CALL gds.triangleCentrality.mutate('myGraph', {
+  mutateProperty: 'triangleCentrality'
+})
+YIELD globalTriangleCount, nodePropertiesWritten
+----
+
+.Results
+[opts="header"]
+|===
+| globalTriangleCount | nodePropertiesWritten
+| 8 | 9
+|===
+--
+
+The `triangleCentrality` property is added to every node in the projected graph.
+
+[role=query-example, group=triangle-centrality-mutate]
+--
+.Stream the scores stored in the projected graph:
+[source, cypher, role=noplay]
+----
+CALL gds.graph.nodeProperty.stream('myGraph', 'triangleCentrality')
+YIELD nodeId, propertyValue
+RETURN gds.util.asNode(nodeId).name AS name, propertyValue AS triangleCentrality
+ORDER BY triangleCentrality DESC, name
+----
+
+.Results
+[opts="header"]
+|===
+| name | triangleCentrality
+| "Coordinator" | 0.75
+| "A1" | 0.5
+| "A2" | 0.5
+| "A3" | 0.5
+| "A4" | 0.5
+| "B1" | 0.5
+| "B2" | 0.5
+| "B3" | 0.5
+| "B4" | 0.5
+|===
+--
+
+The scores are stored in the GDS graph catalog; the database nodes have not been changed by `mutate`.
+See xref:management-ops/graph-reads/graph-stream-nodes.adoc[Streaming node properties] for more ways to inspect them.
+
+
+[[algorithms-triangle-centrality-examples-write]]
+=== Write
+
+include::partial$/algorithms/shared/examples-write-intro.adoc[]
+
+[role=query-example, group=triangle-centrality-write]
+--
+[source, cypher, role=noplay]
+----
+CALL gds.triangleCentrality.write('myGraph', {
+  writeProperty: 'triangleCentrality'
+})
+YIELD globalTriangleCount, nodePropertiesWritten
+----
+
+.Results
+[opts="header"]
+|===
+| globalTriangleCount | nodePropertiesWritten
+| 8 | 9
+|===
+--
+
+The `triangleCentrality` property is written to every projected node in Neo4j.
+
+
+[role=query-example, group=triangle-centrality-write]
+--
+.Read the scores written to the Neo4j database:
+[source, cypher, role=noplay]
+----
+MATCH (person:Person)
+RETURN person.name AS name, person.triangleCentrality AS triangleCentrality
+ORDER BY triangleCentrality DESC, name
+----
+
+.Results
+[opts="header"]
+|===
+| name | triangleCentrality
+| "Coordinator" | 0.75
+| "A1" | 0.5
+| "A2" | 0.5
+| "A3" | 0.5
+| "A4" | 0.5
+| "B1" | 0.5
+| "B2" | 0.5
+| "B3" | 0.5
+| "B4" | 0.5
+|===
+--
+
+
+[[algorithms-triangle-centrality-examples-max-degree]]
+=== Maximum Degree
+
+[[algorithms-triangle-centrality-max-degree]]
+The `maxDegree` parameter excludes nodes from computation when their degree is greater than the configured value.
+This can reduce the computation time for graphs with high-degree nodes.
+To inspect your graph's degree distribution, see xref:management-ops/graph-list.adoc[Listing graphs].
+Every triangle incident to an excluded node is omitted from both the local and global triangle counts.
+Relationships incident to excluded nodes are also omitted from the neighbor terms in the centrality formula.
+
+An excluded node has a triangle count of `-1` and a Triangle Centrality score of `NaN`.
+Stream and mutate modes include these `NaN` scores.
+Write mode skips them: an excluded node's existing write property is left unchanged, and no property is created if it is absent.
+Excluded nodes therefore do not contribute to `nodePropertiesWritten` in write mode.
+The default value does not exclude any nodes.
+
+[role=query-example]
+--
+.The following will run the algorithm in stream mode with the maximum degree set to three:
+[source, cypher, role=noplay]
+----
+CALL gds.triangleCentrality.stream('myGraph', {maxDegree: 3})
+YIELD nodeId, triangleCount, triangleCentrality
+RETURN gds.util.asNode(nodeId).name AS name, triangleCount, triangleCentrality
+ORDER BY name
+----
+
+.Results
+[opts="header"]
+|===
+| name | triangleCount | triangleCentrality
+| "A1" | -1 | NaN
+| "A2" | 1 | 0.5
+| "A3" | 1 | 0.5
+| "A4" | 1 | 0.5
+| "B1" | -1 | NaN
+| "B2" | 1 | 0.5
+| "B3" | 1 | 0.5
+| "B4" | 1 | 0.5
+| "Coordinator" | 0 | 0.0
+|===
+--
+
+A1 and B1 each have degree `4`, so `maxDegree: 3` excludes them and all triangles containing either node.
+One triangle remains in each team, giving a global triangle count of `2`.
+The coordinator's two neighbors are excluded, so its centrality becomes `0.0`.
+A1 and B1 remain in the streamed output with triangle counts of `-1` and centrality scores of `NaN`.
+
+
+[[algorithms-triangle-centrality-examples-filtering]]
+=== Node Filtering
+
+[[algorithms-triangle-centrality-filtering]]
+Triangle Centrality supports the same node label filtering as Triangle Count.
+You can specify a list of up to three node labels in the configuration.
+Only triangles that satisfy `labelFilter` contribute to the local and global triangle counts.
+Each entry in `labelFilter` must match a different node in the triangle.
+A node with multiple labels can match any one required entry, but cannot satisfy multiple entries in the same triangle.
+
+If three labels are specified, the algorithm only counts triangles that contain nodes with all three labels, with each label represented by at least one node in the triangle.
+If fewer than three labels are specified, each specified label must be represented by at least one node in the triangle, but nodes with no specified label can also be part of the triangle.
+If a label is repeated in the list, it must be represented by as many nodes as it appears in the list.
+
+The `labelFilter` parameter filters triangles without removing nodes or relationships from the graph.
+Use the `nodeLabels` parameter to select which nodes the algorithm runs on.
+A node whose labels are absent from `labelFilter` can still receive a centrality score.
+Both the local triangle counts and the global triangle count in the denominator include only accepted triangles.
+Triangle-neighbor membership uses all triangles in the graph selected by `nodeLabels` and `maxDegree`, including triangles rejected by `labelFilter`.
+This keeps the centrality scores of included nodes between `0.0` and `1.0`, while preserving Triangle Count's local and global triangle counts.
+
+[[algorithms-triangle-centrality-filtering-k4]]
+Consider a complete graph, K4, whose four nodes have the distinct labels `A`, `B`, `C`, and `D`.
+Every pair of nodes is connected, giving four triangles: `ABC`, `ABD`, `ACD`, and `BCD`.
+
+image::example-graphs/triangle-centrality-k4.svg["Complete graph on nodes A, B, C, and D, with a relationship between every pair", width=300,role=popup]
+
+.Create the K4 graph:
+[source, cypher, role=noplay setup-query]
+----
+CREATE
+  (a:A {name: 'A'}), (b:B {name: 'B'}),
+  (c:C {name: 'C'}), (d:D {name: 'D'}),
+  (a)-[:K4_LINK]->(b), (a)-[:K4_LINK]->(c), (a)-[:K4_LINK]->(d),
+  (b)-[:K4_LINK]->(c), (b)-[:K4_LINK]->(d), (c)-[:K4_LINK]->(d)
+----
+
+.Project the graph, retaining its node labels and using undirected relationships:
+[source, cypher, role=noplay graph-project-query]
+----
+MATCH (source)-[:K4_LINK]->(target)
+RETURN gds.graph.project(
+  'k4Graph',
+  source,
+  target,
+  {sourceNodeLabels: labels(source), targetNodeLabels: labels(target)},
+  {undirectedRelationshipTypes: ['*']}
+)
+----
+
+[role=query-example]
+--
+.Without filtering, each node belongs to three triangles:
+[source, cypher, role=noplay]
+----
+CALL gds.triangleCentrality.stream('k4Graph')
+YIELD nodeId, triangleCentrality, triangleCount, triangleNeighbors
+RETURN gds.util.asNode(nodeId).name AS name,
+       triangleCentrality, triangleCount, triangleNeighbors
+ORDER BY name
+----
+
+.Results
+[opts="header"]
+|===
+| name | triangleCentrality | triangleCount | triangleNeighbors
+| "A" | 1.0 | 3 | 3
+| "B" | 1.0 | 3 | 3
+| "C" | 1.0 | 3 | 3
+| "D" | 1.0 | 3 | 3
+|===
+--
+
+[role=query-example]
+--
+.Node selection removes D and its incident relationships:
+[source, cypher, role=noplay]
+----
+CALL gds.triangleCentrality.stream('k4Graph', {nodeLabels: ['A', 'B', 'C']})
+YIELD nodeId, triangleCentrality, triangleCount, triangleNeighbors
+RETURN gds.util.asNode(nodeId).name AS name,
+       triangleCentrality, triangleCount, triangleNeighbors
+ORDER BY name
+----
+
+.Results
+[opts="header"]
+|===
+| name | triangleCentrality | triangleCount | triangleNeighbors
+| "A" | 1.0 | 1 | 2
+| "B" | 1.0 | 1 | 2
+| "C" | 1.0 | 1 | 2
+|===
+--
+
+[role=query-example]
+--
+.Triangle filtering counts only ABC while retaining all four nodes:
+[source, cypher, role=noplay]
+----
+CALL gds.triangleCentrality.stream('k4Graph', {labelFilter: ['A', 'B', 'C']})
+YIELD nodeId, triangleCentrality, triangleCount, triangleNeighbors
+RETURN gds.util.asNode(nodeId).name AS name,
+       triangleCentrality, triangleCount, triangleNeighbors
+ORDER BY name
+----
+
+.Results
+[opts="header"]
+|===
+| name | triangleCentrality | triangleCount | triangleNeighbors
+| "A" | 1.0 | 1 | 3
+| "B" | 1.0 | 1 | 3
+| "C" | 1.0 | 1 | 3
+| "D" | 1.0 | 0 | 3
+|===
+--
+
+The following table compares node selection with triangle filtering.
+Tuples are ordered `(A, B, C, D)`; an excluded node has no computed result.
+
+[opts="header",cols="3,3,1,3"]
+|===
+| Configuration | Centrality scores | Global triangle count | Local triangle counts
+| No filter | `(1.0, 1.0, 1.0, 1.0)` | `4` | `(3, 3, 3, 3)`
+| `nodeLabels: ['A', 'B', 'C']` | `(1.0, 1.0, 1.0, excluded)` | `1` | `(1, 1, 1, excluded)`
+| `labelFilter: ['A', 'B', 'C']` | `(1.0, 1.0, 1.0, 1.0)` | `1` | `(1, 1, 1, 0)`
+|===
+
+With `labelFilter`, D still shares graph triangles with A, B, and C, so all three are its triangle neighbors.
+Their filtered triangle counts are each `1`, while D's own count is `0`.
+D's centrality is therefore `((0 + 1 + 1 + 1) / 3) / 1 = 1.0`.
+Using `nodeLabels` instead excludes D from the computation entirely.

@@ -82,6 +82,7 @@ public enum AlgorithmLabel implements Label {
     SteinerTree("SteinerTree"),
     TopologicalSort("TopologicalSort"),
     ToUndirected("ToUndirected"),
+    TriangleCentrality("TriangleCentrality"),
     TriangleCount("TriangleCount"),
     Triangles("Triangles"),
     WCC("WCC"),
@@ -155,6 +156,7 @@ public enum AlgorithmLabel implements Label {
             case Algorithm.SteinerTree -> SteinerTree;
             case Algorithm.TopologicalSort -> TopologicalSort;
             case Algorithm.ToUndirected -> ToUndirected;
+            case Algorithm.TriangleCentrality -> TriangleCentrality;
             case Algorithm.TriangleCount -> TriangleCount;
             case Algorithm.Triangles -> Triangles;
             case Algorithm.WCC -> WCC;

@@ -37,6 +37,10 @@ public class NodeFilteredAdjacencyCursor implements AdjacencyCursor {
         hasNextVLong();
     }
 
+    public AdjacencyCursor innerCursor() {
+        return innerCursor;
+    }
+
     @Override
     public void init(long index, int degree) {
         innerCursor.init(index, degree);

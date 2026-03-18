@@ -17,9 +17,12 @@ dependencies {
     // Test dependencies
     integrationTestCompileOnly openGds.immutables.builder
 
+    integrationTestImplementation project(':algo')
     integrationTestImplementation project(':algorithms-machinery')
     integrationTestImplementation project(':algorithms-procedure-facade')
+    integrationTestImplementation project(':annotations')
     integrationTestImplementation project(':applications-facade')
+    integrationTestImplementation project(':community-algorithms')
     integrationTestImplementation project(':config-api')
     integrationTestImplementation project(':defaults-and-limits-configuration')
     integrationTestImplementation project(':domain-services')

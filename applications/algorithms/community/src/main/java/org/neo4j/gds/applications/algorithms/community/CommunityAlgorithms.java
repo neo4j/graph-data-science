@@ -72,6 +72,9 @@ import org.neo4j.gds.triangle.IntersectingTriangleCount;
 import org.neo4j.gds.triangle.LocalClusteringCoefficient;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientParameters;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientResult;
+import org.neo4j.gds.triangle.TriangleCentrality;
+import org.neo4j.gds.triangle.TriangleCentralityParameters;
+import org.neo4j.gds.triangle.TriangleCentralityResult;
 import org.neo4j.gds.triangle.TriangleCountParameters;
 import org.neo4j.gds.triangle.TriangleCountResult;
 import org.neo4j.gds.triangle.TriangleResult;
@@ -256,6 +259,22 @@ public class CommunityAlgorithms {
     public HugeLongArray scc(Graph graph, ProgressTracker progressTracker) {
         return new Scc(
             graph,
+            progressTracker,
+            terminationFlag
+        ).compute();
+    }
+
+    TriangleCentralityResult triangleCentrality(
+        Graph graph,
+        TriangleCentralityParameters parameters,
+        ProgressTracker progressTracker
+    ) {
+        return TriangleCentrality.create(
+            graph,
+            parameters.concurrency(),
+            parameters.maxDegree(),
+            parameters.labelFilter(),
+            DefaultPool.INSTANCE,
             progressTracker,
             terminationFlag
         ).compute();

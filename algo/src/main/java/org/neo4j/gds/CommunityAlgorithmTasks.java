@@ -44,6 +44,7 @@ import org.neo4j.gds.sllpa.SpeakerListenerLPAConfig;
 import org.neo4j.gds.sllpa.SpeakerListenerLPAProgressTrackerCreator;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientParameters;
 import org.neo4j.gds.triangle.TriangleCountTask;
+import org.neo4j.gds.triangle.TriangleCentralityProgressTrackerCreator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -141,6 +142,10 @@ public final class CommunityAlgorithmTasks {
 
     public static Task scc(Graph graph, Concurrency concurrency) {
         return Tasks.leaf(AlgorithmLabel.SCC.asString(), concurrency, graph.nodeCount());
+    }
+
+    public static Task triangleCentrality(Graph graph, Concurrency concurrency) {
+        return TriangleCentralityProgressTrackerCreator.progressTask(concurrency, graph.nodeCount());
     }
 
     public static Task triangleCount(Graph graph, Concurrency concurrency) {

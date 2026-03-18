@@ -68,6 +68,7 @@
 *** xref:algorithms/harmonic-centrality.adoc[]
 *** xref:algorithms/hits.adoc[]
 *** xref:algorithms/page-rank.adoc[]
+*** xref:algorithms/triangle-centrality.adoc[]
 ** xref:algorithms/community.adoc[]
 *** xref:algorithms/approx-max-k-cut.adoc[]
 *** xref:algorithms/clique-counting.adoc[]

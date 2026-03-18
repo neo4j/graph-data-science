@@ -48,6 +48,7 @@ import org.neo4j.gds.community.ModularityOptimizationMutateStep;
 import org.neo4j.gds.community.SccMutateStep;
 import org.neo4j.gds.community.SpeakerListenerLPAMutateStep;
 import org.neo4j.gds.community.StandardCommunityProperties;
+import org.neo4j.gds.community.TriangleCentralityMutateStep;
 import org.neo4j.gds.community.TriangleCountMutateStep;
 import org.neo4j.gds.community.WccMutateStep;
 import org.neo4j.gds.config.ConsecutiveIdsConfig;
@@ -74,6 +75,8 @@ import org.neo4j.gds.scc.SccMutateConfig;
 import org.neo4j.gds.sllpa.SpeakerListenerLPAConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientMutateConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientResult;
+import org.neo4j.gds.triangle.TriangleCentralityMutateConfig;
+import org.neo4j.gds.triangle.TriangleCentralityResult;
 import org.neo4j.gds.triangle.TriangleCountMutateConfig;
 import org.neo4j.gds.triangle.TriangleCountResult;
 import org.neo4j.gds.wcc.WccMutateConfig;
@@ -320,6 +323,25 @@ public class CommunityAlgorithmsMutateModeBusinessFacade {
         var mutateStep = new SpeakerListenerLPAMutateStep(mutateNodePropertyService, configuration.nodeLabels(),configuration.mutateProperty());
 
         return synchroniser.synchronise(() -> instrumentedCommunityAlgorithms.speakerListenerLPA(
+            graphName,
+            configuration,
+            Optional.of(new MutateSideEffect<>(mutateStep)),
+            new MutateResultRenderer<>(configuration, resultBuilder)
+        ));
+    }
+
+    public <RESULT> RESULT triangleCentrality(
+        GraphName graphName,
+        TriangleCentralityMutateConfig configuration,
+        ResultBuilder<TriangleCentralityMutateConfig, TriangleCentralityResult, RESULT, NodePropertiesWritten> resultBuilder
+    ) {
+        var mutateStep = new TriangleCentralityMutateStep(
+            mutateNodePropertyService,
+            configuration.nodeLabels(),
+            configuration.mutateProperty()
+        );
+
+        return synchroniser.synchronise(() -> instrumentedCommunityAlgorithms.triangleCentrality(
             graphName,
             configuration,
             Optional.of(new MutateSideEffect<>(mutateStep)),

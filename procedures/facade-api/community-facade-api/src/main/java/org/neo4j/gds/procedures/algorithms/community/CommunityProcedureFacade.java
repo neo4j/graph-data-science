@@ -470,6 +470,46 @@ public interface CommunityProcedureFacade {
         Map<String, Object> algorithmConfiguration
     );
 
+    Stream<TriangleCentralityStreamResult> triangleCentralityStream(
+        String graphName,
+        Map<String, Object> configuration
+    );
+
+    Stream<MemoryEstimateResult> triangleCentralityStreamEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    );
+
+    Stream<TriangleCentralityStatsResult> triangleCentralityStats(
+        String graphName,
+        Map<String, Object> configuration
+    );
+
+    Stream<MemoryEstimateResult> triangleCentralityStatsEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    );
+
+    Stream<TriangleCentralityMutateResult> triangleCentralityMutate(
+        String graphName,
+        Map<String, Object> rawConfiguration
+    );
+
+    Stream<MemoryEstimateResult> triangleCentralityMutateEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> rawConfiguration
+    );
+
+    Stream<TriangleCentralityWriteResult> triangleCentralityWrite(
+        String graphName,
+        Map<String, Object> configuration
+    );
+
+    Stream<MemoryEstimateResult> triangleCentralityWriteEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    );
+
     Stream<TriangleCountMutateResult> triangleCountMutate(
         String graphName,
         Map<String, Object> rawConfiguration

@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="420" viewBox="0 0 760 420" role="img" aria-labelledby="title description">
+  <title id="title">A coordinator between two cohesive teams</title>
+  <desc id="description">Each team is a complete graph on four people. The coordinator connects to A1 and B1, has degree two, and belongs to no triangles. Its Triangle Centrality is 0.75, while every team member scores 0.5. All relationships are KNOWS, projected as undirected.</desc>
+  <g font-family="Arial, sans-serif" font-size="23" fill="#014063" text-anchor="middle">
+    <text x="135" y="35">Team A</text>
+    <text x="625" y="35">Team B</text>
+  </g>
+  <g stroke="#555" stroke-width="2" fill="none">
+    <path d="M240 210 L60 90 V330 Z M100 210 L240 210 M100 210 L60 90 M100 210 L60 330"/>
+    <path d="M520 210 L700 90 V330 Z M660 210 L520 210 M660 210 L700 90 M660 210 L700 330"/>
+    <path d="M240 210 H520"/>
+  </g>
+  <g fill="#014063">
+    <circle cx="240" cy="210" r="34"/>
+    <circle cx="60" cy="90" r="34"/>
+    <circle cx="100" cy="210" r="34"/>
+    <circle cx="60" cy="330" r="34"/>
+    <circle cx="520" cy="210" r="34"/>
+    <circle cx="700" cy="90" r="34"/>
+    <circle cx="660" cy="210" r="34"/>
+    <circle cx="700" cy="330" r="34"/>
+    <circle cx="380" cy="210" r="52" stroke="#00a1e0" stroke-width="4"/>
+  </g>
+  <g font-family="Arial, sans-serif" fill="white" text-anchor="middle">
+    <g font-size="23">
+      <text x="240" y="209">A1</text>
+      <text x="60" y="89">A2</text>
+      <text x="100" y="209">A3</text>
+      <text x="60" y="329">A4</text>
+      <text x="520" y="209">B1</text>
+      <text x="700" y="89">B2</text>
+      <text x="660" y="209">B3</text>
+      <text x="700" y="329">B4</text>
+    </g>
+    <g font-size="13">
+      <text x="240" y="228">TC: 0.5</text>
+      <text x="60" y="108">TC: 0.5</text>
+      <text x="100" y="228">TC: 0.5</text>
+      <text x="60" y="348">TC: 0.5</text>
+      <text x="520" y="228">TC: 0.5</text>
+      <text x="700" y="108">TC: 0.5</text>
+      <text x="660" y="228">TC: 0.5</text>
+      <text x="700" y="348">TC: 0.5</text>
+    </g>
+    <text x="380" y="204" font-size="17">Coordinator</text>
+    <text x="380" y="227" font-size="15">TC: 0.75</text>
+  </g>
+  <g font-family="Arial, sans-serif" font-size="15" fill="#333" text-anchor="middle">
+    <text x="380" y="288">Degree: 2</text>
+    <text x="380" y="398">All relationships: KNOWS; projected as undirected</text>
+  </g>
+</svg>

@@ -540,6 +540,15 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         "gds.triangleCount.write",
         "gds.triangleCount.write.estimate",
 
+        "gds.triangleCentrality.mutate",
+        "gds.triangleCentrality.mutate.estimate",
+        "gds.triangleCentrality.stats",
+        "gds.triangleCentrality.stats.estimate",
+        "gds.triangleCentrality.stream",
+        "gds.triangleCentrality.stream.estimate",
+        "gds.triangleCentrality.write",
+        "gds.triangleCentrality.write.estimate",
+
         "gds.localClusteringCoefficient.mutate",
         "gds.localClusteringCoefficient.mutate.estimate",
         "gds.localClusteringCoefficient.stats",
@@ -640,7 +649,7 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         );
 
         // If you find yourself updating this count, please also update the count in SmokeTest.kt
-        int expectedCount = 481;
+        int expectedCount = 489;
         assertEquals(
             expectedCount,
             returnedRows,

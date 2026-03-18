@@ -1,0 +1,2 @@
+| maxDegree | Integer | 2^63^ - 1 | yes | If a node has a degree higher than this it will not be considered by the algorithm. Triangle centrality is `NaN` and triangle count is `-1` for excluded nodes.
+| labelFilter | List of String | [] | yes | A list of up to three node labels as strings. Only triangles with nodes having representatives for each specified label will be counted. If left empty (default), all triangles will be counted.

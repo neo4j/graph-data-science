@@ -22,6 +22,9 @@ package org.neo4j.gds.ml.pipeline;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.ElementProjection;
 import org.neo4j.gds.GdsCypher;
@@ -38,6 +41,8 @@ import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.executor.GdsCallableFinder;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.test.TestProc;
+import org.neo4j.procedure.Name;
+import org.neo4j.procedure.Procedure;
 
 import java.util.List;
 import java.util.Map;
@@ -62,7 +67,8 @@ class NodePropertyStepTest extends BaseProcTest {
     void setup() throws Exception {
         registerProcedures(
             GraphProjectProc.class,
-            GraphStreamNodePropertiesProc.class
+            GraphStreamNodePropertiesProc.class,
+            TriangleCentralityPipelineProc.class
         );
         String createQuery = GdsCypher.call(GRAPH_NAME)
             .graphProject()
@@ -127,5 +133,50 @@ class NodePropertyStepTest extends BaseProcTest {
             )
             .estimate(GraphDimensions.of(1), new Concurrency(4))
             .memoryUsage().max).isZero();
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+        "triangleCentrality", "gds.triangleCentrality", "gds.triangleCentrality.mutate", "GDS.TRIANGLECENTRALITY.MUTATE"
+    })
+    void shouldEstimateAndExecuteTriangleCentralityStep(String procedureName) {
+        // The leaf has no triangles but centrality 1.0, distinguishing the scores from triangle counts.
+        runQuery("MATCH (n:Node) WITH n LIMIT 1 CREATE (n)-[:R]->(:Node)");
+        runQuery("CALL gds.graph.project('triangleGraph', 'Node', {R: {orientation: 'UNDIRECTED'}})");
+
+        // Use procedure injection so the pipeline stub receives the production facade and cancellation flag.
+        runQuery("CALL gds.testTriangleCentralityPipelineStep($name)", Map.of("name", procedureName));
+
+        var graph = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db.databaseName()), "triangleGraph")
+            .graphStore().getUnion();
+        assertThat(graph.nodeCount()).isEqualTo(4);
+        var scores = graph.nodeProperties(PROPERTY_NAME);
+        for (long node = 0; node < graph.nodeCount(); node++) {
+            assertThat(scores.doubleValue(node)).isEqualTo(1.0);
+        }
+    }
+
+    public static class TriangleCentralityPipelineProc extends BaseProc {
+        @Procedure("gds.testTriangleCentralityPipelineStep")
+        public void execute(@Name("name") String procedureName) {
+            var step = NodePropertyStepFactory.createNodePropertyStep(
+                procedureName, Map.of("mutateProperty", PROPERTY_NAME)
+            );
+            var stub = NodePropertyStepFactoryUsingStubs.GetOrCreate().getStub(step.procName());
+            assertThat(step.procName()).isEqualTo("gds.triangleCentrality.mutate");
+
+            var context = executionContext();
+            var concurrency = new Concurrency(4);
+            var estimate = step.estimate(
+                context.algorithmsProcedureFacade(), new OpenModelCatalog(), context.user().getUsername(),
+                List.of("Node"), List.of("R"), stub
+            );
+            assertThat(estimate.estimate(GraphDimensions.of(4, 8), concurrency).memoryUsage().max).isPositive();
+
+            step.execute(
+                context, "triangleGraph", List.of(NodeLabel.of("Node")), List.of(RelationshipType.of("R")),
+                concurrency, stub
+            );
+        }
     }
 }

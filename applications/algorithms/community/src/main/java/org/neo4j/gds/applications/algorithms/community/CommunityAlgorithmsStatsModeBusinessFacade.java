@@ -50,6 +50,8 @@ import org.neo4j.gds.scc.SccCommonBaseConfig;
 import org.neo4j.gds.sllpa.SpeakerListenerLPAConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientBaseConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientResult;
+import org.neo4j.gds.triangle.TriangleCentralityResult;
+import org.neo4j.gds.triangle.TriangleCentralityStatsConfig;
 import org.neo4j.gds.triangle.TriangleCountBaseConfig;
 import org.neo4j.gds.triangle.TriangleCountResult;
 import org.neo4j.gds.wcc.WccBaseConfig;
@@ -230,6 +232,19 @@ public class CommunityAlgorithmsStatsModeBusinessFacade {
         StatsResultBuilder<PregelResult, RESULT> resultBuilder
     ) {
         return synchroniser.synchronise(() -> instrumentedCommunityAlgorithms.speakerListenerLPA(
+            graphName,
+            configuration,
+            Optional.empty(),
+            new StatsResultRenderer<>(resultBuilder)
+        ));
+    }
+
+    public <RESULT> RESULT triangleCentrality(
+        GraphName graphName,
+        TriangleCentralityStatsConfig configuration,
+        StatsResultBuilder<TriangleCentralityResult, RESULT> resultBuilder
+    ) {
+        return synchroniser.synchronise(() -> instrumentedCommunityAlgorithms.triangleCentrality(
             graphName,
             configuration,
             Optional.empty(),

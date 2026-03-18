@@ -56,6 +56,8 @@ import org.neo4j.gds.scc.SccCommonBaseConfig;
 import org.neo4j.gds.sllpa.SpeakerListenerLPAConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientBaseConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientResult;
+import org.neo4j.gds.triangle.TriangleCentralityBaseConfig;
+import org.neo4j.gds.triangle.TriangleCentralityResult;
 import org.neo4j.gds.triangle.TriangleCountBaseConfig;
 import org.neo4j.gds.triangle.TriangleCountResult;
 import org.neo4j.gds.triangle.TriangleResult;
@@ -253,6 +255,18 @@ class TrackedCommunityAlgorithms {
 
         return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> algorithms.speakerListenerLPA(graph, configuration, progressTracker),
+            progressTracker,
+            true
+        );
+    }
+
+    TriangleCentralityResult triangleCentrality(Graph graph, TriangleCentralityBaseConfig configuration) {
+        var parameters = configuration.toParameters();
+        var task = CommunityAlgorithmTasks.triangleCentrality(graph, parameters.concurrency());
+        var progressTracker = progressTrackerCreator.create(task, configuration);
+
+        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
+            () -> algorithms.triangleCentrality(graph, parameters, progressTracker),
             progressTracker,
             true
         );
