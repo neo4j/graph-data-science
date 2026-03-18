@@ -132,7 +132,7 @@ public final class VarLongDecoding {
 
     public static int decodeDeltaVLongsLength(byte[] page, int offset, int length) {
         int count = 0;
-        for (int indexInPage = offset; indexInPage < offset + length ; indexInPage++) {
+        for (int indexInPage = offset; indexInPage < offset + length; indexInPage++) {
             // during compression, we mark the last byte of a var long by
             // setting the MSB (sign bit) to 1 and end up with a negative value.
             if (page[indexInPage] < 0) {
