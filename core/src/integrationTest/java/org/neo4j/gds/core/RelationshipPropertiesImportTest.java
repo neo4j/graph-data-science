@@ -27,6 +27,7 @@ import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.properties.relationships.RelationshipWithPropertyConsumer;
+import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
 import org.neo4j.gds.projection.GraphStoreFactorySuppliers;
 import org.neo4j.gds.projection.NativeProjectionGraphStoreFactorySupplier;
@@ -43,6 +44,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class RelationshipPropertiesImportTest extends BaseTest {
     private static final GraphStoreFactorySuppliers GRAPH_STORE_FACTORY_SUPPLIERS = new GraphStoreFactorySuppliers(
+        Log.noOpLog(),
         Map.of(
             GraphProjectFromStoreConfig.class, NativeProjectionGraphStoreFactorySupplier::create
         )

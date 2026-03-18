@@ -39,6 +39,7 @@ import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
 import org.neo4j.gds.applications.algorithms.machinery.WriteNodePropertyService;
 import org.neo4j.gds.applications.modelcatalog.ModelRepository;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
+import org.neo4j.gds.core.RequestCorrelationId;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.logging.GdsLoggers;
@@ -95,6 +96,7 @@ public class PipelineApplications {
     private final NodePropertyExporterBuilder nodePropertyExporterBuilder;
     private final ProcedureReturnColumns procedureReturnColumns;
     private final RelationshipExporterBuilder relationshipExporterBuilder;
+    private final RequestCorrelationId requestCorrelationId;
     private final TaskRegistryFactory taskRegistryFactory;
     private final TerminationMonitor terminationMonitor;
     private final TerminationFlag terminationFlag;
@@ -133,6 +135,7 @@ public class PipelineApplications {
         NodePropertyExporterBuilder nodePropertyExporterBuilder,
         ProcedureReturnColumns procedureReturnColumns,
         RelationshipExporterBuilder relationshipExporterBuilder,
+        RequestCorrelationId requestCorrelationId,
         TaskRegistryFactory taskRegistryFactory,
         TerminationMonitor terminationMonitor,
         TerminationFlag terminationFlag,
@@ -164,6 +167,7 @@ public class PipelineApplications {
         this.nodePropertyExporterBuilder = nodePropertyExporterBuilder;
         this.procedureReturnColumns = procedureReturnColumns;
         this.relationshipExporterBuilder = relationshipExporterBuilder;
+        this.requestCorrelationId = requestCorrelationId;
         this.taskRegistryFactory = taskRegistryFactory;
         this.terminationMonitor = terminationMonitor;
         this.terminationFlag = terminationFlag;
@@ -235,6 +239,7 @@ public class PipelineApplications {
             writeContext.nodePropertyExporterBuilder(),
             procedureReturnColumns,
             writeContext.relationshipExporterBuilder(),
+            requestScopedDependencies.correlationId(),
             requestScopedDependencies.taskRegistryFactory(),
             requestScopedDependencies.terminationFlag(),
             terminationMonitor,
@@ -258,6 +263,7 @@ public class PipelineApplications {
             writeContext.nodePropertyExporterBuilder(),
             procedureReturnColumns,
             writeContext.relationshipExporterBuilder(),
+            requestScopedDependencies.correlationId(),
             requestScopedDependencies.taskRegistryFactory(),
             terminationMonitor,
             requestScopedDependencies.terminationFlag(),
@@ -735,6 +741,7 @@ public class PipelineApplications {
             nodePropertyExporterBuilder,
             procedureReturnColumns,
             relationshipExporterBuilder,
+            requestCorrelationId,
             taskRegistryFactory,
             terminationMonitor,
             user,
@@ -762,6 +769,7 @@ public class PipelineApplications {
             nodePropertyExporterBuilder,
             procedureReturnColumns,
             relationshipExporterBuilder,
+            requestCorrelationId,
             taskRegistryFactory,
             terminationMonitor,
             user,
@@ -788,6 +796,7 @@ public class PipelineApplications {
             nodePropertyExporterBuilder,
             procedureReturnColumns,
             relationshipExporterBuilder,
+            requestCorrelationId,
             taskRegistryFactory,
             terminationMonitor,
             user,
@@ -814,6 +823,7 @@ public class PipelineApplications {
             nodePropertyExporterBuilder,
             procedureReturnColumns,
             relationshipExporterBuilder,
+            requestCorrelationId,
             taskRegistryFactory,
             terminationFlag,
             terminationMonitor,
@@ -828,8 +838,6 @@ public class PipelineApplications {
         NodeRegressionPredictPipelineBaseConfig configuration,
         Label label
     ) {
-
-
         return NodeRegressionPredictComputation.create(
             log,
             modelCatalog,
@@ -841,6 +849,7 @@ public class PipelineApplications {
             nodePropertyExporterBuilder,
             procedureReturnColumns,
             relationshipExporterBuilder,
+            requestCorrelationId,
             taskRegistryFactory,
             terminationMonitor,
             user,

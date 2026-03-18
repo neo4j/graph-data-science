@@ -38,6 +38,8 @@ import org.neo4j.gds.api.schema.MutableRelationshipSchema;
 import org.neo4j.gds.core.DimensionsMap;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
+import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
+import org.neo4j.gds.core.RequestCorrelationId;
 import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.loading.CSRGraphStore;
@@ -53,6 +55,7 @@ import org.neo4j.gds.core.loading.construction.NodeLabelTokens;
 import org.neo4j.gds.core.loading.construction.PropertyValues;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryEstimations;
 import org.neo4j.gds.values.GdsValue;
@@ -91,6 +94,8 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
 
     @Builder.Factory
     static GdlFactory gdlFactory(
+        Optional<Log> log,
+        Optional<RequestCorrelationId> requestCorrelationId,
         Optional<String> gdlGraph,
         Optional<DatabaseId> databaseId,
         Optional<String> userName,
@@ -124,6 +129,8 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
         var capabilities = graphCapabilities.orElseGet(() -> ImmutableStaticCapabilities.of(WriteMode.LOCAL));
 
         return new GdlFactory(
+            log.orElse(Log.noOpLog()),
+            requestCorrelationId.orElse(PlainSimpleRequestCorrelationId.create()),
             gdlHandler,
             config,
             graphDimensions,
@@ -134,6 +141,8 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
     }
 
     private GdlFactory(
+        Log log,
+        RequestCorrelationId requestCorrelationId,
         GDLHandler gdlHandler,
         GraphProjectFromGdlConfig graphProjectConfig,
         GraphDimensions graphDimensions,
@@ -145,7 +154,9 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
             graphProjectConfig,
             capabilities,
             GraphLoaderContext.NULL_CONTEXT,
-            graphDimensions
+            graphDimensions,
+            log,
+            requestCorrelationId
         );
         this.gdlHandler = gdlHandler;
         this.databaseId = databaseId;

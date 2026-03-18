@@ -115,8 +115,14 @@ public class AlgorithmEstimationTemplate {
 
     private GraphMemoryEstimation estimate(GraphProjectConfig projectionConfiguration) {
         return projectionConfiguration.isFictitiousLoading()
-            ? fictitiousGraphStoreEstimationService.estimate(projectionConfiguration)
-            : databaseGraphStoreEstimationService.estimate(projectionConfiguration);
+            ? fictitiousGraphStoreEstimationService.estimate(
+            requestScopedDependencies.correlationId(),
+            projectionConfiguration
+        )
+            : databaseGraphStoreEstimationService.estimate(
+                requestScopedDependencies.correlationId(),
+                projectionConfiguration
+            );
     }
 
     private <CONFIGURATION extends AlgoBaseConfig> GraphDimensions dimensionsFromActualGraph(

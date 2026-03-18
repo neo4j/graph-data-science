@@ -21,6 +21,7 @@ package org.neo4j.gds.core;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.config.GraphProjectConfig;
+import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.projection.GraphStoreFactorySupplier;
 import org.neo4j.gds.projection.GraphStoreFactorySuppliers;
 
@@ -35,7 +36,7 @@ class GraphStoreFactorySuppliersTest {
     @Test
     void shouldSupplyGraphStoreFactory() {
         var supplier = mock(GraphStoreFactorySupplier.class);
-        var suppliers = new GraphStoreFactorySuppliers(Map.of(SomeGraphProjectConfig.class, cfg -> supplier));
+        var suppliers = new GraphStoreFactorySuppliers(Log.noOpLog(), Map.of(SomeGraphProjectConfig.class, (__, ___) -> supplier));
 
         var actual = suppliers.find(new SomeGraphProjectConfig());
 
@@ -45,7 +46,7 @@ class GraphStoreFactorySuppliersTest {
     @Test
     void shouldSupplyGraphStoreFactoryEvenForSubClasses() {
         var supplier = mock(GraphStoreFactorySupplier.class);
-        var suppliers = new GraphStoreFactorySuppliers(Map.of(GraphProjectConfig.class, cfg -> supplier));
+        var suppliers = new GraphStoreFactorySuppliers(Log.noOpLog(), Map.of(GraphProjectConfig.class, (__, ___) -> supplier));
 
         var actual = suppliers.find(new SomeGraphProjectConfig());
 
@@ -54,7 +55,7 @@ class GraphStoreFactorySuppliersTest {
 
     @Test
     void shouldNotSupplyGraphStoreFactoryWhenNotConfigured() {
-        var suppliers = new GraphStoreFactorySuppliers(Collections.emptyMap());
+        var suppliers = new GraphStoreFactorySuppliers(Log.noOpLog(), Collections.emptyMap());
 
         try {
             suppliers.find(new SomeGraphProjectConfig());

@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.gdl.GdlFactory;
+import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
 import org.neo4j.gds.projection.GraphStoreFactorySuppliers;
 import org.neo4j.gds.projection.NativeProjectionGraphStoreFactorySupplier;
@@ -48,7 +49,10 @@ class GraphStoreCapabilitiesTest extends BaseProcTest {
         runQuery("CREATE (a)-[:T]->(b);");
         var graphStore = new StoreLoaderBuilder()
             .databaseService(db)
-            .graphStoreFactorySuppliers(new GraphStoreFactorySuppliers(Map.of(GraphProjectFromStoreConfig.class, NativeProjectionGraphStoreFactorySupplier::create)))
+            .graphStoreFactorySuppliers(new GraphStoreFactorySuppliers(
+                Log.noOpLog(),
+                Map.of(GraphProjectFromStoreConfig.class, NativeProjectionGraphStoreFactorySupplier::create)
+            ))
             .build()
             .graphStore();
 

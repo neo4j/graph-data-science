@@ -30,6 +30,7 @@ import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.extension.Neo4jGraphExtension;
+import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
 import org.neo4j.gds.projection.GraphStoreFactorySuppliers;
 import org.neo4j.gds.projection.NativeProjectionGraphStoreFactorySupplier;
@@ -42,6 +43,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Neo4jGraphExtension
 class NativeNodeLabelExporterTest extends BaseTest {
     private static final GraphStoreFactorySuppliers GRAPH_STORE_FACTORY_SUPPLIERS = new GraphStoreFactorySuppliers(
+        Log.noOpLog(),
         Map.of(
             GraphProjectFromStoreConfig.class,
             NativeProjectionGraphStoreFactorySupplier::create

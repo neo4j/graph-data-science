@@ -59,9 +59,8 @@ public abstract class NodeLabelExporterBuilder {
 
     /**
      * Set the {@link org.neo4j.gds.core.utils.progress.tasks.ProgressTracker} to use for logging progress during export.
-     *
      * If a {@link org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker} is used, caller must manage beginning and finishing the subtasks.
-     * By default, an {@link org.neo4j.gds.core.utils.progress.tasks.ProgressTracker.EmptyProgressTracker} is used. That one doesn't require caller to manage any tasks.
+     * By default, an {@link org.neo4j.gds.core.utils.progress.tasks.ProgressTracker#NULL_TRACKER} is used. That one doesn't require caller to manage any tasks.
      *
      * @param progressTracker The progress tracker to use for logging progress during export.
      * @return this

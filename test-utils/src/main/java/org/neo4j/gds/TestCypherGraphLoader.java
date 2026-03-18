@@ -108,7 +108,7 @@ public final class TestCypherGraphLoader implements TestGraphLoader {
     }
 
     private GraphLoader cypherLoader() {
-        var graphStoreFactorySuppliers = new GraphStoreFactorySuppliers(
+        var graphStoreFactorySuppliers = new GraphStoreFactorySuppliers(maybeLog.orElse(Log.noOpLog()),
             Map.of(
                 GraphProjectFromCypherConfig.class, CypherProjectionGraphStoreFactorySupplier::create
             )

@@ -22,6 +22,7 @@ package org.neo4j.gds.core;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.StoreLoaderBuilder;
+import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
 import org.neo4j.gds.projection.GraphStoreFactorySuppliers;
 import org.neo4j.gds.projection.NativeProjectionGraphStoreFactorySupplier;
@@ -32,6 +33,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 final class GraphLoaderNegativeTest extends RandomGraphTestCase {
     private static final GraphStoreFactorySuppliers GRAPH_STORE_FACTORY_SUPPLIERS = new GraphStoreFactorySuppliers(
+        Log.noOpLog(),
         Map.of(
             GraphProjectFromStoreConfig.class, NativeProjectionGraphStoreFactorySupplier::create
         )

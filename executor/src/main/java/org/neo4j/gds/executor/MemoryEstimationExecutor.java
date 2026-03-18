@@ -107,11 +107,25 @@ public class MemoryEstimationExecutor<ALGO extends Algorithm<ALGO_RESULT>, ALGO_
 
             var memoryEstimationGraphConfigParser = new MemoryEstimationGraphConfigParser(executionContext.username());
             var graphProjectConfig = memoryEstimationGraphConfigParser.parse(graphConfig);
-            var graphStoreFactorySuppliers = new GraphStoreFactorySuppliers(Map.of(GraphProjectFromStoreConfig.class, NativeProjectionGraphStoreFactorySupplier::create));
+            var graphStoreFactorySuppliers = new GraphStoreFactorySuppliers(
+                executionContext.log(),
+                Map.of(GraphProjectFromStoreConfig.class, NativeProjectionGraphStoreFactorySupplier::create)
+            );
             var graphStoreFactorySupplier = graphStoreFactorySuppliers.find(graphProjectConfig);
             var graphStoreCreator = graphProjectConfig.isFictitiousLoading()
-                ? new FictitiousGraphStoreLoader(graphProjectConfig, graphStoreFactorySupplier)
-                : new GraphStoreFromDatabaseLoader(graphProjectConfig, graphStoreFactorySupplier.get(graphLoaderContext, dependencyResolver));
+                ? new FictitiousGraphStoreLoader(
+                executionContext.requestCorrelationId(),
+                graphProjectConfig,
+                graphStoreFactorySupplier
+            )
+                : new GraphStoreFromDatabaseLoader(
+                    graphProjectConfig,
+                    graphStoreFactorySupplier.get(
+                        graphLoaderContext,
+                        dependencyResolver,
+                        executionContext.requestCorrelationId()
+                    )
+                );
 
             graphDims = graphStoreCreator.graphDimensions();
             maybeGraphEstimation = Optional.of(graphStoreCreator.estimateMemoryUsageAfterLoading());

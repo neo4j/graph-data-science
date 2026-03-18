@@ -39,6 +39,7 @@ import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.gds.logging.GdsTestLog;
+import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
 import org.neo4j.gds.projection.GraphStoreFactorySuppliers;
 import org.neo4j.gds.projection.NativeProjectionGraphStoreFactorySupplier;
@@ -61,6 +62,7 @@ import static org.neo4j.gds.termination.TerminationFlag.RUNNING_TRUE;
 
 class NativeRelationshipExporterTest extends BaseTest {
     private static final GraphStoreFactorySuppliers GRAPH_STORE_FACTORY_SUPPLIERS = new GraphStoreFactorySuppliers(
+        Log.noOpLog(),
         Map.of(
             GraphProjectFromStoreConfig.class, NativeProjectionGraphStoreFactorySupplier::create
         )

@@ -278,6 +278,7 @@ class ModularityOptimizationMutateProcTest extends BaseProcTest {
         runQuery("CREATE (a1: A), (a2: A), (b: B), (:B), (a1)-[:REL1]->(a2), (a2)-[:REL2]->(b)");
 
         var graphStoreFactorySuppliers = new GraphStoreFactorySuppliers(
+            Log.noOpLog(),
             Map.of(
                 GraphProjectFromStoreConfig.class, NativeProjectionGraphStoreFactorySupplier::create
             )
@@ -501,13 +502,18 @@ class ModularityOptimizationMutateProcTest extends BaseProcTest {
             .build();
 
         var graphStoreFactorySuppliers = new GraphStoreFactorySuppliers(
+            Log.noOpLog(),
             Map.of(
                 GraphProjectFromStoreConfig.class, NativeProjectionGraphStoreFactorySupplier::create
             )
         );
 
         var graphStoreFactorySupplier = graphStoreFactorySuppliers.find(graphProjectConfig);
-        var graphStoreFactory = graphStoreFactorySupplier.get(graphLoaderContext, dependencyResolver);
+        var graphStoreFactory = graphStoreFactorySupplier.get(
+            graphLoaderContext,
+            dependencyResolver,
+            PlainSimpleRequestCorrelationId.create()
+        );
         return new GraphLoader(graphProjectConfig, graphStoreFactory);
     }
 

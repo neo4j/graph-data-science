@@ -27,6 +27,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.legacycypherprojection.CypherProjectionGraphStoreFactorySupplier;
 import org.neo4j.gds.legacycypherprojection.GraphProjectFromCypherConfig;
 import org.neo4j.gds.Aggregation;
+import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
 import org.neo4j.gds.projection.GraphStoreFactorySuppliers;
 import org.neo4j.gds.projection.NativeProjectionGraphStoreFactorySupplier;
@@ -42,6 +43,7 @@ import static org.neo4j.gds.compat.GraphDatabaseApiProxy.applyInFullAccessTransa
 
 class GraphLoaderDirectionalityTest extends BaseTest {
     private static final GraphStoreFactorySuppliers GRAPH_STORE_FACTORY_SUPPLIERS = new GraphStoreFactorySuppliers(
+        Log.noOpLog(),
         Map.of(
             GraphProjectFromCypherConfig.class, CypherProjectionGraphStoreFactorySupplier::create,
             GraphProjectFromStoreConfig.class, NativeProjectionGraphStoreFactorySupplier::create

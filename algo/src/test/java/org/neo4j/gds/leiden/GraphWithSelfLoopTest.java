@@ -73,7 +73,7 @@ class GraphWithSelfLoopTest {
             1.0 / graph.relationshipCount(),
             new Concurrency(4),
             DefaultPool.INSTANCE,
-            ProgressTracker.EmptyProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER
         );
 
         assertThat(modularity).isCloseTo(-0.0555555, Offset.offset(1e-4));
@@ -183,7 +183,7 @@ class GraphWithSelfLoopTest {
             1.0 / graph.relationshipCount(),
             new Concurrency(4),
             DefaultPool.INSTANCE,
-            ProgressTracker.EmptyProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER
         );
 
         assertThat(modularity).isCloseTo(-0.0555555, Offset.offset(1e-4));

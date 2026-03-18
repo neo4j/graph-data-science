@@ -23,6 +23,7 @@ import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResultFactory;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.config.GraphProjectConfig;
+import org.neo4j.gds.core.RequestCorrelationId;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
 import org.neo4j.gds.projection.GraphProjectNativeResult;
 import org.neo4j.gds.transaction.TransactionContext;
@@ -67,6 +68,7 @@ public class NativeProjectApplication {
     ) {
         if (configuration.isFictitiousLoading()) return estimateButFictitiously(
             graphProjectMemoryUsageService,
+            requestScopedDependencies.correlationId(),
             configuration
         );
 
@@ -84,9 +86,10 @@ public class NativeProjectApplication {
      */
     public MemoryEstimateResult estimateButFictitiously(
         GraphProjectMemoryUsageService graphProjectMemoryUsageService,
+        RequestCorrelationId requestCorrelationId,
         GraphProjectConfig configuration
     ) {
-        var estimate = graphProjectMemoryUsageService.getFictitiousEstimate(configuration);
+        var estimate = graphProjectMemoryUsageService.getFictitiousEstimate(requestCorrelationId, configuration);
 
         return MemoryEstimateResultFactory.from(estimate);
     }

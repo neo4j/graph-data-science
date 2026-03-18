@@ -24,7 +24,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.gds.Aggregation;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.CypherLoaderBuilder;
 import org.neo4j.gds.GraphFactoryTestSupport;
@@ -37,13 +36,14 @@ import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.StoreLoaderBuilder;
-import org.neo4j.gds.TestGraph;
 import org.neo4j.gds.TestGraphLoaderFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.legacycypherprojection.CypherProjectionGraphStoreFactorySupplier;
 import org.neo4j.gds.legacycypherprojection.GraphProjectFromCypherConfig;
 import org.neo4j.gds.logging.GdsTestLog;
+import org.neo4j.gds.Aggregation;
+import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
 import org.neo4j.gds.projection.GraphStoreFactorySuppliers;
 import org.neo4j.gds.projection.NativeProjectionGraphStoreFactorySupplier;
@@ -66,6 +66,7 @@ import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 
 class GraphLoaderTest extends BaseTest {
     private static final GraphStoreFactorySuppliers CYPHER_SUPPLIERS = new GraphStoreFactorySuppliers(
+        Log.noOpLog(),
         Map.of(
             GraphProjectFromCypherConfig.class,
             CypherProjectionGraphStoreFactorySupplier::create
@@ -73,6 +74,7 @@ class GraphLoaderTest extends BaseTest {
     );
 
     private static final GraphStoreFactorySuppliers NATIVE_SUPPLIERS = new GraphStoreFactorySuppliers(
+        Log.noOpLog(),
         Map.of(
             GraphProjectFromStoreConfig.class,
             NativeProjectionGraphStoreFactorySupplier::create
@@ -222,11 +224,6 @@ class GraphLoaderTest extends BaseTest {
                 }
                 return false;
             });
-
-        assertThat(log.getMessages(TestLog.DEBUG))
-            .extracting(removingThreadId())
-            .isNotEmpty()
-            .anyMatch(message -> message.startsWith("Loading Actual memory usage of the loaded graph:"));
     }
 
     @AllGraphStoreFactoryTypesTest
@@ -329,7 +326,7 @@ class GraphLoaderTest extends BaseTest {
             .withLabels("X", "Y", "Z")
             .withRelationshipTypes("Q")
             .graph();
-        TestGraph expected = fromGdl("(:X),(:Y),(:X),(:Y)-[:Q]->(:Z)");
+        var expected = fromGdl("(:X),(:Y),(:X),(:Y)-[:Q]->(:Z)");
         assertGraphEquals(expected, graph);
     }
 

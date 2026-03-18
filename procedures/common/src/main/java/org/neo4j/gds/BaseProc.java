@@ -21,6 +21,7 @@ package org.neo4j.gds;
 
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
+import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
 import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistry;
@@ -103,6 +104,7 @@ public abstract class BaseProc {
                 .isGdsAdmin(transactionContext().isGdsAdmin())
                 .metrics(metrics)
                 .algorithmsProcedureFacade(graphDataScienceProcedures.algorithms())
+                .requestCorrelationId(PlainSimpleRequestCorrelationId.create())
                 .build();
     }
 

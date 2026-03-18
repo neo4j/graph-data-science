@@ -26,6 +26,7 @@ import org.neo4j.gds.api.User;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.config.GraphProjectConfig;
+import org.neo4j.gds.core.RequestCorrelationId;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.MemoryTracker;
 import org.neo4j.gds.mem.MemoryTreeWithDimensions;
@@ -74,17 +75,28 @@ public class GraphProjectMemoryUsageService {
         var graphLoaderContext = graphLoaderContext(requestScopedDependencies, transactionContext);
 
         var graphStoreFactorySupplier = graphStoreFactorySuppliers.find(configuration);
-        var graphStoreFactory = graphStoreFactorySupplier.get(graphLoaderContext, dependencyResolver);
+        var graphStoreFactory = graphStoreFactorySupplier.get(
+            graphLoaderContext,
+            dependencyResolver,
+            requestScopedDependencies.correlationId()
+        );
 
         var graphStoreCreator = new GraphStoreFromDatabaseLoader(configuration, graphStoreFactory);
 
         return computeEstimate(configuration, graphStoreCreator);
     }
 
-    MemoryTreeWithDimensions getFictitiousEstimate(GraphProjectConfig configuration) {
+    MemoryTreeWithDimensions getFictitiousEstimate(
+        RequestCorrelationId requestCorrelationId,
+        GraphProjectConfig configuration
+    ) {
         var graphStoreFactorySupplier = graphStoreFactorySuppliers.find(configuration);
 
-        var graphStoreCreator = new FictitiousGraphStoreLoader(configuration, graphStoreFactorySupplier);
+        var graphStoreCreator = new FictitiousGraphStoreLoader(
+            requestCorrelationId,
+            configuration,
+            graphStoreFactorySupplier
+        );
 
         return computeEstimate(configuration, graphStoreCreator);
     }

@@ -34,6 +34,7 @@ import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
@@ -86,6 +87,7 @@ class MemoryEstimationExecutorTest extends BaseTest {
             .modelCatalog(ModelCatalog.EMPTY)
             .isGdsAdmin(false)
             .metrics(Metrics.DISABLED)
+            .requestCorrelationId(PlainSimpleRequestCorrelationId.create())
             .build();
 
         memoryEstimationExecutor = new MemoryEstimationExecutor<>(

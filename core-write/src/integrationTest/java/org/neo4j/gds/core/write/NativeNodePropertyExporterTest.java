@@ -38,6 +38,7 @@ import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.logging.GdsTestLog;
+import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.nodeproperties.DoubleTestPropertyValues;
 import org.neo4j.gds.nodeproperties.LongTestPropertyValues;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
@@ -60,6 +61,7 @@ import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 
 class NativeNodePropertyExporterTest extends BaseTest {
     private static final GraphStoreFactorySuppliers GRAPH_STORE_FACTORY_SUPPLIERS = new GraphStoreFactorySuppliers(
+        Log.noOpLog(),
         Map.of(
             GraphProjectFromStoreConfig.class, NativeProjectionGraphStoreFactorySupplier::create
         )

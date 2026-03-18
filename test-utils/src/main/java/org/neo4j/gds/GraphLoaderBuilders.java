@@ -27,6 +27,8 @@ import org.neo4j.gds.api.ImmutableGraphLoaderContext;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.GraphLoader;
+import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
+import org.neo4j.gds.core.RequestCorrelationId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
@@ -63,6 +65,7 @@ public final class GraphLoaderBuilders {
         Optional<ExecutorService> executorService,
         Optional<TerminationFlag> terminationFlag,
         Optional<Log> log,
+        Optional<RequestCorrelationId> requestCorrelationId,
         Optional<String> userName,
         // CreateConfig parameters
         Optional<String> graphName,
@@ -108,6 +111,7 @@ public final class GraphLoaderBuilders {
             executorService,
             terminationFlag,
             log,
+            requestCorrelationId,
             graphProjectConfig
         );
     }
@@ -121,6 +125,7 @@ public final class GraphLoaderBuilders {
         Optional<ExecutorService> executorService,
         Optional<TerminationFlag> terminationFlag,
         Optional<Log> log,
+        Optional<RequestCorrelationId> requestCorrelationId,
         GraphProjectFromStoreConfig graphProjectConfig
     ) {
         return createGraphLoader(
@@ -130,6 +135,7 @@ public final class GraphLoaderBuilders {
             executorService,
             terminationFlag,
             log,
+            requestCorrelationId,
             graphProjectConfig
         );
     }
@@ -146,6 +152,7 @@ public final class GraphLoaderBuilders {
         Optional<TransactionContext> transactionContext,
         Optional<TerminationFlag> terminationFlag,
         Optional<Log> log,
+        Optional<RequestCorrelationId> requestCorrelationId,
         Optional<String> userName,
         // CreateConfig parameters
         Optional<String> graphName,
@@ -174,6 +181,7 @@ public final class GraphLoaderBuilders {
             Optional.empty(),
             terminationFlag,
             log,
+            requestCorrelationId,
             graphProjectConfig
         );
     }
@@ -186,6 +194,7 @@ public final class GraphLoaderBuilders {
         Optional<ExecutorService> executorService,
         Optional<TerminationFlag> terminationFlag,
         Optional<Log> log,
+        Optional<RequestCorrelationId> requestCorrelationId,
         GraphProjectConfig graphProjectConfig
     ) {
         var dependencyResolver = GraphDatabaseApiProxy.dependencyResolver(databaseService);
@@ -200,7 +209,11 @@ public final class GraphLoaderBuilders {
             .log(log.orElseGet(Log::noOpLog))
             .build();
         var graphStoreFactorySupplier = graphStoreFactorySuppliers.find(graphProjectConfig);
-        var graphStoreFactory = graphStoreFactorySupplier.get(graphLoaderContext, dependencyResolver);
+        var graphStoreFactory = graphStoreFactorySupplier.get(
+            graphLoaderContext,
+            dependencyResolver,
+            requestCorrelationId.orElse(PlainSimpleRequestCorrelationId.create())
+        );
         return new GraphLoader(
             graphProjectConfig,
             graphStoreFactory

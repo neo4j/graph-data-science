@@ -20,17 +20,20 @@
 package org.neo4j.gds.projection;
 
 import org.neo4j.gds.config.GraphProjectConfig;
+import org.neo4j.gds.logging.Log;
 
 import java.util.Map;
-import java.util.function.Function;
+import java.util.function.BiFunction;
 
 /**
  * This is where you load up your GraphStoreFactorySuppliers. And you access them using a key.
  */
 public class GraphStoreFactorySuppliers {
-    private final Map<Class<?>, Function<GraphProjectConfig, GraphStoreFactorySupplier>> suppliers;
+    private final Log log;
+    private final Map<Class<?>, BiFunction<Log, GraphProjectConfig, GraphStoreFactorySupplier>> suppliers;
 
-    public GraphStoreFactorySuppliers(Map<Class<?>, Function<GraphProjectConfig, GraphStoreFactorySupplier>> suppliers) {
+    public GraphStoreFactorySuppliers(Log log, Map<Class<?>, BiFunction<Log, GraphProjectConfig, GraphStoreFactorySupplier>> suppliers) {
+        this.log = log;
         this.suppliers = suppliers;
     }
 
@@ -44,7 +47,7 @@ public class GraphStoreFactorySuppliers {
             .filter(e -> e.getKey().isAssignableFrom(configuration.getClass()))
             .findFirst();
 
-        if (first.isPresent()) return first.get().getValue().apply(configuration);
+        if (first.isPresent()) return first.get().getValue().apply(log, configuration);
 
         var keyAsString = configuration.getClass().getSimpleName();
 

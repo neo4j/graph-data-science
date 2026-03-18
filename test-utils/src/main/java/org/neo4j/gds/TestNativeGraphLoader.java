@@ -116,7 +116,7 @@ public final class TestNativeGraphLoader implements TestGraphLoader {
     private GraphLoader storeLoader() {
         StoreLoaderBuilder storeLoaderBuilder = new StoreLoaderBuilder().databaseService(db);
 
-        var graphStoreFactorySuppliers = new GraphStoreFactorySuppliers(
+        var graphStoreFactorySuppliers = new GraphStoreFactorySuppliers(maybeLog.orElse(Log.noOpLog()),
             Map.of(
                 GraphProjectFromStoreConfig.class, NativeProjectionGraphStoreFactorySupplier::create
             )

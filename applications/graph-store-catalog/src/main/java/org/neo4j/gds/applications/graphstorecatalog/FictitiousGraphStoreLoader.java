@@ -26,6 +26,7 @@ import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
+import org.neo4j.gds.core.RequestCorrelationId;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
 import org.neo4j.gds.projection.GraphStoreFactorySupplier;
@@ -38,13 +39,16 @@ import static org.neo4j.gds.RelationshipType.ALL_RELATIONSHIPS;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class FictitiousGraphStoreLoader implements GraphStoreCreator {
+    private final RequestCorrelationId requestCorrelationId;
     private final GraphProjectConfig graphProjectConfig;
     private final GraphStoreFactorySupplier graphStoreFactorySupplier;
 
     public FictitiousGraphStoreLoader(
+        RequestCorrelationId requestCorrelationId,
         GraphProjectConfig graphProjectConfig,
         GraphStoreFactorySupplier graphStoreFactorySupplier
     ) {
+        this.requestCorrelationId = requestCorrelationId;
         this.graphProjectConfig = graphProjectConfig;
         this.graphStoreFactorySupplier = graphStoreFactorySupplier;
     }
@@ -77,7 +81,8 @@ public class FictitiousGraphStoreLoader implements GraphStoreCreator {
         return graphStoreFactorySupplier.getWithDimension(
             GraphLoaderContext.NULL_CONTEXT,
             graphDimensions(),
-            new StandInDependencyResolver()
+            new StandInDependencyResolver(),
+            requestCorrelationId
         ).estimateMemoryUsageDuringLoading();
     }
 
@@ -86,7 +91,8 @@ public class FictitiousGraphStoreLoader implements GraphStoreCreator {
         return graphStoreFactorySupplier.getWithDimension(
             GraphLoaderContext.NULL_CONTEXT,
             graphDimensions(),
-            new StandInDependencyResolver()
+            new StandInDependencyResolver(),
+            requestCorrelationId
         ).estimateMemoryUsageAfterLoading();
     }
 

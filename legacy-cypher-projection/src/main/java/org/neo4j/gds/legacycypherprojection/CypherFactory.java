@@ -34,6 +34,7 @@ import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
+import org.neo4j.gds.core.RequestCorrelationId;
 import org.neo4j.gds.core.loading.CSRGraphStore;
 import org.neo4j.gds.core.loading.Capabilities;
 import org.neo4j.gds.core.loading.ImmutableStaticCapabilities;
@@ -43,6 +44,7 @@ import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskTreeProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistry;
+import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.transaction.TransactionContext;
 
@@ -66,24 +68,44 @@ public final class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCy
         GraphProjectFromCypherConfig graphProjectConfig,
         GraphLoaderContext loadingContext,
         GraphDimensions graphDimensions,
-        DependencyResolver dependencyResolver
+        DependencyResolver dependencyResolver,
+        Log log,
+        RequestCorrelationId requestCorrelationId
     ) {
-        return create(graphProjectConfig, loadingContext, Optional.of(graphDimensions), dependencyResolver);
+        return create(
+            graphProjectConfig,
+            loadingContext,
+            Optional.of(graphDimensions),
+            dependencyResolver,
+            log,
+            requestCorrelationId
+        );
     }
 
     static CypherFactory createWithDerivedDimensions(
         GraphProjectFromCypherConfig graphProjectConfig,
         GraphLoaderContext loadingContext,
-        DependencyResolver dependencyResolver
+        DependencyResolver dependencyResolver,
+        Log log,
+        RequestCorrelationId requestCorrelationId
     ) {
-        return create(graphProjectConfig, loadingContext, Optional.empty(), dependencyResolver);
+        return create(
+            graphProjectConfig,
+            loadingContext,
+            Optional.empty(),
+            dependencyResolver,
+            log,
+            requestCorrelationId
+        );
     }
 
     private static CypherFactory create(
         GraphProjectFromCypherConfig graphProjectConfig,
         GraphLoaderContext loadingContext,
         Optional<GraphDimensions> baseDimensions,
-        DependencyResolver dependencyResolver
+        DependencyResolver dependencyResolver,
+        Log log,
+        RequestCorrelationId requestCorrelationId
     ) {
 
         EstimationResult nodeEstimation;
@@ -126,7 +148,9 @@ public final class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCy
             dim,
             nodeEstimation.propertyCount(),
             relationEstimation.propertyCount(),
-            dependencyResolver
+            dependencyResolver,
+            log,
+            requestCorrelationId
         );
     }
 
@@ -136,10 +160,18 @@ public final class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCy
         GraphDimensions graphDimensions,
         long estimatedNumberOfNodeProperties,
         long estimatedNumberOfRelProperties,
-        DependencyResolver dependencyResolver
+        DependencyResolver dependencyResolver,
+        Log log,
+        RequestCorrelationId requestCorrelationId
     ) {
-        // TODO: need to pass capabilities from outside?
-        super(graphProjectConfig, ImmutableStaticCapabilities.of(Capabilities.WriteMode.LOCAL), loadingContext, graphDimensions);
+        super(
+            graphProjectConfig,
+            ImmutableStaticCapabilities.of(Capabilities.WriteMode.LOCAL),
+            loadingContext,
+            graphDimensions,
+            log,
+            requestCorrelationId
+        );
 
         this.cypherConfig = graphProjectConfig;
         this.numberOfNodeProperties = estimatedNumberOfNodeProperties;

@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.logging;
 
+import java.util.function.Supplier;
+
 /**
  * We have our own log interface. This enables us to evolve the interface, to run without Neo4j,
  * to not have dependencies on Neo4j everywhere.
@@ -37,6 +39,13 @@ public interface Log {
     void warn(String format, Object... arguments);
 
     boolean isDebugEnabled();
+
+    /**
+     * A neat little idea for handling costly messages
+     */
+    default void debug(Supplier<String> message) {
+        if (isDebugEnabled()) debug(message.get());
+    }
 
     void debug(String format, Object... arguments);
 

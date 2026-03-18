@@ -30,6 +30,7 @@ import org.neo4j.gds.applications.algorithms.machinery.Computation;
 import org.neo4j.gds.applications.algorithms.machinery.Label;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
+import org.neo4j.gds.core.RequestCorrelationId;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistry;
@@ -59,6 +60,7 @@ final class NodeRegressionPredictComputation implements Computation<HugeDoubleAr
     private final NodePropertyExporterBuilder nodePropertyExporterBuilder;
     private final ProcedureReturnColumns procedureReturnColumns;
     private final RelationshipExporterBuilder relationshipExporterBuilder;
+    private final RequestCorrelationId requestCorrelationId;
     private final TaskRegistryFactory taskRegistryFactory;
     private final TerminationMonitor terminationMonitor;
     private final User user;
@@ -83,6 +85,7 @@ final class NodeRegressionPredictComputation implements Computation<HugeDoubleAr
         NodePropertyExporterBuilder nodePropertyExporterBuilder,
         ProcedureReturnColumns procedureReturnColumns,
         RelationshipExporterBuilder relationshipExporterBuilder,
+        RequestCorrelationId requestCorrelationId,
         TaskRegistryFactory taskRegistryFactory,
         TerminationMonitor terminationMonitor,
         User user,
@@ -103,6 +106,7 @@ final class NodeRegressionPredictComputation implements Computation<HugeDoubleAr
         this.nodePropertyExporterBuilder = nodePropertyExporterBuilder;
         this.procedureReturnColumns = procedureReturnColumns;
         this.relationshipExporterBuilder = relationshipExporterBuilder;
+        this.requestCorrelationId = requestCorrelationId;
         this.taskRegistryFactory = taskRegistryFactory;
         this.terminationMonitor = terminationMonitor;
         this.user = user;
@@ -125,6 +129,7 @@ final class NodeRegressionPredictComputation implements Computation<HugeDoubleAr
         NodePropertyExporterBuilder nodePropertyExporterBuilder,
         ProcedureReturnColumns procedureReturnColumns,
         RelationshipExporterBuilder relationshipExporterBuilder,
+        RequestCorrelationId requestCorrelationId,
         TaskRegistryFactory taskRegistryFactory,
         TerminationMonitor terminationMonitor,
         User user,
@@ -147,6 +152,7 @@ final class NodeRegressionPredictComputation implements Computation<HugeDoubleAr
             nodePropertyExporterBuilder,
             procedureReturnColumns,
             relationshipExporterBuilder,
+            requestCorrelationId,
             taskRegistryFactory,
             terminationMonitor,
             user,
@@ -192,6 +198,7 @@ final class NodeRegressionPredictComputation implements Computation<HugeDoubleAr
             .nodeLookup(nodeLookup)
             .nodePropertyExporterBuilder(nodePropertyExporterBuilder)
             .relationshipExporterBuilder(relationshipExporterBuilder)
+            .requestCorrelationId(requestCorrelationId)
             .returnColumns(procedureReturnColumns)
             .taskRegistryFactory(taskRegistryFactory)
             .terminationMonitor(terminationMonitor)

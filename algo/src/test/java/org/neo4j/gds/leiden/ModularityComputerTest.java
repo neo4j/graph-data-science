@@ -85,7 +85,7 @@ class ModularityComputerTest {
             1.0 / graph.relationshipCount(),
             new Concurrency(4),
             DefaultPool.INSTANCE,
-            ProgressTracker.EmptyProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER
         );
         assertThat(modularity).isCloseTo(0.4230, Offset.offset(1e-3));
     }
@@ -118,7 +118,7 @@ class ModularityComputerTest {
             1.0 / graph.relationshipCount(),
             new Concurrency(4),
             DefaultPool.INSTANCE,
-            ProgressTracker.EmptyProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER
         );
         assertThat(modularity).isCloseTo(0.4230, Offset.offset(1e-3));
     }

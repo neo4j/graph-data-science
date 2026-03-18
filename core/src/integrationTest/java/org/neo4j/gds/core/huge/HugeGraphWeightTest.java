@@ -25,6 +25,7 @@ import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.PageUtil;
+import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.Estimate;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
 import org.neo4j.gds.projection.GraphStoreFactorySuppliers;
@@ -102,7 +103,10 @@ final class HugeGraphWeightTest extends BaseTest {
     private Graph loadGraph(final GraphDatabaseService db) {
         return new StoreLoaderBuilder()
             .databaseService(db)
-            .graphStoreFactorySuppliers(new GraphStoreFactorySuppliers(Map.of(GraphProjectFromStoreConfig.class, NativeProjectionGraphStoreFactorySupplier::create)))
+            .graphStoreFactorySuppliers(new GraphStoreFactorySuppliers(
+                Log.noOpLog(),
+                Map.of(GraphProjectFromStoreConfig.class, NativeProjectionGraphStoreFactorySupplier::create)
+            ))
             .addRelationshipProperty(PropertyMapping.of("weight", 0))
             .build()
             .graph();

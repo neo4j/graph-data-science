@@ -40,6 +40,7 @@ import java.util.concurrent.ExecutorService;
 
 public final class Kmeans extends Algorithm<KmeansResult> {
     private static final int UNASSIGNED = -1;
+
     private HugeIntArray bestCommunities;
     private final Graph graph;
     private final KmeansParameters parameters;

@@ -26,6 +26,7 @@ import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
 import org.neo4j.gds.projection.GraphStoreFactorySuppliers;
 import org.neo4j.gds.projection.NativeProjectionGraphStoreFactorySupplier;
@@ -62,7 +63,10 @@ final class UndirectedLoopsTest extends BaseTest {
     void undirectedWithMultipleLoopsShouldSucceed() {
         Graph graph = new StoreLoaderBuilder()
                 .databaseService(db)
-                .graphStoreFactorySuppliers(new GraphStoreFactorySuppliers(Map.of(GraphProjectFromStoreConfig.class, NativeProjectionGraphStoreFactorySupplier::create)))
+            .graphStoreFactorySuppliers(new GraphStoreFactorySuppliers(
+                Log.noOpLog(),
+                Map.of(GraphProjectFromStoreConfig.class, NativeProjectionGraphStoreFactorySupplier::create)
+            ))
                 .addRelationshipProperty(PropertyMapping.of("cost", Double.MAX_VALUE))
                 .build()
                 .graph();

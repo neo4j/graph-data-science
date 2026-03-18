@@ -254,7 +254,7 @@ class BatchingProgressLoggerTest {
             .mapToObj(i -> (Runnable) () ->
                 IntStream.range(0, batchSize).forEach(ignore -> {
                     LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(1));
-                    logger.logProgress();
+                    logger.logProgress(() -> null);
                 }))
             .toList();
 

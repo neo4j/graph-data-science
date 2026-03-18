@@ -25,71 +25,7 @@ import org.neo4j.gds.mem.MemoryRange;
 import java.util.function.Supplier;
 
 public interface ProgressTracker {
-
-    ProgressTracker NULL_TRACKER = new EmptyProgressTracker();
-
-    void setEstimatedResourceFootprint(MemoryRange memoryEstimationInBytes);
-
-    void requestedConcurrency(Concurrency concurrency);
-
-    void beginSubTask();
-
-    void beginSubTask(long taskVolume);
-
-    void beginSubTask(String expectedTaskDescription);
-
-    void beginSubTask(String expectedTaskDescription, long taskVolume);
-
-    void endSubTask();
-
-    void endSubTask(String expectedTaskDescription);
-
-    void endSubTaskWithFailure();
-
-    void endSubTaskWithFailure(String expectedTaskDescription);
-
-    void logProgress(long value);
-
-    default void logProgress() {
-        logProgress(1);
-    }
-
-    void logProgress(long value, String messageTemplate);
-
-    // prefer setting volume via factory method for leaves
-    // to make root progress available from the start
-    void setVolume(long volume);
-
-    /**
-     * Returns the task volume of the currently running task or
-     * {@link Task#UNKNOWN_VOLUME} if no task volume is set.
-     */
-    long currentVolume();
-
-    void logDebug(Supplier<String> messageSupplier);
-
-    default void logDebug(String message) {
-        logMessage(LogLevel.DEBUG, message);
-    }
-
-    default void logWarning(String message) {
-        logMessage(LogLevel.WARNING, message);
-    }
-
-    default void logInfo(String message) {
-        logMessage(LogLevel.INFO, message);
-    }
-
-    void logMessage(LogLevel level, String message);
-
-    void release();
-
-    void setSteps(long steps);
-
-    void logSteps(long steps);
-
-    class EmptyProgressTracker implements ProgressTracker {
-
+    ProgressTracker NULL_TRACKER = new ProgressTracker() {
         @Override
         public void setEstimatedResourceFootprint(MemoryRange memoryRangeInBytes) {
         }
@@ -176,5 +112,97 @@ public interface ProgressTracker {
         public void endSubTaskWithFailure(String expectedTaskDescription) {
 
         }
+    };
+
+    void setEstimatedResourceFootprint(MemoryRange memoryEstimationInBytes);
+
+    void requestedConcurrency(Concurrency concurrency);
+
+    void beginSubTask();
+
+    void beginSubTask(long taskVolume);
+
+    void beginSubTask(String expectedTaskDescription);
+
+    void beginSubTask(String expectedTaskDescription, long taskVolume);
+
+    void endSubTask();
+
+    void endSubTask(String expectedTaskDescription);
+
+    void endSubTaskWithFailure();
+
+    void endSubTaskWithFailure(String expectedTaskDescription);
+
+    /**
+     * @deprecated get rid or at least rename
+     */
+    @Deprecated
+    void logProgress(long value);
+
+    /**
+     * @deprecated get rid or at least rename
+     */
+    @Deprecated
+    default void logProgress() {
+        logProgress(1);
     }
+
+    /**
+     * @deprecated get rid or at least rename
+     */
+    @Deprecated
+    void logProgress(long value, String messageTemplate);
+
+    // prefer setting volume via factory method for leaves
+    // to make root progress available from the start
+    void setVolume(long volume);
+
+    /**
+     * Returns the task volume of the currently running task or
+     * {@link Task#UNKNOWN_VOLUME} if no task volume is set.
+     */
+    long currentVolume();
+
+    /**
+     * @deprecated Stop using progress tracker for logging
+     */
+    @Deprecated
+    void logDebug(Supplier<String> messageSupplier);
+
+    /**
+     * @deprecated Stop using progress tracker for logging
+     */
+    @Deprecated
+    default void logDebug(String message) {
+        logMessage(LogLevel.DEBUG, message);
+    }
+
+    /**
+     * @deprecated Stop using progress tracker for logging
+     */
+    @Deprecated
+    default void logWarning(String message) {
+        logMessage(LogLevel.WARNING, message);
+    }
+
+    /**
+     * @deprecated Stop using progress tracker for logging
+     */
+    @Deprecated
+    default void logInfo(String message) {
+        logMessage(LogLevel.INFO, message);
+    }
+
+    /**
+     * @deprecated Stop using progress tracker for logging
+     */
+    @Deprecated
+    void logMessage(LogLevel level, String message);
+
+    void release();
+
+    void setSteps(long steps);
+
+    void logSteps(long steps);
 }

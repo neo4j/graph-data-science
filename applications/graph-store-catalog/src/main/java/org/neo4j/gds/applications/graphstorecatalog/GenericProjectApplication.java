@@ -26,6 +26,7 @@ import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResultFacto
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.config.GraphProjectConfig;
+import org.neo4j.gds.core.RequestCorrelationId;
 import org.neo4j.gds.core.loading.GraphProjectResult;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.utils.ProgressTimer;
@@ -88,6 +89,7 @@ public class GenericProjectApplication<RESULT extends GraphProjectResult, CONFIG
     ) {
         if (configuration.isFictitiousLoading()) return estimateButFictitiously(
             graphProjectMemoryUsageService,
+            requestScopedDependencies.correlationId(),
             configuration
         );
 
@@ -123,7 +125,11 @@ public class GenericProjectApplication<RESULT extends GraphProjectResult, CONFIG
                 transactionContext
             );
             var graphStoreFactorySupplier = graphStoreFactorySuppliers.find(configuration);
-            var graphStoreFactory = graphStoreFactorySupplier.get(graphLoaderContext, dependencyResolver);
+            var graphStoreFactory = graphStoreFactorySupplier.get(
+                graphLoaderContext,
+                dependencyResolver,
+                requestScopedDependencies.correlationId()
+            );
             var graphStoreCreator = new GraphStoreFromDatabaseLoader(
                 configuration,
                 graphStoreFactory
@@ -145,9 +151,10 @@ public class GenericProjectApplication<RESULT extends GraphProjectResult, CONFIG
      */
     private MemoryEstimateResult estimateButFictitiously(
         GraphProjectMemoryUsageService graphProjectMemoryUsageService,
+        RequestCorrelationId requestCorrelationId,
         GraphProjectConfig configuration
     ) {
-        var estimate = graphProjectMemoryUsageService.getFictitiousEstimate(configuration);
+        var estimate = graphProjectMemoryUsageService.getFictitiousEstimate(requestCorrelationId, configuration);
 
         return MemoryEstimateResultFactory.from(estimate);
     }

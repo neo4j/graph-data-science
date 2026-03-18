@@ -24,6 +24,7 @@ import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
+import org.neo4j.gds.core.RequestCorrelationId;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
 import org.neo4j.gds.projection.GraphStoreFactorySuppliers;
@@ -40,9 +41,16 @@ public class FictitiousGraphStoreEstimationService {
         this.graphStoreFactorySuppliers = graphStoreFactorySuppliers;
     }
 
-    public GraphMemoryEstimation estimate(GraphProjectConfig graphProjectConfig) {
+    public GraphMemoryEstimation estimate(
+        RequestCorrelationId requestCorrelationId,
+        GraphProjectConfig graphProjectConfig
+    ) {
         var dimensions = graphDimensions(graphProjectConfig);
-        var estimateMemoryUsageAfterLoading = estimateMemoryUsageAfterLoading(graphProjectConfig, dimensions);
+        var estimateMemoryUsageAfterLoading = estimateMemoryUsageAfterLoading(
+            requestCorrelationId,
+            graphProjectConfig,
+            dimensions
+        );
         return new GraphMemoryEstimation(dimensions, estimateMemoryUsageAfterLoading);
     }
 
@@ -63,13 +71,15 @@ public class FictitiousGraphStoreEstimationService {
     }
 
     private MemoryEstimation estimateMemoryUsageAfterLoading(
+        RequestCorrelationId requestCorrelationId,
         GraphProjectConfig graphProjectConfig,
         GraphDimensions graphDimensions
     ) {
         return graphStoreFactorySuppliers.find(graphProjectConfig).getWithDimension(
             GraphLoaderContext.NULL_CONTEXT,
             graphDimensions,
-            new StandInDependencyResolver()
+            new StandInDependencyResolver(),
+            requestCorrelationId
         ).estimateMemoryUsageAfterLoading();
     }
 }

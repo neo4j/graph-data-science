@@ -230,7 +230,7 @@ public final class OpenGraphDataScienceExtensionBuilder {
         var loggers = new GdsLoggers(log, new LoggerForProgressTrackingAdapter(log));
 
         // These are Neo4j specific, but not edition specific, so we create them here
-        var graphStoreFactorySuppliers = new GraphStoreFactorySuppliers(
+        var graphStoreFactorySuppliers = new GraphStoreFactorySuppliers(log,
             Map.of(
                 GraphProjectFromStoreConfig.class, NativeProjectionGraphStoreFactorySupplier::create,
                 GraphProjectFromCypherConfig.class, CypherProjectionGraphStoreFactorySupplier::create

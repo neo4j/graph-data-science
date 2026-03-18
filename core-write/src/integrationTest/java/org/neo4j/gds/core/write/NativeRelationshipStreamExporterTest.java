@@ -23,7 +23,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.neo4j.gds.Aggregation;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.TestSupport;
@@ -40,6 +39,8 @@ import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.logging.GdsTestLog;
+import org.neo4j.gds.Aggregation;
+import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
 import org.neo4j.gds.projection.GraphStoreFactorySuppliers;
 import org.neo4j.gds.projection.NativeProjectionGraphStoreFactorySupplier;
@@ -65,6 +66,7 @@ import static org.neo4j.gds.termination.TerminationFlag.RUNNING_TRUE;
 
 class NativeRelationshipStreamExporterTest extends BaseTest {
     private static final GraphStoreFactorySuppliers GRAPH_STORE_FACTORY_SUPPLIERS = new GraphStoreFactorySuppliers(
+        Log.noOpLog(),
         Map.of(
             GraphProjectFromStoreConfig.class,
             NativeProjectionGraphStoreFactorySupplier::create
@@ -107,6 +109,7 @@ class NativeRelationshipStreamExporterTest extends BaseTest {
             .isThrownBy(() -> exporter.write("OUT_TYPE", List.of(), List.of()));
     }
 
+    @Test
     void exportScalar() {
         var exportRelationships = List.of(
             relationship("a", "b", Values.longValue(42L), Values.doubleValue(1332)),
@@ -133,7 +136,9 @@ class NativeRelationshipStreamExporterTest extends BaseTest {
 
         assertEquals(exportRelationships.size(), relationshipsWritten);
 
-        var exportedGraph = new StoreLoaderBuilder().databaseService(db)
+        var exportedGraph = new StoreLoaderBuilder()
+            .databaseService(db)
+            .graphStoreFactorySuppliers(GRAPH_STORE_FACTORY_SUPPLIERS)
             .addRelationshipType(relationshipType)
             .addRelationshipProperty(longKey, longKey, DefaultValue.forLong(), Aggregation.NONE)
             .addRelationshipProperty(doubleKey, doubleKey, DefaultValue.forDouble(), Aggregation.NONE)

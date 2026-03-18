@@ -58,7 +58,10 @@ class ProgressLoggingTest extends BaseTest {
 
         new StoreLoaderBuilder()
             .databaseService(db)
-            .graphStoreFactorySuppliers(new GraphStoreFactorySuppliers(Map.of(GraphProjectFromStoreConfig.class, NativeProjectionGraphStoreFactorySupplier::create)))
+            .graphStoreFactorySuppliers(new GraphStoreFactorySuppliers(
+                log,
+                Map.of(GraphProjectFromStoreConfig.class, NativeProjectionGraphStoreFactorySupplier::create)
+            ))
             .log(log)
             .addNodeLabel(LABEL)
             .addRelationshipType(RELATIONSHIP)
@@ -66,7 +69,7 @@ class ProgressLoggingTest extends BaseTest {
             .build()
             .graph();
 
-        assertThat(log.getMessages(GdsTestLog.INFO)).allSatisfy(msg -> assertThat(msg).contains("Loading"));
-        assertThat(log.getMessages(GdsTestLog.DEBUG)).allSatisfy(msg -> assertThat(msg).contains("Loading"));
+        assertThat(log.getMessages(GdsTestLog.INFO)).allSatisfy(msg -> assertThat(msg).contains("Loading :: "));
+        assertThat(log.getMessages(GdsTestLog.DEBUG)).singleElement().matches(s -> s.contains("Actual memory usage of the loaded graph"));
     }
 }

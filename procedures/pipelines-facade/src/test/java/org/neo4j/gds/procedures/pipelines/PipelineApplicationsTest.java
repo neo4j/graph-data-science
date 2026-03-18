@@ -66,6 +66,7 @@ class PipelineApplicationsTest {
             null,
             null,
             null,
+            null,
             requestScopedDependencies.user(),
             null,
             pipelineConfigurationParser,

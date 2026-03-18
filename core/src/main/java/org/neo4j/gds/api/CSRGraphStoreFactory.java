@@ -32,6 +32,7 @@ import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.IdMapBehaviorServiceProvider;
+import org.neo4j.gds.core.RequestCorrelationId;
 import org.neo4j.gds.core.huge.HugeGraph;
 import org.neo4j.gds.core.loading.AdjacencyBuffer;
 import org.neo4j.gds.core.loading.AdjacencyListBehavior;
@@ -41,6 +42,7 @@ import org.neo4j.gds.core.loading.GraphStoreBuilder;
 import org.neo4j.gds.core.loading.Nodes;
 import org.neo4j.gds.core.loading.RelationshipImportResult;
 import org.neo4j.gds.core.loading.nodeproperties.NodePropertiesFromStoreBuilder;
+import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -52,16 +54,21 @@ import java.util.Map;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public abstract class CSRGraphStoreFactory<CONFIG extends GraphProjectConfig> extends
-    GraphStoreFactory<CSRGraphStore, CONFIG> {
+public abstract class CSRGraphStoreFactory<CONFIG extends GraphProjectConfig> extends GraphStoreFactory<CSRGraphStore, CONFIG> {
+    private final Log log;
+    private final RequestCorrelationId requestCorrelationId;
 
     public CSRGraphStoreFactory(
         CONFIG graphProjectConfig,
         Capabilities capabilities,
         GraphLoaderContext loadingContext,
-        GraphDimensions dimensions
+        GraphDimensions dimensions,
+        Log log,
+        RequestCorrelationId requestCorrelationId
     ) {
         super(graphProjectConfig, capabilities, loadingContext, dimensions);
+        this.log = log;
+        this.requestCorrelationId = requestCorrelationId;
     }
 
     protected CSRGraphStore createGraphStore(Nodes nodes, RelationshipImportResult relationshipImportResult) {
@@ -87,13 +94,13 @@ public abstract class CSRGraphStoreFactory<CONFIG extends GraphProjectConfig> ex
     }
 
     protected void logLoadingSummary(GraphStore graphStore) {
-        progressTracker().logDebug(() -> {
+        log.debug(() -> {
             var sizeInBytes = MemoryUsage.sizeOf(graphStore);
             if (sizeInBytes >= 0) {
                 var memoryUsage = Estimate.humanReadable(sizeInBytes);
-                return formatWithLocale("Actual memory usage of the loaded graph: %s", memoryUsage);
+                return formatWithLocale("[%s] Actual memory usage of the loaded graph: %s", requestCorrelationId, memoryUsage);
             } else {
-                return "Actual memory usage of the loaded graph could not be determined.";
+                return formatWithLocale("[%s] Actual memory usage of the loaded graph could not be determined.", requestCorrelationId);
             }
         });
     }

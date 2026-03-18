@@ -26,7 +26,6 @@ import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistry;
 import org.neo4j.gds.mem.MemoryRange;
-import org.neo4j.gds.utils.GdsFeatureToggles;
 
 import java.util.Locale;
 import java.util.Optional;
@@ -78,6 +77,24 @@ public final class TaskProgressTracker implements ProgressTracker {
         return create(baseTask, jobId, taskRegistryFactory, taskProgressLogger, userLogRegistry);
     }
 
+    public static TaskProgressTracker create(
+        Task baseTask,
+        JobId jobId,
+        TaskRegistryFactory taskRegistryFactory,
+        TaskProgressLogger taskProgressLogger,
+        UserLogRegistry userLogRegistry
+    ) {
+        var didLog = new AtomicBoolean(false);
+        Consumer<RuntimeException> onError = error -> {
+            if (!didLog.get()) {
+                taskProgressLogger.logWarning(String.format(Locale.US, ":: %s", error.getMessage()));
+                didLog.set(true);
+            }
+        };
+
+        return new TaskProgressTracker(baseTask, taskRegistryFactory.newInstance(jobId), userLogRegistry, taskProgressLogger, onError);
+    }
+
     private TaskProgressTracker(
         Task baseTask,
         TaskRegistry taskRegistry,
@@ -90,32 +107,6 @@ public final class TaskProgressTracker implements ProgressTracker {
         this.userLogRegistry = userLogRegistry;
         this.taskProgressLogger = taskProgressLogger;
         this.onError = onError;
-    }
-
-    public static TaskProgressTracker create(
-        Task baseTask,
-        JobId jobId,
-        TaskRegistryFactory taskRegistryFactory,
-        TaskProgressLogger taskProgressLogger,
-        UserLogRegistry userLogRegistry
-    ) {
-        Consumer<RuntimeException>  onError;
-
-        if (GdsFeatureToggles.FAIL_ON_PROGRESS_TRACKER_ERRORS.isEnabled()) {
-            onError = error -> {
-                throw error;
-            };
-        } else {
-            var didLog = new AtomicBoolean(false);
-            onError = error -> {
-                if (!didLog.get()) {
-                    taskProgressLogger.logWarning(String.format(Locale.US, ":: %s", error.getMessage()));
-                    didLog.set(true);
-                }
-            };
-        }
-
-        return new TaskProgressTracker(baseTask, taskRegistryFactory.newInstance(jobId), userLogRegistry, taskProgressLogger, onError);
     }
 
     @Override

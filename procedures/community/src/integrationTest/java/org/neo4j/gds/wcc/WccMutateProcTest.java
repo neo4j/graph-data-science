@@ -186,6 +186,7 @@ class WccMutateProcTest extends BaseProcTest {
         var testGraphName = "wccGraph";
 
         var graphStoreFactorySuppliers = new GraphStoreFactorySuppliers(
+            Log.noOpLog(),
             Map.of(
                 GraphProjectFromStoreConfig.class, NativeProjectionGraphStoreFactorySupplier::create
             )
@@ -232,6 +233,7 @@ class WccMutateProcTest extends BaseProcTest {
     @Test
     void testMutateYields() {
         var graphStoreFactorySuppliers = new GraphStoreFactorySuppliers(
+            Log.noOpLog(),
             Map.of(
                 GraphProjectFromStoreConfig.class, NativeProjectionGraphStoreFactorySupplier::create
             )
@@ -349,6 +351,7 @@ class WccMutateProcTest extends BaseProcTest {
         String graphName = "myGraph";
 
         var graphStoreFactorySuppliers = new GraphStoreFactorySuppliers(
+            Log.noOpLog(),
             Map.of(
                 GraphProjectFromStoreConfig.class, NativeProjectionGraphStoreFactorySupplier::create
             )
@@ -600,13 +603,18 @@ class WccMutateProcTest extends BaseProcTest {
             .build();
 
         var graphStoreFactorySuppliers = new GraphStoreFactorySuppliers(
+            Log.noOpLog(),
             Map.of(
                 GraphProjectFromStoreConfig.class, NativeProjectionGraphStoreFactorySupplier::create
             )
         );
 
         var graphStoreFactorySupplier = graphStoreFactorySuppliers.find(graphProjectConfig);
-        var graphStoreFactory = graphStoreFactorySupplier.get(graphLoaderContext, dependencyResolver);
+        var graphStoreFactory = graphStoreFactorySupplier.get(
+            graphLoaderContext,
+            dependencyResolver,
+            PlainSimpleRequestCorrelationId.create()
+        );
         return new GraphLoader(graphProjectConfig, graphStoreFactory);
     }
 

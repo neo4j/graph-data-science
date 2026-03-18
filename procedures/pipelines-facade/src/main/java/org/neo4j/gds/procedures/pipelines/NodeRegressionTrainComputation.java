@@ -29,6 +29,7 @@ import org.neo4j.gds.api.User;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmMachinery;
 import org.neo4j.gds.applications.algorithms.machinery.Computation;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
+import org.neo4j.gds.core.RequestCorrelationId;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistry;
@@ -62,6 +63,7 @@ final class NodeRegressionTrainComputation implements Computation<NodeRegression
     private final NodePropertyExporterBuilder nodePropertyExporterBuilder;
     private final ProcedureReturnColumns procedureReturnColumns;
     private final RelationshipExporterBuilder relationshipExporterBuilder;
+    private final RequestCorrelationId requestCorrelationId;
     private final TaskRegistryFactory taskRegistryFactory;
     private final TerminationMonitor terminationMonitor;
     private final UserLogRegistry userLogRegistry;
@@ -82,6 +84,7 @@ final class NodeRegressionTrainComputation implements Computation<NodeRegression
         NodePropertyExporterBuilder nodePropertyExporterBuilder,
         ProcedureReturnColumns procedureReturnColumns,
         RelationshipExporterBuilder relationshipExporterBuilder,
+        RequestCorrelationId requestCorrelationId,
         TaskRegistryFactory taskRegistryFactory,
         TerminationFlag terminationFlag,
         TerminationMonitor terminationMonitor,
@@ -101,6 +104,7 @@ final class NodeRegressionTrainComputation implements Computation<NodeRegression
         this.nodePropertyExporterBuilder = nodePropertyExporterBuilder;
         this.procedureReturnColumns = procedureReturnColumns;
         this.relationshipExporterBuilder = relationshipExporterBuilder;
+        this.requestCorrelationId = requestCorrelationId;
         this.taskRegistryFactory = taskRegistryFactory;
         this.terminationFlag = terminationFlag;
         this.terminationMonitor = terminationMonitor;
@@ -122,6 +126,7 @@ final class NodeRegressionTrainComputation implements Computation<NodeRegression
         NodePropertyExporterBuilder nodePropertyExporterBuilder,
         ProcedureReturnColumns procedureReturnColumns,
         RelationshipExporterBuilder relationshipExporterBuilder,
+        RequestCorrelationId requestCorrelationId,
         TaskRegistryFactory taskRegistryFactory,
         TerminationFlag terminationFlag,
         TerminationMonitor terminationMonitor,
@@ -142,6 +147,7 @@ final class NodeRegressionTrainComputation implements Computation<NodeRegression
             nodePropertyExporterBuilder,
             procedureReturnColumns,
             relationshipExporterBuilder,
+            requestCorrelationId,
             taskRegistryFactory,
             terminationFlag,
             terminationMonitor,
@@ -175,6 +181,7 @@ final class NodeRegressionTrainComputation implements Computation<NodeRegression
             .nodeLookup(nodeLookup)
             .nodePropertyExporterBuilder(nodePropertyExporterBuilder)
             .relationshipExporterBuilder(relationshipExporterBuilder)
+            .requestCorrelationId(requestCorrelationId)
             .returnColumns(procedureReturnColumns)
             .taskRegistryFactory(taskRegistryFactory)
             .terminationMonitor(terminationMonitor)

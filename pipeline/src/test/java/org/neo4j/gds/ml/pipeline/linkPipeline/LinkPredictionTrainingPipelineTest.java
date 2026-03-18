@@ -29,6 +29,7 @@ import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.NodeLookup;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.api.schema.GraphSchema;
+import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
@@ -198,6 +199,7 @@ class LinkPredictionTrainingPipelineTest {
             .userLogRegistry(UserLogRegistry.EMPTY)
             .isGdsAdmin(false)
             .metrics(Metrics.DISABLED)
+            .requestCorrelationId(PlainSimpleRequestCorrelationId.create())
             .build();
 
         var pipeline = new LinkPredictionTrainingPipeline();
@@ -243,6 +245,7 @@ class LinkPredictionTrainingPipelineTest {
             .userLogRegistry(UserLogRegistry.EMPTY)
             .isGdsAdmin(false)
             .metrics(Metrics.DISABLED)
+            .requestCorrelationId(PlainSimpleRequestCorrelationId.create())
             .build();
 
         var pipeline = new LinkPredictionTrainingPipeline();
@@ -288,6 +291,7 @@ class LinkPredictionTrainingPipelineTest {
             .userLogRegistry(UserLogRegistry.EMPTY)
             .isGdsAdmin(false)
             .metrics(Metrics.DISABLED)
+            .requestCorrelationId(PlainSimpleRequestCorrelationId.create())
             .build();
 
         var pipeline = new LinkPredictionTrainingPipeline();

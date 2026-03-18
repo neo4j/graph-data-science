@@ -27,6 +27,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.NodeLookup;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.config.GraphProjectConfig;
+import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.utils.progress.PerDatabaseTaskStore;
@@ -141,6 +142,7 @@ class ProcedureExecutorTest {
             .userLogRegistry(UserLogRegistry.EMPTY)
             .metrics(Metrics.DISABLED)
             .memoryEstimationContext(new MemoryEstimationContext(true))
+            .requestCorrelationId(PlainSimpleRequestCorrelationId.create())
             .build();
     }
 

@@ -11,4 +11,5 @@ dependencies {
 
     implementation project(':config-api')
     implementation project(':core')
+    implementation project(':logging')
 }

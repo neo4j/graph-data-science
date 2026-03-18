@@ -27,6 +27,7 @@ import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
+import org.neo4j.gds.core.RequestCorrelationId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.loading.CSRGraphStore;
 import org.neo4j.gds.core.loading.Capabilities.WriteMode;
@@ -51,6 +52,7 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphProjectFromSt
     static NativeFactory nativeFactory(
         GraphProjectFromStoreConfig graphProjectFromStoreConfig,
         GraphLoaderContext loadingContext,
+        RequestCorrelationId requestCorrelationId,
         Optional<GraphDimensions> graphDimensions,
         DependencyResolver dependencyResolver
     ) {
@@ -65,6 +67,7 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphProjectFromSt
         return new NativeFactory(
             graphProjectFromStoreConfig,
             loadingContext,
+            requestCorrelationId,
             dimensions,
             initProgressTracker(graphProjectFromStoreConfig, loadingContext, dimensions)
         );
@@ -74,10 +77,18 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphProjectFromSt
     NativeFactory(
         GraphProjectFromStoreConfig graphProjectConfig,
         GraphLoaderContext loadingContext,
+        RequestCorrelationId requestCorrelationId,
         GraphDimensions graphDimensions,
         ProgressTracker progressTracker
     ) {
-        super(graphProjectConfig, ImmutableStaticCapabilities.of(WriteMode.LOCAL), loadingContext, graphDimensions);
+        super(
+            graphProjectConfig,
+            ImmutableStaticCapabilities.of(WriteMode.LOCAL),
+            loadingContext,
+            graphDimensions,
+            loadingContext.log(),
+            requestCorrelationId
+        );
         this.storeConfig = graphProjectConfig;
         this.progressTracker = progressTracker;
     }

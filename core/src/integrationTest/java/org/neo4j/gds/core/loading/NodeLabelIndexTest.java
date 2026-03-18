@@ -68,7 +68,10 @@ public class NodeLabelIndexTest extends BaseTest {
         var log = new GdsTestLog();
         var graph = new StoreLoaderBuilder()
             .databaseService(db)
-            .graphStoreFactorySuppliers(new GraphStoreFactorySuppliers(Map.of(GraphProjectFromStoreConfig.class, NativeProjectionGraphStoreFactorySupplier::create)))
+            .graphStoreFactorySuppliers(new GraphStoreFactorySuppliers(
+                log,
+                Map.of(GraphProjectFromStoreConfig.class, NativeProjectionGraphStoreFactorySupplier::create)
+            ))
             .log(log)
             .addNodeLabel("Foo")
             .addNodeLabel("Bar")

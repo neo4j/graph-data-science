@@ -23,28 +23,57 @@ import org.neo4j.common.DependencyResolver;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.core.RequestCorrelationId;
+import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.projection.GraphStoreFactorySupplier;
 
 public final class CypherProjectionGraphStoreFactorySupplier implements GraphStoreFactorySupplier {
+    private final Log log;
     private final GraphProjectFromCypherConfig graphProjectFromCypherConfig;
 
-    private CypherProjectionGraphStoreFactorySupplier(GraphProjectFromCypherConfig graphProjectFromCypherConfig) {
+    private CypherProjectionGraphStoreFactorySupplier(
+        Log log,
+        GraphProjectFromCypherConfig graphProjectFromCypherConfig
+    ) {
+        this.log = log;
         this.graphProjectFromCypherConfig = graphProjectFromCypherConfig;
     }
 
     @Override
-    public CypherFactory get(GraphLoaderContext loaderContext, DependencyResolver dependencyResolver) {
-        return CypherFactory.createWithDerivedDimensions(graphProjectFromCypherConfig, loaderContext, dependencyResolver);
+    public CypherFactory get(
+        GraphLoaderContext loaderContext,
+        DependencyResolver dependencyResolver,
+        RequestCorrelationId requestCorrelationId
+    ) {
+        return CypherFactory.createWithDerivedDimensions(
+            graphProjectFromCypherConfig,
+            loaderContext,
+            dependencyResolver,
+            log,
+            requestCorrelationId
+        );
     }
 
     @Override
-    public CypherFactory getWithDimension(GraphLoaderContext loaderContext, GraphDimensions graphDimensions, DependencyResolver dependencyResolver) {
-        return CypherFactory.createWithBaseDimensions(graphProjectFromCypherConfig, loaderContext, graphDimensions, dependencyResolver);
+    public CypherFactory getWithDimension(
+        GraphLoaderContext loaderContext,
+        GraphDimensions graphDimensions,
+        DependencyResolver dependencyResolver,
+        RequestCorrelationId requestCorrelationId
+    ) {
+        return CypherFactory.createWithBaseDimensions(
+            graphProjectFromCypherConfig,
+            loaderContext,
+            graphDimensions,
+            dependencyResolver,
+            log,
+            requestCorrelationId
+        );
     }
 
-    public static CypherProjectionGraphStoreFactorySupplier create(GraphProjectConfig graphProjectConfig) {
+    public static CypherProjectionGraphStoreFactorySupplier create(Log log, GraphProjectConfig graphProjectConfig) {
         if (graphProjectConfig instanceof GraphProjectFromCypherConfig graphProjectFromCypherConfig)
-            return new CypherProjectionGraphStoreFactorySupplier(graphProjectFromCypherConfig);
+            return new CypherProjectionGraphStoreFactorySupplier(log, graphProjectFromCypherConfig);
 
         var problematicConfigurationType = graphProjectConfig.getClass().getSimpleName();
 

@@ -125,7 +125,7 @@ public class BatchingProgressLogger implements ProgressLogger {
     }
 
     private synchronized void doLogPercentage(Supplier<String> msgFactory, long progress) {
-        String message = msgFactory != NO_MESSAGE ? msgFactory.get() : null;
+        var message = msgFactory.get();
         progressCounter.add(progress);
         int nextPercentage = (int) ((progressCounter.sum() / (double) taskVolume) * 100);
         if (globalPercentage < nextPercentage && globalPercentage < 100) {

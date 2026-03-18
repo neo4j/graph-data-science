@@ -25,18 +25,21 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.GraphStoreFactory;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.core.RequestCorrelationId;
 
 public interface GraphStoreFactorySupplier {
     GraphStoreFactory<? extends GraphStore, ? extends GraphProjectConfig> get(
         GraphLoaderContext loaderContext,
-        DependencyResolver dependencyResolver
+        DependencyResolver dependencyResolver,
+        RequestCorrelationId requestCorrelationId
     );
 
     default GraphStoreFactory<? extends GraphStore, ? extends GraphProjectConfig> getWithDimension(
         GraphLoaderContext loaderContext,
         GraphDimensions graphDimensions,
-        DependencyResolver dependencyResolver
+        DependencyResolver dependencyResolver,
+        RequestCorrelationId requestCorrelationId
     ) {
-        return get(loaderContext, dependencyResolver);
+        return get(loaderContext, dependencyResolver, requestCorrelationId);
     }
 }

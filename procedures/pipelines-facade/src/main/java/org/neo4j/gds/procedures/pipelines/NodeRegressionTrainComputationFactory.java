@@ -25,6 +25,7 @@ import org.neo4j.gds.api.NodeLookup;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.algorithms.machinery.Computation;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
+import org.neo4j.gds.core.RequestCorrelationId;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistry;
@@ -52,6 +53,7 @@ class NodeRegressionTrainComputationFactory {
     private final NodePropertyExporterBuilder nodePropertyExporterBuilder;
     private final ProcedureReturnColumns procedureReturnColumns;
     private final RelationshipExporterBuilder relationshipExporterBuilder;
+    private final RequestCorrelationId requestCorrelationId;
     private final TaskRegistryFactory taskRegistryFactory;
     private final TerminationFlag terminationFlag;
     private final TerminationMonitor terminationMonitor;
@@ -73,6 +75,7 @@ class NodeRegressionTrainComputationFactory {
         NodePropertyExporterBuilder nodePropertyExporterBuilder,
         ProcedureReturnColumns procedureReturnColumns,
         RelationshipExporterBuilder relationshipExporterBuilder,
+        RequestCorrelationId requestCorrelationId,
         TaskRegistryFactory taskRegistryFactory,
         TerminationFlag terminationFlag,
         TerminationMonitor terminationMonitor,
@@ -91,6 +94,7 @@ class NodeRegressionTrainComputationFactory {
         this.nodePropertyExporterBuilder = nodePropertyExporterBuilder;
         this.procedureReturnColumns = procedureReturnColumns;
         this.relationshipExporterBuilder = relationshipExporterBuilder;
+        this.requestCorrelationId = requestCorrelationId;
         this.taskRegistryFactory = taskRegistryFactory;
         this.terminationMonitor = terminationMonitor;
         this.userLogRegistry = userLogRegistry;
@@ -112,6 +116,7 @@ class NodeRegressionTrainComputationFactory {
             nodePropertyExporterBuilder,
             procedureReturnColumns,
             relationshipExporterBuilder,
+            requestCorrelationId,
             taskRegistryFactory,
             terminationFlag,
             terminationMonitor,

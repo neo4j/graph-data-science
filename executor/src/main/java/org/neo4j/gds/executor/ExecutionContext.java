@@ -26,6 +26,8 @@ import org.neo4j.gds.api.CloseableResourceRegistry;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.NodeLookup;
 import org.neo4j.gds.api.ProcedureReturnColumns;
+import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
+import org.neo4j.gds.core.RequestCorrelationId;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
@@ -39,6 +41,10 @@ import org.neo4j.gds.termination.TerminationMonitor;
 
 import java.util.Optional;
 
+/**
+ * A lovely mish-mash of long-lived services, request scoped services, and parameters. Embrace it.
+ * And by that I mean, stop thinking and keep abusing this non-design.
+ */
 @ValueClass
 public interface ExecutionContext {
 
@@ -71,6 +77,8 @@ public interface ExecutionContext {
     boolean isGdsAdmin();
 
     Metrics metrics();
+
+    RequestCorrelationId requestCorrelationId();
 
     @Nullable
     AlgorithmsProcedureFacade algorithmsProcedureFacade();
@@ -181,6 +189,11 @@ public interface ExecutionContext {
         @Override
         public Metrics metrics() {
             return Metrics.DISABLED;
+        }
+
+        @Override
+        public RequestCorrelationId requestCorrelationId() {
+            return PlainSimpleRequestCorrelationId.create();
         }
 
         @Override

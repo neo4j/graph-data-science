@@ -30,6 +30,7 @@ import org.neo4j.gds.api.CSRGraphStoreFactory;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
+import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.mem.MemoryEstimation;
@@ -159,6 +160,7 @@ class NativeFactoryTest {
         var nativeFactorySpy = spy(new NativeFactory(
             mock(GraphProjectFromStoreConfig.class),
             mock(GraphLoaderContext.class),
+            PlainSimpleRequestCorrelationId.create(),
             mock(GraphDimensions.class),
             progressTrackerMock
         ));

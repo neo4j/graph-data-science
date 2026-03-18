@@ -31,6 +31,7 @@ import org.neo4j.gds.api.User;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistry;
 import org.neo4j.gds.executor.MemoryEstimationContext;
@@ -111,6 +112,7 @@ class NodeClassificationTrainComputationTest {
 
         // all these fakes just to satisfy null checks, they are never used :facepalm:
         var requestScopedDependencies = RequestScopedDependencies.builder()
+            .correlationId(PlainSimpleRequestCorrelationId.create())
             .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
             .userLogRegistry(UserLogRegistry.EMPTY)
             .build();
@@ -128,6 +130,7 @@ class NodeClassificationTrainComputationTest {
             null,
             ProcedureReturnColumns.EMPTY,
             null,
+            requestScopedDependencies.correlationId(),
             requestScopedDependencies.taskRegistryFactory(),
             TerminationFlag.RUNNING_TRUE,
             TerminationMonitor.EMPTY,

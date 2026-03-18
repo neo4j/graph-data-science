@@ -22,23 +22,16 @@ package org.neo4j.gds.core.utils.progress;
 import java.util.function.Supplier;
 
 public interface ProgressLogger {
-
     String TASK_SEPARATOR = " :: ";
-
-    Supplier<String> NO_MESSAGE = () -> null;
 
     String getTask();
 
     void setTask(String task);
 
-    default void logProgress() {
-        logProgress(NO_MESSAGE);
-    }
-
     void logProgress(Supplier<String> msgFactory);
 
     default void logProgress(long progress) {
-        logProgress(progress, NO_MESSAGE);
+        logProgress(progress, () -> null);
     }
 
     void logProgress(long progress, Supplier<String> msgFactory);
