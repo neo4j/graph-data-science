@@ -22,11 +22,13 @@ package org.neo4j.gds.core.utils.progress;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.core.JobId;
+import org.neo4j.gds.core.utils.progress.tasks.LeafTask;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
 import java.time.Duration;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class LocalTaskRegistryFactoryTest {
@@ -68,5 +70,37 @@ class LocalTaskRegistryFactoryTest {
         taskRegistry1.registerTask(task1);
 
         assertThrows(IllegalArgumentException.class, () -> taskRegistryFactory.newInstance(jobId));
+    }
+
+    @Test
+    void shouldAllowReplacingCompletedTasks() {
+        var jobId = new JobId();
+
+        var task1 = Tasks.leaf("root1");
+        var taskRegistry1 = taskRegistryFactory.newInstance(jobId);
+        taskRegistry1.registerTask(task1);
+
+        assertThrows(IllegalArgumentException.class, () -> taskRegistryFactory.newInstance(jobId));
+
+        task1.start();
+        assertThrows(IllegalArgumentException.class, () -> taskRegistryFactory.newInstance(jobId));
+
+        task1.finish();
+
+        var registry2 = taskRegistryFactory.newInstance(jobId);
+        LeafTask task2 = Tasks.leaf("root2");
+        registry2.registerTask(task2);
+
+        task2.start();
+        task2.fail();
+
+        var registry3 = taskRegistryFactory.newInstance(jobId);
+        LeafTask task3 = Tasks.leaf("root3");
+        registry3.registerTask(task2);
+
+        task3.start();
+        task3.cancel();
+
+        assertDoesNotThrow(() -> taskRegistryFactory.newInstance(jobId));
     }
 }

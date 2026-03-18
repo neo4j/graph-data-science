@@ -22,6 +22,7 @@ package org.neo4j.gds.core.utils.progress;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.neo4j.gds.core.JobId;
+import org.neo4j.gds.core.utils.progress.tasks.Status;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -39,6 +40,10 @@ public class LocalTaskRegistryFactory implements TaskRegistryFactory {
     public TaskRegistry newInstance(JobId jobId) {
         taskStore
             .query(username, jobId)
+            .filter(userTask -> {
+                Status status = userTask.task().status();
+                return status == Status.RUNNING || status == Status.PENDING;
+            })
             .ifPresent(userTask -> {
                 throw new IllegalArgumentException(
                     formatWithLocale(
