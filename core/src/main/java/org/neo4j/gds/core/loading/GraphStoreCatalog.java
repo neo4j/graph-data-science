@@ -56,7 +56,7 @@ public final class GraphStoreCatalog {
 
     // as we want to use the Neo4j log if possible and the catalog is a static instance,
     // we make the log injectable
-    private static Optional<Log> log = Optional.empty();
+    private static Log log = Log.noOpLog();
 
     private GraphStoreCatalog() {
     }
@@ -78,7 +78,7 @@ public final class GraphStoreCatalog {
     }
 
     public static void setLog(Log log) {
-        GraphStoreCatalog.log = Optional.of(log);
+        GraphStoreCatalog.log = log;
     }
 
     public static GraphStoreCatalogEntry get(CatalogRequest request, String graphName) {
@@ -213,7 +213,7 @@ public final class GraphStoreCatalog {
                         MemoryUsage.sizeOf(graphStore)
                     )
                 ),
-                log.orElseGet(Log::noOpLog)::warn
+                log::warn
             )
         );
     }
@@ -430,7 +430,7 @@ public final class GraphStoreCatalog {
                                     MemoryUsage.sizeOf(graphStore)
                                 )
                             ),
-                            log.orElseGet(Log::noOpLog)::warn
+                            log::warn
                         )
                     );
 
