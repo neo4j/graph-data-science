@@ -22,7 +22,6 @@ package org.neo4j.gds;
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.api.CSRGraph;
 import org.neo4j.gds.api.CSRGraphAdapter;
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.extension.IdFunction;
 
 public class TestGraph extends CSRGraphAdapter {
@@ -36,7 +35,7 @@ public class TestGraph extends CSRGraphAdapter {
         this.idFunction = idFunction;
     }
 
-    public Graph innerGraph() {
+    public CSRGraph innerGraph() {
         return csrGraph;
     }
 

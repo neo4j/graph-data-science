@@ -21,6 +21,7 @@ package org.neo4j.gds.compression.packed;
 
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.neo4j.gds.compression.api.AdjacencyListBuilder;
+import org.neo4j.gds.compression.api.Slice;
 import org.neo4j.gds.compression.common.AdjacencyCompression;
 import org.neo4j.gds.compression.common.MemoryTracker;
 import org.neo4j.gds.mem.BitUtil;
@@ -44,7 +45,7 @@ public final class PackedTailPacker {
 
     public static long compress(
         AdjacencyListBuilder.Allocator<Address> allocator,
-        AdjacencyListBuilder.Slice<Address> slice,
+        Slice<Address> slice,
         long[] values,
         int length,
         Aggregation aggregation,
@@ -64,7 +65,7 @@ public final class PackedTailPacker {
 
     public static long compressWithProperties(
         AdjacencyListBuilder.Allocator<Address> allocator,
-        AdjacencyListBuilder.Slice<Address> slice,
+        Slice<Address> slice,
         long[] values,
         int length,
         MemoryTracker memoryTracker
@@ -74,7 +75,7 @@ public final class PackedTailPacker {
 
     private static long preparePacking(
         AdjacencyListBuilder.Allocator<Address> allocator,
-        AdjacencyListBuilder.Slice<Address> slice,
+        Slice<Address> slice,
         long[] values,
         int length,
         MemoryTracker memoryTracker
@@ -116,7 +117,7 @@ public final class PackedTailPacker {
 
     private static long runPacking(
         AdjacencyListBuilder.Allocator<Address> allocator,
-        AdjacencyListBuilder.Slice<Address> slice,
+        Slice<Address> slice,
         long[] values,
         byte[] header,
         long bytes,

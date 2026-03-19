@@ -129,4 +129,16 @@ public final class VarLongDecoding {
     private VarLongDecoding() {
         throw new UnsupportedOperationException("No instances");
     }
+
+    public static int decodeDeltaVLongsLength(byte[] page, int offset, int length) {
+        int count = 0;
+        for (int indexInPage = offset; indexInPage < offset + length; indexInPage++) {
+            // during compression, we mark the last byte of a var long by
+            // setting the MSB (sign bit) to 1 and end up with a negative value.
+            if (page[indexInPage] < 0) {
+                count++;
+            }
+        }
+        return count;
+    }
 }

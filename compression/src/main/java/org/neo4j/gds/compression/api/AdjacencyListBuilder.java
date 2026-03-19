@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.compression.api;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.collections.ha.HugeIntArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.compression.utilities.PageReordering;
@@ -47,16 +46,6 @@ public interface AdjacencyListBuilder<PAGE, T> {
 
         @Override
         void close();
-    }
-
-    @Value.Modifiable
-    interface Slice<PAGE> {
-
-        PAGE slice();
-
-        int offset();
-
-        int length();
     }
 
     default void reorder(PAGE[] pages, HugeLongArray offsets, HugeIntArray degrees) {

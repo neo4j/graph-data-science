@@ -27,6 +27,7 @@ import org.neo4j.gds.api.AdjacencyList;
 import org.neo4j.gds.collections.PageUtil;
 import org.neo4j.gds.collections.ha.HugeIntArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.compression.api.ModifiableSlice;
 import org.neo4j.gds.compression.common.BumpAllocator;
 import org.neo4j.gds.compression.common.VarLongEncoding;
 import org.neo4j.gds.core.loading.MutableIntValue;
@@ -280,17 +281,11 @@ public final class CompressedAdjacencyList implements AdjacencyList {
         }
     }
 
-    public static final class PageSlice {
-        public byte[] page;
-        public int offset;
-        public int length;
+    public ModifiableSlice<byte[]> newPageSlice() {
+        return ModifiableSlice.create();
     }
 
-    public PageSlice newPageSlice() {
-        return new PageSlice();
-    }
-
-    public boolean initPageSlice(long nodeId, PageSlice slice) {
+    public boolean initPageSlice(long nodeId, ModifiableSlice<byte[]> slice) {
         int degree = this.degrees.get(nodeId);
         if (degree == 0) {
             return false;
@@ -302,14 +297,14 @@ public final class CompressedAdjacencyList implements AdjacencyList {
 
         if (page.length > BumpAllocator.PAGE_SIZE) {
             // oversize page
-            slice.page = page;
-            slice.offset = 0;
-            slice.length = page.length;
+            slice.setSlice(page);
+            slice.setOffset(0);
+            slice.setLength(page.length);
         } else {
             // regular page
-            slice.page = page;
-            slice.offset = indexInPage;
-            slice.length = VarLongEncoding.encodedVLongsByteSize(page, indexInPage, degree);
+            slice.setSlice(page);
+            slice.setOffset(indexInPage);
+            slice.setLength(VarLongEncoding.encodedVLongsByteSize(page, indexInPage, degree));
         }
 
         return true;
