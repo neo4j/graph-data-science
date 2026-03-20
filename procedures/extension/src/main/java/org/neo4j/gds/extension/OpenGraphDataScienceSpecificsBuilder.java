@@ -19,22 +19,17 @@
  */
 package org.neo4j.gds.extension;
 
+import org.neo4j.gds.core.write.NativeExportBuildersProvider;
 import org.neo4j.gds.procedures.ExporterBuildersProviderService;
 import org.neo4j.gds.procedures.integration.EditionSpecifics;
 
+/**
+ * Here we capture the choices for the open edition of GDS.
+ */
 class OpenGraphDataScienceSpecificsBuilder {
-    private ExporterBuildersProviderService exporterBuildersProviderService;
-
-    /**
-     * @deprecated have this class produce it from first principles/ basic components
-     */
-    @Deprecated
-    OpenGraphDataScienceSpecificsBuilder with(ExporterBuildersProviderService exporterBuildersProviderService) {
-        this.exporterBuildersProviderService = exporterBuildersProviderService;
-        return this;
-    }
-
     EditionSpecifics build() {
+        ExporterBuildersProviderService exporterBuildersProviderService = (__, ___) -> new NativeExportBuildersProvider(); // we always just offer native writes in OpenGDS
+
         return new EditionSpecifics(exporterBuildersProviderService);
     }
 }

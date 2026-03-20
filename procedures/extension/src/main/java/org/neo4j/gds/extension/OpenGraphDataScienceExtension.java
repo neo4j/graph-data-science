@@ -30,9 +30,7 @@ import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.core.OpenGdsIdMapBehavior;
 import org.neo4j.gds.core.model.OpenModelCatalog;
-import org.neo4j.gds.core.write.NativeExportBuildersProvider;
 import org.neo4j.gds.metrics.Metrics;
-import org.neo4j.gds.procedures.ExporterBuildersProviderService;
 import org.neo4j.gds.procedures.integration.DefaultExportLocation;
 import org.neo4j.gds.procedures.integration.LogAccessor;
 import org.neo4j.gds.procedures.integration.OpenGraphDataScienceExtensionBuilder;
@@ -73,7 +71,6 @@ public class OpenGraphDataScienceExtension extends ExtensionFactory<OpenGraphDat
 
         // OpenGDS edition customisations go here
         var concurrencyValidator = new OpenGdsConcurrencyValidator();
-        ExporterBuildersProviderService exporterBuildersProviderService = (__, ___) -> new NativeExportBuildersProvider(); // we always just offer native writes in OpenGDS
         var exportLocation = new DefaultExportLocation(log, neo4jConfiguration);
         var featureTogglesRepository = new FeatureTogglesRepository();
         var idMapBehavior = new OpenGdsIdMapBehavior();
@@ -85,9 +82,7 @@ public class OpenGraphDataScienceExtension extends ExtensionFactory<OpenGraphDat
         var cypherAggregation = new CypherAggregation();
         var alphaCypherAggregation = new AlphaCypherAggregation();
 
-        var editionSpecifics = new OpenGraphDataScienceSpecificsBuilder()
-            .with(exporterBuildersProviderService)
-            .build();
+        var editionSpecifics = new OpenGraphDataScienceSpecificsBuilder().build();
 
         var graphDataScienceExtensionBuilderAndAssociatedProducts = OpenGraphDataScienceExtensionBuilder.create(
             log,
