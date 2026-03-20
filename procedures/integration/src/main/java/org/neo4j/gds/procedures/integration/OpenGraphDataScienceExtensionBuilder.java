@@ -149,7 +149,7 @@ public final class OpenGraphDataScienceExtensionBuilder {
         DependencySatisfier dependencySatisfier,
         GlobalProcedures globalProcedures,
         Configuration neo4jConfiguration,
-        EditionSpecifics editionSpecifics,
+        OpenGraphDataScienceSpecifics openGraphDataScienceSpecifics,
         ConcurrencyValidator concurrencyValidator,
         DefaultsConfiguration defaultsConfiguration,
         ExportLocation exportLocation,
@@ -242,7 +242,7 @@ public final class OpenGraphDataScienceExtensionBuilder {
         var graphDataScienceProviderFactory = new GraphDataScienceProceduresProviderFactory(
             loggers,
             neo4jConfiguration,
-            editionSpecifics,
+            openGraphDataScienceSpecifics,
             globallyScopedDependencies,
             defaultsConfiguration,
             exportLocation,
