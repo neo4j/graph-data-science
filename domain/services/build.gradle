@@ -11,7 +11,11 @@ test {
 }
 
 dependencies {
-    api project(':core') // Ves is going to be so proud of me
+    // Ves is going to be so proud of me
+    // We establish a layer boundary here,
+    // by having this one module front several domain layer modules
+    api project(':core')
+    api project(':model-catalog-api')
 
     testImplementation platform(openGds.junit.bom)
     testImplementation 'org.junit.jupiter:junit-jupiter'

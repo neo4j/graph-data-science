@@ -32,8 +32,6 @@ import org.neo4j.gds.applications.modelcatalog.ModelRepository;
 import org.neo4j.gds.applications.operations.FeatureTogglesRepository;
 import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
-import org.neo4j.gds.core.loading.GraphStoreCatalogService;
-import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.logging.GdsLoggers;
 import org.neo4j.gds.core.utils.progress.TaskStoreService;
 import org.neo4j.gds.core.write.ExporterContext;
@@ -44,7 +42,6 @@ import org.neo4j.gds.metrics.Metrics;
 import org.neo4j.gds.metrics.telemetry.TelemetryLogger;
 import org.neo4j.gds.metrics.telemetry.TelemetryLoggerImpl;
 import org.neo4j.gds.procedures.DatabaseIdAccessor;
-import org.neo4j.gds.procedures.ExporterBuildersProviderService;
 import org.neo4j.gds.procedures.GraphCatalogProcedureFacadeFactory;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.KernelTransactionAccessor;
@@ -80,9 +77,9 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
     private final GdsLoggers loggers;
     private final Configuration neo4jConfiguration;
 
+    private final EditionSpecifics editionSpecifics;
     private final GloballyScopedDependencies globallyScopedDependencies;
     private final DefaultsConfiguration defaultsConfiguration;
-    private final ExporterBuildersProviderService exporterBuildersProviderService;
     private final ExportLocation exportLocation;
     private final GraphCatalogProcedureFacadeFactory graphCatalogProcedureFacadeFactory;
     private final GraphStoreFactorySuppliers graphStoreFactorySuppliers;
@@ -92,7 +89,6 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
     private final MemoryGuard memoryGuard;
     private final MemoryEstimationContext memoryEstimationContext;
     private final Metrics metrics;
-    private final ModelCatalog modelCatalog;
     private final ModelRepository modelRepository;
     private final PipelineRepository pipelineRepository;
     private final TaskRegistryFactoryService taskRegistryFactoryService;
@@ -107,9 +103,9 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
     GraphDataScienceProceduresProvider(
         GdsLoggers loggers,
         Configuration neo4jConfiguration,
+        EditionSpecifics editionSpecifics,
         GloballyScopedDependencies globallyScopedDependencies,
         DefaultsConfiguration defaultsConfiguration,
-        ExporterBuildersProviderService exporterBuildersProviderService,
         ExportLocation exportLocation,
         GraphCatalogProcedureFacadeFactory graphCatalogProcedureFacadeFactory,
         FeatureTogglesRepository featureTogglesRepository,
@@ -119,7 +115,6 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
         MemoryGuard memoryGuard,
         MemoryEstimationContext memoryEstimationContext,
         Metrics metrics,
-        ModelCatalog modelCatalog,
         ModelRepository modelRepository,
         PipelineRepository pipelineRepository,
         TaskRegistryFactoryService taskRegistryFactoryService,
@@ -133,10 +128,10 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
     ) {
         this.loggers = loggers;
         this.neo4jConfiguration = neo4jConfiguration;
+        this.editionSpecifics = editionSpecifics;
         this.globallyScopedDependencies = globallyScopedDependencies;
 
         this.defaultsConfiguration = defaultsConfiguration;
-        this.exporterBuildersProviderService = exporterBuildersProviderService;
         this.exportLocation = exportLocation;
         this.graphCatalogProcedureFacadeFactory = graphCatalogProcedureFacadeFactory;
         this.graphStoreFactorySuppliers = graphStoreFactorySuppliers;
@@ -146,7 +141,6 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
         this.memoryGuard = memoryGuard;
         this.memoryEstimationContext = memoryEstimationContext;
         this.metrics = metrics;
-        this.modelCatalog = modelCatalog;
         this.modelRepository = modelRepository;
         this.pipelineRepository = pipelineRepository;
         this.taskRegistryFactoryService = taskRegistryFactoryService;
@@ -223,7 +217,6 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
             memoryGuard,
             memoryEstimationContext,
             metrics,
-            modelCatalog,
             modelRepository,
             pipelineRepository,
             graphDatabaseService,
@@ -245,10 +238,11 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
         ExporterContext exporterContext,
         GraphDatabaseService graphDatabaseService
     ) {
-        var exportBuildersProvider = exporterBuildersProviderService.identifyExportBuildersProvider(
-            graphDatabaseService,
-            neo4jConfiguration
-        );
+        var exportBuildersProvider = editionSpecifics.exporterBuildersProviderService()
+            .identifyExportBuildersProvider(
+                graphDatabaseService,
+                neo4jConfiguration
+            );
 
         return WriteContext.create(exportBuildersProvider, exporterContext);
     }

@@ -15,34 +15,31 @@ dependencies {
     compileOnly(neo4j.procedure.api) { transitive = false }
 
     // Test dependencies
-    // TODO: trim this as much as possible
-    integrationTestImplementation project(':gdl-graph')
-    integrationTestImplementation project(':logging')
-    integrationTestImplementation project(':metrics-api')
-    integrationTestImplementation project(':memory-usage')
-    integrationTestImplementation project(':native-projection')
-    integrationTestImplementation project(':proc-test-utilities')
-
     integrationTestCompileOnly openGds.immutables.builder
-
-    integrationTestImplementation project(':opengds-extension')
 
     integrationTestImplementation project(':algorithms-machinery')
     integrationTestImplementation project(':algorithms-procedure-facade')
+    integrationTestImplementation project(':applications-facade')
     integrationTestImplementation project(':annotations')
+    integrationTestImplementation project(':config-api')
+    integrationTestImplementation project(':defaults-and-limits-configuration')
     integrationTestImplementation project(':domain-services')
+    integrationTestImplementation project(':gdl-graph')
     integrationTestImplementation project(':graph-projection-api')
     integrationTestImplementation project(':graph-schema-api')
+    integrationTestImplementation project(':graph-store-catalog-applications')
+    integrationTestImplementation project(':logging')
+    integrationTestImplementation project(':memory-usage')
+    integrationTestImplementation project(':metrics-api')
+    integrationTestImplementation project(':model-catalog-applications')
+    integrationTestImplementation project(':native-projection')
     integrationTestImplementation project(':neo4j-api')
+    integrationTestImplementation project(':opengds-extension')
+    integrationTestImplementation project(':proc-test-utilities')
+    integrationTestImplementation project(':progress-tracking')
+    integrationTestImplementation project(':projection')
+    integrationTestImplementation project(':operations-applications')
     integrationTestImplementation project(':string-formatting')
     integrationTestImplementation project(':termination')
-    integrationTestImplementation project(':applications-facade')
-    integrationTestImplementation project(':defaults-and-limits-configuration')
-    integrationTestImplementation project(':progress-tracking')
-    integrationTestImplementation project(':graph-store-catalog-applications')
-    integrationTestImplementation project(':operations-applications')
-    integrationTestImplementation project(':model-catalog-applications')
     integrationTestImplementation project(':transaction')
-    integrationTestImplementation project(':config-api')
-    integrationTestImplementation project(':projection')
 }

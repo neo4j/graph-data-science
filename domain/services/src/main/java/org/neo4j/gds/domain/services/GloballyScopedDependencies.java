@@ -20,15 +20,26 @@
 package org.neo4j.gds.domain.services;
 
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
+import org.neo4j.gds.core.model.ModelCatalog;
 
+/**
+ * No Neo4j dependencies in here please.
+ * Let's have them be passed around alongside, and eventually abstracted away.
+ */
 public class GloballyScopedDependencies {
     private final GraphStoreCatalogService graphStoreCatalogService;
+    private final ModelCatalog modelCatalog;
 
-    GloballyScopedDependencies(GraphStoreCatalogService graphStoreCatalogService) {
+    GloballyScopedDependencies(GraphStoreCatalogService graphStoreCatalogService, ModelCatalog modelCatalog) {
         this.graphStoreCatalogService = graphStoreCatalogService;
+        this.modelCatalog = modelCatalog;
     }
 
     public GraphStoreCatalogService graphStoreCatalogService() {
         return graphStoreCatalogService;
+    }
+
+    public ModelCatalog modelCatalog() {
+        return modelCatalog;
     }
 }

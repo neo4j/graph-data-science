@@ -48,6 +48,7 @@ import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.utils.progress.PerDatabaseTaskStore;
 import org.neo4j.gds.core.utils.progress.tasks.LoggerForProgressTracking;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.domain.services.GloballyScopedDependenciesBuilder;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.logging.Log;
@@ -447,7 +448,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
 
         var applicationsFacade = ApplicationsFacade.create(
             new GdsLoggers(Log.noOpLog(), LoggerForProgressTracking.noOpLog()),
-            null,
+            new GloballyScopedDependenciesBuilder().build(),
             null,
             Optional.empty(),
             Optional.empty(),
@@ -456,7 +457,6 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
             null,
             requestScopedDependencies,
             WriteContext.builder().build(),
-            null,
             null,
             null,
             null,

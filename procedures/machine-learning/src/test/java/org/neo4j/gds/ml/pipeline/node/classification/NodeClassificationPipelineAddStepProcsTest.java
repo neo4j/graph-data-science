@@ -59,7 +59,6 @@ class NodeClassificationPipelineAddStepProcsTest extends BaseProcTest {
             new GdsLoggers(Log.noOpLog(), LoggerForProgressTracking.noOpLog()),
             null,
             null,
-            null,
             new PipelineRepository(),
             null,
             null,
@@ -334,7 +333,6 @@ class NodeClassificationPipelineAddStepProcsTest extends BaseProcTest {
         return new GraphDataScienceProceduresBuilder(Log.noOpLog())
             .with(LocalPipelinesProcedureFacade.create(
                 new GdsLoggers(Log.noOpLog(), LoggerForProgressTracking.noOpLog()),
-                null,
                 null,
                 null,
                 new PipelineRepository(),

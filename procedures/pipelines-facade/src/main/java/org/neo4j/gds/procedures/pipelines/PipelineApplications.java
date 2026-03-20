@@ -40,7 +40,6 @@ import org.neo4j.gds.applications.algorithms.machinery.WriteNodePropertyService;
 import org.neo4j.gds.applications.modelcatalog.ModelRepository;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.core.RequestCorrelationId;
-import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.logging.GdsLoggers;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistry;
@@ -85,7 +84,6 @@ public class PipelineApplications {
     private final GloballyScopedDependencies globallyScopedDependencies;
     private final MutateNodePropertyService mutateNodePropertyService;
     private final WriteNodePropertyService writeNodePropertyService;
-    private final ModelCatalog modelCatalog;
     private final PipelineRepository pipelineRepository;
 
     private final CloseableResourceRegistry closeableResourceRegistry;
@@ -125,7 +123,6 @@ public class PipelineApplications {
         GloballyScopedDependencies globallyScopedDependencies,
         MutateNodePropertyService mutateNodePropertyService,
         WriteNodePropertyService writeNodePropertyService,
-        ModelCatalog modelCatalog,
         PipelineRepository pipelineRepository,
         CloseableResourceRegistry closeableResourceRegistry,
         DatabaseId databaseId,
@@ -157,7 +154,6 @@ public class PipelineApplications {
         this.globallyScopedDependencies = globallyScopedDependencies;
         this.mutateNodePropertyService = mutateNodePropertyService;
         this.writeNodePropertyService = writeNodePropertyService;
-        this.modelCatalog = modelCatalog;
         this.pipelineRepository = pipelineRepository;
         this.closeableResourceRegistry = closeableResourceRegistry;
         this.databaseId = databaseId;
@@ -189,7 +185,6 @@ public class PipelineApplications {
     static PipelineApplications create(
         GdsLoggers loggers,
         GloballyScopedDependencies globallyScopedDependencies,
-        ModelCatalog modelCatalog,
         ModelRepository modelRepository,
         PipelineRepository pipelineRepository,
         CloseableResourceRegistry closeableResourceRegistry,
@@ -208,13 +203,17 @@ public class PipelineApplications {
     ) {
         var mutateNodeProperty = new MutateNodePropertyService(loggers.log());
 
-        var modelPersister = new ModelPersister(loggers.log(), modelCatalog, modelRepository);
+        var modelPersister = new ModelPersister(
+            loggers.log(),
+            globallyScopedDependencies.modelCatalog(),
+            modelRepository
+        );
         var linkPredictionPipelineEstimator = new LinkPredictionPipelineEstimator(
-            modelCatalog,
+            globallyScopedDependencies.modelCatalog(),
             algorithmsProcedureFacade
         );
         var nodeClassificationPredictPipelineEstimator = new NodeClassificationPredictPipelineEstimator(
-            modelCatalog,
+            globallyScopedDependencies.modelCatalog(),
             algorithmsProcedureFacade
         );
 
@@ -224,12 +223,12 @@ public class PipelineApplications {
             writeContext
         );
 
-        var trainedLPPipelineModel = new TrainedLPPipelineModel(modelCatalog);
-        var trainedNCPipelineModel = new TrainedNCPipelineModel(modelCatalog);
+        var trainedLPPipelineModel = new TrainedLPPipelineModel(globallyScopedDependencies.modelCatalog());
+        var trainedNCPipelineModel = new TrainedNCPipelineModel(globallyScopedDependencies.modelCatalog());
 
         var nodeRegressionTrainComputationFactory = new NodeRegressionTrainComputationFactory(
             loggers.log(),
-            modelCatalog,
+            globallyScopedDependencies,
             pipelineRepository,
             closeableResourceRegistry,
             requestScopedDependencies.databaseId(),
@@ -253,7 +252,6 @@ public class PipelineApplications {
             globallyScopedDependencies,
             mutateNodeProperty,
             writeNodePropertyService,
-            modelCatalog,
             pipelineRepository,
             closeableResourceRegistry,
             requestScopedDependencies.databaseId(),
@@ -732,7 +730,7 @@ public class PipelineApplications {
     ) {
         return LinkPredictionComputation.create(
             log,
-            modelCatalog,
+            globallyScopedDependencies,
             closeableResourceRegistry,
             databaseId,
             memoryEstimationContext,
@@ -759,7 +757,7 @@ public class PipelineApplications {
     ) {
         return LinkPredictionTrainComputation.create(
             log,
-            modelCatalog,
+            globallyScopedDependencies,
             pipelineRepository,
             closeableResourceRegistry,
             databaseId,
@@ -787,7 +785,7 @@ public class PipelineApplications {
     ) {
         return NodeClassificationPredictComputation.create(
             log,
-            modelCatalog,
+            globallyScopedDependencies,
             closeableResourceRegistry,
             databaseId,
             memoryEstimationContext,
@@ -813,7 +811,7 @@ public class PipelineApplications {
     ) {
         return NodeClassificationTrainComputation.create(
             log,
-            modelCatalog,
+            globallyScopedDependencies,
             pipelineRepository,
             closeableResourceRegistry,
             databaseId,
@@ -840,7 +838,7 @@ public class PipelineApplications {
     ) {
         return NodeRegressionPredictComputation.create(
             log,
-            modelCatalog,
+            globallyScopedDependencies,
             closeableResourceRegistry,
             databaseId,
             memoryEstimationContext,
@@ -867,7 +865,7 @@ public class PipelineApplications {
      * Not sure why it is like this.
      */
     private void ensureTrainingModelCanBeStored(ModelConfig configuration) {
-        modelCatalog.verifyModelCanBeStored(
+        globallyScopedDependencies.modelCatalog().verifyModelCanBeStored(
             user.getUsername(),
             configuration.modelName(),
             NodeClassificationTrainingPipeline.MODEL_TYPE
@@ -892,9 +890,9 @@ public class PipelineApplications {
         );
 
         var estimate = LinkPredictionTrainPipelineExecutor.estimate(
+            globallyScopedDependencies.modelCatalog(),
             pipeline,
             configuration,
-            modelCatalog,
             algorithmsProcedureFacade,
             user.getUsername()
         );
@@ -930,9 +928,9 @@ public class PipelineApplications {
         );
 
         var estimate = NodeClassificationTrain.estimate(
+            globallyScopedDependencies.modelCatalog(),
             pipeline,
             configuration,
-            modelCatalog,
             algorithmsProcedureFacade
         );
 
@@ -949,13 +947,19 @@ public class PipelineApplications {
         Map<String, Object> procedureConfig
     ) {
         if (!procedureConfig.containsKey(RELATIONSHIP_WEIGHT_PROPERTY)) return;
-        var maybeRelationshipProperty = pipeline.relationshipWeightProperty(modelCatalog, user.getUsername());
+        var maybeRelationshipProperty = pipeline.relationshipWeightProperty(
+            globallyScopedDependencies.modelCatalog(),
+            user.getUsername()
+        );
         if (maybeRelationshipProperty.isEmpty()) return;
         var relationshipProperty = maybeRelationshipProperty.get();
         var property = (String) procedureConfig.get(RELATIONSHIP_WEIGHT_PROPERTY);
         if (relationshipProperty.equals(property)) return;
 
-        String tasks = pipeline.tasksByRelationshipProperty(modelCatalog, user.getUsername())
+        var tasks = pipeline.tasksByRelationshipProperty(
+                globallyScopedDependencies.modelCatalog(),
+                user.getUsername()
+            )
             .get(relationshipProperty)
             .stream()
             .map(s -> "`" + s + "`")

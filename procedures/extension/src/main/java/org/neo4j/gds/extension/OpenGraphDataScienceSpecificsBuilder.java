@@ -17,26 +17,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.domain.services;
+package org.neo4j.gds.extension;
 
-import org.neo4j.gds.core.loading.GraphStoreCatalogService;
-import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.procedures.ExporterBuildersProviderService;
+import org.neo4j.gds.procedures.integration.EditionSpecifics;
 
-public class GloballyScopedDependenciesBuilder {
-    private GraphStoreCatalogService graphStoreCatalogService;
-    private ModelCatalog modelCatalog;
+class OpenGraphDataScienceSpecificsBuilder {
+    private ExporterBuildersProviderService exporterBuildersProviderService;
 
-    public GloballyScopedDependenciesBuilder with(GraphStoreCatalogService graphStoreCatalogService) {
-        this.graphStoreCatalogService = graphStoreCatalogService;
+    /**
+     * @deprecated have this class produce it from first principles/ basic components
+     */
+    @Deprecated
+    OpenGraphDataScienceSpecificsBuilder with(ExporterBuildersProviderService exporterBuildersProviderService) {
+        this.exporterBuildersProviderService = exporterBuildersProviderService;
         return this;
     }
 
-    public GloballyScopedDependenciesBuilder with(ModelCatalog modelCatalog) {
-        this.modelCatalog = modelCatalog;
-        return this;
-    }
-
-    public GloballyScopedDependencies build() {
-        return new GloballyScopedDependencies(graphStoreCatalogService, modelCatalog);
+    EditionSpecifics build() {
+        return new EditionSpecifics(exporterBuildersProviderService);
     }
 }

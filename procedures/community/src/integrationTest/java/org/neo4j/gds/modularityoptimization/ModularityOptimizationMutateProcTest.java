@@ -573,7 +573,6 @@ class ModularityOptimizationMutateProcTest extends BaseProcTest {
             null,
             null,
             null,
-            null,
             new ProgressTrackerCreator(new LoggerForProgressTrackingAdapter(logMock), requestScopedDependencies),
             null,
             algorithmProcessingTemplate

@@ -42,7 +42,6 @@ import org.neo4j.gds.applications.modelcatalog.ModelCatalogApplications;
 import org.neo4j.gds.applications.modelcatalog.ModelRepository;
 import org.neo4j.gds.applications.operations.FeatureTogglesRepository;
 import org.neo4j.gds.applications.operations.OperationsApplications;
-import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.logging.GdsLoggers;
 import org.neo4j.gds.domain.services.GloballyScopedDependencies;
 import org.neo4j.gds.metrics.projections.ProjectionMetricsService;
@@ -110,7 +109,6 @@ public final class ApplicationsFacade {
         ProjectionMetricsService projectionMetricsService,
         RequestScopedDependencies requestScopedDependencies,
         WriteContext writeContext,
-        ModelCatalog modelCatalog,
         ModelRepository modelRepository,
         GraphDatabaseService graphDatabaseService,
         Transaction procedureTransaction,
@@ -176,20 +174,20 @@ public final class ApplicationsFacade {
         );
 
         var modelCatalogApplications = createModelCatalogApplications(
+            globallyScopedDependencies,
             requestScopedDependencies,
-            modelCatalog,
             modelCatalogApplicationsDecorator
         );
 
         var nodeEmbeddingApplications = NodeEmbeddingApplications.create(
             loggers.log(),
+            globallyScopedDependencies,
             requestScopedDependencies,
             writeContext,
             algorithmEstimationTemplate,
             algorithmProcessingTemplateConvenience,
             progressTrackerCreator,
             mutateNodeProperty,
-            modelCatalog,
             modelRepository
         );
 
@@ -257,12 +255,12 @@ public final class ApplicationsFacade {
     }
 
     private static ModelCatalogApplications createModelCatalogApplications(
+        GloballyScopedDependencies globallyScopedDependencies,
         RequestScopedDependencies requestScopedDependencies,
-        ModelCatalog modelCatalog,
         Optional<Function<ModelCatalogApplications, ModelCatalogApplications>> modelCatalogApplicationsDecorator
     ) {
         var modelCatalogApplications = DefaultModelCatalogApplications.create(
-            modelCatalog,
+            globallyScopedDependencies.modelCatalog(),
             requestScopedDependencies.user()
         );
 

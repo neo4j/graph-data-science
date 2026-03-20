@@ -26,11 +26,11 @@ import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.algorithms.machinery.Computation;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.core.RequestCorrelationId;
-import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistry;
 import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.core.write.RelationshipExporterBuilder;
+import org.neo4j.gds.domain.services.GloballyScopedDependencies;
 import org.neo4j.gds.executor.MemoryEstimationContext;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.metrics.Metrics;
@@ -42,7 +42,7 @@ import org.neo4j.gds.termination.TerminationMonitor;
 
 class NodeRegressionTrainComputationFactory {
     private final Log log;
-    private final ModelCatalog modelCatalog;
+    private final GloballyScopedDependencies globallyScopedDependencies;
     private final PipelineRepository pipelineRepository;
 
     private final CloseableResourceRegistry closeableResourceRegistry;
@@ -65,7 +65,7 @@ class NodeRegressionTrainComputationFactory {
 
     NodeRegressionTrainComputationFactory(
         Log log,
-        ModelCatalog modelCatalog,
+        GloballyScopedDependencies globallyScopedDependencies,
         PipelineRepository pipelineRepository,
         CloseableResourceRegistry closeableResourceRegistry,
         DatabaseId databaseId,
@@ -84,7 +84,7 @@ class NodeRegressionTrainComputationFactory {
         AlgorithmsProcedureFacade algorithmsProcedureFacade
     ) {
         this.log = log;
-        this.modelCatalog = modelCatalog;
+        this.globallyScopedDependencies = globallyScopedDependencies;
         this.pipelineRepository = pipelineRepository;
         this.closeableResourceRegistry = closeableResourceRegistry;
         this.databaseId = databaseId;
@@ -106,7 +106,7 @@ class NodeRegressionTrainComputationFactory {
     Computation<NodeRegressionTrainResult.NodeRegressionTrainPipelineResult> create(NodeRegressionPipelineTrainConfig configuration) {
         return NodeRegressionTrainComputation.create(
             log,
-            modelCatalog,
+            globallyScopedDependencies,
             pipelineRepository,
             closeableResourceRegistry,
             databaseId,

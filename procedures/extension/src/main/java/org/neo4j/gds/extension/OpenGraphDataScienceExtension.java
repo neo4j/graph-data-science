@@ -85,15 +85,19 @@ public class OpenGraphDataScienceExtension extends ExtensionFactory<OpenGraphDat
         var cypherAggregation = new CypherAggregation();
         var alphaCypherAggregation = new AlphaCypherAggregation();
 
+        var editionSpecifics = new OpenGraphDataScienceSpecificsBuilder()
+            .with(exporterBuildersProviderService)
+            .build();
+
         var graphDataScienceExtensionBuilderAndAssociatedProducts = OpenGraphDataScienceExtensionBuilder.create(
             log,
             databaseManagementService,
             dependencySatisfier,
             globalProcedures,
             neo4jConfiguration,
+            editionSpecifics,
             concurrencyValidator,
             defaultsConfiguration,
-            exporterBuildersProviderService,
             exportLocation,
             featureTogglesRepository,
             idMapBehavior,

@@ -106,9 +106,9 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
     }
 
     public static MemoryEstimation estimate(
+        ModelCatalog modelCatalog,
         LinkPredictionTrainingPipeline pipeline,
         LinkPredictionTrainConfig configuration,
-        ModelCatalog modelCatalog,
         AlgorithmsProcedureFacade algorithmsProcedureFacade,
         String username
     ) {

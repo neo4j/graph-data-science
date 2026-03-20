@@ -31,11 +31,11 @@ import org.neo4j.gds.applications.algorithms.machinery.Label;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.core.RequestCorrelationId;
-import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistry;
 import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.core.write.RelationshipExporterBuilder;
+import org.neo4j.gds.domain.services.GloballyScopedDependencies;
 import org.neo4j.gds.executor.ImmutableExecutionContext;
 import org.neo4j.gds.executor.MemoryEstimationContext;
 import org.neo4j.gds.logging.Log;
@@ -50,7 +50,7 @@ import org.neo4j.gds.termination.TerminationMonitor;
 
 final class NodeRegressionPredictComputation implements Computation<HugeDoubleArray> {
     private final Log log;
-    private final ModelCatalog modelCatalog;
+    private final GloballyScopedDependencies globallyScopedDependencies;
 
     private final CloseableResourceRegistry closeableResourceRegistry;
     private final DatabaseId databaseId;
@@ -76,7 +76,7 @@ final class NodeRegressionPredictComputation implements Computation<HugeDoubleAr
 
     private NodeRegressionPredictComputation(
         Log log,
-        ModelCatalog modelCatalog,
+        GloballyScopedDependencies globallyScopedDependencies,
         CloseableResourceRegistry closeableResourceRegistry,
         DatabaseId databaseId,
         MemoryEstimationContext memoryEstimationContext,
@@ -97,7 +97,7 @@ final class NodeRegressionPredictComputation implements Computation<HugeDoubleAr
         TrainedNRPipelineModel trainedNRPipelineModel
     ) {
         this.log = log;
-        this.modelCatalog = modelCatalog;
+        this.globallyScopedDependencies = globallyScopedDependencies;
         this.closeableResourceRegistry = closeableResourceRegistry;
         this.databaseId = databaseId;
         this.memoryEstimationContext = memoryEstimationContext;
@@ -120,7 +120,7 @@ final class NodeRegressionPredictComputation implements Computation<HugeDoubleAr
 
     static NodeRegressionPredictComputation create(
         Log log,
-        ModelCatalog modelCatalog,
+        GloballyScopedDependencies globallyScopedDependencies,
         CloseableResourceRegistry closeableResourceRegistry,
         DatabaseId databaseId,
         MemoryEstimationContext memoryEstimationContext,
@@ -139,11 +139,11 @@ final class NodeRegressionPredictComputation implements Computation<HugeDoubleAr
         NodeRegressionPredictPipelineBaseConfig configuration,
         Label label
     ) {
-        var trainedNRPipelineModel = new TrainedNRPipelineModel(modelCatalog);
+        var trainedNRPipelineModel = new TrainedNRPipelineModel(globallyScopedDependencies.modelCatalog());
 
         return new NodeRegressionPredictComputation(
             log,
-            modelCatalog,
+            globallyScopedDependencies,
             closeableResourceRegistry,
             databaseId,
             memoryEstimationContext,
@@ -194,7 +194,7 @@ final class NodeRegressionPredictComputation implements Computation<HugeDoubleAr
             .isGdsAdmin(user.isAdmin())
             .log(log)
             .metrics(metrics)
-            .modelCatalog(modelCatalog)
+            .modelCatalog(globallyScopedDependencies.modelCatalog())
             .nodeLookup(nodeLookup)
             .nodePropertyExporterBuilder(nodePropertyExporterBuilder)
             .relationshipExporterBuilder(relationshipExporterBuilder)

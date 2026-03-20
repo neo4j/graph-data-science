@@ -38,7 +38,6 @@ class NodeClassificationFacadeTest {
             null,
             null,
             null,
-            null,
             repository,
             null,
             null,
@@ -84,7 +83,6 @@ class NodeClassificationFacadeTest {
         var repository = new PipelineRepository();
         var nodeClassificationPredictPipelineEstimator = new NodeClassificationPredictPipelineEstimator(null, null);
         var applications = new PipelineApplications(
-            null,
             null,
             null,
             null,

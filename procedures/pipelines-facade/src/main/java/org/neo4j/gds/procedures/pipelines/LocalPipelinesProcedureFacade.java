@@ -28,7 +28,6 @@ import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
 import org.neo4j.gds.applications.modelcatalog.ModelRepository;
-import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.logging.GdsLoggers;
 import org.neo4j.gds.domain.services.GloballyScopedDependencies;
 import org.neo4j.gds.executor.MemoryEstimationContext;
@@ -62,7 +61,6 @@ public final class LocalPipelinesProcedureFacade implements PipelinesProcedureFa
     public static PipelinesProcedureFacade create(
         GdsLoggers loggers,
         GloballyScopedDependencies globallyScopedDependencies,
-        ModelCatalog modelCatalog,
         ModelRepository modelRepository,
         PipelineRepository pipelineRepository,
         CloseableResourceRegistry closeableResourceRegistry,
@@ -83,7 +81,6 @@ public final class LocalPipelinesProcedureFacade implements PipelinesProcedureFa
         var pipelineApplications = PipelineApplications.create(
             loggers,
             globallyScopedDependencies,
-            modelCatalog,
             modelRepository,
             pipelineRepository,
             closeableResourceRegistry,
@@ -109,7 +106,7 @@ public final class LocalPipelinesProcedureFacade implements PipelinesProcedureFa
         );
 
         var nodeClassificationFacade = LocalNodeClassificationFacade.create(
-            modelCatalog,
+            globallyScopedDependencies.modelCatalog(),
             requestScopedDependencies.user(),
             pipelineConfigurationParser,
             pipelineApplications,
@@ -117,7 +114,7 @@ public final class LocalPipelinesProcedureFacade implements PipelinesProcedureFa
         );
 
         var nodeRegressionFacade = LocalNodeRegressionFacade.create(
-            modelCatalog,
+            globallyScopedDependencies.modelCatalog(),
             requestScopedDependencies.user(),
             pipelineConfigurationParser,
             pipelineApplications,

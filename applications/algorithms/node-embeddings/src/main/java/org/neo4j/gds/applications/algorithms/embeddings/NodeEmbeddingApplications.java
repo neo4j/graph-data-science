@@ -26,7 +26,7 @@ import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
 import org.neo4j.gds.applications.modelcatalog.ModelRepository;
-import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.domain.services.GloballyScopedDependencies;
 import org.neo4j.gds.logging.Log;
 
 public final class NodeEmbeddingApplications {
@@ -55,16 +55,16 @@ public final class NodeEmbeddingApplications {
 
     public static NodeEmbeddingApplications create(
         Log log,
+        GloballyScopedDependencies globallyScopedDependencies,
         RequestScopedDependencies requestScopedDependencies,
         WriteContext writeContext,
         AlgorithmEstimationTemplate algorithmEstimationTemplate,
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
         ProgressTrackerCreator progressTrackerCreator,
         MutateNodePropertyService mutateNodePropertyService,
-        ModelCatalog modelCatalog,
         ModelRepository modelRepository
     ) {
-        var graphSageModelCatalog = new GraphSageModelCatalog(modelCatalog);
+        var graphSageModelCatalog = new GraphSageModelCatalog(globallyScopedDependencies.modelCatalog());
 
         var algorithms = new NodeEmbeddingAlgorithms(
             graphSageModelCatalog,

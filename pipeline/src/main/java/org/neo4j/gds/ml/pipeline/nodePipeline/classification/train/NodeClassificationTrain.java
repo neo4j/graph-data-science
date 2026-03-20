@@ -79,9 +79,9 @@ public final class NodeClassificationTrain implements PipelineTrainer<NodeClassi
     private final TerminationFlag terminationFlag;
 
     public static MemoryEstimation estimate(
+        ModelCatalog modelCatalog,
         NodeClassificationTrainingPipeline pipeline,
         NodeClassificationPipelineTrainConfig configuration,
-        ModelCatalog modelCatalog,
         AlgorithmsProcedureFacade algorithmsProcedureFacade
     ) {
         return new NodeClassificationTrainMemoryEstimateDefinition(

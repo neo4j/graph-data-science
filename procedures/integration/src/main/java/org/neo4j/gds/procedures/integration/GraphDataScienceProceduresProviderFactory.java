@@ -29,15 +29,12 @@ import org.neo4j.gds.applications.modelcatalog.ModelRepository;
 import org.neo4j.gds.applications.operations.FeatureTogglesRepository;
 import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
-import org.neo4j.gds.core.loading.GraphStoreCatalogService;
-import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.logging.GdsLoggers;
 import org.neo4j.gds.core.utils.progress.TaskStoreService;
 import org.neo4j.gds.domain.services.GloballyScopedDependencies;
 import org.neo4j.gds.executor.MemoryEstimationContext;
 import org.neo4j.gds.mem.MemoryTracker;
 import org.neo4j.gds.metrics.Metrics;
-import org.neo4j.gds.procedures.ExporterBuildersProviderService;
 import org.neo4j.gds.procedures.GraphCatalogProcedureFacadeFactory;
 import org.neo4j.gds.procedures.TaskRegistryFactoryService;
 import org.neo4j.gds.procedures.UserAccessor;
@@ -61,16 +58,15 @@ final class GraphDataScienceProceduresProviderFactory {
     private final GdsLoggers loggers;
 
     private final Configuration neo4jConfiguration;
+    private final EditionSpecifics editionSpecifics;
     private final GloballyScopedDependencies globallyScopedDependencies;
     private final DefaultsConfiguration defaultsConfiguration;
-    private final ExporterBuildersProviderService exporterBuildersProviderService;
     private final ExportLocation exportLocation;
     private final FeatureTogglesRepository featureTogglesRepository;
     private final GraphStoreFactorySuppliers graphStoreFactorySuppliers;
     private final LicenseDetails licenseDetails;
     private final LimitsConfiguration limitsConfiguration;
     private final Metrics metrics;
-    private final ModelCatalog modelCatalog;
     private final ModelRepository modelRepository;
     private final Optional<Function<AlgorithmProcessingTemplate, AlgorithmProcessingTemplate>> algorithmProcessingTemplateDecorator;
     private final Optional<Function<GraphCatalogApplications, GraphCatalogApplications>> graphCatalogApplicationsDecorator;
@@ -80,16 +76,15 @@ final class GraphDataScienceProceduresProviderFactory {
     GraphDataScienceProceduresProviderFactory(
         GdsLoggers loggers,
         Configuration neo4jConfiguration,
+        EditionSpecifics editionSpecifics,
         GloballyScopedDependencies globallyScopedDependencies,
         DefaultsConfiguration defaultsConfiguration,
-        ExporterBuildersProviderService exporterBuildersProviderService,
         ExportLocation exportLocation,
         FeatureTogglesRepository featureTogglesRepository,
         GraphStoreFactorySuppliers graphStoreFactorySuppliers,
         LicenseDetails licenseDetails,
         LimitsConfiguration limitsConfiguration,
         Metrics metrics,
-        ModelCatalog modelCatalog,
         ModelRepository modelRepository,
         Optional<Function<AlgorithmProcessingTemplate, AlgorithmProcessingTemplate>> algorithmProcessingTemplateDecorator,
         Optional<Function<GraphCatalogApplications, GraphCatalogApplications>> graphCatalogApplicationsDecorator,
@@ -98,16 +93,15 @@ final class GraphDataScienceProceduresProviderFactory {
     ) {
         this.loggers = loggers;
         this.neo4jConfiguration = neo4jConfiguration;
+        this.editionSpecifics = editionSpecifics;
         this.globallyScopedDependencies = globallyScopedDependencies;
         this.defaultsConfiguration = defaultsConfiguration;
-        this.exporterBuildersProviderService = exporterBuildersProviderService;
         this.exportLocation = exportLocation;
         this.featureTogglesRepository = featureTogglesRepository;
         this.graphStoreFactorySuppliers = graphStoreFactorySuppliers;
         this.licenseDetails = licenseDetails;
         this.limitsConfiguration = limitsConfiguration;
         this.metrics = metrics;
-        this.modelCatalog = modelCatalog;
         this.modelRepository = modelRepository;
         this.algorithmProcessingTemplateDecorator = algorithmProcessingTemplateDecorator;
         this.graphCatalogApplicationsDecorator = graphCatalogApplicationsDecorator;
@@ -132,9 +126,9 @@ final class GraphDataScienceProceduresProviderFactory {
         return new GraphDataScienceProceduresProvider(
             loggers,
             neo4jConfiguration,
+            editionSpecifics,
             globallyScopedDependencies,
             defaultsConfiguration,
-            exporterBuildersProviderService,
             exportLocation,
             catalogProcedureFacadeFactory,
             featureTogglesRepository,
@@ -144,7 +138,6 @@ final class GraphDataScienceProceduresProviderFactory {
             memoryGuard,
             new MemoryEstimationContext(useMaxMemoryEstimation),
             metrics,
-            modelCatalog,
             modelRepository,
             pipelineRepository,
             taskRegistryFactoryService,

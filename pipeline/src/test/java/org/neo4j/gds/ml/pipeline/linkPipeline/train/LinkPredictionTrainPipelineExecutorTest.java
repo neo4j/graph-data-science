@@ -509,9 +509,9 @@ final class LinkPredictionTrainPipelineExecutorTest {
 
             var actualRange = LinkPredictionTrainPipelineExecutor
                 .estimate(
+                    ImmutableExecutionContext.EMPTY.modelCatalog(),
                     pipeline,
                     config,
-                    ImmutableExecutionContext.EMPTY.modelCatalog(),
                     ImmutableExecutionContext.EMPTY.algorithmsProcedureFacade(),
                     ImmutableExecutionContext.EMPTY.username()
                 )
@@ -536,9 +536,9 @@ final class LinkPredictionTrainPipelineExecutorTest {
             LinkPredictionTrainingPipeline pipeline = new LinkPredictionTrainingPipeline();
 
             assertThatThrownBy(() -> LinkPredictionTrainPipelineExecutor.estimate(
+                ExecutionContext.EMPTY.modelCatalog(),
                 pipeline,
                 config,
-                ExecutionContext.EMPTY.modelCatalog(),
                 ExecutionContext.EMPTY.algorithmsProcedureFacade(),
                 ExecutionContext.EMPTY.username()
             ))
@@ -581,7 +581,7 @@ final class LinkPredictionTrainPipelineExecutorTest {
                 .build();
 
             assertThatThrownBy(() -> TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
-                var result = new LinkPredictionTrainPipelineExecutor(
+                new LinkPredictionTrainPipelineExecutor(
                     pipeline,
                     config,
                     caller.executionContext(),
@@ -594,7 +594,7 @@ final class LinkPredictionTrainPipelineExecutorTest {
 
 
             assertThatThrownBy(() -> TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
-                var result = new LinkPredictionTrainPipelineExecutor(
+                new LinkPredictionTrainPipelineExecutor(
                     pipeline2,
                     config,
                     caller.executionContext(),

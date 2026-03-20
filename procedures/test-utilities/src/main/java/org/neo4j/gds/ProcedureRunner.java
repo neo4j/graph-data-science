@@ -194,7 +194,6 @@ public final class ProcedureRunner {
             MemoryGuard.DISABLED,
             new MemoryEstimationContext(false),
             Metrics.DISABLED,
-            modelCatalog,
             null,
             null,
             graphDatabaseService,

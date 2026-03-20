@@ -30,11 +30,11 @@ import org.neo4j.gds.applications.algorithms.machinery.Computation;
 import org.neo4j.gds.applications.algorithms.machinery.Label;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.core.RequestCorrelationId;
-import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistry;
 import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.core.write.RelationshipExporterBuilder;
+import org.neo4j.gds.domain.services.GloballyScopedDependencies;
 import org.neo4j.gds.executor.ImmutableExecutionContext;
 import org.neo4j.gds.executor.MemoryEstimationContext;
 import org.neo4j.gds.logging.Log;
@@ -47,7 +47,7 @@ import org.neo4j.gds.termination.TerminationMonitor;
 
 final class LinkPredictionTrainComputation implements Computation<LinkPredictionTrainPipelineExecutor.LinkPredictionTrainPipelineResult> {
     private final Log log;
-    private final ModelCatalog modelCatalog;
+    private final GloballyScopedDependencies globallyScopedDependencies;
     private final PipelineRepository pipelineRepository;
 
     private final CloseableResourceRegistry closeableResourceRegistry;
@@ -73,7 +73,7 @@ final class LinkPredictionTrainComputation implements Computation<LinkPrediction
 
     private LinkPredictionTrainComputation(
         Log log,
-        ModelCatalog modelCatalog,
+        GloballyScopedDependencies globallyScopedDependencies,
         PipelineRepository pipelineRepository,
         CloseableResourceRegistry closeableResourceRegistry,
         DatabaseId databaseId,
@@ -94,7 +94,7 @@ final class LinkPredictionTrainComputation implements Computation<LinkPrediction
         Label label
     ) {
         this.log = log;
-        this.modelCatalog = modelCatalog;
+        this.globallyScopedDependencies = globallyScopedDependencies;
         this.pipelineRepository = pipelineRepository;
         this.closeableResourceRegistry = closeableResourceRegistry;
         this.databaseId = databaseId;
@@ -117,7 +117,7 @@ final class LinkPredictionTrainComputation implements Computation<LinkPrediction
 
     static LinkPredictionTrainComputation create(
         Log log,
-        ModelCatalog modelCatalog,
+        GloballyScopedDependencies globallyScopedDependencies,
         PipelineRepository pipelineRepository,
         CloseableResourceRegistry closeableResourceRegistry,
         DatabaseId databaseId,
@@ -139,7 +139,7 @@ final class LinkPredictionTrainComputation implements Computation<LinkPrediction
     ) {
         return new LinkPredictionTrainComputation(
             log,
-            modelCatalog,
+            globallyScopedDependencies,
             pipelineRepository,
             closeableResourceRegistry,
             databaseId,
@@ -203,7 +203,7 @@ final class LinkPredictionTrainComputation implements Computation<LinkPrediction
             .isGdsAdmin(this.user.isAdmin())
             .log(log)
             .metrics(metrics)
-            .modelCatalog(modelCatalog)
+            .modelCatalog(globallyScopedDependencies.modelCatalog())
             .nodeLookup(nodeLookup)
             .nodePropertyExporterBuilder(nodePropertyExporterBuilder)
             .relationshipExporterBuilder(relationshipExporterBuilder)

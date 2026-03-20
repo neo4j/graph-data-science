@@ -38,7 +38,6 @@ import org.neo4j.gds.applications.operations.FeatureTogglesRepository;
 import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
-import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.logging.GdsLoggers;
 import org.neo4j.gds.domain.services.GloballyScopedDependencies;
 import org.neo4j.gds.executor.MemoryEstimationContext;
@@ -124,7 +123,6 @@ public class LocalGraphDataScienceProcedures implements GraphDataScienceProcedur
         MemoryGuard memoryGuard,
         MemoryEstimationContext memoryEstimationContext,
         Metrics metrics,
-        ModelCatalog modelCatalog,
         ModelRepository modelRepository,
         PipelineRepository pipelineRepository,
         GraphDatabaseService graphDatabaseService,
@@ -183,7 +181,6 @@ public class LocalGraphDataScienceProcedures implements GraphDataScienceProcedur
             metrics.projectionMetrics(),
             requestScopedDependencies,
             writeContext,
-            modelCatalog,
             modelRepository,
             graphDatabaseService,
             procedureTransaction,
@@ -229,7 +226,6 @@ public class LocalGraphDataScienceProcedures implements GraphDataScienceProcedur
         var pipelinesProcedureFacade = LocalPipelinesProcedureFacade.create(
             loggers,
             globallyScopedDependencies,
-            modelCatalog,
             modelRepository,
             pipelineRepository,
             closeableResourceRegistry,

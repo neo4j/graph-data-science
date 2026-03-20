@@ -30,11 +30,11 @@ import org.neo4j.gds.applications.algorithms.machinery.Computation;
 import org.neo4j.gds.applications.algorithms.machinery.Label;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.core.RequestCorrelationId;
-import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistry;
 import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.core.write.RelationshipExporterBuilder;
+import org.neo4j.gds.domain.services.GloballyScopedDependencies;
 import org.neo4j.gds.executor.ImmutableExecutionContext;
 import org.neo4j.gds.executor.MemoryEstimationContext;
 import org.neo4j.gds.logging.Log;
@@ -45,7 +45,7 @@ import org.neo4j.gds.termination.TerminationMonitor;
 
 final class NodeClassificationPredictComputation implements Computation<NodeClassificationPipelineResult> {
     private final Log log;
-    private final ModelCatalog modelCatalog;
+    private final GloballyScopedDependencies globallyScopedDependencies;
 
     private final CloseableResourceRegistry closeableResourceRegistry;
     private final DatabaseId databaseId;
@@ -71,7 +71,7 @@ final class NodeClassificationPredictComputation implements Computation<NodeClas
 
     private NodeClassificationPredictComputation(
         Log log,
-        ModelCatalog modelCatalog,
+        GloballyScopedDependencies globallyScopedDependencies,
         CloseableResourceRegistry closeableResourceRegistry,
         DatabaseId databaseId,
         MemoryEstimationContext memoryEstimationContext,
@@ -92,7 +92,7 @@ final class NodeClassificationPredictComputation implements Computation<NodeClas
         TrainedNCPipelineModel trainedNCPipelineModel
     ) {
         this.log = log;
-        this.modelCatalog = modelCatalog;
+        this.globallyScopedDependencies = globallyScopedDependencies;
         this.closeableResourceRegistry = closeableResourceRegistry;
         this.databaseId = databaseId;
         this.memoryEstimationContext = memoryEstimationContext;
@@ -115,7 +115,7 @@ final class NodeClassificationPredictComputation implements Computation<NodeClas
 
     static NodeClassificationPredictComputation create(
         Log log,
-        ModelCatalog modelCatalog,
+        GloballyScopedDependencies globallyScopedDependencies,
         CloseableResourceRegistry closeableResourceRegistry,
         DatabaseId databaseId,
         MemoryEstimationContext memoryEstimationContext,
@@ -134,11 +134,11 @@ final class NodeClassificationPredictComputation implements Computation<NodeClas
         NodeClassificationPredictPipelineBaseConfig configuration,
         Label label
     ) {
-        var trainedNCPipelineModel = new TrainedNCPipelineModel(modelCatalog);
+        var trainedNCPipelineModel = new TrainedNCPipelineModel(globallyScopedDependencies.modelCatalog());
 
         return new NodeClassificationPredictComputation(
             log,
-            modelCatalog,
+            globallyScopedDependencies,
             closeableResourceRegistry,
             databaseId,
             memoryEstimationContext,
@@ -192,7 +192,7 @@ final class NodeClassificationPredictComputation implements Computation<NodeClas
             .isGdsAdmin(user.isAdmin())
             .log(log)
             .metrics(metrics)
-            .modelCatalog(modelCatalog)
+            .modelCatalog(globallyScopedDependencies.modelCatalog())
             .nodeLookup(nodeLookup)
             .nodePropertyExporterBuilder(nodePropertyExporterBuilder)
             .relationshipExporterBuilder(relationshipExporterBuilder)

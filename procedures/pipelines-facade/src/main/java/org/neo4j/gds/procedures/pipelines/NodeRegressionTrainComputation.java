@@ -30,11 +30,11 @@ import org.neo4j.gds.applications.algorithms.machinery.AlgorithmMachinery;
 import org.neo4j.gds.applications.algorithms.machinery.Computation;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.core.RequestCorrelationId;
-import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistry;
 import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.core.write.RelationshipExporterBuilder;
+import org.neo4j.gds.domain.services.GloballyScopedDependencies;
 import org.neo4j.gds.executor.ImmutableExecutionContext;
 import org.neo4j.gds.executor.MemoryEstimationContext;
 import org.neo4j.gds.logging.Log;
@@ -53,7 +53,7 @@ final class NodeRegressionTrainComputation implements Computation<NodeRegression
     private final AlgorithmMachinery algorithmMachinery = new AlgorithmMachinery();
 
     private final Log log;
-    private final ModelCatalog modelCatalog;
+    private final GloballyScopedDependencies globallyScopedDependencies;
     private final PipelineRepository pipelineRepository;
     private final CloseableResourceRegistry closeableResourceRegistry;
     private final DatabaseId databaseId;
@@ -74,7 +74,7 @@ final class NodeRegressionTrainComputation implements Computation<NodeRegression
 
     NodeRegressionTrainComputation(
         Log log,
-        ModelCatalog modelCatalog,
+        GloballyScopedDependencies globallyScopedDependencies,
         PipelineRepository pipelineRepository,
         CloseableResourceRegistry closeableResourceRegistry,
         DatabaseId databaseId,
@@ -94,7 +94,7 @@ final class NodeRegressionTrainComputation implements Computation<NodeRegression
         NodeRegressionPipelineTrainConfig configuration
     ) {
         this.log = log;
-        this.modelCatalog = modelCatalog;
+        this.globallyScopedDependencies = globallyScopedDependencies;
         this.pipelineRepository = pipelineRepository;
         this.closeableResourceRegistry = closeableResourceRegistry;
         this.databaseId = databaseId;
@@ -116,7 +116,7 @@ final class NodeRegressionTrainComputation implements Computation<NodeRegression
 
     static Computation<NodeRegressionTrainResult.NodeRegressionTrainPipelineResult> create(
         Log log,
-        ModelCatalog modelCatalog,
+        GloballyScopedDependencies globallyScopedDependencies,
         PipelineRepository pipelineRepository,
         CloseableResourceRegistry closeableResourceRegistry,
         DatabaseId databaseId,
@@ -137,7 +137,7 @@ final class NodeRegressionTrainComputation implements Computation<NodeRegression
     ) {
         return new NodeRegressionTrainComputation(
             log,
-            modelCatalog,
+            globallyScopedDependencies,
             pipelineRepository,
             closeableResourceRegistry,
             databaseId,
@@ -177,7 +177,7 @@ final class NodeRegressionTrainComputation implements Computation<NodeRegression
             .isGdsAdmin(user.isAdmin())
             .log(log)
             .metrics(metrics)
-            .modelCatalog(modelCatalog)
+            .modelCatalog(globallyScopedDependencies.modelCatalog())
             .nodeLookup(nodeLookup)
             .nodePropertyExporterBuilder(nodePropertyExporterBuilder)
             .relationshipExporterBuilder(relationshipExporterBuilder)

@@ -52,7 +52,6 @@ import org.neo4j.gds.legacycypherprojection.GraphProjectFromCypherConfig;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.MemoryTracker;
 import org.neo4j.gds.metrics.Metrics;
-import org.neo4j.gds.procedures.ExporterBuildersProviderService;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.TaskRegistryFactoryService;
 import org.neo4j.gds.procedures.UserAccessor;
@@ -97,7 +96,6 @@ public final class OpenGraphDataScienceExtensionBuilder {
     // edition specifics
     private final LicenseState licenseState;
     private final Metrics metrics;
-    private final ModelCatalog modelCatalog;
 
     // services
     private final GloballyScopedDependencies globallyScopedDependencies;
@@ -117,7 +115,6 @@ public final class OpenGraphDataScienceExtensionBuilder {
         GraphDataScienceProceduresProviderFactory graphDataScienceProceduresProviderFactory,
         LicenseState licenseState,
         Metrics metrics,
-        ModelCatalog modelCatalog,
         TaskStoreService taskStoreService,
         TaskRegistryFactoryService taskRegistryFactoryService,
         TaskStoreObserver taskStoreObserver,
@@ -132,7 +129,6 @@ public final class OpenGraphDataScienceExtensionBuilder {
         this.graphDataScienceProceduresProviderFactory = graphDataScienceProceduresProviderFactory;
         this.licenseState = licenseState;
         this.metrics = metrics;
-        this.modelCatalog = modelCatalog;
         this.globallyScopedDependencies = globallyScopedDependencies;
         this.taskStoreService = taskStoreService;
         this.taskRegistryFactoryService = taskRegistryFactoryService;
@@ -153,9 +149,9 @@ public final class OpenGraphDataScienceExtensionBuilder {
         DependencySatisfier dependencySatisfier,
         GlobalProcedures globalProcedures,
         Configuration neo4jConfiguration,
+        EditionSpecifics editionSpecifics,
         ConcurrencyValidator concurrencyValidator,
         DefaultsConfiguration defaultsConfiguration,
-        ExporterBuildersProviderService exporterBuildersProviderService,
         ExportLocation exportLocation,
         FeatureTogglesRepository featureTogglesRepository,
         IdMapBehavior idMapBehavior,
@@ -208,6 +204,7 @@ public final class OpenGraphDataScienceExtensionBuilder {
 
         var globallyScopedDependencies = new GloballyScopedDependenciesBuilder()
             .with(graphStoreCatalogService)
+            .with(modelCatalog)
             .build();
 
         // in the short term, until we eradicate old usages, we also install the shared state in its old place
@@ -245,16 +242,15 @@ public final class OpenGraphDataScienceExtensionBuilder {
         var graphDataScienceProviderFactory = new GraphDataScienceProceduresProviderFactory(
             loggers,
             neo4jConfiguration,
+            editionSpecifics,
             globallyScopedDependencies,
             defaultsConfiguration,
-            exporterBuildersProviderService,
             exportLocation,
             featureTogglesRepository,
             graphStoreFactorySuppliers,
             LicenseDetails.from(licenseState),
             limitsConfiguration,
             metrics,
-            modelCatalog,
             modelRepository,
             algorithmProcessingTemplateDecorator,
             graphCatalogApplicationsDecorator,
@@ -270,7 +266,6 @@ public final class OpenGraphDataScienceExtensionBuilder {
             graphDataScienceProviderFactory,
             licenseState,
             metrics,
-            modelCatalog,
             taskStoreService,
             taskRegistryFactoryService,
             taskStoreObserver,
@@ -392,10 +387,14 @@ public final class OpenGraphDataScienceExtensionBuilder {
 
     private void registerModelCatalogComponent() {
         // needed by tests :facepalm:
-        componentRegistration.registerComponent("Model Catalog", ModelCatalog.class, __ -> modelCatalog);
+        componentRegistration.registerComponent(
+            "Model Catalog",
+            ModelCatalog.class,
+            __ -> globallyScopedDependencies.modelCatalog()
+        );
 
         // needed by tests
-        componentRegistration.setUpDependency(modelCatalog);
+        componentRegistration.setUpDependency(globallyScopedDependencies.modelCatalog());
     }
 
     private void registerUsernameComponent() {
