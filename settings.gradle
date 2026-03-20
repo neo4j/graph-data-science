@@ -158,6 +158,9 @@ project(':doc-test').projectDir = file('doc-test')
 include('doc-test-tools')
 project(':doc-test-tools').projectDir = file('doc-test-tools')
 
+include('domain-services')
+project(':domain-services').projectDir = file('domain/services')
+
 include('edition-api')
 project(':edition-api').projectDir = file('edition-api')
 

@@ -32,12 +32,12 @@ import org.neo4j.gds.core.loading.CatalogRequest;
 import org.neo4j.gds.core.loading.GraphDropNodePropertiesResult;
 import org.neo4j.gds.core.loading.GraphDropRelationshipResult;
 import org.neo4j.gds.core.loading.GraphStoreCatalogEntry;
-import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.utils.logging.GdsLoggers;
 import org.neo4j.gds.core.write.NodeLabelExporterBuilder;
 import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.core.write.RelationshipExporterBuilder;
 import org.neo4j.gds.core.write.RelationshipPropertiesExporterBuilder;
+import org.neo4j.gds.domain.services.GloballyScopedDependencies;
 import org.neo4j.gds.graphsampling.RandomWalkSamplerType;
 import org.neo4j.gds.legacycypherprojection.GraphProjectCypherResult;
 import org.neo4j.gds.logging.Log;
@@ -81,7 +81,7 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
 
     // global dependencies
     private final Log log;
-    private final GraphStoreCatalogService graphStoreCatalogService;
+    private final GloballyScopedDependencies globallyScopedDependencies;
     private final ProjectionMetricsService projectionMetricsService;
 
     // services
@@ -113,7 +113,7 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
 
     DefaultGraphCatalogApplications(
         Log log,
-        GraphStoreCatalogService graphStoreCatalogService,
+        GloballyScopedDependencies globallyScopedDependencies,
         ProjectionMetricsService projectionMetricsService,
         GraphNameValidationService graphNameValidationService,
         CypherProjectApplication cypherProjectApplication,
@@ -140,7 +140,7 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
         ExportToDatabaseApplication exportToDatabaseApplication
     ) {
         this.log = log;
-        this.graphStoreCatalogService = graphStoreCatalogService;
+        this.globallyScopedDependencies = globallyScopedDependencies;
         this.projectionMetricsService = projectionMetricsService;
 
         this.graphNameValidationService = graphNameValidationService;
@@ -171,8 +171,8 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
 
     public static GraphCatalogApplications create(
         GdsLoggers loggers,
+        GloballyScopedDependencies globallyScopedDependencies,
         ExportLocation exportLocation,
-        GraphStoreCatalogService graphStoreCatalogService,
         GraphStoreFactorySuppliers graphStoreFactorySuppliers,
         ProjectionMetricsService projectionMetricsService,
         GraphDatabaseService graphDatabaseService,
@@ -183,12 +183,12 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
         var cypherProjectApplication = new CypherProjectApplication(
             new GenericProjectApplication<>(
                 loggers.log(),
-                graphStoreCatalogService,
+                globallyScopedDependencies,
                 graphStoreFactorySuppliers,
                 GraphProjectCypherResult.Builder::new
             )
         );
-        var dropGraphApplication = new DropGraphApplication(graphStoreCatalogService);
+        var dropGraphApplication = new DropGraphApplication(globallyScopedDependencies.graphStoreCatalogService());
         var dropNodePropertiesApplication = new DropNodePropertiesApplication(loggers.loggerForProgressTracking());
         var dropRelationshipsApplication = new DropRelationshipsApplication(loggers.loggerForProgressTracking());
         var estimateCommonNeighbourAwareRandomWalkApplication = new EstimateCommonNeighbourAwareRandomWalkApplication();
@@ -204,17 +204,17 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
             graphDatabaseService,
             procedureTransaction
         );
-        var generateGraphApplication = new GenerateGraphApplication(loggers.log(), graphStoreCatalogService);
-        var graphMemoryUsageApplication = new GraphMemoryUsageApplication(graphStoreCatalogService);
+        var generateGraphApplication = new GenerateGraphApplication(loggers.log(), globallyScopedDependencies.graphStoreCatalogService());
+        var graphMemoryUsageApplication = new GraphMemoryUsageApplication(globallyScopedDependencies.graphStoreCatalogService());
         var graphSamplingApplication = new GraphSamplingApplication(
             loggers.loggerForProgressTracking(),
-            graphStoreCatalogService
+            globallyScopedDependencies.graphStoreCatalogService()
         );
-        var listGraphApplication = ListGraphApplication.create(graphStoreCatalogService);
+        var listGraphApplication = ListGraphApplication.create(globallyScopedDependencies.graphStoreCatalogService());
         var nativeProjectApplication = new NativeProjectApplication(
             new GenericProjectApplication<>(
                 loggers.log(),
-                graphStoreCatalogService,
+                globallyScopedDependencies,
                 graphStoreFactorySuppliers,
                 GraphProjectNativeResult.Builder::new
             )
@@ -225,7 +225,7 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
         var streamRelationshipsApplication = new StreamRelationshipsApplication();
         var subGraphProjectApplication = new SubGraphProjectApplication(
             loggers,
-            graphStoreCatalogService
+            globallyScopedDependencies.graphStoreCatalogService()
         );
         var writeNodeLabelApplication = new WriteNodeLabelApplication(loggers.log());
         var writeNodePropertiesApplication = new WriteNodePropertiesApplication(loggers);
@@ -234,7 +234,7 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
 
         return new DefaultGraphCatalogApplicationsBuilder(
             loggers.log(),
-            graphStoreCatalogService,
+            globallyScopedDependencies,
             projectionMetricsService,
             graphNameValidationService
         )
@@ -267,7 +267,7 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
     public boolean graphExists(RequestScopedDependencies requestScopedDependencies, String graphNameAsString) {
         var graphName = graphNameValidationService.validate(graphNameAsString);
 
-        return graphStoreCatalogService.graphExists(
+        return globallyScopedDependencies.graphStoreCatalogService().graphExists(
             requestScopedDependencies.user(),
             requestScopedDependencies.databaseId(),
             graphName
@@ -450,7 +450,7 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
         var graphName = ensureGraphNameValidAndUnknown(requestScopedDependencies, graphNameAsString);
         var originGraphName = graphNameValidationService.validate(originGraphNameAsString);
 
-        graphStoreCatalogService.ensureGraphExists(
+        globallyScopedDependencies.graphStoreCatalogService().ensureGraphExists(
             requestScopedDependencies.user(),
             requestScopedDependencies.databaseId(),
             originGraphName
@@ -486,7 +486,7 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
     public GraphMemoryUsage sizeOf(RequestScopedDependencies requestScopedDependencies, String graphNameAsString) {
         var graphName = graphNameValidationService.validate(graphNameAsString);
 
-        if (!graphStoreCatalogService.graphExists(
+        if (!globallyScopedDependencies.graphStoreCatalogService().graphExists(
             requestScopedDependencies.user(),
             requestScopedDependencies.databaseId(),
             graphName
@@ -1028,7 +1028,7 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
     }
 
     private GraphStore getGraphStore(RequestScopedDependencies requestScopedDependencies, GraphName graphName, BaseConfig configuration) {
-        var graphStoreCatalogEntry = graphStoreCatalogService.getGraphStoreCatalogEntry(
+        var graphStoreCatalogEntry = globallyScopedDependencies.graphStoreCatalogService().getGraphStoreCatalogEntry(
             graphName,
             requestScopedDependencies.user(),
             configuration.usernameOverride(),
@@ -1074,7 +1074,7 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
     private GraphName ensureGraphNameValidAndUnknown(RequestScopedDependencies requestScopedDependencies, String graphNameAsString) {
         var graphName = graphNameValidationService.validateStrictly(graphNameAsString);
 
-        graphStoreCatalogService.ensureGraphDoesNotExist(requestScopedDependencies.user(), requestScopedDependencies.databaseId(), graphName);
+        globallyScopedDependencies.graphStoreCatalogService().ensureGraphDoesNotExist(requestScopedDependencies.user(), requestScopedDependencies.databaseId(), graphName);
 
         return graphName;
     }
@@ -1090,7 +1090,7 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
         RequestScopedDependencies requestScopedDependencies,
         GraphName graphName
     ) {
-        return graphStoreCatalogService.get(
+        return globallyScopedDependencies.graphStoreCatalogService().get(
             CatalogRequest.of(
                 requestScopedDependencies.user(),
                 requestScopedDependencies.databaseId()

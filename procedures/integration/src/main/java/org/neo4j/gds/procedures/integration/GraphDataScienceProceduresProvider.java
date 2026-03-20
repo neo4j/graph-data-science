@@ -37,6 +37,7 @@ import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.logging.GdsLoggers;
 import org.neo4j.gds.core.utils.progress.TaskStoreService;
 import org.neo4j.gds.core.write.ExporterContext;
+import org.neo4j.gds.domain.services.GloballyScopedDependencies;
 import org.neo4j.gds.executor.MemoryEstimationContext;
 import org.neo4j.gds.mem.MemoryTracker;
 import org.neo4j.gds.metrics.Metrics;
@@ -79,13 +80,13 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
     private final GdsLoggers loggers;
     private final Configuration neo4jConfiguration;
 
+    private final GloballyScopedDependencies globallyScopedDependencies;
     private final DefaultsConfiguration defaultsConfiguration;
     private final ExporterBuildersProviderService exporterBuildersProviderService;
     private final ExportLocation exportLocation;
     private final GraphCatalogProcedureFacadeFactory graphCatalogProcedureFacadeFactory;
     private final GraphStoreFactorySuppliers graphStoreFactorySuppliers;
     private final FeatureTogglesRepository featureTogglesRepository;
-    private final GraphStoreCatalogService graphStoreCatalogService;
     private final LicenseDetails licenseDetails;
     private final LimitsConfiguration limitsConfiguration;
     private final MemoryGuard memoryGuard;
@@ -106,12 +107,12 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
     GraphDataScienceProceduresProvider(
         GdsLoggers loggers,
         Configuration neo4jConfiguration,
+        GloballyScopedDependencies globallyScopedDependencies,
         DefaultsConfiguration defaultsConfiguration,
         ExporterBuildersProviderService exporterBuildersProviderService,
         ExportLocation exportLocation,
         GraphCatalogProcedureFacadeFactory graphCatalogProcedureFacadeFactory,
         FeatureTogglesRepository featureTogglesRepository,
-        GraphStoreCatalogService graphStoreCatalogService,
         GraphStoreFactorySuppliers graphStoreFactorySuppliers,
         LicenseDetails licenseDetails,
         LimitsConfiguration limitsConfiguration,
@@ -132,6 +133,7 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
     ) {
         this.loggers = loggers;
         this.neo4jConfiguration = neo4jConfiguration;
+        this.globallyScopedDependencies = globallyScopedDependencies;
 
         this.defaultsConfiguration = defaultsConfiguration;
         this.exporterBuildersProviderService = exporterBuildersProviderService;
@@ -139,7 +141,6 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
         this.graphCatalogProcedureFacadeFactory = graphCatalogProcedureFacadeFactory;
         this.graphStoreFactorySuppliers = graphStoreFactorySuppliers;
         this.featureTogglesRepository = featureTogglesRepository;
-        this.graphStoreCatalogService = graphStoreCatalogService;
         this.licenseDetails = licenseDetails;
         this.limitsConfiguration = limitsConfiguration;
         this.memoryGuard = memoryGuard;
@@ -210,12 +211,12 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
 
         return LocalGraphDataScienceProcedures.create(
             loggers,
+            globallyScopedDependencies,
             telemetryLogger,
             defaultsConfiguration,
             exportLocation,
             graphCatalogProcedureFacadeFactory,
             featureTogglesRepository,
-            graphStoreCatalogService,
             graphStoreFactorySuppliers,
             licenseDetails,
             limitsConfiguration,

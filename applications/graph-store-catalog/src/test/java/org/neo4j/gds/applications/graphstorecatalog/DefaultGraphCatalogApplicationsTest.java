@@ -25,6 +25,7 @@ import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
+import org.neo4j.gds.domain.services.GloballyScopedDependenciesBuilder;
 import org.neo4j.gds.logging.Log;
 
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
@@ -41,7 +42,7 @@ class DefaultGraphCatalogApplicationsTest {
         var graphStoreCatalogService = mock(GraphStoreCatalogService.class);
         var facade = new DefaultGraphCatalogApplicationsBuilder(
             Log.noOpLog(),
-            graphStoreCatalogService,
+            new GloballyScopedDependenciesBuilder().with(graphStoreCatalogService).build(),
             null
         ).build();
 
@@ -64,7 +65,7 @@ class DefaultGraphCatalogApplicationsTest {
         var graphStoreCatalogService = mock(GraphStoreCatalogService.class);
         var facade = new DefaultGraphCatalogApplicationsBuilder(
             Log.noOpLog(),
-            graphStoreCatalogService,
+            new GloballyScopedDependenciesBuilder().with(graphStoreCatalogService).build(),
         null
         ).build();
 
@@ -90,7 +91,7 @@ class DefaultGraphCatalogApplicationsTest {
         var graphStoreCatalogService = mock(GraphStoreCatalogService.class);
         var facade = new DefaultGraphCatalogApplicationsBuilder(
             Log.noOpLog(),
-            graphStoreCatalogService,
+            new GloballyScopedDependenciesBuilder().with(graphStoreCatalogService).build(),
             null
         ).build();
 
@@ -151,7 +152,7 @@ class DefaultGraphCatalogApplicationsTest {
     void shouldHandleNullsInNativeProjectParameters() {
         var facade = new DefaultGraphCatalogApplicationsBuilder(
             Log.noOpLog(),
-            mock(GraphStoreCatalogService.class),
+            new GloballyScopedDependenciesBuilder().with(mock(GraphStoreCatalogService.class)).build(),
             null
         ).build();
 
@@ -216,7 +217,7 @@ class DefaultGraphCatalogApplicationsTest {
     void shouldHandleNullsInCypherProjectParameters() {
         var facade = new DefaultGraphCatalogApplicationsBuilder(
             Log.noOpLog(),
-            mock(GraphStoreCatalogService.class),
+            new GloballyScopedDependenciesBuilder().with(mock(GraphStoreCatalogService.class)).build(),
             null
         ).build();
 
@@ -279,7 +280,7 @@ class DefaultGraphCatalogApplicationsTest {
         var graphStoreCatalogService = mock(GraphStoreCatalogService.class);
         var facade = new DefaultGraphCatalogApplicationsBuilder(
             Log.noOpLog(),
-            graphStoreCatalogService,
+            new GloballyScopedDependenciesBuilder().with(graphStoreCatalogService).build(),
             null
         ).build();
 
@@ -332,7 +333,7 @@ class DefaultGraphCatalogApplicationsTest {
         var graphStoreCatalogService = mock(GraphStoreCatalogService.class);
         var facade = new DefaultGraphCatalogApplicationsBuilder(
             Log.noOpLog(),
-            graphStoreCatalogService,
+            new GloballyScopedDependenciesBuilder().with(graphStoreCatalogService).build(),
             null
         ).build();
 

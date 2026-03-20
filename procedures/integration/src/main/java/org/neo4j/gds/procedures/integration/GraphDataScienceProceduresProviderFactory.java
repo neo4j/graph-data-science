@@ -33,6 +33,7 @@ import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.logging.GdsLoggers;
 import org.neo4j.gds.core.utils.progress.TaskStoreService;
+import org.neo4j.gds.domain.services.GloballyScopedDependencies;
 import org.neo4j.gds.executor.MemoryEstimationContext;
 import org.neo4j.gds.mem.MemoryTracker;
 import org.neo4j.gds.metrics.Metrics;
@@ -60,11 +61,11 @@ final class GraphDataScienceProceduresProviderFactory {
     private final GdsLoggers loggers;
 
     private final Configuration neo4jConfiguration;
+    private final GloballyScopedDependencies globallyScopedDependencies;
     private final DefaultsConfiguration defaultsConfiguration;
     private final ExporterBuildersProviderService exporterBuildersProviderService;
     private final ExportLocation exportLocation;
     private final FeatureTogglesRepository featureTogglesRepository;
-    private final GraphStoreCatalogService graphStoreCatalogService;
     private final GraphStoreFactorySuppliers graphStoreFactorySuppliers;
     private final LicenseDetails licenseDetails;
     private final LimitsConfiguration limitsConfiguration;
@@ -79,11 +80,11 @@ final class GraphDataScienceProceduresProviderFactory {
     GraphDataScienceProceduresProviderFactory(
         GdsLoggers loggers,
         Configuration neo4jConfiguration,
+        GloballyScopedDependencies globallyScopedDependencies,
         DefaultsConfiguration defaultsConfiguration,
         ExporterBuildersProviderService exporterBuildersProviderService,
         ExportLocation exportLocation,
         FeatureTogglesRepository featureTogglesRepository,
-        GraphStoreCatalogService graphStoreCatalogService,
         GraphStoreFactorySuppliers graphStoreFactorySuppliers,
         LicenseDetails licenseDetails,
         LimitsConfiguration limitsConfiguration,
@@ -97,11 +98,11 @@ final class GraphDataScienceProceduresProviderFactory {
     ) {
         this.loggers = loggers;
         this.neo4jConfiguration = neo4jConfiguration;
+        this.globallyScopedDependencies = globallyScopedDependencies;
         this.defaultsConfiguration = defaultsConfiguration;
         this.exporterBuildersProviderService = exporterBuildersProviderService;
         this.exportLocation = exportLocation;
         this.featureTogglesRepository = featureTogglesRepository;
-        this.graphStoreCatalogService = graphStoreCatalogService;
         this.graphStoreFactorySuppliers = graphStoreFactorySuppliers;
         this.licenseDetails = licenseDetails;
         this.limitsConfiguration = limitsConfiguration;
@@ -131,12 +132,12 @@ final class GraphDataScienceProceduresProviderFactory {
         return new GraphDataScienceProceduresProvider(
             loggers,
             neo4jConfiguration,
+            globallyScopedDependencies,
             defaultsConfiguration,
             exporterBuildersProviderService,
             exportLocation,
             catalogProcedureFacadeFactory,
             featureTogglesRepository,
-            graphStoreCatalogService,
             graphStoreFactorySuppliers,
             licenseDetails,
             limitsConfiguration,

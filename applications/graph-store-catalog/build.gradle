@@ -34,7 +34,7 @@ dependencies {
     implementation project(':annotations')
     implementation project(':application-services')
     implementation project(':config-api')
-    implementation project(':core')
+    implementation project(':domain-services')
     implementation project(':core-write')
     implementation project(':csv')
     implementation project(':graph-projection-api')

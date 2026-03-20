@@ -40,13 +40,13 @@ import org.neo4j.gds.applications.algorithms.machinery.WriteNodePropertyService;
 import org.neo4j.gds.applications.modelcatalog.ModelRepository;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.core.RequestCorrelationId;
-import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.logging.GdsLoggers;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistry;
 import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.core.write.RelationshipExporterBuilder;
+import org.neo4j.gds.domain.services.GloballyScopedDependencies;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.gds.executor.MemoryEstimationContext;
 import org.neo4j.gds.logging.Log;
@@ -82,7 +82,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class PipelineApplications {
     private final Log log;
-    private final GraphStoreCatalogService graphStoreCatalogService;
+    private final GloballyScopedDependencies globallyScopedDependencies;
     private final MutateNodePropertyService mutateNodePropertyService;
     private final WriteNodePropertyService writeNodePropertyService;
     private final ModelCatalog modelCatalog;
@@ -122,7 +122,7 @@ public class PipelineApplications {
 
     PipelineApplications(
         Log log,
-        GraphStoreCatalogService graphStoreCatalogService,
+        GloballyScopedDependencies globallyScopedDependencies,
         MutateNodePropertyService mutateNodePropertyService,
         WriteNodePropertyService writeNodePropertyService,
         ModelCatalog modelCatalog,
@@ -154,7 +154,7 @@ public class PipelineApplications {
         NodeRegressionTrainComputationFactory nodeRegressionTrainComputationFactory
     ) {
         this.log = log;
-        this.graphStoreCatalogService = graphStoreCatalogService;
+        this.globallyScopedDependencies = globallyScopedDependencies;
         this.mutateNodePropertyService = mutateNodePropertyService;
         this.writeNodePropertyService = writeNodePropertyService;
         this.modelCatalog = modelCatalog;
@@ -188,7 +188,7 @@ public class PipelineApplications {
 
     static PipelineApplications create(
         GdsLoggers loggers,
-        GraphStoreCatalogService graphStoreCatalogService,
+        GloballyScopedDependencies globallyScopedDependencies,
         ModelCatalog modelCatalog,
         ModelRepository modelRepository,
         PipelineRepository pipelineRepository,
@@ -250,7 +250,7 @@ public class PipelineApplications {
 
         return new PipelineApplications(
             loggers.log(),
-            graphStoreCatalogService,
+            globallyScopedDependencies,
             mutateNodeProperty,
             writeNodePropertyService,
             modelCatalog,
@@ -401,7 +401,7 @@ public class PipelineApplications {
 
         var dimensionTransformer = new DimensionTransformerForLinkPrediction(
             log,
-            graphStoreCatalogService,
+            globallyScopedDependencies.graphStoreCatalogService(),
             databaseId,
             trainedLPPipelineModel,
             configuration

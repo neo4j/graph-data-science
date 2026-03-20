@@ -45,6 +45,8 @@ import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.TaskStore;
 import org.neo4j.gds.core.utils.progress.TaskStoreService;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistry;
+import org.neo4j.gds.domain.services.GloballyScopedDependencies;
+import org.neo4j.gds.domain.services.GloballyScopedDependenciesBuilder;
 import org.neo4j.gds.legacycypherprojection.CypherProjectionGraphStoreFactorySupplier;
 import org.neo4j.gds.legacycypherprojection.GraphProjectFromCypherConfig;
 import org.neo4j.gds.logging.Log;
@@ -98,7 +100,7 @@ public final class OpenGraphDataScienceExtensionBuilder {
     private final ModelCatalog modelCatalog;
 
     // services
-    private final GraphStoreCatalogService graphStoreCatalogService;
+    private final GloballyScopedDependencies globallyScopedDependencies;
     private final TaskStoreService taskStoreService;
     private final TaskRegistryFactoryService taskRegistryFactoryService;
     private final TaskStoreObserver taskStoreObserver;
@@ -111,8 +113,8 @@ public final class OpenGraphDataScienceExtensionBuilder {
         Log log,
         ComponentRegistration componentRegistration,
         DatabaseManagementService databaseManagementService,
+        GloballyScopedDependencies globallyScopedDependencies,
         GraphDataScienceProceduresProviderFactory graphDataScienceProceduresProviderFactory,
-        GraphStoreCatalogService graphStoreCatalogService,
         LicenseState licenseState,
         Metrics metrics,
         ModelCatalog modelCatalog,
@@ -131,7 +133,7 @@ public final class OpenGraphDataScienceExtensionBuilder {
         this.licenseState = licenseState;
         this.metrics = metrics;
         this.modelCatalog = modelCatalog;
-        this.graphStoreCatalogService = graphStoreCatalogService;
+        this.globallyScopedDependencies = globallyScopedDependencies;
         this.taskStoreService = taskStoreService;
         this.taskRegistryFactoryService = taskRegistryFactoryService;
         this.taskStoreObserver = taskStoreObserver;
@@ -169,9 +171,6 @@ public final class OpenGraphDataScienceExtensionBuilder {
         Optional<Function<GraphCatalogApplications, GraphCatalogApplications>> graphCatalogApplicationsDecorator,
         Optional<Function<ModelCatalogApplications, ModelCatalogApplications>> modelCatalogApplicationsDecorator
     ) {
-        // GraphStoreCatalog will one day not be a singleton
-        var graphStoreCatalogService = new GraphStoreCatalogService();
-
         singletonConfigurer.configureSingletons(concurrencyValidator, idMapBehavior, poolSizes);
 
         // Read some configuration used to select behaviour
@@ -202,8 +201,14 @@ public final class OpenGraphDataScienceExtensionBuilder {
         // We make it available in a neat service
         var memoryTracker = new MemoryTracker(availableMemory, log);
 
+        // GraphStoreCatalog will one day not be a singleton
+        var graphStoreCatalogService = new GraphStoreCatalogService();
         graphStoreCatalogService.registerGraphStoreAddedListener(memoryTracker);
         graphStoreCatalogService.registerGraphStoreRemovedListener(memoryTracker);
+
+        var globallyScopedDependencies = new GloballyScopedDependenciesBuilder()
+            .with(graphStoreCatalogService)
+            .build();
 
         // in the short term, until we eradicate old usages, we also install the shared state in its old place
         GcListenerExtension.setMemoryGauge(freeMemoryAfterLastGc);
@@ -240,11 +245,11 @@ public final class OpenGraphDataScienceExtensionBuilder {
         var graphDataScienceProviderFactory = new GraphDataScienceProceduresProviderFactory(
             loggers,
             neo4jConfiguration,
+            globallyScopedDependencies,
             defaultsConfiguration,
             exporterBuildersProviderService,
             exportLocation,
             featureTogglesRepository,
-            graphStoreCatalogService,
             graphStoreFactorySuppliers,
             LicenseDetails.from(licenseState),
             limitsConfiguration,
@@ -261,8 +266,8 @@ public final class OpenGraphDataScienceExtensionBuilder {
             log,
             componentRegistration,
             databaseManagementService,
+            globallyScopedDependencies,
             graphDataScienceProviderFactory,
-            graphStoreCatalogService,
             licenseState,
             metrics,
             modelCatalog,
@@ -304,8 +309,8 @@ public final class OpenGraphDataScienceExtensionBuilder {
 
         var lifeSupport = new LifeSupport();
         lifeSupport.add(gcListener);
-        lifeSupport.add(new GraphStoreCatalogLogInitializer(log, graphStoreCatalogService));
-        lifeSupport.add(InMemoryGraphTracker.create(databaseManagementService, graphStoreCatalogService));
+        lifeSupport.add(new GraphStoreCatalogLogInitializer(log, globallyScopedDependencies.graphStoreCatalogService()));
+        lifeSupport.add(InMemoryGraphTracker.create(databaseManagementService, globallyScopedDependencies.graphStoreCatalogService()));
 
         return lifeSupport;
     }

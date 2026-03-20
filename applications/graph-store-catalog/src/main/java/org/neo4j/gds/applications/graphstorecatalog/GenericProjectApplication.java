@@ -28,8 +28,8 @@ import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.RequestCorrelationId;
 import org.neo4j.gds.core.loading.GraphProjectResult;
-import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.utils.ProgressTimer;
+import org.neo4j.gds.domain.services.GloballyScopedDependencies;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.projection.GraphStoreFactorySuppliers;
 import org.neo4j.gds.transaction.TransactionContext;
@@ -44,18 +44,18 @@ import java.util.function.Function;
  */
 public class GenericProjectApplication<RESULT extends GraphProjectResult, CONFIGURATION extends GraphProjectConfig, RESULT_BUILDER extends GraphProjectResult.Builder<RESULT>> {
     private final Log log;
-    private final GraphStoreCatalogService graphStoreCatalogService;
+    private final GloballyScopedDependencies globallyScopedDependencies;
     private final GraphStoreFactorySuppliers graphStoreFactorySuppliers;
     private final Function<CONFIGURATION, RESULT_BUILDER> resultBuilderFactory;
 
     GenericProjectApplication(
         Log log,
-        GraphStoreCatalogService graphStoreCatalogService,
+        GloballyScopedDependencies globallyScopedDependencies,
         GraphStoreFactorySuppliers graphStoreFactorySuppliers,
         Function<CONFIGURATION, RESULT_BUILDER> resultBuilderFactory
     ) {
         this.log = log;
-        this.graphStoreCatalogService = graphStoreCatalogService;
+        this.globallyScopedDependencies = globallyScopedDependencies;
         this.graphStoreFactorySuppliers = graphStoreFactorySuppliers;
         this.resultBuilderFactory = resultBuilderFactory;
     }
@@ -140,7 +140,7 @@ public class GenericProjectApplication<RESULT extends GraphProjectResult, CONFIG
                 .withNodeCount(graphStore.nodeCount())
                 .withRelationshipCount(graphStore.relationshipCount());
 
-            graphStoreCatalogService.set(configuration, graphStore);
+            globallyScopedDependencies.graphStoreCatalogService().set(configuration, graphStore);
         }
 
         return resultBuilder.build();

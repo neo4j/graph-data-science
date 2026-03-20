@@ -1,6 +1,6 @@
 # Applications
 
-This directory hosts the application layer in the standard stack [citation needed]:
+This directory hosts the application layer in the [standard stack](https://en.wikipedia.org/wiki/Multitier_architecture):
 
 1) User interface
 2) Applications

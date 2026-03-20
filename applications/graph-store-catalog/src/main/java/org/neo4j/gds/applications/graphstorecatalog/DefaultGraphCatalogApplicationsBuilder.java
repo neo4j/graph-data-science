@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.applications.graphstorecatalog;
 
-import org.neo4j.gds.core.loading.GraphStoreCatalogService;
+import org.neo4j.gds.domain.services.GloballyScopedDependencies;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.metrics.projections.ProjectionMetricsService;
 
@@ -29,7 +29,7 @@ import org.neo4j.gds.metrics.projections.ProjectionMetricsService;
 class DefaultGraphCatalogApplicationsBuilder {
     // global dependencies
     private final Log log;
-    private final GraphStoreCatalogService graphStoreCatalogService;
+    private final GloballyScopedDependencies globallyScopedDependencies;
     private final ProjectionMetricsService projectionMetricsService;
     private final GraphNameValidationService graphNameValidationService;
 
@@ -59,12 +59,12 @@ class DefaultGraphCatalogApplicationsBuilder {
 
     public DefaultGraphCatalogApplicationsBuilder(
         Log log,
-        GraphStoreCatalogService graphStoreCatalogService,
+        GloballyScopedDependencies globallyScopedDependencies,
         ProjectionMetricsService projectionMetricsService
     ) {
         this(
             log,
-            graphStoreCatalogService,
+            globallyScopedDependencies,
             projectionMetricsService,
             new GraphNameValidationService()
         );
@@ -75,12 +75,12 @@ class DefaultGraphCatalogApplicationsBuilder {
      */
     DefaultGraphCatalogApplicationsBuilder(
         Log log,
-        GraphStoreCatalogService graphStoreCatalogService,
+        GloballyScopedDependencies globallyScopedDependencies,
         ProjectionMetricsService projectionMetricsService,
         GraphNameValidationService graphNameValidationService
     ) {
         this.log = log;
-        this.graphStoreCatalogService = graphStoreCatalogService;
+        this.globallyScopedDependencies = globallyScopedDependencies;
         this.projectionMetricsService = projectionMetricsService;
         this.graphNameValidationService = graphNameValidationService;
     }
@@ -204,7 +204,7 @@ class DefaultGraphCatalogApplicationsBuilder {
     DefaultGraphCatalogApplications build() {
         return new DefaultGraphCatalogApplications(
             log,
-            graphStoreCatalogService,
+            globallyScopedDependencies,
             projectionMetricsService,
             graphNameValidationService,
             cypherProjectApplication,

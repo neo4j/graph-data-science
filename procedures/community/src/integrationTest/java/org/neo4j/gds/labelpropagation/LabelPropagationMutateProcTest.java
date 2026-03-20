@@ -70,6 +70,7 @@ import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistry;
+import org.neo4j.gds.domain.services.GloballyScopedDependenciesBuilder;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
@@ -556,11 +557,11 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
         GraphStoreFactorySuppliers graphStoreFactorySuppliers = null; // break much?
         var applicationsFacade = ApplicationsFacade.create(
             new GdsLoggers(logMock, new LoggerForProgressTrackingAdapter(logMock)),
+            new GloballyScopedDependenciesBuilder().with(graphStoreCatalogService).build(),
             null,
             Optional.empty(),
             Optional.empty(),
             null,
-            graphStoreCatalogService,
             graphStoreFactorySuppliers,
             null,
             requestScopedDependencies,

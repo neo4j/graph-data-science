@@ -30,7 +30,7 @@ dependencies {
     integrationTestImplementation project(':algorithms-machinery')
     integrationTestImplementation project(':algorithms-procedure-facade')
     integrationTestImplementation project(':annotations')
-    integrationTestImplementation project(':core')
+    integrationTestImplementation project(':domain-services')
     integrationTestImplementation project(':graph-projection-api')
     integrationTestImplementation project(':graph-schema-api')
     integrationTestImplementation project(':neo4j-api')

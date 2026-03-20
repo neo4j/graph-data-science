@@ -37,6 +37,7 @@ import org.neo4j.gds.core.utils.progress.EmptyTaskStore;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogStore;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistry;
+import org.neo4j.gds.domain.services.GloballyScopedDependenciesBuilder;
 import org.neo4j.gds.executor.MemoryEstimationContext;
 import org.neo4j.gds.logging.LogAdapter;
 import org.neo4j.gds.mem.MemoryTracker;
@@ -47,7 +48,6 @@ import org.neo4j.gds.procedures.GraphCatalogProcedureFacadeFactory;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.LocalGraphDataScienceProcedures;
 import org.neo4j.gds.procedures.ProcedureCallContextReturnColumns;
-import org.neo4j.gds.projection.GraphStoreFactorySuppliers;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
@@ -155,7 +155,6 @@ public final class ProcedureRunner {
         Username username
     ) {
         var gdsLog = new LogAdapter(log);
-        GraphStoreFactorySuppliers graphStoreFactorySuppliers = null; // I wonder what will break new GraphStoreFactorySuppliers(/* probably make this long-lived */new HashMap<>());
 
         var procedureContext = WriteContext.builder().build();
 
@@ -171,21 +170,25 @@ public final class ProcedureRunner {
             .build();
         var graphStoreCatalogService = new GraphStoreCatalogService();
 
-        var catalogProcedureFacadeFactory = new GraphCatalogProcedureFacadeFactory(gdsLog, graphStoreFactorySuppliers);
+        var catalogProcedureFacadeFactory = new GraphCatalogProcedureFacadeFactory(gdsLog, null);
 
         var modelCatalog = new OpenModelCatalog();
 
         var loggers = new GdsLoggers(gdsLog, new LoggerForProgressTrackingAdapter(gdsLog));
 
+        var globallyScopedDependencies = new GloballyScopedDependenciesBuilder()
+            .with(graphStoreCatalogService)
+            .build();
+
         return LocalGraphDataScienceProcedures.create(
             loggers,
+            globallyScopedDependencies,
             new TelemetryLoggerImpl(loggers.log()),
             DefaultsConfiguration.Instance,
             null,
             catalogProcedureFacadeFactory,
             null,
-            graphStoreCatalogService,
-            graphStoreFactorySuppliers,
+            null,
             null,
             LimitsConfiguration.Instance,
             MemoryGuard.DISABLED,

@@ -69,6 +69,7 @@ import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistry;
+import org.neo4j.gds.domain.services.GloballyScopedDependenciesBuilder;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
@@ -560,12 +561,12 @@ class ModularityOptimizationMutateProcTest extends BaseProcTest {
         );
         var applicationsFacade = ApplicationsFacade.create(
             new GdsLoggers(logMock, new LoggerForProgressTrackingAdapter(logMock)),
+            new GloballyScopedDependenciesBuilder().with(graphStoreCatalogService).build(),
             null,
             Optional.empty(),
             Optional.empty(),
             null,
-            graphStoreCatalogService,
-            null, // break huh?
+            null,
             ProjectionMetricsService.DISABLED,
             requestScopedDependencies,
             WriteContext.builder().build(),

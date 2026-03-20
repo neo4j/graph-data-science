@@ -42,9 +42,9 @@ import org.neo4j.gds.applications.modelcatalog.ModelCatalogApplications;
 import org.neo4j.gds.applications.modelcatalog.ModelRepository;
 import org.neo4j.gds.applications.operations.FeatureTogglesRepository;
 import org.neo4j.gds.applications.operations.OperationsApplications;
-import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.logging.GdsLoggers;
+import org.neo4j.gds.domain.services.GloballyScopedDependencies;
 import org.neo4j.gds.metrics.projections.ProjectionMetricsService;
 import org.neo4j.gds.projection.GraphStoreFactorySuppliers;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -101,11 +101,11 @@ public final class ApplicationsFacade {
      */
     public static ApplicationsFacade create(
         GdsLoggers loggers,
+        GloballyScopedDependencies globallyScopedDependencies,
         ExportLocation exportLocation,
         Optional<Function<GraphCatalogApplications, GraphCatalogApplications>> graphCatalogApplicationsDecorator,
         Optional<Function<ModelCatalogApplications, ModelCatalogApplications>> modelCatalogApplicationsDecorator,
         FeatureTogglesRepository featureTogglesRepository,
-        GraphStoreCatalogService graphStoreCatalogService,
         GraphStoreFactorySuppliers graphStoreFactorySuppliers,
         ProjectionMetricsService projectionMetricsService,
         RequestScopedDependencies requestScopedDependencies,
@@ -145,8 +145,8 @@ public final class ApplicationsFacade {
 
         var graphCatalogApplications = createGraphCatalogApplications(
             loggers,
+            globallyScopedDependencies,
             exportLocation,
-            graphStoreCatalogService,
             graphStoreFactorySuppliers,
             projectionMetricsService,
             graphDatabaseService,
@@ -233,8 +233,8 @@ public final class ApplicationsFacade {
 
     private static GraphCatalogApplications createGraphCatalogApplications(
         GdsLoggers loggers,
+        GloballyScopedDependencies globallyScopedDependencies,
         ExportLocation exportLocation,
-        GraphStoreCatalogService graphStoreCatalogService,
         GraphStoreFactorySuppliers graphStoreFactorySuppliers,
         ProjectionMetricsService projectionMetricsService,
         GraphDatabaseService graphDatabaseService,
@@ -243,8 +243,8 @@ public final class ApplicationsFacade {
     ) {
         var graphCatalogApplications = DefaultGraphCatalogApplications.create(
             loggers,
+            globallyScopedDependencies,
             exportLocation,
-            graphStoreCatalogService,
             graphStoreFactorySuppliers,
             projectionMetricsService,
             graphDatabaseService,

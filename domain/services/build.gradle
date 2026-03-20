@@ -1,0 +1,20 @@
+plugins {
+    id 'buildlogic-gds-java'
+}
+
+description = 'Neo4j Graph Data Science :: Domain Services'
+
+group = 'org.neo4j.gds'
+
+test {
+    useJUnitPlatform()
+}
+
+dependencies {
+    api project(':core') // Ves is going to be so proud of me
+
+    testImplementation platform(openGds.junit.bom)
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+
+    testRuntimeOnly openGds.bundles.test.platforms
+}

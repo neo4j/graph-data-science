@@ -40,6 +40,7 @@ import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.logging.GdsLoggers;
+import org.neo4j.gds.domain.services.GloballyScopedDependencies;
 import org.neo4j.gds.executor.MemoryEstimationContext;
 import org.neo4j.gds.functions.FunctionsFacade;
 import org.neo4j.gds.functions.LocalFunctionsFacade;
@@ -111,12 +112,12 @@ public class LocalGraphDataScienceProcedures implements GraphDataScienceProcedur
 
     public static GraphDataScienceProcedures create(
         GdsLoggers loggers,
+        GloballyScopedDependencies globallyScopedDependencies,
         TelemetryLogger telemetryLogger,
         DefaultsConfiguration defaultsConfiguration,
         ExportLocation exportLocation,
         GraphCatalogProcedureFacadeFactory graphCatalogProcedureFacadeFactory,
         FeatureTogglesRepository featureTogglesRepository,
-        GraphStoreCatalogService graphStoreCatalogService,
         GraphStoreFactorySuppliers graphStoreFactorySuppliers,
         LicenseDetails licenseDetails,
         LimitsConfiguration limitsConfiguration,
@@ -151,7 +152,7 @@ public class LocalGraphDataScienceProcedures implements GraphDataScienceProcedur
 
         var algorithmEstimationTemplate = new AlgorithmEstimationTemplate(
             new FictitiousGraphStoreEstimationService(graphStoreFactorySuppliers),
-            graphStoreCatalogService,
+            globallyScopedDependencies.graphStoreCatalogService(),
             databaseGraphStoreEstimationService,
             requestScopedDependencies
         );
@@ -160,7 +161,7 @@ public class LocalGraphDataScienceProcedures implements GraphDataScienceProcedur
             loggers.log(),
             telemetryLogger,
             algorithmProcessingTemplateDecorator,
-            graphStoreCatalogService,
+            globallyScopedDependencies.graphStoreCatalogService(),
             memoryGuard,
             metrics.algorithmMetrics(),
             requestScopedDependencies
@@ -173,11 +174,11 @@ public class LocalGraphDataScienceProcedures implements GraphDataScienceProcedur
 
         var applicationsFacade = ApplicationsFacade.create(
             loggers,
+            globallyScopedDependencies,
             exportLocation,
             graphCatalogApplicationsDecorator,
             modelCatalogApplicationsDecorator,
             featureTogglesRepository,
-            graphStoreCatalogService,
             graphStoreFactorySuppliers,
             metrics.projectionMetrics(),
             requestScopedDependencies,
@@ -227,7 +228,7 @@ public class LocalGraphDataScienceProcedures implements GraphDataScienceProcedur
 
         var pipelinesProcedureFacade = LocalPipelinesProcedureFacade.create(
             loggers,
-            graphStoreCatalogService,
+            globallyScopedDependencies,
             modelCatalog,
             modelRepository,
             pipelineRepository,

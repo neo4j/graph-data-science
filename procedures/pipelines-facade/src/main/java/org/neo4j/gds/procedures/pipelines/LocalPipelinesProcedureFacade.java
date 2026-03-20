@@ -28,9 +28,9 @@ import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
 import org.neo4j.gds.applications.modelcatalog.ModelRepository;
-import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.logging.GdsLoggers;
+import org.neo4j.gds.domain.services.GloballyScopedDependencies;
 import org.neo4j.gds.executor.MemoryEstimationContext;
 import org.neo4j.gds.metrics.Metrics;
 import org.neo4j.gds.ml.pipeline.TrainingPipeline;
@@ -61,7 +61,7 @@ public final class LocalPipelinesProcedureFacade implements PipelinesProcedureFa
 
     public static PipelinesProcedureFacade create(
         GdsLoggers loggers,
-        GraphStoreCatalogService graphStoreCatalogService,
+        GloballyScopedDependencies globallyScopedDependencies,
         ModelCatalog modelCatalog,
         ModelRepository modelRepository,
         PipelineRepository pipelineRepository,
@@ -80,10 +80,9 @@ public final class LocalPipelinesProcedureFacade implements PipelinesProcedureFa
     ) {
         var pipelineConfigurationParser = new PipelineConfigurationParser(requestScopedDependencies.user());
 
-
         var pipelineApplications = PipelineApplications.create(
             loggers,
-            graphStoreCatalogService,
+            globallyScopedDependencies,
             modelCatalog,
             modelRepository,
             pipelineRepository,

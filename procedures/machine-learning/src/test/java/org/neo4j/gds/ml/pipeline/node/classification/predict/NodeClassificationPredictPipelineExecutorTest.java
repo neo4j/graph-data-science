@@ -448,9 +448,9 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
         var applicationsFacade = ApplicationsFacade.create(
             new GdsLoggers(Log.noOpLog(), LoggerForProgressTracking.noOpLog()),
             null,
-            Optional.empty(),
-            Optional.empty(),
             null,
+            Optional.empty(),
+            Optional.empty(),
             null,
             null,
             null,
