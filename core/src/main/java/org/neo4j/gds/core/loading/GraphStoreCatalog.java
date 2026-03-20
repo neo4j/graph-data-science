@@ -21,7 +21,6 @@ package org.neo4j.gds.core.loading;
 
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.TestOnly;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.EphemeralResultStore;
 import org.neo4j.gds.api.GraphStore;
@@ -82,7 +81,7 @@ public final class GraphStoreCatalog {
     }
 
     public static GraphStoreCatalogEntry get(CatalogRequest request, String graphName) {
-        var userCatalogKey = UserCatalog.UserCatalogKey.of(request.databaseName(), graphName);
+        var userCatalogKey = UserCatalogKey.of(request.databaseName(), graphName);
         var ownCatalog = getUserCatalog(request.username());
 
         var maybeGraph = ownCatalog.get(userCatalogKey, request.restrictSearchToUsernameCatalog());
@@ -130,7 +129,7 @@ public final class GraphStoreCatalog {
         Consumer<GraphStoreCatalogEntry> removedGraphConsumer,
         boolean failOnMissing
     ) {
-        var userCatalogKey = UserCatalog.UserCatalogKey.of(request.databaseName(), graphName);
+        var userCatalogKey = UserCatalogKey.of(request.databaseName(), graphName);
         var ownCatalog = getUserCatalog(request.username());
 
         var didRemove = ownCatalog.remove(
@@ -190,7 +189,7 @@ public final class GraphStoreCatalog {
                 userCatalog = new UserCatalog();
             }
             userCatalog.set(
-                UserCatalog.UserCatalogKey.of(graphStore.databaseInfo().databaseId(), config.graphName()),
+                UserCatalogKey.of(graphStore.databaseInfo().databaseId().databaseName(), config.graphName()),
                 config,
                 graphStore
             );
@@ -219,11 +218,11 @@ public final class GraphStoreCatalog {
     }
 
     public static boolean exists(String username, String databaseName, String graphName) {
-        return getUserCatalog(username).exists(UserCatalog.UserCatalogKey.of(databaseName, graphName));
+        return getUserCatalog(username).exists(UserCatalogKey.of(databaseName, graphName));
     }
 
     public static boolean exists(String username, DatabaseId databaseId, String graphName) {
-        return getUserCatalog(username).exists(UserCatalog.UserCatalogKey.of(databaseId, graphName));
+        return getUserCatalog(username).exists(UserCatalogKey.of(databaseId.databaseName(), graphName));
     }
 
     public static int graphStoreCount() {
@@ -251,7 +250,7 @@ public final class GraphStoreCatalog {
         DatabaseId databaseId,
         String graphName
     ) {
-        return getUserCatalog(username).getDegreeDistribution(UserCatalog.UserCatalogKey.of(databaseId, graphName));
+        return getUserCatalog(username).getDegreeDistribution(UserCatalogKey.of(databaseId.databaseName(), graphName));
     }
 
     public static void setDegreeDistribution(
@@ -261,7 +260,7 @@ public final class GraphStoreCatalog {
         Map<String, Object> degreeDistribution
     ) {
         getUserCatalog(username).setDegreeDistribution(
-            UserCatalog.UserCatalogKey.of(databaseId, graphName),
+            UserCatalogKey.of(databaseId.databaseName(), graphName),
             degreeDistribution
         );
     }
@@ -309,23 +308,16 @@ public final class GraphStoreCatalog {
     public record GraphStoreCatalogEntryWithUsername(GraphStoreCatalogEntry catalogEntry, String username) {
     }
 
-    static class UserCatalog {
+    public record UserCatalogKey(
+        String databaseName,
+        String graphName) {
 
-        @ValueClass
-        public interface UserCatalogKey {
-
-            String graphName();
-
-            String databaseName();
-
-            static UserCatalogKey of(DatabaseId databaseId, String graphName) {
-                return of(databaseId.databaseName(), graphName);
-            }
-
-            static UserCatalogKey of(String databaseName, String graphName) {
-                return ImmutableUserCatalogKey.of(graphName, databaseName);
-            }
+        public static UserCatalogKey of(String databaseName, String graphName) {
+            return new UserCatalogKey(databaseName, graphName);
         }
+    }
+
+    private static class UserCatalog {
 
         private static final UserCatalog EMPTY = new UserCatalog();
 
