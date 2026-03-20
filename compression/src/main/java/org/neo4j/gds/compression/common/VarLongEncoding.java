@@ -21,6 +21,10 @@ package org.neo4j.gds.compression.common;
 
 import org.neo4j.internal.unsafe.UnsafeUtil;
 
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.VarHandle;
+import java.nio.ByteOrder;
+
 public final class VarLongEncoding {
 
     public static final long THRESHOLD_1_BYTE = 128L;
@@ -31,6 +35,11 @@ public final class VarLongEncoding {
     public static final long THRESHOLD_6_BYTE = 4398046511104L;
     public static final long THRESHOLD_7_BYTE = 562949953421312L;
     public static final long THRESHOLD_8_BYTE = 72057594037927936L;
+
+    private static final VarHandle LONG_VIEW = MethodHandles.byteArrayViewVarHandle(
+        long[].class,
+        ByteOrder.nativeOrder()
+    );
 
     public static int encodeVLongs(long[] values, int limit, byte[] out, int into) {
         return encodeVLongs(values, 0, limit, out, into);
@@ -52,17 +61,44 @@ public final class VarLongEncoding {
         return size;
     }
 
+    /**
+     * Uses SWAR (simd within a register) to compute the length of compressed targets
+     * by checking 8 bytes (long) at once for terminal bytes of var-length encoding.
+     *
+     * @param page page containing compressed targets
+     * @param offset offset in page from which to start counting
+     * @param count number of encoded targets
+     * @return the length of the compressed targets representation
+     */
     public static int encodedVLongsByteSize(byte[] page, int offset, int count) {
         int indexInPage = offset;
-        for (int i = 0; i < count; i++) {
+        int values = 0;
+
+        // swar
+        while (values < count && (indexInPage + Long.BYTES) < page.length) {
+            long word = (long) LONG_VIEW.get(page, indexInPage);
+            // isolate each sign-bit:
             // during compression, we mark the last byte of a var long by
             // setting the MSB (sign bit) to 1 and end up with a negative value.
+            long signs = word & 0x8080808080808080L;
+            int valueCount = Long.bitCount(signs);
+            if (values + valueCount >= count) {
+                break;
+            }
+            values += valueCount;
+            indexInPage += Long.BYTES;
+        }
+
+        // tail
+        while (values < count) {
             while (page[indexInPage] >= 0) {
                 indexInPage++;
             }
             // account for the last byte of the var long
             indexInPage++;
+            values++;
         }
+
         return indexInPage - offset;
     }
 
