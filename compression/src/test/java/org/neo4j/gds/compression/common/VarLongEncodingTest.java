@@ -38,8 +38,11 @@ class VarLongEncodingTest {
         VarLongEncoding.encodeVLongs(targets1, 0, targets1.length, page, into);
         VarLongEncoding.encodeVLongs(targets2, 0, targets2.length, page, into + targets1EncodedSize);
 
-        assertThat(targets1EncodedSize).isEqualTo(VarLongEncoding.encodedVLongsByteSize(page, into, targets1.length));
-        assertThat(targets2EncodedSize).isEqualTo(VarLongEncoding.encodedVLongsByteSize(page, into + targets1EncodedSize, targets2.length));
+        var result1 = VarLongEncoding.encodedVLongsByteSize(page, into, targets1.length);
+        var result2 = VarLongEncoding.encodedVLongsByteSize(page, into + targets1EncodedSize, targets2.length);
+
+        assertThat(result1).isEqualTo(targets1EncodedSize);
+        assertThat(result2).isEqualTo(targets2EncodedSize);
     }
 
     @Test
@@ -54,7 +57,7 @@ class VarLongEncodingTest {
 
         int result = VarLongEncoding.encodedVLongsByteSize(page, into, targets.length);
 
-        assertThat(targetsEncodedSize).isEqualTo(result);
+        assertThat(result).isEqualTo(targetsEncodedSize);
     }
 
     @Test
@@ -69,7 +72,7 @@ class VarLongEncodingTest {
 
         int result = VarLongEncoding.encodedVLongsByteSize(page, into, targets.length);
 
-        assertThat(targetsEncodedSize).isEqualTo(result);
+        assertThat(result).isEqualTo(targetsEncodedSize);
     }
 
     @Test
@@ -85,6 +88,21 @@ class VarLongEncodingTest {
 
         int result = VarLongEncoding.encodedVLongsByteSize(page, into, targets.length);
 
-        assertThat(targetsEncodedSize).isEqualTo(result);
+        assertThat(result).isEqualTo(targetsEncodedSize);
+    }
+
+    @Test
+    void encodedVLongByteSizeWithLessThanOneWordLeftInPage() {
+        var targets = new long[]{0, 1, 2, 3, 4, 5, 6};
+
+        int targetsEncodedSize = VarLongEncoding.encodedVLongsSize(targets, 0, targets.length);
+
+        byte[] page = new byte[56];
+        int into = 0;
+        VarLongEncoding.encodeVLongs(targets, 0, targets.length, page, into);
+
+        int result = VarLongEncoding.encodedVLongsByteSize(page, into, targets.length);
+
+        assertThat(result).isEqualTo(targetsEncodedSize);
     }
 }
