@@ -34,6 +34,7 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistry;
+import org.neo4j.gds.domain.services.GloballyScopedDependenciesBuilder;
 import org.neo4j.gds.executor.MemoryEstimationContext;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.metrics.Metrics;
@@ -120,7 +121,7 @@ class NodeClassificationTrainComputationTest {
 
         return new NodeClassificationTrainComputation(
             Log.noOpLog(),
-            null,
+            new GloballyScopedDependenciesBuilder().build(),
             pipelineRepository,
             CloseableResourceRegistry.EMPTY,
             DatabaseId.DEFAULT,

@@ -25,6 +25,8 @@ import org.neo4j.gds.api.User;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.Computation;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
+import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.domain.services.GloballyScopedDependenciesBuilder;
 import org.neo4j.gds.ml.metrics.regression.RegressionMetrics;
 import org.neo4j.gds.ml.pipeline.nodePipeline.regression.NodeRegressionTrainResult;
 
@@ -49,7 +51,7 @@ class PipelineApplicationsTest {
         var nodeRegressionTrainComputationFactory = mock(NodeRegressionTrainComputationFactory.class);
         var pipelineApplications = new PipelineApplications(
             null,
-            null,
+            new GloballyScopedDependenciesBuilder().with(ModelCatalog.EMPTY).build(),
             null,
             null,
             null,
