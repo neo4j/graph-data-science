@@ -58,7 +58,7 @@ final class GraphDataScienceProceduresProviderFactory {
     private final GdsLoggers loggers;
 
     private final Configuration neo4jConfiguration;
-    private final EditionSpecifics editionSpecifics;
+    private final OpenGraphDataScienceSpecifics openGraphDataScienceSpecifics;
     private final GloballyScopedDependencies globallyScopedDependencies;
     private final DefaultsConfiguration defaultsConfiguration;
     private final ExportLocation exportLocation;
@@ -76,7 +76,7 @@ final class GraphDataScienceProceduresProviderFactory {
     GraphDataScienceProceduresProviderFactory(
         GdsLoggers loggers,
         Configuration neo4jConfiguration,
-        EditionSpecifics editionSpecifics,
+        OpenGraphDataScienceSpecifics openGraphDataScienceSpecifics,
         GloballyScopedDependencies globallyScopedDependencies,
         DefaultsConfiguration defaultsConfiguration,
         ExportLocation exportLocation,
@@ -93,7 +93,7 @@ final class GraphDataScienceProceduresProviderFactory {
     ) {
         this.loggers = loggers;
         this.neo4jConfiguration = neo4jConfiguration;
-        this.editionSpecifics = editionSpecifics;
+        this.openGraphDataScienceSpecifics = openGraphDataScienceSpecifics;
         this.globallyScopedDependencies = globallyScopedDependencies;
         this.defaultsConfiguration = defaultsConfiguration;
         this.exportLocation = exportLocation;
@@ -126,7 +126,7 @@ final class GraphDataScienceProceduresProviderFactory {
         return new GraphDataScienceProceduresProvider(
             loggers,
             neo4jConfiguration,
-            editionSpecifics,
+            openGraphDataScienceSpecifics,
             globallyScopedDependencies,
             defaultsConfiguration,
             exportLocation,

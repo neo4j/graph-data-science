@@ -77,7 +77,7 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
     private final GdsLoggers loggers;
     private final Configuration neo4jConfiguration;
 
-    private final EditionSpecifics editionSpecifics;
+    private final OpenGraphDataScienceSpecifics openGraphDataScienceSpecifics;
     private final GloballyScopedDependencies globallyScopedDependencies;
     private final DefaultsConfiguration defaultsConfiguration;
     private final ExportLocation exportLocation;
@@ -103,7 +103,7 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
     GraphDataScienceProceduresProvider(
         GdsLoggers loggers,
         Configuration neo4jConfiguration,
-        EditionSpecifics editionSpecifics,
+        OpenGraphDataScienceSpecifics openGraphDataScienceSpecifics,
         GloballyScopedDependencies globallyScopedDependencies,
         DefaultsConfiguration defaultsConfiguration,
         ExportLocation exportLocation,
@@ -128,7 +128,7 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
     ) {
         this.loggers = loggers;
         this.neo4jConfiguration = neo4jConfiguration;
-        this.editionSpecifics = editionSpecifics;
+        this.openGraphDataScienceSpecifics = openGraphDataScienceSpecifics;
         this.globallyScopedDependencies = globallyScopedDependencies;
 
         this.defaultsConfiguration = defaultsConfiguration;
@@ -238,7 +238,7 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
         ExporterContext exporterContext,
         GraphDatabaseService graphDatabaseService
     ) {
-        var exportBuildersProvider = editionSpecifics.exporterBuildersProviderService()
+        var exportBuildersProvider = openGraphDataScienceSpecifics.exporterBuildersProviderService()
             .identifyExportBuildersProvider(
                 graphDatabaseService,
                 neo4jConfiguration

@@ -27,10 +27,10 @@ import org.neo4j.gds.procedures.ExporterBuildersProviderService;
  * We establish a marker and separator, to distinguish from other plumbing bits.
  * And we greatly shorten parameter lists.
  */
-public class EditionSpecifics {
+public class OpenGraphDataScienceSpecifics {
     private final ExporterBuildersProviderService exporterBuildersProviderService;
 
-    public EditionSpecifics(ExporterBuildersProviderService exporterBuildersProviderService) {
+    public OpenGraphDataScienceSpecifics(ExporterBuildersProviderService exporterBuildersProviderService) {
         this.exporterBuildersProviderService = exporterBuildersProviderService;
     }
 

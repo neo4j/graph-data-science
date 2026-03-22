@@ -21,15 +21,15 @@ package org.neo4j.gds.extension;
 
 import org.neo4j.gds.core.write.NativeExportBuildersProvider;
 import org.neo4j.gds.procedures.ExporterBuildersProviderService;
-import org.neo4j.gds.procedures.integration.EditionSpecifics;
+import org.neo4j.gds.procedures.integration.OpenGraphDataScienceSpecifics;
 
 /**
  * Here we capture the choices for the open edition of GDS.
  */
 class OpenGraphDataScienceSpecificsBuilder {
-    EditionSpecifics build() {
+    OpenGraphDataScienceSpecifics build() {
         ExporterBuildersProviderService exporterBuildersProviderService = (__, ___) -> new NativeExportBuildersProvider(); // we always just offer native writes in OpenGDS
 
-        return new EditionSpecifics(exporterBuildersProviderService);
+        return new OpenGraphDataScienceSpecifics(exporterBuildersProviderService);
     }
 }
