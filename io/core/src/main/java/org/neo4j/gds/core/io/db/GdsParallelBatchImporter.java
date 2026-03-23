@@ -41,6 +41,7 @@ import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.io.layout.Neo4jLayout;
 import org.neo4j.io.pagecache.context.CursorContextFactory;
 import org.neo4j.io.pagecache.tracing.PageCacheTracer;
+import org.neo4j.kernel.DatabaseCreationOptions;
 import org.neo4j.kernel.api.index.IndexProvidersAccess;
 import org.neo4j.kernel.impl.index.schema.DefaultIndexProvidersAccess;
 import org.neo4j.kernel.impl.index.schema.IndexImporterFactoryImpl;
@@ -270,7 +271,9 @@ public final class GdsParallelBatchImporter {
             CursorContextFactory.NULL_CONTEXT_FACTORY,
             indexProvidersAccess,
             1,
-            EmptyDependencyResolver.EMPTY_RESOLVER
+            EmptyDependencyResolver.EMPTY_RESOLVER,
+            // Not sure the empty is actually correct here but it's on par with the rest.
+            DatabaseCreationOptions.EMPTY_CREATION_OPTIONS
         );
     }
 
