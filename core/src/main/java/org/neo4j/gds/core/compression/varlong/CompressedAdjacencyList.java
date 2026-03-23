@@ -304,7 +304,7 @@ public final class CompressedAdjacencyList implements AdjacencyList {
             // regular page
             slice.setSlice(page);
             slice.setOffset(indexInPage);
-            slice.setLength(VarLongEncoding.encodedVLongsByteSize(page, indexInPage, degree));
+            slice.setLength(VarLongEncoding.encodedByteLength(page, indexInPage, degree));
         }
 
         return true;

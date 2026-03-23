@@ -27,19 +27,14 @@ import java.nio.ByteOrder;
 
 public final class VarLongEncoding {
 
-    public static final long THRESHOLD_1_BYTE = 128L;
-    public static final long THRESHOLD_2_BYTE = 16384L;
-    public static final long THRESHOLD_3_BYTE = 2097152L;
-    public static final long THRESHOLD_4_BYTE = 268435456L;
-    public static final long THRESHOLD_5_BYTE = 34359738368L;
-    public static final long THRESHOLD_6_BYTE = 4398046511104L;
-    public static final long THRESHOLD_7_BYTE = 562949953421312L;
-    public static final long THRESHOLD_8_BYTE = 72057594037927936L;
-
-    private static final VarHandle LONG_VIEW = MethodHandles.byteArrayViewVarHandle(
-        long[].class,
-        ByteOrder.nativeOrder()
-    );
+    private static final long THRESHOLD_1_BYTE = 128L;
+    private static final long THRESHOLD_2_BYTE = 16384L;
+    private static final long THRESHOLD_3_BYTE = 2097152L;
+    private static final long THRESHOLD_4_BYTE = 268435456L;
+    private static final long THRESHOLD_5_BYTE = 34359738368L;
+    private static final long THRESHOLD_6_BYTE = 4398046511104L;
+    private static final long THRESHOLD_7_BYTE = 562949953421312L;
+    private static final long THRESHOLD_8_BYTE = 72057594037927936L;
 
     public static int encodeVLongs(long[] values, int limit, byte[] out, int into) {
         return encodeVLongs(values, 0, limit, out, into);
@@ -61,46 +56,6 @@ public final class VarLongEncoding {
         return size;
     }
 
-    /**
-     * Uses SWAR (simd within a register) to compute the length of compressed targets
-     * by checking 8 bytes (long) at once for terminal bytes of var-length encoding.
-     *
-     * @param page page containing compressed targets
-     * @param offset offset in page from which to start counting
-     * @param count number of encoded targets
-     * @return the length of the compressed targets representation
-     */
-    public static int encodedVLongsByteSize(byte[] page, int offset, int count) {
-        int indexInPage = offset;
-        int values = 0;
-
-        // swar
-        while (values < count && (indexInPage + Long.BYTES) < page.length) {
-            long word = (long) LONG_VIEW.get(page, indexInPage);
-            // isolate each sign-bit:
-            // during compression, we mark the last byte of a var long by
-            // setting the MSB (sign bit) to 1 and end up with a negative value.
-            long signs = word & 0x8080808080808080L;
-            int valueCount = Long.bitCount(signs);
-            if (values + valueCount >= count) {
-                break;
-            }
-            values += valueCount;
-            indexInPage += Long.BYTES;
-        }
-
-        // tail
-        while (values < count) {
-            while (page[indexInPage] >= 0) {
-                indexInPage++;
-            }
-            // account for the last byte of the var long
-            indexInPage++;
-            values++;
-        }
-
-        return indexInPage - offset;
-    }
 
     public static int encodeVLongs(long[] values, int offset, int end, byte[] out, int into) {
         for (int i = offset; i < end; ++i) {
@@ -289,6 +244,91 @@ public final class VarLongEncoding {
 
     public static long zigZag(final long value) {
         return (value >> 63) ^ (value << 1);
+    }
+
+    private static final VarHandle LONG_VIEW = MethodHandles.byteArrayViewVarHandle(
+        long[].class,
+        ByteOrder.nativeOrder()
+    );
+
+    /**
+     * Mask all sign bits within an 8 Byte word
+     */
+    private static final long SIGN_BIT_MASK_8BYTE = 0x8080808080808080L;
+
+    /**
+     * Uses SWAR (simd within a register) to compute the length of compressed targets
+     * by checking 8 bytes (long) at once for terminal bytes of var-length encoding.
+     *
+     * @param page page containing compressed targets
+     * @param offset offset in page from which to start counting
+     * @param count number of encoded targets
+     * @return the length of the compressed targets representation
+     */
+    public static int encodedByteLength(byte[] page, int offset, int count) {
+        int indexInPage = offset;
+        int values = 0;
+
+        // SWAR: moving in 8 Byte steps
+        while (values < count && (indexInPage + Long.BYTES) < page.length) {
+            long word = (long) LONG_VIEW.get(page, indexInPage);
+            // isolate sign bits within the word:
+            long signs = word & SIGN_BIT_MASK_8BYTE;
+            // if a sign bit is a one-bit, it indicates the end of a compressed value
+            int valueCount = Long.bitCount(signs);
+            if (values + valueCount >= count) {
+                break;
+            }
+            values += valueCount;
+            indexInPage += Long.BYTES;
+        }
+
+        // tail
+        while (values < count) {
+            // if the sign bit is a one-bit, its byte value is negative
+            while (page[indexInPage] >= 0) {
+                indexInPage++;
+            }
+            // account for the last byte of the var long
+            indexInPage++;
+            values++;
+        }
+
+        return indexInPage - offset;
+    }
+
+    /**
+     * Uses SWAR (simd within a register) to compute the number of compressed targets
+     * by checking 8 bytes (long) at once for terminal bytes of var-length encoding.
+     *
+     * @param page page containing compressed targets
+     * @param offset offset in page from which to start counting
+     * @param length length of the slice to search
+     * @return the number of the compressed targets representation
+     */
+    public static int encodedValueCount(byte[] page, int offset, int length) {
+        int indexInPage = offset;
+        int values = 0;
+
+        // SWAR: moving in 8 Byte steps
+        while (indexInPage + Long.BYTES < page.length && indexInPage + Long.BYTES < offset + length) {
+            long word = (long) LONG_VIEW.get(page, indexInPage);
+            // isolate sign bits within the word
+            long signs = word & SIGN_BIT_MASK_8BYTE;
+            // if a sign bit is a one-bit, it indicates the end of a compressed value
+            values += Long.bitCount(signs);
+            indexInPage += Long.BYTES;
+        }
+
+        // tail
+        while (indexInPage < offset + length) {
+            // if the sign bit is a one-bit, its byte value is negative
+            if (page[indexInPage] < 0) {
+                values++;
+            }
+            indexInPage++;
+        }
+        return values;
     }
 
     private VarLongEncoding() {

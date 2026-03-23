@@ -22,15 +22,7 @@ package org.neo4j.gds.compression.common;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.internal.unsafe.UnsafeUtil;
 
-import java.lang.invoke.MethodHandles;
-import java.lang.invoke.VarHandle;
-import java.nio.ByteOrder;
-
 public final class VarLongDecoding {
-    private static final VarHandle LONG_VIEW = MethodHandles.byteArrayViewVarHandle(
-        long[].class,
-        ByteOrder.nativeOrder()
-    );
 
     public static int decodeDeltaVLongs(
         long startValue,
@@ -138,41 +130,4 @@ public final class VarLongDecoding {
         throw new UnsupportedOperationException("No instances");
     }
 
-    public static int decodeDeltaVLongsLength(byte[] page, int offset, int length) {
-        int count = 0;
-        for (int indexInPage = offset; indexInPage < offset + length; indexInPage++) {
-            // during compression, we mark the last byte of a var long by
-            // setting the MSB (sign bit) to 1 and end up with a negative value.
-            if (page[indexInPage] < 0) {
-                count++;
-            }
-        }
-        return count;
-    }
-
-    public static int decodeDeltaVLongsLengthSwar(byte[] page, int offset, int length) {
-        int indexInPage = offset;
-        int values = 0;
-
-        // swar
-        while (indexInPage + Long.BYTES < page.length && indexInPage + Long.BYTES < offset + length) {
-            long word = (long) LONG_VIEW.get(page, indexInPage);
-            long signs = word & 0x8080808080808080L;
-            int valueCount = Long.bitCount(signs);
-
-            values += valueCount;
-            indexInPage += Long.BYTES;
-        }
-
-        // tail
-        while (indexInPage < offset + length) {
-            // during compression, we mark the last byte of a var long by
-            // setting the MSB (sign bit) to 1 and end up with a negative value.
-            if (page[indexInPage] < 0) {
-                values++;
-            }
-            indexInPage++;
-        }
-        return values;
-    }
 }
