@@ -24,9 +24,9 @@ import java.util.NoSuchElementException;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class GraphNotFoundException extends NoSuchElementException {
-    private final GraphStoreCatalog.UserCatalog.UserCatalogKey userCatalogKey;
+    private final GraphStoreCatalog.UserCatalogKey userCatalogKey;
 
-    public GraphNotFoundException(GraphStoreCatalog.UserCatalog.UserCatalogKey userCatalogKey) {
+    public GraphNotFoundException(GraphStoreCatalog.UserCatalogKey userCatalogKey) {
         super(
             formatWithLocale(
                 "Graph with name `%s` does not exist on database `%s`. It might exist on another database.",
