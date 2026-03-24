@@ -154,6 +154,9 @@ class SequentialDischarging {
     }
 
     void discharge(long v) {
+       if (MaxFlowFunctions.treatAsNonPositive(excess.get(v))) {
+            return;
+        }
         var oldLabel = label.get(v);
         if (oldLabel >= flowGraph.nodeCount()) { //only used by gap-heuristic (if gap-relabeled after added to workingQueue)
             return;
