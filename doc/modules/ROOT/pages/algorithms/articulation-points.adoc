@@ -13,7 +13,7 @@ include::partial$/algorithms/shared/algorithm-traits.adoc[]
 [[algorithms-articulation-points-intro]]
 == Introduction
 
-Given a graph, an articulation point is a node whose removal increases the number of connected components in the graph.
+Given a graph, an articulation point is a node whose removal increases the number of disconnected components in the graph.
 The  Neo4j GDS Library provides an efficient linear time sequential algorithm to compute all articulation points in a graph.
 
 
