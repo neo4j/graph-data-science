@@ -66,5 +66,4 @@ dependencies {
     testImplementation openGds.gdl
 
     testImplementation project(':node-embedding-algorithms')
-    testImplementation project(':similarity-algorithms')
 }
