@@ -26,11 +26,8 @@ import com.carrotsearch.hppc.LongSet;
 import org.immutables.builder.Builder;
 import org.neo4j.common.DependencyResolver;
 import org.neo4j.gds.ElementIdentifier;
-import org.neo4j.gds.ElementProjection;
 import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.PropertyMapping;
-import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.compat.InternalReadOps;
@@ -44,15 +41,18 @@ import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.api.StatementConstants;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import static org.neo4j.gds.ElementProjection.PROJECT_ALL;
 import static org.neo4j.gds.core.GraphDimensions.ANY_LABEL;
 import static org.neo4j.gds.core.GraphDimensions.ANY_RELATIONSHIP_TYPE;
 import static org.neo4j.gds.core.GraphDimensions.NO_SUCH_LABEL;
@@ -60,7 +60,10 @@ import static org.neo4j.gds.core.GraphDimensions.NO_SUCH_RELATIONSHIP_TYPE;
 
 public final class GraphDimensionsReader extends StatementFunction<GraphDimensions> {
     private final IdGeneratorFactory idGeneratorFactory;
-    private final GraphProjectFromStoreConfig graphProjectConfig;
+    private final Map<NodeLabel, String> nodeLabelMappings;
+    private final Map<RelationshipType, String> relationshipTypeMappings;
+    private final Collection<String> nodeProperties;
+    private final Collection<String> relationshipProperties;
 
     @Builder.Factory
     static GraphDimensionsReader graphDimensionsReader(
@@ -68,21 +71,63 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
         GraphProjectFromStoreConfig graphProjectConfig,
         DependencyResolver dependencyResolver
     ) {
+        var nodeLabelMappings = graphProjectConfig.nodeProjections().projections().entrySet().stream()
+            .collect(Collectors.toMap(
+                Map.Entry::getKey,
+                e -> e.getValue().label()
+            ));
+
+        var relationshipTypeMappings = graphProjectConfig.relationshipProjections().projections().entrySet().stream()
+            .collect(Collectors.toMap(
+                Map.Entry::getKey,
+                e -> e.getValue().type()
+            ));
+
+        var nodeProperties = graphProjectConfig
+            .nodeProjections()
+            .projections()
+            .values()
+            .stream()
+            .flatMap(projection -> projection.properties().stream())
+            .map(PropertyMapping::neoPropertyKey)
+            .distinct()
+            .toList();
+
+        var relationshipProperties = graphProjectConfig
+            .relationshipProjections()
+            .projections()
+            .values()
+            .stream()
+            .flatMap(projection -> projection.properties().stream())
+            .map(PropertyMapping::neoPropertyKey)
+            .distinct()
+            .toList();
+
+
         return new GraphDimensionsReader(
             graphLoaderContext.transactionContext(),
-            graphProjectConfig,
-            dependencyResolver.resolveDependency(IdGeneratorFactory.class)
+            dependencyResolver.resolveDependency(IdGeneratorFactory.class),
+            nodeLabelMappings,
+            relationshipTypeMappings,
+            nodeProperties,
+            relationshipProperties
         );
     }
 
-    private GraphDimensionsReader(
+    public GraphDimensionsReader(
         TransactionContext tx,
-        GraphProjectFromStoreConfig graphProjectConfig,
-        IdGeneratorFactory idGeneratorFactory
+        IdGeneratorFactory idGeneratorFactory,
+        Map<NodeLabel, String> nodeLabelMappings,
+        Map<RelationshipType, String> relationshipTypeMappings,
+        Collection<String> nodeProperties,
+        Collection<String> relationshipProperties
     ) {
         super(tx);
-        this.graphProjectConfig = graphProjectConfig;
         this.idGeneratorFactory = idGeneratorFactory;
+        this.nodeLabelMappings = nodeLabelMappings;
+        this.relationshipTypeMappings = relationshipTypeMappings;
+        this.nodeProperties = nodeProperties;
+        this.relationshipProperties = relationshipProperties;
     }
 
     @Override
@@ -94,8 +139,8 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
 
         final TokenElementIdentifierMappings<RelationshipType> typeTokenRelTypeMappings = getRelationshipTypeTokens(tokenRead);
 
-        Map<String, Integer> nodePropertyTokens = loadPropertyTokens(getNodeProjections().projections(), tokenRead);
-        Map<String, Integer> relationshipPropertyTokens = loadPropertyTokens(getRelationshipProjections().projections(), tokenRead);
+        Map<String, Integer> nodePropertyTokens = loadPropertyTokens(nodeProperties, tokenRead);
+        Map<String, Integer> relationshipPropertyTokens = loadPropertyTokens(relationshipProperties, tokenRead);
 
         long nodeCount = labelTokenNodeLabelMappings.keyStream()
             .mapToLong(dataRead::estimateCountsForNode)
@@ -132,10 +177,9 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
     private TokenElementIdentifierMappings<NodeLabel> getNodeLabelTokens(TokenRead tokenRead) {
         var labelTokenNodeLabelMappings = new TokenElementIdentifierMappings<NodeLabel>(
             ANY_LABEL);
-        graphProjectConfig.nodeProjections()
-            .projections()
-            .forEach((nodeLabel, projection) -> {
-                var labelToken = projection.projectAll() ? ANY_LABEL : getNodeLabelToken(tokenRead, projection.label());
+        nodeLabelMappings
+            .forEach((nodeLabel, neoLabel) -> {
+                var labelToken = neoLabel.equals(PROJECT_ALL) ? ANY_LABEL : getNodeLabelToken(tokenRead, neoLabel);
                 labelTokenNodeLabelMappings.put(labelToken, nodeLabel);
             });
         return labelTokenNodeLabelMappings;
@@ -144,37 +188,27 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
     private TokenElementIdentifierMappings<RelationshipType> getRelationshipTypeTokens(TokenRead tokenRead) {
         var typeTokenRelTypeMappings = new TokenElementIdentifierMappings<RelationshipType>(
             ANY_RELATIONSHIP_TYPE);
-        graphProjectConfig.relationshipProjections()
-            .projections()
-            .forEach((relType, projection) -> {
-                var typeToken = projection.projectAll() ? ANY_RELATIONSHIP_TYPE : getRelationshipTypeToken(
+
+        relationshipTypeMappings
+            .forEach((relType, neoRelType) -> {
+                var typeToken = neoRelType.equals(PROJECT_ALL) ? ANY_RELATIONSHIP_TYPE : getRelationshipTypeToken(
                     tokenRead,
-                    projection.type()
+                    neoRelType
                 );
                 typeTokenRelTypeMappings.put(typeToken, relType);
             });
         return typeTokenRelTypeMappings;
     }
 
-    private NodeProjections getNodeProjections() {
-        return graphProjectConfig.nodeProjections();
-    }
-
-    private RelationshipProjections getRelationshipProjections() {
-        return graphProjectConfig.relationshipProjections();
-    }
-
     private Map<String, Integer> loadPropertyTokens(
-        Map<? extends ElementIdentifier, ? extends ElementProjection> projectionMapping,
+        Collection<String> properties,
         TokenRead tokenRead
     ) {
-        return projectionMapping
-            .values()
+        return properties
             .stream()
-            .flatMap(projections -> projections.properties().stream())
             .collect(Collectors.toMap(
-                PropertyMapping::neoPropertyKey,
-                propertyMapping -> propertyMapping.neoPropertyKey() != null ? tokenRead.propertyKey(propertyMapping.neoPropertyKey()) : StatementConstants.NO_SUCH_PROPERTY_KEY,
+                Function.identity(),
+                property -> property != null ? tokenRead.propertyKey(property) : StatementConstants.NO_SUCH_PROPERTY_KEY,
                 (sameKey1, sameKey2) -> sameKey1
             ));
     }
