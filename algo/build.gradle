@@ -39,20 +39,16 @@ dependencies {
     implementation project(':community-configs')
     implementation project(':node-embeddings-configs')
 
-    implementation project(':collections-memory-estimation')
     implementation project(':compression')
     implementation project(':config-api')
     implementation project(':core')
     implementation project(':core-utils')
     implementation project(':gds-values')
     implementation project(':graph-schema-api')
-    implementation project(':licensing')
     implementation project(':logging')
-    implementation project(':memory-estimation')
     implementation project(':memory-usage')
     implementation project(':ml-core')
     implementation project(':ml-algo')
-    implementation project(':ml-api')
     implementation project(':model-catalog-api')
     implementation project(':pregel')
     implementation project(':progress-tracking')
@@ -63,20 +59,13 @@ dependencies {
     // TEST DEPENDENCIES
     testAnnotationProcessor project(':annotations')
 
-    testImplementation project(':edition-api')
     testImplementation project(':gdl-graph')
     testImplementation project(':gdl-junit-extension')
     testImplementation project(':test-utils')
     testImplementation project(':ml-test-utils')
-    testImplementation project(':ml-algo')
-    testImplementation openGds.jqwik
     testImplementation openGds.gdl
-    testImplementation openGds.mockito.junit.jupiter
 
     testImplementation project(':centrality-algorithms')
-    testImplementation project(':community-algorithms')
-    testImplementation project(':miscellaneous-algorithms')
     testImplementation project(':node-embedding-algorithms')
-    testImplementation project(':path-finding-algorithms')
     testImplementation project(':similarity-algorithms')
 }
