@@ -23,10 +23,17 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.NodeEmbeddingsAlgorithmTasks;
 import org.neo4j.gds.TestProgressTrackerHelper;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.applications.algorithms.embeddings.NodeEmbeddingAlgorithms;
+import org.neo4j.gds.compat.GdsVersionInfoProvider;
 import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.core.concurrency.DefaultPool;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.embeddings.graphsage.algo.AggregatorType;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrain;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfigImpl;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainParameters;
+import org.neo4j.gds.embeddings.graphsage.algo.MultiLabelGraphSageTrain;
+import org.neo4j.gds.embeddings.graphsage.algo.SingleLabelGraphSageTrain;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
@@ -70,8 +77,6 @@ class GraphSageTrainProgressLoggingTest {
 
         var params = TrainConfigTransformer.toParameters(config);
 
-        var nodeEmbeddingAlgorithms = new NodeEmbeddingAlgorithms(null, TerminationFlag.RUNNING_TRUE);
-
         var progressTrackerWithLog = TestProgressTrackerHelper.create(
             new NodeEmbeddingsAlgorithmTasks().graphSageTrain(graph, params),
             new Concurrency(1)
@@ -80,7 +85,14 @@ class GraphSageTrainProgressLoggingTest {
         var progressTracker = progressTrackerWithLog.progressTracker();
         var log = progressTrackerWithLog.log();
 
-        nodeEmbeddingAlgorithms.graphSageTrain(graph, params, config, progressTracker);
+
+        graphSageTrain(
+            graph,
+            config,
+            params,
+            progressTracker,
+            TerminationFlag.RUNNING_TRUE
+        ).compute();
 
         assertThat(log.getMessages(INFO))
             // avoid asserting on the thread id
@@ -132,4 +144,36 @@ class GraphSageTrainProgressLoggingTest {
                 "GraphSageTrain :: Finished"
             );
     }
+
+    private GraphSageTrain graphSageTrain(
+        Graph graph,
+        GraphSageTrainConfig configuration,
+        GraphSageTrainParameters parameters,
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
+    ) {
+        var gdsVersion = GdsVersionInfoProvider.GDS_VERSION_INFO.gdsVersion();
+
+        if (configuration.isMultiLabel()) return new MultiLabelGraphSageTrain(
+            graph,
+            parameters,
+            configuration.projectedFeatureDimension().orElseThrow(),
+            DefaultPool.INSTANCE,
+            progressTracker,
+            terminationFlag,
+            gdsVersion,
+            configuration
+        );
+
+        return new SingleLabelGraphSageTrain(
+            graph,
+            parameters,
+            DefaultPool.INSTANCE,
+            progressTracker,
+            terminationFlag,
+            gdsVersion,
+            configuration
+        );
+    }
+
 }

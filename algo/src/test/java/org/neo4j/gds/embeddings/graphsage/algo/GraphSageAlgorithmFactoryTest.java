@@ -28,16 +28,11 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.api.schema.GraphSchema;
-import org.neo4j.gds.applications.algorithms.embeddings.GraphSageModelCatalog;
-import org.neo4j.gds.applications.algorithms.embeddings.NodeEmbeddingAlgorithmsEstimationModeBusinessFacade;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.config.MutateConfig;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.core.model.InjectModelCatalog;
 import org.neo4j.gds.core.model.Model;
-import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.core.model.ModelCatalogExtension;
 import org.neo4j.gds.embeddings.graphsage.GraphSageModelTrainer;
 import org.neo4j.gds.embeddings.graphsage.Layer;
 import org.neo4j.gds.embeddings.graphsage.ModelData;
@@ -50,7 +45,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Function;
 import java.util.function.LongUnaryOperator;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -68,22 +62,18 @@ import static org.neo4j.gds.mem.Estimate.sizeOfOpenHashContainer;
 import static org.neo4j.gds.mem.MemoryEstimations.RESIDENT_MEMORY;
 import static org.neo4j.gds.mem.MemoryEstimations.TEMPORARY_MEMORY;
 
-@ModelCatalogExtension
 class GraphSageAlgorithmFactoryTest {
-
-    @InjectModelCatalog
-    private ModelCatalog modelCatalog;
 
     @SuppressWarnings("UnnecessaryLocalVariable")
     @ParameterizedTest
     @MethodSource("parameters")
     void memoryEstimation(
-        Function<ModelCatalog, GraphSageBaseConfig> gsConfigProvider,
+        GraphSageTestParameters graphSageTestParameters,
         GraphSageTrainMemoryEstimateParameters trainParameters,
         long nodeCount,
         LongUnaryOperator hugeObjectArraySize
     ) {
-        var gsConfig = gsConfigProvider.apply(modelCatalog);
+        var gsConfig = graphSageTestParameters.config();
 
         // features: HugeOA[nodeCount * double[featureSize]]
         var initialFeaturesArray = sizeOfDoubleArray(trainParameters.estimationFeatureDimension());
@@ -231,16 +221,16 @@ class GraphSageAlgorithmFactoryTest {
         }).collect(toList());
 
         // normalize rows = same as input (output of aggregator)
-        var lastLayerBatchNodeCount = batchSizes.get(batchSizes.size() - 1);
+        var lastLayerBatchNodeCount = batchSizes.getLast();
         var minNormalizeRows = sizeOfDoubleArray(lastLayerBatchNodeCount.getOne() * trainParameters.embeddingDimension());
         var maxNormalizeRows = sizeOfDoubleArray(lastLayerBatchNodeCount.getTwo() * trainParameters.embeddingDimension());
         aggregatorMemories.add(MemoryRange.of(minNormalizeRows, maxNormalizeRows));
 
         // previous layer representation = parent = local features: double[(bs..3bs) * featureSize]
-        var firstLayerBatchNodeCount = batchSizes.get(0);
+        var firstLayerBatchNodeCount = batchSizes.getFirst();
         var minFirstLayerMemory = sizeOfDoubleArray(firstLayerBatchNodeCount.getOne() * trainParameters.estimationFeatureDimension());
         var maxFirstLayerMemory = sizeOfDoubleArray(firstLayerBatchNodeCount.getTwo() * trainParameters.estimationFeatureDimension());
-        aggregatorMemories.add(0, MemoryRange.of(minFirstLayerMemory, maxFirstLayerMemory));
+        aggregatorMemories.addFirst(MemoryRange.of(minFirstLayerMemory, maxFirstLayerMemory));
 
         var lossFunctionMemory = Stream.concat(
             subGraphMemories.stream(),
@@ -255,9 +245,15 @@ class GraphSageAlgorithmFactoryTest {
             .add(MemoryRange.of(resultFeaturesMemory))
             .add(MemoryRange.of(40L)); // GraphSage.class
 
-        var graphSageModelCatalog = new GraphSageModelCatalog(modelCatalog);
-        var estimationFacade = new NodeEmbeddingAlgorithmsEstimationModeBusinessFacade(graphSageModelCatalog, null);
-        var memoryEstimation = estimationFacade.graphSage(gsConfig, gsConfig instanceof MutateConfig);
+
+        var memoryEstimateParameters = TrainConfigTransformer.toMemoryEstimateParameters(
+            graphSageTestParameters.model().trainConfig()
+        );
+
+        var memoryEstimation = new GraphSageMemoryEstimateDefinition(
+            memoryEstimateParameters,
+            gsConfig instanceof MutateConfig
+        ).memoryEstimation();
 
         var actualTree = memoryEstimation.estimate(GraphDimensions.of(nodeCount), concurrency);
 
@@ -278,25 +274,16 @@ class GraphSageAlgorithmFactoryTest {
             .aggregator(AggregatorType.MEAN)
             .build();
 
-        var model = Model.of(
-            "graphSage",
-            GraphSchema.empty(),
-            ModelData.of(new Layer[]{}, new SingleLabelFeatureFunction()),
-            trainConfig,
-            GraphSageModelTrainer.GraphSageTrainMetrics.empty()
+        var memoryEstimateParameters = TrainConfigTransformer.toMemoryEstimateParameters(
+            trainConfig
         );
 
-        modelCatalog.set(model);
+        var memoryEstimation = new GraphSageMemoryEstimateDefinition(
+            memoryEstimateParameters,
+            false
+        ).memoryEstimation();
 
-        var gsConfig = GraphSageStreamConfigImpl
-            .builder()
-            .modelUser("")
-            .modelName("modelName")
-            .build();
 
-        var graphSageModelCatalog = new GraphSageModelCatalog(modelCatalog);
-        var estimationFacade = new NodeEmbeddingAlgorithmsEstimationModeBusinessFacade(graphSageModelCatalog, null);
-        var memoryEstimation = estimationFacade.graphSage(gsConfig, gsConfig instanceof MutateConfig);
         var actualEstimation = memoryEstimation.estimate(GraphDimensions.of(1337), new Concurrency(42));
 
         assertThat(flatten(actualEstimation)).containsExactly(
@@ -329,26 +316,15 @@ class GraphSageAlgorithmFactoryTest {
             .aggregator(AggregatorType.MEAN)
             .build();
 
-        var model = Model.of(
-            "graphSage",
-            GraphSchema.empty(),
-            ModelData.of(new Layer[]{}, new SingleLabelFeatureFunction()),
-            trainConfig,
-            GraphSageModelTrainer.GraphSageTrainMetrics.empty()
+        var memoryEstimateParameters = TrainConfigTransformer.toMemoryEstimateParameters(
+            trainConfig
         );
 
-        modelCatalog.set(model);
+        var memoryEstimation = new GraphSageMemoryEstimateDefinition(
+            memoryEstimateParameters,
+            true
+        ).memoryEstimation();
 
-        var gsConfig = GraphSageMutateConfigImpl
-            .builder()
-            .modelUser("")
-            .modelName("modelName")
-            .mutateProperty("foo")
-            .build();
-
-        var graphSageModelCatalog = new GraphSageModelCatalog(modelCatalog);
-        var estimationFacade = new NodeEmbeddingAlgorithmsEstimationModeBusinessFacade(graphSageModelCatalog, null);
-        var memoryEstimation = estimationFacade.graphSage(gsConfig, true);
         var actualEstimation = memoryEstimation.estimate(GraphDimensions.of(1337), new Concurrency(42));
 
         assertThat(flatten(actualEstimation)).containsExactly(
@@ -462,20 +438,19 @@ class GraphSageAlgorithmFactoryTest {
                                             GraphSageModelTrainer.GraphSageTrainMetrics.empty()
                                         );
 
-                                        Function<ModelCatalog, GraphSageBaseConfig> streamConfigProvider = (modelCatalog) -> {
-                                            modelCatalog.set(model);
 
-                                            return GraphSageStreamConfigImpl
-                                                .builder()
-                                                .concurrency(concurrency)
-                                                .modelName(modelName)
-                                                .modelUser(userName)
-                                                .batchSize(batchSize)
-                                                .build();
-                                        };
+                                        var config = GraphSageStreamConfigImpl
+                                            .builder()
+                                            .concurrency(concurrency)
+                                            .modelName(modelName)
+                                            .modelUser(userName)
+                                            .batchSize(batchSize)
+                                            .build();
+
+                                        var graphSageTestParameters = new GraphSageTestParameters(config, model);
 
                                         return arguments(
-                                            streamConfigProvider,
+                                            graphSageTestParameters,
                                             TrainConfigTransformer.toMemoryEstimateParameters(trainConfig),
                                             nodeCount,
                                             hugeObjectArraySize
@@ -501,26 +476,15 @@ class GraphSageAlgorithmFactoryTest {
             .featureProperties(List.of("a"))
             .build();
 
-        var model = Model.of(
-            "graphSage",
-            GraphSchema.empty(),
-            ModelData.of(new Layer[]{}, new SingleLabelFeatureFunction()),
-            trainConfig,
-            GraphSageModelTrainer.GraphSageTrainMetrics.empty()
+        var memoryEstimateParameters = TrainConfigTransformer.toMemoryEstimateParameters(
+            trainConfig
         );
 
-        modelCatalog.set(model);
+        var memoryEstimation = new GraphSageMemoryEstimateDefinition(
+            memoryEstimateParameters,
+            true
+        ).memoryEstimation();
 
-        var config = GraphSageMutateConfigImpl
-            .builder()
-            .modelUser("")
-            .modelName(modelName)
-            .mutateProperty("foo")
-            .build();
-
-        var graphSageModelCatalog = new GraphSageModelCatalog(modelCatalog);
-        var estimationFacade = new NodeEmbeddingAlgorithmsEstimationModeBusinessFacade(graphSageModelCatalog, null);
-        var memoryEstimation = estimationFacade.graphSage(config, true);
         var actualTree = memoryEstimation.estimate(GraphDimensions.of(10000), new Concurrency(4));
 
         MemoryRange actual = actualTree.memoryUsage();
@@ -533,4 +497,9 @@ class GraphSageAlgorithmFactoryTest {
             .map(MemoryTree::memoryUsage)
             .contains(MemoryRange.of(5320064L));
     }
+
+    private record GraphSageTestParameters(
+        GraphSageStreamConfig config,
+        Model<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics> model
+    ){}
 }

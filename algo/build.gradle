@@ -64,6 +64,4 @@ dependencies {
     testImplementation project(':test-utils')
     testImplementation project(':ml-test-utils')
     testImplementation openGds.gdl
-
-    testImplementation project(':node-embedding-algorithms')
 }

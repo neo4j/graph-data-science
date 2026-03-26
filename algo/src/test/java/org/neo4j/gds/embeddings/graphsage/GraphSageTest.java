@@ -23,6 +23,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.neo4j.gds.Aggregation;
 import org.neo4j.gds.NodeEmbeddingsAlgorithmTasks;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
@@ -31,8 +32,6 @@ import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.schema.Direction;
-import org.neo4j.gds.applications.algorithms.embeddings.GraphSageModelCatalog;
-import org.neo4j.gds.applications.algorithms.embeddings.NodeEmbeddingAlgorithms;
 import org.neo4j.gds.beta.generator.PropertyProducer;
 import org.neo4j.gds.beta.generator.RandomGraphGenerator;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
@@ -56,7 +55,6 @@ import org.neo4j.gds.embeddings.graphsage.algo.SingleLabelGraphSageTrain;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
-import org.neo4j.gds.Aggregation;
 import org.neo4j.gds.termination.TerminatedException;
 import org.neo4j.gds.termination.TerminationFlag;
 
@@ -169,18 +167,19 @@ class GraphSageTest {
             .modelName(MODEL_NAME)
             .concurrency(4)
             .build();
+        var parameters = streamConfig.toParameters();
 
-        var graphSageModelCatalog = new GraphSageModelCatalog(modelCatalog);
-        var nodeEmbeddingAlgorithms = new NodeEmbeddingAlgorithms(
-            graphSageModelCatalog,
+        var algorithm = new GraphSage(
+            orphanGraph,
+            model,
+            parameters.algorithmParameters().concurrency(),
+            parameters.algorithmParameters().batchSize(),
+            DefaultPool.INSTANCE,
+            ProgressTracker.NULL_TRACKER,
             TerminationFlag.RUNNING_TRUE
         );
 
-        var result = nodeEmbeddingAlgorithms.graphSage(
-            orphanGraph,
-            streamConfig.toParameters(),
-            ProgressTracker.NULL_TRACKER
-        );
+        var result = algorithm.compute();
 
         for (int i = 0; i < orphanGraph.nodeCount() - 1; i++) {
             Arrays.stream(result.embeddings().get(i))
