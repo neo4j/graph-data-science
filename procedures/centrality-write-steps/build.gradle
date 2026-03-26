@@ -18,10 +18,5 @@ dependencies {
     implementation project(':config-api')
     implementation project(':core')
     implementation project(':core-api')
-    implementation project(':core-write')
-    implementation project(':logging')
-    implementation project(':string-formatting')
     implementation project(':pregel')
-    implementation project(':progress-tracking')
-    implementation project(':termination')
 }
