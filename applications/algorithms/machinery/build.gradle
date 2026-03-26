@@ -16,7 +16,6 @@ dependencies {
     implementation project(':algo-common')
     // `CypherMapWrapper`
     implementation project(':annotations')
-    implementation project(':application-services')
     implementation project(':config-api')
     implementation project(':core')
     implementation project(':core-write')

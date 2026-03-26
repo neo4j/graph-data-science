@@ -62,9 +62,6 @@ project(':algorithms-procedure-facade').projectDir = file('procedures/algorithms
 include('annotations')
 project(':annotations').projectDir = file('annotations')
 
-include('application-services')
-project(':application-services').projectDir = file('applications/services')
-
 include('applications-facade')
 project(':applications-facade').projectDir = file('applications/facade')
 
