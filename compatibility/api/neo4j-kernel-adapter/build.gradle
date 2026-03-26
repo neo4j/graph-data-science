@@ -1,5 +1,5 @@
 plugins {
-    id 'buildlogic-gds-java-plain'
+    id 'buildlogic-gds-java'
 }
 
 description = 'Neo4j Graph Data Science :: Neo4j Kernel Adapter API'
@@ -13,6 +13,7 @@ dependencies {
     annotationProcessor openGds.recordBuilder
 
     api project(':neo4j-adapter')
+    api project(':core-api')
 
     compileOnly project(':annotations')
     compileOnly openGds.recordBuilder
@@ -36,6 +37,7 @@ dependencies {
     compileOnly(neo4j.layout) { transitive = false }
     compileOnly(neo4j.logging) { transitive = false }
     compileOnly(neo4j.neo4j) { transitive = false }
+    compileOnly(neo4j.procedure) { transitive = false }
     compileOnly(neo4j.procedure.api) { transitive = false }
     compileOnly(neo4j.resource) { transitive = false }
     compileOnly(neo4j.schema) { transitive = false }

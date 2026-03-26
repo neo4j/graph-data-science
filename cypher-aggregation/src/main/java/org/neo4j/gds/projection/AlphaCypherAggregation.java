@@ -20,7 +20,7 @@
 package org.neo4j.gds.projection;
 
 import org.neo4j.gds.annotation.CustomProcedure;
-import org.neo4j.gds.api.DatabaseId;
+import org.neo4j.gds.compat.DatabaseIdSupplier;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.UserFunctionSignatureBuilder;
 import org.neo4j.gds.core.loading.Capabilities.WriteMode;
@@ -99,14 +99,16 @@ public class AlphaCypherAggregation implements CallableUserAggregationFunction {
             .stream()
             .map(DatabaseReferenceImpl.Internal::databaseId)
             .anyMatch(databaseId::equals);
+
         var writeMode = runsOnCompositeDatabase
             ? WriteMode.NONE
             : WriteMode.LOCAL;
 
         var transactionSequenceNumber = ctx.kernelTransaction().getTransactionSequenceNumber();
         var requestCorrelationId = Neo4jPoweredRequestCorrelationId.create(transactionSequenceNumber);
+
         return new AlphaGraphAggregator(
-            DatabaseId.of(databaseService.databaseName()),
+            new DatabaseIdSupplier().databaseId(ctx),
             username,
             writeMode,
             queryProvider,
