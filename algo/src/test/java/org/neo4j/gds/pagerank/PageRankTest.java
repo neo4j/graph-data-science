@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.pagerank;
 
+import com.carrotsearch.hppc.LongScatterSet;
 import org.assertj.core.api.SoftAssertions;
 import org.assertj.core.api.junit.jupiter.SoftAssertionsExtension;
 import org.assertj.core.data.Offset;
@@ -28,20 +29,19 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.neo4j.gds.CentralityAlgorithmTasks;
 import org.neo4j.gds.TestGraph;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.applications.algorithms.centrality.CentralityAlgorithms;
-import org.neo4j.gds.applications.algorithms.centrality.CentralityBusinessAlgorithms;
-import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
-import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.beta.generator.RandomGraphGenerator;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistry;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -59,6 +59,7 @@ import java.util.stream.Collectors;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
+import static org.neo4j.gds.pagerank.PageRankVariant.PAGE_RANK;
 
 @ExtendWith(SoftAssertionsExtension.class)
 class PageRankTest {
@@ -113,8 +114,7 @@ class PageRankTest {
                 .tolerance(0)
                 .build();
 
-            var centralityAlgorithms = new CentralityAlgorithms(TerminationFlag.RUNNING_TRUE);
-            var result = centralityAlgorithms.pageRank(graph, config, ProgressTracker.NULL_TRACKER);
+            var result = pageRank(graph, config, ProgressTracker.NULL_TRACKER, TerminationFlag.RUNNING_TRUE).compute();
             var rankProvider = result.centralityScoreProvider();
 
             var expected = graph.nodeProperties("expectedRank");
@@ -136,9 +136,11 @@ class PageRankTest {
                 .tolerance(tolerance)
                 .build();
 
-            var centralityAlgorithms = new CentralityAlgorithms(TerminationFlag.RUNNING_TRUE);
-
-            var pregelResult = centralityAlgorithms.pageRank(graph, config, ProgressTracker.NULL_TRACKER);
+            var pageRank = pageRank(
+                graph,
+                config, ProgressTracker.NULL_TRACKER, TerminationFlag.RUNNING_TRUE
+            );
+            var pregelResult = pageRank.compute();
 
             // initial iteration is counted extra in Pregel
             assertThat(pregelResult.iterations()).isEqualTo(expectedIterations);
@@ -162,8 +164,7 @@ class PageRankTest {
                 .sourceNodes(sourceNodeIds)
                 .build();
 
-            var centralityAlgorithms = new CentralityAlgorithms(TerminationFlag.RUNNING_TRUE);
-            var result = centralityAlgorithms.pageRank(graph, config, ProgressTracker.NULL_TRACKER);
+            var result = pageRank(graph, config, ProgressTracker.NULL_TRACKER, TerminationFlag.RUNNING_TRUE).compute();
             var rankProvider = result.centralityScoreProvider();
 
             var expected = graph.nodeProperties(expectedPropertyKey);
@@ -193,8 +194,7 @@ class PageRankTest {
                 .sourceNodes(sourceNodesMap)
                 .build();
 
-            var centralityAlgorithms = new CentralityAlgorithms(TerminationFlag.RUNNING_TRUE);
-            var result = centralityAlgorithms.pageRank(graph, config, ProgressTracker.NULL_TRACKER);
+            var result = pageRank(graph, config, ProgressTracker.NULL_TRACKER, TerminationFlag.RUNNING_TRUE).compute();
             var rankProvider = result.centralityScoreProvider();
 
             var expected = graph.nodeProperties("expectedBiasedPersonalizedRank");
@@ -210,21 +210,23 @@ class PageRankTest {
         @Test
         void shouldLogProgress() {
             var log = new GdsTestLog();
-            var requestScopedDependencies = RequestScopedDependencies.builder()
-                .correlationId(PlainSimpleRequestCorrelationId.create())
-                .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
-                .userLogRegistry(UserLogRegistry.EMPTY)
-                .build();
-            var progressTrackerCreator = new ProgressTrackerCreator(new LoggerForProgressTrackingAdapter(log), requestScopedDependencies);
-            var centralityAlgorithms = new CentralityAlgorithms(TerminationFlag.RUNNING_TRUE);
-            var businessAlgorithms = new CentralityBusinessAlgorithms(
-                centralityAlgorithms,
-                progressTrackerCreator
-            );
+            var tasks = new CentralityAlgorithmTasks();
 
             var maxIterations = 10;
             var config = PageRankConfigImpl.builder().maxIterations(maxIterations).build();
-            businessAlgorithms.pageRank(graph, config);
+
+            var progressTracker = TaskProgressTracker.create(
+                tasks.pageRank(graph, config),
+                new LoggerForProgressTrackingAdapter(log),
+                config.concurrency(),
+                config.jobId(),
+                PlainSimpleRequestCorrelationId.create(),
+                EmptyTaskRegistryFactory.INSTANCE,
+                UserLogRegistry.EMPTY
+            );
+
+            pageRank(graph, config, progressTracker, TerminationFlag.RUNNING_TRUE)
+                .compute();
 
             assertThat(log.getMessages(TestLog.INFO))
                 .extracting(removingThreadId())
@@ -296,14 +298,14 @@ class PageRankTest {
 
         @Test
         void checkTerminationFlag() {
-            var centralityAlgorithms = new CentralityAlgorithms(TerminationFlag.STOP_RUNNING);
-
             var config = PageRankStreamConfigImpl.builder()
                 .maxIterations(40)
                 .concurrency(1)
                 .build();
 
-            TestSupport.assertTransactionTermination(() -> centralityAlgorithms.pageRank(graph, config, ProgressTracker.NULL_TRACKER));
+            TestSupport.assertTransactionTermination(() -> pageRank(graph, config, ProgressTracker.NULL_TRACKER,
+                TerminationFlag.STOP_RUNNING).compute()
+            );
         }
     }
 
@@ -382,8 +384,7 @@ class PageRankTest {
                 .concurrency(1)
                 .build();
 
-            var centralityAlgorithms = new CentralityAlgorithms(TerminationFlag.RUNNING_TRUE);
-            var result = centralityAlgorithms.pageRank(graph, config, ProgressTracker.NULL_TRACKER);
+            var result = pageRank(graph, config, ProgressTracker.NULL_TRACKER, TerminationFlag.RUNNING_TRUE).compute();
             var rankProvider = result.centralityScoreProvider();
 
             var expected = graph.nodeProperties("expectedRank");
@@ -405,8 +406,9 @@ class PageRankTest {
                 .concurrency(1)
                 .build();
 
-            var centralityAlgorithms = new CentralityAlgorithms(TerminationFlag.RUNNING_TRUE);
-            var result = centralityAlgorithms.pageRank(zeroWeightsGraph, config, ProgressTracker.NULL_TRACKER);
+            var result = pageRank(zeroWeightsGraph, config, ProgressTracker.NULL_TRACKER,
+                TerminationFlag.RUNNING_TRUE
+            ).compute();
             var rankProvider = result.centralityScoreProvider();
 
             var expected = zeroWeightsGraph.nodeProperties("expectedRank");
@@ -436,8 +438,7 @@ class PageRankTest {
                 .sourceNodes(sourceNodesMap)
                 .build();
 
-            var centralityAlgorithms = new CentralityAlgorithms(TerminationFlag.RUNNING_TRUE);
-            var result = centralityAlgorithms.pageRank(graph, config, ProgressTracker.NULL_TRACKER);
+            var result = pageRank(graph, config, ProgressTracker.NULL_TRACKER, TerminationFlag.RUNNING_TRUE).compute();
             var rankProvider = result.centralityScoreProvider();
 
             var expected = graph.nodeProperties("expectedBiasedPersonalizedRank");
@@ -510,7 +511,7 @@ class PageRankTest {
         private Graph paperGraph;
 
         @Test
-        void articleRank(SoftAssertions softly) {
+        void articleRankAlgorithm(SoftAssertions softly) {
             var config = ArticleRankStreamConfigImpl
                 .builder()
                 .maxIterations(40)
@@ -518,9 +519,10 @@ class PageRankTest {
                 .concurrency(1)
                 .build();
 
-            var centralityAlgorithms = new CentralityAlgorithms(TerminationFlag.RUNNING_TRUE);
-
-            var result = centralityAlgorithms.articleRank(graph, config, ProgressTracker.NULL_TRACKER);
+            var result = articleRank(
+                graph,
+                config
+            ).compute();
 
             var rankProvider = result.centralityScoreProvider();
 
@@ -542,9 +544,10 @@ class PageRankTest {
                 .concurrency(1)
                 .build();
 
-            var centralityAlgorithms = new CentralityAlgorithms(TerminationFlag.RUNNING_TRUE);
-
-            var result = centralityAlgorithms.articleRank(paperGraph, config, ProgressTracker.NULL_TRACKER);
+            var result = articleRank(
+                paperGraph,
+                config
+            ).compute();
 
             var rankProvider = result.centralityScoreProvider();
 
@@ -570,9 +573,10 @@ class PageRankTest {
                 .sourceNodes(sourceNodesMap)
                 .build();
 
-            var centralityAlgorithms = new CentralityAlgorithms(TerminationFlag.RUNNING_TRUE);
-
-            var result = centralityAlgorithms.articleRank(graph, config, ProgressTracker.NULL_TRACKER);
+            var result = articleRank(
+                graph,
+                config
+            ).compute();
 
             var rankProvider = result.centralityScoreProvider();
 
@@ -621,7 +625,7 @@ class PageRankTest {
         private IdFunction idFunction;
 
         @Test
-        void eigenvector() {
+        void eigenvectorAlgo() {
             var config = EigenvectorStreamConfigImpl
                 .builder()
                 .maxIterations(40)
@@ -629,9 +633,7 @@ class PageRankTest {
                 .concurrency(1)
                 .build();
 
-            var centralityAlgorithms = new CentralityAlgorithms(TerminationFlag.RUNNING_TRUE);
-
-            var result = centralityAlgorithms.eigenVector(graph, config, ProgressTracker.NULL_TRACKER);
+            var result = eigenvector(graph, config).compute();
 
             var rankProvider = result.centralityScoreProvider();
 
@@ -655,9 +657,7 @@ class PageRankTest {
                 .concurrency(1)
                 .build();
 
-            var centralityAlgorithms = new CentralityAlgorithms(TerminationFlag.RUNNING_TRUE);
-
-            var result = centralityAlgorithms.eigenVector(graph, config, ProgressTracker.NULL_TRACKER);
+            var result = eigenvector(graph, config).compute();
 
             var rankProvider = result.centralityScoreProvider();
 
@@ -681,9 +681,7 @@ class PageRankTest {
                 .sourceNodes(List.of(idFunction.of("d")))
                 .build();
 
-            var centralityAlgorithms = new CentralityAlgorithms(TerminationFlag.RUNNING_TRUE);
-
-            var result = centralityAlgorithms.eigenVector(graph, config, ProgressTracker.NULL_TRACKER);
+            var result = eigenvector(graph, config).compute();
 
             var rankProvider = result.centralityScoreProvider();
 
@@ -738,9 +736,7 @@ class PageRankTest {
                 .scaler(ScalerFactory.parse(scalerName))
                 .build();
 
-            var centralityAlgorithms = new CentralityAlgorithms(TerminationFlag.RUNNING_TRUE);
-
-            var result = centralityAlgorithms.pageRank(graph, config, ProgressTracker.NULL_TRACKER);
+            var result = pageRank(graph, config, ProgressTracker.NULL_TRACKER, TerminationFlag.RUNNING_TRUE).compute();
             var rankProvider = result.centralityScoreProvider();
 
             var expected = graph.nodeProperties(expectedPropertyKey);
@@ -766,16 +762,112 @@ class PageRankTest {
         var configBuilder = PageRankConfigImpl.builder();
 
         PageRankConfig config1 = configBuilder.concurrency(1).build();
-        var centralityAlgorithms = new CentralityAlgorithms(TerminationFlag.RUNNING_TRUE);
-        var result = centralityAlgorithms.pageRank(graph, config1, ProgressTracker.NULL_TRACKER);
+        var result = pageRank(graph, config1, ProgressTracker.NULL_TRACKER, TerminationFlag.RUNNING_TRUE).compute();
         var singleThreaded = result.centralityScoreProvider();
 
         PageRankConfig config = configBuilder.concurrency(4).build();
-        var result2 = centralityAlgorithms.pageRank(graph, config, ProgressTracker.NULL_TRACKER);
+        var result2 = pageRank(graph, config, ProgressTracker.NULL_TRACKER, TerminationFlag.RUNNING_TRUE).compute();
         var multiThreaded = result2.centralityScoreProvider();
 
         for (long nodeId = 0; nodeId < graph.nodeCount(); nodeId++) {
             assertThat(singleThreaded.applyAsDouble(nodeId)).isEqualTo(multiThreaded.applyAsDouble(nodeId), Offset.offset(1e-5));
         }
     }
+
+    private PageRankAlgorithm<PageRankConfig> pageRank(
+        Graph graph,
+        PageRankConfig config,
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
+    ) {
+        var degreeFunction = DegreeFunctions.pageRankDegreeFunction(
+            graph,
+            config.hasRelationshipWeightProperty(),
+            config.concurrency(),
+            terminationFlag
+        );
+
+        var alpha = 1 - config.dampingFactor();
+        InitialProbabilityProvider probabilityProvider = InitialProbabilityFactory.create(
+            graph::toMappedNodeId,
+            alpha,
+            config.sourceNodes()
+        );
+        var pageRankComputation = new PageRankComputation<>(config, probabilityProvider, degreeFunction);
+        return new PageRankAlgorithm<>(
+            graph,
+            config,
+            pageRankComputation,
+            PAGE_RANK,
+            DefaultPool.INSTANCE,
+            progressTracker,
+            terminationFlag
+        );
+
+    }
+
+    private PageRankAlgorithm<ArticleRankConfig> articleRank(
+        Graph graph,
+        ArticleRankConfig config
+    ) {
+        var degreeFunction = DegreeFunctions.pageRankDegreeFunction(
+            graph,
+            config.hasRelationshipWeightProperty(),
+            config.concurrency(),
+            TerminationFlag.RUNNING_TRUE
+        );
+
+        var alpha = 1 - config.dampingFactor();
+        InitialProbabilityProvider probabilityProvider = InitialProbabilityFactory.create(
+            graph::toMappedNodeId,
+            alpha,
+            config.sourceNodes()
+        );
+        double avgDegree = DegreeFunctions.averageDegree(graph, config.concurrency());
+        var pageRankComputation = new ArticleRankComputation<>(config, probabilityProvider, degreeFunction, avgDegree);
+        return new PageRankAlgorithm<>(
+            graph,
+            config,
+            pageRankComputation,
+            PAGE_RANK,
+            DefaultPool.INSTANCE,
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
+        );
+    }
+
+    private PageRankAlgorithm<EigenvectorConfig> eigenvector(
+        Graph graph,
+        EigenvectorConfig config
+    ) {
+        var mappedSourceNodes = new LongScatterSet(config.sourceNodes().inputNodes().size());
+        config.sourceNodes().inputNodes().stream()
+            .mapToLong(graph::toMappedNodeId)
+            .forEach(mappedSourceNodes::add);
+
+        boolean hasRelationshipWeightProperty = config.hasRelationshipWeightProperty();
+        var degreeFunction = DegreeFunctions.eigenvectorDegreeFunction(
+            graph,
+            hasRelationshipWeightProperty,
+            config.concurrency(),
+            TerminationFlag.RUNNING_TRUE
+        );
+
+        var computation = new EigenvectorComputation<>(
+            graph.nodeCount(),
+            config,
+            mappedSourceNodes,
+            degreeFunction
+        );
+        return new PageRankAlgorithm<>(
+            graph,
+            config,
+            computation,
+            PAGE_RANK,
+            DefaultPool.INSTANCE,
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
+        );
+    }
+
 }

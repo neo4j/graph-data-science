@@ -25,7 +25,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.SimilarityAlgorithmTasks;
 import org.neo4j.gds.TestGraph;
 import org.neo4j.gds.TestProgressTrackerHelper;
-import org.neo4j.gds.applications.algorithms.similarity.SimilarityAlgorithms;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
@@ -77,8 +76,6 @@ class FilteredNodeSimilarityTest {
 
     @Test
     void should() {
-        var similarityAlgorithms = new SimilarityAlgorithms(TerminationFlag.RUNNING_TRUE);
-
         var sourceNodeFilter = Stream.of("a", "b", "c").map(graph::toOriginalNodeId).collect(Collectors.toSet());
 
         var nodeSimParams = new NodeSimilarityParameters(
@@ -103,15 +100,24 @@ class FilteredNodeSimilarityTest {
             )
         );
 
+        var filteredNodeSimilarity = new NodeSimilarity(
+            graph,
+            params.nodeSimilarityParameters(),
+            ProgressTracker.NULL_TRACKER,
+            params.filteringParameters().sourceFilter().toNodeFilter(graph),
+            params.filteringParameters().targetFilter().toNodeFilter(graph),
+            TerminationFlag.RUNNING_TRUE
+        );
+
         // no results for nodes that are not specified in the node filter -- nice
-        var noOfResultsWithSourceNodeOutsideOfFilter = similarityAlgorithms.filteredNodeSimilarity(graph, params, ProgressTracker.NULL_TRACKER)
+        var noOfResultsWithSourceNodeOutsideOfFilter = filteredNodeSimilarity.compute()
             .streamResult()
             .filter(res -> !sourceNodeFilter.contains(graph.toOriginalNodeId(res.node1)))
             .count();
         assertThat(noOfResultsWithSourceNodeOutsideOfFilter).isEqualTo(0L);
 
         // nodes outside of the node filter are not present as target nodes either -- not nice
-        var noOfResultsWithTargetNodeOutSideOfFilter = similarityAlgorithms.filteredNodeSimilarity(graph, params, ProgressTracker.NULL_TRACKER)
+        var noOfResultsWithTargetNodeOutSideOfFilter = filteredNodeSimilarity.compute()
             .streamResult()
             .filter(res -> !sourceNodeFilter.contains(graph.toOriginalNodeId(res.node2)))
             .count();
@@ -120,7 +126,6 @@ class FilteredNodeSimilarityTest {
 
     @Test
     void shouldSurviveIoannisObjections() {
-        var similarityAlgorithms = new SimilarityAlgorithms(TerminationFlag.RUNNING_TRUE);
 
         var sourceNodeFilter = Set.of(graph.toOriginalNodeId("d"));
 
@@ -146,15 +151,24 @@ class FilteredNodeSimilarityTest {
             )
         );
 
+        var filteredNodeSimilarity = new NodeSimilarity(
+            graph,
+            params.nodeSimilarityParameters(),
+            ProgressTracker.NULL_TRACKER,
+            params.filteringParameters().sourceFilter().toNodeFilter(graph),
+            params.filteringParameters().targetFilter().toNodeFilter(graph),
+            TerminationFlag.RUNNING_TRUE
+        );
+
         // no results for nodes that are not specified in the node filter -- nice
-        var noOfResultsWithSourceNodeOutsideOfFilter = similarityAlgorithms.filteredNodeSimilarity(graph, params, ProgressTracker.NULL_TRACKER)
+        var noOfResultsWithSourceNodeOutsideOfFilter = filteredNodeSimilarity.compute()
             .streamResult()
             .filter(res -> !sourceNodeFilter.contains(graph.toOriginalNodeId(res.node1)))
             .count();
         assertThat(noOfResultsWithSourceNodeOutsideOfFilter).isEqualTo(0L);
 
         // nodes outside of the node filter are not present as target nodes either -- not nice
-        var noOfResultsWithTargetNodeOutSideOfFilter = similarityAlgorithms.filteredNodeSimilarity(graph, params, ProgressTracker.NULL_TRACKER)
+        var noOfResultsWithTargetNodeOutSideOfFilter = filteredNodeSimilarity.compute()
             .streamResult()
             .filter(res -> !sourceNodeFilter.contains(graph.toOriginalNodeId(res.node2)))
             .count();
@@ -164,8 +178,6 @@ class FilteredNodeSimilarityTest {
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
     void shouldSurviveIoannisFurtherObjections(boolean enableWcc) {
-        var similarityAlgorithms = new SimilarityAlgorithms(TerminationFlag.RUNNING_TRUE);
-
         var sourceNodeFilter = Set.of(graph.toOriginalNodeId("d"));
 
         var nodeSimParams = new NodeSimilarityParameters(
@@ -190,15 +202,24 @@ class FilteredNodeSimilarityTest {
             )
         );
 
+        var filteredNodeSimilarity = new NodeSimilarity(
+            graph,
+            params.nodeSimilarityParameters(),
+            ProgressTracker.NULL_TRACKER,
+            params.filteringParameters().sourceFilter().toNodeFilter(graph),
+            params.filteringParameters().targetFilter().toNodeFilter(graph),
+            TerminationFlag.RUNNING_TRUE
+        );
+
         // no results for nodes that are not specified in the node filter -- nice
-        var noOfResultsWithSourceNodeOutsideOfFilter = similarityAlgorithms.filteredNodeSimilarity(graph, params, ProgressTracker.NULL_TRACKER)
+        var noOfResultsWithSourceNodeOutsideOfFilter = filteredNodeSimilarity.compute()
             .streamResult()
             .filter(res -> !sourceNodeFilter.contains(graph.toOriginalNodeId(res.node1)))
             .count();
         assertThat(noOfResultsWithSourceNodeOutsideOfFilter).isEqualTo(0L);
 
         // nodes outside of the node filter are not present as target nodes either -- not nice
-        var noOfResultsWithTargetNodeOutSideOfFilter = similarityAlgorithms.filteredNodeSimilarity(graph, params, ProgressTracker.NULL_TRACKER)
+        var noOfResultsWithTargetNodeOutSideOfFilter = filteredNodeSimilarity.compute()
             .streamResult()
             .filter(res -> !sourceNodeFilter.contains(graph.toOriginalNodeId(res.node2)))
             .count();

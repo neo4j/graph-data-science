@@ -42,29 +42,6 @@ public class PageRankAlgorithm<C extends RankConfig> extends Algorithm<PageRankR
     private final C config;
     private final ExecutorService executorService;
 
-    /**
-     * @deprecated Use the variant  that does proper injection of termination flag instead
-     */
-    @Deprecated
-    public PageRankAlgorithm(
-        Graph graph,
-        C config,
-        PregelComputation<C> pregelComputation,
-        PageRankVariant mode,
-        ExecutorService executorService,
-        ProgressTracker progressTracker
-    ) {
-        this(
-            graph,
-            config,
-            pregelComputation,
-            mode,
-            executorService,
-            progressTracker,
-            TerminationFlag.RUNNING_TRUE
-        );
-    }
-
     public PageRankAlgorithm(
         Graph graph,
         C config,

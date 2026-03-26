@@ -64,8 +64,4 @@ dependencies {
     testImplementation project(':test-utils')
     testImplementation project(':ml-test-utils')
     testImplementation openGds.gdl
-
-    testImplementation project(':centrality-algorithms')
-    testImplementation project(':node-embedding-algorithms')
-    testImplementation project(':similarity-algorithms')
 }
