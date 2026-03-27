@@ -25,26 +25,29 @@ import org.junit.jupiter.api.Test;
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.neo4j.gds.core.io.json.Utils.*;
 import static org.neo4j.gds.core.io.json.Utils.deserialize;
+import static org.neo4j.gds.core.io.json.Utils.formatWithoutWhitespace;
 import static org.neo4j.gds.core.io.json.Utils.serialize;
 
-class DatabaseInfoSerializerTest {
+class GraphStoreMetadataSerializerTest {
 
     @Test
-    void serializeDatabaseInfo() throws JsonProcessingException {
+    void serializeGraphStoreMetadata() throws JsonProcessingException {
         var databaseName = "neo";
         var databaseLocation = DatabaseInfo.DatabaseLocation.LOCAL;
         var databaseInfo = new DatabaseInfo(databaseName, databaseLocation, Optional.empty());
+        var graphStoreMetadata = new GraphStoreMetadata(databaseInfo);
 
-        var result = serialize(databaseInfo);
+        var result = serialize(graphStoreMetadata);
 
         var expected = formatWithoutWhitespace(
             """
                 {
-                     "databaseName":"%s",
-                     "databaseLocation":"%s",
-                     "remoteDatabaseId":null
+                    "databaseInfo": {
+                         "databaseName":"%s",
+                         "databaseLocation":"%s",
+                         "remoteDatabaseId":null
+                    }
                 }
                 """, databaseName, databaseLocation
         );
@@ -52,34 +55,14 @@ class DatabaseInfoSerializerTest {
     }
 
     @Test
-    void serializeDatabaseInfoWithRemote() throws JsonProcessingException {
-        var databaseName = "neo";
-        var databaseLocation = DatabaseInfo.DatabaseLocation.REMOTE;
-        var remoteDatabaseId = "foo";
-        var databaseInfo = new DatabaseInfo(databaseName, databaseLocation, Optional.of(remoteDatabaseId));
-
-        var result = serialize(databaseInfo);
-
-        var expected = formatWithoutWhitespace(
-            """
-                {
-                     "databaseName":"%s",
-                     "databaseLocation":"%s",
-                     "remoteDatabaseId":"%s"
-                }
-                """, databaseName, databaseLocation, remoteDatabaseId
-        );
-        assertThat(result).isEqualTo(expected);
-    }
-
-    @Test
-    void roundTripDatabaseInfo() throws JsonProcessingException {
+    void roundTripGraphStoreMetadata() throws JsonProcessingException {
         var databaseName = "neo";
         var databaseLocation = DatabaseInfo.DatabaseLocation.LOCAL;
         var databaseInfo = new DatabaseInfo(databaseName, databaseLocation, Optional.empty());
+        var graphStoreMetadata = new GraphStoreMetadata(databaseInfo);
 
-        var result = deserialize(serialize(databaseInfo), DatabaseInfo.class);
+        var result = deserialize(serialize(graphStoreMetadata), GraphStoreMetadata.class);
 
-        assertThat(result).isEqualTo(databaseInfo);
+        assertThat(result).isEqualTo(graphStoreMetadata);
     }
 }
