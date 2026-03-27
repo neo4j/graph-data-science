@@ -22,7 +22,7 @@ package org.neo4j.gds.applications.graphstorecatalog;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
-import org.neo4j.gds.applications.services.GraphDimensionFactory;
+import org.neo4j.gds.applications.algorithms.machinery.GraphDimensionFactory;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.BaseConfig;
 import org.neo4j.gds.config.GraphProjectConfig;

@@ -22,7 +22,6 @@ package org.neo4j.gds.applications.algorithms.machinery;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.applications.services.GraphDimensionFactory;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;

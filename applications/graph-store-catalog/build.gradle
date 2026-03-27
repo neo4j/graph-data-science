@@ -32,7 +32,6 @@ dependencies {
     // TODO: This is only included because `org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException`
     implementation project(':algo-common')
     implementation project(':annotations')
-    implementation project(':application-services')
     implementation project(':config-api')
     implementation project(':domain-services')
     implementation project(':core-write')
