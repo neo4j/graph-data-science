@@ -34,8 +34,8 @@ class GraphStoreMetadataSerializerTest {
     @Test
     void serializeDatabaseInfo() throws JsonProcessingException {
         var databaseName = "neo";
-        var databaseLocation = GraphStoreMetadata.DatabaseInfo.DatabaseLocation.LOCAL;
-        var databaseInfo = new GraphStoreMetadata.DatabaseInfo(databaseName, databaseLocation, Optional.empty());
+        var databaseLocation = DatabaseInfo.DatabaseLocation.LOCAL;
+        var databaseInfo = new DatabaseInfo(databaseName, databaseLocation, Optional.empty());
 
         var result = serialize(databaseInfo);
 
@@ -54,9 +54,9 @@ class GraphStoreMetadataSerializerTest {
     @Test
     void serializeDatabaseInfoWithRemote() throws JsonProcessingException {
         var databaseName = "neo";
-        var databaseLocation = GraphStoreMetadata.DatabaseInfo.DatabaseLocation.REMOTE;
+        var databaseLocation = DatabaseInfo.DatabaseLocation.REMOTE;
         var remoteDatabaseId = "foo";
-        var databaseInfo = new GraphStoreMetadata.DatabaseInfo(databaseName, databaseLocation, Optional.of(remoteDatabaseId));
+        var databaseInfo = new DatabaseInfo(databaseName, databaseLocation, Optional.of(remoteDatabaseId));
 
         var result = serialize(databaseInfo);
 
@@ -75,10 +75,10 @@ class GraphStoreMetadataSerializerTest {
     @Test
     void roundTripDatabaseInfo() throws JsonProcessingException {
         var databaseName = "neo";
-        var databaseLocation = GraphStoreMetadata.DatabaseInfo.DatabaseLocation.LOCAL;
-        var databaseInfo = new GraphStoreMetadata.DatabaseInfo(databaseName, databaseLocation, Optional.empty());
+        var databaseLocation = DatabaseInfo.DatabaseLocation.LOCAL;
+        var databaseInfo = new DatabaseInfo(databaseName, databaseLocation, Optional.empty());
 
-        var result = deserialize(serialize(databaseInfo), GraphStoreMetadata.DatabaseInfo.class);
+        var result = deserialize(serialize(databaseInfo), DatabaseInfo.class);
 
         assertThat(result).isEqualTo(databaseInfo);
     }
@@ -86,9 +86,10 @@ class GraphStoreMetadataSerializerTest {
     @Test
     void serializeGraphStoreMetadata() throws JsonProcessingException {
         var databaseName = "neo";
-        var databaseLocation = GraphStoreMetadata.DatabaseInfo.DatabaseLocation.LOCAL;
-        var databaseInfo = new GraphStoreMetadata.DatabaseInfo(databaseName, databaseLocation, Optional.empty());
-        var graphStoreMetadata = new GraphStoreMetadata(databaseInfo);
+        var databaseLocation = DatabaseInfo.DatabaseLocation.LOCAL;
+        var databaseInfo = new DatabaseInfo(databaseName, databaseLocation, Optional.empty());
+        var writeMode = WriteMode.LOCAL;
+        var graphStoreMetadata = new GraphStoreMetadata(databaseInfo, writeMode);
 
         var result = serialize(graphStoreMetadata);
 
@@ -99,9 +100,10 @@ class GraphStoreMetadataSerializerTest {
                          "databaseName":"%s",
                          "databaseLocation":"%s",
                          "remoteDatabaseId":null
-                    }
+                    },
+                    "writeMode": "%s"
                 }
-                """, databaseName, databaseLocation
+                """, databaseName, databaseLocation, writeMode
         );
         assertThat(result).isEqualTo(expected);
     }
@@ -109,9 +111,9 @@ class GraphStoreMetadataSerializerTest {
     @Test
     void roundTripGraphStoreMetadata() throws JsonProcessingException {
         var databaseName = "neo";
-        var databaseLocation = GraphStoreMetadata.DatabaseInfo.DatabaseLocation.LOCAL;
-        var databaseInfo = new GraphStoreMetadata.DatabaseInfo(databaseName, databaseLocation, Optional.empty());
-        var graphStoreMetadata = new GraphStoreMetadata(databaseInfo);
+        var databaseLocation = DatabaseInfo.DatabaseLocation.LOCAL;
+        var databaseInfo = new DatabaseInfo(databaseName, databaseLocation, Optional.empty());
+        var graphStoreMetadata = new GraphStoreMetadata(databaseInfo, WriteMode.LOCAL);
 
         var result = deserialize(serialize(graphStoreMetadata), GraphStoreMetadata.class);
 

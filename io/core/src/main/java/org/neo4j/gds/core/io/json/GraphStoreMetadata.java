@@ -22,13 +22,21 @@ package org.neo4j.gds.core.io.json;
 import java.util.Optional;
 
 public record GraphStoreMetadata(
-    DatabaseInfo databaseInfo
+    DatabaseInfo databaseInfo,
+    WriteMode writeMode
 ) {
-    public record DatabaseInfo(
-        String databaseName,
-        DatabaseLocation databaseLocation,
-        Optional<String> remoteDatabaseId
-    ) {
-        enum DatabaseLocation {LOCAL, REMOTE, NONE}
+}
+
+record DatabaseInfo(
+    String databaseName,
+    DatabaseLocation databaseLocation,
+    Optional<String> remoteDatabaseId
+) {
+    enum DatabaseLocation {
+        LOCAL, REMOTE, NONE
     }
+}
+
+enum WriteMode {
+    LOCAL, REMOTE, NONE
 }
