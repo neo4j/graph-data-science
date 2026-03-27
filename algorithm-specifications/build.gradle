@@ -12,54 +12,23 @@ dependencies {
 
     implementation project(':algo')
     implementation project(':algo-common')
-    implementation project(':algorithms-facade-common')
 
     implementation project(':algorithms-machinery')
 
     // `CypherMapWrapper`
     implementation project(':annotations')
 
-    implementation project(':centrality-configs')
-    implementation project(':centrality-facade-api')
-
-    implementation project(':community-configs')
-    implementation project(':community-facade-api')
-
-    implementation project(':miscellaneous-configs')
-    implementation project(':miscellaneous-facade-api')
-
-    implementation project(':node-embeddings-configs')
-    implementation project(':node-embeddings-facade-api')
-
-    implementation project(':path-finding-configs')
-    implementation project(':path-finding-facade-api')
-
-    implementation project(':similarity-configs')
-    implementation project(':similarity-facade-api')
-
-
     // `BaseConfig`
     implementation project(':config-api')
 
-    // `WritePropertyConfig` and others
-    implementation project(':core')
-
     implementation project(':executor')
 
-    // `TrainBaseConfig`
-    implementation project(':ml-algo')
-
 //    implementation project(':model-catalog-api')
-
-    // `PageRank` and variants need this
-    implementation project(':pregel')
 
     // `NullComputationResultConsumer`
     implementation project(':proc-common')
 
     implementation project(':progress-tracking')
-
-    implementation project(':termination')
 
     integrationTestImplementation project(':proc-catalog')
     integrationTestImplementation project(':proc-test-utilities')
