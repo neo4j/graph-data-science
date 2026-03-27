@@ -47,6 +47,7 @@ dependencies {
 
     implementation openGds.jackson.databind
     implementation openGds.jackson.dataformat.csv
+    implementation openGds.jackson.datatype.jdk8
 
     // Test dependencies
     testImplementation project(':gdl-graph')
