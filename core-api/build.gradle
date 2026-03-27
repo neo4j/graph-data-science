@@ -25,16 +25,12 @@ dependencies {
     implementation project(':annotations')
     implementation project(':collections')
     implementation project(':concurrency')
-    implementation project(':core-utils')
     implementation project(':graph-projection-api')
     implementation project(':graph-schema-api')
     implementation project(':memory-info')
     implementation project(':string-formatting')
 
     implementation openGds.commons.lang3
-    implementation openGds.hdrhistogram
     implementation openGds.hppc
-
     testImplementation project(':test-utils')
-
 }
