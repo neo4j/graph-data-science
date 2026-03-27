@@ -14,21 +14,17 @@ dependencies {
     compileOnly openGds.jetbrains.annotations
     compileOnly openGds.immutables.value.annotations
 
-    implementation project(':annotations')
     implementation project(':config-api')
     implementation project(':core')
     implementation project(':collections')
     implementation project(':logging')
     implementation project(':memory-usage')
-    implementation project(':neo4j-api')
     implementation project(':progress-tracking')
-    implementation project(':string-formatting')
     implementation project(':termination')
     implementation openGds.hdrhistogram
 
     testImplementation openGds.assertj.core
     testImplementation project(':test-utils')
-    testImplementation project(':graph-schema-api')
 
     testImplementation project(':gdl-junit-extension')
 }
