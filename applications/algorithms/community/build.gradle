@@ -9,20 +9,17 @@ group = 'org.neo4j.gds'
 dependencies {
     implementation project(":algo")
     implementation project(":algo-common")
-    implementation project(':algo-params-common')
     implementation project(":algorithms-machinery")
     implementation project(":community-configs")
     implementation project(':community-mutate-steps')
     implementation project(":config-api")
     implementation project(":core")
-    implementation project(":graph-schema-api")
     implementation project(":logging")
     implementation project(":memory-usage")
     implementation project(":pregel")
     implementation project(":progress-tracking")
     implementation project(":termination")
 
-    testImplementation project(':annotations')
     testImplementation project(':test-utils')
 
 }
