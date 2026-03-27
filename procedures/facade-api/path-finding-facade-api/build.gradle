@@ -16,9 +16,6 @@ dependencies {
     // TODO: we only need `neo4j.graph.algo` because of `PathImpl` maybe copy it around 🤔
     compileOnly(neo4j.graph.algo) { transitive = false }
 
-    // Various result builders are here
-    implementation project(':algo-common')
-
     implementation project(':algorithms-facade-common')
 
     // this is needed because of `AlgorithmProcessingTimings`
@@ -29,19 +26,10 @@ dependencies {
 
     // this is needed because of `WritePropertyConfig`
     implementation project(':core')
-
-    implementation project(':graph-schema-api')
-
     // this is needed because of `MemoryEstimation`
     implementation project(':memory-usage')
 
     implementation project(':neo4j-api')
-
-    // we bring this in only to use `PregelConfig` and `Partitioning` enum
-    implementation project(':pregel')
-
-    // only `JobIdConfig` is what we need from this module
-    implementation project(':progress-tracking')
 
     implementation project(':string-formatting')
 
