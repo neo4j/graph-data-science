@@ -25,19 +25,13 @@ dependencies {
     // TODO: Move UserInputAsStringOrListOfString up where it belongs
     compileOnly(neo4j.graphdb.api) { transitive = false }
 
-    api openGds.commons.lang3
-
     implementation(
         project(':algo-params-common'),
         project(':concurrency'),
         project(':concurrency-validation-api'),
         project(':core-api'),
         project(':graph-projection-api'),
-        project(':graph-schema-api'),
-        // `JobIdConfig` 🙈
-        project(':progress-tracking'),
         project(':string-formatting'),
-
     )
 
     testImplementation project(':test-utils')
