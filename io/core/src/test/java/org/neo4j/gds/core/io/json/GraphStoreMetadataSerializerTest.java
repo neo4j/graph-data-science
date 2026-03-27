@@ -32,10 +32,62 @@ import static org.neo4j.gds.core.io.json.Utils.serialize;
 class GraphStoreMetadataSerializerTest {
 
     @Test
+    void serializeDatabaseInfo() throws JsonProcessingException {
+        var databaseName = "neo";
+        var databaseLocation = GraphStoreMetadata.DatabaseInfo.DatabaseLocation.LOCAL;
+        var databaseInfo = new GraphStoreMetadata.DatabaseInfo(databaseName, databaseLocation, Optional.empty());
+
+        var result = serialize(databaseInfo);
+
+        var expected = formatWithoutWhitespace(
+            """
+                {
+                     "databaseName":"%s",
+                     "databaseLocation":"%s",
+                     "remoteDatabaseId":null
+                }
+                """, databaseName, databaseLocation
+        );
+        assertThat(result).isEqualTo(expected);
+    }
+
+    @Test
+    void serializeDatabaseInfoWithRemote() throws JsonProcessingException {
+        var databaseName = "neo";
+        var databaseLocation = GraphStoreMetadata.DatabaseInfo.DatabaseLocation.REMOTE;
+        var remoteDatabaseId = "foo";
+        var databaseInfo = new GraphStoreMetadata.DatabaseInfo(databaseName, databaseLocation, Optional.of(remoteDatabaseId));
+
+        var result = serialize(databaseInfo);
+
+        var expected = formatWithoutWhitespace(
+            """
+                {
+                     "databaseName":"%s",
+                     "databaseLocation":"%s",
+                     "remoteDatabaseId":"%s"
+                }
+                """, databaseName, databaseLocation, remoteDatabaseId
+        );
+        assertThat(result).isEqualTo(expected);
+    }
+
+    @Test
+    void roundTripDatabaseInfo() throws JsonProcessingException {
+        var databaseName = "neo";
+        var databaseLocation = GraphStoreMetadata.DatabaseInfo.DatabaseLocation.LOCAL;
+        var databaseInfo = new GraphStoreMetadata.DatabaseInfo(databaseName, databaseLocation, Optional.empty());
+
+        var result = deserialize(serialize(databaseInfo), GraphStoreMetadata.DatabaseInfo.class);
+
+        assertThat(result).isEqualTo(databaseInfo);
+    }
+
+    @Test
     void serializeGraphStoreMetadata() throws JsonProcessingException {
         var databaseName = "neo";
-        var databaseLocation = DatabaseInfo.DatabaseLocation.LOCAL;
-        var databaseInfo = new DatabaseInfo(databaseName, databaseLocation, Optional.empty());
+        var databaseLocation = GraphStoreMetadata.DatabaseInfo.DatabaseLocation.LOCAL;
+        var databaseInfo = new GraphStoreMetadata.DatabaseInfo(databaseName, databaseLocation, Optional.empty());
         var graphStoreMetadata = new GraphStoreMetadata(databaseInfo);
 
         var result = serialize(graphStoreMetadata);
@@ -57,8 +109,8 @@ class GraphStoreMetadataSerializerTest {
     @Test
     void roundTripGraphStoreMetadata() throws JsonProcessingException {
         var databaseName = "neo";
-        var databaseLocation = DatabaseInfo.DatabaseLocation.LOCAL;
-        var databaseInfo = new DatabaseInfo(databaseName, databaseLocation, Optional.empty());
+        var databaseLocation = GraphStoreMetadata.DatabaseInfo.DatabaseLocation.LOCAL;
+        var databaseInfo = new GraphStoreMetadata.DatabaseInfo(databaseName, databaseLocation, Optional.empty());
         var graphStoreMetadata = new GraphStoreMetadata(databaseInfo);
 
         var result = deserialize(serialize(graphStoreMetadata), GraphStoreMetadata.class);
