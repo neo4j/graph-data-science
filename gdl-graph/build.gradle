@@ -17,33 +17,20 @@ dependencies {
     compileOnly openGds.jetbrains.annotations
     compileOnly(neo4j.values) { transitive = false }
 
-    implementation project(':algo-common')
     implementation project(':annotations')
     implementation project(':config-api')
     implementation project(':core')
-    implementation project(':core-utils')
     implementation project(':core-test-utils')
     implementation project(':gds-values')
-    implementation project(':legacy-cypher-projection')
-    implementation project(':native-projection')
     implementation project(':graph-schema-api')
     implementation project(':logging')
     implementation project(':memory-usage')
-    implementation project(':model-catalog-api')
-    implementation project(':neo4j-api')
-    implementation project(':neo4j-log-adapter')
     implementation project(':neo4j-settings')
-    implementation project(':opengds-procedure-facade')
-    implementation project(':open-model-catalog')
     implementation project(':proc-common')
-    implementation project(':procedures-facade-api')
     implementation project(':progress-tracking')
     implementation project(':string-formatting')
-    implementation project(':transaction')
-    implementation project(':termination')
 
     implementation(
-        openGds.neo4j.cypher.dsl,
         openGds.gdl,
     )
 
