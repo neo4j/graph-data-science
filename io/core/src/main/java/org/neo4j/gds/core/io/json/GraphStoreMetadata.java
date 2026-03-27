@@ -19,11 +19,13 @@
  */
 package org.neo4j.gds.core.io.json;
 
+import java.util.Map;
 import java.util.Optional;
 
 public record GraphStoreMetadata(
     DatabaseInfo databaseInfo,
-    WriteMode writeMode
+    WriteMode writeMode,
+    IdMapInfo IdMapInfo
 ) {
 }
 
@@ -35,6 +37,14 @@ record DatabaseInfo(
     enum DatabaseLocation {
         LOCAL, REMOTE, NONE
     }
+}
+
+record IdMapInfo(
+    String idMapType,
+    long nodeCount,
+    long maxOriginalId,
+    Map<String, Long> nodeLabelCounts
+) {
 }
 
 enum WriteMode {

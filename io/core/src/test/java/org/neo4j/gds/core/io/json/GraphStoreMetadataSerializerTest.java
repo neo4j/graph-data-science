@@ -21,8 +21,11 @@ package org.neo4j.gds.core.io.json;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.core.loading.ArrayIdMapBuilder;
 
+import java.util.Map;
 import java.util.Optional;
+import java.util.TreeMap;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.neo4j.gds.core.io.json.Utils.deserialize;
@@ -84,12 +87,57 @@ class GraphStoreMetadataSerializerTest {
     }
 
     @Test
+    void serializeIdMapInfo() throws JsonProcessingException {
+        var idMapType = ArrayIdMapBuilder.ID;
+        long nodeCount = 1337L;
+        long maxOriginalId = 1984L;
+        var nodeLabelCounts = new TreeMap<String, Long>();
+        nodeLabelCounts.put("A", 42L);
+        nodeLabelCounts.put("B", 1984L);
+
+        var idMapInfo = new IdMapInfo(idMapType, nodeCount, maxOriginalId, nodeLabelCounts);
+
+        var result = serialize(idMapInfo);
+
+        var expected = formatWithoutWhitespace("""
+            {
+                "idMapType": "%s",
+                "nodeCount": %d,
+                "maxOriginalId": %d,
+                "nodeLabelCounts": {
+                    "A": 42,
+                    "B": 1984
+                }
+            }
+            """, idMapType, nodeCount, maxOriginalId);
+
+        assertThat(result).isEqualTo(expected);
+    }
+
+    @Test
+    void roundTripIdMapInfo() throws JsonProcessingException {
+        var idMapType = ArrayIdMapBuilder.ID;
+        long nodeCount = 1337L;
+        long maxOriginalId = 1984L;
+        var nodeLabelCounts = new TreeMap<String, Long>();
+        nodeLabelCounts.put("A", 42L);
+        nodeLabelCounts.put("B", 1984L);
+
+        var idMapInfo = new IdMapInfo(idMapType, nodeCount, maxOriginalId, nodeLabelCounts);
+
+        var result = deserialize(serialize(idMapInfo), IdMapInfo.class);
+
+        assertThat(result).isEqualTo(idMapInfo);
+    }
+
+    @Test
     void serializeGraphStoreMetadata() throws JsonProcessingException {
         var databaseName = "neo";
         var databaseLocation = DatabaseInfo.DatabaseLocation.LOCAL;
         var databaseInfo = new DatabaseInfo(databaseName, databaseLocation, Optional.empty());
         var writeMode = WriteMode.LOCAL;
-        var graphStoreMetadata = new GraphStoreMetadata(databaseInfo, writeMode);
+        var idMapInfo = new IdMapInfo(ArrayIdMapBuilder.ID, 42, 42, Map.of("A", 42L));
+        var graphStoreMetadata = new GraphStoreMetadata(databaseInfo, writeMode, idMapInfo);
 
         var result = serialize(graphStoreMetadata);
 
@@ -97,13 +145,21 @@ class GraphStoreMetadataSerializerTest {
             """
                 {
                     "databaseInfo": {
-                         "databaseName":"%s",
-                         "databaseLocation":"%s",
+                         "databaseName":"neo",
+                         "databaseLocation":"LOCAL",
                          "remoteDatabaseId":null
                     },
-                    "writeMode": "%s"
+                    "writeMode": "LOCAL",
+                    "IdMapInfo": {
+                        "idMapType": "array",
+                        "nodeCount": 42,
+                        "maxOriginalId": 42,
+                        "nodeLabelCounts": {
+                            "A": 42
+                        }
+                    }
                 }
-                """, databaseName, databaseLocation, writeMode
+                """
         );
         assertThat(result).isEqualTo(expected);
     }
@@ -113,7 +169,8 @@ class GraphStoreMetadataSerializerTest {
         var databaseName = "neo";
         var databaseLocation = DatabaseInfo.DatabaseLocation.LOCAL;
         var databaseInfo = new DatabaseInfo(databaseName, databaseLocation, Optional.empty());
-        var graphStoreMetadata = new GraphStoreMetadata(databaseInfo, WriteMode.LOCAL);
+        var idMapInfo = new IdMapInfo(ArrayIdMapBuilder.ID, 42, 42, Map.of("A", 42L));
+        var graphStoreMetadata = new GraphStoreMetadata(databaseInfo, WriteMode.LOCAL, idMapInfo);
 
         var result = deserialize(serialize(graphStoreMetadata), GraphStoreMetadata.class);
 
