@@ -51,7 +51,6 @@ record IdMapInfo(
 }
 
 record RelationshipInfo(
-    String adjacencyListType,
     long relationshipCount,
     boolean isInverseIndexed,
     int propertyCount

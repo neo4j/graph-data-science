@@ -207,7 +207,7 @@ class GraphStoreMetadataSerializerTest {
         var writeMode = WriteMode.LOCAL;
         var idMapInfo = new IdMapInfo(ArrayIdMapBuilder.ID, 42, 42, Map.of("A", 42L));
         var relationshipInfo = Map.of(
-            "REL", new RelationshipInfo("delta_varlong", 1337L, false, 1)
+            "REL", new RelationshipInfo(1337L, false, 1)
         );
         var nodeSchema = Map.of(
             "A", new NodeSchema(Map.of(
