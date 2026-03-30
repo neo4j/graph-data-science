@@ -1,5 +1,11 @@
 = Machine Learning
 
+[CAUTION]
+====
+This feature is currently in Early Access Preview and only available for enabled customers.
+If you are interested in trying out this feature, please visit https://neo4j.com/contact-us/?ref=graph-data-science[neo4j.com].
+====
+
 Aura Graph Analytics can be used to create, store and reuse machine learning models created by one of the xref:machine-learning/machine-learning.adoc[available machine learning algorithms].
 
 The Model Catalog is a persistent store for trained machine learning models.
