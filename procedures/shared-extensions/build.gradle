@@ -14,11 +14,15 @@ dependencies {
     compileOnly(neo4j.annotations) { transitive = false }
     compileOnly(neo4j.common) { transitive = false }
     compileOnly(neo4j.graphdb.api) { transitive = false }
+    compileOnly(neo4j.gql.status) { transitive = false }
     compileOnly(neo4j.kernel) { transitive = false }
+    compileOnly(neo4j.kernel.api) { transitive = false }
     compileOnly(neo4j.logging) { transitive = false }
+    compileOnly(neo4j.procedure) { transitive = false }
 
     implementation project(':core-api')
     implementation project(':logging')
+    implementation project(':neo4j-kernel-adapter-api')
     implementation project(':opengds-procedure-facade')
     implementation project(':procedure-integration')
     implementation project(':progress-tracking')

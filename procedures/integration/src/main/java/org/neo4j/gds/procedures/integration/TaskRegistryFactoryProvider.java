@@ -20,15 +20,14 @@
 package org.neo4j.gds.procedures.integration;
 
 import org.neo4j.function.ThrowingFunction;
+import org.neo4j.gds.compat.DatabaseIdSupplier;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
-import org.neo4j.gds.procedures.DatabaseIdAccessor;
 import org.neo4j.gds.procedures.TaskRegistryFactoryService;
 import org.neo4j.gds.procedures.UserAccessor;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.kernel.api.procedure.Context;
 
 public class TaskRegistryFactoryProvider implements ThrowingFunction<Context, TaskRegistryFactory, ProcedureException> {
-    private final DatabaseIdAccessor databaseIdAccessor = new DatabaseIdAccessor();
     private final UserAccessor userAccessor;
 
     private final TaskRegistryFactoryService taskRegistryFactoryService;
@@ -40,7 +39,7 @@ public class TaskRegistryFactoryProvider implements ThrowingFunction<Context, Ta
 
     @Override
     public TaskRegistryFactory apply(Context context) {
-        var databaseId = databaseIdAccessor.getDatabaseId(context.graphDatabaseAPI());
+        var databaseId = new DatabaseIdSupplier().databaseId(context);
         var user = userAccessor.getUser(context.securityContext());
 
         return taskRegistryFactoryService.getTaskRegistryFactory(databaseId, user);

@@ -30,6 +30,7 @@ import org.neo4j.gds.applications.graphstorecatalog.GraphCatalogApplications;
 import org.neo4j.gds.applications.modelcatalog.ModelCatalogApplications;
 import org.neo4j.gds.applications.modelcatalog.ModelRepository;
 import org.neo4j.gds.applications.operations.FeatureTogglesRepository;
+import org.neo4j.gds.compat.DatabaseIdSupplier;
 import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.core.utils.logging.GdsLoggers;
@@ -41,7 +42,6 @@ import org.neo4j.gds.mem.MemoryTracker;
 import org.neo4j.gds.metrics.Metrics;
 import org.neo4j.gds.metrics.telemetry.TelemetryLogger;
 import org.neo4j.gds.metrics.telemetry.TelemetryLoggerImpl;
-import org.neo4j.gds.procedures.DatabaseIdAccessor;
 import org.neo4j.gds.procedures.GraphCatalogProcedureFacadeFactory;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.KernelTransactionAccessor;
@@ -68,7 +68,6 @@ import java.util.function.Function;
  * We use this at request time to construct the facade that the procedures call.
  */
 public class GraphDataScienceProceduresProvider implements ThrowingFunction<Context, GraphDataScienceProcedures, ProcedureException> {
-    private final DatabaseIdAccessor databaseIdAccessor = new DatabaseIdAccessor();
     private final KernelTransactionAccessor kernelTransactionAccessor = new KernelTransactionAccessor();
     private final ProcedureTransactionAccessor procedureTransactionAccessor = new ProcedureTransactionAccessor();
     private final RequestCorrelationIdAccessor requestCorrelationIdAccessor = new RequestCorrelationIdAccessor();
@@ -163,7 +162,7 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
         var procedureCallContext = context.procedureCallContext();
         var procedureTransaction = procedureTransactionAccessor.getProcedureTransaction(context);
 
-        var databaseId = databaseIdAccessor.getDatabaseId(graphDatabaseService);
+        var databaseId = new DatabaseIdSupplier().databaseId(context);
         var procedureReturnColumns = new ProcedureCallContextReturnColumns(procedureCallContext);
         var requestCorrelationId = requestCorrelationIdAccessor.getRequestCorrelationId(kernelTransaction);
         var terminationMonitor = new TransactionTerminationMonitor(kernelTransaction);

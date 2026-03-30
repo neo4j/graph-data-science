@@ -20,14 +20,13 @@
 package org.neo4j.gds.procedures.integration;
 
 import org.neo4j.function.ThrowingFunction;
+import org.neo4j.gds.compat.DatabaseIdSupplier;
 import org.neo4j.gds.core.utils.progress.TaskStore;
 import org.neo4j.gds.core.utils.progress.TaskStoreService;
-import org.neo4j.gds.procedures.DatabaseIdAccessor;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.kernel.api.procedure.Context;
 
 public class TaskStoreProvider implements ThrowingFunction<Context, TaskStore, ProcedureException> {
-    private final DatabaseIdAccessor databaseIdAccessor = new DatabaseIdAccessor();
 
     private final TaskStoreService taskStoreService;
 
@@ -37,7 +36,7 @@ public class TaskStoreProvider implements ThrowingFunction<Context, TaskStore, P
 
     @Override
     public TaskStore apply(Context context) {
-        var databaseId = databaseIdAccessor.getDatabaseId(context.graphDatabaseAPI());
+        var databaseId = new DatabaseIdSupplier().databaseId(context);
 
         return taskStoreService.getOrCreateTaskStore(databaseId);
     }

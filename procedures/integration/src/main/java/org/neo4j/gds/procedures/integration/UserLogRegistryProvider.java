@@ -20,8 +20,8 @@
 package org.neo4j.gds.procedures.integration;
 
 import org.neo4j.function.ThrowingFunction;
+import org.neo4j.gds.compat.DatabaseIdSupplier;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistry;
-import org.neo4j.gds.procedures.DatabaseIdAccessor;
 import org.neo4j.gds.procedures.UserAccessor;
 import org.neo4j.gds.procedures.UserLogServices;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
@@ -31,8 +31,6 @@ import org.neo4j.kernel.api.procedure.Context;
  * This exists to support injectable user log registries in Pregel
  */
 class UserLogRegistryProvider implements ThrowingFunction<Context, UserLogRegistry, ProcedureException> {
-    private final DatabaseIdAccessor databaseIdAccessor = new DatabaseIdAccessor();
-
     private final UserAccessor userAccessor;
     private final UserLogServices userLogServices;
 
@@ -43,7 +41,7 @@ class UserLogRegistryProvider implements ThrowingFunction<Context, UserLogRegist
 
     @Override
     public UserLogRegistry apply(Context context) throws ProcedureException {
-        var databaseId = databaseIdAccessor.getDatabaseId(context.graphDatabaseAPI());
+        var databaseId = new DatabaseIdSupplier().databaseId(context);
         var user = userAccessor.getUser(context.securityContext());
 
         return userLogServices.getUserLogRegistry(databaseId, user);

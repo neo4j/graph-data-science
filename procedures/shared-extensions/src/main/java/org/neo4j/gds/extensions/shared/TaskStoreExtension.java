@@ -20,7 +20,7 @@
 package org.neo4j.gds.extensions.shared;
 
 import org.neo4j.annotations.service.ServiceProvider;
-import org.neo4j.gds.procedures.DatabaseIdAccessor;
+import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.procedures.integration.LogAccessor;
 import org.neo4j.gds.procedures.integration.TaskStoreObserver;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -38,7 +38,6 @@ import org.neo4j.logging.internal.LogService;
  */
 @ServiceProvider
 public final class TaskStoreExtension extends ExtensionFactory<TaskStoreExtension.Dependencies> {
-    private final DatabaseIdAccessor databaseIdAccessor = new DatabaseIdAccessor();
     private final LogAccessor logAccessor = new LogAccessor();
 
     public TaskStoreExtension() {
@@ -48,7 +47,8 @@ public final class TaskStoreExtension extends ExtensionFactory<TaskStoreExtensio
     @Override
     public Lifecycle newInstance(ExtensionContext extensionContext, Dependencies dependencies) {
         var log = logAccessor.getLog(dependencies.logService(), getClass());
-        var databaseId = databaseIdAccessor.getDatabaseId(dependencies.graphDatabaseService());
+        // FIXME: Find a way to use the DatabaseIdSupplier
+        var databaseId = DatabaseId.of(dependencies.graphDatabaseService().databaseName());
         log.info("Bootstrapping task store for new database '%s'", databaseId);
 
         // get a handle on the observer

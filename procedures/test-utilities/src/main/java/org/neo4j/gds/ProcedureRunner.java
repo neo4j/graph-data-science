@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds;
 
+import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryGuard;
@@ -30,7 +31,6 @@ import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
 import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
-import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.core.utils.logging.GdsLoggers;
 import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.utils.progress.EmptyTaskStore;
@@ -43,7 +43,6 @@ import org.neo4j.gds.logging.LogAdapter;
 import org.neo4j.gds.mem.MemoryTracker;
 import org.neo4j.gds.metrics.Metrics;
 import org.neo4j.gds.metrics.telemetry.TelemetryLoggerImpl;
-import org.neo4j.gds.procedures.DatabaseIdAccessor;
 import org.neo4j.gds.procedures.GraphCatalogProcedureFacadeFactory;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.LocalGraphDataScienceProcedures;
@@ -160,7 +159,7 @@ public final class ProcedureRunner {
 
         var requestScopedDependencies = RequestScopedDependencies.builder()
             .correlationId(PlainSimpleRequestCorrelationId.create())
-            .databaseId(new DatabaseIdAccessor().getDatabaseId(graphDatabaseService))
+            .databaseId(DatabaseId.of(graphDatabaseService.databaseName()))
             .graphLoaderContext(GraphLoaderContext.NULL_CONTEXT)
             .taskRegistryFactory(taskRegistryFactory)
             .taskStore(EmptyTaskStore.INSTANCE)
@@ -171,8 +170,6 @@ public final class ProcedureRunner {
         var graphStoreCatalogService = new GraphStoreCatalogService();
 
         var catalogProcedureFacadeFactory = new GraphCatalogProcedureFacadeFactory(gdsLog, null);
-
-        var modelCatalog = new OpenModelCatalog();
 
         var loggers = new GdsLoggers(gdsLog, new LoggerForProgressTrackingAdapter(gdsLog));
 
