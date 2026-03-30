@@ -137,7 +137,10 @@ class GraphStoreMetadataSerializerTest {
         var databaseInfo = new DatabaseInfo(databaseName, databaseLocation, Optional.empty());
         var writeMode = WriteMode.LOCAL;
         var idMapInfo = new IdMapInfo(ArrayIdMapBuilder.ID, 42, 42, Map.of("A", 42L));
-        var graphStoreMetadata = new GraphStoreMetadata(databaseInfo, writeMode, idMapInfo);
+        var relationshipInfos = Map.of(
+            "REL", new RelationshipInfo("delta_varlong", 1337L, false, 1)
+        );
+        var graphStoreMetadata = new GraphStoreMetadata(databaseInfo, writeMode, idMapInfo, relationshipInfos);
 
         var result = serialize(graphStoreMetadata);
 
@@ -150,12 +153,20 @@ class GraphStoreMetadataSerializerTest {
                          "remoteDatabaseId":null
                     },
                     "writeMode": "LOCAL",
-                    "IdMapInfo": {
+                    "idMapInfo": {
                         "idMapType": "array",
                         "nodeCount": 42,
                         "maxOriginalId": 42,
                         "nodeLabelCounts": {
                             "A": 42
+                        }
+                    },
+                    "relationshipInfos": {
+                        "REL": {
+                            "adjacencyListType": "delta_varlong",
+                            "relationshipCount": 1337,
+                            "isInverseIndexed": false,
+                            "propertyCount": 1
                         }
                     }
                 }
@@ -170,7 +181,10 @@ class GraphStoreMetadataSerializerTest {
         var databaseLocation = DatabaseInfo.DatabaseLocation.LOCAL;
         var databaseInfo = new DatabaseInfo(databaseName, databaseLocation, Optional.empty());
         var idMapInfo = new IdMapInfo(ArrayIdMapBuilder.ID, 42, 42, Map.of("A", 42L));
-        var graphStoreMetadata = new GraphStoreMetadata(databaseInfo, WriteMode.LOCAL, idMapInfo);
+        var relationshipInfos = Map.of(
+            "REL", new RelationshipInfo("delta_varlong", 1337L, false, 1)
+        );
+        var graphStoreMetadata = new GraphStoreMetadata(databaseInfo, WriteMode.LOCAL, idMapInfo, relationshipInfos);
 
         var result = deserialize(serialize(graphStoreMetadata), GraphStoreMetadata.class);
 

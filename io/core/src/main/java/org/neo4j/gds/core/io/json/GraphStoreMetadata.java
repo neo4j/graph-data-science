@@ -25,7 +25,8 @@ import java.util.Optional;
 public record GraphStoreMetadata(
     DatabaseInfo databaseInfo,
     WriteMode writeMode,
-    IdMapInfo IdMapInfo
+    IdMapInfo idMapInfo,
+    Map<String, RelationshipInfo> relationshipInfos
 ) {
 }
 
@@ -46,6 +47,13 @@ record IdMapInfo(
     Map<String, Long> nodeLabelCounts
 ) {
 }
+
+record RelationshipInfo(
+    String adjacencyListType,
+    long relationshipCount,
+    boolean isInverseIndexed,
+    int propertyCount
+) {}
 
 enum WriteMode {
     LOCAL, REMOTE, NONE
