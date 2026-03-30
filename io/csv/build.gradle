@@ -21,7 +21,6 @@ dependencies {
     compileOnly(neo4j.import.api) { transitive = false }
 
     implementation project(':annotations')
-    implementation project(':config-api')
     implementation project(':core')
     implementation project(':graph-schema-api')
     implementation project(':io-core')
@@ -31,14 +30,10 @@ dependencies {
     implementation project(':neo4j-settings')
     implementation project(':progress-tracking')
     implementation project(':string-formatting')
-    implementation project(':subgraph-filtering')
 
     implementation openGds.jackson.databind
     implementation openGds.jackson.dataformat.csv
     implementation openGds.fastcsv
-    implementation(openGds.opencypher.ccparser) {
-        transitive = false
-    }
 
     testImplementation project(':gdl-graph')
     testImplementation project(':gdl-junit-extension')
