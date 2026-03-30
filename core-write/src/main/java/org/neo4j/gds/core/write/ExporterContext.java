@@ -21,6 +21,7 @@ package org.neo4j.gds.core.write;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.compat.DatabaseIdSupplier;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.internal.kernel.api.security.SecurityContext;
 import org.neo4j.kernel.api.procedure.Context;
@@ -37,6 +38,7 @@ public interface ExporterContext {
 
     SecurityContext securityContext();
 
+    String databaseName();
 
     final class ProcedureContextWrapper implements ExporterContext {
         private final Context procedureContext;
@@ -56,6 +58,11 @@ public interface ExporterContext {
         @Override
         public SecurityContext securityContext() {
             return procedureContext.securityContext();
+        }
+
+        @Override
+        public String databaseName() {
+            return new DatabaseIdSupplier().databaseName(procedureContext);
         }
     }
 }

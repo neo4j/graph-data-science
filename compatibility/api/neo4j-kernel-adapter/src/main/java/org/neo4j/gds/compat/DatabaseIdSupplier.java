@@ -34,11 +34,15 @@ public class DatabaseIdSupplier {
     }
 
     public DatabaseId databaseId(Context context) {
+        return DatabaseId.of(databaseName(context));
+    }
+
+    public String databaseName(Context context) {
         var spdBuiltInProcedures = spdBuiltInProceduresProvider.spdBuiltInProcedures(context);
         if (spdBuiltInProcedures.isGraphShard()) {
-            return DatabaseId.of(spdBuiltInProcedures.virtualSpdName());
+            return spdBuiltInProcedures.virtualSpdName();
         }
 
-        return DatabaseId.of(context.graphDatabaseAPI().databaseName());
+        return context.graphDatabaseAPI().databaseName();
     }
 }

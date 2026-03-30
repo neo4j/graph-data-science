@@ -47,9 +47,9 @@ class DatabaseIdSupplierTest {
         when(spdBuiltInProceduresMock.isGraphShard()).thenReturn(false);
 
         var databaseIdSupplier = new DatabaseIdSupplier(spdProcedureProviderMock);
-        var databaseId = databaseIdSupplier.databaseId(contextMock);
+        var databaseName = databaseIdSupplier.databaseName(contextMock);
 
-        assertThat(databaseId.databaseName()).isEqualTo("database-id-from-api");
+        assertThat(databaseName).isEqualTo("database-id-from-api");
 
         verify(spdBuiltInProceduresMock, times(1)).isGraphShard();
         verify(contextMock, times(1)).graphDatabaseAPI();
@@ -68,9 +68,9 @@ class DatabaseIdSupplierTest {
         when(spdBuiltInProceduresMock.virtualSpdName()).thenReturn("database-id-from-spd");
 
         var databaseIdSupplier = new DatabaseIdSupplier(spdProcedureProviderMock);
-        var databaseId = databaseIdSupplier.databaseId(contextMock);
+        var databaseName = databaseIdSupplier.databaseName(contextMock);
 
-        assertThat(databaseId.databaseName()).isEqualTo("database-id-from-spd");
+        assertThat(databaseName).isEqualTo("database-id-from-spd");
         verify(spdBuiltInProceduresMock, times(1)).isGraphShard();
         verify(spdBuiltInProceduresMock, times(1)).virtualSpdName();
         verify(contextMock, times(0)).graphDatabaseAPI();
