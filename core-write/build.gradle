@@ -36,14 +36,11 @@ dependencies {
     implementation project(':neo4j-utility')
     implementation project(':neo4j-values')
     implementation project(':progress-tracking')
-    implementation project(':graph-schema-api')
     implementation project(':transaction')
     implementation project(':termination')
 
     // TEST DEPENDENCIES
     testImplementation project(':gdl-graph')
-    testImplementation project(':gdl-junit-extension')
-    testImplementation project(':test-graph-loaders')
     testImplementation project(':test-utils')
 
     integrationTestImplementation project(':logging')
