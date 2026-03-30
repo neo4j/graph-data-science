@@ -26,7 +26,8 @@ public record GraphStoreMetadata(
     DatabaseInfo databaseInfo,
     WriteMode writeMode,
     IdMapInfo idMapInfo,
-    Map<String, RelationshipInfo> relationshipInfos
+    Map<String, RelationshipInfo> relationshipInfo,
+    Map<String, NodeSchema> nodeSchema
 ) {
 }
 
@@ -54,6 +55,24 @@ record RelationshipInfo(
     boolean isInverseIndexed,
     int propertyCount
 ) {}
+
+record NodeSchema(
+    Map<String, PropertySchema> propertySchemas
+) {}
+
+record PropertySchema(
+    ValueType valueType,
+    Object defaultValue,
+    PropertyState propertyState
+) {}
+
+enum ValueType {
+    LONG, DOUBLE, FLOAT_ARRAY, DOUBLE_ARRAY, LONG_ARRAY
+}
+
+enum PropertyState {
+   PERSISTENT, TRANSIENT, REMOTE
+}
 
 enum WriteMode {
     LOCAL, REMOTE, NONE

@@ -20,6 +20,7 @@
 package org.neo4j.gds.core.io.json;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.core.loading.ArrayIdMapBuilder;
 
@@ -132,15 +133,7 @@ class GraphStoreMetadataSerializerTest {
 
     @Test
     void serializeGraphStoreMetadata() throws JsonProcessingException {
-        var databaseName = "neo";
-        var databaseLocation = DatabaseInfo.DatabaseLocation.LOCAL;
-        var databaseInfo = new DatabaseInfo(databaseName, databaseLocation, Optional.empty());
-        var writeMode = WriteMode.LOCAL;
-        var idMapInfo = new IdMapInfo(ArrayIdMapBuilder.ID, 42, 42, Map.of("A", 42L));
-        var relationshipInfos = Map.of(
-            "REL", new RelationshipInfo("delta_varlong", 1337L, false, 1)
-        );
-        var graphStoreMetadata = new GraphStoreMetadata(databaseInfo, writeMode, idMapInfo, relationshipInfos);
+        var graphStoreMetadata = getGraphStoreMetadata();
 
         var result = serialize(graphStoreMetadata);
 
@@ -161,12 +154,23 @@ class GraphStoreMetadataSerializerTest {
                             "A": 42
                         }
                     },
-                    "relationshipInfos": {
+                    "relationshipInfo": {
                         "REL": {
                             "adjacencyListType": "delta_varlong",
                             "relationshipCount": 1337,
                             "isInverseIndexed": false,
                             "propertyCount": 1
+                        }
+                    },
+                    "nodeSchema": {
+                        "A": {
+                            "propertySchemas": {
+                                "foo": {
+                                    "valueType": "LONG",
+                                    "defaultValue": 42,
+                                    "propertyState": "PERSISTENT"
+                                }
+                            }
                         }
                     }
                 }
@@ -177,17 +181,33 @@ class GraphStoreMetadataSerializerTest {
 
     @Test
     void roundTripGraphStoreMetadata() throws JsonProcessingException {
-        var databaseName = "neo";
-        var databaseLocation = DatabaseInfo.DatabaseLocation.LOCAL;
-        var databaseInfo = new DatabaseInfo(databaseName, databaseLocation, Optional.empty());
-        var idMapInfo = new IdMapInfo(ArrayIdMapBuilder.ID, 42, 42, Map.of("A", 42L));
-        var relationshipInfos = Map.of(
-            "REL", new RelationshipInfo("delta_varlong", 1337L, false, 1)
-        );
-        var graphStoreMetadata = new GraphStoreMetadata(databaseInfo, WriteMode.LOCAL, idMapInfo, relationshipInfos);
+        var graphStoreMetadata = getGraphStoreMetadata();
 
         var result = deserialize(serialize(graphStoreMetadata), GraphStoreMetadata.class);
 
         assertThat(result).isEqualTo(graphStoreMetadata);
+    }
+
+    private static @NonNull GraphStoreMetadata getGraphStoreMetadata() {
+        var databaseLocation = DatabaseInfo.DatabaseLocation.LOCAL;
+        var databaseInfo = new DatabaseInfo("neo", databaseLocation, Optional.empty());
+        var writeMode = WriteMode.LOCAL;
+        var idMapInfo = new IdMapInfo(ArrayIdMapBuilder.ID, 42, 42, Map.of("A", 42L));
+        var relationshipInfo = Map.of(
+            "REL", new RelationshipInfo("delta_varlong", 1337L, false, 1)
+        );
+        var nodeSchema = Map.of(
+            "A", new NodeSchema(Map.of(
+                "foo", new PropertySchema(ValueType.LONG, 42, PropertyState.PERSISTENT)
+
+            ))
+        );
+        return new GraphStoreMetadata(
+            databaseInfo,
+            writeMode,
+            idMapInfo,
+            relationshipInfo,
+            nodeSchema
+        );
     }
 }
