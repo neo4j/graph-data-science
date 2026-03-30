@@ -21,9 +21,6 @@ dependencies {
 
     implementation project(':memory-usage')
 
-    // only `JobIdConfig` is what we need from this module
-    implementation project(':progress-tracking')
-
     // test infrastructure
     testImplementation platform(openGds.junit.bom)
     testImplementation openGds.bundles.test.mocking
