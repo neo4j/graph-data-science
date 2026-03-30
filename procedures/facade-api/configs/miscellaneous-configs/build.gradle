@@ -19,9 +19,6 @@ dependencies {
     // Configuration annotations
     implementation project(':annotations')
 
-    // ScalerFactory 🙈
-    implementation project(':algo-common')
-
     // `BaseConfig` lives here
     implementation project(':config-api')
 
@@ -30,22 +27,10 @@ dependencies {
 
     implementation project(':graph-schema-api')
 
-    // this is needed because of `MemoryEstimation`
-    implementation project(':memory-usage')
-
-
-    // we bring this in only to use `PregelConfig` and `Partitioning` enum
-    implementation project(':pregel')
-
-    // only `JobIdConfig` is what we need from this module
-    implementation project(':progress-tracking')
-
     implementation project(':string-formatting')
     implementation project(':scaling-utils')
 
     testImplementation project(':test-utils')
     testImplementation project(':gdl-graph')
     testImplementation project(':gdl-junit-extension')
-    testImplementation openGds.gdl
-
 }
