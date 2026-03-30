@@ -25,7 +25,6 @@ dependencies {
     implementation project(':gds-values')
     implementation project(':graph-schema-api')
     implementation project(':histogram')
-    implementation project(':licensing')
     implementation project(':logging')
     implementation project(':memory-access')
     implementation project(':memory-info')
@@ -36,8 +35,6 @@ dependencies {
     implementation project(':collections-memory-estimation')
     implementation project(':transaction')
     implementation project(':termination')
-
-    implementation project(':concurrency-validation-api')
 
     api(
         project(':core-api'),
@@ -58,7 +55,6 @@ dependencies {
     implementation (
         openGds.caffeine,
         openGds.stormpot,
-        project(':neo4j-log-adapter'),
     )
 
     // TEST DEPENDENCIES
@@ -69,16 +65,13 @@ dependencies {
     testAnnotationProcessor project(':config-generator')
     testAnnotationProcessor openGds.immutables.value
 
-    testImplementation project(':edition-api')
     testImplementation project(':gdl-graph')
     testImplementation project(':gdl-junit-extension')
     testImplementation project(':legacy-cypher-projection')
-    testImplementation project(':progress-tracking')
     testImplementation project(':projection')
     testImplementation project(':test-graph-loaders')
     testImplementation project(':test-utils')
 
-    testImplementation openGds.jqwik
     testImplementation openGds.qaladatagen
     testImplementation openGds.junit.pioneer
 
