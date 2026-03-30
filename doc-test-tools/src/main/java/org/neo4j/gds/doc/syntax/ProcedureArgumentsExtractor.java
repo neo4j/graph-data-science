@@ -29,9 +29,22 @@ final class ProcedureArgumentsExtractor {
     public static List<String> findArguments(String codeSnippet) {
         var start = codeSnippet.indexOf('(') + 1;
         var end = codeSnippet.indexOf(')');
-        var x = codeSnippet.substring(start, end);
-        return Arrays.stream(x.split(","))
-            .map(yieldField -> yieldField.split(":")[0].trim())
+        
+        // Extract content between parentheses, stopping before YIELD if present
+        var argumentsSection = codeSnippet.substring(start, end);
+        
+        // Check if YIELD appears before the closing parenthesis
+        var yieldIndex = argumentsSection.indexOf("YIELD");
+        if (yieldIndex != -1) {
+            argumentsSection = argumentsSection.substring(0, yieldIndex);
+        }
+        
+        // Remove optional parameters (content within square brackets)
+        argumentsSection = argumentsSection.replaceAll("\\[(.*?)\\]", "");
+        
+        return Arrays.stream(argumentsSection.split(","))
+            .map(arg -> arg.split(":")[0].trim())
+            .filter(arg -> !arg.isEmpty())
             .collect(Collectors.toList());
     }
 

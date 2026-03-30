@@ -27,17 +27,37 @@ class ProcedureArgumentsExtractorTest {
 
     @Test
     void shouldExtractArguments() {
-        var query = "CALL gds.labelPropagation.stream(\n" +
-                    "  graphName: String,\n" +
-                    "  configuration: Map\n" +
-                    ")\n" +
-                    "YIELD\n" +
-                    "    nodeId: Integer,\n" +
-                    "    communityId: Integer";
+        var query = """
+            CALL gds.labelPropagation.stream(
+              graphName: String,
+              configuration: Map
+            )
+            YIELD
+                nodeId: Integer,
+                communityId: Integer
+            """;
 
         var foundArguments = ProcedureArgumentsExtractor.findArguments(query);
 
         assertThat(foundArguments).containsExactlyInAnyOrder("graphName", "configuration");
+    }
+
+    @Test
+    void shouldIgnoreOptionalParameters() {
+        var query = """
+            CALL gds.model.store(
+                [ sessionInfo: String or Map, ]
+                modelName: String,
+                failIfUnsupported: Boolean
+            )
+            YIELD
+                modelName: String,
+                storeMillis: Integer
+            """;
+
+        var foundArguments = ProcedureArgumentsExtractor.findArguments(query);
+
+        assertThat(foundArguments).containsExactlyInAnyOrder("modelName", "failIfUnsupported");
     }
 
 }

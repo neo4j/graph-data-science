@@ -193,6 +193,7 @@ class ProcedureSyntaxAutoChecker extends Postprocessor {
                     .getCells()
                     .get(0)) // Get the first column in the row --> corresponds to the return column names
                 .map(Cell::getText)
+                .filter(name -> !name.contains("label:serverless"))
                 // remove any potential supscripts
                 .map(name -> name.replaceAll("<sup.*</sup>", ""))
                 // remove any potential links in the names
