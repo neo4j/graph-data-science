@@ -172,6 +172,19 @@ class GraphStoreMetadataSerializerTest {
                                 }
                             }
                         }
+                    },
+                    "relationshipSchema": {
+                        "REL": {
+                            "direction": "DIRECTED",
+                            "propertySchemas": {
+                                "bar": {
+                                    "valueType": "DOUBLE",
+                                    "defaultValue": 4.2,
+                                    "propertyState": "PERSISTENT",
+                                    "aggregation": "NONE"
+                                }
+                            }
+                        }
                     }
                 }
                 """
@@ -198,16 +211,25 @@ class GraphStoreMetadataSerializerTest {
         );
         var nodeSchema = Map.of(
             "A", new NodeSchema(Map.of(
-                "foo", new PropertySchema(ValueType.LONG, 42, PropertyState.PERSISTENT)
+                "foo", new NodePropertySchema(ValueType.LONG, 42, PropertyState.PERSISTENT)
 
             ))
+        );
+        var relationshipSchema = Map.of(
+            "REL", new RelationshipSchema(
+                Direction.DIRECTED,
+                Map.of(
+                    "bar", new RelationshipPropertySchema(ValueType.DOUBLE, 4.2, PropertyState.PERSISTENT, Aggregation.NONE)
+                )
+            )
         );
         return new GraphStoreMetadata(
             databaseInfo,
             writeMode,
             idMapInfo,
             relationshipInfo,
-            nodeSchema
+            nodeSchema,
+            relationshipSchema
         );
     }
 }

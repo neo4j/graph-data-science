@@ -27,7 +27,8 @@ public record GraphStoreMetadata(
     WriteMode writeMode,
     IdMapInfo idMapInfo,
     Map<String, RelationshipInfo> relationshipInfo,
-    Map<String, NodeSchema> nodeSchema
+    Map<String, NodeSchema> nodeSchema,
+    Map<String, RelationshipSchema> relationshipSchema
 ) {
 }
 
@@ -57,21 +58,41 @@ record RelationshipInfo(
 ) {}
 
 record NodeSchema(
-    Map<String, PropertySchema> propertySchemas
+    Map<String, NodePropertySchema> propertySchemas
 ) {}
 
-record PropertySchema(
+record NodePropertySchema(
     ValueType valueType,
     Object defaultValue,
     PropertyState propertyState
 ) {}
 
-enum ValueType {
-    LONG, DOUBLE, FLOAT_ARRAY, DOUBLE_ARRAY, LONG_ARRAY
+record RelationshipSchema(
+    Direction direction,
+    Map<String, RelationshipPropertySchema> propertySchemas
+) {}
+
+record RelationshipPropertySchema(
+    ValueType valueType,
+    Object defaultValue,
+    PropertyState propertyState,
+    Aggregation aggregation
+) {}
+
+enum Aggregation {
+    NONE, SINGLE, SUM, MIN, MAX, COUNT
+}
+
+enum Direction {
+    DIRECTED, UNDIRECTED
 }
 
 enum PropertyState {
    PERSISTENT, TRANSIENT, REMOTE
+}
+
+enum ValueType {
+    LONG, DOUBLE, FLOAT_ARRAY, DOUBLE_ARRAY, LONG_ARRAY
 }
 
 enum WriteMode {
