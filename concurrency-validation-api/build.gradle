@@ -7,6 +7,5 @@ description = 'Neo4j Graph Data Science :: Concurrency Validation API'
 group = 'org.neo4j.gds'
 
 dependencies {
-    implementation project(':licensing')
     implementation project(':string-formatting')
 }
