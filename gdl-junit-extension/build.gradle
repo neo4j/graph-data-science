@@ -14,8 +14,6 @@ dependencies {
     compileOnly openGds.immutables.value
     compileOnly project(':annotations')
 
-    implementation openGds.junit.jupiter.api
-
     implementation project(':config-api')
 
     implementation project(':core-api')
@@ -27,8 +25,6 @@ dependencies {
     implementation project(':gdl-graph')
     implementation project(':graph-projection-api')
     implementation project(':graph-schema-api')
-
-    implementation project(':string-formatting')
 
     testImplementation platform(openGds.junit.bom)
     testImplementation openGds.bundles.test.basic
