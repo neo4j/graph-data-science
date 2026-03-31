@@ -33,43 +33,29 @@ dependencies {
 
     implementation project(':algo-common')
     implementation project(':algorithms-facade-api')
-    implementation project(':algorithms-machinery')
     implementation project(':annotations')
     implementation project(':config-api')
     implementation project(':core')
-    implementation project(':core-write')
-    implementation project(':defaults-and-limits-configuration')
-    implementation project(':edition-api')
     implementation project(':executor')
-    implementation project(':graph-schema-api')
-    implementation project(':graph-store-catalog-applications')
-    implementation project(':licensing')
     implementation project(':logging')
 
-    implementation project(':ml-algo')
-    implementation project(':model-catalog-api')
     implementation project(':neo4j-api')
     implementation project(':neo4j-log-adapter')
     implementation project(':open-licensing')
-    implementation project(':pregel')
     implementation project(':procedure-integration')
     implementation project(':procedures-facade-api')
     implementation project(':progress-tracking')
-    implementation project(':string-formatting')
     implementation project(':termination')
     implementation project(':transaction')
 
     implementation openGds.reflections
-    implementation openGds.hdrhistogram
 
     // Test dependencies
     testAnnotationProcessor project(':annotations')
     testAnnotationProcessor project(':config-generator')
     testAnnotationProcessor openGds.immutables.value
 
-    testImplementation project(':algo-test')
     testImplementation project(':proc-test-utilities')
-    testImplementation project(':graph-schema-api')
     testCompileOnly openGds.immutables.value.annotations
     testCompileOnly openGds.immutables.builder
     testCompileOnly openGds.jetbrains.annotations
