@@ -19,7 +19,6 @@ dependencies {
     implementation project(':annotations')
     implementation project(':config-api')
     implementation project(':graph-schema-api')
-    implementation project(':licensing')
     implementation project(':model-catalog-api')
 
     testAnnotationProcessor project(':config-generator')
