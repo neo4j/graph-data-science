@@ -21,14 +21,11 @@ dependencies {
     implementation project(':graph-catalog-facade-api')
     implementation project(':graph-schema-api')
     implementation project(':graph-store-catalog-applications')
-    implementation project(':io-core')
     implementation project(':legacy-cypher-projection')
     implementation project(':memory-usage')
     implementation project(':native-projection')
     implementation project(':neo4j-api')
-    implementation project(':progress-tracking')
     implementation project(':subgraph-filtering')
-    implementation project(':termination')
     implementation project(':transaction')
 
     // Test dependencies
