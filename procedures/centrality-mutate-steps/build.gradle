@@ -13,9 +13,6 @@ dependencies {
 
     implementation project(':algorithms-machinery')
 
-    // Required for configuration-related types used by services/utilities
-    implementation project(':config-api')
-
     implementation project(':core')
     implementation project(':core-api')
 }
