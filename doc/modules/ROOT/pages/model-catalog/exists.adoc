@@ -11,7 +11,7 @@ We can check if a model is available in the catalog by looking up its name.
 .Check if a model exists in the catalog:
 [source, cypher, role=noplay]
 ----
-CALL gds.model.exists(modelName: String)
+CALL gds.model.exists([ sessionInfo: String or Map, ] modelName: String)
 YIELD
     modelName: String,
     modelType: String,
@@ -19,10 +19,11 @@ YIELD
 ----
 
 .Parameters
-[opts="header",cols="1,1,1m,1,4"]
+[opts="header",cols="3,1,1m,1,4"]
 |===
 | Name          | Type   | Default | Optional | Description
-| modelName     | String | n/a     | no       | The name of a model.
+| sessionInfo label:serverless[Aura Graph Analytics]    | String or Map     | n/a     | no       | The name of the xref:aura-graph-analytics/index.adoc[GDS Session] on which the model might exist. Accepts the output of the helper function `sessionInfo`.
+| modelName                                             | String            | n/a     | no       | The name of a model.
 |===
 
 .Results

@@ -11,7 +11,7 @@ Information about models in the catalog can be retrieved using the `gds.model.li
 .List models from the catalog:
 [source, cypher, role=noplay]
 ----
-CALL gds.model.list(modelName: String)
+CALL gds.model.list([ sessionInfo: String or Map, ] modelName: String)
 YIELD
     modelName: String,
     modelType: String,
@@ -25,10 +25,11 @@ YIELD
 ----
 
 .Parameters
-[opts="header",cols="1,1,1m,1,4"]
+[opts="header",cols="3,1,1m,1,4"]
 |===
-| Name          | Type   | Default | Optional | Description
-| modelName     | String | n/a     | yes      | The name of a model. If not specified, all models in the catalog are listed.
+| Name                                                  | Type              | Default | Optional | Description
+| sessionInfo label:serverless[Aura Graph Analytics]    | String or Map     | n/a     | no       | The name of the xref:aura-graph-analytics/index.adoc[GDS Session] from which the models are listed. Accepts the output of the helper function `sessionInfo`.
+| modelName                                             | String            | n/a     | yes      | The name of a model. If not specified, all models in the catalog are listed.
 |===
 
 include::partial$/machine-learning/model-catalog/shared/model-info-result.adoc[]

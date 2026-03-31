@@ -177,6 +177,7 @@
 * xref:aura-graph-analytics/index.adoc[]
 ** xref:aura-graph-analytics/quickstart.adoc[]
 ** xref:aura-graph-analytics/cypher.adoc[]
+** xref:aura-graph-analytics/machine-learning.adoc[]
 * link:https://neo4j.com/docs/bloom-user-guide/current/bloom-tutorial/gds-integration/[Bloom visualization]
 * Appendix
 ** xref:operations-reference/appendix-a.adoc[]

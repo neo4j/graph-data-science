@@ -1,0 +1,40 @@
+= Machine Learning
+
+[CAUTION]
+====
+This feature is currently in Early Access Preview and only available for enabled customers.
+If you are interested in trying out this feature, please visit https://neo4j.com/contact-us/?ref=graph-data-science[neo4j.com].
+====
+
+Aura Graph Analytics can be used to create, store and reuse machine learning models created by one of the xref:machine-learning/machine-learning.adoc[available machine learning algorithms].
+
+The Model Catalog is a persistent store for trained machine learning models.
+Once stored, a model can be reused in later sessions, even after the original GDS Session has ended.
+
+Models are scoped by:
+
+* *User*: A model is owned by the user that created the session responsible for storing it.
+* *Project*: GDS Sessions can access models managed within the same Aura project.
+* *Cloud provider + region*: Models are only available to Sessions in the same cloud provider and region where they were stored.
+
+== Usage
+
+The model catalog can be managed by the following model catalog operations.
+
+[NOTE]
+====
+Access to the model catalog via the xref:aura-graph-analytics/cypher.adoc[Cypher API for Aura Graph Analytics] requires an additional parameter `sessionInfo`.
+====
+
+* xref:model-catalog/store.adoc[Storing a model]
+* xref:model-catalog/list.adoc[Listing models]
+* xref:model-catalog/exists.adoc[Checking whether a model exists]
+* xref:model-catalog/drop.adoc[Dropping a model]
+
+
+== Limitations
+
+Model storage in Aura Graph Analytics has some limitations.
+
+* The `gds.model.publish` procedure is currently not supported, so models **cannot be shared** with other users.
+* Models cannot be accessed across regions or cloud providers.
