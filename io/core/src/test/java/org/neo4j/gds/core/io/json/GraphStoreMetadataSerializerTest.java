@@ -22,11 +22,15 @@ package org.neo4j.gds.core.io.json;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.core.loading.ArrayIdMapBuilder;
 
 import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.neo4j.gds.core.io.json.Utils.deserialize;
@@ -133,14 +137,52 @@ class GraphStoreMetadataSerializerTest {
         assertThat(result).isEqualTo(idMapInfo);
     }
 
-    @Test
-    void serializeDefaultValue() throws JsonProcessingException {
-        var defaultValue = org.neo4j.gds.api.DefaultValue.of(42L, true);
+    static Stream<Arguments> defaultValues() {
+        return Stream.of(
+            Arguments.of(
+                org.neo4j.gds.api.DefaultValue.of(42L, true),
+                """
+                    {
+                      "value": {
+                        "long": 42
+                      },
+                      "isUserDefined": true
+                    }
+                    """
+            ),
+            Arguments.of(
+                org.neo4j.gds.api.DefaultValue.of(42L, false),
+                """
+                    {
+                      "value": {
+                        "long": 42
+                      },
+                      "isUserDefined": false
+                    }
+                    """
+            ),
+            Arguments.of(
+                org.neo4j.gds.api.DefaultValue.of(new long[] {1, 3, 3, 7}, false),
+                """
+                    {
+                      "value": {
+                        "long_array": [1, 3, 3, 7]
+                      },
+                      "isUserDefined": false
+                    }
+                    """
+            )
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("defaultValues")
+    void serializeDefaultValue(org.neo4j.gds.api.DefaultValue defaultValue, String expected) throws JsonProcessingException {
         var input = new DefaultValue(defaultValue.getObject(), defaultValue.isUserDefined());
 
         var result = serialize(input);
 
-        System.out.println(result);
+        assertThat(result).isEqualTo(formatWithoutWhitespace(expected));
     }
 
     @Test
