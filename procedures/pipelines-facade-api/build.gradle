@@ -10,9 +10,6 @@ dependencies {
 
     compileOnly openGds.jetbrains.annotations
 
-    // `HistogramUtils` - do this need to be in `:algo-common` 🤔
-    implementation project(':algo-common')
-
     implementation project(':algorithms-facade-common')
 
     // Because of `AlgorithmProcessingTimings`
@@ -20,9 +17,6 @@ dependencies {
 
     // `BaseConfig`
     implementation project(':config-api')
-
-    // `AbstractResultBuilder`
-    implementation project(':core')
 
     // `NodeClassificationModelResult` 🙈
     implementation project(':pipeline')
@@ -34,8 +28,4 @@ dependencies {
 
     // `ModelConfig`
     implementation project(':model-catalog-api')
-
-    // `JobIdConfig`
-    implementation project(':progress-tracking')
-
 }
