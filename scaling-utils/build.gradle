@@ -16,9 +16,6 @@ dependencies {
 
     implementation project(':annotations')
     implementation project(':core')
-    implementation project(':collections')
-    implementation project(':logging')
-    implementation project(':memory-usage')
     implementation project(':progress-tracking')
     implementation project(':string-formatting')
 
