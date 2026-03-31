@@ -14,11 +14,9 @@ dependencies {
 
     compileOnly      openGds.google.auto.service
 
-    implementation project(':annotations')
     implementation project(':executor')
     implementation (neo4j.procedure.api)
     implementation openGds.immutables.value.annotations
     implementation openGds.google.auto.common
-    implementation openGds.javapoet
     implementation openGds.jetbrains.annotations
 }
