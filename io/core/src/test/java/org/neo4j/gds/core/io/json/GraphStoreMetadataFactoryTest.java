@@ -25,13 +25,18 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.schema.MutableNodeSchema;
 import org.neo4j.gds.api.schema.PropertySchema;
+import org.neo4j.gds.core.loading.ArrayIdMapBuilder;
 import org.neo4j.gds.core.loading.Capabilities;
+import org.neo4j.gds.core.loading.ImmutableStaticCapabilities;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.gdl.GdlFactory;
+import org.neo4j.gds.gdl.ImmutableGraphProjectFromGdlConfig;
 
 import java.util.Map;
 import java.util.Optional;
@@ -57,6 +62,253 @@ class GraphStoreMetadataFactoryTest {
     @Inject
     private GraphStore graphStore;
 
+    static Stream<Arguments> graphStores() {
+        return Stream.of(
+            // defaults
+            Arguments.of(
+                GdlFactory.builder()
+                    .gdlGraph("()-->()")
+                    .build()
+                    .build(),
+                new GraphStoreMetadata(
+                    new DatabaseInfo("gdl", DatabaseInfo.DatabaseLocation.LOCAL, Optional.empty()),
+                    WriteMode.LOCAL,
+                    new IdMapInfo(
+                        ArrayIdMapBuilder.ID,
+                        2,
+                        1,
+                        Map.of(NodeLabel.ALL_NODES.name(), 2L)
+                    ),
+                    Map.of(RelationshipType.ALL_RELATIONSHIPS.name(), new RelationshipInfo(1, false, 0)),
+                    Map.of(NodeLabel.ALL_NODES.name(), new NodeSchema(Map.of())),
+                    Map.of(
+                        RelationshipType.ALL_RELATIONSHIPS.name(),
+                        new RelationshipSchema(Direction.DIRECTED, Map.of())
+                    )
+                )
+            ),
+            // some variation in graph store meta data
+            Arguments.of(
+                GdlFactory.builder()
+                    .graphName("my_graph")
+                    .databaseId(DatabaseId.of("custom_db_id"))
+                    .databaseLocation(org.neo4j.gds.api.DatabaseInfo.DatabaseLocation.LOCAL)
+                    .graphCapabilities(ImmutableStaticCapabilities.of(Capabilities.WriteMode.LOCAL))
+                    .idMapBuilderType(ArrayIdMapBuilder.ID)
+                    .gdlGraph("()-->()")
+                    .build()
+                    .build(),
+                new GraphStoreMetadata(
+                    new DatabaseInfo("custom_db_id", DatabaseInfo.DatabaseLocation.LOCAL, Optional.empty()),
+                    WriteMode.LOCAL,
+                    new IdMapInfo(
+                        ArrayIdMapBuilder.ID,
+                        2,
+                        1,
+                        Map.of(NodeLabel.ALL_NODES.name(), 2L)
+                    ),
+                    Map.of(RelationshipType.ALL_RELATIONSHIPS.name(), new RelationshipInfo(1, false, 0)),
+                    Map.of(NodeLabel.ALL_NODES.name(), new NodeSchema(Map.of())),
+                    Map.of(
+                        RelationshipType.ALL_RELATIONSHIPS.name(),
+                        new RelationshipSchema(Direction.DIRECTED, Map.of())
+                    )
+                )
+            ),
+            // some more variation in graph store meta data
+            Arguments.of(
+                GdlFactory.builder()
+                    .graphName("my_graph")
+                    .databaseId(DatabaseId.of("another_custom_name"))
+                    .databaseLocation(org.neo4j.gds.api.DatabaseInfo.DatabaseLocation.REMOTE)
+                    .remoteDatabaseId(DatabaseId.of("my_remote_db"))
+                    .graphCapabilities(ImmutableStaticCapabilities.of(Capabilities.WriteMode.REMOTE))
+                    .gdlGraph("()-->()")
+                    .build()
+                    .build(),
+                new GraphStoreMetadata(
+                    new DatabaseInfo(
+                        "another_custom_name",
+                        DatabaseInfo.DatabaseLocation.REMOTE,
+                        Optional.of("my_remote_db")
+                    ),
+                    WriteMode.REMOTE,
+                    new IdMapInfo(
+                        ArrayIdMapBuilder.ID,
+                        2,
+                        1,
+                        Map.of(NodeLabel.ALL_NODES.name(), 2L)
+                    ),
+                    Map.of(RelationshipType.ALL_RELATIONSHIPS.name(), new RelationshipInfo(1, false, 0)),
+                    Map.of(NodeLabel.ALL_NODES.name(), new NodeSchema(Map.of())),
+                    Map.of(
+                        RelationshipType.ALL_RELATIONSHIPS.name(),
+                        new RelationshipSchema(Direction.DIRECTED, Map.of())
+                    )
+                )
+            ),
+            // variation in node schema
+            Arguments.of(
+                GdlFactory.builder()
+                    .gdlGraph(
+                        "(:A { prop1: 42, prop2: 4.2 })-->(:B { prop3: [1.0, 3.0, 3.0, 7.0], prop4: [1L, 3L, 3L, 7L] })")
+                    .build()
+                    .build(),
+                new GraphStoreMetadata(
+                    new DatabaseInfo("gdl", DatabaseInfo.DatabaseLocation.LOCAL, Optional.empty()),
+                    WriteMode.LOCAL,
+                    new IdMapInfo(
+                        ArrayIdMapBuilder.ID,
+                        2,
+                        1,
+                        Map.of("A", 1L, "B", 1L)
+                    ),
+                    Map.of(RelationshipType.ALL_RELATIONSHIPS.name(), new RelationshipInfo(1, false, 0)),
+                    Map.of(
+                        "A", new NodeSchema(Map.of(
+                            "prop1",
+                            new NodePropertySchema(
+                                ValueType.LONG,
+                                new DefaultValue(Long.MIN_VALUE, false),
+                                PropertyState.TRANSIENT
+                            ),
+                            "prop2",
+                            new NodePropertySchema(
+                                ValueType.DOUBLE,
+                                new DefaultValue(Double.NaN, false),
+                                PropertyState.TRANSIENT
+                            )
+                        )),
+                        "B", new NodeSchema(Map.of(
+                            "prop3",
+                            new NodePropertySchema(
+                                ValueType.FLOAT_ARRAY,
+                                new DefaultValue(org.neo4j.gds.api.DefaultValue.forFloatArray().getObject(), false),
+                                PropertyState.TRANSIENT
+                            ),
+                            "prop4",
+                            new NodePropertySchema(
+                                ValueType.LONG_ARRAY,
+                                new DefaultValue(org.neo4j.gds.api.DefaultValue.forLongArray().getObject(), false),
+                                PropertyState.TRANSIENT
+                            )
+                        ))
+                    ),
+                    Map.of(
+                        RelationshipType.ALL_RELATIONSHIPS.name(),
+                        new RelationshipSchema(Direction.DIRECTED, Map.of())
+                    )
+                )
+            ),
+            // changing property states
+            Arguments.of(
+                GdlFactory.builder()
+                    .graphProjectConfig(ImmutableGraphProjectFromGdlConfig.builder()
+                        .graphName("gdl")
+                        .gdlGraph(
+                            "(:A { prop1: 42, prop2: 4.2 })-->(:B { prop3: [1.0, 3.0, 3.0, 7.0], prop4: [1L, 3L, 3L, 7L] })")
+                        .propertyState(org.neo4j.gds.api.PropertyState.PERSISTENT)
+                        .build()
+                    )
+                    .build()
+                    .build(),
+                new GraphStoreMetadata(
+                    new DatabaseInfo("gdl", DatabaseInfo.DatabaseLocation.LOCAL, Optional.empty()),
+                    WriteMode.LOCAL,
+                    new IdMapInfo(
+                        ArrayIdMapBuilder.ID,
+                        2,
+                        1,
+                        Map.of("A", 1L, "B", 1L)
+                    ),
+                    Map.of(RelationshipType.ALL_RELATIONSHIPS.name(), new RelationshipInfo(1, false, 0)),
+                    Map.of(
+                        "A", new NodeSchema(Map.of(
+                            "prop1",
+                            new NodePropertySchema(
+                                ValueType.LONG,
+                                new DefaultValue(Long.MIN_VALUE, false),
+                                PropertyState.PERSISTENT
+                            ),
+                            "prop2",
+                            new NodePropertySchema(
+                                ValueType.DOUBLE,
+                                new DefaultValue(Double.NaN, false),
+                                PropertyState.PERSISTENT
+                            )
+                        )),
+                        "B", new NodeSchema(Map.of(
+                            "prop3",
+                            new NodePropertySchema(
+                                ValueType.FLOAT_ARRAY,
+                                new DefaultValue(org.neo4j.gds.api.DefaultValue.forFloatArray().getObject(), false),
+                                PropertyState.PERSISTENT
+                            ),
+                            "prop4",
+                            new NodePropertySchema(
+                                ValueType.LONG_ARRAY,
+                                new DefaultValue(org.neo4j.gds.api.DefaultValue.forLongArray().getObject(), false),
+                                PropertyState.PERSISTENT
+                            )
+                        ))
+                    ),
+                    Map.of(
+                        RelationshipType.ALL_RELATIONSHIPS.name(),
+                        new RelationshipSchema(Direction.DIRECTED, Map.of())
+                    )
+                )
+            ),
+            // variation in relationship schema
+            Arguments.of(
+                GdlFactory.builder()
+                    .graphProjectConfig(ImmutableGraphProjectFromGdlConfig.builder()
+                        .graphName("gdl")
+                        .gdlGraph("()-[:REL1 { w1: 13.37 }]->()-[:REL1 { w1: 13.38 }]->()-[:REL2]->()")
+                        .propertyState(org.neo4j.gds.api.PropertyState.PERSISTENT)
+                        .build()
+                    )
+                    .build()
+                    .build(),
+                new GraphStoreMetadata(
+                    new DatabaseInfo("gdl", DatabaseInfo.DatabaseLocation.LOCAL, Optional.empty()),
+                    WriteMode.LOCAL,
+                    new IdMapInfo(
+                        ArrayIdMapBuilder.ID,
+                        4,
+                        3,
+                        Map.of(NodeLabel.ALL_NODES.name(), 4L)
+                    ),
+                    Map.of(
+                        "REL1", new RelationshipInfo(2, false, 1),
+                        "REL2", new RelationshipInfo(1, false, 0)
+                    ),
+                    Map.of(NodeLabel.ALL_NODES.name(), new NodeSchema(Map.of())),
+                    Map.of(
+                        "REL1",
+                        new RelationshipSchema(
+                            Direction.DIRECTED, Map.of(
+                            "w1", new RelationshipPropertySchema(
+                                ValueType.DOUBLE,
+                                new DefaultValue(Double.NaN, false),
+                                PropertyState.PERSISTENT,
+                                Aggregation.NONE
+                            )
+                        )),
+                        "REL2", new RelationshipSchema(Direction.DIRECTED, Map.of())
+                    )
+                )
+            )
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("graphStores")
+    void fromGraphStore(GraphStore graphStore, GraphStoreMetadata expected) {
+        var result = GraphStoreMetadataFactory.fromGraphStore(graphStore);
+
+        assertThat(result).isEqualTo(expected);
+    }
+
     @Test
     void fromGraphStore() {
         var result = GraphStoreMetadataFactory.fromGraphStore(graphStore);
@@ -76,7 +328,7 @@ class GraphStoreMetadataFactoryTest {
                 ),
                 Map.of(
                     "REL_TYPE1", new RelationshipInfo(2, false, 1),
-                    "REL_TYPE2", new RelationshipInfo(2, false, 1)
+                    "REL_TYPE2", new RelationshipInfo(2, false, 0)
                 ),
                 Map.of(
                     "Label1", new NodeSchema(Map.of(
@@ -168,7 +420,7 @@ class GraphStoreMetadataFactoryTest {
 
         assertThat(result).isEqualTo(Map.of(
             "REL_TYPE1", new RelationshipInfo(2, false, 1),
-            "REL_TYPE2", new RelationshipInfo(2, false, 1)
+            "REL_TYPE2", new RelationshipInfo(2, false, 0)
         ));
     }
 
@@ -199,7 +451,7 @@ class GraphStoreMetadataFactoryTest {
                 ),
                 "prop4", new NodePropertySchema(
                     ValueType.FLOAT_ARRAY,
-                    new DefaultValue(org.neo4j.gds.api.DefaultValue.forFloatArray().getObject(), false) ,
+                    new DefaultValue(org.neo4j.gds.api.DefaultValue.forFloatArray().getObject(), false),
                     PropertyState.TRANSIENT
                 )
             )),

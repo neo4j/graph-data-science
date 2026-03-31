@@ -95,7 +95,7 @@ public final class GraphStoreMetadataFactory {
                 relationshipType -> {
                     var relationshipCount = graphStore.relationshipCount(relationshipType);
                     var isInverseIndexed = inverseIndexedRelationshipTypes.contains(relationshipType);
-                    var propertyCount = graphStore.relationshipPropertyKeys().size();
+                    var propertyCount = graphStore.relationshipPropertyKeys(relationshipType).size();
 
                     return new RelationshipInfo(relationshipCount, isInverseIndexed, propertyCount);
                 }
@@ -156,11 +156,11 @@ public final class GraphStoreMetadataFactory {
         ));
     }
 
-    static DefaultValue toDefaultValue(org.neo4j.gds.api.DefaultValue defaultValue) {
+    private static DefaultValue toDefaultValue(org.neo4j.gds.api.DefaultValue defaultValue) {
         return new DefaultValue(defaultValue.getObject(), defaultValue.isUserDefined());
     }
 
-    static ValueType toValueType(org.neo4j.gds.api.nodeproperties.ValueType valueType) {
+    private static ValueType toValueType(org.neo4j.gds.api.nodeproperties.ValueType valueType) {
         return switch (valueType) {
             case LONG -> ValueType.LONG;
             case DOUBLE -> ValueType.DOUBLE;
@@ -176,7 +176,7 @@ public final class GraphStoreMetadataFactory {
         };
     }
 
-    static PropertyState toPropertyState(org.neo4j.gds.api.PropertyState propertyState) {
+    private static PropertyState toPropertyState(org.neo4j.gds.api.PropertyState propertyState) {
         return switch (propertyState) {
             case PERSISTENT -> PropertyState.PERSISTENT;
             case TRANSIENT -> PropertyState.TRANSIENT;
@@ -184,14 +184,14 @@ public final class GraphStoreMetadataFactory {
         };
     }
 
-    static Direction toDirection(
+    private static Direction toDirection(
         org.neo4j.gds.api.schema.RelationshipSchema relationshipSchema,
         RelationshipType relationshipType
     ) {
         return relationshipSchema.isUndirected(relationshipType) ? Direction.UNDIRECTED : Direction.DIRECTED;
     }
 
-    static Aggregation toAggregation(org.neo4j.gds.Aggregation aggregation) {
+    private static Aggregation toAggregation(org.neo4j.gds.Aggregation aggregation) {
         return switch (aggregation) {
             case NONE -> Aggregation.NONE;
             case SINGLE -> Aggregation.SINGLE;
