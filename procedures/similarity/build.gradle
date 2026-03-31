@@ -24,7 +24,12 @@ dependencies {
 
     testAnnotationProcessor project(':annotations')
 
-    testImplementation project(':config-api')
+    testCompileOnly neo4j.annotations
+    testCompileOnly openGds.immutables.builder
+    testCompileOnly openGds.immutables.value.annotations
+    testCompileOnly openGds.jetbrains.annotations
+    testCompileOnly project(':config-api')
+
     testImplementation project(':core')
     testImplementation project(':gdl-graph')
     testImplementation project(':graph-projection-api')
@@ -32,13 +37,7 @@ dependencies {
     testImplementation project(':string-formatting')
 
     testImplementation project(':proc-test-utilities')
-    testImplementation project(':proc-common')
-    testImplementation project(':ml-core')
-    testImplementation project(':progress-tracking')
     testImplementation project(':projection')
-    testCompileOnly openGds.immutables.value.annotations
-    testCompileOnly openGds.immutables.builder
-    testCompileOnly openGds.jetbrains.annotations
 
     testImplementation project(':opengds-extension')
 }
