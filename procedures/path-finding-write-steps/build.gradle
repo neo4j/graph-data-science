@@ -22,14 +22,9 @@ dependencies {
 
     implementation project(':algorithms-machinery')
 
-    // FIXME: Massively annoying we need to bring this in because services use configs;
-    //  Also `ElementTypeValidator` is there even though it's not depending on any config 🤷
-    implementation project(':config-api')
-
     implementation project(':core')
     implementation project(':core-api')
     implementation project(':logging')
-    implementation project(':string-formatting')
 
     // FIXME: These don't belong here, the write should be abstracted via service.
     implementation project(':core-write')
