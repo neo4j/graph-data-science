@@ -45,7 +45,6 @@ dependencies {
     implementation project(':memory-usage')
     implementation project(':metrics-api')
     implementation project(':native-projection')
-    implementation project(':neo4j-api')
     implementation project(':neo4j-settings')
     implementation project(':progress-tracking')
     implementation project(':projection')
@@ -63,10 +62,8 @@ dependencies {
     testImplementation openGds.junit.jupiter.params
     testImplementation openGds.mockito.junit.jupiter
 
-    testImplementation project(":core-utils")
     testImplementation project(':gdl-graph')
     testImplementation project(':gdl-junit-extension')
-    testImplementation project(":neo4j-api")
     testImplementation project(":test-utils")
 
     integrationTestAnnotationProcessor project(':annotations')
