@@ -39,13 +39,6 @@ dependencies {
     implementation project(':string-formatting')
     implementation project(':transaction')
 
-
-    implementation openGds.jol.core
-    implementation(openGds.opencypher.ccparser) {
-        transitive = false
-    }
-    implementation openGds.hdrhistogram
-
     // Test dependencies
     testAnnotationProcessor project(':annotations')
 
@@ -53,14 +46,11 @@ dependencies {
     testCompileOnly openGds.immutables.builder
     testCompileOnly openGds.jetbrains.annotations
 
-    testImplementation project(':executor')
     testImplementation project(':gdl-graph')
     testImplementation project(':test-utils')
     testImplementation project(':proc-catalog')
     testImplementation project(':proc-community')
     testImplementation project(':test-graph-loaders')
-
-    testImplementation openGds.neo4j.cypher.dsl
 
     testImplementation project(':opengds-extension')
 }
