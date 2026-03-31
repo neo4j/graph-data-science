@@ -21,60 +21,40 @@ dependencies {
     // Neo4j dependencies
     compileOnly(neo4j.procedure.api) { transitive = false }
 
-    implementation project(':algorithms-machinery')
-    implementation project(':algo-common')
     implementation project(':annotations')
     implementation project(':config-api')
     implementation project(':core')
     implementation project(':core-utils')
-    implementation project(':core-write')
     implementation project(':csv')
-    implementation project(':executor')
-    implementation project(':graph-catalog-procedure-facade')
     implementation project(':graph-catalog-facade-api')
-    implementation project(':graph-sampling')
     implementation project(':graph-schema-api')
-    implementation project(':graph-store-catalog-applications')
-    implementation project(':io-core')
     implementation project(':legacy-cypher-projection')
     implementation project(':logging')
     implementation project(':memory-usage')
     implementation project(':model-catalog-api')
-    implementation project(':model-catalog-applications')
-    implementation project(':model-catalog-procedure-facade')
     implementation project(':native-projection')
-    implementation project(':neo4j-api')
     implementation project(':neo4j-settings')
     implementation project(':procedures-facade-api')
-
     implementation project(':progress-tracking')
     implementation project(':proc-common')
     implementation project(':string-formatting')
     implementation project(':subgraph-filtering')
-    implementation project(':termination')
-    implementation project(':transaction')
 
-    implementation openGds.jol.core
     implementation(openGds.opencypher.ccparser) {
         transitive = false
     }
-    implementation openGds.hdrhistogram
 
     // Test dependencies
     testAnnotationProcessor project(':annotations')
 
     testImplementation project(':gdl-graph')
-    testImplementation project(':gdl-junit-extension')
-    testImplementation project(':open-model-catalog')
     testImplementation project(':proc-centrality')
-    testImplementation project(':proc-common')
     testImplementation project(':proc-community')
     testImplementation project(':proc-similarity')
     testImplementation project(':proc-test-utilities')
     testCompileOnly openGds.immutables.value.annotations
     testCompileOnly openGds.immutables.builder
     testCompileOnly openGds.jetbrains.annotations
-    testImplementation openGds.mockito.junit.jupiter
 
     testImplementation project(':opengds-extension')
 }
