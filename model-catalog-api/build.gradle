@@ -21,14 +21,9 @@ dependencies {
 
     implementation project(':annotations')
     implementation project(':config-api')
-    implementation project(':graph-projection-api')
     implementation project(':graph-schema-api')
-    implementation project(':licensing')
     implementation project(':ml-api')
     implementation project(':string-formatting')
-
-    implementation openGds.commons.lang3
-
 
     testAnnotationProcessor project(':annotations')
     testAnnotationProcessor project(':config-generator')
