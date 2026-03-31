@@ -12,6 +12,5 @@ dependencies {
     implementation project(':algo-params-common')
     implementation project(':annotations')
     implementation project(':concurrency')
-    implementation project(':graph-projection-api')
     implementation project(':string-formatting')
 }
