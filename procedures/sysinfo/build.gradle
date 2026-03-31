@@ -39,11 +39,8 @@ dependencies {
 
     testCompileOnly project(':annotations')
 
-    testImplementation project(':edition-api')
     testImplementation project(':test-utils')
     testImplementation project(':test-graph-loaders')
-
-    testImplementation openGds.mockito.junit.jupiter
 
     testImplementation project(':opengds-extension')
 }
