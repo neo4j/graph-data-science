@@ -100,17 +100,19 @@ class GraphStoreMetadataSerializerTest {
 
         var result = serialize(idMapInfo);
 
-        var expected = formatWithoutWhitespace("""
-            {
-                "idMapType": "%s",
-                "nodeCount": %d,
-                "maxOriginalId": %d,
-                "nodeLabelCounts": {
-                    "A": 42,
-                    "B": 1984
+        var expected = formatWithoutWhitespace(
+            """
+                {
+                    "idMapType": "%s",
+                    "nodeCount": %d,
+                    "maxOriginalId": %d,
+                    "nodeLabelCounts": {
+                        "A": 42,
+                        "B": 1984
+                    }
                 }
-            }
-            """, idMapType, nodeCount, maxOriginalId);
+                """, idMapType, nodeCount, maxOriginalId
+        );
 
         assertThat(result).isEqualTo(expected);
     }
@@ -132,6 +134,16 @@ class GraphStoreMetadataSerializerTest {
     }
 
     @Test
+    void serializeDefaultValue() throws JsonProcessingException {
+        var defaultValue = org.neo4j.gds.api.DefaultValue.of(42L, true);
+        var input = new DefaultValue(defaultValue.getObject(), defaultValue.isUserDefined());
+
+        var result = serialize(input);
+
+        System.out.println(result);
+    }
+
+    @Test
     void serializeGraphStoreMetadata() throws JsonProcessingException {
         var graphStoreMetadata = getGraphStoreMetadata();
 
@@ -140,52 +152,59 @@ class GraphStoreMetadataSerializerTest {
         var expected = formatWithoutWhitespace(
             """
                 {
-                    "databaseInfo": {
-                         "databaseName":"neo",
-                         "databaseLocation":"LOCAL",
-                         "remoteDatabaseId":null
-                    },
-                    "writeMode": "LOCAL",
-                    "idMapInfo": {
-                        "idMapType": "array",
-                        "nodeCount": 42,
-                        "maxOriginalId": 42,
-                        "nodeLabelCounts": {
-                            "A": 42
-                        }
-                    },
-                    "relationshipInfo": {
-                        "REL": {
-                            "adjacencyListType": "delta_varlong",
-                            "relationshipCount": 1337,
-                            "isInverseIndexed": false,
-                            "propertyCount": 1
-                        }
-                    },
-                    "nodeSchema": {
-                        "A": {
-                            "propertySchemas": {
-                                "foo": {
-                                    "valueType": "LONG",
-                                    "defaultValue": 42,
-                                    "propertyState": "PERSISTENT"
-                                }
-                            }
-                        }
-                    },
-                    "relationshipSchema": {
-                        "REL": {
-                            "direction": "DIRECTED",
-                            "propertySchemas": {
-                                "bar": {
-                                    "valueType": "DOUBLE",
-                                    "defaultValue": 4.2,
-                                    "propertyState": "PERSISTENT",
-                                    "aggregation": "NONE"
-                                }
-                            }
-                        }
+                  "databaseInfo": {
+                    "databaseName": "neo",
+                    "databaseLocation": "LOCAL",
+                    "remoteDatabaseId": null
+                  },
+                  "writeMode": "LOCAL",
+                  "idMapInfo": {
+                    "idMapType": "array",
+                    "nodeCount": 42,
+                    "maxOriginalId": 42,
+                    "nodeLabelCounts": {
+                      "A": 42
                     }
+                  },
+                  "relationshipInfo": {
+                    "REL": {
+                      "relationshipCount": 1337,
+                      "isInverseIndexed": false,
+                      "propertyCount": 1
+                    }
+                  },
+                  "nodeSchema": {
+                    "A": {
+                      "propertySchemas": {
+                        "foo": {
+                          "valueType": "LONG",
+                          "defaultValue": {
+                            "value": {
+                              "long": 42
+                            },
+                            "isUserDefined": false
+                          },
+                          "propertyState": "PERSISTENT"
+                        }
+                      }
+                    }
+                  },
+                  "relationshipSchema": {
+                    "REL": {
+                      "direction": "DIRECTED",
+                      "propertySchemas": {
+                        "bar": {
+                          "valueType": "DOUBLE",
+                          "defaultValue": {
+                            "value": 4.2,
+                            "isUserDefined": false
+                          },
+                          "propertyState": "PERSISTENT",
+                          "aggregation": "NONE"
+                        }
+                      }
+                    }
+                  }
                 }
                 """
         );
@@ -211,7 +230,7 @@ class GraphStoreMetadataSerializerTest {
         );
         var nodeSchema = Map.of(
             "A", new NodeSchema(Map.of(
-                "foo", new NodePropertySchema(ValueType.LONG, 42, PropertyState.PERSISTENT)
+                "foo", new NodePropertySchema(ValueType.LONG, new DefaultValue(42L, false), PropertyState.PERSISTENT)
 
             ))
         );
@@ -219,7 +238,13 @@ class GraphStoreMetadataSerializerTest {
             "REL", new RelationshipSchema(
                 Direction.DIRECTED,
                 Map.of(
-                    "bar", new RelationshipPropertySchema(ValueType.DOUBLE, 4.2, PropertyState.PERSISTENT, Aggregation.NONE)
+                    "bar",
+                    new RelationshipPropertySchema(
+                        ValueType.DOUBLE,
+                        new DefaultValue(4.2, false),
+                        PropertyState.PERSISTENT,
+                        Aggregation.NONE
+                    )
                 )
             )
         );

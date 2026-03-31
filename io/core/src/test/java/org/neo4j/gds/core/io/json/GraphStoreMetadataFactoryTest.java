@@ -25,7 +25,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.schema.MutableNodeSchema;
 import org.neo4j.gds.api.schema.PropertySchema;
@@ -81,12 +80,32 @@ class GraphStoreMetadataFactoryTest {
                 ),
                 Map.of(
                     "Label1", new NodeSchema(Map.of(
-                        "prop1", new NodePropertySchema(ValueType.LONG, Long.MIN_VALUE, PropertyState.TRANSIENT),
-                        "prop2", new NodePropertySchema(ValueType.DOUBLE, Double.NaN, PropertyState.TRANSIENT)
+                        "prop1",
+                        new NodePropertySchema(
+                            ValueType.LONG,
+                            new DefaultValue(Long.MIN_VALUE, false),
+                            PropertyState.TRANSIENT
+                        ),
+                        "prop2",
+                        new NodePropertySchema(
+                            ValueType.DOUBLE,
+                            new DefaultValue(Double.NaN, false),
+                            PropertyState.TRANSIENT
+                        )
                     )),
                     "Label2", new NodeSchema(Map.of(
-                        "prop3", new NodePropertySchema(ValueType.LONG_ARRAY, null, PropertyState.TRANSIENT),
-                        "prop4", new NodePropertySchema(ValueType.FLOAT_ARRAY, null, PropertyState.TRANSIENT)
+                        "prop3",
+                        new NodePropertySchema(
+                            ValueType.LONG_ARRAY,
+                            new DefaultValue(org.neo4j.gds.api.DefaultValue.forLongArray().getObject(), false),
+                            PropertyState.TRANSIENT
+                        ),
+                        "prop4",
+                        new NodePropertySchema(
+                            ValueType.FLOAT_ARRAY,
+                            new DefaultValue(org.neo4j.gds.api.DefaultValue.forFloatArray().getObject(), false),
+                            PropertyState.TRANSIENT
+                        )
                     )),
                     "Label3", new NodeSchema(Map.of())
                 ),
@@ -97,7 +116,7 @@ class GraphStoreMetadataFactoryTest {
                             "relProp1",
                             new RelationshipPropertySchema(
                                 ValueType.DOUBLE,
-                                Double.NaN,
+                                new DefaultValue(Double.NaN, false),
                                 PropertyState.TRANSIENT,
                                 Aggregation.NONE
                             )
@@ -159,12 +178,30 @@ class GraphStoreMetadataFactoryTest {
 
         assertThat(result).isEqualTo(Map.of(
             "Label1", new NodeSchema(Map.of(
-                "prop1", new NodePropertySchema(ValueType.LONG, Long.MIN_VALUE, PropertyState.TRANSIENT),
-                "prop2", new NodePropertySchema(ValueType.DOUBLE, Double.NaN, PropertyState.TRANSIENT)
+                "prop1",
+                new NodePropertySchema(
+                    ValueType.LONG,
+                    new DefaultValue(org.neo4j.gds.api.DefaultValue.forLong().getObject(), false),
+                    PropertyState.TRANSIENT
+                ),
+                "prop2",
+                new NodePropertySchema(
+                    ValueType.DOUBLE,
+                    new DefaultValue(org.neo4j.gds.api.DefaultValue.forDouble().getObject(), false),
+                    PropertyState.TRANSIENT
+                )
             )),
             "Label2", new NodeSchema(Map.of(
-                "prop3", new NodePropertySchema(ValueType.LONG_ARRAY, null, PropertyState.TRANSIENT),
-                "prop4", new NodePropertySchema(ValueType.FLOAT_ARRAY, null, PropertyState.TRANSIENT)
+                "prop3", new NodePropertySchema(
+                    ValueType.LONG_ARRAY,
+                    new DefaultValue(org.neo4j.gds.api.DefaultValue.forLongArray().getObject(), false),
+                    PropertyState.TRANSIENT
+                ),
+                "prop4", new NodePropertySchema(
+                    ValueType.FLOAT_ARRAY,
+                    new DefaultValue(org.neo4j.gds.api.DefaultValue.forFloatArray().getObject(), false) ,
+                    PropertyState.TRANSIENT
+                )
             )),
             "Label3", new NodeSchema(Map.of())
         ));
@@ -181,7 +218,7 @@ class GraphStoreMetadataFactoryTest {
                     "relProp1",
                     new RelationshipPropertySchema(
                         ValueType.DOUBLE,
-                        Double.NaN,
+                        new DefaultValue(Double.NaN, false),
                         PropertyState.TRANSIENT,
                         Aggregation.NONE
                     )
@@ -216,7 +253,7 @@ class GraphStoreMetadataFactoryTest {
                         "foo",
                         new NodePropertySchema(
                             ValueType.LONG,
-                            DefaultValue.forLong().getObject(),
+                            new DefaultValue(org.neo4j.gds.api.DefaultValue.forLong().getObject(), false),
                             PropertyState.PERSISTENT
                         )
                     ))
@@ -234,7 +271,8 @@ class GraphStoreMetadataFactoryTest {
                         Map.of(
                             "bar", PropertySchema.of(
                                 "bar",
-                                org.neo4j.gds.api.nodeproperties.ValueType.LONG, DefaultValue.of(42L),
+                                org.neo4j.gds.api.nodeproperties.ValueType.LONG,
+                                org.neo4j.gds.api.DefaultValue.of(42L),
                                 org.neo4j.gds.api.PropertyState.REMOTE
                             )
                         )
@@ -245,7 +283,7 @@ class GraphStoreMetadataFactoryTest {
                         "foo",
                         new NodePropertySchema(
                             ValueType.LONG,
-                            DefaultValue.forLong().getObject(),
+                            new DefaultValue(org.neo4j.gds.api.DefaultValue.forLong().getObject(), false),
                             PropertyState.PERSISTENT
                         )
                     )),
@@ -254,7 +292,7 @@ class GraphStoreMetadataFactoryTest {
                         "bar",
                         new NodePropertySchema(
                             ValueType.LONG,
-                            42L,
+                            new DefaultValue(42L, true),
                             PropertyState.REMOTE
                         )
                     ))
@@ -306,7 +344,7 @@ class GraphStoreMetadataFactoryTest {
                             "relProp",
                             new RelationshipPropertySchema(
                                 ValueType.DOUBLE,
-                                Double.NaN,
+                                new DefaultValue(Double.NaN, false),
                                 PropertyState.TRANSIENT,
                                 Aggregation.NONE
                             )

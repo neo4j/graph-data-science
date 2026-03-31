@@ -110,7 +110,7 @@ public final class GraphStoreMetadataFactory {
                     PropertySchema::key,
                     propertySchema -> {
                         var valueType = toValueType(propertySchema.valueType());
-                        var defaultValue = propertySchema.defaultValue().getObject();
+                        var defaultValue = toDefaultValue(propertySchema.defaultValue());
                         var propertyState = toPropertyState(propertySchema.state());
 
                         return new NodePropertySchema(
@@ -137,7 +137,7 @@ public final class GraphStoreMetadataFactory {
                         PropertySchema::key,
                         propertySchema -> {
                             var valueType = toValueType(propertySchema.valueType());
-                            var defaultValue = propertySchema.defaultValue().getObject();
+                            var defaultValue = toDefaultValue(propertySchema.defaultValue());
                             var propertyState = toPropertyState(propertySchema.state());
                             var aggregation = toAggregation(propertySchema.aggregation());
 
@@ -154,6 +154,10 @@ public final class GraphStoreMetadataFactory {
                 return new RelationshipSchema(direction, propertySchemas);
             }
         ));
+    }
+
+    static DefaultValue toDefaultValue(org.neo4j.gds.api.DefaultValue defaultValue) {
+        return new DefaultValue(defaultValue.getObject(), defaultValue.isUserDefined());
     }
 
     static ValueType toValueType(org.neo4j.gds.api.nodeproperties.ValueType valueType) {

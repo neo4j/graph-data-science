@@ -19,6 +19,11 @@
  */
 package org.neo4j.gds.core.io.json;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+
 import java.util.Map;
 import java.util.Optional;
 
@@ -62,7 +67,7 @@ record NodeSchema(
 
 record NodePropertySchema(
     ValueType valueType,
-    Object defaultValue,
+    DefaultValue defaultValue,
     PropertyState propertyState
 ) {}
 
@@ -73,10 +78,35 @@ record RelationshipSchema(
 
 record RelationshipPropertySchema(
     ValueType valueType,
-    Object defaultValue,
+    DefaultValue defaultValue,
     PropertyState propertyState,
     Aggregation aggregation
 ) {}
+
+record DefaultValue(
+    @JsonProperty("value")
+    @JsonTypeInfo(
+        use = JsonTypeInfo.Id.NAME,
+        include = JsonTypeInfo.As.WRAPPER_OBJECT
+    )
+    @JsonSubTypes({
+        @JsonSubTypes.Type(value = Long.class, name = "long"),
+        @JsonSubTypes.Type(value = Double.class, name = "double"),
+        @JsonSubTypes.Type(value = long[].class, name = "long_array"),
+        @JsonSubTypes.Type(value = double[].class, name = "double_array"),
+        @JsonSubTypes.Type(value = float[].class, name = "float_array")
+    })
+    Object defaultValue,
+    boolean isUserDefined
+) {
+    @JsonCreator
+    public static DefaultValue of(
+        @JsonProperty("value") Object defaultValue,
+        @JsonProperty("isUserDefined") boolean isUserDefined
+    ) {
+        return new DefaultValue(defaultValue, isUserDefined);
+    }
+}
 
 enum Aggregation {
     NONE, SINGLE, SUM, MIN, MAX, COUNT
