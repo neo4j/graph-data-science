@@ -10,6 +10,7 @@ dependencies {
     annotationProcessor neo4j.annotations
 
     compileOnly project(':annotations')
+    compileOnly project(':config-api')
     compileOnly openGds.immutables.value
 
     // Neo4j dependencies
@@ -21,12 +22,10 @@ dependencies {
     compileOnly(neo4j.kernel) { transitive = false }
     compileOnly(neo4j.kernel.api) { transitive = false }
     compileOnly(neo4j.logging) { transitive = false }
+    compileOnly(neo4j.procedure.api) { transitive = false }
 
     implementation project(':algorithms-machinery')
-    implementation project(':algorithms-procedure-facade')
-    implementation project(':applications-facade')
     implementation project(':concurrency-validation-api')
-    implementation project(':config-api')
     implementation project(':core-write')
     implementation project(':cypher-aggregation')
     implementation project(':defaults-and-limits-configuration')
@@ -36,17 +35,13 @@ dependencies {
     implementation project(':legacy-cypher-projection')
     implementation project(':licensing')
     implementation project(':logging')
-    implementation project(':memory-estimation')
     implementation project(':memory-facade')
-    implementation project(':memory-usage')
     implementation project(':metrics-api')
     implementation project(':model-catalog-applications')
     implementation project(':native-projection')
     implementation project(':neo4j-api')
-    implementation project(':neo4j-integration-tools')
     implementation project(':neo4j-log-adapter')
     implementation project(':neo4j-settings')
-    implementation project(':node-embedding-algorithms')
     implementation project(':opengds-procedure-facade')
     implementation project(':operations-applications')
     implementation project(':pipelines-procedure-facade')
