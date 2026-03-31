@@ -30,7 +30,6 @@ dependencies {
     implementation openGds.hdrhistogram
 
     testImplementation openGds.assertj.core
-    testImplementation openGds.junit.jupiter.api
     testImplementation openGds.junit.jupiter.engine
     testImplementation openGds.junit.jupiter.params
     testImplementation platform(openGds.junit.bom)
