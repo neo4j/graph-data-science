@@ -20,17 +20,12 @@ dependencies {
     implementation project(':algo-common')
     implementation project(':config-api')
     implementation project(':core')
-    implementation project(':core-write')
-    implementation project(':graph-schema-api')
     implementation project(':logging')
-    implementation project(':memory-estimation')
     implementation project(':memory-usage')
-    implementation project(':metrics-api')
     implementation project(':path-finding-configs')
     implementation project(':path-finding-mutate-steps')
     implementation project(':path-finding-write-steps')
     implementation project(':progress-tracking')
-    implementation project(':string-formatting')
     implementation project(':termination')
 
     // Test dependencies
