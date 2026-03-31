@@ -18,7 +18,6 @@ dependencies {
     implementation openGds.ejml.core
     implementation openGds.ejml.ddense
 
-    implementation project(':annotations')
     implementation project(':core')
     implementation project(':memory-usage')
     implementation project(':string-formatting')
@@ -33,6 +32,4 @@ dependencies {
     testImplementation project(':test-utils')
     testImplementation project(':graph-schema-api')
     testImplementation project(':ml-test-utils')
-
-    testImplementation openGds.jqwik
 }
