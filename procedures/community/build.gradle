@@ -20,7 +20,6 @@ dependencies {
     integrationTestImplementation project(':algorithms-machinery')
     integrationTestImplementation project(':algorithms-procedure-facade')
     integrationTestImplementation project(':applications-facade')
-    integrationTestImplementation project(':annotations')
     integrationTestImplementation project(':config-api')
     integrationTestImplementation project(':defaults-and-limits-configuration')
     integrationTestImplementation project(':domain-services')
