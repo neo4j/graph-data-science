@@ -14,7 +14,6 @@ dependencies {
     implementation project(':neo4j-kernel-adapter-api')
     implementation project(':neo4j-settings')
     implementation project(':proc-common')
-    implementation project(':procedure-integration')
     implementation project(':procedures-facade-api')
     implementation project(':progress-tracking')
 
@@ -33,9 +32,6 @@ dependencies {
     testImplementation project(':core-utils')
     testImplementation project(':executor')
     testImplementation project(':gdl-graph')
-    testImplementation project(':gdl-junit-extension')
-    testImplementation project(':graph-schema-api')
-    testImplementation project(':ml-core')
     testImplementation project(':proc-test-utilities')
     testImplementation project(':shared-extensions')
     testImplementation project(':string-formatting')
