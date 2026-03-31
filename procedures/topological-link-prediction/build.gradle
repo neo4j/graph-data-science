@@ -17,6 +17,5 @@ dependencies {
     testImplementation platform(openGds.junit.bom)
 
     testImplementation project(':opengds-extension')
-    testImplementation project(':opengds-procedure-facade')
     testImplementation project(':test-utils')
 }
