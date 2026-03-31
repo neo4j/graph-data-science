@@ -31,9 +31,6 @@ dependencies {
     // `GraphProjectNativeResult`
     implementation project(':native-projection')
 
-    // `JobIdConfig`
-    implementation project(':progress-tracking')
-
     // `GraphFilterResult` lives here, we don't want to bring it all in though...
     implementation project(':subgraph-filtering')
 }
