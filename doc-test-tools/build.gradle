@@ -12,25 +12,15 @@ dependencies {
     annotationProcessor openGds.immutables.builder
     annotationProcessor openGds.immutables.value
 
-    implementation     project(':algo-common')
     implementation     project(':annotations')
-    implementation     project(':config-api')
     implementation     project(':core')
-    implementation     project(':executor')
-    implementation     project(':model-catalog-api')
     implementation     project(':neo4j-settings')
-    implementation     project(':open-model-catalog')
-    implementation     project(':proc-pregel')
     implementation     project(':string-formatting')
     implementation     project(':test-utils')
 
     implementation     openGds.asciidoctorj
     implementation     openGds.reflections
 
-    testImplementation project(':community-configs')
-    testImplementation project(':cypher-aggregation')
-    testImplementation project(':pipeline')
-    testImplementation project(':pregel-example')
     testImplementation project(':proc-catalog')
     testImplementation project(':proc-centrality')
     testImplementation project(':proc-common')
@@ -43,8 +33,6 @@ dependencies {
     testImplementation project(':proc-similarity')
     testImplementation project(':proc-sysinfo')
     testImplementation project(':proc-topological-link-prediction')
-
-    testImplementation openGds.reflections
 }
 
 tasks.register('unpackDocs', Copy) {
