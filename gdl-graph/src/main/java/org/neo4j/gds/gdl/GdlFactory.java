@@ -25,6 +25,7 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.CSRGraphStoreFactory;
 import org.neo4j.gds.api.DatabaseId;
+import org.neo4j.gds.api.DatabaseInfo;
 import org.neo4j.gds.api.DatabaseInfo.DatabaseLocation;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphLoaderContext;
@@ -81,7 +82,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlConfig> {
 
     private final GDLHandler gdlHandler;
-    private final DatabaseId databaseId;
+    private final DatabaseInfo databaseInfo;
     private final String idMapBuilderType;
 
     public static GdlFactory of(String gdlGraph) {
@@ -98,6 +99,8 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
         Optional<RequestCorrelationId> requestCorrelationId,
         Optional<String> gdlGraph,
         Optional<DatabaseId> databaseId,
+        Optional<DatabaseLocation> databaseLocation,
+        Optional<DatabaseId> remoteDatabaseId,
         Optional<String> userName,
         Optional<String> graphName,
         Optional<GraphProjectFromGdlConfig> graphProjectConfig,
@@ -128,13 +131,19 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
         // NOTE: We don't really have a database, but GDL is for testing to work as if we had a database
         var capabilities = graphCapabilities.orElseGet(() -> ImmutableStaticCapabilities.of(WriteMode.LOCAL));
 
+        var databaseInfo = ImmutableDatabaseInfo.builder()
+            .databaseId(databaseId.orElse(DatabaseId.of("GDL")))
+            .databaseLocation(databaseLocation.orElse(DatabaseLocation.LOCAL))
+            .remoteDatabaseId(remoteDatabaseId)
+            .build();
+
         return new GdlFactory(
             log.orElse(Log.noOpLog()),
             requestCorrelationId.orElse(PlainSimpleRequestCorrelationId.create()),
             gdlHandler,
             config,
             graphDimensions,
-            databaseId.orElse(DatabaseId.of("GDL")),
+            databaseInfo,
             capabilities,
             idMapBuilderType.orElse(IdMap.NO_TYPE)
         );
@@ -146,7 +155,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
         GDLHandler gdlHandler,
         GraphProjectFromGdlConfig graphProjectConfig,
         GraphDimensions graphDimensions,
-        DatabaseId databaseId,
+        DatabaseInfo databaseInfo,
         Capabilities capabilities,
         String idMapBuilderType
     ) {
@@ -159,7 +168,8 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
             requestCorrelationId
         );
         this.gdlHandler = gdlHandler;
-        this.databaseId = databaseId;
+        this.databaseInfo = databaseInfo;
+
         this.idMapBuilderType = idMapBuilderType;
     }
 
@@ -187,10 +197,6 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
             Map.of()
         );
 
-        var databaseInfo = ImmutableDatabaseInfo.builder()
-            .databaseId(databaseId)
-            .databaseLocation(DatabaseLocation.LOCAL)
-            .build();
         return new GraphStoreBuilder()
             .databaseInfo(databaseInfo)
             .capabilities(capabilities)
