@@ -45,7 +45,6 @@ dependencies {
 
     // Test dependencies
     testAnnotationProcessor neo4j.annotations
-    testImplementation project(':annotations')
     testImplementation project(':test-utils')
 }
 
