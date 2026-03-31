@@ -18,16 +18,13 @@ dependencies {
 
     integrationTestAnnotationProcessor project(':annotations')
 
-    integrationTestImplementation project(':algo-common')
     integrationTestImplementation project(':core')
     integrationTestImplementation project(':gdl-graph')
     integrationTestImplementation project(':neo4j-kernel-adapter-api')
     integrationTestImplementation project(':proc-test-utilities')
     integrationTestImplementation project(':proc-common')
-    integrationTestImplementation project(':graph-schema-api')
     integrationTestImplementation project(':string-formatting')
     integrationTestImplementation project(':scaling-utils')
-
 
     integrationTestCompileOnly openGds.immutables.value.annotations
     integrationTestCompileOnly openGds.immutables.builder
