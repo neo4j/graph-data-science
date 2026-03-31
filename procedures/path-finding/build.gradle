@@ -20,7 +20,6 @@ dependencies {
 
     testImplementation project(':annotations')
 
-    testImplementation project(':algo-common')
     testImplementation project(':config-api')
     testImplementation project(':core')
     testImplementation project(':gdl-graph')
@@ -28,8 +27,6 @@ dependencies {
     testImplementation project(':neo4j-kernel-adapter-api')
     testImplementation project(':proc-test-utilities')
     testImplementation project(':proc-common')
-    testImplementation project(':progress-tracking')
-    testImplementation project(':graph-schema-api')
     testImplementation project(':string-formatting')
     testImplementation project(':test-utils')
 
