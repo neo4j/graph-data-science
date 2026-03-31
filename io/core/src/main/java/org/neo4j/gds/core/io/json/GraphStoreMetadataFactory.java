@@ -34,7 +34,7 @@ import java.util.stream.Collectors;
 public final class GraphStoreMetadataFactory {
     private GraphStoreMetadataFactory() {}
 
-    static GraphStoreMetadata fromGraphStore(GraphStore graphStore) {
+    public static GraphStoreMetadata fromGraphStore(GraphStore graphStore) {
         var databaseInfo = new DatabaseInfo(
             graphStore.databaseInfo().databaseId().databaseName(),
             toDatabaseLocation(graphStore.databaseInfo().databaseLocation()),
