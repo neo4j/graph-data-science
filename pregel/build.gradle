@@ -18,10 +18,8 @@ dependencies {
     compileOnly openGds.jetbrains.annotations
 
     implementation project(':annotations')
-    implementation project(':collections-memory-estimation')
     implementation project(':config-api')
     implementation project(':core')
-    implementation project(':core-utils')
     implementation project(':gds-values')
     implementation project(':memory-usage')
     implementation project(':progress-tracking')
@@ -32,10 +30,10 @@ dependencies {
     testAnnotationProcessor project(':config-generator')
 
     testCompileOnly project(':annotations')
+    testCompileOnly project(':graph-schema-api')
 
     testImplementation project(':gdl-graph')
     testImplementation project(':gdl-junit-extension')
-    testImplementation project(':graph-schema-api')
     testImplementation project(':logging')
     testImplementation project(':test-utils')
 }
