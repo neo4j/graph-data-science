@@ -22,10 +22,7 @@ package org.neo4j.gds.core.io.json;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.api.DatabaseId;
-import org.neo4j.gds.api.DatabaseInfo;
 import org.neo4j.gds.api.GraphName;
-import org.neo4j.gds.core.loading.Capabilities;
 
 public final class GdsModule extends SimpleModule {
 
@@ -42,12 +39,6 @@ public final class GdsModule extends SimpleModule {
         addSerializer(RelationshipType.class, new RelationshipTypeSerializer());
         addKeySerializer(RelationshipType.class, new RelationshipTypeSerializer.KeySerializer());
         addDeserializer(RelationshipType.class, new RelationshipTypeDeserializer());
-        addSerializer(DatabaseId.class, new DatabaseIdSerializer());
-        addDeserializer(DatabaseId.class, new DatabaseIdDeserializer());
-        addSerializer(DatabaseInfo.class, new DatabaseInfoSerializer());
-        addDeserializer(DatabaseInfo.class, new DatabaseInfoDeserializer());
-        addSerializer(Capabilities.class, new CapabilitiesSerializer());
-        addDeserializer(Capabilities.class, new CapabilitiesDeserializer());
     }
 
     public static GdsModule getInstance() {
