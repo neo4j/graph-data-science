@@ -10,12 +10,12 @@ dependencies {
     api project(':pregel')
 
     compileOnly openGds.immutables.value.annotations
+    compileOnly project(':algorithms-facade-api')
 
     implementation project(':annotations')
     implementation project(':algo')
     implementation project(':algo-common')
     implementation project(':algorithms-machinery')
-    implementation project(':algorithms-facade-api')
     implementation project(':config-api')
     implementation project(':core')
     implementation project(':core-write')
@@ -34,14 +34,11 @@ dependencies {
     testAnnotationProcessor project(':config-generator')
 
     testCompileOnly openGds.immutables.builder
+    testCompileOnly project(':gds-values')
 
-    testImplementation project(':algorithms-machinery')
     testImplementation project(':gdl-graph')
     testImplementation project(':gdl-junit-extension')
-    testImplementation project(':gds-values')
     testImplementation project(':memory-usage')
-    testImplementation project(':licensing')
-    testImplementation project(':logging')
     testImplementation project(':procedures-facade-api')
     testImplementation project(':open-licensing')
     testImplementation project(':test-utils')
