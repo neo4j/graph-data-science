@@ -381,6 +381,14 @@ class GraphStoreMetadataFactoryTest {
     }
 
     @Test
+    void toDatabaseInfo() {
+        var result = GraphStoreMetadataFactory.toDatabaseInfo(graphStore.databaseInfo());
+
+        var expected = new DatabaseInfo("gdl", DatabaseInfo.DatabaseLocation.LOCAL, Optional.empty());
+        assertThat(result).isEqualTo(expected);
+    }
+
+    @Test
     void toDatabaseLocation() {
         assertThat(GraphStoreMetadataFactory.toDatabaseLocation(org.neo4j.gds.api.DatabaseInfo.DatabaseLocation.LOCAL))
             .isEqualTo(DatabaseInfo.DatabaseLocation.LOCAL);
