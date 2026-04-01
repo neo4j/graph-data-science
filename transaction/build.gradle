@@ -16,12 +16,6 @@ dependencies {
     compileOnly(neo4j.kernel.api) { transitive = false }
     compileOnly(neo4j.resource) { transitive = false }
 
-    implementation project(':config-api')
     implementation project(':neo4j-api')
     implementation project(':neo4j-kernel-adapter-api')
-    implementation project(':licensing')
-
-    // Test dependencices
-    testImplementation project(':edition-api')
-    testImplementation project(':test-utils')
 }
