@@ -25,6 +25,8 @@ import org.neo4j.gds.api.DatabaseInfo;
 import org.neo4j.gds.api.ImmutableDatabaseInfo;
 import org.neo4j.gds.core.io.file.GraphInfo;
 import org.neo4j.gds.core.io.file.GraphInfoBuilder;
+import org.neo4j.gds.core.loading.Capabilities;
+import org.neo4j.gds.core.loading.ImmutableStaticCapabilities;
 
 import java.util.Collection;
 import java.util.Map;
@@ -43,6 +45,21 @@ public final class CsvMetaDataFactory {
             .relationshipTypeCounts(toRelationshipTypeCounts(graphStoreMetadata))
             .inverseIndexedRelationshipTypes(toInverseRelationshipTypes(graphStoreMetadata));
         return builder.build();
+    }
+
+    static Capabilities toCapabilities(GraphStoreMetadata graphStoreMetadata) {
+        return ImmutableStaticCapabilities
+            .builder()
+            .writeMode(toWriteMode(graphStoreMetadata))
+            .build();
+    }
+
+    private static Capabilities.WriteMode toWriteMode(GraphStoreMetadata graphStoreMetadata) {
+        return switch(graphStoreMetadata.writeMode()) {
+            case LOCAL -> Capabilities.WriteMode.LOCAL;
+            case REMOTE -> Capabilities.WriteMode.REMOTE;
+            case NONE -> Capabilities.WriteMode.NONE;
+        };
     }
 
     private static Collection<? extends RelationshipType> toInverseRelationshipTypes(GraphStoreMetadata graphStoreMetadata) {

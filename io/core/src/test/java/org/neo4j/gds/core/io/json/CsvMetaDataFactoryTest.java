@@ -55,7 +55,6 @@ class CsvMetaDataFactoryTest {
     @Inject
     private GraphStore graphStore;
 
-    // TODO: Pass remoteDatabaseId as a test
     @Test
     void toGraphInfo() {
         var graphStoreMetadata = GraphStoreMetadataFactory.fromGraphStore(graphStore);
@@ -82,6 +81,41 @@ class CsvMetaDataFactoryTest {
         var result = CsvMetaDataFactory.toGraphInfo(graphStoreMetadata);
 
         var expected = getGraphInfo(graphStore);
+        assertThat(result).isEqualTo(expected);
+    }
+
+    @Test
+    void toCapabilities() {
+        var graphStoreMetadata = GraphStoreMetadataFactory.fromGraphStore(graphStore);
+
+        var result = CsvMetaDataFactory.toCapabilities(graphStoreMetadata);
+
+        var expected = ImmutableStaticCapabilities
+            .builder()
+            .writeMode(graphStore.capabilities().writeMode())
+            .build();
+        assertThat(result).isEqualTo(expected);
+    }
+
+    @Test
+    void toCapabilitiesWithRemote() {
+        var graphStore = GdlFactory.builder()
+            .graphName("my_graph")
+            .databaseId(DatabaseId.of("another_custom_name"))
+            .databaseLocation(org.neo4j.gds.api.DatabaseInfo.DatabaseLocation.REMOTE)
+            .remoteDatabaseId(DatabaseId.of("my_remote_db"))
+            .graphCapabilities(ImmutableStaticCapabilities.of(Capabilities.WriteMode.REMOTE))
+            .gdlGraph("()-->()")
+            .build()
+            .build();
+        var graphStoreMetadata = GraphStoreMetadataFactory.fromGraphStore(graphStore);
+
+        var result = CsvMetaDataFactory.toCapabilities(graphStoreMetadata);
+
+        var expected = ImmutableStaticCapabilities
+            .builder()
+            .writeMode(graphStore.capabilities().writeMode())
+            .build();
         assertThat(result).isEqualTo(expected);
     }
 
