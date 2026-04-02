@@ -1,7 +1,8 @@
 site:
   title: Neo4j Graph Data Science
   url: https://neo4j.com/docs
-  start_page: graph-data-science:ROOT:index.adoc
+  version: '2026.03'
+  start_page: graph-data-science:index.adoc
 
 content:
   sources:
