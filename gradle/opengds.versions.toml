@@ -119,7 +119,7 @@ nebula-dependencies = "com.netflix.nebula.info-dependencies:16.1.0"
 nebula-java = "com.netflix.nebula.info-java:16.1.0"
 nebula-props = "com.netflix.nebula.info-props:16.1.0"
 nebula-scm = "com.netflix.nebula.info-scm:16.1.0"
-shadowjar = "com.gradleup.shadow:9.3.2"
+shadowjar = "com.gradleup.shadow:9.4.1"
 spawn = "ch.kk7.spawn:1.0.20180924200750"
 
 [bundles]
