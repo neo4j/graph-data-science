@@ -20,11 +20,13 @@
 package org.neo4j.gds.core.io.json;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.api.schema.MutableNodeSchema;
 import org.neo4j.gds.core.io.file.GraphInfo;
 import org.neo4j.gds.core.io.file.GraphInfoBuilder;
-import org.neo4j.gds.core.loading.CSRGraphStore;
 import org.neo4j.gds.core.loading.Capabilities;
 import org.neo4j.gds.core.loading.ImmutableStaticCapabilities;
 import org.neo4j.gds.extension.GdlExtension;
@@ -90,10 +92,7 @@ class CsvMetaDataFactoryTest {
 
         var result = CsvMetaDataFactory.toCapabilities(graphStoreMetadata);
 
-        var expected = ImmutableStaticCapabilities
-            .builder()
-            .writeMode(graphStore.capabilities().writeMode())
-            .build();
+        var expected = getCapabilities(graphStore);
         assertThat(result).isEqualTo(expected);
     }
 
@@ -112,10 +111,36 @@ class CsvMetaDataFactoryTest {
 
         var result = CsvMetaDataFactory.toCapabilities(graphStoreMetadata);
 
-        var expected = ImmutableStaticCapabilities
-            .builder()
-            .writeMode(graphStore.capabilities().writeMode())
+        var expected = getCapabilities(graphStore);
+        assertThat(result).isEqualTo(expected);
+    }
+
+    @Test
+    void toNodeShema() {
+        var graphStoreMetadata = GraphStoreMetadataFactory.fromGraphStore(graphStore);
+
+        var result = CsvMetaDataFactory.toNodeSchema(graphStoreMetadata);
+
+        var expected = graphStore.schema().nodeSchema();
+        assertThat(result).isEqualTo(expected);
+    }
+
+    @Test
+    void toNodeSchemaWithManyNodePropertyTypes() {
+        var graphStore = GdlFactory.builder()
+            .graphName("my_graph")
+            .databaseId(DatabaseId.of("another_custom_name"))
+            .databaseLocation(org.neo4j.gds.api.DatabaseInfo.DatabaseLocation.REMOTE)
+            .remoteDatabaseId(DatabaseId.of("my_remote_db"))
+            .graphCapabilities(ImmutableStaticCapabilities.of(Capabilities.WriteMode.REMOTE))
+            .gdlGraph("(a:A {propertyA: 42L})-[]->(b:B {propertyB: 0.1337}), (c:C {propertyC: [1.0]})-[]->(d:D {propertyD: [42L]})")
+            .build()
             .build();
+        var graphStoreMetadata = GraphStoreMetadataFactory.fromGraphStore(graphStore);
+
+        var result = CsvMetaDataFactory.toNodeSchema(graphStoreMetadata);
+
+        var expected = graphStore.schema().nodeSchema();
         assertThat(result).isEqualTo(expected);
     }
 
@@ -135,6 +160,13 @@ class CsvMetaDataFactoryTest {
                     ))
                 )
             .inverseIndexedRelationshipTypes(graphStore.inverseIndexedRelationshipTypes())
+            .build();
+    }
+
+    private static Capabilities getCapabilities(GraphStore graphStore) {
+        return ImmutableStaticCapabilities
+            .builder()
+            .writeMode(graphStore.capabilities().writeMode())
             .build();
     }
 }

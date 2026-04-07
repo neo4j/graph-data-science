@@ -19,10 +19,14 @@
  */
 package org.neo4j.gds.core.io.json;
 
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.DatabaseInfo;
 import org.neo4j.gds.api.ImmutableDatabaseInfo;
+import org.neo4j.gds.api.schema.MutableNodeSchema;
+import org.neo4j.gds.api.schema.MutableNodeSchemaEntry;
+import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.core.io.file.GraphInfo;
 import org.neo4j.gds.core.io.file.GraphInfoBuilder;
 import org.neo4j.gds.core.loading.Capabilities;
@@ -52,6 +56,71 @@ public final class CsvMetaDataFactory {
             .builder()
             .writeMode(toWriteMode(graphStoreMetadata))
             .build();
+    }
+
+    static org.neo4j.gds.api.schema.NodeSchema toNodeSchema(GraphStoreMetadata graphStoreMetadata) {
+        var result = MutableNodeSchema.empty();
+
+        var nodeSchemaEntries = graphStoreMetadata
+            .nodeSchema()
+            .entrySet()
+            .stream()
+            .map(CsvMetaDataFactory::toNodeSchemaEntry)
+            .toList();
+        nodeSchemaEntries.forEach(result::set);
+
+        return result;
+    }
+
+    private static MutableNodeSchemaEntry toNodeSchemaEntry(Map.Entry<String, NodeSchema> entry) {
+        var nodeLabel = NodeLabel.of(entry.getKey());
+        var properties = toPropertySchemas(entry.getValue().propertySchemas());
+        return new MutableNodeSchemaEntry(nodeLabel, properties); // TODO: Introduce factory
+    }
+
+    private static Map<String, PropertySchema> toPropertySchemas(Map<String, NodePropertySchema> schemas) {
+        return schemas
+            .entrySet()
+            .stream()
+            .collect(
+                Collectors.toMap(
+                    Map.Entry::getKey,
+                    CsvMetaDataFactory::toPropertySchema
+                )
+            );
+    }
+
+    private static PropertySchema toPropertySchema(Map.Entry<String, NodePropertySchema> schemaEntry) {
+        var nodePropertySchema = schemaEntry.getValue();
+
+        return PropertySchema.of(
+            schemaEntry.getKey(),
+            toValueType(nodePropertySchema.valueType()),
+            toDefaultValue(nodePropertySchema.defaultValue()),
+            toPropertyState(nodePropertySchema.propertyState())
+        );
+    }
+
+    private static org.neo4j.gds.api.nodeproperties.ValueType toValueType(ValueType valueType) {
+        return switch (valueType) {
+            case LONG -> org.neo4j.gds.api.nodeproperties.ValueType.LONG;
+            case DOUBLE -> org.neo4j.gds.api.nodeproperties.ValueType.DOUBLE;
+            case FLOAT_ARRAY -> org.neo4j.gds.api.nodeproperties.ValueType.FLOAT_ARRAY;
+            case DOUBLE_ARRAY -> org.neo4j.gds.api.nodeproperties.ValueType.DOUBLE_ARRAY;
+            case LONG_ARRAY -> org.neo4j.gds.api.nodeproperties.ValueType.LONG_ARRAY;
+        };
+    }
+
+    private static org.neo4j.gds.api.DefaultValue toDefaultValue(DefaultValue defaultValue) {
+        return org.neo4j.gds.api.DefaultValue.of(defaultValue.defaultValue(), defaultValue.isUserDefined());
+    }
+
+    private static org.neo4j.gds.api.PropertyState toPropertyState(PropertyState propertyState) {
+        return switch (propertyState) {
+            case PERSISTENT -> org.neo4j.gds.api.PropertyState.PERSISTENT;
+            case TRANSIENT -> org.neo4j.gds.api.PropertyState.TRANSIENT;
+            case REMOTE -> org.neo4j.gds.api.PropertyState.REMOTE;
+        };
     }
 
     private static Capabilities.WriteMode toWriteMode(GraphStoreMetadata graphStoreMetadata) {
