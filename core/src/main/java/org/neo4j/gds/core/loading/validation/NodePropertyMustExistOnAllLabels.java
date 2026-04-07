@@ -48,22 +48,22 @@ public class NodePropertyMustExistOnAllLabels implements AlgorithmGraphStoreRequ
         GraphStore graphStore,
         Collection<NodeLabel> selectedLabels
     ) {
-        if (nodeProperty!=null){
-        if (!graphStore.hasNodeProperty(selectedLabels, nodeProperty)) {
-            var labelsWithMissingProperty = selectedLabels
-                .stream()
-                .filter(label -> !graphStore.nodePropertyKeys(label).contains(nodeProperty))
-                .map(NodeLabel::name)
-                .collect(Collectors.toList());
+        if (nodeProperty != null) {
+            if (!graphStore.hasNodeProperty(selectedLabels, nodeProperty)) {
+                var labelsWithMissingProperty = selectedLabels
+                    .stream()
+                    .filter(label -> !graphStore.nodePropertyKeys(label).contains(nodeProperty))
+                    .map(NodeLabel::name)
+                    .collect(Collectors.toList());
 
-            throw new IllegalArgumentException(formatWithLocale(
-                "Node property `%s` is not present for all requested labels. Requested labels: %s. Labels without the property key: %s. Properties available on all requested labels: %s",
-                nodeProperty,
-                StringJoining.join(selectedLabels.stream().map(NodeLabel::name)),
-                StringJoining.join(labelsWithMissingProperty),
-                StringJoining.join(graphStore.nodePropertyKeys(selectedLabels))
-            ));
-        }
+                throw new IllegalArgumentException(formatWithLocale(
+                    "Node property `%s` is not present for all requested labels. Requested labels: %s. Labels without the property key: %s. Properties available on all requested labels: %s",
+                    nodeProperty,
+                    StringJoining.join(selectedLabels.stream().map(NodeLabel::name)),
+                    StringJoining.join(labelsWithMissingProperty),
+                    StringJoining.join(graphStore.nodePropertyKeys(selectedLabels))
+                ));
+            }
         }
 
     }
