@@ -196,7 +196,7 @@ class NodeSchemaTest {
 
         var nodeSchema = MutableNodeSchema.empty()
             .addProperty(label, "foo", ValueType.DOUBLE)
-            .addProperty(label, "baz", PropertySchema.of("baz", ValueType.LONG, DefaultValue.forLong(), PropertyState.TRANSIENT))
+            .addProperty(label, PropertySchema.of("baz", ValueType.LONG, DefaultValue.forLong(), PropertyState.TRANSIENT))
             .addProperty(label, "bar", ValueType.LONG_ARRAY);
 
         nodeSchema.addLabel(NodeLabel.of("Test"), nodeSchema.unionProperties());
@@ -259,9 +259,9 @@ class NodeSchemaTest {
     @Test
     void toStringWithMultipleLabelsWithProperties() {
         var nodeSchema = MutableNodeSchema.empty()
-            .addProperty(NodeLabel.of("Label A"), "Property #1", PropertySchema.of("Property #1", ValueType.LONG, DefaultValue.of(42), PropertyState.TRANSIENT))
-            .addProperty(NodeLabel.of("Label A"), "Property #2", PropertySchema.of("Property #2", ValueType.DOUBLE, DefaultValue.of(42.0), PropertyState.TRANSIENT))
-            .addProperty(NodeLabel.of("Label B"), "Property #3", PropertySchema.of("Property #3", ValueType.LONG, DefaultValue.of(1337, false), PropertyState.PERSISTENT));
+            .addProperty(NodeLabel.of("Label A"), PropertySchema.of("Property #1", ValueType.LONG, DefaultValue.of(42), PropertyState.TRANSIENT))
+            .addProperty(NodeLabel.of("Label A"), PropertySchema.of("Property #2", ValueType.DOUBLE, DefaultValue.of(42.0), PropertyState.TRANSIENT))
+            .addProperty(NodeLabel.of("Label B"), PropertySchema.of("Property #3", ValueType.LONG, DefaultValue.of(1337, false), PropertyState.PERSISTENT));
 
         var result = nodeSchema.toString();
 

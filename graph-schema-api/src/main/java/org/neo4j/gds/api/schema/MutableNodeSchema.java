@@ -109,8 +109,8 @@ public final class MutableNodeSchema implements NodeSchema {
         return this;
     }
 
-    public MutableNodeSchema addProperty(NodeLabel nodeLabel, String propertyName, PropertySchema propertySchema) {
-        getOrCreateLabel(nodeLabel).addProperty(propertyName, propertySchema);
+    public MutableNodeSchema addProperty(NodeLabel nodeLabel, PropertySchema propertySchema) {
+        getOrCreateLabel(nodeLabel).addProperty(propertySchema.key(), propertySchema);
         return this;
     }
 
