@@ -75,7 +75,7 @@ public final class CsvMetaDataFactory {
     private static MutableNodeSchemaEntry toNodeSchemaEntry(Map.Entry<String, NodeSchema> entry) {
         var nodeLabel = NodeLabel.of(entry.getKey());
         var properties = toPropertySchemas(entry.getValue().propertySchemas());
-        return new MutableNodeSchemaEntry(nodeLabel, properties); // TODO: Introduce factory
+        return MutableNodeSchemaEntry.of(nodeLabel, properties);
     }
 
     private static Map<String, PropertySchema> toPropertySchemas(Map<String, NodePropertySchema> schemas) {

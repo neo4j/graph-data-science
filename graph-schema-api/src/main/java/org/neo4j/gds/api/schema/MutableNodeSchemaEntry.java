@@ -35,15 +35,19 @@ public class MutableNodeSchemaEntry implements NodeSchemaEntry {
     private final NodeLabel nodeLabel;
     private final Map<String, PropertySchema> properties;
 
+    public static MutableNodeSchemaEntry of(NodeLabel nodeLabel, Map<String, PropertySchema> properties) {
+        return new MutableNodeSchemaEntry(nodeLabel, properties);
+    }
+
     static MutableNodeSchemaEntry from(NodeSchemaEntry fromEntry) {
-        return new MutableNodeSchemaEntry(fromEntry.identifier(), new HashMap<>(fromEntry.properties()));
+        return MutableNodeSchemaEntry.of(fromEntry.identifier(), new HashMap<>(fromEntry.properties()));
     }
 
     MutableNodeSchemaEntry(NodeLabel identifier) {
         this(identifier, new LinkedHashMap<>());
     }
 
-    public MutableNodeSchemaEntry(NodeLabel nodeLabel, Map<String, PropertySchema> properties) {
+    private MutableNodeSchemaEntry(NodeLabel nodeLabel, Map<String, PropertySchema> properties) {
         this.nodeLabel = nodeLabel;
         this.properties = properties;
     }
@@ -70,7 +74,7 @@ public class MutableNodeSchemaEntry implements NodeSchemaEntry {
             );
         }
 
-        return new MutableNodeSchemaEntry(this.identifier(), unionProperties(other.properties));
+        return MutableNodeSchemaEntry.of(this.identifier(), unionProperties(other.properties));
     }
 
     @Override

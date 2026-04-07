@@ -71,7 +71,7 @@ class NodeSchemaLoaderTest {
 
         var labelAProperties = nodeSchema.get(NodeLabel.of("A"));
         assertThat(labelAProperties)
-            .isEqualTo(new MutableNodeSchemaEntry(
+            .isEqualTo(MutableNodeSchemaEntry.of(
                 NodeLabel.of("A"),
                 Map.of(
                     "prop1",
@@ -86,7 +86,7 @@ class NodeSchemaLoaderTest {
 
         var labelBProperties = nodeSchema.get(NodeLabel.of("B"));
         assertThat(labelBProperties)
-            .isEqualTo(new MutableNodeSchemaEntry(
+            .isEqualTo(MutableNodeSchemaEntry.of(
                 NodeLabel.of("B"),
                 Map.of(
                     "prop2",
@@ -148,7 +148,7 @@ class NodeSchemaLoaderTest {
 
         var labelAProperties = nodeSchema.get(NodeLabel.of("A"));
         assertThat(labelAProperties)
-            .isEqualTo(new MutableNodeSchemaEntry(
+            .isEqualTo(MutableNodeSchemaEntry.of(
                 NodeLabel.of("A"),
                 Map.of(
                     "prop1",
@@ -163,7 +163,7 @@ class NodeSchemaLoaderTest {
 
         var labelBProperties = nodeSchema.get(NodeLabel.of("B"));
         assertThat(labelBProperties)
-            .isEqualTo(new MutableNodeSchemaEntry(NodeLabel.of("B"), Map.of()));
+            .isEqualTo(MutableNodeSchemaEntry.of(NodeLabel.of("B"), Map.of()));
     }
 
     static Stream<List<String>> arrayLines() {
