@@ -22,7 +22,9 @@ package org.neo4j.gds.api.schema;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
@@ -130,5 +132,30 @@ public final class MutableNodeSchema implements NodeSchema {
     @Override
     public int hashCode() {
         return entries.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        var className = MutableNodeSchema.class.getSimpleName();
+        if (this.entries.isEmpty()) {
+            return String.format("%s{<empty>}", className);
+        }
+
+        final var INDENT = "    ";
+        var lines = new ArrayList<String>();
+
+        lines.add(className + "{");
+        entries.keySet().stream()
+            .sorted(Comparator.comparing(NodeLabel::name))
+            .map(this::get)
+            .map((entry) -> entry.toString()
+                .lines()
+                .map(INDENT::concat)
+                .collect(Collectors.joining("\n"))
+            )
+            .forEach(lines::add);
+        lines.add("}");
+
+        return String.join("\n", lines);
     }
 }

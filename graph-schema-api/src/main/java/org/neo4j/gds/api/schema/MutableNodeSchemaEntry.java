@@ -23,6 +23,8 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -127,5 +129,20 @@ public class MutableNodeSchemaEntry implements NodeSchemaEntry {
         int result = nodeLabel.hashCode();
         result = 31 * result + properties.hashCode();
         return result;
+    }
+
+    @Override
+    public String toString() {
+        final var INDENT = "    ";
+        var lines = new ArrayList<String>();
+
+        lines.add(MutableNodeSchemaEntry.class.getSimpleName() + "{");
+        lines.add(INDENT + String.format("Label=\"%s\"", nodeLabel.name()));
+        properties.values().stream()
+            .sorted(Comparator.comparing(PropertySchema::key))
+            .forEach((property) -> lines.add(INDENT + property));
+        lines.add("}");
+
+        return String.join("\n", lines);
     }
 }

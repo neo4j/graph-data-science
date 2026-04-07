@@ -207,4 +207,76 @@ class NodeSchemaTest {
             PropertySchema.of("bar", ValueType.LONG_ARRAY)
         );
     }
+
+    @Test
+    void toStringOnEmptySchema() {
+        var nodeSchema = MutableNodeSchema.empty();
+
+        var result = nodeSchema.toString();
+
+        var expected = "MutableNodeSchema{<empty>}";
+        assertThat(result).isEqualTo(expected);
+    }
+
+    @Test
+    void toStringWithMultipleLabels() {
+        var nodeSchema = MutableNodeSchema
+            .empty()
+            .addLabel(NodeLabel.of("Label A"))
+            .addLabel(NodeLabel.of("Label B"));
+
+        var result = nodeSchema.toString();
+
+        var expected = """
+        MutableNodeSchema{
+            MutableNodeSchemaEntry{
+                Label="Label A"
+            }
+            MutableNodeSchemaEntry{
+                Label="Label B"
+            }
+        }""";
+        assertThat(result).isEqualTo(expected);
+    }
+
+    @Test
+    void toStringWithNoDefaultValue() {
+        var nodeSchema = MutableNodeSchema.empty()
+            .addProperty(NodeLabel.of("Label A"), "Property #1", ValueType.DOUBLE);
+
+        var result = nodeSchema.toString();
+
+        var expected = """
+        MutableNodeSchema{
+            MutableNodeSchemaEntry{
+                Label="Label A"
+                PropertySchema{key=Property #1, valueType=DOUBLE, defaultValue=DefaultValue(NaN)}
+            }
+        }""";
+        assertThat(result).isEqualTo(expected);
+    }
+
+    @Test
+    void toStringWithMultipleLabelsWithProperties() {
+        var nodeSchema = MutableNodeSchema.empty()
+            .addProperty(NodeLabel.of("Label A"), "Property #1", PropertySchema.of("Property #1", ValueType.LONG, DefaultValue.of(42), PropertyState.TRANSIENT))
+            .addProperty(NodeLabel.of("Label A"), "Property #2", PropertySchema.of("Property #2", ValueType.DOUBLE, DefaultValue.of(42.0), PropertyState.TRANSIENT))
+            .addProperty(NodeLabel.of("Label B"), "Property #3", PropertySchema.of("Property #3", ValueType.LONG, DefaultValue.of(1337, false), PropertyState.PERSISTENT));
+
+        var result = nodeSchema.toString();
+
+        var expected = """
+        MutableNodeSchema{
+            MutableNodeSchemaEntry{
+                Label="Label A"
+                PropertySchema{key=Property #1, valueType=LONG, defaultValue=DefaultValue(42)}
+                PropertySchema{key=Property #2, valueType=DOUBLE, defaultValue=DefaultValue(42.0)}
+            }
+            MutableNodeSchemaEntry{
+                Label="Label B"
+                PropertySchema{key=Property #3, valueType=LONG, defaultValue=DefaultValue(1337)}
+            }
+        }""";
+        assertThat(result).isEqualTo(expected);
+    }
 }
