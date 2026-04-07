@@ -44,8 +44,9 @@ public class GraphStoreValidation {
     ) {
         validateNodeLabels(graphStore, selectedLabels);
         validateRelationshipTypes(graphStore, selectedRelationshipTypes);
-        validateRelationshipProperty(graphStore, selectedRelationshipTypes, relationshipProperty);
+        //have this happen first
         validateAlgorithmRequirements(graphStore, selectedLabels, selectedRelationshipTypes);
+        validateRelationshipProperty(graphStore, selectedRelationshipTypes, relationshipProperty);
     }
 
     protected void validateNodeLabels(

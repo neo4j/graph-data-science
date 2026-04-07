@@ -40,7 +40,6 @@ import org.neo4j.gds.core.loading.validation.SourceNodeRequirement;
 import org.neo4j.gds.core.loading.validation.SourceNodeTargetNodeRequirement;
 import org.neo4j.gds.core.loading.validation.SourceNodeTargetNodesGraphStoreValidation;
 import org.neo4j.gds.core.loading.validation.SourceNodesRequirement;
-import org.neo4j.gds.core.loading.validation.TargetNodesRequirement;
 import org.neo4j.gds.core.loading.validation.UndirectedOnlyRequirement;
 import org.neo4j.gds.dag.longestPath.DagLongestPathParameters;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortParameters;
@@ -50,6 +49,7 @@ import org.neo4j.gds.maxflow.FlowResult;
 import org.neo4j.gds.maxflow.MaxFlowParameters;
 import org.neo4j.gds.mcmf.CostFlowResult;
 import org.neo4j.gds.mcmf.MCMFParameters;
+import org.neo4j.gds.pathfinding.validation.FlowAlgorithmRequirements;
 import org.neo4j.gds.pathfinding.validation.RandomWalkGraphValidation;
 import org.neo4j.gds.paths.astar.AStarParameters;
 import org.neo4j.gds.paths.bellmanford.BellmanFordParameters;
@@ -323,10 +323,7 @@ public class PathFindingComputeBusinessFacade {
             graphName,
             graphParameters,
             relationshipProperty,
-            new AlgorithmGraphStoreRequirementsBuilder()
-                .withAlgorithmRequirement(new SourceNodesRequirement(parameters.sourceNodes().inputNodes()))
-                .withAlgorithmRequirement(new TargetNodesRequirement(parameters.targetNodes().inputNodes()))
-                .build(),
+            new GraphStoreValidation(FlowAlgorithmRequirements.create(parameters)),
             Optional.empty(),
             user,
             databaseId
@@ -351,15 +348,12 @@ public class PathFindingComputeBusinessFacade {
         boolean logProgress,
         ResultTransformerBuilder<TimedAlgorithmResult<CostFlowResult>, TR> resultTransformerBuilder
     ) {
-        var capacityGraphValidation = capacityProperty.
-            map(p -> new GraphStoreValidation(new NodePropertyMustExistOnAllLabels(p))).
-            orElse(new GraphStoreValidation(new NoAlgorithmRequirements()));
 
         var capacityGraphResources = graphStoreCatalogService.fetchGraphResources(
             graphName,
             graphParameters,
             capacityProperty,
-            capacityGraphValidation,
+            new GraphStoreValidation(FlowAlgorithmRequirements.create(parameters.maxFlowParameters())),
             Optional.empty(),
             user,
             databaseId
@@ -369,6 +363,7 @@ public class PathFindingComputeBusinessFacade {
             graphName,
             graphParameters,
             costProperty,
+            //the below validation just renames the outputed error variable name (because its not relationship weight property)
             new GraphStoreValidation(new RelationshipPropertyGraphStoreValidation(costProperty, "costProperty")),
             Optional.empty(),
             user,

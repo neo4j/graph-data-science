@@ -29,7 +29,7 @@ public final class CompoundAlgorithmGraphStoreRequirements implements AlgorithmG
 
     private final Collection<AlgorithmGraphStoreRequirements> graphStoreValidationList;
 
-    CompoundAlgorithmGraphStoreRequirements(Collection<AlgorithmGraphStoreRequirements> graphStoreValidationList) {
+    public CompoundAlgorithmGraphStoreRequirements(Collection<AlgorithmGraphStoreRequirements> graphStoreValidationList) {
         this.graphStoreValidationList = graphStoreValidationList;
     }
 
