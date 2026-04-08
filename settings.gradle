@@ -7,6 +7,9 @@ pluginManagement {
         }
     }
 }
+plugins {
+    id "com.autonomousapps.build-health" version "3.6.1"
+}
 
 ext {
     neo4jVersionOverride = providers.gradleProperty('neo4jVersion')
