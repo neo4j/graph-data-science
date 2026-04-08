@@ -10,6 +10,17 @@ apply from: '../gradle/licensing.gradle'
 
 dependencies {
     implementation project(':proc-sysinfo')
+    implementation project(':proc-catalog')
+    implementation project(':proc-centrality')
+    implementation project(':proc-common')
+    implementation project(':proc-community')
+    implementation project(':proc-embeddings')
+    implementation project(':proc-machine-learning')
+    implementation project(':proc-misc')
+    implementation project(':proc-path-finding')
+    implementation project(':proc-pipeline-catalog')
+    implementation project(':proc-similarity')
+    implementation project(':proc-topological-link-prediction')
     implementation project(':opengds-extension')
     implementation project(':open-model-catalog')
 
