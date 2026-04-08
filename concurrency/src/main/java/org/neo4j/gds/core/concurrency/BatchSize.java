@@ -19,4 +19,20 @@
  */
 package org.neo4j.gds.core.concurrency;
 
-public record BatchSize(int value) {}
+import org.jetbrains.annotations.Nullable;
+
+public record BatchSize(int value) {
+
+    public static @Nullable BatchSize of(Object value) {
+        return switch (value) {
+            case null -> null;
+            case BatchSize batchSize -> batchSize;
+            case Number idString -> new BatchSize(idString.intValue());
+            default -> throw new IllegalArgumentException("Invalid BatchSize value: " + value);
+        };
+    }
+
+    public static int toString(BatchSize batchSize) {
+        return batchSize.value();
+    }
+}
