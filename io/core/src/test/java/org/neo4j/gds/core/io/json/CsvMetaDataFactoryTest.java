@@ -20,11 +20,11 @@
 package org.neo4j.gds.core.io.json;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.NodeLabel;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
+import org.neo4j.gds.Aggregation;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.gds.api.schema.MutableNodeSchema;
 import org.neo4j.gds.core.io.file.GraphInfo;
 import org.neo4j.gds.core.io.file.GraphInfoBuilder;
 import org.neo4j.gds.core.loading.Capabilities;
@@ -33,6 +33,7 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.gdl.GdlFactory;
+import org.neo4j.gds.gdl.ImmutableGraphProjectFromGdlConfig;
 
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -141,6 +142,37 @@ class CsvMetaDataFactoryTest {
         var result = CsvMetaDataFactory.toNodeSchema(graphStoreMetadata);
 
         var expected = graphStore.schema().nodeSchema();
+        assertThat(result).isEqualTo(expected);
+    }
+
+    @Test
+    void toRelationshipSchema() {
+        var graphStoreMetadata = GraphStoreMetadataFactory.fromGraphStore(graphStore);
+
+        var result = CsvMetaDataFactory.toRelationshipSchema(graphStoreMetadata);
+
+        var expected = graphStore.schema().relationshipSchema();
+        assertThat(result).isEqualTo(expected);
+    }
+
+    @ParameterizedTest
+    @EnumSource
+    void toRelationshipSchemaWithManyRelationshipProperties(Aggregation aggregation) {
+        var graphStore = GdlFactory.builder()
+            .graphProjectConfig(
+                ImmutableGraphProjectFromGdlConfig.builder()
+                    .gdlGraph("()-[:REL1 {aProp: 42L, bProp: 1337L}]->(), ()-[:REL2 {cProp: 1.0, dProp: 2.0}]->()")
+                    .aggregation(aggregation)
+                    .graphName("test")
+                    .build()
+            )
+            .build()
+            .build();
+        var graphStoreMetadata = GraphStoreMetadataFactory.fromGraphStore(graphStore);
+
+        var result = CsvMetaDataFactory.toRelationshipSchema(graphStoreMetadata);
+
+        var expected = graphStore.schema().relationshipSchema();
         assertThat(result).isEqualTo(expected);
     }
 

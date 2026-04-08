@@ -26,7 +26,9 @@ import org.neo4j.gds.api.DatabaseInfo;
 import org.neo4j.gds.api.ImmutableDatabaseInfo;
 import org.neo4j.gds.api.schema.MutableNodeSchema;
 import org.neo4j.gds.api.schema.MutableNodeSchemaEntry;
+import org.neo4j.gds.api.schema.MutableRelationshipSchema;
 import org.neo4j.gds.api.schema.PropertySchema;
+import org.neo4j.gds.api.schema.RelationshipSchema;
 import org.neo4j.gds.core.io.file.GraphInfo;
 import org.neo4j.gds.core.io.file.GraphInfoBuilder;
 import org.neo4j.gds.core.loading.Capabilities;
@@ -70,6 +72,62 @@ public final class CsvMetaDataFactory {
         nodeSchemaEntries.forEach(result::set);
 
         return result;
+    }
+
+    static RelationshipSchema toRelationshipSchema(GraphStoreMetadata graphStoreMetadata) {
+        var result = MutableRelationshipSchema.empty();
+
+        for (var entry : graphStoreMetadata.relationshipSchema().entrySet()) {
+            var propertySchemas = entry.getValue().propertySchemas();
+            if (propertySchemas.isEmpty()) {
+                result.addRelationshipType(
+                    RelationshipType.of(entry.getKey()),
+                    toDirection(entry.getValue().direction())
+                );
+            } else {
+                propertySchemas.entrySet().stream()
+                    .map(CsvMetaDataFactory::toRelationshipPropertySchema)
+                    .forEach((relationshipPropertySchema) -> result.addProperty(
+                            RelationshipType.of(entry.getKey()),
+                            toDirection(entry.getValue().direction()),
+                            relationshipPropertySchema.key(),
+                            relationshipPropertySchema
+                        )
+                    );
+            }
+        }
+
+        return result;
+    }
+
+    private static org.neo4j.gds.api.schema.RelationshipPropertySchema toRelationshipPropertySchema(Map.Entry<String, RelationshipPropertySchema> propertyEntry) {
+        var propertySchema = propertyEntry.getValue();
+
+        return org.neo4j.gds.api.schema.RelationshipPropertySchema.of(
+            propertyEntry.getKey(),
+            toValueType(propertySchema.valueType()),
+            toDefaultValue(propertySchema.defaultValue()),
+            toPropertyState(propertySchema.propertyState()),
+            toAggregation(propertySchema.aggregation())
+        );
+    }
+
+    private static org.neo4j.gds.Aggregation toAggregation(Aggregation aggregation) {
+        return switch(aggregation) {
+            case NONE -> org.neo4j.gds.Aggregation.NONE;
+            case SINGLE -> org.neo4j.gds.Aggregation.SINGLE;
+            case SUM -> org.neo4j.gds.Aggregation.SUM;
+            case MIN -> org.neo4j.gds.Aggregation.MIN;
+            case MAX -> org.neo4j.gds.Aggregation.MAX;
+            case COUNT -> org.neo4j.gds.Aggregation.COUNT;
+        };
+    }
+
+    private static org.neo4j.gds.api.schema.Direction toDirection(Direction direction) {
+        return switch(direction) {
+            case DIRECTED -> org.neo4j.gds.api.schema.Direction.DIRECTED;
+            case UNDIRECTED -> org.neo4j.gds.api.schema.Direction.UNDIRECTED;
+        };
     }
 
     private static MutableNodeSchemaEntry toNodeSchemaEntry(Map.Entry<String, NodeSchema> entry) {
