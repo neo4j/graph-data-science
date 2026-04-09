@@ -39,7 +39,6 @@ import org.neo4j.gds.core.write.ExporterContext;
 import org.neo4j.gds.domain.services.GloballyScopedDependencies;
 import org.neo4j.gds.executor.MemoryEstimationContext;
 import org.neo4j.gds.mem.MemoryTracker;
-import org.neo4j.gds.metrics.Metrics;
 import org.neo4j.gds.metrics.telemetry.TelemetryLogger;
 import org.neo4j.gds.metrics.telemetry.TelemetryLoggerImpl;
 import org.neo4j.gds.procedures.GraphCatalogProcedureFacadeFactory;
@@ -87,7 +86,6 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
     private final LimitsConfiguration limitsConfiguration;
     private final MemoryGuard memoryGuard;
     private final MemoryEstimationContext memoryEstimationContext;
-    private final Metrics metrics;
     private final ModelRepository modelRepository;
     private final PipelineRepository pipelineRepository;
     private final TaskRegistryFactoryService taskRegistryFactoryService;
@@ -113,7 +111,6 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
         LimitsConfiguration limitsConfiguration,
         MemoryGuard memoryGuard,
         MemoryEstimationContext memoryEstimationContext,
-        Metrics metrics,
         ModelRepository modelRepository,
         PipelineRepository pipelineRepository,
         TaskRegistryFactoryService taskRegistryFactoryService,
@@ -139,7 +136,6 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
         this.limitsConfiguration = limitsConfiguration;
         this.memoryGuard = memoryGuard;
         this.memoryEstimationContext = memoryEstimationContext;
-        this.metrics = metrics;
         this.modelRepository = modelRepository;
         this.pipelineRepository = pipelineRepository;
         this.taskRegistryFactoryService = taskRegistryFactoryService;
@@ -215,7 +211,7 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
             limitsConfiguration,
             memoryGuard,
             memoryEstimationContext,
-            metrics,
+            openGraphDataScienceSpecifics.metrics(),
             modelRepository,
             pipelineRepository,
             graphDatabaseService,

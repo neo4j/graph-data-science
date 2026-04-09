@@ -23,6 +23,7 @@ import org.neo4j.gds.OpenGdsLicenseState;
 import org.neo4j.gds.core.OpenGdsIdMapBehavior;
 import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.core.write.NativeExportBuildersProvider;
+import org.neo4j.gds.metrics.Metrics;
 import org.neo4j.gds.procedures.ExporterBuildersProviderService;
 import org.neo4j.gds.procedures.integration.OpenGraphDataScienceSpecifics;
 
@@ -37,12 +38,15 @@ class OpenGraphDataScienceSpecificsBuilder {
 
         var licenseState = OpenGdsLicenseState.INSTANCE;
 
+        var metrics = Metrics.DISABLED; // no metrics in OpenGDS
+
         var modelCatalog = new OpenModelCatalog();
 
         return new OpenGraphDataScienceSpecifics(
             exporterBuildersProviderService,
             idMapBehavior,
             licenseState,
+            metrics,
             modelCatalog
         );
     }

@@ -34,7 +34,6 @@ import org.neo4j.gds.core.utils.progress.TaskStoreService;
 import org.neo4j.gds.domain.services.GloballyScopedDependencies;
 import org.neo4j.gds.executor.MemoryEstimationContext;
 import org.neo4j.gds.mem.MemoryTracker;
-import org.neo4j.gds.metrics.Metrics;
 import org.neo4j.gds.procedures.GraphCatalogProcedureFacadeFactory;
 import org.neo4j.gds.procedures.TaskRegistryFactoryService;
 import org.neo4j.gds.procedures.UserAccessor;
@@ -66,7 +65,6 @@ final class GraphDataScienceProceduresProviderFactory {
     private final GraphStoreFactorySuppliers graphStoreFactorySuppliers;
     private final LicenseDetails licenseDetails;
     private final LimitsConfiguration limitsConfiguration;
-    private final Metrics metrics;
     private final ModelRepository modelRepository;
     private final Optional<Function<AlgorithmProcessingTemplate, AlgorithmProcessingTemplate>> algorithmProcessingTemplateDecorator;
     private final Optional<Function<GraphCatalogApplications, GraphCatalogApplications>> graphCatalogApplicationsDecorator;
@@ -84,7 +82,6 @@ final class GraphDataScienceProceduresProviderFactory {
         GraphStoreFactorySuppliers graphStoreFactorySuppliers,
         LicenseDetails licenseDetails,
         LimitsConfiguration limitsConfiguration,
-        Metrics metrics,
         ModelRepository modelRepository,
         Optional<Function<AlgorithmProcessingTemplate, AlgorithmProcessingTemplate>> algorithmProcessingTemplateDecorator,
         Optional<Function<GraphCatalogApplications, GraphCatalogApplications>> graphCatalogApplicationsDecorator,
@@ -101,7 +98,6 @@ final class GraphDataScienceProceduresProviderFactory {
         this.graphStoreFactorySuppliers = graphStoreFactorySuppliers;
         this.licenseDetails = licenseDetails;
         this.limitsConfiguration = limitsConfiguration;
-        this.metrics = metrics;
         this.modelRepository = modelRepository;
         this.algorithmProcessingTemplateDecorator = algorithmProcessingTemplateDecorator;
         this.graphCatalogApplicationsDecorator = graphCatalogApplicationsDecorator;
@@ -137,7 +133,6 @@ final class GraphDataScienceProceduresProviderFactory {
             limitsConfiguration,
             memoryGuard,
             new MemoryEstimationContext(useMaxMemoryEstimation),
-            metrics,
             modelRepository,
             pipelineRepository,
             taskRegistryFactoryService,
