@@ -157,7 +157,7 @@ public final class MutableNodeSchema implements NodeSchema {
                     .append('{')
                     .append(System.lineSeparator()),
                 (builder, entry) -> builder.append(entry).append(System.lineSeparator()),
-                (builder, _) -> builder
+                (builder, unused) -> builder
             )
             .append('}')
             .toString();

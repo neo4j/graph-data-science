@@ -147,7 +147,7 @@ public class MutableNodeSchemaEntry implements NodeSchemaEntry {
                     .append(StringFormatting.formatWithLocale("Label=\"%s\"", nodeLabel.name()))
                     .append(System.lineSeparator()),
                 (builder, property) -> builder.append(INDENT).append(property).append(System.lineSeparator()),
-                (builder, _) -> builder
+                (builder, unused) -> builder
             )
             .append('}')
             .toString();
