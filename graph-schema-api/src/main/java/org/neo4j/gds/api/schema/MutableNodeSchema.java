@@ -21,6 +21,7 @@ package org.neo4j.gds.api.schema;
 
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.utils.StringFormatting;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -138,24 +139,27 @@ public final class MutableNodeSchema implements NodeSchema {
     public String toString() {
         var className = MutableNodeSchema.class.getSimpleName();
         if (this.entries.isEmpty()) {
-            return String.format("%s{<empty>}", className);
+            return StringFormatting.formatWithLocale("%s{<empty>}", className);
         }
 
         final var INDENT = "    ";
-        var lines = new ArrayList<String>();
-
-        lines.add(className + "{");
-        entries.keySet().stream()
+        return entries.keySet().stream()
             .sorted(Comparator.comparing(NodeLabel::name))
             .map(this::get)
             .map((entry) -> entry.toString()
                 .lines()
                 .map(INDENT::concat)
-                .collect(Collectors.joining("\n"))
+                .collect(Collectors.joining(System.lineSeparator()))
             )
-            .forEach(lines::add);
-        lines.add("}");
-
-        return String.join("\n", lines);
+            .reduce(
+                new StringBuilder()
+                    .append(className)
+                    .append('{')
+                    .append(System.lineSeparator()),
+                (builder, entry) -> builder.append(entry).append(System.lineSeparator()),
+                (builder, _) -> builder
+            )
+            .append('}')
+            .toString();
     }
 }

@@ -42,15 +42,15 @@ public final class GraphStoreMetadataMapper {
     private GraphStoreMetadataMapper() {}
 
     public static GraphInfo toGraphInfo(GraphStoreMetadata graphStoreMetadata) {
-        var builder = GraphInfoBuilder
+        return GraphInfoBuilder
             .builder()
             .databaseInfo(toDatabaseInfo(graphStoreMetadata))
             .idMapBuilderType(graphStoreMetadata.idMapInfo().idMapType())
             .nodeCount(graphStoreMetadata.idMapInfo().nodeCount())
             .maxOriginalId(graphStoreMetadata.idMapInfo().maxOriginalId())
             .relationshipTypeCounts(toRelationshipTypeCounts(graphStoreMetadata))
-            .inverseIndexedRelationshipTypes(toInverseRelationshipTypes(graphStoreMetadata));
-        return builder.build();
+            .inverseIndexedRelationshipTypes(toInverseRelationshipTypes(graphStoreMetadata))
+            .build();
     }
 
     public static Capabilities toCapabilities(GraphStoreMetadata graphStoreMetadata) {
@@ -137,9 +137,7 @@ public final class GraphStoreMetadataMapper {
     }
 
     private static Map<String, PropertySchema> toPropertySchemas(Map<String, NodePropertySchema> schemas) {
-        return schemas
-            .entrySet()
-            .stream()
+        return schemas.entrySet().stream()
             .collect(
                 Collectors.toMap(
                     Map.Entry::getKey,
@@ -191,8 +189,7 @@ public final class GraphStoreMetadataMapper {
 
     private static Collection<? extends RelationshipType> toInverseRelationshipTypes(GraphStoreMetadata graphStoreMetadata) {
         return graphStoreMetadata
-            .relationshipInfo().entrySet()
-            .stream()
+            .relationshipInfo().entrySet().stream()
             .filter(entry -> entry.getValue().isInverseIndexed())
             .map(Map.Entry::getKey)
             .map(RelationshipType::of)
@@ -200,8 +197,6 @@ public final class GraphStoreMetadataMapper {
     }
 
     private static DatabaseInfo toDatabaseInfo(GraphStoreMetadata graphStoreMetadata) {
-        var databaseId = toDatabaseId(graphStoreMetadata);
-        var databaseLocation = toDatabaseLocation(graphStoreMetadata);
         var remoteDatabaseId = graphStoreMetadata
             .databaseInfo()
             .remoteDatabaseId()
@@ -209,8 +204,8 @@ public final class GraphStoreMetadataMapper {
 
         return ImmutableDatabaseInfo
             .builder()
-            .databaseId(databaseId)
-            .databaseLocation(databaseLocation)
+            .databaseId(toDatabaseId(graphStoreMetadata))
+            .databaseLocation(toDatabaseLocation(graphStoreMetadata))
             .remoteDatabaseId(remoteDatabaseId)
             .build();
     }
@@ -229,8 +224,7 @@ public final class GraphStoreMetadataMapper {
 
     private static Map<? extends RelationshipType, Long> toRelationshipTypeCounts(GraphStoreMetadata graphStoreMetadata) {
         return graphStoreMetadata
-            .relationshipInfo().keySet()
-            .stream()
+            .relationshipInfo().keySet().stream()
             .collect(Collectors.toMap(
                 RelationshipType::of,
                 name -> graphStoreMetadata.relationshipInfo().get(name).relationshipCount()

@@ -22,6 +22,7 @@ package org.neo4j.gds.api.schema;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.utils.StringFormatting;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -134,15 +135,21 @@ public class MutableNodeSchemaEntry implements NodeSchemaEntry {
     @Override
     public String toString() {
         final var INDENT = "    ";
-        var lines = new ArrayList<String>();
 
-        lines.add(MutableNodeSchemaEntry.class.getSimpleName() + "{");
-        lines.add(INDENT + String.format("Label=\"%s\"", nodeLabel.name()));
-        properties.values().stream()
+        return properties.values().stream()
             .sorted(Comparator.comparing(PropertySchema::key))
-            .forEach((property) -> lines.add(INDENT + property));
-        lines.add("}");
-
-        return String.join("\n", lines);
+            .reduce(
+                new StringBuilder()
+                    .append(MutableNodeSchemaEntry.class.getSimpleName())
+                    .append('{')
+                    .append(System.lineSeparator())
+                    .append(INDENT)
+                    .append(StringFormatting.formatWithLocale("Label=\"%s\"", nodeLabel.name()))
+                    .append(System.lineSeparator()),
+                (builder, property) -> builder.append(INDENT).append(property).append(System.lineSeparator()),
+                (builder, _) -> builder
+            )
+            .append('}')
+            .toString();
     }
 }
