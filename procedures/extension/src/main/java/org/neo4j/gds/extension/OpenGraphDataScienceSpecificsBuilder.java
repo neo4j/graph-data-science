@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.extension;
 
+import org.neo4j.gds.core.OpenGdsIdMapBehavior;
 import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.core.write.NativeExportBuildersProvider;
 import org.neo4j.gds.procedures.ExporterBuildersProviderService;
@@ -31,8 +32,10 @@ class OpenGraphDataScienceSpecificsBuilder {
     OpenGraphDataScienceSpecifics build() {
         ExporterBuildersProviderService exporterBuildersProviderService = (__, ___) -> new NativeExportBuildersProvider(); // we always just offer native writes in OpenGDS
 
+        var idMapBehavior = new OpenGdsIdMapBehavior();
+
         var modelCatalog = new OpenModelCatalog();
 
-        return new OpenGraphDataScienceSpecifics(exporterBuildersProviderService, modelCatalog);
+        return new OpenGraphDataScienceSpecifics(exporterBuildersProviderService, idMapBehavior, modelCatalog);
     }
 }

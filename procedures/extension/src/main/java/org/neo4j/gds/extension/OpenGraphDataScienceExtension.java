@@ -28,7 +28,6 @@ import org.neo4j.gds.concurrency.OpenGdsConcurrencyValidator;
 import org.neo4j.gds.concurrency.OpenGdsPoolSizes;
 import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
-import org.neo4j.gds.core.OpenGdsIdMapBehavior;
 import org.neo4j.gds.metrics.Metrics;
 import org.neo4j.gds.procedures.integration.DefaultExportLocation;
 import org.neo4j.gds.procedures.integration.LogAccessor;
@@ -72,7 +71,6 @@ public class OpenGraphDataScienceExtension extends ExtensionFactory<OpenGraphDat
         var concurrencyValidator = new OpenGdsConcurrencyValidator();
         var exportLocation = new DefaultExportLocation(log, neo4jConfiguration);
         var featureTogglesRepository = new FeatureTogglesRepository();
-        var idMapBehavior = new OpenGdsIdMapBehavior();
         var metrics = Metrics.DISABLED; // no metrics in OpenGDS
         var modelRepository = new OpenModelRepository(); // no model storing in OpenGDS
         var poolSizes = new OpenGdsPoolSizes(); // limited to four
@@ -93,7 +91,6 @@ public class OpenGraphDataScienceExtension extends ExtensionFactory<OpenGraphDat
             defaultsConfiguration,
             exportLocation,
             featureTogglesRepository,
-            idMapBehavior,
             OpenGdsLicenseState.INSTANCE,
             limitsConfiguration,
             metrics,
