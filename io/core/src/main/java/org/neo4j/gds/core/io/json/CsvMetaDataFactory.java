@@ -41,7 +41,7 @@ import java.util.stream.Collectors;
 public final class CsvMetaDataFactory {
     private CsvMetaDataFactory() {}
 
-    static GraphInfo toGraphInfo(GraphStoreMetadata graphStoreMetadata) {
+    public static GraphInfo toGraphInfo(GraphStoreMetadata graphStoreMetadata) {
         var builder = GraphInfoBuilder
             .builder()
             .databaseInfo(toDatabaseInfo(graphStoreMetadata))
@@ -53,14 +53,14 @@ public final class CsvMetaDataFactory {
         return builder.build();
     }
 
-    static Capabilities toCapabilities(GraphStoreMetadata graphStoreMetadata) {
+    public static Capabilities toCapabilities(GraphStoreMetadata graphStoreMetadata) {
         return ImmutableStaticCapabilities
             .builder()
             .writeMode(toWriteMode(graphStoreMetadata))
             .build();
     }
 
-    static org.neo4j.gds.api.schema.NodeSchema toNodeSchema(GraphStoreMetadata graphStoreMetadata) {
+    public static org.neo4j.gds.api.schema.NodeSchema toNodeSchema(GraphStoreMetadata graphStoreMetadata) {
         var result = MutableNodeSchema.empty();
 
         var nodeSchemaEntries = graphStoreMetadata
@@ -74,7 +74,7 @@ public final class CsvMetaDataFactory {
         return result;
     }
 
-    static RelationshipSchema toRelationshipSchema(GraphStoreMetadata graphStoreMetadata) {
+    public static RelationshipSchema toRelationshipSchema(GraphStoreMetadata graphStoreMetadata) {
         var result = MutableRelationshipSchema.empty();
 
         for (var entry : graphStoreMetadata.relationshipSchema().entrySet()) {
