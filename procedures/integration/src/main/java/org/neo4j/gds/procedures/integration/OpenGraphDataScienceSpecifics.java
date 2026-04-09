@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.procedures.integration;
 
+import org.neo4j.gds.LicenseState;
 import org.neo4j.gds.core.IdMapBehavior;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.procedures.ExporterBuildersProviderService;
@@ -32,15 +33,18 @@ import org.neo4j.gds.procedures.ExporterBuildersProviderService;
 public class OpenGraphDataScienceSpecifics {
     private final ExporterBuildersProviderService exporterBuildersProviderService;
     private final IdMapBehavior idMapBehavior;
+    private final LicenseState licenseState;
     private final ModelCatalog modelCatalog;
 
     public OpenGraphDataScienceSpecifics(
         ExporterBuildersProviderService exporterBuildersProviderService,
         IdMapBehavior idMapBehavior,
+        LicenseState licenseState,
         ModelCatalog modelCatalog
     ) {
         this.exporterBuildersProviderService = exporterBuildersProviderService;
         this.idMapBehavior = idMapBehavior;
+        this.licenseState = licenseState;
         this.modelCatalog = modelCatalog;
     }
 
@@ -50,6 +54,10 @@ public class OpenGraphDataScienceSpecifics {
 
     IdMapBehavior idMapBehavior() {
         return idMapBehavior;
+    }
+
+    LicenseState licenseState() {
+        return licenseState;
     }
 
     ModelCatalog modelCatalog() {

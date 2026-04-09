@@ -153,7 +153,6 @@ public final class OpenGraphDataScienceExtensionBuilder {
         DefaultsConfiguration defaultsConfiguration,
         ExportLocation exportLocation,
         FeatureTogglesRepository featureTogglesRepository,
-        LicenseState licenseState,
         LimitsConfiguration limitsConfiguration,
         Metrics metrics,
         ModelRepository modelRepository,
@@ -173,7 +172,9 @@ public final class OpenGraphDataScienceExtensionBuilder {
         // Read some configuration used to select behaviour
         var progressTrackingEnabled = neo4jConfiguration.get(GdsSettings.progressTrackingEnabled());
         var retentionPeriod = neo4jConfiguration.get(GdsSettings.taskRetentionPeriod());
-        log.info("Progress tracking: " + (progressTrackingEnabled ? "enabled" : "disabled" + ", retentionPeriod: " + retentionPeriod.toString()));
+        log.info("Progress tracking: " + (progressTrackingEnabled
+            ? "enabled"
+            : "disabled" + ", retentionPeriod: " + retentionPeriod.toString()));
         var useMaxMemoryEstimation = neo4jConfiguration.get(GdsSettings.validateUsingMaxMemoryEstimation());
         log.info("Memory usage guard: " + (useMaxMemoryEstimation ? "maximum" : "minimum") + " estimate");
 
@@ -233,7 +234,8 @@ public final class OpenGraphDataScienceExtensionBuilder {
         var loggers = new GdsLoggers(log, new LoggerForProgressTrackingAdapter(log));
 
         // These are Neo4j specific, but not edition specific, so we create them here
-        var graphStoreFactorySuppliers = new GraphStoreFactorySuppliers(log,
+        var graphStoreFactorySuppliers = new GraphStoreFactorySuppliers(
+            log,
             Map.of(
                 GraphProjectFromStoreConfig.class, NativeProjectionGraphStoreFactorySupplier::create,
                 GraphProjectFromCypherConfig.class, CypherProjectionGraphStoreFactorySupplier::create
@@ -249,7 +251,7 @@ public final class OpenGraphDataScienceExtensionBuilder {
             exportLocation,
             featureTogglesRepository,
             graphStoreFactorySuppliers,
-            LicenseDetails.from(licenseState),
+            LicenseDetails.from(openGraphDataScienceSpecifics.licenseState()),
             limitsConfiguration,
             metrics,
             modelRepository,
@@ -265,7 +267,7 @@ public final class OpenGraphDataScienceExtensionBuilder {
             databaseManagementService,
             globallyScopedDependencies,
             graphDataScienceProviderFactory,
-            licenseState,
+            openGraphDataScienceSpecifics.licenseState(),
             metrics,
             taskStoreService,
             taskRegistryFactoryService,
@@ -279,7 +281,12 @@ public final class OpenGraphDataScienceExtensionBuilder {
         return Triple.of(graphDataScienceExtensionBuilder, taskRegistryFactoryService, taskStoreService);
     }
 
-    private static void registerCypherAggregation(GlobalProcedures globalProcedures, CypherAggregation cypherAggregation, AlphaCypherAggregation alphaCypherAggregation, Log log) {
+    private static void registerCypherAggregation(
+        GlobalProcedures globalProcedures,
+        CypherAggregation cypherAggregation,
+        AlphaCypherAggregation alphaCypherAggregation,
+        Log log
+    ) {
         try {
             globalProcedures.register(cypherAggregation);
             globalProcedures.register(alphaCypherAggregation);
@@ -305,8 +312,14 @@ public final class OpenGraphDataScienceExtensionBuilder {
 
         var lifeSupport = new LifeSupport();
         lifeSupport.add(gcListener);
-        lifeSupport.add(new GraphStoreCatalogLogInitializer(log, globallyScopedDependencies.graphStoreCatalogService()));
-        lifeSupport.add(InMemoryGraphTracker.create(databaseManagementService, globallyScopedDependencies.graphStoreCatalogService()));
+        lifeSupport.add(new GraphStoreCatalogLogInitializer(
+            log,
+            globallyScopedDependencies.graphStoreCatalogService()
+        ));
+        lifeSupport.add(InMemoryGraphTracker.create(
+            databaseManagementService,
+            globallyScopedDependencies.graphStoreCatalogService()
+        ));
 
         return lifeSupport;
     }

@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.extension;
 
+import org.neo4j.gds.OpenGdsLicenseState;
 import org.neo4j.gds.core.OpenGdsIdMapBehavior;
 import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.core.write.NativeExportBuildersProvider;
@@ -34,8 +35,15 @@ class OpenGraphDataScienceSpecificsBuilder {
 
         var idMapBehavior = new OpenGdsIdMapBehavior();
 
+        var licenseState = OpenGdsLicenseState.INSTANCE;
+
         var modelCatalog = new OpenModelCatalog();
 
-        return new OpenGraphDataScienceSpecifics(exporterBuildersProviderService, idMapBehavior, modelCatalog);
+        return new OpenGraphDataScienceSpecifics(
+            exporterBuildersProviderService,
+            idMapBehavior,
+            licenseState,
+            modelCatalog
+        );
     }
 }
