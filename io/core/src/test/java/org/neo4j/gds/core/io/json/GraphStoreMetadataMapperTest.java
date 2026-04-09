@@ -41,7 +41,7 @@ import java.util.stream.Collectors;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @GdlExtension
-class CsvMetaDataFactoryTest {
+class GraphStoreMetadataMapperTest {
 
     @GdlGraph
     public static final String GDL = """
@@ -62,7 +62,7 @@ class CsvMetaDataFactoryTest {
     void toGraphInfo() {
         var graphStoreMetadata = GraphStoreMetadataFactory.fromGraphStore(graphStore);
 
-        var result = CsvMetaDataFactory.toGraphInfo(graphStoreMetadata);
+        var result = GraphStoreMetadataMapper.toGraphInfo(graphStoreMetadata);
 
         var expected = getGraphInfo(graphStore);
         assertThat(result).isEqualTo(expected);
@@ -81,7 +81,7 @@ class CsvMetaDataFactoryTest {
             .build();
         var graphStoreMetadata = GraphStoreMetadataFactory.fromGraphStore(graphStore);
 
-        var result = CsvMetaDataFactory.toGraphInfo(graphStoreMetadata);
+        var result = GraphStoreMetadataMapper.toGraphInfo(graphStoreMetadata);
 
         var expected = getGraphInfo(graphStore);
         assertThat(result).isEqualTo(expected);
@@ -91,7 +91,7 @@ class CsvMetaDataFactoryTest {
     void toCapabilities() {
         var graphStoreMetadata = GraphStoreMetadataFactory.fromGraphStore(graphStore);
 
-        var result = CsvMetaDataFactory.toCapabilities(graphStoreMetadata);
+        var result = GraphStoreMetadataMapper.toCapabilities(graphStoreMetadata);
 
         var expected = getCapabilities(graphStore);
         assertThat(result).isEqualTo(expected);
@@ -110,7 +110,7 @@ class CsvMetaDataFactoryTest {
             .build();
         var graphStoreMetadata = GraphStoreMetadataFactory.fromGraphStore(graphStore);
 
-        var result = CsvMetaDataFactory.toCapabilities(graphStoreMetadata);
+        var result = GraphStoreMetadataMapper.toCapabilities(graphStoreMetadata);
 
         var expected = getCapabilities(graphStore);
         assertThat(result).isEqualTo(expected);
@@ -120,7 +120,7 @@ class CsvMetaDataFactoryTest {
     void toNodeShema() {
         var graphStoreMetadata = GraphStoreMetadataFactory.fromGraphStore(graphStore);
 
-        var result = CsvMetaDataFactory.toNodeSchema(graphStoreMetadata);
+        var result = GraphStoreMetadataMapper.toNodeSchema(graphStoreMetadata);
 
         var expected = graphStore.schema().nodeSchema();
         assertThat(result).isEqualTo(expected);
@@ -139,7 +139,7 @@ class CsvMetaDataFactoryTest {
             .build();
         var graphStoreMetadata = GraphStoreMetadataFactory.fromGraphStore(graphStore);
 
-        var result = CsvMetaDataFactory.toNodeSchema(graphStoreMetadata);
+        var result = GraphStoreMetadataMapper.toNodeSchema(graphStoreMetadata);
 
         var expected = graphStore.schema().nodeSchema();
         assertThat(result).isEqualTo(expected);
@@ -149,7 +149,7 @@ class CsvMetaDataFactoryTest {
     void toRelationshipSchema() {
         var graphStoreMetadata = GraphStoreMetadataFactory.fromGraphStore(graphStore);
 
-        var result = CsvMetaDataFactory.toRelationshipSchema(graphStoreMetadata);
+        var result = GraphStoreMetadataMapper.toRelationshipSchema(graphStoreMetadata);
 
         var expected = graphStore.schema().relationshipSchema();
         assertThat(result).isEqualTo(expected);
@@ -170,7 +170,7 @@ class CsvMetaDataFactoryTest {
             .build();
         var graphStoreMetadata = GraphStoreMetadataFactory.fromGraphStore(graphStore);
 
-        var result = CsvMetaDataFactory.toRelationshipSchema(graphStoreMetadata);
+        var result = GraphStoreMetadataMapper.toRelationshipSchema(graphStoreMetadata);
 
         var expected = graphStore.schema().relationshipSchema();
         assertThat(result).isEqualTo(expected);

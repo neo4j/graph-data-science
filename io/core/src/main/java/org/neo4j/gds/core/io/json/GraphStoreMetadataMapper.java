@@ -38,8 +38,8 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public final class CsvMetaDataFactory {
-    private CsvMetaDataFactory() {}
+public final class GraphStoreMetadataMapper {
+    private GraphStoreMetadataMapper() {}
 
     public static GraphInfo toGraphInfo(GraphStoreMetadata graphStoreMetadata) {
         var builder = GraphInfoBuilder
@@ -67,7 +67,7 @@ public final class CsvMetaDataFactory {
             .nodeSchema()
             .entrySet()
             .stream()
-            .map(CsvMetaDataFactory::toNodeSchemaEntry)
+            .map(GraphStoreMetadataMapper::toNodeSchemaEntry)
             .toList();
         nodeSchemaEntries.forEach(result::set);
 
@@ -86,7 +86,7 @@ public final class CsvMetaDataFactory {
                 );
             } else {
                 propertySchemas.entrySet().stream()
-                    .map(CsvMetaDataFactory::toRelationshipPropertySchema)
+                    .map(GraphStoreMetadataMapper::toRelationshipPropertySchema)
                     .forEach((relationshipPropertySchema) -> result.addProperty(
                             RelationshipType.of(entry.getKey()),
                             toDirection(entry.getValue().direction()),
@@ -143,7 +143,7 @@ public final class CsvMetaDataFactory {
             .collect(
                 Collectors.toMap(
                     Map.Entry::getKey,
-                    CsvMetaDataFactory::toPropertySchema
+                    GraphStoreMetadataMapper::toPropertySchema
                 )
             );
     }
