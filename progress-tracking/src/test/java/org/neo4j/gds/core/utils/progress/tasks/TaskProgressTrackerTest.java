@@ -22,13 +22,13 @@ package org.neo4j.gds.core.utils.progress.tasks;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.compat.TestLog;
+import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
 import org.neo4j.gds.core.RequestCorrelationIdForTesting;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.RenamesCurrentThread;
 import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
-import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.utils.progress.PerDatabaseTaskStore;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.core.utils.progress.UserTask;
@@ -121,19 +121,17 @@ class TaskProgressTrackerTest {
         progressTracker.beginSubTask();
         assertThat(progressTracker.currentSubTask()).isEqualTo(task);
 
-        var iterativeSubTasks = task.subTasks();
-
         // visit first iteration leaf
         progressTracker.beginSubTask();
         progressTracker.endSubTask();
 
-        assertThat(iterativeSubTasks).extracting(Task::status).contains(Status.FINISHED);
-        assertThat(iterativeSubTasks).extracting(Task::status).contains(Status.PENDING);
+        assertThat(task.subTasks()).extracting(Task::status).contains(Status.FINISHED);
+        assertThat(task.subTasks()).extracting(Task::status).contains(Status.PENDING);
 
         // end task without visiting second iteration leaf
         progressTracker.endSubTask();
-        assertThat(iterativeSubTasks).extracting(Task::status).contains(Status.FINISHED);
-        assertThat(iterativeSubTasks).extracting(Task::status).contains(Status.CANCELED);
+        assertThat(task.subTasks()).extracting(Task::status).contains(Status.FINISHED);
+        assertThat(task.subTasks()).extracting(Task::status).contains(Status.CANCELED);
     }
 
     @Test

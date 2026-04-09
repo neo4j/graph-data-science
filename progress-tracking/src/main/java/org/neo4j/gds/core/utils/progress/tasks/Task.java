@@ -25,6 +25,7 @@ import org.neo4j.gds.core.utils.ClockService;
 import org.neo4j.gds.mem.MemoryRange;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -36,13 +37,14 @@ public class Task {
     public static final long NOT_FINISHED = -1L;
 
     private final String description;
-    private final List<Task> subTasks;
     private Status status;
     private long startTime;
     private long finishTime;
 
     private MemoryRange estimatedMemoryRangeInBytes = MemoryRange.empty();
     private int maxConcurrency = UNKNOWN_CONCURRENCY;
+
+    protected final List<Task> subTasks;
 
     public Task(String description, List<Task> subTasks) {
         this.description = description;
@@ -56,8 +58,8 @@ public class Task {
         return description;
     }
 
-    public List<Task> subTasks() {
-        return subTasks;
+    public Stream<Task> subTasks() {
+        return subTasks.stream();
     }
 
     public Status status() {
@@ -108,7 +110,7 @@ public class Task {
         var volume = new MutableLong(0);
         var progress = new MutableLong(0);
 
-        subTasks().stream().map(Task::getProgress).forEach(childProgress -> {
+        subTasks().map(Task::getProgress).forEach(childProgress -> {
             if (childProgress.volume() == UNKNOWN_VOLUME || volume.longValue() == UNKNOWN_VOLUME) {
                 volume.setValue(UNKNOWN_VOLUME);
             } else {
@@ -181,12 +183,11 @@ public class Task {
     }
 
     protected Task nextSubTaskAfterValidation() {
-        if (subTasks.stream().anyMatch(t -> t.status == Status.RUNNING)) {
+        if (subTasks().anyMatch(t -> t.status == Status.RUNNING)) {
             throw new IllegalStateException("Cannot move to next subtask, because some subtasks are still running");
         }
 
         return subTasks()
-            .stream()
             .filter(t -> t.status() == Status.PENDING)
             .findFirst()
             .orElseThrow(() -> new IllegalStateException("No more pending subtasks"));

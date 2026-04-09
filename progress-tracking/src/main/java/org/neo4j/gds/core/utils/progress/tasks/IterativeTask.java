@@ -51,7 +51,7 @@ public class IterativeTask extends Task {
         super(description, subTasks);
         this.subTasksSupplier = subTasksSupplier;
         this.mode = mode;
-        this.maxIterations = subTasks().size() / subTasksSupplier.get().size();
+        this.maxIterations = Math.toIntExact(subTasks().count() / subTasksSupplier.get().size());
     }
 
     @Override
@@ -67,7 +67,7 @@ public class IterativeTask extends Task {
 
     @Override
     protected Task nextSubTaskAfterValidation() {
-        var maybeRunningTask = subTasks().stream().filter(t -> t.status() == Status.RUNNING).findFirst();
+        var maybeRunningTask = subTasks().filter(t -> t.status() == Status.RUNNING).findFirst();
         if (maybeRunningTask.isPresent()) {
             throw new IllegalStateException(formatWithLocale(
                 "Cannot move to next subtask, because subtask `%s` is still running",
@@ -75,13 +75,13 @@ public class IterativeTask extends Task {
             ));
         }
 
-        var maybeNextSubtask = subTasks().stream().filter(t -> t.status() == Status.PENDING).findFirst();
+        var maybeNextSubtask = subTasks().filter(t -> t.status() == Status.PENDING).findFirst();
 
         if (maybeNextSubtask.isPresent()) {
             return maybeNextSubtask.get();
         } else if (mode == Mode.OPEN) {
             var newIterationTasks = subTasksSupplier.get();
-            subTasks().addAll(newIterationTasks);
+            subTasks.addAll(newIterationTasks);
             return newIterationTasks.getFirst();
         } else {
             throw new IllegalStateException("No more pending subtasks");
@@ -91,15 +91,11 @@ public class IterativeTask extends Task {
     @Override
     public void finish() {
         super.finish();
-        subTasks().forEach(t -> {
-            if (t.status() == Status.PENDING) {
-                t.cancel();
-            }
-        });
+        subTasks().filter(t -> t.status() == Status.PENDING).forEach(Task::cancel);
     }
 
     public int currentIteration() {
-        return (int) subTasks().stream().filter(t -> t.status() == Status.FINISHED).count() / subTasksSupplier
+        return (int) subTasks().filter(t -> t.status() == Status.FINISHED).count() / subTasksSupplier
             .get()
             .size();
     }

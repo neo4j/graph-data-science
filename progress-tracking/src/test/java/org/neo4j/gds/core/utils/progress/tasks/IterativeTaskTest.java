@@ -38,7 +38,7 @@ class IterativeTaskTest {
             3
         );
 
-        assertThat(iterativeFixedTask.subTasks().size()).isEqualTo(6);
+        assertThat(iterativeFixedTask.subTasks()).hasSize(6);
 
         var iterativeDynamicTask = Tasks.iterativeDynamic(
             "root",
@@ -46,14 +46,14 @@ class IterativeTaskTest {
             3
         );
 
-        assertThat(iterativeDynamicTask.subTasks().size()).isEqualTo(6);
+        assertThat(iterativeDynamicTask.subTasks()).hasSize(6);
 
         var iterativeOpenTask = Tasks.iterativeOpen(
             "root",
             taskSupplier
         );
 
-        assertThat(iterativeOpenTask.subTasks().size()).isEqualTo(0);
+        assertThat(iterativeOpenTask.subTasks()).hasSize(0);
     }
 
     @Test
