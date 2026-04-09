@@ -27,7 +27,12 @@ public record BatchSize(int value) {
         return switch (value) {
             case null -> null;
             case BatchSize batchSize -> batchSize;
-            case Number idString -> new BatchSize(idString.intValue());
+            case Number number -> {
+                if (number.longValue() < 1) {
+                    throw new IllegalArgumentException("BatchSize must be larger than 1 but was " + value);
+                }
+                yield new BatchSize(number.intValue());
+            }
             default -> throw new IllegalArgumentException("Invalid BatchSize value: " + value);
         };
     }
