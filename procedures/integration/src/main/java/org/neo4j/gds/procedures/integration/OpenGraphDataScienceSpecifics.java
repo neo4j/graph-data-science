@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.procedures.integration;
 
+import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.procedures.ExporterBuildersProviderService;
 
 /**
@@ -29,12 +30,21 @@ import org.neo4j.gds.procedures.ExporterBuildersProviderService;
  */
 public class OpenGraphDataScienceSpecifics {
     private final ExporterBuildersProviderService exporterBuildersProviderService;
+    private final ModelCatalog modelCatalog;
 
-    public OpenGraphDataScienceSpecifics(ExporterBuildersProviderService exporterBuildersProviderService) {
+    public OpenGraphDataScienceSpecifics(
+        ExporterBuildersProviderService exporterBuildersProviderService,
+        ModelCatalog modelCatalog
+    ) {
         this.exporterBuildersProviderService = exporterBuildersProviderService;
+        this.modelCatalog = modelCatalog;
     }
 
     ExporterBuildersProviderService exporterBuildersProviderService() {
         return exporterBuildersProviderService;
+    }
+
+    ModelCatalog modelCatalog() {
+        return modelCatalog;
     }
 }

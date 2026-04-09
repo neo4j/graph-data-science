@@ -158,7 +158,6 @@ public final class OpenGraphDataScienceExtensionBuilder {
         LicenseState licenseState,
         LimitsConfiguration limitsConfiguration,
         Metrics metrics,
-        ModelCatalog modelCatalog,
         ModelRepository modelRepository,
         PoolSizes poolSizes,
         CypherAggregation cypherAggregation,
@@ -204,7 +203,7 @@ public final class OpenGraphDataScienceExtensionBuilder {
 
         var globallyScopedDependencies = new GloballyScopedDependenciesBuilder()
             .with(graphStoreCatalogService)
-            .with(modelCatalog)
+            .with(openGraphDataScienceSpecifics.modelCatalog())
             .build();
 
         // in the short term, until we eradicate old usages, we also install the shared state in its old place
