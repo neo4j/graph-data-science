@@ -20,6 +20,7 @@
 package org.neo4j.gds.procedures.integration;
 
 import org.neo4j.gds.LicenseState;
+import org.neo4j.gds.concurrency.PoolSizes;
 import org.neo4j.gds.core.IdMapBehavior;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.metrics.Metrics;
@@ -37,19 +38,22 @@ public class OpenGraphDataScienceSpecifics {
     private final LicenseState licenseState;
     private final Metrics metrics;
     private final ModelCatalog modelCatalog;
+    private final PoolSizes poolSizes;
 
     public OpenGraphDataScienceSpecifics(
         ExporterBuildersProviderService exporterBuildersProviderService,
         IdMapBehavior idMapBehavior,
         LicenseState licenseState,
         Metrics metrics,
-        ModelCatalog modelCatalog
+        ModelCatalog modelCatalog,
+        PoolSizes poolSizes
     ) {
         this.exporterBuildersProviderService = exporterBuildersProviderService;
         this.idMapBehavior = idMapBehavior;
         this.licenseState = licenseState;
         this.metrics = metrics;
         this.modelCatalog = modelCatalog;
+        this.poolSizes = poolSizes;
     }
 
     ExporterBuildersProviderService exporterBuildersProviderService() {
@@ -70,5 +74,9 @@ public class OpenGraphDataScienceSpecifics {
 
     ModelCatalog modelCatalog() {
         return modelCatalog;
+    }
+
+    PoolSizes poolSizes() {
+        return poolSizes;
     }
 }

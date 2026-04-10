@@ -20,6 +20,7 @@
 package org.neo4j.gds.extension;
 
 import org.neo4j.gds.OpenGdsLicenseState;
+import org.neo4j.gds.concurrency.OpenGdsPoolSizes;
 import org.neo4j.gds.core.OpenGdsIdMapBehavior;
 import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.core.write.NativeExportBuildersProvider;
@@ -42,12 +43,15 @@ class OpenGraphDataScienceSpecificsBuilder {
 
         var modelCatalog = new OpenModelCatalog();
 
+        var poolSizes = new OpenGdsPoolSizes(); // limited to four
+
         return new OpenGraphDataScienceSpecifics(
             exporterBuildersProviderService,
             idMapBehavior,
             licenseState,
             metrics,
-            modelCatalog
+            modelCatalog,
+            poolSizes
         );
     }
 }

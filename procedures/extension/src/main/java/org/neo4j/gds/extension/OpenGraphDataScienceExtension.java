@@ -24,7 +24,6 @@ import org.neo4j.configuration.Config;
 import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.gds.applications.operations.FeatureTogglesRepository;
 import org.neo4j.gds.concurrency.OpenGdsConcurrencyValidator;
-import org.neo4j.gds.concurrency.OpenGdsPoolSizes;
 import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.procedures.integration.DefaultExportLocation;
@@ -70,7 +69,6 @@ public class OpenGraphDataScienceExtension extends ExtensionFactory<OpenGraphDat
         var exportLocation = new DefaultExportLocation(log, neo4jConfiguration);
         var featureTogglesRepository = new FeatureTogglesRepository();
         var modelRepository = new OpenModelRepository(); // no model storing in OpenGDS
-        var poolSizes = new OpenGdsPoolSizes(); // limited to four
 
         var cypherAggregation = new CypherAggregation();
         var alphaCypherAggregation = new AlphaCypherAggregation();
@@ -90,7 +88,6 @@ public class OpenGraphDataScienceExtension extends ExtensionFactory<OpenGraphDat
             featureTogglesRepository,
             limitsConfiguration,
             modelRepository,
-            poolSizes,
             cypherAggregation,
             alphaCypherAggregation,
             Optional.empty(), // no extra checks in OpenGDS
