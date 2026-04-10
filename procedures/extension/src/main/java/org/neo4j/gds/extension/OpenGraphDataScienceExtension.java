@@ -29,8 +29,6 @@ import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.procedures.integration.DefaultExportLocation;
 import org.neo4j.gds.procedures.integration.LogAccessor;
 import org.neo4j.gds.procedures.integration.OpenGraphDataScienceExtensionBuilder;
-import org.neo4j.gds.projection.AlphaCypherAggregation;
-import org.neo4j.gds.projection.CypherAggregation;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
 import org.neo4j.kernel.extension.ExtensionFactory;
 import org.neo4j.kernel.extension.context.ExtensionContext;
@@ -70,9 +68,6 @@ public class OpenGraphDataScienceExtension extends ExtensionFactory<OpenGraphDat
         var featureTogglesRepository = new FeatureTogglesRepository();
         var modelRepository = new OpenModelRepository(); // no model storing in OpenGDS
 
-        var cypherAggregation = new CypherAggregation();
-        var alphaCypherAggregation = new AlphaCypherAggregation();
-
         var editionSpecifics = new OpenGraphDataScienceSpecificsBuilder().build();
 
         var graphDataScienceExtensionBuilderAndAssociatedProducts = OpenGraphDataScienceExtensionBuilder.create(
@@ -88,8 +83,6 @@ public class OpenGraphDataScienceExtension extends ExtensionFactory<OpenGraphDat
             featureTogglesRepository,
             limitsConfiguration,
             modelRepository,
-            cypherAggregation,
-            alphaCypherAggregation,
             Optional.empty(), // no extra checks in OpenGDS
             Optional.empty(), // no extra checks in OpenGDS
             Optional.empty() // no extra checks in OpenGDS

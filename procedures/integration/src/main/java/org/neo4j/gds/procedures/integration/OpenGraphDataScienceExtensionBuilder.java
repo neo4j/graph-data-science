@@ -154,8 +154,6 @@ public final class OpenGraphDataScienceExtensionBuilder {
         FeatureTogglesRepository featureTogglesRepository,
         LimitsConfiguration limitsConfiguration,
         ModelRepository modelRepository,
-        CypherAggregation cypherAggregation,
-        AlphaCypherAggregation alphaCypherAggregation,
         Optional<Function<AlgorithmProcessingTemplate, AlgorithmProcessingTemplate>> algorithmProcessingTemplateDecorator,
         Optional<Function<GraphCatalogApplications, GraphCatalogApplications>> graphCatalogApplicationsDecorator,
         Optional<Function<ModelCatalogApplications, ModelCatalogApplications>> modelCatalogApplicationsDecorator
@@ -225,7 +223,7 @@ public final class OpenGraphDataScienceExtensionBuilder {
             }
         );
 
-        registerCypherAggregation(globalProcedures, cypherAggregation, alphaCypherAggregation, log);
+        registerCypherAggregation(globalProcedures, log);
 
         // Neo4j Procedures do nothing special with progress logger, so we just use the adapter
         var loggers = new GdsLoggers(log, new LoggerForProgressTrackingAdapter(log));
@@ -279,10 +277,11 @@ public final class OpenGraphDataScienceExtensionBuilder {
 
     private static void registerCypherAggregation(
         GlobalProcedures globalProcedures,
-        CypherAggregation cypherAggregation,
-        AlphaCypherAggregation alphaCypherAggregation,
         Log log
     ) {
+        var cypherAggregation = new CypherAggregation();
+        var alphaCypherAggregation = new AlphaCypherAggregation();
+
         try {
             globalProcedures.register(cypherAggregation);
             globalProcedures.register(alphaCypherAggregation);
