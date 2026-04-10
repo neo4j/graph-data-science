@@ -20,6 +20,7 @@
 package org.neo4j.gds.procedures.integration;
 
 import org.neo4j.gds.LicenseState;
+import org.neo4j.gds.concurrency.ConcurrencyValidator;
 import org.neo4j.gds.concurrency.PoolSizes;
 import org.neo4j.gds.core.IdMapBehavior;
 import org.neo4j.gds.core.model.ModelCatalog;
@@ -33,6 +34,7 @@ import org.neo4j.gds.procedures.ExporterBuildersProviderService;
  * And we greatly shorten parameter lists.
  */
 public class OpenGraphDataScienceSpecifics {
+    private final ConcurrencyValidator concurrencyValidator;
     private final ExporterBuildersProviderService exporterBuildersProviderService;
     private final IdMapBehavior idMapBehavior;
     private final LicenseState licenseState;
@@ -41,6 +43,7 @@ public class OpenGraphDataScienceSpecifics {
     private final PoolSizes poolSizes;
 
     public OpenGraphDataScienceSpecifics(
+        ConcurrencyValidator concurrencyValidator,
         ExporterBuildersProviderService exporterBuildersProviderService,
         IdMapBehavior idMapBehavior,
         LicenseState licenseState,
@@ -48,12 +51,17 @@ public class OpenGraphDataScienceSpecifics {
         ModelCatalog modelCatalog,
         PoolSizes poolSizes
     ) {
+        this.concurrencyValidator = concurrencyValidator;
         this.exporterBuildersProviderService = exporterBuildersProviderService;
         this.idMapBehavior = idMapBehavior;
         this.licenseState = licenseState;
         this.metrics = metrics;
         this.modelCatalog = modelCatalog;
         this.poolSizes = poolSizes;
+    }
+
+    ConcurrencyValidator concurrencyValidator() {
+        return concurrencyValidator;
     }
 
     ExporterBuildersProviderService exporterBuildersProviderService() {

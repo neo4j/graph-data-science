@@ -20,6 +20,7 @@
 package org.neo4j.gds.extension;
 
 import org.neo4j.gds.OpenGdsLicenseState;
+import org.neo4j.gds.concurrency.OpenGdsConcurrencyValidator;
 import org.neo4j.gds.concurrency.OpenGdsPoolSizes;
 import org.neo4j.gds.core.OpenGdsIdMapBehavior;
 import org.neo4j.gds.core.model.OpenModelCatalog;
@@ -33,6 +34,8 @@ import org.neo4j.gds.procedures.integration.OpenGraphDataScienceSpecifics;
  */
 class OpenGraphDataScienceSpecificsBuilder {
     OpenGraphDataScienceSpecifics build() {
+        var concurrencyValidator = new OpenGdsConcurrencyValidator();
+
         ExporterBuildersProviderService exporterBuildersProviderService = (__, ___) -> new NativeExportBuildersProvider(); // we always just offer native writes in OpenGDS
 
         var idMapBehavior = new OpenGdsIdMapBehavior();
@@ -46,6 +49,7 @@ class OpenGraphDataScienceSpecificsBuilder {
         var poolSizes = new OpenGdsPoolSizes(); // limited to four
 
         return new OpenGraphDataScienceSpecifics(
+            concurrencyValidator,
             exporterBuildersProviderService,
             idMapBehavior,
             licenseState,

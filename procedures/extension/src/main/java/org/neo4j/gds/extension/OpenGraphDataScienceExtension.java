@@ -63,7 +63,6 @@ public class OpenGraphDataScienceExtension extends ExtensionFactory<OpenGraphDat
         var limitsConfiguration = LimitsConfiguration.Instance;
 
         // OpenGDS edition customisations go here
-        var concurrencyValidator = new OpenGdsConcurrencyValidator();
         var exportLocation = new DefaultExportLocation(log, neo4jConfiguration);
         var featureTogglesRepository = new FeatureTogglesRepository();
         var modelRepository = new OpenModelRepository(); // no model storing in OpenGDS
@@ -77,7 +76,6 @@ public class OpenGraphDataScienceExtension extends ExtensionFactory<OpenGraphDat
             globalProcedures,
             neo4jConfiguration,
             editionSpecifics,
-            concurrencyValidator,
             defaultsConfiguration,
             exportLocation,
             featureTogglesRepository,

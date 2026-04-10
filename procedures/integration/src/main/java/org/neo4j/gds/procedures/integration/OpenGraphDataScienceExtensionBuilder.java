@@ -30,7 +30,6 @@ import org.neo4j.gds.applications.graphstorecatalog.GraphCatalogApplications;
 import org.neo4j.gds.applications.modelcatalog.ModelCatalogApplications;
 import org.neo4j.gds.applications.modelcatalog.ModelRepository;
 import org.neo4j.gds.applications.operations.FeatureTogglesRepository;
-import org.neo4j.gds.concurrency.ConcurrencyValidator;
 import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.core.Username;
@@ -148,7 +147,6 @@ public final class OpenGraphDataScienceExtensionBuilder {
         GlobalProcedures globalProcedures,
         Configuration neo4jConfiguration,
         OpenGraphDataScienceSpecifics openGraphDataScienceSpecifics,
-        ConcurrencyValidator concurrencyValidator,
         DefaultsConfiguration defaultsConfiguration,
         ExportLocation exportLocation,
         FeatureTogglesRepository featureTogglesRepository,
@@ -159,7 +157,7 @@ public final class OpenGraphDataScienceExtensionBuilder {
         Optional<Function<ModelCatalogApplications, ModelCatalogApplications>> modelCatalogApplicationsDecorator
     ) {
         singletonConfigurer.configureSingletons(
-            concurrencyValidator,
+            openGraphDataScienceSpecifics.concurrencyValidator(),
             openGraphDataScienceSpecifics.idMapBehavior(),
             openGraphDataScienceSpecifics.poolSizes()
         );
