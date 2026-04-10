@@ -25,16 +25,31 @@ import org.neo4j.gds.concurrency.OpenGdsPoolSizes;
 import org.neo4j.gds.core.OpenGdsIdMapBehavior;
 import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.core.write.NativeExportBuildersProvider;
+import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.metrics.Metrics;
 import org.neo4j.gds.procedures.ExporterBuildersProviderService;
+import org.neo4j.gds.procedures.integration.DefaultExportLocation;
 import org.neo4j.gds.procedures.integration.OpenGraphDataScienceSpecifics;
+import org.neo4j.graphdb.config.Configuration;
+
+import java.util.Optional;
 
 /**
  * Here we capture the choices for the open edition of GDS.
  */
 class OpenGraphDataScienceSpecificsBuilder {
+    private final Log log;
+    private final Configuration neo4jConfiguration;
+
+    OpenGraphDataScienceSpecificsBuilder(Log log, Configuration neo4jConfiguration) {
+        this.log = log;
+        this.neo4jConfiguration = neo4jConfiguration;
+    }
+
     OpenGraphDataScienceSpecifics build() {
         var concurrencyValidator = new OpenGdsConcurrencyValidator();
+
+        var exportLocation = new DefaultExportLocation(log, neo4jConfiguration);
 
         ExporterBuildersProviderService exporterBuildersProviderService = (__, ___) -> new NativeExportBuildersProvider(); // we always just offer native writes in OpenGDS
 
@@ -52,13 +67,17 @@ class OpenGraphDataScienceSpecificsBuilder {
 
         return new OpenGraphDataScienceSpecifics(
             concurrencyValidator,
+            exportLocation,
             exporterBuildersProviderService,
             idMapBehavior,
             licenseState,
             metrics,
             modelCatalog,
             modelRepository,
-            poolSizes
+            poolSizes,
+            Optional.empty(), // no extra checks in OpenGDS
+            Optional.empty(), // no extra checks in OpenGDS
+            Optional.empty() // no extra checks in OpenGDS
         );
     }
 }

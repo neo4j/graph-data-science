@@ -20,11 +20,7 @@
 package org.neo4j.gds.procedures.integration;
 
 import org.neo4j.gds.LicenseDetails;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.DefaultMemoryGuard;
-import org.neo4j.gds.applications.graphstorecatalog.ExportLocation;
-import org.neo4j.gds.applications.graphstorecatalog.GraphCatalogApplications;
-import org.neo4j.gds.applications.modelcatalog.ModelCatalogApplications;
 import org.neo4j.gds.applications.operations.FeatureTogglesRepository;
 import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
@@ -41,9 +37,6 @@ import org.neo4j.gds.procedures.pipelines.PipelineRepository;
 import org.neo4j.gds.projection.GraphStoreFactorySuppliers;
 import org.neo4j.graphdb.config.Configuration;
 
-import java.util.Optional;
-import java.util.function.Function;
-
 /**
  * This is a way to squirrel away some dull code.
  * We want to keep Neo4j out from here, this could be reusable.
@@ -59,14 +52,10 @@ final class GraphDataScienceProceduresProviderFactory {
     private final OpenGraphDataScienceSpecifics openGraphDataScienceSpecifics;
     private final GloballyScopedDependencies globallyScopedDependencies;
     private final DefaultsConfiguration defaultsConfiguration;
-    private final ExportLocation exportLocation;
     private final FeatureTogglesRepository featureTogglesRepository;
     private final GraphStoreFactorySuppliers graphStoreFactorySuppliers;
     private final LicenseDetails licenseDetails;
     private final LimitsConfiguration limitsConfiguration;
-    private final Optional<Function<AlgorithmProcessingTemplate, AlgorithmProcessingTemplate>> algorithmProcessingTemplateDecorator;
-    private final Optional<Function<GraphCatalogApplications, GraphCatalogApplications>> graphCatalogApplicationsDecorator;
-    private final Optional<Function<ModelCatalogApplications, ModelCatalogApplications>> modelCatalogApplicationsDecorator;
     private final MemoryTracker memoryTracker;
 
     GraphDataScienceProceduresProviderFactory(
@@ -75,14 +64,10 @@ final class GraphDataScienceProceduresProviderFactory {
         OpenGraphDataScienceSpecifics openGraphDataScienceSpecifics,
         GloballyScopedDependencies globallyScopedDependencies,
         DefaultsConfiguration defaultsConfiguration,
-        ExportLocation exportLocation,
         FeatureTogglesRepository featureTogglesRepository,
         GraphStoreFactorySuppliers graphStoreFactorySuppliers,
         LicenseDetails licenseDetails,
         LimitsConfiguration limitsConfiguration,
-        Optional<Function<AlgorithmProcessingTemplate, AlgorithmProcessingTemplate>> algorithmProcessingTemplateDecorator,
-        Optional<Function<GraphCatalogApplications, GraphCatalogApplications>> graphCatalogApplicationsDecorator,
-        Optional<Function<ModelCatalogApplications, ModelCatalogApplications>> modelCatalogApplicationsDecorator,
         MemoryTracker memoryTracker
     ) {
         this.loggers = loggers;
@@ -90,14 +75,10 @@ final class GraphDataScienceProceduresProviderFactory {
         this.openGraphDataScienceSpecifics = openGraphDataScienceSpecifics;
         this.globallyScopedDependencies = globallyScopedDependencies;
         this.defaultsConfiguration = defaultsConfiguration;
-        this.exportLocation = exportLocation;
         this.featureTogglesRepository = featureTogglesRepository;
         this.graphStoreFactorySuppliers = graphStoreFactorySuppliers;
         this.licenseDetails = licenseDetails;
         this.limitsConfiguration = limitsConfiguration;
-        this.algorithmProcessingTemplateDecorator = algorithmProcessingTemplateDecorator;
-        this.graphCatalogApplicationsDecorator = graphCatalogApplicationsDecorator;
-        this.modelCatalogApplicationsDecorator = modelCatalogApplicationsDecorator;
         this.memoryTracker = memoryTracker;
     }
 
@@ -121,7 +102,6 @@ final class GraphDataScienceProceduresProviderFactory {
             openGraphDataScienceSpecifics,
             globallyScopedDependencies,
             defaultsConfiguration,
-            exportLocation,
             catalogProcedureFacadeFactory,
             featureTogglesRepository,
             graphStoreFactorySuppliers,
@@ -133,9 +113,6 @@ final class GraphDataScienceProceduresProviderFactory {
             taskRegistryFactoryService,
             taskStoreService,
             userLogServices,
-            algorithmProcessingTemplateDecorator,
-            graphCatalogApplicationsDecorator,
-            modelCatalogApplicationsDecorator,
             memoryTracker,
             userAccessor
         );

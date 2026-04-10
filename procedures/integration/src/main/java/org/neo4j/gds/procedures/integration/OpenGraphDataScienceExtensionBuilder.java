@@ -24,10 +24,6 @@ import org.neo4j.common.DependencySatisfier;
 import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.gds.LicenseDetails;
 import org.neo4j.gds.LicenseState;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
-import org.neo4j.gds.applications.graphstorecatalog.ExportLocation;
-import org.neo4j.gds.applications.graphstorecatalog.GraphCatalogApplications;
-import org.neo4j.gds.applications.modelcatalog.ModelCatalogApplications;
 import org.neo4j.gds.applications.operations.FeatureTogglesRepository;
 import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
@@ -67,9 +63,7 @@ import org.neo4j.kernel.lifecycle.Lifecycle;
 
 import java.lang.management.ManagementFactory;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.Function;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -147,12 +141,8 @@ public final class OpenGraphDataScienceExtensionBuilder {
         Configuration neo4jConfiguration,
         OpenGraphDataScienceSpecifics openGraphDataScienceSpecifics,
         DefaultsConfiguration defaultsConfiguration,
-        ExportLocation exportLocation,
         FeatureTogglesRepository featureTogglesRepository,
-        LimitsConfiguration limitsConfiguration,
-        Optional<Function<AlgorithmProcessingTemplate, AlgorithmProcessingTemplate>> algorithmProcessingTemplateDecorator,
-        Optional<Function<GraphCatalogApplications, GraphCatalogApplications>> graphCatalogApplicationsDecorator,
-        Optional<Function<ModelCatalogApplications, ModelCatalogApplications>> modelCatalogApplicationsDecorator
+        LimitsConfiguration limitsConfiguration
     ) {
         singletonConfigurer.configureSingletons(
             openGraphDataScienceSpecifics.concurrencyValidator(),
@@ -239,14 +229,10 @@ public final class OpenGraphDataScienceExtensionBuilder {
             openGraphDataScienceSpecifics,
             globallyScopedDependencies,
             defaultsConfiguration,
-            exportLocation,
             featureTogglesRepository,
             graphStoreFactorySuppliers,
             LicenseDetails.from(openGraphDataScienceSpecifics.licenseState()),
             limitsConfiguration,
-            algorithmProcessingTemplateDecorator,
-            graphCatalogApplicationsDecorator,
-            modelCatalogApplicationsDecorator,
             memoryTracker
         );
 

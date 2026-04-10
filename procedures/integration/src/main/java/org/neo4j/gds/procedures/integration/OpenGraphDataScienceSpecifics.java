@@ -20,6 +20,10 @@
 package org.neo4j.gds.procedures.integration;
 
 import org.neo4j.gds.LicenseState;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
+import org.neo4j.gds.applications.graphstorecatalog.ExportLocation;
+import org.neo4j.gds.applications.graphstorecatalog.GraphCatalogApplications;
+import org.neo4j.gds.applications.modelcatalog.ModelCatalogApplications;
 import org.neo4j.gds.applications.modelcatalog.ModelRepository;
 import org.neo4j.gds.concurrency.ConcurrencyValidator;
 import org.neo4j.gds.concurrency.PoolSizes;
@@ -27,6 +31,9 @@ import org.neo4j.gds.core.IdMapBehavior;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.metrics.Metrics;
 import org.neo4j.gds.procedures.ExporterBuildersProviderService;
+
+import java.util.Optional;
+import java.util.function.Function;
 
 /**
  * Yet another [Parameter Object](https://wiki.c2.com/?ParameterObject).
@@ -36,6 +43,7 @@ import org.neo4j.gds.procedures.ExporterBuildersProviderService;
  */
 public class OpenGraphDataScienceSpecifics {
     private final ConcurrencyValidator concurrencyValidator;
+    private final ExportLocation exportLocation;
     private final ExporterBuildersProviderService exporterBuildersProviderService;
     private final IdMapBehavior idMapBehavior;
     private final LicenseState licenseState;
@@ -43,18 +51,26 @@ public class OpenGraphDataScienceSpecifics {
     private final ModelCatalog modelCatalog;
     private final ModelRepository modelRepository;
     private final PoolSizes poolSizes;
+    private final Optional<Function<AlgorithmProcessingTemplate, AlgorithmProcessingTemplate>> algorithmProcessingTemplateDecorator;
+    private final Optional<Function<GraphCatalogApplications, GraphCatalogApplications>> graphCatalogApplicationsDecorator;
+    private final Optional<Function<ModelCatalogApplications, ModelCatalogApplications>> modelCatalogApplicationsDecorator;
 
     public OpenGraphDataScienceSpecifics(
         ConcurrencyValidator concurrencyValidator,
+        ExportLocation exportLocation,
         ExporterBuildersProviderService exporterBuildersProviderService,
         IdMapBehavior idMapBehavior,
         LicenseState licenseState,
         Metrics metrics,
         ModelCatalog modelCatalog,
         ModelRepository modelRepository,
-        PoolSizes poolSizes
+        PoolSizes poolSizes,
+        Optional<Function<AlgorithmProcessingTemplate, AlgorithmProcessingTemplate>> algorithmProcessingTemplateDecorator,
+        Optional<Function<GraphCatalogApplications, GraphCatalogApplications>> graphCatalogApplicationsDecorator,
+        Optional<Function<ModelCatalogApplications, ModelCatalogApplications>> modelCatalogApplicationsDecorator
     ) {
         this.concurrencyValidator = concurrencyValidator;
+        this.exportLocation = exportLocation;
         this.exporterBuildersProviderService = exporterBuildersProviderService;
         this.idMapBehavior = idMapBehavior;
         this.licenseState = licenseState;
@@ -62,14 +78,29 @@ public class OpenGraphDataScienceSpecifics {
         this.modelCatalog = modelCatalog;
         this.modelRepository = modelRepository;
         this.poolSizes = poolSizes;
+        this.algorithmProcessingTemplateDecorator = algorithmProcessingTemplateDecorator;
+        this.graphCatalogApplicationsDecorator = graphCatalogApplicationsDecorator;
+        this.modelCatalogApplicationsDecorator = modelCatalogApplicationsDecorator;
+    }
+
+    Optional<Function<AlgorithmProcessingTemplate, AlgorithmProcessingTemplate>> algorithmProcessingTemplateDecorator() {
+        return algorithmProcessingTemplateDecorator;
     }
 
     ConcurrencyValidator concurrencyValidator() {
         return concurrencyValidator;
     }
 
+    ExportLocation exportLocation() {
+        return exportLocation;
+    }
+
     ExporterBuildersProviderService exporterBuildersProviderService() {
         return exporterBuildersProviderService;
+    }
+
+    Optional<Function<GraphCatalogApplications, GraphCatalogApplications>> graphCatalogApplicationsDecorator() {
+        return graphCatalogApplicationsDecorator;
     }
 
     IdMapBehavior idMapBehavior() {
@@ -86,6 +117,10 @@ public class OpenGraphDataScienceSpecifics {
 
     ModelCatalog modelCatalog() {
         return modelCatalog;
+    }
+
+    Optional<Function<ModelCatalogApplications, ModelCatalogApplications>> modelCatalogApplicationsDecorator() {
+        return modelCatalogApplicationsDecorator;
     }
 
     ModelRepository modelRepository() {

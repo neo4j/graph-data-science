@@ -21,13 +21,9 @@ package org.neo4j.gds.procedures.integration;
 
 import org.neo4j.function.ThrowingFunction;
 import org.neo4j.gds.LicenseDetails;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryGuard;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
-import org.neo4j.gds.applications.graphstorecatalog.ExportLocation;
-import org.neo4j.gds.applications.graphstorecatalog.GraphCatalogApplications;
-import org.neo4j.gds.applications.modelcatalog.ModelCatalogApplications;
 import org.neo4j.gds.applications.operations.FeatureTogglesRepository;
 import org.neo4j.gds.compat.DatabaseIdSupplier;
 import org.neo4j.gds.configuration.DefaultsConfiguration;
@@ -59,9 +55,6 @@ import org.neo4j.graphdb.config.Configuration;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.kernel.api.procedure.Context;
 
-import java.util.Optional;
-import java.util.function.Function;
-
 /**
  * We use this at request time to construct the facade that the procedures call.
  */
@@ -77,7 +70,6 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
     private final OpenGraphDataScienceSpecifics openGraphDataScienceSpecifics;
     private final GloballyScopedDependencies globallyScopedDependencies;
     private final DefaultsConfiguration defaultsConfiguration;
-    private final ExportLocation exportLocation;
     private final GraphCatalogProcedureFacadeFactory graphCatalogProcedureFacadeFactory;
     private final GraphStoreFactorySuppliers graphStoreFactorySuppliers;
     private final FeatureTogglesRepository featureTogglesRepository;
@@ -90,9 +82,6 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
     private final TaskStoreService taskStoreService;
     private final UserLogServices userLogServices;
 
-    private final Optional<Function<AlgorithmProcessingTemplate, AlgorithmProcessingTemplate>> algorithmProcessingTemplateDecorator;
-    private final Optional<Function<GraphCatalogApplications, GraphCatalogApplications>> graphCatalogApplicationsDecorator;
-    private final Optional<Function<ModelCatalogApplications, ModelCatalogApplications>> modelCatalogApplicationsDecorator;
     private final MemoryTracker memoryTracker;
 
     GraphDataScienceProceduresProvider(
@@ -101,7 +90,6 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
         OpenGraphDataScienceSpecifics openGraphDataScienceSpecifics,
         GloballyScopedDependencies globallyScopedDependencies,
         DefaultsConfiguration defaultsConfiguration,
-        ExportLocation exportLocation,
         GraphCatalogProcedureFacadeFactory graphCatalogProcedureFacadeFactory,
         FeatureTogglesRepository featureTogglesRepository,
         GraphStoreFactorySuppliers graphStoreFactorySuppliers,
@@ -113,9 +101,6 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
         TaskRegistryFactoryService taskRegistryFactoryService,
         TaskStoreService taskStoreService,
         UserLogServices userLogServices,
-        Optional<Function<AlgorithmProcessingTemplate, AlgorithmProcessingTemplate>> algorithmProcessingTemplateDecorator,
-        Optional<Function<GraphCatalogApplications, GraphCatalogApplications>> graphCatalogApplicationsDecorator,
-        Optional<Function<ModelCatalogApplications, ModelCatalogApplications>> modelCatalogApplicationsDecorator,
         MemoryTracker memoryTracker,
         UserAccessor userAccessor
     ) {
@@ -125,7 +110,6 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
         this.globallyScopedDependencies = globallyScopedDependencies;
 
         this.defaultsConfiguration = defaultsConfiguration;
-        this.exportLocation = exportLocation;
         this.graphCatalogProcedureFacadeFactory = graphCatalogProcedureFacadeFactory;
         this.graphStoreFactorySuppliers = graphStoreFactorySuppliers;
         this.featureTogglesRepository = featureTogglesRepository;
@@ -138,9 +122,6 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
         this.taskStoreService = taskStoreService;
         this.userLogServices = userLogServices;
 
-        this.algorithmProcessingTemplateDecorator = algorithmProcessingTemplateDecorator;
-        this.graphCatalogApplicationsDecorator = graphCatalogApplicationsDecorator;
-        this.modelCatalogApplicationsDecorator = modelCatalogApplicationsDecorator;
         this.memoryTracker = memoryTracker;
         this.userAccessor = userAccessor;
     }
@@ -199,7 +180,7 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
             globallyScopedDependencies,
             telemetryLogger,
             defaultsConfiguration,
-            exportLocation,
+            openGraphDataScienceSpecifics.exportLocation(),
             graphCatalogProcedureFacadeFactory,
             featureTogglesRepository,
             graphStoreFactorySuppliers,
@@ -218,9 +199,9 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
             terminationMonitor,
             procedureTransaction,
             writeContext,
-            algorithmProcessingTemplateDecorator,
-            graphCatalogApplicationsDecorator,
-            modelCatalogApplicationsDecorator,
+            openGraphDataScienceSpecifics.algorithmProcessingTemplateDecorator(),
+            openGraphDataScienceSpecifics.graphCatalogApplicationsDecorator(),
+            openGraphDataScienceSpecifics.modelCatalogApplicationsDecorator(),
             memoryTracker
         );
     }
