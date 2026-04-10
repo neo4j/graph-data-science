@@ -25,6 +25,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
+import static org.neo4j.gds.ElementProjection.PROJECT_ALL;
+
 public class RelationshipType extends ElementIdentifier {
 
     public static final RelationshipType ALL_RELATIONSHIPS = RelationshipType.of("__ALL__");
@@ -39,6 +41,10 @@ public class RelationshipType extends ElementIdentifier {
     }
 
     public static RelationshipType of(@NotNull String name) {
+        if (name.equals(PROJECT_ALL)) {
+            return ALL_RELATIONSHIPS;
+        }
+
         return new RelationshipType(name);
     }
 
