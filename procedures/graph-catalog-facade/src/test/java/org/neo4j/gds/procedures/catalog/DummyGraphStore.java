@@ -102,7 +102,7 @@ class DummyGraphStore implements GraphStore {
 
                     @Override
                     public Collection<MutableNodeSchemaEntry> entries() {
-                        return Set.of(new MutableNodeSchemaEntry(NodeLabel.of("A"), Map.of()));
+                        return Set.of(MutableNodeSchemaEntry.of(NodeLabel.of("A"), Map.of()));
                     }
 
                     @Override

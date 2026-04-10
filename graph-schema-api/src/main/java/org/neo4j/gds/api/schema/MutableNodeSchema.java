@@ -21,8 +21,10 @@ package org.neo4j.gds.api.schema;
 
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.utils.StringFormatting;
 
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
@@ -107,8 +109,8 @@ public final class MutableNodeSchema implements NodeSchema {
         return this;
     }
 
-    public MutableNodeSchema addProperty(NodeLabel nodeLabel, String propertyName, PropertySchema propertySchema) {
-        getOrCreateLabel(nodeLabel).addProperty(propertyName, propertySchema);
+    public MutableNodeSchema addProperty(NodeLabel nodeLabel, PropertySchema propertySchema) {
+        getOrCreateLabel(nodeLabel).addProperty(propertySchema.key(), propertySchema);
         return this;
     }
 
@@ -130,5 +132,33 @@ public final class MutableNodeSchema implements NodeSchema {
     @Override
     public int hashCode() {
         return entries.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        var className = MutableNodeSchema.class.getSimpleName();
+        if (this.entries.isEmpty()) {
+            return StringFormatting.formatWithLocale("%s{<empty>}", className);
+        }
+
+        final var INDENT = "    ";
+        return entries.keySet().stream()
+            .sorted(Comparator.comparing(NodeLabel::name))
+            .map(this::get)
+            .map((entry) -> entry.toString()
+                .lines()
+                .map(INDENT::concat)
+                .collect(Collectors.joining(System.lineSeparator()))
+            )
+            .reduce(
+                new StringBuilder()
+                    .append(className)
+                    .append('{')
+                    .append(System.lineSeparator()),
+                (builder, entry) -> builder.append(entry).append(System.lineSeparator()),
+                (builder, unused) -> builder
+            )
+            .append('}')
+            .toString();
     }
 }

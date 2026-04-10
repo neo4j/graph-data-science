@@ -22,7 +22,9 @@ package org.neo4j.gds.api.schema;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.utils.StringFormatting;
 
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -35,15 +37,19 @@ public class MutableNodeSchemaEntry implements NodeSchemaEntry {
     private final NodeLabel nodeLabel;
     private final Map<String, PropertySchema> properties;
 
+    public static MutableNodeSchemaEntry of(NodeLabel nodeLabel, Map<String, PropertySchema> properties) {
+        return new MutableNodeSchemaEntry(nodeLabel, properties);
+    }
+
     static MutableNodeSchemaEntry from(NodeSchemaEntry fromEntry) {
-        return new MutableNodeSchemaEntry(fromEntry.identifier(), new HashMap<>(fromEntry.properties()));
+        return MutableNodeSchemaEntry.of(fromEntry.identifier(), new HashMap<>(fromEntry.properties()));
     }
 
     MutableNodeSchemaEntry(NodeLabel identifier) {
         this(identifier, new LinkedHashMap<>());
     }
 
-    public MutableNodeSchemaEntry(NodeLabel nodeLabel, Map<String, PropertySchema> properties) {
+    private MutableNodeSchemaEntry(NodeLabel nodeLabel, Map<String, PropertySchema> properties) {
         this.nodeLabel = nodeLabel;
         this.properties = properties;
     }
@@ -70,7 +76,7 @@ public class MutableNodeSchemaEntry implements NodeSchemaEntry {
             );
         }
 
-        return new MutableNodeSchemaEntry(this.identifier(), unionProperties(other.properties));
+        return MutableNodeSchemaEntry.of(this.identifier(), unionProperties(other.properties));
     }
 
     @Override
@@ -123,5 +129,26 @@ public class MutableNodeSchemaEntry implements NodeSchemaEntry {
         int result = nodeLabel.hashCode();
         result = 31 * result + properties.hashCode();
         return result;
+    }
+
+    @Override
+    public String toString() {
+        final var INDENT = "    ";
+
+        return properties.values().stream()
+            .sorted(Comparator.comparing(PropertySchema::key))
+            .reduce(
+                new StringBuilder()
+                    .append(MutableNodeSchemaEntry.class.getSimpleName())
+                    .append('{')
+                    .append(System.lineSeparator())
+                    .append(INDENT)
+                    .append(StringFormatting.formatWithLocale("Label=\"%s\"", nodeLabel.name()))
+                    .append(System.lineSeparator()),
+                (builder, property) -> builder.append(INDENT).append(property).append(System.lineSeparator()),
+                (builder, unused) -> builder
+            )
+            .append('}')
+            .toString();
     }
 }

@@ -35,11 +35,7 @@ public final class GraphStoreMetadataFactory {
     private GraphStoreMetadataFactory() {}
 
     public static GraphStoreMetadata fromGraphStore(GraphStore graphStore) {
-        var databaseInfo = new DatabaseInfo(
-            graphStore.databaseInfo().databaseId().databaseName(),
-            toDatabaseLocation(graphStore.databaseInfo().databaseLocation()),
-            graphStore.databaseInfo().remoteDatabaseId().map(DatabaseId::databaseName)
-        );
+        var databaseInfo = toDatabaseInfo(graphStore.databaseInfo());
         var writeMode = toWriteMode(graphStore.capabilities().writeMode());
         var idMapInfo = toIdMapInfo(graphStore.nodes());
         var relationshipInfo = toRelationshipInfo(graphStore);
@@ -53,6 +49,14 @@ public final class GraphStoreMetadataFactory {
             relationshipInfo,
             nodeSchema,
             relationshipSchema
+        );
+    }
+
+    static DatabaseInfo toDatabaseInfo(org.neo4j.gds.api.DatabaseInfo databaseInfo) {
+        return new DatabaseInfo(
+            databaseInfo.databaseId().databaseName(),
+            toDatabaseLocation(databaseInfo.databaseLocation()),
+            databaseInfo.remoteDatabaseId().map(DatabaseId::databaseName)
         );
     }
 

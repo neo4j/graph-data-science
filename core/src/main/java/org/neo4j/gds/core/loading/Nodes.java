@@ -73,7 +73,7 @@ public interface Nodes {
                         .state(propertyState)
                         .build();
 
-                    nodeSchema.addProperty(nodeLabel, propertySchema.key(), propertySchema);
+                    nodeSchema.addProperty(nodeLabel, propertySchema);
                     nodePropertyStoreBuilder.putProperty(
                         propertySchema.key(),
                         ImmutableNodeProperty.of(nodePropertyValues, propertySchema)

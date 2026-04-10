@@ -62,7 +62,7 @@ class NodeSchemaBuilderVisitorTest {
         var labelAEntry = builtSchema.get(NodeLabel.of("A"));
         assertThat(labelAEntry)
             .isEqualTo(
-                new MutableNodeSchemaEntry(
+                MutableNodeSchemaEntry.of(
                     NodeLabel.of("A"),
                     Map.of(
                         "prop1",
@@ -79,7 +79,7 @@ class NodeSchemaBuilderVisitorTest {
         var labelBEntry = builtSchema.get(NodeLabel.of("B"));
         assertThat(labelBEntry)
             .isEqualTo(
-                new MutableNodeSchemaEntry(
+                MutableNodeSchemaEntry.of(
                     NodeLabel.of("B"),
                     Map.of(
                         "prop2",
