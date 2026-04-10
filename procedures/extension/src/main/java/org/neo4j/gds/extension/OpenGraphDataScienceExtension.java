@@ -25,7 +25,6 @@ import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.gds.applications.operations.FeatureTogglesRepository;
 import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
-import org.neo4j.gds.procedures.integration.DefaultExportLocation;
 import org.neo4j.gds.procedures.integration.LogAccessor;
 import org.neo4j.gds.procedures.integration.OpenGraphDataScienceExtensionBuilder;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
@@ -33,8 +32,6 @@ import org.neo4j.kernel.extension.ExtensionFactory;
 import org.neo4j.kernel.extension.context.ExtensionContext;
 import org.neo4j.kernel.lifecycle.Lifecycle;
 import org.neo4j.logging.internal.LogService;
-
-import java.util.Optional;
 
 /**
  * The OpenGDS extension for Neo4j.
@@ -62,10 +59,9 @@ public class OpenGraphDataScienceExtension extends ExtensionFactory<OpenGraphDat
         var limitsConfiguration = LimitsConfiguration.Instance;
 
         // OpenGDS edition customisations go here
-        var exportLocation = new DefaultExportLocation(log, neo4jConfiguration);
         var featureTogglesRepository = new FeatureTogglesRepository();
 
-        var editionSpecifics = new OpenGraphDataScienceSpecificsBuilder().build();
+        var editionSpecifics = new OpenGraphDataScienceSpecificsBuilder(log, neo4jConfiguration).build();
 
         var graphDataScienceExtensionBuilderAndAssociatedProducts = OpenGraphDataScienceExtensionBuilder.create(
             log,
@@ -75,12 +71,8 @@ public class OpenGraphDataScienceExtension extends ExtensionFactory<OpenGraphDat
             neo4jConfiguration,
             editionSpecifics,
             defaultsConfiguration,
-            exportLocation,
             featureTogglesRepository,
-            limitsConfiguration,
-            Optional.empty(), // no extra checks in OpenGDS
-            Optional.empty(), // no extra checks in OpenGDS
-            Optional.empty() // no extra checks in OpenGDS
+            limitsConfiguration
         );
 
         var graphDataScienceExtensionBuilder = graphDataScienceExtensionBuilderAndAssociatedProducts.getLeft();
