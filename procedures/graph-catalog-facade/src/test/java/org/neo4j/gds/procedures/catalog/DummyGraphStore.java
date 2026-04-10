@@ -31,8 +31,6 @@ import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.ImmutableDatabaseInfo;
 import org.neo4j.gds.api.Topology;
 import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.gds.api.properties.graph.GraphProperty;
-import org.neo4j.gds.api.properties.graph.GraphPropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodeProperty;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.properties.relationships.RelationshipProperty;
@@ -42,7 +40,6 @@ import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.api.schema.MutableNodeSchemaEntry;
 import org.neo4j.gds.api.schema.MutableRelationshipSchemaEntry;
 import org.neo4j.gds.api.schema.NodeSchema;
-import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.api.schema.RelationshipSchema;
 import org.neo4j.gds.core.loading.Capabilities;
 import org.neo4j.gds.core.loading.DeletionResult;
@@ -50,7 +47,6 @@ import org.neo4j.gds.core.loading.SingleTypeRelationships;
 
 import java.time.ZonedDateTime;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -168,11 +164,6 @@ class DummyGraphStore implements GraphStore {
             }
 
             @Override
-            public Map<String, PropertySchema> graphProperties() {
-                return Collections.emptyMap();
-            }
-
-            @Override
             public GraphSchema filterNodeLabels(Set<NodeLabel> labelsToKeep) {
                 throw new UnsupportedOperationException("TODO");
             }
@@ -201,36 +192,6 @@ class DummyGraphStore implements GraphStore {
 
     @Override
     public Capabilities capabilities() {
-        throw new UnsupportedOperationException("TODO");
-    }
-
-    @Override
-    public Set<String> graphPropertyKeys() {
-        throw new UnsupportedOperationException("TODO");
-    }
-
-    @Override
-    public boolean hasGraphProperty(String propertyKey) {
-        throw new UnsupportedOperationException("TODO");
-    }
-
-    @Override
-    public GraphProperty graphProperty(String propertyKey) {
-        throw new UnsupportedOperationException("TODO");
-    }
-
-    @Override
-    public GraphPropertyValues graphPropertyValues(String propertyKey) {
-        throw new UnsupportedOperationException("TODO");
-    }
-
-    @Override
-    public void addGraphProperty(String propertyKey, GraphPropertyValues propertyValues) {
-        throw new UnsupportedOperationException("TODO");
-    }
-
-    @Override
-    public void removeGraphProperty(String propertyKey) {
         throw new UnsupportedOperationException("TODO");
     }
 

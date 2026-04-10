@@ -35,9 +35,6 @@ import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.Topology;
 import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.gds.api.properties.graph.GraphProperty;
-import org.neo4j.gds.api.properties.graph.GraphPropertyStore;
-import org.neo4j.gds.api.properties.graph.GraphPropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodeProperty;
 import org.neo4j.gds.api.properties.nodes.NodePropertyStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
@@ -91,8 +88,6 @@ public final class CSRGraphStore implements GraphStoreWithTopology {
 
     private MutableGraphSchema schema;
 
-    private GraphPropertyStore graphProperties;
-
     private NodePropertyStore nodeProperties;
 
     private final ZoneId zoneId;
@@ -106,7 +101,6 @@ public final class CSRGraphStore implements GraphStoreWithTopology {
         IdMap nodes,
         NodePropertyStore nodeProperties,
         Map<RelationshipType, SingleTypeRelationships> relationships,
-        GraphPropertyStore graphProperties,
         Concurrency concurrency,
         ZoneId zoneId
     ) {
@@ -114,8 +108,6 @@ public final class CSRGraphStore implements GraphStoreWithTopology {
         this.capabilities = capabilities;
 
         this.schema = schema;
-
-        this.graphProperties = graphProperties;
 
         this.nodes = nodes;
         this.nodeProperties = nodeProperties;
@@ -136,7 +128,6 @@ public final class CSRGraphStore implements GraphStoreWithTopology {
         MutableGraphSchema schema,
         Nodes nodes,
         RelationshipImportResult relationshipImportResult,
-        Optional<GraphPropertyStore> graphProperties,
         Concurrency concurrency,
         Optional<ZoneId> zoneId
     ) {
@@ -147,7 +138,6 @@ public final class CSRGraphStore implements GraphStoreWithTopology {
             nodes.idMap(),
             nodes.properties(),
             relationshipImportResult.importResults(),
-            graphProperties.orElseGet(GraphPropertyStore::empty),
             concurrency,
             zoneId.orElseGet(ZoneId::systemDefault)
         );
@@ -176,71 +166,6 @@ public final class CSRGraphStore implements GraphStoreWithTopology {
     @Override
     public Capabilities capabilities() {
         return capabilities;
-    }
-
-    // Graph properties
-
-    @Override
-    public Set<String> graphPropertyKeys() {
-        return graphProperties.keySet();
-    }
-
-    @Override
-    public boolean hasGraphProperty(String propertyKey) {
-        return graphPropertyKeys().contains(propertyKey);
-    }
-
-    @Override
-    public GraphProperty graphProperty(String propertyKey) {
-        return graphProperties.get(propertyKey);
-    }
-
-    @Override
-    public GraphPropertyValues graphPropertyValues(String propertyKey) {
-        return graphProperty(propertyKey).values();
-    }
-
-    @Override
-    public void addGraphProperty(String propertyKey, GraphPropertyValues propertyValues) {
-        updateGraphStore((graphStore) -> {
-            if (graphStore.hasGraphProperty(propertyKey)) {
-                throw new UnsupportedOperationException(
-                    formatWithLocale(
-                        "Graph property %s already exists",
-                        propertyKey
-                    )
-                );
-            }
-
-            graphStore.graphProperties = GraphPropertyStore
-                .builder()
-                .from(graphStore.graphProperties)
-                .putIfAbsent(propertyKey, GraphProperty.of(propertyKey, propertyValues))
-                .build();
-
-            var newGraphPropertySchema = new HashMap<>(schema().graphProperties());
-            newGraphPropertySchema.put(propertyKey, PropertySchema.of(propertyKey, propertyValues.valueType()));
-
-            this.schema = MutableGraphSchema
-                .of(schema.nodeSchema(), schema.relationshipSchema(), newGraphPropertySchema);
-        });
-    }
-
-    @Override
-    public void removeGraphProperty(String propertyKey) {
-        updateGraphStore(graphStore -> {
-            graphStore.graphProperties = GraphPropertyStore
-                .builder()
-                .from(graphStore.graphProperties)
-                .removeProperty(propertyKey)
-                .build();
-
-            var newGraphPropertySchema = new HashMap<>(schema().graphProperties());
-            newGraphPropertySchema.remove(propertyKey);
-
-            this.schema = MutableGraphSchema
-                .of(schema.nodeSchema(), schema.relationshipSchema(), newGraphPropertySchema);
-        });
     }
 
     @Override
@@ -644,8 +569,7 @@ public final class CSRGraphStore implements GraphStoreWithTopology {
         var filteredNodeProperties = filterNodeProperties(nodeLabels);
         var nodeSchema = schema.nodeSchema().filter(new HashSet<>(nodeLabels));
 
-        var graphSchema = MutableGraphSchema
-            .of(nodeSchema, MutableRelationshipSchema.empty(), schema.graphProperties());
+        var graphSchema = MutableGraphSchema.of(nodeSchema, MutableRelationshipSchema.empty());
 
         var initialGraph = new HugeGraphBuilder()
             .nodes(nodes)
@@ -676,8 +600,7 @@ public final class CSRGraphStore implements GraphStoreWithTopology {
     ) {
         var graphSchema = MutableGraphSchema.of(
             nodeSchema,
-            schema.relationshipSchema().filter(Set.of(relationshipType)),
-            schema.graphProperties()
+            schema.relationshipSchema().filter(Set.of(relationshipType))
         );
 
         var relationship = relationships.get(relationshipType);

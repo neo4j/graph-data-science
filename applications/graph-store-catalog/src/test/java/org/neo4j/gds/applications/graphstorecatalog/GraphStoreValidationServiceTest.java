@@ -104,47 +104,6 @@ class GraphStoreValidationServiceTest {
     }
 
     @Test
-    void shouldEnsureGraphPropertyExists() {
-        var service = new GraphStoreValidationService();
-
-        var graphStore = mock(GraphStore.class);
-        when(graphStore.hasGraphProperty("foo")).thenReturn(true);
-        service.ensureGraphPropertyExists(graphStore, "foo");
-
-        // yay didn't blow up
-    }
-
-    @Test
-    void shouldFlagUpWhenGraphPropertyDoesNotExists() {
-        var service = new GraphStoreValidationService();
-
-        var graphStore = mock(GraphStore.class);
-        when(graphStore.hasGraphProperty("foo")).thenReturn(false);
-        when(graphStore.graphPropertyKeys()).thenReturn(Set.of("bar", "baz"));
-        assertThatIllegalArgumentException().isThrownBy(() -> service.ensureGraphPropertyExists(
-            graphStore,
-            "foo"
-        )).withMessage("" +
-            "The specified graph property 'foo' does not exist. " +
-            "The following properties exist in the graph ['bar', 'baz'].");
-    }
-
-    @Test
-    void shouldSuggestAlternativesWhenGraphPropertyDoesNotExist() {
-        var service = new GraphStoreValidationService();
-
-        var graphStore = mock(GraphStore.class);
-        when(graphStore.hasGraphProperty("bar")).thenReturn(false);
-        when(graphStore.graphPropertyKeys()).thenReturn(Set.of("foo", "baz"));
-        assertThatIllegalArgumentException().isThrownBy(() -> service.ensureGraphPropertyExists(
-            graphStore,
-            "bar"
-        )).withMessage("" +
-            "The specified graph property 'bar' does not exist. " +
-            "Did you mean: ['baz'].");
-    }
-
-    @Test
     void shouldValidateNodeProjectionHasSpecifiedPropertiesWhenNotSpecifyingLabel() {
         var service = new GraphStoreValidationService();
 

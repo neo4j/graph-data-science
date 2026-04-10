@@ -115,21 +115,9 @@ public interface GraphCatalogProcedureFacade {
         String relationshipType
     );
 
-    Stream<GraphDropGraphPropertiesResult> dropGraphProperty(
-        String graphName,
-        String graphProperty,
-        Map<String, Object> configuration
-    );
-
     Stream<MutateLabelResult> mutateNodeLabel(
         String graphName,
         String nodeLabel,
-        Map<String, Object> configuration
-    );
-
-    Stream<StreamGraphPropertyResult> streamGraphProperty(
-        String graphName,
-        String graphProperty,
         Map<String, Object> configuration
     );
 

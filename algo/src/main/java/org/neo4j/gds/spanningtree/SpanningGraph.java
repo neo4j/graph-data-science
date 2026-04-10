@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.spanningtree;
 
+import org.neo4j.gds.Aggregation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
@@ -29,11 +30,10 @@ import org.neo4j.gds.api.properties.relationships.RelationshipConsumer;
 import org.neo4j.gds.api.properties.relationships.RelationshipWithPropertyConsumer;
 import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.api.schema.GraphSchema;
-import org.neo4j.gds.api.schema.ImmutableMutableGraphSchema;
 import org.neo4j.gds.api.schema.ImmutableRelationshipPropertySchema;
+import org.neo4j.gds.api.schema.MutableGraphSchema;
 import org.neo4j.gds.api.schema.MutableRelationshipSchema;
 import org.neo4j.gds.api.schema.MutableRelationshipSchemaEntry;
-import org.neo4j.gds.Aggregation;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -89,8 +89,7 @@ public class SpanningGraph extends GraphAdapter {
             )
         );
 
-        return ImmutableMutableGraphSchema.builder()
-            .from(graph.schema())
+        return MutableGraphSchema.builderFrom(graph.schema())
             .relationshipSchema(relationshipSchema)
             .build();
     }

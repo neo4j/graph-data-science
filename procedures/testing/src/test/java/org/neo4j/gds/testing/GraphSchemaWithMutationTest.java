@@ -70,9 +70,7 @@ class GraphSchemaWithMutationTest extends BaseProcTest {
                         "foo", "Integer (DefaultValue(-9223372036854775808), PERSISTENT)",
                         "baz", "Integer (DefaultValue(-9223372036854775808), TRANSIENT)"
                     )),
-                    "relationships", Map.of("REL", Map.of("bar", "Float (DefaultValue(NaN), PERSISTENT, Aggregation.NONE)")),
-                    "graphProperties",
-                    Map.of()
+                    "relationships", Map.of("REL", Map.of("bar", "Float (DefaultValue(NaN), PERSISTENT, Aggregation.NONE)"))
                 )
             )
         ));
@@ -91,9 +89,7 @@ class GraphSchemaWithMutationTest extends BaseProcTest {
                         Map.of("A", Map.of("foo", "Integer (DefaultValue(-9223372036854775808), PERSISTENT)")),
                         "relationships",
                         Map.of("BOO", Map.of("faz", "Float (DefaultValue(NaN), TRANSIENT, Aggregation.NONE)"),
-                            "REL", Map.of("bar", "Float (DefaultValue(NaN), PERSISTENT, Aggregation.NONE)")),
-                        "graphProperties",
-                        Map.of()
+                            "REL", Map.of("bar", "Float (DefaultValue(NaN), PERSISTENT, Aggregation.NONE)"))
                     )
                 )
             )

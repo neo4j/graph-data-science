@@ -20,15 +20,14 @@
 package org.neo4j.gds.core.io.file.csv;
 
 import org.apache.commons.lang3.mutable.MutableLong;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.Aggregation;
 import org.neo4j.gds.CsvTestSupport;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.gds.api.properties.graph.LongGraphPropertyValues;
 import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
@@ -41,11 +40,9 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.gdl.GdlFactory;
-import org.neo4j.gds.Aggregation;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Collections;
@@ -55,23 +52,18 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.LongStream;
 
-import static java.util.function.Predicate.not;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.neo4j.gds.Orientation.NATURAL;
 import static org.neo4j.gds.Orientation.REVERSE;
 import static org.neo4j.gds.Orientation.UNDIRECTED;
 import static org.neo4j.gds.core.io.file.csv.CsvGraphCapabilitiesWriter.GRAPH_CAPABILITIES_FILE_NAME;
 import static org.neo4j.gds.core.io.file.csv.CsvGraphInfoVisitor.GRAPH_INFO_FILE_NAME;
-import static org.neo4j.gds.core.io.file.csv.CsvGraphPropertySchemaVisitor.GRAPH_PROPERTY_SCHEMA_FILE_NAME;
 import static org.neo4j.gds.core.io.file.csv.CsvNodeSchemaVisitor.NODE_SCHEMA_FILE_NAME;
 import static org.neo4j.gds.core.io.file.csv.CsvNodeVisitor.ID_COLUMN_NAME;
 import static org.neo4j.gds.core.io.file.csv.CsvRelationshipSchemaVisitor.RELATIONSHIP_SCHEMA_FILE_NAME;
 import static org.neo4j.gds.core.io.file.csv.CsvRelationshipVisitor.END_ID_COLUMN_NAME;
 import static org.neo4j.gds.core.io.file.csv.CsvRelationshipVisitor.START_ID_COLUMN_NAME;
-import static org.neo4j.gds.core.io.file.csv.CsvSchemaConstants.GRAPH_PROPERTY_SCHEMA_COLUMNS;
 import static org.neo4j.gds.core.io.file.csv.CsvSchemaConstants.NODE_SCHEMA_COLUMNS;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -132,11 +124,6 @@ class GraphStoreToCsvExporterTest extends CsvTest {
     public static final List<String> LABEL_MAPPINGS_COLUMNS = List.of("index", "label");
     private static final List<String> NODE_COLUMNS = List.of(ID_COLUMN_NAME);
     private static final List<String> RELATIONSHIP_COLUMNS = List.of(START_ID_COLUMN_NAME, END_ID_COLUMN_NAME);
-
-    @AfterEach
-    void tearDown() {
-        graphStore.graphPropertyKeys().forEach(graphStore::removeGraphProperty);
-    }
 
     @Test
     void exportTopology() {
@@ -254,61 +241,6 @@ class GraphStoreToCsvExporterTest extends CsvTest {
     }
 
     @Test
-    void shouldExportGraphProperties() {
-        var parameters = new GraphStoreToFileExporterParameters(
-            tempDir.toString(),
-            "",
-            RelationshipType.ALL_RELATIONSHIPS,
-            new Concurrency(1),
-            10_000
-        );
-
-        var graphPropertyValues = new LongGraphPropertyValues() {
-            @Override
-            public long valueCount() {
-                return 3;
-            }
-
-            @Override
-            public LongStream longValues() {
-                return LongStream.range(0, valueCount());
-            }
-        };
-
-        graphStore.addGraphProperty("graphProp", graphPropertyValues);
-
-        var exporter = GraphStoreToCsvExporter.create(
-            graphStore,
-            parameters,
-            tempDir,
-            Optional.empty(),
-            PlainSimpleRequestCorrelationId.create(),
-            TaskRegistryFactory.empty(),
-            LoggerForProgressTracking.noOpLog(),
-            DefaultPool.INSTANCE
-        );
-        exporter.run();
-
-        assertCsvFiles(List.of("graph_property_graphProp_0.csv", "graph_property_graphProp_header.csv"));
-
-        assertDataContent(
-            "graph_property_graphProp_0.csv",
-            List.of(
-                List.of("0"),
-                List.of("1"),
-                List.of("2")
-            )
-        );
-
-        assertDataContent(
-            "graph_property_graphProp_header.csv",
-            List.of(
-                List.of("graphProp:long")
-            )
-        );
-    }
-
-    @Test
     void exportMultithreaded() {
         var parameters = new GraphStoreToFileExporterParameters(
             tempDir.toString(),
@@ -387,81 +319,6 @@ class GraphStoreToCsvExporterTest extends CsvTest {
     }
 
     @Test
-    void exportGraphPropertiesMultithreaded() throws IOException {
-        var parameters = new GraphStoreToFileExporterParameters(
-            tempDir.toString(),
-            "",
-            RelationshipType.ALL_RELATIONSHIPS,
-            new Concurrency(4),
-            10_000
-        );
-
-        var graphPropertyValues = new LongGraphPropertyValues() {
-
-            @Override
-            public long valueCount() {
-                return 1_000_000;
-            }
-
-            @Override
-            public LongStream longValues() {
-                return LongStream.range(0, valueCount());
-            }
-        };
-
-        graphStore.addGraphProperty("graphProp", graphPropertyValues);
-
-        var exporter = GraphStoreToCsvExporter.create(
-            graphStore,
-            parameters,
-            tempDir,
-            Optional.empty(),
-            PlainSimpleRequestCorrelationId.create(),
-            TaskRegistryFactory.empty(),
-            LoggerForProgressTracking.noOpLog(),
-            DefaultPool.INSTANCE
-        );
-        exporter.run();
-
-        assertCsvFiles(
-            LongStream
-                .range(0, parameters.concurrency().value())
-                .mapToObj(
-                    i -> formatWithLocale(
-                        CsvGraphPropertyVisitor.GRAPH_PROPERTY_DATA_FILE_NAME_TEMPLATE,
-                        "graphProp",
-                        i
-                    )
-                )
-                .collect(Collectors.toList())
-        );
-
-        var dataFiles = Files
-            .list(tempDir)
-            .filter(path -> path.getFileName().toString().startsWith("graph_property_graphProp"))
-            .filter(not(path -> path.getFileName().toString().endsWith("header.csv")))
-            .collect(Collectors.toList());
-
-        assertThat(dataFiles).hasSize(4);
-
-        var exportedValues = dataFiles
-            .stream()
-            .flatMap(path -> {
-                try {
-                    return Files.readAllLines(path).stream();
-                } catch (IOException e) {
-                    throw new UncheckedIOException(e);
-                }
-            })
-            .filter(not(String::isEmpty))
-            .mapToLong(Long::valueOf)
-            .sorted()
-            .toArray();
-
-        assertArrayEquals(LongStream.range(0, graphPropertyValues.valueCount()).toArray(), exportedValues);
-    }
-
-    @Test
     void exportSchemaAndDatabaseId() {
         var parameters = new GraphStoreToFileExporterParameters(
             tempDir.toString(),
@@ -470,18 +327,6 @@ class GraphStoreToCsvExporterTest extends CsvTest {
             new Concurrency(1),
             10_000
         );
-
-        graphStore.addGraphProperty("graphProp", new LongGraphPropertyValues() {
-            @Override
-            public LongStream longValues() {
-                return LongStream.range(0, valueCount());
-            }
-
-            @Override
-            public long valueCount() {
-                return 3;
-            }
-        });
 
         var exporter = GraphStoreToCsvExporter.create(
             graphStore,
@@ -499,7 +344,6 @@ class GraphStoreToCsvExporterTest extends CsvTest {
             List.of(
                 NODE_SCHEMA_FILE_NAME,
                 RELATIONSHIP_SCHEMA_FILE_NAME,
-                GRAPH_PROPERTY_SCHEMA_FILE_NAME,
                 GRAPH_INFO_FILE_NAME
             )
         );
@@ -612,19 +456,6 @@ class GraphStoreToCsvExporterTest extends CsvTest {
                     ValueType.DOUBLE.csvName(),
                     ValueType.DOUBLE.fallbackValue().toString(),
                     Aggregation.NONE.name(),
-                    PropertyState.PERSISTENT.name()
-                )
-            )
-        );
-
-        assertDataContent(
-            GRAPH_PROPERTY_SCHEMA_FILE_NAME,
-            List.of(
-                GRAPH_PROPERTY_SCHEMA_COLUMNS,
-                List.of(
-                    "graphProp",
-                    ValueType.LONG.csvName(),
-                    ValueType.LONG.fallbackValue().toString(),
                     PropertyState.PERSISTENT.name()
                 )
             )

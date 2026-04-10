@@ -191,8 +191,7 @@ public final class RandomGraphGenerator {
 
         var graphSchema = MutableGraphSchema.of(
             nodePropertiesAndSchema.nodeSchema(),
-            relationshipSchema,
-            Map.of()
+            relationshipSchema
         );
 
         return new RandomGraphSpecs(

@@ -22,20 +22,17 @@ package org.neo4j.gds.core.io;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.schema.NodeSchema;
-import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.api.schema.RelationshipSchema;
 import org.neo4j.gds.core.io.file.GraphInfo;
 
 import java.util.Locale;
-import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public record MetaDataStore(
     GraphInfo graphInfo,
     NodeSchema nodeSchema,
-    RelationshipSchema relationshipSchema,
-    Map<String, PropertySchema> graphPropertySchema
+    RelationshipSchema relationshipSchema
 ) {
     public static MetaDataStore of(GraphStore graphStore) {
         var relTypeCounts = graphStore.relationshipTypes()
@@ -72,8 +69,7 @@ public record MetaDataStore(
         return new MetaDataStore(
             graphInfo,
             schema.nodeSchema(),
-            schema.relationshipSchema(),
-            schema.graphProperties()
+            schema.relationshipSchema()
         );
     }
 }

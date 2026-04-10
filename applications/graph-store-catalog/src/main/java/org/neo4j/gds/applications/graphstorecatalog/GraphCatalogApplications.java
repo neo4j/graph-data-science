@@ -120,24 +120,10 @@ public interface GraphCatalogApplications {
         String relationshipType
     );
 
-    long dropGraphProperty(
-        RequestScopedDependencies requestScopedDependencies,
-        String graphName,
-        String graphProperty,
-        Map<String, Object> configuration
-    );
-
     MutateLabelResult mutateNodeLabel(
         RequestScopedDependencies requestScopedDependencies,
         String graphName,
         String nodeLabel,
-        Map<String, Object> configuration
-    );
-
-    Stream<?> streamGraphProperty(
-        RequestScopedDependencies requestScopedDependencies,
-        String graphName,
-        String graphProperty,
         Map<String, Object> configuration
     );
 

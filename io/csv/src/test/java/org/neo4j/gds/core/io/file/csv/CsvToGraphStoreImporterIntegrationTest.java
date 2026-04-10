@@ -30,8 +30,6 @@ import org.neo4j.gds.api.DatabaseInfo;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.GraphStoreAdapter;
 import org.neo4j.gds.api.ImmutableDatabaseInfo;
-import org.neo4j.gds.api.properties.graph.DoubleArrayGraphPropertyValues;
-import org.neo4j.gds.api.properties.graph.LongGraphPropertyValues;
 import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
@@ -48,9 +46,6 @@ import org.neo4j.gds.logging.Log;
 
 import java.nio.file.Path;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.LongStream;
-import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
@@ -119,55 +114,6 @@ class CsvToGraphStoreImporterIntegrationTest {
         var importedGraphStore = userGraphStore.graphStore();
         var importedGraph = importedGraphStore.getUnion();
         assertGraphEquals(graphStore.getUnion(), importedGraph);
-    }
-
-    @ParameterizedTest
-    @ValueSource(ints = {1, 4})
-    void shouldImportGraphStoreWithGraphProperties(int concurrency) {
-        var graphStore = GdlFactory.of(GRAPH_WITH_PROPERTIES).build();
-
-        addLongGraphProperty(graphStore);
-        addDoubleArrayGraphProperty(graphStore);
-        addLongNamedGraphProperty(graphStore);
-
-        var requestCorrelationId = PlainSimpleRequestCorrelationId.create();
-
-        GraphStoreToCsvExporter.create(
-            graphStore,
-            exportParameters(concurrency),
-            graphLocation,
-            Optional.empty(),
-            requestCorrelationId,
-            TaskRegistryFactory.empty(),
-            LoggerForProgressTracking.noOpLog(),
-            DefaultPool.INSTANCE
-        ).run();
-        var importer = new CsvToGraphStoreImporter(
-            new Concurrency(concurrency),
-            graphLocation,
-            Log.noOpLog(),
-            requestCorrelationId,
-            EmptyTaskRegistryFactory.INSTANCE
-        );
-        var userGraphStore = importer.run().graphStore();
-
-        assertThat(userGraphStore.graphPropertyKeys()).containsExactlyInAnyOrder(
-            "longProp",
-            "doubleArrayProp",
-            "thisisaverylongnameintentionallytotriggerquoting"
-        );
-
-        var expectedLongValues = LongStream.range(0, 10_000).toArray();
-        assertThat(userGraphStore.graphProperty("longProp").values().longValues().toArray())
-            .containsExactlyInAnyOrder(expectedLongValues);
-
-        var expectedDoubleArrayProperties = LongStream
-            .range(0, 1337)
-            .mapToObj(i -> new double[]{(double) i, 42.0})
-            .toList()
-            .toArray(new double[0][0]);
-        assertThat(userGraphStore.graphProperty("doubleArrayProp").values().doubleArrayValues().collect(Collectors.toList()))
-            .containsExactlyInAnyOrder(expectedDoubleArrayProperties);
     }
 
     @ParameterizedTest
@@ -345,48 +291,6 @@ class CsvToGraphStoreImporterIntegrationTest {
             new Concurrency(concurrency),
             10_000
         );
-    }
-
-    private void addDoubleArrayGraphProperty(GraphStore graphStore) {
-        graphStore.addGraphProperty("doubleArrayProp", new DoubleArrayGraphPropertyValues() {
-            @Override
-            public Stream<double[]> doubleArrayValues() {
-                return LongStream.range(0, 1337).mapToObj(i -> new double[]{ (double) i, 42.0 });
-            }
-
-            @Override
-            public long valueCount() {
-                return 1337;
-            }
-        });
-    }
-
-    private void addLongGraphProperty(GraphStore graphStore) {
-        graphStore.addGraphProperty("longProp", new LongGraphPropertyValues() {
-            @Override
-            public LongStream longValues() {
-                return LongStream.range(0, 10_000);
-            }
-
-            @Override
-            public long valueCount() {
-                return 10_000;
-            }
-        });
-    }
-
-    private void addLongNamedGraphProperty(GraphStore graphStore) {
-        graphStore.addGraphProperty("thisisaverylongnameintentionallytotriggerquoting", new LongGraphPropertyValues() {
-            @Override
-            public LongStream longValues() {
-                return LongStream.range(0, 10_000);
-            }
-
-            @Override
-            public long valueCount() {
-                return 10_000;
-            }
-        });
     }
 
     private static class RemoteDatabaseGraphStoreWrapper extends GraphStoreAdapter {

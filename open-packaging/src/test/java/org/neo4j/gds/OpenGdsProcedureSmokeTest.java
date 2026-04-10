@@ -42,9 +42,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class OpenGdsProcedureSmokeTest extends BaseProcTest {
 
     private static final List<String> PROCEDURES = asList(
-        "gds.graph.graphProperty.stream",
-        "gds.graph.graphProperty.drop",
-
         "gds.graph.nodeLabel.mutate",
         "gds.graph.nodeLabel.write",
 

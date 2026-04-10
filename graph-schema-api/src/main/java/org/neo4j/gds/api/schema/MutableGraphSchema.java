@@ -23,12 +23,7 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.ValueClass;
 
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @ValueClass
 @SuppressWarnings({"immutables:subtype", "immutables:from"})
@@ -41,44 +36,40 @@ public interface MutableGraphSchema extends GraphSchema {
 
     @Override
     default MutableGraphSchema filterNodeLabels(Set<NodeLabel> labelsToKeep) {
-        return of(nodeSchema().filter(labelsToKeep), relationshipSchema(), graphProperties());
+        return of(nodeSchema().filter(labelsToKeep), relationshipSchema());
     }
 
     @Override
     default MutableGraphSchema filterRelationshipTypes(Set<RelationshipType> relationshipTypesToKeep) {
-        return of(nodeSchema(), relationshipSchema().filter(relationshipTypesToKeep), graphProperties());
+        return of(nodeSchema(), relationshipSchema().filter(relationshipTypesToKeep));
     }
 
     @Override
     default MutableGraphSchema union(GraphSchema other) {
         return MutableGraphSchema.of(
             nodeSchema().union(other.nodeSchema()),
-            relationshipSchema().union(other.relationshipSchema()),
-            unionGraphProperties(other.graphProperties())
+            relationshipSchema().union(other.relationshipSchema())
         );
     }
 
     static MutableGraphSchema empty() {
-        return of(MutableNodeSchema.empty(), MutableRelationshipSchema.empty(), Map.of());
+        return of(MutableNodeSchema.empty(), MutableRelationshipSchema.empty());
     }
 
     static MutableGraphSchema from(GraphSchema from) {
         return of(
             MutableNodeSchema.from(from.nodeSchema()),
-            MutableRelationshipSchema.from(from.relationshipSchema()),
-            new HashMap<>(from.graphProperties())
+            MutableRelationshipSchema.from(from.relationshipSchema())
         );
     }
 
     static MutableGraphSchema of(
         MutableNodeSchema nodeSchema,
-        MutableRelationshipSchema relationshipSchema,
-        Map<String, PropertySchema> graphProperties
+        MutableRelationshipSchema relationshipSchema
     ) {
         return ImmutableMutableGraphSchema.builder()
             .nodeSchema(nodeSchema)
             .relationshipSchema(relationshipSchema)
-            .graphProperties(graphProperties)
             .build();
     }
 
@@ -86,25 +77,9 @@ public interface MutableGraphSchema extends GraphSchema {
         return ImmutableMutableGraphSchema.builder();
     }
 
-    private Map<String, PropertySchema> unionGraphProperties(Map<String, PropertySchema> otherProperties) {
-        return Stream.concat(
-            graphProperties().entrySet().stream(),
-            otherProperties.entrySet().stream()
-        ).collect(Collectors.toMap(
-            Map.Entry::getKey,
-            Map.Entry::getValue,
-            (leftType, rightType) -> {
-                if (leftType.valueType() != rightType.valueType()) {
-                    throw new IllegalArgumentException(String.format(
-                        Locale.ENGLISH,
-                        "Combining schema entries with value type %s and %s is not supported.",
-                        leftType.valueType(),
-                        rightType.valueType()
-                    ));
-                } else {
-                    return leftType;
-                }
-            }
-        ));
+    static ImmutableMutableGraphSchema.Builder builderFrom(GraphSchema parent) {
+        return builder()
+            .nodeSchema(MutableNodeSchema.from(parent.nodeSchema()))
+            .relationshipSchema(MutableRelationshipSchema.from(parent.relationshipSchema()));
     }
 }

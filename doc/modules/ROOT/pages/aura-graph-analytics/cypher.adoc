@@ -320,8 +320,6 @@ The following graph catalog procedures are not supported:
 * `gds.graph.export.csv.estimate`
 * `gds.backup`
 * `gds.restore`
-* `gds.graph.graphProperty.drop`
-* `gds.graph.graphProperty.stream`
 
 
 ==== Machine learning

@@ -37,8 +37,6 @@ import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.Topology;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.gds.api.properties.graph.GraphProperty;
-import org.neo4j.gds.api.properties.graph.GraphPropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodeProperty;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.properties.relationships.RelationshipProperty;
@@ -287,36 +285,6 @@ class GraphCatalogProcedureFacadeTest {
 
         @Override
         public Capabilities capabilities() {
-            throw new UnsupportedOperationException("TODO");
-        }
-
-        @Override
-        public Set<String> graphPropertyKeys() {
-            throw new UnsupportedOperationException("TODO");
-        }
-
-        @Override
-        public boolean hasGraphProperty(String propertyKey) {
-            throw new UnsupportedOperationException("TODO");
-        }
-
-        @Override
-        public GraphProperty graphProperty(String propertyKey) {
-            throw new UnsupportedOperationException("TODO");
-        }
-
-        @Override
-        public GraphPropertyValues graphPropertyValues(String propertyKey) {
-            throw new UnsupportedOperationException("TODO");
-        }
-
-        @Override
-        public void addGraphProperty(String propertyKey, GraphPropertyValues propertyValues) {
-            throw new UnsupportedOperationException("TODO");
-        }
-
-        @Override
-        public void removeGraphProperty(String propertyKey) {
             throw new UnsupportedOperationException("TODO");
         }
 

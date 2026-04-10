@@ -34,7 +34,6 @@ import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Objects;
-import java.util.stream.LongStream;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
@@ -77,23 +76,6 @@ class CsvToGraphStoreImporterTest {
     }
 
     @Test
-    void shouldImportGraphProperties() throws URISyntaxException {
-        var exporter = new CsvToGraphStoreImporter(
-            new Concurrency(2),
-            importPath(),
-            Log.noOpLog(),
-            PlainSimpleRequestCorrelationId.create(),
-            EmptyTaskRegistryFactory.INSTANCE
-        );
-        var userGraphStore = exporter.run();
-        var graphStore = userGraphStore.graphStore();
-
-        assertThat(graphStore.graphPropertyKeys()).containsExactly("prop1");
-        assertThat(graphStore.graphProperty("prop1").values().longValues().toArray())
-            .containsExactlyInAnyOrder(LongStream.range(0, 10).toArray());
-    }
-
-    @Test
     void shouldLogProgress() throws URISyntaxException {
         var log = new GdsTestLog();
         var exporter = new CsvToGraphStoreImporter(
@@ -116,9 +98,6 @@ class CsvToGraphStoreImporterTest {
         log.assertContainsMessage(TestLog.INFO, "Csv import :: Import relationships 80%");
         log.assertContainsMessage(TestLog.INFO, "Csv import :: Import relationships 100%");
         log.assertContainsMessage(TestLog.INFO, "Csv import :: Import relationships :: Finished");
-        log.assertContainsMessage(TestLog.INFO, "Csv import :: Import graph properties :: Start");
-        log.assertContainsMessage(TestLog.INFO, "Csv import :: Import graph properties 100%");
-        log.assertContainsMessage(TestLog.INFO, "Csv import :: Import graph properties :: Finished");
         log.assertContainsMessage(TestLog.INFO, "Csv import :: Finished");
     }
 

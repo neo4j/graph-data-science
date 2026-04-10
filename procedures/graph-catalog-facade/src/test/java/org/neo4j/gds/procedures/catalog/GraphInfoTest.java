@@ -174,15 +174,13 @@ final class GraphInfoTest {
         assertThat(graphInfo.schema).containsExactlyInAnyOrderEntriesOf(
             Map.of(
                 "nodes", Map.of("A", Map.of()),
-                "relationships", Map.of("REL", Map.of()),
-                "graphProperties", Map.of()
+                "relationships", Map.of("REL", Map.of())
             )
         );
         assertThat(graphInfo.schemaWithOrientation).containsExactlyInAnyOrderEntriesOf(
             Map.of(
                 "nodes", Map.of("A", Map.of()),
-                "relationships", Map.of("REL", Map.of("direction", "DIRECTED", "properties", Map.of())),
-                "graphProperties", Map.of()
+                "relationships", Map.of("REL", Map.of("direction", "DIRECTED", "properties", Map.of()))
             )
         );
         assertThat(graphInfo.sizeInBytes).isEqualTo(-1L);

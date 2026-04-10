@@ -70,12 +70,12 @@ public interface Pipeline<FEATURE_STEP extends FeatureStep> extends ToMapConvert
     }
 
     default Set<String> featurePropertiesMissingFromGraph(GraphStore graphStore, Collection<NodeLabel> nodeLabels) {
-        var graphProperties = graphStore.nodePropertyKeys(nodeLabels);
+        var nodePropertyKeys = graphStore.nodePropertyKeys(nodeLabels);
 
         return featureSteps()
             .stream()
             .flatMap(step -> step.inputNodeProperties().stream())
-            .filter(property -> !graphProperties.contains(property))
+            .filter(property -> !nodePropertyKeys.contains(property))
             .collect(Collectors.toSet());
     }
 

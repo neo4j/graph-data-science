@@ -193,8 +193,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
         var relationshipImportResult = loadRelationships(nodes.idMap());
         var schema = MutableGraphSchema.of(
             nodes.schema(),
-            relationshipImportResult.relationshipSchema(),
-            Map.of()
+            relationshipImportResult.relationshipSchema()
         );
 
         return new GraphStoreBuilder()

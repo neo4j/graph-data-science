@@ -575,38 +575,6 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
     }
 
     @Override
-    public long dropGraphProperty(
-        RequestScopedDependencies requestScopedDependencies,
-        String graphNameAsString,
-        String graphProperty,
-        Map<String, Object> rawConfiguration
-    ) {
-        var graphName = graphNameValidationService.validate(graphNameAsString);
-
-        // we do this for the side effect of checking for unknown configuration keys, it is a bit naff
-        catalogConfigurationService.validateDropGraphPropertiesConfiguration(
-            graphName,
-            graphProperty,
-            rawConfiguration
-        );
-
-        var graphStoreWithConfig = getGraphStoreWithConfig(requestScopedDependencies, graphName);
-        var graphStore = graphStoreWithConfig.graphStore();
-        graphStoreValidationService.ensureGraphPropertyExists(graphStore, graphProperty);
-
-        var numberOfProperties = graphStore.graphPropertyValues(graphProperty).valueCount();
-
-        try {
-            graphStore.removeGraphProperty(graphProperty);
-        } catch (RuntimeException e) {
-            log.warn("Graph property removal failed", e);
-            throw e;
-        }
-
-        return numberOfProperties;
-    }
-
-    @Override
     public MutateLabelResult mutateNodeLabel(
         RequestScopedDependencies requestScopedDependencies,
         String graphNameAsString,
@@ -629,28 +597,6 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
             configuration,
             nodeFilter
         );
-    }
-
-    @Override
-    public Stream<?> streamGraphProperty(
-        RequestScopedDependencies requestScopedDependencies,
-        String graphNameAsString,
-        String graphProperty,
-        Map<String, Object> rawConfiguration
-    ) {
-        var graphName = graphNameValidationService.validate(graphNameAsString);
-
-        catalogConfigurationService.validateGraphStreamGraphPropertiesConfig(
-            graphName,
-            graphProperty,
-            rawConfiguration
-        );
-
-        var graphStoreWithConfig = getGraphStoreWithConfig(requestScopedDependencies, graphName);
-        var graphStore = graphStoreWithConfig.graphStore();
-        graphStoreValidationService.ensureGraphPropertyExists(graphStore, graphProperty);
-
-        return graphStore.graphPropertyValues(graphProperty).objects();
     }
 
     @Override

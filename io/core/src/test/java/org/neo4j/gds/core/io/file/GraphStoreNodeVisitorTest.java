@@ -37,8 +37,6 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 
-import java.util.Map;
-
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
 
 @GdlExtension
@@ -85,8 +83,7 @@ class GraphStoreNodeVisitorTest {
 
         var graphSchema = MutableGraphSchema.of(
             nodeSchema,
-            relationshipSchema,
-            Map.of()
+            relationshipSchema
         );
 
         HugeGraph actualGraph = GraphFactory.create(

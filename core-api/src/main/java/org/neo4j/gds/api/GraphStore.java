@@ -22,8 +22,6 @@ package org.neo4j.gds.api;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.gds.api.properties.graph.GraphProperty;
-import org.neo4j.gds.api.properties.graph.GraphPropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodeProperty;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.properties.relationships.RelationshipProperty;
@@ -56,24 +54,6 @@ public interface GraphStore {
     ZonedDateTime modificationTime();
 
     Capabilities capabilities();
-
-    // Graph Properties
-
-    Set<String> graphPropertyKeys();
-
-    boolean hasGraphProperty(String propertyKey);
-
-    GraphProperty graphProperty(String propertyKey);
-
-    GraphPropertyValues graphPropertyValues(String propertyKey);
-
-    void addGraphProperty(
-        String propertyKey,
-        GraphPropertyValues propertyValues
-    );
-
-    void removeGraphProperty(String propertyKey);
-
 
     // Nodes
 

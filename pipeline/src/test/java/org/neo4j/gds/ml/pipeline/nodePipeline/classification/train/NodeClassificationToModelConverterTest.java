@@ -23,12 +23,10 @@ import org.assertj.core.util.DoubleComparator;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.api.schema.MutableGraphSchema;
 import org.neo4j.gds.api.schema.MutableNodeSchema;
 import org.neo4j.gds.api.schema.MutableRelationshipSchema;
-import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.collections.LongMultiSet;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.metrics.EvaluationScores;
@@ -98,8 +96,6 @@ class NodeClassificationToModelConverterTest {
             .nodeSchema(MutableNodeSchema.empty().addLabel(NodeLabel.of("M")))
             .relationshipSchema(MutableRelationshipSchema
                 .empty().addRelationshipType(RelationshipType.of("R"), Direction.UNDIRECTED))
-            .putGraphProperty("array", PropertySchema.of("array", ValueType.DOUBLE_ARRAY))
-            .putGraphProperty("scalar", PropertySchema.of("scalar", ValueType.DOUBLE))
             .build();
         var model = converter.toModel(ncResult, originalSchema).model();
 

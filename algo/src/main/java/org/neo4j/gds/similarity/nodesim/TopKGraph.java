@@ -30,8 +30,8 @@ import org.neo4j.gds.api.properties.relationships.RelationshipConsumer;
 import org.neo4j.gds.api.properties.relationships.RelationshipWithPropertyConsumer;
 import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.api.schema.GraphSchema;
-import org.neo4j.gds.api.schema.ImmutableMutableGraphSchema;
 import org.neo4j.gds.api.schema.ImmutableRelationshipPropertySchema;
+import org.neo4j.gds.api.schema.MutableGraphSchema;
 import org.neo4j.gds.api.schema.MutableRelationshipSchema;
 import org.neo4j.gds.api.schema.MutableRelationshipSchemaEntry;
 
@@ -80,8 +80,7 @@ public class TopKGraph extends GraphAdapter {
             )
         );
 
-        return ImmutableMutableGraphSchema.builder()
-            .from(graph.schema())
+        return MutableGraphSchema.builderFrom(graph.schema())
             .relationshipSchema(relationshipSchema)
             .build();
     }

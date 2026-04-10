@@ -88,7 +88,6 @@ public final class GraphStoreToCsvExporter {
             () -> new CsvNodeLabelMappingVisitor(exportPath),
             () -> new CsvRelationshipTypeMappingVisitor(exportPath),
             () -> new CsvRelationshipSchemaVisitor(exportPath),
-            () -> new CsvGraphPropertySchemaVisitor(exportPath),
             () -> new CsvGraphCapabilitiesWriter(exportPath),
             (index) -> new CsvNodeVisitor(
                 exportPath,
@@ -98,12 +97,6 @@ public final class GraphStoreToCsvExporter {
                 labelMapper
             ),
             (index) -> new CsvRelationshipVisitor(exportPath, relationshipSchema, headerFiles, index, relationshipTypeMapper),
-            (index) -> new CsvGraphPropertyVisitor(
-                exportPath,
-                graphStore.schema().graphProperties(),
-                headerFiles,
-                index
-            ),
             requestCorrelationId,
             taskRegistryFactory,
             log,

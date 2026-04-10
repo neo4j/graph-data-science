@@ -39,7 +39,6 @@ import org.neo4j.gds.core.io.GraphStoreInput;
 import org.neo4j.gds.core.io.file.FileHeader;
 import org.neo4j.gds.core.io.file.FileInput;
 import org.neo4j.gds.core.io.file.GraphInfo;
-import org.neo4j.gds.core.io.file.GraphPropertyFileHeader;
 import org.neo4j.gds.core.io.file.HeaderProperty;
 import org.neo4j.gds.core.io.file.MappedListIterator;
 import org.neo4j.gds.core.io.file.NodeFileHeader;
@@ -82,7 +81,6 @@ public final class CsvFileInput implements FileInput {
     // TODO: type that has the mapping
     private final Optional<HashMap<String, String>> labelMapping;
     private final MutableRelationshipSchema relationshipSchema;
-    private final Map<String, PropertySchema> graphPropertySchema;
     private final Capabilities capabilities;
     private final Optional<Map<String, String>> typeMapping;
 
@@ -94,7 +92,6 @@ public final class CsvFileInput implements FileInput {
         this.labelMapping = new NodeLabelMappingLoader(importPath).load();
         this.typeMapping = new RelationshipTypeMappingLoader(importPath).load();
         this.relationshipSchema = new RelationshipSchemaLoader(importPath).load();
-        this.graphPropertySchema = new GraphPropertySchemaLoader(importPath).load();
         this.capabilities = new GraphCapabilitiesLoader(importPath, CSV_MAPPER).load();
     }
 
@@ -138,17 +135,6 @@ public final class CsvFileInput implements FileInput {
     }
 
     @Override
-    public InputIterable graphProperties() {
-        var pathMapping = CsvImportFileUtil.graphPropertyHeaderToFileMapping(importPath);
-        var headerToDataFilesMapping = pathMapping.entrySet().stream().collect(Collectors.toMap(
-            entry -> CsvImportFileUtil.parseGraphPropertyHeader(entry.getKey()),
-            Map.Entry::getValue
-        ));
-
-        return () -> new GraphPropertyImporter(headerToDataFilesMapping, graphPropertySchema);
-    }
-
-    @Override
     public String userName() {
         return userName;
     }
@@ -171,11 +157,6 @@ public final class CsvFileInput implements FileInput {
     @Override
     public MutableRelationshipSchema relationshipSchema() {
         return relationshipSchema;
-    }
-
-    @Override
-    public Map<String, PropertySchema> graphPropertySchema() {
-        return graphPropertySchema;
     }
 
     @Override
@@ -244,22 +225,6 @@ public final class CsvFileInput implements FileInput {
         @Override
         public InputChunk newChunk() {
             return new RelationshipLineChunk(elementSchema);
-        }
-    }
-
-    static class GraphPropertyImporter extends FileImporter<GraphPropertyFileHeader, Map<String, PropertySchema>, PropertySchema> {
-
-
-        GraphPropertyImporter(
-            Map<GraphPropertyFileHeader, List<Path>> headerToDataFilesMapping,
-            Map<String, PropertySchema> graphPropertySchema
-        ) {
-            super(headerToDataFilesMapping, graphPropertySchema);
-        }
-
-        @Override
-        public InputChunk newChunk() {
-            return new GraphPropertyLineChunk(elementSchema);
         }
     }
 
@@ -343,21 +308,6 @@ public final class CsvFileInput implements FileInput {
 
             visitProperties(header, propertySchemas, visitor, lineArray);
 
-            visitor.endOfEntity();
-        }
-    }
-
-    static class GraphPropertyLineChunk extends LineChunk<GraphPropertyFileHeader, Map<String, PropertySchema>, PropertySchema> {
-
-        GraphPropertyLineChunk(Map<String, PropertySchema> stringPropertySchemaMap) {
-            super(stringPropertySchemaMap);
-        }
-
-        @Override
-        void visitLine(
-            String[] lineArray, GraphPropertyFileHeader header, InputEntityVisitor visitor
-        ) throws IOException {
-            visitProperties(header, propertySchemas, visitor, lineArray);
             visitor.endOfEntity();
         }
     }

@@ -44,7 +44,6 @@ import org.neo4j.gds.utils.StringFormatting;
 import org.opencypher.v9_0.parser.javacc.ParseException;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
@@ -217,6 +216,6 @@ public final class GraphStoreFilter {
                 .filter(filteredRelationshipTypes)
         );
 
-        return MutableGraphSchema.of(nodeSchema, relationshipSchema, Map.of());
+        return MutableGraphSchema.of(nodeSchema, relationshipSchema);
     }
 }

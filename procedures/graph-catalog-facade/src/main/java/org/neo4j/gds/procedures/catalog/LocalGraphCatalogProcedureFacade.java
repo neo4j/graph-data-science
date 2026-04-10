@@ -317,28 +317,6 @@ public class LocalGraphCatalogProcedureFacade implements GraphCatalogProcedureFa
     }
 
     @Override
-    public Stream<GraphDropGraphPropertiesResult> dropGraphProperty(
-        String graphName,
-        String graphProperty,
-        Map<String, Object> configuration
-    ) {
-        var numberOfPropertiesRemoved = catalog.dropGraphProperty(
-            requestScopedDependencies,
-            graphName,
-            graphProperty,
-            configuration
-        );
-
-        var result = new GraphDropGraphPropertiesResult(
-            graphName,
-            graphProperty,
-            numberOfPropertiesRemoved
-        );
-
-        return Stream.of(result);
-    }
-
-    @Override
     public Stream<MutateLabelResult> mutateNodeLabel(
         String graphName,
         String nodeLabel,
@@ -352,22 +330,6 @@ public class LocalGraphCatalogProcedureFacade implements GraphCatalogProcedureFa
         );
 
         return Stream.of(result);
-    }
-
-    @Override
-    public Stream<StreamGraphPropertyResult> streamGraphProperty(
-        String graphName,
-        String graphProperty,
-        Map<String, Object> configuration
-    ) {
-        var result = catalog.streamGraphProperty(
-            requestScopedDependencies,
-            graphName,
-            graphProperty,
-            configuration
-        );
-
-        return result.map(StreamGraphPropertyResult::new);
     }
 
     @Override

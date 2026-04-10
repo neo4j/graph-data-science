@@ -25,15 +25,12 @@ import org.neo4j.gds.RelationshipType;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public interface GraphSchema {
 
     NodeSchema nodeSchema();
 
     RelationshipSchema relationshipSchema();
-
-    Map<String, PropertySchema> graphProperties();
 
     GraphSchema filterNodeLabels(Set<NodeLabel> labelsToKeep);
 
@@ -44,16 +41,14 @@ public interface GraphSchema {
     default Map<String, Object> toMap() {
         return Map.of(
             "nodes", nodeSchema().toMap(),
-            "relationships", relationshipSchema().toMap(),
-            "graphProperties", graphPropertySchemaMap()
+            "relationships", relationshipSchema().toMap()
         );
     }
 
     default Map<String, Object> toMapOld() {
         return Map.of(
             "nodes", nodeSchema().toMap(),
-            "relationships", relationshipSchema().toMapOld(),
-            "graphProperties", graphPropertySchemaMap()
+            "relationships", relationshipSchema().toMapOld()
         );
     }
 
@@ -63,16 +58,6 @@ public interface GraphSchema {
 
     default Direction direction() {
         return relationshipSchema().isUndirected() ? Direction.UNDIRECTED : Direction.DIRECTED;
-    }
-
-    private Map<String, String> graphPropertySchemaMap() {
-        return graphProperties()
-            .entrySet()
-            .stream()
-            .collect(Collectors.toMap(
-                Map.Entry::getKey,
-                schema -> GraphSchema.forPropertySchema(schema.getValue())
-            ));
     }
 
     static GraphSchema empty() {

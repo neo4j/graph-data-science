@@ -29,7 +29,6 @@ import org.neo4j.gds.core.RequestCorrelationId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.core.io.GraphStoreGraphPropertyVisitor;
 import org.neo4j.gds.core.io.GraphStoreRelationshipVisitor;
 import org.neo4j.gds.core.loading.Capabilities.WriteMode;
 import org.neo4j.gds.core.loading.GraphStoreBuilder;
@@ -59,7 +58,6 @@ public abstract class FileToGraphStoreImporter {
 
     private final GraphStoreNodeVisitor.Builder nodeVisitorBuilder;
     private final GraphStoreRelationshipVisitor.Builder relationshipVisitorBuilder;
-    private final GraphStoreGraphPropertyVisitor.Builder graphPropertyVisitorBuilder;
     private final Path importPath;
     private final Concurrency concurrency;
 
@@ -81,7 +79,6 @@ public abstract class FileToGraphStoreImporter {
         this.requestCorrelationId = requestCorrelationId;
         this.nodeVisitorBuilder = new GraphStoreNodeVisitor.Builder();
         this.relationshipVisitorBuilder = new GraphStoreRelationshipVisitor.Builder();
-        this.graphPropertyVisitorBuilder = new GraphStoreGraphPropertyVisitor.Builder();
         this.concurrency = concurrency;
         this.importPath = importPath;
         this.graphSchemaBuilder = ImmutableMutableGraphSchema.builder();
@@ -137,7 +134,6 @@ public abstract class FileToGraphStoreImporter {
 
         var nodes = importNodes(fileInput);
         importRelationships(fileInput, nodes.idMap());
-        importGraphProperties(fileInput);
     }
 
     private ProgressTracker createProgressTracker(FileInput fileInput) {
@@ -151,10 +147,6 @@ public abstract class FileToGraphStoreImporter {
             ? Task.UNKNOWN_VOLUME
             : graphInfo.relationshipTypeCounts().values().stream().mapToLong(Long::longValue).sum();
         importTasks.add(Tasks.leaf("Import relationships", relationshipTaskVolume));
-
-        if (!fileInput.graphPropertySchema().isEmpty()) {
-            importTasks.add(Tasks.leaf("Import graph properties"));
-        }
 
         var task = Tasks.task(
             rootTaskName() + " import",
@@ -237,40 +229,6 @@ public abstract class FileToGraphStoreImporter {
         graphStoreBuilder.relationshipImportResult(relationshipImportResult);
 
         progressTracker.endSubTask();
-    }
-
-    private void importGraphProperties(FileInput fileInput) {
-        if (!fileInput.graphPropertySchema().isEmpty()) {
-            progressTracker.beginSubTask();
-
-            var graphPropertySchema = fileInput.graphPropertySchema();
-            graphSchemaBuilder.graphProperties(graphPropertySchema);
-            graphPropertyVisitorBuilder.withGraphPropertySchema(graphPropertySchema);
-
-            var graphStoreGraphPropertyVisitor = graphPropertyVisitorBuilder.build();
-
-            var graphPropertiesIterator = fileInput.graphProperties().iterator();
-
-            var tasks = ParallelUtil.tasks(
-                concurrency,
-                (index) -> new ElementImportRunner<>(
-                    graphStoreGraphPropertyVisitor,
-                    graphPropertiesIterator,
-                    progressTracker
-                )
-            );
-            ParallelUtil.run(tasks, DefaultPool.INSTANCE);
-            graphStoreGraphPropertyVisitor.close();
-
-            graphStoreBuilder.graphProperties(
-                GraphPropertyStoreFromVisitorHelper.fromGraphPropertyVisitor(
-                    graphPropertySchema,
-                    graphStoreGraphPropertyVisitor
-                )
-            );
-
-            progressTracker.endSubTask();
-        }
     }
 
     public static final Validator<Path> DIRECTORY_IS_READABLE = value -> {

@@ -193,38 +193,6 @@ public class CatalogConfigurationService {
         return configuration;
     }
 
-    void validateDropGraphPropertiesConfiguration(
-        GraphName graphName,
-        String graphProperty,
-        Map<String, Object> rawConfiguration
-    ) {
-        var cypherConfig = CypherMapWrapper.create(rawConfiguration);
-
-        var configuration = GraphRemoveGraphPropertiesConfig.of(
-            graphName.value(),
-            graphProperty,
-            cypherConfig
-        );
-
-        ensureThereAreNoExtraConfigurationKeys(cypherConfig, configuration);
-    }
-
-    void validateGraphStreamGraphPropertiesConfig(
-        GraphName graphName,
-        String graphProperty,
-        Map<String, Object> rawConfiguration
-    ) {
-        var cypherConfig = CypherMapWrapper.create(rawConfiguration);
-
-        var configuration = GraphStreamGraphPropertiesConfig.of(
-            graphName.value(),
-            graphProperty,
-            cypherConfig
-        );
-
-        ensureThereAreNoExtraConfigurationKeys(cypherConfig, configuration);
-    }
-
     GraphStreamNodePropertiesConfig parseGraphStreamNodePropertiesConfiguration(
         GraphName graphName,
         Object nodeProperties,

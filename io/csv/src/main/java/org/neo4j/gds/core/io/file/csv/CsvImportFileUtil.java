@@ -21,7 +21,6 @@ package org.neo4j.gds.core.io.file.csv;
 
 import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.databind.ObjectReader;
-import org.neo4j.gds.core.io.file.GraphPropertyFileHeader;
 import org.neo4j.gds.core.io.file.NodeFileHeader;
 import org.neo4j.gds.core.io.file.RelationshipFileHeader;
 
@@ -80,18 +79,6 @@ final class CsvImportFileUtil {
         }
     }
 
-    public static GraphPropertyFileHeader parseGraphPropertyHeader(Path headerFile) {
-        try (MappingIterator<String[]> iterator = HEADER_FILE_READER.readValues(headerFile.toFile())) {
-            var headerLine = iterator.next();
-            if (headerLine == null) {
-                throw new UncheckedIOException(new IOException("Header line was null"));
-            }
-            return GraphPropertyFileHeader.of(headerLine);
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
-    }
-
     public static Map<Path, List<Path>> nodeHeaderToFileMapping(Path csvDirectory, Stream<String> identifiers) {
         var files = identifiers
             .map(id -> formatWithLocale("nodes_%s_header.csv", id))
@@ -107,10 +94,6 @@ final class CsvImportFileUtil {
         return headerToFileMapping(csvDirectory, CsvImportFileUtil::getRelationshipHeaderFiles);
     }
 
-    public static Map<Path, List<Path>> graphPropertyHeaderToFileMapping(Path csvDirectory) {
-        return headerToFileMapping(csvDirectory, CsvImportFileUtil::getGraphPropertyHeaderFiles);
-    }
-
     static List<Path> getNodeHeaderFiles(Path csvDirectory) {
         String nodeFilesPattern = "^nodes(_\\w+)*_header.csv";
         return getFilesByRegex(csvDirectory, nodeFilesPattern);
@@ -119,11 +102,6 @@ final class CsvImportFileUtil {
     static List<Path> getRelationshipHeaderFiles(Path csvDirectory) {
         String nodeFilesPattern = "^relationships(_\\w+)+_header.csv";
         return getFilesByRegex(csvDirectory, nodeFilesPattern);
-    }
-
-    static List<Path> getGraphPropertyHeaderFiles(Path csvDirectory) {
-        var graphPropertyFilesPattern = "^graph_property(_\\w+)+_header.csv";
-        return getFilesByRegex(csvDirectory, graphPropertyFilesPattern);
     }
 
     private static Map<Path, List<Path>> headerToFileMapping(

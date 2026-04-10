@@ -31,7 +31,6 @@ import org.neo4j.gds.core.io.GraphStoreExporter;
 import org.neo4j.gds.core.io.GraphStoreInput;
 import org.neo4j.gds.core.io.IdentifierMapper;
 import org.neo4j.gds.core.io.NeoNodeProperties;
-import org.neo4j.gds.core.io.schema.ElementSchemaVisitor;
 import org.neo4j.gds.core.io.schema.NodeSchemaVisitor;
 import org.neo4j.gds.core.io.schema.RelationshipSchemaVisitor;
 import org.neo4j.gds.core.io.schema.SimpleVisitor;
@@ -56,7 +55,6 @@ public class GraphStoreToFileExporter extends GraphStoreExporter {
     private final GraphStoreToFileExporterParameters parameters;
     private final VisitorProducer<NodeVisitor> nodeVisitorSupplier;
     private final VisitorProducer<RelationshipVisitor> relationshipVisitorSupplier;
-    private final VisitorProducer<GraphPropertyVisitor> graphPropertyVisitorSupplier;
 
     private final Supplier<SingleRowVisitor<String>> userInfoVisitorSupplier;
     private final Supplier<SingleRowVisitor<GraphInfo>> graphInfoVisitorSupplier;
@@ -65,7 +63,6 @@ public class GraphStoreToFileExporter extends GraphStoreExporter {
     private final Supplier<SimpleVisitor<Map.Entry<RelationshipType, String>>> typeMappingVisitorSupplier;
 
     private final Supplier<RelationshipSchemaVisitor> relationshipSchemaVisitorSupplier;
-    private final Supplier<ElementSchemaVisitor> graphPropertySchemaVisitorSupplier;
     private final Supplier<SimpleWriter<Capabilities>> graphCapabilitiesWriterSupplier;
 
     private final RequestCorrelationId requestCorrelationId;
@@ -86,11 +83,9 @@ public class GraphStoreToFileExporter extends GraphStoreExporter {
         Supplier<SimpleVisitor<Map.Entry<NodeLabel, String>>> labelMappingVisitorSupplier,
         Supplier<SimpleVisitor<Map.Entry<RelationshipType, String>>> typeMappingVisitorSupplier,
         Supplier<RelationshipSchemaVisitor> relationshipSchemaVisitorSupplier,
-        Supplier<ElementSchemaVisitor> graphPropertySchemaVisitorSupplier,
         Supplier<SimpleWriter<Capabilities>> graphCapabilitiesWriterSupplier,
         VisitorProducer<NodeVisitor> nodeVisitorSupplier,
         VisitorProducer<RelationshipVisitor> relationshipVisitorSupplier,
-        VisitorProducer<GraphPropertyVisitor> graphPropertyVisitorSupplier,
         RequestCorrelationId requestCorrelationId,
         TaskRegistryFactory taskRegistryFactory,
         LoggerForProgressTracking log,
@@ -109,14 +104,12 @@ public class GraphStoreToFileExporter extends GraphStoreExporter {
         this.parameters = parameters;
         this.nodeVisitorSupplier = nodeVisitorSupplier;
         this.relationshipVisitorSupplier = relationshipVisitorSupplier;
-        this.graphPropertyVisitorSupplier = graphPropertyVisitorSupplier;
         this.userInfoVisitorSupplier = userInfoVisitorSupplier;
         this.graphInfoVisitorSupplier = graphInfoVisitorSupplier;
         this.nodeSchemaVisitorSupplier = nodeSchemaVisitorSupplier;
         this.labelMappingVisitorSupplier = labelMappingVisitorSupplier;
         this.typeMappingVisitorSupplier = typeMappingVisitorSupplier;
         this.relationshipSchemaVisitorSupplier = relationshipSchemaVisitorSupplier;
-        this.graphPropertySchemaVisitorSupplier = graphPropertySchemaVisitorSupplier;
         this.graphCapabilitiesWriterSupplier = graphCapabilitiesWriterSupplier;
         this.requestCorrelationId = requestCorrelationId;
         this.taskRegistryFactory = taskRegistryFactory;
@@ -135,13 +128,11 @@ public class GraphStoreToFileExporter extends GraphStoreExporter {
             exportGraphInfo(graphStoreInput);
             exportNodeSchema(graphStoreInput);
             exportRelationshipSchema(graphStoreInput);
-            exportGraphPropertySchema(graphStoreInput);
             exportGraphCapabilities(graphStoreInput);
             exportNodeLabelMapping(graphStoreInput);
             exportRelationshipTypeMapping(graphStoreInput);
             exportNodes(pbiInput, progressTracker);
             exportRelationships(pbiInput, progressTracker);
-            exportGraphProperties(graphStoreInput, progressTracker);
         } catch (Exception e) {
             // as the tracker is created in this method
             progressTracker.endSubTaskWithFailure();
@@ -164,10 +155,6 @@ public class GraphStoreToFileExporter extends GraphStoreExporter {
             "Export relationships",
             graphInfo.relationshipTypeCounts().values().stream().mapToLong(Long::longValue).sum()
         ));
-
-        if (!graphStoreInput.metaDataStore().graphPropertySchema().isEmpty()) {
-            importTasks.add(Tasks.leaf("Export graph properties"));
-        }
 
         var task = Tasks.task(rootTaskName + " export", importTasks);
         return TaskProgressTracker.create(task, log, concurrency, requestCorrelationId, taskRegistryFactory);
@@ -218,33 +205,6 @@ public class GraphStoreToFileExporter extends GraphStoreExporter {
             .mayInterruptIfRunning(false)
             .run();
         progressTracker.endSubTask();
-    }
-
-    private void exportGraphProperties(
-        GraphStoreInput graphStoreInput,
-        ProgressTracker progressTracker
-    ) {
-        if (!graphStoreInput.metaDataStore().graphPropertySchema().isEmpty()) {
-            progressTracker.beginSubTask();
-            var graphPropertyInput = graphStoreInput.graphProperties();
-            var graphPropertyInputIterator = graphPropertyInput.iterator();
-
-            var tasks = ParallelUtil.tasks(
-                concurrency,
-                (index) -> new ElementImportRunner<>(
-                    graphPropertyVisitorSupplier.apply(index),
-                    graphPropertyInputIterator,
-                    progressTracker
-                )
-            );
-
-            RunWithConcurrency.builder()
-                .concurrency(concurrency)
-                .tasks(tasks)
-                .executor(executorService)
-                .run();
-            progressTracker.endSubTask();
-        }
     }
 
     private void exportUserName() {
@@ -320,19 +280,6 @@ public class GraphStoreToFileExporter extends GraphStoreExporter {
                         relationshipSchemaVisitor.endOfEntity();
                     });
                 }
-            });
-        }
-    }
-
-    private void exportGraphPropertySchema(GraphStoreInput graphStoreInput) {
-        var graphPropertySchema = graphStoreInput.metaDataStore().graphPropertySchema();
-        try (var graphPropertySchemaVisitor = graphPropertySchemaVisitorSupplier.get()) {
-            graphPropertySchema.forEach((key, propertySchema) -> {
-                graphPropertySchemaVisitor.key(key);
-                graphPropertySchemaVisitor.defaultValue(propertySchema.defaultValue());
-                graphPropertySchemaVisitor.valueType(propertySchema.valueType());
-                graphPropertySchemaVisitor.state(propertySchema.state());
-                graphPropertySchemaVisitor.endOfEntity();
             });
         }
     }

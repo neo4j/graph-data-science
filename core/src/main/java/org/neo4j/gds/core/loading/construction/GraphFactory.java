@@ -365,7 +365,7 @@ public final class GraphFactory {
         relationshipSchema.set(relationships.relationshipSchemaEntry());
 
         return create(
-            MutableGraphSchema.of(nodeSchema, relationshipSchema, Map.of()),
+            MutableGraphSchema.of(nodeSchema, relationshipSchema),
             idMap,
             Map.of(),
             relationships

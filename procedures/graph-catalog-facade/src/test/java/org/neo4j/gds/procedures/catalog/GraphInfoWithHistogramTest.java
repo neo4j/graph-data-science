@@ -155,9 +155,7 @@ class GraphInfoWithHistogramTest {
                 "nodes",
                 Map.of("A", Map.of()),
                 "relationships",
-                Map.of("REL", Map.of()),
-                "graphProperties",
-                Map.of()
+                Map.of("REL", Map.of())
             )
         );
         assertThat(graphInfoWithHistogram.schemaWithOrientation).containsExactlyInAnyOrderEntriesOf(
@@ -165,9 +163,7 @@ class GraphInfoWithHistogramTest {
                 "nodes",
                 Map.of("A", Map.of()),
                 "relationships",
-                Map.of("REL", Map.of("direction", "DIRECTED", "properties", Map.of())),
-                "graphProperties",
-                Map.of()
+                Map.of("REL", Map.of("direction", "DIRECTED", "properties", Map.of()))
             )
         );
         assertThat(graphInfoWithHistogram.sizeInBytes).isEqualTo(-1L);

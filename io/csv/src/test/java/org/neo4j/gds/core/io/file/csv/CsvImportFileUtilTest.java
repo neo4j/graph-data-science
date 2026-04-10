@@ -121,47 +121,6 @@ class CsvImportFileUtilTest {
         assertThat(relationshipHeaderToFileMapping).containsExactlyInAnyOrderEntriesOf(expectedMapping);
     }
 
-    @ParameterizedTest
-    @MethodSource("graphPropertyFileNames")
-    void shouldFindGraphPropertyFiles(List<String> fileNames) throws IOException {
-        for (String fileName : fileNames) {
-            Files.createFile(tempDir.resolve(fileName));
-        }
-        var nodeHeaderFiles = CsvImportFileUtil.getGraphPropertyHeaderFiles(tempDir)
-            .stream()
-            .map(Path::getFileName)
-            .map(Path::toString)
-            .collect(Collectors.toList());
-
-        assertThat(nodeHeaderFiles).containsExactlyInAnyOrder(
-            "graph_property_prop1_header.csv",
-            "graph_property_prop2_header.csv"
-        );
-    }
-
-    @ParameterizedTest
-    @MethodSource("graphPropertyFileNames")
-    void shouldConstructGraphPropertyHeaderToDataFileMapping(List<String> fileNames) throws IOException {
-        for (String fileName : fileNames) {
-            Files.createFile(tempDir.resolve(fileName));
-        }
-        Map<Path, List<Path>> headerToFileMapping = CsvImportFileUtil.graphPropertyHeaderToFileMapping(tempDir);
-        headerToFileMapping.values().forEach(paths -> paths.sort(Comparator.comparing(Path::toString)));
-
-        Map<Path, List<Path>> expectedMapping = Map.of(
-            tempDir.resolve("graph_property_prop1_header.csv"), List.of(
-                tempDir.resolve("graph_property_prop1_0.csv"),
-                tempDir.resolve("graph_property_prop1_1.csv"),
-                tempDir.resolve("graph_property_prop1_2.csv")
-            ),
-            tempDir.resolve("graph_property_prop2_header.csv"), List.of(
-                tempDir.resolve("graph_property_prop2_0.csv"),
-                tempDir.resolve("graph_property_prop2_1.csv")
-            )
-        );
-        assertThat(headerToFileMapping).containsExactlyInAnyOrderEntriesOf(expectedMapping);
-    }
-
     @Test
     void shouldParseNodeHeaderFile() throws IOException {
         var headerPath = tempDir.resolve("nodes_Person_King_header.csv");
@@ -187,30 +146,6 @@ class CsvImportFileUtilTest {
         assertThat(parsedHeader.propertyMappings()).containsExactlyInAnyOrder(
             HeaderProperty.parse(2, "foo:long"),
             HeaderProperty.parse(3, "bar:double")
-        );
-    }
-
-    @Test
-    void shouldParseGraphPropertyHeaderFile() throws IOException {
-        var headerPath = tempDir.resolve("graph_property_prop1_header.csv");
-        FileUtils.writeLines(headerPath.toFile(), List.of("prop1:long"));
-
-        var parsedHeader = CsvImportFileUtil.parseGraphPropertyHeader(headerPath);
-
-        assertThat(parsedHeader.propertyMapping()).isEqualTo(
-            HeaderProperty.parse(0, "prop1:long")
-        );
-    }
-
-    @Test
-    void shouldFailToParseBadGraphPropertyHeaderFile() throws IOException {
-        var headerPath = tempDir.resolve("graph_property_prop1_header.csv");
-        FileUtils.writeLines(headerPath.toFile(), List.of("prop1:long"));
-
-        var parsedHeader = CsvImportFileUtil.parseGraphPropertyHeader(headerPath);
-
-        assertThat(parsedHeader.propertyMapping()).isEqualTo(
-            HeaderProperty.parse(0, "prop1:long")
         );
     }
 
@@ -263,19 +198,4 @@ class CsvImportFileUtilTest {
         );
     }
 
-    private static Stream<Arguments> graphPropertyFileNames() {
-        return Stream.of(
-            Arguments.of(
-                List.of(
-                    "graph_property_prop1_0.csv",
-                    "graph_property_prop1_1.csv",
-                    "graph_property_prop1_2.csv",
-                    "graph_property_prop1_header.csv",
-                    "graph_property_prop2_0.csv",
-                    "graph_property_prop2_1.csv",
-                    "graph_property_prop2_header.csv"
-                )
-            )
-        );
-    }
 }

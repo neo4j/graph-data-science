@@ -50,7 +50,6 @@ import org.neo4j.gds.mem.Estimate;
 import org.neo4j.gds.mem.MemoryUsage;
 
 import java.util.List;
-import java.util.Map;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -74,8 +73,7 @@ public abstract class CSRGraphStoreFactory<CONFIG extends GraphProjectConfig> ex
     protected CSRGraphStore createGraphStore(Nodes nodes, RelationshipImportResult relationshipImportResult) {
         var schema = MutableGraphSchema.of(
             nodes.schema(),
-            relationshipImportResult.relationshipSchema(),
-            Map.of()
+            relationshipImportResult.relationshipSchema()
         );
 
         var databaseInfo = ImmutableDatabaseInfo.builder()

@@ -32,7 +32,6 @@ import java.nio.file.Path;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.LongFunction;
-import java.util.stream.Collectors;
 
 public abstract class GraphStoreExporter {
 
@@ -117,18 +116,12 @@ public abstract class GraphStoreExporter {
             nodeLabelMapping
         );
         var relationshipStore = RelationshipStore.of(graphStore, defaultRelationshipType, relationshipTypeMapping);
-        var graphProperties = graphStore
-            .graphPropertyKeys()
-            .stream()
-            .map(graphStore::graphProperty)
-            .collect(Collectors.toSet());
 
         var graphStoreInput = GraphStoreInput.of(
             metaDataStore,
             nodeStore,
             relationshipStore,
             graphStore.capabilities(),
-            graphProperties,
             batchSize,
             concurrency,
             idMappingType()

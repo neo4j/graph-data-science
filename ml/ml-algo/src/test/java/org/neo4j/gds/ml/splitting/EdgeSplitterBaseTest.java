@@ -47,8 +47,7 @@ abstract class EdgeSplitterBaseTest {
             new MutableRelationshipSchema(Map.of(
                 relationships.relationshipSchemaEntry().identifier(),
                 relationships.relationshipSchemaEntry()
-            )),
-            Map.of()
+            ))
         );
 
         var graphCharacteristicsBuilder = GraphCharacteristics
