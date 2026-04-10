@@ -28,7 +28,6 @@ import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
 import org.neo4j.gds.applications.graphstorecatalog.ExportLocation;
 import org.neo4j.gds.applications.graphstorecatalog.GraphCatalogApplications;
 import org.neo4j.gds.applications.modelcatalog.ModelCatalogApplications;
-import org.neo4j.gds.applications.modelcatalog.ModelRepository;
 import org.neo4j.gds.applications.operations.FeatureTogglesRepository;
 import org.neo4j.gds.compat.DatabaseIdSupplier;
 import org.neo4j.gds.configuration.DefaultsConfiguration;
@@ -86,7 +85,6 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
     private final LimitsConfiguration limitsConfiguration;
     private final MemoryGuard memoryGuard;
     private final MemoryEstimationContext memoryEstimationContext;
-    private final ModelRepository modelRepository;
     private final PipelineRepository pipelineRepository;
     private final TaskRegistryFactoryService taskRegistryFactoryService;
     private final TaskStoreService taskStoreService;
@@ -111,7 +109,6 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
         LimitsConfiguration limitsConfiguration,
         MemoryGuard memoryGuard,
         MemoryEstimationContext memoryEstimationContext,
-        ModelRepository modelRepository,
         PipelineRepository pipelineRepository,
         TaskRegistryFactoryService taskRegistryFactoryService,
         TaskStoreService taskStoreService,
@@ -136,7 +133,6 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
         this.limitsConfiguration = limitsConfiguration;
         this.memoryGuard = memoryGuard;
         this.memoryEstimationContext = memoryEstimationContext;
-        this.modelRepository = modelRepository;
         this.pipelineRepository = pipelineRepository;
         this.taskRegistryFactoryService = taskRegistryFactoryService;
         this.taskStoreService = taskStoreService;
@@ -212,7 +208,7 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
             memoryGuard,
             memoryEstimationContext,
             openGraphDataScienceSpecifics.metrics(),
-            modelRepository,
+            openGraphDataScienceSpecifics.modelRepository(),
             pipelineRepository,
             graphDatabaseService,
             kernelTransaction,

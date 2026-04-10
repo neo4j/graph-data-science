@@ -28,7 +28,6 @@ import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTempla
 import org.neo4j.gds.applications.graphstorecatalog.ExportLocation;
 import org.neo4j.gds.applications.graphstorecatalog.GraphCatalogApplications;
 import org.neo4j.gds.applications.modelcatalog.ModelCatalogApplications;
-import org.neo4j.gds.applications.modelcatalog.ModelRepository;
 import org.neo4j.gds.applications.operations.FeatureTogglesRepository;
 import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
@@ -151,7 +150,6 @@ public final class OpenGraphDataScienceExtensionBuilder {
         ExportLocation exportLocation,
         FeatureTogglesRepository featureTogglesRepository,
         LimitsConfiguration limitsConfiguration,
-        ModelRepository modelRepository,
         Optional<Function<AlgorithmProcessingTemplate, AlgorithmProcessingTemplate>> algorithmProcessingTemplateDecorator,
         Optional<Function<GraphCatalogApplications, GraphCatalogApplications>> graphCatalogApplicationsDecorator,
         Optional<Function<ModelCatalogApplications, ModelCatalogApplications>> modelCatalogApplicationsDecorator
@@ -246,7 +244,6 @@ public final class OpenGraphDataScienceExtensionBuilder {
             graphStoreFactorySuppliers,
             LicenseDetails.from(openGraphDataScienceSpecifics.licenseState()),
             limitsConfiguration,
-            modelRepository,
             algorithmProcessingTemplateDecorator,
             graphCatalogApplicationsDecorator,
             modelCatalogApplicationsDecorator,

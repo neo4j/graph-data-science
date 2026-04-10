@@ -46,6 +46,8 @@ class OpenGraphDataScienceSpecificsBuilder {
 
         var modelCatalog = new OpenModelCatalog();
 
+        var modelRepository = new OpenModelRepository(); // no model storing in OpenGDS
+
         var poolSizes = new OpenGdsPoolSizes(); // limited to four
 
         return new OpenGraphDataScienceSpecifics(
@@ -55,6 +57,7 @@ class OpenGraphDataScienceSpecificsBuilder {
             licenseState,
             metrics,
             modelCatalog,
+            modelRepository,
             poolSizes
         );
     }

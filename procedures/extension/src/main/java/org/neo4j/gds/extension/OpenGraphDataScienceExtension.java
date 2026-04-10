@@ -23,7 +23,6 @@ import org.neo4j.annotations.service.ServiceProvider;
 import org.neo4j.configuration.Config;
 import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.gds.applications.operations.FeatureTogglesRepository;
-import org.neo4j.gds.concurrency.OpenGdsConcurrencyValidator;
 import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.procedures.integration.DefaultExportLocation;
@@ -65,7 +64,6 @@ public class OpenGraphDataScienceExtension extends ExtensionFactory<OpenGraphDat
         // OpenGDS edition customisations go here
         var exportLocation = new DefaultExportLocation(log, neo4jConfiguration);
         var featureTogglesRepository = new FeatureTogglesRepository();
-        var modelRepository = new OpenModelRepository(); // no model storing in OpenGDS
 
         var editionSpecifics = new OpenGraphDataScienceSpecificsBuilder().build();
 
@@ -80,7 +78,6 @@ public class OpenGraphDataScienceExtension extends ExtensionFactory<OpenGraphDat
             exportLocation,
             featureTogglesRepository,
             limitsConfiguration,
-            modelRepository,
             Optional.empty(), // no extra checks in OpenGDS
             Optional.empty(), // no extra checks in OpenGDS
             Optional.empty() // no extra checks in OpenGDS

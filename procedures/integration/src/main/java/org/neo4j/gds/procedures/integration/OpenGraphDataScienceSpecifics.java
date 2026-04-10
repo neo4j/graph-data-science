@@ -20,6 +20,7 @@
 package org.neo4j.gds.procedures.integration;
 
 import org.neo4j.gds.LicenseState;
+import org.neo4j.gds.applications.modelcatalog.ModelRepository;
 import org.neo4j.gds.concurrency.ConcurrencyValidator;
 import org.neo4j.gds.concurrency.PoolSizes;
 import org.neo4j.gds.core.IdMapBehavior;
@@ -40,6 +41,7 @@ public class OpenGraphDataScienceSpecifics {
     private final LicenseState licenseState;
     private final Metrics metrics;
     private final ModelCatalog modelCatalog;
+    private final ModelRepository modelRepository;
     private final PoolSizes poolSizes;
 
     public OpenGraphDataScienceSpecifics(
@@ -49,6 +51,7 @@ public class OpenGraphDataScienceSpecifics {
         LicenseState licenseState,
         Metrics metrics,
         ModelCatalog modelCatalog,
+        ModelRepository modelRepository,
         PoolSizes poolSizes
     ) {
         this.concurrencyValidator = concurrencyValidator;
@@ -57,6 +60,7 @@ public class OpenGraphDataScienceSpecifics {
         this.licenseState = licenseState;
         this.metrics = metrics;
         this.modelCatalog = modelCatalog;
+        this.modelRepository = modelRepository;
         this.poolSizes = poolSizes;
     }
 
@@ -82,6 +86,10 @@ public class OpenGraphDataScienceSpecifics {
 
     ModelCatalog modelCatalog() {
         return modelCatalog;
+    }
+
+    ModelRepository modelRepository() {
+        return modelRepository;
     }
 
     PoolSizes poolSizes() {

@@ -25,7 +25,6 @@ import org.neo4j.gds.applications.algorithms.machinery.DefaultMemoryGuard;
 import org.neo4j.gds.applications.graphstorecatalog.ExportLocation;
 import org.neo4j.gds.applications.graphstorecatalog.GraphCatalogApplications;
 import org.neo4j.gds.applications.modelcatalog.ModelCatalogApplications;
-import org.neo4j.gds.applications.modelcatalog.ModelRepository;
 import org.neo4j.gds.applications.operations.FeatureTogglesRepository;
 import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
@@ -65,7 +64,6 @@ final class GraphDataScienceProceduresProviderFactory {
     private final GraphStoreFactorySuppliers graphStoreFactorySuppliers;
     private final LicenseDetails licenseDetails;
     private final LimitsConfiguration limitsConfiguration;
-    private final ModelRepository modelRepository;
     private final Optional<Function<AlgorithmProcessingTemplate, AlgorithmProcessingTemplate>> algorithmProcessingTemplateDecorator;
     private final Optional<Function<GraphCatalogApplications, GraphCatalogApplications>> graphCatalogApplicationsDecorator;
     private final Optional<Function<ModelCatalogApplications, ModelCatalogApplications>> modelCatalogApplicationsDecorator;
@@ -82,7 +80,6 @@ final class GraphDataScienceProceduresProviderFactory {
         GraphStoreFactorySuppliers graphStoreFactorySuppliers,
         LicenseDetails licenseDetails,
         LimitsConfiguration limitsConfiguration,
-        ModelRepository modelRepository,
         Optional<Function<AlgorithmProcessingTemplate, AlgorithmProcessingTemplate>> algorithmProcessingTemplateDecorator,
         Optional<Function<GraphCatalogApplications, GraphCatalogApplications>> graphCatalogApplicationsDecorator,
         Optional<Function<ModelCatalogApplications, ModelCatalogApplications>> modelCatalogApplicationsDecorator,
@@ -98,7 +95,6 @@ final class GraphDataScienceProceduresProviderFactory {
         this.graphStoreFactorySuppliers = graphStoreFactorySuppliers;
         this.licenseDetails = licenseDetails;
         this.limitsConfiguration = limitsConfiguration;
-        this.modelRepository = modelRepository;
         this.algorithmProcessingTemplateDecorator = algorithmProcessingTemplateDecorator;
         this.graphCatalogApplicationsDecorator = graphCatalogApplicationsDecorator;
         this.modelCatalogApplicationsDecorator = modelCatalogApplicationsDecorator;
@@ -133,7 +129,6 @@ final class GraphDataScienceProceduresProviderFactory {
             limitsConfiguration,
             memoryGuard,
             new MemoryEstimationContext(useMaxMemoryEstimation),
-            modelRepository,
             pipelineRepository,
             taskRegistryFactoryService,
             taskStoreService,
