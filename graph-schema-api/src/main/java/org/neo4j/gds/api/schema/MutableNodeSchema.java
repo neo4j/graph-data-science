@@ -23,7 +23,6 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.utils.StringFormatting;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
