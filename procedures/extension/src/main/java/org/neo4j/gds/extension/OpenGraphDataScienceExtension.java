@@ -48,19 +48,18 @@ public class OpenGraphDataScienceExtension extends ExtensionFactory<OpenGraphDat
     @Override
     public Lifecycle newInstance(ExtensionContext extensionContext, Dependencies dependencies) {
         var log = new LogAccessor().getLog(dependencies.logService(), getClass());
+        var neo4jConfiguration = dependencies.config();
+
+        var editionSpecifics = new OpenGraphDataScienceSpecificsBuilder(log, neo4jConfiguration).build();
 
         var databaseManagementService = dependencies.databaseManagementService();
         var dependencySatisfier = extensionContext.dependencySatisfier();
         var globalProcedures = dependencies.globalProcedures();
-        var neo4jConfiguration = dependencies.config();
 
         // super annoying that some parts of our code defy dependency injection, so we need these as singletons
         var defaultsConfiguration = DefaultsConfiguration.Instance;
-        var limitsConfiguration = LimitsConfiguration.Instance;
-
         var featureTogglesRepository = new FeatureTogglesRepository();
-
-        var editionSpecifics = new OpenGraphDataScienceSpecificsBuilder(log, neo4jConfiguration).build();
+        var limitsConfiguration = LimitsConfiguration.Instance;
 
         var graphDataScienceExtensionBuilderAndAssociatedProducts = OpenGraphDataScienceExtensionBuilder.create(
             log,
