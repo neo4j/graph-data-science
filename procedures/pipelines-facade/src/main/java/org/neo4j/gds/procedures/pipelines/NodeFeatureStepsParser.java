@@ -50,7 +50,7 @@ class NodeFeatureStepsParser {
         }
 
         throw new IllegalArgumentException(StringFormatting.formatWithLocale(
-            "The value of `%s` is required to be a list of strings.",
+            "The value of `%s` is required to be a list of strings or a single string.",
             label
         ));
     }

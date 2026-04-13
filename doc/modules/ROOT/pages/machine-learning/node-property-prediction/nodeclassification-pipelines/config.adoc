@@ -252,7 +252,7 @@ include::partial$/machine-learning/node-property-prediction/pipelineInfoResult.a
 [source, cypher, role=noplay]
 ----
 CALL gds.beta.pipeline.nodeClassification.configureSplit('pipe', {
- testFraction: 0.2,
+  testFraction: 0.2,
   validationFolds: 5
 })
 YIELD splitConfig
