@@ -34,17 +34,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 class UserAccessorTest {
-
-    public static Stream<Arguments> roleAdminProviderAuraDS() {
-        return Stream.of(
-            Arguments.of("admin", true),
-            Arguments.of("console_admin_vdc", true),
-            Arguments.of("console_admin_pro_123445", true),
-            Arguments.of("user", false),
-            Arguments.of("console_user", false)
-        );
-    }
-
     public static Stream<Arguments> roleAdminProviderPlugin() {
         return Stream.of(
             Arguments.of("admin", true),
@@ -56,25 +45,9 @@ class UserAccessorTest {
     }
 
     @ParameterizedTest
-    @MethodSource("roleAdminProviderAuraDS")
-    void testAuraAdminRoles(String role, boolean expected) {
-        var userAccessor = UserAccessor.createForAuraDS();
-
-        var securityContext = mock(SecurityContext.class);
-        var mockSubject = mock(AuthSubject.class);
-        when(securityContext.subject()).thenReturn(mockSubject);
-        when(securityContext.roles()).thenReturn(Set.of("foo", role, "bar"));
-        when(mockSubject.executingUser()).thenReturn("foo");
-
-        User user = userAccessor.getUser(securityContext);
-
-        assertThat(user.isAdmin()).isEqualTo(expected);
-    }
-
-    @ParameterizedTest
     @MethodSource("roleAdminProviderPlugin")
     void testAdminRoles(String role, boolean expected) {
-        var userAccessor = UserAccessor.create();
+        var userAccessor = new DefaultUserAccessor();
 
         var securityContext = mock(SecurityContext.class);
         var mockSubject = mock(AuthSubject.class);
@@ -86,5 +59,4 @@ class UserAccessorTest {
 
         assertThat(user.isAdmin()).isEqualTo(expected);
     }
-
 }

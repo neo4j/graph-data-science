@@ -22,9 +22,11 @@ package org.neo4j.gds.procedures;
 import org.neo4j.gds.api.User;
 import org.neo4j.internal.kernel.api.security.SecurityContext;
 
-/**
- * An abstraction that allows us to stack off Neo4j concerns cleanly.
- */
-public interface UserAccessor {
-    User getUser(SecurityContext securityContext);
+public final class DefaultUserAccessor implements UserAccessor {
+    public User getUser(SecurityContext securityContext) {
+        var subject = securityContext.subject();
+        var username = subject.executingUser();
+        var isAdmin = securityContext.roles().stream().anyMatch(role -> role.equals("admin"));
+        return new User(username, isAdmin);
+    }
 }

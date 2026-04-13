@@ -52,7 +52,7 @@ public class GraphCatalogProcedureFacadeFactory {
 
     /**
      * We inject services here so that we may control and isolate access to dependencies.
-     * Take {@link org.neo4j.gds.procedures.UserAccessor} for example.
+     * Take {@link UserAccessor} for example.
      * Without it, I would have to stub out Neo4j's {@link org.neo4j.kernel.api.procedure.Context}, in a non-trivial,
      * ugly way. Now instead I can inject the user by stubbing out GDS' own little POJO service.
      */

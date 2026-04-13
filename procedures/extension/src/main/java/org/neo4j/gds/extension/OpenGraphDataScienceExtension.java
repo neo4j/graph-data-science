@@ -58,7 +58,6 @@ public class OpenGraphDataScienceExtension extends ExtensionFactory<OpenGraphDat
         var defaultsConfiguration = DefaultsConfiguration.Instance;
         var limitsConfiguration = LimitsConfiguration.Instance;
 
-        // OpenGDS edition customisations go here
         var featureTogglesRepository = new FeatureTogglesRepository();
 
         var editionSpecifics = new OpenGraphDataScienceSpecificsBuilder(log, neo4jConfiguration).build();

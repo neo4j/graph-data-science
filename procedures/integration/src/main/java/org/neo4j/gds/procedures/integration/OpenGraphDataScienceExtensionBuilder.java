@@ -44,6 +44,7 @@ import org.neo4j.gds.legacycypherprojection.GraphProjectFromCypherConfig;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.MemoryTracker;
 import org.neo4j.gds.metrics.Metrics;
+import org.neo4j.gds.procedures.DefaultUserAccessor;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.TaskRegistryFactoryService;
 import org.neo4j.gds.procedures.UserAccessor;
@@ -200,7 +201,7 @@ public final class OpenGraphDataScienceExtensionBuilder {
         );
 
         var componentRegistration = new ComponentRegistration(log, dependencySatisfier, globalProcedures);
-        var userAccessor = UserAccessor.create();
+        var userAccessor = new DefaultUserAccessor();
 
         componentRegistration.registerComponent(
             "GDS Memory Facade", MemoryFacade.class, context -> {
