@@ -252,7 +252,7 @@ CALL gds.session.delete(
 === Retrieving session information for a graph
 
 The `gds.graph.sessionInfo` function returns information about the GDS Session that is associated with a projected graph.
-It can be used to retrieve information required for the `sessionInfo` parameter of most `gds.model` procedures.
+It can be used to retrieve information required for the `sessionName` parameter of most `gds.model` procedures.
 
 ==== Syntax
 

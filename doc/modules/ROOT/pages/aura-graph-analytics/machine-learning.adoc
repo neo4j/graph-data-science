@@ -23,7 +23,7 @@ The model catalog can be managed by the following model catalog operations.
 
 [NOTE]
 ====
-Access to the model catalog via the xref:aura-graph-analytics/cypher.adoc[Cypher API for Aura Graph Analytics] requires an additional parameter `sessionInfo`.
+Access to the model catalog via the xref:aura-graph-analytics/cypher.adoc[Cypher API for Aura Graph Analytics] requires an additional parameter `sessionName`.
 ====
 
 * xref:model-catalog/store.adoc[Storing a model]
