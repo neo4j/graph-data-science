@@ -99,6 +99,7 @@ public final class OpenGraphDataScienceExtensionBuilder {
     private final UserAccessor userAccessor;
 
     private OpenGraphDataScienceExtensionBuilder(
+        UserAccessor userAccessor,
         Log log,
         ComponentRegistration componentRegistration,
         DatabaseManagementService databaseManagementService,
@@ -111,9 +112,9 @@ public final class OpenGraphDataScienceExtensionBuilder {
         TaskStoreObserver taskStoreObserver,
         boolean useMaxMemoryEstimation,
         UserLogServices userLogServices,
-        Lifecycle gcListener,
-        UserAccessor userAccessor
+        Lifecycle gcListener
     ) {
+        this.userAccessor = userAccessor;
         this.log = log;
         this.componentRegistration = componentRegistration;
         this.databaseManagementService = databaseManagementService;
@@ -127,7 +128,6 @@ public final class OpenGraphDataScienceExtensionBuilder {
         this.useMaxMemoryEstimation = useMaxMemoryEstimation;
         this.userLogServices = userLogServices;
         this.gcListener = gcListener;
-        this.userAccessor = userAccessor;
     }
 
     /**
@@ -167,7 +167,6 @@ public final class OpenGraphDataScienceExtensionBuilder {
         var taskStoreObserver = new DefaultTaskStoreObserver(taskStoreRepository, taskStoreService);
         var taskRegistryFactoryService = new TaskRegistryFactoryService(progressTrackingEnabled, taskStoreService);
 
-        // User log state will eventually be created here, instead of referencing a big shared singleton
         var userLogServices = new UserLogServices();
 
         // Memory gauge integrates with the JVM
@@ -238,6 +237,7 @@ public final class OpenGraphDataScienceExtensionBuilder {
         );
 
         var graphDataScienceExtensionBuilder = new OpenGraphDataScienceExtensionBuilder(
+            userAccessor,
             log,
             componentRegistration,
             databaseManagementService,
@@ -250,8 +250,7 @@ public final class OpenGraphDataScienceExtensionBuilder {
             taskStoreObserver,
             useMaxMemoryEstimation,
             userLogServices,
-            gcListener,
-            userAccessor
+            gcListener
         );
 
         return Triple.of(graphDataScienceExtensionBuilder, taskRegistryFactoryService, taskStoreService);
@@ -303,11 +302,11 @@ public final class OpenGraphDataScienceExtensionBuilder {
 
     private void registerGraphDataScienceComponent() {
         var graphDataScienceProvider = graphDataScienceProceduresProviderFactory.createGraphDataScienceProvider(
+            userAccessor,
             taskRegistryFactoryService,
             taskStoreService,
             useMaxMemoryEstimation,
-            userLogServices,
-            userAccessor
+            userLogServices
         );
 
         componentRegistration.registerComponent(

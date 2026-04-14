@@ -89,6 +89,7 @@ public class GraphCatalogProcedureFacadeFactory {
                 kernelTransaction.resourceMonitor().registerCloseableResource(autoCloseable);
             }
         };
+
         var transactionContext = transactionContextAccessor.transactionContext(
             graphDatabaseService,
             procedureTransaction

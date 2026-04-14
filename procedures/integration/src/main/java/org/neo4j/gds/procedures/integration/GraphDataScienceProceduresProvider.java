@@ -85,6 +85,7 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
     private final MemoryTracker memoryTracker;
 
     GraphDataScienceProceduresProvider(
+        UserAccessor userAccessor,
         GdsLoggers loggers,
         Configuration neo4jConfiguration,
         OpenGraphDataScienceSpecifics openGraphDataScienceSpecifics,
@@ -101,14 +102,15 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
         TaskRegistryFactoryService taskRegistryFactoryService,
         TaskStoreService taskStoreService,
         UserLogServices userLogServices,
-        MemoryTracker memoryTracker,
-        UserAccessor userAccessor
+        MemoryTracker memoryTracker
     ) {
+        this.userAccessor = userAccessor;
+
         this.loggers = loggers;
         this.neo4jConfiguration = neo4jConfiguration;
+
         this.openGraphDataScienceSpecifics = openGraphDataScienceSpecifics;
         this.globallyScopedDependencies = globallyScopedDependencies;
-
         this.defaultsConfiguration = defaultsConfiguration;
         this.graphCatalogProcedureFacadeFactory = graphCatalogProcedureFacadeFactory;
         this.graphStoreFactorySuppliers = graphStoreFactorySuppliers;
@@ -121,9 +123,7 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
         this.taskRegistryFactoryService = taskRegistryFactoryService;
         this.taskStoreService = taskStoreService;
         this.userLogServices = userLogServices;
-
         this.memoryTracker = memoryTracker;
-        this.userAccessor = userAccessor;
     }
 
     @Override

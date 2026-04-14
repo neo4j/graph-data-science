@@ -83,11 +83,11 @@ final class GraphDataScienceProceduresProviderFactory {
     }
 
     GraphDataScienceProceduresProvider createGraphDataScienceProvider(
+        UserAccessor userAccessor,
         TaskRegistryFactoryService taskRegistryFactoryService,
         TaskStoreService taskStoreService,
         boolean useMaxMemoryEstimation,
-        UserLogServices userLogServices,
-        UserAccessor userAccessor
+        UserLogServices userLogServices
     ) {
         var catalogProcedureFacadeFactory = new GraphCatalogProcedureFacadeFactory(
             loggers.log(),
@@ -97,6 +97,7 @@ final class GraphDataScienceProceduresProviderFactory {
         var memoryGuard = DefaultMemoryGuard.create(loggers.log(), useMaxMemoryEstimation, memoryTracker);
 
         return new GraphDataScienceProceduresProvider(
+            userAccessor,
             loggers,
             neo4jConfiguration,
             openGraphDataScienceSpecifics,
@@ -113,8 +114,7 @@ final class GraphDataScienceProceduresProviderFactory {
             taskRegistryFactoryService,
             taskStoreService,
             userLogServices,
-            memoryTracker,
-            userAccessor
+            memoryTracker
         );
     }
 }
