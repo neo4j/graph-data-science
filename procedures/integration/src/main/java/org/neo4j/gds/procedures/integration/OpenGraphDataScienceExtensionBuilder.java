@@ -178,7 +178,7 @@ public final class OpenGraphDataScienceExtensionBuilder {
         var availableMemory = Runtime.getRuntime().maxMemory();
         var freeMemoryAfterLastGc = new AtomicLong(availableMemory);
         // We make it available in a neat service
-        var memoryTracker = new MemoryTracker(availableMemory, log);
+        var memoryTracker = MemoryTracker.create(log, availableMemory);
 
         // GraphStoreCatalog will one day not be a singleton
         var graphStoreCatalogService = new GraphStoreCatalogService();
