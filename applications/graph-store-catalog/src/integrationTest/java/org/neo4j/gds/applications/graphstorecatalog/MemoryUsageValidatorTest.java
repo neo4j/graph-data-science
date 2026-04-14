@@ -47,6 +47,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 class MemoryUsageValidatorTest extends BaseTest {
 
@@ -55,7 +56,7 @@ class MemoryUsageValidatorTest extends BaseTest {
         var dimensions = GraphDimensions.builder().nodeCount(1000).build();
         var memoryTree = MemoryTree.empty();
 
-        assertThatNoException().isThrownBy(() -> new MemoryUsageValidator("foo",new MemoryTracker(10000000, Log.noOpLog()),
+        assertThatNoException().isThrownBy(() -> new MemoryUsageValidator("foo", mock(MemoryTracker.class),
             false,
             Log.noOpLog()
         )
@@ -70,8 +71,10 @@ class MemoryUsageValidatorTest extends BaseTest {
     void shouldFailOnInsufficientMemory() {
         var dimensions = GraphDimensions.builder().nodeCount(1000).build();
         var memoryTree = new TestTree("test", MemoryRange.of(42));
+        var memoryTracker = mock(MemoryTracker.class);
 
-        assertThatThrownBy(() -> new MemoryUsageValidator("foo", new MemoryTracker(21, Log.noOpLog()),
+        when(memoryTracker.availableMemory()).thenReturn(21L);
+        assertThatThrownBy(() -> new MemoryUsageValidator("foo", memoryTracker,
             false,
             Log.noOpLog()
         )
@@ -89,7 +92,7 @@ class MemoryUsageValidatorTest extends BaseTest {
         var dimensions = GraphDimensions.builder().nodeCount(1000).build();
         var memoryTree = new TestTree("test", MemoryRange.of(42));
 
-        assertThatNoException().isThrownBy(() -> new MemoryUsageValidator("foo", new MemoryTracker(21, Log.noOpLog()),
+        assertThatNoException().isThrownBy(() -> new MemoryUsageValidator("foo", mock(MemoryTracker.class),
             false,
             Log.noOpLog()
         )
@@ -105,13 +108,15 @@ class MemoryUsageValidatorTest extends BaseTest {
         var log = mock(Log.class);
         var dimensions = GraphDimensions.builder().nodeCount(1000).build();
         var memoryTree = new TestTree("test", MemoryRange.of(42));
+        var memoryTracker = mock(MemoryTracker.class);
         var memoryUsageValidator = new MemoryUsageValidator(
             "foo",
-            new MemoryTracker(21, log),
+            memoryTracker,
             false,
             log
         );
 
+        when(memoryTracker.availableMemory()).thenReturn(21L);
         assertThatIllegalStateException().isThrownBy(
             () -> memoryUsageValidator.tryValidateMemoryUsage(
                 "task",

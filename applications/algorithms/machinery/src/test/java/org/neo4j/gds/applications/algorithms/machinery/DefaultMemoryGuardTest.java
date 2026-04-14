@@ -26,10 +26,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.User;
 import org.neo4j.gds.core.GraphDimensions;
-import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.JobId;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryRange;
@@ -42,6 +41,10 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
@@ -88,23 +91,24 @@ class DefaultMemoryGuardTest {
     void shouldAllowExecution() {
         when(memoryTree.memoryUsage()).thenReturn(MemoryRange.of(13, 19));
 
+        var memoryTracker = mock(MemoryTracker.class);
         var memoryGuard = new DefaultMemoryGuard(
             logMock,
             graphDimensionFactoryMock,
             false,
-            new MemoryTracker(42, logMock)
+            memoryTracker
         );
 
-        // there is enough memory available
+        doNothing().when(memoryTracker).tryToTrack("Mark", "labels everywhere", jobIdMock, 13L);
         memoryGuard.assertAlgorithmCanRun(
             graphMock,
             graphStoreMock,
             Set.of(),
             CONCURRENCY,
             () -> memoryEstimation,
-            new StandardLabel("some label"),
+            new StandardLabel("labels everywhere"),
             DimensionTransformer.DISABLED,
-            User.DEFAULT.getUsername(),
+            "Mark",
             jobIdMock,
             false
         );
@@ -115,14 +119,20 @@ class DefaultMemoryGuardTest {
 
         when(memoryTree.memoryUsage()).thenReturn(MemoryRange.of(117, 243));
 
+        var memoryTracker = mock(MemoryTracker.class);
         var memoryGuard = new DefaultMemoryGuard(
             logMock,
             graphDimensionFactoryMock,
             false,
-            new MemoryTracker(42, logMock)
+            memoryTracker
         );
 
-        // uh oh
+        doThrow(new IllegalStateException("another error from memory tracker")).when(memoryTracker).tryToTrack(
+            "Alice",
+            "some other label",
+            jobIdMock,
+            117L
+        );
         assertThatIllegalStateException()
             .isThrownBy(
                 () -> memoryGuard.assertAlgorithmCanRun(
@@ -133,12 +143,12 @@ class DefaultMemoryGuardTest {
                     () -> memoryEstimation,
                     new StandardLabel("some other label"),
                     DimensionTransformer.DISABLED,
-                    User.DEFAULT.getUsername(),
+                    "Alice",
                     jobIdMock,
                     false
                 )
             )
-            .withMessage("Memory required to run some other label (117b) exceeds available memory (42b)");
+            .withMessage("another error from memory tracker");
     }
 
     @Test
@@ -146,14 +156,20 @@ class DefaultMemoryGuardTest {
 
         when(memoryTree.memoryUsage()).thenReturn(MemoryRange.of(117, 243));
 
+        var memoryTracker = mock(MemoryTracker.class);
         var memoryGuard = new DefaultMemoryGuard(
             logMock,
             graphDimensionFactoryMock,
             true,
-            new MemoryTracker(42, logMock)
+            memoryTracker
         );
 
-        // uh oh
+        doThrow(new IllegalStateException("error from memory tracker")).when(memoryTracker).tryToTrack(
+            "Bob",
+            "yet another label",
+            jobIdMock,
+            243L
+        );
         assertThatIllegalStateException()
             .isThrownBy(
                 () -> memoryGuard.assertAlgorithmCanRun(
@@ -164,12 +180,12 @@ class DefaultMemoryGuardTest {
                     () -> memoryEstimation,
                     new StandardLabel("yet another label"),
                     DimensionTransformer.DISABLED,
-                    User.DEFAULT.getUsername(),
+                    "Bob",
                     jobIdMock,
                     false
                 )
             )
-            .withMessage("Memory required to run yet another label (243b) exceeds available memory (42b)");
+            .withMessage("error from memory tracker");
     }
 
     @Test
@@ -177,41 +193,27 @@ class DefaultMemoryGuardTest {
 
         when(memoryTree.memoryUsage()).thenReturn(MemoryRange.of(43, 99));
 
+        var memoryTracker = mock(MemoryTracker.class);
         var memoryGuard = new DefaultMemoryGuard(
             logMock,
             graphDimensionFactoryMock,
             false,
-            new MemoryTracker(42, logMock)
+            memoryTracker
         );
 
-        assertThatIllegalStateException()
-            .isThrownBy(
-                () -> memoryGuard.assertAlgorithmCanRun(
-                    graphMock,
-                    graphStoreMock,
-                    Set.of(),
-                    CONCURRENCY,
-                    () -> memoryEstimation,
-                    new StandardLabel("some other label"),
-                    DimensionTransformer.DISABLED,
-                    User.DEFAULT.getUsername(),
-                    jobIdMock,
-                    false
-                )
-            );
-
-        // now bypass the memory guard
         assertDoesNotThrow(() -> memoryGuard.assertAlgorithmCanRun(
             graphMock,
             graphStoreMock,
             Set.of(),
             CONCURRENCY,
             () -> memoryEstimation,
-            new StandardLabel("some other label"),
+            new StandardLabel("labels galore"),
             DimensionTransformer.DISABLED,
-            User.DEFAULT.getUsername(),
+            "Eve",
             jobIdMock,
             true
         ));
+
+        verify(memoryTracker).track("Eve", "labels galore", jobIdMock, 43L);
     }
 }

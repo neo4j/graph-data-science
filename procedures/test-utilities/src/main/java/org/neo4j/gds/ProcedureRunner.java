@@ -204,7 +204,7 @@ public final class ProcedureRunner {
             Optional.empty(),
             Optional.empty(),
             Optional.empty(),
-            new MemoryTracker(Long.MAX_VALUE, gdsLog)
+            MemoryTracker.DISABLED
         );
     }
 }

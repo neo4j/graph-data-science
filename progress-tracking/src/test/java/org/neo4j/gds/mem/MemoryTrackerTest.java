@@ -20,17 +20,11 @@
 package org.neo4j.gds.mem;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Answers;
 import org.neo4j.gds.api.graph.store.catalog.GraphStoreAddedEvent;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.utils.progress.UserTask;
 import org.neo4j.gds.logging.Log;
-
-import java.util.Random;
-import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
@@ -38,26 +32,16 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 class MemoryTrackerTest {
-
-    @ParameterizedTest
-    @MethodSource("invalidInitialMemoryValues")
-    void shouldNotAllowNegativeInitialValue(long initialMemoryValue) {
+    @Test
+    void shouldNotAllowNegativeInitialValue() {
         assertThatIllegalArgumentException()
-            .isThrownBy(() -> new MemoryTracker(initialMemoryValue, Log.noOpLog()))
+            .isThrownBy(() -> MemoryTracker.create(Log.noOpLog(), -42))
             .withMessageContaining("Negative values are not allowed.");
-    }
-
-    @ParameterizedTest
-    @MethodSource("validInitialMemoryValues")
-    void shouldBeCreatedConsistently(long initialMemoryValue) {
-        var memoryTracker = new MemoryTracker(initialMemoryValue, Log.noOpLog());
-
-        assertThat(memoryTracker.initialMemory()).isEqualTo(initialMemoryValue);
     }
 
     @Test
     void shouldHaveAvailableMemorySameAsInitialBeforeAnyTracking() {
-        var memoryTracker = new MemoryTracker(19L, Log.noOpLog());
+        var memoryTracker = new MemoryTracker(Log.noOpLog(), 19L);
 
         assertThat(memoryTracker.availableMemory())
             .isEqualTo(memoryTracker.availableMemory())
@@ -66,10 +50,10 @@ class MemoryTrackerTest {
 
     @Test
     void shouldHaveAvailableMemoryWithoutTheTrackedMemory() {
-        var memoryTracker = new MemoryTracker(19L, Log.noOpLog());
+        var memoryTracker = new MemoryTracker(Log.noOpLog(), 19L);
 
-        memoryTracker.track("a","b",new JobId("foo"), 9);
-        memoryTracker.track("a","b",new JobId("bar"), 3);
+        memoryTracker.track("a", "b", new JobId("foo"), 9);
+        memoryTracker.track("a", "b", new JobId("bar"), 3);
 
         assertThat(memoryTracker.availableMemory())
             .isEqualTo(memoryTracker.availableMemory())
@@ -78,7 +62,7 @@ class MemoryTrackerTest {
 
     @Test
     void shouldListForUser(){
-        var memoryTracker = new MemoryTracker(19L, Log.noOpLog());
+        var memoryTracker = new MemoryTracker(Log.noOpLog(), 19L);
         memoryTracker.track("alice","task1",new JobId("job1"), 9);
         memoryTracker.track("alice","task2",new JobId("job2"), 3);
         memoryTracker.track("bob","task3",new JobId("job3"), 5);
@@ -91,12 +75,12 @@ class MemoryTrackerTest {
     }
 
     @Test
-    void shouldListForAll(){
-        var memoryTracker = new MemoryTracker(19L, Log.noOpLog());
-        memoryTracker.track("alice","task1",new JobId("job1"), 9);
-        memoryTracker.track("alice","task2",new JobId("job2"), 3);
-        memoryTracker.track("bob","task3",new JobId("job3"), 5);
-        memoryTracker.onGraphStoreAdded(new GraphStoreAddedEvent("alice","neo4j","graph1",11));
+    void shouldListForAll() {
+        var memoryTracker = new MemoryTracker(Log.noOpLog(), 19L);
+        memoryTracker.track("alice", "task1", new JobId("job1"), 9);
+        memoryTracker.track("alice", "task2", new JobId("job2"), 3);
+        memoryTracker.track("bob", "task3", new JobId("job3"), 5);
+        memoryTracker.onGraphStoreAdded(new GraphStoreAddedEvent("alice", "neo4j", "graph1", 11));
 
         var list = memoryTracker.listAll().toList();
         assertThat(list.stream().map(UserEntityMemory::name).toList()).containsExactlyInAnyOrder("task1","task2","task3","graph1");
@@ -106,44 +90,44 @@ class MemoryTrackerTest {
     }
 
     @Test
-    void shouldReturnMemoryForUser(){
-        var memoryTracker = new MemoryTracker(19L, Log.noOpLog());
-        memoryTracker.track("alice","task1",new JobId("job1"), 9);
-        memoryTracker.track("alice","task2",new JobId("job2"), 3);
-        memoryTracker.track("bob","task3",new JobId("job3"), 5);
-        memoryTracker.onGraphStoreAdded(new GraphStoreAddedEvent("alice","neo4j","graph1",11));
+    void shouldReturnMemoryForUser() {
+        var memoryTracker = new MemoryTracker(Log.noOpLog(), 19L);
+        memoryTracker.track("alice", "task1", new JobId("job1"), 9);
+        memoryTracker.track("alice", "task2", new JobId("job2"), 3);
+        memoryTracker.track("bob", "task3", new JobId("job3"), 5);
+        memoryTracker.onGraphStoreAdded(new GraphStoreAddedEvent("alice", "neo4j", "graph1", 11));
 
-        var  aliceMemory = memoryTracker.memorySummary("alice");
+        var aliceMemory = memoryTracker.memorySummary("alice");
         assertThat(aliceMemory.totalGraphsMemory()).isEqualTo(11L);
         assertThat(aliceMemory.totalTasksMemory()).isEqualTo(12L);
 
-        var  bobMemory = memoryTracker.memorySummary("bob");
+        var bobMemory = memoryTracker.memorySummary("bob");
         assertThat(bobMemory.totalGraphsMemory()).isEqualTo(0L);
         assertThat(bobMemory.totalTasksMemory()).isEqualTo(5L);
 
     }
 
     @Test
-    void shouldReturnMemoryForAll(){
-        var memoryTracker = new MemoryTracker(19L, Log.noOpLog());
-        memoryTracker.track("alice","task1",new JobId("job1"), 9);
-        memoryTracker.track("alice","task2",new JobId("job2"), 3);
-        memoryTracker.track("bob","task3",new JobId("job3"), 5);
-        memoryTracker.onGraphStoreAdded(new GraphStoreAddedEvent("alice","neo4j","graph1",11));
+    void shouldReturnMemoryForAll() {
+        var memoryTracker = new MemoryTracker(Log.noOpLog(), 19L);
+        memoryTracker.track("alice", "task1", new JobId("job1"), 9);
+        memoryTracker.track("alice", "task2", new JobId("job2"), 3);
+        memoryTracker.track("bob", "task3", new JobId("job3"), 5);
+        memoryTracker.onGraphStoreAdded(new GraphStoreAddedEvent("alice", "neo4j", "graph1", 11));
 
         var list = memoryTracker.memorySummary().toList();
 
-        assertThat(list.stream()).map(UserMemorySummary::totalGraphsMemory).containsExactlyInAnyOrder(11L,0L);
-        assertThat(list.stream()).map(UserMemorySummary::totalTasksMemory).containsExactlyInAnyOrder(12L,5L);
+        assertThat(list.stream()).map(UserMemorySummary::totalGraphsMemory).containsExactlyInAnyOrder(11L, 0L);
+        assertThat(list.stream()).map(UserMemorySummary::totalTasksMemory).containsExactlyInAnyOrder(12L, 5L);
 
     }
 
     @Test
     void shouldFreeMemoryOnTaskCompleted() {
-        var memoryTracker = new MemoryTracker(19L, Log.noOpLog());
+        var memoryTracker = new MemoryTracker(Log.noOpLog(), 19L);
 
-        memoryTracker.track("a","b", new JobId("foo"), 9);
-        memoryTracker.track("a","b",new JobId("bar"), 3);
+        memoryTracker.track("a", "b", new JobId("foo"), 9);
+        memoryTracker.track("a", "b", new JobId("bar"), 3);
 
         var userTaskMock = mock(UserTask.class, Answers.RETURNS_MOCKS);
         when(userTaskMock.jobId()).thenReturn(new JobId("foo"));
@@ -154,17 +138,4 @@ class MemoryTrackerTest {
         assertThat(memoryTracker.availableMemory())
             .isEqualTo(16L);
     }
-
-    static Stream<Arguments> validInitialMemoryValues() {
-        return new Random()
-            .longs(50, 0, Long.MAX_VALUE)
-            .mapToObj(Arguments::of);
-    }
-
-    static Stream<Arguments> invalidInitialMemoryValues() {
-        return new Random()
-            .longs(50, Long.MIN_VALUE, 0)
-            .mapToObj(Arguments::of);
-    }
-
 }
