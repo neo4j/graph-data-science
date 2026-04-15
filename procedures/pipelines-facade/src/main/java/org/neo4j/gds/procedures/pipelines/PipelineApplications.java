@@ -222,7 +222,6 @@ public class PipelineApplications {
             requestScopedDependencies,
             writeContext
         );
-
         var trainedLPPipelineModel = new TrainedLPPipelineModel(globallyScopedDependencies.modelCatalog());
         var trainedNCPipelineModel = new TrainedNCPipelineModel(globallyScopedDependencies.modelCatalog());
 
@@ -436,6 +435,32 @@ public class PipelineApplications {
             () -> linkPredictionMemoryEstimation(configuration),
             computation,
             mutateStep,
+            resultBuilder
+        );
+    }
+
+    ComputeResult linkPredictionCompute(GraphName graphName, Map<String, Object> rawConfiguration) {
+        var configuration = pipelineConfigurationParser.parseLinkPredictionPredictPipelineComputeConfig(rawConfiguration);
+        var label = new StandardLabel("LinkPredictionPipelineCompute");
+        var computation = constructLinkPredictionComputation(configuration, label);
+        var computeStep = new LinkPredictionPipelineComputeStep(
+            log,
+            configuration,
+            terminationFlag,
+            trainedLPPipelineModel
+        );
+        var resultBuilder = new LinkPredictionPipelineComputeResultBuilder(configuration);
+
+        return algorithmProcessingTemplate.processAlgorithmForWrite(
+            Optional.empty(),
+            graphName,
+            configuration,
+            Optional.empty(),
+            Optional.empty(),
+            label,
+            () -> linkPredictionMemoryEstimation(configuration),
+            computation,
+            computeStep,
             resultBuilder
         );
     }

@@ -181,6 +181,40 @@ public final class LocalLinkPredictionFacade implements LinkPredictionFacade {
     }
 
     @Override
+    public Stream<ComputeResult> compute(
+        String graphNameAsString,
+        Map<String, Object> configuration
+    ) {
+        PipelineCompanion.preparePipelineConfig(graphNameAsString, configuration);
+
+        var graphName = GraphName.parse(graphNameAsString);
+
+        var result = pipelineApplications.linkPredictionCompute(
+            graphName,
+            configuration
+        );
+
+        return Stream.of(result);
+    }
+
+    @Override
+    public Stream<MemoryEstimateResult> computeEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> rawConfiguration
+    ) {
+        PipelineCompanion.preparePipelineConfig(graphNameOrConfiguration, rawConfiguration);
+
+        var configuration = pipelineConfigurationParser.parseLinkPredictionPredictPipelineComputeConfig(rawConfiguration);
+
+        var result = pipelineApplications.linkPredictionEstimate(
+            graphNameOrConfiguration,
+            configuration
+        );
+
+        return Stream.of(result);
+    }
+
+    @Override
     public Stream<StreamResult> stream(
         String graphNameAsString,
         Map<String, Object> configuration

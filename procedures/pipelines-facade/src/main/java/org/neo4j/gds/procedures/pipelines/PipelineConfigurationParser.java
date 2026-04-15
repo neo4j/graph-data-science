@@ -70,6 +70,10 @@ public class PipelineConfigurationParser {
         return parseConfigurationWithValidation(configuration, cypherMapWrapper -> new LinkPredictionPredictPipelineMutateConfigImpl(user.getUsername(), cypherMapWrapper), LinkPredictionPredictPipelineMutateConfig::configKeys);
     }
 
+    LinkPredictionPredictPipelineComputeConfig parseLinkPredictionPredictPipelineComputeConfig(Map<String, Object> configuration) {
+        return parseConfigurationWithValidation(configuration, cypherMapWrapper -> new LinkPredictionPredictPipelineComputeConfigImpl(user.getUsername(), cypherMapWrapper), LinkPredictionPredictPipelineComputeConfig::configKeys);
+    }
+
     LinkPredictionSplitConfig parseLinkPredictionSplitConfig(Map<String, Object> rawConfiguration) {
         return parseConfigurationWithValidation(
             rawConfiguration,
