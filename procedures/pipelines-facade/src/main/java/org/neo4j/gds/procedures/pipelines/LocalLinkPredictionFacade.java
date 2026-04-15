@@ -181,7 +181,7 @@ public final class LocalLinkPredictionFacade implements LinkPredictionFacade {
     }
 
     @Override
-    public Stream<ComputeResult> compute(
+    public Stream<LinkPredictionPredictResult> predict(
         String graphNameAsString,
         Map<String, Object> configuration
     ) {
@@ -189,25 +189,8 @@ public final class LocalLinkPredictionFacade implements LinkPredictionFacade {
 
         var graphName = GraphName.parse(graphNameAsString);
 
-        var result = pipelineApplications.linkPredictionCompute(
+        var result = pipelineApplications.linkPredictionPredict(
             graphName,
-            configuration
-        );
-
-        return Stream.of(result);
-    }
-
-    @Override
-    public Stream<MemoryEstimateResult> computeEstimate(
-        Object graphNameOrConfiguration,
-        Map<String, Object> rawConfiguration
-    ) {
-        PipelineCompanion.preparePipelineConfig(graphNameOrConfiguration, rawConfiguration);
-
-        var configuration = pipelineConfigurationParser.parseLinkPredictionPredictPipelineComputeConfig(rawConfiguration);
-
-        var result = pipelineApplications.linkPredictionEstimate(
-            graphNameOrConfiguration,
             configuration
         );
 

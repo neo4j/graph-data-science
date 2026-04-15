@@ -22,29 +22,29 @@ package org.neo4j.gds.procedures.pipelines;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
-import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
-import org.neo4j.gds.ml.linkmodels.LinkPredictionResult;
+import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
+import org.neo4j.gds.collections.ha.HugeDoubleArray;
 
 import java.util.Optional;
 
-class LinkPredictionPipelineComputeResultBuilder implements ResultBuilder<LinkPredictionPredictPipelineComputeConfig, LinkPredictionResult, ComputeResult, RelationshipsWritten> {
-    private final LinkPredictionPredictPipelineComputeConfig configuration;
+class NodeRegressionPredictPipelineWriteResultBuilder implements ResultBuilder<NodeRegressionPredictPipelineWriteConfig, HugeDoubleArray, WriteResult, NodePropertiesWritten> {
+    private final NodeRegressionPredictPipelineWriteConfig configuration;
 
-    LinkPredictionPipelineComputeResultBuilder(LinkPredictionPredictPipelineComputeConfig configuration) {
+    NodeRegressionPredictPipelineWriteResultBuilder(NodeRegressionPredictPipelineWriteConfig configuration) {
         this.configuration = configuration;
     }
 
     @Override
-    public ComputeResult build(
+    public WriteResult build(
         Graph graph,
-        LinkPredictionPredictPipelineComputeConfig configuration,
-        Optional<LinkPredictionResult> result,
+        NodeRegressionPredictPipelineWriteConfig configuration,
+        Optional<HugeDoubleArray> result,
         AlgorithmProcessingTimings timings,
-        Optional<RelationshipsWritten> metadata
+        Optional<NodePropertiesWritten> metadata
     ) {
-        if (result.isEmpty()) return ComputeResult.emptyFrom(timings, this.configuration.toMap());
+        if (result.isEmpty()) return WriteResult.emptyFrom(timings, this.configuration.toMap());
 
-        return ComputeResult.create(
+        return WriteResult.create(
             timings,
             metadata.orElseThrow(),
             this.configuration.toMap()

@@ -181,4 +181,19 @@ final class LocalNodeRegressionFacade implements NodeRegressionFacade {
 
         return pipelineApplications.nodeRegressionTrain(graphName, configuration);
     }
+
+    @Override
+    public Stream<WriteResult> write(String graphNameAsString, Map<String, Object> configuration) {
+        PipelineCompanion.preparePipelineConfig(graphNameAsString, configuration);
+        nodeRegressionPredictConfigPreProcessor.enhanceInputWithPipelineParameters(configuration);
+
+        var graphName = GraphName.parse(graphNameAsString);
+
+        var result = pipelineApplications.nodeRegressionPredictWrite(
+            graphName,
+            configuration
+        );
+
+        return Stream.of(result);
+    }
 }

@@ -35,15 +35,15 @@ import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.ml.linkmodels.LinkPredictionResult;
 
-class LinkPredictionPipelineComputeStep implements WriteStep<LinkPredictionResult, RelationshipsWritten> {
+class LinkPredictionPipelineWriteToResultStoreStep implements WriteStep<LinkPredictionResult, RelationshipsWritten> {
     private final Log log;
-    private final LinkPredictionPredictPipelineComputeConfig configuration;
+    private final LinkPredictionPredictPipelineWriteConfig configuration;
     private final org.neo4j.gds.termination.TerminationFlag terminationFlag;
     private final TrainedLPPipelineModel trainedLPPipelineModel;
 
-    LinkPredictionPipelineComputeStep(
+    LinkPredictionPipelineWriteToResultStoreStep(
         Log log,
-        LinkPredictionPredictPipelineComputeConfig configuration,
+        LinkPredictionPredictPipelineWriteConfig configuration,
         org.neo4j.gds.termination.TerminationFlag terminationFlag,
         TrainedLPPipelineModel trainedLPPipelineModel
     ) {

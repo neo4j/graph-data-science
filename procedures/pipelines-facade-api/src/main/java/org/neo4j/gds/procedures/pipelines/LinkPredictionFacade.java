@@ -59,14 +59,9 @@ public interface LinkPredictionFacade {
         Map<String, Object> rawConfiguration
     );
 
-    Stream<ComputeResult> compute(
+    Stream<LinkPredictionPredictResult> predict(
         String graphNameAsString,
         Map<String, Object> configuration
-    );
-
-    Stream<MemoryEstimateResult> computeEstimate(
-        Object graphNameOrConfiguration,
-        Map<String, Object> rawConfiguration
     );
 
     Stream<StreamResult> stream(

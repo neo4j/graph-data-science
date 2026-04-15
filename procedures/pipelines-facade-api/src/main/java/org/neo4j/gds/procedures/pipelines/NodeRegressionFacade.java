@@ -46,4 +46,6 @@ public interface NodeRegressionFacade {
     Stream<NodePipelineInfoResult> selectFeatures(String pipelineName, Object featureProperties);
 
     Stream<NodeRegressionPipelineTrainResult> train(String graphName, Map<String, Object> configuration);
+
+    Stream<WriteResult> write(String graphName, Map<String, Object> configuration);
 }

@@ -70,8 +70,8 @@ public class PipelineConfigurationParser {
         return parseConfigurationWithValidation(configuration, cypherMapWrapper -> new LinkPredictionPredictPipelineMutateConfigImpl(user.getUsername(), cypherMapWrapper), LinkPredictionPredictPipelineMutateConfig::configKeys);
     }
 
-    LinkPredictionPredictPipelineComputeConfig parseLinkPredictionPredictPipelineComputeConfig(Map<String, Object> configuration) {
-        return parseConfigurationWithValidation(configuration, cypherMapWrapper -> new LinkPredictionPredictPipelineComputeConfigImpl(user.getUsername(), cypherMapWrapper), LinkPredictionPredictPipelineComputeConfig::configKeys);
+    LinkPredictionPredictPipelineWriteConfig parseLinkPredictionPredictPipelineComputeConfig(Map<String, Object> configuration) {
+        return parseConfigurationWithValidation(configuration, cypherMapWrapper -> new LinkPredictionPredictPipelineWriteConfigImpl(user.getUsername(), cypherMapWrapper), LinkPredictionPredictPipelineWriteConfig::configKeys);
     }
 
     LinkPredictionSplitConfig parseLinkPredictionSplitConfig(Map<String, Object> rawConfiguration) {
@@ -151,6 +151,10 @@ public class PipelineConfigurationParser {
 
     NodeRegressionPredictPipelineMutateConfig parseNodeRegressionPredictPipelineMutateConfig(Map<String, Object> configuration) {
         return parseConfigurationWithValidation(configuration, cypherMapWrapper -> new NodeRegressionPredictPipelineMutateConfigImpl(user.getUsername(), cypherMapWrapper), NodeRegressionPredictPipelineMutateConfig::configKeys);
+    }
+
+    NodeRegressionPredictPipelineWriteConfig parseNodeRegressionPredictPipelineWriteConfig(Map<String, Object> configuration) {
+        return parseConfigurationWithValidation(configuration, cypherMapWrapper -> new NodeRegressionPredictPipelineWriteConfigImpl(user.getUsername(), cypherMapWrapper), NodeRegressionPredictPipelineWriteConfig::configKeys);
     }
 
     NodeRegressionPipelineTrainConfig parseNodeRegressionTrainConfig(Map<String, Object> configuration) {

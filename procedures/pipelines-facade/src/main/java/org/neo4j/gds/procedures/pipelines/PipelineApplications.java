@@ -439,17 +439,17 @@ public class PipelineApplications {
         );
     }
 
-    ComputeResult linkPredictionCompute(GraphName graphName, Map<String, Object> rawConfiguration) {
+    LinkPredictionPredictResult linkPredictionPredict(GraphName graphName, Map<String, Object> rawConfiguration) {
         var configuration = pipelineConfigurationParser.parseLinkPredictionPredictPipelineComputeConfig(rawConfiguration);
-        var label = new StandardLabel("LinkPredictionPipelineCompute");
+        var label = new StandardLabel("LinkPredictionPipelinePredict");
         var computation = constructLinkPredictionComputation(configuration, label);
-        var computeStep = new LinkPredictionPipelineComputeStep(
+        var writeToResultStoreStep = new LinkPredictionPipelineWriteToResultStoreStep(
             log,
             configuration,
             terminationFlag,
             trainedLPPipelineModel
         );
-        var resultBuilder = new LinkPredictionPipelineComputeResultBuilder(configuration);
+        var resultBuilder = new LinkPredictionPipelinePredictResultBuilder(configuration);
 
         return algorithmProcessingTemplate.processAlgorithmForWrite(
             Optional.empty(),
@@ -460,7 +460,7 @@ public class PipelineApplications {
             label,
             () -> linkPredictionMemoryEstimation(configuration),
             computation,
-            computeStep,
+            writeToResultStoreStep,
             resultBuilder
         );
     }
@@ -686,6 +686,27 @@ public class PipelineApplications {
             this::nodeRegressionPredictMemoryEstimation,
             computation,
             mutateStep,
+            resultBuilder
+        );
+    }
+
+    WriteResult nodeRegressionPredictWrite(GraphName graphName, Map<String, Object> rawConfiguration) {
+        var configuration = pipelineConfigurationParser.parseNodeRegressionPredictPipelineWriteConfig(rawConfiguration);
+        var label = new StandardLabel("NodeRegressionPredictPipelineWrite");
+        var computation = constructNodeRegressionPredictComputation(configuration, label);
+        var writeStep = new NodeRegressionPredictPipelineWriteStep(writeNodePropertyService, configuration);
+        var resultBuilder = new NodeRegressionPredictPipelineWriteResultBuilder(configuration);
+
+        return algorithmProcessingTemplate.processAlgorithmForWrite(
+            Optional.empty(),
+            graphName,
+            configuration,
+            Optional.empty(),
+            Optional.empty(),
+            label,
+            this::nodeRegressionPredictMemoryEstimation,
+            computation,
+            writeStep,
             resultBuilder
         );
     }

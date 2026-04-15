@@ -25,7 +25,7 @@ import org.neo4j.gds.procedures.algorithms.results.WriteRelationshipsResult;
 
 import java.util.Map;
 
-public record ComputeResult(
+public record LinkPredictionPredictResult(
     long preProcessingMillis,
     long computeMillis,
     long writeMillis,
@@ -34,12 +34,12 @@ public record ComputeResult(
     Map<String, Object> configuration
 ) implements WriteRelationshipsResult {
 
-    static ComputeResult create(
+    static LinkPredictionPredictResult create(
         AlgorithmProcessingTimings timings,
         RelationshipsWritten metadata,
         Map<String, Object> configurationMap
     ) {
-        return new ComputeResult(
+        return new LinkPredictionPredictResult(
             timings.preProcessingMillis,
             timings.computeMillis,
             timings.sideEffectMillis,
@@ -49,8 +49,8 @@ public record ComputeResult(
         );
     }
 
-    static ComputeResult emptyFrom(AlgorithmProcessingTimings timings, Map<String, Object> configurationMap) {
-        return new ComputeResult(
+    static LinkPredictionPredictResult emptyFrom(AlgorithmProcessingTimings timings, Map<String, Object> configurationMap) {
+        return new LinkPredictionPredictResult(
             timings.preProcessingMillis,
             timings.computeMillis,
             timings.sideEffectMillis,

@@ -25,7 +25,7 @@ import org.neo4j.gds.config.WriteRelationshipConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 @Configuration
-public interface LinkPredictionPredictPipelineComputeConfig extends LinkPredictionPredictPipelineBaseConfig, WritePropertyConfig, WriteRelationshipConfig {
+public interface LinkPredictionPredictPipelineWriteConfig extends LinkPredictionPredictPipelineBaseConfig, WritePropertyConfig, WriteRelationshipConfig {
 
     @Override
     default String writeProperty() {
@@ -37,7 +37,7 @@ public interface LinkPredictionPredictPipelineComputeConfig extends LinkPredicti
         return "PREDICTED_LINK";
     }
 
-    static LinkPredictionPredictPipelineComputeConfig of(String username, CypherMapWrapper config) {
-        return new LinkPredictionPredictPipelineComputeConfigImpl(username, config);
+    static LinkPredictionPredictPipelineWriteConfig of(String username, CypherMapWrapper config) {
+        return new LinkPredictionPredictPipelineWriteConfigImpl(username, config);
     }
 }
