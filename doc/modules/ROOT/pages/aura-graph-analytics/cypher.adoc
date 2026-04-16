@@ -89,15 +89,15 @@ CALL gds.session.getOrCreate(
   '2GB',
   duration({minutes: 30})
 )
-YIELD name
-RETURN name
+YIELD id
+RETURN id
 ----
 
 .Results
 [opts="header"]
 |===
-| name
-| "test-session"
+| id
+| "af123456-9876abcd"
 |===
 --
 
@@ -201,7 +201,7 @@ CALL gds.session.list(
 
 === Deleting sessions
 
-The `gds.session.delete` procedure deletes a GDS Session with the given ID.
+The `gds.session.delete` procedure deletes a GDS Session with the given sessionName.
 If the session is not found, an error is raised.
 
 [role=cleanup-query]
