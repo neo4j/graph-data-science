@@ -89,15 +89,15 @@ CALL gds.session.getOrCreate(
   '2GB',
   duration({minutes: 30})
 )
-YIELD id
-RETURN id
+YIELD name
+RETURN name
 ----
 
 .Results
 [opts="header"]
 |===
-| id
-| "af123456-9876abcd"
+| name
+| "test-session"
 |===
 --
 
