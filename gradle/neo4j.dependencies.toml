@@ -38,5 +38,6 @@ resource = { module = "org.neo4j:neo4j-resource", version.ref = "neo4j" }
 schema = { module = "org.neo4j:neo4j-schema", version.ref = "neo4j" }
 ssl = { module = "org.neo4j:neo4j-ssl", version.ref = "neo4j" }
 token-api = { module = "org.neo4j:neo4j-token-api", version.ref = "neo4j" }
+test-utils = { module = "org.neo4j:test-utils", version.ref = "neo4j" }
 unsafe = { module = "org.neo4j:neo4j-unsafe", version.ref = "neo4j" }
 values = { module = "org.neo4j:neo4j-values", version.ref = "neo4j" }
