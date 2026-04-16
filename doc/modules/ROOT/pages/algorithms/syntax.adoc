@@ -18,15 +18,12 @@ Additionally, different execution modes are provided:
 
 Finally, an execution mode may be xref:common-usage/memory-estimation.adoc[estimated] by appending the command with `estimate`.
 
-[NOTE]
-Only the production-quality tier guarantees availability of all execution modes and estimation procedures.
-
 Including all of the above mentioned elements leads to the following syntax outline:
 
 .Syntax composition:
 [source]
 ----
-CALL gds[.<tier>].<algorithm>.<execution-mode>[.<estimate>](
+CALL gds.<algorithm>.<execution-mode>[.<estimate>](
   graphName: String,
   configuration: Map
 )
@@ -38,7 +35,7 @@ The syntax looks as follows:
 .Syntax composition for memory estimation:
 [source]
 ----
-CALL gds[.<tier>].<algorithm>.<execution-mode>.estimate(
+CALL gds.<algorithm>.<execution-mode>.estimate(
   configuration: Map
 )
 ----

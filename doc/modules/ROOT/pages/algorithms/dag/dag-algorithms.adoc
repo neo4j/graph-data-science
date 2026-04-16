@@ -14,6 +14,5 @@ One of these is the longest path problem, for which GDS provides an efficient al
 
 The Neo4j GDS library includes the following DAG algorithms:
 
-* Alpha
 ** xref:algorithms/dag/topological-sort.adoc[Topological Sort]
 ** xref:algorithms/dag/longest-path.adoc[Longest Path]

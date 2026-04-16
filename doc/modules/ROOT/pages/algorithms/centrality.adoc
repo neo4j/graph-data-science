@@ -17,7 +17,4 @@ The Neo4j GDS library includes the following centrality algorithms, grouped by q
 ** xref:algorithms/eigenvector-centrality.adoc[Eigenvector Centrality]
 ** xref:algorithms/harmonic-centrality.adoc[Harmonic Centrality]
 ** xref:algorithms/page-rank.adoc[Page Rank]
-
-
-* Alpha
 ** xref:algorithms/hits.adoc[HITS]
