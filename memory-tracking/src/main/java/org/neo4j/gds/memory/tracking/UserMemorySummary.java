@@ -17,22 +17,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.mem;
+package org.neo4j.gds.memory.tracking;
 
-public class MemoryReservationExceededException extends RuntimeException {
-
-    private final long bytesRequired;
-    private final long bytesAvailable;
-
-    MemoryReservationExceededException(long bytesRequired, long bytesAvailable) {
-        this.bytesRequired = bytesRequired;
-        this.bytesAvailable = bytesAvailable;
-    }
-
-    public long bytesRequired() {
-        return bytesRequired;
-    }
-    public long bytesAvailable() {
-        return bytesAvailable;
-    }
-}
+public record UserMemorySummary(String user, long totalGraphsMemory, long totalTasksMemory) {}

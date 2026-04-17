@@ -17,7 +17,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.mem;
 
-public record UserMemorySummary(String user, long totalGraphsMemory, long totalTasksMemory) {}
+plugins {
+    id 'buildlogic-gds-java'
+}
 
+description = 'Neo4j Graph Data Science :: Memory Tracking'
+
+group = 'org.neo4j.gds'
+
+dependencies {
+    implementation openGds.commons.lang3
+
+    implementation project(':domain-services')
+    implementation project(':logging')
+    implementation project(':progress-tracking')
+    implementation project(':string-formatting')
+
+    testImplementation platform(openGds.junit.bom)
+    testImplementation openGds.bundles.test.basic
+    testImplementation openGds.mockito.junit.jupiter
+
+    testRuntimeOnly openGds.bundles.test.platforms
+}

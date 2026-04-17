@@ -42,7 +42,7 @@ import org.neo4j.gds.domain.services.GloballyScopedDependenciesBuilder;
 import org.neo4j.gds.legacycypherprojection.CypherProjectionGraphStoreFactorySupplier;
 import org.neo4j.gds.legacycypherprojection.GraphProjectFromCypherConfig;
 import org.neo4j.gds.logging.Log;
-import org.neo4j.gds.mem.MemoryTracker;
+import org.neo4j.gds.memory.tracking.MemoryTracker;
 import org.neo4j.gds.metrics.Metrics;
 import org.neo4j.gds.procedures.DefaultUserAccessor;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;

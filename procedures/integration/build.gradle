@@ -36,6 +36,7 @@ dependencies {
     implementation project(':licensing')
     implementation project(':logging')
     implementation project(':memory-facade')
+    implementation project(':memory-tracking')
     implementation project(':metrics-api')
     implementation project(':model-catalog-applications')
     implementation project(':native-projection')

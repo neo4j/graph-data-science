@@ -25,7 +25,7 @@ import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies
 import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
 import org.neo4j.gds.applications.graphstorecatalog.GraphProjectMemoryUsageService;
 import org.neo4j.gds.logging.Log;
-import org.neo4j.gds.mem.MemoryTracker;
+import org.neo4j.gds.memory.tracking.MemoryTracker;
 import org.neo4j.gds.procedures.catalog.DatabaseModeRestriction;
 import org.neo4j.gds.procedures.catalog.GraphCatalogProcedureFacade;
 import org.neo4j.gds.procedures.catalog.LocalGraphCatalogProcedureFacade;

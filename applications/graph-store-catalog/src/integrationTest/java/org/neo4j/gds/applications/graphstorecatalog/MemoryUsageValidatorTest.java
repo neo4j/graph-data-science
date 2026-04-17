@@ -35,9 +35,9 @@ import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryEstimations;
 import org.neo4j.gds.mem.MemoryRange;
-import org.neo4j.gds.mem.MemoryTracker;
 import org.neo4j.gds.mem.MemoryTree;
 import org.neo4j.gds.mem.MemoryTreeWithDimensions;
+import org.neo4j.gds.memory.tracking.MemoryTracker;
 
 import java.util.stream.Stream;
 

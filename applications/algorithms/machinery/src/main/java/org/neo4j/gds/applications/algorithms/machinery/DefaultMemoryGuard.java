@@ -27,8 +27,8 @@ import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.MemoryEstimation;
-import org.neo4j.gds.mem.MemoryReservationExceededException;
-import org.neo4j.gds.mem.MemoryTracker;
+import org.neo4j.gds.memory.tracking.MemoryReservationExceededException;
+import org.neo4j.gds.memory.tracking.MemoryTracker;
 import org.neo4j.gds.utils.StringFormatting;
 
 import java.util.Collection;

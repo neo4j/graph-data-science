@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.mem;
+package org.neo4j.gds.memory.tracking;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.neo4j.gds.core.JobId;
@@ -30,10 +30,10 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 
 class TaskMemoryContainer {
+    private static final ConcurrentHashMap<JobId,Pair<String,Long>> EMPTY_HASH_MAP = new ConcurrentHashMap<>();
 
     private final ConcurrentHashMap<String,ConcurrentHashMap<JobId, Pair<String,Long>>> memoryInUse = new ConcurrentHashMap<>();
     private final AtomicLong allocatedMemory = new AtomicLong();
-    private static final ConcurrentHashMap<JobId,Pair<String,Long>> EMPTY_HASH_MAP = new ConcurrentHashMap<>();
 
     void reserve(String username, String taskName, JobId jobId,long memoryAmount){
         memoryInUse.putIfAbsent(username, new ConcurrentHashMap<>());

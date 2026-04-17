@@ -40,7 +40,7 @@ import org.neo4j.gds.core.utils.warnings.UserLogRegistry;
 import org.neo4j.gds.domain.services.GloballyScopedDependenciesBuilder;
 import org.neo4j.gds.executor.MemoryEstimationContext;
 import org.neo4j.gds.logging.LogAdapter;
-import org.neo4j.gds.mem.MemoryTracker;
+import org.neo4j.gds.memory.tracking.MemoryTracker;
 import org.neo4j.gds.metrics.Metrics;
 import org.neo4j.gds.metrics.telemetry.TelemetryLoggerImpl;
 import org.neo4j.gds.procedures.GraphCatalogProcedureFacadeFactory;

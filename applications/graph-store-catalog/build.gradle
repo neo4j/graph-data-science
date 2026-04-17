@@ -42,6 +42,7 @@ dependencies {
     implementation project(':io-core')
     implementation project(':legacy-cypher-projection')
     implementation project(':logging')
+    implementation project(':memory-tracking')
     implementation project(':memory-usage')
     implementation project(':metrics-api')
     implementation project(':native-projection')

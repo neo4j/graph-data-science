@@ -26,6 +26,7 @@ dependencies {
     implementation project(':graph-store-catalog-applications')
     implementation project(':licensing')
     implementation project(':logging')
+    implementation project(':memory-tracking')
     implementation project(':memory-usage')
     implementation project(':model-catalog-applications')
     implementation project(':neo4j-api')

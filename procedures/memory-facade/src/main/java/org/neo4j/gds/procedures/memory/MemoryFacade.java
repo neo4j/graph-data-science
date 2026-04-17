@@ -21,14 +21,13 @@ package org.neo4j.gds.procedures.memory;
 
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.core.JobId;
-import org.neo4j.gds.mem.MemoryTracker;
-import org.neo4j.gds.mem.UserEntityMemory;
-import org.neo4j.gds.mem.UserMemorySummary;
+import org.neo4j.gds.memory.tracking.MemoryTracker;
+import org.neo4j.gds.memory.tracking.UserEntityMemory;
+import org.neo4j.gds.memory.tracking.UserMemorySummary;
 
 import java.util.stream.Stream;
 
 public class MemoryFacade {
-
     private final MemoryTracker memoryTracker;
     private final User user;
 

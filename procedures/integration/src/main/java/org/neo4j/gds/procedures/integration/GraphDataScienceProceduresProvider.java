@@ -33,7 +33,7 @@ import org.neo4j.gds.core.utils.progress.TaskStoreService;
 import org.neo4j.gds.core.write.ExporterContext;
 import org.neo4j.gds.domain.services.GloballyScopedDependencies;
 import org.neo4j.gds.executor.MemoryEstimationContext;
-import org.neo4j.gds.mem.MemoryTracker;
+import org.neo4j.gds.memory.tracking.MemoryTracker;
 import org.neo4j.gds.metrics.telemetry.TelemetryLogger;
 import org.neo4j.gds.metrics.telemetry.TelemetryLoggerImpl;
 import org.neo4j.gds.procedures.GraphCatalogProcedureFacadeFactory;

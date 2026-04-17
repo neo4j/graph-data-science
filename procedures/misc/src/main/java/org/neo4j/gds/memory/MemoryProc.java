@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.memory;
 
-import org.neo4j.gds.mem.UserEntityMemory;
-import org.neo4j.gds.mem.UserMemorySummary;
+import org.neo4j.gds.memory.tracking.UserEntityMemory;
+import org.neo4j.gds.memory.tracking.UserMemorySummary;
 import org.neo4j.gds.procedures.memory.MemoryFacade;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;

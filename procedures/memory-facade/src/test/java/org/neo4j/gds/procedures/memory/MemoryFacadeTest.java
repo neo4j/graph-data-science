@@ -21,9 +21,9 @@ package org.neo4j.gds.procedures.memory;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.User;
-import org.neo4j.gds.mem.MemoryTracker;
-import org.neo4j.gds.mem.UserEntityMemory;
-import org.neo4j.gds.mem.UserMemorySummary;
+import org.neo4j.gds.memory.tracking.MemoryTracker;
+import org.neo4j.gds.memory.tracking.UserEntityMemory;
+import org.neo4j.gds.memory.tracking.UserMemorySummary;
 
 import java.util.stream.Stream;
 

@@ -30,6 +30,7 @@ dependencies {
     implementation project(':graph-store-catalog-applications')
     implementation project(':logging')
     implementation project(':memory-estimation')
+    implementation project(':memory-tracking')
     implementation project(':memory-usage')
     implementation project(':metrics-api')
     implementation project(':model-catalog-api')

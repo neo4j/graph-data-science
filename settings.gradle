@@ -236,6 +236,9 @@ project(':memory-facade').projectDir = file('procedures/memory-facade')
 include('memory-info')
 project(':memory-info').projectDir = file('memory-info')
 
+include('memory-tracking')
+project(':memory-tracking').projectDir = file('memory-tracking')
+
 include('memory-usage')
 project(':memory-usage').projectDir = file('memory-usage')
 

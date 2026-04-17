@@ -17,17 +17,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.mem;
+package org.neo4j.gds.memory.tracking;
 
-import org.neo4j.gds.core.JobId;
+public class MemoryReservationExceededException extends RuntimeException {
 
-public record UserEntityMemory(String user, String name, String entity, long memoryInBytes) {
+    private final long bytesRequired;
+    private final long bytesAvailable;
 
-    static UserEntityMemory createGraph(String user, String name, long memoryInBytes){
-        return  new UserEntityMemory(user,name,"graph",memoryInBytes);
+    MemoryReservationExceededException(long bytesRequired, long bytesAvailable) {
+        this.bytesRequired = bytesRequired;
+        this.bytesAvailable = bytesAvailable;
     }
-    static UserEntityMemory createTask(String user, String name,  JobId jobId, long memoryInBytes){
-        return  new UserEntityMemory(user, name, jobId.asString(), memoryInBytes);
-    }
 
+    public long bytesRequired() {
+        return bytesRequired;
+    }
+    public long bytesAvailable() {
+        return bytesAvailable;
+    }
 }

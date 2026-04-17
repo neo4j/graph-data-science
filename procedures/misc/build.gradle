@@ -10,6 +10,7 @@ dependencies {
     annotationProcessor project(':procedure-collector')
 
     implementation project(':memory-facade')
+    implementation project(':memory-tracking')
     implementation project(':neo4j-integration-tools')
     implementation project(':neo4j-kernel-adapter-api')
     implementation project(':neo4j-settings')
