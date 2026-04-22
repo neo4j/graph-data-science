@@ -46,6 +46,7 @@ public class RandomGraphGeneratorBuilder {
     private Direction direction = Direction.DIRECTED;
     private RandomGraphGeneratorConfig.AllowSelfLoops allowSelfLoops = RandomGraphGeneratorConfig.AllowSelfLoops.NO;
     private RelationshipType relationshipType = RelationshipType.of("REL");
+    private Optional<String> idMapBuilderType = Optional.empty();
     private AdjacencyListBehavior.Factory adjacencyCompressorFactory = null;
     private boolean forceDag = false;
     private boolean inverseIndex = false;
@@ -122,6 +123,11 @@ public class RandomGraphGeneratorBuilder {
         return this;
     }
 
+    public RandomGraphGeneratorBuilder idMapBuilderType(String idMapBuilderType) {
+        this.idMapBuilderType = Optional.of(idMapBuilderType);
+        return this;
+    }
+
     public RandomGraphGeneratorBuilder adjacencyCompressorFactory(AdjacencyListBehavior.Factory adjacencyCompressorFactory) {
         this.adjacencyCompressorFactory = adjacencyCompressorFactory;
         return this;
@@ -141,6 +147,7 @@ public class RandomGraphGeneratorBuilder {
             aggregation,
             direction,
             allowSelfLoops,
+            idMapBuilderType,
             adjacencyCompressorFactory,
             forceDag,
             inverseIndex

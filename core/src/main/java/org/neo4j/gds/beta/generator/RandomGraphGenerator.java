@@ -82,6 +82,7 @@ public final class RandomGraphGenerator {
     private final Optional<NodeLabelProducer> maybeNodeLabelProducer;
     private final List<PropertyProducer<double[]>> relationshipPropertyProducers;
     private final Map<NodeLabel, Set<PropertyProducer<?>>> nodePropertyProducers;
+    private final Optional<String> idMapBuilderType;
     private final AdjacencyListBehavior.Factory adjacencyCompressorFactory;
     private final boolean forceDag;
     private final HugeLongArray randomDagMapping;
@@ -98,6 +99,7 @@ public final class RandomGraphGenerator {
         Aggregation aggregation,
         Direction direction,
         AllowSelfLoops allowSelfLoops,
+        Optional<String> idMapBuilderType,
         AdjacencyListBehavior.Factory adjacencyCompressorFactory,
         boolean forceDag,
         boolean inverseIndex
@@ -112,6 +114,7 @@ public final class RandomGraphGenerator {
         this.aggregation = aggregation;
         this.direction = direction;
         this.allowSelfLoops = allowSelfLoops;
+        this.idMapBuilderType = idMapBuilderType;
         this.forceDag = forceDag;
         this.random = new Random(seed);
         this.propertyValueRandom = new Random(seed);
@@ -155,6 +158,7 @@ public final class RandomGraphGenerator {
     private RandomGraphSpecs generateSpecs() {
         var nodesBuilder = GraphFactory.initNodesBuilder()
             .maxOriginalId(nodeCount)
+            .idMapBuilderType(idMapBuilderType)
             .hasLabelInformation(maybeNodeLabelProducer.isPresent())
             .build();
 
