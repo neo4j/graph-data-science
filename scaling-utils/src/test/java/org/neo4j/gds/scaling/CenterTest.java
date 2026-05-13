@@ -29,8 +29,7 @@ import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.nodeproperties.DoubleTestPropertyValues;
-import org.neo4j.gds.scaling.compute.CenterComputer;
-import org.neo4j.gds.scaling.scale.Center;
+import org.neo4j.gds.scaling.compute.MinMaxAverageComputer;
 
 import java.util.List;
 import java.util.Map;
@@ -60,7 +59,7 @@ class CenterTest {
     @ParameterizedTest
     @MethodSource("properties")
     void normalizes(NodePropertyValues properties, double avg, double[] expected) {
-        var scaler = (Center) CenterComputer.create(
+        var computed = MinMaxAverageComputer.compute(
             properties,
             10,
             new Concurrency(1),
@@ -68,7 +67,9 @@ class CenterTest {
             DefaultPool.INSTANCE
         );
 
-        assertThat(scaler.avg).isEqualTo(avg);
+        var scaler = ScalerFactory.createCenter(properties, computed);
+
+        assertThat(computed.average()).isEqualTo(avg);
         assertThat(scaler.statistics()).containsExactlyEntriesOf(Map.of("avg", List.of(avg)));
 
         double[] actual = IntStream.range(0, 10).mapToDouble(scaler::scaleProperty).toArray();
@@ -78,7 +79,7 @@ class CenterTest {
     @Test
     void handlesMissingValue() {
         var properties = new DoubleTestPropertyValues(value -> value == 5 ? Double.NaN : value);
-        var scaler = CenterComputer.create(
+        var scaler = ScalerFactory.of(ScalerType.Center).create(
             properties,
             10,
             new Concurrency(1),

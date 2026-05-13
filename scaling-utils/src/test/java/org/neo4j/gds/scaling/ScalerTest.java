@@ -24,9 +24,7 @@ import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.nodeproperties.DoubleTestPropertyValues;
-import org.neo4j.gds.scaling.compute.MeanComputer;
 import org.neo4j.gds.scaling.scale.ArrayScaler;
-import org.neo4j.gds.scaling.scale.Mean;
 
 import java.util.List;
 import java.util.Map;
@@ -37,14 +35,14 @@ class ScalerTest {
 
     @Test
     void shouldAccumulateStatsCorrectly() {
-        var meanScaler1 = (Mean) MeanComputer.create(
+        var meanScaler1 = ScalerFactory.of(ScalerType.Mean).create(
             new DoubleTestPropertyValues(nodeId -> nodeId),
             10,
             new Concurrency(1),
             ProgressTracker.NULL_TRACKER,
             DefaultPool.INSTANCE
         );
-        var meanScaler2 = (Mean) MeanComputer.create(
+        var meanScaler2 = ScalerFactory.of(ScalerType.Mean).create(
             new DoubleTestPropertyValues(nodeId -> 2 * nodeId),
             10,
             new Concurrency(1),

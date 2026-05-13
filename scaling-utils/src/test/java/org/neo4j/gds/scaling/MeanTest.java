@@ -29,8 +29,7 @@ import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.nodeproperties.DoubleTestPropertyValues;
-import org.neo4j.gds.scaling.compute.MeanComputer;
-import org.neo4j.gds.scaling.scale.Mean;
+import org.neo4j.gds.scaling.compute.MinMaxAverageComputer;
 
 import java.util.Arrays;
 import java.util.List;
@@ -54,16 +53,16 @@ class MeanTest {
     @ParameterizedTest
     @MethodSource("properties")
     void normalizes(NodePropertyValues properties, double avg, double min, double max, double[] expected) {
-        var scaler = (Mean) MeanComputer.create(
+        var computed = MinMaxAverageComputer.compute(
             properties,
             10,
             new Concurrency(1),
             ProgressTracker.NULL_TRACKER,
-            DefaultPool.INSTANCE
-        );
+            DefaultPool.INSTANCE);
+        var scaler = ScalerFactory.createMean(properties, computed);
 
-        assertThat(scaler.avg).isEqualTo(avg);
-        assertThat(scaler.maxMinDiff).isEqualTo(max - min);
+        assertThat(computed.average()).isEqualTo(avg);
+        assertThat(computed.max() - computed.min()).isEqualTo(max - min);
         assertThat(scaler.statistics()).containsExactlyInAnyOrderEntriesOf(Map.of(
             "max", List.of(max),
             "avg", List.of(avg),
@@ -78,7 +77,7 @@ class MeanTest {
     void avoidsDivByZero() {
         double propValue = 4D;
         var properties = new DoubleTestPropertyValues(nodeId -> propValue);
-        var scaler = MeanComputer.create(
+        var scaler = ScalerFactory.of(ScalerType.Mean).create(
             properties,
             10,
             new Concurrency(1),
@@ -100,7 +99,7 @@ class MeanTest {
     @Test
     void handlesMissingValue() {
         var properties = new DoubleTestPropertyValues(value -> value == 5 ? Double.NaN : value);
-        var scaler = MeanComputer.create(
+        var scaler = ScalerFactory.of(ScalerType.Mean).create(
             properties,
             10,
             new Concurrency(1),

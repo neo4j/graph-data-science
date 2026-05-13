@@ -36,7 +36,8 @@ import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.mem.MemoryEstimateDefinition;
-import org.neo4j.gds.scaling.compute.L2NormComputer;
+import org.neo4j.gds.scaling.ScalerFactory;
+import org.neo4j.gds.scaling.ScalerType;
 
 import java.util.Optional;
 import java.util.function.LongToDoubleFunction;
@@ -130,7 +131,7 @@ public final class EigenvectorComputation implements PregelComputation<PregelCon
         };
 
         // Normalize using L2-Norm (Power iteration)
-        var scaler = L2NormComputer.create(
+        var scaler = ScalerFactory.of(ScalerType.L2Norm).create(
             properties,
             context.nodeCount(),
             concurrency,
