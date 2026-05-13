@@ -26,16 +26,8 @@ import org.neo4j.gds.scaling.compute.L1NormComputer;
 import org.neo4j.gds.scaling.compute.L2NormComputer;
 import org.neo4j.gds.scaling.compute.MinMaxAverageComputer;
 import org.neo4j.gds.scaling.compute.StdComputer;
-import org.neo4j.gds.scaling.scale.Center;
-import org.neo4j.gds.scaling.scale.L1Norm;
-import org.neo4j.gds.scaling.scale.L2Norm;
-import org.neo4j.gds.scaling.scale.LogScaler;
-import org.neo4j.gds.scaling.scale.Max;
-import org.neo4j.gds.scaling.scale.Mean;
-import org.neo4j.gds.scaling.scale.MinMax;
-import org.neo4j.gds.scaling.scale.NoneScaler;
 import org.neo4j.gds.scaling.scale.ScalarScaler;
-import org.neo4j.gds.scaling.scale.StdScore;
+import org.neo4j.gds.scaling.scale.ScalarTransform;
 import org.neo4j.gds.scaling.scale.Zero;
 
 import java.util.List;
@@ -71,46 +63,67 @@ public final class ScalerFactory {
 
     public ScalerType type() { return type; }
 
-    public static Center createCenter(NodePropertyValues properties, MinMaxAverageComputer.Result computed) {
-        return new Center(properties, computed.average());
+    public static ScalarScaler noneScaler(NodePropertyValues properties) {
+        return ScalarTransform.of(properties, Map.of(), a -> a);
     }
 
-    public static ScalarScaler createMean(NodePropertyValues properties, MinMaxAverageComputer.Result computed) {
+    public static ScalarScaler logScaler(NodePropertyValues properties, double offset) {
+        return ScalarTransform.of(properties, Map.of(), a -> Math.log(a + offset));
+    }
+
+    public static ScalarScaler centerScaler(NodePropertyValues properties, MinMaxAverageComputer.Result computed) {
+        var statistics = Map.of("avg", List.of(computed.average()));
+        return ScalarTransform.of(properties, statistics, a -> a - computed.average());
+    }
+
+    public static ScalarScaler meanScaler(NodePropertyValues properties, MinMaxAverageComputer.Result computed) {
         var statistics = Map.of(
             "min", List.of(computed.min()),
             "max", List.of(computed.max()),
             "avg", List.of(computed.average()));
         double maxMinDiff = computed.max() - computed.min();
-        return maxMinDiff < CLOSE_TO_ZERO ? Zero.of(statistics) : new Mean(properties, statistics, computed.average(), maxMinDiff);
+        return maxMinDiff < CLOSE_TO_ZERO
+            ? Zero.of(statistics)
+            : ScalarTransform.of(properties, statistics, a -> (a - computed.average()) / maxMinDiff);
     }
 
-    public static ScalarScaler createMax(NodePropertyValues properties, MinMaxAverageComputer.Result computed) {
+    public static ScalarScaler maxScaler(NodePropertyValues properties, MinMaxAverageComputer.Result computed) {
         double absMax = Math.max(Math.abs(computed.min()), Math.abs(computed.max()));
         var statistics = Map.of("absMax", List.of(absMax));
-        return absMax < CLOSE_TO_ZERO ? Zero.of(statistics) : new Max(properties, statistics, absMax);
+        return absMax < CLOSE_TO_ZERO
+            ? Zero.of(statistics)
+            : ScalarTransform.of(properties, statistics, a -> a / absMax);
     }
 
-    public static ScalarScaler createMinMax(NodePropertyValues properties, MinMaxAverageComputer.Result computed) {
+    public static ScalarScaler minMaxScaler(NodePropertyValues properties, MinMaxAverageComputer.Result computed) {
         var statistics = Map.of(
             "min", List.of(computed.min()),
             "max", List.of(computed.max()));
         var diff = computed.max() - computed.min();
-        return diff < CLOSE_TO_ZERO ? Zero.of(statistics) : new MinMax(properties, statistics, computed.min(), diff);
+        return diff < CLOSE_TO_ZERO
+            ? Zero.of(statistics)
+            : ScalarTransform.of(properties, statistics, a -> (a - computed.min()) / diff);
     }
 
-    public static ScalarScaler createL1Norm(NodePropertyValues properties, L1NormComputer.Result computed) {
-        return computed.sum() < CLOSE_TO_ZERO ? Zero.of() : new L1Norm(properties, computed.sum());
+    public static ScalarScaler L1NormScaler(NodePropertyValues properties, L1NormComputer.Result computed) {
+        return computed.sum() < CLOSE_TO_ZERO
+            ? Zero.of()
+            : ScalarTransform.of(properties, Map.of(), a -> a / computed.sum());
     }
 
-    public static ScalarScaler createL2Norm(NodePropertyValues properties, L2NormComputer.Result computed) {
-        return computed.length() < CLOSE_TO_ZERO ? Zero.of() : new L2Norm(properties, computed.length());
+    public static ScalarScaler L2NormScaler(NodePropertyValues properties, L2NormComputer.Result computed) {
+        return computed.length() < CLOSE_TO_ZERO
+            ? Zero.of()
+            : ScalarTransform.of(properties, Map.of(), a -> a / computed.length());
     }
-
-    public static ScalarScaler createStd(NodePropertyValues properties, StdComputer.Result computed) {
+    
+    public static ScalarScaler StdScaler(NodePropertyValues properties, StdComputer.Result computed) {
         var statistics = Map.of(
             "avg", List.of(computed.average()),
             "std", List.of(computed.std()));
-        return computed.std() < CLOSE_TO_ZERO ? Zero.of(statistics) : new StdScore(properties, statistics, computed.average(), computed.std());
+        return computed.std() < CLOSE_TO_ZERO
+            ? Zero.of(statistics)
+            : ScalarTransform.of(properties, statistics, a -> (a - computed.average()) / computed.std());
     }
 
     public ScalarScaler create(
@@ -121,52 +134,52 @@ public final class ScalerFactory {
         ExecutorService executor
     ) {
         return switch (type) {
-            case None -> NoneScaler.of(properties);
+            case None -> noneScaler(properties);
             case Zero -> Zero.of();
-            case Log -> LogScaler.of(properties, offset);
-            case Center -> createCenter(properties,
+            case Log -> logScaler(properties, offset);
+            case Center -> centerScaler(properties,
                 MinMaxAverageComputer.compute(
                     properties,
                     nodeCount,
                     concurrency,
                     progressTracker,
                     executor));
-            case Mean -> createMean(properties,
+            case Mean -> meanScaler(properties,
                 MinMaxAverageComputer.compute(
                     properties,
                     nodeCount,
                     concurrency,
                     progressTracker,
                     executor));
-            case Max -> createMax(properties,
+            case Max -> maxScaler(properties,
                 MinMaxAverageComputer.compute(
                     properties,
                     nodeCount,
                     concurrency,
                     progressTracker,
                     executor));
-            case MinMax -> createMinMax(properties,
+            case MinMax -> minMaxScaler(properties,
                 MinMaxAverageComputer.compute(
                     properties,
                     nodeCount,
                     concurrency,
                     progressTracker,
                     executor));
-            case L1Norm -> createL1Norm(properties,
+            case L1Norm -> L1NormScaler(properties,
                 L1NormComputer.compute(
                     properties,
                     nodeCount,
                     concurrency,
                     progressTracker,
                     executor));
-            case L2Norm -> createL2Norm(properties,
+            case L2Norm -> L2NormScaler(properties,
                 L2NormComputer.compute(
                     properties,
                     nodeCount,
                     concurrency,
                     progressTracker,
                     executor));
-            case Std -> createStd(properties,
+            case Std -> StdScaler(properties,
                 StdComputer.compute(
                     properties,
                     nodeCount,

@@ -66,7 +66,7 @@ class L1NormTest {
             DefaultPool.INSTANCE
         );
 
-        var scaler = ScalerFactory.createL1Norm(properties, computed);
+        var scaler = ScalerFactory.L1NormScaler(properties, computed);
 
         assertThat(computed.sum()).isEqualTo(l1norm);
 

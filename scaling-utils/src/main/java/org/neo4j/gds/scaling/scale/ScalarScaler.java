@@ -19,29 +19,9 @@
  */
 package org.neo4j.gds.scaling.scale;
 
-import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-
-import java.util.List;
-import java.util.Map;
-
 public abstract class ScalarScaler implements Scaler {
-
-    protected final NodePropertyValues properties;
-    private final Map<String, List<Double>> statistics;
-
-    protected ScalarScaler(NodePropertyValues properties, Map<String, List<Double>> statistics) {
-        this.properties = properties;
-        this.statistics = statistics;
-    }
-
     @Override
     public int dimension() {
         return 1;
     }
-
-    @Override
-    public Map<String, List<Double>> statistics() {
-        return statistics;
-    }
-
 }

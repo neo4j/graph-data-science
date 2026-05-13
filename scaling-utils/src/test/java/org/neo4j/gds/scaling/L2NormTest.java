@@ -57,7 +57,7 @@ class L2NormTest {
             DefaultPool.INSTANCE
         );
 
-        var scaler = ScalerFactory.createL2Norm(properties, computed);
+        var scaler = ScalerFactory.L2NormScaler(properties, computed);
 
         assertThat(computed.length()).isEqualTo(euclideanLength);
 

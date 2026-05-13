@@ -67,7 +67,7 @@ class CenterTest {
             DefaultPool.INSTANCE
         );
 
-        var scaler = ScalerFactory.createCenter(properties, computed);
+        var scaler = ScalerFactory.centerScaler(properties, computed);
 
         assertThat(computed.average()).isEqualTo(avg);
         assertThat(scaler.statistics()).containsExactlyEntriesOf(Map.of("avg", List.of(avg)));

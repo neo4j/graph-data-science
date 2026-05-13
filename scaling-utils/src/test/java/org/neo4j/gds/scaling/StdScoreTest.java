@@ -60,7 +60,7 @@ class StdScoreTest {
             DefaultPool.INSTANCE
         );
 
-        var scaler = ScalerFactory.createStd(properties, computed);
+        var scaler = ScalerFactory.StdScaler(properties, computed);
 
         assertThat(computed.average()).isEqualTo(avg);
         assertThat(computed.std()).isEqualTo(std);

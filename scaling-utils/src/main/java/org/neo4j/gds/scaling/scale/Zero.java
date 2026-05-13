@@ -19,22 +19,27 @@
  */
 package org.neo4j.gds.scaling.scale;
 
-import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-
 import java.util.List;
 import java.util.Map;
 
 public final class Zero extends ScalarScaler {
-    private Zero(NodePropertyValues properties, Map<String, List<Double>> statistics) {
-        super(properties, statistics);
+    private final Map<String, List<Double>> statistics;
+
+    private Zero(Map<String, List<Double>> statistics) {
+        this.statistics = statistics;
     }
 
     public static Zero of(Map<String, List<Double>> stats) {
-        return new Zero(null, stats);
+        return new Zero(stats);
     }
 
     public static Zero of() {
-        return new Zero(null, Map.of());
+        return of(Map.of());
+    }
+
+    @Override
+    public Map<String, List<Double>> statistics() {
+        return statistics;
     }
 
     @Override
