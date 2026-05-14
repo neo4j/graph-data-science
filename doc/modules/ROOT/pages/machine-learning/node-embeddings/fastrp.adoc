@@ -55,6 +55,14 @@ We will return to xref:machine-learning/node-embeddings/fastrp.adoc#algorithms-e
 Therefore, each node's embedding depends on a neighborhood of radius equal to the number of iterations.
 This way FastRP exploits higher-order relationships in the graph while still being highly scalable.
 
+[TIP]
+====
+FastRP embeddings can be used with Neo4j vector search to retrieve nodes with similar graph topology.
+Write the embeddings to node properties, create a Neo4j https://neo4j.com/docs/cypher-manual/current/indexes/semantic-indexes/vector-indexes/[vector index] over that property, and query it with Cypher.
+This structural vector search can be useful on its own or combined with full-text and content embedding results in a hybrid search query.
+For a worked lexical, semantic, and structural example, see https://neo4j.com/developer/genai-ecosystem/hybrid-search/[Hybrid search in the Developer Guide].
+====
+
 
 === Node properties
 
