@@ -19,13 +19,11 @@
  */
 package org.neo4j.gds.core.io.json;
 
-import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.DatabaseInfo;
-import org.neo4j.gds.api.schema.MutableNodeSchema;
-import org.neo4j.gds.api.schema.MutableNodeSchemaEntry;
 import org.neo4j.gds.api.schema.MutableRelationshipSchema;
+import org.neo4j.gds.api.schema.NodeSchemaRecord;
 import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.api.schema.RelationshipSchema;
 import org.neo4j.gds.core.io.file.GraphInfo;
@@ -55,18 +53,28 @@ public final class GraphStoreMetadataMapper {
         return new Capabilities(toWriteMode(graphStoreMetadata));
     }
 
-    public static org.neo4j.gds.api.schema.NodeSchema toNodeSchema(GraphStoreMetadata graphStoreMetadata) {
-        var result = MutableNodeSchema.empty();
+    public static org.neo4j.gds.api.schema.NodeSchemaRecord toNodeSchema(GraphStoreMetadata graphStoreMetadata) {
+        var result = NodeSchemaRecord.builder();
 
-        var nodeSchemaEntries = graphStoreMetadata
-            .nodeSchema()
-            .entrySet()
-            .stream()
-            .map(GraphStoreMetadataMapper::toNodeSchemaEntry)
-            .toList();
-        nodeSchemaEntries.forEach(result::set);
+        for (var entry : graphStoreMetadata.nodeSchema().entrySet()) {
+            var propertySchemas = entry.getValue().propertySchemas();
+            if (propertySchemas.isEmpty()) {
+                result.addLabel(entry.getKey());
 
-        return result;
+            } else {
+                propertySchemas.entrySet().stream()
+                    .map(GraphStoreMetadataMapper::toPropertySchema)
+                    .forEach(propertySchema -> result.addProperty(
+                        entry.getKey(),
+                        propertySchema.key(),
+                        propertySchema.valueType(),
+                        propertySchema.defaultValue(),
+                        propertySchema.state()
+                    ));
+            }
+        }
+
+        return result.build();
     }
 
     public static RelationshipSchema toRelationshipSchema(GraphStoreMetadata graphStoreMetadata) {
@@ -79,6 +87,7 @@ public final class GraphStoreMetadataMapper {
                     RelationshipType.of(entry.getKey()),
                     toDirection(entry.getValue().direction())
                 );
+
             } else {
                 propertySchemas.entrySet().stream()
                     .map(GraphStoreMetadataMapper::toRelationshipPropertySchema)
@@ -123,22 +132,6 @@ public final class GraphStoreMetadataMapper {
             case DIRECTED -> org.neo4j.gds.api.schema.Direction.DIRECTED;
             case UNDIRECTED -> org.neo4j.gds.api.schema.Direction.UNDIRECTED;
         };
-    }
-
-    private static MutableNodeSchemaEntry toNodeSchemaEntry(Map.Entry<String, NodeSchema> entry) {
-        var nodeLabel = NodeLabel.of(entry.getKey());
-        var properties = toPropertySchemas(entry.getValue().propertySchemas());
-        return MutableNodeSchemaEntry.of(nodeLabel, properties);
-    }
-
-    private static Map<String, PropertySchema> toPropertySchemas(Map<String, NodePropertySchema> schemas) {
-        return schemas.entrySet().stream()
-            .collect(
-                Collectors.toMap(
-                    Map.Entry::getKey,
-                    GraphStoreMetadataMapper::toPropertySchema
-                )
-            );
     }
 
     private static PropertySchema toPropertySchema(Map.Entry<String, NodePropertySchema> schemaEntry) {
