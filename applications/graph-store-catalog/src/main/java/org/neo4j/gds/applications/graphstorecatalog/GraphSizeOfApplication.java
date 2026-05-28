@@ -38,7 +38,7 @@ class GraphSizeOfApplication {
             requestScopedDependencies.databaseId().databaseName()
         );
 
-        var graphStoreWithConfig = graphStoreCatalogService.get(catalogRequest, graphName);
+        var graphStoreWithConfig = graphStoreCatalogService.getGraphStoreCatalogEntry(catalogRequest, graphName);
         var graphStore = graphStoreWithConfig.graphStore();
         var graphMemoryUsage = GraphMemoryUsageFactory.of(graphStore);
 

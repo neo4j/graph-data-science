@@ -31,13 +31,14 @@ import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.loading.GraphStoreCatalogEntry;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.loading.ImmutableCatalogRequest;
+import org.neo4j.gds.core.loading.LocalGraphStoreCatalogService;
 
 public final class GraphStoreFromCatalogLoader implements GraphStoreLoader {
     private final AlgoBaseConfig config;
     private final GraphStore graphStore;
     private final ResultStore resultStore;
     private final GraphProjectConfig graphProjectConfig;
-    private final GraphStoreCatalogService graphStoreCatalogService = new GraphStoreCatalogService();
+    private final GraphStoreCatalogService graphStoreCatalogService = new LocalGraphStoreCatalogService();
     private final GraphName graphName;
 
     public GraphStoreFromCatalogLoader(
@@ -85,7 +86,7 @@ public final class GraphStoreFromCatalogLoader implements GraphStoreLoader {
             config.usernameOverride(),
             requestScopedDependencies.user().isAdmin()
         );
-        return graphStoreCatalogService.get(request, graphName);
+        return graphStoreCatalogService.getGraphStoreCatalogEntry(request, graphName);
 
     }
 }

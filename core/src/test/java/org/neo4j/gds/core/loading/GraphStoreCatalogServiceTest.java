@@ -58,7 +58,7 @@ class GraphStoreCatalogServiceTest {
             )
         );
         GraphStoreCatalog.set(configuration, graphStore); // shorthand for project
-        var service = new GraphStoreCatalogService();
+        var service = new LocalGraphStoreCatalogService();
 
         assertTrue(
             service.graphExists(
@@ -87,7 +87,7 @@ class GraphStoreCatalogServiceTest {
 
     @Test
     void shouldRespectFailFlag() {
-        var service = new GraphStoreCatalogService();
+        var service = new LocalGraphStoreCatalogService();
 
         assertNull(
             service.removeGraph(

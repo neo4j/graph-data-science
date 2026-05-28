@@ -23,6 +23,7 @@ import org.assertj.core.api.SoftAssertions;
 import org.assertj.core.api.junit.jupiter.SoftAssertionsExtension;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.neo4j.gds.GraphParameters;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DatabaseId;
@@ -30,12 +31,12 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.User;
-import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.core.loading.validation.GraphStoreValidation;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 
-import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -68,19 +69,18 @@ class GraphStoreCatalogServiceGetGraphTest {
 
     @Test
     void shouldWorkWithoutAnyFilters(SoftAssertions assertions) {
-        var serviceSpy = spy(GraphStoreCatalogService.class);
+        var serviceSpy = spy(LocalGraphStoreCatalogService.class);
         var graphStoreWithConfigMock = mock(GraphStoreCatalogEntry.class);
         when(graphStoreWithConfigMock.graphStore()).thenReturn(graphStore);
-        doReturn(graphStoreWithConfigMock).when(serviceSpy).get(any(), any());
+        doReturn(graphStoreWithConfigMock).when(serviceSpy).getGraphStoreCatalogEntry(any(), any());
 
-        var configMock = mock(AlgoBaseConfig.class);
-        when(configMock.nodeLabelsFilter()).thenReturn(Collections.emptySet());
-        when(configMock.projectAllRelationshipTypes()).thenReturn(true);
+        var graphParameters  = new GraphParameters(Set.of(),Set.of(),true,Optional.empty());
 
         var graphResources = serviceSpy.getGraphResources(
             GraphName.parse("bogus"),
-            configMock,
+            graphParameters,
             Optional.empty(),
+            mock(GraphStoreValidation.class),
             Optional.empty(),
             Optional.empty(),
             new User("bogusUser", false),
@@ -113,19 +113,23 @@ class GraphStoreCatalogServiceGetGraphTest {
 
     @Test
     void shouldWorkWithNodeLabels(SoftAssertions assertions) {
-        var serviceSpy = spy(GraphStoreCatalogService.class);
+        var serviceSpy = spy(LocalGraphStoreCatalogService.class);
         var graphStoreWithConfigMock = mock(GraphStoreCatalogEntry.class);
         when(graphStoreWithConfigMock.graphStore()).thenReturn(graphStore);
-        doReturn(graphStoreWithConfigMock).when(serviceSpy).get(any(), any());
+        doReturn(graphStoreWithConfigMock).when(serviceSpy).getGraphStoreCatalogEntry(any(), any());
 
-        var configMock = mock(AlgoBaseConfig.class);
-        when(configMock.nodeLabelsFilter()).thenReturn(Set.of(NodeLabel.of("N")));
-        when(configMock.projectAllRelationshipTypes()).thenReturn(true);
+        var graphParameters  = new GraphParameters(
+            Set.of(NodeLabel.of("N")),
+            List.of(),
+            true,
+            Optional.empty()
+        );
 
         var graphResources = serviceSpy.getGraphResources(
             GraphName.parse("bogus"),
-            configMock,
+            graphParameters,
             Optional.empty(),
+            mock(GraphStoreValidation.class),
             Optional.empty(),
             Optional.empty(),
             new User("bogusUser", false),
@@ -158,19 +162,23 @@ class GraphStoreCatalogServiceGetGraphTest {
 
     @Test
     void shouldWorkWithRelationshipTypes(SoftAssertions assertions) {
-        var serviceSpy = spy(GraphStoreCatalogService.class);
+        var serviceSpy = spy(LocalGraphStoreCatalogService.class);
         var graphStoreWithConfigMock = mock(GraphStoreCatalogEntry.class);
         when(graphStoreWithConfigMock.graphStore()).thenReturn(graphStore);
-        doReturn(graphStoreWithConfigMock).when(serviceSpy).get(any(), any());
+        doReturn(graphStoreWithConfigMock).when(serviceSpy).getGraphStoreCatalogEntry(any(), any());
 
-        var configMock = mock(AlgoBaseConfig.class);
-        when(configMock.nodeLabelsFilter()).thenReturn(Collections.emptySet());
-        when(configMock.relationshipTypesFilter()).thenReturn(Set.of(RelationshipType.of("T")));
+        var graphParameters  = new GraphParameters(
+            Set.of(),
+            Set.of(RelationshipType.of("T")),
+            false,
+            Optional.empty()
+        );
 
         var graphResources = serviceSpy.getGraphResources(
             GraphName.parse("bogus"),
-            configMock,
+            graphParameters,
             Optional.empty(),
+            mock(GraphStoreValidation.class),
             Optional.empty(),
             Optional.empty(),
             new User("bogusUser", false),
@@ -204,19 +212,23 @@ class GraphStoreCatalogServiceGetGraphTest {
 
     @Test
     void shouldWorkWithNodeLabelsAndRelationshipTypes(SoftAssertions assertions) {
-        var serviceSpy = spy(GraphStoreCatalogService.class);
+        var serviceSpy = spy(LocalGraphStoreCatalogService.class);
         var graphStoreWithConfigMock = mock(GraphStoreCatalogEntry.class);
         when(graphStoreWithConfigMock.graphStore()).thenReturn(graphStore);
-        doReturn(graphStoreWithConfigMock).when(serviceSpy).get(any(), any());
+        doReturn(graphStoreWithConfigMock).when(serviceSpy).getGraphStoreCatalogEntry(any(), any());
 
-        var configMock = mock(AlgoBaseConfig.class);
-        when(configMock.nodeLabelsFilter()).thenReturn(Set.of(NodeLabel.of("N")));
-        when(configMock.relationshipTypesFilter()).thenReturn(Set.of(RelationshipType.of("T")));
+        var graphParameters  = new GraphParameters(
+            Set.of(NodeLabel.of("N")),
+            Set.of(RelationshipType.of("T")),
+            false,
+            Optional.empty()
+        );
 
         var graphResources = serviceSpy.getGraphResources(
             GraphName.parse("bogus"),
-            configMock,
+            graphParameters,
             Optional.empty(),
+            mock(GraphStoreValidation.class),
             Optional.empty(),
             Optional.empty(),
             new User("bogusUser", false),
@@ -250,20 +262,25 @@ class GraphStoreCatalogServiceGetGraphTest {
 
     @Test
     void shouldReturnGraphWithNoRelationshipsForEmptyRelationshipTypeFilter(SoftAssertions assertions) {
-        var serviceSpy = spy(GraphStoreCatalogService.class);
+        var serviceSpy = spy(LocalGraphStoreCatalogService.class);
         var graphStoreWithConfigMock = mock(GraphStoreCatalogEntry.class);
         when(graphStoreWithConfigMock.graphStore()).thenReturn(graphStore);
-        doReturn(graphStoreWithConfigMock).when(serviceSpy).get(any(), any());
+        doReturn(graphStoreWithConfigMock).when(serviceSpy).getGraphStoreCatalogEntry(any(), any());
 
-        var configMock = mock(AlgoBaseConfig.class);
-        when(configMock.nodeLabelsFilter()).thenReturn(Set.of(NodeLabel.of("N")));
-        when(configMock.projectAllRelationshipTypes()).thenReturn(false);
-        when(configMock.relationshipTypes()).thenReturn(Collections.emptyList());
+
+
+        var graphParameters  = new GraphParameters(
+            Set.of(NodeLabel.of("N")),
+            Set.of(),
+            false,
+            Optional.empty()
+        );
 
         var graphResources = serviceSpy.getGraphResources(
             GraphName.parse("bogus"),
-            configMock,
+            graphParameters,
             Optional.empty(),
+            mock(GraphStoreValidation.class),
             Optional.empty(),
             Optional.empty(),
             new User("bogusUser", false),

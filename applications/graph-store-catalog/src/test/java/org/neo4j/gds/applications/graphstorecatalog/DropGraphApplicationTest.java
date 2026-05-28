@@ -72,10 +72,10 @@ class DropGraphApplicationTest {
         var g2 = GraphName.parse("bar");
         var g3 = GraphName.parse("baz");
         var g4 = GraphName.parse("quux");
-        when(graphStoreCatalogService.get(request, g1)).thenReturn(mock(GraphStoreCatalogEntry.class));
-        when(graphStoreCatalogService.get(request, g2)).thenThrow(new NoSuchElementException("aha!"));
-        when(graphStoreCatalogService.get(request, g3)).thenReturn(mock(GraphStoreCatalogEntry.class));
-        when(graphStoreCatalogService.get(request, g4)).thenThrow(new NoSuchElementException("another!"));
+        when(graphStoreCatalogService.getGraphStoreCatalogEntry(request, g1)).thenReturn(mock(GraphStoreCatalogEntry.class));
+        when(graphStoreCatalogService.getGraphStoreCatalogEntry(request, g2)).thenThrow(new NoSuchElementException("aha!"));
+        when(graphStoreCatalogService.getGraphStoreCatalogEntry(request, g3)).thenReturn(mock(GraphStoreCatalogEntry.class));
+        when(graphStoreCatalogService.getGraphStoreCatalogEntry(request, g4)).thenThrow(new NoSuchElementException("another!"));
         try {
             dropGraphService.compute(
                 List.of(g1, g2, g3, g4),
@@ -90,10 +90,10 @@ class DropGraphApplicationTest {
                 "The graphs `bar`, and `quux` do not exist on database `some database`.");
         }
 
-        verify(graphStoreCatalogService).get(request, g1);
-        verify(graphStoreCatalogService).get(request, g2);
-        verify(graphStoreCatalogService).get(request, g3);
-        verify(graphStoreCatalogService).get(request, g4);
+        verify(graphStoreCatalogService).getGraphStoreCatalogEntry(request, g1);
+        verify(graphStoreCatalogService).getGraphStoreCatalogEntry(request, g2);
+        verify(graphStoreCatalogService).getGraphStoreCatalogEntry(request, g3);
+        verify(graphStoreCatalogService).getGraphStoreCatalogEntry(request, g4);
         verifyNoMoreInteractions(graphStoreCatalogService);
     }
 

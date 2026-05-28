@@ -60,7 +60,7 @@ class DimensionTransformerForLinkPrediction implements DimensionTransformer {
 
         var model = trainedLPPipelineModel.get(configuration.modelName(), configuration.username());
 
-        var graphStore = graphStoreCatalogService.get(
+        var graphStore = graphStoreCatalogService.getGraphStoreCatalogEntry(
             CatalogRequest.of(configuration.username(), databaseId),
             GraphName.parse(configuration.graphName())
         ).graphStore();

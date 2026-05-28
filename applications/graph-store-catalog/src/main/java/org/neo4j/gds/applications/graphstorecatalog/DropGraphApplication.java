@@ -73,7 +73,7 @@ public class DropGraphApplication {
         var failures = new LinkedList<Pair<GraphName, NoSuchElementException>>();
         graphNames.forEach(graphName -> {
                 try {
-                    graphStoreCatalogService.get(request, graphName);
+                    graphStoreCatalogService.getGraphStoreCatalogEntry(request, graphName);
                 } catch (NoSuchElementException e) {
                     failures.add(Pair.of(graphName, e));
                 }

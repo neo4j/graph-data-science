@@ -30,7 +30,7 @@ import org.neo4j.gds.api.User;
 import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
 import org.neo4j.gds.core.loading.Capabilities;
 import org.neo4j.gds.core.loading.CatalogRequest;
-import org.neo4j.gds.core.loading.GraphStoreCatalogService;
+import org.neo4j.gds.core.loading.LocalGraphStoreCatalogService;
 import org.neo4j.gds.core.utils.progress.EmptyTaskStore;
 import org.neo4j.gds.core.utils.progress.tasks.Status;
 import org.neo4j.gds.logging.Log;
@@ -54,7 +54,7 @@ class ProductGraphAggregatorIT {
         var graphName = "graph";
         var databaseId = DatabaseId.random();
 
-        var graphStoreCatalogService = new GraphStoreCatalogService();
+        var graphStoreCatalogService = new LocalGraphStoreCatalogService();
         try (
             var aggregator = new ProductGraphAggregator(
                 databaseId,
@@ -96,7 +96,7 @@ class ProductGraphAggregatorIT {
                         .isEqualTo(1)
                 );
 
-            var graphStore = graphStoreCatalogService.get(
+            var graphStore = graphStoreCatalogService.getGraphStoreCatalogEntry(
                 CatalogRequest.of(new User(userName, false), databaseId),
                 GraphName.parse(graphName)
             ).graphStore();
@@ -118,7 +118,7 @@ class ProductGraphAggregatorIT {
                 Capabilities.WriteMode.LOCAL,
                 QueryEstimator.empty(),
                 ExecutingQueryProvider.empty(),
-                new GraphStoreCatalogService(),
+                new LocalGraphStoreCatalogService(),
                 ProjectionMetricsService.DISABLED,
                 taskStore,
                 Log.noOpLog(),
@@ -157,7 +157,7 @@ class ProductGraphAggregatorIT {
             Capabilities.WriteMode.LOCAL,
             QueryEstimator.empty(),
             ExecutingQueryProvider.empty(),
-            new  GraphStoreCatalogService(),
+            new LocalGraphStoreCatalogService(),
             ProjectionMetricsService.DISABLED,
             taskStore,
             Log.noOpLog(),
