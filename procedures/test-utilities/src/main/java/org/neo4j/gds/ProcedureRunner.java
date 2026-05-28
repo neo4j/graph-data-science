@@ -30,13 +30,11 @@ import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
 import org.neo4j.gds.core.Username;
-import org.neo4j.gds.core.loading.GraphStoreCatalogService;
+import org.neo4j.gds.core.loading.LocalGraphStoreCatalogService;
 import org.neo4j.gds.core.utils.logging.GdsLoggers;
 import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.utils.progress.EmptyTaskStore;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
-import org.neo4j.gds.user.log.EmptyUserLogStore;
-import org.neo4j.gds.user.log.UserLogRegistry;
 import org.neo4j.gds.domain.services.GloballyScopedDependenciesBuilder;
 import org.neo4j.gds.executor.MemoryEstimationContext;
 import org.neo4j.gds.logging.LogAdapter;
@@ -47,6 +45,8 @@ import org.neo4j.gds.procedures.GraphCatalogProcedureFacadeFactory;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.LocalGraphDataScienceProcedures;
 import org.neo4j.gds.procedures.ProcedureCallContextReturnColumns;
+import org.neo4j.gds.user.log.EmptyUserLogStore;
+import org.neo4j.gds.user.log.UserLogRegistry;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
@@ -167,7 +167,7 @@ public final class ProcedureRunner {
             .userLogRegistry(UserLogRegistry.EMPTY)
             .userLogStore(EmptyUserLogStore.INSTANCE)
             .build();
-        var graphStoreCatalogService = new GraphStoreCatalogService();
+        var graphStoreCatalogService = new LocalGraphStoreCatalogService();
 
         var catalogProcedureFacadeFactory = new GraphCatalogProcedureFacadeFactory(gdsLog, null);
 

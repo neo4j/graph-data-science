@@ -69,7 +69,7 @@ class GraphStoreCatalogServiceGetGraphTest {
 
     @Test
     void shouldWorkWithoutAnyFilters(SoftAssertions assertions) {
-        var serviceSpy = spy(GraphStoreCatalogService.class);
+        var serviceSpy = spy(LocalGraphStoreCatalogService.class);
         var graphStoreWithConfigMock = mock(GraphStoreCatalogEntry.class);
         when(graphStoreWithConfigMock.graphStore()).thenReturn(graphStore);
         doReturn(graphStoreWithConfigMock).when(serviceSpy).get(any(), any());
@@ -113,7 +113,7 @@ class GraphStoreCatalogServiceGetGraphTest {
 
     @Test
     void shouldWorkWithNodeLabels(SoftAssertions assertions) {
-        var serviceSpy = spy(GraphStoreCatalogService.class);
+        var serviceSpy = spy(LocalGraphStoreCatalogService.class);
         var graphStoreWithConfigMock = mock(GraphStoreCatalogEntry.class);
         when(graphStoreWithConfigMock.graphStore()).thenReturn(graphStore);
         doReturn(graphStoreWithConfigMock).when(serviceSpy).get(any(), any());
@@ -162,7 +162,7 @@ class GraphStoreCatalogServiceGetGraphTest {
 
     @Test
     void shouldWorkWithRelationshipTypes(SoftAssertions assertions) {
-        var serviceSpy = spy(GraphStoreCatalogService.class);
+        var serviceSpy = spy(LocalGraphStoreCatalogService.class);
         var graphStoreWithConfigMock = mock(GraphStoreCatalogEntry.class);
         when(graphStoreWithConfigMock.graphStore()).thenReturn(graphStore);
         doReturn(graphStoreWithConfigMock).when(serviceSpy).get(any(), any());
@@ -212,7 +212,7 @@ class GraphStoreCatalogServiceGetGraphTest {
 
     @Test
     void shouldWorkWithNodeLabelsAndRelationshipTypes(SoftAssertions assertions) {
-        var serviceSpy = spy(GraphStoreCatalogService.class);
+        var serviceSpy = spy(LocalGraphStoreCatalogService.class);
         var graphStoreWithConfigMock = mock(GraphStoreCatalogEntry.class);
         when(graphStoreWithConfigMock.graphStore()).thenReturn(graphStore);
         doReturn(graphStoreWithConfigMock).when(serviceSpy).get(any(), any());
@@ -262,7 +262,7 @@ class GraphStoreCatalogServiceGetGraphTest {
 
     @Test
     void shouldReturnGraphWithNoRelationshipsForEmptyRelationshipTypeFilter(SoftAssertions assertions) {
-        var serviceSpy = spy(GraphStoreCatalogService.class);
+        var serviceSpy = spy(LocalGraphStoreCatalogService.class);
         var graphStoreWithConfigMock = mock(GraphStoreCatalogEntry.class);
         when(graphStoreWithConfigMock.graphStore()).thenReturn(graphStore);
         doReturn(graphStoreWithConfigMock).when(serviceSpy).get(any(), any());
