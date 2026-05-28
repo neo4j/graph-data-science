@@ -26,6 +26,7 @@ import org.neo4j.gds.core.loading.GraphResources;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.loading.PostLoadETLHook;
 import org.neo4j.gds.core.loading.PostLoadValidationHook;
+import org.neo4j.gds.core.loading.validation.GraphStoreValidation;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.MemoryEstimation;
@@ -275,10 +276,11 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
 
             return graphStoreCatalogService.getGraphResources(
                 graphName,
-                configuration,
+                configuration.toGraphParameters(),
+                relationshipProperty,
+                new GraphStoreValidation(configuration::graphStoreValidation),
                 postGraphStoreLoadValidationHooks,
                 postGraphStoreLoadETLHooks,
-                relationshipProperty,
                 requestScopedDependencies.user(),
                 requestScopedDependencies.databaseId()
             );

@@ -20,11 +20,13 @@
 package org.neo4j.gds.applications.algorithms.machinery;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.GraphParameters;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.core.RequestCorrelationId;
 import org.neo4j.gds.core.loading.GraphResources;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
+import org.neo4j.gds.core.loading.validation.GraphStoreValidation;
 import org.neo4j.gds.logging.Log;
 
 import java.util.Optional;
@@ -32,6 +34,8 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -63,15 +67,19 @@ class DefaultAlgorithmProcessingTemplateTest {
 
         var configuration = new ExampleConfiguration();
         var graphResources = new GraphResources(null, mock(Graph.class), null);
+
+
         when(graphStoreCatalogService.getGraphResources(
-            GraphName.parse("some graph"),
-            configuration,
-            Optional.empty(),
-            Optional.empty(),
-            Optional.empty(),
-            requestScopedDependencies.user(),
-            requestScopedDependencies.databaseId()
-        )).thenReturn(graphResources);
+            eq(GraphName.parse("some graph")),
+            any(GraphParameters.class),
+            eq(Optional.empty()),
+            any(GraphStoreValidation.class),
+            eq(Optional.empty()),
+            eq(Optional.empty()),
+            eq(requestScopedDependencies.user()),
+            eq(requestScopedDependencies.databaseId())
+            )
+        ).thenReturn(graphResources);
         when(algorithmComputer.computeAlgorithm(
             configuration,
             graphResources,
@@ -132,13 +140,14 @@ class DefaultAlgorithmProcessingTemplateTest {
         var configuration = new ExampleConfiguration();
         var graphResources = new GraphResources(null, mock(Graph.class), null);
         when(graphStoreCatalogService.getGraphResources(
-            GraphName.parse("some other graph"),
-            configuration,
-            Optional.empty(),
-            Optional.empty(),
-            Optional.empty(),
-            requestScopedDependencies.user(),
-            requestScopedDependencies.databaseId()
+            eq(GraphName.parse("some other graph")),
+            any(GraphParameters.class),
+            eq(Optional.empty()),
+            any(GraphStoreValidation.class),
+            eq(Optional.empty()),
+            eq(Optional.empty()),
+            eq(requestScopedDependencies.user()),
+            eq(requestScopedDependencies.databaseId())
         )).thenReturn(graphResources);
         when(algorithmComputer.computeAlgorithm(
             configuration,
@@ -200,13 +209,14 @@ class DefaultAlgorithmProcessingTemplateTest {
         var configuration = new ExampleConfiguration();
         var graphResources = new GraphResources(null, mock(Graph.class), null);
         when(graphStoreCatalogService.getGraphResources(
-            GraphName.parse("some other graph"),
-            configuration,
-            Optional.empty(),
-            Optional.empty(),
-            Optional.empty(),
-            requestScopedDependencies.user(),
-            requestScopedDependencies.databaseId()
+            eq(GraphName.parse("some other graph")),
+            any(GraphParameters.class),
+            eq(Optional.empty()),
+            any(GraphStoreValidation.class),
+            eq(Optional.empty()),
+            eq(Optional.empty()),
+            eq(requestScopedDependencies.user()),
+            eq(requestScopedDependencies.databaseId())
         )).thenReturn(graphResources);
         when(algorithmComputer.computeAlgorithm(
             configuration,

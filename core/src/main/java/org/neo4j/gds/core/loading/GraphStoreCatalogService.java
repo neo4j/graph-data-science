@@ -29,7 +29,6 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.api.graph.store.catalog.GraphStoreAddedEventListener;
 import org.neo4j.gds.api.graph.store.catalog.GraphStoreRemovedEventListener;
-import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.loading.GraphStoreCatalog.GraphStoreCatalogEntryWithUsername;
 import org.neo4j.gds.core.loading.validation.GraphStoreValidation;
@@ -77,61 +76,30 @@ public class GraphStoreCatalogService {
 
     /**
      * Load GraphStore and graph, with copious validation.
-     *
-     * @deprecated use the overload instead {@link #getGraphResources(org.neo4j.gds.api.GraphName, java.util.Collection, java.util.Collection, boolean, java.util.Optional, org.neo4j.gds.core.loading.validation.GraphStoreValidation, java.util.Optional, java.util.Optional, org.neo4j.gds.api.User, java.util.Optional, org.neo4j.gds.api.DatabaseId)}
-     */
-    @Deprecated(forRemoval = true, since = "2.20.0")
-    public GraphResources getGraphResources(
-        GraphName graphName,
-        AlgoBaseConfig configuration,
-        Optional<Iterable<PostLoadValidationHook>> postGraphStoreLoadValidationHooks,
-        Optional<Iterable<PostLoadETLHook>> postGraphStoreLoadETLHooks,
-        Optional<String> relationshipProperty,
-        User user,
-        DatabaseId databaseId
-    ) {
-        return getGraphResources(
-            graphName,
-            configuration.nodeLabelsFilter(),
-            configuration.relationshipTypesFilter(),
-            configuration.projectAllRelationshipTypes(),
-            relationshipProperty,
-            new GraphStoreValidation(configuration::graphStoreValidation),
-            postGraphStoreLoadValidationHooks,
-            postGraphStoreLoadETLHooks,
-            user,
-            configuration.usernameOverride(),
-            databaseId
-        );
-    }
-
-    /**
-     * Load GraphStore and graph, with copious validation.
      */
     public GraphResources getGraphResources(
         GraphName graphName,
-        Collection<NodeLabel> nodeLabelsFilter,
-        Collection<RelationshipType> relationshipTypesFilter,
-        boolean loadAllRelationships, // FIXME: this is because some weird logic in AlgoBaseConfig -- investigate
+        GraphParameters graphParameters,
         Optional<String> relationshipProperty,
         GraphStoreValidation graphStoreValidation,
         Optional<Iterable<PostLoadValidationHook>> postGraphStoreLoadValidationHooks,
         Optional<Iterable<PostLoadETLHook>> postGraphStoreLoadETLHooks,
         User user,
-        Optional<String> usernameOverride,
         DatabaseId databaseId
     ) {
         var graphStoreCatalogEntry = getGraphStoreCatalogEntry(
             graphName,
-            user, usernameOverride, databaseId
+            user,
+            graphParameters.usernameOverride(),
+            databaseId
         );
 
         var graphStore = graphStoreCatalogEntry.graphStore();
 
         postGraphStoreLoadValidationHooks.ifPresent(hooks -> validateGraphStore(graphStore, hooks));
 
-        var nodeLabels = resolveNodeLabels(graphStore, nodeLabelsFilter);
-        var relationshipTypes = resolveRelationshipTypes(graphStore, loadAllRelationships, relationshipTypesFilter);
+        var nodeLabels = resolveNodeLabels(graphStore, graphParameters.nodeLabelsFilter());
+        var relationshipTypes = resolveRelationshipTypes(graphStore, graphParameters.loadAllRelationshipTypes(), graphParameters.relationshipTypesFilter());
 
         // Validate the graph store before going any further
         graphStoreValidation.validate(graphStore, nodeLabels, relationshipTypes, relationshipProperty);

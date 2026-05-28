@@ -184,6 +184,7 @@ public final class OpenGraphDataScienceExtensionBuilder {
         graphStoreCatalogService.registerGraphStoreAddedListener(memoryTracker);
         graphStoreCatalogService.registerGraphStoreRemovedListener(memoryTracker);
 
+
         var globallyScopedDependencies = new GloballyScopedDependenciesBuilder()
             .with(graphStoreCatalogService)
             .with(openGraphDataScienceSpecifics.modelCatalog())
