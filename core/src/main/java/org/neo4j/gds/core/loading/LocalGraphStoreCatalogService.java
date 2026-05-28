@@ -66,7 +66,7 @@ public class LocalGraphStoreCatalogService implements GraphStoreCatalogService {
         return result.get();
     }
 
-    public GraphStoreCatalogEntry get(CatalogRequest catalogRequest, GraphName graphName) {
+    public GraphStoreCatalogEntry getGraphStoreCatalogEntry(CatalogRequest catalogRequest, GraphName graphName) {
         return GraphStoreCatalog.get(catalogRequest, graphName.value());
     }
 
@@ -187,18 +187,6 @@ public class LocalGraphStoreCatalogService implements GraphStoreCatalogService {
             hook.onGraphLoaded(graph);
         }
     }
-
-    public GraphStoreCatalogEntry getGraphStoreCatalogEntry(
-        GraphName graphName,
-        User user,
-        Optional<String> usernameOverride,
-        DatabaseId databaseId
-    ) {
-        var catalogRequest = CatalogRequest.of(user, databaseId, usernameOverride);
-
-        return get(catalogRequest, graphName);
-    }
-
 
     public Optional<Map<String, Object>> getDegreeDistribution(
         User user,

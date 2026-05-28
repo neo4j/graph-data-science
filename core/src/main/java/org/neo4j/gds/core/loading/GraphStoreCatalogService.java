@@ -50,7 +50,7 @@ public interface GraphStoreCatalogService {
         boolean shouldFailIfMissing
     );
 
-    GraphStoreCatalogEntry get(CatalogRequest catalogRequest, GraphName graphName);
+    GraphStoreCatalogEntry getGraphStoreCatalogEntry(CatalogRequest catalogRequest, GraphName graphName);
 
 
     /**
@@ -85,14 +85,6 @@ public interface GraphStoreCatalogService {
         User user,
         DatabaseId databaseId
     );
-
-    GraphStoreCatalogEntry getGraphStoreCatalogEntry(
-        GraphName graphName,
-        User user,
-        Optional<String> usernameOverride,
-        DatabaseId databaseId
-    );
-
 
     Optional<Map<String, Object>> getDegreeDistribution(
         User user,
@@ -151,6 +143,15 @@ public interface GraphStoreCatalogService {
             );
             throw new IllegalArgumentException(message);
         }
+    }
+
+    default GraphStoreCatalogEntry getGraphStoreCatalogEntry(
+        GraphName graphName,
+        User user,
+        Optional<String> usernameOverride,
+        DatabaseId databaseId
+    ){
+        return getGraphStoreCatalogEntry(CatalogRequest.of(user, databaseId, usernameOverride), graphName);
     }
 
     static Collection<NodeLabel> resolveNodeLabels(GraphStore graphStore,Collection<NodeLabel>  nodeLabelsFilter) {

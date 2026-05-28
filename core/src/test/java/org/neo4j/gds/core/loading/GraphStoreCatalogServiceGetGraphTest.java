@@ -72,7 +72,7 @@ class GraphStoreCatalogServiceGetGraphTest {
         var serviceSpy = spy(LocalGraphStoreCatalogService.class);
         var graphStoreWithConfigMock = mock(GraphStoreCatalogEntry.class);
         when(graphStoreWithConfigMock.graphStore()).thenReturn(graphStore);
-        doReturn(graphStoreWithConfigMock).when(serviceSpy).get(any(), any());
+        doReturn(graphStoreWithConfigMock).when(serviceSpy).getGraphStoreCatalogEntry(any(), any());
 
         var graphParameters  = new GraphParameters(Set.of(),Set.of(),true,Optional.empty());
 
@@ -116,7 +116,7 @@ class GraphStoreCatalogServiceGetGraphTest {
         var serviceSpy = spy(LocalGraphStoreCatalogService.class);
         var graphStoreWithConfigMock = mock(GraphStoreCatalogEntry.class);
         when(graphStoreWithConfigMock.graphStore()).thenReturn(graphStore);
-        doReturn(graphStoreWithConfigMock).when(serviceSpy).get(any(), any());
+        doReturn(graphStoreWithConfigMock).when(serviceSpy).getGraphStoreCatalogEntry(any(), any());
 
         var graphParameters  = new GraphParameters(
             Set.of(NodeLabel.of("N")),
@@ -165,7 +165,7 @@ class GraphStoreCatalogServiceGetGraphTest {
         var serviceSpy = spy(LocalGraphStoreCatalogService.class);
         var graphStoreWithConfigMock = mock(GraphStoreCatalogEntry.class);
         when(graphStoreWithConfigMock.graphStore()).thenReturn(graphStore);
-        doReturn(graphStoreWithConfigMock).when(serviceSpy).get(any(), any());
+        doReturn(graphStoreWithConfigMock).when(serviceSpy).getGraphStoreCatalogEntry(any(), any());
 
         var graphParameters  = new GraphParameters(
             Set.of(),
@@ -215,7 +215,7 @@ class GraphStoreCatalogServiceGetGraphTest {
         var serviceSpy = spy(LocalGraphStoreCatalogService.class);
         var graphStoreWithConfigMock = mock(GraphStoreCatalogEntry.class);
         when(graphStoreWithConfigMock.graphStore()).thenReturn(graphStore);
-        doReturn(graphStoreWithConfigMock).when(serviceSpy).get(any(), any());
+        doReturn(graphStoreWithConfigMock).when(serviceSpy).getGraphStoreCatalogEntry(any(), any());
 
         var graphParameters  = new GraphParameters(
             Set.of(NodeLabel.of("N")),
@@ -265,7 +265,7 @@ class GraphStoreCatalogServiceGetGraphTest {
         var serviceSpy = spy(LocalGraphStoreCatalogService.class);
         var graphStoreWithConfigMock = mock(GraphStoreCatalogEntry.class);
         when(graphStoreWithConfigMock.graphStore()).thenReturn(graphStore);
-        doReturn(graphStoreWithConfigMock).when(serviceSpy).get(any(), any());
+        doReturn(graphStoreWithConfigMock).when(serviceSpy).getGraphStoreCatalogEntry(any(), any());
 
 
 

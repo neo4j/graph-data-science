@@ -86,7 +86,7 @@ public final class GraphStoreFromCatalogLoader implements GraphStoreLoader {
             config.usernameOverride(),
             requestScopedDependencies.user().isAdmin()
         );
-        return graphStoreCatalogService.get(request, graphName);
+        return graphStoreCatalogService.getGraphStoreCatalogEntry(request, graphName);
 
     }
 }

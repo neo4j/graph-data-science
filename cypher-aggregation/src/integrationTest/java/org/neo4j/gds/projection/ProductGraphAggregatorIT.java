@@ -96,7 +96,7 @@ class ProductGraphAggregatorIT {
                         .isEqualTo(1)
                 );
 
-            var graphStore = graphStoreCatalogService.get(
+            var graphStore = graphStoreCatalogService.getGraphStoreCatalogEntry(
                 CatalogRequest.of(new User(userName, false), databaseId),
                 GraphName.parse(graphName)
             ).graphStore();

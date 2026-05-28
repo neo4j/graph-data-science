@@ -1035,7 +1035,7 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
         RequestScopedDependencies requestScopedDependencies,
         GraphName graphName
     ) {
-        return globallyScopedDependencies.graphStoreCatalogService().get(
+        return globallyScopedDependencies.graphStoreCatalogService().getGraphStoreCatalogEntry(
             CatalogRequest.of(
                 requestScopedDependencies.user(),
                 requestScopedDependencies.databaseId()

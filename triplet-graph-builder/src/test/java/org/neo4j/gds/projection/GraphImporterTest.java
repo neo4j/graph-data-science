@@ -50,8 +50,8 @@ import org.neo4j.gds.core.utils.progress.tasks.Status;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.logging.Log;
-import org.neo4j.gds.user.log.UserLogRegistry;
 import org.neo4j.gds.logging.LogAdapter;
+import org.neo4j.gds.user.log.UserLogRegistry;
 import org.neo4j.gds.values.primitive.PrimitiveValues;
 
 import java.util.List;
@@ -121,7 +121,7 @@ class GraphImporterTest {
         assertThat(result.nodeCount()).isEqualTo(3);
         assertThat(result.relationshipCount()).isEqualTo(2);
 
-        var graphStore = graphStoreCatalogService.get(
+        var graphStore = graphStoreCatalogService.getGraphStoreCatalogEntry(
                 CatalogRequest.of(EMPTY_USER, TEST_DATABASE_ID),
                 GraphName.parse("g")
             )
@@ -171,7 +171,7 @@ class GraphImporterTest {
             true
         );
 
-        var graphStore = graphStoreCatalogService.get(
+        var graphStore = graphStoreCatalogService.getGraphStoreCatalogEntry(
                 CatalogRequest.of(EMPTY_USER, TEST_DATABASE_ID),
                 GraphName.parse("g")
             )
@@ -221,7 +221,7 @@ class GraphImporterTest {
             true
         );
 
-        var graphStore = graphStoreCatalogService.get(
+        var graphStore = graphStoreCatalogService.getGraphStoreCatalogEntry(
                 CatalogRequest.of(EMPTY_USER, TEST_DATABASE_ID),
                 GraphName.parse("g")
             )
@@ -274,7 +274,7 @@ class GraphImporterTest {
             true
         );
 
-        var graphStore = graphStoreCatalogService.get(
+        var graphStore = graphStoreCatalogService.getGraphStoreCatalogEntry(
                 CatalogRequest.of(EMPTY_USER, TEST_DATABASE_ID),
                 GraphName.parse("g")
             )
@@ -327,7 +327,7 @@ class GraphImporterTest {
         assertThat(result.nodeCount()).isEqualTo(3);
         assertThat(result.relationshipCount()).isEqualTo(2);
 
-        var graphStore = graphStoreCatalogService.get(
+        var graphStore = graphStoreCatalogService.getGraphStoreCatalogEntry(
                 CatalogRequest.of(EMPTY_USER, TEST_DATABASE_ID),
                 GraphName.parse("g")
             )
@@ -380,7 +380,7 @@ class GraphImporterTest {
         assertThat(result.nodeCount()).isEqualTo(3);
         assertThat(result.relationshipCount()).isEqualTo(2);
 
-        var graphStore = graphStoreCatalogService.get(
+        var graphStore = graphStoreCatalogService.getGraphStoreCatalogEntry(
                 CatalogRequest.of(EMPTY_USER, TEST_DATABASE_ID),
                 GraphName.parse("g")
             )
