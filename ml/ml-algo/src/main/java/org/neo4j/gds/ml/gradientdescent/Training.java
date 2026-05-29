@@ -20,12 +20,11 @@
 package org.neo4j.gds.ml.gradientdescent;
 
 import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryEstimations;
 import org.neo4j.gds.mem.MemoryRange;
-import org.neo4j.gds.core.utils.progress.tasks.LogLevel;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.core.ComputationContext;
 import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.batch.Batch;
@@ -46,22 +45,19 @@ import java.util.stream.Collectors;
 import static org.neo4j.gds.ml.core.tensor.TensorFunctions.averageTensors;
 
 public class Training {
+    private final Log log;
     private final GradientDescentConfig config;
-    private final ProgressTracker progressTracker;
-    private final LogLevel messageLogLevel;
     private final long trainSize;
     private final TerminationFlag terminationFlag;
 
     public Training(
+        Log log,
         GradientDescentConfig config,
-        ProgressTracker progressTracker,
-        LogLevel messageLogLevel,
         long trainSize,
         TerminationFlag terminationFlag
     ) {
+        this.log = log;
         this.config = config;
-        this.progressTracker = progressTracker;
-        this.messageLogLevel = messageLogLevel;
         this.trainSize = trainSize;
         this.terminationFlag = terminationFlag;
     }
@@ -104,7 +100,7 @@ public class Training {
         var consumers = executeBatches(concurrency, objective, queueSupplier.get());
         var prevWeightGradients = avgWeightGradients(consumers);
         var initialLoss = avgLoss(consumers);
-        progressTracker.logMessage(messageLogLevel, StringFormatting.formatWithLocale("Initial loss %s", initialLoss));
+        log.info(StringFormatting.formatWithLocale("Initial loss %s", initialLoss));
         while (!stopper.terminated()) {
             // each loop represents one epoch
             terminationFlag.assertRunning();
@@ -115,22 +111,21 @@ public class Training {
             double loss = avgLoss(consumers);
             losses.add(loss);
             stopper.registerLoss(loss);
-            progressTracker.logMessage(messageLogLevel, StringFormatting.formatWithLocale(
+            log.info(StringFormatting.formatWithLocale(
                 "Epoch %d with loss %s",
                 losses.size(),
                 loss
             ));
         }
 
-        progressTracker.logMessage(messageLogLevel, StringFormatting.formatWithLocale(
+        log.info(StringFormatting.formatWithLocale(
             "%s after %d out of %d epochs. Initial loss: %s, Last loss: %s.%s",
             stopper.converged() ? "converged" : "terminated",
             losses.size(),
             config.maxEpochs(),
             initialLoss,
-            losses.get(losses.size() - 1),
+            losses.getLast(),
             stopper.converged() ? "" : " Did not converge"
-
         ));
     }
 

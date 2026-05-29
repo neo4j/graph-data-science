@@ -21,8 +21,7 @@ package org.neo4j.gds.ml.gradientdescent;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.core.utils.progress.tasks.LogLevel;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.batch.Batch;
 import org.neo4j.gds.ml.core.batch.BatchQueue;
@@ -52,8 +51,8 @@ class TrainingTest {
             .patience(10)
             .build();
 
-        var training = new Training(config, ProgressTracker.NULL_TRACKER, LogLevel.INFO, 100L, TerminationFlag.RUNNING_TRUE);
-        var singleThreadedTraining = new Training(config, ProgressTracker.NULL_TRACKER, LogLevel.INFO, 100L, TerminationFlag.RUNNING_TRUE);
+        var training = new Training(Log.noOpLog(), config, 100L, TerminationFlag.RUNNING_TRUE);
+        var singleThreadedTraining = new Training(Log.noOpLog(), config, 100L, TerminationFlag.RUNNING_TRUE);
 
         var objective = new TestTrainingObjective();
         var singleThreadedObjective = new TestTrainingObjective();
@@ -75,7 +74,7 @@ class TrainingTest {
             .maxEpochs(10)
             .build();
 
-        var training = new Training(config, ProgressTracker.NULL_TRACKER, LogLevel.INFO, 100L, terminationFlag);
+        var training = new Training(Log.noOpLog(), config, 100L, terminationFlag);
 
         var objective = new TestTrainingObjective();
 

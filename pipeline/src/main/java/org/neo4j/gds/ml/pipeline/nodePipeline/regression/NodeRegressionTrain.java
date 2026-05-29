@@ -28,7 +28,6 @@ import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
-import org.neo4j.gds.core.utils.progress.tasks.LogLevel;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
@@ -220,8 +219,7 @@ public final class NodeRegressionTrain implements PipelineTrainer<NodeRegression
             (trainSet, config, metricsHandler, messageLogLevel) -> trainModel(
                 trainSet,
                 config,
-                features,
-                messageLogLevel
+                features
             ),
             (evaluationSet, regressor, scoreConsumer) -> registerMetricScores(
                 evaluationSet,
@@ -283,8 +281,7 @@ public final class NodeRegressionTrain implements PipelineTrainer<NodeRegression
         var bestRegressor = trainModel(
             outerSplit.trainSet(),
             trainingStatistics.bestParameters(),
-            features,
-            LogLevel.INFO
+            features
         );
         progressTracker.endSubTask("Train best model");
 
@@ -307,7 +304,7 @@ public final class NodeRegressionTrain implements PipelineTrainer<NodeRegression
         TrainerConfig bestParameters
     ) {
         progressTracker.beginSubTask("Retrain best model");
-        var retrainedRegressor = trainModel(trainSet, bestParameters, features, LogLevel.INFO);
+        var retrainedRegressor = trainModel(trainSet, bestParameters, features);
         progressTracker.endSubTask("Retrain best model");
 
         return retrainedRegressor;
@@ -316,15 +313,12 @@ public final class NodeRegressionTrain implements PipelineTrainer<NodeRegression
     private Regressor trainModel(
         ReadOnlyHugeLongArray trainSet,
         TrainerConfig trainerConfig,
-        Features features,
-        LogLevel messageLogLevel
+        Features features
     ) {
         var trainer = RegressionTrainerFactory.create(
             log,
             trainerConfig,
             terminationFlag,
-            progressTracker,
-            messageLogLevel,
             concurrency,
             trainConfig.randomSeed()
         );

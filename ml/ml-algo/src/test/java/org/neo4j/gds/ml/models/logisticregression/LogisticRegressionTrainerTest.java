@@ -24,12 +24,11 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.TestFeatures;
 import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.collections.ha.HugeIntArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
-import org.neo4j.gds.core.utils.progress.tasks.LogLevel;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.Map;
 import java.util.Random;
@@ -43,13 +42,12 @@ class LogisticRegressionTrainerTest {
     @Test
     void withBias() {
         var trainer = new LogisticRegressionTrainer(
+            Log.noOpLog(),
             new Concurrency(1),
             LogisticRegressionTrainConfig.DEFAULT,
             4,
             true,
-            TerminationFlag.RUNNING_TRUE,
-            ProgressTracker.NULL_TRACKER,
-            LogLevel.INFO
+            TerminationFlag.RUNNING_TRUE
         );
 
         double[][] features = new double[5][3];
@@ -84,13 +82,12 @@ class LogisticRegressionTrainerTest {
         HugeLongArray labels = HugeLongArray.newArray(20_000);
         labels.setAll(i -> i % 4);
         var trainer = new LogisticRegressionTrainer(
+            Log.noOpLog(),
             new Concurrency(4),
             LogisticRegressionTrainConfig.DEFAULT,
             4,
             true,
-            TerminationFlag.RUNNING_TRUE,
-            ProgressTracker.NULL_TRACKER,
-            LogLevel.INFO
+            TerminationFlag.RUNNING_TRUE
         );
 
         double[][] features = new double[20_000][3];
@@ -119,13 +116,12 @@ class LogisticRegressionTrainerTest {
     @Test
     void usingStandardWeights() {
         var trainer = new LogisticRegressionTrainer(
+            Log.noOpLog(),
             new Concurrency(1),
             LogisticRegressionTrainConfig.DEFAULT,
             4,
             false,
-            TerminationFlag.RUNNING_TRUE,
-            ProgressTracker.NULL_TRACKER,
-            LogLevel.INFO
+            TerminationFlag.RUNNING_TRUE
         );
 
         var random = new Random(42L);
@@ -165,13 +161,12 @@ class LogisticRegressionTrainerTest {
     @Test
     void usingPenaltyShouldGiveSmallerAbsoluteValueWeights() {
         var trainer = new LogisticRegressionTrainer(
+            Log.noOpLog(),
             new Concurrency(1),
             LogisticRegressionTrainConfig.of(Map.of("penalty", 100, "maxEpochs", 100)),
             4,
             true,
-            TerminationFlag.RUNNING_TRUE,
-            ProgressTracker.NULL_TRACKER,
-            LogLevel.INFO
+            TerminationFlag.RUNNING_TRUE
         );
 
         double[][] features = new double[5][3];
@@ -201,13 +196,12 @@ class LogisticRegressionTrainerTest {
     @Test
     void shouldHandleLargeValuedFeatures() {
         var trainer = new LogisticRegressionTrainer(
+            Log.noOpLog(),
             new Concurrency(1),
             LogisticRegressionTrainConfig.DEFAULT,
             4,
             true,
-            TerminationFlag.RUNNING_TRUE,
-            ProgressTracker.NULL_TRACKER,
-            LogLevel.INFO
+            TerminationFlag.RUNNING_TRUE
         );
 
         double[][] features = new double[5][3];
@@ -261,13 +255,12 @@ class LogisticRegressionTrainerTest {
     @NotNull
     private LogisticRegressionTrainer trainer() {
         return new LogisticRegressionTrainer(
+            Log.noOpLog(),
             new Concurrency(1),
             LogisticRegressionTrainConfig.of(Map.of("penalty", 1L)),
             1,
             false,
-            TerminationFlag.RUNNING_TRUE,
-            ProgressTracker.NULL_TRACKER,
-            LogLevel.INFO
+            TerminationFlag.RUNNING_TRUE
         );
     }
 

@@ -20,11 +20,10 @@
 package org.neo4j.gds.ml.models.mlp;
 
 import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.collections.ha.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
-import org.neo4j.gds.core.utils.progress.tasks.LogLevel;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.core.batch.BatchQueue;
 import org.neo4j.gds.ml.gradientdescent.Training;
 import org.neo4j.gds.ml.models.ClassifierTrainer;
@@ -35,34 +34,26 @@ import java.util.SplittableRandom;
 import java.util.function.Supplier;
 
 public class MLPClassifierTrainer implements ClassifierTrainer {
+    private final Log log;
 
     private final int numberOfClasses;
-
     private final MLPClassifierTrainConfig trainConfig;
-
     private final SplittableRandom random;
-
-    private final ProgressTracker progressTracker;
-
-    private final LogLevel messageLogLevel;
-
     private final TerminationFlag terminationFlag;
-
     private final Concurrency concurrency;
 
-    public MLPClassifierTrainer(int numberOfClasses,
-                                MLPClassifierTrainConfig trainConfig,
-                                Optional<Long> randomSeed,
-                                ProgressTracker progressTracker,
-                                LogLevel messageLogLevel,
-                                TerminationFlag terminationFlag,
-                                Concurrency concurrency
+    public MLPClassifierTrainer(
+        Log log,
+        int numberOfClasses,
+        MLPClassifierTrainConfig trainConfig,
+        Optional<Long> randomSeed,
+        TerminationFlag terminationFlag,
+        Concurrency concurrency
     ) {
+        this.log = log;
         this.numberOfClasses = numberOfClasses;
         this.trainConfig = trainConfig;
         this.random = new SplittableRandom(randomSeed.orElseGet(() -> new SplittableRandom().nextLong()));
-        this.progressTracker = progressTracker;
-        this.messageLogLevel = messageLogLevel;
         this.terminationFlag = terminationFlag;
         this.concurrency = concurrency;
     }
@@ -73,7 +64,7 @@ public class MLPClassifierTrainer implements ClassifierTrainer {
 
         var objective = new MLPClassifierObjective(classifier, features, labels, trainConfig.penalty(), trainConfig.focusWeight(),
             trainConfig.initializeClassWeights(numberOfClasses));
-        var training = new Training(trainConfig, progressTracker, messageLogLevel, trainSet.size(), terminationFlag);
+        var training = new Training(log, trainConfig, trainSet.size(), terminationFlag);
 
         Supplier<BatchQueue> queueSupplier = () -> BatchQueue.fromArray(trainSet, trainConfig.batchSize());
 
