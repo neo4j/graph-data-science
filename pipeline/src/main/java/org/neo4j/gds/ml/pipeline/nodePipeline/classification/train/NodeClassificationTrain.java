@@ -329,6 +329,7 @@ public final class NodeClassificationTrain implements PipelineTrainer<NodeClassi
         ModelSpecificMetricsHandler metricsHandler
     ) {
         ClassifierTrainer trainer = ClassifierTrainerFactory.create(
+            log,
             trainerConfig,
             classIdMap.size(),
             terminationFlag,

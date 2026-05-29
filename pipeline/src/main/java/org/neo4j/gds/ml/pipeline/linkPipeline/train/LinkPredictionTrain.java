@@ -227,6 +227,7 @@ public final class LinkPredictionTrain {
         ModelSpecificMetricsHandler metricsHandler
     ) {
         return ClassifierTrainerFactory.create(
+            log,
             trainerConfig,
             classIdMap.size(),
             terminationFlag,

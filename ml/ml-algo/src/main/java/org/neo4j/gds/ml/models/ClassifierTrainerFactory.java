@@ -20,6 +20,7 @@
 package org.neo4j.gds.ml.models;
 
 import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryEstimations;
@@ -42,6 +43,7 @@ public final class ClassifierTrainerFactory {
     private ClassifierTrainerFactory() {}
 
     public static ClassifierTrainer create(
+        Log log,
         TrainerConfig config,
         int numberOfClasses,
         TerminationFlag terminationFlag,
@@ -66,12 +68,11 @@ public final class ClassifierTrainerFactory {
             }
             case RandomForestClassification: {
                 return new RandomForestClassifierTrainer(
+                    log,
                     concurrency,
                     numberOfClasses,
                     (RandomForestClassifierTrainerConfig) config,
                     randomSeed,
-                    progressTracker,
-                    messageLogLevel,
                     terminationFlag,
                     metricsHandler
                 );

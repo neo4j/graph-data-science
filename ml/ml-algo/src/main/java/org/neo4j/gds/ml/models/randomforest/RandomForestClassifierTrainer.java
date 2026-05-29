@@ -24,6 +24,7 @@ import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
+import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryEstimations;
@@ -31,8 +32,6 @@ import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.collections.ha.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.ParalleLongPageCreator;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
-import org.neo4j.gds.core.utils.progress.tasks.LogLevel;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.mem.Estimate;
 import org.neo4j.gds.ml.decisiontree.ClassifierImpurityCriterionType;
 import org.neo4j.gds.ml.decisiontree.DecisionTreeClassifierTrainer;
@@ -60,33 +59,31 @@ import static org.neo4j.gds.ml.metrics.classification.OutOfBagError.OUT_OF_BAG_E
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class RandomForestClassifierTrainer implements ClassifierTrainer {
+    private final Log log;
 
     private final int numberOfClasses;
     private final RandomForestClassifierTrainerConfig config;
     private final Concurrency concurrency;
     private final SplittableRandom random;
-    private final ProgressTracker progressTracker;
-    private final LogLevel messageLogLevel;
     private final TerminationFlag terminationFlag;
-    private Optional<Double> outOfBagError = Optional.empty();
     private final ModelSpecificMetricsHandler metricsHandler;
 
+    private Optional<Double> outOfBagError = Optional.empty();
+
     public RandomForestClassifierTrainer(
+        Log log,
         Concurrency concurrency,
         int numberOfClasses,
         RandomForestClassifierTrainerConfig config,
         Optional<Long> randomSeed,
-        ProgressTracker progressTracker,
-        LogLevel messageLogLevel,
         TerminationFlag terminationFlag,
         ModelSpecificMetricsHandler metricsHandler
     ) {
+        this.log = log;
         this.numberOfClasses = numberOfClasses;
         this.config = config;
         this.concurrency = concurrency;
         this.random = new SplittableRandom(randomSeed.orElseGet(() -> new SplittableRandom().nextLong()));
-        this.progressTracker = progressTracker;
-        this.messageLogLevel = messageLogLevel;
         this.terminationFlag = terminationFlag;
         this.metricsHandler = metricsHandler;
     }
@@ -152,6 +149,7 @@ public class RandomForestClassifierTrainer implements ClassifierTrainer {
 
         var tasks = IntStream.range(0, numberOfDecisionTrees).mapToObj(unused ->
             new TrainDecisionTreeTask(
+                log,
                 maybePredictions,
                 decisionTreeTrainConfig,
                 config,
@@ -161,8 +159,6 @@ public class RandomForestClassifierTrainer implements ClassifierTrainer {
                 numberOfClasses,
                 impurityCriterion,
                 trainSet,
-                progressTracker,
-                messageLogLevel,
                 numberOfTreesTrained
             )
         ).collect(Collectors.toList());
@@ -205,9 +201,9 @@ public class RandomForestClassifierTrainer implements ClassifierTrainer {
     }
 
     static class TrainDecisionTreeTask implements Runnable {
+        private final Log log;
 
         private final int numberOfClasses;
-        private DecisionTreePredictor<Integer> trainedTree;
         private final Optional<HugeAtomicLongArray> maybePredictions;
         private final DecisionTreeTrainerConfig decisionTreeTrainConfig;
         private final RandomForestTrainerConfig randomForestTrainConfig;
@@ -216,11 +212,12 @@ public class RandomForestClassifierTrainer implements ClassifierTrainer {
         private final HugeIntArray allLabels;
         private final ImpurityCriterion impurityCriterion;
         private final ReadOnlyHugeLongArray trainSet;
-        private final ProgressTracker progressTracker;
-        private final LogLevel messageLogLevel;
         private final AtomicInteger numberOfTreesTrained;
 
+        private DecisionTreePredictor<Integer> trainedTree;
+
         TrainDecisionTreeTask(
+            Log log,
             Optional<HugeAtomicLongArray> maybePredictions,
             DecisionTreeTrainerConfig decisionTreeTrainConfig,
             RandomForestTrainerConfig randomForestTrainConfig,
@@ -230,10 +227,9 @@ public class RandomForestClassifierTrainer implements ClassifierTrainer {
             int numberOfClasses,
             ImpurityCriterion impurityCriterion,
             ReadOnlyHugeLongArray trainSet,
-            ProgressTracker progressTracker,
-            LogLevel messageLogLevel,
             AtomicInteger numberOfTreesTrained
         ) {
+            this.log = log;
             this.maybePredictions = maybePredictions;
             this.decisionTreeTrainConfig = decisionTreeTrainConfig;
             this.randomForestTrainConfig = randomForestTrainConfig;
@@ -243,8 +239,6 @@ public class RandomForestClassifierTrainer implements ClassifierTrainer {
             this.numberOfClasses = numberOfClasses;
             this.impurityCriterion = impurityCriterion;
             this.trainSet = trainSet;
-            this.progressTracker = progressTracker;
-            this.messageLogLevel = messageLogLevel;
             this.numberOfTreesTrained = numberOfTreesTrained;
         }
 
@@ -305,14 +299,12 @@ public class RandomForestClassifierTrainer implements ClassifierTrainer {
                 predictionsCache
             ));
 
-            progressTracker.logMessage(
-                messageLogLevel,
-                formatWithLocale(
-                    "Trained decision tree %d out of %d",
-                    numberOfTreesTrained.incrementAndGet(),
-                    randomForestTrainConfig.numberOfDecisionTrees()
-                )
+            var message = formatWithLocale(
+                "Trained decision tree %d out of %d",
+                numberOfTreesTrained.incrementAndGet(),
+                randomForestTrainConfig.numberOfDecisionTrees()
             );
+            log.info(message);
         }
 
         private BootstrappedDataset bootstrappedDataset() {
