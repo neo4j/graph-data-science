@@ -21,16 +21,19 @@ package org.neo4j.gds.config;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.compat.VirtualRelationshipImpl;
-import org.neo4j.graphalgo.impl.util.PathImpl;
+import org.neo4j.graphdb.Path;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.kernel.impl.core.NodeEntity;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class UserInputAsStringOrListOfStringTest {
 
@@ -85,7 +88,18 @@ class UserInputAsStringOrListOfStringTest {
     @Test
     void shouldNotParsePath() {
         var node = new NodeEntity(null, 0);
-        var path = PathImpl.singular(node);
+        var path = mock(Path.class);
+        when(path.iterator()).thenReturn(new Iterator<>() {
+            @Override
+            public boolean hasNext() {
+                return true;
+            }
+
+            @Override
+            public NodeEntity next() {
+                return node;
+            }
+        });
         assertThatThrownBy(() -> UserInputAsStringOrListOfString.parse(path, "nodeProperties"))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessage("Type mismatch for nodeProperties: expected List<String> or String, but found node");
