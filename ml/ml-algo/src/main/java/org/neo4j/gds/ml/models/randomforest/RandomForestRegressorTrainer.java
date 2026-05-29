@@ -229,7 +229,7 @@ public class RandomForestRegressorTrainer implements RegressorTrainer {
                 numberOfTreesTrained.incrementAndGet(),
                 randomForestTrainConfig.numberOfDecisionTrees()
             );
-            log.info(message);
+            log.debug(message);
         }
 
         private ReadOnlyHugeLongArray bootstrappedDataset() {

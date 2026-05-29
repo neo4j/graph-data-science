@@ -100,7 +100,7 @@ public class Training {
         var consumers = executeBatches(concurrency, objective, queueSupplier.get());
         var prevWeightGradients = avgWeightGradients(consumers);
         var initialLoss = avgLoss(consumers);
-        log.info(StringFormatting.formatWithLocale("Initial loss %s", initialLoss));
+        log.debug(StringFormatting.formatWithLocale("Initial loss %s", initialLoss));
         while (!stopper.terminated()) {
             // each loop represents one epoch
             terminationFlag.assertRunning();
@@ -111,14 +111,14 @@ public class Training {
             double loss = avgLoss(consumers);
             losses.add(loss);
             stopper.registerLoss(loss);
-            log.info(StringFormatting.formatWithLocale(
+            log.debug(StringFormatting.formatWithLocale(
                 "Epoch %d with loss %s",
                 losses.size(),
                 loss
             ));
         }
 
-        log.info(StringFormatting.formatWithLocale(
+        log.debug(StringFormatting.formatWithLocale(
             "%s after %d out of %d epochs. Initial loss: %s, Last loss: %s.%s",
             stopper.converged() ? "converged" : "terminated",
             losses.size(),

@@ -26,13 +26,6 @@ Node Classification Train Pipeline :: Select best model :: Trial 2 of 2 :: Finis
 Best trial was Trial 1 with main validation metric 0.8194
 Node Classification Train Pipeline :: Select best model :: Finished
 Node Classification Train Pipeline :: Train best model :: Start
-Node Classification Train Pipeline :: Train best model :: Initial loss 0.6931
-Node Classification Train Pipeline :: Train best model :: Epoch 1 with loss 0.6578
-Node Classification Train Pipeline :: Train best model :: Epoch 2 with loss 0.6326
-Node Classification Train Pipeline :: Train best model :: Epoch 3 with loss 0.6171
-Node Classification Train Pipeline :: Train best model :: Epoch 4 with loss 0.6110
-Node Classification Train Pipeline :: Train best model :: Epoch 5 with loss 0.6128
-Node Classification Train Pipeline :: Train best model :: converged after 5 out of 100 epochs. Initial loss: 0.6931, Last loss: 0.6128.
 Node Classification Train Pipeline :: Train best model 100%
 Node Classification Train Pipeline :: Train best model :: Finished
 Node Classification Train Pipeline :: Evaluate on train data :: Start
@@ -44,12 +37,6 @@ Node Classification Train Pipeline :: Evaluate on test data 100%
 Final model metrics on test set: {F1_class_1=0.7499}
 Node Classification Train Pipeline :: Evaluate on test data :: Finished
 Node Classification Train Pipeline :: Retrain best model :: Start
-Node Classification Train Pipeline :: Retrain best model :: Initial loss 0.6931
-Node Classification Train Pipeline :: Retrain best model :: Epoch 1 with loss 0.6645
-Node Classification Train Pipeline :: Retrain best model :: Epoch 2 with loss 0.6460
-Node Classification Train Pipeline :: Retrain best model :: Epoch 3 with loss 0.6373
-Node Classification Train Pipeline :: Retrain best model :: Epoch 4 with loss 0.6376
-Node Classification Train Pipeline :: Retrain best model :: converged after 4 out of 100 epochs. Initial loss: 0.6931, Last loss: 0.6376.
 Node Classification Train Pipeline :: Retrain best model 100%
 Node Classification Train Pipeline :: Retrain best model :: Finished
 Node Classification Train Pipeline :: Finished

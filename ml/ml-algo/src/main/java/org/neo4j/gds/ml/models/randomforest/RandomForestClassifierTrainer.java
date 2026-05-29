@@ -304,7 +304,7 @@ public class RandomForestClassifierTrainer implements ClassifierTrainer {
                 numberOfTreesTrained.incrementAndGet(),
                 randomForestTrainConfig.numberOfDecisionTrees()
             );
-            log.info(message);
+            log.debug(message);
         }
 
         private BootstrappedDataset bootstrappedDataset() {
